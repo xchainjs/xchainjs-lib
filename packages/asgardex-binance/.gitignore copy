@@ -1,0 +1,10 @@
+*.log
+.DS_Store
+node_modules
+lerna-debug.log
+npm-debug.log
+packages/**/lib
+yarn-error.log
+yarn.lock
+.env
+

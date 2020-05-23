@@ -1,0 +1,33 @@
+image: node:13
+
+stages:
+  - lint
+  - build
+  - test
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - .yarn
+
+before_script:
+  - apt-get update
+  # To build `node-hid` following dependencies are needed to be installed first
+  - apt install -y libusb-1.0-0 libusb-1.0-0-dev libudev-dev
+  - yarn install
+
+lint:
+  stage: lint
+  script: yarn lint
+
+build:
+  stage: build
+  script: yarn build
+
+test:
+  stage: test
+  script:
+    - yarn clean
+    - yarn build
+    - yarn test
