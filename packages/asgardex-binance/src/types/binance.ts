@@ -404,6 +404,8 @@ export type Balance = {
   frozen: string
 }
 
+export type Balances = Balance[]
+
 /**
  * Result of  `bncClient.transfer(...)`
  * to transfer tokens from one address to another.
@@ -472,7 +474,7 @@ export interface BncClient {
    * Get balances
    * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#clientgetbalancesbalances
    */
-  getBalance(address: Address): Promise<Balance>
+  getBalance(address: Address): Promise<Balances>
 
   /**
    *   Get Transactions

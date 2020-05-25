@@ -1,6 +1,6 @@
 require('dotenv').config()
 import BinanceClient from '../src/client'
-import { Network } from '../src/types/binance'
+import { Network, Balance } from '../src/types/binance'
 
 describe('BinanceClient Test', () => {
   const balance = [
@@ -9,7 +9,7 @@ describe('BinanceClient Test', () => {
       frozen: '0.00000000',
       locked: '0.00000000',
       symbol: 'BNB',
-    },
+    } as Balance,
   ]
   const net = Network.MAINNET
   const phrase = process.env.VAULT_PHRASE

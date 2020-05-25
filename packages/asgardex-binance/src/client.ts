@@ -1,6 +1,6 @@
 import * as BIP39 from 'bip39'
 import bncClient from '@binance-chain/javascript-sdk'
-import { BncClient, Address, MultiTransfer, Market, Balance, Network, TransferResult } from './types/binance'
+import { BncClient, Address, MultiTransfer, Market, Network, TransferResult, Balances } from './types/binance'
 const axios = require('axios').default
 
 /**
@@ -18,7 +18,7 @@ export interface BinanceClient {
   validatePhrase(phrase: string): boolean
   getAddress(): string
   validateAddress(address: string): boolean
-  getBalance(address?: Address): Promise<Balance>
+  getBalance(address?: Address): Promise<Balances>
   // TODO Add return type
   // https://gitlab.com/thorchain/asgardex-common/asgardex-binance/-/issues/2
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -102,7 +102,7 @@ class Client implements BinanceClient {
   }
 
   // Sets this.phrase to be accessed later
-  setPhrase = (phrase?: string) => {
+  setPhrase = (phrase = '') => {
     if (phrase) {
       if (BIP39.validateMnemonic(phrase)) {
         this.phrase = phrase
@@ -131,14 +131,16 @@ class Client implements BinanceClient {
     return this.bncClient.checkAddress(address, this.getPrefix())
   }
 
-  getBalance = async (address?: Address): Promise<Balance> => {
-    let balance
+  getBalance = async (address?: Address): Promise<Balances> => {
     if (address) {
-      balance = this.bncClient.getBalance(address)
+      return this.bncClient.getBalance(address)
     } else {
-      balance = this.bncClient.getBalance(this.getAddress())
+      try {
+        return this.bncClient.getBalance(this.getAddress())
+      } catch (e) {
+        return Promise.reject(e)
+      }
     }
-    return balance
   }
 
   // TODO Add proper return type
