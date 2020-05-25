@@ -28,6 +28,4 @@ build:
 test:
   stage: test
   script:
-    - yarn clean
-    - yarn build
     - yarn test

@@ -478,6 +478,9 @@ export interface BncClient {
    *   Get Transactions
    * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#bncclientgettransactionsaddress-offset--promise
    */
+  // TODO Add proper return type
+  // https://gitlab.com/thorchain/asgardex-common/asgardex-binance/-/issues/2
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   getTransactions(address: Address, offset: number): Promise<any>
 
   /**

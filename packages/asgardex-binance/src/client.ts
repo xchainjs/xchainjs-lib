@@ -19,6 +19,9 @@ export interface BinanceClient {
   getAddress(): string
   validateAddress(address: string): boolean
   getBalance(address?: Address): Promise<Balance>
+  // TODO Add return type
+  // https://gitlab.com/thorchain/asgardex-common/asgardex-binance/-/issues/2
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   getTransactions(date: number, address?: string): Promise<any[]>
   vaultTx(addressTo: Address, amount: number, asset: string, memo: string): Promise<TransferResult>
   normalTx(addressTo: Address, amount: number, asset: string): Promise<TransferResult>
@@ -138,6 +141,9 @@ class Client implements BinanceClient {
     return balance
   }
 
+  // TODO Add proper return type
+  // https://gitlab.com/thorchain/asgardex-common/asgardex-binance/-/issues/2
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   getTransactions = async (date: number, address?: string): Promise<any[]> => {
     const pathTx = '/api/v1/transactions?address='
     const startTime = '&startTime=' // 3 months back. might need to think this.
