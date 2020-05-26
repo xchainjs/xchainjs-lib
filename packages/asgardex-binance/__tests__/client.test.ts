@@ -1,5 +1,5 @@
 require('dotenv').config()
-import BinanceClient from '../src/client'
+import { Client as BinanceClient } from '../src/client'
 import { Network, Balance } from '../src/types/binance'
 
 describe('BinanceClient Test', () => {

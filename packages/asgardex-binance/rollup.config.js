@@ -13,13 +13,13 @@ export default {
       file: pkg.main,
       format: 'cjs',
       exports: 'named',
-      sourcemap: true,
+      sourcemap: false,
     },
     {
       file: pkg.module,
       format: 'es',
       exports: 'named',
-      sourcemap: true,
+      sourcemap: false,
     },
   ],
   plugins: [
@@ -31,19 +31,6 @@ export default {
       exclude: '__tests__/**',
       clean: true,
     }),
-    commonjs({
-      namedExports: {
-        // API of `u2f-api` is defined in `node_modules/u2f-api/lib/u2f-api.js`
-        // and re-imported in `node_modules/u2f-api/index.js`
-        'node_modules/u2f-api/index.js': [
-          'isSupported',
-          'ensureSupport',
-          'register',
-          'sign',
-          'ErrorCodes',
-          'ErrorNames',
-        ],
-      },
-    }),
+    commonjs(),
   ],
 }

@@ -1,7 +1,7 @@
 import * as BIP39 from 'bip39'
+import axios from 'axios'
 import bncClient from '@binance-chain/javascript-sdk'
 import { BncClient, Address, MultiTransfer, Market, Network, TransferResult, Balances } from './types/binance'
-const axios = require('axios').default
 
 /**
  * Interface for custom Binance client
@@ -54,14 +54,13 @@ export interface BinanceClient {
 class Client implements BinanceClient {
   private network: Network
   private bncClient: BncClient
-  private phrase = ''
+  private phrase: string
 
   // Client is initialised with network type
   constructor(_network: Network = Network.TESTNET, _phrase?: string) {
     this.network = _network
-    if (_phrase) {
-      this.phrase = _phrase
-    }
+    this.phrase = _phrase || ''
+    console.log('phrase', this.phrase)
     this.bncClient = new bncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(_network)
     this.setPhrase(this.phrase)
@@ -104,7 +103,7 @@ class Client implements BinanceClient {
   // Sets this.phrase to be accessed later
   setPhrase = (phrase = '') => {
     if (phrase) {
-      if (BIP39.validateMnemonic(phrase)) {
+      if (this.validatePhrase(phrase)) {
         this.phrase = phrase
         this.bncClient.setPrivateKey(bncClient.crypto.getPrivateKeyFromMnemonic(this.phrase))
       } else {
@@ -149,16 +148,14 @@ class Client implements BinanceClient {
   getTransactions = async (date: number, address?: string): Promise<any[]> => {
     const pathTx = '/api/v1/transactions?address='
     const startTime = '&startTime=' // 3 months back. might need to think this.
-    let transactions = []
     let address_ = ''
     address_ = address ? address : this.getAddress()
     try {
       const response = await axios.get(this.getClientUrl() + pathTx + address_ + startTime + date)
-      transactions = response.data.tx
+      return response?.data?.tx
     } catch (error) {
       return Promise.reject(error)
     }
-    return transactions
   }
 
   vaultTx = async (addressTo: Address, amount: number, asset: string, memo: string): Promise<TransferResult> => {
@@ -182,5 +179,4 @@ class Client implements BinanceClient {
     return result
   }
 }
-
-export default Client
+export { Client }
