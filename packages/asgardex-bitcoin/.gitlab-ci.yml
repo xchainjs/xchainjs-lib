@@ -13,8 +13,6 @@ cache:
 
 before_script:
   - apt-get update
-  # To build `node-hid` following dependencies are needed to be installed first
-  - apt install -y libusb-1.0-0 libusb-1.0-0-dev libudev-dev
   - yarn install
 
 lint:
@@ -28,6 +26,4 @@ build:
 test:
   stage: test
   script:
-    - yarn clean
-    - yarn build
     - yarn test
