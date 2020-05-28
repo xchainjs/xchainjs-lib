@@ -1,0 +1,27 @@
+image: node:12.14
+
+stages:
+  - lint
+  - test
+  - build
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - .yarn
+
+before_script:
+  - yarn install
+
+lint:
+  stage: lint
+  script: yarn lint
+
+build:
+  stage: build
+  script: yarn build
+
+test:
+  stage: test
+  script: yarn test

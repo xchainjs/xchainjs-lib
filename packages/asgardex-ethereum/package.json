@@ -1,0 +1,63 @@
+{
+  "name": "@thorchain/asgardex-ethereum",
+  "version": "0.1.0",
+  "description": "Ethereum client for ASGARDEX",
+  "keywords": [
+    "THORChain",
+    "ASGARDEX",
+    "Ethereum"
+  ],
+  "author": "THORChain",
+  "homepage": "https://gitlab.com/thorchain/asgardex-common/asgardex-ethereum",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.com:thorchain/asgardex-common/asgardex-ethereum.git"
+  },
+  "scripts": {
+    "clean": "rimraf lib/**",
+    "build": "rollup -c",
+    "test": "jest",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix",
+    "prepublishOnly": "yarn build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "bip39": "^3.0.2",
+    "ethers": "^4.0.47"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.1.5",
+    "@typescript-eslint/eslint-plugin": "^2.26.0",
+    "@typescript-eslint/parser": "^2.26.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^4.2.3",
+    "jest": "^25.2.7",
+    "lerna": "^3.20.2",
+    "lint-staged": "^10.1.1",
+    "prettier": "^2.0.2",
+    "rollup": "^2.3.2",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-peer-deps-external": "^2.2.2",
+    "rollup-plugin-typescript2": "^0.27.0",
+    "ts-jest": "^25.3.1",
+    "tslib": "^1.11.1",
+    "typescript": "^3.8.3"
+  }
+}
