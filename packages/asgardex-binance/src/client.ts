@@ -13,9 +13,7 @@ export interface BinanceClient {
   getClientUrl(): string
   getExplorerUrl(): string
   getPrefix(): string
-  generatePhrase(): string
-  setPhrase(phrase?: string): void
-  validatePhrase(phrase: string): boolean
+  setPhrase(phrase?: string): Promise<void>
   getAddress(): string
   validateAddress(address: string): boolean
   getBalance(address?: Address): Promise<Balances>
@@ -57,12 +55,11 @@ class Client implements BinanceClient {
   private phrase: string
 
   // Client is initialised with network type
-  constructor(_network: Network = Network.TESTNET, _phrase?: string) {
-    this.network = _network
-    this.phrase = _phrase || ''
-    console.log('phrase', this.phrase)
+  constructor(network: Network = Network.TESTNET, phrase = '') {
+    this.network = network
+    this.phrase = phrase
     this.bncClient = new bncClient(this.getClientUrl())
-    this.bncClient.chooseNetwork(_network)
+    this.bncClient.chooseNetwork(network)
     this.setPhrase(this.phrase)
   }
 
@@ -96,28 +93,22 @@ class Client implements BinanceClient {
     return this.network === Network.TESTNET ? 'tbnb' : 'bnb'
   }
 
-  generatePhrase = (): string => {
+  static generatePhrase = (): string => {
     return BIP39.generateMnemonic()
   }
 
   // Sets this.phrase to be accessed later
-  setPhrase = (phrase = '') => {
-    if (phrase) {
-      if (this.validatePhrase(phrase)) {
-        this.phrase = phrase
-        this.bncClient.setPrivateKey(bncClient.crypto.getPrivateKeyFromMnemonic(this.phrase))
-      } else {
-        console.log('Invalid BIP39 phrase passed to Binance Client')
-      }
+  setPhrase = async (phrase: string): Promise<void> => {
+    if (Client.validatePhrase(phrase)) {
+      this.phrase = phrase
+      await this.bncClient.setPrivateKey(bncClient.crypto.getPrivateKeyFromMnemonic(this.phrase))
+    } else {
+      Promise.reject('Invalid BIP39 phrase passed to Binance Client')
     }
   }
 
-  validatePhrase = (phrase: string): boolean => {
-    if (phrase) {
-      return BIP39.validateMnemonic(phrase)
-    } else {
-      return false
-    }
+  static validatePhrase = (phrase: string): boolean => {
+    return BIP39.validateMnemonic(phrase)
   }
 
   getAddress = (): string => {

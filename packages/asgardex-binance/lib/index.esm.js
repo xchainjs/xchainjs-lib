@@ -23242,9 +23242,10 @@ var Network;
  */
 var Client = /** @class */ (function () {
     // Client is initialised with network type
-    function Client(_network, _phrase) {
+    function Client(network, phrase) {
         var _this = this;
-        if (_network === void 0) { _network = Network.TESTNET; }
+        if (network === void 0) { network = Network.TESTNET; }
+        if (phrase === void 0) { phrase = ''; }
         this.init = function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -23280,30 +23281,24 @@ var Client = /** @class */ (function () {
         this.getPrefix = function () {
             return _this.network === Network.TESTNET ? 'tbnb' : 'bnb';
         };
-        this.generatePhrase = function () {
-            return src_5();
-        };
         // Sets this.phrase to be accessed later
-        this.setPhrase = function (phrase) {
-            if (phrase === void 0) { phrase = ''; }
-            if (phrase) {
-                if (_this.validatePhrase(phrase)) {
-                    _this.phrase = phrase;
-                    _this.bncClient.setPrivateKey(bncClient.crypto.getPrivateKeyFromMnemonic(_this.phrase));
+        this.setPhrase = function (phrase) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!Client.validatePhrase(phrase)) return [3 /*break*/, 2];
+                        this.phrase = phrase;
+                        return [4 /*yield*/, this.bncClient.setPrivateKey(bncClient.crypto.getPrivateKeyFromMnemonic(this.phrase))];
+                    case 1:
+                        _a.sent();
+                        return [3 /*break*/, 3];
+                    case 2:
+                        Promise.reject('Invalid BIP39 phrase passed to Binance Client');
+                        _a.label = 3;
+                    case 3: return [2 /*return*/];
                 }
-                else {
-                    console.log('Invalid BIP39 phrase passed to Binance Client');
-                }
-            }
-        };
-        this.validatePhrase = function (phrase) {
-            if (phrase) {
-                return src_6(phrase);
-            }
-            else {
-                return false;
-            }
-        };
+            });
+        }); };
         this.getAddress = function () {
             var privateKey = bncClient.crypto.getPrivateKeyFromMnemonic(_this.phrase); // Extract private key
             var address = bncClient.crypto.getAddressFromPrivateKey(privateKey, _this.getPrefix()); // Extract address with prefix
@@ -23405,16 +23400,21 @@ var Client = /** @class */ (function () {
                 });
             });
         };
-        this.network = _network;
-        this.phrase = _phrase || '';
-        console.log('phrase', this.phrase);
+        this.network = network;
+        this.phrase = phrase;
         this.bncClient = new bncClient(this.getClientUrl());
-        this.bncClient.chooseNetwork(_network);
+        this.bncClient.chooseNetwork(network);
         this.setPhrase(this.phrase);
     }
     // Will return the desired network
     Client.prototype.getNetwork = function () {
         return this.network;
+    };
+    Client.generatePhrase = function () {
+        return src_5();
+    };
+    Client.validatePhrase = function (phrase) {
+        return src_6(phrase);
     };
     return Client;
 }());

@@ -31,8 +31,7 @@ describe('BinanceClient Test', () => {
   it('should update net', () => {
     const net_ = Network.TESTNET
     bnbClient.setNetwork(net_)
-    const network = bnbClient.getNetwork()
-    expect(network).toEqual('testnet')
+    expect(bnbClient.getNetwork()).toEqual('testnet')
     const prefix = bnbClient.getPrefix()
     expect(prefix).toEqual('tbnb')
     if (phrase) {
@@ -42,14 +41,14 @@ describe('BinanceClient Test', () => {
   })
 
   it('should generate phrase', () => {
-    const phrase_ = bnbClient.generatePhrase()
-    const valid = bnbClient.validatePhrase(phrase_)
+    const phrase_ = BinanceClient.generatePhrase()
+    const valid = BinanceClient.validatePhrase(phrase_)
     expect(valid).toBeTruthy()
   })
 
   it('should validate phrase', () => {
     if (phrase) {
-      const valid = bnbClient.validatePhrase(phrase)
+      const valid = BinanceClient.validatePhrase(phrase)
       expect(valid).toBeTruthy()
     }
   })
