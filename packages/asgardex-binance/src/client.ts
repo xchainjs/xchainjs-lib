@@ -1,19 +1,22 @@
 import * as BIP39 from 'bip39'
 import axios from 'axios'
-import bncClient from '@binance-chain/javascript-sdk'
-import { BncClient, Address, MultiTransfer, Market, Network, TransferResult, Balances } from './types/binance'
+import { Address, MultiTransfer, Network, TransferResult, Balances, Prefix } from './types/binance'
+// import { BncClient, NETWORK_PREFIX_MAPPING } from '@binance-chain/javascript-sdk/typings/client'
+// import { BncClient, NETWORK_PREFIX_MAPPING } from '@binance-chain/javascript-sdk/typings/client'
+
+import { crypto } from '@binance-chain/javascript-sdk'
+import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
 
 /**
  * Interface for custom Binance client
  */
 export interface BinanceClient {
-  init(): Promise<void>
-  setNetwork(net: Network): Promise<void>
+  setNetwork(net: Network): BinanceClient
   getNetwork(): Network
   getClientUrl(): string
   getExplorerUrl(): string
-  getPrefix(): string
-  setPhrase(phrase?: string): Promise<void>
+  getPrefix(): Prefix
+  setPhrase(phrase?: string): BinanceClient
   getAddress(): string
   validateAddress(address: string): boolean
   getBalance(address?: Address): Promise<Balances>
@@ -26,7 +29,8 @@ export interface BinanceClient {
   //isTestnet(): boolean
   // setPrivateKey(privateKey: string): Promise<BinanceClient>
   // removePrivateKey(): Promise<void>
-  getMarkets(limit?: number, offset?: number): Promise<Market>
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  getMarkets(limit?: number, offset?: number): Promise<any>
   multiSend(address: Address, transactions: MultiTransfer[], memo?: string): Promise<TransferResult>
 }
 
@@ -35,13 +39,13 @@ export interface BinanceClient {
  *
  * @example
  * ```
- * import { binance } from 'asgardex-common'
+ * import { Client as BinanceClient } from '@thorchain/asgardex-binance'
  *
- * # testnet
- * const client = await binance.client(binance.Network.TESTNET)
+ * # testnet (by default)
+ * const client = new BinanceClient('any BIP39 mnemonic')
  * await client.transfer(...)
  * # mainnet
- * const client = await binance.client(binance.Network.MAINNET)
+ * const client = await binance.client('any BIP39 mnemonic', Network.MAINNET)
  * await client.transfer(...)
  *
  * ```
@@ -53,27 +57,30 @@ class Client implements BinanceClient {
   private network: Network
   private bncClient: BncClient
   private phrase: string
+  private address: string | null = null
+  private privateKey: string | null = null
+  private dirtyPrivateKey = true
 
-  // Client is initialised with network type
-  constructor(network: Network = Network.TESTNET, phrase = '') {
+  /**
+   * Client has to be initialised with network type and phrase
+   * It will throw an error if an invalid phrase has been passed
+   **/
+
+  constructor(phrase: string, network: Network = 'testnet') {
+    // Invalid phrase will throw an error!
+    this.setPhrase(phrase)
     this.network = network
     this.phrase = phrase
-    this.bncClient = new bncClient(this.getClientUrl())
+    this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
-    this.setPhrase(this.phrase)
-  }
-
-  init = async (): Promise<void> => {
-    await this.bncClient.initChain()
   }
 
   // update network
-  setNetwork = async (_network: Network): Promise<void> => {
-    this.network = _network
-    this.bncClient = new bncClient(this.getClientUrl())
-    this.bncClient.chooseNetwork(_network)
-    this.setPhrase(this.phrase)
-    await this.bncClient.initChain()
+  setNetwork(network: Network): BinanceClient {
+    this.network = network
+    this.bncClient = new BncClient(this.getClientUrl())
+    this.bncClient.chooseNetwork(network)
+    return this
   }
 
   // Will return the desired network
@@ -82,38 +89,63 @@ class Client implements BinanceClient {
   }
 
   getClientUrl = (): string => {
-    return this.network === Network.TESTNET ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
+    return this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
   }
 
   getExplorerUrl = (): string => {
-    return this.network === Network.TESTNET ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
+    return this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
   }
 
-  getPrefix = (): string => {
-    return this.network === Network.TESTNET ? 'tbnb' : 'bnb'
+  getPrefix = (): Prefix => {
+    return this.network === 'testnet' ? 'tbnb' : 'bnb'
   }
-
   static generatePhrase = (): string => {
     return BIP39.generateMnemonic()
   }
 
   // Sets this.phrase to be accessed later
-  setPhrase = async (phrase: string): Promise<void> => {
-    if (Client.validatePhrase(phrase)) {
-      this.phrase = phrase
-      await this.bncClient.setPrivateKey(bncClient.crypto.getPrivateKeyFromMnemonic(this.phrase))
-    } else {
-      Promise.reject('Invalid BIP39 phrase passed to Binance Client')
+  setPhrase = (phrase: string): BinanceClient => {
+    if (this.phrase && this.phrase === phrase) return this
+
+    if (!Client.validatePhrase(phrase)) {
+      throw Error('Invalid BIP39 phrase passed to Binance Client')
     }
+    this.phrase = phrase
+    // whenever a new phrase has been added, a private key + address need to be renewed
+    this.address = null
+    this.privateKey = null
+    this.dirtyPrivateKey = true
+    return this
   }
 
   static validatePhrase = (phrase: string): boolean => {
     return BIP39.validateMnemonic(phrase)
   }
 
+  private getPrivateKey = () => {
+    if (!this.privateKey) {
+      const privateKey = crypto.getPrivateKeyFromMnemonic(this.phrase)
+      this.privateKey = privateKey
+      return privateKey
+    }
+    return this.privateKey
+  }
+
+  private setPrivateKey = async () => {
+    if (this.dirtyPrivateKey) {
+      const privateKey = this.getPrivateKey()
+      await this.bncClient.setPrivateKey(privateKey).catch((error) => Promise.reject(error))
+      this.dirtyPrivateKey = false
+    }
+    return Promise.resolve()
+  }
+
   getAddress = (): string => {
-    const privateKey = bncClient.crypto.getPrivateKeyFromMnemonic(this.phrase) // Extract private key
-    const address = bncClient.crypto.getAddressFromPrivateKey(privateKey, this.getPrefix()) // Extract address with prefix
+    if (this.address) return this.address
+
+    const privateKey = this.getPrivateKey() // Extract private key
+    const address = crypto.getAddressFromPrivateKey(privateKey, this.getPrefix()) // Extract address with prefix
+    this.address = address
     return address
   }
 
@@ -122,27 +154,20 @@ class Client implements BinanceClient {
   }
 
   getBalance = async (address?: Address): Promise<Balances> => {
-    if (address) {
-      return this.bncClient.getBalance(address)
-    } else {
-      try {
-        return this.bncClient.getBalance(this.getAddress())
-      } catch (e) {
-        return Promise.reject(e)
-      }
-    }
+    await this.bncClient.initChain()
+    return this.bncClient.getBalance(address || this.getAddress())
   }
 
   // TODO Add proper return type
   // https://gitlab.com/thorchain/asgardex-common/asgardex-binance/-/issues/2
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   getTransactions = async (date: number, address?: string): Promise<any[]> => {
+    await this.bncClient.initChain()
     const pathTx = '/api/v1/transactions?address='
     const startTime = '&startTime=' // 3 months back. might need to think this.
-    let address_ = ''
-    address_ = address ? address : this.getAddress()
     try {
-      const response = await axios.get(this.getClientUrl() + pathTx + address_ + startTime + date)
+      const addressFrom = address || this.getAddress()
+      const response = await axios.get(this.getClientUrl() + pathTx + addressFrom + startTime + date)
       return response?.data?.tx
     } catch (error) {
       return Promise.reject(error)
@@ -150,24 +175,37 @@ class Client implements BinanceClient {
   }
 
   vaultTx = async (addressTo: Address, amount: number, asset: string, memo: string): Promise<TransferResult> => {
-    const addressFrom = this.getAddress()
-    const result = await this.bncClient.transfer(addressFrom, addressTo, amount, asset, memo)
-    return result
+    await this.bncClient.initChain()
+    await this.setPrivateKey()
+    try {
+      const addressFrom = this.getAddress()
+      const result = await this.bncClient.transfer(addressFrom, addressTo, amount, asset, memo)
+      return result
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   normalTx = async (addressTo: Address, amount: number, asset: string): Promise<TransferResult> => {
-    const fromAddress = this.getAddress()
-    const result = await this.bncClient.transfer(fromAddress, addressTo, amount, asset)
-    return result
+    await this.bncClient.initChain()
+    await this.setPrivateKey()
+    try {
+      const addressFrom = this.getAddress()
+      const result = await this.bncClient.transfer(addressFrom, addressTo, amount, asset)
+      return result
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
-  getMarkets = async (limit = 1000, offset = 0): Promise<Market> => {
+  getMarkets = async (limit = 1000, offset = 0) => {
+    await this.bncClient.initChain()
     return this.bncClient.getMarkets(limit, offset)
   }
 
   multiSend = async (address: Address, transactions: MultiTransfer[], memo = '') => {
-    const result = await this.bncClient.multiSend(address, transactions, memo)
-    return result
+    await this.bncClient.initChain()
+    return await this.bncClient.multiSend(address, transactions, memo)
   }
 }
 export { Client }

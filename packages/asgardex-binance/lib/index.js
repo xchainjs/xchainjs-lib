@@ -8,7 +8,8 @@ var buffer = _interopDefault(require('buffer'));
 var events = _interopDefault(require('events'));
 var stream = _interopDefault(require('stream'));
 var string_decoder$1 = _interopDefault(require('string_decoder'));
-var bncClient = _interopDefault(require('@binance-chain/javascript-sdk'));
+var javascriptSdk = require('@binance-chain/javascript-sdk');
+var client = require('@binance-chain/javascript-sdk/lib/client');
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -4784,16 +4785,7 @@ var browser$1 = function createHash (alg) {
 
 var MAX_ALLOC = Math.pow(2, 30) - 1; // default in iojs
 
-function checkBuffer (buf, name) {
-  if (typeof buf !== 'string' && !Buffer.isBuffer(buf)) {
-    throw new TypeError(name + ' must be a buffer or string')
-  }
-}
-
-var precondition = function (password, salt, iterations, keylen) {
-  checkBuffer(password, 'Password');
-  checkBuffer(salt, 'Salt');
-
+var precondition = function (iterations, keylen) {
   if (typeof iterations !== 'number') {
     throw new TypeError('Iterations not a number')
   }
@@ -4815,10 +4807,12 @@ var defaultEncoding;
 /* istanbul ignore next */
 if (process.browser) {
   defaultEncoding = 'utf-8';
-} else {
+} else if (process.version) {
   var pVersionMajor = parseInt(process.version.split('.')[0].slice(1), 10);
 
   defaultEncoding = pVersionMajor >= 6 ? 'utf-8' : 'binary';
+} else {
+  defaultEncoding = 'utf-8';
 }
 var defaultEncoding_1 = defaultEncoding;
 
@@ -4827,7 +4821,26 @@ var md5 = function (buffer) {
 };
 
 var Buffer$g = safeBuffer.Buffer;
-var ZEROS = Buffer$g.alloc(128);
+
+var toBuffer = function (thing, encoding, name) {
+  if (Buffer$g.isBuffer(thing)) {
+    return thing
+  } else if (typeof thing === 'string') {
+    return Buffer$g.from(thing, encoding)
+  } else if (ArrayBuffer.isView(thing)) {
+    return Buffer$g.from(thing.buffer)
+  } else {
+    throw new TypeError(name + ' must be a string, a Buffer, a typed array or a DataView')
+  }
+};
+
+var Buffer$h = safeBuffer.Buffer;
+
+
+
+
+
+var ZEROS = Buffer$h.alloc(128);
 var sizes = {
   md5: 16,
   sha1: 20,
@@ -4846,17 +4859,17 @@ function Hmac (alg, key, saltLen) {
   if (key.length > blocksize) {
     key = hash(key);
   } else if (key.length < blocksize) {
-    key = Buffer$g.concat([key, ZEROS], blocksize);
+    key = Buffer$h.concat([key, ZEROS], blocksize);
   }
 
-  var ipad = Buffer$g.allocUnsafe(blocksize + sizes[alg]);
-  var opad = Buffer$g.allocUnsafe(blocksize + sizes[alg]);
+  var ipad = Buffer$h.allocUnsafe(blocksize + sizes[alg]);
+  var opad = Buffer$h.allocUnsafe(blocksize + sizes[alg]);
   for (var i = 0; i < blocksize; i++) {
     ipad[i] = key[i] ^ 0x36;
     opad[i] = key[i] ^ 0x5C;
   }
 
-  var ipad1 = Buffer$g.allocUnsafe(blocksize + saltLen + 4);
+  var ipad1 = Buffer$h.allocUnsafe(blocksize + saltLen + 4);
   ipad.copy(ipad1, 0, 0, blocksize);
   this.ipad1 = ipad1;
   this.ipad2 = ipad;
@@ -4888,17 +4901,16 @@ function getDigest (alg) {
 }
 
 function pbkdf2 (password, salt, iterations, keylen, digest) {
-  precondition(password, salt, iterations, keylen);
-
-  if (!Buffer$g.isBuffer(password)) password = Buffer$g.from(password, defaultEncoding_1);
-  if (!Buffer$g.isBuffer(salt)) salt = Buffer$g.from(salt, defaultEncoding_1);
+  precondition(iterations, keylen);
+  password = toBuffer(password, defaultEncoding_1, 'Password');
+  salt = toBuffer(salt, defaultEncoding_1, 'Salt');
 
   digest = digest || 'sha1';
 
   var hmac = new Hmac(digest, password, salt.length);
 
-  var DK = Buffer$g.allocUnsafe(keylen);
-  var block1 = Buffer$g.allocUnsafe(salt.length + 4);
+  var DK = Buffer$h.allocUnsafe(keylen);
+  var block1 = Buffer$h.allocUnsafe(salt.length + 4);
   salt.copy(block1, 0, 0, salt.length);
 
   var destPos = 0;
@@ -4925,20 +4937,25 @@ function pbkdf2 (password, salt, iterations, keylen, digest) {
 
 var syncBrowser = pbkdf2;
 
-var Buffer$h = safeBuffer.Buffer;
+var Buffer$i = safeBuffer.Buffer;
+
+
+
+
+
 
 var ZERO_BUF;
 var subtle = commonjsGlobal.crypto && commonjsGlobal.crypto.subtle;
 var toBrowser = {
-  'sha': 'SHA-1',
+  sha: 'SHA-1',
   'sha-1': 'SHA-1',
-  'sha1': 'SHA-1',
-  'sha256': 'SHA-256',
+  sha1: 'SHA-1',
+  sha256: 'SHA-256',
   'sha-256': 'SHA-256',
-  'sha384': 'SHA-384',
+  sha384: 'SHA-384',
   'sha-384': 'SHA-384',
   'sha-512': 'SHA-512',
-  'sha512': 'SHA-512'
+  sha512: 'SHA-512'
 };
 var checks = [];
 function checkNative (algo) {
@@ -4951,7 +4968,7 @@ function checkNative (algo) {
   if (checks[algo] !== undefined) {
     return checks[algo]
   }
-  ZERO_BUF = ZERO_BUF || Buffer$h.alloc(8);
+  ZERO_BUF = ZERO_BUF || Buffer$i.alloc(8);
   var prom = browserPbkdf2(ZERO_BUF, ZERO_BUF, 10, 128, algo)
     .then(function () {
       return true
@@ -4964,7 +4981,7 @@ function checkNative (algo) {
 
 function browserPbkdf2 (password, salt, iterations, length, algo) {
   return subtle.importKey(
-    'raw', password, {name: 'PBKDF2'}, false, ['deriveBits']
+    'raw', password, { name: 'PBKDF2' }, false, ['deriveBits']
   ).then(function (key) {
     return subtle.deriveBits({
       name: 'PBKDF2',
@@ -4975,7 +4992,7 @@ function browserPbkdf2 (password, salt, iterations, length, algo) {
       }
     }, key, length << 3)
   }).then(function (res) {
-    return Buffer$h.from(res)
+    return Buffer$i.from(res)
   })
 }
 
@@ -5011,10 +5028,10 @@ var async = function (password, salt, iterations, keylen, digest, callback) {
     })
   }
 
-  precondition(password, salt, iterations, keylen);
+  precondition(iterations, keylen);
+  password = toBuffer(password, defaultEncoding_1, 'Password');
+  salt = toBuffer(salt, defaultEncoding_1, 'Salt');
   if (typeof callback !== 'function') throw new Error('No callback provided to pbkdf2')
-  if (!Buffer$h.isBuffer(password)) password = Buffer$h.from(password, defaultEncoding_1);
-  if (!Buffer$h.isBuffer(salt)) salt = Buffer$h.from(salt, defaultEncoding_1);
 
   resolvePromise(checkNative(algo).then(function (resp) {
     if (resp) return browserPbkdf2(password, salt, iterations, keylen, algo)
@@ -23201,38 +23218,17 @@ axios_1.default = default_1;
 var axios$1 = axios_1;
 
 /**
- * Type definitions for Binance Chain API
- * @see https://docs.binance.org/api-reference/dex-api/
- *
- */
-(function (OrderStatus) {
-    OrderStatus["Ack"] = "Ack";
-    OrderStatus["PartialFill"] = "PartialFill";
-    OrderStatus["IocNoFill"] = "IocNoFill";
-    OrderStatus["FullyFill"] = "FullyFill";
-    OrderStatus["Canceled"] = "Canceled";
-    OrderStatus["Expired"] = "Expired";
-    OrderStatus["FailedBlocking"] = "FailedBlocking";
-    OrderStatus["FailedMatching"] = "FailedMatching";
-    OrderStatus["IocExpire"] = "IocExpire";
-})(exports.OrderStatus || (exports.OrderStatus = {}));
-(function (Network) {
-    Network["TESTNET"] = "testnet";
-    Network["MAINNET"] = "mainnet";
-})(exports.Network || (exports.Network = {}));
-
-/**
  * Custom Binance client
  *
  * @example
  * ```
- * import { binance } from 'asgardex-common'
+ * import { Client as BinanceClient } from '@thorchain/asgardex-binance'
  *
- * # testnet
- * const client = await binance.client(binance.Network.TESTNET)
+ * # testnet (by default)
+ * const client = new BinanceClient('any BIP39 mnemonic')
  * await client.transfer(...)
  * # mainnet
- * const client = await binance.client(binance.Network.MAINNET)
+ * const client = await binance.client('any BIP39 mnemonic', Network.MAINNET)
  * await client.transfer(...)
  *
  * ```
@@ -23241,67 +23237,69 @@ var axios$1 = axios_1;
  * @implements {BinanceClient}
  */
 var Client = /** @class */ (function () {
-    // Client is initialised with network type
-    function Client(network, phrase) {
+    /**
+     * Client has to be initialised with network type and phrase
+     * It will throw an error if an invalid phrase has been passed
+     **/
+    function Client(phrase, network) {
         var _this = this;
-        if (network === void 0) { network = exports.Network.TESTNET; }
-        if (phrase === void 0) { phrase = ''; }
-        this.init = function () { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.bncClient.initChain()];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); };
-        // update network
-        this.setNetwork = function (_network) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        this.network = _network;
-                        this.bncClient = new bncClient(this.getClientUrl());
-                        this.bncClient.chooseNetwork(_network);
-                        this.setPhrase(this.phrase);
-                        return [4 /*yield*/, this.bncClient.initChain()];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); };
+        if (network === void 0) { network = 'testnet'; }
+        this.address = null;
+        this.privateKey = null;
+        this.dirtyPrivateKey = true;
         this.getClientUrl = function () {
-            return _this.network === exports.Network.TESTNET ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org';
+            return _this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org';
         };
         this.getExplorerUrl = function () {
-            return _this.network === exports.Network.TESTNET ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org';
+            return _this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org';
         };
         this.getPrefix = function () {
-            return _this.network === exports.Network.TESTNET ? 'tbnb' : 'bnb';
+            return _this.network === 'testnet' ? 'tbnb' : 'bnb';
         };
         // Sets this.phrase to be accessed later
-        this.setPhrase = function (phrase) { return __awaiter(_this, void 0, void 0, function () {
+        this.setPhrase = function (phrase) {
+            if (_this.phrase && _this.phrase === phrase)
+                return _this;
+            if (!Client.validatePhrase(phrase)) {
+                throw Error('Invalid BIP39 phrase passed to Binance Client');
+            }
+            _this.phrase = phrase;
+            // whenever a new phrase has been added, a private key + address need to be renewed
+            _this.address = null;
+            _this.privateKey = null;
+            _this.dirtyPrivateKey = true;
+            return _this;
+        };
+        this.getPrivateKey = function () {
+            if (!_this.privateKey) {
+                var privateKey = javascriptSdk.crypto.getPrivateKeyFromMnemonic(_this.phrase);
+                _this.privateKey = privateKey;
+                return privateKey;
+            }
+            return _this.privateKey;
+        };
+        this.setPrivateKey = function () { return __awaiter(_this, void 0, void 0, function () {
+            var privateKey;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!Client.validatePhrase(phrase)) return [3 /*break*/, 2];
-                        this.phrase = phrase;
-                        return [4 /*yield*/, this.bncClient.setPrivateKey(bncClient.crypto.getPrivateKeyFromMnemonic(this.phrase))];
+                        if (!this.dirtyPrivateKey) return [3 /*break*/, 2];
+                        privateKey = this.getPrivateKey();
+                        return [4 /*yield*/, this.bncClient.setPrivateKey(privateKey).catch(function (error) { return Promise.reject(error); })];
                     case 1:
                         _a.sent();
-                        return [3 /*break*/, 3];
-                    case 2:
-                        Promise.reject('Invalid BIP39 phrase passed to Binance Client');
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
+                        this.dirtyPrivateKey = false;
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, Promise.resolve()];
                 }
             });
         }); };
         this.getAddress = function () {
-            var privateKey = bncClient.crypto.getPrivateKeyFromMnemonic(_this.phrase); // Extract private key
-            var address = bncClient.crypto.getAddressFromPrivateKey(privateKey, _this.getPrefix()); // Extract address with prefix
+            if (_this.address)
+                return _this.address;
+            var privateKey = _this.getPrivateKey(); // Extract private key
+            var address = javascriptSdk.crypto.getAddressFromPrivateKey(privateKey, _this.getPrefix()); // Extract address with prefix
+            _this.address = address;
             return address;
         };
         this.validateAddress = function (address) {
@@ -23309,71 +23307,90 @@ var Client = /** @class */ (function () {
         };
         this.getBalance = function (address) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                if (address) {
-                    return [2 /*return*/, this.bncClient.getBalance(address)];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.bncClient.initChain()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/, this.bncClient.getBalance(address || this.getAddress())];
                 }
-                else {
-                    try {
-                        return [2 /*return*/, this.bncClient.getBalance(this.getAddress())];
-                    }
-                    catch (e) {
-                        return [2 /*return*/, Promise.reject(e)];
-                    }
-                }
-                return [2 /*return*/];
             });
         }); };
         // TODO Add proper return type
         // https://gitlab.com/thorchain/asgardex-common/asgardex-binance/-/issues/2
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         this.getTransactions = function (date, address) { return __awaiter(_this, void 0, void 0, function () {
-            var pathTx, startTime, address_, response, error_1;
+            var pathTx, startTime, addressFrom, response, error_1;
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0:
+                    case 0: return [4 /*yield*/, this.bncClient.initChain()];
+                    case 1:
+                        _b.sent();
                         pathTx = '/api/v1/transactions?address=';
                         startTime = '&startTime=' // 3 months back. might need to think this.
                         ;
-                        address_ = '';
-                        address_ = address ? address : this.getAddress();
-                        _b.label = 1;
-                    case 1:
-                        _b.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, axios$1.get(this.getClientUrl() + pathTx + address_ + startTime + date)];
+                        _b.label = 2;
                     case 2:
+                        _b.trys.push([2, 4, , 5]);
+                        addressFrom = address || this.getAddress();
+                        return [4 /*yield*/, axios$1.get(this.getClientUrl() + pathTx + addressFrom + startTime + date)];
+                    case 3:
                         response = _b.sent();
                         return [2 /*return*/, (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.tx];
-                    case 3:
+                    case 4:
                         error_1 = _b.sent();
                         return [2 /*return*/, Promise.reject(error_1)];
-                    case 4: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         }); };
         this.vaultTx = function (addressTo, amount, asset, memo) { return __awaiter(_this, void 0, void 0, function () {
-            var addressFrom, result;
+            var addressFrom, result, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
+                    case 0: return [4 /*yield*/, this.bncClient.initChain()];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.setPrivateKey()];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3:
+                        _a.trys.push([3, 5, , 6]);
                         addressFrom = this.getAddress();
                         return [4 /*yield*/, this.bncClient.transfer(addressFrom, addressTo, amount, asset, memo)];
-                    case 1:
+                    case 4:
                         result = _a.sent();
                         return [2 /*return*/, result];
+                    case 5:
+                        error_2 = _a.sent();
+                        return [2 /*return*/, Promise.reject(error_2)];
+                    case 6: return [2 /*return*/];
                 }
             });
         }); };
         this.normalTx = function (addressTo, amount, asset) { return __awaiter(_this, void 0, void 0, function () {
-            var fromAddress, result;
+            var addressFrom, result, error_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        fromAddress = this.getAddress();
-                        return [4 /*yield*/, this.bncClient.transfer(fromAddress, addressTo, amount, asset)];
+                    case 0: return [4 /*yield*/, this.bncClient.initChain()];
                     case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.setPrivateKey()];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3:
+                        _a.trys.push([3, 5, , 6]);
+                        addressFrom = this.getAddress();
+                        return [4 /*yield*/, this.bncClient.transfer(addressFrom, addressTo, amount, asset)];
+                    case 4:
                         result = _a.sent();
                         return [2 /*return*/, result];
+                    case 5:
+                        error_3 = _a.sent();
+                        return [2 /*return*/, Promise.reject(error_3)];
+                    case 6: return [2 /*return*/];
                 }
             });
         }); };
@@ -23382,30 +23399,43 @@ var Client = /** @class */ (function () {
             if (offset === void 0) { offset = 0; }
             return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
-                    return [2 /*return*/, this.bncClient.getMarkets(limit, offset)];
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, this.bncClient.initChain()];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/, this.bncClient.getMarkets(limit, offset)];
+                    }
                 });
             });
         };
         this.multiSend = function (address, transactions, memo) {
             if (memo === void 0) { memo = ''; }
             return __awaiter(_this, void 0, void 0, function () {
-                var result;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.bncClient.multiSend(address, transactions, memo)];
+                        case 0: return [4 /*yield*/, this.bncClient.initChain()];
                         case 1:
-                            result = _a.sent();
-                            return [2 /*return*/, result];
+                            _a.sent();
+                            return [4 /*yield*/, this.bncClient.multiSend(address, transactions, memo)];
+                        case 2: return [2 /*return*/, _a.sent()];
                     }
                 });
             });
         };
+        // Invalid phrase will throw an error!
+        this.setPhrase(phrase);
         this.network = network;
         this.phrase = phrase;
-        this.bncClient = new bncClient(this.getClientUrl());
+        this.bncClient = new client.BncClient(this.getClientUrl());
         this.bncClient.chooseNetwork(network);
-        this.setPhrase(this.phrase);
     }
+    // update network
+    Client.prototype.setNetwork = function (network) {
+        this.network = network;
+        this.bncClient = new client.BncClient(this.getClientUrl());
+        this.bncClient.chooseNetwork(network);
+        return this;
+    };
     // Will return the desired network
     Client.prototype.getNetwork = function () {
         return this.network;
@@ -23428,6 +23458,23 @@ var getHashFromTransfer = function (transfer) { var _a; return (_a = transfer ==
  * Get `hash` from memo
  */
 var getTxHashFromMemo = function (transfer) { var _a; return (_a = transfer === null || transfer === void 0 ? void 0 : transfer.data) === null || _a === void 0 ? void 0 : _a.M.split(':')[1]; };
+
+/**
+ * Type definitions for Binance Chain API
+ * @see https://docs.binance.org/api-reference/dex-api/
+ *
+ */
+(function (OrderStatus) {
+    OrderStatus["Ack"] = "Ack";
+    OrderStatus["PartialFill"] = "PartialFill";
+    OrderStatus["IocNoFill"] = "IocNoFill";
+    OrderStatus["FullyFill"] = "FullyFill";
+    OrderStatus["Canceled"] = "Canceled";
+    OrderStatus["Expired"] = "Expired";
+    OrderStatus["FailedBlocking"] = "FailedBlocking";
+    OrderStatus["FailedMatching"] = "FailedMatching";
+    OrderStatus["IocExpire"] = "IocExpire";
+})(exports.OrderStatus || (exports.OrderStatus = {}));
 
 /**
  * Type definitions for data of Binance WebSocket Streams

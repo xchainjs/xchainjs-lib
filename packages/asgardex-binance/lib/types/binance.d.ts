@@ -3,6 +3,7 @@
  * @see https://docs.binance.org/api-reference/dex-api/
  *
  */
+import { NETWORK_PREFIX_MAPPING } from '@binance-chain/javascript-sdk/lib/client';
 /**
  * Address
  */
@@ -407,86 +408,8 @@ export declare type Transfer = {
     log: string;
     ok: boolean;
 };
-export declare enum Network {
-    TESTNET = "testnet",
-    MAINNET = "mainnet"
-}
-/**
- * Binance Chain Client
- * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#module_client.BncClient
- * */
-export interface BncClient {
-    /**
-     * Sets the client network (testnet or mainnet).
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#bncclientchoosenetworknetwork
-     */
-    chooseNetwork(network: Network): void;
-    /**
-     * Initialize the client with the chain's ID. Asynchronous.
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#bncclientinitchain--promise
-     */
-    initChain(): Promise<BncClient>;
-    /**
-     * Sets the client's private key for calls made by this client.
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#bncclientsetprivatekeyprivatekey-localonly--promise
-     */
-    setPrivateKey(privateKey: string, localOnly?: boolean): Promise<BncClient>;
-    /**
-     * Validates an address.
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#bncclientcheckaddressaddress-prefix--boolean
-     */
-    checkAddress(address: Address, prefix: string): boolean;
-    /**
-     * Getter for Binance DEX url
-     */
-    getBinanceUrl(): string;
-    /**
-     * Getter for prefix
-     */
-    getPrefix(): string;
-    /**
-     * Validates an address.
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#cryptocheckaddress--boolean
-     */
-    isValidAddress(address: Address): boolean;
-    /**
-     * Get balances
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#clientgetbalancesbalances
-     */
-    getBalance(address: Address): Promise<Balances>;
-    /**
-     *   Get Transactions
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#bncclientgettransactionsaddress-offset--promise
-     */
-    getTransactions(address: Address, offset: number): Promise<any>;
-    /**
-     * Get markets
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#bncclientgetmarketsoffset-limit--promise
-     */
-    getMarkets(limit: number, offset: number): Promise<Market>;
-    /**
-     * Create and sign a multi send tx
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#bncclientmultisendfromaddress-outputs-memo-sequence--promise
-     */
-    multiSend(fromAddress: Address, outputs: MultiTransfer[], memo?: string, sequence?: number): Promise<TransferResult>;
-    /**
-     * Transfer tokens from one address to another.
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#bncclienttransferfromaddress-toaddress-amount-asset-memo-sequence--promise
-     */
-    transfer(fromAddress: Address, toAddress: Address, amount: number, asset: string, memo?: string, sequence?: number): Promise<TransferResult>;
-    /**
-     * crypto
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#crypto
-     */
-    crypto: BNBCrypto;
-}
-declare type BNBCrypto = {
-    /**
-     * Checks whether an address is valid.
-     * https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#cryptocheckaddress--boolean
-     */
-    checkAddress(address: Address, hrp: string): boolean;
-};
+export declare type Network = keyof typeof NETWORK_PREFIX_MAPPING;
+export declare type Prefix = typeof NETWORK_PREFIX_MAPPING[Network];
 export declare type MultiTransfer = {
     to: Address;
     coins: Coin[];
@@ -495,4 +418,3 @@ export declare type Coin = {
     denom: string;
     amount: number;
 };
-export {};

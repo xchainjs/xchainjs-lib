@@ -32,7 +32,7 @@
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
-    "@binance-chain/javascript-sdk": "^3.0.2",
+    "@binance-chain/javascript-sdk": "3.0.2-alpha.11",
     "@types/jest": "^25.2.3",
     "@typescript-eslint/eslint-plugin": "^3.0.1",
     "@typescript-eslint/parser": "^3.0.1",
@@ -58,6 +58,6 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@binance-chain/javascript-sdk": "^3.x"
+    "@binance-chain/javascript-sdk": "3.0.2-alpha.11"
   }
 }

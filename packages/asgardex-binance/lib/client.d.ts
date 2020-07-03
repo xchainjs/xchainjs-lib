@@ -1,22 +1,21 @@
-import { Address, MultiTransfer, Market, Network, TransferResult, Balances } from './types/binance';
+import { Address, MultiTransfer, Network, TransferResult, Balances, Prefix } from './types/binance';
 /**
  * Interface for custom Binance client
  */
 export interface BinanceClient {
-    init(): Promise<void>;
-    setNetwork(net: Network): Promise<void>;
+    setNetwork(net: Network): BinanceClient;
     getNetwork(): Network;
     getClientUrl(): string;
     getExplorerUrl(): string;
-    getPrefix(): string;
-    setPhrase(phrase?: string): Promise<void>;
+    getPrefix(): Prefix;
+    setPhrase(phrase?: string): BinanceClient;
     getAddress(): string;
     validateAddress(address: string): boolean;
     getBalance(address?: Address): Promise<Balances>;
     getTransactions(date: number, address?: string): Promise<any[]>;
     vaultTx(addressTo: Address, amount: number, asset: string, memo: string): Promise<TransferResult>;
     normalTx(addressTo: Address, amount: number, asset: string): Promise<TransferResult>;
-    getMarkets(limit?: number, offset?: number): Promise<Market>;
+    getMarkets(limit?: number, offset?: number): Promise<any>;
     multiSend(address: Address, transactions: MultiTransfer[], memo?: string): Promise<TransferResult>;
 }
 /**
@@ -24,13 +23,13 @@ export interface BinanceClient {
  *
  * @example
  * ```
- * import { binance } from 'asgardex-common'
+ * import { Client as BinanceClient } from '@thorchain/asgardex-binance'
  *
- * # testnet
- * const client = await binance.client(binance.Network.TESTNET)
+ * # testnet (by default)
+ * const client = new BinanceClient('any BIP39 mnemonic')
  * await client.transfer(...)
  * # mainnet
- * const client = await binance.client(binance.Network.MAINNET)
+ * const client = await binance.client('any BIP39 mnemonic', Network.MAINNET)
  * await client.transfer(...)
  *
  * ```
@@ -42,23 +41,37 @@ declare class Client implements BinanceClient {
     private network;
     private bncClient;
     private phrase;
-    constructor(network?: Network, phrase?: string);
-    init: () => Promise<void>;
-    setNetwork: (_network: Network) => Promise<void>;
+    private address;
+    private privateKey;
+    private dirtyPrivateKey;
+    /**
+     * Client has to be initialised with network type and phrase
+     * It will throw an error if an invalid phrase has been passed
+     **/
+    constructor(phrase: string, network?: Network);
+    setNetwork(network: Network): BinanceClient;
     getNetwork(): Network;
     getClientUrl: () => string;
     getExplorerUrl: () => string;
-    getPrefix: () => string;
+    getPrefix: () => Prefix;
     static generatePhrase: () => string;
-    setPhrase: (phrase: string) => Promise<void>;
+    setPhrase: (phrase: string) => BinanceClient;
     static validatePhrase: (phrase: string) => boolean;
+    private getPrivateKey;
+    private setPrivateKey;
     getAddress: () => string;
     validateAddress: (address: Address) => boolean;
     getBalance: (address?: string | undefined) => Promise<Balances>;
     getTransactions: (date: number, address?: string | undefined) => Promise<any[]>;
     vaultTx: (addressTo: Address, amount: number, asset: string, memo: string) => Promise<TransferResult>;
     normalTx: (addressTo: Address, amount: number, asset: string) => Promise<TransferResult>;
-    getMarkets: (limit?: number, offset?: number) => Promise<Market>;
-    multiSend: (address: Address, transactions: MultiTransfer[], memo?: string) => Promise<TransferResult>;
+    getMarkets: (limit?: number, offset?: number) => Promise<never[] | {
+        result: any;
+        status: number;
+    }>;
+    multiSend: (address: Address, transactions: MultiTransfer[], memo?: string) => Promise<{
+        result: any;
+        status: number;
+    }>;
 }
 export { Client };
