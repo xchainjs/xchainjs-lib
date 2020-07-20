@@ -1,3 +1,10 @@
+# v.2.0.0 (2020-07-20)
+
+- BREAKING CHANGE: `getTransactions` expects `GetTxsParams` as its parameter
+- Refactored implementation of `getTransactions`
+- Use latest `@binance-chain/javascript-sdk@4.0.5"
+- Fix `Tx` type
+
 # v.1.0.0 (2020-05-14)
 
 Refactors the client to be constructed with a `net` and optional `phrase`

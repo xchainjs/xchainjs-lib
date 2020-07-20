@@ -195,7 +195,7 @@ export type TxPage = {
   /**
    * List of transactions
    */
-  tx: [Tx]
+  tx: Txs
 }
 
 /**
@@ -218,7 +218,7 @@ export type Tx = {
   /**
    * _no offical description_
    */
-  data: string
+  data: string | null
   /**
    * From address
    */
@@ -226,11 +226,11 @@ export type Tx = {
   /**
    * Order ID
    */
-  orderId: string
+  orderId: string | null
   /**
    * Time of transaction
    */
-  timeStamp: number
+  timeStamp: string
   /**
    * To address
    */
@@ -254,7 +254,11 @@ export type Tx = {
   /**
    * Type of transaction
    */
-  txType: string
+  txType: TxType
+  /**
+   * memo
+   */
+  memo: string
   /**
    * Value of transaction
    */
@@ -274,7 +278,55 @@ export type Tx = {
   /**
    * _no offical description_
    */
-  proposalId: string
+  proposalId: string | null
+}
+
+export type Txs = Tx[]
+
+export type TxSide = 'RECEIVE' | 'SEND'
+
+/**
+ * Type of transactions
+ * @see https://docs.binance.org/api-reference/dex-api/paths.html#apiv1transactions
+ */
+export type TxType =
+  | 'NEW_ORDER'
+  | 'ISSUE_TOKEN'
+  | 'BURN_TOKEN'
+  | 'LIST_TOKEN'
+  | 'CANCEL_ORDER'
+  | 'FREEZE_TOKEN'
+  | 'UN_FREEZE_TOKEN'
+  | 'TRANSFER'
+  | 'PROPOSAL'
+  | 'VOTE'
+  | 'MINT'
+  | 'DEPOSIT'
+  | 'CREATE_VALIDATOR'
+  | 'REMOVE_VALIDATOR'
+  | 'TIME_LOCK'
+  | 'TIME_UNLOCK'
+  | 'TIME_RELOCK'
+  | 'SET_ACCOUNT_FLAG'
+  | 'HTL_TRANSFER'
+  | 'CLAIM_HTL'
+  | 'DEPOSIT_HTL'
+  | 'REFUND_HTL'
+
+/**
+ * Parameters for `/api/v1/transactions` endpoint
+ * @see https://docs.binance.org/api-reference/dex-api/paths.html#apiv1transactions
+ */
+export type GetTxsParams = {
+  address?: string
+  blockHeight?: number
+  endTime?: number
+  limit?: number
+  offset?: number
+  side?: TxSide
+  startTime?: number
+  txAsset?: string
+  txType?: TxType
 }
 
 /**

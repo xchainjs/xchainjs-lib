@@ -271,10 +271,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@binance-chain/javascript-sdk@3.0.2-alpha.11":
-  version "3.0.2-alpha.11"
-  resolved "https://registry.yarnpkg.com/@binance-chain/javascript-sdk/-/javascript-sdk-3.0.2-alpha.11.tgz#c805bbb0d95f52487e6ce14b6a60b4d2788278b5"
-  integrity sha512-HYpkoo32c5Th9zud5S6OVYycGamqBPgDHO/fZQ8GZvnDGmwN1gW7eJgJ6citC65AblaEqjBwo5TCt5cx5qSx0g==
+"@binance-chain/javascript-sdk@^4.0.5":
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/@binance-chain/javascript-sdk/-/javascript-sdk-4.0.5.tgz#9225b81b45d6823784dc59fe73e223c651037ffa"
+  integrity sha512-vlIaY/Gc5rN1hBAEPvXr5LyHnXlA5/0NkdPSI5hRfiRcixhFj7/Iso5CTg4kI/xKr3JFtfyLFo6fWqyoP8IgYA==
   dependencies:
     "@babel/runtime" "^7.10.4"
     "@ledgerhq/hw-transport-u2f" "^5.9.0"
@@ -297,6 +297,7 @@
     bip32 "^2.0.5"
     bip39 "^3.0.2"
     bn.js "^4.11.8"
+    camelcase "^5.3.1"
     crypto-browserify "^3.12.0"
     crypto-js "^3.1.9-1"
     elliptic "^6.0.0"
@@ -304,6 +305,7 @@
     events "^3.0.0"
     is_js "^0.9.0"
     lodash "^4.17.15"
+    minimist "^1.2.5"
     ndjson "^1.5.0"
     protocol-buffers-encodings "^1.1.0"
     pumpify "^2.0.1"

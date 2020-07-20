@@ -66,10 +66,8 @@ describe('BinanceClient Test', () => {
     expect(result).toEqual(emptyBalances)
   })
 
-  it('has an empty history', async () => {
-    const date = new Date()
-    const dateNumber = date.setMonth(date.getMonth() - 3)
-    const txArray = await bnbClient.getTransactions(dateNumber)
-    expect(txArray).toEqual([])
+  it('has an empty tx history', async () => {
+    const txArray = await bnbClient.getTransactions()
+    expect(txArray).toEqual({ total: 0, tx: [] })
   })
 })

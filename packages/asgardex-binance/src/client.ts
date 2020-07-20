@@ -1,8 +1,15 @@
 import * as BIP39 from 'bip39'
 import axios from 'axios'
-import { Address, MultiTransfer, Network, TransferResult, Balances, Prefix } from './types/binance'
-// import { BncClient, NETWORK_PREFIX_MAPPING } from '@binance-chain/javascript-sdk/typings/client'
-// import { BncClient, NETWORK_PREFIX_MAPPING } from '@binance-chain/javascript-sdk/typings/client'
+import {
+  Address,
+  MultiTransfer,
+  Network,
+  TransferResult,
+  Balances,
+  Prefix,
+  GetTxsParams,
+  TxPage,
+} from './types/binance'
 
 import { crypto } from '@binance-chain/javascript-sdk'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
@@ -20,10 +27,7 @@ export interface BinanceClient {
   getAddress(): string
   validateAddress(address: string): boolean
   getBalance(address?: Address): Promise<Balances>
-  // TODO Add return type
-  // https://gitlab.com/thorchain/asgardex-common/asgardex-binance/-/issues/2
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  getTransactions(date: number, address?: string): Promise<any[]>
+  getTransactions(params?: GetTxsParams): Promise<TxPage>
   vaultTx(addressTo: Address, amount: number, asset: string, memo: string): Promise<TransferResult>
   normalTx(addressTo: Address, amount: number, asset: string): Promise<TransferResult>
   //isTestnet(): boolean
@@ -158,17 +162,36 @@ class Client implements BinanceClient {
     return this.bncClient.getBalance(address || this.getAddress())
   }
 
-  // TODO Add proper return type
-  // https://gitlab.com/thorchain/asgardex-common/asgardex-binance/-/issues/2
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  getTransactions = async (date: number, address?: string): Promise<any[]> => {
+  getTransactions = async (params: GetTxsParams = {}): Promise<TxPage> => {
+    const {
+      address = this.getAddress(),
+      blockHeight,
+      endTime,
+      limit,
+      offset,
+      side,
+      startTime,
+      txAsset,
+      txType,
+    } = params
+
+    const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
+    const url = new URL(clientUrl)
+    if (address) url.searchParams.set('address', address)
+    if (blockHeight) url.searchParams.set('blockHeight', blockHeight.toString())
+    if (endTime) url.searchParams.set('endTime', endTime.toString())
+    if (limit) url.searchParams.set('limit', limit.toString())
+    if (offset) url.searchParams.set('offset', offset.toString())
+    if (side) url.searchParams.set('side', side.toString())
+    if (startTime) url.searchParams.set('startTime', startTime.toString())
+    if (txAsset) url.searchParams.set('txAsset', txAsset.toString())
+    if (txType) url.searchParams.set('txType', txType.toString())
+
     await this.bncClient.initChain()
-    const pathTx = '/api/v1/transactions?address='
-    const startTime = '&startTime=' // 3 months back. might need to think this.
+
     try {
-      const addressFrom = address || this.getAddress()
-      const response = await axios.get(this.getClientUrl() + pathTx + addressFrom + startTime + date)
-      return response?.data?.tx
+      const response = await axios.get<TxPage>(url.toString())
+      return response.data
     } catch (error) {
       return Promise.reject(error)
     }
