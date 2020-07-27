@@ -1,12 +1,12 @@
 require('dotenv').config()
-import BitcoinClient, { Network } from '../src/client'
+import { Client, Network } from '../src/client'
 
 describe('BitcoinClient Test', () => {
   const valueOut = 99000
   const MEMO = 'SWAP:THOR.RUNE'
   const net = Network.MAIN
   const phrase = process.env.VAULT_PHRASE
-  const btcClient = new BitcoinClient(net, phrase)
+  const btcClient = new Client(net, phrase)
   let address: string
   const addressTo = process.env.USER_BTC
 

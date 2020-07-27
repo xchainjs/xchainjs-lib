@@ -13,7 +13,7 @@ const pathTx = 'raw/transaction/'
  * Class variables accessed across functions
  */
 
-export enum Network {
+enum Network {
   TEST = 'testnet',
   MAIN = 'mainnet',
 }
@@ -21,7 +21,7 @@ export enum Network {
 /**
  * BitcoinClient Interface. Potentially to become AsgardClient
  */
-export interface BitcoinClient {
+interface BitcoinClient {
   setNetwork(net: Network): void
   getNetwork(net: Network): Bitcoin.networks.Network
   generatePhrase(): string
@@ -250,4 +250,4 @@ class Client implements BitcoinClient {
   }
 }
 
-export default Client
+export { Client, Network }

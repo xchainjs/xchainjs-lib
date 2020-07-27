@@ -3,14 +3,14 @@ import * as Utils from './utils';
 /**
  * Class variables accessed across functions
  */
-export declare enum Network {
+declare enum Network {
     TEST = "testnet",
     MAIN = "mainnet"
 }
 /**
  * BitcoinClient Interface. Potentially to become AsgardClient
  */
-export interface BitcoinClient {
+interface BitcoinClient {
     setNetwork(net: Network): void;
     getNetwork(net: Network): Bitcoin.networks.Network;
     generatePhrase(): string;
@@ -46,4 +46,4 @@ declare class Client implements BitcoinClient {
     vaultTx: (addressVault: string, valueOut: number, memo: string, feeRate: number) => Promise<string>;
     normalTx: (addressTo: string, valueOut: number, feeRate: number) => Promise<string>;
 }
-export default Client;
+export { Client, Network };
