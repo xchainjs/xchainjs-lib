@@ -40075,7 +40075,7 @@ var Client = /** @class */ (function () {
                     _this.phrase = phrase;
                 }
                 else {
-                    console.log('Invalid BIP39 phrase passed to BitcoinClient');
+                    throw new Error('Invalid BIP39 phrase');
                 }
             }
         };
@@ -40266,7 +40266,7 @@ var Client = /** @class */ (function () {
             });
         }); };
         this.net = _net;
-        this.setPhrase(_phrase);
+        _phrase && this.setPhrase(_phrase);
         this.utxos = [];
     }
     Client.prototype.validatePhrase = function (phrase) {

@@ -46,7 +46,7 @@ class Client implements BitcoinClient {
   // Client is initialised with network type
   constructor(_net: Network = Network.TEST, _phrase?: string) {
     this.net = _net
-    this.setPhrase(_phrase)
+    _phrase && this.setPhrase(_phrase)
     this.utxos = []
   }
 
@@ -60,7 +60,7 @@ class Client implements BitcoinClient {
       if (BIP39.validateMnemonic(phrase)) {
         this.phrase = phrase
       } else {
-        console.log('Invalid BIP39 phrase passed to BitcoinClient')
+        throw new Error('Invalid BIP39 phrase')
       }
     }
   }
