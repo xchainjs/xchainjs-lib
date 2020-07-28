@@ -58,6 +58,6 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@binance-chain/javascript-sdk": "^4.05"
+    "@binance-chain/javascript-sdk": "^4.0.5"
   }
 }
