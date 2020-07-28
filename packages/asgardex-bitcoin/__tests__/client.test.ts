@@ -4,9 +4,10 @@ import { Client, Network } from '../src/client'
 describe('BitcoinClient Test', () => {
   const net = Network.MAIN
   const phrase = process.env.VAULT_PHRASE
-  const btcClient = new Client(net)
+  const electrsAPI = (process.env.ELECTRS_API as string);
+  const btcClient = new Client(net, electrsAPI)
   let address: string
-  // const valueOut = 99000
+  const valueOut = 99000
   // const MEMO = 'SWAP:THOR.RUNE'
   // const addressTo = process.env.USER_BTC
 
@@ -54,16 +55,16 @@ describe('BitcoinClient Test', () => {
     expect(valid).toBeTruthy()
   })
 
-  // it('should get the right balance', async () => {
-  //   await btcClient.scanUTXOs(address)
-  //   const balance = btcClient.getBalance()
-  //   expect(balance).toEqual(valueOut)
-  // })
+  it('should get the right balance', async () => {
+    await btcClient.scanUTXOs(address)
+    const balance = btcClient.getBalance()
+    expect(balance).toEqual(valueOut)
+  })
 
-  // it('should get the right history', async () => {
-  //   const txArray = await btcClient.getTransactions(address)
-  //   expect(txArray[0]).toEqual('7fc1d2c1e4017a6aea030be1d4f5365d11abfd295f56c13615e49641c55c54b8')
-  // })
+  it('should get the right history', async () => {
+    const txArray = await btcClient.getTransactions(address)
+    expect(txArray[0]).toHaveProperty('txid', '7fc1d2c1e4017a6aea030be1d4f5365d11abfd295f56c13615e49641c55c54b8')
+  })
 
   // it('should do the a normal tx', async () => {
   //   if (addressTo !== undefined) {

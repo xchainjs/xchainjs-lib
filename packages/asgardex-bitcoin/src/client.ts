@@ -2,12 +2,13 @@ import * as BIP39 from 'bip39' // https://github.com/bitcoinjs/bip39
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
 import * as Utils from './utils'
-const axios = require('axios').default
+// const axios = require('axios').default
+import { getAddressTxs, getAddressUtxos, getTxInfo } from './electrs-api'
 
 // https://blockchair.com/api/docs#link_300
-const baseUrl = 'https://api.blockchair.com/bitcoin/'
-const pathAddress = 'dashboards/address/'
-const pathTx = 'raw/transaction/'
+// const baseUrl = 'https://api.blockchair.com/bitcoin/'
+// const pathAddress = 'dashboards/address/'
+// const pathTx = 'raw/transaction/'
 
 /**
  * Class variables accessed across functions
@@ -41,12 +42,14 @@ interface BitcoinClient {
 class Client implements BitcoinClient {
   net: Network
   phrase = ''
+  electrsAPI = ''
   utxos: Utils.UTXO[]
 
   // Client is initialised with network type
-  constructor(_net: Network = Network.TEST, _phrase?: string) {
+  constructor(_net: Network = Network.TEST, _electrsAPI: string = '', _phrase?: string) {
     this.net = _net
     _phrase && this.setPhrase(_phrase)
+    _electrsAPI && this.setElectrsAPI(_electrsAPI)
     this.utxos = []
   }
 
@@ -87,6 +90,10 @@ class Client implements BitcoinClient {
     }
   }
 
+  setElectrsAPI(endpoint: string): void {
+    this.electrsAPI = endpoint
+  }
+
   // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
   // The address is then decoded into type P2PWPK and returned.
   getAddress = (): string => {
@@ -123,20 +130,16 @@ class Client implements BitcoinClient {
 
   // Scans UTXOs on Address
   scanUTXOs = async (address: string) => {
-    let pathNetwork = ''
-    if (this.net === Network.TEST) {
-      pathNetwork = 'testnet/'
-    }
     try {
-      const response = await axios.get(baseUrl + pathNetwork + pathAddress + address)
-      const utxo = response.data.data[address].utxo
+      const utxos = await getAddressUtxos(this.electrsAPI, address)
 
-      for (let i = 0; i < utxo.length; i++) {
-        const txHash = utxo[i].transaction_hash
-        const value = utxo[i].value
-        const index = utxo[i].index
-        const txRx = await axios.get(baseUrl + pathNetwork + pathTx + txHash)
-        const script = txRx.data.data[txHash].decoded_raw_transaction.vout[index].scriptPubKey.hex
+      for (let i = 0; i < utxos.length; i++) {
+        const txHash = utxos[i].txid
+        const value = utxos[i].value
+        const index = utxos[i].vout
+        const txData = await getTxInfo(this.electrsAPI, txHash)
+        const script = txData.vout[index].scriptpubkey
+        // TODO: check scriptpubkey_type is op_return
 
         const witness = {
           value: value,
@@ -178,15 +181,10 @@ class Client implements BitcoinClient {
     return change
   }
 
-  getTransactions = async (address: string): Promise<string[]> => {
-    let pathNetwork = ''
+  getTransactions = async (address: string): Promise<Array<object>> => {
     let transactions = []
-    if (this.net === Network.TEST) {
-      pathNetwork = 'testnet/'
-    }
     try {
-      const response = await axios.get(baseUrl + pathNetwork + pathAddress + address)
-      transactions = response.data.data[address].transactions
+      transactions = await getAddressTxs(this.electrsAPI, address)
     } catch (error) {
       return Promise.reject(error)
     }
