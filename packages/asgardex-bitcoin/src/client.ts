@@ -68,6 +68,11 @@ class Client implements BitcoinClient {
     }
   }
 
+  purgeClient = (): void => {
+    this.phrase = ''
+    this.utxos = []
+  }
+
   validatePhrase(phrase: string): boolean {
     if (phrase) {
       return BIP39.validateMnemonic(phrase)
@@ -97,16 +102,19 @@ class Client implements BitcoinClient {
   // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
   // The address is then decoded into type P2PWPK and returned.
   getAddress = (): string => {
-    const network = this.getNetwork(this.net)
-    const btcKeys = this.getBtcKeys(this.net, this.phrase)
-    const { address } = Bitcoin.payments.p2wpkh({
-      pubkey: btcKeys.publicKey,
-      network: network,
-    })
-    if (!address) {
-      throw new Error('address not defined')
+    if (this.phrase) {
+      const network = this.getNetwork(this.net)
+      const btcKeys = this.getBtcKeys(this.net, this.phrase)
+      const { address } = Bitcoin.payments.p2wpkh({
+        pubkey: btcKeys.publicKey,
+        network: network,
+      })
+      if (!address) {
+        throw new Error('address not defined')
+      }
+      return address
     }
-    return address
+    throw new Error('Phrase not set')
   }
 
   // Private function to get keyPair from the this.phrase

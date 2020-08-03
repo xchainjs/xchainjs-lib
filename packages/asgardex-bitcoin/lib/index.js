@@ -36928,19 +36928,26 @@ var Client = /** @class */ (function () {
                 }
             }
         };
+        this.purgeClient = function () {
+            _this.phrase = '';
+            _this.utxos = [];
+        };
         // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
         // The address is then decoded into type P2PWPK and returned.
         this.getAddress = function () {
-            var network = _this.getNetwork(_this.net);
-            var btcKeys = _this.getBtcKeys(_this.net, _this.phrase);
-            var address = src_6$1.p2wpkh({
-                pubkey: btcKeys.publicKey,
-                network: network,
-            }).address;
-            if (!address) {
-                throw new Error('address not defined');
+            if (_this.phrase) {
+                var network = _this.getNetwork(_this.net);
+                var btcKeys = _this.getBtcKeys(_this.net, _this.phrase);
+                var address = src_6$1.p2wpkh({
+                    pubkey: btcKeys.publicKey,
+                    network: network,
+                }).address;
+                if (!address) {
+                    throw new Error('address not defined');
+                }
+                return address;
             }
-            return address;
+            throw new Error('Phrase not set');
         };
         // Will return true/false
         this.validateAddress = function (address) {

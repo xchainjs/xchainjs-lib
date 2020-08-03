@@ -34,6 +34,7 @@ declare class Client implements BitcoinClient {
     constructor(_net?: Network, _electrsAPI?: string, _phrase?: string);
     generatePhrase: () => string;
     setPhrase: (phrase?: string | undefined) => void;
+    purgeClient: () => void;
     validatePhrase(phrase: string): boolean;
     setNetwork(_net: Network): void;
     getNetwork(net: Network): Bitcoin.networks.Network;

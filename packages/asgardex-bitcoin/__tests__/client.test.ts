@@ -83,4 +83,10 @@ describe('BitcoinClient Test', () => {
   //     )
   //   }
   // })
+
+  it('should purge phrase and utxos', () => {
+    btcClient.purgeClient()
+    expect(() => { btcClient.getAddress() }).toThrow()
+    expect(btcClient.getBalance()).toEqual(0)
+  })
 })
