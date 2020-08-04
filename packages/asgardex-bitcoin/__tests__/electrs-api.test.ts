@@ -2,8 +2,8 @@ require('dotenv').config()
 import { getAddressUtxos, getAddressTxs, getTxInfo } from '../src/electrs-api'
 
 describe('Electrs API Test', () => {
-  const electrsAPI = (process.env.ELECTRS_API as string)
-  const address = (process.env.VAULT_BTC as string)
+  const electrsAPI = process.env.ELECTRS_API as string
+  const address = process.env.VAULT_BTC as string
   const testTxId = '7fc1d2c1e4017a6aea030be1d4f5365d11abfd295f56c13615e49641c55c54b8'
   const valueOut = 99000
   const hexScript = '6a0e535741503a54484f522e52554e45'

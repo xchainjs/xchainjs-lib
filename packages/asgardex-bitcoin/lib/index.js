@@ -36890,6 +36890,23 @@ var getTxInfo = function (baseUrl, txId) { return __awaiter(void 0, void 0, void
         }
     });
 }); };
+var getAddressInfo = function (baseUrl, address) { return __awaiter(void 0, void 0, void 0, function () {
+    var response, error_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, axios.get(baseUrl + "/address/" + address)];
+            case 1:
+                response = _a.sent();
+                return [2 /*return*/, response.data];
+            case 2:
+                error_4 = _a.sent();
+                return [2 /*return*/, Promise.reject(error_4)];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -37015,6 +37032,17 @@ var Client = /** @class */ (function () {
                 return 0;
             }
         };
+        this.getBalanceForAddress = function (address) { return __awaiter(_this, void 0, void 0, function () {
+            var addressInfo;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, getAddressInfo(this.electrsAPI, address)];
+                    case 1:
+                        addressInfo = _a.sent();
+                        return [2 /*return*/, addressInfo.chain_stats.funded_txo_sum - addressInfo.chain_stats.spent_txo_sum];
+                }
+            });
+        }); };
         // Given a desired output, return change
         this.getChange = function (valueOut) {
             var balance = _this.getBalance();

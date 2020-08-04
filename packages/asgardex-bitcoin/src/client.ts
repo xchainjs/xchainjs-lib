@@ -3,7 +3,7 @@ import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoin
 import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
 import * as Utils from './utils'
 // const axios = require('axios').default
-import { getAddressTxs, getAddressUtxos, getTxInfo } from './electrs-api'
+import { getAddressTxs, getAddressUtxos, getTxInfo, getAddressInfo } from './electrs-api'
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -32,8 +32,10 @@ interface BitcoinClient {
   validateAddress(address: string): boolean
   scanUTXOs(address: string): Promise<void>
   getBalance(): number
+  getBalanceForAddress(address?: string): Promise<number>
   vaultTx(addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string>
   normalTx(addressTo: string, valueOut: number, feeRate: number): Promise<string>
+  purgeClient(): void
 }
 
 /**
@@ -46,7 +48,7 @@ class Client implements BitcoinClient {
   utxos: Utils.UTXO[]
 
   // Client is initialised with network type
-  constructor(_net: Network = Network.TEST, _electrsAPI: string = '', _phrase?: string) {
+  constructor(_net: Network = Network.TEST, _electrsAPI = '', _phrase?: string) {
     this.net = _net
     _phrase && this.setPhrase(_phrase)
     _electrsAPI && this.setElectrsAPI(_electrsAPI)
@@ -175,6 +177,11 @@ class Client implements BitcoinClient {
     } else {
       return 0
     }
+  }
+
+  getBalanceForAddress = async (address: string): Promise<number> => {
+    const addressInfo = await getAddressInfo(this.electrsAPI, address)
+    return addressInfo.chain_stats.funded_txo_sum - addressInfo.chain_stats.spent_txo_sum
   }
 
   // Given a desired output, return change

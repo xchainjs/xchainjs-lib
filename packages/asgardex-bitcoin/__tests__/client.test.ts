@@ -4,7 +4,7 @@ import { Client, Network } from '../src/client'
 describe('BitcoinClient Test', () => {
   const net = Network.MAIN
   const phrase = process.env.VAULT_PHRASE
-  const electrsAPI = (process.env.ELECTRS_API as string);
+  const electrsAPI = process.env.ELECTRS_API as string
   const btcClient = new Client(net, electrsAPI)
   let address: string
   const valueOut = 99000
@@ -38,13 +38,15 @@ describe('BitcoinClient Test', () => {
 
   it('should throw an error for setting a bad phrase', () => {
     if (phrase) {
-      expect(() => { btcClient.setPhrase('cat') }).toThrow()
+      expect(() => {
+        btcClient.setPhrase('cat')
+      }).toThrow()
     }
   })
 
   it('should not throw an error for setting a good phrase', () => {
     if (phrase) {
-      expect(btcClient.setPhrase(phrase)).toBeUndefined;
+      expect(btcClient.setPhrase(phrase)).toBeUndefined
     }
   })
 
@@ -84,9 +86,17 @@ describe('BitcoinClient Test', () => {
   //   }
   // })
 
-  it('should purge phrase and utxos', () => {
+  it('should purge phrase and utxos', async () => {
     btcClient.purgeClient()
-    expect(() => { btcClient.getAddress() }).toThrow()
-    expect(btcClient.getBalance()).toEqual(0)
+    expect(() => {
+      btcClient.getAddress()
+    }).toThrow()
+    const balance = btcClient.getBalance()
+    expect(balance).toEqual(0)
+  })
+
+  it('should get the balance of an address without phrase', async () => {
+    const balance = await btcClient.getBalanceForAddress(address)
+    expect(balance).toEqual(valueOut)
   })
 })
