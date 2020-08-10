@@ -52,7 +52,8 @@
     "rollup-plugin-typescript2": "^0.27.1",
     "ts-jest": "^26.0.0",
     "tslib": "^2.0.0",
-    "typescript": "^3.9.3"
+    "typescript": "^3.9.3",
+    "axios-case-converter": "^0.6.0"
   },
   "publishConfig": {
     "access": "public"

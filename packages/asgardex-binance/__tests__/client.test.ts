@@ -70,4 +70,16 @@ describe('BinanceClient Test', () => {
     const txArray = await bnbClient.getTransactions()
     expect(txArray).toEqual({ total: 0, tx: [] })
   })
+
+  it('fetches the fees', async () => {
+    const feesArray = await bnbClient.getFees()
+    const submitProposalFee = feesArray[0]
+    expect(submitProposalFee.msgType).toEqual('submit_proposal')
+    expect(submitProposalFee.fee).toBeGreaterThan(0)
+    expect(submitProposalFee.feeFor).toBeGreaterThan(0)
+
+    const sendFee = feesArray.find((e) => e?.fixedFeeParams?.msgType === 'send')
+    expect(sendFee).toBeDefined()
+    expect(sendFee?.fixedFeeParams?.fee).toBeGreaterThan(0)
+  })
 })

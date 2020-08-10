@@ -9,7 +9,10 @@ import {
   Prefix,
   GetTxsParams,
   TxPage,
+  TxFee,
 } from './types/binance'
+
+import applyCaseMiddleware from 'axios-case-converter'
 
 import { crypto } from '@binance-chain/javascript-sdk'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
@@ -36,6 +39,8 @@ export interface BinanceClient {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   getMarkets(limit?: number, offset?: number): Promise<any>
   multiSend(address: Address, transactions: MultiTransfer[], memo?: string): Promise<TransferResult>
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  getFees(): Promise<any[]>
 }
 
 /**
@@ -229,6 +234,21 @@ class Client implements BinanceClient {
   multiSend = async (address: Address, transactions: MultiTransfer[], memo = '') => {
     await this.bncClient.initChain()
     return await this.bncClient.multiSend(address, transactions, memo)
+  }
+
+  getFees = async () => {
+    const clientUrl = `${this.getClientUrl()}/api/v1/fees`
+    const url = new URL(clientUrl)
+
+    await this.bncClient.initChain()
+
+    try {
+      const client = applyCaseMiddleware(axios.create())
+      const response = await client.get<TxFee[]>(url.toString())
+      return response.data
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 }
 export { Client }

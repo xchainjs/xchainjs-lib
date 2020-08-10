@@ -199,6 +199,48 @@ export type TxPage = {
 }
 
 /**
+ * TxFee
+ * @see https://docs.binance.org/api-reference/dex-api/paths.html#fee
+ */
+
+export type TxFee = {
+  /* Transaction msg type that this fee applies to */
+  msgType?: string
+
+  /* Fee amount */
+  fee?: number
+
+  /* 1= proposer, 2=all, 3 = free */
+  feeFor?: number
+
+  /* Fee for multi-transfer */
+  multiTransferFee?: number
+
+  /* e.g. 2 */
+  lowerLimitAsMulti?: number
+
+  /* Set if the fee is fixed */
+  fixedFeeParams?: {
+    /* Transaction msg type that this fee applies to */
+    msgType?: string
+
+    /* The fixed fee amount */
+    fee?: number
+
+    /* 1 = proposer, 2 = all, 3 = free */
+    feeFor?: number
+  }
+
+  /* dex fee */
+  dexFeeFields?: {
+    /* Fee name */
+    feeName: string
+    /* Fee value */
+    feeValue: number
+  }[]
+}
+
+/**
  * Tx
  * @see https://docs.binance.org/api-reference/dex-api/paths.html#tx
  */
