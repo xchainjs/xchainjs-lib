@@ -1,9 +1,9 @@
 import * as BIP39 from 'bip39' // https://github.com/bitcoinjs/bip39
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
+import moment from 'moment'
 import * as Utils from './utils'
-// const axios = require('axios').default
-import { getAddressTxs, getAddressUtxos, getTxInfo, getAddressInfo } from './electrs-api'
+import { getAddressTxs, getAddressUtxos, getTxInfo, getAddressInfo, getFeeEstimates, getBlocks } from './electrs-api'
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -36,6 +36,8 @@ interface BitcoinClient {
   vaultTx(addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string>
   normalTx(addressTo: string, valueOut: number, feeRate: number): Promise<string>
   purgeClient(): void
+  calcFees(memo?: string): Promise<object>
+  calcAvgBlockPublishTime(): Promise<number>
 }
 
 /**
@@ -204,6 +206,58 @@ class Client implements BitcoinClient {
       return Promise.reject(error)
     }
     return transactions
+  }
+
+  calcAvgBlockPublishTime = async (): Promise<number> => {
+    const blocks = await getBlocks(this.electrsAPI)
+    const times: Array<number> = []
+    blocks.forEach((block: any, index: number) => {
+      if (index !== 0) {
+        const block1PublishTime = moment.unix(blocks[index - 1].timestamp)
+        const block2PublishTime = moment.unix(block.timestamp)
+        times.push(block1PublishTime.diff(block2PublishTime, 'seconds'))
+      }
+    })
+    const avgBlockPublishTime = Utils.arrayAverage(times)
+    return avgBlockPublishTime
+  }
+
+  // returns an object of the fee rate, estimated fee, and estimatedTxTime for getting a transaction in to the x'th blocks
+  // eg. { ..., '3': { 'feeRate': 87.882, 'estimatedFee': 4231, 'estimatedTxTime': 1820 }, ... }
+  // = getting a tx into one of the next 3 blocks would require a feerate >= 87.882 sat/byte,
+  // for a total of 4231 sats in fees and take approximately 1820 seconds to confirm
+  // contains calculated fees for getting into next 1-10 blocks
+  calcFees = async (memo?: string): Promise<Utils.FeeOptions> => {
+    if (this.utxos.length === 0) {
+      throw new Error('No utxos to send')
+    } else {
+      const calcdFees: Utils.FeeOptions = {}
+      const avgBlockPublishTime = await this.calcAvgBlockPublishTime()
+      let feeRates = await getFeeEstimates(this.electrsAPI)
+      // remove estimates for >10 next blocks
+      const string1to10 = Array.from({ length: 10 }, (_v, i) => `${i + 1}`)
+      feeRates = Utils.filterByKeys(feeRates, string1to10)
+      if (memo) {
+        const data = Buffer.from(memo, 'utf8')
+        const OP_RETURN = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data])
+        Object.keys(feeRates).forEach((key) => {
+          calcdFees[key] = {
+            feeRate: (feeRates as any)[key],
+            estimatedFee: Utils.getVaultFee(this.utxos, OP_RETURN, (feeRates as any)[key]),
+            estimatedTxTime: (Number(key)) * avgBlockPublishTime,
+          }
+        })
+      } else {
+        Object.keys(feeRates).forEach((key) => {
+          calcdFees[key] = {
+            feeRate: (feeRates as any)[key],
+            estimatedFee: Utils.getNormalFee(this.utxos, (feeRates as any)[key]),
+            estimatedTxTime: (Number(key)) * avgBlockPublishTime,
+          }
+        })
+      }
+      return calcdFees
+    }
   }
 
   // Generates a valid transaction hex to broadcast

@@ -18,6 +18,25 @@ export const getAddressTxs = async (baseUrl: string, address: string): Promise<a
   }
 }
 
+export const getFeeEstimates = async (baseUrl: string): Promise<any> => {
+  try {
+    const response = await axios.get(`${baseUrl}/fee-estimates`)
+    return response.data
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+export const getBlocks = async (baseUrl: string, startHeight?: number): Promise<any> => {
+  try {
+    const url = `${baseUrl}/blocks${startHeight ? `/${startHeight}` : ''}`
+    const response = await axios.get(url)
+    return response.data
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
 export const getTxInfo = async (baseUrl: string, txId: string): Promise<any> => {
   try {
     const response = await axios.get(`${baseUrl}/tx/${txId}`)
@@ -35,4 +54,3 @@ export const getAddressInfo = async (baseUrl: string, address: string): Promise<
     return Promise.reject(error)
   }
 }
-

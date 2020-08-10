@@ -9,7 +9,7 @@ const TX_OUTPUT_PUBKEYHASH = 25
 export const dustThreshold = 1000
 
 /**
- * Witness and UTXO interaces
+ * Interaces
  */
 export interface Witness {
   value: number
@@ -19,6 +19,14 @@ export interface UTXO {
   hash: string
   index: number
   witnessUtxo: Witness
+}
+export interface FeeOption {
+  feeRate: number // sats/byte
+  estimatedFee: number // sats
+  estimatedTxTime: number // seconds
+}
+export interface FeeOptions {
+  [index: string]: FeeOption
 }
 
 function inputBytes(input: UTXO) {
@@ -53,4 +61,20 @@ export function getNormalFee(inputs: UTXO[], feeRate: number) {
       TX_OUTPUT_PUBKEYHASH) *
     feeRate
   )
+}
+
+export function arrayAverage(array: Array<number>) {
+  let sum = 0
+  array.forEach((value) => (sum += value))
+  return sum / array.length
+}
+
+export function filterByKeys(obj: object, filterKeys: Array<string>) {
+  const filtered = {}
+  filterKeys.forEach(key => {
+    if (obj.hasOwnProperty(key)) {
+      (filtered as any)[key] = (obj as any)[key]
+    }
+  })
+  return filtered
 }

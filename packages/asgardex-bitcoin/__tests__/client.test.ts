@@ -8,7 +8,7 @@ describe('BitcoinClient Test', () => {
   const btcClient = new Client(net, electrsAPI)
   let address: string
   const valueOut = 99000
-  // const MEMO = 'SWAP:THOR.RUNE'
+  const MEMO = 'SWAP:THOR.RUNE'
   // const addressTo = process.env.USER_BTC
 
   it('should have right prefix', () => {
@@ -98,5 +98,39 @@ describe('BitcoinClient Test', () => {
   it('should get the balance of an address without phrase', async () => {
     const balance = await btcClient.getBalanceForAddress(address)
     expect(balance).toEqual(valueOut)
+  })
+
+  it('should throw an error when trying to calculate fees without any utxos', async () => {
+    btcClient.purgeClient()
+    expect(async () => await btcClient.calcFees()).rejects.toThrow('No utxos to send')
+  })
+
+  it('should return estimated fees of a normal tx for up to the next 10 blocks', async () => {
+    const net = Network.TEST
+    btcClient.setNetwork(net)
+    btcClient.setPhrase(phrase)
+    const vaultAddress = btcClient.getAddress()
+    await btcClient.scanUTXOs(vaultAddress)
+    const estimates = await btcClient.calcFees()
+    expect(estimates).toHaveProperty('1')
+    expect((estimates as any)['1']).toHaveProperty('feeRate', expect.any(Number))
+    expect((estimates as any)['5']).toHaveProperty('estimatedFee', expect.any(Number))
+    expect((estimates as any)['10']).toHaveProperty('estimatedTxTime', expect.any(Number))
+    expect((estimates as any)['11']).toBeUndefined()
+  })
+
+  it('should return estimated fees of a vault tx that are more expensive than a normal tx', async () => {
+    btcClient.setPhrase(phrase)
+    await btcClient.scanUTXOs(address)
+    const normalTx = await btcClient.calcFees()
+    const vaultTx = await btcClient.calcFees(MEMO)
+    const normalTxFee = (normalTx as any)['1'].estimatedFee
+    const vaultTxFee = (vaultTx as any)['1'].estimatedFee
+    expect(vaultTxFee).toBeGreaterThan(normalTxFee)
+  })
+
+  it('should calculate average block publish time', async () => {
+    const blockTimes = await btcClient.calcAvgBlockPublishTime()
+    expect(blockTimes).toBeGreaterThan(10)
   })
 })
