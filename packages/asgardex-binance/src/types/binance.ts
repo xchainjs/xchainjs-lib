@@ -205,39 +205,45 @@ export type TxPage = {
 
 export type TxFee = {
   /* Transaction msg type that this fee applies to */
-  msgType?: string
+  msg_type?: string
 
   /* Fee amount */
   fee?: number
 
   /* 1= proposer, 2=all, 3 = free */
-  feeFor?: number
+  fee_for?: number
 
   /* Fee for multi-transfer */
-  multiTransferFee?: number
+  multi_transfer_fee?: number
 
   /* e.g. 2 */
-  lowerLimitAsMulti?: number
+  lower_limit_as_multi?: number
 
   /* Set if the fee is fixed */
-  fixedFeeParams?: {
-    /* Transaction msg type that this fee applies to */
-    msgType?: string
-
-    /* The fixed fee amount */
-    fee?: number
-
-    /* 1 = proposer, 2 = all, 3 = free */
-    feeFor?: number
-  }
+  fixed_fee_params?: FixedFeeParams
 
   /* dex fee */
-  dexFeeFields?: {
-    /* Fee name */
-    feeName: string
-    /* Fee value */
-    feeValue: number
-  }[]
+  dex_fee_fields?: DexFeeFieldParams[]
+}
+
+/* fixed fee */
+export type FixedFeeParams = {
+  /* Transaction msg type that this fee applies to */
+  msg_type?: string
+
+  /* The fixed fee amount */
+  fee?: number
+
+  /* 1 = proposer, 2 = all, 3 = free */
+  fee_for?: number
+}
+
+/* dex fee */
+export type DexFeeFieldParams = {
+  /* Fee name */
+  fee_name: string
+  /* Fee value */
+  fee_value: number
 }
 
 /**

@@ -12,8 +12,6 @@ import {
   TxFee,
 } from './types/binance'
 
-import applyCaseMiddleware from 'axios-case-converter'
-
 import { crypto } from '@binance-chain/javascript-sdk'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
 
@@ -243,8 +241,7 @@ class Client implements BinanceClient {
     await this.bncClient.initChain()
 
     try {
-      const client = applyCaseMiddleware(axios.create())
-      const response = await client.get<TxFee[]>(url.toString())
+      const response = await axios.get<TxFee[]>(url.toString())
       return response.data
     } catch (error) {
       return Promise.reject(error)
