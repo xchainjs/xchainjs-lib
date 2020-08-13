@@ -58,14 +58,14 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should get the right balance', async () => {
-    await btcClient.scanUTXOs(address)
+    await btcClient.scanUTXOs()
     const balance = btcClient.getBalance()
     expect(balance).toEqual(valueOut)
   })
 
   it('should get the right history', async () => {
     const txArray = await btcClient.getTransactions(address)
-    expect(txArray[0]).toHaveProperty('txid', '7fc1d2c1e4017a6aea030be1d4f5365d11abfd295f56c13615e49641c55c54b8')
+    expect(txArray[0].txid).toEqual('7fc1d2c1e4017a6aea030be1d4f5365d11abfd295f56c13615e49641c55c54b8')
   })
 
   // it('should do the a normal tx', async () => {
@@ -109,28 +109,27 @@ describe('BitcoinClient Test', () => {
     const net = Network.TEST
     btcClient.setNetwork(net)
     btcClient.setPhrase(phrase)
-    const vaultAddress = btcClient.getAddress()
-    await btcClient.scanUTXOs(vaultAddress)
+    await btcClient.scanUTXOs()
     const estimates = await btcClient.calcFees()
     expect(estimates).toHaveProperty('1')
-    expect((estimates as any)['1']).toHaveProperty('feeRate', expect.any(Number))
-    expect((estimates as any)['5']).toHaveProperty('estimatedFee', expect.any(Number))
-    expect((estimates as any)['10']).toHaveProperty('estimatedTxTime', expect.any(Number))
-    expect((estimates as any)['11']).toBeUndefined()
+    expect(estimates['1'].feeRate).toEqual(expect.any(Number))
+    expect(estimates['5'].estimatedFee).toEqual(expect.any(Number))
+    expect(estimates['10'].estimatedTxTime).toEqual(expect.any(Number))
+    expect(estimates['11']).toBeUndefined()
   })
 
   it('should return estimated fees of a vault tx that are more expensive than a normal tx', async () => {
     btcClient.setPhrase(phrase)
-    await btcClient.scanUTXOs(address)
+    await btcClient.scanUTXOs()
     const normalTx = await btcClient.calcFees()
     const vaultTx = await btcClient.calcFees(MEMO)
-    const normalTxFee = (normalTx as any)['1'].estimatedFee
-    const vaultTxFee = (vaultTx as any)['1'].estimatedFee
+    const normalTxFee = normalTx['1'].estimatedFee
+    const vaultTxFee = vaultTx['1'].estimatedFee
     expect(vaultTxFee).toBeGreaterThan(normalTxFee)
   })
 
   it('should calculate average block publish time', async () => {
-    const blockTimes = await btcClient.calcAvgBlockPublishTime()
+    const blockTimes = await btcClient.getBlockTime()
     expect(blockTimes).toBeGreaterThan(10)
   })
 })

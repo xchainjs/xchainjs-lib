@@ -18,7 +18,7 @@ interface BitcoinClient {
     validatePhrase(phrase: string): boolean;
     getAddress(): string;
     validateAddress(address: string): boolean;
-    scanUTXOs(address: string): Promise<void>;
+    scanUTXOs(): Promise<void>;
     getBalance(): number;
     getBalanceForAddress(address?: string): Promise<number>;
     vaultTx(addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string>;
@@ -38,15 +38,15 @@ declare class Client implements BitcoinClient {
     constructor(_net?: Network, _electrsAPI?: string, _phrase?: string);
     generatePhrase: () => string;
     setPhrase: (phrase?: string | undefined) => void;
-    purgeClient: () => void;
     validatePhrase(phrase: string): boolean;
+    purgeClient: () => void;
     setNetwork(_net: Network): void;
     getNetwork(net: Network): Bitcoin.networks.Network;
     setElectrsAPI(endpoint: string): void;
     getAddress: () => string;
     private getBtcKeys;
     validateAddress: (address: string) => boolean;
-    scanUTXOs: (address: string) => Promise<void>;
+    scanUTXOs: () => Promise<void>;
     getBalance: () => number;
     getBalanceForAddress: (address: string) => Promise<number>;
     private getChange;

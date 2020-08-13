@@ -42659,7 +42659,7 @@ var Client = /** @class */ (function () {
             _this.utxos = [];
         };
         // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-        // The address is then decoded into type P2PWPK and returned.
+        // The address is then decoded into type P2WPKH and returned.
         this.getAddress = function () {
             if (_this.phrase) {
                 var network = _this.getNetwork(_this.net);
@@ -42687,12 +42687,13 @@ var Client = /** @class */ (function () {
             }
         };
         // Scans UTXOs on Address
-        this.scanUTXOs = function (address) { return __awaiter(_this, void 0, void 0, function () {
-            var utxos, i, txHash, value, index, txData, script, witness, utxoObject, error_1;
+        this.scanUTXOs = function () { return __awaiter(_this, void 0, void 0, function () {
+            var address, utxos, i, txHash, value, index, txData, script, witness, utxoObject, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 6, , 7]);
+                        address = this.getAddress();
                         return [4 /*yield*/, getAddressUtxos(this.electrsAPI, address)];
                     case 1:
                         utxos = _a.sent();
@@ -42724,8 +42725,7 @@ var Client = /** @class */ (function () {
                     case 5: return [3 /*break*/, 7];
                     case 6:
                         error_1 = _a.sent();
-                        console.error(error_1);
-                        return [3 /*break*/, 7];
+                        throw new Error(error_1);
                     case 7: return [2 /*return*/];
                 }
             });
@@ -42835,7 +42835,7 @@ var Client = /** @class */ (function () {
                                 calcdFees_1[key] = {
                                     feeRate: feeRates_1[key],
                                     estimatedFee: getVaultFee(_this.utxos, OP_RETURN_1, feeRates_1[key]),
-                                    estimatedTxTime: (Number(key)) * avgBlockPublishTime_1,
+                                    estimatedTxTime: Number(key) * avgBlockPublishTime_1,
                                 };
                             });
                         }
@@ -42844,7 +42844,7 @@ var Client = /** @class */ (function () {
                                 calcdFees_1[key] = {
                                     feeRate: feeRates_1[key],
                                     estimatedFee: getNormalFee(_this.utxos, feeRates_1[key]),
-                                    estimatedTxTime: (Number(key)) * avgBlockPublishTime_1,
+                                    estimatedTxTime: Number(key) * avgBlockPublishTime_1,
                                 };
                             });
                         }

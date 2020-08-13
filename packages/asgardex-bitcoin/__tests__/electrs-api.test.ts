@@ -1,5 +1,12 @@
 require('dotenv').config()
-import { getAddressUtxos, getAddressTxs, getTxInfo, getFeeEstimates, getBlocks } from '../src/electrs-api'
+import {
+  getAddressUtxos,
+  getAddressTxs,
+  getTxInfo,
+  getFeeEstimates,
+  getBlocks,
+  getAddressInfo,
+} from '../src/electrs-api'
 
 describe('Electrs API Test', () => {
   const electrsAPI = process.env.ELECTRS_API as string
@@ -41,5 +48,11 @@ describe('Electrs API Test', () => {
   it('getBlocks should return data from the last 10 blocks', async () => {
     const blocks = await getBlocks(electrsAPI)
     expect(blocks).toHaveLength(10)
+    expect(blocks[0].id).toEqual(expect.any(String))
+  })
+
+  it('getAddressInfo should return data for an address', async () => {
+    const addressInfo = await getAddressInfo(electrsAPI, address)
+    expect(addressInfo.chain_stats.funded_txo_sum).toEqual(99000)
   })
 })

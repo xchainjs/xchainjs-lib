@@ -20,14 +20,6 @@ export interface UTXO {
   index: number
   witnessUtxo: Witness
 }
-export interface FeeOption {
-  feeRate: number // sats/byte
-  estimatedFee: number // sats
-  estimatedTxTime: number // seconds
-}
-export interface FeeOptions {
-  [index: string]: FeeOption
-}
 
 function inputBytes(input: UTXO) {
   return TX_INPUT_BASE + (input.witnessUtxo.script ? input.witnessUtxo.script.length : TX_INPUT_PUBKEYHASH)
@@ -71,9 +63,9 @@ export function arrayAverage(array: Array<number>) {
 
 export function filterByKeys(obj: object, filterKeys: Array<string>) {
   const filtered = {}
-  filterKeys.forEach(key => {
+  filterKeys.forEach((key) => {
     if (obj.hasOwnProperty(key)) {
-      (filtered as any)[key] = (obj as any)[key]
+      ;(filtered as any)[key] = (obj as any)[key]
     }
   })
   return filtered

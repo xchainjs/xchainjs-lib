@@ -4,6 +4,8 @@ import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
 import moment from 'moment'
 import * as Utils from './utils'
 import { getAddressTxs, getAddressUtxos, getTxInfo, getAddressInfo, getFeeEstimates, getBlocks } from './electrs-api'
+import { Estimates, Txs, Blocks, Address } from './types/electrs-api-types'
+import { FeeOptions } from './types/client-types'
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -23,21 +25,23 @@ enum Network {
  * BitcoinClient Interface. Potentially to become AsgardClient
  */
 interface BitcoinClient {
-  setNetwork(net: Network): void
-  getNetwork(net: Network): Bitcoin.networks.Network
   generatePhrase(): string
   setPhrase(phrase?: string): void
   validatePhrase(phrase: string): boolean
+  purgeClient(): void
+  setNetwork(net: Network): void
+  getNetwork(net: Network): Bitcoin.networks.Network
+  setBaseUrl(endpoint: string): void
   getAddress(): string
   validateAddress(address: string): boolean
-  scanUTXOs(address: string): Promise<void>
+  scanUTXOs(): Promise<void>
   getBalance(): number
   getBalanceForAddress(address?: string): Promise<number>
+  getTransactions(address: string): Promise<Txs>
+  getBlockTime(): Promise<number>
+  calcFees(memo?: string): Promise<object>
   vaultTx(addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string>
   normalTx(addressTo: string, valueOut: number, feeRate: number): Promise<string>
-  purgeClient(): void
-  calcFees(memo?: string): Promise<object>
-  calcAvgBlockPublishTime(): Promise<number>
 }
 
 /**
@@ -53,7 +57,7 @@ class Client implements BitcoinClient {
   constructor(_net: Network = Network.TEST, _electrsAPI = '', _phrase?: string) {
     this.net = _net
     _phrase && this.setPhrase(_phrase)
-    _electrsAPI && this.setElectrsAPI(_electrsAPI)
+    _electrsAPI && this.setBaseUrl(_electrsAPI)
     this.utxos = []
   }
 
@@ -72,17 +76,17 @@ class Client implements BitcoinClient {
     }
   }
 
-  purgeClient = (): void => {
-    this.phrase = ''
-    this.utxos = []
-  }
-
   validatePhrase(phrase: string): boolean {
     if (phrase) {
       return BIP39.validateMnemonic(phrase)
     } else {
       return false
     }
+  }
+
+  purgeClient = (): void => {
+    this.phrase = ''
+    this.utxos = []
   }
 
   // update network
@@ -99,12 +103,12 @@ class Client implements BitcoinClient {
     }
   }
 
-  setElectrsAPI(endpoint: string): void {
+  setBaseUrl(endpoint: string): void {
     this.electrsAPI = endpoint
   }
 
   // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-  // The address is then decoded into type P2PWPK and returned.
+  // The address is then decoded into type P2WPKH and returned.
   getAddress = (): string => {
     if (this.phrase) {
       const network = this.getNetwork(this.net)
@@ -141,8 +145,9 @@ class Client implements BitcoinClient {
   }
 
   // Scans UTXOs on Address
-  scanUTXOs = async (address: string) => {
+  scanUTXOs = async (): Promise<void> => {
     try {
+      const address = this.getAddress()
       const utxos = await getAddressUtxos(this.electrsAPI, address)
 
       for (let i = 0; i < utxos.length; i++) {
@@ -166,7 +171,7 @@ class Client implements BitcoinClient {
         this.utxos.push(utxoObject)
       }
     } catch (error) {
-      console.error(error)
+      throw new Error(error)
     }
   }
 
@@ -182,7 +187,7 @@ class Client implements BitcoinClient {
   }
 
   getBalanceForAddress = async (address: string): Promise<number> => {
-    const addressInfo = await getAddressInfo(this.electrsAPI, address)
+    const addressInfo: Address = await getAddressInfo(this.electrsAPI, address)
     return addressInfo.chain_stats.funded_txo_sum - addressInfo.chain_stats.spent_txo_sum
   }
 
@@ -198,7 +203,7 @@ class Client implements BitcoinClient {
     return change
   }
 
-  getTransactions = async (address: string): Promise<Array<object>> => {
+  getTransactions = async (address: string): Promise<Txs> => {
     let transactions = []
     try {
       transactions = await getAddressTxs(this.electrsAPI, address)
@@ -208,10 +213,10 @@ class Client implements BitcoinClient {
     return transactions
   }
 
-  calcAvgBlockPublishTime = async (): Promise<number> => {
-    const blocks = await getBlocks(this.electrsAPI)
+  getBlockTime = async (): Promise<number> => {
+    const blocks: Blocks = await getBlocks(this.electrsAPI)
     const times: Array<number> = []
-    blocks.forEach((block: any, index: number) => {
+    blocks.forEach((block, index: number) => {
       if (index !== 0) {
         const block1PublishTime = moment.unix(blocks[index - 1].timestamp)
         const block2PublishTime = moment.unix(block.timestamp)
@@ -227,13 +232,13 @@ class Client implements BitcoinClient {
   // = getting a tx into one of the next 3 blocks would require a feerate >= 87.882 sat/byte,
   // for a total of 4231 sats in fees and take approximately 1820 seconds to confirm
   // contains calculated fees for getting into next 1-10 blocks
-  calcFees = async (memo?: string): Promise<Utils.FeeOptions> => {
+  calcFees = async (memo?: string): Promise<FeeOptions> => {
     if (this.utxos.length === 0) {
       throw new Error('No utxos to send')
     } else {
-      const calcdFees: Utils.FeeOptions = {}
-      const avgBlockPublishTime = await this.calcAvgBlockPublishTime()
-      let feeRates = await getFeeEstimates(this.electrsAPI)
+      const calcdFees: FeeOptions = {}
+      const avgBlockPublishTime = await this.getBlockTime()
+      let feeRates: Estimates = await getFeeEstimates(this.electrsAPI)
       // remove estimates for >10 next blocks
       const string1to10 = Array.from({ length: 10 }, (_v, i) => `${i + 1}`)
       feeRates = Utils.filterByKeys(feeRates, string1to10)
@@ -242,17 +247,17 @@ class Client implements BitcoinClient {
         const OP_RETURN = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data])
         Object.keys(feeRates).forEach((key) => {
           calcdFees[key] = {
-            feeRate: (feeRates as any)[key],
-            estimatedFee: Utils.getVaultFee(this.utxos, OP_RETURN, (feeRates as any)[key]),
-            estimatedTxTime: (Number(key)) * avgBlockPublishTime,
+            feeRate: feeRates[key],
+            estimatedFee: Utils.getVaultFee(this.utxos, OP_RETURN, feeRates[key]),
+            estimatedTxTime: Number(key) * avgBlockPublishTime,
           }
         })
       } else {
         Object.keys(feeRates).forEach((key) => {
           calcdFees[key] = {
-            feeRate: (feeRates as any)[key],
-            estimatedFee: Utils.getNormalFee(this.utxos, (feeRates as any)[key]),
-            estimatedTxTime: (Number(key)) * avgBlockPublishTime,
+            feeRate: feeRates[key],
+            estimatedFee: Utils.getNormalFee(this.utxos, feeRates[key]),
+            estimatedTxTime: Number(key) * avgBlockPublishTime,
           }
         })
       }
