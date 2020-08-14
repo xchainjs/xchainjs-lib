@@ -1,3 +1,10 @@
+# v.2.1.0 (2020-08-14)
+
+### Add:
+
+- `getFees()`
+- `TxFee`
+
 # v.2.0.0 (2020-07-20)
 
 - BREAKING CHANGE: `getTransactions` expects `GetTxsParams` as its parameter
