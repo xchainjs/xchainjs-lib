@@ -226,6 +226,8 @@ export type TxFee = {
   dex_fee_fields?: DexFeeFieldParams[]
 }
 
+export type TxFees = TxFee[]
+
 /* fixed fee */
 export type FixedFeeParams = {
   /* Transaction msg type that this fee applies to */
