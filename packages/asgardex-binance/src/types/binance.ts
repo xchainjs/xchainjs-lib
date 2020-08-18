@@ -510,19 +510,20 @@ export type Balance = {
 
 export type Balances = Balance[]
 
-/**
- * Result of  `bncClient.transfer(...)`
- * to transfer tokens from one address to another.
- * See https://github.com/binance-chain/javascript-sdk/wiki/API-Documentation#bncclienttransferfromaddress-toaddress-amount-asset-memo-sequence--promise
- * */
-export type TransferResult = { result?: Transfer[] }
-
 export type Transfer = {
   code: number
   hash: string
   log: string
   ok: boolean
 }
+
+export type Transfers = Transfer[]
+/**
+ * Result of  `bncClient.transfer(...)`
+ * to transfer tokens from one address to another.
+ * See https://github.com/binance-chain/javascript-sdk/blob/master/docs/api-docs/classes/bncclient.md#transfer
+ * */
+export type TransferResult = { result?: Transfers }
 
 export type Network = keyof typeof NETWORK_PREFIX_MAPPING
 

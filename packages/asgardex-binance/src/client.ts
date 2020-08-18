@@ -31,6 +31,8 @@ export interface BinanceClient {
   getTransactions(params?: GetTxsParams): Promise<TxPage>
   vaultTx(addressTo: Address, amount: number, asset: string, memo: string): Promise<TransferResult>
   normalTx(addressTo: Address, amount: number, asset: string): Promise<TransferResult>
+  freeze(amount: number, asset: string): Promise<TransferResult>
+  unfreeze(amount: number, asset: string): Promise<TransferResult>
   //isTestnet(): boolean
   // setPrivateKey(privateKey: string): Promise<BinanceClient>
   // removePrivateKey(): Promise<void>
@@ -105,6 +107,7 @@ class Client implements BinanceClient {
   getPrefix = (): Prefix => {
     return this.network === 'testnet' ? 'tbnb' : 'bnb'
   }
+
   static generatePhrase = (): string => {
     return BIP39.generateMnemonic()
   }
@@ -223,6 +226,28 @@ class Client implements BinanceClient {
     }
   }
 
+  freeze = async (amount: number, asset: string): Promise<TransferResult> => {
+    await this.bncClient.initChain()
+    await this.setPrivateKey()
+    try {
+      const addressFrom = this.getAddress()
+      return await this.bncClient.tokens.freeze(addressFrom, asset, amount)
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  unfreeze = async (amount: number, asset: string): Promise<TransferResult> => {
+    await this.bncClient.initChain()
+    await this.setPrivateKey()
+    try {
+      const addressFrom = this.getAddress()
+      return await this.bncClient.tokens.unfreeze(addressFrom, asset, amount)
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
   getMarkets = async (limit = 1000, offset = 0) => {
     await this.bncClient.initChain()
     return this.bncClient.getMarkets(limit, offset)
@@ -243,4 +268,5 @@ class Client implements BinanceClient {
     }
   }
 }
+
 export { Client }
