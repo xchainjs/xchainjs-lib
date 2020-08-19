@@ -56,3 +56,12 @@ export const getAddressInfo = async (baseUrl: string, address: string): Promise<
     return Promise.reject(error)
   }
 }
+
+export const broadcastTx = async (baseUrl: string, txhex: string): Promise<string> => {
+  try {
+    const response = await axios.post(`${baseUrl}/tx`, txhex)
+    return response.data
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}

@@ -3,13 +3,13 @@ import { Client, Network } from '../src/client'
 
 describe('BitcoinClient Test', () => {
   const net = Network.MAIN
-  const phrase = process.env.VAULT_PHRASE
+  const phrase = process.env.VAULT_PHRASE as string
   const electrsAPI = process.env.ELECTRS_API as string
   const btcClient = new Client(net, electrsAPI)
   let address: string
   const valueOut = 99000
   const MEMO = 'SWAP:THOR.RUNE'
-  // const addressTo = process.env.USER_BTC
+  // const addressTo = process.env.USER_BTC as string
 
   it('should have right prefix', () => {
     const network = btcClient.getNetwork(net)
@@ -68,23 +68,29 @@ describe('BitcoinClient Test', () => {
     expect(txArray[0].txid).toEqual('7fc1d2c1e4017a6aea030be1d4f5365d11abfd295f56c13615e49641c55c54b8')
   })
 
-  // it('should do the a normal tx', async () => {
-  //   if (addressTo !== undefined) {
-  //     const hex = await btcClient.normalTx(addressTo, valueOut, 1)
-  //     expect(hex).toEqual(
-  //       '02000000000101b8545cc54196e41536c1565f29fdab115d36f5d4e10b03ea6a7a01e4c1d2c17f0000000000ffffffff012b82010000000000160014a63674f00480abf2dfbbaf5b1a07658af5bcf6780248304502210097fa99fb7c7c347e526ce00ec0593fc647e58db50d78d3af18f265f8c600a85702201433baa2cbdee2e6ebfb429c6dcfeccef175e6823faecfebd94376a0ab7efdf0012102831eb18021fd7224b385bb11502d2ff0aa73229e177885289690d0c726c1976300000000',
-  //     )
-  //   }
-  // })
+  it('should do a normal tx', async () => {
+    const net = Network.TEST
+    const phraseOne = 'cycle join secret hospital slim party write price myth okay long slight'
+    const addyTwo = 'tb1qmyq44gzke8vzzj0npun6xla4anj92ghqn0g0qn'
+    btcClient.purgeClient()
+    btcClient.setNetwork(net)
+    btcClient.setPhrase(phraseOne)
+    await btcClient.scanUTXOs()
+    const txid = await btcClient.normalTx(addyTwo, valueOut, 1)
+    expect(txid).toEqual(expect.any(String))
+  })
 
-  // it('should do the vault tx', async () => {
-  //   if (addressTo !== undefined) {
-  //     const hex = await btcClient.vaultTx(addressTo, valueOut, MEMO, 1)
-  //     expect(hex).toEqual(
-  //       '02000000000101b8545cc54196e41536c1565f29fdab115d36f5d4e10b03ea6a7a01e4c1d2c17f0000000000ffffffff021282010000000000160014a63674f00480abf2dfbbaf5b1a07658af5bcf6780000000000000000106a0e535741503a54484f522e52554e45024830450221008e8fb2a690f9f575e1ef9cf3d4a1147ffb60c71c3195c95829793832fde4cf8402206462de6b27e97abf5dfab6aba25527a62b6e75a9737881ca3380d238aad0b985012102831eb18021fd7224b385bb11502d2ff0aa73229e177885289690d0c726c1976300000000',
-  //     )
-  //   }
-  // })
+  it('should do the vault tx', async () => {
+    const net = Network.TEST
+    const phraseTwo = 'heavy spin someone rice laptop minor dice deal fever praise reject panic'
+    const addyOne = 'tb1qvgn58ktpaacpzp6w8fdjgk9dfgv28gytvvhd5a'
+    btcClient.purgeClient()
+    btcClient.setNetwork(net)
+    btcClient.setPhrase(phraseTwo)
+    await btcClient.scanUTXOs()
+    const txid = await btcClient.vaultTx(addyOne, valueOut, MEMO, 1)
+    expect(txid).toEqual(expect.any(String))
+  })
 
   it('should purge phrase and utxos', async () => {
     btcClient.purgeClient()

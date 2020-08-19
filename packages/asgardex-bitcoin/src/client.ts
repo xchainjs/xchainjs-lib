@@ -3,7 +3,15 @@ import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoin
 import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
 import moment from 'moment'
 import * as Utils from './utils'
-import { getAddressTxs, getAddressUtxos, getTxInfo, getAddressInfo, getFeeEstimates, getBlocks } from './electrs-api'
+import {
+  getAddressTxs,
+  getAddressUtxos,
+  getTxInfo,
+  getAddressInfo,
+  getFeeEstimates,
+  getBlocks,
+  broadcastTx,
+} from './electrs-api'
 import { Estimates, Txs, Blocks, Address } from './types/electrs-api-types'
 import { FeeOptions } from './types/client-types'
 
@@ -227,6 +235,33 @@ class Client implements BitcoinClient {
     return avgBlockPublishTime
   }
 
+  getTxWeight = async (addressTo: string, valueOut: number, memo?: string): Promise<number> => {
+    const network = this.getNetwork(this.net)
+    const btcKeys = this.getBtcKeys(this.net, this.phrase)
+    const psbt = new Bitcoin.Psbt({ network: network }) // Network-specific
+    this.utxos.forEach((UTXO) =>
+      psbt.addInput({
+        hash: UTXO.hash,
+        index: UTXO.index,
+        witnessUtxo: UTXO.witnessUtxo,
+      }),
+    )
+    psbt.addOutput({ address: addressTo, value: valueOut }) // Add output {address, value}
+    const change = this.getChange(valueOut)
+    if (change > 0) {
+      psbt.addOutput({ address: this.getAddress(), value: change }) // Add change
+    }
+    if (memo) {
+      const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
+      const OP_RETURN = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
+      psbt.addOutput({ script: OP_RETURN, value: 0 }) // Add OP_RETURN {script, value}
+    }
+    psbt.signAllInputs(btcKeys) // Sign all inputs
+    const tx = psbt.finalizeAllInputs().extractTransaction() // Finalise inputs, extract tx
+    const inputs = this.utxos.length // Add weight for each input sig
+    return tx.virtualSize() + inputs
+  }
+
   // returns an object of the fee rate, estimated fee, and estimatedTxTime for getting a transaction in to the x'th blocks
   // eg. { ..., '3': { 'feeRate': 87.882, 'estimatedFee': 4231, 'estimatedTxTime': 1820 }, ... }
   // = getting a tx into one of the next 3 blocks would require a feerate >= 87.882 sat/byte,
@@ -271,7 +306,8 @@ class Client implements BitcoinClient {
     const btcKeys = this.getBtcKeys(this.net, this.phrase)
     const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
     const OP_RETURN = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
-    const fee = Utils.getVaultFee(this.utxos, OP_RETURN, feeRate)
+    const txWeight = await this.getTxWeight(addressVault, valueOut, memo)
+    const fee = txWeight * feeRate
 
     const psbt = new Bitcoin.Psbt({ network: network }) // Network-specific
     //Inputs
@@ -283,25 +319,24 @@ class Client implements BitcoinClient {
       }),
     )
     // Outputs
-    psbt.addOutput({ address: addressVault, value: valueOut - fee }) // Add output {address, value}
-    const change = this.getChange(valueOut)
+    psbt.addOutput({ address: addressVault, value: valueOut }) // Add output {address, value}
+    const change = this.getChange(valueOut + fee)
     if (change > 0) {
       psbt.addOutput({ address: this.getAddress(), value: change }) // Add change
     }
     psbt.addOutput({ script: OP_RETURN, value: 0 }) // Add OP_RETURN {script, value}
-    psbt.signInput(0, btcKeys) // Sign input0 with key-pair
+    psbt.signAllInputs(btcKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs
-    const tx = psbt.extractTransaction() // TX can be extracted in JSON
-    return tx.toHex()
+    const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+    return await broadcastTx(this.electrsAPI, txHex) // Broadcast TX and get txid
   }
 
   // Generates a valid transaction hex to broadcast
   normalTx = async (addressTo: string, valueOut: number, feeRate: number): Promise<string> => {
     const network = this.getNetwork(this.net)
     const btcKeys = this.getBtcKeys(this.net, this.phrase)
-
-    const fee = Utils.getNormalFee(this.utxos, feeRate)
-
+    const txWeight = await this.getTxWeight(addressTo, valueOut)
+    const fee = txWeight * feeRate
     const psbt = new Bitcoin.Psbt({ network: network }) // Network-specific
     this.utxos.forEach((UTXO) =>
       psbt.addInput({
@@ -310,15 +345,15 @@ class Client implements BitcoinClient {
         witnessUtxo: UTXO.witnessUtxo,
       }),
     )
-    psbt.addOutput({ address: addressTo, value: valueOut - fee }) // Add output {address, value}
-    const change = this.getChange(valueOut)
+    psbt.addOutput({ address: addressTo, value: valueOut }) // Add output {address, value}
+    const change = this.getChange(valueOut + fee)
     if (change > 0) {
       psbt.addOutput({ address: this.getAddress(), value: change }) // Add change
     }
-    psbt.signInput(0, btcKeys) // Sign input0 with key-pair
+    psbt.signAllInputs(btcKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs
-    const tx = psbt.extractTransaction() // TX can be extracted in JSON
-    return tx.toHex()
+    const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+    return await broadcastTx(this.electrsAPI, txHex) // Broadcast TX and get txid
   }
 }
 
