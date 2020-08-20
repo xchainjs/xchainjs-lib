@@ -42616,6 +42616,23 @@ var getAddressInfo = function (baseUrl, address) { return __awaiter(void 0, void
         }
     });
 }); };
+var broadcastTx = function (baseUrl, txhex) { return __awaiter(void 0, void 0, void 0, function () {
+    var response, error_7;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, axios.post(baseUrl + "/tx", txhex)];
+            case 1:
+                response = _a.sent();
+                return [2 /*return*/, response.data];
+            case 2:
+                error_7 = _a.sent();
+                return [2 /*return*/, Promise.reject(error_7)];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -42783,7 +42800,7 @@ var Client = /** @class */ (function () {
                 }
             });
         }); };
-        this.calcAvgBlockPublishTime = function () { return __awaiter(_this, void 0, void 0, function () {
+        this.getBlockTime = function () { return __awaiter(_this, void 0, void 0, function () {
             var blocks, times, avgBlockPublishTime;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -42803,6 +42820,40 @@ var Client = /** @class */ (function () {
                 }
             });
         }); };
+        this.getTxWeight = function (addressTo, valueOut, memo) { return __awaiter(_this, void 0, void 0, function () {
+            var network, btcKeys, psbt, change, data, OP_RETURN, tx, inputs;
+            return __generator(this, function (_a) {
+                network = this.getNetwork(this.net);
+                btcKeys = this.getBtcKeys(this.net, this.phrase);
+                psbt = new src_9$1({ network: network }) // Network-specific
+                ;
+                this.utxos.forEach(function (UTXO) {
+                    return psbt.addInput({
+                        hash: UTXO.hash,
+                        index: UTXO.index,
+                        witnessUtxo: UTXO.witnessUtxo,
+                    });
+                });
+                psbt.addOutput({ address: addressTo, value: valueOut }); // Add output {address, value}
+                change = this.getChange(valueOut);
+                if (change > 0) {
+                    psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
+                }
+                if (memo) {
+                    data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
+                    ;
+                    OP_RETURN = src_7$1.compile([src_10.OP_RETURN, data]) // Compile OP_RETURN script
+                    ;
+                    psbt.addOutput({ script: OP_RETURN, value: 0 }); // Add OP_RETURN {script, value}
+                }
+                psbt.signAllInputs(btcKeys); // Sign all inputs
+                tx = psbt.finalizeAllInputs().extractTransaction() // Finalise inputs, extract tx
+                ;
+                inputs = this.utxos.length // Add weight for each input sig
+                ;
+                return [2 /*return*/, tx.virtualSize() + inputs];
+            });
+        }); };
         // returns an object of the fee rate, estimated fee, and estimatedTxTime for getting a transaction in to the x'th blocks
         // eg. { ..., '3': { 'feeRate': 87.882, 'estimatedFee': 4231, 'estimatedTxTime': 1820 }, ... }
         // = getting a tx into one of the next 3 blocks would require a feerate >= 87.882 sat/byte,
@@ -42818,7 +42869,7 @@ var Client = /** @class */ (function () {
                         throw new Error('No utxos to send');
                     case 1:
                         calcdFees_1 = {};
-                        return [4 /*yield*/, this.calcAvgBlockPublishTime()];
+                        return [4 /*yield*/, this.getBlockTime()];
                     case 2:
                         avgBlockPublishTime_1 = _a.sent();
                         return [4 /*yield*/, getFeeEstimates(this.electrsAPI)
@@ -42854,70 +42905,86 @@ var Client = /** @class */ (function () {
         }); };
         // Generates a valid transaction hex to broadcast
         this.vaultTx = function (addressVault, valueOut, memo, feeRate) { return __awaiter(_this, void 0, void 0, function () {
-            var network, btcKeys, data, OP_RETURN, fee, psbt, change, tx;
+            var network, btcKeys, data, OP_RETURN, txWeight, fee, psbt, change, txHex;
             return __generator(this, function (_a) {
-                network = this.getNetwork(this.net);
-                btcKeys = this.getBtcKeys(this.net, this.phrase);
-                data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
-                ;
-                OP_RETURN = src_7$1.compile([src_10.OP_RETURN, data]) // Compile OP_RETURN script
-                ;
-                fee = getVaultFee(this.utxos, OP_RETURN, feeRate);
-                psbt = new src_9$1({ network: network }) // Network-specific
-                ;
-                //Inputs
-                this.utxos.forEach(function (UTXO) {
-                    return psbt.addInput({
-                        hash: UTXO.hash,
-                        index: UTXO.index,
-                        witnessUtxo: UTXO.witnessUtxo,
-                    });
-                });
-                // Outputs
-                psbt.addOutput({ address: addressVault, value: valueOut - fee }); // Add output {address, value}
-                change = this.getChange(valueOut);
-                if (change > 0) {
-                    psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
+                switch (_a.label) {
+                    case 0:
+                        network = this.getNetwork(this.net);
+                        btcKeys = this.getBtcKeys(this.net, this.phrase);
+                        data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
+                        ;
+                        OP_RETURN = src_7$1.compile([src_10.OP_RETURN, data]) // Compile OP_RETURN script
+                        ;
+                        return [4 /*yield*/, this.getTxWeight(addressVault, valueOut, memo)];
+                    case 1:
+                        txWeight = _a.sent();
+                        fee = txWeight * feeRate;
+                        psbt = new src_9$1({ network: network }) // Network-specific
+                        ;
+                        //Inputs
+                        this.utxos.forEach(function (UTXO) {
+                            return psbt.addInput({
+                                hash: UTXO.hash,
+                                index: UTXO.index,
+                                witnessUtxo: UTXO.witnessUtxo,
+                            });
+                        });
+                        // Outputs
+                        psbt.addOutput({ address: addressVault, value: valueOut }); // Add output {address, value}
+                        change = this.getChange(valueOut + fee);
+                        if (change > 0) {
+                            psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
+                        }
+                        psbt.addOutput({ script: OP_RETURN, value: 0 }); // Add OP_RETURN {script, value}
+                        psbt.signAllInputs(btcKeys); // Sign all inputs
+                        psbt.finalizeAllInputs(); // Finalise inputs
+                        txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+                        ;
+                        return [4 /*yield*/, broadcastTx(this.electrsAPI, txHex)]; // Broadcast TX and get txid
+                    case 2: // TX extracted and formatted to hex
+                    return [2 /*return*/, _a.sent()]; // Broadcast TX and get txid
                 }
-                psbt.addOutput({ script: OP_RETURN, value: 0 }); // Add OP_RETURN {script, value}
-                psbt.signInput(0, btcKeys); // Sign input0 with key-pair
-                psbt.finalizeAllInputs(); // Finalise inputs
-                tx = psbt.extractTransaction() // TX can be extracted in JSON
-                ;
-                return [2 /*return*/, tx.toHex()];
             });
         }); };
         // Generates a valid transaction hex to broadcast
         this.normalTx = function (addressTo, valueOut, feeRate) { return __awaiter(_this, void 0, void 0, function () {
-            var network, btcKeys, fee, psbt, change, tx;
+            var network, btcKeys, txWeight, fee, psbt, change, txHex;
             return __generator(this, function (_a) {
-                network = this.getNetwork(this.net);
-                btcKeys = this.getBtcKeys(this.net, this.phrase);
-                fee = getNormalFee(this.utxos, feeRate);
-                psbt = new src_9$1({ network: network }) // Network-specific
-                ;
-                this.utxos.forEach(function (UTXO) {
-                    return psbt.addInput({
-                        hash: UTXO.hash,
-                        index: UTXO.index,
-                        witnessUtxo: UTXO.witnessUtxo,
-                    });
-                });
-                psbt.addOutput({ address: addressTo, value: valueOut - fee }); // Add output {address, value}
-                change = this.getChange(valueOut);
-                if (change > 0) {
-                    psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
+                switch (_a.label) {
+                    case 0:
+                        network = this.getNetwork(this.net);
+                        btcKeys = this.getBtcKeys(this.net, this.phrase);
+                        return [4 /*yield*/, this.getTxWeight(addressTo, valueOut)];
+                    case 1:
+                        txWeight = _a.sent();
+                        fee = txWeight * feeRate;
+                        psbt = new src_9$1({ network: network }) // Network-specific
+                        ;
+                        this.utxos.forEach(function (UTXO) {
+                            return psbt.addInput({
+                                hash: UTXO.hash,
+                                index: UTXO.index,
+                                witnessUtxo: UTXO.witnessUtxo,
+                            });
+                        });
+                        psbt.addOutput({ address: addressTo, value: valueOut }); // Add output {address, value}
+                        change = this.getChange(valueOut + fee);
+                        if (change > 0) {
+                            psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
+                        }
+                        psbt.signAllInputs(btcKeys); // Sign all inputs
+                        psbt.finalizeAllInputs(); // Finalise inputs
+                        txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+                        ;
+                        return [4 /*yield*/, broadcastTx(this.electrsAPI, txHex)]; // Broadcast TX and get txid
+                    case 2: // TX extracted and formatted to hex
+                    return [2 /*return*/, _a.sent()]; // Broadcast TX and get txid
                 }
-                psbt.signInput(0, btcKeys); // Sign input0 with key-pair
-                psbt.finalizeAllInputs(); // Finalise inputs
-                tx = psbt.extractTransaction() // TX can be extracted in JSON
-                ;
-                return [2 /*return*/, tx.toHex()];
             });
         }); };
         this.net = _net;
         _phrase && this.setPhrase(_phrase);
-        _electrsAPI && this.setElectrsAPI(_electrsAPI);
+        _electrsAPI && this.setBaseUrl(_electrsAPI);
         this.utxos = [];
     }
     Client.prototype.validatePhrase = function (phrase) {
@@ -42941,7 +43008,7 @@ var Client = /** @class */ (function () {
             return src_5$1.bitcoin;
         }
     };
-    Client.prototype.setElectrsAPI = function (endpoint) {
+    Client.prototype.setBaseUrl = function (endpoint) {
         this.electrsAPI = endpoint;
     };
     // Private function to get keyPair from the this.phrase

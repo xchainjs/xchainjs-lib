@@ -1,5 +1,7 @@
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Utils from './utils';
+import { Txs } from './types/electrs-api-types';
+import { FeeOptions } from './types/client-types';
 /**
  * Class variables accessed across functions
  */
@@ -11,21 +13,23 @@ declare enum Network {
  * BitcoinClient Interface. Potentially to become AsgardClient
  */
 interface BitcoinClient {
-    setNetwork(net: Network): void;
-    getNetwork(net: Network): Bitcoin.networks.Network;
     generatePhrase(): string;
     setPhrase(phrase?: string): void;
     validatePhrase(phrase: string): boolean;
+    purgeClient(): void;
+    setNetwork(net: Network): void;
+    getNetwork(net: Network): Bitcoin.networks.Network;
+    setBaseUrl(endpoint: string): void;
     getAddress(): string;
     validateAddress(address: string): boolean;
     scanUTXOs(): Promise<void>;
     getBalance(): number;
     getBalanceForAddress(address?: string): Promise<number>;
+    getTransactions(address: string): Promise<Txs>;
+    getBlockTime(): Promise<number>;
+    calcFees(memo?: string): Promise<object>;
     vaultTx(addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string>;
     normalTx(addressTo: string, valueOut: number, feeRate: number): Promise<string>;
-    purgeClient(): void;
-    calcFees(memo?: string): Promise<object>;
-    calcAvgBlockPublishTime(): Promise<number>;
 }
 /**
  * Implements Client declared above
@@ -42,7 +46,7 @@ declare class Client implements BitcoinClient {
     purgeClient: () => void;
     setNetwork(_net: Network): void;
     getNetwork(net: Network): Bitcoin.networks.Network;
-    setElectrsAPI(endpoint: string): void;
+    setBaseUrl(endpoint: string): void;
     getAddress: () => string;
     private getBtcKeys;
     validateAddress: (address: string) => boolean;
@@ -50,9 +54,10 @@ declare class Client implements BitcoinClient {
     getBalance: () => number;
     getBalanceForAddress: (address: string) => Promise<number>;
     private getChange;
-    getTransactions: (address: string) => Promise<Array<object>>;
-    calcAvgBlockPublishTime: () => Promise<number>;
-    calcFees: (memo?: string | undefined) => Promise<Utils.FeeOptions>;
+    getTransactions: (address: string) => Promise<Txs>;
+    getBlockTime: () => Promise<number>;
+    getTxWeight: (addressTo: string, valueOut: number, memo?: string | undefined) => Promise<number>;
+    calcFees: (memo?: string | undefined) => Promise<FeeOptions>;
     vaultTx: (addressVault: string, valueOut: number, memo: string, feeRate: number) => Promise<string>;
     normalTx: (addressTo: string, valueOut: number, feeRate: number) => Promise<string>;
 }
