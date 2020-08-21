@@ -1,6 +1,7 @@
 require('dotenv').config()
 import { Client as BinanceClient } from '../src/client'
-import { Balances } from '../src/types/binance'
+import { Balances, Fee, TransferFee } from '../src/types/binance'
+import { isTransferFee } from '../src/util'
 
 describe('BinanceClient Test', () => {
   let bnbClient: BinanceClient
@@ -73,12 +74,13 @@ describe('BinanceClient Test', () => {
 
   it('fetches the fees', async () => {
     const feesArray = await bnbClient.getFees()
-    const submitProposalFee = feesArray[0]
+    const submitProposalFee = feesArray[0] as Fee
+
     expect(submitProposalFee.msg_type).toEqual('submit_proposal')
     expect(submitProposalFee.fee).toBeGreaterThan(0)
     expect(submitProposalFee.fee_for).toBeGreaterThan(0)
 
-    const sendFee = feesArray.find((e) => e?.fixed_fee_params?.msg_type === 'send')
+    const sendFee: TransferFee | undefined = feesArray.find(isTransferFee)
     expect(sendFee).toBeDefined()
     expect(sendFee?.fixed_fee_params?.fee).toBeGreaterThan(0)
   })

@@ -9,7 +9,7 @@ import {
   Prefix,
   GetTxsParams,
   TxPage,
-  TxFees,
+  Fees,
 } from './types/binance'
 
 import { crypto } from '@binance-chain/javascript-sdk'
@@ -39,7 +39,7 @@ export interface BinanceClient {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   getMarkets(limit?: number, offset?: number): Promise<any>
   multiSend(address: Address, transactions: MultiTransfer[], memo?: string): Promise<TransferResult>
-  getFees(): Promise<TxFees>
+  getFees(): Promise<Fees>
 }
 
 /**
@@ -258,10 +258,10 @@ class Client implements BinanceClient {
     return await this.bncClient.multiSend(address, transactions, memo)
   }
 
-  getFees = async (): Promise<TxFees> => {
+  getFees = async (): Promise<Fees> => {
     await this.bncClient.initChain()
     try {
-      const response = await axios.get<TxFees>(`${this.getClientUrl()}/api/v1/fees`)
+      const response = await axios.get<Fees>(`${this.getClientUrl()}/api/v1/fees`)
       return response.data
     } catch (error) {
       return Promise.reject(error)

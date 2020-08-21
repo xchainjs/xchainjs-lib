@@ -1,5 +1,6 @@
-import { getHashFromTransfer, getTxHashFromMemo } from '../src/util'
+import { getHashFromTransfer, getTxHashFromMemo, isFee, isTransferFee, isDexFees } from '../src/util'
 import { TransferEvent, Transfer } from '../src/types/binance-ws'
+import { DexFees, Fee, TransferFee } from '../src/types/binance'
 
 describe('binance/util', () => {
   describe('getHashFromTransfer', () => {
@@ -51,6 +52,60 @@ describe('binance/util', () => {
       }
       const result = getTxHashFromMemo(tx)
       expect(result).toBeUndefined()
+    })
+  })
+
+  describe('fee type guards', () => {
+    const fee: Fee = {
+      msg_type: 'submit_proposal',
+      fee: 500000000,
+      fee_for: 1,
+    }
+
+    const dexFees: DexFees = {
+      dex_fee_fields: [
+        {
+          fee_name: 'ExpireFee',
+          fee_value: 25000,
+        },
+      ],
+    }
+
+    const transferFee: TransferFee = {
+      fixed_fee_params: {
+        msg_type: 'send',
+        fee: 37500,
+        fee_for: 1,
+      },
+      multi_transfer_fee: 30000,
+      lower_limit_as_multi: 2,
+    }
+
+    describe('isFee', () => {
+      it('validates Fee', () => {
+        expect(isFee(fee)).toBeTruthy()
+      })
+      it('invalidates a Fee', () => {
+        expect(isFee(dexFees)).toBeFalsy()
+      })
+    })
+
+    describe('isTransferFee', () => {
+      it('validates TransferFee', () => {
+        expect(isTransferFee(transferFee)).toBeTruthy()
+      })
+      it('invalidates a TransferFee', () => {
+        expect(isTransferFee(fee)).toBeFalsy()
+      })
+    })
+
+    describe('isDexFees', () => {
+      it('validates DexFees', () => {
+        expect(isDexFees(dexFees)).toBeTruthy()
+      })
+      it('invalidates a DexFees', () => {
+        expect(isDexFees(fee)).toBeFalsy()
+      })
     })
   })
 })

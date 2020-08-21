@@ -198,55 +198,61 @@ export type TxPage = {
   tx: Txs
 }
 
-/**
- * TxFee
- * @see https://docs.binance.org/api-reference/dex-api/paths.html#fee
- */
+export type FeeType =
+  | 'submit_proposal'
+  | 'deposit'
+  | 'vote'
+  | 'create_validator'
+  | 'remove_validator'
+  | 'dexList'
+  | 'orderNew'
+  | 'orderCancel'
+  | 'issueMsg'
+  | 'mintMsg'
+  | 'tokensBurn'
+  | 'tokensFreeze'
+  | 'send'
+  | 'timeLock'
+  | 'timeUnlock'
+  | 'timeRelock'
+  | 'setAccountFlags'
+  | 'HTLT'
+  | 'depositHTLT'
+  | 'claimHTLT'
+  | 'refundHTLT'
 
-export type TxFee = {
-  /* Transaction msg type that this fee applies to */
-  msg_type?: string
-
-  /* Fee amount */
-  fee?: number
-
-  /* 1= proposer, 2=all, 3 = free */
-  fee_for?: number
-
-  /* Fee for multi-transfer */
-  multi_transfer_fee?: number
-
-  /* e.g. 2 */
-  lower_limit_as_multi?: number
-
-  /* Set if the fee is fixed */
-  fixed_fee_params?: FixedFeeParams
-
-  /* dex fee */
-  dex_fee_fields?: DexFeeFieldParams[]
+export type Fee = {
+  msg_type: FeeType
+  fee: number
+  fee_for: number
 }
 
-export type TxFees = TxFee[]
-
-/* fixed fee */
-export type FixedFeeParams = {
-  /* Transaction msg type that this fee applies to */
-  msg_type?: string
-
-  /* The fixed fee amount */
-  fee?: number
-
-  /* 1 = proposer, 2 = all, 3 = free */
-  fee_for?: number
+export type TransferFee = {
+  fixed_fee_params: Fee
+  multi_transfer_fee: number
+  lower_limit_as_multi: number
 }
 
-/* dex fee */
-export type DexFeeFieldParams = {
-  /* Fee name */
-  fee_name: string
-  /* Fee value */
+export type DexFeeName =
+  | 'ExpireFee'
+  | 'ExpireFeeNative'
+  | 'CancelFee'
+  | 'CancelFeeNative'
+  | 'FeeRate'
+  | 'FeeRateNative'
+  | 'IOCExpireFee'
+  | 'IOCExpireFeeNative'
+
+export type DexFee = {
+  fee_name: DexFeeName
   fee_value: number
 }
+
+export type DexFees = {
+  dex_fee_fields: DexFee[]
+}
+
+export type Fees = Array<Fee | TransferFee | DexFees>
 
 /**
  * Tx
