@@ -1,4 +1,4 @@
-import { Address, MultiTransfer, Network, TransferResult, Balances, Prefix, GetTxsParams, TxPage, TxFees } from './types/binance';
+import { Address, MultiTransfer, Network, TransferResult, Balances, Prefix, GetTxsParams, TxPage, Fees } from './types/binance';
 /**
  * Interface for custom Binance client
  */
@@ -19,7 +19,7 @@ export interface BinanceClient {
     unfreeze(amount: number, asset: string): Promise<TransferResult>;
     getMarkets(limit?: number, offset?: number): Promise<any>;
     multiSend(address: Address, transactions: MultiTransfer[], memo?: string): Promise<TransferResult>;
-    getFees(): Promise<TxFees>;
+    getFees(): Promise<Fees>;
 }
 /**
  * Custom Binance client
@@ -78,6 +78,6 @@ declare class Client implements BinanceClient {
         result: any;
         status: number;
     }>;
-    getFees: () => Promise<TxFees>;
+    getFees: () => Promise<Fees>;
 }
 export { Client };

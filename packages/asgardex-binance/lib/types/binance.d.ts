@@ -190,29 +190,26 @@ export declare type TxPage = {
      */
     tx: Txs;
 };
-/**
- * TxFee
- * @see https://docs.binance.org/api-reference/dex-api/paths.html#fee
- */
-export declare type TxFee = {
-    msg_type?: string;
-    fee?: number;
-    fee_for?: number;
-    multi_transfer_fee?: number;
-    lower_limit_as_multi?: number;
-    fixed_fee_params?: FixedFeeParams;
-    dex_fee_fields?: DexFeeFieldParams[];
+export declare type FeeType = 'submit_proposal' | 'deposit' | 'vote' | 'create_validator' | 'remove_validator' | 'dexList' | 'orderNew' | 'orderCancel' | 'issueMsg' | 'mintMsg' | 'tokensBurn' | 'tokensFreeze' | 'send' | 'timeLock' | 'timeUnlock' | 'timeRelock' | 'setAccountFlags' | 'HTLT' | 'depositHTLT' | 'claimHTLT' | 'refundHTLT';
+export declare type Fee = {
+    msg_type: FeeType;
+    fee: number;
+    fee_for: number;
 };
-export declare type TxFees = TxFee[];
-export declare type FixedFeeParams = {
-    msg_type?: string;
-    fee?: number;
-    fee_for?: number;
+export declare type TransferFee = {
+    fixed_fee_params: Fee;
+    multi_transfer_fee: number;
+    lower_limit_as_multi: number;
 };
-export declare type DexFeeFieldParams = {
-    fee_name: string;
+export declare type DexFeeName = 'ExpireFee' | 'ExpireFeeNative' | 'CancelFee' | 'CancelFeeNative' | 'FeeRate' | 'FeeRateNative' | 'IOCExpireFee' | 'IOCExpireFeeNative';
+export declare type DexFee = {
+    fee_name: DexFeeName;
     fee_value: number;
 };
+export declare type DexFees = {
+    dex_fee_fields: DexFee[];
+};
+export declare type Fees = Array<Fee | TransferFee | DexFees>;
 /**
  * Tx
  * @see https://docs.binance.org/api-reference/dex-api/paths.html#tx

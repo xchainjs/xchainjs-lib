@@ -1,4 +1,5 @@
 import { Transfer } from './types/binance-ws';
+import { TransferFee, DexFees, Fee } from './types/binance';
 /**
  * Get `hash` from transfer event sent by Binance chain
  * @see https://docs.binance.org/api-reference/dex-api/ws-streams.html#3-transfer
@@ -10,3 +11,15 @@ export declare const getHashFromTransfer: (transfer?: {
  * Get `hash` from memo
  */
 export declare const getTxHashFromMemo: (transfer?: import("./types/binance-ws").WSEvent<Transfer> | undefined) => string | undefined;
+/**
+ * Type guard for runtime checks of `Fee`
+ */
+export declare const isFee: (v: Fee | TransferFee | DexFees) => v is Fee;
+/**
+ * Type guard for `TransferFee`
+ */
+export declare const isTransferFee: (v: Fee | TransferFee | DexFees) => v is TransferFee;
+/**
+ * Type guard for `DexFees`
+ */
+export declare const isDexFees: (v: Fee | TransferFee | DexFees) => v is DexFees;

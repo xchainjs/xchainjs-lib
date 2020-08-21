@@ -1501,9 +1501,75 @@ Object.defineProperty(Duplex$1.prototype, 'destroyed', {
   }
 });
 
+var safeBuffer$1 = createCommonjsModule(function (module, exports) {
+/* eslint-disable node/no-deprecated-api */
+
+var Buffer = buffer.Buffer;
+
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key];
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer;
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports);
+  exports.Buffer = SafeBuffer;
+}
+
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer);
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+};
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size);
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding);
+    } else {
+      buf.fill(fill);
+    }
+  } else {
+    buf.fill(0);
+  }
+  return buf
+};
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+};
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer.SlowBuffer(size)
+};
+});
+var safeBuffer_1$1 = safeBuffer$1.Buffer;
+
 /*<replacement>*/
 
-var Buffer$3 = safeBuffer.Buffer;
+var Buffer$3 = safeBuffer$1.Buffer;
 /*</replacement>*/
 
 var isEncoding = Buffer$3.isEncoding || function (encoding) {
@@ -3553,7 +3619,7 @@ HashBase.prototype._digest = function () {
 
 var hashBase = HashBase;
 
-var Buffer$6 = safeBuffer.Buffer;
+var Buffer$6 = safeBuffer$1.Buffer;
 
 var ARRAY16 = new Array(16);
 
@@ -3860,7 +3926,7 @@ function fn5 (a, b, c, d, e, m, k, s) {
 
 var ripemd160 = RIPEMD160;
 
-var Buffer$8 = safeBuffer.Buffer;
+var Buffer$8 = safeBuffer$1.Buffer;
 
 // prototype class for hash functions
 function Hash (blockSize, finalSize) {
@@ -3952,7 +4018,7 @@ var hash = Hash;
 
 
 
-var Buffer$9 = safeBuffer.Buffer;
+var Buffer$9 = safeBuffer$1.Buffer;
 
 var K = [
   0x5a827999, 0x6ed9eba1, 0x8f1bbcdc | 0, 0xca62c1d6 | 0
@@ -4048,7 +4114,7 @@ var sha = Sha;
 
 
 
-var Buffer$a = safeBuffer.Buffer;
+var Buffer$a = safeBuffer$1.Buffer;
 
 var K$1 = [
   0x5a827999, 0x6ed9eba1, 0x8f1bbcdc | 0, 0xca62c1d6 | 0
@@ -4147,7 +4213,7 @@ var sha1 = Sha1;
 
 
 
-var Buffer$b = safeBuffer.Buffer;
+var Buffer$b = safeBuffer$1.Buffer;
 
 var K$2 = [
   0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
@@ -4284,7 +4350,7 @@ var sha256 = Sha256;
 
 
 
-var Buffer$c = safeBuffer.Buffer;
+var Buffer$c = safeBuffer$1.Buffer;
 
 var W$3 = new Array(64);
 
@@ -4327,7 +4393,7 @@ Sha224.prototype._hash = function () {
 
 var sha224 = Sha224;
 
-var Buffer$d = safeBuffer.Buffer;
+var Buffer$d = safeBuffer$1.Buffer;
 
 var K$3 = [
   0x428a2f98, 0xd728ae22, 0x71374491, 0x23ef65cd,
@@ -4586,7 +4652,7 @@ Sha512.prototype._hash = function () {
 
 var sha512 = Sha512;
 
-var Buffer$e = safeBuffer.Buffer;
+var Buffer$e = safeBuffer$1.Buffer;
 
 var W$5 = new Array(160);
 
@@ -4659,7 +4725,7 @@ exports.sha384 = sha384;
 exports.sha512 = sha512;
 });
 
-var Buffer$f = safeBuffer.Buffer;
+var Buffer$f = safeBuffer$1.Buffer;
 var Transform$2 = stream.Transform;
 var StringDecoder$2 = string_decoder$1.StringDecoder;
 
@@ -4820,7 +4886,7 @@ var md5 = function (buffer) {
   return new md5_js().update(buffer).digest()
 };
 
-var Buffer$g = safeBuffer.Buffer;
+var Buffer$g = safeBuffer$1.Buffer;
 
 var toBuffer = function (thing, encoding, name) {
   if (Buffer$g.isBuffer(thing)) {
@@ -4834,7 +4900,7 @@ var toBuffer = function (thing, encoding, name) {
   }
 };
 
-var Buffer$h = safeBuffer.Buffer;
+var Buffer$h = safeBuffer$1.Buffer;
 
 
 
@@ -4937,7 +5003,7 @@ function pbkdf2 (password, salt, iterations, keylen, digest) {
 
 var syncBrowser = pbkdf2;
 
-var Buffer$i = safeBuffer.Buffer;
+var Buffer$i = safeBuffer$1.Buffer;
 
 
 
@@ -5062,7 +5128,7 @@ function oldBrowser () {
   throw new Error('Secure random number generation is not supported by this browser.\nUse Chrome, Firefox or Internet Explorer 11')
 }
 
-var Buffer = safeBuffer.Buffer;
+var Buffer = safeBuffer$1.Buffer;
 var crypto = commonjsGlobal.crypto || commonjsGlobal.msCrypto;
 
 if (crypto && crypto.getRandomValues) {
@@ -23542,6 +23608,18 @@ var getHashFromTransfer = function (transfer) { var _a; return (_a = transfer ==
  * Get `hash` from memo
  */
 var getTxHashFromMemo = function (transfer) { var _a; return (_a = transfer === null || transfer === void 0 ? void 0 : transfer.data) === null || _a === void 0 ? void 0 : _a.M.split(':')[1]; };
+/**
+ * Type guard for runtime checks of `Fee`
+ */
+var isFee = function (v) { var _a, _b, _c; return !!((_a = v) === null || _a === void 0 ? void 0 : _a.msg_type) && ((_b = v) === null || _b === void 0 ? void 0 : _b.fee) !== undefined && ((_c = v) === null || _c === void 0 ? void 0 : _c.fee_for) !== undefined; };
+/**
+ * Type guard for `TransferFee`
+ */
+var isTransferFee = function (v) { var _a, _b; return isFee((_a = v) === null || _a === void 0 ? void 0 : _a.fixed_fee_params) && !!((_b = v) === null || _b === void 0 ? void 0 : _b.multi_transfer_fee); };
+/**
+ * Type guard for `DexFees`
+ */
+var isDexFees = function (v) { var _a, _b; return ((_b = (_a = v) === null || _a === void 0 ? void 0 : _a.dex_fee_fields) === null || _b === void 0 ? void 0 : _b.length) > 0; };
 
 /**
  * Type definitions for Binance Chain API
@@ -23587,3 +23665,6 @@ exports.Client = Client;
 exports.WS = binanceWs;
 exports.getHashFromTransfer = getHashFromTransfer;
 exports.getTxHashFromMemo = getTxHashFromMemo;
+exports.isDexFees = isDexFees;
+exports.isFee = isFee;
+exports.isTransferFee = isTransferFee;
