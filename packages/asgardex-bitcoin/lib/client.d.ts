@@ -27,7 +27,8 @@ interface BitcoinClient {
     getBalanceForAddress(address?: string): Promise<number>;
     getTransactions(address: string): Promise<Txs>;
     getBlockTime(): Promise<number>;
-    calcFees(memo?: string): Promise<object>;
+    getTxWeight(addressTo: string, memo?: string): Promise<number>;
+    calcFees(addressTo: string, memo?: string): Promise<object>;
     vaultTx(addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string>;
     normalTx(addressTo: string, valueOut: number, feeRate: number): Promise<string>;
 }
@@ -56,8 +57,8 @@ declare class Client implements BitcoinClient {
     private getChange;
     getTransactions: (address: string) => Promise<Txs>;
     getBlockTime: () => Promise<number>;
-    getTxWeight: (addressTo: string, valueOut: number, memo?: string | undefined) => Promise<number>;
-    calcFees: (memo?: string | undefined) => Promise<FeeOptions>;
+    getTxWeight: (addressTo: string, memo?: string | undefined) => Promise<number>;
+    calcFees: (addressTo: string, memo?: string | undefined) => Promise<FeeOptions>;
     vaultTx: (addressVault: string, valueOut: number, memo: string, feeRate: number) => Promise<string>;
     normalTx: (addressTo: string, valueOut: number, feeRate: number) => Promise<string>;
 }

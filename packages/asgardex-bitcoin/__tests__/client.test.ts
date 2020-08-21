@@ -9,7 +9,11 @@ describe('BitcoinClient Test', () => {
   let address: string
   const valueOut = 99000
   const MEMO = 'SWAP:THOR.RUNE'
-  // const addressTo = process.env.USER_BTC as string
+  // please don't touch the tBTC in these
+  const phraseOne = 'cycle join secret hospital slim party write price myth okay long slight'
+  const addyOne = 'tb1qvgn58ktpaacpzp6w8fdjgk9dfgv28gytvvhd5a'
+  const phraseTwo = 'heavy spin someone rice laptop minor dice deal fever praise reject panic'
+  const addyTwo = 'tb1qmyq44gzke8vzzj0npun6xla4anj92ghqn0g0qn'
 
   it('should have right prefix', () => {
     const network = btcClient.getNetwork(net)
@@ -68,10 +72,19 @@ describe('BitcoinClient Test', () => {
     expect(txArray[0].txid).toEqual('7fc1d2c1e4017a6aea030be1d4f5365d11abfd295f56c13615e49641c55c54b8')
   })
 
+  it('should prevent a tx when fees and valueOut exceed balance', async () => {
+    const net = Network.TEST
+    btcClient.purgeClient()
+    btcClient.setNetwork(net)
+    btcClient.setPhrase(phraseOne)
+    await btcClient.scanUTXOs()
+    expect(async () => await btcClient.normalTx(addyTwo, 9999999999, 1)).rejects.toThrow(
+      'Balance insufficient for transaction',
+    )
+  })
+
   it('should do a normal tx', async () => {
     const net = Network.TEST
-    const phraseOne = 'cycle join secret hospital slim party write price myth okay long slight'
-    const addyTwo = 'tb1qmyq44gzke8vzzj0npun6xla4anj92ghqn0g0qn'
     btcClient.purgeClient()
     btcClient.setNetwork(net)
     btcClient.setPhrase(phraseOne)
@@ -82,8 +95,6 @@ describe('BitcoinClient Test', () => {
 
   it('should do the vault tx', async () => {
     const net = Network.TEST
-    const phraseTwo = 'heavy spin someone rice laptop minor dice deal fever praise reject panic'
-    const addyOne = 'tb1qvgn58ktpaacpzp6w8fdjgk9dfgv28gytvvhd5a'
     btcClient.purgeClient()
     btcClient.setNetwork(net)
     btcClient.setPhrase(phraseTwo)
@@ -108,7 +119,7 @@ describe('BitcoinClient Test', () => {
 
   it('should throw an error when trying to calculate fees without any utxos', async () => {
     btcClient.purgeClient()
-    expect(async () => await btcClient.calcFees()).rejects.toThrow('No utxos to send')
+    expect(async () => await btcClient.calcFees(addyTwo)).rejects.toThrow('No utxos to send')
   })
 
   it('should return estimated fees of a normal tx for up to the next 10 blocks', async () => {
@@ -116,7 +127,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork(net)
     btcClient.setPhrase(phrase)
     await btcClient.scanUTXOs()
-    const estimates = await btcClient.calcFees()
+    const estimates = await btcClient.calcFees(addyTwo)
     expect(estimates).toHaveProperty('1')
     expect(estimates['1'].feeRate).toEqual(expect.any(Number))
     expect(estimates['5'].estimatedFee).toEqual(expect.any(Number))
@@ -125,10 +136,13 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should return estimated fees of a vault tx that are more expensive than a normal tx', async () => {
+    const net = Network.TEST
+    btcClient.purgeClient()
+    btcClient.setNetwork(net)
     btcClient.setPhrase(phrase)
     await btcClient.scanUTXOs()
-    const normalTx = await btcClient.calcFees()
-    const vaultTx = await btcClient.calcFees(MEMO)
+    const normalTx = await btcClient.calcFees(addyTwo)
+    const vaultTx = await btcClient.calcFees(addyTwo, MEMO)
     const normalTxFee = normalTx['1'].estimatedFee
     const vaultTxFee = vaultTx['1'].estimatedFee
     expect(vaultTxFee).toBeGreaterThan(normalTxFee)

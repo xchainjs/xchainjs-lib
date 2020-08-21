@@ -42464,39 +42464,7 @@ var moment = createCommonjsModule(function (module, exports) {
 /**
  * Bitcoin byte syzes
  */
-var TX_EMPTY_SIZE = 4 + 1 + 1 + 4; //10
-var TX_INPUT_BASE = 32 + 4 + 1 + 4; // 41
-var TX_INPUT_PUBKEYHASH = 107;
-var TX_OUTPUT_BASE = 8 + 1; //9
-var TX_OUTPUT_PUBKEYHASH = 25;
 var dustThreshold = 1000;
-function inputBytes(input) {
-    return TX_INPUT_BASE + (input.witnessUtxo.script ? input.witnessUtxo.script.length : TX_INPUT_PUBKEYHASH);
-}
-function getVaultFee(inputs, data, feeRate) {
-    return ((TX_EMPTY_SIZE +
-        inputs.reduce(function (a, x) {
-            return a + inputBytes(x);
-        }, 0) +
-        TX_OUTPUT_BASE +
-        TX_OUTPUT_PUBKEYHASH +
-        TX_OUTPUT_BASE +
-        TX_OUTPUT_PUBKEYHASH +
-        TX_OUTPUT_BASE +
-        data.length) *
-        feeRate);
-}
-function getNormalFee(inputs, feeRate) {
-    return ((TX_EMPTY_SIZE +
-        inputs.reduce(function (a, x) {
-            return a + inputBytes(x);
-        }, 0) +
-        TX_OUTPUT_BASE +
-        TX_OUTPUT_PUBKEYHASH +
-        TX_OUTPUT_BASE +
-        TX_OUTPUT_PUBKEYHASH) *
-        feeRate);
-}
 function arrayAverage(array) {
     var sum = 0;
     array.forEach(function (value) { return (sum += value); });
@@ -42820,11 +42788,13 @@ var Client = /** @class */ (function () {
                 }
             });
         }); };
-        this.getTxWeight = function (addressTo, valueOut, memo) { return __awaiter(_this, void 0, void 0, function () {
-            var network, btcKeys, psbt, change, data, OP_RETURN, tx, inputs;
+        this.getTxWeight = function (addressTo, memo) { return __awaiter(_this, void 0, void 0, function () {
+            var network, btcKeys, balance, balancePlaceholder, psbt, data, OP_RETURN, tx, inputs;
             return __generator(this, function (_a) {
                 network = this.getNetwork(this.net);
                 btcKeys = this.getBtcKeys(this.net, this.phrase);
+                balance = this.getBalance();
+                balancePlaceholder = balance - dustThreshold - 1;
                 psbt = new src_9$1({ network: network }) // Network-specific
                 ;
                 this.utxos.forEach(function (UTXO) {
@@ -42834,11 +42804,8 @@ var Client = /** @class */ (function () {
                         witnessUtxo: UTXO.witnessUtxo,
                     });
                 });
-                psbt.addOutput({ address: addressTo, value: valueOut }); // Add output {address, value}
-                change = this.getChange(valueOut);
-                if (change > 0) {
-                    psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
-                }
+                psbt.addOutput({ address: addressTo, value: balancePlaceholder }); // Add output
+                psbt.addOutput({ address: this.getAddress(), value: 1 }); // change output
                 if (memo) {
                     data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
                     ;
@@ -42859,66 +42826,62 @@ var Client = /** @class */ (function () {
         // = getting a tx into one of the next 3 blocks would require a feerate >= 87.882 sat/byte,
         // for a total of 4231 sats in fees and take approximately 1820 seconds to confirm
         // contains calculated fees for getting into next 1-10 blocks
-        this.calcFees = function (memo) { return __awaiter(_this, void 0, void 0, function () {
-            var calcdFees_1, avgBlockPublishTime_1, feeRates_1, string1to10, data, OP_RETURN_1;
-            var _this = this;
+        this.calcFees = function (addressTo, memo) { return __awaiter(_this, void 0, void 0, function () {
+            var calcdFees, avgBlockPublishTime, feeRates, string1to10, txWeight;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(this.utxos.length === 0)) return [3 /*break*/, 1];
-                        throw new Error('No utxos to send');
-                    case 1:
-                        calcdFees_1 = {};
+                        if (this.utxos.length === 0) {
+                            throw new Error('No utxos to send');
+                        }
+                        calcdFees = {};
                         return [4 /*yield*/, this.getBlockTime()];
-                    case 2:
-                        avgBlockPublishTime_1 = _a.sent();
+                    case 1:
+                        avgBlockPublishTime = _a.sent();
                         return [4 /*yield*/, getFeeEstimates(this.electrsAPI)
                             // remove estimates for >10 next blocks
                         ];
-                    case 3:
-                        feeRates_1 = _a.sent();
+                    case 2:
+                        feeRates = _a.sent();
                         string1to10 = Array.from({ length: 10 }, function (_v, i) { return "" + (i + 1); });
-                        feeRates_1 = filterByKeys(feeRates_1, string1to10);
-                        if (memo) {
-                            data = Buffer.from(memo, 'utf8');
-                            OP_RETURN_1 = src_7$1.compile([src_10.OP_RETURN, data]);
-                            Object.keys(feeRates_1).forEach(function (key) {
-                                calcdFees_1[key] = {
-                                    feeRate: feeRates_1[key],
-                                    estimatedFee: getVaultFee(_this.utxos, OP_RETURN_1, feeRates_1[key]),
-                                    estimatedTxTime: Number(key) * avgBlockPublishTime_1,
-                                };
-                            });
-                        }
-                        else {
-                            Object.keys(feeRates_1).forEach(function (key) {
-                                calcdFees_1[key] = {
-                                    feeRate: feeRates_1[key],
-                                    estimatedFee: getNormalFee(_this.utxos, feeRates_1[key]),
-                                    estimatedTxTime: Number(key) * avgBlockPublishTime_1,
-                                };
-                            });
-                        }
-                        return [2 /*return*/, calcdFees_1];
+                        feeRates = filterByKeys(feeRates, string1to10);
+                        return [4 /*yield*/, this.getTxWeight(addressTo, memo)];
+                    case 3:
+                        txWeight = _a.sent();
+                        Object.keys(feeRates).forEach(function (key) {
+                            calcdFees[key] = {
+                                feeRate: feeRates[key],
+                                estimatedFee: txWeight * feeRates[key],
+                                estimatedTxTime: Number(key) * avgBlockPublishTime,
+                            };
+                        });
+                        return [2 /*return*/, calcdFees];
                 }
             });
         }); };
         // Generates a valid transaction hex to broadcast
         this.vaultTx = function (addressVault, valueOut, memo, feeRate) { return __awaiter(_this, void 0, void 0, function () {
-            var network, btcKeys, data, OP_RETURN, txWeight, fee, psbt, change, txHex;
+            var balance, network, btcKeys, data, OP_RETURN, txWeight, fee, psbt, change, txHex;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (this.utxos.length === 0) {
+                            throw new Error('No utxos to send');
+                        }
+                        balance = this.getBalance();
                         network = this.getNetwork(this.net);
                         btcKeys = this.getBtcKeys(this.net, this.phrase);
                         data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
                         ;
                         OP_RETURN = src_7$1.compile([src_10.OP_RETURN, data]) // Compile OP_RETURN script
                         ;
-                        return [4 /*yield*/, this.getTxWeight(addressVault, valueOut, memo)];
+                        return [4 /*yield*/, this.getTxWeight(addressVault, memo)];
                     case 1:
                         txWeight = _a.sent();
                         fee = txWeight * feeRate;
+                        if (fee + valueOut > balance) {
+                            throw new Error('Balance insufficient for transaction');
+                        }
                         psbt = new src_9$1({ network: network }) // Network-specific
                         ;
                         //Inputs
@@ -42948,16 +42911,23 @@ var Client = /** @class */ (function () {
         }); };
         // Generates a valid transaction hex to broadcast
         this.normalTx = function (addressTo, valueOut, feeRate) { return __awaiter(_this, void 0, void 0, function () {
-            var network, btcKeys, txWeight, fee, psbt, change, txHex;
+            var balance, network, btcKeys, txWeight, fee, psbt, change, txHex;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (this.utxos.length === 0) {
+                            throw new Error('No utxos to send');
+                        }
+                        balance = this.getBalance();
                         network = this.getNetwork(this.net);
                         btcKeys = this.getBtcKeys(this.net, this.phrase);
-                        return [4 /*yield*/, this.getTxWeight(addressTo, valueOut)];
+                        return [4 /*yield*/, this.getTxWeight(addressTo)];
                     case 1:
                         txWeight = _a.sent();
                         fee = txWeight * feeRate;
+                        if (fee + valueOut > balance) {
+                            throw new Error('Balance insufficient for transaction');
+                        }
                         psbt = new src_9$1({ network: network }) // Network-specific
                         ;
                         this.utxos.forEach(function (UTXO) {
