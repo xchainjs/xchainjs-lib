@@ -41,8 +41,7 @@ export default class Client implements EthereumClient {
      */
     get address(): Address;
     get wallet(): Wallet;
-    get vault(): Contract;
-    set vault(vault: Contract);
+    get vault(): Contract | null;
     get network(): Network;
     get provider(): Provider;
     get balance(): BigNumberish;

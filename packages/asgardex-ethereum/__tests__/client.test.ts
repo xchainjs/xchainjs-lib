@@ -12,6 +12,7 @@ import { TransactionResponse, TransactionReceipt } from 'ethers/providers/abstra
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
 const address = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E'
+const vault = '0x8c2A90D36Ec9F745C9B28B588Cba5e2A978A1656'
 const wallet = {
   signingKey: {
     address: '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E',
@@ -228,23 +229,17 @@ describe('Transactions', () => {
     expect(txResult).toEqual([expect.objectContaining(txResponse)])
   })
 
-  it('sends a vaultTx', async () => {
+  it('checks vault and vaultTx', async () => {
     const ethClient = new Client(Network.MAIN, phrase)
     ethClient.init()
 
-    const mockTx = jest.spyOn(ethClient.wallet, 'sendTransaction')
-    mockTx.mockImplementation(
-      async (_): Promise<TransactionResponse> => {
-        return Promise.resolve(txResponse)
-      },
-    )
-
-    await ethClient.vaultTx(ethClient.address, parseEther('1'), 'SWAP')
-    expect(mockTx).toHaveBeenCalledWith({
-      data: Buffer.from('SWAP', 'utf8'),
-      to: '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E',
-      value: bigNumberify('0x0de0b6b3a7640000'),
-    })
+    const vaultTx = ethClient.vaultTx(ethClient.address, parseEther('1'), 'SWAP')
+    expect(vaultTx).rejects.toBe('vault has to be set before sending vault tx')
+    ethClient.setVault(vault)
+    expect(ethClient.vault).not.toBeNull()
+    if (ethClient.vault != null) {
+      expect(ethClient.vault.address).toEqual(vault)
+    }
   })
 
   it('sends a normalTx', async () => {

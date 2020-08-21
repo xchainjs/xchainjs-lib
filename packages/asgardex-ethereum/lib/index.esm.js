@@ -1,5 +1,5 @@
 import { generateMnemonic, validateMnemonic } from 'bip39';
-import { getDefaultProvider, Wallet } from 'ethers';
+import { getDefaultProvider, Contract, Wallet, utils } from 'ethers';
 import { EtherscanProvider } from 'ethers/providers';
 import { getAddress, formatEther } from 'ethers/utils';
 
@@ -56,19 +56,665 @@ function __generator(thisArg, body) {
     }
 }
 
+var vaultABI = [
+	{
+		inputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "constructor"
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: false,
+				internalType: "address",
+				name: "asset",
+				type: "address"
+			},
+			{
+				indexed: false,
+				internalType: "uint256",
+				name: "delta",
+				type: "uint256"
+			}
+		],
+		name: "Add",
+		type: "event"
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: false,
+				internalType: "address payable[]",
+				name: "arrayAsgards",
+				type: "address[]"
+			}
+		],
+		name: "AddAsgard",
+		type: "event"
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: false,
+				internalType: "address",
+				name: "asset",
+				type: "address"
+			},
+			{
+				indexed: false,
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			},
+			{
+				indexed: false,
+				internalType: "string",
+				name: "memo",
+				type: "string"
+			}
+		],
+		name: "Deposit",
+		type: "event"
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: false,
+				internalType: "address",
+				name: "to",
+				type: "address"
+			},
+			{
+				indexed: false,
+				internalType: "address",
+				name: "asset",
+				type: "address"
+			},
+			{
+				indexed: false,
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			},
+			{
+				indexed: false,
+				internalType: "string",
+				name: "memo",
+				type: "string"
+			}
+		],
+		name: "Transfer",
+		type: "event"
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: false,
+				internalType: "address",
+				name: "yggdrasil",
+				type: "address"
+			},
+			{
+				indexed: false,
+				internalType: "address",
+				name: "asset",
+				type: "address"
+			},
+			{
+				indexed: false,
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			}
+		],
+		name: "YggdrasilMinus",
+		type: "event"
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: false,
+				internalType: "address",
+				name: "yggdrasil",
+				type: "address"
+			},
+			{
+				indexed: false,
+				internalType: "address",
+				name: "asset",
+				type: "address"
+			},
+			{
+				indexed: false,
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			}
+		],
+		name: "YggdrasilPlus",
+		type: "event"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address payable[]",
+				name: "newAsgards",
+				type: "address[]"
+			}
+		],
+		name: "addAsgard",
+		outputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256"
+			}
+		],
+		name: "arrayAsgards",
+		outputs: [
+			{
+				internalType: "address payable",
+				name: "",
+				type: "address"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address"
+			}
+		],
+		name: "asgardAllowance",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "to",
+				type: "address"
+			},
+			{
+				internalType: "address",
+				name: "asset",
+				type: "address"
+			},
+			{
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			},
+			{
+				internalType: "string",
+				name: "memo",
+				type: "string"
+			}
+		],
+		name: "asgardTransfer",
+		outputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address"
+			}
+		],
+		name: "asgards",
+		outputs: [
+			{
+				internalType: "bool",
+				name: "",
+				type: "bool"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "string",
+				name: "memo",
+				type: "string"
+			}
+		],
+		name: "deposit",
+		outputs: [
+		],
+		stateMutability: "payable",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "asset",
+				type: "address"
+			},
+			{
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			},
+			{
+				internalType: "string",
+				name: "memo",
+				type: "string"
+			}
+		],
+		name: "deposit",
+		outputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+		],
+		name: "getAsgardCount",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "asset",
+				type: "address"
+			}
+		],
+		name: "sync",
+		outputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address"
+			},
+			{
+				internalType: "address",
+				name: "",
+				type: "address"
+			}
+		],
+		name: "yggAllowance",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "asset",
+				type: "address"
+			},
+			{
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			}
+		],
+		name: "yggdrasilMinus",
+		outputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "yggdrasil",
+				type: "address"
+			},
+			{
+				internalType: "address",
+				name: "asset",
+				type: "address"
+			},
+			{
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			}
+		],
+		name: "yggdrasilPlus",
+		outputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "to",
+				type: "address"
+			},
+			{
+				internalType: "address",
+				name: "asset",
+				type: "address"
+			},
+			{
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			},
+			{
+				internalType: "string",
+				name: "memo",
+				type: "string"
+			}
+		],
+		name: "yggdrasilTransfer",
+		outputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	}
+];
+
+var erc20ABI = [
+	{
+		inputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "constructor"
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: true,
+				internalType: "address",
+				name: "owner",
+				type: "address"
+			},
+			{
+				indexed: true,
+				internalType: "address",
+				name: "spender",
+				type: "address"
+			},
+			{
+				indexed: false,
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			}
+		],
+		name: "Approval",
+		type: "event"
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: true,
+				internalType: "address",
+				name: "from",
+				type: "address"
+			},
+			{
+				indexed: true,
+				internalType: "address",
+				name: "to",
+				type: "address"
+			},
+			{
+				indexed: false,
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			}
+		],
+		name: "Transfer",
+		type: "event"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address"
+			},
+			{
+				internalType: "address",
+				name: "",
+				type: "address"
+			}
+		],
+		name: "allowance",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "spender",
+				type: "address"
+			},
+			{
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			}
+		],
+		name: "approve",
+		outputs: [
+			{
+				internalType: "bool",
+				name: "success",
+				type: "bool"
+			}
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address"
+			}
+		],
+		name: "balanceOf",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+		],
+		name: "decimals",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+		],
+		name: "name",
+		outputs: [
+			{
+				internalType: "string",
+				name: "",
+				type: "string"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+		],
+		name: "symbol",
+		outputs: [
+			{
+				internalType: "string",
+				name: "",
+				type: "string"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+		],
+		name: "totalSupply",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "to",
+				type: "address"
+			},
+			{
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			}
+		],
+		name: "transfer",
+		outputs: [
+			{
+				internalType: "bool",
+				name: "success",
+				type: "bool"
+			}
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "from",
+				type: "address"
+			},
+			{
+				internalType: "address",
+				name: "to",
+				type: "address"
+			},
+			{
+				internalType: "uint256",
+				name: "value",
+				type: "uint256"
+			}
+		],
+		name: "transferFrom",
+		outputs: [
+			{
+				internalType: "bool",
+				name: "success",
+				type: "bool"
+			}
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	}
+];
+
 var Network;
 (function (Network) {
     Network["TEST"] = "rinkeby";
     Network["MAIN"] = "homestead";
 })(Network || (Network = {}));
+var ethAddress = '0x0000000000000000000000000000000000000000';
 /**
  * Custom Ethereum client
  * @todo Error handling
  */
 var Client = /** @class */ (function () {
-    function Client(network, phrase) {
+    function Client(network, phrase, vault) {
         var _this = this;
         if (network === void 0) { network = Network.TEST; }
+        this._vault = null;
         /**
          * changes the wallet eg. when using connect() after init()
          */
@@ -85,7 +731,9 @@ var Client = /** @class */ (function () {
             this._wallet = Wallet.fromMnemonic(this._phrase);
             this._address = this._wallet.address;
             this._balance = 0;
-            this._etherscan = new EtherscanProvider(this._network); //for tx history
+            this._etherscan = new EtherscanProvider(this._network); // for tx history
+            if (vault)
+                this.setVault(vault);
         }
     }
     Object.defineProperty(Client.prototype, "address", {
@@ -101,6 +749,13 @@ var Client = /** @class */ (function () {
     Object.defineProperty(Client.prototype, "wallet", {
         get: function () {
             return this._wallet;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Client.prototype, "vault", {
+        get: function () {
+            return this._vault;
         },
         enumerable: true,
         configurable: true
@@ -166,6 +821,19 @@ var Client = /** @class */ (function () {
         }
     };
     /**
+     * Set's the current vault contract
+     */
+    Client.prototype.setVault = function (vault) {
+        if (!vault) {
+            throw new Error('Vault address must be provided');
+        }
+        else {
+            var contract = new Contract(vault, vaultABI, this._provider);
+            this._vault = contract.connect(this.wallet);
+            return this._vault;
+        }
+    };
+    /**
      * Generates a new mnemonic / phrase
      */
     Client.generatePhrase = function () {
@@ -225,6 +893,32 @@ var Client = /** @class */ (function () {
         });
     };
     /**
+     * Gets the erc20 asset balance of an address
+     */
+    Client.prototype.getERC20Balance = function (asset, address) {
+        return __awaiter(this, void 0, void 0, function () {
+            var contract, erc20, etherString;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (address && !Client.validateAddress(address)) {
+                            throw new Error('Invalid Address');
+                        }
+                        if (!Client.validateAddress(asset)) {
+                            throw new Error('Invalid Asset');
+                        }
+                        contract = new Contract(asset, erc20ABI, this.wallet);
+                        erc20 = contract.connect(this.wallet);
+                        return [4 /*yield*/, erc20.functions.balanceOf(address || this._address)];
+                    case 1:
+                        etherString = _a.sent();
+                        this._balance = formatEther(etherString);
+                        return [2 /*return*/, this._balance];
+                }
+            });
+        });
+    };
+    /**
      * Gets the current block of the network
      */
     Client.prototype.getBlockNumber = function () {
@@ -259,19 +953,38 @@ var Client = /** @class */ (function () {
     };
     /**
      * Sends a transaction to the vault
-     * @todo add from?: string, nonce: BigNumberish, gasLimit: BigNumberish, gasPrice: BigNumberish
      */
-    Client.prototype.vaultTx = function (addressTo, amount, memo) {
+    Client.prototype.vaultTx = function (asset, amount, memo) {
         return __awaiter(this, void 0, void 0, function () {
-            var transactionRequest, transactionResponse;
+            var contract, erc20, allowance, approved, deposit;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        transactionRequest = { to: addressTo, value: amount, data: Buffer.from(memo, 'utf8') };
-                        return [4 /*yield*/, this.wallet.sendTransaction(transactionRequest)];
-                    case 1:
-                        transactionResponse = _a.sent();
-                        return [2 /*return*/, transactionResponse];
+                        if (!this.vault) {
+                            return [2 /*return*/, Promise.reject('vault has to be set before sending vault tx')];
+                        }
+                        if (!(asset.toString() == ethAddress)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.vault.deposit(utils.toUtf8String(memo), { value: amount })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2:
+                        contract = new Contract(asset, erc20ABI, this.provider);
+                        erc20 = contract.connect(this.wallet);
+                        return [4 /*yield*/, erc20.allowance(this.vault.address, { from: this.wallet.address })];
+                    case 3:
+                        allowance = _a.sent();
+                        if (!(formatEther(allowance) < amount)) return [3 /*break*/, 6];
+                        return [4 /*yield*/, erc20.approve(this.vault.address, amount, { from: this.wallet.address })];
+                    case 4:
+                        approved = _a.sent();
+                        return [4 /*yield*/, approved.wait()];
+                    case 5:
+                        _a.sent();
+                        _a.label = 6;
+                    case 6: return [4 /*yield*/, this.vault.deposit(asset, amount, utils.toUtf8String(memo))];
+                    case 7:
+                        deposit = _a.sent();
+                        return [4 /*yield*/, deposit.wait()];
+                    case 8: return [2 /*return*/, _a.sent()];
                 }
             });
         });
