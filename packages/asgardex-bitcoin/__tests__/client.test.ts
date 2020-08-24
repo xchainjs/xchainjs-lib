@@ -152,4 +152,18 @@ describe('BitcoinClient Test', () => {
     const blockTimes = await btcClient.getBlockTime()
     expect(blockTimes).toBeGreaterThan(10)
   })
+
+  it('should error when an invalid address is provided', async () => {
+    const net = Network.TEST
+    btcClient.purgeClient()
+    btcClient.setNetwork(net)
+    btcClient.setPhrase(phrase)
+    await btcClient.scanUTXOs()
+    const invalidAddress = '23vasdvaxc465sddf23'
+    expect(async () => await btcClient.calcFees(invalidAddress)).rejects.toThrow('Invalid address')
+    expect(async () => await btcClient.getBalanceForAddress(invalidAddress)).rejects.toThrow('Invalid address')
+    expect(async () => await btcClient.getTransactions(invalidAddress)).rejects.toThrow('Invalid address')
+    expect(async () => await btcClient.getTxWeight(invalidAddress)).rejects.toThrow('Invalid address')
+    expect(async () => await btcClient.normalTx(invalidAddress, 99000, 1)).rejects.toThrow('Invalid address')
+  })
 })

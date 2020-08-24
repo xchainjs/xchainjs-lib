@@ -42730,7 +42730,11 @@ var Client = /** @class */ (function () {
             var addressInfo;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, getAddressInfo(this.electrsAPI, address)];
+                    case 0:
+                        if (!this.validateAddress(address)) {
+                            throw new Error('Invalid address');
+                        }
+                        return [4 /*yield*/, getAddressInfo(this.electrsAPI, address)];
                     case 1:
                         addressInfo = _a.sent();
                         return [2 /*return*/, addressInfo.chain_stats.funded_txo_sum - addressInfo.chain_stats.spent_txo_sum];
@@ -42753,6 +42757,9 @@ var Client = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!this.validateAddress(address)) {
+                            throw new Error('Invalid address');
+                        }
                         transactions = [];
                         _a.label = 1;
                     case 1:
@@ -42791,6 +42798,9 @@ var Client = /** @class */ (function () {
         this.getTxWeight = function (addressTo, memo) { return __awaiter(_this, void 0, void 0, function () {
             var network, btcKeys, balance, balancePlaceholder, psbt, data, OP_RETURN, tx, inputs;
             return __generator(this, function (_a) {
+                if (!this.validateAddress(addressTo)) {
+                    throw new Error('Invalid address');
+                }
                 network = this.getNetwork(this.net);
                 btcKeys = this.getBtcKeys(this.net, this.phrase);
                 balance = this.getBalance();
@@ -42834,6 +42844,9 @@ var Client = /** @class */ (function () {
                         if (this.utxos.length === 0) {
                             throw new Error('No utxos to send');
                         }
+                        if (!this.validateAddress(addressTo)) {
+                            throw new Error('Invalid address');
+                        }
                         calcdFees = {};
                         return [4 /*yield*/, this.getBlockTime()];
                     case 1:
@@ -42867,6 +42880,9 @@ var Client = /** @class */ (function () {
                     case 0:
                         if (this.utxos.length === 0) {
                             throw new Error('No utxos to send');
+                        }
+                        if (!this.validateAddress(addressVault)) {
+                            throw new Error('Invalid address');
                         }
                         balance = this.getBalance();
                         network = this.getNetwork(this.net);
@@ -42917,6 +42933,9 @@ var Client = /** @class */ (function () {
                     case 0:
                         if (this.utxos.length === 0) {
                             throw new Error('No utxos to send');
+                        }
+                        if (!this.validateAddress(addressTo)) {
+                            throw new Error('Invalid address');
                         }
                         balance = this.getBalance();
                         network = this.getNetwork(this.net);

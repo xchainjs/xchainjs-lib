@@ -196,6 +196,9 @@ class Client implements BitcoinClient {
   }
 
   getBalanceForAddress = async (address: string): Promise<number> => {
+    if (!this.validateAddress(address)) {
+      throw new Error('Invalid address')
+    }
     const addressInfo: Address = await getAddressInfo(this.electrsAPI, address)
     return addressInfo.chain_stats.funded_txo_sum - addressInfo.chain_stats.spent_txo_sum
   }
@@ -213,6 +216,9 @@ class Client implements BitcoinClient {
   }
 
   getTransactions = async (address: string): Promise<Txs> => {
+    if (!this.validateAddress(address)) {
+      throw new Error('Invalid address')
+    }
     let transactions = []
     try {
       transactions = await getAddressTxs(this.electrsAPI, address)
@@ -237,6 +243,9 @@ class Client implements BitcoinClient {
   }
 
   getTxWeight = async (addressTo: string, memo?: string): Promise<number> => {
+    if (!this.validateAddress(addressTo)) {
+      throw new Error('Invalid address')
+    }
     const network = this.getNetwork(this.net)
     const btcKeys = this.getBtcKeys(this.net, this.phrase)
     const balance = this.getBalance()
@@ -271,6 +280,9 @@ class Client implements BitcoinClient {
     if (this.utxos.length === 0) {
       throw new Error('No utxos to send')
     }
+    if (!this.validateAddress(addressTo)) {
+      throw new Error('Invalid address')
+    }
     const calcdFees: FeeOptions = {}
     const avgBlockPublishTime = await this.getBlockTime()
     let feeRates: Estimates = await getFeeEstimates(this.electrsAPI)
@@ -292,6 +304,9 @@ class Client implements BitcoinClient {
   vaultTx = async (addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string> => {
     if (this.utxos.length === 0) {
       throw new Error('No utxos to send')
+    }
+    if (!this.validateAddress(addressVault)) {
+      throw new Error('Invalid address')
     }
     const balance = this.getBalance()
     const network = this.getNetwork(this.net)
@@ -329,6 +344,9 @@ class Client implements BitcoinClient {
   normalTx = async (addressTo: string, valueOut: number, feeRate: number): Promise<string> => {
     if (this.utxos.length === 0) {
       throw new Error('No utxos to send')
+    }
+    if (!this.validateAddress(addressTo)) {
+      throw new Error('Invalid address')
     }
     const balance = this.getBalance()
     const network = this.getNetwork(this.net)
