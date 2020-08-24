@@ -266,3 +266,5 @@ export default class Client implements EthereumClient {
     return transactionResponse
   }
 }
+
+export { Client }
