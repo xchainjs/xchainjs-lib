@@ -544,3 +544,8 @@ export type Coin = {
   denom: string
   amount: number
 }
+
+export type AccountResult = {
+  result: Account
+  status: number
+}

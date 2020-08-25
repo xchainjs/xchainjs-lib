@@ -10,6 +10,7 @@ import {
   GetTxsParams,
   TxPage,
   Fees,
+  AccountResult,
 } from './types/binance'
 
 import { crypto } from '@binance-chain/javascript-sdk'
@@ -19,6 +20,7 @@ import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
  * Interface for custom Binance client
  */
 export interface BinanceClient {
+  getBncClient(): BncClient
   setNetwork(net: Network): BinanceClient
   getNetwork(): Network
   getClientUrl(): string
@@ -39,6 +41,7 @@ export interface BinanceClient {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   getMarkets(limit?: number, offset?: number): Promise<any>
   multiSend(address: Address, transactions: MultiTransfer[], memo?: string): Promise<TransferResult>
+  getAccount(address: string): Promise<AccountResult | null>
   getFees(): Promise<Fees>
 }
 
@@ -81,6 +84,17 @@ class Client implements BinanceClient {
     this.phrase = phrase
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
+  }
+
+  // Returns BncClient
+  getBncClient(): BncClient {
+    return this.bncClient
+  }
+
+  // get account using address
+  getAccount = async (address: string): Promise<AccountResult | null> => {
+    await this.bncClient.initChain()
+    return await this.bncClient.getAccount(address)
   }
 
   // update network
