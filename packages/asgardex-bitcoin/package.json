@@ -29,7 +29,8 @@
     "build": "rollup -c",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "yarn build",
+    "postversion": "git push --follow-tags"
   },
   "dependencies": {
     "axios": "^0.19.2",
