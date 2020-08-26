@@ -2,7 +2,6 @@ import * as BIP39 from 'bip39'
 import axios from 'axios'
 import {
   Address,
-  MultiTransfer,
   Network,
   TransferResult,
   Balances,
@@ -11,6 +10,11 @@ import {
   TxPage,
   Fees,
   AccountResult,
+  VaultTxParams,
+  NormalTxParams,
+  FreezeParams,
+  MultiSendParams,
+  GetMarketsParams,
 } from './types/binance'
 
 import { crypto } from '@binance-chain/javascript-sdk'
@@ -26,21 +30,21 @@ export interface BinanceClient {
   getClientUrl(): string
   getExplorerUrl(): string
   getPrefix(): Prefix
-  setPhrase(phrase?: string): BinanceClient
-  getAddress(): string
+  setPhrase(phrase: string): BinanceClient
+  getAddress(): string | undefined
   validateAddress(address: string): boolean
   getBalance(address?: Address): Promise<Balances>
   getTransactions(params?: GetTxsParams): Promise<TxPage>
-  vaultTx(addressTo: Address, amount: number, asset: string, memo: string): Promise<TransferResult>
-  normalTx(addressTo: Address, amount: number, asset: string): Promise<TransferResult>
-  freeze(amount: number, asset: string): Promise<TransferResult>
-  unfreeze(amount: number, asset: string): Promise<TransferResult>
+  vaultTx(params: VaultTxParams): Promise<TransferResult>
+  normalTx(params: NormalTxParams): Promise<TransferResult>
+  freeze(params: FreezeParams): Promise<TransferResult>
+  unfreeze(params: FreezeParams): Promise<TransferResult>
   //isTestnet(): boolean
   // setPrivateKey(privateKey: string): Promise<BinanceClient>
   // removePrivateKey(): Promise<void>
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  getMarkets(limit?: number, offset?: number): Promise<any>
-  multiSend(address: Address, transactions: MultiTransfer[], memo?: string): Promise<TransferResult>
+  getMarkets(params: GetMarketsParams): Promise<any>
+  multiSend(params: MultiSendParams): Promise<TransferResult>
   getAccount(address: string): Promise<AccountResult | null>
   getFees(): Promise<Fees>
 }
@@ -67,7 +71,7 @@ export interface BinanceClient {
 class Client implements BinanceClient {
   private network: Network
   private bncClient: BncClient
-  private phrase: string
+  private phrase: string | null = null
   private address: string | null = null
   private privateKey: string | null = null
   private dirtyPrivateKey = true
@@ -77,11 +81,10 @@ class Client implements BinanceClient {
    * It will throw an error if an invalid phrase has been passed
    **/
 
-  constructor(phrase: string, network: Network = 'testnet') {
+  constructor({ network = 'testnet', phrase }: { network: Network; phrase?: string }) {
     // Invalid phrase will throw an error!
-    this.setPhrase(phrase)
+    if (phrase) this.setPhrase(phrase)
     this.network = network
-    this.phrase = phrase
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
   }
@@ -145,8 +148,14 @@ class Client implements BinanceClient {
     return BIP39.validateMnemonic(phrase)
   }
 
+  /**
+   * @private
+   * Returns private key
+   * Throws an error if phrase has not been set before
+   * */
   private getPrivateKey = () => {
     if (!this.privateKey) {
+      if (!this.phrase) throw Error('Phrase has not been set before')
       const privateKey = crypto.getPrivateKeyFromMnemonic(this.phrase)
       this.privateKey = privateKey
       return privateKey
@@ -156,17 +165,29 @@ class Client implements BinanceClient {
 
   private setPrivateKey = async () => {
     if (this.dirtyPrivateKey) {
-      const privateKey = this.getPrivateKey()
+      let privateKey
+      try {
+        privateKey = this.getPrivateKey()
+      } catch (error) {
+        return Promise.reject(error)
+      }
       await this.bncClient.setPrivateKey(privateKey).catch((error) => Promise.reject(error))
       this.dirtyPrivateKey = false
     }
     return Promise.resolve()
   }
 
-  getAddress = (): string => {
+  getAddress = (): string | undefined => {
     if (this.address) return this.address
 
-    const privateKey = this.getPrivateKey() // Extract private key
+    // Extract private key
+    let privateKey
+    try {
+      privateKey = this.getPrivateKey()
+    } catch (error) {
+      return undefined
+    }
+
     const address = crypto.getAddressFromPrivateKey(privateKey, this.getPrefix()) // Extract address with prefix
     this.address = address
     return address
@@ -178,7 +199,7 @@ class Client implements BinanceClient {
 
   getBalance = async (address?: Address): Promise<Balances> => {
     await this.bncClient.initChain()
-    return this.bncClient.getBalance(address || this.getAddress())
+    return this.bncClient.getBalance(address || this.getAddress() || undefined)
   }
 
   getTransactions = async (params: GetTxsParams = {}): Promise<TxPage> => {
@@ -216,58 +237,67 @@ class Client implements BinanceClient {
     }
   }
 
-  vaultTx = async (addressTo: Address, amount: number, asset: string, memo: string): Promise<TransferResult> => {
+  vaultTx = async ({ addressFrom, addressTo, amount, asset, memo }: VaultTxParams): Promise<TransferResult> => {
     await this.bncClient.initChain()
-    await this.setPrivateKey()
-    try {
-      const addressFrom = this.getAddress()
-      const result = await this.bncClient.transfer(addressFrom, addressTo, amount, asset, memo)
-      return result
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    await this.setPrivateKey().catch((error) => Promise.reject(error))
+
+    const from = addressFrom || this.getAddress()
+    if (!from)
+      return Promise.reject(
+        new Error(
+          'Parameter `addressFrom` has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
+        ),
+      )
+    return await this.bncClient.transfer(from, addressTo, amount, asset, memo)
   }
 
-  normalTx = async (addressTo: Address, amount: number, asset: string): Promise<TransferResult> => {
+  normalTx = async ({ addressFrom, addressTo, amount, asset }: NormalTxParams): Promise<TransferResult> => {
     await this.bncClient.initChain()
-    await this.setPrivateKey()
-    try {
-      const addressFrom = this.getAddress()
-      const result = await this.bncClient.transfer(addressFrom, addressTo, amount, asset)
-      return result
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    await this.setPrivateKey().catch((error) => Promise.reject(error))
+
+    const from = addressFrom || this.getAddress()
+    if (!from)
+      return Promise.reject(
+        new Error(
+          'Parameter `addressFrom` has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
+        ),
+      )
+    return await this.bncClient.transfer(from, addressTo, amount, asset)
   }
 
-  freeze = async (amount: number, asset: string): Promise<TransferResult> => {
+  freeze = async ({ address, asset, amount }: FreezeParams): Promise<TransferResult> => {
     await this.bncClient.initChain()
-    await this.setPrivateKey()
-    try {
-      const addressFrom = this.getAddress()
-      return await this.bncClient.tokens.freeze(addressFrom, asset, amount)
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    await this.setPrivateKey().catch((error) => Promise.reject(error))
+
+    const addr = address || this.getAddress()
+    if (!addr)
+      return Promise.reject(
+        new Error(
+          'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
+        ),
+      )
+    return await this.bncClient.tokens.freeze(addr, asset, amount)
   }
 
-  unfreeze = async (amount: number, asset: string): Promise<TransferResult> => {
+  unfreeze = async ({ address, asset, amount }: FreezeParams): Promise<TransferResult> => {
     await this.bncClient.initChain()
-    await this.setPrivateKey()
-    try {
-      const addressFrom = this.getAddress()
-      return await this.bncClient.tokens.unfreeze(addressFrom, asset, amount)
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    await this.setPrivateKey().catch((error) => Promise.reject(error))
+    const addr = address || this.getAddress()
+    if (!addr)
+      return Promise.reject(
+        new Error(
+          'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
+        ),
+      )
+    return await this.bncClient.tokens.unfreeze(addr, asset, amount)
   }
 
-  getMarkets = async (limit = 1000, offset = 0) => {
+  getMarkets = async ({ limit = 1000, offset = 0 }: GetMarketsParams) => {
     await this.bncClient.initChain()
     return this.bncClient.getMarkets(limit, offset)
   }
 
-  multiSend = async (address: Address, transactions: MultiTransfer[], memo = '') => {
+  multiSend = async ({ address, transactions, memo = '' }: MultiSendParams) => {
     await this.bncClient.initChain()
     return await this.bncClient.multiSend(address, transactions, memo)
   }

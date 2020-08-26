@@ -9,22 +9,22 @@ describe('BinanceClient Test', () => {
   const phrase = 'wheel leg dune emerge sudden badge rough shine convince poet doll kiwi sleep labor hello'
   const testnetAddress = 'bnb1t95kjgmjc045l2a728z02textadd98ytlyvkk0'
   beforeEach(() => {
-    bnbClient = new BinanceClient(phrase, 'mainnet')
+    bnbClient = new BinanceClient({ phrase, network: 'mainnet' })
   })
 
   it('should start with empty wallet', async () => {
     const phraseEmpty = 'rural bright ball negative already grass good grant nation screen model pizza'
-    const bnbClientEmptyMain = new BinanceClient(phraseEmpty, 'mainnet')
+    const bnbClientEmptyMain = new BinanceClient({ phrase: phraseEmpty, network: 'mainnet' })
     const addressMain = bnbClientEmptyMain.getAddress()
     expect(addressMain).toEqual('bnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9e738vr')
-    const bnbClientEmptyTest = new BinanceClient(phraseEmpty, 'testnet')
+    const bnbClientEmptyTest = new BinanceClient({ phrase: phraseEmpty, network: 'testnet' })
     const addressTest = bnbClientEmptyTest.getAddress()
     expect(addressTest).toEqual('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj')
   })
 
   it('throws an error passing an invalid phrase', async () => {
     expect(() => {
-      new BinanceClient('invalid phrase')
+      new BinanceClient({ phrase: 'invalid phrase', network: 'mainnet' })
     }).toThrow()
   })
 
@@ -34,7 +34,7 @@ describe('BinanceClient Test', () => {
   })
 
   it('should update net', () => {
-    const client = new BinanceClient(phrase, 'mainnet')
+    const client = new BinanceClient({ phrase, network: 'mainnet' })
     client.setNetwork('testnet')
     expect(client.getNetwork()).toEqual('testnet')
 
