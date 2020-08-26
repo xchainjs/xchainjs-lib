@@ -137,9 +137,6 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phrase)
     await btcClient.scanUTXOs()
     const estimates = await btcClient.calcFees(addyTwo)
-    expect(estimates).toHaveProperty('1')
-    expect(estimates['1'].feeRate).toEqual(expect.any(Number))
-    expect(estimates['5'].estimatedFee).toEqual(expect.any(Number))
     expect(estimates['10'].estimatedTxTime).toEqual(expect.any(Number))
     expect(estimates['11']).toBeUndefined()
   })
@@ -152,8 +149,8 @@ describe('BitcoinClient Test', () => {
     await btcClient.scanUTXOs()
     const normalTx = await btcClient.calcFees(addyTwo)
     const vaultTx = await btcClient.calcFees(addyTwo, MEMO)
-    const normalTxFee = normalTx['1'].estimatedFee
-    const vaultTxFee = vaultTx['1'].estimatedFee
+    const normalTxFee = normalTx['10'].estimatedFee
+    const vaultTxFee = vaultTx['10'].estimatedFee
     expect(vaultTxFee).toBeGreaterThan(normalTxFee)
   })
 
