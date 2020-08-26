@@ -67,6 +67,15 @@ describe('BitcoinClient Test', () => {
     expect(balance).toEqual(valueOut)
   })
 
+  it('should get the right balance when scanUTXOs is called twice', async () => {
+    await btcClient.scanUTXOs()
+    const balance = btcClient.getBalance()
+    expect(balance).toEqual(valueOut)
+    await btcClient.scanUTXOs()
+    const newBalance = btcClient.getBalance()
+    expect(newBalance).toEqual(valueOut)
+  })
+
   it('should get the right history', async () => {
     const txArray = await btcClient.getTransactions(address)
     expect(txArray[0].txid).toEqual('7fc1d2c1e4017a6aea030be1d4f5365d11abfd295f56c13615e49641c55c54b8')
@@ -150,7 +159,7 @@ describe('BitcoinClient Test', () => {
 
   it('should calculate average block publish time', async () => {
     const blockTimes = await btcClient.getBlockTime()
-    expect(blockTimes).toBeGreaterThan(10)
+    expect(blockTimes).toBeGreaterThan(1)
   })
 
   it('should error when an invalid address is provided', async () => {

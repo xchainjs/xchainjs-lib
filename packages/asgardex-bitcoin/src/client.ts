@@ -156,6 +156,7 @@ class Client implements BitcoinClient {
   // Scans UTXOs on Address
   scanUTXOs = async (): Promise<void> => {
     try {
+      this.utxos = [] // clear existing utxos
       const address = this.getAddress()
       const utxos = await getAddressUtxos(this.electrsAPI, address)
 
