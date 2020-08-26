@@ -4,6 +4,7 @@ stages:
   - lint
   - build
   - test
+  - deploy
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
@@ -27,3 +28,12 @@ test:
   stage: test
   script:
     - yarn test
+
+publish:
+  stage: deploy
+  only:
+    - tags
+  script:
+    - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'>.npmrc
+    - npm publish
+
