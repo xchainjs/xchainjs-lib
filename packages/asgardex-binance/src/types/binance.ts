@@ -1,3 +1,5 @@
+import { BigSource } from 'big.js'
+
 /**
  * Type definitions for Binance Chain API
  * @see https://docs.binance.org/api-reference/dex-api/
@@ -385,9 +387,15 @@ export type GetTxsParams = {
   txType?: TxType
 }
 
-export type VaultTxParams = { addressFrom?: Address; addressTo: Address; amount: number; asset: string; memo: string }
-export type NormalTxParams = { addressFrom?: Address; addressTo: Address; amount: number; asset: string }
-export type FreezeParams = { address?: Address; amount: number; asset: string }
+export type VaultTxParams = {
+  addressFrom?: Address
+  addressTo: Address
+  amount: BigSource
+  asset: string
+  memo: string
+}
+export type NormalTxParams = { addressFrom?: Address; addressTo: Address; amount: BigSource; asset: string }
+export type FreezeParams = { address?: Address; amount: BigSource; asset: string }
 export type MultiSendParams = { address: Address; transactions: MultiTransfer[]; memo?: string }
 export type GetMarketsParams = { limit?: number; offset?: number }
 /**

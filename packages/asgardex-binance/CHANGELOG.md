@@ -1,3 +1,7 @@
+# v.3.0.1 (2020-08-26)
+
+- Change type of `amount` to `BigSource` in `normalTx`, `vaultTx`, `freeze`, `unfreeze`
+
 # v.3.0.0 (2020-08-26)
 
 ### Breaking changes:

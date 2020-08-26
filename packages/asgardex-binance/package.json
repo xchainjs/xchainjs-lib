@@ -1,6 +1,6 @@
 {
   "name": "@thorchain/asgardex-binance",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Custom Binance client and utilities used by ASGARDEX clients",
   "keywords": [
     "THORChain",
@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
+    "@types/big.js": "^4.0.5",
     "@types/jest": "^26.0.10",
     "@typescript-eslint/eslint-plugin": "^3.10.1",
     "@typescript-eslint/parser": "^3.10.1",
