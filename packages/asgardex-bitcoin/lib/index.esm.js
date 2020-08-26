@@ -18811,15 +18811,6 @@ function sha256x2 (buffer) {
 
 var bs58check = base$1(sha256x2);
 
-var _nodeResolve_empty = {};
-
-var _nodeResolve_empty$1 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    'default': _nodeResolve_empty
-});
-
-var require$$0$1 = getCjsExportFromNamespace(_nodeResolve_empty$1);
-
 var bn = createCommonjsModule(function (module) {
 (function (module, exports) {
 
@@ -18872,7 +18863,7 @@ var bn = createCommonjsModule(function (module) {
 
   var Buffer;
   try {
-    Buffer = require$$0$1.Buffer;
+    Buffer = buffer.Buffer;
   } catch (e) {
   }
 
@@ -22536,6 +22527,15 @@ function intFromLE(bytes) {
 }
 utils.intFromLE = intFromLE;
 });
+
+var _nodeResolve_empty = {};
+
+var _nodeResolve_empty$1 = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    'default': _nodeResolve_empty
+});
+
+var require$$0$1 = getCjsExportFromNamespace(_nodeResolve_empty$1);
 
 var r;
 
@@ -42678,6 +42678,7 @@ var Client = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 6, , 7]);
+                        this.utxos = []; // clear existing utxos
                         address = this.getAddress();
                         return [4 /*yield*/, getAddressUtxos(this.electrsAPI, address)];
                     case 1:

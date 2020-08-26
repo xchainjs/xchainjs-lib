@@ -34,5 +34,5 @@ export default {
       browser: true,
     }),
   ],
-  external: ['readable-stream'],
+  external: ['readable-stream', 'buffer', 'stream', 'string_decoder'],
 }
