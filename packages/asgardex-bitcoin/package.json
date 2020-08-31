@@ -36,7 +36,6 @@
     "axios": "^0.19.2",
     "bip39": "^3.0.2",
     "bitcoinjs-lib": "^5.1.10",
-    "moment": "^2.27.0",
     "wif": "^2.0.6"
   },
   "devDependencies": {

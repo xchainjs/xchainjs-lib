@@ -1,18 +1,9 @@
 import * as BIP39 from 'bip39' // https://github.com/bitcoinjs/bip39
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
-import moment from 'moment'
 import * as Utils from './utils'
-import {
-  getAddressTxs,
-  getAddressUtxos,
-  getTxInfo,
-  getAddressInfo,
-  getFeeEstimates,
-  getBlocks,
-  broadcastTx,
-} from './electrs-api'
-import { Estimates, Txs, Blocks, Address } from './types/electrs-api-types'
+import { getAddressTxs, getAddressUtxos, getTxInfo, getAddressInfo, getFeeEstimates, broadcastTx } from './electrs-api'
+import { Estimates, Txs, Address } from './types/electrs-api-types'
 import { FeeOptions } from './types/client-types'
 
 // https://blockchair.com/api/docs#link_300
@@ -34,22 +25,35 @@ enum Network {
  */
 interface BitcoinClient {
   generatePhrase(): string
+
   setPhrase(phrase?: string): void
+
   validatePhrase(phrase: string): boolean
+
   purgeClient(): void
+
   setNetwork(net: Network): void
+
   getNetwork(net: Network): Bitcoin.networks.Network
+
   setBaseUrl(endpoint: string): void
+
   getAddress(): string
+
   validateAddress(address: string): boolean
+
   scanUTXOs(): Promise<void>
+
   getBalance(): number
+
   getBalanceForAddress(address?: string): Promise<number>
+
   getTransactions(address: string): Promise<Txs>
-  getBlockTime(): Promise<number>
-  getTxWeight(addressTo: string, memo?: string): Promise<number>
+
   calcFees(addressTo: string, memo?: string): Promise<object>
+
   vaultTx(addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string>
+
   normalTx(addressTo: string, valueOut: number, feeRate: number): Promise<string>
 }
 
@@ -229,73 +233,77 @@ class Client implements BitcoinClient {
     return transactions
   }
 
-  getBlockTime = async (): Promise<number> => {
-    const blocks: Blocks = await getBlocks(this.electrsAPI)
-    const times: Array<number> = []
-    blocks.forEach((block, index: number) => {
-      if (index !== 0) {
-        const block1PublishTime = moment.unix(blocks[index - 1].timestamp)
-        const block2PublishTime = moment.unix(block.timestamp)
-        times.push(block1PublishTime.diff(block2PublishTime, 'seconds'))
-      }
-    })
-    const avgBlockPublishTime = Utils.arrayAverage(times)
-    return avgBlockPublishTime
-  }
+  // getBlockTime = async (): Promise<number> => {
+  //   const blocks: Blocks = await getBlocks(this.electrsAPI)
+  //   const times: Array<number> = []
+  //   blocks.forEach((block, index: number) => {
+  //     if (index !== 0) {
+  //       const block1PublishTime = moment.unix(blocks[index - 1].timestamp)
+  //       const block2PublishTime = moment.unix(block.timestamp)
+  //       times.push(block1PublishTime.diff(block2PublishTime, 'seconds'))
+  //     }
+  //   })
+  //   const avgBlockPublishTime = Utils.arrayAverage(times)
+  //   return avgBlockPublishTime
+  // }
 
-  getTxWeight = async (addressTo: string, memo?: string): Promise<number> => {
-    if (!this.validateAddress(addressTo)) {
-      throw new Error('Invalid address')
-    }
-    const network = this.getNetwork(this.net)
-    const btcKeys = this.getBtcKeys(this.net, this.phrase)
-    const balance = this.getBalance()
-    const balancePlaceholder = balance - Utils.dustThreshold - 1
-    const psbt = new Bitcoin.Psbt({ network: network }) // Network-specific
-    this.utxos.forEach((UTXO) =>
-      psbt.addInput({
-        hash: UTXO.hash,
-        index: UTXO.index,
-        witnessUtxo: UTXO.witnessUtxo,
-      }),
-    )
-    psbt.addOutput({ address: addressTo, value: balancePlaceholder }) // Add output
-    psbt.addOutput({ address: this.getAddress(), value: 1 }) // change output
-    if (memo) {
-      const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
-      const OP_RETURN = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
-      psbt.addOutput({ script: OP_RETURN, value: 0 }) // Add OP_RETURN {script, value}
-    }
-    psbt.signAllInputs(btcKeys) // Sign all inputs
-    const tx = psbt.finalizeAllInputs().extractTransaction() // Finalise inputs, extract tx
-    const inputs = this.utxos.length // Add weight for each input sig
-    return tx.virtualSize() + inputs
-  }
+  // getTxWeight = async (addressTo: string, memo?: string): Promise<number> => {
+  //   if (!this.validateAddress(addressTo)) {
+  //     throw new Error('Invalid address')
+  //   }
+  //   const network = this.getNetwork(this.net)
+  //   const btcKeys = this.getBtcKeys(this.net, this.phrase)
+  //   const balance = this.getBalance()
+  //   const balancePlaceholder = balance - Utils.dustThreshold - 1
+  //   const psbt = new Bitcoin.Psbt({ network: network }) // Network-specific
+  //   this.utxos.forEach((UTXO) =>
+  //     psbt.addInput({
+  //       hash: UTXO.hash,
+  //       index: UTXO.index,
+  //       witnessUtxo: UTXO.witnessUtxo,
+  //     }),
+  //   )
+  //   psbt.addOutput({ address: addressTo, value: balancePlaceholder }) // Add output
+  //   psbt.addOutput({ address: this.getAddress(), value: 1 }) // change output
+  //   if (memo) {
+  //     const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
+  //     const OP_RETURN = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
+  //     psbt.addOutput({ script: OP_RETURN, value: 0 }) // Add OP_RETURN {script, value}
+  //   }
+  //   psbt.signAllInputs(btcKeys) // Sign all inputs
+  //   const tx = psbt.finalizeAllInputs().extractTransaction() // Finalise inputs, extract tx
+  //   const inputs = this.utxos.length // Add weight for each input sig
+  //   return tx.virtualSize() + inputs
+  // }
 
-  // returns an object of the fee rate, estimated fee, and estimatedTxTime for getting a transaction in to the x'th blocks
-  // eg. { ..., '3': { 'feeRate': 87.882, 'estimatedFee': 4231, 'estimatedTxTime': 1820 }, ... }
+  // returns an object of the fee rate, total fee for getting a transactions
+  // eg. { 'fast': { 'feeRate': 87.882, 'feeTotal': 4231 }, regular: ... }
   // = getting a tx into one of the next 3 blocks would require a feerate >= 87.882 sat/byte,
-  // for a total of 4231 sats in fees and take approximately 1820 seconds to confirm
-  // contains calculated fees for getting into next 1-10 blocks
-  calcFees = async (addressTo: string, memo?: string): Promise<FeeOptions> => {
+  // for a total of 4231 sats in fees
+  calcFees = async (memo?: string): Promise<FeeOptions> => {
     if (this.utxos.length === 0) {
       throw new Error('No utxos to send')
     }
-    if (!this.validateAddress(addressTo)) {
-      throw new Error('Invalid address')
-    }
     const calcdFees: FeeOptions = {}
-    const avgBlockPublishTime = await this.getBlockTime()
-    let feeRates: Estimates = await getFeeEstimates(this.electrsAPI)
-    // remove estimates for >10 next blocks
-    const string1to10 = Array.from({ length: 10 }, (_v, i) => `${i + 1}`)
-    feeRates = Utils.filterByKeys(feeRates, string1to10)
-    const txWeight = await this.getTxWeight(addressTo, memo)
-    Object.keys(feeRates).forEach((key) => {
+    const FeeRateEstimates: Estimates = await getFeeEstimates(this.electrsAPI)
+    const nextBlockFeeRate = FeeRateEstimates['1'] || 20
+    const feesOptions: { [index: string]: number } = {
+      fast: 5,
+      regular: 1,
+      slow: 0.5,
+    }
+    Object.keys(feesOptions).forEach((key) => {
+      const feeRate = nextBlockFeeRate * feesOptions[key]
+      let feeTotal
+      if (memo) {
+        const OP_RETURN = Utils.compileMemo(memo)
+        feeTotal = Utils.getVaultFee(this.utxos, OP_RETURN, feeRate)
+      } else {
+        feeTotal = Utils.getNormalFee(this.utxos, feeRate)
+      }
       calcdFees[key] = {
-        feeRate: feeRates[key],
-        estimatedFee: txWeight * feeRates[key],
-        estimatedTxTime: Number(key) * avgBlockPublishTime,
+        feeRate: feeRate,
+        feeTotal,
       }
     })
     return calcdFees
@@ -312,10 +320,9 @@ class Client implements BitcoinClient {
     const balance = this.getBalance()
     const network = this.getNetwork(this.net)
     const btcKeys = this.getBtcKeys(this.net, this.phrase)
-    const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
-    const OP_RETURN = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
-    const txWeight = await this.getTxWeight(addressVault, memo)
-    const fee = txWeight * feeRate
+    const OP_RETURN = Utils.compileMemo(memo)
+    const feeRateWhole = Number(feeRate.toFixed(0))
+    const fee = Utils.getVaultFee(this.utxos, OP_RETURN, feeRateWhole)
     if (fee + valueOut > balance) {
       throw new Error('Balance insufficient for transaction')
     }
@@ -352,8 +359,8 @@ class Client implements BitcoinClient {
     const balance = this.getBalance()
     const network = this.getNetwork(this.net)
     const btcKeys = this.getBtcKeys(this.net, this.phrase)
-    const txWeight = await this.getTxWeight(addressTo)
-    const fee = txWeight * feeRate
+    const feeRateWhole = Number(feeRate.toFixed(0))
+    const fee = Utils.getNormalFee(this.utxos, feeRateWhole)
     if (fee + valueOut > balance) {
       throw new Error('Balance insufficient for transaction')
     }

@@ -1,7 +1,6 @@
 export interface FeeOption {
   feeRate: number // sats/byte
-  estimatedFee: number // sats
-  estimatedTxTime: number // seconds
+  feeTotal: number // sats
 }
 
 export interface FeeOptions {

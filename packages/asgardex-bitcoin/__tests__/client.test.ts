@@ -128,17 +128,17 @@ describe('BitcoinClient Test', () => {
 
   it('should throw an error when trying to calculate fees without any utxos', async () => {
     btcClient.purgeClient()
-    expect(async () => await btcClient.calcFees(addyTwo)).rejects.toThrow('No utxos to send')
+    expect(async () => await btcClient.calcFees()).rejects.toThrow('No utxos to send')
   })
 
-  it('should return estimated fees of a normal tx for up to the next 10 blocks', async () => {
+  it('should return estimated fees of a normal tx', async () => {
     const net = Network.TEST
     btcClient.setNetwork(net)
     btcClient.setPhrase(phrase)
     await btcClient.scanUTXOs()
-    const estimates = await btcClient.calcFees(addyTwo)
-    expect(estimates['10'].estimatedTxTime).toEqual(expect.any(Number))
-    expect(estimates['11']).toBeUndefined()
+    const estimates = await btcClient.calcFees()
+    expect(estimates['fast'].feeTotal).toEqual(expect.any(Number))
+    expect(estimates['slow'].feeRate).toEqual(expect.any(Number))
   })
 
   it('should return estimated fees of a vault tx that are more expensive than a normal tx', async () => {
@@ -147,17 +147,17 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork(net)
     btcClient.setPhrase(phrase)
     await btcClient.scanUTXOs()
-    const normalTx = await btcClient.calcFees(addyTwo)
-    const vaultTx = await btcClient.calcFees(addyTwo, MEMO)
-    const normalTxFee = normalTx['10'].estimatedFee
-    const vaultTxFee = vaultTx['10'].estimatedFee
+    const normalTx = await btcClient.calcFees()
+    const vaultTx = await btcClient.calcFees(MEMO)
+    const normalTxFee = normalTx['fast'].feeTotal
+    const vaultTxFee = vaultTx['fast'].feeTotal
     expect(vaultTxFee).toBeGreaterThan(normalTxFee)
   })
 
-  it('should calculate average block publish time', async () => {
-    const blockTimes = await btcClient.getBlockTime()
-    expect(blockTimes).toBeGreaterThan(1)
-  })
+  // it('should calculate average block publish time', async () => {
+  //   const blockTimes = await btcClient.getBlockTime()
+  //   expect(blockTimes).toBeGreaterThan(1)
+  // })
 
   it('should error when an invalid address is provided', async () => {
     const net = Network.TEST
@@ -166,10 +166,8 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phrase)
     await btcClient.scanUTXOs()
     const invalidAddress = '23vasdvaxc465sddf23'
-    expect(async () => await btcClient.calcFees(invalidAddress)).rejects.toThrow('Invalid address')
     expect(async () => await btcClient.getBalanceForAddress(invalidAddress)).rejects.toThrow('Invalid address')
     expect(async () => await btcClient.getTransactions(invalidAddress)).rejects.toThrow('Invalid address')
-    expect(async () => await btcClient.getTxWeight(invalidAddress)).rejects.toThrow('Invalid address')
     expect(async () => await btcClient.normalTx(invalidAddress, 99000, 1)).rejects.toThrow('Invalid address')
   })
 })

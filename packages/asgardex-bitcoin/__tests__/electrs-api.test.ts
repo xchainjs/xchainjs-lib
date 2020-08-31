@@ -39,8 +39,6 @@ describe('Electrs API Test', () => {
 
   it('getFeeEstimates should return an object of fees', async () => {
     const estimates = await getFeeEstimates(electrsAPI)
-    expect(estimates).toHaveProperty('10')
-    expect(estimates).toHaveProperty('25')
     expect(estimates).toHaveProperty('144')
   })
 

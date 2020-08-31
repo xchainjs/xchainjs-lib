@@ -1,3 +1,4 @@
+import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 /**
  * Bitcoin byte syzes
  */
@@ -25,12 +26,18 @@ function inputBytes(input: UTXO) {
   return TX_INPUT_BASE + (input.witnessUtxo.script ? input.witnessUtxo.script.length : TX_INPUT_PUBKEYHASH)
 }
 
+export const compileMemo = (memo: string) => {
+  const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
+  return Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
+}
+
 export function getVaultFee(inputs: UTXO[], data: Buffer, feeRate: number) {
-  return (
+  const vaultFee =
     (TX_EMPTY_SIZE +
-      inputs.reduce(function (a, x) {
-        return a + inputBytes(x)
-      }, 0) +
+    inputs.reduce(function (a, x) {
+      return a + inputBytes(x)
+    }, 0) +
+    inputs.length + // +1 byte for each input signature
       TX_OUTPUT_BASE +
       TX_OUTPUT_PUBKEYHASH +
       TX_OUTPUT_BASE +
@@ -38,21 +45,22 @@ export function getVaultFee(inputs: UTXO[], data: Buffer, feeRate: number) {
       TX_OUTPUT_BASE +
       data.length) *
     feeRate
-  )
+  return vaultFee > 1000 ? vaultFee : 1000
 }
 
 export function getNormalFee(inputs: UTXO[], feeRate: number) {
-  return (
+  const normalFee =
     (TX_EMPTY_SIZE +
-      inputs.reduce(function (a, x) {
-        return a + inputBytes(x)
-      }, 0) +
+    inputs.reduce(function (a, x) {
+      return a + inputBytes(x)
+    }, 0) +
+    inputs.length + // +1 byte for each input signature
       TX_OUTPUT_BASE +
       TX_OUTPUT_PUBKEYHASH +
       TX_OUTPUT_BASE +
       TX_OUTPUT_PUBKEYHASH) *
     feeRate
-  )
+  return normalFee > 1000 ? normalFee : 1000
 }
 
 export function arrayAverage(array: Array<number>) {

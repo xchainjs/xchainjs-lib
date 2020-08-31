@@ -21,12 +21,17 @@ describe('Bitcoin Utils Test', () => {
   const OP_RETURN = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
 
   it('get the right vault fee', () => {
-    const fee = Utils.getVaultFee(UTXO, OP_RETURN, 1)
-    expect(fee).toEqual(188)
+    const fee = Utils.getVaultFee(UTXO, OP_RETURN, 10)
+    expect(fee).toEqual(1890)
   })
 
   it('get the right normal fee', () => {
+    const fee = Utils.getNormalFee(UTXO, 10)
+    expect(fee).toEqual(1640)
+  })
+
+  it('should return a minimum fee of 1000', () => {
     const fee = Utils.getNormalFee(UTXO, 1)
-    expect(fee).toEqual(163)
+    expect(fee).toEqual(1000)
   })
 })
