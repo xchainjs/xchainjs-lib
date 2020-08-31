@@ -17,7 +17,6 @@ interface BitcoinClient {
   getBalance(): number
   getBalanceForAddress(address?: string): Promise<number>
   getTransactions(address: string): Promise<Txs>
-  getBlockTime(): Promise<number>
   calcFees(memo?: string): Promise<object>
   vaultTx(addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string>
   normalTx(addressTo: string, valueOut: number, feeRate: number): Promise<string>
@@ -150,19 +149,11 @@ Get transactions for an address
 
 **Return**: `Array` of `objects` 
 
-### .getBlockTime()
-
-_Async_ 
-
-Get the average block publish time in seconds
-
-**Return**: `number` in seconds 
-
 ### .calcFees(`memo`)
 
 _Async_ 
 
-Calculates the fee rate, the fee total estimate, and estimated confirmation time for getting a transaction into the next 10 blocks. Add a `memo` for a vault TX
+Calculates the fee rate and the fee total estimate for fast, regular, and slow transactions. Add a `memo` for a vault TX
 
 **memo**: `string` _optional_
 
