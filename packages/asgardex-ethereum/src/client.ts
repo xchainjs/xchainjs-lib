@@ -1,20 +1,12 @@
 import { generateMnemonic, validateMnemonic } from 'bip39'
-import { Wallet, getDefaultProvider, Contract, utils } from 'ethers'
-import { EtherscanProvider, TransactionResponse, Provider } from 'ethers/providers'
-import { BigNumberish, getAddress, formatEther } from 'ethers/utils'
+import { ethers } from 'ethers'
+import { Provider, TransactionResponse } from "@ethersproject/abstract-provider";
+import { EtherscanProvider, getDefaultProvider } from "@ethersproject/providers";
 import vaultABI from '../data/vault.json'
 import erc20ABI from '../data/erc20.json'
-
-/**
- * Class variables accessed across functions
- */
-type Address = string
-type Phrase = string
-
-export enum Network {
-  TEST = 'rinkeby',
-  MAIN = 'homestead',
-}
+import { getAddress, formatEther } from 'ethers/lib/utils';
+import { toUtf8String } from "@ethersproject/strings";
+import { Network, Address, Phrase } from './types';
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
 
@@ -24,11 +16,12 @@ const ethAddress = '0x0000000000000000000000000000000000000000'
 export interface EthereumClient {
   setNetwork(network: Network): Network
   setPhrase(phrase?: string): void
-  getBalance(address: Address): Promise<BigNumberish>
+  getAddress(): string
+  getBalance(address: Address): Promise<ethers.BigNumberish>
   getBlockNumber(): Promise<number>
   getTransactions(address?: Address): Promise<Array<TransactionResponse>>
-  vaultTx(asset: string, amount: BigNumberish, memo: string): Promise<TransactionResponse>
-  normalTx(addressTo: Address, amount: BigNumberish, asset: string): Promise<TransactionResponse>
+  vaultTx(asset: string, amount: ethers.BigNumberish, memo: string): Promise<TransactionResponse>
+  normalTx(addressTo: Address, amount: ethers.BigNumberish, asset: string): Promise<TransactionResponse>
 }
 
 /**
@@ -36,14 +29,14 @@ export interface EthereumClient {
  * @todo Error handling
  */
 export default class Client implements EthereumClient {
-  private _wallet: Wallet
+  private _wallet: ethers.Wallet
   private _network: Network
   private _phrase: Phrase
   private _provider: Provider
   private _address: Address
-  private _balance: BigNumberish
+  private _balance: ethers.BigNumberish
   private _etherscan: EtherscanProvider
-  private _vault: Contract | null = null
+  private _vault: ethers.Contract | null = null
 
   constructor(network: Network = Network.TEST, phrase?: Phrase, vault?: string) {
     if (phrase && !validateMnemonic(phrase)) {
@@ -52,7 +45,7 @@ export default class Client implements EthereumClient {
       this._phrase = phrase || generateMnemonic()
       this._network = network
       this._provider = getDefaultProvider(network)
-      this._wallet = Wallet.fromMnemonic(this._phrase)
+      this._wallet = ethers.Wallet.fromMnemonic(this._phrase)
       this._address = this._wallet.address
       this._balance = 0
       this._etherscan = new EtherscanProvider(this._network) // for tx history
@@ -63,15 +56,15 @@ export default class Client implements EthereumClient {
   /**
    * Getters
    */
-  get address(): Address {
+  getAddress(): Address {
     return this._address
   }
 
-  get wallet(): Wallet {
+  get wallet(): ethers.Wallet {
     return this._wallet
   }
 
-  get vault(): Contract | null {
+  get vault(): ethers.Contract | null {
     return this._vault
   }
 
@@ -83,7 +76,7 @@ export default class Client implements EthereumClient {
     return this._provider
   }
 
-  get balance(): BigNumberish {
+  get balance(): ethers.BigNumberish {
     return this._balance
   }
 
@@ -95,7 +88,7 @@ export default class Client implements EthereumClient {
   /**
    * changes the wallet eg. when using connect() after init()
    */
-  private changeWallet = (wallet: Wallet): Wallet => {
+  private changeWallet = (wallet: ethers.Wallet): ethers.Wallet => {
     return (this._wallet = wallet)
   }
 
@@ -111,7 +104,7 @@ export default class Client implements EthereumClient {
   /**
    * Connects to the ethereum network with t
    */
-  init(): Wallet {
+  init(): ethers.Wallet {
     const provider = getDefaultProvider(this._network)
     const newWallet = this.wallet.connect(provider)
     this.changeWallet(newWallet)
@@ -135,11 +128,11 @@ export default class Client implements EthereumClient {
   /**
    * Set's the current vault contract
    */
-  setVault(vault: string): Contract {
+  setVault(vault: string): ethers.Contract {
     if (!vault) {
       throw new Error('Vault address must be provided')
     } else {
-      const contract = new Contract(vault, vaultABI, this._provider)
+      const contract = new ethers.Contract(vault, vaultABI, this._provider)
       this._vault = contract.connect(this.wallet)
       return this._vault
     }
@@ -167,7 +160,7 @@ export default class Client implements EthereumClient {
       throw new Error('Phrase must be provided')
     } else {
       this._phrase = phrase
-      const newWallet = Wallet.fromMnemonic(phrase)
+      const newWallet = ethers.Wallet.fromMnemonic(phrase)
       this.changeWallet(newWallet)
       return true
     }
@@ -189,7 +182,7 @@ export default class Client implements EthereumClient {
    * Gets the eth balance of an address
    * @todo add start & end block parameters
    */
-  async getBalance(address?: Address): Promise<BigNumberish> {
+  async getBalance(address?: Address): Promise<ethers.BigNumberish> {
     if (address && !Client.validateAddress(address)) {
       throw new Error('Invalid Address')
     } else {
@@ -202,14 +195,14 @@ export default class Client implements EthereumClient {
   /**
    * Gets the erc20 asset balance of an address
    */
-  async getERC20Balance(asset: Address, address?: Address): Promise<BigNumberish> {
+  async getERC20Balance(asset: Address, address?: Address): Promise<ethers.BigNumberish> {
     if (address && !Client.validateAddress(address)) {
       throw new Error('Invalid Address')
     }
     if (!Client.validateAddress(asset)) {
       throw new Error('Invalid Asset')
     }
-    const contract = new Contract(asset, erc20ABI, this.wallet)
+    const contract = new ethers.Contract(asset, erc20ABI, this.wallet)
     const erc20 = contract.connect(this.wallet)
     const etherString = await erc20.functions.balanceOf(address || this._address)
     this._balance = formatEther(etherString)
@@ -238,21 +231,21 @@ export default class Client implements EthereumClient {
   /**
    * Sends a transaction to the vault
    */
-  async vaultTx(asset: Address, amount: BigNumberish, memo: string): Promise<TransactionResponse> {
+  async vaultTx(asset: Address, amount: ethers.BigNumberish, memo: string): Promise<TransactionResponse> {
     if (!this.vault) {
       return Promise.reject('vault has to be set before sending vault tx')
     }
     if (asset.toString() == ethAddress) {
-      return await this.vault.deposit(utils.toUtf8String(memo), { value: amount })
+      return await this.vault.deposit(toUtf8String(memo), { value: amount })
     }
-    const contract = new Contract(asset, erc20ABI, this.provider)
+    const contract = new ethers.Contract(asset, erc20ABI, this.provider)
     const erc20 = contract.connect(this.wallet)
     const allowance = await erc20.allowance(this.vault.address, { from: this.wallet.address })
     if (formatEther(allowance) < amount) {
       const approved = await erc20.approve(this.vault.address, amount, { from: this.wallet.address })
       await approved.wait()
     }
-    const deposit = await this.vault.deposit(asset, amount, utils.toUtf8String(memo))
+    const deposit = await this.vault.deposit(asset, amount, toUtf8String(memo))
     return await deposit.wait()
   }
 
@@ -260,7 +253,7 @@ export default class Client implements EthereumClient {
    * Sends a transaction to the vault
    * @todo add from?: string, nonce: BigNumberish, gasLimit: BigNumberish, gasPrice: BigNumberish
    */
-  async normalTx(addressTo: Address, amount: BigNumberish): Promise<TransactionResponse> {
+  async normalTx(addressTo: Address, amount: ethers.BigNumberish): Promise<TransactionResponse> {
     const transactionRequest = { to: addressTo, value: amount }
     const transactionResponse = await this.wallet.sendTransaction(transactionRequest)
     return transactionResponse

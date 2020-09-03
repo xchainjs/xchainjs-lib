@@ -22,7 +22,6 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true
   },
   "include": ["src/**/*"]
 }
