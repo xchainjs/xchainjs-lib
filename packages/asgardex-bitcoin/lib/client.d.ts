@@ -23,7 +23,7 @@ interface BitcoinClient {
     getAddress(): string;
     validateAddress(address: string): boolean;
     scanUTXOs(): Promise<void>;
-    getBalance(): number;
+    getBalance(): Promise<number>;
     getBalanceForAddress(address?: string): Promise<number>;
     getTransactions(address: string): Promise<Txs>;
     calcFees(addressTo: string, memo?: string): Promise<object>;
@@ -50,7 +50,7 @@ declare class Client implements BitcoinClient {
     private getBtcKeys;
     validateAddress: (address: string) => boolean;
     scanUTXOs: () => Promise<void>;
-    getBalance: () => number;
+    getBalance: () => Promise<number>;
     getBalanceForAddress: (address: string) => Promise<number>;
     private getChange;
     getTransactions: (address: string) => Promise<Txs>;

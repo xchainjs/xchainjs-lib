@@ -37059,16 +37059,24 @@ var Client = /** @class */ (function () {
             });
         }); };
         // Returns balance of all UTXOs
-        this.getBalance = function () {
-            if (_this.utxos && _this.utxos.length > 0) {
-                var reducer = function (accumulator, currentValue) { return accumulator + currentValue; };
-                var sumBalance = _this.utxos.map(function (e) { return e.witnessUtxo.value; }).reduce(reducer);
-                return sumBalance;
-            }
-            else {
-                return 0;
-            }
-        };
+        this.getBalance = function () { return __awaiter(_this, void 0, void 0, function () {
+            var reducer, sumBalance;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.scanUTXOs()];
+                    case 1:
+                        _a.sent();
+                        if (this.utxos && this.utxos.length > 0) {
+                            reducer = function (accumulator, currentValue) { return accumulator + currentValue; };
+                            sumBalance = this.utxos.map(function (e) { return e.witnessUtxo.value; }).reduce(reducer);
+                            return [2 /*return*/, sumBalance];
+                        }
+                        else {
+                            return [2 /*return*/, 0];
+                        }
+                }
+            });
+        }); };
         this.getBalanceForAddress = function (address) { return __awaiter(_this, void 0, void 0, function () {
             var addressInfo;
             return __generator(this, function (_a) {
@@ -37085,16 +37093,23 @@ var Client = /** @class */ (function () {
             });
         }); };
         // Given a desired output, return change
-        this.getChange = function (valueOut) {
-            var balance = _this.getBalance();
-            var change = 0;
-            if (balance > 0) {
-                if (balance - valueOut > dustThreshold) {
-                    change = balance - valueOut;
+        this.getChange = function (valueOut) { return __awaiter(_this, void 0, void 0, function () {
+            var balance, change;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getBalance()];
+                    case 1:
+                        balance = _a.sent();
+                        change = 0;
+                        if (balance > 0) {
+                            if (balance - valueOut > dustThreshold) {
+                                change = balance - valueOut;
+                            }
+                        }
+                        return [2 /*return*/, change];
                 }
-            }
-            return change;
-        };
+            });
+        }); };
         this.getTransactions = function (address) { return __awaiter(_this, void 0, void 0, function () {
             var transactions, error_2;
             return __generator(this, function (_a) {
@@ -37168,13 +37183,15 @@ var Client = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
+                    case 0: return [4 /*yield*/, this.scanUTXOs()];
+                    case 1:
+                        _a.sent();
                         if (this.utxos.length === 0) {
                             throw new Error('No utxos to send');
                         }
                         calcdFees = {};
                         return [4 /*yield*/, getFeeEstimates(this.electrsAPI)];
-                    case 1:
+                    case 2:
                         FeeRateEstimates = _a.sent();
                         nextBlockFeeRate = FeeRateEstimates['1'] || 20;
                         feesOptions = {
@@ -37206,14 +37223,15 @@ var Client = /** @class */ (function () {
             var balance, network, btcKeys, OP_RETURN, feeRateWhole, fee, psbt, change, txHex;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
+                    case 0: return [4 /*yield*/, this.getBalance()];
+                    case 1:
+                        balance = _a.sent();
                         if (this.utxos.length === 0) {
                             throw new Error('No utxos to send');
                         }
                         if (!this.validateAddress(addressVault)) {
                             throw new Error('Invalid address');
                         }
-                        balance = this.getBalance();
                         network = this.getNetwork(this.net);
                         btcKeys = this.getBtcKeys(this.net, this.phrase);
                         OP_RETURN = compileMemo(memo);
@@ -37234,7 +37252,9 @@ var Client = /** @class */ (function () {
                         });
                         // Outputs
                         psbt.addOutput({ address: addressVault, value: valueOut }); // Add output {address, value}
-                        change = this.getChange(valueOut + fee);
+                        return [4 /*yield*/, this.getChange(valueOut + fee)];
+                    case 2:
+                        change = _a.sent();
                         if (change > 0) {
                             psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
                         }
@@ -37244,7 +37264,7 @@ var Client = /** @class */ (function () {
                         txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
                         ;
                         return [4 /*yield*/, broadcastTx(this.electrsAPI, txHex)]; // Broadcast TX and get txid
-                    case 1: // TX extracted and formatted to hex
+                    case 3: // TX extracted and formatted to hex
                     return [2 /*return*/, _a.sent()]; // Broadcast TX and get txid
                 }
             });
@@ -37254,14 +37274,15 @@ var Client = /** @class */ (function () {
             var balance, network, btcKeys, feeRateWhole, fee, psbt, change, txHex;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
+                    case 0: return [4 /*yield*/, this.getBalance()];
+                    case 1:
+                        balance = _a.sent();
                         if (this.utxos.length === 0) {
                             throw new Error('No utxos to send');
                         }
                         if (!this.validateAddress(addressTo)) {
                             throw new Error('Invalid address');
                         }
-                        balance = this.getBalance();
                         network = this.getNetwork(this.net);
                         btcKeys = this.getBtcKeys(this.net, this.phrase);
                         feeRateWhole = Number(feeRate.toFixed(0));
@@ -37279,7 +37300,9 @@ var Client = /** @class */ (function () {
                             });
                         });
                         psbt.addOutput({ address: addressTo, value: valueOut }); // Add output {address, value}
-                        change = this.getChange(valueOut + fee);
+                        return [4 /*yield*/, this.getChange(valueOut + fee)];
+                    case 2:
+                        change = _a.sent();
                         if (change > 0) {
                             psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
                         }
@@ -37288,7 +37311,7 @@ var Client = /** @class */ (function () {
                         txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
                         ;
                         return [4 /*yield*/, broadcastTx(this.electrsAPI, txHex)]; // Broadcast TX and get txid
-                    case 1: // TX extracted and formatted to hex
+                    case 3: // TX extracted and formatted to hex
                     return [2 /*return*/, _a.sent()]; // Broadcast TX and get txid
                 }
             });
