@@ -44,7 +44,7 @@ interface BitcoinClient {
 
   scanUTXOs(): Promise<void>
 
-  getBalance(): number
+  getBalance(): Promise<number>
 
   getBalanceForAddress(address?: string): Promise<number>
 
@@ -190,7 +190,8 @@ class Client implements BitcoinClient {
   }
 
   // Returns balance of all UTXOs
-  getBalance = (): number => {
+  getBalance = async (): Promise<number> => {
+    await this.scanUTXOs()
     if (this.utxos && this.utxos.length > 0) {
       const reducer = (accumulator: number, currentValue: number) => accumulator + currentValue
       const sumBalance = this.utxos.map((e) => e.witnessUtxo.value).reduce(reducer)
@@ -209,8 +210,8 @@ class Client implements BitcoinClient {
   }
 
   // Given a desired output, return change
-  private getChange = (valueOut: number): number => {
-    const balance = this.getBalance()
+  private getChange = async (valueOut: number): Promise<number> => {
+    const balance = await this.getBalance()
     let change = 0
     if (balance > 0) {
       if (balance - valueOut > Utils.dustThreshold) {
@@ -281,6 +282,7 @@ class Client implements BitcoinClient {
   // = getting a tx into one of the next 3 blocks would require a feerate >= 87.882 sat/byte,
   // for a total of 4231 sats in fees
   calcFees = async (memo?: string): Promise<FeeOptions> => {
+    await this.scanUTXOs()
     if (this.utxos.length === 0) {
       throw new Error('No utxos to send')
     }
@@ -311,13 +313,13 @@ class Client implements BitcoinClient {
 
   // Generates a valid transaction hex to broadcast
   vaultTx = async (addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string> => {
+    const balance = await this.getBalance()
     if (this.utxos.length === 0) {
       throw new Error('No utxos to send')
     }
     if (!this.validateAddress(addressVault)) {
       throw new Error('Invalid address')
     }
-    const balance = this.getBalance()
     const network = this.getNetwork(this.net)
     const btcKeys = this.getBtcKeys(this.net, this.phrase)
     const OP_RETURN = Utils.compileMemo(memo)
@@ -337,7 +339,7 @@ class Client implements BitcoinClient {
     )
     // Outputs
     psbt.addOutput({ address: addressVault, value: valueOut }) // Add output {address, value}
-    const change = this.getChange(valueOut + fee)
+    const change = await this.getChange(valueOut + fee)
     if (change > 0) {
       psbt.addOutput({ address: this.getAddress(), value: change }) // Add change
     }
@@ -350,13 +352,13 @@ class Client implements BitcoinClient {
 
   // Generates a valid transaction hex to broadcast
   normalTx = async (addressTo: string, valueOut: number, feeRate: number): Promise<string> => {
+    const balance = await this.getBalance()
     if (this.utxos.length === 0) {
       throw new Error('No utxos to send')
     }
     if (!this.validateAddress(addressTo)) {
       throw new Error('Invalid address')
     }
-    const balance = this.getBalance()
     const network = this.getNetwork(this.net)
     const btcKeys = this.getBtcKeys(this.net, this.phrase)
     const feeRateWhole = Number(feeRate.toFixed(0))
@@ -373,7 +375,7 @@ class Client implements BitcoinClient {
       }),
     )
     psbt.addOutput({ address: addressTo, value: valueOut }) // Add output {address, value}
-    const change = this.getChange(valueOut + fee)
+    const change = await this.getChange(valueOut + fee)
     if (change > 0) {
       psbt.addOutput({ address: this.getAddress(), value: change }) // Add change
     }
