@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
-import { Provider, TransactionResponse } from "@ethersproject/abstract-provider";
-import { EtherscanProvider } from "@ethersproject/providers";
-import { Network, Address, Phrase } from './types';
+import { Provider, TransactionResponse } from '@ethersproject/abstract-provider';
+import { EtherscanProvider } from '@ethersproject/providers';
+import { Network, Address, Phrase, NormalTxOpts, Erc20TxOpts, EstimateGasERC20Opts } from './types';
 /**
  * Interface for custom Ethereum client
  */
@@ -11,9 +11,13 @@ export interface EthereumClient {
     getAddress(): string;
     getBalance(address: Address): Promise<ethers.BigNumberish>;
     getBlockNumber(): Promise<number>;
+    getTransactionCount(blocktag: string | number): Promise<number>;
     getTransactions(address?: Address): Promise<Array<TransactionResponse>>;
     vaultTx(asset: string, amount: ethers.BigNumberish, memo: string): Promise<TransactionResponse>;
-    normalTx(addressTo: Address, amount: ethers.BigNumberish, asset: string): Promise<TransactionResponse>;
+    estimateNormalTx(params: NormalTxOpts): Promise<ethers.BigNumberish>;
+    normalTx(opts: NormalTxOpts): Promise<TransactionResponse>;
+    estimateGasERC20Tx(params: EstimateGasERC20Opts): Promise<ethers.BigNumberish>;
+    erc20Tx(opts: Erc20TxOpts): Promise<TransactionResponse>;
 }
 /**
  * Custom Ethereum client
@@ -89,6 +93,17 @@ export default class Client implements EthereumClient {
      */
     getBlockNumber(): Promise<number>;
     /**
+     * Returns a Promise that resovles to the number of transactions this account has ever sent (also called the nonce) at the blockTag.
+     * @param blocktag A block tag is used to uniquely identify a block’s position in the blockchain:
+     * a Number or hex string:
+     * Each block has a block number (eg. 42 or "0x2a).
+     * “latest”:
+     *  The most recently mined block.
+     * “pending”:
+     *  The block that is currently being mined.
+     */
+    getTransactionCount(blocktag?: string | number, address?: Address): Promise<number>;
+    /**
      * Gets the transaction history of an address.
      */
     getTransactions(address?: Address): Promise<Array<TransactionResponse>>;
@@ -97,9 +112,22 @@ export default class Client implements EthereumClient {
      */
     vaultTx(asset: Address, amount: ethers.BigNumberish, memo: string): Promise<TransactionResponse>;
     /**
-     * Sends a transaction to the vault
-     * @todo add from?: string, nonce: BigNumberish, gasLimit: BigNumberish, gasPrice: BigNumberish
+     * Returns the estimate gas for a normal transaction
+     * @param params NormalTxOpts  transaction options
      */
-    normalTx(addressTo: Address, amount: ethers.BigNumberish): Promise<TransactionResponse>;
+    estimateNormalTx(params: NormalTxOpts): Promise<ethers.BigNumberish>;
+    /**
+     * Sends a transaction in ether
+     */
+    normalTx(params: NormalTxOpts): Promise<TransactionResponse>;
+    /**
+     * Returns a promise with the gas estimate to the function call `transfer` of a contract
+     * that follows the ERC20 interfaces
+     **/
+    estimateGasERC20Tx(params: EstimateGasERC20Opts): Promise<ethers.BigNumberish>;
+    /**
+     * Returns a promise with the `TransactionResponse` of the erc20 transfer
+     */
+    erc20Tx(params: Erc20TxOpts): Promise<TransactionResponse>;
 }
 export { Client };

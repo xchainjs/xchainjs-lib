@@ -1,12 +1,13 @@
 import { generateMnemonic, validateMnemonic } from 'bip39'
 import { ethers } from 'ethers'
-import { Provider, TransactionResponse } from "@ethersproject/abstract-provider";
-import { EtherscanProvider, getDefaultProvider } from "@ethersproject/providers";
+import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
+import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
+
 import vaultABI from '../data/vault.json'
 import erc20ABI from '../data/erc20.json'
-import { getAddress, formatEther } from 'ethers/lib/utils';
-import { toUtf8String } from "@ethersproject/strings";
-import { Network, Address, Phrase } from './types';
+import { getAddress, formatEther } from 'ethers/lib/utils'
+import { toUtf8String } from '@ethersproject/strings'
+import { Network, Address, Phrase, NormalTxOpts, Erc20TxOpts, EstimateGasERC20Opts } from './types'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
 
@@ -19,9 +20,13 @@ export interface EthereumClient {
   getAddress(): string
   getBalance(address: Address): Promise<ethers.BigNumberish>
   getBlockNumber(): Promise<number>
+  getTransactionCount(blocktag: string | number): Promise<number>
   getTransactions(address?: Address): Promise<Array<TransactionResponse>>
   vaultTx(asset: string, amount: ethers.BigNumberish, memo: string): Promise<TransactionResponse>
-  normalTx(addressTo: Address, amount: ethers.BigNumberish, asset: string): Promise<TransactionResponse>
+  estimateNormalTx(params: NormalTxOpts): Promise<ethers.BigNumberish>
+  normalTx(opts: NormalTxOpts): Promise<TransactionResponse>
+  estimateGasERC20Tx(params: EstimateGasERC20Opts): Promise<ethers.BigNumberish>
+  erc20Tx(opts: Erc20TxOpts): Promise<TransactionResponse>
 }
 
 /**
@@ -184,7 +189,7 @@ export default class Client implements EthereumClient {
    */
   async getBalance(address?: Address): Promise<ethers.BigNumberish> {
     if (address && !Client.validateAddress(address)) {
-      throw new Error('Invalid Address')
+      return Promise.reject('Invalid Address')
     } else {
       const etherString = await this.wallet.provider.getBalance(address || this._address)
       this._balance = formatEther(etherString)
@@ -197,23 +202,36 @@ export default class Client implements EthereumClient {
    */
   async getERC20Balance(asset: Address, address?: Address): Promise<ethers.BigNumberish> {
     if (address && !Client.validateAddress(address)) {
-      throw new Error('Invalid Address')
+      return Promise.reject('Invalid Address')
     }
     if (!Client.validateAddress(asset)) {
-      throw new Error('Invalid Asset')
+      return Promise.reject('Invalid Asset')
     }
     const contract = new ethers.Contract(asset, erc20ABI, this.wallet)
     const erc20 = contract.connect(this.wallet)
-    const etherString = await erc20.functions.balanceOf(address || this._address)
-    this._balance = formatEther(etherString)
-    return this._balance
+    const erc20Balance = await erc20.functions.balanceOf(address || this._address)
+    return erc20Balance
   }
 
   /**
    * Gets the current block of the network
    */
   async getBlockNumber(): Promise<number> {
-    return await this.wallet.provider.getBlockNumber()
+    return this.wallet.provider.getBlockNumber()
+  }
+
+  /**
+   * Returns a Promise that resovles to the number of transactions this account has ever sent (also called the nonce) at the blockTag.
+   * @param blocktag A block tag is used to uniquely identify a block’s position in the blockchain:
+   * a Number or hex string:
+   * Each block has a block number (eg. 42 or "0x2a).
+   * “latest”:
+   *  The most recently mined block.
+   * “pending”:
+   *  The block that is currently being mined.
+   */
+  async getTransactionCount(blocktag: string | number = 'latest', address?: Address): Promise<number> {
+    return this.provider.getTransactionCount(address || this.getAddress(), blocktag)
   }
 
   /**
@@ -221,9 +239,9 @@ export default class Client implements EthereumClient {
    */
   async getTransactions(address: Address = this._address): Promise<Array<TransactionResponse>> {
     if (address && !Client.validateAddress(address)) {
-      throw new Error('Invalid Address')
+      return Promise.reject('Invalid Address')
     } else {
-      const transactions = await this._etherscan.getHistory(address)
+      const transactions = this._etherscan.getHistory(address)
       return transactions
     }
   }
@@ -250,13 +268,57 @@ export default class Client implements EthereumClient {
   }
 
   /**
-   * Sends a transaction to the vault
-   * @todo add from?: string, nonce: BigNumberish, gasLimit: BigNumberish, gasPrice: BigNumberish
+   * Returns the estimate gas for a normal transaction
+   * @param params NormalTxOpts  transaction options
    */
-  async normalTx(addressTo: Address, amount: ethers.BigNumberish): Promise<TransactionResponse> {
-    const transactionRequest = { to: addressTo, value: amount }
-    const transactionResponse = await this.wallet.sendTransaction(transactionRequest)
+  async estimateNormalTx(params: NormalTxOpts): Promise<ethers.BigNumberish> {
+    const { addressTo, amount, overrides } = params
+    const transactionRequest = Object.assign({ to: addressTo, value: amount }, overrides || {})
+    return this.wallet.provider.estimateGas(transactionRequest)
+  }
+
+  /**
+   * Sends a transaction in ether
+   */
+  async normalTx(params: NormalTxOpts): Promise<TransactionResponse> {
+    const { addressTo, amount, overrides } = params
+    const transactionRequest = Object.assign({ to: addressTo, value: amount }, overrides || {})
+    const transactionResponse = this.wallet.sendTransaction(transactionRequest)
     return transactionResponse
+  }
+
+  /**
+   * Returns a promise with the gas estimate to the function call `transfer` of a contract
+   * that follows the ERC20 interfaces
+   **/
+  async estimateGasERC20Tx(params: EstimateGasERC20Opts): Promise<ethers.BigNumberish> {
+    const { erc20ContractAddress, addressTo, amount } = params
+    if (addressTo && !Client.validateAddress(addressTo)) {
+      return Promise.reject('Invalid Address')
+    }
+    if (!Client.validateAddress(erc20ContractAddress)) {
+      return Promise.reject('Invalid ERC20 Contract Address')
+    }
+    const contract = new ethers.Contract(erc20ContractAddress, erc20ABI, this.wallet)
+    const erc20 = contract.connect(this.wallet)
+    return erc20.estimate.transfer(addressTo, amount)
+  }
+
+  /**
+   * Returns a promise with the `TransactionResponse` of the erc20 transfer
+   */
+  async erc20Tx(params: Erc20TxOpts): Promise<TransactionResponse> {
+    const { erc20ContractAddress, addressTo, amount, overrides } = params
+    if (addressTo && !Client.validateAddress(addressTo)) {
+      return Promise.reject('Invalid Address')
+    }
+    if (!Client.validateAddress(erc20ContractAddress)) {
+      return Promise.reject('Invalid ERC20 Contract Address')
+    }
+    const contract = new ethers.Contract(erc20ContractAddress, erc20ABI, this.wallet)
+    const erc20 = contract.connect(this.wallet)
+    const transactionOverrides = Object.assign({}, overrides || {})
+    return erc20.transfer(addressTo, amount, transactionOverrides)
   }
 }
 

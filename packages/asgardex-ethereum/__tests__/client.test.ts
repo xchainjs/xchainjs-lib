@@ -177,6 +177,19 @@ describe('Transactions', () => {
     expect(txResult).toEqual([expect.objectContaining(txResponse)])
   })
 
+  it('gets transaction count', async () => {
+    const ethClient = new Client(Network.TEST, phrase)
+    ethClient.init()
+
+    const mockTxCount = jest.spyOn(ethClient.provider, 'getTransactionCount')
+    mockTxCount.mockImplementation(async (_): Promise<number> => Promise.resolve(1))
+
+    const count = await ethClient.getTransactionCount()
+
+    expect(mockTxCount).toHaveBeenCalledWith(ethClient.getAddress(), 'latest')
+    expect(count).toEqual(1)
+  })
+
   it('checks vault and vaultTx', async () => {
     const ethClient = new Client(Network.MAIN, phrase)
     ethClient.init()
@@ -201,8 +214,35 @@ describe('Transactions', () => {
       },
     )
 
-    await ethClient.normalTx(ethClient.getAddress(), parseEther('1'))
+    await ethClient.normalTx({ addressTo: ethClient.getAddress(), amount: parseEther('1') })
     expect(mockTx).toHaveBeenCalledWith({
+      to: '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E',
+      value: ethers.BigNumber.from('0x0de0b6b3a7640000'),
+    })
+  })
+
+  it('sends a normalTx with special parameters', async () => {
+    const ethClient = new Client(Network.MAIN, phrase)
+    ethClient.init()
+
+    const mockTx = jest.spyOn(ethClient.wallet, 'sendTransaction')
+    mockTx.mockImplementation(
+      async (_): Promise<TransactionResponse> => {
+        return Promise.resolve(txResponse)
+      },
+    )
+
+    await ethClient.normalTx({
+      addressTo: ethClient.getAddress(),
+      amount: parseEther('1'),
+      overrides: {
+        nonce: 123,
+        data: '0xdeadbeef',
+      },
+    })
+    expect(mockTx).toHaveBeenCalledWith({
+      data: '0xdeadbeef',
+      nonce: 123,
       to: '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E',
       value: ethers.BigNumber.from('0x0de0b6b3a7640000'),
     })
@@ -240,6 +280,62 @@ describe('Balances', () => {
   it('throws error on bad address', async () => {
     const ethClient = new Client(Network.TEST, phrase)
     ethClient.init()
-    await expect(ethClient.getBalance('0xbad')).rejects.toThrowError()
+    ethClient.getBalance('0xbad').catch((e) => expect(e).toMatch('Invalid Address'))
+  })
+})
+
+describe('ERC20', () => {
+  it('gets erc 20 balance for a contract without addr', async () => {
+    const ethClient = new Client(Network.TEST, phrase)
+    ethClient.init()
+
+    const mockerc20Bal = jest.spyOn(ethClient, 'getERC20Balance')
+    mockerc20Bal.mockImplementation(async (_): Promise<ethers.BigNumberish> => Promise.resolve(ethers.BigNumber.from(1)))
+
+    const erc20Bal = await ethClient.getERC20Balance('0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8')
+    expect(erc20Bal).toEqual(ethers.BigNumber.from(1))
+  })
+
+  it('gets gas estimate for a erc20 transfer', async () => {
+    const ethClient = new Client(Network.TEST, phrase)
+    ethClient.init()
+
+    const mockerc20 = jest.spyOn(ethClient, 'estimateGasERC20Tx')
+    mockerc20.mockImplementation(async (_): Promise<ethers.BigNumberish> => Promise.resolve(ethers.BigNumber.from(100000)))
+
+    const gasEstimate = await ethClient.estimateGasERC20Tx({
+      erc20ContractAddress: '0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8',
+      addressTo: '0x2fe25ca708fc485cf356b2f27399247d91c6edbd',
+      amount: 1,
+    })
+
+    expect(gasEstimate).toEqual(ethers.BigNumber.from(100000))
+  })
+
+  it('sends erc20 with params', async () => {
+    const ethClient = new Client(Network.TEST, phrase)
+    ethClient.init()
+
+    const mockerc20 = jest.spyOn(ethClient, 'erc20Tx')
+    mockerc20.mockImplementation(async (_): Promise<TransactionResponse> => Promise.resolve(txResponse))
+
+    const txR = await ethClient.erc20Tx({
+      erc20ContractAddress: '0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8',
+      addressTo: '0x2fe25ca708fc485cf356b2f27399247d91c6edbd',
+      amount: 1,
+      overrides: {
+        gasLimit: 100000,
+      },
+    })
+
+    expect(txR).toEqual(txResponse)
+    expect(mockerc20).toHaveBeenCalledWith({
+      erc20ContractAddress: '0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8',
+      addressTo: '0x2fe25ca708fc485cf356b2f27399247d91c6edbd',
+      amount: 1,
+      overrides: {
+        gasLimit: 100000,
+      },
+    })
   })
 })

@@ -35049,7 +35049,7 @@ var Client = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!(address && !Client.validateAddress(address))) return [3 /*break*/, 1];
-                        throw new Error('Invalid Address');
+                        return [2 /*return*/, Promise.reject('Invalid Address')];
                     case 1: return [4 /*yield*/, this.wallet.provider.getBalance(address || this._address)];
                     case 2:
                         etherString = _a.sent();
@@ -35064,23 +35064,22 @@ var Client = /** @class */ (function () {
      */
     Client.prototype.getERC20Balance = function (asset, address) {
         return __awaiter(this, void 0, void 0, function () {
-            var contract, erc20, etherString;
+            var contract, erc20, erc20Balance;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (address && !Client.validateAddress(address)) {
-                            throw new Error('Invalid Address');
+                            return [2 /*return*/, Promise.reject('Invalid Address')];
                         }
                         if (!Client.validateAddress(asset)) {
-                            throw new Error('Invalid Asset');
+                            return [2 /*return*/, Promise.reject('Invalid Asset')];
                         }
                         contract = new ethers.Contract(asset, erc20ABI, this.wallet);
                         erc20 = contract.connect(this.wallet);
                         return [4 /*yield*/, erc20.functions.balanceOf(address || this._address)];
                     case 1:
-                        etherString = _a.sent();
-                        this._balance = formatEther(etherString);
-                        return [2 /*return*/, this._balance];
+                        erc20Balance = _a.sent();
+                        return [2 /*return*/, erc20Balance];
                 }
             });
         });
@@ -35091,10 +35090,25 @@ var Client = /** @class */ (function () {
     Client.prototype.getBlockNumber = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.wallet.provider.getBlockNumber()];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
+                return [2 /*return*/, this.wallet.provider.getBlockNumber()];
+            });
+        });
+    };
+    /**
+     * Returns a Promise that resovles to the number of transactions this account has ever sent (also called the nonce) at the blockTag.
+     * @param blocktag A block tag is used to uniquely identify a block’s position in the blockchain:
+     * a Number or hex string:
+     * Each block has a block number (eg. 42 or "0x2a).
+     * “latest”:
+     *  The most recently mined block.
+     * “pending”:
+     *  The block that is currently being mined.
+     */
+    Client.prototype.getTransactionCount = function (blocktag, address) {
+        if (blocktag === void 0) { blocktag = 'latest'; }
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.provider.getTransactionCount(address || this.getAddress(), blocktag)];
             });
         });
     };
@@ -35106,14 +35120,12 @@ var Client = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var transactions;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!(address && !Client.validateAddress(address))) return [3 /*break*/, 1];
-                        throw new Error('Invalid Address');
-                    case 1: return [4 /*yield*/, this._etherscan.getHistory(address)];
-                    case 2:
-                        transactions = _a.sent();
-                        return [2 /*return*/, transactions];
+                if (address && !Client.validateAddress(address)) {
+                    return [2 /*return*/, Promise.reject('Invalid Address')];
+                }
+                else {
+                    transactions = this._etherscan.getHistory(address);
+                    return [2 /*return*/, transactions];
                 }
             });
         });
@@ -35157,21 +35169,72 @@ var Client = /** @class */ (function () {
         });
     };
     /**
-     * Sends a transaction to the vault
-     * @todo add from?: string, nonce: BigNumberish, gasLimit: BigNumberish, gasPrice: BigNumberish
+     * Returns the estimate gas for a normal transaction
+     * @param params NormalTxOpts  transaction options
      */
-    Client.prototype.normalTx = function (addressTo, amount) {
+    Client.prototype.estimateNormalTx = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var transactionRequest, transactionResponse;
+            var addressTo, amount, overrides, transactionRequest;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        transactionRequest = { to: addressTo, value: amount };
-                        return [4 /*yield*/, this.wallet.sendTransaction(transactionRequest)];
-                    case 1:
-                        transactionResponse = _a.sent();
-                        return [2 /*return*/, transactionResponse];
+                addressTo = params.addressTo, amount = params.amount, overrides = params.overrides;
+                transactionRequest = Object.assign({ to: addressTo, value: amount }, overrides || {});
+                return [2 /*return*/, this.wallet.provider.estimateGas(transactionRequest)];
+            });
+        });
+    };
+    /**
+     * Sends a transaction in ether
+     */
+    Client.prototype.normalTx = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var addressTo, amount, overrides, transactionRequest, transactionResponse;
+            return __generator(this, function (_a) {
+                addressTo = params.addressTo, amount = params.amount, overrides = params.overrides;
+                transactionRequest = Object.assign({ to: addressTo, value: amount }, overrides || {});
+                transactionResponse = this.wallet.sendTransaction(transactionRequest);
+                return [2 /*return*/, transactionResponse];
+            });
+        });
+    };
+    /**
+     * Returns a promise with the gas estimate to the function call `transfer` of a contract
+     * that follows the ERC20 interfaces
+     **/
+    Client.prototype.estimateGasERC20Tx = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var erc20ContractAddress, addressTo, amount, contract, erc20;
+            return __generator(this, function (_a) {
+                erc20ContractAddress = params.erc20ContractAddress, addressTo = params.addressTo, amount = params.amount;
+                if (addressTo && !Client.validateAddress(addressTo)) {
+                    return [2 /*return*/, Promise.reject('Invalid Address')];
                 }
+                if (!Client.validateAddress(erc20ContractAddress)) {
+                    return [2 /*return*/, Promise.reject('Invalid ERC20 Contract Address')];
+                }
+                contract = new ethers.Contract(erc20ContractAddress, erc20ABI, this.wallet);
+                erc20 = contract.connect(this.wallet);
+                return [2 /*return*/, erc20.estimate.transfer(addressTo, amount)];
+            });
+        });
+    };
+    /**
+     * Returns a promise with the `TransactionResponse` of the erc20 transfer
+     */
+    Client.prototype.erc20Tx = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var erc20ContractAddress, addressTo, amount, overrides, contract, erc20, transactionOverrides;
+            return __generator(this, function (_a) {
+                erc20ContractAddress = params.erc20ContractAddress, addressTo = params.addressTo, amount = params.amount, overrides = params.overrides;
+                if (addressTo && !Client.validateAddress(addressTo)) {
+                    return [2 /*return*/, Promise.reject('Invalid Address')];
+                }
+                if (!Client.validateAddress(erc20ContractAddress)) {
+                    return [2 /*return*/, Promise.reject('Invalid ERC20 Contract Address')];
+                }
+                contract = new ethers.Contract(erc20ContractAddress, erc20ABI, this.wallet);
+                erc20 = contract.connect(this.wallet);
+                transactionOverrides = Object.assign({}, overrides || {});
+                return [2 /*return*/, erc20.transfer(addressTo, amount, transactionOverrides)];
             });
         });
     };
