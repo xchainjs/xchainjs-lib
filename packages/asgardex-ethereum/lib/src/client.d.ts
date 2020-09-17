@@ -21,7 +21,6 @@ export interface EthereumClient {
 }
 /**
  * Custom Ethereum client
- * @todo Error handling
  */
 export default class Client implements EthereumClient {
     private _wallet;
@@ -29,7 +28,6 @@ export default class Client implements EthereumClient {
     private _phrase;
     private _provider;
     private _address;
-    private _balance;
     private _etherscan;
     private _vault;
     constructor(network?: Network, phrase?: Phrase, vault?: string);
@@ -41,7 +39,6 @@ export default class Client implements EthereumClient {
     get vault(): ethers.Contract | null;
     get network(): Network;
     get provider(): Provider;
-    get balance(): ethers.BigNumberish;
     get etherscan(): EtherscanProvider;
     /**
      * changes the wallet eg. when using connect() after init()
@@ -51,10 +48,6 @@ export default class Client implements EthereumClient {
      * changes the provider
      */
     EtherscanProvider(): Provider;
-    /**
-     * Connects to the ethereum network with t
-     */
-    init(): ethers.Wallet;
     /**
      * Set's the current network
      */

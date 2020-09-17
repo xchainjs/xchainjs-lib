@@ -31,7 +31,6 @@ export interface EthereumClient {
 
 /**
  * Custom Ethereum client
- * @todo Error handling
  */
 export default class Client implements EthereumClient {
   private _wallet: ethers.Wallet
@@ -39,7 +38,6 @@ export default class Client implements EthereumClient {
   private _phrase: Phrase
   private _provider: Provider
   private _address: Address
-  private _balance: ethers.BigNumberish
   private _etherscan: EtherscanProvider
   private _vault: ethers.Contract | null = null
 
@@ -52,9 +50,12 @@ export default class Client implements EthereumClient {
       this._provider = getDefaultProvider(network)
       this._wallet = ethers.Wallet.fromMnemonic(this._phrase)
       this._address = this._wallet.address
-      this._balance = 0
       this._etherscan = new EtherscanProvider(this._network) // for tx history
       if (vault) this.setVault(vault)
+      // Connects to the ethereum network with it
+      const provider = getDefaultProvider(this._network)
+      const newWallet = this.wallet.connect(provider)
+      this.changeWallet(newWallet)
     }
   }
 
@@ -81,10 +82,6 @@ export default class Client implements EthereumClient {
     return this._provider
   }
 
-  get balance(): ethers.BigNumberish {
-    return this._balance
-  }
-
   // to enable spying on EtherscanProvider.getHistory()
   get etherscan(): EtherscanProvider {
     return this._etherscan
@@ -104,16 +101,6 @@ export default class Client implements EthereumClient {
     const newWallet = this.wallet.connect(new EtherscanProvider(this._network))
     this.changeWallet(newWallet)
     return (this._provider = this._wallet.provider)
-  }
-
-  /**
-   * Connects to the ethereum network with t
-   */
-  init(): ethers.Wallet {
-    const provider = getDefaultProvider(this._network)
-    const newWallet = this.wallet.connect(provider)
-    this.changeWallet(newWallet)
-    return this._wallet
   }
 
   /**
@@ -190,10 +177,12 @@ export default class Client implements EthereumClient {
   async getBalance(address?: Address): Promise<ethers.BigNumberish> {
     if (address && !Client.validateAddress(address)) {
       return Promise.reject('Invalid Address')
-    } else {
-      const etherString = await this.wallet.provider.getBalance(address || this._address)
-      this._balance = formatEther(etherString)
-      return this._balance
+    }
+
+    try {
+      return await this.wallet.provider.getBalance(address || this._address)
+    } catch (error) {
+      return Promise.reject(error)
     }
   }
 

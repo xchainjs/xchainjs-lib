@@ -1,9 +1,9 @@
 import Client from '../src/client'
 import { Network } from '../src/types'
 import { ethers, Wallet, providers } from 'ethers'
-import { parseEther } from "@ethersproject/units";
-import { TransactionResponse, TransactionReceipt } from "@ethersproject/abstract-provider"
-import { SigningKey } from 'ethers/lib/utils';
+import { formatEther, parseEther } from '@ethersproject/units'
+import { TransactionResponse, TransactionReceipt } from '@ethersproject/abstract-provider'
+import { SigningKey } from 'ethers/lib/utils'
 
 /**
  * Test Data
@@ -17,10 +17,11 @@ const wallet = {
   signingKey: {
     curve: 'secp256k1',
     privateKey: '0x739172c3520ea86ad6238b4f303cc09da6ca7254c76af1a1e8fa3fb00eb5c16f',
-    publicKey: '0x04ef84375983ef666afdf0e430929574510aa56fb5ee0ee8c02a73f2d2c12ff8f7eee6cdaf9ab6d14fdeebc7ff3d7890f5f98376dac0e5d816dca347bc71d2aec8',
+    publicKey:
+      '0x04ef84375983ef666afdf0e430929574510aa56fb5ee0ee8c02a73f2d2c12ff8f7eee6cdaf9ab6d14fdeebc7ff3d7890f5f98376dac0e5d816dca347bc71d2aec8',
     compressedPublicKey: '0x02ef84375983ef666afdf0e430929574510aa56fb5ee0ee8c02a73f2d2c12ff8f7',
-    _isSigningKey: true
-    },
+    _isSigningKey: true,
+  },
 }
 
 const txResponse = {
@@ -66,7 +67,6 @@ describe('Wallets', () => {
   it('should create a wallet from phrase', () => {
     const ethClient = new Client(Network.TEST, phrase)
     expect(ethClient.wallet).toBeInstanceOf(Wallet)
-    expect(ethClient.wallet.provider).toBeNull()
     expect(ethClient.wallet._signingKey()).toMatchObject(wallet.signingKey)
   })
 
@@ -89,7 +89,6 @@ describe('Wallets', () => {
 describe('Connecting', () => {
   it('should connect to testnet', () => {
     const ethClient = new Client()
-    ethClient.init()
 
     expect(ethClient.wallet).toBeInstanceOf(Wallet)
     expect(ethClient.wallet.provider).toBeInstanceOf(providers.FallbackProvider)
@@ -101,7 +100,6 @@ describe('Connecting', () => {
 
   it('should connect to specified network', () => {
     const ethClient = new Client(Network.MAIN, phrase)
-    ethClient.init()
 
     expect(ethClient.wallet).toBeInstanceOf(Wallet)
     expect(ethClient.wallet.provider).toBeInstanceOf(providers.FallbackProvider)
@@ -114,7 +112,6 @@ describe('Connecting', () => {
 
   it('should set network', () => {
     const ethClient = new Client(Network.TEST, phrase)
-    ethClient.init()
     ethClient.setNetwork(Network.TEST)
 
     ethClient.wallet.provider.getNetwork().then((network) => {
@@ -166,7 +163,6 @@ describe('Utils', () => {
 describe('Transactions', () => {
   it('gets tx history', async () => {
     const ethClient = new Client(Network.TEST, phrase)
-    ethClient.init()
 
     const mockHistory = jest.spyOn(ethClient.etherscan, 'getHistory')
     mockHistory.mockImplementation(async (_): Promise<Array<TransactionResponse>> => Promise.resolve([txResponse]))
@@ -179,7 +175,6 @@ describe('Transactions', () => {
 
   it('gets transaction count', async () => {
     const ethClient = new Client(Network.TEST, phrase)
-    ethClient.init()
 
     const mockTxCount = jest.spyOn(ethClient.provider, 'getTransactionCount')
     mockTxCount.mockImplementation(async (_): Promise<number> => Promise.resolve(1))
@@ -192,7 +187,6 @@ describe('Transactions', () => {
 
   it('checks vault and vaultTx', async () => {
     const ethClient = new Client(Network.MAIN, phrase)
-    ethClient.init()
 
     const vaultTx = ethClient.vaultTx(ethClient.getAddress(), parseEther('1'), 'SWAP')
     expect(vaultTx).rejects.toBe('vault has to be set before sending vault tx')
@@ -205,7 +199,6 @@ describe('Transactions', () => {
 
   it('sends a normalTx', async () => {
     const ethClient = new Client(Network.MAIN, phrase)
-    ethClient.init()
 
     const mockTx = jest.spyOn(ethClient.wallet, 'sendTransaction')
     mockTx.mockImplementation(
@@ -223,7 +216,6 @@ describe('Transactions', () => {
 
   it('sends a normalTx with special parameters', async () => {
     const ethClient = new Client(Network.MAIN, phrase)
-    ethClient.init()
 
     const mockTx = jest.spyOn(ethClient.wallet, 'sendTransaction')
     mockTx.mockImplementation(
@@ -252,7 +244,6 @@ describe('Transactions', () => {
 describe('Balances', () => {
   it('gets a balance without address args', async () => {
     const ethClient = new Client(Network.TEST, phrase)
-    ethClient.init()
 
     const mockBalance = jest.spyOn(ethClient.wallet.provider, 'getBalance')
     mockBalance.mockImplementation(async (_): Promise<ethers.BigNumber> => Promise.resolve(parseEther('1.786')))
@@ -260,26 +251,23 @@ describe('Balances', () => {
     const balance = await ethClient.getBalance()
 
     expect(mockBalance).toHaveBeenCalledWith('0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E')
-    expect(ethClient.balance).toEqual('1.786')
-    expect(balance).toEqual('1.786')
+    expect(formatEther(balance)).toEqual('1.786')
   })
 
   it('gets a balance from address', async () => {
     const ethClient = new Client(Network.TEST, phrase)
-    ethClient.init()
 
     const mockBalance = jest.spyOn(ethClient.wallet.provider, 'getBalance')
     mockBalance.mockImplementation(async (_): Promise<ethers.BigNumber> => Promise.resolve(parseEther('0.1')))
 
-    await ethClient.getBalance('0xb1d133e115E32Bee0F163EcD2c60FB462b8cDdC1')
+    const balance = await ethClient.getBalance('0xb1d133e115E32Bee0F163EcD2c60FB462b8cDdC1')
 
     expect(mockBalance).toHaveBeenCalledWith('0xb1d133e115E32Bee0F163EcD2c60FB462b8cDdC1')
-    expect(ethClient.balance).toEqual('0.1')
+    expect(formatEther(balance)).toEqual('0.1')
   })
 
   it('throws error on bad address', async () => {
     const ethClient = new Client(Network.TEST, phrase)
-    ethClient.init()
     ethClient.getBalance('0xbad').catch((e) => expect(e).toMatch('Invalid Address'))
   })
 })
@@ -287,21 +275,20 @@ describe('Balances', () => {
 describe('ERC20', () => {
   it('gets erc 20 balance for a contract without addr', async () => {
     const ethClient = new Client(Network.TEST, phrase)
-    ethClient.init()
 
     const mockerc20Bal = jest.spyOn(ethClient, 'getERC20Balance')
-    mockerc20Bal.mockImplementation(async (_): Promise<ethers.BigNumberish> => Promise.resolve(ethers.BigNumber.from(1)))
+    mockerc20Bal.mockImplementation(async (_): Promise<ethers.BigNumber> => Promise.resolve(parseEther('1')))
 
     const erc20Bal = await ethClient.getERC20Balance('0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8')
-    expect(erc20Bal).toEqual(ethers.BigNumber.from(1))
+    expect(formatEther(erc20Bal)).toEqual('1.0')
   })
 
   it('gets gas estimate for a erc20 transfer', async () => {
     const ethClient = new Client(Network.TEST, phrase)
-    ethClient.init()
-
     const mockerc20 = jest.spyOn(ethClient, 'estimateGasERC20Tx')
-    mockerc20.mockImplementation(async (_): Promise<ethers.BigNumberish> => Promise.resolve(ethers.BigNumber.from(100000)))
+    mockerc20.mockImplementation(
+      async (_): Promise<ethers.BigNumberish> => Promise.resolve(ethers.BigNumber.from(100000)),
+    )
 
     const gasEstimate = await ethClient.estimateGasERC20Tx({
       erc20ContractAddress: '0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8',
@@ -314,7 +301,6 @@ describe('ERC20', () => {
 
   it('sends erc20 with params', async () => {
     const ethClient = new Client(Network.TEST, phrase)
-    ethClient.init()
 
     const mockerc20 = jest.spyOn(ethClient, 'erc20Tx')
     mockerc20.mockImplementation(async (_): Promise<TransactionResponse> => Promise.resolve(txResponse))

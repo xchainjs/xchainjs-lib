@@ -23,6 +23,7 @@ export default {
     },
   ],
   plugins: [
+    // ignore(["@ethersproject/providers", "@ethersproject/abstract-provider", "@ethersproject/strings"]),
     external(),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
@@ -33,12 +34,31 @@ export default {
     commonjs({
       // see: https://github.com/ethers-io/ethers.js/issues/839#issuecomment-630320675
       namedExports: {
-        "node_modules/bn.js/lib/bn.js" : ["BN"],
-        "node_modules/elliptic/lib/elliptic.js": ["ec"],
+        'node_modules/bn.js/lib/bn.js': ['BN'],
+        'node_modules/elliptic/lib/elliptic.js': ['ec'],
         'node_modules/ethers/dist/ethers.esm.js': ['ethers'],
-      }
+      },
     }),
     json(),
   ],
-  external: ['buffer', 'http', 'https', 'url', 'stream', 'string_decoder'],
+  external: [
+    'buffer',
+    'http',
+    'https',
+    'url',
+    'stream',
+    'string_decoder',
+    // Avoid to bundle following libraries which are already part of `ethers`.
+    // Also it avoids get Rollup warnings based on these libraries (something like this):
+    // ```
+    // (!) `this` has been rewritten to `undefined`
+    // https://rollupjs.org/guide/en/#error-this-is-undefined
+    // node_modules/@ethersproject/providers/lib.esm/base-provider.js
+    // ...
+    // ...and 8 other files
+    // ```
+    '@ethersproject/providers',
+    '@ethersproject/abstract-provider',
+    '@ethersproject/strings',
+  ],
 }
