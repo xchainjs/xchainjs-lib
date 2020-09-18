@@ -50,7 +50,7 @@ interface BitcoinClient {
 
   getTransactions(address: string): Promise<Txs>
 
-  calcFees(addressTo: string, memo?: string): Promise<object>
+  calcFees(addressTo: string, memo?: string): Promise<FeeOptions>
 
   vaultTx(addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string>
 
@@ -79,7 +79,7 @@ class Client implements BitcoinClient {
   }
 
   // Sets this.phrase to be accessed later
-  setPhrase = (phrase?: string) => {
+  setPhrase = (phrase?: string): void => {
     if (phrase) {
       if (BIP39.validateMnemonic(phrase)) {
         this.phrase = phrase

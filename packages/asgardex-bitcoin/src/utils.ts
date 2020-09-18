@@ -22,22 +22,22 @@ export interface UTXO {
   witnessUtxo: Witness
 }
 
-function inputBytes(input: UTXO) {
+function inputBytes(input: UTXO): number {
   return TX_INPUT_BASE + (input.witnessUtxo.script ? input.witnessUtxo.script.length : TX_INPUT_PUBKEYHASH)
 }
 
-export const compileMemo = (memo: string) => {
+export const compileMemo = (memo: string): Buffer => {
   const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
   return Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
 }
 
-export function getVaultFee(inputs: UTXO[], data: Buffer, feeRate: number) {
+export function getVaultFee(inputs: UTXO[], data: Buffer, feeRate: number): number {
   const vaultFee =
     (TX_EMPTY_SIZE +
-    inputs.reduce(function (a, x) {
-      return a + inputBytes(x)
-    }, 0) +
-    inputs.length + // +1 byte for each input signature
+      inputs.reduce(function (a, x) {
+        return a + inputBytes(x)
+      }, 0) +
+      inputs.length + // +1 byte for each input signature
       TX_OUTPUT_BASE +
       TX_OUTPUT_PUBKEYHASH +
       TX_OUTPUT_BASE +
@@ -48,13 +48,13 @@ export function getVaultFee(inputs: UTXO[], data: Buffer, feeRate: number) {
   return vaultFee > 1000 ? vaultFee : 1000
 }
 
-export function getNormalFee(inputs: UTXO[], feeRate: number) {
+export function getNormalFee(inputs: UTXO[], feeRate: number): number {
   const normalFee =
     (TX_EMPTY_SIZE +
-    inputs.reduce(function (a, x) {
-      return a + inputBytes(x)
-    }, 0) +
-    inputs.length + // +1 byte for each input signature
+      inputs.reduce(function (a, x) {
+        return a + inputBytes(x)
+      }, 0) +
+      inputs.length + // +1 byte for each input signature
       TX_OUTPUT_BASE +
       TX_OUTPUT_PUBKEYHASH +
       TX_OUTPUT_BASE +
@@ -63,18 +63,8 @@ export function getNormalFee(inputs: UTXO[], feeRate: number) {
   return normalFee > 1000 ? normalFee : 1000
 }
 
-export function arrayAverage(array: Array<number>) {
+export function arrayAverage(array: Array<number>): number {
   let sum = 0
   array.forEach((value) => (sum += value))
   return sum / array.length
-}
-
-export function filterByKeys(obj: object, filterKeys: Array<string>) {
-  const filtered = {}
-  filterKeys.forEach((key) => {
-    if (obj.hasOwnProperty(key)) {
-      ;(filtered as any)[key] = (obj as any)[key]
-    }
-  })
-  return filtered
 }
