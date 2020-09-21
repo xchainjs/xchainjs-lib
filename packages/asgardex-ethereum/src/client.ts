@@ -290,7 +290,7 @@ export default class Client implements EthereumClient {
     }
     const contract = new ethers.Contract(erc20ContractAddress, erc20ABI, this.wallet)
     const erc20 = contract.connect(this.wallet)
-    return erc20.estimate.transfer(addressTo, amount)
+    return erc20.estimateGas.transfer(addressTo, amount)
   }
 
   /**

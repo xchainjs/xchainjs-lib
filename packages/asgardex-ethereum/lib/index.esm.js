@@ -19468,7 +19468,7 @@ var Client = /** @class */ (function () {
                 }
                 contract = new ethers.Contract(erc20ContractAddress, erc20ABI, this.wallet);
                 erc20 = contract.connect(this.wallet);
-                return [2 /*return*/, erc20.estimate.transfer(addressTo, amount)];
+                return [2 /*return*/, erc20.estimateGas.transfer(addressTo, amount)];
             });
         });
     };
