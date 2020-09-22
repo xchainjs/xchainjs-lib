@@ -92,7 +92,7 @@ describe('BitcoinClient Test', () => {
     btcClient.purgeClient()
     btcClient.setNetwork(net)
     btcClient.setPhrase(phraseOne)
-    const txid = await btcClient.normalTx(addyTwo, 2223, 1)
+    const txid = await btcClient.normalTx({ addressTo: addyTwo, amount: 2223, feeRate: 1 })
     expect(txid).toEqual(expect.any(String))
   })
 
@@ -111,7 +111,7 @@ describe('BitcoinClient Test', () => {
     btcClient.purgeClient()
     btcClient.setNetwork(net)
     btcClient.setPhrase(phraseTwo)
-    const txid = await btcClient.vaultTx(addyOne, 2223, MEMO, 1)
+    const txid = await btcClient.vaultTx({ addressTo: addyOne, amount: 2223, memo: MEMO, feeRate: 1 })
     expect(txid).toEqual(expect.any(String))
   })
 
@@ -125,9 +125,9 @@ describe('BitcoinClient Test', () => {
     btcClient.purgeClient()
     btcClient.setNetwork(net)
     btcClient.setPhrase(phraseOne)
-    expect(async () => await btcClient.normalTx(addyTwo, 9999999999, 1)).rejects.toThrow(
-      'Balance insufficient for transaction',
-    )
+    expect(
+      async () => await btcClient.normalTx({ addressTo: addyTwo, amount: 9999999999, feeRate: 1 }),
+    ).rejects.toThrow('Balance insufficient for transaction')
   })
 
   it('should return estimated fees of a normal tx', async () => {
@@ -164,6 +164,8 @@ describe('BitcoinClient Test', () => {
     const invalidAddress = '23vasdvaxc465sddf23'
     expect(async () => await btcClient.getBalanceForAddress(invalidAddress)).rejects.toThrow('Invalid address')
     expect(async () => await btcClient.getTransactions(invalidAddress)).rejects.toThrow('Invalid address')
-    expect(async () => await btcClient.normalTx(invalidAddress, 99000, 1)).rejects.toThrow('Invalid address')
+    expect(
+      async () => await btcClient.normalTx({ addressTo: invalidAddress, amount: 99000, feeRate: 1 }),
+    ).rejects.toThrow('Invalid address')
   })
 })

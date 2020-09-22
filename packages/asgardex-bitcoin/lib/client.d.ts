@@ -1,7 +1,7 @@
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Utils from './utils';
 import { Txs } from './types/electrs-api-types';
-import { FeeOptions } from './types/client-types';
+import { FeeOptions, NormalTxParams, VaultTxParams } from './types/client-types';
 /**
  * Class variables accessed across functions
  */
@@ -26,9 +26,9 @@ interface BitcoinClient {
     getBalance(): Promise<number>;
     getBalanceForAddress(address?: string): Promise<number>;
     getTransactions(address: string): Promise<Txs>;
-    calcFees(addressTo: string, memo?: string): Promise<object>;
-    vaultTx(addressVault: string, valueOut: number, memo: string, feeRate: number): Promise<string>;
-    normalTx(addressTo: string, valueOut: number, feeRate: number): Promise<string>;
+    calcFees(addressTo: string, memo?: string): Promise<FeeOptions>;
+    vaultTx(params: VaultTxParams): Promise<string>;
+    normalTx(params: NormalTxParams): Promise<string>;
 }
 /**
  * Implements Client declared above
@@ -55,7 +55,7 @@ declare class Client implements BitcoinClient {
     private getChange;
     getTransactions: (address: string) => Promise<Txs>;
     calcFees: (memo?: string | undefined) => Promise<FeeOptions>;
-    vaultTx: (addressVault: string, valueOut: number, memo: string, feeRate: number) => Promise<string>;
-    normalTx: (addressTo: string, valueOut: number, feeRate: number) => Promise<string>;
+    vaultTx: ({ addressTo, amount, feeRate, memo }: VaultTxParams) => Promise<string>;
+    normalTx: ({ addressTo, amount, feeRate }: NormalTxParams) => Promise<string>;
 }
 export { Client, Network };

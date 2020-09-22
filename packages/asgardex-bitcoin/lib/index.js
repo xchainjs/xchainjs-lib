@@ -37334,8 +37334,7 @@ var Client = /** @class */ (function () {
         // = getting a tx into one of the next 3 blocks would require a feerate >= 87.882 sat/byte,
         // for a total of 4231 sats in fees
         this.calcFees = function (memo) { return __awaiter(_this, void 0, void 0, function () {
-            var calcdFees, FeeRateEstimates, nextBlockFeeRate, feesOptions;
-            var _this = this;
+            var feeOption, calcdFees, FeeRateEstimates, nextBlockFeeRate, feesOptions, key, feeRate, feeTotal, OP_RETURN;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.scanUTXOs()];
@@ -37344,7 +37343,8 @@ var Client = /** @class */ (function () {
                         if (this.utxos.length === 0) {
                             throw new Error('No utxos to send');
                         }
-                        calcdFees = {};
+                        feeOption = { feeRate: 0, feeTotal: 0 };
+                        calcdFees = { fast: feeOption, regular: feeOption, slow: feeOption };
                         return [4 /*yield*/, getFeeEstimates(this.electrsAPI)];
                     case 2:
                         FeeRateEstimates = _a.sent();
@@ -37354,123 +37354,129 @@ var Client = /** @class */ (function () {
                             regular: 1,
                             slow: 0.5,
                         };
-                        Object.keys(feesOptions).forEach(function (key) {
-                            var feeRate = nextBlockFeeRate * feesOptions[key];
-                            var feeTotal;
+                        for (key in feesOptions) {
+                            feeRate = nextBlockFeeRate * feesOptions[key];
+                            feeTotal = void 0;
                             if (memo) {
-                                var OP_RETURN = compileMemo(memo);
-                                feeTotal = getVaultFee(_this.utxos, OP_RETURN, feeRate);
+                                OP_RETURN = compileMemo(memo);
+                                feeTotal = getVaultFee(this.utxos, OP_RETURN, feeRate);
                             }
                             else {
-                                feeTotal = getNormalFee(_this.utxos, feeRate);
+                                feeTotal = getNormalFee(this.utxos, feeRate);
                             }
                             calcdFees[key] = {
                                 feeRate: feeRate,
                                 feeTotal: feeTotal,
                             };
-                        });
+                        }
                         return [2 /*return*/, calcdFees];
                 }
             });
         }); };
         // Generates a valid transaction hex to broadcast
-        this.vaultTx = function (addressVault, valueOut, memo, feeRate) { return __awaiter(_this, void 0, void 0, function () {
-            var balance, network, btcKeys, OP_RETURN, feeRateWhole, fee, psbt, change, txHex;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.getBalance()];
-                    case 1:
-                        balance = _a.sent();
-                        if (this.utxos.length === 0) {
-                            throw new Error('No utxos to send');
-                        }
-                        if (!this.validateAddress(addressVault)) {
-                            throw new Error('Invalid address');
-                        }
-                        network = this.getNetwork(this.net);
-                        btcKeys = this.getBtcKeys(this.net, this.phrase);
-                        OP_RETURN = compileMemo(memo);
-                        feeRateWhole = Number(feeRate.toFixed(0));
-                        fee = getVaultFee(this.utxos, OP_RETURN, feeRateWhole);
-                        if (fee + valueOut > balance) {
-                            throw new Error('Balance insufficient for transaction');
-                        }
-                        psbt = new src_9$1({ network: network }) // Network-specific
-                        ;
-                        //Inputs
-                        this.utxos.forEach(function (UTXO) {
-                            return psbt.addInput({
-                                hash: UTXO.hash,
-                                index: UTXO.index,
-                                witnessUtxo: UTXO.witnessUtxo,
+        this.vaultTx = function (_a) {
+            var addressTo = _a.addressTo, amount = _a.amount, feeRate = _a.feeRate, memo = _a.memo;
+            return __awaiter(_this, void 0, void 0, function () {
+                var balance, network, btcKeys, OP_RETURN, feeRateWhole, fee, psbt, change, txHex;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, this.getBalance()];
+                        case 1:
+                            balance = _b.sent();
+                            if (this.utxos.length === 0) {
+                                throw new Error('No utxos to send');
+                            }
+                            if (!this.validateAddress(addressTo)) {
+                                throw new Error('Invalid address');
+                            }
+                            network = this.getNetwork(this.net);
+                            btcKeys = this.getBtcKeys(this.net, this.phrase);
+                            OP_RETURN = compileMemo(memo);
+                            feeRateWhole = Number(feeRate.toFixed(0));
+                            fee = getVaultFee(this.utxos, OP_RETURN, feeRateWhole);
+                            if (fee + amount > balance) {
+                                throw new Error('Balance insufficient for transaction');
+                            }
+                            psbt = new src_9$1({ network: network }) // Network-specific
+                            ;
+                            //Inputs
+                            this.utxos.forEach(function (UTXO) {
+                                return psbt.addInput({
+                                    hash: UTXO.hash,
+                                    index: UTXO.index,
+                                    witnessUtxo: UTXO.witnessUtxo,
+                                });
                             });
-                        });
-                        // Outputs
-                        psbt.addOutput({ address: addressVault, value: valueOut }); // Add output {address, value}
-                        return [4 /*yield*/, this.getChange(valueOut + fee)];
-                    case 2:
-                        change = _a.sent();
-                        if (change > 0) {
-                            psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
-                        }
-                        psbt.addOutput({ script: OP_RETURN, value: 0 }); // Add OP_RETURN {script, value}
-                        psbt.signAllInputs(btcKeys); // Sign all inputs
-                        psbt.finalizeAllInputs(); // Finalise inputs
-                        txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
-                        ;
-                        return [4 /*yield*/, broadcastTx(this.electrsAPI, txHex)]; // Broadcast TX and get txid
-                    case 3: // TX extracted and formatted to hex
-                    return [2 /*return*/, _a.sent()]; // Broadcast TX and get txid
-                }
+                            // Outputs
+                            psbt.addOutput({ address: addressTo, value: amount }); // Add output {address, value}
+                            return [4 /*yield*/, this.getChange(amount + fee)];
+                        case 2:
+                            change = _b.sent();
+                            if (change > 0) {
+                                psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
+                            }
+                            psbt.addOutput({ script: OP_RETURN, value: 0 }); // Add OP_RETURN {script, value}
+                            psbt.signAllInputs(btcKeys); // Sign all inputs
+                            psbt.finalizeAllInputs(); // Finalise inputs
+                            txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+                            ;
+                            return [4 /*yield*/, broadcastTx(this.electrsAPI, txHex)]; // Broadcast TX and get txid
+                        case 3: // TX extracted and formatted to hex
+                        return [2 /*return*/, _b.sent()]; // Broadcast TX and get txid
+                    }
+                });
             });
-        }); };
+        };
         // Generates a valid transaction hex to broadcast
-        this.normalTx = function (addressTo, valueOut, feeRate) { return __awaiter(_this, void 0, void 0, function () {
-            var balance, network, btcKeys, feeRateWhole, fee, psbt, change, txHex;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.getBalance()];
-                    case 1:
-                        balance = _a.sent();
-                        if (this.utxos.length === 0) {
-                            throw new Error('No utxos to send');
-                        }
-                        if (!this.validateAddress(addressTo)) {
-                            throw new Error('Invalid address');
-                        }
-                        network = this.getNetwork(this.net);
-                        btcKeys = this.getBtcKeys(this.net, this.phrase);
-                        feeRateWhole = Number(feeRate.toFixed(0));
-                        fee = getNormalFee(this.utxos, feeRateWhole);
-                        if (fee + valueOut > balance) {
-                            throw new Error('Balance insufficient for transaction');
-                        }
-                        psbt = new src_9$1({ network: network }) // Network-specific
-                        ;
-                        this.utxos.forEach(function (UTXO) {
-                            return psbt.addInput({
-                                hash: UTXO.hash,
-                                index: UTXO.index,
-                                witnessUtxo: UTXO.witnessUtxo,
+        this.normalTx = function (_a) {
+            var addressTo = _a.addressTo, amount = _a.amount, feeRate = _a.feeRate;
+            return __awaiter(_this, void 0, void 0, function () {
+                var balance, network, btcKeys, feeRateWhole, fee, psbt, change, txHex;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, this.getBalance()];
+                        case 1:
+                            balance = _b.sent();
+                            if (this.utxos.length === 0) {
+                                throw new Error('No utxos to send');
+                            }
+                            if (!this.validateAddress(addressTo)) {
+                                throw new Error('Invalid address');
+                            }
+                            network = this.getNetwork(this.net);
+                            btcKeys = this.getBtcKeys(this.net, this.phrase);
+                            feeRateWhole = Number(feeRate.toFixed(0));
+                            fee = getNormalFee(this.utxos, feeRateWhole);
+                            if (fee + amount > balance) {
+                                throw new Error('Balance insufficient for transaction');
+                            }
+                            psbt = new src_9$1({ network: network }) // Network-specific
+                            ;
+                            this.utxos.forEach(function (UTXO) {
+                                return psbt.addInput({
+                                    hash: UTXO.hash,
+                                    index: UTXO.index,
+                                    witnessUtxo: UTXO.witnessUtxo,
+                                });
                             });
-                        });
-                        psbt.addOutput({ address: addressTo, value: valueOut }); // Add output {address, value}
-                        return [4 /*yield*/, this.getChange(valueOut + fee)];
-                    case 2:
-                        change = _a.sent();
-                        if (change > 0) {
-                            psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
-                        }
-                        psbt.signAllInputs(btcKeys); // Sign all inputs
-                        psbt.finalizeAllInputs(); // Finalise inputs
-                        txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
-                        ;
-                        return [4 /*yield*/, broadcastTx(this.electrsAPI, txHex)]; // Broadcast TX and get txid
-                    case 3: // TX extracted and formatted to hex
-                    return [2 /*return*/, _a.sent()]; // Broadcast TX and get txid
-                }
+                            psbt.addOutput({ address: addressTo, value: amount }); // Add output {address, value}
+                            return [4 /*yield*/, this.getChange(amount + fee)];
+                        case 2:
+                            change = _b.sent();
+                            if (change > 0) {
+                                psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
+                            }
+                            psbt.signAllInputs(btcKeys); // Sign all inputs
+                            psbt.finalizeAllInputs(); // Finalise inputs
+                            txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+                            ;
+                            return [4 /*yield*/, broadcastTx(this.electrsAPI, txHex)]; // Broadcast TX and get txid
+                        case 3: // TX extracted and formatted to hex
+                        return [2 /*return*/, _b.sent()]; // Broadcast TX and get txid
+                    }
+                });
             });
-        }); };
+        };
         this.net = _net;
         _phrase && this.setPhrase(_phrase);
         _electrsAPI && this.setBaseUrl(_electrsAPI);
