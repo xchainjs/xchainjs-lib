@@ -19,6 +19,7 @@ interface BitcoinClient {
     purgeClient(): void;
     setNetwork(net: Network): void;
     getNetwork(net: Network): Bitcoin.networks.Network;
+    getExplorerUrl(): string;
     setBaseUrl(endpoint: string): void;
     getAddress(): string;
     validateAddress(address: string): boolean;
@@ -46,6 +47,7 @@ declare class Client implements BitcoinClient {
     setNetwork(_net: Network): void;
     getNetwork(net: Network): Bitcoin.networks.Network;
     setBaseUrl(endpoint: string): void;
+    getExplorerUrl: () => string;
     getAddress: () => string;
     private getBtcKeys;
     validateAddress: (address: string) => boolean;

@@ -37129,6 +37129,9 @@ var Client = /** @class */ (function () {
             _this.phrase = '';
             _this.utxos = [];
         };
+        this.getExplorerUrl = function () {
+            return _this.net === Network.TEST ? 'https://blockstream.info/testnet/' : 'https://blockstream.info/';
+        };
         // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
         // The address is then decoded into type P2WPKH and returned.
         this.getAddress = function () {

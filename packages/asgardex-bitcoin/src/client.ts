@@ -36,6 +36,8 @@ interface BitcoinClient {
 
   getNetwork(net: Network): Bitcoin.networks.Network
 
+  getExplorerUrl(): string
+
   setBaseUrl(endpoint: string): void
 
   getAddress(): string
@@ -118,6 +120,10 @@ class Client implements BitcoinClient {
 
   setBaseUrl(endpoint: string): void {
     this.electrsAPI = endpoint
+  }
+
+  getExplorerUrl = (): string => {
+    return this.net === Network.TEST ? 'https://blockstream.info/testnet/' : 'https://blockstream.info/'
   }
 
   // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
