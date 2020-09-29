@@ -1,6 +1,6 @@
 {
   "name": "@asgardex-clients/core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "main": "dist/index",
   "types": "dist/index",
@@ -17,5 +17,6 @@
   "devDependencies": {
     "rimraf": "~3.0.2",
     "typescript": "~4.0.0"
-  }
+  },
+  "gitHead": "7d72ba7156b8d5703ef96367365e6c2886a1801b"
 }
