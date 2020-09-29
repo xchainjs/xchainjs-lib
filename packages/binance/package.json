@@ -1,6 +1,6 @@
 {
   "name": "@asgardex-clients/binance",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "private": false,
   "main": "dist/index",
@@ -22,5 +22,5 @@
     "rimraf": "~3.0.2",
     "typescript": "~4.0.0"
   },
-  "gitHead": "7d72ba7156b8d5703ef96367365e6c2886a1801b"
+  "gitHead": "3989696361e640b3dd55138772a43fc301797cd2"
 }
