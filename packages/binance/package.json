@@ -1,6 +1,6 @@
 {
   "name": "@asgardex-clients/binance",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "private": false,
   "main": "dist/index",
@@ -16,7 +16,7 @@
     "test": "yarn run build"
   },
   "dependencies": {
-    "@asgardex-clients/core": "^1.0.1"
+    "@asgardex-clients/core": "^0.0.5"
   },
   "devDependencies": {
     "rimraf": "~3.0.2",
