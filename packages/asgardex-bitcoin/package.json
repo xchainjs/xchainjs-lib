@@ -1,6 +1,6 @@
 {
   "name": "@thorchain/asgardex-bitcoin",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Custom Bitcoin client and utilities used by ASGARDEX clients",
   "keywords": [
     "THORChain",
