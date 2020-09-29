@@ -1,0 +1,23 @@
+{
+  "name": "@asgardex-clients/binance",
+  "version": "1.0.0",
+  "license": "MIT",
+
+  "main": "dist/index",
+  "types": "dist/index",
+  "files": ["dist"],
+  "scripts": {
+    "build": "yarn run clean && yarn run compile",
+    "clean": "rimraf -rf ./dist",
+    "compile": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "yarn run build",
+    "test": "yarn run build"
+  },
+  "dependencies": {
+    "@asgardex-clients/core": "^1.0.0"
+  },
+  "devDependencies": {
+    "rimraf": "~3.0.2",
+    "typescript": "~4.0.0"
+  }
+}

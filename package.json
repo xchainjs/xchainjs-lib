@@ -1,0 +1,19 @@
+{
+  "name": "root",
+  "private": true,
+  "description": "Asgardex Chain Clients MonoRepo",
+  "devDependencies": {},
+  "workspaces": ["packages/*"],
+
+  "scripts": {
+    "clean": "lerna run clean",
+    "build": "lerna run build",
+    "pub": "lerna publish",
+    "test": "lerna run test"
+  },
+  "devDependencies": {
+    "eslint": "~7.8.0",
+    "lerna": "^3.22.1",
+    "typescript": "~4.0.0"
+  }
+}
