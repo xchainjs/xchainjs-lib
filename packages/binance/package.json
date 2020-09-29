@@ -1,6 +1,6 @@
 {
   "name": "@asgardex-clients/binance",
-  "version": "1.0.1",
+  "version": "0.0.1",
   "license": "MIT",
   "main": "dist/index",
   "types": "dist/index",
