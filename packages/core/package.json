@@ -1,11 +1,12 @@
 {
   "name": "@asgardex-clients/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
-
   "main": "dist/index",
   "types": "dist/index",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "yarn run clean && yarn run compile",
     "clean": "rimraf -rf ./dist",
