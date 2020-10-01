@@ -2,21 +2,27 @@
   "name": "@asgardex-clients/core",
   "version": "0.0.5",
   "license": "MIT",
-  "main": "dist/index",
-  "types": "dist/index",
+  "main": "lib/index",
+  "types": "lib/index",
   "files": [
-    "dist"
+    "lib"
   ],
   "scripts": {
     "build": "yarn run clean && yarn run compile",
-    "clean": "rimraf -rf ./dist",
+    "clean": "rimraf -rf ./lib",
     "compile": "tsc -p tsconfig.build.json",
     "prepublishOnly": "yarn run build",
-    "test": "yarn run build"
+    "test": "jest"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.14",
+    "jest": "^26.4.2",
     "rimraf": "~3.0.2",
+    "ts-jest": "^26.4.1",
     "typescript": "~4.0.0"
   },
-  "gitHead": "3989696361e640b3dd55138772a43fc301797cd2"
+  "gitHead": "3989696361e640b3dd55138772a43fc301797cd2",
+  "dependencies": {
+    "axios": "^0.20.0"
+  }
 }
