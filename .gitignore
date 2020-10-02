@@ -1,5 +1,6 @@
 node_modules
 dist
 results
+lerna-debug.log
 .nyc_output
 *.tsbuildinfo

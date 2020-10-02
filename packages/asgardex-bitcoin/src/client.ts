@@ -1,9 +1,8 @@
-// import * as BIP39 from 'bip39' // https://github.com/bitcoinjs/bip39
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
 import * as Utils from './utils'
-import { getAddressTxs, getAddressUtxos, getTxInfo, getAddressInfo, getFeeEstimates } from './electrs-api'
-import { Estimates, Txs, Address } from './types/electrs-api-types'
+import * as blockChair from './blockchair-api'
+import { AddressTx } from './types/blockchair-api-types'
 import { FeeOptions, FeeOptionsKey } from './types/client-types'
 import { AsgardexClient, TxParams, broadcastTx } from '@asgardex-clients/core'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
@@ -26,17 +25,11 @@ enum Network {
  * BitcoinClient Interface. Potentially to become AsgardClient
  */
 interface BitcoinClient {
-  // generatePhrase(): string
-
-  // validatePhrase(phrase: string): boolean
-
   purgeClient(): void
 
   setNetwork(net: Network): void
 
   getNetwork(net: Network): Bitcoin.networks.Network
-
-  setBaseUrl(endpoint: string): void
 
   getAddress(): string
 
@@ -44,12 +37,7 @@ interface BitcoinClient {
 
   scanUTXOs(): Promise<void>
 
-  // getBalanceForAddress(address?: string): Promise<number>
-
-  // getTransactions(address: string): Promise<Txs>
-
   calcFees(addressTo: string, memo?: string): Promise<FeeOptions>
-
 }
 
 /**
@@ -58,14 +46,12 @@ interface BitcoinClient {
 class Client implements BitcoinClient, AsgardexClient {
   net: Network
   phrase = ''
-  electrsAPI = ''
   utxos: Utils.UTXO[]
 
   // Client is initialised with network type
   constructor(_net: Network = Network.TEST, _electrsAPI = '', _phrase?: string) {
     this.net = _net
     _phrase && this.setPhrase(_phrase)
-    _electrsAPI && this.setBaseUrl(_electrsAPI)
     this.utxos = []
   }
 
@@ -101,10 +87,6 @@ class Client implements BitcoinClient, AsgardexClient {
     } else {
       return Bitcoin.networks.bitcoin
     }
-  }
-
-  setBaseUrl(endpoint: string): void {
-    this.electrsAPI = endpoint
   }
 
   getExplorerUrl = (): string => {
@@ -153,16 +135,19 @@ class Client implements BitcoinClient, AsgardexClient {
   // Scans UTXOs on Address
   scanUTXOs = async (): Promise<void> => {
     try {
-      this.utxos = [] // clear existing utxos
+      const chain = this.net === Network.TEST ? 'bitcoin/testnet' : 'bitcoin'
       const address = this.getAddress()
-      const utxos = await getAddressUtxos(this.electrsAPI, address)
+      const dashboardsAddress = await blockChair.getAddress(chain, address)
+
+      this.utxos = [] // clear existing utxos
+      const utxos = dashboardsAddress[address].utxo
 
       for (let i = 0; i < utxos.length; i++) {
-        const txHash = utxos[i].txid
+        const txHash = utxos[i].transaction_hash
         const value = utxos[i].value
-        const index = utxos[i].vout
-        const txData = await getTxInfo(this.electrsAPI, txHash)
-        const script = txData.vout[index].scriptpubkey
+        const index = utxos[i].index
+        const txData = await blockChair.getRawTx(chain, txHash)
+        const script = txData[txHash].decoded_raw_transaction.vout[index].scriptPubKey.hex
         // TODO: check scriptpubkey_type is op_return
 
         const witness = {
@@ -182,25 +167,19 @@ class Client implements BitcoinClient, AsgardexClient {
     }
   }
 
-  // Returns balance of all UTXOs
-  getBalance = async (): Promise<number> => {
-    await this.scanUTXOs()
-    if (this.utxos && this.utxos.length > 0) {
-      const reducer = (accumulator: number, currentValue: number) => accumulator + currentValue
-      const sumBalance = this.utxos.map((e) => e.witnessUtxo.value).reduce(reducer)
-      return sumBalance
-    } else {
-      return 0
+  // Returns balance of address
+  getBalance = async (address?: string): Promise<number> => {
+    if (!address) {
+      address = this.getAddress()
     }
-  }
 
-  // TODO -> reformat into simple getBalance
-  getBalanceForAddress = async (address: string): Promise<number> => {
-    if (!this.validateAddress(address)) {
-      throw new Error('Invalid address')
+    try {
+      const chain = this.net === Network.TEST ? 'bitcoin/testnet' : 'bitcoin'
+      const dashboardAddress = await blockChair.getAddress(chain, address)
+      return dashboardAddress[address].address.balance
+    } catch (error) {
+      return Promise.reject(error)
     }
-    const addressInfo: Address = await getAddressInfo(this.electrsAPI, address)
-    return addressInfo.chain_stats.funded_txo_sum - addressInfo.chain_stats.spent_txo_sum
   }
 
   // Given a desired output, return change
@@ -215,16 +194,17 @@ class Client implements BitcoinClient, AsgardexClient {
     return change
   }
 
-  getTransactions = async (address: string): Promise<Txs> => {
-    if (!this.validateAddress(address)) {
-      throw new Error('Invalid address')
-    }
+  getTransactions = async (address: string): Promise<AddressTx[]> => {
     let transactions = []
+
     try {
-      transactions = await getAddressTxs(this.electrsAPI, address)
+      const chain = this.net === Network.TEST ? 'bitcoin/testnet' : 'bitcoin'
+      const dashboardAddress = await blockChair.getAddress(chain, address)
+      transactions = dashboardAddress[address].transactions
     } catch (error) {
       return Promise.reject(error)
     }
+
     return transactions
   }
 
@@ -283,8 +263,10 @@ class Client implements BitcoinClient, AsgardexClient {
 
     const feeOption = { feeRate: 0, feeTotal: 0 }
     const calcdFees: FeeOptions = { fast: feeOption, regular: feeOption, slow: feeOption }
-    const FeeRateEstimates: Estimates = await getFeeEstimates(this.electrsAPI)
-    const nextBlockFeeRate = FeeRateEstimates['1'] || 20
+    const chain = this.net === Network.TEST ? 'bitcoin/testnet' : 'bitcoin'
+    const btcStats = await blockChair.bitcoinStats(chain)
+    const nextBlockFeeRate = btcStats.suggested_transaction_fee_per_byte_sat
+
     const feesOptions: Record<FeeOptionsKey, number> = {
       fast: 5,
       regular: 1,

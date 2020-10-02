@@ -1,0 +1,55 @@
+Arguments: 
+  /usr/local/Cellar/node/13.10.1/bin/node /usr/local/Cellar/yarn/1.22.4/libexec/bin/yarn.js build
+
+PATH: 
+  /Users/stuart/.rvm/gems/ruby-2.4.1/bin:/Users/stuart/.rvm/gems/ruby-2.4.1@global/bin:/Users/stuart/.rvm/rubies/ruby-2.4.1/bin:/usr/local/opt/php@7.3/sbin:/usr/local/opt/php@7.3/bin:/usr/local/opt/php@7.3/sbin:/usr/local/opt/php@7.3/bin:/usr/local/opt/php@7.3/bin:/usr/local/opt/php@7.3/sbin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Users/stuart/.rvm/bin:/Users/stuart/development/flutter/bin:/Users/stuart/.istioctl/bin
+
+Yarn version: 
+  1.22.4
+
+Node version: 
+  13.10.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/stuart/Projects/thorchain/asgardex-clients/packages/core/package.json: Unexpected token } in JSON at position 579
+      at JSON.parse (<anonymous>)
+      at /usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:310:30)
+      at /usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "@asgardex-clients/core",
+    "version": "0.0.5",
+    "license": "MIT",
+    "main": "lib/index",
+    "types": "lib/index",
+    "files": [
+      "lib"
+    ],
+    "scripts": {
+      "build": "yarn run clean && yarn run compile",
+      "clean": "rimraf -rf ./lib",
+      "compile": "tsc -p tsconfig.build.json",
+      "prepublishOnly": "yarn run build",
+      "test": "jest"
+    },
+    "devDependencies": {
+      "@types/jest": "^26.0.14",
+      "jest": "^26.4.2",
+      "rimraf": "~3.0.2",
+      "ts-jest": "^26.4.1",
+      "typescript": "~4.0.0"
+    },
+    "gitHead": "3989696361e640b3dd55138772a43fc301797cd2",
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

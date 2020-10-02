@@ -6,6 +6,7 @@ var buffer = require('buffer');
 var readableStream = require('readable-stream');
 var stream = require('stream');
 var string_decoder = require('string_decoder');
+var core$2 = require('@asgardex-clients/core');
 var crypto$2$1 = require('crypto');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -56251,7 +56252,7 @@ var Client = /** @class */ (function () {
         this.transfer = function (_a) {
             var amount = _a.amount, recipient = _a.recipient, memo = _a.memo, feeRate = _a.feeRate;
             return __awaiter(_this, void 0, void 0, function () {
-                var balance, network, btcKeys, feeRateWhole, compiledMemo, fee, psbt, change;
+                var balance, network, btcKeys, feeRateWhole, compiledMemo, fee, psbt, change, txHex, chain;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0: return [4 /*yield*/, this.getBalance()];
@@ -56297,10 +56298,11 @@ var Client = /** @class */ (function () {
                             }
                             psbt.signAllInputs(btcKeys); // Sign all inputs
                             psbt.finalizeAllInputs(); // Finalise inputs
-                            // const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
-                            // const chain = this.net == Network.TEST ? 'bitcoin/testnet' : 'bitcoin'
-                            // return await broadcastTx(chain, txHex)
-                            return [2 /*return*/, ''];
+                            txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+                            ;
+                            chain = this.net == exports.Network.TEST ? 'bitcoin/testnet' : 'bitcoin';
+                            return [4 /*yield*/, core$2.broadcastTx(chain, txHex)];
+                        case 3: return [2 /*return*/, _b.sent()];
                     }
                 });
             });

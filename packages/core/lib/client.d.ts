@@ -1,4 +1,3 @@
-import { BtcChainOptions } from './types/blockchair-types';
 export declare type AsgardexClient = {
     setPhrase(phrase?: string): void;
     generatePhrase(): void;
@@ -13,5 +12,3 @@ export declare type TxParams = {
     memo?: string;
     feeRate: number;
 };
-export declare const broadcastTx: (chain: string, txHex: string) => Promise<string>;
-export declare const getBtcChainAddressBalance: (chain: BtcChainOptions, address: string) => Promise<string>;
