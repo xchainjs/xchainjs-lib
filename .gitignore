@@ -1,5 +1,11 @@
 node_modules
 dist
 results
+lerna-debug.log
 .nyc_output
 *.tsbuildinfo
+.DS_Store
+
+# Core client
+packages/asgardex-client/.DS_Store
+packages/asgardex-client/yarn-error.log
