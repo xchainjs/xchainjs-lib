@@ -4,3 +4,7 @@ results
 lerna-debug.log
 .nyc_output
 *.tsbuildinfo
+.DS_Store
+
+# Core client
+packages/core/.DS_Store

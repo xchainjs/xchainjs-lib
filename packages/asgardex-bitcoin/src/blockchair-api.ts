@@ -1,21 +1,19 @@
 import axios from 'axios'
-import {
-  BlockChairResponse,
-  BtcAddressDTO,
-  BtcChainOptions,
-  Transactions,
-  RawTxsBTC,
-  ChainStatsBtc,
-} from './types/blockchair-api-types'
+import { BlockChairResponse, BtcAddressDTO, Transactions, RawTxsBTC, ChainStatsBtc } from './types/blockchair-api-types'
+
+const setApiKeyParams = (key?: string) => {
+  return key && key.length > 0 ? { params: { key: key } } : {}
+}
 
 /**
  * https://blockchair.com/api/docs#link_200
  * @param chain
  * @param hash
  */
-export const getTx = async (chain: BtcChainOptions, hash: string): Promise<Transactions> => {
+export const getTx = async (baseUrl: string, hash: string, apiKey?: string): Promise<Transactions> => {
   try {
-    const response = await axios.get(`https://api.blockchair.com/${chain}/dashboards/transaction/${hash}`)
+    // const response = await axios.get(`https://api.blockchair.com/${chain}/dashboards/transaction/${hash}`)
+    const response = await axios.get(`${baseUrl}/dashboards/transaction/${hash}`, setApiKeyParams(apiKey))
     const txs: BlockChairResponse<Transactions> = response.data
     return txs.data
   } catch (error) {
@@ -28,9 +26,9 @@ export const getTx = async (chain: BtcChainOptions, hash: string): Promise<Trans
  * @param chain
  * @param hash
  */
-export const getRawTx = async (chain: BtcChainOptions, hash: string): Promise<RawTxsBTC> => {
+export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): Promise<RawTxsBTC> => {
   try {
-    const response = await axios.get(`// https://api.blockchair.com/${chain}/raw/transaction/${hash}`)
+    const response = await axios.get(`${baseUrl}/raw/transaction/${hash}`, setApiKeyParams(apiKey))
     const txs: BlockChairResponse<RawTxsBTC> = response.data
     return txs.data
   } catch (error) {
@@ -43,9 +41,9 @@ export const getRawTx = async (chain: BtcChainOptions, hash: string): Promise<Ra
  * @param chain
  * @param address
  */
-export const getAddress = async (chain: BtcChainOptions, address: string): Promise<BtcAddressDTO> => {
+export const getAddress = async (baseUrl: string, address: string, apiKey?: string): Promise<BtcAddressDTO> => {
   try {
-    const response = await axios.get(`https://api.blockchair.com/${chain}/dashboards/address/${address}`)
+    const response = await axios.get(`${baseUrl}/dashboards/address/${address}`, setApiKeyParams(apiKey))
     const addressResponse: BlockChairResponse<BtcAddressDTO> = response.data
     return addressResponse.data
   } catch (error) {
@@ -58,9 +56,9 @@ export const getAddress = async (chain: BtcChainOptions, address: string): Promi
  * @param chain
  * @param txHex
  */
-export const broadcastTx = async (chain: BtcChainOptions, txHex: string): Promise<string> => {
+export const broadcastTx = async (baseUrl: string, txHex: string, apiKey?: string): Promise<string> => {
   try {
-    const response = await axios.post(`https://api.blockchair.com/${chain}/push/transaction`, { data: txHex })
+    const response = await axios.post(`${baseUrl}/push/transaction`, { data: txHex }, setApiKeyParams(apiKey))
     return response.data.data.transaction_hash
   } catch (error) {
     return Promise.reject(error)
@@ -71,9 +69,9 @@ export const broadcastTx = async (chain: BtcChainOptions, txHex: string): Promis
  * https://blockchair.com/api/docs#link_001
  * @param chain
  */
-export const bitcoinStats = async (chain: BtcChainOptions): Promise<ChainStatsBtc> => {
+export const bitcoinStats = async (baseUrl: string, apiKey?: string): Promise<ChainStatsBtc> => {
   try {
-    const response = await axios.get(`https://api.blockchair.com/${chain}/stats`)
+    const response = await axios.get(`${baseUrl}/stats`, setApiKeyParams(apiKey))
     const bcRes: BlockChairResponse<ChainStatsBtc> = response.data
     return bcRes.data
   } catch (error) {
