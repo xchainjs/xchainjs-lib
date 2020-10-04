@@ -7,4 +7,5 @@ lerna-debug.log
 .DS_Store
 
 # Core client
-packages/core/.DS_Store
+packages/asgardex-client/.DS_Store
+packages/asgardex-client/yarn-error.log
