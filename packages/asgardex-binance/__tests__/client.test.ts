@@ -1,87 +1,180 @@
 require('dotenv').config()
-import { Client as BinanceClient } from '../src/client'
-import { Balances, Fee, TransferFee } from '../src/types/binance'
-import { isTransferFee } from '../src/util'
+import { Client as BinanceClient, Network, Balance, Path } from '../src/client'
 
 describe('BinanceClient Test', () => {
-  let bnbClient: BinanceClient
   // Note: This phrase is created by https://iancoleman.io/bip39/ and will never been used in a real-world
-  const phrase = 'wheel leg dune emerge sudden badge rough shine convince poet doll kiwi sleep labor hello'
-  const testnetAddress = 'bnb1t95kjgmjc045l2a728z02textadd98ytlyvkk0'
-  beforeEach(() => {
-    bnbClient = new BinanceClient({ phrase, network: 'mainnet' })
-  })
+  const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
+  const bnbClient = new BinanceClient({ phrase, network: Network.MAIN })
+  const mainnetaddress = 'bnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9e738vr'
+  const testnetAddress = 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj'
+  const transferFee = { average: 37500 }
+  const freezeFee = 500000
+  const freezeAmount = 500000
+  const testnetBNBBalance: Balance = {
+    coin: 'BNB',
+    amount: 1088887500,
+    frozenAmount: 10000000,
+  }
+
+  // tbnb1t95kjgmjc045l2a728z02textadd98yt339jk7 is used for testing transaction.
+  // it needs to have balances.
+  const phraseForTX = 'wheel leg dune emerge sudden badge rough shine convince poet doll kiwi sleep labor hello'
+  const testnetAddressForTx = 'tbnb1t95kjgmjc045l2a728z02textadd98yt339jk7'
 
   it('should start with empty wallet', async () => {
-    const phraseEmpty = 'rural bright ball negative already grass good grant nation screen model pizza'
-    const bnbClientEmptyMain = new BinanceClient({ phrase: phraseEmpty, network: 'mainnet' })
+    const bnbClientEmptyMain = new BinanceClient({ phrase, network: Network.MAIN })
     const addressMain = bnbClientEmptyMain.getAddress()
-    expect(addressMain).toEqual('bnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9e738vr')
-    const bnbClientEmptyTest = new BinanceClient({ phrase: phraseEmpty, network: 'testnet' })
+    expect(addressMain).toEqual(mainnetaddress)
+    
+    const bnbClientEmptyTest = new BinanceClient({ phrase, network: Network.TEST })
     const addressTest = bnbClientEmptyTest.getAddress()
-    expect(addressTest).toEqual('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj')
+    expect(addressTest).toEqual(testnetAddress)
   })
 
   it('throws an error passing an invalid phrase', async () => {
     expect(() => {
-      new BinanceClient({ phrase: 'invalid phrase', network: 'mainnet' })
+      new BinanceClient({ phrase: 'invalid phrase', network: Network.MAIN })
     }).toThrow()
   })
 
   it('should have right address', async () => {
-    const address = bnbClient.getAddress()
-    expect(address).toEqual(testnetAddress)
+    expect(bnbClient.getAddress()).toEqual(mainnetaddress)
   })
 
   it('should update net', () => {
-    const client = new BinanceClient({ phrase, network: 'mainnet' })
-    client.setNetwork('testnet')
-    expect(client.getNetwork()).toEqual('testnet')
+    const client = new BinanceClient({ phrase, network: Network.MAIN })
+    client.setNetwork(Network.TEST)
+    expect(client.getNetwork()).toEqual(Network.TEST)
+    expect(client.getAddress()).toEqual(testnetAddress)
+  })
 
-    const address = bnbClient.getAddress()
-    expect(address).toEqual(testnetAddress)
+  it('setPhrase should return addres', () => {
+    expect(bnbClient.setPhrase(phrase)).toEqual(mainnetaddress)
+
+    bnbClient.setNetwork(Network.TEST)
+    expect(bnbClient.setPhrase(phrase)).toEqual(testnetAddress)
   })
 
   it('should generate phrase', () => {
-    const phrase_ = BinanceClient.generatePhrase()
-    const valid = BinanceClient.validatePhrase(phrase_)
-    expect(valid).toBeTruthy()
+    const client = new BinanceClient({ phrase, network: Network.MAIN })
+    expect(client.getAddress()).toEqual(mainnetaddress)
+
+    client.setPhrase(BinanceClient.generatePhrase())
+    expect(client.getAddress()).toBeTruthy()
+    expect(client.getAddress()).not.toEqual(mainnetaddress)
   })
 
-  it('should validate phrase', () => {
-    const valid = BinanceClient.validatePhrase(phrase)
-    expect(valid).toBeTruthy()
+  it('should validate address', () => {
+    bnbClient.purgeClient()
+    bnbClient.setNetwork(Network.MAIN)
+    bnbClient.setPhrase(phrase)
+    expect(bnbClient.validateAddress(mainnetaddress)).toBeTruthy()
+
+    bnbClient.setNetwork(Network.TEST)
+    expect(bnbClient.validateAddress(testnetAddress)).toBeTruthy()
   })
 
-  it('it should init should have right prefix', async () => {
-    let prefix = bnbClient.getPrefix()
-    expect(prefix).toEqual('bnb')
-    bnbClient.setNetwork('testnet')
-    prefix = bnbClient.getPrefix()
-    expect(prefix).toEqual('tbnb')
+  it('should return explorer URL for mainnet', async () => {
+    bnbClient.purgeClient()
+    bnbClient.setNetwork(Network.MAIN)
+    bnbClient.setPhrase(phrase)
+
+    const addressURL = await bnbClient.getExplorerUrl(Path.address, mainnetaddress)
+    expect(addressURL).toEqual(`https://explorer.binance.org/address/${mainnetaddress}`)
+    const txURL = await bnbClient.getExplorerUrl(Path.tx, 'D95CC7F92C2B494885F37C7CEFEB4F7127605908C8A65FA421D4B31DD2994D6B')
+    expect(txURL).toEqual('https://explorer.binance.org/tx/D95CC7F92C2B494885F37C7CEFEB4F7127605908C8A65FA421D4B31DD2994D6B')
+  })
+
+  it('should return explorer URL for testnet', async () => {
+    bnbClient.purgeClient()
+    bnbClient.setNetwork(Network.TEST)
+    bnbClient.setPhrase(phrase)
+    
+    const addressURL = await bnbClient.getExplorerUrl(Path.address, testnetAddress)
+    expect(addressURL).toEqual(`https://testnet-explorer.binance.org/address/${testnetAddress}`)
+    const txURL = await bnbClient.getExplorerUrl(Path.tx, 'D95CC7F92C2B494885F37C7CEFEB4F7127605908C8A65FA421D4B31DD2994D6B')
+    expect(txURL).toEqual('https://testnet-explorer.binance.org/tx/D95CC7F92C2B494885F37C7CEFEB4F7127605908C8A65FA421D4B31DD2994D6B')
   })
 
   it('has no balances', async () => {
-    const emptyBalances: Balances = []
-    const result = await bnbClient.getBalance()
-    expect(result).toEqual(emptyBalances)
+    bnbClient.purgeClient()
+    bnbClient.setNetwork(Network.MAIN)
+    bnbClient.setPhrase(phrase)
+
+    const emptyBalances: Balance[] = []
+    expect(await bnbClient.getBalance('bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku')).toEqual(emptyBalances)
   })
 
-  it('has an empty tx history', async () => {
-    const txArray = await bnbClient.getTransactions()
-    expect(txArray).toEqual({ total: 0, tx: [] })
+  it('has balances', async () => {
+    bnbClient.purgeClient()
+    bnbClient.setNetwork(Network.TEST)
+    bnbClient.setPhrase(phrase)
+
+    expect(await bnbClient.getBalance('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', 'BNB')).toEqual([testnetBNBBalance])
   })
+
+  // it('has an empty tx history', async () => {
+  //   const txArray = await bnbClient.getTransactions()
+  //   expect(txArray).toEqual({ total: 0, tx: [] })
+  // })
 
   it('fetches the fees', async () => {
-    const feesArray = await bnbClient.getFees()
-    const submitProposalFee = feesArray[0] as Fee
+    bnbClient.purgeClient()
+    bnbClient.setNetwork(Network.MAIN)
+    bnbClient.setPhrase(phrase)
 
-    expect(submitProposalFee.msg_type).toEqual('submit_proposal')
-    expect(submitProposalFee.fee).toBeGreaterThan(0)
-    expect(submitProposalFee.fee_for).toBeGreaterThan(0)
+    const fees = await bnbClient.getFees()
+    expect(fees).toEqual(transferFee)
+  })
 
-    const sendFee: TransferFee | undefined = feesArray.find(isTransferFee)
-    expect(sendFee).toBeDefined()
-    expect(sendFee?.fixed_fee_params?.fee).toBeGreaterThan(0)
+  it('should broadcast a transfer', async () => {
+    const client = new BinanceClient({ phrase: phraseForTX, network: Network.TEST })
+    expect(client.getAddress()).toEqual(testnetAddressForTx)
+    
+    const beforeTransfer = await client.getBalance()
+
+    // feeRate should be optional
+    const txHash = await client.transfer({ asset: 'BNB', recipient: 'tbnb1t95kjgmjc045l2a728z02textadd98yt339jk7', amount: 1, feeRate: 0 })
+    expect(txHash).toEqual(expect.any(String))
+
+    const afterTransfer = await client.getBalance()
+    expect(afterTransfer[0].amount).toEqual(beforeTransfer[0].amount - transferFee.average)
+  })
+
+  it('should deposit', async () => {
+    const client = new BinanceClient({ phrase: phraseForTX, network: Network.TEST })
+    expect(client.getAddress()).toEqual(testnetAddressForTx)
+
+    const beforeTransfer = await client.getBalance()
+    
+    // feeRate should be optional
+    const txHash = await client.deposit({ asset: 'BNB', recipient: 'tbnb1t95kjgmjc045l2a728z02textadd98yt339jk7', amount: 1, feeRate: 0 })
+    expect(txHash).toEqual(expect.any(String))
+
+    const afterTransfer = await client.getBalance()
+    expect(afterTransfer[0].amount).toEqual(beforeTransfer[0].amount - transferFee.average)
+  })
+
+  it('should freeze/unfreeze token', async () => {
+    const client = new BinanceClient({ phrase: phraseForTX, network: Network.TEST })
+    expect(client.getAddress()).toEqual(testnetAddressForTx)
+
+    const beforeFreeze = await client.getBalance()
+
+    let txHash = await client.freeze({ asset: 'BNB', amount: freezeAmount})
+    expect(txHash).toEqual(expect.any(String))
+
+    const afterFreeze = await client.getBalance()
+
+    txHash = await client.unfreeze({ asset: 'BNB', amount: freezeAmount})
+    expect(txHash).toEqual(expect.any(String))
+    
+    const afterUnFreeze = await client.getBalance()
+
+    expect(afterFreeze[0].amount).toEqual(beforeFreeze[0].amount - freezeAmount - freezeFee)
+    expect(afterFreeze[0].frozenAmount).toEqual(freezeAmount)
+
+    expect(afterUnFreeze[0].amount).toEqual(beforeFreeze[0].amount - freezeFee * 2)
+    expect(afterUnFreeze[0].frozenAmount).toEqual(0)
   })
 })
