@@ -12,14 +12,14 @@ export type Balance = {
 
 export type Balances = Balance[]
 
-type TxType = 'transfer' | 'freeze' | 'unfreeze' | 'unkown'
+export type TxType = 'transfer' | 'freeze' | 'unfreeze' | 'unkown'
 
-type TxTo = {
+export type TxTo = {
   address: string // to address
   amount: BaseAmount // amount sent to
 }
 
-type Tx = {
+export type Tx = {
   asset: Asset // asset
   from: Address // from address
   to: TxTo[] // list of "to" transactions. BNC will have one `TxTo` only, `BTC` might have many transactions going "out" (based on UTXO)
@@ -28,24 +28,23 @@ type Tx = {
   hash: string // Tx hash
 }
 
-type Txs = Tx[]
+export type Txs = Tx[]
 
-type TxsPage = {
+export type TxsPage = {
   total: number
   txs: Txs
 }
 
-
-type TxHistoryParams = {
+export type TxHistoryParams = {
   address: Address // Address to get history for
   offset?: number // Optional Offset
   limit?: number // Optional Limit of transactions
   startTime?: Date // Optional start time
 }
 
-type TxHash = string
+export type TxHash = string
 
-type TxParams = {
+export type TxParams = {
   asset: Asset
   amount: BaseAmount
   recipient: Address
@@ -53,11 +52,11 @@ type TxParams = {
   memo?: string // optional memo to pass
 }
 
-type FeeType
-  = 'byte' // fee will be measured as `BaseAmount` per `byte`
+export type FeeType =
+  | 'byte' // fee will be measured as `BaseAmount` per `byte`
   | 'base' // fee will be "flat" measured in `BaseAmount`
 
-type Fees = {
+export type Fees = {
   type: FeeType
   fastest?: number
   fast?: number
@@ -65,12 +64,11 @@ type Fees = {
 }
 
 export type AsgardexClientParams = {
-  network?: Network,
+  network?: Network
   phrase: string
 }
 
 export interface AsgardexClient {
-
   setNetwork(net: Network): void
   getNetwork(): Network
 
@@ -91,5 +89,4 @@ export interface AsgardexClient {
   deposit(params: TxParams): Promise<TxHash>
 
   purgeClient(): void
-
 }
