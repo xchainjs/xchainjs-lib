@@ -1893,6 +1893,11 @@
     hdkey "^2.0.1"
     uuid "^8.1.0"
 
+"@thorchain/asgardex-util@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@thorchain/asgardex-util/-/asgardex-util-0.5.0.tgz#afe63cb6a37caaacdfd7dc97bb95893ddf59aca9"
+  integrity sha512-FZqUdgcl46kKraLHEk8qpNAzFCetudTShnfk3DbT1EREYTBKiaM1HZRYDO3gWrBPjuq6bazqfdrP2Ol5uY1ApQ==
+
 "@types/babel__core@^7.0.0", "@types/babel__core@^7.1.7":
   version "7.1.10"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.10.tgz#ca58fc195dd9734e77e57c6f2df565623636ab40"
