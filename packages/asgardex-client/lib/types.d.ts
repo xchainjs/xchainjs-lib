@@ -7,12 +7,12 @@ export declare type Balance = {
     frozenAmount?: BaseAmount;
 };
 export declare type Balances = Balance[];
-declare type TxType = 'transfer' | 'freeze' | 'unfreeze' | 'unkown';
-declare type TxTo = {
+export declare type TxType = 'transfer' | 'freeze' | 'unfreeze' | 'unkown';
+export declare type TxTo = {
     address: string;
     amount: BaseAmount;
 };
-declare type Tx = {
+export declare type Tx = {
     asset: Asset;
     from: Address;
     to: TxTo[];
@@ -20,27 +20,27 @@ declare type Tx = {
     type: TxType;
     hash: string;
 };
-declare type Txs = Tx[];
-declare type TxsPage = {
+export declare type Txs = Tx[];
+export declare type TxsPage = {
     total: number;
     txs: Txs;
 };
-declare type TxHistoryParams = {
+export declare type TxHistoryParams = {
     address: Address;
     offset?: number;
     limit?: number;
     startTime?: Date;
 };
-declare type TxHash = string;
-declare type TxParams = {
+export declare type TxHash = string;
+export declare type TxParams = {
     asset: Asset;
     amount: BaseAmount;
     recipient: Address;
     feeRate?: number;
     memo?: string;
 };
-declare type FeeType = 'byte' | 'base';
-declare type Fees = {
+export declare type FeeType = 'byte' | 'base';
+export declare type Fees = {
     type: FeeType;
     fastest?: number;
     fast?: number;
@@ -64,4 +64,3 @@ export interface AsgardexClient {
     deposit(params: TxParams): Promise<TxHash>;
     purgeClient(): void;
 }
-export {};
