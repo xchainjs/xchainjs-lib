@@ -2,7 +2,7 @@ import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoin
 import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
 import * as Utils from './utils'
 import * as blockChair from './blockchair-api'
-import { Address, AsgardexClient, TxParams, Balance, Network, Path, Fees } from '@asgardex-clients/asgardex-client'
+import { TxsPage, Address, AsgardexClient, TxParams, Balance, Network, Fees } from '@asgardex-clients/asgardex-client'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
 
 // https://blockchair.com/api/docs#link_300
@@ -34,7 +34,7 @@ class Client implements BitcoinClient, AsgardexClient {
   nodeApiKey = ''
 
   // Client is initialised with network type
-  constructor(_net: Network = Network.TEST, _nodeUrl = '', _nodeApiKey = '', _phrase?: string) {
+  constructor(_net: Network = 'testnet', _nodeUrl = '', _nodeApiKey = '', _phrase?: string) {
     this.net = _net
     _nodeUrl && this.setNodeURL(_nodeUrl)
     _nodeApiKey && this.setNodeAPIKey(_nodeApiKey)
@@ -58,7 +58,8 @@ class Client implements BitcoinClient, AsgardexClient {
   setPhrase = (phrase: string): Address => {
     if (asgardexCrypto.validatePhrase(phrase)) {
       this.phrase = phrase
-      return phrase
+      const address = this.getAddress()
+      return address
     } else {
       throw new Error('Invalid BIP39 phrase')
     }
@@ -76,14 +77,16 @@ class Client implements BitcoinClient, AsgardexClient {
 
   // Will return the desired network
   getNetwork(): Network {
-    return this.net === Network.TEST ? Network.TEST : Network.MAIN
+    return this.net
   }
 
-  getExplorerUrl(type: Path, param: string): string {
-    const networkPath = this.net === Network.TEST ? '/testnet' : ''
-    return type === Path.tx
-      ? `https://blockstream.info${networkPath}/tx/${param}`
-      : `https://blockstream.info${networkPath}/address/${param}`
+  getExplorerAddressUrl(address: Address): string {
+    const networkPath = this.net === 'testnet' ? '/testnet' : ''
+    return `https://blockstream.info${networkPath}/address/${address}`
+  }
+  getExplorerTxUrl(txID: string): string {
+    const networkPath = this.net === 'testnet' ? '/testnet' : ''
+    return `https://blockstream.info${networkPath}/tx/${txID}`
   }
 
   // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
@@ -91,7 +94,7 @@ class Client implements BitcoinClient, AsgardexClient {
   getAddress = (): string => {
     if (this.phrase) {
       const network = this.getNetwork()
-      const btcNetwork = network === Network.TEST ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+      const btcNetwork = network === 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
       const btcKeys = this.getBtcKeys(this.phrase)
       const { address } = Bitcoin.payments.p2wpkh({
         pubkey: btcKeys.publicKey,
@@ -107,7 +110,7 @@ class Client implements BitcoinClient, AsgardexClient {
 
   // Private function to get keyPair from the this.phrase
   private getBtcKeys(_phrase: string): Bitcoin.ECPairInterface {
-    const network = this.getNetwork() == Network.TEST ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     // const buffer = BIP39.mnemonicToSeedSync(_phrase)
     // const wif = WIF.encode(network.wif, buffer, true)
     const seed = asgardexCrypto.getSeed(_phrase)
@@ -117,7 +120,7 @@ class Client implements BitcoinClient, AsgardexClient {
 
   // Will return true/false
   validateAddress = (address: string): boolean => {
-    const network = this.getNetwork() == Network.TEST ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     try {
       Bitcoin.address.toOutputScript(address, network)
       return true
@@ -167,7 +170,7 @@ class Client implements BitcoinClient, AsgardexClient {
     }
 
     try {
-      // const chain = this.net === Network.TEST ? 'bitcoin/testnet' : 'bitcoin'
+      // const chain = this.net === 'testnet' ? 'bitcoin/testnet' : 'bitcoin'
       const dashboardAddress = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
       return [
         {
@@ -194,25 +197,29 @@ class Client implements BitcoinClient, AsgardexClient {
   }
 
   /**
+   * TODO(kashif) uncommenting this to satisfy the interface.
+   * Need to confirm whether anything special is needed to complete
+   * it here. Also needs test cases.
+   *
    * TODO: Add this in with correct response type
    * Requires querying tx data for each address tx
    * @param memo
    */
-  // getTransactions = async (address: string): Promise<TxPage[]> => {
-  //   let transactions = []
+  getTransactions = async (address: string): Promise<TxsPage[]> => {
+    let transactions = []
 
-  //   try {
-  //     const chain = this.net === Network.TEST ? 'bitcoin/testnet' : 'bitcoin'
-  //     const dashboardAddress = await blockChair.getAddress(chain, address)
-  //     transactions = dashboardAddress[address].transactions.reduce( async (txs, tx) => {
-  //       await
-  //     }, [])
-  //   } catch (error) {
-  //     return Promise.reject(error)
-  //   }
+    try {
+      const chain = this.net === 'testnet' ? 'bitcoin/testnet' : 'bitcoin'
+      const dashboardAddress = await blockChair.getAddress(chain, address)
+      transactions = dashboardAddress[address].transactions.reduce( async (txs, tx) => {
+        await
+      }, [])
+    } catch (error) {
+      return Promise.reject(error)
+    }
 
-  //   return transactions
-  // }
+    return transactions
+  }
 
   // getBlockTime = async (): Promise<number> => {
   //   const blocks: Blocks = await getBlocks(this.electrsAPI)
@@ -309,7 +316,7 @@ class Client implements BitcoinClient, AsgardexClient {
     if (!this.validateAddress(recipient)) {
       throw new Error('Invalid address')
     }
-    const network = this.getNetwork() == Network.TEST ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     const btcKeys = this.getBtcKeys(this.phrase)
     const feeRateWhole = Number(feeRate.toFixed(0))
     const compiledMemo = memo ? Utils.compileMemo(memo) : null
