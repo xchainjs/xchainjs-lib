@@ -77,8 +77,8 @@ export interface AsgardexClient {
   setNetwork(net: Network): void
   getNetwork(): Network
 
-  getExplorerAddressUrl(): string
-  getExplorerTxUrl(): string
+  getExplorerAddressUrl(address: Address): string
+  getExplorerTxUrl(txID: string): string
 
   getAddress(): Address
 
