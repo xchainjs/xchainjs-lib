@@ -33,12 +33,12 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
+    "@asgardex-clients/core": "^0.0.5",
+    "@thorchain/asgardex-crypto": "^0.1.0",
     "axios": "^0.20.0",
     "bip39": "^3.0.2",
     "bitcoinjs-lib": "^5.2.0",
-    "wif": "^2.0.6",
-    "@thorchain/asgardex-crypto": "^0.1.0",
-    "@asgardex-clients/core": "^0.0.5"
+    "wif": "^2.0.6"
   },
   "devDependencies": {
     "@rollup/plugin-json": "^4.1.0",
@@ -48,6 +48,7 @@
     "@types/wif": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^4.1.1",
     "@typescript-eslint/parser": "^4.1.1",
+    "axios-mock-adapter": "^1.18.2",
     "dotenv": "^8.2.0",
     "eslint": "^7.9.0",
     "eslint-config-prettier": "^6.11.0",
