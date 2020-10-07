@@ -1,4 +1,4 @@
-import { Asset, BaseAmount } from "@thorchain/asgardex-util"
+import { Asset, BaseAmount } from '@thorchain/asgardex-util'
 
 export type Address = string
 
@@ -14,14 +14,21 @@ export type Balances = Balance[]
 
 export type TxType = 'transfer' | 'freeze' | 'unfreeze' | 'unkown'
 
+export type TxHash = string
+
 export type TxTo = {
-  address: string // to address
-  amount: BaseAmount // amount sent to
+  to: Address // address
+  amount: BaseAmount // amount
+}
+
+export type TxFrom = {
+  from: Address | TxHash // address or tx id
+  amount: BaseAmount // amount
 }
 
 export type Tx = {
   asset: Asset // asset
-  from: Address // from address
+  from: TxFrom[] // list of "to" txs. BNC will have one `TxFrom` only, `BTC` might have many transactions going "in" (based on UTXO)
   to: TxTo[] // list of "to" transactions. BNC will have one `TxTo` only, `BTC` might have many transactions going "out" (based on UTXO)
   date: Date // timestamp of tx
   type: TxType // type
@@ -41,8 +48,6 @@ export type TxHistoryParams = {
   limit?: number // Optional Limit of transactions
   startTime?: Date // Optional start time
 }
-
-export type TxHash = string
 
 export type TxParams = {
   asset: Asset

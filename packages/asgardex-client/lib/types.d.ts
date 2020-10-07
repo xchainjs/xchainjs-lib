@@ -1,4 +1,4 @@
-import { Asset, BaseAmount } from "@thorchain/asgardex-util";
+import { Asset, BaseAmount } from '@thorchain/asgardex-util';
 export declare type Address = string;
 export declare type Network = 'testnet' | 'mainnet';
 export declare type Balance = {
@@ -8,13 +8,18 @@ export declare type Balance = {
 };
 export declare type Balances = Balance[];
 export declare type TxType = 'transfer' | 'freeze' | 'unfreeze' | 'unkown';
+export declare type TxHash = string;
 export declare type TxTo = {
-    address: string;
+    to: Address;
+    amount: BaseAmount;
+};
+export declare type TxFrom = {
+    from: Address | TxHash;
     amount: BaseAmount;
 };
 export declare type Tx = {
     asset: Asset;
-    from: Address;
+    from: TxFrom[];
     to: TxTo[];
     date: Date;
     type: TxType;
@@ -31,7 +36,6 @@ export declare type TxHistoryParams = {
     limit?: number;
     startTime?: Date;
 };
-export declare type TxHash = string;
 export declare type TxParams = {
     asset: Asset;
     amount: BaseAmount;
