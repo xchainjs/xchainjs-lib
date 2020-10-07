@@ -223,10 +223,15 @@ class Client implements BinanceClient, AsgardexClient {
         txs: txHistory.tx.map(tx => {
           return {
             asset: assetFromString(tx.txAsset) || AssetBNB,
-            from: tx.fromAddr,
+            from: [
+              {
+                from: tx.fromAddr,
+                amount: bigToBaseAmount(tx.value),
+              }
+            ],
             to: [
               {
-                address: tx.toAddr,
+                to: tx.toAddr,
                 amount: bigToBaseAmount(tx.value),
               }
             ],
