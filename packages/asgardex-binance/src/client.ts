@@ -1,15 +1,10 @@
 import axios from 'axios'
-import { Big } from 'big.js'
 import {
   Balances as BinanceBalances,
   Fees as BinanceFees,
   Prefix,
   TransferFee,
-  FreezeParams,
-  // GetTxsParams,
-  // TxPage,
-  // VaultTxParams,
-  // NormalTxParams,
+  TxPage as BinanceTxPage,
   // MultiSendParams,
   // GetMarketsParams,
 } from './types/binance'
@@ -19,24 +14,33 @@ import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
 import { 
   Address,
   AsgardexClient,
+  AsgardexClientParams,
+  Balances,
   Fees,
   Network,
-  Path,
   TxParams,
-  TransferResult
+  TxHash,
+  TxHistoryParams,
+  TxsPage,
 } from '@asgardex-clients/asgardex-client'
+import {
+  Asset,
+  AssetBNB,
+  BaseAmount,
+  assetFromString,
+} from '@thorchain/asgardex-util'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
-import { isTransferFee } from './util'
+import { isTransferFee, getTxType, bigToBaseAmount, baseAmountToBig } from './util'
 
 // This should be moved to asgardex-client interface
 type PrivKey = string
 
 // This should be moved to asgardex-client interface
-interface Balance {
-  coin: string
-  amount: number
-  frozenAmount?: number
-}
+export declare type FreezeParams = {
+  asset: Asset;
+  amount: BaseAmount;
+  recipient?: Address;
+};
 
 /**
  * Interface for custom Binance client
@@ -48,11 +52,9 @@ export interface BinanceClient {
 
   validateAddress(address: string): boolean
 
-  freeze(params: FreezeParams): Promise<TransferResult>
+  freeze(params: FreezeParams): Promise<TxHash>
+  unfreeze(params: FreezeParams): Promise<TxHash>
 
-  unfreeze(params: FreezeParams): Promise<TransferResult>
-
-  // getTransactions(params?: GetTxsParams): Promise<TxPage>
   // getMarkets(params: GetMarketsParams): Promise<any>
   // multiSend(params: MultiSendParams): Promise<TransferResult>
 }
@@ -75,7 +77,7 @@ class Client implements BinanceClient, AsgardexClient {
    * It will throw an error if an invalid phrase has been passed
    **/
 
-  constructor({ network = Network.TEST, phrase }: { network: Network; phrase?: string }) {
+  constructor({ network = 'testnet', phrase }: AsgardexClientParams) {
     // Invalid phrase will throw an error!
     this.network = network
     this.bncClient = new BncClient(this.getClientUrl())
@@ -105,27 +107,24 @@ class Client implements BinanceClient, AsgardexClient {
   }
 
   private getClientUrl = (): string => {
-    // return this.network === Network.TEST ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
+    // return this.network === 'testnet'? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
 
     // Accelerated 1
-    return this.network === Network.TEST ? 'https://testnet-dex-asiapacific.binance.org' : 'https://dex-asiapacific.binance.org'
+    return this.network === 'testnet' ? 'https://testnet-dex-asiapacific.binance.org' : 'https://dex-asiapacific.binance.org'
+  }
+  
+  getExplorerAddressUrl = (): string => {
+    const networkPath = this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
+    return `${networkPath}/address/${this.getAddress()}`
   }
 
-  getExplorerUrl = (type: Path, param: string): string => {
-    const networkPath = this.network === Network.TEST ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
-    return type === Path.tx ? `${networkPath}/tx/${param}` : `${networkPath}/address/${param}`
-  }
-
-  // Not used for binance client
-  setNodeURL(_url: string): void {
-  }
-
-  // Not used for binance client
-  setNodeAPIKey(_key: string): void {
+  getExplorerTxUrl = (): string => {
+    const networkPath = this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
+    return `${networkPath}/tx/`
   }
 
   private getPrefix = (): Prefix => {
-    return this.network === Network.TEST ? 'tbnb' : 'bnb'
+    return this.network === 'testnet' ? 'tbnb' : 'bnb'
   }
 
   static generatePhrase = (): string => {
@@ -180,7 +179,7 @@ class Client implements BinanceClient, AsgardexClient {
     return this.bncClient.checkAddress(address, this.getPrefix())
   }
 
-  getBalance = async (address?: Address, asset?: string): Promise<Balance[]> => {
+  getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
     if (!address) {
       address = this.getAddress()
     }
@@ -188,52 +187,59 @@ class Client implements BinanceClient, AsgardexClient {
       await this.bncClient.initChain()
       const balances: BinanceBalances = await this.bncClient.getBalance(address)
 
-      return balances.map(balance => (
-        {
-          coin: balance.symbol,
-          amount: Number((parseFloat(balance.free) * 1e8).toFixed()),
-          frozenAmount: Number((parseFloat(balance.frozen) * 1e8).toFixed()),
+      return balances.map(balance => {
+        return {
+          asset: assetFromString(balance.symbol) || AssetBNB,
+          amount: bigToBaseAmount(balance.free),
+          frozenAmount: bigToBaseAmount(balance.frozen),
         }
-      )).filter(balance => !asset || balance.coin === asset)
+      }).filter(balance => !asset || balance.asset === asset)
     } catch (error) {
       return Promise.reject(error)
     }
   }
 
-  // getTransactions = async (params: GetTxsParams = {}): Promise<TxPage> => {
-  //   const {
-  //     address = this.getAddress(),
-  //     blockHeight,
-  //     endTime,
-  //     limit,
-  //     offset,
-  //     side,
-  //     startTime,
-  //     txAsset,
-  //     txType,
-  //   } = params
+  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
+    await this.bncClient.initChain()
 
-  //   const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
-  //   const url = new URL(clientUrl)
-  //   if (address) url.searchParams.set('address', address)
-  //   if (blockHeight) url.searchParams.set('blockHeight', blockHeight.toString())
-  //   if (endTime) url.searchParams.set('endTime', endTime.toString())
-  //   if (limit) url.searchParams.set('limit', limit.toString())
-  //   if (offset) url.searchParams.set('offset', offset.toString())
-  //   if (side) url.searchParams.set('side', side.toString())
-  //   if (startTime) url.searchParams.set('startTime', startTime.toString())
-  //   if (txAsset) url.searchParams.set('txAsset', txAsset.toString())
-  //   if (txType) url.searchParams.set('txType', txType.toString())
+    const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
+    const url = new URL(clientUrl)
 
-  //   await this.bncClient.initChain()
+    url.searchParams.set('address', params ? params.address : this.getAddress())
+    if (params && params.limit) {
+      url.searchParams.set('limit', params.limit.toString())
+    }
+    if (params && params.offset) {
+      url.searchParams.set('offset', params.offset.toString())
+    }
+    if (params && params.startTime) {
+      url.searchParams.set('startTime', params.startTime.toString())
+    }
 
-  //   try {
-  //     const response = await axios.get<TxPage>(url.toString())
-  //     return response.data
-  //   } catch (error) {
-  //     return Promise.reject(error)
-  //   }
-  // }
+    try {
+      const txHistory = await axios.get<BinanceTxPage>(url.toString()).then(response => response.data)
+      return {
+        total: txHistory.total,
+        txs: txHistory.tx.map(tx => {
+          return {
+            asset: assetFromString(tx.txAsset) || AssetBNB,
+            from: tx.fromAddr,
+            to: [
+              {
+                address: tx.toAddr,
+                amount: bigToBaseAmount(tx.value),
+              }
+            ],
+            date: new Date(tx.timeStamp),
+            type: getTxType(tx.txType),
+            hash: tx.txHash,
+          }
+        })
+      }
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
 
   // getMarkets = async ({ limit = 1000, offset = 0 }: GetMarketsParams) => {
   //   await this.bncClient.initChain()
@@ -245,35 +251,21 @@ class Client implements BinanceClient, AsgardexClient {
   //   return await this.bncClient.multiSend(address, transactions, memo)
   // }
 
-  async deposit({ asset, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
-    return this.transfer({ asset, amount, recipient, memo, feeRate })
+  async deposit({ asset, amount, recipient, memo }: TxParams): Promise<string> {
+    return this.transfer({ asset, amount, recipient, memo })
   }
 
-  async transfer({ asset, amount, recipient, memo }: TxParams): Promise<TransferResult> {
+  async transfer({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> {
     await this.bncClient.initChain()
     await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
 
-    const transferResult = await this.bncClient.transfer(this.getAddress(), recipient, amount / 1e8, asset, memo)
-    try {
-      return transferResult.result.map((txResult: any) => txResult.hash)[0]
-    } catch (err) {
-      return ''
-    }
-  }
-
-  freeze = async ({ address, asset, amount }: FreezeParams): Promise<TransferResult> => {
-    await this.bncClient.initChain()
-    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
-
-    const addr = address || this.getAddress()
-    if (!addr)
-      return Promise.reject(
-        new Error(
-          'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
-        ),
-      )
-
-    const transferResult = await this.bncClient.tokens.freeze(addr, asset, Big(amount).div(Big(1e8)))
+    const transferResult = await this.bncClient.transfer(
+      this.getAddress(),
+      recipient,
+      amount.amount().div(1e8).toNumber(),
+      asset.symbol,
+      memo
+    )
 
     try {
       return transferResult.result.map((txResult: any) => txResult.hash)[0]
@@ -282,19 +274,40 @@ class Client implements BinanceClient, AsgardexClient {
     }
   }
 
-  unfreeze = async ({ address, asset, amount }: FreezeParams): Promise<TransferResult> => {
+  freeze = async ({ recipient, asset, amount }: FreezeParams): Promise<TxHash> => {
     await this.bncClient.initChain()
     await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
 
-    const addr = address || this.getAddress()
-    if (!addr)
+    const address = recipient || this.getAddress()
+    if (!address)
       return Promise.reject(
         new Error(
           'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
         ),
       )
 
-    const transferResult = await this.bncClient.tokens.unfreeze(addr, asset, Big(amount).div(Big(1e8)))
+    const transferResult = await this.bncClient.tokens.freeze(address, asset.symbol, baseAmountToBig(amount))
+
+    try {
+      return transferResult.result.map((txResult: any) => txResult.hash)[0]
+    } catch (err) {
+      return ''
+    }
+  }
+
+  unfreeze = async ({ recipient, asset, amount }: FreezeParams): Promise<TxHash> => {
+    await this.bncClient.initChain()
+    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
+
+    const address = recipient || this.getAddress()
+    if (!address)
+      return Promise.reject(
+        new Error(
+          'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
+        ),
+      )
+
+    const transferResult = await this.bncClient.tokens.unfreeze(address, asset.symbol, baseAmountToBig(amount))
 
     try {
       return transferResult.result.map((txResult: any) => txResult.hash)[0]
@@ -313,6 +326,7 @@ class Client implements BinanceClient, AsgardexClient {
       }
 
       return {
+        type: 'base',
         average: (transferFee as TransferFee).fixed_fee_params.fee,
       } as Fees
     } catch (error) {
@@ -321,4 +335,4 @@ class Client implements BinanceClient, AsgardexClient {
   }
 }
 
-export { Client, Network, Balance, Path }
+export { Client }
