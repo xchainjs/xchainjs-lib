@@ -3,9 +3,9 @@ import {
   Balances as BinanceBalances,
   Fees as BinanceFees,
   Prefix,
-  TransferFee,
+  TransferFee as BinanceTransferFee,
+  Fee as BinanceFee,
   TxPage as BinanceTxPage,
-  // MultiSendParams,
   // GetMarketsParams,
 } from './types/binance'
 
@@ -30,17 +30,33 @@ import {
   assetFromString,
 } from '@thorchain/asgardex-util'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
-import { isTransferFee, getTxType, bigToBaseAmount, baseAmountToBig } from './util'
+import { isTransferFee, getTxType, bigToBaseAmount, baseAmountToBig, isFreezeFee } from './util'
 
 // This should be moved to asgardex-client interface
 type PrivKey = string
 
-// This should be moved to asgardex-client interface
+// Should be moved to asgardex-client interface
 export declare type FreezeParams = {
   asset: Asset;
   amount: BaseAmount;
   recipient?: Address;
 };
+
+export type Coin = {
+  asset: Asset
+  amount: BaseAmount
+}
+
+export type MultiTransfer = {
+  to: Address
+  coins: Coin[]
+}
+
+export declare type MultiSendParams = {
+  address?: Address;
+  transactions: MultiTransfer[];
+  memo?: string
+}
 
 /**
  * Interface for custom Binance client
@@ -52,8 +68,13 @@ export interface BinanceClient {
 
   validateAddress(address: string): boolean
 
+  getMultiSendFees(): Promise<Fees>
+  getFreezeFees(): Promise<Fees>
+
   freeze(params: FreezeParams): Promise<TxHash>
   unfreeze(params: FreezeParams): Promise<TxHash>
+
+  multiSend(params: MultiSendParams): Promise<TxHash>
 
   // getMarkets(params: GetMarketsParams): Promise<any>
   // multiSend(params: MultiSendParams): Promise<TransferResult>
@@ -251,16 +272,38 @@ class Client implements BinanceClient, AsgardexClient {
   //   return this.bncClient.getMarkets(limit, offset)
   // }
 
-  // multiSend = async ({ address, transactions, memo = '' }: MultiSendParams) => {
-  //   await this.bncClient.initChain()
-  //   return await this.bncClient.multiSend(address, transactions, memo)
-  // }
+  multiSend = async ({ address, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
+    await this.bncClient.initChain()
+    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
 
-  async deposit({ asset, amount, recipient, memo }: TxParams): Promise<string> {
+    const transferResult = await this.bncClient.multiSend(
+      address || this.getAddress(),
+      transactions.map(transaction => {
+        return {
+          to: transaction.to,
+          coins: transaction.coins.map(coin => {
+            return {
+              denom: coin.asset.symbol,
+              amount: baseAmountToBig(coin.amount)
+            }
+          })
+        }
+      }),
+      memo
+    )
+
+    try {
+      return transferResult.result.map((txResult: any) => txResult.hash)[0]
+    } catch (err) {
+      return ''
+    }
+  }
+
+  deposit = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     return this.transfer({ asset, amount, recipient, memo })
   }
 
-  async transfer({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> {
+  transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     await this.bncClient.initChain()
     await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
 
@@ -332,7 +375,43 @@ class Client implements BinanceClient, AsgardexClient {
 
       return {
         type: 'base',
-        average: (transferFee as TransferFee).fixed_fee_params.fee,
+        average: (transferFee as BinanceTransferFee).fixed_fee_params.fee,
+      } as Fees
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+  
+  getMultiSendFees = async (): Promise<Fees> => {
+    await this.bncClient.initChain()
+    try {
+      const feesArray = await axios.get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`).then(response => response.data)
+      const transferFee = feesArray.find(isTransferFee)
+      if (!transferFee) {
+        throw new Error('failed to get transfer fees')
+      }
+
+      return {
+        type: 'base',
+        average: (transferFee as BinanceTransferFee).multi_transfer_fee,
+      } as Fees
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+  
+  getFreezeFees = async (): Promise<Fees> => {
+    await this.bncClient.initChain()
+    try {
+      const feesArray = await axios.get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`).then(response => response.data)
+      const transferFee = feesArray.find(isFreezeFee)
+      if (!transferFee) {
+        throw new Error('failed to get transfer fees')
+      }
+
+      return {
+        type: 'base',
+        average: (transferFee as BinanceFee).fee,
       } as Fees
     } catch (error) {
       return Promise.reject(error)

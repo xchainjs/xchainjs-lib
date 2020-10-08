@@ -22,6 +22,11 @@ export const isFee = (v: Fee | TransferFee | DexFees): v is Fee =>
   !!(v as Fee)?.msg_type && (v as Fee)?.fee !== undefined && (v as Fee)?.fee_for !== undefined
 
 /**
+ * Type guard for `FreezeFee`
+ */
+export const isFreezeFee = (v: Fee | TransferFee | DexFees): v is Fee => (v as Fee)?.msg_type === 'tokensFreeze'
+
+/**
  * Type guard for `TransferFee`
  */
 export const isTransferFee = (v: Fee | TransferFee | DexFees): v is TransferFee =>
