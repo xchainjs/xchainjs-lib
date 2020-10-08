@@ -11,9 +11,10 @@ import {
   Balance,
   Network,
   Fees,
+  AsgardexClientParams,
 } from '@asgardex-clients/asgardex-client'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
-import { baseAmount, assetFromString } from '@thorchain/asgardex-util'
+import { baseAmount, assetToString, AssetBTC } from '@thorchain/asgardex-util'
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -26,11 +27,14 @@ import { baseAmount, assetFromString } from '@thorchain/asgardex-util'
 interface BitcoinClient {
   purgeClient(): void
 
-  getAddress(): string
-
   validateAddress(address: string): boolean
 
   scanUTXOs(): Promise<void>
+}
+
+type BitcoinClientParams = AsgardexClientParams & {
+  nodeUrl?: string
+  nodeApiKey?: string
 }
 
 /**
@@ -44,11 +48,11 @@ class Client implements BitcoinClient, AsgardexClient {
   nodeApiKey = ''
 
   // Client is initialised with network type
-  constructor(_net: Network = 'testnet', _nodeUrl = '', _nodeApiKey = '', _phrase?: string) {
-    this.net = _net
-    _nodeUrl && this.setNodeURL(_nodeUrl)
-    _nodeApiKey && this.setNodeAPIKey(_nodeApiKey)
-    _phrase && this.setPhrase(_phrase)
+  constructor({ network = 'testnet', nodeUrl = '', nodeApiKey = '', phrase }: BitcoinClientParams) {
+    this.net = network
+    this.setNodeURL(nodeUrl)
+    this.setNodeAPIKey(nodeApiKey)
+    phrase && this.setPhrase(phrase)
     this.utxos = []
   }
 
@@ -106,6 +110,7 @@ class Client implements BitcoinClient, AsgardexClient {
       const network = this.getNetwork()
       const btcNetwork = network === 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
       const btcKeys = this.getBtcKeys(this.phrase)
+
       const { address } = Bitcoin.payments.p2wpkh({
         pubkey: btcKeys.publicKey,
         network: btcNetwork,
@@ -175,7 +180,6 @@ class Client implements BitcoinClient, AsgardexClient {
 
   // Returns balance of address
   getBalance = async (address?: string): Promise<Balance[]> => {
-    await this.scanUTXOs()
     if (!address) {
       address = this.getAddress()
     }
@@ -185,25 +189,23 @@ class Client implements BitcoinClient, AsgardexClient {
       const dashboardAddress = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
       return [
         {
-          asset: assetFromString('BTC.BTC')!,
+          asset: AssetBTC,
           amount: baseAmount(dashboardAddress[address].address.balance),
         },
       ]
     } catch (error) {
-      return Promise.reject(error)
+      return Promise.reject(new Error('Invalid address'))
     }
   }
 
   // Given a desired output, return change
   private getChange = async (valueOut: number): Promise<number> => {
     const balances = await this.getBalance()
-    //TODO(kashif) needs verification if this is how we should compare symbol === 'BTC.BTC'
-    const btcBalance = balances.find((balance) => balance.asset.symbol === 'BTC.BTC')
+    const btcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetBTC))
     let change = 0
-    if (btcBalance && btcBalance.amount.amount().toNumber() > 0) {
-      if (btcBalance.amount.amount().toNumber() - valueOut > Utils.dustThreshold) {
-        change = btcBalance.amount.amount().toNumber() - valueOut
-      }
+
+    if (btcBalance && btcBalance.amount.amount().minus(valueOut).isGreaterThan(Utils.dustThreshold)) {
+      change = btcBalance.amount.amount().minus(valueOut).toNumber()
     }
     return change
   }
@@ -318,11 +320,12 @@ class Client implements BitcoinClient, AsgardexClient {
     return memoFees
   }
 
-  async deposit({ asset, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
+  async deposit({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
     return this.transfer({ asset, amount, recipient, memo, feeRate })
   }
 
-  async transfer({ asset, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
+  async transfer({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
+    await this.scanUTXOs()
     const balance = await this.getBalance()
     const btcBalance = balance.find((balance) => balance.asset.symbol === asset.symbol)
     if (!btcBalance) {
@@ -341,7 +344,7 @@ class Client implements BitcoinClient, AsgardexClient {
     const fee = compiledMemo
       ? Utils.getVaultFee(this.utxos, compiledMemo, feeRateWhole)
       : Utils.getNormalFee(this.utxos, feeRateWhole)
-    if (fee + amount.amount().toNumber() > btcBalance.amount.amount().toNumber()) {
+    if (amount.amount().plus(fee).isGreaterThan(btcBalance.amount.amount())) {
       throw new Error('Balance insufficient for transaction')
     }
     const psbt = new Bitcoin.Psbt({ network: network }) // Network-specific

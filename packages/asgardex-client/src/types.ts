@@ -50,7 +50,7 @@ export type TxHistoryParams = {
 }
 
 export type TxParams = {
-  asset: Asset
+  asset?: Asset
   amount: BaseAmount
   recipient: Address
   feeRate?: number // optional feeRate
@@ -70,7 +70,7 @@ export type Fees = {
 
 export type AsgardexClientParams = {
   network?: Network
-  phrase: string
+  phrase?: string
 }
 
 export interface AsgardexClient {

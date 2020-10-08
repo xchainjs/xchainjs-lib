@@ -1,55 +1,48 @@
 require('dotenv').config()
 import * as Bitcoin from 'bitcoinjs-lib'
-import { Client, Network } from '../src/client'
+import { Client } from '../src/client'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
-import { assetFromString, baseAmount } from '@thorchain/asgardex-util'
+import { baseAmount, AssetBTC } from '@thorchain/asgardex-util'
 
-//Mocks
-import mockApi, { responses } from '../__mocks__/blockChair'
-
-const PHRASE = process.env.VAULT_PHRASE as string
 const NODE_URL = 'https://api.blockchair.com/bitcoin/testnet'
 const NODE_API_KEY = process.env.BLOCKCHAIR_API_KEY || ''
-
-const makeWallet = (network: Network = 'testnet') => {
-  const client = new Client(network, NODE_URL, NODE_API_KEY)
-  const phrase = client.generatePhrase()
-  client.setPhrase(phrase)
-  const address = client.getAddress()
-  return { phrase, address, network }
-}
-
-beforeEach(() => {
-  mockApi.mockGetAddress()
-  mockApi.mockBitcoinStats()
-  mockApi.mockGetTx()
-  mockApi.mockGetRawTx()
+const btcClient = new Client({
+  network: 'mainnet',
+  nodeUrl: NODE_URL,
+  nodeApiKey: NODE_API_KEY,
 })
 
-afterEach(() => {
-  mockApi.restore()
-})
+jest.setTimeout(30000)
 
 describe('BitcoinClient Test', () => {
-  const btcClient = new Client('mainnet', NODE_URL, NODE_API_KEY)
-  let address: string
+  beforeEach(() => btcClient.purgeClient())
+  afterEach(() => btcClient.purgeClient())
+
   const MEMO = 'SWAP:THOR.RUNE'
   // please don't touch the tBTC in these
-  const phraseOne = 'cycle join secret hospital slim party write price myth okay long slight'
-  const addyOne = 'tb1qvgn58ktpaacpzp6w8fdjgk9dfgv28gytvvhd5a'
-  const phraseTwo = 'heavy spin someone rice laptop minor dice deal fever praise reject panic'
-  const addyTwo = 'tb1qmyq44gzke8vzzj0npun6xla4anj92ghqn0g0qn'
+  // NOTE(kashif) For some reason these phrases and addresses don't match.
+  // const phraseOne = 'cycle join secret hospital slim party write price myth okay long slight'
+  // const addyOne = 'tb1qvgn58ktpaacpzp6w8fdjgk9dfgv28gytvvhd5a' //actual address seems to be: tb1qfjypmuujfxmqtfudgszc6qrf22mpdskc769qrf
+  // const phraseTwo = 'heavy spin someone rice laptop minor dice deal fever praise reject panic'
+  // const addyTwo = 'tb1qmyq44gzke8vzzj0npun6xla4anj92ghqn0g0qn' //actual address seems to be: tb1qc74x3y3xzc0gttq7qgkxv230fgjuyaud29vm9m
 
-  const testWallet = makeWallet()
+  const phraseOne = 'foster blouse cattle fiction deputy social brown toast various sock awkward print'
+  const addyOne = 'tb1ql5wfzdm6llldgc90wj3uryf0f8pksd4d70p9hg'
+  const phraseTwo = 'rubber torch second universe pond fence flat permit tree kiss civil fantasy'
+  const addyTwo = 'tb1q75z9ake8lr2aka5t4d4per3jel4n7dg3q7lefn'
+
+  // Third ones is used only for balance verification
+  const phraseThree = 'father script wrestle topic better gravity awful robot letter illegal casino laugh'
+  const addyThree = 'tb1q59c5s6slg5075y7gngxd5c20rphntd367nfvdh'
 
   it('should have the correct bitcoin network right prefix', () => {
+    btcClient.setNetwork('mainnet')
     const network = btcClient.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     expect(network.bech32).toEqual('bc')
   })
 
   it('should update net', () => {
-    const net = 'testnet'
-    btcClient.setNetwork(net)
+    btcClient.setNetwork('testnet')
     const network = btcClient.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     expect(network.bech32).toEqual('tb')
   })
@@ -61,108 +54,76 @@ describe('BitcoinClient Test', () => {
   })
 
   it('set phrase should return correct address', () => {
-    const result = btcClient.setPhrase(testWallet.phrase)
-    expect(result).toEqual(testWallet.address)
+    const result = btcClient.setPhrase(phraseOne)
+    expect(result).toEqual(addyOne)
   })
 
   it('should throw an error for setting a bad phrase', () => {
-    expect(() => {
-      btcClient.setPhrase('cat')
-    }).toThrow()
+    expect(() => btcClient.setPhrase('cat')).toThrow()
   })
 
   it('should not throw an error for setting a good phrase', () => {
-    expect(btcClient.setPhrase(PHRASE)).toBeUndefined
+    expect(btcClient.setPhrase(phraseOne)).toBeUndefined
   })
 
   it('should validate the right address', () => {
-    btcClient.setPhrase(testWallet.phrase)
-    btcClient.setNetwork(testWallet.network)
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
 
-    address = btcClient.getAddress()
+    const address = btcClient.getAddress()
     const valid = btcClient.validateAddress(address)
-    expect(address).toEqual(testWallet.address)
+    expect(address).toEqual(addyOne)
     expect(valid).toBeTruthy()
   })
 
   it('should get the right balance', async () => {
-    const expectedBalance = [
-      {
-        coin: 'BTC.BTC',
-        amount: responses.getAddressResponse.address.balance,
-      },
-    ]
-    btcClient.setPhrase(testWallet.phrase)
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseThree)
     const balance = await btcClient.getBalance()
-    expect(balance.length).toEqual(expectedBalance.length)
-    expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance[0].amount)
+    expect(balance.length).toEqual(1)
+    expect(balance[0].amount.amount().toNumber()).toEqual(100000)
   })
 
   it('should get the right balance when scanUTXOs is called twice', async () => {
-    const expectedBalance = [
-      {
-        coin: 'BTC.BTC',
-        amount: responses.getAddressResponse.address.balance,
-      },
-    ]
-    btcClient.purgeClient()
-    btcClient.setNetwork(testWallet.network)
-    btcClient.setPhrase(testWallet.phrase)
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseThree)
 
     const balance = await btcClient.getBalance()
-    expect(balance.length).toEqual(expectedBalance.length)
-    expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance[0].amount)
+    expect(balance.length).toEqual(1)
+    expect(balance[0].amount.amount().toNumber()).toEqual(100000)
 
     const newBalance = await btcClient.getBalance()
-    expect(newBalance.length).toEqual(expectedBalance.length)
-    expect(newBalance[0].amount.amount().toNumber()).toEqual(expectedBalance[0].amount)
+    expect(newBalance.length).toEqual(1)
+    expect(newBalance[0].amount.amount().toNumber()).toEqual(100000)
   })
 
-  // it('should get the right history', async () => {
-  //   const net = 'testnet'
-  //   btcClient.purgeClient()
-  //   btcClient.setNetwork(net)
-  //   btcClient.setPhrase(PHRASE)
-  //   address = btcClient.getAddress()
-  //   const txArray = await btcClient.getTransactions(address)
-  //   expect(txArray[1].txid).toEqual('7fc1d2c1e4017a6aea030be1d4f5365d11abfd295f56c13615e49641c55c54b8')
-  // })
-
   it('should broadcast a normal transfer', async () => {
-    btcClient.purgeClient()
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
-    const asset = assetFromString('BTC.BTC')!
     const amount = baseAmount(2223)
     try {
-      const txid = await btcClient.transfer({ asset, recipient: addyTwo, amount, feeRate: 1 })
+      const txid = await btcClient.transfer({ asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
       expect(txid).toEqual(expect.any(String))
     } catch (err) {
       console.log('ERR running test', err)
+      throw err
     }
   })
 
   it('should purge phrase and utxos', async () => {
     btcClient.purgeClient()
-    expect(() => {
-      btcClient.getAddress()
-    }).toThrow('Phrase not set')
-    expect(async () => {
-      await btcClient.getBalance()
-    }).rejects.toThrow('Phrase not set')
+    expect(() => btcClient.getAddress()).toThrow('Phrase not set')
+    return expect(btcClient.getBalance()).rejects.toThrow('Phrase not set')
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
-    const net = 'testnet'
-    btcClient.purgeClient()
-    btcClient.setNetwork(net)
+    btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseTwo)
 
-    const asset = assetFromString('BTC.BTC')!
     const amount = baseAmount(2223)
     try {
       const txid = await btcClient.transfer({
-        asset,
+        asset: AssetBTC,
         recipient: addyOne,
         amount,
         memo: MEMO,
@@ -171,39 +132,32 @@ describe('BitcoinClient Test', () => {
       expect(txid).toEqual(expect.any(String))
     } catch (err) {
       console.log('ERR running test', err)
+      throw err
     }
   })
 
   it('should get the balance of an address without phrase', async () => {
-    const expectedBalance = [
-      {
-        coin: 'BTC.BTC',
-        amount: responses.getAddressResponse.address.balance,
-      },
-    ]
-    const balance = await btcClient.getBalance(address)
-    expect(balance.length).toEqual(expectedBalance.length)
-    expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance[0].amount)
+    btcClient.setNetwork('testnet')
+    btcClient.purgeClient()
+    const balance = await btcClient.getBalance(addyThree)
+    expect(balance.length).toEqual(1)
+    expect(balance[0].amount.amount().toNumber()).toEqual(100000)
   })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
-    mockApi.restore()
-    const net = 'testnet'
-    btcClient.purgeClient()
-    btcClient.setNetwork(net)
+    btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
 
-    const asset = assetFromString('BTC.BTC')!
+    const asset = AssetBTC
     const amount = baseAmount(9999999999)
-    expect(async () => await btcClient.transfer({ asset, recipient: addyTwo, amount, feeRate: 1 })).rejects.toThrow(
+    return expect(btcClient.transfer({ asset, recipient: addyTwo, amount, feeRate: 1 })).rejects.toThrow(
       'Balance insufficient for transaction',
     )
   })
 
   it('should return estimated fees of a normal tx', async () => {
-    const net = 'testnet'
-    btcClient.setNetwork(net)
-    btcClient.setPhrase(PHRASE)
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
     const estimates = await btcClient.getFees()
     expect(estimates.fast).toEqual(expect.any(Number))
     expect(estimates.fastest).toEqual(expect.any(Number))
@@ -211,33 +165,31 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should return estimated fees of a vault tx that are more expensive than a normal tx', async () => {
-    const net = 'testnet'
-    btcClient.purgeClient()
-    btcClient.setNetwork(net)
-    btcClient.setPhrase(PHRASE)
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
     const normalTx = await btcClient.getFees()
     const vaultTx = await btcClient.getFeesWithMemo(MEMO)
     expect(vaultTx.fast!).toBeGreaterThan(normalTx.fast!)
   })
 
-  // it('should calculate average block publish time', async () => {
-  //   const blockTimes = await btcClient.getBlockTime()
-  //   expect(blockTimes).toBeGreaterThan(1)
-  // })
+  it('should error when an invalid address is used in getting balance', () => {
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
+    const invalidAddress = 'error_address'
+    const expectedError = 'Invalid address'
+    return expect(btcClient.getBalance(invalidAddress)).rejects.toThrow(expectedError)
+  })
 
-  it('should error when an invalid address is provided', async () => {
-    const net = 'testnet'
-    btcClient.purgeClient()
-    btcClient.setNetwork(net)
-    btcClient.setPhrase(PHRASE)
+  it('should error when an invalid address is used in transfer', () => {
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseTwo)
     const invalidAddress = 'error_address'
 
-    const asset = assetFromString('BTC.BTC')!
     const amount = baseAmount(99000)
-    expect(async () => await btcClient.getBalance(invalidAddress)).rejects.toThrow('Invalid address')
-    // expect(async () => await btcClient.getTransactions(invalidAddress)).rejects.toThrow('Invalid address')
-    expect(
-      async () => await btcClient.transfer({ asset, recipient: invalidAddress, amount, feeRate: 1 }),
-    ).rejects.toThrow('Invalid address')
+    const expectedError = 'Invalid address'
+
+    return expect(
+      btcClient.transfer({ asset: AssetBTC, recipient: invalidAddress, amount, feeRate: 1 }),
+    ).rejects.toThrow(expectedError)
   })
 })

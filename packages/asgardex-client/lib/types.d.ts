@@ -37,7 +37,7 @@ export declare type TxHistoryParams = {
     startTime?: Date;
 };
 export declare type TxParams = {
-    asset: Asset;
+    asset?: Asset;
     amount: BaseAmount;
     recipient: Address;
     feeRate?: number;
@@ -52,7 +52,7 @@ export declare type Fees = {
 };
 export declare type AsgardexClientParams = {
     network?: Network;
-    phrase: string;
+    phrase?: string;
 };
 export interface AsgardexClient {
     setNetwork(net: Network): void;
