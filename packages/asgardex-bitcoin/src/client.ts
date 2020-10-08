@@ -2,8 +2,19 @@ import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoin
 import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
 import * as Utils from './utils'
 import * as blockChair from './blockchair-api'
-import { Address, AsgardexClient, TxParams, Balance, Network, Path, Fees } from '@asgardex-clients/asgardex-client'
+import {
+  TxHistoryParams,
+  TxsPage,
+  Address,
+  AsgardexClient,
+  TxParams,
+  Balance,
+  Network,
+  Fees,
+  AsgardexClientParams,
+} from '@asgardex-clients/asgardex-client'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
+import { baseAmount, assetToString, AssetBTC } from '@thorchain/asgardex-util'
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -16,11 +27,14 @@ import * as asgardexCrypto from '@thorchain/asgardex-crypto'
 interface BitcoinClient {
   purgeClient(): void
 
-  getAddress(): string
-
   validateAddress(address: string): boolean
 
   scanUTXOs(): Promise<void>
+}
+
+type BitcoinClientParams = AsgardexClientParams & {
+  nodeUrl?: string
+  nodeApiKey?: string
 }
 
 /**
@@ -34,11 +48,11 @@ class Client implements BitcoinClient, AsgardexClient {
   nodeApiKey = ''
 
   // Client is initialised with network type
-  constructor(_net: Network = Network.TEST, _nodeUrl = '', _nodeApiKey = '', _phrase?: string) {
-    this.net = _net
-    _nodeUrl && this.setNodeURL(_nodeUrl)
-    _nodeApiKey && this.setNodeAPIKey(_nodeApiKey)
-    _phrase && this.setPhrase(_phrase)
+  constructor({ network = 'testnet', nodeUrl = '', nodeApiKey = '', phrase }: BitcoinClientParams) {
+    this.net = network
+    this.setNodeURL(nodeUrl)
+    this.setNodeAPIKey(nodeApiKey)
+    phrase && this.setPhrase(phrase)
     this.utxos = []
   }
 
@@ -58,7 +72,8 @@ class Client implements BitcoinClient, AsgardexClient {
   setPhrase = (phrase: string): Address => {
     if (asgardexCrypto.validatePhrase(phrase)) {
       this.phrase = phrase
-      return phrase
+      const address = this.getAddress()
+      return address
     } else {
       throw new Error('Invalid BIP39 phrase')
     }
@@ -76,14 +91,16 @@ class Client implements BitcoinClient, AsgardexClient {
 
   // Will return the desired network
   getNetwork(): Network {
-    return this.net === Network.TEST ? Network.TEST : Network.MAIN
+    return this.net
   }
 
-  getExplorerUrl(type: Path, param: string): string {
-    const networkPath = this.net === Network.TEST ? '/testnet' : ''
-    return type === Path.tx
-      ? `https://blockstream.info${networkPath}/tx/${param}`
-      : `https://blockstream.info${networkPath}/address/${param}`
+  getExplorerAddressUrl(address: Address): string {
+    const networkPath = this.net === 'testnet' ? '/testnet' : ''
+    return `https://blockstream.info${networkPath}/address/${address}`
+  }
+  getExplorerTxUrl(txID: string): string {
+    const networkPath = this.net === 'testnet' ? '/testnet' : ''
+    return `https://blockstream.info${networkPath}/tx/${txID}`
   }
 
   // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
@@ -91,8 +108,9 @@ class Client implements BitcoinClient, AsgardexClient {
   getAddress = (): string => {
     if (this.phrase) {
       const network = this.getNetwork()
-      const btcNetwork = network === Network.TEST ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+      const btcNetwork = network === 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
       const btcKeys = this.getBtcKeys(this.phrase)
+
       const { address } = Bitcoin.payments.p2wpkh({
         pubkey: btcKeys.publicKey,
         network: btcNetwork,
@@ -107,7 +125,7 @@ class Client implements BitcoinClient, AsgardexClient {
 
   // Private function to get keyPair from the this.phrase
   private getBtcKeys(_phrase: string): Bitcoin.ECPairInterface {
-    const network = this.getNetwork() == Network.TEST ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     // const buffer = BIP39.mnemonicToSeedSync(_phrase)
     // const wif = WIF.encode(network.wif, buffer, true)
     const seed = asgardexCrypto.getSeed(_phrase)
@@ -117,7 +135,7 @@ class Client implements BitcoinClient, AsgardexClient {
 
   // Will return true/false
   validateAddress = (address: string): boolean => {
-    const network = this.getNetwork() == Network.TEST ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     try {
       Bitcoin.address.toOutputScript(address, network)
       return true
@@ -167,28 +185,27 @@ class Client implements BitcoinClient, AsgardexClient {
     }
 
     try {
-      // const chain = this.net === Network.TEST ? 'bitcoin/testnet' : 'bitcoin'
+      // const chain = this.net === 'testnet' ? 'bitcoin/testnet' : 'bitcoin'
       const dashboardAddress = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
       return [
         {
-          coin: 'BTC.BTC',
-          amount: dashboardAddress[address].address.balance,
+          asset: AssetBTC,
+          amount: baseAmount(dashboardAddress[address].address.balance),
         },
       ]
     } catch (error) {
-      return Promise.reject(error)
+      return Promise.reject(new Error('Invalid address'))
     }
   }
 
   // Given a desired output, return change
   private getChange = async (valueOut: number): Promise<number> => {
     const balances = await this.getBalance()
-    const btcBalance = balances.find((balance) => balance.coin === 'BTC.BTC')
+    const btcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetBTC))
     let change = 0
-    if (btcBalance && btcBalance.amount > 0) {
-      if (btcBalance.amount - valueOut > Utils.dustThreshold) {
-        change = btcBalance.amount - valueOut
-      }
+
+    if (btcBalance && btcBalance.amount.amount().minus(valueOut).isGreaterThan(Utils.dustThreshold)) {
+      change = btcBalance.amount.amount().minus(valueOut).toNumber()
     }
     return change
   }
@@ -198,21 +215,29 @@ class Client implements BitcoinClient, AsgardexClient {
    * Requires querying tx data for each address tx
    * @param memo
    */
-  // getTransactions = async (address: string): Promise<TxPage[]> => {
-  //   let transactions = []
+  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
+    // TODO(kashif) temporarily work in progress.
+    // Need to confirm whether anything special is needed to complete
+    // it here. Also needs test cases.
+    console.log(params?.address)
+    return Promise.resolve({
+      total: 0,
+      txs: [],
+    })
 
-  //   try {
-  //     const chain = this.net === Network.TEST ? 'bitcoin/testnet' : 'bitcoin'
-  //     const dashboardAddress = await blockChair.getAddress(chain, address)
-  //     transactions = dashboardAddress[address].transactions.reduce( async (txs, tx) => {
-  //       await
-  //     }, [])
-  //   } catch (error) {
-  //     return Promise.reject(error)
-  //   }
+    // let transactions = []
+    // try {
+    //   const chain = this.net === 'testnet' ? 'bitcoin/testnet' : 'bitcoin'
+    //   const dashboardAddress = await blockChair.getAddress(chain, address)
+    //   transactions = dashboardAddress[address].transactions.reduce( async (txs, tx) => {
+    //     await
+    //   }, [])
+    // } catch (error) {
+    //   return Promise.reject(error)
+    // }
 
-  //   return transactions
-  // }
+    // return transactions
+  }
 
   // getBlockTime = async (): Promise<number> => {
   //   const blocks: Blocks = await getBlocks(this.electrsAPI)
@@ -266,18 +291,19 @@ class Client implements BitcoinClient, AsgardexClient {
       throw new Error('No utxos to send')
     }
 
-    const calcdFees = { fast: 0, average: 0, slow: 0 }
     const btcStats = await blockChair.bitcoinStats(this.nodeUrl, this.nodeApiKey)
     const nextBlockFeeRate = btcStats.suggested_transaction_fee_per_byte_sat
     const feesOptions: Fees = {
-      fast: 5,
+      type: 'byte',
+      fastest: 5,
       average: 1,
-      slow: 0.5,
+      fast: 0.5,
     }
-    let key: keyof typeof feesOptions
-    for (key in feesOptions) {
-      const feeRate = nextBlockFeeRate * feesOptions[key]
-      calcdFees[key] = feeRate
+    const calcdFees: Fees = {
+      type: feesOptions.type,
+      fast: nextBlockFeeRate * feesOptions.fast!,
+      average: nextBlockFeeRate * feesOptions.average!,
+      fastest: nextBlockFeeRate * feesOptions.fastest!,
     }
     return calcdFees
   }
@@ -285,21 +311,23 @@ class Client implements BitcoinClient, AsgardexClient {
   async getFeesWithMemo(memo: string): Promise<Fees> {
     const OP_RETURN = Utils.compileMemo(memo)
     const fees = await this.getFees()
-    const memoFees: Fees = { fast: 0, average: 0, slow: 0 }
-    let key: keyof typeof fees
-    for (key in fees) {
-      memoFees[key] = Utils.getVaultFee(this.utxos, OP_RETURN, fees[key])
+    const memoFees: Fees = {
+      type: 'byte',
+      fast: Utils.getVaultFee(this.utxos, OP_RETURN, fees.fast ?? 0),
+      average: Utils.getVaultFee(this.utxos, OP_RETURN, fees.average ?? 0),
+      fastest: Utils.getVaultFee(this.utxos, OP_RETURN, fees.fastest ?? 0),
     }
     return memoFees
   }
 
-  async deposit({ asset, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
+  async deposit({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
     return this.transfer({ asset, amount, recipient, memo, feeRate })
   }
 
-  async transfer({ asset, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
+  async transfer({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
+    await this.scanUTXOs()
     const balance = await this.getBalance()
-    const btcBalance = balance.find((balance) => balance.coin === asset)
+    const btcBalance = balance.find((balance) => balance.asset.symbol === asset.symbol)
     if (!btcBalance) {
       throw new Error('No btcBalance found')
     }
@@ -309,14 +337,14 @@ class Client implements BitcoinClient, AsgardexClient {
     if (!this.validateAddress(recipient)) {
       throw new Error('Invalid address')
     }
-    const network = this.getNetwork() == Network.TEST ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     const btcKeys = this.getBtcKeys(this.phrase)
-    const feeRateWhole = Number(feeRate.toFixed(0))
+    const feeRateWhole = Number(feeRate?.toFixed(0))
     const compiledMemo = memo ? Utils.compileMemo(memo) : null
     const fee = compiledMemo
       ? Utils.getVaultFee(this.utxos, compiledMemo, feeRateWhole)
       : Utils.getNormalFee(this.utxos, feeRateWhole)
-    if (fee + amount > btcBalance.amount) {
+    if (amount.amount().plus(fee).isGreaterThan(btcBalance.amount.amount())) {
       throw new Error('Balance insufficient for transaction')
     }
     const psbt = new Bitcoin.Psbt({ network: network }) // Network-specific
@@ -329,8 +357,8 @@ class Client implements BitcoinClient, AsgardexClient {
       }),
     )
     // Outputs
-    psbt.addOutput({ address: recipient, value: amount }) // Add output {address, value}
-    const change = await this.getChange(amount + fee)
+    psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
+    const change = await this.getChange(amount.amount().toNumber() + fee)
     if (change > 0) {
       psbt.addOutput({ address: this.getAddress(), value: change }) // Add change
     }
