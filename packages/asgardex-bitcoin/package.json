@@ -48,7 +48,6 @@
     "@types/wif": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^4.1.1",
     "@typescript-eslint/parser": "^4.1.1",
-    "axios-mock-adapter": "^1.18.2",
     "dotenv": "^8.2.0",
     "eslint": "^7.9.0",
     "eslint-config-prettier": "^6.11.0",
