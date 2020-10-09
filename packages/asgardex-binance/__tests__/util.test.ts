@@ -1,4 +1,4 @@
-import { getHashFromTransfer, getTxHashFromMemo, isFee, isTransferFee, isDexFees } from '../src/util'
+import { getHashFromTransfer, getTxHashFromMemo, isFee, isTransferFee, isDexFees, isFreezeFee } from '../src/util'
 import { TransferEvent, Transfer } from '../src/types/binance-ws'
 import { DexFees, Fee, TransferFee } from '../src/types/binance'
 
@@ -81,6 +81,12 @@ describe('binance/util', () => {
       lower_limit_as_multi: 2,
     }
 
+    const freezeFee: Fee = {
+      msg_type: 'tokensFreeze',
+      fee: 500000,
+      fee_for: 1,
+    }
+
     describe('isFee', () => {
       it('validates Fee', () => {
         expect(isFee(fee)).toBeTruthy()
@@ -105,6 +111,15 @@ describe('binance/util', () => {
       })
       it('invalidates a DexFees', () => {
         expect(isDexFees(fee)).toBeFalsy()
+      })
+    })
+
+    describe('isFreezeFee', () => {
+      it('validates FreezeFee', () => {
+        expect(isFreezeFee(freezeFee)).toBeTruthy()
+      })
+      it('invalidates a FreezeFee', () => {
+        expect(isFreezeFee(dexFees)).toBeFalsy()
       })
     })
   })

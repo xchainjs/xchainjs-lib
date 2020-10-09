@@ -31,6 +31,10 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix",
     "prepublishOnly": "yarn build"
   },
+  "dependencies": {
+    "@thorchain/asgardex-crypto": "^0.1.0",
+    "@asgardex-clients/core": "^0.0.5"
+  },
   "devDependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
     "@types/big.js": "^4.0.5",

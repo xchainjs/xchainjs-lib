@@ -1,5 +1,6 @@
 import { Transfer, TransferEvent } from './types/binance-ws'
-import { TransferFee, DexFees, Fee } from './types/binance'
+import { TransferFee, DexFees, Fee, TxType as BinanceTxType } from './types/binance'
+import { TxType } from '@asgardex-clients/asgardex-client'
 
 /**
  * Get `hash` from transfer event sent by Binance chain
@@ -19,6 +20,11 @@ export const isFee = (v: Fee | TransferFee | DexFees): v is Fee =>
   !!(v as Fee)?.msg_type && (v as Fee)?.fee !== undefined && (v as Fee)?.fee_for !== undefined
 
 /**
+ * Type guard for `FreezeFee`
+ */
+export const isFreezeFee = (v: Fee | TransferFee | DexFees): v is Fee => (v as Fee)?.msg_type === 'tokensFreeze'
+
+/**
  * Type guard for `TransferFee`
  */
 export const isTransferFee = (v: Fee | TransferFee | DexFees): v is TransferFee =>
@@ -28,3 +34,13 @@ export const isTransferFee = (v: Fee | TransferFee | DexFees): v is TransferFee 
  * Type guard for `DexFees`
  */
 export const isDexFees = (v: Fee | TransferFee | DexFees): v is DexFees => (v as DexFees)?.dex_fee_fields?.length > 0
+
+/**
+ * Get TxType
+ */
+export const getTxType = (t: BinanceTxType): TxType => {
+  if (t === 'TRANSFER' || t === 'DEPOSIT') return 'transfer'
+  if (t === 'FREEZE_TOKEN') return 'freeze'
+  if (t === 'UN_FREEZE_TOKEN') return 'unfreeze'
+  return 'unkown'
+}
