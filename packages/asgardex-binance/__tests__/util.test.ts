@@ -1,4 +1,4 @@
-import { getHashFromTransfer, getTxHashFromMemo, isFee, isTransferFee, isDexFees, bigToBaseAmount, baseAmountToBig, baseAmountToNumber, isFreezeFee } from '../src/util'
+import { getHashFromTransfer, getTxHashFromMemo, isFee, isTransferFee, isDexFees, isFreezeFee } from '../src/util'
 import { TransferEvent, Transfer } from '../src/types/binance-ws'
 import { DexFees, Fee, TransferFee } from '../src/types/binance'
 
@@ -121,20 +121,6 @@ describe('binance/util', () => {
       it('invalidates a FreezeFee', () => {
         expect(isFreezeFee(dexFees)).toBeFalsy()
       })
-    })
-  })
-
-  describe('BaseAmount Convertion', () => {
-    it('bigToBaseAmount', () => {
-      expect(bigToBaseAmount(0.1).amount().toNumber()).toEqual(10000000)
-    })
-
-    it('bigToBaseAmount', () => {
-      expect(baseAmountToBig(bigToBaseAmount(0.1)).toString()).toEqual('0.1')
-    })
-
-    it('baseAmountToNumber', () => {
-      expect(baseAmountToNumber(bigToBaseAmount(0.1))).toEqual(10000000)
     })
   })
 })

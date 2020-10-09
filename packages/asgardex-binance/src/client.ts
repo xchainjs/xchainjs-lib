@@ -6,7 +6,6 @@ import {
   TransferFee as BinanceTransferFee,
   Fee as BinanceFee,
   TxPage as BinanceTxPage,
-  // GetMarketsParams,
 } from './types/binance'
 
 import { crypto } from '@binance-chain/javascript-sdk'
@@ -28,15 +27,16 @@ import {
   AssetBNB,
   BaseAmount,
   assetFromString,
+  assetAmount,
+  assetToBase,
+  baseToAsset,
 } from '@thorchain/asgardex-util'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
-import { isTransferFee, getTxType, bigToBaseAmount, baseAmountToBig, isFreezeFee } from './util'
+import { isTransferFee, getTxType, isFreezeFee } from './util'
 
-// This should be moved to asgardex-client interface
 type PrivKey = string
 
-// Should be moved to asgardex-client interface
-export declare type FreezeParams = {
+export type FreezeParams = {
   asset: Asset;
   amount: BaseAmount;
   recipient?: Address;
@@ -52,7 +52,7 @@ export type MultiTransfer = {
   coins: Coin[]
 }
 
-export declare type MultiSendParams = {
+export type MultiSendParams = {
   address?: Address;
   transactions: MultiTransfer[];
   memo?: string
@@ -63,6 +63,7 @@ export declare type MultiSendParams = {
  */
 export interface BinanceClient {
   purgeClient(): void
+  getBncClient(): BncClient
 
   getAddress(): string
 
@@ -75,9 +76,6 @@ export interface BinanceClient {
   unfreeze(params: FreezeParams): Promise<TxHash>
 
   multiSend(params: MultiSendParams): Promise<TxHash>
-
-  // getMarkets(params: GetMarketsParams): Promise<any>
-  // multiSend(params: MultiSendParams): Promise<TransferResult>
 }
 
 /**
@@ -101,15 +99,20 @@ class Client implements BinanceClient, AsgardexClient {
   constructor({ network = 'testnet', phrase }: AsgardexClientParams) {
     // Invalid phrase will throw an error!
     this.network = network
+    if (phrase) this.setPhrase(phrase)
+
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
-    if (phrase) this.setPhrase(phrase)
   }
 
   purgeClient(): void {
     this.phrase = ''
     this.address = ''
     this.privateKey = null
+  }
+
+  getBncClient(): BncClient {
+    return this.bncClient
   }
 
   // update network
@@ -128,10 +131,7 @@ class Client implements BinanceClient, AsgardexClient {
   }
 
   private getClientUrl = (): string => {
-    // return this.network === 'testnet'? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
-
-    // Accelerated 1
-    return this.network === 'testnet' ? 'https://testnet-dex-asiapacific.binance.org' : 'https://dex-asiapacific.binance.org'
+    return this.network === 'testnet'? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
   }
   
   getExplorerAddressUrl = (): string => {
@@ -152,7 +152,6 @@ class Client implements BinanceClient, AsgardexClient {
     return asgardexCrypto.generatePhrase()
   }
 
-  // Sets this.phrase to be accessed later
   setPhrase = (phrase: string): Address => {
     if (!this.phrase || this.phrase !== phrase) {
       if (!asgardexCrypto.validatePhrase(phrase)) {
@@ -211,8 +210,8 @@ class Client implements BinanceClient, AsgardexClient {
       return balances.map(balance => {
         return {
           asset: assetFromString(balance.symbol) || AssetBNB,
-          amount: bigToBaseAmount(balance.free),
-          frozenAmount: bigToBaseAmount(balance.frozen),
+          amount: assetToBase(assetAmount(balance.free, 8)),
+          frozenAmount: assetToBase(assetAmount(balance.frozen, 8)),
         }
       }).filter(balance => !asset || balance.asset === asset)
     } catch (error) {
@@ -242,18 +241,22 @@ class Client implements BinanceClient, AsgardexClient {
       return {
         total: txHistory.total,
         txs: txHistory.tx.map(tx => {
+          const asset = assetFromString(`${AssetBNB.chain}.${tx.txAsset}`);
+
+          if (!asset) return null
+
           return {
-            asset: assetFromString(tx.txAsset) || AssetBNB,
+            asset,
             from: [
               {
                 from: tx.fromAddr,
-                amount: bigToBaseAmount(tx.value),
+                amount: assetToBase(assetAmount(tx.value, 8)),
               }
             ],
             to: [
               {
                 to: tx.toAddr,
-                amount: bigToBaseAmount(tx.value),
+                amount: assetToBase(assetAmount(tx.value, 8)),
               }
             ],
             date: new Date(tx.timeStamp),
@@ -261,16 +264,12 @@ class Client implements BinanceClient, AsgardexClient {
             hash: tx.txHash,
           }
         })
+        .filter(tx => tx).map(tx => tx!)
       }
     } catch (error) {
       return Promise.reject(error)
     }
   }
-
-  // getMarkets = async ({ limit = 1000, offset = 0 }: GetMarketsParams) => {
-  //   await this.bncClient.initChain()
-  //   return this.bncClient.getMarkets(limit, offset)
-  // }
 
   multiSend = async ({ address, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
     await this.bncClient.initChain()
@@ -284,7 +283,7 @@ class Client implements BinanceClient, AsgardexClient {
           coins: transaction.coins.map(coin => {
             return {
               denom: coin.asset.symbol,
-              amount: baseAmountToBig(coin.amount)
+              amount: baseToAsset(coin.amount).amount().toString()
             }
           })
         }
@@ -293,7 +292,7 @@ class Client implements BinanceClient, AsgardexClient {
     )
 
     try {
-      return transferResult.result.map((txResult: any) => txResult.hash)[0]
+      return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
     } catch (err) {
       return ''
     }
@@ -310,13 +309,13 @@ class Client implements BinanceClient, AsgardexClient {
     const transferResult = await this.bncClient.transfer(
       this.getAddress(),
       recipient,
-      amount.amount().div(1e8).toNumber(),
+      baseToAsset(amount).amount().toString(),
       asset.symbol,
       memo
     )
 
     try {
-      return transferResult.result.map((txResult: any) => txResult.hash)[0]
+      return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
     } catch (err) {
       return ''
     }
@@ -334,10 +333,14 @@ class Client implements BinanceClient, AsgardexClient {
         ),
       )
 
-    const transferResult = await this.bncClient.tokens.freeze(address, asset.symbol, baseAmountToBig(amount))
+    const transferResult = await this.bncClient.tokens.freeze(
+      address,
+      asset.symbol,
+      baseToAsset(amount).amount().toString()
+    )
 
     try {
-      return transferResult.result.map((txResult: any) => txResult.hash)[0]
+      return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
     } catch (err) {
       return ''
     }
@@ -355,10 +358,14 @@ class Client implements BinanceClient, AsgardexClient {
         ),
       )
 
-    const transferResult = await this.bncClient.tokens.unfreeze(address, asset.symbol, baseAmountToBig(amount))
+    const transferResult = await this.bncClient.tokens.unfreeze(
+      address,
+      asset.symbol,
+      baseToAsset(amount).amount().toString()
+    )
 
     try {
-      return transferResult.result.map((txResult: any) => txResult.hash)[0]
+      return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
     } catch (err) {
       return ''
     }

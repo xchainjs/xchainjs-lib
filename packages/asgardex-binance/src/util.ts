@@ -1,8 +1,6 @@
-import { Big, BigSource } from 'big.js'
 import { Transfer, TransferEvent } from './types/binance-ws'
 import { TransferFee, DexFees, Fee, TxType as BinanceTxType } from './types/binance'
 import { TxType } from '@asgardex-clients/asgardex-client'
-import { BaseAmount, baseAmount } from '@thorchain/asgardex-util'
 
 /**
  * Get `hash` from transfer event sent by Binance chain
@@ -45,25 +43,4 @@ export const getTxType = (t: BinanceTxType): TxType => {
   if (t === 'FREEZE_TOKEN') return 'freeze'
   if (t === 'UN_FREEZE_TOKEN') return 'unfreeze'
   return 'unkown'
-}
-
-/**
- * Convert BigSource To BaseAmount
- */
-export const bigToBaseAmount = (v: BigSource): BaseAmount => {
-  return baseAmount(Big(v).mul(1e8).toString())
-}
-
-/**
- * Convert BaseAmount To BigSource
- */
-export const baseAmountToBig = (v: BaseAmount): BigSource => {
-  return v.amount().div(1e8).toString()
-}
-
-/**
- * Convert BaseAmount To Number
- */
-export const baseAmountToNumber = (v: BaseAmount): number => {
-  return v.amount().toNumber()
 }
