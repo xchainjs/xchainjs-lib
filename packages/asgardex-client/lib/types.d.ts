@@ -46,9 +46,9 @@ export declare type TxParams = {
 export declare type FeeType = 'byte' | 'base';
 export declare type Fees = {
     type: FeeType;
-    fastest?: number;
-    fast?: number;
-    average: number;
+    fastest?: BaseAmount;
+    fast?: BaseAmount;
+    average: BaseAmount;
 };
 export declare type AsgardexClientParams = {
     network?: Network;

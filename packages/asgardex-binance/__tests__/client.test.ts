@@ -11,13 +11,10 @@ describe('BinanceClient Test', () => {
   const testnetaddress = 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj'
 
   // This needs to be updated once `Fees` type in `asgardex-client` changes
-  const transferFee = { type: 'base', average: 37500 }
-  const multiSendFee = { type: 'base', average: 30000 }
-  const freezeFee = { type: 'base', average: 500000 }
+  const transferFee = { type: 'base', average: baseAmount(37500) }
+  const multiSendFee = { type: 'base', average: baseAmount(30000) }
+  const freezeFee = { type: 'base', average: baseAmount(500000) }
 
-  const transferFeeAmount = baseAmount(transferFee.average)
-  const multiSendFeeAmount = baseAmount(multiSendFee.average)
-  const freezeFeeAmount = baseAmount(freezeFee.average)
   const transferAmount = baseAmount(1000000)
   const freezeAmount = baseAmount(500000)
 
@@ -109,17 +106,20 @@ describe('BinanceClient Test', () => {
 
   it('fetches the transfer fees', async () => {
     const fees = await bnbClient.getFees()
-    expect(fees).toEqual(transferFee)
+    expect(fees.type).toEqual(transferFee.type)
+    expect(fees.average.amount().isEqualTo(transferFee.average.amount())).toBeTruthy()
   })
 
   it('fetches the multisend fees', async () => {
     const fees = await bnbClient.getMultiSendFees()
-    expect(fees).toEqual(multiSendFee)
+    expect(fees.type).toEqual(multiSendFee.type)
+    expect(fees.average.amount().isEqualTo(multiSendFee.average.amount())).toBeTruthy()
   })
 
   it('fetches the freeze fees', async () => {
     const fees = await bnbClient.getFreezeFees()
-    expect(fees).toEqual(freezeFee)
+    expect(fees.type).toEqual(freezeFee.type)
+    expect(fees.average.amount().isEqualTo(freezeFee.average.amount())).toBeTruthy()
   })
 
   it('should broadcast a transfer', async () => {
@@ -137,7 +137,7 @@ describe('BinanceClient Test', () => {
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
 
-    const expected = beforeTransfer[0].amount.amount().minus(transferFeeAmount.amount()).isEqualTo(afterTransfer[0].amount.amount())
+    const expected = beforeTransfer[0].amount.amount().minus(transferFee.average.amount()).isEqualTo(afterTransfer[0].amount.amount())
     expect(expected).toBeTruthy()
   })
 
@@ -156,7 +156,7 @@ describe('BinanceClient Test', () => {
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
 
-    const expected = beforeTransfer[0].amount.amount().minus(transferFeeAmount.amount()).isEqualTo(afterTransfer[0].amount.amount())
+    const expected = beforeTransfer[0].amount.amount().minus(transferFee.average.amount()).isEqualTo(afterTransfer[0].amount.amount())
     expect(expected).toBeTruthy()
   })
 
@@ -174,7 +174,7 @@ describe('BinanceClient Test', () => {
     const afterFreeze = await client.getBalance()
     expect(afterFreeze.length).toEqual(1)
 
-    let expected = beforeFreeze[0].amount.amount().minus(freezeAmount.amount()).minus(freezeFeeAmount.amount()).isEqualTo(afterFreeze[0].amount.amount())
+    let expected = beforeFreeze[0].amount.amount().minus(freezeAmount.amount()).minus(freezeFee.average.amount()).isEqualTo(afterFreeze[0].amount.amount())
     expect(expected).toBeTruthy()
     expected = beforeFreeze[0].frozenAmount!.amount().plus(freezeAmount.amount()).isEqualTo(afterFreeze[0].frozenAmount!.amount())
     expect(expected).toBeTruthy()
@@ -194,7 +194,7 @@ describe('BinanceClient Test', () => {
     const afterUnFreeze = await client.getBalance()
     expect(afterUnFreeze.length).toEqual(1)
 
-    let expected = beforeUnFreeze[0].amount.amount().plus(freezeAmount.amount()).minus(freezeFeeAmount.amount()).isEqualTo(afterUnFreeze[0].amount.amount())
+    let expected = beforeUnFreeze[0].amount.amount().plus(freezeAmount.amount()).minus(freezeFee.average.amount()).isEqualTo(afterUnFreeze[0].amount.amount())
     expect(expected).toBeTruthy()
     expected = beforeUnFreeze[0].frozenAmount!.amount().minus(freezeAmount.amount()).isEqualTo(afterUnFreeze[0].frozenAmount!.amount())
     expect(expected).toBeTruthy()
@@ -243,7 +243,7 @@ describe('BinanceClient Test', () => {
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
 
-    const expected = beforeTransfer[0].amount.amount().minus(multiSendFeeAmount.amount().multipliedBy(transactions.length)).isEqualTo(afterTransfer[0].amount.amount())
+    const expected = beforeTransfer[0].amount.amount().minus(multiSendFee.average.amount().multipliedBy(transactions.length)).isEqualTo(afterTransfer[0].amount.amount())
     expect(expected).toBeTruthy()
   })
 

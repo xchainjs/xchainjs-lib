@@ -17,6 +17,7 @@ import {
   Balances,
   Fees,
   Network,
+  Txs,
   TxParams,
   TxHash,
   TxHistoryParams,
@@ -29,6 +30,7 @@ import {
   assetFromString,
   assetAmount,
   assetToBase,
+  baseAmount,
   baseToAsset,
 } from '@thorchain/asgardex-util'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
@@ -37,10 +39,10 @@ import { isTransferFee, getTxType, isFreezeFee } from './util'
 type PrivKey = string
 
 export type FreezeParams = {
-  asset: Asset;
-  amount: BaseAmount;
-  recipient?: Address;
-};
+  asset: Asset
+  amount: BaseAmount
+  recipient?: Address
+}
 
 export type Coin = {
   asset: Asset
@@ -53,8 +55,8 @@ export type MultiTransfer = {
 }
 
 export type MultiSendParams = {
-  address?: Address;
-  transactions: MultiTransfer[];
+  address?: Address
+  transactions: MultiTransfer[]
   memo?: string
 }
 
@@ -238,33 +240,36 @@ class Client implements BinanceClient, AsgardexClient {
 
     try {
       const txHistory = await axios.get<BinanceTxPage>(url.toString()).then(response => response.data)
+      
       return {
         total: txHistory.total,
-        txs: txHistory.tx.map(tx => {
-          const asset = assetFromString(`${AssetBNB.chain}.${tx.txAsset}`);
+        txs: txHistory.tx.reduce((acc, tx) => {
+          const asset = assetFromString(`${AssetBNB.chain}.${tx.txAsset}`)
 
-          if (!asset) return null
-
-          return {
-            asset,
-            from: [
-              {
-                from: tx.fromAddr,
-                amount: assetToBase(assetAmount(tx.value, 8)),
-              }
-            ],
-            to: [
-              {
-                to: tx.toAddr,
-                amount: assetToBase(assetAmount(tx.value, 8)),
-              }
-            ],
-            date: new Date(tx.timeStamp),
-            type: getTxType(tx.txType),
-            hash: tx.txHash,
-          }
-        })
-        .filter(tx => tx).map(tx => tx!)
+          if (!asset)  return acc;
+          
+          return [
+            ...acc, 
+            {
+              asset,
+              from: [
+                {
+                  from: tx.fromAddr,
+                  amount: assetToBase(assetAmount(tx.value, 8)),
+                }
+              ],
+              to: [
+                {
+                  to: tx.toAddr,
+                  amount: assetToBase(assetAmount(tx.value, 8)),
+                }
+              ],
+              date: new Date(tx.timeStamp),
+              type: getTxType(tx.txType),
+              hash: tx.txHash,
+            }
+          ]
+        }, [] as Txs),
       }
     } catch (error) {
       return Promise.reject(error)
@@ -382,7 +387,7 @@ class Client implements BinanceClient, AsgardexClient {
 
       return {
         type: 'base',
-        average: (transferFee as BinanceTransferFee).fixed_fee_params.fee,
+        average: baseAmount((transferFee as BinanceTransferFee).fixed_fee_params.fee),
       } as Fees
     } catch (error) {
       return Promise.reject(error)
@@ -400,7 +405,7 @@ class Client implements BinanceClient, AsgardexClient {
 
       return {
         type: 'base',
-        average: (transferFee as BinanceTransferFee).multi_transfer_fee,
+        average: baseAmount((transferFee as BinanceTransferFee).multi_transfer_fee),
       } as Fees
     } catch (error) {
       return Promise.reject(error)
@@ -411,14 +416,14 @@ class Client implements BinanceClient, AsgardexClient {
     await this.bncClient.initChain()
     try {
       const feesArray = await axios.get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`).then(response => response.data)
-      const transferFee = feesArray.find(isFreezeFee)
-      if (!transferFee) {
+      const freezeFee = feesArray.find(isFreezeFee)
+      if (!freezeFee) {
         throw new Error('failed to get transfer fees')
       }
 
       return {
         type: 'base',
-        average: (transferFee as BinanceFee).fee,
+        average: baseAmount((freezeFee as BinanceFee).fee),
       } as Fees
     } catch (error) {
       return Promise.reject(error)

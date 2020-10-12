@@ -63,9 +63,9 @@ export type FeeType =
 
 export type Fees = {
   type: FeeType
-  fastest?: number
-  fast?: number
-  average: number
+  fastest?: BaseAmount
+  fast?: BaseAmount
+  average: BaseAmount
 }
 
 export type AsgardexClientParams = {
