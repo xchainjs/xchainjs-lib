@@ -2,7 +2,6 @@ import buffer from 'buffer';
 import readableStream from 'readable-stream';
 import stream from 'stream';
 import string_decoder from 'string_decoder';
-import { broadcastTx } from '@asgardex-clients/core';
 import crypto$2$1 from 'crypto';
 
 /*! *****************************************************************************
@@ -20089,17 +20088,1475 @@ function getNormalFee(inputs, feeRate) {
     return normalFee > 1000 ? normalFee : 1000;
 }
 
-var axios = require('axios').default;
-var getAddressUtxos = function (baseUrl, address) { return __awaiter(void 0, void 0, void 0, function () {
-    var response, error_1;
+var bind = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is a Buffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Buffer, otherwise false
+ */
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
+    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a plain Object
+ *
+ * @param {Object} val The value to test
+ * @return {boolean} True if value is a plain Object, otherwise false
+ */
+function isPlainObject(val) {
+  if (toString.call(val) !== '[object Object]') {
+    return false;
+  }
+
+  var prototype = Object.getPrototypeOf(val);
+  return prototype === null || prototype === Object.prototype;
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
+                                           navigator.product === 'NativeScript' ||
+                                           navigator.product === 'NS')) {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (isPlainObject(result[key]) && isPlainObject(val)) {
+      result[key] = merge(result[key], val);
+    } else if (isPlainObject(val)) {
+      result[key] = merge({}, val);
+    } else if (isArray(val)) {
+      result[key] = val.slice();
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+/**
+ * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+ *
+ * @param {string} content with BOM
+ * @return {string} content value without BOM
+ */
+function stripBOM(content) {
+  if (content.charCodeAt(0) === 0xFEFF) {
+    content = content.slice(1);
+  }
+  return content;
+}
+
+var utils$2 = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isPlainObject: isPlainObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  extend: extend,
+  trim: trim,
+  stripBOM: stripBOM
+};
+
+function encode$5(val) {
+  return encodeURIComponent(val).
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+var buildURL = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils$2.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils$2.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils$2.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils$2.forEach(val, function parseValue(v) {
+        if (utils$2.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils$2.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode$5(key) + '=' + encode$5(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    var hashmarkIndex = url.indexOf('#');
+    if (hashmarkIndex !== -1) {
+      url = url.slice(0, hashmarkIndex);
+    }
+
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils$2.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+var InterceptorManager_1 = InterceptorManager;
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+var transformData = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils$2.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+var isCancel = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+var normalizeHeaderName = function normalizeHeaderName(headers, normalizedName) {
+  utils$2.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+var enhanceError = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+
+  error.request = request;
+  error.response = response;
+  error.isAxiosError = true;
+
+  error.toJSON = function toJSON() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: this.config,
+      code: this.code
+    };
+  };
+  return error;
+};
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+var createError = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+var settle = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+var cookies = (
+  utils$2.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+    (function standardBrowserEnv() {
+      return {
+        write: function write(name, value, expires, path, domain, secure) {
+          var cookie = [];
+          cookie.push(name + '=' + encodeURIComponent(value));
+
+          if (utils$2.isNumber(expires)) {
+            cookie.push('expires=' + new Date(expires).toGMTString());
+          }
+
+          if (utils$2.isString(path)) {
+            cookie.push('path=' + path);
+          }
+
+          if (utils$2.isString(domain)) {
+            cookie.push('domain=' + domain);
+          }
+
+          if (secure === true) {
+            cookie.push('secure');
+          }
+
+          document.cookie = cookie.join('; ');
+        },
+
+        read: function read(name) {
+          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+          return (match ? decodeURIComponent(match[3]) : null);
+        },
+
+        remove: function remove(name) {
+          this.write(name, '', Date.now() - 86400000);
+        }
+      };
+    })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return {
+        write: function write() {},
+        read: function read() { return null; },
+        remove: function remove() {}
+      };
+    })()
+);
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+var isAbsoluteURL = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+var combineURLs = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+/**
+ * Creates a new URL by combining the baseURL with the requestedURL,
+ * only when the requestedURL is not already an absolute URL.
+ * If the requestURL is absolute, this function returns the requestedURL untouched.
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} requestedURL Absolute or relative URL to combine
+ * @returns {string} The combined full path
+ */
+var buildFullPath = function buildFullPath(baseURL, requestedURL) {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+var parseHeaders = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils$2.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils$2.trim(line.substr(0, i)).toLowerCase();
+    val = utils$2.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+var isURLSameOrigin = (
+  utils$2.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+    (function standardBrowserEnv() {
+      var msie = /(msie|trident)/i.test(navigator.userAgent);
+      var urlParsingNode = document.createElement('a');
+      var originURL;
+
+      /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+      function resolveURL(url) {
+        var href = url;
+
+        if (msie) {
+        // IE needs attribute set twice to normalize properties
+          urlParsingNode.setAttribute('href', href);
+          href = urlParsingNode.href;
+        }
+
+        urlParsingNode.setAttribute('href', href);
+
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+          href: urlParsingNode.href,
+          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+          host: urlParsingNode.host,
+          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+          hostname: urlParsingNode.hostname,
+          port: urlParsingNode.port,
+          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+            urlParsingNode.pathname :
+            '/' + urlParsingNode.pathname
+        };
+      }
+
+      originURL = resolveURL(window.location.href);
+
+      /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+      return function isURLSameOrigin(requestURL) {
+        var parsed = (utils$2.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+        return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+      };
+    })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return function isURLSameOrigin() {
+        return true;
+      };
+    })()
+);
+
+var xhr = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+
+    if (utils$2.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    if (
+      (utils$2.isBlob(requestData) || utils$2.isFile(requestData)) &&
+      requestData.type
+    ) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = unescape(encodeURIComponent(config.auth.password)) || '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    var fullPath = buildFullPath(config.baseURL, config.url);
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    // Listen for ready state
+    request.onreadystatechange = function handleLoad() {
+      if (!request || request.readyState !== 4) {
+        return;
+      }
+
+      // The request errored out and we didn't get a response, this will be
+      // handled by onerror instead
+      // With one exception: request that using file: protocol, most browsers
+      // will return status as 0 even though it's a successful request
+      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+        return;
+      }
+
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle browser request cancellation (as opposed to a manual cancellation)
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils$2.isStandardBrowserEnv()) {
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+        cookies.read(config.xsrfCookieName) :
+        undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils$2.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (!utils$2.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!config.withCredentials;
+    }
+
+    // Add responseType to request if needed
+    if (config.responseType) {
+      try {
+        request.responseType = config.responseType;
+      } catch (e) {
+        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+        if (config.responseType !== 'json') {
+          throw e;
+        }
+      }
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (!requestData) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils$2.isUndefined(headers) && utils$2.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = xhr;
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = xhr;
+  }
+  return adapter;
+}
+
+var defaults = {
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Accept');
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils$2.isFormData(data) ||
+      utils$2.isArrayBuffer(data) ||
+      utils$2.isBuffer(data) ||
+      utils$2.isStream(data) ||
+      utils$2.isFile(data) ||
+      utils$2.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils$2.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils$2.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils$2.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) { /* Ignore */ }
+    }
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+  maxBodyLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils$2.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils$2.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils$2.merge(DEFAULT_CONTENT_TYPE);
+});
+
+var defaults_1 = defaults;
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+var dispatchRequest = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils$2.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers
+  );
+
+  utils$2.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults_1.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+/**
+ * Config-specific merge-function which creates a new config-object
+ * by merging two configuration objects together.
+ *
+ * @param {Object} config1
+ * @param {Object} config2
+ * @returns {Object} New object resulting from merging config2 to config1
+ */
+var mergeConfig = function mergeConfig(config1, config2) {
+  // eslint-disable-next-line no-param-reassign
+  config2 = config2 || {};
+  var config = {};
+
+  var valueFromConfig2Keys = ['url', 'method', 'data'];
+  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy', 'params'];
+  var defaultToConfig2Keys = [
+    'baseURL', 'transformRequest', 'transformResponse', 'paramsSerializer',
+    'timeout', 'timeoutMessage', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
+    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress', 'decompress',
+    'maxContentLength', 'maxBodyLength', 'maxRedirects', 'transport', 'httpAgent',
+    'httpsAgent', 'cancelToken', 'socketPath', 'responseEncoding'
+  ];
+  var directMergeKeys = ['validateStatus'];
+
+  function getMergedValue(target, source) {
+    if (utils$2.isPlainObject(target) && utils$2.isPlainObject(source)) {
+      return utils$2.merge(target, source);
+    } else if (utils$2.isPlainObject(source)) {
+      return utils$2.merge({}, source);
+    } else if (utils$2.isArray(source)) {
+      return source.slice();
+    }
+    return source;
+  }
+
+  function mergeDeepProperties(prop) {
+    if (!utils$2.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (!utils$2.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  }
+
+  utils$2.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
+    if (!utils$2.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    }
+  });
+
+  utils$2.forEach(mergeDeepPropertiesKeys, mergeDeepProperties);
+
+  utils$2.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
+    if (!utils$2.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    } else if (!utils$2.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  utils$2.forEach(directMergeKeys, function merge(prop) {
+    if (prop in config2) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (prop in config1) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  var axiosKeys = valueFromConfig2Keys
+    .concat(mergeDeepPropertiesKeys)
+    .concat(defaultToConfig2Keys)
+    .concat(directMergeKeys);
+
+  var otherKeys = Object
+    .keys(config1)
+    .concat(Object.keys(config2))
+    .filter(function filterAxiosKeys(key) {
+      return axiosKeys.indexOf(key) === -1;
+    });
+
+  utils$2.forEach(otherKeys, mergeDeepProperties);
+
+  return config;
+};
+
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager_1(),
+    response: new InterceptorManager_1()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = arguments[1] || {};
+    config.url = arguments[0];
+  } else {
+    config = config || {};
+  }
+
+  config = mergeConfig(this.defaults, config);
+
+  // Set config.method
+  if (config.method) {
+    config.method = config.method.toLowerCase();
+  } else if (this.defaults.method) {
+    config.method = this.defaults.method.toLowerCase();
+  } else {
+    config.method = 'get';
+  }
+
+  // Hook up interceptors middleware
+  var chain = [dispatchRequest, undefined];
+  var promise = Promise.resolve(config);
+
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    chain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+
+Axios.prototype.getUri = function getUri(config) {
+  config = mergeConfig(this.defaults, config);
+  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
+};
+
+// Provide aliases for supported request methods
+utils$2.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url
+    }));
+  };
+});
+
+utils$2.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+var Axios_1 = Axios;
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+var Cancel_1 = Cancel;
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel_1(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+var CancelToken_1 = CancelToken;
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+var spread = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios_1(defaultConfig);
+  var instance = bind(Axios_1.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils$2.extend(instance, Axios_1.prototype, context);
+
+  // Copy context to instance
+  utils$2.extend(instance, context);
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults_1);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios_1;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(mergeConfig(axios.defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = Cancel_1;
+axios.CancelToken = CancelToken_1;
+axios.isCancel = isCancel;
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = spread;
+
+var axios_1 = axios;
+
+// Allow use of default import syntax in TypeScript
+var default_1 = axios;
+axios_1.default = default_1;
+
+var axios$1 = axios_1;
+
+var setApiKeyParams = function (key) {
+    return key && key.length > 0 ? { params: { key: key } } : {};
+};
+/**
+ * https://blockchair.com/api/docs#link_200
+ * @param chain
+ * @param hash
+ */
+var getTx = function (baseUrl, hash, apiKey) { return __awaiter(void 0, void 0, void 0, function () {
+    var response, txs, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios.get(baseUrl + "/address/" + address + "/utxo")];
+                return [4 /*yield*/, axios$1.get(baseUrl + "/dashboards/transaction/" + hash, setApiKeyParams(apiKey))];
             case 1:
                 response = _a.sent();
-                return [2 /*return*/, response.data];
+                txs = response.data;
+                return [2 /*return*/, txs.data];
             case 2:
                 error_1 = _a.sent();
                 return [2 /*return*/, Promise.reject(error_1)];
@@ -20107,16 +21564,22 @@ var getAddressUtxos = function (baseUrl, address) { return __awaiter(void 0, voi
         }
     });
 }); };
-var getAddressTxs = function (baseUrl, address) { return __awaiter(void 0, void 0, void 0, function () {
-    var response, error_2;
+/**
+ * https://blockchair.com/api/docs#link_201
+ * @param chain
+ * @param hash
+ */
+var getRawTx = function (baseUrl, hash, apiKey) { return __awaiter(void 0, void 0, void 0, function () {
+    var response, txs, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios.get(baseUrl + "/address/" + address + "/txs")];
+                return [4 /*yield*/, axios$1.get(baseUrl + "/raw/transaction/" + hash, setApiKeyParams(apiKey))];
             case 1:
                 response = _a.sent();
-                return [2 /*return*/, response.data];
+                txs = response.data;
+                return [2 /*return*/, txs.data];
             case 2:
                 error_2 = _a.sent();
                 return [2 /*return*/, Promise.reject(error_2)];
@@ -20124,16 +21587,35 @@ var getAddressTxs = function (baseUrl, address) { return __awaiter(void 0, void 
         }
     });
 }); };
-var getFeeEstimates = function (baseUrl) { return __awaiter(void 0, void 0, void 0, function () {
-    var response, error_3;
+/**
+ * https://blockchair.com/api/docs#link_300
+ * @param chain
+ * @param address
+ */
+var getAddress = function (baseUrl, address, apiKey, limit, offset) { return __awaiter(void 0, void 0, void 0, function () {
+    var params, response, addressResponse, error_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios.get(baseUrl + "/fee-estimates")];
+                params = {};
+                if (apiKey)
+                    params.key = apiKey;
+                if (limit) {
+                    if (limit > 10000)
+                        throw new Error("Max limit allowed 10000");
+                    params.limit = limit;
+                }
+                if (offset) {
+                    if (offset > 1000000)
+                        throw new Error("Max offset allowed 1000000");
+                    params.offset = offset;
+                }
+                return [4 /*yield*/, axios$1.get(baseUrl + "/dashboards/address/" + address, { params: params })];
             case 1:
                 response = _a.sent();
-                return [2 /*return*/, response.data];
+                addressResponse = response.data;
+                return [2 /*return*/, addressResponse.data];
             case 2:
                 error_3 = _a.sent();
                 return [2 /*return*/, Promise.reject(error_3)];
@@ -20141,36 +21623,46 @@ var getFeeEstimates = function (baseUrl) { return __awaiter(void 0, void 0, void
         }
     });
 }); };
-var getTxInfo = function (baseUrl, txId) { return __awaiter(void 0, void 0, void 0, function () {
-    var response, error_5;
+/**
+ * https://blockchair.com/api/docs#link_202
+ * @param chain
+ * @param txHex
+ */
+var broadcastTx = function (baseUrl, txHex, apiKey) { return __awaiter(void 0, void 0, void 0, function () {
+    var response, error_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios.get(baseUrl + "/tx/" + txId)];
+                return [4 /*yield*/, axios$1.post(baseUrl + "/push/transaction", { data: txHex }, setApiKeyParams(apiKey))];
             case 1:
                 response = _a.sent();
-                return [2 /*return*/, response.data];
+                return [2 /*return*/, response.data.data.transaction_hash];
             case 2:
-                error_5 = _a.sent();
-                return [2 /*return*/, Promise.reject(error_5)];
+                error_4 = _a.sent();
+                return [2 /*return*/, Promise.reject(error_4)];
             case 3: return [2 /*return*/];
         }
     });
 }); };
-var getAddressInfo = function (baseUrl, address) { return __awaiter(void 0, void 0, void 0, function () {
-    var response, error_6;
+/**
+ * https://blockchair.com/api/docs#link_001
+ * @param chain
+ */
+var bitcoinStats = function (baseUrl, apiKey) { return __awaiter(void 0, void 0, void 0, function () {
+    var response, bcRes, error_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios.get(baseUrl + "/address/" + address)];
+                return [4 /*yield*/, axios$1.get(baseUrl + "/stats", setApiKeyParams(apiKey))];
             case 1:
                 response = _a.sent();
-                return [2 /*return*/, response.data];
+                bcRes = response.data;
+                return [2 /*return*/, bcRes.data];
             case 2:
-                error_6 = _a.sent();
-                return [2 /*return*/, Promise.reject(error_6)];
+                error_5 = _a.sent();
+                return [2 /*return*/, Promise.reject(error_5)];
             case 3: return [2 /*return*/];
         }
     });
@@ -55959,59 +57451,2946 @@ var getSeed = function (phrase) {
     return seed;
 };
 
-// https://blockchair.com/api/docs#link_300
-// const baseUrl = 'https://api.blockchair.com/bitcoin/'
-// const pathAddress = 'dashboards/address/'
-// const pathTx = 'raw/transaction/'
-/**
- * Class variables accessed across functions
+var bignumber$1 = createCommonjsModule(function (module) {
+(function (globalObject) {
+
+/*
+ *      bignumber.js v7.2.1
+ *      A JavaScript library for arbitrary-precision arithmetic.
+ *      https://github.com/MikeMcl/bignumber.js
+ *      Copyright (c) 2018 Michael Mclaughlin <M8ch88l@gmail.com>
+ *      MIT Licensed.
+ *
+ *      BigNumber.prototype methods     |  BigNumber methods
+ *                                      |
+ *      absoluteValue            abs    |  clone
+ *      comparedTo                      |  config               set
+ *      decimalPlaces            dp     |      DECIMAL_PLACES
+ *      dividedBy                div    |      ROUNDING_MODE
+ *      dividedToIntegerBy       idiv   |      EXPONENTIAL_AT
+ *      exponentiatedBy          pow    |      RANGE
+ *      integerValue                    |      CRYPTO
+ *      isEqualTo                eq     |      MODULO_MODE
+ *      isFinite                        |      POW_PRECISION
+ *      isGreaterThan            gt     |      FORMAT
+ *      isGreaterThanOrEqualTo   gte    |      ALPHABET
+ *      isInteger                       |  isBigNumber
+ *      isLessThan               lt     |  maximum              max
+ *      isLessThanOrEqualTo      lte    |  minimum              min
+ *      isNaN                           |  random
+ *      isNegative                      |
+ *      isPositive                      |
+ *      isZero                          |
+ *      minus                           |
+ *      modulo                   mod    |
+ *      multipliedBy             times  |
+ *      negated                         |
+ *      plus                            |
+ *      precision                sd     |
+ *      shiftedBy                       |
+ *      squareRoot               sqrt   |
+ *      toExponential                   |
+ *      toFixed                         |
+ *      toFormat                        |
+ *      toFraction                      |
+ *      toJSON                          |
+ *      toNumber                        |
+ *      toPrecision                     |
+ *      toString                        |
+ *      valueOf                         |
+ *
  */
-var Network;
-(function (Network) {
-    Network["TEST"] = "testnet";
-    Network["MAIN"] = "mainnet";
-})(Network || (Network = {}));
+
+
+  var BigNumber,
+    isNumeric = /^-?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i,
+
+    mathceil = Math.ceil,
+    mathfloor = Math.floor,
+
+    bignumberError = '[BigNumber Error] ',
+    tooManyDigits = bignumberError + 'Number primitive has more than 15 significant digits: ',
+
+    BASE = 1e14,
+    LOG_BASE = 14,
+    MAX_SAFE_INTEGER = 0x1fffffffffffff,         // 2^53 - 1
+    // MAX_INT32 = 0x7fffffff,                   // 2^31 - 1
+    POWS_TEN = [1, 10, 100, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13],
+    SQRT_BASE = 1e7,
+
+    // EDITABLE
+    // The limit on the value of DECIMAL_PLACES, TO_EXP_NEG, TO_EXP_POS, MIN_EXP, MAX_EXP, and
+    // the arguments to toExponential, toFixed, toFormat, and toPrecision.
+    MAX = 1E9;                                   // 0 to MAX_INT32
+
+
+  /*
+   * Create and return a BigNumber constructor.
+   */
+  function clone(configObject) {
+    var div, convertBase, parseNumeric,
+      P = BigNumber.prototype = { constructor: BigNumber, toString: null, valueOf: null },
+      ONE = new BigNumber(1),
+
+
+      //----------------------------- EDITABLE CONFIG DEFAULTS -------------------------------
+
+
+      // The default values below must be integers within the inclusive ranges stated.
+      // The values can also be changed at run-time using BigNumber.set.
+
+      // The maximum number of decimal places for operations involving division.
+      DECIMAL_PLACES = 20,                     // 0 to MAX
+
+      // The rounding mode used when rounding to the above decimal places, and when using
+      // toExponential, toFixed, toFormat and toPrecision, and round (default value).
+      // UP         0 Away from zero.
+      // DOWN       1 Towards zero.
+      // CEIL       2 Towards +Infinity.
+      // FLOOR      3 Towards -Infinity.
+      // HALF_UP    4 Towards nearest neighbour. If equidistant, up.
+      // HALF_DOWN  5 Towards nearest neighbour. If equidistant, down.
+      // HALF_EVEN  6 Towards nearest neighbour. If equidistant, towards even neighbour.
+      // HALF_CEIL  7 Towards nearest neighbour. If equidistant, towards +Infinity.
+      // HALF_FLOOR 8 Towards nearest neighbour. If equidistant, towards -Infinity.
+      ROUNDING_MODE = 4,                       // 0 to 8
+
+      // EXPONENTIAL_AT : [TO_EXP_NEG , TO_EXP_POS]
+
+      // The exponent value at and beneath which toString returns exponential notation.
+      // Number type: -7
+      TO_EXP_NEG = -7,                         // 0 to -MAX
+
+      // The exponent value at and above which toString returns exponential notation.
+      // Number type: 21
+      TO_EXP_POS = 21,                         // 0 to MAX
+
+      // RANGE : [MIN_EXP, MAX_EXP]
+
+      // The minimum exponent value, beneath which underflow to zero occurs.
+      // Number type: -324  (5e-324)
+      MIN_EXP = -1e7,                          // -1 to -MAX
+
+      // The maximum exponent value, above which overflow to Infinity occurs.
+      // Number type:  308  (1.7976931348623157e+308)
+      // For MAX_EXP > 1e7, e.g. new BigNumber('1e100000000').plus(1) may be slow.
+      MAX_EXP = 1e7,                           // 1 to MAX
+
+      // Whether to use cryptographically-secure random number generation, if available.
+      CRYPTO = false,                          // true or false
+
+      // The modulo mode used when calculating the modulus: a mod n.
+      // The quotient (q = a / n) is calculated according to the corresponding rounding mode.
+      // The remainder (r) is calculated as: r = a - n * q.
+      //
+      // UP        0 The remainder is positive if the dividend is negative, else is negative.
+      // DOWN      1 The remainder has the same sign as the dividend.
+      //             This modulo mode is commonly known as 'truncated division' and is
+      //             equivalent to (a % n) in JavaScript.
+      // FLOOR     3 The remainder has the same sign as the divisor (Python %).
+      // HALF_EVEN 6 This modulo mode implements the IEEE 754 remainder function.
+      // EUCLID    9 Euclidian division. q = sign(n) * floor(a / abs(n)).
+      //             The remainder is always positive.
+      //
+      // The truncated division, floored division, Euclidian division and IEEE 754 remainder
+      // modes are commonly used for the modulus operation.
+      // Although the other rounding modes can also be used, they may not give useful results.
+      MODULO_MODE = 1,                         // 0 to 9
+
+      // The maximum number of significant digits of the result of the exponentiatedBy operation.
+      // If POW_PRECISION is 0, there will be unlimited significant digits.
+      POW_PRECISION = 0,                    // 0 to MAX
+
+      // The format specification used by the BigNumber.prototype.toFormat method.
+      FORMAT = {
+        decimalSeparator: '.',
+        groupSeparator: ',',
+        groupSize: 3,
+        secondaryGroupSize: 0,
+        fractionGroupSeparator: '\xA0',      // non-breaking space
+        fractionGroupSize: 0
+      },
+
+      // The alphabet used for base conversion.
+      // It must be at least 2 characters long, with no '.' or repeated character.
+      // '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_'
+      ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz';
+
+
+    //------------------------------------------------------------------------------------------
+
+
+    // CONSTRUCTOR
+
+
+    /*
+     * The BigNumber constructor and exported function.
+     * Create and return a new instance of a BigNumber object.
+     *
+     * n {number|string|BigNumber} A numeric value.
+     * [b] {number} The base of n. Integer, 2 to ALPHABET.length inclusive.
+     */
+    function BigNumber(n, b) {
+      var alphabet, c, caseChanged, e, i, isNum, len, str,
+        x = this;
+
+      // Enable constructor usage without new.
+      if (!(x instanceof BigNumber)) {
+
+        // Don't throw on constructor call without new (#81).
+        // '[BigNumber Error] Constructor call without new: {n}'
+        //throw Error(bignumberError + ' Constructor call without new: ' + n);
+        return new BigNumber(n, b);
+      }
+
+      if (b == null) {
+
+        // Duplicate.
+        if (n instanceof BigNumber) {
+          x.s = n.s;
+          x.e = n.e;
+          x.c = (n = n.c) ? n.slice() : n;
+          return;
+        }
+
+        isNum = typeof n == 'number';
+
+        if (isNum && n * 0 == 0) {
+
+          // Use `1 / n` to handle minus zero also.
+          x.s = 1 / n < 0 ? (n = -n, -1) : 1;
+
+          // Faster path for integers.
+          if (n === ~~n) {
+            for (e = 0, i = n; i >= 10; i /= 10, e++);
+            x.e = e;
+            x.c = [n];
+            return;
+          }
+
+          str = n + '';
+        } else {
+          if (!isNumeric.test(str = n + '')) return parseNumeric(x, str, isNum);
+          x.s = str.charCodeAt(0) == 45 ? (str = str.slice(1), -1) : 1;
+        }
+
+        // Decimal point?
+        if ((e = str.indexOf('.')) > -1) str = str.replace('.', '');
+
+        // Exponential form?
+        if ((i = str.search(/e/i)) > 0) {
+
+          // Determine exponent.
+          if (e < 0) e = i;
+          e += +str.slice(i + 1);
+          str = str.substring(0, i);
+        } else if (e < 0) {
+
+          // Integer.
+          e = str.length;
+        }
+
+      } else {
+
+        // '[BigNumber Error] Base {not a primitive number|not an integer|out of range}: {b}'
+        intCheck(b, 2, ALPHABET.length, 'Base');
+        str = n + '';
+
+        // Allow exponential notation to be used with base 10 argument, while
+        // also rounding to DECIMAL_PLACES as with other bases.
+        if (b == 10) {
+          x = new BigNumber(n instanceof BigNumber ? n : str);
+          return round(x, DECIMAL_PLACES + x.e + 1, ROUNDING_MODE);
+        }
+
+        isNum = typeof n == 'number';
+
+        if (isNum) {
+
+          // Avoid potential interpretation of Infinity and NaN as base 44+ values.
+          if (n * 0 != 0) return parseNumeric(x, str, isNum, b);
+
+          x.s = 1 / n < 0 ? (str = str.slice(1), -1) : 1;
+
+          // '[BigNumber Error] Number primitive has more than 15 significant digits: {n}'
+          if (BigNumber.DEBUG && str.replace(/^0\.0*|\./, '').length > 15) {
+            throw Error
+             (tooManyDigits + n);
+          }
+
+          // Prevent later check for length on converted number.
+          isNum = false;
+        } else {
+          x.s = str.charCodeAt(0) === 45 ? (str = str.slice(1), -1) : 1;
+        }
+
+        alphabet = ALPHABET.slice(0, b);
+        e = i = 0;
+
+        // Check that str is a valid base b number.
+        // Don't use RegExp so alphabet can contain special characters.
+        for (len = str.length; i < len; i++) {
+          if (alphabet.indexOf(c = str.charAt(i)) < 0) {
+            if (c == '.') {
+
+              // If '.' is not the first character and it has not be found before.
+              if (i > e) {
+                e = len;
+                continue;
+              }
+            } else if (!caseChanged) {
+
+              // Allow e.g. hexadecimal 'FF' as well as 'ff'.
+              if (str == str.toUpperCase() && (str = str.toLowerCase()) ||
+                  str == str.toLowerCase() && (str = str.toUpperCase())) {
+                caseChanged = true;
+                i = -1;
+                e = 0;
+                continue;
+              }
+            }
+
+            return parseNumeric(x, n + '', isNum, b);
+          }
+        }
+
+        str = convertBase(str, b, 10, x.s);
+
+        // Decimal point?
+        if ((e = str.indexOf('.')) > -1) str = str.replace('.', '');
+        else e = str.length;
+      }
+
+      // Determine leading zeros.
+      for (i = 0; str.charCodeAt(i) === 48; i++);
+
+      // Determine trailing zeros.
+      for (len = str.length; str.charCodeAt(--len) === 48;);
+
+      str = str.slice(i, ++len);
+
+      if (str) {
+        len -= i;
+
+        // '[BigNumber Error] Number primitive has more than 15 significant digits: {n}'
+        if (isNum && BigNumber.DEBUG &&
+          len > 15 && (n > MAX_SAFE_INTEGER || n !== mathfloor(n))) {
+            throw Error
+             (tooManyDigits + (x.s * n));
+        }
+
+        e = e - i - 1;
+
+         // Overflow?
+        if (e > MAX_EXP) {
+
+          // Infinity.
+          x.c = x.e = null;
+
+        // Underflow?
+        } else if (e < MIN_EXP) {
+
+          // Zero.
+          x.c = [x.e = 0];
+        } else {
+          x.e = e;
+          x.c = [];
+
+          // Transform base
+
+          // e is the base 10 exponent.
+          // i is where to slice str to get the first element of the coefficient array.
+          i = (e + 1) % LOG_BASE;
+          if (e < 0) i += LOG_BASE;
+
+          if (i < len) {
+            if (i) x.c.push(+str.slice(0, i));
+
+            for (len -= LOG_BASE; i < len;) {
+              x.c.push(+str.slice(i, i += LOG_BASE));
+            }
+
+            str = str.slice(i);
+            i = LOG_BASE - str.length;
+          } else {
+            i -= len;
+          }
+
+          for (; i--; str += '0');
+          x.c.push(+str);
+        }
+      } else {
+
+        // Zero.
+        x.c = [x.e = 0];
+      }
+    }
+
+
+    // CONSTRUCTOR PROPERTIES
+
+
+    BigNumber.clone = clone;
+
+    BigNumber.ROUND_UP = 0;
+    BigNumber.ROUND_DOWN = 1;
+    BigNumber.ROUND_CEIL = 2;
+    BigNumber.ROUND_FLOOR = 3;
+    BigNumber.ROUND_HALF_UP = 4;
+    BigNumber.ROUND_HALF_DOWN = 5;
+    BigNumber.ROUND_HALF_EVEN = 6;
+    BigNumber.ROUND_HALF_CEIL = 7;
+    BigNumber.ROUND_HALF_FLOOR = 8;
+    BigNumber.EUCLID = 9;
+
+
+    /*
+     * Configure infrequently-changing library-wide settings.
+     *
+     * Accept an object with the following optional properties (if the value of a property is
+     * a number, it must be an integer within the inclusive range stated):
+     *
+     *   DECIMAL_PLACES   {number}           0 to MAX
+     *   ROUNDING_MODE    {number}           0 to 8
+     *   EXPONENTIAL_AT   {number|number[]}  -MAX to MAX  or  [-MAX to 0, 0 to MAX]
+     *   RANGE            {number|number[]}  -MAX to MAX (not zero)  or  [-MAX to -1, 1 to MAX]
+     *   CRYPTO           {boolean}          true or false
+     *   MODULO_MODE      {number}           0 to 9
+     *   POW_PRECISION       {number}           0 to MAX
+     *   ALPHABET         {string}           A string of two or more unique characters which does
+     *                                       not contain '.'.
+     *   FORMAT           {object}           An object with some of the following properties:
+     *      decimalSeparator       {string}
+     *      groupSeparator         {string}
+     *      groupSize              {number}
+     *      secondaryGroupSize     {number}
+     *      fractionGroupSeparator {string}
+     *      fractionGroupSize      {number}
+     *
+     * (The values assigned to the above FORMAT object properties are not checked for validity.)
+     *
+     * E.g.
+     * BigNumber.config({ DECIMAL_PLACES : 20, ROUNDING_MODE : 4 })
+     *
+     * Ignore properties/parameters set to null or undefined, except for ALPHABET.
+     *
+     * Return an object with the properties current values.
+     */
+    BigNumber.config = BigNumber.set = function (obj) {
+      var p, v;
+
+      if (obj != null) {
+
+        if (typeof obj == 'object') {
+
+          // DECIMAL_PLACES {number} Integer, 0 to MAX inclusive.
+          // '[BigNumber Error] DECIMAL_PLACES {not a primitive number|not an integer|out of range}: {v}'
+          if (obj.hasOwnProperty(p = 'DECIMAL_PLACES')) {
+            v = obj[p];
+            intCheck(v, 0, MAX, p);
+            DECIMAL_PLACES = v;
+          }
+
+          // ROUNDING_MODE {number} Integer, 0 to 8 inclusive.
+          // '[BigNumber Error] ROUNDING_MODE {not a primitive number|not an integer|out of range}: {v}'
+          if (obj.hasOwnProperty(p = 'ROUNDING_MODE')) {
+            v = obj[p];
+            intCheck(v, 0, 8, p);
+            ROUNDING_MODE = v;
+          }
+
+          // EXPONENTIAL_AT {number|number[]}
+          // Integer, -MAX to MAX inclusive or
+          // [integer -MAX to 0 inclusive, 0 to MAX inclusive].
+          // '[BigNumber Error] EXPONENTIAL_AT {not a primitive number|not an integer|out of range}: {v}'
+          if (obj.hasOwnProperty(p = 'EXPONENTIAL_AT')) {
+            v = obj[p];
+            if (isArray(v)) {
+              intCheck(v[0], -MAX, 0, p);
+              intCheck(v[1], 0, MAX, p);
+              TO_EXP_NEG = v[0];
+              TO_EXP_POS = v[1];
+            } else {
+              intCheck(v, -MAX, MAX, p);
+              TO_EXP_NEG = -(TO_EXP_POS = v < 0 ? -v : v);
+            }
+          }
+
+          // RANGE {number|number[]} Non-zero integer, -MAX to MAX inclusive or
+          // [integer -MAX to -1 inclusive, integer 1 to MAX inclusive].
+          // '[BigNumber Error] RANGE {not a primitive number|not an integer|out of range|cannot be zero}: {v}'
+          if (obj.hasOwnProperty(p = 'RANGE')) {
+            v = obj[p];
+            if (isArray(v)) {
+              intCheck(v[0], -MAX, -1, p);
+              intCheck(v[1], 1, MAX, p);
+              MIN_EXP = v[0];
+              MAX_EXP = v[1];
+            } else {
+              intCheck(v, -MAX, MAX, p);
+              if (v) {
+                MIN_EXP = -(MAX_EXP = v < 0 ? -v : v);
+              } else {
+                throw Error
+                 (bignumberError + p + ' cannot be zero: ' + v);
+              }
+            }
+          }
+
+          // CRYPTO {boolean} true or false.
+          // '[BigNumber Error] CRYPTO not true or false: {v}'
+          // '[BigNumber Error] crypto unavailable'
+          if (obj.hasOwnProperty(p = 'CRYPTO')) {
+            v = obj[p];
+            if (v === !!v) {
+              if (v) {
+                if (typeof crypto != 'undefined' && crypto &&
+                 (crypto.getRandomValues || crypto.randomBytes)) {
+                  CRYPTO = v;
+                } else {
+                  CRYPTO = !v;
+                  throw Error
+                   (bignumberError + 'crypto unavailable');
+                }
+              } else {
+                CRYPTO = v;
+              }
+            } else {
+              throw Error
+               (bignumberError + p + ' not true or false: ' + v);
+            }
+          }
+
+          // MODULO_MODE {number} Integer, 0 to 9 inclusive.
+          // '[BigNumber Error] MODULO_MODE {not a primitive number|not an integer|out of range}: {v}'
+          if (obj.hasOwnProperty(p = 'MODULO_MODE')) {
+            v = obj[p];
+            intCheck(v, 0, 9, p);
+            MODULO_MODE = v;
+          }
+
+          // POW_PRECISION {number} Integer, 0 to MAX inclusive.
+          // '[BigNumber Error] POW_PRECISION {not a primitive number|not an integer|out of range}: {v}'
+          if (obj.hasOwnProperty(p = 'POW_PRECISION')) {
+            v = obj[p];
+            intCheck(v, 0, MAX, p);
+            POW_PRECISION = v;
+          }
+
+          // FORMAT {object}
+          // '[BigNumber Error] FORMAT not an object: {v}'
+          if (obj.hasOwnProperty(p = 'FORMAT')) {
+            v = obj[p];
+            if (typeof v == 'object') FORMAT = v;
+            else throw Error
+             (bignumberError + p + ' not an object: ' + v);
+          }
+
+          // ALPHABET {string}
+          // '[BigNumber Error] ALPHABET invalid: {v}'
+          if (obj.hasOwnProperty(p = 'ALPHABET')) {
+            v = obj[p];
+
+            // Disallow if only one character, or contains '.' or a repeated character.
+            if (typeof v == 'string' && !/^.$|\.|(.).*\1/.test(v)) {
+              ALPHABET = v;
+            } else {
+              throw Error
+               (bignumberError + p + ' invalid: ' + v);
+            }
+          }
+
+        } else {
+
+          // '[BigNumber Error] Object expected: {v}'
+          throw Error
+           (bignumberError + 'Object expected: ' + obj);
+        }
+      }
+
+      return {
+        DECIMAL_PLACES: DECIMAL_PLACES,
+        ROUNDING_MODE: ROUNDING_MODE,
+        EXPONENTIAL_AT: [TO_EXP_NEG, TO_EXP_POS],
+        RANGE: [MIN_EXP, MAX_EXP],
+        CRYPTO: CRYPTO,
+        MODULO_MODE: MODULO_MODE,
+        POW_PRECISION: POW_PRECISION,
+        FORMAT: FORMAT,
+        ALPHABET: ALPHABET
+      };
+    };
+
+
+    /*
+     * Return true if v is a BigNumber instance, otherwise return false.
+     *
+     * v {any}
+     */
+    BigNumber.isBigNumber = function (v) {
+      return v instanceof BigNumber || v && v._isBigNumber === true || false;
+    };
+
+
+    /*
+     * Return a new BigNumber whose value is the maximum of the arguments.
+     *
+     * arguments {number|string|BigNumber}
+     */
+    BigNumber.maximum = BigNumber.max = function () {
+      return maxOrMin(arguments, P.lt);
+    };
+
+
+    /*
+     * Return a new BigNumber whose value is the minimum of the arguments.
+     *
+     * arguments {number|string|BigNumber}
+     */
+    BigNumber.minimum = BigNumber.min = function () {
+      return maxOrMin(arguments, P.gt);
+    };
+
+
+    /*
+     * Return a new BigNumber with a random value equal to or greater than 0 and less than 1,
+     * and with dp, or DECIMAL_PLACES if dp is omitted, decimal places (or less if trailing
+     * zeros are produced).
+     *
+     * [dp] {number} Decimal places. Integer, 0 to MAX inclusive.
+     *
+     * '[BigNumber Error] Argument {not a primitive number|not an integer|out of range}: {dp}'
+     * '[BigNumber Error] crypto unavailable'
+     */
+    BigNumber.random = (function () {
+      var pow2_53 = 0x20000000000000;
+
+      // Return a 53 bit integer n, where 0 <= n < 9007199254740992.
+      // Check if Math.random() produces more than 32 bits of randomness.
+      // If it does, assume at least 53 bits are produced, otherwise assume at least 30 bits.
+      // 0x40000000 is 2^30, 0x800000 is 2^23, 0x1fffff is 2^21 - 1.
+      var random53bitInt = (Math.random() * pow2_53) & 0x1fffff
+       ? function () { return mathfloor(Math.random() * pow2_53); }
+       : function () { return ((Math.random() * 0x40000000 | 0) * 0x800000) +
+         (Math.random() * 0x800000 | 0); };
+
+      return function (dp) {
+        var a, b, e, k, v,
+          i = 0,
+          c = [],
+          rand = new BigNumber(ONE);
+
+        if (dp == null) dp = DECIMAL_PLACES;
+        else intCheck(dp, 0, MAX);
+
+        k = mathceil(dp / LOG_BASE);
+
+        if (CRYPTO) {
+
+          // Browsers supporting crypto.getRandomValues.
+          if (crypto.getRandomValues) {
+
+            a = crypto.getRandomValues(new Uint32Array(k *= 2));
+
+            for (; i < k;) {
+
+              // 53 bits:
+              // ((Math.pow(2, 32) - 1) * Math.pow(2, 21)).toString(2)
+              // 11111 11111111 11111111 11111111 11100000 00000000 00000000
+              // ((Math.pow(2, 32) - 1) >>> 11).toString(2)
+              //                                     11111 11111111 11111111
+              // 0x20000 is 2^21.
+              v = a[i] * 0x20000 + (a[i + 1] >>> 11);
+
+              // Rejection sampling:
+              // 0 <= v < 9007199254740992
+              // Probability that v >= 9e15, is
+              // 7199254740992 / 9007199254740992 ~= 0.0008, i.e. 1 in 1251
+              if (v >= 9e15) {
+                b = crypto.getRandomValues(new Uint32Array(2));
+                a[i] = b[0];
+                a[i + 1] = b[1];
+              } else {
+
+                // 0 <= v <= 8999999999999999
+                // 0 <= (v % 1e14) <= 99999999999999
+                c.push(v % 1e14);
+                i += 2;
+              }
+            }
+            i = k / 2;
+
+          // Node.js supporting crypto.randomBytes.
+          } else if (crypto.randomBytes) {
+
+            // buffer
+            a = crypto.randomBytes(k *= 7);
+
+            for (; i < k;) {
+
+              // 0x1000000000000 is 2^48, 0x10000000000 is 2^40
+              // 0x100000000 is 2^32, 0x1000000 is 2^24
+              // 11111 11111111 11111111 11111111 11111111 11111111 11111111
+              // 0 <= v < 9007199254740992
+              v = ((a[i] & 31) * 0x1000000000000) + (a[i + 1] * 0x10000000000) +
+                 (a[i + 2] * 0x100000000) + (a[i + 3] * 0x1000000) +
+                 (a[i + 4] << 16) + (a[i + 5] << 8) + a[i + 6];
+
+              if (v >= 9e15) {
+                crypto.randomBytes(7).copy(a, i);
+              } else {
+
+                // 0 <= (v % 1e14) <= 99999999999999
+                c.push(v % 1e14);
+                i += 7;
+              }
+            }
+            i = k / 7;
+          } else {
+            CRYPTO = false;
+            throw Error
+             (bignumberError + 'crypto unavailable');
+          }
+        }
+
+        // Use Math.random.
+        if (!CRYPTO) {
+
+          for (; i < k;) {
+            v = random53bitInt();
+            if (v < 9e15) c[i++] = v % 1e14;
+          }
+        }
+
+        k = c[--i];
+        dp %= LOG_BASE;
+
+        // Convert trailing digits to zeros according to dp.
+        if (k && dp) {
+          v = POWS_TEN[LOG_BASE - dp];
+          c[i] = mathfloor(k / v) * v;
+        }
+
+        // Remove trailing elements which are zero.
+        for (; c[i] === 0; c.pop(), i--);
+
+        // Zero?
+        if (i < 0) {
+          c = [e = 0];
+        } else {
+
+          // Remove leading elements which are zero and adjust exponent accordingly.
+          for (e = -1 ; c[0] === 0; c.splice(0, 1), e -= LOG_BASE);
+
+          // Count the digits of the first element of c to determine leading zeros, and...
+          for (i = 1, v = c[0]; v >= 10; v /= 10, i++);
+
+          // adjust the exponent accordingly.
+          if (i < LOG_BASE) e -= LOG_BASE - i;
+        }
+
+        rand.e = e;
+        rand.c = c;
+        return rand;
+      };
+    })();
+
+
+    // PRIVATE FUNCTIONS
+
+
+    // Called by BigNumber and BigNumber.prototype.toString.
+    convertBase = (function () {
+      var decimal = '0123456789';
+
+      /*
+       * Convert string of baseIn to an array of numbers of baseOut.
+       * Eg. toBaseOut('255', 10, 16) returns [15, 15].
+       * Eg. toBaseOut('ff', 16, 10) returns [2, 5, 5].
+       */
+      function toBaseOut(str, baseIn, baseOut, alphabet) {
+        var j,
+          arr = [0],
+          arrL,
+          i = 0,
+          len = str.length;
+
+        for (; i < len;) {
+          for (arrL = arr.length; arrL--; arr[arrL] *= baseIn);
+
+          arr[0] += alphabet.indexOf(str.charAt(i++));
+
+          for (j = 0; j < arr.length; j++) {
+
+            if (arr[j] > baseOut - 1) {
+              if (arr[j + 1] == null) arr[j + 1] = 0;
+              arr[j + 1] += arr[j] / baseOut | 0;
+              arr[j] %= baseOut;
+            }
+          }
+        }
+
+        return arr.reverse();
+      }
+
+      // Convert a numeric string of baseIn to a numeric string of baseOut.
+      // If the caller is toString, we are converting from base 10 to baseOut.
+      // If the caller is BigNumber, we are converting from baseIn to base 10.
+      return function (str, baseIn, baseOut, sign, callerIsToString) {
+        var alphabet, d, e, k, r, x, xc, y,
+          i = str.indexOf('.'),
+          dp = DECIMAL_PLACES,
+          rm = ROUNDING_MODE;
+
+        // Non-integer.
+        if (i >= 0) {
+          k = POW_PRECISION;
+
+          // Unlimited precision.
+          POW_PRECISION = 0;
+          str = str.replace('.', '');
+          y = new BigNumber(baseIn);
+          x = y.pow(str.length - i);
+          POW_PRECISION = k;
+
+          // Convert str as if an integer, then restore the fraction part by dividing the
+          // result by its base raised to a power.
+
+          y.c = toBaseOut(toFixedPoint(coeffToString(x.c), x.e, '0'),
+           10, baseOut, decimal);
+          y.e = y.c.length;
+        }
+
+        // Convert the number as integer.
+
+        xc = toBaseOut(str, baseIn, baseOut, callerIsToString
+         ? (alphabet = ALPHABET, decimal)
+         : (alphabet = decimal, ALPHABET));
+
+        // xc now represents str as an integer and converted to baseOut. e is the exponent.
+        e = k = xc.length;
+
+        // Remove trailing zeros.
+        for (; xc[--k] == 0; xc.pop());
+
+        // Zero?
+        if (!xc[0]) return alphabet.charAt(0);
+
+        // Does str represent an integer? If so, no need for the division.
+        if (i < 0) {
+          --e;
+        } else {
+          x.c = xc;
+          x.e = e;
+
+          // The sign is needed for correct rounding.
+          x.s = sign;
+          x = div(x, y, dp, rm, baseOut);
+          xc = x.c;
+          r = x.r;
+          e = x.e;
+        }
+
+        // xc now represents str converted to baseOut.
+
+        // THe index of the rounding digit.
+        d = e + dp + 1;
+
+        // The rounding digit: the digit to the right of the digit that may be rounded up.
+        i = xc[d];
+
+        // Look at the rounding digits and mode to determine whether to round up.
+
+        k = baseOut / 2;
+        r = r || d < 0 || xc[d + 1] != null;
+
+        r = rm < 4 ? (i != null || r) && (rm == 0 || rm == (x.s < 0 ? 3 : 2))
+              : i > k || i == k &&(rm == 4 || r || rm == 6 && xc[d - 1] & 1 ||
+               rm == (x.s < 0 ? 8 : 7));
+
+        // If the index of the rounding digit is not greater than zero, or xc represents
+        // zero, then the result of the base conversion is zero or, if rounding up, a value
+        // such as 0.00001.
+        if (d < 1 || !xc[0]) {
+
+          // 1^-dp or 0
+          str = r ? toFixedPoint(alphabet.charAt(1), -dp, alphabet.charAt(0))
+              : alphabet.charAt(0);
+        } else {
+
+          // Truncate xc to the required number of decimal places.
+          xc.length = d;
+
+          // Round up?
+          if (r) {
+
+            // Rounding up may mean the previous digit has to be rounded up and so on.
+            for (--baseOut; ++xc[--d] > baseOut;) {
+              xc[d] = 0;
+
+              if (!d) {
+                ++e;
+                xc = [1].concat(xc);
+              }
+            }
+          }
+
+          // Determine trailing zeros.
+          for (k = xc.length; !xc[--k];);
+
+          // E.g. [4, 11, 15] becomes 4bf.
+          for (i = 0, str = ''; i <= k; str += alphabet.charAt(xc[i++]));
+
+          // Add leading zeros, decimal point and trailing zeros as required.
+          str = toFixedPoint(str, e, alphabet.charAt(0));
+        }
+
+        // The caller will add the sign.
+        return str;
+      };
+    })();
+
+
+    // Perform division in the specified base. Called by div and convertBase.
+    div = (function () {
+
+      // Assume non-zero x and k.
+      function multiply(x, k, base) {
+        var m, temp, xlo, xhi,
+          carry = 0,
+          i = x.length,
+          klo = k % SQRT_BASE,
+          khi = k / SQRT_BASE | 0;
+
+        for (x = x.slice(); i--;) {
+          xlo = x[i] % SQRT_BASE;
+          xhi = x[i] / SQRT_BASE | 0;
+          m = khi * xlo + xhi * klo;
+          temp = klo * xlo + ((m % SQRT_BASE) * SQRT_BASE) + carry;
+          carry = (temp / base | 0) + (m / SQRT_BASE | 0) + khi * xhi;
+          x[i] = temp % base;
+        }
+
+        if (carry) x = [carry].concat(x);
+
+        return x;
+      }
+
+      function compare(a, b, aL, bL) {
+        var i, cmp;
+
+        if (aL != bL) {
+          cmp = aL > bL ? 1 : -1;
+        } else {
+
+          for (i = cmp = 0; i < aL; i++) {
+
+            if (a[i] != b[i]) {
+              cmp = a[i] > b[i] ? 1 : -1;
+              break;
+            }
+          }
+        }
+
+        return cmp;
+      }
+
+      function subtract(a, b, aL, base) {
+        var i = 0;
+
+        // Subtract b from a.
+        for (; aL--;) {
+          a[aL] -= i;
+          i = a[aL] < b[aL] ? 1 : 0;
+          a[aL] = i * base + a[aL] - b[aL];
+        }
+
+        // Remove leading zeros.
+        for (; !a[0] && a.length > 1; a.splice(0, 1));
+      }
+
+      // x: dividend, y: divisor.
+      return function (x, y, dp, rm, base) {
+        var cmp, e, i, more, n, prod, prodL, q, qc, rem, remL, rem0, xi, xL, yc0,
+          yL, yz,
+          s = x.s == y.s ? 1 : -1,
+          xc = x.c,
+          yc = y.c;
+
+        // Either NaN, Infinity or 0?
+        if (!xc || !xc[0] || !yc || !yc[0]) {
+
+          return new BigNumber(
+
+           // Return NaN if either NaN, or both Infinity or 0.
+           !x.s || !y.s || (xc ? yc && xc[0] == yc[0] : !yc) ? NaN :
+
+            // Return ±0 if x is ±0 or y is ±Infinity, or return ±Infinity as y is ±0.
+            xc && xc[0] == 0 || !yc ? s * 0 : s / 0
+         );
+        }
+
+        q = new BigNumber(s);
+        qc = q.c = [];
+        e = x.e - y.e;
+        s = dp + e + 1;
+
+        if (!base) {
+          base = BASE;
+          e = bitFloor(x.e / LOG_BASE) - bitFloor(y.e / LOG_BASE);
+          s = s / LOG_BASE | 0;
+        }
+
+        // Result exponent may be one less then the current value of e.
+        // The coefficients of the BigNumbers from convertBase may have trailing zeros.
+        for (i = 0; yc[i] == (xc[i] || 0); i++);
+
+        if (yc[i] > (xc[i] || 0)) e--;
+
+        if (s < 0) {
+          qc.push(1);
+          more = true;
+        } else {
+          xL = xc.length;
+          yL = yc.length;
+          i = 0;
+          s += 2;
+
+          // Normalise xc and yc so highest order digit of yc is >= base / 2.
+
+          n = mathfloor(base / (yc[0] + 1));
+
+          // Not necessary, but to handle odd bases where yc[0] == (base / 2) - 1.
+          // if (n > 1 || n++ == 1 && yc[0] < base / 2) {
+          if (n > 1) {
+            yc = multiply(yc, n, base);
+            xc = multiply(xc, n, base);
+            yL = yc.length;
+            xL = xc.length;
+          }
+
+          xi = yL;
+          rem = xc.slice(0, yL);
+          remL = rem.length;
+
+          // Add zeros to make remainder as long as divisor.
+          for (; remL < yL; rem[remL++] = 0);
+          yz = yc.slice();
+          yz = [0].concat(yz);
+          yc0 = yc[0];
+          if (yc[1] >= base / 2) yc0++;
+          // Not necessary, but to prevent trial digit n > base, when using base 3.
+          // else if (base == 3 && yc0 == 1) yc0 = 1 + 1e-15;
+
+          do {
+            n = 0;
+
+            // Compare divisor and remainder.
+            cmp = compare(yc, rem, yL, remL);
+
+            // If divisor < remainder.
+            if (cmp < 0) {
+
+              // Calculate trial digit, n.
+
+              rem0 = rem[0];
+              if (yL != remL) rem0 = rem0 * base + (rem[1] || 0);
+
+              // n is how many times the divisor goes into the current remainder.
+              n = mathfloor(rem0 / yc0);
+
+              //  Algorithm:
+              //  product = divisor multiplied by trial digit (n).
+              //  Compare product and remainder.
+              //  If product is greater than remainder:
+              //    Subtract divisor from product, decrement trial digit.
+              //  Subtract product from remainder.
+              //  If product was less than remainder at the last compare:
+              //    Compare new remainder and divisor.
+              //    If remainder is greater than divisor:
+              //      Subtract divisor from remainder, increment trial digit.
+
+              if (n > 1) {
+
+                // n may be > base only when base is 3.
+                if (n >= base) n = base - 1;
+
+                // product = divisor * trial digit.
+                prod = multiply(yc, n, base);
+                prodL = prod.length;
+                remL = rem.length;
+
+                // Compare product and remainder.
+                // If product > remainder then trial digit n too high.
+                // n is 1 too high about 5% of the time, and is not known to have
+                // ever been more than 1 too high.
+                while (compare(prod, rem, prodL, remL) == 1) {
+                  n--;
+
+                  // Subtract divisor from product.
+                  subtract(prod, yL < prodL ? yz : yc, prodL, base);
+                  prodL = prod.length;
+                  cmp = 1;
+                }
+              } else {
+
+                // n is 0 or 1, cmp is -1.
+                // If n is 0, there is no need to compare yc and rem again below,
+                // so change cmp to 1 to avoid it.
+                // If n is 1, leave cmp as -1, so yc and rem are compared again.
+                if (n == 0) {
+
+                  // divisor < remainder, so n must be at least 1.
+                  cmp = n = 1;
+                }
+
+                // product = divisor
+                prod = yc.slice();
+                prodL = prod.length;
+              }
+
+              if (prodL < remL) prod = [0].concat(prod);
+
+              // Subtract product from remainder.
+              subtract(rem, prod, remL, base);
+              remL = rem.length;
+
+               // If product was < remainder.
+              if (cmp == -1) {
+
+                // Compare divisor and new remainder.
+                // If divisor < new remainder, subtract divisor from remainder.
+                // Trial digit n too low.
+                // n is 1 too low about 5% of the time, and very rarely 2 too low.
+                while (compare(yc, rem, yL, remL) < 1) {
+                  n++;
+
+                  // Subtract divisor from remainder.
+                  subtract(rem, yL < remL ? yz : yc, remL, base);
+                  remL = rem.length;
+                }
+              }
+            } else if (cmp === 0) {
+              n++;
+              rem = [0];
+            } // else cmp === 1 and n will be 0
+
+            // Add the next digit, n, to the result array.
+            qc[i++] = n;
+
+            // Update the remainder.
+            if (rem[0]) {
+              rem[remL++] = xc[xi] || 0;
+            } else {
+              rem = [xc[xi]];
+              remL = 1;
+            }
+          } while ((xi++ < xL || rem[0] != null) && s--);
+
+          more = rem[0] != null;
+
+          // Leading zero?
+          if (!qc[0]) qc.splice(0, 1);
+        }
+
+        if (base == BASE) {
+
+          // To calculate q.e, first get the number of digits of qc[0].
+          for (i = 1, s = qc[0]; s >= 10; s /= 10, i++);
+
+          round(q, dp + (q.e = i + e * LOG_BASE - 1) + 1, rm, more);
+
+        // Caller is convertBase.
+        } else {
+          q.e = e;
+          q.r = +more;
+        }
+
+        return q;
+      };
+    })();
+
+
+    /*
+     * Return a string representing the value of BigNumber n in fixed-point or exponential
+     * notation rounded to the specified decimal places or significant digits.
+     *
+     * n: a BigNumber.
+     * i: the index of the last digit required (i.e. the digit that may be rounded up).
+     * rm: the rounding mode.
+     * id: 1 (toExponential) or 2 (toPrecision).
+     */
+    function format(n, i, rm, id) {
+      var c0, e, ne, len, str;
+
+      if (rm == null) rm = ROUNDING_MODE;
+      else intCheck(rm, 0, 8);
+
+      if (!n.c) return n.toString();
+
+      c0 = n.c[0];
+      ne = n.e;
+
+      if (i == null) {
+        str = coeffToString(n.c);
+        str = id == 1 || id == 2 && ne <= TO_EXP_NEG
+         ? toExponential(str, ne)
+         : toFixedPoint(str, ne, '0');
+      } else {
+        n = round(new BigNumber(n), i, rm);
+
+        // n.e may have changed if the value was rounded up.
+        e = n.e;
+
+        str = coeffToString(n.c);
+        len = str.length;
+
+        // toPrecision returns exponential notation if the number of significant digits
+        // specified is less than the number of digits necessary to represent the integer
+        // part of the value in fixed-point notation.
+
+        // Exponential notation.
+        if (id == 1 || id == 2 && (i <= e || e <= TO_EXP_NEG)) {
+
+          // Append zeros?
+          for (; len < i; str += '0', len++);
+          str = toExponential(str, e);
+
+        // Fixed-point notation.
+        } else {
+          i -= ne;
+          str = toFixedPoint(str, e, '0');
+
+          // Append zeros?
+          if (e + 1 > len) {
+            if (--i > 0) for (str += '.'; i--; str += '0');
+          } else {
+            i += e - len;
+            if (i > 0) {
+              if (e + 1 == len) str += '.';
+              for (; i--; str += '0');
+            }
+          }
+        }
+      }
+
+      return n.s < 0 && c0 ? '-' + str : str;
+    }
+
+
+    // Handle BigNumber.max and BigNumber.min.
+    function maxOrMin(args, method) {
+      var m, n,
+        i = 0;
+
+      if (isArray(args[0])) args = args[0];
+      m = new BigNumber(args[0]);
+
+      for (; ++i < args.length;) {
+        n = new BigNumber(args[i]);
+
+        // If any number is NaN, return NaN.
+        if (!n.s) {
+          m = n;
+          break;
+        } else if (method.call(m, n)) {
+          m = n;
+        }
+      }
+
+      return m;
+    }
+
+
+    /*
+     * Strip trailing zeros, calculate base 10 exponent and check against MIN_EXP and MAX_EXP.
+     * Called by minus, plus and times.
+     */
+    function normalise(n, c, e) {
+      var i = 1,
+        j = c.length;
+
+       // Remove trailing zeros.
+      for (; !c[--j]; c.pop());
+
+      // Calculate the base 10 exponent. First get the number of digits of c[0].
+      for (j = c[0]; j >= 10; j /= 10, i++);
+
+      // Overflow?
+      if ((e = i + e * LOG_BASE - 1) > MAX_EXP) {
+
+        // Infinity.
+        n.c = n.e = null;
+
+      // Underflow?
+      } else if (e < MIN_EXP) {
+
+        // Zero.
+        n.c = [n.e = 0];
+      } else {
+        n.e = e;
+        n.c = c;
+      }
+
+      return n;
+    }
+
+
+    // Handle values that fail the validity test in BigNumber.
+    parseNumeric = (function () {
+      var basePrefix = /^(-?)0([xbo])(?=\w[\w.]*$)/i,
+        dotAfter = /^([^.]+)\.$/,
+        dotBefore = /^\.([^.]+)$/,
+        isInfinityOrNaN = /^-?(Infinity|NaN)$/,
+        whitespaceOrPlus = /^\s*\+(?=[\w.])|^\s+|\s+$/g;
+
+      return function (x, str, isNum, b) {
+        var base,
+          s = isNum ? str : str.replace(whitespaceOrPlus, '');
+
+        // No exception on ±Infinity or NaN.
+        if (isInfinityOrNaN.test(s)) {
+          x.s = isNaN(s) ? null : s < 0 ? -1 : 1;
+          x.c = x.e = null;
+        } else {
+          if (!isNum) {
+
+            // basePrefix = /^(-?)0([xbo])(?=\w[\w.]*$)/i
+            s = s.replace(basePrefix, function (m, p1, p2) {
+              base = (p2 = p2.toLowerCase()) == 'x' ? 16 : p2 == 'b' ? 2 : 8;
+              return !b || b == base ? p1 : m;
+            });
+
+            if (b) {
+              base = b;
+
+              // E.g. '1.' to '1', '.1' to '0.1'
+              s = s.replace(dotAfter, '$1').replace(dotBefore, '0.$1');
+            }
+
+            if (str != s) return new BigNumber(s, base);
+          }
+
+          // '[BigNumber Error] Not a number: {n}'
+          // '[BigNumber Error] Not a base {b} number: {n}'
+          if (BigNumber.DEBUG) {
+            throw Error
+              (bignumberError + 'Not a' + (b ? ' base ' + b : '') + ' number: ' + str);
+          }
+
+          // NaN
+          x.c = x.e = x.s = null;
+        }
+      }
+    })();
+
+
+    /*
+     * Round x to sd significant digits using rounding mode rm. Check for over/under-flow.
+     * If r is truthy, it is known that there are more digits after the rounding digit.
+     */
+    function round(x, sd, rm, r) {
+      var d, i, j, k, n, ni, rd,
+        xc = x.c,
+        pows10 = POWS_TEN;
+
+      // if x is not Infinity or NaN...
+      if (xc) {
+
+        // rd is the rounding digit, i.e. the digit after the digit that may be rounded up.
+        // n is a base 1e14 number, the value of the element of array x.c containing rd.
+        // ni is the index of n within x.c.
+        // d is the number of digits of n.
+        // i is the index of rd within n including leading zeros.
+        // j is the actual index of rd within n (if < 0, rd is a leading zero).
+        out: {
+
+          // Get the number of digits of the first element of xc.
+          for (d = 1, k = xc[0]; k >= 10; k /= 10, d++);
+          i = sd - d;
+
+          // If the rounding digit is in the first element of xc...
+          if (i < 0) {
+            i += LOG_BASE;
+            j = sd;
+            n = xc[ni = 0];
+
+            // Get the rounding digit at index j of n.
+            rd = n / pows10[d - j - 1] % 10 | 0;
+          } else {
+            ni = mathceil((i + 1) / LOG_BASE);
+
+            if (ni >= xc.length) {
+
+              if (r) {
+
+                // Needed by sqrt.
+                for (; xc.length <= ni; xc.push(0));
+                n = rd = 0;
+                d = 1;
+                i %= LOG_BASE;
+                j = i - LOG_BASE + 1;
+              } else {
+                break out;
+              }
+            } else {
+              n = k = xc[ni];
+
+              // Get the number of digits of n.
+              for (d = 1; k >= 10; k /= 10, d++);
+
+              // Get the index of rd within n.
+              i %= LOG_BASE;
+
+              // Get the index of rd within n, adjusted for leading zeros.
+              // The number of leading zeros of n is given by LOG_BASE - d.
+              j = i - LOG_BASE + d;
+
+              // Get the rounding digit at index j of n.
+              rd = j < 0 ? 0 : n / pows10[d - j - 1] % 10 | 0;
+            }
+          }
+
+          r = r || sd < 0 ||
+
+          // Are there any non-zero digits after the rounding digit?
+          // The expression  n % pows10[d - j - 1]  returns all digits of n to the right
+          // of the digit at j, e.g. if n is 908714 and j is 2, the expression gives 714.
+           xc[ni + 1] != null || (j < 0 ? n : n % pows10[d - j - 1]);
+
+          r = rm < 4
+           ? (rd || r) && (rm == 0 || rm == (x.s < 0 ? 3 : 2))
+           : rd > 5 || rd == 5 && (rm == 4 || r || rm == 6 &&
+
+            // Check whether the digit to the left of the rounding digit is odd.
+            ((i > 0 ? j > 0 ? n / pows10[d - j] : 0 : xc[ni - 1]) % 10) & 1 ||
+             rm == (x.s < 0 ? 8 : 7));
+
+          if (sd < 1 || !xc[0]) {
+            xc.length = 0;
+
+            if (r) {
+
+              // Convert sd to decimal places.
+              sd -= x.e + 1;
+
+              // 1, 0.1, 0.01, 0.001, 0.0001 etc.
+              xc[0] = pows10[(LOG_BASE - sd % LOG_BASE) % LOG_BASE];
+              x.e = -sd || 0;
+            } else {
+
+              // Zero.
+              xc[0] = x.e = 0;
+            }
+
+            return x;
+          }
+
+          // Remove excess digits.
+          if (i == 0) {
+            xc.length = ni;
+            k = 1;
+            ni--;
+          } else {
+            xc.length = ni + 1;
+            k = pows10[LOG_BASE - i];
+
+            // E.g. 56700 becomes 56000 if 7 is the rounding digit.
+            // j > 0 means i > number of leading zeros of n.
+            xc[ni] = j > 0 ? mathfloor(n / pows10[d - j] % pows10[j]) * k : 0;
+          }
+
+          // Round up?
+          if (r) {
+
+            for (; ;) {
+
+              // If the digit to be rounded up is in the first element of xc...
+              if (ni == 0) {
+
+                // i will be the length of xc[0] before k is added.
+                for (i = 1, j = xc[0]; j >= 10; j /= 10, i++);
+                j = xc[0] += k;
+                for (k = 1; j >= 10; j /= 10, k++);
+
+                // if i != k the length has increased.
+                if (i != k) {
+                  x.e++;
+                  if (xc[0] == BASE) xc[0] = 1;
+                }
+
+                break;
+              } else {
+                xc[ni] += k;
+                if (xc[ni] != BASE) break;
+                xc[ni--] = 0;
+                k = 1;
+              }
+            }
+          }
+
+          // Remove trailing zeros.
+          for (i = xc.length; xc[--i] === 0; xc.pop());
+        }
+
+        // Overflow? Infinity.
+        if (x.e > MAX_EXP) {
+          x.c = x.e = null;
+
+        // Underflow? Zero.
+        } else if (x.e < MIN_EXP) {
+          x.c = [x.e = 0];
+        }
+      }
+
+      return x;
+    }
+
+
+    // PROTOTYPE/INSTANCE METHODS
+
+
+    /*
+     * Return a new BigNumber whose value is the absolute value of this BigNumber.
+     */
+    P.absoluteValue = P.abs = function () {
+      var x = new BigNumber(this);
+      if (x.s < 0) x.s = 1;
+      return x;
+    };
+
+
+    /*
+     * Return
+     *   1 if the value of this BigNumber is greater than the value of BigNumber(y, b),
+     *   -1 if the value of this BigNumber is less than the value of BigNumber(y, b),
+     *   0 if they have the same value,
+     *   or null if the value of either is NaN.
+     */
+    P.comparedTo = function (y, b) {
+      return compare(this, new BigNumber(y, b));
+    };
+
+
+    /*
+     * If dp is undefined or null or true or false, return the number of decimal places of the
+     * value of this BigNumber, or null if the value of this BigNumber is ±Infinity or NaN.
+     *
+     * Otherwise, if dp is a number, return a new BigNumber whose value is the value of this
+     * BigNumber rounded to a maximum of dp decimal places using rounding mode rm, or
+     * ROUNDING_MODE if rm is omitted.
+     *
+     * [dp] {number} Decimal places: integer, 0 to MAX inclusive.
+     * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
+     *
+     * '[BigNumber Error] Argument {not a primitive number|not an integer|out of range}: {dp|rm}'
+     */
+    P.decimalPlaces = P.dp = function (dp, rm) {
+      var c, n, v,
+        x = this;
+
+      if (dp != null) {
+        intCheck(dp, 0, MAX);
+        if (rm == null) rm = ROUNDING_MODE;
+        else intCheck(rm, 0, 8);
+
+        return round(new BigNumber(x), dp + x.e + 1, rm);
+      }
+
+      if (!(c = x.c)) return null;
+      n = ((v = c.length - 1) - bitFloor(this.e / LOG_BASE)) * LOG_BASE;
+
+      // Subtract the number of trailing zeros of the last number.
+      if (v = c[v]) for (; v % 10 == 0; v /= 10, n--);
+      if (n < 0) n = 0;
+
+      return n;
+    };
+
+
+    /*
+     *  n / 0 = I
+     *  n / N = N
+     *  n / I = 0
+     *  0 / n = 0
+     *  0 / 0 = N
+     *  0 / N = N
+     *  0 / I = 0
+     *  N / n = N
+     *  N / 0 = N
+     *  N / N = N
+     *  N / I = N
+     *  I / n = I
+     *  I / 0 = I
+     *  I / N = N
+     *  I / I = N
+     *
+     * Return a new BigNumber whose value is the value of this BigNumber divided by the value of
+     * BigNumber(y, b), rounded according to DECIMAL_PLACES and ROUNDING_MODE.
+     */
+    P.dividedBy = P.div = function (y, b) {
+      return div(this, new BigNumber(y, b), DECIMAL_PLACES, ROUNDING_MODE);
+    };
+
+
+    /*
+     * Return a new BigNumber whose value is the integer part of dividing the value of this
+     * BigNumber by the value of BigNumber(y, b).
+     */
+    P.dividedToIntegerBy = P.idiv = function (y, b) {
+      return div(this, new BigNumber(y, b), 0, 1);
+    };
+
+
+    /*
+     * Return a BigNumber whose value is the value of this BigNumber exponentiated by n.
+     *
+     * If m is present, return the result modulo m.
+     * If n is negative round according to DECIMAL_PLACES and ROUNDING_MODE.
+     * If POW_PRECISION is non-zero and m is not present, round to POW_PRECISION using ROUNDING_MODE.
+     *
+     * The modular power operation works efficiently when x, n, and m are integers, otherwise it
+     * is equivalent to calculating x.exponentiatedBy(n).modulo(m) with a POW_PRECISION of 0.
+     *
+     * n {number|string|BigNumber} The exponent. An integer.
+     * [m] {number|string|BigNumber} The modulus.
+     *
+     * '[BigNumber Error] Exponent not an integer: {n}'
+     */
+    P.exponentiatedBy = P.pow = function (n, m) {
+      var half, isModExp, k, more, nIsBig, nIsNeg, nIsOdd, y,
+        x = this;
+
+      n = new BigNumber(n);
+
+      // Allow NaN and ±Infinity, but not other non-integers.
+      if (n.c && !n.isInteger()) {
+        throw Error
+          (bignumberError + 'Exponent not an integer: ' + n);
+      }
+
+      if (m != null) m = new BigNumber(m);
+
+      // Exponent of MAX_SAFE_INTEGER is 15.
+      nIsBig = n.e > 14;
+
+      // If x is NaN, ±Infinity, ±0 or ±1, or n is ±Infinity, NaN or ±0.
+      if (!x.c || !x.c[0] || x.c[0] == 1 && !x.e && x.c.length == 1 || !n.c || !n.c[0]) {
+
+        // The sign of the result of pow when x is negative depends on the evenness of n.
+        // If +n overflows to ±Infinity, the evenness of n would be not be known.
+        y = new BigNumber(Math.pow(+x.valueOf(), nIsBig ? 2 - isOdd(n) : +n));
+        return m ? y.mod(m) : y;
+      }
+
+      nIsNeg = n.s < 0;
+
+      if (m) {
+
+        // x % m returns NaN if abs(m) is zero, or m is NaN.
+        if (m.c ? !m.c[0] : !m.s) return new BigNumber(NaN);
+
+        isModExp = !nIsNeg && x.isInteger() && m.isInteger();
+
+        if (isModExp) x = x.mod(m);
+
+      // Overflow to ±Infinity: >=2**1e10 or >=1.0000024**1e15.
+      // Underflow to ±0: <=0.79**1e10 or <=0.9999975**1e15.
+      } else if (n.e > 9 && (x.e > 0 || x.e < -1 || (x.e == 0
+        // [1, 240000000]
+        ? x.c[0] > 1 || nIsBig && x.c[1] >= 24e7
+        // [80000000000000]  [99999750000000]
+        : x.c[0] < 8e13 || nIsBig && x.c[0] <= 9999975e7))) {
+
+        // If x is negative and n is odd, k = -0, else k = 0.
+        k = x.s < 0 && isOdd(n) ? -0 : 0;
+
+        // If x >= 1, k = ±Infinity.
+        if (x.e > -1) k = 1 / k;
+
+        // If n is negative return ±0, else return ±Infinity.
+        return new BigNumber(nIsNeg ? 1 / k : k);
+
+      } else if (POW_PRECISION) {
+
+        // Truncating each coefficient array to a length of k after each multiplication
+        // equates to truncating significant digits to POW_PRECISION + [28, 41],
+        // i.e. there will be a minimum of 28 guard digits retained.
+        k = mathceil(POW_PRECISION / LOG_BASE + 2);
+      }
+
+      if (nIsBig) {
+        half = new BigNumber(0.5);
+        nIsOdd = isOdd(n);
+      } else {
+        nIsOdd = n % 2;
+      }
+
+      if (nIsNeg) n.s = 1;
+
+      y = new BigNumber(ONE);
+
+      // Performs 54 loop iterations for n of 9007199254740991.
+      for (; ;) {
+
+        if (nIsOdd) {
+          y = y.times(x);
+          if (!y.c) break;
+
+          if (k) {
+            if (y.c.length > k) y.c.length = k;
+          } else if (isModExp) {
+            y = y.mod(m);    //y = y.minus(div(y, m, 0, MODULO_MODE).times(m));
+          }
+        }
+
+        if (nIsBig) {
+          n = n.times(half);
+          round(n, n.e + 1, 1);
+          if (!n.c[0]) break;
+          nIsBig = n.e > 14;
+          nIsOdd = isOdd(n);
+        } else {
+          n = mathfloor(n / 2);
+          if (!n) break;
+          nIsOdd = n % 2;
+        }
+
+        x = x.times(x);
+
+        if (k) {
+          if (x.c && x.c.length > k) x.c.length = k;
+        } else if (isModExp) {
+          x = x.mod(m);    //x = x.minus(div(x, m, 0, MODULO_MODE).times(m));
+        }
+      }
+
+      if (isModExp) return y;
+      if (nIsNeg) y = ONE.div(y);
+
+      return m ? y.mod(m) : k ? round(y, POW_PRECISION, ROUNDING_MODE, more) : y;
+    };
+
+
+    /*
+     * Return a new BigNumber whose value is the value of this BigNumber rounded to an integer
+     * using rounding mode rm, or ROUNDING_MODE if rm is omitted.
+     *
+     * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
+     *
+     * '[BigNumber Error] Argument {not a primitive number|not an integer|out of range}: {rm}'
+     */
+    P.integerValue = function (rm) {
+      var n = new BigNumber(this);
+      if (rm == null) rm = ROUNDING_MODE;
+      else intCheck(rm, 0, 8);
+      return round(n, n.e + 1, rm);
+    };
+
+
+    /*
+     * Return true if the value of this BigNumber is equal to the value of BigNumber(y, b),
+     * otherwise return false.
+     */
+    P.isEqualTo = P.eq = function (y, b) {
+      return compare(this, new BigNumber(y, b)) === 0;
+    };
+
+
+    /*
+     * Return true if the value of this BigNumber is a finite number, otherwise return false.
+     */
+    P.isFinite = function () {
+      return !!this.c;
+    };
+
+
+    /*
+     * Return true if the value of this BigNumber is greater than the value of BigNumber(y, b),
+     * otherwise return false.
+     */
+    P.isGreaterThan = P.gt = function (y, b) {
+      return compare(this, new BigNumber(y, b)) > 0;
+    };
+
+
+    /*
+     * Return true if the value of this BigNumber is greater than or equal to the value of
+     * BigNumber(y, b), otherwise return false.
+     */
+    P.isGreaterThanOrEqualTo = P.gte = function (y, b) {
+      return (b = compare(this, new BigNumber(y, b))) === 1 || b === 0;
+
+    };
+
+
+    /*
+     * Return true if the value of this BigNumber is an integer, otherwise return false.
+     */
+    P.isInteger = function () {
+      return !!this.c && bitFloor(this.e / LOG_BASE) > this.c.length - 2;
+    };
+
+
+    /*
+     * Return true if the value of this BigNumber is less than the value of BigNumber(y, b),
+     * otherwise return false.
+     */
+    P.isLessThan = P.lt = function (y, b) {
+      return compare(this, new BigNumber(y, b)) < 0;
+    };
+
+
+    /*
+     * Return true if the value of this BigNumber is less than or equal to the value of
+     * BigNumber(y, b), otherwise return false.
+     */
+    P.isLessThanOrEqualTo = P.lte = function (y, b) {
+      return (b = compare(this, new BigNumber(y, b))) === -1 || b === 0;
+    };
+
+
+    /*
+     * Return true if the value of this BigNumber is NaN, otherwise return false.
+     */
+    P.isNaN = function () {
+      return !this.s;
+    };
+
+
+    /*
+     * Return true if the value of this BigNumber is negative, otherwise return false.
+     */
+    P.isNegative = function () {
+      return this.s < 0;
+    };
+
+
+    /*
+     * Return true if the value of this BigNumber is positive, otherwise return false.
+     */
+    P.isPositive = function () {
+      return this.s > 0;
+    };
+
+
+    /*
+     * Return true if the value of this BigNumber is 0 or -0, otherwise return false.
+     */
+    P.isZero = function () {
+      return !!this.c && this.c[0] == 0;
+    };
+
+
+    /*
+     *  n - 0 = n
+     *  n - N = N
+     *  n - I = -I
+     *  0 - n = -n
+     *  0 - 0 = 0
+     *  0 - N = N
+     *  0 - I = -I
+     *  N - n = N
+     *  N - 0 = N
+     *  N - N = N
+     *  N - I = N
+     *  I - n = I
+     *  I - 0 = I
+     *  I - N = N
+     *  I - I = N
+     *
+     * Return a new BigNumber whose value is the value of this BigNumber minus the value of
+     * BigNumber(y, b).
+     */
+    P.minus = function (y, b) {
+      var i, j, t, xLTy,
+        x = this,
+        a = x.s;
+
+      y = new BigNumber(y, b);
+      b = y.s;
+
+      // Either NaN?
+      if (!a || !b) return new BigNumber(NaN);
+
+      // Signs differ?
+      if (a != b) {
+        y.s = -b;
+        return x.plus(y);
+      }
+
+      var xe = x.e / LOG_BASE,
+        ye = y.e / LOG_BASE,
+        xc = x.c,
+        yc = y.c;
+
+      if (!xe || !ye) {
+
+        // Either Infinity?
+        if (!xc || !yc) return xc ? (y.s = -b, y) : new BigNumber(yc ? x : NaN);
+
+        // Either zero?
+        if (!xc[0] || !yc[0]) {
+
+          // Return y if y is non-zero, x if x is non-zero, or zero if both are zero.
+          return yc[0] ? (y.s = -b, y) : new BigNumber(xc[0] ? x :
+
+           // IEEE 754 (2008) 6.3: n - n = -0 when rounding to -Infinity
+           ROUNDING_MODE == 3 ? -0 : 0);
+        }
+      }
+
+      xe = bitFloor(xe);
+      ye = bitFloor(ye);
+      xc = xc.slice();
+
+      // Determine which is the bigger number.
+      if (a = xe - ye) {
+
+        if (xLTy = a < 0) {
+          a = -a;
+          t = xc;
+        } else {
+          ye = xe;
+          t = yc;
+        }
+
+        t.reverse();
+
+        // Prepend zeros to equalise exponents.
+        for (b = a; b--; t.push(0));
+        t.reverse();
+      } else {
+
+        // Exponents equal. Check digit by digit.
+        j = (xLTy = (a = xc.length) < (b = yc.length)) ? a : b;
+
+        for (a = b = 0; b < j; b++) {
+
+          if (xc[b] != yc[b]) {
+            xLTy = xc[b] < yc[b];
+            break;
+          }
+        }
+      }
+
+      // x < y? Point xc to the array of the bigger number.
+      if (xLTy) t = xc, xc = yc, yc = t, y.s = -y.s;
+
+      b = (j = yc.length) - (i = xc.length);
+
+      // Append zeros to xc if shorter.
+      // No need to add zeros to yc if shorter as subtract only needs to start at yc.length.
+      if (b > 0) for (; b--; xc[i++] = 0);
+      b = BASE - 1;
+
+      // Subtract yc from xc.
+      for (; j > a;) {
+
+        if (xc[--j] < yc[j]) {
+          for (i = j; i && !xc[--i]; xc[i] = b);
+          --xc[i];
+          xc[j] += BASE;
+        }
+
+        xc[j] -= yc[j];
+      }
+
+      // Remove leading zeros and adjust exponent accordingly.
+      for (; xc[0] == 0; xc.splice(0, 1), --ye);
+
+      // Zero?
+      if (!xc[0]) {
+
+        // Following IEEE 754 (2008) 6.3,
+        // n - n = +0  but  n - n = -0  when rounding towards -Infinity.
+        y.s = ROUNDING_MODE == 3 ? -1 : 1;
+        y.c = [y.e = 0];
+        return y;
+      }
+
+      // No need to check for Infinity as +x - +y != Infinity && -x - -y != Infinity
+      // for finite x and y.
+      return normalise(y, xc, ye);
+    };
+
+
+    /*
+     *   n % 0 =  N
+     *   n % N =  N
+     *   n % I =  n
+     *   0 % n =  0
+     *  -0 % n = -0
+     *   0 % 0 =  N
+     *   0 % N =  N
+     *   0 % I =  0
+     *   N % n =  N
+     *   N % 0 =  N
+     *   N % N =  N
+     *   N % I =  N
+     *   I % n =  N
+     *   I % 0 =  N
+     *   I % N =  N
+     *   I % I =  N
+     *
+     * Return a new BigNumber whose value is the value of this BigNumber modulo the value of
+     * BigNumber(y, b). The result depends on the value of MODULO_MODE.
+     */
+    P.modulo = P.mod = function (y, b) {
+      var q, s,
+        x = this;
+
+      y = new BigNumber(y, b);
+
+      // Return NaN if x is Infinity or NaN, or y is NaN or zero.
+      if (!x.c || !y.s || y.c && !y.c[0]) {
+        return new BigNumber(NaN);
+
+      // Return x if y is Infinity or x is zero.
+      } else if (!y.c || x.c && !x.c[0]) {
+        return new BigNumber(x);
+      }
+
+      if (MODULO_MODE == 9) {
+
+        // Euclidian division: q = sign(y) * floor(x / abs(y))
+        // r = x - qy    where  0 <= r < abs(y)
+        s = y.s;
+        y.s = 1;
+        q = div(x, y, 0, 3);
+        y.s = s;
+        q.s *= s;
+      } else {
+        q = div(x, y, 0, MODULO_MODE);
+      }
+
+      y = x.minus(q.times(y));
+
+      // To match JavaScript %, ensure sign of zero is sign of dividend.
+      if (!y.c[0] && MODULO_MODE == 1) y.s = x.s;
+
+      return y;
+    };
+
+
+    /*
+     *  n * 0 = 0
+     *  n * N = N
+     *  n * I = I
+     *  0 * n = 0
+     *  0 * 0 = 0
+     *  0 * N = N
+     *  0 * I = N
+     *  N * n = N
+     *  N * 0 = N
+     *  N * N = N
+     *  N * I = N
+     *  I * n = I
+     *  I * 0 = N
+     *  I * N = N
+     *  I * I = I
+     *
+     * Return a new BigNumber whose value is the value of this BigNumber multiplied by the value
+     * of BigNumber(y, b).
+     */
+    P.multipliedBy = P.times = function (y, b) {
+      var c, e, i, j, k, m, xcL, xlo, xhi, ycL, ylo, yhi, zc,
+        base, sqrtBase,
+        x = this,
+        xc = x.c,
+        yc = (y = new BigNumber(y, b)).c;
+
+      // Either NaN, ±Infinity or ±0?
+      if (!xc || !yc || !xc[0] || !yc[0]) {
+
+        // Return NaN if either is NaN, or one is 0 and the other is Infinity.
+        if (!x.s || !y.s || xc && !xc[0] && !yc || yc && !yc[0] && !xc) {
+          y.c = y.e = y.s = null;
+        } else {
+          y.s *= x.s;
+
+          // Return ±Infinity if either is ±Infinity.
+          if (!xc || !yc) {
+            y.c = y.e = null;
+
+          // Return ±0 if either is ±0.
+          } else {
+            y.c = [0];
+            y.e = 0;
+          }
+        }
+
+        return y;
+      }
+
+      e = bitFloor(x.e / LOG_BASE) + bitFloor(y.e / LOG_BASE);
+      y.s *= x.s;
+      xcL = xc.length;
+      ycL = yc.length;
+
+      // Ensure xc points to longer array and xcL to its length.
+      if (xcL < ycL) zc = xc, xc = yc, yc = zc, i = xcL, xcL = ycL, ycL = i;
+
+      // Initialise the result array with zeros.
+      for (i = xcL + ycL, zc = []; i--; zc.push(0));
+
+      base = BASE;
+      sqrtBase = SQRT_BASE;
+
+      for (i = ycL; --i >= 0;) {
+        c = 0;
+        ylo = yc[i] % sqrtBase;
+        yhi = yc[i] / sqrtBase | 0;
+
+        for (k = xcL, j = i + k; j > i;) {
+          xlo = xc[--k] % sqrtBase;
+          xhi = xc[k] / sqrtBase | 0;
+          m = yhi * xlo + xhi * ylo;
+          xlo = ylo * xlo + ((m % sqrtBase) * sqrtBase) + zc[j] + c;
+          c = (xlo / base | 0) + (m / sqrtBase | 0) + yhi * xhi;
+          zc[j--] = xlo % base;
+        }
+
+        zc[j] = c;
+      }
+
+      if (c) {
+        ++e;
+      } else {
+        zc.splice(0, 1);
+      }
+
+      return normalise(y, zc, e);
+    };
+
+
+    /*
+     * Return a new BigNumber whose value is the value of this BigNumber negated,
+     * i.e. multiplied by -1.
+     */
+    P.negated = function () {
+      var x = new BigNumber(this);
+      x.s = -x.s || null;
+      return x;
+    };
+
+
+    /*
+     *  n + 0 = n
+     *  n + N = N
+     *  n + I = I
+     *  0 + n = n
+     *  0 + 0 = 0
+     *  0 + N = N
+     *  0 + I = I
+     *  N + n = N
+     *  N + 0 = N
+     *  N + N = N
+     *  N + I = N
+     *  I + n = I
+     *  I + 0 = I
+     *  I + N = N
+     *  I + I = I
+     *
+     * Return a new BigNumber whose value is the value of this BigNumber plus the value of
+     * BigNumber(y, b).
+     */
+    P.plus = function (y, b) {
+      var t,
+        x = this,
+        a = x.s;
+
+      y = new BigNumber(y, b);
+      b = y.s;
+
+      // Either NaN?
+      if (!a || !b) return new BigNumber(NaN);
+
+      // Signs differ?
+       if (a != b) {
+        y.s = -b;
+        return x.minus(y);
+      }
+
+      var xe = x.e / LOG_BASE,
+        ye = y.e / LOG_BASE,
+        xc = x.c,
+        yc = y.c;
+
+      if (!xe || !ye) {
+
+        // Return ±Infinity if either ±Infinity.
+        if (!xc || !yc) return new BigNumber(a / 0);
+
+        // Either zero?
+        // Return y if y is non-zero, x if x is non-zero, or zero if both are zero.
+        if (!xc[0] || !yc[0]) return yc[0] ? y : new BigNumber(xc[0] ? x : a * 0);
+      }
+
+      xe = bitFloor(xe);
+      ye = bitFloor(ye);
+      xc = xc.slice();
+
+      // Prepend zeros to equalise exponents. Faster to use reverse then do unshifts.
+      if (a = xe - ye) {
+        if (a > 0) {
+          ye = xe;
+          t = yc;
+        } else {
+          a = -a;
+          t = xc;
+        }
+
+        t.reverse();
+        for (; a--; t.push(0));
+        t.reverse();
+      }
+
+      a = xc.length;
+      b = yc.length;
+
+      // Point xc to the longer array, and b to the shorter length.
+      if (a - b < 0) t = yc, yc = xc, xc = t, b = a;
+
+      // Only start adding at yc.length - 1 as the further digits of xc can be ignored.
+      for (a = 0; b;) {
+        a = (xc[--b] = xc[b] + yc[b] + a) / BASE | 0;
+        xc[b] = BASE === xc[b] ? 0 : xc[b] % BASE;
+      }
+
+      if (a) {
+        xc = [a].concat(xc);
+        ++ye;
+      }
+
+      // No need to check for zero, as +x + +y != 0 && -x + -y != 0
+      // ye = MAX_EXP + 1 possible
+      return normalise(y, xc, ye);
+    };
+
+
+    /*
+     * If sd is undefined or null or true or false, return the number of significant digits of
+     * the value of this BigNumber, or null if the value of this BigNumber is ±Infinity or NaN.
+     * If sd is true include integer-part trailing zeros in the count.
+     *
+     * Otherwise, if sd is a number, return a new BigNumber whose value is the value of this
+     * BigNumber rounded to a maximum of sd significant digits using rounding mode rm, or
+     * ROUNDING_MODE if rm is omitted.
+     *
+     * sd {number|boolean} number: significant digits: integer, 1 to MAX inclusive.
+     *                     boolean: whether to count integer-part trailing zeros: true or false.
+     * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
+     *
+     * '[BigNumber Error] Argument {not a primitive number|not an integer|out of range}: {sd|rm}'
+     */
+    P.precision = P.sd = function (sd, rm) {
+      var c, n, v,
+        x = this;
+
+      if (sd != null && sd !== !!sd) {
+        intCheck(sd, 1, MAX);
+        if (rm == null) rm = ROUNDING_MODE;
+        else intCheck(rm, 0, 8);
+
+        return round(new BigNumber(x), sd, rm);
+      }
+
+      if (!(c = x.c)) return null;
+      v = c.length - 1;
+      n = v * LOG_BASE + 1;
+
+      if (v = c[v]) {
+
+        // Subtract the number of trailing zeros of the last element.
+        for (; v % 10 == 0; v /= 10, n--);
+
+        // Add the number of digits of the first element.
+        for (v = c[0]; v >= 10; v /= 10, n++);
+      }
+
+      if (sd && x.e + 1 > n) n = x.e + 1;
+
+      return n;
+    };
+
+
+    /*
+     * Return a new BigNumber whose value is the value of this BigNumber shifted by k places
+     * (powers of 10). Shift to the right if n > 0, and to the left if n < 0.
+     *
+     * k {number} Integer, -MAX_SAFE_INTEGER to MAX_SAFE_INTEGER inclusive.
+     *
+     * '[BigNumber Error] Argument {not a primitive number|not an integer|out of range}: {k}'
+     */
+    P.shiftedBy = function (k) {
+      intCheck(k, -MAX_SAFE_INTEGER, MAX_SAFE_INTEGER);
+      return this.times('1e' + k);
+    };
+
+
+    /*
+     *  sqrt(-n) =  N
+     *  sqrt(N) =  N
+     *  sqrt(-I) =  N
+     *  sqrt(I) =  I
+     *  sqrt(0) =  0
+     *  sqrt(-0) = -0
+     *
+     * Return a new BigNumber whose value is the square root of the value of this BigNumber,
+     * rounded according to DECIMAL_PLACES and ROUNDING_MODE.
+     */
+    P.squareRoot = P.sqrt = function () {
+      var m, n, r, rep, t,
+        x = this,
+        c = x.c,
+        s = x.s,
+        e = x.e,
+        dp = DECIMAL_PLACES + 4,
+        half = new BigNumber('0.5');
+
+      // Negative/NaN/Infinity/zero?
+      if (s !== 1 || !c || !c[0]) {
+        return new BigNumber(!s || s < 0 && (!c || c[0]) ? NaN : c ? x : 1 / 0);
+      }
+
+      // Initial estimate.
+      s = Math.sqrt(+x);
+
+      // Math.sqrt underflow/overflow?
+      // Pass x to Math.sqrt as integer, then adjust the exponent of the result.
+      if (s == 0 || s == 1 / 0) {
+        n = coeffToString(c);
+        if ((n.length + e) % 2 == 0) n += '0';
+        s = Math.sqrt(n);
+        e = bitFloor((e + 1) / 2) - (e < 0 || e % 2);
+
+        if (s == 1 / 0) {
+          n = '1e' + e;
+        } else {
+          n = s.toExponential();
+          n = n.slice(0, n.indexOf('e') + 1) + e;
+        }
+
+        r = new BigNumber(n);
+      } else {
+        r = new BigNumber(s + '');
+      }
+
+      // Check for zero.
+      // r could be zero if MIN_EXP is changed after the this value was created.
+      // This would cause a division by zero (x/t) and hence Infinity below, which would cause
+      // coeffToString to throw.
+      if (r.c[0]) {
+        e = r.e;
+        s = e + dp;
+        if (s < 3) s = 0;
+
+        // Newton-Raphson iteration.
+        for (; ;) {
+          t = r;
+          r = half.times(t.plus(div(x, t, dp, 1)));
+
+          if (coeffToString(t.c  ).slice(0, s) === (n =
+             coeffToString(r.c)).slice(0, s)) {
+
+            // The exponent of r may here be one less than the final result exponent,
+            // e.g 0.0009999 (e-4) --> 0.001 (e-3), so adjust s so the rounding digits
+            // are indexed correctly.
+            if (r.e < e) --s;
+            n = n.slice(s - 3, s + 1);
+
+            // The 4th rounding digit may be in error by -1 so if the 4 rounding digits
+            // are 9999 or 4999 (i.e. approaching a rounding boundary) continue the
+            // iteration.
+            if (n == '9999' || !rep && n == '4999') {
+
+              // On the first iteration only, check to see if rounding up gives the
+              // exact result as the nines may infinitely repeat.
+              if (!rep) {
+                round(t, t.e + DECIMAL_PLACES + 2, 0);
+
+                if (t.times(t).eq(x)) {
+                  r = t;
+                  break;
+                }
+              }
+
+              dp += 4;
+              s += 4;
+              rep = 1;
+            } else {
+
+              // If rounding digits are null, 0{0,4} or 50{0,3}, check for exact
+              // result. If not, then there are further digits and m will be truthy.
+              if (!+n || !+n.slice(1) && n.charAt(0) == '5') {
+
+                // Truncate to the first rounding digit.
+                round(r, r.e + DECIMAL_PLACES + 2, 1);
+                m = !r.times(r).eq(x);
+              }
+
+              break;
+            }
+          }
+        }
+      }
+
+      return round(r, r.e + DECIMAL_PLACES + 1, ROUNDING_MODE, m);
+    };
+
+
+    /*
+     * Return a string representing the value of this BigNumber in exponential notation and
+     * rounded using ROUNDING_MODE to dp fixed decimal places.
+     *
+     * [dp] {number} Decimal places. Integer, 0 to MAX inclusive.
+     * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
+     *
+     * '[BigNumber Error] Argument {not a primitive number|not an integer|out of range}: {dp|rm}'
+     */
+    P.toExponential = function (dp, rm) {
+      if (dp != null) {
+        intCheck(dp, 0, MAX);
+        dp++;
+      }
+      return format(this, dp, rm, 1);
+    };
+
+
+    /*
+     * Return a string representing the value of this BigNumber in fixed-point notation rounding
+     * to dp fixed decimal places using rounding mode rm, or ROUNDING_MODE if rm is omitted.
+     *
+     * Note: as with JavaScript's number type, (-0).toFixed(0) is '0',
+     * but e.g. (-0.00001).toFixed(0) is '-0'.
+     *
+     * [dp] {number} Decimal places. Integer, 0 to MAX inclusive.
+     * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
+     *
+     * '[BigNumber Error] Argument {not a primitive number|not an integer|out of range}: {dp|rm}'
+     */
+    P.toFixed = function (dp, rm) {
+      if (dp != null) {
+        intCheck(dp, 0, MAX);
+        dp = dp + this.e + 1;
+      }
+      return format(this, dp, rm);
+    };
+
+
+    /*
+     * Return a string representing the value of this BigNumber in fixed-point notation rounded
+     * using rm or ROUNDING_MODE to dp decimal places, and formatted according to the properties
+     * of the FORMAT object (see BigNumber.set).
+     *
+     * FORMAT = {
+     *      decimalSeparator : '.',
+     *      groupSeparator : ',',
+     *      groupSize : 3,
+     *      secondaryGroupSize : 0,
+     *      fractionGroupSeparator : '\xA0',    // non-breaking space
+     *      fractionGroupSize : 0
+     * };
+     *
+     * [dp] {number} Decimal places. Integer, 0 to MAX inclusive.
+     * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
+     *
+     * '[BigNumber Error] Argument {not a primitive number|not an integer|out of range}: {dp|rm}'
+     */
+    P.toFormat = function (dp, rm) {
+      var str = this.toFixed(dp, rm);
+
+      if (this.c) {
+        var i,
+          arr = str.split('.'),
+          g1 = +FORMAT.groupSize,
+          g2 = +FORMAT.secondaryGroupSize,
+          groupSeparator = FORMAT.groupSeparator,
+          intPart = arr[0],
+          fractionPart = arr[1],
+          isNeg = this.s < 0,
+          intDigits = isNeg ? intPart.slice(1) : intPart,
+          len = intDigits.length;
+
+        if (g2) i = g1, g1 = g2, g2 = i, len -= i;
+
+        if (g1 > 0 && len > 0) {
+          i = len % g1 || g1;
+          intPart = intDigits.substr(0, i);
+
+          for (; i < len; i += g1) {
+            intPart += groupSeparator + intDigits.substr(i, g1);
+          }
+
+          if (g2 > 0) intPart += groupSeparator + intDigits.slice(i);
+          if (isNeg) intPart = '-' + intPart;
+        }
+
+        str = fractionPart
+         ? intPart + FORMAT.decimalSeparator + ((g2 = +FORMAT.fractionGroupSize)
+          ? fractionPart.replace(new RegExp('\\d{' + g2 + '}\\B', 'g'),
+           '$&' + FORMAT.fractionGroupSeparator)
+          : fractionPart)
+         : intPart;
+      }
+
+      return str;
+    };
+
+
+    /*
+     * Return a string array representing the value of this BigNumber as a simple fraction with
+     * an integer numerator and an integer denominator. The denominator will be a positive
+     * non-zero value less than or equal to the specified maximum denominator. If a maximum
+     * denominator is not specified, the denominator will be the lowest value necessary to
+     * represent the number exactly.
+     *
+     * [md] {number|string|BigNumber} Integer >= 1, or Infinity. The maximum denominator.
+     *
+     * '[BigNumber Error] Argument {not an integer|out of range} : {md}'
+     */
+    P.toFraction = function (md) {
+      var arr, d, d0, d1, d2, e, exp, n, n0, n1, q, s,
+        x = this,
+        xc = x.c;
+
+      if (md != null) {
+        n = new BigNumber(md);
+
+        // Throw if md is less than one or is not an integer, unless it is Infinity.
+        if (!n.isInteger() && (n.c || n.s !== 1) || n.lt(ONE)) {
+          throw Error
+            (bignumberError + 'Argument ' +
+              (n.isInteger() ? 'out of range: ' : 'not an integer: ') + md);
+        }
+      }
+
+      if (!xc) return x.toString();
+
+      d = new BigNumber(ONE);
+      n1 = d0 = new BigNumber(ONE);
+      d1 = n0 = new BigNumber(ONE);
+      s = coeffToString(xc);
+
+      // Determine initial denominator.
+      // d is a power of 10 and the minimum max denominator that specifies the value exactly.
+      e = d.e = s.length - x.e - 1;
+      d.c[0] = POWS_TEN[(exp = e % LOG_BASE) < 0 ? LOG_BASE + exp : exp];
+      md = !md || n.comparedTo(d) > 0 ? (e > 0 ? d : n1) : n;
+
+      exp = MAX_EXP;
+      MAX_EXP = 1 / 0;
+      n = new BigNumber(s);
+
+      // n0 = d1 = 0
+      n0.c[0] = 0;
+
+      for (; ;)  {
+        q = div(n, d, 0, 1);
+        d2 = d0.plus(q.times(d1));
+        if (d2.comparedTo(md) == 1) break;
+        d0 = d1;
+        d1 = d2;
+        n1 = n0.plus(q.times(d2 = n1));
+        n0 = d2;
+        d = n.minus(q.times(d2 = d));
+        n = d2;
+      }
+
+      d2 = div(md.minus(d0), d1, 0, 1);
+      n0 = n0.plus(d2.times(n1));
+      d0 = d0.plus(d2.times(d1));
+      n0.s = n1.s = x.s;
+      e *= 2;
+
+      // Determine which fraction is closer to x, n0/d0 or n1/d1
+      arr = div(n1, d1, e, ROUNDING_MODE).minus(x).abs().comparedTo(
+         div(n0, d0, e, ROUNDING_MODE).minus(x).abs()) < 1
+          ? [n1.toString(), d1.toString()]
+          : [n0.toString(), d0.toString()];
+
+      MAX_EXP = exp;
+      return arr;
+    };
+
+
+    /*
+     * Return the value of this BigNumber converted to a number primitive.
+     */
+    P.toNumber = function () {
+      return +this;
+    };
+
+
+    /*
+     * Return a string representing the value of this BigNumber rounded to sd significant digits
+     * using rounding mode rm or ROUNDING_MODE. If sd is less than the number of digits
+     * necessary to represent the integer part of the value in fixed-point notation, then use
+     * exponential notation.
+     *
+     * [sd] {number} Significant digits. Integer, 1 to MAX inclusive.
+     * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
+     *
+     * '[BigNumber Error] Argument {not a primitive number|not an integer|out of range}: {sd|rm}'
+     */
+    P.toPrecision = function (sd, rm) {
+      if (sd != null) intCheck(sd, 1, MAX);
+      return format(this, sd, rm, 2);
+    };
+
+
+    /*
+     * Return a string representing the value of this BigNumber in base b, or base 10 if b is
+     * omitted. If a base is specified, including base 10, round according to DECIMAL_PLACES and
+     * ROUNDING_MODE. If a base is not specified, and this BigNumber has a positive exponent
+     * that is equal to or greater than TO_EXP_POS, or a negative exponent equal to or less than
+     * TO_EXP_NEG, return exponential notation.
+     *
+     * [b] {number} Integer, 2 to ALPHABET.length inclusive.
+     *
+     * '[BigNumber Error] Base {not a primitive number|not an integer|out of range}: {b}'
+     */
+    P.toString = function (b) {
+      var str,
+        n = this,
+        s = n.s,
+        e = n.e;
+
+      // Infinity or NaN?
+      if (e === null) {
+
+        if (s) {
+          str = 'Infinity';
+          if (s < 0) str = '-' + str;
+        } else {
+          str = 'NaN';
+        }
+      } else {
+        str = coeffToString(n.c);
+
+        if (b == null) {
+          str = e <= TO_EXP_NEG || e >= TO_EXP_POS
+           ? toExponential(str, e)
+           : toFixedPoint(str, e, '0');
+        } else {
+          intCheck(b, 2, ALPHABET.length, 'Base');
+          str = convertBase(toFixedPoint(str, e, '0'), 10, b, s, true);
+        }
+
+        if (s < 0 && n.c[0]) str = '-' + str;
+      }
+
+      return str;
+    };
+
+
+    /*
+     * Return as toString, but do not accept a base argument, and include the minus sign for
+     * negative zero.
+     */
+    P.valueOf = P.toJSON = function () {
+      var str,
+        n = this,
+        e = n.e;
+
+      if (e === null) return n.toString();
+
+      str = coeffToString(n.c);
+
+      str = e <= TO_EXP_NEG || e >= TO_EXP_POS
+        ? toExponential(str, e)
+        : toFixedPoint(str, e, '0');
+
+      return n.s < 0 ? '-' + str : str;
+    };
+
+
+    P._isBigNumber = true;
+
+    if (configObject != null) BigNumber.set(configObject);
+
+    return BigNumber;
+  }
+
+
+  // PRIVATE HELPER FUNCTIONS
+
+
+  function bitFloor(n) {
+    var i = n | 0;
+    return n > 0 || n === i ? i : i - 1;
+  }
+
+
+  // Return a coefficient array as a string of base 10 digits.
+  function coeffToString(a) {
+    var s, z,
+      i = 1,
+      j = a.length,
+      r = a[0] + '';
+
+    for (; i < j;) {
+      s = a[i++] + '';
+      z = LOG_BASE - s.length;
+      for (; z--; s = '0' + s);
+      r += s;
+    }
+
+    // Determine trailing zeros.
+    for (j = r.length; r.charCodeAt(--j) === 48;);
+    return r.slice(0, j + 1 || 1);
+  }
+
+
+  // Compare the value of BigNumbers x and y.
+  function compare(x, y) {
+    var a, b,
+      xc = x.c,
+      yc = y.c,
+      i = x.s,
+      j = y.s,
+      k = x.e,
+      l = y.e;
+
+    // Either NaN?
+    if (!i || !j) return null;
+
+    a = xc && !xc[0];
+    b = yc && !yc[0];
+
+    // Either zero?
+    if (a || b) return a ? b ? 0 : -j : i;
+
+    // Signs differ?
+    if (i != j) return i;
+
+    a = i < 0;
+    b = k == l;
+
+    // Either Infinity?
+    if (!xc || !yc) return b ? 0 : !xc ^ a ? 1 : -1;
+
+    // Compare exponents.
+    if (!b) return k > l ^ a ? 1 : -1;
+
+    j = (k = xc.length) < (l = yc.length) ? k : l;
+
+    // Compare digit by digit.
+    for (i = 0; i < j; i++) if (xc[i] != yc[i]) return xc[i] > yc[i] ^ a ? 1 : -1;
+
+    // Compare lengths.
+    return k == l ? 0 : k > l ^ a ? 1 : -1;
+  }
+
+
+  /*
+   * Check that n is a primitive number, an integer, and in range, otherwise throw.
+   */
+  function intCheck(n, min, max, name) {
+    if (n < min || n > max || n !== (n < 0 ? mathceil(n) : mathfloor(n))) {
+      throw Error
+       (bignumberError + (name || 'Argument') + (typeof n == 'number'
+         ? n < min || n > max ? ' out of range: ' : ' not an integer: '
+         : ' not a primitive number: ') + n);
+    }
+  }
+
+
+  function isArray(obj) {
+    return Object.prototype.toString.call(obj) == '[object Array]';
+  }
+
+
+  // Assumes finite n.
+  function isOdd(n) {
+    var k = n.c.length - 1;
+    return bitFloor(n.e / LOG_BASE) == k && n.c[k] % 2 != 0;
+  }
+
+
+  function toExponential(str, e) {
+    return (str.length > 1 ? str.charAt(0) + '.' + str.slice(1) : str) +
+     (e < 0 ? 'e' : 'e+') + e;
+  }
+
+
+  function toFixedPoint(str, e, z) {
+    var len, zs;
+
+    // Negative exponent?
+    if (e < 0) {
+
+      // Prepend zeros.
+      for (zs = z + '.'; ++e; zs += z);
+      str = zs + str;
+
+    // Positive exponent
+    } else {
+      len = str.length;
+
+      // Append zeros.
+      if (++e > len) {
+        for (zs = z, e -= len; --e; zs += z);
+        str += zs;
+      } else if (e < len) {
+        str = str.slice(0, e) + '.' + str.slice(e);
+      }
+    }
+
+    return str;
+  }
+
+
+  // EXPORT
+
+
+  BigNumber = clone();
+  BigNumber['default'] = BigNumber.BigNumber = BigNumber;
+
+  // AMD.
+  if ( module.exports) {
+    module.exports = BigNumber;
+
+  // Browser.
+  } else {
+    if (!globalObject) {
+      globalObject = typeof self != 'undefined' && self ? self : window;
+    }
+
+    globalObject.BigNumber = BigNumber;
+  }
+})(commonjsGlobal);
+});
+
+/**
+ * Shortcut to create a BigNumber
+ */
+var bn$2 = function (value) { return new bignumber$1(value); };
+/**
+ * Helper to check whether a BigNumber is valid or not
+ * */
+var isValidBN = function (value) { return !value.isNaN(); };
+var SymbolPosition;
+(function (SymbolPosition) {
+    SymbolPosition["BEFORE"] = "before";
+    SymbolPosition["AFTER"] = "after";
+})(SymbolPosition || (SymbolPosition = {}));
+/**
+ * Helper to get a fixed `BigNumber`
+ * Returns zero `BigNumber` if `value` is invalid
+ * */
+var fixedBN = function (value, decimalPlaces) {
+    if (decimalPlaces === void 0) { decimalPlaces = 2; }
+    var n = bn$2(value || 0);
+    var fixedBN = isValidBN(n) ? n.toFixed(decimalPlaces) : bn$2(0).toFixed(decimalPlaces);
+    return bn$2(fixedBN);
+};
+var BTCChain = 'BTC';
+
+var Denomination;
+(function (Denomination) {
+    /**
+     * values for asset amounts in base units (no decimal)
+     */
+    Denomination["BASE"] = "BASE";
+    /**
+     * values of asset amounts (w/ decimal)
+     */
+    Denomination["ASSET"] = "ASSET";
+})(Denomination || (Denomination = {}));
+
+/**
+ * Default number of asset decimals
+ *
+ * For history reason and by starting the project on Binance chain assets, it's 8 decimal.
+ *
+ * For example:
+ * RUNE has a maximum of 8 digits of decimal
+ * 0.00000001 RUNE == 1 ð (tor)
+ * */
+var ASSET_DECIMAL = 8;
+/**
+ * Factory to create base amounts (e.g. tor)
+ *
+ * @param value - Base amount - If the value is undefined, BaseAmount with value `0` will be returned
+ * @param decimal - Decimal places - default 8
+ *
+ **/
+var baseAmount = function (value, decimal) {
+    if (decimal === void 0) { decimal = ASSET_DECIMAL; }
+    return ({
+        type: Denomination.BASE,
+        amount: function () { return fixedBN(value, 0); },
+        decimal: decimal,
+    });
+};
+var AssetBTC = { chain: BTCChain, symbol: 'BTC', ticker: 'BTC' };
+/**
+ * Returns an `Asset` as a string using following naming convention:
+ *
+ * `AAA.BBB-CCC`
+ * where
+ * chain: `AAA`
+ * ticker (optional): `BBB`
+ * symbol: `BBB-CCC` or `CCC` (if no ticker available)
+ *
+ */
+var assetToString = function (_a) {
+    var chain = _a.chain, symbol = _a.symbol;
+    return chain + "." + symbol;
+};
+/**
+ * Currency symbols currently supported
+ */
+var AssetCurrencySymbol;
+(function (AssetCurrencySymbol) {
+    AssetCurrencySymbol["RUNE"] = "\u16B1";
+    AssetCurrencySymbol["BTC"] = "\u20BF";
+    AssetCurrencySymbol["SATOSHI"] = "\u26A1";
+    AssetCurrencySymbol["ETH"] = "\u039E";
+    AssetCurrencySymbol["USD"] = "$";
+})(AssetCurrencySymbol || (AssetCurrencySymbol = {}));
+
 /**
  * Implements Client declared above
  */
 var Client = /** @class */ (function () {
     // Client is initialised with network type
-    function Client(_net, _electrsAPI, _phrase) {
+    function Client(_a) {
         var _this = this;
-        if (_net === void 0) { _net = Network.TEST; }
-        if (_electrsAPI === void 0) { _electrsAPI = ''; }
+        var _b = _a.network, network = _b === void 0 ? 'testnet' : _b, _c = _a.nodeUrl, nodeUrl = _c === void 0 ? '' : _c, _d = _a.nodeApiKey, nodeApiKey = _d === void 0 ? '' : _d, phrase = _a.phrase;
         this.phrase = '';
-        this.electrsAPI = '';
+        this.nodeUrl = '';
+        this.nodeApiKey = '';
         this.generatePhrase = function () {
             return generatePhrase();
         };
         // Sets this.phrase to be accessed later
         this.setPhrase = function (phrase) {
-            if (phrase) {
-                if (validatePhrase(phrase)) {
-                    _this.phrase = phrase;
-                }
-                else {
-                    throw new Error('Invalid BIP39 phrase');
-                }
+            if (validatePhrase(phrase)) {
+                _this.phrase = phrase;
+                var address = _this.getAddress();
+                return address;
+            }
+            else {
+                throw new Error('Invalid BIP39 phrase');
             }
         };
         this.purgeClient = function () {
             _this.phrase = '';
             _this.utxos = [];
         };
-        this.getExplorerUrl = function () {
-            return _this.net === Network.TEST ? 'https://blockstream.info/testnet/' : 'https://blockstream.info/';
-        };
         // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
         // The address is then decoded into type P2WPKH and returned.
         this.getAddress = function () {
             if (_this.phrase) {
-                var network = _this.getNetwork(_this.net);
-                var btcKeys = _this.getBtcKeys(_this.net, _this.phrase);
+                var network = _this.getNetwork();
+                var btcNetwork = network === 'testnet' ? src_5.testnet : src_5.bitcoin;
+                var btcKeys = _this.getBtcKeys(_this.phrase);
                 var address = src_6.p2wpkh({
                     pubkey: btcKeys.publicKey,
-                    network: network,
+                    network: btcNetwork,
                 }).address;
                 if (!address) {
                     throw new Error('address not defined');
@@ -56022,7 +60401,7 @@ var Client = /** @class */ (function () {
         };
         // Will return true/false
         this.validateAddress = function (address) {
-            var network = _this.getNetwork(_this.net);
+            var network = _this.getNetwork() == 'testnet' ? src_5.testnet : src_5.bitcoin;
             try {
                 src_2$1.toOutputScript(address, network);
                 return true;
@@ -56033,27 +60412,28 @@ var Client = /** @class */ (function () {
         };
         // Scans UTXOs on Address
         this.scanUTXOs = function () { return __awaiter(_this, void 0, void 0, function () {
-            var address, utxos, i, txHash, value, index, txData, script, witness, utxoObject, error_1;
+            var address, dashboardsAddress, utxos, i, txHash, value, index, txData, script, witness, utxoObject, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 6, , 7]);
-                        this.utxos = []; // clear existing utxos
                         address = this.getAddress();
-                        return [4 /*yield*/, getAddressUtxos(this.electrsAPI, address)];
+                        return [4 /*yield*/, getAddress(this.nodeUrl, address, this.nodeApiKey)];
                     case 1:
-                        utxos = _a.sent();
+                        dashboardsAddress = _a.sent();
+                        this.utxos = []; // clear existing utxos
+                        utxos = dashboardsAddress[address].utxo;
                         i = 0;
                         _a.label = 2;
                     case 2:
                         if (!(i < utxos.length)) return [3 /*break*/, 5];
-                        txHash = utxos[i].txid;
+                        txHash = utxos[i].transaction_hash;
                         value = utxos[i].value;
-                        index = utxos[i].vout;
-                        return [4 /*yield*/, getTxInfo(this.electrsAPI, txHash)];
+                        index = utxos[i].index;
+                        return [4 /*yield*/, getRawTx(this.nodeUrl, txHash, this.nodeApiKey)];
                     case 3:
                         txData = _a.sent();
-                        script = txData.vout[index].scriptpubkey;
+                        script = txData[txHash].decoded_raw_transaction.vout[index].scriptPubKey.hex;
                         witness = {
                             value: value,
                             script: Buffer.from(script, 'hex'),
@@ -56076,129 +60456,191 @@ var Client = /** @class */ (function () {
                 }
             });
         }); };
-        // Returns balance of all UTXOs
-        this.getBalance = function () { return __awaiter(_this, void 0, void 0, function () {
-            var reducer, sumBalance;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.scanUTXOs()];
-                    case 1:
-                        _a.sent();
-                        if (this.utxos && this.utxos.length > 0) {
-                            reducer = function (accumulator, currentValue) { return accumulator + currentValue; };
-                            sumBalance = this.utxos.map(function (e) { return e.witnessUtxo.value; }).reduce(reducer);
-                            return [2 /*return*/, sumBalance];
-                        }
-                        else {
-                            return [2 /*return*/, 0];
-                        }
-                }
-            });
-        }); };
-        // TODO -> reformat into simple getBalance
-        this.getBalanceForAddress = function (address) { return __awaiter(_this, void 0, void 0, function () {
-            var addressInfo;
+        // Returns balance of address
+        this.getBalance = function (address) { return __awaiter(_this, void 0, void 0, function () {
+            var dashboardAddress, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!this.validateAddress(address)) {
-                            throw new Error('Invalid address');
+                        if (!address) {
+                            address = this.getAddress();
                         }
-                        return [4 /*yield*/, getAddressInfo(this.electrsAPI, address)];
+                        _a.label = 1;
                     case 1:
-                        addressInfo = _a.sent();
-                        return [2 /*return*/, addressInfo.chain_stats.funded_txo_sum - addressInfo.chain_stats.spent_txo_sum];
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, getAddress(this.nodeUrl, address, this.nodeApiKey)];
+                    case 2:
+                        dashboardAddress = _a.sent();
+                        return [2 /*return*/, [
+                                {
+                                    asset: AssetBTC,
+                                    amount: baseAmount(dashboardAddress[address].address.balance),
+                                },
+                            ]];
+                    case 3:
+                        error_2 = _a.sent();
+                        return [2 /*return*/, Promise.reject(new Error('Invalid address'))];
+                    case 4: return [2 /*return*/];
                 }
             });
         }); };
         // Given a desired output, return change
         this.getChange = function (valueOut) { return __awaiter(_this, void 0, void 0, function () {
-            var balance, change;
+            var balances, btcBalance, change;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.getBalance()];
                     case 1:
-                        balance = _a.sent();
+                        balances = _a.sent();
+                        btcBalance = balances.find(function (balance) { return assetToString(balance.asset) === assetToString(AssetBTC); });
                         change = 0;
-                        if (balance > 0) {
-                            if (balance - valueOut > dustThreshold) {
-                                change = balance - valueOut;
-                            }
+                        if (btcBalance && btcBalance.amount.amount().minus(valueOut).isGreaterThan(dustThreshold)) {
+                            change = btcBalance.amount.amount().minus(valueOut).toNumber();
                         }
                         return [2 /*return*/, change];
                 }
             });
         }); };
-        this.getTransactions = function (address) { return __awaiter(_this, void 0, void 0, function () {
-            var transactions, error_2;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+        /**
+         * TODO: Add this in with correct response type
+         * Requires querying tx data for each address tx
+         * @param memo
+         */
+        this.getTransactions = function (params) { return __awaiter(_this, void 0, void 0, function () {
+            var address, limit, offset, transactions, dashboardAddress, txList, _i, txList_1, hash, rawTx, tx, error_3, result;
+            var _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
-                        if (!this.validateAddress(address)) {
-                            throw new Error('Invalid address');
-                        }
+                        address = (_a = params === null || params === void 0 ? void 0 : params.address) !== null && _a !== void 0 ? _a : this.getAddress();
+                        limit = (_b = params === null || params === void 0 ? void 0 : params.limit) !== null && _b !== void 0 ? _b : 10;
+                        offset = (_c = params === null || params === void 0 ? void 0 : params.offset) !== null && _c !== void 0 ? _c : 0;
                         transactions = [];
-                        _a.label = 1;
+                        _d.label = 1;
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, getAddressTxs(this.electrsAPI, address)];
+                        _d.trys.push([1, 7, , 8]);
+                        return [4 /*yield*/, getAddress(this.nodeUrl, address, this.nodeApiKey, limit, offset)];
                     case 2:
-                        transactions = _a.sent();
-                        return [3 /*break*/, 4];
+                        dashboardAddress = _d.sent();
+                        txList = dashboardAddress[address].transactions;
+                        _i = 0, txList_1 = txList;
+                        _d.label = 3;
                     case 3:
-                        error_2 = _a.sent();
-                        return [2 /*return*/, Promise.reject(error_2)];
-                    case 4: return [2 /*return*/, transactions];
+                        if (!(_i < txList_1.length)) return [3 /*break*/, 6];
+                        hash = txList_1[_i];
+                        return [4 /*yield*/, getTx(this.nodeUrl, hash, this.nodeApiKey)];
+                    case 4:
+                        rawTx = (_d.sent())[hash];
+                        tx = {
+                            asset: AssetBTC,
+                            from: rawTx.inputs.map(function (i) { return ({ from: i.recipient, amount: baseAmount(i.value) }); }),
+                            to: rawTx.outputs.map(function (i) { return ({ to: i.recipient, amount: baseAmount(i.value) }); }),
+                            date: new Date(rawTx.transaction.time),
+                            type: 'transfer',
+                            hash: rawTx.transaction.hash,
+                        };
+                        transactions.push(tx);
+                        _d.label = 5;
+                    case 5:
+                        _i++;
+                        return [3 /*break*/, 3];
+                    case 6: return [3 /*break*/, 8];
+                    case 7:
+                        error_3 = _d.sent();
+                        return [2 /*return*/, Promise.reject(error_3)];
+                    case 8:
+                        result = {
+                            total: transactions.length,
+                            txs: transactions,
+                        };
+                        return [2 /*return*/, result];
                 }
             });
         }); };
-        // getBlockTime = async (): Promise<number> => {
-        //   const blocks: Blocks = await getBlocks(this.electrsAPI)
-        //   const times: Array<number> = []
-        //   blocks.forEach((block, index: number) => {
-        //     if (index !== 0) {
-        //       const block1PublishTime = moment.unix(blocks[index - 1].timestamp)
-        //       const block2PublishTime = moment.unix(block.timestamp)
-        //       times.push(block1PublishTime.diff(block2PublishTime, 'seconds'))
-        //     }
-        //   })
-        //   const avgBlockPublishTime = Utils.arrayAverage(times)
-        //   return avgBlockPublishTime
-        // }
-        // getTxWeight = async (addressTo: string, memo?: string): Promise<number> => {
-        //   if (!this.validateAddress(addressTo)) {
-        //     throw new Error('Invalid address')
-        //   }
-        //   const network = this.getNetwork(this.net)
-        //   const btcKeys = this.getBtcKeys(this.net, this.phrase)
-        //   const balance = this.getBalance()
-        //   const balancePlaceholder = balance - Utils.dustThreshold - 1
-        //   const psbt = new Bitcoin.Psbt({ network: network }) // Network-specific
-        //   this.utxos.forEach((UTXO) =>
-        //     psbt.addInput({
-        //       hash: UTXO.hash,
-        //       index: UTXO.index,
-        //       witnessUtxo: UTXO.witnessUtxo,
-        //     }),
-        //   )
-        //   psbt.addOutput({ address: addressTo, value: balancePlaceholder }) // Add output
-        //   psbt.addOutput({ address: this.getAddress(), value: 1 }) // change output
-        //   if (memo) {
-        //     const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
-        //     const OP_RETURN = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
-        //     psbt.addOutput({ script: OP_RETURN, value: 0 }) // Add OP_RETURN {script, value}
-        //   }
-        //   psbt.signAllInputs(btcKeys) // Sign all inputs
-        //   const tx = psbt.finalizeAllInputs().extractTransaction() // Finalise inputs, extract tx
-        //   const inputs = this.utxos.length // Add weight for each input sig
-        //   return tx.virtualSize() + inputs
-        // }
-        // returns an object of the fee rate, total fee for getting a transactions
-        // eg. { 'fast': { 'feeRate': 87.882, 'feeTotal': 4231 }, regular: ... }
-        // = getting a tx into one of the next 3 blocks would require a feerate >= 87.882 sat/byte,
-        // for a total of 4231 sats in fees
-        this.calcFees = function (memo) { return __awaiter(_this, void 0, void 0, function () {
-            var feeOption, calcdFees, FeeRateEstimates, nextBlockFeeRate, feesOptions, key, feeRate, feeTotal, OP_RETURN;
+        this.net = network;
+        this.setNodeURL(nodeUrl);
+        this.setNodeAPIKey(nodeApiKey);
+        phrase && this.setPhrase(phrase);
+        this.utxos = [];
+    }
+    Client.prototype.setNodeURL = function (url) {
+        this.nodeUrl = url;
+    };
+    Client.prototype.setNodeAPIKey = function (key) {
+        this.nodeApiKey = key;
+    };
+    // update network
+    Client.prototype.setNetwork = function (_net) {
+        this.net = _net;
+    };
+    // Will return the desired network
+    Client.prototype.getNetwork = function () {
+        return this.net;
+    };
+    Client.prototype.getExplorerAddressUrl = function (address) {
+        var networkPath = this.net === 'testnet' ? '/testnet' : '';
+        return "https://blockstream.info" + networkPath + "/address/" + address;
+    };
+    Client.prototype.getExplorerTxUrl = function (txID) {
+        var networkPath = this.net === 'testnet' ? '/testnet' : '';
+        return "https://blockstream.info" + networkPath + "/tx/" + txID;
+    };
+    // Private function to get keyPair from the this.phrase
+    Client.prototype.getBtcKeys = function (_phrase) {
+        var network = this.getNetwork() == 'testnet' ? src_5.testnet : src_5.bitcoin;
+        // const buffer = BIP39.mnemonicToSeedSync(_phrase)
+        // const wif = WIF.encode(network.wif, buffer, true)
+        var seed = getSeed(_phrase);
+        var wif = wif_3(network.wif, Buffer.from(seed, 'hex'), true);
+        return src_4$1.fromWIF(wif, network);
+    };
+    // getBlockTime = async (): Promise<number> => {
+    //   const blocks: Blocks = await getBlocks(this.electrsAPI)
+    //   const times: Array<number> = []
+    //   blocks.forEach((block, index: number) => {
+    //     if (index !== 0) {
+    //       const block1PublishTime = moment.unix(blocks[index - 1].timestamp)
+    //       const block2PublishTime = moment.unix(block.timestamp)
+    //       times.push(block1PublishTime.diff(block2PublishTime, 'seconds'))
+    //     }
+    //   })
+    //   const avgBlockPublishTime = Utils.arrayAverage(times)
+    //   return avgBlockPublishTime
+    // }
+    // getTxWeight = async (addressTo: string, memo?: string): Promise<number> => {
+    //   if (!this.validateAddress(addressTo)) {
+    //     throw new Error('Invalid address')
+    //   }
+    //   const network = this.getNetwork(this.net)
+    //   const btcKeys = this.getBtcKeys(this.net, this.phrase)
+    //   const balance = this.getBalance()
+    //   const balancePlaceholder = balance - Utils.dustThreshold - 1
+    //   const psbt = new Bitcoin.Psbt({ network: network }) // Network-specific
+    //   this.utxos.forEach((UTXO) =>
+    //     psbt.addInput({
+    //       hash: UTXO.hash,
+    //       index: UTXO.index,
+    //       witnessUtxo: UTXO.witnessUtxo,
+    //     }),
+    //   )
+    //   psbt.addOutput({ address: addressTo, value: balancePlaceholder }) // Add output
+    //   psbt.addOutput({ address: this.getAddress(), value: 1 }) // change output
+    //   if (memo) {
+    //     const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
+    //     const OP_RETURN = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
+    //     psbt.addOutput({ script: OP_RETURN, value: 0 }) // Add OP_RETURN {script, value}
+    //   }
+    //   psbt.signAllInputs(btcKeys) // Sign all inputs
+    //   const tx = psbt.finalizeAllInputs().extractTransaction() // Finalise inputs, extract tx
+    //   const inputs = this.utxos.length // Add weight for each input sig
+    //   return tx.virtualSize() + inputs
+    // }
+    /**
+     * getFees
+     */
+    Client.prototype.getFees = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var btcStats, nextBlockFeeRate, feesOptions, calcdFees;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.scanUTXOs()];
@@ -56207,126 +60649,124 @@ var Client = /** @class */ (function () {
                         if (this.utxos.length === 0) {
                             throw new Error('No utxos to send');
                         }
-                        feeOption = { feeRate: 0, feeTotal: 0 };
-                        calcdFees = { fast: feeOption, regular: feeOption, slow: feeOption };
-                        return [4 /*yield*/, getFeeEstimates(this.electrsAPI)];
+                        return [4 /*yield*/, bitcoinStats(this.nodeUrl, this.nodeApiKey)];
                     case 2:
-                        FeeRateEstimates = _a.sent();
-                        nextBlockFeeRate = FeeRateEstimates['1'] || 20;
+                        btcStats = _a.sent();
+                        nextBlockFeeRate = btcStats.suggested_transaction_fee_per_byte_sat;
                         feesOptions = {
-                            fast: 5,
-                            regular: 1,
-                            slow: 0.5,
+                            type: 'byte',
+                            fastest: baseAmount(5),
+                            average: baseAmount(1),
+                            fast: baseAmount(0.5),
                         };
-                        for (key in feesOptions) {
-                            feeRate = nextBlockFeeRate * feesOptions[key];
-                            feeTotal = void 0;
-                            if (memo) {
-                                OP_RETURN = compileMemo(memo);
-                                feeTotal = getVaultFee(this.utxos, OP_RETURN, feeRate);
-                            }
-                            else {
-                                feeTotal = getNormalFee(this.utxos, feeRate);
-                            }
-                            calcdFees[key] = {
-                                feeRate: feeRate,
-                                feeTotal: feeTotal,
-                            };
-                        }
+                        calcdFees = {
+                            type: feesOptions.type,
+                            fast: baseAmount(feesOptions.fast.amount().multipliedBy(nextBlockFeeRate)),
+                            average: baseAmount(feesOptions.average.amount().multipliedBy(nextBlockFeeRate)),
+                            fastest: baseAmount(feesOptions.fastest.amount().multipliedBy(nextBlockFeeRate)),
+                        };
                         return [2 /*return*/, calcdFees];
                 }
             });
-        }); };
-        this.transfer = function (_a) {
-            var amount = _a.amount, recipient = _a.recipient, memo = _a.memo, feeRate = _a.feeRate;
-            return __awaiter(_this, void 0, void 0, function () {
-                var balance, network, btcKeys, feeRateWhole, compiledMemo, fee, psbt, change, txHex, chain;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0: return [4 /*yield*/, this.getBalance()];
-                        case 1:
-                            balance = _b.sent();
-                            if (this.utxos.length === 0) {
-                                throw new Error('No utxos to send');
-                            }
-                            if (!this.validateAddress(recipient)) {
-                                throw new Error('Invalid address');
-                            }
-                            network = this.getNetwork(this.net);
-                            btcKeys = this.getBtcKeys(this.net, this.phrase);
-                            feeRateWhole = Number(feeRate.toFixed(0));
-                            compiledMemo = memo ? compileMemo(memo) : null;
-                            fee = compiledMemo
-                                ? getVaultFee(this.utxos, compiledMemo, feeRateWhole)
-                                : getNormalFee(this.utxos, feeRateWhole);
-                            if (fee + amount > balance) {
-                                throw new Error('Balance insufficient for transaction');
-                            }
-                            psbt = new src_9({ network: network }) // Network-specific
-                            ;
-                            //Inputs
-                            this.utxos.forEach(function (UTXO) {
-                                return psbt.addInput({
-                                    hash: UTXO.hash,
-                                    index: UTXO.index,
-                                    witnessUtxo: UTXO.witnessUtxo,
-                                });
-                            });
-                            // Outputs
-                            psbt.addOutput({ address: recipient, value: amount }); // Add output {address, value}
-                            return [4 /*yield*/, this.getChange(amount + fee)];
-                        case 2:
-                            change = _b.sent();
-                            if (change > 0) {
-                                psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
-                            }
-                            if (compiledMemo) {
-                                // if memo exists
-                                psbt.addOutput({ script: compiledMemo, value: 0 }); // Add OP_RETURN {script, value}
-                            }
-                            psbt.signAllInputs(btcKeys); // Sign all inputs
-                            psbt.finalizeAllInputs(); // Finalise inputs
-                            txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
-                            ;
-                            chain = this.net == Network.TEST ? 'bitcoin/testnet' : 'bitcoin';
-                            return [4 /*yield*/, broadcastTx(chain, txHex)];
-                        case 3: return [2 /*return*/, _b.sent()];
-                    }
-                });
+        });
+    };
+    Client.prototype.getFeesWithMemo = function (memo) {
+        var _a, _b, _c, _d, _e, _f;
+        return __awaiter(this, void 0, void 0, function () {
+            var OP_RETURN, fees, memoFees;
+            return __generator(this, function (_g) {
+                switch (_g.label) {
+                    case 0:
+                        OP_RETURN = compileMemo(memo);
+                        return [4 /*yield*/, this.getFees()];
+                    case 1:
+                        fees = _g.sent();
+                        memoFees = {
+                            type: 'byte',
+                            fast: baseAmount(getVaultFee(this.utxos, OP_RETURN, (_b = (_a = fees.fast) === null || _a === void 0 ? void 0 : _a.amount().toNumber()) !== null && _b !== void 0 ? _b : 0)),
+                            average: baseAmount(getVaultFee(this.utxos, OP_RETURN, (_d = (_c = fees.average) === null || _c === void 0 ? void 0 : _c.amount().toNumber()) !== null && _d !== void 0 ? _d : 0)),
+                            fastest: baseAmount(getVaultFee(this.utxos, OP_RETURN, (_f = (_e = fees.fastest) === null || _e === void 0 ? void 0 : _e.amount().toNumber()) !== null && _f !== void 0 ? _f : 0)),
+                        };
+                        return [2 /*return*/, memoFees];
+                }
             });
-        };
-        this.net = _net;
-        _phrase && this.setPhrase(_phrase);
-        _electrsAPI && this.setBaseUrl(_electrsAPI);
-        this.utxos = [];
-    }
-    // update network
-    Client.prototype.setNetwork = function (_net) {
-        this.net = _net;
+        });
     };
-    // Will return the desired network
-    Client.prototype.getNetwork = function (net) {
-        if (net === Network.TEST) {
-            return src_5.testnet;
-        }
-        else {
-            return src_5.bitcoin;
-        }
+    Client.prototype.deposit = function (_a) {
+        var _b = _a.asset, asset = _b === void 0 ? AssetBTC : _b, amount = _a.amount, recipient = _a.recipient, memo = _a.memo, feeRate = _a.feeRate;
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_c) {
+                return [2 /*return*/, this.transfer({ asset: asset, amount: amount, recipient: recipient, memo: memo, feeRate: feeRate })];
+            });
+        });
     };
-    Client.prototype.setBaseUrl = function (endpoint) {
-        this.electrsAPI = endpoint;
-    };
-    // Private function to get keyPair from the this.phrase
-    Client.prototype.getBtcKeys = function (_net, _phrase) {
-        var network = this.getNetwork(_net);
-        // const buffer = BIP39.mnemonicToSeedSync(_phrase)
-        // const wif = WIF.encode(network.wif, buffer, true)
-        var seed = getSeed(_phrase);
-        var wif = wif_3(network.wif, Buffer.from(seed, 'hex'), true);
-        return src_4$1.fromWIF(wif, network);
+    Client.prototype.transfer = function (_a) {
+        var _b = _a.asset, asset = _b === void 0 ? AssetBTC : _b, amount = _a.amount, recipient = _a.recipient, memo = _a.memo, feeRate = _a.feeRate;
+        return __awaiter(this, void 0, void 0, function () {
+            var balance, btcBalance, network, btcKeys, feeRateWhole, compiledMemo, fee, psbt, change, txHex;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0: return [4 /*yield*/, this.scanUTXOs()];
+                    case 1:
+                        _c.sent();
+                        return [4 /*yield*/, this.getBalance()];
+                    case 2:
+                        balance = _c.sent();
+                        btcBalance = balance.find(function (balance) { return balance.asset.symbol === asset.symbol; });
+                        if (!btcBalance) {
+                            throw new Error('No btcBalance found');
+                        }
+                        if (this.utxos.length === 0) {
+                            throw new Error('No utxos to send');
+                        }
+                        if (!this.validateAddress(recipient)) {
+                            throw new Error('Invalid address');
+                        }
+                        network = this.getNetwork() == 'testnet' ? src_5.testnet : src_5.bitcoin;
+                        btcKeys = this.getBtcKeys(this.phrase);
+                        feeRateWhole = Number(feeRate === null || feeRate === void 0 ? void 0 : feeRate.toFixed(0));
+                        compiledMemo = memo ? compileMemo(memo) : null;
+                        fee = compiledMemo
+                            ? getVaultFee(this.utxos, compiledMemo, feeRateWhole)
+                            : getNormalFee(this.utxos, feeRateWhole);
+                        if (amount.amount().plus(fee).isGreaterThan(btcBalance.amount.amount())) {
+                            throw new Error('Balance insufficient for transaction');
+                        }
+                        psbt = new src_9({ network: network }) // Network-specific
+                        ;
+                        //Inputs
+                        this.utxos.forEach(function (UTXO) {
+                            return psbt.addInput({
+                                hash: UTXO.hash,
+                                index: UTXO.index,
+                                witnessUtxo: UTXO.witnessUtxo,
+                            });
+                        });
+                        // Outputs
+                        psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }); // Add output {address, value}
+                        return [4 /*yield*/, this.getChange(amount.amount().toNumber() + fee)];
+                    case 3:
+                        change = _c.sent();
+                        if (change > 0) {
+                            psbt.addOutput({ address: this.getAddress(), value: change }); // Add change
+                        }
+                        if (compiledMemo) {
+                            // if memo exists
+                            psbt.addOutput({ script: compiledMemo, value: 0 }); // Add OP_RETURN {script, value}
+                        }
+                        psbt.signAllInputs(btcKeys); // Sign all inputs
+                        psbt.finalizeAllInputs(); // Finalise inputs
+                        txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+                        ;
+                        return [4 /*yield*/, broadcastTx(this.nodeUrl, txHex, this.nodeApiKey)];
+                    case 4: // TX extracted and formatted to hex
+                    return [2 /*return*/, _c.sent()];
+                }
+            });
+        });
     };
     return Client;
 }());
 
-export { Client, Network };
+export { Client };
 //# sourceMappingURL=index.esm.js.map

@@ -7,6 +7,7 @@ import {
   TxsPage,
   Address,
   AsgardexClient,
+  Tx,
   TxParams,
   Balance,
   Network,
@@ -216,27 +217,36 @@ class Client implements BitcoinClient, AsgardexClient {
    * @param memo
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    // TODO(kashif) temporarily work in progress.
-    // Need to confirm whether anything special is needed to complete
-    // it here. Also needs test cases.
-    console.log(params?.address)
-    return Promise.resolve({
-      total: 0,
-      txs: [],
-    })
+    const address = params?.address ?? this.getAddress()
+    const limit = params?.limit ?? 10
+    const offset = params?.offset ?? 0
 
-    // let transactions = []
-    // try {
-    //   const chain = this.net === 'testnet' ? 'bitcoin/testnet' : 'bitcoin'
-    //   const dashboardAddress = await blockChair.getAddress(chain, address)
-    //   transactions = dashboardAddress[address].transactions.reduce( async (txs, tx) => {
-    //     await
-    //   }, [])
-    // } catch (error) {
-    //   return Promise.reject(error)
-    // }
+    let transactions: Tx[] = []
+    try {
+      const dashboardAddress = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey, limit, offset)
+      let txList = dashboardAddress[address].transactions
 
-    // return transactions
+      for(let hash of txList){
+        const rawTx = (await blockChair.getTx(this.nodeUrl, hash, this.nodeApiKey))[hash]
+        const tx: Tx = {
+          asset: AssetBTC,
+          from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value) })),
+          to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value) })),
+          date: new Date(rawTx.transaction.time),
+          type: 'transfer',
+          hash: rawTx.transaction.hash,
+        }
+        transactions.push(tx)
+      }
+    } catch (error) {
+      return Promise.reject(error)
+    }
+
+    const result: TxsPage = {
+      total: transactions.length,
+      txs: transactions,
+    }
+    return result
   }
 
   // getBlockTime = async (): Promise<number> => {
