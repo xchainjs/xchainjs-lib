@@ -295,15 +295,15 @@ class Client implements BitcoinClient, AsgardexClient {
     const nextBlockFeeRate = btcStats.suggested_transaction_fee_per_byte_sat
     const feesOptions: Fees = {
       type: 'byte',
-      fastest: 5,
-      average: 1,
-      fast: 0.5,
+      fastest: baseAmount(5),
+      average: baseAmount(1),
+      fast: baseAmount(0.5),
     }
     const calcdFees: Fees = {
       type: feesOptions.type,
-      fast: nextBlockFeeRate * feesOptions.fast!,
-      average: nextBlockFeeRate * feesOptions.average!,
-      fastest: nextBlockFeeRate * feesOptions.fastest!,
+      fast: baseAmount(feesOptions.fast!.amount().multipliedBy(nextBlockFeeRate)),
+      average: baseAmount(feesOptions.average!.amount().multipliedBy(nextBlockFeeRate)),
+      fastest: baseAmount(feesOptions.fastest!.amount().multipliedBy(nextBlockFeeRate)),
     }
     return calcdFees
   }
@@ -313,9 +313,9 @@ class Client implements BitcoinClient, AsgardexClient {
     const fees = await this.getFees()
     const memoFees: Fees = {
       type: 'byte',
-      fast: Utils.getVaultFee(this.utxos, OP_RETURN, fees.fast ?? 0),
-      average: Utils.getVaultFee(this.utxos, OP_RETURN, fees.average ?? 0),
-      fastest: Utils.getVaultFee(this.utxos, OP_RETURN, fees.fastest ?? 0),
+      fast: baseAmount(Utils.getVaultFee(this.utxos, OP_RETURN, fees.fast?.amount().toNumber() ?? 0)),
+      average: baseAmount(Utils.getVaultFee(this.utxos, OP_RETURN, fees.average?.amount().toNumber() ?? 0)),
+      fastest: baseAmount(Utils.getVaultFee(this.utxos, OP_RETURN, fees.fastest?.amount().toNumber() ?? 0)),
     }
     return memoFees
   }
