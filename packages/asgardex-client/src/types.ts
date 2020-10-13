@@ -12,7 +12,7 @@ export type Balance = {
 
 export type Balances = Balance[]
 
-export type TxType = 'transfer' | 'freeze' | 'unfreeze' | 'unkown'
+export type TxType = 'transfer' | 'freeze' | 'unfreeze' | 'unknown'
 
 export type TxHash = string
 

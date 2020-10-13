@@ -7,7 +7,7 @@ export declare type Balance = {
     frozenAmount?: BaseAmount;
 };
 export declare type Balances = Balance[];
-export declare type TxType = 'transfer' | 'freeze' | 'unfreeze' | 'unkown';
+export declare type TxType = 'transfer' | 'freeze' | 'unfreeze' | 'unknown';
 export declare type TxHash = string;
 export declare type TxTo = {
     to: Address;

@@ -42,5 +42,5 @@ export const getTxType = (t: BinanceTxType): TxType => {
   if (t === 'TRANSFER' || t === 'DEPOSIT') return 'transfer'
   if (t === 'FREEZE_TOKEN') return 'freeze'
   if (t === 'UN_FREEZE_TOKEN') return 'unfreeze'
-  return 'unkown'
+  return 'unknown'
 }
