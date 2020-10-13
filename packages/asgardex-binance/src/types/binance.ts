@@ -395,8 +395,6 @@ export type VaultTxParams = {
   memo: string
 }
 export type NormalTxParams = { addressFrom?: Address; addressTo: Address; amount: BigSource; asset: string }
-export type FreezeParams = { address?: Address; amount: BigSource; asset: string }
-export type MultiSendParams = { address: Address; transactions: MultiTransfer[]; memo?: string }
 export type GetMarketsParams = { limit?: number; offset?: number }
 /**
  * OrderList
@@ -547,16 +545,6 @@ export type TransferResult = { result?: Transfers }
 export type Network = keyof typeof NETWORK_PREFIX_MAPPING
 
 export type Prefix = typeof NETWORK_PREFIX_MAPPING[Network]
-
-export type MultiTransfer = {
-  to: Address
-  coins: Coin[]
-}
-
-export type Coin = {
-  denom: string
-  amount: number
-}
 
 export type AccountResult = {
   result: Account
