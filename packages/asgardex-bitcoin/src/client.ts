@@ -9,6 +9,7 @@ import {
   AsgardexClient,
   Tx,
   TxParams,
+  TxHash,
   Balance,
   Network,
   Fees,
@@ -26,8 +27,6 @@ import { baseAmount, assetToString, AssetBTC } from '@thorchain/asgardex-util'
  * BitcoinClient Interface
  */
 interface BitcoinClient {
-  purgeClient(): void
-
   validateAddress(address: string): boolean
 
   scanUTXOs(): Promise<void>
@@ -106,7 +105,7 @@ class Client implements BitcoinClient, AsgardexClient {
 
   // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
   // The address is then decoded into type P2WPKH and returned.
-  getAddress = (): string => {
+  getAddress = (): Address => {
     if (this.phrase) {
       const network = this.getNetwork()
       const btcNetwork = network === 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
@@ -211,18 +210,19 @@ class Client implements BitcoinClient, AsgardexClient {
     return change
   }
 
-  /**
-   * TODO: Add this in with correct response type
-   * Requires querying tx data for each address tx
-   * @param memo
-   */
+  // Get transaction for the address
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     const address = params?.address ?? this.getAddress()
     const limit = params?.limit ?? 10
     const offset = params?.offset ?? 0
 
+    let totalCount = 0
     let transactions: Tx[] = []
     try {
+      //Calling getAddress without limit/offset to get total count
+      const dAddr = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
+      totalCount = dAddr[address].transactions.length
+
       const dashboardAddress = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey, limit, offset)
       let txList = dashboardAddress[address].transactions
 
@@ -243,7 +243,7 @@ class Client implements BitcoinClient, AsgardexClient {
     }
 
     const result: TxsPage = {
-      total: transactions.length,
+      total: totalCount,
       txs: transactions,
     }
     return result
@@ -330,11 +330,11 @@ class Client implements BitcoinClient, AsgardexClient {
     return memoFees
   }
 
-  async deposit({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
+  async deposit({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<TxHash> {
     return this.transfer({ asset, amount, recipient, memo, feeRate })
   }
 
-  async transfer({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
+  async transfer({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<TxHash> {
     await this.scanUTXOs()
     const balance = await this.getBalance()
     const btcBalance = balance.find((balance) => balance.asset.symbol === asset.symbol)

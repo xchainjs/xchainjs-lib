@@ -211,7 +211,8 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
     // Offset should work
     const txPages = await btcClient.getTransactions({ address:addyThree, offset: 1, limit: 1 })
-    expect(txPages.total).toEqual(0)
+    expect(txPages.total).toEqual(1)
+    expect(txPages.txs.length).toEqual(0) //coz addyThree only has one tx so offsetting should give 0
   })
 
   it('should not get address transactions when offset too high', async () => {
