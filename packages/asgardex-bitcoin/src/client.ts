@@ -7,7 +7,9 @@ import {
   TxsPage,
   Address,
   AsgardexClient,
+  Tx,
   TxParams,
+  TxHash,
   Balance,
   Network,
   Fees,
@@ -25,8 +27,6 @@ import { baseAmount, assetToString, AssetBTC } from '@thorchain/asgardex-util'
  * BitcoinClient Interface
  */
 interface BitcoinClient {
-  purgeClient(): void
-
   validateAddress(address: string): boolean
 
   scanUTXOs(): Promise<void>
@@ -105,7 +105,7 @@ class Client implements BitcoinClient, AsgardexClient {
 
   // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
   // The address is then decoded into type P2WPKH and returned.
-  getAddress = (): string => {
+  getAddress = (): Address => {
     if (this.phrase) {
       const network = this.getNetwork()
       const btcNetwork = network === 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
@@ -210,33 +210,43 @@ class Client implements BitcoinClient, AsgardexClient {
     return change
   }
 
-  /**
-   * TODO: Add this in with correct response type
-   * Requires querying tx data for each address tx
-   * @param memo
-   */
+  // Get transaction for the address
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    // TODO(kashif) temporarily work in progress.
-    // Need to confirm whether anything special is needed to complete
-    // it here. Also needs test cases.
-    console.log(params?.address)
-    return Promise.resolve({
-      total: 0,
-      txs: [],
-    })
+    const address = params?.address ?? this.getAddress()
+    const limit = params?.limit ?? 10
+    const offset = params?.offset ?? 0
 
-    // let transactions = []
-    // try {
-    //   const chain = this.net === 'testnet' ? 'bitcoin/testnet' : 'bitcoin'
-    //   const dashboardAddress = await blockChair.getAddress(chain, address)
-    //   transactions = dashboardAddress[address].transactions.reduce( async (txs, tx) => {
-    //     await
-    //   }, [])
-    // } catch (error) {
-    //   return Promise.reject(error)
-    // }
+    let totalCount = 0
+    let transactions: Tx[] = []
+    try {
+      //Calling getAddress without limit/offset to get total count
+      const dAddr = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
+      totalCount = dAddr[address].transactions.length
 
-    // return transactions
+      const dashboardAddress = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey, limit, offset)
+      let txList = dashboardAddress[address].transactions
+
+      for(let hash of txList){
+        const rawTx = (await blockChair.getTx(this.nodeUrl, hash, this.nodeApiKey))[hash]
+        const tx: Tx = {
+          asset: AssetBTC,
+          from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value) })),
+          to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value) })),
+          date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
+          type: 'transfer',
+          hash: rawTx.transaction.hash,
+        }
+        transactions.push(tx)
+      }
+    } catch (error) {
+      return Promise.reject(error)
+    }
+
+    const result: TxsPage = {
+      total: totalCount,
+      txs: transactions,
+    }
+    return result
   }
 
   // getBlockTime = async (): Promise<number> => {
@@ -295,15 +305,15 @@ class Client implements BitcoinClient, AsgardexClient {
     const nextBlockFeeRate = btcStats.suggested_transaction_fee_per_byte_sat
     const feesOptions: Fees = {
       type: 'byte',
-      fastest: 5,
-      average: 1,
-      fast: 0.5,
+      fastest: baseAmount(5),
+      average: baseAmount(1),
+      fast: baseAmount(0.5),
     }
     const calcdFees: Fees = {
       type: feesOptions.type,
-      fast: nextBlockFeeRate * feesOptions.fast!,
-      average: nextBlockFeeRate * feesOptions.average!,
-      fastest: nextBlockFeeRate * feesOptions.fastest!,
+      fast: baseAmount(feesOptions.fast!.amount().multipliedBy(nextBlockFeeRate)),
+      average: baseAmount(feesOptions.average!.amount().multipliedBy(nextBlockFeeRate)),
+      fastest: baseAmount(feesOptions.fastest!.amount().multipliedBy(nextBlockFeeRate)),
     }
     return calcdFees
   }
@@ -313,18 +323,18 @@ class Client implements BitcoinClient, AsgardexClient {
     const fees = await this.getFees()
     const memoFees: Fees = {
       type: 'byte',
-      fast: Utils.getVaultFee(this.utxos, OP_RETURN, fees.fast ?? 0),
-      average: Utils.getVaultFee(this.utxos, OP_RETURN, fees.average ?? 0),
-      fastest: Utils.getVaultFee(this.utxos, OP_RETURN, fees.fastest ?? 0),
+      fast: baseAmount(Utils.getVaultFee(this.utxos, OP_RETURN, fees.fast?.amount().toNumber() ?? 0)),
+      average: baseAmount(Utils.getVaultFee(this.utxos, OP_RETURN, fees.average?.amount().toNumber() ?? 0)),
+      fastest: baseAmount(Utils.getVaultFee(this.utxos, OP_RETURN, fees.fastest?.amount().toNumber() ?? 0)),
     }
     return memoFees
   }
 
-  async deposit({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
+  async deposit({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<TxHash> {
     return this.transfer({ asset, amount, recipient, memo, feeRate })
   }
 
-  async transfer({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<string> {
+  async transfer({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<TxHash> {
     await this.scanUTXOs()
     const balance = await this.getBalance()
     const btcBalance = balance.find((balance) => balance.asset.symbol === asset.symbol)

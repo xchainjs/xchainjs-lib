@@ -76,7 +76,7 @@ export interface Transactions {
       is_rbf: boolean
     }
     inputs: TxIO[]
-    outputs: TxIO[][]
+    outputs: TxIO[]
   }
 }
 
@@ -156,7 +156,7 @@ export interface BtcAddressDTO {
       transaction_count: number
       scripthash_type: string
     }
-    transactions: AddressTx[]
+    transactions: string[]
     utxo: {
       block_id: number
       transaction_hash: string

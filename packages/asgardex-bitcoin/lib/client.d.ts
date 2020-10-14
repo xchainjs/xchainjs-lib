@@ -1,53 +1,48 @@
-import * as Bitcoin from 'bitcoinjs-lib';
 import * as Utils from './utils';
-import { Txs } from './types/electrs-api-types';
-import { FeeOptions } from './types/client-types';
-import { AsgardexClient, TxParams } from '@asgardex-clients/core';
+import { TxHistoryParams, TxsPage, Address, AsgardexClient, TxParams, TxHash, Balance, Network, Fees, AsgardexClientParams } from '@asgardex-clients/asgardex-client';
 /**
- * Class variables accessed across functions
- */
-declare enum Network {
-    TEST = "testnet",
-    MAIN = "mainnet"
-}
-/**
- * BitcoinClient Interface. Potentially to become AsgardClient
+ * BitcoinClient Interface
  */
 interface BitcoinClient {
-    purgeClient(): void;
-    setNetwork(net: Network): void;
-    getNetwork(net: Network): Bitcoin.networks.Network;
-    setBaseUrl(endpoint: string): void;
-    getAddress(): string;
     validateAddress(address: string): boolean;
     scanUTXOs(): Promise<void>;
-    calcFees(addressTo: string, memo?: string): Promise<FeeOptions>;
 }
+declare type BitcoinClientParams = AsgardexClientParams & {
+    nodeUrl?: string;
+    nodeApiKey?: string;
+};
 /**
  * Implements Client declared above
  */
 declare class Client implements BitcoinClient, AsgardexClient {
     net: Network;
     phrase: string;
-    electrsAPI: string;
     utxos: Utils.UTXO[];
-    constructor(_net?: Network, _electrsAPI?: string, _phrase?: string);
+    nodeUrl: string;
+    nodeApiKey: string;
+    constructor({ network, nodeUrl, nodeApiKey, phrase }: BitcoinClientParams);
+    setNodeURL(url: string): void;
+    setNodeAPIKey(key: string): void;
     generatePhrase: () => string;
-    setPhrase: (phrase?: string | undefined) => void;
+    setPhrase: (phrase: string) => Address;
     purgeClient: () => void;
     setNetwork(_net: Network): void;
-    getNetwork(net: Network): Bitcoin.networks.Network;
-    setBaseUrl(endpoint: string): void;
-    getExplorerUrl: () => string;
-    getAddress: () => string;
+    getNetwork(): Network;
+    getExplorerAddressUrl(address: Address): string;
+    getExplorerTxUrl(txID: string): string;
+    getAddress: () => Address;
     private getBtcKeys;
     validateAddress: (address: string) => boolean;
     scanUTXOs: () => Promise<void>;
-    getBalance: () => Promise<number>;
-    getBalanceForAddress: (address: string) => Promise<number>;
+    getBalance: (address?: string | undefined) => Promise<Balance[]>;
     private getChange;
-    getTransactions: (address: string) => Promise<Txs>;
-    calcFees: (memo?: string | undefined) => Promise<FeeOptions>;
-    transfer: ({ amount, recipient, memo, feeRate }: TxParams) => Promise<string>;
+    getTransactions: (params?: TxHistoryParams | undefined) => Promise<TxsPage>;
+    /**
+     * getFees
+     */
+    getFees(): Promise<Fees>;
+    getFeesWithMemo(memo: string): Promise<Fees>;
+    deposit({ asset, amount, recipient, memo, feeRate }: TxParams): Promise<TxHash>;
+    transfer({ asset, amount, recipient, memo, feeRate }: TxParams): Promise<TxHash>;
 }
 export { Client, Network };
