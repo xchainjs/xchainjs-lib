@@ -232,7 +232,7 @@ class Client implements BitcoinClient, AsgardexClient {
           asset: AssetBTC,
           from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value) })),
           to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value) })),
-          date: new Date(rawTx.transaction.time),
+          date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
           type: 'transfer',
           hash: rawTx.transaction.hash,
         }

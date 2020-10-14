@@ -200,7 +200,7 @@ describe('BitcoinClient Test', () => {
     const txPages = await btcClient.getTransactions({ address:addyThree, limit: 4  })
     expect(txPages.total).toEqual(1)
     expect(txPages.txs[0].asset).toEqual(AssetBTC)
-    expect(txPages.txs[0].date).toEqual(new Date("2020-10-07T16:28:33.000Z"))
+    expect(txPages.txs[0].date).toEqual(new Date("2020-10-08T01:28:33.000Z"))
     expect(txPages.txs[0].hash).toEqual('63fe21150a285bd4c4266e6e3aafe5d99cc76eafb8e92a0c0b2896d3c3a21c78')
     expect(txPages.txs[0].type).toEqual('transfer')
     expect(txPages.txs[0].to.length).toEqual(2)
