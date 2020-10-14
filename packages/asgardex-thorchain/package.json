@@ -25,7 +25,7 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "yarn run clean && yarn run compile",
+    "build": "rollup -c",
     "compile": "tsc -p tsconfig.build.json",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix",
