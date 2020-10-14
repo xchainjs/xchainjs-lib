@@ -1,4 +1,4 @@
-import { Transfer, TransferEvent } from './types/binance-ws';
+import { Transfer } from './types/binance-ws';
 import { TransferFee, DexFees, Fee, TxType as BinanceTxType } from './types/binance';
 import { TxType } from '@asgardex-clients/asgardex-client';
 /**
@@ -6,12 +6,12 @@ import { TxType } from '@asgardex-clients/asgardex-client';
  * @see https://docs.binance.org/api-reference/dex-api/ws-streams.html#3-transfer
  */
 export declare const getHashFromTransfer: (transfer?: {
-    data?: Pick<Transfer, 'H'>;
-}) => string | undefined;
+    data?: Pick<Transfer, "H"> | undefined;
+} | undefined) => string | undefined;
 /**
  * Get `hash` from memo
  */
-export declare const getTxHashFromMemo: (transfer?: TransferEvent) => string;
+export declare const getTxHashFromMemo: (transfer?: import("./types/binance-ws").WSEvent<Transfer> | undefined) => string | undefined;
 /**
  * Type guard for runtime checks of `Fee`
  */

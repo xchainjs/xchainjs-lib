@@ -1,16 +1,7 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var crypto$3 = require('@binance-chain/javascript-sdk/lib/crypto');
-var client = require('@binance-chain/javascript-sdk/lib/client');
-var buffer = require('buffer');
-var crypto$2 = require('crypto');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var buffer__default = /*#__PURE__*/_interopDefaultLegacy(buffer);
-var crypto$2__default = /*#__PURE__*/_interopDefaultLegacy(crypto$2);
+import { getPrivateKeyFromMnemonic, getAddressFromPrivateKey } from '@binance-chain/javascript-sdk/lib/crypto';
+import { BncClient } from '@binance-chain/javascript-sdk/lib/client';
+import buffer from 'buffer';
+import crypto$2 from 'crypto';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -30417,7 +30408,7 @@ nacl.setPRNG = function(fn) {
     });
   } else if (typeof commonjsRequire !== 'undefined') {
     // Node.js.
-    crypto = crypto$2__default['default'];
+    crypto = crypto$2;
     if (crypto && crypto.randomBytes) {
       nacl.setPRNG(function(x, n) {
         var i, v = crypto.randomBytes(n);
@@ -31244,7 +31235,7 @@ var bn$1 = createCommonjsModule$1(function (module) {
 
   var Buffer;
   try {
-    Buffer = buffer__default['default'].Buffer;
+    Buffer = buffer.Buffer;
   } catch (e) {
   }
 
@@ -35239,7 +35230,7 @@ class Address {
         if (typeof networkId !== "string" || networkId.length !== 2) {
             throw Error(`Unsupported networkId for Address: "${networkId}"`);
         }
-        const words = bech32.toWords(buffer__default['default'].Buffer.from(lodash.padStart(version.toString(16), 2, "0") +
+        const words = bech32.toWords(buffer.Buffer.from(lodash.padStart(version.toString(16), 2, "0") +
             H160_1.H160.ensure(accountId).value, "hex"));
         return new Address(H160_1.H160.ensure(accountId), bech32.encode(networkId + "c", words));
     }
@@ -35256,7 +35247,7 @@ class Address {
         if (version !== 1) {
             throw Error(`Unsupported version for Address: ${version}`);
         }
-        const accountId = utility.toHex(buffer__default['default'].Buffer.from(bytes.slice(1)));
+        const accountId = utility.toHex(buffer.Buffer.from(bytes.slice(1)));
         return new Address(new H160_1.H160(accountId), address);
     }
     static check(address) {
@@ -39007,7 +38998,7 @@ var core$1 = createCommonjsModule$1(function (module, exports) {
 	    // Native crypto import via require (NodeJS)
 	    if (!crypto && typeof commonjsRequire === 'function') {
 	        try {
-	            crypto = crypto$2__default['default'];
+	            crypto = crypto$2;
 	        } catch (err) {}
 	    }
 
@@ -40339,13 +40330,13 @@ var Client = /** @class */ (function () {
             if (!_this.privateKey) {
                 if (!_this.phrase)
                     throw new Error('Phrase not set');
-                _this.privateKey = crypto$3.getPrivateKeyFromMnemonic(_this.phrase);
+                _this.privateKey = getPrivateKeyFromMnemonic(_this.phrase);
             }
             return _this.privateKey;
         };
         this.getAddress = function () {
             if (!_this.address) {
-                var address = crypto$3.getAddressFromPrivateKey(_this.getPrivateKey(), _this.getPrefix());
+                var address = getAddressFromPrivateKey(_this.getPrivateKey(), _this.getPrefix());
                 if (!address) {
                     throw new Error('address not defined');
                 }
@@ -40663,7 +40654,7 @@ var Client = /** @class */ (function () {
         this.network = network;
         if (phrase)
             this.setPhrase(phrase);
-        this.bncClient = new client.BncClient(this.getClientUrl());
+        this.bncClient = new BncClient(this.getClientUrl());
         this.bncClient.chooseNetwork(network);
     }
     Client.prototype.purgeClient = function () {
@@ -40677,7 +40668,7 @@ var Client = /** @class */ (function () {
     // update network
     Client.prototype.setNetwork = function (network) {
         this.network = network;
-        this.bncClient = new client.BncClient(this.getClientUrl());
+        this.bncClient = new BncClient(this.getClientUrl());
         this.bncClient.chooseNetwork(network);
         this.address = '';
         return this;
@@ -40696,6 +40687,7 @@ var Client = /** @class */ (function () {
  * Order status as part of an order
  * See description of Order.status for more detail https://docs.binance.org/api-reference/dex-api/paths.html#order
  */
+var OrderStatus;
 (function (OrderStatus) {
     OrderStatus["Ack"] = "Ack";
     OrderStatus["PartialFill"] = "PartialFill";
@@ -40706,7 +40698,7 @@ var Client = /** @class */ (function () {
     OrderStatus["FailedBlocking"] = "FailedBlocking";
     OrderStatus["FailedMatching"] = "FailedMatching";
     OrderStatus["IocExpire"] = "IocExpire";
-})(exports.OrderStatus || (exports.OrderStatus = {}));
+})(OrderStatus || (OrderStatus = {}));
 
 /**
  * Type definitions for data of Binance WebSocket Streams
@@ -40731,12 +40723,4 @@ var binanceWs = /*#__PURE__*/Object.freeze({
     get Taker () { return Taker; }
 });
 
-exports.Client = Client;
-exports.WS = binanceWs;
-exports.getHashFromTransfer = getHashFromTransfer;
-exports.getTxHashFromMemo = getTxHashFromMemo;
-exports.getTxType = getTxType;
-exports.isDexFees = isDexFees;
-exports.isFee = isFee;
-exports.isFreezeFee = isFreezeFee;
-exports.isTransferFee = isTransferFee;
+export { Client, OrderStatus, binanceWs as WS, getHashFromTransfer, getTxHashFromMemo, getTxType, isDexFees, isFee, isFreezeFee, isTransferFee };

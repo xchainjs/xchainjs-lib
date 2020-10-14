@@ -69,8 +69,8 @@ declare class Client implements BinanceClient, AsgardexClient {
     private getPrivateKey;
     getAddress: () => string;
     validateAddress: (address: Address) => boolean;
-    getBalance: (address?: Address, asset?: Asset) => Promise<Balances>;
-    getTransactions: (params?: TxHistoryParams) => Promise<TxsPage>;
+    getBalance: (address?: string | undefined, asset?: Asset | undefined) => Promise<Balances>;
+    getTransactions: (params?: TxHistoryParams | undefined) => Promise<TxsPage>;
     multiSend: ({ address, transactions, memo }: MultiSendParams) => Promise<TxHash>;
     deposit: ({ asset, amount, recipient, memo }: TxParams) => Promise<TxHash>;
     transfer: ({ asset, amount, recipient, memo }: TxParams) => Promise<TxHash>;
