@@ -60513,13 +60513,9 @@ var Client = /** @class */ (function () {
                 }
             });
         }); };
-        /**
-         * TODO: Add this in with correct response type
-         * Requires querying tx data for each address tx
-         * @param memo
-         */
+        // Get transaction for the address
         this.getTransactions = function (params) { return __awaiter(_this, void 0, void 0, function () {
-            var address, limit, offset, transactions, dashboardAddress, txList, _i, txList_1, hash, rawTx, tx, error_3, result;
+            var address, limit, offset, totalCount, transactions, dAddr, dashboardAddress, txList, _i, txList_1, hash, rawTx, tx, error_3, result;
             var _a, _b, _c;
             return __generator(this, function (_d) {
                 switch (_d.label) {
@@ -60527,21 +60523,26 @@ var Client = /** @class */ (function () {
                         address = (_a = params === null || params === void 0 ? void 0 : params.address) !== null && _a !== void 0 ? _a : this.getAddress();
                         limit = (_b = params === null || params === void 0 ? void 0 : params.limit) !== null && _b !== void 0 ? _b : 10;
                         offset = (_c = params === null || params === void 0 ? void 0 : params.offset) !== null && _c !== void 0 ? _c : 0;
+                        totalCount = 0;
                         transactions = [];
                         _d.label = 1;
                     case 1:
-                        _d.trys.push([1, 7, , 8]);
-                        return [4 /*yield*/, getAddress(this.nodeUrl, address, this.nodeApiKey, limit, offset)];
+                        _d.trys.push([1, 8, , 9]);
+                        return [4 /*yield*/, getAddress(this.nodeUrl, address, this.nodeApiKey)];
                     case 2:
+                        dAddr = _d.sent();
+                        totalCount = dAddr[address].transactions.length;
+                        return [4 /*yield*/, getAddress(this.nodeUrl, address, this.nodeApiKey, limit, offset)];
+                    case 3:
                         dashboardAddress = _d.sent();
                         txList = dashboardAddress[address].transactions;
                         _i = 0, txList_1 = txList;
-                        _d.label = 3;
-                    case 3:
-                        if (!(_i < txList_1.length)) return [3 /*break*/, 6];
+                        _d.label = 4;
+                    case 4:
+                        if (!(_i < txList_1.length)) return [3 /*break*/, 7];
                         hash = txList_1[_i];
                         return [4 /*yield*/, getTx(this.nodeUrl, hash, this.nodeApiKey)];
-                    case 4:
+                    case 5:
                         rawTx = (_d.sent())[hash];
                         tx = {
                             asset: AssetBTC,
@@ -60552,17 +60553,17 @@ var Client = /** @class */ (function () {
                             hash: rawTx.transaction.hash,
                         };
                         transactions.push(tx);
-                        _d.label = 5;
-                    case 5:
+                        _d.label = 6;
+                    case 6:
                         _i++;
-                        return [3 /*break*/, 3];
-                    case 6: return [3 /*break*/, 8];
-                    case 7:
+                        return [3 /*break*/, 4];
+                    case 7: return [3 /*break*/, 9];
+                    case 8:
                         error_3 = _d.sent();
                         return [2 /*return*/, Promise.reject(error_3)];
-                    case 8:
+                    case 9:
                         result = {
-                            total: transactions.length,
+                            total: totalCount,
                             txs: transactions,
                         };
                         return [2 /*return*/, result];

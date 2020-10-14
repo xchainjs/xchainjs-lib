@@ -44,7 +44,7 @@ export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): 
 export const getAddress = async (baseUrl: string, address: string, apiKey?: string, limit?: number, offset?: number): Promise<BtcAddressDTO> => {
 
   try {
-    const params: any = {}
+    const params: { [key: string]: string | number } = {}
     if (apiKey) params.key = apiKey
     if (limit) {
       if(limit > 10000) throw new Error("Max limit allowed 10000")

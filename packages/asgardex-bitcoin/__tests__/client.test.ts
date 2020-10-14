@@ -159,9 +159,9 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const estimates = await btcClient.getFees()
-    expect(estimates.fast).not.toBeNull()
-    expect(estimates.fastest).not.toBeNull()
-    expect(estimates.average).not.toBeNull()
+    expect(estimates.fast).toBeDefined()
+    expect(estimates.fastest).toBeDefined()
+    expect(estimates.average).toBeDefined()
   })
 
   it('should return estimated fees of a vault tx that are more expensive than a normal tx', async () => {
@@ -169,7 +169,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     const normalTx = await btcClient.getFees()
     const vaultTx = await btcClient.getFeesWithMemo(MEMO)
-    expect(vaultTx.fast!.amount().isGreaterThan(normalTx.fast!.amount())).toBe(true)
+    expect(vaultTx.fast!.amount().isGreaterThan(normalTx.fast!.amount())).toBeTruthy()
   })
 
   it('should error when an invalid address is used in getting balance', () => {
