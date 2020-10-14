@@ -8,7 +8,7 @@ import {
   TxPage as BinanceTxPage,
 } from './types/binance'
 
-import { crypto } from '@binance-chain/javascript-sdk'
+import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
 import { 
   Address,
@@ -135,15 +135,17 @@ class Client implements BinanceClient, AsgardexClient {
   private getClientUrl = (): string => {
     return this.network === 'testnet'? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
   }
+
+  private getExplorerUrl = (): string => {
+    return this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
+  }
   
-  getExplorerAddressUrl = (): string => {
-    const networkPath = this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
-    return `${networkPath}/address/${this.getAddress()}`
+  getExplorerAddressUrl = (address: Address): string => {
+    return `${this.getExplorerUrl()}/address/${address}`
   }
 
-  getExplorerTxUrl = (): string => {
-    const networkPath = this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
-    return `${networkPath}/tx/`
+  getExplorerTxUrl = (txID: string): string => {
+    return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
   private getPrefix = (): Prefix => {
@@ -177,9 +179,7 @@ class Client implements BinanceClient, AsgardexClient {
     if (!this.privateKey) {
       if (!this.phrase) throw new Error('Phrase not set')
 
-      const privateKey = crypto.getPrivateKeyFromMnemonic(this.phrase)
-      this.privateKey = privateKey
-      return privateKey
+      this.privateKey = crypto.getPrivateKeyFromMnemonic(this.phrase)
     }
 
     return this.privateKey
@@ -315,7 +315,7 @@ class Client implements BinanceClient, AsgardexClient {
       this.getAddress(),
       recipient,
       baseToAsset(amount).amount().toString(),
-      asset.symbol,
+      asset ? asset.symbol : AssetBNB.symbol,
       memo
     )
 
