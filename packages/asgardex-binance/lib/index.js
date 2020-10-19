@@ -40284,7 +40284,7 @@ var getTxType = function (t) {
         return 'freeze';
     if (t === 'UN_FREEZE_TOKEN')
         return 'unfreeze';
-    return 'unkown';
+    return 'unknown';
 };
 
 /**
@@ -40302,8 +40302,8 @@ var Client = /** @class */ (function () {
         var _this = this;
         var _b = _a.network, network = _b === void 0 ? 'testnet' : _b, phrase = _a.phrase;
         this.phrase = '';
-        this.address = '';
-        this.privateKey = null;
+        this.address = ''; // default address at index 0
+        this.privateKey = null; // default private key at index 0
         this.getClientUrl = function () {
             return _this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org';
         };
@@ -40335,20 +40335,25 @@ var Client = /** @class */ (function () {
          * Returns private key
          * Throws an error if phrase has not been set before
          * */
-        this.getPrivateKey = function () {
-            if (!_this.privateKey) {
+        this.getPrivateKey = function (index) {
+            if (!_this.privateKey || index) {
                 if (!_this.phrase)
                     throw new Error('Phrase not set');
-                _this.privateKey = crypto$3.getPrivateKeyFromMnemonic(_this.phrase);
+                var privateKey = crypto$3.getPrivateKeyFromMnemonic(_this.phrase, true, index);
+                if (index)
+                    return privateKey;
+                _this.privateKey = privateKey;
             }
             return _this.privateKey;
         };
-        this.getAddress = function () {
-            if (!_this.address) {
-                var address = crypto$3.getAddressFromPrivateKey(_this.getPrivateKey(), _this.getPrefix());
+        this.getAddress = function (index) {
+            if (!_this.address || index) {
+                var address = crypto$3.getAddressFromPrivateKey(_this.getPrivateKey(index), _this.getPrefix());
                 if (!address) {
                     throw new Error('address not defined');
                 }
+                if (index)
+                    return address;
                 _this.address = address;
             }
             return _this.address;
