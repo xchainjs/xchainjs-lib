@@ -1,11 +1,10 @@
-import { PrivKey } from 'cosmos-client'
+import { PrivKey, Msg } from 'cosmos-client'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
-import { StdTx } from 'cosmos-client/x/auth'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 import { codec } from 'cosmos-client/codec'
 
-import { AssetAtom } from './cosmos/types'
+import { AssetAtom, AssetMuon } from './cosmos/types'
 import { isMsgSend, isMsgMultiSend } from './util'
 import { 
   Address,
@@ -26,7 +25,6 @@ import {
   Asset,
   assetFromString,
   baseAmount,
-  baseToAsset,
 } from '@thorchain/asgardex-util'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
 
@@ -39,6 +37,8 @@ export interface CosmosClient {
   getAddress(): string
   
   validateAddress(address: string): boolean
+
+  getMainAsset(): Asset
 }
 
 class Client implements CosmosClient, AsgardexClient {
@@ -76,15 +76,27 @@ class Client implements CosmosClient, AsgardexClient {
   }
 
   getClientUrl = (): string => {
-    return this.network === 'testnet' ? 'http://lcd.gaia.bigdipper.live:1317' : 'https://api.cosmos.network'
+    // For gaia-13007
+    // return this.network === 'testnet' ? 'http://lcd.gaia.bigdipper.live:1317' : 'https://api.cosmos.network'
+
+    // For stargate-3a
+    return this.network === 'testnet' ? 'https://api.stargate.bigdipper.live' : 'https://api.cosmos.network'
   }
 
   getChainId = (): string => {
-    return this.network === 'testnet' ? 'gaia-3a' : 'cosmoshub-3'
+    // For gaia-13007
+    // return this.network === 'testnet' ? 'gaia-3a' : 'cosmoshub-3'
+
+    // For stargate-3a
+    return this.network === 'testnet' ? 'stargate-3a' : 'cosmoshub-3'
   }
 
   private getExplorerUrl = (): string => {
-    return this.network === 'testnet' ? 'https://gaia.bigdipper.live' : 'https://cosmos.bigdipper.live'
+    // For gaia-13007
+    // return this.network === 'testnet' ? 'https://gaia.bigdipper.live' : 'https://cosmos.bigdipper.live'
+
+    // For stargate-3a
+    return this.network === 'testnet' ? 'https://stargate.bigdipper.live' : 'https://cosmos.bigdipper.live'
   }
   
   getExplorerAddressUrl = (address: Address): string => {
@@ -144,6 +156,10 @@ class Client implements CosmosClient, AsgardexClient {
     return this.thorClient.checkAddress(address)
   }
 
+  getMainAsset = (): Asset => {
+    return this.network === 'testnet' ? AssetMuon : AssetAtom
+  }
+
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
     if (!address) {
       address = this.getAddress()
@@ -151,10 +167,11 @@ class Client implements CosmosClient, AsgardexClient {
 
     try {
       const balances = await this.thorClient.getBalance(address)
+      const mainAsset = this.getMainAsset()
 
       return balances.map(balance => {
         return {
-          asset: balance.denom && assetFromString(`${AssetAtom.chain}.${balance.denom}`) || AssetAtom,
+          asset: balance.denom && assetFromString(`${mainAsset.chain}.${balance.denom}`) || mainAsset,
           amount: baseAmount(balance.amount, 6),
         }
       }).filter(balance => !asset || balance.asset === asset)
@@ -172,14 +189,21 @@ class Client implements CosmosClient, AsgardexClient {
     const txMaxHeight = undefined
 
     try {
+      const mainAsset = this.getMainAsset()
       const txHistory = await this.thorClient.searchTx(messageAction, messageSender, page, limit, txMinHeight, txMaxHeight)
 
       const txs: Txs = (txHistory.txs || []).reduce((acc, tx: any) => {
-        const stdTx: StdTx = codec.fromJSONString(JSON.stringify(tx.tx))
+        let msgs: Msg[] = []
+        if (tx.tx.type !== undefined)
+        {
+          msgs = codec.fromJSONString(JSON.stringify(tx.tx)).msg
+        } else {
+          msgs = codec.fromJSONString(JSON.stringify(tx.tx.body.messages))
+        }
 
         let from: TxFrom[] = []
         let to: TxTo[] = []
-        stdTx.msg.map(msg => {
+        msgs.map(msg => {
           if (isMsgSend(msg)) {
             const msgSend = msg as MsgSend
             const amount = msgSend.amount
@@ -220,7 +244,7 @@ class Client implements CosmosClient, AsgardexClient {
         return [
           ...acc,
           {
-            asset: AssetAtom,
+            asset: mainAsset,
             from,
             to,
             date: new Date(tx.timestamp),
@@ -245,19 +269,20 @@ class Client implements CosmosClient, AsgardexClient {
 
   transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
+      const mainAsset = this.getMainAsset()
       const transferResult = await this.thorClient.transfer(
         this.getPrivateKey(),
         this.getAddress(),
         recipient,
-        baseToAsset(amount).amount().toString(),
-        asset ? asset.symbol : AssetAtom.symbol,
+        amount.amount().toString(),
+        asset ? asset.symbol : mainAsset.symbol,
         memo
       )
 
       return transferResult?.txhash || ''
 
-    } catch (err) {
-      return ''
+    } catch (error) {
+      return Promise.reject(error)
     }
   }
   

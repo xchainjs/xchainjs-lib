@@ -1,11 +1,43 @@
+import nock from 'nock'
+
 import { Client } from '../src/client'
 import { TxsPage } from '@asgardex-clients/asgardex-client'
+import { AssetMuon } from '../src/cosmos/types'
+import { baseAmount, BaseAmount } from '@thorchain/asgardex-util'
+import { BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
+
+const mock_txsPost_api = (
+  url: string,
+  from_address: string,
+  to_address: string,
+  send_amount: Coin[],
+  memo: undefined | string,
+  result: any,
+) => {
+  nock(url, { allowUnmocked: true })
+    .post(`/txs`, (body) => {
+      expect(body.tx.msg.length).toEqual(1)
+      expect(body.tx.msg[0].type).toEqual('cosmos-sdk/MsgSend')
+      expect(body.tx.msg[0].value.from_address).toEqual(from_address)
+      expect(body.tx.msg[0].value.to_address).toEqual(to_address)
+      expect(body.tx.msg[0].value.amount).toEqual(send_amount)
+      expect(body.tx.memo).toEqual(memo)
+      return true
+    })
+    .reply(200, result)
+}
 
 describe('Client Test', () => {
   let cosmosClient: Client
-  const phrase = 'foster blouse cattle fiction deputy social brown toast various sock awkward print'
-  const mainnet_address = 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv'
-  const testnet_address = 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv'
+  // For gaia-13007
+  // const phrase = 'foster blouse cattle fiction deputy social brown toast various sock awkward print'
+  // const mainnet_address = 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv'
+  // const testnet_address = 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv'
+
+  // For stargate-3a
+  const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
+  const mainnet_address = 'cosmos1xkc5syzd8mmsr5yjg0nrrwkyj7r9r5ta5dp59t'
+  const testnet_address = 'cosmos1xkc5syzd8mmsr5yjg0nrrwkyj7r9r5ta5dp59t'
 
   beforeEach(() => {
     cosmosClient = new Client({ phrase, network: 'mainnet' })
@@ -90,63 +122,42 @@ describe('Client Test', () => {
   })
 
   it('has tx history', async () => {
-    cosmosClient.setNetwork('testnet')
+    let transactions = await cosmosClient.getTransactions({address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z'})
+    expect(transactions.total).toBeGreaterThan(0)
 
-    const transactions = await cosmosClient.getTransactions({address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2'})
+    cosmosClient.setNetwork('testnet')
+    // const transactions = await cosmosClient.getTransactions({address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2'})
+    transactions = await cosmosClient.getTransactions({address: 'cosmos1h2gacd88hkvlmz5g04md87r54kjf0klnwt25n9'})
     expect(transactions.total).toBeGreaterThan(0)
   })
 
-  // it('transfer', async () => {
-  //   const from_address = mainnet_address
-  //   const to_address = 'thor1vr2qu5a64tqq9m6mh3d0ghe8yxwzxhfqahkxwa'
-  //   const send_amount: Coin[] = [
-  //     {
-  //       denom: 'thor',
-  //       amount: '100',
-  //     },
-  //   ]
-  //   const transferAmount = baseAmount(1000000)
-  //   const memo = 'transfer'
+  it('transfer', async () => {
+    const to_address = 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv'
+    const send_amount: BaseAmount = baseAmount(10000, 6)
+    const memo = 'transfer'
+    
+    const expected_txsPost_result: BroadcastTxCommitResult = {
+      check_tx: {},
+      deliver_tx: {},
+      txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
+      height: 0,
+    }
 
-  //   mock_accountsAddressGet_api(cosmosClient.getClientUrl(), mainnet_address, {
-  //     height: 0,
-  //     result: {
-  //       coins: [
-  //         {
-  //           denom: 'thor',
-  //           amount: '21000',
-  //         },
-  //       ],
-  //       account_number: 0,
-  //       sequence: 0,
-  //     },
-  //   })
+    cosmosClient.setNetwork('testnet')
+    mock_txsPost_api(cosmosClient.getClientUrl(), cosmosClient.getAddress(), to_address, [
+      {
+        denom: AssetMuon.symbol,
+        amount: send_amount.amount().toString(),
+      }
+    ], memo, expected_txsPost_result)
 
-  //   mock_accountsAddressTransfersPost_api(
-  //     cosmosClient.getClientUrl(),
-  //     from_address,
-  //     to_address,
-  //     send_amount,
-  //     {
-  //       gas: '1000',
-  //       amount: [],
-  //     },
-  //     memo,
-  //   )
+    const result = await cosmosClient.transfer({
+      asset: AssetMuon,
+      recipient: to_address,
+      amount: send_amount,
+      memo,
+    })
 
-  //   const expected_txsPost_result: BroadcastTxCommitResult = {
-  //     check_tx: {},
-  //     deliver_tx: {},
-  //     txhash: '',
-  //     height: 0,
-  //   }
-  //   mock_txsPost_api(cosmosClient.getClientUrl(), from_address, to_address, send_amount, memo, expected_txsPost_result)
-
-  //   const result = await cosmosClient.transfer({
-  //     asset: AssetRuneNative,
-  //     recipient: to_address,
-  //     amount: transferAmount,
-  //   })
-  //   expect(result).toEqual(expected_txsPost_result)
-  // })
+    expect(result).toEqual('EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D')
+  })
 })

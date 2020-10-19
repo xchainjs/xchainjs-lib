@@ -2,10 +2,10 @@ import * as BIP39 from 'bip39'
 import * as BIP32 from 'bip32'
 import { BigSource } from 'big.js'
 
-import { CosmosSDK, AccAddress, PrivKeyEd25519, PrivKey } from 'cosmos-client'
-import { BroadcastTxCommitResult, Coin, PaginatedQueryTxs } from 'cosmos-client/api'
-import { auth } from 'cosmos-client/x/auth'
-import { bank } from 'cosmos-client/x/bank'
+import { CosmosSDK, AccAddress, PrivKeyEd25519, PrivKey, Msg } from 'cosmos-client'
+import { BroadcastTxCommitResult, Coin, PaginatedQueryTxs, StdTxFee, StdTxSignature } from 'cosmos-client/api'
+import { auth, StdTx, BaseAccount } from 'cosmos-client/x/auth'
+import { bank, MsgSend } from 'cosmos-client/x/bank'
 
 import { Network } from '@asgardex-clients/asgardex-client'
 
@@ -103,24 +103,52 @@ export class CosmosSDKClient {
       const fromAddress = AccAddress.fromBech32(from)
       const toAddress = AccAddress.fromBech32(to)
 
-      const account = await auth.accountsAddressGet(this.sdk, fromAddress).then((res) => res.data.result)
+      let account: BaseAccount = await auth.accountsAddressGet(this.sdk, fromAddress).then((res) => res.data.result)
+      if (account.account_number === undefined) {
+        account = BaseAccount.fromJSON((account as any).value)
+      }
 
-      const unsignedStdTx = await bank
-        .accountsAddressTransfersPost(this.sdk, toAddress, {
-          base_req: {
-            from: fromAddress.toBech32(),
-            memo: memo,
-            chain_id: this.sdk.chainID,
-            account_number: account.account_number.toString(),
-            sequence: account.sequence.toString(),
-            gas: '',
-            gas_adjustment: '',
-            fees: [],
-            simulate: false,
-          },
-          amount: [{ denom: asset, amount: amount.toString() }],
-        })
-        .then((res) => res.data)
+      // const unsignedStdTx = await bank
+      //   .accountsAddressTransfersPost(this.sdk, toAddress, {
+      //     base_req: {
+      //       from,
+      //       memo: memo,
+      //       chain_id: this.sdk.chainID,
+      //       account_number: account.account_number.toString(),
+      //       sequence: account.sequence.toString(),
+      //       gas: '',
+      //       gas_adjustment: '',
+      //       fees: [],
+      //       simulate: false,
+      //     },
+      //     amount: [{ denom: asset, amount: amount.toString() }],
+      //   })
+      //   .then((res) => res.data)
+
+      const msg: Msg = [
+        MsgSend.fromJSON(
+          {
+            from_address: fromAddress.toBech32(),
+            to_address: toAddress.toBech32(),
+            amount: [{
+              denom: asset,
+              amount: amount.toString(),
+            }]
+          }
+        )
+      ]
+      const fee: StdTxFee = {
+        gas: '',
+        amount: []
+      }
+      const signatures: StdTxSignature[] = []
+
+      const unsignedStdTx = StdTx.fromJSON({
+        msg,
+        fee,
+        signatures,
+        memo,
+      })
 
       const signedStdTx = auth.signStdTx(
         this.sdk,
@@ -130,7 +158,7 @@ export class CosmosSDKClient {
         account.sequence.toString(),
       )
 
-      const result = await auth.txsPost(this.sdk, signedStdTx, 'sync').then((res) => res.data)
+      const result = await auth.txsPost(this.sdk, signedStdTx, 'block').then((res) => res.data)
 
       return result
     } catch (error) {
