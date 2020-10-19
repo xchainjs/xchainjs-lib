@@ -193,14 +193,13 @@ describe('BitcoinClient Test', () => {
     ).rejects.toThrow(expectedError)
   })
 
-
   it('should get address transactions', async () => {
     btcClient.setNetwork('testnet')
 
-    const txPages = await btcClient.getTransactions({ address:addyThree, limit: 4  })
+    const txPages = await btcClient.getTransactions({ address: addyThree, limit: 4 })
     expect(txPages.total).toEqual(1)
     expect(txPages.txs[0].asset).toEqual(AssetBTC)
-    expect(txPages.txs[0].date).toEqual(new Date("2020-10-08T01:28:33.000Z"))
+    expect(txPages.txs[0].date).toEqual(new Date('2020-10-08T01:28:33.000Z'))
     expect(txPages.txs[0].hash).toEqual('63fe21150a285bd4c4266e6e3aafe5d99cc76eafb8e92a0c0b2896d3c3a21c78')
     expect(txPages.txs[0].type).toEqual('transfer')
     expect(txPages.txs[0].to.length).toEqual(2)
@@ -210,7 +209,7 @@ describe('BitcoinClient Test', () => {
   it('should get address transactions by offset', async () => {
     btcClient.setNetwork('testnet')
     // Offset should work
-    const txPages = await btcClient.getTransactions({ address:addyThree, offset: 1, limit: 1 })
+    const txPages = await btcClient.getTransactions({ address: addyThree, offset: 1, limit: 1 })
     expect(txPages.total).toEqual(1)
     expect(txPages.txs.length).toEqual(0) //coz addyThree only has one tx so offsetting should give 0
   })
@@ -218,19 +217,23 @@ describe('BitcoinClient Test', () => {
   it('should not get address transactions when offset too high', async () => {
     btcClient.setNetwork('testnet')
     // Offset max should work
-    return expect(btcClient.getTransactions({ address:addyThree, offset: 9000000 })).rejects.toThrow('Max offset allowed 1000000')
+    return expect(btcClient.getTransactions({ address: addyThree, offset: 9000000 })).rejects.toThrow(
+      'Max offset allowed 1000000',
+    )
   })
 
   it('should get address transactions with limit', async () => {
     btcClient.setNetwork('testnet')
     // Limit should work
-    const txPages = await btcClient.getTransactions({ address:addyThree, limit: 1 })
+    const txPages = await btcClient.getTransactions({ address: addyThree, limit: 1 })
     return expect(txPages.total).toEqual(1)
   })
 
   it('should not get address transactions when limit too high', async () => {
     btcClient.setNetwork('testnet')
     // Limit max should work
-    return expect(btcClient.getTransactions({ address:addyThree, limit: 9000000 })).rejects.toThrow('Max limit allowed 10000')
+    return expect(btcClient.getTransactions({ address: addyThree, limit: 9000000 })).rejects.toThrow(
+      'Max limit allowed 10000',
+    )
   })
 })
