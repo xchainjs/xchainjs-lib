@@ -9,7 +9,6 @@ describe('BinanceClient Test', () => {
   const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
   const mainnetaddress = 'bnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9e738vr'
   const testnetaddress = 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj'
-  const mainnetaddress_at_index1 = 'bnb1vjlcrl5d9t8sexzajsr57taqmxf6jpmgng3gmn'
 
   // This needs to be updated once `Fees` type in `asgardex-client` changes
   const transferFee = { type: 'base', average: baseAmount(37500) }
@@ -52,8 +51,6 @@ describe('BinanceClient Test', () => {
 
   it('should have right address', async () => {
     expect(bnbClient.getAddress()).toEqual(mainnetaddress)
-
-    expect(bnbClient.getAddress(1)).toEqual(mainnetaddress_at_index1)
   })
 
   it('should update net', () => {

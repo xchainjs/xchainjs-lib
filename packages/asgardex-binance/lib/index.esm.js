@@ -40326,25 +40326,20 @@ var Client = /** @class */ (function () {
          * Returns private key
          * Throws an error if phrase has not been set before
          * */
-        this.getPrivateKey = function (index) {
-            if (!_this.privateKey || index) {
+        this.getPrivateKey = function () {
+            if (!_this.privateKey) {
                 if (!_this.phrase)
                     throw new Error('Phrase not set');
-                var privateKey = getPrivateKeyFromMnemonic(_this.phrase, true, index);
-                if (index)
-                    return privateKey;
-                _this.privateKey = privateKey;
+                _this.privateKey = getPrivateKeyFromMnemonic(_this.phrase);
             }
             return _this.privateKey;
         };
-        this.getAddress = function (index) {
-            if (!_this.address || index) {
-                var address = getAddressFromPrivateKey(_this.getPrivateKey(index), _this.getPrefix());
+        this.getAddress = function () {
+            if (!_this.address) {
+                var address = getAddressFromPrivateKey(_this.getPrivateKey(), _this.getPrefix());
                 if (!address) {
                     throw new Error('address not defined');
                 }
-                if (index)
-                    return address;
                 _this.address = address;
             }
             return _this.address;

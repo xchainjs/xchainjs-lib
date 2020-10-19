@@ -67,7 +67,7 @@ export interface BinanceClient {
   purgeClient(): void
   getBncClient(): BncClient
 
-  getAddress(index?: number): string
+  getAddress(): string
 
   validateAddress(address: string): boolean
 
@@ -175,28 +175,22 @@ class Client implements BinanceClient, AsgardexClient {
    * Returns private key
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey = (index?: number): PrivKey => {
-    if (!this.privateKey || index) {
+  private getPrivateKey = (): PrivKey => {
+    if (!this.privateKey) {
       if (!this.phrase) throw new Error('Phrase not set')
 
-      const privateKey = crypto.getPrivateKeyFromMnemonic(this.phrase, true, index)
-
-      if (index) return privateKey;
-
-      this.privateKey = privateKey;
+      this.privateKey = crypto.getPrivateKeyFromMnemonic(this.phrase)
     }
 
     return this.privateKey
   }
 
-  getAddress = (index?: number): string => {
-    if (!this.address || index) {
-      const address = crypto.getAddressFromPrivateKey(this.getPrivateKey(index), this.getPrefix())
+  getAddress = (): string => {
+    if (!this.address) {
+      const address = crypto.getAddressFromPrivateKey(this.getPrivateKey(), this.getPrefix())
       if (!address) {
         throw new Error('address not defined')
       }
-
-      if (index) return address;
 
       this.address = address
     }

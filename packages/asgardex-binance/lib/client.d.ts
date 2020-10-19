@@ -25,7 +25,7 @@ export declare type MultiSendParams = {
 export interface BinanceClient {
     purgeClient(): void;
     getBncClient(): BncClient;
-    getAddress(index?: number): string;
+    getAddress(): string;
     validateAddress(address: string): boolean;
     getMultiSendFees(): Promise<Fees>;
     getFreezeFees(): Promise<Fees>;
@@ -67,7 +67,7 @@ declare class Client implements BinanceClient, AsgardexClient {
      * Throws an error if phrase has not been set before
      * */
     private getPrivateKey;
-    getAddress: (index?: number | undefined) => string;
+    getAddress: () => string;
     validateAddress: (address: Address) => boolean;
     getBalance: (address?: string | undefined, asset?: Asset | undefined) => Promise<Balances>;
     getTransactions: (params?: TxHistoryParams | undefined) => Promise<TxsPage>;
