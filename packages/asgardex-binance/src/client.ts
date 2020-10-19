@@ -90,8 +90,8 @@ class Client implements BinanceClient, AsgardexClient {
   private network: Network
   private bncClient: BncClient
   private phrase: string = ''
-  private address: Address = ''
-  private privateKey: PrivKey | null = null
+  private address: Address = '' // default address at index 0
+  private privateKey: PrivKey | null = null // default private key at index 0
 
   /**
    * Client has to be initialised with network type and phrase
@@ -175,7 +175,7 @@ class Client implements BinanceClient, AsgardexClient {
    * Returns private key
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey = () => {
+  private getPrivateKey = (): PrivKey => {
     if (!this.privateKey) {
       if (!this.phrase) throw new Error('Phrase not set')
 

@@ -40275,7 +40275,7 @@ var getTxType = function (t) {
         return 'freeze';
     if (t === 'UN_FREEZE_TOKEN')
         return 'unfreeze';
-    return 'unkown';
+    return 'unknown';
 };
 
 /**
@@ -40293,8 +40293,8 @@ var Client = /** @class */ (function () {
         var _this = this;
         var _b = _a.network, network = _b === void 0 ? 'testnet' : _b, phrase = _a.phrase;
         this.phrase = '';
-        this.address = '';
-        this.privateKey = null;
+        this.address = ''; // default address at index 0
+        this.privateKey = null; // default private key at index 0
         this.getClientUrl = function () {
             return _this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org';
         };
