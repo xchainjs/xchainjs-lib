@@ -5,7 +5,7 @@ import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 import { codec } from 'cosmos-client/codec'
 
 import { AssetAtom, AssetMuon } from './cosmos/types'
-import { isMsgSend, isMsgMultiSend } from './util'
+import { isMsgSend, isMsgMultiSend, getDenom, getAsset } from './util'
 import { 
   Address,
   AsgardexClient,
@@ -23,7 +23,6 @@ import {
 } from '@asgardex-clients/asgardex-client'
 import {
   Asset,
-  assetFromString,
   baseAmount,
 } from '@thorchain/asgardex-util'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
@@ -45,13 +44,12 @@ class Client implements CosmosClient, AsgardexClient {
   private network: Network
   private thorClient: CosmosSDKClient
   private phrase: string = ''
-  private address: Address = ''
-  private privateKey: PrivKey | null = null
+  private address: Address = '' // default address at index 0
+  private privateKey: PrivKey | null = null // default private key at index 0
 
   constructor({ network = 'testnet', phrase }: AsgardexClientParams) {
     this.network = network
     this.thorClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId())
-    this.thorClient.chooseNetwork(network)
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -62,10 +60,9 @@ class Client implements CosmosClient, AsgardexClient {
     this.privateKey = null
   }
 
-  setNetwork(network: Network): AsgardexClient {
+  setNetwork = (network: Network): AsgardexClient => {
     this.network = network
     this.thorClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId())
-    this.thorClient.chooseNetwork(network)
     this.address = ''
     
     return this
@@ -76,27 +73,15 @@ class Client implements CosmosClient, AsgardexClient {
   }
 
   getClientUrl = (): string => {
-    // For gaia-13007
-    // return this.network === 'testnet' ? 'http://lcd.gaia.bigdipper.live:1317' : 'https://api.cosmos.network'
-
-    // For stargate-3a
-    return this.network === 'testnet' ? 'https://api.stargate.bigdipper.live' : 'https://api.cosmos.network'
+    return this.network === 'testnet' ? 'http://lcd.gaia.bigdipper.live:1317' : 'https://api.cosmos.network'
   }
 
   getChainId = (): string => {
-    // For gaia-13007
-    // return this.network === 'testnet' ? 'gaia-3a' : 'cosmoshub-3'
-
-    // For stargate-3a
-    return this.network === 'testnet' ? 'stargate-3a' : 'cosmoshub-3'
+    return this.network === 'testnet' ? 'gaia-3a' : 'cosmoshub-3'
   }
 
   private getExplorerUrl = (): string => {
-    // For gaia-13007
-    // return this.network === 'testnet' ? 'https://gaia.bigdipper.live' : 'https://cosmos.bigdipper.live'
-
-    // For stargate-3a
-    return this.network === 'testnet' ? 'https://stargate.bigdipper.live' : 'https://cosmos.bigdipper.live'
+    return this.network === 'testnet' ? 'https://gaia.bigdipper.live' : 'https://cosmos.bigdipper.live'
   }
   
   getExplorerAddressUrl = (address: Address): string => {
@@ -171,7 +156,7 @@ class Client implements CosmosClient, AsgardexClient {
 
       return balances.map(balance => {
         return {
-          asset: balance.denom && assetFromString(`${mainAsset.chain}.${balance.denom}`) || mainAsset,
+          asset: balance.denom && getAsset(balance.denom) || mainAsset,
           amount: baseAmount(balance.amount, 6),
         }
       }).filter(balance => !asset || balance.asset === asset)
@@ -181,7 +166,7 @@ class Client implements CosmosClient, AsgardexClient {
   }
 
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const messageAction = undefined
+    const messageAction = 'send' // filter MsgSend only
     const messageSender = params && params.address || this.getAddress()
     const page = params && params.offset || undefined
     const limit = params && params.limit || undefined
@@ -275,7 +260,7 @@ class Client implements CosmosClient, AsgardexClient {
         this.getAddress(),
         recipient,
         amount.amount().toString(),
-        asset ? asset.symbol : mainAsset.symbol,
+        getDenom(asset || mainAsset),
         memo
       )
 

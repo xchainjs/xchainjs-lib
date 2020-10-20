@@ -2,12 +2,10 @@ import * as BIP39 from 'bip39'
 import * as BIP32 from 'bip32'
 import { BigSource } from 'big.js'
 
-import { CosmosSDK, AccAddress, PrivKeyEd25519, PrivKey, Msg } from 'cosmos-client'
+import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from 'cosmos-client'
 import { BroadcastTxCommitResult, Coin, PaginatedQueryTxs, StdTxFee, StdTxSignature } from 'cosmos-client/api'
 import { auth, StdTx, BaseAccount } from 'cosmos-client/x/auth'
 import { bank, MsgSend } from 'cosmos-client/x/bank'
-
-import { Network } from '@asgardex-clients/asgardex-client'
 
 export class CosmosSDKClient {
   sdk: CosmosSDK
@@ -15,17 +13,17 @@ export class CosmosSDKClient {
   server: string
   chainId: string
   prefix: string = 'cosmos'
-  network: Network = 'testnet'
+
+  private derive_path = '44\'/118\'/0\'/0/0'
 
   constructor(server: string, chainId: string) {
     this.server = server
     this.chainId = chainId
     this.sdk = new CosmosSDK(this.server, this.chainId)
-    this.chooseNetwork('testnet')
+    this.setPrefix()
   }
 
-  chooseNetwork = (network: Network): void => {
-    this.network = network
+  setPrefix = (): void => {
     AccAddress.setBech32Prefix(
       this.prefix,
       this.prefix + 'pub',
@@ -43,13 +41,13 @@ export class CosmosSDKClient {
   getPrivKeyFromMnemonic = (mnemonic: string): PrivKey => {
     const seed = BIP39.mnemonicToSeedSync(mnemonic)
     const node = BIP32.fromSeed(seed)
-    const child = node.derivePath("44'/118'/0'/0/0")
+    const child = node.derivePath(this.derive_path)
 
     if (!child.privateKey) {
-      throw new Error("child does not have a privateKey")
+      throw new Error('child does not have a privateKey')
     }
 
-    return new PrivKeyEd25519(child.privateKey)
+    return new PrivKeySecp256k1(child.privateKey)
   }
 
   checkAddress = (address: string): boolean => {
@@ -108,6 +106,7 @@ export class CosmosSDKClient {
         account = BaseAccount.fromJSON((account as any).value)
       }
 
+      // Get unsignedStdTx using /bank/accounts/{address}/transfers
       // const unsignedStdTx = await bank
       //   .accountsAddressTransfersPost(this.sdk, toAddress, {
       //     base_req: {
@@ -138,7 +137,7 @@ export class CosmosSDKClient {
         )
       ]
       const fee: StdTxFee = {
-        gas: '',
+        gas: '200000',
         amount: []
       }
       const signatures: StdTxSignature[] = []

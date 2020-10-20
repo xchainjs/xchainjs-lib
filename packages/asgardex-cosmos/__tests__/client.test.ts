@@ -5,6 +5,7 @@ import { TxsPage } from '@asgardex-clients/asgardex-client'
 import { AssetMuon } from '../src/cosmos/types'
 import { baseAmount, BaseAmount } from '@thorchain/asgardex-util'
 import { BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
+import { getDenom } from '../src/util'
 
 const mock_txsPost_api = (
   url: string,
@@ -29,15 +30,10 @@ const mock_txsPost_api = (
 
 describe('Client Test', () => {
   let cosmosClient: Client
-  // For gaia-13007
-  // const phrase = 'foster blouse cattle fiction deputy social brown toast various sock awkward print'
-  // const mainnet_address = 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv'
-  // const testnet_address = 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv'
 
-  // For stargate-3a
-  const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
-  const mainnet_address = 'cosmos1xkc5syzd8mmsr5yjg0nrrwkyj7r9r5ta5dp59t'
-  const testnet_address = 'cosmos1xkc5syzd8mmsr5yjg0nrrwkyj7r9r5ta5dp59t'
+  const phrase = 'foster blouse cattle fiction deputy social brown toast various sock awkward print'
+  const mainnet_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
+  const testnet_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
 
   beforeEach(() => {
     cosmosClient = new Client({ phrase, network: 'mainnet' })
@@ -106,9 +102,10 @@ describe('Client Test', () => {
   it('has balances', async () => {
     cosmosClient.setNetwork('testnet')
 
-    const balances = await cosmosClient.getBalance()
-    const expected = balances[0].amount.amount().isGreaterThan(0)
+    const balances = await cosmosClient.getBalance('cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv')
+    const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, 6).amount())
     expect(expected).toBeTruthy()
+    expect(balances[0].asset).toEqual(AssetMuon)
   })
 
   it('has an empty tx history', async () => {
@@ -126,8 +123,7 @@ describe('Client Test', () => {
     expect(transactions.total).toBeGreaterThan(0)
 
     cosmosClient.setNetwork('testnet')
-    // const transactions = await cosmosClient.getTransactions({address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2'})
-    transactions = await cosmosClient.getTransactions({address: 'cosmos1h2gacd88hkvlmz5g04md87r54kjf0klnwt25n9'})
+    transactions = await cosmosClient.getTransactions({address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2'})
     expect(transactions.total).toBeGreaterThan(0)
   })
 
@@ -146,12 +142,42 @@ describe('Client Test', () => {
     cosmosClient.setNetwork('testnet')
     mock_txsPost_api(cosmosClient.getClientUrl(), cosmosClient.getAddress(), to_address, [
       {
-        denom: AssetMuon.symbol,
+        denom: getDenom(AssetMuon),
         amount: send_amount.amount().toString(),
       }
     ], memo, expected_txsPost_result)
 
     const result = await cosmosClient.transfer({
+      asset: AssetMuon,
+      recipient: to_address,
+      amount: send_amount,
+      memo,
+    })
+
+    expect(result).toEqual('EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D')
+  })
+
+  it('deposit', async () => {
+    const to_address = 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv'
+    const send_amount: BaseAmount = baseAmount(10000, 6)
+    const memo = 'transfer'
+    
+    const expected_txsPost_result: BroadcastTxCommitResult = {
+      check_tx: {},
+      deliver_tx: {},
+      txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
+      height: 0,
+    }
+
+    cosmosClient.setNetwork('testnet')
+    mock_txsPost_api(cosmosClient.getClientUrl(), cosmosClient.getAddress(), to_address, [
+      {
+        denom: getDenom(AssetMuon),
+        amount: send_amount.amount().toString(),
+      }
+    ], memo, expected_txsPost_result)
+
+    const result = await cosmosClient.deposit({
       asset: AssetMuon,
       recipient: to_address,
       amount: send_amount,
