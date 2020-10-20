@@ -6,15 +6,15 @@ import {
   TxHistoryParams,
   TxsPage,
   Address,
-  AsgardexClient,
+  XChainClient,
   Tx,
   TxParams,
   TxHash,
   Balance,
   Network,
   Fees,
-  AsgardexClientParams,
-} from '@asgardex-clients/asgardex-client'
+  XChainClientParams,
+} from '@xchainjs/xchain-client'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
 import { baseAmount, assetToString, AssetBTC } from '@thorchain/asgardex-util'
 
@@ -32,7 +32,7 @@ interface BitcoinClient {
   scanUTXOs(): Promise<void>
 }
 
-type BitcoinClientParams = AsgardexClientParams & {
+type BitcoinClientParams = XChainClientParams & {
   nodeUrl?: string
   nodeApiKey?: string
 }
@@ -40,7 +40,7 @@ type BitcoinClientParams = AsgardexClientParams & {
 /**
  * Implements Client declared above
  */
-class Client implements BitcoinClient, AsgardexClient {
+class Client implements BitcoinClient, XChainClient {
   net: Network
   phrase = ''
   utxos: Utils.UTXO[]

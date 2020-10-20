@@ -1,9 +1,9 @@
-# ASGARDEX Wallet Client Interface
+# XChain Wallet Client Interface
 
 ## Get Client
 Returns the client.
 ```
-getClient(): AsgardexClient
+getClient(): XChainClient
 ```
 
 ## Set Network
@@ -13,7 +13,7 @@ enum Network {
   TEST = 'testnet',
   MAIN = 'mainnet',
 }
-setNetwork(net: Network): AsgardexClient
+setNetwork(net: Network): XChainClient
 ```
 Returns the client. 
 

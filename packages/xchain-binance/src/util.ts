@@ -1,6 +1,6 @@
 import { Transfer, TransferEvent } from './types/binance-ws'
 import { TransferFee, DexFees, Fee, TxType as BinanceTxType } from './types/binance'
-import { TxType } from '@asgardex-clients/asgardex-client'
+import { TxType } from '@xchainjs/xchain-client'
 
 /**
  * Get `hash` from transfer event sent by Binance chain

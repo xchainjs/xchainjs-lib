@@ -68,12 +68,12 @@ export type Fees = {
   average: BaseAmount
 }
 
-export type AsgardexClientParams = {
+export type XChainClientParams = {
   network?: Network
   phrase?: string
 }
 
-export interface AsgardexClient {
+export interface XChainClient {
   setNetwork(net: Network): void
   getNetwork(): Network
 

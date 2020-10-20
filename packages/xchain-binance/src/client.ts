@@ -10,10 +10,10 @@ import {
 
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
-import { 
+import {
   Address,
-  AsgardexClient,
-  AsgardexClientParams,
+  XChainClient,
+  XChainClientParams,
   Balances,
   Fees,
   Network,
@@ -22,7 +22,7 @@ import {
   TxHash,
   TxHistoryParams,
   TxsPage,
-} from '@asgardex-clients/asgardex-client'
+} from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetBNB,
@@ -86,7 +86,7 @@ export interface BinanceClient {
  * @class Binance
  * @implements {BinanceClient}
  */
-class Client implements BinanceClient, AsgardexClient {
+class Client implements BinanceClient, XChainClient {
   private network: Network
   private bncClient: BncClient
   private phrase: string = ''
@@ -98,7 +98,7 @@ class Client implements BinanceClient, AsgardexClient {
    * It will throw an error if an invalid phrase has been passed
    **/
 
-  constructor({ network = 'testnet', phrase }: AsgardexClientParams) {
+  constructor({ network = 'testnet', phrase }: XChainClientParams) {
     // Invalid phrase will throw an error!
     this.network = network
     if (phrase) this.setPhrase(phrase)
@@ -118,7 +118,7 @@ class Client implements BinanceClient, AsgardexClient {
   }
 
   // update network
-  setNetwork(network: Network): AsgardexClient {
+  setNetwork(network: Network): XChainClient {
     this.network = network
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
@@ -139,7 +139,7 @@ class Client implements BinanceClient, AsgardexClient {
   private getExplorerUrl = (): string => {
     return this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
   }
-  
+
   getExplorerAddressUrl = (address: Address): string => {
     return `${this.getExplorerUrl()}/address/${address}`
   }
@@ -240,16 +240,16 @@ class Client implements BinanceClient, AsgardexClient {
 
     try {
       const txHistory = await axios.get<BinanceTxPage>(url.toString()).then(response => response.data)
-      
+
       return {
         total: txHistory.total,
         txs: txHistory.tx.reduce((acc, tx) => {
           const asset = assetFromString(`${AssetBNB.chain}.${tx.txAsset}`)
 
           if (!asset)  return acc;
-          
+
           return [
-            ...acc, 
+            ...acc,
             {
               asset,
               from: [
@@ -375,7 +375,7 @@ class Client implements BinanceClient, AsgardexClient {
       return ''
     }
   }
-  
+
   getFees = async (): Promise<Fees> => {
     await this.bncClient.initChain()
     try {
@@ -393,7 +393,7 @@ class Client implements BinanceClient, AsgardexClient {
       return Promise.reject(error)
     }
   }
-  
+
   getMultiSendFees = async (): Promise<Fees> => {
     await this.bncClient.initChain()
     try {
@@ -411,7 +411,7 @@ class Client implements BinanceClient, AsgardexClient {
       return Promise.reject(error)
     }
   }
-  
+
   getFreezeFees = async (): Promise<Fees> => {
     await this.bncClient.initChain()
     try {
