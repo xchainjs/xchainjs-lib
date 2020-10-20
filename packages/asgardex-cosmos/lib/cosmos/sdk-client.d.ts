@@ -13,6 +13,6 @@ export declare class CosmosSDKClient {
     getPrivKeyFromMnemonic: (mnemonic: string) => PrivKey;
     checkAddress: (address: string) => boolean;
     getBalance: (address: string) => Promise<Coin[]>;
-    searchTx: (messageAction?: string, messageSender?: string, page?: number, limit?: number, txMinHeight?: number, txMaxHeight?: number) => Promise<PaginatedQueryTxs>;
-    transfer: (privkey: PrivKey, from: string, to: string, amount: BigSource, asset: string, memo?: string) => Promise<BroadcastTxCommitResult>;
+    searchTx: (messageAction?: string | undefined, messageSender?: string | undefined, page?: number | undefined, limit?: number | undefined, txMinHeight?: number | undefined, txMaxHeight?: number | undefined) => Promise<PaginatedQueryTxs>;
+    transfer: (privkey: PrivKey, from: string, to: string, amount: BigSource, asset: string, memo?: string | undefined) => Promise<BroadcastTxCommitResult>;
 }

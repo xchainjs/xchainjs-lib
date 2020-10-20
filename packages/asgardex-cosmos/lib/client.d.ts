@@ -31,8 +31,8 @@ declare class Client implements CosmosClient, AsgardexClient {
     getAddress: () => string;
     validateAddress: (address: Address) => boolean;
     getMainAsset: () => Asset;
-    getBalance: (address?: Address, asset?: Asset) => Promise<Balances>;
-    getTransactions: (params?: TxHistoryParams) => Promise<TxsPage>;
+    getBalance: (address?: string | undefined, asset?: Asset | undefined) => Promise<Balances>;
+    getTransactions: (params?: TxHistoryParams | undefined) => Promise<TxsPage>;
     deposit: ({ asset, amount, recipient, memo }: TxParams) => Promise<TxHash>;
     transfer: ({ asset, amount, recipient, memo }: TxParams) => Promise<TxHash>;
     getFees: () => Promise<Fees>;

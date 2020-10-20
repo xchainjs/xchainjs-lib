@@ -1,24 +1,12 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var buffer = require('buffer');
-var readableStream = require('readable-stream');
-var stream = require('stream');
-var string_decoder = require('string_decoder');
-var cosmosClient = require('cosmos-client');
-var auth = require('cosmos-client/x/auth');
-var bank = require('cosmos-client/x/bank');
-var codec = require('cosmos-client/codec');
-var crypto$2$1 = require('crypto');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var buffer__default = /*#__PURE__*/_interopDefaultLegacy(buffer);
-var readableStream__default = /*#__PURE__*/_interopDefaultLegacy(readableStream);
-var stream__default = /*#__PURE__*/_interopDefaultLegacy(stream);
-var string_decoder__default = /*#__PURE__*/_interopDefaultLegacy(string_decoder);
-var crypto$2__default = /*#__PURE__*/_interopDefaultLegacy(crypto$2$1);
+import buffer from 'buffer';
+import readableStream from 'readable-stream';
+import stream from 'stream';
+import string_decoder from 'string_decoder';
+import { AccAddress, PrivKeySecp256k1, CosmosSDK } from 'cosmos-client';
+import { auth, BaseAccount, StdTx } from 'cosmos-client/x/auth';
+import { bank, MsgSend } from 'cosmos-client/x/bank';
+import { codec } from 'cosmos-client/codec';
+import crypto$2$1 from 'crypto';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -129,7 +117,7 @@ var safeBuffer = createCommonjsModule(function (module, exports) {
 /*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 /* eslint-disable node/no-deprecated-api */
 
-var Buffer = buffer__default['default'].Buffer;
+var Buffer = buffer.Buffer;
 
 // alternative to using Object.keys for old browsers
 function copyProps (src, dst) {
@@ -138,10 +126,10 @@ function copyProps (src, dst) {
   }
 }
 if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = buffer__default['default'];
+  module.exports = buffer;
 } else {
   // Copy properties from require('buffer')
-  copyProps(buffer__default['default'], exports);
+  copyProps(buffer, exports);
   exports.Buffer = SafeBuffer;
 }
 
@@ -189,13 +177,13 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   if (typeof size !== 'number') {
     throw new TypeError('Argument must be a number')
   }
-  return buffer__default['default'].SlowBuffer(size)
+  return buffer.SlowBuffer(size)
 };
 });
 var safeBuffer_1 = safeBuffer.Buffer;
 
 var Buffer$1 = safeBuffer.Buffer;
-var Transform = readableStream__default['default'].Transform;
+var Transform = readableStream.Transform;
 
 
 function throwIfNotStringOrBuffer (val, prefix) {
@@ -433,7 +421,7 @@ function fnI (a, b, c, d, m, k, s) {
 
 var md5_js = MD5;
 
-var Buffer$3 = buffer__default['default'].Buffer;
+var Buffer$3 = buffer.Buffer;
 
 
 
@@ -1396,8 +1384,8 @@ exports.sha512 = sha512;
 });
 
 var Buffer$b = safeBuffer.Buffer;
-var Transform$1 = stream__default['default'].Transform;
-var StringDecoder = string_decoder__default['default'].StringDecoder;
+var Transform$1 = stream.Transform;
+var StringDecoder = string_decoder.StringDecoder;
 
 
 function CipherBase (hashMode) {
@@ -18900,7 +18888,7 @@ var bn = createCommonjsModule(function (module) {
 
   var Buffer;
   try {
-    Buffer = buffer__default['default'].Buffer;
+    Buffer = buffer.Buffer;
   } catch (e) {
   }
 
@@ -28878,10 +28866,10 @@ var CosmosSDKClient = /** @class */ (function () {
         this.prefix = 'cosmos';
         this.derive_path = '44\'/118\'/0\'/0/0';
         this.setPrefix = function () {
-            cosmosClient.AccAddress.setBech32Prefix(_this.prefix, _this.prefix + 'pub', _this.prefix + 'valoper', _this.prefix + 'valoperpub', _this.prefix + 'valcons', _this.prefix + 'valconspub');
+            AccAddress.setBech32Prefix(_this.prefix, _this.prefix + 'pub', _this.prefix + 'valoper', _this.prefix + 'valoperpub', _this.prefix + 'valcons', _this.prefix + 'valconspub');
         };
         this.getAddressFromPrivKey = function (privkey) {
-            return cosmosClient.AccAddress.fromPublicKey(privkey.getPubKey()).toBech32();
+            return AccAddress.fromPublicKey(privkey.getPubKey()).toBech32();
         };
         this.getPrivKeyFromMnemonic = function (mnemonic) {
             var seed = src_1(mnemonic);
@@ -28890,14 +28878,14 @@ var CosmosSDKClient = /** @class */ (function () {
             if (!child.privateKey) {
                 throw new Error('child does not have a privateKey');
             }
-            return new cosmosClient.PrivKeySecp256k1(child.privateKey);
+            return new PrivKeySecp256k1(child.privateKey);
         };
         this.checkAddress = function (address) {
             try {
                 if (!address.startsWith(_this.prefix)) {
                     return false;
                 }
-                return cosmosClient.AccAddress.fromBech32(address).toBech32() === address;
+                return AccAddress.fromBech32(address).toBech32() === address;
             }
             catch (err) {
                 return false;
@@ -28907,8 +28895,8 @@ var CosmosSDKClient = /** @class */ (function () {
             var accAddress;
             return __generator(this, function (_a) {
                 try {
-                    accAddress = cosmosClient.AccAddress.fromBech32(address);
-                    return [2 /*return*/, bank.bank.balancesAddressGet(this.sdk, accAddress).then(function (res) { return res.data.result; })];
+                    accAddress = AccAddress.fromBech32(address);
+                    return [2 /*return*/, bank.balancesAddressGet(this.sdk, accAddress).then(function (res) { return res.data.result; })];
                 }
                 catch (error) {
                     return [2 /*return*/, Promise.reject(error)];
@@ -28923,7 +28911,7 @@ var CosmosSDKClient = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, auth.auth
+                        return [4 /*yield*/, auth
                                 .txsGet(this.sdk, messageAction, messageSender, page, limit, txMinHeight, txMaxHeight)
                                 .then(function (res) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
                                 return [2 /*return*/, res.data];
@@ -28942,16 +28930,16 @@ var CosmosSDKClient = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, , 4]);
-                        fromAddress = cosmosClient.AccAddress.fromBech32(from);
-                        toAddress = cosmosClient.AccAddress.fromBech32(to);
-                        return [4 /*yield*/, auth.auth.accountsAddressGet(this.sdk, fromAddress).then(function (res) { return res.data.result; })];
+                        fromAddress = AccAddress.fromBech32(from);
+                        toAddress = AccAddress.fromBech32(to);
+                        return [4 /*yield*/, auth.accountsAddressGet(this.sdk, fromAddress).then(function (res) { return res.data.result; })];
                     case 1:
                         account = _a.sent();
                         if (account.account_number === undefined) {
-                            account = auth.BaseAccount.fromJSON(account.value);
+                            account = BaseAccount.fromJSON(account.value);
                         }
                         msg = [
-                            bank.MsgSend.fromJSON({
+                            MsgSend.fromJSON({
                                 from_address: fromAddress.toBech32(),
                                 to_address: toAddress.toBech32(),
                                 amount: [{
@@ -28965,14 +28953,14 @@ var CosmosSDKClient = /** @class */ (function () {
                             amount: []
                         };
                         signatures = [];
-                        unsignedStdTx = auth.StdTx.fromJSON({
+                        unsignedStdTx = StdTx.fromJSON({
                             msg: msg,
                             fee: fee,
                             signatures: signatures,
                             memo: memo,
                         });
-                        signedStdTx = auth.auth.signStdTx(this.sdk, privkey, unsignedStdTx, account.account_number.toString(), account.sequence.toString());
-                        return [4 /*yield*/, auth.auth.txsPost(this.sdk, signedStdTx, 'block').then(function (res) { return res.data; })];
+                        signedStdTx = auth.signStdTx(this.sdk, privkey, unsignedStdTx, account.account_number.toString(), account.sequence.toString());
+                        return [4 /*yield*/, auth.txsPost(this.sdk, signedStdTx, 'block').then(function (res) { return res.data; })];
                     case 2:
                         result = _a.sent();
                         return [2 /*return*/, result];
@@ -28985,7 +28973,7 @@ var CosmosSDKClient = /** @class */ (function () {
         }); };
         this.server = server;
         this.chainId = chainId;
-        this.sdk = new cosmosClient.CosmosSDK(this.server, this.chainId);
+        this.sdk = new CosmosSDK(this.server, this.chainId);
         this.setPrefix();
     }
     return CosmosSDKClient;
@@ -57896,7 +57884,7 @@ nacl.setPRNG = function(fn) {
     });
   } else if (typeof commonjsRequire !== 'undefined') {
     // Node.js.
-    crypto = crypto$2__default['default'];
+    crypto = crypto$2$1;
     if (crypto && crypto.randomBytes) {
       nacl.setPRNG(function(x, n) {
         var i, v = crypto.randomBytes(n);
@@ -58723,7 +58711,7 @@ var bn$2 = createCommonjsModule$1(function (module) {
 
   var Buffer;
   try {
-    Buffer = buffer__default['default'].Buffer;
+    Buffer = buffer.Buffer;
   } catch (e) {
   }
 
@@ -62718,7 +62706,7 @@ class Address {
         if (typeof networkId !== "string" || networkId.length !== 2) {
             throw Error(`Unsupported networkId for Address: "${networkId}"`);
         }
-        const words = bech32.toWords(buffer__default['default'].Buffer.from(lodash.padStart(version.toString(16), 2, "0") +
+        const words = bech32.toWords(buffer.Buffer.from(lodash.padStart(version.toString(16), 2, "0") +
             H160_1.H160.ensure(accountId).value, "hex"));
         return new Address(H160_1.H160.ensure(accountId), bech32.encode(networkId + "c", words));
     }
@@ -62735,7 +62723,7 @@ class Address {
         if (version !== 1) {
             throw Error(`Unsupported version for Address: ${version}`);
         }
-        const accountId = utility.toHex(buffer__default['default'].Buffer.from(bytes.slice(1)));
+        const accountId = utility.toHex(buffer.Buffer.from(bytes.slice(1)));
         return new Address(new H160_1.H160(accountId), address);
     }
     static check(address) {
@@ -66486,7 +66474,7 @@ var core$1 = createCommonjsModule$1(function (module, exports) {
 	    // Native crypto import via require (NodeJS)
 	    if (!crypto && typeof commonjsRequire === 'function') {
 	        try {
-	            crypto = crypto$2__default['default'];
+	            crypto = crypto$2$1;
 	        } catch (err) {}
 	    }
 
@@ -67842,10 +67830,10 @@ var Client = /** @class */ (function () {
                         txs = (txHistory.txs || []).reduce(function (acc, tx) {
                             var msgs = [];
                             if (tx.tx.type !== undefined) {
-                                msgs = codec.codec.fromJSONString(JSON.stringify(tx.tx)).msg;
+                                msgs = codec.fromJSONString(JSON.stringify(tx.tx)).msg;
                             }
                             else {
-                                msgs = codec.codec.fromJSONString(JSON.stringify(tx.tx.body.messages));
+                                msgs = codec.fromJSONString(JSON.stringify(tx.tx.body.messages));
                             }
                             var from = [];
                             var to = [];
@@ -67972,8 +67960,4 @@ var Client = /** @class */ (function () {
     return Client;
 }());
 
-exports.Client = Client;
-exports.getAsset = getAsset;
-exports.getDenom = getDenom;
-exports.isMsgMultiSend = isMsgMultiSend;
-exports.isMsgSend = isMsgSend;
+export { Client, getAsset, getDenom, isMsgMultiSend, isMsgSend };
