@@ -89,7 +89,7 @@ export interface BinanceClient {
 class Client implements BinanceClient, XChainClient {
   private network: Network
   private bncClient: BncClient
-  private phrase: string = ''
+  private phrase = ''
   private address: Address = '' // default address at index 0
   private privateKey: PrivKey | null = null // default private key at index 0
 
@@ -133,7 +133,7 @@ class Client implements BinanceClient, XChainClient {
   }
 
   private getClientUrl = (): string => {
-    return this.network === 'testnet'? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
+    return this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
   }
 
   private getExplorerUrl = (): string => {
@@ -209,13 +209,15 @@ class Client implements BinanceClient, XChainClient {
       await this.bncClient.initChain()
       const balances: BinanceBalances = await this.bncClient.getBalance(address)
 
-      return balances.map(balance => {
-        return {
-          asset: assetFromString(balance.symbol) || AssetBNB,
-          amount: assetToBase(assetAmount(balance.free, 8)),
-          frozenAmount: assetToBase(assetAmount(balance.frozen, 8)),
-        }
-      }).filter(balance => !asset || balance.asset === asset)
+      return balances
+        .map((balance) => {
+          return {
+            asset: assetFromString(balance.symbol) || AssetBNB,
+            amount: assetToBase(assetAmount(balance.free, 8)),
+            frozenAmount: assetToBase(assetAmount(balance.frozen, 8)),
+          }
+        })
+        .filter((balance) => !asset || balance.asset === asset)
     } catch (error) {
       return Promise.reject(error)
     }
@@ -239,14 +241,14 @@ class Client implements BinanceClient, XChainClient {
     }
 
     try {
-      const txHistory = await axios.get<BinanceTxPage>(url.toString()).then(response => response.data)
+      const txHistory = await axios.get<BinanceTxPage>(url.toString()).then((response) => response.data)
 
       return {
         total: txHistory.total,
         txs: txHistory.tx.reduce((acc, tx) => {
           const asset = assetFromString(`${AssetBNB.chain}.${tx.txAsset}`)
 
-          if (!asset)  return acc;
+          if (!asset) return acc
 
           return [
             ...acc,
@@ -256,18 +258,18 @@ class Client implements BinanceClient, XChainClient {
                 {
                   from: tx.fromAddr,
                   amount: assetToBase(assetAmount(tx.value, 8)),
-                }
+                },
               ],
               to: [
                 {
                   to: tx.toAddr,
                   amount: assetToBase(assetAmount(tx.value, 8)),
-                }
+                },
               ],
               date: new Date(tx.timeStamp),
               type: getTxType(tx.txType),
               hash: tx.txHash,
-            }
+            },
           ]
         }, [] as Txs),
       }
@@ -282,18 +284,18 @@ class Client implements BinanceClient, XChainClient {
 
     const transferResult = await this.bncClient.multiSend(
       address || this.getAddress(),
-      transactions.map(transaction => {
+      transactions.map((transaction) => {
         return {
           to: transaction.to,
-          coins: transaction.coins.map(coin => {
+          coins: transaction.coins.map((coin) => {
             return {
               denom: coin.asset.symbol,
-              amount: baseToAsset(coin.amount).amount().toString()
+              amount: baseToAsset(coin.amount).amount().toString(),
             }
-          })
+          }),
         }
       }),
-      memo
+      memo,
     )
 
     try {
@@ -316,7 +318,7 @@ class Client implements BinanceClient, XChainClient {
       recipient,
       baseToAsset(amount).amount().toString(),
       asset ? asset.symbol : AssetBNB.symbol,
-      memo
+      memo,
     )
 
     try {
@@ -341,7 +343,7 @@ class Client implements BinanceClient, XChainClient {
     const transferResult = await this.bncClient.tokens.freeze(
       address,
       asset.symbol,
-      baseToAsset(amount).amount().toString()
+      baseToAsset(amount).amount().toString(),
     )
 
     try {
@@ -366,7 +368,7 @@ class Client implements BinanceClient, XChainClient {
     const transferResult = await this.bncClient.tokens.unfreeze(
       address,
       asset.symbol,
-      baseToAsset(amount).amount().toString()
+      baseToAsset(amount).amount().toString(),
     )
 
     try {
@@ -379,7 +381,9 @@ class Client implements BinanceClient, XChainClient {
   getFees = async (): Promise<Fees> => {
     await this.bncClient.initChain()
     try {
-      const feesArray = await axios.get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`).then(response => response.data)
+      const feesArray = await axios
+        .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
+        .then((response) => response.data)
       const transferFee = feesArray.find(isTransferFee)
       if (!transferFee) {
         throw new Error('failed to get transfer fees')
@@ -397,7 +401,9 @@ class Client implements BinanceClient, XChainClient {
   getMultiSendFees = async (): Promise<Fees> => {
     await this.bncClient.initChain()
     try {
-      const feesArray = await axios.get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`).then(response => response.data)
+      const feesArray = await axios
+        .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
+        .then((response) => response.data)
       const transferFee = feesArray.find(isTransferFee)
       if (!transferFee) {
         throw new Error('failed to get transfer fees')
@@ -415,7 +421,9 @@ class Client implements BinanceClient, XChainClient {
   getFreezeFees = async (): Promise<Fees> => {
     await this.bncClient.initChain()
     try {
-      const feesArray = await axios.get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`).then(response => response.data)
+      const feesArray = await axios
+        .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
+        .then((response) => response.data)
       const freezeFee = feesArray.find(isFreezeFee)
       if (!freezeFee) {
         throw new Error('failed to get transfer fees')

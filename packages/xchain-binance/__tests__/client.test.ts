@@ -29,7 +29,7 @@ describe('BinanceClient Test', () => {
 
   afterEach(async () => {
     bnbClient.purgeClient()
-    
+
     await delay(1000)
   })
 
@@ -37,7 +37,7 @@ describe('BinanceClient Test', () => {
     const bnbClientEmptyMain = new BinanceClient({ phrase, network: 'mainnet' })
     const addressMain = bnbClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnetaddress)
-    
+
     const bnbClientEmptyTest = new BinanceClient({ phrase, network: 'testnet' })
     const addressTest = bnbClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnetaddress)
@@ -125,7 +125,7 @@ describe('BinanceClient Test', () => {
   it('should broadcast a transfer', async () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)
-    
+
     const beforeTransfer = await client.getBalance()
     expect(beforeTransfer.length).toEqual(1)
 
@@ -137,7 +137,10 @@ describe('BinanceClient Test', () => {
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
 
-    const expected = beforeTransfer[0].amount.amount().minus(transferFee.average.amount()).isEqualTo(afterTransfer[0].amount.amount())
+    const expected = beforeTransfer[0].amount
+      .amount()
+      .minus(transferFee.average.amount())
+      .isEqualTo(afterTransfer[0].amount.amount())
     expect(expected).toBeTruthy()
   })
 
@@ -147,7 +150,7 @@ describe('BinanceClient Test', () => {
 
     const beforeTransfer = await client.getBalance()
     expect(beforeTransfer.length).toEqual(1)
-    
+
     // feeRate should be optional
     const txHash = await client.deposit({ asset: AssetBNB, recipient: testnetaddressForTx, amount: transferAmount })
     expect(txHash).toEqual(expect.any(String))
@@ -156,7 +159,10 @@ describe('BinanceClient Test', () => {
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
 
-    const expected = beforeTransfer[0].amount.amount().minus(transferFee.average.amount()).isEqualTo(afterTransfer[0].amount.amount())
+    const expected = beforeTransfer[0].amount
+      .amount()
+      .minus(transferFee.average.amount())
+      .isEqualTo(afterTransfer[0].amount.amount())
     expect(expected).toBeTruthy()
   })
 
@@ -167,16 +173,23 @@ describe('BinanceClient Test', () => {
     const beforeFreeze = await client.getBalance()
     expect(beforeFreeze.length).toEqual(1)
 
-    const txHash = await client.freeze({ asset: AssetBNB, amount: freezeAmount})
+    const txHash = await client.freeze({ asset: AssetBNB, amount: freezeAmount })
     expect(txHash).toEqual(expect.any(String))
     await delay(1000) //delay after transaction
 
     const afterFreeze = await client.getBalance()
     expect(afterFreeze.length).toEqual(1)
 
-    let expected = beforeFreeze[0].amount.amount().minus(freezeAmount.amount()).minus(freezeFee.average.amount()).isEqualTo(afterFreeze[0].amount.amount())
+    let expected = beforeFreeze[0].amount
+      .amount()
+      .minus(freezeAmount.amount())
+      .minus(freezeFee.average.amount())
+      .isEqualTo(afterFreeze[0].amount.amount())
     expect(expected).toBeTruthy()
-    expected = beforeFreeze[0].frozenAmount!.amount().plus(freezeAmount.amount()).isEqualTo(afterFreeze[0].frozenAmount!.amount())
+    expected = beforeFreeze[0]
+      .frozenAmount!.amount()
+      .plus(freezeAmount.amount())
+      .isEqualTo(afterFreeze[0].frozenAmount!.amount())
     expect(expected).toBeTruthy()
   })
 
@@ -187,23 +200,30 @@ describe('BinanceClient Test', () => {
     const beforeUnFreeze = await client.getBalance()
     expect(beforeUnFreeze.length).toEqual(1)
 
-    const txHash = await client.unfreeze({ asset: AssetBNB, amount: freezeAmount})
+    const txHash = await client.unfreeze({ asset: AssetBNB, amount: freezeAmount })
     expect(txHash).toEqual(expect.any(String))
     await delay(1000) //delay after transaction
-    
+
     const afterUnFreeze = await client.getBalance()
     expect(afterUnFreeze.length).toEqual(1)
 
-    let expected = beforeUnFreeze[0].amount.amount().plus(freezeAmount.amount()).minus(freezeFee.average.amount()).isEqualTo(afterUnFreeze[0].amount.amount())
+    let expected = beforeUnFreeze[0].amount
+      .amount()
+      .plus(freezeAmount.amount())
+      .minus(freezeFee.average.amount())
+      .isEqualTo(afterUnFreeze[0].amount.amount())
     expect(expected).toBeTruthy()
-    expected = beforeUnFreeze[0].frozenAmount!.amount().minus(freezeAmount.amount()).isEqualTo(afterUnFreeze[0].frozenAmount!.amount())
+    expected = beforeUnFreeze[0]
+      .frozenAmount!.amount()
+      .minus(freezeAmount.amount())
+      .isEqualTo(afterUnFreeze[0].frozenAmount!.amount())
     expect(expected).toBeTruthy()
   })
 
   it('should broadcast a multi transfer', async () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)
-    
+
     const beforeTransfer = await client.getBalance()
     expect(beforeTransfer.length).toEqual(1)
 
@@ -213,29 +233,29 @@ describe('BinanceClient Test', () => {
         coins: [
           {
             asset: AssetBNB,
-            amount: freezeAmount
-          }
-        ]
+            amount: freezeAmount,
+          },
+        ],
       },
       {
         to: testnetaddressForTx,
         coins: [
           {
             asset: AssetBNB,
-            amount: freezeAmount
-          }
-        ]
+            amount: freezeAmount,
+          },
+        ],
       },
       {
         to: testnetaddressForTx,
         coins: [
           {
             asset: AssetBNB,
-            amount: freezeAmount
-          }
-        ]
-      }
-    ];
+            amount: freezeAmount,
+          },
+        ],
+      },
+    ]
     const txHash = await client.multiSend({ transactions })
     expect(txHash).toEqual(expect.any(String))
     await delay(1000) //delay after transaction
@@ -243,7 +263,10 @@ describe('BinanceClient Test', () => {
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
 
-    const expected = beforeTransfer[0].amount.amount().minus(multiSendFee.average.amount().multipliedBy(transactions.length)).isEqualTo(afterTransfer[0].amount.amount())
+    const expected = beforeTransfer[0].amount
+      .amount()
+      .minus(multiSendFee.average.amount().multipliedBy(transactions.length))
+      .isEqualTo(afterTransfer[0].amount.amount())
     expect(expected).toBeTruthy()
   })
 
