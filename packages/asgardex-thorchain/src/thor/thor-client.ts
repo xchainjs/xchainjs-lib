@@ -2,36 +2,34 @@ import * as BIP39 from 'bip39'
 import * as BIP32 from 'bip32'
 import { BigSource } from 'big.js'
 
-import { CosmosSDK, AccAddress, PrivKeyEd25519, PrivKey } from 'cosmos-client'
-import { BroadcastTxCommitResult, Coin, PaginatedQueryTxs } from 'cosmos-client/api'
-import { auth } from 'cosmos-client/x/auth'
+import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from 'cosmos-client'
+import { BroadcastTxCommitResult, Coin, PaginatedQueryTxs, StdTxFee, StdTxSignature } from 'cosmos-client/api'
+import { auth, StdTx, BaseAccount } from 'cosmos-client/x/auth'
 import { bank } from 'cosmos-client/x/bank'
 import { codec } from 'cosmos-client/codec'
 
-import { Network } from '@asgardex-clients/asgardex-client'
-
-import { MsgSend, NETWORK_PREFIX_MAPPING } from './types'
+import { MsgSend } from './types'
 
 export class ThorClient {
   sdk: CosmosSDK
 
   server: string
   chainId: string
-  prefix: string
-  network: Network = 'testnet'
+  prefix: string = ''
+
+  private derive_path = '44\'/931\'/0\'/0/0'
 
   constructor(server: string, chainId: string, prefix: string) {
     this.server = server
     this.chainId = chainId
-    this.prefix = prefix
     this.sdk = new CosmosSDK(this.server, this.chainId)
-    this.chooseNetwork('testnet')
 
+    this.setPrifix(prefix)
     codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
   }
 
-  chooseNetwork = (network: keyof typeof NETWORK_PREFIX_MAPPING): void => {
-    this.network = network
+  setPrifix = (prefix: string): void => {
+    this.prefix = prefix
     AccAddress.setBech32Prefix(
       this.prefix,
       this.prefix + 'pub',
@@ -49,13 +47,13 @@ export class ThorClient {
   getPrivKeyFromMnemonic = (mnemonic: string): PrivKey => {
     const seed = BIP39.mnemonicToSeedSync(mnemonic)
     const node = BIP32.fromSeed(seed);
-    const child = node.derivePath("44'/118'/0'/0/0");
+    const child = node.derivePath(this.derive_path);
 
     if (!child.privateKey) {
       throw new Error("child does not have a privateKey");
     }
 
-    return new PrivKeyEd25519(child.privateKey)
+    return new PrivKeySecp256k1(child.privateKey)
   }
 
   checkAddress = (address: string): boolean => {
@@ -73,9 +71,8 @@ export class ThorClient {
   getBalance = async (address: string): Promise<Coin[]> => {
     try {
       const accAddress = AccAddress.fromBech32(address)
-      const account = await auth.accountsAddressGet(this.sdk, accAddress).then((res) => res.data.result)
-
-      return account.coins
+      
+      return bank.balancesAddressGet(this.sdk, accAddress).then((res) => res.data.result)
     } catch (error) {
       return Promise.reject(error)
     }
@@ -110,31 +107,59 @@ export class ThorClient {
       const fromAddress = AccAddress.fromBech32(from)
       const toAddress = AccAddress.fromBech32(to)
 
-      const account = await auth.accountsAddressGet(this.sdk, fromAddress).then((res) => res.data.result)
+      let account: BaseAccount = await auth.accountsAddressGet(this.sdk, fromAddress).then((res) => res.data.result)
+      if (account.account_number === undefined) {
+        account = BaseAccount.fromJSON((account as any).value)
+      }
 
-      const unsignedStdTx = await bank
-        .accountsAddressTransfersPost(this.sdk, toAddress, {
-          base_req: {
-            from: fromAddress.toBech32(),
-            memo: memo,
-            chain_id: this.sdk.chainID,
-            account_number: account.account_number.toString(),
-            sequence: account.sequence.toString(),
-            gas: '',
-            gas_adjustment: '',
-            fees: [],
-            simulate: false,
-          },
-          amount: [{ denom: asset, amount: amount.toString() }],
-        })
-        .then((res) => res.data)
+      // const unsignedStdTx = await bank
+      //   .accountsAddressTransfersPost(this.sdk, toAddress, {
+      //     base_req: {
+      //       from: fromAddress.toBech32(),
+      //       memo: memo,
+      //       chain_id: this.sdk.chainID,
+      //       account_number: account.account_number.toString(),
+      //       sequence: account.sequence.toString(),
+      //       gas: '',
+      //       gas_adjustment: '',
+      //       fees: [],
+      //       simulate: false,
+      //     },
+      //     amount: [{ denom: asset, amount: amount.toString() }],
+      //   })
+      //   .then((res) => res.data)
 
-      unsignedStdTx.msg = unsignedStdTx.msg.map((msg: any) => {
-        return MsgSend.fromJSON({
-          from_address: msg.from_address.toBech32(),
-          to_address: msg.to_address.toBech32(),
-          amount: msg.amount,
-        })
+      // unsignedStdTx.msg = unsignedStdTx.msg.map((msg: any) => {
+      //   return MsgSend.fromJSON({
+      //     from_address: msg.from_address.toBech32(),
+      //     to_address: msg.to_address.toBech32(),
+      //     amount: msg.amount,
+      //   })
+      // })
+
+      const msg: Msg = [
+        MsgSend.fromJSON(
+          {
+            from_address: fromAddress.toBech32(),
+            to_address: toAddress.toBech32(),
+            amount: [{
+              denom: asset,
+              amount: amount.toString(),
+            }]
+          }
+        )
+      ]
+      const fee: StdTxFee = {
+        gas: '200000',
+        amount: []
+      }
+      const signatures: StdTxSignature[] = []
+
+      const unsignedStdTx = StdTx.fromJSON({
+        msg,
+        fee,
+        signatures,
+        memo,
       })
 
       const signedStdTx = auth.signStdTx(
@@ -145,7 +170,7 @@ export class ThorClient {
         account.sequence.toString(),
       )
 
-      const result = await auth.txsPost(this.sdk, signedStdTx, 'sync').then((res) => res.data)
+      const result = await auth.txsPost(this.sdk, signedStdTx, 'block').then((res) => res.data)
 
       return result
     } catch (error) {

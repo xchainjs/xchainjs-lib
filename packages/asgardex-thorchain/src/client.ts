@@ -1,10 +1,10 @@
-import { PrivKey } from 'cosmos-client'
+import { PrivKey, Msg } from 'cosmos-client'
+import { codec } from 'cosmos-client/codec'
 
 import { ThorClient } from './thor/thor-client'
-import {
-  AssetThor,
-  Prefix
-} from './thor/types'
+import { MsgSend } from './thor/types'
+import { isMsgSend } from './util'
+
 import { 
   Address,
   AsgardexClient,
@@ -13,6 +13,8 @@ import {
   Fees,
   Network,
   Txs,
+  TxFrom,
+  TxTo,
   TxParams,
   TxHash,
   TxHistoryParams,
@@ -20,11 +22,11 @@ import {
 } from '@asgardex-clients/asgardex-client'
 import {
   Asset,
-  assetAmount,
+  AssetRuneNative,
   assetFromString,
-  assetToBase,
   baseAmount,
   baseToAsset,
+  THORChain,
 } from '@thorchain/asgardex-util'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
 
@@ -49,7 +51,6 @@ class Client implements ThorchainClient, AsgardexClient {
   constructor({ network = 'testnet', phrase }: AsgardexClientParams) {
     this.network = network
     this.thorClient = new ThorClient(this.getClientUrl(), this.getChainId(), this.getPrefix())
-    this.thorClient.chooseNetwork(network)
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -63,7 +64,6 @@ class Client implements ThorchainClient, AsgardexClient {
   setNetwork(network: Network): AsgardexClient {
     this.network = network
     this.thorClient = new ThorClient(this.getClientUrl(), this.getChainId(), this.getPrefix())
-    this.thorClient.chooseNetwork(network)
     this.address = ''
     
     return this
@@ -93,7 +93,7 @@ class Client implements ThorchainClient, AsgardexClient {
     return `${this.getExplorerUrl()}/txs/${txID}`
   }
 
-  private getPrefix = (): Prefix => {
+  private getPrefix = (): string => {
     return this.network === 'testnet' ? 'tthor' : 'thor'
   }
 
@@ -155,18 +155,17 @@ class Client implements ThorchainClient, AsgardexClient {
       const balances = await this.thorClient.getBalance(address)
       console.log('original balances', balances)
 
-      return balances.map(balance => {
-        return {
-          asset: balance.denom && assetFromString(balance.denom) || AssetThor,
-          amount: assetToBase(assetAmount(balance.amount, 8)),
+      return balances.map(balance => (
+        {
+          asset: balance.denom && assetFromString(`${THORChain}.${balance.denom}`) || AssetRuneNative,
+          amount: baseAmount(balance.amount, 8),
         }
-      }).filter(balance => !asset || balance.asset === asset)
+      )).filter(balance => !asset || balance.asset === asset)
     } catch (error) {
       return Promise.reject(error)
     }
   }
 
-  // Need to be updated
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     const messageAction = undefined;
     const messageSender = params && params.address || this.getAddress()
@@ -180,21 +179,58 @@ class Client implements ThorchainClient, AsgardexClient {
 
       console.log('original tx history', txHistory)
 
+      const txs: Txs = (txHistory.txs || []).reduce((acc, tx: any) => {
+        let msgs: Msg[] = []
+        if (tx.tx.type !== undefined)
+        {
+          msgs = codec.fromJSONString(JSON.stringify(tx.tx)).msg
+        } else {
+          msgs = codec.fromJSONString(JSON.stringify(tx.tx.body.messages))
+        }
+
+        let from: TxFrom[] = []
+        let to: TxTo[] = []
+        let asset: Asset | null = null
+
+        msgs.map(msg => {
+          if (isMsgSend(msg)) {
+            const msgSend = msg as MsgSend
+            const amount = msgSend.amount
+              .map(coin => baseAmount(coin.amount, 8))
+              .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 8), baseAmount(0, 8))
+
+            asset = msgSend.amount.reduce((acc, cur) => {
+              if (acc) return acc
+              return assetFromString(`${THORChain}.${cur.denom}`)
+            }, null as Asset | null)
+            
+            from.push({
+              from: msgSend.from_address.toBech32(),
+              amount,
+            })
+            to.push({
+              to: msgSend.to_address.toBech32(),
+              amount,
+            })
+          }
+        })
+
+        return [
+          ...acc,
+          {
+            asset: asset || AssetRuneNative,
+            from,
+            to,
+            date: new Date(tx.timestamp),
+            type: (from.length > 0 || to.length > 0) ? 'transfer' : 'unknown',
+            hash: tx.hash || '',
+          }
+        ]
+      }, [] as Txs)
+
       return {
         total: txHistory.total_count || 0,
-        txs: (txHistory.txs || []).reduce((acc, tx) => {
-          return [
-            ...acc,
-            {
-              asset: AssetThor,
-              from: [],
-              to: [],
-              date: new Date(),
-              type: 'transfer',
-              hash: tx.hash || '',
-            }
-          ]
-        }, [] as Txs)
+        txs,
       }
     } catch (error) {
       return Promise.reject(error)
@@ -212,7 +248,7 @@ class Client implements ThorchainClient, AsgardexClient {
         this.getAddress(),
         recipient,
         baseToAsset(amount).amount().toString(),
-        asset ? asset.symbol : AssetThor.symbol,
+        asset ? asset.symbol : AssetRuneNative.symbol,
         memo
       )
 

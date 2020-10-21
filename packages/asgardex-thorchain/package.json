@@ -64,5 +64,8 @@
     "@thorchain/asgardex-crypto": "^0.1.0",
     "@asgardex-clients/core": "^0.0.5",
     "nock": "^13.0.4"
+  },
+  "peerDependencies": {
+    "cosmos-client": "^0.39.2"
   }
 }
