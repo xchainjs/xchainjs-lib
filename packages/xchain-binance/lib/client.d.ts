@@ -1,5 +1,5 @@
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client';
-import { Address, AsgardexClient, AsgardexClientParams, Balances, Fees, Network, TxParams, TxHash, TxHistoryParams, TxsPage } from '@asgardex-clients/asgardex-client';
+import { Address, XChainClient, XChainClientParams, Balances, Fees, Network, TxParams, TxHash, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client';
 import { Asset, BaseAmount } from '@thorchain/asgardex-util';
 export declare type FreezeParams = {
     asset: Asset;
@@ -39,7 +39,7 @@ export interface BinanceClient {
  * @class Binance
  * @implements {BinanceClient}
  */
-declare class Client implements BinanceClient, AsgardexClient {
+declare class Client implements BinanceClient, XChainClient {
     private network;
     private bncClient;
     private phrase;
@@ -49,10 +49,10 @@ declare class Client implements BinanceClient, AsgardexClient {
      * Client has to be initialised with network type and phrase
      * It will throw an error if an invalid phrase has been passed
      **/
-    constructor({ network, phrase }: AsgardexClientParams);
+    constructor({ network, phrase }: XChainClientParams);
     purgeClient(): void;
     getBncClient(): BncClient;
-    setNetwork(network: Network): AsgardexClient;
+    setNetwork(network: Network): XChainClient;
     getNetwork(): Network;
     private getClientUrl;
     private getExplorerUrl;

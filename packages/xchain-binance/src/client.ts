@@ -219,7 +219,7 @@ class Client implements BinanceClient, XChainClient {
         })
         .filter((balance) => !asset || balance.asset === asset)
     } catch (error) {
-      return Promise.reject(error)
+      return [] as Balances
     }
   }
 
