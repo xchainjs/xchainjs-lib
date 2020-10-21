@@ -40367,7 +40367,15 @@ var Client = /** @class */ (function () {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, this.bncClient.getBalance(address)];
+                        return [4 /*yield*/, axios$1
+                                .get(this.getClientUrl() + "/api/v1/account/" + address)
+                                .then(function (response) { return response.data.balances; })
+                                .catch(function (error) {
+                                if (error.response.data.code === 404 && error.response.data.message === 'account not found') {
+                                    return [];
+                                }
+                                throw error;
+                            })];
                     case 2:
                         balances = _a.sent();
                         return [2 /*return*/, balances

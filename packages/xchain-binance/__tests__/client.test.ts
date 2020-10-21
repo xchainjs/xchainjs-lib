@@ -84,7 +84,11 @@ describe('BinanceClient Test', () => {
   })
 
   it('has no balances', async () => {
-    const balances = await bnbClient.getBalance('bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku')
+    let balances = await bnbClient.getBalance('bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku')
+    expect(balances).toEqual([])
+
+    // no balances for `account not found`
+    balances = await bnbClient.getBalance('bnb1ja07feunxx6z9kue3fn05dazt0gpn4y9e5t8rn')
     expect(balances).toEqual([])
   })
 
