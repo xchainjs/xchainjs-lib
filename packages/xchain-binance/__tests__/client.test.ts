@@ -144,28 +144,6 @@ describe('BinanceClient Test', () => {
     expect(expected).toBeTruthy()
   })
 
-  it('should deposit', async () => {
-    const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
-    expect(client.getAddress()).toEqual(testnetaddressForTx)
-
-    const beforeTransfer = await client.getBalance()
-    expect(beforeTransfer.length).toEqual(1)
-
-    // feeRate should be optional
-    const txHash = await client.deposit({ asset: AssetBNB, recipient: testnetaddressForTx, amount: transferAmount })
-    expect(txHash).toEqual(expect.any(String))
-    await delay(1000) //delay after transaction
-
-    const afterTransfer = await client.getBalance()
-    expect(afterTransfer.length).toEqual(1)
-
-    const expected = beforeTransfer[0].amount
-      .amount()
-      .minus(transferFee.average.amount())
-      .isEqualTo(afterTransfer[0].amount.amount())
-    expect(expected).toBeTruthy()
-  })
-
   it('should freeze token', async () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)

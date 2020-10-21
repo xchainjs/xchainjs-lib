@@ -305,10 +305,6 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
-  deposit = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
-    return this.transfer({ asset, amount, recipient, memo })
-  }
-
   transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     await this.bncClient.initChain()
     await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
