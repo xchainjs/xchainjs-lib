@@ -330,10 +330,6 @@ class Client implements BitcoinClient, XChainClient {
     return memoFees
   }
 
-  async deposit({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<TxHash> {
-    return this.transfer({ asset, amount, recipient, memo, feeRate })
-  }
-
   async transfer({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<TxHash> {
     await this.scanUTXOs()
     const balance = await this.getBalance()
