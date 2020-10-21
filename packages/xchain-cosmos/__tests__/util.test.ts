@@ -1,7 +1,6 @@
-import { Asset } from '@thorchain/asgardex-util'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
+import { AssetMuon, AssetAtom } from '../src/cosmos/types'
 import { isMsgMultiSend, isMsgSend, getDenom, getAsset } from '../src/util'
-import { AssetMuon, AssetAtom, CosmosChain } from '../src/cosmos/types'
 
 describe('cosmos/util', () => {
   describe('Msg type guards', () => {
@@ -13,8 +12,8 @@ describe('cosmos/util', () => {
             {
               denom: 'uatom',
               amount: '100000',
-            }
-          ]
+            },
+          ],
         },
         {
           address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
@@ -22,8 +21,8 @@ describe('cosmos/util', () => {
             {
               denom: 'uatom',
               amount: '300000',
-            }
-          ]
+            },
+          ],
         },
       ],
       outputs: [
@@ -33,8 +32,8 @@ describe('cosmos/util', () => {
             {
               denom: 'uatom',
               amount: '400000',
-            }
-          ]
+            },
+          ],
         },
       ],
     }
@@ -46,8 +45,8 @@ describe('cosmos/util', () => {
         {
           denom: 'uatom',
           amount: '100000',
-        }
-      ]
+        },
+      ],
     })
 
     describe('isMsgMultiSend', () => {
@@ -90,7 +89,7 @@ describe('cosmos/util', () => {
       })
 
       it('get asset for unknown', () => {
-        expect(getAsset('unknown')).toEqual({ chain: CosmosChain, symbol: 'unknown', ticker: 'unknown' } as Asset)
+        expect(getAsset('unknown')).toBeNull()
       })
     })
   })

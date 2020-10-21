@@ -1,20 +1,20 @@
 import * as BIP39 from 'bip39'
 import * as BIP32 from 'bip32'
-import { BigSource } from 'big.js'
 
 import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from 'cosmos-client'
 import { BroadcastTxCommitResult, Coin, PaginatedQueryTxs, StdTxFee, StdTxSignature } from 'cosmos-client/api'
 import { auth, StdTx, BaseAccount } from 'cosmos-client/x/auth'
 import { bank, MsgSend } from 'cosmos-client/x/bank'
+import { SearchTxParams, TransferParams } from './types'
 
 export class CosmosSDKClient {
   sdk: CosmosSDK
 
   server: string
   chainId: string
-  prefix: string = 'cosmos'
+  prefix = 'cosmos'
 
-  private derive_path = '44\'/118\'/0\'/0/0'
+  private derive_path = "44'/118'/0'/0/0"
 
   constructor(server: string, chainId: string) {
     this.server = server
@@ -65,21 +65,21 @@ export class CosmosSDKClient {
   getBalance = async (address: string): Promise<Coin[]> => {
     try {
       const accAddress = AccAddress.fromBech32(address)
-      
+
       return bank.balancesAddressGet(this.sdk, accAddress).then((res) => res.data.result)
     } catch (error) {
       return Promise.reject(error)
     }
   }
 
-  searchTx = async (
-    messageAction?: string,
-    messageSender?: string,
-    page?: number,
-    limit?: number,
-    txMinHeight?: number,
-    txMaxHeight?: number,
-  ): Promise<PaginatedQueryTxs> => {
+  searchTx = async ({
+    messageAction,
+    messageSender,
+    page,
+    limit,
+    txMinHeight,
+    txMaxHeight,
+  }: SearchTxParams): Promise<PaginatedQueryTxs> => {
     try {
       return await auth
         .txsGet(this.sdk, messageAction, messageSender, page, limit, txMinHeight, txMaxHeight)
@@ -89,14 +89,7 @@ export class CosmosSDKClient {
     }
   }
 
-  transfer = async (
-    privkey: PrivKey,
-    from: string,
-    to: string,
-    amount: BigSource,
-    asset: string,
-    memo?: string,
-  ): Promise<BroadcastTxCommitResult> => {
+  transfer = async ({ privkey, from, to, amount, asset, memo }: TransferParams): Promise<BroadcastTxCommitResult> => {
     try {
       const fromAddress = AccAddress.fromBech32(from)
       const toAddress = AccAddress.fromBech32(to)
@@ -106,39 +99,21 @@ export class CosmosSDKClient {
         account = BaseAccount.fromJSON((account as any).value)
       }
 
-      // Get unsignedStdTx using /bank/accounts/{address}/transfers
-      // const unsignedStdTx = await bank
-      //   .accountsAddressTransfersPost(this.sdk, toAddress, {
-      //     base_req: {
-      //       from,
-      //       memo: memo,
-      //       chain_id: this.sdk.chainID,
-      //       account_number: account.account_number.toString(),
-      //       sequence: account.sequence.toString(),
-      //       gas: '',
-      //       gas_adjustment: '',
-      //       fees: [],
-      //       simulate: false,
-      //     },
-      //     amount: [{ denom: asset, amount: amount.toString() }],
-      //   })
-      //   .then((res) => res.data)
-
       const msg: Msg = [
-        MsgSend.fromJSON(
-          {
-            from_address: fromAddress.toBech32(),
-            to_address: toAddress.toBech32(),
-            amount: [{
+        MsgSend.fromJSON({
+          from_address: fromAddress.toBech32(),
+          to_address: toAddress.toBech32(),
+          amount: [
+            {
               denom: asset,
               amount: amount.toString(),
-            }]
-          }
-        )
+            },
+          ],
+        }),
       ]
       const fee: StdTxFee = {
         gas: '200000',
-        amount: []
+        amount: [],
       }
       const signatures: StdTxSignature[] = []
 

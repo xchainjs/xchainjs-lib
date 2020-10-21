@@ -1,13 +1,13 @@
 {
-  "name": "@thorchain/asgardex-thorchain",
+  "name": "@xchainjs/xchain-cosmos",
   "version": "3.0.1",
-  "description": "Custom Thorchain client and utilities used by ASGARDEX clients",
+  "description": "Custom Cosmos client and utilities used by XChainJS clients",
   "keywords": [
-    "THORChain",
-    "ASGARDEX"
+    "XChain",
+    "Cosoms"
   ],
-  "author": "THORChain",
-  "homepage": "https://gitlab.com/thorchain/asgardex-common/asgardex-thorchain",
+  "author": "XChainJS",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -21,16 +21,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@gitlab.com:thorchain/asgardex-common/asgardex-thorchain.git"
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
     "clean": "rimraf lib/**",
     "build": "rollup -c",
-    "compile": "tsc -p tsconfig.build.json",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix",
-    "prepublishOnly": "yarn build",
-    "start:example": "ts-node example/index.ts"
+    "prepublishOnly": "yarn build"
   },
   "devDependencies": {
     "@types/big.js": "^4.0.5",
@@ -62,7 +60,7 @@
   },
   "dependencies": {
     "@thorchain/asgardex-crypto": "^0.1.0",
-    "@asgardex-clients/core": "^0.0.5",
+    "@xchainjs/xchain-client": "^0.0.5",
     "nock": "^13.0.4"
   },
   "peerDependencies": {

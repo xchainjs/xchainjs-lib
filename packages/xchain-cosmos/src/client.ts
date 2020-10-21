@@ -1,15 +1,5 @@
-import { PrivKey, Msg } from 'cosmos-client'
-
-import { CosmosSDKClient } from './cosmos/sdk-client'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
-import { codec } from 'cosmos-client/codec'
-
-import { AssetAtom, AssetMuon } from './cosmos/types'
-import { isMsgSend, isMsgMultiSend, getDenom, getAsset } from './util'
-import { 
+import {
   Address,
-  AsgardexClient,
-  AsgardexClientParams,
   Balances,
   Fees,
   Network,
@@ -20,12 +10,19 @@ import {
   TxHistoryParams,
   Txs,
   TxsPage,
-} from '@asgardex-clients/asgardex-client'
-import {
-  Asset,
-  baseAmount,
-} from '@thorchain/asgardex-util'
+  XChainClient,
+  XChainClientParams,
+} from '@xchainjs/xchain-client'
+import { Asset, baseAmount } from '@thorchain/asgardex-util'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
+
+import { PrivKey, Msg } from 'cosmos-client'
+import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
+import { codec } from 'cosmos-client/codec'
+
+import { CosmosSDKClient } from './cosmos/sdk-client'
+import { AssetAtom, AssetMuon } from './cosmos/types'
+import { isMsgSend, isMsgMultiSend, getDenom, getAsset } from './util'
 
 /**
  * Interface for custom Cosmos client
@@ -34,20 +31,20 @@ export interface CosmosClient {
   purgeClient(): void
 
   getAddress(): string
-  
+
   validateAddress(address: string): boolean
 
   getMainAsset(): Asset
 }
 
-class Client implements CosmosClient, AsgardexClient {
+class Client implements CosmosClient, XChainClient {
   private network: Network
   private thorClient: CosmosSDKClient
-  private phrase: string = ''
+  private phrase = ''
   private address: Address = '' // default address at index 0
   private privateKey: PrivKey | null = null // default private key at index 0
 
-  constructor({ network = 'testnet', phrase }: AsgardexClientParams) {
+  constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
     this.thorClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId())
 
@@ -60,11 +57,11 @@ class Client implements CosmosClient, AsgardexClient {
     this.privateKey = null
   }
 
-  setNetwork = (network: Network): AsgardexClient => {
+  setNetwork = (network: Network): XChainClient => {
     this.network = network
     this.thorClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId())
     this.address = ''
-    
+
     return this
   }
 
@@ -83,7 +80,7 @@ class Client implements CosmosClient, AsgardexClient {
   private getExplorerUrl = (): string => {
     return this.network === 'testnet' ? 'https://gaia.bigdipper.live' : 'https://cosmos.bigdipper.live'
   }
-  
+
   getExplorerAddressUrl = (address: Address): string => {
     return `${this.getExplorerUrl()}/account/${address}`
   }
@@ -110,7 +107,7 @@ class Client implements CosmosClient, AsgardexClient {
       this.privateKey = null
       this.address = ''
     }
-    
+
     return this.getAddress()
   }
 
@@ -133,7 +130,7 @@ class Client implements CosmosClient, AsgardexClient {
 
       this.address = address
     }
-    
+
     return this.address
   }
 
@@ -154,12 +151,14 @@ class Client implements CosmosClient, AsgardexClient {
       const balances = await this.thorClient.getBalance(address)
       const mainAsset = this.getMainAsset()
 
-      return balances.map(balance => {
-        return {
-          asset: balance.denom && getAsset(balance.denom) || mainAsset,
-          amount: baseAmount(balance.amount, 6),
-        }
-      }).filter(balance => !asset || balance.asset === asset)
+      return balances
+        .map((balance) => {
+          return {
+            asset: (balance.denom && getAsset(balance.denom)) || mainAsset,
+            amount: baseAmount(balance.amount, 6),
+          }
+        })
+        .filter((balance) => !asset || balance.asset === asset)
     } catch (error) {
       return Promise.reject(error)
     }
@@ -167,32 +166,38 @@ class Client implements CosmosClient, AsgardexClient {
 
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     const messageAction = 'send' // filter MsgSend only
-    const messageSender = params && params.address || this.getAddress()
-    const page = params && params.offset || undefined
-    const limit = params && params.limit || undefined
+    const messageSender = (params && params.address) || this.getAddress()
+    const page = (params && params.offset) || undefined
+    const limit = (params && params.limit) || undefined
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
     try {
       const mainAsset = this.getMainAsset()
-      const txHistory = await this.thorClient.searchTx(messageAction, messageSender, page, limit, txMinHeight, txMaxHeight)
+      const txHistory = await this.thorClient.searchTx({
+        messageAction,
+        messageSender,
+        page,
+        limit,
+        txMinHeight,
+        txMaxHeight,
+      })
 
       const txs: Txs = (txHistory.txs || []).reduce((acc, tx: any) => {
         let msgs: Msg[] = []
-        if (tx.tx.type !== undefined)
-        {
+        if (tx.tx.type !== undefined) {
           msgs = codec.fromJSONString(JSON.stringify(tx.tx)).msg
         } else {
           msgs = codec.fromJSONString(JSON.stringify(tx.tx.body.messages))
         }
 
-        let from: TxFrom[] = []
-        let to: TxTo[] = []
-        msgs.map(msg => {
+        const from: TxFrom[] = []
+        const to: TxTo[] = []
+        msgs.map((msg) => {
           if (isMsgSend(msg)) {
             const msgSend = msg as MsgSend
             const amount = msgSend.amount
-              .map(coin => baseAmount(coin.amount, 6))
+              .map((coin) => baseAmount(coin.amount, 6))
               .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
 
             from.push({
@@ -203,26 +208,29 @@ class Client implements CosmosClient, AsgardexClient {
               to: msgSend.to_address.toBech32(),
               amount,
             })
-          }
-          else if (isMsgMultiSend(msg)) {
+          } else if (isMsgMultiSend(msg)) {
             const msgMultiSend = msg as MsgMultiSend
-            
-            from.push(...msgMultiSend.inputs.map(input => {
-              return {
-                from: input.address,
-                amount: input.coins
-                  .map(coin => baseAmount(coin.amount, 6))
-                  .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
-              }
-            }))
-            to.push(...msgMultiSend.outputs.map(output => {
-              return {
-                to: output.address,
-                amount: output.coins
-                  .map(coin => baseAmount(coin.amount, 6))
-                  .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
-              }
-            }))
+
+            from.push(
+              ...msgMultiSend.inputs.map((input) => {
+                return {
+                  from: input.address,
+                  amount: input.coins
+                    .map((coin) => baseAmount(coin.amount, 6))
+                    .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6)),
+                }
+              }),
+            )
+            to.push(
+              ...msgMultiSend.outputs.map((output) => {
+                return {
+                  to: output.address,
+                  amount: output.coins
+                    .map((coin) => baseAmount(coin.amount, 6))
+                    .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6)),
+                }
+              }),
+            )
           }
         })
 
@@ -233,9 +241,9 @@ class Client implements CosmosClient, AsgardexClient {
             from,
             to,
             date: new Date(tx.timestamp),
-            type: (from.length > 0 || to.length > 0) ? 'transfer' : 'unknown',
+            type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
             hash: tx.hash || '',
-          }
+          },
         ]
       }, [] as Txs)
 
@@ -255,22 +263,21 @@ class Client implements CosmosClient, AsgardexClient {
   transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
       const mainAsset = this.getMainAsset()
-      const transferResult = await this.thorClient.transfer(
-        this.getPrivateKey(),
-        this.getAddress(),
-        recipient,
-        amount.amount().toString(),
-        getDenom(asset || mainAsset),
-        memo
-      )
+      const transferResult = await this.thorClient.transfer({
+        privkey: this.getPrivateKey(),
+        from: this.getAddress(),
+        to: recipient,
+        amount: amount.amount().toString(),
+        asset: getDenom(asset || mainAsset),
+        memo,
+      })
 
       return transferResult?.txhash || ''
-
     } catch (error) {
       return Promise.reject(error)
     }
   }
-  
+
   // Need to be updated
   getFees = async (): Promise<Fees> => {
     try {

@@ -1,6 +1,6 @@
-import { BigSource } from 'big.js';
 import { CosmosSDK, PrivKey } from 'cosmos-client';
 import { BroadcastTxCommitResult, Coin, PaginatedQueryTxs } from 'cosmos-client/api';
+import { SearchTxParams, TransferParams } from './types';
 export declare class CosmosSDKClient {
     sdk: CosmosSDK;
     server: string;
@@ -13,6 +13,6 @@ export declare class CosmosSDKClient {
     getPrivKeyFromMnemonic: (mnemonic: string) => PrivKey;
     checkAddress: (address: string) => boolean;
     getBalance: (address: string) => Promise<Coin[]>;
-    searchTx: (messageAction?: string | undefined, messageSender?: string | undefined, page?: number | undefined, limit?: number | undefined, txMinHeight?: number | undefined, txMaxHeight?: number | undefined) => Promise<PaginatedQueryTxs>;
-    transfer: (privkey: PrivKey, from: string, to: string, amount: BigSource, asset: string, memo?: string | undefined) => Promise<BroadcastTxCommitResult>;
+    searchTx: ({ messageAction, messageSender, page, limit, txMinHeight, txMaxHeight, }: SearchTxParams) => Promise<PaginatedQueryTxs>;
+    transfer: ({ privkey, from, to, amount, asset, memo }: TransferParams) => Promise<BroadcastTxCommitResult>;
 }

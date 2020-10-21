@@ -1,4 +1,4 @@
-import { Address, AsgardexClient, AsgardexClientParams, Balances, Fees, Network, TxParams, TxHash, TxHistoryParams, TxsPage } from '@asgardex-clients/asgardex-client';
+import { Address, Balances, Fees, Network, TxParams, TxHash, TxHistoryParams, TxsPage, XChainClient, XChainClientParams } from '@xchainjs/xchain-client';
 import { Asset } from '@thorchain/asgardex-util';
 /**
  * Interface for custom Cosmos client
@@ -9,15 +9,15 @@ export interface CosmosClient {
     validateAddress(address: string): boolean;
     getMainAsset(): Asset;
 }
-declare class Client implements CosmosClient, AsgardexClient {
+declare class Client implements CosmosClient, XChainClient {
     private network;
     private thorClient;
     private phrase;
     private address;
     private privateKey;
-    constructor({ network, phrase }: AsgardexClientParams);
+    constructor({ network, phrase }: XChainClientParams);
     purgeClient(): void;
-    setNetwork: (network: Network) => AsgardexClient;
+    setNetwork: (network: Network) => XChainClient;
     getNetwork(): Network;
     getClientUrl: () => string;
     getChainId: () => string;
