@@ -40366,24 +40366,31 @@ var Client = /** @class */ (function () {
                         }
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 4, , 5]);
-                        return [4 /*yield*/, this.bncClient.initChain()];
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios$1
+                                .get(this.getClientUrl() + "/api/v1/account/" + address)
+                                .then(function (response) { return response.data.balances; })
+                                .catch(function (error) {
+                                if (error.response.data.code === 404 && error.response.data.message === 'account not found') {
+                                    return [];
+                                }
+                                throw error;
+                            })];
                     case 2:
-                        _a.sent();
-                        return [4 /*yield*/, this.bncClient.getBalance(address)];
-                    case 3:
                         balances = _a.sent();
-                        return [2 /*return*/, balances.map(function (balance) {
+                        return [2 /*return*/, balances
+                                .map(function (balance) {
                                 return {
                                     asset: assetFromString(balance.symbol) || AssetBNB,
                                     amount: assetToBase(assetAmount(balance.free, 8)),
                                     frozenAmount: assetToBase(assetAmount(balance.frozen, 8)),
                                 };
-                            }).filter(function (balance) { return !asset || balance.asset === asset; })];
-                    case 4:
+                            })
+                                .filter(function (balance) { return !asset || balance.asset === asset; })];
+                    case 3:
                         error_1 = _a.sent();
                         return [2 /*return*/, Promise.reject(error_1)];
-                    case 5: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         }); };
@@ -40391,9 +40398,7 @@ var Client = /** @class */ (function () {
             var clientUrl, url, txHistory, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.bncClient.initChain()];
-                    case 1:
-                        _a.sent();
+                    case 0:
                         clientUrl = this.getClientUrl() + "/api/v1/transactions";
                         url = new URL(clientUrl);
                         url.searchParams.set('address', params ? params.address : this.getAddress());
@@ -40406,11 +40411,11 @@ var Client = /** @class */ (function () {
                         if (params && params.startTime) {
                             url.searchParams.set('startTime', params.startTime.toString());
                         }
-                        _a.label = 2;
-                    case 2:
-                        _a.trys.push([2, 4, , 5]);
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
                         return [4 /*yield*/, axios$1.get(url.toString()).then(function (response) { return response.data; })];
-                    case 3:
+                    case 2:
                         txHistory = _a.sent();
                         return [2 /*return*/, {
                                 total: txHistory.total,
@@ -40425,25 +40430,25 @@ var Client = /** @class */ (function () {
                                                 {
                                                     from: tx.fromAddr,
                                                     amount: assetToBase(assetAmount(tx.value, 8)),
-                                                }
+                                                },
                                             ],
                                             to: [
                                                 {
                                                     to: tx.toAddr,
                                                     amount: assetToBase(assetAmount(tx.value, 8)),
-                                                }
+                                                },
                                             ],
                                             date: new Date(tx.timeStamp),
                                             type: getTxType(tx.txType),
                                             hash: tx.txHash,
-                                        }
+                                        },
                                     ]);
                                 }, []),
                             }];
-                    case 4:
+                    case 3:
                         error_2 = _a.sent();
                         return [2 /*return*/, Promise.reject(error_2)];
-                    case 5: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         }); };
@@ -40465,9 +40470,9 @@ var Client = /** @class */ (function () {
                                         coins: transaction.coins.map(function (coin) {
                                             return {
                                                 denom: coin.asset.symbol,
-                                                amount: baseToAsset(coin.amount).amount().toString()
+                                                amount: baseToAsset(coin.amount).amount().toString(),
                                             };
-                                        })
+                                        }),
                                     };
                                 }), memo)];
                         case 3:
@@ -40579,14 +40584,12 @@ var Client = /** @class */ (function () {
             var feesArray, transferFee, error_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.bncClient.initChain()];
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, axios$1
+                                .get(this.getClientUrl() + "/api/v1/fees")
+                                .then(function (response) { return response.data; })];
                     case 1:
-                        _a.sent();
-                        _a.label = 2;
-                    case 2:
-                        _a.trys.push([2, 4, , 5]);
-                        return [4 /*yield*/, axios$1.get(this.getClientUrl() + "/api/v1/fees").then(function (response) { return response.data; })];
-                    case 3:
                         feesArray = _a.sent();
                         transferFee = feesArray.find(isTransferFee);
                         if (!transferFee) {
@@ -40596,10 +40599,10 @@ var Client = /** @class */ (function () {
                                 type: 'base',
                                 average: baseAmount(transferFee.fixed_fee_params.fee),
                             }];
-                    case 4:
+                    case 2:
                         error_3 = _a.sent();
                         return [2 /*return*/, Promise.reject(error_3)];
-                    case 5: return [2 /*return*/];
+                    case 3: return [2 /*return*/];
                 }
             });
         }); };
@@ -40607,14 +40610,12 @@ var Client = /** @class */ (function () {
             var feesArray, transferFee, error_4;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.bncClient.initChain()];
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, axios$1
+                                .get(this.getClientUrl() + "/api/v1/fees")
+                                .then(function (response) { return response.data; })];
                     case 1:
-                        _a.sent();
-                        _a.label = 2;
-                    case 2:
-                        _a.trys.push([2, 4, , 5]);
-                        return [4 /*yield*/, axios$1.get(this.getClientUrl() + "/api/v1/fees").then(function (response) { return response.data; })];
-                    case 3:
                         feesArray = _a.sent();
                         transferFee = feesArray.find(isTransferFee);
                         if (!transferFee) {
@@ -40624,10 +40625,10 @@ var Client = /** @class */ (function () {
                                 type: 'base',
                                 average: baseAmount(transferFee.multi_transfer_fee),
                             }];
-                    case 4:
+                    case 2:
                         error_4 = _a.sent();
                         return [2 /*return*/, Promise.reject(error_4)];
-                    case 5: return [2 /*return*/];
+                    case 3: return [2 /*return*/];
                 }
             });
         }); };
@@ -40635,14 +40636,12 @@ var Client = /** @class */ (function () {
             var feesArray, freezeFee, error_5;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.bncClient.initChain()];
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, axios$1
+                                .get(this.getClientUrl() + "/api/v1/fees")
+                                .then(function (response) { return response.data; })];
                     case 1:
-                        _a.sent();
-                        _a.label = 2;
-                    case 2:
-                        _a.trys.push([2, 4, , 5]);
-                        return [4 /*yield*/, axios$1.get(this.getClientUrl() + "/api/v1/fees").then(function (response) { return response.data; })];
-                    case 3:
                         feesArray = _a.sent();
                         freezeFee = feesArray.find(isFreezeFee);
                         if (!freezeFee) {
@@ -40652,10 +40651,10 @@ var Client = /** @class */ (function () {
                                 type: 'base',
                                 average: baseAmount(freezeFee.fee),
                             }];
-                    case 4:
+                    case 2:
                         error_5 = _a.sent();
                         return [2 /*return*/, Promise.reject(error_5)];
-                    case 5: return [2 /*return*/];
+                    case 3: return [2 /*return*/];
                 }
             });
         }); };

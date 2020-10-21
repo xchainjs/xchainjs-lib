@@ -1,5 +1,6 @@
 import axios from 'axios'
 import {
+  Account as BinanceAccount,
   Balances as BinanceBalances,
   Fees as BinanceFees,
   Prefix,
@@ -206,8 +207,15 @@ class Client implements BinanceClient, XChainClient {
       address = this.getAddress()
     }
     try {
-      await this.bncClient.initChain()
-      const balances: BinanceBalances = await this.bncClient.getBalance(address)
+      const balances: BinanceBalances = await axios
+        .get(`${this.getClientUrl()}/api/v1/account/${address}`)
+        .then(response => (response.data as BinanceAccount).balances)
+        .catch(error => {
+          if (error.response.data.code === 404 && error.response.data.message === 'account not found') {
+            return []
+          }
+          throw error
+        })
 
       return balances
         .map((balance) => {
@@ -224,8 +232,6 @@ class Client implements BinanceClient, XChainClient {
   }
 
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    await this.bncClient.initChain()
-
     const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
     const url = new URL(clientUrl)
 
@@ -379,7 +385,6 @@ class Client implements BinanceClient, XChainClient {
   }
 
   getFees = async (): Promise<Fees> => {
-    await this.bncClient.initChain()
     try {
       const feesArray = await axios
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
@@ -399,7 +404,6 @@ class Client implements BinanceClient, XChainClient {
   }
 
   getMultiSendFees = async (): Promise<Fees> => {
-    await this.bncClient.initChain()
     try {
       const feesArray = await axios
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
@@ -419,7 +423,6 @@ class Client implements BinanceClient, XChainClient {
   }
 
   getFreezeFees = async (): Promise<Fees> => {
-    await this.bncClient.initChain()
     try {
       const feesArray = await axios
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
