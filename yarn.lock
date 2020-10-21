@@ -2,11 +2,6 @@
 # yarn lockfile v1
 
 
-"@asgardex-clients/core@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@asgardex-clients/core/-/core-0.0.5.tgz#b6c29e4f730b6421968dbd979a9b9c77efa2f31a"
-  integrity sha512-8A8TiTcpsHGBCrM3IxdbPTYHS34wlCB9Hu7MiIGUDEQ4IyJ/FCZ7iUUF19LSeL2ZJYrvseOIXAmozfboaI3+cw==
-
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4":
   version "7.10.4"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.10.4.tgz#168da1a36e90da68ae8d49c0f1b48c7c6249213a"

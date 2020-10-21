@@ -1,7 +1,7 @@
 {
   "name": "root",
   "private": true,
-  "description": "Asgardex Chain Clients MonoRepo",
+  "description": "XChainJS Chain Clients MonoRepo",
   "workspaces": ["packages/*"],
 
   "scripts": {

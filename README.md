@@ -1,3 +1,3 @@
-# asgardex-clients
+# xchainjs-lib
 
 `lerna bootstrap`

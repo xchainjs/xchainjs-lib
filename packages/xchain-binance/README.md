@@ -1,6 +1,6 @@
-# `@thorchain/asgardex-binance`
+# `@xchainjs/xchain-binance`
 
-Binance Module for ASGARDEX Clients
+Binance Module for XChainJS Clients
 
 ## Modules
 
@@ -11,10 +11,10 @@ Binance Module for ASGARDEX Clients
 ## Installation
 
 ```
-yarn add @thorchain/asgardex-binance
+yarn add @xchainjs/xchain-binance
 ```
 
-Following peer dependencies have to be installed into your project. These are not included in `@thorchain/asgardex-binance`.
+Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-binance`.
 
 ```
 yarn add @binance-chain/javascript-sdk

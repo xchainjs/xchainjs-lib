@@ -1,4 +1,4 @@
-# `@thorchain/asgardex-bitcoin`
+# `@xchainjs/xchain-client`
 
 Implements the following:
 
@@ -30,7 +30,7 @@ interface BitcoinClient {
 ## Installation
 
 ```
-yarn add @thorchain/asgardex-bitcoin
+yarn add @xchainjs/xchain-client
 ```
 
 Following dependencies will be installed into your project:

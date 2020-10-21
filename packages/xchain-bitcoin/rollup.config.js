@@ -34,5 +34,5 @@ export default {
       browser: true,
     }),
   ],
-  external: ['readable-stream', 'buffer', 'stream', 'string_decoder', '@asgardex-clients/core'],
+  external: ['readable-stream', 'buffer', 'stream', 'string_decoder', '@xchainjs/xchain-client'],
 }

@@ -50,11 +50,11 @@ export declare type Fees = {
     fast?: BaseAmount;
     average: BaseAmount;
 };
-export declare type AsgardexClientParams = {
+export declare type XChainClientParams = {
     network?: Network;
     phrase?: string;
 };
-export interface AsgardexClient {
+export interface XChainClient {
     setNetwork(net: Network): void;
     getNetwork(): Network;
     getExplorerAddressUrl(address: Address): string;
