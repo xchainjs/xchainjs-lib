@@ -132,7 +132,7 @@ describe('BinanceClient Test', () => {
     // feeRate should be optional
     const txHash = await client.transfer({ asset: AssetBNB, recipient: testnetaddressForTx, amount: transferAmount })
     expect(txHash).toEqual(expect.any(String))
-    await delay(1000) //delay after transaction
+    await delay(2000) //delay after transaction
 
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
@@ -154,7 +154,7 @@ describe('BinanceClient Test', () => {
     // feeRate should be optional
     const txHash = await client.deposit({ asset: AssetBNB, recipient: testnetaddressForTx, amount: transferAmount })
     expect(txHash).toEqual(expect.any(String))
-    await delay(1000) //delay after transaction
+    await delay(2000) //delay after transaction
 
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
@@ -175,7 +175,7 @@ describe('BinanceClient Test', () => {
 
     const txHash = await client.freeze({ asset: AssetBNB, amount: freezeAmount })
     expect(txHash).toEqual(expect.any(String))
-    await delay(1000) //delay after transaction
+    await delay(2000) //delay after transaction
 
     const afterFreeze = await client.getBalance()
     expect(afterFreeze.length).toEqual(1)
@@ -202,7 +202,7 @@ describe('BinanceClient Test', () => {
 
     const txHash = await client.unfreeze({ asset: AssetBNB, amount: freezeAmount })
     expect(txHash).toEqual(expect.any(String))
-    await delay(1000) //delay after transaction
+    await delay(2000) //delay after transaction
 
     const afterUnFreeze = await client.getBalance()
     expect(afterUnFreeze.length).toEqual(1)
@@ -258,7 +258,7 @@ describe('BinanceClient Test', () => {
     ]
     const txHash = await client.multiSend({ transactions })
     expect(txHash).toEqual(expect.any(String))
-    await delay(1000) //delay after transaction
+    await delay(2000) //delay after transaction
 
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)

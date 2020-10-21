@@ -206,7 +206,6 @@ class Client implements BinanceClient, XChainClient {
       address = this.getAddress()
     }
     try {
-      await this.bncClient.initChain()
       const balances: BinanceBalances = await this.bncClient.getBalance(address)
 
       return balances
@@ -219,13 +218,11 @@ class Client implements BinanceClient, XChainClient {
         })
         .filter((balance) => !asset || balance.asset === asset)
     } catch (error) {
-      return [] as Balances
+      return Promise.reject(error)
     }
   }
 
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    await this.bncClient.initChain()
-
     const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
     const url = new URL(clientUrl)
 
@@ -379,7 +376,6 @@ class Client implements BinanceClient, XChainClient {
   }
 
   getFees = async (): Promise<Fees> => {
-    await this.bncClient.initChain()
     try {
       const feesArray = await axios
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
@@ -399,7 +395,6 @@ class Client implements BinanceClient, XChainClient {
   }
 
   getMultiSendFees = async (): Promise<Fees> => {
-    await this.bncClient.initChain()
     try {
       const feesArray = await axios
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
@@ -419,7 +414,6 @@ class Client implements BinanceClient, XChainClient {
   }
 
   getFreezeFees = async (): Promise<Fees> => {
-    await this.bncClient.initChain()
     try {
       const feesArray = await axios
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
