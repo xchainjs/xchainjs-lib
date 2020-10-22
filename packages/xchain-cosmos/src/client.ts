@@ -39,14 +39,14 @@ export interface CosmosClient {
 
 class Client implements CosmosClient, XChainClient {
   private network: Network
-  private thorClient: CosmosSDKClient
+  private sdkClient: CosmosSDKClient
   private phrase = ''
   private address: Address = '' // default address at index 0
   private privateKey: PrivKey | null = null // default private key at index 0
 
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
-    this.thorClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId())
+    this.sdkClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId())
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -59,7 +59,7 @@ class Client implements CosmosClient, XChainClient {
 
   setNetwork = (network: Network): XChainClient => {
     this.network = network
-    this.thorClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId())
+    this.sdkClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId())
     this.address = ''
 
     return this
@@ -99,7 +99,7 @@ class Client implements CosmosClient, XChainClient {
 
   setPhrase = (phrase: string): Address => {
     if (this.phrase !== phrase) {
-      if (!asgardexCrypto.validatePhrase(phrase)) {
+      if (!Client.validatePhrase(phrase)) {
         throw new Error('Invalid BIP39 phrase')
       }
 
@@ -115,7 +115,7 @@ class Client implements CosmosClient, XChainClient {
     if (!this.privateKey) {
       if (!this.phrase) throw new Error('Phrase not set')
 
-      this.privateKey = this.thorClient.getPrivKeyFromMnemonic(this.phrase)
+      this.privateKey = this.sdkClient.getPrivKeyFromMnemonic(this.phrase)
     }
 
     return this.privateKey
@@ -123,7 +123,7 @@ class Client implements CosmosClient, XChainClient {
 
   getAddress = (): string => {
     if (!this.address) {
-      const address = this.thorClient.getAddressFromPrivKey(this.getPrivateKey())
+      const address = this.sdkClient.getAddressFromPrivKey(this.getPrivateKey())
       if (!address) {
         throw new Error('address not defined')
       }
@@ -135,7 +135,7 @@ class Client implements CosmosClient, XChainClient {
   }
 
   validateAddress = (address: Address): boolean => {
-    return this.thorClient.checkAddress(address)
+    return this.sdkClient.checkAddress(address)
   }
 
   getMainAsset = (): Asset => {
@@ -143,12 +143,8 @@ class Client implements CosmosClient, XChainClient {
   }
 
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
-    if (!address) {
-      address = this.getAddress()
-    }
-
     try {
-      const balances = await this.thorClient.getBalance(address)
+      const balances = await this.sdkClient.getBalance(address || this.getAddress())
       const mainAsset = this.getMainAsset()
 
       return balances
@@ -174,7 +170,7 @@ class Client implements CosmosClient, XChainClient {
 
     try {
       const mainAsset = this.getMainAsset()
-      const txHistory = await this.thorClient.searchTx({
+      const txHistory = await this.sdkClient.searchTx({
         messageAction,
         messageSender,
         page,
@@ -263,7 +259,7 @@ class Client implements CosmosClient, XChainClient {
   transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
       const mainAsset = this.getMainAsset()
-      const transferResult = await this.thorClient.transfer({
+      const transferResult = await this.sdkClient.transfer({
         privkey: this.getPrivateKey(),
         from: this.getAddress(),
         to: recipient,

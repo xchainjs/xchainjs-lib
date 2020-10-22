@@ -67707,7 +67707,7 @@ var Client = /** @class */ (function () {
         this.privateKey = null; // default private key at index 0
         this.setNetwork = function (network) {
             _this.network = network;
-            _this.thorClient = new CosmosSDKClient(_this.getClientUrl(), _this.getChainId());
+            _this.sdkClient = new CosmosSDKClient(_this.getClientUrl(), _this.getChainId());
             _this.address = '';
             return _this;
         };
@@ -67728,7 +67728,7 @@ var Client = /** @class */ (function () {
         };
         this.setPhrase = function (phrase) {
             if (_this.phrase !== phrase) {
-                if (!validatePhrase(phrase)) {
+                if (!Client.validatePhrase(phrase)) {
                     throw new Error('Invalid BIP39 phrase');
                 }
                 _this.phrase = phrase;
@@ -67741,13 +67741,13 @@ var Client = /** @class */ (function () {
             if (!_this.privateKey) {
                 if (!_this.phrase)
                     throw new Error('Phrase not set');
-                _this.privateKey = _this.thorClient.getPrivKeyFromMnemonic(_this.phrase);
+                _this.privateKey = _this.sdkClient.getPrivKeyFromMnemonic(_this.phrase);
             }
             return _this.privateKey;
         };
         this.getAddress = function () {
             if (!_this.address) {
-                var address = _this.thorClient.getAddressFromPrivKey(_this.getPrivateKey());
+                var address = _this.sdkClient.getAddressFromPrivKey(_this.getPrivateKey());
                 if (!address) {
                     throw new Error('address not defined');
                 }
@@ -67756,7 +67756,7 @@ var Client = /** @class */ (function () {
             return _this.address;
         };
         this.validateAddress = function (address) {
-            return _this.thorClient.checkAddress(address);
+            return _this.sdkClient.checkAddress(address);
         };
         this.getMainAsset = function () {
             return _this.network === 'testnet' ? AssetMuon : AssetAtom;
@@ -67766,14 +67766,9 @@ var Client = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!address) {
-                            address = this.getAddress();
-                        }
-                        _a.label = 1;
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.sdkClient.getBalance(address || this.getAddress())];
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, this.thorClient.getBalance(address)];
-                    case 2:
                         balances = _a.sent();
                         mainAsset_1 = this.getMainAsset();
                         return [2 /*return*/, balances
@@ -67784,10 +67779,10 @@ var Client = /** @class */ (function () {
                                 };
                             })
                                 .filter(function (balance) { return !asset || balance.asset === asset; })];
-                    case 3:
+                    case 2:
                         error_1 = _a.sent();
                         return [2 /*return*/, Promise.reject(error_1)];
-                    case 4: return [2 /*return*/];
+                    case 3: return [2 /*return*/];
                 }
             });
         }); };
@@ -67808,7 +67803,7 @@ var Client = /** @class */ (function () {
                     case 1:
                         _b.trys.push([1, 3, , 4]);
                         mainAsset_2 = this.getMainAsset();
-                        return [4 /*yield*/, this.thorClient.searchTx({
+                        return [4 /*yield*/, this.sdkClient.searchTx({
                                 messageAction: messageAction,
                                 messageSender: messageSender,
                                 page: page,
@@ -67902,7 +67897,7 @@ var Client = /** @class */ (function () {
                         case 0:
                             _b.trys.push([0, 2, , 3]);
                             mainAsset = this.getMainAsset();
-                            return [4 /*yield*/, this.thorClient.transfer({
+                            return [4 /*yield*/, this.sdkClient.transfer({
                                     privkey: this.getPrivateKey(),
                                     from: this.getAddress(),
                                     to: recipient,
@@ -67937,7 +67932,7 @@ var Client = /** @class */ (function () {
             });
         }); };
         this.network = network;
-        this.thorClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId());
+        this.sdkClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId());
         if (phrase)
             this.setPhrase(phrase);
     }
