@@ -11,7 +11,7 @@ export interface CosmosClient {
 }
 declare class Client implements CosmosClient, XChainClient {
     private network;
-    private thorClient;
+    private sdkClient;
     private phrase;
     private address;
     private privateKey;
