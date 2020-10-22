@@ -1,14 +1,5 @@
-import { PrivKey, Msg } from 'cosmos-client'
-import { codec } from 'cosmos-client/codec'
-
-import { ThorClient } from './thor/thor-client'
-import { MsgSend } from './thor/types'
-import { isMsgSend } from './util'
-
 import { 
   Address,
-  AsgardexClient,
-  AsgardexClientParams,
   Balances,
   Fees,
   Network,
@@ -19,16 +10,24 @@ import {
   TxHash,
   TxHistoryParams,
   TxsPage,
-} from '@asgardex-clients/asgardex-client'
+  XChainClient,
+  XChainClientParams,
+} from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetRuneNative,
   assetFromString,
   baseAmount,
-  baseToAsset,
   THORChain,
 } from '@thorchain/asgardex-util'
 import * as asgardexCrypto from '@thorchain/asgardex-crypto'
+
+import { PrivKey, Msg } from 'cosmos-client'
+import { codec } from 'cosmos-client/codec'
+
+import { ThorClient } from './thor/thor-client'
+import { MsgSend } from './thor/types'
+import { isMsgSend } from './util'
 
 /**
  * Interface for custom Thorchain client
@@ -41,14 +40,14 @@ export interface ThorchainClient {
   validateAddress(address: string): boolean
 }
 
-class Client implements ThorchainClient, AsgardexClient {
+class Client implements ThorchainClient, XChainClient {
   private network: Network
   private thorClient: ThorClient
   private phrase: string = ''
   private address: Address = ''
   private privateKey: PrivKey | null = null
 
-  constructor({ network = 'testnet', phrase }: AsgardexClientParams) {
+  constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
     this.thorClient = new ThorClient(this.getClientUrl(), this.getChainId(), this.getPrefix())
 
@@ -61,7 +60,7 @@ class Client implements ThorchainClient, AsgardexClient {
     this.privateKey = null
   }
 
-  setNetwork(network: Network): AsgardexClient {
+  setNetwork(network: Network): XChainClient {
     this.network = network
     this.thorClient = new ThorClient(this.getClientUrl(), this.getChainId(), this.getPrefix())
     this.address = ''
@@ -175,7 +174,14 @@ class Client implements ThorchainClient, AsgardexClient {
     const txMaxHeight = undefined
 
     try {
-      const txHistory = await this.thorClient.searchTx(messageAction, messageSender, page, limit, txMinHeight, txMaxHeight)
+      const txHistory = await this.thorClient.searchTx({
+        messageAction,
+        messageSender,
+        page,
+        limit,
+        txMinHeight,
+        txMaxHeight,
+      })
 
       console.log('original tx history', txHistory)
 
@@ -243,14 +249,14 @@ class Client implements ThorchainClient, AsgardexClient {
 
   transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
-      const transferResult = await this.thorClient.transfer(
-        this.getPrivateKey(),
-        this.getAddress(),
-        recipient,
-        baseToAsset(amount).amount().toString(),
-        asset ? asset.symbol : AssetRuneNative.symbol,
-        memo
-      )
+      const transferResult = await this.thorClient.transfer({
+        privkey: this.getPrivateKey(),
+        from: this.getAddress(),
+        to: recipient,
+        amount: amount.amount().toString(),
+        asset: asset ? asset.symbol : AssetRuneNative.symbol,
+        memo,
+      })
 
       return transferResult?.txhash || ''
 

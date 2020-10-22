@@ -1,4 +1,6 @@
-import { AccAddress, Msg } from 'cosmos-client'
+import { BigSource } from 'big.js'
+
+import { AccAddress, Msg, PrivKey } from 'cosmos-client'
 import { Coin } from 'cosmos-client/api'
 
 export class MsgSend extends Msg {
@@ -17,4 +19,22 @@ export class MsgSend extends Msg {
   static fromJSON(value: any): MsgSend {
     return new MsgSend(AccAddress.fromBech32(value.from_address), AccAddress.fromBech32(value.to_address), value.amount)
   }
+}
+
+export type SearchTxParams = {
+  messageAction?: string
+  messageSender?: string
+  page?: number
+  limit?: number
+  txMinHeight?: number
+  txMaxHeight?: number
+}
+
+export type TransferParams = {
+  privkey: PrivKey
+  from: string
+  to: string
+  amount: BigSource
+  asset: string
+  memo?: string
 }

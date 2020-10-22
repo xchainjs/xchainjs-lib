@@ -1,14 +1,13 @@
 import * as BIP39 from 'bip39'
 import * as BIP32 from 'bip32'
-import { BigSource } from 'big.js'
 
 import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from 'cosmos-client'
 import { BroadcastTxCommitResult, Coin, PaginatedQueryTxs, StdTxFee, StdTxSignature } from 'cosmos-client/api'
 import { auth, StdTx, BaseAccount } from 'cosmos-client/x/auth'
-import { bank } from 'cosmos-client/x/bank'
+import { bank, MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 import { codec } from 'cosmos-client/codec'
 
-import { MsgSend } from './types'
+import { SearchTxParams, TransferParams } from './types'
 
 export class ThorClient {
   sdk: CosmosSDK
@@ -26,6 +25,7 @@ export class ThorClient {
 
     this.setPrifix(prefix)
     codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
+    codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
   }
 
   setPrifix = (prefix: string): void => {
@@ -78,14 +78,14 @@ export class ThorClient {
     }
   }
 
-  searchTx = async (
-    messageAction?: string,
-    messageSender?: string,
-    page?: number,
-    limit?: number,
-    txMinHeight?: number,
-    txMaxHeight?: number,
-  ): Promise<PaginatedQueryTxs> => {
+  searchTx = async ({
+    messageAction,
+    messageSender,
+    page,
+    limit,
+    txMinHeight,
+    txMaxHeight,
+  }: SearchTxParams): Promise<PaginatedQueryTxs> => {
     try {
       return await auth
         .txsGet(this.sdk, messageAction, messageSender, page, limit, txMinHeight, txMaxHeight)
@@ -95,14 +95,7 @@ export class ThorClient {
     }
   }
 
-  transfer = async (
-    privkey: PrivKey,
-    from: string,
-    to: string,
-    amount: BigSource,
-    asset: string,
-    memo?: string,
-  ): Promise<BroadcastTxCommitResult> => {
+  transfer = async ({ privkey, from, to, amount, asset, memo }: TransferParams): Promise<BroadcastTxCommitResult> => {
     try {
       const fromAddress = AccAddress.fromBech32(from)
       const toAddress = AccAddress.fromBech32(to)
@@ -111,31 +104,6 @@ export class ThorClient {
       if (account.account_number === undefined) {
         account = BaseAccount.fromJSON((account as any).value)
       }
-
-      // const unsignedStdTx = await bank
-      //   .accountsAddressTransfersPost(this.sdk, toAddress, {
-      //     base_req: {
-      //       from: fromAddress.toBech32(),
-      //       memo: memo,
-      //       chain_id: this.sdk.chainID,
-      //       account_number: account.account_number.toString(),
-      //       sequence: account.sequence.toString(),
-      //       gas: '',
-      //       gas_adjustment: '',
-      //       fees: [],
-      //       simulate: false,
-      //     },
-      //     amount: [{ denom: asset, amount: amount.toString() }],
-      //   })
-      //   .then((res) => res.data)
-
-      // unsignedStdTx.msg = unsignedStdTx.msg.map((msg: any) => {
-      //   return MsgSend.fromJSON({
-      //     from_address: msg.from_address.toBech32(),
-      //     to_address: msg.to_address.toBech32(),
-      //     amount: msg.amount,
-      //   })
-      // })
 
       const msg: Msg = [
         MsgSend.fromJSON(
