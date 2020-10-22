@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@xchainjs/xchain-client": "^0.0.5",
-    "@thorchain/asgardex-crypto": "^0.1.0",
+    "@xchainjs/xchain-crypto": "^0.1.0",
     "axios": "^0.20.0",
     "bip39": "^3.0.2",
     "bitcoinjs-lib": "^5.2.0",

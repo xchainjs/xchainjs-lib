@@ -14,7 +14,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { Asset, baseAmount } from '@thorchain/asgardex-util'
-import * as asgardexCrypto from '@thorchain/asgardex-crypto'
+import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { PrivKey, Msg } from 'cosmos-client'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
@@ -90,11 +90,11 @@ class Client implements CosmosClient, XChainClient {
   }
 
   static generatePhrase = (): string => {
-    return asgardexCrypto.generatePhrase()
+    return xchainCrypto.generatePhrase()
   }
 
   static validatePhrase = (phrase: string): boolean => {
-    return asgardexCrypto.validatePhrase(phrase)
+    return xchainCrypto.validatePhrase(phrase)
   }
 
   setPhrase = (phrase: string): Address => {

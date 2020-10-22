@@ -72,7 +72,6 @@ declare class Client implements BinanceClient, XChainClient {
     getBalance: (address?: string | undefined, asset?: Asset | undefined) => Promise<Balances>;
     getTransactions: (params?: TxHistoryParams | undefined) => Promise<TxsPage>;
     multiSend: ({ address, transactions, memo }: MultiSendParams) => Promise<TxHash>;
-    deposit: ({ asset, amount, recipient, memo }: TxParams) => Promise<TxHash>;
     transfer: ({ asset, amount, recipient, memo }: TxParams) => Promise<TxHash>;
     freeze: ({ recipient, asset, amount }: FreezeParams) => Promise<TxHash>;
     unfreeze: ({ recipient, asset, amount }: FreezeParams) => Promise<TxHash>;

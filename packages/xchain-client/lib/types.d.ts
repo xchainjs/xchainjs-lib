@@ -65,6 +65,5 @@ export interface XChainClient {
     getTransactions(params?: TxHistoryParams): Promise<TxsPage>;
     getFees(): Promise<Fees>;
     transfer(params: TxParams): Promise<TxHash>;
-    deposit(params: TxParams): Promise<TxHash>;
     purgeClient(): void;
 }

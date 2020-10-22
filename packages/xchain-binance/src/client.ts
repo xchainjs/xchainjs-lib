@@ -33,7 +33,7 @@ import {
   baseAmount,
   baseToAsset,
 } from '@thorchain/asgardex-util'
-import * as asgardexCrypto from '@thorchain/asgardex-crypto'
+import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { isTransferFee, getTxType, isFreezeFee } from './util'
 
 type PrivKey = string
@@ -153,12 +153,12 @@ class Client implements BinanceClient, XChainClient {
   }
 
   static generatePhrase = (): string => {
-    return asgardexCrypto.generatePhrase()
+    return xchainCrypto.generatePhrase()
   }
 
   setPhrase = (phrase: string): Address => {
     if (!this.phrase || this.phrase !== phrase) {
-      if (!asgardexCrypto.validatePhrase(phrase)) {
+      if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid BIP39 phrase')
       }
 
