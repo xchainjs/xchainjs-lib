@@ -84,7 +84,11 @@ describe('BinanceClient Test', () => {
   })
 
   it('has no balances', async () => {
-    const balances = await bnbClient.getBalance('bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku')
+    let balances = await bnbClient.getBalance('bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku')
+    expect(balances).toEqual([])
+
+    // no balances for `account not found`
+    balances = await bnbClient.getBalance('bnb1ja07feunxx6z9kue3fn05dazt0gpn4y9e5t8rn')
     expect(balances).toEqual([])
   })
 
@@ -132,7 +136,7 @@ describe('BinanceClient Test', () => {
     // feeRate should be optional
     const txHash = await client.transfer({ asset: AssetBNB, recipient: testnetaddressForTx, amount: transferAmount })
     expect(txHash).toEqual(expect.any(String))
-    await delay(1000) //delay after transaction
+    await delay(2000) //delay after transaction
 
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
@@ -153,7 +157,7 @@ describe('BinanceClient Test', () => {
 
     const txHash = await client.freeze({ asset: AssetBNB, amount: freezeAmount })
     expect(txHash).toEqual(expect.any(String))
-    await delay(1000) //delay after transaction
+    await delay(2000) //delay after transaction
 
     const afterFreeze = await client.getBalance()
     expect(afterFreeze.length).toEqual(1)
@@ -180,7 +184,7 @@ describe('BinanceClient Test', () => {
 
     const txHash = await client.unfreeze({ asset: AssetBNB, amount: freezeAmount })
     expect(txHash).toEqual(expect.any(String))
-    await delay(1000) //delay after transaction
+    await delay(2000) //delay after transaction
 
     const afterUnFreeze = await client.getBalance()
     expect(afterUnFreeze.length).toEqual(1)
@@ -236,7 +240,7 @@ describe('BinanceClient Test', () => {
     ]
     const txHash = await client.multiSend({ transactions })
     expect(txHash).toEqual(expect.any(String))
-    await delay(1000) //delay after transaction
+    await delay(2000) //delay after transaction
 
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
