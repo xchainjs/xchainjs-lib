@@ -168,9 +168,11 @@ describe('BinanceClient Test', () => {
       .minus(freezeFee.average.amount())
       .isEqualTo(afterFreeze[0].amount.amount())
     expect(expected).toBeTruthy()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expected = beforeFreeze[0]
       .frozenAmount!.amount()
       .plus(freezeAmount.amount())
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       .isEqualTo(afterFreeze[0].frozenAmount!.amount())
     expect(expected).toBeTruthy()
   })
@@ -195,9 +197,11 @@ describe('BinanceClient Test', () => {
       .minus(freezeFee.average.amount())
       .isEqualTo(afterUnFreeze[0].amount.amount())
     expect(expected).toBeTruthy()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expected = beforeUnFreeze[0]
       .frozenAmount!.amount()
       .minus(freezeAmount.amount())
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       .isEqualTo(afterUnFreeze[0].frozenAmount!.amount())
     expect(expected).toBeTruthy()
   })

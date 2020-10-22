@@ -1,6 +1,5 @@
 import axios from 'axios'
 import {
-  Account as BinanceAccount,
   Balances as BinanceBalances,
   Fees as BinanceFees,
   Prefix,
@@ -203,19 +202,12 @@ class Client implements BinanceClient, XChainClient {
   }
 
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
-    if (!address) {
-      address = this.getAddress()
-    }
     try {
-      const balances: BinanceBalances = await axios
-        .get(`${this.getClientUrl()}/api/v1/account/${address}`)
-        .then(response => (response.data as BinanceAccount).balances)
-        .catch(error => {
-          if (error.response.data.code === 404 && error.response.data.message === 'account not found') {
-            return []
-          }
-          throw error
-        })
+      if (!address) {
+        address = this.getAddress()
+      }
+
+      const balances: BinanceBalances = await this.bncClient.getBalance(address)
 
       return balances
         .map((balance) => {
@@ -313,7 +305,7 @@ class Client implements BinanceClient, XChainClient {
 
   transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     await this.bncClient.initChain()
-    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
+    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
 
     const transferResult = await this.bncClient.transfer(
       this.getAddress(),
@@ -332,7 +324,7 @@ class Client implements BinanceClient, XChainClient {
 
   freeze = async ({ recipient, asset, amount }: FreezeParams): Promise<TxHash> => {
     await this.bncClient.initChain()
-    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
+    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
 
     const address = recipient || this.getAddress()
     if (!address)
@@ -357,7 +349,7 @@ class Client implements BinanceClient, XChainClient {
 
   unfreeze = async ({ recipient, asset, amount }: FreezeParams): Promise<TxHash> => {
     await this.bncClient.initChain()
-    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
+    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
 
     const address = recipient || this.getAddress()
     if (!address)
