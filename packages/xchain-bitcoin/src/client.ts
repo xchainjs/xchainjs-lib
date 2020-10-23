@@ -15,7 +15,7 @@ import {
   Fees,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import * as asgardexCrypto from '@thorchain/asgardex-crypto'
+import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { baseAmount, assetToString, AssetBTC } from '@thorchain/asgardex-util'
 
 // https://blockchair.com/api/docs#link_300
@@ -65,12 +65,12 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   generatePhrase = (): string => {
-    return asgardexCrypto.generatePhrase()
+    return xchainCrypto.generatePhrase()
   }
 
   // Sets this.phrase to be accessed later
   setPhrase = (phrase: string): Address => {
-    if (asgardexCrypto.validatePhrase(phrase)) {
+    if (xchainCrypto.validatePhrase(phrase)) {
       this.phrase = phrase
       const address = this.getAddress()
       return address
@@ -128,7 +128,7 @@ class Client implements BitcoinClient, XChainClient {
     const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     // const buffer = BIP39.mnemonicToSeedSync(_phrase)
     // const wif = WIF.encode(network.wif, buffer, true)
-    const seed = asgardexCrypto.getSeed(_phrase)
+    const seed = xchainCrypto.getSeed(_phrase)
     const wif = WIF.encode(network.wif, Buffer.from(seed, 'hex'), true)
     return Bitcoin.ECPair.fromWIF(wif, network)
   }
