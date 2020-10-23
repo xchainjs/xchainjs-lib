@@ -1,6 +1,6 @@
 import { Msg } from 'cosmos-client'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
-import { Asset, assetToString } from '@thorchain/asgardex-util'
+import { Asset, assetToString } from '@xchainjs/xchain-util'
 import { AssetThor } from './thor/types'
 
 /**

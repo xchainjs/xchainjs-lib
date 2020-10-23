@@ -1,6 +1,6 @@
 import { BigSource } from 'big.js'
 
-import { Asset, THORChain } from '@thorchain/asgardex-util'
+import { Asset, THORChain } from '@xchainjs/xchain-util'
 import { PrivKey, Msg } from 'cosmos-client'
 import { BaseAccount, StdTx } from 'cosmos-client/x/auth'
 
