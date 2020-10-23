@@ -61,8 +61,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@thorchain/asgardex-crypto": "^0.1.0",
     "@xchainjs/xchain-client": "^0.0.5",
+    "@xchainjs/xchain-crypto": "^0.1.0",
     "nock": "^13.0.4"
   },
   "peerDependencies": {

@@ -20,7 +20,7 @@ import {
   baseAmount,
   THORChain,
 } from '@thorchain/asgardex-util'
-import * as asgardexCrypto from '@thorchain/asgardex-crypto'
+import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { PrivKey, Msg } from 'cosmos-client'
 import { codec } from 'cosmos-client/codec'
@@ -97,16 +97,16 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   static generatePhrase = (): string => {
-    return asgardexCrypto.generatePhrase()
+    return xchainCrypto.generatePhrase()
   }
 
   static validatePhrase = (phrase: string): boolean => {
-    return asgardexCrypto.validatePhrase(phrase)
+    return xchainCrypto.validatePhrase(phrase)
   }
 
   setPhrase = (phrase: string): Address => {
     if (this.phrase !== phrase) {
-      if (!asgardexCrypto.validatePhrase(phrase)) {
+      if (!Client.validatePhrase(phrase)) {
         throw new Error('Invalid BIP39 phrase')
       }
 
@@ -146,12 +146,8 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
-    if (!address) {
-      address = this.getAddress()
-    }
-
     try {
-      const balances = await this.thorClient.getBalance(address)
+      const balances = await this.thorClient.getBalance(address || this.getAddress())
       console.log('original balances', balances)
 
       return balances.map(balance => (
