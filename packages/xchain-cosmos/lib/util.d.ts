@@ -1,6 +1,6 @@
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank';
 import { Msg } from 'cosmos-client';
-import { Asset } from '@thorchain/asgardex-util';
+import { Asset } from '@xchainjs/xchain-util';
 /**
  * Type guard for MsgSend
  */

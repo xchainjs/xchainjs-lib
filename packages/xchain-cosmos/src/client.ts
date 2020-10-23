@@ -13,7 +13,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, baseAmount } from '@thorchain/asgardex-util'
+import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { PrivKey, Msg } from 'cosmos-client'

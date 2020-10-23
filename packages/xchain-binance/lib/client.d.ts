@@ -1,6 +1,6 @@
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client';
 import { Address, XChainClient, XChainClientParams, Balances, Fees, Network, TxParams, TxHash, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client';
-import { Asset, BaseAmount } from '@thorchain/asgardex-util';
+import { Asset, BaseAmount } from '@xchainjs/xchain-util';
 export declare type FreezeParams = {
     asset: Asset;
     amount: BaseAmount;

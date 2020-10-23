@@ -1,4 +1,4 @@
-import { Asset, BaseAmount } from '@thorchain/asgardex-util'
+import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
 export type Address = string
 
