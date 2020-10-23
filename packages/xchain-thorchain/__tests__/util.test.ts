@@ -1,5 +1,6 @@
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
-import { isMsgMultiSend, isMsgSend } from '../src/util'
+import { AssetThor } from '../src/thor/types'
+import { isMsgMultiSend, isMsgSend, getDenom, getAsset } from '../src/util'
 
 describe('cosmos/util', () => {
   describe('Msg type guards', () => {
@@ -11,8 +12,8 @@ describe('cosmos/util', () => {
             {
               denom: 'uatom',
               amount: '100000',
-            }
-          ]
+            },
+          ],
         },
         {
           address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
@@ -20,8 +21,8 @@ describe('cosmos/util', () => {
             {
               denom: 'uatom',
               amount: '300000',
-            }
-          ]
+            },
+          ],
         },
       ],
       outputs: [
@@ -31,8 +32,8 @@ describe('cosmos/util', () => {
             {
               denom: 'uatom',
               amount: '400000',
-            }
-          ]
+            },
+          ],
         },
       ],
     }
@@ -44,8 +45,8 @@ describe('cosmos/util', () => {
         {
           denom: 'uatom',
           amount: '100000',
-        }
-      ]
+        },
+      ],
     })
 
     describe('isMsgMultiSend', () => {
@@ -63,6 +64,24 @@ describe('cosmos/util', () => {
       })
       it('invalidates MsgSend', () => {
         expect(isMsgSend(msgMultiSend)).toBeFalsy()
+      })
+    })
+  })
+
+  describe('Denom <-> Asset', () => {
+    describe('getDenom', () => {
+      it('get denom for AssetThor', () => {
+        expect(getDenom(AssetThor)).toEqual('thor')
+      })
+    })
+
+    describe('getAsset', () => {
+      it('get asset for thor', () => {
+        expect(getAsset('thor')).toEqual(AssetThor)
+      })
+
+      it('get asset for unknown', () => {
+        expect(getAsset('unknown')).toBeNull()
       })
     })
   })

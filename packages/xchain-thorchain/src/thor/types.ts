@@ -1,24 +1,39 @@
 import { BigSource } from 'big.js'
 
-import { AccAddress, Msg, PrivKey } from 'cosmos-client'
-import { Coin } from 'cosmos-client/api'
+import { Asset, THORChain } from '@thorchain/asgardex-util'
+import { PrivKey, Msg } from 'cosmos-client'
+import { BaseAccount, StdTx } from 'cosmos-client/x/auth'
 
-export class MsgSend extends Msg {
-  from_address: AccAddress
-  to_address: AccAddress
-  amount: Coin[]
+export const AssetThor: Asset = { chain: THORChain, symbol: 'THOR', ticker: 'THOR' }
 
-  constructor(from_address: AccAddress, to_address: AccAddress, amount: Coin[]) {
-    super()
+export type BaseAccountResponse = {
+  type?: string
+  value?: BaseAccount
+}
 
-    this.from_address = from_address
-    this.to_address = to_address
-    this.amount = amount
+export type RawTxResponse = {
+  body: {
+    messages: Msg[]
   }
+}
 
-  static fromJSON(value: any): MsgSend {
-    return new MsgSend(AccAddress.fromBech32(value.from_address), AccAddress.fromBech32(value.to_address), value.amount)
-  }
+export type TxResponse = {
+  height?: number
+  txhash?: string
+  raw_log?: string
+  gas_wanted?: string
+  gas_used?: string
+  tx?: StdTx | RawTxResponse
+  timestamp: string
+}
+
+export type TxHistoryResponse = {
+  total_count?: number
+  count?: number
+  page_number?: number
+  page_total?: number
+  limit?: number
+  txs?: Array<TxResponse>
 }
 
 export type SearchTxParams = {
@@ -37,4 +52,8 @@ export type TransferParams = {
   amount: BigSource
   asset: string
   memo?: string
+}
+
+export type APIQueryParam = {
+  [x: string]: string
 }

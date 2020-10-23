@@ -1,4 +1,4 @@
-import { 
+import {
   Address,
   Balances,
   Fees,
@@ -13,21 +13,17 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import {
-  Asset,
-  AssetRuneNative,
-  assetFromString,
-  baseAmount,
-  THORChain,
-} from '@thorchain/asgardex-util'
+import { Asset, assetFromString, baseAmount, THORChain } from '@thorchain/asgardex-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { PrivKey, Msg } from 'cosmos-client'
+import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 import { codec } from 'cosmos-client/codec'
 
 import { ThorClient } from './thor/thor-client'
-import { MsgSend } from './thor/types'
-import { isMsgSend } from './util'
+import { AssetThor, RawTxResponse } from './thor/types'
+import { isMsgSend, isMsgMultiSend, getDenom, getAsset } from './util'
+import { StdTx } from 'cosmos-client/x/auth'
 
 /**
  * Interface for custom Thorchain client
@@ -36,14 +32,14 @@ export interface ThorchainClient {
   purgeClient(): void
 
   getAddress(): string
-  
+
   validateAddress(address: string): boolean
 }
 
 class Client implements ThorchainClient, XChainClient {
   private network: Network
   private thorClient: ThorClient
-  private phrase: string = ''
+  private phrase = ''
   private address: Address = ''
   private privateKey: PrivKey | null = null
 
@@ -64,7 +60,7 @@ class Client implements ThorchainClient, XChainClient {
     this.network = network
     this.thorClient = new ThorClient(this.getClientUrl(), this.getChainId(), this.getPrefix())
     this.address = ''
-    
+
     return this
   }
 
@@ -73,7 +69,7 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   getClientUrl = (): string => {
-    return this.network === 'testnet' ? 'http://168.119.22.92:1317' : 'http://13.250.144.124:1317'
+    return this.network === 'testnet' ? 'http://13.238.212.224:1317' : 'http://104.248.96.152:1317'
   }
 
   getChainId = (): string => {
@@ -83,7 +79,7 @@ class Client implements ThorchainClient, XChainClient {
   private getExplorerUrl = (): string => {
     return 'https://thorchain.net/'
   }
-  
+
   getExplorerAddressUrl = (address: Address): string => {
     return `${this.getExplorerUrl()}/addresses/${address}`
   }
@@ -114,7 +110,7 @@ class Client implements ThorchainClient, XChainClient {
       this.privateKey = null
       this.address = ''
     }
-    
+
     return this.getAddress()
   }
 
@@ -137,7 +133,7 @@ class Client implements ThorchainClient, XChainClient {
 
       this.address = address
     }
-    
+
     return this.address
   }
 
@@ -148,24 +144,23 @@ class Client implements ThorchainClient, XChainClient {
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
     try {
       const balances = await this.thorClient.getBalance(address || this.getAddress())
-      console.log('original balances', balances)
 
-      return balances.map(balance => (
-        {
-          asset: balance.denom && assetFromString(`${THORChain}.${balance.denom}`) || AssetRuneNative,
+      return balances
+        .map((balance) => ({
+          asset: (balance.denom && getAsset(balance.denom)) || AssetThor,
           amount: baseAmount(balance.amount, 8),
-        }
-      )).filter(balance => !asset || balance.asset === asset)
+        }))
+        .filter((balance) => !asset || balance.asset === asset)
     } catch (error) {
       return Promise.reject(error)
     }
   }
 
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const messageAction = undefined;
-    const messageSender = params && params.address || this.getAddress()
-    const page = params && params.offset || undefined
-    const limit = params && params.limit || undefined    
+    const messageAction = undefined // filter MsgSend only
+    const messageSender = (params && params.address) || this.getAddress()
+    const page = (params && params.offset) || undefined
+    const limit = (params && params.limit) || undefined
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
@@ -179,33 +174,30 @@ class Client implements ThorchainClient, XChainClient {
         txMaxHeight,
       })
 
-      console.log('original tx history', txHistory)
-
-      const txs: Txs = (txHistory.txs || []).reduce((acc, tx: any) => {
+      const txs: Txs = (txHistory.txs || []).reduce((acc, tx) => {
         let msgs: Msg[] = []
-        if (tx.tx.type !== undefined)
-        {
-          msgs = codec.fromJSONString(JSON.stringify(tx.tx)).msg
+        if ((tx.tx as RawTxResponse).body === undefined) {
+          msgs = codec.fromJSONString(JSON.stringify(tx.tx as StdTx)).msg
         } else {
-          msgs = codec.fromJSONString(JSON.stringify(tx.tx.body.messages))
+          msgs = codec.fromJSONString(JSON.stringify((tx.tx as RawTxResponse).body.messages))
         }
 
-        let from: TxFrom[] = []
-        let to: TxTo[] = []
+        const from: TxFrom[] = []
+        const to: TxTo[] = []
         let asset: Asset | null = null
 
-        msgs.map(msg => {
+        msgs.map((msg) => {
           if (isMsgSend(msg)) {
             const msgSend = msg as MsgSend
             const amount = msgSend.amount
-              .map(coin => baseAmount(coin.amount, 8))
+              .map((coin) => baseAmount(coin.amount, 8))
               .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 8), baseAmount(0, 8))
 
             asset = msgSend.amount.reduce((acc, cur) => {
               if (acc) return acc
               return assetFromString(`${THORChain}.${cur.denom}`)
             }, null as Asset | null)
-            
+
             from.push({
               from: msgSend.from_address.toBech32(),
               amount,
@@ -214,24 +206,47 @@ class Client implements ThorchainClient, XChainClient {
               to: msgSend.to_address.toBech32(),
               amount,
             })
+          } else if (isMsgMultiSend(msg)) {
+            const msgMultiSend = msg as MsgMultiSend
+
+            from.push(
+              ...msgMultiSend.inputs.map((input) => {
+                return {
+                  from: input.address,
+                  amount: input.coins
+                    .map((coin) => baseAmount(coin.amount, 6))
+                    .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6)),
+                }
+              }),
+            )
+            to.push(
+              ...msgMultiSend.outputs.map((output) => {
+                return {
+                  to: output.address,
+                  amount: output.coins
+                    .map((coin) => baseAmount(coin.amount, 6))
+                    .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6)),
+                }
+              }),
+            )
           }
         })
 
         return [
           ...acc,
           {
-            asset: asset || AssetRuneNative,
+            asset: asset || AssetThor,
             from,
             to,
             date: new Date(tx.timestamp),
-            type: (from.length > 0 || to.length > 0) ? 'transfer' : 'unknown',
-            hash: tx.hash || '',
-          }
+            type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
+            hash: tx.txhash || '',
+          },
         ]
       }, [] as Txs)
 
       return {
-        total: txHistory.total_count || 0,
+        total: parseInt(txHistory.total_count?.toString() || '0'),
         txs,
       }
     } catch (error) {
@@ -250,17 +265,16 @@ class Client implements ThorchainClient, XChainClient {
         from: this.getAddress(),
         to: recipient,
         amount: amount.amount().toString(),
-        asset: asset ? asset.symbol : AssetRuneNative.symbol,
+        asset: getDenom(asset || AssetThor),
         memo,
       })
 
       return transferResult?.txhash || ''
-
     } catch (err) {
       return ''
     }
   }
-  
+
   // Need to be updated
   getFees = async (): Promise<Fees> => {
     try {
