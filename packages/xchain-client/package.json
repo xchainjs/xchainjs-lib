@@ -29,6 +29,6 @@
   },
   "gitHead": "3989696361e640b3dd55138772a43fc301797cd2",
   "dependencies": {
-    "@thorchain/asgardex-util": "^0.5.0"
+    "@xchainjs/xchain-util": "^0.1.0"
   }
 }

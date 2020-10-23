@@ -1,5 +1,5 @@
 import { Address, Balances, Fees, Network, TxParams, TxHash, TxHistoryParams, TxsPage, XChainClient, XChainClientParams } from '@xchainjs/xchain-client';
-import { Asset } from '@thorchain/asgardex-util';
+import { Asset } from '@xchainjs/xchain-util';
 /**
  * Interface for custom Cosmos client
  */

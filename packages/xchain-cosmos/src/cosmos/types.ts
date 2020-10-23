@@ -1,6 +1,6 @@
 import { BigSource } from 'big.js'
 
-import { Asset } from '@thorchain/asgardex-util'
+import { Asset } from '@xchainjs/xchain-util'
 import { PrivKey } from 'cosmos-client'
 
 export type SearchTxParams = {

@@ -1,6 +1,6 @@
 require('dotenv').config()
 import { Client as BinanceClient } from '../src/client'
-import { AssetBNB, baseAmount, delay } from '@thorchain/asgardex-util'
+import { AssetBNB, baseAmount, delay } from '@xchainjs/xchain-util'
 
 describe('BinanceClient Test', () => {
   let bnbClient: BinanceClient

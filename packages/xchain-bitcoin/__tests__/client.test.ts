@@ -1,8 +1,8 @@
 require('dotenv').config()
 import * as Bitcoin from 'bitcoinjs-lib'
 import { Client } from '../src/client'
-import * as asgardexCrypto from '@thorchain/asgardex-crypto'
-import { baseAmount, AssetBTC } from '@thorchain/asgardex-util'
+import * as xchainCrypto from '@xchainjs/xchain-crypto'
+import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 
 const NODE_URL = 'https://api.blockchair.com/bitcoin/testnet'
 const NODE_API_KEY = process.env.BLOCKCHAIR_API_KEY || ''
@@ -49,7 +49,7 @@ describe('BitcoinClient Test', () => {
 
   it('should generate a valid phrase', () => {
     const _phrase = btcClient.generatePhrase()
-    const valid = asgardexCrypto.validatePhrase(_phrase)
+    const valid = xchainCrypto.validatePhrase(_phrase)
     expect(valid).toBeTruthy()
   })
 

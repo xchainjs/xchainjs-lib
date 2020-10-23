@@ -1,4 +1,4 @@
-import { Asset, BaseAmount } from '@thorchain/asgardex-util';
+import { Asset, BaseAmount } from '@xchainjs/xchain-util';
 export declare type Address = string;
 export declare type Network = 'testnet' | 'mainnet';
 export declare type Balance = {

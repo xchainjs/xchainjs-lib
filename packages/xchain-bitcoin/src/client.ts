@@ -16,7 +16,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { baseAmount, assetToString, AssetBTC } from '@thorchain/asgardex-util'
+import { baseAmount, assetToString, AssetBTC } from '@xchainjs/xchain-util'
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
