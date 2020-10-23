@@ -2,12 +2,12 @@ import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 import { AssetThor } from '../src/thor/types'
 import { isMsgMultiSend, isMsgSend, getDenom, getAsset } from '../src/util'
 
-describe('cosmos/util', () => {
+describe('thorchain/util', () => {
   describe('Msg type guards', () => {
     const msgMultiSend: MsgMultiSend = {
       inputs: [
         {
-          address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+          address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
           coins: [
             {
               denom: 'uatom',
@@ -16,7 +16,7 @@ describe('cosmos/util', () => {
           ],
         },
         {
-          address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+          address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
           coins: [
             {
               denom: 'uatom',
@@ -27,7 +27,7 @@ describe('cosmos/util', () => {
       ],
       outputs: [
         {
-          address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+          address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
           coins: [
             {
               denom: 'uatom',
@@ -39,8 +39,8 @@ describe('cosmos/util', () => {
     }
 
     const msgSend: MsgSend = MsgSend.fromJSON({
-      from_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-      to_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+      from_address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
+      to_address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
       amount: [
         {
           denom: 'uatom',
