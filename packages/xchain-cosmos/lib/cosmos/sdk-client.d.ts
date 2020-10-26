@@ -1,6 +1,6 @@
 import { CosmosSDK, PrivKey } from 'cosmos-client';
-import { BroadcastTxCommitResult, Coin, PaginatedQueryTxs } from 'cosmos-client/api';
-import { SearchTxParams, TransferParams } from './types';
+import { BroadcastTxCommitResult, Coin } from 'cosmos-client/api';
+import { SearchTxParams, TransferParams, TxHistoryResponse } from './types';
 export declare class CosmosSDKClient {
     sdk: CosmosSDK;
     server: string;
@@ -13,6 +13,6 @@ export declare class CosmosSDKClient {
     getPrivKeyFromMnemonic: (mnemonic: string) => PrivKey;
     checkAddress: (address: string) => boolean;
     getBalance: (address: string) => Promise<Coin[]>;
-    searchTx: ({ messageAction, messageSender, page, limit, txMinHeight, txMaxHeight, }: SearchTxParams) => Promise<PaginatedQueryTxs>;
+    searchTx: ({ messageAction, messageSender, page, limit, txMinHeight, txMaxHeight, }: SearchTxParams) => Promise<TxHistoryResponse>;
     transfer: ({ privkey, from, to, amount, asset, memo }: TransferParams) => Promise<BroadcastTxCommitResult>;
 }

@@ -4,8 +4,6 @@ import { Asset } from '@xchainjs/xchain-util';
  * Interface for custom Cosmos client
  */
 export interface CosmosClient {
-    purgeClient(): void;
-    getAddress(): string;
     validateAddress(address: string): boolean;
     getMainAsset(): Asset;
 }

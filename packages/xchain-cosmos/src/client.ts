@@ -3,12 +3,9 @@ import {
   Balances,
   Fees,
   Network,
-  TxFrom,
-  TxTo,
   TxParams,
   TxHash,
   TxHistoryParams,
-  Txs,
   TxsPage,
   XChainClient,
   XChainClientParams,
@@ -16,22 +13,16 @@ import {
 import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
-import { PrivKey, Msg } from 'cosmos-client'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
-import { codec } from 'cosmos-client/codec'
+import { PrivKey } from 'cosmos-client'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './cosmos/types'
-import { isMsgSend, isMsgMultiSend, getDenom, getAsset } from './util'
+import { getDenom, getAsset, getTxsFromHistory } from './util'
 
 /**
  * Interface for custom Cosmos client
  */
 export interface CosmosClient {
-  purgeClient(): void
-
-  getAddress(): string
-
   validateAddress(address: string): boolean
 
   getMainAsset(): Asset
@@ -161,7 +152,7 @@ class Client implements CosmosClient, XChainClient {
   }
 
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const messageAction = 'send' // filter MsgSend only
+    const messageAction = undefined
     const messageSender = (params && params.address) || this.getAddress()
     const page = (params && params.offset) || undefined
     const limit = (params && params.limit) || undefined
@@ -179,73 +170,9 @@ class Client implements CosmosClient, XChainClient {
         txMaxHeight,
       })
 
-      const txs: Txs = (txHistory.txs || []).reduce((acc, tx: any) => {
-        let msgs: Msg[] = []
-        if (tx.tx.type !== undefined) {
-          msgs = codec.fromJSONString(JSON.stringify(tx.tx)).msg
-        } else {
-          msgs = codec.fromJSONString(JSON.stringify(tx.tx.body.messages))
-        }
-
-        const from: TxFrom[] = []
-        const to: TxTo[] = []
-        msgs.map((msg) => {
-          if (isMsgSend(msg)) {
-            const msgSend = msg as MsgSend
-            const amount = msgSend.amount
-              .map((coin) => baseAmount(coin.amount, 6))
-              .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
-
-            from.push({
-              from: msgSend.from_address.toBech32(),
-              amount,
-            })
-            to.push({
-              to: msgSend.to_address.toBech32(),
-              amount,
-            })
-          } else if (isMsgMultiSend(msg)) {
-            const msgMultiSend = msg as MsgMultiSend
-
-            from.push(
-              ...msgMultiSend.inputs.map((input) => {
-                return {
-                  from: input.address,
-                  amount: input.coins
-                    .map((coin) => baseAmount(coin.amount, 6))
-                    .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6)),
-                }
-              }),
-            )
-            to.push(
-              ...msgMultiSend.outputs.map((output) => {
-                return {
-                  to: output.address,
-                  amount: output.coins
-                    .map((coin) => baseAmount(coin.amount, 6))
-                    .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6)),
-                }
-              }),
-            )
-          }
-        })
-
-        return [
-          ...acc,
-          {
-            asset: mainAsset,
-            from,
-            to,
-            date: new Date(tx.timestamp),
-            type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
-            hash: tx.hash || '',
-          },
-        ]
-      }, [] as Txs)
-
       return {
         total: parseInt(txHistory.total_count?.toString() || '0'),
-        txs,
+        txs: getTxsFromHistory(txHistory.txs || [], mainAsset),
       }
     } catch (error) {
       return Promise.reject(error)

@@ -35,7 +35,7 @@ describe('Client Test', () => {
   const address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
 
   beforeEach(() => {
-    cosmosClient = new Client({ phrase, network: 'mainnet' })
+    cosmosClient = new Client({ phrase, network: 'testnet' })
   })
 
   afterEach(() => {
@@ -89,18 +89,17 @@ describe('Client Test', () => {
   it('should init, should have right prefix', async () => {
     expect(cosmosClient.validateAddress(cosmosClient.getAddress())).toEqual(true)
 
-    cosmosClient.setNetwork('testnet')
+    cosmosClient.setNetwork('mainnet')
     expect(cosmosClient.validateAddress(cosmosClient.getAddress())).toEqual(true)
   })
 
   it('has no balances', async () => {
+    cosmosClient.setNetwork('mainnet')
     const result = await cosmosClient.getBalance()
     expect(result).toEqual([])
   })
 
   it('has balances', async () => {
-    cosmosClient.setNetwork('testnet')
-
     const balances = await cosmosClient.getBalance('cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv')
     const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, 6).amount())
     expect(expected).toBeTruthy()
@@ -113,16 +112,17 @@ describe('Client Test', () => {
       txs: [],
     }
 
+    cosmosClient.setNetwork('mainnet')
     const transactions = await cosmosClient.getTransactions()
     expect(transactions).toEqual(expected)
   })
 
   it('has tx history', async () => {
-    let transactions = await cosmosClient.getTransactions({ address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z' })
+    let transactions = await cosmosClient.getTransactions({ address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2' })
     expect(transactions.total).toBeGreaterThan(0)
 
-    cosmosClient.setNetwork('testnet')
-    transactions = await cosmosClient.getTransactions({ address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2' })
+    cosmosClient.setNetwork('mainnet')
+    transactions = await cosmosClient.getTransactions({ address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z' })
     expect(transactions.total).toBeGreaterThan(0)
   })
 
@@ -138,7 +138,6 @@ describe('Client Test', () => {
       height: 0,
     }
 
-    cosmosClient.setNetwork('testnet')
     assertTxsPost(
       cosmosClient.getClientUrl(),
       cosmosClient.getAddress(),
@@ -175,7 +174,6 @@ describe('Client Test', () => {
       height: 0,
     }
 
-    cosmosClient.setNetwork('testnet')
     assertTxsPost(
       cosmosClient.getClientUrl(),
       cosmosClient.getAddress(),

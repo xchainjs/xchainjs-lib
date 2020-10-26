@@ -3,7 +3,6 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var crypto$1$1 = require('crypto');
-var codec = require('cosmos-client/codec');
 var buffer = require('buffer');
 var readableStream = require('readable-stream');
 var stream = require('stream');
@@ -11,6 +10,7 @@ var string_decoder = require('string_decoder');
 var cosmosClient = require('cosmos-client');
 var auth = require('cosmos-client/x/auth');
 var bank = require('cosmos-client/x/bank');
+var codec = require('cosmos-client/codec');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -4371,6 +4371,1430 @@ var generatePhrase = function (size) {
 var validatePhrase = function (phrase) {
     return bip39.validateMnemonic(phrase);
 };
+
+var bind = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is a Buffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Buffer, otherwise false
+ */
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
+    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
+                                           navigator.product === 'NativeScript' ||
+                                           navigator.product === 'NS')) {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = merge(result[key], val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Function equal to merge with the difference being that no reference
+ * to original objects is kept.
+ *
+ * @see merge
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function deepMerge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = deepMerge(result[key], val);
+    } else if (typeof val === 'object') {
+      result[key] = deepMerge({}, val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+var utils = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  deepMerge: deepMerge,
+  extend: extend,
+  trim: trim
+};
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%40/gi, '@').
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+var buildURL = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    var hashmarkIndex = url.indexOf('#');
+    if (hashmarkIndex !== -1) {
+      url = url.slice(0, hashmarkIndex);
+    }
+
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+var InterceptorManager_1 = InterceptorManager;
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+var transformData = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+var isCancel = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+var normalizeHeaderName = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+var enhanceError = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+
+  error.request = request;
+  error.response = response;
+  error.isAxiosError = true;
+
+  error.toJSON = function() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: this.config,
+      code: this.code
+    };
+  };
+  return error;
+};
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+var createError = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+var settle = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+var isAbsoluteURL = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+var combineURLs = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+/**
+ * Creates a new URL by combining the baseURL with the requestedURL,
+ * only when the requestedURL is not already an absolute URL.
+ * If the requestURL is absolute, this function returns the requestedURL untouched.
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} requestedURL Absolute or relative URL to combine
+ * @returns {string} The combined full path
+ */
+var buildFullPath = function buildFullPath(baseURL, requestedURL) {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+var parseHeaders = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+var isURLSameOrigin = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+    (function standardBrowserEnv() {
+      var msie = /(msie|trident)/i.test(navigator.userAgent);
+      var urlParsingNode = document.createElement('a');
+      var originURL;
+
+      /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+      function resolveURL(url) {
+        var href = url;
+
+        if (msie) {
+        // IE needs attribute set twice to normalize properties
+          urlParsingNode.setAttribute('href', href);
+          href = urlParsingNode.href;
+        }
+
+        urlParsingNode.setAttribute('href', href);
+
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+          href: urlParsingNode.href,
+          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+          host: urlParsingNode.host,
+          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+          hostname: urlParsingNode.hostname,
+          port: urlParsingNode.port,
+          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+            urlParsingNode.pathname :
+            '/' + urlParsingNode.pathname
+        };
+      }
+
+      originURL = resolveURL(window.location.href);
+
+      /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+      return function isURLSameOrigin(requestURL) {
+        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+        return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+      };
+    })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return function isURLSameOrigin() {
+        return true;
+      };
+    })()
+);
+
+var cookies = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+    (function standardBrowserEnv() {
+      return {
+        write: function write(name, value, expires, path, domain, secure) {
+          var cookie = [];
+          cookie.push(name + '=' + encodeURIComponent(value));
+
+          if (utils.isNumber(expires)) {
+            cookie.push('expires=' + new Date(expires).toGMTString());
+          }
+
+          if (utils.isString(path)) {
+            cookie.push('path=' + path);
+          }
+
+          if (utils.isString(domain)) {
+            cookie.push('domain=' + domain);
+          }
+
+          if (secure === true) {
+            cookie.push('secure');
+          }
+
+          document.cookie = cookie.join('; ');
+        },
+
+        read: function read(name) {
+          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+          return (match ? decodeURIComponent(match[3]) : null);
+        },
+
+        remove: function remove(name) {
+          this.write(name, '', Date.now() - 86400000);
+        }
+      };
+    })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return {
+        write: function write() {},
+        read: function read() { return null; },
+        remove: function remove() {}
+      };
+    })()
+);
+
+var xhr = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password || '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    var fullPath = buildFullPath(config.baseURL, config.url);
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    // Listen for ready state
+    request.onreadystatechange = function handleLoad() {
+      if (!request || request.readyState !== 4) {
+        return;
+      }
+
+      // The request errored out and we didn't get a response, this will be
+      // handled by onerror instead
+      // With one exception: request that using file: protocol, most browsers
+      // will return status as 0 even though it's a successful request
+      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+        return;
+      }
+
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle browser request cancellation (as opposed to a manual cancellation)
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      var cookies$1 = cookies;
+
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+        cookies$1.read(config.xsrfCookieName) :
+        undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (!utils.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!config.withCredentials;
+    }
+
+    // Add responseType to request if needed
+    if (config.responseType) {
+      try {
+        request.responseType = config.responseType;
+      } catch (e) {
+        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+        if (config.responseType !== 'json') {
+          throw e;
+        }
+      }
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (requestData === undefined) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = xhr;
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = xhr;
+  }
+  return adapter;
+}
+
+var defaults = {
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Accept');
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) { /* Ignore */ }
+    }
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+var defaults_1 = defaults;
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+var dispatchRequest = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults_1.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+/**
+ * Config-specific merge-function which creates a new config-object
+ * by merging two configuration objects together.
+ *
+ * @param {Object} config1
+ * @param {Object} config2
+ * @returns {Object} New object resulting from merging config2 to config1
+ */
+var mergeConfig = function mergeConfig(config1, config2) {
+  // eslint-disable-next-line no-param-reassign
+  config2 = config2 || {};
+  var config = {};
+
+  var valueFromConfig2Keys = ['url', 'method', 'params', 'data'];
+  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy'];
+  var defaultToConfig2Keys = [
+    'baseURL', 'url', 'transformRequest', 'transformResponse', 'paramsSerializer',
+    'timeout', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
+    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress',
+    'maxContentLength', 'validateStatus', 'maxRedirects', 'httpAgent',
+    'httpsAgent', 'cancelToken', 'socketPath'
+  ];
+
+  utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    }
+  });
+
+  utils.forEach(mergeDeepPropertiesKeys, function mergeDeepProperties(prop) {
+    if (utils.isObject(config2[prop])) {
+      config[prop] = utils.deepMerge(config1[prop], config2[prop]);
+    } else if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (utils.isObject(config1[prop])) {
+      config[prop] = utils.deepMerge(config1[prop]);
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  var axiosKeys = valueFromConfig2Keys
+    .concat(mergeDeepPropertiesKeys)
+    .concat(defaultToConfig2Keys);
+
+  var otherKeys = Object
+    .keys(config2)
+    .filter(function filterAxiosKeys(key) {
+      return axiosKeys.indexOf(key) === -1;
+    });
+
+  utils.forEach(otherKeys, function otherKeysDefaultToConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  return config;
+};
+
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager_1(),
+    response: new InterceptorManager_1()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = arguments[1] || {};
+    config.url = arguments[0];
+  } else {
+    config = config || {};
+  }
+
+  config = mergeConfig(this.defaults, config);
+
+  // Set config.method
+  if (config.method) {
+    config.method = config.method.toLowerCase();
+  } else if (this.defaults.method) {
+    config.method = this.defaults.method.toLowerCase();
+  } else {
+    config.method = 'get';
+  }
+
+  // Hook up interceptors middleware
+  var chain = [dispatchRequest, undefined];
+  var promise = Promise.resolve(config);
+
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    chain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+
+Axios.prototype.getUri = function getUri(config) {
+  config = mergeConfig(this.defaults, config);
+  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+var Axios_1 = Axios;
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+var Cancel_1 = Cancel;
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel_1(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+var CancelToken_1 = CancelToken;
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+var spread = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios_1(defaultConfig);
+  var instance = bind(Axios_1.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios_1.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults_1);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios_1;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(mergeConfig(axios.defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = Cancel_1;
+axios.CancelToken = CancelToken_1;
+axios.isCancel = isCancel;
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = spread;
+
+var axios_1 = axios;
+
+// Allow use of default import syntax in TypeScript
+var default_1 = axios;
+axios_1.default = default_1;
+
+var axios$1 = axios_1;
 
 var inherits_browser = createCommonjsModule(function (module) {
 if (typeof Object.create === 'function') {
@@ -29103,7 +30527,7 @@ function shr64_lo(ah, al, num) {
 }
 var shr64_lo_1 = shr64_lo;
 
-var utils = {
+var utils$1 = {
 	inherits: inherits_1,
 	toArray: toArray_1,
 	toHex: toHex_1,
@@ -29148,7 +30572,7 @@ var BlockHash_1 = BlockHash;
 
 BlockHash.prototype.update = function update(msg, enc) {
   // Convert message to array, pad it, and join into 32bit blocks
-  msg = utils.toArray(msg, enc);
+  msg = utils$1.toArray(msg, enc);
   if (!this.pending)
     this.pending = msg;
   else
@@ -29165,7 +30589,7 @@ BlockHash.prototype.update = function update(msg, enc) {
     if (this.pending.length === 0)
       this.pending = null;
 
-    msg = utils.join32(msg, 0, msg.length - r, this.endian);
+    msg = utils$1.join32(msg, 0, msg.length - r, this.endian);
     for (var i = 0; i < msg.length; i += this._delta32)
       this._update(msg, i, i + this._delta32);
   }
@@ -29224,7 +30648,7 @@ var common = {
 	BlockHash: BlockHash_1
 };
 
-var rotr32$1 = utils.rotr32;
+var rotr32$1 = utils$1.rotr32;
 
 function ft_1(s, x, y, z) {
   if (s === 0)
@@ -29282,9 +30706,9 @@ var common$1 = {
 	g1_256: g1_256_1
 };
 
-var rotl32$1 = utils.rotl32;
-var sum32$1 = utils.sum32;
-var sum32_5$1 = utils.sum32_5;
+var rotl32$1 = utils$1.rotl32;
+var sum32$1 = utils$1.sum32;
+var sum32_5$1 = utils$1.sum32_5;
 var ft_1$1 = common$1.ft_1;
 var BlockHash$1 = common.BlockHash;
 
@@ -29304,7 +30728,7 @@ function SHA1() {
   this.W = new Array(80);
 }
 
-utils.inherits(SHA1, BlockHash$1);
+utils$1.inherits(SHA1, BlockHash$1);
 var _1 = SHA1;
 
 SHA1.blockSize = 512;
@@ -29346,14 +30770,14 @@ SHA1.prototype._update = function _update(msg, start) {
 
 SHA1.prototype._digest = function digest(enc) {
   if (enc === 'hex')
-    return utils.toHex32(this.h, 'big');
+    return utils$1.toHex32(this.h, 'big');
   else
-    return utils.split32(this.h, 'big');
+    return utils$1.split32(this.h, 'big');
 };
 
-var sum32$2 = utils.sum32;
-var sum32_4$1 = utils.sum32_4;
-var sum32_5$2 = utils.sum32_5;
+var sum32$2 = utils$1.sum32;
+var sum32_4$1 = utils$1.sum32_4;
+var sum32_5$2 = utils$1.sum32_5;
 var ch32$1 = common$1.ch32;
 var maj32$1 = common$1.maj32;
 var s0_256$1 = common$1.s0_256;
@@ -29394,7 +30818,7 @@ function SHA256() {
   this.k = sha256_K;
   this.W = new Array(64);
 }
-utils.inherits(SHA256, BlockHash$2);
+utils$1.inherits(SHA256, BlockHash$2);
 var _256 = SHA256;
 
 SHA256.blockSize = 512;
@@ -29445,9 +30869,9 @@ SHA256.prototype._update = function _update(msg, start) {
 
 SHA256.prototype._digest = function digest(enc) {
   if (enc === 'hex')
-    return utils.toHex32(this.h, 'big');
+    return utils$1.toHex32(this.h, 'big');
   else
-    return utils.split32(this.h, 'big');
+    return utils$1.split32(this.h, 'big');
 };
 
 function SHA224() {
@@ -29459,7 +30883,7 @@ function SHA224() {
     0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939,
     0xffc00b31, 0x68581511, 0x64f98fa7, 0xbefa4fa4 ];
 }
-utils.inherits(SHA224, _256);
+utils$1.inherits(SHA224, _256);
 var _224 = SHA224;
 
 SHA224.blockSize = 512;
@@ -29470,22 +30894,22 @@ SHA224.padLength = 64;
 SHA224.prototype._digest = function digest(enc) {
   // Just truncate output
   if (enc === 'hex')
-    return utils.toHex32(this.h.slice(0, 7), 'big');
+    return utils$1.toHex32(this.h.slice(0, 7), 'big');
   else
-    return utils.split32(this.h.slice(0, 7), 'big');
+    return utils$1.split32(this.h.slice(0, 7), 'big');
 };
 
-var rotr64_hi$1 = utils.rotr64_hi;
-var rotr64_lo$1 = utils.rotr64_lo;
-var shr64_hi$1 = utils.shr64_hi;
-var shr64_lo$1 = utils.shr64_lo;
-var sum64$1 = utils.sum64;
-var sum64_hi$1 = utils.sum64_hi;
-var sum64_lo$1 = utils.sum64_lo;
-var sum64_4_hi$1 = utils.sum64_4_hi;
-var sum64_4_lo$1 = utils.sum64_4_lo;
-var sum64_5_hi$1 = utils.sum64_5_hi;
-var sum64_5_lo$1 = utils.sum64_5_lo;
+var rotr64_hi$1 = utils$1.rotr64_hi;
+var rotr64_lo$1 = utils$1.rotr64_lo;
+var shr64_hi$1 = utils$1.shr64_hi;
+var shr64_lo$1 = utils$1.shr64_lo;
+var sum64$1 = utils$1.sum64;
+var sum64_hi$1 = utils$1.sum64_hi;
+var sum64_lo$1 = utils$1.sum64_lo;
+var sum64_4_hi$1 = utils$1.sum64_4_hi;
+var sum64_4_lo$1 = utils$1.sum64_4_lo;
+var sum64_5_hi$1 = utils$1.sum64_5_hi;
+var sum64_5_lo$1 = utils$1.sum64_5_lo;
 
 var BlockHash$3 = common.BlockHash;
 
@@ -29549,7 +30973,7 @@ function SHA512() {
   this.k = sha512_K;
   this.W = new Array(160);
 }
-utils.inherits(SHA512, BlockHash$3);
+utils$1.inherits(SHA512, BlockHash$3);
 var _512 = SHA512;
 
 SHA512.blockSize = 1024;
@@ -29679,9 +31103,9 @@ SHA512.prototype._update = function _update(msg, start) {
 
 SHA512.prototype._digest = function digest(enc) {
   if (enc === 'hex')
-    return utils.toHex32(this.h, 'big');
+    return utils$1.toHex32(this.h, 'big');
   else
-    return utils.split32(this.h, 'big');
+    return utils$1.split32(this.h, 'big');
 };
 
 function ch64_hi(xh, xl, yh, yl, zh) {
@@ -29815,7 +31239,7 @@ function SHA384() {
     0xdb0c2e0d, 0x64f98fa7,
     0x47b5481d, 0xbefa4fa4 ];
 }
-utils.inherits(SHA384, _512);
+utils$1.inherits(SHA384, _512);
 var _384 = SHA384;
 
 SHA384.blockSize = 1024;
@@ -29825,9 +31249,9 @@ SHA384.padLength = 128;
 
 SHA384.prototype._digest = function digest(enc) {
   if (enc === 'hex')
-    return utils.toHex32(this.h.slice(0, 12), 'big');
+    return utils$1.toHex32(this.h.slice(0, 12), 'big');
   else
-    return utils.split32(this.h.slice(0, 12), 'big');
+    return utils$1.split32(this.h.slice(0, 12), 'big');
 };
 
 var sha1$1 = _1;
@@ -29844,10 +31268,10 @@ var sha$1 = {
 	sha512: sha512$1
 };
 
-var rotl32$2 = utils.rotl32;
-var sum32$3 = utils.sum32;
-var sum32_3$1 = utils.sum32_3;
-var sum32_4$2 = utils.sum32_4;
+var rotl32$2 = utils$1.rotl32;
+var sum32$3 = utils$1.sum32;
+var sum32_3$1 = utils$1.sum32_3;
+var sum32_4$2 = utils$1.sum32_4;
 var BlockHash$4 = common.BlockHash;
 
 function RIPEMD160$1() {
@@ -29859,7 +31283,7 @@ function RIPEMD160$1() {
   this.h = [ 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0 ];
   this.endian = 'little';
 }
-utils.inherits(RIPEMD160$1, BlockHash$4);
+utils$1.inherits(RIPEMD160$1, BlockHash$4);
 var ripemd160$2 = RIPEMD160$1;
 
 RIPEMD160$1.blockSize = 512;
@@ -29910,9 +31334,9 @@ RIPEMD160$1.prototype._update = function update(msg, start) {
 
 RIPEMD160$1.prototype._digest = function digest(enc) {
   if (enc === 'hex')
-    return utils.toHex32(this.h, 'little');
+    return utils$1.toHex32(this.h, 'little');
   else
-    return utils.split32(this.h, 'little');
+    return utils$1.split32(this.h, 'little');
 };
 
 function f(j, x, y, z) {
@@ -29999,7 +31423,7 @@ function Hmac$3(hash, key, enc) {
   this.inner = null;
   this.outer = null;
 
-  this._init(utils.toArray(key, enc));
+  this._init(utils$1.toArray(key, enc));
 }
 var hmac = Hmac$3;
 
@@ -30036,7 +31460,7 @@ Hmac$3.prototype.digest = function digest(enc) {
 var hash_1 = createCommonjsModule(function (module, exports) {
 var hash = exports;
 
-hash.utils = utils;
+hash.utils = utils$1;
 hash.common = common;
 hash.sha = sha$1;
 hash.ripemd = ripemd;
@@ -32810,7 +34234,7 @@ function decode (string, version) {
   return decodeRaw(bs58check.decode(string), version)
 }
 
-function encode (version, privateKey, compressed) {
+function encode$1 (version, privateKey, compressed) {
   if (typeof version === 'number') return bs58check.encode(encodeRaw(version, privateKey, compressed))
 
   return bs58check.encode(
@@ -32825,7 +34249,7 @@ function encode (version, privateKey, compressed) {
 var wif = {
   decode: decode,
   decodeRaw: decodeRaw,
-  encode: encode,
+  encode: encode$1,
   encodeRaw: encodeRaw
 };
 
@@ -33149,6 +34573,140 @@ var src_2$1 = src$2.fromBase58;
 var src_3$1 = src$2.fromPublicKey;
 var src_4$1 = src$2.fromPrivateKey;
 
+var CosmosChain = 'THOR';
+var AssetAtom = { chain: CosmosChain, symbol: 'ATOM', ticker: 'ATOM' };
+var AssetMuon = { chain: CosmosChain, symbol: 'MUON', ticker: 'MUON' };
+
+/**
+ * Type guard for MsgSend
+ */
+var isMsgSend = function (v) {
+    var _a, _b, _c;
+    return ((_a = v) === null || _a === void 0 ? void 0 : _a.amount) !== undefined &&
+        ((_b = v) === null || _b === void 0 ? void 0 : _b.from_address) !== undefined &&
+        ((_c = v) === null || _c === void 0 ? void 0 : _c.to_address) !== undefined;
+};
+/**
+ * Type guard for MsgMultiSend
+ */
+var isMsgMultiSend = function (v) { var _a, _b; return ((_a = v) === null || _a === void 0 ? void 0 : _a.inputs) !== undefined && ((_b = v) === null || _b === void 0 ? void 0 : _b.outputs) !== undefined; };
+/**
+ * Get denom from Asset
+ */
+var getDenom = function (v) {
+    if (assetToString(v) === assetToString(AssetAtom))
+        return 'uatom';
+    if (assetToString(v) === assetToString(AssetMuon))
+        return 'umuon';
+    return v.symbol;
+};
+/**
+ * Get Asset from denom
+ */
+var getAsset = function (v) {
+    if (v === getDenom(AssetAtom))
+        return AssetAtom;
+    if (v === getDenom(AssetMuon))
+        return AssetMuon;
+    return null;
+};
+/**
+ * Parse transaction type
+ */
+var getTxsFromHistory = function (txs, mainAsset) {
+    return txs.reduce(function (acc, tx) {
+        var msgs = [];
+        if (tx.tx.body === undefined) {
+            msgs = codec.codec.fromJSONString(codec.codec.toJSONString(tx.tx)).msg;
+        }
+        else {
+            msgs = codec.codec.fromJSONString(codec.codec.toJSONString(tx.tx.body.messages));
+        }
+        var from = [];
+        var to = [];
+        msgs.map(function (msg) {
+            if (isMsgSend(msg)) {
+                var msgSend_1 = msg;
+                var amount = msgSend_1.amount
+                    .map(function (coin) { return baseAmount(coin.amount, 6); })
+                    .reduce(function (acc, cur) { return baseAmount(acc.amount().plus(cur.amount()), 6); }, baseAmount(0, 6));
+                var from_index = from.findIndex(function (value) { return value.from === msgSend_1.from_address.toBech32(); });
+                if (from_index === -1) {
+                    from.push({
+                        from: msgSend_1.from_address.toBech32(),
+                        amount: amount,
+                    });
+                }
+                else {
+                    from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), 6);
+                }
+                var to_index = to.findIndex(function (value) { return value.to === msgSend_1.to_address.toBech32(); });
+                if (to_index === -1) {
+                    to.push({
+                        to: msgSend_1.to_address.toBech32(),
+                        amount: amount,
+                    });
+                }
+                else {
+                    to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), 6);
+                }
+            }
+            else if (isMsgMultiSend(msg)) {
+                var msgMultiSend = msg;
+                msgMultiSend.inputs.map(function (input) {
+                    var amount = input.coins
+                        .map(function (coin) { return baseAmount(coin.amount, 6); })
+                        .reduce(function (acc, cur) { return baseAmount(acc.amount().plus(cur.amount()), 6); }, baseAmount(0, 6));
+                    var from_index = from.findIndex(function (value) { return value.from === input.address; });
+                    if (from_index === -1) {
+                        from.push({
+                            from: input.address,
+                            amount: amount,
+                        });
+                    }
+                    else {
+                        from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), 6);
+                    }
+                });
+                msgMultiSend.outputs.map(function (output) {
+                    var amount = output.coins
+                        .map(function (coin) { return baseAmount(coin.amount, 6); })
+                        .reduce(function (acc, cur) { return baseAmount(acc.amount().plus(cur.amount()), 6); }, baseAmount(0, 6));
+                    var to_index = to.findIndex(function (value) { return value.to === output.address; });
+                    if (to_index === -1) {
+                        to.push({
+                            to: output.address,
+                            amount: amount,
+                        });
+                    }
+                    else {
+                        to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), 6);
+                    }
+                });
+            }
+        });
+        return __spreadArrays(acc, [
+            {
+                asset: mainAsset,
+                from: from,
+                to: to,
+                date: new Date(tx.timestamp),
+                type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
+                hash: tx.txhash || '',
+            },
+        ]);
+    }, []);
+};
+/**
+ * Get Query String
+ */
+var getQueryString = function (v) {
+    return Object.keys(v)
+        .filter(function (key) { return key.length > 0; })
+        .map(function (key) { return (v[key] == null ? key : key + "=" + encodeURIComponent(v[key].toString())); })
+        .join('&');
+};
+
 var CosmosSDKClient = /** @class */ (function () {
     function CosmosSDKClient(server, chainId) {
         var _this = this;
@@ -33196,17 +34754,33 @@ var CosmosSDKClient = /** @class */ (function () {
         this.searchTx = function (_a) {
             var messageAction = _a.messageAction, messageSender = _a.messageSender, page = _a.page, limit = _a.limit, txMinHeight = _a.txMinHeight, txMaxHeight = _a.txMaxHeight;
             return __awaiter(_this, void 0, void 0, function () {
-                var error_1;
-                var _this = this;
+                var queryParameter, error_1;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
                             _b.trys.push([0, 2, , 3]);
-                            return [4 /*yield*/, auth.auth
-                                    .txsGet(this.sdk, messageAction, messageSender, page, limit, txMinHeight, txMaxHeight)
-                                    .then(function (res) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
-                                    return [2 /*return*/, res.data];
-                                }); }); })];
+                            queryParameter = {};
+                            if (messageAction !== undefined) {
+                                queryParameter['message.action'] = messageAction;
+                            }
+                            if (messageSender !== undefined) {
+                                queryParameter['message.sender'] = messageSender;
+                            }
+                            if (page !== undefined) {
+                                queryParameter['page'] = page.toString();
+                            }
+                            if (limit !== undefined) {
+                                queryParameter['limit'] = limit.toString();
+                            }
+                            if (txMinHeight !== undefined) {
+                                queryParameter['tx.minheight'] = txMinHeight.toString();
+                            }
+                            if (txMaxHeight !== undefined) {
+                                queryParameter['tx.maxheight'] = txMaxHeight.toString();
+                            }
+                            return [4 /*yield*/, axios$1
+                                    .get(this.server + "/txs?" + getQueryString(queryParameter))
+                                    .then(function (res) { return res.data; })];
                         case 1: return [2 /*return*/, _b.sent()];
                         case 2:
                             error_1 = _b.sent();
@@ -33275,45 +34849,6 @@ var CosmosSDKClient = /** @class */ (function () {
     }
     return CosmosSDKClient;
 }());
-
-// This needs to be updated asgardex-util does not support COSMOS
-var CosmosChain = 'THOR';
-var AssetAtom = { chain: CosmosChain, symbol: 'ATOM', ticker: 'ATOM' };
-var AssetMuon = { chain: CosmosChain, symbol: 'MUON', ticker: 'MUON' };
-
-/**
- * Type guard for MsgSend
- */
-var isMsgSend = function (v) {
-    var _a, _b, _c;
-    return ((_a = v) === null || _a === void 0 ? void 0 : _a.amount) !== undefined &&
-        ((_b = v) === null || _b === void 0 ? void 0 : _b.from_address) !== undefined &&
-        ((_c = v) === null || _c === void 0 ? void 0 : _c.to_address) !== undefined;
-};
-/**
- * Type guard for MsgMultiSend
- */
-var isMsgMultiSend = function (v) { var _a, _b; return ((_a = v) === null || _a === void 0 ? void 0 : _a.inputs) !== undefined && ((_b = v) === null || _b === void 0 ? void 0 : _b.outputs) !== undefined; };
-/**
- * Get denom from Asset
- */
-var getDenom = function (v) {
-    if (assetToString(v) === assetToString(AssetAtom))
-        return 'uatom';
-    if (assetToString(v) === assetToString(AssetMuon))
-        return 'umuon';
-    return v.symbol;
-};
-/**
- * Get Asset from denom
- */
-var getAsset = function (v) {
-    if (v === getDenom(AssetAtom))
-        return AssetAtom;
-    if (v === getDenom(AssetMuon))
-        return AssetMuon;
-    return null;
-};
 
 var Client = /** @class */ (function () {
     function Client(_a) {
@@ -33404,7 +34939,7 @@ var Client = /** @class */ (function () {
             });
         }); };
         this.getTransactions = function (params) { return __awaiter(_this, void 0, void 0, function () {
-            var messageAction, messageSender, page, limit, txMinHeight, txMaxHeight, mainAsset_2, txHistory, txs, error_2;
+            var messageAction, messageSender, page, limit, txMinHeight, txMaxHeight, mainAsset, txHistory, error_2;
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -33419,7 +34954,7 @@ var Client = /** @class */ (function () {
                         _b.label = 1;
                     case 1:
                         _b.trys.push([1, 3, , 4]);
-                        mainAsset_2 = this.getMainAsset();
+                        mainAsset = this.getMainAsset();
                         return [4 /*yield*/, this.sdkClient.searchTx({
                                 messageAction: messageAction,
                                 messageSender: messageSender,
@@ -33430,65 +34965,9 @@ var Client = /** @class */ (function () {
                             })];
                     case 2:
                         txHistory = _b.sent();
-                        txs = (txHistory.txs || []).reduce(function (acc, tx) {
-                            var msgs = [];
-                            if (tx.tx.type !== undefined) {
-                                msgs = codec.codec.fromJSONString(JSON.stringify(tx.tx)).msg;
-                            }
-                            else {
-                                msgs = codec.codec.fromJSONString(JSON.stringify(tx.tx.body.messages));
-                            }
-                            var from = [];
-                            var to = [];
-                            msgs.map(function (msg) {
-                                if (isMsgSend(msg)) {
-                                    var msgSend = msg;
-                                    var amount = msgSend.amount
-                                        .map(function (coin) { return baseAmount(coin.amount, 6); })
-                                        .reduce(function (acc, cur) { return baseAmount(acc.amount().plus(cur.amount()), 6); }, baseAmount(0, 6));
-                                    from.push({
-                                        from: msgSend.from_address.toBech32(),
-                                        amount: amount,
-                                    });
-                                    to.push({
-                                        to: msgSend.to_address.toBech32(),
-                                        amount: amount,
-                                    });
-                                }
-                                else if (isMsgMultiSend(msg)) {
-                                    var msgMultiSend = msg;
-                                    from.push.apply(from, msgMultiSend.inputs.map(function (input) {
-                                        return {
-                                            from: input.address,
-                                            amount: input.coins
-                                                .map(function (coin) { return baseAmount(coin.amount, 6); })
-                                                .reduce(function (acc, cur) { return baseAmount(acc.amount().plus(cur.amount()), 6); }, baseAmount(0, 6)),
-                                        };
-                                    }));
-                                    to.push.apply(to, msgMultiSend.outputs.map(function (output) {
-                                        return {
-                                            to: output.address,
-                                            amount: output.coins
-                                                .map(function (coin) { return baseAmount(coin.amount, 6); })
-                                                .reduce(function (acc, cur) { return baseAmount(acc.amount().plus(cur.amount()), 6); }, baseAmount(0, 6)),
-                                        };
-                                    }));
-                                }
-                            });
-                            return __spreadArrays(acc, [
-                                {
-                                    asset: mainAsset_2,
-                                    from: from,
-                                    to: to,
-                                    date: new Date(tx.timestamp),
-                                    type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
-                                    hash: tx.hash || '',
-                                },
-                            ]);
-                        }, []);
                         return [2 /*return*/, {
                                 total: parseInt(((_a = txHistory.total_count) === null || _a === void 0 ? void 0 : _a.toString()) || '0'),
-                                txs: txs,
+                                txs: getTxsFromHistory(txHistory.txs || [], mainAsset),
                             }];
                     case 3:
                         error_2 = _b.sent();
@@ -33573,5 +35052,7 @@ var Client = /** @class */ (function () {
 exports.Client = Client;
 exports.getAsset = getAsset;
 exports.getDenom = getDenom;
+exports.getQueryString = getQueryString;
+exports.getTxsFromHistory = getTxsFromHistory;
 exports.isMsgMultiSend = isMsgMultiSend;
 exports.isMsgSend = isMsgSend;
