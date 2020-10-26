@@ -1,11 +1,16 @@
+import axios from 'axios'
 import * as BIP39 from 'bip39'
 import * as BIP32 from 'bip32'
 
+import { TxHistoryParams } from '@xchainjs/xchain-client'
+
 import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from 'cosmos-client'
-import { BroadcastTxCommitResult, Coin, PaginatedQueryTxs, StdTxFee, StdTxSignature } from 'cosmos-client/api'
+import { BroadcastTxCommitResult, Coin, StdTxFee, StdTxSignature } from 'cosmos-client/api'
 import { auth, StdTx, BaseAccount } from 'cosmos-client/x/auth'
 import { bank, MsgSend } from 'cosmos-client/x/bank'
-import { SearchTxParams, TransferParams } from './types'
+
+import { APIQueryParam, BaseAccountResponse, SearchTxParams, TransferParams, TxHistoryResponse } from './types'
+import { getQueryString } from '../util'
 
 export class CosmosSDKClient {
   sdk: CosmosSDK
@@ -79,11 +84,31 @@ export class CosmosSDKClient {
     limit,
     txMinHeight,
     txMaxHeight,
-  }: SearchTxParams): Promise<PaginatedQueryTxs> => {
+  }: SearchTxParams): Promise<TxHistoryResponse> => {
     try {
-      return await auth
-        .txsGet(this.sdk, messageAction, messageSender, page, limit, txMinHeight, txMaxHeight)
-        .then(async (res) => res.data)
+      const queryParameter: APIQueryParam = {}
+      if (messageAction !== undefined) {
+        queryParameter['message.action'] = messageAction
+      }
+      if (messageSender !== undefined) {
+        queryParameter['message.sender'] = messageSender
+      }
+      if (page !== undefined) {
+        queryParameter['page'] = page.toString()
+      }
+      if (limit !== undefined) {
+        queryParameter['limit'] = limit.toString()
+      }
+      if (txMinHeight !== undefined) {
+        queryParameter['tx.minheight'] = txMinHeight.toString()
+      }
+      if (txMaxHeight !== undefined) {
+        queryParameter['tx.maxheight'] = txMaxHeight.toString()
+      }
+
+      return await axios
+        .get<TxHistoryParams>(`${this.server}/txs?${getQueryString(queryParameter)}`)
+        .then((res) => res.data)
     } catch (error) {
       return Promise.reject(error)
     }
@@ -96,7 +121,7 @@ export class CosmosSDKClient {
 
       let account: BaseAccount = await auth.accountsAddressGet(this.sdk, fromAddress).then((res) => res.data.result)
       if (account.account_number === undefined) {
-        account = BaseAccount.fromJSON((account as any).value)
+        account = BaseAccount.fromJSON((account as BaseAccountResponse).value)
       }
 
       const msg: Msg = [

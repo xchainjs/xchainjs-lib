@@ -1,6 +1,10 @@
+import { Msg } from 'cosmos-client'
+import { StdTxFee } from 'cosmos-client/api'
+import { StdTx } from 'cosmos-client/x/auth'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
-import { AssetMuon, AssetAtom } from '../src/cosmos/types'
-import { isMsgMultiSend, isMsgSend, getDenom, getAsset } from '../src/util'
+import { baseAmount } from '@xchainjs/xchain-util'
+import { AssetMuon, AssetAtom, TxResponse, RawTxResponse, APIQueryParam } from '../src/cosmos/types'
+import { isMsgMultiSend, isMsgSend, getDenom, getAsset, getTxsFromHistory, getQueryString } from '../src/util'
 
 describe('cosmos/util', () => {
   describe('Msg type guards', () => {
@@ -91,6 +95,123 @@ describe('cosmos/util', () => {
       it('get asset for unknown', () => {
         expect(getAsset('unknown')).toBeNull()
       })
+    })
+  })
+
+  describe('parse Tx', () => {
+    const fee: StdTxFee = {
+      gas: '200000',
+      amount: [],
+    }
+    const from_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
+    const to_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
+
+    const txs: Array<TxResponse> = [
+      {
+        height: 0,
+        txhash: '',
+        raw_log: '',
+        gas_wanted: '200000',
+        gas_used: '35000',
+        tx: {
+          msg: [
+            MsgSend.fromJSON({
+              from_address,
+              to_address,
+              amount: [
+                {
+                  denom: 'uatom',
+                  amount: '1000',
+                },
+              ],
+            }),
+            MsgSend.fromJSON({
+              from_address,
+              to_address,
+              amount: [
+                {
+                  denom: 'uatom',
+                  amount: '1000',
+                },
+              ],
+            }),
+          ] as Msg[],
+          fee: fee,
+          signatures: null,
+          memo: '',
+        } as StdTx,
+        timestamp: new Date().toString(),
+      },
+      {
+        height: 0,
+        txhash: '',
+        raw_log: '',
+        gas_wanted: '200000',
+        gas_used: '35000',
+        tx: {
+          body: {
+            messages: [
+              MsgSend.fromJSON({
+                from_address,
+                to_address,
+                amount: [
+                  {
+                    denom: 'uatom',
+                    amount: '1000',
+                  },
+                ],
+              }),
+              MsgSend.fromJSON({
+                from_address,
+                to_address,
+                amount: [
+                  {
+                    denom: 'uatom',
+                    amount: '1000',
+                  },
+                ],
+              }),
+            ] as Msg[],
+          },
+        } as RawTxResponse,
+        timestamp: new Date().toString(),
+      },
+    ]
+
+    it('parse Tx', () => {
+      const parsed_txs = getTxsFromHistory(txs, AssetAtom)
+
+      expect(parsed_txs.length).toEqual(2)
+
+      expect(parsed_txs[0].asset).toEqual(AssetAtom)
+      expect(parsed_txs[0].from.length).toEqual(1)
+      expect(parsed_txs[0].from[0].from).toEqual(from_address)
+      expect(parsed_txs[0].from[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
+      expect(parsed_txs[0].to.length).toEqual(1)
+      expect(parsed_txs[0].to[0].to).toEqual(to_address)
+      expect(parsed_txs[0].to[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
+
+      expect(parsed_txs[1].asset).toEqual(AssetAtom)
+      expect(parsed_txs[1].from.length).toEqual(1)
+      expect(parsed_txs[1].from[0].from).toEqual(from_address)
+      expect(parsed_txs[1].from[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
+      expect(parsed_txs[1].to.length).toEqual(1)
+      expect(parsed_txs[1].to[0].to).toEqual(to_address)
+      expect(parsed_txs[1].to[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
+    })
+  })
+
+  describe('get query string', () => {
+    const queryParameter: APIQueryParam = {
+      'message.Sender': 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg',
+      page: '1',
+      limit: '5',
+    }
+
+    it('get query string from query params', () => {
+      expect(getQueryString(queryParameter)).toEqual(
+        'message.Sender=cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg&page=1&limit=5',
+      )
     })
   })
 })
