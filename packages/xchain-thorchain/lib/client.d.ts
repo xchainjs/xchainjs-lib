@@ -4,8 +4,6 @@ import { Asset } from '@xchainjs/xchain-util';
  * Interface for custom Thorchain client
  */
 export interface ThorchainClient {
-    purgeClient(): void;
-    getAddress(): string;
     validateAddress(address: string): boolean;
 }
 declare class Client implements ThorchainClient, XChainClient {
@@ -14,16 +12,18 @@ declare class Client implements ThorchainClient, XChainClient {
     private phrase;
     private address;
     private privateKey;
+    private derive_path;
     constructor({ network, phrase }: XChainClientParams);
     purgeClient(): void;
     setNetwork(network: Network): XChainClient;
     getNetwork(): Network;
     getClientUrl: () => string;
     getChainId: () => string;
+    private getPrefix;
+    private registerCodecs;
     private getExplorerUrl;
     getExplorerAddressUrl: (address: Address) => string;
     getExplorerTxUrl: (txID: string) => string;
-    private getPrefix;
     static generatePhrase: () => string;
     static validatePhrase: (phrase: string) => boolean;
     setPhrase: (phrase: string) => Address;

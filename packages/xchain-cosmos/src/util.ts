@@ -6,7 +6,8 @@ import { StdTx } from 'cosmos-client/x/auth'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 import { codec } from 'cosmos-client/codec'
 
-import { AssetAtom, AssetMuon, RawTxResponse, TxResponse, APIQueryParam } from './cosmos/types'
+import { RawTxResponse, TxResponse, APIQueryParam } from './cosmos/types'
+import { AssetAtom, AssetMuon } from './types'
 
 /**
  * Type guard for MsgSend

@@ -19,6 +19,7 @@ declare class Client implements CosmosClient, XChainClient {
     getNetwork(): Network;
     getClientUrl: () => string;
     getChainId: () => string;
+    private registerCodecs;
     private getExplorerUrl;
     getExplorerAddressUrl: (address: Address) => string;
     getExplorerTxUrl: (txID: string) => string;

@@ -2,8 +2,9 @@ import nock from 'nock'
 
 import { TxsPage } from '@xchainjs/xchain-client'
 import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
+import { TxHistoryResponse } from '@xchainjs/xchain-cosmos'
 import { BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
-import { AssetThor, TxHistoryResponse } from '../src/thor/types'
+import { AssetRune } from '../src/types'
 import { Client } from '../src/client'
 import { getDenom } from '../src/util'
 
@@ -14,7 +15,7 @@ const assertTxsPost = (
   send_amount: Coin[],
   memo: undefined | string,
   result: BroadcastTxCommitResult,
-) => {
+): void => {
   nock(url, { allowUnmocked: true })
     .post(`/txs`, (body) => {
       expect(body.tx.msg.length).toEqual(1)
@@ -28,7 +29,7 @@ const assertTxsPost = (
     .reply(200, result)
 }
 
-const assertTxHstory = (url: string, address: string, result: TxHistoryResponse) => {
+const assertTxHstory = (url: string, address: string, result: TxHistoryResponse): void => {
   nock(url).get(`/txs?message.sender=${address}`).reply(200, result)
 }
 
@@ -39,7 +40,7 @@ describe('Client Test', () => {
   const testnet_address = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
 
   beforeEach(() => {
-    thorClient = new Client({ phrase, network: 'mainnet' })
+    thorClient = new Client({ phrase, network: 'testnet' })
   })
 
   afterEach(() => {
@@ -67,7 +68,7 @@ describe('Client Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(await thorClient.getAddress()).toEqual(mainnet_address)
+    expect(await thorClient.getAddress()).toEqual(testnet_address)
   })
 
   it('should update net', async () => {
@@ -93,22 +94,22 @@ describe('Client Test', () => {
   it('should init, should have right prefix', async () => {
     expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
 
-    thorClient.setNetwork('testnet')
+    thorClient.setNetwork('mainnet')
     expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
   })
 
   it('has no balances', async () => {
-    thorClient.setNetwork('testnet')
     const result = await thorClient.getBalance()
     expect(result).toEqual([])
   })
 
   it('has balances', async () => {
+    thorClient.setNetwork('mainnet')
     const balances = await thorClient.getBalance('thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5')
     expect(balances.length).toBeGreaterThan(0)
     const expected = balances[0].amount.amount().isGreaterThan(baseAmount(0, 6).amount())
     expect(expected).toBeTruthy()
-    expect(balances[0].asset).toEqual(AssetThor)
+    expect(balances[0].asset).toEqual(AssetRune)
   })
 
   it('has an empty tx history', async () => {
@@ -122,7 +123,7 @@ describe('Client Test', () => {
   })
 
   it('has tx history', async () => {
-    assertTxHstory(thorClient.getClientUrl(), mainnet_address, {
+    assertTxHstory(thorClient.getClientUrl(), testnet_address, {
       count: 1,
       limit: 30,
       page_number: 1,
@@ -164,8 +165,6 @@ describe('Client Test', () => {
   })
 
   it('transfer', async () => {
-    thorClient.setNetwork('testnet')
-
     const to_address = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
     const send_amount: BaseAmount = baseAmount(10000, 6)
     const memo = 'transfer'
@@ -183,7 +182,7 @@ describe('Client Test', () => {
       to_address,
       [
         {
-          denom: getDenom(AssetThor),
+          denom: getDenom(AssetRune),
           amount: send_amount.amount().toString(),
         },
       ],
@@ -192,7 +191,7 @@ describe('Client Test', () => {
     )
 
     const result = await thorClient.transfer({
-      asset: AssetThor,
+      asset: AssetRune,
       recipient: to_address,
       amount: send_amount,
       memo,
@@ -202,8 +201,6 @@ describe('Client Test', () => {
   })
 
   it('deposit', async () => {
-    thorClient.setNetwork('testnet')
-
     const to_address = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
     const send_amount: BaseAmount = baseAmount(10000, 6)
     const memo = 'deposit'
@@ -221,7 +218,7 @@ describe('Client Test', () => {
       to_address,
       [
         {
-          denom: getDenom(AssetThor),
+          denom: getDenom(AssetRune),
           amount: send_amount.amount().toString(),
         },
       ],
@@ -230,7 +227,7 @@ describe('Client Test', () => {
     )
 
     const result = await thorClient.deposit({
-      asset: AssetThor,
+      asset: AssetRune,
       recipient: to_address,
       amount: send_amount,
       memo,

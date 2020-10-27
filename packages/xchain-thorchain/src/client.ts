@@ -3,9 +3,6 @@ import {
   Balances,
   Fees,
   Network,
-  Txs,
-  TxFrom,
-  TxTo,
   TxParams,
   TxHash,
   TxHistoryParams,
@@ -13,39 +10,41 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, assetFromString, baseAmount, THORChain } from '@xchainjs/xchain-util'
+import { CosmosSDKClient, getTxsFromHistory } from '@xchainjs/xchain-cosmos'
+import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
-import { PrivKey, Msg } from 'cosmos-client'
+import { PrivKey } from 'cosmos-client'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 import { codec } from 'cosmos-client/codec'
 
-import { ThorClient } from './thor/thor-client'
-import { AssetThor, RawTxResponse } from './thor/types'
-import { isMsgSend, isMsgMultiSend, getDenom, getAsset } from './util'
-import { StdTx } from 'cosmos-client/x/auth'
+import { AssetRune } from './types'
+import { getDenom, getAsset } from './util'
 
 /**
  * Interface for custom Thorchain client
  */
 export interface ThorchainClient {
-  purgeClient(): void
-
-  getAddress(): string
-
   validateAddress(address: string): boolean
 }
 
 class Client implements ThorchainClient, XChainClient {
   private network: Network
-  private thorClient: ThorClient
+  private thorClient: CosmosSDKClient
   private phrase = ''
   private address: Address = ''
   private privateKey: PrivKey | null = null
 
+  private derive_path = "44'/931'/0'/0/0"
+
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
-    this.thorClient = new ThorClient(this.getClientUrl(), this.getChainId(), this.getPrefix())
+    this.thorClient = new CosmosSDKClient({
+      server: this.getClientUrl(),
+      chainId: this.getChainId(),
+      prefix: this.getPrefix(),
+      derive_path: this.derive_path,
+    })
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -58,7 +57,12 @@ class Client implements ThorchainClient, XChainClient {
 
   setNetwork(network: Network): XChainClient {
     this.network = network
-    this.thorClient = new ThorClient(this.getClientUrl(), this.getChainId(), this.getPrefix())
+    this.thorClient = new CosmosSDKClient({
+      server: this.getClientUrl(),
+      chainId: this.getChainId(),
+      prefix: this.getPrefix(),
+      derive_path: this.derive_path,
+    })
     this.address = ''
 
     return this
@@ -76,6 +80,15 @@ class Client implements ThorchainClient, XChainClient {
     return 'thorchain'
   }
 
+  private getPrefix = (): string => {
+    return this.network === 'testnet' ? 'tthor' : 'thor'
+  }
+
+  private registerCodecs = (): void => {
+    codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
+    codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
+  }
+
   private getExplorerUrl = (): string => {
     return 'https://thorchain.net/'
   }
@@ -86,10 +99,6 @@ class Client implements ThorchainClient, XChainClient {
 
   getExplorerTxUrl = (txID: string): string => {
     return `${this.getExplorerUrl()}/txs/${txID}`
-  }
-
-  private getPrefix = (): string => {
-    return this.network === 'testnet' ? 'tthor' : 'thor'
   }
 
   static generatePhrase = (): string => {
@@ -147,7 +156,7 @@ class Client implements ThorchainClient, XChainClient {
 
       return balances
         .map((balance) => ({
-          asset: (balance.denom && getAsset(balance.denom)) || AssetThor,
+          asset: (balance.denom && getAsset(balance.denom)) || AssetRune,
           amount: baseAmount(balance.amount, 8),
         }))
         .filter((balance) => !asset || balance.asset === asset)
@@ -157,7 +166,7 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const messageAction = undefined // filter MsgSend only
+    const messageAction = undefined
     const messageSender = (params && params.address) || this.getAddress()
     const page = (params && params.offset) || undefined
     const limit = (params && params.limit) || undefined
@@ -165,6 +174,8 @@ class Client implements ThorchainClient, XChainClient {
     const txMaxHeight = undefined
 
     try {
+      this.registerCodecs()
+
       const txHistory = await this.thorClient.searchTx({
         messageAction,
         messageSender,
@@ -174,80 +185,9 @@ class Client implements ThorchainClient, XChainClient {
         txMaxHeight,
       })
 
-      const txs: Txs = (txHistory.txs || []).reduce((acc, tx) => {
-        let msgs: Msg[] = []
-        if ((tx.tx as RawTxResponse).body === undefined) {
-          msgs = codec.fromJSONString(JSON.stringify(tx.tx as StdTx)).msg
-        } else {
-          msgs = codec.fromJSONString(JSON.stringify((tx.tx as RawTxResponse).body.messages))
-        }
-
-        const from: TxFrom[] = []
-        const to: TxTo[] = []
-        let asset: Asset | null = null
-
-        msgs.map((msg) => {
-          if (isMsgSend(msg)) {
-            const msgSend = msg as MsgSend
-            const amount = msgSend.amount
-              .map((coin) => baseAmount(coin.amount, 8))
-              .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 8), baseAmount(0, 8))
-
-            asset = msgSend.amount.reduce((acc, cur) => {
-              if (acc) return acc
-              return assetFromString(`${THORChain}.${cur.denom}`)
-            }, null as Asset | null)
-
-            from.push({
-              from: msgSend.from_address.toBech32(),
-              amount,
-            })
-            to.push({
-              to: msgSend.to_address.toBech32(),
-              amount,
-            })
-          } else if (isMsgMultiSend(msg)) {
-            const msgMultiSend = msg as MsgMultiSend
-
-            from.push(
-              ...msgMultiSend.inputs.map((input) => {
-                return {
-                  from: input.address,
-                  amount: input.coins
-                    .map((coin) => baseAmount(coin.amount, 6))
-                    .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6)),
-                }
-              }),
-            )
-            to.push(
-              ...msgMultiSend.outputs.map((output) => {
-                return {
-                  to: output.address,
-                  amount: output.coins
-                    .map((coin) => baseAmount(coin.amount, 6))
-                    .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6)),
-                }
-              }),
-            )
-          }
-        })
-
-        return [
-          ...acc,
-          {
-            asset: asset || AssetThor,
-            from,
-            to,
-            date: new Date(tx.timestamp),
-            type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
-            hash: tx.txhash || '',
-          },
-        ]
-      }, [] as Txs)
-
       return {
         total: parseInt(txHistory.total_count?.toString() || '0'),
-        txs,
+        txs: getTxsFromHistory(txHistory.txs || [], AssetRune),
       }
     } catch (error) {
       return Promise.reject(error)
@@ -260,12 +200,14 @@ class Client implements ThorchainClient, XChainClient {
 
   transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
+      this.registerCodecs()
+
       const transferResult = await this.thorClient.transfer({
         privkey: this.getPrivateKey(),
         from: this.getAddress(),
         to: recipient,
         amount: amount.amount().toString(),
-        asset: getDenom(asset || AssetThor),
+        asset: getDenom(asset || AssetRune),
         memo,
       })
 

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain",
-  "version": "3.0.1",
+  "version": "0.3.3",
   "description": "Custom Thorchain client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -26,7 +26,6 @@
   "scripts": {
     "clean": "rimraf lib/**",
     "build": "rollup -c",
-    "compile": "tsc -p tsconfig.build.json",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix",
     "prepublishOnly": "yarn build",
@@ -61,6 +60,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@xchainjs/xchain-cosmos": "^0.3.3",
     "@xchainjs/xchain-client": "^0.0.5",
     "@xchainjs/xchain-crypto": "^0.1.0",
     "nock": "^13.0.4"

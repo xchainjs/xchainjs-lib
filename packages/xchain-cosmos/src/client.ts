@@ -14,9 +14,11 @@ import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { PrivKey } from 'cosmos-client'
+import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
+import { codec } from 'cosmos-client/codec'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
-import { AssetAtom, AssetMuon } from './cosmos/types'
+import { AssetAtom, AssetMuon } from './types'
 import { getDenom, getAsset, getTxsFromHistory } from './util'
 
 /**
@@ -37,7 +39,7 @@ class Client implements CosmosClient, XChainClient {
 
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
-    this.sdkClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId())
+    this.sdkClient = new CosmosSDKClient({ server: this.getClientUrl(), chainId: this.getChainId() })
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -50,7 +52,7 @@ class Client implements CosmosClient, XChainClient {
 
   setNetwork = (network: Network): XChainClient => {
     this.network = network
-    this.sdkClient = new CosmosSDKClient(this.getClientUrl(), this.getChainId())
+    this.sdkClient = new CosmosSDKClient({ server: this.getClientUrl(), chainId: this.getChainId() })
     this.address = ''
 
     return this
@@ -66,6 +68,11 @@ class Client implements CosmosClient, XChainClient {
 
   getChainId = (): string => {
     return this.network === 'testnet' ? 'gaia-3a' : 'cosmoshub-3'
+  }
+
+  private registerCodecs = (): void => {
+    codec.registerCodec('cosmos-sdk/MsgSend', MsgSend, MsgSend.fromJSON)
+    codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
   }
 
   private getExplorerUrl = (): string => {
@@ -160,6 +167,8 @@ class Client implements CosmosClient, XChainClient {
     const txMaxHeight = undefined
 
     try {
+      this.registerCodecs()
+
       const mainAsset = this.getMainAsset()
       const txHistory = await this.sdkClient.searchTx({
         messageAction,
@@ -185,6 +194,8 @@ class Client implements CosmosClient, XChainClient {
 
   transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
+      this.registerCodecs()
+
       const mainAsset = this.getMainAsset()
       const transferResult = await this.sdkClient.transfer({
         privkey: this.getPrivateKey(),

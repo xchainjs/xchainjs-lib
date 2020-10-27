@@ -3,7 +3,8 @@ import { StdTxFee } from 'cosmos-client/api'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 import { baseAmount } from '@xchainjs/xchain-util'
-import { AssetMuon, AssetAtom, TxResponse, RawTxResponse, APIQueryParam } from '../src/cosmos/types'
+import { TxResponse, RawTxResponse, APIQueryParam } from '../src/cosmos/types'
+import { AssetMuon, AssetAtom } from '../src/types'
 import { isMsgMultiSend, isMsgSend, getDenom, getAsset, getTxsFromHistory, getQueryString } from '../src/util'
 
 describe('cosmos/util', () => {

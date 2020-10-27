@@ -9,7 +9,14 @@ import { BroadcastTxCommitResult, Coin, StdTxFee, StdTxSignature } from 'cosmos-
 import { auth, StdTx, BaseAccount } from 'cosmos-client/x/auth'
 import { bank, MsgSend } from 'cosmos-client/x/bank'
 
-import { APIQueryParam, BaseAccountResponse, SearchTxParams, TransferParams, TxHistoryResponse } from './types'
+import {
+  APIQueryParam,
+  BaseAccountResponse,
+  SearchTxParams,
+  TransferParams,
+  TxHistoryResponse,
+  CosmosSDKClientParams,
+} from './types'
 import { getQueryString } from '../util'
 
 export class CosmosSDKClient {
@@ -17,13 +24,16 @@ export class CosmosSDKClient {
 
   server: string
   chainId: string
-  prefix = 'cosmos'
 
-  private derive_path = "44'/118'/0'/0/0"
+  prefix = ''
+  derive_path = ''
 
-  constructor(server: string, chainId: string) {
+  // by default, cosmos chain
+  constructor({ server, chainId, prefix = 'cosmos', derive_path = "44'/118'/0'/0/0" }: CosmosSDKClientParams) {
     this.server = server
     this.chainId = chainId
+    this.prefix = prefix
+    this.derive_path = derive_path
     this.sdk = new CosmosSDK(this.server, this.chainId)
     this.setPrefix()
   }
