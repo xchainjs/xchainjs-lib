@@ -35,7 +35,6 @@ export class CosmosSDKClient {
     this.prefix = prefix
     this.derive_path = derive_path
     this.sdk = new CosmosSDK(this.server, this.chainId)
-    this.setPrefix()
   }
 
   setPrefix = (): void => {
@@ -50,6 +49,8 @@ export class CosmosSDKClient {
   }
 
   getAddressFromPrivKey = (privkey: PrivKey): string => {
+    this.setPrefix()
+
     return AccAddress.fromPublicKey(privkey.getPubKey()).toBech32()
   }
 
@@ -67,6 +68,8 @@ export class CosmosSDKClient {
 
   checkAddress = (address: string): boolean => {
     try {
+      this.setPrefix()
+
       if (!address.startsWith(this.prefix)) {
         return false
       }
@@ -79,6 +82,8 @@ export class CosmosSDKClient {
 
   getBalance = async (address: string): Promise<Coin[]> => {
     try {
+      this.setPrefix()
+
       const accAddress = AccAddress.fromBech32(address)
 
       return bank.balancesAddressGet(this.sdk, accAddress).then((res) => res.data.result)
@@ -116,6 +121,8 @@ export class CosmosSDKClient {
         queryParameter['tx.maxheight'] = txMaxHeight.toString()
       }
 
+      this.setPrefix()
+
       return await axios
         .get<TxHistoryParams>(`${this.server}/txs?${getQueryString(queryParameter)}`)
         .then((res) => res.data)
@@ -126,6 +133,8 @@ export class CosmosSDKClient {
 
   transfer = async ({ privkey, from, to, amount, asset, memo }: TransferParams): Promise<BroadcastTxCommitResult> => {
     try {
+      this.setPrefix()
+
       const fromAddress = AccAddress.fromBech32(from)
       const toAddress = AccAddress.fromBech32(to)
 
