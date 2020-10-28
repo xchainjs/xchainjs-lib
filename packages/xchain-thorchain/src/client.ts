@@ -10,6 +10,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
+import { CosmosSDKClient, getTxsFromHistory } from '@xchainjs/xchain-cosmos'
 import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
@@ -17,29 +18,33 @@ import { PrivKey } from 'cosmos-client'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 import { codec } from 'cosmos-client/codec'
 
-import { CosmosSDKClient } from './cosmos/sdk-client'
-import { AssetAtom, AssetMuon } from './types'
-import { getDenom, getAsset, getTxsFromHistory } from './util'
+import { AssetRune } from './types'
+import { getDenom, getAsset } from './util'
 
 /**
- * Interface for custom Cosmos client
+ * Interface for custom Thorchain client
  */
-export interface CosmosClient {
+export interface ThorchainClient {
   validateAddress(address: string): boolean
-
-  getMainAsset(): Asset
 }
 
-class Client implements CosmosClient, XChainClient {
+class Client implements ThorchainClient, XChainClient {
   private network: Network
-  private sdkClient: CosmosSDKClient
+  private thorClient: CosmosSDKClient
   private phrase = ''
-  private address: Address = '' // default address at index 0
-  private privateKey: PrivKey | null = null // default private key at index 0
+  private address: Address = ''
+  private privateKey: PrivKey | null = null
+
+  private derive_path = "44'/931'/0'/0/0"
 
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
-    this.sdkClient = new CosmosSDKClient({ server: this.getClientUrl(), chainId: this.getChainId() })
+    this.thorClient = new CosmosSDKClient({
+      server: this.getClientUrl(),
+      chainId: this.getChainId(),
+      prefix: this.getPrefix(),
+      derive_path: this.derive_path,
+    })
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -50,9 +55,14 @@ class Client implements CosmosClient, XChainClient {
     this.privateKey = null
   }
 
-  setNetwork = (network: Network): XChainClient => {
+  setNetwork(network: Network): XChainClient {
     this.network = network
-    this.sdkClient = new CosmosSDKClient({ server: this.getClientUrl(), chainId: this.getChainId() })
+    this.thorClient = new CosmosSDKClient({
+      server: this.getClientUrl(),
+      chainId: this.getChainId(),
+      prefix: this.getPrefix(),
+      derive_path: this.derive_path,
+    })
     this.address = ''
 
     return this
@@ -63,28 +73,32 @@ class Client implements CosmosClient, XChainClient {
   }
 
   getClientUrl = (): string => {
-    return this.network === 'testnet' ? 'http://lcd.gaia.bigdipper.live:1317' : 'https://api.cosmos.network'
+    return this.network === 'testnet' ? 'http://13.238.212.224:1317' : 'http://104.248.96.152:1317'
   }
 
   getChainId = (): string => {
-    return this.network === 'testnet' ? 'gaia-3a' : 'cosmoshub-3'
+    return 'thorchain'
+  }
+
+  private getPrefix = (): string => {
+    return this.network === 'testnet' ? 'tthor' : 'thor'
   }
 
   private registerCodecs = (): void => {
-    codec.registerCodec('cosmos-sdk/MsgSend', MsgSend, MsgSend.fromJSON)
-    codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
+    codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
+    codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
   }
 
   private getExplorerUrl = (): string => {
-    return this.network === 'testnet' ? 'https://gaia.bigdipper.live' : 'https://cosmos.bigdipper.live'
+    return 'https://thorchain.net/'
   }
 
   getExplorerAddressUrl = (address: Address): string => {
-    return `${this.getExplorerUrl()}/account/${address}`
+    return `${this.getExplorerUrl()}/addresses/${address}`
   }
 
   getExplorerTxUrl = (txID: string): string => {
-    return `${this.getExplorerUrl()}/transactions/${txID}`
+    return `${this.getExplorerUrl()}/txs/${txID}`
   }
 
   static generatePhrase = (): string => {
@@ -113,7 +127,7 @@ class Client implements CosmosClient, XChainClient {
     if (!this.privateKey) {
       if (!this.phrase) throw new Error('Phrase not set')
 
-      this.privateKey = this.sdkClient.getPrivKeyFromMnemonic(this.phrase)
+      this.privateKey = this.thorClient.getPrivKeyFromMnemonic(this.phrase)
     }
 
     return this.privateKey
@@ -121,7 +135,7 @@ class Client implements CosmosClient, XChainClient {
 
   getAddress = (): string => {
     if (!this.address) {
-      const address = this.sdkClient.getAddressFromPrivKey(this.getPrivateKey())
+      const address = this.thorClient.getAddressFromPrivKey(this.getPrivateKey())
       if (!address) {
         throw new Error('address not defined')
       }
@@ -133,25 +147,18 @@ class Client implements CosmosClient, XChainClient {
   }
 
   validateAddress = (address: Address): boolean => {
-    return this.sdkClient.checkAddress(address)
-  }
-
-  getMainAsset = (): Asset => {
-    return this.network === 'testnet' ? AssetMuon : AssetAtom
+    return this.thorClient.checkAddress(address)
   }
 
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
     try {
-      const balances = await this.sdkClient.getBalance(address || this.getAddress())
-      const mainAsset = this.getMainAsset()
+      const balances = await this.thorClient.getBalance(address || this.getAddress())
 
       return balances
-        .map((balance) => {
-          return {
-            asset: (balance.denom && getAsset(balance.denom)) || mainAsset,
-            amount: baseAmount(balance.amount, 6),
-          }
-        })
+        .map((balance) => ({
+          asset: (balance.denom && getAsset(balance.denom)) || AssetRune,
+          amount: baseAmount(balance.amount, 8),
+        }))
         .filter((balance) => !asset || balance.asset === asset)
     } catch (error) {
       return Promise.reject(error)
@@ -169,8 +176,7 @@ class Client implements CosmosClient, XChainClient {
     try {
       this.registerCodecs()
 
-      const mainAsset = this.getMainAsset()
-      const txHistory = await this.sdkClient.searchTx({
+      const txHistory = await this.thorClient.searchTx({
         messageAction,
         messageSender,
         page,
@@ -181,7 +187,7 @@ class Client implements CosmosClient, XChainClient {
 
       return {
         total: parseInt(txHistory.total_count?.toString() || '0'),
-        txs: getTxsFromHistory(txHistory.txs || [], mainAsset),
+        txs: getTxsFromHistory(txHistory.txs || [], AssetRune),
       }
     } catch (error) {
       return Promise.reject(error)
@@ -196,19 +202,18 @@ class Client implements CosmosClient, XChainClient {
     try {
       this.registerCodecs()
 
-      const mainAsset = this.getMainAsset()
-      const transferResult = await this.sdkClient.transfer({
+      const transferResult = await this.thorClient.transfer({
         privkey: this.getPrivateKey(),
         from: this.getAddress(),
         to: recipient,
         amount: amount.amount().toString(),
-        asset: getDenom(asset || mainAsset),
+        asset: getDenom(asset || AssetRune),
         memo,
       })
 
       return transferResult?.txhash || ''
-    } catch (error) {
-      return Promise.reject(error)
+    } catch (err) {
+      return ''
     }
   }
 
@@ -217,7 +222,7 @@ class Client implements CosmosClient, XChainClient {
     try {
       return {
         type: 'base',
-        average: baseAmount(0, 6),
+        average: baseAmount(0),
       } as Fees
     } catch (error) {
       return Promise.reject(error)

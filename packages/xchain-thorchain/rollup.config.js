@@ -33,5 +33,5 @@ export default {
     }),
     commonjs(),
   ],
-  external: ['readable-stream', 'axios', 'buffer', 'cosmos-client', 'stream', 'string_decoder'],
+  external: ['readable-stream', 'buffer', 'stream', 'string_decoder'],
 }

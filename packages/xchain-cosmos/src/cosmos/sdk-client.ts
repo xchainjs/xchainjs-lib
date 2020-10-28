@@ -9,7 +9,14 @@ import { BroadcastTxCommitResult, Coin, StdTxFee, StdTxSignature } from 'cosmos-
 import { auth, StdTx, BaseAccount } from 'cosmos-client/x/auth'
 import { bank, MsgSend } from 'cosmos-client/x/bank'
 
-import { APIQueryParam, BaseAccountResponse, SearchTxParams, TransferParams, TxHistoryResponse } from './types'
+import {
+  APIQueryParam,
+  BaseAccountResponse,
+  SearchTxParams,
+  TransferParams,
+  TxHistoryResponse,
+  CosmosSDKClientParams,
+} from './types'
 import { getQueryString } from '../util'
 
 export class CosmosSDKClient {
@@ -17,15 +24,17 @@ export class CosmosSDKClient {
 
   server: string
   chainId: string
-  prefix = 'cosmos'
 
-  private derive_path = "44'/118'/0'/0/0"
+  prefix = ''
+  derive_path = ''
 
-  constructor(server: string, chainId: string) {
+  // by default, cosmos chain
+  constructor({ server, chainId, prefix = 'cosmos', derive_path = "44'/118'/0'/0/0" }: CosmosSDKClientParams) {
     this.server = server
     this.chainId = chainId
+    this.prefix = prefix
+    this.derive_path = derive_path
     this.sdk = new CosmosSDK(this.server, this.chainId)
-    this.setPrefix()
   }
 
   setPrefix = (): void => {
@@ -40,6 +49,8 @@ export class CosmosSDKClient {
   }
 
   getAddressFromPrivKey = (privkey: PrivKey): string => {
+    this.setPrefix()
+
     return AccAddress.fromPublicKey(privkey.getPubKey()).toBech32()
   }
 
@@ -57,6 +68,8 @@ export class CosmosSDKClient {
 
   checkAddress = (address: string): boolean => {
     try {
+      this.setPrefix()
+
       if (!address.startsWith(this.prefix)) {
         return false
       }
@@ -69,6 +82,8 @@ export class CosmosSDKClient {
 
   getBalance = async (address: string): Promise<Coin[]> => {
     try {
+      this.setPrefix()
+
       const accAddress = AccAddress.fromBech32(address)
 
       return bank.balancesAddressGet(this.sdk, accAddress).then((res) => res.data.result)
@@ -106,6 +121,8 @@ export class CosmosSDKClient {
         queryParameter['tx.maxheight'] = txMaxHeight.toString()
       }
 
+      this.setPrefix()
+
       return await axios
         .get<TxHistoryParams>(`${this.server}/txs?${getQueryString(queryParameter)}`)
         .then((res) => res.data)
@@ -116,6 +133,8 @@ export class CosmosSDKClient {
 
   transfer = async ({ privkey, from, to, amount, asset, memo }: TransferParams): Promise<BroadcastTxCommitResult> => {
     try {
+      this.setPrefix()
+
       const fromAddress = AccAddress.fromBech32(from)
       const toAddress = AccAddress.fromBech32(to)
 

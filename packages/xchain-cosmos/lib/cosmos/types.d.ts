@@ -1,10 +1,12 @@
 import { BigSource } from 'big.js';
-import { Asset } from '@xchainjs/xchain-util';
 import { PrivKey, Msg } from 'cosmos-client';
 import { BaseAccount, StdTx } from 'cosmos-client/x/auth';
-export declare const CosmosChain = "THOR";
-export declare const AssetAtom: Asset;
-export declare const AssetMuon: Asset;
+export declare type CosmosSDKClientParams = {
+    server: string;
+    chainId: string;
+    prefix?: string;
+    derive_path?: string;
+};
 export declare type SearchTxParams = {
     messageAction?: string;
     messageSender?: string;

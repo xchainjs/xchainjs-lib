@@ -1,12 +1,12 @@
 {
-  "name": "@xchainjs/xchain-cosmos",
+  "name": "@xchainjs/xchain-thorchain",
   "version": "0.3.3",
-  "description": "Custom Cosmos client and utilities used by XChainJS clients",
+  "description": "Custom Thorchain client and utilities used by XChainJS clients",
   "keywords": [
-    "XChain",
-    "Cosoms"
+    "THORChain",
+    "XChain"
   ],
-  "author": "XChainJS",
+  "author": "THORChain",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
   "main": "lib/index.js",
@@ -28,7 +28,8 @@
     "build": "rollup -c",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "yarn build",
+    "start:example": "ts-node example/index.ts"
   },
   "devDependencies": {
     "@types/big.js": "^4.0.5",
@@ -59,6 +60,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@xchainjs/xchain-cosmos": "^0.3.3",
     "@xchainjs/xchain-client": "^0.0.5",
     "@xchainjs/xchain-crypto": "^0.1.0",
     "nock": "^13.0.4"

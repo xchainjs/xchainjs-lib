@@ -1,13 +1,13 @@
 import { CosmosSDK, PrivKey } from 'cosmos-client';
 import { BroadcastTxCommitResult, Coin } from 'cosmos-client/api';
-import { SearchTxParams, TransferParams, TxHistoryResponse } from './types';
+import { SearchTxParams, TransferParams, TxHistoryResponse, CosmosSDKClientParams } from './types';
 export declare class CosmosSDKClient {
     sdk: CosmosSDK;
     server: string;
     chainId: string;
     prefix: string;
-    private derive_path;
-    constructor(server: string, chainId: string);
+    derive_path: string;
+    constructor({ server, chainId, prefix, derive_path }: CosmosSDKClientParams);
     setPrefix: () => void;
     getAddressFromPrivKey: (privkey: PrivKey) => string;
     getPrivKeyFromMnemonic: (mnemonic: string) => PrivKey;
