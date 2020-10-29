@@ -217,16 +217,16 @@ class Client implements BitcoinClient, XChainClient {
     const offset = params?.offset ?? 0
 
     let totalCount = 0
-    let transactions: Tx[] = []
+    const transactions: Tx[] = []
     try {
       //Calling getAddress without limit/offset to get total count
       const dAddr = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
       totalCount = dAddr[address].transactions.length
 
       const dashboardAddress = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey, limit, offset)
-      let txList = dashboardAddress[address].transactions
+      const txList = dashboardAddress[address].transactions
 
-      for(let hash of txList){
+      for (const hash of txList) {
         const rawTx = (await blockChair.getTx(this.nodeUrl, hash, this.nodeApiKey))[hash]
         const tx: Tx = {
           asset: AssetBTC,
@@ -311,9 +311,9 @@ class Client implements BitcoinClient, XChainClient {
     }
     const calcdFees: Fees = {
       type: feesOptions.type,
-      fast: baseAmount(feesOptions.fast!.amount().multipliedBy(nextBlockFeeRate)),
-      average: baseAmount(feesOptions.average!.amount().multipliedBy(nextBlockFeeRate)),
-      fastest: baseAmount(feesOptions.fastest!.amount().multipliedBy(nextBlockFeeRate)),
+      fast: baseAmount(feesOptions.fast?.amount().multipliedBy(nextBlockFeeRate)),
+      average: baseAmount(feesOptions.average?.amount().multipliedBy(nextBlockFeeRate)),
+      fastest: baseAmount(feesOptions.fastest?.amount().multipliedBy(nextBlockFeeRate)),
     }
     return calcdFees
   }
