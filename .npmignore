@@ -1,0 +1,2 @@
+packages/**/__tests__
+packages/**/src/*.test.*
