@@ -41,22 +41,26 @@ export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): 
  * @param chain
  * @param address
  */
-export const getAddress = async (baseUrl: string, address: string, apiKey?: string, limit?: number, offset?: number): Promise<BtcAddressDTO> => {
-
+export const getAddress = async (
+  baseUrl: string,
+  address: string,
+  apiKey?: string,
+  limit?: number,
+  offset?: number,
+): Promise<BtcAddressDTO> => {
   try {
     const params: { [key: string]: string | number } = {}
     if (apiKey) params.key = apiKey
     if (limit) {
-      if(limit > 10000) throw new Error("Max limit allowed 10000")
+      if (limit > 10000) throw new Error('Max limit allowed 10000')
       params.limit = limit
     }
     if (offset) {
-      if(offset > 1000000) throw new Error("Max offset allowed 1000000")
+      if (offset > 1000000) throw new Error('Max offset allowed 1000000')
       params.offset = offset
     }
 
-
-    const response = await axios.get(`${baseUrl}/dashboards/address/${address}`, {params})
+    const response = await axios.get(`${baseUrl}/dashboards/address/${address}`, { params })
     const addressResponse: BlockChairResponse<BtcAddressDTO> = response.data
     return addressResponse.data
   } catch (error) {

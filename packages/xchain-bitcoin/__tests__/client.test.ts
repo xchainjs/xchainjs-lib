@@ -169,7 +169,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     const normalTx = await btcClient.getFees()
     const vaultTx = await btcClient.getFeesWithMemo(MEMO)
-    expect(vaultTx.fast!.amount().isGreaterThan(normalTx.fast!.amount())).toBeTruthy()
+    expect(vaultTx.fast?.amount().isGreaterThan(normalTx.fast?.amount())).toBeTruthy()
   })
 
   it('should error when an invalid address is used in getting balance', () => {

@@ -27,7 +27,7 @@
     "clean": "rimraf lib/**",
     "build": "rollup -c rollup.config.ts",
     "test": "jest",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build"
   },
   "publishConfig": {

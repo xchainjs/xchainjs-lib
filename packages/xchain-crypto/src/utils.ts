@@ -27,7 +27,7 @@ export const sha256ripemd160 = (hex: string): string => {
   if (typeof hex !== 'string') throw new Error('sha256ripemd160 expects a string')
   if (hex.length % 2 !== 0) throw new Error(`invalid hex string length: ${hex}`)
   const hexEncoded = hexEncoding.parse(hex)
-  const ProgramSha256: any = sha256(hexEncoded)
+  const ProgramSha256 = sha256(hexEncoded)
   return ripemd160(ProgramSha256).toString()
 }
 
