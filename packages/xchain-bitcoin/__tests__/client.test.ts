@@ -20,20 +20,14 @@ describe('BitcoinClient Test', () => {
 
   const MEMO = 'SWAP:THOR.RUNE'
   // please don't touch the tBTC in these
-  // NOTE(kashif) For some reason these phrases and addresses don't match.
-  // const phraseOne = 'cycle join secret hospital slim party write price myth okay long slight'
-  // const addyOne = 'tb1qvgn58ktpaacpzp6w8fdjgk9dfgv28gytvvhd5a' //actual address seems to be: tb1qfjypmuujfxmqtfudgszc6qrf22mpdskc769qrf
-  // const phraseTwo = 'heavy spin someone rice laptop minor dice deal fever praise reject panic'
-  // const addyTwo = 'tb1qmyq44gzke8vzzj0npun6xla4anj92ghqn0g0qn' //actual address seems to be: tb1qc74x3y3xzc0gttq7qgkxv230fgjuyaud29vm9m
-
-  const phraseOne = 'foster blouse cattle fiction deputy social brown toast various sock awkward print'
-  const addyOne = 'tb1ql5wfzdm6llldgc90wj3uryf0f8pksd4d70p9hg'
-  const phraseTwo = 'rubber torch second universe pond fence flat permit tree kiss civil fantasy'
-  const addyTwo = 'tb1q75z9ake8lr2aka5t4d4per3jel4n7dg3q7lefn'
+  const phraseOne = 'atom green various power must another rent imitate gadget creek fat then'
+  const addyOne = 'tb1qcnlekeq5d259c6x3txenltrc05k2wwwwyfxphe'
+  const phraseTwo = 'north machine wash sister amazing jungle amused shrimp until genuine promote abstract'
+  const addyTwo = 'tb1qz8q2lwfmp965cszdd5raq9m7gljs57hkzpw56d'
 
   // Third ones is used only for balance verification
-  const phraseThree = 'father script wrestle topic better gravity awful robot letter illegal casino laugh'
-  const addyThree = 'tb1q59c5s6slg5075y7gngxd5c20rphntd367nfvdh'
+  const phraseThree = 'quantum vehicle print stairs canvas kid erode grass baby orbit lake remove'
+  const addyThree = 'tb1q3a00snh7erczk94k48fe9q5z0fldgnh4twsh29'
 
   it('should have the correct bitcoin network right prefix', () => {
     btcClient.setNetwork('mainnet')
@@ -81,7 +75,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseThree)
     const balance = await btcClient.getBalance()
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(100000)
+    expect(balance[0].amount.amount().toNumber()).toEqual(102000)
   })
 
   it('should get the right balance when scanUTXOs is called twice', async () => {
@@ -90,11 +84,11 @@ describe('BitcoinClient Test', () => {
 
     const balance = await btcClient.getBalance()
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(100000)
+    expect(balance[0].amount.amount().toNumber()).toEqual(102000)
 
     const newBalance = await btcClient.getBalance()
     expect(newBalance.length).toEqual(1)
-    expect(newBalance[0].amount.amount().toNumber()).toEqual(100000)
+    expect(newBalance[0].amount.amount().toNumber()).toEqual(102000)
   })
 
   it('should broadcast a normal transfer', async () => {
@@ -141,7 +135,7 @@ describe('BitcoinClient Test', () => {
     btcClient.purgeClient()
     const balance = await btcClient.getBalance(addyThree)
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(100000)
+    expect(balance[0].amount.amount().toNumber()).toEqual(102000)
   })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
@@ -182,7 +176,7 @@ describe('BitcoinClient Test', () => {
 
   it('should error when an invalid address is used in transfer', () => {
     btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseTwo)
+    btcClient.setPhrase(phraseOne)
     const invalidAddress = 'error_address'
 
     const amount = baseAmount(99000)
@@ -197,10 +191,10 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
 
     const txPages = await btcClient.getTransactions({ address: addyThree, limit: 4 })
-    expect(txPages.total).toEqual(1)
+    expect(txPages.total).toEqual(2) //there are 2 tx in addyThree
     expect(txPages.txs[0].asset).toEqual(AssetBTC)
-    expect(txPages.txs[0].date).toEqual(new Date('2020-10-08T01:28:33.000Z'))
-    expect(txPages.txs[0].hash).toEqual('63fe21150a285bd4c4266e6e3aafe5d99cc76eafb8e92a0c0b2896d3c3a21c78')
+    expect(txPages.txs[0].date).toEqual(new Date('2020-10-29T06:40:02.000Z'))
+    expect(txPages.txs[0].hash).toEqual('5d13e94178c07d5e824968922766222a70253f9b8fa49e2c1ec63e105663cd54')
     expect(txPages.txs[0].type).toEqual('transfer')
     expect(txPages.txs[0].to.length).toEqual(2)
     expect(txPages.txs[0].from.length).toEqual(1)
@@ -210,8 +204,8 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
     // Offset should work
     const txPages = await btcClient.getTransactions({ address: addyThree, offset: 1, limit: 1 })
-    expect(txPages.total).toEqual(1)
-    expect(txPages.txs.length).toEqual(0) //coz addyThree only has one tx so offsetting should give 0
+    expect(txPages.total).toEqual(2) //there are 2 tx in addyThree
+    expect(txPages.txs.length).toEqual(1) //addyThree has two tx so offsetting should give 1
   })
 
   it('should not get address transactions when offset too high', async () => {
@@ -226,7 +220,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
     // Limit should work
     const txPages = await btcClient.getTransactions({ address: addyThree, limit: 1 })
-    return expect(txPages.total).toEqual(1)
+    return expect(txPages.total).toEqual(2) //there are 2 tx in addyThree
   })
 
   it('should not get address transactions when limit too high', async () => {
