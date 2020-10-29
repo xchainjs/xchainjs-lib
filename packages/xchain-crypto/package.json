@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "module": "lib/index.es.js",
   "jsnext:main": "lib/index.es.js",
-  "types": "lib/src/index.d.ts",
+  "types": "lib/index.d.ts",
   "files": [
     "lib",
     "!lib/__tests__"

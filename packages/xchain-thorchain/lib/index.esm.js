@@ -33471,6 +33471,7 @@ var CosmosSDKClient = /** @class */ (function () {
             AccAddress.setBech32Prefix(_this.prefix, _this.prefix + 'pub', _this.prefix + 'valoper', _this.prefix + 'valoperpub', _this.prefix + 'valcons', _this.prefix + 'valconspub');
         };
         this.getAddressFromPrivKey = function (privkey) {
+            _this.setPrefix();
             return AccAddress.fromPublicKey(privkey.getPubKey()).toBech32();
         };
         this.getPrivKeyFromMnemonic = function (mnemonic) {
@@ -33484,6 +33485,7 @@ var CosmosSDKClient = /** @class */ (function () {
         };
         this.checkAddress = function (address) {
             try {
+                _this.setPrefix();
                 if (!address.startsWith(_this.prefix)) {
                     return false;
                 }
@@ -33497,6 +33499,7 @@ var CosmosSDKClient = /** @class */ (function () {
             var accAddress;
             return __generator$1(this, function (_a) {
                 try {
+                    this.setPrefix();
                     accAddress = AccAddress.fromBech32(address);
                     return [2 /*return*/, bank.balancesAddressGet(this.sdk, accAddress).then(function (res) { return res.data.result; })];
                 }
@@ -33533,6 +33536,7 @@ var CosmosSDKClient = /** @class */ (function () {
                             if (txMaxHeight !== undefined) {
                                 queryParameter['tx.maxheight'] = txMaxHeight.toString();
                             }
+                            this.setPrefix();
                             return [4 /*yield*/, axios$1
                                     .get(this.server + "/txs?" + getQueryString(queryParameter))
                                     .then(function (res) { return res.data; })];
@@ -33553,6 +33557,7 @@ var CosmosSDKClient = /** @class */ (function () {
                     switch (_b.label) {
                         case 0:
                             _b.trys.push([0, 3, , 4]);
+                            this.setPrefix();
                             fromAddress = AccAddress.fromBech32(from);
                             toAddress = AccAddress.fromBech32(to);
                             return [4 /*yield*/, auth.accountsAddressGet(this.sdk, fromAddress).then(function (res) { return res.data.result; })];
@@ -33602,7 +33607,6 @@ var CosmosSDKClient = /** @class */ (function () {
         this.prefix = prefix;
         this.derive_path = derive_path;
         this.sdk = new CosmosSDK(this.server, this.chainId);
-        this.setPrefix();
     }
     return CosmosSDKClient;
 }());
