@@ -7,11 +7,11 @@ var buffer = require('buffer');
 var readableStream = require('readable-stream');
 var stream = require('stream');
 var string_decoder = require('string_decoder');
+var crypto$1$1 = require('crypto');
 var cosmosClient = require('cosmos-client');
 var auth = require('cosmos-client/x/auth');
 var bank = require('cosmos-client/x/bank');
 var codec = require('cosmos-client/codec');
-var crypto$1$1 = require('crypto');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -22567,15 +22567,6 @@ function intFromLE(bytes) {
 utils.intFromLE = intFromLE;
 });
 
-var _nodeResolve_empty = {};
-
-var _nodeResolve_empty$1 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    'default': _nodeResolve_empty
-});
-
-var require$$0$1 = getCjsExportFromNamespace(_nodeResolve_empty$1);
-
 var r;
 
 var brorand = function rand(len) {
@@ -22631,7 +22622,7 @@ if (typeof self === 'object') {
 } else {
   // Node.js or Web worker with no crypto support
   try {
-    var crypto$2 = require$$0$1;
+    var crypto$2 = crypto$1__default['default'];
     if (typeof crypto$2.randomBytes !== 'function')
       throw new Error('Not supported');
 
@@ -27654,13 +27645,13 @@ EDDSA.prototype.isPoint = function isPoint(val) {
   return val instanceof this.pointClass;
 };
 
-var require$$0$2 = getCjsExportFromNamespace(_package$1);
+var require$$0$1 = getCjsExportFromNamespace(_package$1);
 
 var elliptic_1 = createCommonjsModule(function (module, exports) {
 
 var elliptic = exports;
 
-elliptic.version = require$$0$2.version;
+elliptic.version = require$$0$1.version;
 elliptic.utils = utils_1$1;
 elliptic.rand = brorand;
 elliptic.curve = curve_1;

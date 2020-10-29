@@ -3,11 +3,11 @@ import buffer from 'buffer';
 import readableStream from 'readable-stream';
 import stream from 'stream';
 import string_decoder from 'string_decoder';
+import crypto$1$1 from 'crypto';
 import { AccAddress, PrivKeySecp256k1, CosmosSDK } from 'cosmos-client';
 import { BaseAccount, StdTx, auth } from 'cosmos-client/x/auth';
 import { bank, MsgSend, MsgMultiSend } from 'cosmos-client/x/bank';
 import { codec } from 'cosmos-client/codec';
-import crypto$1$1 from 'crypto';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -22554,15 +22554,6 @@ function intFromLE(bytes) {
 utils.intFromLE = intFromLE;
 });
 
-var _nodeResolve_empty = {};
-
-var _nodeResolve_empty$1 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    'default': _nodeResolve_empty
-});
-
-var require$$0$1 = getCjsExportFromNamespace(_nodeResolve_empty$1);
-
 var r;
 
 var brorand = function rand(len) {
@@ -22618,7 +22609,7 @@ if (typeof self === 'object') {
 } else {
   // Node.js or Web worker with no crypto support
   try {
-    var crypto$2 = require$$0$1;
+    var crypto$2 = crypto$1$1;
     if (typeof crypto$2.randomBytes !== 'function')
       throw new Error('Not supported');
 
@@ -27641,13 +27632,13 @@ EDDSA.prototype.isPoint = function isPoint(val) {
   return val instanceof this.pointClass;
 };
 
-var require$$0$2 = getCjsExportFromNamespace(_package$1);
+var require$$0$1 = getCjsExportFromNamespace(_package$1);
 
 var elliptic_1 = createCommonjsModule(function (module, exports) {
 
 var elliptic = exports;
 
-elliptic.version = require$$0$2.version;
+elliptic.version = require$$0$1.version;
 elliptic.utils = utils_1$1;
 elliptic.rand = brorand;
 elliptic.curve = curve_1;

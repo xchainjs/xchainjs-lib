@@ -3,10 +3,32 @@ import nock from 'nock'
 import { TxsPage } from '@xchainjs/xchain-client'
 import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { TxHistoryResponse } from '@xchainjs/xchain-cosmos'
-import { BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
+import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
 import { AssetRune } from '../src/types'
 import { Client } from '../src/client'
 import { getDenom } from '../src/util'
+
+const mockAccountsAddress = (
+  url: string,
+  address: string,
+  result: {
+    height: number
+    result: BaseAccount
+  },
+) => {
+  nock(url).get(`/auth/accounts/${address}`).reply(200, result)
+}
+
+const mockAccountsBalance = (
+  url: string,
+  address: string,
+  result: {
+    height: number
+    result: Coin[]
+  },
+) => {
+  nock(url).get(`/bank/balances/${address}`).reply(200, result)
+}
 
 const assertTxsPost = (
   url: string,
@@ -16,7 +38,7 @@ const assertTxsPost = (
   memo: undefined | string,
   result: BroadcastTxCommitResult,
 ): void => {
-  nock(url, { allowUnmocked: true })
+  nock(url)
     .post(`/txs`, (body) => {
       expect(body.tx.msg.length).toEqual(1)
       expect(body.tx.msg[0].type).toEqual('thorchain/MsgSend')
@@ -99,17 +121,29 @@ describe('Client Test', () => {
   })
 
   it('has no balances', async () => {
+    mockAccountsBalance(thorClient.getClientUrl(), testnet_address, {
+      height: 0,
+      result: [],
+    })
     const result = await thorClient.getBalance()
     expect(result).toEqual([])
   })
 
   it('has balances', async () => {
     thorClient.setNetwork('mainnet')
+    mockAccountsBalance(thorClient.getClientUrl(), 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
+      height: 0,
+      result: [
+        {
+          denom: 'thor',
+          amount: '100',
+        },
+      ],
+    })
     const balances = await thorClient.getBalance('thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5')
-    expect(balances.length).toBeGreaterThan(0)
-    const expected = balances[0].amount.amount().isGreaterThan(baseAmount(0, 6).amount())
-    expect(expected).toBeTruthy()
+    expect(balances.length).toEqual(1)
     expect(balances[0].asset).toEqual(AssetRune)
+    expect(balances[0].amount.amount().isEqualTo(baseAmount(100).amount())).toBeTruthy()
   })
 
   it('has an empty tx history', async () => {
@@ -117,6 +151,14 @@ describe('Client Test', () => {
       total: 0,
       txs: [],
     }
+    assertTxHstory(thorClient.getClientUrl(), testnet_address, {
+      count: 0,
+      limit: 30,
+      page_number: 1,
+      page_total: 1,
+      total_count: 0,
+      txs: [],
+    })
 
     const transactions = await thorClient.getTransactions()
     expect(transactions).toEqual(expected)
@@ -176,9 +218,22 @@ describe('Client Test', () => {
       height: 0,
     }
 
+    mockAccountsAddress(thorClient.getClientUrl(), testnet_address, {
+      height: 0,
+      result: {
+        coins: [
+          {
+            denom: 'thor',
+            amount: '21000',
+          },
+        ],
+        account_number: '0',
+        sequence: '0',
+      },
+    })
     assertTxsPost(
       thorClient.getClientUrl(),
-      thorClient.getAddress(),
+      testnet_address,
       to_address,
       [
         {
@@ -212,9 +267,22 @@ describe('Client Test', () => {
       height: 0,
     }
 
+    mockAccountsAddress(thorClient.getClientUrl(), testnet_address, {
+      height: 0,
+      result: {
+        coins: [
+          {
+            denom: 'thor',
+            amount: '21000',
+          },
+        ],
+        account_number: '0',
+        sequence: '0',
+      },
+    })
     assertTxsPost(
       thorClient.getClientUrl(),
-      thorClient.getAddress(),
+      testnet_address,
       to_address,
       [
         {
