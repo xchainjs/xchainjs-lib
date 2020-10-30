@@ -7,12 +7,11 @@ var buffer = require('buffer');
 var readableStream = require('readable-stream');
 var stream = require('stream');
 var string_decoder = require('string_decoder');
-var crypto$1$1 = require('crypto');
+var crypto$2$1 = require('crypto');
 var cosmosClient = require('cosmos-client');
 var auth = require('cosmos-client/x/auth');
 var bank = require('cosmos-client/x/bank');
 var codec = require('cosmos-client/codec');
-require('crypto');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -21,6 +20,7 @@ var buffer__default = /*#__PURE__*/_interopDefaultLegacy(buffer);
 var readableStream__default = /*#__PURE__*/_interopDefaultLegacy(readableStream);
 var stream__default = /*#__PURE__*/_interopDefaultLegacy(stream);
 var string_decoder__default = /*#__PURE__*/_interopDefaultLegacy(string_decoder);
+var crypto$2__default = /*#__PURE__*/_interopDefaultLegacy(crypto$2$1);
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -22622,7 +22622,7 @@ if (typeof self === 'object') {
 } else {
   // Node.js or Web worker with no crypto support
   try {
-    var crypto$2 = crypto$1__default['default'];
+    var crypto$2 = crypto$2__default['default'];
     if (typeof crypto$2.randomBytes !== 'function')
       throw new Error('Not supported');
 
@@ -32144,6 +32144,7 @@ var sha256$2 = require('crypto-js/sha256');
 var ripemd160$2 = require('crypto-js/ripemd160');
 var hexEncoding = require('crypto-js/enc-hex');
 
+// origin from https://github.com/cosmos-client/cosmos-client-ts/blob/master/src/tendermint/types/secp256k1.ts
 var crypto$3 = require('crypto');
 var secp256k1$2 = require('tiny-secp256k1');
 var PubKeySecp256k1 = /** @class */ (function () {
@@ -32216,6 +32217,7 @@ var PrivKeySecp256k1 = /** @class */ (function () {
     return PrivKeySecp256k1;
 }());
 
+// origin from https://github.com/cosmos-client/cosmos-client-ts/blob/master/src/tendermint/types/ed25519.ts
 var crypto$1$1 = require('crypto');
 var nacl = require('tweetnacl');
 var PubKeyEd25519 = /** @class */ (function () {

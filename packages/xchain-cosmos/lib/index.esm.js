@@ -3,11 +3,11 @@ import buffer from 'buffer';
 import readableStream from 'readable-stream';
 import stream from 'stream';
 import string_decoder from 'string_decoder';
+import crypto$2$1 from 'crypto';
 import { AccAddress, PrivKeySecp256k1 as PrivKeySecp256k1$1, CosmosSDK } from 'cosmos-client';
 import { BaseAccount, StdTx, auth } from 'cosmos-client/x/auth';
 import { bank, MsgSend, MsgMultiSend } from 'cosmos-client/x/bank';
 import { codec } from 'cosmos-client/codec';
-import 'crypto';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -22609,7 +22609,7 @@ if (typeof self === 'object') {
 } else {
   // Node.js or Web worker with no crypto support
   try {
-    var crypto$2 = crypto$1$1;
+    var crypto$2 = crypto$2$1;
     if (typeof crypto$2.randomBytes !== 'function')
       throw new Error('Not supported');
 
@@ -32131,6 +32131,7 @@ var sha256$2 = require('crypto-js/sha256');
 var ripemd160$2 = require('crypto-js/ripemd160');
 var hexEncoding = require('crypto-js/enc-hex');
 
+// origin from https://github.com/cosmos-client/cosmos-client-ts/blob/master/src/tendermint/types/secp256k1.ts
 var crypto$3 = require('crypto');
 var secp256k1$2 = require('tiny-secp256k1');
 var PubKeySecp256k1 = /** @class */ (function () {
@@ -32203,6 +32204,7 @@ var PrivKeySecp256k1 = /** @class */ (function () {
     return PrivKeySecp256k1;
 }());
 
+// origin from https://github.com/cosmos-client/cosmos-client-ts/blob/master/src/tendermint/types/ed25519.ts
 var crypto$1$1 = require('crypto');
 var nacl = require('tweetnacl');
 var PubKeyEd25519 = /** @class */ (function () {
