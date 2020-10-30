@@ -84,7 +84,7 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
 
   const derivedKey = await pbkdf2Async(Buffer.from(password), salt, kdfParams.c, kdfParams.dklen, hashFunction)
   const cipherIV = crypto.createCipheriv(cipher, derivedKey.slice(0, 16), iv)
-  const cipherText: any = Buffer.concat([cipherIV.update(Buffer.from(phrase, 'utf8')), cipherIV.final()])
+  const cipherText: Buffer = Buffer.concat([cipherIV.update(Buffer.from(phrase, 'utf8')), cipherIV.final()])
   const mac = blake256(Buffer.concat([derivedKey.slice(16, 32), Buffer.from(cipherText, 'hex')]))
 
   const cryptoStruct = {

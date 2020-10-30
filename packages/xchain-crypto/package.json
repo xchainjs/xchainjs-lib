@@ -13,7 +13,7 @@
   "scripts": {
     "clean": "rimraf lib/**",
     "build": "rollup -c",
-    "lint": "eslint '{src,__tests__}/**/*.ts' --fix",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "test": "jest --coverage",
     "prepublishOnly": "yarn build"
   },

@@ -29,7 +29,7 @@
     "build": "rollup -c",
     "test": "jest",
     "compile": "tsc -p tsconfig.build.json",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
