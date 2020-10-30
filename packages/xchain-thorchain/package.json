@@ -60,9 +60,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@xchainjs/xchain-cosmos": "^0.3.3",
     "@xchainjs/xchain-client": "^0.0.5",
+    "@xchainjs/xchain-cosmos": "^0.3.3",
     "@xchainjs/xchain-crypto": "^0.1.0",
+    "axios": "^0.19.2",
     "nock": "^13.0.4"
   },
   "peerDependencies": {

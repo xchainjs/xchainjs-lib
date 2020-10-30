@@ -1,10 +1,32 @@
 import nock from 'nock'
 import { TxHistoryResponse } from '@xchainjs/xchain-cosmos'
-import { BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
+import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 import { codec } from 'cosmos-client/codec'
 
 import { CosmosSDKClient } from '../src/cosmos/sdk-client'
+
+const mockAccountsAddress = (
+  url: string,
+  address: string,
+  result: {
+    height: number
+    result: BaseAccount
+  },
+) => {
+  nock(url).get(`/auth/accounts/${address}`).reply(200, result)
+}
+
+const mockAccountsBalance = (
+  url: string,
+  address: string,
+  result: {
+    height: number
+    result: Coin[]
+  },
+) => {
+  nock(url).get(`/bank/balances/${address}`).reply(200, result)
+}
 
 const assertTxsPost = (
   url: string,
@@ -45,14 +67,18 @@ describe('SDK Client Test', () => {
     prefix: 'cosmos',
     derive_path: "44'/118'/0'/0/0",
   })
+
+  const thorMainnetNode = 'http://104.248.96.152:1317'
   const thorMainnetClient: CosmosSDKClient = new CosmosSDKClient({
-    server: 'http://104.248.96.152:1317',
+    server: thorMainnetNode,
     chainId: 'thorchain',
     prefix: 'thor',
     derive_path: "44'/931'/0'/0/0",
   })
+
+  const thorTestnetNode = 'http://13.238.212.224:1317'
   const thorTestnetClient: CosmosSDKClient = new CosmosSDKClient({
-    server: 'http://13.238.212.224:1317',
+    server: thorTestnetNode,
     chainId: 'thorchain',
     prefix: 'tthor',
     derive_path: "44'/931'/0'/0/0",
@@ -101,11 +127,24 @@ describe('SDK Client Test', () => {
     expect(parseInt(balances[0].amount || '0')).toEqual(75000000)
     expect(balances[0].denom).toEqual('umuon')
 
-    balances = await thorMainnetClient.getBalance('thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5')
-    expect(balances.length).toBeGreaterThan(0)
-    expect(parseInt(balances[0].amount || '0')).toBeGreaterThan(0)
+    mockAccountsBalance(thorMainnetNode, thor_mainnet_address, {
+      height: 0,
+      result: [
+        {
+          denom: 'thor',
+          amount: '100',
+        },
+      ],
+    })
+    balances = await thorMainnetClient.getBalance(thor_mainnet_address)
+    expect(balances.length).toEqual(1)
     expect(balances[0].denom).toEqual('thor')
+    expect(parseInt(balances[0].amount || '0')).toEqual(100)
 
+    mockAccountsBalance(thorTestnetNode, thor_testnet_address, {
+      height: 0,
+      result: [],
+    })
     balances = await thorTestnetClient.getBalance(thor_testnet_address)
     expect(balances).toEqual([])
   })
@@ -117,10 +156,18 @@ describe('SDK Client Test', () => {
     txHistory = await cosmosTestnetClient.searchTx({ messageSender: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2' })
     expect(parseInt(txHistory.total_count?.toString() || '0')).toBeGreaterThan(0)
 
+    assertTxHstory(thorMainnetNode, thor_mainnet_address, {
+      count: 0,
+      limit: 30,
+      page_number: 1,
+      page_total: 1,
+      total_count: 0,
+      txs: [],
+    })
     txHistory = await thorMainnetClient.searchTx({ messageSender: thor_mainnet_address })
     expect(parseInt(txHistory.total_count?.toString() || '0')).toEqual(0)
 
-    assertTxHstory('http://13.238.212.224:1317', thor_testnet_address, {
+    assertTxHstory(thorTestnetNode, thor_testnet_address, {
       count: 1,
       limit: 30,
       page_number: 1,
@@ -170,35 +217,6 @@ describe('SDK Client Test', () => {
     }
 
     assertTxsPost(
-      'http://13.238.212.224:1317',
-      thor_testnet_address,
-      'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
-      'thorchain/MsgSend',
-      [
-        {
-          denom: 'thor',
-          amount: '10000',
-        },
-      ],
-      'transfer',
-      expected_txsPost_result,
-    )
-
-    codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
-    codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
-
-    let result = await thorTestnetClient.transfer({
-      privkey: thorTestnetClient.getPrivKeyFromMnemonic(thor_phrase),
-      from: thor_testnet_address,
-      to: 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
-      amount: 10000,
-      asset: 'thor',
-      memo: 'transfer',
-    })
-
-    expect(result).toEqual(expected_txsPost_result)
-
-    assertTxsPost(
       'http://lcd.gaia.bigdipper.live:1317',
       cosmos_address,
       'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
@@ -216,12 +234,54 @@ describe('SDK Client Test', () => {
     codec.registerCodec('cosmos-sdk/MsgSend', MsgSend, MsgSend.fromJSON)
     codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
 
-    result = await cosmosTestnetClient.transfer({
+    let result = await cosmosTestnetClient.transfer({
       privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase),
       from: cosmos_address,
       to: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
       amount: 10000,
       asset: 'muon',
+      memo: 'transfer',
+    })
+
+    expect(result).toEqual(expected_txsPost_result)
+
+    mockAccountsAddress(thorTestnetNode, thor_testnet_address, {
+      height: 0,
+      result: {
+        coins: [
+          {
+            denom: 'thor',
+            amount: '21000',
+          },
+        ],
+        account_number: '0',
+        sequence: '0',
+      },
+    })
+    assertTxsPost(
+      thorTestnetNode,
+      thor_testnet_address,
+      'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
+      'thorchain/MsgSend',
+      [
+        {
+          denom: 'thor',
+          amount: '10000',
+        },
+      ],
+      'transfer',
+      expected_txsPost_result,
+    )
+
+    codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
+    codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
+
+    result = await thorTestnetClient.transfer({
+      privkey: thorTestnetClient.getPrivKeyFromMnemonic(thor_phrase),
+      from: thor_testnet_address,
+      to: 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
+      amount: 10000,
+      asset: 'thor',
       memo: 'transfer',
     })
 
