@@ -1,9 +1,12 @@
+import crypto from 'crypto'
+import { pbkdf2Async, createAddress } from './utils'
+import { PubKeySecp256k1, PrivKeySecp256k1 } from './secp256k1'
+import { PubKeyEd25519, PrivKeyEd25519 } from './ed25519'
+
 const bip39 = require('bip39')
-const crypto = require('crypto')
+const HDKey = require('hdkey')
 const { blake256 } = require('foundry-primitives')
 const { v4: uuidv4 } = require('uuid')
-import { pbkdf2Async, createAddress } from './utils'
-const HDKey = require('hdkey')
 
 // Constants
 const XChainBIP39Phrase = 'xchain'
@@ -18,8 +21,13 @@ const meta = 'xchain-keystore'
 
 // Interfaces
 
+export type PublicKeyPair = {
+  secp256k1: PubKeySecp256k1
+  ed25519: PubKeyEd25519
+}
+
 export type Keystore = {
-  address: string
+  publickeys: PublicKeyPair
   crypto: {
     cipher: string
     ciphertext: string
@@ -67,9 +75,19 @@ export const getAddress = (phrase: string): string => {
   return address
 }
 
+export const getPublicKeyPair = (phrase: string): PublicKeyPair => {
+  const seed = getSeed(phrase)
+  const hdkey = HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
+  const childkey = hdkey.derive(BIP44Path)
+
+  return {
+    secp256k1: new PrivKeySecp256k1(childkey.privateKey).getPubKey(),
+    ed25519: new PrivKeyEd25519(childkey.privateKey).getPubKey()
+  }
+}
+
 export const encryptToKeyStore = async (phrase: string, password: string): Promise<Keystore> => {
   const ID = uuidv4()
-  const addr = getAddress(phrase)
   const salt = crypto.randomBytes(32)
   const iv = crypto.randomBytes(16)
   const kdfParams = {
@@ -84,9 +102,8 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
 
   const derivedKey = await pbkdf2Async(Buffer.from(password), salt, kdfParams.c, kdfParams.dklen, hashFunction)
   const cipherIV = crypto.createCipheriv(cipher, derivedKey.slice(0, 16), iv)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cipherText: any = Buffer.concat([cipherIV.update(Buffer.from(phrase, 'utf8')), cipherIV.final()])
-  const mac = blake256(Buffer.concat([derivedKey.slice(16, 32), Buffer.from(cipherText, 'hex')]))
+  const cipherText = Buffer.concat([cipherIV.update(Buffer.from(phrase, 'utf8')), cipherIV.final()])
+  const mac = blake256(Buffer.concat([derivedKey.slice(16, 32), Buffer.from(cipherText)]))
 
   const cryptoStruct = {
     cipher: cipher,
@@ -98,7 +115,7 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   }
 
   const keystore = {
-    address: addr,
+    publickeys: getPublicKeyPair(phrase),
     crypto: cryptoStruct,
     id: ID,
     version: 1,
