@@ -11,6 +11,8 @@
     "test": "lerna run test"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
     "eslint": "~7.8.0",
     "lerna": "^3.22.1",
     "typescript": "~4.0.0"
