@@ -108,6 +108,7 @@ var pbkdf2Async = function (passphrase, salt, iterations, keylen, digest) { retu
     });
 }); };
 
+// origin from https://github.com/cosmos-client/cosmos-client-ts/blob/master/src/tendermint/types/secp256k1.ts
 var crypto = require('crypto');
 var secp256k1 = require('tiny-secp256k1');
 var PubKeySecp256k1 = /** @class */ (function () {
@@ -180,6 +181,7 @@ var PrivKeySecp256k1 = /** @class */ (function () {
     return PrivKeySecp256k1;
 }());
 
+// origin from https://github.com/cosmos-client/cosmos-client-ts/blob/master/src/tendermint/types/ed25519.ts
 var crypto$1 = require('crypto');
 var nacl = require('tweetnacl');
 var PubKeyEd25519 = /** @class */ (function () {

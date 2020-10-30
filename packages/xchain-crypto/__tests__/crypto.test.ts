@@ -1,4 +1,11 @@
-import { generatePhrase, validatePhrase, encryptToKeyStore, decryptFromKeystore } from '../src/crypto'
+import {
+  generatePhrase,
+  validatePhrase,
+  encryptToKeyStore,
+  decryptFromKeystore,
+  getPublicKeyPair,
+  getAddress,
+} from '../src/crypto'
 import { encodeAddress } from '../src/utils'
 
 describe('Generate Phrase', () => {
@@ -29,6 +36,16 @@ describe('Validate Phrase', () => {
     const phrase = 'flush viable fury sword mention dignity ethics secret nasty gallery teach wrong'
     const incorrectPhrase = validatePhrase(phrase)
     expect(incorrectPhrase).toBeFalsy()
+  })
+})
+
+describe('getPublicKeyPair', () => {
+  it('Generates Correct Publickeys from phrase', async () => {
+    const phrase = 'flush viable fury sword mention dignity ethics secret nasty gallery teach fever'
+    const publickeys = getPublicKeyPair(phrase)
+    expect(encodeAddress(publickeys.secp256k1.getAddress())).toEqual(getAddress(phrase))
+    expect(encodeAddress(publickeys.secp256k1.getAddress())).toEqual('thor1nlxjrjq0aqzcs9amv9wgp62z0452kf3f2772tv')
+    expect(encodeAddress(publickeys.ed25519.getAddress())).toEqual('thor18cmnqkplamr5mq6sk22eldllssjvjdjppjmtjp')
   })
 })
 

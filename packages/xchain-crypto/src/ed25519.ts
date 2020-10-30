@@ -1,3 +1,5 @@
+// origin from https://github.com/cosmos-client/cosmos-client-ts/blob/master/src/tendermint/types/ed25519.ts
+
 const crypto = require('crypto')
 const nacl = require('tweetnacl')
 import { PubKey, PrivKey } from './key'

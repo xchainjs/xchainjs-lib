@@ -1,11 +1,11 @@
-export type PrivKey = {
+export interface PrivKey {
   getPubKey(): PubKey
   toBuffer(): Buffer
   toBase64(): string
   sign(message: Buffer): Buffer
 }
 
-export type PubKey = {
+export interface PubKey {
   getAddress(): Buffer
   toBuffer(): Buffer
   toBase64(): string

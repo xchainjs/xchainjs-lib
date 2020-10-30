@@ -1,3 +1,5 @@
+// origin from https://github.com/cosmos-client/cosmos-client-ts/blob/master/src/tendermint/types/secp256k1.ts
+
 const crypto = require('crypto')
 const secp256k1 = require('tiny-secp256k1')
 import { PubKey, PrivKey } from './key'
