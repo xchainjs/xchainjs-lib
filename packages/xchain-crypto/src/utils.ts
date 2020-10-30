@@ -1,8 +1,8 @@
 import crypto from 'crypto'
-const bech32 = require(`bech32`)
-import sha256 from 'crypto-js/sha256'
-import ripemd160 from 'crypto-js/ripemd160'
-import hexEncoding from 'crypto-js/enc-hex'
+const bech32 = require('bech32')
+const sha256 = require('crypto-js/sha256')
+const ripemd160 = require('crypto-js/ripemd160')
+const hexEncoding = require('crypto-js/enc-hex')
 
 export const getBytes = (string: string): number[] => {
   const arrayBytes: number[] = []
@@ -27,8 +27,7 @@ export const sha256ripemd160 = (hex: string): string => {
   if (typeof hex !== 'string') throw new Error('sha256ripemd160 expects a string')
   if (hex.length % 2 !== 0) throw new Error(`invalid hex string length: ${hex}`)
   const hexEncoded = hexEncoding.parse(hex)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ProgramSha256: any = sha256(hexEncoded)
+  const ProgramSha256 = sha256(hexEncoded)
   return ripemd160(ProgramSha256).toString()
 }
 
@@ -54,7 +53,7 @@ export const pbkdf2Async = async (
   salt: string | Buffer | NodeJS.TypedArray | DataView,
   iterations: number,
   keylen: number,
-  digest: string
+  digest: string,
 ): Promise<Buffer> => {
   return new Promise<Buffer>((resolve, reject) => {
     crypto.pbkdf2(passphrase, salt, iterations, keylen, digest, (err, drived) => {

@@ -1,4 +1,12 @@
-import { generatePhrase, validatePhrase, encryptToKeyStore, decryptFromKeystore } from '../src/crypto'
+import {
+  generatePhrase,
+  validatePhrase,
+  encryptToKeyStore,
+  decryptFromKeystore,
+  getPublicKeyPair,
+  getAddress,
+} from '../src/crypto'
+import { encodeAddress } from '../src/utils'
 
 describe('Generate Phrase', () => {
   it('Generates 12-word phrase', () => {
@@ -31,12 +39,27 @@ describe('Validate Phrase', () => {
   })
 })
 
+describe('getPublicKeyPair', () => {
+  it('Generates Correct Publickeys from phrase', async () => {
+    const phrase = 'flush viable fury sword mention dignity ethics secret nasty gallery teach fever'
+    const publickeys = getPublicKeyPair(phrase)
+    expect(encodeAddress(publickeys.secp256k1.getAddress())).toEqual(getAddress(phrase))
+    expect(encodeAddress(publickeys.secp256k1.getAddress())).toEqual('thor1nlxjrjq0aqzcs9amv9wgp62z0452kf3f2772tv')
+    expect(encodeAddress(publickeys.ed25519.getAddress())).toEqual('thor18cmnqkplamr5mq6sk22eldllssjvjdjppjmtjp')
+  })
+})
+
 describe('Export Keystore', () => {
   it('Generates Correct Keystore', async () => {
     const phrase = 'flush viable fury sword mention dignity ethics secret nasty gallery teach fever'
     const password = 'thorchain'
     const keystore = await encryptToKeyStore(phrase, password)
-    expect(keystore.address).toEqual('thor1nlxjrjq0aqzcs9amv9wgp62z0452kf3f2772tv')
+    expect(encodeAddress(keystore.publickeys.secp256k1.getAddress())).toEqual(
+      'thor1nlxjrjq0aqzcs9amv9wgp62z0452kf3f2772tv',
+    )
+    expect(encodeAddress(keystore.publickeys.ed25519.getAddress())).toEqual(
+      'thor18cmnqkplamr5mq6sk22eldllssjvjdjppjmtjp',
+    )
     expect(keystore.crypto.cipher).toEqual('aes-128-ctr')
     expect(keystore.crypto.kdf).toEqual('pbkdf2')
     expect(keystore.crypto.kdfparams.prf).toEqual('hmac-sha256')
