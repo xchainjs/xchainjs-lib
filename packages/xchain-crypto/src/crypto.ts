@@ -82,7 +82,7 @@ export const getPublicKeyPair = (phrase: string): PublicKeyPair => {
 
   return {
     secp256k1: new PrivKeySecp256k1(childkey.privateKey).getPubKey(),
-    ed25519: new PrivKeyEd25519(childkey.privateKey).getPubKey()
+    ed25519: new PrivKeyEd25519(childkey.privateKey).getPubKey(),
   }
 }
 
@@ -94,10 +94,10 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
     prf: prf,
     dklen: dklen,
     salt: salt.toString('hex'),
-    c: c
+    c: c,
   }
   const cipherParams = {
-    iv: iv.toString('hex')
+    iv: iv.toString('hex'),
   }
 
   const derivedKey = await pbkdf2Async(Buffer.from(password), salt, kdfParams.c, kdfParams.dklen, hashFunction)
@@ -111,7 +111,7 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
     cipherparams: cipherParams,
     kdf: kdf,
     kdfparams: kdfParams,
-    mac: mac
+    mac: mac,
   }
 
   const keystore = {
@@ -119,7 +119,7 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
     crypto: cryptoStruct,
     id: ID,
     version: 1,
-    meta: meta
+    meta: meta,
   }
 
   return keystore
@@ -133,7 +133,7 @@ export const decryptFromKeystore = async (keystore: Keystore, password: string):
       Buffer.from(kdfparams.salt, 'hex'),
       kdfparams.c,
       kdfparams.dklen,
-      hashFunction
+      hashFunction,
     )
 
     const ciphertext = Buffer.from(keystore.crypto.ciphertext, 'hex')
@@ -145,7 +145,7 @@ export const decryptFromKeystore = async (keystore: Keystore, password: string):
     const decipher = crypto.createDecipheriv(
       keystore.crypto.cipher,
       derivedKey.slice(0, 16),
-      Buffer.from(keystore.crypto.cipherparams.iv, 'hex')
+      Buffer.from(keystore.crypto.cipherparams.iv, 'hex'),
     )
 
     const phrase = Buffer.concat([decipher.update(ciphertext), decipher.final()])

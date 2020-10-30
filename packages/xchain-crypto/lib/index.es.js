@@ -287,7 +287,7 @@ var getPublicKeyPair = function (phrase) {
     var childkey = hdkey.derive(BIP44Path);
     return {
         secp256k1: new PrivKeySecp256k1(childkey.privateKey).getPubKey(),
-        ed25519: new PrivKeyEd25519(childkey.privateKey).getPubKey()
+        ed25519: new PrivKeyEd25519(childkey.privateKey).getPubKey(),
     };
 };
 var encryptToKeyStore = function (phrase, password) { return __awaiter(void 0, void 0, void 0, function () {
@@ -302,10 +302,10 @@ var encryptToKeyStore = function (phrase, password) { return __awaiter(void 0, v
                     prf: prf,
                     dklen: dklen,
                     salt: salt.toString('hex'),
-                    c: c
+                    c: c,
                 };
                 cipherParams = {
-                    iv: iv.toString('hex')
+                    iv: iv.toString('hex'),
                 };
                 return [4 /*yield*/, pbkdf2Async(Buffer.from(password), salt, kdfParams.c, kdfParams.dklen, hashFunction)];
             case 1:
@@ -319,14 +319,14 @@ var encryptToKeyStore = function (phrase, password) { return __awaiter(void 0, v
                     cipherparams: cipherParams,
                     kdf: kdf,
                     kdfparams: kdfParams,
-                    mac: mac
+                    mac: mac,
                 };
                 keystore = {
                     publickeys: getPublicKeyPair(phrase),
                     crypto: cryptoStruct,
                     id: ID,
                     version: 1,
-                    meta: meta
+                    meta: meta,
                 };
                 return [2 /*return*/, keystore];
         }

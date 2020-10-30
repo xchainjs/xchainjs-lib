@@ -53,7 +53,7 @@ export const pbkdf2Async = async (
   salt: string | Buffer | NodeJS.TypedArray | DataView,
   iterations: number,
   keylen: number,
-  digest: string
+  digest: string,
 ): Promise<Buffer> => {
   return new Promise<Buffer>((resolve, reject) => {
     crypto.pbkdf2(passphrase, salt, iterations, keylen, digest, (err, drived) => {
