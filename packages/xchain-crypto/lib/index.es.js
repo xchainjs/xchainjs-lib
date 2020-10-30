@@ -1340,6 +1340,7 @@ var sha256ripemd160 = function (hex) {
     if (hex.length % 2 !== 0)
         throw new Error("invalid hex string length: " + hex);
     var hexEncoded = encHex.parse(hex);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     var ProgramSha256 = sha256(hexEncoded);
     return ripemd160(ProgramSha256).toString();
 };

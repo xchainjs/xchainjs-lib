@@ -4,8 +4,8 @@
     "target": "es5",
     "sourceMap": true,
     "noEmitOnError": true,
-    "lib": ["es6", "dom", "es2016", "es2017"],
+    "lib": ["es6", "dom", "es2016", "es2017"]
   },
 
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist" ]
 }

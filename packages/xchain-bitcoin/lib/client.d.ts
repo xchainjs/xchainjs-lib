@@ -1,5 +1,5 @@
 import * as Utils from './utils';
-import { TxHistoryParams, TxsPage, Address, AsgardexClient, TxParams, TxHash, Balance, Network, Fees, AsgardexClientParams } from '@asgardex-clients/asgardex-client';
+import { TxHistoryParams, TxsPage, Address, XChainClient, TxParams, TxHash, Balance, Network, Fees, XChainClientParams } from '@xchainjs/xchain-client';
 /**
  * BitcoinClient Interface
  */
@@ -7,14 +7,14 @@ interface BitcoinClient {
     validateAddress(address: string): boolean;
     scanUTXOs(): Promise<void>;
 }
-declare type BitcoinClientParams = AsgardexClientParams & {
+declare type BitcoinClientParams = XChainClientParams & {
     nodeUrl?: string;
     nodeApiKey?: string;
 };
 /**
  * Implements Client declared above
  */
-declare class Client implements BitcoinClient, AsgardexClient {
+declare class Client implements BitcoinClient, XChainClient {
     net: Network;
     phrase: string;
     utxos: Utils.UTXO[];
@@ -42,7 +42,6 @@ declare class Client implements BitcoinClient, AsgardexClient {
      */
     getFees(): Promise<Fees>;
     getFeesWithMemo(memo: string): Promise<Fees>;
-    deposit({ asset, amount, recipient, memo, feeRate }: TxParams): Promise<TxHash>;
     transfer({ asset, amount, recipient, memo, feeRate }: TxParams): Promise<TxHash>;
 }
 export { Client, Network };
