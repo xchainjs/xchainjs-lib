@@ -266,7 +266,11 @@ describe('BinanceClient Test', () => {
   })
 
   it('has an empty tx history', async () => {
-    const txArray = await bnbClient.getTransactions()
+    const bnbClientEmptyMain = new BinanceClient({
+      phrase: 'nose link choose blossom social craft they better render provide escape talk',
+      network: 'mainnet',
+    })
+    const txArray = await bnbClientEmptyMain.getTransactions()
     expect(txArray).toEqual({ total: 0, txs: [] })
   })
 
@@ -276,5 +280,14 @@ describe('BinanceClient Test', () => {
     const txArray = await bnbClient.getTransactions({ address: testnetaddressForTx })
     expect(txArray.total).toBeTruthy()
     expect(txArray.txs.length).toBeTruthy()
+  })
+
+  it('get transaction data', async () => {
+    const tx = await bnbClient.getTransactionData('A0935C2ECF97BEE2A8868671ABE8FE8423BA9A4FFFA59F09A74C915135FA0137')
+    expect(tx.hash).toEqual('A0935C2ECF97BEE2A8868671ABE8FE8423BA9A4FFFA59F09A74C915135FA0137')
+    expect(tx.from[0].from).toEqual('bnb1qhx26x87tadk83hapzvhxtgkcjascpu2tumalg')
+    expect(tx.from[0].amount.amount().isEqualTo(baseAmount(10000000, 6).amount())).toBeTruthy()
+    expect(tx.to[0].to).toEqual('bnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9e738vr')
+    expect(tx.to[0].amount.amount().isEqualTo(baseAmount(10000000, 6).amount())).toBeTruthy()
   })
 })

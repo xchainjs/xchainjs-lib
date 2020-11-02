@@ -1,6 +1,8 @@
 import { Transfer, TransferEvent } from './types/binance-ws'
 import { TransferFee, DexFees, Fee, TxType as BinanceTxType } from './types/binance'
 import { TxType } from '@xchainjs/xchain-client'
+import { getMsgByAminoPrefix } from '@binance-chain/javascript-sdk/lib/utils'
+import { SendMsg, FreezeTokenMsg, UnFreezeTokenMsg } from '@binance-chain/javascript-sdk/lib/types'
 
 /**
  * Get `hash` from transfer event sent by Binance chain
@@ -42,5 +44,21 @@ export const getTxType = (t: BinanceTxType): TxType => {
   if (t === 'TRANSFER' || t === 'DEPOSIT') return 'transfer'
   if (t === 'FREEZE_TOKEN') return 'freeze'
   if (t === 'UN_FREEZE_TOKEN') return 'unfreeze'
+  return 'unknown'
+}
+
+/**
+ * Get TxType from Amino prefix
+ */
+export const getTxTypeFromAminoPrefix = (aminoPrefix: string): TxType => {
+  switch (getMsgByAminoPrefix(aminoPrefix)) {
+    case SendMsg:
+      return 'transfer'
+    case FreezeTokenMsg:
+      return 'freeze'
+    case UnFreezeTokenMsg:
+      return 'unfreeze'
+  }
+
   return 'unknown'
 }

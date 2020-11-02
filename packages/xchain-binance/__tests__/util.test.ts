@@ -1,4 +1,12 @@
-import { getHashFromTransfer, getTxHashFromMemo, isFee, isTransferFee, isDexFees, isFreezeFee } from '../src/util'
+import {
+  getHashFromTransfer,
+  getTxHashFromMemo,
+  getTxTypeFromAminoPrefix,
+  isFee,
+  isTransferFee,
+  isDexFees,
+  isFreezeFee,
+} from '../src/util'
 import { TransferEvent, Transfer } from '../src/types/binance-ws'
 import { DexFees, Fee, TransferFee } from '../src/types/binance'
 
@@ -52,6 +60,12 @@ describe('binance/util', () => {
       }
       const result = getTxHashFromMemo(tx)
       expect(result).toBeUndefined()
+    })
+  })
+
+  describe('getTxTypeFromAminoPrefix', () => {
+    it('getTxTypeFromAminoPrefix', () => {
+      expect(getTxTypeFromAminoPrefix('2A2C87FA')).toEqual('transfer')
     })
   })
 

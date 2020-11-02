@@ -550,3 +550,27 @@ export type AccountResult = {
   result: Account
   status: number
 }
+
+export type BlockHeader = {
+  chain_id: string
+  height: string
+  time: string
+}
+
+export type BlockID = {
+  hash: string
+}
+
+export type BlockMeta = {
+  block_id: BlockID
+  header: BlockHeader
+}
+
+export type Block = {
+  header: BlockHeader
+}
+
+export type ResultBlock = {
+  block_meta: BlockMeta
+  block: Block
+}
