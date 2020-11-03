@@ -6,6 +6,18 @@ import { BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
 import { AssetMuon } from '../src/types'
 import { Client } from '../src/client'
 import { getDenom } from '../src/util'
+import { TxHistoryResponse, TxResponse } from '../src/cosmos/types'
+
+const mockAccountsBalance = (
+  url: string,
+  address: string,
+  result: {
+    height: number
+    result: Coin[]
+  },
+) => {
+  nock(url).get(`/bank/balances/${address}`).reply(200, result)
+}
 
 const assertTxsPost = (
   url: string,
@@ -26,6 +38,14 @@ const assertTxsPost = (
       return true
     })
     .reply(200, result)
+}
+
+const assertTxHstory = (url: string, address: string, result: TxHistoryResponse): void => {
+  nock(url).get(`/txs?message.sender=${address}`).reply(200, result)
+}
+
+const assertTxHashGet = (url: string, hash: string, result: TxResponse): void => {
+  nock(url).get(`/txs/${hash}`).reply(200, result)
 }
 
 describe('Client Test', () => {
@@ -95,6 +115,12 @@ describe('Client Test', () => {
 
   it('has no balances', async () => {
     cosmosClient.setNetwork('mainnet')
+
+    mockAccountsBalance(cosmosClient.getClientUrl(), address, {
+      height: 0,
+      result: [],
+    })
+
     const result = await cosmosClient.getBalance()
     expect(result).toEqual([])
   })
@@ -107,12 +133,21 @@ describe('Client Test', () => {
   })
 
   it('has an empty tx history', async () => {
+    cosmosClient.setNetwork('mainnet')
+
     const expected: TxsPage = {
       total: 0,
       txs: [],
     }
+    assertTxHstory(cosmosClient.getClientUrl(), address, {
+      count: 0,
+      limit: 30,
+      page_number: 1,
+      page_total: 1,
+      total_count: 0,
+      txs: [],
+    })
 
-    cosmosClient.setNetwork('mainnet')
     const transactions = await cosmosClient.getTransactions()
     expect(transactions).toEqual(expected)
   })
@@ -122,6 +157,44 @@ describe('Client Test', () => {
     expect(transactions.total).toBeGreaterThan(0)
 
     cosmosClient.setNetwork('mainnet')
+
+    assertTxHstory(cosmosClient.getClientUrl(), 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z', {
+      count: 1,
+      limit: 30,
+      page_number: 1,
+      page_total: 1,
+      total_count: 1,
+      txs: [
+        {
+          height: 1047,
+          txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
+          raw_log: 'transaction logs',
+          gas_wanted: '5000000000000000',
+          gas_used: '148996',
+          tx: {
+            body: {
+              messages: [
+                {
+                  type: 'cosmos-sdk/MsgSend',
+                  value: {
+                    from_address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z',
+                    to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
+                    amount: [
+                      {
+                        denom: 'uatom',
+                        amount: 4318994970,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          timestamp: '2020-09-25T06:09:15Z',
+        },
+      ],
+    })
+
     transactions = await cosmosClient.getTransactions({ address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z' })
     expect(transactions.total).toBeGreaterThan(0)
   })
@@ -200,6 +273,35 @@ describe('Client Test', () => {
 
   it('get transaction data', async () => {
     cosmosClient.setNetwork('mainnet')
+
+    assertTxHashGet(cosmosClient.getClientUrl(), '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {
+      height: 1047,
+      txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
+      raw_log: 'transaction logs',
+      gas_wanted: '5000000000000000',
+      gas_used: '148996',
+      tx: {
+        body: {
+          messages: [
+            {
+              type: 'cosmos-sdk/MsgSend',
+              value: {
+                from_address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z',
+                to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
+                amount: [
+                  {
+                    denom: 'uatom',
+                    amount: 4318994970,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      timestamp: '2020-09-25T06:09:15Z',
+    })
+
     const tx = await cosmosClient.getTransactionData('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
     expect(tx.type).toEqual('transfer')
     expect(tx.hash).toEqual('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
