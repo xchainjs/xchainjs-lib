@@ -3,6 +3,7 @@ import {
   Balances,
   Fees,
   Network,
+  Tx,
   TxParams,
   TxHash,
   TxHistoryParams,
@@ -189,6 +190,16 @@ class Client implements ThorchainClient, XChainClient {
         total: parseInt(txHistory.total_count?.toString() || '0'),
         txs: getTxsFromHistory(txHistory.txs || [], AssetRune),
       }
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  getTransactionData = async (txId: string): Promise<Tx> => {
+    try {
+      const txResult = await this.thorClient.txsHashGet(txId)
+
+      return getTxsFromHistory([txResult], AssetRune)[0]
     } catch (error) {
       return Promise.reject(error)
     }

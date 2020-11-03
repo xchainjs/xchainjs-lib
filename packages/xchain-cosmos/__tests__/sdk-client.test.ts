@@ -1,5 +1,5 @@
 import nock from 'nock'
-import { TxHistoryResponse } from '@xchainjs/xchain-cosmos'
+import { TxHistoryResponse, TxResponse } from '@xchainjs/xchain-cosmos'
 import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 import { codec } from 'cosmos-client/codec'
@@ -52,6 +52,10 @@ const assertTxsPost = (
 
 const assertTxHstory = (url: string, address: string, result: TxHistoryResponse): void => {
   nock(url).get(`/txs?message.sender=${address}`).reply(200, result)
+}
+
+const assertTxHashGet = (url: string, hash: string, result: TxResponse): void => {
+  nock(url).get(`/txs/${hash}`).reply(200, result)
 }
 
 describe('SDK Client Test', () => {
@@ -286,5 +290,43 @@ describe('SDK Client Test', () => {
     })
 
     expect(result).toEqual(expected_txsPost_result)
+  })
+
+  it('get transaction data', async () => {
+    let tx = await cosmosMainnetClient.txsHashGet('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
+    expect(tx.txhash).toEqual('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
+    expect(tx.height).toEqual('45582')
+
+    const txHashData = {
+      height: 1047,
+      txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
+      raw_log: 'transaction logs',
+      gas_wanted: '5000000000000000',
+      gas_used: '148996',
+      tx: {
+        body: {
+          messages: [
+            {
+              type: 'thorchain/MsgSend',
+              value: {
+                from_address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
+                to_address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
+                amount: [
+                  {
+                    denom: 'thor',
+                    amount: 1000000,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      timestamp: '2020-09-25T06:09:15Z',
+    }
+    assertTxHashGet(thorTestnetNode, '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', txHashData)
+
+    tx = await thorTestnetClient.txsHashGet('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
+    expect(tx).toEqual(txHashData)
   })
 })

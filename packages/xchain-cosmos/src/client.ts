@@ -3,6 +3,7 @@ import {
   Balances,
   Fees,
   Network,
+  Tx,
   TxParams,
   TxHash,
   TxHistoryParams,
@@ -183,6 +184,17 @@ class Client implements CosmosClient, XChainClient {
         total: parseInt(txHistory.total_count?.toString() || '0'),
         txs: getTxsFromHistory(txHistory.txs || [], mainAsset),
       }
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  getTransactionData = async (txId: string): Promise<Tx> => {
+    try {
+      const mainAsset = this.getMainAsset()
+      const txResult = await this.sdkClient.txsHashGet(txId)
+
+      return getTxsFromHistory([txResult], mainAsset)[0]
     } catch (error) {
       return Promise.reject(error)
     }
