@@ -11,9 +11,12 @@ describe('BinanceClient Test', () => {
   const testnetaddress = 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj'
 
   // This needs to be updated once `Fees` type in `asgardex-client` changes
-  const transferFee = { type: 'base', average: baseAmount(37500) }
-  const multiSendFee = { type: 'base', average: baseAmount(30000) }
-  const freezeFee = { type: 'base', average: baseAmount(500000) }
+  const singleTxFee = baseAmount(37500)
+  const transferFee = { type: 'base', average: singleTxFee, fast: singleTxFee, fastest: singleTxFee }
+  const multiTxFee = baseAmount(30000)
+  const multiSendFee = { type: 'base', average: multiTxFee, fast: multiTxFee, fastest: multiTxFee }
+  const freezeTxFee = baseAmount(500000)
+  const freezeFee = { type: 'base', average: freezeTxFee, fast: freezeTxFee, fastest: freezeTxFee }
 
   const transferAmount = baseAmount(1000000)
   const freezeAmount = baseAmount(500000)
@@ -111,19 +114,25 @@ describe('BinanceClient Test', () => {
   it('fetches the transfer fees', async () => {
     const fees = await bnbClient.getFees()
     expect(fees.type).toEqual(transferFee.type)
-    expect(fees.average.amount().isEqualTo(transferFee.average.amount())).toBeTruthy()
+    expect(fees.average.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+    expect(fees.fast.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+    expect(fees.fastest.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
   })
 
   it('fetches the multisend fees', async () => {
     const fees = await bnbClient.getMultiSendFees()
     expect(fees.type).toEqual(multiSendFee.type)
-    expect(fees.average.amount().isEqualTo(multiSendFee.average.amount())).toBeTruthy()
+    expect(fees.average.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
+    expect(fees.fast.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
+    expect(fees.fastest.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
   })
 
   it('fetches the freeze fees', async () => {
     const fees = await bnbClient.getFreezeFees()
     expect(fees.type).toEqual(freezeFee.type)
-    expect(fees.average.amount().isEqualTo(freezeFee.average.amount())).toBeTruthy()
+    expect(fees.average.amount().isEqualTo(freezeTxFee.amount())).toBeTruthy()
+    expect(fees.fast.amount().isEqualTo(freezeTxFee.amount())).toBeTruthy()
+    expect(fees.fastest.amount().isEqualTo(freezeTxFee.amount())).toBeTruthy()
   })
 
   it('should broadcast a transfer', async () => {

@@ -1,4 +1,5 @@
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
+import { FeeRate } from './types/client-types'
 /**
  * Bitcoin byte syzes
  */
@@ -31,7 +32,7 @@ export const compileMemo = (memo: string): Buffer => {
   return Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
 }
 
-export function getVaultFee(inputs: UTXO[], data: Buffer, feeRate: number): number {
+export function getVaultFee(inputs: UTXO[], data: Buffer, feeRate: FeeRate): number {
   const vaultFee =
     (TX_EMPTY_SIZE +
       inputs.reduce(function (a, x) {
@@ -48,7 +49,7 @@ export function getVaultFee(inputs: UTXO[], data: Buffer, feeRate: number): numb
   return vaultFee > 1000 ? vaultFee : 1000
 }
 
-export function getNormalFee(inputs: UTXO[], feeRate: number): number {
+export function getNormalFee(inputs: UTXO[], feeRate: FeeRate): number {
   const normalFee =
     (TX_EMPTY_SIZE +
       inputs.reduce(function (a, x) {

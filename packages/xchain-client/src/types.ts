@@ -53,19 +53,18 @@ export type TxParams = {
   asset?: Asset
   amount: BaseAmount
   recipient: Address
-  feeRate?: number // optional feeRate
   memo?: string // optional memo to pass
 }
+
+export type FeeOptionKey = 'average' | 'fast' | 'fastest'
+export type FeeOption = Record<FeeOptionKey, BaseAmount>
 
 export type FeeType =
   | 'byte' // fee will be measured as `BaseAmount` per `byte`
   | 'base' // fee will be "flat" measured in `BaseAmount`
 
-export type Fees = {
+export type Fees = FeeOption & {
   type: FeeType
-  fastest?: BaseAmount
-  fast?: BaseAmount
-  average: BaseAmount
 }
 
 export type XChainClientParams = {
