@@ -1,6 +1,7 @@
 require('dotenv').config()
 import * as Bitcoin from 'bitcoinjs-lib'
 import { Client } from '../src/client'
+import { MIN_TX_FEE } from '../src/utils'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 
@@ -158,14 +159,45 @@ describe('BitcoinClient Test', () => {
     expect(estimates.average).toBeDefined()
   })
 
-  it('should return estimated fees of a vault tx that are more expensive than a normal tx', async () => {
+  it('should return estimated fees of a vault tx that are more expensive than a normal tx (in case of > MIN_TX_FEE only)', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const normalTx = await btcClient.getFees()
     const vaultTx = await btcClient.getFeesWithMemo(MEMO)
-    expect(vaultTx.average.amount().isGreaterThan(normalTx.average.amount())).toBeTruthy()
-    expect(vaultTx.fast.amount().isGreaterThan(normalTx.fast.amount())).toBeTruthy()
-    expect(vaultTx.fastest.amount().isGreaterThan(normalTx.fastest.amount())).toBeTruthy()
+
+    if (vaultTx.average.amount().isGreaterThan(MIN_TX_FEE)) {
+      expect(vaultTx.average.amount().isGreaterThan(normalTx.average.amount())).toBeTruthy()
+    } else {
+      expect(vaultTx.average.amount().isEqualTo(MIN_TX_FEE)).toBeTruthy()
+    }
+
+    if (vaultTx.fast.amount().isGreaterThan(MIN_TX_FEE)) {
+      expect(vaultTx.fast.amount().isGreaterThan(normalTx.fast.amount())).toBeTruthy()
+    } else {
+      expect(vaultTx.fast.amount().isEqualTo(MIN_TX_FEE)).toBeTruthy()
+    }
+
+    if (vaultTx.fastest.amount().isGreaterThan(MIN_TX_FEE)) {
+      expect(vaultTx.fastest.amount().isGreaterThan(normalTx.fastest.amount())).toBeTruthy()
+    } else {
+      expect(vaultTx.fastest.amount().isEqualTo(MIN_TX_FEE)).toBeTruthy()
+    }
+  })
+
+  it('returns different fee rates for a normal tx', async () => {
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
+    const { fast, fastest, average } = await btcClient.getFeeRates()
+    expect(fast > average)
+    expect(fastest > fast)
+  })
+
+  it('returns different fee rates for a tx with memo', async () => {
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
+    const { fast, fastest, average } = await btcClient.getFeeRatesWithMemo(MEMO)
+    expect(fast > average)
+    expect(fastest > fast)
   })
 
   it('should error when an invalid address is used in getting balance', () => {
