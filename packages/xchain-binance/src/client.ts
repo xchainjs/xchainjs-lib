@@ -6,12 +6,11 @@ import {
   TransferFee as BinanceTransferFee,
   Fee as BinanceFee,
   TxPage as BinanceTxPage,
-  TransactionDataResult,
+  TransactionResult,
 } from './types/binance'
 
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
-import { SendData } from '@binance-chain/javascript-sdk/lib/types'
 import {
   Address,
   XChainClient,
@@ -37,7 +36,8 @@ import {
   baseToAsset,
 } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { isTransferFee, isFreezeFee, parseTxBytes, parseTx } from './util'
+import { isTransferFee, isFreezeFee, parseTx } from './util'
+import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 
 type PrivKey = string
 
@@ -242,11 +242,7 @@ class Client implements BinanceClient, XChainClient {
 
       return {
         total: txHistory.total,
-        txs: txHistory.tx.reduce((acc, tx) => {
-          const txData = parseTx(tx)
-
-          return [...acc, ...(txData ? [txData] : [])]
-        }, [] as Txs),
+        txs: txHistory.tx.map(parseTx).filter(Boolean) as Txs,
       }
     } catch (error) {
       return Promise.reject(error)
@@ -259,31 +255,34 @@ class Client implements BinanceClient, XChainClient {
         address: params ? params.address : this.getAddress(),
         limit: params && params.limit?.toString(),
         offset: params && params.offset?.toString(),
-        startTime: params && params.startTime?.toString(),
+        startTime: params && params.startTime && params.startTime.getTime().toString(),
       })
     } catch (error) {
       return Promise.reject(error)
     }
   }
 
+  /**
+   * /api/v1/tx/{hash} to query transaction hash (* it doesn't provide timestamp)
+   * /api/v1/transactions to query transaction data (* use blockHeight and address from /api/v1/tx/{hash})
+   * @param txId
+   */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const txResult = (await this.bncClient.getTx(txId)) as TransactionDataResult
-      if (txResult.status !== 200) {
-        throw new Error('transaction not found')
-      }
+      const txResult: TransactionResult = await axios
+        .get(`${this.getClientUrl()}/api/v1/tx/${txId}?format=json`)
+        .then((response) => response.data)
 
-      const blockHeight = txResult.result.height
-      const txData = txResult.result.data
-      const msgs = parseTxBytes(Buffer.from(txData.substr(3, txData.length - 4), 'hex'))
+      const blockHeight = txResult.height
 
       let address = ''
+      const msgs = txResult.tx.value.msg
       if (msgs.length) {
-        const msg = msgs[0] as SendData
+        const msg = msgs[0].value as SignedSend
         if (msg.inputs && msg.inputs.length) {
-          address = crypto.encodeAddress(msg.inputs[0].address, this.getPrefix())
+          address = msg.inputs[0].address
         } else if (msg.outputs && msg.outputs.length) {
-          address = crypto.encodeAddress(msg.outputs[0].address, this.getPrefix())
+          address = msg.outputs[0].address
         }
       }
 

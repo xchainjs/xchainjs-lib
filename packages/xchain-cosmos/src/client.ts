@@ -191,10 +191,14 @@ class Client implements CosmosClient, XChainClient {
 
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const mainAsset = this.getMainAsset()
       const txResult = await this.sdkClient.txsHashGet(txId)
+      const txs = getTxsFromHistory([txResult], this.getMainAsset())
 
-      return getTxsFromHistory([txResult], mainAsset)[0]
+      if (txs.length === 0) {
+        throw new Error('transaction not found')
+      }
+
+      return txs[0]
     } catch (error) {
       return Promise.reject(error)
     }

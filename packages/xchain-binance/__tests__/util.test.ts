@@ -1,5 +1,3 @@
-import { SendData } from '@binance-chain/javascript-sdk/lib/types'
-import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import {
   getHashFromTransfer,
   getTxHashFromMemo,
@@ -7,7 +5,6 @@ import {
   isTransferFee,
   isDexFees,
   isFreezeFee,
-  parseTxBytes,
   parseTx,
 } from '../src/util'
 import { TransferEvent, Transfer } from '../src/types/binance-ws'
@@ -63,23 +60,6 @@ describe('binance/util', () => {
       }
       const result = getTxHashFromMemo(tx)
       expect(result).toBeUndefined()
-    })
-  })
-
-  describe('parseTxBytes', () => {
-    it('should parse tx bytes', () => {
-      const tx = parseTxBytes(
-        Buffer.from(
-          'D001F0625DEE0A582A2C87FA0A280A1491937520F40458F5B414D267961B46C19789DD7012100A08555344542D36443810A0E490ED0112280A14C2A857480C89F80CB6F7E2422F5FBD9025C7AE8B12100A08555344542D36443810A0E490ED0112700A26EB5AE987210356E0A580389A6FD2CC91CD525C6D5A4D8054AF70DF17484E58678F9F574A0B4D1240326D9DCA08DC93DBD0134ABED66C70F06821ADA08493CCCBC28E6FD94D52857859F7FF247FE98133C994D556574219596E68835F094EA83E60BAFC0B8E144B3D183320D9923F',
-          'hex',
-        ),
-      )
-
-      expect(tx.length).toEqual(1)
-
-      const msg = tx[0] as SendData
-      expect(crypto.encodeAddress(msg.inputs[0].address, 'bnb')).toEqual('bnb1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64m')
-      expect(crypto.encodeAddress(msg.outputs[0].address, 'bnb')).toEqual('bnb1c259wjqv38uqedhhufpz7haajqju0t5thass5v')
     })
   })
 

@@ -1,9 +1,6 @@
 import { Transfer, TransferEvent } from './types/binance-ws'
 import { TransferFee, DexFees, Fee, TxType as BinanceTxType, Tx as BinanceTx } from './types/binance'
 import { TxType, Tx } from '@xchainjs/xchain-client'
-import { getMsgByAminoPrefix } from '@binance-chain/javascript-sdk/lib/utils'
-import { Msg, AminoPrefix } from '@binance-chain/javascript-sdk/lib/types'
-import { decoder } from '@binance-chain/javascript-sdk/lib/amino'
 import { assetFromString, AssetBNB, assetToBase, assetAmount } from '@xchainjs/xchain-util/lib'
 
 /**
@@ -47,31 +44,6 @@ export const getTxType = (t: BinanceTxType): TxType => {
   if (t === 'FREEZE_TOKEN') return 'freeze'
   if (t === 'UN_FREEZE_TOKEN') return 'unfreeze'
   return 'unknown'
-}
-
-/**
- * Parse TxBytes to Msgs
- */
-export const parseTxBytes = (txBytes: Buffer): Array<Msg> => {
-  const msgAminoPrefix = txBytes.slice(8, 12).toString('hex')
-  const msgType = getMsgByAminoPrefix(msgAminoPrefix)
-  const type = {
-    msg: [msgType.defaultMsg()],
-    signatures: [
-      {
-        pub_key: Buffer.from(''),
-        signature: Buffer.from(''),
-        account_number: 0,
-        sequence: 0,
-      },
-    ],
-    memo: '',
-    source: 0,
-    data: '',
-    aminoPrefix: AminoPrefix.StdTx,
-  }
-
-  return decoder.unMarshalBinaryLengthPrefixed(txBytes, type).val.msg
 }
 
 /**

@@ -198,8 +198,13 @@ class Client implements ThorchainClient, XChainClient {
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
       const txResult = await this.thorClient.txsHashGet(txId)
+      const txs = getTxsFromHistory([txResult], AssetRune)
 
-      return getTxsFromHistory([txResult], AssetRune)[0]
+      if (txs.length === 0) {
+        throw new Error('transaction not found')
+      }
+
+      return txs[0]
     } catch (error) {
       return Promise.reject(error)
     }
