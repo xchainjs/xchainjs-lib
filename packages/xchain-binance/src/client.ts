@@ -3,8 +3,6 @@ import {
   Balances as BinanceBalances,
   Fees as BinanceFees,
   Prefix,
-  TransferFee as BinanceTransferFee,
-  Fee as BinanceFee,
   TxPage as BinanceTxPage,
   TransactionResult,
 } from './types/binance'
