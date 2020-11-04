@@ -546,31 +546,15 @@ export type Network = keyof typeof NETWORK_PREFIX_MAPPING
 
 export type Prefix = typeof NETWORK_PREFIX_MAPPING[Network]
 
-export type AccountResult = {
-  result: Account
-  status: number
-}
-
-export type BlockHeader = {
-  chain_id: string
-  height: string
-  time: string
-}
-
-export type BlockID = {
+export type TransactionData = {
   hash: string
+  log: string
+  data: string
+  height: string
+  code: number
 }
 
-export type BlockMeta = {
-  block_id: BlockID
-  header: BlockHeader
-}
-
-export type Block = {
-  header: BlockHeader
-}
-
-export type ResultBlock = {
-  block_meta: BlockMeta
-  block: Block
+export type TransactionDataResult = {
+  result: TransactionData
+  status: number
 }

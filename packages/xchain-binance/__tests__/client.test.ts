@@ -283,11 +283,11 @@ describe('BinanceClient Test', () => {
   })
 
   it('get transaction data', async () => {
-    const tx = await bnbClient.getTransactionData('A0935C2ECF97BEE2A8868671ABE8FE8423BA9A4FFFA59F09A74C915135FA0137')
-    expect(tx.hash).toEqual('A0935C2ECF97BEE2A8868671ABE8FE8423BA9A4FFFA59F09A74C915135FA0137')
-    expect(tx.from[0].from).toEqual('bnb1qhx26x87tadk83hapzvhxtgkcjascpu2tumalg')
-    expect(tx.from[0].amount.amount().isEqualTo(baseAmount(10000000, 6).amount())).toBeTruthy()
-    expect(tx.to[0].to).toEqual('bnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9e738vr')
-    expect(tx.to[0].amount.amount().isEqualTo(baseAmount(10000000, 6).amount())).toBeTruthy()
+    const tx = await bnbClient.getTransactionData('0C6B721844BB5751311EC8910ED17F6E950E7F2D3D404145DBBA4E8B6428C3F1')
+    expect(tx.hash).toEqual('0C6B721844BB5751311EC8910ED17F6E950E7F2D3D404145DBBA4E8B6428C3F1')
+    expect(tx.from[0].from).toEqual('bnb1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64m')
+    expect(tx.from[0].amount.amount().isEqualTo(baseAmount(497300000, 6).amount())).toBeTruthy()
+    expect(tx.to[0].to).toEqual('bnb1c259wjqv38uqedhhufpz7haajqju0t5thass5v')
+    expect(tx.to[0].amount.amount().isEqualTo(baseAmount(497300000, 6).amount())).toBeTruthy()
   })
 })

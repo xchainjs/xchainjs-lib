@@ -1,8 +1,10 @@
 import { Transfer, TransferEvent } from './types/binance-ws'
-import { TransferFee, DexFees, Fee, TxType as BinanceTxType } from './types/binance'
-import { TxType } from '@xchainjs/xchain-client'
+import { TransferFee, DexFees, Fee, TxType as BinanceTxType, Tx as BinanceTx } from './types/binance'
+import { TxType, Tx } from '@xchainjs/xchain-client'
 import { getMsgByAminoPrefix } from '@binance-chain/javascript-sdk/lib/utils'
-import { SendMsg, FreezeTokenMsg, UnFreezeTokenMsg } from '@binance-chain/javascript-sdk/lib/types'
+import { Msg, AminoPrefix } from '@binance-chain/javascript-sdk/lib/types'
+import { decoder } from '@binance-chain/javascript-sdk/lib/amino'
+import { assetFromString, AssetBNB, assetToBase, assetAmount } from '@xchainjs/xchain-util/lib'
 
 /**
  * Get `hash` from transfer event sent by Binance chain
@@ -48,17 +50,54 @@ export const getTxType = (t: BinanceTxType): TxType => {
 }
 
 /**
- * Get TxType from Amino prefix
+ * Parse TxBytes to Msgs
  */
-export const getTxTypeFromAminoPrefix = (aminoPrefix: string): TxType => {
-  switch (getMsgByAminoPrefix(aminoPrefix)) {
-    case SendMsg:
-      return 'transfer'
-    case FreezeTokenMsg:
-      return 'freeze'
-    case UnFreezeTokenMsg:
-      return 'unfreeze'
+export const parseTxBytes = (txBytes: Buffer): Array<Msg> => {
+  const msgAminoPrefix = txBytes.slice(8, 12).toString('hex')
+  const msgType = getMsgByAminoPrefix(msgAminoPrefix)
+  const type = {
+    msg: [msgType.defaultMsg()],
+    signatures: [
+      {
+        pub_key: Buffer.from(''),
+        signature: Buffer.from(''),
+        account_number: 0,
+        sequence: 0,
+      },
+    ],
+    memo: '',
+    source: 0,
+    data: '',
+    aminoPrefix: AminoPrefix.StdTx,
   }
 
-  return 'unknown'
+  return decoder.unMarshalBinaryLengthPrefixed(txBytes, type).val.msg
+}
+
+/**
+ * Parse Tx
+ */
+export const parseTx = (tx: BinanceTx): Tx | null => {
+  const asset = assetFromString(`${AssetBNB.chain}.${tx.txAsset}`)
+
+  if (!asset) return null
+
+  return {
+    asset,
+    from: [
+      {
+        from: tx.fromAddr,
+        amount: assetToBase(assetAmount(tx.value, 8)),
+      },
+    ],
+    to: [
+      {
+        to: tx.toAddr,
+        amount: assetToBase(assetAmount(tx.value, 8)),
+      },
+    ],
+    date: new Date(tx.timeStamp),
+    type: getTxType(tx.txType),
+    hash: tx.txHash,
+  }
 }

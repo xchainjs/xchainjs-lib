@@ -6,12 +6,12 @@ import {
   TransferFee as BinanceTransferFee,
   Fee as BinanceFee,
   TxPage as BinanceTxPage,
-  ResultBlock,
+  TransactionDataResult,
 } from './types/binance'
 
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
-import RpcClient from '@binance-chain/javascript-sdk/lib/rpc'
+import { SendData } from '@binance-chain/javascript-sdk/lib/types'
 import {
   Address,
   XChainClient,
@@ -25,8 +25,6 @@ import {
   TxHash,
   TxHistoryParams,
   TxsPage,
-  TxFrom,
-  TxTo,
 } from '@xchainjs/xchain-client'
 import {
   Asset,
@@ -39,8 +37,7 @@ import {
   baseToAsset,
 } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { isTransferFee, getTxType, isFreezeFee, getTxTypeFromAminoPrefix } from './util'
-import { ResultTx, StdTx, SendData } from '@binance-chain/javascript-sdk/lib/types'
+import { isTransferFee, isFreezeFee, parseTxBytes, parseTx } from './util'
 
 type PrivKey = string
 
@@ -229,52 +226,26 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
-  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
-    const url = new URL(clientUrl)
-
-    url.searchParams.set('address', params ? params.address : this.getAddress())
-    if (params && params.limit) {
-      url.searchParams.set('limit', params.limit.toString())
-    }
-    if (params && params.offset) {
-      url.searchParams.set('offset', params.offset.toString())
-    }
-    if (params && params.startTime) {
-      url.searchParams.set('startTime', params.startTime.toString())
-    }
-
+  private searchTransactions = async (params?: { [x: string]: string | undefined }): Promise<TxsPage> => {
     try {
+      const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
+      const url = new URL(clientUrl)
+
+      for (const key in params) {
+        const value = params[key]
+        if (value) {
+          url.searchParams.set(key, value)
+        }
+      }
+
       const txHistory = await axios.get<BinanceTxPage>(url.toString()).then((response) => response.data)
 
       return {
         total: txHistory.total,
         txs: txHistory.tx.reduce((acc, tx) => {
-          const asset = assetFromString(`${AssetBNB.chain}.${tx.txAsset}`)
+          const txData = parseTx(tx)
 
-          if (!asset) return acc
-
-          return [
-            ...acc,
-            {
-              asset,
-              from: [
-                {
-                  from: tx.fromAddr,
-                  amount: assetToBase(assetAmount(tx.value, 8)),
-                },
-              ],
-              to: [
-                {
-                  to: tx.toAddr,
-                  amount: assetToBase(assetAmount(tx.value, 8)),
-                },
-              ],
-              date: new Date(tx.timeStamp),
-              type: getTxType(tx.txType),
-              hash: tx.txHash,
-            },
-          ]
+          return [...acc, ...(txData ? [txData] : [])]
         }, [] as Txs),
       }
     } catch (error) {
@@ -282,71 +253,48 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
+  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
+    try {
+      return await this.searchTransactions({
+        address: params ? params.address : this.getAddress(),
+        limit: params && params.limit?.toString(),
+        offset: params && params.offset?.toString(),
+        startTime: params && params.startTime?.toString(),
+      })
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const peers = await axios
-        .get<Array<{ access_addr: string }>>(`${this.getClientUrl()}/api/v1/peers`)
-        .then((response) => response.data)
-
-      if (peers.length === 0) {
-        throw new Error('peers not found')
+      const txResult = (await this.bncClient.getTx(txId)) as TransactionDataResult
+      if (txResult.status !== 200) {
+        throw new Error('transaction not found')
       }
 
-      const rpcClient = new RpcClient(peers[peers.length - 1].access_addr, this.getNetwork())
-      const resultTx: ResultTx = await rpcClient.getTxByHash(txId)
-      const stdTx: StdTx = resultTx.tx as StdTx
-      const block: ResultBlock = await rpcClient.block({ height: resultTx.height })
+      const blockHeight = txResult.result.height
+      const txData = txResult.result.data
+      const msgs = parseTxBytes(Buffer.from(txData.substr(3, txData.length - 4), 'hex'))
 
-      const from: TxFrom[] = []
-      const to: TxTo[] = []
-
-      stdTx.msg.map((msg) => {
-        const msgSend: SendData = msg as SendData
-        if (getTxTypeFromAminoPrefix(msgSend.aminoPrefix) === 'transfer') {
-          msgSend.inputs.map((input) => {
-            const amount = input.coins
-              .map((coin) => baseAmount(coin.amount.toString(), 6))
-              .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
-            const address = crypto.encodeAddress(input.address, this.getPrefix())
-
-            const from_index = from.findIndex((value) => value.from === address)
-            if (from_index === -1) {
-              from.push({
-                from: address,
-                amount,
-              })
-            } else {
-              from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), 6)
-            }
-          })
-
-          msgSend.outputs.map((output) => {
-            const amount = output.coins
-              .map((coin) => baseAmount(coin.amount.toString(), 6))
-              .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
-            const address = crypto.encodeAddress(output.address, this.getPrefix())
-
-            const to_index = to.findIndex((value) => value.to === address)
-            if (to_index === -1) {
-              to.push({
-                to: address,
-                amount,
-              })
-            } else {
-              to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), 6)
-            }
-          })
+      let address = ''
+      if (msgs.length) {
+        const msg = msgs[0] as SendData
+        if (msg.inputs && msg.inputs.length) {
+          address = crypto.encodeAddress(msg.inputs[0].address, this.getPrefix())
+        } else if (msg.outputs && msg.outputs.length) {
+          address = crypto.encodeAddress(msg.outputs[0].address, this.getPrefix())
         }
-      })
-
-      return {
-        asset: AssetBNB,
-        from,
-        to,
-        date: new Date(block.block_meta.header.time),
-        type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
-        hash: resultTx.hash as string,
       }
+
+      const txHistory = await this.searchTransactions({ address, blockHeight })
+      const transaction = txHistory.txs.find((tx) => (tx.hash = txId))
+
+      if (!transaction) {
+        throw new Error('transaction not found')
+      }
+
+      return transaction
     } catch (error) {
       return Promise.reject(error)
     }
