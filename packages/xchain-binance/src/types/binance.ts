@@ -7,6 +7,7 @@ import { BigSource } from 'big.js'
  */
 
 import { NETWORK_PREFIX_MAPPING } from '@binance-chain/javascript-sdk/lib/client'
+import { Msg, StdSignature } from '@binance-chain/javascript-sdk/lib/types'
 
 /**
  * Address
@@ -546,7 +547,24 @@ export type Network = keyof typeof NETWORK_PREFIX_MAPPING
 
 export type Prefix = typeof NETWORK_PREFIX_MAPPING[Network]
 
-export type AccountResult = {
-  result: Account
-  status: number
+export type AminoWrapping<T> = {
+  type: string
+  value: T
+}
+
+export type StdTransaction = {
+  msg: Array<AminoWrapping<Msg>>
+  signatures: Array<StdSignature>
+  memo: string
+  source: number
+  data?: Buffer | null | string
+}
+
+export type TransactionResult = {
+  hash: string
+  log: string
+  data: string
+  height: string
+  code: number
+  tx: AminoWrapping<StdTransaction>
 }

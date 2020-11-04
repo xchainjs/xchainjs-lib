@@ -1,6 +1,14 @@
-import { getHashFromTransfer, getTxHashFromMemo, isFee, isTransferFee, isDexFees, isFreezeFee } from '../src/util'
+import {
+  getHashFromTransfer,
+  getTxHashFromMemo,
+  isFee,
+  isTransferFee,
+  isDexFees,
+  isFreezeFee,
+  parseTx,
+} from '../src/util'
 import { TransferEvent, Transfer } from '../src/types/binance-ws'
-import { DexFees, Fee, TransferFee } from '../src/types/binance'
+import { DexFees, Fee, TransferFee, Tx as BinanceTx } from '../src/types/binance'
 
 describe('binance/util', () => {
   describe('getHashFromTransfer', () => {
@@ -52,6 +60,36 @@ describe('binance/util', () => {
       }
       const result = getTxHashFromMemo(tx)
       expect(result).toBeUndefined()
+    })
+  })
+
+  describe('parseTx', () => {
+    it('should parse tx', () => {
+      const origin_tx: BinanceTx = {
+        txHash: '0C6B721844BB5751311EC8910ED17F6E950E7F2D3D404145DBBA4E8B6428C3F1',
+        blockHeight: 123553830,
+        txType: 'TRANSFER',
+        timeStamp: '2020-11-03T17:21:34.152Z',
+        fromAddr: 'bnb1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64m',
+        toAddr: 'bnb1c259wjqv38uqedhhufpz7haajqju0t5thass5v',
+        value: '4.97300000',
+        txAsset: 'USDT-6D8',
+        txFee: '0.00037500',
+        proposalId: null,
+        txAge: 58638,
+        orderId: null,
+        code: 0,
+        data: null,
+        confirmBlocks: 0,
+        memo: '',
+        source: 0,
+        sequence: 1034585,
+      }
+      const tx = parseTx(origin_tx)
+
+      expect(tx).toBeTruthy()
+      expect(tx && tx.from[0].from).toEqual('bnb1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64m')
+      expect(tx && tx.to[0].to).toEqual('bnb1c259wjqv38uqedhhufpz7haajqju0t5thass5v')
     })
   })
 
