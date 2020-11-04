@@ -30,6 +30,7 @@ import { FeeData, FeeRate, FeeRates } from './types/client-types'
  */
 interface BitcoinClient {
   validateAddress(address: string): boolean
+  getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
   getFeeRatesWithMemo(memo: string): Promise<FeeRates>
   scanUTXOs(): Promise<void>
@@ -255,7 +256,7 @@ class Client implements BitcoinClient, XChainClient {
   /**
    * Calculates fees based on fee rate and memo
    */
-  calcFee = (feeRate: FeeRate, memo?: string): BaseAmount => {
+  private calcFee = (feeRate: FeeRate, memo?: string): BaseAmount => {
     if (memo) {
       const OP_RETURN = Utils.compileMemo(memo)
       const vaultFee = Utils.getVaultFee(this.utxos, OP_RETURN, feeRate)
@@ -268,7 +269,7 @@ class Client implements BitcoinClient, XChainClient {
   /**
    * Returns rates and fees
    */
-  getFeeData = async (memo?: string): Promise<FeeData> => {
+  private getFeeData = async (memo?: string): Promise<FeeData> => {
     await this.scanUTXOs()
     if (this.utxos.length === 0) {
       throw new Error('No utxos to send')
