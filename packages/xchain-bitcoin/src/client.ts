@@ -13,10 +13,12 @@ import {
   Balance,
   Network,
   Fees,
+  FeeOptionKey,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { baseAmount, assetToString, AssetBTC } from '@xchainjs/xchain-util'
+import { baseAmount, assetToString, AssetBTC, BaseAmount } from '@xchainjs/xchain-util'
+import { FeeData, FeeRate, FeeRates } from './types/client-types'
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -28,7 +30,9 @@ import { baseAmount, assetToString, AssetBTC } from '@xchainjs/xchain-util'
  */
 interface BitcoinClient {
   validateAddress(address: string): boolean
-
+  getFeesWithMemo(memo: string): Promise<Fees>
+  getFeeRates(): Promise<FeeRates>
+  getFeeRatesWithMemo(memo: string): Promise<FeeRates>
   scanUTXOs(): Promise<void>
 }
 
@@ -249,53 +253,23 @@ class Client implements BitcoinClient, XChainClient {
     return result
   }
 
-  // getBlockTime = async (): Promise<number> => {
-  //   const blocks: Blocks = await getBlocks(this.electrsAPI)
-  //   const times: Array<number> = []
-  //   blocks.forEach((block, index: number) => {
-  //     if (index !== 0) {
-  //       const block1PublishTime = moment.unix(blocks[index - 1].timestamp)
-  //       const block2PublishTime = moment.unix(block.timestamp)
-  //       times.push(block1PublishTime.diff(block2PublishTime, 'seconds'))
-  //     }
-  //   })
-  //   const avgBlockPublishTime = Utils.arrayAverage(times)
-  //   return avgBlockPublishTime
-  // }
-
-  // getTxWeight = async (addressTo: string, memo?: string): Promise<number> => {
-  //   if (!this.validateAddress(addressTo)) {
-  //     throw new Error('Invalid address')
-  //   }
-  //   const network = this.getNetwork(this.net)
-  //   const btcKeys = this.getBtcKeys(this.net, this.phrase)
-  //   const balance = this.getBalance()
-  //   const balancePlaceholder = balance - Utils.dustThreshold - 1
-  //   const psbt = new Bitcoin.Psbt({ network: network }) // Network-specific
-  //   this.utxos.forEach((UTXO) =>
-  //     psbt.addInput({
-  //       hash: UTXO.hash,
-  //       index: UTXO.index,
-  //       witnessUtxo: UTXO.witnessUtxo,
-  //     }),
-  //   )
-  //   psbt.addOutput({ address: addressTo, value: balancePlaceholder }) // Add output
-  //   psbt.addOutput({ address: this.getAddress(), value: 1 }) // change output
-  //   if (memo) {
-  //     const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
-  //     const OP_RETURN = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
-  //     psbt.addOutput({ script: OP_RETURN, value: 0 }) // Add OP_RETURN {script, value}
-  //   }
-  //   psbt.signAllInputs(btcKeys) // Sign all inputs
-  //   const tx = psbt.finalizeAllInputs().extractTransaction() // Finalise inputs, extract tx
-  //   const inputs = this.utxos.length // Add weight for each input sig
-  //   return tx.virtualSize() + inputs
-  // }
+  /**
+   * Calculates fees based on fee rate and memo
+   */
+  private calcFee = (feeRate: FeeRate, memo?: string): BaseAmount => {
+    if (memo) {
+      const OP_RETURN = Utils.compileMemo(memo)
+      const vaultFee = Utils.getVaultFee(this.utxos, OP_RETURN, feeRate)
+      return baseAmount(vaultFee)
+    }
+    const normalFee = Utils.getNormalFee(this.utxos, feeRate)
+    return baseAmount(normalFee)
+  }
 
   /**
-   * getFees
+   * Returns rates and fees
    */
-  async getFees(): Promise<Fees> {
+  private getFeeData = async (memo?: string): Promise<FeeData> => {
     await this.scanUTXOs()
     if (this.utxos.length === 0) {
       throw new Error('No utxos to send')
@@ -303,34 +277,77 @@ class Client implements BitcoinClient, XChainClient {
 
     const btcStats = await blockChair.bitcoinStats(this.nodeUrl, this.nodeApiKey)
     const nextBlockFeeRate = btcStats.suggested_transaction_fee_per_byte_sat
-    const feesOptions: Fees = {
+    const rates: Record<FeeOptionKey, number> = {
+      fastest: nextBlockFeeRate * 5,
+      fast: nextBlockFeeRate * 1,
+      average: nextBlockFeeRate * 0.5,
+    }
+
+    const fees: Fees = {
       type: 'byte',
-      fastest: baseAmount(5),
-      average: baseAmount(1),
-      fast: baseAmount(0.5),
+      fast: this.calcFee(rates.fast, memo),
+      average: this.calcFee(rates.average, memo),
+      fastest: this.calcFee(rates.fastest, memo),
     }
-    const calcdFees: Fees = {
-      type: feesOptions.type,
-      fast: baseAmount(feesOptions.fast?.amount().multipliedBy(nextBlockFeeRate)),
-      average: baseAmount(feesOptions.average?.amount().multipliedBy(nextBlockFeeRate)),
-      fastest: baseAmount(feesOptions.fastest?.amount().multipliedBy(nextBlockFeeRate)),
-    }
-    return calcdFees
+
+    return { fees, rates }
   }
 
-  async getFeesWithMemo(memo: string): Promise<Fees> {
-    const OP_RETURN = Utils.compileMemo(memo)
-    const fees = await this.getFees()
-    const memoFees: Fees = {
-      type: 'byte',
-      fast: baseAmount(Utils.getVaultFee(this.utxos, OP_RETURN, fees.fast?.amount().toNumber() ?? 0)),
-      average: baseAmount(Utils.getVaultFee(this.utxos, OP_RETURN, fees.average?.amount().toNumber() ?? 0)),
-      fastest: baseAmount(Utils.getVaultFee(this.utxos, OP_RETURN, fees.fastest?.amount().toNumber() ?? 0)),
+  /**
+   * Returns fees for transactions w/o a memo
+   */
+  getFees = async (): Promise<Fees> => {
+    try {
+      const { fees } = await this.getFeeData()
+      return fees
+    } catch (error) {
+      return Promise.reject(error)
     }
-    return memoFees
   }
 
-  async transfer({ asset = AssetBTC, amount, recipient, memo, feeRate }: TxParams): Promise<TxHash> {
+  /**
+   * Returns fees for transactions w/ a memo
+   */
+  getFeesWithMemo = async (memo: string): Promise<Fees> => {
+    try {
+      const { fees } = await this.getFeeData(memo)
+      return fees
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  /**
+   * Returns fee rates for transactions w/ a memo
+   */
+  getFeeRates = async (): Promise<FeeRates> => {
+    try {
+      const { rates } = await this.getFeeData()
+      return rates
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  /**
+   * Returns fee rates for transactions w/ a memo
+   */
+  getFeeRatesWithMemo = async (memo: string): Promise<FeeRates> => {
+    try {
+      const { rates } = await this.getFeeData(memo)
+      return rates
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  transfer = async ({
+    asset = AssetBTC,
+    amount,
+    recipient,
+    memo,
+    feeRate,
+  }: TxParams & { feeRate: FeeRate }): Promise<TxHash> => {
     await this.scanUTXOs()
     const balance = await this.getBalance()
     const btcBalance = balance.find((balance) => balance.asset.symbol === asset.symbol)
@@ -345,7 +362,7 @@ class Client implements BitcoinClient, XChainClient {
     }
     const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     const btcKeys = this.getBtcKeys(this.phrase)
-    const feeRateWhole = Number(feeRate?.toFixed(0))
+    const feeRateWhole = Number(feeRate.toFixed(0))
     const compiledMemo = memo ? Utils.compileMemo(memo) : null
     const fee = compiledMemo
       ? Utils.getVaultFee(this.utxos, compiledMemo, feeRateWhole)

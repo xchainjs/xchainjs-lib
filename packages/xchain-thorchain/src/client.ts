@@ -219,14 +219,14 @@ class Client implements ThorchainClient, XChainClient {
 
   // Need to be updated
   getFees = async (): Promise<Fees> => {
-    try {
-      return {
-        type: 'base',
-        average: baseAmount(0),
-      } as Fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const fee = baseAmount(0)
+
+    return Promise.resolve({
+      type: 'base',
+      fast: fee,
+      fastest: fee,
+      average: fee,
+    })
   }
 }
 

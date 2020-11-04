@@ -214,14 +214,14 @@ class Client implements CosmosClient, XChainClient {
 
   // Need to be updated
   getFees = async (): Promise<Fees> => {
-    try {
-      return {
-        type: 'base',
-        average: baseAmount(0, 6),
-      } as Fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const fee = baseAmount(0, 6)
+
+    return Promise.resolve({
+      type: 'base',
+      fast: fee,
+      fastest: fee,
+      average: fee,
+    })
   }
 }
 

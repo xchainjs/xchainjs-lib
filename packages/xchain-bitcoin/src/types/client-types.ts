@@ -1,11 +1,9 @@
-export type FeeOption = {
-  feeRate: number // sats/byte
-  feeTotal: number // sats
-}
+import { FeeOptionKey, Fees } from '@xchainjs/xchain-client'
 
-export type FeeOptionsKey = 'fast' | 'regular' | 'slow'
+export type FeeRate = number
+export type FeeRates = Record<FeeOptionKey, FeeRate>
 
-export type FeeOptions = Record<FeeOptionsKey, FeeOption>
+export type FeeData = { rates: FeeRates; fees: Fees }
 
 export type NormalTxParams = { addressTo: string; amount: number; feeRate: number }
 export type VaultTxParams = NormalTxParams & { memo: string }

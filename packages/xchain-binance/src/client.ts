@@ -1,12 +1,5 @@
 import axios from 'axios'
-import {
-  Balances as BinanceBalances,
-  Fees as BinanceFees,
-  Prefix,
-  TransferFee as BinanceTransferFee,
-  Fee as BinanceFee,
-  TxPage as BinanceTxPage,
-} from './types/binance'
+import { Balances as BinanceBalances, Fees as BinanceFees, Prefix, TxPage as BinanceTxPage } from './types/binance'
 
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
@@ -382,9 +375,13 @@ class Client implements BinanceClient, XChainClient {
         throw new Error('failed to get transfer fees')
       }
 
+      const singleTxFee = baseAmount(transferFee.fixed_fee_params.fee)
+
       return {
         type: 'base',
-        average: baseAmount((transferFee as BinanceTransferFee).fixed_fee_params.fee),
+        fast: singleTxFee,
+        fastest: singleTxFee,
+        average: singleTxFee,
       } as Fees
     } catch (error) {
       return Promise.reject(error)
@@ -401,9 +398,13 @@ class Client implements BinanceClient, XChainClient {
         throw new Error('failed to get transfer fees')
       }
 
+      const multiTxFee = baseAmount(transferFee.multi_transfer_fee)
+
       return {
         type: 'base',
-        average: baseAmount((transferFee as BinanceTransferFee).multi_transfer_fee),
+        average: multiTxFee,
+        fast: multiTxFee,
+        fastest: multiTxFee,
       } as Fees
     } catch (error) {
       return Promise.reject(error)
@@ -420,10 +421,14 @@ class Client implements BinanceClient, XChainClient {
         throw new Error('failed to get transfer fees')
       }
 
+      const fee = baseAmount(freezeFee.fee)
+
       return {
         type: 'base',
-        average: baseAmount((freezeFee as BinanceFee).fee),
-      } as Fees
+        fast: fee,
+        fastest: fee,
+        average: fee,
+      }
     } catch (error) {
       return Promise.reject(error)
     }
