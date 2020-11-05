@@ -111,7 +111,10 @@ describe('BitcoinClient Test', () => {
     return expect(btcClient.getBalance()).rejects.toThrow('Phrase not set')
   })
 
-  it('should do broadcast a vault transfer with a memo', async () => {
+  /**
+   * @TODO unskip after resolving https://github.com/xchainjs/xchainjs-lib/issues/77
+   */
+  it.skip('should do broadcast a vault transfer with a memo', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseTwo)
 
