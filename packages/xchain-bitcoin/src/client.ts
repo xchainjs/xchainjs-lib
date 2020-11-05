@@ -234,8 +234,8 @@ class Client implements BitcoinClient, XChainClient {
         const rawTx = (await blockChair.getTx(this.nodeUrl, hash, this.nodeApiKey))[hash]
         const tx: Tx = {
           asset: AssetBTC,
-          from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value) })),
-          to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value) })),
+          from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
+          to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
           date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
           type: 'transfer',
           hash: rawTx.transaction.hash,
@@ -253,8 +253,20 @@ class Client implements BitcoinClient, XChainClient {
     return result
   }
 
-  getTransactionData = async (_txId: string): Promise<Tx> => {
-    return Promise.reject('getTransactionData is not implemented for BTC yet')
+  getTransactionData = async (txId: string): Promise<Tx> => {
+    try {
+      const rawTx = (await blockChair.getTx(this.nodeUrl, txId, this.nodeApiKey))[txId]
+      return {
+        asset: AssetBTC,
+        from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
+        to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
+        date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
+        type: 'transfer',
+        hash: rawTx.transaction.hash,
+      }
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   /**
