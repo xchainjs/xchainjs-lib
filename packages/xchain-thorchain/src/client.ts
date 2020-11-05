@@ -12,7 +12,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, getTxsFromHistory } from '@xchainjs/xchain-cosmos'
-import { Asset, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { PrivKey } from 'cosmos-client'
@@ -37,6 +37,11 @@ class Client implements ThorchainClient, XChainClient {
   private privateKey: PrivKey | null = null
 
   private derive_path = "44'/931'/0'/0/0"
+
+  // there is no fixed fee, we set fee amount when creating a transaction.
+  private fastFee: BaseAmount = baseAmount(750, 6)
+  private fastestFee: BaseAmount = baseAmount(2500, 6)
+  private averageFee: BaseAmount = baseAmount(0, 6)
 
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
@@ -233,15 +238,12 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
-  // Need to be updated
   getFees = async (): Promise<Fees> => {
-    const fee = baseAmount(0)
-
     return Promise.resolve({
       type: 'base',
-      fast: fee,
-      fastest: fee,
-      average: fee,
+      fast: this.fastFee,
+      fastest: this.fastestFee,
+      average: this.averageFee,
     })
   }
 }
