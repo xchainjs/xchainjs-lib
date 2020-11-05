@@ -94,13 +94,16 @@ class Client implements BitcoinClient, XChainClient {
     return this.net
   }
 
-  getExplorerAddressUrl(address: Address): string {
+  getExplorerUrl(): string {
     const networkPath = this.net === 'testnet' ? '/testnet' : ''
-    return `https://blockstream.info${networkPath}/address/${address}`
+    return `https://blockstream.info${networkPath}`
+  }
+
+  getExplorerAddressUrl(address: Address): string {
+    return `${this.getExplorerUrl()}/address/${address}`
   }
   getExplorerTxUrl(txID: string): string {
-    const networkPath = this.net === 'testnet' ? '/testnet' : ''
-    return `https://blockstream.info${networkPath}/tx/${txID}`
+    return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
   // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)

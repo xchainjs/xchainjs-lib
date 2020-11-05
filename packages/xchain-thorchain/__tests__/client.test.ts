@@ -303,4 +303,32 @@ describe('Client Test', () => {
 
     expect(result).toEqual('EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D')
   })
+
+  it('should return valid explorer url', () => {
+    // Client created with network === 'testnet'
+    expect(thorClient.getExplorerUrl()).toEqual('https://thorchain.net')
+
+    thorClient.setNetwork('mainnet')
+    expect(thorClient.getExplorerUrl()).toEqual('https://thorchain.net')
+  })
+
+  it('should retrun valid explorer address url', () => {
+    expect(thorClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
+      'https://thorchain.net/addresses/anotherTestAddressHere',
+    )
+
+    thorClient.setNetwork('mainnet')
+    expect(thorClient.getExplorerAddressUrl('testAddressHere')).toEqual(
+      'https://thorchain.net/addresses/testAddressHere',
+    )
+  })
+
+  it('should retrun valid explorer tx url', () => {
+    expect(thorClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
+      'https://thorchain.net/txs/anotherTestTxHere',
+    )
+
+    thorClient.setNetwork('mainnet')
+    expect(thorClient.getExplorerTxUrl('testTxHere')).toEqual('https://thorchain.net/txs/testTxHere')
+  })
 })

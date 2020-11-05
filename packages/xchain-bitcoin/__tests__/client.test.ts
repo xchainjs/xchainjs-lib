@@ -230,4 +230,30 @@ describe('BitcoinClient Test', () => {
       'Max limit allowed 10000',
     )
   })
+
+  it('should return valid explorer url', () => {
+    // Client created with network === 'mainnet'
+    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info')
+
+    btcClient.setNetwork('testnet')
+    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info/testnet')
+  })
+
+  it('should retrun valid explorer address url', () => {
+    expect(btcClient.getExplorerAddressUrl('testAddressHere')).toEqual(
+      'https://blockstream.info/address/testAddressHere',
+    )
+    btcClient.setNetwork('testnet')
+    expect(btcClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
+      'https://blockstream.info/testnet/address/anotherTestAddressHere',
+    )
+  })
+
+  it('should retrun valid explorer tx url', () => {
+    expect(btcClient.getExplorerTxUrl('testTxHere')).toEqual('https://blockstream.info/tx/testTxHere')
+    btcClient.setNetwork('testnet')
+    expect(btcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
+      'https://blockstream.info/testnet/address/anotherTestTxHere',
+    )
+  })
 })

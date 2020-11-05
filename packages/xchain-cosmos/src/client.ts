@@ -75,7 +75,7 @@ class Client implements CosmosClient, XChainClient {
     codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
   }
 
-  private getExplorerUrl = (): string => {
+  getExplorerUrl = (): string => {
     return this.network === 'testnet' ? 'https://gaia.bigdipper.live' : 'https://cosmos.bigdipper.live'
   }
 

@@ -268,4 +268,32 @@ describe('BinanceClient Test', () => {
     expect(txArray.total).toBeTruthy()
     expect(txArray.txs.length).toBeTruthy()
   })
+
+  it('should return valid explorer url', () => {
+    // Client created with network === 'mainnet'
+    expect(bnbClient.getExplorerUrl()).toEqual('https://explorer.binance.org')
+
+    bnbClient.setNetwork('testnet')
+    expect(bnbClient.getExplorerUrl()).toEqual('https://testnet-explorer.binance.org')
+  })
+
+  it('should retrun valid explorer address url', () => {
+    expect(bnbClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
+      'https://explorer.binance.org/address/anotherTestAddressHere',
+    )
+
+    bnbClient.setNetwork('testnet')
+    expect(bnbClient.getExplorerAddressUrl('testAddressHere')).toEqual(
+      'https://testnet-explorer.binance.org/address/testAddressHere',
+    )
+  })
+
+  it('should retrun valid explorer tx url', () => {
+    expect(bnbClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
+      'https://explorer.binance.org/tx/anotherTestTxHere',
+    )
+
+    bnbClient.setNetwork('testnet')
+    expect(bnbClient.getExplorerTxUrl('testTxHere')).toEqual('https://testnet-explorer.binance.org/tx/testTxHere')
+  })
 })
