@@ -239,7 +239,10 @@ class Client implements BinanceClient, XChainClient {
         if (value) {
           url.searchParams.set(key, value)
           if (key === 'startTime' && !params['endTime']) {
-            url.searchParams.set('endTime', (value + diffTime).toString())
+            url.searchParams.set('endTime', (parseInt(value) + diffTime).toString())
+          }
+          if (key === 'endTime' && !params['startTime']) {
+            url.searchParams.set('startTime', (parseInt(value) - diffTime).toString())
           }
         }
       }
