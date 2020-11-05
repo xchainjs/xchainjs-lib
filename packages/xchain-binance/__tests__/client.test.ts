@@ -282,7 +282,7 @@ describe('BinanceClient Test', () => {
     expect(txArray.txs.length).toBeTruthy()
   })
 
-  it.only('get transaction data', async () => {
+  it('get transaction data', async () => {
     const tx = await bnbClient.getTransactionData('A9E8E05603658BF3A295F04C856FE69E79EDA7375A307369F37411939BC321BB')
     expect(tx.hash).toEqual('A9E8E05603658BF3A295F04C856FE69E79EDA7375A307369F37411939BC321BB')
     expect(tx.from[0].from).toEqual('bnb1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64m')
