@@ -137,7 +137,7 @@ class Client implements BinanceClient, XChainClient {
     return this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
   }
 
-  private getExplorerUrl = (): string => {
+  getExplorerUrl = (): string => {
     return this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
   }
 

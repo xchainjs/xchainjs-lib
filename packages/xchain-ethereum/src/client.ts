@@ -66,6 +66,10 @@ export default class Client implements EthereumClient {
     return this._address
   }
 
+  protected getExplorerUrl = (): string => {
+    return ''
+  }
+
   get wallet(): ethers.Wallet {
     return this._wallet
   }

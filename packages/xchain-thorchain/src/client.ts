@@ -90,8 +90,8 @@ class Client implements ThorchainClient, XChainClient {
     codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
   }
 
-  private getExplorerUrl = (): string => {
-    return 'https://thorchain.net/'
+  getExplorerUrl = (): string => {
+    return 'https://thorchain.net'
   }
 
   getExplorerAddressUrl = (address: Address): string => {
