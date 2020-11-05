@@ -38,11 +38,6 @@ class Client implements CosmosClient, XChainClient {
   private address: Address = '' // default address at index 0
   private privateKey: PrivKey | null = null // default private key at index 0
 
-  // there is no fixed fee, we set fee amount when creating a transaction.
-  private fastFee: BaseAmount = baseAmount(750, 6)
-  private fastestFee: BaseAmount = baseAmount(2500, 6)
-  private averageFee: BaseAmount = baseAmount(0, 6)
-
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
     this.sdkClient = new CosmosSDKClient({ server: this.getClientUrl(), chainId: this.getChainId() })
@@ -233,12 +228,13 @@ class Client implements CosmosClient, XChainClient {
     }
   }
 
+  // there is no fixed fee, we set fee amount when creating a transaction.
   getFees = async (): Promise<Fees> => {
     return Promise.resolve({
       type: 'base',
-      fast: this.fastFee,
-      fastest: this.fastestFee,
-      average: this.averageFee,
+      fast: baseAmount(750, 6),
+      fastest: baseAmount(2500, 6),
+      average: baseAmount(0, 6),
     })
   }
 }
