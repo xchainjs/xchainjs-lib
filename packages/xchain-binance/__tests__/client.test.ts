@@ -11,9 +11,12 @@ describe('BinanceClient Test', () => {
   const testnetaddress = 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj'
 
   // This needs to be updated once `Fees` type in `asgardex-client` changes
-  const transferFee = { type: 'base', average: baseAmount(37500) }
-  const multiSendFee = { type: 'base', average: baseAmount(30000) }
-  const freezeFee = { type: 'base', average: baseAmount(500000) }
+  const singleTxFee = baseAmount(37500)
+  const transferFee = { type: 'base', average: singleTxFee, fast: singleTxFee, fastest: singleTxFee }
+  const multiTxFee = baseAmount(30000)
+  const multiSendFee = { type: 'base', average: multiTxFee, fast: multiTxFee, fastest: multiTxFee }
+  const freezeTxFee = baseAmount(500000)
+  const freezeFee = { type: 'base', average: freezeTxFee, fast: freezeTxFee, fastest: freezeTxFee }
 
   const transferAmount = baseAmount(1000000)
   const freezeAmount = baseAmount(500000)
@@ -111,19 +114,25 @@ describe('BinanceClient Test', () => {
   it('fetches the transfer fees', async () => {
     const fees = await bnbClient.getFees()
     expect(fees.type).toEqual(transferFee.type)
-    expect(fees.average.amount().isEqualTo(transferFee.average.amount())).toBeTruthy()
+    expect(fees.average.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+    expect(fees.fast.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+    expect(fees.fastest.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
   })
 
   it('fetches the multisend fees', async () => {
     const fees = await bnbClient.getMultiSendFees()
     expect(fees.type).toEqual(multiSendFee.type)
-    expect(fees.average.amount().isEqualTo(multiSendFee.average.amount())).toBeTruthy()
+    expect(fees.average.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
+    expect(fees.fast.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
+    expect(fees.fastest.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
   })
 
   it('fetches the freeze fees', async () => {
     const fees = await bnbClient.getFreezeFees()
     expect(fees.type).toEqual(freezeFee.type)
-    expect(fees.average.amount().isEqualTo(freezeFee.average.amount())).toBeTruthy()
+    expect(fees.average.amount().isEqualTo(freezeTxFee.amount())).toBeTruthy()
+    expect(fees.fast.amount().isEqualTo(freezeTxFee.amount())).toBeTruthy()
+    expect(fees.fastest.amount().isEqualTo(freezeTxFee.amount())).toBeTruthy()
   })
 
   it('should broadcast a transfer', async () => {
@@ -257,7 +266,11 @@ describe('BinanceClient Test', () => {
   })
 
   it('has an empty tx history', async () => {
-    const txArray = await bnbClient.getTransactions()
+    const bnbClientEmptyMain = new BinanceClient({
+      phrase: 'nose link choose blossom social craft they better render provide escape talk',
+      network: 'mainnet',
+    })
+    const txArray = await bnbClientEmptyMain.getTransactions()
     expect(txArray).toEqual({ total: 0, txs: [] })
   })
 
@@ -267,6 +280,15 @@ describe('BinanceClient Test', () => {
     const txArray = await bnbClient.getTransactions({ address: testnetaddressForTx })
     expect(txArray.total).toBeTruthy()
     expect(txArray.txs.length).toBeTruthy()
+  })
+
+  it.only('get transaction data', async () => {
+    const tx = await bnbClient.getTransactionData('A9E8E05603658BF3A295F04C856FE69E79EDA7375A307369F37411939BC321BB')
+    expect(tx.hash).toEqual('A9E8E05603658BF3A295F04C856FE69E79EDA7375A307369F37411939BC321BB')
+    expect(tx.from[0].from).toEqual('bnb1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64m')
+    expect(tx.from[0].amount.amount().isEqualTo(baseAmount(107167590000000, 8).amount())).toBeTruthy()
+    expect(tx.to[0].to).toEqual('bnb1fm4gqjxkrdfk8f23xjv6yfx3k7vhrdck8qp6a6')
+    expect(tx.to[0].amount.amount().isEqualTo(baseAmount(107167590000000, 8).amount())).toBeTruthy()
   })
 
   it('should return valid explorer url', () => {

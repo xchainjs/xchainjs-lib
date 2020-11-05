@@ -3,6 +3,7 @@ import {
   Balances,
   Fees,
   Network,
+  Tx,
   TxParams,
   TxHash,
   TxHistoryParams,
@@ -188,6 +189,21 @@ class Client implements CosmosClient, XChainClient {
     }
   }
 
+  getTransactionData = async (txId: string): Promise<Tx> => {
+    try {
+      const txResult = await this.sdkClient.txsHashGet(txId)
+      const txs = getTxsFromHistory([txResult], this.getMainAsset())
+
+      if (txs.length === 0) {
+        throw new Error('transaction not found')
+      }
+
+      return txs[0]
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
   deposit = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     return this.transfer({ asset, amount, recipient, memo })
   }
@@ -214,14 +230,14 @@ class Client implements CosmosClient, XChainClient {
 
   // Need to be updated
   getFees = async (): Promise<Fees> => {
-    try {
-      return {
-        type: 'base',
-        average: baseAmount(0, 6),
-      } as Fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const fee = baseAmount(0, 6)
+
+    return Promise.resolve({
+      type: 'base',
+      fast: fee,
+      fastest: fee,
+      average: fee,
+    })
   }
 }
 

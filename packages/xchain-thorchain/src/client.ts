@@ -3,6 +3,7 @@ import {
   Balances,
   Fees,
   Network,
+  Tx,
   TxParams,
   TxHash,
   TxHistoryParams,
@@ -194,6 +195,21 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
+  getTransactionData = async (txId: string): Promise<Tx> => {
+    try {
+      const txResult = await this.thorClient.txsHashGet(txId)
+      const txs = getTxsFromHistory([txResult], AssetRune)
+
+      if (txs.length === 0) {
+        throw new Error('transaction not found')
+      }
+
+      return txs[0]
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
   deposit = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     return this.transfer({ asset, amount, recipient, memo })
   }
@@ -219,14 +235,14 @@ class Client implements ThorchainClient, XChainClient {
 
   // Need to be updated
   getFees = async (): Promise<Fees> => {
-    try {
-      return {
-        type: 'base',
-        average: baseAmount(0),
-      } as Fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const fee = baseAmount(0)
+
+    return Promise.resolve({
+      type: 'base',
+      fast: fee,
+      fastest: fee,
+      average: fee,
+    })
   }
 }
 

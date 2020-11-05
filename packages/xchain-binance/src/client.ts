@@ -3,9 +3,8 @@ import {
   Balances as BinanceBalances,
   Fees as BinanceFees,
   Prefix,
-  TransferFee as BinanceTransferFee,
-  Fee as BinanceFee,
   TxPage as BinanceTxPage,
+  TransactionResult,
 } from './types/binance'
 
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
@@ -17,6 +16,7 @@ import {
   Balances,
   Fees,
   Network,
+  Tx,
   Txs,
   TxParams,
   TxHash,
@@ -34,7 +34,8 @@ import {
   baseToAsset,
 } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { isTransferFee, getTxType, isFreezeFee } from './util'
+import { isTransferFee, isFreezeFee, parseTx } from './util'
+import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 
 type PrivKey = string
 
@@ -223,54 +224,85 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
-  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
-    const url = new URL(clientUrl)
-
-    url.searchParams.set('address', params ? params.address : this.getAddress())
-    if (params && params.limit) {
-      url.searchParams.set('limit', params.limit.toString())
-    }
-    if (params && params.offset) {
-      url.searchParams.set('offset', params.offset.toString())
-    }
-    if (params && params.startTime) {
-      url.searchParams.set('startTime', params.startTime.toString())
-    }
-
+  private searchTransactions = async (params?: { [x: string]: string | undefined }): Promise<TxsPage> => {
     try {
+      const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
+      const url = new URL(clientUrl)
+
+      const endTime = Date.now()
+      const diffTime = 90 * 24 * 60 * 60 * 1000
+      url.searchParams.set('endTime', endTime.toString())
+      url.searchParams.set('startTime', (endTime - diffTime).toString())
+
+      for (const key in params) {
+        const value = params[key]
+        if (value) {
+          url.searchParams.set(key, value)
+          if (key === 'startTime' && !params['endTime']) {
+            url.searchParams.set('endTime', (parseInt(value) + diffTime).toString())
+          }
+          if (key === 'endTime' && !params['startTime']) {
+            url.searchParams.set('startTime', (parseInt(value) - diffTime).toString())
+          }
+        }
+      }
+
       const txHistory = await axios.get<BinanceTxPage>(url.toString()).then((response) => response.data)
 
       return {
         total: txHistory.total,
-        txs: txHistory.tx.reduce((acc, tx) => {
-          const asset = assetFromString(`${AssetBNB.chain}.${tx.txAsset}`)
-
-          if (!asset) return acc
-
-          return [
-            ...acc,
-            {
-              asset,
-              from: [
-                {
-                  from: tx.fromAddr,
-                  amount: assetToBase(assetAmount(tx.value, 8)),
-                },
-              ],
-              to: [
-                {
-                  to: tx.toAddr,
-                  amount: assetToBase(assetAmount(tx.value, 8)),
-                },
-              ],
-              date: new Date(tx.timeStamp),
-              type: getTxType(tx.txType),
-              hash: tx.txHash,
-            },
-          ]
-        }, [] as Txs),
+        txs: txHistory.tx.map(parseTx).filter(Boolean) as Txs,
       }
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
+    try {
+      return await this.searchTransactions({
+        address: params ? params.address : this.getAddress(),
+        limit: params && params.limit?.toString(),
+        offset: params && params.offset?.toString(),
+        startTime: params && params.startTime && params.startTime.getTime().toString(),
+      })
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  /**
+   * /api/v1/tx/{hash} to query transaction hash (* it doesn't provide timestamp)
+   * /api/v1/transactions to query transaction data (* use blockHeight and address from /api/v1/tx/{hash})
+   * @param txId
+   */
+  getTransactionData = async (txId: string): Promise<Tx> => {
+    try {
+      const txResult: TransactionResult = await axios
+        .get(`${this.getClientUrl()}/api/v1/tx/${txId}?format=json`)
+        .then((response) => response.data)
+
+      const blockHeight = txResult.height
+
+      let address = ''
+      const msgs = txResult.tx.value.msg
+      if (msgs.length) {
+        const msg = msgs[0].value as SignedSend
+        if (msg.inputs && msg.inputs.length) {
+          address = msg.inputs[0].address
+        } else if (msg.outputs && msg.outputs.length) {
+          address = msg.outputs[0].address
+        }
+      }
+
+      const txHistory = await this.searchTransactions({ address, blockHeight })
+      const transaction = txHistory.txs.find((tx) => (tx.hash = txId))
+
+      if (!transaction) {
+        throw new Error('transaction not found')
+      }
+
+      return transaction
     } catch (error) {
       return Promise.reject(error)
     }
@@ -382,9 +414,13 @@ class Client implements BinanceClient, XChainClient {
         throw new Error('failed to get transfer fees')
       }
 
+      const singleTxFee = baseAmount(transferFee.fixed_fee_params.fee)
+
       return {
         type: 'base',
-        average: baseAmount((transferFee as BinanceTransferFee).fixed_fee_params.fee),
+        fast: singleTxFee,
+        fastest: singleTxFee,
+        average: singleTxFee,
       } as Fees
     } catch (error) {
       return Promise.reject(error)
@@ -401,9 +437,13 @@ class Client implements BinanceClient, XChainClient {
         throw new Error('failed to get transfer fees')
       }
 
+      const multiTxFee = baseAmount(transferFee.multi_transfer_fee)
+
       return {
         type: 'base',
-        average: baseAmount((transferFee as BinanceTransferFee).multi_transfer_fee),
+        average: multiTxFee,
+        fast: multiTxFee,
+        fastest: multiTxFee,
       } as Fees
     } catch (error) {
       return Promise.reject(error)
@@ -420,10 +460,14 @@ class Client implements BinanceClient, XChainClient {
         throw new Error('failed to get transfer fees')
       }
 
+      const fee = baseAmount(freezeFee.fee)
+
       return {
         type: 'base',
-        average: baseAmount((freezeFee as BinanceFee).fee),
-      } as Fees
+        fast: fee,
+        fastest: fee,
+        average: fee,
+      }
     } catch (error) {
       return Promise.reject(error)
     }

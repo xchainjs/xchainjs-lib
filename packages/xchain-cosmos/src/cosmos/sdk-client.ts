@@ -16,6 +16,7 @@ import {
   TransferParams,
   TxHistoryResponse,
   CosmosSDKClientParams,
+  TxResponse,
 } from './types'
 import { getQueryString } from '../util'
 
@@ -128,6 +129,16 @@ export class CosmosSDKClient {
         .then((res) => res.data)
     } catch (error) {
       return Promise.reject(error)
+    }
+  }
+
+  txsHashGet = async (hash: string): Promise<TxResponse> => {
+    try {
+      this.setPrefix()
+
+      return await axios.get<TxResponse>(`${this.server}/txs/${hash}`).then((res) => res.data)
+    } catch (error) {
+      throw new Error('transaction not found')
     }
   }
 

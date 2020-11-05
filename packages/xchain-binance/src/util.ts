@@ -1,6 +1,7 @@
 import { Transfer, TransferEvent } from './types/binance-ws'
-import { TransferFee, DexFees, Fee, TxType as BinanceTxType } from './types/binance'
-import { TxType } from '@xchainjs/xchain-client'
+import { TransferFee, DexFees, Fee, TxType as BinanceTxType, Tx as BinanceTx } from './types/binance'
+import { TxType, Tx } from '@xchainjs/xchain-client'
+import { assetFromString, AssetBNB, assetToBase, assetAmount } from '@xchainjs/xchain-util/lib'
 
 /**
  * Get `hash` from transfer event sent by Binance chain
@@ -43,4 +44,32 @@ export const getTxType = (t: BinanceTxType): TxType => {
   if (t === 'FREEZE_TOKEN') return 'freeze'
   if (t === 'UN_FREEZE_TOKEN') return 'unfreeze'
   return 'unknown'
+}
+
+/**
+ * Parse Tx
+ */
+export const parseTx = (tx: BinanceTx): Tx | null => {
+  const asset = assetFromString(`${AssetBNB.chain}.${tx.txAsset}`)
+
+  if (!asset) return null
+
+  return {
+    asset,
+    from: [
+      {
+        from: tx.fromAddr,
+        amount: assetToBase(assetAmount(tx.value, 8)),
+      },
+    ],
+    to: [
+      {
+        to: tx.toAddr,
+        amount: assetToBase(assetAmount(tx.value, 8)),
+      },
+    ],
+    date: new Date(tx.timeStamp),
+    type: getTxType(tx.txType),
+    hash: tx.txHash,
+  }
 }
