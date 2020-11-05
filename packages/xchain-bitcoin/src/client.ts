@@ -253,6 +253,10 @@ class Client implements BitcoinClient, XChainClient {
     return result
   }
 
+  getTransactionData = async (_txId: string): Promise<Tx> => {
+    return Promise.reject('getTransactionData is not implemented for BTC yet')
+  }
+
   /**
    * Calculates fees based on fee rate and memo
    */

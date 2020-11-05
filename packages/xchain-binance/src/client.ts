@@ -229,10 +229,21 @@ class Client implements BinanceClient, XChainClient {
       const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
       const url = new URL(clientUrl)
 
+      const endTime = Date.now()
+      const diffTime = 90 * 24 * 60 * 60 * 1000
+      url.searchParams.set('endTime', endTime.toString())
+      url.searchParams.set('startTime', (endTime - diffTime).toString())
+
       for (const key in params) {
         const value = params[key]
         if (value) {
           url.searchParams.set(key, value)
+          if (key === 'startTime' && !params['endTime']) {
+            url.searchParams.set('endTime', (parseInt(value) + diffTime).toString())
+          }
+          if (key === 'endTime' && !params['startTime']) {
+            url.searchParams.set('startTime', (parseInt(value) - diffTime).toString())
+          }
         }
       }
 
