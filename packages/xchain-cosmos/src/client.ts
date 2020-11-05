@@ -11,7 +11,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { PrivKey } from 'cosmos-client'
