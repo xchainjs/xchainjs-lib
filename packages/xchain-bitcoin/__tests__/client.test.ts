@@ -150,6 +150,34 @@ describe('BitcoinClient Test', () => {
     )
   })
 
+  it('returns fees and rates of a normal tx', async () => {
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
+    const { fees, rates } = await btcClient.getFeesWithRates()
+    // check fees
+    expect(fees.fast).toBeDefined()
+    expect(fees.fastest).toBeDefined()
+    expect(fees.average).toBeDefined()
+    // check rates
+    expect(rates.fast).toBeDefined()
+    expect(rates.fastest).toBeDefined()
+    expect(rates.average).toBeDefined()
+  })
+
+  it('returns fees and rates of a tx w/ memo', async () => {
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
+    const { fees, rates } = await btcClient.getFeesWithRates(MEMO)
+    // check fees
+    expect(fees.fast).toBeDefined()
+    expect(fees.fastest).toBeDefined()
+    expect(fees.average).toBeDefined()
+    // check rates
+    expect(rates.fast).toBeDefined()
+    expect(rates.fastest).toBeDefined()
+    expect(rates.average).toBeDefined()
+  })
+
   it('should return estimated fees of a normal tx', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
@@ -188,14 +216,6 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const { fast, fastest, average } = await btcClient.getFeeRates()
-    expect(fast > average)
-    expect(fastest > fast)
-  })
-
-  it('returns different fee rates for a tx with memo', async () => {
-    btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseOne)
-    const { fast, fastest, average } = await btcClient.getFeeRatesWithMemo(MEMO)
     expect(fast > average)
     expect(fastest > fast)
   })
