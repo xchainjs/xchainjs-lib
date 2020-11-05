@@ -289,7 +289,7 @@ describe('BitcoinClient Test', () => {
     expect(btcClient.getExplorerTxUrl('testTxHere')).toEqual('https://blockstream.info/tx/testTxHere')
     btcClient.setNetwork('testnet')
     expect(btcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
-      'https://blockstream.info/testnet/address/anotherTestTxHere',
+      'https://blockstream.info/testnet/tx/anotherTestTxHere',
     )
   })
 })

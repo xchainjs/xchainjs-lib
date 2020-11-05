@@ -91,7 +91,7 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   getExplorerUrl = (): string => {
-    return 'https://thorchain.net/'
+    return 'https://thorchain.net'
   }
 
   getExplorerAddressUrl = (address: Address): string => {
