@@ -2,7 +2,6 @@ require('dotenv').config()
 import * as Bitcoin from 'bitcoinjs-lib'
 import { Client } from '../src/client'
 import { MIN_TX_FEE } from '../src/utils'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 
 const NODE_URL = 'https://api.blockchair.com/bitcoin/testnet'
@@ -40,12 +39,6 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
     const network = btcClient.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     expect(network.bech32).toEqual('tb')
-  })
-
-  it('should generate a valid phrase', () => {
-    const _phrase = btcClient.generatePhrase()
-    const valid = xchainCrypto.validatePhrase(_phrase)
-    expect(valid).toBeTruthy()
   })
 
   it('set phrase should return correct address', () => {

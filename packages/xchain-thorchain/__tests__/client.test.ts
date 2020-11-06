@@ -106,17 +106,6 @@ describe('Client Test', () => {
     expect(address).toEqual(testnet_address)
   })
 
-  it('should generate phrase', () => {
-    const phrase_ = Client.generatePhrase()
-    const valid = Client.validatePhrase(phrase_)
-    expect(valid).toBeTruthy()
-  })
-
-  it('should validate phrase', () => {
-    const valid = Client.validatePhrase(phrase)
-    expect(valid).toBeTruthy()
-  })
-
   it('should init, should have right prefix', async () => {
     expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
 
