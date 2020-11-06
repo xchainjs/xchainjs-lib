@@ -1,3 +1,19 @@
+ # v.3.1.0 (2020-11-06)
+
+### Add
+
+- `getTransactionData(txId: string): Promise<Tx>`
+
+- `asset` parameter to the `getTransactions` method
+
+### Change
+
+- `getExplorerUrl` is public now
+
+### Fix
+ 
+- Fixed asset parsing for `getBalance` method
+
 # v.3.0.1 (2020-08-26)
 
 - Change type of `amount` to `BigSource` in `normalTx`, `vaultTx`, `freeze`, `unfreeze`
