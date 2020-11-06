@@ -32,6 +32,7 @@ import {
   assetToBase,
   baseAmount,
   baseToAsset,
+  BNBChain,
 } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { isTransferFee, isFreezeFee, parseTx } from './util'
@@ -137,7 +138,7 @@ class Client implements BinanceClient, XChainClient {
     return this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
   }
 
-  private getExplorerUrl = (): string => {
+  getExplorerUrl = (): string => {
     return this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
   }
 
@@ -213,7 +214,7 @@ class Client implements BinanceClient, XChainClient {
       return balances
         .map((balance) => {
           return {
-            asset: assetFromString(balance.symbol) || AssetBNB,
+            asset: assetFromString(`${BNBChain}.${balance.symbol}`) || AssetBNB,
             amount: assetToBase(assetAmount(balance.free, 8)),
             frozenAmount: assetToBase(assetAmount(balance.frozen, 8)),
           }
@@ -265,6 +266,7 @@ class Client implements BinanceClient, XChainClient {
         limit: params && params.limit?.toString(),
         offset: params && params.offset?.toString(),
         startTime: params && params.startTime && params.startTime.getTime().toString(),
+        txAsset: params && params.asset,
       })
     } catch (error) {
       return Promise.reject(error)

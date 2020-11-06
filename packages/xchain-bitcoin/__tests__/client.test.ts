@@ -111,7 +111,10 @@ describe('BitcoinClient Test', () => {
     return expect(btcClient.getBalance()).rejects.toThrow('Phrase not set')
   })
 
-  it('should do broadcast a vault transfer with a memo', async () => {
+  /**
+   * @TODO unskip after resolving https://github.com/xchainjs/xchainjs-lib/issues/77
+   */
+  it.skip('should do broadcast a vault transfer with a memo', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseTwo)
 
@@ -301,5 +304,33 @@ describe('BitcoinClient Test', () => {
     expect(txData.to[0].amount.amount().isEqualTo(baseAmount(100000, 8).amount())).toBeTruthy()
     expect(txData.to[1].to).toEqual('tb1qxx4azx0lw4tc6ylurc55ak5hl7u2ws0w9kw9h3')
     expect(txData.to[1].amount.amount().isEqualTo(baseAmount(8798533, 8).amount())).toBeTruthy()
+  })
+
+  it('should return valid explorer url', () => {
+    btcClient.setNetwork('mainnet')
+    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info')
+
+    btcClient.setNetwork('testnet')
+    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info/testnet')
+  })
+
+  it('should retrun valid explorer address url', () => {
+    btcClient.setNetwork('mainnet')
+    expect(btcClient.getExplorerAddressUrl('testAddressHere')).toEqual(
+      'https://blockstream.info/address/testAddressHere',
+    )
+    btcClient.setNetwork('testnet')
+    expect(btcClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
+      'https://blockstream.info/testnet/address/anotherTestAddressHere',
+    )
+  })
+
+  it('should retrun valid explorer tx url', () => {
+    btcClient.setNetwork('mainnet')
+    expect(btcClient.getExplorerTxUrl('testTxHere')).toEqual('https://blockstream.info/tx/testTxHere')
+    btcClient.setNetwork('testnet')
+    expect(btcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
+      'https://blockstream.info/testnet/tx/anotherTestTxHere',
+    )
   })
 })

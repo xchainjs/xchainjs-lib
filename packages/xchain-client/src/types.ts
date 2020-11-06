@@ -47,6 +47,7 @@ export type TxHistoryParams = {
   offset?: number // Optional Offset
   limit?: number // Optional Limit of transactions
   startTime?: Date // Optional start time
+  asset?: string // Optional asset. Result transactions will be filtered by this asset
 }
 
 export type TxParams = {
@@ -76,6 +77,7 @@ export interface XChainClient {
   setNetwork(net: Network): void
   getNetwork(): Network
 
+  getExplorerUrl(): string
   getExplorerAddressUrl(address: Address): string
   getExplorerTxUrl(txID: string): string
 

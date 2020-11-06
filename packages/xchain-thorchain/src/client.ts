@@ -90,8 +90,8 @@ class Client implements ThorchainClient, XChainClient {
     codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
   }
 
-  private getExplorerUrl = (): string => {
-    return 'https://thorchain.net/'
+  getExplorerUrl = (): string => {
+    return 'https://thorchain.net'
   }
 
   getExplorerAddressUrl = (address: Address): string => {
@@ -233,15 +233,13 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
-  // Need to be updated
+  // there is no fixed fee, we set fee amount when creating a transaction.
   getFees = async (): Promise<Fees> => {
-    const fee = baseAmount(0)
-
     return Promise.resolve({
       type: 'base',
-      fast: fee,
-      fastest: fee,
-      average: fee,
+      fast: baseAmount(750, 6),
+      fastest: baseAmount(2500, 6),
+      average: baseAmount(0, 6),
     })
   }
 }

@@ -310,4 +310,32 @@ describe('Client Test', () => {
     expect(tx.to[0].to).toEqual('cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr')
     expect(tx.to[0].amount.amount().isEqualTo(baseAmount(4318994970, 6).amount())).toBeTruthy()
   })
+
+  it('should return valid explorer url', () => {
+    // Client created with network === 'testnet'
+    expect(cosmosClient.getExplorerUrl()).toEqual('https://gaia.bigdipper.live')
+
+    cosmosClient.setNetwork('mainnet')
+    expect(cosmosClient.getExplorerUrl()).toEqual('https://cosmos.bigdipper.live')
+  })
+
+  it('should retrun valid explorer address url', () => {
+    expect(cosmosClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
+      'https://gaia.bigdipper.live/account/anotherTestAddressHere',
+    )
+
+    cosmosClient.setNetwork('mainnet')
+    expect(cosmosClient.getExplorerAddressUrl('testAddressHere')).toEqual(
+      'https://cosmos.bigdipper.live/account/testAddressHere',
+    )
+  })
+
+  it('should retrun valid explorer tx url', () => {
+    expect(cosmosClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
+      'https://gaia.bigdipper.live/transactions/anotherTestTxHere',
+    )
+
+    cosmosClient.setNetwork('mainnet')
+    expect(cosmosClient.getExplorerTxUrl('testTxHere')).toEqual('https://cosmos.bigdipper.live/transactions/testTxHere')
+  })
 })
