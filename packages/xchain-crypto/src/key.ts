@@ -1,5 +1,5 @@
 export interface PrivKey {
-  getPubKey(): PubKey
+  getPubKey(): PubKey | null
   toBuffer(): Buffer
   toBase64(): string
   sign(message: Buffer): Buffer

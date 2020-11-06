@@ -1,7 +1,8 @@
 // origin from https://github.com/cosmos-client/cosmos-client-ts/blob/master/src/tendermint/types/secp256k1.ts
 
-const crypto = require('crypto')
-const secp256k1 = require('tiny-secp256k1')
+import crypto from 'crypto'
+import secp256k1 from 'tiny-secp256k1'
+
 import { PubKey, PrivKey } from './key'
 
 export class PubKeySecp256k1 implements PubKey {
@@ -53,11 +54,14 @@ export class PubKeySecp256k1 implements PubKey {
 }
 
 export class PrivKeySecp256k1 implements PrivKey {
-  private pubKey: PubKeySecp256k1
+  private pubKey: PubKeySecp256k1 | null = null
   private privKey: Buffer
 
   constructor(privKey: Buffer) {
-    this.pubKey = new PubKeySecp256k1(secp256k1.pointFromScalar(privKey))
+    const point = secp256k1.pointFromScalar(privKey)
+    if (point) {
+      this.pubKey = new PubKeySecp256k1(point)
+    }
     this.privKey = privKey
   }
 
