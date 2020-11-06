@@ -266,7 +266,7 @@ class Client implements BinanceClient, XChainClient {
         limit: params && params.limit?.toString(),
         offset: params && params.offset?.toString(),
         startTime: params && params.startTime && params.startTime.getTime().toString(),
-        asset: params && params.asset,
+        txAsset: params && params.asset,
       })
     } catch (error) {
       return Promise.reject(error)
