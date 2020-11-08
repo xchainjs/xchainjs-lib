@@ -20,7 +20,7 @@ describe('BitcoinClient Test', () => {
   // please don't touch the tBTC in these
   const phraseOne = 'atom green various power must another rent imitate gadget creek fat then'
   const addyOne = 'tb1qcnlekeq5d259c6x3txenltrc05k2wwwwyfxphe'
-  const phraseTwo = 'north machine wash sister amazing jungle amused shrimp until genuine promote abstract'
+  // const phraseTwo = 'north machine wash sister amazing jungle amused shrimp until genuine promote abstract'
   const addyTwo = 'tb1qz8q2lwfmp965cszdd5raq9m7gljs57hkzpw56d'
 
   // Third ones is used only for balance verification
@@ -110,12 +110,9 @@ describe('BitcoinClient Test', () => {
     return expect(btcClient.getBalance()).rejects.toThrow('Phrase not set')
   })
 
-  /**
-   * @TODO unskip after resolving https://github.com/xchainjs/xchainjs-lib/issues/77
-   */
-  it.skip('should do broadcast a vault transfer with a memo', async () => {
+  it('should do broadcast a vault transfer with a memo', async () => {
     btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseTwo)
+    btcClient.setPhrase(phraseThree)
 
     const amount = baseAmount(2223)
     try {
