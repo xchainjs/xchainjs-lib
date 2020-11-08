@@ -5,18 +5,15 @@ import { MIN_TX_FEE } from '../src/utils'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 
-const NODE_URL = 'https://api.blockchair.com/bitcoin/testnet'
-const NODE_API_KEY = process.env.BLOCKCHAIR_API_KEY || ''
-const btcClient = new Client({
-  network: 'mainnet',
-  nodeUrl: NODE_URL,
-  nodeApiKey: NODE_API_KEY,
-})
+import mockBlockchairApi from '../__mocks__/block-chair'
+mockBlockchairApi.init()
 
-jest.setTimeout(30000)
+const btcClient = new Client({ network: 'mainnet', nodeUrl: 'mock', nodeApiKey: 'mock' })
 
 describe('BitcoinClient Test', () => {
-  beforeEach(() => btcClient.purgeClient())
+  beforeEach(() => {
+    btcClient.purgeClient()
+  })
   afterEach(() => btcClient.purgeClient())
 
   const MEMO = 'SWAP:THOR.RUNE'
@@ -72,24 +69,26 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should get the right balance', async () => {
+    const expectedBalance = 102000
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseThree)
     const balance = await btcClient.getBalance()
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(102000)
+    expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
 
   it('should get the right balance when scanUTXOs is called twice', async () => {
+    const expectedBalance = 102000
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseThree)
 
     const balance = await btcClient.getBalance()
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(102000)
+    expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
 
     const newBalance = await btcClient.getBalance()
     expect(newBalance.length).toEqual(1)
-    expect(newBalance[0].amount.amount().toNumber()).toEqual(102000)
+    expect(newBalance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
 
   it('should broadcast a normal transfer', async () => {
@@ -235,14 +234,6 @@ describe('BitcoinClient Test', () => {
     expect(txPages.txs[0].type).toEqual('transfer')
     expect(txPages.txs[0].to.length).toEqual(2)
     expect(txPages.txs[0].from.length).toEqual(1)
-  })
-
-  it('should get address transactions by offset', async () => {
-    btcClient.setNetwork('testnet')
-    // Offset should work
-    const txPages = await btcClient.getTransactions({ address: addyThree, offset: 1, limit: 1 })
-    expect(txPages.total).toEqual(2) //there are 2 tx in addyThree
-    expect(txPages.txs.length).toEqual(1) //addyThree has two tx so offsetting should give 1
   })
 
   it('should not get address transactions when offset too high', async () => {
