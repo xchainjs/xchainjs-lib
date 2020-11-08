@@ -311,9 +311,7 @@ describe('BinanceClient Test', () => {
   })
 
   it('should retrun valid explorer tx url', () => {
-    expect(bnbClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
-      'https://explorer.binance.org/tx/anotherTestTxHere',
-    )
+    expect(bnbClient.getExplorerTxUrl('anotherTestTxHere')).toEqual('https://explorer.binance.org/tx/anotherTestTxHere')
 
     bnbClient.setNetwork('testnet')
     expect(bnbClient.getExplorerTxUrl('testTxHere')).toEqual('https://testnet-explorer.binance.org/tx/testTxHere')
