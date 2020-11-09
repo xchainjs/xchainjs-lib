@@ -3,10 +3,10 @@ import { pbkdf2Async, createAddress } from './utils'
 import { PubKeySecp256k1, PrivKeySecp256k1 } from './secp256k1'
 import { PubKeyEd25519, PrivKeyEd25519 } from './ed25519'
 
-const bip39 = require('bip39')
-const HDKey = require('hdkey')
-const { blake256 } = require('foundry-primitives')
-const { v4: uuidv4 } = require('uuid')
+import * as bip39 from 'bip39'
+import HDKey from 'hdkey'
+import { blake256 } from 'foundry-primitives'
+import { v4 as uuidv4 } from 'uuid'
 
 // Constants
 const XChainBIP39Phrase = 'xchain'
@@ -22,7 +22,7 @@ const meta = 'xchain-keystore'
 // Interfaces
 
 export type PublicKeyPair = {
-  secp256k1: PubKeySecp256k1
+  secp256k1: PubKeySecp256k1 | null
   ed25519: PubKeyEd25519
 }
 
@@ -58,7 +58,7 @@ export const validatePhrase = (phrase: string): boolean => {
   return bip39.validateMnemonic(phrase)
 }
 
-export const getSeed = (phrase: string): string => {
+export const getSeed = (phrase: string): Buffer => {
   const words = phrase.split(' ')
   if (words.length != 12 && words.length != 24) {
     throw new Error('invalid phrase')
@@ -69,15 +69,15 @@ export const getSeed = (phrase: string): string => {
 
 export const getAddress = (phrase: string): string => {
   const seed = getSeed(phrase)
-  const hdkey = HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
+  const hdkey = HDKey.fromMasterSeed(seed)
   const childkey = hdkey.derive(BIP44Path)
-  const address = createAddress(childkey._publicKey)
+  const address = createAddress(childkey.publicKey)
   return address
 }
 
 export const getPublicKeyPair = (phrase: string): PublicKeyPair => {
   const seed = getSeed(phrase)
-  const hdkey = HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
+  const hdkey = HDKey.fromMasterSeed(seed)
   const childkey = hdkey.derive(BIP44Path)
 
   return {

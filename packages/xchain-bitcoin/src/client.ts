@@ -69,10 +69,6 @@ class Client implements BitcoinClient, XChainClient {
     this.nodeApiKey = key
   }
 
-  generatePhrase = (): string => {
-    return xchainCrypto.generatePhrase()
-  }
-
   // Sets this.phrase to be accessed later
   setPhrase = (phrase: string): Address => {
     if (xchainCrypto.validatePhrase(phrase)) {

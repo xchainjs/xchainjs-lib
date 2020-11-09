@@ -33,6 +33,7 @@ import {
   baseAmount,
   baseToAsset,
   BNBChain,
+  assetToString,
 } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { isTransferFee, isFreezeFee, parseTx } from './util'
@@ -154,10 +155,6 @@ class Client implements BinanceClient, XChainClient {
     return this.network === 'testnet' ? 'tbnb' : 'bnb'
   }
 
-  static generatePhrase = (): string => {
-    return xchainCrypto.generatePhrase()
-  }
-
   setPhrase = (phrase: string): Address => {
     if (!this.phrase || this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {
@@ -191,7 +188,9 @@ class Client implements BinanceClient, XChainClient {
     if (!this.address) {
       const address = crypto.getAddressFromPrivateKey(this.getPrivateKey(), this.getPrefix())
       if (!address) {
-        throw new Error('address not defined')
+        throw new Error(
+          'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
+        )
       }
 
       this.address = address
@@ -205,11 +204,7 @@ class Client implements BinanceClient, XChainClient {
 
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
     try {
-      if (!address) {
-        address = this.getAddress()
-      }
-
-      const balances: BinanceBalances = await this.bncClient.getBalance(address)
+      const balances: BinanceBalances = await this.bncClient.getBalance(address || this.getAddress())
 
       return balances
         .map((balance) => {
@@ -219,7 +214,7 @@ class Client implements BinanceClient, XChainClient {
             frozenAmount: assetToBase(assetAmount(balance.frozen, 8)),
           }
         })
-        .filter((balance) => !asset || balance.asset === asset)
+        .filter((balance) => !asset || assetToString(balance.asset) === assetToString(asset))
     } catch (error) {
       return Promise.reject(error)
     }
@@ -311,98 +306,82 @@ class Client implements BinanceClient, XChainClient {
   }
 
   multiSend = async ({ address, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
-    await this.bncClient.initChain()
-    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
-
-    const transferResult = await this.bncClient.multiSend(
-      address || this.getAddress(),
-      transactions.map((transaction) => {
-        return {
-          to: transaction.to,
-          coins: transaction.coins.map((coin) => {
-            return {
-              denom: coin.asset.symbol,
-              amount: baseToAsset(coin.amount).amount().toString(),
-            }
-          }),
-        }
-      }),
-      memo,
-    )
-
     try {
+      await this.bncClient.initChain()
+      await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
+
+      const transferResult = await this.bncClient.multiSend(
+        address || this.getAddress(),
+        transactions.map((transaction) => {
+          return {
+            to: transaction.to,
+            coins: transaction.coins.map((coin) => {
+              return {
+                denom: coin.asset.symbol,
+                amount: baseToAsset(coin.amount).amount().toString(),
+              }
+            }),
+          }
+        }),
+        memo,
+      )
+
       return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
-    } catch (err) {
-      return ''
+    } catch (error) {
+      return Promise.reject(error)
     }
   }
 
   transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
-    await this.bncClient.initChain()
-    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
-
-    const transferResult = await this.bncClient.transfer(
-      this.getAddress(),
-      recipient,
-      baseToAsset(amount).amount().toString(),
-      asset ? asset.symbol : AssetBNB.symbol,
-      memo,
-    )
-
     try {
+      await this.bncClient.initChain()
+      await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
+
+      const transferResult = await this.bncClient.transfer(
+        this.getAddress(),
+        recipient,
+        baseToAsset(amount).amount().toString(),
+        asset ? asset.symbol : AssetBNB.symbol,
+        memo,
+      )
+
       return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
-    } catch (err) {
-      return ''
+    } catch (error) {
+      return Promise.reject(error)
     }
   }
 
   freeze = async ({ recipient, asset, amount }: FreezeParams): Promise<TxHash> => {
-    await this.bncClient.initChain()
-    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
+    try {
+      await this.bncClient.initChain()
+      await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
 
-    const address = recipient || this.getAddress()
-    if (!address)
-      return Promise.reject(
-        new Error(
-          'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
-        ),
+      const transferResult = await this.bncClient.tokens.freeze(
+        recipient || this.getAddress(),
+        asset.symbol,
+        baseToAsset(amount).amount().toString(),
       )
 
-    const transferResult = await this.bncClient.tokens.freeze(
-      address,
-      asset.symbol,
-      baseToAsset(amount).amount().toString(),
-    )
-
-    try {
       return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
-    } catch (err) {
-      return ''
+    } catch (error) {
+      return Promise.reject(error)
     }
   }
 
   unfreeze = async ({ recipient, asset, amount }: FreezeParams): Promise<TxHash> => {
-    await this.bncClient.initChain()
-    await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
+    try {
+      await this.bncClient.initChain()
+      await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
 
-    const address = recipient || this.getAddress()
-    if (!address)
-      return Promise.reject(
-        new Error(
-          'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
-        ),
+      const transferResult = await this.bncClient.tokens.unfreeze(
+        recipient || this.getAddress(),
+        asset.symbol,
+        baseToAsset(amount).amount().toString(),
       )
 
-    const transferResult = await this.bncClient.tokens.unfreeze(
-      address,
-      asset.symbol,
-      baseToAsset(amount).amount().toString(),
-    )
-
-    try {
       return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
-    } catch (err) {
-      return ''
+    } catch (error) {
+      return Promise.reject(error)
     }
   }
 
@@ -411,6 +390,7 @@ class Client implements BinanceClient, XChainClient {
       const feesArray = await axios
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
         .then((response) => response.data)
+
       const transferFee = feesArray.find(isTransferFee)
       if (!transferFee) {
         throw new Error('failed to get transfer fees')
@@ -434,6 +414,7 @@ class Client implements BinanceClient, XChainClient {
       const feesArray = await axios
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
         .then((response) => response.data)
+
       const transferFee = feesArray.find(isTransferFee)
       if (!transferFee) {
         throw new Error('failed to get transfer fees')
@@ -457,6 +438,7 @@ class Client implements BinanceClient, XChainClient {
       const feesArray = await axios
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
         .then((response) => response.data)
+
       const freezeFee = feesArray.find(isFreezeFee)
       if (!freezeFee) {
         throw new Error('failed to get transfer fees')

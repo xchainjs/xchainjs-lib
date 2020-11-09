@@ -1,6 +1,50 @@
-require('dotenv').config()
+import nock from 'nock'
+
 import { Client as BinanceClient } from '../src/client'
-import { AssetBNB, baseAmount, delay } from '@xchainjs/xchain-util'
+import { AssetBNB, baseAmount } from '@xchainjs/xchain-util'
+import { Account, Fees, TransactionResult, TxPage } from '../src/types/binance'
+
+const mockGetAccount = (url: string, address: string, result: Account, ntimes = 1, status = 200) => {
+  nock(url).get(`/api/v1/account/${address}`).times(ntimes).reply(status, result)
+}
+
+const mockGetFees = (url: string, result: Fees) => {
+  nock(url).get('/api/v1/fees').reply(200, result)
+}
+
+const mockTxHash = (url: string, hash: string, result: TransactionResult) => {
+  nock(url).get(`/api/v1/tx/${hash}?format=json`).reply(200, result)
+}
+
+const mockSearchTransactions = (url: string, result: TxPage) => {
+  nock(url)
+    .get(`/api/v1/transactions`)
+    .query((_) => true)
+    .reply(200, result)
+}
+
+const mockNodeInfo = (url: string) => {
+  nock(url)
+    .get('/api/v1/node-info')
+    .reply(200, {
+      node_info: {
+        network: 'Binance-Chain-Ganges',
+      },
+    })
+}
+
+const mockTxSend = (url: string) => {
+  nock(url)
+    .post('/api/v1/broadcast?sync=true')
+    .reply(200, [
+      {
+        code: 0,
+        hash: '90F7F45652D05800EED577CBA805A6858C3867E08A07D627BECC0D6304E52A31',
+        log: 'Msg 0: ',
+        ok: true,
+      },
+    ])
+}
 
 describe('BinanceClient Test', () => {
   let bnbClient: BinanceClient
@@ -10,7 +54,6 @@ describe('BinanceClient Test', () => {
   const mainnetaddress = 'bnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9e738vr'
   const testnetaddress = 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj'
 
-  // This needs to be updated once `Fees` type in `asgardex-client` changes
   const singleTxFee = baseAmount(37500)
   const transferFee = { type: 'base', average: singleTxFee, fast: singleTxFee, fastest: singleTxFee }
   const multiTxFee = baseAmount(30000)
@@ -21,10 +64,11 @@ describe('BinanceClient Test', () => {
   const transferAmount = baseAmount(1000000)
   const freezeAmount = baseAmount(500000)
 
-  // tbnb1t95kjgmjc045l2a728z02textadd98yt339jk7 is used for testing transaction.
-  // it needs to have balances.
   const phraseForTX = 'wheel leg dune emerge sudden badge rough shine convince poet doll kiwi sleep labor hello'
   const testnetaddressForTx = 'tbnb1t95kjgmjc045l2a728z02textadd98yt339jk7'
+
+  const mainnetClientURL = 'https://dex.binance.org'
+  const testnetClientURL = 'https://testnet-dex.binance.org'
 
   beforeEach(async () => {
     bnbClient = new BinanceClient({ phrase, network: 'mainnet' })
@@ -32,8 +76,6 @@ describe('BinanceClient Test', () => {
 
   afterEach(async () => {
     bnbClient.purgeClient()
-
-    await delay(1000)
   })
 
   it('should start with empty wallet', async () => {
@@ -70,15 +112,6 @@ describe('BinanceClient Test', () => {
     expect(bnbClient.setPhrase(phrase)).toEqual(testnetaddress)
   })
 
-  it('should generate phrase', () => {
-    const client = new BinanceClient({ phrase, network: 'mainnet' })
-    expect(client.getAddress()).toEqual(mainnetaddress)
-
-    client.setPhrase(BinanceClient.generatePhrase())
-    expect(client.getAddress()).toBeTruthy()
-    expect(client.getAddress()).not.toEqual(mainnetaddress)
-  })
-
   it('should validate address', () => {
     expect(bnbClient.validateAddress(mainnetaddress)).toBeTruthy()
 
@@ -87,16 +120,50 @@ describe('BinanceClient Test', () => {
   })
 
   it('has no balances', async () => {
+    mockGetAccount(mainnetClientURL, 'bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku', {
+      account_number: 0,
+      address: 'bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku',
+      balances: [],
+      public_key: [],
+      sequence: 0,
+    })
     let balances = await bnbClient.getBalance('bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku')
     expect(balances).toEqual([])
 
-    // no balances for `account not found`
+    mockGetAccount(
+      mainnetClientURL,
+      'bnb1ja07feunxx6z9kue3fn05dazt0gpn4y9e5t8rn',
+      {
+        account_number: 0,
+        address: '',
+        balances: [],
+        public_key: [],
+        sequence: 0,
+      },
+      1,
+      404,
+    )
     balances = await bnbClient.getBalance('bnb1ja07feunxx6z9kue3fn05dazt0gpn4y9e5t8rn')
     expect(balances).toEqual([])
   })
 
   it('has balances', async () => {
     bnbClient.setNetwork('testnet')
+
+    mockGetAccount(testnetClientURL, 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', {
+      account_number: 29408,
+      address: 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj',
+      balances: [
+        {
+          free: '12.89087500',
+          frozen: '0.10000000',
+          locked: '0.00000000',
+          symbol: 'BNB',
+        },
+      ],
+      public_key: [],
+      sequence: 5,
+    })
 
     const balances = await bnbClient.getBalance('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', AssetBNB)
     expect(balances.length).toEqual(1)
@@ -112,6 +179,23 @@ describe('BinanceClient Test', () => {
   })
 
   it('fetches the transfer fees', async () => {
+    mockGetFees(mainnetClientURL, [
+      {
+        msg_type: 'tokensFreeze',
+        fee: 500000,
+        fee_for: 1,
+      },
+      {
+        fixed_fee_params: {
+          msg_type: 'send',
+          fee: 37500,
+          fee_for: 1,
+        },
+        multi_transfer_fee: 30000,
+        lower_limit_as_multi: 2,
+      },
+    ])
+
     const fees = await bnbClient.getFees()
     expect(fees.type).toEqual(transferFee.type)
     expect(fees.average.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
@@ -120,6 +204,23 @@ describe('BinanceClient Test', () => {
   })
 
   it('fetches the multisend fees', async () => {
+    mockGetFees(mainnetClientURL, [
+      {
+        msg_type: 'tokensFreeze',
+        fee: 500000,
+        fee_for: 1,
+      },
+      {
+        fixed_fee_params: {
+          msg_type: 'send',
+          fee: 37500,
+          fee_for: 1,
+        },
+        multi_transfer_fee: 30000,
+        lower_limit_as_multi: 2,
+      },
+    ])
+
     const fees = await bnbClient.getMultiSendFees()
     expect(fees.type).toEqual(multiSendFee.type)
     expect(fees.average.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
@@ -128,6 +229,23 @@ describe('BinanceClient Test', () => {
   })
 
   it('fetches the freeze fees', async () => {
+    mockGetFees(mainnetClientURL, [
+      {
+        msg_type: 'tokensFreeze',
+        fee: 500000,
+        fee_for: 1,
+      },
+      {
+        fixed_fee_params: {
+          msg_type: 'send',
+          fee: 37500,
+          fee_for: 1,
+        },
+        multi_transfer_fee: 30000,
+        lower_limit_as_multi: 2,
+      },
+    ])
+
     const fees = await bnbClient.getFreezeFees()
     expect(fees.type).toEqual(freezeFee.type)
     expect(fees.average.amount().isEqualTo(freezeTxFee.amount())).toBeTruthy()
@@ -139,13 +257,49 @@ describe('BinanceClient Test', () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)
 
+    mockGetAccount(
+      testnetClientURL,
+      testnetaddressForTx,
+      {
+        account_number: 0,
+        address: testnetaddressForTx,
+        balances: [
+          {
+            free: '1.00037500',
+            frozen: '0.10000000',
+            locked: '0.00000000',
+            symbol: 'BNB',
+          },
+        ],
+        public_key: [],
+        sequence: 0,
+      },
+      3,
+    )
+
     const beforeTransfer = await client.getBalance()
     expect(beforeTransfer.length).toEqual(1)
 
-    // feeRate should be optional
+    mockNodeInfo(testnetClientURL)
+    mockTxSend(testnetClientURL)
+
     const txHash = await client.transfer({ asset: AssetBNB, recipient: testnetaddressForTx, amount: transferAmount })
     expect(txHash).toEqual(expect.any(String))
-    await delay(2000) //delay after transaction
+
+    mockGetAccount(testnetClientURL, testnetaddressForTx, {
+      account_number: 0,
+      address: testnetaddressForTx,
+      balances: [
+        {
+          free: '1.00000000',
+          frozen: '0.10000000',
+          locked: '0.00000000',
+          symbol: 'BNB',
+        },
+      ],
+      public_key: [],
+      sequence: 0,
+    })
 
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
@@ -161,12 +315,49 @@ describe('BinanceClient Test', () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)
 
+    mockGetAccount(
+      testnetClientURL,
+      testnetaddressForTx,
+      {
+        account_number: 0,
+        address: testnetaddressForTx,
+        balances: [
+          {
+            free: '1.01000000',
+            frozen: '0.00000000',
+            locked: '0.00000000',
+            symbol: 'BNB',
+          },
+        ],
+        public_key: [],
+        sequence: 0,
+      },
+      4,
+    )
+
     const beforeFreeze = await client.getBalance()
     expect(beforeFreeze.length).toEqual(1)
 
+    mockNodeInfo(testnetClientURL)
+    mockTxSend(testnetClientURL)
+
     const txHash = await client.freeze({ asset: AssetBNB, amount: freezeAmount })
     expect(txHash).toEqual(expect.any(String))
-    await delay(2000) //delay after transaction
+
+    mockGetAccount(testnetClientURL, testnetaddressForTx, {
+      account_number: 0,
+      address: testnetaddressForTx,
+      balances: [
+        {
+          free: '1.00000000',
+          frozen: '0.00500000',
+          locked: '0.00000000',
+          symbol: 'BNB',
+        },
+      ],
+      public_key: [],
+      sequence: 0,
+    })
 
     const afterFreeze = await client.getBalance()
     expect(afterFreeze.length).toEqual(1)
@@ -190,12 +381,49 @@ describe('BinanceClient Test', () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)
 
+    mockGetAccount(
+      testnetClientURL,
+      testnetaddressForTx,
+      {
+        account_number: 0,
+        address: testnetaddressForTx,
+        balances: [
+          {
+            free: '1.00000000',
+            frozen: '0.00500000',
+            locked: '0.00000000',
+            symbol: 'BNB',
+          },
+        ],
+        public_key: [],
+        sequence: 0,
+      },
+      4,
+    )
+
     const beforeUnFreeze = await client.getBalance()
     expect(beforeUnFreeze.length).toEqual(1)
 
+    mockNodeInfo(testnetClientURL)
+    mockTxSend(testnetClientURL)
+
     const txHash = await client.unfreeze({ asset: AssetBNB, amount: freezeAmount })
     expect(txHash).toEqual(expect.any(String))
-    await delay(2000) //delay after transaction
+
+    mockGetAccount(testnetClientURL, testnetaddressForTx, {
+      account_number: 0,
+      address: testnetaddressForTx,
+      balances: [
+        {
+          free: '1.00000000',
+          frozen: '0.00000000',
+          locked: '0.00000000',
+          symbol: 'BNB',
+        },
+      ],
+      public_key: [],
+      sequence: 0,
+    })
 
     const afterUnFreeze = await client.getBalance()
     expect(afterUnFreeze.length).toEqual(1)
@@ -218,6 +446,26 @@ describe('BinanceClient Test', () => {
   it('should broadcast a multi transfer', async () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)
+
+    mockGetAccount(
+      testnetClientURL,
+      testnetaddressForTx,
+      {
+        account_number: 0,
+        address: testnetaddressForTx,
+        balances: [
+          {
+            free: '1.00090000',
+            frozen: '0.10000000',
+            locked: '0.00000000',
+            symbol: 'BNB',
+          },
+        ],
+        public_key: [],
+        sequence: 0,
+      },
+      3,
+    )
 
     const beforeTransfer = await client.getBalance()
     expect(beforeTransfer.length).toEqual(1)
@@ -251,9 +499,27 @@ describe('BinanceClient Test', () => {
         ],
       },
     ]
+
+    mockNodeInfo(testnetClientURL)
+    mockTxSend(testnetClientURL)
+
     const txHash = await client.multiSend({ transactions })
     expect(txHash).toEqual(expect.any(String))
-    await delay(2000) //delay after transaction
+
+    mockGetAccount(testnetClientURL, testnetaddressForTx, {
+      account_number: 0,
+      address: testnetaddressForTx,
+      balances: [
+        {
+          free: '1.00000000',
+          frozen: '0.10000000',
+          locked: '0.00000000',
+          symbol: 'BNB',
+        },
+      ],
+      public_key: [],
+      sequence: 0,
+    })
 
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
@@ -270,6 +536,12 @@ describe('BinanceClient Test', () => {
       phrase: 'nose link choose blossom social craft they better render provide escape talk',
       network: 'mainnet',
     })
+
+    mockSearchTransactions(mainnetClientURL, {
+      total: 0,
+      tx: [],
+    })
+
     const txArray = await bnbClientEmptyMain.getTransactions()
     expect(txArray).toEqual({ total: 0, txs: [] })
   })
@@ -277,12 +549,114 @@ describe('BinanceClient Test', () => {
   it('has tx history', async () => {
     bnbClient.setNetwork('testnet')
 
+    mockSearchTransactions(testnetClientURL, {
+      total: 1,
+      tx: [
+        {
+          txHash: 'A9E8E05603658BF3A295F04C856FE69E79EDA7375A307369F37411939BC321BB',
+          blockHeight: 85905063,
+          txType: 'TRANSFER',
+          timeStamp: '2020-11-06T12:38:42.889Z',
+          fromAddr: testnetaddressForTx,
+          toAddr: 'bnb14qsnqxrjg68k5w6duq4fseap6fkg9m8fspz8f2',
+          value: '1000',
+          txAsset: 'BNB',
+          txFee: '0.00000000',
+          proposalId: null,
+          txAge: 10,
+          orderId: 'EB54F541FAA756D3666DC8C9B9931FAC1D19CAC3-192151',
+          code: 0,
+          data: '',
+          confirmBlocks: 0,
+          memo: '',
+          source: 100,
+          sequence: 192150,
+        },
+      ],
+    })
+
     const txArray = await bnbClient.getTransactions({ address: testnetaddressForTx })
     expect(txArray.total).toBeTruthy()
     expect(txArray.txs.length).toBeTruthy()
   })
 
-  it.only('get transaction data', async () => {
+  it('get transaction data', async () => {
+    mockTxHash(mainnetClientURL, 'A9E8E05603658BF3A295F04C856FE69E79EDA7375A307369F37411939BC321BB', {
+      hash: 'A9E8E05603658BF3A295F04C856FE69E79EDA7375A307369F37411939BC321BB',
+      log: 'Msg 0: ',
+      height: '85905063',
+      code: 0,
+      tx: {
+        type: 'auth/StdTx',
+        value: {
+          data: null,
+          memo: 'SWAP:THOR.RUNE',
+          msg: [
+            {
+              type: 'cosmos-sdk/Send',
+              value: {
+                inputs: [
+                  {
+                    address: 'bnb1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64m',
+                    coins: [
+                      {
+                        amount: 107167590000000,
+                        denom: 'BNB',
+                      },
+                    ],
+                  },
+                ],
+                outputs: [
+                  {
+                    address: 'bnb1fm4gqjxkrdfk8f23xjv6yfx3k7vhrdck8qp6a6',
+                    coins: [
+                      {
+                        amount: 107167590000000,
+                        denom: 'BNB',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+          signatures: [
+            {
+              account_number: 496097,
+              pub_key: Buffer.from(''),
+              sequence: 0,
+              signature: Buffer.from(''),
+            },
+          ],
+          source: 0,
+        },
+      },
+    })
+    mockSearchTransactions(mainnetClientURL, {
+      total: 0,
+      tx: [
+        {
+          txHash: 'A9E8E05603658BF3A295F04C856FE69E79EDA7375A307369F37411939BC321BB',
+          blockHeight: 85905063,
+          txType: 'TRANSFER',
+          timeStamp: '2020-11-06T12:38:42.889Z',
+          fromAddr: 'bnb1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64m',
+          toAddr: 'bnb1fm4gqjxkrdfk8f23xjv6yfx3k7vhrdck8qp6a6',
+          value: '1071675.9',
+          txAsset: 'BNB',
+          txFee: '0.00000000',
+          proposalId: null,
+          txAge: 10,
+          orderId: 'EB54F541FAA756D3666DC8C9B9931FAC1D19CAC3-192151',
+          code: 0,
+          data: '',
+          confirmBlocks: 0,
+          memo: '',
+          source: 100,
+          sequence: 192150,
+        },
+      ],
+    })
     const tx = await bnbClient.getTransactionData('A9E8E05603658BF3A295F04C856FE69E79EDA7375A307369F37411939BC321BB')
     expect(tx.hash).toEqual('A9E8E05603658BF3A295F04C856FE69E79EDA7375A307369F37411939BC321BB')
     expect(tx.from[0].from).toEqual('bnb1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64m')
