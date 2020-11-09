@@ -67,7 +67,7 @@ describe('BitcoinClient Test', () => {
     expect(valid).toBeTruthy()
   })
 
-  it.skip('should get the right balance', async () => {
+  it('should get the right balance', async () => {
     const expectedBalance = 102000
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseThree)
@@ -76,7 +76,7 @@ describe('BitcoinClient Test', () => {
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
 
-  it.skip('should get the right balance when scanUTXOs is called twice', async () => {
+  it('should get the right balance when scanUTXOs is called twice', async () => {
     const expectedBalance = 102000
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseThree)
@@ -90,12 +90,10 @@ describe('BitcoinClient Test', () => {
     expect(newBalance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
 
-  it.skip('should broadcast a normal transfer', async () => {
+  it('should broadcast a normal transfer', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
-    const address = btcClient.getAddress()
-    console.log('address:', address)
     try {
       const txid = await btcClient.transfer({ asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
       expect(txid).toEqual(expect.any(String))
@@ -111,15 +109,15 @@ describe('BitcoinClient Test', () => {
     return expect(btcClient.getBalance()).rejects.toThrow('Phrase not set')
   })
 
-  it.skip('should do broadcast a vault transfer with a memo', async () => {
+  it('should do broadcast a vault transfer with a memo', async () => {
     btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseThree)
+    btcClient.setPhrase(phraseOne)
 
     const amount = baseAmount(2223)
     try {
       const txid = await btcClient.transfer({
         asset: AssetBTC,
-        recipient: addyOne,
+        recipient: addyThree,
         amount,
         memo: MEMO,
         feeRate: 1,
@@ -131,7 +129,7 @@ describe('BitcoinClient Test', () => {
     }
   })
 
-  it.skip('should get the balance of an address without phrase', async () => {
+  it('should get the balance of an address without phrase', async () => {
     btcClient.setNetwork('testnet')
     btcClient.purgeClient()
     const balance = await btcClient.getBalance(addyThree)
@@ -139,7 +137,7 @@ describe('BitcoinClient Test', () => {
     expect(balance[0].amount.amount().toNumber()).toEqual(102000)
   })
 
-  it.skip('should prevent a tx when fees and valueOut exceed balance', async () => {
+  it('should prevent a tx when fees and valueOut exceed balance', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
 
@@ -150,7 +148,7 @@ describe('BitcoinClient Test', () => {
     )
   })
 
-  it.skip('returns fees and rates of a normal tx', async () => {
+  it('returns fees and rates of a normal tx', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const { fees, rates } = await btcClient.getFeesWithRates()
@@ -164,7 +162,7 @@ describe('BitcoinClient Test', () => {
     expect(rates.average).toBeDefined()
   })
 
-  it.skip('returns fees and rates of a tx w/ memo', async () => {
+  it('returns fees and rates of a tx w/ memo', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const { fees, rates } = await btcClient.getFeesWithRates(MEMO)
@@ -178,7 +176,7 @@ describe('BitcoinClient Test', () => {
     expect(rates.average).toBeDefined()
   })
 
-  it.skip('should return estimated fees of a normal tx', async () => {
+  it('should return estimated fees of a normal tx', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const estimates = await btcClient.getFees()
@@ -187,7 +185,7 @@ describe('BitcoinClient Test', () => {
     expect(estimates.average).toBeDefined()
   })
 
-  it.skip('should return estimated fees of a vault tx that are more expensive than a normal tx (in case of > MIN_TX_FEE only)', async () => {
+  it('should return estimated fees of a vault tx that are more expensive than a normal tx (in case of > MIN_TX_FEE only)', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const normalTx = await btcClient.getFees()
@@ -212,7 +210,7 @@ describe('BitcoinClient Test', () => {
     }
   })
 
-  it.skip('returns different fee rates for a normal tx', async () => {
+  it('returns different fee rates for a normal tx', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const { fast, fastest, average } = await btcClient.getFeeRates()
@@ -228,7 +226,7 @@ describe('BitcoinClient Test', () => {
     return expect(btcClient.getBalance(invalidAddress)).rejects.toThrow(expectedError)
   })
 
-  it.skip('should error when an invalid address is used in transfer', () => {
+  it('should error when an invalid address is used in transfer', () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const invalidAddress = 'error_address'
@@ -241,7 +239,7 @@ describe('BitcoinClient Test', () => {
     ).rejects.toThrow(expectedError)
   })
 
-  it.skip('should get address transactions', async () => {
+  it('should get address transactions', async () => {
     btcClient.setNetwork('testnet')
 
     const txPages = await btcClient.getTransactions({ address: addyThree, limit: 4 })
@@ -254,7 +252,7 @@ describe('BitcoinClient Test', () => {
     expect(txPages.txs[0].from.length).toEqual(1)
   })
 
-  it.skip('should not get address transactions when offset too high', async () => {
+  it('should not get address transactions when offset too high', async () => {
     btcClient.setNetwork('testnet')
     // Offset max should work
     return expect(btcClient.getTransactions({ address: addyThree, offset: 9000000 })).rejects.toThrow(
@@ -262,14 +260,14 @@ describe('BitcoinClient Test', () => {
     )
   })
 
-  it.skip('should get address transactions with limit', async () => {
+  it('should get address transactions with limit', async () => {
     btcClient.setNetwork('testnet')
     // Limit should work
     const txPages = await btcClient.getTransactions({ address: addyThree, limit: 1 })
     return expect(txPages.total).toEqual(2) //there are 2 tx in addyThree
   })
 
-  it.skip('should not get address transactions when limit too high', async () => {
+  it('should not get address transactions when limit too high', async () => {
     btcClient.setNetwork('testnet')
     // Limit max should work
     return expect(btcClient.getTransactions({ address: addyThree, limit: 9000000 })).rejects.toThrow(

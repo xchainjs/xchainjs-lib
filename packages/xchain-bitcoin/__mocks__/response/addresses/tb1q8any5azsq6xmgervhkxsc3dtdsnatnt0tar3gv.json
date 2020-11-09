@@ -1,22 +1,29 @@
 {
   "address": {
-    "type": null,
-    "script_hex": "",
-    "balance": 0,
+    "type": "witness_v0_scripthash",
+    "script_hex": "00143f664a7450068db4646cbd8d0c45ab6c27d5cd6f",
+    "balance": 50000,
     "balance_usd": 0,
-    "received": 0,
+    "received": 50000,
     "received_usd": 0,
     "spent": 0,
     "spent_usd": 0,
-    "output_count": 0,
-    "unspent_output_count": 0,
-    "first_seen_receiving": null,
-    "last_seen_receiving": null,
+    "output_count": 1,
+    "unspent_output_count": 1,
+    "first_seen_receiving": "2020-11-09 13:16:39",
+    "last_seen_receiving": "2020-11-09 13:16:39",
     "first_seen_spending": null,
     "last_seen_spending": null,
     "scripthash_type": null,
-    "transaction_count": 0
+    "transaction_count": 1
   },
-  "transactions": [],
-  "utxo": []
+  "transactions": ["822da352ee98395d873d54eb39c65ea0b21995fbed06d0c996d93c5d82dc63d4"],
+  "utxo": [
+    {
+      "block_id": 1890930,
+      "transaction_hash": "822da352ee98395d873d54eb39c65ea0b21995fbed06d0c996d93c5d82dc63d4",
+      "index": 0,
+      "value": 50000
+    }
+  ]
 }
