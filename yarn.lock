@@ -2196,6 +2196,11 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
+"@thorchain/asgardex-util@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@thorchain/asgardex-util/-/asgardex-util-0.5.0.tgz#afe63cb6a37caaacdfd7dc97bb95893ddf59aca9"
+  integrity sha512-FZqUdgcl46kKraLHEk8qpNAzFCetudTShnfk3DbT1EREYTBKiaM1HZRYDO3gWrBPjuq6bazqfdrP2Ol5uY1ApQ==
+
 "@types/babel__core@^7.0.0", "@types/babel__core@^7.1.7":
   version "7.1.10"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.10.tgz#ca58fc195dd9734e77e57c6f2df565623636ab40"
@@ -2749,6 +2754,13 @@
   dependencies:
     "@typescript-eslint/types" "4.5.0"
     eslint-visitor-keys "^2.0.0"
+
+"@xchainjs/xchain-client@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-client/-/xchain-client-0.0.5.tgz#5c3195ca84deee7be87d1aa3c68d06edc1494930"
+  integrity sha512-lp8UtvXBpW6mYFw8heL6cFA4EAvEit6KywiZgC+hYWPvQ5Runcer82iufBeVHG7cd9D2Ui75+6BLd/AVgUzm+Q==
+  dependencies:
+    "@thorchain/asgardex-util" "^0.5.0"
 
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
