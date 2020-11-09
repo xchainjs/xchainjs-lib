@@ -45,9 +45,9 @@ describe('getPublicKeyPair', () => {
     const publickeys = getPublicKeyPair(phrase)
     expect(encodeAddress(publickeys.secp256k1?.getAddress() ?? '')).toEqual(getAddress(phrase))
     expect(encodeAddress(publickeys.secp256k1?.getAddress() ?? '')).toEqual(
-      'thor1nlxjrjq0aqzcs9amv9wgp62z0452kf3f2772tv',
+      'thor13ymnnjc4jtymjsc297nulyf0d3qtdl8pyg0tvx',
     )
-    expect(encodeAddress(publickeys.ed25519.getAddress())).toEqual('thor18cmnqkplamr5mq6sk22eldllssjvjdjppjmtjp')
+    expect(encodeAddress(publickeys.ed25519.getAddress())).toEqual('thor179wypy2zld6su560x25mj268dlscyqxhqfjp85')
   })
 })
 
@@ -57,10 +57,10 @@ describe('Export Keystore', () => {
     const password = 'thorchain'
     const keystore = await encryptToKeyStore(phrase, password)
     expect(encodeAddress(keystore.publickeys.secp256k1?.getAddress() ?? '')).toEqual(
-      'thor1nlxjrjq0aqzcs9amv9wgp62z0452kf3f2772tv',
+      'thor13ymnnjc4jtymjsc297nulyf0d3qtdl8pyg0tvx',
     )
     expect(encodeAddress(keystore.publickeys.ed25519.getAddress())).toEqual(
-      'thor18cmnqkplamr5mq6sk22eldllssjvjdjppjmtjp',
+      'thor179wypy2zld6su560x25mj268dlscyqxhqfjp85',
     )
     expect(keystore.crypto.cipher).toEqual('aes-128-ctr')
     expect(keystore.crypto.kdf).toEqual('pbkdf2')
