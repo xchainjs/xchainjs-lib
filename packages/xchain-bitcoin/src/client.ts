@@ -1,3 +1,4 @@
+import * as BIP39 from 'bip39'
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
 import * as Utils from './utils'
@@ -13,12 +14,12 @@ import {
   Balance,
   Network,
   Fees,
-  FeeOptionKey,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { baseAmount, assetToString, AssetBTC, BaseAmount } from '@xchainjs/xchain-util'
-import { FeeData, FeeRate, FeeRates } from './types/client-types'
+import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
+import { TxIO } from './types/blockchair-api-types'
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -30,9 +31,9 @@ import { FeeData, FeeRate, FeeRates } from './types/client-types'
  */
 interface BitcoinClient {
   validateAddress(address: string): boolean
+  getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
-  getFeeRatesWithMemo(memo: string): Promise<FeeRates>
   scanUTXOs(): Promise<void>
 }
 
@@ -129,10 +130,10 @@ class Client implements BitcoinClient, XChainClient {
   // Private function to get keyPair from the this.phrase
   private getBtcKeys(_phrase: string): Bitcoin.ECPairInterface {
     const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
-    // const seed = BIP39.mnemonicToSeedSync(_phrase)
-    // const wif = WIF.encode(network.wif, buffer, true)
-    const seed = xchainCrypto.getSeed(_phrase)
+    const seed = BIP39.mnemonicToSeedSync(_phrase)
     const wif = WIF.encode(network.wif, seed, true)
+    // TODO (@junkai121) Use `xchainCrypto.getSeed` while fixing it https://github.com/xchainjs/xchainjs-lib/issues/88
+    // const seed = xchainCrypto.getSeed(_phrase)
     return Bitcoin.ECPair.fromWIF(wif, network)
   }
 
@@ -233,8 +234,11 @@ class Client implements BitcoinClient, XChainClient {
         const rawTx = (await blockChair.getTx(this.nodeUrl, hash, this.nodeApiKey))[hash]
         const tx: Tx = {
           asset: AssetBTC,
-          from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
-          to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
+          from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
+          to: rawTx.outputs
+            // ignore tx with type 'nulldata'
+            .filter((i: TxIO) => i.type !== 'nulldata')
+            .map((i: TxIO) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
           date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
           type: 'transfer',
           hash: rawTx.transaction.hash,
@@ -284,7 +288,7 @@ class Client implements BitcoinClient, XChainClient {
   /**
    * Returns rates and fees
    */
-  private getFeeData = async (memo?: string): Promise<FeeData> => {
+  getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
     await this.scanUTXOs()
     if (this.utxos.length === 0) {
       throw new Error('No utxos to send')
@@ -292,7 +296,7 @@ class Client implements BitcoinClient, XChainClient {
 
     const btcStats = await blockChair.bitcoinStats(this.nodeUrl, this.nodeApiKey)
     const nextBlockFeeRate = btcStats.suggested_transaction_fee_per_byte_sat
-    const rates: Record<FeeOptionKey, number> = {
+    const rates: FeeRates = {
       fastest: nextBlockFeeRate * 5,
       fast: nextBlockFeeRate * 1,
       average: nextBlockFeeRate * 0.5,
@@ -310,10 +314,11 @@ class Client implements BitcoinClient, XChainClient {
 
   /**
    * Returns fees for transactions w/o a memo
+   * Note: If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
    */
   getFees = async (): Promise<Fees> => {
     try {
-      const { fees } = await this.getFeeData()
+      const { fees } = await this.getFeesWithRates()
       return fees
     } catch (error) {
       return Promise.reject(error)
@@ -322,10 +327,11 @@ class Client implements BitcoinClient, XChainClient {
 
   /**
    * Returns fees for transactions w/ a memo
+   * Note: If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
    */
   getFeesWithMemo = async (memo: string): Promise<Fees> => {
     try {
-      const { fees } = await this.getFeeData(memo)
+      const { fees } = await this.getFeesWithRates(memo)
       return fees
     } catch (error) {
       return Promise.reject(error)
@@ -334,22 +340,11 @@ class Client implements BitcoinClient, XChainClient {
 
   /**
    * Returns fee rates for transactions w/ a memo
+   * Note: If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
    */
   getFeeRates = async (): Promise<FeeRates> => {
     try {
-      const { rates } = await this.getFeeData()
-      return rates
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
-   * Returns fee rates for transactions w/ a memo
-   */
-  getFeeRatesWithMemo = async (memo: string): Promise<FeeRates> => {
-    try {
-      const { rates } = await this.getFeeData(memo)
+      const { rates } = await this.getFeesWithRates()
       return rates
     } catch (error) {
       return Promise.reject(error)
