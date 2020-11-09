@@ -1,4 +1,3 @@
-require('dotenv').config()
 import * as Bitcoin from 'bitcoinjs-lib'
 import { Client } from '../src/client'
 import { MIN_TX_FEE } from '../src/utils'
@@ -18,13 +17,13 @@ describe('BitcoinClient Test', () => {
   const MEMO = 'SWAP:THOR.RUNE'
   // please don't touch the tBTC in these
   const phraseOne = 'atom green various power must another rent imitate gadget creek fat then'
-  const addyOne = 'tb1qcnlekeq5d259c6x3txenltrc05k2wwwwyfxphe'
+  const addyOne = 'tb1q8any5azsq6xmgervhkxsc3dtdsnatnt0tar3gv'
   // const phraseTwo = 'north machine wash sister amazing jungle amused shrimp until genuine promote abstract'
   const addyTwo = 'tb1qz8q2lwfmp965cszdd5raq9m7gljs57hkzpw56d'
 
   // Third ones is used only for balance verification
   const phraseThree = 'quantum vehicle print stairs canvas kid erode grass baby orbit lake remove'
-  const addyThree = 'tb1q3a00snh7erczk94k48fe9q5z0fldgnh4twsh29'
+  const addyThree = 'tb1qdfy7dr0k4jmukvkwmead57uc2mkzzh6m9ayeu8'
 
   it('should have the correct bitcoin network right prefix', () => {
     btcClient.setNetwork('mainnet')
@@ -105,13 +104,13 @@ describe('BitcoinClient Test', () => {
 
   it('should do broadcast a vault transfer with a memo', async () => {
     btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseThree)
+    btcClient.setPhrase(phraseOne)
 
     const amount = baseAmount(2223)
     try {
       const txid = await btcClient.transfer({
         asset: AssetBTC,
-        recipient: addyOne,
+        recipient: addyThree,
         amount,
         memo: MEMO,
         feeRate: 1,
@@ -140,6 +139,34 @@ describe('BitcoinClient Test', () => {
     return expect(btcClient.transfer({ asset, recipient: addyTwo, amount, feeRate: 1 })).rejects.toThrow(
       'Balance insufficient for transaction',
     )
+  })
+
+  it('returns fees and rates of a normal tx', async () => {
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
+    const { fees, rates } = await btcClient.getFeesWithRates()
+    // check fees
+    expect(fees.fast).toBeDefined()
+    expect(fees.fastest).toBeDefined()
+    expect(fees.average).toBeDefined()
+    // check rates
+    expect(rates.fast).toBeDefined()
+    expect(rates.fastest).toBeDefined()
+    expect(rates.average).toBeDefined()
+  })
+
+  it('returns fees and rates of a tx w/ memo', async () => {
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
+    const { fees, rates } = await btcClient.getFeesWithRates(MEMO)
+    // check fees
+    expect(fees.fast).toBeDefined()
+    expect(fees.fastest).toBeDefined()
+    expect(fees.average).toBeDefined()
+    // check rates
+    expect(rates.fast).toBeDefined()
+    expect(rates.fastest).toBeDefined()
+    expect(rates.average).toBeDefined()
   })
 
   it('should return estimated fees of a normal tx', async () => {
@@ -180,14 +207,6 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const { fast, fastest, average } = await btcClient.getFeeRates()
-    expect(fast > average)
-    expect(fastest > fast)
-  })
-
-  it('returns different fee rates for a tx with memo', async () => {
-    btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseOne)
-    const { fast, fastest, average } = await btcClient.getFeeRatesWithMemo(MEMO)
     expect(fast > average)
     expect(fastest > fast)
   })
