@@ -1,0 +1,48 @@
+{
+      "raw_transaction": "02000000000101d84f3903ecdd350d0528e257c3a35afcc07312118d47b6853f4a23cdcc322b330000000000feffffff02d0070000000000001600148f5ef84efec8f02b16b6a9d39282827a7ed44ef56af66926000000001600149a5b76205399d510edab5ffc6fb74f68073c66dc02473044022034dd07ef6e3eea1497fa84fce0bdd74e9354cb39a30331d10ed5d4b848d4d5a602207f2594a82058f1c5774c7b9b3e46c256fe2a673a60861d5150e39a86fa595279012103a7063e9051f0374739dd2228cf7f903949e9109e4dfa97c1630ebba8c00d280ecc761c00",
+      "decoded_raw_transaction": {
+        "txid": "5d13e94178c07d5e824968922766222a70253f9b8fa49e2c1ec63e105663cd54",
+        "hash": "7a6490b61c91231471fe03f4a3f25cc71214d95581bbd822e058501e0a4af88e",
+        "version": 2,
+        "size": 222,
+        "vsize": 141,
+        "weight": 561,
+        "locktime": 1865420,
+        "vin": [
+          {
+            "txid": "332b32cccd234a3f85b6478d111273c0fc5aa3c357e228050d35ddec03394fd8",
+            "vout": 0,
+            "scriptSig": { "asm": "", "hex": "" },
+            "txinwitness": [
+              "3044022034dd07ef6e3eea1497fa84fce0bdd74e9354cb39a30331d10ed5d4b848d4d5a602207f2594a82058f1c5774c7b9b3e46c256fe2a673a60861d5150e39a86fa59527901",
+              "03a7063e9051f0374739dd2228cf7f903949e9109e4dfa97c1630ebba8c00d280e"
+            ],
+            "sequence": 4294967294
+          }
+        ],
+        "vout": [
+          {
+            "value": 2.0e-5,
+            "n": 0,
+            "scriptPubKey": {
+              "asm": "0 8f5ef84efec8f02b16b6a9d39282827a7ed44ef5",
+              "hex": "00148f5ef84efec8f02b16b6a9d39282827a7ed44ef5",
+              "reqSigs": 1,
+              "type": "witness_v0_keyhash",
+              "addresses": ["tb1q3a00snh7erczk94k48fe9q5z0fldgnh4twsh29"]
+            }
+          },
+          {
+            "value": 6.4447857,
+            "n": 1,
+            "scriptPubKey": {
+              "asm": "0 9a5b76205399d510edab5ffc6fb74f68073c66dc",
+              "hex": "00149a5b76205399d510edab5ffc6fb74f68073c66dc",
+              "reqSigs": 1,
+              "type": "witness_v0_keyhash",
+              "addresses": ["tb1qnfdhvgznn823pmdttl7xld60dqrncekuyv9j9v"]
+            }
+          }
+        ]
+      }
+    }

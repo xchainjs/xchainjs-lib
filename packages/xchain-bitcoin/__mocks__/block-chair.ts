@@ -1,6 +1,5 @@
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
-import { addresses, rawTransactions, dashboardTransactions, bitcoinStats } from './responses.json'
 
 const mock = new MockAdapter(axios)
 
@@ -13,33 +12,30 @@ export default {
   init: () => {
     //Mock getAddress
     mock.onGet(/\/dashboards\/address\//).reply(function (config: MockConfig) {
-      const id: any = config.url?.split('/').pop()
-      return [200, { data: { [id]: (addresses as any)[id] } }]
+      const id: string = config.url?.split('/').pop() ?? ''
+      const resp = require(`./response/addresses/${id}.json`)
+      return [200, { data: { [id]: resp } }]
     })
 
     //Mock getRawTx
     mock.onGet(/\/raw\/transaction\//).reply(function (config: MockConfig) {
-      const id: any = config.url?.split('/').pop()
-      const result: any = { data: { [id]: (rawTransactions as any)[id] } }
+      const id = config.url?.split('/').pop() ?? ''
+      const resp = require(`./response/rawTransactions/${id}.json`)
+      const result: any = { data: { [id]: resp } }
       return [200, result]
     })
 
     //Mock getStat
     mock.onGet(/\/stats/).reply(function () {
-      return [200, { data: bitcoinStats }]
+      const resp = require(`./response/bitcoinStats.json`)
+      return [200, { data: resp }]
     })
 
     //Mock getTx
     mock.onGet(/\/dashboards\/transaction\//).reply(function (config: MockConfig) {
-      const id: any = config.url?.split('/').pop()
-      return [
-        200,
-        {
-          data: {
-            [id]: (dashboardTransactions as any)[id],
-          },
-        },
-      ]
+      const id = config.url?.split('/').pop() ?? ''
+      const resp = require(`./response/dashboardTransactions/${id}.json`)
+      return [200, { data: { [id]: resp } }]
     })
 
     //Mock pushTransaction
