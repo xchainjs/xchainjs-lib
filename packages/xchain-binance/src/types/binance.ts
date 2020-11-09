@@ -175,11 +175,11 @@ export type Account = {
   /**
    * List of balances
    */
-  balances: [Balance]
+  balances: Balance[]
   /**
    * Public key bytes
    */
-  public_key: [number]
+  public_key: number[]
   /**
    * sequence is for preventing replay attack
    */
@@ -563,7 +563,7 @@ export type StdTransaction = {
 export type TransactionResult = {
   hash: string
   log: string
-  data: string
+  data?: string
   height: string
   code: number
   tx: AminoWrapping<StdTransaction>
