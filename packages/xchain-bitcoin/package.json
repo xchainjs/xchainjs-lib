@@ -35,6 +35,7 @@
     "@xchainjs/xchain-client": "^0.0.5",
     "@xchainjs/xchain-crypto": "^0.1.0",
     "axios": "^0.20.0",
+    "axios-mock-adapter": "^1.19.0",
     "bip39": "^3.0.2",
     "bitcoinjs-lib": "^5.2.0",
     "wif": "^2.0.6"
