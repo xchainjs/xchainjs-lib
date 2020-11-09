@@ -154,10 +154,6 @@ class Client implements BinanceClient, XChainClient {
     return this.network === 'testnet' ? 'tbnb' : 'bnb'
   }
 
-  static generatePhrase = (): string => {
-    return xchainCrypto.generatePhrase()
-  }
-
   setPhrase = (phrase: string): Address => {
     if (!this.phrase || this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {

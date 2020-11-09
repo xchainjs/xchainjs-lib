@@ -70,15 +70,6 @@ describe('BinanceClient Test', () => {
     expect(bnbClient.setPhrase(phrase)).toEqual(testnetaddress)
   })
 
-  it('should generate phrase', () => {
-    const client = new BinanceClient({ phrase, network: 'mainnet' })
-    expect(client.getAddress()).toEqual(mainnetaddress)
-
-    client.setPhrase(BinanceClient.generatePhrase())
-    expect(client.getAddress()).toBeTruthy()
-    expect(client.getAddress()).not.toEqual(mainnetaddress)
-  })
-
   it('should validate address', () => {
     expect(bnbClient.validateAddress(mainnetaddress)).toBeTruthy()
 

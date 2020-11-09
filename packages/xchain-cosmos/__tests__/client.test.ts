@@ -95,17 +95,6 @@ describe('Client Test', () => {
     expect(address).toEqual(address)
   })
 
-  it('should generate phrase', () => {
-    const generated_phase = Client.generatePhrase()
-    const valid = Client.validatePhrase(generated_phase)
-    expect(valid).toBeTruthy()
-  })
-
-  it('should validate phrase', () => {
-    const valid = Client.validatePhrase(phrase)
-    expect(valid).toBeTruthy()
-  })
-
   it('should init, should have right prefix', async () => {
     expect(cosmosClient.validateAddress(cosmosClient.getAddress())).toEqual(true)
 

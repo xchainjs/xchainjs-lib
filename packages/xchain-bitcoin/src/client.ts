@@ -68,10 +68,6 @@ class Client implements BitcoinClient, XChainClient {
     this.nodeApiKey = key
   }
 
-  generatePhrase = (): string => {
-    return xchainCrypto.generatePhrase()
-  }
-
   // Sets this.phrase to be accessed later
   setPhrase = (phrase: string): Address => {
     if (xchainCrypto.validatePhrase(phrase)) {
@@ -133,10 +129,10 @@ class Client implements BitcoinClient, XChainClient {
   // Private function to get keyPair from the this.phrase
   private getBtcKeys(_phrase: string): Bitcoin.ECPairInterface {
     const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
-    // const buffer = BIP39.mnemonicToSeedSync(_phrase)
+    // const seed = BIP39.mnemonicToSeedSync(_phrase)
     // const wif = WIF.encode(network.wif, buffer, true)
     const seed = xchainCrypto.getSeed(_phrase)
-    const wif = WIF.encode(network.wif, Buffer.from(seed, 'hex'), true)
+    const wif = WIF.encode(network.wif, seed, true)
     return Bitcoin.ECPair.fromWIF(wif, network)
   }
 

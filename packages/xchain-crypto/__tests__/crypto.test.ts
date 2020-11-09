@@ -43,8 +43,10 @@ describe('getPublicKeyPair', () => {
   it('Generates Correct Publickeys from phrase', async () => {
     const phrase = 'flush viable fury sword mention dignity ethics secret nasty gallery teach fever'
     const publickeys = getPublicKeyPair(phrase)
-    expect(encodeAddress(publickeys.secp256k1.getAddress())).toEqual(getAddress(phrase))
-    expect(encodeAddress(publickeys.secp256k1.getAddress())).toEqual('thor1nlxjrjq0aqzcs9amv9wgp62z0452kf3f2772tv')
+    expect(encodeAddress(publickeys.secp256k1?.getAddress() ?? '')).toEqual(getAddress(phrase))
+    expect(encodeAddress(publickeys.secp256k1?.getAddress() ?? '')).toEqual(
+      'thor1nlxjrjq0aqzcs9amv9wgp62z0452kf3f2772tv',
+    )
     expect(encodeAddress(publickeys.ed25519.getAddress())).toEqual('thor18cmnqkplamr5mq6sk22eldllssjvjdjppjmtjp')
   })
 })
@@ -54,7 +56,7 @@ describe('Export Keystore', () => {
     const phrase = 'flush viable fury sword mention dignity ethics secret nasty gallery teach fever'
     const password = 'thorchain'
     const keystore = await encryptToKeyStore(phrase, password)
-    expect(encodeAddress(keystore.publickeys.secp256k1.getAddress())).toEqual(
+    expect(encodeAddress(keystore.publickeys.secp256k1?.getAddress() ?? '')).toEqual(
       'thor1nlxjrjq0aqzcs9amv9wgp62z0452kf3f2772tv',
     )
     expect(encodeAddress(keystore.publickeys.ed25519.getAddress())).toEqual(

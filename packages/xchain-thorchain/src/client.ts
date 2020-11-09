@@ -102,17 +102,9 @@ class Client implements ThorchainClient, XChainClient {
     return `${this.getExplorerUrl()}/txs/${txID}`
   }
 
-  static generatePhrase = (): string => {
-    return xchainCrypto.generatePhrase()
-  }
-
-  static validatePhrase = (phrase: string): boolean => {
-    return xchainCrypto.validatePhrase(phrase)
-  }
-
   setPhrase = (phrase: string): Address => {
     if (this.phrase !== phrase) {
-      if (!Client.validatePhrase(phrase)) {
+      if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid BIP39 phrase')
       }
 

@@ -1,8 +1,8 @@
 import crypto from 'crypto'
-const bech32 = require('bech32')
-const sha256 = require('crypto-js/sha256')
-const ripemd160 = require('crypto-js/ripemd160')
-const hexEncoding = require('crypto-js/enc-hex')
+import * as bech32 from 'bech32'
+import sha256 from 'crypto-js/sha256'
+import ripemd160 from 'crypto-js/ripemd160'
+import hexEncoding from 'crypto-js/enc-hex'
 
 export const getBytes = (string: string): number[] => {
   const arrayBytes: number[] = []
@@ -13,7 +13,7 @@ export const getBytes = (string: string): number[] => {
   return arrayBytes
 }
 
-export const ab2hexstring = (arr: number[]) => {
+export const ab2hexstring = (arr: Buffer) => {
   let result = ''
   for (let i = 0; i < arr.length; i++) {
     let str = arr[i].toString(16)
@@ -41,7 +41,7 @@ export const encodeAddress = (value: string | Buffer, prefix = 'thor', type: Buf
   return bech32.encode(prefix, words)
 }
 
-export const createAddress = (publicKey: number[]): string => {
+export const createAddress = (publicKey: Buffer): string => {
   const hexed = ab2hexstring(publicKey)
   const hash = sha256ripemd160(hexed)
   const address = encodeAddress(hash, 'thor')

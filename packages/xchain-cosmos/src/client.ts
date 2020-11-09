@@ -88,17 +88,9 @@ class Client implements CosmosClient, XChainClient {
     return `${this.getExplorerUrl()}/transactions/${txID}`
   }
 
-  static generatePhrase = (): string => {
-    return xchainCrypto.generatePhrase()
-  }
-
-  static validatePhrase = (phrase: string): boolean => {
-    return xchainCrypto.validatePhrase(phrase)
-  }
-
   setPhrase = (phrase: string): Address => {
     if (this.phrase !== phrase) {
-      if (!Client.validatePhrase(phrase)) {
+      if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid BIP39 phrase')
       }
 
