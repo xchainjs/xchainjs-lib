@@ -5,25 +5,22 @@ import { MIN_TX_FEE } from '../src/utils'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 
-const NODE_URL = 'https://api.blockchair.com/bitcoin/testnet'
-const NODE_API_KEY = process.env.BLOCKCHAIR_API_KEY || ''
-const btcClient = new Client({
-  network: 'mainnet',
-  nodeUrl: NODE_URL,
-  nodeApiKey: NODE_API_KEY,
-})
+import mockBlockchairApi from '../__mocks__/block-chair'
+mockBlockchairApi.init()
 
-jest.setTimeout(30000)
+const btcClient = new Client({ network: 'mainnet', nodeUrl: 'mock', nodeApiKey: 'mock' })
 
 describe('BitcoinClient Test', () => {
-  beforeEach(() => btcClient.purgeClient())
+  beforeEach(() => {
+    btcClient.purgeClient()
+  })
   afterEach(() => btcClient.purgeClient())
 
   const MEMO = 'SWAP:THOR.RUNE'
   // please don't touch the tBTC in these
   const phraseOne = 'atom green various power must another rent imitate gadget creek fat then'
   const addyOne = 'tb1qcnlekeq5d259c6x3txenltrc05k2wwwwyfxphe'
-  const phraseTwo = 'north machine wash sister amazing jungle amused shrimp until genuine promote abstract'
+  // const phraseTwo = 'north machine wash sister amazing jungle amused shrimp until genuine promote abstract'
   const addyTwo = 'tb1qz8q2lwfmp965cszdd5raq9m7gljs57hkzpw56d'
 
   // Third ones is used only for balance verification
@@ -72,24 +69,26 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should get the right balance', async () => {
+    const expectedBalance = 102000
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseThree)
     const balance = await btcClient.getBalance()
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(102000)
+    expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
 
   it('should get the right balance when scanUTXOs is called twice', async () => {
+    const expectedBalance = 102000
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseThree)
 
     const balance = await btcClient.getBalance()
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(102000)
+    expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
 
     const newBalance = await btcClient.getBalance()
     expect(newBalance.length).toEqual(1)
-    expect(newBalance[0].amount.amount().toNumber()).toEqual(102000)
+    expect(newBalance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
 
   it('should broadcast a normal transfer', async () => {
@@ -111,12 +110,9 @@ describe('BitcoinClient Test', () => {
     return expect(btcClient.getBalance()).rejects.toThrow('Phrase not set')
   })
 
-  /**
-   * @TODO unskip after resolving https://github.com/xchainjs/xchainjs-lib/issues/77
-   */
-  it.skip('should do broadcast a vault transfer with a memo', async () => {
+  it('should do broadcast a vault transfer with a memo', async () => {
     btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseTwo)
+    btcClient.setPhrase(phraseThree)
 
     const amount = baseAmount(2223)
     try {
@@ -235,14 +231,6 @@ describe('BitcoinClient Test', () => {
     expect(txPages.txs[0].type).toEqual('transfer')
     expect(txPages.txs[0].to.length).toEqual(2)
     expect(txPages.txs[0].from.length).toEqual(1)
-  })
-
-  it('should get address transactions by offset', async () => {
-    btcClient.setNetwork('testnet')
-    // Offset should work
-    const txPages = await btcClient.getTransactions({ address: addyThree, offset: 1, limit: 1 })
-    expect(txPages.total).toEqual(2) //there are 2 tx in addyThree
-    expect(txPages.txs.length).toEqual(1) //addyThree has two tx so offsetting should give 1
   })
 
   it('should not get address transactions when offset too high', async () => {

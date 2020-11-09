@@ -366,9 +366,7 @@ describe('Client Test', () => {
   })
 
   it('should retrun valid explorer tx url', () => {
-    expect(thorClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
-      'https://thorchain.net/txs/anotherTestTxHere',
-    )
+    expect(thorClient.getExplorerTxUrl('anotherTestTxHere')).toEqual('https://thorchain.net/txs/anotherTestTxHere')
 
     thorClient.setNetwork('mainnet')
     expect(thorClient.getExplorerTxUrl('testTxHere')).toEqual('https://thorchain.net/txs/testTxHere')
