@@ -1,26 +1,49 @@
 import nock from 'nock'
 
 import { Client as BinanceClient } from '../src/client'
-import { AssetBNB, baseAmount, delay } from '@xchainjs/xchain-util'
-import { Account, TransactionResult, TxPage, Fees } from '../src/types/binance'
+import { AssetBNB, baseAmount } from '@xchainjs/xchain-util'
+import { Account, Fees, TransactionResult, TxPage } from '../src/types/binance'
 
-const mockGetAccount = (url: string, address: string, result: Account, status = 200) => {
-  nock(url, { allowUnmocked: true }).get(`/api/v1/account/${address}`).reply(status, result)
+const mockGetAccount = (url: string, address: string, result: Account, ntimes = 1, status = 200) => {
+  nock(url).get(`/api/v1/account/${address}`).times(ntimes).reply(status, result)
 }
 
 const mockGetFees = (url: string, result: Fees) => {
-  nock(url, { allowUnmocked: true }).get('/api/v1/fees').reply(200, result)
+  nock(url).get('/api/v1/fees').reply(200, result)
 }
 
 const mockTxHash = (url: string, hash: string, result: TransactionResult) => {
-  nock(url, { allowUnmocked: true }).get(`/api/v1/tx/${hash}?format=json`).reply(200, result)
+  nock(url).get(`/api/v1/tx/${hash}?format=json`).reply(200, result)
 }
 
 const mockSearchTransactions = (url: string, result: TxPage) => {
-  nock(url, { allowUnmocked: true })
+  nock(url)
     .get(`/api/v1/transactions`)
     .query((_) => true)
     .reply(200, result)
+}
+
+const mockNodeInfo = (url: string) => {
+  nock(url)
+    .get('/api/v1/node-info')
+    .reply(200, {
+      node_info: {
+        network: 'Binance-Chain-Ganges',
+      },
+    })
+}
+
+const mockTxSend = (url: string) => {
+  nock(url)
+    .post('/api/v1/broadcast?sync=true')
+    .reply(200, [
+      {
+        code: 0,
+        hash: '90F7F45652D05800EED577CBA805A6858C3867E08A07D627BECC0D6304E52A31',
+        log: 'Msg 0: ',
+        ok: true,
+      },
+    ])
 }
 
 describe('BinanceClient Test', () => {
@@ -31,7 +54,6 @@ describe('BinanceClient Test', () => {
   const mainnetaddress = 'bnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9e738vr'
   const testnetaddress = 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj'
 
-  // This needs to be updated once `Fees` type in `asgardex-client` changes
   const singleTxFee = baseAmount(37500)
   const transferFee = { type: 'base', average: singleTxFee, fast: singleTxFee, fastest: singleTxFee }
   const multiTxFee = baseAmount(30000)
@@ -42,8 +64,6 @@ describe('BinanceClient Test', () => {
   const transferAmount = baseAmount(1000000)
   const freezeAmount = baseAmount(500000)
 
-  // tbnb1t95kjgmjc045l2a728z02textadd98yt339jk7 is used for testing transaction.
-  // it needs to have balances.
   const phraseForTX = 'wheel leg dune emerge sudden badge rough shine convince poet doll kiwi sleep labor hello'
   const testnetaddressForTx = 'tbnb1t95kjgmjc045l2a728z02textadd98yt339jk7'
 
@@ -119,7 +139,6 @@ describe('BinanceClient Test', () => {
     let balances = await bnbClient.getBalance('bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku')
     expect(balances).toEqual([])
 
-    // no balances for `account not found`
     mockGetAccount(
       mainnetClientURL,
       'bnb1ja07feunxx6z9kue3fn05dazt0gpn4y9e5t8rn',
@@ -130,6 +149,7 @@ describe('BinanceClient Test', () => {
         public_key: [],
         sequence: 0,
       },
+      1,
       404,
     )
     balances = await bnbClient.getBalance('bnb1ja07feunxx6z9kue3fn05dazt0gpn4y9e5t8rn')
@@ -246,15 +266,49 @@ describe('BinanceClient Test', () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)
 
+    mockGetAccount(
+      testnetClientURL,
+      testnetaddressForTx,
+      {
+        account_number: 0,
+        address: testnetaddressForTx,
+        balances: [
+          {
+            free: '1.00037500',
+            frozen: '0.10000000',
+            locked: '0.00000000',
+            symbol: 'BNB',
+          },
+        ],
+        public_key: [],
+        sequence: 0,
+      },
+      3,
+    )
+
     const beforeTransfer = await client.getBalance()
     expect(beforeTransfer.length).toEqual(1)
 
-    await delay(1000) //delay before transaction
+    mockNodeInfo(testnetClientURL)
+    mockTxSend(testnetClientURL)
 
-    // feeRate should be optional
     const txHash = await client.transfer({ asset: AssetBNB, recipient: testnetaddressForTx, amount: transferAmount })
     expect(txHash).toEqual(expect.any(String))
-    await delay(2000) //delay after transaction
+
+    mockGetAccount(testnetClientURL, testnetaddressForTx, {
+      account_number: 0,
+      address: testnetaddressForTx,
+      balances: [
+        {
+          free: '1.00000000',
+          frozen: '0.10000000',
+          locked: '0.00000000',
+          symbol: 'BNB',
+        },
+      ],
+      public_key: [],
+      sequence: 0,
+    })
 
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
@@ -270,15 +324,49 @@ describe('BinanceClient Test', () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)
 
+    mockGetAccount(
+      testnetClientURL,
+      testnetaddressForTx,
+      {
+        account_number: 0,
+        address: testnetaddressForTx,
+        balances: [
+          {
+            free: '1.01000000',
+            frozen: '0.00000000',
+            locked: '0.00000000',
+            symbol: 'BNB',
+          },
+        ],
+        public_key: [],
+        sequence: 0,
+      },
+      4,
+    )
+
     const beforeFreeze = await client.getBalance()
     expect(beforeFreeze.length).toEqual(1)
 
-    await delay(1000) //delay before transaction
+    mockNodeInfo(testnetClientURL)
+    mockTxSend(testnetClientURL)
 
     const txHash = await client.freeze({ asset: AssetBNB, amount: freezeAmount })
     expect(txHash).toEqual(expect.any(String))
 
-    await delay(2000) //delay after transaction
+    mockGetAccount(testnetClientURL, testnetaddressForTx, {
+      account_number: 0,
+      address: testnetaddressForTx,
+      balances: [
+        {
+          free: '1.00000000',
+          frozen: '0.00500000',
+          locked: '0.00000000',
+          symbol: 'BNB',
+        },
+      ],
+      public_key: [],
+      sequence: 0,
+    })
 
     const afterFreeze = await client.getBalance()
     expect(afterFreeze.length).toEqual(1)
@@ -302,15 +390,49 @@ describe('BinanceClient Test', () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)
 
+    mockGetAccount(
+      testnetClientURL,
+      testnetaddressForTx,
+      {
+        account_number: 0,
+        address: testnetaddressForTx,
+        balances: [
+          {
+            free: '1.00000000',
+            frozen: '0.00500000',
+            locked: '0.00000000',
+            symbol: 'BNB',
+          },
+        ],
+        public_key: [],
+        sequence: 0,
+      },
+      4,
+    )
+
     const beforeUnFreeze = await client.getBalance()
     expect(beforeUnFreeze.length).toEqual(1)
 
-    await delay(1000) //delay before transaction
+    mockNodeInfo(testnetClientURL)
+    mockTxSend(testnetClientURL)
 
     const txHash = await client.unfreeze({ asset: AssetBNB, amount: freezeAmount })
     expect(txHash).toEqual(expect.any(String))
 
-    await delay(2000) //delay after transaction
+    mockGetAccount(testnetClientURL, testnetaddressForTx, {
+      account_number: 0,
+      address: testnetaddressForTx,
+      balances: [
+        {
+          free: '1.00000000',
+          frozen: '0.00000000',
+          locked: '0.00000000',
+          symbol: 'BNB',
+        },
+      ],
+      public_key: [],
+      sequence: 0,
+    })
 
     const afterUnFreeze = await client.getBalance()
     expect(afterUnFreeze.length).toEqual(1)
@@ -333,6 +455,26 @@ describe('BinanceClient Test', () => {
   it('should broadcast a multi transfer', async () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)
+
+    mockGetAccount(
+      testnetClientURL,
+      testnetaddressForTx,
+      {
+        account_number: 0,
+        address: testnetaddressForTx,
+        balances: [
+          {
+            free: '1.00090000',
+            frozen: '0.10000000',
+            locked: '0.00000000',
+            symbol: 'BNB',
+          },
+        ],
+        public_key: [],
+        sequence: 0,
+      },
+      3,
+    )
 
     const beforeTransfer = await client.getBalance()
     expect(beforeTransfer.length).toEqual(1)
@@ -367,12 +509,26 @@ describe('BinanceClient Test', () => {
       },
     ]
 
-    await delay(1000) //delay before transaction
+    mockNodeInfo(testnetClientURL)
+    mockTxSend(testnetClientURL)
 
     const txHash = await client.multiSend({ transactions })
     expect(txHash).toEqual(expect.any(String))
 
-    await delay(2000) //delay after transaction
+    mockGetAccount(testnetClientURL, testnetaddressForTx, {
+      account_number: 0,
+      address: testnetaddressForTx,
+      balances: [
+        {
+          free: '1.00000000',
+          frozen: '0.10000000',
+          locked: '0.00000000',
+          symbol: 'BNB',
+        },
+      ],
+      public_key: [],
+      sequence: 0,
+    })
 
     const afterTransfer = await client.getBalance()
     expect(afterTransfer.length).toEqual(1)
