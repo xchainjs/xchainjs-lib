@@ -33,7 +33,7 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "^0.0.5",
+    "@xchainjs/xchain-client": "^0.0.7",
     "@xchainjs/xchain-crypto": "^0.1.0"
   },
   "devDependencies": {
