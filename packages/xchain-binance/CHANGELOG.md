@@ -1,3 +1,9 @@
+# v.3.1.1 (2020-11-09)
+
+### Change
+
+- updated `xchain-client` deps 
+ 
  # v.3.1.0 (2020-11-06)
 
 ### Add
