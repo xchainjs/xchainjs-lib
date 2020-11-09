@@ -1,52 +1,22 @@
 {
-  "data": {
-    "tb1q8any5azsq6xmgervhkxsc3dtdsnatnt0tar3gv": {
-      "address": {
-        "type": null,
-        "script_hex": "",
-        "balance": 0,
-        "balance_usd": 0,
-        "received": 0,
-        "received_usd": 0,
-        "spent": 0,
-        "spent_usd": 0,
-        "output_count": 0,
-        "unspent_output_count": 0,
-        "first_seen_receiving": null,
-        "last_seen_receiving": null,
-        "first_seen_spending": null,
-        "last_seen_spending": null,
-        "scripthash_type": null,
-        "transaction_count": 0
-      },
-      "transactions": [],
-      "utxo": []
-    }
+  "address": {
+    "type": null,
+    "script_hex": "",
+    "balance": 0,
+    "balance_usd": 0,
+    "received": 0,
+    "received_usd": 0,
+    "spent": 0,
+    "spent_usd": 0,
+    "output_count": 0,
+    "unspent_output_count": 0,
+    "first_seen_receiving": null,
+    "last_seen_receiving": null,
+    "first_seen_spending": null,
+    "last_seen_spending": null,
+    "scripthash_type": null,
+    "transaction_count": 0
   },
-  "context": {
-    "code": 200,
-    "source": "D",
-    "limit": "100,100",
-    "offset": "0,0",
-    "results": 0,
-    "state": 1890877,
-    "cache": {
-      "live": true,
-      "duration": 10,
-      "since": "2020-11-09 11:17:11",
-      "until": "2020-11-09 11:17:21",
-      "time": null
-    },
-    "api": {
-      "version": "2.0.66",
-      "last_major_update": "2020-07-19 00:00:00",
-      "next_major_update": null,
-      "documentation": "https://blockchair.com/api/docs",
-      "notice": "Beginning July 19th, 2020 we start enforcing request cost formulas, see the changelog for details"
-    },
-    "time": 0.07238912582397461,
-    "render_time": 0.019879817962646484,
-    "full_time": 0.0922689437866211,
-    "request_cost": 1
-  }
+  "transactions": [],
+  "utxo": []
 }
