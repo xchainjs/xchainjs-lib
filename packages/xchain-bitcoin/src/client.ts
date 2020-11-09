@@ -19,6 +19,7 @@ import {
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { baseAmount, assetToString, AssetBTC, BaseAmount } from '@xchainjs/xchain-util'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
+import { TxIO } from './types/blockchair-api-types'
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -237,8 +238,11 @@ class Client implements BitcoinClient, XChainClient {
         const rawTx = (await blockChair.getTx(this.nodeUrl, hash, this.nodeApiKey))[hash]
         const tx: Tx = {
           asset: AssetBTC,
-          from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
-          to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
+          from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
+          to: rawTx.outputs
+            // ignore tx with type 'nulldata'
+            .filter((i: TxIO) => i.type !== 'nulldata')
+            .map((i: TxIO) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
           date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
           type: 'transfer',
           hash: rawTx.transaction.hash,

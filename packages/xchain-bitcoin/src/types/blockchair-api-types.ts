@@ -16,7 +16,7 @@ export interface BlockChairResponse<T> {
   }
 }
 
-interface TxIO {
+export interface TxIO {
   block_id: number
   transaction_id: number
   index: number
