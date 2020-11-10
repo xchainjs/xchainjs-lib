@@ -1,6 +1,6 @@
 # v.0.4.1 (2020-10-11)
 
-### Breaking changes:
+### Fix:
 
 - Use latest `xchain-client@0.0.7`
 
