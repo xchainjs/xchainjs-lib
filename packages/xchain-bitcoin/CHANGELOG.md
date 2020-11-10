@@ -1,3 +1,9 @@
+# v.0.4.1 (2020-11-11)
+
+### Fix
+
+- replaced functions properties to the arrow functions at the `Client`
+
 # v.0.4.0 (2020-09-11)
 
 ### Breaking changes:
