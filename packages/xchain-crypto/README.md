@@ -23,8 +23,6 @@ Users can also export their phrases after the fact, ensuring they have saved it 
 
 ```js
 // Crypto Constants for xchain
-const XChainBIP39Phrase = 'xchain'
-const BIP44Path = "m/44'/931'/0'/0/0"
 const cipher = 'aes-128-ctr'
 const kdf = 'pbkdf2'
 const prf = 'hmac-sha256'

@@ -1,8 +1,8 @@
 import axios from 'axios'
-import * as BIP39 from 'bip39'
 import * as BIP32 from 'bip32'
 
 import { TxHistoryParams } from '@xchainjs/xchain-client'
+import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from 'cosmos-client'
 import { BroadcastTxCommitResult, Coin, StdTxFee, StdTxSignature } from 'cosmos-client/api'
@@ -56,7 +56,7 @@ export class CosmosSDKClient {
   }
 
   getPrivKeyFromMnemonic = (mnemonic: string): PrivKey => {
-    const seed = BIP39.mnemonicToSeedSync(mnemonic)
+    const seed = xchainCrypto.getSeed(mnemonic)
     const node = BIP32.fromSeed(seed)
     const child = node.derivePath(this.derive_path)
 
