@@ -1,3 +1,4 @@
+import * as BIP39 from 'bip39'
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as Utils from './utils'
 import * as blockChair from './blockchair-api'
@@ -131,13 +132,13 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   // Private function to get keyPair from the this.phrase
-  private getBtcKeys(_phrase: string): Bitcoin.ECPairInterface {
+  private getBtcKeys(phrase: string): Bitcoin.ECPairInterface {
     const isTestnet = this.getNetwork() === 'testnet'
 
     const network = isTestnet ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     const derive_path = isTestnet ? this.derive_path.testnet : this.derive_path.mainnet
 
-    const seed = xchainCrypto.getSeed(_phrase)
+    const seed = BIP39.mnemonicToSeedSync(phrase)
     const master = Bitcoin.bip32.fromSeed(seed, network).derivePath(derive_path)
 
     return Bitcoin.ECPair.fromPublicKey(master.publicKey, { network })
