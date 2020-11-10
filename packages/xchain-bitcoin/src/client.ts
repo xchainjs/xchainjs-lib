@@ -1,6 +1,4 @@
-import * as BIP39 from 'bip39'
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
-import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
 import * as Utils from './utils'
 import * as blockChair from './blockchair-api'
 import {
@@ -51,6 +49,11 @@ class Client implements BitcoinClient, XChainClient {
   utxos: Utils.UTXO[]
   nodeUrl = ''
   nodeApiKey = ''
+
+  derive_path = {
+    mainnet: "84'/0'/0'/0/0",
+    testnet: "84'/1'/0'/0/0",
+  }
 
   // Client is initialised with network type
   constructor({ network = 'testnet', nodeUrl = '', nodeApiKey = '', phrase }: BitcoinClientParams) {
@@ -129,12 +132,15 @@ class Client implements BitcoinClient, XChainClient {
 
   // Private function to get keyPair from the this.phrase
   private getBtcKeys(_phrase: string): Bitcoin.ECPairInterface {
-    const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
-    const seed = BIP39.mnemonicToSeedSync(_phrase)
-    const wif = WIF.encode(network.wif, seed, true)
-    // TODO (@junkai121) Use `xchainCrypto.getSeed` while fixing it https://github.com/xchainjs/xchainjs-lib/issues/88
-    // const seed = xchainCrypto.getSeed(_phrase)
-    return Bitcoin.ECPair.fromWIF(wif, network)
+    const isTestnet = this.getNetwork() === 'testnet'
+
+    const network = isTestnet ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const derive_path = isTestnet ? this.derive_path.testnet : this.derive_path.mainnet
+
+    const seed = xchainCrypto.getSeed(_phrase)
+    const master = Bitcoin.bip32.fromSeed(seed, network).derivePath(derive_path)
+
+    return Bitcoin.ECPair.fromPublicKey(master.publicKey, { network })
   }
 
   // Will return true/false
