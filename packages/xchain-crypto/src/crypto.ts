@@ -9,7 +9,6 @@ import { blake256 } from 'foundry-primitives'
 import { v4 as uuidv4 } from 'uuid'
 
 // Constants
-const XChainBIP39Phrase = 'xchain'
 const BIP44Path = "m/44'/931'/0'/0/0"
 const cipher = 'aes-128-ctr'
 const kdf = 'pbkdf2'
@@ -63,7 +62,7 @@ export const getSeed = (phrase: string): Buffer => {
   if (words.length != 12 && words.length != 24) {
     throw new Error('invalid phrase')
   }
-  const seed = bip39.mnemonicToSeedSync(phrase, XChainBIP39Phrase)
+  const seed = bip39.mnemonicToSeedSync(phrase)
   return seed
 }
 

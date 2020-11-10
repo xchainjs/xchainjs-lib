@@ -1,6 +1,7 @@
 import nock from 'nock'
 
 import { TxsPage } from '@xchainjs/xchain-client'
+import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { TxHistoryResponse, TxResponse } from '@xchainjs/xchain-cosmos'
 import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
@@ -75,11 +76,11 @@ describe('Client Test', () => {
 
   it('should start with empty wallet', async () => {
     const thorClientEmptyMain = new Client({ phrase, network: 'mainnet' })
-    const addressMain = await thorClientEmptyMain.getAddress()
+    const addressMain = thorClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnet_address)
 
     const thorClientEmptyTest = new Client({ phrase, network: 'testnet' })
-    const addressTest = await thorClientEmptyTest.getAddress()
+    const addressTest = thorClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnet_address)
   })
 
@@ -94,7 +95,11 @@ describe('Client Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(await thorClient.getAddress()).toEqual(testnet_address)
+    expect(thorClient.getAddress()).toEqual(testnet_address)
+
+    thorClient.setNetwork('mainnet')
+    expect(thorClient.getAddress()).toEqual(mainnet_address)
+    expect(xchainCrypto.getAddress(phrase)).toEqual(mainnet_address)
   })
 
   it('should update net', async () => {
