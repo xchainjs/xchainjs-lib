@@ -36,16 +36,10 @@ import {
   assetToString,
 } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { isTransferFee, isFreezeFee, parseTx } from './util'
+import { isTransferFee, parseTx } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 
 type PrivKey = string
-
-export type FreezeParams = {
-  asset: Asset
-  amount: BaseAmount
-  recipient?: Address
-}
 
 export type Coin = {
   asset: Asset
@@ -75,10 +69,6 @@ export interface BinanceClient {
   validateAddress(address: string): boolean
 
   getMultiSendFees(): Promise<Fees>
-  getFreezeFees(): Promise<Fees>
-
-  freeze(params: FreezeParams): Promise<TxHash>
-  unfreeze(params: FreezeParams): Promise<TxHash>
 
   multiSend(params: MultiSendParams): Promise<TxHash>
 }
@@ -211,7 +201,6 @@ class Client implements BinanceClient, XChainClient {
           return {
             asset: assetFromString(`${BNBChain}.${balance.symbol}`) || AssetBNB,
             amount: assetToBase(assetAmount(balance.free, 8)),
-            frozenAmount: assetToBase(assetAmount(balance.frozen, 8)),
           }
         })
         .filter((balance) => !asset || assetToString(balance.asset) === assetToString(asset))
@@ -351,40 +340,6 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
-  freeze = async ({ recipient, asset, amount }: FreezeParams): Promise<TxHash> => {
-    try {
-      await this.bncClient.initChain()
-      await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
-
-      const transferResult = await this.bncClient.tokens.freeze(
-        recipient || this.getAddress(),
-        asset.symbol,
-        baseToAsset(amount).amount().toString(),
-      )
-
-      return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  unfreeze = async ({ recipient, asset, amount }: FreezeParams): Promise<TxHash> => {
-    try {
-      await this.bncClient.initChain()
-      await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
-
-      const transferResult = await this.bncClient.tokens.unfreeze(
-        recipient || this.getAddress(),
-        asset.symbol,
-        baseToAsset(amount).amount().toString(),
-      )
-
-      return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
   getFees = async (): Promise<Fees> => {
     try {
       const feesArray = await axios
@@ -428,30 +383,6 @@ class Client implements BinanceClient, XChainClient {
         fast: multiTxFee,
         fastest: multiTxFee,
       } as Fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  getFreezeFees = async (): Promise<Fees> => {
-    try {
-      const feesArray = await axios
-        .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
-        .then((response) => response.data)
-
-      const freezeFee = feesArray.find(isFreezeFee)
-      if (!freezeFee) {
-        throw new Error('failed to get transfer fees')
-      }
-
-      const fee = baseAmount(freezeFee.fee)
-
-      return {
-        type: 'base',
-        fast: fee,
-        fastest: fee,
-        average: fee,
-      }
     } catch (error) {
       return Promise.reject(error)
     }

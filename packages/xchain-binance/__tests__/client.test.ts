@@ -58,11 +58,8 @@ describe('BinanceClient Test', () => {
   const transferFee = { type: 'base', average: singleTxFee, fast: singleTxFee, fastest: singleTxFee }
   const multiTxFee = baseAmount(30000)
   const multiSendFee = { type: 'base', average: multiTxFee, fast: multiTxFee, fastest: multiTxFee }
-  const freezeTxFee = baseAmount(500000)
-  const freezeFee = { type: 'base', average: freezeTxFee, fast: freezeTxFee, fastest: freezeTxFee }
 
   const transferAmount = baseAmount(1000000)
-  const freezeAmount = baseAmount(500000)
 
   const phraseForTX = 'wheel leg dune emerge sudden badge rough shine convince poet doll kiwi sleep labor hello'
   const testnetaddressForTx = 'tbnb1t95kjgmjc045l2a728z02textadd98yt339jk7'
@@ -169,13 +166,8 @@ describe('BinanceClient Test', () => {
     expect(balances.length).toEqual(1)
 
     const amount = balances[0].amount
-    const frozenAmount = balances[0].frozenAmount
 
     expect(amount.amount().isEqualTo(1289087500)).toBeTruthy()
-    expect(balances[0].frozenAmount).toBeTruthy()
-    if (frozenAmount) {
-      expect(frozenAmount.amount().isEqualTo(10000000)).toBeTruthy()
-    }
   })
 
   it('fetches the transfer fees', async () => {
@@ -226,31 +218,6 @@ describe('BinanceClient Test', () => {
     expect(fees.average.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
     expect(fees.fast.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
     expect(fees.fastest.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
-  })
-
-  it('fetches the freeze fees', async () => {
-    mockGetFees(mainnetClientURL, [
-      {
-        msg_type: 'tokensFreeze',
-        fee: 500000,
-        fee_for: 1,
-      },
-      {
-        fixed_fee_params: {
-          msg_type: 'send',
-          fee: 37500,
-          fee_for: 1,
-        },
-        multi_transfer_fee: 30000,
-        lower_limit_as_multi: 2,
-      },
-    ])
-
-    const fees = await bnbClient.getFreezeFees()
-    expect(fees.type).toEqual(freezeFee.type)
-    expect(fees.average.amount().isEqualTo(freezeTxFee.amount())).toBeTruthy()
-    expect(fees.fast.amount().isEqualTo(freezeTxFee.amount())).toBeTruthy()
-    expect(fees.fastest.amount().isEqualTo(freezeTxFee.amount())).toBeTruthy()
   })
 
   it('should broadcast a transfer', async () => {
@@ -311,138 +278,6 @@ describe('BinanceClient Test', () => {
     expect(expected).toBeTruthy()
   })
 
-  it('should freeze token', async () => {
-    const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
-    expect(client.getAddress()).toEqual(testnetaddressForTx)
-
-    mockGetAccount(
-      testnetClientURL,
-      testnetaddressForTx,
-      {
-        account_number: 0,
-        address: testnetaddressForTx,
-        balances: [
-          {
-            free: '1.01000000',
-            frozen: '0.00000000',
-            locked: '0.00000000',
-            symbol: 'BNB',
-          },
-        ],
-        public_key: [],
-        sequence: 0,
-      },
-      4,
-    )
-
-    const beforeFreeze = await client.getBalance()
-    expect(beforeFreeze.length).toEqual(1)
-
-    mockNodeInfo(testnetClientURL)
-    mockTxSend(testnetClientURL)
-
-    const txHash = await client.freeze({ asset: AssetBNB, amount: freezeAmount })
-    expect(txHash).toEqual(expect.any(String))
-
-    mockGetAccount(testnetClientURL, testnetaddressForTx, {
-      account_number: 0,
-      address: testnetaddressForTx,
-      balances: [
-        {
-          free: '1.00000000',
-          frozen: '0.00500000',
-          locked: '0.00000000',
-          symbol: 'BNB',
-        },
-      ],
-      public_key: [],
-      sequence: 0,
-    })
-
-    const afterFreeze = await client.getBalance()
-    expect(afterFreeze.length).toEqual(1)
-
-    let expected = beforeFreeze[0].amount
-      .amount()
-      .minus(freezeAmount.amount())
-      .minus(freezeFee.average.amount())
-      .isEqualTo(afterFreeze[0].amount.amount())
-    expect(expected).toBeTruthy()
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expected = beforeFreeze[0]
-      .frozenAmount!.amount()
-      .plus(freezeAmount.amount())
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      .isEqualTo(afterFreeze[0].frozenAmount!.amount())
-    expect(expected).toBeTruthy()
-  })
-
-  it('should unfreeze token', async () => {
-    const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
-    expect(client.getAddress()).toEqual(testnetaddressForTx)
-
-    mockGetAccount(
-      testnetClientURL,
-      testnetaddressForTx,
-      {
-        account_number: 0,
-        address: testnetaddressForTx,
-        balances: [
-          {
-            free: '1.00000000',
-            frozen: '0.00500000',
-            locked: '0.00000000',
-            symbol: 'BNB',
-          },
-        ],
-        public_key: [],
-        sequence: 0,
-      },
-      4,
-    )
-
-    const beforeUnFreeze = await client.getBalance()
-    expect(beforeUnFreeze.length).toEqual(1)
-
-    mockNodeInfo(testnetClientURL)
-    mockTxSend(testnetClientURL)
-
-    const txHash = await client.unfreeze({ asset: AssetBNB, amount: freezeAmount })
-    expect(txHash).toEqual(expect.any(String))
-
-    mockGetAccount(testnetClientURL, testnetaddressForTx, {
-      account_number: 0,
-      address: testnetaddressForTx,
-      balances: [
-        {
-          free: '1.00000000',
-          frozen: '0.00000000',
-          locked: '0.00000000',
-          symbol: 'BNB',
-        },
-      ],
-      public_key: [],
-      sequence: 0,
-    })
-
-    const afterUnFreeze = await client.getBalance()
-    expect(afterUnFreeze.length).toEqual(1)
-
-    let expected = beforeUnFreeze[0].amount
-      .amount()
-      .plus(freezeAmount.amount())
-      .minus(freezeFee.average.amount())
-      .isEqualTo(afterUnFreeze[0].amount.amount())
-    expect(expected).toBeTruthy()
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expected = beforeUnFreeze[0]
-      .frozenAmount!.amount()
-      .minus(freezeAmount.amount())
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      .isEqualTo(afterUnFreeze[0].frozenAmount!.amount())
-    expect(expected).toBeTruthy()
-  })
-
   it('should broadcast a multi transfer', async () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)
@@ -476,7 +311,7 @@ describe('BinanceClient Test', () => {
         coins: [
           {
             asset: AssetBNB,
-            amount: freezeAmount,
+            amount: transferAmount,
           },
         ],
       },
@@ -485,7 +320,7 @@ describe('BinanceClient Test', () => {
         coins: [
           {
             asset: AssetBNB,
-            amount: freezeAmount,
+            amount: transferAmount,
           },
         ],
       },
@@ -494,7 +329,7 @@ describe('BinanceClient Test', () => {
         coins: [
           {
             asset: AssetBNB,
-            amount: freezeAmount,
+            amount: transferAmount,
           },
         ],
       },

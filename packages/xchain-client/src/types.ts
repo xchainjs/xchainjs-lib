@@ -7,12 +7,11 @@ export type Network = 'testnet' | 'mainnet'
 export type Balance = {
   asset: Asset
   amount: BaseAmount
-  frozenAmount?: BaseAmount
 }
 
 export type Balances = Balance[]
 
-export type TxType = 'transfer' | 'freeze' | 'unfreeze' | 'unknown'
+export type TxType = 'transfer' | 'unknown'
 
 export type TxHash = string
 
