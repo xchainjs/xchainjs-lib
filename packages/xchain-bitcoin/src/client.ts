@@ -157,9 +157,9 @@ class Client implements BitcoinClient, XChainClient {
 
   // Will return true/false
   validateAddress = (address: string): boolean => {
-    const network = this.isTestnet() ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const btcNetwork = this.btcNetwork()
     try {
-      Bitcoin.address.toOutputScript(address, network)
+      Bitcoin.address.toOutputScript(address, btcNetwork)
       return true
     } catch (error) {
       return false
