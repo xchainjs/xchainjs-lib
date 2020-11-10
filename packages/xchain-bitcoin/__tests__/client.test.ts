@@ -27,13 +27,13 @@ describe('BitcoinClient Test', () => {
 
   it('should have the correct bitcoin network right prefix', () => {
     btcClient.setNetwork('mainnet')
-    const network = btcClient.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const network = btcClient.isTestnet() ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     expect(network.bech32).toEqual('bc')
   })
 
   it('should update net', () => {
     btcClient.setNetwork('testnet')
-    const network = btcClient.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const network = btcClient.isTestnet() ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
     expect(network.bech32).toEqual('tb')
   })
 
