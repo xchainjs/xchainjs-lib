@@ -1,10 +1,18 @@
+# v.4.0.0 (2020-11-11)
+
+### Breaking change
+
+- Remove `freeze` and `unfreeze` related functions: `getFreezeFees()`, `freeze()`, `unfreeze()`, `getFreezeFees()`
+- Ignore `freeze` and `unfreeze` in `parseTx()`
+- Ignore `freeze` and `unfreeze` in `getTxType()`
+
 # v.3.1.1 (2020-11-09)
 
 ### Change
 
 - updated `xchain-client` package version
 
- # v.3.1.0 (2020-11-06)
+# v.3.1.0 (2020-11-06)
 
 ### Add
 
@@ -17,7 +25,7 @@
 - `getExplorerUrl` is public now
 
 ### Fix
- 
+
 - Fixed asset parsing for `getBalance` method
 
 # v.3.0.1 (2020-08-26)
@@ -27,6 +35,7 @@
 # v.3.0.0 (2020-08-26)
 
 ### Breaking changes:
+
 - `Constructor` argument is an object now `{ network: Network; phrase?: string }`
 - `getAddress` returns undefined if `phrase` has not been set before
 - `getPrivateKey()` throws an error if `phrase` has not been set before
@@ -34,16 +43,18 @@
 - `vaultTx`, `normalTx`, `multiSend`, `getMarkets` accept an object as its parameters
 
 ### Add:
+
 - `freeze(params: FreezeParams): Promise<TransferResult>`
 - `unfreeze(params: FreezeParams): Promise<TransferResult>`
 - `getBncClient(): BncClient`
 
 ### Fix:
+
 - Fix `Rollup` warnings of `Unresolved dependencies` and `Circular dependencies`
 
 ### Update:
-- Use latest npm dependencies
 
+- Use latest npm dependencies
 
 # v.2.1.1 (2020-08-14)
 
