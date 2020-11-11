@@ -407,6 +407,9 @@ class Client implements BitcoinClient, XChainClient {
         witnessUtxo: UTXO.witnessUtxo,
       }),
     )
+
+    console.log('utxos are : ', this.utxos)
+
     // Outputs
     psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
     const change = await this.getChange(amount.amount().toNumber() + fee)
