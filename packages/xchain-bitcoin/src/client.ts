@@ -1,6 +1,5 @@
 import * as BIP39 from 'bip39'
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
-import * as WIF from 'wif' // https://github.com/bitcoinjs/wif
 import * as Utils from './utils'
 import * as blockChair from './blockchair-api'
 import {
@@ -30,6 +29,8 @@ import { TxIO } from './types/blockchair-api-types'
  * BitcoinClient Interface
  */
 interface BitcoinClient {
+  isTestnet(): boolean
+  derivePath(): string
   validateAddress(address: string): boolean
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
@@ -51,6 +52,11 @@ class Client implements BitcoinClient, XChainClient {
   utxos: Utils.UTXO[]
   nodeUrl = ''
   nodeApiKey = ''
+
+  private derive_path = {
+    mainnet: "84'/0'/0'/0/0",
+    testnet: "84'/1'/0'/0/0",
+  }
 
   // Client is initialised with network type
   constructor({ network = 'testnet', nodeUrl = '', nodeApiKey = '', phrase }: BitcoinClientParams) {
@@ -95,8 +101,20 @@ class Client implements BitcoinClient, XChainClient {
     return this.net
   }
 
+  isTestnet(): boolean {
+    return this.net === 'testnet'
+  }
+
+  derivePath(): string {
+    return this.isTestnet() ? this.derive_path.testnet : this.derive_path.mainnet
+  }
+
+  private btcNetwork(): Bitcoin.Network {
+    return this.isTestnet() ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+  }
+
   getExplorerUrl = (): string => {
-    const networkPath = this.net === 'testnet' ? '/testnet' : ''
+    const networkPath = this.isTestnet() ? '/testnet' : ''
     return `https://blockstream.info${networkPath}`
   }
 
@@ -111,8 +129,7 @@ class Client implements BitcoinClient, XChainClient {
   // The address is then decoded into type P2WPKH and returned.
   getAddress = (): Address => {
     if (this.phrase) {
-      const network = this.getNetwork()
-      const btcNetwork = network === 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+      const btcNetwork = this.btcNetwork()
       const btcKeys = this.getBtcKeys(this.phrase)
 
       const { address } = Bitcoin.payments.p2wpkh({
@@ -128,20 +145,25 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   // Private function to get keyPair from the this.phrase
-  private getBtcKeys = (_phrase: string): Bitcoin.ECPairInterface => {
-    const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
-    const seed = BIP39.mnemonicToSeedSync(_phrase)
-    const wif = WIF.encode(network.wif, seed, true)
-    // TODO (@junkai121) Use `xchainCrypto.getSeed` while fixing it https://github.com/xchainjs/xchainjs-lib/issues/88
-    // const seed = xchainCrypto.getSeed(_phrase)
-    return Bitcoin.ECPair.fromWIF(wif, network)
+  private getBtcKeys = (phrase: string): Bitcoin.ECPairInterface => {
+    const btcNetwork = this.btcNetwork()
+    const derive_path = this.derivePath()
+
+    const seed = BIP39.mnemonicToSeedSync(phrase)
+    const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(derive_path)
+
+    if (!master.privateKey) {
+      throw new Error('Could not get private key from phrase')
+    }
+
+    return Bitcoin.ECPair.fromPrivateKey(master.privateKey, { network: btcNetwork })
   }
 
   // Will return true/false
   validateAddress = (address: string): boolean => {
-    const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const btcNetwork = this.btcNetwork()
     try {
-      Bitcoin.address.toOutputScript(address, network)
+      Bitcoin.address.toOutputScript(address, btcNetwork)
       return true
     } catch (error) {
       return false
@@ -370,7 +392,7 @@ class Client implements BitcoinClient, XChainClient {
     if (!this.validateAddress(recipient)) {
       throw new Error('Invalid address')
     }
-    const network = this.getNetwork() == 'testnet' ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    const btcNetwork = this.btcNetwork()
     const btcKeys = this.getBtcKeys(this.phrase)
     const feeRateWhole = Number(feeRate.toFixed(0))
     const compiledMemo = memo ? Utils.compileMemo(memo) : null
@@ -380,7 +402,7 @@ class Client implements BitcoinClient, XChainClient {
     if (amount.amount().plus(fee).isGreaterThan(btcBalance.amount.amount())) {
       throw new Error('Balance insufficient for transaction')
     }
-    const psbt = new Bitcoin.Psbt({ network: network }) // Network-specific
+    const psbt = new Bitcoin.Psbt({ network: btcNetwork }) // Network-specific
     //Inputs
     this.utxos.forEach((UTXO) =>
       psbt.addInput({
@@ -389,6 +411,7 @@ class Client implements BitcoinClient, XChainClient {
         witnessUtxo: UTXO.witnessUtxo,
       }),
     )
+
     // Outputs
     psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
     const change = await this.getChange(amount.amount().toNumber() + fee)
