@@ -67,7 +67,7 @@ class Client implements BitcoinClient, XChainClient {
     this.utxos = []
   }
 
-  setNodeURL(url: string): void {
+  setNodeURL = (url: string): void => {
     this.nodeUrl = url
   }
 
@@ -92,12 +92,12 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   // update network
-  setNetwork(_net: Network): void {
+  setNetwork = (_net: Network): void => {
     this.net = _net
   }
 
   // Will return the desired network
-  getNetwork(): Network {
+  getNetwork = (): Network => {
     return this.net
   }
 
@@ -113,15 +113,15 @@ class Client implements BitcoinClient, XChainClient {
     return this.isTestnet() ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
   }
 
-  getExplorerUrl(): string {
+  getExplorerUrl = (): string => {
     const networkPath = this.isTestnet() ? '/testnet' : ''
     return `https://blockstream.info${networkPath}`
   }
 
-  getExplorerAddressUrl(address: Address): string {
+  getExplorerAddressUrl = (address: Address): string => {
     return `${this.getExplorerUrl()}/address/${address}`
   }
-  getExplorerTxUrl(txID: string): string {
+  getExplorerTxUrl = (txID: string): string =>  {
     return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
@@ -145,7 +145,7 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   // Private function to get keyPair from the this.phrase
-  private getBtcKeys(phrase: string): Bitcoin.ECPairInterface {
+  private getBtcKeys = (phrase: string): Bitcoin.ECPairInterface => {
     const btcNetwork = this.btcNetwork()
     const derive_path = this.derivePath()
 
