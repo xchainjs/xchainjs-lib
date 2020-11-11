@@ -152,7 +152,11 @@ class Client implements BitcoinClient, XChainClient {
     const seed = BIP39.mnemonicToSeedSync(phrase)
     const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(derive_path)
 
-    return Bitcoin.ECPair.fromPublicKey(master.publicKey, { network: btcNetwork })
+    if (!master.privateKey) {
+      throw new Error('Could not get private key from phrase')
+    }
+
+    return Bitcoin.ECPair.fromPrivateKey(master.privateKey, { network: btcNetwork })
   }
 
   // Will return true/false
@@ -407,8 +411,6 @@ class Client implements BitcoinClient, XChainClient {
         witnessUtxo: UTXO.witnessUtxo,
       }),
     )
-
-    console.log('utxos are : ', this.utxos)
 
     // Outputs
     psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
