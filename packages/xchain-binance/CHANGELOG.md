@@ -3,8 +3,8 @@
 ### Breaking change
 
 - Remove `freeze` and `unfreeze` related functions: `getFreezeFees()`, `freeze()`, `unfreeze()`, `getFreezeFees()`
-- Ignore `freeze` and `unfreeze` in `parseTx()`
-- Ignore `freeze` and `unfreeze` in `getTxType()`
+- Ignore `freeze` and `unfreeze` txs in `parseTx()`
+- Ignore `freeze` and `unfreeze` txs in `getTxType()`
 
 # v.3.1.1 (2020-11-09)
 
