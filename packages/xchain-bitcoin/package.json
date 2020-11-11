@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-bitcoin",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Custom Bitcoin client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -32,7 +32,7 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "^0.0.7",
+    "@xchainjs/xchain-client": "^0.1.0",
     "@xchainjs/xchain-crypto": "^0.1.0",
     "axios": "^0.20.0",
     "axios-mock-adapter": "^1.19.0",
