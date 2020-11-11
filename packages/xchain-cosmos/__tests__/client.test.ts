@@ -64,11 +64,11 @@ describe('Client Test', () => {
 
   it('should start with empty wallet', async () => {
     const cosmosClientEmptyMain = new Client({ phrase, network: 'mainnet' })
-    const addressMain = await cosmosClientEmptyMain.getAddress()
+    const addressMain = cosmosClientEmptyMain.getAddress()
     expect(addressMain).toEqual(address)
 
     const cosmosClientEmptyTest = new Client({ phrase, network: 'testnet' })
-    const addressTest = await cosmosClientEmptyTest.getAddress()
+    const addressTest = cosmosClientEmptyTest.getAddress()
     expect(addressTest).toEqual(address)
   })
 
@@ -83,7 +83,7 @@ describe('Client Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(await cosmosClient.getAddress()).toEqual(address)
+    expect(cosmosClient.getAddress()).toEqual(address)
   })
 
   it('should update net', async () => {
@@ -91,7 +91,7 @@ describe('Client Test', () => {
     client.setNetwork('testnet')
     expect(client.getNetwork()).toEqual('testnet')
 
-    const address = await client.getAddress()
+    const address = client.getAddress()
     expect(address).toEqual(address)
   })
 
