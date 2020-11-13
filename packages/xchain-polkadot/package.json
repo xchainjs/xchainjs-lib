@@ -33,8 +33,6 @@
     "start:example": "ts-node example/index.ts"
   },
   "devDependencies": {
-    "@polkadot/api": "^2.6.1",
-    "@polkadot/keyring": "^4.0.1",
     "@types/big.js": "^4.0.5",
     "@types/jest": "^26.0.10",
     "@typescript-eslint/eslint-plugin": "^3.10.1",
@@ -62,6 +60,8 @@
     "access": "public"
   },
   "dependencies": {
+    "@polkadot/api": "^2.6.1",
+    "@polkadot/keyring": "^4.0.1",
     "@xchainjs/xchain-client": "^0.0.7",
     "axios": "^0.19.2",
     "nock": "^13.0.4"

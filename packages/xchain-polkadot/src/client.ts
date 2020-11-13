@@ -15,7 +15,7 @@ import {
 import { Asset, assetAmount, assetToBase } from '@xchainjs/xchain-util/lib'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
-import { Keyring } from '@polkadot/keyring'
+import Keyring from '@polkadot/keyring'
 import { KeyringPair } from '@polkadot/keyring/types'
 
 import { SubscanResponse, Account, AssetDOT, TransfersResult } from './types'
