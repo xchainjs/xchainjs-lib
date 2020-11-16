@@ -12,14 +12,14 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, assetAmount, assetToBase } from '@xchainjs/xchain-util/lib'
+import { Asset, assetAmount, assetToString } from '@xchainjs/xchain-util/lib'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import Keyring from '@polkadot/keyring'
 import { KeyringPair } from '@polkadot/keyring/types'
 
-import { SubscanResponse, Account, AssetDOT, TransfersResult } from './types'
-import { isSuccess } from './util'
+import { SubscanResponse, Account, AssetDOT, TransfersResult, Extrinsic, Transfer } from './types'
+import { isSuccess, assetToBase10 } from './util'
 
 /**
  * Interface for custom Polkadot client
@@ -90,6 +90,7 @@ class Client implements PolkadotClient, XChainClient {
 
   private getKeyringPair = (): KeyringPair => {
     const key = new Keyring({ ss58Format: this.getSS58Format(), type: 'ed25519' })
+
     return key.createFromUri(this.phrase)
   }
 
@@ -107,7 +108,7 @@ class Client implements PolkadotClient, XChainClient {
     return this.address
   }
 
-  getBalance = async (address?: Address, _asset?: Asset): Promise<Balances> => {
+  getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
     try {
       const response: SubscanResponse<Account> = await axios
         .post(`${this.getClientUrl()}/api/open/account`, { address: address || this.getAddress() })
@@ -119,11 +120,11 @@ class Client implements PolkadotClient, XChainClient {
 
       const account = response.data
 
-      return account
+      return account && (!asset || assetToString(asset) === assetToString(AssetDOT))
         ? [
             {
               asset: AssetDOT,
-              amount: assetToBase(assetAmount(account.balance, 10)),
+              amount: assetToBase10(assetAmount(account.balance, 10)),
             },
           ]
         : []
@@ -159,13 +160,13 @@ class Client implements PolkadotClient, XChainClient {
           from: [
             {
               from: transfer.from,
-              amount: assetToBase(assetAmount(transfer.amount, 10)),
+              amount: assetToBase10(assetAmount(transfer.amount, 10)),
             },
           ],
           to: [
             {
-              to: transfer.from,
-              amount: assetToBase(assetAmount(transfer.amount, 10)),
+              to: transfer.to,
+              amount: assetToBase10(assetAmount(transfer.amount, 10)),
             },
           ],
           date: new Date(transfer.block_timestamp * 1000),
@@ -178,8 +179,42 @@ class Client implements PolkadotClient, XChainClient {
     }
   }
 
-  getTransactionData = async (_txId: string): Promise<Tx> => {
-    return Promise.reject()
+  getTransactionData = async (txId: string): Promise<Tx> => {
+    try {
+      const response: SubscanResponse<Extrinsic> = await axios
+        .post(`${this.getClientUrl()}/api/scan/extrinsic`, {
+          hash: txId,
+        })
+        .then((res) => res.data)
+
+      if (!isSuccess(response) || !response.data) {
+        throw new Error('Failed to get transactions')
+      }
+
+      const extrinsic: Extrinsic = response.data
+      const transfer: Transfer = extrinsic.transfer
+
+      return {
+        asset: AssetDOT,
+        from: [
+          {
+            from: transfer.from,
+            amount: assetToBase10(assetAmount(transfer.amount, 10)),
+          },
+        ],
+        to: [
+          {
+            to: transfer.to,
+            amount: assetToBase10(assetAmount(transfer.amount, 10)),
+          },
+        ],
+        date: new Date(extrinsic.block_timestamp * 1000),
+        type: 'transfer',
+        hash: extrinsic.extrinsic_hash,
+      }
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   deposit = async (_params: TxParams): Promise<TxHash> => {
@@ -190,7 +225,6 @@ class Client implements PolkadotClient, XChainClient {
     return Promise.reject()
   }
 
-  // there is no fixed fee, we set fee amount when creating a transaction.
   getFees = async (): Promise<Fees> => {
     return Promise.reject()
   }
