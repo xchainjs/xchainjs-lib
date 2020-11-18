@@ -12,29 +12,49 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, assetAmount, assetToString } from '@xchainjs/xchain-util/lib'
+import { Asset, assetAmount, assetToString, assetToBase, baseAmount } from '@xchainjs/xchain-util/lib'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import Keyring from '@polkadot/keyring'
 import { KeyringPair } from '@polkadot/keyring/types'
+import { RuntimeDispatchInfo } from '@polkadot/types/interfaces'
+import HttpProvider from '@polkadot/rpc-provider/http'
+import {
+  getRegistry,
+  methods,
+  createSigningPayload,
+  createSignedTx,
+  POLKADOT_SS58_FORMAT,
+  WESTEND_SS58_FORMAT,
+} from '@substrate/txwrapper'
+import { EXTRINSIC_VERSION } from '@substrate/txwrapper/lib/util'
 
 import { SubscanResponse, Account, AssetDOT, TransfersResult, Extrinsic, Transfer } from './types'
-import { isSuccess, assetToBase10 } from './util'
+import { isSuccess } from './util'
+
+const DECIMAL = 10
 
 /**
  * Interface for custom Polkadot client
  */
 export interface PolkadotClient {
   getSS58Format(): number
+  getChainName(): 'Polkadot' | 'Westend'
+  getSpecName(): 'polkadot' | 'westend'
+
+  estimateFees(params: TxParams): Promise<Fees>
 }
 
 class Client implements PolkadotClient, XChainClient {
   private network: Network
   private phrase = ''
   private address: Address = ''
+  private provider: HttpProvider
 
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
+
+    this.provider = new HttpProvider(this.getRPCEndpoint())
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -48,6 +68,8 @@ class Client implements PolkadotClient, XChainClient {
     this.network = network
     this.address = ''
 
+    this.provider = new HttpProvider(this.getRPCEndpoint())
+
     return this
   }
 
@@ -57,6 +79,10 @@ class Client implements PolkadotClient, XChainClient {
 
   getClientUrl = (): string => {
     return this.network === 'testnet' ? 'https://westend.subscan.io' : 'https://polkadot.subscan.io'
+  }
+
+  getRPCEndpoint = (): string => {
+    return this.network === 'testnet' ? 'https://westend-rpc.polkadot.io' : 'https://rpc.polkadot.io'
   }
 
   getExplorerUrl = (): string => {
@@ -72,7 +98,15 @@ class Client implements PolkadotClient, XChainClient {
   }
 
   getSS58Format = (): number => {
-    return this.network === 'testnet' ? 42 : 0
+    return this.network === 'testnet' ? WESTEND_SS58_FORMAT : POLKADOT_SS58_FORMAT
+  }
+
+  getChainName = (): 'Polkadot' | 'Westend' => {
+    return this.network === 'testnet' ? 'Westend' : 'Polkadot'
+  }
+
+  getSpecName = (): 'polkadot' | 'westend' => {
+    return this.network === 'testnet' ? 'westend' : 'polkadot'
   }
 
   setPhrase = (phrase: string): Address => {
@@ -124,7 +158,7 @@ class Client implements PolkadotClient, XChainClient {
         ? [
             {
               asset: AssetDOT,
-              amount: assetToBase10(assetAmount(account.balance, 10)),
+              amount: assetToBase(assetAmount(account.balance, DECIMAL)),
             },
           ]
         : []
@@ -160,13 +194,13 @@ class Client implements PolkadotClient, XChainClient {
           from: [
             {
               from: transfer.from,
-              amount: assetToBase10(assetAmount(transfer.amount, 10)),
+              amount: assetToBase(assetAmount(transfer.amount, DECIMAL)),
             },
           ],
           to: [
             {
               to: transfer.to,
-              amount: assetToBase10(assetAmount(transfer.amount, 10)),
+              amount: assetToBase(assetAmount(transfer.amount, DECIMAL)),
             },
           ],
           date: new Date(transfer.block_timestamp * 1000),
@@ -199,13 +233,13 @@ class Client implements PolkadotClient, XChainClient {
         from: [
           {
             from: transfer.from,
-            amount: assetToBase10(assetAmount(transfer.amount, 10)),
+            amount: assetToBase(assetAmount(transfer.amount, DECIMAL)),
           },
         ],
         to: [
           {
             to: transfer.to,
-            amount: assetToBase10(assetAmount(transfer.amount, 10)),
+            amount: assetToBase(assetAmount(transfer.amount, DECIMAL)),
           },
         ],
         date: new Date(extrinsic.block_timestamp * 1000),
@@ -217,16 +251,106 @@ class Client implements PolkadotClient, XChainClient {
     }
   }
 
-  deposit = async (_params: TxParams): Promise<TxHash> => {
-    return Promise.reject()
+  private getTxBytes = async (params: TxParams): Promise<string> => {
+    try {
+      const { block } = await this.provider.send('chain_getBlock', [])
+      const blockHash = await this.provider.send('chain_getBlockHash', [])
+      const genesisHash = await this.provider.send('chain_getBlockHash', [0])
+      const metadataRpc = await this.provider.send('state_getMetadata', [])
+      const { specVersion, transactionVersion } = await this.provider.send('state_getRuntimeVersion', [])
+
+      // Get Account nonce.
+      const nonce = await this.provider.send('account_nextIndex', [this.getAddress()])
+
+      // Create Polkadot's type registry.
+      const registry = getRegistry(this.getChainName(), this.getSpecName(), specVersion, metadataRpc)
+
+      // Now we can create our `balances.transfer` unsigned tx. The following
+      // function takes the above data as arguments, so can be performed offline
+      // if desired.
+      const unsigned = methods.balances.transfer(
+        {
+          value: params.amount.amount().toNumber(),
+          dest: params.recipient,
+        },
+        {
+          address: this.getAddress(),
+          blockHash,
+          blockNumber: registry.createType('BlockNumber', block.header.number).toNumber(),
+          eraPeriod: 64,
+          genesisHash,
+          metadataRpc,
+          nonce,
+          specVersion,
+          tip: 0,
+          transactionVersion,
+        },
+        {
+          metadataRpc,
+          registry,
+        },
+      )
+
+      // Construct the signing payload from an unsigned transaction.
+      const signingPayload = createSigningPayload(unsigned, { registry })
+
+      // Sign a payload. This operation should be performed on an offline device.
+      const { signature } = registry
+        .createType('ExtrinsicPayload', signingPayload, {
+          version: EXTRINSIC_VERSION,
+        })
+        .sign(this.getKeyringPair())
+
+      // Serialize a signed transaction.
+      const tx = createSignedTx(unsigned, signature, { metadataRpc, registry })
+      return tx
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
-  transfer = async (_params: TxParams): Promise<TxHash> => {
-    return Promise.reject()
+  deposit = async (params: TxParams): Promise<TxHash> => {
+    return this.transfer(params)
+  }
+
+  transfer = async (params: TxParams): Promise<TxHash> => {
+    try {
+      const tx = await this.getTxBytes(params)
+
+      // Send the tx to the node. Again, since `txwrapper` is offline-only, this
+      // operation should be handled externally. Here, we just send a JSONRPC
+      // request directly to the node.
+      const txHash = await this.provider.send('author_submitExtrinsic', [tx])
+
+      return txHash
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  estimateFees = async (params: TxParams): Promise<Fees> => {
+    try {
+      const tx = await this.getTxBytes(params)
+
+      const hash = await this.provider.send('chain_getFinalizedHead', [])
+      const paymentInfo: RuntimeDispatchInfo = await this.provider.send('payment_queryInfo', [tx, hash])
+
+      return {
+        type: 'byte',
+        average: baseAmount(paymentInfo.partialFee.toString(), DECIMAL),
+        fast: baseAmount(paymentInfo.partialFee.toString(), DECIMAL),
+        fastest: baseAmount(paymentInfo.partialFee.toString(), DECIMAL),
+      }
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   getFees = async (): Promise<Fees> => {
-    return Promise.reject()
+    return await this.estimateFees({
+      recipient: this.getAddress(),
+      amount: baseAmount(0, DECIMAL),
+    })
   }
 }
 

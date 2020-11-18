@@ -1,37 +1,7 @@
-import nock from 'nock'
 import { Client } from '../src/client'
 import { baseAmount } from '@xchainjs/xchain-util'
-import { SubscanResponse, Account, TransfersResult, Extrinsic } from '../src/types'
-
-const assertAccountsBalance = (url: string, address: string, result: SubscanResponse<Account>) => {
-  nock(url, { allowUnmocked: true })
-    .post('/api/open/account', (body) => {
-      expect(body.address).toEqual(address)
-
-      return true
-    })
-    .reply(200, result)
-}
-
-const assertTxHistory = (url: string, address: string, result: SubscanResponse<TransfersResult>) => {
-  nock(url, { allowUnmocked: true })
-    .post('/api/scan/transfers', (body) => {
-      expect(body.address).toEqual(address)
-
-      return true
-    })
-    .reply(200, result)
-}
-
-const assertTxData = (url: string, hash: string, result: SubscanResponse<Extrinsic>) => {
-  nock(url, { allowUnmocked: true })
-    .post('/api/scan/extrinsic', (body) => {
-      expect(body.hash).toEqual(hash)
-
-      return true
-    })
-    .reply(200, result)
-}
+import { assertAccountsBalance, assertTxData, assertTxHistory } from '../__mocks__/subscan'
+import { mock_transfer, mock_estimate_fee } from '../__mocks__/rpc'
 
 describe('Client Test', () => {
   let polkadotClient: Client
@@ -288,5 +258,44 @@ describe('Client Test', () => {
     expect(txResult.from[0].amount.amount().isEqualTo(baseAmount('5000000000', 10).amount())).toBeTruthy()
     expect(txResult.to[0].to).toEqual('5ELorcuxqBNbAgC72F1PLW55hHf9jdeFkAcqCsQ4mLDCVLxb')
     expect(txResult.to[0].amount.amount().isEqualTo(baseAmount('5000000000', 10).amount())).toBeTruthy()
+  })
+
+  it('transfer', async () => {
+    polkadotClient.setNetwork('testnet')
+
+    mock_transfer(polkadotClient.getRPCEndpoint())
+
+    const txHash = await polkadotClient.transfer({
+      amount: baseAmount('10000', 10),
+      recipient: testnet_address,
+    })
+
+    expect(txHash).toEqual('0xdd227d44f1ed2e5b82e38daf699f66fc5ea28f1e104167b19d587a2363190ee9')
+  })
+
+  it('deposit', async () => {
+    polkadotClient.setNetwork('testnet')
+
+    mock_transfer(polkadotClient.getRPCEndpoint())
+
+    const txHash = await polkadotClient.deposit({
+      amount: baseAmount('10000', 10),
+      recipient: testnet_address,
+    })
+
+    expect(txHash).toEqual('0xdd227d44f1ed2e5b82e38daf699f66fc5ea28f1e104167b19d587a2363190ee9')
+  })
+
+  it('get fees', async () => {
+    polkadotClient.setNetwork('testnet')
+
+    mock_estimate_fee(polkadotClient.getRPCEndpoint())
+
+    const fees = await polkadotClient.getFees()
+
+    expect(fees.type).toEqual('byte')
+    expect(fees.average.amount().isEqualTo(baseAmount('15000000001', 10).amount())).toBeTruthy()
+    expect(fees.fast.amount().isEqualTo(baseAmount('15000000001', 10).amount())).toBeTruthy()
+    expect(fees.fastest.amount().isEqualTo(baseAmount('15000000001', 10).amount())).toBeTruthy()
   })
 })
