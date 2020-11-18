@@ -19,18 +19,20 @@ import Keyring from '@polkadot/keyring'
 import { KeyringPair } from '@polkadot/keyring/types'
 import { RuntimeDispatchInfo } from '@polkadot/types/interfaces'
 import HttpProvider from '@polkadot/rpc-provider/http'
-import {
-  getRegistry,
-  methods,
-  createSigningPayload,
-  createSignedTx,
-  POLKADOT_SS58_FORMAT,
-  WESTEND_SS58_FORMAT,
-} from '@substrate/txwrapper'
-import { EXTRINSIC_VERSION } from '@substrate/txwrapper/lib/util'
+import * as txWrapper from '@substrate/txwrapper'
+import { EXTRINSIC_VERSION } from '@substrate/txwrapper/lib/util/constants'
 
 import { SubscanResponse, Account, AssetDOT, TransfersResult, Extrinsic, Transfer } from './types'
 import { isSuccess } from './util'
+
+const {
+  POLKADOT_SS58_FORMAT,
+  WESTEND_SS58_FORMAT,
+  methods,
+  createSigningPayload,
+  createSignedTx,
+  getRegistry,
+} = txWrapper
 
 const DECIMAL = 10
 

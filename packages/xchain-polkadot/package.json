@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-polkadot",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Custom Polkadot client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -28,7 +28,7 @@
     "clean": "rimraf lib/**",
     "build": "rollup -c",
     "test": "jest",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",
     "start:example": "ts-node example/index.ts"
   },
@@ -60,12 +60,10 @@
     "access": "public"
   },
   "dependencies": {
+    "@substrate/txwrapper": "3.10.2",
     "@xchainjs/xchain-client": "^0.0.7",
     "@xchainjs/xchain-crypto": "^0.1.0",
     "axios": "^0.19.2",
     "nock": "^13.0.4"
-  },
-  "peerDependencies": {
-    "@substrate/txwrapper": "3.10.2"
   }
 }
