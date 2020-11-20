@@ -1,4 +1,3 @@
-import * as BIP39 from 'bip39'
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as Utils from './utils'
 import * as blockChair from './blockchair-api'
@@ -15,7 +14,7 @@ import {
   Fees,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
+import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
 import { baseAmount, assetToString, AssetBTC, BaseAmount } from '@xchainjs/xchain-util'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 import { TxIO } from './types/blockchair-api-types'
@@ -77,7 +76,7 @@ class Client implements BitcoinClient, XChainClient {
 
   // Sets this.phrase to be accessed later
   setPhrase = (phrase: string): Address => {
-    if (xchainCrypto.validatePhrase(phrase)) {
+    if (validatePhrase(phrase)) {
       this.phrase = phrase
       const address = this.getAddress()
       return address
@@ -149,7 +148,7 @@ class Client implements BitcoinClient, XChainClient {
     const btcNetwork = this.btcNetwork()
     const derive_path = this.derivePath()
 
-    const seed = BIP39.mnemonicToSeedSync(phrase)
+    const seed = getSeed(phrase)
     const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(derive_path)
 
     if (!master.privateKey) {

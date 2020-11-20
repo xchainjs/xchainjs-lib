@@ -2750,6 +2750,13 @@
     "@typescript-eslint/types" "4.5.0"
     eslint-visitor-keys "^2.0.0"
 
+"@xchainjs/xchain-client@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-client/-/xchain-client-0.0.7.tgz#7ca6c46f9c690d37663062f596a9210f847bfed7"
+  integrity sha512-4WglU0u8VmcN17kC9VdrdsnVimInSDJ/iDpJ1d8+S63GbJBZKt3W8ekP3xsy4z0I2RAQ9WBnv6aAyXuyCV2pPw==
+  dependencies:
+    "@xchainjs/xchain-util" "^0.1.0"
+
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@zkochan/cmd-shim/-/cmd-shim-3.1.0.tgz#2ab8ed81f5bb5452a85f25758eb9b8681982fd2e"
