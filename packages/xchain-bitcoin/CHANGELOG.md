@@ -1,3 +1,10 @@
+# v.0.5.1 (2020-11-20)
+
+### Update
+
+- Use `getSeed` of `xchain-crypto`
+- Remove `bip39` from dependencies
+
 # v.0.5.0 (2020-11-20)
 
 ### Breaking change

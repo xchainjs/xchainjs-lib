@@ -60,7 +60,7 @@ export const validatePhrase = (phrase: string): boolean => {
 export const getSeed = (phrase: string): Buffer => {
   const words = phrase.split(' ')
   if (words.length != 12 && words.length != 24) {
-    throw new Error('invalid phrase')
+    throw new Error('Phrase has to be 12 or 24 words')
   }
   const seed = bip39.mnemonicToSeedSync(phrase)
   return seed
