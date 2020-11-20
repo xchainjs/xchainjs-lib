@@ -121,7 +121,7 @@ class Client implements BitcoinClient, XChainClient {
   getExplorerAddressUrl = (address: Address): string => {
     return `${this.getExplorerUrl()}/address/${address}`
   }
-  getExplorerTxUrl = (txID: string): string =>  {
+  getExplorerTxUrl = (txID: string): string => {
     return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
