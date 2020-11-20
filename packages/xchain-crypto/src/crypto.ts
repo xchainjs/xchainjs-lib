@@ -57,14 +57,7 @@ export const validatePhrase = (phrase: string): boolean => {
   return bip39.validateMnemonic(phrase)
 }
 
-export const getSeed = (phrase: string): Buffer => {
-  const words = phrase.split(' ')
-  if (words.length != 12 && words.length != 24) {
-    throw new Error('invalid phrase')
-  }
-  const seed = bip39.mnemonicToSeedSync(phrase)
-  return seed
-}
+export const getSeed = (phrase: string): Buffer => bip39.mnemonicToSeedSync(phrase)
 
 export const getAddress = (phrase: string): string => {
   const seed = getSeed(phrase)
