@@ -61,7 +61,7 @@
   },
   "dependencies": {
     "@xchainjs/xchain-client": "^0.0.7",
-    "@xchainjs/xchain-cosmos": "^0.3.3",
+    "@xchainjs/xchain-cosmos": "^0.4.0",
     "@xchainjs/xchain-crypto": "^0.2.0",
     "axios": "^0.19.2",
     "nock": "^13.0.4"
