@@ -17,4 +17,6 @@ First release
 - purgeClient(): void
 
 - getSS58Format(): number
+- getWsEndpoint(): string
 - estimateFees(params: TxParams): Promise<Fees>
+- purgeProvider(): void

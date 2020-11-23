@@ -30,6 +30,8 @@ export interface PolkadotClient {
   getSS58Format(): number
   getWsEndpoint(): string
   estimateFees(params: TxParams): Promise<Fees>
+
+  purgeProvider(): void
 }
 
 class Client implements PolkadotClient, XChainClient {
@@ -44,14 +46,26 @@ class Client implements PolkadotClient, XChainClient {
     if (phrase) this.setPhrase(phrase)
   }
 
+  purgeProvider = (): void => {
+    this.api?.disconnect()
+  }
+
   purgeClient = (): void => {
+    this.purgeProvider()
+
+    this.api = null
     this.phrase = ''
     this.address = ''
   }
 
   setNetwork(network: Network): XChainClient {
-    this.network = network
-    this.address = ''
+    if (network !== this.network) {
+      this.purgeProvider()
+      
+      this.api = null
+      this.network = network
+      this.address = ''
+    }
 
     return this
   }
@@ -106,7 +120,6 @@ class Client implements PolkadotClient, XChainClient {
   private getAPI = async (): Promise<ApiPromise> => {
     try {
       if (!this.api) {
-        console.log('creating ws provider')
         this.api = new ApiPromise({ provider: new WsProvider(this.getWsEndpoint()) })
         await this.api.isReady
       }
@@ -255,8 +268,6 @@ class Client implements PolkadotClient, XChainClient {
         .transfer(params.recipient, params.amount.amount().toNumber())
         .signAndSend(this.getKeyringPair())
 
-      await api.disconnect()
-
       return txHash.toString()
     } catch (error) {
       return Promise.reject(error)
@@ -270,13 +281,13 @@ class Client implements PolkadotClient, XChainClient {
         .transfer(params.recipient, params.amount.amount().toNumber())
         .paymentInfo(this.getKeyringPair())
 
-      await api.disconnect()
+      const fee = baseAmount(info.partialFee.toString(), DECIMAL)
 
       return {
         type: 'byte',
-        average: baseAmount(info.partialFee.toString(), DECIMAL),
-        fast: baseAmount(info.partialFee.toString(), DECIMAL),
-        fastest: baseAmount(info.partialFee.toString(), DECIMAL),
+        average: fee,
+        fast: fee,
+        fastest: fee,
       }
     } catch (error) {
       return Promise.reject(error)

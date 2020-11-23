@@ -12,7 +12,6 @@ export interface Scope {
 
 global.WebSocket = WebSocket;
 
-// scope definition returned
 function mockWs (wsUrl: string): Scope {
   console.log(wsUrl)
   const server = new Server(wsUrl);
@@ -20,16 +19,13 @@ function mockWs (wsUrl: string): Scope {
   const scope: Scope = {
     body: {},
     done: (): void => {
-      server.stop((): void => {
-        // ignore
-      });
+      server.stop((): void => {});
     },
     requests: 0,
     server
   };
 
   server.on('connection', (socket): void => {
-    // FIXME This whole any mess is a mess
     socket.on('message', (body: any): void => {
       const request = JSON.parse(body)
       console.log('request method', request.method)
