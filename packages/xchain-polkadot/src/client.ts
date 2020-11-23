@@ -15,24 +15,11 @@ import {
 import { Asset, assetAmount, assetToString, assetToBase, baseAmount } from '@xchainjs/xchain-util/lib'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
-import Keyring from '@polkadot/keyring'
+import { ApiPromise, WsProvider, Keyring } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'
-import { RuntimeDispatchInfo } from '@polkadot/types/interfaces'
-import HttpProvider from '@polkadot/rpc-provider/http'
-import * as txWrapper from '@substrate/txwrapper'
-import { EXTRINSIC_VERSION } from '@substrate/txwrapper/lib/util/constants'
 
 import { SubscanResponse, Account, AssetDOT, TransfersResult, Extrinsic, Transfer } from './types'
 import { isSuccess } from './util'
-
-const {
-  POLKADOT_SS58_FORMAT,
-  WESTEND_SS58_FORMAT,
-  methods,
-  createSigningPayload,
-  createSignedTx,
-  getRegistry,
-} = txWrapper
 
 const DECIMAL = 10
 
@@ -41,9 +28,7 @@ const DECIMAL = 10
  */
 export interface PolkadotClient {
   getSS58Format(): number
-  getChainName(): 'Polkadot' | 'Westend'
-  getSpecName(): 'polkadot' | 'westend'
-
+  getWsEndpoint(): string
   estimateFees(params: TxParams): Promise<Fees>
 }
 
@@ -51,17 +36,15 @@ class Client implements PolkadotClient, XChainClient {
   private network: Network
   private phrase = ''
   private address: Address = ''
-  private provider: HttpProvider
+  private api: ApiPromise | null = null
 
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
 
-    this.provider = new HttpProvider(this.getRPCEndpoint())
-
     if (phrase) this.setPhrase(phrase)
   }
 
-  purgeClient(): void {
+  purgeClient = (): void => {
     this.phrase = ''
     this.address = ''
   }
@@ -69,8 +52,6 @@ class Client implements PolkadotClient, XChainClient {
   setNetwork(network: Network): XChainClient {
     this.network = network
     this.address = ''
-
-    this.provider = new HttpProvider(this.getRPCEndpoint())
 
     return this
   }
@@ -83,8 +64,8 @@ class Client implements PolkadotClient, XChainClient {
     return this.network === 'testnet' ? 'https://westend.subscan.io' : 'https://polkadot.subscan.io'
   }
 
-  getRPCEndpoint = (): string => {
-    return this.network === 'testnet' ? 'https://westend-rpc.polkadot.io' : 'https://rpc.polkadot.io'
+  getWsEndpoint = (): string => {
+    return this.network === 'testnet' ? 'wss://westend-rpc.polkadot.io' : 'wss://rpc.polkadot.io'
   }
 
   getExplorerUrl = (): string => {
@@ -100,15 +81,7 @@ class Client implements PolkadotClient, XChainClient {
   }
 
   getSS58Format = (): number => {
-    return this.network === 'testnet' ? WESTEND_SS58_FORMAT : POLKADOT_SS58_FORMAT
-  }
-
-  getChainName = (): 'Polkadot' | 'Westend' => {
-    return this.network === 'testnet' ? 'Westend' : 'Polkadot'
-  }
-
-  getSpecName = (): 'polkadot' | 'westend' => {
-    return this.network === 'testnet' ? 'westend' : 'polkadot'
+    return this.network === 'testnet' ? 42 : 0
   }
 
   setPhrase = (phrase: string): Address => {
@@ -128,6 +101,24 @@ class Client implements PolkadotClient, XChainClient {
     const key = new Keyring({ ss58Format: this.getSS58Format(), type: 'ed25519' })
 
     return key.createFromUri(this.phrase)
+  }
+
+  private getAPI = async (): Promise<ApiPromise> => {
+    try {
+      if (!this.api) {
+        console.log('creating ws provider')
+        this.api = new ApiPromise({ provider: new WsProvider(this.getWsEndpoint()) })
+        await this.api.isReady
+      }
+
+      if (!this.api.isConnected) {
+        await this.api.connect()
+      }
+
+      return this.api
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   getAddress = (): Address => {
@@ -253,78 +244,20 @@ class Client implements PolkadotClient, XChainClient {
     }
   }
 
-  private getTxBytes = async (params: TxParams): Promise<string> => {
-    try {
-      const { block } = await this.provider.send('chain_getBlock', [])
-      const blockHash = await this.provider.send('chain_getBlockHash', [])
-      const genesisHash = await this.provider.send('chain_getBlockHash', [0])
-      const metadataRpc = await this.provider.send('state_getMetadata', [])
-      const { specVersion, transactionVersion } = await this.provider.send('state_getRuntimeVersion', [])
-
-      // Get Account nonce.
-      const nonce = await this.provider.send('account_nextIndex', [this.getAddress()])
-
-      // Create Polkadot's type registry.
-      const registry = getRegistry(this.getChainName(), this.getSpecName(), specVersion, metadataRpc)
-
-      // Now we can create our `balances.transfer` unsigned tx. The following
-      // function takes the above data as arguments, so can be performed offline
-      // if desired.
-      const unsigned = methods.balances.transfer(
-        {
-          value: params.amount.amount().toNumber(),
-          dest: params.recipient,
-        },
-        {
-          address: this.getAddress(),
-          blockHash,
-          blockNumber: registry.createType('BlockNumber', block.header.number).toNumber(),
-          eraPeriod: 64,
-          genesisHash,
-          metadataRpc,
-          nonce,
-          specVersion,
-          tip: 0,
-          transactionVersion,
-        },
-        {
-          metadataRpc,
-          registry,
-        },
-      )
-
-      // Construct the signing payload from an unsigned transaction.
-      const signingPayload = createSigningPayload(unsigned, { registry })
-
-      // Sign a payload. This operation should be performed on an offline device.
-      const { signature } = registry
-        .createType('ExtrinsicPayload', signingPayload, {
-          version: EXTRINSIC_VERSION,
-        })
-        .sign(this.getKeyringPair())
-
-      // Serialize a signed transaction.
-      const tx = createSignedTx(unsigned, signature, { metadataRpc, registry })
-      return tx
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
   deposit = async (params: TxParams): Promise<TxHash> => {
     return this.transfer(params)
   }
 
   transfer = async (params: TxParams): Promise<TxHash> => {
     try {
-      const tx = await this.getTxBytes(params)
+      const api = await this.getAPI()
+      const txHash = await api.tx.balances
+        .transfer(params.recipient, params.amount.amount().toNumber())
+        .signAndSend(this.getKeyringPair())
 
-      // Send the tx to the node. Again, since `txwrapper` is offline-only, this
-      // operation should be handled externally. Here, we just send a JSONRPC
-      // request directly to the node.
-      const txHash = await this.provider.send('author_submitExtrinsic', [tx])
+      await api.disconnect()
 
-      return txHash
+      return txHash.toString()
     } catch (error) {
       return Promise.reject(error)
     }
@@ -332,16 +265,18 @@ class Client implements PolkadotClient, XChainClient {
 
   estimateFees = async (params: TxParams): Promise<Fees> => {
     try {
-      const tx = await this.getTxBytes(params)
+      const api = await this.getAPI()
+      const info = await api.tx.balances
+        .transfer(params.recipient, params.amount.amount().toNumber())
+        .paymentInfo(this.getKeyringPair())
 
-      const hash = await this.provider.send('chain_getFinalizedHead', [])
-      const paymentInfo: RuntimeDispatchInfo = await this.provider.send('payment_queryInfo', [tx, hash])
+      await api.disconnect()
 
       return {
         type: 'byte',
-        average: baseAmount(paymentInfo.partialFee.toString(), DECIMAL),
-        fast: baseAmount(paymentInfo.partialFee.toString(), DECIMAL),
-        fastest: baseAmount(paymentInfo.partialFee.toString(), DECIMAL),
+        average: baseAmount(info.partialFee.toString(), DECIMAL),
+        fast: baseAmount(info.partialFee.toString(), DECIMAL),
+        fastest: baseAmount(info.partialFee.toString(), DECIMAL),
       }
     } catch (error) {
       return Promise.reject(error)

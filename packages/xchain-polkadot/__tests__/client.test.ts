@@ -1,9 +1,15 @@
 import { Client } from '../src/client'
 import { baseAmount } from '@xchainjs/xchain-util'
+import { Scope, mockWs } from '../__mocks__/ws'
+import { Constructor } from '@polkadot/types/types'
+import { Global } from '@polkadot/rpc-provider/mock/types'
 import { assertAccountsBalance, assertTxData, assertTxHistory } from '../__mocks__/subscan'
-import { mock_transfer, mock_estimate_fee } from '../__mocks__/rpc'
+
+declare const global: Global
 
 describe('Client Test', () => {
+  let mock: Scope
+  let globalWs: Constructor<WebSocket>
   let polkadotClient: Client
 
   const phrase = 'wing divide pear industry silver concert chest cloud torch merit fatigue silk'
@@ -11,11 +17,17 @@ describe('Client Test', () => {
   const testnet_address = '5DGcavWpcNWUZga6dwG8dSsfUs5LqQ19hMcLeNo3JExF7EFN'
 
   beforeEach(() => {
-    polkadotClient = new Client({ phrase, network: 'mainnet' })
+    polkadotClient = new Client({ phrase, network: 'testnet' })
+
+    globalWs = global.WebSocket
+    mock = mockWs(polkadotClient.getWsEndpoint())
   })
 
   afterEach(() => {
     polkadotClient.purgeClient()
+
+    global.WebSocket = globalWs
+    mock.done()
   })
 
   it('throws an error passing an invalid phrase', async () => {
@@ -29,21 +41,23 @@ describe('Client Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(polkadotClient.getAddress()).toEqual(mainnet_address)
-
-    polkadotClient.setNetwork('testnet')
     expect(polkadotClient.getAddress()).toEqual(testnet_address)
+
+    polkadotClient.setNetwork('mainnet')
+    expect(polkadotClient.getAddress()).toEqual(mainnet_address)
   })
 
   it('should update net', async () => {
-    polkadotClient.setNetwork('testnet')
-    expect(polkadotClient.getNetwork()).toEqual('testnet')
+    polkadotClient.setNetwork('mainnet')
+    expect(polkadotClient.getNetwork()).toEqual('mainnet')
 
     const address = await polkadotClient.getAddress()
-    expect(address).toEqual(testnet_address)
+    expect(address).toEqual(mainnet_address)
   })
 
   it('no balances', async () => {
+    polkadotClient.setNetwork('mainnet')
+
     assertAccountsBalance(polkadotClient.getClientUrl(), mainnet_address, {
       code: 0,
       message: 'Success',
@@ -56,8 +70,6 @@ describe('Client Test', () => {
   })
 
   it('has balances', async () => {
-    polkadotClient.setNetwork('testnet')
-
     assertAccountsBalance(polkadotClient.getClientUrl(), testnet_address, {
       code: 0,
       message: 'Success',
@@ -75,6 +87,8 @@ describe('Client Test', () => {
   })
 
   it('no txHistory', async () => {
+    polkadotClient.setNetwork('mainnet')
+
     assertTxHistory(polkadotClient.getClientUrl(), mainnet_address, {
       code: 0,
       message: 'Success',
@@ -91,8 +105,6 @@ describe('Client Test', () => {
   })
 
   it('has txHistory', async () => {
-    polkadotClient.setNetwork('testnet')
-
     assertTxHistory(polkadotClient.getClientUrl(), '5HpLdCTNBQDjFomqpG2XWadgB4zHTuqQqNHhUyYbett7k1RR', {
       code: 0,
       message: 'Success',
@@ -149,8 +161,6 @@ describe('Client Test', () => {
   })
 
   it('get transaction data', async () => {
-    polkadotClient.setNetwork('testnet')
-
     assertTxData(polkadotClient.getClientUrl(), '0x6b328ca6d1f72413dfb831980e601305e84ecb867cfc12dc41c2d813349a6ee5', {
       code: 0,
       message: 'Success',
@@ -261,10 +271,6 @@ describe('Client Test', () => {
   })
 
   it('transfer', async () => {
-    polkadotClient.setNetwork('testnet')
-
-    mock_transfer(polkadotClient.getRPCEndpoint())
-
     const txHash = await polkadotClient.transfer({
       amount: baseAmount('10000', 10),
       recipient: testnet_address,
@@ -274,10 +280,6 @@ describe('Client Test', () => {
   })
 
   it('deposit', async () => {
-    polkadotClient.setNetwork('testnet')
-
-    mock_transfer(polkadotClient.getRPCEndpoint())
-
     const txHash = await polkadotClient.deposit({
       amount: baseAmount('10000', 10),
       recipient: testnet_address,
@@ -287,10 +289,6 @@ describe('Client Test', () => {
   })
 
   it('get fees', async () => {
-    polkadotClient.setNetwork('testnet')
-
-    mock_estimate_fee(polkadotClient.getRPCEndpoint())
-
     const fees = await polkadotClient.getFees()
 
     expect(fees.type).toEqual('byte')

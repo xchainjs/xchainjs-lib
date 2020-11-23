@@ -1,4 +1,4 @@
-# v.0.1.0 (2020-11-18)
+# v.0.1.0 (2020-11-23)
 
 First release
 
@@ -17,6 +17,4 @@ First release
 - purgeClient(): void
 
 - getSS58Format(): number
-- getChainName(): 'Polkadot' | 'Westend'
-- getSpecName(): 'polkadot' | 'westend'
 - estimateFees(params: TxParams): Promise<Fees>

@@ -27,12 +27,13 @@
   "scripts": {
     "clean": "rimraf lib/**",
     "build": "rollup -c",
-    "test": "jest",
-    "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0",
+    "test": "jest --detectOpenHandles",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",
     "start:example": "ts-node example/index.ts"
   },
   "devDependencies": {
+    "@polkadot/api": "^2.7.1",
     "@types/big.js": "^4.0.5",
     "@types/jest": "^26.0.10",
     "@typescript-eslint/eslint-plugin": "^3.10.1",
@@ -43,7 +44,9 @@
     "eslint-plugin-prettier": "^3.1.4",
     "husky": "^4.2.5",
     "jest": "^26.4.2",
+    "jest-websocket-mock": "^2.2.0",
     "lint-staged": "^10.2.13",
+    "mock-socket": "9.0.3",
     "prettier": "^2.1.1",
     "rollup": "2.26.5",
     "rollup-plugin-commonjs": "^10.1.0",
@@ -60,10 +63,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@substrate/txwrapper": "3.10.2",
     "@xchainjs/xchain-client": "^0.0.7",
     "@xchainjs/xchain-crypto": "^0.1.0",
     "axios": "^0.19.2",
     "nock": "^13.0.4"
+  },
+  "peerDependencies": {
+    "@polkadot/api": "^2.7.1"
   }
 }
