@@ -15,9 +15,8 @@ import { CosmosSDKClient, getTxsFromHistory } from '@xchainjs/xchain-cosmos'
 import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
-import { PrivKey } from 'cosmos-client'
+import { PrivKey, codec } from 'cosmos-client'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
-import { codec } from 'cosmos-client/codec'
 
 import { AssetRune } from './types'
 import { getDenom, getAsset } from './util'

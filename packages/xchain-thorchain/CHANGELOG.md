@@ -1,3 +1,13 @@
+# v.0.4.2 (2020-11-23)
+
+### Fix
+
+- Fix import of `cosmos/codec`
+
+### Update
+
+- Use latest `@xchainjs/cosmos@0.4.2`
+
 # v.0.4.1 (2020-11-23)
 
 ### Update
