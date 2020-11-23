@@ -3239,18 +3239,6 @@
   dependencies:
     "@xchainjs/xchain-util" "^0.1.0"
 
-"@xchainjs/xchain-crypto@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-crypto/-/xchain-crypto-0.1.0.tgz#1b914f287da40214b8459c5907ed0dec438374bf"
-  integrity sha512-I7sQgbfcS+UhgWMAYtb+ivKyZrfMK6RQa+/2oLfT/Htrc9815L0qFEHi8HjGOQC6uIdJt5jrD5NqiiBL7yYzBA==
-  dependencies:
-    bech32 "^1.1.4"
-    bip39 "^3.0.2"
-    crypto-js "^4.0.0"
-    foundry-primitives "^0.2.1"
-    hdkey "^2.0.1"
-    uuid "^8.1.0"
-
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@zkochan/cmd-shim/-/cmd-shim-3.1.0.tgz#2ab8ed81f5bb5452a85f25758eb9b8681982fd2e"
@@ -9564,7 +9552,7 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-nock@^13.0.5:
+nock@^13.0.4, nock@^13.0.5:
   version "13.0.5"
   resolved "https://registry.yarnpkg.com/nock/-/nock-13.0.5.tgz#a618c6f86372cb79fac04ca9a2d1e4baccdb2414"
   integrity sha512-1ILZl0zfFm2G4TIeJFW0iHknxr2NyA+aGCMTjDVUsBY4CkMRispF1pfIYkTRdAR/3Bg+UzdEuK0B6HczMQZcCg==

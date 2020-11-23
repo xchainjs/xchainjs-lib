@@ -1,3 +1,9 @@
+# v.0.4.2 (2020-11-23)
+
+### Fix imports
+
+- Fix imports of `cosmos/codec`
+
 # v.0.4.1 (2020-11-23)
 
 ### Update

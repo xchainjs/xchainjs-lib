@@ -1,10 +1,9 @@
 import { TxFrom, TxTo, Txs } from '@xchainjs/xchain-client'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
-import { Msg } from 'cosmos-client'
+import { Msg, codec } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
-import { codec } from 'cosmos-client/codec'
 
 import { RawTxResponse, TxResponse, APIQueryParam } from './cosmos/types'
 import { AssetAtom, AssetMuon } from './types'
