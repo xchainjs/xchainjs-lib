@@ -2,7 +2,7 @@ import nock from 'nock'
 import { TxHistoryResponse, TxResponse } from '@xchainjs/xchain-cosmos'
 import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
-import { codec } from 'cosmos-client/codec'
+import { codec } from 'cosmos-client'
 
 import { CosmosSDKClient } from '../src/cosmos/sdk-client'
 
