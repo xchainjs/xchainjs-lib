@@ -30,8 +30,6 @@ export interface PolkadotClient {
   getSS58Format(): number
   getWsEndpoint(): string
   estimateFees(params: TxParams): Promise<Fees>
-
-  purgeProvider(): void
 }
 
 class Client implements PolkadotClient, XChainClient {
@@ -46,14 +44,14 @@ class Client implements PolkadotClient, XChainClient {
     if (phrase) this.setPhrase(phrase)
   }
 
-  purgeProvider = (): void => {
+  private purgeProvider = (): void => {
     this.api?.disconnect()
+    this.api = null
   }
 
   purgeClient = (): void => {
     this.purgeProvider()
 
-    this.api = null
     this.phrase = ''
     this.address = ''
   }
@@ -62,7 +60,6 @@ class Client implements PolkadotClient, XChainClient {
     if (network !== this.network) {
       this.purgeProvider()
 
-      this.api = null
       this.network = network
       this.address = ''
     }
