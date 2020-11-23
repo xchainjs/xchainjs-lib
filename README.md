@@ -27,9 +27,10 @@ For wallets that need even more flexibility (smart contract blockchains) the cli
 ## XChainJS uses following libraries, frameworks and more:
 
 - [BitcoinJS](https://github.com/bitcoinjs/bitcoinjs-lib)
-- [WIF](https://github.com/bitcoinjs/wif)
 - [@binance-chain/javascript-sdk](https://github.com/binance-chain/javascript-sdk)
 - [@ethersproject](https://github.com/ethers-io/ethers.js)
+- [cosmos-client](https://github.com/cosmos-client/cosmos-client-ts)
+- [PolkadotJS](https://github.com/polkadot-js)
 
 ![Test](https://github.com/thorchain/asgardex-electron/workflows/Test/badge.svg)
 
