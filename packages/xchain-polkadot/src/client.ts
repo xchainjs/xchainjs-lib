@@ -61,7 +61,7 @@ class Client implements PolkadotClient, XChainClient {
   setNetwork(network: Network): XChainClient {
     if (network !== this.network) {
       this.purgeProvider()
-      
+
       this.api = null
       this.network = network
       this.address = ''
