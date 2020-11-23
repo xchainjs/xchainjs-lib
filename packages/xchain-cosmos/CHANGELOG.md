@@ -2,7 +2,7 @@
 
 ### Update
 
-- Update to latest `@xchainjs/*` packages and others dependencies
+- Update to latest `@xchainjs/*` packages and other dependencies
 
 # v.0.4.0 (2020-11-20)
 
