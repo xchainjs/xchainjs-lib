@@ -8,7 +8,7 @@ Cosmos Module for XChainJS Clients
 yarn add @xchainjs/xchain-cosmos
 ```
 
-Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-binance`.
+Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-cosmos`.
 
 ```
 yarn add cosmos-client
