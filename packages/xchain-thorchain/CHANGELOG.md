@@ -1,3 +1,9 @@
+# v.x.x.x (2020-XX-XX)
+
+### Update
+
+- Update dependencies
+
 # v.0.4.2 (2020-11-23)
 
 ### Fix
