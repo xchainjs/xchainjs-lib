@@ -2,11 +2,22 @@ import nock from 'nock'
 
 import { TxsPage } from '@xchainjs/xchain-client'
 import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
-import { BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
+import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
 import { AssetMuon } from '../src/types'
 import { Client } from '../src/client'
 import { getDenom } from '../src/util'
 import { TxHistoryResponse, TxResponse } from '../src/cosmos/types'
+
+const mockAccountsAddress = (
+  url: string,
+  address: string,
+  result: {
+    height: number
+    result: BaseAccount
+  },
+) => {
+  nock(url).get(`/auth/accounts/${address}`).reply(200, result)
+}
 
 const mockAccountsBalance = (
   url: string,
@@ -115,6 +126,16 @@ describe('Client Test', () => {
   })
 
   it('has balances', async () => {
+    mockAccountsBalance(cosmosClient.getClientUrl(), 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv', {
+      height: 0,
+      result: [
+        {
+          denom: 'muon',
+          amount: '75000000',
+        },
+      ],
+    })
+
     const balances = await cosmosClient.getBalance('cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv')
     const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, 6).amount())
     expect(expected).toBeTruthy()
@@ -142,6 +163,43 @@ describe('Client Test', () => {
   })
 
   it('has tx history', async () => {
+    assertTxHstory(cosmosClient.getClientUrl(), 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
+      count: 1,
+      limit: 30,
+      page_number: 1,
+      page_total: 1,
+      total_count: 1,
+      txs: [
+        {
+          height: 1047,
+          txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
+          raw_log: 'transaction logs',
+          gas_wanted: '5000000000000000',
+          gas_used: '148996',
+          tx: {
+            body: {
+              messages: [
+                {
+                  type: 'cosmos-sdk/MsgSend',
+                  value: {
+                    from_address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2',
+                    to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
+                    amount: [
+                      {
+                        denom: 'umuon',
+                        amount: 4318994970,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          timestamp: '2020-09-25T06:09:15Z',
+        },
+      ],
+    })
+
     let transactions = await cosmosClient.getTransactions({ address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2' })
     expect(transactions.total).toBeGreaterThan(0)
 
@@ -200,6 +258,19 @@ describe('Client Test', () => {
       height: 0,
     }
 
+    mockAccountsAddress(cosmosClient.getClientUrl(), cosmosClient.getAddress(), {
+      height: 0,
+      result: {
+        coins: [
+          {
+            denom: 'muon',
+            amount: '21000',
+          },
+        ],
+        account_number: '0',
+        sequence: '0',
+      },
+    })
     assertTxsPost(
       cosmosClient.getClientUrl(),
       cosmosClient.getAddress(),
@@ -236,6 +307,19 @@ describe('Client Test', () => {
       height: 0,
     }
 
+    mockAccountsAddress(cosmosClient.getClientUrl(), cosmosClient.getAddress(), {
+      height: 0,
+      result: {
+        coins: [
+          {
+            denom: 'muon',
+            amount: '21000',
+          },
+        ],
+        account_number: '0',
+        sequence: '0',
+      },
+    })
     assertTxsPost(
       cosmosClient.getClientUrl(),
       cosmosClient.getAddress(),

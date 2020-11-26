@@ -346,6 +346,21 @@ class Client implements BitcoinClient, XChainClient {
     }
   }
 
+  getDefaultFees = (): Fees => {
+    const rates: FeeRates = {
+      fastest: 50,
+      fast: 20,
+      average: 10,
+    }
+
+    return {
+      type: 'byte',
+      fast: this.calcFee(rates.fast),
+      average: this.calcFee(rates.average),
+      fastest: this.calcFee(rates.fastest),
+    }
+  }
+
   /**
    * Returns fees for transactions w/ a memo
    * Note: If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method

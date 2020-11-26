@@ -21,6 +21,8 @@ import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 import { AssetRune } from './types'
 import { getDenom, getAsset } from './util'
 
+const DECIMAL = 6
+
 /**
  * Interface for custom Thorchain client
  */
@@ -149,7 +151,7 @@ class Client implements ThorchainClient, XChainClient {
       return balances
         .map((balance) => ({
           asset: (balance.denom && getAsset(balance.denom)) || AssetRune,
-          amount: baseAmount(balance.amount, 8),
+          amount: baseAmount(balance.amount, DECIMAL),
         }))
         .filter((balance) => !asset || balance.asset === asset)
     } catch (error) {
@@ -228,10 +230,19 @@ class Client implements ThorchainClient, XChainClient {
   getFees = async (): Promise<Fees> => {
     return Promise.resolve({
       type: 'base',
-      fast: baseAmount(750, 6),
-      fastest: baseAmount(2500, 6),
-      average: baseAmount(0, 6),
+      fast: baseAmount(750, DECIMAL),
+      fastest: baseAmount(2500, DECIMAL),
+      average: baseAmount(0, DECIMAL),
     })
+  }
+
+  getDefaultFees = (): Fees => {
+    return {
+      type: 'base',
+      fast: baseAmount(750, DECIMAL),
+      fastest: baseAmount(2500, DECIMAL),
+      average: baseAmount(0, DECIMAL),
+    }
   }
 }
 

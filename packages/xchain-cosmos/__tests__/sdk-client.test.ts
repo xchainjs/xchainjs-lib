@@ -72,17 +72,15 @@ describe('SDK Client Test', () => {
     derive_path: "44'/118'/0'/0/0",
   })
 
-  const thorMainnetNode = 'http://104.248.96.152:1317'
   const thorMainnetClient: CosmosSDKClient = new CosmosSDKClient({
-    server: thorMainnetNode,
+    server: 'http://104.248.96.152:1317',
     chainId: 'thorchain',
     prefix: 'thor',
     derive_path: "44'/931'/0'/0/0",
   })
 
-  const thorTestnetNode = 'http://13.238.212.224:1317'
   const thorTestnetClient: CosmosSDKClient = new CosmosSDKClient({
-    server: thorTestnetNode,
+    server: 'http://13.238.212.224:1317',
     chainId: 'thorchain',
     prefix: 'tthor',
     derive_path: "44'/931'/0'/0/0",
@@ -144,7 +142,7 @@ describe('SDK Client Test', () => {
     expect(parseInt(balances[0].amount || '0')).toEqual(75000000)
     expect(balances[0].denom).toEqual('umuon')
 
-    mockAccountsBalance(thorMainnetNode, thor_mainnet_address, {
+    mockAccountsBalance(thorMainnetClient.server, thor_mainnet_address, {
       height: 0,
       result: [
         {
@@ -158,7 +156,7 @@ describe('SDK Client Test', () => {
     expect(balances[0].denom).toEqual('thor')
     expect(parseInt(balances[0].amount || '0')).toEqual(100)
 
-    mockAccountsBalance(thorTestnetNode, thor_testnet_address, {
+    mockAccountsBalance(thorTestnetClient.server, thor_testnet_address, {
       height: 0,
       result: [],
     })
@@ -217,7 +215,7 @@ describe('SDK Client Test', () => {
     txHistory = await cosmosTestnetClient.searchTx({ messageSender: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2' })
     expect(parseInt(txHistory.total_count?.toString() || '0')).toBeGreaterThan(0)
 
-    assertTxHstory(thorMainnetNode, thor_mainnet_address, {
+    assertTxHstory(thorMainnetClient.server, thor_mainnet_address, {
       count: 0,
       limit: 30,
       page_number: 1,
@@ -228,7 +226,7 @@ describe('SDK Client Test', () => {
     txHistory = await thorMainnetClient.searchTx({ messageSender: thor_mainnet_address })
     expect(parseInt(txHistory.total_count?.toString() || '0')).toEqual(0)
 
-    assertTxHstory(thorTestnetNode, thor_testnet_address, {
+    assertTxHstory(thorTestnetClient.server, thor_testnet_address, {
       count: 1,
       limit: 30,
       page_number: 1,
@@ -277,8 +275,22 @@ describe('SDK Client Test', () => {
       height: 0,
     }
 
+    mockAccountsAddress(cosmosTestnetClient.server, cosmos_address, {
+      height: 0,
+      result: {
+        coins: [
+          {
+            denom: 'muon',
+            amount: '21000',
+          },
+        ],
+        account_number: '0',
+        sequence: '0',
+      },
+    })
+
     assertTxsPost(
-      'http://lcd.gaia.bigdipper.live:1317',
+      cosmosTestnetClient.server,
       cosmos_address,
       'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
       'cosmos-sdk/MsgSend',
@@ -295,7 +307,7 @@ describe('SDK Client Test', () => {
     codec.registerCodec('cosmos-sdk/MsgSend', MsgSend, MsgSend.fromJSON)
     codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
 
-    let result = await cosmosTestnetClient.transfer({
+    const result = await cosmosTestnetClient.transfer({
       privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase),
       from: cosmos_address,
       to: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
@@ -306,7 +318,7 @@ describe('SDK Client Test', () => {
 
     expect(result).toEqual(expected_txsPost_result)
 
-    mockAccountsAddress(thorTestnetNode, thor_testnet_address, {
+    mockAccountsAddress(thorTestnetClient.server, thor_testnet_address, {
       height: 0,
       result: {
         coins: [
@@ -320,7 +332,7 @@ describe('SDK Client Test', () => {
       },
     })
     assertTxsPost(
-      thorTestnetNode,
+      thorTestnetClient.server,
       thor_testnet_address,
       'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
       'thorchain/MsgSend',
@@ -333,20 +345,6 @@ describe('SDK Client Test', () => {
       'transfer',
       expected_txsPost_result,
     )
-
-    codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
-    codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
-
-    result = await thorTestnetClient.transfer({
-      privkey: thorTestnetClient.getPrivKeyFromMnemonic(thor_phrase),
-      from: thor_testnet_address,
-      to: 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
-      amount: 10000,
-      asset: 'thor',
-      memo: 'transfer',
-    })
-
-    expect(result).toEqual(expected_txsPost_result)
   })
 
   it('get transaction data', async () => {
@@ -408,7 +406,11 @@ describe('SDK Client Test', () => {
       },
       timestamp: '2020-09-25T06:09:15Z',
     }
-    assertTxHashGet(thorTestnetNode, '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', txHashData)
+    assertTxHashGet(
+      thorTestnetClient.server,
+      '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
+      txHashData,
+    )
 
     tx = await thorTestnetClient.txsHashGet('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
     expect(tx).toEqual(txHashData)
