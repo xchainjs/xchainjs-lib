@@ -307,7 +307,7 @@ describe('SDK Client Test', () => {
     codec.registerCodec('cosmos-sdk/MsgSend', MsgSend, MsgSend.fromJSON)
     codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
 
-    let result = await cosmosTestnetClient.transfer({
+    const result = await cosmosTestnetClient.transfer({
       privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase),
       from: cosmos_address,
       to: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
