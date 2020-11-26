@@ -297,6 +297,15 @@ class Client implements PolkadotClient, XChainClient {
       amount: baseAmount(0, DECIMAL),
     })
   }
+
+  getDefaultFees = (): Fees => {
+    return {
+      type: 'base',
+      fast: baseAmount(750, 6),
+      fastest: baseAmount(2500, 6),
+      average: baseAmount(0, 6),
+    }
+  }
 }
 
 export { Client }

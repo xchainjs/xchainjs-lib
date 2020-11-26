@@ -4,6 +4,7 @@
 
 - Update dependencies
 - Move `cosmos-client` to `dependencies`
+- Add `getDefaultFees`
 
 # v.0.4.2 (2020-11-23)
 

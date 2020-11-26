@@ -3,6 +3,7 @@
 ### Update
 
 - Update dependencies
+- Add `getDefaultFees`
 
 # v.0.4.2 (2020-11-23)
 
