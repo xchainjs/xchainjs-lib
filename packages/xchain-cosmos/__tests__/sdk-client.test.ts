@@ -307,7 +307,7 @@ describe('SDK Client Test', () => {
     codec.registerCodec('cosmos-sdk/MsgSend', MsgSend, MsgSend.fromJSON)
     codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
 
-    const result = await cosmosTestnetClient.transfer({
+    let result = await cosmosTestnetClient.transfer({
       privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase),
       from: cosmos_address,
       to: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
@@ -345,20 +345,6 @@ describe('SDK Client Test', () => {
       'transfer',
       expected_txsPost_result,
     )
-
-    // codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
-    // codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
-
-    // result = await thorTestnetClient.transfer({
-    //   privkey: thorTestnetClient.getPrivKeyFromMnemonic(thor_phrase),
-    //   from: thor_testnet_address,
-    //   to: 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
-    //   amount: 10000,
-    //   asset: 'thor',
-    //   memo: 'transfer',
-    // })
-
-    // expect(result).toEqual(expected_txsPost_result)
   })
 
   it('get transaction data', async () => {

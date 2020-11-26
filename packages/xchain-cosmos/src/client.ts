@@ -21,6 +21,8 @@ import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './types'
 import { getDenom, getAsset, getTxsFromHistory } from './util'
 
+const DECIMAL = 6
+
 /**
  * Interface for custom Cosmos client
  */
@@ -141,7 +143,7 @@ class Client implements CosmosClient, XChainClient {
         .map((balance) => {
           return {
             asset: (balance.denom && getAsset(balance.denom)) || mainAsset,
-            amount: baseAmount(balance.amount, 6),
+            amount: baseAmount(balance.amount, DECIMAL),
           }
         })
         .filter((balance) => !asset || balance.asset === asset)
@@ -223,18 +225,18 @@ class Client implements CosmosClient, XChainClient {
   getFees = async (): Promise<Fees> => {
     return Promise.resolve({
       type: 'base',
-      fast: baseAmount(750, 6),
-      fastest: baseAmount(2500, 6),
-      average: baseAmount(0, 6),
+      fast: baseAmount(750, DECIMAL),
+      fastest: baseAmount(2500, DECIMAL),
+      average: baseAmount(0, DECIMAL),
     })
   }
 
   getDefaultFees = (): Fees => {
     return {
       type: 'base',
-      fast: baseAmount(750, 6),
-      fastest: baseAmount(2500, 6),
-      average: baseAmount(0, 6),
+      fast: baseAmount(750, DECIMAL),
+      fastest: baseAmount(2500, DECIMAL),
+      average: baseAmount(0, DECIMAL),
     }
   }
 }
