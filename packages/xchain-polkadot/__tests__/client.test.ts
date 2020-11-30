@@ -274,7 +274,7 @@ describe('Client Test', () => {
     const txHash = await polkadotClient.transfer({
       amount: baseAmount('1000000000', 12),
       recipient: '5CwPxumBRDLkP7VQEYzhwoYw6AP4FNmRM7G1pj7Atj6dEzgY',
-      memo: "ABC",
+      memo: 'ABC',
     })
 
     expect(txHash).toEqual('0xdd227d44f1ed2e5b82e38daf699f66fc5ea28f1e104167b19d587a2363190ee9')

@@ -260,7 +260,7 @@ class Client implements PolkadotClient, XChainClient {
     try {
       const api = await this.getAPI()
 
-      let txs = [ api.tx.balances.transfer(params.recipient, params.amount.amount().toString()) ]
+      const txs = [api.tx.balances.transfer(params.recipient, params.amount.amount().toString())]
 
       if (params.memo) {
         txs.push(api.tx.system.remark(params.memo))
