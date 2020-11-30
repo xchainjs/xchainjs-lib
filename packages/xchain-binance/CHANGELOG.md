@@ -4,6 +4,7 @@
 
 - Update dependencies
 - Add `getDefaultFees`
+- Add `getSingleAndMultiFees`
 
 # v.4.1.0 (2020-11-20)
 

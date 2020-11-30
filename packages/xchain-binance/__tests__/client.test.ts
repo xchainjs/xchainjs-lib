@@ -228,6 +228,36 @@ describe('BinanceClient Test', () => {
     expect(fees.fastest.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
   })
 
+  it('fetches single and multi fees', async () => {
+    mockGetFees(mainnetClientURL, [
+      {
+        msg_type: 'tokensFreeze',
+        fee: 500000,
+        fee_for: 1,
+      },
+      {
+        fixed_fee_params: {
+          msg_type: 'send',
+          fee: 37500,
+          fee_for: 1,
+        },
+        multi_transfer_fee: 30000,
+        lower_limit_as_multi: 2,
+      },
+    ])
+
+    const { single, multi } = await bnbClient.getSingleAndMultiFees()
+    expect(single.type).toEqual(transferFee.type)
+    expect(single.average.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+    expect(single.fast.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+    expect(single.fastest.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+
+    expect(multi.type).toEqual(multiSendFee.type)
+    expect(multi.average.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
+    expect(multi.fast.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
+    expect(multi.fastest.amount().isEqualTo(multiTxFee.amount())).toBeTruthy()
+  })
+
   it('should broadcast a transfer', async () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
     expect(client.getAddress()).toEqual(testnetaddressForTx)

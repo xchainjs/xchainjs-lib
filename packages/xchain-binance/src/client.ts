@@ -5,6 +5,7 @@ import {
   Prefix,
   TxPage as BinanceTxPage,
   TransactionResult,
+  TransferFee,
 } from './types/binance'
 
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
@@ -69,6 +70,7 @@ export interface BinanceClient {
   validateAddress(address: string): boolean
 
   getMultiSendFees(): Promise<Fees>
+  getSingleAndMultiFees(): Promise<{ single: Fees; multi: Fees }>
 
   multiSend(params: MultiSendParams): Promise<TxHash>
 }
@@ -340,7 +342,7 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
-  getFees = async (): Promise<Fees> => {
+  private getTransferFee = async (): Promise<TransferFee> => {
     try {
       const feesArray = await axios
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
@@ -351,6 +353,15 @@ class Client implements BinanceClient, XChainClient {
         throw new Error('failed to get transfer fees')
       }
 
+      return transferFee
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  getFees = async (): Promise<Fees> => {
+    try {
+      const transferFee = await this.getTransferFee()
       const singleTxFee = baseAmount(transferFee.fixed_fee_params.fee)
 
       return {
@@ -377,15 +388,7 @@ class Client implements BinanceClient, XChainClient {
 
   getMultiSendFees = async (): Promise<Fees> => {
     try {
-      const feesArray = await axios
-        .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
-        .then((response) => response.data)
-
-      const transferFee = feesArray.find(isTransferFee)
-      if (!transferFee) {
-        throw new Error('failed to get transfer fees')
-      }
-
+      const transferFee = await this.getTransferFee()
       const multiTxFee = baseAmount(transferFee.multi_transfer_fee)
 
       return {
@@ -394,6 +397,31 @@ class Client implements BinanceClient, XChainClient {
         fast: multiTxFee,
         fastest: multiTxFee,
       } as Fees
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  getSingleAndMultiFees = async (): Promise<{ single: Fees; multi: Fees }> => {
+    try {
+      const transferFee = await this.getTransferFee()
+      const singleTxFee = baseAmount(transferFee.fixed_fee_params.fee)
+      const multiTxFee = baseAmount(transferFee.multi_transfer_fee)
+
+      return {
+        single: {
+          type: 'base',
+          fast: singleTxFee,
+          fastest: singleTxFee,
+          average: singleTxFee,
+        } as Fees,
+        multi: {
+          type: 'base',
+          average: multiTxFee,
+          fast: multiTxFee,
+          fastest: multiTxFee,
+        } as Fees,
+      }
     } catch (error) {
       return Promise.reject(error)
     }
