@@ -7,7 +7,8 @@ import vaultABI from '../data/vault.json'
 import erc20ABI from '../data/erc20.json'
 import { getAddress, formatEther } from 'ethers/lib/utils'
 import { toUtf8String } from '@ethersproject/strings'
-import { Network, Address, Phrase, NormalTxOpts, Erc20TxOpts, EstimateGasERC20Opts } from './types'
+import { Network, Phrase, NormalTxOpts, Erc20TxOpts, EstimateGasERC20Opts } from './types'
+import { XChainClient, Address } from '@xchainjs/xchain-client'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
 
@@ -32,7 +33,7 @@ export interface EthereumClient {
 /**
  * Custom Ethereum client
  */
-export default class Client implements EthereumClient {
+export default class Client implements XChainClient {
   private _wallet: ethers.Wallet
   private _network: Network
   private _phrase: Phrase
@@ -151,14 +152,14 @@ export default class Client implements EthereumClient {
   /**
    * Sets a new phrase (Eg. If user wants to change wallet)
    */
-  setPhrase(phrase: Phrase): boolean {
+  setPhrase(phrase: Phrase): Address {
     if (!Client.validatePhrase(phrase)) {
       throw new Error('Phrase must be provided')
     } else {
       this._phrase = phrase
       const newWallet = ethers.Wallet.fromMnemonic(phrase)
       this.changeWallet(newWallet)
-      return true
+      return this.getAddress()
     }
   }
 
