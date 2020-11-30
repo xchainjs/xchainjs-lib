@@ -83,7 +83,7 @@ describe('Client Test', () => {
 
     const balances = await polkadotClient.getBalance()
     expect(balances.length).toEqual(1)
-    expect(balances[0].amount.amount().isEqualTo(baseAmount('5000000000', 10).amount())).toBeTruthy()
+    expect(balances[0].amount.amount().isEqualTo(baseAmount('500000000000', 12).amount())).toBeTruthy()
   })
 
   it('no txHistory', async () => {
@@ -155,9 +155,9 @@ describe('Client Test', () => {
     expect(txHistory.txs.length).toEqual(1)
     expect(txHistory.txs[0].hash).toEqual('0x6b328ca6d1f72413dfb831980e601305e84ecb867cfc12dc41c2d813349a6ee5')
     expect(txHistory.txs[0].from[0].from).toEqual('5HpLdCTNBQDjFomqpG2XWadgB4zHTuqQqNHhUyYbett7k1RR')
-    expect(txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount('5000000000', 10).amount())).toBeTruthy()
+    expect(txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount('500000000000', 12).amount())).toBeTruthy()
     expect(txHistory.txs[0].to[0].to).toEqual('5DGcavWpcNWUZga6dwG8dSsfUs5LqQ19hMcLeNo3JExF7EFN')
-    expect(txHistory.txs[0].to[0].amount.amount().isEqualTo(baseAmount('5000000000', 10).amount())).toBeTruthy()
+    expect(txHistory.txs[0].to[0].amount.amount().isEqualTo(baseAmount('500000000000', 12).amount())).toBeTruthy()
   })
 
   it('get transaction data', async () => {
@@ -265,24 +265,16 @@ describe('Client Test', () => {
 
     expect(txResult.hash).toEqual('0x6b328ca6d1f72413dfb831980e601305e84ecb867cfc12dc41c2d813349a6ee5')
     expect(txResult.from[0].from).toEqual('5HpLdCTNBQDjFomqpG2XWadgB4zHTuqQqNHhUyYbett7k1RR')
-    expect(txResult.from[0].amount.amount().isEqualTo(baseAmount('5000000000', 10).amount())).toBeTruthy()
+    expect(txResult.from[0].amount.amount().isEqualTo(baseAmount('500000000000', 12).amount())).toBeTruthy()
     expect(txResult.to[0].to).toEqual('5ELorcuxqBNbAgC72F1PLW55hHf9jdeFkAcqCsQ4mLDCVLxb')
-    expect(txResult.to[0].amount.amount().isEqualTo(baseAmount('5000000000', 10).amount())).toBeTruthy()
+    expect(txResult.to[0].amount.amount().isEqualTo(baseAmount('500000000000', 12).amount())).toBeTruthy()
   })
 
   it('transfer', async () => {
     const txHash = await polkadotClient.transfer({
-      amount: baseAmount('10000', 10),
-      recipient: testnet_address,
-    })
-
-    expect(txHash).toEqual('0xdd227d44f1ed2e5b82e38daf699f66fc5ea28f1e104167b19d587a2363190ee9')
-  })
-
-  it('deposit', async () => {
-    const txHash = await polkadotClient.deposit({
-      amount: baseAmount('10000', 10),
-      recipient: testnet_address,
+      amount: baseAmount('1000000000', 12),
+      recipient: '5CwPxumBRDLkP7VQEYzhwoYw6AP4FNmRM7G1pj7Atj6dEzgY',
+      memo: 'ABC',
     })
 
     expect(txHash).toEqual('0xdd227d44f1ed2e5b82e38daf699f66fc5ea28f1e104167b19d587a2363190ee9')
@@ -292,8 +284,17 @@ describe('Client Test', () => {
     const fees = await polkadotClient.getFees()
 
     expect(fees.type).toEqual('byte')
-    expect(fees.average.amount().isEqualTo(baseAmount('15000000001', 10).amount())).toBeTruthy()
-    expect(fees.fast.amount().isEqualTo(baseAmount('15000000001', 10).amount())).toBeTruthy()
-    expect(fees.fastest.amount().isEqualTo(baseAmount('15000000001', 10).amount())).toBeTruthy()
+    expect(fees.average.amount().isEqualTo(baseAmount('15000000001', 12).amount())).toBeTruthy()
+    expect(fees.fast.amount().isEqualTo(baseAmount('15000000001', 12).amount())).toBeTruthy()
+    expect(fees.fastest.amount().isEqualTo(baseAmount('15000000001', 12).amount())).toBeTruthy()
+  })
+
+  it('get default fees', async () => {
+    const fees = await polkadotClient.getDefaultFees()
+
+    expect(fees.type).toEqual('byte')
+    expect(fees.average.amount().isEqualTo(baseAmount('15000000000', 12).amount())).toBeTruthy()
+    expect(fees.fast.amount().isEqualTo(baseAmount('15000000000', 12).amount())).toBeTruthy()
+    expect(fees.fastest.amount().isEqualTo(baseAmount('15000000000', 12).amount())).toBeTruthy()
   })
 })

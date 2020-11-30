@@ -4,6 +4,8 @@
 
 - Update dependencies
 - Add `getDefaultFees`
+- Remove `deposit`
+- Fix `transfer` to use `system.remark` to handle the memo
 
 # v.0.1.0 (2020-11-23)
 
