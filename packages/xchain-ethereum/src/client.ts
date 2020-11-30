@@ -5,10 +5,11 @@ import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import vaultABI from '../data/vault.json'
 import erc20ABI from '../data/erc20.json'
-import { getAddress, formatEther } from 'ethers/lib/utils'
+import { formatEther, getAddress } from 'ethers/lib/utils'
 import { toUtf8String } from '@ethersproject/strings'
-import { Network, Phrase, NormalTxOpts, Erc20TxOpts, EstimateGasERC20Opts } from './types'
-import { XChainClient, Address } from '@xchainjs/xchain-client'
+import { Erc20TxOpts, EstimateGasERC20Opts, Network as EthNetwork, NormalTxOpts, Phrase } from './types'
+import { Address, Network as XChainNetwork, XChainClient } from '@xchainjs/xchain-client'
+import { ethNetworkToXchains, xchainNetworkToEths } from '@xchainjs/xchain-ethereum/src/utils'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
 
@@ -16,7 +17,7 @@ const ethAddress = '0x0000000000000000000000000000000000000000'
  * Interface for custom Ethereum client
  */
 export interface EthereumClient {
-  setNetwork(network: Network): Network
+  setNetwork(network: XChainNetwork): EthNetwork
   setPhrase(phrase?: string): void
   getAddress(): string
   getBalance(address: Address): Promise<ethers.BigNumberish>
@@ -35,14 +36,14 @@ export interface EthereumClient {
  */
 export default class Client implements XChainClient {
   private _wallet: ethers.Wallet
-  private _network: Network
+  private _network: EthNetwork
   private _phrase: Phrase
   private _provider: Provider
   private _address: Address
   private _etherscan: EtherscanProvider
   private _vault: ethers.Contract | null = null
 
-  constructor(network: Network = Network.TEST, phrase?: Phrase, vault?: string) {
+  constructor(network: EthNetwork = EthNetwork.TEST, phrase?: Phrase, vault?: string) {
     if (phrase && !validateMnemonic(phrase)) {
       throw new Error('Invalid Phrase')
     } else {
@@ -79,8 +80,8 @@ export default class Client implements XChainClient {
     return this._vault
   }
 
-  get network(): Network {
-    return this._network
+  get network(): XChainNetwork {
+    return ethNetworkToXchains(this._network)
   }
 
   get provider(): Provider {
@@ -111,14 +112,13 @@ export default class Client implements XChainClient {
   /**
    * Set's the current network
    */
-  setNetwork(network: Network): Network {
+  setNetwork(network: XChainNetwork): void {
     if (!network) {
       throw new Error('Wallet must be provided')
     } else {
-      this._network = network
+      this._network = xchainNetworkToEths(network)
       this._provider = getDefaultProvider(network)
       this._etherscan = new EtherscanProvider(network)
-      return this._network
     }
   }
 
