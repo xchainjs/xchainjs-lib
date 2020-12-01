@@ -35,6 +35,7 @@ class Client implements PolkadotClient, XChainClient {
   private phrase = ''
   private address: Address = ''
   private api: ApiPromise | null = null
+  private derivationPath = "44//354//0//0//0'"
 
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
@@ -109,7 +110,7 @@ class Client implements PolkadotClient, XChainClient {
   private getKeyringPair = (): KeyringPair => {
     const key = new Keyring({ ss58Format: this.getSS58Format(), type: 'ed25519' })
 
-    return key.createFromUri(this.phrase)
+    return key.createFromUri(`${this.phrase}//${this.derivationPath}`)
   }
 
   private getAPI = async (): Promise<ApiPromise> => {
