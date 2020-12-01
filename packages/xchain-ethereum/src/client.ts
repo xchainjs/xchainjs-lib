@@ -1,4 +1,3 @@
-import { generateMnemonic, validateMnemonic } from 'bip39'
 import { ethers } from 'ethers'
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
@@ -20,6 +19,7 @@ import {
   TxHash,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount } from '@xchainjs/xchain-util'
+import * as Crypto from '@xchainjs/xchain-crypto'
 import * as blockChair from './blockchair-api'
 import { ethNetworkToXchains, xchainNetworkToEths } from './utils'
 import { TxHistoryParams } from '@xchainjs/xchain-client/src'
@@ -66,10 +66,10 @@ export default class Client implements XChainClient {
   private blockchairNodeApiKey = ''
 
   constructor({ network = 'testnet', blockchairUrl = '', blockchairNodeApiKey = '', phrase, vault }: ClientParams) {
-    if (phrase && !validateMnemonic(phrase)) {
+    if (phrase && !Crypto.validatePhrase(phrase)) {
       throw new Error('Invalid Phrase')
     } else {
-      this._phrase = phrase || generateMnemonic()
+      this._phrase = phrase || Crypto.generatePhrase() // @todo do we need to set a size here?
       this._network = xchainNetworkToEths(network)
       this._provider = getDefaultProvider(network)
       this._wallet = ethers.Wallet.fromMnemonic(this._phrase)
@@ -184,26 +184,11 @@ export default class Client implements XChainClient {
       return this._vault
     }
   }
-
-  /**
-   * Generates a new mnemonic / phrase
-   */
-  static generatePhrase(): string {
-    return generateMnemonic()
-  }
-
-  /**
-   * Validates a mnemonic phrase
-   */
-  static validatePhrase(phrase: string): boolean {
-    return validateMnemonic(phrase) ? true : false
-  }
-
   /**
    * Sets a new phrase (Eg. If user wants to change wallet)
    */
   setPhrase(phrase: string): Address {
-    if (!Client.validatePhrase(phrase)) {
+    if (!Crypto.validatePhrase(phrase)) {
       throw new Error('Phrase must be provided')
     } else {
       this._phrase = phrase

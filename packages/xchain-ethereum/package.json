@@ -34,8 +34,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "^0.0.7",
-    "bip39": "^3.0.2"
+    "@xchainjs/xchain-client": "^0.0.7"
   },
   "devDependencies": {
     "ethers": "^5.0.9"
