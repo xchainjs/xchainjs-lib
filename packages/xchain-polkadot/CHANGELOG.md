@@ -6,6 +6,7 @@
 - Add `getDefaultFees`
 - Remove `deposit`
 - Fix `transfer` to use `system.remark` to handle the memo
+- Fix address derivation
 
 # v.0.1.0 (2020-11-23)
 

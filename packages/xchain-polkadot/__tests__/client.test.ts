@@ -13,8 +13,8 @@ describe('Client Test', () => {
   let polkadotClient: Client
 
   const phrase = 'wing divide pear industry silver concert chest cloud torch merit fatigue silk'
-  const mainnet_address = '12CujFmtU9mx1DacbaK8mbhpLV4zXhZHmrLpofnPrKymHpxo'
-  const testnet_address = '5DGcavWpcNWUZga6dwG8dSsfUs5LqQ19hMcLeNo3JExF7EFN'
+  const mainnet_address = '15gn1stGWNFPrErAUmEfKEaG6eSpGqdAZg8E7yRKSNdozbZn'
+  const testnet_address = '5GkUsYdCeayvQhqeX8BfB5k7F2TAaY52VBPjxgRxtHcHp2sd'
 
   beforeEach(() => {
     polkadotClient = new Client({ phrase, network: 'testnet' })
