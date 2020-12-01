@@ -15,6 +15,7 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
+  Balance,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount } from '@xchainjs/xchain-util'
 import * as blockChair from './blockchair-api'
@@ -59,7 +60,7 @@ export default class Client implements XChainClient {
   private _address: Address
   private _etherscan: EtherscanProvider
   private _vault: ethers.Contract | null = null
-  private blockChairNodeUrl = ''
+  private blockchairNodeUrl = ''
   private blockchairNodeApiKey = ''
 
   constructor({ network = 'testnet', blockchairUrl = '', blockchairNodeApiKey = '', phrase, vault }: ClientParams) {
@@ -83,7 +84,7 @@ export default class Client implements XChainClient {
   }
 
   setBlockchairNodeURL = (url: string): void => {
-    this.blockChairNodeUrl = url
+    this.blockchairNodeUrl = url
   }
 
   setBlockchairNodeAPIKey(key: string): void {
@@ -204,19 +205,20 @@ export default class Client implements XChainClient {
     }
   }
 
-  /**
-   * Gets the eth balance of an address
-   * @todo add start & end block parameters
-   */
-  async getBalance(address?: Address): Promise<ethers.BigNumberish> {
-    if (address && !Client.validateAddress(address)) {
-      return Promise.reject('Invalid Address')
-    }
+  // Returns balance of address
+  getBalance = async (addressParam?: string): Promise<Balance[]> => {
+    const address = addressParam || this.getAddress()
 
     try {
-      return await this.wallet.provider.getBalance(address || this._address)
+      const dashboardAddress = await blockChair.getAddress(this.blockchairNodeUrl, address, this.blockchairNodeApiKey)
+      return [
+        {
+          asset: AssetETH,
+          amount: baseAmount(dashboardAddress[address].address.balance),
+        },
+      ]
     } catch (error) {
-      return Promise.reject(error)
+      return Promise.reject(new Error('Invalid address'))
     }
   }
 
@@ -268,11 +270,11 @@ export default class Client implements XChainClient {
     const transactions: Tx[] = []
     try {
       //Calling getAddress without limit/offset to get total count
-      const dAddr = await blockChair.getAddress(this.blockChairNodeUrl, address, this.blockchairNodeApiKey)
+      const dAddr = await blockChair.getAddress(this.blockchairNodeUrl, address, this.blockchairNodeApiKey)
       totalCount = dAddr[address].transactions.length
 
       const dashboardAddress = await blockChair.getAddress(
-        this.blockChairNodeUrl,
+        this.blockchairNodeUrl,
         address,
         this.blockchairNodeApiKey,
         limit,
@@ -281,7 +283,7 @@ export default class Client implements XChainClient {
       const txList = dashboardAddress[address].transactions
 
       for (const hash of txList) {
-        const rawTx = (await blockChair.getTx(this.blockChairNodeUrl, hash, this.blockchairNodeApiKey))[hash]
+        const rawTx = (await blockChair.getTx(this.blockchairNodeUrl, hash, this.blockchairNodeApiKey))[hash]
         const tx: Tx = {
           asset: AssetETH,
           from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
