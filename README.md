@@ -2,6 +2,9 @@
 
 XChainJS is a library with a common interface for multiple blockchains, built for simple and fast integration for wallets and more. 
 
+Join the conversation! 
+https://t.me/xchainjs
+
 # Interface
 
 The interface is [defined here.](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-client/README.md)
