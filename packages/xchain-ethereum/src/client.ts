@@ -7,9 +7,20 @@ import vaultABI from '../data/vault.json'
 import erc20ABI from '../data/erc20.json'
 import { formatEther, getAddress } from 'ethers/lib/utils'
 import { toUtf8String } from '@ethersproject/strings'
-import { Erc20TxOpts, EstimateGasERC20Opts, Network as EthNetwork, NormalTxOpts, Phrase } from './types'
-import { Address, Network as XChainNetwork, XChainClient } from '@xchainjs/xchain-client'
-import { ethNetworkToXchains, xchainNetworkToEths } from '@xchainjs/xchain-ethereum/src/utils'
+import { Erc20TxOpts, EstimateGasERC20Opts, Network as EthNetwork, NormalTxOpts } from './types'
+import {
+  Address,
+  Network as XChainNetwork,
+  Tx,
+  TxsPage,
+  XChainClient,
+  XChainClientParams,
+} from '@xchainjs/xchain-client'
+import { AssetETH, baseAmount } from '@xchainjs/xchain-util'
+import * as blockChair from './blockchair-api'
+import { ethNetworkToXchains, xchainNetworkToEths } from './utils'
+import { TxHistoryParams } from '@xchainjs/xchain-client/src'
+import { TxIO } from './types/blockchair-api-types'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
 
@@ -23,12 +34,45 @@ export interface EthereumClient {
   getBalance(address: Address): Promise<ethers.BigNumberish>
   getBlockNumber(): Promise<number>
   getTransactionCount(blocktag: string | number): Promise<number>
-  getTransactions(address?: Address): Promise<Array<TransactionResponse>>
+  // getTransactions(address?: Address): Promise<Array<TransactionResponse>>
   vaultTx(asset: string, amount: ethers.BigNumberish, memo: string): Promise<TransactionResponse>
   estimateNormalTx(params: NormalTxOpts): Promise<ethers.BigNumberish>
   normalTx(opts: NormalTxOpts): Promise<TransactionResponse>
   estimateGasERC20Tx(params: EstimateGasERC20Opts): Promise<ethers.BigNumberish>
   erc20Tx(opts: Erc20TxOpts): Promise<TransactionResponse>
+}
+
+function getResult(result: { status?: number; message?: string; result?: any }): any {
+  // getLogs, getHistory have weird success responses
+  if (result.status == 0 && (result.message === 'No records found' || result.message === 'No transactions found')) {
+    return result.result
+  }
+
+  if (result.status != 1 || result.message != 'OK') {
+    const error: any = new Error('invalid response')
+    error.result = JSON.stringify(result)
+    if ((result.result || '').toLowerCase().indexOf('rate limit') >= 0) {
+      error.throttleRetry = true
+    }
+    throw error
+  }
+
+  return result.result
+}
+
+type GetEthHistoryParams = {
+  addressOrName: string | Promise<string>
+  startBlock?: string | number
+  endBlock?: string | number
+  page?: number
+  offset?: number
+  sort?: 'asc' | 'desc'
+}
+
+type ClientParams = XChainClientParams & {
+  blockchairUrl?: string
+  blockchairNodeApiKey?: string
+  vault?: string
 }
 
 /**
@@ -37,18 +81,21 @@ export interface EthereumClient {
 export default class Client implements XChainClient {
   private _wallet: ethers.Wallet
   private _network: EthNetwork
-  private _phrase: Phrase
+  private _phrase: string
   private _provider: Provider
   private _address: Address
   private _etherscan: EtherscanProvider
   private _vault: ethers.Contract | null = null
+  private blockChairNodeUrl = ''
+  private blockchairNodeApiKey = ''
 
-  constructor(network: EthNetwork = EthNetwork.TEST, phrase?: Phrase, vault?: string) {
+  // constructor(network: EthNetwork = EthNetwork.TEST, phrase?: Phrase, vault?: string) {
+  constructor({ network = 'testnet', blockchairUrl = '', blockchairNodeApiKey = '', phrase, vault }: ClientParams) {
     if (phrase && !validateMnemonic(phrase)) {
       throw new Error('Invalid Phrase')
     } else {
       this._phrase = phrase || generateMnemonic()
-      this._network = network
+      this._network = xchainNetworkToEths(network)
       this._provider = getDefaultProvider(network)
       this._wallet = ethers.Wallet.fromMnemonic(this._phrase)
       this._address = this._wallet.address
@@ -58,7 +105,17 @@ export default class Client implements XChainClient {
       const provider = getDefaultProvider(this._network)
       const newWallet = this.wallet.connect(provider)
       this.changeWallet(newWallet)
+      this.setBlockchairNodeURL(blockchairUrl)
+      this.setBlockchairNodeAPIKey(blockchairNodeApiKey)
     }
+  }
+
+  setBlockchairNodeURL = (url: string): void => {
+    this.blockChairNodeUrl = url
+  }
+
+  setBlockchairNodeAPIKey(key: string): void {
+    this.blockchairNodeApiKey = key
   }
 
   /**
@@ -138,21 +195,21 @@ export default class Client implements XChainClient {
   /**
    * Generates a new mnemonic / phrase
    */
-  static generatePhrase(): Phrase {
+  static generatePhrase(): string {
     return generateMnemonic()
   }
 
   /**
    * Validates a mnemonic phrase
    */
-  static validatePhrase(phrase: Phrase): boolean {
+  static validatePhrase(phrase: string): boolean {
     return validateMnemonic(phrase) ? true : false
   }
 
   /**
    * Sets a new phrase (Eg. If user wants to change wallet)
    */
-  setPhrase(phrase: Phrase): Address {
+  setPhrase(phrase: string): Address {
     if (!Client.validatePhrase(phrase)) {
       throw new Error('Phrase must be provided')
     } else {
@@ -229,14 +286,150 @@ export default class Client implements XChainClient {
   }
 
   /**
+   * Copy of https://github.com/ethers-io/ethers.js/blob/master/packages/providers/src.ts/etherscan-provider.ts#L392
+   * with custom additions (additional search parameters) until
+   * https://github.com/ethers-io/ethers.js/issues/740 is done
+   */
+  // getEthHistory = (params: GetEthHistoryParams) => {
+  //   let url = this._etherscan.baseUrl
+  //
+  //   let apiKey = ''
+  //   if (this._etherscan.apiKey) {
+  //     apiKey += '&apikey=' + this._etherscan.apiKey
+  //   }
+  //
+  //   const startBlock = params.startBlock || 0
+  //   const endBlock = params.endBlock || 99999999
+  //
+  //   return this._etherscan.resolveName(params.addressOrName).then((address) => {
+  //     const page = params.page ? `&page=${params.page}` : ''
+  //     const offset = params.page ? `&offset=${params.offset}` : ''
+  //
+  //     url += '/api?module=account&action=txlist&address=' + address
+  //     url += '&startblock=' + startBlock
+  //     url += '&endblock=' + endBlock
+  //     url += '&sort=asc' + apiKey
+  //     url += page
+  //     url += offset
+  //
+  //     return fetch(url)
+  //       .then(getResult)
+  //       .then((result: Array<any>) => {
+  //         let output: Array<TransactionResponse> = []
+  //         result.forEach((tx) => {
+  //           ;['contractAddress', 'to'].forEach(function (key) {
+  //             if (tx[key] == '') {
+  //               delete tx[key]
+  //             }
+  //           })
+  //           if (tx.creates == null && tx.contractAddress != null) {
+  //             tx.creates = tx.contractAddress
+  //           }
+  //           let item = this._etherscan.formatter.transactionResponse(tx)
+  //           if (tx.timeStamp) {
+  //             item.timestamp = parseInt(tx.timeStamp)
+  //           }
+  //           output.push(item)
+  //         })
+  //         return output
+  //       })
+  //   })
+  // }
+
+  /**
    * Gets the transaction history of an address.
    */
-  async getTransactions(address: Address = this._address): Promise<Array<TransactionResponse>> {
+  /*async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
+    const address = params?.address || this._address
     if (address && !Client.validateAddress(address)) {
       return Promise.reject('Invalid Address')
     } else {
-      const transactions = this._etherscan.getHistory(address)
-      return transactions
+      /!**
+       * Time period might be set by setting start-/end- block parameters
+       * they might be calculated by timestamps
+       * @see https://etherscan.io/apis#blocks
+       *!/
+      const transactions = await this._etherscan.getHistory(address)
+
+      const txs = await this.getEthHistory({
+        addressOrName: address
+      })
+
+      const res: TxsPage = {
+        total: transactions.length,
+        txs: transactions.map((tx) => ({
+          asset: AssetETH,
+          from: [
+            {
+              from: tx.from || '-',
+              // convert to the string as eth project has its own BigNumber
+              amount: baseAmount(tx.value.toString(), 18),
+            },
+          ],
+          to: [
+            {
+              to: tx.to || '-',
+              // convert to the string as eth project has its own BigNumber
+              // @TODO whoch decimals
+              // @TODO is it base amount ?
+              amount: baseAmount(tx.value.toString(), 18),
+            },
+          ],
+          date: (tx.timestamp && new Date(tx.timestamp)) || new Date(0),
+          // is it always transfer?
+          type: 'transfer',
+          hash: tx.hash,
+        })),
+      }
+      return res
+    }
+  }*/
+
+  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
+    const address = params?.address ?? this.getAddress()
+    const limit = params?.limit ?? 10
+    const offset = params?.offset ?? 0
+
+    this._etherscan.baseUrl
+
+    let totalCount = 0
+    const transactions: Tx[] = []
+    try {
+      //Calling getAddress without limit/offset to get total count
+      const dAddr = await blockChair.getAddress(this.blockChairNodeUrl, address, this.blockchairNodeApiKey)
+      totalCount = dAddr[address].transactions.length
+
+      const dashboardAddress = await blockChair.getAddress(
+        this.blockChairNodeUrl,
+        address,
+        this.blockchairNodeApiKey,
+        limit,
+        offset,
+      )
+      const txList = dashboardAddress[address].transactions
+
+      for (const hash of txList) {
+        const rawTx = (await blockChair.getTx(this.blockChairNodeUrl, hash, this.blockchairNodeApiKey))[hash]
+        const tx: Tx = {
+          asset: AssetETH,
+          from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
+          to: rawTx.outputs
+            // ignore tx with type 'nulldata'
+            .filter((i: TxIO) => i.type !== 'nulldata')
+            .map((i: TxIO) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
+          date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
+          type: 'transfer',
+          hash: rawTx.transaction.hash,
+        }
+        transactions.push(tx)
+      }
+    } catch (error) {
+      return Promise.reject(error)
+    }
+
+    return {
+      total: totalCount,
+      txs: transactions,
     }
   }
 
