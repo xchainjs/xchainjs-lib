@@ -1,15 +1,11 @@
 import crypto from 'crypto'
-import { pbkdf2Async, createAddress } from './utils'
-import { PubKeySecp256k1, PrivKeySecp256k1 } from './secp256k1'
-import { PubKeyEd25519, PrivKeyEd25519 } from './ed25519'
+import { pbkdf2Async } from './utils'
 
 import * as bip39 from 'bip39'
-import HDKey from 'hdkey'
 import { blake256 } from 'foundry-primitives'
 import { v4 as uuidv4 } from 'uuid'
 
 // Constants
-const BIP44Path = "m/44'/931'/0'/0/0"
 const cipher = 'aes-128-ctr'
 const kdf = 'pbkdf2'
 const prf = 'hmac-sha256'
@@ -20,13 +16,7 @@ const meta = 'xchain-keystore'
 
 // Interfaces
 
-export type PublicKeyPair = {
-  secp256k1: PubKeySecp256k1 | null
-  ed25519: PubKeyEd25519
-}
-
 export type Keystore = {
-  publickeys: PublicKeyPair
   crypto: {
     cipher: string
     ciphertext: string
@@ -57,28 +47,19 @@ export const validatePhrase = (phrase: string): boolean => {
   return bip39.validateMnemonic(phrase)
 }
 
-export const getSeed = (phrase: string): Buffer => bip39.mnemonicToSeedSync(phrase)
-
-export const getAddress = (phrase: string): string => {
-  const seed = getSeed(phrase)
-  const hdkey = HDKey.fromMasterSeed(seed)
-  const childkey = hdkey.derive(BIP44Path)
-  const address = createAddress(childkey.publicKey)
-  return address
-}
-
-export const getPublicKeyPair = (phrase: string): PublicKeyPair => {
-  const seed = getSeed(phrase)
-  const hdkey = HDKey.fromMasterSeed(seed)
-  const childkey = hdkey.derive(BIP44Path)
-
-  return {
-    secp256k1: new PrivKeySecp256k1(childkey.privateKey).getPubKey(),
-    ed25519: new PrivKeyEd25519(childkey.privateKey).getPubKey(),
+export const getSeed = (phrase: string): Buffer => {
+  if (!validatePhrase(phrase)) {
+    throw new Error('Invalid BIP39 phrase')
   }
+
+  return bip39.mnemonicToSeedSync(phrase)
 }
 
 export const encryptToKeyStore = async (phrase: string, password: string): Promise<Keystore> => {
+  if (!validatePhrase(phrase)) {
+    throw new Error('Invalid BIP39 phrase')
+  }
+
   const ID = uuidv4()
   const salt = crypto.randomBytes(32)
   const iv = crypto.randomBytes(16)
@@ -107,7 +88,6 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   }
 
   const keystore = {
-    publickeys: getPublicKeyPair(phrase),
     crypto: cryptoStruct,
     id: ID,
     version: 1,

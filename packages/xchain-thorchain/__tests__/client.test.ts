@@ -1,7 +1,6 @@
 import nock from 'nock'
 
 import { TxsPage } from '@xchainjs/xchain-client'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { TxHistoryResponse, TxResponse } from '@xchainjs/xchain-cosmos'
 import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
@@ -99,7 +98,6 @@ describe('Client Test', () => {
 
     thorClient.setNetwork('mainnet')
     expect(thorClient.getAddress()).toEqual(mainnet_address)
-    expect(xchainCrypto.getAddress(phrase)).toEqual(mainnet_address)
   })
 
   it('should update net', async () => {
