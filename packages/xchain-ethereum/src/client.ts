@@ -42,33 +42,6 @@ export interface EthereumClient {
   erc20Tx(opts: Erc20TxOpts): Promise<TransactionResponse>
 }
 
-function getResult(result: { status?: number; message?: string; result?: any }): any {
-  // getLogs, getHistory have weird success responses
-  if (result.status == 0 && (result.message === 'No records found' || result.message === 'No transactions found')) {
-    return result.result
-  }
-
-  if (result.status != 1 || result.message != 'OK') {
-    const error: any = new Error('invalid response')
-    error.result = JSON.stringify(result)
-    if ((result.result || '').toLowerCase().indexOf('rate limit') >= 0) {
-      error.throttleRetry = true
-    }
-    throw error
-  }
-
-  return result.result
-}
-
-type GetEthHistoryParams = {
-  addressOrName: string | Promise<string>
-  startBlock?: string | number
-  endBlock?: string | number
-  page?: number
-  offset?: number
-  sort?: 'asc' | 'desc'
-}
-
 type ClientParams = XChainClientParams & {
   blockchairUrl?: string
   blockchairNodeApiKey?: string
@@ -89,7 +62,6 @@ export default class Client implements XChainClient {
   private blockChairNodeUrl = ''
   private blockchairNodeApiKey = ''
 
-  // constructor(network: EthNetwork = EthNetwork.TEST, phrase?: Phrase, vault?: string) {
   constructor({ network = 'testnet', blockchairUrl = '', blockchairNodeApiKey = '', phrase, vault }: ClientParams) {
     if (phrase && !validateMnemonic(phrase)) {
       throw new Error('Invalid Phrase')
@@ -284,106 +256,6 @@ export default class Client implements XChainClient {
   async getTransactionCount(blocktag: string | number = 'latest', address?: Address): Promise<number> {
     return this.provider.getTransactionCount(address || this.getAddress(), blocktag)
   }
-
-  /**
-   * Copy of https://github.com/ethers-io/ethers.js/blob/master/packages/providers/src.ts/etherscan-provider.ts#L392
-   * with custom additions (additional search parameters) until
-   * https://github.com/ethers-io/ethers.js/issues/740 is done
-   */
-  // getEthHistory = (params: GetEthHistoryParams) => {
-  //   let url = this._etherscan.baseUrl
-  //
-  //   let apiKey = ''
-  //   if (this._etherscan.apiKey) {
-  //     apiKey += '&apikey=' + this._etherscan.apiKey
-  //   }
-  //
-  //   const startBlock = params.startBlock || 0
-  //   const endBlock = params.endBlock || 99999999
-  //
-  //   return this._etherscan.resolveName(params.addressOrName).then((address) => {
-  //     const page = params.page ? `&page=${params.page}` : ''
-  //     const offset = params.page ? `&offset=${params.offset}` : ''
-  //
-  //     url += '/api?module=account&action=txlist&address=' + address
-  //     url += '&startblock=' + startBlock
-  //     url += '&endblock=' + endBlock
-  //     url += '&sort=asc' + apiKey
-  //     url += page
-  //     url += offset
-  //
-  //     return fetch(url)
-  //       .then(getResult)
-  //       .then((result: Array<any>) => {
-  //         let output: Array<TransactionResponse> = []
-  //         result.forEach((tx) => {
-  //           ;['contractAddress', 'to'].forEach(function (key) {
-  //             if (tx[key] == '') {
-  //               delete tx[key]
-  //             }
-  //           })
-  //           if (tx.creates == null && tx.contractAddress != null) {
-  //             tx.creates = tx.contractAddress
-  //           }
-  //           let item = this._etherscan.formatter.transactionResponse(tx)
-  //           if (tx.timeStamp) {
-  //             item.timestamp = parseInt(tx.timeStamp)
-  //           }
-  //           output.push(item)
-  //         })
-  //         return output
-  //       })
-  //   })
-  // }
-
-  /**
-   * Gets the transaction history of an address.
-   */
-  /*async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const address = params?.address || this._address
-    if (address && !Client.validateAddress(address)) {
-      return Promise.reject('Invalid Address')
-    } else {
-      /!**
-       * Time period might be set by setting start-/end- block parameters
-       * they might be calculated by timestamps
-       * @see https://etherscan.io/apis#blocks
-       *!/
-      const transactions = await this._etherscan.getHistory(address)
-
-      const txs = await this.getEthHistory({
-        addressOrName: address
-      })
-
-      const res: TxsPage = {
-        total: transactions.length,
-        txs: transactions.map((tx) => ({
-          asset: AssetETH,
-          from: [
-            {
-              from: tx.from || '-',
-              // convert to the string as eth project has its own BigNumber
-              amount: baseAmount(tx.value.toString(), 18),
-            },
-          ],
-          to: [
-            {
-              to: tx.to || '-',
-              // convert to the string as eth project has its own BigNumber
-              // @TODO whoch decimals
-              // @TODO is it base amount ?
-              amount: baseAmount(tx.value.toString(), 18),
-            },
-          ],
-          date: (tx.timestamp && new Date(tx.timestamp)) || new Date(0),
-          // is it always transfer?
-          type: 'transfer',
-          hash: tx.hash,
-        })),
-      }
-      return res
-    }
-  }*/
 
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     const address = params?.address ?? this.getAddress()
