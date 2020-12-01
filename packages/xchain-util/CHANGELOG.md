@@ -3,4 +3,7 @@
 ### Update
 
 - Update dependencies
-- Remove `unused modules`
+
+### Breaking change
+
+- Remove `swap`, `stake`, `memo` modules (to be part of `asgardex-utils` only)
