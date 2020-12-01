@@ -5,6 +5,9 @@
 - Update dependencies
 - add `bip39.validatePhrase(phrase)` in `getSeed()`
 - add `bip39.validatePhrase(phrase)` in `encryptToKeystore()`
+
+### Breaking change
+
 - remove `getAddress()`
 - remove `getPublicKeyPair()`
 - remove pub keys from key store meta-data
