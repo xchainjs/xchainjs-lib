@@ -16,6 +16,8 @@ import {
   XChainClient,
   XChainClientParams,
   Balance,
+  TxParams,
+  TxHash,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount } from '@xchainjs/xchain-util'
 import * as blockChair from './blockchair-api'
@@ -83,6 +85,14 @@ export default class Client implements XChainClient {
     }
   }
 
+  purgeClient(): void {
+    this.setPhrase('')
+  }
+
+  getNetwork(): XChainNetwork {
+    return ethNetworkToXchains(this._network)
+  }
+
   setBlockchairNodeURL = (url: string): void => {
     this.blockchairNodeUrl = url
   }
@@ -98,8 +108,18 @@ export default class Client implements XChainClient {
     return this._address
   }
 
-  protected getExplorerUrl = (): string => {
+  // @todo what url ?
+  getExplorerUrl = (): string => {
     return ''
+  }
+
+  // @todo what url ?
+  getExplorerAddressUrl = (address: Address): string => {
+    return `${this.getExplorerUrl()}/address/${address}`
+  }
+  // @todo what url ?
+  getExplorerTxUrl = (txID: string): string => {
+    return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
   get wallet(): ethers.Wallet {
@@ -286,11 +306,11 @@ export default class Client implements XChainClient {
         const rawTx = (await blockChair.getTx(this.blockchairNodeUrl, hash, this.blockchairNodeApiKey))[hash]
         const tx: Tx = {
           asset: AssetETH,
-          from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
+          from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, 18) })),
           to: rawTx.outputs
             // ignore tx with type 'nulldata'
             .filter((i: TxIO) => i.type !== 'nulldata')
-            .map((i: TxIO) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
+            .map((i: TxIO) => ({ to: i.recipient, amount: baseAmount(i.value, 18) })),
           date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
           type: 'transfer',
           hash: rawTx.transaction.hash,
@@ -305,6 +325,35 @@ export default class Client implements XChainClient {
       total: totalCount,
       txs: transactions,
     }
+  }
+
+  getTransactionData = async (txId: string): Promise<Tx> => {
+    try {
+      const rawTx = (await blockChair.getTx(this.blockchairNodeUrl, txId, this.blockchairNodeApiKey))[txId]
+      return {
+        asset: AssetETH,
+        from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value, 18) })),
+        to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value, 18) })),
+        date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
+        type: 'transfer',
+        hash: rawTx.transaction.hash,
+      }
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  transfer = async ({ memo, amount: amountParam, recipient }: TxParams): Promise<TxHash> => {
+    // @todo do we need to convert from BaseAmount to the AssetAmount
+    const amount = amountParam.amount().toString()
+    const res = await (memo
+      ? this.vaultTx(recipient, amount, memo)
+      : this.normalTx({
+          addressTo: recipient,
+          amount,
+        }))
+
+    return res.hash
   }
 
   /**
