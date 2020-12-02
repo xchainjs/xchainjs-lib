@@ -17,6 +17,7 @@ import {
   Balance,
   TxParams,
   TxHash,
+  Fees,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
@@ -24,6 +25,8 @@ import * as blockChair from './blockchair-api'
 import { ethNetworkToXchains, xchainNetworkToEths } from './utils'
 import { TxHistoryParams } from '@xchainjs/xchain-client/src'
 import { TxIO } from './types/blockchair-api-types'
+import { Networkish } from '@ethersproject/networks'
+import axios from 'axios'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
 
@@ -48,8 +51,45 @@ export interface EthereumClient {
 type ClientParams = XChainClientParams & {
   blockchairUrl?: string
   blockchairNodeApiKey?: string
+  etherscanApiKey?: string
   vault?: string
 }
+
+type GasOracleResponse = {
+  LastBlock?: string
+  SafeGasPrice?: string
+  ProposeGasPrice?: string
+  FastGasPrice?: string
+}
+
+class EtherscanCustomProvider extends EtherscanProvider {
+  constructor(network?: Networkish, apiKey?: string) {
+    super(network, apiKey)
+  }
+
+  get apiKeyQueryParameter() {
+    return !!this.apiKey ? `&apiKey=${this.apiKey}` : ''
+  }
+
+  /**
+   * @desc SafeGasPrice, ProposeGasPrice And FastGasPrice returned in string-Gwei
+   * @see https://etherscan.io/apis#gastracker
+   */
+  getGasOracle = (): Promise<GasOracleResponse> => {
+    let url = this.baseUrl + '/api?module=gastracker&action=gasoracle'
+
+    return axios.get(url + this.apiKeyQueryParameter).then((response) => response.data.result)
+  }
+}
+
+const ETH_DECIMAL = 18
+
+const mapGasOracleResponseToFees = (response: GasOracleResponse): Fees => ({
+  average: baseAmount(response.SafeGasPrice, ETH_DECIMAL),
+  fast: baseAmount(response.ProposeGasPrice, ETH_DECIMAL),
+  fastest: baseAmount(response.FastGasPrice, ETH_DECIMAL),
+  type: 'base',
+})
 
 /**
  * Custom Ethereum client
@@ -60,12 +100,19 @@ export default class Client implements XChainClient {
   private _phrase: string
   private _provider: Provider
   private _address: Address
-  private _etherscan: EtherscanProvider
+  private _etherscan: EtherscanCustomProvider
   private _vault: ethers.Contract | null = null
   private blockchairNodeUrl = ''
   private blockchairNodeApiKey = ''
 
-  constructor({ network = 'testnet', blockchairUrl = '', blockchairNodeApiKey = '', phrase, vault }: ClientParams) {
+  constructor({
+    network = 'testnet',
+    blockchairUrl = '',
+    blockchairNodeApiKey = '',
+    phrase,
+    vault,
+    etherscanApiKey,
+  }: ClientParams) {
     if (phrase && !Crypto.validatePhrase(phrase)) {
       throw new Error('Invalid Phrase')
     } else {
@@ -74,7 +121,7 @@ export default class Client implements XChainClient {
       this._provider = getDefaultProvider(network)
       this._wallet = ethers.Wallet.fromMnemonic(this._phrase)
       this._address = this._wallet.address
-      this._etherscan = new EtherscanProvider(this._network) // for tx history
+      this._etherscan = new EtherscanCustomProvider(this._network, etherscanApiKey) // for tx history
       if (vault) this.setVault(vault)
       // Connects to the ethereum network with it
       const provider = getDefaultProvider(this._network)
@@ -168,7 +215,7 @@ export default class Client implements XChainClient {
     } else {
       this._network = xchainNetworkToEths(network)
       this._provider = getDefaultProvider(network)
-      this._etherscan = new EtherscanProvider(network)
+      this._etherscan = new EtherscanCustomProvider(network)
     }
   }
 
@@ -291,11 +338,11 @@ export default class Client implements XChainClient {
         const rawTx = (await blockChair.getTx(this.blockchairNodeUrl, hash, this.blockchairNodeApiKey))[hash]
         const tx: Tx = {
           asset: AssetETH,
-          from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, 18) })),
+          from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, ETH_DECIMAL) })),
           to: rawTx.outputs
             // ignore tx with type 'nulldata'
             .filter((i: TxIO) => i.type !== 'nulldata')
-            .map((i: TxIO) => ({ to: i.recipient, amount: baseAmount(i.value, 18) })),
+            .map((i: TxIO) => ({ to: i.recipient, amount: baseAmount(i.value, ETH_DECIMAL) })),
           date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
           type: 'transfer',
           hash: rawTx.transaction.hash,
@@ -317,8 +364,8 @@ export default class Client implements XChainClient {
       const rawTx = (await blockChair.getTx(this.blockchairNodeUrl, txId, this.blockchairNodeApiKey))[txId]
       return {
         asset: AssetETH,
-        from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value, 18) })),
-        to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value, 18) })),
+        from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value, ETH_DECIMAL) })),
+        to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value, ETH_DECIMAL) })),
         date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
         type: 'transfer',
         hash: rawTx.transaction.hash,
@@ -363,16 +410,6 @@ export default class Client implements XChainClient {
   }
 
   /**
-   * Returns the estimate gas for a normal transaction
-   * @param params NormalTxOpts  transaction options
-   */
-  async estimateNormalTx(params: NormalTxOpts): Promise<ethers.BigNumberish> {
-    const { addressTo, amount, overrides } = params
-    const transactionRequest = Object.assign({ to: addressTo, value: amount }, overrides || {})
-    return this.wallet.provider.estimateGas(transactionRequest)
-  }
-
-  /**
    * Sends a transaction in ether
    */
   async normalTx(params: NormalTxOpts): Promise<TransactionResponse> {
@@ -380,6 +417,29 @@ export default class Client implements XChainClient {
     const transactionRequest = Object.assign({ to: addressTo, value: amount }, overrides || {})
     const transactionResponse = this.wallet.sendTransaction(transactionRequest)
     return transactionResponse
+  }
+
+  getFees = async (): Promise<Fees> => {
+    return this._etherscan.getGasOracle().then(mapGasOracleResponseToFees)
+  }
+
+  getDefaultFees = (): Fees => {
+    return {
+      type: 'base',
+      average: baseAmount(0),
+      fast: baseAmount(0),
+      fastest: baseAmount(0),
+    }
+  }
+
+  /**
+   * Returns the estimate gas for a normal transaction
+   * @param params NormalTxOpts  transaction options
+   */
+  async estimateNormalTx(params: NormalTxOpts): Promise<ethers.BigNumberish> {
+    const { addressTo, amount, overrides } = params
+    const transactionRequest = Object.assign({ to: addressTo, value: amount, gas: '5208' }, overrides || {})
+    return this.wallet.provider.estimateGas(transactionRequest)
   }
 
   /**
