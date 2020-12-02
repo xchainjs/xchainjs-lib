@@ -18,12 +18,12 @@ import {
   TxParams,
   TxHash,
   Fees,
+  TxHistoryParams,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as blockChair from './blockchair-api'
 import { ethNetworkToXchains, xchainNetworkToEths } from './utils'
-import { TxHistoryParams } from '@xchainjs/xchain-client/src'
 import { TxIO } from './types/blockchair-api-types'
 import { Networkish } from '@ethersproject/networks'
 import axios from 'axios'
