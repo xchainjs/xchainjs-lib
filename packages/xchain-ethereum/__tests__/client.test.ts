@@ -313,7 +313,7 @@ describe('Balances', () => {
             balance: parseEther('1.786'),
           },
         },
-      } as any) as AddressDTO)
+      } as unknown) as AddressDTO)
     })
 
     await ethClient.getBalance()
@@ -337,7 +337,7 @@ describe('Balances', () => {
             balance: parseEther('1.786'),
           },
         },
-      } as any) as AddressDTO)
+      } as unknown) as AddressDTO)
     })
 
     await ethClient.getBalance('0xb1d133e115E32Bee0F163EcD2c60FB462b8cDdC1')
