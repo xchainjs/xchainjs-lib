@@ -6,7 +6,7 @@ import vaultABI from '../data/vault.json'
 import erc20ABI from '../data/erc20.json'
 import { formatEther, getAddress } from 'ethers/lib/utils'
 import { toUtf8String } from '@ethersproject/strings'
-import { Erc20TxOpts, EstimateGasERC20Opts, Network as EthNetwork, NormalTxOpts } from './types'
+import { Erc20TxOpts, EstimateGasERC20Opts, GasOracleResponse, Network as EthNetwork, NormalTxOpts } from './types'
 import {
   Address,
   Network as XChainNetwork,
@@ -25,8 +25,7 @@ import * as Crypto from '@xchainjs/xchain-crypto'
 import * as blockChair from './blockchair-api'
 import { ethNetworkToXchains, xchainNetworkToEths } from './utils'
 import { TxIO } from './types/blockchair-api-types'
-import { Networkish } from '@ethersproject/networks'
-import axios from 'axios'
+import { getGasOracle } from './etherscan-api'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
 
@@ -55,33 +54,6 @@ type ClientParams = XChainClientParams & {
   vault?: string
 }
 
-type GasOracleResponse = {
-  LastBlock?: string
-  SafeGasPrice?: string
-  ProposeGasPrice?: string
-  FastGasPrice?: string
-}
-
-class EtherscanCustomProvider extends EtherscanProvider {
-  constructor(network?: Networkish, apiKey?: string) {
-    super(network, apiKey)
-  }
-
-  get apiKeyQueryParameter() {
-    return !!this.apiKey ? `&apiKey=${this.apiKey}` : ''
-  }
-
-  /**
-   * @desc SafeGasPrice, ProposeGasPrice And FastGasPrice returned in string-Gwei
-   * @see https://etherscan.io/apis#gastracker
-   */
-  getGasOracle = (): Promise<GasOracleResponse> => {
-    let url = this.baseUrl + '/api?module=gastracker&action=gasoracle'
-
-    return axios.get(url + this.apiKeyQueryParameter).then((response) => response.data.result)
-  }
-}
-
 const ETH_DECIMAL = 18
 
 const mapGasOracleResponseToFees = (response: GasOracleResponse): Fees => ({
@@ -100,7 +72,7 @@ export default class Client implements XChainClient {
   private _phrase: string
   private _provider: Provider
   private _address: Address
-  private _etherscan: EtherscanCustomProvider
+  private _etherscan: EtherscanProvider
   private _vault: ethers.Contract | null = null
   private blockchairNodeUrl = ''
   private blockchairNodeApiKey = ''
@@ -121,7 +93,7 @@ export default class Client implements XChainClient {
       this._provider = getDefaultProvider(network)
       this._wallet = ethers.Wallet.fromMnemonic(this._phrase)
       this._address = this._wallet.address
-      this._etherscan = new EtherscanCustomProvider(this._network, etherscanApiKey) // for tx history
+      this._etherscan = new EtherscanProvider(this._network, etherscanApiKey) // for tx history
       if (vault) this.setVault(vault)
       // Connects to the ethereum network with it
       const provider = getDefaultProvider(this._network)
@@ -211,7 +183,7 @@ export default class Client implements XChainClient {
     } else {
       this._network = xchainNetworkToEths(network)
       this._provider = getDefaultProvider(network)
-      this._etherscan = new EtherscanCustomProvider(network)
+      this._etherscan = new EtherscanProvider(network)
     }
   }
 
@@ -416,7 +388,7 @@ export default class Client implements XChainClient {
   }
 
   getFees = async (): Promise<Fees> => {
-    return this._etherscan.getGasOracle().then(mapGasOracleResponseToFees)
+    return getGasOracle(this._etherscan.baseUrl, this._etherscan.apiKey).then(mapGasOracleResponseToFees)
   }
 
   getDefaultFees = (): Fees => {

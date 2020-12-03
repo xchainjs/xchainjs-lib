@@ -42,3 +42,11 @@ export type EstimateGasERC20Opts = {
   addressTo: Address
   amount: ethers.BigNumberish
 }
+
+
+export type GasOracleResponse = {
+  LastBlock?: string
+  SafeGasPrice?: string
+  ProposeGasPrice?: string
+  FastGasPrice?: string
+}
