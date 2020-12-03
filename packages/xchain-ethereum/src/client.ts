@@ -177,10 +177,6 @@ export default class Client implements XChainClient {
     return this._vault
   }
 
-  get network(): XChainNetwork {
-    return ethNetworkToXchains(this._network)
-  }
-
   get provider(): Provider {
     return this._provider
   }
@@ -266,7 +262,7 @@ export default class Client implements XChainClient {
       return [
         {
           asset: AssetETH,
-          amount: baseAmount(dashboardAddress[address].address.balance),
+          amount: baseAmount(dashboardAddress[address].address.balance, ETH_DECIMAL),
         },
       ]
     } catch (error) {
