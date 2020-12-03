@@ -8,10 +8,7 @@ Utitity helpers for XChain clients
 - `async` - Utitilies for `async` handling
 - `bn` - Utitilies for using `bignumber.js`
 - `chain` - Utilities for multi-chain
-- `memo` - Utilities for memos
-- `stake` - XYK formula calc for stake
 - `string` - Utilities for strings
-- `swap` - XYK formula calc for swap
 
 ## Usage
 
@@ -32,39 +29,6 @@ import bn, {
 
 ```
 import delay from '@xchainjs/xchain-util'
-```
-
-**Calculations-Staking**
-
-```
-import {
-  PoolData,
-  getSwapOutput,
-  getSwapOutputWithFee,
-  getSwapInput,
-  getSwapSlip,
-  getSwapFee,
-  getValueOfAssetInRune,
-  getValueOfRuneInAsset,
-  getDoubleSwapOutput,
-  getDoubleSwapOutputWithFee,
-  getDoubleSwapInput,
-  getDoubleSwapSlip,
-  getDoubleSwapFee,
-  getValueOfAsset1InAsset2,
-} from '@xchainjs/xchain-util'
-```
-
-**Calculations-Swapping**
-
-```
-import {
-  UnitData,
-  StakeData,
-  getStakeUnits,
-  getPoolShare,
-  getSlipOnStake
-} from '@xchainjs/xchain-util'
 ```
 
 **Asset Helpers**

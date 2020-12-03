@@ -1,15 +1,14 @@
 /**
  * Chains
- *
- * Based on definition in Thorchain `common`
- * https://gitlab.com/thorchain/thornode/-/blob/master/common/chain.go#L15-18
  */
 export const BNBChain = 'BNB'
 export const BTCChain = 'BTC'
 export const ETHChain = 'ETH'
 export const THORChain = 'THOR'
+export const CosmosChain = 'GAIA'
+export const PolkadotChain = 'DOT'
 
 /**
- * All possible chains Thornode currently supports (or plan to support in near future)
+ * All possible chains XChainJS currently supports
  * */
-export const chains = [BNBChain, BTCChain, ETHChain, THORChain] as const
+export const chains = [BNBChain, BTCChain, ETHChain, THORChain, CosmosChain, PolkadotChain] as const
