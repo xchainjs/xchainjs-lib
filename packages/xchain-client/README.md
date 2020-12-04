@@ -223,7 +223,7 @@ Example of return:
 # Transactions
 
 ## Get Fees
-This function calculates and returns the fee object in a generalised way for a simple transfer function. ASGARDEX userbase has high time preferences, so high fee rates are preferred. 
+This function calculates and returns the fee object in a generalised way for a simple transfer function. 
 
 Since this depends on optional third-party services, sensible defaults should be hardcoded if there are errors.
 
