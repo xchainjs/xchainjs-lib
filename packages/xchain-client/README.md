@@ -143,7 +143,6 @@ Returns the balance of an address.
 * If address is not passed, gets the balance of the current client address. 
 * Optional asset can be passed, in which the query will be specific to that asset, such as ERC-20 token. 
 * Returns an array of assets and amounts, with assets in chain notation `CHAIN.SYMBOL-ID`
-* Converts to 8 decimal places for conformity
 
 ```
 getBalance(address?: Address, asset?: string): Promise<Balances>
