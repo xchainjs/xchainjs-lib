@@ -78,13 +78,25 @@ Example:
 4) Binance Chain node for Binance queries
 * etc
 
-```
-export type ServiceKeys = {
-  [key: string]: { // name of the service (ie `blockchair`)
-    serviceKey: string // Optional API Key for the service
+Service keys will be passed into constructor by extending `XChainClientParams` interface.
+
+Example BitcoinClient:
+
+```ts
+// extending `XChainClientParams` to provide url and key of API service
+type BitcoinClientParams = XChainClientParams & {
+  nodeUrl?: string
+  nodeApiKey?: string
+}
+
+class Client implements BitcoinClient, XChainClient {
+
+  // passing url and key of API service into constructor
+  constructor({ network = 'testnet', nodeUrl = '', nodeApiKey = '', phrase }: BitcoinClientParams) {
+    ...
   }
 }
-setServiceKeys(keys: ServiceKeys)
+
 ```
 
 ---- 
