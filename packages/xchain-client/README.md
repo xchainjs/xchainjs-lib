@@ -297,6 +297,19 @@ transfer(params: TxParams): Promise<TransferResult>
 ```
 The function should return the hash of the finalised transaction.
 
+## Chain Specific
+Chain-specific transactions can be added as well, such as Ethereum `approve()` or Binance Chain `freeze()/unfreeze()`
+```
+type ApproveParams = {
+  asset: Asset
+  amount: BaseAmount
+  spender: Address
+}
+
+approve(params: ApproveParams): Promise<TransferResult>
+```
+The function should return the hash of the finalised transaction.
+
 ## Purge
 When a wallet is "locked" the private key should be purged in each client by setting it back to null. Also the phrase has to be cleared `this.phrase = ''` 
 
