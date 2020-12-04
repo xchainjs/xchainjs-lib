@@ -6,7 +6,7 @@ export const BTCChain = 'BTC'
 export const ETHChain = 'ETH'
 export const THORChain = 'THOR'
 export const CosmosChain = 'GAIA'
-export const PolkadotChain = 'POLKADOT'
+export const PolkadotChain = 'POLKA'
 
 /**
  * All possible chains XChainJS currently supports

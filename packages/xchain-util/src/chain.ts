@@ -18,7 +18,7 @@ export const chainToString = (chainId: Chain) => {
       return 'Binance Chain'
     case 'GAIA':
       return 'Cosmos'
-    case 'POLKADOT':
+    case 'POLKA':
       return 'Polkadot'
     default:
       return 'unknown chain'

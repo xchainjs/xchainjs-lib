@@ -7,7 +7,7 @@ describe('chain', () => {
     expect(isChain('ETH')).toBeTruthy()
     expect(isChain('THOR')).toBeTruthy()
     expect(isChain('GAIA')).toBeTruthy()
-    expect(isChain('POLKADOT')).toBeTruthy()
+    expect(isChain('POLKA')).toBeTruthy()
     expect(isChain('')).toBeFalsy()
     expect(isChain('invalid')).toBeFalsy()
   })
@@ -27,8 +27,8 @@ describe('chain', () => {
     it('returns string for GAIA', () => {
       expect(chainToString('GAIA')).toEqual('Cosmos')
     })
-    it('returns string for POLKADOT', () => {
-      expect(chainToString('POLKADOT')).toEqual('Polkadot')
+    it('returns string for POLKA', () => {
+      expect(chainToString('POLKA')).toEqual('Polkadot')
     })
   })
 })
