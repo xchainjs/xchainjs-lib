@@ -3,6 +3,7 @@
 ### Update
 
 - Update dependencies
+- Add chain const for `cosmos` and `polkadot`
 
 ### Breaking change
 
