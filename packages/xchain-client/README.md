@@ -51,12 +51,9 @@ public address: Address
 # Config and Setup
 
 ## Set Network
-Used to set a type of NETWORK, which is either MAINNET or TESTNET. 
+Used to set a type of `Network`, which is either `'mainnet'` or `'testnet'`. 
+
 ```
-enum Network {
-  TEST = 'testnet',
-  MAIN = 'mainnet',
-}
 setNetwork(net: Network): XChainClient
 ```
 Returns the client. 
