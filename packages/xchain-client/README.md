@@ -311,7 +311,7 @@ approve(params: ApproveParams): Promise<TransferResult>
 The function should return the hash of the finalised transaction.
 
 ## Purge
-When a wallet is "locked" the private key should be purged in each client by setting it back to null. 
+When a wallet is "locked" the private key should be purged in each client by setting it back to null. Also the phrase has to be cleared `this.phrase = ''` 
 
 ```
 purgeClient()
