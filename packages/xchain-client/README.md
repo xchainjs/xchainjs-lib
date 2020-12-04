@@ -166,13 +166,16 @@ Example of returned array:
 
 ## Get Transactions
 Gets a simplied array of recent transactions for an address. 
-```
-export type TxHistoryParams = {
+```ts
+// Defined in xchain-client/src/types.ts
+type TxHistoryParams = {
   address: Address // Address to get history for
-  offset: number // Optional Offset
-  limit: string // Optional Limit of transactions
-  startTime: string // Optional start time
+  offset?: number // Optional Offset
+  limit?: number // Optional Limit of transactions
+  startTime?: Date // Optional start time
+  asset?: string // Optional asset. Result transactions will be filtered by this asset
 }
+
 getTransactions(params?: TxHistoryParams): Promise<TxPage>
 ```
 
