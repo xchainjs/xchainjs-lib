@@ -103,20 +103,28 @@ class Client implements BitcoinClient, XChainClient {
 
 # Querying
 
-## Get Explorer URL
+## Get Explorer URLs
 Returns the correctly formatted url string with paths for:
 * Addresses
 * Transactions
 
-The default Explorer URL can be hard-coded, or passed in as a service. The object to be cast into the explorer link should be passed in as a string, like a transaction ID or an address. 
+The default Explorer URL can be hard-coded, or passed in as a service. It will be provided by `getExplorerUrl`
+```ts
+getExplorerUrl(): string
 ```
-enum Path {
-  address = 'address',
-  transaction = 'transaction',
-}
-getExplorerUrl(type: Path, param: string): string
+
+
+To get explorer's URL for an address, use `getExplorerAddressUrl` by passing an `address`.
+```ts
+getExplorerAddressUrl = (address: Address): string 
 ```
-The function should return the correctly formatted url string. 
+
+To get explorer's URL for a transaction, use `getExplorerTxUrl` by passing a transaction ID.
+```ts
+getExplorerTxUrl = (txID: string): string
+```
+
+All functions should return the correctly formatted url string. 
 
 **Example**
 ```
