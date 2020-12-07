@@ -8,7 +8,7 @@ const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKe
  * @see https://etherscan.io/apis#gastracker
  */
 export const getGasOracle = (baseUrl: string, apiKey?: string): Promise<GasOracleResponse> => {
-  let url = baseUrl + '/api?module=gastracker&action=gasoracle'
+  const url = baseUrl + '/api?module=gastracker&action=gasoracle'
 
   return axios.get(url + getApiKeyQueryParameter(apiKey)).then((response) => response.data.result)
 }

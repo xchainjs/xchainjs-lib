@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 export type Address = string
 
 export enum Network {
-  TEST = 'rinkeby',
+  TEST = 'goerli',
   MAIN = 'homestead',
 }
 
@@ -42,7 +42,6 @@ export type EstimateGasERC20Opts = {
   addressTo: Address
   amount: ethers.BigNumberish
 }
-
 
 export type GasOracleResponse = {
   LastBlock?: string

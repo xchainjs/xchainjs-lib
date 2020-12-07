@@ -108,18 +108,17 @@ describe('Connecting', () => {
     mockGeneratePhrase.mockReset()
   })
 
-  it('should connect to testnet', () => {
+  it('should connect to testnet', async () => {
     const ethClient = new Client({})
 
     expect(ethClient.wallet).toBeInstanceOf(Wallet)
     expect(ethClient.wallet.provider).toBeInstanceOf(providers.FallbackProvider)
-    ethClient.wallet.provider.getNetwork().then((network) => {
-      expect(network.name).toEqual('rinkeby')
-      expect(network.chainId).toEqual(4)
-    })
+    const network = await ethClient.wallet.provider.getNetwork()
+    expect(network.name).toEqual('goerli')
+    expect(network.chainId).toEqual(5)
   })
 
-  it('should connect to specified network', () => {
+  it('should connect to specified network', async () => {
     const ethClient = new Client({
       network: 'mainnet',
       phrase,
@@ -128,23 +127,21 @@ describe('Connecting', () => {
     expect(ethClient.wallet).toBeInstanceOf(Wallet)
     expect(ethClient.wallet.provider).toBeInstanceOf(providers.FallbackProvider)
     expect(ethClient.wallet._signingKey()).toMatchObject(wallet.signingKey)
-    ethClient.wallet.provider.getNetwork().then((network) => {
-      expect(network.name).toEqual('homestead')
-      expect(network.chainId).toEqual(1)
-    })
+    const network = await ethClient.wallet.provider.getNetwork()
+    expect(network.name).toEqual('homestead')
+    expect(network.chainId).toEqual(1)
   })
 
-  it('should set network', () => {
+  it('should set network', async () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
     })
     ethClient.setNetwork('testnet')
 
-    ethClient.wallet.provider.getNetwork().then((network) => {
-      expect(network.name).toEqual('rinkeby')
-      expect(network.chainId).toEqual(4)
-    })
+    const network = await ethClient.wallet.provider.getNetwork()
+    expect(network.name).toEqual('goerli')
+    expect(network.chainId).toEqual(5)
   })
 })
 
@@ -160,11 +157,6 @@ describe('Utils', () => {
     mockGeneratePhrase.mockReset()
   })
 
-  // it('should generate a phrase', () => {
-  //   const newPhrase = Client.generatePhrase()
-  //   expect(ethers.utils.isValidMnemonic(newPhrase)).toBeTruthy()
-  // })
-
   it('should get address', () => {
     const ethClient = new Client({
       network: 'testnet',
@@ -176,18 +168,7 @@ describe('Utils', () => {
   it('should get network', () => {
     const ethClient = new Client({ network: 'testnet' })
     expect(ethClient.getNetwork()).toEqual('testnet')
-    // expect(ethClient._network).toEqual('rinkeby')
   })
-
-  // it('should fail a bad phrase', () => {
-  //   const badPhrase = Client.validatePhrase('bad bad bad bad bad bad')
-  //   expect(badPhrase).toBeFalsy()
-  // })
-
-  // it('should pass a good phrase', () => {
-  //   const goodPhrase = Client.validatePhrase(phrase)
-  //   expect(goodPhrase).toBeTruthy()
-  // })
 
   it('should fail a bad address', () => {
     expect(Client.validateAddress('0xBADbadBad')).toBeFalsy()
@@ -208,18 +189,6 @@ describe('Transactions', () => {
     mockGeneratePhrase.mockReset()
   })
 
-  /*it('gets tx history', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
-
-    const mockHistory = jest.spyOn(ethClient.etherscan, 'getHistory')
-    mockHistory.mockImplementation(async (_): Promise<Array<TransactionResponse>> => Promise.resolve([txResponse]))
-
-    const txResult = await ethClient.getTransactions()
-
-    expect(mockHistory).toHaveBeenCalledWith('0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E')
-    expect(txResult).toEqual([expect.objectContaining(txResponse)])
-  })*/
-
   it('gets transaction count', async () => {
     const ethClient = new Client({ network: 'testnet', phrase })
 
@@ -238,10 +207,7 @@ describe('Transactions', () => {
     const vaultTx = ethClient.vaultTx(ethClient.getAddress(), parseEther('1'), 'SWAP')
     expect(vaultTx).rejects.toBe('vault has to be set before sending vault tx')
     ethClient.setVault(vault)
-    expect(ethClient.vault).not.toBeNull()
-    if (ethClient.vault != null) {
-      expect(ethClient.vault.address).toEqual(vault)
-    }
+    expect(ethClient.getVault()).toEqual(vault)
   })
 
   it('sends a normalTx', async () => {
@@ -347,7 +313,8 @@ describe('Balances', () => {
 
   it('throws error on bad address', async () => {
     const ethClient = new Client({ network: 'testnet', phrase })
-    ethClient.getBalance('0xbad').catch((e) => expect(e).toMatch('Invalid Address'))
+    const balances = ethClient.getBalance('0xbad')
+    expect(balances).rejects.toThrowError()
   })
 })
 

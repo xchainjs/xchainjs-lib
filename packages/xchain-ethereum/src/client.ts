@@ -1,10 +1,10 @@
-import { ethers } from 'ethers'
+import { ethers, BigNumberish } from 'ethers'
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import vaultABI from '../data/vault.json'
 import erc20ABI from '../data/erc20.json'
-import { formatEther, getAddress } from 'ethers/lib/utils'
+import { formatEther } from 'ethers/lib/utils'
 import { toUtf8String } from '@ethersproject/strings'
 import { Erc20TxOpts, EstimateGasERC20Opts, GasOracleResponse, Network as EthNetwork, NormalTxOpts } from './types'
 import {
@@ -20,7 +20,7 @@ import {
   Fees,
   TxHistoryParams,
 } from '@xchainjs/xchain-client'
-import { AssetETH, baseAmount } from '@xchainjs/xchain-util'
+import { AssetETH, baseAmount, baseToAsset } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as blockChair from './blockchair-api'
 import { ethNetworkToXchains, xchainNetworkToEths } from './utils'
@@ -33,17 +33,14 @@ const ethAddress = '0x0000000000000000000000000000000000000000'
  * Interface for custom Ethereum client
  */
 export interface EthereumClient {
-  setNetwork(network: XChainNetwork): EthNetwork
-  setPhrase(phrase?: string): void
-  getAddress(): string
-  getBalance(address: Address): Promise<ethers.BigNumberish>
   getBlockNumber(): Promise<number>
   getTransactionCount(blocktag: string | number): Promise<number>
-  // getTransactions(address?: Address): Promise<Array<TransactionResponse>>
-  vaultTx(asset: string, amount: ethers.BigNumberish, memo: string): Promise<TransactionResponse>
-  estimateNormalTx(params: NormalTxOpts): Promise<ethers.BigNumberish>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  call<T>(asset: Address, abi: ethers.ContractInterface, func: string, params: Array<any>): Promise<T>
+  vaultTx(asset: string, amount: BigNumberish, memo: string): Promise<TransactionResponse>
+  estimateNormalTx(params: NormalTxOpts): Promise<BigNumberish>
   normalTx(opts: NormalTxOpts): Promise<TransactionResponse>
-  estimateGasERC20Tx(params: EstimateGasERC20Opts): Promise<ethers.BigNumberish>
+  estimateGasERC20Tx(params: EstimateGasERC20Opts): Promise<BigNumberish>
   erc20Tx(opts: Erc20TxOpts): Promise<TransactionResponse>
 }
 
@@ -66,14 +63,14 @@ const mapGasOracleResponseToFees = (response: GasOracleResponse): Fees => ({
 /**
  * Custom Ethereum client
  */
-export default class Client implements XChainClient {
+export default class Client implements XChainClient, EthereumClient {
   private _wallet: ethers.Wallet
   private _network: EthNetwork
   private _phrase: string
   private _provider: Provider
   private _address: Address
   private _etherscan: EtherscanProvider
-  private _vault: ethers.Contract | null = null
+  private _vault?: Address
   private blockchairNodeUrl = ''
   private blockchairNodeApiKey = ''
 
@@ -90,15 +87,14 @@ export default class Client implements XChainClient {
     } else {
       this._phrase = phrase || Crypto.generatePhrase() // @todo do we need to set a size here?
       this._network = xchainNetworkToEths(network)
-      this._provider = getDefaultProvider(network)
+      this._provider = getDefaultProvider(this._network)
       this._wallet = ethers.Wallet.fromMnemonic(this._phrase)
       this._address = this._wallet.address
+      this._vault = vault
       this._etherscan = new EtherscanProvider(this._network, etherscanApiKey) // for tx history
-      if (vault) this.setVault(vault)
+
       // Connects to the ethereum network with it
-      const provider = getDefaultProvider(this._network)
-      const newWallet = this.wallet.connect(provider)
-      this.changeWallet(newWallet)
+      this.changeWallet(this.wallet.connect(this._provider))
       this.setBlockchairNodeURL(blockchairUrl)
       this.setBlockchairNodeAPIKey(blockchairNodeApiKey)
     }
@@ -127,6 +123,10 @@ export default class Client implements XChainClient {
     return this._address
   }
 
+  getVault(): Address | undefined {
+    return this._vault
+  }
+
   // @todo what url ?
   getExplorerUrl = (): string => {
     return ''
@@ -143,10 +143,6 @@ export default class Client implements XChainClient {
 
   get wallet(): ethers.Wallet {
     return this._wallet
-  }
-
-  get vault(): ethers.Contract | null {
-    return this._vault
   }
 
   get provider(): Provider {
@@ -169,9 +165,9 @@ export default class Client implements XChainClient {
    * changes the provider
    */
   EtherscanProvider(): Provider {
-    const newWallet = this.wallet.connect(new EtherscanProvider(this._network))
-    this.changeWallet(newWallet)
-    return (this._provider = this._wallet.provider)
+    this._provider = new EtherscanProvider(this._network)
+    this.changeWallet(this.wallet.connect(this._provider))
+    return this._provider
   }
 
   /**
@@ -182,35 +178,33 @@ export default class Client implements XChainClient {
       throw new Error('Wallet must be provided')
     } else {
       this._network = xchainNetworkToEths(network)
-      this._provider = getDefaultProvider(network)
-      this._etherscan = new EtherscanProvider(network)
+      this._provider = getDefaultProvider(this._network)
+      this._etherscan = new EtherscanProvider(this._network)
     }
   }
 
   /**
    * Set's the current vault contract
    */
-  setVault(vault: string): ethers.Contract {
+  setVault(vault: string): string {
     if (!vault) {
       throw new Error('Vault address must be provided')
-    } else {
-      const contract = new ethers.Contract(vault, vaultABI, this._provider)
-      this._vault = contract.connect(this.wallet)
-      return this._vault
     }
+
+    return (this._vault = vault)
   }
+
   /**
    * Sets a new phrase (Eg. If user wants to change wallet)
    */
   setPhrase(phrase: string): Address {
     if (!Crypto.validatePhrase(phrase)) {
       throw new Error('Phrase must be provided')
-    } else {
-      this._phrase = phrase
-      const newWallet = ethers.Wallet.fromMnemonic(phrase)
-      this.changeWallet(newWallet)
-      return this.getAddress()
     }
+
+    this._phrase = phrase
+    this.changeWallet(ethers.Wallet.fromMnemonic(phrase))
+    return this.getAddress()
   }
 
   /**
@@ -218,7 +212,7 @@ export default class Client implements XChainClient {
    */
   static validateAddress(address: Address): boolean {
     try {
-      getAddress(address)
+      ethers.utils.getAddress(address)
       return true
     } catch (error) {
       return false
@@ -245,17 +239,14 @@ export default class Client implements XChainClient {
   /**
    * Gets the erc20 asset balance of an address
    */
-  async getERC20Balance(asset: Address, address?: Address): Promise<ethers.BigNumberish> {
+  async getERC20Balance(asset: Address, address?: Address): Promise<BigNumberish> {
     if (address && !Client.validateAddress(address)) {
       return Promise.reject('Invalid Address')
     }
     if (!Client.validateAddress(asset)) {
       return Promise.reject('Invalid Asset')
     }
-    const contract = new ethers.Contract(asset, erc20ABI, this.wallet)
-    const erc20 = contract.connect(this.wallet)
-    const erc20Balance = await erc20.functions.balanceOf(address || this._address)
-    return erc20Balance
+    return this.call<BigNumberish>(asset, erc20ABI, 'balanceOf', [address || this.getAddress()])
   }
 
   /**
@@ -283,8 +274,6 @@ export default class Client implements XChainClient {
     const address = params?.address ?? this.getAddress()
     const limit = params?.limit ?? 10
     const offset = params?.offset ?? 0
-
-    this._etherscan.baseUrl
 
     let totalCount = 0
     const transactions: Tx[] = []
@@ -344,8 +333,7 @@ export default class Client implements XChainClient {
   }
 
   transfer = async ({ memo, amount: amountParam, recipient }: TxParams): Promise<TxHash> => {
-    // @todo do we need to convert from BaseAmount to the AssetAmount
-    const amount = amountParam.amount().toString()
+    const amount = baseToAsset(amountParam).amount().toString()
     const res = await (memo
       ? this.vaultTx(recipient, amount, memo)
       : this.normalTx({
@@ -356,35 +344,64 @@ export default class Client implements XChainClient {
     return res.hash
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async call<T>(asset: Address, abi: ethers.ContractInterface, func: string, params: Array<any>): Promise<T> {
+    try {
+      if (!asset) {
+        throw new Error('asset must be provided')
+      }
+
+      const contract = new ethers.Contract(asset, abi, this.provider).connect(this.wallet)
+      return await contract[func](...params)
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
   /**
    * Sends a transaction to the vault
    */
-  async vaultTx(asset: Address, amount: ethers.BigNumberish, memo: string): Promise<TransactionResponse> {
-    if (!this.vault) {
-      return Promise.reject('vault has to be set before sending vault tx')
+  async vaultTx(asset: Address, amount: BigNumberish, memo: string): Promise<TransactionResponse> {
+    try {
+      const vault = this.getVault()
+      if (!vault) {
+        return Promise.reject('vault has to be set before sending vault tx')
+      }
+
+      if (asset == ethAddress) {
+        return await this.call<TransactionResponse>(vault, vaultABI, 'deposit', [toUtf8String(memo), { value: amount }])
+      }
+
+      const allowance = await this.call<BigNumberish>(asset, erc20ABI, 'allowance', [
+        this.getAddress(),
+        vault,
+        { from: this.wallet.address },
+      ])
+      if (formatEther(allowance) < amount) {
+        const approved = await this.call<TransactionResponse>(asset, erc20ABI, 'approve', [
+          vault,
+          amount,
+          { from: this.wallet.address },
+        ])
+        await approved.wait()
+      }
+      return await this.call<TransactionResponse>(vault, vaultABI, 'deposit', [asset, amount, toUtf8String(memo)])
+    } catch (error) {
+      return Promise.reject(error)
     }
-    if (asset.toString() == ethAddress) {
-      return await this.vault.deposit(toUtf8String(memo), { value: amount })
-    }
-    const contract = new ethers.Contract(asset, erc20ABI, this.provider)
-    const erc20 = contract.connect(this.wallet)
-    const allowance = await erc20.allowance(this.vault.address, { from: this.wallet.address })
-    if (formatEther(allowance) < amount) {
-      const approved = await erc20.approve(this.vault.address, amount, { from: this.wallet.address })
-      await approved.wait()
-    }
-    const deposit = await this.vault.deposit(asset, amount, toUtf8String(memo))
-    return await deposit.wait()
   }
 
   /**
    * Sends a transaction in ether
    */
   async normalTx(params: NormalTxOpts): Promise<TransactionResponse> {
-    const { addressTo, amount, overrides } = params
-    const transactionRequest = Object.assign({ to: addressTo, value: amount }, overrides || {})
-    const transactionResponse = this.wallet.sendTransaction(transactionRequest)
-    return transactionResponse
+    try {
+      const { addressTo, amount, overrides } = params
+      const transactionRequest = Object.assign({ to: addressTo, value: amount }, overrides || {})
+      return await this.wallet.sendTransaction(transactionRequest)
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   getFees = async (): Promise<Fees> => {
@@ -404,7 +421,7 @@ export default class Client implements XChainClient {
    * Returns the estimate gas for a normal transaction
    * @param params NormalTxOpts  transaction options
    */
-  async estimateNormalTx(params: NormalTxOpts): Promise<ethers.BigNumberish> {
+  async estimateNormalTx(params: NormalTxOpts): Promise<BigNumberish> {
     const { addressTo, amount, overrides } = params
     const transactionRequest = Object.assign({ to: addressTo, value: amount, gas: '5208' }, overrides || {})
     return this.wallet.provider.estimateGas(transactionRequest)
@@ -414,7 +431,7 @@ export default class Client implements XChainClient {
    * Returns a promise with the gas estimate to the function call `transfer` of a contract
    * that follows the ERC20 interfaces
    **/
-  async estimateGasERC20Tx(params: EstimateGasERC20Opts): Promise<ethers.BigNumberish> {
+  async estimateGasERC20Tx(params: EstimateGasERC20Opts): Promise<BigNumberish> {
     const { erc20ContractAddress, addressTo, amount } = params
     if (addressTo && !Client.validateAddress(addressTo)) {
       return Promise.reject('Invalid Address')
@@ -438,10 +455,12 @@ export default class Client implements XChainClient {
     if (!Client.validateAddress(erc20ContractAddress)) {
       return Promise.reject('Invalid ERC20 Contract Address')
     }
-    const contract = new ethers.Contract(erc20ContractAddress, erc20ABI, this.wallet)
-    const erc20 = contract.connect(this.wallet)
     const transactionOverrides = Object.assign({}, overrides || {})
-    return erc20.transfer(addressTo, amount, transactionOverrides)
+    return this.call<TransactionResponse>(erc20ContractAddress, erc20ABI, 'transfer', [
+      addressTo,
+      amount,
+      transactionOverrides,
+    ])
   }
 }
 
