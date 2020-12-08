@@ -228,8 +228,8 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   // Given a desired output, return change
-  private getChange = async (valueOut: number): Promise<number> => {
-    const balances = await this.getBalance()
+  private getChange = async (valueOut: number, address?: string): Promise<number> => {
+    const balances = await this.getBalance(address)
     const btcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetBTC))
     let change = 0
 
@@ -391,15 +391,17 @@ class Client implements BitcoinClient, XChainClient {
     }
   }
 
-  transfer = async ({
+  private buildTx = async ({
     asset = AssetBTC,
     amount,
     recipient,
     memo,
     feeRate,
-  }: TxParams & { feeRate: FeeRate }): Promise<TxHash> => {
-    await this.scanUTXOs()
-    const balance = await this.getBalance()
+    sender,
+  }: TxParams & { feeRate: FeeRate; sender?: string }): Promise<Bitcoin.Psbt> => {
+    const address = sender || this.getAddress()
+    await this.scanUTXOs(address)
+    const balance = await this.getBalance(address)
     const btcBalance = balance.find((balance) => balance.asset.symbol === asset.symbol)
     if (!btcBalance) {
       throw new Error('No btcBalance found')
@@ -411,7 +413,6 @@ class Client implements BitcoinClient, XChainClient {
       throw new Error('Invalid address')
     }
     const btcNetwork = this.btcNetwork()
-    const btcKeys = this.getBtcKeys(this.phrase)
     const feeRateWhole = Number(feeRate.toFixed(0))
     const compiledMemo = memo ? Utils.compileMemo(memo) : null
     const fee = compiledMemo
@@ -432,65 +433,30 @@ class Client implements BitcoinClient, XChainClient {
 
     // Outputs
     psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
-    const change = await this.getChange(amount.amount().toNumber() + fee)
+    const change = await this.getChange(amount.amount().toNumber() + fee, address)
     if (change > 0) {
-      psbt.addOutput({ address: this.getAddress(), value: change }) // Add change
+      psbt.addOutput({ address, value: change }) // Add change
     }
     if (compiledMemo) {
       // if memo exists
       psbt.addOutput({ script: compiledMemo, value: 0 }) // Add OP_RETURN {script, value}
     }
+
+    return psbt
+  }
+
+  transfer = async (params: TxParams & { feeRate: FeeRate }): Promise<TxHash> => {
+    const psbt = await this.buildTx(params)
+    const btcKeys = this.getBtcKeys(this.phrase)
     psbt.signAllInputs(btcKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
-    return await blockChair.broadcastTx(this.nodeUrl, txHex, this.nodeApiKey)
+
+    return this.broadcastTx(txHex)
   }
 
-  createTxForLedger = async ({
-    asset = AssetBTC,
-    amount,
-    sender,
-    recipient,
-    memo,
-    feeRate,
-  }: LedgerTxParams & { feeRate: FeeRate }): Promise<Utils.LedgerTxInfo> => {
-    await this.scanUTXOs(sender)
-    const balance = await this.getBalance(sender)
-    const btcBalance = balance.find((balance) => balance.asset.symbol === asset.symbol)
-    if (!btcBalance) {
-      throw new Error('No btcBalance found')
-    }
-    if (this.utxos.length === 0) {
-      throw new Error('No utxos to send')
-    }
-    if (!this.validateAddress(recipient)) {
-      throw new Error('Invalid address')
-    }
-    const btcNetwork = this.btcNetwork()
-    const feeRateWhole = Number(feeRate.toFixed(0))
-    const compiledMemo = memo ? Utils.compileMemo(memo) : null
-    const fee = compiledMemo
-      ? Utils.getVaultFee(this.utxos, compiledMemo, feeRateWhole)
-      : Utils.getNormalFee(this.utxos, feeRateWhole)
-    if (amount.amount().plus(fee).isGreaterThan(btcBalance.amount.amount())) {
-      throw new Error('Balance insufficient for transaction')
-    }
-    const psbt = new Bitcoin.Psbt({ network: btcNetwork }) // Network-specific
-    //Inputs
-    this.utxos.forEach((UTXO) =>
-      psbt.addInput({
-        hash: UTXO.hash,
-        index: UTXO.index,
-        witnessUtxo: UTXO.witnessUtxo,
-      }),
-    )
-
-    // Outputs
-    psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
-    if (compiledMemo) {
-      // if memo exists
-      psbt.addOutput({ script: compiledMemo, value: 0 }) // Add OP_RETURN {script, value}
-    }
+  createTxForLedger = async (params: LedgerTxParams & { feeRate: FeeRate }): Promise<Utils.LedgerTxInfo> => {
+    const psbt = await this.buildTx(params)
 
     return {
       utxos: this.utxos,
@@ -498,7 +464,7 @@ class Client implements BitcoinClient, XChainClient {
     }
   }
 
-  broadcastLedgerTx = async (txHex: string) => {
+  broadcastTx = async (txHex: string): Promise<TxHash> => {
     return await blockChair.broadcastTx(this.nodeUrl, txHex, this.nodeApiKey)
   }
 }
