@@ -36,6 +36,8 @@ interface BitcoinClient {
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
   scanUTXOs(): Promise<void>
+  broadcastTx(txHex: string): Promise<TxHash>
+  createTxForLedger(params: TxParams): Promise<Utils.LedgerTxInfo>
 }
 
 type BitcoinClientParams = XChainClientParams & {
@@ -404,13 +406,13 @@ class Client implements BitcoinClient, XChainClient {
     const balance = await this.getBalance(address)
     const btcBalance = balance.find((balance) => balance.asset.symbol === asset.symbol)
     if (!btcBalance) {
-      throw new Error('No btcBalance found')
+      return Promise.reject(new Error('No btcBalance found'))
     }
     if (this.utxos.length === 0) {
-      throw new Error('No utxos to send')
+      return Promise.reject(Error('No utxos to send'))
     }
     if (!this.validateAddress(recipient)) {
-      throw new Error('Invalid address')
+      return Promise.reject(new Error('Invalid address'))
     }
     const btcNetwork = this.btcNetwork()
     const feeRateWhole = Number(feeRate.toFixed(0))
@@ -419,7 +421,7 @@ class Client implements BitcoinClient, XChainClient {
       ? Utils.getVaultFee(this.utxos, compiledMemo, feeRateWhole)
       : Utils.getNormalFee(this.utxos, feeRateWhole)
     if (amount.amount().plus(fee).isGreaterThan(btcBalance.amount.amount())) {
-      throw new Error('Balance insufficient for transaction')
+      return Promise.reject(Error('Balance insufficient for transaction'))
     }
     const psbt = new Bitcoin.Psbt({ network: btcNetwork }) // Network-specific
     //Inputs
