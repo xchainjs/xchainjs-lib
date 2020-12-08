@@ -21,6 +21,12 @@ export interface UTXO {
   hash: string
   index: number
   witnessUtxo: Witness
+  txHex: string
+}
+
+export type LedgerTxInfo = {
+  utxos: Array<UTXO>
+  newTxHex: string
 }
 
 function inputBytes(input: UTXO): number {
