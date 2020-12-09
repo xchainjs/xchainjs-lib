@@ -18,6 +18,7 @@ import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
 import { baseAmount, AssetBTC, BaseAmount } from '@xchainjs/xchain-util'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 import { TxIO } from './types/blockchair-api-types'
+import { UTXOs } from './types/common'
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -46,14 +47,9 @@ type BitcoinClientParams = XChainClientParams & {
 class Client implements BitcoinClient, XChainClient {
   net: Network
   phrase = ''
-  utxos: Utils.UTXO[]
+  utxos: UTXOs
   nodeUrl = ''
   nodeApiKey = ''
-
-  private derive_path = {
-    mainnet: "84'/0'/0'/0/0",
-    testnet: "84'/1'/0'/0/0",
-  }
 
   // Client is initialised with network type
   constructor({ network = 'testnet', nodeUrl = '', nodeApiKey = '', phrase }: BitcoinClientParams) {
@@ -99,7 +95,8 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   derivePath(): string {
-    return Utils.isTestnet(this.net) ? this.derive_path.testnet : this.derive_path.mainnet
+    const { testnet, mainnet } = Utils.getDerivePath()
+    return Utils.isTestnet(this.net) ? testnet : mainnet
   }
 
   getExplorerUrl = (): string => {

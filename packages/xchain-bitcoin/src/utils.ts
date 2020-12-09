@@ -4,7 +4,8 @@ import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoin
 import { FeeRate } from './types/client-types'
 import * as blockChair from './blockchair-api'
 import { BtcAddressUTXOs, BtcAddressUTXO } from './types/blockchair-api-types'
-import { BroadcastTxParams } from './types/common'
+import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
+import { MIN_TX_FEE } from './const'
 /**
  * Bitcoin byte syzes
  */
@@ -13,23 +14,7 @@ const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
 const TX_INPUT_PUBKEYHASH = 107
 const TX_OUTPUT_BASE = 8 + 1 //9
 const TX_OUTPUT_PUBKEYHASH = 25
-export const dustThreshold = 1000
-
-/**
- * Interaces
- */
-export interface Witness {
-  value: number
-  script: Buffer
-}
-export interface UTXO {
-  hash: string
-  index: number
-  witnessUtxo: Witness
-  txHex: string
-}
-
-export type UTXOs = UTXO[]
+const DUST_THRESHOLD = 1000
 
 function inputBytes(input: UTXO): number {
   return TX_INPUT_BASE + (input.witnessUtxo.script ? input.witnessUtxo.script.length : TX_INPUT_PUBKEYHASH)
@@ -40,14 +25,7 @@ export const compileMemo = (memo: string): Buffer => {
   return Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
 }
 
-/**
- * Minimum transaction fee
- * 1000 satoshi/kB (similar to current `minrelaytxfee`)
- * @see https://github.com/bitcoin/bitcoin/blob/db88db47278d2e7208c50d16ab10cb355067d071/src/validation.h#L56
- */
-export const MIN_TX_FEE = 1000
-
-export function getVaultFee(inputs: UTXO[], data: Buffer, feeRate: FeeRate): number {
+export function getVaultFee(inputs: UTXOs, data: Buffer, feeRate: FeeRate): number {
   const vaultFee =
     (TX_EMPTY_SIZE +
       inputs.reduce(function (a, x) {
@@ -64,7 +42,7 @@ export function getVaultFee(inputs: UTXO[], data: Buffer, feeRate: FeeRate): num
   return vaultFee > MIN_TX_FEE ? vaultFee : MIN_TX_FEE
 }
 
-export function getNormalFee(inputs: UTXO[], feeRate: FeeRate): number {
+export function getNormalFee(inputs: UTXOs, feeRate: FeeRate): number {
   const normalFee =
     (TX_EMPTY_SIZE +
       inputs.reduce(function (a, x) {
@@ -116,7 +94,7 @@ const getChange = async (valueOut: number, address: string, nodeUrl: string, nod
     const btcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetBTC))
     let change = 0
 
-    if (btcBalance && btcBalance.amount.amount().minus(valueOut).isGreaterThan(dustThreshold)) {
+    if (btcBalance && btcBalance.amount.amount().minus(valueOut).isGreaterThan(DUST_THRESHOLD)) {
       change = btcBalance.amount.amount().minus(valueOut).toNumber()
     }
     return change
@@ -186,14 +164,16 @@ export const buildTx = async ({
 }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXOs }> => {
   try {
     const utxos = await scanUTXOs(sender, nodeUrl, nodeApiKey)
+    if (utxos.length === 0) {
+      return Promise.reject(Error('No utxos to send'))
+    }
+
     const balance = await getBalance(sender, nodeUrl, nodeApiKey)
     const btcBalance = balance.find((balance) => balance.asset.symbol === AssetBTC.symbol)
     if (!btcBalance) {
       return Promise.reject(new Error('No btcBalance found'))
     }
-    if (utxos.length === 0) {
-      return Promise.reject(Error('No utxos to send'))
-    }
+
     if (!validateAddress(recipient, network)) {
       return Promise.reject(new Error('Invalid address'))
     }
@@ -205,11 +185,11 @@ export const buildTx = async ({
     }
     const psbt = new Bitcoin.Psbt({ network: btcNetwork(network) }) // Network-specific
     //Inputs
-    utxos.forEach((UTXO) =>
+    utxos.forEach((utxo) =>
       psbt.addInput({
-        hash: UTXO.hash,
-        index: UTXO.index,
-        witnessUtxo: UTXO.witnessUtxo,
+        hash: utxo.hash,
+        index: utxo.index,
+        witnessUtxo: utxo.witnessUtxo,
       }),
     )
 
@@ -233,3 +213,8 @@ export const buildTx = async ({
 export const broadcastTx = async ({ txHex, nodeUrl, nodeApiKey }: BroadcastTxParams): Promise<TxHash> => {
   return await blockChair.broadcastTx(nodeUrl, txHex, nodeApiKey)
 }
+
+export const getDerivePath = (index = 0): DerivePath => ({
+  mainnet: `84'/0'/0'/0/${index}`,
+  testnet: `84'/1'/0'/0/${index}`,
+})

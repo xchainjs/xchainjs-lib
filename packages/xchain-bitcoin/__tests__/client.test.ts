@@ -1,5 +1,5 @@
 import { Client } from '../src/client'
-import { MIN_TX_FEE } from '../src/utils'
+import { MIN_TX_FEE } from '../src/const'
 import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 
 import mockBlockchairApi from '../__mocks__/block-chair'
