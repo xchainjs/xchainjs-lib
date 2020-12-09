@@ -10,10 +10,14 @@ export type LedgerTxInfo = {
 export const createTxForLedger = async (
   params: TxParams & { feeRate: FeeRate; sender: Address; network: Network; nodeUrl: string; nodeApiKey: string },
 ): Promise<LedgerTxInfo> => {
-  const { psbt, utxos } = await Utils.buildTx(params)
+  try {
+    const { psbt, utxos } = await Utils.buildTx(params)
 
-  return {
-    utxos,
-    newTxHex: psbt.data.globalMap.unsignedTx.toBuffer().toString('hex'),
+    return {
+      utxos,
+      newTxHex: psbt.data.globalMap.unsignedTx.toBuffer().toString('hex'),
+    }
+  } catch (e) {
+    return Promise.reject(e)
   }
 }
