@@ -56,8 +56,6 @@ export type TxParams = {
   memo?: string // optional memo to pass
 }
 
-export type LedgerTxParams = TxParams & { sender: Address }
-
 export type FeeOptionKey = 'average' | 'fast' | 'fastest'
 export type FeeOption = Record<FeeOptionKey, BaseAmount>
 
