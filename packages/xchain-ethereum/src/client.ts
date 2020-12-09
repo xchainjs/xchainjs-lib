@@ -357,7 +357,7 @@ export default class Client implements XChainClient, EthereumClient {
     if (!address) {
       return Promise.reject(new Error('address must be provided'))
     }
-    
+
     const contract = new ethers.Contract(address, abi, this.provider).connect(this.getWallet())
     return contract[func](...params)
   }
