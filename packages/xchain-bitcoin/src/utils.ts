@@ -30,11 +30,6 @@ export interface UTXO {
 
 export type UTXOs = UTXO[]
 
-export type LedgerTxInfo = {
-  utxos: UTXOs
-  newTxHex: string
-}
-
 function inputBytes(input: UTXO): number {
   return TX_INPUT_BASE + (input.witnessUtxo.script ? input.witnessUtxo.script.length : TX_INPUT_PUBKEYHASH)
 }
@@ -114,15 +109,19 @@ export const getBalance = async (address: string, nodeUrl: string, nodeApiKey: s
 }
 
 // Given a desired output, return change
-async function getChange(valueOut: number, address: string, nodeUrl: string, nodeApiKey: string): Promise<number> {
-  const balances = await getBalance(address, nodeUrl, nodeApiKey)
-  const btcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetBTC))
-  let change = 0
+const getChange = async (valueOut: number, address: string, nodeUrl: string, nodeApiKey: string): Promise<number> => {
+  try {
+    const balances = await getBalance(address, nodeUrl, nodeApiKey)
+    const btcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetBTC))
+    let change = 0
 
-  if (btcBalance && btcBalance.amount.amount().minus(valueOut).isGreaterThan(dustThreshold)) {
-    change = btcBalance.amount.amount().minus(valueOut).toNumber()
+    if (btcBalance && btcBalance.amount.amount().minus(valueOut).isGreaterThan(dustThreshold)) {
+      change = btcBalance.amount.amount().minus(valueOut).toNumber()
+    }
+    return change
+  } catch (e) {
+    return Promise.reject(e)
   }
-  return change
 }
 
 // Will return true/false
@@ -141,24 +140,30 @@ export const scanUTXOs = async (address: Address, nodeUrl: string, nodeApiKey: s
   const utxos: BtcAddressUTXOs = dashboardsAddress[address].utxo
 
   return Promise.all(
-    utxos.map(({ transaction_hash: hash, value, index }: BtcAddressUTXO) => {
-      return blockChair.getRawTx(nodeUrl, hash, nodeApiKey).then((txData) => {
-        const script = txData[hash].decoded_raw_transaction.vout[index].scriptPubKey.hex
-        // TODO: check scriptpubkey_type is op_return
+    utxos.map(
+      ({ transaction_hash: hash, value, index }: BtcAddressUTXO): Promise<UTXO> =>
+        new Promise((resolve, reject) =>
+          blockChair
+            .getRawTx(nodeUrl, hash, nodeApiKey)
+            .then((txData) => {
+              const script = txData[hash].decoded_raw_transaction.vout[index].scriptPubKey.hex
+              // TODO: check scriptpubkey_type is op_return
 
-        const witnessUtxo = {
-          value,
-          script: Buffer.from(script, 'hex'),
-        }
+              const witnessUtxo = {
+                value,
+                script: Buffer.from(script, 'hex'),
+              }
 
-        return Promise.resolve({
-          hash,
-          index,
-          witnessUtxo,
-          txHex: txData[hash].raw_transaction,
-        })
-      })
-    }),
+              return resolve({
+                hash,
+                index,
+                witnessUtxo,
+                txHex: txData[hash].raw_transaction,
+              })
+            })
+            .catch((err) => reject(err)),
+        ),
+    ),
   )
 }
 
@@ -178,44 +183,48 @@ export const buildTx = async ({
   nodeUrl: string
   nodeApiKey: string
 }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXOs }> => {
-  const utxos = await scanUTXOs(sender, nodeUrl, nodeApiKey)
-  const balance = await getBalance(sender, nodeUrl, nodeApiKey)
-  const btcBalance = balance.find((balance) => balance.asset.symbol === AssetBTC.symbol)
-  if (!btcBalance) {
-    return Promise.reject(new Error('No btcBalance found'))
-  }
-  if (utxos.length === 0) {
-    return Promise.reject(Error('No utxos to send'))
-  }
-  if (!validateAddress(recipient, network)) {
-    return Promise.reject(new Error('Invalid address'))
-  }
-  const feeRateWhole = Number(feeRate.toFixed(0))
-  const compiledMemo = memo ? compileMemo(memo) : null
-  const fee = compiledMemo ? getVaultFee(utxos, compiledMemo, feeRateWhole) : getNormalFee(utxos, feeRateWhole)
-  if (amount.amount().plus(fee).isGreaterThan(btcBalance.amount.amount())) {
-    return Promise.reject(Error('Balance insufficient for transaction'))
-  }
-  const psbt = new Bitcoin.Psbt({ network: btcNetwork(network) }) // Network-specific
-  //Inputs
-  utxos.forEach((UTXO) =>
-    psbt.addInput({
-      hash: UTXO.hash,
-      index: UTXO.index,
-      witnessUtxo: UTXO.witnessUtxo,
-    }),
-  )
+  try {
+    const utxos = await scanUTXOs(sender, nodeUrl, nodeApiKey)
+    const balance = await getBalance(sender, nodeUrl, nodeApiKey)
+    const btcBalance = balance.find((balance) => balance.asset.symbol === AssetBTC.symbol)
+    if (!btcBalance) {
+      return Promise.reject(new Error('No btcBalance found'))
+    }
+    if (utxos.length === 0) {
+      return Promise.reject(Error('No utxos to send'))
+    }
+    if (!validateAddress(recipient, network)) {
+      return Promise.reject(new Error('Invalid address'))
+    }
+    const feeRateWhole = Number(feeRate.toFixed(0))
+    const compiledMemo = memo ? compileMemo(memo) : null
+    const fee = compiledMemo ? getVaultFee(utxos, compiledMemo, feeRateWhole) : getNormalFee(utxos, feeRateWhole)
+    if (amount.amount().plus(fee).isGreaterThan(btcBalance.amount.amount())) {
+      return Promise.reject(Error('Balance insufficient for transaction'))
+    }
+    const psbt = new Bitcoin.Psbt({ network: btcNetwork(network) }) // Network-specific
+    //Inputs
+    utxos.forEach((UTXO) =>
+      psbt.addInput({
+        hash: UTXO.hash,
+        index: UTXO.index,
+        witnessUtxo: UTXO.witnessUtxo,
+      }),
+    )
 
-  // Outputs
-  psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
-  const change = await getChange(amount.amount().toNumber() + fee, sender, nodeUrl, nodeApiKey)
-  if (change > 0) {
-    psbt.addOutput({ address: sender, value: change }) // Add change
-  }
-  if (compiledMemo) {
-    // if memo exists
-    psbt.addOutput({ script: compiledMemo, value: 0 }) // Add OP_RETURN {script, value}
-  }
+    // Outputs
+    psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
+    const change = await getChange(amount.amount().toNumber() + fee, sender, nodeUrl, nodeApiKey)
+    if (change > 0) {
+      psbt.addOutput({ address: sender, value: change }) // Add change
+    }
+    if (compiledMemo) {
+      // if memo exists
+      psbt.addOutput({ script: compiledMemo, value: 0 }) // Add OP_RETURN {script, value}
+    }
 
-  return { psbt, utxos }
+    return { psbt, utxos }
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }
