@@ -153,18 +153,23 @@ class Client implements BitcoinClient, XChainClient {
   validateAddress = (address: string): boolean => Utils.validateAddress(address, this.net)
 
   // Returns balance of address
-  getBalance = async (address?: string): Promise<Balance[]> =>
-    Utils.getBalance(address || this.getAddress(), this.nodeUrl, this.nodeApiKey)
+  getBalance = async (address?: string): Promise<Balance[]> => {
+    try {
+      return Utils.getBalance(address || this.getAddress(), this.nodeUrl, this.nodeApiKey)
+    } catch (e) {
+      return Promise.reject(e)
+    }
+  }
 
   // Get transaction for the address
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const address = params?.address ?? this.getAddress()
     const limit = params?.limit ?? 10
     const offset = params?.offset ?? 0
 
     let totalCount = 0
     const transactions: Tx[] = []
     try {
+      const address = params?.address ?? this.getAddress()
       //Calling getAddress without limit/offset to get total count
       const dAddr = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
       totalCount = dAddr[address].transactions.length
@@ -304,19 +309,23 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   transfer = async (params: TxParams & { feeRate: FeeRate }): Promise<TxHash> => {
-    const { psbt } = await Utils.buildTx({
-      ...params,
-      sender: this.getAddress(),
-      nodeUrl: this.nodeUrl,
-      nodeApiKey: this.nodeApiKey,
-      network: this.net,
-    })
-    const btcKeys = this.getBtcKeys(this.phrase)
-    psbt.signAllInputs(btcKeys) // Sign all inputs
-    psbt.finalizeAllInputs() // Finalise inputs
-    const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+    try {
+      const { psbt } = await Utils.buildTx({
+        ...params,
+        sender: this.getAddress(),
+        nodeUrl: this.nodeUrl,
+        nodeApiKey: this.nodeApiKey,
+        network: this.net,
+      })
+      const btcKeys = this.getBtcKeys(this.phrase)
+      psbt.signAllInputs(btcKeys) // Sign all inputs
+      psbt.finalizeAllInputs() // Finalise inputs
+      const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-    return this.broadcastTx(txHex)
+      return this.broadcastTx(txHex)
+    } catch (e) {
+      return Promise.reject(e)
+    }
   }
 
   broadcastTx = async (txHex: string): Promise<TxHash> => {
