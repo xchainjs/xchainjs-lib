@@ -3,7 +3,7 @@ import { LedgerTxInfo, LedgerTxParams } from './types/ledger'
 import * as Utils from './utils'
 import * as blockChair from './blockchair-api'
 
-export const createTx = async (params: LedgerTxParams): Promise<LedgerTxInfo> => {
+export const createTxInfo = async (params: LedgerTxParams): Promise<LedgerTxInfo> => {
   try {
     const { psbt, utxos } = await Utils.buildTx(params)
 
