@@ -127,6 +127,16 @@ export interface AddressTx {
   balance_change: number
 }
 
+export type BtcAddressUTXO = {
+  block_id: number
+  transaction_hash: string
+  index: number
+  value: number
+}
+
+export type BtcAddressDTOs = BtcAddressDTO[]
+
+export type BtcAddressUTXOs = BtcAddressUTXO[]
 export interface BtcAddressDTO {
   [key: string]: {
     address: {
@@ -157,12 +167,7 @@ export interface BtcAddressDTO {
       scripthash_type: string
     }
     transactions: string[]
-    utxo: {
-      block_id: number
-      transaction_hash: string
-      index: number
-      value: number
-    }[]
+    utxo: BtcAddressUTXOs
   }
 }
 

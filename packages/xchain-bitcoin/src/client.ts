@@ -13,10 +13,9 @@ import {
   Network,
   Fees,
   XChainClientParams,
-  LedgerTxParams,
 } from '@xchainjs/xchain-client'
 import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
-import { baseAmount, assetToString, AssetBTC, BaseAmount } from '@xchainjs/xchain-util'
+import { baseAmount, AssetBTC, BaseAmount } from '@xchainjs/xchain-util'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 import { TxIO } from './types/blockchair-api-types'
 
@@ -29,15 +28,11 @@ import { TxIO } from './types/blockchair-api-types'
  * BitcoinClient Interface
  */
 interface BitcoinClient {
-  isTestnet(): boolean
   derivePath(): string
   validateAddress(address: string): boolean
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
-  scanUTXOs(): Promise<void>
-  broadcastTx(txHex: string): Promise<TxHash>
-  createTxForLedger(params: TxParams): Promise<Utils.LedgerTxInfo>
 }
 
 type BitcoinClientParams = XChainClientParams & {
@@ -103,20 +98,12 @@ class Client implements BitcoinClient, XChainClient {
     return this.net
   }
 
-  isTestnet(): boolean {
-    return this.net === 'testnet'
-  }
-
   derivePath(): string {
-    return this.isTestnet() ? this.derive_path.testnet : this.derive_path.mainnet
-  }
-
-  private btcNetwork(): Bitcoin.Network {
-    return this.isTestnet() ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+    return Utils.isTestnet(this.net) ? this.derive_path.testnet : this.derive_path.mainnet
   }
 
   getExplorerUrl = (): string => {
-    const networkPath = this.isTestnet() ? '/testnet' : ''
+    const networkPath = Utils.isTestnet(this.net) ? '/testnet' : ''
     return `https://blockstream.info${networkPath}`
   }
 
@@ -131,7 +118,7 @@ class Client implements BitcoinClient, XChainClient {
   // The address is then decoded into type P2WPKH and returned.
   getAddress = (): Address => {
     if (this.phrase) {
-      const btcNetwork = this.btcNetwork()
+      const btcNetwork = Utils.btcNetwork(this.net)
       const btcKeys = this.getBtcKeys(this.phrase)
 
       const { address } = Bitcoin.payments.p2wpkh({
@@ -148,7 +135,7 @@ class Client implements BitcoinClient, XChainClient {
 
   // Private function to get keyPair from the this.phrase
   private getBtcKeys = (phrase: string): Bitcoin.ECPairInterface => {
-    const btcNetwork = this.btcNetwork()
+    const btcNetwork = Utils.btcNetwork(this.net)
     const derive_path = this.derivePath()
 
     const seed = getSeed(phrase)
@@ -162,94 +149,26 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   // Will return true/false
-  validateAddress = (address: string): boolean => {
-    const btcNetwork = this.btcNetwork()
-    try {
-      Bitcoin.address.toOutputScript(address, btcNetwork)
-      return true
-    } catch (error) {
-      return false
-    }
-  }
-
-  // Scans UTXOs on Address
-  scanUTXOs = async (address?: Address): Promise<void> => {
-    try {
-      if (!address) {
-        address = this.getAddress()
-      }
-      const dashboardsAddress = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
-
-      this.utxos = [] // clear existing utxos
-      const utxos = dashboardsAddress[address].utxo
-
-      for (let i = 0; i < utxos.length; i++) {
-        const txHash = utxos[i].transaction_hash
-        const value = utxos[i].value
-        const index = utxos[i].index
-        const txData = await blockChair.getRawTx(this.nodeUrl, txHash, this.nodeApiKey)
-        const script = txData[txHash].decoded_raw_transaction.vout[index].scriptPubKey.hex
-        // TODO: check scriptpubkey_type is op_return
-
-        const witness = {
-          value: value,
-          script: Buffer.from(script, 'hex'),
-        }
-
-        const utxoObject = {
-          hash: txHash,
-          index: index,
-          witnessUtxo: witness,
-          txHex: txData[txHash].raw_transaction,
-        }
-        this.utxos.push(utxoObject)
-      }
-    } catch (error) {
-      throw new Error(error)
-    }
-  }
+  validateAddress = (address: string): boolean => Utils.validateAddress(address, this.net)
 
   // Returns balance of address
   getBalance = async (address?: string): Promise<Balance[]> => {
-    if (!address) {
-      address = this.getAddress()
-    }
-
     try {
-      // const chain = this.net === 'testnet' ? 'bitcoin/testnet' : 'bitcoin'
-      const dashboardAddress = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
-      return [
-        {
-          asset: AssetBTC,
-          amount: baseAmount(dashboardAddress[address].address.balance),
-        },
-      ]
-    } catch (error) {
-      return Promise.reject(new Error('Invalid address'))
+      return Utils.getBalance(address || this.getAddress(), this.nodeUrl, this.nodeApiKey)
+    } catch (e) {
+      return Promise.reject(e)
     }
-  }
-
-  // Given a desired output, return change
-  private getChange = async (valueOut: number, address?: string): Promise<number> => {
-    const balances = await this.getBalance(address)
-    const btcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetBTC))
-    let change = 0
-
-    if (btcBalance && btcBalance.amount.amount().minus(valueOut).isGreaterThan(Utils.dustThreshold)) {
-      change = btcBalance.amount.amount().minus(valueOut).toNumber()
-    }
-    return change
   }
 
   // Get transaction for the address
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const address = params?.address ?? this.getAddress()
     const limit = params?.limit ?? 10
     const offset = params?.offset ?? 0
 
     let totalCount = 0
     const transactions: Tx[] = []
     try {
+      const address = params?.address ?? this.getAddress()
       //Calling getAddress without limit/offset to get total count
       const dAddr = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
       totalCount = dAddr[address].transactions.length
@@ -316,11 +235,6 @@ class Client implements BitcoinClient, XChainClient {
    * Returns rates and fees
    */
   getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
-    await this.scanUTXOs()
-    if (this.utxos.length === 0) {
-      throw new Error('No utxos to send')
-    }
-
     const btcStats = await blockChair.bitcoinStats(this.nodeUrl, this.nodeApiKey)
     const nextBlockFeeRate = btcStats.suggested_transaction_fee_per_byte_sat
     const rates: FeeRates = {
@@ -393,81 +307,24 @@ class Client implements BitcoinClient, XChainClient {
     }
   }
 
-  private buildTx = async ({
-    asset = AssetBTC,
-    amount,
-    recipient,
-    memo,
-    feeRate,
-    sender,
-  }: TxParams & { feeRate: FeeRate; sender?: string }): Promise<Bitcoin.Psbt> => {
-    const address = sender || this.getAddress()
-    await this.scanUTXOs(address)
-    const balance = await this.getBalance(address)
-    const btcBalance = balance.find((balance) => balance.asset.symbol === asset.symbol)
-    if (!btcBalance) {
-      return Promise.reject(new Error('No btcBalance found'))
-    }
-    if (this.utxos.length === 0) {
-      return Promise.reject(Error('No utxos to send'))
-    }
-    if (!this.validateAddress(recipient)) {
-      return Promise.reject(new Error('Invalid address'))
-    }
-    const btcNetwork = this.btcNetwork()
-    const feeRateWhole = Number(feeRate.toFixed(0))
-    const compiledMemo = memo ? Utils.compileMemo(memo) : null
-    const fee = compiledMemo
-      ? Utils.getVaultFee(this.utxos, compiledMemo, feeRateWhole)
-      : Utils.getNormalFee(this.utxos, feeRateWhole)
-    if (amount.amount().plus(fee).isGreaterThan(btcBalance.amount.amount())) {
-      return Promise.reject(Error('Balance insufficient for transaction'))
-    }
-    const psbt = new Bitcoin.Psbt({ network: btcNetwork }) // Network-specific
-    //Inputs
-    this.utxos.forEach((UTXO) =>
-      psbt.addInput({
-        hash: UTXO.hash,
-        index: UTXO.index,
-        witnessUtxo: UTXO.witnessUtxo,
-      }),
-    )
-
-    // Outputs
-    psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
-    const change = await this.getChange(amount.amount().toNumber() + fee, address)
-    if (change > 0) {
-      psbt.addOutput({ address, value: change }) // Add change
-    }
-    if (compiledMemo) {
-      // if memo exists
-      psbt.addOutput({ script: compiledMemo, value: 0 }) // Add OP_RETURN {script, value}
-    }
-
-    return psbt
-  }
-
   transfer = async (params: TxParams & { feeRate: FeeRate }): Promise<TxHash> => {
-    const psbt = await this.buildTx(params)
-    const btcKeys = this.getBtcKeys(this.phrase)
-    psbt.signAllInputs(btcKeys) // Sign all inputs
-    psbt.finalizeAllInputs() // Finalise inputs
-    const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+    try {
+      const { psbt } = await Utils.buildTx({
+        ...params,
+        sender: this.getAddress(),
+        nodeUrl: this.nodeUrl,
+        nodeApiKey: this.nodeApiKey,
+        network: this.net,
+      })
+      const btcKeys = this.getBtcKeys(this.phrase)
+      psbt.signAllInputs(btcKeys) // Sign all inputs
+      psbt.finalizeAllInputs() // Finalise inputs
+      const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-    return this.broadcastTx(txHex)
-  }
-
-  createTxForLedger = async (params: LedgerTxParams & { feeRate: FeeRate }): Promise<Utils.LedgerTxInfo> => {
-    const psbt = await this.buildTx(params)
-
-    return {
-      utxos: this.utxos,
-      newTxHex: psbt.data.globalMap.unsignedTx.toBuffer().toString('hex'),
+      return await Utils.broadcastTx({ txHex, nodeUrl: this.nodeUrl, nodeApiKey: this.nodeApiKey })
+    } catch (e) {
+      return Promise.reject(e)
     }
-  }
-
-  broadcastTx = async (txHex: string): Promise<TxHash> => {
-    return await blockChair.broadcastTx(this.nodeUrl, txHex, this.nodeApiKey)
   }
 }
 
