@@ -1,4 +1,3 @@
-import * as Bitcoin from 'bitcoinjs-lib'
 import { Client } from '../src/client'
 import { MIN_TX_FEE } from '../src/utils'
 import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
@@ -25,19 +24,8 @@ describe('BitcoinClient Test', () => {
   const phraseThree = 'quantum vehicle print stairs canvas kid erode grass baby orbit lake remove'
   const addyThree = 'tb1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rzgjhra4'
 
-  it('should have the correct bitcoin network right prefix', () => {
-    btcClient.setNetwork('mainnet')
-    const network = btcClient.isTestnet() ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
-    expect(network.bech32).toEqual('bc')
-  })
-
-  it('should update net', () => {
-    btcClient.setNetwork('testnet')
-    const network = btcClient.isTestnet() ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
-    expect(network.bech32).toEqual('tb')
-  })
-
   it('set phrase should return correct address', () => {
+    btcClient.setNetwork('testnet')
     const result = btcClient.setPhrase(phraseOne)
     expect(result).toEqual(addyOne)
   })

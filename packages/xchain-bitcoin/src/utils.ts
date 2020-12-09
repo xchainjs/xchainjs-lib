@@ -1,5 +1,9 @@
+import { Address, Balance, Network, TxParams } from '@xchainjs/xchain-client/lib'
+import { AssetBTC, assetToString, baseAmount } from '@xchainjs/xchain-util/lib'
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import { FeeRate } from './types/client-types'
+import * as blockChair from './blockchair-api'
+import { BtcAddressUTXOs, BtcAddressUTXO } from './types/blockchair-api-types'
 /**
  * Bitcoin byte syzes
  */
@@ -24,8 +28,10 @@ export interface UTXO {
   txHex: string
 }
 
+export type UTXOs = UTXO[]
+
 export type LedgerTxInfo = {
-  utxos: Array<UTXO>
+  utxos: UTXOs
   newTxHex: string
 }
 
@@ -81,4 +87,135 @@ export function arrayAverage(array: Array<number>): number {
   let sum = 0
   array.forEach((value) => (sum += value))
   return sum / array.length
+}
+
+export const isTestnet = (net: Network): boolean => {
+  return net === 'testnet'
+}
+
+export const btcNetwork = (network: Network): Bitcoin.Network => {
+  return isTestnet(network) ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+}
+
+// Returns balance of address
+export const getBalance = async (address: string, nodeUrl: string, nodeApiKey: string): Promise<Balance[]> => {
+  try {
+    // const chain = this.net === 'testnet' ? 'bitcoin/testnet' : 'bitcoin'
+    const dashboardAddress = await blockChair.getAddress(nodeUrl, address, nodeApiKey)
+    return [
+      {
+        asset: AssetBTC,
+        amount: baseAmount(dashboardAddress[address].address.balance),
+      },
+    ]
+  } catch (error) {
+    return Promise.reject(new Error('Invalid address'))
+  }
+}
+
+// Given a desired output, return change
+async function getChange(valueOut: number, address: string, nodeUrl: string, nodeApiKey: string): Promise<number> {
+  const balances = await getBalance(address, nodeUrl, nodeApiKey)
+  const btcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetBTC))
+  let change = 0
+
+  if (btcBalance && btcBalance.amount.amount().minus(valueOut).isGreaterThan(dustThreshold)) {
+    change = btcBalance.amount.amount().minus(valueOut).toNumber()
+  }
+  return change
+}
+
+// Will return true/false
+export const validateAddress = (address: string, network: Network): boolean => {
+  try {
+    Bitcoin.address.toOutputScript(address, btcNetwork(network))
+    return true
+  } catch (error) {
+    return false
+  }
+}
+
+// Scans UTXOs on Address
+export const scanUTXOs = async (address: Address, nodeUrl: string, nodeApiKey: string): Promise<UTXOs> => {
+  const dashboardsAddress = await blockChair.getAddress(nodeUrl, address, nodeApiKey)
+  const utxos: BtcAddressUTXOs = dashboardsAddress[address].utxo
+
+  return Promise.all(
+    utxos.map(({ transaction_hash: hash, value, index }: BtcAddressUTXO) => {
+      return blockChair.getRawTx(nodeUrl, hash, nodeApiKey).then((txData) => {
+        const script = txData[hash].decoded_raw_transaction.vout[index].scriptPubKey.hex
+        // TODO: check scriptpubkey_type is op_return
+
+        const witnessUtxo = {
+          value,
+          script: Buffer.from(script, 'hex'),
+        }
+
+        return Promise.resolve({
+          hash,
+          index,
+          witnessUtxo,
+          txHex: txData[hash].raw_transaction,
+        })
+      })
+    }),
+  )
+}
+
+export const buildTx = async ({
+  amount,
+  recipient,
+  memo,
+  feeRate,
+  sender,
+  network,
+  nodeUrl,
+  nodeApiKey,
+}: TxParams & {
+  feeRate: FeeRate
+  sender: Address
+  network: Network
+  nodeUrl: string
+  nodeApiKey: string
+}): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXOs }> => {
+  const utxos = await scanUTXOs(sender, nodeUrl, nodeApiKey)
+  const balance = await getBalance(sender, nodeUrl, nodeApiKey)
+  const btcBalance = balance.find((balance) => balance.asset.symbol === AssetBTC.symbol)
+  if (!btcBalance) {
+    return Promise.reject(new Error('No btcBalance found'))
+  }
+  if (utxos.length === 0) {
+    return Promise.reject(Error('No utxos to send'))
+  }
+  if (!validateAddress(recipient, network)) {
+    return Promise.reject(new Error('Invalid address'))
+  }
+  const feeRateWhole = Number(feeRate.toFixed(0))
+  const compiledMemo = memo ? compileMemo(memo) : null
+  const fee = compiledMemo ? getVaultFee(utxos, compiledMemo, feeRateWhole) : getNormalFee(utxos, feeRateWhole)
+  if (amount.amount().plus(fee).isGreaterThan(btcBalance.amount.amount())) {
+    return Promise.reject(Error('Balance insufficient for transaction'))
+  }
+  const psbt = new Bitcoin.Psbt({ network: btcNetwork(network) }) // Network-specific
+  //Inputs
+  utxos.forEach((UTXO) =>
+    psbt.addInput({
+      hash: UTXO.hash,
+      index: UTXO.index,
+      witnessUtxo: UTXO.witnessUtxo,
+    }),
+  )
+
+  // Outputs
+  psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
+  const change = await getChange(amount.amount().toNumber() + fee, sender, nodeUrl, nodeApiKey)
+  if (change > 0) {
+    psbt.addOutput({ address: sender, value: change }) // Add change
+  }
+  if (compiledMemo) {
+    // if memo exists
+    psbt.addOutput({ script: compiledMemo, value: 0 }) // Add OP_RETURN {script, value}
+  }
+
+  return { psbt, utxos }
 }
