@@ -1,15 +1,7 @@
-import { Address, Network, TxParams } from '@xchainjs/xchain-client'
-import { FeeRate } from './types/client-types'
+import { LedgerTxInfo, LedgerTxParams } from './types/ledger'
 import * as Utils from './utils'
 
-export type LedgerTxInfo = {
-  utxos: Utils.UTXOs
-  newTxHex: string
-}
-
-export const createTxForLedger = async (
-  params: TxParams & { feeRate: FeeRate; sender: Address; network: Network; nodeUrl: string; nodeApiKey: string },
-): Promise<LedgerTxInfo> => {
+export const createTxForLedger = async (params: LedgerTxParams): Promise<LedgerTxInfo> => {
   try {
     const { psbt, utxos } = await Utils.buildTx(params)
 
