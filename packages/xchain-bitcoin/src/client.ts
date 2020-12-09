@@ -33,7 +33,6 @@ interface BitcoinClient {
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
-  broadcastTx(txHex: string): Promise<TxHash>
 }
 
 type BitcoinClientParams = XChainClientParams & {
@@ -322,14 +321,10 @@ class Client implements BitcoinClient, XChainClient {
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-      return this.broadcastTx(txHex)
+      return await blockChair.broadcastTx(this.nodeUrl, txHex, this.nodeApiKey)
     } catch (e) {
       return Promise.reject(e)
     }
-  }
-
-  broadcastTx = async (txHex: string): Promise<TxHash> => {
-    return await blockChair.broadcastTx(this.nodeUrl, txHex, this.nodeApiKey)
   }
 }
 
