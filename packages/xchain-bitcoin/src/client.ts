@@ -321,7 +321,7 @@ class Client implements BitcoinClient, XChainClient {
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-      return await blockChair.broadcastTx(this.nodeUrl, txHex, this.nodeApiKey)
+      return await Utils.broadcastTx({ txHex, nodeUrl: this.nodeUrl, nodeApiKey: this.nodeApiKey })
     } catch (e) {
       return Promise.reject(e)
     }

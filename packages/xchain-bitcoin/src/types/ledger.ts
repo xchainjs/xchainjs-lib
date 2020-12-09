@@ -7,7 +7,7 @@ export type LedgerTxInfo = {
   newTxHex: string
 }
 
-export type LedgerTxParams = TxParams & {
+export type LedgerTxInfoParams = Pick<TxParams, 'amount' | 'recipient'> & {
   feeRate: FeeRate
   sender: Address
   network: Network

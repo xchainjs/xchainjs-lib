@@ -1,9 +1,7 @@
-import { TxHash } from '@xchainjs/xchain-client/lib'
-import { LedgerTxInfo, LedgerTxParams } from './types/ledger'
+import { LedgerTxInfo, LedgerTxInfoParams } from './types/ledger'
 import * as Utils from './utils'
-import * as blockChair from './blockchair-api'
 
-export const createTxInfo = async (params: LedgerTxParams): Promise<LedgerTxInfo> => {
+export const createTxInfo = async (params: LedgerTxInfoParams): Promise<LedgerTxInfo> => {
   try {
     const { psbt, utxos } = await Utils.buildTx(params)
 
@@ -14,8 +12,4 @@ export const createTxInfo = async (params: LedgerTxParams): Promise<LedgerTxInfo
   } catch (e) {
     return Promise.reject(e)
   }
-}
-
-export const broadcastTx = async (txHex: string, nodeUrl: string, nodeApiKey: string): Promise<TxHash> => {
-  return await blockChair.broadcastTx(nodeUrl, txHex, nodeApiKey)
 }

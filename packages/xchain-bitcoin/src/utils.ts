@@ -1,9 +1,10 @@
-import { Address, Balance, Network, TxParams } from '@xchainjs/xchain-client/lib'
+import { Address, Balance, Network, TxHash, TxParams } from '@xchainjs/xchain-client/lib'
 import { AssetBTC, assetToString, baseAmount } from '@xchainjs/xchain-util/lib'
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import { FeeRate } from './types/client-types'
 import * as blockChair from './blockchair-api'
 import { BtcAddressUTXOs, BtcAddressUTXO } from './types/blockchair-api-types'
+import { BroadcastTxParams } from './types/common'
 /**
  * Bitcoin byte syzes
  */
@@ -227,4 +228,8 @@ export const buildTx = async ({
   } catch (e) {
     return Promise.reject(e)
   }
+}
+
+export const broadcastTx = async ({ txHex, nodeUrl, nodeApiKey }: BroadcastTxParams): Promise<TxHash> => {
+  return await blockChair.broadcastTx(nodeUrl, txHex, nodeApiKey)
 }
