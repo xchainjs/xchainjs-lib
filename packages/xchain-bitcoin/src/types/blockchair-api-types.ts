@@ -210,5 +210,5 @@ export interface ChainStatsBtc {
     event: string
     time_left: number
   }[]
-  suggested_transaction_fee_per_byte_sat: 49
+  suggested_transaction_fee_per_byte_sat: number
 }
