@@ -1,16 +1,16 @@
 import { ethers } from 'ethers'
+import { BaseAmount } from '@xchainjs/xchain-util/lib'
 
 export type Address = string
-export type Phrase = string
 
 export enum Network {
-  TEST = 'rinkeby',
+  TEST = 'goerli',
   MAIN = 'homestead',
 }
 
 export type NormalTxOpts = {
-  addressTo: Address
-  amount: ethers.BigNumberish
+  recipient: Address
+  amount: BaseAmount
   overrides?: NormalTxOverrides
 }
 
@@ -23,7 +23,7 @@ export type NormalTxOverrides = {
 
 export type Erc20TxOpts = {
   erc20ContractAddress: Address
-  addressTo: Address
+  recipient: Address
   amount: ethers.BigNumberish
 
   overrides?: Erc20TxOverrides
@@ -40,6 +40,13 @@ export type Erc20TxOverrides = {
 
 export type EstimateGasERC20Opts = {
   erc20ContractAddress: Address
-  addressTo: Address
+  recipient: Address
   amount: ethers.BigNumberish
+}
+
+export type GasOracleResponse = {
+  LastBlock?: string
+  SafeGasPrice?: string
+  ProposeGasPrice?: string
+  FastGasPrice?: string
 }

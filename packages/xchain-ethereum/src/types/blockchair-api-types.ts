@@ -1,14 +1,3 @@
-export type BtcChainOptions =
-  | 'bitcoin'
-  | 'bitcoin-cash'
-  | 'litecoin'
-  | 'bitcoin-sv'
-  | 'dogecoin'
-  | 'dash'
-  | 'groestlcoin'
-  | 'zcash'
-  | 'bitcoin/testnet'
-
 export interface BlockChairResponse<T> {
   data: T
   context: {
@@ -83,7 +72,7 @@ export interface Transactions {
 /**
  * https://blockchair.com/api/docs#link_201
  */
-export interface RawTxsBTC {
+export interface RawTxs {
   [key: string]: {
     raw_transaction: string
     decoded_raw_transaction: {
@@ -127,42 +116,44 @@ export interface AddressTx {
   balance_change: number
 }
 
-export interface BtcAddressDTO {
+export interface AddressCall {
+  block_id: number
+  transaction_hash: string
+  index: string
+  time: string
+  sender: string
+  recipient: string
+  value: number
+  value_usd: number
+  transferred: true
+}
+
+export interface AddressDTO {
   [key: string]: {
     address: {
-      type:
-        | 'pubkey'
-        | 'pubkeyhash'
-        | 'scripthash'
-        | 'multisig'
-        | 'nulldata'
-        | 'nonstandard'
-        | 'witness_v0_keyhash'
-        | 'witness_v0_scripthash'
-        | 'witness_unknown'
-      script_hex: string
-      balance: number
+      type?: string
+      contract_code_hex?: string
+      contract_created?: boolean
+      contract_destroyed?: boolean
+      balance?: string
       balance_usd: number
-      received: number
+      received_approximate: string
       received_usd: number
-      spent: number
+      spent_approximate: string
       spent_usd: number
-      output_count: number
-      unspent_output_count: number
-      first_seen_receiving: string
-      last_seen_receiving: string
-      first_seen_spending: string
-      last_seen_spending: string
+      fees_approximate: string
+      fees_usd: number
+      receiving_call_count: number
+      spending_call_count: number
+      call_count: number
       transaction_count: number
-      scripthash_type: string
+      first_seen_receiving?: string
+      last_seen_receiving?: string
+      first_seen_spending?: string
+      last_seen_spending?: string
+      nonce?: number
     }
-    transactions: string[]
-    utxo: {
-      block_id: number
-      transaction_hash: string
-      index: number
-      value: number
-    }[]
+    calls: AddressCall[]
   }
 }
 

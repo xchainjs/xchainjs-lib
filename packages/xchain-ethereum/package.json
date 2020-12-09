@@ -35,7 +35,9 @@
   },
   "dependencies": {
     "@xchainjs/xchain-client": "^0.0.7",
-    "bip39": "^3.0.2"
+    "@xchainjs/xchain-crypto": "^0.2.2",
+    "@xchainjs/xchain-util": "^0.1.0",
+    "axios": "^0.21.0"
   },
   "devDependencies": {
     "ethers": "^5.0.9"
