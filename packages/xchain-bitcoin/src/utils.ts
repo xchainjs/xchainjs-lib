@@ -1,9 +1,9 @@
+import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
+import * as blockChair from './blockchair-api'
 import { Address, Balance, Network, TxHash, TxParams } from '@xchainjs/xchain-client/lib'
 import { AssetBTC, assetToString, baseAmount } from '@xchainjs/xchain-util/lib'
-import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
-import { FeeRate } from './types/client-types'
-import * as blockChair from './blockchair-api'
 import { BtcAddressUTXOs, BtcAddressUTXO } from './types/blockchair-api-types'
+import { FeeRate } from './types/client-types'
 import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
 /**
