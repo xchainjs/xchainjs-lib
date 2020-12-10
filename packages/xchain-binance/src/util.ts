@@ -2,6 +2,7 @@ import { Transfer, TransferEvent } from './types/binance-ws'
 import { TransferFee, DexFees, Fee, TxType as BinanceTxType, Tx as BinanceTx } from './types/binance'
 import { TxType, Tx } from '@xchainjs/xchain-client'
 import { assetFromString, AssetBNB, assetToBase, assetAmount } from '@xchainjs/xchain-util/lib'
+import { DerivePath } from './types/common'
 
 /**
  * Get `hash` from transfer event sent by Binance chain
@@ -66,3 +67,5 @@ export const parseTx = (tx: BinanceTx): Tx | null => {
     hash: tx.txHash,
   }
 }
+
+export const getDerivePath = (index = 0): DerivePath => [44, 714, 0, 0, index]
