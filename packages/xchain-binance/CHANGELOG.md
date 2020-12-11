@@ -1,5 +1,7 @@
 # v.x.x.x (2020-XX-XX)
 
+# v.4.2.0 (2020-12-11)
+
 ### Update
 
 - Update dependencies
