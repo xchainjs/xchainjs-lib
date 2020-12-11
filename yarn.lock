@@ -2451,11 +2451,6 @@
   dependencies:
     "@xchainjs/xchain-util" "^0.1.0"
 
-"@xchainjs/xchain-util@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.1.0.tgz#b7464f089f21bcc96f50ddb4a80dff850667b6a4"
-  integrity sha512-vyCJvXda/7kHQqTMrleSWeiXfdhcWMbTlt3Ika1C50KHDvhD+eIVvf7kbNig3rmX1g4DJnOoOxRGFfp5AVMjxA==
-
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@zkochan/cmd-shim/-/cmd-shim-3.1.0.tgz#2ab8ed81f5bb5452a85f25758eb9b8681982fd2e"
