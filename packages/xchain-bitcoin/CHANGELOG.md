@@ -1,9 +1,23 @@
 # v.x.x.x (2020-XX-XX)
 
+# v.0.6.0 (2020-12-11)
+
 ### Update
 
 - Update dependencies
 - Add `getDefaultFees`
+- Add `createTxInfo` to support transactions using Ledger
+- Add `getDerivePath` helper
+
+### Breaking changes
+
+- Remove deprecated stuff of `electrs`
+- Extract constants to `src/const`
+- Extract common types to `types/common`
+
+### Fix
+
+- Update exports
 
 # v.0.5.1 (2020-11-20)
 
