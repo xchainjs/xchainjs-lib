@@ -44,10 +44,14 @@ export const isAmount = (v: TxEventAttribute): boolean => v.key === 'amount'
 /**
  * Parse amount string to value and denom
  */
-export const parseAmountString = (v: string): TransferAmount => {
-  const value = parseInt(v)
-  const denom = v.replace(value.toString(), '')
-  return { value, denom }
+export const parseAmountString = (v: string): TransferAmount | undefined => {
+  try {
+    const value = parseInt(v)
+    const denom = v.replace(value.toString(), '')
+    return { value, denom }
+  } catch (e) {
+    return undefined
+  }
 }
 
 /**
@@ -68,17 +72,18 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
           const recipient = recipients[i].value
           const sender = senders[i].value
           const amount = parseAmountString(amounts[i].value)
+          if (recipient && sender && amount) {
+            asset = getAsset(amount.denom)
 
-          asset = getAsset(amount.denom)
-
-          from.push({
-            from: sender,
-            amount: baseAmount(amount.value, DECIMAL),
-          })
-          to.push({
-            to: recipient,
-            amount: baseAmount(amount.value, DECIMAL),
-          })
+            from.push({
+              from: sender,
+              amount: baseAmount(amount.value, DECIMAL),
+            })
+            to.push({
+              to: recipient,
+              amount: baseAmount(amount.value, DECIMAL),
+            })
+          }
         }
       }
     })
