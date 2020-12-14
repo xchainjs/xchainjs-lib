@@ -50,15 +50,15 @@ describe('thorchain/util', () => {
 
     const recipientAttribute: TxEventAttribute = {
       key: 'recipient',
-      value: '',
+      value: 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
     }
     const senderAttribute: TxEventAttribute = {
       key: 'sender',
-      value: '',
+      value: 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
     }
     const amountAttribute: TxEventAttribute = {
       key: 'amount',
-      value: '',
+      value: '100rune',
     }
     describe('isRecipient', () => {
       it('validates isRecipient', () => {
@@ -90,8 +90,8 @@ describe('thorchain/util', () => {
     describe('parseAmountString', () => {
       it('should parse amount string', () => {
         const amount = parseAmountString('1000rune')
-        expect(amount.denom).toEqual('rune')
-        expect(amount.value).toEqual(1000)
+        expect(amount?.denom).toEqual('rune')
+        expect(amount?.value).toEqual(1000)
       })
     })
     describe('getTxsFromHistory', () => {
