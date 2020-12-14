@@ -15,10 +15,12 @@ import { CosmosSDKClient } from '@xchainjs/xchain-cosmos'
 import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
-import { PrivKey, codec } from 'cosmos-client'
+import { PrivKey, codec, Msg, AccAddress } from 'cosmos-client'
+import { StdTxSignature } from 'cosmos-client/api'
+import { StdTx } from 'cosmos-client/x/auth'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
-import { AssetRune } from './types'
+import { AssetRune, MsgNativeTx, DepositParam } from './types'
 import { getDenom, getAsset, getTxsFromHistory, DECIMAL } from './util'
 
 /**
@@ -26,6 +28,8 @@ import { getDenom, getAsset, getTxsFromHistory, DECIMAL } from './util'
  */
 export interface ThorchainClient {
   validateAddress(address: string): boolean
+
+  deposit({ amount, memo }: DepositParam): Promise<TxHash>
 }
 
 class Client implements ThorchainClient, XChainClient {
@@ -87,6 +91,7 @@ class Client implements ThorchainClient, XChainClient {
   private registerCodecs = (): void => {
     codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
     codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
+    codec.registerCodec('thorchain/MsgNativeTx', MsgNativeTx, MsgNativeTx.fromJSON)
   }
 
   getExplorerUrl = (): string => {
@@ -201,8 +206,50 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
-  deposit = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
-    return this.transfer({ asset, amount, recipient, memo })
+  deposit = async ({ asset, amount, memo, fee }: DepositParam): Promise<TxHash> => {
+    try {
+      const msg: Msg = [
+        MsgNativeTx.fromJSON({
+          coins: [
+            {
+              denom: getDenom(asset || AssetRune),
+              amount: amount.amount().toString(),
+            },
+          ],
+          memo,
+          signer: this.getAddress(),
+        }),
+      ]
+
+      console.log('msg', msg)
+
+      const signatures: StdTxSignature[] = []
+
+      const unsignedStdTx = StdTx.fromJSON({
+        msg,
+        fee: fee || {
+          gas: '200000',
+          amount: [],
+        },
+        signatures,
+        memo,
+      })
+
+      const signer = AccAddress.fromBech32(this.getAddress())
+
+      console.log('unsignedStdTx', unsignedStdTx)
+      console.log('signer', signer)
+
+      const transferResult = await this.thorClient.signAndBroadcast(
+        unsignedStdTx,
+        this.getPrivateKey(),
+        signer,
+      )
+
+      return transferResult?.txhash || ''
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
@@ -219,8 +266,8 @@ class Client implements ThorchainClient, XChainClient {
       })
 
       return transferResult?.txhash || ''
-    } catch (err) {
-      return ''
+    } catch (error) {
+      return Promise.reject(error)
     }
   }
 

@@ -299,55 +299,6 @@ describe('Client Test', () => {
     expect(result).toEqual('EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D')
   })
 
-  it('deposit', async () => {
-    const to_address = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
-    const send_amount: BaseAmount = baseAmount(10000, 6)
-    const memo = 'deposit'
-
-    const expected_txsPost_result: BroadcastTxCommitResult = {
-      check_tx: {},
-      deliver_tx: {},
-      txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
-      height: 0,
-    }
-
-    mockAccountsAddress(thorClient.getClientUrl(), testnet_address, {
-      height: 0,
-      result: {
-        coins: [
-          {
-            denom: 'thor',
-            amount: '21000',
-          },
-        ],
-        account_number: '0',
-        sequence: '0',
-      },
-    })
-    assertTxsPost(
-      thorClient.getClientUrl(),
-      testnet_address,
-      to_address,
-      [
-        {
-          denom: getDenom(AssetRune),
-          amount: send_amount.amount().toString(),
-        },
-      ],
-      memo,
-      expected_txsPost_result,
-    )
-
-    const result = await thorClient.deposit({
-      asset: AssetRune,
-      recipient: to_address,
-      amount: send_amount,
-      memo,
-    })
-
-    expect(result).toEqual('EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D')
-  })
-
   it('get transaction data', async () => {
     thorClient.setNetwork('mainnet')
     assertTxHashGet(thorClient.getClientUrl(), '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {

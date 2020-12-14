@@ -2,6 +2,7 @@ import { BigSource } from 'big.js'
 
 import { PrivKey, Msg, codec } from 'cosmos-client'
 import { BaseAccount, StdTx } from 'cosmos-client/x/auth'
+import { StdTxFee } from 'cosmos-client/api'
 
 export type CosmosSDKClientParams = {
   server: string
@@ -26,6 +27,7 @@ export type TransferParams = {
   amount: BigSource
   asset: string
   memo?: string
+  fee?: StdTxFee
 }
 
 export type BaseAccountResponse = {
