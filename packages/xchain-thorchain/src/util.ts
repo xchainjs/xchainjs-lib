@@ -58,13 +58,13 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
     const from: TxFrom[] = []
     const to: TxTo[] = []
     let asset
-    tx.logs?.map(log => {
+    tx.logs?.map((log) => {
       const attributes = log.events.find(isTransferEvent)?.attributes
       const recipients = attributes?.filter(isRecipient)
       const senders = attributes?.filter(isSender)
       const amounts = attributes?.filter(isAmount)
       if (recipients && senders && amounts) {
-        for (let i = 0 ; i < Math.min(recipients.length, senders.length, amounts.length) ; i ++) {
+        for (let i = 0; i < Math.min(recipients.length, senders.length, amounts.length); i++) {
           const recipient = recipients[i].value
           const sender = senders[i].value
           const amount = parseAmountString(amounts[i].value)

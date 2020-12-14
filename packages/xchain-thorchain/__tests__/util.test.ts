@@ -1,5 +1,15 @@
 import { AssetRune } from '../src/types'
-import { getDenom, getAsset, getTxsFromHistory, isTransferEvent, isRecipient, isSender, isAmount, parseAmountString, DECIMAL } from '../src/util'
+import {
+  getDenom,
+  getAsset,
+  getTxsFromHistory,
+  isTransferEvent,
+  isRecipient,
+  isSender,
+  isAmount,
+  parseAmountString,
+  DECIMAL,
+} from '../src/util'
 import { TxEventAttribute } from '@xchainjs/xchain-cosmos'
 import { baseAmount } from '@xchainjs/xchain-util'
 
@@ -21,16 +31,20 @@ describe('thorchain/util', () => {
   describe('type guards', () => {
     describe('isTransferEvent', () => {
       it('validates isTransferEvent', () => {
-        expect(isTransferEvent({
-          type: 'transfer',
-          attributes: [],
-        })).toBeTruthy()
+        expect(
+          isTransferEvent({
+            type: 'transfer',
+            attributes: [],
+          }),
+        ).toBeTruthy()
       })
       it('invalidates a isTransferEvent', () => {
-        expect(isTransferEvent({
-          type: 'message',
-          attributes: [],
-        })).toBeFalsy()
+        expect(
+          isTransferEvent({
+            type: 'message',
+            attributes: [],
+          }),
+        ).toBeFalsy()
       })
     })
 
@@ -75,7 +89,7 @@ describe('thorchain/util', () => {
   describe('transaction util', () => {
     describe('parseAmountString', () => {
       it('should parse amount string', () => {
-        const amount = parseAmountString("1000rune")
+        const amount = parseAmountString('1000rune')
         expect(amount.denom).toEqual('rune')
         expect(amount.value).toEqual(1000)
       })
@@ -96,49 +110,49 @@ describe('thorchain/util', () => {
                   attributes: [
                     {
                       key: 'action',
-                      value: 'native_tx'
+                      value: 'native_tx',
                     },
                     {
                       key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
+                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
                     },
                     {
                       key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
-                    }
-                  ]
+                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
+                    },
+                  ],
                 },
                 {
                   type: 'transfer',
                   attributes: [
                     {
                       key: 'recipient',
-                      value: 'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw'
+                      value: 'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw',
                     },
                     {
                       key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
+                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
                     },
                     {
                       key: 'amount',
-                      value: '100000000rune'
+                      value: '100000000rune',
                     },
                     {
                       key: 'recipient',
-                      value: 'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2'
+                      value: 'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2',
                     },
                     {
                       key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
+                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
                     },
                     {
                       key: 'amount',
-                      value: '200000000000rune'
-                    }
-                  ]
-                }
-              ]
-            }
+                      value: '200000000000rune',
+                    },
+                  ],
+                },
+              ],
+            },
           ],
           gas_wanted: '5000000000000000',
           gas_used: '148996',

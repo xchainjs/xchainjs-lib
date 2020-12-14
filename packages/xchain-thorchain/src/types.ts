@@ -1,8 +1,8 @@
 import { Asset } from '@xchainjs/xchain-util'
 
 export type TransferAmount = {
-    value: number
-    denom: string
+  value: number
+  denom: string
 }
 
 export const THORChain = 'THOR'

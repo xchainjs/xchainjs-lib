@@ -182,49 +182,49 @@ describe('Client Test', () => {
                   attributes: [
                     {
                       key: 'action',
-                      value: 'native_tx'
+                      value: 'native_tx',
                     },
                     {
                       key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
+                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
                     },
                     {
                       key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
-                    }
-                  ]
+                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
+                    },
+                  ],
                 },
                 {
                   type: 'transfer',
                   attributes: [
                     {
                       key: 'recipient',
-                      value: 'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw'
+                      value: 'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw',
                     },
                     {
                       key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
+                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
                     },
                     {
                       key: 'amount',
-                      value: '100000000rune'
+                      value: '100000000rune',
                     },
                     {
                       key: 'recipient',
-                      value: 'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2'
+                      value: 'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2',
                     },
                     {
                       key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
+                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
                     },
                     {
                       key: 'amount',
-                      value: '200000000000rune'
-                    }
-                  ]
-                }
-              ]
-            }
+                      value: '200000000000rune',
+                    },
+                  ],
+                },
+              ],
+            },
           ],
           gas_wanted: '5000000000000000',
           gas_used: '148996',
@@ -239,11 +239,15 @@ describe('Client Test', () => {
     expect(transactions.txs[0].from[0].from).toEqual('tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly')
     expect(transactions.txs[0].from[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
     expect(transactions.txs[0].from[1].from).toEqual('tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly')
-    expect(transactions.txs[0].from[1].amount.amount().isEqualTo(baseAmount(200000000000, DECIMAL).amount())).toEqual(true)
+    expect(transactions.txs[0].from[1].amount.amount().isEqualTo(baseAmount(200000000000, DECIMAL).amount())).toEqual(
+      true,
+    )
     expect(transactions.txs[0].to[0].to).toEqual('tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw')
     expect(transactions.txs[0].to[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
     expect(transactions.txs[0].to[1].to).toEqual('tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2')
-    expect(transactions.txs[0].to[1].amount.amount().isEqualTo(baseAmount(200000000000, DECIMAL).amount())).toEqual(true)
+    expect(transactions.txs[0].to[1].amount.amount().isEqualTo(baseAmount(200000000000, DECIMAL).amount())).toEqual(
+      true,
+    )
   })
 
   it('transfer', async () => {
@@ -360,49 +364,49 @@ describe('Client Test', () => {
               attributes: [
                 {
                   key: 'action',
-                  value: 'native_tx'
+                  value: 'native_tx',
                 },
                 {
                   key: 'sender',
-                  value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
+                  value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
                 },
                 {
                   key: 'sender',
-                  value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
-                }
-              ]
+                  value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
+                },
+              ],
             },
             {
               type: 'transfer',
               attributes: [
                 {
                   key: 'recipient',
-                  value: 'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw'
+                  value: 'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw',
                 },
                 {
                   key: 'sender',
-                  value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
+                  value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
                 },
                 {
                   key: 'amount',
-                  value: '100000000rune'
+                  value: '100000000rune',
                 },
                 {
                   key: 'recipient',
-                  value: 'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2'
+                  value: 'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2',
                 },
                 {
                   key: 'sender',
-                  value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
+                  value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
                 },
                 {
                   key: 'amount',
-                  value: '200000000000rune'
-                }
-              ]
-            }
-          ]
-        }
+                  value: '200000000000rune',
+                },
+              ],
+            },
+          ],
+        },
       ],
       gas_wanted: '5000000000000000',
       gas_used: '148996',
