@@ -142,7 +142,15 @@ export class CosmosSDKClient {
     }
   }
 
-  transfer = async ({ privkey, from, to, amount, asset, memo, fee }: TransferParams): Promise<BroadcastTxCommitResult> => {
+  transfer = async ({
+    privkey,
+    from,
+    to,
+    amount,
+    asset,
+    memo,
+    fee,
+  }: TransferParams): Promise<BroadcastTxCommitResult> => {
     try {
       this.setPrefix()
 
@@ -179,7 +187,11 @@ export class CosmosSDKClient {
     }
   }
 
-  signAndBroadcast = async (unsignedStdTx: StdTx, privkey: PrivKey, signer: AccAddress): Promise<BroadcastTxCommitResult> => {
+  signAndBroadcast = async (
+    unsignedStdTx: StdTx,
+    privkey: PrivKey,
+    signer: AccAddress,
+  ): Promise<BroadcastTxCommitResult> => {
     try {
       this.setPrefix()
 
@@ -196,7 +208,7 @@ export class CosmosSDKClient {
         account.sequence.toString(),
       )
 
-      console.log("signedStdTx", signedStdTx)
+      console.log('signedStdTx', signedStdTx)
 
       const result = await auth.txsPost(this.sdk, signedStdTx, 'block').then((res) => res.data)
 

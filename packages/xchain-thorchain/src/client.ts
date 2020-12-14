@@ -240,11 +240,7 @@ class Client implements ThorchainClient, XChainClient {
       console.log('unsignedStdTx', unsignedStdTx)
       console.log('signer', signer)
 
-      const transferResult = await this.thorClient.signAndBroadcast(
-        unsignedStdTx,
-        this.getPrivateKey(),
-        signer,
-      )
+      const transferResult = await this.thorClient.signAndBroadcast(unsignedStdTx, this.getPrivateKey(), signer)
 
       return transferResult?.txhash || ''
     } catch (error) {
