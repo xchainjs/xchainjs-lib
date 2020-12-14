@@ -1,5 +1,10 @@
 # v.x.x.x (2020-XX-XX)
 
+### Update
+
+- Set the latest multi-chain node
+- Update `getTransactionData`, `getTransactions`
+
 # v.0.5.0 (2020-12-11)
 
 ### Update

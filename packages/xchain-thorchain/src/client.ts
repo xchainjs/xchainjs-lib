@@ -11,7 +11,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { CosmosSDKClient, getTxsFromHistory } from '@xchainjs/xchain-cosmos'
+import { CosmosSDKClient } from '@xchainjs/xchain-cosmos'
 import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
@@ -19,9 +19,7 @@ import { PrivKey, codec } from 'cosmos-client'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
 import { AssetRune } from './types'
-import { getDenom, getAsset } from './util'
-
-const DECIMAL = 6
+import { getDenom, getAsset, getTxsFromHistory, DECIMAL } from './util'
 
 /**
  * Interface for custom Thorchain client
@@ -75,7 +73,7 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   getClientUrl = (): string => {
-    return this.network === 'testnet' ? 'http://134.209.138.247:1317' : 'http://138.68.125.107:1317'
+    return this.network === 'testnet' ? 'http://18.198.92.45:1317' : 'http://138.68.125.107:1317'
   }
 
   getChainId = (): string => {

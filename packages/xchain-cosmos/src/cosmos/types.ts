@@ -1,6 +1,6 @@
 import { BigSource } from 'big.js'
 
-import { PrivKey, Msg } from 'cosmos-client'
+import { PrivKey, Msg, codec } from 'cosmos-client'
 import { BaseAccount, StdTx } from 'cosmos-client/x/auth'
 
 export type CosmosSDKClientParams = {
@@ -39,13 +39,30 @@ export type RawTxResponse = {
   }
 }
 
+export type TxEventAttribute = {
+  key: string
+  value: string
+}
+
+export type TxEvent = {
+  type: string
+  attributes: TxEventAttribute[]
+}
+
+export type TxLog = {
+  msg_index: number
+  log: string
+  events: TxEvent[]
+}
+
 export type TxResponse = {
   height?: number
   txhash?: string
   raw_log?: string
+  logs?: TxLog[]
   gas_wanted?: string
   gas_used?: string
-  tx?: StdTx | RawTxResponse
+  tx?: StdTx | RawTxResponse | codec.AminoWrapping
   timestamp: string
 }
 
