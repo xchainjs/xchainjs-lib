@@ -40,7 +40,7 @@ export type RawTxResponse = {
 }
 
 export type TxEventAttribute = {
-  type: string
+  key: string
   value: string
 }
 
