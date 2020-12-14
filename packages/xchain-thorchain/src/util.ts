@@ -51,7 +51,7 @@ export const parseAmountString = (v: string): Balance | undefined => {
     if (value && denom && value.length === 1 && denom.length === 1) {
       const amount = baseAmount(value[0], DECIMAL)
       const asset = getAsset(denom[0])
-      return asset ? {amount, asset} : undefined
+      return asset ? { amount, asset } : undefined
     }
     return undefined
   } catch (e) {
