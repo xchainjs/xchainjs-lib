@@ -90,8 +90,8 @@ describe('thorchain/util', () => {
     describe('parseAmountString', () => {
       it('should parse amount string', () => {
         const amount = parseAmountString('1000rune')
-        expect(amount?.denom).toEqual('rune')
-        expect(amount?.value).toEqual(1000)
+        expect(amount?.asset).toEqual(AssetRune)
+        expect(amount?.amount.amount().isEqualTo(baseAmount(1000, DECIMAL).amount())).toBeTruthy()
       })
     })
     describe('getTxsFromHistory', () => {

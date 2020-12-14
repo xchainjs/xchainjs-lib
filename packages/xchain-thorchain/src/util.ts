@@ -1,7 +1,7 @@
 import { Asset, assetToString, baseAmount, assetFromString, THORChain } from '@xchainjs/xchain-util'
-import { AssetRune, TransferAmount } from './types'
+import { AssetRune } from './types'
 import { TxResponse, TxEvent, TxEventAttribute } from '@xchainjs/xchain-cosmos/lib'
-import { Txs, TxFrom, TxTo } from '@xchainjs/xchain-client'
+import { Txs, TxFrom, TxTo, Balance } from '@xchainjs/xchain-client'
 
 export const DECIMAL = 6
 
@@ -44,11 +44,16 @@ export const isAmount = (v: TxEventAttribute): boolean => v.key === 'amount'
 /**
  * Parse amount string to value and denom
  */
-export const parseAmountString = (v: string): TransferAmount | undefined => {
+export const parseAmountString = (v: string): Balance | undefined => {
   try {
-    const value = parseInt(v)
-    const denom = v.replace(value.toString(), '')
-    return { value, denom }
+    const value = v.match(/\d+/g)
+    const denom = v.match(/[a-z]+/g)
+    if (value && denom && value.length === 1 && denom.length === 1) {
+      const amount = baseAmount(value[0], DECIMAL)
+      const asset = getAsset(denom[0])
+      return asset ? {amount, asset} : undefined
+    }
+    return undefined
   } catch (e) {
     return undefined
   }
@@ -71,17 +76,17 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
         for (let i = 0; i < Math.min(recipients.length, senders.length, amounts.length); i++) {
           const recipient = recipients[i].value
           const sender = senders[i].value
-          const amount = parseAmountString(amounts[i].value)
-          if (recipient && sender && amount) {
-            asset = getAsset(amount.denom)
+          const balance = parseAmountString(amounts[i].value)
+          if (recipient && sender && balance) {
+            asset = balance.asset
 
             from.push({
               from: sender,
-              amount: baseAmount(amount.value, DECIMAL),
+              amount: balance.amount,
             })
             to.push({
               to: recipient,
-              amount: baseAmount(amount.value, DECIMAL),
+              amount: balance.amount,
             })
           }
         }
