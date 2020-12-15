@@ -21,7 +21,15 @@ import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
 import { AssetRune, DepositParam } from './types'
 import { MsgNativeTx } from './messages'
-import { getDenom, getAsset, getTxsFromHistory, DECIMAL, getDenomWithChain, isBroadcastSuccess } from './util'
+import {
+  getDenom,
+  getAsset,
+  getTxsFromHistory,
+  DECIMAL,
+  DEFAULT_GAS_VALUE,
+  getDenomWithChain,
+  isBroadcastSuccess,
+} from './util'
 
 /**
  * Interface for custom Thorchain client
@@ -235,7 +243,7 @@ class Client implements ThorchainClient, XChainClient {
         msg,
         fee: {
           amount: [],
-          gas: '10000000',
+          gas: DEFAULT_GAS_VALUE,
         },
         signatures: [],
         memo: '',
@@ -276,7 +284,7 @@ class Client implements ThorchainClient, XChainClient {
         memo,
         fee: {
           amount: [],
-          gas: '10000000',
+          gas: DEFAULT_GAS_VALUE,
         },
       })
 

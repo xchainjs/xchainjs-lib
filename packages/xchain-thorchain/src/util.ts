@@ -4,6 +4,7 @@ import { TxResponse, TxEvent, TxEventAttribute } from '@xchainjs/xchain-cosmos/l
 import { Txs, TxFrom, TxTo, Balance } from '@xchainjs/xchain-client'
 
 export const DECIMAL = 8
+export const DEFAULT_GAS_VALUE = '10000000'
 
 /**
  * Get denom from Asset
