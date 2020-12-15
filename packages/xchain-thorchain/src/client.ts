@@ -16,11 +16,11 @@ import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { PrivKey, codec, Msg, AccAddress } from 'cosmos-client'
-import { StdTxFee } from 'cosmos-client/api'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
-import { AssetRune, MsgNativeTx, DepositParam } from './types'
+import { AssetRune, DepositParam } from './types'
+import { MsgNativeTx } from './messages'
 import { getDenom, getAsset, getTxsFromHistory, DECIMAL, getDenomWithChain, isBroadcastSuccess } from './util'
 
 /**
@@ -206,18 +206,9 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
-  private getDefaultStdTxFee = (): StdTxFee => {
-    return {
-      amount: [],
-      gas: '10000000',
-    }
-  }
-
-  deposit = async ({ asset, amount, memo }: DepositParam): Promise<TxHash> => {
+  deposit = async ({ asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     try {
       this.registerCodecs()
-
-      if (!asset) asset = AssetRune
 
       const assetBalance = await this.getBalance(this.getAddress(), asset)
       const fee = await this.getFees()
@@ -242,7 +233,10 @@ class Client implements ThorchainClient, XChainClient {
 
       const unsignedStdTx = StdTx.fromJSON({
         msg,
-        fee: this.getDefaultStdTxFee(),
+        fee: {
+          amount: [],
+          gas: '10000000',
+        },
         signatures: [],
         memo: '',
       })
@@ -263,11 +257,9 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
-  transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
+  transfer = async ({ asset = AssetRune, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
       this.registerCodecs()
-
-      if (!asset) asset = AssetRune
 
       const assetBalance = await this.getBalance(this.getAddress(), asset)
       const fee = await this.getFees()
@@ -282,7 +274,10 @@ class Client implements ThorchainClient, XChainClient {
         amount: amount.amount().toString(),
         asset: getDenom(asset),
         memo,
-        fee: this.getDefaultStdTxFee(),
+        fee: {
+          amount: [],
+          gas: '10000000',
+        },
       })
 
       if (!isBroadcastSuccess(transferResult)) {
@@ -295,7 +290,6 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
-  // there is no fixed fee, we set fee amount when creating a transaction.
   getFees = async (): Promise<Fees> => {
     return Promise.resolve(this.getDefaultFees())
   }

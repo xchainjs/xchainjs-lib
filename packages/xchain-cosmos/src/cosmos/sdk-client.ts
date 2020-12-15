@@ -149,18 +149,18 @@ export class CosmosSDKClient {
     amount,
     asset,
     memo = '',
-    fee,
+    fee = {
+      amount: [],
+      gas: '200000',
+    },
   }: TransferParams): Promise<BroadcastTxCommitResult> => {
     try {
       this.setPrefix()
 
-      const fromAddress = AccAddress.fromBech32(from)
-      const toAddress = AccAddress.fromBech32(to)
-
       const msg: Msg = [
         MsgSend.fromJSON({
-          from_address: fromAddress.toBech32(),
-          to_address: toAddress.toBech32(),
+          from_address: from,
+          to_address: to,
           amount: [
             {
               amount: amount.toString(),
@@ -173,15 +173,12 @@ export class CosmosSDKClient {
 
       const unsignedStdTx = StdTx.fromJSON({
         msg,
-        fee: fee || {
-          amount: [],
-          gas: '200000',
-        },
+        fee,
         signatures,
         memo,
       })
 
-      return this.signAndBroadcast(unsignedStdTx, privkey, fromAddress)
+      return this.signAndBroadcast(unsignedStdTx, privkey, AccAddress.fromBech32(from))
     } catch (error) {
       return Promise.reject(error)
     }
