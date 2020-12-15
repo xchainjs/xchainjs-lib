@@ -15,17 +15,29 @@ import { CosmosSDKClient } from '@xchainjs/xchain-cosmos'
 import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
-import { PrivKey, codec } from 'cosmos-client'
+import { PrivKey, codec, Msg, AccAddress } from 'cosmos-client'
+import { StdTx } from 'cosmos-client/x/auth'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
-import { AssetRune } from './types'
-import { getDenom, getAsset, getTxsFromHistory, DECIMAL } from './util'
+import { AssetRune, DepositParam } from './types'
+import { MsgNativeTx } from './messages'
+import {
+  getDenom,
+  getAsset,
+  getTxsFromHistory,
+  DECIMAL,
+  DEFAULT_GAS_VALUE,
+  getDenomWithChain,
+  isBroadcastSuccess,
+} from './util'
 
 /**
  * Interface for custom Thorchain client
  */
 export interface ThorchainClient {
   validateAddress(address: string): boolean
+
+  deposit(params: DepositParam): Promise<TxHash>
 }
 
 class Client implements ThorchainClient, XChainClient {
@@ -49,13 +61,13 @@ class Client implements ThorchainClient, XChainClient {
     if (phrase) this.setPhrase(phrase)
   }
 
-  purgeClient(): void {
+  purgeClient = (): void => {
     this.phrase = ''
     this.address = ''
     this.privateKey = null
   }
 
-  setNetwork(network: Network): XChainClient {
+  setNetwork = (network: Network): XChainClient => {
     this.network = network
     this.thorClient = new CosmosSDKClient({
       server: this.getClientUrl(),
@@ -68,7 +80,7 @@ class Client implements ThorchainClient, XChainClient {
     return this
   }
 
-  getNetwork(): Network {
+  getNetwork = (): Network => {
     return this.network
   }
 
@@ -87,6 +99,7 @@ class Client implements ThorchainClient, XChainClient {
   private registerCodecs = (): void => {
     codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
     codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
+    codec.registerCodec('thorchain/MsgNativeTx', MsgNativeTx, MsgNativeTx.fromJSON)
   }
 
   getExplorerUrl = (): string => {
@@ -201,45 +214,101 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
-  deposit = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
-    return this.transfer({ asset, amount, recipient, memo })
-  }
-
-  transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
+  deposit = async ({ asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     try {
       this.registerCodecs()
+
+      const assetBalance = await this.getBalance(this.getAddress(), asset)
+      const fee = await this.getFees()
+      if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
+        throw new Error('insufficient funds')
+      }
+
+      const signer = this.getAddress()
+
+      const msg: Msg = [
+        MsgNativeTx.fromJSON({
+          coins: [
+            {
+              asset: getDenomWithChain(asset),
+              amount: amount.amount().toString(),
+            },
+          ],
+          memo,
+          signer,
+        }),
+      ]
+
+      const unsignedStdTx = StdTx.fromJSON({
+        msg,
+        fee: {
+          amount: [],
+          gas: DEFAULT_GAS_VALUE,
+        },
+        signatures: [],
+        memo: '',
+      })
+
+      const transferResult = await this.thorClient.signAndBroadcast(
+        unsignedStdTx,
+        this.getPrivateKey(),
+        AccAddress.fromBech32(signer),
+      )
+
+      if (!isBroadcastSuccess(transferResult)) {
+        throw new Error(`failed to broadcast transaction: ${transferResult.txhash}`)
+      }
+
+      return transferResult?.txhash || ''
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  transfer = async ({ asset = AssetRune, amount, recipient, memo }: TxParams): Promise<TxHash> => {
+    try {
+      this.registerCodecs()
+
+      const assetBalance = await this.getBalance(this.getAddress(), asset)
+      const fee = await this.getFees()
+      if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
+        throw new Error('insufficient funds')
+      }
 
       const transferResult = await this.thorClient.transfer({
         privkey: this.getPrivateKey(),
         from: this.getAddress(),
         to: recipient,
         amount: amount.amount().toString(),
-        asset: getDenom(asset || AssetRune),
+        asset: getDenom(asset),
         memo,
+        fee: {
+          amount: [],
+          gas: DEFAULT_GAS_VALUE,
+        },
       })
 
+      if (!isBroadcastSuccess(transferResult)) {
+        throw new Error(`failed to broadcast transaction: ${transferResult.txhash}`)
+      }
+
       return transferResult?.txhash || ''
-    } catch (err) {
-      return ''
+    } catch (error) {
+      return Promise.reject(error)
     }
   }
 
-  // there is no fixed fee, we set fee amount when creating a transaction.
   getFees = async (): Promise<Fees> => {
-    return Promise.resolve({
-      type: 'base',
-      fast: baseAmount(750, DECIMAL),
-      fastest: baseAmount(2500, DECIMAL),
-      average: baseAmount(0, DECIMAL),
-    })
+    return Promise.resolve(this.getDefaultFees())
   }
 
   getDefaultFees = (): Fees => {
+    const fee = baseAmount(10000000, DECIMAL)
     return {
       type: 'base',
-      fast: baseAmount(750, DECIMAL),
-      fastest: baseAmount(2500, DECIMAL),
-      average: baseAmount(0, DECIMAL),
+      fast: fee,
+      fastest: fee,
+      average: fee,
     }
   }
 }

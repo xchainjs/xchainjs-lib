@@ -5,7 +5,7 @@ import { TxHistoryParams } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from 'cosmos-client'
-import { BroadcastTxCommitResult, Coin, StdTxFee, StdTxSignature } from 'cosmos-client/api'
+import { BroadcastTxCommitResult, Coin, StdTxSignature } from 'cosmos-client/api'
 import { auth, StdTx, BaseAccount } from 'cosmos-client/x/auth'
 import { bank, MsgSend } from 'cosmos-client/x/bank'
 
@@ -142,34 +142,33 @@ export class CosmosSDKClient {
     }
   }
 
-  transfer = async ({ privkey, from, to, amount, asset, memo }: TransferParams): Promise<BroadcastTxCommitResult> => {
+  transfer = async ({
+    privkey,
+    from,
+    to,
+    amount,
+    asset,
+    memo = '',
+    fee = {
+      amount: [],
+      gas: '200000',
+    },
+  }: TransferParams): Promise<BroadcastTxCommitResult> => {
     try {
       this.setPrefix()
 
-      const fromAddress = AccAddress.fromBech32(from)
-      const toAddress = AccAddress.fromBech32(to)
-
-      let account: BaseAccount = await auth.accountsAddressGet(this.sdk, fromAddress).then((res) => res.data.result)
-      if (account.account_number === undefined) {
-        account = BaseAccount.fromJSON((account as BaseAccountResponse).value)
-      }
-
       const msg: Msg = [
         MsgSend.fromJSON({
-          from_address: fromAddress.toBech32(),
-          to_address: toAddress.toBech32(),
+          from_address: from,
+          to_address: to,
           amount: [
             {
-              denom: asset,
               amount: amount.toString(),
+              denom: asset,
             },
           ],
         }),
       ]
-      const fee: StdTxFee = {
-        gas: '200000',
-        amount: [],
-      }
       const signatures: StdTxSignature[] = []
 
       const unsignedStdTx = StdTx.fromJSON({
@@ -179,6 +178,25 @@ export class CosmosSDKClient {
         memo,
       })
 
+      return this.signAndBroadcast(unsignedStdTx, privkey, AccAddress.fromBech32(from))
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  signAndBroadcast = async (
+    unsignedStdTx: StdTx,
+    privkey: PrivKey,
+    signer: AccAddress,
+  ): Promise<BroadcastTxCommitResult> => {
+    try {
+      this.setPrefix()
+
+      let account: BaseAccount = await auth.accountsAddressGet(this.sdk, signer).then((res) => res.data.result)
+      if (account.account_number === undefined) {
+        account = BaseAccount.fromJSON((account as BaseAccountResponse).value)
+      }
+
       const signedStdTx = auth.signStdTx(
         this.sdk,
         privkey,
@@ -187,9 +205,7 @@ export class CosmosSDKClient {
         account.sequence.toString(),
       )
 
-      const result = await auth.txsPost(this.sdk, signedStdTx, 'block').then((res) => res.data)
-
-      return result
+      return await auth.txsPost(this.sdk, signedStdTx, 'block').then((res) => res.data)
     } catch (error) {
       return Promise.reject(error)
     }

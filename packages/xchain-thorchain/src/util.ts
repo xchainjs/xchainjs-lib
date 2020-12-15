@@ -3,7 +3,8 @@ import { AssetRune } from './types'
 import { TxResponse, TxEvent, TxEventAttribute } from '@xchainjs/xchain-cosmos/lib'
 import { Txs, TxFrom, TxTo, Balance } from '@xchainjs/xchain-client'
 
-export const DECIMAL = 6
+export const DECIMAL = 8
+export const DEFAULT_GAS_VALUE = '10000000'
 
 /**
  * Get denom from Asset
@@ -14,12 +15,25 @@ export const getDenom = (v: Asset): string => {
 }
 
 /**
+ * Get denom with chainname from Asset
+ */
+export const getDenomWithChain = (v: Asset): string => {
+  return `${THORChain}.${v.symbol.toUpperCase()}`
+}
+
+/**
  * Get Asset from denom
  */
 export const getAsset = (v: string): Asset | null => {
   if (v === getDenom(AssetRune)) return AssetRune
   return assetFromString(`${THORChain}.${v.toUpperCase()}`)
 }
+
+/**
+ * Response guard for transaction broadcast
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isBroadcastSuccess = (v: any): boolean => v.logs !== undefined
 
 /**
  * Type guard for transfer event
