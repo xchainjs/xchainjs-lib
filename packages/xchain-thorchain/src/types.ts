@@ -1,11 +1,6 @@
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { Msg, AccAddress } from 'cosmos-client'
 
-export type TransferAmount = {
-  value: number
-  denom: string
-}
-
 export type DepositParam = {
   asset?: Asset
   amount: BaseAmount
