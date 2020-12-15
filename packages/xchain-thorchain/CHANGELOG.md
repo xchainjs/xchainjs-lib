@@ -4,6 +4,8 @@
 
 - Set the latest multi-chain node
 - Update `getTransactionData`, `getTransactions`
+- Update `transfer` (for `MsgSend`)
+- Update `deposit` (for `MsgNativeTx`)
 
 # v.0.5.0 (2020-12-11)
 

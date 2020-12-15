@@ -1,6 +1,7 @@
 import { AssetRune } from '../src/types'
 import {
   getDenom,
+  getDenomWithChain,
   getAsset,
   getTxsFromHistory,
   isTransferEvent,
@@ -9,6 +10,7 @@ import {
   isAmount,
   parseAmountString,
   DECIMAL,
+  isBroadcastSuccess,
 } from '../src/util'
 import { TxEventAttribute } from '@xchainjs/xchain-cosmos'
 import { baseAmount } from '@xchainjs/xchain-util'
@@ -18,6 +20,12 @@ describe('thorchain/util', () => {
     describe('getDenom', () => {
       it('get denom for AssetRune', () => {
         expect(getDenom(AssetRune)).toEqual('rune')
+      })
+    })
+
+    describe('getDenomWithChain', () => {
+      it('get denom for AssetRune', () => {
+        expect(getDenomWithChain(AssetRune)).toEqual('THOR.RUNE')
       })
     })
 
@@ -64,7 +72,7 @@ describe('thorchain/util', () => {
       it('validates isRecipient', () => {
         expect(isRecipient(recipientAttribute)).toBeTruthy()
       })
-      it('invalidates a isRecipient', () => {
+      it('invalidates isRecipient', () => {
         expect(isRecipient(senderAttribute)).toBeFalsy()
       })
     })
@@ -72,7 +80,7 @@ describe('thorchain/util', () => {
       it('validates isSender', () => {
         expect(isSender(senderAttribute)).toBeTruthy()
       })
-      it('invalidates a isSender', () => {
+      it('invalidates isSender', () => {
         expect(isSender(recipientAttribute)).toBeFalsy()
       })
     })
@@ -80,7 +88,7 @@ describe('thorchain/util', () => {
       it('validates isAmount', () => {
         expect(isAmount(amountAttribute)).toBeTruthy()
       })
-      it('invalidates a isAmount', () => {
+      it('invalidates isAmount', () => {
         expect(isAmount(recipientAttribute)).toBeFalsy()
       })
     })
@@ -171,6 +179,14 @@ describe('thorchain/util', () => {
         expect(history[0].to[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
         expect(history[0].to[1].to).toEqual('tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2')
         expect(history[0].to[1].amount.amount().isEqualTo(baseAmount(200000000000, DECIMAL).amount())).toEqual(true)
+      })
+      describe('isBroadcastSuccess', () => {
+        it('validates isBroadcastSuccess', () => {
+          expect(isBroadcastSuccess({ logs: [] })).toBeTruthy()
+        })
+        it('invalidates isBroadcastSuccess', () => {
+          expect(isBroadcastSuccess({})).toBeFalsy()
+        })
       })
     })
   })

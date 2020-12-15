@@ -148,7 +148,7 @@ export class CosmosSDKClient {
     to,
     amount,
     asset,
-    memo,
+    memo = '',
     fee,
   }: TransferParams): Promise<BroadcastTxCommitResult> => {
     try {
@@ -163,8 +163,8 @@ export class CosmosSDKClient {
           to_address: toAddress.toBech32(),
           amount: [
             {
-              denom: asset,
               amount: amount.toString(),
+              denom: asset,
             },
           ],
         }),
@@ -174,8 +174,8 @@ export class CosmosSDKClient {
       const unsignedStdTx = StdTx.fromJSON({
         msg,
         fee: fee || {
-          gas: '200000',
           amount: [],
+          gas: '200000',
         },
         signatures,
         memo,
@@ -208,11 +208,7 @@ export class CosmosSDKClient {
         account.sequence.toString(),
       )
 
-      console.log('signedStdTx', signedStdTx)
-
-      const result = await auth.txsPost(this.sdk, signedStdTx, 'block').then((res) => res.data)
-
-      return result
+      return await auth.txsPost(this.sdk, signedStdTx, 'block').then((res) => res.data)
     } catch (error) {
       return Promise.reject(error)
     }

@@ -1,5 +1,9 @@
 # v.x.x.x (2020-XX-XX)
 
+### Update
+
+- Extract `signAndBroadcast` from `transfer`
+
 # v.0.5.0 (2020-12-11)
 
 ### Update

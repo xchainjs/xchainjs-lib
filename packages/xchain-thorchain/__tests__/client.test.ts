@@ -6,7 +6,7 @@ import { TxHistoryResponse, TxResponse } from '@xchainjs/xchain-cosmos'
 import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
 import { AssetRune } from '../src/types'
 import { Client } from '../src/client'
-import { getDenom, DECIMAL } from '../src/util'
+import { DECIMAL } from '../src/util'
 
 const mockAccountsAddress = (
   url: string,
@@ -30,21 +30,10 @@ const mockAccountsBalance = (
   nock(url).get(`/bank/balances/${address}`).reply(200, result)
 }
 
-const assertTxsPost = (
-  url: string,
-  from_address: string,
-  to_address: string,
-  send_amount: Coin[],
-  memo: undefined | string,
-  result: BroadcastTxCommitResult,
-): void => {
+const assertTxsPost = (url: string, memo: undefined | string, result: BroadcastTxCommitResult): void => {
   nock(url)
     .post(`/txs`, (body) => {
       expect(body.tx.msg.length).toEqual(1)
-      expect(body.tx.msg[0].type).toEqual('thorchain/MsgSend')
-      expect(body.tx.msg[0].value.from_address).toEqual(from_address)
-      expect(body.tx.msg[0].value.to_address).toEqual(to_address)
-      expect(body.tx.msg[0].value.amount).toEqual(send_amount)
       expect(body.tx.memo).toEqual(memo)
       return true
     })
@@ -255,11 +244,12 @@ describe('Client Test', () => {
     const send_amount: BaseAmount = baseAmount(10000, 6)
     const memo = 'transfer'
 
-    const expected_txsPost_result: BroadcastTxCommitResult = {
+    const expected_txsPost_result = {
       check_tx: {},
       deliver_tx: {},
       txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
       height: 0,
+      logs: [],
     }
 
     mockAccountsAddress(thorClient.getClientUrl(), testnet_address, {
@@ -267,31 +257,73 @@ describe('Client Test', () => {
       result: {
         coins: [
           {
-            denom: 'thor',
-            amount: '21000',
+            denom: 'rune',
+            amount: '210000000',
           },
         ],
         account_number: '0',
         sequence: '0',
       },
     })
-    assertTxsPost(
-      thorClient.getClientUrl(),
-      testnet_address,
-      to_address,
-      [
+    mockAccountsBalance(thorClient.getClientUrl(), testnet_address, {
+      height: 0,
+      result: [
         {
-          denom: getDenom(AssetRune),
-          amount: send_amount.amount().toString(),
+          denom: 'rune',
+          amount: '210000000',
         },
       ],
-      memo,
-      expected_txsPost_result,
-    )
+    })
+    assertTxsPost(thorClient.getClientUrl(), memo, expected_txsPost_result)
 
     const result = await thorClient.transfer({
       asset: AssetRune,
       recipient: to_address,
+      amount: send_amount,
+      memo,
+    })
+
+    expect(result).toEqual('EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D')
+  })
+
+  it('deposit', async () => {
+    const send_amount: BaseAmount = baseAmount(10000, 6)
+    const memo = 'swap:BNB.BNB:tbnb1ftzhmpzr4t8ta3etu4x7nwujf9jqckp3th2lh0'
+
+    const expected_txsPost_result = {
+      check_tx: {},
+      deliver_tx: {},
+      txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
+      height: 0,
+      logs: [],
+    }
+
+    mockAccountsAddress(thorClient.getClientUrl(), testnet_address, {
+      height: 0,
+      result: {
+        coins: [
+          {
+            denom: 'rune',
+            amount: '210000000',
+          },
+        ],
+        account_number: '0',
+        sequence: '0',
+      },
+    })
+    mockAccountsBalance(thorClient.getClientUrl(), testnet_address, {
+      height: 0,
+      result: [
+        {
+          denom: 'rune',
+          amount: '210000000',
+        },
+      ],
+    })
+    assertTxsPost(thorClient.getClientUrl(), '', expected_txsPost_result)
+
+    const result = await thorClient.deposit({
+      asset: AssetRune,
       amount: send_amount,
       memo,
     })

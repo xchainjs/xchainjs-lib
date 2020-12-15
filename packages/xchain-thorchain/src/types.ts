@@ -1,6 +1,5 @@
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { Msg, AccAddress } from 'cosmos-client'
-import { Coin, StdTxFee } from 'cosmos-client/api'
 
 export type TransferAmount = {
   value: number
@@ -11,14 +10,18 @@ export type DepositParam = {
   asset?: Asset
   amount: BaseAmount
   memo: string
-  fee?: StdTxFee
 }
 
 export const THORChain = 'THOR'
 export const AssetRune: Asset = { chain: THORChain, symbol: 'RUNE', ticker: 'RUNE' }
 
+export type MsgCoin = {
+  asset: string
+  amount: string
+}
+
 export class MsgNativeTx extends Msg {
-  coins: Coin[]
+  coins: MsgCoin[]
   memo: string
   signer: AccAddress
   /**
@@ -27,7 +30,7 @@ export class MsgNativeTx extends Msg {
    * @param to_address
    * @param amount
    */
-  constructor(coins: Coin[], memo: string, signer: AccAddress) {
+  constructor(coins: MsgCoin[], memo: string, signer: AccAddress) {
     super()
 
     this.coins = coins
@@ -38,7 +41,7 @@ export class MsgNativeTx extends Msg {
    *
    * @param value
    */
-  static fromJSON = (value: { coins: Coin[]; memo: string; signer: string }): MsgNativeTx => {
+  static fromJSON = (value: { coins: MsgCoin[]; memo: string; signer: string }): MsgNativeTx => {
     return new MsgNativeTx(value.coins, value.memo, AccAddress.fromBech32(value.signer))
   }
 }
