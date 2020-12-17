@@ -1,5 +1,9 @@
 # v.x.x.x (2020-XX-XX)
 
+### Fix
+
+- `getBalance`, `getTransactions`, `getTransactionData`
+
 # v.0.2.0 (2020-12-11)
 
 ### Update

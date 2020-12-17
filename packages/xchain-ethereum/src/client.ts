@@ -24,8 +24,7 @@ import {
 import { AssetETH, baseAmount, baseToAsset, BaseAmount, assetFromString } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as blockChair from './blockchair-api'
-import { ethNetworkToXchains, xchainNetworkToEths } from './utils'
-import { TxIO } from './types/blockchair-api-types'
+import { ethNetworkToXchains, xchainNetworkToEths, ETH_DECIMAL } from './utils'
 import { getGasOracle } from './etherscan-api'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
@@ -35,7 +34,6 @@ const ethAddress = '0x0000000000000000000000000000000000000000'
  */
 export interface EthereumClient {
   getBlockNumber(): Promise<number>
-  getTransactionCount(blocktag: string | number): Promise<number>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   call<T>(asset: Address, abi: ethers.ContractInterface, func: string, params: Array<any>): Promise<T>
   vaultTx(asset: string, amount: BaseAmount, memo: string): Promise<TransactionResponse>
@@ -51,8 +49,6 @@ type ClientParams = XChainClientParams & {
   etherscanApiKey?: string
   vault?: string
 }
-
-const ETH_DECIMAL = 18
 
 /**
  * Custom Ethereum client
@@ -163,7 +159,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   private changeWallet = (wallet: ethers.Wallet): ethers.Wallet => {
     this.wallet = wallet
-    this.address = wallet.address
+    this.address = wallet.address.toLowerCase()
     return this.getWallet()
   }
 
@@ -216,15 +212,13 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   // Returns balance of address
-  getBalance = async (addressParam?: string): Promise<Balance[]> => {
-    const address = addressParam || this.getAddress()
-
+  getBalance = async (address: string = this.getAddress()): Promise<Balance[]> => {
     try {
       const dashboardAddress = await blockChair.getAddress(this.blockchairNodeUrl, address, this.blockchairNodeApiKey)
       return [
         {
           asset: AssetETH,
-          amount: baseAmount(dashboardAddress[address].address.balance, ETH_DECIMAL),
+          amount: baseAmount(dashboardAddress[address].address.balance || 0, ETH_DECIMAL),
         },
       ]
     } catch (error) {
@@ -266,24 +260,7 @@ export default class Client implements XChainClient, EthereumClient {
     return this.getWallet().provider.getBlockNumber()
   }
 
-  /**
-   * Returns a Promise that resovles to the number of transactions this account has ever sent (also called the nonce) at the blockTag.
-   * @param blocktag A block tag is used to uniquely identify a block’s position in the blockchain:
-   * a Number or hex string:
-   * Each block has a block number (eg. 42 or "0x2a).
-   * “latest”:
-   *  The most recently mined block.
-   * “pending”:
-   *  The block that is currently being mined.
-   */
-  getTransactionCount = async (blocktag: string | number = 'latest', address?: Address): Promise<number> => {
-    return this.provider.getTransactionCount(address || this.getAddress(), blocktag)
-  }
-
-  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const address = params?.address ?? this.getAddress()
-    const limit = params?.limit ?? 10
-    const offset = params?.offset ?? 0
+  getTransactions = async ({address = this.getAddress(), limit = 10, offset = 0}: TxHistoryParams): Promise<TxsPage> => {
 
     let totalCount = 0
     const transactions: Tx[] = []
@@ -302,18 +279,19 @@ export default class Client implements XChainClient, EthereumClient {
       const txList = dashboardAddress[address].calls
 
       for (const call of txList) {
-        const hash = call.transaction_hash
-        const rawTx = (await blockChair.getTx(this.blockchairNodeUrl, hash, this.blockchairNodeApiKey))[hash]
         const tx: Tx = {
           asset: AssetETH,
-          from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, ETH_DECIMAL) })),
-          to: rawTx.outputs
-            // ignore tx with type 'nulldata'
-            .filter((i: TxIO) => i.type !== 'nulldata')
-            .map((i: TxIO) => ({ to: i.recipient, amount: baseAmount(i.value, ETH_DECIMAL) })),
-          date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
-          type: 'transfer',
-          hash: rawTx.transaction.hash,
+          from: [{
+            from: call.sender,
+            amount: baseAmount(call.value, ETH_DECIMAL),
+          }],
+          to: [{
+            to: call.recipient,
+            amount: baseAmount(call.value, ETH_DECIMAL),
+          }],
+          date: new Date(`${call.time} UTC`),
+          type: call.transferred ? 'transfer' : 'unknown',
+          hash: call.transaction_hash,
         }
         transactions.push(tx)
       }
@@ -329,14 +307,21 @@ export default class Client implements XChainClient, EthereumClient {
 
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const rawTx = (await blockChair.getTx(this.blockchairNodeUrl, txId, this.blockchairNodeApiKey))[txId]
+      const tx = (await blockChair.getTx(this.blockchairNodeUrl, txId, this.blockchairNodeApiKey))[txId].transaction
+      
       return {
         asset: AssetETH,
-        from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value, ETH_DECIMAL) })),
-        to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value, ETH_DECIMAL) })),
-        date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
+        from: [{
+          from: tx.sender,
+          amount: baseAmount(tx.value, ETH_DECIMAL),
+        }],
+        to: [{
+          to: tx.recipient,
+          amount: baseAmount(tx.value, ETH_DECIMAL),
+        }],
+        date: new Date(`${tx.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
         type: 'transfer',
-        hash: rawTx.transaction.hash,
+        hash: tx.hash,
       }
     } catch (error) {
       return Promise.reject(error)

@@ -40,32 +40,50 @@ export interface Transactions {
     transaction: {
       block_id: number
       id: number
+      index: number
       hash: string
       date: string
       time: string
-      size: number
-      weight: number
-      version: number
-      lock_time: number
-      is_coinbase: boolean
-      has_witness: boolean
-      input_count: number
-      output_count: number
-      input_total: number
-      input_total_usd: number
-      output_total: number
-      output_total_usd: number
-      fee: number
-      fee_usd: number
-      fee_per_kb: number
-      fee_per_kb_usd: number
-      fee_per_kwu: number
-      fee_per_kwu_usd: number
-      cdd_total: number
-      is_rbf: boolean
+      failed: boolean
+      type: string
+      sender: string
+      recipient: string
+      call_count: number
+      value: string
+      value_usd: number | null
+      internal_value: string
+      internal_value_usd: number | null
+      fee: string
+      fee_usd: number | null
+      gas_used: number
+      gas_limit: number
+      gas_price: number
+      input_hex: string
+      nonce: number
+      v: string
+      r: string
+      s: string
     }
-    inputs: TxIO[]
-    outputs: TxIO[]
+    calls: {
+      block_id: number
+      transaction_id: number
+      transaction_hash: string
+      index: string
+      depth: number
+      date: string
+      time: string
+      failed: boolean
+      fail_reason: string | null
+      type: string
+      sender: string
+      recipient: string
+      child_call_count: number
+      value: string
+      value_usd: number | null
+      transferred: boolean
+      input_hex: string
+      output_hex: string
+    }[]
   }
 }
 
@@ -124,18 +142,18 @@ export interface AddressCall {
   sender: string
   recipient: string
   value: number
-  value_usd: number
+  value_usd: number | null
   transferred: true
 }
 
 export interface AddressDTO {
   [key: string]: {
     address: {
-      type?: string
-      contract_code_hex?: string
-      contract_created?: boolean
-      contract_destroyed?: boolean
-      balance?: string
+      type: string | null
+      contract_code_hex: string | null
+      contract_created: boolean | null
+      contract_destroyed: boolean | null
+      balance: string | null
       balance_usd: number
       received_approximate: string
       received_usd: number
@@ -147,11 +165,11 @@ export interface AddressDTO {
       spending_call_count: number
       call_count: number
       transaction_count: number
-      first_seen_receiving?: string
-      last_seen_receiving?: string
-      first_seen_spending?: string
-      last_seen_spending?: string
-      nonce?: number
+      first_seen_receiving: string | null
+      last_seen_receiving: string | null
+      first_seen_spending: string | null
+      last_seen_spending: string | null
+      nonce: number | null
     }
     calls: AddressCall[]
   }
