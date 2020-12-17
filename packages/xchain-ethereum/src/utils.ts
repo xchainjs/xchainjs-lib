@@ -1,6 +1,8 @@
 import { Network as XChainNetwork } from '@xchainjs/xchain-client'
 import { Network as EthNetwork } from './types'
 
+export const ETH_DECIMAL = 18
+
 export const xchainNetworkToEths = (network: XChainNetwork): EthNetwork => {
   switch (network) {
     /**
