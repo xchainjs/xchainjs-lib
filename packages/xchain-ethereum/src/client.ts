@@ -260,8 +260,11 @@ export default class Client implements XChainClient, EthereumClient {
     return this.getWallet().provider.getBlockNumber()
   }
 
-  getTransactions = async ({address = this.getAddress(), limit = 10, offset = 0}: TxHistoryParams): Promise<TxsPage> => {
-
+  getTransactions = async ({
+    address = this.getAddress(),
+    limit = 10,
+    offset = 0,
+  }: TxHistoryParams): Promise<TxsPage> => {
     let totalCount = 0
     const transactions: Tx[] = []
     try {
@@ -281,14 +284,18 @@ export default class Client implements XChainClient, EthereumClient {
       for (const call of txList) {
         const tx: Tx = {
           asset: AssetETH,
-          from: [{
-            from: call.sender,
-            amount: baseAmount(call.value, ETH_DECIMAL),
-          }],
-          to: [{
-            to: call.recipient,
-            amount: baseAmount(call.value, ETH_DECIMAL),
-          }],
+          from: [
+            {
+              from: call.sender,
+              amount: baseAmount(call.value, ETH_DECIMAL),
+            },
+          ],
+          to: [
+            {
+              to: call.recipient,
+              amount: baseAmount(call.value, ETH_DECIMAL),
+            },
+          ],
           date: new Date(`${call.time} UTC`),
           type: call.transferred ? 'transfer' : 'unknown',
           hash: call.transaction_hash,
@@ -308,17 +315,21 @@ export default class Client implements XChainClient, EthereumClient {
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
       const tx = (await blockChair.getTx(this.blockchairNodeUrl, txId, this.blockchairNodeApiKey))[txId].transaction
-      
+
       return {
         asset: AssetETH,
-        from: [{
-          from: tx.sender,
-          amount: baseAmount(tx.value, ETH_DECIMAL),
-        }],
-        to: [{
-          to: tx.recipient,
-          amount: baseAmount(tx.value, ETH_DECIMAL),
-        }],
+        from: [
+          {
+            from: tx.sender,
+            amount: baseAmount(tx.value, ETH_DECIMAL),
+          },
+        ],
+        to: [
+          {
+            to: tx.recipient,
+            amount: baseAmount(tx.value, ETH_DECIMAL),
+          },
+        ],
         date: new Date(`${tx.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
         type: 'transfer',
         hash: tx.hash,

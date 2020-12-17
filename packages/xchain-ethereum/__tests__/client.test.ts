@@ -173,10 +173,10 @@ describe('Balances', () => {
           last_seen_receiving: '2020-12-08 04:49:56',
           first_seen_spending: null,
           last_seen_spending: null,
-          nonce: null
+          nonce: null,
         },
         calls: [],
-      }
+      },
     })
 
     const balance = await ethClient.getBalance()
@@ -215,10 +215,10 @@ describe('Balances', () => {
           last_seen_receiving: '2020-12-08 04:49:56',
           first_seen_spending: null,
           last_seen_spending: null,
-          nonce: null
+          nonce: null,
         },
         calls: [],
-      }
+      },
     })
 
     const balance = await ethClient.getBalance('0xdac17f958d2ee523a2206206994597c13d831ec7')
@@ -268,28 +268,31 @@ describe('Transactions', () => {
           last_seen_spending: null,
           nonce: null,
         },
-        calls: [{
-          block_id: 3888697,
-          transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-          index: '0',
-          time: '2020-12-08 04:49:56',
-          sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
-          recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-          value: 0,
-          value_usd: null,
-          transferred: true,
-        },{
-          block_id: 3888697,
-          transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-          index: '0',
-          time: '2020-12-08 04:49:56',
-          sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
-          recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-          value: 0,
-          value_usd: null,
-          transferred: true,
-        }],
-      }
+        calls: [
+          {
+            block_id: 3888697,
+            transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
+            index: '0',
+            time: '2020-12-08 04:49:56',
+            sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
+            recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+            value: 0,
+            value_usd: null,
+            transferred: true,
+          },
+          {
+            block_id: 3888697,
+            transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
+            index: '0',
+            time: '2020-12-08 04:49:56',
+            sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
+            recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+            value: 0,
+            value_usd: null,
+            transferred: true,
+          },
+        ],
+      },
     })
 
     mockDashboardAddress(blockchairUrl, '0xdac17f958d2ee523a2206206994597c13d831ec7', {
@@ -317,21 +320,26 @@ describe('Transactions', () => {
           last_seen_spending: null,
           nonce: null,
         },
-        calls: [{
-          block_id: 3888697,
-          transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-          index: '0',
-          time: '2020-12-08 04:49:56',
-          sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
-          recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-          value: 1000,
-          value_usd: null,
-          transferred: true,
-        }],
-      }
+        calls: [
+          {
+            block_id: 3888697,
+            transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
+            index: '0',
+            time: '2020-12-08 04:49:56',
+            sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
+            recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+            value: 1000,
+            value_usd: null,
+            transferred: true,
+          },
+        ],
+      },
     })
 
-    const txHistory = await ethClient.getTransactions({address: '0xdac17f958d2ee523a2206206994597c13d831ec7', limit: 1})
+    const txHistory = await ethClient.getTransactions({
+      address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      limit: 1,
+    })
     expect(txHistory.total).toEqual(2)
     expect(txHistory.txs[0].hash).toEqual('0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2')
     expect(txHistory.txs[0].asset).toEqual(AssetETH)
@@ -372,36 +380,42 @@ describe('Transactions', () => {
           gas_used: 21608,
           gas_limit: 32412,
           gas_price: 20000000000,
-          input_hex: 'a9059cbb0000000000000000000000001d5516bc994a130fc4fa2a6275f5b4ee022b18720000000000000000000000000000000000000000000000000000000004cace80',
+          input_hex:
+            'a9059cbb0000000000000000000000001d5516bc994a130fc4fa2a6275f5b4ee022b18720000000000000000000000000000000000000000000000000000000004cace80',
           nonce: 98,
           v: '2e',
           r: '8797fe82968c48ccaf7db43785a2a97c6868b187a009f930e8406a052aefdc7b',
-          s: '54dc9740ebf75835bd3aca3de018454251213e13b44fa93ecbf5f17faf16d995'
+          s: '54dc9740ebf75835bd3aca3de018454251213e13b44fa93ecbf5f17faf16d995',
         },
-        calls: [{
-          block_id: 3888697,
-          transaction_id: 3888697000001,
-          transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-          index: '0',
-          depth: 0,
-          date: '2020-12-08',
-          time: '2020-12-08 04:49:56',
-          failed: false,
-          fail_reason: null,
-          type: 'call',
-          sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
-          recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-          child_call_count: 0,
-          value: '1000',
-          value_usd: 0,
-          transferred: true,
-          input_hex: 'a9059cbb0000000000000000000000001d5516bc994a130fc4fa2a6275f5b4ee022b18720000000000000000000000000000000000000000000000000000000004cace80',
-          output_hex: ''
-        }],
-      }
+        calls: [
+          {
+            block_id: 3888697,
+            transaction_id: 3888697000001,
+            transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
+            index: '0',
+            depth: 0,
+            date: '2020-12-08',
+            time: '2020-12-08 04:49:56',
+            failed: false,
+            fail_reason: null,
+            type: 'call',
+            sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
+            recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+            child_call_count: 0,
+            value: '1000',
+            value_usd: 0,
+            transferred: true,
+            input_hex:
+              'a9059cbb0000000000000000000000001d5516bc994a130fc4fa2a6275f5b4ee022b18720000000000000000000000000000000000000000000000000000000004cace80',
+            output_hex: '',
+          },
+        ],
+      },
     })
 
-    const txData = await ethClient.getTransactionData('0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2')
+    const txData = await ethClient.getTransactionData(
+      '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
+    )
     expect(txData.hash).toEqual('0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2')
     expect(txData.asset).toEqual(AssetETH)
     expect(txData.from[0].from).toEqual('0x4a89644d5dffb825a42a3496e24510424ca01516')
@@ -463,7 +477,6 @@ describe('Transactions', () => {
     })
   })
 })
-
 
 describe('ERC20', () => {
   it('gets erc 20 balance for a contract without addr', async () => {
