@@ -212,8 +212,9 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   // Returns balance of address
-  getBalance = async (address: string = this.getAddress()): Promise<Balance[]> => {
+  getBalance = async (address?: string): Promise<Balance[]> => {
     try {
+      address = address || this.getAddress()
       const dashboardAddress = await blockChair.getAddress(this.blockchairNodeUrl, address, this.blockchairNodeApiKey)
       return [
         {
@@ -260,17 +261,16 @@ export default class Client implements XChainClient, EthereumClient {
     return this.getWallet().provider.getBlockNumber()
   }
 
-  getTransactions = async ({
-    address = this.getAddress(),
-    limit = 10,
-    offset = 0,
-  }: TxHistoryParams): Promise<TxsPage> => {
-    let totalCount = 0
-    const transactions: Tx[] = []
+  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     try {
-      //Calling getAddress without limit/offset to get total count
+      const address = params?.address || this.getAddress()
+      const limit = params?.limit || 10
+      const offset = params?.offset || 0
+
+      // Calling getAddress without limit/offset to get total count
       const dAddr = await blockChair.getAddress(this.blockchairNodeUrl, address, this.blockchairNodeApiKey)
-      totalCount = dAddr[address].calls.length
+      const totalCount = dAddr[address].calls.length
+      const transactions: Tx[] = []
 
       const dashboardAddress = await blockChair.getAddress(
         this.blockchairNodeUrl,
@@ -302,13 +302,13 @@ export default class Client implements XChainClient, EthereumClient {
         }
         transactions.push(tx)
       }
+
+      return {
+        total: totalCount,
+        txs: transactions,
+      }
     } catch (error) {
       return Promise.reject(error)
-    }
-
-    return {
-      total: totalCount,
-      txs: transactions,
     }
   }
 
