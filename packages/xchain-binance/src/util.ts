@@ -1,8 +1,11 @@
 import { Transfer, TransferEvent } from './types/binance-ws'
-import { TransferFee, DexFees, Fee, TxType as BinanceTxType, Tx as BinanceTx } from './types/binance'
-import { TxType, Tx } from '@xchainjs/xchain-client'
-import { assetFromString, AssetBNB, assetToBase, assetAmount } from '@xchainjs/xchain-util/lib'
+import { TransferFee, DexFees, Fee, TxType as BinanceTxType, Tx as BinanceTx, Network, Address } from './types/binance'
+import { TxType, Tx, TxParams, TxHash } from '@xchainjs/xchain-client'
+import { assetFromString, AssetBNB, assetToBase, assetAmount, baseToAsset } from '@xchainjs/xchain-util/lib'
 import { DerivePath } from './types/common'
+import { BncClient, Transaction } from '@binance-chain/javascript-sdk'
+import { AminoPrefix, SignMsg } from '@binance-chain/javascript-sdk/lib/types'
+import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 
 /**
  * Get `hash` from transfer event sent by Binance chain
@@ -65,6 +68,91 @@ export const parseTx = (tx: BinanceTx): Tx | null => {
     date: new Date(tx.timeStamp),
     type: getTxType(tx.txType),
     hash: tx.txHash,
+  }
+}
+
+export const getClientUrl = (network: Network): string => {
+  return network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
+}
+
+export const createTxInfo = async ({
+  asset,
+  amount,
+  recipient,
+  memo,
+  sender,
+  network,
+}: TxParams & { sender: Address; network: Network }): Promise<{ tx: Transaction; signMsg: SignMsg }> => {
+  try {
+    const accCode = crypto.decodeAddress(sender)
+    const toAccCode = crypto.decodeAddress(recipient)
+    const txAmount = baseToAsset(amount).amount()
+    const denom = asset ? asset.symbol : AssetBNB.symbol
+    const coin = {
+      denom,
+      amount: txAmount,
+    }
+    const msg = {
+      inputs: [
+        {
+          address: accCode,
+          coins: [coin],
+        },
+      ],
+      outputs: [
+        {
+          address: toAccCode,
+          coins: [coin],
+        },
+      ],
+      aminoPrefix: AminoPrefix.MsgSend,
+    }
+    const signMsg = {
+      inputs: [
+        {
+          address: sender,
+          coins: [
+            {
+              amount: txAmount,
+              denom,
+            },
+          ],
+        },
+      ],
+      outputs: [
+        {
+          address: recipient,
+          coins: [
+            {
+              amount: txAmount,
+              denom,
+            },
+          ],
+        },
+      ],
+    }
+
+    const bncClient = new BncClient(getClientUrl(network))
+    await bncClient.initChain()
+    bncClient.setSigningDelegate(async (tx) => tx)
+    const tx = await bncClient._prepareTransaction(msg, signMsg, sender, null, memo)
+
+    return {
+      tx,
+      signMsg,
+    }
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+export const sendRawTransaction = async (network: Network, signedBz: string): Promise<TxHash> => {
+  try {
+    const bncClient = new BncClient(getClientUrl(network))
+    const transferResult = await bncClient.sendRawTransaction(signedBz, true)
+    return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
+  } catch (e) {
+    return Promise.reject(e)
   }
 }
 

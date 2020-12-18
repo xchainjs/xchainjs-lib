@@ -37,7 +37,7 @@ import {
   assetToString,
 } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { isTransferFee, parseTx } from './util'
+import { isTransferFee, parseTx, getClientUrl } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 
 type PrivKey = string
@@ -98,7 +98,7 @@ class Client implements BinanceClient, XChainClient {
     this.network = network
     if (phrase) this.setPhrase(phrase)
 
-    this.bncClient = new BncClient(this.getClientUrl())
+    this.bncClient = new BncClient(getClientUrl(network))
     this.bncClient.chooseNetwork(network)
   }
 
@@ -115,7 +115,7 @@ class Client implements BinanceClient, XChainClient {
   // update network
   setNetwork(network: Network): XChainClient {
     this.network = network
-    this.bncClient = new BncClient(this.getClientUrl())
+    this.bncClient = new BncClient(getClientUrl(network))
     this.bncClient.chooseNetwork(network)
     this.address = ''
 
@@ -125,10 +125,6 @@ class Client implements BinanceClient, XChainClient {
   // Will return the desired network
   getNetwork(): Network {
     return this.network
-  }
-
-  private getClientUrl = (): string => {
-    return this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
   }
 
   getExplorerUrl = (): string => {
@@ -213,7 +209,7 @@ class Client implements BinanceClient, XChainClient {
 
   private searchTransactions = async (params?: { [x: string]: string | undefined }): Promise<TxsPage> => {
     try {
-      const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
+      const clientUrl = `${getClientUrl(this.network)}/api/v1/transactions`
       const url = new URL(clientUrl)
 
       const endTime = Date.now()
@@ -267,7 +263,7 @@ class Client implements BinanceClient, XChainClient {
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
       const txResult: TransactionResult = await axios
-        .get(`${this.getClientUrl()}/api/v1/tx/${txId}?format=json`)
+        .get(`${getClientUrl(this.network)}/api/v1/tx/${txId}?format=json`)
         .then((response) => response.data)
 
       const blockHeight = txResult.height
@@ -345,7 +341,7 @@ class Client implements BinanceClient, XChainClient {
   private getTransferFee = async (): Promise<TransferFee> => {
     try {
       const feesArray = await axios
-        .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
+        .get<BinanceFees>(`${getClientUrl(this.network)}/api/v1/fees`)
         .then((response) => response.data)
 
       const transferFee = feesArray.find(isTransferFee)
