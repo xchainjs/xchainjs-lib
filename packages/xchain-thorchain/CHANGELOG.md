@@ -6,6 +6,7 @@
 
 - Add `setClientUrl`
 - Add `getDefaultClientUrl`
+- Add `getClientUrlByNetwork`
 
 ### Fix
 

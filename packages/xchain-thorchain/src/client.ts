@@ -19,7 +19,7 @@ import { PrivKey, codec, Msg, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
-import { AssetRune, DepositParam } from './types'
+import { AssetRune, DepositParam, ClientUrl } from './types'
 import { MsgNativeTx } from './messages'
 import {
   getDenom,
@@ -37,15 +37,16 @@ import {
 export interface ThorchainClient {
   validateAddress(address: string): boolean
 
-  getDefaultClientUrl(): string
-  setClientUrl(clientUrl: string): void
+  getDefaultClientUrl(): ClientUrl
+  getClientUrlByNetwork(network: Network): string
+  setClientUrl(clientUrl: ClientUrl): void
 
   deposit(params: DepositParam): Promise<TxHash>
 }
 
 class Client implements ThorchainClient, XChainClient {
   private network: Network
-  private clientUrl: string
+  private clientUrl: ClientUrl
   private thorClient: CosmosSDKClient
   private phrase = ''
   private address: Address = ''
@@ -53,9 +54,9 @@ class Client implements ThorchainClient, XChainClient {
 
   private derive_path = "44'/931'/0'/0/0"
 
-  constructor({ network = 'testnet', phrase }: XChainClientParams) {
+  constructor({ network = 'testnet', phrase, clientUrl }: XChainClientParams & { clientUrl?: ClientUrl }) {
     this.network = network
-    this.clientUrl = this.getDefaultClientUrl()
+    this.clientUrl = clientUrl ? clientUrl : this.getDefaultClientUrl()
     this.thorClient = this.getNewThorClient()
 
     if (phrase) this.setPhrase(phrase)
@@ -70,7 +71,6 @@ class Client implements ThorchainClient, XChainClient {
   setNetwork = (network: Network): XChainClient => {
     if (this.network != network) {
       this.network = network
-      this.clientUrl = this.getDefaultClientUrl()
       this.thorClient = this.getNewThorClient()
       this.address = ''
     }
@@ -82,17 +82,24 @@ class Client implements ThorchainClient, XChainClient {
     return this.network
   }
 
-  setClientUrl = (clientUrl: string): void => {
+  setClientUrl = (clientUrl: ClientUrl): void => {
     this.clientUrl = clientUrl
     this.thorClient = this.getNewThorClient()
   }
 
   getClientUrl = (): string => {
-    return this.clientUrl
+    return this.getClientUrlByNetwork(this.network)
   }
 
-  getDefaultClientUrl = (): string => {
-    return this.network === 'testnet' ? 'https://testnet.thornode.thorchain.info' : 'http://138.68.125.107:1317'
+  getDefaultClientUrl = (): ClientUrl => {
+    return {
+      testnet: 'https://testnet.thornode.thorchain.info',
+      mainnet: 'http://138.68.125.107:1317',
+    }
+  }
+
+  getClientUrlByNetwork = (network: Network): string => {
+    return this.clientUrl[network]
   }
 
   private getNewThorClient = (): CosmosSDKClient => {

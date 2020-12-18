@@ -1,5 +1,10 @@
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
+export type ClientUrl = {
+  testnet: string
+  mainnet: string
+}
+
 export type DepositParam = {
   asset?: Asset
   amount: BaseAmount
