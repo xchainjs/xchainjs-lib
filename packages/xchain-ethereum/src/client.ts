@@ -4,7 +4,7 @@ import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import vaultABI from '../data/vault.json'
 import erc20ABI from '../data/erc20.json'
-import { formatEther } from 'ethers/lib/utils'
+import { formatEther, parseEther } from 'ethers/lib/utils'
 import { toUtf8String } from '@ethersproject/strings'
 import { Erc20TxOpts, EstimateGasERC20Opts, GasOracleResponse, Network as EthNetwork, NormalTxOpts } from './types'
 import {
@@ -363,7 +363,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   vaultTx = async (address: Address, amount: BaseAmount, memo: string): Promise<TransactionResponse> => {
     try {
-      const txAmount = baseToAsset(amount).amount().toString()
+      const txAmount = baseToAsset(amount).amount().toFormat()
       const vault = this.getVault()
 
       if (address === ethAddress) {
@@ -395,8 +395,8 @@ export default class Client implements XChainClient, EthereumClient {
   normalTx = async (params: NormalTxOpts): Promise<TransactionResponse> => {
     try {
       const { recipient, amount, overrides } = params
-      const txAmount = baseToAsset(amount).amount().toString()
-      const transactionRequest = Object.assign({ to: recipient, value: txAmount }, overrides || {})
+      const txAmount = baseToAsset(amount).amount().toFormat()
+      const transactionRequest = Object.assign({ to: recipient, value: parseEther(txAmount) }, overrides || {})
       return await this.getWallet().sendTransaction(transactionRequest)
     } catch (error) {
       return Promise.reject(error)
@@ -430,7 +430,7 @@ export default class Client implements XChainClient, EthereumClient {
   estimateNormalTx = async (params: NormalTxOpts): Promise<BaseAmount> => {
     try {
       const { recipient, amount, overrides } = params
-      const txAmount = baseToAsset(amount).amount().toString()
+      const txAmount = baseToAsset(amount).amount().toFormat()
       const transactionRequest = Object.assign({ to: recipient, value: txAmount, gas: '5208' }, overrides || {})
       const estimate = await this.getWallet().provider.estimateGas(transactionRequest)
 

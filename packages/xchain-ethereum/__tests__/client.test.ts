@@ -6,6 +6,7 @@ import { Balances } from '@xchainjs/xchain-client'
 import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
 import { mockDashboardAddress, mockGetTx } from '../__mocks__/blockchair-api'
+import { mock_eth_gasPrice } from '../__mocks__/etherscan-api'
 
 /**
  * Test Data
@@ -16,6 +17,7 @@ const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august 
 const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
 const vault = '0x8c2A90D36Ec9F745C9B28B588Cba5e2A978A1656'
 const blockchairUrl = 'https://api.blockchair.com/ethereum/testnet'
+const etherscanUrl = 'https://api-goerli.etherscan.io'
 const wallet = {
   signingKey: {
     curve: 'secp256k1',
@@ -425,30 +427,24 @@ describe('Transactions', () => {
     expect(txData.type).toEqual('transfer')
   })
 
-  it('checks vault and vaultTx', async () => {
-    const ethClient = new Client({ network: 'mainnet', phrase })
-
-    const vaultTx = ethClient.vaultTx(ethClient.getAddress(), baseAmount(parseEther('1').toString(), 18), 'SWAP')
-    expect(vaultTx).rejects.toThrowError()
-    ethClient.setVault(vault)
-    expect(ethClient.getVault()).toEqual(vault)
-  })
-
-  it('sends a normalTx', async () => {
-    const ethClient = new Client({ network: 'mainnet', phrase })
-
-    const mockTx = jest.spyOn(ethClient.getWallet(), 'sendTransaction')
-    mockTx.mockImplementation(
-      async (_): Promise<TransactionResponse> => {
-        return Promise.resolve(txResponse)
-      },
-    )
-
-    await ethClient.normalTx({ recipient: ethClient.getAddress(), amount: baseAmount(parseEther('1').toString(), 18) })
-    expect(mockTx).toHaveBeenCalledWith({
-      to: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
-      value: '1',
+  it.only('sends a normalTx', async () => {
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+      blockchairUrl,
     })
+
+    // const mockTx = jest.spyOn(ethClient.getProvider(), 'getBlockNumber')
+    // mockTx.mockImplementation(
+    //   async (): Promise<number> => {
+    //     return Promise.resolve(1)
+    //   },
+    // )
+
+    mock_eth_gasPrice(etherscanUrl, '0xb2d05e00')
+
+    const txResult = await ethClient.transfer({ recipient: '0x8ced5ad0d8da4ec211c17355ed3dbfec4cf0e5b9', amount: baseAmount(100, ETH_DECIMAL) })
+    expect(txResult).toEqual(0)
   })
 
   it('sends a normalTx with special parameters', async () => {
@@ -475,6 +471,15 @@ describe('Transactions', () => {
       to: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
       value: '1',
     })
+  })
+
+  it('checks vault and vaultTx', async () => {
+    const ethClient = new Client({ network: 'mainnet', phrase })
+
+    const vaultTx = ethClient.vaultTx(ethClient.getAddress(), baseAmount(parseEther('1').toString(), 18), 'SWAP')
+    expect(vaultTx).rejects.toThrowError()
+    ethClient.setVault(vault)
+    expect(ethClient.getVault()).toEqual(vault)
   })
 })
 
