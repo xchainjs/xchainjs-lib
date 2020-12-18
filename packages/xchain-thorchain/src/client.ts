@@ -85,7 +85,7 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   getClientUrl = (): string => {
-    return this.network === 'testnet' ? 'http://18.198.92.45:1317' : 'http://138.68.125.107:1317'
+    return this.network === 'testnet' ? 'https://testnet.thornode.thorchain.info' : 'http://138.68.125.107:1317'
   }
 
   getChainId = (): string => {
