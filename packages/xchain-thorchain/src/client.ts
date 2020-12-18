@@ -37,11 +37,15 @@ import {
 export interface ThorchainClient {
   validateAddress(address: string): boolean
 
+  getDefaultClientUrl(): string
+  setClientUrl(clientUrl: string): void
+
   deposit(params: DepositParam): Promise<TxHash>
 }
 
 class Client implements ThorchainClient, XChainClient {
   private network: Network
+  private clientUrl: string
   private thorClient: CosmosSDKClient
   private phrase = ''
   private address: Address = ''
@@ -51,12 +55,8 @@ class Client implements ThorchainClient, XChainClient {
 
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
     this.network = network
-    this.thorClient = new CosmosSDKClient({
-      server: this.getClientUrl(),
-      chainId: this.getChainId(),
-      prefix: this.getPrefix(),
-      derive_path: this.derive_path,
-    })
+    this.clientUrl = this.getDefaultClientUrl()
+    this.thorClient = this.getNewThorClient()
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -68,14 +68,11 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   setNetwork = (network: Network): XChainClient => {
-    this.network = network
-    this.thorClient = new CosmosSDKClient({
-      server: this.getClientUrl(),
-      chainId: this.getChainId(),
-      prefix: this.getPrefix(),
-      derive_path: this.derive_path,
-    })
-    this.address = ''
+    if (this.network != network) {
+      this.network = network
+      this.thorClient = this.getNewThorClient()
+      this.address = ''
+    }
 
     return this
   }
@@ -84,8 +81,26 @@ class Client implements ThorchainClient, XChainClient {
     return this.network
   }
 
+  setClientUrl = (clientUrl: string): void => {
+    this.clientUrl = clientUrl
+    this.thorClient = this.getNewThorClient()
+  }
+
   getClientUrl = (): string => {
+    return this.clientUrl
+  }
+
+  getDefaultClientUrl = (): string => {
     return this.network === 'testnet' ? 'https://testnet.thornode.thorchain.info' : 'http://138.68.125.107:1317'
+  }
+
+  private getNewThorClient = (): CosmosSDKClient => {
+    return new CosmosSDKClient({
+      server: this.getClientUrl(),
+      chainId: this.getChainId(),
+      prefix: this.getPrefix(),
+      derive_path: this.derive_path,
+    })
   }
 
   getChainId = (): string => {

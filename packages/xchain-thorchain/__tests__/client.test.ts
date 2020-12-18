@@ -105,6 +105,20 @@ describe('Client Test', () => {
     expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
   })
 
+  it('should have right client url', async () => {
+    thorClient.setNetwork('mainnet')
+    expect(thorClient.getClientUrl()).toEqual('http://138.68.125.107:1317')
+
+    thorClient.setNetwork('testnet')
+    expect(thorClient.getClientUrl()).toEqual('https://testnet.thornode.thorchain.info')
+
+    thorClient.setClientUrl('new client url')
+    expect(thorClient.getClientUrl()).toEqual('new client url')
+
+    thorClient.setNetwork('mainnet')
+    expect(thorClient.getClientUrl()).toEqual('http://138.68.125.107:1317')
+  })
+
   it('has no balances', async () => {
     mockAccountsBalance(thorClient.getClientUrl(), testnet_address, {
       height: 0,
