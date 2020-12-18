@@ -70,6 +70,7 @@ class Client implements ThorchainClient, XChainClient {
   setNetwork = (network: Network): XChainClient => {
     if (this.network != network) {
       this.network = network
+      this.clientUrl = this.getDefaultClientUrl()
       this.thorClient = this.getNewThorClient()
       this.address = ''
     }
