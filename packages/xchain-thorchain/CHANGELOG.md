@@ -1,5 +1,17 @@
 # v.x.x.x (2020-XX-XX)
 
+# v.0.6.1 (2020-12-18)
+
+### Update
+
+- Add `setClientUrl`
+- Add `getDefaultClientUrl`
+- Add `getClientUrlByNetwork`
+
+### Fix
+
+- Fix client url for multichain testnet (`https://testnet.thornode.thorchain.info`)
+
 # v.0.6.0 (2020-12-16)
 
 ### Update

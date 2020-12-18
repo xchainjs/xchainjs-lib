@@ -19,7 +19,7 @@ import { PrivKey, codec, Msg, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
-import { AssetRune, DepositParam } from './types'
+import { AssetRune, DepositParam, ClientUrl } from './types'
 import { MsgNativeTx } from './messages'
 import {
   getDenom,
@@ -37,11 +37,16 @@ import {
 export interface ThorchainClient {
   validateAddress(address: string): boolean
 
+  getDefaultClientUrl(): ClientUrl
+  getClientUrlByNetwork(network: Network): string
+  setClientUrl(clientUrl: ClientUrl): void
+
   deposit(params: DepositParam): Promise<TxHash>
 }
 
 class Client implements ThorchainClient, XChainClient {
   private network: Network
+  private clientUrl: ClientUrl
   private thorClient: CosmosSDKClient
   private phrase = ''
   private address: Address = ''
@@ -49,14 +54,10 @@ class Client implements ThorchainClient, XChainClient {
 
   private derive_path = "44'/931'/0'/0/0"
 
-  constructor({ network = 'testnet', phrase }: XChainClientParams) {
+  constructor({ network = 'testnet', phrase, clientUrl }: XChainClientParams & { clientUrl?: ClientUrl }) {
     this.network = network
-    this.thorClient = new CosmosSDKClient({
-      server: this.getClientUrl(),
-      chainId: this.getChainId(),
-      prefix: this.getPrefix(),
-      derive_path: this.derive_path,
-    })
+    this.clientUrl = clientUrl || this.getDefaultClientUrl()
+    this.thorClient = this.getNewThorClient()
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -68,14 +69,11 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   setNetwork = (network: Network): XChainClient => {
-    this.network = network
-    this.thorClient = new CosmosSDKClient({
-      server: this.getClientUrl(),
-      chainId: this.getChainId(),
-      prefix: this.getPrefix(),
-      derive_path: this.derive_path,
-    })
-    this.address = ''
+    if (this.network != network) {
+      this.network = network
+      this.thorClient = this.getNewThorClient()
+      this.address = ''
+    }
 
     return this
   }
@@ -84,8 +82,33 @@ class Client implements ThorchainClient, XChainClient {
     return this.network
   }
 
+  setClientUrl = (clientUrl: ClientUrl): void => {
+    this.clientUrl = clientUrl
+    this.thorClient = this.getNewThorClient()
+  }
+
   getClientUrl = (): string => {
-    return this.network === 'testnet' ? 'http://18.198.92.45:1317' : 'http://138.68.125.107:1317'
+    return this.getClientUrlByNetwork(this.network)
+  }
+
+  getDefaultClientUrl = (): ClientUrl => {
+    return {
+      testnet: 'https://testnet.thornode.thorchain.info',
+      mainnet: 'http://138.68.125.107:1317',
+    }
+  }
+
+  getClientUrlByNetwork = (network: Network): string => {
+    return this.clientUrl[network]
+  }
+
+  private getNewThorClient = (): CosmosSDKClient => {
+    return new CosmosSDKClient({
+      server: this.getClientUrl(),
+      chainId: this.getChainId(),
+      prefix: this.getPrefix(),
+      derive_path: this.derive_path,
+    })
   }
 
   getChainId = (): string => {
