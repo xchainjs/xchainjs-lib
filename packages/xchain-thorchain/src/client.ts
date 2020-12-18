@@ -56,7 +56,7 @@ class Client implements ThorchainClient, XChainClient {
 
   constructor({ network = 'testnet', phrase, clientUrl }: XChainClientParams & { clientUrl?: ClientUrl }) {
     this.network = network
-    this.clientUrl = clientUrl ? clientUrl : this.getDefaultClientUrl()
+    this.clientUrl = clientUrl || this.getDefaultClientUrl()
     this.thorClient = this.getNewThorClient()
 
     if (phrase) this.setPhrase(phrase)
