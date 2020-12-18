@@ -443,7 +443,10 @@ describe('Transactions', () => {
 
     mock_eth_gasPrice(etherscanUrl, '0xb2d05e00')
 
-    const txResult = await ethClient.transfer({ recipient: '0x8ced5ad0d8da4ec211c17355ed3dbfec4cf0e5b9', amount: baseAmount(100, ETH_DECIMAL) })
+    const txResult = await ethClient.transfer({
+      recipient: '0x8ced5ad0d8da4ec211c17355ed3dbfec4cf0e5b9',
+      amount: baseAmount(100, ETH_DECIMAL),
+    })
     expect(txResult).toEqual(0)
   })
 
