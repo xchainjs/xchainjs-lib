@@ -67,6 +67,8 @@ export interface BinanceClient {
 
   getAddress(): string
 
+  getPrefix(): Prefix
+
   validateAddress(address: string): boolean
 
   getMultiSendFees(): Promise<Fees>
@@ -143,7 +145,7 @@ class Client implements BinanceClient, XChainClient {
     return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
-  private getPrefix = (): Prefix => {
+  getPrefix = (): Prefix => {
     return this.network === 'testnet' ? 'tbnb' : 'bnb'
   }
 
