@@ -10,10 +10,19 @@ const setApiKeyParams = (key?: string) => {
  * @param chain
  * @param hash
  */
-export const getTx = async (baseUrl: string, hash: string, apiKey?: string): Promise<Transactions> => {
+export const getTx = async (
+  baseUrl: string,
+  hash: string,
+  erc_20?: boolean,
+  apiKey?: string,
+): Promise<Transactions> => {
   try {
-    // const response = await axios.get(`https://api.blockchair.com/${chain}/dashboards/transaction/${hash}`)
-    const response = await axios.get(`${baseUrl}/dashboards/transaction/${hash}`, setApiKeyParams(apiKey))
+    const response = await axios.get(`${baseUrl}/dashboards/transaction/${hash}`, {
+      params: {
+        erc_20,
+        key: apiKey && apiKey.length > 0 ? apiKey : undefined,
+      },
+    })
     const txs: BlockChairResponse<Transactions> = response.data
     return txs.data
   } catch (error) {
