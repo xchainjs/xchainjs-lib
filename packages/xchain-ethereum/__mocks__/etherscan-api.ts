@@ -1,16 +1,12 @@
 import nock from 'nock'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const mock_eth_gasPrice = (url: string, result: any) => {
+export const mock_etherscan_api = (url: string, method: string, result: string) => {
   nock(url)
     .get(`/api`)
-    .query((param) => {
-        console.log('here', param)
-        return param.module === 'proxy' && param.action === 'eth_gasPrice'
-    })
+    .query(param => param.module === 'proxy' && param.action === method)
     .reply(200, {
       jsonrpc: '2.0',
       result,
-      id: 73,
+      id: 1,
     })
 }

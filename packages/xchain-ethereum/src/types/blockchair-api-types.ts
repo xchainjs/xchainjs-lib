@@ -84,6 +84,17 @@ export interface Transactions {
       input_hex: string
       output_hex: string
     }[]
+    layer_2?: {
+      erc_20: {
+        token_address: string
+        token_name: string
+        token_symbol: string
+        token_decimals: number
+        sender: string
+        recipient: string
+        value: string
+      }[]
+    }
   }
 }
 

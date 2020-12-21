@@ -1,5 +1,11 @@
 # v.x.x.x (2020-XX-XX)
 
+### Update
+
+- Add function comments including possible errors.
+- Update blockchair API response.
+- Update mocked tests. (blockchair/etherscan)
+
 ### Fix
 
 - `getBalance`, `getTransactions`, `getTransactionData`

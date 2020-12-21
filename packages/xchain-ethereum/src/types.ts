@@ -22,7 +22,7 @@ export type NormalTxOverrides = {
 }
 
 export type Erc20TxOpts = {
-  erc20ContractAddress: Address
+  assetAddress: Address
   recipient: Address
   amount: ethers.BigNumberish
 
@@ -39,7 +39,7 @@ export type Erc20TxOverrides = {
 }
 
 export type EstimateGasERC20Opts = {
-  erc20ContractAddress: Address
+  assetAddress: Address
   recipient: Address
   amount: ethers.BigNumberish
 }
