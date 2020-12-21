@@ -17,7 +17,6 @@ export const getTx = async (
   apiKey?: string,
 ): Promise<Transactions> => {
   try {
-    // const response = await axios.get(`https://api.blockchair.com/${chain}/dashboards/transaction/${hash}`)
     const response = await axios.get(`${baseUrl}/dashboards/transaction/${hash}`, {
       params: {
         erc_20,

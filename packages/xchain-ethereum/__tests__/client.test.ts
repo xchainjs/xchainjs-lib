@@ -19,7 +19,7 @@ const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
 const vault = '0x8c2A90D36Ec9F745C9B28B588Cba5e2A978A1656'
 const blockchairUrl = 'https://api.blockchair.com/ethereum/testnet'
 const etherscanUrl = 'https://api-goerli.etherscan.io'
-const goerliInfraUrl = 'https://goerli.infura.io/v3'
+const goerliInfuraUrl = 'https://goerli.infura.io/v3'
 const goerliAlchemyUrl = 'https://eth-goerli.alchemyapi.io/v2'
 const wallet = {
   signingKey: {
@@ -533,13 +533,13 @@ describe('Transactions', () => {
       blockchairUrl,
     })
 
-    mock_all_api(etherscanUrl, goerliInfraUrl, goerliAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, goerliInfraUrl, goerliAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, goerliInfraUrl, goerliAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, goerliInfraUrl, goerliAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      goerliInfraUrl,
+      goerliInfuraUrl,
       goerliAlchemyUrl,
       'eth_sendRawTransaction',
       '0xc2b98a50107fbb6ed9369c552e332f50810eaef04a70c0253b617106f02a674d',
@@ -559,13 +559,13 @@ describe('Transactions', () => {
       blockchairUrl,
     })
 
-    mock_all_api(etherscanUrl, goerliInfraUrl, goerliAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, goerliInfraUrl, goerliAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, goerliInfraUrl, goerliAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, goerliInfraUrl, goerliAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      goerliInfraUrl,
+      goerliInfuraUrl,
       goerliAlchemyUrl,
       'eth_sendRawTransaction',
       '0xe82829e2c2d425c83a093ada3ee58a0680e0fa199f59aae79ee922f7ce90c797',
