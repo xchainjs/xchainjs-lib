@@ -131,6 +131,10 @@ class Client implements PolkadotClient, XChainClient {
     }
   }
 
+  /**
+   * https://polkadot.js.org/docs/util-crypto/examples/validate-address
+   * @param address 
+   */
   validateAddress = (address: string): boolean => {
     try {
       const key = new Keyring({ ss58Format: this.getSS58Format(), type: 'ed25519' })
