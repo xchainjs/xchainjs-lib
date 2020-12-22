@@ -69,8 +69,6 @@ export interface BinanceClient {
 
   getPrefix(): Prefix
 
-  validateAddress(address: string): boolean
-
   getMultiSendFees(): Promise<Fees>
   getSingleAndMultiFees(): Promise<{ single: Fees; multi: Fees }>
 

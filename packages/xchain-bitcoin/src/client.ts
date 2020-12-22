@@ -30,7 +30,6 @@ import { UTXOs } from './types/common'
  */
 interface BitcoinClient {
   derivePath(): string
-  validateAddress(address: string): boolean
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>

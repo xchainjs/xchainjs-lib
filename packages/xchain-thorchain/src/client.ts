@@ -35,8 +35,6 @@ import {
  * Interface for custom Thorchain client
  */
 export interface ThorchainClient {
-  validateAddress(address: string): boolean
-
   getDefaultClientUrl(): ClientUrl
   getClientUrlByNetwork(network: Network): string
   setClientUrl(clientUrl: ClientUrl): void

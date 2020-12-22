@@ -27,8 +27,6 @@ const DECIMAL = 6
  * Interface for custom Cosmos client
  */
 export interface CosmosClient {
-  validateAddress(address: string): boolean
-
   getMainAsset(): Asset
 }
 
