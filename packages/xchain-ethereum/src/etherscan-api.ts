@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { GasOracleResponse } from '@xchainjs/xchain-ethereum/src/types'
+import { GasOracleResponse } from './types'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 

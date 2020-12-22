@@ -1,5 +1,7 @@
 # v.x.x.x (2020-XX-XX)
 
+# v.0.3.0 (2020-12-22)
+
 ### Update
 
 - Add function comments including possible errors.
