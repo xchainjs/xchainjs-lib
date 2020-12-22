@@ -80,6 +80,7 @@ export interface XChainClient {
   getExplorerAddressUrl(address: Address): string
   getExplorerTxUrl(txID: string): string
 
+  validateAddress(address: string): boolean
   getAddress(): Address
 
   setPhrase(phrase: string): Address

@@ -1,5 +1,9 @@
 # v.x.x.x (2020-XX-XX)
 
+### Breaking change
+
+- Remove `validateAddress` from `BitcoinClient`
+
 # v.0.6.0 (2020-12-11)
 
 ### Update

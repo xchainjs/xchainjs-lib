@@ -1,5 +1,9 @@
 # v.x.x.x (2020-XX-XX)
 
+### Breaking change
+
+- Remove `validateAddress` from `ThorchainClient`
+
 # v.0.6.1 (2020-12-18)
 
 ### Update

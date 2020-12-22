@@ -1,5 +1,9 @@
 # v.x.x.x (2020-XX-XX)
 
+### Breaking change
+
+- Remove `validateAddress` from `CosmosClient`
+
 # v.0.5.1 (2020-12-16)
 
 ### Update

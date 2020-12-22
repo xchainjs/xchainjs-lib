@@ -49,6 +49,7 @@
     "nock": "^13.0.4"
   },
   "peerDependencies": {
-    "@polkadot/api": "^2.7.1"
+    "@polkadot/api": "^2.7.1",
+    "@polkadot/util": "^4.2.1"
   }
 }

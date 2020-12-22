@@ -55,6 +55,16 @@ describe('Client Test', () => {
     expect(address).toEqual(mainnet_address)
   })
 
+  it('should validate address', async () => {
+    polkadotClient.setNetwork('mainnet')
+    expect(polkadotClient.validateAddress(testnet_address)).toEqual(false)
+    expect(polkadotClient.validateAddress(mainnet_address)).toEqual(true)
+
+    polkadotClient.setNetwork('testnet')
+    expect(polkadotClient.validateAddress(mainnet_address)).toEqual(false)
+    expect(polkadotClient.validateAddress(testnet_address)).toEqual(true)
+  })
+
   it('no balances', async () => {
     polkadotClient.setNetwork('mainnet')
 

@@ -17,6 +17,7 @@ import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { ApiPromise, WsProvider, Keyring } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'
+import { hexToU8a, isHex } from '@polkadot/util'
 
 import { SubscanResponse, Account, AssetDOT, TransfersResult, Extrinsic, Transfer } from './types'
 import { isSuccess } from './util'
@@ -127,6 +128,15 @@ class Client implements PolkadotClient, XChainClient {
       return this.api
     } catch (error) {
       return Promise.reject(error)
+    }
+  }
+
+  validateAddress = (address: string): boolean => {
+    try {
+      const key = new Keyring({ ss58Format: this.getSS58Format(), type: 'ed25519' })
+      return key.encodeAddress(isHex(address) ? hexToU8a(address) : key.decodeAddress(address)) === address
+    } catch (error) {
+      return false
     }
   }
 
