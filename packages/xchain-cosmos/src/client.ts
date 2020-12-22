@@ -11,7 +11,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, baseAmount, assetToString } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { PrivKey, codec } from 'cosmos-client'
@@ -144,7 +144,7 @@ class Client implements CosmosClient, XChainClient {
             amount: baseAmount(balance.amount, DECIMAL),
           }
         })
-        .filter((balance) => !asset || balance.asset === asset)
+        .filter((balance) => !asset || assetToString(balance.asset) === assetToString(asset))
     } catch (error) {
       return Promise.reject(error)
     }
