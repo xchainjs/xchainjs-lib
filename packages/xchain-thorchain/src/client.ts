@@ -12,7 +12,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient } from '@xchainjs/xchain-cosmos'
-import { Asset, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, baseAmount, assetToString } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { PrivKey, codec, Msg, AccAddress } from 'cosmos-client'
@@ -179,13 +179,12 @@ class Client implements ThorchainClient, XChainClient {
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
     try {
       const balances = await this.thorClient.getBalance(address || this.getAddress())
-
       return balances
         .map((balance) => ({
           asset: (balance.denom && getAsset(balance.denom)) || AssetRune,
           amount: baseAmount(balance.amount, DECIMAL),
         }))
-        .filter((balance) => !asset || balance.asset === asset)
+        .filter((balance) => !asset || assetToString(balance.asset) === assetToString(asset))
     } catch (error) {
       return Promise.reject(error)
     }
