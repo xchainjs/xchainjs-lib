@@ -133,7 +133,7 @@ class Client implements PolkadotClient, XChainClient {
 
   /**
    * https://polkadot.js.org/docs/util-crypto/examples/validate-address
-   * @param address 
+   * @param address
    */
   validateAddress = (address: string): boolean => {
     try {
