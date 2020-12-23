@@ -1,8 +1,8 @@
-# v.x.x.x (2020-XX-XX)
+# v.0.2.1 (2020-23-12)
 
 ### Update
 
-- Add `validateAddress`
+- Add `validateAddress` #149
 
 # v.0.2.0 (2020-12-11)
 
