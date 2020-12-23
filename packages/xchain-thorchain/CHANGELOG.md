@@ -1,8 +1,16 @@
-# v.x.x.x (2020-XX-XX)
+# v.0.6.2 (2020-12-23)
+
+### Update
+
+- Use latest xchain-client@0.2.1
+
+### Fix
+
+- Fix invalid assets comparison #151
 
 ### Breaking change
 
-- Remove `validateAddress` from `ThorchainClient`
+- Remove `validateAddress` from `ThorchainClient` #149
 
 # v.0.6.1 (2020-12-18)
 
