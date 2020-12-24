@@ -274,15 +274,26 @@ class Client implements PolkadotClient, XChainClient {
   transfer = async (params: TxParams): Promise<TxHash> => {
     try {
       const api = await this.getAPI()
+      let txHash = null
 
-      const txs = [api.tx.balances.transfer(params.recipient, params.amount.amount().toString())]
+      // Createing a transfer
+      const transfer = api.tx.balances.transfer(params.recipient, params.amount.amount().toString())
+      if (!params.memo) {
+        // Send a simple transfer
+        txHash = await transfer.signAndSend(this.getKeyringPair())
+      } else {
+        // Send a `utility.batch` with two Calls: i) Balance.Transfer ii) System.Remark
+        const txs = []
+        txs.push(transfer)
 
-      if (params.memo) {
+        // Creating a remark
         txs.push(api.tx.system.remark(params.memo))
+
+        // Send the Batch Transaction
+        const batchTx = api.tx.utility.batchAll(txs)
+
+        txHash = await batchTx.signAndSend(this.getKeyringPair())
       }
-
-      const txHash = await api.tx.utility.batch(txs).signAndSend(this.getKeyringPair())
-
       return txHash.toString()
     } catch (error) {
       return Promise.reject(error)

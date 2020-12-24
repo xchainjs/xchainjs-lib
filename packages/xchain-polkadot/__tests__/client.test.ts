@@ -280,7 +280,29 @@ describe('Client Test', () => {
     expect(txResult.to[0].amount.amount().isEqualTo(baseAmount('500000000000', 12).amount())).toBeTruthy()
   })
 
-  it('transfer', async () => {
+  /**
+   *
+    TODO: Add the failing test cases.
+   */
+  // it('transferWithoutMemo', async () => {
+  //   const txHash = await polkadotClient.transfer({
+  //     amount: baseAmount('1000000000', 12),
+  //     recipient: '5CwPxumBRDLkP7VQEYzhwoYw6AP4FNmRM7G1pj7Atj6dEzgY',
+  //   })
+
+  //   expect(txHash).toEqual('0xdd227d44f1ed2e5b82e38daf699f66fc5ea28f1e104167b19d587a2363190ee9')
+  // })
+
+  // it('transferWithoutMemoWithInsufficientFunds', async () => {
+  //   const txHash = await polkadotClient.transfer({
+  //     amount: baseAmount('1000000000', 120000000),
+  //     recipient: '5CwPxumBRDLkP7VQEYzhwoYw6AP4FNmRM7G1pj7Atj6dEzgY',
+  //   })
+
+  //   expect(txHash).toEqual('0xdd227d44f1ed2e5b82e38daf699f66fc5ea28f1e104167b19d587a2363190ee9')
+  // })
+
+  it('transferWithMemo', async () => {
     const txHash = await polkadotClient.transfer({
       amount: baseAmount('1000000000', 12),
       recipient: '5CwPxumBRDLkP7VQEYzhwoYw6AP4FNmRM7G1pj7Atj6dEzgY',
