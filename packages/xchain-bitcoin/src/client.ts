@@ -33,6 +33,7 @@ interface BitcoinClient {
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
+  getDefaultFeesWithRates(): FeesWithRates
 }
 
 type BitcoinClientParams = XChainClientParams & {
@@ -263,17 +264,27 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   getDefaultFees = (): Fees => {
+    const { fees } = this.getDefaultFeesWithRates()
+    return fees
+  }
+
+  getDefaultFeesWithRates = (): FeesWithRates => {
     const rates: FeeRates = {
       fastest: 50,
       fast: 20,
       average: 10,
     }
 
-    return {
+    const fees: Fees = {
       type: 'byte',
       fast: this.calcFee(rates.fast),
       average: this.calcFee(rates.average),
       fastest: this.calcFee(rates.fastest),
+    }
+
+    return {
+      fees,
+      rates,
     }
   }
 
