@@ -274,26 +274,33 @@ class Client implements PolkadotClient, XChainClient {
   transfer = async (params: TxParams): Promise<TxHash> => {
     try {
       const api = await this.getAPI()
-      let txHash = null
+      let transaction = null
 
       // Createing a transfer
       const transfer = api.tx.balances.transfer(params.recipient, params.amount.amount().toString())
       if (!params.memo) {
         // Send a simple transfer
-        txHash = await transfer.signAndSend(this.getKeyringPair())
+        transaction = transfer
       } else {
         // Send a `utility.batch` with two Calls: i) Balance.Transfer ii) System.Remark
-        const txs = []
-        txs.push(transfer)
 
         // Creating a remark
-        txs.push(api.tx.system.remark(params.memo))
+        const remark = api.tx.system.remark(params.memo)
 
         // Send the Batch Transaction
-        const batchTx = api.tx.utility.batchAll(txs)
-
-        txHash = await batchTx.signAndSend(this.getKeyringPair())
+        transaction = api.tx.utility.batch([transfer, remark])
       }
+
+      // Check balances
+      const paymentInfo = await transaction.paymentInfo(this.getKeyringPair())
+      const fee = baseAmount(paymentInfo.partialFee.toString(), this.getDecimal())
+      const balances = await this.getBalance(this.getAddress(), AssetDOT)
+
+      if (!balances || params.amount.amount().plus(fee.amount()).isGreaterThan(balances[0].amount.amount())) {
+        throw new Error('insufficient balance')
+      }
+
+      const txHash = await transaction.signAndSend(this.getKeyringPair())
       return txHash.toString()
     } catch (error) {
       return Promise.reject(error)

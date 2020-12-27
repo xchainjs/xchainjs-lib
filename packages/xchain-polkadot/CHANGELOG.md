@@ -3,6 +3,8 @@
 ### Update
 
 - Add `validateAddress`
+- Update `transfer` (check `insufficient balance`)
+- Update dependencies
 
 # v.0.2.0 (2020-12-11)
 

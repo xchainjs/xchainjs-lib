@@ -33,7 +33,7 @@
     "start:example": "ts-node example/index.ts"
   },
   "devDependencies": {
-    "@polkadot/api": "^2.7.1",
+    "@polkadot/api": "^3.1.1",
     "@types/big.js": "^4.0.5",
     "jest-websocket-mock": "^2.2.0",
     "mock-socket": "9.0.3"
@@ -49,7 +49,7 @@
     "nock": "^13.0.4"
   },
   "peerDependencies": {
-    "@polkadot/api": "^2.7.1",
-    "@polkadot/util": "^4.2.1"
+    "@polkadot/api": "^3.1.1",
+    "@polkadot/util": "^5.1.1"
   }
 }

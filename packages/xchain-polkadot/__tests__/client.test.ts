@@ -280,29 +280,58 @@ describe('Client Test', () => {
     expect(txResult.to[0].amount.amount().isEqualTo(baseAmount('500000000000', 12).amount())).toBeTruthy()
   })
 
-  /**
-   *
-    TODO: Add the failing test cases.
-   */
-  // it('transferWithoutMemo', async () => {
-  //   const txHash = await polkadotClient.transfer({
-  //     amount: baseAmount('1000000000', 12),
-  //     recipient: '5CwPxumBRDLkP7VQEYzhwoYw6AP4FNmRM7G1pj7Atj6dEzgY',
-  //   })
+  it('transferWithoutMemo', async () => {
+    assertAccountsBalance(polkadotClient.getClientUrl(), testnet_address, {
+      code: 0,
+      message: 'Success',
+      ttl: 1,
+      data: {
+        address: testnet_address,
+        balance: '0.5',
+        lock: '0',
+      },
+    })
 
-  //   expect(txHash).toEqual('0xdd227d44f1ed2e5b82e38daf699f66fc5ea28f1e104167b19d587a2363190ee9')
-  // })
+    const txHash = await polkadotClient.transfer({
+      amount: baseAmount('1000000000', 12),
+      recipient: '5CwPxumBRDLkP7VQEYzhwoYw6AP4FNmRM7G1pj7Atj6dEzgY',
+    })
 
-  // it('transferWithoutMemoWithInsufficientFunds', async () => {
-  //   const txHash = await polkadotClient.transfer({
-  //     amount: baseAmount('1000000000', 120000000),
-  //     recipient: '5CwPxumBRDLkP7VQEYzhwoYw6AP4FNmRM7G1pj7Atj6dEzgY',
-  //   })
+    expect(txHash).toEqual('0xdd227d44f1ed2e5b82e38daf699f66fc5ea28f1e104167b19d587a2363190ee9')
+  })
 
-  //   expect(txHash).toEqual('0xdd227d44f1ed2e5b82e38daf699f66fc5ea28f1e104167b19d587a2363190ee9')
-  // })
+  it('transferWithoutMemoWithInsufficientFunds', async () => {
+    assertAccountsBalance(polkadotClient.getClientUrl(), testnet_address, {
+      code: 0,
+      message: 'Success',
+      ttl: 1,
+      data: {
+        address: testnet_address,
+        balance: '0.5',
+        lock: '0',
+      },
+    })
+
+    return expect(
+      polkadotClient.transfer({
+        amount: baseAmount('100000000000000000', 12),
+        recipient: '5CwPxumBRDLkP7VQEYzhwoYw6AP4FNmRM7G1pj7Atj6dEzgY',
+      }),
+    ).rejects.toThrow('insufficient balance')
+  })
 
   it('transferWithMemo', async () => {
+    assertAccountsBalance(polkadotClient.getClientUrl(), testnet_address, {
+      code: 0,
+      message: 'Success',
+      ttl: 1,
+      data: {
+        address: testnet_address,
+        balance: '0.5',
+        lock: '0',
+      },
+    })
+
     const txHash = await polkadotClient.transfer({
       amount: baseAmount('1000000000', 12),
       recipient: '5CwPxumBRDLkP7VQEYzhwoYw6AP4FNmRM7G1pj7Atj6dEzgY',
@@ -310,6 +339,27 @@ describe('Client Test', () => {
     })
 
     expect(txHash).toEqual('0xdd227d44f1ed2e5b82e38daf699f66fc5ea28f1e104167b19d587a2363190ee9')
+  })
+
+  it('transferWithMemoWithInsufficientFunds', async () => {
+    assertAccountsBalance(polkadotClient.getClientUrl(), testnet_address, {
+      code: 0,
+      message: 'Success',
+      ttl: 1,
+      data: {
+        address: testnet_address,
+        balance: '0.5',
+        lock: '0',
+      },
+    })
+
+    return expect(
+      polkadotClient.transfer({
+        amount: baseAmount('100000000000000000', 12),
+        recipient: '5CwPxumBRDLkP7VQEYzhwoYw6AP4FNmRM7G1pj7Atj6dEzgY',
+        memo: 'ABC',
+      }),
+    ).rejects.toThrow('insufficient balance')
   })
 
   it('get fees', async () => {
