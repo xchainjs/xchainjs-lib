@@ -289,7 +289,7 @@ class Client implements PolkadotClient, XChainClient {
 
       // Check balances
       const paymentInfo = await transaction.paymentInfo(this.getKeyringPair())
-      const fee = baseAmount(paymentInfo.partialFee.toString(), this.getDecimal())
+      const fee = baseAmount(paymentInfo.partialFee.toString(), getDecimal(this.network))
       const balances = await this.getBalance(this.getAddress(), AssetDOT)
 
       if (!balances || params.amount.amount().plus(fee.amount()).isGreaterThan(balances[0].amount.amount())) {
