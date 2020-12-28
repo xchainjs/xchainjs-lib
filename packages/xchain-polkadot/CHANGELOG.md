@@ -2,7 +2,7 @@
 
 ### Breaking change
 
-- Extract `getDefaultFees`, `getDecimal` from `Client` to `utils`
+- Extract `getDefaultFees`, `getDecimal` from `Client` to `utils` #157
 
 ### Update
 

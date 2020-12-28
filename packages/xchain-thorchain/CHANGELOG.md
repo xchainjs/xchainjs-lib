@@ -2,7 +2,7 @@
 
 ### Breaking change
 
-- Extract `getDefaultFees` from `Client` to `utils`
+- Extract `getDefaultFees` from `Client` to `utils` #157
 
 # v.0.6.2 (2020-12-23)
 

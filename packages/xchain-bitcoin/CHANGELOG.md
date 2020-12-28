@@ -2,11 +2,11 @@
 
 ### Update
 
-- Add `getDefaultFeesWithRates` to `utils`
+- Add `getDefaultFeesWithRates` to `utils` #157
 
 ### Breaking change
 
-- Extract `getDefaultFees`, `calcFee` from `Client` to `utils`
+- Extract `getDefaultFees`, `calcFee` from `Client` to `utils` #157
 - Remove `validateAddress` from `BitcoinClient`
 
 # v.0.6.0 (2020-12-11)

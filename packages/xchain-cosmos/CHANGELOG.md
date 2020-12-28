@@ -2,7 +2,7 @@
 
 ### Breaking change
 
-- Extract `getDefaultFees` from `Client` to `utils`
+- Extract `getDefaultFees` from `Client` to `utils` #157
 - Remove `validateAddress` from `CosmosClient`
 
 # v.0.5.1 (2020-12-16)
