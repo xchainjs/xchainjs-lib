@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-binance",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "description": "Custom Binance client and utilities used by XChainJS clients",
   "keywords": [
     "BNB",
@@ -33,7 +33,7 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "^0.2.0",
+    "@xchainjs/xchain-client": "^0.3.0",
     "@xchainjs/xchain-crypto": "^0.2.0"
   },
   "devDependencies": {
