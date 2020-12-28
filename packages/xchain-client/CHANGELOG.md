@@ -1,4 +1,4 @@
-# v.x.x.x (2020-XX-XX)
+# v.0.2.2 (2020-28-12)
 
 ### Breaking change
 
