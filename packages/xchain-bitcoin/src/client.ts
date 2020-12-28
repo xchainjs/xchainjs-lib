@@ -15,10 +15,9 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
-import { baseAmount, AssetBTC, BaseAmount } from '@xchainjs/xchain-util'
+import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 import { TxIO } from './types/blockchair-api-types'
-import { UTXOs } from './types/common'
 
 // https://blockchair.com/api/docs#link_300
 // const baseUrl = 'https://api.blockchair.com/bitcoin/'
@@ -33,7 +32,6 @@ interface BitcoinClient {
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
-  getDefaultFeesWithRates(): FeesWithRates
 }
 
 type BitcoinClientParams = XChainClientParams & {
@@ -47,7 +45,6 @@ type BitcoinClientParams = XChainClientParams & {
 class Client implements BitcoinClient, XChainClient {
   net: Network
   phrase = ''
-  utxos: UTXOs
   nodeUrl = ''
   nodeApiKey = ''
 
@@ -57,7 +54,6 @@ class Client implements BitcoinClient, XChainClient {
     this.setNodeURL(nodeUrl)
     this.setNodeAPIKey(nodeApiKey)
     phrase && this.setPhrase(phrase)
-    this.utxos = []
   }
 
   setNodeURL = (url: string): void => {
@@ -81,7 +77,6 @@ class Client implements BitcoinClient, XChainClient {
 
   purgeClient = (): void => {
     this.phrase = ''
-    this.utxos = []
   }
 
   // update network
@@ -216,19 +211,6 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   /**
-   * Calculates fees based on fee rate and memo
-   */
-  private calcFee = (feeRate: FeeRate, memo?: string): BaseAmount => {
-    if (memo) {
-      const OP_RETURN = Utils.compileMemo(memo)
-      const vaultFee = Utils.getVaultFee(this.utxos, OP_RETURN, feeRate)
-      return baseAmount(vaultFee)
-    }
-    const normalFee = Utils.getNormalFee(this.utxos, feeRate)
-    return baseAmount(normalFee)
-  }
-
-  /**
    * Returns rates and fees
    */
   getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
@@ -242,9 +224,9 @@ class Client implements BitcoinClient, XChainClient {
 
     const fees: Fees = {
       type: 'byte',
-      fast: this.calcFee(rates.fast, memo),
-      average: this.calcFee(rates.average, memo),
-      fastest: this.calcFee(rates.fastest, memo),
+      fast: Utils.calcFee(rates.fast, memo),
+      average: Utils.calcFee(rates.average, memo),
+      fastest: Utils.calcFee(rates.fastest, memo),
     }
 
     return { fees, rates }
@@ -260,31 +242,6 @@ class Client implements BitcoinClient, XChainClient {
       return fees
     } catch (error) {
       return Promise.reject(error)
-    }
-  }
-
-  getDefaultFees = (): Fees => {
-    const { fees } = this.getDefaultFeesWithRates()
-    return fees
-  }
-
-  getDefaultFeesWithRates = (): FeesWithRates => {
-    const rates: FeeRates = {
-      fastest: 50,
-      fast: 20,
-      average: 10,
-    }
-
-    const fees: Fees = {
-      type: 'byte',
-      fast: this.calcFee(rates.fast),
-      average: this.calcFee(rates.average),
-      fastest: this.calcFee(rates.fastest),
-    }
-
-    return {
-      fees,
-      rates,
     }
   }
 

@@ -375,17 +375,6 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
-  getDefaultFees = (): Fees => {
-    const singleTxFee = baseAmount(37500)
-
-    return {
-      type: 'base',
-      fast: singleTxFee,
-      fastest: singleTxFee,
-      average: singleTxFee,
-    } as Fees
-  }
-
   getMultiSendFees = async (): Promise<Fees> => {
     try {
       const transferFee = await this.getTransferFee()

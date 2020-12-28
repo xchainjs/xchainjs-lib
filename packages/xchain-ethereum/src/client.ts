@@ -557,20 +557,6 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
-   * Get the default gas price.
-   *
-   * @returns (Fees) The default gas price.
-   */
-  getDefaultFees = (): Fees => {
-    return {
-      type: 'base',
-      average: baseAmount(30, ETH_DECIMAL),
-      fast: baseAmount(35, ETH_DECIMAL),
-      fastest: baseAmount(39, ETH_DECIMAL),
-    }
-  }
-
-  /**
    * Estimate gas for ETH transfer.
    *
    * @param params The ETH transaction options.

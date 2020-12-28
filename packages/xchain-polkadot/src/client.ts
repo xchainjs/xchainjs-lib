@@ -20,7 +20,7 @@ import { KeyringPair } from '@polkadot/keyring/types'
 import { hexToU8a, isHex } from '@polkadot/util'
 
 import { SubscanResponse, Account, AssetDOT, TransfersResult, Extrinsic, Transfer } from './types'
-import { isSuccess } from './util'
+import { isSuccess, getDecimal } from './util'
 
 /**
  * Interface for custom Polkadot client
@@ -158,10 +158,6 @@ class Client implements PolkadotClient, XChainClient {
     return this.address
   }
 
-  private getDecimal = (): number => {
-    return this.network === 'testnet' ? 12 : 10
-  }
-
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
     try {
       const response: SubscanResponse<Account> = await axios
@@ -178,7 +174,7 @@ class Client implements PolkadotClient, XChainClient {
         ? [
             {
               asset: AssetDOT,
-              amount: assetToBase(assetAmount(account.balance, this.getDecimal())),
+              amount: assetToBase(assetAmount(account.balance, getDecimal(this.network))),
             },
           ]
         : []
@@ -214,13 +210,13 @@ class Client implements PolkadotClient, XChainClient {
           from: [
             {
               from: transfer.from,
-              amount: assetToBase(assetAmount(transfer.amount, this.getDecimal())),
+              amount: assetToBase(assetAmount(transfer.amount, getDecimal(this.network))),
             },
           ],
           to: [
             {
               to: transfer.to,
-              amount: assetToBase(assetAmount(transfer.amount, this.getDecimal())),
+              amount: assetToBase(assetAmount(transfer.amount, getDecimal(this.network))),
             },
           ],
           date: new Date(transfer.block_timestamp * 1000),
@@ -253,13 +249,13 @@ class Client implements PolkadotClient, XChainClient {
         from: [
           {
             from: transfer.from,
-            amount: assetToBase(assetAmount(transfer.amount, this.getDecimal())),
+            amount: assetToBase(assetAmount(transfer.amount, getDecimal(this.network))),
           },
         ],
         to: [
           {
             to: transfer.to,
-            amount: assetToBase(assetAmount(transfer.amount, this.getDecimal())),
+            amount: assetToBase(assetAmount(transfer.amount, getDecimal(this.network))),
           },
         ],
         date: new Date(extrinsic.block_timestamp * 1000),
@@ -314,7 +310,7 @@ class Client implements PolkadotClient, XChainClient {
         .transfer(params.recipient, params.amount.amount().toNumber())
         .paymentInfo(this.getKeyringPair())
 
-      const fee = baseAmount(info.partialFee.toString(), this.getDecimal())
+      const fee = baseAmount(info.partialFee.toString(), getDecimal(this.network))
 
       return {
         type: 'byte',
@@ -330,19 +326,8 @@ class Client implements PolkadotClient, XChainClient {
   getFees = async (): Promise<Fees> => {
     return await this.estimateFees({
       recipient: this.getAddress(),
-      amount: baseAmount(0, this.getDecimal()),
+      amount: baseAmount(0, getDecimal(this.network)),
     })
-  }
-
-  getDefaultFees = (): Fees => {
-    const fee = assetToBase(assetAmount(0.015, this.getDecimal()))
-
-    return {
-      type: 'byte',
-      fast: fee,
-      fastest: fee,
-      average: fee,
-    }
   }
 }
 
