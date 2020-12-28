@@ -370,13 +370,4 @@ describe('Client Test', () => {
     expect(fees.fast.amount().isEqualTo(baseAmount('15000000001', 12).amount())).toBeTruthy()
     expect(fees.fastest.amount().isEqualTo(baseAmount('15000000001', 12).amount())).toBeTruthy()
   })
-
-  it('get default fees', async () => {
-    const fees = await polkadotClient.getDefaultFees()
-
-    expect(fees.type).toEqual('byte')
-    expect(fees.average.amount().isEqualTo(baseAmount('15000000000', 12).amount())).toBeTruthy()
-    expect(fees.fast.amount().isEqualTo(baseAmount('15000000000', 12).amount())).toBeTruthy()
-    expect(fees.fastest.amount().isEqualTo(baseAmount('15000000000', 12).amount())).toBeTruthy()
-  })
 })

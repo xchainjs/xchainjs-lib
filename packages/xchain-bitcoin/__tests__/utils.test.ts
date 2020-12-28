@@ -37,4 +37,11 @@ describe('Bitcoin Utils Test', () => {
     const fee = Utils.getNormalFee(utxos, 1)
     expect(fee).toEqual(1000)
   })
+
+  it('should return default fees of a normal tx', async () => {
+    const estimates = Utils.getDefaultFees()
+    expect(estimates.fast).toBeDefined()
+    expect(estimates.fastest).toBeDefined()
+    expect(estimates.average).toBeDefined()
+  })
 })

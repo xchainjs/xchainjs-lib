@@ -160,15 +160,6 @@ describe('BitcoinClient Test', () => {
     expect(estimates.average).toBeDefined()
   })
 
-  it('should return default fees of a normal tx', async () => {
-    btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseOne)
-    const estimates = await btcClient.getDefaultFees()
-    expect(estimates.fast).toBeDefined()
-    expect(estimates.fastest).toBeDefined()
-    expect(estimates.average).toBeDefined()
-  })
-
   it('should return estimated fees of a vault tx that are more expensive than a normal tx (in case of > MIN_TX_FEE only)', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)

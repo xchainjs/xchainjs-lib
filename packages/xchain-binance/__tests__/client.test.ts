@@ -170,14 +170,6 @@ describe('BinanceClient Test', () => {
     expect(amount.amount().isEqualTo(1289087500)).toBeTruthy()
   })
 
-  it('fetches default fees', async () => {
-    const fees = await bnbClient.getDefaultFees()
-    expect(fees.type).toEqual(transferFee.type)
-    expect(fees.average.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
-    expect(fees.fast.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
-    expect(fees.fastest.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
-  })
-
   it('fetches the transfer fees', async () => {
     mockGetFees(mainnetClientURL, [
       {
