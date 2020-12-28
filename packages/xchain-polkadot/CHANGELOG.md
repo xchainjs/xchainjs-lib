@@ -1,5 +1,9 @@
 # v.x.x.x (2020-XX-XX)
 
+### Breaking change
+
+- Extract `getDefaultFees`, `getDecimal` from `Client` to `utils` #157
+
 ### Update
 
 - Add `validateAddress`

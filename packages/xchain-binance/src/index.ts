@@ -1,3 +1,3 @@
 export * from './client'
 export * from './types'
-export { getDerivePath } from './util'
+export { getDerivePath, getDefaultFees } from './util'

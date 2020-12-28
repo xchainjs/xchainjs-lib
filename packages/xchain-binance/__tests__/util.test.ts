@@ -1,6 +1,15 @@
-import { getHashFromTransfer, getTxHashFromMemo, isFee, isTransferFee, isDexFees, parseTx } from '../src/util'
+import {
+  getDefaultFees,
+  getHashFromTransfer,
+  getTxHashFromMemo,
+  isFee,
+  isTransferFee,
+  isDexFees,
+  parseTx,
+} from '../src/util'
 import { TransferEvent, Transfer } from '../src/types/binance-ws'
 import { DexFees, Fee, TransferFee, Tx as BinanceTx } from '../src/types/binance'
+import { baseAmount } from '@xchainjs/xchain-util'
 
 describe('binance/util', () => {
   describe('getHashFromTransfer', () => {
@@ -136,6 +145,16 @@ describe('binance/util', () => {
       it('invalidates a DexFees', () => {
         expect(isDexFees(fee)).toBeFalsy()
       })
+    })
+
+    describe('fetches default fees', async () => {
+      const singleTxFee = baseAmount(37500)
+      const transferFee = { type: 'base', average: singleTxFee, fast: singleTxFee, fastest: singleTxFee }
+      const fees = await getDefaultFees()
+      expect(fees.type).toEqual(transferFee.type)
+      expect(fees.average.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+      expect(fees.fast.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+      expect(fees.fastest.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
     })
   })
 })

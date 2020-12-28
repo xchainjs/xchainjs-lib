@@ -19,9 +19,7 @@ import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './types'
-import { getDenom, getAsset, getTxsFromHistory } from './util'
-
-const DECIMAL = 6
+import { DECIMAL, getDenom, getAsset, getTxsFromHistory } from './util'
 
 /**
  * Interface for custom Cosmos client
@@ -227,15 +225,6 @@ class Client implements CosmosClient, XChainClient {
       fastest: baseAmount(2500, DECIMAL),
       average: baseAmount(0, DECIMAL),
     })
-  }
-
-  getDefaultFees = (): Fees => {
-    return {
-      type: 'base',
-      fast: baseAmount(750, DECIMAL),
-      fastest: baseAmount(2500, DECIMAL),
-      average: baseAmount(0, DECIMAL),
-    }
   }
 }
 

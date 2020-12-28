@@ -1,3 +1,9 @@
+# v.x.x.x (2020-XX-XX)
+
+### Breaking change
+
+- Remove `getDefaultFees` #157
+
 # v.0.2.1 (2020-23-12)
 
 ### Update

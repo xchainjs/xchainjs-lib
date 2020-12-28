@@ -1,4 +1,4 @@
-import { TxFrom, TxTo, Txs } from '@xchainjs/xchain-client'
+import { TxFrom, TxTo, Txs, Fees } from '@xchainjs/xchain-client'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import { Msg, codec } from 'cosmos-client'
@@ -7,6 +7,8 @@ import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
 import { RawTxResponse, TxResponse, APIQueryParam } from './cosmos/types'
 import { AssetAtom, AssetMuon } from './types'
+
+export const DECIMAL = 6
 
 /**
  * Type guard for MsgSend
@@ -137,4 +139,13 @@ export const getQueryString = (v: APIQueryParam): string => {
     .filter((key) => key.length > 0)
     .map((key) => (v[key] == null ? key : `${key}=${encodeURIComponent(v[key].toString())}`))
     .join('&')
+}
+
+export const getDefaultFees = (): Fees => {
+  return {
+    type: 'base',
+    fast: baseAmount(750, DECIMAL),
+    fastest: baseAmount(2500, DECIMAL),
+    average: baseAmount(0, DECIMAL),
+  }
 }

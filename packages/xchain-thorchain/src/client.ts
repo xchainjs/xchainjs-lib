@@ -24,6 +24,7 @@ import { MsgNativeTx } from './messages'
 import {
   getDenom,
   getAsset,
+  getDefaultFees,
   getTxsFromHistory,
   DECIMAL,
   DEFAULT_GAS_VALUE,
@@ -319,17 +320,7 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   getFees = async (): Promise<Fees> => {
-    return Promise.resolve(this.getDefaultFees())
-  }
-
-  getDefaultFees = (): Fees => {
-    const fee = baseAmount(10000000, DECIMAL)
-    return {
-      type: 'base',
-      fast: fee,
-      fastest: fee,
-      average: fee,
-    }
+    return Promise.resolve(getDefaultFees())
   }
 }
 

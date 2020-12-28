@@ -2,6 +2,7 @@
 
 ### Breaking change
 
+- Extract `getDefaultFees` from `Client` to `utils` #157
 - Remove `validateAddress` from `BinanceClient`
 
 # v.4.2.0 (2020-12-11)

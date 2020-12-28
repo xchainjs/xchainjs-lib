@@ -1,7 +1,7 @@
 import { Asset, assetToString, baseAmount, assetFromString, THORChain } from '@xchainjs/xchain-util'
 import { AssetRune } from './types'
 import { TxResponse, TxEvent, TxEventAttribute } from '@xchainjs/xchain-cosmos/lib'
-import { Txs, TxFrom, TxTo, Balance } from '@xchainjs/xchain-client'
+import { Txs, TxFrom, TxTo, Balance, Fees } from '@xchainjs/xchain-client'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '10000000'
@@ -119,4 +119,14 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
       },
     ]
   }, [] as Txs)
+}
+
+export const getDefaultFees = (): Fees => {
+  const fee = baseAmount(DEFAULT_GAS_VALUE, DECIMAL)
+  return {
+    type: 'base',
+    fast: fee,
+    fastest: fee,
+    average: fee,
+  }
 }

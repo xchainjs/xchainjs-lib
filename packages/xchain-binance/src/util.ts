@@ -1,7 +1,7 @@
 import { Transfer, TransferEvent } from './types/binance-ws'
 import { TransferFee, DexFees, Fee, TxType as BinanceTxType, Tx as BinanceTx } from './types/binance'
-import { TxType, Tx } from '@xchainjs/xchain-client'
-import { assetFromString, AssetBNB, assetToBase, assetAmount } from '@xchainjs/xchain-util/lib'
+import { TxType, Tx, Fees } from '@xchainjs/xchain-client'
+import { assetFromString, AssetBNB, assetToBase, assetAmount, baseAmount } from '@xchainjs/xchain-util/lib'
 import { DerivePath } from './types/common'
 
 /**
@@ -69,3 +69,14 @@ export const parseTx = (tx: BinanceTx): Tx | null => {
 }
 
 export const getDerivePath = (index = 0): DerivePath => [44, 714, 0, 0, index]
+
+export const getDefaultFees = (): Fees => {
+  const singleTxFee = baseAmount(37500)
+
+  return {
+    type: 'base',
+    fast: singleTxFee,
+    fastest: singleTxFee,
+    average: singleTxFee,
+  } as Fees
+}

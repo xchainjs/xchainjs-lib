@@ -1,9 +1,9 @@
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as blockChair from './blockchair-api'
-import { Address, Balance, Network, TxHash, TxParams } from '@xchainjs/xchain-client/lib'
-import { AssetBTC, assetToString, baseAmount } from '@xchainjs/xchain-util/lib'
+import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client/lib'
+import { AssetBTC, assetToString, BaseAmount, baseAmount } from '@xchainjs/xchain-util/lib'
 import { BtcAddressUTXOs, BtcAddressUTXO } from './types/blockchair-api-types'
-import { FeeRate } from './types/client-types'
+import { FeeRate, FeeRates, FeesWithRates } from './types/client-types'
 import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
 /**
@@ -218,3 +218,41 @@ export const getDerivePath = (index = 0): DerivePath => ({
   mainnet: `84'/0'/0'/0/${index}`,
   testnet: `84'/1'/0'/0/${index}`,
 })
+
+/**
+ * Calculates fees based on fee rate and memo
+ */
+export const calcFee = (feeRate: FeeRate, memo?: string): BaseAmount => {
+  if (memo) {
+    const OP_RETURN = compileMemo(memo)
+    const vaultFee = getVaultFee([], OP_RETURN, feeRate)
+    return baseAmount(vaultFee)
+  }
+  const normalFee = getNormalFee([], feeRate)
+  return baseAmount(normalFee)
+}
+
+export const getDefaultFeesWithRates = (): FeesWithRates => {
+  const rates: FeeRates = {
+    fastest: 50,
+    fast: 20,
+    average: 10,
+  }
+
+  const fees: Fees = {
+    type: 'byte',
+    fast: calcFee(rates.fast),
+    average: calcFee(rates.average),
+    fastest: calcFee(rates.fastest),
+  }
+
+  return {
+    fees,
+    rates,
+  }
+}
+
+export const getDefaultFees = (): Fees => {
+  const { fees } = getDefaultFeesWithRates()
+  return fees
+}
