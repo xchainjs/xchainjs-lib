@@ -1,5 +1,9 @@
 # v.x.x.x (2020-XX-XX)
 
+### Breaking change
+
+- Extract `getDefaultFees` from `Client` to `utils`
+
 # v.0.3.0 (2020-12-22)
 
 ### Update

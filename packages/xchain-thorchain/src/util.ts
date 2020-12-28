@@ -122,7 +122,7 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
 }
 
 export const getDefaultFees = (): Fees => {
-  const fee = baseAmount(10000000, DECIMAL)
+  const fee = baseAmount(DEFAULT_GAS_VALUE, DECIMAL)
   return {
     type: 'base',
     fast: fee,
