@@ -93,7 +93,7 @@ export default class Client implements XChainClient, EthereumClient {
 
   /**
    * Purge client.
-   * 
+   *
    * @returns {void}
    */
   purgeClient = (): void => {

@@ -13,9 +13,9 @@ const setApiKeyParams = (key?: string): { params?: { [key: string]: string } } =
 
 /**
  * Get transaction by hash.
- * 
+ *
  * https://blockchair.com/api/docs#link_200
- * 
+ *
  * @param {string} baseUrl
  * @param {string} hash
  * @param {boolean} erc_20 (optional)
@@ -44,9 +44,9 @@ export const getTx = async (
 
 /**
  * Get raw transaction by hash.
- * 
+ *
  * https://blockchair.com/api/docs#link_201
- * 
+ *
  * @param {string} baseUrl
  * @param {string} hash
  * @param {string} apiKey (optional)
@@ -64,9 +64,9 @@ export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): 
 
 /**
  * Get address information.
- * 
+ *
  * https://blockchair.com/api/docs#link_300
- * 
+ *
  * @param {string} baseUrl
  * @param {string} address
  * @param {string} apiKey (optional)
@@ -103,9 +103,9 @@ export const getAddress = async (
 
 /**
  * Broadcast transaction.
- * 
+ *
  * https://blockchair.com/api/docs#link_202
- * 
+ *
  * @param {string} baseUrl
  * @param {string} txHex
  * @param {string} apiKey (optional)

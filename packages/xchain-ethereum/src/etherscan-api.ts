@@ -5,9 +5,9 @@ const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKe
 
 /**
  * SafeGasPrice, ProposeGasPrice And FastGasPrice returned in string-Gwei
- * 
+ *
  * https://etherscan.io/apis#gastracker
- * 
+ *
  * @param {string} baseUrl
  * @param {string} apiKey (optional)
  * @returns {GasOracleResponse}

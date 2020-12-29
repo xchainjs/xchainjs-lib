@@ -5,7 +5,7 @@ export const ETH_DECIMAL = 18
 
 /**
  * XChainNetwork -> EthNetwork
- * 
+ *
  * @param {XChainNetwork} network
  * @returns {EthNetwork}
  */
@@ -20,7 +20,7 @@ export const xchainNetworkToEths = (network: XChainNetwork): EthNetwork => {
 
 /**
  * EthNetwork -> XChainNetwork
- * 
+ *
  * @param {EthNetwork} network
  * @returns {XChainNetwork}
  */
