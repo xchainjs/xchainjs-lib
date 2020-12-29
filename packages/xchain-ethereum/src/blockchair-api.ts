@@ -1,14 +1,26 @@
 import axios from 'axios'
-import { BlockChairResponse, AddressDTO, Transactions, RawTxs, ChainStatsBtc } from './types/blockchair-api-types'
+import { BlockChairResponse, AddressDTO, Transactions, RawTxs } from './types/blockchair-api-types'
 
-const setApiKeyParams = (key?: string) => {
+/**
+ * Set Api key params.
+ *
+ * @param {string} key (optional)
+ * @returns {Params}
+ */
+const setApiKeyParams = (key?: string): { params?: { [key: string]: string } } => {
   return key && key.length > 0 ? { params: { key: key } } : {}
 }
 
 /**
+ * Get transaction by hash.
+ * 
  * https://blockchair.com/api/docs#link_200
- * @param chain
- * @param hash
+ * 
+ * @param {string} baseUrl
+ * @param {string} hash
+ * @param {boolean} erc_20 (optional)
+ * @param {string} apiKey (optional)
+ * @returns {Transactions}
  */
 export const getTx = async (
   baseUrl: string,
@@ -31,9 +43,14 @@ export const getTx = async (
 }
 
 /**
+ * Get raw transaction by hash.
+ * 
  * https://blockchair.com/api/docs#link_201
- * @param chain
- * @param hash
+ * 
+ * @param {string} baseUrl
+ * @param {string} hash
+ * @param {string} apiKey (optional)
+ * @returns {RawTxs}
  */
 export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): Promise<RawTxs> => {
   try {
@@ -46,9 +63,16 @@ export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): 
 }
 
 /**
+ * Get address information.
+ * 
  * https://blockchair.com/api/docs#link_300
- * @param chain
- * @param address
+ * 
+ * @param {string} baseUrl
+ * @param {string} address
+ * @param {string} apiKey (optional)
+ * @param {number} limit (optional)
+ * @param {number} offset (optional)
+ * @returns {AddressDTO}
  */
 export const getAddress = async (
   baseUrl: string,
@@ -78,28 +102,19 @@ export const getAddress = async (
 }
 
 /**
+ * Broadcast transaction.
+ * 
  * https://blockchair.com/api/docs#link_202
- * @param chain
- * @param txHex
+ * 
+ * @param {string} baseUrl
+ * @param {string} txHex
+ * @param {string} apiKey (optional)
+ * @returns {string}
  */
 export const broadcastTx = async (baseUrl: string, txHex: string, apiKey?: string): Promise<string> => {
   try {
     const response = await axios.post(`${baseUrl}/push/transaction`, { data: txHex }, setApiKeyParams(apiKey))
     return response.data.data.transaction_hash
-  } catch (error) {
-    return Promise.reject(error)
-  }
-}
-
-/**
- * https://blockchair.com/api/docs#link_001
- * @param chain
- */
-export const bitcoinStats = async (baseUrl: string, apiKey?: string): Promise<ChainStatsBtc> => {
-  try {
-    const response = await axios.get(`${baseUrl}/stats`, setApiKeyParams(apiKey))
-    const bcRes: BlockChairResponse<ChainStatsBtc> = response.data
-    return bcRes.data
   } catch (error) {
     return Promise.reject(error)
   }
