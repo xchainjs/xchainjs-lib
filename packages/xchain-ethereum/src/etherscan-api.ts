@@ -6,11 +6,11 @@ const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKe
 /**
  * SafeGasPrice, ProposeGasPrice And FastGasPrice returned in string-Gwei
  *
- * https://etherscan.io/apis#gastracker
+ * @see https://etherscan.io/apis#gastracker
  *
- * @param {string} baseUrl
- * @param {string} apiKey (optional)
- * @returns {GasOracleResponse}
+ * @param {string} baseUrl The etherscan node url.
+ * @param {string} apiKey (optional) The etherscan API key.
+ * @returns {GasOracleResponse} LastBlock, SafeGasPrice, ProposeGasPrice, FastGasPrice
  */
 export const getGasOracle = (baseUrl: string, apiKey?: string): Promise<GasOracleResponse> => {
   const url = baseUrl + '/api?module=gastracker&action=gasoracle'

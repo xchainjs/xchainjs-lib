@@ -19,11 +19,6 @@ import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 import { TxIO } from './types/blockchair-api-types'
 
-// https://blockchair.com/api/docs#link_300
-// const baseUrl = 'https://api.blockchair.com/bitcoin/'
-// const pathAddress = 'dashboards/address/'
-// const pathTx = 'raw/transaction/'
-
 /**
  * BitcoinClient Interface
  */
@@ -40,15 +35,20 @@ type BitcoinClientParams = XChainClientParams & {
 }
 
 /**
- * Implements Client declared above
+ * Custom Bitcoin client
  */
 class Client implements BitcoinClient, XChainClient {
-  net: Network
-  phrase = ''
-  nodeUrl = ''
-  nodeApiKey = ''
+  private net: Network
+  private phrase = ''
+  private nodeUrl = ''
+  private nodeApiKey = ''
 
-  // Client is initialised with network type
+  /**
+   * Constructure
+   * @desc Client is initialised with network type
+   *
+   * @param {BitcoinClientParams} params
+   */
   constructor({ network = 'testnet', nodeUrl = '', nodeApiKey = '', phrase }: BitcoinClientParams) {
     this.net = network
     this.setNodeURL(nodeUrl)
@@ -56,58 +56,131 @@ class Client implements BitcoinClient, XChainClient {
     phrase && this.setPhrase(phrase)
   }
 
+  /**
+   * Set/Update the node url.
+   *
+   * @param {string} url The new node url.
+   * @returns {void}
+   */
   setNodeURL = (url: string): void => {
     this.nodeUrl = url
   }
 
+  /**
+   * Set/Update the node api key.
+   *
+   * @param {string} key The new node api key.
+   * @returns {void}
+   */
   setNodeAPIKey(key: string): void {
     this.nodeApiKey = key
   }
 
-  // Sets this.phrase to be accessed later
+  /**
+   * Set/update a new phrase.
+   *
+   * @param {string} phrase A new phrase.
+   * @returns {Address} The address from the given phrase
+   *
+   * @throws {"Invalid phrase"}
+   * Thrown if the given phase is invalid.
+   */
   setPhrase = (phrase: string): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
       const address = this.getAddress()
       return address
     } else {
-      throw new Error('Invalid BIP39 phrase')
+      throw new Error('Invalid phrase')
     }
   }
 
+  /**
+   * Purge client.
+   *
+   * @returns {void}
+   */
   purgeClient = (): void => {
     this.phrase = ''
   }
 
-  // update network
-  setNetwork = (_net: Network): void => {
-    this.net = _net
+  /**
+   * Set/update the current network.
+   *
+   * @param {Network} network `mainnet` or `testnet`.
+   * @returns {void}
+   *
+   * @throws {"Network must be provided"}
+   * Thrown if network has not been set before.
+   */
+  setNetwork = (net: Network): void => {
+    if (!net) {
+      throw new Error('Network must be provided')
+    } else {
+      this.net = net
+    }
   }
 
-  // Will return the desired network
+  /**
+   * Get the current network.
+   *
+   * @returns {Network} The current network. (`mainnet` or `testnet`)
+   */
   getNetwork = (): Network => {
     return this.net
   }
 
+  /**
+   * Get DerivePath
+   *
+   * @returns {string} The bitcoin derive path.
+   */
   derivePath(): string {
     const { testnet, mainnet } = Utils.getDerivePath()
     return Utils.isTestnet(this.net) ? testnet : mainnet
   }
 
+  /**
+   * Get the explorer url.
+   *
+   * @returns {string} The explorer url.
+   */
   getExplorerUrl = (): string => {
     const networkPath = Utils.isTestnet(this.net) ? '/testnet' : ''
     return `https://blockstream.info${networkPath}`
   }
 
+  /**
+   * Get the explorer url for the given address.
+   *
+   * @param {Address} address
+   * @returns {string} The explorer url for the given address.
+   */
   getExplorerAddressUrl = (address: Address): string => {
     return `${this.getExplorerUrl()}/address/${address}`
   }
+
+  /**
+   * Get the explorer url for the given transaction id.
+   *
+   * @param {string} txID The transaction id
+   * @returns {string} The explorer url for the given transaction id.
+   */
   getExplorerTxUrl = (txID: string): string => {
     return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
-  // Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-  // The address is then decoded into type P2WPKH and returned.
+  /**
+   * Get the current address.
+   *
+   * @desc Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
+   * The address is then decoded into type P2WPKH and returned.
+   *
+   * @returns {Address} The current address.
+   *
+   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
+   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
+   */
   getAddress = (): Address => {
     if (this.phrase) {
       const btcNetwork = Utils.btcNetwork(this.net)
@@ -118,14 +191,24 @@ class Client implements BitcoinClient, XChainClient {
         network: btcNetwork,
       })
       if (!address) {
-        throw new Error('address not defined')
+        throw new Error('Address not defined')
       }
       return address
     }
-    throw new Error('Phrase not set')
+    throw new Error('Phrase must be provided')
   }
 
-  // Private function to get keyPair from the this.phrase
+  /**
+   * @private
+   * Get private key.
+   *
+   * @desc Private function to get keyPair from the this.phrase
+   *
+   * @param {string} phrase The phrase to be used for generating privkey
+   * @returns {ECPairInterface} The privkey generated from the given phrase
+   *
+   * @throws {"Could not get private key from phrase"} Throws an error if failed creating BTC keys from the given phrase
+   * */
   private getBtcKeys = (phrase: string): Bitcoin.ECPairInterface => {
     const btcNetwork = Utils.btcNetwork(this.net)
     const derive_path = this.derivePath()
@@ -140,10 +223,20 @@ class Client implements BitcoinClient, XChainClient {
     return Bitcoin.ECPair.fromPrivateKey(master.privateKey, { network: btcNetwork })
   }
 
-  // Will return true/false
+  /**
+   * Validate the given address.
+   *
+   * @param {Address} address
+   * @returns {boolean} `true` or `false`
+   */
   validateAddress = (address: string): boolean => Utils.validateAddress(address, this.net)
 
-  // Returns balance of address
+  /**
+   * Get the BTC balance of a given address.
+   *
+   * @param {Address} address (optional) By default, it will return the balance of the current wallet.
+   * @returns {Array<Balance>} The BTC balance of the address.
+   */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
       return Utils.getBalance(address || this.getAddress(), this.nodeUrl, this.nodeApiKey)
@@ -152,7 +245,13 @@ class Client implements BitcoinClient, XChainClient {
     }
   }
 
-  // Get transaction for the address
+  /**
+   * Get transaction history of a given address with pagination options.
+   * By default it will return the transaction history of the current wallet.
+   *
+   * @param {TxHistoryParams} params (optional) The options to get transaction history.
+   * @returns {TxsPage} The transaction history.
+   */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     const limit = params?.limit ?? 10
     const offset = params?.offset ?? 0
@@ -194,6 +293,12 @@ class Client implements BitcoinClient, XChainClient {
     return result
   }
 
+  /**
+   * Get the transaction details of a given transaction id.
+   *
+   * @param {string} txId The transaction id.
+   * @returns {Tx} The transaction details of the given transaction id.
+   */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
       const rawTx = (await blockChair.getTx(this.nodeUrl, txId, this.nodeApiKey))[txId]
@@ -211,7 +316,10 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   /**
-   * Returns rates and fees
+   * Get the rates and fees.
+   *
+   * @param {string} memo (optional) The memo to be used for fee calculation
+   * @returns {FeesWithRates} The fees and rates
    */
   getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
     const btcStats = await blockChair.bitcoinStats(this.nodeUrl, this.nodeApiKey)
@@ -233,8 +341,9 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   /**
-   * Returns fees for transactions w/o a memo
-   * Note: If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
+   * Get the current fees.
+   *
+   * @returns {Fees} The fees without memo
    */
   getFees = async (): Promise<Fees> => {
     try {
@@ -246,8 +355,11 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   /**
-   * Returns fees for transactions w/ a memo
-   * Note: If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
+   * Get the fees for transactions with memo.
+   * @desc If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
+   *
+   * @param {string} memo
+   * @returns {Fees} The fees with memo
    */
   getFeesWithMemo = async (memo: string): Promise<Fees> => {
     try {
@@ -259,8 +371,10 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   /**
-   * Returns fee rates for transactions w/ a memo
-   * Note: If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
+   * Get the fee rates for transactions without a memo.
+   * @desc If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
+   *
+   * @returns {FeeRates} The fee rate
    */
   getFeeRates = async (): Promise<FeeRates> => {
     try {
@@ -271,6 +385,12 @@ class Client implements BitcoinClient, XChainClient {
     }
   }
 
+  /**
+   * Transfer BTC.
+   *
+   * @param {TxParams&FeeRate} params The transfer options.
+   * @returns {TxHash} The transaction hash.
+   */
   transfer = async (params: TxParams & { feeRate: FeeRate }): Promise<TxHash> => {
     try {
       const { psbt } = await Utils.buildTx({

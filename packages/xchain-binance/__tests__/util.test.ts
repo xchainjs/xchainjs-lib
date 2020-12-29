@@ -147,14 +147,16 @@ describe('binance/util', () => {
       })
     })
 
-    describe('fetches default fees', async () => {
-      const singleTxFee = baseAmount(37500)
-      const transferFee = { type: 'base', average: singleTxFee, fast: singleTxFee, fastest: singleTxFee }
-      const fees = await getDefaultFees()
-      expect(fees.type).toEqual(transferFee.type)
-      expect(fees.average.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
-      expect(fees.fast.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
-      expect(fees.fastest.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+    describe('fetches default fees', () => {
+      it('fetches default fees', async () => {
+        const singleTxFee = baseAmount(37500)
+        const transferFee = { type: 'base', average: singleTxFee, fast: singleTxFee, fastest: singleTxFee }
+        const fees = await getDefaultFees()
+        expect(fees.type).toEqual(transferFee.type)
+        expect(fees.average.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+        expect(fees.fast.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+        expect(fees.fastest.amount().isEqualTo(singleTxFee.amount())).toBeTruthy()
+      })
     })
   })
 })

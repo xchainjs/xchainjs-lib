@@ -1,6 +1,6 @@
 import { Asset, assetToString, baseAmount, assetFromString, THORChain } from '@xchainjs/xchain-util'
 import { AssetRune } from './types'
-import { TxResponse, TxEvent, TxEventAttribute } from '@xchainjs/xchain-cosmos/lib'
+import { TxResponse, TxEvent, TxEventAttribute } from '@xchainjs/xchain-cosmos'
 import { Txs, TxFrom, TxTo, Balance, Fees } from '@xchainjs/xchain-client'
 
 export const DECIMAL = 8

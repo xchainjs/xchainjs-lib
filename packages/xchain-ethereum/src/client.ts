@@ -125,7 +125,7 @@ export default class Client implements XChainClient, EthereumClient {
   /**
    * Get the current network.
    *
-   * @returns {XChainNetwork} The current network. (`mainnet` or `testnet`)
+   * @returns {Network} The current network. (`mainnet` or `testnet`)
    */
   getNetwork = (): XChainNetwork => {
     return ethNetworkToXchains(this.network)
@@ -237,7 +237,7 @@ export default class Client implements XChainClient, EthereumClient {
   /**
    * Set/update the current network.
    *
-   * @param {XChainNetwork} network `mainnet` or `testnet`.
+   * @param {Network} network `mainnet` or `testnet`.
    * @returns {void}
    *
    * @throws {"Network must be provided"}
@@ -305,9 +305,8 @@ export default class Client implements XChainClient, EthereumClient {
 
   /**
    * Get the ETH balance of a given address.
-   * By default, it will return the balance of the current wallet.
    *
-   * @param {Address} address (optional)
+   * @param {Address} address (optional) By default, it will return the balance of the current wallet.
    * @returns {Array<Balance>} The ETH balance of the address.
    */
   getBalance = async (address?: Address): Promise<Balance[]> => {

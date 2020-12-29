@@ -80,8 +80,8 @@ describe('BitcoinClient Test', () => {
 
   it('should purge phrase and utxos', async () => {
     btcClient.purgeClient()
-    expect(() => btcClient.getAddress()).toThrow('Phrase not set')
-    return expect(btcClient.getBalance()).rejects.toThrow('Phrase not set')
+    expect(() => btcClient.getAddress()).toThrow('Phrase must be provided')
+    return expect(btcClient.getBalance()).rejects.toThrow('Phrase must be provided')
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {

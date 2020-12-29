@@ -1,5 +1,5 @@
 import { Fees, Network as XChainNetwork } from '@xchainjs/xchain-client'
-import { baseAmount } from '@xchainjs/xchain-util/lib'
+import { baseAmount } from '@xchainjs/xchain-util'
 import { Network as EthNetwork } from './types'
 
 export const ETH_DECIMAL = 18

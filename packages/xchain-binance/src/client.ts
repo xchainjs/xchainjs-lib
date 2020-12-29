@@ -89,12 +89,16 @@ class Client implements BinanceClient, XChainClient {
   private privateKey: PrivKey | null = null // default private key at index 0
 
   /**
-   * Client has to be initialised with network type and phrase
-   * It will throw an error if an invalid phrase has been passed
-   **/
-
+   * Constructure
+   *
+   * @desc Client has to be initialised with network type and phrase.
+   * It will throw an error if an invalid phrase has been passed.
+   *
+   * @param {XChainClientParams} params
+   *
+   * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
+   */
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
-    // Invalid phrase will throw an error!
     this.network = network
     if (phrase) this.setPhrase(phrase)
 
@@ -102,55 +106,117 @@ class Client implements BinanceClient, XChainClient {
     this.bncClient.chooseNetwork(network)
   }
 
+  /**
+   * Purge client.
+   *
+   * @returns {void}
+   */
   purgeClient(): void {
     this.phrase = ''
     this.address = ''
     this.privateKey = null
   }
 
+  /**
+   * Get the BncClient interface.
+   *
+   * @returns {BncClient} The BncClient from `@binance-chain/javascript-sdk`.
+   */
   getBncClient(): BncClient {
     return this.bncClient
   }
 
-  // update network
+  /**
+   * Set/update the current network.
+   *
+   * @param {Network} network `mainnet` or `testnet`.
+   * @returns {void}
+   *
+   * @throws {"Network must be provided"}
+   * Thrown if network has not been set before.
+   */
   setNetwork(network: Network): XChainClient {
-    this.network = network
-    this.bncClient = new BncClient(this.getClientUrl())
-    this.bncClient.chooseNetwork(network)
-    this.address = ''
+    if (!network) {
+      throw new Error('Network must be provided')
+    } else {
+      this.network = network
+      this.bncClient = new BncClient(this.getClientUrl())
+      this.bncClient.chooseNetwork(network)
+      this.address = ''
 
-    return this
+      return this
+    }
   }
 
-  // Will return the desired network
+  /**
+   * Get the current network.
+   *
+   * @returns {Network} The current network. (`mainnet` or `testnet`)
+   */
   getNetwork(): Network {
     return this.network
   }
 
+  /**
+   * Get the client url.
+   *
+   * @returns {string} The client url for binance chain.
+   */
   private getClientUrl = (): string => {
     return this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
   }
 
+  /**
+   * Get the explorer url.
+   *
+   * @returns {string} The explorer url.
+   */
   getExplorerUrl = (): string => {
     return this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
   }
 
+  /**
+   * Get the explorer url for the given address.
+   *
+   * @param {Address} address
+   * @returns {string} The explorer url for the given address.
+   */
   getExplorerAddressUrl = (address: Address): string => {
     return `${this.getExplorerUrl()}/address/${address}`
   }
 
+  /**
+   * Get the explorer url for the given transaction id.
+   *
+   * @param {string} txID
+   * @returns {string} The explorer url for the given transaction id.
+   */
   getExplorerTxUrl = (txID: string): string => {
     return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
+  /**
+   * Get current address prefix based on the network.
+   *
+   * @returns {Prefix} The prefix based on the network.
+   */
   getPrefix = (): Prefix => {
     return this.network === 'testnet' ? 'tbnb' : 'bnb'
   }
 
+  /**
+   * Set/update a new phrase
+   *
+   * @param {string} phrase A new phrase.
+   * @returns {Address} The address from the given phrase
+   *
+   * @throws {"Invalid phrase"}
+   * Thrown if the given phase is invalid.
+   */
   setPhrase = (phrase: string): Address => {
     if (!this.phrase || this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {
-        throw new Error('Invalid BIP39 phrase')
+        throw new Error('Invalid phrase')
       }
 
       this.phrase = phrase
@@ -163,7 +229,11 @@ class Client implements BinanceClient, XChainClient {
 
   /**
    * @private
-   * Returns private key
+   * Get private key.
+   *
+   * @returns {PrivKey} The privkey generated from the given phrase
+   *
+   * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
   private getPrivateKey = (): PrivKey => {
@@ -176,6 +246,13 @@ class Client implements BinanceClient, XChainClient {
     return this.privateKey
   }
 
+  /**
+   * Get the current address.
+   *
+   * @returns {Address} The current address.
+   *
+   * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
+   */
   getAddress = (): string => {
     if (!this.address) {
       const address = crypto.getAddressFromPrivateKey(this.getPrivateKey(), this.getPrefix())
@@ -190,10 +267,23 @@ class Client implements BinanceClient, XChainClient {
     return this.address
   }
 
+  /**
+   * Validate the given address.
+   *
+   * @param {Address} address
+   * @returns {boolean} `true` or `false`
+   */
   validateAddress = (address: Address): boolean => {
     return this.bncClient.checkAddress(address, this.getPrefix())
   }
 
+  /**
+   * Get the balance of a given address.
+   *
+   * @param {Address} address (optional) By default, it will return the balance of the current wallet.
+   * @param {Asset} asset (optional) If not set, it will return all assets available.
+   * @returns {Array<Balance>} The balance of the address.
+   */
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
     try {
       const balances: BinanceBalances = await this.bncClient.getBalance(address || this.getAddress())
@@ -211,6 +301,12 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
+  /**
+   * @private
+   * Search transactions with parameters.
+   *
+   * @returns {Params} The parameters to be used for transaction search.
+   * */
   private searchTransactions = async (params?: { [x: string]: string | undefined }): Promise<TxsPage> => {
     try {
       const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
@@ -245,6 +341,13 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
+  /**
+   * Get transaction history of a given address with pagination options.
+   * By default it will return the transaction history of the current wallet.
+   *
+   * @param {TxHistoryParams} params (optional) The options to get transaction history.
+   * @returns {TxsPage} The transaction history.
+   */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     try {
       return await this.searchTransactions({
@@ -260,9 +363,10 @@ class Client implements BinanceClient, XChainClient {
   }
 
   /**
-   * /api/v1/tx/{hash} to query transaction hash (* it doesn't provide timestamp)
-   * /api/v1/transactions to query transaction data (* use blockHeight and address from /api/v1/tx/{hash})
-   * @param txId
+   * Get the transaction details of a given transaction id.
+   *
+   * @param {string} txId The transaction id.
+   * @returns {Tx} The transaction details of the given transaction id.
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
@@ -296,6 +400,12 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
+  /**
+   * Broadcast multi-send transaction.
+   *
+   * @param {MultiSendParams} params The multi-send transfer options.
+   * @returns {TxHash} The transaction hash.
+   */
   multiSend = async ({ address, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
     try {
       await this.bncClient.initChain()
@@ -323,6 +433,12 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
+  /**
+   * Transfer balances.
+   *
+   * @param {TxParams} params The transfer options.
+   * @returns {TxHash} The transaction hash.
+   */
   transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
       await this.bncClient.initChain()
@@ -342,6 +458,11 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
+  /**
+   * Get the current transfer fee.
+   *
+   * @returns {TransferFee} The current transfer fee.
+   */
   private getTransferFee = async (): Promise<TransferFee> => {
     try {
       const feesArray = await axios
@@ -359,6 +480,11 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
+  /**
+   * Get the current fee.
+   *
+   * @returns {Fees} The current fee.
+   */
   getFees = async (): Promise<Fees> => {
     try {
       const transferFee = await this.getTransferFee()
@@ -375,6 +501,11 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
+  /**
+   * Get the current fee for multi-send transaction.
+   *
+   * @returns {Fees} The current fee for multi-send transaction.
+   */
   getMultiSendFees = async (): Promise<Fees> => {
     try {
       const transferFee = await this.getTransferFee()
@@ -391,6 +522,11 @@ class Client implements BinanceClient, XChainClient {
     }
   }
 
+  /**
+   * Get the current fee for both single and multi-send transaction.
+   *
+   * @returns {SingleAndMultiFees} The current fee for both single and multi-send transaction.
+   */
   getSingleAndMultiFees = async (): Promise<{ single: Fees; multi: Fees }> => {
     try {
       const transferFee = await this.getTransferFee()
