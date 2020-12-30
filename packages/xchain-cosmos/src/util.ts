@@ -8,42 +8,61 @@ import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 import { RawTxResponse, TxResponse, APIQueryParam } from './cosmos/types'
 import { AssetAtom, AssetMuon } from './types'
 
+/**
+ * The decimal for cosmos chain.
+ */
 export const DECIMAL = 6
 
 /**
  * Type guard for MsgSend
+ *
+ * @param {Msg} msg
+ * @returns {boolean} `true` or `false`.
  */
-export const isMsgSend = (v: Msg): v is MsgSend =>
-  (v as MsgSend)?.amount !== undefined &&
-  (v as MsgSend)?.from_address !== undefined &&
-  (v as MsgSend)?.to_address !== undefined
+export const isMsgSend = (msg: Msg): msg is MsgSend =>
+  (msg as MsgSend)?.amount !== undefined &&
+  (msg as MsgSend)?.from_address !== undefined &&
+  (msg as MsgSend)?.to_address !== undefined
 
 /**
  * Type guard for MsgMultiSend
+ *
+ * @param {Msg} msg
+ * @returns {boolean} `true` or `false`.
  */
-export const isMsgMultiSend = (v: Msg): v is MsgMultiSend =>
-  (v as MsgMultiSend)?.inputs !== undefined && (v as MsgMultiSend)?.outputs !== undefined
+export const isMsgMultiSend = (msg: Msg): msg is MsgMultiSend =>
+  (msg as MsgMultiSend)?.inputs !== undefined && (msg as MsgMultiSend)?.outputs !== undefined
 
 /**
  * Get denom from Asset
+ *
+ * @param {Asset} asset
+ * @returns {string} The denom of the given asset.
  */
-export const getDenom = (v: Asset): string => {
-  if (assetToString(v) === assetToString(AssetAtom)) return 'uatom'
-  if (assetToString(v) === assetToString(AssetMuon)) return 'umuon'
-  return v.symbol
+export const getDenom = (asset: Asset): string => {
+  if (assetToString(asset) === assetToString(AssetAtom)) return 'uatom'
+  if (assetToString(asset) === assetToString(AssetMuon)) return 'umuon'
+  return asset.symbol
 }
 
 /**
  * Get Asset from denom
+ *
+ * @param {string} denom
+ * @returns {Asset|null} The asset of the given denom.
  */
-export const getAsset = (v: string): Asset | null => {
-  if (v === getDenom(AssetAtom)) return AssetAtom
-  if (v === getDenom(AssetMuon)) return AssetMuon
+export const getAsset = (denom: string): Asset | null => {
+  if (denom === getDenom(AssetAtom)) return AssetAtom
+  if (denom === getDenom(AssetMuon)) return AssetMuon
   return null
 }
 
 /**
  * Parse transaction type
+ *
+ * @param {Array<TxResponse>} txs The transaction response from the node.
+ * @param {Asset} mainAsset Current main asset which depends on the network.
+ * @returns {Txs} The parsed transaction result.
  */
 export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs => {
   return txs.reduce((acc, tx) => {
@@ -133,14 +152,22 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
 
 /**
  * Get Query String
+ *
+ * @param {APIQueryParam}
+ * @returns {string} The query string.
  */
-export const getQueryString = (v: APIQueryParam): string => {
-  return Object.keys(v)
+export const getQueryString = (params: APIQueryParam): string => {
+  return Object.keys(params)
     .filter((key) => key.length > 0)
-    .map((key) => (v[key] == null ? key : `${key}=${encodeURIComponent(v[key].toString())}`))
+    .map((key) => (params[key] == null ? key : `${key}=${encodeURIComponent(params[key].toString())}`))
     .join('&')
 }
 
+/**
+ * Get the default fee.
+ *
+ * @returns {Fees} The default fee.
+ */
 export const getDefaultFees = (): Fees => {
   return {
     type: 'base',

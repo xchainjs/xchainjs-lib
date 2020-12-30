@@ -1,3 +1,13 @@
+# v.x.x.x
+
+### Update
+
+- Update comments for documentation
+
+### Breaking change
+
+- Remove `deposit`
+
 # v.0.6.0 (2020-12-28)
 
 ### Breaking change
