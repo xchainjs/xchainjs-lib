@@ -34,10 +34,10 @@ export const isMsgMultiSend = (msg: Msg): msg is MsgMultiSend =>
   (msg as MsgMultiSend)?.inputs !== undefined && (msg as MsgMultiSend)?.outputs !== undefined
 
 /**
- * Get denom from Asset
+ * Get denomination from Asset
  *
  * @param {Asset} asset
- * @returns {string} The denom of the given asset.
+ * @returns {string} The denomination of the given asset.
  */
 export const getDenom = (asset: Asset): string => {
   if (assetToString(asset) === assetToString(AssetAtom)) return 'uatom'
@@ -46,10 +46,10 @@ export const getDenom = (asset: Asset): string => {
 }
 
 /**
- * Get Asset from denom
+ * Get Asset from denomination
  *
  * @param {string} denom
- * @returns {Asset|null} The asset of the given denom.
+ * @returns {Asset|null} The asset of the given denomination.
  */
 export const getAsset = (denom: string): Asset | null => {
   if (denom === getDenom(AssetAtom)) return AssetAtom

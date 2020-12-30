@@ -181,7 +181,7 @@ class Client implements CosmosClient, XChainClient {
    * @private
    * Get private key.
    *
-   * @returns {PrivKey} The privkey generated from the given phrase
+   * @returns {PrivKey} The private key generated from the given phrase
    *
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
