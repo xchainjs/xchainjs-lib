@@ -7,61 +7,88 @@ export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '10000000'
 
 /**
- * Get denom from Asset
+ * Get denomination from Asset
+ *
+ * @param {Asset} asset
+ * @returns {string} The denomination of the given asset.
  */
-export const getDenom = (v: Asset): string => {
-  if (assetToString(v) === assetToString(AssetRune)) return 'rune'
-  return v.symbol
+export const getDenom = (asset: Asset): string => {
+  if (assetToString(asset) === assetToString(AssetRune)) return 'rune'
+  return asset.symbol
 }
 
 /**
- * Get denom with chainname from Asset
+ * Get denomination with chainname from Asset
+ *
+ * @param {Asset} asset
+ * @returns {string} The denomination with chainname of the given asset.
  */
-export const getDenomWithChain = (v: Asset): string => {
-  return `${THORChain}.${v.symbol.toUpperCase()}`
+export const getDenomWithChain = (asset: Asset): string => {
+  return `${THORChain}.${asset.symbol.toUpperCase()}`
 }
 
 /**
- * Get Asset from denom
+ * Get Asset from denomination
+ *
+ * @param {string} denom
+ * @returns {Asset|null} The asset of the given denomination.
  */
-export const getAsset = (v: string): Asset | null => {
-  if (v === getDenom(AssetRune)) return AssetRune
-  return assetFromString(`${THORChain}.${v.toUpperCase()}`)
+export const getAsset = (denom: string): Asset | null => {
+  if (denom === getDenom(AssetRune)) return AssetRune
+  return assetFromString(`${THORChain}.${denom.toUpperCase()}`)
 }
 
 /**
  * Response guard for transaction broadcast
+ *
+ * @param {any} response The response from the node.
+ * @returns {boolean} `true` or `false`.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isBroadcastSuccess = (v: any): boolean => v.logs !== undefined
+export const isBroadcastSuccess = (response: any): boolean => response.logs !== undefined
 
 /**
  * Type guard for transfer event
+ *
+ * @param {TxEvent} txEvent The transaction event.
+ * @returns {boolean} `true` or `false`.
  */
-export const isTransferEvent = (v: TxEvent): boolean => v.type === 'transfer'
+export const isTransferEvent = (txEvent: TxEvent): boolean => txEvent.type === 'transfer'
 
 /**
  * Type guard for recipient attribute
+ *
+ * @param {TxEvent} txEventAttribute The transaction event attribute.
+ * @returns {boolean} `true` or `false`.
  */
-export const isRecipient = (v: TxEventAttribute): boolean => v.key === 'recipient'
+export const isRecipient = (txEventAttribute: TxEventAttribute): boolean => txEventAttribute.key === 'recipient'
 
 /**
  * Type guard for sender attribute
+ *
+ * @param {TxEvent} txEventAttribute The transaction event attribute.
+ * @returns {boolean} `true` or `false`.
  */
-export const isSender = (v: TxEventAttribute): boolean => v.key === 'sender'
+export const isSender = (txEventAttribute: TxEventAttribute): boolean => txEventAttribute.key === 'sender'
 
 /**
  * Type guard for amount attribute
+ *
+ * @param {TxEvent} txEventAttribute The transaction event attribute.
+ * @returns {boolean} `true` or `false`.
  */
-export const isAmount = (v: TxEventAttribute): boolean => v.key === 'amount'
+export const isAmount = (txEventAttribute: TxEventAttribute): boolean => txEventAttribute.key === 'amount'
 
 /**
- * Parse amount string to value and denom
+ * Parse amount string to value and denomination
+ *
+ * @param {string} amountStr The amount string.
+ * @returns {Balance|undefined} The balance parsed from the amount string.
  */
-export const parseAmountString = (v: string): Balance | undefined => {
+export const parseAmountString = (amountStr: string): Balance | undefined => {
   try {
-    const value = v.match(/\d+/g)
-    const denom = v.match(/[a-z]+/g)
+    const value = amountStr.match(/\d+/g)
+    const denom = amountStr.match(/[a-z]+/g)
     if (value && denom && value.length === 1 && denom.length === 1) {
       const amount = baseAmount(value[0], DECIMAL)
       const asset = getAsset(denom[0])
@@ -75,6 +102,10 @@ export const parseAmountString = (v: string): Balance | undefined => {
 
 /**
  * Parse transaction type
+ *
+ * @param {Array<TxResponse>} txs The transaction response from the node.
+ * @param {Asset} mainAsset Current main asset which depends on the network.
+ * @returns {Txs} The parsed transaction result.
  */
 export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs => {
   return txs.reduce((acc, tx) => {
@@ -121,6 +152,11 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
   }, [] as Txs)
 }
 
+/**
+ * Get the default fee.
+ *
+ * @returns {Fees} The default fee.
+ */
 export const getDefaultFees = (): Fees => {
   const fee = baseAmount(DEFAULT_GAS_VALUE, DECIMAL)
   return {
