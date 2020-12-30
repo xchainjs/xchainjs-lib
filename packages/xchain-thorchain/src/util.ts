@@ -7,10 +7,10 @@ export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '10000000'
 
 /**
- * Get denom from Asset
+ * Get denomination from Asset
  *
  * @param {Asset} asset
- * @returns {string} The denom of the given asset.
+ * @returns {string} The denomination of the given asset.
  */
 export const getDenom = (asset: Asset): string => {
   if (assetToString(asset) === assetToString(AssetRune)) return 'rune'
@@ -18,20 +18,20 @@ export const getDenom = (asset: Asset): string => {
 }
 
 /**
- * Get denom with chainname from Asset
+ * Get denomination with chainname from Asset
  *
  * @param {Asset} asset
- * @returns {string} The denom with chainname of the given asset.
+ * @returns {string} The denomination with chainname of the given asset.
  */
 export const getDenomWithChain = (asset: Asset): string => {
   return `${THORChain}.${asset.symbol.toUpperCase()}`
 }
 
 /**
- * Get Asset from denom
+ * Get Asset from denomination
  *
  * @param {string} denom
- * @returns {Asset|null} The asset of the given denom.
+ * @returns {Asset|null} The asset of the given denomination.
  */
 export const getAsset = (denom: string): Asset | null => {
   if (denom === getDenom(AssetRune)) return AssetRune
@@ -41,7 +41,7 @@ export const getAsset = (denom: string): Asset | null => {
 /**
  * Response guard for transaction broadcast
  *
- * @param {any} resopnse The response from the node.
+ * @param {any} response The response from the node.
  * @returns {boolean} `true` or `false`.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,7 +80,7 @@ export const isSender = (txEventAttribute: TxEventAttribute): boolean => txEvent
 export const isAmount = (txEventAttribute: TxEventAttribute): boolean => txEventAttribute.key === 'amount'
 
 /**
- * Parse amount string to value and denom
+ * Parse amount string to value and denomination
  *
  * @param {string} amountStr The amount string.
  * @returns {Balance|undefined} The balance parsed from the amount string.
