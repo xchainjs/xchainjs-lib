@@ -45,7 +45,7 @@ class Client implements BitcoinClient, XChainClient {
 
   /**
    * Constructor
-   * @desc Client is initialised with network type
+   * Client is initialised with network type
    *
    * @param {BitcoinClientParams} params
    */
@@ -173,7 +173,7 @@ class Client implements BitcoinClient, XChainClient {
   /**
    * Get the current address.
    *
-   * @desc Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
+   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
    * The address is then decoded into type P2WPKH and returned.
    *
    * @returns {Address} The current address.
@@ -202,7 +202,7 @@ class Client implements BitcoinClient, XChainClient {
    * @private
    * Get private key.
    *
-   * @desc Private function to get keyPair from the this.phrase
+   * Private function to get keyPair from the this.phrase
    *
    * @param {string} phrase The phrase to be used for generating privkey
    * @returns {ECPairInterface} The privkey generated from the given phrase
@@ -356,7 +356,7 @@ class Client implements BitcoinClient, XChainClient {
 
   /**
    * Get the fees for transactions with memo.
-   * @desc If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
+   * If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
    *
    * @param {string} memo
    * @returns {Fees} The fees with memo

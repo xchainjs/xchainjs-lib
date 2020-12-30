@@ -91,7 +91,7 @@ class Client implements BinanceClient, XChainClient {
   /**
    * Constructor
    *
-   * @desc Client has to be initialised with network type and phrase.
+   * Client has to be initialised with network type and phrase.
    * It will throw an error if an invalid phrase has been passed.
    *
    * @param {XChainClientParams} params

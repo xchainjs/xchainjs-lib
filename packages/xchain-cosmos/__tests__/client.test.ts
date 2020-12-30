@@ -295,55 +295,6 @@ describe('Client Test', () => {
     expect(result).toEqual('EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D')
   })
 
-  it('deposit', async () => {
-    const to_address = 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv'
-    const send_amount: BaseAmount = baseAmount(10000, 6)
-    const memo = 'transfer'
-
-    const expected_txsPost_result: BroadcastTxCommitResult = {
-      check_tx: {},
-      deliver_tx: {},
-      txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
-      height: 0,
-    }
-
-    mockAccountsAddress(cosmosClient.getClientUrl(), cosmosClient.getAddress(), {
-      height: 0,
-      result: {
-        coins: [
-          {
-            denom: 'muon',
-            amount: '21000',
-          },
-        ],
-        account_number: '0',
-        sequence: '0',
-      },
-    })
-    assertTxsPost(
-      cosmosClient.getClientUrl(),
-      cosmosClient.getAddress(),
-      to_address,
-      [
-        {
-          denom: getDenom(AssetMuon),
-          amount: send_amount.amount().toString(),
-        },
-      ],
-      memo,
-      expected_txsPost_result,
-    )
-
-    const result = await cosmosClient.deposit({
-      asset: AssetMuon,
-      recipient: to_address,
-      amount: send_amount,
-      memo,
-    })
-
-    expect(result).toEqual('EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D')
-  })
-
   it('get transaction data', async () => {
     cosmosClient.setNetwork('mainnet')
 
