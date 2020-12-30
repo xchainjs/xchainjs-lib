@@ -19,8 +19,7 @@ import { PrivKey, codec, Msg, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
-import { AssetRune, DepositParam, ClientUrl } from './types'
-import { MsgNativeTx } from './messages'
+import { AssetRune, DepositParam, ClientUrl, MsgNativeTx } from './types'
 import {
   getDenom,
   getAsset,
@@ -53,6 +52,16 @@ class Client implements ThorchainClient, XChainClient {
 
   private derive_path = "44'/931'/0'/0/0"
 
+  /**
+   * Constructor
+   *
+   * Client has to be initialised with network type and phrase.
+   * It will throw an error if an invalid phrase has been passed.
+   *
+   * @param {XChainClientParams} params
+   *
+   * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
+   */
   constructor({ network = 'testnet', phrase, clientUrl }: XChainClientParams & { clientUrl?: ClientUrl }) {
     this.network = network
     this.clientUrl = clientUrl || this.getDefaultClientUrl()
@@ -61,35 +70,72 @@ class Client implements ThorchainClient, XChainClient {
     if (phrase) this.setPhrase(phrase)
   }
 
+  /**
+   * Purge client.
+   *
+   * @returns {void}
+   */
   purgeClient = (): void => {
     this.phrase = ''
     this.address = ''
     this.privateKey = null
   }
 
+  /**
+   * Set/update the current network.
+   *
+   * @param {Network} network `mainnet` or `testnet`.
+   * @returns {void}
+   *
+   * @throws {"Network must be provided"}
+   * Thrown if network has not been set before.
+   */
   setNetwork = (network: Network): XChainClient => {
-    if (this.network != network) {
+    if (!network) {
+      throw new Error('Network must be provided')
+    } else {
       this.network = network
       this.thorClient = this.getNewThorClient()
       this.address = ''
-    }
 
-    return this
+      return this
+    }
   }
 
+  /**
+   * Get the current network.
+   *
+   * @returns {Network} The current network. (`mainnet` or `testnet`)
+   */
   getNetwork = (): Network => {
     return this.network
   }
 
+  /**
+   * Set/update the client URL.
+   *
+   * @param {ClientUrl} clientUrl The client url to be set.
+   * @returns {void}
+   */
   setClientUrl = (clientUrl: ClientUrl): void => {
     this.clientUrl = clientUrl
     this.thorClient = this.getNewThorClient()
   }
 
+  /**
+   * Get the client url.
+   *
+   * @returns {string} The client url for thorchain based on the current network.
+   */
   getClientUrl = (): string => {
     return this.getClientUrlByNetwork(this.network)
   }
 
+  /**
+   * Get the client url.
+   *
+   * @returns {ClientUrl} The client url (both mainnet and testnet) for thorchain.
+   */
   getDefaultClientUrl = (): ClientUrl => {
     return {
       testnet: 'https://testnet.thornode.thorchain.info',
@@ -97,10 +143,22 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
+  /**
+   * Get the client url.
+   *
+   * @param {Network} network
+   * @returns {string} The client url for thorchain based on the network.
+   */
   getClientUrlByNetwork = (network: Network): string => {
     return this.clientUrl[network]
   }
 
+  /**
+   * @private
+   * Get new thorchain client.
+   *
+   * @returns {CosmosSDKClient} The new thorchain client.
+   */
   private getNewThorClient = (): CosmosSDKClient => {
     return new CosmosSDKClient({
       server: this.getClientUrl(),
@@ -110,36 +168,78 @@ class Client implements ThorchainClient, XChainClient {
     })
   }
 
+  /**
+   * Get the chain id.
+   *
+   * @returns {string} The chain id based on the network.
+   */
   getChainId = (): string => {
     return 'thorchain'
   }
 
+  /**
+   * Get current address prefix based on the network.
+   *
+   * @returns {Prefix} The prefix based on the network.
+   */
   private getPrefix = (): string => {
     return this.network === 'testnet' ? 'tthor' : 'thor'
   }
 
+  /**
+   * @private
+   * Register message codecs.
+   *
+   * @returns {void}
+   */
   private registerCodecs = (): void => {
     codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
     codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
     codec.registerCodec('thorchain/MsgNativeTx', MsgNativeTx, MsgNativeTx.fromJSON)
   }
 
+  /**
+   * Get the explorer url.
+   *
+   * @returns {string} The explorer url.
+   */
   getExplorerUrl = (): string => {
     return 'https://thorchain.net'
   }
 
+  /**
+   * Get the explorer url for the given address.
+   *
+   * @param {Address} address
+   * @returns {string} The explorer url for the given address.
+   */
   getExplorerAddressUrl = (address: Address): string => {
     return `${this.getExplorerUrl()}/addresses/${address}`
   }
 
+  /**
+   * Get the explorer url for the given transaction id.
+   *
+   * @param {string} txID
+   * @returns {string} The explorer url for the given transaction id.
+   */
   getExplorerTxUrl = (txID: string): string => {
     return `${this.getExplorerUrl()}/txs/${txID}`
   }
 
+  /**
+   * Set/update a new phrase
+   *
+   * @param {string} phrase A new phrase.
+   * @returns {Address} The address from the given phrase
+   *
+   * @throws {"Invalid phrase"}
+   * Thrown if the given phase is invalid.
+   */
   setPhrase = (phrase: string): Address => {
     if (this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {
-        throw new Error('Invalid BIP39 phrase')
+        throw new Error('Invalid phrase')
       }
 
       this.phrase = phrase
@@ -150,6 +250,15 @@ class Client implements ThorchainClient, XChainClient {
     return this.getAddress()
   }
 
+  /**
+   * @private
+   * Get private key.
+   *
+   * @returns {PrivKey} The privkey generated from the given phrase
+   *
+   * @throws {"Phrase not set"}
+   * Throws an error if phrase has not been set before
+   * */
   private getPrivateKey = (): PrivKey => {
     if (!this.privateKey) {
       if (!this.phrase) throw new Error('Phrase not set')
@@ -160,6 +269,13 @@ class Client implements ThorchainClient, XChainClient {
     return this.privateKey
   }
 
+  /**
+   * Get the current address.
+   *
+   * @returns {Address} The current address.
+   *
+   * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
+   */
   getAddress = (): string => {
     if (!this.address) {
       const address = this.thorClient.getAddressFromPrivKey(this.getPrivateKey())
@@ -173,10 +289,23 @@ class Client implements ThorchainClient, XChainClient {
     return this.address
   }
 
+  /**
+   * Validate the given address.
+   *
+   * @param {Address} address
+   * @returns {boolean} `true` or `false`
+   */
   validateAddress = (address: Address): boolean => {
     return this.thorClient.checkAddress(address)
   }
 
+  /**
+   * Get the balance of a given address.
+   *
+   * @param {Address} address (optional) By default, it will return the balance of the current wallet.
+   * @param {Asset} asset (optional) If not set, it will return all assets available.
+   * @returns {Array<Balance>} The balance of the address.
+   */
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
     try {
       const balances = await this.thorClient.getBalance(address || this.getAddress())
@@ -191,6 +320,13 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
+  /**
+   * Get transaction history of a given address with pagination options.
+   * By default it will return the transaction history of the current wallet.
+   *
+   * @param {TxHistoryParams} params (optional) The options to get transaction history.
+   * @returns {TxsPage} The transaction history.
+   */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     const messageAction = undefined
     const messageSender = (params && params.address) || this.getAddress()
@@ -220,6 +356,12 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
+  /**
+   * Get the transaction details of a given transaction id.
+   *
+   * @param {string} txId The transaction id.
+   * @returns {Tx} The transaction details of the given transaction id.
+   */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
       const txResult = await this.thorClient.txsHashGet(txId)
@@ -235,6 +377,12 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
+  /**
+   * Transaction with MsgNativeTx.
+   *
+   * @param {DepositParam} params The transaction options.
+   * @returns {TxHash} The transaction hash.
+   */
   deposit = async ({ asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     try {
       this.registerCodecs()
@@ -286,6 +434,12 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
+  /**
+   * Transfer balances with MsgSend
+   *
+   * @param {TxParams} params The transfer options.
+   * @returns {TxHash} The transaction hash.
+   */
   transfer = async ({ asset = AssetRune, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
       this.registerCodecs()
