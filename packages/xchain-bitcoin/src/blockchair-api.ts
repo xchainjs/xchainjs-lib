@@ -1,14 +1,25 @@
 import axios from 'axios'
 import { BlockChairResponse, BtcAddressDTO, Transactions, RawTxsBTC, ChainStatsBtc } from './types/blockchair-api-types'
 
+/**
+ * Set Api key params.
+ *
+ * @param {string} key (optional) The API key.
+ * @returns {Params}
+ */
 const setApiKeyParams = (key?: string) => {
   return key && key.length > 0 ? { params: { key: key } } : {}
 }
 
 /**
- * https://blockchair.com/api/docs#link_200
- * @param chain
- * @param hash
+ * Get transaction by hash.
+ *
+ * @see https://blockchair.com/api/docs#link_200
+ *
+ * @param {string} baseUrl The blockchair node url.
+ * @param {string} hash The transaction hash.
+ * @param {string} apiKey (optional) The blockchair API key.
+ * @returns {Transactions}
  */
 export const getTx = async (baseUrl: string, hash: string, apiKey?: string): Promise<Transactions> => {
   try {
@@ -22,9 +33,14 @@ export const getTx = async (baseUrl: string, hash: string, apiKey?: string): Pro
 }
 
 /**
- * https://blockchair.com/api/docs#link_201
- * @param chain
- * @param hash
+ * Get raw transaction by hash.
+ *
+ * @see https://blockchair.com/api/docs#link_201
+ *
+ * @param {string} baseUrl The blockchair node url.
+ * @param {string} hash The transaction hash.
+ * @param {string} apiKey (optional) The blockchair API key.
+ * @returns {RawTxsBTC}
  */
 export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): Promise<RawTxsBTC> => {
   try {
@@ -37,9 +53,16 @@ export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): 
 }
 
 /**
- * https://blockchair.com/api/docs#link_300
- * @param chain
- * @param address
+ * Get address information.
+ *
+ * @see https://blockchair.com/api/docs#link_300
+ *
+ * @param {string} baseUrl The blockchair node url.
+ * @param {string} address
+ * @param {string} apiKey (optional) The blockchair API key.
+ * @param {number} limit (optional)
+ * @param {number} offset (optional)
+ * @returns {BtcAddressDTO}
  */
 export const getAddress = async (
   baseUrl: string,
@@ -69,9 +92,14 @@ export const getAddress = async (
 }
 
 /**
- * https://blockchair.com/api/docs#link_202
- * @param chain
- * @param txHex
+ * Broadcast transaction.
+ *
+ * @see https://blockchair.com/api/docs#link_202
+ *
+ * @param {string} baseUrl The blockchair node url.
+ * @param {string} txHex
+ * @param {string} apiKey (optional) The blockchair API key.
+ * @returns {string} Transaction hash.
  */
 export const broadcastTx = async (baseUrl: string, txHex: string, apiKey?: string): Promise<string> => {
   try {
@@ -83,8 +111,13 @@ export const broadcastTx = async (baseUrl: string, txHex: string, apiKey?: strin
 }
 
 /**
- * https://blockchair.com/api/docs#link_001
- * @param chain
+ * Get Bitcoin stats.
+ *
+ * @see https://blockchair.com/api/docs#link_001
+ *
+ * @param {string} baseUrl The blockchair node url.
+ * @param {string} apiKey (optional) The blockchair API key.
+ * @returns {ChainStatsBtc} The Bitcoin stats.
  */
 export const bitcoinStats = async (baseUrl: string, apiKey?: string): Promise<ChainStatsBtc> => {
   try {

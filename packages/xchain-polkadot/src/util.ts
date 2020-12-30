@@ -1,5 +1,5 @@
-import { Fees, Network } from '@xchainjs/xchain-client/lib'
-import { assetAmount, assetToBase } from '@xchainjs/xchain-util/lib'
+import { Fees, Network } from '@xchainjs/xchain-client'
+import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 /**
  * Check Subscan API response

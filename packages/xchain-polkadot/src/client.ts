@@ -12,7 +12,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, assetAmount, assetToString, assetToBase, baseAmount } from '@xchainjs/xchain-util/lib'
+import { Asset, assetAmount, assetToString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { ApiPromise, WsProvider, Keyring } from '@polkadot/api'

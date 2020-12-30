@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { BaseAmount } from '@xchainjs/xchain-util/lib'
+import { BaseAmount } from '@xchainjs/xchain-util'
 
 export type Address = string
 
