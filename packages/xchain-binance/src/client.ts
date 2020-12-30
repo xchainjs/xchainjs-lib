@@ -89,7 +89,7 @@ class Client implements BinanceClient, XChainClient {
   private privateKey: PrivKey | null = null // default private key at index 0
 
   /**
-   * Constructure
+   * Constructor
    *
    * @desc Client has to be initialised with network type and phrase.
    * It will throw an error if an invalid phrase has been passed.
@@ -160,7 +160,7 @@ class Client implements BinanceClient, XChainClient {
   /**
    * Get the client url.
    *
-   * @returns {string} The client url for binance chain.
+   * @returns {string} The client url for binance chain based on the network.
    */
   private getClientUrl = (): string => {
     return this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
@@ -169,7 +169,7 @@ class Client implements BinanceClient, XChainClient {
   /**
    * Get the explorer url.
    *
-   * @returns {string} The explorer url.
+   * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl = (): string => {
     return this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
@@ -179,7 +179,7 @@ class Client implements BinanceClient, XChainClient {
    * Get the explorer url for the given address.
    *
    * @param {Address} address
-   * @returns {string} The explorer url for the given address.
+   * @returns {string} The explorer url for the given address based on the network.
    */
   getExplorerAddressUrl = (address: Address): string => {
     return `${this.getExplorerUrl()}/address/${address}`
@@ -189,7 +189,7 @@ class Client implements BinanceClient, XChainClient {
    * Get the explorer url for the given transaction id.
    *
    * @param {string} txID
-   * @returns {string} The explorer url for the given transaction id.
+   * @returns {string} The explorer url for the given transaction id based on the network.
    */
   getExplorerTxUrl = (txID: string): string => {
     return `${this.getExplorerUrl()}/tx/${txID}`

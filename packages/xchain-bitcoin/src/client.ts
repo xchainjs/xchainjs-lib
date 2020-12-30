@@ -44,7 +44,7 @@ class Client implements BitcoinClient, XChainClient {
   private nodeApiKey = ''
 
   /**
-   * Constructure
+   * Constructor
    * @desc Client is initialised with network type
    *
    * @param {BitcoinClientParams} params
@@ -133,7 +133,7 @@ class Client implements BitcoinClient, XChainClient {
   /**
    * Get DerivePath
    *
-   * @returns {string} The bitcoin derive path.
+   * @returns {string} The bitcoin derivation path based on the network.
    */
   derivePath(): string {
     const { testnet, mainnet } = Utils.getDerivePath()
@@ -143,7 +143,7 @@ class Client implements BitcoinClient, XChainClient {
   /**
    * Get the explorer url.
    *
-   * @returns {string} The explorer url.
+   * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl = (): string => {
     const networkPath = Utils.isTestnet(this.net) ? '/testnet' : ''
@@ -154,7 +154,7 @@ class Client implements BitcoinClient, XChainClient {
    * Get the explorer url for the given address.
    *
    * @param {Address} address
-   * @returns {string} The explorer url for the given address.
+   * @returns {string} The explorer url for the given address based on the network.
    */
   getExplorerAddressUrl = (address: Address): string => {
     return `${this.getExplorerUrl()}/address/${address}`
@@ -164,7 +164,7 @@ class Client implements BitcoinClient, XChainClient {
    * Get the explorer url for the given transaction id.
    *
    * @param {string} txID The transaction id
-   * @returns {string} The explorer url for the given transaction id.
+   * @returns {string} The explorer url for the given transaction id based on the network.
    */
   getExplorerTxUrl = (txID: string): string => {
     return `${this.getExplorerUrl()}/tx/${txID}`
@@ -372,7 +372,7 @@ class Client implements BitcoinClient, XChainClient {
 
   /**
    * Get the fee rates for transactions without a memo.
-   * @desc If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
+   * If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
    *
    * @returns {FeeRates} The fee rate
    */

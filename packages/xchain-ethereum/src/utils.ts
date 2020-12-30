@@ -12,6 +12,9 @@ export const ETH_DECIMAL = 18
  */
 export const xchainNetworkToEths = (network: XChainNetwork): EthNetwork => {
   switch (network) {
+    // DO NOT use switch/case's default branch
+    // to be sure that ALL possible cases are
+    // processed in a similar way to reverted ethNetworkToXchains
     case 'mainnet':
       return EthNetwork.MAIN
     case 'testnet':
@@ -27,6 +30,9 @@ export const xchainNetworkToEths = (network: XChainNetwork): EthNetwork => {
  */
 export const ethNetworkToXchains = (network: EthNetwork): XChainNetwork => {
   switch (network) {
+    // DO NOT use switch/case's default branch
+    // to be sure that ALL possible cases are
+    // processed in a similar way to reverted xchainNetworkToEths
     case EthNetwork.MAIN:
       return 'mainnet'
     case EthNetwork.TEST:

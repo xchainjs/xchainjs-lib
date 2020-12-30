@@ -64,7 +64,7 @@ export default class Client implements XChainClient, EthereumClient {
   private blockchairNodeApiKey = ''
 
   /**
-   * Constructure
+   * Constructor
    * @param {ClientParams} params
    */
   constructor({
