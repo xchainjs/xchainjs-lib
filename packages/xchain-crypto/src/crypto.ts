@@ -14,8 +14,9 @@ const c = 262144
 const hashFunction = 'sha256'
 const meta = 'xchain-keystore'
 
-// Interfaces
-
+/**
+ * The Keystore interface
+ */
 export type Keystore = {
   crypto: {
     cipher: string
@@ -37,16 +38,36 @@ export type Keystore = {
   meta: string
 }
 
+/**
+ * Generate a new phrase.
+ *
+ * @param {string} size The new phrase size.
+ * @returns {string} The generated phrase based on the size.
+ */
 export const generatePhrase = (size = 12): string => {
   const entropy = size == 12 ? 128 : 256
   const phrase = bip39.generateMnemonic(entropy)
   return phrase
 }
 
+/**
+ * Validate the given phrase.
+ *
+ * @param {string} phrase
+ * @returns {boolean} `true` or `false`
+ */
 export const validatePhrase = (phrase: string): boolean => {
   return bip39.validateMnemonic(phrase)
 }
 
+/**
+ * Get the seed from the given phrase.
+ *
+ * @param {string} phrase
+ * @returns {Buffer} The seed from the given phrase.
+ *
+ * @throws {"Invalid BIP39 phrase"} Thrown if phrase is an invalid one.
+ */
 export const getSeed = (phrase: string): Buffer => {
   if (!validatePhrase(phrase)) {
     throw new Error('Invalid BIP39 phrase')
@@ -55,6 +76,15 @@ export const getSeed = (phrase: string): Buffer => {
   return bip39.mnemonicToSeedSync(phrase)
 }
 
+/**
+ * Get the Keystore interface from the given phrase and password.
+ *
+ * @param {string} phrase
+ * @param {string} password
+ * @returns {Keystore} The keystore interface generated from the given phrase and password.
+ *
+ * @throws {"Invalid BIP39 phrase"} Thrown if phrase is an invalid one.
+ */
 export const encryptToKeyStore = async (phrase: string, password: string): Promise<Keystore> => {
   if (!validatePhrase(phrase)) {
     throw new Error('Invalid BIP39 phrase')
@@ -97,6 +127,15 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   return keystore
 }
 
+/**
+ * Get the phrase from the keystore
+ *
+ * @param {Keystore} keystore
+ * @param {string} password
+ * @returns {Keystore} The phrase from the keystore.
+ *
+ * @throws {"Invalid password"} Thrown if password is an incorrect one.
+ */
 export const decryptFromKeystore = async (keystore: Keystore, password: string): Promise<string> => {
   const kdfparams = keystore.crypto.kdfparams
   try {
@@ -112,7 +151,7 @@ export const decryptFromKeystore = async (keystore: Keystore, password: string):
     const mac = blake256(Buffer.concat([derivedKey.slice(16, 32), ciphertext]))
 
     if (mac !== keystore.crypto.mac) {
-      return Promise.reject('invalid password')
+      return Promise.reject('Invalid password')
     }
     const decipher = crypto.createDecipheriv(
       keystore.crypto.cipher,
