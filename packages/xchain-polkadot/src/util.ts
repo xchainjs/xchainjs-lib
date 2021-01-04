@@ -3,7 +3,7 @@ import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 /**
  * Check Subscan API response
- * 
+ *
  * @param {SubscanResponse} response The subscan response.
  * @returns {boolean} `true` or `false`
  */
@@ -11,7 +11,7 @@ export const isSuccess = (response: { code: number }): boolean => !response.code
 
 /**
  * Get the decimal based on the network
- * 
+ *
  * @param {Network} network The network.
  * @returns {number} The decimal based on the network.
  */

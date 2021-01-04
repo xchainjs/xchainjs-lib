@@ -57,7 +57,7 @@ class Client implements PolkadotClient, XChainClient {
    * @private
    *
    * Purge Provider.
-   * 
+   *
    * @returns {void}
    */
   private purgeProvider = (): void => {
@@ -92,11 +92,11 @@ class Client implements PolkadotClient, XChainClient {
     } else {
       if (network !== this.network) {
         this.purgeProvider()
-  
+
         this.network = network
         this.address = ''
       }
-  
+
       return this
     }
   }
@@ -204,7 +204,7 @@ class Client implements PolkadotClient, XChainClient {
   /**
    * @private
    * Private function to get the polkadotjs API provider.
-   * 
+   *
    * @see https://polkadot.js.org/docs/api/start/create#api-instance
    *
    * @returns {ApiPromise} The polkadotjs API provider based on the network.
@@ -438,7 +438,7 @@ class Client implements PolkadotClient, XChainClient {
 
   /**
    * Get the current fee with transfer options.
-   * 
+   *
    * @see https://polkadot.js.org/docs/api/cookbook/tx/#how-do-i-estimate-the-transaction-fees
    *
    * @param {TxParams} params The transfer options.
