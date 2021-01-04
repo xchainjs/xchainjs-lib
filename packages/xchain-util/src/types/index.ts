@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js'
-import { chains } from './chain.const'
+import { chains } from '../chain.const'
 
 export enum Denomination {
   /**
