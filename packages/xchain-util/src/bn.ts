@@ -41,7 +41,7 @@ export const validBNOrZero = (value: BigNumber | undefined) => (value && isValid
  * Format a BaseNumber to a string depending on given decimal places
  *
  * @param {BigNumber} value
- * @param {number} decimal (optional) The decimal place. Default value is `2`.
+ * @param {number} decimal The decimal place. (optional)
  * @returns {string} The formatted string from the given BigNumber and decimal place.
  * */
 export const formatBN = (value: BigNumber, decimal = 2) => value.toFormat(decimal)
@@ -58,9 +58,9 @@ export enum SymbolPosition {
  * Formats a big number value by prefixing it with `$`
  *
  * @param {BigNumber} n
- * @param {number} decimalPlaces (optional) The decimal place. Default value is `2`.
- * @param {string} symbol (optional) The currency symbol. Default value is `$`.
- * @param {position} position (optional) The symbol position. Default value is `before`.
+ * @param {number} decimalPlaces The decimal place. (optional)
+ * @param {string} symbol The currency symbol. (optional)
+ * @param {position} position The symbol position. (optional)
  * @returns {string} The formatted string from the given BigNumber, decimal places, symbol and position.
  */
 export const formatBNCurrency = (
@@ -81,7 +81,7 @@ export const formatBNCurrency = (
  * Returns zero `BigNumber` if `value` is invalid
  *
  * @param {number|string|BigNumber|undefined} value
- * @param {number} decimalPlaces (optional) The decimal place. Default value is `2`.
+ * @param {number} decimalPlaces The decimal place. (optional)
  * @returns {BigNumber} The BigNumber interface from the given value and decimal.
  * */
 export const fixedBN = (value: number | string | BigNumber | undefined, decimalPlaces = 2): BigNumber => {

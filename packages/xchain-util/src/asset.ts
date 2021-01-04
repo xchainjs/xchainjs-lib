@@ -21,7 +21,7 @@ const ASSET_DECIMAL = 8
  * Factory to create values of assets (e.g. RUNE)
  *
  * @param {string|number|BigNumber|undefined} value - The asset amount, If the value is undefined, AssetAmount with value `0` will be returned.
- * @param {number} decimal (optional) The decimal places. Default value is 8.
+ * @param {number} decimal The decimal places. (optional)
  * @returns {AssetAmount} The asset amount from the given value and decimal.
  *
  **/
@@ -36,7 +36,7 @@ export const assetAmount = (value: string | number | BigNumber | undefined, deci
  * Factory to create base amounts (e.g. tor)
  *
  * @param {string|number|BigNumber|undefined} value - The base amount, If the value is undefined, BaseAmount with value `0` will be returned.
- * @param {number} decimal (optional) The decimal places of its associated AssetAmount. Default value is 8.
+ * @param {number} decimal The decimal places of its associated AssetAmount. (optional)
  * @returns {BaseAmount} The base amount from the given value and decimal.
  **/
 export const baseAmount = (value: string | number | BigNumber | undefined, decimal: number = ASSET_DECIMAL) =>

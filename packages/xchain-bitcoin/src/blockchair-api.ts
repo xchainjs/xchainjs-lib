@@ -4,7 +4,7 @@ import { BlockChairResponse, BtcAddressDTO, Transactions, RawTxsBTC, ChainStatsB
 /**
  * Set Api key params.
  *
- * @param {string} key (optional) The API key.
+ * @param {string} key The API key. (optional)
  * @returns {Params}
  */
 const setApiKeyParams = (key?: string) => {
@@ -18,7 +18,7 @@ const setApiKeyParams = (key?: string) => {
  *
  * @param {string} baseUrl The blockchair node url.
  * @param {string} hash The transaction hash.
- * @param {string} apiKey (optional) The blockchair API key.
+ * @param {string} apiKey The blockchair API key. (optional)
  * @returns {Transactions}
  */
 export const getTx = async (baseUrl: string, hash: string, apiKey?: string): Promise<Transactions> => {
@@ -39,7 +39,7 @@ export const getTx = async (baseUrl: string, hash: string, apiKey?: string): Pro
  *
  * @param {string} baseUrl The blockchair node url.
  * @param {string} hash The transaction hash.
- * @param {string} apiKey (optional) The blockchair API key.
+ * @param {string} apiKey The blockchair API key. (optional)
  * @returns {RawTxsBTC}
  */
 export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): Promise<RawTxsBTC> => {
@@ -59,7 +59,7 @@ export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): 
  *
  * @param {string} baseUrl The blockchair node url.
  * @param {string} address
- * @param {string} apiKey (optional) The blockchair API key.
+ * @param {string} apiKey The blockchair API key. (optional)
  * @param {number} limit (optional)
  * @param {number} offset (optional)
  * @returns {BtcAddressDTO}
@@ -98,7 +98,7 @@ export const getAddress = async (
  *
  * @param {string} baseUrl The blockchair node url.
  * @param {string} txHex
- * @param {string} apiKey (optional) The blockchair API key.
+ * @param {string} apiKey The blockchair API key. (optional)
  * @returns {string} Transaction hash.
  */
 export const broadcastTx = async (baseUrl: string, txHex: string, apiKey?: string): Promise<string> => {
@@ -116,7 +116,7 @@ export const broadcastTx = async (baseUrl: string, txHex: string, apiKey?: strin
  * @see https://blockchair.com/api/docs#link_001
  *
  * @param {string} baseUrl The blockchair node url.
- * @param {string} apiKey (optional) The blockchair API key.
+ * @param {string} apiKey The blockchair API key. (optional)
  * @returns {ChainStatsBtc} The Bitcoin stats.
  */
 export const bitcoinStats = async (baseUrl: string, apiKey?: string): Promise<ChainStatsBtc> => {

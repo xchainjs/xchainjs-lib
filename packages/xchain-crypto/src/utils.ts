@@ -56,8 +56,8 @@ export const sha256ripemd160 = (hex: string): string => {
  * Encode address from the string or Buffer.
  *
  * @param {string|Buffer} value The string or Buffer to be encoded.
- * @param {string} prefix (optional) The prefix of the address. Default value is `thor`.
- * @param {BufferEncoding} type (optional) The buffer encoding type. It will be used when string is provided. Default value is `hex`.
+ * @param {string} prefix The prefix of the address. (optional)
+ * @param {BufferEncoding} type The buffer encoding type. It will be used when string is provided. (optional)
  * @returns {string} The address generated from the given string or buffer.
  */
 export const encodeAddress = (value: string | Buffer, prefix = 'thor', type: BufferEncoding = 'hex'): string => {

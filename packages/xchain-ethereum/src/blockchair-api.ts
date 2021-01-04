@@ -5,7 +5,7 @@ import { TxHash } from '@xchainjs/xchain-client'
 /**
  * Set Api key params.
  *
- * @param {string} key (optional) The API key.
+ * @param {string} key The API key. (optional)
  * @returns {Params}
  */
 const setApiKeyParams = (key?: string): { params?: { [key: string]: string } } => {
@@ -19,8 +19,8 @@ const setApiKeyParams = (key?: string): { params?: { [key: string]: string } } =
  *
  * @param {string} baseUrl The blockchair node url.
  * @param {string} hash The transaction hash.
- * @param {boolean} erc_20 (optional) The option to get erc20 transactions.
- * @param {string} apiKey (optional) The blockchair API key.
+ * @param {boolean} erc_20 The option to get erc20 transactions. (optional)
+ * @param {string} apiKey The blockchair API key. (optional)
  * @returns {Transactions} The transaction result.
  */
 export const getTx = async (
@@ -50,7 +50,7 @@ export const getTx = async (
  *
  * @param {string} baseUrl The blockchair node url.
  * @param {string} hash The transaction hash.
- * @param {string} apiKey (optional) The blockchair API key.
+ * @param {string} apiKey The blockchair API key. (optional)
  * @returns {RawTxs} The raw transaction result.
  */
 export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): Promise<RawTxs> => {
@@ -70,7 +70,7 @@ export const getRawTx = async (baseUrl: string, hash: string, apiKey?: string): 
  *
  * @param {string} baseUrl The blockchair node url.
  * @param {string} address
- * @param {string} apiKey (optional) The blockchair API key.
+ * @param {string} apiKey The blockchair API key. (optional)
  * @param {number} limit (optional)
  * @param {number} offset (optional)
  * @returns {AddressDTO} The address information.
@@ -109,7 +109,7 @@ export const getAddress = async (
  *
  * @param {string} baseUrl The blockchair node url.
  * @param {string} txHex The transaction to be broadcasted. (in hex string)
- * @param {string} apiKey (optional) The blockchair API key.
+ * @param {string} apiKey The blockchair API key. (optional)
  * @returns {TxHash} The transaction hash.
  */
 export const broadcastTx = async (baseUrl: string, txHex: string, apiKey?: string): Promise<TxHash> => {
