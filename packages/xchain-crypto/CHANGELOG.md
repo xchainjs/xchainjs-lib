@@ -5,6 +5,7 @@
 - Update dependencies
 - add `bip39.validatePhrase(phrase)` in `getSeed()`
 - add `bip39.validatePhrase(phrase)` in `encryptToKeystore()`
+- Update comments for documentation
 
 ### Breaking change
 
