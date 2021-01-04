@@ -36,7 +36,7 @@ export const assetAmount = (value: string | number | BigNumber | undefined, deci
  * Factory to create base amounts (e.g. tor)
  *
  * @param {string|number|BigNumber|undefined} value - The base amount, If the value is undefined, BaseAmount with value `0` will be returned.
- * @param {number} decimal (optional) The decimal places. Default value is 8.
+ * @param {number} decimal (optional) The decimal places of its associated AssetAmount. Default value is 8.
  * @returns {BaseAmount} The base amount from the given value and decimal.
  **/
 export const baseAmount = (value: string | number | BigNumber | undefined, decimal: number = ASSET_DECIMAL) =>
@@ -65,7 +65,7 @@ export const baseToAsset = (base: BaseAmount): AssetAmount => {
  * Helper to convert asset to base values (e.g. tor -> RUNE)
  *
  * @param {AssetAmount} asset
- * @returns {BaseAmount} The base amount from the given base amount.
+ * @returns {BaseAmount} The base amount from the given AssetAmount.
  * */
 export const assetToBase = (asset: AssetAmount): BaseAmount => {
   const value = asset
@@ -98,7 +98,7 @@ export const isBaseAmount = (v: Amounts): v is BaseAmount => (v as BaseAmount).t
  * Note: `trimZeros` wins over `decimal`
  *
  * @param {Params} param The asset amount format options.
- * @returns {string} The formated asset amountn string from the given options.
+ * @returns {string} The formatted asset amount string from the given options.
  */
 export const formatAssetAmount = ({
   amount,
@@ -118,12 +118,12 @@ export const formatAssetAmount = ({
  * Formats a `BaseAmount` value into a `string`
  *
  * @param {BaseAmount} amount
- * @returns {string} The formated base amount string from the given base amount.
+ * @returns {string} The formatted base amount string from the given base amount.
  */
 export const formatBaseAmount = (amount: BaseAmount) => formatBN(amount.amount(), 0)
 
 /**
- * Base "chain" assets for BNB chain.
+ * Base "chain" asset of Binance chain.
  *
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
@@ -131,7 +131,7 @@ export const formatBaseAmount = (amount: BaseAmount) => formatBN(amount.amount()
 export const AssetBNB: Asset = { chain: BNBChain, symbol: 'BNB', ticker: 'BNB' }
 
 /**
- * Base "chain" assets on bitcoin main net.
+ * Base "chain" asset on bitcoin main net.
  *
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
@@ -139,7 +139,7 @@ export const AssetBNB: Asset = { chain: BNBChain, symbol: 'BNB', ticker: 'BNB' }
 export const AssetBTC: Asset = { chain: BTCChain, symbol: 'BTC', ticker: 'BTC' }
 
 /**
- * Base "chain" assets on ethereum main net.
+ * Base "chain" asset on ethereum main net.
  *
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
@@ -149,7 +149,7 @@ export const AssetETH: Asset = { chain: ETHChain, symbol: 'ETH', ticker: 'ETH' }
 export const RUNE_TICKER = 'RUNE'
 
 /**
- * Base "chain" assets for RUNE-67C on Binance test net.
+ * Base "chain" asset for RUNE-67C on Binance test net.
  *
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
@@ -157,7 +157,7 @@ export const RUNE_TICKER = 'RUNE'
 export const AssetRune67C: Asset = { chain: BNBChain, symbol: 'RUNE-67C', ticker: RUNE_TICKER }
 
 /**
- * Base "chain" assets for RUNE-B1A on Binance main net.
+ * Base "chain" asset for RUNE-B1A on Binance main net.
  *
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
@@ -165,7 +165,7 @@ export const AssetRune67C: Asset = { chain: BNBChain, symbol: 'RUNE-67C', ticker
 export const AssetRuneB1A: Asset = { chain: BNBChain, symbol: 'RUNE-B1A', ticker: RUNE_TICKER }
 
 /**
- * Base "chain" assets on thorchain main net.
+ * Base "chain" asset on thorchain main net.
  *
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
@@ -270,7 +270,7 @@ export const currencySymbolByAsset = ({ ticker }: Asset) => {
  * Note: `trimZeros` wins over `decimal`
  *
  * @param {Params} params The asset amount currency format options.
- * @return {string} The formated asset amount string using its currency format.
+ * @return {string} The formatted asset amount string using its currency format.
  */
 export const formatAssetAmountCurrency = ({
   amount,
@@ -320,7 +320,7 @@ export const formatAssetAmountCurrency = ({
  * Note: `trimZeros` wins over `decimal`
  *
  * @param {Params} params The base amount currency format options.
- * @return {string} The formated base amount string using its currency format.
+ * @return {string} The formatted base amount string using its currency format.
  */
 export const formatBaseAsAssetAmount = ({
   amount,

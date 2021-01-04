@@ -42,7 +42,7 @@ export const validBNOrZero = (value: BigNumber | undefined) => (value && isValid
  *
  * @param {BigNumber} value
  * @param {number} decimal (optional) The decimal place. Default value is `2`.
- * @returns {string} The formated string from the given BigNumber and decimal place.
+ * @returns {string} The formatted string from the given BigNumber and decimal place.
  * */
 export const formatBN = (value: BigNumber, decimal = 2) => value.toFormat(decimal)
 
@@ -60,8 +60,8 @@ export enum SymbolPosition {
  * @param {BigNumber} n
  * @param {number} decimalPlaces (optional) The decimal place. Default value is `2`.
  * @param {string} symbol (optional) The currency symbol. Default value is `$`.
- * @param {position} position (optional) The symbol position. Defult value is `before`.
- * @returns {string} The formated string from the given BigNumber, decimal places, symbol and position.
+ * @param {position} position (optional) The symbol position. Default value is `before`.
+ * @returns {string} The formatted string from the given BigNumber, decimal places, symbol and position.
  */
 export const formatBNCurrency = (
   n: BigNumber,
