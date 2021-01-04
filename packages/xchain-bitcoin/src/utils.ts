@@ -293,7 +293,7 @@ export const broadcastTx = async ({ txHex, nodeUrl, nodeApiKey }: BroadcastTxPar
 
 /**
  * Get DerivePath.
- * 
+ *
  * @param {number} index (optional)
  * @returns {DerivePath} The bitcoin derivation path by the index. (both mainnet and testnet)
  */
