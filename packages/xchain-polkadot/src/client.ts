@@ -43,7 +43,7 @@ class Client implements PolkadotClient, XChainClient {
 
   /**
    * Constructor
-   * Client is initialised with network type
+   * Client is initialised with network type and phrase (optional)
    *
    * @param {XChainClientParams} params
    */
@@ -81,7 +81,7 @@ class Client implements PolkadotClient, XChainClient {
    * Set/update the current network.
    *
    * @param {Network} network `mainnet` or `testnet`.
-   * @returns {void}
+   * @returns {XChainClient}
    *
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
