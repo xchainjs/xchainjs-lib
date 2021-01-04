@@ -269,7 +269,7 @@ class Client implements PolkadotClient, XChainClient {
   /**
    * Get the DOT balance of a given address.
    *
-   * @param {Address} address (optional) By default, it will return the balance of the current wallet.
+   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Array<Balance>} The DOT balance of the address.
    */
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
@@ -301,7 +301,7 @@ class Client implements PolkadotClient, XChainClient {
    * Get transaction history of a given address with pagination options.
    * By default it will return the transaction history of the current wallet.
    *
-   * @param {TxHistoryParams} params (optional) The options to get transaction history.
+   * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {

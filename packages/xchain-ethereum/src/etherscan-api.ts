@@ -9,7 +9,7 @@ const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKe
  * @see https://etherscan.io/apis#gastracker
  *
  * @param {string} baseUrl The etherscan node url.
- * @param {string} apiKey (optional) The etherscan API key.
+ * @param {string} apiKey The etherscan API key. (optional)
  * @returns {GasOracleResponse} LastBlock, SafeGasPrice, ProposeGasPrice, FastGasPrice
  */
 export const getGasOracle = (baseUrl: string, apiKey?: string): Promise<GasOracleResponse> => {

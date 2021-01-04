@@ -8,7 +8,7 @@ import { DerivePath } from './types/common'
  * Get `hash` from transfer event sent by Binance chain.
  * @see https://docs.binance.org/api-reference/dex-api/ws-streams.html#3-transfer
  *
- * @param {TransferEvent} transfer (optional) The transfer event.
+ * @param {TransferEvent} transfer The transfer event. (optional)
  * @returns {string|undefined} The hash from transfer event.
  */
 export const getHashFromTransfer = (transfer?: { data?: Pick<Transfer, 'H'> }): string | undefined => transfer?.data?.H
@@ -16,7 +16,7 @@ export const getHashFromTransfer = (transfer?: { data?: Pick<Transfer, 'H'> }): 
 /**
  * Get `hash` from memo
  *
- * @param {TransferEvent} transfer (optional) The transfer event.
+ * @param {TransferEvent} transfer The transfer event. (optional)
  * @returns {string|undefined} The hash from the memo.
  */
 export const getTxHashFromMemo = (transfer?: TransferEvent) => transfer?.data?.M.split(':')[1]
@@ -61,7 +61,7 @@ export const getTxType = (t: BinanceTxType): TxType => {
 /**
  * Parse Tx
  *
- * @param {BinanceTx} t (optional) The transaction to be parsed.
+ * @param {BinanceTx} t The transaction to be parsed. (optional)
  * @returns {Tx|null} The transaction parsed from the binance tx.
  */
 export const parseTx = (tx: BinanceTx): Tx | null => {

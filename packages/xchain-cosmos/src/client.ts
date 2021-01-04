@@ -238,8 +238,8 @@ class Client implements CosmosClient, XChainClient {
   /**
    * Get the balance of a given address.
    *
-   * @param {Address} address (optional) By default, it will return the balance of the current wallet.
-   * @param {Asset} asset (optional) If not set, it will return all assets available.
+   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
+   * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Array<Balance>} The balance of the address.
    */
   getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
@@ -264,7 +264,7 @@ class Client implements CosmosClient, XChainClient {
    * Get transaction history of a given address with pagination options.
    * By default it will return the transaction history of the current wallet.
    *
-   * @param {TxHistoryParams} params (optional) The options to get transaction history.
+   * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {

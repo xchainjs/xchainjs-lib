@@ -234,7 +234,7 @@ class Client implements BitcoinClient, XChainClient {
   /**
    * Get the BTC balance of a given address.
    *
-   * @param {Address} address (optional) By default, it will return the balance of the current wallet.
+   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Array<Balance>} The BTC balance of the address.
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
@@ -249,7 +249,7 @@ class Client implements BitcoinClient, XChainClient {
    * Get transaction history of a given address with pagination options.
    * By default it will return the transaction history of the current wallet.
    *
-   * @param {TxHistoryParams} params (optional) The options to get transaction history.
+   * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
@@ -318,7 +318,7 @@ class Client implements BitcoinClient, XChainClient {
   /**
    * Get the rates and fees.
    *
-   * @param {string} memo (optional) The memo to be used for fee calculation
+   * @param {string} memo The memo to be used for fee calculation (optional)
    * @returns {FeesWithRates} The fees and rates
    */
   getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {

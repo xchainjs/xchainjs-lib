@@ -306,7 +306,7 @@ export default class Client implements XChainClient, EthereumClient {
   /**
    * Get the ETH balance of a given address.
    *
-   * @param {Address} address (optional) By default, it will return the balance of the current wallet.
+   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Array<Balance>} The ETH balance of the address.
    */
   getBalance = async (address?: Address): Promise<Balance[]> => {
@@ -365,7 +365,7 @@ export default class Client implements XChainClient, EthereumClient {
    * Get transaction history of a given address with pagination options.
    * By default it will return the transaction history of the current wallet.
    *
-   * @param {TxHistoryParams} params (optional) The options to get transaction history.
+   * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
