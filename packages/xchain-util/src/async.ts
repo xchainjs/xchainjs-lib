@@ -5,6 +5,7 @@
  *
  * @example
  *
+ * ```
  * const anyAsyncFunc = async () => {
  *  // do something
  *  console.log('before delay')
@@ -13,5 +14,6 @@
  *  // and do other things
  *  console.log('after delay')
  * }
+ * ```
  */
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
