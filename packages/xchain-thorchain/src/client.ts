@@ -42,6 +42,9 @@ export interface ThorchainClient {
   deposit(params: DepositParam): Promise<TxHash>
 }
 
+/**
+ * Custom Thorchain Client
+ */
 class Client implements ThorchainClient, XChainClient {
   private network: Network
   private clientUrl: ClientUrl
