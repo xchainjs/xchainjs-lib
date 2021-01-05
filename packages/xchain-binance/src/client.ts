@@ -77,9 +77,6 @@ export interface BinanceClient {
 
 /**
  * Custom Binance client
- *
- * @class Binance
- * @implements {BinanceClient}
  */
 class Client implements BinanceClient, XChainClient {
   private network: Network
