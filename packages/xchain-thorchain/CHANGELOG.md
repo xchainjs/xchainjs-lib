@@ -1,4 +1,8 @@
-# v.x.x.x
+# v.0.7.1 (2021-01-06)
+
+### Fix
+
+- Fix getTransactions pagination issue #168
 
 ### Update
 
