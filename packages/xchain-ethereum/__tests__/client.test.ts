@@ -8,6 +8,7 @@ import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
 import { mockDashboardAddress, mockGetTx } from '../__mocks__/blockchair-api'
 import { mock_all_api } from '../__mocks__'
+import { mock_etherscan_balance_api } from '../__mocks__/etherscan-api'
 
 /**
  * Test Data
@@ -187,34 +188,7 @@ describe('Balances', () => {
       blockchairUrl,
     })
 
-    mockDashboardAddress(blockchairUrl, ethClient.getAddress(), {
-      '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e': {
-        address: {
-          type: 'account',
-          contract_code_hex: null,
-          contract_created: null,
-          contract_destroyed: null,
-          balance: '100',
-          balance_usd: 0,
-          received_approximate: '4358301000000000000',
-          received_usd: 0,
-          spent_approximate: '0',
-          spent_usd: 0,
-          fees_approximate: '0',
-          fees_usd: 0,
-          receiving_call_count: 38,
-          spending_call_count: 0,
-          call_count: 38,
-          transaction_count: 38,
-          first_seen_receiving: '2020-04-21 07:52:18',
-          last_seen_receiving: '2020-12-08 04:49:56',
-          first_seen_spending: null,
-          last_seen_spending: null,
-          nonce: null,
-        },
-        calls: [],
-      },
-    })
+    mock_etherscan_balance_api(etherscanUrl, '100')
 
     const balance = await ethClient.getBalance()
     expect(balance.length).toEqual(1)
@@ -229,39 +203,12 @@ describe('Balances', () => {
       blockchairUrl,
     })
 
-    mockDashboardAddress(blockchairUrl, '0xdac17f958d2ee523a2206206994597c13d831ec7', {
-      '0xdac17f958d2ee523a2206206994597c13d831ec7': {
-        address: {
-          type: 'account',
-          contract_code_hex: null,
-          contract_created: null,
-          contract_destroyed: null,
-          balance: '10000',
-          balance_usd: 0,
-          received_approximate: '4358301000000000000',
-          received_usd: 0,
-          spent_approximate: '0',
-          spent_usd: 0,
-          fees_approximate: '0',
-          fees_usd: 0,
-          receiving_call_count: 38,
-          spending_call_count: 0,
-          call_count: 38,
-          transaction_count: 38,
-          first_seen_receiving: '2020-04-21 07:52:18',
-          last_seen_receiving: '2020-12-08 04:49:56',
-          first_seen_spending: null,
-          last_seen_spending: null,
-          nonce: null,
-        },
-        calls: [],
-      },
-    })
+    mock_etherscan_balance_api(etherscanUrl, '1000')
 
     const balance = await ethClient.getBalance('0xdac17f958d2ee523a2206206994597c13d831ec7')
     expect(balance.length).toEqual(1)
     expect(balance[0].asset).toEqual(AssetETH)
-    expect(balance[0].amount.amount().isEqualTo(baseAmount(10000, ETH_DECIMAL).amount())).toBeTruthy()
+    expect(balance[0].amount.amount().isEqualTo(baseAmount(1000, ETH_DECIMAL).amount())).toBeTruthy()
   })
 
   it('throws error on bad address', async () => {

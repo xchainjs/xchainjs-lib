@@ -312,11 +312,11 @@ export default class Client implements XChainClient, EthereumClient {
   getBalance = async (address?: Address): Promise<Balance[]> => {
     try {
       address = address || this.getAddress()
-      const dashboardAddress = await blockChair.getAddress(this.blockchairNodeUrl, address, this.blockchairNodeApiKey)
+      const balance = await this.getEtherscanProvider().getBalance(address)
       return [
         {
           asset: AssetETH,
-          amount: baseAmount(dashboardAddress[address].address.balance || 0, ETH_DECIMAL),
+          amount: baseAmount(balance.toString() || 0, ETH_DECIMAL),
         },
       ]
     } catch (error) {
