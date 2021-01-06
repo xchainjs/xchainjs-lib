@@ -333,9 +333,9 @@ class Client implements ThorchainClient, XChainClient {
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     const messageAction = undefined
     const messageSender = (params && params.address) || this.getAddress()
-    const offset = (params && params.offset) ?? 10
-    const limit = (params && params.limit) ?? 0
-    const page = limit ? offset / limit + 1 : 1
+    const offset = (params && params.offset) || undefined
+    const limit = (params && params.limit) || undefined
+    const page = limit && offset ? offset / limit + 1 : undefined
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
