@@ -19,7 +19,7 @@ import { PrivKey, codec, Msg, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
-import { AssetRune, DepositParam, ClientUrl, MsgNativeTx } from './types'
+import { AssetRune, DepositParam, ClientUrl, MsgNativeTx, ThorchainClientParams, ExplorerUrl } from './types'
 import {
   getDenom,
   getAsset,
@@ -38,6 +38,9 @@ export interface ThorchainClient {
   getDefaultClientUrl(): ClientUrl
   getClientUrlByNetwork(network: Network): string
   setClientUrl(clientUrl: ClientUrl): void
+  getDefaultExplorerUrl(): ExplorerUrl
+  getExplorerUrlByNetwork(network: Network): string
+  setExplorerUrl(explorerUrl: ExplorerUrl): void
 
   deposit(params: DepositParam): Promise<TxHash>
 }
@@ -48,6 +51,7 @@ export interface ThorchainClient {
 class Client implements ThorchainClient, XChainClient {
   private network: Network
   private clientUrl: ClientUrl
+  private explorerUrl: ExplorerUrl
   private thorClient: CosmosSDKClient
   private phrase = ''
   private address: Address = ''
@@ -65,9 +69,10 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor({ network = 'testnet', phrase, clientUrl }: XChainClientParams & { clientUrl?: ClientUrl }) {
+  constructor({ network = 'testnet', phrase, clientUrl, explorerUrl }: XChainClientParams & ThorchainClientParams) {
     this.network = network
     this.clientUrl = clientUrl || this.getDefaultClientUrl()
+    this.explorerUrl = explorerUrl || this.getDefaultExplorerUrl()
     this.thorClient = this.getNewThorClient()
 
     if (phrase) this.setPhrase(phrase)
@@ -157,6 +162,47 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
+   * Set/update the explorer URL.
+   *
+   * @param {ExplorerUrl} explorerUrl The explorer url to be set.
+   * @returns {void}
+   */
+  setExplorerUrl = (explorerUrl: ExplorerUrl): void => {
+    this.explorerUrl = explorerUrl
+  }
+
+  /**
+   * Get the explorer url.
+   *
+   * @returns {string} The explorer url for thorchain based on the current network.
+   */
+  getExplorerUrl = (): string => {
+    return this.getExplorerUrlByNetwork(this.network)
+  }
+
+  /**
+   * Get the explorer url.
+   *
+   * @returns {ExplorerUrl} The explorer url (both mainnet and testnet) for thorchain.
+   */
+  getDefaultExplorerUrl = (): ExplorerUrl => {
+    return {
+      testnet: 'https://testnet.thorchain.net',
+      mainnet: 'https://thorchain.net',
+    }
+  }
+
+  /**
+   * Get the explorer url.
+   *
+   * @param {Network} network
+   * @returns {string} The explorer url for thorchain based on the network.
+   */
+  getExplorerUrlByNetwork = (network: Network): string => {
+    return this.explorerUrl[network]
+  }
+
+  /**
    * @private
    * Get new thorchain client.
    *
@@ -199,18 +245,6 @@ class Client implements ThorchainClient, XChainClient {
     codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
     codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
     codec.registerCodec('thorchain/MsgNativeTx', MsgNativeTx, MsgNativeTx.fromJSON)
-  }
-
-  /**
-   * Get the explorer url.
-   *
-   * @returns {string} The explorer url.
-   */
-  getExplorerUrl = (): string => {
-    if (this.network === 'testnet') {
-      return 'https://testnet.thorchain.net'
-    }
-    return 'https://thorchain.net'
   }
 
   /**
