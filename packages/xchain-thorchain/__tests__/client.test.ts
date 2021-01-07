@@ -106,16 +106,10 @@ describe('Client Test', () => {
   })
 
   it('should have right client url', async () => {
-    expect(thorClient.getClientUrlByNetwork('mainnet')).toEqual('http://138.68.125.107:1317')
-    expect(thorClient.getClientUrlByNetwork('testnet')).toEqual('https://testnet.thornode.thorchain.info')
-
     thorClient.setClientUrl({
       mainnet: 'new mainnet client',
       testnet: 'new testnet client',
     })
-
-    expect(thorClient.getClientUrlByNetwork('mainnet')).toEqual('new mainnet client')
-    expect(thorClient.getClientUrlByNetwork('testnet')).toEqual('new testnet client')
 
     thorClient.setNetwork('mainnet')
     expect(thorClient.getClientUrl()).toEqual('new mainnet client')
@@ -429,7 +423,7 @@ describe('Client Test', () => {
   })
 
   it('should return valid explorer url', () => {
-    expect(thorClient.getExplorerUrl()).toEqual('https://thorchain.net')
+    expect(thorClient.getExplorerUrl()).toEqual('https://testnet.thorchain.net')
 
     thorClient.setNetwork('mainnet')
     expect(thorClient.getExplorerUrl()).toEqual('https://thorchain.net')
@@ -437,7 +431,7 @@ describe('Client Test', () => {
 
   it('should retrun valid explorer address url', () => {
     expect(thorClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
-      'https://thorchain.net/addresses/anotherTestAddressHere',
+      'https://testnet.thorchain.net/addresses/anotherTestAddressHere',
     )
 
     thorClient.setNetwork('mainnet')
@@ -447,7 +441,9 @@ describe('Client Test', () => {
   })
 
   it('should retrun valid explorer tx url', () => {
-    expect(thorClient.getExplorerTxUrl('anotherTestTxHere')).toEqual('https://thorchain.net/txs/anotherTestTxHere')
+    expect(thorClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
+      'https://testnet.thorchain.net/txs/anotherTestTxHere',
+    )
 
     thorClient.setNetwork('mainnet')
     expect(thorClient.getExplorerTxUrl('testTxHere')).toEqual('https://thorchain.net/txs/testTxHere')

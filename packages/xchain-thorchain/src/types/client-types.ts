@@ -5,6 +5,16 @@ export type ClientUrl = {
   mainnet: string
 }
 
+export type ExplorerUrl = {
+  testnet: string
+  mainnet: string
+}
+
+export type ThorchainClientParams = {
+  clientUrl?: ClientUrl
+  explorerUrl?: ExplorerUrl
+}
+
 export type DepositParam = {
   asset?: Asset
   amount: BaseAmount
