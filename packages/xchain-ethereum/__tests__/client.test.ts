@@ -5,9 +5,9 @@ import { TransactionResponse, TransactionReceipt } from '@ethersproject/abstract
 import { baseAmount, AssetETH, BaseAmount, assetToString } from '@xchainjs/xchain-util'
 import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
-import { mockDashboardAddress, mockGetTx } from '../__mocks__/blockchair-api'
+import { mockDashboardAddress } from '../__mocks__/blockchair-api'
 import { mock_all_api } from '../__mocks__'
-import { mock_ethplorer_api_getAddress } from '../__mocks__/ethplorer-api'
+import { mock_ethplorer_api_getAddress, mock_ethplorer_api_getTxInfo } from '../__mocks__/ethplorer-api'
 
 /**
  * Test Data
@@ -292,6 +292,7 @@ describe('Transactions', () => {
       network: 'testnet',
       phrase,
       blockchairUrl,
+      ethplorerUrl,
     })
 
     mockDashboardAddress(blockchairUrl, '0xdac17f958d2ee523a2206206994597c13d831ec7', {
@@ -387,60 +388,47 @@ describe('Transactions', () => {
       },
     })
 
-    mockGetTx(blockchairUrl, '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2', {
-      '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2': {
-        transaction: {
-          block_id: 3888697,
-          id: 3888697000001,
-          index: 1,
-          hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-          date: '2020-12-08',
-          time: '2020-12-08 04:49:56',
-          failed: false,
-          type: 'call',
-          sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
-          recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-          call_count: 1,
+    mock_ethplorer_api_getTxInfo(ethplorerUrl, '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2', {
+      hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
+      timestamp: 1604254250,
+      blockNumber: 11172738,
+      confirmations: 433964,
+      success: true,
+      from: '0xbabeae03735f9ed247f73978fe912028c9b5e828',
+      to: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
+      value: 0,
+      input:
+        '0xa9059cbb000000000000000000000000e40ec68d7dccb6a7314d0faf6d33a4d72483cd770000000000000000000000000000000000000000000000000000048c27395000',
+      gasLimit: 80952,
+      gasUsed: 53968,
+      logs: [],
+      operations: [
+        {
+          timestamp: 1604254250,
+          transactionHash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
           value: '1000',
-          value_usd: 0,
-          internal_value: '0',
-          internal_value_usd: null,
-          fee: '432160000000000',
-          fee_usd: null,
-          gas_used: 21608,
-          gas_limit: 32412,
-          gas_price: 20000000000,
-          input_hex:
-            'a9059cbb0000000000000000000000001d5516bc994a130fc4fa2a6275f5b4ee022b18720000000000000000000000000000000000000000000000000000000004cace80',
-          nonce: 98,
-          v: '2e',
-          r: '8797fe82968c48ccaf7db43785a2a97c6868b187a009f930e8406a052aefdc7b',
-          s: '54dc9740ebf75835bd3aca3de018454251213e13b44fa93ecbf5f17faf16d995',
-        },
-        calls: [
-          {
-            block_id: 3888697,
-            transaction_id: 3888697000001,
-            transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-            index: '0',
-            depth: 0,
-            date: '2020-12-08',
-            time: '2020-12-08 04:49:56',
-            failed: false,
-            fail_reason: null,
-            type: 'call',
-            sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
-            recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-            child_call_count: 0,
-            value: '1000',
-            value_usd: 0,
-            transferred: true,
-            input_hex:
-              'a9059cbb0000000000000000000000001d5516bc994a130fc4fa2a6275f5b4ee022b18720000000000000000000000000000000000000000000000000000000004cace80',
-            output_hex: '',
+          intValue: 1000,
+          type: 'transfer',
+          isEth: false,
+          priority: 203,
+          from: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+          to: '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77',
+          addresses: ['0xdac17f958d2ee523a2206206994597c13d831ec7', '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77'],
+          tokenInfo: {
+            address: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
+            decimals: '6',
+            name: 'MEMEI',
+            symbol: 'MEI',
+            totalSupply: '74075000000000',
+            lastUpdated: 1609732766,
+            owner: '0x',
+            issuancesCount: 0,
+            holdersCount: 1557,
+            ethTransfersCount: 0,
+            price: false,
           },
-        ],
-      },
+        },
+      ],
     })
 
     const txHistory = await ethClient.getTransactions({
@@ -449,11 +437,11 @@ describe('Transactions', () => {
     })
     expect(txHistory.total).toEqual(2)
     expect(txHistory.txs[0].hash).toEqual('0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2')
-    expect(txHistory.txs[0].asset).toEqual(AssetETH)
-    expect(txHistory.txs[0].from[0].from).toEqual('0x4a89644d5dffb825a42a3496e24510424ca01516')
-    expect(txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount(1000, ETH_DECIMAL).amount())).toBeTruthy()
-    expect(txHistory.txs[0].to[0].to).toEqual('0xdac17f958d2ee523a2206206994597c13d831ec7')
-    expect(txHistory.txs[0].to[0].amount.amount().isEqualTo(baseAmount(1000, ETH_DECIMAL).amount())).toBeTruthy()
+    expect(txHistory.txs[0].asset.symbol).toEqual('MEI')
+    expect(txHistory.txs[0].from[0].from).toEqual('0xdac17f958d2ee523a2206206994597c13d831ec7')
+    expect(txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount(1000, 6).amount())).toBeTruthy()
+    expect(txHistory.txs[0].to[0].to).toEqual('0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77')
+    expect(txHistory.txs[0].to[0].amount.amount().isEqualTo(baseAmount(1000, 6).amount())).toBeTruthy()
     expect(txHistory.txs[0].type).toEqual('transfer')
   })
 
@@ -461,74 +449,62 @@ describe('Transactions', () => {
     const ethClient = new Client({
       network: 'mainnet',
       phrase,
-      blockchairUrl,
+      ethplorerUrl,
     })
 
-    mockGetTx(blockchairUrl, '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2', {
-      '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2': {
-        transaction: {
-          block_id: 3888697,
-          id: 3888697000001,
-          index: 1,
-          hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-          date: '2020-12-08',
-          time: '2020-12-08 04:49:56',
-          failed: false,
-          type: 'call',
-          sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
-          recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-          call_count: 1,
+    mock_ethplorer_api_getTxInfo(ethplorerUrl, '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c', {
+      hash: '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
+      timestamp: 1604254250,
+      blockNumber: 11172738,
+      confirmations: 433964,
+      success: true,
+      from: '0xbabeae03735f9ed247f73978fe912028c9b5e828',
+      to: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
+      value: 0,
+      input:
+        '0xa9059cbb000000000000000000000000e40ec68d7dccb6a7314d0faf6d33a4d72483cd770000000000000000000000000000000000000000000000000000048c27395000',
+      gasLimit: 80952,
+      gasUsed: 53968,
+      logs: [],
+      operations: [
+        {
+          timestamp: 1604254250,
+          transactionHash: '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
           value: '1000',
-          value_usd: 0,
-          internal_value: '0',
-          internal_value_usd: null,
-          fee: '432160000000000',
-          fee_usd: null,
-          gas_used: 21608,
-          gas_limit: 32412,
-          gas_price: 20000000000,
-          input_hex:
-            'a9059cbb0000000000000000000000001d5516bc994a130fc4fa2a6275f5b4ee022b18720000000000000000000000000000000000000000000000000000000004cace80',
-          nonce: 98,
-          v: '2e',
-          r: '8797fe82968c48ccaf7db43785a2a97c6868b187a009f930e8406a052aefdc7b',
-          s: '54dc9740ebf75835bd3aca3de018454251213e13b44fa93ecbf5f17faf16d995',
-        },
-        calls: [
-          {
-            block_id: 3888697,
-            transaction_id: 3888697000001,
-            transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-            index: '0',
-            depth: 0,
-            date: '2020-12-08',
-            time: '2020-12-08 04:49:56',
-            failed: false,
-            fail_reason: null,
-            type: 'call',
-            sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
-            recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-            child_call_count: 0,
-            value: '1000',
-            value_usd: 0,
-            transferred: true,
-            input_hex:
-              'a9059cbb0000000000000000000000001d5516bc994a130fc4fa2a6275f5b4ee022b18720000000000000000000000000000000000000000000000000000000004cace80',
-            output_hex: '',
+          intValue: 1000,
+          type: 'transfer',
+          isEth: false,
+          priority: 203,
+          from: '0xbabeae03735f9ed247f73978fe912028c9b5e828',
+          to: '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77',
+          addresses: ['0xbabeae03735f9ed247f73978fe912028c9b5e828', '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77'],
+          tokenInfo: {
+            address: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
+            decimals: '6',
+            name: 'MEMEI',
+            symbol: 'MEI',
+            totalSupply: '74075000000000',
+            lastUpdated: 1609732766,
+            owner: '0x',
+            issuancesCount: 0,
+            holdersCount: 1557,
+            ethTransfersCount: 0,
+            price: false,
           },
-        ],
-      },
+        },
+      ],
     })
 
     const txData = await ethClient.getTransactionData(
-      '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
+      '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
     )
-    expect(txData.hash).toEqual('0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2')
-    expect(txData.asset).toEqual(AssetETH)
-    expect(txData.from[0].from).toEqual('0x4a89644d5dffb825a42a3496e24510424ca01516')
-    expect(txData.from[0].amount.amount().isEqualTo(baseAmount(1000, ETH_DECIMAL).amount())).toBeTruthy()
-    expect(txData.to[0].to).toEqual('0xdac17f958d2ee523a2206206994597c13d831ec7')
-    expect(txData.to[0].amount.amount().isEqualTo(baseAmount(1000, ETH_DECIMAL).amount())).toBeTruthy()
+
+    expect(txData.hash).toEqual('0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c')
+    expect(txData.asset.symbol).toEqual('MEI')
+    expect(txData.from[0].from).toEqual('0xbabeae03735f9ed247f73978fe912028c9b5e828')
+    expect(txData.from[0].amount.amount().isEqualTo(baseAmount(1000, 6).amount())).toBeTruthy()
+    expect(txData.to[0].to).toEqual('0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77')
+    expect(txData.to[0].amount.amount().isEqualTo(baseAmount(1000, 6).amount())).toBeTruthy()
     expect(txData.type).toEqual('transfer')
   })
 

@@ -1,9 +1,16 @@
 import nock from 'nock'
-import { AddressInfo } from '../src/types'
+import { AddressInfo, TransactionInfo } from '../src/types'
 
 export const mock_ethplorer_api_getAddress = (url: string, address: string, result: AddressInfo) => {
   nock(url)
     .get(`/getAddressInfo/${address}`)
+    .query((_) => true)
+    .reply(200, result)
+}
+
+export const mock_ethplorer_api_getTxInfo = (url: string, txId: string, result: TransactionInfo) => {
+  nock(url)
+    .get(`/getTxInfo/${txId}`)
     .query((_) => true)
     .reply(200, result)
 }
