@@ -41,7 +41,7 @@ const assertTxsPost = (url: string, memo: undefined | string, result: BroadcastT
 }
 
 const assertTxHstory = (url: string, address: string, result: TxHistoryResponse): void => {
-  nock(url).get(`/txs?message.sender=${address}`).reply(200, result)
+  nock(url).get(`/txs?message.sender=${address}&limit=1`).reply(200, result)
 }
 
 const assertTxHashGet = (url: string, hash: string, result: TxResponse): void => {

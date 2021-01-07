@@ -333,26 +333,49 @@ class Client implements ThorchainClient, XChainClient {
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     const messageAction = undefined
     const messageSender = (params && params.address) || this.getAddress()
-    const offset = params?.offset || undefined
+    const offset = params?.offset
     const limit = params?.limit || undefined
-    const page = limit && offset ? Math.floor(offset / limit) + 1 : undefined
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
     try {
       this.registerCodecs()
 
-      const txHistory = await this.thorClient.searchTx({
+      let txHistory = await this.thorClient.searchTx({
         messageAction,
         messageSender,
-        page,
-        limit,
+        page: undefined,
+        limit: 1,
         txMinHeight,
         txMaxHeight,
       })
 
+      const total_count = txHistory.total_count
+
+      if (total_count && limit && offset !== undefined) {
+        txHistory = await this.thorClient.searchTx({
+          messageAction,
+          messageSender,
+          page: total_count - offset - limit + 1,
+          limit: 1,
+          txMinHeight,
+          txMaxHeight,
+        })
+
+        if (txHistory.txs?.length === 1) {
+          txHistory = await this.thorClient.searchTx({
+            messageAction,
+            messageSender,
+            page: undefined,
+            limit,
+            txMinHeight: txHistory.txs[0].height,
+            txMaxHeight,
+          })
+        }
+      }
+
       return {
-        total: parseInt(txHistory.total_count?.toString() || '0'),
+        total: parseInt(total_count?.toString() || '0'),
         txs: getTxsFromHistory(txHistory.txs || [], AssetRune),
       }
     } catch (error) {
