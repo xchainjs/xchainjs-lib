@@ -207,6 +207,9 @@ class Client implements ThorchainClient, XChainClient {
    * @returns {string} The explorer url.
    */
   getExplorerUrl = (): string => {
+    if (this.network === 'testnet') {
+      return 'https://testnet.thorchain.net'
+    }
     return 'https://thorchain.net'
   }
 
