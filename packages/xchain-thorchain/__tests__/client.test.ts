@@ -106,16 +106,10 @@ describe('Client Test', () => {
   })
 
   it('should have right client url', async () => {
-    expect(thorClient.getClientUrlByNetwork('mainnet')).toEqual('http://138.68.125.107:1317')
-    expect(thorClient.getClientUrlByNetwork('testnet')).toEqual('https://testnet.thornode.thorchain.info')
-
     thorClient.setClientUrl({
       mainnet: 'new mainnet client',
       testnet: 'new testnet client',
     })
-
-    expect(thorClient.getClientUrlByNetwork('mainnet')).toEqual('new mainnet client')
-    expect(thorClient.getClientUrlByNetwork('testnet')).toEqual('new testnet client')
 
     thorClient.setNetwork('mainnet')
     expect(thorClient.getClientUrl()).toEqual('new mainnet client')

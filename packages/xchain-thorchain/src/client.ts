@@ -35,11 +35,8 @@ import {
  * Interface for custom Thorchain client
  */
 export interface ThorchainClient {
-  getDefaultClientUrl(): ClientUrl
-  getClientUrlByNetwork(network: Network): string
   setClientUrl(clientUrl: ClientUrl): void
-  getDefaultExplorerUrl(): ExplorerUrl
-  getExplorerUrlByNetwork(network: Network): string
+  getClientUrl(): string
   setExplorerUrl(explorerUrl: ExplorerUrl): void
 
   deposit(params: DepositParam): Promise<TxHash>
@@ -144,7 +141,7 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @returns {ClientUrl} The client url (both mainnet and testnet) for thorchain.
    */
-  getDefaultClientUrl = (): ClientUrl => {
+  private getDefaultClientUrl = (): ClientUrl => {
     return {
       testnet: 'https://testnet.thornode.thorchain.info',
       mainnet: 'http://138.68.125.107:1317',
@@ -157,7 +154,7 @@ class Client implements ThorchainClient, XChainClient {
    * @param {Network} network
    * @returns {string} The client url for thorchain based on the network.
    */
-  getClientUrlByNetwork = (network: Network): string => {
+  private getClientUrlByNetwork = (network: Network): string => {
     return this.clientUrl[network]
   }
 
@@ -185,7 +182,7 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @returns {ExplorerUrl} The explorer url (both mainnet and testnet) for thorchain.
    */
-  getDefaultExplorerUrl = (): ExplorerUrl => {
+  private getDefaultExplorerUrl = (): ExplorerUrl => {
     return {
       testnet: 'https://testnet.thorchain.net',
       mainnet: 'https://thorchain.net',
@@ -198,7 +195,7 @@ class Client implements ThorchainClient, XChainClient {
    * @param {Network} network
    * @returns {string} The explorer url for thorchain based on the network.
    */
-  getExplorerUrlByNetwork = (network: Network): string => {
+  private getExplorerUrlByNetwork = (network: Network): string => {
     return this.explorerUrl[network]
   }
 
