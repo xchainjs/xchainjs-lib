@@ -1,14 +1,13 @@
 import nock from 'nock'
 import { ethers, Wallet, providers, utils } from 'ethers'
-import { formatEther, parseEther } from '@ethersproject/units'
+import { parseEther } from '@ethersproject/units'
 import { TransactionResponse, TransactionReceipt } from '@ethersproject/abstract-provider'
-import { baseAmount, AssetETH, BaseAmount } from '@xchainjs/xchain-util'
-import { Balances } from '@xchainjs/xchain-client'
+import { baseAmount, AssetETH, BaseAmount, assetToString } from '@xchainjs/xchain-util'
 import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
 import { mockDashboardAddress, mockGetTx } from '../__mocks__/blockchair-api'
 import { mock_all_api } from '../__mocks__'
-import { mock_etherscan_balance_api } from '../__mocks__/etherscan-api'
+import { mock_ethplorer_api_getAddress } from '../__mocks__/ethplorer-api'
 
 /**
  * Test Data
@@ -19,9 +18,10 @@ const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august 
 const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
 const vault = '0x8c2A90D36Ec9F745C9B28B588Cba5e2A978A1656'
 const blockchairUrl = 'https://api.blockchair.com/ethereum/testnet'
-const etherscanUrl = 'https://api-goerli.etherscan.io'
-const goerliInfuraUrl = 'https://goerli.infura.io/v3'
-const goerliAlchemyUrl = 'https://eth-goerli.alchemyapi.io/v2'
+const ethplorerUrl = 'https://api.ethplorer.io'
+const etherscanUrl = 'https://api-kovan.etherscan.io'
+const kovanInfuraUrl = 'https://kovan.infura.io/v3'
+const kovanAlchemyUrl = 'https://eth-kovan.alchemyapi.io/v2'
 const wallet = {
   signingKey: {
     curve: 'secp256k1',
@@ -130,8 +130,8 @@ describe('Connecting', () => {
     ethClient.setNetwork('testnet')
 
     const network = await ethClient.getWallet().provider.getNetwork()
-    expect(network.name).toEqual('goerli')
-    expect(network.chainId).toEqual(5)
+    expect(network.name).toEqual('kovan')
+    expect(network.chainId).toEqual(42)
   })
 })
 
@@ -185,10 +185,30 @@ describe('Balances', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      blockchairUrl,
+      ethplorerUrl,
     })
 
-    mock_etherscan_balance_api(etherscanUrl, '100')
+    mock_ethplorer_api_getAddress(ethplorerUrl, ethClient.getAddress(), {
+      address: ethClient.getAddress(),
+      ETH: {
+        balance: 100,
+        price: {
+          rate: 1196.5425814145788,
+          diff: 11.71,
+          diff7d: 62.3,
+          ts: 1609987982,
+          marketCapUsd: 136582198332.62915,
+          availableSupply: 114147377.999,
+          volume24h: 44933107598.39366,
+          diff30d: 108.688017487141,
+          volDiff1: 7.230942506781318,
+          volDiff7: 81.97257329720685,
+          volDiff30: 16.64321146720964,
+        },
+      },
+      tokens: [],
+      countTxs: 1,
+    })
 
     const balance = await ethClient.getBalance()
     expect(balance.length).toEqual(1)
@@ -200,15 +220,54 @@ describe('Balances', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      blockchairUrl,
+      ethplorerUrl,
     })
 
-    mock_etherscan_balance_api(etherscanUrl, '1000')
+    mock_ethplorer_api_getAddress(ethplorerUrl, '0x12d4444f96c644385d8ab355f6ddf801315b6254', {
+      address: '0x12d4444f96c644385d8ab355f6ddf801315b6254',
+      ETH: {
+        balance: 100,
+        price: {
+          rate: 1196.5425814145788,
+          diff: 11.71,
+          diff7d: 62.3,
+          ts: 1609987982,
+          marketCapUsd: 136582198332.62915,
+          availableSupply: 114147377.999,
+          volume24h: 44933107598.39366,
+          diff30d: 108.688017487141,
+          volDiff1: 7.230942506781318,
+          volDiff7: 81.97257329720685,
+          volDiff30: 16.64321146720964,
+        },
+      },
+      tokens: [
+        {
+          balance: 1000,
+          tokenInfo: {
+            address: '0x2306934ca884caa042dc595371003093092b2bbf',
+            decimals: '18',
+            name: 'tomatos.finance',
+            owner: '0x',
+            symbol: 'TOMATOS',
+            totalSupply: '1000000000000000000000000000',
+            lastUpdated: 1609117980,
+            issuancesCount: 0,
+            holdersCount: 3181,
+            ethTransfersCount: 0,
+            price: false,
+          },
+        },
+      ],
+      countTxs: 1,
+    })
 
-    const balance = await ethClient.getBalance('0xdac17f958d2ee523a2206206994597c13d831ec7')
-    expect(balance.length).toEqual(1)
-    expect(balance[0].asset).toEqual(AssetETH)
-    expect(balance[0].amount.amount().isEqualTo(baseAmount(1000, ETH_DECIMAL).amount())).toBeTruthy()
+    const balance = await ethClient.getBalance('0x12d4444f96c644385d8ab355f6ddf801315b6254')
+    expect(balance.length).toEqual(2)
+    expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
+    expect(balance[0].amount.amount().isEqualTo(baseAmount(100, ETH_DECIMAL).amount())).toBeTruthy()
+    expect(balance[1].asset.symbol).toEqual('TOMATOS')
+    expect(balance[1].amount.amount().isEqualTo(baseAmount(1000, 18).amount())).toBeTruthy()
   })
 
   it('throws error on bad address', async () => {
@@ -480,23 +539,23 @@ describe('Transactions', () => {
       blockchairUrl,
     })
 
-    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      goerliInfuraUrl,
-      goerliAlchemyUrl,
+      kovanInfuraUrl,
+      kovanAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xc2b98a50107fbb6ed9369c552e332f50810eaef04a70c0253b617106f02a674d',
+      '0xe389726c5d2bfd8b88f5842f1000635fc672992eb7aaa92d583b207ba51d9946',
     )
 
     const txResult = await ethClient.transfer({
       recipient: '0x8ced5ad0d8da4ec211c17355ed3dbfec4cf0e5b9',
       amount: baseAmount(100, ETH_DECIMAL),
     })
-    expect(txResult).toEqual('0xc2b98a50107fbb6ed9369c552e332f50810eaef04a70c0253b617106f02a674d')
+    expect(txResult).toEqual('0xe389726c5d2bfd8b88f5842f1000635fc672992eb7aaa92d583b207ba51d9946')
   })
 
   it('sends a normalTx with special parameters', async () => {
@@ -506,16 +565,16 @@ describe('Transactions', () => {
       blockchairUrl,
     })
 
-    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, goerliInfuraUrl, goerliAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      goerliInfuraUrl,
-      goerliAlchemyUrl,
+      kovanInfuraUrl,
+      kovanAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xe82829e2c2d425c83a093ada3ee58a0680e0fa199f59aae79ee922f7ce90c797',
+      '0x3ee03f3d41acc7dffe5fa83fbaa65dab11803f6c5862cd20de58a9258ffb6043',
     )
 
     const txResult = await ethClient.normalTx({
@@ -545,25 +604,6 @@ describe('ERC20', () => {
 
   afterEach(() => {
     nock.cleanAll()
-  })
-
-  it('gets erc 20 balance for a contract without addr', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
-
-    const mockerc20Bal = jest.spyOn(ethClient, 'getERC20Balance')
-    mockerc20Bal.mockImplementation(
-      async (_): Promise<Balances> =>
-        Promise.resolve([
-          {
-            asset: AssetETH,
-            amount: baseAmount(parseEther('1').toString(), 18),
-          },
-        ]),
-    )
-
-    const erc20Bal = await ethClient.getERC20Balance('0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8')
-    expect(erc20Bal.length).toEqual(1)
-    expect(formatEther(erc20Bal[0].amount.amount().toString())).toEqual('1.0')
   })
 
   it('gets gas estimate for a erc20 transfer', async () => {

@@ -1,11 +1,16 @@
 import { ethers } from 'ethers'
 import { BaseAmount } from '@xchainjs/xchain-util'
+import { Balance } from '@xchainjs/xchain-client'
 
 export type Address = string
 
 export enum Network {
-  TEST = 'goerli',
+  TEST = 'kovan',
   MAIN = 'homestead',
+}
+
+export type ETHBalance = Balance & {
+  assetAddress?: string
 }
 
 export type NormalTxOpts = {

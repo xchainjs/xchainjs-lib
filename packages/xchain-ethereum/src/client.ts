@@ -6,7 +6,14 @@ import vaultABI from '../data/vault.json'
 import erc20ABI from '../data/erc20.json'
 import { formatEther, parseEther } from 'ethers/lib/utils'
 import { toUtf8String } from '@ethersproject/strings'
-import { Erc20TxOpts, EstimateGasERC20Opts, GasOracleResponse, Network as EthNetwork, NormalTxOpts } from './types'
+import {
+  Erc20TxOpts,
+  EstimateGasERC20Opts,
+  GasOracleResponse,
+  Network as EthNetwork,
+  NormalTxOpts,
+  ETHBalance,
+} from './types'
 import {
   Address,
   Network as XChainNetwork,
@@ -14,16 +21,15 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
-  Balance,
   TxParams,
   TxHash,
   Fees,
   TxHistoryParams,
-  Balances,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount, baseToAsset, BaseAmount, assetFromString } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as blockChair from './blockchair-api'
+import * as ethplorerAPI from './ethplorer-api'
 import { ethNetworkToXchains, xchainNetworkToEths, ETH_DECIMAL } from './utils'
 import { getGasOracle } from './etherscan-api'
 
@@ -46,6 +52,8 @@ export interface EthereumClient {
 type ClientParams = XChainClientParams & {
   blockchairUrl?: string
   blockchairNodeApiKey?: string
+  ethplorerUrl?: string
+  ethplorerApiKey?: string
   etherscanApiKey?: string
   vault?: string
 }
@@ -62,6 +70,8 @@ export default class Client implements XChainClient, EthereumClient {
   private etherscan: EtherscanProvider
   private blockchairNodeUrl = ''
   private blockchairNodeApiKey = ''
+  private ethplorerUrl = ''
+  private ethplorerApiKey = ''
 
   /**
    * Constructor
@@ -71,6 +81,8 @@ export default class Client implements XChainClient, EthereumClient {
     network = 'testnet',
     blockchairUrl = '',
     blockchairNodeApiKey = '',
+    ethplorerUrl = '',
+    ethplorerApiKey = '',
     phrase,
     vault,
     etherscanApiKey,
@@ -80,6 +92,8 @@ export default class Client implements XChainClient, EthereumClient {
     this.etherscan = new EtherscanProvider(this.network, etherscanApiKey) // for tx history
     this.setBlockchairNodeURL(blockchairUrl)
     this.setBlockchairNodeAPIKey(blockchairNodeApiKey)
+    this.setEthplorerURL(ethplorerUrl)
+    this.setEthplorerAPIKey(ethplorerApiKey)
 
     if (vault) {
       this.vault = vault
@@ -120,6 +134,26 @@ export default class Client implements XChainClient, EthereumClient {
    */
   setBlockchairNodeAPIKey = (key: string): void => {
     this.blockchairNodeApiKey = key
+  }
+
+  /**
+   * Set/Update the blockchair url.
+   *
+   * @param {string} url The new blockchair url.
+   * @returns {void}
+   */
+  setEthplorerURL = (url: string): void => {
+    this.ethplorerUrl = url
+  }
+
+  /**
+   * Set/Update the blockchair api key.
+   *
+   * @param {string} key The new blockchair api key.
+   * @returns {void}
+   */
+  setEthplorerAPIKey = (key: string): void => {
+    this.ethplorerApiKey = key
   }
 
   /**
@@ -200,7 +234,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {string} The explorer url.
    */
   getExplorerUrl = (): string => {
-    return this.getNetwork() === 'testnet' ? 'https://goerli.etherscan.io/' : 'https://etherscan.io/'
+    return this.getNetwork() === 'testnet' ? 'https://kovan.etherscan.io/' : 'https://etherscan.io/'
   }
 
   /**
@@ -307,57 +341,30 @@ export default class Client implements XChainClient, EthereumClient {
    * Get the ETH balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balance>} The ETH balance of the address.
+   * @returns {Array<ETHBalance>} The all balance of the address.
    */
-  getBalance = async (address?: Address): Promise<Balance[]> => {
+  getBalance = async (address?: Address): Promise<ETHBalance[]> => {
     try {
       address = address || this.getAddress()
-      const balance = await this.getEtherscanProvider().getBalance(address)
-      return [
+      const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
+      const balances: ETHBalance[] = [
         {
           asset: AssetETH,
-          amount: baseAmount(balance.toString() || 0, ETH_DECIMAL),
+          amount: baseAmount(account.ETH.balance, ETH_DECIMAL),
         },
       ]
+
+      account.tokens.forEach((token) => {
+        balances.push({
+          asset: assetFromString(`${AssetETH.chain}.${token.tokenInfo.symbol}`) || AssetETH,
+          amount: baseAmount(token.balance, parseInt(token.tokenInfo.decimals)),
+          assetAddress: token.tokenInfo.address,
+        })
+      })
+
+      return balances
     } catch (error) {
       return Promise.reject(new Error('Invalid address'))
-    }
-  }
-
-  /**
-   * Gets the erc20 asset balance of a given address.
-   * By default it will return the balance of the current wallet.
-   *
-   * @param {Address} assetAddress The erc20 asset address.
-   * @param {Address} address (optional)
-   * @returns {Array<Balance>} The ETH balance of the address.
-   *
-   * @throws {"Invalid Address"}
-   * Thrown if address is invalid.
-   * @throws {"Invalid Asset Address"}
-   * Thrown if asset address is invalid.
-   */
-  getERC20Balance = async (assetAddress: Address, address?: Address): Promise<Balances> => {
-    try {
-      if (address && !this.validateAddress(address)) {
-        return Promise.reject('Invalid Address')
-      }
-      if (!this.validateAddress(assetAddress)) {
-        return Promise.reject('Invalid Asset Address')
-      }
-
-      const amount = await this.call<BigNumberish>(assetAddress, erc20ABI, 'balanceOf', [address || this.getAddress()])
-      const decimal = await this.call<BigNumberish>(assetAddress, erc20ABI, 'decimals', [])
-      const name = await this.call<string>(assetAddress, erc20ABI, 'name', [])
-      const symbol = await this.call<string>(assetAddress, erc20ABI, 'symbol', [])
-      return [
-        {
-          asset: assetFromString(`${name}.${symbol}`) || AssetETH,
-          amount: baseAmount(formatEther(amount), decimal ? parseInt(decimal.toString()) : ETH_DECIMAL),
-        },
-      ]
-    } catch (error) {
-      return Promise.reject(error)
     }
   }
 
