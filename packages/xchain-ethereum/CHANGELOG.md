@@ -3,6 +3,8 @@
 ### Update
 
 - Update comments for documentation
+- Update `getBalance`, `getTransactions`, `getTransactionData`, `transfer`
+- Update mocked tests
 
 # v.0.4.0 (2020-12-28)
 
