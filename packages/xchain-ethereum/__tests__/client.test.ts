@@ -1,6 +1,6 @@
 import nock from 'nock'
 import { Wallet, providers } from 'ethers'
-import { baseAmount, AssetETH, BaseAmount, assetToString } from '@xchainjs/xchain-util'
+import { baseAmount, AssetETH, BaseAmount, assetToString, assetFromString, ETHChain } from '@xchainjs/xchain-util'
 import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
 import { mock_all_api } from '../__mocks__'
@@ -204,7 +204,7 @@ describe('Client Test', () => {
     expect(balance.length).toEqual(2)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
     expect(balance[0].amount.amount().isEqualTo(baseAmount('100000000000000000000', ETH_DECIMAL).amount())).toBeTruthy()
-    expect(balance[1].asset.symbol).toEqual('TOMATOS')
+    expect(balance[1].asset.symbol).toEqual('TOMATOS-0x2306934ca884caa042dc595371003093092b2bbf')
     expect(balance[1].amount.amount().isEqualTo(baseAmount(1000, 18).amount())).toBeTruthy()
   })
 
@@ -308,11 +308,11 @@ describe('Client Test', () => {
     const txHistory = await ethClient.getTransactions({
       address,
       limit: 1,
-      assetAddress: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      asset: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
     })
     expect(txHistory.total).toEqual(1)
     expect(txHistory.txs[0].hash).toEqual('0x042f4c15f379ea9d15adf31df62024ae1738fafbef2267460a046295e2e28046')
-    expect(txHistory.txs[0].asset.symbol).toEqual('USDT')
+    expect(txHistory.txs[0].asset.symbol).toEqual('USDT-0xdac17f958d2ee523a2206206994597c13d831ec7')
     expect(txHistory.txs[0].from[0].from).toEqual('0xf743cce2be90dd1d1ea13860a238fa4713d552ab')
     expect(txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount('103000000', 6).amount())).toBeTruthy()
     expect(txHistory.txs[0].to[0].to).toEqual('0xe242271f229e4a7e3f3d555d5b0f86a412f24123')
@@ -375,7 +375,7 @@ describe('Client Test', () => {
     )
 
     expect(txData.hash).toEqual('0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c')
-    expect(txData.asset.symbol).toEqual('MEI')
+    expect(txData.asset.symbol).toEqual('MEI-0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85')
     expect(txData.from[0].from).toEqual('0xbabeae03735f9ed247f73978fe912028c9b5e828')
     expect(txData.from[0].amount.amount().isEqualTo(baseAmount(1000, 6).amount())).toBeTruthy()
     expect(txData.to[0].to).toEqual('0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77')
@@ -456,7 +456,7 @@ describe('Client Test', () => {
     const txHash = await ethClient.transfer({
       recipient: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       amount: baseAmount(100, ETH_DECIMAL),
-      assetAddress: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      asset: assetFromString(`${ETHChain}.USDT-0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa`) || undefined,
     })
     expect(txHash).toEqual('0xcd0e007a6f81120d45478e3eef07c017ec104d4a2a5f1bff23cf0837ba3aab28')
   })

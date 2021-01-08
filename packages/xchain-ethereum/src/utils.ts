@@ -1,5 +1,5 @@
 import { Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
-import { baseAmount, AssetETH, assetFromString, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { baseAmount, AssetETH, assetFromString, assetAmount, assetToBase, ETHChain } from '@xchainjs/xchain-util'
 import { Network as EthNetwork, TransactionOperation, TransactionInfo } from './types'
 
 export const ETH_DECIMAL = 18
@@ -46,7 +46,7 @@ export const getTxFromOperation = (operation: TransactionOperation): Tx => {
   const decimals = parseInt(operation.tokenInfo.decimals)
 
   return {
-    asset: assetFromString(`${AssetETH.chain}.${symbol}`) || AssetETH,
+    asset: assetFromString(`${ETHChain}.${symbol}-${operation.tokenInfo.address}`) || AssetETH,
     from: [
       {
         from: operation.from,

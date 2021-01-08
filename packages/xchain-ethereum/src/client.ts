@@ -11,7 +11,6 @@ import {
   GasOracleResponse,
   Network as EthNetwork,
   NormalTxOpts,
-  ETHBalance,
   VaultTxOpts,
 } from './types'
 import {
@@ -25,6 +24,7 @@ import {
   TxHash,
   Fees,
   TxHistoryParams,
+  Balances,
 } from '@xchainjs/xchain-client'
 import {
   AssetETH,
@@ -34,6 +34,7 @@ import {
   assetFromString,
   assetAmount,
   assetToBase,
+  assetToString,
 } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as ethplorerAPI from './ethplorer-api'
@@ -329,15 +330,14 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Array<ETHBalance>} The all balance of the address.
    */
-  getBalance = async (address?: Address): Promise<ETHBalance[]> => {
+  getBalance = async (address?: Address): Promise<Balances> => {
     try {
       address = address || this.getAddress()
       const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
-      const balances: ETHBalance[] = [
+      const balances: Balances = [
         {
           asset: AssetETH,
           amount: assetToBase(assetAmount(account.ETH.balance, ETH_DECIMAL)),
-          decimals: ETH_DECIMAL,
         },
       ]
 
@@ -345,10 +345,9 @@ export default class Client implements XChainClient, EthereumClient {
         account.tokens.forEach((token) => {
           const decimals = parseInt(token.tokenInfo.decimals)
           balances.push({
-            asset: assetFromString(`${AssetETH.chain}.${token.tokenInfo.symbol}`) || AssetETH,
+            asset:
+              assetFromString(`${AssetETH.chain}.${token.tokenInfo.symbol}-${token.tokenInfo.address}`) || AssetETH,
             amount: baseAmount(token.balance, decimals),
-            assetAddress: token.tokenInfo.address,
-            decimals,
           })
         })
       }
@@ -369,12 +368,12 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Need to provide ethplorer API key for token transactions"}
    * Thrown if the ethplorer API key is not provided.
    */
-  getTransactions = async (params?: TxHistoryParams & { assetAddress?: Address }): Promise<TxsPage> => {
+  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     try {
       const address = params?.address || this.getAddress()
       const limit = params?.limit || 10
       const startTime = params?.startTime
-      const assetAddress = params?.assetAddress
+      const assetAddress = params?.asset
 
       if (assetAddress && !this.ethplorerApiKey) {
         throw new Error('Need to provide ethplorer API key for token transactions')
@@ -437,16 +436,18 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
+   *
+   * @throws {"Invalid asset address"}
+   * Thrown if the given asset is invalid.
    */
   transfer = async ({
-    assetAddress,
+    asset,
     memo,
     amount,
     recipient,
     gasLimit,
     gasPrice,
   }: TxParams & {
-    assetAddress?: Address
     gasPrice?: BaseAmount
     gasLimit?: number
   }): Promise<TxHash> => {
@@ -454,6 +455,14 @@ export default class Client implements XChainClient, EthereumClient {
       const overrides = gasPrice && {
         gasLimit: gasLimit || DEFAULT_GASLIMIT,
         gasPrice: parseEther(baseToAsset(gasPrice).amount().toFormat()),
+      }
+
+      let assetAddress
+      if (asset && assetToString(asset) !== assetToString(AssetETH)) {
+        assetAddress = asset.symbol.slice(asset.ticker.length + 1)
+        if (!this.validateAddress(assetAddress)) {
+          return Promise.reject(new Error('Invalid asset address'))
+        }
       }
 
       let result
