@@ -11,6 +11,14 @@ export enum Network {
 
 export type ETHBalance = Balance & {
   assetAddress?: string
+  decimals?: number
+}
+
+export type VaultTxOpts = {
+  address: Address
+  amount: BaseAmount
+  memo: string
+  overrides?: ContractTxOverrides
 }
 
 export type NormalTxOpts = {
@@ -29,12 +37,12 @@ export type NormalTxOverrides = {
 export type Erc20TxOpts = {
   assetAddress: Address
   recipient: Address
-  amount: ethers.BigNumberish
+  amount: BaseAmount
 
-  overrides?: Erc20TxOverrides
+  overrides?: ContractTxOverrides
 }
 
-export type Erc20TxOverrides = {
+export type ContractTxOverrides = {
   nonce?: ethers.BigNumberish
 
   // mandatory: https://github.com/ethers-io/ethers.js/issues/469#issuecomment-475926538
@@ -46,7 +54,7 @@ export type Erc20TxOverrides = {
 export type EstimateGasERC20Opts = {
   assetAddress: Address
   recipient: Address
-  amount: ethers.BigNumberish
+  amount: BaseAmount
 }
 
 export type GasOracleResponse = {

@@ -3,6 +3,7 @@ import { baseAmount, AssetETH, assetFromString, assetAmount, assetToBase } from 
 import { Network as EthNetwork, TransactionOperation, TransactionInfo } from './types'
 
 export const ETH_DECIMAL = 18
+export const DEFAULT_GASLIMIT = 63000
 
 /**
  * XChainNetwork -> EthNetwork

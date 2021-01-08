@@ -110,6 +110,7 @@ export const getAddressHistory = async (
         limit,
         timestamp,
         showZeroValues: true,
+        type: 'transfer',
       },
     })
     return response.data.operations

@@ -4,8 +4,7 @@ import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import vaultABI from '../data/vault.json'
 import erc20ABI from '../data/erc20.json'
-import { formatEther, parseEther } from 'ethers/lib/utils'
-import { toUtf8String } from '@ethersproject/strings'
+import { parseEther } from 'ethers/lib/utils'
 import {
   Erc20TxOpts,
   EstimateGasERC20Opts,
@@ -13,6 +12,7 @@ import {
   Network as EthNetwork,
   NormalTxOpts,
   ETHBalance,
+  VaultTxOpts,
 } from './types'
 import {
   Address,
@@ -43,6 +43,7 @@ import {
   ETH_DECIMAL,
   getTxFromOperation,
   getTxFromEthTransaction,
+  DEFAULT_GASLIMIT,
 } from './utils'
 import { getGasOracle } from './etherscan-api'
 
@@ -54,7 +55,7 @@ const ethAddress = '0x0000000000000000000000000000000000000000'
 export interface EthereumClient {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   call<T>(asset: Address, abi: ethers.ContractInterface, func: string, params: Array<any>): Promise<T>
-  vaultTx(asset: string, amount: BaseAmount, memo: string): Promise<TransactionResponse>
+  vaultTx(opts: VaultTxOpts): Promise<TransactionResponse>
   normalTx(opts: NormalTxOpts): Promise<TransactionResponse>
   erc20Tx(opts: Erc20TxOpts): Promise<TransactionResponse>
 
@@ -336,16 +337,21 @@ export default class Client implements XChainClient, EthereumClient {
         {
           asset: AssetETH,
           amount: assetToBase(assetAmount(account.ETH.balance, ETH_DECIMAL)),
+          decimals: ETH_DECIMAL,
         },
       ]
 
-      account.tokens.forEach((token) => {
-        balances.push({
-          asset: assetFromString(`${AssetETH.chain}.${token.tokenInfo.symbol}`) || AssetETH,
-          amount: baseAmount(token.balance, parseInt(token.tokenInfo.decimals)),
-          assetAddress: token.tokenInfo.address,
+      if (account.tokens) {
+        account.tokens.forEach((token) => {
+          const decimals = parseInt(token.tokenInfo.decimals)
+          balances.push({
+            asset: assetFromString(`${AssetETH.chain}.${token.tokenInfo.symbol}`) || AssetETH,
+            amount: baseAmount(token.balance, decimals),
+            assetAddress: token.tokenInfo.address,
+            decimals,
+          })
         })
-      })
+      }
 
       return balances
     } catch (error) {
@@ -359,6 +365,9 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
+   *
+   * @throws {"Need to provide ethplorer API key for token transactions"}
+   * Thrown if the ethplorer API key is not provided.
    */
   getTransactions = async (params?: TxHistoryParams & { assetAddress?: Address }): Promise<TxsPage> => {
     try {
@@ -366,6 +375,10 @@ export default class Client implements XChainClient, EthereumClient {
       const limit = params?.limit || 10
       const startTime = params?.startTime
       const assetAddress = params?.assetAddress
+
+      if (assetAddress && !this.ethplorerApiKey) {
+        throw new Error('Need to provide ethplorer API key for token transactions')
+      }
 
       if (assetAddress) {
         const tokenTransactions = await ethplorerAPI.getAddressHistory(
@@ -425,10 +438,37 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async ({ memo, amount, recipient }: TxParams): Promise<TxHash> => {
+  transfer = async ({
+    assetAddress,
+    memo,
+    amount,
+    recipient,
+    gasLimit,
+    gasPrice,
+  }: TxParams & {
+    assetAddress?: Address
+    gasPrice?: BaseAmount
+    gasLimit?: number
+  }): Promise<TxHash> => {
     try {
-      const { hash } = await (memo ? this.vaultTx(recipient, amount, memo) : this.normalTx({ recipient, amount }))
-      return hash
+      const overrides = gasPrice && {
+        gasLimit: gasLimit || DEFAULT_GASLIMIT,
+        gasPrice: parseEther(baseToAsset(gasPrice).amount().toFormat()),
+      }
+
+      let result
+
+      if (assetAddress) {
+        result = await this.erc20Tx({ assetAddress, recipient, amount, overrides })
+      } else {
+        if (memo) {
+          result = await this.vaultTx({ address: recipient, amount, memo, overrides })
+        } else {
+          result = await this.normalTx({ recipient, amount, overrides })
+        }
+      }
+
+      return result.hash
     } catch (error) {
       return Promise.reject(error)
     }
@@ -459,18 +499,22 @@ export default class Client implements XChainClient, EthereumClient {
   /**
    * Send a transaction to the vault.
    *
-   * @param {Address} address The contract address.
-   * @param {BaseAmount} amount The amount to be transferred.
-   * @param {string} memo The memo to be set.
+   * @param {VaultTxOpts} params The Vault transaction options.
    * @returns {TransactionResponse}  The vault transaction result.
    */
-  vaultTx = async (address: Address, amount: BaseAmount, memo: string): Promise<TransactionResponse> => {
+  vaultTx = async ({ address, amount, memo, overrides }: VaultTxOpts): Promise<TransactionResponse> => {
     try {
-      const txAmount = baseToAsset(amount).amount().toFormat()
+      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
       const vault = this.getVault()
 
       if (address === ethAddress) {
-        return await this.call<TransactionResponse>(vault, vaultABI, 'deposit', [toUtf8String(memo), { value: amount }])
+        return await this.call<TransactionResponse>(vault, vaultABI, 'deposit(string)', [
+          memo,
+          {
+            ...Object.assign({}, overrides || {}),
+            value: txAmount,
+          },
+        ])
       }
 
       const allowance = await this.call<BigNumberish>(address, erc20ABI, 'allowance', [
@@ -478,7 +522,7 @@ export default class Client implements XChainClient, EthereumClient {
         vault,
         { from: this.getWallet().address },
       ])
-      if (formatEther(allowance) < txAmount) {
+      if (txAmount.gt(allowance)) {
         const approved = await this.call<TransactionResponse>(address, erc20ABI, 'approve', [
           vault,
           txAmount,
@@ -486,7 +530,12 @@ export default class Client implements XChainClient, EthereumClient {
         ])
         await approved.wait()
       }
-      return await this.call<TransactionResponse>(vault, vaultABI, 'deposit', [address, txAmount, toUtf8String(memo)])
+      return await this.call<TransactionResponse>(vault, vaultABI, 'deposit(address,uint256,string)', [
+        address,
+        txAmount,
+        memo,
+        Object.assign({}, overrides || {}),
+      ])
     } catch (error) {
       return Promise.reject(error)
     }
@@ -500,8 +549,8 @@ export default class Client implements XChainClient, EthereumClient {
    */
   normalTx = async ({ recipient, amount, overrides }: NormalTxOpts): Promise<TransactionResponse> => {
     try {
-      const txAmount = baseToAsset(amount).amount().toFormat()
-      const transactionRequest = Object.assign({ to: recipient, value: parseEther(txAmount) }, overrides || {})
+      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
+      const transactionRequest = Object.assign({ to: recipient, value: txAmount }, overrides || {})
       return await this.getWallet().sendTransaction(transactionRequest)
     } catch (error) {
       return Promise.reject(error)
@@ -532,7 +581,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   estimateNormalTx = async ({ recipient, amount, overrides }: NormalTxOpts): Promise<BaseAmount> => {
     try {
-      const txAmount = baseToAsset(amount).amount().toFormat()
+      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
       const transactionRequest = Object.assign({ to: recipient, value: txAmount, gas: '5208' }, overrides || {})
       const estimate = await this.getWallet().provider.estimateGas(transactionRequest)
 
@@ -555,6 +604,7 @@ export default class Client implements XChainClient, EthereumClient {
    **/
   estimateGasERC20Tx = async ({ assetAddress, recipient, amount }: EstimateGasERC20Opts): Promise<BaseAmount> => {
     try {
+      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
       if (recipient && !this.validateAddress(recipient)) {
         return Promise.reject('Invalid Address')
       }
@@ -563,7 +613,7 @@ export default class Client implements XChainClient, EthereumClient {
       }
       const contract = new ethers.Contract(assetAddress, erc20ABI, this.getWallet())
       const erc20 = contract.connect(this.getWallet())
-      const estimate = await erc20.estimateGas.transfer(recipient, amount)
+      const estimate = await erc20.estimateGas.transfer(recipient, txAmount)
 
       return baseAmount(estimate.toString(), ETH_DECIMAL)
     } catch (error) {
@@ -584,6 +634,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   erc20Tx = async ({ assetAddress, recipient, amount, overrides }: Erc20TxOpts): Promise<TransactionResponse> => {
     try {
+      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
       if (recipient && !this.validateAddress(recipient)) {
         return Promise.reject('Invalid Address')
       }
@@ -593,7 +644,7 @@ export default class Client implements XChainClient, EthereumClient {
 
       return await this.call<TransactionResponse>(assetAddress, erc20ABI, 'transfer', [
         recipient,
-        amount,
+        txAmount,
         Object.assign({}, overrides || {}),
       ])
     } catch (error) {

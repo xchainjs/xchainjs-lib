@@ -57,7 +57,7 @@ export interface AddressInfo {
     timestamp: string
   }
   tokenInfo?: TokenInfo
-  tokens: TokenBalance[]
+  tokens?: TokenBalance[]
   countTxs: number
 }
 

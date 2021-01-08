@@ -1,7 +1,5 @@
 import nock from 'nock'
-import { ethers, Wallet, providers, utils } from 'ethers'
-import { parseEther } from '@ethersproject/units'
-import { TransactionResponse, TransactionReceipt } from '@ethersproject/abstract-provider'
+import { Wallet, providers } from 'ethers'
 import { baseAmount, AssetETH, BaseAmount, assetToString } from '@xchainjs/xchain-util'
 import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
@@ -13,15 +11,11 @@ import {
   mock_ethplorer_api_getAddressHistory,
 } from '../__mocks__/ethplorer-api'
 
-/**
- * Test Data
- * @todo import from .ts
- */
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
 const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
 const vault = '0x8c2A90D36Ec9F745C9B28B588Cba5e2A978A1656'
-const ethplorerUrl = 'https://api.ethplorer.io'
+const ethplorerUrl = 'https://kovan-api.ethplorer.io'
 const etherscanUrl = 'https://api-kovan.etherscan.io'
 const kovanInfuraUrl = 'https://kovan.infura.io/v3'
 const kovanAlchemyUrl = 'https://eth-kovan.alchemyapi.io/v2'
@@ -36,33 +30,10 @@ const wallet = {
   },
 }
 
-const txResponse = {
-  hash: '0x9eb9db9c3ec72918c7db73ae44e520139e95319c421ed6f9fc11fa8dd0cddc56',
-  parentHash: '0x9b095b36c15eaf13044373aef8ee0bd3a382a5abb92e402afa44b8249c3a90e9',
-  number: 3,
-  timestamp: 1492010489,
-  nonce: 1,
-  difficulty: 2,
-  gasLimit: ethers.BigNumber.from('0x47e7c4'),
-  gasPrice: ethers.BigNumber.from('0x3b9aca00'),
-  to: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
-  from: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
-  value: ethers.BigNumber.from('0x00'),
-  data: '0x54455354',
-  chainId: 4,
-  gasUsed: ethers.BigNumber.from(0),
-  miner: '0x0000000000000000000000000000000000000000',
-  extraData:
-    '0xd783010600846765746887676f312e372e33856c696e757800000000000000004e10f96536e45ceca7e34cc1bdda71db3f3bb029eb69afd28b57eb0202c0ec0859d383a99f63503c4df9ab6c1dc63bf6b9db77be952f47d86d2d7b208e77397301',
-  transactions: [],
-  confirmations: 1,
-  wait: (_?: number): Promise<TransactionReceipt> => Promise.reject(new Error('no need to implement')),
-}
-
 /**
  * Wallet Tests
  */
-describe('Wallets', () => {
+describe('Client Test', () => {
   beforeEach(() => {
     nock.disableNetConnect()
   })
@@ -97,19 +68,6 @@ describe('Wallets', () => {
     const ethClient = new Client({})
     expect(() => ethClient.setPhrase('bad bad phrase')).toThrowError()
   })
-})
-
-/**
- * Connectivity Tests (networks/providers)
- */
-describe('Connecting', () => {
-  beforeEach(() => {
-    nock.disableNetConnect()
-  })
-
-  afterEach(() => {
-    nock.cleanAll()
-  })
 
   it('should connect to specified network', async () => {
     const ethClient = new Client({
@@ -136,19 +94,6 @@ describe('Connecting', () => {
     expect(network.name).toEqual('kovan')
     expect(network.chainId).toEqual(42)
   })
-})
-
-/**
- * Utils
- */
-describe('Utils', () => {
-  beforeEach(() => {
-    nock.disableNetConnect()
-  })
-
-  afterEach(() => {
-    nock.cleanAll()
-  })
 
   it('should get address', () => {
     const ethClient = new Client({
@@ -172,16 +117,6 @@ describe('Utils', () => {
     const ethClient = new Client({ network: 'testnet' })
     const goodAddress = ethClient.validateAddress(address)
     expect(goodAddress).toBeTruthy()
-  })
-})
-
-describe('Balances', () => {
-  beforeEach(() => {
-    nock.disableNetConnect()
-  })
-
-  afterEach(() => {
-    nock.cleanAll()
   })
 
   it('gets a balance without address args', async () => {
@@ -279,16 +214,6 @@ describe('Balances', () => {
     const balances = ethClient.getBalance('0xbad')
     expect(balances).rejects.toThrowError()
   })
-})
-
-describe('Transactions', () => {
-  beforeEach(() => {
-    nock.disableNetConnect()
-  })
-
-  afterEach(() => {
-    nock.cleanAll()
-  })
 
   it('get eth transaction history', async () => {
     const ethClient = new Client({
@@ -332,9 +257,10 @@ describe('Transactions', () => {
       network: 'testnet',
       phrase,
       ethplorerUrl,
+      ethplorerApiKey: 'api-key',
     })
 
-    mock_ethplorer_api_getAddressHistory(ethplorerUrl, '0xff71cb760666ab06aa73f34995b42dd4b85ea07b', [
+    mock_ethplorer_api_getAddressHistory(ethplorerUrl, address, [
       {
         timestamp: 1610014043,
         transactionHash: '0x042f4c15f379ea9d15adf31df62024ae1738fafbef2267460a046295e2e28046',
@@ -380,9 +306,9 @@ describe('Transactions', () => {
     ])
 
     const txHistory = await ethClient.getTransactions({
-      address: '0xff71cb760666ab06aa73f34995b42dd4b85ea07b',
+      address,
       limit: 1,
-      assetAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      assetAddress: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
     })
     expect(txHistory.total).toEqual(1)
     expect(txHistory.txs[0].hash).toEqual('0x042f4c15f379ea9d15adf31df62024ae1738fafbef2267460a046295e2e28046')
@@ -482,7 +408,34 @@ describe('Transactions', () => {
     expect(txResult).toEqual('0xe389726c5d2bfd8b88f5842f1000635fc672992eb7aaa92d583b207ba51d9946')
   })
 
-  it('sends a normalTx with special parameters', async () => {
+  it('sends a vaultTx', async () => {
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+      vault,
+    })
+
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(
+      etherscanUrl,
+      kovanInfuraUrl,
+      kovanAlchemyUrl,
+      'eth_sendRawTransaction',
+      '0x6b2ab6fcec41fcd1c292daa0c78dfac6f1fea6cb44eef4b7f6dcfa87a1757083',
+    )
+
+    const txHash = await ethClient.transfer({
+      recipient: '0x0000000000000000000000000000000000000000',
+      amount: baseAmount(100, ETH_DECIMAL),
+      memo: 'memo',
+    })
+    expect(txHash).toEqual('0x6b2ab6fcec41fcd1c292daa0c78dfac6f1fea6cb44eef4b7f6dcfa87a1757083')
+  })
+
+  it('sends a erc20Tx', async () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
@@ -497,36 +450,15 @@ describe('Transactions', () => {
       kovanInfuraUrl,
       kovanAlchemyUrl,
       'eth_sendRawTransaction',
-      '0x3ee03f3d41acc7dffe5fa83fbaa65dab11803f6c5862cd20de58a9258ffb6043',
+      '0xcd0e007a6f81120d45478e3eef07c017ec104d4a2a5f1bff23cf0837ba3aab28',
     )
 
-    const txResult = await ethClient.normalTx({
-      recipient: ethClient.getAddress(),
+    const txHash = await ethClient.transfer({
+      recipient: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       amount: baseAmount(100, ETH_DECIMAL),
-      overrides: {
-        data: utils.toUtf8Bytes('memo'),
-      },
+      assetAddress: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
     })
-    expect(txResult.data).toEqual('0x6d656d6f')
-  })
-
-  it('checks vault and vaultTx', async () => {
-    const ethClient = new Client({ network: 'mainnet', phrase })
-
-    const vaultTx = ethClient.vaultTx(ethClient.getAddress(), baseAmount(parseEther('1').toString(), 18), 'SWAP')
-    expect(vaultTx).rejects.toThrowError()
-    ethClient.setVault(vault)
-    expect(ethClient.getVault()).toEqual(vault)
-  })
-})
-
-describe('ERC20', () => {
-  beforeEach(() => {
-    nock.disableNetConnect()
-  })
-
-  afterEach(() => {
-    nock.cleanAll()
+    expect(txHash).toEqual('0xcd0e007a6f81120d45478e3eef07c017ec104d4a2a5f1bff23cf0837ba3aab28')
   })
 
   it('gets gas estimate for a erc20 transfer', async () => {
@@ -537,35 +469,9 @@ describe('ERC20', () => {
     const gasEstimate = await ethClient.estimateGasERC20Tx({
       assetAddress: '0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8',
       recipient: '0x2fe25ca708fc485cf356b2f27399247d91c6edbd',
-      amount: 1,
+      amount: baseAmount(1, ETH_DECIMAL),
     })
 
     expect(gasEstimate.amount().toString()).toEqual(baseAmount(100000, 18).amount().toString())
-  })
-
-  it('sends erc20 with params', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
-
-    const mockerc20 = jest.spyOn(ethClient, 'erc20Tx')
-    mockerc20.mockImplementation(async (_): Promise<TransactionResponse> => Promise.resolve(txResponse))
-
-    const txR = await ethClient.erc20Tx({
-      assetAddress: '0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8',
-      recipient: '0x2fe25ca708fc485cf356b2f27399247d91c6edbd',
-      amount: 1,
-      overrides: {
-        gasLimit: 100000,
-      },
-    })
-
-    expect(txR).toEqual(txResponse)
-    expect(mockerc20).toHaveBeenCalledWith({
-      assetAddress: '0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8',
-      recipient: '0x2fe25ca708fc485cf356b2f27399247d91c6edbd',
-      amount: 1,
-      overrides: {
-        gasLimit: 100000,
-      },
-    })
   })
 })
