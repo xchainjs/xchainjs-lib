@@ -1,4 +1,8 @@
-# v.x.x.x (2020-XX-XX)
+# v.0.2.1 (2021-01-08)
+
+### Fix
+
+- `assetToBase` ignores `decimal` #174
 
 ### Update
 
