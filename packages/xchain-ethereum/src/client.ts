@@ -49,6 +49,7 @@ import {
   DEFAULT_GASLIMIT,
   getTokenAddress,
   validateAddress,
+  validateSymbol,
 } from './utils'
 import { getGasOracle } from './etherscan-api'
 
@@ -343,12 +344,16 @@ export default class Client implements XChainClient, EthereumClient {
       if (account.tokens) {
         account.tokens.forEach((token) => {
           const decimals = parseInt(token.tokenInfo.decimals)
-          const tokenAsset = assetFromString(`${ETHChain}.${token.tokenInfo.symbol}-${token.tokenInfo.address}`)
-          if (tokenAsset && getTokenAddress(tokenAsset)) {
-            balances.push({
-              asset: tokenAsset,
-              amount: baseAmount(token.balance, decimals),
-            })
+          const symbol = token.tokenInfo.symbol
+          const tokenAddress = token.tokenInfo.address
+          if (validateSymbol(symbol) && this.validateAddress(tokenAddress)) {
+            const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${tokenAddress}`)
+            if (tokenAsset && getTokenAddress(tokenAsset)) {
+              balances.push({
+                asset: tokenAsset,
+                amount: baseAmount(token.balance, decimals),
+              })
+            }
           }
         })
       }

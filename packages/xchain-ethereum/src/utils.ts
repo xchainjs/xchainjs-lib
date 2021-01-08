@@ -63,12 +63,25 @@ export const validateAddress = (address: Address): boolean => {
  * @param {Asset} asset
  * @returns {string|null} The token address.
  */
-export const getTokenAddress = (asset: Asset): string | null => {
-  const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
-  if (!validateAddress(assetAddress)) {
-    return null
+export const getTokenAddress = (asset: Asset | null): string | null => {
+  if (asset) {
+    const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
+    if (validateAddress(assetAddress)) {
+      return assetAddress
+    }
   }
-  return assetAddress
+
+  return null
+}
+
+/**
+ * Check if the symbol is valid.
+ *
+ * @param {string | undefined} symbol
+ * @returns {boolean} `true` or `false`.
+ */
+export const validateSymbol = (symbol?: string | null): boolean => {
+  return !!symbol && symbol.length >= 3
 }
 
 /**
@@ -79,30 +92,33 @@ export const getTokenAddress = (asset: Asset): string | null => {
  */
 export const getTxFromOperation = (operation: TransactionOperation): Tx | null => {
   const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
-  const asset = assetFromString(`${ETHChain}.${operation.tokenInfo.symbol}-${operation.tokenInfo.address}`)
-
-  if (!asset || !getTokenAddress(asset)) {
-    return null
+  const symbol = operation.tokenInfo.symbol
+  const tokenAddress = operation.tokenInfo.address
+  if (validateSymbol(symbol) && validateAddress(tokenAddress)) {
+    const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${tokenAddress}`)
+    if (tokenAsset && getTokenAddress(tokenAsset)) {
+      return {
+        asset: tokenAsset,
+        from: [
+          {
+            from: operation.from,
+            amount: baseAmount(operation.value, decimals),
+          },
+        ],
+        to: [
+          {
+            to: operation.to,
+            amount: baseAmount(operation.value, decimals),
+          },
+        ],
+        date: new Date(operation.timestamp * 1000),
+        type: operation.type === 'transfer' ? 'transfer' : 'unknown',
+        hash: operation.transactionHash,
+      }
+    }
   }
 
-  return {
-    asset,
-    from: [
-      {
-        from: operation.from,
-        amount: baseAmount(operation.value, decimals),
-      },
-    ],
-    to: [
-      {
-        to: operation.to,
-        amount: baseAmount(operation.value, decimals),
-      },
-    ],
-    date: new Date(operation.timestamp * 1000),
-    type: operation.type === 'transfer' ? 'transfer' : 'unknown',
-    hash: operation.transactionHash,
-  }
+  return null
 }
 
 /**
