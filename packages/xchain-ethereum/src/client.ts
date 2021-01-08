@@ -25,6 +25,7 @@ import {
   Fees,
   TxHistoryParams,
   Balances,
+  Txs,
 } from '@xchainjs/xchain-client'
 import {
   AssetETH,
@@ -45,6 +46,8 @@ import {
   getTxFromOperation,
   getTxFromEthTransaction,
   DEFAULT_GASLIMIT,
+  getTokenAddress,
+  validateAddress,
 } from './utils'
 import { getGasOracle } from './etherscan-api'
 
@@ -316,12 +319,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {boolean} `true` or `false`
    */
   validateAddress = (address: Address): boolean => {
-    try {
-      ethers.utils.getAddress(address)
-      return true
-    } catch (error) {
-      return false
-    }
+    return validateAddress(address)
   }
 
   /**
@@ -345,7 +343,7 @@ export default class Client implements XChainClient, EthereumClient {
         account.tokens.forEach((token) => {
           const decimals = parseInt(token.tokenInfo.decimals)
           const tokenAsset = assetFromString(`${AssetETH.chain}.${token.tokenInfo.symbol}-${token.tokenInfo.address}`)
-          if (tokenAsset) {
+          if (tokenAsset && getTokenAddress(tokenAsset)) {
             balances.push({
               asset: tokenAsset,
               amount: baseAmount(token.balance, decimals),
@@ -392,7 +390,10 @@ export default class Client implements XChainClient, EthereumClient {
         )
         return {
           total: tokenTransactions.length,
-          txs: tokenTransactions.map(getTxFromOperation),
+          txs: tokenTransactions.reduce((acc, cur) => {
+            const tx = getTxFromOperation(cur)
+            return tx ? [...acc, tx] : acc
+          }, [] as Txs),
         }
       } else {
         const ethTransactions = await ethplorerAPI.getAddressTransactions(
@@ -418,13 +419,21 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
+   *
+   * @throws {"Need to provide valid txId"}
+   * Thrown if the given txId is invalid.
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
       const txInfo = await ethplorerAPI.getTxInfo(this.ethplorerUrl, txId, this.ethplorerApiKey)
 
       if (txInfo.operations && txInfo.operations.length > 0) {
-        return getTxFromOperation(txInfo.operations[0])
+        const tx = getTxFromOperation(txInfo.operations[0])
+        if (!tx) {
+          throw new Error('Need to provide valid txId')
+        }
+
+        return tx
       } else {
         return getTxFromEthTransaction(txInfo)
       }
@@ -461,10 +470,7 @@ export default class Client implements XChainClient, EthereumClient {
 
       let assetAddress
       if (asset && assetToString(asset) !== assetToString(AssetETH)) {
-        assetAddress = asset.symbol.slice(asset.ticker.length + 1)
-        if (!this.validateAddress(assetAddress)) {
-          return Promise.reject(new Error('Invalid asset address'))
-        }
+        assetAddress = getTokenAddress(asset)
       }
 
       let result

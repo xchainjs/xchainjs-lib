@@ -1,6 +1,7 @@
 import { Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
-import { baseAmount, AssetETH, assetFromString, assetAmount, assetToBase, ETHChain } from '@xchainjs/xchain-util'
-import { Network as EthNetwork, TransactionOperation, TransactionInfo } from './types'
+import { baseAmount, AssetETH, assetFromString, assetAmount, assetToBase, ETHChain, Asset } from '@xchainjs/xchain-util'
+import { Network as EthNetwork, TransactionOperation, TransactionInfo, Address } from './types'
+import { ethers } from 'ethers'
 
 export const ETH_DECIMAL = 18
 export const DEFAULT_GASLIMIT = 63000
@@ -41,12 +42,52 @@ export const ethNetworkToXchains = (network: EthNetwork): XChainNetwork => {
   }
 }
 
-export const getTxFromOperation = (operation: TransactionOperation): Tx => {
+/**
+ * Validate the given address.
+ *
+ * @param {Address} address
+ * @returns {boolean} `true` or `false`
+ */
+export const validateAddress = (address: Address): boolean => {
+  try {
+    ethers.utils.getAddress(address)
+    return true
+  } catch (error) {
+    return false
+  }
+}
+
+/**
+ * Get token address from asset.
+ *
+ * @param {Asset} asset
+ * @returns {string|null} The token address.
+ */
+export const getTokenAddress = (asset: Asset): string | null => {
+  const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
+  if (!validateAddress(assetAddress)) {
+    return null
+  }
+  return assetAddress
+}
+
+/**
+ * Get transactions from operation
+ *
+ * @param {TransactionOperation} operation
+ * @returns {Tx|null} The parsed transaction.
+ */
+export const getTxFromOperation = (operation: TransactionOperation): Tx | null => {
   const symbol = operation.tokenInfo.symbol
-  const decimals = parseInt(operation.tokenInfo.decimals)
+  const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
+  const asset = assetFromString(`${ETHChain}.${symbol}-${operation.tokenInfo.address}`)
+
+  if (!asset || !getTokenAddress(asset)) {
+    return null
+  }
 
   return {
-    asset: assetFromString(`${ETHChain}.${symbol}-${operation.tokenInfo.address}`) || AssetETH,
+    asset,
     from: [
       {
         from: operation.from,
@@ -64,6 +105,13 @@ export const getTxFromOperation = (operation: TransactionOperation): Tx => {
     hash: operation.transactionHash,
   }
 }
+
+/**
+ * Get transactions from ETH transaction
+ *
+ * @param {TransactionInfo} txInfo
+ * @returns {Tx} The parsed transaction.
+ */
 export const getTxFromEthTransaction = (txInfo: TransactionInfo): Tx => {
   return {
     asset: AssetETH,
