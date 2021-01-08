@@ -78,9 +78,8 @@ export const getTokenAddress = (asset: Asset): string | null => {
  * @returns {Tx|null} The parsed transaction.
  */
 export const getTxFromOperation = (operation: TransactionOperation): Tx | null => {
-  const symbol = operation.tokenInfo.symbol
   const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
-  const asset = assetFromString(`${ETHChain}.${symbol}-${operation.tokenInfo.address}`)
+  const asset = assetFromString(`${ETHChain}.${operation.tokenInfo.symbol}-${operation.tokenInfo.address}`)
 
   if (!asset || !getTokenAddress(asset)) {
     return null

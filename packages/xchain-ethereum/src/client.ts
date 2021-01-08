@@ -36,6 +36,7 @@ import {
   assetAmount,
   assetToBase,
   assetToString,
+  ETHChain,
 } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as ethplorerAPI from './ethplorer-api'
@@ -342,7 +343,7 @@ export default class Client implements XChainClient, EthereumClient {
       if (account.tokens) {
         account.tokens.forEach((token) => {
           const decimals = parseInt(token.tokenInfo.decimals)
-          const tokenAsset = assetFromString(`${AssetETH.chain}.${token.tokenInfo.symbol}-${token.tokenInfo.address}`)
+          const tokenAsset = assetFromString(`${ETHChain}.${token.tokenInfo.symbol}-${token.tokenInfo.address}`)
           if (tokenAsset && getTokenAddress(tokenAsset)) {
             balances.push({
               asset: tokenAsset,
