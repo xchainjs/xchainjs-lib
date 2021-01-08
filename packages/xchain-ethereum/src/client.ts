@@ -26,11 +26,24 @@ import {
   Fees,
   TxHistoryParams,
 } from '@xchainjs/xchain-client'
-import { AssetETH, baseAmount, baseToAsset, BaseAmount, assetFromString } from '@xchainjs/xchain-util'
+import {
+  AssetETH,
+  baseAmount,
+  baseToAsset,
+  BaseAmount,
+  assetFromString,
+  assetAmount,
+  assetToBase,
+} from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
-import * as blockChair from './blockchair-api'
 import * as ethplorerAPI from './ethplorer-api'
-import { ethNetworkToXchains, xchainNetworkToEths, ETH_DECIMAL } from './utils'
+import {
+  ethNetworkToXchains,
+  xchainNetworkToEths,
+  ETH_DECIMAL,
+  getTxFromOperation,
+  getTxFromEthTransaction,
+} from './utils'
 import { getGasOracle } from './etherscan-api'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
@@ -50,8 +63,6 @@ export interface EthereumClient {
 }
 
 type ClientParams = XChainClientParams & {
-  blockchairUrl?: string
-  blockchairNodeApiKey?: string
   ethplorerUrl?: string
   ethplorerApiKey?: string
   etherscanApiKey?: string
@@ -68,8 +79,6 @@ export default class Client implements XChainClient, EthereumClient {
   private wallet: ethers.Wallet | null = null
   private provider: Provider
   private etherscan: EtherscanProvider
-  private blockchairNodeUrl = ''
-  private blockchairNodeApiKey = ''
   private ethplorerUrl = ''
   private ethplorerApiKey = ''
 
@@ -79,8 +88,6 @@ export default class Client implements XChainClient, EthereumClient {
    */
   constructor({
     network = 'testnet',
-    blockchairUrl = '',
-    blockchairNodeApiKey = '',
     ethplorerUrl = '',
     ethplorerApiKey = '',
     phrase,
@@ -89,9 +96,7 @@ export default class Client implements XChainClient, EthereumClient {
   }: ClientParams) {
     this.network = xchainNetworkToEths(network)
     this.provider = getDefaultProvider(this.network)
-    this.etherscan = new EtherscanProvider(this.network, etherscanApiKey) // for tx history
-    this.setBlockchairNodeURL(blockchairUrl)
-    this.setBlockchairNodeAPIKey(blockchairNodeApiKey)
+    this.etherscan = new EtherscanProvider(this.network, etherscanApiKey)
     this.setEthplorerURL(ethplorerUrl)
     this.setEthplorerAPIKey(ethplorerApiKey)
 
@@ -117,29 +122,9 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
-   * Set/Update the blockchair url.
+   * Set/Update the ethplorer url.
    *
-   * @param {string} url The new blockchair url.
-   * @returns {void}
-   */
-  setBlockchairNodeURL = (url: string): void => {
-    this.blockchairNodeUrl = url
-  }
-
-  /**
-   * Set/Update the blockchair api key.
-   *
-   * @param {string} key The new blockchair api key.
-   * @returns {void}
-   */
-  setBlockchairNodeAPIKey = (key: string): void => {
-    this.blockchairNodeApiKey = key
-  }
-
-  /**
-   * Set/Update the blockchair url.
-   *
-   * @param {string} url The new blockchair url.
+   * @param {string} url The new ethplorer url.
    * @returns {void}
    */
   setEthplorerURL = (url: string): void => {
@@ -147,9 +132,9 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
-   * Set/Update the blockchair api key.
+   * Set/Update the ethplorer api key.
    *
-   * @param {string} key The new blockchair api key.
+   * @param {string} key The new ethplorer api key.
    * @returns {void}
    */
   setEthplorerAPIKey = (key: string): void => {
@@ -350,7 +335,7 @@ export default class Client implements XChainClient, EthereumClient {
       const balances: ETHBalance[] = [
         {
           asset: AssetETH,
-          amount: baseAmount(account.ETH.balance, ETH_DECIMAL),
+          amount: assetToBase(assetAmount(account.ETH.balance, ETH_DECIMAL)),
         },
       ]
 
@@ -375,31 +360,39 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
    */
-  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
+  getTransactions = async (params?: TxHistoryParams & { assetAddress?: Address }): Promise<TxsPage> => {
     try {
       const address = params?.address || this.getAddress()
       const limit = params?.limit || 10
-      const offset = params?.offset || 0
+      const startTime = params?.startTime
+      const assetAddress = params?.assetAddress
 
-      const dAddr = await blockChair.getAddress(this.blockchairNodeUrl, address, this.blockchairNodeApiKey)
-      const totalCount = dAddr[address].calls.length
+      if (assetAddress) {
+        const tokenTransactions = await ethplorerAPI.getAddressHistory(
+          this.ethplorerUrl,
+          address,
+          assetAddress,
+          limit,
+          startTime && startTime.getTime() / 1000,
+          this.ethplorerApiKey,
+        )
+        return {
+          total: tokenTransactions.length,
+          txs: tokenTransactions.map(getTxFromOperation),
+        }
+      } else {
+        const ethTransactions = await ethplorerAPI.getAddressTransactions(
+          this.ethplorerUrl,
+          address,
+          limit,
+          startTime && startTime.getTime() / 1000,
+          this.ethplorerApiKey,
+        )
 
-      const dashboardAddress = await blockChair.getAddress(
-        this.blockchairNodeUrl,
-        address,
-        this.blockchairNodeApiKey,
-        limit,
-        offset,
-      )
-
-      const transactions: Tx[] = []
-      for (const call of dashboardAddress[address].calls) {
-        transactions.push(await this.getTransactionData(call.transaction_hash))
-      }
-
-      return {
-        total: totalCount,
-        txs: transactions,
+        return {
+          total: ethTransactions.length,
+          txs: ethTransactions.map(getTxFromEthTransaction),
+        }
       }
     } catch (error) {
       return Promise.reject(error)
@@ -417,47 +410,9 @@ export default class Client implements XChainClient, EthereumClient {
       const txInfo = await ethplorerAPI.getTxInfo(this.ethplorerUrl, txId, this.ethplorerApiKey)
 
       if (txInfo.operations && txInfo.operations.length > 0) {
-        const operation = txInfo.operations[0]
-        const symbol = operation.tokenInfo.symbol
-        const decimals = parseInt(operation.tokenInfo.decimals)
-
-        return {
-          asset: assetFromString(`${AssetETH.chain}.${symbol}`) || AssetETH,
-          from: [
-            {
-              from: operation.from,
-              amount: baseAmount(operation.value, decimals),
-            },
-          ],
-          to: [
-            {
-              to: operation.to,
-              amount: baseAmount(operation.value, decimals),
-            },
-          ],
-          date: new Date(operation.timestamp * 1000),
-          type: operation.type === 'transfer' ? 'transfer' : 'unknown',
-          hash: operation.transactionHash,
-        }
+        return getTxFromOperation(txInfo.operations[0])
       } else {
-        return {
-          asset: AssetETH,
-          from: [
-            {
-              from: txInfo.from,
-              amount: baseAmount(txInfo.value, ETH_DECIMAL),
-            },
-          ],
-          to: [
-            {
-              to: txInfo.to,
-              amount: baseAmount(txInfo.value, ETH_DECIMAL),
-            },
-          ],
-          date: new Date(txInfo.timestamp * 1000),
-          type: 'transfer',
-          hash: txInfo.hash,
-        }
+        return getTxFromEthTransaction(txInfo)
       }
     } catch (error) {
       return Promise.reject(error)

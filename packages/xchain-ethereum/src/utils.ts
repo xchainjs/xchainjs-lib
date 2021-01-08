@@ -1,6 +1,6 @@
-import { Fees, Network as XChainNetwork } from '@xchainjs/xchain-client'
-import { baseAmount } from '@xchainjs/xchain-util'
-import { Network as EthNetwork } from './types'
+import { Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
+import { baseAmount, AssetETH, assetFromString, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Network as EthNetwork, TransactionOperation, TransactionInfo } from './types'
 
 export const ETH_DECIMAL = 18
 
@@ -37,6 +37,50 @@ export const ethNetworkToXchains = (network: EthNetwork): XChainNetwork => {
       return 'mainnet'
     case EthNetwork.TEST:
       return 'testnet'
+  }
+}
+
+export const getTxFromOperation = (operation: TransactionOperation): Tx => {
+  const symbol = operation.tokenInfo.symbol
+  const decimals = parseInt(operation.tokenInfo.decimals)
+
+  return {
+    asset: assetFromString(`${AssetETH.chain}.${symbol}`) || AssetETH,
+    from: [
+      {
+        from: operation.from,
+        amount: baseAmount(operation.value, decimals),
+      },
+    ],
+    to: [
+      {
+        to: operation.to,
+        amount: baseAmount(operation.value, decimals),
+      },
+    ],
+    date: new Date(operation.timestamp * 1000),
+    type: operation.type === 'transfer' ? 'transfer' : 'unknown',
+    hash: operation.transactionHash,
+  }
+}
+export const getTxFromEthTransaction = (txInfo: TransactionInfo): Tx => {
+  return {
+    asset: AssetETH,
+    from: [
+      {
+        from: txInfo.from,
+        amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
+      },
+    ],
+    to: [
+      {
+        to: txInfo.to,
+        amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
+      },
+    ],
+    date: new Date(txInfo.timestamp * 1000),
+    type: 'transfer',
+    hash: txInfo.hash,
   }
 }
 

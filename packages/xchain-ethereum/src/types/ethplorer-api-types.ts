@@ -1,3 +1,18 @@
+export interface PriceInfo {
+  rate: number
+  diff: number
+  diff7d?: number
+  ts: number
+  marketCapUsd?: number
+  availableSupply?: number
+  volume24h?: number
+  diff30d?: number
+  volDiff1?: number
+  volDiff7?: number
+  volDiff30?: number
+  currency?: string
+}
+
 export interface TokenInfo {
   address: string
   decimals: string
@@ -11,17 +26,14 @@ export interface TokenInfo {
   image?: string
   description?: string
   website?: string
+  twitter?: string
+  facebook?: string
+  coingecko?: string
   ethTransfersCount: number
-  price:
-    | boolean
-    | {
-        rate: number
-        diff: number
-        ts: number
-        onlyPrice: number
-        currency: string
-      }
+  price: boolean | PriceInfo
   publicTags?: string[]
+  txsCount?: number
+  transfersCount?: number
 }
 
 export interface TokenBalance {
@@ -37,19 +49,7 @@ export interface AddressInfo {
     balance: number
     totalIn?: number
     totalOut?: number
-    price: {
-      rate: number
-      diff: number
-      diff7d: number
-      ts: number
-      marketCapUsd: number
-      availableSupply: number
-      volume24h: number
-      diff30d: number
-      volDiff1: number
-      volDiff7: number
-      volDiff30: number
-    }
+    price: PriceInfo
   }
   contractInfo?: {
     creatorAddress: string
@@ -67,17 +67,17 @@ export interface TransactionEventLog {
   data: string
 }
 
-export interface TransactionOperations {
+export interface TransactionOperation {
   timestamp: number
   transactionHash: string
   value: string
-  intValue: number
+  intValue?: number
   type: string
-  priority: number
+  priority?: number
   from: string
   to: string
-  addresses: string[]
-  isEth: boolean
+  addresses?: string[]
+  isEth?: boolean
   usdPrice?: number
   tokenInfo: TokenInfo
 }
@@ -85,16 +85,16 @@ export interface TransactionOperations {
 export interface TransactionInfo {
   hash: string
   timestamp: number
-  blockNumber: number
-  confirmations: number
+  blockNumber?: number
+  confirmations?: number
   success: boolean
   from: string
   to: string
   value: number
-  input: string
-  gasLimit: number
-  gasUsed: number
+  input?: string
+  gasLimit?: number
+  gasUsed?: number
   creates?: string
-  logs: TransactionEventLog[]
-  operations?: TransactionOperations[]
+  logs?: TransactionEventLog[]
+  operations?: TransactionOperation[]
 }

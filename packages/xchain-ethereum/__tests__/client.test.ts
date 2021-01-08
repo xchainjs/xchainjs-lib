@@ -5,9 +5,13 @@ import { TransactionResponse, TransactionReceipt } from '@ethersproject/abstract
 import { baseAmount, AssetETH, BaseAmount, assetToString } from '@xchainjs/xchain-util'
 import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
-import { mockDashboardAddress } from '../__mocks__/blockchair-api'
 import { mock_all_api } from '../__mocks__'
-import { mock_ethplorer_api_getAddress, mock_ethplorer_api_getTxInfo } from '../__mocks__/ethplorer-api'
+import {
+  mock_ethplorer_api_getAddress,
+  mock_ethplorer_api_getTxInfo,
+  mock_ethplorer_api_getAddressTransactions,
+  mock_ethplorer_api_getAddressHistory,
+} from '../__mocks__/ethplorer-api'
 
 /**
  * Test Data
@@ -17,7 +21,6 @@ const phrase = 'canyon throw labor waste awful century ugly they found post sour
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
 const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
 const vault = '0x8c2A90D36Ec9F745C9B28B588Cba5e2A978A1656'
-const blockchairUrl = 'https://api.blockchair.com/ethereum/testnet'
 const ethplorerUrl = 'https://api.ethplorer.io'
 const etherscanUrl = 'https://api-kovan.etherscan.io'
 const kovanInfuraUrl = 'https://kovan.infura.io/v3'
@@ -213,7 +216,7 @@ describe('Balances', () => {
     const balance = await ethClient.getBalance()
     expect(balance.length).toEqual(1)
     expect(balance[0].asset).toEqual(AssetETH)
-    expect(balance[0].amount.amount().isEqualTo(baseAmount(100, ETH_DECIMAL).amount())).toBeTruthy()
+    expect(balance[0].amount.amount().isEqualTo(baseAmount('100000000000000000000', ETH_DECIMAL).amount())).toBeTruthy()
   })
 
   it('gets a balance from address', async () => {
@@ -265,7 +268,7 @@ describe('Balances', () => {
     const balance = await ethClient.getBalance('0x12d4444f96c644385d8ab355f6ddf801315b6254')
     expect(balance.length).toEqual(2)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
-    expect(balance[0].amount.amount().isEqualTo(baseAmount(100, ETH_DECIMAL).amount())).toBeTruthy()
+    expect(balance[0].amount.amount().isEqualTo(baseAmount('100000000000000000000', ETH_DECIMAL).amount())).toBeTruthy()
     expect(balance[1].asset.symbol).toEqual('TOMATOS')
     expect(balance[1].amount.amount().isEqualTo(baseAmount(1000, 18).amount())).toBeTruthy()
   })
@@ -287,161 +290,107 @@ describe('Transactions', () => {
     nock.cleanAll()
   })
 
-  it('get transaction history', async () => {
+  it('get eth transaction history', async () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      blockchairUrl,
       ethplorerUrl,
     })
 
-    mockDashboardAddress(blockchairUrl, '0xdac17f958d2ee523a2206206994597c13d831ec7', {
-      '0xdac17f958d2ee523a2206206994597c13d831ec7': {
-        address: {
-          type: 'account',
-          contract_code_hex: null,
-          contract_created: null,
-          contract_destroyed: null,
-          balance: '10000',
-          balance_usd: 0,
-          received_approximate: '4358301000000000000',
-          received_usd: 0,
-          spent_approximate: '0',
-          spent_usd: 0,
-          fees_approximate: '0',
-          fees_usd: 0,
-          receiving_call_count: 38,
-          spending_call_count: 0,
-          call_count: 38,
-          transaction_count: 38,
-          first_seen_receiving: '2020-04-21 07:52:18',
-          last_seen_receiving: '2020-12-08 04:49:56',
-          first_seen_spending: null,
-          last_seen_spending: null,
-          nonce: null,
-        },
-        calls: [
-          {
-            block_id: 3888697,
-            transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-            index: '0',
-            time: '2020-12-08 04:49:56',
-            sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
-            recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-            value: 0,
-            value_usd: null,
-            transferred: true,
-          },
-          {
-            block_id: 3888697,
-            transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-            index: '0',
-            time: '2020-12-08 04:49:56',
-            sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
-            recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-            value: 0,
-            value_usd: null,
-            transferred: true,
-          },
-        ],
+    mock_ethplorer_api_getAddressTransactions(ethplorerUrl, '0xff71cb760666ab06aa73f34995b42dd4b85ea07b', [
+      {
+        timestamp: 1603667072,
+        from: '0xd3330a2f2fb4075335b9f2a682a5a550ffdadd6a',
+        to: '0xff71cb760666ab06aa73f34995b42dd4b85ea07b',
+        hash: '0x22e1e4f7395fed6f0e86d1f36ad65c884d0680c3a7b4d003ea7f21d8d7995a4a',
+        value: 0.0102004945,
+        input: '0x',
+        success: true,
       },
-    })
-
-    mockDashboardAddress(blockchairUrl, '0xdac17f958d2ee523a2206206994597c13d831ec7', {
-      '0xdac17f958d2ee523a2206206994597c13d831ec7': {
-        address: {
-          type: 'account',
-          contract_code_hex: null,
-          contract_created: null,
-          contract_destroyed: null,
-          balance: '10000',
-          balance_usd: 0,
-          received_approximate: '4358301000000000000',
-          received_usd: 0,
-          spent_approximate: '0',
-          spent_usd: 0,
-          fees_approximate: '0',
-          fees_usd: 0,
-          receiving_call_count: 38,
-          spending_call_count: 0,
-          call_count: 38,
-          transaction_count: 38,
-          first_seen_receiving: '2020-04-21 07:52:18',
-          last_seen_receiving: '2020-12-08 04:49:56',
-          first_seen_spending: null,
-          last_seen_spending: null,
-          nonce: null,
-        },
-        calls: [
-          {
-            block_id: 3888697,
-            transaction_hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-            index: '0',
-            time: '2020-12-08 04:49:56',
-            sender: '0x4a89644d5dffb825a42a3496e24510424ca01516',
-            recipient: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-            value: 1000,
-            value_usd: null,
-            transferred: true,
-          },
-        ],
-      },
-    })
-
-    mock_ethplorer_api_getTxInfo(ethplorerUrl, '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2', {
-      hash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-      timestamp: 1604254250,
-      blockNumber: 11172738,
-      confirmations: 433964,
-      success: true,
-      from: '0xbabeae03735f9ed247f73978fe912028c9b5e828',
-      to: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
-      value: 0,
-      input:
-        '0xa9059cbb000000000000000000000000e40ec68d7dccb6a7314d0faf6d33a4d72483cd770000000000000000000000000000000000000000000000000000048c27395000',
-      gasLimit: 80952,
-      gasUsed: 53968,
-      logs: [],
-      operations: [
-        {
-          timestamp: 1604254250,
-          transactionHash: '0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2',
-          value: '1000',
-          intValue: 1000,
-          type: 'transfer',
-          isEth: false,
-          priority: 203,
-          from: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-          to: '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77',
-          addresses: ['0xdac17f958d2ee523a2206206994597c13d831ec7', '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77'],
-          tokenInfo: {
-            address: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
-            decimals: '6',
-            name: 'MEMEI',
-            symbol: 'MEI',
-            totalSupply: '74075000000000',
-            lastUpdated: 1609732766,
-            owner: '0x',
-            issuancesCount: 0,
-            holdersCount: 1557,
-            ethTransfersCount: 0,
-            price: false,
-          },
-        },
-      ],
-    })
+    ])
 
     const txHistory = await ethClient.getTransactions({
-      address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      address: '0xff71cb760666ab06aa73f34995b42dd4b85ea07b',
       limit: 1,
     })
-    expect(txHistory.total).toEqual(2)
-    expect(txHistory.txs[0].hash).toEqual('0x0816e0f18643b8a53b52091321954733bc173542f01424f4ca86cbf1d2e567b2')
-    expect(txHistory.txs[0].asset.symbol).toEqual('MEI')
-    expect(txHistory.txs[0].from[0].from).toEqual('0xdac17f958d2ee523a2206206994597c13d831ec7')
-    expect(txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount(1000, 6).amount())).toBeTruthy()
-    expect(txHistory.txs[0].to[0].to).toEqual('0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77')
-    expect(txHistory.txs[0].to[0].amount.amount().isEqualTo(baseAmount(1000, 6).amount())).toBeTruthy()
+    expect(txHistory.total).toEqual(1)
+    expect(txHistory.txs[0].hash).toEqual('0x22e1e4f7395fed6f0e86d1f36ad65c884d0680c3a7b4d003ea7f21d8d7995a4a')
+    expect(assetToString(txHistory.txs[0].asset)).toEqual(assetToString(AssetETH))
+    expect(txHistory.txs[0].from[0].from).toEqual('0xd3330a2f2fb4075335b9f2a682a5a550ffdadd6a')
+    expect(
+      txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount('10200494500000000', ETH_DECIMAL).amount()),
+    ).toBeTruthy()
+    expect(txHistory.txs[0].to[0].to).toEqual('0xff71cb760666ab06aa73f34995b42dd4b85ea07b')
+    expect(
+      txHistory.txs[0].to[0].amount.amount().isEqualTo(baseAmount('10200494500000000', ETH_DECIMAL).amount()),
+    ).toBeTruthy()
+    expect(txHistory.txs[0].type).toEqual('transfer')
+  })
+
+  it('get token transaction history', async () => {
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+      ethplorerUrl,
+    })
+
+    mock_ethplorer_api_getAddressHistory(ethplorerUrl, '0xff71cb760666ab06aa73f34995b42dd4b85ea07b', [
+      {
+        timestamp: 1610014043,
+        transactionHash: '0x042f4c15f379ea9d15adf31df62024ae1738fafbef2267460a046295e2e28046',
+        tokenInfo: {
+          address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+          name: 'Tether USD',
+          decimals: '6',
+          symbol: 'USDT',
+          totalSupply: '14040316718197079',
+          owner: '0xc6cde7c39eb2f0f0095f41570af89efc2c1ea828',
+          txsCount: 78093026,
+          transfersCount: 82658394,
+          lastUpdated: 1610070598,
+          issuancesCount: 0,
+          holdersCount: 2324375,
+          website: 'https://tether.to/',
+          twitter: 'Tether_to',
+          image: '/images/tether.png',
+          facebook: 'tether.to',
+          coingecko: 'tether',
+          ethTransfersCount: 0,
+          price: {
+            rate: 1.00018102460765,
+            diff: -0.16,
+            diff7d: -0.08,
+            ts: 1610070308,
+            marketCapUsd: 23460968852.67532,
+            availableSupply: 23456722608.66833,
+            volume24h: 129342312569.62343,
+            diff30d: -0.004226854901574484,
+            volDiff1: 10.400245909757658,
+            volDiff7: 65.49381861802408,
+            volDiff30: 31.788420372084232,
+            currency: 'USD',
+          },
+          publicTags: ['Stablecoins'],
+        },
+        type: 'transfer',
+        value: '103000000',
+        from: '0xf743cce2be90dd1d1ea13860a238fa4713d552ab',
+        to: '0xe242271f229e4a7e3f3d555d5b0f86a412f24123',
+      },
+    ])
+
+    const txHistory = await ethClient.getTransactions({
+      address: '0xff71cb760666ab06aa73f34995b42dd4b85ea07b',
+      limit: 1,
+      assetAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+    })
+    expect(txHistory.total).toEqual(1)
+    expect(txHistory.txs[0].hash).toEqual('0x042f4c15f379ea9d15adf31df62024ae1738fafbef2267460a046295e2e28046')
+    expect(txHistory.txs[0].asset.symbol).toEqual('USDT')
+    expect(txHistory.txs[0].from[0].from).toEqual('0xf743cce2be90dd1d1ea13860a238fa4713d552ab')
+    expect(txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount('103000000', 6).amount())).toBeTruthy()
+    expect(txHistory.txs[0].to[0].to).toEqual('0xe242271f229e4a7e3f3d555d5b0f86a412f24123')
+    expect(txHistory.txs[0].to[0].amount.amount().isEqualTo(baseAmount('103000000', 6).amount())).toBeTruthy()
     expect(txHistory.txs[0].type).toEqual('transfer')
   })
 
@@ -512,7 +461,6 @@ describe('Transactions', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      blockchairUrl,
     })
 
     mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
@@ -538,7 +486,6 @@ describe('Transactions', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      blockchairUrl,
     })
 
     mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
