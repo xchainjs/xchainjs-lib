@@ -77,7 +77,7 @@ export const getTokenAddress = (asset: Asset | null): string | null => {
 /**
  * Check if the symbol is valid.
  *
- * @param {string | undefined} symbol
+ * @param {string|null|undefined} symbol
  * @returns {boolean} `true` or `false`.
  */
 export const validateSymbol = (symbol?: string | null): boolean => {
