@@ -72,7 +72,7 @@ export const assetToBase = (asset: AssetAmount): BaseAmount => {
     .amount()
     .multipliedBy(10 ** asset.decimal)
     .integerValue()
-  return baseAmount(value)
+  return baseAmount(value, asset.decimal)
 }
 
 /**

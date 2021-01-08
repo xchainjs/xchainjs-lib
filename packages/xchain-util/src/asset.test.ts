@@ -68,11 +68,13 @@ describe('asset', () => {
     it('should return base amounts by given asset amounts', () => {
       const amount = assetToBase(assetAmount(22))
       expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.decimal).toEqual(8)
       expect(amount.amount()).toEqual(bn('2200000000'))
     })
     it('should return base amounts by given asset amounts', () => {
       const amount = assetToBase(assetAmount(22, 18))
       expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.decimal).toEqual(18)
       expect(amount.amount()).toEqual(bn('22000000000000000000'))
     })
   })
