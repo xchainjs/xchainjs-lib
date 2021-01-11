@@ -344,11 +344,10 @@ export default class Client implements XChainClient, EthereumClient {
       if (account.tokens) {
         account.tokens.forEach((token) => {
           const decimals = parseInt(token.tokenInfo.decimals)
-          const symbol = token.tokenInfo.symbol
-          const tokenAddress = token.tokenInfo.address
+          const { symbol, address: tokenAddress } = token.tokenInfo
           if (validateSymbol(symbol) && this.validateAddress(tokenAddress)) {
             const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${tokenAddress}`)
-            if (tokenAsset && getTokenAddress(tokenAsset)) {
+            if (tokenAsset) {
               balances.push({
                 asset: tokenAsset,
                 amount: baseAmount(token.balance, decimals),

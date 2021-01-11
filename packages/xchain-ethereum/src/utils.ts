@@ -80,9 +80,7 @@ export const getTokenAddress = (asset: Asset | null): string | null => {
  * @param {string|null|undefined} symbol
  * @returns {boolean} `true` or `false`.
  */
-export const validateSymbol = (symbol?: string | null): boolean => {
-  return !!symbol && symbol.length >= 3
-}
+export const validateSymbol = (symbol?: string | null): boolean => (symbol ? symbol.length >= 3 : false)
 
 /**
  * Get transactions from operation
@@ -92,11 +90,10 @@ export const validateSymbol = (symbol?: string | null): boolean => {
  */
 export const getTxFromOperation = (operation: TransactionOperation): Tx | null => {
   const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
-  const symbol = operation.tokenInfo.symbol
-  const tokenAddress = operation.tokenInfo.address
-  if (validateSymbol(symbol) && validateAddress(tokenAddress)) {
-    const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${tokenAddress}`)
-    if (tokenAsset && getTokenAddress(tokenAsset)) {
+  const { symbol, address } = operation.tokenInfo
+  if (validateSymbol(symbol) && validateAddress(address)) {
+    const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${address}`)
+    if (tokenAsset) {
       return {
         asset: tokenAsset,
         from: [

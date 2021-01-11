@@ -9,7 +9,7 @@ describe('ethereum/util', () => {
     })
     it('should return null ', () => {
       const tokenAddress = getTokenAddress(assetFromString('ETH.ETH'))
-      expect(tokenAddress).toBeFalsy()
+      expect(tokenAddress).toBeNull()
     })
   })
 })
