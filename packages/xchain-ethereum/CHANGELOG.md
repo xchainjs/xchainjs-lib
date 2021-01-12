@@ -1,5 +1,9 @@
 # v.x.x.x
 
+### Update
+
+- Update `getBalance` to check api key
+
 # v.0.5.0 (2021-01-11)
 
 ### Update

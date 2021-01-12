@@ -332,6 +332,9 @@ export default class Client implements XChainClient, EthereumClient {
    */
   getBalance = async (address?: Address): Promise<Balances> => {
     try {
+      if (this.ethplorerApiKey === '') {
+        return Promise.reject(new Error('Missing API Key'))
+      }
       address = address || this.getAddress()
       const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
       const balances: Balances = [
