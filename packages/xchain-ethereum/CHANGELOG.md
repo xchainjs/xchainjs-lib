@@ -1,6 +1,6 @@
 # v.x.x.x
 
-### Update
+### Breaking change
 
 - Update to provide default values for `ethplorerUrl` and `explorerUrl`
 
