@@ -1,7 +1,10 @@
 # v.x.x.x
 
+# v.0.7.1 (2021-01-12)
+
 ### Update
 
+- Update `getBalance` to check api key #180
 - Update comments for documentation
 
 # v.0.7.0 (2020-12-28)

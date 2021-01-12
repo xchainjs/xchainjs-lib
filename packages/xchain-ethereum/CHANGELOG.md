@@ -1,5 +1,12 @@
 # v.x.x.x
 
+# v.0.5.1 (2021-01-12)
+
+### Update
+
+- Update `getBalance` to check api key #180
+- Update `estimateGasNormalTx`, `estimateGasERC20Tx` #177
+
 ### Breaking change
 
 - Update to provide default values for `ethplorerUrl` and `explorerUrl`

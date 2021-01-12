@@ -119,6 +119,9 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
 export const getBalance = async (address: string, nodeUrl: string, nodeApiKey: string): Promise<Balance[]> => {
   try {
     // const chain = this.net === 'testnet' ? 'bitcoin/testnet' : 'bitcoin'
+    if (!nodeApiKey) {
+      return Promise.reject(new Error('Missing API Key for Blockchair'))
+    }
     const dashboardAddress = await blockChair.getAddress(nodeUrl, address, nodeApiKey)
     return [
       {

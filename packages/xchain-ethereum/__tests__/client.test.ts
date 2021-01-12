@@ -122,6 +122,7 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
+      ethplorerApiKey: 'ethplorerApiKey',
     })
 
     mock_ethplorer_api_getAddress(ethClient.getEthplorerUrl(), ethClient.getAddress(), {
@@ -156,6 +157,7 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
+      ethplorerApiKey: 'ethplorerApiKey',
     })
 
     mock_ethplorer_api_getAddress(ethClient.getEthplorerUrl(), '0x12d4444f96c644385d8ab355f6ddf801315b6254', {
