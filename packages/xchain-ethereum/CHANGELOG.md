@@ -5,6 +5,7 @@
 ### Update
 
 - Update `getBalance` to check api key #180
+- Update `estimateGasNormalTx`, `estimateGasERC20Tx`
 
 ### Breaking change
 
