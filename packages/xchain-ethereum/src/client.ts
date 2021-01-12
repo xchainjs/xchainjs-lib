@@ -7,7 +7,6 @@ import erc20ABI from '../data/erc20.json'
 import { parseEther } from 'ethers/lib/utils'
 import {
   Erc20TxOpts,
-  EstimateGasERC20Opts,
   GasOracleResponse,
   Network as EthNetwork,
   NormalTxOpts,
@@ -69,8 +68,8 @@ export interface EthereumClient {
   normalTx(opts: NormalTxOpts): Promise<TransactionResponse>
   erc20Tx(opts: Erc20TxOpts): Promise<TransactionResponse>
 
-  estimateNormalTx(params: NormalTxOpts): Promise<BaseAmount>
-  estimateGasERC20Tx(params: EstimateGasERC20Opts): Promise<BaseAmount>
+  estimateGasNormalTx(params: NormalTxOpts): Promise<BaseAmount>
+  estimateGasERC20Tx(params: Erc20TxOpts): Promise<BaseAmount>
 }
 
 type ClientParams = XChainClientParams & {
@@ -665,10 +664,10 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {NormalTxOpts} params The ETH transaction options.
    * @returns {BaseAmount} The estimated gas fee.
    */
-  estimateNormalTx = async ({ recipient, amount, overrides }: NormalTxOpts): Promise<BaseAmount> => {
+  estimateGasNormalTx = async ({ recipient, amount, overrides }: NormalTxOpts): Promise<BaseAmount> => {
     try {
       const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
-      const transactionRequest = Object.assign({ to: recipient, value: txAmount, gas: '5208' }, overrides || {})
+      const transactionRequest = Object.assign({ to: recipient, value: txAmount }, overrides || {})
       const estimate = await this.getWallet().provider.estimateGas(transactionRequest)
 
       return baseAmount(estimate.toString(), ETH_DECIMAL)
@@ -680,7 +679,7 @@ export default class Client implements XChainClient, EthereumClient {
   /**
    * Estimate gas for erc20 token transfer.
    *
-   * @param {EstimateGasERC20Opts} params The erc20 transaction options.
+   * @param {Erc20TxOpts} params The erc20 transaction options.
    * @returns {BaseAmount} The estimated gas fee.
    *
    * @throws {"Invalid Address"}
@@ -688,7 +687,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Invalid Asset Address"}
    * Thrown if the given asset address is invalid.
    **/
-  estimateGasERC20Tx = async ({ assetAddress, recipient, amount }: EstimateGasERC20Opts): Promise<BaseAmount> => {
+  estimateGasERC20Tx = async ({ assetAddress, recipient, amount, overrides }: Erc20TxOpts): Promise<BaseAmount> => {
     try {
       const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
       if (recipient && !this.validateAddress(recipient)) {
@@ -699,7 +698,7 @@ export default class Client implements XChainClient, EthereumClient {
       }
       const contract = new ethers.Contract(assetAddress, erc20ABI, this.getWallet())
       const erc20 = contract.connect(this.getWallet())
-      const estimate = await erc20.estimateGas.transfer(recipient, txAmount)
+      const estimate = await erc20.estimateGas.transfer(recipient, txAmount, Object.assign({}, overrides || {}))
 
       return baseAmount(estimate.toString(), ETH_DECIMAL)
     } catch (error) {
