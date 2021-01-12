@@ -26,7 +26,7 @@ export class MsgNativeTx extends Msg {
 
 /**
  * This creates MsgNativeTx from json.
- * 
+ *
  * @param value
  * @returns {MsgNativeTx}
  */
