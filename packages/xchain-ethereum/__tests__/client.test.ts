@@ -124,6 +124,7 @@ describe('Client Test', () => {
       network: 'testnet',
       phrase,
       ethplorerUrl,
+      ethplorerApiKey: 'ethplorerApiKey',
     })
 
     mock_ethplorer_api_getAddress(ethplorerUrl, ethClient.getAddress(), {
@@ -159,6 +160,7 @@ describe('Client Test', () => {
       network: 'testnet',
       phrase,
       ethplorerUrl,
+      ethplorerApiKey: 'ethplorerApiKey',
     })
 
     mock_ethplorer_api_getAddress(ethplorerUrl, '0x12d4444f96c644385d8ab355f6ddf801315b6254', {
