@@ -25,8 +25,10 @@ export class MsgNativeTx extends Msg {
 }
 
 /**
- *
+ * This creates MsgNativeTx from json.
+ * 
  * @param value
+ * @returns {MsgNativeTx}
  */
 export const msgNativeTxFromJson = (value: { coins: MsgCoin[]; memo: string; signer: string }): MsgNativeTx => {
   return new MsgNativeTx(value.coins, value.memo, AccAddress.fromBech32(value.signer))
