@@ -12,6 +12,8 @@ import {
   Network as EthNetwork,
   NormalTxOpts,
   VaultTxOpts,
+  ClientUrl,
+  ExplorerUrl,
 } from './types'
 import {
   Address,
@@ -26,6 +28,7 @@ import {
   TxHistoryParams,
   Balances,
   Txs,
+  Network,
 } from '@xchainjs/xchain-client'
 import {
   AssetETH,
@@ -50,6 +53,7 @@ import {
   getTokenAddress,
   validateAddress,
   validateSymbol,
+  ETHPLORER_FREEKEY,
 } from './utils'
 import { getGasOracle } from './etherscan-api'
 
@@ -70,8 +74,9 @@ export interface EthereumClient {
 }
 
 type ClientParams = XChainClientParams & {
-  ethplorerUrl?: string
+  ethplorerUrl?: ClientUrl
   ethplorerApiKey?: string
+  explorerUrl?: ExplorerUrl
   etherscanApiKey?: string
   vault?: string
 }
@@ -86,8 +91,9 @@ export default class Client implements XChainClient, EthereumClient {
   private wallet: ethers.Wallet | null = null
   private provider: Provider
   private etherscan: EtherscanProvider
-  private ethplorerUrl = ''
+  private ethplorerUrl: ClientUrl
   private ethplorerApiKey = ''
+  private explorerUrl: ExplorerUrl
 
   /**
    * Constructor
@@ -95,8 +101,9 @@ export default class Client implements XChainClient, EthereumClient {
    */
   constructor({
     network = 'testnet',
-    ethplorerUrl = '',
-    ethplorerApiKey = '',
+    ethplorerUrl,
+    ethplorerApiKey,
+    explorerUrl,
     phrase,
     vault,
     etherscanApiKey,
@@ -104,8 +111,9 @@ export default class Client implements XChainClient, EthereumClient {
     this.network = xchainNetworkToEths(network)
     this.provider = getDefaultProvider(this.network)
     this.etherscan = new EtherscanProvider(this.network, etherscanApiKey)
-    this.setEthplorerURL(ethplorerUrl)
-    this.setEthplorerAPIKey(ethplorerApiKey)
+    this.ethplorerUrl = ethplorerUrl || this.getDefaultEthplorerURL()
+    this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
+    this.ethplorerApiKey = ethplorerApiKey || ETHPLORER_FREEKEY
 
     if (vault) {
       this.vault = vault
@@ -134,18 +142,18 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {string} url The new ethplorer url.
    * @returns {void}
    */
-  setEthplorerURL = (url: string): void => {
+  setEthplorerURL = (url: ClientUrl): void => {
     this.ethplorerUrl = url
   }
 
   /**
-   * Set/Update the ethplorer api key.
+   * Set/Update the explorer url.
    *
-   * @param {string} key The new ethplorer api key.
+   * @param {string} url The explorer url.
    * @returns {void}
    */
-  setEthplorerAPIKey = (key: string): void => {
-    this.ethplorerApiKey = key
+  setExplorerURL = (url: ExplorerUrl): void => {
+    this.explorerUrl = url
   }
 
   /**
@@ -221,12 +229,65 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
+   * Get the ethplorer API url.
+   *
+   * @returns {string} The ethplorer API url for thorchain based on the current network.
+   */
+  getEthplorerUrl = (): string => {
+    return this.getEthplorerUrlByNetwork(this.getNetwork())
+  }
+
+  /**
+   * Get the ethplorer API url.
+   *
+   * @returns {ClientUrl} The ethplorer API url (both mainnet and testnet) for ethereum.
+   */
+  private getDefaultEthplorerURL = (): ClientUrl => {
+    return {
+      testnet: 'https://kovan-api.ethplorer.io',
+      mainnet: 'https://api.ethplorer.io',
+    }
+  }
+
+  /**
+   * Get the ethplorer API url.
+   *
+   * @param {Network} network
+   * @returns {string} The ethplorer API url for ethereum based on the network.
+   */
+  private getEthplorerUrlByNetwork = (network: Network): string => {
+    return this.ethplorerUrl[network]
+  }
+
+  /**
    * Get the explorer url.
    *
-   * @returns {string} The explorer url.
+   * @returns {string} The explorer url for ethereum based on the current network.
    */
   getExplorerUrl = (): string => {
-    return this.getNetwork() === 'testnet' ? 'https://kovan.etherscan.io/' : 'https://etherscan.io/'
+    return this.getExplorerUrlByNetwork(this.getNetwork())
+  }
+
+  /**
+   * Get the explorer url.
+   *
+   * @returns {ExplorerUrl} The explorer url (both mainnet and testnet) for ethereum.
+   */
+  private getDefaultExplorerURL = (): ExplorerUrl => {
+    return {
+      testnet: 'https://kovan.etherscan.io/',
+      mainnet: 'https://etherscan.io/',
+    }
+  }
+
+  /**
+   * Get the explorer url.
+   *
+   * @param {Network} network
+   * @returns {string} The explorer url for ethereum based on the network.
+   */
+  private getExplorerUrlByNetwork = (network: Network): string => {
+    return this.explorerUrl[network]
   }
 
   /**
@@ -336,7 +397,7 @@ export default class Client implements XChainClient, EthereumClient {
         return Promise.reject(new Error('Missing API Key for Ethplorer'))
       }
       address = address || this.getAddress()
-      const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
+      const account = await ethplorerAPI.getAddress(this.getEthplorerUrl(), address, this.ethplorerApiKey)
       const balances: Balances = [
         {
           asset: AssetETH,
@@ -389,7 +450,7 @@ export default class Client implements XChainClient, EthereumClient {
 
       if (assetAddress) {
         const tokenTransactions = await ethplorerAPI.getAddressHistory(
-          this.ethplorerUrl,
+          this.getEthplorerUrl(),
           address,
           assetAddress,
           limit,
@@ -405,7 +466,7 @@ export default class Client implements XChainClient, EthereumClient {
         }
       } else {
         const ethTransactions = await ethplorerAPI.getAddressTransactions(
-          this.ethplorerUrl,
+          this.getEthplorerUrl(),
           address,
           limit,
           startTime && startTime.getTime() / 1000,
@@ -433,7 +494,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const txInfo = await ethplorerAPI.getTxInfo(this.ethplorerUrl, txId, this.ethplorerApiKey)
+      const txInfo = await ethplorerAPI.getTxInfo(this.getEthplorerUrl(), txId, this.ethplorerApiKey)
 
       if (txInfo.operations && txInfo.operations.length > 0) {
         const tx = getTxFromOperation(txInfo.operations[0])

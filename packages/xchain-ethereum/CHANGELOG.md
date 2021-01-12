@@ -6,6 +6,10 @@
 
 - Update `getBalance` to check api key #180
 
+### Breaking change
+
+- Update to provide default values for `ethplorerUrl` and `explorerUrl`
+
 # v.0.5.0 (2021-01-11)
 
 ### Update
