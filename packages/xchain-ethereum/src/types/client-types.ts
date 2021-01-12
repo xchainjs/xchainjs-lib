@@ -8,6 +8,16 @@ export enum Network {
   MAIN = 'homestead',
 }
 
+export type ClientUrl = {
+  testnet: string
+  mainnet: string
+}
+
+export type ExplorerUrl = {
+  testnet: string
+  mainnet: string
+}
+
 export type VaultTxOpts = {
   address: Address
   amount: BaseAmount
