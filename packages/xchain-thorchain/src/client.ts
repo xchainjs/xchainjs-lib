@@ -19,7 +19,8 @@ import { PrivKey, codec, Msg, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
-import { AssetRune, DepositParam, ClientUrl, MsgNativeTx, ThorchainClientParams, ExplorerUrl } from './types'
+import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, ExplorerUrl } from './types'
+import { MsgNativeTx, msgNativeTxFromJson } from './types/messages'
 import {
   getDenom,
   getAsset,
@@ -241,7 +242,7 @@ class Client implements ThorchainClient, XChainClient {
   private registerCodecs = (): void => {
     codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
     codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
-    codec.registerCodec('thorchain/MsgNativeTx', MsgNativeTx, MsgNativeTx.fromJSON)
+    codec.registerCodec('thorchain/MsgNativeTx', MsgNativeTx, msgNativeTxFromJson)
   }
 
   /**
@@ -434,7 +435,7 @@ class Client implements ThorchainClient, XChainClient {
       const signer = this.getAddress()
 
       const msg: Msg = [
-        MsgNativeTx.fromJSON({
+        msgNativeTxFromJson({
           coins: [
             {
               asset: getDenomWithChain(asset),

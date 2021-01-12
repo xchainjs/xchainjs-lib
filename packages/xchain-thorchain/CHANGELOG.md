@@ -4,6 +4,10 @@
 
 - Fix getTransactions pagination issue #168
 
+### Breaking change
+
+- change MsgNativeTx.fromJson
+
 ### Update
 
 - Update comments for documentation

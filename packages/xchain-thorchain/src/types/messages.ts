@@ -22,11 +22,12 @@ export class MsgNativeTx extends Msg {
     this.memo = memo
     this.signer = signer
   }
-  /**
-   *
-   * @param value
-   */
-  static fromJSON = (value: { coins: MsgCoin[]; memo: string; signer: string }): MsgNativeTx => {
-    return new MsgNativeTx(value.coins, value.memo, AccAddress.fromBech32(value.signer))
-  }
+}
+
+/**
+ *
+ * @param value
+ */
+export const msgNativeTxFromJson = (value: { coins: MsgCoin[]; memo: string; signer: string }): MsgNativeTx => {
+  return new MsgNativeTx(value.coins, value.memo, AccAddress.fromBech32(value.signer))
 }
