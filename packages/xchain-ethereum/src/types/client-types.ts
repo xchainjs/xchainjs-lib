@@ -55,12 +55,6 @@ export type ContractTxOverrides = {
   value?: ethers.BigNumberish
 }
 
-export type EstimateGasERC20Opts = {
-  assetAddress: Address
-  recipient: Address
-  amount: BaseAmount
-}
-
 export type GasOracleResponse = {
   LastBlock?: string
   SafeGasPrice?: string

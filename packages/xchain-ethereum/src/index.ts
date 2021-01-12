@@ -1,3 +1,3 @@
 export * from './types'
 export * from './client'
-export { getDefaultFees } from './utils'
+export { getDefaultFees, getTokenAddress } from './utils'
