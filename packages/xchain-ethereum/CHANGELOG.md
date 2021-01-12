@@ -1,5 +1,9 @@
 # v.x.x.x
 
+### Breaking change
+
+- Update to provide default values for `ethplorerUrl` and `explorerUrl`
+
 # v.0.5.0 (2021-01-11)
 
 ### Update

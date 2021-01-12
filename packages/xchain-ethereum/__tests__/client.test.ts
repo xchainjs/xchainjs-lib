@@ -15,7 +15,6 @@ const phrase = 'canyon throw labor waste awful century ugly they found post sour
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
 const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
 const vault = '0x8c2A90D36Ec9F745C9B28B588Cba5e2A978A1656'
-const ethplorerUrl = 'https://kovan-api.ethplorer.io'
 const etherscanUrl = 'https://api-kovan.etherscan.io'
 const kovanInfuraUrl = 'https://kovan.infura.io/v3'
 const kovanAlchemyUrl = 'https://eth-kovan.alchemyapi.io/v2'
@@ -123,10 +122,9 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      ethplorerUrl,
     })
 
-    mock_ethplorer_api_getAddress(ethplorerUrl, ethClient.getAddress(), {
+    mock_ethplorer_api_getAddress(ethClient.getEthplorerUrl(), ethClient.getAddress(), {
       address: ethClient.getAddress(),
       ETH: {
         balance: 100,
@@ -158,10 +156,9 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      ethplorerUrl,
     })
 
-    mock_ethplorer_api_getAddress(ethplorerUrl, '0x12d4444f96c644385d8ab355f6ddf801315b6254', {
+    mock_ethplorer_api_getAddress(ethClient.getEthplorerUrl(), '0x12d4444f96c644385d8ab355f6ddf801315b6254', {
       address: '0x12d4444f96c644385d8ab355f6ddf801315b6254',
       ETH: {
         balance: 100,
@@ -219,20 +216,23 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      ethplorerUrl,
     })
 
-    mock_ethplorer_api_getAddressTransactions(ethplorerUrl, '0xff71cb760666ab06aa73f34995b42dd4b85ea07b', [
-      {
-        timestamp: 1603667072,
-        from: '0xd3330a2f2fb4075335b9f2a682a5a550ffdadd6a',
-        to: '0xff71cb760666ab06aa73f34995b42dd4b85ea07b',
-        hash: '0x22e1e4f7395fed6f0e86d1f36ad65c884d0680c3a7b4d003ea7f21d8d7995a4a',
-        value: 0.0102004945,
-        input: '0x',
-        success: true,
-      },
-    ])
+    mock_ethplorer_api_getAddressTransactions(
+      ethClient.getEthplorerUrl(),
+      '0xff71cb760666ab06aa73f34995b42dd4b85ea07b',
+      [
+        {
+          timestamp: 1603667072,
+          from: '0xd3330a2f2fb4075335b9f2a682a5a550ffdadd6a',
+          to: '0xff71cb760666ab06aa73f34995b42dd4b85ea07b',
+          hash: '0x22e1e4f7395fed6f0e86d1f36ad65c884d0680c3a7b4d003ea7f21d8d7995a4a',
+          value: 0.0102004945,
+          input: '0x',
+          success: true,
+        },
+      ],
+    )
 
     const txHistory = await ethClient.getTransactions({
       address: '0xff71cb760666ab06aa73f34995b42dd4b85ea07b',
@@ -256,11 +256,10 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      ethplorerUrl,
       ethplorerApiKey: 'api-key',
     })
 
-    mock_ethplorer_api_getAddressHistory(ethplorerUrl, address, [
+    mock_ethplorer_api_getAddressHistory(ethClient.getEthplorerUrl(), address, [
       {
         timestamp: 1610014043,
         transactionHash: '0x042f4c15f379ea9d15adf31df62024ae1738fafbef2267460a046295e2e28046',
@@ -324,51 +323,54 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'mainnet',
       phrase,
-      ethplorerUrl,
     })
 
-    mock_ethplorer_api_getTxInfo(ethplorerUrl, '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c', {
-      hash: '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
-      timestamp: 1604254250,
-      blockNumber: 11172738,
-      confirmations: 433964,
-      success: true,
-      from: '0xbabeae03735f9ed247f73978fe912028c9b5e828',
-      to: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
-      value: 0,
-      input:
-        '0xa9059cbb000000000000000000000000e40ec68d7dccb6a7314d0faf6d33a4d72483cd770000000000000000000000000000000000000000000000000000048c27395000',
-      gasLimit: 80952,
-      gasUsed: 53968,
-      logs: [],
-      operations: [
-        {
-          timestamp: 1604254250,
-          transactionHash: '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
-          value: '1000',
-          intValue: 1000,
-          type: 'transfer',
-          isEth: false,
-          priority: 203,
-          from: '0xbabeae03735f9ed247f73978fe912028c9b5e828',
-          to: '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77',
-          addresses: ['0xbabeae03735f9ed247f73978fe912028c9b5e828', '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77'],
-          tokenInfo: {
-            address: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
-            decimals: '6',
-            name: 'MEMEI',
-            symbol: 'MEI',
-            totalSupply: '74075000000000',
-            lastUpdated: 1609732766,
-            owner: '0x',
-            issuancesCount: 0,
-            holdersCount: 1557,
-            ethTransfersCount: 0,
-            price: false,
+    mock_ethplorer_api_getTxInfo(
+      ethClient.getEthplorerUrl(),
+      '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
+      {
+        hash: '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
+        timestamp: 1604254250,
+        blockNumber: 11172738,
+        confirmations: 433964,
+        success: true,
+        from: '0xbabeae03735f9ed247f73978fe912028c9b5e828',
+        to: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
+        value: 0,
+        input:
+          '0xa9059cbb000000000000000000000000e40ec68d7dccb6a7314d0faf6d33a4d72483cd770000000000000000000000000000000000000000000000000000048c27395000',
+        gasLimit: 80952,
+        gasUsed: 53968,
+        logs: [],
+        operations: [
+          {
+            timestamp: 1604254250,
+            transactionHash: '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
+            value: '1000',
+            intValue: 1000,
+            type: 'transfer',
+            isEth: false,
+            priority: 203,
+            from: '0xbabeae03735f9ed247f73978fe912028c9b5e828',
+            to: '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77',
+            addresses: ['0xbabeae03735f9ed247f73978fe912028c9b5e828', '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77'],
+            tokenInfo: {
+              address: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
+              decimals: '6',
+              name: 'MEMEI',
+              symbol: 'MEI',
+              totalSupply: '74075000000000',
+              lastUpdated: 1609732766,
+              owner: '0x',
+              issuancesCount: 0,
+              holdersCount: 1557,
+              ethTransfersCount: 0,
+              price: false,
+            },
           },
-        },
-      ],
-    })
+        ],
+      },
+    )
 
     const txData = await ethClient.getTransactionData(
       '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',

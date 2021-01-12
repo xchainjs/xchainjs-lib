@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { AddressInfo, TransactionInfo, TransactionOperation } from './types'
+import { ETHPLORER_FREEKEY } from './utils'
 
 /**
  * Get address information.
@@ -15,7 +16,7 @@ export const getAddress = async (baseUrl: string, address: string, apiKey?: stri
   try {
     const response = await axios.get(`${baseUrl}/getAddressInfo/${address}`, {
       params: {
-        apiKey: apiKey || 'freekey',
+        apiKey: apiKey || ETHPLORER_FREEKEY,
       },
     })
     return response.data
