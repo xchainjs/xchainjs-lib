@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Custom Thorchain client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",

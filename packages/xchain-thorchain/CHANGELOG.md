@@ -1,12 +1,16 @@
+# v.x.x.x
+
+# v.0.8.0 (2021-01-13)
+
+### Breaking change
+
+- change MsgNativeTx.fromJson
+
 # v.0.7.1 (2021-01-06)
 
 ### Fix
 
 - Fix getTransactions pagination issue #168
-
-### Breaking change
-
-- change MsgNativeTx.fromJson
 
 ### Update
 
