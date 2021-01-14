@@ -112,3 +112,12 @@ export const getDefaultFees = (): Fees => {
     average: singleTxFee,
   } as Fees
 }
+
+/**
+ * Get address prefix based on the network.
+ *
+ * @param {string} network
+ * @returns {string} The address prefix based on the network.
+ *
+ **/
+export const getPrefix = (network: string) => (network === 'testnet' ? 'tbnb' : 'bnb')

@@ -2,7 +2,6 @@ import axios from 'axios'
 import {
   Balances as BinanceBalances,
   Fees as BinanceFees,
-  Prefix,
   TxPage as BinanceTxPage,
   TransactionResult,
   TransferFee,
@@ -37,7 +36,7 @@ import {
   assetToString,
 } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { isTransferFee, parseTx } from './util'
+import { isTransferFee, parseTx, getPrefix } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 
 type PrivKey = string
@@ -66,8 +65,6 @@ export interface BinanceClient {
   getBncClient(): BncClient
 
   getAddress(): string
-
-  getPrefix(): Prefix
 
   getMultiSendFees(): Promise<Fees>
   getSingleAndMultiFees(): Promise<{ single: Fees; multi: Fees }>
@@ -193,15 +190,6 @@ class Client implements BinanceClient, XChainClient {
   }
 
   /**
-   * Get current address prefix based on the network.
-   *
-   * @returns {Prefix} The prefix based on the network.
-   */
-  getPrefix = (): Prefix => {
-    return this.network === 'testnet' ? 'tbnb' : 'bnb'
-  }
-
-  /**
    * Set/update a new phrase
    *
    * @param {string} phrase A new phrase.
@@ -252,7 +240,7 @@ class Client implements BinanceClient, XChainClient {
    */
   getAddress = (): string => {
     if (!this.address) {
-      const address = crypto.getAddressFromPrivateKey(this.getPrivateKey(), this.getPrefix())
+      const address = crypto.getAddressFromPrivateKey(this.getPrivateKey(), getPrefix(this.network))
       if (!address) {
         throw new Error(
           'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
@@ -271,7 +259,7 @@ class Client implements BinanceClient, XChainClient {
    * @returns {boolean} `true` or `false`
    */
   validateAddress = (address: Address): boolean => {
-    return this.bncClient.checkAddress(address, this.getPrefix())
+    return this.bncClient.checkAddress(address, getPrefix(this.network))
   }
 
   /**

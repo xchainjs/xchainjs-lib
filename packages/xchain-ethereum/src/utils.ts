@@ -159,3 +159,11 @@ export const getDefaultFees = (): Fees => {
     fastest: baseAmount(39, ETH_DECIMAL),
   }
 }
+
+/**
+ * Get address prefix based on the network.
+ *
+ * @returns {string} The address prefix based on the network.
+ *
+ **/
+export const getPrefix = () => '0x'

@@ -176,3 +176,11 @@ export const getDefaultFees = (): Fees => {
     average: baseAmount(0, DECIMAL),
   }
 }
+
+/**
+ * Get address prefix based on the network.
+ *
+ * @returns {string} The address prefix based on the network.
+ *
+ **/
+export const getPrefix = () => 'cosmos'

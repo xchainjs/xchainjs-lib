@@ -4,7 +4,6 @@ Utitity helpers for XChain clients
 
 ## Modules (in alphabetical order)
 
-- `address` - Utilities for handling address
 - `asset` - Utilities for handling assets
 - `async` - Utitilies for `async` handling
 - `bn` - Utitilies for using `bignumber.js`

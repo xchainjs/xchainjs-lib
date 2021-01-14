@@ -1,9 +1,5 @@
 # v.x.x.x
 
-### Update
-
-- Add `getPrefix`
-
 # v.0.2.1 (2021-01-08)
 
 ### Fix
