@@ -1,8 +1,10 @@
 # v.x.x.x
 
-### Update
+# v.0.8.0 (2020-01-15)
 
-- Update `getPrefix`
+### Breaking change
+
+- Move `getPrefix` to util
 
 # v.0.7.1 (2021-01-12)
 
