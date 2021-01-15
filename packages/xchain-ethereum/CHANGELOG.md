@@ -1,5 +1,11 @@
 # v.x.x.x
 
+# v.0.7.1 (2020-01-15)
+
+### Change
+
+- Export `getPrefix`
+
 # v.0.7.0 (2020-01-15)
 
 ### Update
