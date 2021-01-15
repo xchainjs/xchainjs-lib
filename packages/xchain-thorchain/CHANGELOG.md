@@ -2,9 +2,9 @@
 
 # v.0.9.0 (2020-01-15)
 
-### Update
+### Breaking change
 
-- add `getPrefix`
+- Move `getPrefix` to util
 
 # v.0.8.0 (2021-01-13)
 
