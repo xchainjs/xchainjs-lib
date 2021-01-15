@@ -3,6 +3,7 @@
 ### Update
 
 - Update comments for documentation
+- Add `getPrefix`
 
 ### Breaking change
 

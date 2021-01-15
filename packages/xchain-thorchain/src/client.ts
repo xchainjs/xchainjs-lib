@@ -30,6 +30,7 @@ import {
   DEFAULT_GAS_VALUE,
   getDenomWithChain,
   isBroadcastSuccess,
+  getPrefix,
 } from './util'
 
 /**
@@ -210,7 +211,7 @@ class Client implements ThorchainClient, XChainClient {
     return new CosmosSDKClient({
       server: this.getClientUrl(),
       chainId: this.getChainId(),
-      prefix: this.getPrefix(),
+      prefix: getPrefix(this.network),
       derive_path: this.derive_path,
     })
   }
@@ -222,15 +223,6 @@ class Client implements ThorchainClient, XChainClient {
    */
   getChainId = (): string => {
     return 'thorchain'
-  }
-
-  /**
-   * Get current address prefix based on the network.
-   *
-   * @returns {Prefix} The prefix based on the network.
-   */
-  private getPrefix = (): string => {
-    return this.network === 'testnet' ? 'tthor' : 'thor'
   }
 
   /**

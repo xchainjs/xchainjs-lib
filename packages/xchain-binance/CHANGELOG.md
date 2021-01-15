@@ -3,6 +3,7 @@
 ### Update
 
 - Update comments for documentation
+- Add `getPrefix`
 
 # v.4.3.0 (2020-12-28)
 

@@ -1,5 +1,9 @@
 # v.x.x.x
 
+### Update
+
+- Update `getPrefix`
+
 # v.0.7.1 (2021-01-12)
 
 ### Update
