@@ -460,7 +460,13 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
     mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_call', '0x0000000000000000000000000000000000000000000000000000000000000064')
+    mock_all_api(
+      etherscanUrl,
+      kovanInfuraUrl,
+      kovanAlchemyUrl,
+      'eth_call',
+      '0x0000000000000000000000000000000000000000000000000000000000000064',
+    )
 
     let isApproved = await ethClient.isApproved(
       '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',

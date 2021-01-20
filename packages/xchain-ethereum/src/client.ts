@@ -4,14 +4,7 @@ import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import erc20ABI from '../data/erc20.json'
 import { parseEther, toUtf8Bytes } from 'ethers/lib/utils'
-import {
-  Erc20TxOpts,
-  GasOracleResponse,
-  Network as EthNetwork,
-  NormalTxOpts,
-  ClientUrl,
-  ExplorerUrl,
-} from './types'
+import { Erc20TxOpts, GasOracleResponse, Network as EthNetwork, NormalTxOpts, ClientUrl, ExplorerUrl } from './types'
 import {
   Address,
   Network as XChainNetwork,
@@ -55,7 +48,7 @@ import {
 import { getGasOracle } from './etherscan-api'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
-const MAX_UINT = 2**256 - 1
+const MAX_UINT = 2 ** 256 - 1
 
 /**
  * Interface for custom Ethereum client
@@ -627,10 +620,7 @@ export default class Client implements XChainClient, EthereumClient {
   isApproved = async (spender: Address, sender: Address, amount: BaseAmount): Promise<boolean> => {
     try {
       const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
-      const allowance = await this.call<BigNumberish>(sender, erc20ABI, 'allowance', [
-        this.getAddress(),
-        spender,
-      ])
+      const allowance = await this.call<BigNumberish>(sender, erc20ABI, 'allowance', [this.getAddress(), spender])
       return txAmount.lte(allowance)
     } catch (error) {
       return Promise.reject(error)
