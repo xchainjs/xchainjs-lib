@@ -18,24 +18,10 @@ export type ExplorerUrl = {
   mainnet: string
 }
 
-export type VaultTxOpts = {
-  address: Address
-  amount: BaseAmount
-  memo: string
-  overrides?: ContractTxOverrides
-}
-
 export type NormalTxOpts = {
   recipient: Address
   amount: BaseAmount
-  overrides?: NormalTxOverrides
-}
-
-export type NormalTxOverrides = {
-  nonce?: ethers.BigNumberish
-  gasLimit?: ethers.BigNumberish
-  gasPrice?: ethers.BigNumberish
-  data?: ethers.BytesLike
+  overrides?: TxOverrides
 }
 
 export type Erc20TxOpts = {
@@ -43,15 +29,16 @@ export type Erc20TxOpts = {
   recipient: Address
   amount: BaseAmount
 
-  overrides?: ContractTxOverrides
+  overrides?: TxOverrides
 }
 
-export type ContractTxOverrides = {
+export type TxOverrides = {
   nonce?: ethers.BigNumberish
 
   // mandatory: https://github.com/ethers-io/ethers.js/issues/469#issuecomment-475926538
   gasLimit: ethers.BigNumberish
   gasPrice?: ethers.BigNumberish
+  data?: ethers.BytesLike
   value?: ethers.BigNumberish
 }
 
