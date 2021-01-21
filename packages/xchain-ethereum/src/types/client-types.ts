@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { BaseAmount } from '@xchainjs/xchain-util'
+import { BaseAmount, Asset } from '@xchainjs/xchain-util'
 
 export type Address = string
 
@@ -18,14 +18,8 @@ export type ExplorerUrl = {
   mainnet: string
 }
 
-export type NormalTxOpts = {
-  recipient: Address
-  amount: BaseAmount
-  overrides?: TxOverrides
-}
-
-export type Erc20TxOpts = {
-  assetAddress: Address
+export type EstimateGasOpts = {
+  asset?: Asset
   recipient: Address
   amount: BaseAmount
 

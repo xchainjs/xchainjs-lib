@@ -1,10 +1,10 @@
-import { ethers, BigNumberish } from 'ethers'
+import { ethers, BigNumberish, BigNumber } from 'ethers'
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import erc20ABI from '../data/erc20.json'
 import { parseEther, toUtf8Bytes } from 'ethers/lib/utils'
-import { Erc20TxOpts, GasOracleResponse, Network as EthNetwork, NormalTxOpts, ClientUrl, ExplorerUrl } from './types'
+import { GasOracleResponse, Network as EthNetwork, ClientUrl, ExplorerUrl, EstimateGasOpts } from './types'
 import {
   Address,
   Network as XChainNetwork,
@@ -48,7 +48,7 @@ import {
 import { getGasOracle } from './etherscan-api'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
-const MAX_UINT = 2 ** 256 - 1
+const maxApproval = BigNumber.from(2).pow(256).sub(1)
 
 /**
  * Interface for custom Ethereum client
@@ -57,12 +57,7 @@ export interface EthereumClient {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   call<T>(asset: Address, abi: ethers.ContractInterface, func: string, params: Array<any>): Promise<T>
 
-  isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
-  approve(spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash>
-  erc20Transfer(opts: Erc20TxOpts): Promise<TxHash>
-
-  estimateGasNormalTx(params: NormalTxOpts): Promise<BaseAmount>
-  estimateGasERC20Tx(params: Erc20TxOpts): Promise<BaseAmount>
+  estimateGas(params: EstimateGasOpts): Promise<BaseAmount>
 }
 
 type ClientParams = XChainClientParams & {
@@ -464,51 +459,6 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
-   * Transfer ETH.
-   *
-   * @param {TxParams} params The transfer options.
-   * @returns {TxHash} The transaction hash.
-   *
-   * @throws {"Invalid asset address"}
-   * Thrown if the given asset is invalid.
-   */
-  transfer = async ({
-    asset,
-    memo,
-    amount,
-    recipient,
-    gasLimit,
-    gasPrice,
-  }: TxParams & {
-    gasPrice?: BaseAmount
-    gasLimit?: number
-  }): Promise<TxHash> => {
-    try {
-      const overrides = gasPrice && {
-        gasLimit: gasLimit || DEFAULT_GASLIMIT,
-        gasPrice: parseEther(baseToAsset(gasPrice).amount().toFormat()),
-        data: memo ? toUtf8Bytes(memo) : undefined,
-      }
-      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
-
-      let assetAddress
-      if (asset && assetToString(asset) !== assetToString(AssetETH)) {
-        assetAddress = getTokenAddress(asset)
-      }
-
-      if (assetAddress && assetAddress !== ethAddress) {
-        throw new Error('Use erc20Transfer() for erc20 token transfer.')
-      }
-
-      const transactionRequest = Object.assign({ to: recipient, value: txAmount }, overrides || {})
-      const txResult = await this.getWallet().sendTransaction(transactionRequest)
-      return txResult.hash
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
    * Call a contract function.
    * @template T The result interface.
    * @param {Address} address The contract address.
@@ -530,16 +480,102 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
-   * Send ETH transaction.
+   * Check allowance.
    *
-   * @param {NormalTxOpts} params The ETH transaction options.
-   * @returns {TransactionResponse} The transaction result.
+   * @param {Address} spender The spender address.
+   * @param {Address} sender The sender address.
+   * @param {BaseAmount} amount The amount of token.
+   * @returns {boolean} `true` or `false`.
    */
-  normalTx = async ({ recipient, amount, overrides }: NormalTxOpts): Promise<TransactionResponse> => {
+  private isApproved = async (spender: Address, sender: Address, amount: BaseAmount): Promise<boolean> => {
     try {
       const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
-      const transactionRequest = Object.assign({ to: recipient, value: txAmount }, overrides || {})
-      return await this.getWallet().sendTransaction(transactionRequest)
+      const allowance = await this.call<BigNumberish>(sender, erc20ABI, 'allowance', [this.getAddress(), spender])
+      return txAmount.lte(allowance)
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  /**
+   * Check allowance.
+   *
+   * @param {Address} spender The spender address.
+   * @param {Address} sender The sender address.
+   * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
+   * @returns {TransactionResponse} The transaction result.
+   */
+  private approve = async (spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash> => {
+    try {
+      const txAmount = amount ? parseEther(baseToAsset(amount).amount().toFormat()) : maxApproval
+      const txResult = await this.call<TransactionResponse>(sender, erc20ABI, 'approve', [
+        spender,
+        txAmount,
+        { from: this.getWallet().address },
+      ])
+      return txResult.hash
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  /**
+   * Transfer ETH.
+   *
+   * @param {TxParams} params The transfer options.
+   * @returns {TxHash} The transaction hash.
+   *
+   * @throws {"Invalid asset address"}
+   * Thrown if the given asset is invalid.
+   */
+  transfer = async ({
+    asset,
+    memo,
+    amount,
+    recipient,
+    gasLimit,
+    gasPrice,
+  }: TxParams & {
+    gasPrice?: BaseAmount
+    gasLimit?: number
+  }): Promise<TxHash> => {
+    try {
+      const overrides = {
+        gasLimit: gasLimit || DEFAULT_GASLIMIT,
+        gasPrice: gasPrice && parseEther(baseToAsset(gasPrice).amount().toFormat()),
+      }
+      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
+
+      let assetAddress
+      if (asset && assetToString(asset) !== assetToString(AssetETH)) {
+        assetAddress = getTokenAddress(asset)
+      }
+
+      let txResult
+
+      if (assetAddress && assetAddress !== ethAddress) {
+        if (!(await this.isApproved(recipient, assetAddress, amount))) {
+          await this.approve(recipient, assetAddress)
+        }
+
+        txResult = await this.call<TransactionResponse>(assetAddress, erc20ABI, 'transfer', [
+          recipient,
+          txAmount,
+          Object.assign({}, overrides),
+        ])
+      } else {
+        const transactionRequest = Object.assign(
+          { to: recipient, value: txAmount },
+          {
+            ...overrides,
+            data: memo ? toUtf8Bytes(memo) : undefined,
+          },
+        )
+
+        txResult = await this.getWallet().sendTransaction(transactionRequest)
+      }
+
+      return txResult.hash
     } catch (error) {
       return Promise.reject(error)
     }
@@ -562,120 +598,34 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
-   * Estimate gas for ETH transfer.
+   * Estimate gas.
    *
-   * @param {NormalTxOpts} params The ETH transaction options.
+   * @param {EstimateGasOpts} params The transaction options.
    * @returns {BaseAmount} The estimated gas fee.
    */
-  estimateGasNormalTx = async ({ recipient, amount, overrides }: NormalTxOpts): Promise<BaseAmount> => {
+  estimateGas = async ({ asset, recipient, amount, overrides }: EstimateGasOpts): Promise<BaseAmount> => {
     try {
       const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
-      const transactionRequest = Object.assign({ to: recipient, value: txAmount }, overrides || {})
-      const estimate = await this.getWallet().provider.estimateGas(transactionRequest)
+
+      let assetAddress
+      if (asset && assetToString(asset) !== assetToString(AssetETH)) {
+        assetAddress = getTokenAddress(asset)
+      }
+
+      let estimate
+
+      if (assetAddress && assetAddress !== ethAddress) {
+        const contract = new ethers.Contract(assetAddress, erc20ABI, this.getWallet())
+        const erc20 = contract.connect(this.getWallet())
+
+        estimate = await erc20.estimateGas.transfer(recipient, txAmount, Object.assign({}, overrides || {}))
+      } else {
+        const transactionRequest = Object.assign({ to: recipient, value: txAmount }, overrides || {})
+
+        estimate = await this.getWallet().provider.estimateGas(transactionRequest)
+      }
 
       return baseAmount(estimate.toString(), ETH_DECIMAL)
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
-   * Estimate gas for erc20 token transfer.
-   *
-   * @param {Erc20TxOpts} params The erc20 transaction options.
-   * @returns {BaseAmount} The estimated gas fee.
-   *
-   * @throws {"Invalid Address"}
-   * Thrown if the given address is invalid.
-   * @throws {"Invalid Asset Address"}
-   * Thrown if the given asset address is invalid.
-   **/
-  estimateGasERC20Tx = async ({ assetAddress, recipient, amount, overrides }: Erc20TxOpts): Promise<BaseAmount> => {
-    try {
-      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
-      if (recipient && !this.validateAddress(recipient)) {
-        return Promise.reject('Invalid Address')
-      }
-      if (!this.validateAddress(assetAddress)) {
-        return Promise.reject('Invalid Asset Address')
-      }
-      const contract = new ethers.Contract(assetAddress, erc20ABI, this.getWallet())
-      const erc20 = contract.connect(this.getWallet())
-      const estimate = await erc20.estimateGas.transfer(recipient, txAmount, Object.assign({}, overrides || {}))
-
-      return baseAmount(estimate.toString(), ETH_DECIMAL)
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
-   * Check allowance.
-   *
-   * @param {Address} spender The spender address.
-   * @param {Address} sender The sender address.
-   * @param {BaseAmount} amount The amount of token.
-   * @returns {boolean} `true` or `false`.
-   */
-  isApproved = async (spender: Address, sender: Address, amount: BaseAmount): Promise<boolean> => {
-    try {
-      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
-      const allowance = await this.call<BigNumberish>(sender, erc20ABI, 'allowance', [this.getAddress(), spender])
-      return txAmount.lte(allowance)
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
-   * Check allowance.
-   *
-   * @param {Address} spender The spender address.
-   * @param {Address} sender The sender address.
-   * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
-   * @returns {TransactionResponse} The transaction result.
-   */
-  approve = async (spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash> => {
-    try {
-      const txAmount = amount ? parseEther(baseToAsset(amount).amount().toFormat()) : MAX_UINT
-      const txResult = await this.call<TransactionResponse>(sender, erc20ABI, 'approve', [
-        spender,
-        txAmount,
-        { from: this.getWallet().address },
-      ])
-      return txResult.hash
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
-   * Transfer erc20 tokens.
-   *
-   * @param {Erc20TxOpts} params The erc20 transaction options.
-   * @returns {TransactionResponse} The transaction result.
-   *
-   * @throws {"Invalid Address"}
-   * Thrown if the given address is invalid.
-   * @throws {"Invalid Asset Address"}
-   * Thrown if the given asset address is invalid.
-   */
-  erc20Transfer = async ({ assetAddress, recipient, amount, overrides }: Erc20TxOpts): Promise<TxHash> => {
-    try {
-      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
-      if (!this.validateAddress(recipient)) {
-        return Promise.reject('Invalid Address')
-      }
-      if (!this.validateAddress(assetAddress)) {
-        return Promise.reject('Invalid Asset Address')
-      }
-
-      const txResult = await this.call<TransactionResponse>(assetAddress, erc20ABI, 'transfer', [
-        recipient,
-        txAmount,
-        Object.assign({}, overrides || {}),
-      ])
-      return txResult.hash
     } catch (error) {
       return Promise.reject(error)
     }
