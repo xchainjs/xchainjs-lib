@@ -554,6 +554,7 @@ export default class Client implements XChainClient, EthereumClient {
       let txResult
 
       if (assetAddress && assetAddress !== ethAddress) {
+        // Transfer ERC20
         if (!(await this.isApproved(recipient, assetAddress, amount))) {
           await this.approve(recipient, assetAddress)
         }
@@ -564,6 +565,7 @@ export default class Client implements XChainClient, EthereumClient {
           Object.assign({}, overrides),
         ])
       } else {
+        // Transfer ETH
         const transactionRequest = Object.assign(
           { to: recipient, value: txAmount },
           {
