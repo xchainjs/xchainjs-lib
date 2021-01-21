@@ -29,6 +29,8 @@ export type EstimateGasOpts = {
 export type TxOverrides = {
   nonce?: ethers.BigNumberish
 
+  from?: Address
+
   // mandatory: https://github.com/ethers-io/ethers.js/issues/469#issuecomment-475926538
   gasLimit: ethers.BigNumberish
   gasPrice?: ethers.BigNumberish

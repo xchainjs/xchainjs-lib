@@ -541,6 +541,7 @@ export default class Client implements XChainClient, EthereumClient {
   }): Promise<TxHash> => {
     try {
       const overrides = {
+        from: this.getWallet().getAddress(),
         gasLimit: gasLimit || DEFAULT_GASLIMIT,
         gasPrice: gasPrice && parseEther(baseToAsset(gasPrice).amount().toFormat()),
       }
@@ -618,15 +619,27 @@ export default class Client implements XChainClient, EthereumClient {
 
       if (assetAddress && assetAddress !== ethAddress) {
         // ERC20 gas estimate
-        const contract = new ethers.Contract(assetAddress, erc20ABI, this.getWallet())
-        const erc20 = contract.connect(this.getWallet())
+        const contract = new ethers.Contract(assetAddress, erc20ABI, this.provider)
 
-        estimate = await erc20.estimateGas.transfer(recipient, txAmount, Object.assign({}, overrides || {}))
+        estimate = await contract.estimateGas.transfer(
+          recipient,
+          txAmount,
+          Object.assign(
+            {},
+            {
+              ...(overrides ?? {}),
+              from: this.getWallet().address,
+            },
+          ),
+        )
       } else {
         // ETH gas estimate
-        const transactionRequest = Object.assign({ to: recipient, value: txAmount }, overrides || {})
+        const transactionRequest = Object.assign(
+          { from: this.getWallet().address, to: recipient, value: txAmount },
+          overrides || {},
+        )
 
-        estimate = await this.getWallet().provider.estimateGas(transactionRequest)
+        estimate = await this.provider.estimateGas(transactionRequest)
       }
 
       return baseAmount(estimate.toString(), ETH_DECIMAL)
