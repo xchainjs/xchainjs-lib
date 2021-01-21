@@ -4,7 +4,7 @@ import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import erc20ABI from '../data/erc20.json'
 import { parseEther, toUtf8Bytes } from 'ethers/lib/utils'
-import { GasOracleResponse, Network as EthNetwork, ClientUrl, ExplorerUrl, EstimateGasOpts } from './types'
+import { GasOracleResponse, Network as EthNetwork, ClientUrl, ExplorerUrl, EstimateGasOpts, TxOverrides } from './types'
 import {
   Address,
   Network as XChainNetwork,
@@ -540,8 +540,7 @@ export default class Client implements XChainClient, EthereumClient {
     gasLimit?: number
   }): Promise<TxHash> => {
     try {
-      const overrides = {
-        from: this.getWallet().getAddress(),
+      const overrides: TxOverrides = {
         gasLimit: gasLimit || DEFAULT_GASLIMIT,
         gasPrice: gasPrice && parseEther(baseToAsset(gasPrice).amount().toFormat()),
       }
@@ -606,8 +605,9 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {EstimateGasOpts} params The transaction options.
    * @returns {BaseAmount} The estimated gas fee.
    */
-  estimateGas = async ({ asset, recipient, amount, overrides }: EstimateGasOpts): Promise<BaseAmount> => {
+  estimateGas = async ({ asset, sender, recipient, amount, overrides }: EstimateGasOpts): Promise<BaseAmount> => {
     try {
+      sender = sender || this.getWallet().address
       const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
 
       let assetAddress
@@ -624,20 +624,11 @@ export default class Client implements XChainClient, EthereumClient {
         estimate = await contract.estimateGas.transfer(
           recipient,
           txAmount,
-          Object.assign(
-            {},
-            {
-              ...(overrides ?? {}),
-              from: this.getWallet().address,
-            },
-          ),
+          Object.assign({ from: sender }, overrides || {}),
         )
       } else {
         // ETH gas estimate
-        const transactionRequest = Object.assign(
-          { from: this.getWallet().address, to: recipient, value: txAmount },
-          overrides || {},
-        )
+        const transactionRequest = Object.assign({ from: sender, to: recipient, value: txAmount }, overrides || {})
 
         estimate = await this.provider.estimateGas(transactionRequest)
       }
