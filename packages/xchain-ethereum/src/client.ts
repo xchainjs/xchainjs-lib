@@ -58,6 +58,9 @@ export interface EthereumClient {
   call<T>(asset: Address, abi: ethers.ContractInterface, func: string, params: Array<any>): Promise<T>
 
   estimateGas(params: EstimateGasOpts): Promise<BaseAmount>
+
+  isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
+  approve(spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash>
 }
 
 type ClientParams = XChainClientParams & {
@@ -487,7 +490,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {BaseAmount} amount The amount of token.
    * @returns {boolean} `true` or `false`.
    */
-  private isApproved = async (spender: Address, sender: Address, amount: BaseAmount): Promise<boolean> => {
+  isApproved = async (spender: Address, sender: Address, amount: BaseAmount): Promise<boolean> => {
     try {
       const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
       const allowance = await this.call<BigNumberish>(sender, erc20ABI, 'allowance', [this.getAddress(), spender])
@@ -505,7 +508,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @returns {TransactionResponse} The transaction result.
    */
-  private approve = async (spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash> => {
+  approve = async (spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash> => {
     try {
       const txAmount = amount ? parseEther(baseToAsset(amount).amount().toFormat()) : maxApproval
       const txResult = await this.call<TransactionResponse>(sender, erc20ABI, 'approve', [
@@ -555,10 +558,6 @@ export default class Client implements XChainClient, EthereumClient {
 
       if (assetAddress && assetAddress !== ethAddress) {
         // Transfer ERC20
-        if (!(await this.isApproved(recipient, assetAddress, amount))) {
-          await this.approve(recipient, assetAddress)
-        }
-
         txResult = await this.call<TransactionResponse>(assetAddress, erc20ABI, 'transfer', [
           recipient,
           txAmount,

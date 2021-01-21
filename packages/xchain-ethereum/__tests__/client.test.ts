@@ -433,13 +433,6 @@ describe('Client Test', () => {
       kovanInfuraUrl,
       kovanAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xfd0a17a61e315338336296f20b1bec4accd72047f2239a64f60180975b762c39',
-    )
-    mock_all_api(
-      etherscanUrl,
-      kovanInfuraUrl,
-      kovanAlchemyUrl,
-      'eth_sendRawTransaction',
       '0x8899a3c9b88384fce3542cf7409448181f0b2ae72da139193f7cf1802be50b58',
     )
 
@@ -496,5 +489,63 @@ describe('Client Test', () => {
     })
 
     expect(gasEstimate.amount().toString()).toEqual(baseAmount(21000, 18).amount().toString())
+  })
+
+  it('isApproved', async () => {
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+    })
+
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(
+      etherscanUrl,
+      kovanInfuraUrl,
+      kovanAlchemyUrl,
+      'eth_call',
+      '0x0000000000000000000000000000000000000000000000000000000000000064',
+    )
+
+    let isApproved = await ethClient.isApproved(
+      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      baseAmount(100, ETH_DECIMAL),
+    )
+    expect(isApproved).toEqual(true)
+
+    isApproved = await ethClient.isApproved(
+      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      baseAmount(101, ETH_DECIMAL),
+    )
+    expect(isApproved).toEqual(false)
+  })
+
+  it('approve', async () => {
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+    })
+
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(
+      etherscanUrl,
+      kovanInfuraUrl,
+      kovanAlchemyUrl,
+      'eth_sendRawTransaction',
+      '0x14dda501ddbddaf04e1dfde884a3b1b0e751cebe79bc922bead30789d39ed92c',
+    )
+
+    const hash = await ethClient.approve(
+      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      baseAmount(100, ETH_DECIMAL),
+    )
+    expect(hash).toEqual('0x14dda501ddbddaf04e1dfde884a3b1b0e751cebe79bc922bead30789d39ed92c')
   })
 })
