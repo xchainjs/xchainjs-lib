@@ -617,11 +617,13 @@ export default class Client implements XChainClient, EthereumClient {
       let estimate
 
       if (assetAddress && assetAddress !== ethAddress) {
+        // ERC20 gas estimate
         const contract = new ethers.Contract(assetAddress, erc20ABI, this.getWallet())
         const erc20 = contract.connect(this.getWallet())
 
         estimate = await erc20.estimateGas.transfer(recipient, txAmount, Object.assign({}, overrides || {}))
       } else {
+        // ETH gas estimate
         const transactionRequest = Object.assign({ to: recipient, value: txAmount }, overrides || {})
 
         estimate = await this.getWallet().provider.estimateGas(transactionRequest)
