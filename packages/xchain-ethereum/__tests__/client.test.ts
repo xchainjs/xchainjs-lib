@@ -1,6 +1,6 @@
 import nock from 'nock'
 import { Wallet, providers } from 'ethers'
-import { baseAmount, AssetETH, BaseAmount, assetToString, assetFromString, ETHChain } from '@xchainjs/xchain-util'
+import { baseAmount, AssetETH, assetToString, assetFromString, ETHChain } from '@xchainjs/xchain-util'
 import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
 import { mock_all_api } from '../__mocks__'
@@ -14,7 +14,6 @@ import {
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
 const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
-const vault = '0x8c2A90D36Ec9F745C9B28B588Cba5e2A978A1656'
 const etherscanUrl = 'https://api-kovan.etherscan.io'
 const kovanInfuraUrl = 'https://kovan.infura.io/v3'
 const kovanAlchemyUrl = 'https://eth-kovan.alchemyapi.io/v2'
@@ -387,7 +386,7 @@ describe('Client Test', () => {
     expect(txData.type).toEqual('transfer')
   })
 
-  it('sends a normalTx', async () => {
+  it('ETH transfer', async () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
@@ -402,21 +401,20 @@ describe('Client Test', () => {
       kovanInfuraUrl,
       kovanAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xe389726c5d2bfd8b88f5842f1000635fc672992eb7aaa92d583b207ba51d9946',
+      '0xa6eeb5456d6fc8856d1cd6a1ee86efd3143b41840a7a6ad6d73b406f5a2288e0',
     )
 
     const txResult = await ethClient.transfer({
       recipient: '0x8ced5ad0d8da4ec211c17355ed3dbfec4cf0e5b9',
-      amount: baseAmount(100, ETH_DECIMAL),
+      amount: baseAmount(1001, ETH_DECIMAL),
     })
-    expect(txResult).toEqual('0xe389726c5d2bfd8b88f5842f1000635fc672992eb7aaa92d583b207ba51d9946')
+    expect(txResult).toEqual('0xa6eeb5456d6fc8856d1cd6a1ee86efd3143b41840a7a6ad6d73b406f5a2288e0')
   })
 
-  it('sends a vaultTx', async () => {
+  it('ERC20 transfer', async () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      vault,
     })
 
     mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
@@ -427,23 +425,27 @@ describe('Client Test', () => {
       etherscanUrl,
       kovanInfuraUrl,
       kovanAlchemyUrl,
+      'eth_call',
+      '0x0000000000000000000000000000000000000000000000000000000000000064',
+    )
+    mock_all_api(
+      etherscanUrl,
+      kovanInfuraUrl,
+      kovanAlchemyUrl,
       'eth_sendRawTransaction',
-      '0x6b2ab6fcec41fcd1c292daa0c78dfac6f1fea6cb44eef4b7f6dcfa87a1757083',
+      '0x8899a3c9b88384fce3542cf7409448181f0b2ae72da139193f7cf1802be50b58',
     )
 
     const txHash = await ethClient.transfer({
-      recipient: '0x0000000000000000000000000000000000000000',
-      amount: baseAmount(100, ETH_DECIMAL),
-      memo: 'memo',
+      recipient: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      amount: baseAmount(1000000, ETH_DECIMAL),
+      asset: assetFromString(`${ETHChain}.DAI-0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa`) || undefined,
     })
-    expect(txHash).toEqual('0x6b2ab6fcec41fcd1c292daa0c78dfac6f1fea6cb44eef4b7f6dcfa87a1757083')
+    expect(txHash).toEqual('0x8899a3c9b88384fce3542cf7409448181f0b2ae72da139193f7cf1802be50b58')
   })
 
-  it('sends a erc20Tx', async () => {
-    const ethClient = new Client({
-      network: 'testnet',
-      phrase,
-    })
+  it('estimate gas for eth transfer', async () => {
+    const ethClient = new Client({ network: 'testnet', phrase })
 
     mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
@@ -457,25 +459,93 @@ describe('Client Test', () => {
       '0xcd0e007a6f81120d45478e3eef07c017ec104d4a2a5f1bff23cf0837ba3aab28',
     )
 
-    const txHash = await ethClient.transfer({
-      recipient: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      amount: baseAmount(100, ETH_DECIMAL),
-      asset: assetFromString(`${ETHChain}.USDT-0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa`) || undefined,
-    })
-    expect(txHash).toEqual('0xcd0e007a6f81120d45478e3eef07c017ec104d4a2a5f1bff23cf0837ba3aab28')
-  })
-
-  it('gets gas estimate for a erc20 transfer', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
-    const mockerc20 = jest.spyOn(ethClient, 'estimateGasERC20Tx')
-    mockerc20.mockImplementation(async (_): Promise<BaseAmount> => Promise.resolve(baseAmount(100000, 18)))
-
-    const gasEstimate = await ethClient.estimateGasERC20Tx({
-      assetAddress: '0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8',
+    const gasEstimate = await ethClient.estimateGas({
       recipient: '0x2fe25ca708fc485cf356b2f27399247d91c6edbd',
       amount: baseAmount(1, ETH_DECIMAL),
     })
 
-    expect(gasEstimate.amount().toString()).toEqual(baseAmount(100000, 18).amount().toString())
+    expect(gasEstimate.amount().toString()).toEqual(baseAmount(21000, 18).amount().toString())
+  })
+
+  it('estimate gas for erc20 transfer', async () => {
+    const ethClient = new Client({ network: 'testnet', phrase })
+
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(
+      etherscanUrl,
+      kovanInfuraUrl,
+      kovanAlchemyUrl,
+      'eth_sendRawTransaction',
+      '0xcd0e007a6f81120d45478e3eef07c017ec104d4a2a5f1bff23cf0837ba3aab28',
+    )
+
+    const gasEstimate = await ethClient.estimateGas({
+      asset: assetFromString(`${ETHChain}.DAI-0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa`) || undefined,
+      recipient: '0x2fe25ca708fc485cf356b2f27399247d91c6edbd',
+      amount: baseAmount(1, ETH_DECIMAL),
+    })
+
+    expect(gasEstimate.amount().toString()).toEqual(baseAmount(21000, 18).amount().toString())
+  })
+
+  it('isApproved', async () => {
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+    })
+
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(
+      etherscanUrl,
+      kovanInfuraUrl,
+      kovanAlchemyUrl,
+      'eth_call',
+      '0x0000000000000000000000000000000000000000000000000000000000000064',
+    )
+
+    let isApproved = await ethClient.isApproved(
+      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      baseAmount(100, ETH_DECIMAL),
+    )
+    expect(isApproved).toEqual(true)
+
+    isApproved = await ethClient.isApproved(
+      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      baseAmount(101, ETH_DECIMAL),
+    )
+    expect(isApproved).toEqual(false)
+  })
+
+  it('approve', async () => {
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+    })
+
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(
+      etherscanUrl,
+      kovanInfuraUrl,
+      kovanAlchemyUrl,
+      'eth_sendRawTransaction',
+      '0x14dda501ddbddaf04e1dfde884a3b1b0e751cebe79bc922bead30789d39ed92c',
+    )
+
+    const hash = await ethClient.approve(
+      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      baseAmount(100, ETH_DECIMAL),
+    )
+    expect(hash).toEqual('0x14dda501ddbddaf04e1dfde884a3b1b0e751cebe79bc922bead30789d39ed92c')
   })
 })
