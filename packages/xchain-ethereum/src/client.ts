@@ -387,7 +387,7 @@ export default class Client implements XChainClient, EthereumClient {
         } else {
           tx =
             (
-              await etherscanAPI.getTokenTransactionHistory({
+              await etherscanAPI.getETHTransactionHistory({
                 baseUrl: this.etherscan.baseUrl,
                 startblock: txInfo.blockNumber,
                 endblock: txInfo.blockNumber,
