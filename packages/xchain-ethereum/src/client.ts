@@ -17,35 +17,19 @@ import {
   Fees,
   TxHistoryParams,
   Balances,
-  Txs,
   Network,
 } from '@xchainjs/xchain-client'
-import {
-  AssetETH,
-  baseAmount,
-  baseToAsset,
-  BaseAmount,
-  assetFromString,
-  assetAmount,
-  assetToBase,
-  assetToString,
-  ETHChain,
-} from '@xchainjs/xchain-util'
+import { AssetETH, baseAmount, baseToAsset, BaseAmount, assetToString, Asset } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
-import * as ethplorerAPI from './ethplorer-api'
+import * as etherscanAPI from './etherscan-api'
 import {
+  ETH_DECIMAL,
+  DEFAULT_GASLIMIT,
   ethNetworkToXchains,
   xchainNetworkToEths,
-  ETH_DECIMAL,
-  getTxFromOperation,
-  getTxFromEthTransaction,
-  DEFAULT_GASLIMIT,
   getTokenAddress,
   validateAddress,
-  validateSymbol,
-  ETHPLORER_FREEKEY,
 } from './utils'
-import { getGasOracle } from './etherscan-api'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
 const maxApproval = BigNumber.from(2).pow(256).sub(1)
@@ -79,28 +63,17 @@ export default class Client implements XChainClient, EthereumClient {
   private wallet: ethers.Wallet | null = null
   private provider: Provider
   private etherscan: EtherscanProvider
-  private ethplorerUrl: ClientUrl
-  private ethplorerApiKey = ''
   private explorerUrl: ExplorerUrl
 
   /**
    * Constructor
    * @param {ClientParams} params
    */
-  constructor({
-    network = 'testnet',
-    ethplorerUrl,
-    ethplorerApiKey,
-    explorerUrl,
-    phrase,
-    etherscanApiKey,
-  }: ClientParams) {
+  constructor({ network = 'testnet', explorerUrl, phrase, etherscanApiKey }: ClientParams) {
     this.network = xchainNetworkToEths(network)
     this.provider = getDefaultProvider(this.network)
     this.etherscan = new EtherscanProvider(this.network, etherscanApiKey)
-    this.ethplorerUrl = ethplorerUrl || this.getDefaultEthplorerURL()
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
-    this.ethplorerApiKey = ethplorerApiKey || ETHPLORER_FREEKEY
 
     if (phrase) {
       this.setPhrase(phrase)
@@ -116,16 +89,6 @@ export default class Client implements XChainClient, EthereumClient {
   purgeClient = (): void => {
     this.address = null
     this.wallet = null
-  }
-
-  /**
-   * Set/Update the ethplorer url.
-   *
-   * @param {string} url The new ethplorer url.
-   * @returns {void}
-   */
-  setEthplorerURL = (url: ClientUrl): void => {
-    this.ethplorerUrl = url
   }
 
   /**
@@ -196,37 +159,6 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
-   * Get the ethplorer API url.
-   *
-   * @returns {string} The ethplorer API url for thorchain based on the current network.
-   */
-  getEthplorerUrl = (): string => {
-    return this.getEthplorerUrlByNetwork(this.getNetwork())
-  }
-
-  /**
-   * Get the ethplorer API url.
-   *
-   * @returns {ClientUrl} The ethplorer API url (both mainnet and testnet) for ethereum.
-   */
-  private getDefaultEthplorerURL = (): ClientUrl => {
-    return {
-      testnet: 'https://kovan-api.ethplorer.io',
-      mainnet: 'https://api.ethplorer.io',
-    }
-  }
-
-  /**
-   * Get the ethplorer API url.
-   *
-   * @param {Network} network
-   * @returns {string} The ethplorer API url for ethereum based on the network.
-   */
-  private getEthplorerUrlByNetwork = (network: Network): string => {
-    return this.ethplorerUrl[network]
-  }
-
-  /**
    * Get the explorer url.
    *
    * @returns {string} The explorer url for ethereum based on the current network.
@@ -242,7 +174,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   private getDefaultExplorerURL = (): ExplorerUrl => {
     return {
-      testnet: 'https://kovan.etherscan.io/',
+      testnet: 'https://rinkeby.etherscan.io/',
       mainnet: 'https://etherscan.io/',
     }
   }
@@ -339,41 +271,46 @@ export default class Client implements XChainClient, EthereumClient {
    * Get the ETH balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<ETHBalance>} The all balance of the address.
+   * @returns {Array<Balances>} The all balance of the address.
+   *
+   * @throws {"Invalid asset"} throws when the give asset is an invalid one
    */
-  getBalance = async (address?: Address): Promise<Balances> => {
+  getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
     try {
-      if (!this.ethplorerApiKey) {
-        return Promise.reject(new Error('Missing API Key for Ethplorer'))
-      }
       address = address || this.getAddress()
-      const account = await ethplorerAPI.getAddress(this.getEthplorerUrl(), address, this.ethplorerApiKey)
-      const balances: Balances = [
-        {
-          asset: AssetETH,
-          amount: assetToBase(assetAmount(account.ETH.balance, ETH_DECIMAL)),
-        },
-      ]
 
-      if (account.tokens) {
-        account.tokens.forEach((token) => {
-          const decimals = parseInt(token.tokenInfo.decimals)
-          const { symbol, address: tokenAddress } = token.tokenInfo
-          if (validateSymbol(symbol) && this.validateAddress(tokenAddress)) {
-            const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${tokenAddress}`)
-            if (tokenAsset) {
-              balances.push({
-                asset: tokenAsset,
-                amount: baseAmount(token.balance, decimals),
-              })
-            }
-          }
+      if (asset && assetToString(asset) !== assetToString(AssetETH)) {
+        // Handle token balances
+        const assetAddress = getTokenAddress(asset)
+        if (!assetAddress) {
+          throw new Error('Invalid asset')
+        }
+
+        const balance = await etherscanAPI.getTokenBalance({
+          baseUrl: this.etherscan.baseUrl,
+          address,
+          assetAddress,
+          apiKey: this.etherscan.apiKey,
         })
+        const decimals = await this.call<BigNumberish>(assetAddress, erc20ABI, 'decimals', [])
+        return [
+          {
+            asset,
+            amount: baseAmount(balance.toString(), BigNumber.from(decimals).toNumber() || ETH_DECIMAL),
+          },
+        ]
+      } else {
+        // Handle ETH balances
+        const balance = await this.etherscan.getBalance(address)
+        return [
+          {
+            asset: AssetETH,
+            amount: baseAmount(balance.toString(), ETH_DECIMAL),
+          },
+        ]
       }
-
-      return balances
     } catch (error) {
-      return Promise.reject(new Error('Invalid address'))
+      return Promise.reject(error)
     }
   }
 
@@ -383,50 +320,37 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
-   *
-   * @throws {"Need to provide ethplorer API key for token transactions"}
-   * Thrown if the ethplorer API key is not provided.
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     try {
       const address = params?.address || this.getAddress()
-      const limit = params?.limit || 10
-      const startTime = params?.startTime
+      const page = params?.offset || 1
+      const offset = params?.limit
       const assetAddress = params?.asset
 
-      if (assetAddress && !this.ethplorerApiKey) {
-        throw new Error('Need to provide ethplorer API key for token transactions')
-      }
-
+      let transations
       if (assetAddress) {
-        const tokenTransactions = await ethplorerAPI.getAddressHistory(
-          this.getEthplorerUrl(),
+        transations = await etherscanAPI.getTokenTransactionHistory({
+          baseUrl: this.etherscan.baseUrl,
           address,
           assetAddress,
-          limit,
-          startTime && startTime.getTime() / 1000,
-          this.ethplorerApiKey,
-        )
-        return {
-          total: tokenTransactions.length,
-          txs: tokenTransactions.reduce((acc, cur) => {
-            const tx = getTxFromOperation(cur)
-            return tx ? [...acc, tx] : acc
-          }, [] as Txs),
-        }
+          page,
+          offset,
+          apiKey: this.etherscan.apiKey,
+        })
       } else {
-        const ethTransactions = await ethplorerAPI.getAddressTransactions(
-          this.getEthplorerUrl(),
+        transations = await etherscanAPI.getETHTransactionHistory({
+          baseUrl: this.etherscan.baseUrl,
           address,
-          limit,
-          startTime && startTime.getTime() / 1000,
-          this.ethplorerApiKey,
-        )
+          page,
+          offset,
+          apiKey: this.etherscan.apiKey,
+        })
+      }
 
-        return {
-          total: ethTransactions.length,
-          txs: ethTransactions.map(getTxFromEthTransaction),
-        }
+      return {
+        total: transations.length,
+        txs: transations,
       }
     } catch (error) {
       return Promise.reject(error)
@@ -437,25 +361,47 @@ export default class Client implements XChainClient, EthereumClient {
    * Get the transaction details of a given transaction id.
    *
    * @param {string} txId The transaction id.
+   * @param {string} assetAddress The asset address. (optional)
    * @returns {Tx} The transaction details of the given transaction id.
    *
    * @throws {"Need to provide valid txId"}
    * Thrown if the given txId is invalid.
    */
-  getTransactionData = async (txId: string): Promise<Tx> => {
+  getTransactionData = async (txId: string, assetAddress?: string): Promise<Tx> => {
     try {
-      const txInfo = await ethplorerAPI.getTxInfo(this.getEthplorerUrl(), txId, this.ethplorerApiKey)
+      let tx
+      const txInfo = await this.etherscan.getTransaction(txId)
 
-      if (txInfo.operations && txInfo.operations.length > 0) {
-        const tx = getTxFromOperation(txInfo.operations[0])
-        if (!tx) {
-          throw new Error('Need to provide valid txId')
+      if (txInfo) {
+        if (assetAddress) {
+          tx =
+            (
+              await etherscanAPI.getTokenTransactionHistory({
+                baseUrl: this.etherscan.baseUrl,
+                assetAddress,
+                startblock: txInfo.blockNumber,
+                endblock: txInfo.blockNumber,
+                apiKey: this.etherscan.apiKey,
+              })
+            ).find((info) => info.hash === txId) ?? null
+        } else {
+          tx =
+            (
+              await etherscanAPI.getETHTransactionHistory({
+                baseUrl: this.etherscan.baseUrl,
+                startblock: txInfo.blockNumber,
+                endblock: txInfo.blockNumber,
+                apiKey: this.etherscan.apiKey,
+              })
+            ).find((info) => info.hash === txId) ?? null
         }
-
-        return tx
-      } else {
-        return getTxFromEthTransaction(txInfo)
       }
+
+      if (!tx) {
+        throw new Error('Need to provide valid txId')
+      }
+
+      return tx
     } catch (error) {
       return Promise.reject(error)
     }
@@ -588,7 +534,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {Fees} The current gas price.
    */
   getFees = async (): Promise<Fees> => {
-    return getGasOracle(this.etherscan.baseUrl, this.etherscan.apiKey).then(
+    return etherscanAPI.getGasOracle(this.etherscan.baseUrl, this.etherscan.apiKey).then(
       (response: GasOracleResponse): Fees => ({
         type: 'base',
         average: baseAmount(response.SafeGasPrice, ETH_DECIMAL),

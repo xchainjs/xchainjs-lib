@@ -1,6 +1,6 @@
 import { Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
-import { baseAmount, AssetETH, assetFromString, assetAmount, assetToBase, ETHChain, Asset } from '@xchainjs/xchain-util'
-import { Network as EthNetwork, TransactionOperation, TransactionInfo, Address } from './types'
+import { Asset, AssetETH, assetFromString, baseAmount, ETHChain } from '@xchainjs/xchain-util'
+import { Network as EthNetwork, Address, ETHTransactionInfo, TokenTransactionInfo } from './types'
 import { ethers } from 'ethers'
 
 export const ETH_DECIMAL = 18
@@ -84,14 +84,15 @@ export const getTokenAddress = (asset: Asset | null): string | null => {
 export const validateSymbol = (symbol?: string | null): boolean => (symbol ? symbol.length >= 3 : false)
 
 /**
- * Get transactions from operation
+ * Get transactions from token tx
  *
- * @param {TransactionOperation} operation
+ * @param {TokenTransactionInfo} tx
  * @returns {Tx|null} The parsed transaction.
  */
-export const getTxFromOperation = (operation: TransactionOperation): Tx | null => {
-  const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
-  const { symbol, address } = operation.tokenInfo
+export const getTxFromTokenTransaction = (tx: TokenTransactionInfo): Tx | null => {
+  const decimals = parseInt(tx.tokenDecimal) || ETH_DECIMAL
+  const symbol = tx.tokenSymbol
+  const address = tx.contractAddress
   if (validateSymbol(symbol) && validateAddress(address)) {
     const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${address}`)
     if (tokenAsset) {
@@ -99,19 +100,19 @@ export const getTxFromOperation = (operation: TransactionOperation): Tx | null =
         asset: tokenAsset,
         from: [
           {
-            from: operation.from,
-            amount: baseAmount(operation.value, decimals),
+            from: tx.from,
+            amount: baseAmount(tx.value, decimals),
           },
         ],
         to: [
           {
-            to: operation.to,
-            amount: baseAmount(operation.value, decimals),
+            to: tx.to,
+            amount: baseAmount(tx.value, decimals),
           },
         ],
-        date: new Date(operation.timestamp * 1000),
-        type: operation.type === 'transfer' ? 'transfer' : 'unknown',
-        hash: operation.transactionHash,
+        date: new Date(tx.timeStamp),
+        type: 'transfer',
+        hash: tx.hash,
       }
     }
   }
@@ -122,27 +123,27 @@ export const getTxFromOperation = (operation: TransactionOperation): Tx | null =
 /**
  * Get transactions from ETH transaction
  *
- * @param {TransactionInfo} txInfo
+ * @param {ETHTransactionInfo} tx
  * @returns {Tx} The parsed transaction.
  */
-export const getTxFromEthTransaction = (txInfo: TransactionInfo): Tx => {
+export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
   return {
     asset: AssetETH,
     from: [
       {
-        from: txInfo.from,
-        amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
+        from: tx.from,
+        amount: baseAmount(tx.value, ETH_DECIMAL),
       },
     ],
     to: [
       {
-        to: txInfo.to,
-        amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
+        to: tx.to,
+        amount: baseAmount(tx.value, ETH_DECIMAL),
       },
     ],
-    date: new Date(txInfo.timestamp * 1000),
+    date: new Date(tx.timeStamp),
     type: 'transfer',
-    hash: txInfo.hash,
+    hash: tx.hash,
   }
 }
 

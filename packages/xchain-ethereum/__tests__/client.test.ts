@@ -5,18 +5,18 @@ import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
 import { mock_all_api } from '../__mocks__'
 import {
-  mock_ethplorer_api_getAddress,
-  mock_ethplorer_api_getTxInfo,
-  mock_ethplorer_api_getAddressTransactions,
-  mock_ethplorer_api_getAddressHistory,
-} from '../__mocks__/ethplorer-api'
+  mock_etherscan_balance_api,
+  mock_etherscan_tokenbalance_api,
+  mock_etherscan_eth_txs_api,
+  mock_etherscan_token_txs_api,
+} from '../__mocks__/etherscan-api'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
 const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
-const etherscanUrl = 'https://api-kovan.etherscan.io'
-const kovanInfuraUrl = 'https://kovan.infura.io/v3'
-const kovanAlchemyUrl = 'https://eth-kovan.alchemyapi.io/v2'
+const etherscanUrl = 'https://api-rinkeby.etherscan.io'
+const rinkebyInfuraUrl = 'https://rinkeby.infura.io/v3'
+const rinkebyAlchemyUrl = 'https://eth-rinkeby.alchemyapi.io/v2'
 const wallet = {
   signingKey: {
     curve: 'secp256k1',
@@ -89,8 +89,8 @@ describe('Client Test', () => {
     ethClient.setNetwork('testnet')
 
     const network = await ethClient.getWallet().provider.getNetwork()
-    expect(network.name).toEqual('kovan')
-    expect(network.chainId).toEqual(42)
+    expect(network.name).toEqual('rinkeby')
+    expect(network.chainId).toEqual(4)
   })
 
   it('should get address', () => {
@@ -121,89 +121,55 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      ethplorerApiKey: 'ethplorerApiKey',
     })
 
-    mock_ethplorer_api_getAddress(ethClient.getEthplorerUrl(), ethClient.getAddress(), {
-      address: ethClient.getAddress(),
-      ETH: {
-        balance: 100,
-        price: {
-          rate: 1196.5425814145788,
-          diff: 11.71,
-          diff7d: 62.3,
-          ts: 1609987982,
-          marketCapUsd: 136582198332.62915,
-          availableSupply: 114147377.999,
-          volume24h: 44933107598.39366,
-          diff30d: 108.688017487141,
-          volDiff1: 7.230942506781318,
-          volDiff7: 81.97257329720685,
-          volDiff30: 16.64321146720964,
-        },
-      },
-      tokens: [],
-      countTxs: 1,
-    })
+    mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
 
     const balance = await ethClient.getBalance()
     expect(balance.length).toEqual(1)
-    expect(balance[0].asset).toEqual(AssetETH)
-    expect(balance[0].amount.amount().isEqualTo(baseAmount('100000000000000000000', ETH_DECIMAL).amount())).toBeTruthy()
+    expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
+    expect(balance[0].amount.amount().isEqualTo(baseAmount('96713467036431545', ETH_DECIMAL).amount())).toBeTruthy()
   })
 
   it('gets a balance from address', async () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      ethplorerApiKey: 'ethplorerApiKey',
     })
 
-    mock_ethplorer_api_getAddress(ethClient.getEthplorerUrl(), '0x12d4444f96c644385d8ab355f6ddf801315b6254', {
-      address: '0x12d4444f96c644385d8ab355f6ddf801315b6254',
-      ETH: {
-        balance: 100,
-        price: {
-          rate: 1196.5425814145788,
-          diff: 11.71,
-          diff7d: 62.3,
-          ts: 1609987982,
-          marketCapUsd: 136582198332.62915,
-          availableSupply: 114147377.999,
-          volume24h: 44933107598.39366,
-          diff30d: 108.688017487141,
-          volDiff1: 7.230942506781318,
-          volDiff7: 81.97257329720685,
-          volDiff30: 16.64321146720964,
-        },
-      },
-      tokens: [
-        {
-          balance: 1000,
-          tokenInfo: {
-            address: '0x2306934ca884caa042dc595371003093092b2bbf',
-            decimals: '18',
-            name: 'tomatos.finance',
-            owner: '0x',
-            symbol: 'TOMATOS',
-            totalSupply: '1000000000000000000000000000',
-            lastUpdated: 1609117980,
-            issuancesCount: 0,
-            holdersCount: 3181,
-            ethTransfersCount: 0,
-            price: false,
-          },
-        },
-      ],
-      countTxs: 1,
-    })
+    mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
 
-    const balance = await ethClient.getBalance('0x12d4444f96c644385d8ab355f6ddf801315b6254')
-    expect(balance.length).toEqual(2)
+    const balance = await ethClient.getBalance('0x8d8ac01b3508ca869cb631bb2977202fbb574a0d')
+    expect(balance.length).toEqual(1)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
-    expect(balance[0].amount.amount().isEqualTo(baseAmount('100000000000000000000', ETH_DECIMAL).amount())).toBeTruthy()
-    expect(balance[1].asset.symbol).toEqual('TOMATOS-0x2306934ca884caa042dc595371003093092b2bbf')
-    expect(balance[1].amount.amount().isEqualTo(baseAmount(1000, 18).amount())).toBeTruthy()
+    expect(balance[0].amount.amount().isEqualTo(baseAmount('96713467036431545', ETH_DECIMAL).amount())).toBeTruthy()
+  })
+
+  it('gets erc20 token balance', async () => {
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+    })
+
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_etherscan_tokenbalance_api(etherscanUrl, '96713467036431545')
+    mock_all_api(
+      etherscanUrl,
+      rinkebyInfuraUrl,
+      rinkebyAlchemyUrl,
+      'eth_call',
+      '0x0000000000000000000000000000000000000000000000000000000000000012',
+    )
+
+    const asset = assetFromString(`${ETHChain}.DAI-0xc7ad46e0b8a400bb3c915120d284aafba8fc4735`) ?? undefined
+    const balance = await ethClient.getBalance(undefined, asset)
+    expect(balance.length).toEqual(1)
+    expect(assetToString(balance[0].asset)).toEqual(assetToString(asset ?? AssetETH))
+    expect(balance[0].amount.decimal).toEqual(18)
+    expect(balance[0].amount.amount().isEqualTo(baseAmount('96713467036431545', 18).amount())).toBeTruthy()
   })
 
   it('throws error on bad address', async () => {
@@ -219,36 +185,40 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_ethplorer_api_getAddressTransactions(
-      ethClient.getEthplorerUrl(),
-      '0xff71cb760666ab06aa73f34995b42dd4b85ea07b',
-      [
-        {
-          timestamp: 1603667072,
-          from: '0xd3330a2f2fb4075335b9f2a682a5a550ffdadd6a',
-          to: '0xff71cb760666ab06aa73f34995b42dd4b85ea07b',
-          hash: '0x22e1e4f7395fed6f0e86d1f36ad65c884d0680c3a7b4d003ea7f21d8d7995a4a',
-          value: 0.0102004945,
-          input: '0x',
-          success: true,
-        },
-      ],
-    )
+    mock_etherscan_eth_txs_api(etherscanUrl, [
+      {
+        blockNumber: '7937085',
+        timeStamp: '1611284369',
+        hash: '0x40565f6d4cbe1c339decce9769fc94fcc868be98faba4429b79aa4ad2bb26ab4',
+        from: '0x7a250d5630b4cf539739df2c5dacb4c659f2488d',
+        to: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
+        value: '150023345036431545',
+        contractAddress: '',
+        input: '',
+        type: 'call',
+        gas: '0',
+        gasUsed: '0',
+        traceId: '0_1',
+        isError: '0',
+        errCode: '',
+      },
+    ])
 
     const txHistory = await ethClient.getTransactions({
-      address: '0xff71cb760666ab06aa73f34995b42dd4b85ea07b',
+      address,
       limit: 1,
     })
+
     expect(txHistory.total).toEqual(1)
-    expect(txHistory.txs[0].hash).toEqual('0x22e1e4f7395fed6f0e86d1f36ad65c884d0680c3a7b4d003ea7f21d8d7995a4a')
+    expect(txHistory.txs[0].hash).toEqual('0x40565f6d4cbe1c339decce9769fc94fcc868be98faba4429b79aa4ad2bb26ab4')
     expect(assetToString(txHistory.txs[0].asset)).toEqual(assetToString(AssetETH))
-    expect(txHistory.txs[0].from[0].from).toEqual('0xd3330a2f2fb4075335b9f2a682a5a550ffdadd6a')
+    expect(txHistory.txs[0].from[0].from).toEqual('0x7a250d5630b4cf539739df2c5dacb4c659f2488d')
     expect(
-      txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount('10200494500000000', ETH_DECIMAL).amount()),
+      txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount('150023345036431545', ETH_DECIMAL).amount()),
     ).toBeTruthy()
-    expect(txHistory.txs[0].to[0].to).toEqual('0xff71cb760666ab06aa73f34995b42dd4b85ea07b')
+    expect(txHistory.txs[0].to[0].to).toEqual('0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e')
     expect(
-      txHistory.txs[0].to[0].amount.amount().isEqualTo(baseAmount('10200494500000000', ETH_DECIMAL).amount()),
+      txHistory.txs[0].to[0].amount.amount().isEqualTo(baseAmount('150023345036431545', ETH_DECIMAL).amount()),
     ).toBeTruthy()
     expect(txHistory.txs[0].type).toEqual('transfer')
   })
@@ -257,132 +227,114 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      ethplorerApiKey: 'api-key',
     })
 
-    mock_ethplorer_api_getAddressHistory(ethClient.getEthplorerUrl(), address, [
+    mock_etherscan_token_txs_api(etherscanUrl, [
       {
-        timestamp: 1610014043,
-        transactionHash: '0x042f4c15f379ea9d15adf31df62024ae1738fafbef2267460a046295e2e28046',
-        tokenInfo: {
-          address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-          name: 'Tether USD',
-          decimals: '6',
-          symbol: 'USDT',
-          totalSupply: '14040316718197079',
-          owner: '0xc6cde7c39eb2f0f0095f41570af89efc2c1ea828',
-          txsCount: 78093026,
-          transfersCount: 82658394,
-          lastUpdated: 1610070598,
-          issuancesCount: 0,
-          holdersCount: 2324375,
-          website: 'https://tether.to/',
-          twitter: 'Tether_to',
-          image: '/images/tether.png',
-          facebook: 'tether.to',
-          coingecko: 'tether',
-          ethTransfersCount: 0,
-          price: {
-            rate: 1.00018102460765,
-            diff: -0.16,
-            diff7d: -0.08,
-            ts: 1610070308,
-            marketCapUsd: 23460968852.67532,
-            availableSupply: 23456722608.66833,
-            volume24h: 129342312569.62343,
-            diff30d: -0.004226854901574484,
-            volDiff1: 10.400245909757658,
-            volDiff7: 65.49381861802408,
-            volDiff30: 31.788420372084232,
-            currency: 'USD',
-          },
-          publicTags: ['Stablecoins'],
-        },
-        type: 'transfer',
-        value: '103000000',
-        from: '0xf743cce2be90dd1d1ea13860a238fa4713d552ab',
-        to: '0xe242271f229e4a7e3f3d555d5b0f86a412f24123',
+        blockNumber: '7937097',
+        timeStamp: '1611284549',
+        hash: '0x84f28d86da01417a35e448f62248b9dee40261be82496275495bb0f0de6c8a1e',
+        nonce: '11',
+        blockHash: '0x460e054d7420823b4d6110045593d33ec82a040df8f1e47371bf3a52ab54910a',
+        from: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
+        contractAddress: '0x01be23585060835e02b77ef475b0cc51aa1e0709',
+        to: '0x0d1e5112b7bf0595837f6e19a8233e8b918ef3aa',
+        value: '200000000000000000000',
+        tokenName: 'ChainLink Token',
+        tokenSymbol: 'LINK',
+        tokenDecimal: '18',
+        transactionIndex: '3',
+        gas: '219318',
+        gasPrice: '1000000000',
+        gasUsed: '188808',
+        cumulativeGasUsed: '680846',
+        input: 'deprecated',
+        confirmations: '11597',
       },
     ])
 
     const txHistory = await ethClient.getTransactions({
       address,
+      offset: 1,
       limit: 1,
-      asset: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      asset: '0x01be23585060835e02b77ef475b0cc51aa1e0709',
     })
     expect(txHistory.total).toEqual(1)
-    expect(txHistory.txs[0].hash).toEqual('0x042f4c15f379ea9d15adf31df62024ae1738fafbef2267460a046295e2e28046')
-    expect(txHistory.txs[0].asset.symbol).toEqual('USDT-0xdac17f958d2ee523a2206206994597c13d831ec7')
-    expect(txHistory.txs[0].from[0].from).toEqual('0xf743cce2be90dd1d1ea13860a238fa4713d552ab')
-    expect(txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount('103000000', 6).amount())).toBeTruthy()
-    expect(txHistory.txs[0].to[0].to).toEqual('0xe242271f229e4a7e3f3d555d5b0f86a412f24123')
-    expect(txHistory.txs[0].to[0].amount.amount().isEqualTo(baseAmount('103000000', 6).amount())).toBeTruthy()
+    expect(txHistory.txs[0].hash).toEqual('0x84f28d86da01417a35e448f62248b9dee40261be82496275495bb0f0de6c8a1e')
+    expect(txHistory.txs[0].asset.symbol).toEqual('LINK-0x01be23585060835e02b77ef475b0cc51aa1e0709')
+    expect(txHistory.txs[0].from[0].from).toEqual('0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e')
+    expect(
+      txHistory.txs[0].from[0].amount.amount().isEqualTo(baseAmount('200000000000000000000', 18).amount()),
+    ).toBeTruthy()
+    expect(txHistory.txs[0].to[0].to).toEqual('0x0d1e5112b7bf0595837f6e19a8233e8b918ef3aa')
+    expect(
+      txHistory.txs[0].to[0].amount.amount().isEqualTo(baseAmount('200000000000000000000', 18).amount()),
+    ).toBeTruthy()
     expect(txHistory.txs[0].type).toEqual('transfer')
   })
 
   it('get transaction data', async () => {
     const ethClient = new Client({
-      network: 'mainnet',
+      network: 'testnet',
       phrase,
     })
 
-    mock_ethplorer_api_getTxInfo(
-      ethClient.getEthplorerUrl(),
-      '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionByHash', {
+      blockHash: '0x460e054d7420823b4d6110045593d33ec82a040df8f1e47371bf3a52ab54910a',
+      blockNumber: '0x791c49',
+      from: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
+      gas: '0x358b6',
+      gasPrice: '0x3b9aca00',
+      hash: '0x84f28d86da01417a35e448f62248b9dee40261be82496275495bb0f0de6c8a1e',
+      input:
+        '0x38ed173900000000000000000000000000000000000000000000000ad78ebc5ac62000000000000000000000000000000000000000000000000000007abf2a9d39bcfaf800000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000b8c0c226d6fe17e5d9132741836c3ae82a5b6c4e00000000000000000000000000000000000000000000000000000000600a44c8000000000000000000000000000000000000000000000000000000000000000300000000000000000000000001be23585060835e02b77ef475b0cc51aa1e0709000000000000000000000000c778417e063141139fce010982780140aa0cd5ab0000000000000000000000001f9840a85d5af5bf1d1762f925bdaddc4201f984',
+      nonce: '0xb',
+      to: '0x7a250d5630b4cf539739df2c5dacb4c659f2488d',
+      transactionIndex: '0x3',
+      value: '0x0',
+      v: '0x2c',
+      r: '0x933df8626f5d58ab156fee63948fc4a9caffbcbd583d8e813dacbac6ca016077',
+      s: '0x1dd7659476b58823b4d23aca9a4a91e89c5840fe7e34c01c4e9a10c571c9ef44',
+    })
+    mock_etherscan_token_txs_api(etherscanUrl, [
       {
-        hash: '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
-        timestamp: 1604254250,
-        blockNumber: 11172738,
-        confirmations: 433964,
-        success: true,
-        from: '0xbabeae03735f9ed247f73978fe912028c9b5e828',
-        to: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
-        value: 0,
-        input:
-          '0xa9059cbb000000000000000000000000e40ec68d7dccb6a7314d0faf6d33a4d72483cd770000000000000000000000000000000000000000000000000000048c27395000',
-        gasLimit: 80952,
-        gasUsed: 53968,
-        logs: [],
-        operations: [
-          {
-            timestamp: 1604254250,
-            transactionHash: '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
-            value: '1000',
-            intValue: 1000,
-            type: 'transfer',
-            isEth: false,
-            priority: 203,
-            from: '0xbabeae03735f9ed247f73978fe912028c9b5e828',
-            to: '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77',
-            addresses: ['0xbabeae03735f9ed247f73978fe912028c9b5e828', '0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77'],
-            tokenInfo: {
-              address: '0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85',
-              decimals: '6',
-              name: 'MEMEI',
-              symbol: 'MEI',
-              totalSupply: '74075000000000',
-              lastUpdated: 1609732766,
-              owner: '0x',
-              issuancesCount: 0,
-              holdersCount: 1557,
-              ethTransfersCount: 0,
-              price: false,
-            },
-          },
-        ],
+        blockNumber: '7937097',
+        timeStamp: '1611284549',
+        hash: '0x84f28d86da01417a35e448f62248b9dee40261be82496275495bb0f0de6c8a1e',
+        nonce: '11',
+        blockHash: '0x460e054d7420823b4d6110045593d33ec82a040df8f1e47371bf3a52ab54910a',
+        from: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
+        contractAddress: '0x01be23585060835e02b77ef475b0cc51aa1e0709',
+        to: '0x0d1e5112b7bf0595837f6e19a8233e8b918ef3aa',
+        value: '200000000000000000000',
+        tokenName: 'ChainLink Token',
+        tokenSymbol: 'LINK',
+        tokenDecimal: '18',
+        transactionIndex: '3',
+        gas: '219318',
+        gasPrice: '1000000000',
+        gasUsed: '188808',
+        cumulativeGasUsed: '680846',
+        input: 'deprecated',
+        confirmations: '11597',
       },
-    )
+    ])
 
     const txData = await ethClient.getTransactionData(
-      '0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c',
+      '0x84f28d86da01417a35e448f62248b9dee40261be82496275495bb0f0de6c8a1e',
+      '0x01be23585060835e02b77ef475b0cc51aa1e0709',
     )
 
-    expect(txData.hash).toEqual('0xc058a6e70f043f0887ba0d43198fb31f1752632ef06f7e975e193160fd14897c')
-    expect(txData.asset.symbol).toEqual('MEI-0x7ee158dab5b5b7f0bb0c8e5192c563666e7cdd85')
-    expect(txData.from[0].from).toEqual('0xbabeae03735f9ed247f73978fe912028c9b5e828')
-    expect(txData.from[0].amount.amount().isEqualTo(baseAmount(1000, 6).amount())).toBeTruthy()
-    expect(txData.to[0].to).toEqual('0xe40ec68d7dccb6a7314d0faf6d33a4d72483cd77')
-    expect(txData.to[0].amount.amount().isEqualTo(baseAmount(1000, 6).amount())).toBeTruthy()
+    expect(txData.hash).toEqual('0x84f28d86da01417a35e448f62248b9dee40261be82496275495bb0f0de6c8a1e')
+    expect(txData.asset.symbol).toEqual('LINK-0x01be23585060835e02b77ef475b0cc51aa1e0709')
+    expect(txData.from[0].from).toEqual('0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e')
+    expect(txData.from[0].amount.amount().isEqualTo(baseAmount(200000000000000000000, 18).amount())).toBeTruthy()
+    expect(txData.to[0].to).toEqual('0x0d1e5112b7bf0595837f6e19a8233e8b918ef3aa')
+    expect(txData.to[0].amount.amount().isEqualTo(baseAmount(200000000000000000000, 18).amount())).toBeTruthy()
     expect(txData.type).toEqual('transfer')
   })
 
@@ -392,23 +344,23 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      kovanInfuraUrl,
-      kovanAlchemyUrl,
+      rinkebyInfuraUrl,
+      rinkebyAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xa6eeb5456d6fc8856d1cd6a1ee86efd3143b41840a7a6ad6d73b406f5a2288e0',
+      '0x595e89d0129f5ae6aafad1da3ae85fb8accc0132c89dbc1feff90d584c5f587d',
     )
 
     const txResult = await ethClient.transfer({
       recipient: '0x8ced5ad0d8da4ec211c17355ed3dbfec4cf0e5b9',
       amount: baseAmount(1001, ETH_DECIMAL),
     })
-    expect(txResult).toEqual('0xa6eeb5456d6fc8856d1cd6a1ee86efd3143b41840a7a6ad6d73b406f5a2288e0')
+    expect(txResult).toEqual('0x595e89d0129f5ae6aafad1da3ae85fb8accc0132c89dbc1feff90d584c5f587d')
   })
 
   it('ERC20 transfer', async () => {
@@ -417,23 +369,23 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      kovanInfuraUrl,
-      kovanAlchemyUrl,
+      rinkebyInfuraUrl,
+      rinkebyAlchemyUrl,
       'eth_call',
       '0x0000000000000000000000000000000000000000000000000000000000000064',
     )
     mock_all_api(
       etherscanUrl,
-      kovanInfuraUrl,
-      kovanAlchemyUrl,
+      rinkebyInfuraUrl,
+      rinkebyAlchemyUrl,
       'eth_sendRawTransaction',
-      '0x8899a3c9b88384fce3542cf7409448181f0b2ae72da139193f7cf1802be50b58',
+      '0x322e5e48a0357dae04c1cf6e1408e7887fe30388ab6c9eaf2c8e25242a7f7c3e',
     )
 
     const txHash = await ethClient.transfer({
@@ -441,20 +393,20 @@ describe('Client Test', () => {
       amount: baseAmount(1000000, ETH_DECIMAL),
       asset: assetFromString(`${ETHChain}.DAI-0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa`) || undefined,
     })
-    expect(txHash).toEqual('0x8899a3c9b88384fce3542cf7409448181f0b2ae72da139193f7cf1802be50b58')
+    expect(txHash).toEqual('0x322e5e48a0357dae04c1cf6e1408e7887fe30388ab6c9eaf2c8e25242a7f7c3e')
   })
 
   it('estimate gas for eth transfer', async () => {
     const ethClient = new Client({ network: 'testnet', phrase })
 
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      kovanInfuraUrl,
-      kovanAlchemyUrl,
+      rinkebyInfuraUrl,
+      rinkebyAlchemyUrl,
       'eth_sendRawTransaction',
       '0xcd0e007a6f81120d45478e3eef07c017ec104d4a2a5f1bff23cf0837ba3aab28',
     )
@@ -470,14 +422,14 @@ describe('Client Test', () => {
   it('estimate gas for erc20 transfer', async () => {
     const ethClient = new Client({ network: 'testnet', phrase })
 
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      kovanInfuraUrl,
-      kovanAlchemyUrl,
+      rinkebyInfuraUrl,
+      rinkebyAlchemyUrl,
       'eth_sendRawTransaction',
       '0xcd0e007a6f81120d45478e3eef07c017ec104d4a2a5f1bff23cf0837ba3aab28',
     )
@@ -497,13 +449,13 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(
       etherscanUrl,
-      kovanInfuraUrl,
-      kovanAlchemyUrl,
+      rinkebyInfuraUrl,
+      rinkebyAlchemyUrl,
       'eth_call',
       '0x0000000000000000000000000000000000000000000000000000000000000064',
     )
@@ -529,16 +481,16 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, kovanInfuraUrl, kovanAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      kovanInfuraUrl,
-      kovanAlchemyUrl,
+      rinkebyInfuraUrl,
+      rinkebyAlchemyUrl,
       'eth_sendRawTransaction',
-      '0x14dda501ddbddaf04e1dfde884a3b1b0e751cebe79bc922bead30789d39ed92c',
+      '0xbe7340bf40f50e250ded48f848ecafbd964034cc7de05feb5b04f36de40dcb2d',
     )
 
     const hash = await ethClient.approve(
@@ -546,6 +498,6 @@ describe('Client Test', () => {
       '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
       baseAmount(100, ETH_DECIMAL),
     )
-    expect(hash).toEqual('0x14dda501ddbddaf04e1dfde884a3b1b0e751cebe79bc922bead30789d39ed92c')
+    expect(hash).toEqual('0xbe7340bf40f50e250ded48f848ecafbd964034cc7de05feb5b04f36de40dcb2d')
   })
 })
