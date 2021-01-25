@@ -9,7 +9,6 @@ import {
   mock_etherscan_tokenbalance_api,
   mock_etherscan_eth_txs_api,
   mock_etherscan_token_txs_api,
-  mock_etherscan_txdata_api,
 } from '../__mocks__/etherscan-api'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
@@ -280,7 +279,11 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_etherscan_txdata_api(etherscanUrl, {
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionByHash', {
       blockHash: '0x460e054d7420823b4d6110045593d33ec82a040df8f1e47371bf3a52ab54910a',
       blockNumber: '0x791c49',
       from: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',

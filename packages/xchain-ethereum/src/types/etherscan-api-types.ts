@@ -5,21 +5,9 @@ export type GasOracleResponse = {
   FastGasPrice?: string
 }
 
-export type TransactionHash = {
-  blockHash: string
-  blockNumber: string
-  from: string
-  gas: string
-  gasPrice: string
-  hash: string
-  input: string
-  nonce: string
-  to: string
-  transactionIndex: string
-  value: string
-  v: string
-  r: string
-  s: string
+export type TokenBalanceParam = {
+  address: string
+  assetAddress: string
 }
 
 export type TransactionHistoryParam = {

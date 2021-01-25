@@ -1,7 +1,7 @@
 import nock from 'nock'
-import { ETHTransactionInfo, TokenTransactionInfo, TransactionHash } from '../src/types'
+import { ETHTransactionInfo, TokenTransactionInfo } from '../src/types'
 
-export const mock_etherscan_api = (url: string, method: string, result: string) => {
+export const mock_etherscan_api = (url: string, method: string, result: string | Object) => {
   nock(url)
     .get('/api')
     .query(param => param.module === 'proxy' && param.action === method)
@@ -57,20 +57,6 @@ export const mock_etherscan_token_txs_api = (url: string, result: TokenTransacti
     .get('/api')
     .query(param => {
       return param.module === 'account' && param.action === 'tokentx'
-    })
-    .reply(200, {
-      status: '1',
-      message: 'OK',
-      result,
-    })
-  
-}
-
-export const mock_etherscan_txdata_api = (url: string, result: TransactionHash) => {
-  nock(url)
-    .get('/api')
-    .query(param => {
-      return param.module === 'proxy' && param.action === 'eth_getTransactionByHash'
     })
     .reply(200, {
       status: '1',

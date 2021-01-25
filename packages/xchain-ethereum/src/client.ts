@@ -286,22 +286,22 @@ export default class Client implements XChainClient, EthereumClient {
           throw new Error('Invalid asset')
         }
 
-        const balance = await etherscanAPI.getTokenBalance(
-          this.etherscan.baseUrl,
+        const balance = await etherscanAPI.getTokenBalance({
+          baseUrl: this.etherscan.baseUrl,
           address,
           assetAddress,
-          this.etherscan.apiKey,
-        )
-        const decimal = await this.call<BigNumberish>(assetAddress, erc20ABI, 'decimals', [])
+          apiKey: this.etherscan.apiKey,
+        })
+        const decimals = await this.call<BigNumberish>(assetAddress, erc20ABI, 'decimals', [])
         return [
           {
             asset,
-            amount: baseAmount(balance.toString(), parseInt(decimal.toString())),
+            amount: baseAmount(balance.toString(), BigNumber.from(decimals).toNumber() || ETH_DECIMAL),
           },
         ]
       } else {
         // Handle ETH balances
-        const balance = await etherscanAPI.getETHbalance(this.etherscan.baseUrl, address, this.etherscan.apiKey)
+        const balance = await this.etherscan.getBalance(address)
         return [
           {
             asset: AssetETH,
@@ -330,26 +330,22 @@ export default class Client implements XChainClient, EthereumClient {
 
       let transations
       if (assetAddress) {
-        transations = await etherscanAPI.getTokenTransactionHistory(
-          this.etherscan.baseUrl,
-          {
-            address,
-            assetAddress,
-            page,
-            offset,
-          },
-          this.etherscan.apiKey,
-        )
+        transations = await etherscanAPI.getTokenTransactionHistory({
+          baseUrl: this.etherscan.baseUrl,
+          address,
+          assetAddress,
+          page,
+          offset,
+          apiKey: this.etherscan.apiKey,
+        })
       } else {
-        transations = await etherscanAPI.getETHTransactionHistory(
-          this.etherscan.baseUrl,
-          {
-            address,
-            page,
-            offset,
-          },
-          this.etherscan.apiKey,
-        )
+        transations = await etherscanAPI.getETHTransactionHistory({
+          baseUrl: this.etherscan.baseUrl,
+          address,
+          page,
+          offset,
+          apiKey: this.etherscan.apiKey,
+        })
       }
 
       return {
@@ -365,15 +361,41 @@ export default class Client implements XChainClient, EthereumClient {
    * Get the transaction details of a given transaction id.
    *
    * @param {string} txId The transaction id.
-   * @param {string} asset The asset address. (optional)
+   * @param {string} assetAddress The asset address. (optional)
    * @returns {Tx} The transaction details of the given transaction id.
    *
    * @throws {"Need to provide valid txId"}
    * Thrown if the given txId is invalid.
    */
-  getTransactionData = async (txId: string, asset?: string): Promise<Tx> => {
+  getTransactionData = async (txId: string, assetAddress?: string): Promise<Tx> => {
     try {
-      const tx = await etherscanAPI.getTransactionData(this.etherscan.baseUrl, txId, asset, this.etherscan.apiKey)
+      let tx
+      const txInfo = await this.etherscan.getTransaction(txId)
+
+      if (txInfo) {
+        if (assetAddress) {
+          tx =
+            (
+              await etherscanAPI.getTokenTransactionHistory({
+                baseUrl: this.etherscan.baseUrl,
+                assetAddress,
+                startblock: txInfo.blockNumber,
+                endblock: txInfo.blockNumber,
+                apiKey: this.etherscan.apiKey,
+              })
+            ).find((info) => info.hash === txId) ?? null
+        } else {
+          tx =
+            (
+              await etherscanAPI.getTokenTransactionHistory({
+                baseUrl: this.etherscan.baseUrl,
+                startblock: txInfo.blockNumber,
+                endblock: txInfo.blockNumber,
+                apiKey: this.etherscan.apiKey,
+              })
+            ).find((info) => info.hash === txId) ?? null
+        }
+      }
 
       if (!tx) {
         throw new Error('Need to provide valid txId')
