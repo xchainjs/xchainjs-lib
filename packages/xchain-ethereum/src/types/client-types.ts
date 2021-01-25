@@ -4,7 +4,7 @@ import { BaseAmount, Asset } from '@xchainjs/xchain-util'
 export type Address = string
 
 export enum Network {
-  TEST = 'kovan',
+  TEST = 'rinkeby',
   MAIN = 'homestead',
 }
 
@@ -35,11 +35,4 @@ export type TxOverrides = {
   gasPrice?: ethers.BigNumberish
   data?: ethers.BytesLike
   value?: ethers.BigNumberish
-}
-
-export type GasOracleResponse = {
-  LastBlock?: string
-  SafeGasPrice?: string
-  ProposeGasPrice?: string
-  FastGasPrice?: string
 }

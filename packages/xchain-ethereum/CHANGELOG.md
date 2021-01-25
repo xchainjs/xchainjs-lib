@@ -1,5 +1,9 @@
 # v.x.x.x
 
+### Change
+
+- Change `kovan` to `rinkeby`
+
 # v.0.7.1 (2020-01-15)
 
 ### Change
