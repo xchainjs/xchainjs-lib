@@ -132,7 +132,7 @@ class Client implements BitcoinCashClient, XChainClient {
   /**
    * Get DerivePath
    *
-   * @returns {string} The bitcoin derivation path based on the network.
+   * @returns {string} The bitcoin cash derivation path based on the network.
    */
   derivePath(): string {
     const { testnet, mainnet } = utils.getDerivePath()
@@ -176,9 +176,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * Private function to get keyPair from the this.phrase
    *
    * @param {string} phrase The phrase to be used for generating privkey
-   * @returns {ECPairInterface} The privkey generated from the given phrase
-   *
-   * @throws {"Could not get private key from phrase"} Throws an error if failed creating BTC keys from the given phrase
+   * @returns {PrivateKey} The privkey generated from the given phrase
    * */
   private getPrivateKey = (phrase: string): bitcash.PrivateKey => {
     const derive_path = this.derivePath()
