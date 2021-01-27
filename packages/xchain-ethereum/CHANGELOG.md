@@ -1,6 +1,6 @@
-# v.x.x.x
+# v.0.8.0 (2020-01-27)
 
-### Change
+### Breaking change
 
 - Change `kovan` to `rinkeby`
 
