@@ -2,7 +2,7 @@
 
 ## Modules
 
-- `client` - Custom client for communicating with Bitcoin cash by using [bitcore-lib-cash](https://github.com/bitpay/bitcore/tree/master/packages/bitcore-lib-cash)
+- `client` - Custom client for communicating with Bitcoin Cash by using [bitcore-lib-cash](https://github.com/bitpay/bitcore/tree/master/packages/bitcore-lib-cash)
 
 ## Installation
 

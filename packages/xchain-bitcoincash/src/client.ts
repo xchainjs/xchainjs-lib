@@ -177,13 +177,19 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @param {string} phrase The phrase to be used for generating privkey
    * @returns {PrivateKey} The privkey generated from the given phrase
+   *
+   * @throws {"Invalid phrase"} Thrown if invalid phrase is provided.
    * */
   private getPrivateKey = (phrase: string): bitcash.PrivateKey => {
-    const derive_path = this.derivePath()
-    const mnemonic = new Mnemonic(phrase)
-    const hdPrivKey: bitcash.HDPrivateKey = mnemonic.toHDPrivateKey().derive(derive_path)
+    try {
+      const derive_path = this.derivePath()
+      const mnemonic = new Mnemonic(phrase)
+      const hdPrivKey: bitcash.HDPrivateKey = mnemonic.toHDPrivateKey().derive(derive_path)
 
-    return bitcash.PrivateKey.fromObject(hdPrivKey.privateKey)
+      return bitcash.PrivateKey.fromObject(hdPrivKey.privateKey)
+    } catch (error) {
+      throw new Error('Invalid phrase')
+    }
   }
 
   /**
@@ -199,12 +205,17 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getAddress = (): Address => {
     if (this.phrase) {
-      const privKey = this.getPrivateKey(this.phrase)
-      const pubKey = bitcash.PublicKey.fromPrivateKey(privKey)
-      const address = bitcash.Address.fromPublicKey(pubKey, utils.bchNetwork(this.getNetwork()))
+      try {
+        const privKey = this.getPrivateKey(this.phrase)
+        const pubKey = bitcash.PublicKey.fromPrivateKey(privKey)
+        const address = bitcash.Address.fromPublicKey(pubKey, utils.bchNetwork(this.getNetwork()))
 
-      return address.toString()
+        return address.toString()
+      } catch (error) {
+        throw new Error('Address not defined')
+      }
     }
+
     throw new Error('Phrase must be provided')
   }
 

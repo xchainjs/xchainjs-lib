@@ -61,25 +61,4 @@ describe('BCHClient Test', () => {
       'https://explorer.bitcoin.com/tbch/tx/anotherTestTxHere',
     )
   })
-
-  // it('should get the right balance', async () => {
-  //   bchClient.setNetwork('testnet')
-  //   bchClient.setPhrase(phrase)
-  //   const balance = await bchClient.getBalance()
-  //   expect(balance.length).toEqual(1)
-  //   expect(balance[0].amount.amount().toNumber()).toEqual(11000)
-  // })
-
-  // it('should get the right balance when scanUTXOs is called twice', async () => {
-  //   bchClient.setNetwork('testnet')
-  //   bchClient.setPhrase(phrase)
-
-  //   const balance = await bchClient.getBalance()
-  //   expect(balance.length).toEqual(1)
-  //   expect(balance[0].amount.amount().toNumber()).toEqual(11000)
-
-  //   const newBalance = await bchClient.getBalance()
-  //   expect(newBalance.length).toEqual(1)
-  //   expect(newBalance[0].amount.amount().toNumber()).toEqual(11000)
-  // })
 })
