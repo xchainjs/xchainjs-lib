@@ -413,27 +413,37 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
+   *
+   * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
    */
   private buildDepositTx = async (msgNativeTx: MsgNativeTx): Promise<StdTx> => {
-    const response: ThorchainDepositResponse = await axios
-      .post(`${this.getClientUrl()}/thorchain/deposit`, {
-        coins: msgNativeTx.coins,
-        memo: msgNativeTx.memo,
-        base_req: {
-          chain_id: 'thorchain',
-          from: msgNativeTx.signer,
-        },
+    try {
+      const response: ThorchainDepositResponse = await axios
+        .post(`${this.getClientUrl()}/thorchain/deposit`, {
+          coins: msgNativeTx.coins,
+          memo: msgNativeTx.memo,
+          base_req: {
+            chain_id: 'thorchain',
+            from: msgNativeTx.signer,
+          },
+        })
+        .then((response) => response.data)
+
+      if (!response || !response.value) {
+        throw new Error('Invalid client url')
+      }
+
+      const unsignedStdTx = StdTx.fromJSON({
+        msg: response.value.msg,
+        fee: response.value.fee,
+        signatures: [],
+        memo: '',
       })
-      .then((response) => response.data)
 
-    const unsignedStdTx = StdTx.fromJSON({
-      msg: response.value.msg,
-      fee: response.value.fee,
-      signatures: [],
-      memo: '',
-    })
-
-    return unsignedStdTx
+      return unsignedStdTx
+    } catch (error) {
+      return Promise.reject(new Error('Invalid client url'))
+    }
   }
 
   /**
@@ -441,6 +451,9 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @param {DepositParam} params The transaction options.
    * @returns {TxHash} The transaction hash.
+   *
+   * @throws {"insufficient funds"} Thrown if the wallet has insufficient funds.
+   * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
    */
   deposit = async ({ asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     try {
