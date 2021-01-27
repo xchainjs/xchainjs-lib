@@ -2,6 +2,10 @@
 
 # v.0.9.0 (2020-01-15)
 
+### Fix
+
+- Fix `deposit`. Use `/thorchain/deposit` to build a deposit transaction.
+
 ### Breaking change
 
 - Move `getPrefix` to util
