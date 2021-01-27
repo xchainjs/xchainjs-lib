@@ -1,3 +1,4 @@
+import axios from 'axios'
 import {
   Address,
   Balances,
@@ -15,12 +16,12 @@ import { CosmosSDKClient } from '@xchainjs/xchain-cosmos'
 import { Asset, baseAmount, assetToString } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
-import { PrivKey, codec, Msg, AccAddress } from 'cosmos-client'
+import { PrivKey, codec, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
 import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, ExplorerUrl } from './types'
-import { MsgNativeTx, msgNativeTxFromJson } from './types/messages'
+import { MsgNativeTx, msgNativeTxFromJson, ThorchainDepositResponse } from './types/messages'
 import {
   getDenom,
   getAsset,
@@ -234,7 +235,6 @@ class Client implements ThorchainClient, XChainClient {
   private registerCodecs = (): void => {
     codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
     codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
-    codec.registerCodec('thorchain/MsgNativeTx', MsgNativeTx, msgNativeTxFromJson)
   }
 
   /**
@@ -409,6 +409,34 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
+   * Structure StdTx from MsgNativeTx.
+   *
+   * @param {string} txId The transaction id.
+   * @returns {Tx} The transaction details of the given transaction id.
+   */
+  private buildDepositTx = async (msgNativeTx: MsgNativeTx): Promise<StdTx> => {
+    const response: ThorchainDepositResponse = await axios
+      .post(`${this.getClientUrl()}/thorchain/deposit`, {
+        coins: msgNativeTx.coins,
+        memo: msgNativeTx.memo,
+        base_req: {
+          chain_id: 'thorchain',
+          from: msgNativeTx.signer,
+        },
+      })
+      .then((response) => response.data)
+
+    const unsignedStdTx = StdTx.fromJSON({
+      msg: response.value.msg,
+      fee: response.value.fee,
+      signatures: [],
+      memo: '',
+    })
+
+    return unsignedStdTx
+  }
+
+  /**
    * Transaction with MsgNativeTx.
    *
    * @param {DepositParam} params The transaction options.
@@ -416,38 +444,25 @@ class Client implements ThorchainClient, XChainClient {
    */
   deposit = async ({ asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     try {
-      this.registerCodecs()
-
       const assetBalance = await this.getBalance(this.getAddress(), asset)
-      const fee = await this.getFees()
-      if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
-        throw new Error('insufficient funds')
-      }
 
       const signer = this.getAddress()
-
-      const msg: Msg = [
-        msgNativeTxFromJson({
-          coins: [
-            {
-              asset: getDenomWithChain(asset),
-              amount: amount.amount().toString(),
-            },
-          ],
-          memo,
-          signer,
-        }),
-      ]
-
-      const unsignedStdTx = StdTx.fromJSON({
-        msg,
-        fee: {
-          amount: [],
-          gas: DEFAULT_GAS_VALUE,
-        },
-        signatures: [],
-        memo: '',
+      const msgNativeTx = msgNativeTxFromJson({
+        coins: [
+          {
+            asset: getDenomWithChain(asset),
+            amount: amount.amount().toString(),
+          },
+        ],
+        memo,
+        signer,
       })
+      const unsignedStdTx = await this.buildDepositTx(msgNativeTx)
+      const fee = unsignedStdTx.fee
+
+      if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.gas ?? 0))) {
+        throw new Error('insufficient funds')
+      }
 
       const transferResult = await this.thorClient.signAndBroadcast(
         unsignedStdTx,
@@ -504,6 +519,11 @@ class Client implements ThorchainClient, XChainClient {
     }
   }
 
+  /**
+   * Get the fees.
+   *
+   * @returns {Fees}
+   */
   getFees = async (): Promise<Fees> => {
     return Promise.resolve(getDefaultFees())
   }
