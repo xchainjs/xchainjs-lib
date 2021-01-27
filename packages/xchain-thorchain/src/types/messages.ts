@@ -1,4 +1,6 @@
 import { Msg, AccAddress } from 'cosmos-client'
+import { StdTxFee } from 'cosmos-client/api'
+import { StdSignature } from 'cosmos-client/x/auth'
 
 export type MsgCoin = {
   asset: string
@@ -33,3 +35,20 @@ export class MsgNativeTx extends Msg {
 export const msgNativeTxFromJson = (value: { coins: MsgCoin[]; memo: string; signer: string }): MsgNativeTx => {
   return new MsgNativeTx(value.coins, value.memo, AccAddress.fromBech32(value.signer))
 }
+
+export type AminoWrapping<T> = {
+  type: string
+  value: T
+}
+
+export type ThorchainDepositResponse = AminoWrapping<{
+  msg: AminoWrapping<{
+    coins: MsgCoin[]
+    memo: string
+    signer: string
+  }>[]
+  fee: StdTxFee
+  signatures: StdSignature[]
+  memo: string
+  timeout_height: string
+}>
