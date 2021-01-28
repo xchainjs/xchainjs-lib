@@ -4,7 +4,6 @@ import { Network as EthNetwork, Address, ETHTransactionInfo, TokenTransactionInf
 import { ethers } from 'ethers'
 
 export const ETH_DECIMAL = 18
-export const DEFAULT_GASLIMIT = 63000
 export const ETHPLORER_FREEKEY = 'freekey'
 
 /**

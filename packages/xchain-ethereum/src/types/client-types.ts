@@ -1,5 +1,6 @@
 import { ethers } from 'ethers'
 import { BaseAmount, Asset } from '@xchainjs/xchain-util'
+import { FeeOptionKey } from '@xchainjs/xchain-client/lib'
 
 export type Address = string
 
@@ -36,3 +37,5 @@ export type TxOverrides = {
   data?: ethers.BytesLike
   value?: ethers.BigNumberish
 }
+
+export type GasPrices = Record<FeeOptionKey, BaseAmount>
