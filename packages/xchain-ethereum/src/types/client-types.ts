@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { BaseAmount } from '@xchainjs/xchain-util'
-import { FeeOptionKey, TxParams } from '@xchainjs/xchain-client/lib'
+import { FeeOptionKey, Fees, TxParams } from '@xchainjs/xchain-client/lib'
 
 export type Address = string
 

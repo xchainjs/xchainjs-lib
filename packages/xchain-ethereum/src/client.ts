@@ -48,7 +48,7 @@ export interface EthereumClient {
   call<T>(asset: Address, abi: ethers.ContractInterface, func: string, params: Array<any>): Promise<T>
 
   estimateGasLimit(params: GasLimitParams): Promise<BaseAmount>
-  estimateGasLimits(params: GasLimitsParams): Promise<BaseAmount>
+  estimateGasLimits(params: GasLimitsParams): Promise<GasLimits>
   estimateFeesWithGasPricesAndLimits(params: EstimateFeesParams): Promise<FeesWithGasPricesAndLimits>
   estimateFees(params: EstimateFeesParams): Promise<Fees>
 
