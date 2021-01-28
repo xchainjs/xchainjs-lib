@@ -50,11 +50,9 @@ export interface EthereumClient {
   estimateGasLimit(params: GasLimitParams): Promise<BaseAmount>
   estimateGasLimits(params: GasLimitsParams): Promise<GasLimits>
   estimateFeesWithGasPricesAndLimits(params: EstimateFeesParams): Promise<FeesWithGasPricesAndLimits>
-  estimateFees(params: EstimateFeesParams): Promise<Fees>
 
   isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
   approve(spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash>
-  getFees(params: TxParams & { sender: Address }): Promise<Fees>
 }
 
 type ClientParams = XChainClientParams & {
@@ -67,7 +65,7 @@ type ClientParams = XChainClientParams & {
 /**
  * Custom Ethereum client
  */
-export default class Client implements XChainClient, EthereumClient {
+export default class Client implements XChainClient<EstimateFeesParams>, EthereumClient {
   private network: EthNetwork
   private address: Address | null = null
   private wallet: ethers.Wallet | null = null
@@ -639,13 +637,9 @@ export default class Client implements XChainClient, EthereumClient {
     }
   }
 
-  estimateFees = async (params: EstimateFeesParams): Promise<Fees> => {
+  getFees = async (params: EstimateFeesParams): Promise<Fees> => {
     const { fees } = await this.estimateFeesWithGasPricesAndLimits(params)
     return fees
-  }
-
-  getFees = async (): Promise<Fees> => {
-    return Promise.reject('Not supported in xchain-ethereum, use estimateFees instead')
   }
 }
 
