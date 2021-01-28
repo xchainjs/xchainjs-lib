@@ -32,8 +32,8 @@ export type TxOverrides = {
 export type GasPrices = Record<FeeOptionKey, BaseAmount>
 export type GasLimits = Record<FeeOptionKey, BaseAmount>
 
-export type EstimateFeesParams = Omit<TxParams, 'memo'> & { sender: Address }
-export type GasLimitParams = EstimateFeesParams & { gasPrice: BaseAmount }
-export type GasLimitsParams = EstimateFeesParams & { gasPrices: GasPrices }
+export type FeesParams = Omit<TxParams, 'memo'> & { sender: Address }
+export type GasLimitParams = FeesParams & { gasPrice: BaseAmount }
+export type GasLimitsParams = FeesParams & { gasPrices: GasPrices }
 
 export type FeesWithGasPricesAndLimits = { fees: Fees; gasPrices: GasPrices; gasLimits: GasLimits }

@@ -12,7 +12,7 @@ import {
   TxOverrides,
   GasPrices,
   GasLimits,
-  EstimateFeesParams,
+  FeesParams,
   GasLimitParams,
   GasLimitsParams,
   FeesWithGasPricesAndLimits,
@@ -49,7 +49,7 @@ export interface EthereumClient {
 
   estimateGasLimit(params: GasLimitParams): Promise<BaseAmount>
   estimateGasLimits(params: GasLimitsParams): Promise<GasLimits>
-  estimateFeesWithGasPricesAndLimits(params: EstimateFeesParams): Promise<FeesWithGasPricesAndLimits>
+  estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits>
 
   isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
   approve(spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash>
@@ -65,7 +65,7 @@ type ClientParams = XChainClientParams & {
 /**
  * Custom Ethereum client
  */
-export default class Client implements XChainClient<EstimateFeesParams>, EthereumClient {
+export default class Client implements XChainClient<FeesParams>, EthereumClient {
   private network: EthNetwork
   private address: Address | null = null
   private wallet: ethers.Wallet | null = null
@@ -606,7 +606,7 @@ export default class Client implements XChainClient<EstimateFeesParams>, Ethereu
     }))
   }
 
-  estimateFeesWithGasPricesAndLimits = async (params: EstimateFeesParams): Promise<FeesWithGasPricesAndLimits> => {
+  estimateFeesWithGasPricesAndLimits = async (params: FeesParams): Promise<FeesWithGasPricesAndLimits> => {
     // gas prices
     const gasPrices = await this.estimateGasPrices()
     const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
@@ -637,7 +637,7 @@ export default class Client implements XChainClient<EstimateFeesParams>, Ethereu
     }
   }
 
-  getFees = async (params: EstimateFeesParams): Promise<Fees> => {
+  getFees = async (params: FeesParams): Promise<Fees> => {
     const { fees } = await this.estimateFeesWithGasPricesAndLimits(params)
     return fees
   }
