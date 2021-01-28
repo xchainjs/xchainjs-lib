@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
-import { BaseAmount, Asset } from '@xchainjs/xchain-util'
-import { FeeOptionKey } from '@xchainjs/xchain-client/lib'
+import { BaseAmount } from '@xchainjs/xchain-util'
+import { FeeOptionKey, TxParams } from '@xchainjs/xchain-client/lib'
 
 export type Address = string
 
@@ -19,15 +19,6 @@ export type ExplorerUrl = {
   mainnet: string
 }
 
-export type EstimateGasOpts = {
-  asset?: Asset
-  sender?: Address
-  recipient: Address
-  amount: BaseAmount
-
-  overrides?: TxOverrides
-}
-
 export type TxOverrides = {
   nonce?: ethers.BigNumberish
 
@@ -39,3 +30,10 @@ export type TxOverrides = {
 }
 
 export type GasPrices = Record<FeeOptionKey, BaseAmount>
+export type GasLimits = Record<FeeOptionKey, BaseAmount>
+
+export type EstimateFeesParams = Omit<TxParams, 'memo'> & { sender: Address }
+export type GasLimitParams = EstimateFeesParams & { gasPrice: BaseAmount }
+export type GasLimitsParams = EstimateFeesParams & { gasPrices: GasPrices }
+
+export type FeesWithGasPricesAndLimits = { fees: Fees; gasPrices: GasPrices; gasLimits: GasLimits }

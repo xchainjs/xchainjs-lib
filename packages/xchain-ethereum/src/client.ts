@@ -9,9 +9,13 @@ import {
   Network as EthNetwork,
   ClientUrl,
   ExplorerUrl,
-  EstimateGasOpts,
   TxOverrides,
   GasPrices,
+  GasLimits,
+  EstimateFeesParams,
+  GasLimitParams,
+  GasLimitsParams,
+  FeesWithGasPricesAndLimits,
 } from './types'
 import {
   Address,
@@ -43,7 +47,10 @@ export interface EthereumClient {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   call<T>(asset: Address, abi: ethers.ContractInterface, func: string, params: Array<any>): Promise<T>
 
-  estimateGas(params: EstimateGasOpts): Promise<BaseAmount>
+  estimateGasLimit(params: GasLimitParams): Promise<BaseAmount>
+  estimateGasLimits(params: GasLimitsParams): Promise<BaseAmount>
+  estimateFeesWithGasPricesAndLimits(params: EstimateFeesParams): Promise<FeesWithGasPricesAndLimits>
+  estimateFees(params: EstimateFeesParams): Promise<Fees>
 
   isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
   approve(spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash>
@@ -490,9 +497,9 @@ export default class Client implements XChainClient, EthereumClient {
     feeOption: FeeOptionKey
   }): Promise<TxHash> => {
     try {
-      const gasPrices = await this.getGasPrices()
+      const gasPrices = await this.estimateGasPrices()
       const gasPrice = gasPrices[feeOption]
-      const gasLimit = await this.estimateGas({ asset, sender: this.getAddress(), recipient, amount, gasPrice })
+      const gasLimit = await this.estimateGasLimit({ asset, sender: this.getAddress(), recipient, amount, gasPrice })
       const overrides: TxOverrides = {
         gasLimit: BigNumber.from(gasLimit.amount()),
         gasPrice: BigNumber.from(gasPrice.amount()),
@@ -532,7 +539,7 @@ export default class Client implements XChainClient, EthereumClient {
     }
   }
 
-  getGasPrices = async (): Promise<GasPrices> => {
+  estimateGasPrices = async (): Promise<GasPrices> => {
     return etherscanAPI
       .getGasOracle(this.etherscan.baseUrl, this.etherscan.apiKey)
       .then((response: GasOracleResponse) => ({
@@ -548,13 +555,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {EstimateGasOpts} params The transaction options.
    * @returns {BaseAmount} The estimated gas fee.
    */
-  estimateGas = async ({
-    asset,
-    sender,
-    recipient,
-    amount,
-    gasPrice,
-  }: TxParams & { sender: Address; gasPrice: BaseAmount }): Promise<BaseAmount> => {
+  estimateGasLimit = async ({ asset, sender, recipient, amount, gasPrice }: GasLimitParams): Promise<BaseAmount> => {
     try {
       sender = sender || this.getWallet().address
       const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
@@ -590,15 +591,57 @@ export default class Client implements XChainClient, EthereumClient {
     }
   }
 
-  estimateFees = async (params: TxParams & { sender: Address }): Promise<Fees> => {
-    const { fast, fastest, average } = await this.getGasPrices()
-    return Promise.all([
-      this.estimateGas({ ...params, gasPrice: fast }),
-      this.estimateGas({ ...params, gasPrice: fastest }),
-      this.estimateGas({ ...params, gasPrice: average }),
-    ]).then(([fast, fastest, average]) => {
-      return { type: 'byte', average, fast, fastest }
+  estimateGasLimits = async (params: GasLimitsParams): Promise<GasLimits> => {
+    const { gasPrices, ...otherParams } = params
+    const { fast, fastest, average } = gasPrices
+    return Promise.all(
+      // get gas limits
+      [
+        this.estimateGasLimit({ ...otherParams, gasPrice: fast }),
+        this.estimateGasLimit({ ...otherParams, gasPrice: fastest }),
+        this.estimateGasLimit({ ...otherParams, gasPrice: average }),
+      ],
+    ).then(([fast, fastest, average]) => ({
+      average,
+      fast,
+      fastest,
+    }))
+  }
+
+  estimateFeesWithGasPricesAndLimits = async (params: EstimateFeesParams): Promise<FeesWithGasPricesAndLimits> => {
+    // gas prices
+    const gasPrices = await this.estimateGasPrices()
+    const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
+
+    // gas limits
+    const gasLimits = await this.estimateGasLimits({
+      asset: params.asset,
+      amount: params.amount,
+      recipient: params.recipient,
+      sender: params.sender,
+      gasPrices,
     })
+    const { fast: fastGL, fastest: fastestGL, average: averageGL } = gasLimits
+
+    // Simple helper to calculate fees based on `gasPrice` and `gasLimit`
+    const getFee = ({ gasPrice, gasLimit }: { gasPrice: BaseAmount; gasLimit: BaseAmount }) =>
+      baseAmount(gasPrice.amount().multipliedBy(gasLimit.amount()))
+
+    return {
+      gasPrices,
+      gasLimits,
+      fees: {
+        type: 'byte',
+        average: getFee({ gasPrice: averageGP, gasLimit: averageGL }),
+        fast: getFee({ gasPrice: fastGP, gasLimit: fastGL }),
+        fastest: getFee({ gasPrice: fastestGP, gasLimit: fastestGL }),
+      },
+    }
+  }
+
+  estimateFees = async (params: EstimateFeesParams): Promise<Fees> => {
+    const { fees } = await this.estimateFeesWithGasPricesAndLimits(params)
+    return fees
   }
 
   getFees = async (): Promise<Fees> => {
