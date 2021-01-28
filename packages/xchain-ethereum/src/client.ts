@@ -593,9 +593,9 @@ export default class Client implements XChainClient, EthereumClient {
   estimateFees = async (params: TxParams & { sender: Address }): Promise<Fees> => {
     const { fast, fastest, average } = await this.getGasPrices()
     return Promise.all([
-      this.estimateGas({ gasPrice: fast, ...params }),
-      this.estimateGas({ gasPrice: fastest, ...params }),
-      this.estimateGas({ gasPrice: average, ...params }),
+      this.estimateGas({ ...params, gasPrice: fast }),
+      this.estimateGas({ ...params, gasPrice: fastest }),
+      this.estimateGas({ ...params, gasPrice: average }),
     ]).then(([fast, fastest, average]) => {
       return { type: 'byte', average, fast, fastest }
     })
