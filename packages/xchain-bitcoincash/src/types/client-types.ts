@@ -10,3 +10,8 @@ export type VaultTxParams = NormalTxParams & { memo: string }
 
 // We might extract it into xchain-client later
 export type DerivePath = { mainnet: string; testnet: string }
+
+export type ClientUrl = {
+  testnet: string
+  mainnet: string
+}

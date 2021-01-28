@@ -1,5 +1,6 @@
 const Mnemonic = require('bitcore-mnemonic')
 
+import axios from 'axios'
 import * as bitcash from 'bitcore-lib-cash'
 import * as utils from './utils'
 import {
@@ -16,7 +17,9 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
-import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
+import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
+import { AddressDetails } from './types/api-types'
+import { baseAmount } from '@xchainjs/xchain-util/lib'
 
 /**
  * BitcoinCashClient Interface
@@ -29,8 +32,7 @@ interface BitcoinCashClient {
 }
 
 type BitcoinCashClientParams = XChainClientParams & {
-  nodeUrl?: string
-  nodeApiKey?: string
+  clientUrl?: ClientUrl
 }
 
 /**
@@ -39,8 +41,7 @@ type BitcoinCashClientParams = XChainClientParams & {
 class Client implements BitcoinCashClient, XChainClient {
   private network: Network
   private phrase = ''
-  // private nodeUrl = ''
-  // private nodeApiKey = ''
+  private clientUrl: ClientUrl
 
   /**
    * Constructor
@@ -48,11 +49,23 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @param {BitcoinCashClientParams} params
    */
-  constructor({ network = 'testnet', nodeUrl = '', nodeApiKey = '', phrase }: BitcoinCashClientParams) {
+  constructor({ network = 'testnet', clientUrl, phrase }: BitcoinCashClientParams) {
     this.network = network
-    this.setNodeURL(nodeUrl)
-    this.setNodeAPIKey(nodeApiKey)
+    this.clientUrl = clientUrl || this.getDefaultClientURL()
     phrase && this.setPhrase(phrase)
+  }
+
+  /**
+   * Get default ClientURL based on the network.
+   *
+   * @param {string} url The new node url.
+   * @returns {void}
+   */
+  getDefaultClientURL = (): ClientUrl => {
+    return {
+      'testnet': 'https://trest.bitcoin.com/v2',
+      'mainnet': 'https://rest.bitcoin.com/v2'
+    }
   }
 
   /**
@@ -61,19 +74,28 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} url The new node url.
    * @returns {void}
    */
-  setNodeURL = (_url: string): void => {
-    // this.nodeUrl = url
+  setClientURL = (url: ClientUrl): void => {
+    this.clientUrl = url
   }
 
   /**
-   * Set/Update the node api key.
+   * Get the client url.
    *
-   * @param {string} key The new node api key.
-   * @returns {void}
+   * @returns {string} The client url for thorchain based on the current network.
    */
-  setNodeAPIKey(_key: string): void {
-    // this.nodeApiKey = key
+  getClientURL = (): string => {
+    return this.getClientUrlByNetwork(this.getNetwork())
   }
+
+  /**
+   * Get the client url.
+   *
+   * @returns {string} The client url for ethereum based on the network.
+   */
+  getClientUrlByNetwork = (network: Network): string => {
+    return this.clientUrl[network]
+  }
+
 
   /**
    * Set/update a new phrase.
@@ -113,10 +135,11 @@ class Client implements BitcoinCashClient, XChainClient {
    * Thrown if network has not been set before.
    */
   setNetwork = (network: Network): void => {
-    if (!network) {
-      throw new Error('Network must be provided')
-    } else {
+    if (network) {
       this.network = network
+    }
+    else {
+      throw new Error('Network must be provided')
     }
   }
 
@@ -239,9 +262,28 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Array<Balance>} The BTC balance of the address.
+   * 
+   * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
-  getBalance = async (_address?: string): Promise<Balance[]> => {
-    throw new Error('In progress')
+  getBalance = async (address?: string): Promise<Balance[]> => {
+    try {
+      const response: AddressDetails = await axios
+        .get(`${this.getClientURL()}/address/details/${address || this.getAddress()}`)
+        .then((response) => response.data)
+
+      if (!response) {
+        throw new Error('Invalid address')
+      }
+      
+      return [
+        {
+          asset: utils.AssetBCH,
+          amount: baseAmount(response.balanceSat, 8),
+        }
+      ]
+    } catch(error) {
+      return Promise.reject(error)
+    }
   }
 
   /**
