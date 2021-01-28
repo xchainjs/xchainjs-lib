@@ -1,8 +1,8 @@
 import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
-import * as blockChair from './blockchair-api'
+import * as sochain from './sochain-api'
 import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
-import { AssetLTC, assetToString, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
-import { LtcAddressUTXOs, LtcAddressUTXO } from './types/blockchair-api-types'
+import { AssetLTC, assetToString, BaseAmount, baseAmount, bn } from '@xchainjs/xchain-util'
+import { LtcAddressUTXOs, LtcAddressUTXO } from './types/sochain-api-types'
 import { FeeRate, FeeRates, FeesWithRates } from './types/client-types'
 import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
@@ -112,22 +112,18 @@ export const ltcNetwork = (network: Network): Litecoin.Network => {
 /**
  * Get the balances of an address.
  *
+ * @param {string} nodeUrl sochain Node URL.
+ * @param {string} network
  * @param {string} address
- * @param {string} nodeUrl Blockchair Node URL.
- * @param {string} nodeApiKey Blockchair API key.
- * @returns {Array<Balance>} The balances of the give address.
+ * @returns {Array<Balance>} The balances of the given address.
  */
-export const getBalance = async (address: string, nodeUrl: string, nodeApiKey: string): Promise<Balance[]> => {
+export const getBalance = async (nodeUrl: string, network: string, address: string): Promise<Balance[]> => {
   try {
-    // const chain = this.net === 'testnet' ? 'bitcoin/testnet' : 'bitcoin'
-    if (!nodeApiKey) {
-      return Promise.reject(new Error('Missing API Key for Blockchair'))
-    }
-    const dashboardAddress = await blockChair.getAddress(nodeUrl, address, nodeApiKey)
+    const balance = await sochain.getBalance(nodeUrl, network, address)
     return [
       {
         asset: AssetLTC,
-        amount: baseAmount(dashboardAddress[address].address.balance),
+        amount: baseAmount(balance),
       },
     ]
   } catch (error) {
@@ -140,8 +136,8 @@ export const getBalance = async (address: string, nodeUrl: string, nodeApiKey: s
  *
  * @param {number} valueOut
  * @param {string} address
- * @param {string} nodeUrl Blockchair Node URL.
- * @param {string} nodeApiKey Blockchair API key.
+ * @param {string} nodeUrl sochain Node URL.
+ * @param {string} nodeApiKey sochain API key.
  * @returns {number} The change amount.
  */
 const getChange = async (valueOut: number, address: string, nodeUrl: string, nodeApiKey: string): Promise<number> => {
@@ -176,42 +172,27 @@ export const validateAddress = (address: string, network: Network): boolean => {
 }
 
 /**
- * Scan UTXOs from blockchair.
+ * Scan UTXOs from sochain.
  *
- * @param {string} address
- * @param {string} nodeUrl Blockchair Node URL.
- * @param {string} nodeApiKey Blockchair API key.
+ * @param {string} nodeUrl sochain Node URL.
+ * @param {string} network
+ * @param {Address} address
  * @returns {Array<UTXO>} The UTXOs of the given address.
  */
-export const scanUTXOs = async (address: Address, nodeUrl: string, nodeApiKey: string): Promise<UTXOs> => {
-  const dashboardsAddress = await blockChair.getAddress(nodeUrl, address, nodeApiKey)
-  const utxos: LtcAddressUTXOs = dashboardsAddress[address].utxo
+export const scanUTXOs = async (nodeUrl: string, network: string, address: Address): Promise<UTXOs> => {
+  const utxos: LtcAddressUTXOs = await sochain.getUnspentTxs(nodeUrl, network, address)
 
-  return Promise.all(
-    utxos.map(
-      ({ transaction_hash: hash, value, index }: LtcAddressUTXO): Promise<UTXO> =>
-        new Promise((resolve, reject) =>
-          blockChair
-            .getRawTx(nodeUrl, hash, nodeApiKey)
-            .then((txData) => {
-              const script = txData[hash].decoded_raw_transaction.vout[index].scriptPubKey.hex
-              // TODO: check scriptpubkey_type is op_return
-
-              const witnessUtxo = {
-                value,
-                script: Buffer.from(script, 'hex'),
-              }
-
-              return resolve({
-                hash,
-                index,
-                witnessUtxo,
-                txHex: txData[hash].raw_transaction,
-              })
-            })
-            .catch((err) => reject(err)),
-        ),
-    ),
+  return utxos.map(
+    (utxo: LtcAddressUTXO): UTXO => {
+      return {
+        hash: utxo.txid,
+        index: utxo.output_no,
+        witnessUtxo: {
+          value: bn(utxo.value).toNumber(),
+          script: Buffer.from(utxo.script_hex, 'hex'),
+        },
+      }
+    },
   )
 }
 
@@ -291,8 +272,8 @@ export const buildTx = async ({
  * @param {BroadcastTxParams} params The transaction broadcast options.
  * @returns {TxHash} The transaction hash.
  */
-export const broadcastTx = async ({ txHex, nodeUrl, nodeApiKey }: BroadcastTxParams): Promise<TxHash> => {
-  return await blockChair.broadcastTx(nodeUrl, txHex, nodeApiKey)
+export const broadcastTx = async ({ network, txHex, nodeUrl }: BroadcastTxParams): Promise<TxHash> => {
+  return await sochain.broadcastTx(nodeUrl, network, txHex)
 }
 
 /**

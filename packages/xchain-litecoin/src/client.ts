@@ -1,6 +1,6 @@
 import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as Utils from './utils'
-import * as blockChair from './blockchair-api'
+import * as sochain from './sochain-api'
 import {
   TxHistoryParams,
   TxsPage,
@@ -17,7 +17,7 @@ import {
 import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
 import { baseAmount, AssetLTC } from '@xchainjs/xchain-util'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
-import { TxIO } from './types/blockchair-api-types'
+import { TxIO } from './types/sochain-api-types'
 
 /**
  * LitecoinClient Interface
@@ -262,14 +262,14 @@ class Client implements LitecoinClient, XChainClient {
     try {
       const address = params?.address ?? this.getAddress()
       //Calling getAddress without limit/offset to get total count
-      const dAddr = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
+      const dAddr = await sochain.getAddress(this.nodeUrl, address, this.nodeApiKey)
       totalCount = dAddr[address].transactions.length
 
-      const dashboardAddress = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey, limit, offset)
+      const dashboardAddress = await sochain.getAddress(this.nodeUrl, address, this.nodeApiKey, limit, offset)
       const txList = dashboardAddress[address].transactions
 
       for (const hash of txList) {
-        const rawTx = (await blockChair.getTx(this.nodeUrl, hash, this.nodeApiKey))[hash]
+        const rawTx = (await sochain.getTx(this.nodeUrl, hash, this.nodeApiKey))[hash]
         const tx: Tx = {
           asset: AssetLTC,
           from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
@@ -302,7 +302,7 @@ class Client implements LitecoinClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const rawTx = (await blockChair.getTx(this.nodeUrl, txId, this.nodeApiKey))[txId]
+      const rawTx = (await sochain.getTx(this.nodeUrl, txId, this.nodeApiKey))[txId]
       return {
         asset: AssetLTC,
         from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
@@ -323,7 +323,7 @@ class Client implements LitecoinClient, XChainClient {
    * @returns {FeesWithRates} The fees and rates
    */
   getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
-    const ltcStats = await blockChair.litecoinStats(this.nodeUrl, this.nodeApiKey)
+    const ltcStats = await sochain.litecoinStats()
     const nextBlockFeeRate = ltcStats.suggested_transaction_fee_per_byte_sat
     const rates: FeeRates = {
       fastest: nextBlockFeeRate * 5,
