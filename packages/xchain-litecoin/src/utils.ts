@@ -1,7 +1,7 @@
 import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as sochain from './sochain-api'
 import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
-import { AssetLTC, assetToString, BaseAmount, baseAmount, bn } from '@xchainjs/xchain-util'
+import { AssetLTC, assetToString, BaseAmount, baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util'
 import { LtcAddressUTXOs, LtcAddressUTXO } from './types/sochain-api-types'
 import { FeeRate, FeeRates, FeesWithRates } from './types/client-types'
 import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
@@ -123,7 +123,7 @@ export const getBalance = async (nodeUrl: string, network: string, address: stri
     return [
       {
         asset: AssetLTC,
-        amount: baseAmount(balance),
+        amount: balance,
       },
     ]
   } catch (error) {
@@ -137,12 +137,11 @@ export const getBalance = async (nodeUrl: string, network: string, address: stri
  * @param {number} valueOut
  * @param {string} address
  * @param {string} nodeUrl sochain Node URL.
- * @param {string} nodeApiKey sochain API key.
  * @returns {number} The change amount.
  */
-const getChange = async (valueOut: number, address: string, nodeUrl: string, nodeApiKey: string): Promise<number> => {
+const getChange = async (valueOut: number, nodeUrl: string, network: string, address: string): Promise<number> => {
   try {
-    const balances = await getBalance(address, nodeUrl, nodeApiKey)
+    const balances = await getBalance(nodeUrl, network, address)
     const ltcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetLTC))
     let change = 0
 
@@ -188,7 +187,8 @@ export const scanUTXOs = async (nodeUrl: string, network: string, address: Addre
         hash: utxo.txid,
         index: utxo.output_no,
         witnessUtxo: {
-          value: bn(utxo.value).toNumber(),
+          // value: bn(utxo.value).toNumber(),
+          value: assetToBase(assetAmount(utxo.value, 8)).amount().toNumber(),
           script: Buffer.from(utxo.script_hex, 'hex'),
         },
       }
@@ -210,24 +210,22 @@ export const buildTx = async ({
   sender,
   network,
   nodeUrl,
-  nodeApiKey,
 }: TxParams & {
   feeRate: FeeRate
   sender: Address
   network: Network
   nodeUrl: string
-  nodeApiKey: string
 }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXOs }> => {
   try {
-    const utxos = await scanUTXOs(sender, nodeUrl, nodeApiKey)
+    const utxos = await scanUTXOs(nodeUrl, network, sender)
     if (utxos.length === 0) {
       return Promise.reject(Error('No utxos to send'))
     }
 
-    const balance = await getBalance(sender, nodeUrl, nodeApiKey)
-    const btcBalance = balance.find((balance) => balance.asset.symbol === AssetLTC.symbol)
-    if (!btcBalance) {
-      return Promise.reject(new Error('No btcBalance found'))
+    const balance = await getBalance(nodeUrl, network, sender)
+    const ltcBalance = balance.find((balance) => balance.asset.symbol === AssetLTC.symbol)
+    if (!ltcBalance) {
+      return Promise.reject(new Error('No ltcBalance found'))
     }
 
     if (!validateAddress(recipient, network)) {
@@ -236,7 +234,7 @@ export const buildTx = async ({
     const feeRateWhole = Number(feeRate.toFixed(0))
     const compiledMemo = memo ? compileMemo(memo) : null
     const fee = compiledMemo ? getVaultFee(utxos, compiledMemo, feeRateWhole) : getNormalFee(utxos, feeRateWhole)
-    if (amount.amount().plus(fee).isGreaterThan(btcBalance.amount.amount())) {
+    if (amount.amount().plus(fee).isGreaterThan(ltcBalance.amount.amount())) {
       return Promise.reject(Error('Balance insufficient for transaction'))
     }
     const psbt = new Litecoin.Psbt({ network: ltcNetwork(network) }) // Network-specific
@@ -251,7 +249,7 @@ export const buildTx = async ({
 
     // Outputs
     psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
-    const change = await getChange(amount.amount().toNumber() + fee, sender, nodeUrl, nodeApiKey)
+    const change = await getChange(amount.amount().toNumber() + fee, nodeUrl, network, sender)
     if (change > 0) {
       psbt.addOutput({ address: sender, value: change }) // Add change
     }

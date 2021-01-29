@@ -1,0 +1,9 @@
+{
+  "status" : "success",
+  "data" : {
+    "network" : "LTCTEST",
+    "address" : "tltc1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rz364adu",
+    "confirmed_balance" : "0.00002223",
+    "unconfirmed_balance" : "0.00000000"
+  }
+}

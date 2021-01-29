@@ -15,7 +15,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
-import { baseAmount, AssetLTC } from '@xchainjs/xchain-util'
+import { AssetLTC, assetToBase, assetAmount } from '@xchainjs/xchain-util'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 import { TxIO } from './types/sochain-api-types'
 
@@ -31,7 +31,6 @@ interface LitecoinClient {
 
 type LitecoinClientParams = XChainClientParams & {
   nodeUrl?: string
-  nodeApiKey?: string
 }
 
 /**
@@ -41,7 +40,6 @@ class Client implements LitecoinClient, XChainClient {
   private net: Network
   private phrase = ''
   private nodeUrl = ''
-  private nodeApiKey = ''
 
   /**
    * Constructor
@@ -49,10 +47,9 @@ class Client implements LitecoinClient, XChainClient {
    *
    * @param {LitecoinClientParams} params
    */
-  constructor({ network = 'testnet', nodeUrl = '', nodeApiKey = '', phrase }: LitecoinClientParams) {
+  constructor({ network = 'testnet', nodeUrl = '', phrase }: LitecoinClientParams) {
     this.net = network
     this.setNodeURL(nodeUrl)
-    this.setNodeAPIKey(nodeApiKey)
     phrase && this.setPhrase(phrase)
   }
 
@@ -64,16 +61,6 @@ class Client implements LitecoinClient, XChainClient {
    */
   setNodeURL = (url: string): void => {
     this.nodeUrl = url
-  }
-
-  /**
-   * Set/Update the node api key.
-   *
-   * @param {string} key The new node api key.
-   * @returns {void}
-   */
-  setNodeAPIKey(key: string): void {
-    this.nodeApiKey = key
   }
 
   /**
@@ -240,7 +227,7 @@ class Client implements LitecoinClient, XChainClient {
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
-      return Utils.getBalance(address || this.getAddress(), this.nodeUrl, this.nodeApiKey)
+      return Utils.getBalance(this.nodeUrl, this.net, address || this.getAddress())
     } catch (e) {
       return Promise.reject(e)
     }
@@ -254,32 +241,28 @@ class Client implements LitecoinClient, XChainClient {
    * @returns {TxsPage} The transaction history.
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const limit = params?.limit ?? 10
-    const offset = params?.offset ?? 0
+    // const offset = params?.offset ?? 0 //no support for offset atm
 
     let totalCount = 0
     const transactions: Tx[] = []
     try {
       const address = params?.address ?? this.getAddress()
-      //Calling getAddress without limit/offset to get total count
-      const dAddr = await sochain.getAddress(this.nodeUrl, address, this.nodeApiKey)
-      totalCount = dAddr[address].transactions.length
 
-      const dashboardAddress = await sochain.getAddress(this.nodeUrl, address, this.nodeApiKey, limit, offset)
-      const txList = dashboardAddress[address].transactions
+      const response = await sochain.getAddress(this.nodeUrl, this.net, address)
+      totalCount = response.total_txs
 
-      for (const hash of txList) {
-        const rawTx = (await sochain.getTx(this.nodeUrl, hash, this.nodeApiKey))[hash]
+      for (const txItem of response.txs) {
+        const rawTx = await sochain.getTx(this.nodeUrl, this.net, txItem.txid)
         const tx: Tx = {
           asset: AssetLTC,
-          from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
+          from: rawTx.inputs.map((i: TxIO) => ({ from: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
           to: rawTx.outputs
             // ignore tx with type 'nulldata'
             .filter((i: TxIO) => i.type !== 'nulldata')
-            .map((i: TxIO) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
-          date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
+            .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
+          date: new Date(rawTx.time * 1000),
           type: 'transfer',
-          hash: rawTx.transaction.hash,
+          hash: rawTx.txid,
         }
         transactions.push(tx)
       }
@@ -302,14 +285,14 @@ class Client implements LitecoinClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const rawTx = (await sochain.getTx(this.nodeUrl, txId, this.nodeApiKey))[txId]
+      const rawTx = await sochain.getTx(this.nodeUrl, this.net, txId)
       return {
         asset: AssetLTC,
-        from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
-        to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
-        date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
+        from: rawTx.inputs.map((i) => ({ from: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
+        to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
+        date: new Date(rawTx.time * 1000),
         type: 'transfer',
-        hash: rawTx.transaction.hash,
+        hash: rawTx.txid,
       }
     } catch (error) {
       return Promise.reject(error)
@@ -398,7 +381,6 @@ class Client implements LitecoinClient, XChainClient {
         ...params,
         sender: this.getAddress(),
         nodeUrl: this.nodeUrl,
-        nodeApiKey: this.nodeApiKey,
         network: this.net,
       })
       const ltcKeys = this.getLtcKeys(this.phrase)
@@ -406,7 +388,7 @@ class Client implements LitecoinClient, XChainClient {
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-      return await Utils.broadcastTx({ txHex, nodeUrl: this.nodeUrl, nodeApiKey: this.nodeApiKey })
+      return await Utils.broadcastTx({ network: this.net, txHex, nodeUrl: this.nodeUrl })
     } catch (e) {
       return Promise.reject(e)
     }

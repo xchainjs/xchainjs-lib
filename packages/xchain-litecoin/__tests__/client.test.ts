@@ -2,10 +2,10 @@ import { Client } from '../src/client'
 import { MIN_TX_FEE } from '../src/const'
 import { baseAmount, AssetLTC } from '@xchainjs/xchain-util'
 
-import mockBlockchairApi from '../__mocks__/block-chair'
-mockBlockchairApi.init()
+import mockSochainApi from '../__mocks__/sochain'
+mockSochainApi.init()
 
-const ltcClient = new Client({ network: 'mainnet', nodeUrl: 'mock', nodeApiKey: 'mock' })
+const ltcClient = new Client({ network: 'testnet', nodeUrl: 'https://sochain.com/api/v2' })
 
 describe('LitecoinClient Test', () => {
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('LitecoinClient Test', () => {
   const phraseOne = 'atom green various power must another rent imitate gadget creek fat then'
   const addyOne = 'tltc1q2pkall6rf6v6j0cvpady05xhy37erndv05de7g'
 
-  // const phraseTwo = 'north machine wash sister amazing jungle amused shrimp until genuine promote abstract'
+  // const phraseTwo = 'green atom various power must another rent imitate gadget creek fat then'
   const addyTwo = 'tltc1ql68zjjdjx37499luueaw09avednqtge4u23q36'
 
   // Third ones is used only for balance verification
@@ -48,7 +48,7 @@ describe('LitecoinClient Test', () => {
   })
 
   it('should get the right balance', async () => {
-    const expectedBalance = 11000
+    const expectedBalance = 2223
     ltcClient.setNetwork('testnet')
     ltcClient.setPhrase(phraseThree)
     const balance = await ltcClient.getBalance()
@@ -57,7 +57,7 @@ describe('LitecoinClient Test', () => {
   })
 
   it('should get the right balance when scanUTXOs is called twice', async () => {
-    const expectedBalance = 11000
+    const expectedBalance = 2223
     ltcClient.setNetwork('testnet')
     ltcClient.setPhrase(phraseThree)
 
@@ -92,7 +92,7 @@ describe('LitecoinClient Test', () => {
     try {
       const txid = await ltcClient.transfer({
         asset: AssetLTC,
-        recipient: addyThree,
+        recipient: addyTwo,
         amount,
         memo: MEMO,
         feeRate: 1,
@@ -109,7 +109,7 @@ describe('LitecoinClient Test', () => {
     ltcClient.purgeClient()
     const balance = await ltcClient.getBalance(addyThree)
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(11000)
+    expect(balance[0].amount.amount().toNumber()).toEqual(2223)
   })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
@@ -221,19 +221,11 @@ describe('LitecoinClient Test', () => {
 
     expect(txPages.total).toEqual(1) //there is 1 tx in addyThree
     expect(txPages.txs[0].asset).toEqual(AssetLTC)
-    expect(txPages.txs[0].date).toEqual(new Date('2020-11-10T14:16:53.000Z'))
-    expect(txPages.txs[0].hash).toEqual('d931f21a4f39b320e2cb8fb78dc9eedb28ba0217d5488be16e9b1da833b9a3e1')
+    expect(txPages.txs[0].date).toEqual(new Date('2021-01-29T03:36:36.000Z'))
+    expect(txPages.txs[0].hash).toEqual('b0422e9a4222f0f2b030088ee5ccd33ac0d3c59e7178bf3f4626de71b0e376d3')
     expect(txPages.txs[0].type).toEqual('transfer')
     expect(txPages.txs[0].to.length).toEqual(2)
     expect(txPages.txs[0].from.length).toEqual(1)
-  })
-
-  it('should not get address transactions when offset too high', async () => {
-    ltcClient.setNetwork('testnet')
-    // Offset max should work
-    return expect(ltcClient.getTransactions({ address: addyThree, offset: 9000000 })).rejects.toThrow(
-      'Max offset allowed 1000000',
-    )
   })
 
   it('should get address transactions with limit', async () => {
@@ -243,30 +235,21 @@ describe('LitecoinClient Test', () => {
     return expect(txPages.total).toEqual(1) //there 1 tx in addyThree
   })
 
-  it('should not get address transactions when limit too high', async () => {
-    ltcClient.setNetwork('testnet')
-    // Limit max should work
-    return expect(ltcClient.getTransactions({ address: addyThree, limit: 9000000 })).rejects.toThrow(
-      'Max limit allowed 10000',
-    )
-  })
-
   it('should get transaction with hash', async () => {
+    const hash = 'b0422e9a4222f0f2b030088ee5ccd33ac0d3c59e7178bf3f4626de71b0e376d3'
     ltcClient.setNetwork('testnet')
-    const txData = await ltcClient.getTransactionData(
-      'b660ee07167cfa32681e2623f3a29dc64a089cabd9a3a07dd17f9028ac956eb8',
-    )
+    const txData = await ltcClient.getTransactionData(hash)
 
-    expect(txData.hash).toEqual('b660ee07167cfa32681e2623f3a29dc64a089cabd9a3a07dd17f9028ac956eb8')
+    expect(txData.hash).toEqual(hash)
     expect(txData.from.length).toEqual(1)
-    expect(txData.from[0].from).toEqual('2N4nhhJpjauDekVUVgA1T51M5gVg4vzLzNC')
-    expect(txData.from[0].amount.amount().isEqualTo(baseAmount(8898697, 8).amount())).toBeTruthy()
+    expect(txData.from[0].from).toEqual(addyOne)
+    expect(txData.from[0].amount.amount().isEqualTo(baseAmount(860368562, 8).amount())).toBeTruthy()
 
     expect(txData.to.length).toEqual(2)
-    expect(txData.to[0].to).toEqual('tb1q3a00snh7erczk94k48fe9q5z0fldgnh4twsh29')
-    expect(txData.to[0].amount.amount().isEqualTo(baseAmount(100000, 8).amount())).toBeTruthy()
-    expect(txData.to[1].to).toEqual('tb1qxx4azx0lw4tc6ylurc55ak5hl7u2ws0w9kw9h3')
-    expect(txData.to[1].amount.amount().isEqualTo(baseAmount(8798533, 8).amount())).toBeTruthy()
+    expect(txData.to[0].to).toEqual(addyThree)
+    expect(txData.to[0].amount.amount().isEqualTo(baseAmount(2223, 8).amount())).toBeTruthy()
+    expect(txData.to[1].to).toEqual(addyOne)
+    expect(txData.to[1].amount.amount().isEqualTo(baseAmount(860365339, 8).amount())).toBeTruthy()
   })
 
   it('should return valid explorer url', () => {

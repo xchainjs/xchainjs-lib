@@ -1,0 +1,47 @@
+{
+  "status" : "success",
+  "data" : {
+    "network" : "LTCTEST",
+    "txid" : "b0422e9a4222f0f2b030088ee5ccd33ac0d3c59e7178bf3f4626de71b0e376d3",
+    "blockhash" : "3f730516aa4ca2192aa95d524ff9a895c416b322ec501a11b4a961418c9473ab",
+    "confirmations" : 21,
+    "time" : 1611891396,
+    "inputs" : [
+      {
+        "input_no" : 0,
+        "value" : "8.60368562",
+        "address" : "tltc1q2pkall6rf6v6j0cvpady05xhy37erndv05de7g",
+        "type" : "witness_v0_keyhash",
+        "script" : "",
+        "witness" : [
+          "3044022033c31f92120b3aa9a88402490591a6a5af5044a0f92bf80326f5712c5a9e3f7002204c9d987e4c1acd142f0806e774fb84cb6720ab73f0ea1c2f28519ebfb944763d01",
+          "034817f9a4e3cca3bcfa454a80fb1270543f0a170d0ab089bc9040d0431f858cde"
+        ],
+        "from_output" : {
+          "txid" : "5d86c6ea4a8fd7203911398fd57b8877100e72b61c2844f23688634a14f05d55",
+          "output_no" : 1
+        }
+      }
+    ],
+    "outputs" : [
+      {
+        "output_no" : 0,
+        "value" : "0.00002223",
+        "address" : "tltc1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rz364adu",
+        "type" : "witness_v0_keyhash",
+        "script" : "0 7d48afcd6fef2047f9802b5147287399492fc462"
+      },
+      {
+        "output_no" : 1,
+        "value" : "8.60365339",
+        "address" : "tltc1q2pkall6rf6v6j0cvpady05xhy37erndv05de7g",
+        "type" : "witness_v0_keyhash",
+        "script" : "0 506ddfff434e99a93f0c0f5a47d0d7247d91cdac"
+      }
+    ],
+    "tx_hex" : "02000000000101555df0144a638836f244281cb6720e1077887bd58f39113920d78f4aeac6865d0100000000ffffffff02af080000000000001600147d48afcd6fef2047f9802b5147287399492fc4621b22483300000000160014506ddfff434e99a93f0c0f5a47d0d7247d91cdac02473044022033c31f92120b3aa9a88402490591a6a5af5044a0f92bf80326f5712c5a9e3f7002204c9d987e4c1acd142f0806e774fb84cb6720ab73f0ea1c2f28519ebfb944763d0121034817f9a4e3cca3bcfa454a80fb1270543f0a170d0ab089bc9040d0431f858cde00000000",
+    "size" : 222,
+    "version" : 2,
+    "locktime" : 0
+  }
+}
