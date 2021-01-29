@@ -512,7 +512,7 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
       let txResult
 
       if (assetAddress && assetAddress !== ethAddress) {
-        const overrides: TxOverrides = {
+        const overrides: TxOverrides | undefined = (gasLimit || gasPrice) && {
           gasLimit: gasLimit || BigNumber.from(BASE_TOKEN_GAS_COST),
           gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toString()),
         }
@@ -521,10 +521,10 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
         txResult = await this.call<TransactionResponse>(assetAddress, erc20ABI, 'transfer', [
           recipient,
           txAmount,
-          Object.assign({}, overrides),
+          Object.assign({}, overrides ?? {}),
         ])
       } else {
-        const overrides: TxOverrides = {
+        const overrides: TxOverrides | undefined = (gasLimit || gasPrice) && {
           gasLimit: gasLimit || BigNumber.from(SIMPLE_GAS_COST),
           gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toString()),
         }
@@ -533,7 +533,7 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
         const transactionRequest = Object.assign(
           { to: recipient, value: txAmount },
           {
-            ...overrides,
+            ...(overrides ?? {}),
             data: memo ? toUtf8Bytes(memo) : undefined,
           },
         )
