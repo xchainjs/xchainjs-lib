@@ -65,7 +65,6 @@ describe('ethereum/util', () => {
     it('should return the default fee ', () => {
       const defaultFee = getDefaultFees()
       expect(defaultFee.type).toEqual('byte')
-      console.log(defaultFee.average.amount().toString())
       expect(defaultFee.average.amount().isEqualTo(baseAmount('630000000000000', ETH_DECIMAL).amount())).toBeTruthy()
       expect(defaultFee.fast.amount().isEqualTo(baseAmount('735000000000000', ETH_DECIMAL).amount())).toBeTruthy()
       expect(defaultFee.fastest.amount().isEqualTo(baseAmount('819000000000000', ETH_DECIMAL).amount())).toBeTruthy()
