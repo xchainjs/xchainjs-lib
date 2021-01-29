@@ -14,6 +14,7 @@ import {
   ETHTransactionInfo,
   TokenTransactionInfo,
   FeesWithGasPricesAndLimits,
+  GasPrices,
 } from './types'
 import { ethers, BigNumber } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
@@ -23,8 +24,8 @@ export const ETHPLORER_FREEKEY = 'freekey'
 
 // from https://github.com/MetaMask/metamask-extension/blob/ee205b893fe61dc4736efc576e0663189a9d23da/ui/app/pages/send/send.constants.js#L39
 // and based on recommendations of https://ethgasstation.info/blog/gas-limit/
-export const SIMPLE_GAS_COST = 21000
-export const BASE_TOKEN_GAS_COST = 100000
+export const SIMPLE_GAS_COST: ethers.BigNumber = BigNumber.from(21000)
+export const BASE_TOKEN_GAS_COST: ethers.BigNumber = BigNumber.from(100000)
 
 // default gas price in gwei
 export const DEFAULT_GAS_PRICE = 50
@@ -222,13 +223,23 @@ export const estimateDefaultFeesWithGasPricesAndLimits = (asset?: Asset): FeesWi
 }
 
 /**
- * Get the default gas price.
+ * Get the default fees.
  *
  * @returns {Fees} The default gas price.
  */
 export const getDefaultFees = (asset?: Asset): Fees => {
   const { fees } = estimateDefaultFeesWithGasPricesAndLimits(asset)
   return fees
+}
+
+/**
+ * Get the default gas price.
+ *
+ * @returns {Fees} The default gas prices.
+ */
+export const getDefaultGasPrices = (asset?: Asset): GasPrices => {
+  const { gasPrices } = estimateDefaultFeesWithGasPricesAndLimits(asset)
+  return gasPrices
 }
 
 /**

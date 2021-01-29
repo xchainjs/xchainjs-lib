@@ -29,6 +29,8 @@ import {
   TxHistoryParams,
   Balances,
   Network,
+  FeeOptionKey,
+  FeesParams as XFeesParams,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount, BaseAmount, assetToString, Asset } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
@@ -44,6 +46,7 @@ import {
   getFee,
   maxApproval,
   ethAddress,
+  getDefaultGasPrices,
 } from './utils'
 
 /**
@@ -56,7 +59,6 @@ export interface EthereumClient {
   estimateGasLimit(params: GasLimitParams): Promise<BigNumber>
   estimateGasLimits(params: GasLimitsParams): Promise<GasLimits>
   estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits>
-  estimateFees(params: FeesParams): Promise<Fees>
 
   isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
   approve(spender: Address, sender: Address, amount?: BaseAmount): Promise<TransactionResponse>
@@ -486,6 +488,12 @@ export default class Client implements XChainClient, EthereumClient {
    * Transfer ETH.
    *
    * @param {TxParams} params The transfer options.
+   * @param {feeOptionKey} FeeOptionKey Fee option (optional)
+   * @param {gasPrice} BaseAmount Gas price (optional)
+   * @param {gasLimit} BigNumber Gas limit (optional)
+   *
+   * A given `feeOptionKey` wins over `gasPrice` and `gasLimit`
+   *
    * @returns {TxHash} The transaction hash.
    *
    * @throws {"Invalid asset address"}
@@ -496,9 +504,11 @@ export default class Client implements XChainClient, EthereumClient {
     memo,
     amount,
     recipient,
+    feeOptionKey,
     gasPrice,
     gasLimit,
   }: TxParams & {
+    feeOptionKey?: FeeOptionKey
     gasPrice?: BaseAmount
     gasLimit?: BigNumber
   }): Promise<TxHash> => {
@@ -510,14 +520,34 @@ export default class Client implements XChainClient, EthereumClient {
         assetAddress = getTokenAddress(asset)
       }
 
-      let txResult
+      const isETHAddress = assetAddress === ethAddress
 
-      if (assetAddress && assetAddress !== ethAddress) {
-        const overrides: TxOverrides | undefined = (gasLimit || gasPrice) && {
-          gasLimit: gasLimit || BigNumber.from(BASE_TOKEN_GAS_COST),
-          gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toString()),
+      // feeOptionKey
+
+      const defaultGasLimit: ethers.BigNumber = isETHAddress ? SIMPLE_GAS_COST : BASE_TOKEN_GAS_COST
+
+      let overrides: TxOverrides = {
+        gasLimit: gasLimit || defaultGasLimit,
+        gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toString()),
+      }
+
+      // override `overrides` if `feeOptionKey` is provided
+      if (feeOptionKey) {
+        const gasPrice = await this.estimateGasPrices()
+          .then((prices) => prices[feeOptionKey])
+          .catch(() => getDefaultGasPrices()[feeOptionKey])
+        const gasLimit = await this.estimateGasLimit({ asset, recipient, amount, gasPrice }).catch(
+          () => defaultGasLimit,
+        )
+
+        overrides = {
+          gasLimit,
+          gasPrice: BigNumber.from(gasPrice.amount().toString()),
         }
+      }
 
+      let txResult
+      if (assetAddress && !isETHAddress) {
         // Transfer ERC20
         txResult = await this.call<TransactionResponse>(assetAddress, erc20ABI, 'transfer', [
           recipient,
@@ -525,11 +555,6 @@ export default class Client implements XChainClient, EthereumClient {
           Object.assign({}, overrides ?? {}),
         ])
       } else {
-        const overrides: TxOverrides | undefined = (gasLimit || gasPrice) && {
-          gasLimit: gasLimit || BigNumber.from(SIMPLE_GAS_COST),
-          gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toString()),
-        }
-
         // Transfer ETH
         const transactionRequest = Object.assign(
           { to: recipient, value: txAmount },
@@ -578,9 +603,8 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @throws {"Failed to estimate gas limit"} Thrown if failed to estimate gas limit.
    */
-  estimateGasLimit = async ({ asset, sender, recipient, amount, gasPrice }: GasLimitParams): Promise<BigNumber> => {
+  estimateGasLimit = async ({ asset, recipient, amount, gasPrice }: GasLimitParams): Promise<BigNumber> => {
     try {
-      sender = sender || this.getAddress()
       const txAmount = BigNumber.from(amount.amount().toString())
       const gasPriceBN = BigNumber.from(gasPrice.amount().toString())
 
@@ -595,11 +619,14 @@ export default class Client implements XChainClient, EthereumClient {
         // ERC20 gas estimate
         const contract = new ethers.Contract(assetAddress, erc20ABI, this.provider)
 
-        estimate = await contract.estimateGas.transfer(recipient, txAmount, { from: sender, gasPrice: gasPriceBN })
+        estimate = await contract.estimateGas.transfer(recipient, txAmount, {
+          from: this.getAddress(),
+          gasPrice: gasPriceBN,
+        })
       } else {
         // ETH gas estimate
         const transactionRequest = {
-          from: sender,
+          from: this.getAddress(),
           to: recipient,
           value: txAmount,
           gasPrice: gasPriceBN,
@@ -650,7 +677,6 @@ export default class Client implements XChainClient, EthereumClient {
       asset: params.asset,
       amount: params.amount,
       recipient: params.recipient,
-      sender: params.sender,
       gasPrices,
     })
     const { fast: fastGL, fastest: fastestGL, average: averageGL } = gasLimits
@@ -673,17 +699,11 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {FeesParams} params
    * @returns {Fees} The average/fast/fastest fees.
    */
-  estimateFees = async (params: FeesParams): Promise<Fees> => {
+  getFees = async (params: XFeesParams & FeesParams): Promise<Fees> => {
+    if (!params) return Promise.reject('Params need to be passed')
+
     const { fees } = await this.estimateFeesWithGasPricesAndLimits(params)
     return fees
-  }
-
-  /**
-   * Get fees.
-   * @deprecated
-   */
-  getFees = async (): Promise<Fees> => {
-    return Promise.reject('`getFees` is not available in `xchain-etereum`, use `estimateFees` instead')
   }
 }
 
