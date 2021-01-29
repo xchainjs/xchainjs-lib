@@ -1,3 +1,10 @@
+# v.x.x.x (2020-xx-xx)
+
+### Breacking change
+
+- Change `getFee`
+- Add `estimateGasLimit`, `estimateGasLimits`, `estimateFeesWithGasPricesAndLimits`
+
 # v.0.8.0 (2020-01-27)
 
 ### Breaking change

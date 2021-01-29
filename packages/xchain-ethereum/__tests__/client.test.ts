@@ -343,7 +343,6 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      etherscanApiKey: 'PGUWG2N41VPUENUS3BNE4GBPYF9NWZ5JCZ',
     })
 
     mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
@@ -383,7 +382,6 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      etherscanApiKey: 'HTT5INIU4HGPA5PK4YUAF766X1SZ92S5GF',
     })
 
     mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')

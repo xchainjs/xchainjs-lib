@@ -3,7 +3,7 @@ import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import erc20ABI from '../data/erc20.json'
-import { parseEther, toUtf8Bytes } from 'ethers/lib/utils'
+import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
 import {
   GasOracleResponse,
   Network as EthNetwork,
