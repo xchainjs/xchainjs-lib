@@ -72,7 +72,7 @@ export type XChainClientParams = {
   phrase?: string
 }
 
-export interface XChainClient<T = void> {
+export interface XChainClient {
   setNetwork(net: Network): void
   getNetwork(): Network
 
@@ -91,7 +91,7 @@ export interface XChainClient<T = void> {
 
   getTransactionData(txId: string): Promise<Tx>
 
-  getFees(params?: T): Promise<Fees>
+  getFees(): Promise<Fees>
 
   transfer(params: TxParams): Promise<TxHash>
 
