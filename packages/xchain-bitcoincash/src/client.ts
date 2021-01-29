@@ -15,11 +15,15 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
+  TxFrom,
+  TxTo,
 } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
-import { AddressDetails } from './types/api-types'
-import { baseAmount } from '@xchainjs/xchain-util/lib'
+import { AddressDetails, TransactionsInterface } from './types/api-types'
+import { baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util/lib'
+
+const BCH_DECIMAL = 8
 
 /**
  * BitcoinCashClient Interface
@@ -276,8 +280,8 @@ class Client implements BitcoinCashClient, XChainClient {
       return [
         {
           asset: utils.AssetBCH,
-          amount: baseAmount(response.balanceSat, 8),
-        },
+          amount: baseAmount(response.balanceSat, BCH_DECIMAL),
+        }
       ]
     } catch (error) {
       return Promise.reject(error)
@@ -301,9 +305,45 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
-  getTransactionData = async (_txId: string): Promise<Tx> => {
+  getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      throw new Error('In progress')
+      const tx: TransactionsInterface = await axios
+        .get(`${this.getClientURL()}/transaction/details/${txId}`)
+        .then((response) => {
+          console.log(response)
+          return response.data
+        })
+
+      if (!tx) {
+        throw new Error('Invalid TxID')
+      }
+
+      const from: TxFrom[] = []
+      const to: TxTo[] = []
+
+      tx.vin.forEach((input) => {
+        from.push({
+          from: input.cashAddress,
+          amount: baseAmount(input.value, BCH_DECIMAL),
+        })
+      })
+      tx.vout.forEach((output) => {
+        if (output.scriptPubKey.cashAddrs.length > 0) {
+          to.push({
+            to: output.scriptPubKey.cashAddrs[0],
+            amount: assetToBase(assetAmount(output.value, BCH_DECIMAL)),
+          })
+        }
+      })
+
+      return {
+        asset: utils.AssetBCH,
+        from,
+        to,
+        date: new Date(tx.time * 1000),
+        type: 'transfer',
+        hash: tx.txid,
+      }
     } catch (error) {
       return Promise.reject(error)
     }

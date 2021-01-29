@@ -1,5 +1,6 @@
 import { Client } from '../src/client'
 import { mock_getBalance } from '../__mocks__/api'
+import { baseAmount } from '@xchainjs/xchain-util'
 
 const bchClient = new Client({ network: 'mainnet' })
 
@@ -121,5 +122,25 @@ describe('BCHClient Test', () => {
     const balance = await bchClient.getBalance('qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf')
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().isEqualTo('123817511737')).toBeTruthy()
+  })
+
+  it.only('should get transaction data', async () => {
+    bchClient.setNetwork('testnet')
+    bchClient.setPhrase(phrase)
+
+    const txData = await bchClient.getTransactionData('949adb230c2aa6782a1f36e333ea11237a6f6df063734b133d2cdc2fb1aa958d')
+    console.log(JSON.stringify(txData))
+    console.log(txData.from[0].amount.amount().toString())
+    console.log(txData.to[0].amount.amount().toString())
+    expect(txData.hash).toEqual('949adb230c2aa6782a1f36e333ea11237a6f6df063734b133d2cdc2fb1aa958d')
+    expect(txData.from.length).toEqual(1)
+    expect(txData.from[0].from).toEqual('2N4nhhJpjauDekVUVgA1T51M5gVg4vzLzNC')
+    expect(txData.from[0].amount.amount().isEqualTo(baseAmount(8898697, 8).amount())).toBeTruthy()
+
+    expect(txData.to.length).toEqual(2)
+    expect(txData.to[0].to).toEqual('tb1q3a00snh7erczk94k48fe9q5z0fldgnh4twsh29')
+    expect(txData.to[0].amount.amount().isEqualTo(baseAmount(100000, 8).amount())).toBeTruthy()
+    expect(txData.to[1].to).toEqual('tb1qxx4azx0lw4tc6ylurc55ak5hl7u2ws0w9kw9h3')
+    expect(txData.to[1].amount.amount().isEqualTo(baseAmount(8798533, 8).amount())).toBeTruthy()
   })
 })
