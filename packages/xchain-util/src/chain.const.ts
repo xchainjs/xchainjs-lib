@@ -29,9 +29,9 @@ export const BCHChain = 'BCH'
 /**
  * Litecoin Chain
  */
-export const LitecoinChain = 'LTC'
+export const LTCChain = 'LTC'
 
 /**
  * All possible chains XChainJS currently supports
  * */
-export const chains = [BNBChain, BTCChain, ETHChain, THORChain, CosmosChain, PolkadotChain, BCHChain, LitecoinChain] as const
+export const chains = [BNBChain, BTCChain, ETHChain, THORChain, CosmosChain, PolkadotChain, BCHChain, LTCChain] as const
