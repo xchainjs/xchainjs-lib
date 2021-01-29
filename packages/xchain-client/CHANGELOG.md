@@ -1,3 +1,9 @@
+# v.x.x.x (2021-xx-xx)
+
+### Breaking change
+
+- Add optional parameter for `getFees`
+
 # v.0.3.0 (2020-28-12)
 
 ### Breaking change
