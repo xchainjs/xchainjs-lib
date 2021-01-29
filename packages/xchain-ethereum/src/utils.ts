@@ -26,6 +26,9 @@ export const ETHPLORER_FREEKEY = 'freekey'
 export const SIMPLE_GAS_COST = 21000
 export const BASE_TOKEN_GAS_COST = 100000
 
+// default gas price in gwei
+export const DEFAULT_GAS_PRICE = 50
+
 export const ethAddress = '0x0000000000000000000000000000000000000000'
 export const maxApproval = BigNumber.from(2).pow(256).sub(1)
 
@@ -179,9 +182,9 @@ export const getFee = ({ gasPrice, gasLimit }: { gasPrice: BaseAmount; gasLimit:
 
 export const estimateDefaultFeesWithGasPricesAndLimits = (asset?: Asset): FeesWithGasPricesAndLimits => {
   const gasPrices = {
-    average: baseAmount(parseUnits('30', 'gwei').toString(), ETH_DECIMAL),
-    fast: baseAmount(parseUnits('35', 'gwei').toString(), ETH_DECIMAL),
-    fastest: baseAmount(parseUnits('39', 'gwei').toString(), ETH_DECIMAL),
+    average: baseAmount(parseUnits(DEFAULT_GAS_PRICE.toString(), 'gwei').toString(), ETH_DECIMAL),
+    fast: baseAmount(parseUnits((DEFAULT_GAS_PRICE * 2).toString(), 'gwei').toString(), ETH_DECIMAL),
+    fastest: baseAmount(parseUnits((DEFAULT_GAS_PRICE * 3).toString(), 'gwei').toString(), ETH_DECIMAL),
   }
   const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
 
