@@ -547,14 +547,26 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
     }
   }
 
+  /**
+   * Estimate gas price.
+   * @see https://etherscan.io/apis#gastracker
+   *
+   * @returns {GasPrices} The gas prices (average, fast, fastest).
+   *
+   * @throws {"Failed to estimate gas price"} Thrown if failed to estimate gas price.
+   */
   estimateGasPrices = async (): Promise<GasPrices> => {
-    return etherscanAPI
-      .getGasOracle(this.etherscan.baseUrl, this.etherscan.apiKey)
-      .then((response: GasOracleResponse) => ({
+    try {
+      const response: GasOracleResponse = await etherscanAPI.getGasOracle(this.etherscan.baseUrl, this.etherscan.apiKey)
+
+      return {
         average: baseAmount(parseUnits(response.SafeGasPrice, 'gwei').toString(), ETH_DECIMAL),
         fast: baseAmount(parseUnits(response.ProposeGasPrice, 'gwei').toString(), ETH_DECIMAL),
         fastest: baseAmount(parseUnits(response.FastGasPrice, 'gwei').toString(), ETH_DECIMAL),
-      }))
+      }
+    } catch (error) {
+      return Promise.reject(new Error(`Failed to estimate gas price: ${error.msg ?? error.toString()}`))
+    }
   }
 
   /**
@@ -562,6 +574,8 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
    *
    * @param {EstimateGasOpts} params The transaction options.
    * @returns {BaseAmount} The estimated gas fee.
+   *
+   * @throws {"Failed to estimate gas limit"} Thrown if failed to estimate gas limit.
    */
   estimateGasLimit = async ({ asset, sender, recipient, amount, gasPrice }: GasLimitParams): Promise<BigNumber> => {
     try {
@@ -595,10 +609,16 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
 
       return estimate
     } catch (error) {
-      return Promise.reject(error)
+      return Promise.reject(new Error(`Failed to estimate gas limit: ${error.msg ?? error.toString()}`))
     }
   }
 
+  /**
+   * Estimate gas limits (average, fast fastest).
+   *
+   * @param {GasLimitsParams} params
+   * @returns {GasLimits} The estimated gas limits.
+   */
   estimateGasLimits = async (params: GasLimitsParams): Promise<GasLimits> => {
     const { gasPrices, ...otherParams } = params
     const { fast, fastest, average } = gasPrices
@@ -613,6 +633,12 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
     }))
   }
 
+  /**
+   * Estimate gas prices/limits (average, fast fastest).
+   *
+   * @param {FeesParams} params
+   * @returns {FeesWithGasPricesAndLimits} The estimated gas prices/limits.
+   */
   estimateFeesWithGasPricesAndLimits = async (params: FeesParams): Promise<FeesWithGasPricesAndLimits> => {
     // gas prices
     const gasPrices = await this.estimateGasPrices()
@@ -640,6 +666,12 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
     }
   }
 
+  /**
+   * Get fees.
+   *
+   * @param {FeesParams} params
+   * @returns {Fees} The average/fast/fastest fees.
+   */
   getFees = async (params: FeesParams): Promise<Fees> => {
     const { fees } = await this.estimateFeesWithGasPricesAndLimits(params)
     return fees
