@@ -7,6 +7,10 @@ export const BNBChain = 'BNB'
  */
 export const BTCChain = 'BTC'
 /**
+ * Litecoin Chain
+ */
+export const LTCChain = 'LTC'
+/**
  * Ethereum Chain
  */
 export const ETHChain = 'ETH'

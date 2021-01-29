@@ -21,6 +21,8 @@ export const chainToString = (chainId: Chain) => {
       return 'Thorchain'
     case 'BTC':
       return 'Bitcoin'
+    case 'LTC':
+      return 'Litecoin'
     case 'ETH':
       return 'Ethereum'
     case 'BNB':
