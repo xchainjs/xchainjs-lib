@@ -41,10 +41,10 @@ import {
   validateAddress,
   SIMPLE_GAS_COST,
   BASE_TOKEN_GAS_COST,
+  getFee,
+  maxApproval,
+  ethAddress,
 } from './utils'
-
-const ethAddress = '0x0000000000000000000000000000000000000000'
-const maxApproval = BigNumber.from(2).pow(256).sub(1)
 
 /**
  * Interface for custom Ethereum client
@@ -627,10 +627,6 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
       gasPrices,
     })
     const { fast: fastGL, fastest: fastestGL, average: averageGL } = gasLimits
-
-    // Simple helper to calculate fees based on `gasPrice` and `gasLimit`
-    const getFee = ({ gasPrice, gasLimit }: { gasPrice: BaseAmount; gasLimit: BigNumber }) =>
-      baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()))
 
     return {
       gasPrices,
