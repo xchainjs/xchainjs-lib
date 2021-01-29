@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { ethers, BigNumber } from 'ethers'
 import { BaseAmount } from '@xchainjs/xchain-util'
 import { FeeOptionKey, Fees, TxParams } from '@xchainjs/xchain-client/lib'
 
@@ -30,9 +30,9 @@ export type TxOverrides = {
 }
 
 export type GasPrices = Record<FeeOptionKey, BaseAmount>
-export type GasLimits = Record<FeeOptionKey, BaseAmount>
+export type GasLimits = Record<FeeOptionKey, BigNumber>
 
-export type FeesParams = Omit<TxParams, 'memo'> & { sender: Address }
+export type FeesParams = Omit<TxParams, 'memo'> & { sender?: Address }
 export type GasLimitParams = FeesParams & { gasPrice: BaseAmount }
 export type GasLimitsParams = FeesParams & { gasPrices: GasPrices }
 

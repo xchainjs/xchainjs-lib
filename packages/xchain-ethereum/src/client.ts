@@ -7,7 +7,6 @@ import { parseEther, toUtf8Bytes } from 'ethers/lib/utils'
 import {
   GasOracleResponse,
   Network as EthNetwork,
-  ClientUrl,
   ExplorerUrl,
   TxOverrides,
   GasPrices,
@@ -30,12 +29,19 @@ import {
   TxHistoryParams,
   Balances,
   Network,
-  FeeOptionKey,
 } from '@xchainjs/xchain-client'
-import { AssetETH, baseAmount, baseToAsset, BaseAmount, assetToString, Asset } from '@xchainjs/xchain-util'
+import { AssetETH, baseAmount, BaseAmount, assetToString, Asset } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as etherscanAPI from './etherscan-api'
-import { ETH_DECIMAL, ethNetworkToXchains, xchainNetworkToEths, getTokenAddress, validateAddress } from './utils'
+import {
+  ETH_DECIMAL,
+  ethNetworkToXchains,
+  xchainNetworkToEths,
+  getTokenAddress,
+  validateAddress,
+  SIMPLE_GAS_COST,
+  BASE_TOKEN_GAS_COST,
+} from './utils'
 
 const ethAddress = '0x0000000000000000000000000000000000000000'
 const maxApproval = BigNumber.from(2).pow(256).sub(1)
@@ -47,17 +53,15 @@ export interface EthereumClient {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   call<T>(asset: Address, abi: ethers.ContractInterface, func: string, params: Array<any>): Promise<T>
 
-  estimateGasLimit(params: GasLimitParams): Promise<BaseAmount>
+  estimateGasLimit(params: GasLimitParams): Promise<BigNumber>
   estimateGasLimits(params: GasLimitsParams): Promise<GasLimits>
   estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits>
 
   isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
-  approve(spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash>
+  approve(spender: Address, sender: Address, amount?: BaseAmount): Promise<TransactionResponse>
 }
 
 type ClientParams = XChainClientParams & {
-  ethplorerUrl?: ClientUrl
-  ethplorerApiKey?: string
   explorerUrl?: ExplorerUrl
   etherscanApiKey?: string
 }
@@ -446,7 +450,7 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
    */
   isApproved = async (spender: Address, sender: Address, amount: BaseAmount): Promise<boolean> => {
     try {
-      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
+      const txAmount = BigNumber.from(amount.amount().toString())
       const allowance = await this.call<BigNumberish>(sender, erc20ABI, 'allowance', [this.getAddress(), spender])
       return txAmount.lte(allowance)
     } catch (error) {
@@ -462,15 +466,16 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @returns {TransactionResponse} The transaction result.
    */
-  approve = async (spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash> => {
+  approve = async (spender: Address, sender: Address, amount?: BaseAmount): Promise<TransactionResponse> => {
     try {
-      const txAmount = amount ? parseEther(baseToAsset(amount).amount().toFormat()) : maxApproval
+      const txAmount = amount ? BigNumber.from(amount.amount().toString()) : maxApproval
       const txResult = await this.call<TransactionResponse>(sender, erc20ABI, 'approve', [
         spender,
         txAmount,
-        { from: this.getWallet().address },
+        { from: this.getAddress() },
       ])
-      return txResult.hash
+
+      return txResult
     } catch (error) {
       return Promise.reject(error)
     }
@@ -490,19 +495,14 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
     memo,
     amount,
     recipient,
-    feeOption,
+    gasPrice,
+    gasLimit,
   }: TxParams & {
-    feeOption: FeeOptionKey
+    gasPrice?: BaseAmount
+    gasLimit?: BigNumber
   }): Promise<TxHash> => {
     try {
-      const gasPrices = await this.estimateGasPrices()
-      const gasPrice = gasPrices[feeOption]
-      const gasLimit = await this.estimateGasLimit({ asset, sender: this.getAddress(), recipient, amount, gasPrice })
-      const overrides: TxOverrides = {
-        gasLimit: BigNumber.from(gasLimit.amount()),
-        gasPrice: BigNumber.from(gasPrice.amount()),
-      }
-      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
+      const txAmount = BigNumber.from(amount.amount().toString())
 
       let assetAddress
       if (asset && assetToString(asset) !== assetToString(AssetETH)) {
@@ -512,6 +512,11 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
       let txResult
 
       if (assetAddress && assetAddress !== ethAddress) {
+        const overrides: TxOverrides = {
+          gasLimit: gasLimit || BigNumber.from(BASE_TOKEN_GAS_COST),
+          gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toString()),
+        }
+
         // Transfer ERC20
         txResult = await this.call<TransactionResponse>(assetAddress, erc20ABI, 'transfer', [
           recipient,
@@ -519,6 +524,11 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
           Object.assign({}, overrides),
         ])
       } else {
+        const overrides: TxOverrides = {
+          gasLimit: gasLimit || BigNumber.from(SIMPLE_GAS_COST),
+          gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toString()),
+        }
+
         // Transfer ETH
         const transactionRequest = Object.assign(
           { to: recipient, value: txAmount },
@@ -541,9 +551,9 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
     return etherscanAPI
       .getGasOracle(this.etherscan.baseUrl, this.etherscan.apiKey)
       .then((response: GasOracleResponse) => ({
-        average: baseAmount(response.SafeGasPrice, ETH_DECIMAL),
-        fast: baseAmount(response.ProposeGasPrice, ETH_DECIMAL),
-        fastest: baseAmount(response.FastGasPrice, ETH_DECIMAL),
+        average: baseAmount(parseUnits(response.SafeGasPrice, 'gwei').toString(), ETH_DECIMAL),
+        fast: baseAmount(parseUnits(response.ProposeGasPrice, 'gwei').toString(), ETH_DECIMAL),
+        fastest: baseAmount(parseUnits(response.FastGasPrice, 'gwei').toString(), ETH_DECIMAL),
       }))
   }
 
@@ -553,11 +563,11 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
    * @param {EstimateGasOpts} params The transaction options.
    * @returns {BaseAmount} The estimated gas fee.
    */
-  estimateGasLimit = async ({ asset, sender, recipient, amount, gasPrice }: GasLimitParams): Promise<BaseAmount> => {
+  estimateGasLimit = async ({ asset, sender, recipient, amount, gasPrice }: GasLimitParams): Promise<BigNumber> => {
     try {
-      sender = sender || this.getWallet().address
-      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
-      const gasPriceBN = BigNumber.from(gasPrice.amount())
+      sender = sender || this.getAddress()
+      const txAmount = BigNumber.from(amount.amount().toString())
+      const gasPriceBN = BigNumber.from(gasPrice.amount().toString())
 
       let assetAddress
       if (asset && assetToString(asset) !== assetToString(AssetETH)) {
@@ -583,7 +593,7 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
         estimate = await this.provider.estimateGas(transactionRequest)
       }
 
-      return baseAmount(estimate.toString(), ETH_DECIMAL)
+      return estimate
     } catch (error) {
       return Promise.reject(error)
     }
@@ -592,14 +602,11 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
   estimateGasLimits = async (params: GasLimitsParams): Promise<GasLimits> => {
     const { gasPrices, ...otherParams } = params
     const { fast, fastest, average } = gasPrices
-    return Promise.all(
-      // get gas limits
-      [
-        this.estimateGasLimit({ ...otherParams, gasPrice: fast }),
-        this.estimateGasLimit({ ...otherParams, gasPrice: fastest }),
-        this.estimateGasLimit({ ...otherParams, gasPrice: average }),
-      ],
-    ).then(([fast, fastest, average]) => ({
+    return Promise.all([
+      this.estimateGasLimit({ ...otherParams, gasPrice: fast }),
+      this.estimateGasLimit({ ...otherParams, gasPrice: fastest }),
+      this.estimateGasLimit({ ...otherParams, gasPrice: average }),
+    ]).then(([fast, fastest, average]) => ({
       average,
       fast,
       fastest,
@@ -622,8 +629,8 @@ export default class Client implements XChainClient<FeesParams>, EthereumClient 
     const { fast: fastGL, fastest: fastestGL, average: averageGL } = gasLimits
 
     // Simple helper to calculate fees based on `gasPrice` and `gasLimit`
-    const getFee = ({ gasPrice, gasLimit }: { gasPrice: BaseAmount; gasLimit: BaseAmount }) =>
-      baseAmount(gasPrice.amount().multipliedBy(gasLimit.amount()))
+    const getFee = ({ gasPrice, gasLimit }: { gasPrice: BaseAmount; gasLimit: BigNumber }) =>
+      baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()))
 
     return {
       gasPrices,

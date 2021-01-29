@@ -1,8 +1,8 @@
 export type GasOracleResponse = {
-  LastBlock?: string
-  SafeGasPrice?: string
-  ProposeGasPrice?: string
-  FastGasPrice?: string
+  LastBlock: string
+  SafeGasPrice: string
+  ProposeGasPrice: string
+  FastGasPrice: string
 }
 
 export type TokenBalanceParam = {
