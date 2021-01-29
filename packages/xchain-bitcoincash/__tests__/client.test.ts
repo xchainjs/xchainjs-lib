@@ -1,6 +1,7 @@
 import { Client } from '../src/client'
+import { mock_getBalance } from '../__mocks__/api'
 
-const bchClient = new Client({ network: 'mainnet', nodeUrl: 'mock', nodeApiKey: 'mock' })
+const bchClient = new Client({ network: 'mainnet' })
 
 describe('BCHClient Test', () => {
   beforeEach(() => bchClient.purgeClient())
@@ -60,5 +61,65 @@ describe('BCHClient Test', () => {
     expect(bchClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://explorer.bitcoin.com/tbch/tx/anotherTestTxHere',
     )
+  })
+
+  it('should get the right balance', async () => {
+    bchClient.setNetwork('testnet')
+    bchClient.setPhrase(phrase)
+
+    mock_getBalance(bchClient.getClientURL(), bchClient.getAddress(), {
+      balance: 0,
+      balanceSat: 0,
+      totalReceived: 0,
+      totalReceivedSat: 0,
+      totalSent: 0,
+      totalSentSat: 0,
+      unconfirmedBalance: 0,
+      unconfirmedBalanceSat: 0,
+      unconfirmedTxApperances: 0,
+      txApperances: 1343,
+      transactions: [
+        '62a482c869567a43981efbb3a71aeee06e4c94d6bfd297e3f745f129fc2c4ac0',
+        'dc73dd65f51adc99dc9950938619649b8727629c94217b36a08fcbf9f213ee34',
+      ],
+      legacyAddress: 'mvQPGnzRT6gMWASZBMg7NcT3vmvsSKSQtf',
+      cashAddress: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
+      slpAddress: 'slptest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2shlcycvd5',
+      currentPage: 0,
+      pagesTotal: 2
+    })
+    const balance = await bchClient.getBalance()
+    expect(balance.length).toEqual(1)
+    expect(balance[0].amount.amount().toNumber()).toEqual(0)
+  })
+
+  it('should get the right balance', async () => {
+    bchClient.setNetwork('testnet')
+    bchClient.setPhrase(phrase)
+
+    mock_getBalance(bchClient.getClientURL(), 'qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', {
+      balance: 1238.17511737,
+      balanceSat: 123817511737,
+      totalReceived: 1244.42748213,
+      totalReceivedSat: 124442748213,
+      totalSent: 6.25236476,
+      totalSentSat: 625236476,
+      unconfirmedBalance: 0,
+      unconfirmedBalanceSat: 0,
+      unconfirmedTxApperances: 0,
+      txApperances: 1343,
+      transactions: [
+        '62a482c869567a43981efbb3a71aeee06e4c94d6bfd297e3f745f129fc2c4ac0',
+        'dc73dd65f51adc99dc9950938619649b8727629c94217b36a08fcbf9f213ee34',
+      ],
+      legacyAddress: 'mvQPGnzRT6gMWASZBMg7NcT3vmvsSKSQtf',
+      cashAddress: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
+      slpAddress: 'slptest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2shlcycvd5',
+      currentPage: 0,
+      pagesTotal: 2
+    })
+    const balance = await bchClient.getBalance('qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf')
+    expect(balance.length).toEqual(1)
+    expect(balance[0].amount.amount().isEqualTo('123817511737')).toBeTruthy()
   })
 })

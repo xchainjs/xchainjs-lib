@@ -1,5 +1,10 @@
 # v.x.x.x
 
+### Update
+
+- add Bitcoin Cash chain const.
+- add Litecoin chain const.
+
 # v.0.2.1 (2021-01-08)
 
 ### Fix
