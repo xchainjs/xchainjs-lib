@@ -1,69 +1,46 @@
-export type AddressDetails = {
+export type AddressBalance = {
+  confirmed: number
+  unconfirmed: number
   balance: number
-  balanceSat: number
-  totalReceived: number
-  totalReceivedSat: number
-  totalSent: number
-  totalSentSat: number
-  unconfirmedBalance: number
-  unconfirmedBalanceSat: number
-  unconfirmedTxApperances: number
-  txApperances: number
-  transactions: string[]
-  legacyAddress: string
-  cashAddress: string
-  slpAddress: string
-  addrStr?: string
-  currentPage: number
-  pagesTotal: number
 }
 
-export type TransactionsInterface = {
+export type TransactionData = {
+  _id: string
   txid: string
-  version: number
+  network: string
+  chain: string
+  blockHeight: number
+  blockHash: string
+  blockTime: string
+  blockTimeNormalized: string
+  coinbase: boolean
   locktime: number
-  vin: VinInterface[]
-  vout: VoutInterface[]
-  blockhash: string
-  blockheight: number
-  confirmations: number
-  time: number
-  blocktime: number
-  valueOut: number
+  inputCount: number
+  outputCount: number
   size: number
-  valueIn: number
-  fees: number
-  legacyAddress: string
-  cashAddress: string
-  slpAddress: string
-  currentPage: number
-}
-
-export type VinInterface = {
-  txid: string
-  vout: number
-  sequence: number
-  n: number
-  scriptSig: {
-    hex: string
-    asm: string
-  }
+  fee: number
   value: number
-  legacyAddress: string
-  cashAddress: string
+  confirmations: number
 }
 
-export type VoutInterface = {
-  value: string
-  n: number
-  scriptPubKey: {
-    hex: string
-    asm: string
-    addresses: string[]
-    type: string
-    cashAddrs: string[]
-  }
-  spentTxId: string | null
-  spentIndex: number | null
-  spentHeight: number | null
+export type TranactionInputOutput = {
+  _id: string
+  chain: string
+  network: string
+  coinbase: boolean
+  mintIndex: number
+  spentTxid: string
+  mintTxid: string
+  mintHeight: number
+  spentHeight: number
+  address: string
+  script: string
+  value: number
+  confirmations: number
+  sequenceNumber?: number
+}
+
+export type TransactionCoins = {
+  inputs: TranactionInputOutput[]
+  outputs: TranactionInputOutput[]
 }

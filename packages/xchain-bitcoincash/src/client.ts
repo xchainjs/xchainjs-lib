@@ -15,13 +15,11 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
-  TxFrom,
-  TxTo,
 } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
-import { AddressDetails, TransactionsInterface } from './types/api-types'
-import { baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util/lib'
+import { AddressBalance, TransactionCoins, TransactionData } from './types/api-types'
+import { baseAmount } from '@xchainjs/xchain-util/lib'
 
 const BCH_DECIMAL = 8
 
@@ -67,8 +65,8 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getDefaultClientURL = (): ClientUrl => {
     return {
-      testnet: 'https://trest.bitcoin.com/v2',
-      mainnet: 'https://rest.bitcoin.com/v2',
+      testnet: 'https://api.bitcore.io/api/BCH/testnet',
+      mainnet: 'https://api.bitcore.io/api/BCH/mainnet',
     }
   }
 
@@ -170,8 +168,8 @@ class Client implements BitcoinCashClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl = (): string => {
-    const networkPath = utils.isTestnet(this.network) ? 'tbch' : 'bch'
-    return `https://explorer.bitcoin.com/${networkPath}`
+    const networkPath = utils.isTestnet(this.network) ? 'bch-testnet' : 'bch'
+    return `https://www.blockchain.com/${networkPath}`
   }
 
   /**
@@ -260,6 +258,28 @@ class Client implements BitcoinCashClient, XChainClient {
   }
 
   /**
+   * Decode cash address.
+   *
+   * @param {string} address
+   * @returns {string} Decoded cash address.
+   *
+   **/
+  decodeCashAddress = (address: string): string => {
+    return utils.decodeCashAddress(address, this.network)
+  }
+
+  /**
+   * Encode cash address.
+   *
+   * @param {string} address
+   * @returns {string} encoded cash address.
+   *
+   **/
+  encodeCashAddress = (address: string): string => {
+    return utils.encodeCashAddress(address, this.network)
+  }
+
+  /**
    * Get the BTC balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
@@ -269,8 +289,8 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
-      const response: AddressDetails = await axios
-        .get(`${this.getClientURL()}/address/details/${address || this.getAddress()}`)
+      const response: AddressBalance = await axios
+        .get(`${this.getClientURL()}/address/${this.decodeCashAddress(address || this.getAddress())}/balance`)
         .then((response) => response.data)
 
       if (!response) {
@@ -280,8 +300,8 @@ class Client implements BitcoinCashClient, XChainClient {
       return [
         {
           asset: utils.AssetBCH,
-          amount: baseAmount(response.balanceSat, BCH_DECIMAL),
-        }
+          amount: baseAmount(response.balance, BCH_DECIMAL),
+        },
       ]
     } catch (error) {
       return Promise.reject(error)
@@ -307,40 +327,26 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const tx: TransactionsInterface = await axios
-        .get(`${this.getClientURL()}/transaction/details/${txId}`)
-        .then((response) => {
-          console.log(response)
-          return response.data
-        })
-
+      const tx: TransactionData = await axios.get(`${this.getClientURL()}/tx/${txId}`).then((response) => response.data)
       if (!tx) {
         throw new Error('Invalid TxID')
       }
 
-      const from: TxFrom[] = []
-      const to: TxTo[] = []
-
-      tx.vin.forEach((input) => {
-        from.push({
-          from: input.cashAddress,
-          amount: baseAmount(input.value, BCH_DECIMAL),
-        })
-      })
-      tx.vout.forEach((output) => {
-        if (output.scriptPubKey.cashAddrs.length > 0) {
-          to.push({
-            to: output.scriptPubKey.cashAddrs[0],
-            amount: assetToBase(assetAmount(output.value, BCH_DECIMAL)),
-          })
-        }
-      })
+      const coins: TransactionCoins = await axios
+        .get(`${this.getClientURL()}/tx/${txId}/coins`)
+        .then((response) => response.data)
 
       return {
         asset: utils.AssetBCH,
-        from,
-        to,
-        date: new Date(tx.time * 1000),
+        from: coins.inputs.map((input) => ({
+          from: this.encodeCashAddress(input.address),
+          amount: baseAmount(input.value, BCH_DECIMAL),
+        })),
+        to: coins.outputs.map((output) => ({
+          to: this.encodeCashAddress(output.address),
+          amount: baseAmount(output.value, BCH_DECIMAL),
+        })),
+        date: new Date(tx.blockTime),
         type: 'transfer',
         hash: tx.txid,
       }

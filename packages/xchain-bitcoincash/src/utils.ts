@@ -35,3 +35,44 @@ export const isTestnet = (network: Network): boolean => {
 export const bchNetwork = (network: Network): bitcash.Networks.Network => {
   return isTestnet(network) ? bitcash.Networks.testnet : bitcash.Networks.mainnet
 }
+
+/**
+ * Get address prefix based on the network.
+ *
+ * @param {string} network
+ * @returns {string} The address prefix based on the network.
+ *
+ **/
+export const getPrefix = (network: string) => (network === 'testnet' ? 'bchtest:' : 'bitcoincash:')
+
+/**
+ * Decode cash address.
+ *
+ * @param {string} address
+ * @returns {string} Decoded cash address.
+ *
+ **/
+export const decodeCashAddress = (address: string, network: string): string => {
+  const prefix = getPrefix(network)
+  if (address.startsWith(prefix)) {
+    return address.substring(prefix.length, address.length)
+  }
+
+  return address
+}
+
+/**
+ * Encode cash address.
+ *
+ * @param {string} address
+ * @returns {string} Encoded cash address.
+ *
+ **/
+export const encodeCashAddress = (address: string, network: string): string => {
+  const prefix = getPrefix(network)
+  if (address.startsWith(prefix)) {
+    return address
+  }
+
+  return getPrefix(network) + address
+}
