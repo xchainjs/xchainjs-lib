@@ -24,17 +24,17 @@ describe('Litecoin Utils Test', () => {
   const OP_RETURN = Litecoin.script.compile([Litecoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
 
   it('get the right vault fee', () => {
-    const fee = Utils.getVaultFee(utxos, OP_RETURN, 10)
+    const fee = Utils.getFee(utxos, 10, OP_RETURN)
     expect(fee).toEqual(1890)
   })
 
   it('get the right normal fee', () => {
-    const fee = Utils.getNormalFee(utxos, 10)
+    const fee = Utils.getFee(utxos, 10, null)
     expect(fee).toEqual(1640)
   })
 
   it('should return a minimum fee of 1000', () => {
-    const fee = Utils.getNormalFee(utxos, 1)
+    const fee = Utils.getFee(utxos, 1)
     expect(fee).toEqual(1000)
   })
 

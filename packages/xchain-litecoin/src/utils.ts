@@ -31,50 +31,30 @@ export const compileMemo = (memo: string): Buffer => {
 }
 
 /**
- * Get the vault transaction fee.
+ * Get the transaction fee.
  *
  * @param {UTXOs} inputs The UTXOs.
- * @param {Buffer} data The compiled memo.
  * @param {FeeRate} feeRate The fee rate.
+ * @param {Buffer} data The compiled memo (Optional).
  * @returns {number} The fee amount.
  */
-export function getVaultFee(inputs: UTXOs, data: Buffer, feeRate: FeeRate): number {
-  const vaultFee =
-    (TX_EMPTY_SIZE +
-      inputs.reduce(function (a, x) {
-        return a + inputBytes(x)
-      }, 0) +
-      inputs.length + // +1 byte for each input signature
-      TX_OUTPUT_BASE +
-      TX_OUTPUT_PUBKEYHASH +
-      TX_OUTPUT_BASE +
-      TX_OUTPUT_PUBKEYHASH +
-      TX_OUTPUT_BASE +
-      data.length) *
-    feeRate
-  return vaultFee > MIN_TX_FEE ? vaultFee : MIN_TX_FEE
-}
+export function getFee(inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = null): number {
+  let sum =
+    TX_EMPTY_SIZE +
+    inputs.reduce(function (a, x) {
+      return a + inputBytes(x)
+    }, 0) +
+    inputs.length + // +1 byte for each input signature
+    TX_OUTPUT_BASE +
+    TX_OUTPUT_PUBKEYHASH +
+    TX_OUTPUT_BASE +
+    TX_OUTPUT_PUBKEYHASH
 
-/**
- * Get the normal transaction fee.
- *
- * @param {UTXOs} inputs The UTXOs.
- * @param {FeeRate} feeRate The fee rate.
- * @returns {number} The fee amount.
- */
-export function getNormalFee(inputs: UTXOs, feeRate: FeeRate): number {
-  const normalFee =
-    (TX_EMPTY_SIZE +
-      inputs.reduce(function (a, x) {
-        return a + inputBytes(x)
-      }, 0) +
-      inputs.length + // +1 byte for each input signature
-      TX_OUTPUT_BASE +
-      TX_OUTPUT_PUBKEYHASH +
-      TX_OUTPUT_BASE +
-      TX_OUTPUT_PUBKEYHASH) *
-    feeRate
-  return normalFee > MIN_TX_FEE ? normalFee : MIN_TX_FEE
+  if (data) {
+    sum += TX_OUTPUT_BASE + data.length
+  }
+  const fee = sum * feeRate
+  return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
 }
 
 /**
@@ -233,7 +213,7 @@ export const buildTx = async ({
     }
     const feeRateWhole = Number(feeRate.toFixed(0))
     const compiledMemo = memo ? compileMemo(memo) : null
-    const fee = compiledMemo ? getVaultFee(utxos, compiledMemo, feeRateWhole) : getNormalFee(utxos, feeRateWhole)
+    const fee = getFee(utxos, feeRateWhole, compiledMemo)
     if (amount.amount().plus(fee).isGreaterThan(ltcBalance.amount.amount())) {
       return Promise.reject(Error('Balance insufficient for transaction'))
     }
@@ -293,13 +273,9 @@ export const getDerivePath = (index = 0): DerivePath => ({
  * @returns {BaseAmount} The calculated fees based on fee rate and the memo.
  */
 export const calcFee = (feeRate: FeeRate, memo?: string): BaseAmount => {
-  if (memo) {
-    const OP_RETURN = compileMemo(memo)
-    const vaultFee = getVaultFee([], OP_RETURN, feeRate)
-    return baseAmount(vaultFee)
-  }
-  const normalFee = getNormalFee([], feeRate)
-  return baseAmount(normalFee)
+  const compiledMemo = memo ? compileMemo(memo) : null
+  const fee = getFee([], feeRate, compiledMemo)
+  return baseAmount(fee)
 }
 
 /**
