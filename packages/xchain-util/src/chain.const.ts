@@ -30,10 +30,6 @@ export const PolkadotChain = 'POLKA'
  * Bitcoin Cash
  */
 export const BCHChain = 'BCH'
-/**
- * Litecoin Chain
- */
-export const LTCChain = 'LTC'
 
 /**
  * All possible chains XChainJS currently supports
