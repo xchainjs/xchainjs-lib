@@ -1,12 +1,13 @@
 {
-  "name": "@xchainjs/xchain-thorchain",
-  "version": "0.9.1",
-  "description": "Custom Thorchain client and utilities used by XChainJS clients",
+  "name": "@xchainjs/xchain-bitcoincash",
+  "version": "0.1.0",
+  "description": "Custom bitcoincash client and utilities used by XChainJS clients",
   "keywords": [
-    "THORChain",
-    "XChain"
+    "XChain",
+    "Bitcoin",
+    "Cash"
   ],
-  "author": "THORChain",
+  "author": "XChainJS",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
   "main": "lib/index.js",
@@ -29,23 +30,23 @@
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",
-    "start:example": "ts-node example/index.ts"
-  },
-  "devDependencies": {
-    "@types/big.js": "^6.0.0",
-    "cosmos-client": "^0.39.2"
-  },
-  "publishConfig": {
-    "access": "public"
+    "postversion": "git push --follow-tags"
   },
   "dependencies": {
     "@xchainjs/xchain-client": "^0.3.0",
-    "@xchainjs/xchain-cosmos": "^0.7.0",
     "@xchainjs/xchain-crypto": "^0.2.1",
-    "axios": "^0.21.0",
-    "nock": "^13.0.5"
+    "axios": "^0.20.0",
+    "bitcore-lib-cash": "^8.24.1",
+    "bitcore-mnemonic": "^8.24.1"
+  },
+  "devDependencies": {
+    "@types/bitcore-lib-cash": "^8.23.1",
+    "axios-mock-adapter": "^1.19.0"
   },
   "peerDependencies": {
-    "cosmos-client": "^0.39.2"
+    "bitcore-lib-cash": "^8.24.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -4,7 +4,7 @@ import { TxsPage } from '@xchainjs/xchain-client'
 import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { TxHistoryResponse, TxResponse } from '@xchainjs/xchain-cosmos'
 import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
-import { AssetRune } from '../src/types'
+import { AssetRune, ThorchainDepositResponse } from '../src/types'
 import { Client } from '../src/client'
 import { DECIMAL } from '../src/util'
 
@@ -28,6 +28,10 @@ const mockAccountsBalance = (
   },
 ) => {
   nock(url).get(`/bank/balances/${address}`).reply(200, result)
+}
+
+const mockThorchainDeposit = (url: string, result: ThorchainDepositResponse) => {
+  nock(url).post('/thorchain/deposit').reply(200, result)
 }
 
 const assertTxsPost = (url: string, memo: undefined | string, result: BroadcastTxCommitResult): void => {
@@ -332,6 +336,33 @@ describe('Client Test', () => {
           amount: '210000000',
         },
       ],
+    })
+    mockThorchainDeposit(thorClient.getClientUrl(), {
+      type: 'cosmos-sdk/StdTx',
+      value: {
+        msg: [
+          {
+            type: 'thorchain/MsgDeposit',
+            value: {
+              coins: [
+                {
+                  asset: 'THOR.RUNE',
+                  amount: '10000',
+                },
+              ],
+              memo: 'swap:BNB.BNB:tbnb1ftzhmpzr4t8ta3etu4x7nwujf9jqckp3th2lh0',
+              signer: 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
+            },
+          },
+        ],
+        fee: {
+          amount: [],
+          gas: '100000000',
+        },
+        signatures: [],
+        memo: '',
+        timeout_height: '0',
+      },
     })
     assertTxsPost(thorClient.getClientUrl(), '', expected_txsPost_result)
 

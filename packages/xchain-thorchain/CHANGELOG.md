@@ -1,5 +1,11 @@
 # v.x.x.x
 
+# v.0.9.1 (2020-01-26)
+
+### Fix
+
+- Fix `deposit`. Use `/thorchain/deposit` to build a deposit transaction.
+
 # v.0.9.0 (2020-01-15)
 
 ### Breaking change
