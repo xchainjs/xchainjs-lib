@@ -1,5 +1,10 @@
 # v.x.x.x
 
+# v.0.2.2 (2021-01-30)
+
+- Adds yarn clean to package.json prepublishOnly to clear lib folder before building and publishing to npm
+- Fixes linting from redeclaring Litecoin in chain consts twice
+
 ### Update
 
 - add Bitcoin Cash chain const.

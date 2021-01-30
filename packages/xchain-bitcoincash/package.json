@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-bitcoincash",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Custom bitcoincash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -29,7 +29,7 @@
     "build": "rollup -c",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build",
+    "prepublishOnly": "yarn clean && yarn build",
     "postversion": "git push --follow-tags"
   },
   "dependencies": {

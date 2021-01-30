@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-ethereum",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Ethereum client for XChainJS",
   "keywords": [
     "XChain",
@@ -28,7 +28,7 @@
     "build": "rollup -c rollup.config.ts",
     "test": "jest",
     "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "yarn clean && yarn build"
   },
   "publishConfig": {
     "access": "public"

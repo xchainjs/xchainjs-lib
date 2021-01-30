@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-polkadot",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Custom Polkadot client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -29,7 +29,7 @@
     "build": "rollup -c",
     "test": "jest --detectOpenHandles",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build",
+    "prepublishOnly": "yarn clean && yarn build",
     "start:example": "ts-node example/index.ts"
   },
   "devDependencies": {

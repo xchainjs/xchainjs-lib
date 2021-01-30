@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-cosmos",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Custom Cosmos client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -28,7 +28,7 @@
     "build": "rollup -c",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "yarn clean && yarn build"
   },
   "devDependencies": {
     "cosmos-client": "^0.39.2"

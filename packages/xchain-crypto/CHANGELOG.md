@@ -1,4 +1,8 @@
-# v.x.x.x (2020-XX-XX)
+# v.x.x.x (2021-XX-XX)
+
+# v.0.2.3 (2021-01-30)
+
+- Adds yarn clean to package.json prepublishOnly to clear lib folder before building and publishing to npm
 
 ### Update
 

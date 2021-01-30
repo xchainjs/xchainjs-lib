@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-binance",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "description": "Custom Binance client and utilities used by XChainJS clients",
   "keywords": [
     "BNB",
@@ -30,7 +30,7 @@
     "test": "jest",
     "compile": "tsc -p tsconfig.build.json",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "yarn clean && yarn build"
   },
   "dependencies": {
     "@xchainjs/xchain-client": "^0.3.0",

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-crypto",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "XChain Crypto is a crypto module needed by all XChain clients.",
   "main": "lib/index.js",
   "module": "lib/index.es.js",
@@ -15,7 +15,7 @@
     "build": "rollup -c",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "test": "jest --coverage",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "yarn clean && yarn build"
   },
   "repository": {
     "type": "git",

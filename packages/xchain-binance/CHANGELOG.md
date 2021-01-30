@@ -1,12 +1,16 @@
 # v.x.x.x
 
-# v.4.4.1 (2020-01-15)
+# v.4.4.2 (2021-01-30)
+
+- Adds yarn clean to package.json prepublishOnly to clear lib folder before building and publishing to npm
+
+# v.4.4.1 (2021-01-15)
 
 ### Change
 
 - Export `getPrefix`
 
-# v.4.4.0 (2020-01-15)
+# v.4.4.0 (2021-01-15)
 
 ### Update
 
