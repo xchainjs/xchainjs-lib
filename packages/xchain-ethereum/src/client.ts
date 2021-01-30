@@ -672,31 +672,39 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @param {FeesParams} params
    * @returns {FeesWithGasPricesAndLimits} The estimated gas prices/limits.
+   *
+   * @throws {"Failed to estimate fees, gas price, gas limit"} Thrown if failed to estimate fees, gas price, gas limit.
    */
   estimateFeesWithGasPricesAndLimits = async (params: FeesParams): Promise<FeesWithGasPricesAndLimits> => {
-    // gas prices
-    const gasPrices = await this.estimateGasPrices()
-    const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
+    try {
+      // gas prices
+      const gasPrices = await this.estimateGasPrices()
+      const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
 
-    // gas limits
-    const gasLimits = await this.estimateGasLimits({
-      asset: params.asset,
-      amount: params.amount,
-      recipient: params.recipient,
-      gasPrices,
-    })
+      // gas limits
+      const gasLimits = await this.estimateGasLimits({
+        asset: params.asset,
+        amount: params.amount,
+        recipient: params.recipient,
+        gasPrices,
+      })
 
-    const { fast: fastGL, fastest: fastestGL, average: averageGL } = gasLimits
+      const { fast: fastGL, fastest: fastestGL, average: averageGL } = gasLimits
 
-    return {
-      gasPrices,
-      gasLimits,
-      fees: {
-        type: 'byte',
-        average: getFee({ gasPrice: averageGP, gasLimit: averageGL }),
-        fast: getFee({ gasPrice: fastGP, gasLimit: fastGL }),
-        fastest: getFee({ gasPrice: fastestGP, gasLimit: fastestGL }),
-      },
+      return {
+        gasPrices,
+        gasLimits,
+        fees: {
+          type: 'byte',
+          average: getFee({ gasPrice: averageGP, gasLimit: averageGL }),
+          fast: getFee({ gasPrice: fastGP, gasLimit: fastGL }),
+          fastest: getFee({ gasPrice: fastestGP, gasLimit: fastestGL }),
+        },
+      }
+    } catch (error) {
+      return Promise.reject(
+        new Error(`Failed to estimate fees, gas price, gas limit: ${error.msg ?? error.toString()}`),
+      )
     }
   }
 
@@ -705,12 +713,18 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @param {FeesParams} params
    * @returns {Fees} The average/fast/fastest fees.
+   *
+   * @throws {"Failed to get fees"} Thrown if failed to get fees.
    */
   getFees = async (params: XFeesParams & FeesParams): Promise<Fees> => {
     if (!params) return Promise.reject('Params need to be passed')
 
-    const { fees } = await this.estimateFeesWithGasPricesAndLimits(params)
-    return fees
+    try {
+      const { fees } = await this.estimateFeesWithGasPricesAndLimits(params)
+      return fees
+    } catch (error) {
+      return Promise.reject(new Error(`Failed to get fees: ${error.msg ?? error.toString()}`))
+    }
   }
 }
 
