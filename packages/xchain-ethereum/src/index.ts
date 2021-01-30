@@ -6,4 +6,5 @@ export {
   getTokenAddress,
   getPrefix,
   validateAddress,
+  ETHAddress,
 } from './utils'

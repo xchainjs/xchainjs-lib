@@ -44,8 +44,8 @@ import {
   SIMPLE_GAS_COST,
   BASE_TOKEN_GAS_COST,
   getFee,
-  maxApproval,
-  ethAddress,
+  MAX_APPROVAL,
+  ETHAddress,
   getDefaultGasPrices,
 } from './utils'
 
@@ -471,7 +471,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   approve = async (spender: Address, sender: Address, amount?: BaseAmount): Promise<TransactionResponse> => {
     try {
-      const txAmount = amount ? BigNumber.from(amount.amount().toString()) : maxApproval
+      const txAmount = amount ? BigNumber.from(amount.amount().toString()) : MAX_APPROVAL
       const txResult = await this.call<TransactionResponse>(sender, erc20ABI, 'approve', [
         spender,
         txAmount,
@@ -520,7 +520,7 @@ export default class Client implements XChainClient, EthereumClient {
         assetAddress = getTokenAddress(asset)
       }
 
-      const isETHAddress = assetAddress === ethAddress
+      const isETHAddress = assetAddress === ETHAddress
 
       // feeOptionKey
 
@@ -577,7 +577,7 @@ export default class Client implements XChainClient, EthereumClient {
    * Estimate gas price.
    * @see https://etherscan.io/apis#gastracker
    *
-   * @returns {GasPrices} The gas prices (average, fast, fastest).
+   * @returns {GasPrices} The gas prices (average, fast, fastest) in `Wei` (`BaseAmount`)
    *
    * @throws {"Failed to estimate gas price"} Thrown if failed to estimate gas price.
    */
@@ -585,10 +585,15 @@ export default class Client implements XChainClient, EthereumClient {
     try {
       const response: GasOracleResponse = await etherscanAPI.getGasOracle(this.etherscan.baseUrl, this.etherscan.apiKey)
 
+      // Convert result of gas prices: `Gwei` -> `Wei`
+      const averageWei = parseUnits(response.SafeGasPrice, 'gwei')
+      const fastWei = parseUnits(response.ProposeGasPrice, 'gwei')
+      const fastestWei = parseUnits(response.FastGasPrice, 'gwei')
+
       return {
-        average: baseAmount(parseUnits(response.SafeGasPrice, 'gwei').toString(), ETH_DECIMAL),
-        fast: baseAmount(parseUnits(response.ProposeGasPrice, 'gwei').toString(), ETH_DECIMAL),
-        fastest: baseAmount(parseUnits(response.FastGasPrice, 'gwei').toString(), ETH_DECIMAL),
+        average: baseAmount(averageWei.toString(), ETH_DECIMAL),
+        fast: baseAmount(fastWei.toString(), ETH_DECIMAL),
+        fastest: baseAmount(fastestWei.toString(), ETH_DECIMAL),
       }
     } catch (error) {
       return Promise.reject(new Error(`Failed to estimate gas price: ${error.msg ?? error.toString()}`))
@@ -606,6 +611,7 @@ export default class Client implements XChainClient, EthereumClient {
   estimateGasLimit = async ({ asset, recipient, amount, gasPrice }: GasLimitParams): Promise<BigNumber> => {
     try {
       const txAmount = BigNumber.from(amount.amount().toString())
+      // Gas price `Wei` as BigNumber
       const gasPriceBN = BigNumber.from(gasPrice.amount().toString())
 
       let assetAddress
@@ -615,7 +621,7 @@ export default class Client implements XChainClient, EthereumClient {
 
       let estimate
 
-      if (assetAddress && assetAddress !== ethAddress) {
+      if (assetAddress && assetAddress !== ETHAddress) {
         // ERC20 gas estimate
         const contract = new ethers.Contract(assetAddress, erc20ABI, this.provider)
 
@@ -679,6 +685,7 @@ export default class Client implements XChainClient, EthereumClient {
       recipient: params.recipient,
       gasPrices,
     })
+
     const { fast: fastGL, fastest: fastestGL, average: averageGL } = gasLimits
 
     return {

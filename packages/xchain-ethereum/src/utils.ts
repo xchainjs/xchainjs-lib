@@ -30,8 +30,8 @@ export const BASE_TOKEN_GAS_COST: ethers.BigNumber = BigNumber.from(100000)
 // default gas price in gwei
 export const DEFAULT_GAS_PRICE = 50
 
-export const ethAddress = '0x0000000000000000000000000000000000000000'
-export const maxApproval = BigNumber.from(2).pow(256).sub(1)
+export const ETHAddress = '0x0000000000000000000000000000000000000000'
+export const MAX_APPROVAL = BigNumber.from(2).pow(256).sub(1)
 
 /**
  * XChainNetwork -> EthNetwork
@@ -179,7 +179,7 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
  * @returns {Fees} The default gas price.
  */
 export const getFee = ({ gasPrice, gasLimit }: { gasPrice: BaseAmount; gasLimit: BigNumber }) =>
-  baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()))
+  baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), ETH_DECIMAL)
 
 export const estimateDefaultFeesWithGasPricesAndLimits = (asset?: Asset): FeesWithGasPricesAndLimits => {
   const gasPrices = {
@@ -195,7 +195,7 @@ export const estimateDefaultFeesWithGasPricesAndLimits = (asset?: Asset): FeesWi
   }
 
   let gasLimits
-  if (assetAddress && assetAddress !== ethAddress) {
+  if (assetAddress && assetAddress !== ETHAddress) {
     gasLimits = {
       average: BigNumber.from(BASE_TOKEN_GAS_COST),
       fast: BigNumber.from(BASE_TOKEN_GAS_COST),
