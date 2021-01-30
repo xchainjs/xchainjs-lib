@@ -26,10 +26,10 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "rollup -c",
+    "build": "yarn clean && rollup -c",
     "test": "jest --detectOpenHandles",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn clean && yarn build",
+    "prepublishOnly": "yarn build",
     "start:example": "ts-node example/index.ts"
   },
   "devDependencies": {

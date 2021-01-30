@@ -25,10 +25,10 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "rollup -c",
+    "build": "yarn clean && rollup -c",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn clean && yarn build"
+    "prepublishOnly": "yarn build"
   },
   "peerDependencies": {
     "bignumber.js": "9.x"

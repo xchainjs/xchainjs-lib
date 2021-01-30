@@ -25,10 +25,10 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "rollup -c rollup.config.ts",
+    "build": "yarn clean && rollup -c rollup.config.ts",
     "test": "jest",
     "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn clean && yarn build"
+    "prepublishOnly": "yarn build"
   },
   "publishConfig": {
     "access": "public"

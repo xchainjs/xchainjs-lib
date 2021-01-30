@@ -1,6 +1,6 @@
 # v.0.0.2 (2021-01-30)
 
-- Adds yarn clean to package.json prepublishOnly to clear lib folder before building and publishing to npm
+- Clear lib folder on build
 
 # v.0.0.1 (2021-01-29)
 

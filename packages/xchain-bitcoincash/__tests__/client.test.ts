@@ -86,7 +86,7 @@ describe('BCHClient Test', () => {
       cashAddress: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
       slpAddress: 'slptest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2shlcycvd5',
       currentPage: 0,
-      pagesTotal: 2
+      pagesTotal: 2,
     })
     const balance = await bchClient.getBalance()
     expect(balance.length).toEqual(1)
@@ -116,7 +116,7 @@ describe('BCHClient Test', () => {
       cashAddress: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
       slpAddress: 'slptest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2shlcycvd5',
       currentPage: 0,
-      pagesTotal: 2
+      pagesTotal: 2,
     })
     const balance = await bchClient.getBalance('qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf')
     expect(balance.length).toEqual(1)

@@ -26,11 +26,11 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "rollup -c",
+    "build": "yarn clean && rollup -c",
     "test": "jest",
     "compile": "tsc -p tsconfig.build.json",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn clean && yarn build"
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "@xchainjs/xchain-client": "^0.3.0",

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-client",
-  "version": "0.3.1",
+  "version": "0.3.0",
   "license": "MIT",
   "main": "lib/index",
   "types": "lib/index",
@@ -11,7 +11,7 @@
     "build": "yarn run clean && yarn run compile",
     "clean": "rimraf -rf ./lib",
     "compile": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "yarn clean && yarn run build",
+    "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests"
   },
   "devDependencies": {},

@@ -12,10 +12,10 @@
   ],
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "rollup -c",
+    "build": "yarn clean && rollup -c",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "test": "jest --coverage",
-    "prepublishOnly": "yarn clean && yarn build"
+    "prepublishOnly": "yarn build"
   },
   "repository": {
     "type": "git",
