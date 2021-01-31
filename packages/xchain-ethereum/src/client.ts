@@ -552,14 +552,14 @@ export default class Client implements XChainClient, EthereumClient {
         txResult = await this.call<TransactionResponse>(assetAddress, erc20ABI, 'transfer', [
           recipient,
           txAmount,
-          Object.assign({}, overrides ?? {}),
+          Object.assign({}, overrides),
         ])
       } else {
         // Transfer ETH
         const transactionRequest = Object.assign(
           { to: recipient, value: txAmount },
           {
-            ...(overrides ?? {}),
+            ...overrides,
             data: memo ? toUtf8Bytes(memo) : undefined,
           },
         )
