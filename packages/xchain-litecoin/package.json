@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-litecoin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Custom Litecoin client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -25,7 +25,7 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "rollup -c",
+    "build": "yarn clean && rollup -c",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",

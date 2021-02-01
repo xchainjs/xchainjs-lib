@@ -1,5 +1,9 @@
 # v.x.x.x
 
+# v.0.4.1 (2020-01-30)
+
+- Clear lib folder on build
+
 # v.0.4.0 (2020-01-15)
 
 ### Update

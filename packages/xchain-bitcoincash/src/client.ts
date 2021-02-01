@@ -63,8 +63,8 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getDefaultClientURL = (): ClientUrl => {
     return {
-      'testnet': 'https://trest.bitcoin.com/v2',
-      'mainnet': 'https://rest.bitcoin.com/v2'
+      testnet: 'https://trest.bitcoin.com/v2',
+      mainnet: 'https://rest.bitcoin.com/v2',
     }
   }
 
@@ -95,7 +95,6 @@ class Client implements BitcoinCashClient, XChainClient {
   getClientUrlByNetwork = (network: Network): string => {
     return this.clientUrl[network]
   }
-
 
   /**
    * Set/update a new phrase.
@@ -137,8 +136,7 @@ class Client implements BitcoinCashClient, XChainClient {
   setNetwork = (network: Network): void => {
     if (network) {
       this.network = network
-    }
-    else {
+    } else {
       throw new Error('Network must be provided')
     }
   }
@@ -262,7 +260,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Array<Balance>} The BTC balance of the address.
-   * 
+   *
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
@@ -274,14 +272,14 @@ class Client implements BitcoinCashClient, XChainClient {
       if (!response) {
         throw new Error('Invalid address')
       }
-      
+
       return [
         {
           asset: utils.AssetBCH,
           amount: baseAmount(response.balanceSat, 8),
-        }
+        },
       ]
-    } catch(error) {
+    } catch (error) {
       return Promise.reject(error)
     }
   }

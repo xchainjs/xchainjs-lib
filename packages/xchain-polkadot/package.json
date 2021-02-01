@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-polkadot",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Custom Polkadot client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -26,7 +26,7 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "rollup -c",
+    "build": "yarn clean && rollup -c",
     "test": "jest --detectOpenHandles",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",
