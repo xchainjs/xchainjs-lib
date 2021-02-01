@@ -1,3 +1,10 @@
+# v.0.9.0 (2020-01-30)
+
+### Breacking change
+
+- Change `getFee`
+- Add `estimateGasLimit`, `estimateGasLimits`, `estimateFeesWithGasPricesAndLimits`
+
 # v.0.8.1 (2020-01-30)
 
 - Clear lib folder on build

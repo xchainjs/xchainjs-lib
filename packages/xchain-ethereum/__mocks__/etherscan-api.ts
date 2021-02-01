@@ -1,10 +1,20 @@
 import nock from 'nock'
-import { ETHTransactionInfo, TokenTransactionInfo } from '../src/types'
+import { ETHTransactionInfo, TokenTransactionInfo, GasOracleResponse } from '../src/types'
 
 export const mock_etherscan_api = (url: string, method: string, result: string | Object) => {
   nock(url)
     .get('/api')
     .query(param => param.module === 'proxy' && param.action === method)
+    .reply(200, {
+      jsonrpc: '2.0',
+      result,
+      id: 1,
+    })
+}
+export const mock_gastracker_api = (url: string, method: string, result: GasOracleResponse) => {
+  nock(url)
+    .get('/api')
+    .query(param => param.module === 'gastracker' && param.action === method)
     .reply(200, {
       jsonrpc: '2.0',
       result,

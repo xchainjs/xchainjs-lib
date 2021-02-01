@@ -1,11 +1,37 @@
 import { Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
-import { Asset, AssetETH, assetFromString, baseAmount, ETHChain } from '@xchainjs/xchain-util'
-import { Network as EthNetwork, Address, ETHTransactionInfo, TokenTransactionInfo } from './types'
-import { ethers } from 'ethers'
+import {
+  Asset,
+  AssetETH,
+  assetFromString,
+  baseAmount,
+  ETHChain,
+  BaseAmount,
+  assetToString,
+} from '@xchainjs/xchain-util'
+import {
+  Network as EthNetwork,
+  Address,
+  ETHTransactionInfo,
+  TokenTransactionInfo,
+  FeesWithGasPricesAndLimits,
+  GasPrices,
+} from './types'
+import { ethers, BigNumber } from 'ethers'
+import { parseUnits } from 'ethers/lib/utils'
 
 export const ETH_DECIMAL = 18
-export const DEFAULT_GASLIMIT = 63000
 export const ETHPLORER_FREEKEY = 'freekey'
+
+// from https://github.com/MetaMask/metamask-extension/blob/ee205b893fe61dc4736efc576e0663189a9d23da/ui/app/pages/send/send.constants.js#L39
+// and based on recommendations of https://ethgasstation.info/blog/gas-limit/
+export const SIMPLE_GAS_COST: ethers.BigNumber = BigNumber.from(21000)
+export const BASE_TOKEN_GAS_COST: ethers.BigNumber = BigNumber.from(100000)
+
+// default gas price in gwei
+export const DEFAULT_GAS_PRICE = 50
+
+export const ETHAddress = '0x0000000000000000000000000000000000000000'
+export const MAX_APPROVAL = BigNumber.from(2).pow(256).sub(1)
 
 /**
  * XChainNetwork -> EthNetwork
@@ -148,17 +174,72 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
 }
 
 /**
- * Get the default gas price.
+ * Calculate fees by multiplying .
  *
  * @returns {Fees} The default gas price.
  */
-export const getDefaultFees = (): Fees => {
-  return {
-    type: 'base',
-    average: baseAmount(30, ETH_DECIMAL),
-    fast: baseAmount(35, ETH_DECIMAL),
-    fastest: baseAmount(39, ETH_DECIMAL),
+export const getFee = ({ gasPrice, gasLimit }: { gasPrice: BaseAmount; gasLimit: BigNumber }) =>
+  baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), ETH_DECIMAL)
+
+export const estimateDefaultFeesWithGasPricesAndLimits = (asset?: Asset): FeesWithGasPricesAndLimits => {
+  const gasPrices = {
+    average: baseAmount(parseUnits(DEFAULT_GAS_PRICE.toString(), 'gwei').toString(), ETH_DECIMAL),
+    fast: baseAmount(parseUnits((DEFAULT_GAS_PRICE * 2).toString(), 'gwei').toString(), ETH_DECIMAL),
+    fastest: baseAmount(parseUnits((DEFAULT_GAS_PRICE * 3).toString(), 'gwei').toString(), ETH_DECIMAL),
   }
+  const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
+
+  let assetAddress
+  if (asset && assetToString(asset) !== assetToString(AssetETH)) {
+    assetAddress = getTokenAddress(asset)
+  }
+
+  let gasLimits
+  if (assetAddress && assetAddress !== ETHAddress) {
+    gasLimits = {
+      average: BigNumber.from(BASE_TOKEN_GAS_COST),
+      fast: BigNumber.from(BASE_TOKEN_GAS_COST),
+      fastest: BigNumber.from(BASE_TOKEN_GAS_COST),
+    }
+  } else {
+    gasLimits = {
+      average: BigNumber.from(SIMPLE_GAS_COST),
+      fast: BigNumber.from(SIMPLE_GAS_COST),
+      fastest: BigNumber.from(SIMPLE_GAS_COST),
+    }
+  }
+  const { fast: fastGL, fastest: fastestGL, average: averageGL } = gasLimits
+
+  return {
+    gasPrices,
+    gasLimits,
+    fees: {
+      type: 'byte',
+      average: getFee({ gasPrice: averageGP, gasLimit: averageGL }),
+      fast: getFee({ gasPrice: fastGP, gasLimit: fastGL }),
+      fastest: getFee({ gasPrice: fastestGP, gasLimit: fastestGL }),
+    },
+  }
+}
+
+/**
+ * Get the default fees.
+ *
+ * @returns {Fees} The default gas price.
+ */
+export const getDefaultFees = (asset?: Asset): Fees => {
+  const { fees } = estimateDefaultFeesWithGasPricesAndLimits(asset)
+  return fees
+}
+
+/**
+ * Get the default gas price.
+ *
+ * @returns {Fees} The default gas prices.
+ */
+export const getDefaultGasPrices = (asset?: Asset): GasPrices => {
+  const { gasPrices } = estimateDefaultFeesWithGasPricesAndLimits(asset)
+  return gasPrices
 }
 
 /**

@@ -3,8 +3,19 @@ import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import erc20ABI from '../data/erc20.json'
-import { parseEther, toUtf8Bytes } from 'ethers/lib/utils'
-import { GasOracleResponse, Network as EthNetwork, ClientUrl, ExplorerUrl, EstimateGasOpts, TxOverrides } from './types'
+import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
+import {
+  GasOracleResponse,
+  Network as EthNetwork,
+  ExplorerUrl,
+  TxOverrides,
+  GasPrices,
+  GasLimits,
+  FeesParams,
+  GasLimitParams,
+  GasLimitsParams,
+  FeesWithGasPricesAndLimits,
+} from './types'
 import {
   Address,
   Network as XChainNetwork,
@@ -18,21 +29,25 @@ import {
   TxHistoryParams,
   Balances,
   Network,
+  FeeOptionKey,
+  FeesParams as XFeesParams,
 } from '@xchainjs/xchain-client'
-import { AssetETH, baseAmount, baseToAsset, BaseAmount, assetToString, Asset } from '@xchainjs/xchain-util'
+import { AssetETH, baseAmount, BaseAmount, assetToString, Asset } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as etherscanAPI from './etherscan-api'
 import {
   ETH_DECIMAL,
-  DEFAULT_GASLIMIT,
   ethNetworkToXchains,
   xchainNetworkToEths,
   getTokenAddress,
   validateAddress,
+  SIMPLE_GAS_COST,
+  BASE_TOKEN_GAS_COST,
+  getFee,
+  MAX_APPROVAL,
+  ETHAddress,
+  getDefaultGasPrices,
 } from './utils'
-
-const ethAddress = '0x0000000000000000000000000000000000000000'
-const maxApproval = BigNumber.from(2).pow(256).sub(1)
 
 /**
  * Interface for custom Ethereum client
@@ -41,15 +56,15 @@ export interface EthereumClient {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   call<T>(asset: Address, abi: ethers.ContractInterface, func: string, params: Array<any>): Promise<T>
 
-  estimateGas(params: EstimateGasOpts): Promise<BaseAmount>
+  estimateGasLimit(params: GasLimitParams): Promise<BigNumber>
+  estimateGasLimits(params: GasLimitsParams): Promise<GasLimits>
+  estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits>
 
   isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
-  approve(spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash>
+  approve(spender: Address, sender: Address, amount?: BaseAmount): Promise<TransactionResponse>
 }
 
 type ClientParams = XChainClientParams & {
-  ethplorerUrl?: ClientUrl
-  ethplorerApiKey?: string
   explorerUrl?: ExplorerUrl
   etherscanApiKey?: string
 }
@@ -438,7 +453,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   isApproved = async (spender: Address, sender: Address, amount: BaseAmount): Promise<boolean> => {
     try {
-      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
+      const txAmount = BigNumber.from(amount.amount().toString())
       const allowance = await this.call<BigNumberish>(sender, erc20ABI, 'allowance', [this.getAddress(), spender])
       return txAmount.lte(allowance)
     } catch (error) {
@@ -454,15 +469,16 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @returns {TransactionResponse} The transaction result.
    */
-  approve = async (spender: Address, sender: Address, amount?: BaseAmount): Promise<TxHash> => {
+  approve = async (spender: Address, sender: Address, amount?: BaseAmount): Promise<TransactionResponse> => {
     try {
-      const txAmount = amount ? parseEther(baseToAsset(amount).amount().toFormat()) : maxApproval
+      const txAmount = amount ? BigNumber.from(amount.amount().toString()) : MAX_APPROVAL
       const txResult = await this.call<TransactionResponse>(sender, erc20ABI, 'approve', [
         spender,
         txAmount,
-        { from: this.getWallet().address },
+        { from: this.getAddress() },
       ])
-      return txResult.hash
+
+      return txResult
     } catch (error) {
       return Promise.reject(error)
     }
@@ -472,6 +488,12 @@ export default class Client implements XChainClient, EthereumClient {
    * Transfer ETH.
    *
    * @param {TxParams} params The transfer options.
+   * @param {feeOptionKey} FeeOptionKey Fee option (optional)
+   * @param {gasPrice} BaseAmount Gas price (optional)
+   * @param {gasLimit} BigNumber Gas limit (optional)
+   *
+   * A given `feeOptionKey` wins over `gasPrice` and `gasLimit`
+   *
    * @returns {TxHash} The transaction hash.
    *
    * @throws {"Invalid asset address"}
@@ -482,27 +504,50 @@ export default class Client implements XChainClient, EthereumClient {
     memo,
     amount,
     recipient,
-    gasLimit,
+    feeOptionKey,
     gasPrice,
+    gasLimit,
   }: TxParams & {
+    feeOptionKey?: FeeOptionKey
     gasPrice?: BaseAmount
-    gasLimit?: number
+    gasLimit?: BigNumber
   }): Promise<TxHash> => {
     try {
-      const overrides: TxOverrides = {
-        gasLimit: gasLimit || DEFAULT_GASLIMIT,
-        gasPrice: gasPrice && parseEther(baseToAsset(gasPrice).amount().toFormat()),
-      }
-      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
+      const txAmount = BigNumber.from(amount.amount().toString())
 
       let assetAddress
       if (asset && assetToString(asset) !== assetToString(AssetETH)) {
         assetAddress = getTokenAddress(asset)
       }
 
-      let txResult
+      const isETHAddress = assetAddress === ETHAddress
 
-      if (assetAddress && assetAddress !== ethAddress) {
+      // feeOptionKey
+
+      const defaultGasLimit: ethers.BigNumber = isETHAddress ? SIMPLE_GAS_COST : BASE_TOKEN_GAS_COST
+
+      let overrides: TxOverrides = {
+        gasLimit: gasLimit || defaultGasLimit,
+        gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toString()),
+      }
+
+      // override `overrides` if `feeOptionKey` is provided
+      if (feeOptionKey) {
+        const gasPrice = await this.estimateGasPrices()
+          .then((prices) => prices[feeOptionKey])
+          .catch(() => getDefaultGasPrices()[feeOptionKey])
+        const gasLimit = await this.estimateGasLimit({ asset, recipient, amount, gasPrice }).catch(
+          () => defaultGasLimit,
+        )
+
+        overrides = {
+          gasLimit,
+          gasPrice: BigNumber.from(gasPrice.amount().toString()),
+        }
+      }
+
+      let txResult
+      if (assetAddress && !isETHAddress) {
         // Transfer ERC20
         txResult = await this.call<TransactionResponse>(assetAddress, erc20ABI, 'transfer', [
           recipient,
@@ -529,19 +574,30 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
-   * Get the current gas price.
+   * Estimate gas price.
+   * @see https://etherscan.io/apis#gastracker
    *
-   * @returns {Fees} The current gas price.
+   * @returns {GasPrices} The gas prices (average, fast, fastest) in `Wei` (`BaseAmount`)
+   *
+   * @throws {"Failed to estimate gas price"} Thrown if failed to estimate gas price.
    */
-  getFees = async (): Promise<Fees> => {
-    return etherscanAPI.getGasOracle(this.etherscan.baseUrl, this.etherscan.apiKey).then(
-      (response: GasOracleResponse): Fees => ({
-        type: 'base',
-        average: baseAmount(response.SafeGasPrice, ETH_DECIMAL),
-        fast: baseAmount(response.ProposeGasPrice, ETH_DECIMAL),
-        fastest: baseAmount(response.FastGasPrice, ETH_DECIMAL),
-      }),
-    )
+  estimateGasPrices = async (): Promise<GasPrices> => {
+    try {
+      const response: GasOracleResponse = await etherscanAPI.getGasOracle(this.etherscan.baseUrl, this.etherscan.apiKey)
+
+      // Convert result of gas prices: `Gwei` -> `Wei`
+      const averageWei = parseUnits(response.SafeGasPrice, 'gwei')
+      const fastWei = parseUnits(response.ProposeGasPrice, 'gwei')
+      const fastestWei = parseUnits(response.FastGasPrice, 'gwei')
+
+      return {
+        average: baseAmount(averageWei.toString(), ETH_DECIMAL),
+        fast: baseAmount(fastWei.toString(), ETH_DECIMAL),
+        fastest: baseAmount(fastestWei.toString(), ETH_DECIMAL),
+      }
+    } catch (error) {
+      return Promise.reject(new Error(`Failed to estimate gas price: ${error.msg ?? error.toString()}`))
+    }
   }
 
   /**
@@ -549,11 +605,14 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @param {EstimateGasOpts} params The transaction options.
    * @returns {BaseAmount} The estimated gas fee.
+   *
+   * @throws {"Failed to estimate gas limit"} Thrown if failed to estimate gas limit.
    */
-  estimateGas = async ({ asset, sender, recipient, amount, overrides }: EstimateGasOpts): Promise<BaseAmount> => {
+  estimateGasLimit = async ({ asset, recipient, amount, gasPrice }: GasLimitParams): Promise<BigNumber> => {
     try {
-      sender = sender || this.getWallet().address
-      const txAmount = parseEther(baseToAsset(amount).amount().toFormat())
+      const txAmount = BigNumber.from(amount.amount().toString())
+      // Gas price `Wei` as BigNumber
+      const gasPriceBN = BigNumber.from(gasPrice.amount().toString())
 
       let assetAddress
       if (asset && assetToString(asset) !== assetToString(AssetETH)) {
@@ -562,25 +621,109 @@ export default class Client implements XChainClient, EthereumClient {
 
       let estimate
 
-      if (assetAddress && assetAddress !== ethAddress) {
+      if (assetAddress && assetAddress !== ETHAddress) {
         // ERC20 gas estimate
         const contract = new ethers.Contract(assetAddress, erc20ABI, this.provider)
 
-        estimate = await contract.estimateGas.transfer(
-          recipient,
-          txAmount,
-          Object.assign({ from: sender }, overrides || {}),
-        )
+        estimate = await contract.estimateGas.transfer(recipient, txAmount, {
+          from: this.getAddress(),
+          gasPrice: gasPriceBN,
+        })
       } else {
         // ETH gas estimate
-        const transactionRequest = Object.assign({ from: sender, to: recipient, value: txAmount }, overrides || {})
+        const transactionRequest = {
+          from: this.getAddress(),
+          to: recipient,
+          value: txAmount,
+          gasPrice: gasPriceBN,
+        }
 
         estimate = await this.provider.estimateGas(transactionRequest)
       }
 
-      return baseAmount(estimate.toString(), ETH_DECIMAL)
+      return estimate
     } catch (error) {
-      return Promise.reject(error)
+      return Promise.reject(new Error(`Failed to estimate gas limit: ${error.msg ?? error.toString()}`))
+    }
+  }
+
+  /**
+   * Estimate gas limits (average, fast fastest).
+   *
+   * @param {GasLimitsParams} params
+   * @returns {GasLimits} The estimated gas limits.
+   */
+  estimateGasLimits = async (params: GasLimitsParams): Promise<GasLimits> => {
+    const { gasPrices, ...otherParams } = params
+    const { fast, fastest, average } = gasPrices
+    return Promise.all([
+      this.estimateGasLimit({ ...otherParams, gasPrice: fast }),
+      this.estimateGasLimit({ ...otherParams, gasPrice: fastest }),
+      this.estimateGasLimit({ ...otherParams, gasPrice: average }),
+    ]).then(([fast, fastest, average]) => ({
+      average,
+      fast,
+      fastest,
+    }))
+  }
+
+  /**
+   * Estimate gas prices/limits (average, fast fastest).
+   *
+   * @param {FeesParams} params
+   * @returns {FeesWithGasPricesAndLimits} The estimated gas prices/limits.
+   *
+   * @throws {"Failed to estimate fees, gas price, gas limit"} Thrown if failed to estimate fees, gas price, gas limit.
+   */
+  estimateFeesWithGasPricesAndLimits = async (params: FeesParams): Promise<FeesWithGasPricesAndLimits> => {
+    try {
+      // gas prices
+      const gasPrices = await this.estimateGasPrices()
+      const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
+
+      // gas limits
+      const gasLimits = await this.estimateGasLimits({
+        asset: params.asset,
+        amount: params.amount,
+        recipient: params.recipient,
+        gasPrices,
+      })
+
+      const { fast: fastGL, fastest: fastestGL, average: averageGL } = gasLimits
+
+      return {
+        gasPrices,
+        gasLimits,
+        fees: {
+          type: 'byte',
+          average: getFee({ gasPrice: averageGP, gasLimit: averageGL }),
+          fast: getFee({ gasPrice: fastGP, gasLimit: fastGL }),
+          fastest: getFee({ gasPrice: fastestGP, gasLimit: fastestGL }),
+        },
+      }
+    } catch (error) {
+      return Promise.reject(
+        new Error(`Failed to estimate fees, gas price, gas limit: ${error.msg ?? error.toString()}`),
+      )
+    }
+  }
+
+  /**
+   * Get fees.
+   *
+   * @param {FeesParams} params
+   * @returns {Fees} The average/fast/fastest fees.
+   *
+   * @throws {"Failed to get fees"} Thrown if failed to get fees.
+   */
+  getFees = async (params: XFeesParams & FeesParams): Promise<Fees> => {
+    if (!params) return Promise.reject('Params need to be passed')
+
+    try {
+      const { fees } = await this.estimateFeesWithGasPricesAndLimits(params)
+      return fees
+    } catch (error) {
+      return Promise.reject(new Error(`Failed to get fees: ${error.msg ?? error.toString()}`))
     }
   }
 }
