@@ -1,5 +1,11 @@
 # v.x.x.x
 
+# v.0.9.3 (2021-02-02)
+
+### Update
+
+- Add `getExplorerNodeUrl`
+
 # v.0.9.2 (2020-01-30)
 
 - Clear lib folder on build
