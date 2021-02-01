@@ -258,39 +258,39 @@ class Client implements BitcoinCashClient, XChainClient {
   }
 
   /**
-   * Decode cash address.
+   * Decode BCH address.
    *
    * @param {string} address
-   * @returns {string} Decoded cash address.
+   * @returns {string} Decoded BCH address.
    *
    **/
-  decodeCashAddress = (address: string): string => {
-    return utils.decodeCashAddress(address, this.network)
+  decodeAddress = (address: string): string => {
+    return utils.decodeAddress(address, this.network)
   }
 
   /**
-   * Encode cash address.
+   * Encode BCH address.
    *
    * @param {string} address
-   * @returns {string} encoded cash address.
+   * @returns {string} encoded BCH address.
    *
    **/
-  encodeCashAddress = (address: string): string => {
-    return utils.encodeCashAddress(address, this.network)
+  encodeAddress = (address: string): string => {
+    return utils.encodeAddress(address, this.network)
   }
 
   /**
-   * Get the BTC balance of a given address.
+   * Get the BCH balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balance>} The BTC balance of the address.
+   * @returns {Array<Balance>} The BCH balance of the address.
    *
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
       const response: AddressBalance = await axios
-        .get(`${this.getClientURL()}/address/${this.decodeCashAddress(address || this.getAddress())}/balance`)
+        .get(`${this.getClientURL()}/address/${this.decodeAddress(address || this.getAddress())}/balance`)
         .then((response) => response.data)
 
       if (!response) {
@@ -339,11 +339,11 @@ class Client implements BitcoinCashClient, XChainClient {
       return {
         asset: utils.AssetBCH,
         from: coins.inputs.map((input) => ({
-          from: this.encodeCashAddress(input.address),
+          from: this.encodeAddress(input.address),
           amount: baseAmount(input.value, BCH_DECIMAL),
         })),
         to: coins.outputs.map((output) => ({
-          to: this.encodeCashAddress(output.address),
+          to: this.encodeAddress(output.address),
           amount: baseAmount(output.value, BCH_DECIMAL),
         })),
         date: new Date(tx.blockTime),
@@ -411,7 +411,7 @@ class Client implements BitcoinCashClient, XChainClient {
   }
 
   /**
-   * Transfer BTC.
+   * Transfer BCH.
    *
    * @param {TxParams&FeeRate} params The transfer options.
    * @returns {TxHash} The transaction hash.
