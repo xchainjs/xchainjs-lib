@@ -1,12 +1,16 @@
 # v.x.x.x
 
-# v.4.4.1 (2020-01-15)
+# v.4.4.2 (2021-01-30)
+
+- Clear lib folder on build
+
+# v.4.4.1 (2021-01-15)
 
 ### Change
 
 - Export `getPrefix`
 
-# v.4.4.0 (2020-01-15)
+# v.4.4.0 (2021-01-15)
 
 ### Update
 

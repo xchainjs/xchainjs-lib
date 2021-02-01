@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-util",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Helper utilities for XChain clients",
   "keywords": [
     "THORChain",
@@ -25,7 +25,7 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "rollup -c",
+    "build": "yarn clean && rollup -c",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build"

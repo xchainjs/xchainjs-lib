@@ -1,6 +1,9 @@
 import * as bitcash from 'bitcore-lib-cash'
 import { Network } from '@xchainjs/xchain-client'
 import { DerivePath } from './types'
+import { Asset, BCHChain } from '@xchainjs/xchain-util/lib'
+
+export const AssetBCH: Asset = { chain: BCHChain, symbol: 'BCH', ticker: 'BCH' }
 
 /**
  * Get DerivePath.

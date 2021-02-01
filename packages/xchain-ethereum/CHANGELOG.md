@@ -5,6 +5,10 @@
 - Change `getFee`
 - Add `estimateGasLimit`, `estimateGasLimits`, `estimateFeesWithGasPricesAndLimits`
 
+# v.0.8.1 (2020-01-30)
+
+- Clear lib folder on build
+
 # v.0.8.0 (2020-01-27)
 
 ### Breaking change

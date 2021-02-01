@@ -1,5 +1,15 @@
 # v.x.x.x
 
+# v.0.2.2 (2021-01-30)
+
+- Clear lib folder on build
+- Fixes linting from redeclaring Litecoin in chain consts twice
+
+### Update
+
+- add Bitcoin Cash chain const.
+- add Litecoin chain const.
+
 # v.0.2.1 (2021-01-08)
 
 ### Fix

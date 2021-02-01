@@ -1,5 +1,9 @@
 # v.x.x.x
 
+# v.0.9.2 (2020-01-30)
+
+- Clear lib folder on build
+
 # v.0.9.1 (2020-01-26)
 
 ### Fix
