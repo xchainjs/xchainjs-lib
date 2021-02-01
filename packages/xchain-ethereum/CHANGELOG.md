@@ -1,6 +1,10 @@
-# v.0.9.0 (2020-01-30)
+# v.0.9.1 (2020-02-01)
 
-### Breacking change
+### Fix
+
+- Fix type `FeesParams`
+
+### Breaking change
 
 - Change `getFee`
 - Add `estimateGasLimit`, `estimateGasLimits`, `estimateFeesWithGasPricesAndLimits`
