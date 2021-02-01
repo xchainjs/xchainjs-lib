@@ -68,10 +68,13 @@ describe('BCHClient Test', () => {
     bchClient.setNetwork('testnet')
     bchClient.setPhrase(phrase)
 
-    mock_getBalance(bchClient.getClientURL(), 'qpgxmhllgd8fn2flps84537s6uj8mywd4s0w0up43e', {
-      confirmed: 0,
+    mock_getBalance(bchClient.getClientURL(), bchClient.getAddress(), {
+      received: 124442749359,
+      utxo: 1336,
+      address: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
+      txs: 1345,
       unconfirmed: 0,
-      balance: 0,
+      confirmed: 0,
     })
     const balance = await bchClient.getBalance()
     expect(balance.length).toEqual(1)
@@ -83,9 +86,12 @@ describe('BCHClient Test', () => {
     bchClient.setPhrase(phrase)
 
     mock_getBalance(bchClient.getClientURL(), 'qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', {
-      confirmed: 123817511737,
+      received: 123817511737,
+      utxo: 1336,
+      address: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
+      txs: 1345,
       unconfirmed: 0,
-      balance: 123817511737,
+      confirmed: 123817511737,
     })
     const balance = await bchClient.getBalance('qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf')
     expect(balance.length).toEqual(1)
@@ -98,92 +104,67 @@ describe('BCHClient Test', () => {
 
     mock_getTransactionData(
       bchClient.getClientURL(),
-      '0957b51a39d6e67a7a3ced07b49a1102006cb51cea7c82b5a949a8678f3ac35c',
+      '0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b',
       {
-        _id: '5f296d1ac1032d46866487cc',
-        txid: '0957b51a39d6e67a7a3ced07b49a1102006cb51cea7c82b5a949a8678f3ac35c',
-        network: 'testnet',
-        chain: 'BCH',
-        blockHeight: 1398942,
-        blockHash: '00000000b364765e61e40c6dfa64534cfd298bceb31c97502650797925af6e55',
-        blockTime: '2020-08-04T14:15:49.000Z',
-        blockTimeNormalized: '2020-08-04T14:15:49.000Z',
-        coinbase: false,
-        locktime: -1,
-        inputCount: 1,
-        outputCount: 2,
-        size: 226,
-        fee: 248,
-        value: 3586,
-        confirmations: 33389,
-      },
-      {
+        time: 1548767230,
+        size: 245,
         inputs: [
           {
-            _id: '5ec7498ac1032d4686ffad97',
-            chain: 'BCH',
-            network: 'testnet',
+            pkscript: '76a9148836437a157981dfa0a885d8b89f1e7dbeb19f6a88ac',
+            value: 4008203,
+            address: 'bchtest:qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4',
+            witness: [],
+            sequence: 4294967294,
+            output: 0,
+            sigscript:
+              '483045022100bb913689120d3b0c15a4cbf8692db56b280fce590d6742c0786eb9e86adafeff022057eb92814fa417349a867aa38b8a7c38a12c72ae6fa3b479b2e477c5a4482898412103d740fe05c374c9ffdc294d6d486b4b490db9322124cafbd56fee3a71cb9c006c',
             coinbase: false,
-            mintIndex: 0,
-            spentTxid: '0957b51a39d6e67a7a3ced07b49a1102006cb51cea7c82b5a949a8678f3ac35c',
-            mintTxid: 'ab0b2458480c7981abb79a0ba431aaaf65972ff2234e2bf9fc0570c755e811da',
-            mintHeight: 1380503,
-            spentHeight: 1398942,
-            address: 'qzmpc0fz8tdz9kkfhxzmu0rt6d23dvyusugshegndx',
-            script: '76a914b61c3d223ada22dac9b985be3c6bd35516b09c8788ac',
-            value: 3834,
-            confirmations: -1,
-            sequenceNumber: 4294967295,
+            txid: '5fb7685ebec529851d2b0c4dacc8e0ada028191e5279d68baf5a0d96e9e29577',
           },
         ],
+        weight: 980,
+        fee: 2499,
+        locktime: 0,
+        block: {
+          height: 1283394,
+          position: 1,
+        },
         outputs: [
           {
-            _id: '5f296d1ac1032d46866487c6',
-            chain: 'BCH',
-            network: 'testnet',
-            coinbase: false,
-            mintIndex: 0,
-            spentTxid: '',
-            mintTxid: '0957b51a39d6e67a7a3ced07b49a1102006cb51cea7c82b5a949a8678f3ac35c',
-            mintHeight: 1398942,
-            spentHeight: -2,
-            address: 'qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
-            script: '76a914a34bd369e9dca0837d5480fd7c3e6cd9449ac15488ac',
-            value: 600,
-            confirmations: -1,
+            spent: true,
+            pkscript: '76a914151a5bd62929872630531213391c3e2952fa069c88ac',
+            value: 4005704,
+            address: 'bchtest:qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc',
+            spender: {
+              input: 0,
+              txid: 'f1173bb9269c5f7da1e188fae7b6295f3ed4d2861fbd45f4b5415f5bbe06d8ae',
+            },
           },
           {
-            _id: '5f296d1ac1032d46866487c5',
-            chain: 'BCH',
-            network: 'testnet',
-            coinbase: false,
-            mintIndex: 1,
-            spentTxid: '27bfb1667fddcaba710af6a13c8bd2aa45c31888b47bb7e74650223f7f94b47a',
-            mintTxid: '0957b51a39d6e67a7a3ced07b49a1102006cb51cea7c82b5a949a8678f3ac35c',
-            mintHeight: 1398942,
-            spentHeight: 1398948,
-            address: 'qqgjndf87xlamm9thts6p860p90gq29zhswu6kvyru',
-            script: '76a9141129b527f1bfddecabbae1a09f4f095e8028a2bc88ac',
-            value: 2986,
-            confirmations: -1,
-            sequenceNumber: 4294967295,
+            spent: false,
+            pkscript: '6a09696e7465726c696e6b2094112b9aec1d3e1e7c397d40330c920677f74966c858f5ccf940bdb43c580c30',
+            value: 0,
+            address: null,
+            spender: null,
           },
         ],
+        version: 1,
+        deleted: false,
+        rbf: false,
+        txid: '0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b',
       },
     )
 
     const txData = await bchClient.getTransactionData(
-      '0957b51a39d6e67a7a3ced07b49a1102006cb51cea7c82b5a949a8678f3ac35c',
+      '0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b',
     )
-    expect(txData.hash).toEqual('0957b51a39d6e67a7a3ced07b49a1102006cb51cea7c82b5a949a8678f3ac35c')
+    expect(txData.hash).toEqual('0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b')
     expect(txData.from.length).toEqual(1)
-    expect(txData.from[0].from).toEqual('bchtest:qzmpc0fz8tdz9kkfhxzmu0rt6d23dvyusugshegndx')
-    expect(txData.from[0].amount.amount().isEqualTo(baseAmount(3834, 8).amount())).toBeTruthy()
+    expect(txData.from[0].from).toEqual('bchtest:qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
+    expect(txData.from[0].amount.amount().isEqualTo(baseAmount(4008203, 8).amount())).toBeTruthy()
 
-    expect(txData.to.length).toEqual(2)
-    expect(txData.to[0].to).toEqual('bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf')
-    expect(txData.to[0].amount.amount().isEqualTo(baseAmount(600, 8).amount())).toBeTruthy()
-    expect(txData.to[1].to).toEqual('bchtest:qqgjndf87xlamm9thts6p860p90gq29zhswu6kvyru')
-    expect(txData.to[1].amount.amount().isEqualTo(baseAmount(2986, 8).amount())).toBeTruthy()
+    expect(txData.to.length).toEqual(1)
+    expect(txData.to[0].to).toEqual('bchtest:qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
+    expect(txData.to[0].amount.amount().isEqualTo(baseAmount(4005704, 8).amount())).toBeTruthy()
   })
 })

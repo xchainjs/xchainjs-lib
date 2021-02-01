@@ -15,10 +15,12 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
+  TxFrom,
+  TxTo,
 } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
-import { AddressBalance, TransactionCoins, TransactionData } from './types/api-types'
+import { AddressBalance, Transaction } from './types/api-types'
 import { baseAmount } from '@xchainjs/xchain-util/lib'
 
 const BCH_DECIMAL = 8
@@ -65,8 +67,8 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getDefaultClientURL = (): ClientUrl => {
     return {
-      testnet: 'https://api.bitcore.io/api/BCH/testnet',
-      mainnet: 'https://api.bitcore.io/api/BCH/mainnet',
+      testnet: 'https://api.haskoin.com/bchtest',
+      mainnet: 'https://api.haskoin.com/bch',
     }
   }
 
@@ -258,28 +260,6 @@ class Client implements BitcoinCashClient, XChainClient {
   }
 
   /**
-   * Decode BCH address.
-   *
-   * @param {string} address
-   * @returns {string} Decoded BCH address.
-   *
-   **/
-  decodeAddress = (address: string): string => {
-    return utils.decodeAddress(address, this.network)
-  }
-
-  /**
-   * Encode BCH address.
-   *
-   * @param {string} address
-   * @returns {string} encoded BCH address.
-   *
-   **/
-  encodeAddress = (address: string): string => {
-    return utils.encodeAddress(address, this.network)
-  }
-
-  /**
    * Get the BCH balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
@@ -290,7 +270,7 @@ class Client implements BitcoinCashClient, XChainClient {
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
       const response: AddressBalance = await axios
-        .get(`${this.getClientURL()}/address/${this.decodeAddress(address || this.getAddress())}/balance`)
+        .get(`${this.getClientURL()}/address/${address || this.getAddress()}/balance`)
         .then((response) => response.data)
 
       if (!response) {
@@ -300,7 +280,7 @@ class Client implements BitcoinCashClient, XChainClient {
       return [
         {
           asset: utils.AssetBCH,
-          amount: baseAmount(response.balance, BCH_DECIMAL),
+          amount: baseAmount(response.confirmed, BCH_DECIMAL),
         },
       ]
     } catch (error) {
@@ -327,26 +307,34 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const tx: TransactionData = await axios.get(`${this.getClientURL()}/tx/${txId}`).then((response) => response.data)
+      const tx: Transaction = await axios
+        .get(`${this.getClientURL()}/transaction/${txId}`)
+        .then((response) => response.data)
       if (!tx) {
         throw new Error('Invalid TxID')
       }
 
-      const coins: TransactionCoins = await axios
-        .get(`${this.getClientURL()}/tx/${txId}/coins`)
-        .then((response) => response.data)
-
       return {
         asset: utils.AssetBCH,
-        from: coins.inputs.map((input) => ({
-          from: this.encodeAddress(input.address),
-          amount: baseAmount(input.value, BCH_DECIMAL),
-        })),
-        to: coins.outputs.map((output) => ({
-          to: this.encodeAddress(output.address),
-          amount: baseAmount(output.value, BCH_DECIMAL),
-        })),
-        date: new Date(tx.blockTime),
+        from: tx.inputs
+          .filter((input) => !!input.address)
+          .map(
+            (input) =>
+              ({
+                from: input.address,
+                amount: baseAmount(input.value, BCH_DECIMAL),
+              } as TxFrom),
+          ),
+        to: tx.outputs
+          .filter((output) => !!output.address)
+          .map(
+            (output) =>
+              ({
+                to: output.address,
+                amount: baseAmount(output.value, BCH_DECIMAL),
+              } as TxTo),
+          ),
+        date: new Date(tx.time * 1000),
         type: 'transfer',
         hash: tx.txid,
       }

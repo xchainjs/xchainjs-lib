@@ -1,5 +1,5 @@
 import nock from 'nock'
-import { AddressBalance, TransactionData, TransactionCoins } from '../src/types'
+import { AddressBalance, Transaction } from '../src/types'
 
 export const mock_getBalance = (url: string, address: string, result: AddressBalance) => {
   nock(url)
@@ -7,12 +7,8 @@ export const mock_getBalance = (url: string, address: string, result: AddressBal
     .reply(200, result)
 }
 
-export const mock_getTransactionData = (url: string, txId: string, txData: TransactionData, coins: TransactionCoins) => {
+export const mock_getTransactionData = (url: string, txId: string, txData: Transaction) => {
   nock(url)
-    .get(`/tx/${txId}`)
+    .get(`/transaction/${txId}`)
     .reply(200, txData)
-
-  nock(url)
-    .get(`/tx/${txId}/coins`)
-    .reply(200, coins)
 }

@@ -1,46 +1,49 @@
 export type AddressBalance = {
-  confirmed: number
-  unconfirmed: number
-  balance: number
-}
-
-export type TransactionData = {
-  _id: string
-  txid: string
-  network: string
-  chain: string
-  blockHeight: number
-  blockHash: string
-  blockTime: string
-  blockTimeNormalized: string
-  coinbase: boolean
-  locktime: number
-  inputCount: number
-  outputCount: number
-  size: number
-  fee: number
-  value: number
-  confirmations: number
-}
-
-export type TranactionInputOutput = {
-  _id: string
-  chain: string
-  network: string
-  coinbase: boolean
-  mintIndex: number
-  spentTxid: string
-  mintTxid: string
-  mintHeight: number
-  spentHeight: number
+  received: number
+  utxo: number
   address: string
-  script: string
-  value: number
-  confirmations: number
-  sequenceNumber?: number
+  txs: number
+  unconfirmed: number
+  confirmed: number
 }
 
-export type TransactionCoins = {
-  inputs: TranactionInputOutput[]
-  outputs: TranactionInputOutput[]
+export type TransactionInput = {
+  pkscript: string
+  value: number
+  address: string | null
+  witness: string[]
+  sequence: number
+  output: number
+  sigscript: string
+  coinbase: boolean
+  txid: string
+}
+
+export type TransactionOutput = {
+  spent: boolean
+  pkscript: string
+  value: number
+  address: string | null
+  spender: {
+    input: number
+    txid: string
+  } | null
+}
+
+export type Transaction = {
+  time: number
+  size: number
+  inputs: TransactionInput[]
+  weight: number
+  fee: number
+  locktime: number
+  block: {
+    height: number
+    position: number
+  }
+  outputs: TransactionOutput[]
+  version: number
+  deleted: boolean
+  rbf: boolean
+  txid: string
 }
