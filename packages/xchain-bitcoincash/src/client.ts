@@ -292,11 +292,12 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getTransactions = async ({ address, offset, limit }: TxHistoryParams): Promise<TxsPage> => {
     try {
-      const account = await getAccount(this.getClientURL(), address || this.getAddress())
-      const txs = await getTransactions(this.getClientURL(), address || this.getAddress(), {
-        offset: offset || 0,
-        limit: limit || 10,
-      })
+      address = address || this.getAddress()
+      offset = offset || 0
+      limit = limit || 10
+
+      const account = await getAccount(this.getClientURL(), address)
+      const txs = await getTransactions(this.getClientURL(), address, { offset, limit })
 
       if (!account || !txs) {
         throw new Error('Invalid address')
