@@ -12,3 +12,10 @@ export const mock_getTransactionData = (url: string, txId: string, txData: Trans
     .get(`/transaction/${txId}`)
     .reply(200, txData)
 }
+
+export const mock_getTransactions = (url: string, address: string, txs: Transaction[]) => {
+  nock(url)
+    .get(`/address/${address}/transactions/full`)
+    .query((_) => true)
+    .reply(200, txs)
+}

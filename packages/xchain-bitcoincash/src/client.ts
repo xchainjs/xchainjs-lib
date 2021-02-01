@@ -1,6 +1,5 @@
 const Mnemonic = require('bitcore-mnemonic')
 
-import axios from 'axios'
 import * as bitcash from 'bitcore-lib-cash'
 import * as utils from './utils'
 import {
@@ -15,15 +14,11 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
-  TxFrom,
-  TxTo,
 } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
-import { AddressBalance, Transaction } from './types/api-types'
 import { baseAmount } from '@xchainjs/xchain-util/lib'
-
-const BCH_DECIMAL = 8
+import { getTransaction, getAccount, getTransactions } from './haskoin-api'
 
 /**
  * BitcoinCashClient Interface
@@ -269,18 +264,16 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
-      const response: AddressBalance = await axios
-        .get(`${this.getClientURL()}/address/${address || this.getAddress()}/balance`)
-        .then((response) => response.data)
+      const account = await getAccount(this.getClientURL(), address || this.getAddress())
 
-      if (!response) {
+      if (!account) {
         throw new Error('Invalid address')
       }
 
       return [
         {
           asset: utils.AssetBCH,
-          amount: baseAmount(response.confirmed, BCH_DECIMAL),
+          amount: baseAmount(account.confirmed, utils.BCH_DECIMAL),
         },
       ]
     } catch (error) {
@@ -294,9 +287,28 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
+   *
+   * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
-  getTransactions = async (_params?: TxHistoryParams): Promise<TxsPage> => {
-    throw new Error('In progress')
+  getTransactions = async ({ address, offset, limit }: TxHistoryParams): Promise<TxsPage> => {
+    try {
+      const account = await getAccount(this.getClientURL(), address || this.getAddress())
+      const txs = await getTransactions(this.getClientURL(), address || this.getAddress(), {
+        offset: offset || 0,
+        limit: limit || 10,
+      })
+
+      if (!account || !txs) {
+        throw new Error('Invalid address')
+      }
+
+      return {
+        total: account.txs,
+        txs: txs.map(utils.parseTransaction),
+      }
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   /**
@@ -304,40 +316,18 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
+   *
+   * @throws {"Invalid TxID"} Thrown if the given transaction id is an invalid one.
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const tx: Transaction = await axios
-        .get(`${this.getClientURL()}/transaction/${txId}`)
-        .then((response) => response.data)
+      const tx = await getTransaction(this.getClientURL(), txId)
+
       if (!tx) {
         throw new Error('Invalid TxID')
       }
 
-      return {
-        asset: utils.AssetBCH,
-        from: tx.inputs
-          .filter((input) => !!input.address)
-          .map(
-            (input) =>
-              ({
-                from: input.address,
-                amount: baseAmount(input.value, BCH_DECIMAL),
-              } as TxFrom),
-          ),
-        to: tx.outputs
-          .filter((output) => !!output.address)
-          .map(
-            (output) =>
-              ({
-                to: output.address,
-                amount: baseAmount(output.value, BCH_DECIMAL),
-              } as TxTo),
-          ),
-        date: new Date(tx.time * 1000),
-        type: 'transfer',
-        hash: tx.txid,
-      }
+      return utils.parseTransaction(tx)
     } catch (error) {
       return Promise.reject(error)
     }

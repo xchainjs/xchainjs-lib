@@ -1,3 +1,7 @@
+export type ErrorResponse = {
+  error: string
+}
+
 export type AddressBalance = {
   received: number
   utxo: number
@@ -46,4 +50,9 @@ export type Transaction = {
   deleted: boolean
   rbf: boolean
   txid: string
+}
+
+export type TransactionsQueryParam = {
+  offset?: number
+  limit?: number
 }

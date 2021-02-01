@@ -1,9 +1,11 @@
 import * as bitcash from 'bitcore-lib-cash'
-import { Network } from '@xchainjs/xchain-client'
-import { DerivePath } from './types'
-import { Asset, BCHChain } from '@xchainjs/xchain-util/lib'
+import { Network, Tx, TxFrom, TxTo } from '@xchainjs/xchain-client'
+import { Asset, BCHChain, baseAmount } from '@xchainjs/xchain-util/lib'
+import { DerivePath, Transaction } from './types'
+import * as utils from './utils'
 
 export const AssetBCH: Asset = { chain: BCHChain, symbol: 'BCH', ticker: 'BCH' }
+export const BCH_DECIMAL = 8
 
 /**
  * Get DerivePath.
@@ -30,7 +32,7 @@ export const isTestnet = (network: Network): boolean => {
  * Get BCH network to be used with bitcore-lib.
  *
  * @param {Network} network
- * @returns {} The BCh network.
+ * @returns {} The BCH network.
  */
 export const bchNetwork = (network: Network): bitcash.Networks.Network => {
   return isTestnet(network) ? bitcash.Networks.testnet : bitcash.Networks.mainnet
@@ -75,4 +77,38 @@ export const encodeAddress = (address: string, network: string): string => {
   }
 
   return getPrefix(network) + address
+}
+
+/**
+ * Parse transaction.
+ *
+ * @param {Transaction} tx
+ * @returns {Tx} Parsed transaction.
+ *
+ **/
+export const parseTransaction = (tx: Transaction): Tx => {
+  return {
+    asset: utils.AssetBCH,
+    from: tx.inputs
+      .filter((input) => !!input.address)
+      .map(
+        (input) =>
+          ({
+            from: input.address,
+            amount: baseAmount(input.value, BCH_DECIMAL),
+          } as TxFrom),
+      ),
+    to: tx.outputs
+      .filter((output) => !!output.address)
+      .map(
+        (output) =>
+          ({
+            to: output.address,
+            amount: baseAmount(output.value, BCH_DECIMAL),
+          } as TxTo),
+      ),
+    date: new Date(tx.time * 1000),
+    type: 'transfer',
+    hash: tx.txid,
+  }
 }
