@@ -1,8 +1,14 @@
 import nock from 'nock'
-import { AddressDetails } from '../src/types'
+import { AddressBalance, Transaction } from '../src/types'
 
-export const mock_getBalance = (url: string, address: string, result: AddressDetails) => {
+export const mock_getBalance = (url: string, address: string, result: AddressBalance) => {
   nock(url)
-    .get(`/address/details/${address}`)
+    .get(`/address/${address}/balance`)
     .reply(200, result)
+}
+
+export const mock_getTransactionData = (url: string, txId: string, txData: Transaction) => {
+  nock(url)
+    .get(`/transaction/${txId}`)
+    .reply(200, txData)
 }

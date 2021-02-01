@@ -15,11 +15,15 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
+  TxFrom,
+  TxTo,
 } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
-import { AddressDetails } from './types/api-types'
+import { AddressBalance, Transaction } from './types/api-types'
 import { baseAmount } from '@xchainjs/xchain-util/lib'
+
+const BCH_DECIMAL = 8
 
 /**
  * BitcoinCashClient Interface
@@ -63,8 +67,8 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getDefaultClientURL = (): ClientUrl => {
     return {
-      testnet: 'https://trest.bitcoin.com/v2',
-      mainnet: 'https://rest.bitcoin.com/v2',
+      testnet: 'https://api.haskoin.com/bchtest',
+      mainnet: 'https://api.haskoin.com/bch',
     }
   }
 
@@ -166,8 +170,8 @@ class Client implements BitcoinCashClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl = (): string => {
-    const networkPath = utils.isTestnet(this.network) ? 'tbch' : 'bch'
-    return `https://explorer.bitcoin.com/${networkPath}`
+    const networkPath = utils.isTestnet(this.network) ? 'bch-testnet' : 'bch'
+    return `https://www.blockchain.com/${networkPath}`
   }
 
   /**
@@ -256,17 +260,17 @@ class Client implements BitcoinCashClient, XChainClient {
   }
 
   /**
-   * Get the BTC balance of a given address.
+   * Get the BCH balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balance>} The BTC balance of the address.
+   * @returns {Array<Balance>} The BCH balance of the address.
    *
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
-      const response: AddressDetails = await axios
-        .get(`${this.getClientURL()}/address/details/${address || this.getAddress()}`)
+      const response: AddressBalance = await axios
+        .get(`${this.getClientURL()}/address/${address || this.getAddress()}/balance`)
         .then((response) => response.data)
 
       if (!response) {
@@ -276,7 +280,7 @@ class Client implements BitcoinCashClient, XChainClient {
       return [
         {
           asset: utils.AssetBCH,
-          amount: baseAmount(response.balanceSat, 8),
+          amount: baseAmount(response.confirmed, BCH_DECIMAL),
         },
       ]
     } catch (error) {
@@ -301,9 +305,39 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
-  getTransactionData = async (_txId: string): Promise<Tx> => {
+  getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      throw new Error('In progress')
+      const tx: Transaction = await axios
+        .get(`${this.getClientURL()}/transaction/${txId}`)
+        .then((response) => response.data)
+      if (!tx) {
+        throw new Error('Invalid TxID')
+      }
+
+      return {
+        asset: utils.AssetBCH,
+        from: tx.inputs
+          .filter((input) => !!input.address)
+          .map(
+            (input) =>
+              ({
+                from: input.address,
+                amount: baseAmount(input.value, BCH_DECIMAL),
+              } as TxFrom),
+          ),
+        to: tx.outputs
+          .filter((output) => !!output.address)
+          .map(
+            (output) =>
+              ({
+                to: output.address,
+                amount: baseAmount(output.value, BCH_DECIMAL),
+              } as TxTo),
+          ),
+        date: new Date(tx.time * 1000),
+        type: 'transfer',
+        hash: tx.txid,
+      }
     } catch (error) {
       return Promise.reject(error)
     }
@@ -365,7 +399,7 @@ class Client implements BitcoinCashClient, XChainClient {
   }
 
   /**
-   * Transfer BTC.
+   * Transfer BCH.
    *
    * @param {TxParams&FeeRate} params The transfer options.
    * @returns {TxHash} The transaction hash.
