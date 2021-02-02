@@ -1,3 +1,9 @@
+# v.0.10.0 (2020-02-02)
+
+### Breacking change
+
+- Change `ropsten` to `ropsten`
+
 # v.0.9.1 (2020-02-01)
 
 ### Fix

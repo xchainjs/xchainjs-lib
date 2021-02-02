@@ -15,9 +15,9 @@ import {
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
 const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
-const etherscanUrl = 'https://api-rinkeby.etherscan.io'
-const rinkebyInfuraUrl = 'https://rinkeby.infura.io/v3'
-const rinkebyAlchemyUrl = 'https://eth-rinkeby.alchemyapi.io/v2'
+const etherscanUrl = 'https://api-ropsten.etherscan.io'
+const ropstenInfuraUrl = 'https://ropsten.infura.io/v3'
+const ropstenAlchemyUrl = 'https://eth-ropsten.alchemyapi.io/v2'
 const wallet = {
   signingKey: {
     curve: 'secp256k1',
@@ -90,8 +90,8 @@ describe('Client Test', () => {
     ethClient.setNetwork('testnet')
 
     const network = await ethClient.getWallet().provider.getNetwork()
-    expect(network.name).toEqual('rinkeby')
-    expect(network.chainId).toEqual(4)
+    expect(network.name).toEqual('ropsten')
+    expect(network.chainId).toEqual(3)
   })
 
   it('should get address', () => {
@@ -152,15 +152,15 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_etherscan_tokenbalance_api(etherscanUrl, '96713467036431545')
     mock_all_api(
       etherscanUrl,
-      rinkebyInfuraUrl,
-      rinkebyAlchemyUrl,
+      ropstenInfuraUrl,
+      ropstenAlchemyUrl,
       'eth_call',
       '0x0000000000000000000000000000000000000000000000000000000000000012',
     )
@@ -280,11 +280,11 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionByHash', {
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionByHash', {
       blockHash: '0x460e054d7420823b4d6110045593d33ec82a040df8f1e47371bf3a52ab54910a',
       blockNumber: '0x791c49',
       from: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
@@ -345,18 +345,18 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      rinkebyInfuraUrl,
-      rinkebyAlchemyUrl,
+      ropstenInfuraUrl,
+      ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0x77cc00d5fa3daa04a6798099847295fc5b391c8eda45f2103fd12069a8841cc2',
+      '0x48f098a17fe33032668b3780090752473a9e2d9a432699962e40ffed736803d0',
     )
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
@@ -375,7 +375,7 @@ describe('Client Test', () => {
       gasLimit: gasFee.gasLimits.fastest,
       gasPrice: gasFee.gasPrices.fastest,
     })
-    expect(txResult).toEqual('0x77cc00d5fa3daa04a6798099847295fc5b391c8eda45f2103fd12069a8841cc2')
+    expect(txResult).toEqual('0x48f098a17fe33032668b3780090752473a9e2d9a432699962e40ffed736803d0')
   })
 
   it('ERC20 transfer', async () => {
@@ -384,25 +384,25 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      rinkebyInfuraUrl,
-      rinkebyAlchemyUrl,
+      ropstenInfuraUrl,
+      ropstenAlchemyUrl,
       'eth_call',
       '0x0000000000000000000000000000000000000000000000000000000000000064',
     )
     mock_all_api(
       etherscanUrl,
-      rinkebyInfuraUrl,
-      rinkebyAlchemyUrl,
+      ropstenInfuraUrl,
+      ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xc97e5139b5d7a58438db22d136390875788527f06259216fb835b9c0e41fe0da',
+      '0xea328780f0558b0bbf34baa142703957122678f5a5b9a0696102cff41a5d2682',
     )
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
@@ -423,18 +423,18 @@ describe('Client Test', () => {
       gasLimit: gasFee.gasLimits.fastest,
       gasPrice: gasFee.gasPrices.fastest,
     })
-    expect(txHash).toEqual('0xc97e5139b5d7a58438db22d136390875788527f06259216fb835b9c0e41fe0da')
+    expect(txHash).toEqual('0xea328780f0558b0bbf34baa142703957122678f5a5b9a0696102cff41a5d2682')
   })
 
   it('estimate gas for eth transfer', async () => {
     const ethClient = new Client({ network: 'testnet', phrase })
 
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
       SafeGasPrice: '51',
@@ -443,8 +443,8 @@ describe('Client Test', () => {
     })
     mock_all_api(
       etherscanUrl,
-      rinkebyInfuraUrl,
-      rinkebyAlchemyUrl,
+      ropstenInfuraUrl,
+      ropstenAlchemyUrl,
       'eth_sendRawTransaction',
       '0xcd0e007a6f81120d45478e3eef07c017ec104d4a2a5f1bff23cf0837ba3aab28',
     )
@@ -462,12 +462,12 @@ describe('Client Test', () => {
   it('estimate gas for erc20 transfer', async () => {
     const ethClient = new Client({ network: 'testnet', phrase })
 
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
       SafeGasPrice: '51',
@@ -476,10 +476,10 @@ describe('Client Test', () => {
     })
     mock_all_api(
       etherscanUrl,
-      rinkebyInfuraUrl,
-      rinkebyAlchemyUrl,
+      ropstenInfuraUrl,
+      ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xcd0e007a6f81120d45478e3eef07c017ec104d4a2a5f1bff23cf0837ba3aab28',
+      '0xea328780f0558b0bbf34baa142703957122678f5a5b9a0696102cff41a5d2682',
     )
 
     const gasEstimate = await ethClient.estimateFeesWithGasPricesAndLimits({
@@ -499,13 +499,13 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(
       etherscanUrl,
-      rinkebyInfuraUrl,
-      rinkebyAlchemyUrl,
+      ropstenInfuraUrl,
+      ropstenAlchemyUrl,
       'eth_call',
       '0x0000000000000000000000000000000000000000000000000000000000000064',
     )
@@ -531,16 +531,16 @@ describe('Client Test', () => {
       phrase,
     })
 
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, rinkebyInfuraUrl, rinkebyAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
-      rinkebyInfuraUrl,
-      rinkebyAlchemyUrl,
+      ropstenInfuraUrl,
+      ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xbe7340bf40f50e250ded48f848ecafbd964034cc7de05feb5b04f36de40dcb2d',
+      '0x2bf12770e674a9c1918a16f0bb9d85b1041ac2a7b8fca4066b5707252acdc05e',
     )
 
     const tx = await ethClient.approve(
@@ -548,6 +548,6 @@ describe('Client Test', () => {
       '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
       baseAmount(100, ETH_DECIMAL),
     )
-    expect(tx.hash).toEqual('0xbe7340bf40f50e250ded48f848ecafbd964034cc7de05feb5b04f36de40dcb2d')
+    expect(tx.hash).toEqual('0x2bf12770e674a9c1918a16f0bb9d85b1041ac2a7b8fca4066b5707252acdc05e')
   })
 })
