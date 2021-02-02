@@ -5,7 +5,7 @@ import * as C from '@xchainjs/xchain-client'
 export type Address = string
 
 export enum Network {
-  TEST = 'rinkeby',
+  TEST = 'ropsten',
   MAIN = 'homestead',
 }
 
