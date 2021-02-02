@@ -1,16 +1,22 @@
 # v.x.x.x
 
-# v.0.9.2 (2020-01-30)
+# v.0.9.3 (2021-02-02)
+
+### Update
+
+- Add `getExplorerNodeUrl`
+
+# v.0.9.2 (2021-01-30)
 
 - Clear lib folder on build
 
-# v.0.9.1 (2020-01-26)
+# v.0.9.1 (2021-01-26)
 
 ### Fix
 
 - Fix `deposit`. Use `/thorchain/deposit` to build a deposit transaction.
 
-# v.0.9.0 (2020-01-15)
+# v.0.9.0 (2021-01-15)
 
 ### Breaking change
 

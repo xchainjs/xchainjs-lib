@@ -41,6 +41,7 @@ export interface ThorchainClient {
   setClientUrl(clientUrl: ClientUrl): void
   getClientUrl(): string
   setExplorerUrl(explorerUrl: ExplorerUrl): void
+  getExplorerNodeUrl(node: Address): string
 
   deposit(params: DepositParam): Promise<TxHash>
 }
@@ -245,6 +246,16 @@ class Client implements ThorchainClient, XChainClient {
    */
   getExplorerAddressUrl = (address: Address): string => {
     return `${this.getExplorerUrl()}/addresses/${address}`
+  }
+
+  /**
+   * Get the explorer url for the given node.
+   *
+   * @param {Address} node address
+   * @returns {string} The explorer url for the given node.
+   */
+  getExplorerNodeUrl = (address: Address): string => {
+    return `${this.getExplorerUrl()}/nodes/${address}`
   }
 
   /**
