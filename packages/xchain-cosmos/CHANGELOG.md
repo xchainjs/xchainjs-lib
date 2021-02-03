@@ -1,4 +1,8 @@
-# v.x.x.x
+# v.0.8.0 (2021-2-3)
+
+### Update
+
+- Add `searchTxFromRPC` : search transactions using tendermint rpc.
 
 # v.0.7.1 (2021-01-30)
 

@@ -11,6 +11,7 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
+  Txs,
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient } from '@xchainjs/xchain-cosmos'
 import { Asset, baseAmount, assetToString } from '@xchainjs/xchain-util'
@@ -20,7 +21,7 @@ import { PrivKey, codec, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
-import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, ExplorerUrl } from './types'
+import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, ExplorerUrl, NodeUrl } from './types'
 import { MsgNativeTx, msgNativeTxFromJson, ThorchainDepositResponse } from './types/messages'
 import {
   getDenom,
@@ -39,7 +40,7 @@ import {
  */
 export interface ThorchainClient {
   setClientUrl(clientUrl: ClientUrl): void
-  getClientUrl(): string
+  getClientUrl(): NodeUrl
   setExplorerUrl(explorerUrl: ExplorerUrl): void
   getExplorerNodeUrl(node: Address): string
 
@@ -134,9 +135,9 @@ class Client implements ThorchainClient, XChainClient {
   /**
    * Get the client url.
    *
-   * @returns {string} The client url for thorchain based on the current network.
+   * @returns {NodeUrl} The client url for thorchain based on the current network.
    */
-  getClientUrl = (): string => {
+  getClientUrl = (): NodeUrl => {
     return this.getClientUrlByNetwork(this.network)
   }
 
@@ -147,8 +148,14 @@ class Client implements ThorchainClient, XChainClient {
    */
   private getDefaultClientUrl = (): ClientUrl => {
     return {
-      testnet: 'https://testnet.thornode.thorchain.info',
-      mainnet: 'http://138.68.125.107:1317',
+      testnet: {
+        node: 'https://testnet.thornode.thorchain.info',
+        rpc: 'https://testnet.rpc.thorchain.info',
+      },
+      mainnet: {
+        node: 'http://138.68.125.107:1317',
+        rpc: 'http://138.68.125.107:26657',
+      },
     }
   }
 
@@ -156,9 +163,9 @@ class Client implements ThorchainClient, XChainClient {
    * Get the client url.
    *
    * @param {Network} network
-   * @returns {string} The client url for thorchain based on the network.
+   * @returns {NodeUrl} The client url (both node, rpc) for thorchain based on the network.
    */
-  private getClientUrlByNetwork = (network: Network): string => {
+  private getClientUrlByNetwork = (network: Network): NodeUrl => {
     return this.clientUrl[network]
   }
 
@@ -211,7 +218,7 @@ class Client implements ThorchainClient, XChainClient {
    */
   private getNewThorClient = (): CosmosSDKClient => {
     return new CosmosSDKClient({
-      server: this.getClientUrl(),
+      server: this.getClientUrl().node,
       chainId: this.getChainId(),
       prefix: getPrefix(this.network),
       derive_path: this.derive_path,
@@ -380,7 +387,8 @@ class Client implements ThorchainClient, XChainClient {
     try {
       this.registerCodecs()
 
-      const txHistory = await this.thorClient.searchTx({
+      const txHistory = await this.thorClient.searchTxFromRPC({
+        rpcEndpoint: this.getClientUrl().rpc,
         messageAction,
         messageSender,
         page,
@@ -389,9 +397,14 @@ class Client implements ThorchainClient, XChainClient {
         txMaxHeight,
       })
 
+      const txs: Txs = []
+      for (const tx of txHistory.txs) {
+        txs.push(await this.getTransactionData(tx.hash))
+      }
+
       return {
         total: parseInt(txHistory.total_count?.toString() || '0'),
-        txs: getTxsFromHistory(txHistory.txs || [], AssetRune),
+        txs,
       }
     } catch (error) {
       return Promise.reject(error)
@@ -430,7 +443,7 @@ class Client implements ThorchainClient, XChainClient {
   private buildDepositTx = async (msgNativeTx: MsgNativeTx): Promise<StdTx> => {
     try {
       const response: ThorchainDepositResponse = await axios
-        .post(`${this.getClientUrl()}/thorchain/deposit`, {
+        .post(`${this.getClientUrl().node}/thorchain/deposit`, {
           coins: msgNativeTx.coins,
           memo: msgNativeTx.memo,
           base_req: {
