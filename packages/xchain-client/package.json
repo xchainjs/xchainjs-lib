@@ -16,6 +16,6 @@
   },
   "devDependencies": {},
   "dependencies": {
-    "@xchainjs/xchain-util": "^0.2.0"
+    "@xchainjs/xchain-util": "^0.2.2"
   }
 }

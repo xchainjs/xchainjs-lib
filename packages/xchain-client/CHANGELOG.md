@@ -2,6 +2,10 @@
 
 ### Breaking change
 
+- Update @xchainjs/xchain-util package to 0.2.2
+
+### Breaking change
+
 - Add optional parameter for `getFees`
 
 # v.0.3.0 (2020-28-12)
