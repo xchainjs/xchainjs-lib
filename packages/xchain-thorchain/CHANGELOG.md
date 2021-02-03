@@ -1,3 +1,10 @@
+# v.x.x.x (xxxx-xx-xx)
+
+### Breaking change
+
+- Update @xchainjs/xchain-client package to 0.4.0
+- Update @xchainjs/xchain-crypto package to 0.2.3
+
 # v.0.10.0 (2021-02-03)
 
 ### Breaking changes

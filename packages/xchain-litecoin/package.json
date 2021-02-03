@@ -32,8 +32,8 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "^0.3.0",
-    "@xchainjs/xchain-crypto": "^0.2.1",
+    "@xchainjs/xchain-client": "^0.4.0",
+    "@xchainjs/xchain-crypto": "^0.2.3",
     "axios": "^0.20.0",
     "bitcoinjs-lib": "^5.2.0",
     "coininfo": "^5.1.0",
