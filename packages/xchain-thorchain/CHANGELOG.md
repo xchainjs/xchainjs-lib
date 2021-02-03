@@ -1,4 +1,8 @@
-# v.x.x.x
+# v.0.10.0 (2021-02-03)
+
+### Breaking changes
+
+- Change `getTransactions` to use tendermint rpc. (transaction query from the latest ones.)
 
 # v.0.9.3 (2021-02-02)
 

@@ -17,6 +17,8 @@ import {
   TxHistoryResponse,
   CosmosSDKClientParams,
   TxResponse,
+  RPCTxSearchResult,
+  RPCResponse,
 } from './types'
 import { getQueryString } from '../util'
 
@@ -127,6 +129,53 @@ export class CosmosSDKClient {
       return await axios
         .get<TxHistoryParams>(`${this.server}/txs?${getQueryString(queryParameter)}`)
         .then((res) => res.data)
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  searchTxFromRPC = async ({
+    messageAction,
+    messageSender,
+    page,
+    limit,
+    txMinHeight,
+    txMaxHeight,
+    rpcEndpoint,
+  }: SearchTxParams & {
+    rpcEndpoint: string
+  }): Promise<RPCTxSearchResult> => {
+    try {
+      const queryParameter: string[] = []
+      if (messageAction !== undefined) {
+        queryParameter.push(`message.action='${messageAction}'`)
+      }
+      if (messageSender !== undefined) {
+        queryParameter.push(`message.sender='${messageSender}'`)
+      }
+      if (txMinHeight !== undefined) {
+        queryParameter.push(`tx.height>='${txMinHeight}'`)
+      }
+      if (txMaxHeight !== undefined) {
+        queryParameter.push(`tx.height<='${txMaxHeight}'`)
+      }
+
+      const searchParameter: string[] = []
+      searchParameter.push(`query="${queryParameter.join(' AND ')}"`)
+
+      if (page !== undefined) {
+        searchParameter.push(`page="${page}"`)
+      }
+      if (limit !== undefined) {
+        searchParameter.push(`per_page="${limit}"`)
+      }
+      searchParameter.push(`order_by="desc"`)
+
+      const response: RPCResponse<RPCTxSearchResult> = await axios
+        .get(`${rpcEndpoint}/tx_search?${searchParameter.join('&')}`)
+        .then((res) => res.data)
+
+      return response.result
     } catch (error) {
       return Promise.reject(error)
     }

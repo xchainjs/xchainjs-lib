@@ -1,8 +1,13 @@
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
+export type NodeUrl = {
+  node: string
+  rpc: string
+}
+
 export type ClientUrl = {
-  testnet: string
-  mainnet: string
+  testnet: NodeUrl
+  mainnet: NodeUrl
 }
 
 export type ExplorerUrl = {

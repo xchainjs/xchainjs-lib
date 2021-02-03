@@ -80,3 +80,31 @@ export type TxHistoryResponse = {
 export type APIQueryParam = {
   [x: string]: string
 }
+
+export type RPCTxResult = {
+  hash: string
+  height: string
+  index: number
+  tx_result: {
+    code: number
+    data: string
+    log: string
+    info: string
+    gas_wanted: string
+    gas_used: string
+    events: TxEvent[]
+    codespace: string
+  }
+  tx: string
+}
+
+export type RPCTxSearchResult = {
+  txs: RPCTxResult[]
+  total_count: string
+}
+
+export type RPCResponse<T> = {
+  jsonrpc: string
+  id: number
+  result: T
+}
