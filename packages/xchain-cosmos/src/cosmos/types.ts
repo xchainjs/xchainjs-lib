@@ -14,6 +14,8 @@ export type CosmosSDKClientParams = {
 export type SearchTxParams = {
   messageAction?: string
   messageSender?: string
+  transferSender?: string
+  transferRecipient?: string
   page?: number
   limit?: number
   txMinHeight?: number
@@ -60,6 +62,7 @@ export type TxLog = {
 export type TxResponse = {
   height?: number
   txhash?: string
+  data: string
   raw_log?: string
   logs?: TxLog[]
   gas_wanted?: string

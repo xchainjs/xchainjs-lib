@@ -1,4 +1,8 @@
-# v.x.x.x (xxxx-xx-xx)
+# v.0.10.1 (2021-02-05)
+
+### Update
+
+- Update `getTransactions` to support incoming transactions
 
 ### Breaking change
 

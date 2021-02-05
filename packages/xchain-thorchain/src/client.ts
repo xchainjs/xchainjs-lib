@@ -12,17 +12,18 @@ import {
   XChainClient,
   XChainClientParams,
   Txs,
+  TxFrom,
+  TxTo,
 } from '@xchainjs/xchain-client'
-import { CosmosSDKClient } from '@xchainjs/xchain-cosmos'
-import { Asset, baseAmount, assetToString } from '@xchainjs/xchain-util'
+import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
+import { Asset, baseAmount, assetToString, assetFromString } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
-import { PrivKey, codec, AccAddress } from 'cosmos-client'
+import { PrivKey, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
-import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
 
 import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, ExplorerUrl, NodeUrl } from './types'
-import { MsgNativeTx, msgNativeTxFromJson, ThorchainDepositResponse } from './types/messages'
+import { MsgNativeTx, msgNativeTxFromJson, ThorchainDepositResponse, TxResult } from './types/messages'
 import {
   getDenom,
   getAsset,
@@ -33,7 +34,12 @@ import {
   getDenomWithChain,
   isBroadcastSuccess,
   getPrefix,
+  registerCodecs,
+  getTxType,
 } from './util'
+
+const MSG_SEND = 'send'
+const MSG_DEPOSIT = 'deposit'
 
 /**
  * Interface for custom Thorchain client
@@ -235,17 +241,6 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
-   * @private
-   * Register message codecs.
-   *
-   * @returns {void}
-   */
-  private registerCodecs = (): void => {
-    codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
-    codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
-  }
-
-  /**
    * Get the explorer url for the given address.
    *
    * @param {Address} address
@@ -377,33 +372,63 @@ class Client implements ThorchainClient, XChainClient {
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     const messageAction = undefined
-    const messageSender = (params && params.address) || this.getAddress()
+    const address = (params && params.address) || this.getAddress()
     const offset = params?.offset || 0
     const limit = params?.limit || 10
-    const page = limit && offset ? Math.floor(offset / limit) + 1 : undefined
+    const page = limit && offset ? Math.floor(offset / limit) : 0
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
     try {
-      this.registerCodecs()
+      registerCodecs(this.network)
 
-      const txHistory = await this.thorClient.searchTxFromRPC({
-        rpcEndpoint: this.getClientUrl().rpc,
-        messageAction,
-        messageSender,
-        page,
-        limit,
-        txMinHeight,
-        txMaxHeight,
-      })
+      const txIncomingHistory = (
+        await this.thorClient.searchTxFromRPC({
+          rpcEndpoint: this.getClientUrl().rpc,
+          messageAction,
+          transferRecipient: address,
+          limit: 100,
+          txMinHeight,
+          txMaxHeight,
+        })
+      ).txs
+      const txOutgoingHistory = (
+        await this.thorClient.searchTxFromRPC({
+          rpcEndpoint: this.getClientUrl().rpc,
+          messageAction,
+          transferSender: address,
+          limit: 100,
+          txMinHeight,
+          txMaxHeight,
+        })
+      ).txs
+
+      let history: RPCTxResult[] = [...txIncomingHistory, ...txOutgoingHistory]
+        .sort((a, b) => {
+          if (a.height !== b.height) return b.height > a.height ? 1 : -1
+          if (a.hash !== b.hash) return a.hash > b.hash ? 1 : -1
+          return 0
+        })
+        .reduce(
+          (acc, tx) => [...acc, ...(acc.length === 0 || acc[acc.length - 1].hash !== tx.hash ? [tx] : [])],
+          [] as RPCTxResult[],
+        )
+        .filter((tx) => {
+          const action = getTxType(tx.tx_result.data, 'base64')
+          return action === MSG_DEPOSIT || action === MSG_SEND
+        })
+
+      const total = history.length
+
+      history = history.filter((_, index) => index >= page * limit && index < (page + 1) * limit)
 
       const txs: Txs = []
-      for (const tx of txHistory.txs) {
+      for (const tx of history) {
         txs.push(await this.getTransactionData(tx.hash))
       }
 
       return {
-        total: parseInt(txHistory.total_count?.toString() || '0'),
+        total,
         txs,
       }
     } catch (error) {
@@ -420,13 +445,70 @@ class Client implements ThorchainClient, XChainClient {
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
       const txResult = await this.thorClient.txsHashGet(txId)
-      const txs = getTxsFromHistory([txResult], AssetRune)
+      const action = getTxType(txResult.data, 'hex')
+      let txs: Txs = []
+
+      if (action === MSG_DEPOSIT) {
+        txs = [
+          {
+            ...(await this.getDepositTransaction(txId)),
+            date: new Date(txResult.timestamp),
+          },
+        ]
+      } else {
+        txs = getTxsFromHistory([txResult], this.network)
+      }
 
       if (txs.length === 0) {
         throw new Error('transaction not found')
       }
 
       return txs[0]
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  /**
+   * Get the transaction details of a given transaction id. (from /thorchain/txs/hash)
+   *
+   * Node: /thorchain/txs/hash response doesn't have timestamp field.
+   *
+   * @param {string} txId The transaction id.
+   * @returns {Tx} The transaction details of the given transaction id.
+   */
+  getDepositTransaction = async (txId: string): Promise<Omit<Tx, 'date'>> => {
+    try {
+      const result: TxResult = await axios
+        .get(`${this.getClientUrl().node}/thorchain/tx/${txId}`)
+        .then((response) => response.data)
+
+      if (!result || !result.observed_tx) {
+        throw new Error('transaction not found')
+      }
+
+      const from: TxFrom[] = []
+      const to: TxTo[] = []
+      let asset
+      result.observed_tx.tx.coins.forEach((coin) => {
+        from.push({
+          from: result.observed_tx.tx.from_address,
+          amount: baseAmount(coin.amount, DECIMAL),
+        })
+        to.push({
+          to: result.observed_tx.tx.to_address,
+          amount: baseAmount(coin.amount, DECIMAL),
+        })
+        asset = assetFromString(coin.asset)
+      })
+
+      return {
+        asset: asset || AssetRune,
+        from,
+        to,
+        type: 'transfer',
+        hash: txId,
+      }
     } catch (error) {
       return Promise.reject(error)
     }
@@ -525,7 +607,7 @@ class Client implements ThorchainClient, XChainClient {
    */
   transfer = async ({ asset = AssetRune, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
-      this.registerCodecs()
+      registerCodecs(this.network)
 
       const assetBalance = await this.getBalance(this.getAddress(), asset)
       const fee = await this.getFees()

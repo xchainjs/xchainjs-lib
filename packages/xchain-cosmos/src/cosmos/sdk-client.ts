@@ -137,6 +137,8 @@ export class CosmosSDKClient {
   searchTxFromRPC = async ({
     messageAction,
     messageSender,
+    transferSender,
+    transferRecipient,
     page,
     limit,
     txMinHeight,
@@ -152,6 +154,12 @@ export class CosmosSDKClient {
       }
       if (messageSender !== undefined) {
         queryParameter.push(`message.sender='${messageSender}'`)
+      }
+      if (transferSender !== undefined) {
+        queryParameter.push(`transfer.sender='${transferSender}'`)
+      }
+      if (transferRecipient !== undefined) {
+        queryParameter.push(`transfer.recipient='${transferRecipient}'`)
       }
       if (txMinHeight !== undefined) {
         queryParameter.push(`tx.height>='${txMinHeight}'`)

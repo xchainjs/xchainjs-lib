@@ -52,3 +52,29 @@ export type ThorchainDepositResponse = AminoWrapping<{
   memo: string
   timeout_height: string
 }>
+
+export type TxResult = {
+  observed_tx: {
+    tx: {
+      id: string
+      chain: string
+      from_address: string
+      to_address: string
+      coins: {
+        asset: string
+        amount: string
+      }[]
+      gas: {
+        asset: string
+        amount: string
+      }[]
+      memo: string
+    }
+    status: string
+    signers: string[]
+  }
+  keysign_metric: {
+    tx_id: string
+    node_tss_times: null
+  }
+}
