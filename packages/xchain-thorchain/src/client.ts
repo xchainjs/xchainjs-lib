@@ -40,6 +40,7 @@ import {
 
 const MSG_SEND = 'send'
 const MSG_DEPOSIT = 'deposit'
+const MAX_TX_COUNT = 100
 
 /**
  * Interface for custom Thorchain client
@@ -375,7 +376,6 @@ class Client implements ThorchainClient, XChainClient {
     const address = (params && params.address) || this.getAddress()
     const offset = params?.offset || 0
     const limit = params?.limit || 10
-    const page = limit && offset ? Math.floor(offset / limit) : 0
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
@@ -387,7 +387,7 @@ class Client implements ThorchainClient, XChainClient {
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
           transferRecipient: address,
-          limit: 100,
+          limit: MAX_TX_COUNT,
           txMinHeight,
           txMaxHeight,
         })
@@ -397,7 +397,7 @@ class Client implements ThorchainClient, XChainClient {
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
           transferSender: address,
-          limit: 100,
+          limit: MAX_TX_COUNT,
           txMinHeight,
           txMaxHeight,
         })
@@ -417,10 +417,11 @@ class Client implements ThorchainClient, XChainClient {
           const action = getTxType(tx.tx_result.data, 'base64')
           return action === MSG_DEPOSIT || action === MSG_SEND
         })
+        .filter((_, index) => index < MAX_TX_COUNT)
 
       const total = history.length
 
-      history = history.filter((_, index) => index >= page * limit && index < (page + 1) * limit)
+      history = history.filter((_, index) => index >= offset && index < offset + limit)
 
       const txs: Txs = []
       for (const tx of history) {
