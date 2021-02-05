@@ -1,4 +1,8 @@
-# v.x.x.x (xxxx-xx-xx)
+# v.0.8.1 (2021-02-05)
+
+### Update
+
+- Add transfer.sender, transfer.recipient option for transaction search.
 
 ### Breaking change
 
@@ -6,7 +10,7 @@
 - Update @xchainjs/xchain-crypto package to 0.2.3
 - Update @xchainjs/xchain-util package to 0.2.2
 
-# v.0.8.0 (2021-2-3)
+# v.0.8.0 (2021-02-03)
 
 ### Update
 

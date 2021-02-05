@@ -111,6 +111,7 @@ describe('cosmos/util', () => {
       {
         height: 0,
         txhash: '',
+        data: '0A090A076465706F736974',
         raw_log: '',
         gas_wanted: '200000',
         gas_used: '35000',
@@ -146,6 +147,7 @@ describe('cosmos/util', () => {
       {
         height: 0,
         txhash: '',
+        data: '0A090A076465706F736974',
         raw_log: '',
         gas_wanted: '200000',
         gas_used: '35000',

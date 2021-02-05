@@ -1,19 +1,11 @@
 import { AssetRune } from '../src/types'
-import {
-  getDenom,
-  getDenomWithChain,
-  getAsset,
-  getTxsFromHistory,
-  isTransferEvent,
-  isRecipient,
-  isSender,
-  isAmount,
-  parseAmountString,
-  DECIMAL,
-  isBroadcastSuccess,
-} from '../src/util'
-import { TxEventAttribute } from '@xchainjs/xchain-cosmos'
+import { getDenom, getDenomWithChain, getAsset, getTxsFromHistory, isBroadcastSuccess } from '../src/util'
 import { baseAmount } from '@xchainjs/xchain-util'
+import { RawTxResponse, TxResponse } from '@xchainjs/xchain-cosmos/src/cosmos/types'
+import { Msg } from 'cosmos-client'
+import { StdTx } from 'cosmos-client/x/auth'
+import { MsgSend } from 'cosmos-client/x/bank'
+import { StdTxFee } from 'cosmos-client/api'
 
 describe('thorchain/util', () => {
   describe('Denom <-> Asset', () => {
@@ -36,149 +28,108 @@ describe('thorchain/util', () => {
     })
   })
 
-  describe('type guards', () => {
-    describe('isTransferEvent', () => {
-      it('validates isTransferEvent', () => {
-        expect(
-          isTransferEvent({
-            type: 'transfer',
-            attributes: [],
-          }),
-        ).toBeTruthy()
-      })
-      it('invalidates a isTransferEvent', () => {
-        expect(
-          isTransferEvent({
-            type: 'message',
-            attributes: [],
-          }),
-        ).toBeFalsy()
-      })
-    })
-
-    const recipientAttribute: TxEventAttribute = {
-      key: 'recipient',
-      value: 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
-    }
-    const senderAttribute: TxEventAttribute = {
-      key: 'sender',
-      value: 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
-    }
-    const amountAttribute: TxEventAttribute = {
-      key: 'amount',
-      value: '100rune',
-    }
-    describe('isRecipient', () => {
-      it('validates isRecipient', () => {
-        expect(isRecipient(recipientAttribute)).toBeTruthy()
-      })
-      it('invalidates isRecipient', () => {
-        expect(isRecipient(senderAttribute)).toBeFalsy()
-      })
-    })
-    describe('isSender', () => {
-      it('validates isSender', () => {
-        expect(isSender(senderAttribute)).toBeTruthy()
-      })
-      it('invalidates isSender', () => {
-        expect(isSender(recipientAttribute)).toBeFalsy()
-      })
-    })
-    describe('isAmount', () => {
-      it('validates isAmount', () => {
-        expect(isAmount(amountAttribute)).toBeTruthy()
-      })
-      it('invalidates isAmount', () => {
-        expect(isAmount(recipientAttribute)).toBeFalsy()
-      })
-    })
-  })
-
   describe('transaction util', () => {
-    describe('parseAmountString', () => {
-      it('should parse amount string', () => {
-        const amount = parseAmountString('1000rune')
-        expect(amount?.asset).toEqual(AssetRune)
-        expect(amount?.amount.amount().isEqualTo(baseAmount(1000, DECIMAL).amount())).toBeTruthy()
-      })
-    })
     describe('getTxsFromHistory', () => {
-      const transactions = [
+      const fee: StdTxFee = {
+        gas: '200000',
+        amount: [],
+      }
+      const from_address = 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
+      const to_address = 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
+
+      const txs: Array<TxResponse> = [
         {
-          height: 1047,
-          txhash: '098E70A9529AC8F1A57AA0FE65D1D13040B0E803AB8BE7F3B32098164009DED3',
-          raw_log: 'transaction logs',
-          logs: [
-            {
-              msg_index: 0,
-              log: '',
-              events: [
-                {
-                  type: 'message',
-                  attributes: [
+          height: 0,
+          txhash: '',
+          data: '0A060A0473656E64',
+          raw_log: '',
+          gas_wanted: '200000',
+          gas_used: '35000',
+          tx: {
+            msg: [
+              MsgSend.fromJSON({
+                from_address,
+                to_address,
+                amount: [
+                  {
+                    denom: 'rune',
+                    amount: '1000',
+                  },
+                ],
+              }),
+              MsgSend.fromJSON({
+                from_address,
+                to_address,
+                amount: [
+                  {
+                    denom: 'rune',
+                    amount: '1000',
+                  },
+                ],
+              }),
+            ] as Msg[],
+            fee: fee,
+            signatures: null,
+            memo: '',
+          } as StdTx,
+          timestamp: new Date().toString(),
+        },
+        {
+          height: 0,
+          txhash: '',
+          data: '0A090A076465706F736974',
+          raw_log: '',
+          gas_wanted: '200000',
+          gas_used: '35000',
+          tx: {
+            body: {
+              messages: [
+                MsgSend.fromJSON({
+                  from_address,
+                  to_address,
+                  amount: [
                     {
-                      key: 'action',
-                      value: 'native_tx',
-                    },
-                    {
-                      key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                    },
-                    {
-                      key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
+                      denom: 'rune',
+                      amount: '1000',
                     },
                   ],
-                },
-                {
-                  type: 'transfer',
-                  attributes: [
+                }),
+                MsgSend.fromJSON({
+                  from_address,
+                  to_address,
+                  amount: [
                     {
-                      key: 'recipient',
-                      value: 'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw',
-                    },
-                    {
-                      key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                    },
-                    {
-                      key: 'amount',
-                      value: '100000000rune',
-                    },
-                    {
-                      key: 'recipient',
-                      value: 'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2',
-                    },
-                    {
-                      key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                    },
-                    {
-                      key: 'amount',
-                      value: '200000000000rune',
+                      denom: 'rune',
+                      amount: '1000',
                     },
                   ],
-                },
-              ],
+                }),
+              ] as Msg[],
             },
-          ],
-          gas_wanted: '5000000000000000',
-          gas_used: '148996',
-          timestamp: '2020-09-25T06:09:15Z',
+          } as RawTxResponse,
+          timestamp: new Date().toString(),
         },
       ]
       it('should parse transations', () => {
-        const history = getTxsFromHistory(transactions, AssetRune)
-        expect(history.length).toEqual(1)
-        expect(history[0].asset).toEqual(AssetRune)
-        expect(history[0].from[0].from).toEqual('tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly')
-        expect(history[0].from[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
-        expect(history[0].from[1].from).toEqual('tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly')
-        expect(history[0].from[1].amount.amount().isEqualTo(baseAmount(200000000000, DECIMAL).amount())).toEqual(true)
-        expect(history[0].to[0].to).toEqual('tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw')
-        expect(history[0].to[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
-        expect(history[0].to[1].to).toEqual('tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2')
-        expect(history[0].to[1].amount.amount().isEqualTo(baseAmount(200000000000, DECIMAL).amount())).toEqual(true)
+        const parsed_txs = getTxsFromHistory(txs, 'testnet')
+
+        expect(parsed_txs.length).toEqual(2)
+
+        expect(parsed_txs[0].asset).toEqual(AssetRune)
+        expect(parsed_txs[0].from.length).toEqual(1)
+        expect(parsed_txs[0].from[0].from).toEqual(from_address)
+        expect(parsed_txs[0].from[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
+        expect(parsed_txs[0].to.length).toEqual(1)
+        expect(parsed_txs[0].to[0].to).toEqual(to_address)
+        expect(parsed_txs[0].to[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
+
+        expect(parsed_txs[1].asset).toEqual(AssetRune)
+        expect(parsed_txs[1].from.length).toEqual(1)
+        expect(parsed_txs[1].from[0].from).toEqual(from_address)
+        expect(parsed_txs[1].from[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
+        expect(parsed_txs[1].to.length).toEqual(1)
+        expect(parsed_txs[1].to[0].to).toEqual(to_address)
+        expect(parsed_txs[1].to[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
       })
       describe('isBroadcastSuccess', () => {
         it('validates isBroadcastSuccess', () => {

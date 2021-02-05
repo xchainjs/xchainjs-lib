@@ -173,6 +173,7 @@ describe('Client Test', () => {
         {
           height: 1047,
           txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
+          data: '0A090A076465706F736974',
           raw_log: 'transaction logs',
           gas_wanted: '5000000000000000',
           gas_used: '148996',
@@ -215,6 +216,7 @@ describe('Client Test', () => {
         {
           height: 1047,
           txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
+          data: '0A090A076465706F736974',
           raw_log: 'transaction logs',
           gas_wanted: '5000000000000000',
           gas_used: '148996',
@@ -301,6 +303,7 @@ describe('Client Test', () => {
     assertTxHashGet(cosmosClient.getClientUrl(), '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {
       height: 1047,
       txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
+      data: '0A090A076465706F736974',
       raw_log: 'transaction logs',
       gas_wanted: '5000000000000000',
       gas_used: '148996',

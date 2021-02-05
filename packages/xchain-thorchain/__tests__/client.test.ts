@@ -3,7 +3,9 @@ import nock from 'nock'
 import { TxsPage } from '@xchainjs/xchain-client'
 import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { RPCResponse, RPCTxSearchResult, TxResponse } from '@xchainjs/xchain-cosmos'
-import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
+import { Msg } from 'cosmos-client'
+import { StdTx } from 'cosmos-client/x/auth'
+import { BroadcastTxCommitResult, Coin, BaseAccount, StdTxFee } from 'cosmos-client/api'
 import { AssetRune, ThorchainDepositResponse } from '../src/types'
 import { Client } from '../src/client'
 import { DECIMAL } from '../src/util'
@@ -47,6 +49,7 @@ const assertTxsPost = (url: string, memo: undefined | string, result: BroadcastT
 const mockTxHistory = (url: string, result: RPCResponse<RPCTxSearchResult>): void => {
   nock(url)
     .get(`/tx_search`)
+    .twice()
     .query((_) => true)
     .reply(200, result)
 }
@@ -191,9 +194,9 @@ describe('Client Test', () => {
             index: 0,
             tx_result: {
               code: 0,
-              data: 'CgkKB2RlcG9zaXQ=',
+              data: 'CgYKBHNlbmQ=',
               log:
-                '[{"events":[{"type":"bond","attributes":[{"key":"amount","value":"100000000"},{"key":"bound_type","value":"\\u0000"},{"key":"id","value":"46A44C8556375FC41E7B44D1B796995DB2824D7F9C9FD25EA43B2A48493F365F"},{"key":"chain","value":"THOR"},{"key":"from","value":"tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg"},{"key":"to","value":"tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2"},{"key":"coin","value":"100000000 THOR.RUNE"},{"key":"memo","value":"BOND:tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg"}]},{"type":"message","attributes":[{"key":"action","value":"deposit"},{"key":"sender","value":"tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg"},{"key":"sender","value":"tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg"}]},{"type":"new_node","attributes":[{"key":"address","value":"tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg"}]},{"type":"transfer","attributes":[{"key":"recipient","value":"tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw"},{"key":"sender","value":"tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg"},{"key":"amount","value":"100000000rune"},{"key":"recipient","value":"tthor17gw75axcnr8747pkanye45pnrwk7p9c3uhzgff"},{"key":"sender","value":"tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg"},{"key":"amount","value":"100000000rune"}]}]}]',
+                "[{'events:[{'type:'bond','attributes:[{'key:'amount','value:'100000000'},{'key:'bound_type','value:'\\u0000'},{'key:'id','value:'46A44C8556375FC41E7B44D1B796995DB2824D7F9C9FD25EA43B2A48493F365F'},{'key:'chain','value:'THOR'},{'key:'from','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'},{'key:'to','value:'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2'},{'key:'coin','value:'100000000 THOR.RUNE'},{'key:'memo','value:'BOND:tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'}]},{'type:'message','attributes:[{'key:'action','value:'deposit'},{'key:'sender','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'},{'key:'sender','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'}]},{'type:'new_node','attributes:[{'key:'address','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'}]},{'type:'transfer','attributes:[{'key:'recipient','value:'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw'},{'key:'sender','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'},{'key:'amount','value:'100000000rune'},{'key:'recipient','value:'tthor17gw75axcnr8747pkanye45pnrwk7p9c3uhzgff'},{'key:'sender','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'},{'key:'amount','value:'100000000rune'}]}]}]",
               info: '',
               gas_wanted: '100000000',
               gas_used: '134091',
@@ -254,91 +257,56 @@ describe('Client Test', () => {
         total_count: '1',
       },
     })
+
     assertTxHashGet(
       thorClient.getClientUrl().node,
       '098E70A9529AC8F1A57AA0FE65D1D13040B0E803AB8BE7F3B32098164009DED3',
       {
-        height: 1047,
+        height: 0,
         txhash: '098E70A9529AC8F1A57AA0FE65D1D13040B0E803AB8BE7F3B32098164009DED3',
-        raw_log: 'transaction logs',
-        logs: [
-          {
-            msg_index: 0,
-            log: '',
-            events: [
-              {
-                type: 'message',
-                attributes: [
+        data: '0A060A0473656E64',
+        raw_log: '',
+        gas_wanted: '200000',
+        gas_used: '35000',
+        tx: {
+          msg: [
+            {
+              type: 'thorchain/MsgSend',
+              value: {
+                from_address: 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg',
+                to_address: 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg',
+                amount: [
                   {
-                    key: 'action',
-                    value: 'native_tx',
-                  },
-                  {
-                    key: 'sender',
-                    value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                  },
-                  {
-                    key: 'sender',
-                    value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
+                    denom: 'rune',
+                    amount: '100000000',
                   },
                 ],
               },
-              {
-                type: 'transfer',
-                attributes: [
-                  {
-                    key: 'recipient',
-                    value: 'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw',
-                  },
-                  {
-                    key: 'sender',
-                    value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                  },
-                  {
-                    key: 'amount',
-                    value: '100000000rune',
-                  },
-                  {
-                    key: 'recipient',
-                    value: 'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2',
-                  },
-                  {
-                    key: 'sender',
-                    value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                  },
-                  {
-                    key: 'amount',
-                    value: '200000000000rune',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-        gas_wanted: '5000000000000000',
-        gas_used: '148996',
-        timestamp: '2020-09-25T06:09:15Z',
+            },
+          ] as Msg[],
+          fee: {
+            gas: '200000',
+            amount: [],
+          } as StdTxFee,
+          signatures: null,
+          memo: '',
+        } as StdTx,
+        timestamp: new Date().toString(),
       },
     )
 
-    const transactions = await thorClient.getTransactions()
+    const transactions = await thorClient.getTransactions({
+      address: 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg',
+    })
     expect(transactions.total).toEqual(1)
 
     expect(transactions.txs[0].type).toEqual('transfer')
     expect(transactions.txs[0].hash).toEqual('098E70A9529AC8F1A57AA0FE65D1D13040B0E803AB8BE7F3B32098164009DED3')
     expect(transactions.txs[0].asset).toEqual(AssetRune)
-    expect(transactions.txs[0].from[0].from).toEqual('tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly')
+    expect(transactions.txs[0].from[0].from).toEqual('tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg')
     expect(transactions.txs[0].from[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
-    expect(transactions.txs[0].from[1].from).toEqual('tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly')
-    expect(transactions.txs[0].from[1].amount.amount().isEqualTo(baseAmount(200000000000, DECIMAL).amount())).toEqual(
-      true,
-    )
-    expect(transactions.txs[0].to[0].to).toEqual('tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw')
+    expect(transactions.txs[0].to[0].to).toEqual('tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg')
     expect(transactions.txs[0].to[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
-    expect(transactions.txs[0].to[1].to).toEqual('tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2')
-    expect(transactions.txs[0].to[1].amount.amount().isEqualTo(baseAmount(200000000000, DECIMAL).amount())).toEqual(
-      true,
-    )
   })
 
   it('transfer', async () => {
@@ -461,85 +429,50 @@ describe('Client Test', () => {
   })
 
   it('get transaction data', async () => {
-    thorClient.setNetwork('mainnet')
     assertTxHashGet(
       thorClient.getClientUrl().node,
       '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
       {
-        height: 1047,
+        height: 0,
         txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
-        raw_log: 'transaction logs',
-        logs: [
-          {
-            msg_index: 0,
-            log: '',
-            events: [
-              {
-                type: 'message',
-                attributes: [
+        data: '0A060A0473656E64',
+        raw_log: '',
+        gas_wanted: '200000',
+        gas_used: '35000',
+        tx: {
+          msg: [
+            {
+              type: 'thorchain/MsgSend',
+              value: {
+                from_address: 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg',
+                to_address: 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg',
+                amount: [
                   {
-                    key: 'action',
-                    value: 'native_tx',
-                  },
-                  {
-                    key: 'sender',
-                    value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                  },
-                  {
-                    key: 'sender',
-                    value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
+                    denom: 'rune',
+                    amount: '100000000',
                   },
                 ],
               },
-              {
-                type: 'transfer',
-                attributes: [
-                  {
-                    key: 'recipient',
-                    value: 'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw',
-                  },
-                  {
-                    key: 'sender',
-                    value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                  },
-                  {
-                    key: 'amount',
-                    value: '100000000rune',
-                  },
-                  {
-                    key: 'recipient',
-                    value: 'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2',
-                  },
-                  {
-                    key: 'sender',
-                    value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                  },
-                  {
-                    key: 'amount',
-                    value: '200000000000rune',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-        gas_wanted: '5000000000000000',
-        gas_used: '148996',
-        timestamp: '2020-09-25T06:09:15Z',
+            },
+          ] as Msg[],
+          fee: {
+            gas: '200000',
+            amount: [],
+          } as StdTxFee,
+          signatures: null,
+          memo: '',
+        } as StdTx,
+        timestamp: new Date().toString(),
       },
     )
     const tx = await thorClient.getTransactionData('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
     expect(tx.type).toEqual('transfer')
     expect(tx.hash).toEqual('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
     expect(tx.asset).toEqual(AssetRune)
-    expect(tx.from[0].from).toEqual('tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly')
+    expect(tx.from[0].from).toEqual('tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg')
     expect(tx.from[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
-    expect(tx.from[1].from).toEqual('tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly')
-    expect(tx.from[1].amount.amount().isEqualTo(baseAmount(200000000000, DECIMAL).amount())).toEqual(true)
-    expect(tx.to[0].to).toEqual('tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw')
+    expect(tx.to[0].to).toEqual('tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg')
     expect(tx.to[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
-    expect(tx.to[1].to).toEqual('tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2')
-    expect(tx.to[1].amount.amount().isEqualTo(baseAmount(200000000000, DECIMAL).amount())).toEqual(true)
   })
 
   it('should return valid explorer url', () => {
