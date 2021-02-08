@@ -5,6 +5,10 @@
 - Update @xchainjs/xchain-client package to 0.4.0
 - Update @xchainjs/xchain-crypto package to 0.2.3
 
+### Update
+
+- Define / Export `LTC_DECIMAL`
+
 # v.0.0.2 (2021-01-30)
 
 - Clear lib folder on build

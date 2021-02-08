@@ -6,6 +6,7 @@
 - Update @xchainjs/xchain-crypto package to 0.2.3
 - Update @xchainjs/xchain-util package to 0.2.2
 - Move `erc20.json` to `src` folder
+- Export `ETH_DECIMAL`
 
 # v.0.10.0 (2020-02-02)
 

@@ -8,6 +8,8 @@ import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
 import coininfo from 'coininfo'
 
+export const LTC_DECIMAL = 8
+
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
 const TX_INPUT_PUBKEYHASH = 107
