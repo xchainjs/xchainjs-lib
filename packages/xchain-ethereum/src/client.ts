@@ -2,7 +2,7 @@ import { ethers, BigNumberish, BigNumber } from 'ethers'
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
-import erc20ABI from '../data/erc20.json'
+import erc20ABI from './data/erc20.json'
 import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
 import {
   GasOracleResponse,
