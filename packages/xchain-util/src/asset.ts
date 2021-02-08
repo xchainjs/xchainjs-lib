@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js'
 import { fixedBN, formatBN } from './bn'
 import { trimZeros as trimZerosHelper } from './string'
-import { BTCChain, LTCChain, BNBChain, ETHChain, THORChain } from './chain.const'
+import { BTCChain, LTCChain, BNBChain, ETHChain, THORChain, BCHChain } from './chain.const'
 import { isChain } from './chain'
 import { Denomination, AssetAmount, BaseAmount, Amounts, Asset } from './types'
 
@@ -139,6 +139,14 @@ export const AssetBNB: Asset = { chain: BNBChain, symbol: 'BNB', ticker: 'BNB' }
 export const AssetBTC: Asset = { chain: BTCChain, symbol: 'BTC', ticker: 'BTC' }
 
 /**
+ * Base "chain" asset on bitcoin cash main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetBCH: Asset = { chain: BCHChain, symbol: 'BCH', ticker: 'BCH' }
+
+/**
  * Base "chain" asset on litecoin main net.
  *
  * Based on definition in Thorchain `common`
@@ -179,6 +187,22 @@ export const AssetRuneB1A: Asset = { chain: BNBChain, symbol: 'RUNE-B1A', ticker
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
 export const AssetRuneNative: Asset = { chain: THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER }
+
+/**
+ * Base "chain" asset for RUNE on ethereum main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetRuneERC20: Asset = { chain: ETHChain, symbol: `${RUNE_TICKER}-0x3155ba85d5f96b2d030a4966af206230e46849cb`, ticker: RUNE_TICKER }
+
+/**
+ * Base "chain" asset for RUNE on ethereum main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetRuneERC20Testnet: Asset = { chain: ETHChain, symbol: `${RUNE_TICKER}-0xd601c6A3a36721320573885A8d8420746dA3d7A0`, ticker: RUNE_TICKER }
 
 /**
  * Helper to check whether asset is valid

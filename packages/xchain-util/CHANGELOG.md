@@ -1,6 +1,12 @@
 # v.x.x.x
 
+### Update
+
+- Add `AssetBCH`
+
 # v.0.2.2 (2021-01-30)
+
+### Fix
 
 - Clear lib folder on build
 - Fixes linting from redeclaring Litecoin in chain consts twice
