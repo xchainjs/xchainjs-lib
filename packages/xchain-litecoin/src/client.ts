@@ -255,7 +255,10 @@ class Client implements LitecoinClient, XChainClient {
         const rawTx = await sochain.getTx(this.nodeUrl, this.net, txItem.txid)
         const tx: Tx = {
           asset: AssetLTC,
-          from: rawTx.inputs.map((i: TxIO) => ({ from: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
+          from: rawTx.inputs.map((i: TxIO) => ({
+            from: i.address,
+            amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
+          })),
           to: rawTx.outputs
             // ignore tx with type 'nulldata'
             .filter((i: TxIO) => i.type !== 'nulldata')
@@ -288,7 +291,10 @@ class Client implements LitecoinClient, XChainClient {
       const rawTx = await sochain.getTx(this.nodeUrl, this.net, txId)
       return {
         asset: AssetLTC,
-        from: rawTx.inputs.map((i) => ({ from: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
+        from: rawTx.inputs.map((i) => ({
+          from: i.address,
+          amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
+        })),
         to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
         date: new Date(rawTx.time * 1000),
         type: 'transfer',
