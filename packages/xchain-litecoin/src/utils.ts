@@ -259,11 +259,13 @@ export const broadcastTx = async ({ network, txHex, nodeUrl }: BroadcastTxParams
 /**
  * Get DerivePath.
  *
+ * @see https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+ *
  * @param {number} index (optional)
  * @returns {DerivePath} The litecoin derivation path by the index. (both mainnet and testnet)
  */
 export const getDerivePath = (index = 0): DerivePath => ({
-  mainnet: `84'/0'/0'/0/${index}`,
+  mainnet: `84'/2'/0'/0/${index}`,
   testnet: `84'/1'/0'/0/${index}`,
 })
 

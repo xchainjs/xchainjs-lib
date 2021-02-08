@@ -9,6 +9,10 @@
 
 - Define / Export `LTC_DECIMAL`
 
+### Fix
+
+- Fix derivation path
+
 # v.0.0.2 (2021-01-30)
 
 - Clear lib folder on build
