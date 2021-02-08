@@ -1,10 +1,8 @@
 import * as bitcash from 'bitcore-lib-cash'
 import { Network, Tx, TxFrom, TxTo } from '@xchainjs/xchain-client'
-import { Asset, BCHChain, baseAmount } from '@xchainjs/xchain-util/lib'
+import { AssetBCH, baseAmount } from '@xchainjs/xchain-util/lib'
 import { DerivePath, Transaction } from './types'
-import * as utils from './utils'
 
-export const AssetBCH: Asset = { chain: BCHChain, symbol: 'BCH', ticker: 'BCH' }
 export const BCH_DECIMAL = 8
 
 /**
@@ -88,7 +86,7 @@ export const encodeAddress = (address: string, network: string): string => {
  **/
 export const parseTransaction = (tx: Transaction): Tx => {
   return {
-    asset: utils.AssetBCH,
+    asset: AssetBCH,
     from: tx.inputs
       .filter((input) => !!input.address)
       .map(

@@ -8,7 +8,7 @@ import { AddressBalance, Transaction, TransactionsQueryParam } from './types'
  * @returns {boolean}
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isErrorResponse = (response: any): boolean => {
+const isErrorResponse = (response: any): boolean => {
   return !!response.error
 }
 

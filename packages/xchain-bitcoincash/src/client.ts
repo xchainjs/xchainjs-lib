@@ -17,7 +17,7 @@ import {
 } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
-import { baseAmount } from '@xchainjs/xchain-util/lib'
+import { AssetBCH, baseAmount } from '@xchainjs/xchain-util/lib'
 import { getTransaction, getAccount, getTransactions } from './haskoin-api'
 
 /**
@@ -272,7 +272,7 @@ class Client implements BitcoinCashClient, XChainClient {
 
       return [
         {
-          asset: utils.AssetBCH,
+          asset: AssetBCH,
           amount: baseAmount(account.confirmed, utils.BCH_DECIMAL),
         },
       ]
