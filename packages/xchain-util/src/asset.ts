@@ -109,7 +109,8 @@ export const formatAssetAmount = ({
   decimal?: number
   trimZeros?: boolean
 }) => {
-  const formatted = formatBN(amount.amount(), decimal || amount.decimal)
+  // strict check for `undefined` value as negate of 0 will return true and passed decimal value will be ignored
+  const formatted = formatBN(amount.amount(), decimal === undefined ? amount.decimal : decimal)
   // Note: `trimZeros` wins over `decimal`
   return trimZeros ? trimZerosHelper(formatted) : formatted
 }
@@ -194,7 +195,11 @@ export const AssetRuneNative: Asset = { chain: THORChain, symbol: RUNE_TICKER, t
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetRuneERC20: Asset = { chain: ETHChain, symbol: `${RUNE_TICKER}-0x3155ba85d5f96b2d030a4966af206230e46849cb`, ticker: RUNE_TICKER }
+export const AssetRuneERC20: Asset = {
+  chain: ETHChain,
+  symbol: `${RUNE_TICKER}-0x3155ba85d5f96b2d030a4966af206230e46849cb`,
+  ticker: RUNE_TICKER,
+}
 
 /**
  * Base "chain" asset for RUNE on ethereum main net.
@@ -202,7 +207,11 @@ export const AssetRuneERC20: Asset = { chain: ETHChain, symbol: `${RUNE_TICKER}-
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetRuneERC20Testnet: Asset = { chain: ETHChain, symbol: `${RUNE_TICKER}-0xd601c6A3a36721320573885A8d8420746dA3d7A0`, ticker: RUNE_TICKER }
+export const AssetRuneERC20Testnet: Asset = {
+  chain: ETHChain,
+  symbol: `${RUNE_TICKER}-0xd601c6A3a36721320573885A8d8420746dA3d7A0`,
+  ticker: RUNE_TICKER,
+}
 
 /**
  * Helper to check whether asset is valid
@@ -315,7 +324,12 @@ export const formatAssetAmountCurrency = ({
   decimal?: number
   trimZeros?: boolean
 }) => {
-  const amountFormatted = formatAssetAmount({ amount, decimal: decimal || amount.decimal, trimZeros: shouldTrimZeros })
+  const amountFormatted = formatAssetAmount({
+    amount,
+    // strict check for `undefined` value as negate of 0 will return true and passed decimal value will be ignored
+    decimal: decimal === undefined ? amount.decimal : decimal,
+    trimZeros: shouldTrimZeros,
+  })
   const ticker = asset?.ticker ?? ''
 
   if (ticker) {
