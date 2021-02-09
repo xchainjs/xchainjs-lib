@@ -1,5 +1,11 @@
 # v.x.x.x
 
+# v.0.2.3 (2021-02-09)
+
+### Fix
+
+- Added strict checks for undefined values at `formatAssetAmountCurrency` and `formatAssetAmount`
+
 ### Update
 
 - Add `AssetBCH`
