@@ -109,7 +109,8 @@ export const formatAssetAmount = ({
   decimal?: number
   trimZeros?: boolean
 }) => {
-  const formatted = formatBN(amount.amount(), decimal || amount.decimal)
+  // strict check for `undefined` value as negate of 0 will return true and passed decimal value will be ignored
+  const formatted = formatBN(amount.amount(), decimal === undefined ? amount.decimal : decimal)
   // Note: `trimZeros` wins over `decimal`
   return trimZeros ? trimZerosHelper(formatted) : formatted
 }
@@ -315,7 +316,12 @@ export const formatAssetAmountCurrency = ({
   decimal?: number
   trimZeros?: boolean
 }) => {
-  const amountFormatted = formatAssetAmount({ amount, decimal: decimal || amount.decimal, trimZeros: shouldTrimZeros })
+  const amountFormatted = formatAssetAmount({
+    amount,
+    // strict check for `undefined` value as negate of 0 will return true and passed decimal value will be ignored
+    decimal: decimal === undefined ? amount.decimal : decimal,
+    trimZeros: shouldTrimZeros,
+  })
   const ticker = asset?.ticker ?? ''
 
   if (ticker) {
