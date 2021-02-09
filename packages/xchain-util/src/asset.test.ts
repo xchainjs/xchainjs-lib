@@ -117,8 +117,8 @@ describe('asset', () => {
     })
 
     it('formats an `AssetAmount` with 0 decimal', () => {
-      const amount = assetAmount(11.001, 0)
-      expect(formatAssetAmount({ amount, decimal: 5, trimZeros: true })).toEqual('11')
+      const amount = assetAmount(11.001, 5)
+      expect(formatAssetAmount({ amount, decimal: 0 })).toEqual('11')
     })
   })
 
@@ -304,8 +304,8 @@ describe('asset', () => {
     })
 
     it('formats amount by using 0 decimal of asset', () => {
-      const amount = assetAmount(10.01, 0)
-      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, trimZeros: true })).toEqual('10 (BNB)')
+      const amount = assetAmount(10.01, 5)
+      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, decimal: 0 })).toEqual('10 (BNB)')
     })
   })
 

@@ -195,7 +195,11 @@ export const AssetRuneNative: Asset = { chain: THORChain, symbol: RUNE_TICKER, t
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetRuneERC20: Asset = { chain: ETHChain, symbol: `${RUNE_TICKER}-0x3155ba85d5f96b2d030a4966af206230e46849cb`, ticker: RUNE_TICKER }
+export const AssetRuneERC20: Asset = {
+  chain: ETHChain,
+  symbol: `${RUNE_TICKER}-0x3155ba85d5f96b2d030a4966af206230e46849cb`,
+  ticker: RUNE_TICKER,
+}
 
 /**
  * Base "chain" asset for RUNE on ethereum main net.
@@ -203,7 +207,11 @@ export const AssetRuneERC20: Asset = { chain: ETHChain, symbol: `${RUNE_TICKER}-
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetRuneERC20Testnet: Asset = { chain: ETHChain, symbol: `${RUNE_TICKER}-0xd601c6A3a36721320573885A8d8420746dA3d7A0`, ticker: RUNE_TICKER }
+export const AssetRuneERC20Testnet: Asset = {
+  chain: ETHChain,
+  symbol: `${RUNE_TICKER}-0xd601c6A3a36721320573885A8d8420746dA3d7A0`,
+  ticker: RUNE_TICKER,
+}
 
 /**
  * Helper to check whether asset is valid
