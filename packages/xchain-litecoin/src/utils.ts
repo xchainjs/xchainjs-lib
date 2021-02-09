@@ -8,6 +8,8 @@ import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
 import coininfo from 'coininfo'
 
+export const LTC_DECIMAL = 8
+
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
 const TX_INPUT_PUBKEYHASH = 107
@@ -257,11 +259,13 @@ export const broadcastTx = async ({ network, txHex, nodeUrl }: BroadcastTxParams
 /**
  * Get DerivePath.
  *
+ * @see https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+ *
  * @param {number} index (optional)
  * @returns {DerivePath} The litecoin derivation path by the index. (both mainnet and testnet)
  */
 export const getDerivePath = (index = 0): DerivePath => ({
-  mainnet: `84'/0'/0'/0/${index}`,
+  mainnet: `84'/2'/0'/0/${index}`,
   testnet: `84'/1'/0'/0/${index}`,
 })
 

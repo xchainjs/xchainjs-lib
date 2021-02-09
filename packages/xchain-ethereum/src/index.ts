@@ -7,4 +7,5 @@ export {
   getPrefix,
   validateAddress,
   ETHAddress,
+  ETH_DECIMAL,
 } from './utils'

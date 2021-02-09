@@ -9,8 +9,8 @@ describe('BCHClient Test', () => {
   afterEach(() => bchClient.purgeClient())
 
   const phrase = 'atom green various power must another rent imitate gadget creek fat then'
-  const testnet_address = 'bchtest:qpgxmhllgd8fn2flps84537s6uj8mywd4s0w0up43e'
-  const mainnet_address = 'bitcoincash:qrqwc4dxav4dzltr97q8u2245rz7wlxu3ye8c6x99u'
+  const testnet_address = 'bchtest:qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g'
+  const mainnet_address = 'bitcoincash:qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
 
   it('set phrase should return correct address', () => {
     bchClient.setNetwork('testnet')

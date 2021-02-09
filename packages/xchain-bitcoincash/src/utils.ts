@@ -12,8 +12,8 @@ export const BCH_DECIMAL = 8
  * @returns {DerivePath} The bitcoin cash derivation path by the index. (both mainnet and testnet)
  */
 export const getDerivePath = (index = 0): DerivePath => ({
-  mainnet: `m/84'/145'/0'/0/${index}`,
-  testnet: `m/84'/1'/0'/0/${index}`,
+  mainnet: `m/44'/145'/0'/0/${index}`,
+  testnet: `m/44'/1'/0'/0/${index}`,
 })
 
 /**

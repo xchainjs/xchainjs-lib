@@ -10,6 +10,7 @@ import {
   Transaction,
 } from './types/sochain-api-types'
 import { assetToBase, assetAmount, BaseAmount } from '@xchainjs/xchain-util'
+import { LTC_DECIMAL } from './utils'
 
 const toSochainNetwork = (net: string): string => {
   return net === 'testnet' ? 'LTCTEST' : 'LTC'
@@ -72,10 +73,10 @@ export const getBalance = async (baseUrl: string, network: string, address: stri
     const url = `${baseUrl}/get_address_balance/${toSochainNetwork(network)}/${address}`
     const response = await axios.get(url)
     const balanceResponse: SochainResponse<LtcGetBalanceDTO> = response.data
-    const confirmed = assetAmount(balanceResponse.data.confirmed_balance, 8)
-    const unconfirmed = assetAmount(balanceResponse.data.unconfirmed_balance, 8)
+    const confirmed = assetAmount(balanceResponse.data.confirmed_balance, LTC_DECIMAL)
+    const unconfirmed = assetAmount(balanceResponse.data.unconfirmed_balance, LTC_DECIMAL)
     const netAmt = confirmed.amount().plus(unconfirmed.amount())
-    const result = assetToBase(assetAmount(netAmt, 8))
+    const result = assetToBase(assetAmount(netAmt, LTC_DECIMAL))
     return result
   } catch (error) {
     return Promise.reject(error)
