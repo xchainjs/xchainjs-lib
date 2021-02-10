@@ -2,10 +2,10 @@ import { Client } from '../src/client'
 import { MIN_TX_FEE } from '../src/const'
 import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 
-import mockBlockchairApi from '../__mocks__/block-chair'
-mockBlockchairApi.init()
+import mockSochainApi from '../__mocks__/sochain'
+mockSochainApi.init()
 
-const btcClient = new Client({ network: 'mainnet', nodeUrl: 'mock', nodeApiKey: 'mock' })
+const btcClient = new Client({ network: 'mainnet', nodeUrl: 'https://sochain.com/api/v2' })
 
 describe('BitcoinClient Test', () => {
   beforeEach(() => {
@@ -17,7 +17,6 @@ describe('BitcoinClient Test', () => {
   // please don't touch the tBTC in these
   const phraseOne = 'atom green various power must another rent imitate gadget creek fat then'
   const addyOne = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
-  // const phraseTwo = 'north machine wash sister amazing jungle amused shrimp until genuine promote abstract'
   const addyTwo = 'tb1qz8q2lwfmp965cszdd5raq9m7gljs57hkzpw56d'
 
   // Third ones is used only for balance verification
@@ -48,26 +47,12 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should get the right balance', async () => {
-    const expectedBalance = 11000
+    const expectedBalance = 15446
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseThree)
     const balance = await btcClient.getBalance()
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
-  })
-
-  it('should get the right balance when scanUTXOs is called twice', async () => {
-    const expectedBalance = 11000
-    btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseThree)
-
-    const balance = await btcClient.getBalance()
-    expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
-
-    const newBalance = await btcClient.getBalance()
-    expect(newBalance.length).toEqual(1)
-    expect(newBalance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
 
   it('should broadcast a normal transfer', async () => {
@@ -109,7 +94,7 @@ describe('BitcoinClient Test', () => {
     btcClient.purgeClient()
     const balance = await btcClient.getBalance(addyThree)
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(11000)
+    expect(balance[0].amount.amount().toNumber()).toEqual(15446)
   })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
@@ -221,19 +206,11 @@ describe('BitcoinClient Test', () => {
 
     expect(txPages.total).toEqual(1) //there is 1 tx in addyThree
     expect(txPages.txs[0].asset).toEqual(AssetBTC)
-    expect(txPages.txs[0].date).toEqual(new Date('2020-11-10T14:16:53.000Z'))
-    expect(txPages.txs[0].hash).toEqual('d931f21a4f39b320e2cb8fb78dc9eedb28ba0217d5488be16e9b1da833b9a3e1')
+    expect(txPages.txs[0].date).toEqual(new Date('2020-12-13T11:39:55.000Z'))
+    expect(txPages.txs[0].hash).toEqual('6e7071a09e82d72c6c84d253047c38dbd7fea531b93155adfe10acfba41bca63')
     expect(txPages.txs[0].type).toEqual('transfer')
     expect(txPages.txs[0].to.length).toEqual(2)
     expect(txPages.txs[0].from.length).toEqual(1)
-  })
-
-  it('should not get address transactions when offset too high', async () => {
-    btcClient.setNetwork('testnet')
-    // Offset max should work
-    return expect(btcClient.getTransactions({ address: addyThree, offset: 9000000 })).rejects.toThrow(
-      'Max offset allowed 1000000',
-    )
   })
 
   it('should get address transactions with limit', async () => {
@@ -241,14 +218,6 @@ describe('BitcoinClient Test', () => {
     // Limit should work
     const txPages = await btcClient.getTransactions({ address: addyThree, limit: 1 })
     return expect(txPages.total).toEqual(1) //there 1 tx in addyThree
-  })
-
-  it('should not get address transactions when limit too high', async () => {
-    btcClient.setNetwork('testnet')
-    // Limit max should work
-    return expect(btcClient.getTransactions({ address: addyThree, limit: 9000000 })).rejects.toThrow(
-      'Max limit allowed 10000',
-    )
   })
 
   it('should get transaction with hash', async () => {

@@ -1,6 +1,6 @@
-import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
+import * as Bitcoin from 'bitcoinjs-lib'
 import * as Utils from './utils'
-import * as blockChair from './blockchair-api'
+import * as sochain from './sochain-api'
 import {
   TxHistoryParams,
   TxsPage,
@@ -15,9 +15,8 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
-import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
+import { AssetBTC, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
-import { TxIO } from './types/blockchair-api-types'
 
 /**
  * BitcoinClient Interface
@@ -31,7 +30,6 @@ interface BitcoinClient {
 
 type BitcoinClientParams = XChainClientParams & {
   nodeUrl?: string
-  nodeApiKey?: string
 }
 
 /**
@@ -41,7 +39,6 @@ class Client implements BitcoinClient, XChainClient {
   private net: Network
   private phrase = ''
   private nodeUrl = ''
-  private nodeApiKey = ''
 
   /**
    * Constructor
@@ -49,10 +46,9 @@ class Client implements BitcoinClient, XChainClient {
    *
    * @param {BitcoinClientParams} params
    */
-  constructor({ network = 'testnet', nodeUrl = '', nodeApiKey = '', phrase }: BitcoinClientParams) {
+  constructor({ network = 'testnet', nodeUrl = '', phrase }: BitcoinClientParams) {
     this.net = network
     this.setNodeURL(nodeUrl)
-    this.setNodeAPIKey(nodeApiKey)
     phrase && this.setPhrase(phrase)
   }
 
@@ -64,16 +60,6 @@ class Client implements BitcoinClient, XChainClient {
    */
   setNodeURL = (url: string): void => {
     this.nodeUrl = url
-  }
-
-  /**
-   * Set/Update the node api key.
-   *
-   * @param {string} key The new node api key.
-   * @returns {void}
-   */
-  setNodeAPIKey(key: string): void {
-    this.nodeApiKey = key
   }
 
   /**
@@ -239,7 +225,7 @@ class Client implements BitcoinClient, XChainClient {
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
-      return Utils.getBalance(address || this.getAddress(), this.nodeUrl, this.nodeApiKey)
+      return Utils.getBalance(this.nodeUrl, this.net, address || this.getAddress())
     } catch (e) {
       return Promise.reject(e)
     }
@@ -253,44 +239,41 @@ class Client implements BitcoinClient, XChainClient {
    * @returns {TxsPage} The transaction history.
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const limit = params?.limit ?? 10
+    // Sochain API doesn't have pagination parameter
     const offset = params?.offset ?? 0
+    const limit = params?.limit || 10
 
-    let totalCount = 0
-    const transactions: Tx[] = []
     try {
       const address = params?.address ?? this.getAddress()
-      //Calling getAddress without limit/offset to get total count
-      const dAddr = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey)
-      totalCount = dAddr[address].transactions.length
 
-      const dashboardAddress = await blockChair.getAddress(this.nodeUrl, address, this.nodeApiKey, limit, offset)
-      const txList = dashboardAddress[address].transactions
+      const response = await sochain.getAddress(this.nodeUrl, this.net, address)
+      const total = response.txs.length
+      const transactions: Tx[] = []
 
-      for (const hash of txList) {
-        const rawTx = (await blockChair.getTx(this.nodeUrl, hash, this.nodeApiKey))[hash]
+      const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
+      for (const txItem of txs) {
+        const rawTx = await sochain.getTx(this.nodeUrl, this.net, txItem.txid)
         const tx: Tx = {
           asset: AssetBTC,
-          from: rawTx.inputs.map((i: TxIO) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
+          from: rawTx.inputs.map((i) => ({ from: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
           to: rawTx.outputs
-            // ignore tx with type 'nulldata'
-            .filter((i: TxIO) => i.type !== 'nulldata')
-            .map((i: TxIO) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
-          date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
+            .filter((i) => i.type !== 'nulldata')
+            .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
+          date: new Date(rawTx.time * 1000),
           type: 'transfer',
-          hash: rawTx.transaction.hash,
+          hash: rawTx.txid,
         }
         transactions.push(tx)
       }
+
+      const result: TxsPage = {
+        total,
+        txs: transactions,
+      }
+      return result
     } catch (error) {
       return Promise.reject(error)
     }
-
-    const result: TxsPage = {
-      total: totalCount,
-      txs: transactions,
-    }
-    return result
   }
 
   /**
@@ -301,14 +284,14 @@ class Client implements BitcoinClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const rawTx = (await blockChair.getTx(this.nodeUrl, txId, this.nodeApiKey))[txId]
+      const rawTx = await sochain.getTx(this.nodeUrl, this.net, txId)
       return {
         asset: AssetBTC,
-        from: rawTx.inputs.map((i) => ({ from: i.recipient, amount: baseAmount(i.value, 8) })),
-        to: rawTx.outputs.map((i) => ({ to: i.recipient, amount: baseAmount(i.value, 8) })),
-        date: new Date(`${rawTx.transaction.time} UTC`), //blockchair api doesn't append UTC so need to put that manually
+        from: rawTx.inputs.map((i) => ({ from: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
+        to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
+        date: new Date(rawTx.time * 1000),
         type: 'transfer',
-        hash: rawTx.transaction.hash,
+        hash: rawTx.txid,
       }
     } catch (error) {
       return Promise.reject(error)
@@ -322,12 +305,11 @@ class Client implements BitcoinClient, XChainClient {
    * @returns {FeesWithRates} The fees and rates
    */
   getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
-    const btcStats = await blockChair.bitcoinStats(this.nodeUrl, this.nodeApiKey)
-    const nextBlockFeeRate = btcStats.suggested_transaction_fee_per_byte_sat
+    const txFee = await sochain.getSuggestedTxFee()
     const rates: FeeRates = {
-      fastest: nextBlockFeeRate * 5,
-      fast: nextBlockFeeRate * 1,
-      average: nextBlockFeeRate * 0.5,
+      fastest: txFee * 5,
+      fast: txFee * 1,
+      average: txFee * 0.5,
     }
 
     const fees: Fees = {
@@ -397,7 +379,6 @@ class Client implements BitcoinClient, XChainClient {
         ...params,
         sender: this.getAddress(),
         nodeUrl: this.nodeUrl,
-        nodeApiKey: this.nodeApiKey,
         network: this.net,
       })
       const btcKeys = this.getBtcKeys(this.phrase)
@@ -405,7 +386,7 @@ class Client implements BitcoinClient, XChainClient {
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-      return await Utils.broadcastTx({ txHex, nodeUrl: this.nodeUrl, nodeApiKey: this.nodeApiKey })
+      return await Utils.broadcastTx({ network: this.net, txHex, nodeUrl: this.nodeUrl })
     } catch (e) {
       return Promise.reject(e)
     }

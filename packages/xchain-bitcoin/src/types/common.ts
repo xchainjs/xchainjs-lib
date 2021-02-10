@@ -11,7 +11,7 @@ export type UTXO = {
 
 export type UTXOs = UTXO[]
 
-export type BroadcastTxParams = { txHex: string; nodeUrl: string; nodeApiKey: string }
+export type BroadcastTxParams = { network: string; txHex: string; nodeUrl: string }
 
 // We might extract it into xchain-client later
 export type DerivePath = { mainnet: string; testnet: string }
