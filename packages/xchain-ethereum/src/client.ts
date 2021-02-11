@@ -89,9 +89,17 @@ export default class Client implements XChainClient, EthereumClient {
    */
   constructor({ network = 'testnet', explorerUrl, phrase, etherscanApiKey, infuraCreds }: ClientParams) {
     this.network = xchainNetworkToEths(network)
-    this.provider = infuraCreds
-      ? new ethers.providers.InfuraProvider(network, infuraCreds)
-      : getDefaultProvider(this.network)
+
+    if (infuraCreds) {
+      // Infura provider takes either a string of project id
+      // or an object of id and secret
+      this.provider = infuraCreds.projectSecret
+        ? new ethers.providers.InfuraProvider(network, infuraCreds)
+        : new ethers.providers.InfuraProvider(network, infuraCreds.projectId)
+    } else {
+      this.provider = getDefaultProvider(network)
+    }
+
     this.etherscan = new EtherscanProvider(this.network, etherscanApiKey)
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
 
@@ -258,9 +266,17 @@ export default class Client implements XChainClient, EthereumClient {
       throw new Error('Network must be provided')
     } else {
       this.network = xchainNetworkToEths(network)
-      this.provider = this.infuraCreds
-        ? new ethers.providers.InfuraProvider(network, this.infuraCreds)
-        : getDefaultProvider(this.network)
+
+      if (this.infuraCreds) {
+        // Infura provider takes either a string of project id
+        // or an object of id and secret
+        this.provider = this.infuraCreds.projectSecret
+          ? new ethers.providers.InfuraProvider(this.network, this.infuraCreds)
+          : new ethers.providers.InfuraProvider(this.network, this.infuraCreds.projectId)
+      } else {
+        this.provider = getDefaultProvider(this.network)
+      }
+
       this.etherscan = new EtherscanProvider(this.network)
     }
   }
