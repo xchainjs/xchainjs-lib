@@ -302,7 +302,10 @@ class Client implements BitcoinClient, XChainClient {
       })
       return {
         asset: AssetBTC,
-        from: rawTx.inputs.map((i) => ({ from: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
+        from: rawTx.inputs.map((i) => ({
+          from: i.address,
+          amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)),
+        })),
         to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
         date: new Date(rawTx.time * 1000),
         type: 'transfer',
