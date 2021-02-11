@@ -1,5 +1,8 @@
 # v.x.x.x (xxxx-xx-xx)
 
+# v.0.10.2-1 (2020-02-11)
+
+- Sets Infura creds as project ID if no secret is provided.
 # v.0.10.2 (2020-02-11)
 
 - Allow optional Infura credentials

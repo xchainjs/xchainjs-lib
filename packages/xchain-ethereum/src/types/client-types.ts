@@ -31,7 +31,7 @@ export type TxOverrides = {
 
 export type InfuraCreds = {
   projectId: string
-  projectSecret: string
+  projectSecret?: string
 }
 
 export type GasPrices = Record<C.FeeOptionKey, BaseAmount>
