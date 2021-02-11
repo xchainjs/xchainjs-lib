@@ -2,7 +2,8 @@
 
 ### Update
 
-- update `getBalance` for error handling of invalid api key #224
+- Update `getBalance` for error handling of invalid api key #224
+- Add `Service Providers` section in README.md
 
 # v.0.10.2-1 (2020-02-11)
 

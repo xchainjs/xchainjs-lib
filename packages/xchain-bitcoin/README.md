@@ -41,6 +41,22 @@ Following dependencies will be installed into your project:
 - moment
 - axios
 
+## Service Providers
+
+This package uses the following service providers:
+
+| Function                    | Service     | Notes                                                                            |
+| --------------------------- | ----------- | -------------------------------------------------------------------------------- |
+| Balances                    | Sochain     | https://sochain.com/api#get-balance                                              |
+| Transaction history         | Sochain     | https://sochain.com/api#get-display-data-address, https://sochain.com/api#get-tx |
+| Transaction details by hash | Sochain     | https://sochain.com/api#get-tx                                                   |
+| Transaction fee             | Bitcoinfees | https://bitcoinfees.earn.com/api                                                 |
+| Transaction broadcast       | Sochain     | https://sochain.com/api#send-transaction                                         |
+| Explorer                    | Blockstream | https://blockstream.info                                                         |
+
+Sochain API rate limits: https://sochain.com/api#rate-limits (300 requests/minute)
+Bitcoinfees API rate limits: Unknown
+
 ## Testing
 
 Uses a dotenv file to hold a `USER_PHRASE` and a `VAULT_PHRASE`

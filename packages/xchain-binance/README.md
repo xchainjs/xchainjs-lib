@@ -19,3 +19,18 @@ Following peer dependencies have to be installed into your project. These are no
 ```
 yarn add @binance-chain/javascript-sdk
 ```
+
+## Service Providers
+
+This package uses the following service providers:
+
+| Function                    | Service              | Notes                                                                         | Rate limits                   |
+| --------------------------- | -------------------- | ----------------------------------------------------------------------------- | ----------------------------- |
+| Balances                    | Binance Dex          | https://docs.binance.org/api-reference/dex-api/paths.html#apiv1accountaddress | 5 requests per IP per second. |
+| Transaction history         | Binance Dex          | https://docs.binance.org/api-reference/dex-api/paths.html#apiv1transactions   | 60 requests per IP per minute |
+| Transaction details by hash | Binance Dex          | https://docs.binance.org/api-reference/dex-api/paths.html#apiv1txhash         | 10 requests per IP per second |
+| Transaction fees            | Binance Dex          | https://docs.binance.org/api-reference/dex-api/paths.html#apiv1fees           | 1 request per IP per second   |
+| Transaction broadcast       | Binance Dex          | https://docs.binance.org/api-reference/dex-api/paths.html#apiv1broadcast      | 5 requests per IP per second  |
+| Explorer                    | Binance Dex Explorer | https://explorer.binance.org                                                  |                               |
+
+This package gets the node information (`https://docs.binance.org/api-reference/dex-api/paths.html#apiv1node-info`) to transfer tokens.

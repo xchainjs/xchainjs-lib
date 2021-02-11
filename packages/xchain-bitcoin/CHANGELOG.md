@@ -8,6 +8,10 @@
 - Update @xchainjs/xchain-crypto package to 0.2.3
 - Change `blockchair` to `sochain`
 
+### Update
+
+- Add `Service Providers` section in README.md
+
 # v.0.8.2 (2021-01-30)
 
 - Clear lib folder on build

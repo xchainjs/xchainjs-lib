@@ -1,3 +1,9 @@
+# v.x.x.x
+
+### Update
+
+- Add `Service Providers` section in README.md
+
 # v.0.8.1 (2021-02-05)
 
 ### Update
