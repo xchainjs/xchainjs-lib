@@ -1,9 +1,12 @@
 # v.x.x.x
 
+# v.0.9.0
+
 ### Breaking change
 
 - Update @xchainjs/xchain-client package to 0.4.0
 - Update @xchainjs/xchain-crypto package to 0.2.3
+- Change `blockchair` to `sochain`
 
 # v.0.8.2 (2021-01-30)
 
