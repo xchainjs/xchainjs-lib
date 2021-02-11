@@ -82,6 +82,19 @@ describe('Client Test', () => {
     expect(network.chainId).toEqual(1)
   })
 
+  it('should connect to Infura provider', async () => {
+    const ethClient = new Client({
+      network: 'mainnet',
+      phrase,
+      infuraCreds: {
+        projectId: '',
+        projectSecret: '',
+      },
+    })
+
+    expect(ethClient.getWallet().provider).toBeInstanceOf(providers.InfuraProvider)
+  })
+
   it('should set network', async () => {
     const ethClient = new Client({
       network: 'testnet',
