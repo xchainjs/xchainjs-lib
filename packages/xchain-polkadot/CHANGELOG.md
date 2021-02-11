@@ -6,6 +6,11 @@
 - Update @xchainjs/xchain-crypto package to 0.2.3
 - Update @xchainjs/xchain-util package to 0.2.2
 
+### Update
+
+- Add `Service Providers` section in README.md
+
+
 # v.0.4.1 (2020-01-30)
 
 - Clear lib folder on build
