@@ -29,6 +29,11 @@ export type TxOverrides = {
   value?: ethers.BigNumberish
 }
 
+export type InfuraCreds = {
+  projectId: string
+  projectSecret: string
+}
+
 export type GasPrices = Record<C.FeeOptionKey, BaseAmount>
 export type GasLimits = Record<C.FeeOptionKey, BigNumber>
 

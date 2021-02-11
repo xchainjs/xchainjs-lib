@@ -15,6 +15,7 @@ import {
   GasLimitParams,
   GasLimitsParams,
   FeesWithGasPricesAndLimits,
+  InfuraCreds,
 } from './types'
 import {
   Address,
@@ -67,6 +68,7 @@ export interface EthereumClient {
 type ClientParams = XChainClientParams & {
   explorerUrl?: ExplorerUrl
   etherscanApiKey?: string
+  infuraCreds?: InfuraCreds
 }
 
 /**
@@ -79,16 +81,23 @@ export default class Client implements XChainClient, EthereumClient {
   private provider: Provider
   private etherscan: EtherscanProvider
   private explorerUrl: ExplorerUrl
+  private infuraCreds: InfuraCreds | null = null
 
   /**
    * Constructor
    * @param {ClientParams} params
    */
-  constructor({ network = 'testnet', explorerUrl, phrase, etherscanApiKey }: ClientParams) {
+  constructor({ network = 'testnet', explorerUrl, phrase, etherscanApiKey, infuraCreds }: ClientParams) {
     this.network = xchainNetworkToEths(network)
-    this.provider = getDefaultProvider(this.network)
+    this.provider = infuraCreds
+      ? new ethers.providers.InfuraProvider(network, infuraCreds)
+      : getDefaultProvider(this.network)
     this.etherscan = new EtherscanProvider(this.network, etherscanApiKey)
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
+
+    if (infuraCreds) {
+      this.infuraCreds = infuraCreds
+    }
 
     if (phrase) {
       this.setPhrase(phrase)
@@ -249,7 +258,9 @@ export default class Client implements XChainClient, EthereumClient {
       throw new Error('Network must be provided')
     } else {
       this.network = xchainNetworkToEths(network)
-      this.provider = getDefaultProvider(this.network)
+      this.provider = this.infuraCreds
+        ? new ethers.providers.InfuraProvider(network, this.infuraCreds)
+        : getDefaultProvider(this.network)
       this.etherscan = new EtherscanProvider(this.network)
     }
   }
