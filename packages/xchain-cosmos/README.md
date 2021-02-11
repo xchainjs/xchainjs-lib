@@ -32,3 +32,5 @@ This package uses the following service providers:
 | Transaction details by hash | Cosmos RPC | https://cosmos.network/rpc/v0.37.9 (`GET /txs/{hash}`)              |
 | Transaction broadcast       | Cosmos RPC | https://cosmos.network/rpc/v0.37.9 (`POST /txs`)                    |
 | Explorer                    | BigDipper  | https://cosmos.bigdipper.live                                       |
+
+Rate limits: No

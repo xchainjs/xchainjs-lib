@@ -21,3 +21,5 @@ This package uses the following service providers:
 | Transaction details by hash | Haskoin        | https://api.haskoin.com/#/Transaction/getTransaction  |
 | Transaction broadcast       | Haskoin        | https://api.haskoin.com/#/Transaction/postTransaction |
 | Explorer                    | Blockchain.com | https://www.blockchain.com                            |
+
+Rate limits: No
