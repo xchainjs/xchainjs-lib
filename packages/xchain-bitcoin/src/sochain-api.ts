@@ -138,8 +138,8 @@ export const getSuggestedTxFee = async (): Promise<number> => {
   //This number is from https://bitcoinfees.earn.com API
   //Refer: https://bitcoinfees.earn.com/api
   try {
-    const response = await axios.get('https://bitcoinfees.earn.com/api/v1/fees/recommended').then((res) => res.data)
-    return response.fastestFee
+    const response = await axios.get('https://bitcoinfees.earn.com/api/v1/fees/recommended')
+    return response.data.fastestFee
   } catch (error) {
     return DEFAULT_SUGGESTED_TRANSACTION_FEE
   }

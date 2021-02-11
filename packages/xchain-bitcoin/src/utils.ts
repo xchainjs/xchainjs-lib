@@ -42,9 +42,7 @@ export const compileMemo = (memo: string): Buffer => {
 export const getFee = (inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = null): number => {
   let sum =
     TX_EMPTY_SIZE +
-    inputs.reduce((a, x) => {
-      return a + inputBytes(x)
-    }, 0) +
+    inputs.reduce((a, x) => a + inputBytes(x), 0) +
     inputs.length + // +1 byte for each input signature
     TX_OUTPUT_BASE +
     TX_OUTPUT_PUBKEYHASH +
