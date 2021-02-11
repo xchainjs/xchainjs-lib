@@ -325,7 +325,10 @@ export default class Client implements XChainClient, EthereumClient {
         ]
       }
     } catch (error) {
-      return Promise.reject(error)
+      if (error.toString().includes('Invalid API Key')) {
+        return Promise.reject(new Error('Invalid API Key'))
+      }
+      return Promise.reject(new Error('Invalid address'))
     }
   }
 

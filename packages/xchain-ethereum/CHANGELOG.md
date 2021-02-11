@@ -1,5 +1,8 @@
 # v.x.x.x (xxxx-xx-xx)
 
+### Update
+
+- update `getBalance` for error handling of invalid api key #224
 
 # v.0.10.1 (2020-02-09)
 ### Breaking change
