@@ -225,7 +225,7 @@ class Client implements BitcoinClient, XChainClient {
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
-      return Utils.getBalance(this.nodeUrl, this.net, address || this.getAddress())
+      return Utils.getBalance({ nodeUrl: this.nodeUrl, network: this.net, address: address || this.getAddress() })
     } catch (e) {
       return Promise.reject(e)
     }
@@ -246,19 +246,30 @@ class Client implements BitcoinClient, XChainClient {
     try {
       const address = params?.address ?? this.getAddress()
 
-      const response = await sochain.getAddress(this.nodeUrl, this.net, address)
+      const response = await sochain.getAddress({
+        nodeUrl: this.nodeUrl,
+        network: this.net,
+        address,
+      })
       const total = response.txs.length
       const transactions: Tx[] = []
 
       const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
       for (const txItem of txs) {
-        const rawTx = await sochain.getTx(this.nodeUrl, this.net, txItem.txid)
+        const rawTx = await sochain.getTx({
+          nodeUrl: this.nodeUrl,
+          network: this.net,
+          hash: txItem.txid,
+        })
         const tx: Tx = {
           asset: AssetBTC,
-          from: rawTx.inputs.map((i) => ({ from: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
+          from: rawTx.inputs.map((i) => ({
+            from: i.address,
+            amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)),
+          })),
           to: rawTx.outputs
             .filter((i) => i.type !== 'nulldata')
-            .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
+            .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
           date: new Date(rawTx.time * 1000),
           type: 'transfer',
           hash: rawTx.txid,
@@ -284,11 +295,15 @@ class Client implements BitcoinClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const rawTx = await sochain.getTx(this.nodeUrl, this.net, txId)
+      const rawTx = await sochain.getTx({
+        nodeUrl: this.nodeUrl,
+        network: this.net,
+        hash: txId,
+      })
       return {
         asset: AssetBTC,
-        from: rawTx.inputs.map((i) => ({ from: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
-        to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, 8)) })),
+        from: rawTx.inputs.map((i) => ({ from: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
+        to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
         date: new Date(rawTx.time * 1000),
         type: 'transfer',
         hash: rawTx.txid,

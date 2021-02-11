@@ -7,8 +7,12 @@ import {
   BtcGetBalanceDTO,
   BtcBroadcastTransfer,
   Transaction,
+  AddressParams,
+  TxHashParams,
+  TxBroadcastParams,
 } from './types/sochain-api-types'
 import { assetToBase, assetAmount, BaseAmount } from '@xchainjs/xchain-util'
+import { BTC_DECIMAL } from './utils'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 127
 
@@ -21,14 +25,14 @@ const toSochainNetwork = (net: string): string => {
  *
  * @see https://sochain.com/api#get-display-data-address
  *
- * @param {string} baseUrl The sochain node url.
+ * @param {string} nodeUrl The sochain node url.
  * @param {string} network
  * @param {string} address
  * @returns {BtcAddressDTO}
  */
-export const getAddress = async (baseUrl: string, network: string, address: string): Promise<BtcAddressDTO> => {
+export const getAddress = async ({ nodeUrl, network, address }: AddressParams): Promise<BtcAddressDTO> => {
   try {
-    const url = `${baseUrl}/address/${toSochainNetwork(network)}/${address}`
+    const url = `${nodeUrl}/address/${toSochainNetwork(network)}/${address}`
     const response = await axios.get(url)
     const addressResponse: SochainResponse<BtcAddressDTO> = response.data
     return addressResponse.data
@@ -42,14 +46,14 @@ export const getAddress = async (baseUrl: string, network: string, address: stri
  *
  * @see https://sochain.com/api#get-tx
  *
- * @param {string} baseUrl The sochain node url.
+ * @param {string} nodeUrl The sochain node url.
  * @param {string} network network id
  * @param {string} hash The transaction hash.
  * @returns {Transactions}
  */
-export const getTx = async (baseUrl: string, network: string, hash: string): Promise<Transaction> => {
+export const getTx = async ({ nodeUrl, network, hash }: TxHashParams): Promise<Transaction> => {
   try {
-    const url = `${baseUrl}/get_tx/${toSochainNetwork(network)}/${hash}`
+    const url = `${nodeUrl}/get_tx/${toSochainNetwork(network)}/${hash}`
     const response = await axios.get(url)
     const tx: SochainResponse<Transaction> = response.data
     return tx.data
@@ -63,20 +67,20 @@ export const getTx = async (baseUrl: string, network: string, hash: string): Pro
  *
  * @see https://sochain.com/api#get-balance
  *
- * @param {string} baseUrl The sochain node url.
+ * @param {string} nodeUrl The sochain node url.
  * @param {string} network
  * @param {string} address
  * @returns {number}
  */
-export const getBalance = async (baseUrl: string, network: string, address: string): Promise<BaseAmount> => {
+export const getBalance = async ({ nodeUrl, network, address }: AddressParams): Promise<BaseAmount> => {
   try {
-    const url = `${baseUrl}/get_address_balance/${toSochainNetwork(network)}/${address}`
+    const url = `${nodeUrl}/get_address_balance/${toSochainNetwork(network)}/${address}`
     const response = await axios.get(url)
     const balanceResponse: SochainResponse<BtcGetBalanceDTO> = response.data
-    const confirmed = assetAmount(balanceResponse.data.confirmed_balance, 8)
-    const unconfirmed = assetAmount(balanceResponse.data.unconfirmed_balance, 8)
+    const confirmed = assetAmount(balanceResponse.data.confirmed_balance, BTC_DECIMAL)
+    const unconfirmed = assetAmount(balanceResponse.data.unconfirmed_balance, BTC_DECIMAL)
     const netAmt = confirmed.amount().plus(unconfirmed.amount())
-    const result = assetToBase(assetAmount(netAmt, 8))
+    const result = assetToBase(assetAmount(netAmt, BTC_DECIMAL))
     return result
   } catch (error) {
     return Promise.reject(error)
@@ -88,14 +92,14 @@ export const getBalance = async (baseUrl: string, network: string, address: stri
  *
  * @see https://sochain.com/api#get-unspent-tx
  *
- * @param {string} baseUrl The sochain node url.
+ * @param {string} nodeUrl The sochain node url.
  * @param {string} network
  * @param {string} address
  * @returns {BtcAddressUTXOs}
  */
-export const getUnspentTxs = async (baseUrl: string, network: string, address: string): Promise<BtcAddressUTXOs> => {
+export const getUnspentTxs = async ({ nodeUrl, network, address }: AddressParams): Promise<BtcAddressUTXOs> => {
   try {
-    const resp = await axios.get(`${baseUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}`)
+    const resp = await axios.get(`${nodeUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}`)
     const response: SochainResponse<BtcUnspentTxsDTO> = resp.data
     return response.data.txs
   } catch (error) {
@@ -108,14 +112,14 @@ export const getUnspentTxs = async (baseUrl: string, network: string, address: s
  *
  * @see https://sochain.com/api#send-transaction
  *
- * @param {string} baseUrl The sochain node url.
+ * @param {string} nodeUrl The sochain node url.
  * @param {string} network
  * @param {string} txHex
  * @returns {string} Transaction ID.
  */
-export const broadcastTx = async (baseUrl: string, network: string, txHex: string): Promise<string> => {
+export const broadcastTx = async ({ nodeUrl, network, txHex }: TxBroadcastParams): Promise<string> => {
   try {
-    const url = `${baseUrl}/send_tx/${toSochainNetwork(network)}`
+    const url = `${nodeUrl}/send_tx/${toSochainNetwork(network)}`
     const data = { tx_hex: txHex }
     const response: SochainResponse<BtcBroadcastTransfer> = (await axios.post(url, data)).data
     return response.data.txid

@@ -2,8 +2,8 @@ import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoin
 import * as sochain from './sochain-api'
 import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
 import { assetAmount, AssetBTC, assetToBase, assetToString, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
-import { BtcAddressUTXOs } from './types/sochain-api-types'
-import { FeeRate, FeeRates, FeesWithRates } from './types/client-types'
+import { AddressParams, BtcAddressUTXOs } from './types/sochain-api-types'
+import { FeeRate, FeeRates, FeesWithRates, GetChangeParams } from './types/client-types'
 import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
 
@@ -14,7 +14,9 @@ const TX_OUTPUT_BASE = 8 + 1 //9
 const TX_OUTPUT_PUBKEYHASH = 25
 const DUST_THRESHOLD = 1000
 
-function inputBytes(input: UTXO): number {
+export const BTC_DECIMAL = 8
+
+const inputBytes = (input: UTXO): number => {
   return TX_INPUT_BASE + (input.witnessUtxo.script ? input.witnessUtxo.script.length : TX_INPUT_PUBKEYHASH)
 }
 
@@ -37,10 +39,10 @@ export const compileMemo = (memo: string): Buffer => {
  * @param {Buffer} data The compiled memo (Optional).
  * @returns {number} The fee amount.
  */
-export function getFee(inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = null): number {
+export const getFee = (inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = null): number => {
   let sum =
     TX_EMPTY_SIZE +
-    inputs.reduce(function (a, x) {
+    inputs.reduce((a, x) => {
       return a + inputBytes(x)
     }, 0) +
     inputs.length + // +1 byte for each input signature
@@ -62,7 +64,7 @@ export function getFee(inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = nu
  * @param {Array<number>} array
  * @returns {number} The average value.
  */
-export function arrayAverage(array: Array<number>): number {
+export const arrayAverage = (array: Array<number>): number => {
   let sum = 0
   array.forEach((value) => (sum += value))
   return sum / array.length
@@ -92,13 +94,13 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
  * Get the balances of an address.
  *
  * @param {string} nodeUrl sochain Node URL.
- * @param {string} network
- * @param {string} address
+ * @param {Network} network
+ * @param {Address} address
  * @returns {Array<Balance>} The balances of the given address.
  */
-export const getBalance = async (nodeUrl: string, network: string, address: string): Promise<Balance[]> => {
+export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   try {
-    const balance = await sochain.getBalance(nodeUrl, network, address)
+    const balance = await sochain.getBalance(params)
     return [
       {
         asset: AssetBTC,
@@ -114,13 +116,13 @@ export const getBalance = async (nodeUrl: string, network: string, address: stri
  * Get the balance changes amount.
  *
  * @param {number} valueOut
- * @param {string} address
+ * @param {Address} address
  * @param {string} nodeUrl sochain Node URL.
  * @returns {number} The change amount.
  */
-const getChange = async (valueOut: number, nodeUrl: string, network: string, address: string): Promise<number> => {
+const getChange = async ({ valueOut, nodeUrl, network, address }: GetChangeParams): Promise<number> => {
   try {
-    const balances = await getBalance(nodeUrl, network, address)
+    const balances = await getBalance({ nodeUrl, network, address })
     const btcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetBTC))
     let change = 0
 
@@ -136,11 +138,11 @@ const getChange = async (valueOut: number, nodeUrl: string, network: string, add
 /**
  * Validate the BTC address.
  *
- * @param {string} address
+ * @param {Address} address
  * @param {Network} network
  * @returns {boolean} `true` or `false`.
  */
-export const validateAddress = (address: string, network: Network): boolean => {
+export const validateAddress = (address: Address, network: Network): boolean => {
   try {
     Bitcoin.address.toOutputScript(address, btcNetwork(network))
     return true
@@ -153,12 +155,12 @@ export const validateAddress = (address: string, network: Network): boolean => {
  * Scan UTXOs from sochain.
  *
  * @param {string} nodeUrl sochain Node URL.
- * @param {string} network
+ * @param {Network} network
  * @param {Address} address
  * @returns {Array<UTXO>} The UTXOs of the given address.
  */
-export const scanUTXOs = async (nodeUrl: string, network: string, address: Address): Promise<UTXOs> => {
-  const utxos: BtcAddressUTXOs = await sochain.getUnspentTxs(nodeUrl, network, address)
+export const scanUTXOs = async (params: AddressParams): Promise<UTXOs> => {
+  const utxos: BtcAddressUTXOs = await sochain.getUnspentTxs(params)
 
   return utxos.map(
     (utxo) =>
@@ -166,7 +168,7 @@ export const scanUTXOs = async (nodeUrl: string, network: string, address: Addre
         hash: utxo.txid,
         index: utxo.output_no,
         witnessUtxo: {
-          value: assetToBase(assetAmount(utxo.value, 8)).amount().toNumber(),
+          value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
           script: Buffer.from(utxo.script_hex, 'hex'),
         },
       } as UTXO),
@@ -194,12 +196,12 @@ export const buildTx = async ({
   nodeUrl: string
 }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXOs }> => {
   try {
-    const utxos = await scanUTXOs(nodeUrl, network, sender)
+    const utxos = await scanUTXOs({ nodeUrl, network, address: sender })
     if (utxos.length === 0) {
       return Promise.reject(Error('No utxos to send'))
     }
 
-    const balance = await getBalance(nodeUrl, network, sender)
+    const balance = await getBalance({ nodeUrl, network, address: sender })
     const btcBalance = balance.find((balance) => balance.asset.symbol === AssetBTC.symbol)
     if (!btcBalance) {
       return Promise.reject(new Error('No btcBalance found'))
@@ -226,7 +228,7 @@ export const buildTx = async ({
 
     // Outputs
     psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
-    const change = await getChange(amount.amount().toNumber() + fee, nodeUrl, network, sender)
+    const change = await getChange({ valueOut: amount.amount().toNumber() + fee, nodeUrl, network, address: sender })
     if (change > 0) {
       psbt.addOutput({ address: sender, value: change }) // Add change
     }
@@ -248,7 +250,7 @@ export const buildTx = async ({
  * @returns {TxHash} The transaction hash.
  */
 export const broadcastTx = async ({ network, txHex, nodeUrl }: BroadcastTxParams): Promise<TxHash> => {
-  return await sochain.broadcastTx(nodeUrl, network, txHex)
+  return await sochain.broadcastTx({ nodeUrl: nodeUrl, network, txHex })
 }
 
 /**
@@ -313,8 +315,8 @@ export const getDefaultFees = (): Fees => {
 /**
  * Get address prefix based on the network.
  *
- * @param {string} network
+ * @param {Network} network
  * @returns {string} The address prefix based on the network.
  *
  **/
-export const getPrefix = (network: string) => (network === 'testnet' ? 'tb1' : 'bc1')
+export const getPrefix = (network: Network) => (network === 'testnet' ? 'tb1' : 'bc1')
