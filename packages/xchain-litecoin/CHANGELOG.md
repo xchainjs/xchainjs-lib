@@ -9,6 +9,7 @@
 
 - Define / Export `LTC_DECIMAL`
 - Add `Service Providers` section in README.md
+- Update litecoin address prefix
 
 ### Fix
 
