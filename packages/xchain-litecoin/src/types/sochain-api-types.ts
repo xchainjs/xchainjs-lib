@@ -1,3 +1,23 @@
+import { Network, TxHash } from '@xchainjs/xchain-client'
+
+export type AddressParams = {
+  nodeUrl: string
+  network: Network
+  address: string
+}
+
+export type TxHashParams = {
+  nodeUrl: string
+  network: Network
+  hash: TxHash
+}
+
+export type TxBroadcastParams = {
+  nodeUrl: string
+  network: Network
+  txHex: string
+}
+
 export interface SochainResponse<T> {
   data: T
   status: string
