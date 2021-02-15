@@ -4,11 +4,13 @@
 
 - Update @xchainjs/xchain-client package to 0.4.0
 - Update @xchainjs/xchain-crypto package to 0.2.3
+- Update parameters of Sochain APIs ...
 
 ### Update
 
 - Define / Export `LTC_DECIMAL`
 - Add `Service Providers` section in README.md
+- Update litecoin address prefix
 
 ### Fix
 

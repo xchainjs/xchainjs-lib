@@ -227,7 +227,11 @@ class Client implements LitecoinClient, XChainClient {
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
-      return Utils.getBalance(this.nodeUrl, this.net, address || this.getAddress())
+      return Utils.getBalance({
+        nodeUrl: this.nodeUrl,
+        network: this.net,
+        address: address || this.getAddress(),
+      })
     } catch (e) {
       return Promise.reject(e)
     }
@@ -241,18 +245,27 @@ class Client implements LitecoinClient, XChainClient {
    * @returns {TxsPage} The transaction history.
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    // const offset = params?.offset ?? 0 //no support for offset atm
-
-    let totalCount = 0
-    const transactions: Tx[] = []
+    // Sochain API doesn't have pagination parameter
+    const offset = params?.offset ?? 0
+    const limit = params?.limit || 10
     try {
       const address = params?.address ?? this.getAddress()
 
-      const response = await sochain.getAddress(this.nodeUrl, this.net, address)
-      totalCount = response.total_txs
+      const response = await sochain.getAddress({
+        nodeUrl: this.nodeUrl,
+        network: this.net,
+        address,
+      })
+      const total = response.txs.length
+      const transactions: Tx[] = []
 
-      for (const txItem of response.txs) {
-        const rawTx = await sochain.getTx(this.nodeUrl, this.net, txItem.txid)
+      const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
+      for (const txItem of txs) {
+        const rawTx = await sochain.getTx({
+          nodeUrl: this.nodeUrl,
+          network: this.net,
+          hash: txItem.txid,
+        })
         const tx: Tx = {
           asset: AssetLTC,
           from: rawTx.inputs.map((i: TxIO) => ({
@@ -269,15 +282,15 @@ class Client implements LitecoinClient, XChainClient {
         }
         transactions.push(tx)
       }
+
+      const result: TxsPage = {
+        total,
+        txs: transactions,
+      }
+      return result
     } catch (error) {
       return Promise.reject(error)
     }
-
-    const result: TxsPage = {
-      total: totalCount,
-      txs: transactions,
-    }
-    return result
   }
 
   /**
@@ -288,7 +301,11 @@ class Client implements LitecoinClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const rawTx = await sochain.getTx(this.nodeUrl, this.net, txId)
+      const rawTx = await sochain.getTx({
+        nodeUrl: this.nodeUrl,
+        network: this.net,
+        hash: txId,
+      })
       return {
         asset: AssetLTC,
         from: rawTx.inputs.map((i) => ({

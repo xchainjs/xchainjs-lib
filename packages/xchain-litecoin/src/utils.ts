@@ -2,8 +2,8 @@ import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoi
 import * as sochain from './sochain-api'
 import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
 import { AssetLTC, assetToString, BaseAmount, baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util'
-import { LtcAddressUTXOs, LtcAddressUTXO } from './types/sochain-api-types'
-import { FeeRate, FeeRates, FeesWithRates } from './types/client-types'
+import { LtcAddressUTXOs, AddressParams } from './types/sochain-api-types'
+import { FeeRate, FeeRates, FeesWithRates, GetChangeParams } from './types/client-types'
 import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
 import coininfo from 'coininfo'
@@ -94,14 +94,12 @@ export const ltcNetwork = (network: Network): Litecoin.Network => {
 /**
  * Get the balances of an address.
  *
- * @param {string} nodeUrl sochain Node URL.
- * @param {string} network
- * @param {string} address
+ * @param {AddressParams} params
  * @returns {Array<Balance>} The balances of the given address.
  */
-export const getBalance = async (nodeUrl: string, network: string, address: string): Promise<Balance[]> => {
+export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   try {
-    const balance = await sochain.getBalance(nodeUrl, network, address)
+    const balance = await sochain.getBalance(params)
     return [
       {
         asset: AssetLTC,
@@ -116,14 +114,12 @@ export const getBalance = async (nodeUrl: string, network: string, address: stri
 /**
  * Get the balance changes amount.
  *
- * @param {number} valueOut
- * @param {string} address
- * @param {string} nodeUrl sochain Node URL.
+ * @param {GetChangeParams} params
  * @returns {number} The change amount.
  */
-const getChange = async (valueOut: number, nodeUrl: string, network: string, address: string): Promise<number> => {
+const getChange = async ({ valueOut, nodeUrl, network, address }: GetChangeParams): Promise<number> => {
   try {
-    const balances = await getBalance(nodeUrl, network, address)
+    const balances = await getBalance({ nodeUrl, network, address })
     const ltcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetLTC))
     let change = 0
 
@@ -143,7 +139,7 @@ const getChange = async (valueOut: number, nodeUrl: string, network: string, add
  * @param {Network} network
  * @returns {boolean} `true` or `false`.
  */
-export const validateAddress = (address: string, network: Network): boolean => {
+export const validateAddress = (address: Address, network: Network): boolean => {
   try {
     Litecoin.address.toOutputScript(address, ltcNetwork(network))
     return true
@@ -155,26 +151,22 @@ export const validateAddress = (address: string, network: Network): boolean => {
 /**
  * Scan UTXOs from sochain.
  *
- * @param {string} nodeUrl sochain Node URL.
- * @param {string} network
- * @param {Address} address
+ * @param {AddressParams} params
  * @returns {Array<UTXO>} The UTXOs of the given address.
  */
-export const scanUTXOs = async (nodeUrl: string, network: string, address: Address): Promise<UTXOs> => {
-  const utxos: LtcAddressUTXOs = await sochain.getUnspentTxs(nodeUrl, network, address)
+export const scanUTXOs = async (params: AddressParams): Promise<UTXOs> => {
+  const utxos: LtcAddressUTXOs = await sochain.getUnspentTxs(params)
 
   return utxos.map(
-    (utxo: LtcAddressUTXO): UTXO => {
-      return {
+    (utxo) =>
+      ({
         hash: utxo.txid,
         index: utxo.output_no,
         witnessUtxo: {
-          // value: bn(utxo.value).toNumber(),
-          value: assetToBase(assetAmount(utxo.value, 8)).amount().toNumber(),
+          value: assetToBase(assetAmount(utxo.value, LTC_DECIMAL)).amount().toNumber(),
           script: Buffer.from(utxo.script_hex, 'hex'),
         },
-      }
-    },
+      } as UTXO),
   )
 }
 
@@ -199,12 +191,12 @@ export const buildTx = async ({
   nodeUrl: string
 }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXOs }> => {
   try {
-    const utxos = await scanUTXOs(nodeUrl, network, sender)
+    const utxos = await scanUTXOs({ nodeUrl, network, address: sender })
     if (utxos.length === 0) {
       return Promise.reject(Error('No utxos to send'))
     }
 
-    const balance = await getBalance(nodeUrl, network, sender)
+    const balance = await getBalance({ nodeUrl, network, address: sender })
     const ltcBalance = balance.find((balance) => balance.asset.symbol === AssetLTC.symbol)
     if (!ltcBalance) {
       return Promise.reject(new Error('No ltcBalance found'))
@@ -231,7 +223,7 @@ export const buildTx = async ({
 
     // Outputs
     psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
-    const change = await getChange(amount.amount().toNumber() + fee, nodeUrl, network, sender)
+    const change = await getChange({ valueOut: amount.amount().toNumber() + fee, nodeUrl, network, address: sender })
     if (change > 0) {
       psbt.addOutput({ address: sender, value: change }) // Add change
     }
@@ -252,8 +244,8 @@ export const buildTx = async ({
  * @param {BroadcastTxParams} params The transaction broadcast options.
  * @returns {TxHash} The transaction hash.
  */
-export const broadcastTx = async ({ network, txHex, nodeUrl }: BroadcastTxParams): Promise<TxHash> => {
-  return await sochain.broadcastTx(nodeUrl, network, txHex)
+export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
+  return await sochain.broadcastTx(params)
 }
 
 /**
@@ -324,4 +316,4 @@ export const getDefaultFees = (): Fees => {
  * @returns {string} The address prefix based on the network.
  *
  **/
-export const getPrefix = (network: string) => (network === 'testnet' ? 'tb1' : 'bc1')
+export const getPrefix = (network: Network) => (network === 'testnet' ? 'tltc1' : 'ltc1')
