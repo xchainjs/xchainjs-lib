@@ -29,9 +29,19 @@ const isErrorResponse = (response: any): boolean => {
  * @returns {AddressBalance|null}
  */
 export const getAccount = async ({ clientUrl, address }: AddressParams): Promise<AddressBalance | null> => {
-  return axios
-    .get(`${clientUrl}/address/${address}/balance`)
-    .then((response) => (isErrorResponse(response.data) ? null : response.data))
+  try {
+    const result = await axios
+      .get(`${clientUrl}/address/${address}/balance`)
+      .then((response) => (isErrorResponse(response.data) ? null : response.data))
+
+    if (!result) {
+      throw new Error('failed to query account by a given address')
+    }
+
+    return result
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 /**
@@ -42,9 +52,19 @@ export const getAccount = async ({ clientUrl, address }: AddressParams): Promise
  * @returns {Transaction|null}
  */
 export const getTransaction = async ({ clientUrl, txId }: TxHashParams): Promise<Transaction | null> => {
-  return axios
-    .get(`${clientUrl}/transaction/${txId}`)
-    .then((response) => (isErrorResponse(response.data) ? null : response.data))
+  try {
+    const result = await axios
+      .get(`${clientUrl}/transaction/${txId}`)
+      .then((response) => (isErrorResponse(response.data) ? null : response.data))
+
+    if (!result) {
+      throw new Error('failed to query transaction by a given hash')
+    }
+
+    return result
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 /**
@@ -59,12 +79,22 @@ export const getTransactions = async ({
   clientUrl,
   address,
   params,
-}: AddressParams & { params: TransactionsQueryParam }): Promise<Transaction[] | null> => {
-  return axios
-    .get(`${clientUrl}/address/${address}/transactions/full`, {
-      params,
-    })
-    .then((response) => (isErrorResponse(response.data) ? null : response.data))
+}: AddressParams & { params: TransactionsQueryParam }): Promise<Transaction[]> => {
+  try {
+    const result: Transaction[] | null = await axios
+      .get(`${clientUrl}/address/${address}/transactions/full`, {
+        params,
+      })
+      .then((response) => (isErrorResponse(response.data) ? null : response.data))
+
+    if (!result) {
+      throw new Error('failed to query transactions')
+    }
+
+    return result
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 /**
@@ -74,14 +104,24 @@ export const getTransactions = async ({
  * @param {string} address The BCH address.
  * @returns {Array<Transaction>|null}
  */
-export const getUnspentTransactions = async ({ clientUrl, address }: AddressParams): Promise<TxUnspent[] | null> => {
-  // Get transacton count for a given address.
-  const account = await getAccount({ clientUrl, address })
+export const getUnspentTransactions = async ({ clientUrl, address }: AddressParams): Promise<TxUnspent[]> => {
+  try {
+    // Get transacton count for a given address.
+    const account = await getAccount({ clientUrl, address })
 
-  // Set limit to the transaction count.
-  return await axios
-    .get(`${clientUrl}/address/${address}/unspent?limit=${account?.txs}`)
-    .then((response) => (isErrorResponse(response.data) ? null : response.data))
+    // Set limit to the transaction count.
+    const result: TxUnspent[] | null = await axios
+      .get(`${clientUrl}/address/${address}/unspent?limit=${account?.txs}`)
+      .then((response) => (isErrorResponse(response.data) ? null : response.data))
+
+    if (!result) {
+      throw new Error('failed to query unspent transactions')
+    }
+
+    return result
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 /**
