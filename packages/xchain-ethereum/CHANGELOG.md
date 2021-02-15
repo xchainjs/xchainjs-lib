@@ -5,6 +5,10 @@
 - Update `getBalance` for error handling of invalid api key #224
 - Add `Service Providers` section in README.md
 
+### Breaking change
+
+- Fix `typings` from package.json
+
 # v.0.10.2-1 (2020-02-11)
 
 - Sets Infura creds as project ID if no secret is provided.
