@@ -26,11 +26,13 @@ const isErrorResponse = (response: any): boolean => {
  *
  * @param {string} clientUrl The haskoin API url.
  * @param {string} address The BCH address.
- * @returns {AddressBalance|null}
+ * @returns {AddressBalance}
+ *
+ * @throws {"failed to query account by a given address"} thrown if failed to query account by a given address
  */
-export const getAccount = async ({ clientUrl, address }: AddressParams): Promise<AddressBalance | null> => {
+export const getAccount = async ({ clientUrl, address }: AddressParams): Promise<AddressBalance> => {
   try {
-    const result = await axios
+    const result: AddressBalance | null = await axios
       .get(`${clientUrl}/address/${address}/balance`)
       .then((response) => (isErrorResponse(response.data) ? null : response.data))
 
@@ -49,11 +51,13 @@ export const getAccount = async ({ clientUrl, address }: AddressParams): Promise
  *
  * @param {string} clientUrl The haskoin API url.
  * @param {string} txId The transaction id.
- * @returns {Transaction|null}
+ * @returns {Transaction}
+ *
+ * @throws {"failed to query transaction by a given hash"} thrown if failed to query transaction by a given hash
  */
-export const getTransaction = async ({ clientUrl, txId }: TxHashParams): Promise<Transaction | null> => {
+export const getTransaction = async ({ clientUrl, txId }: TxHashParams): Promise<Transaction> => {
   try {
-    const result = await axios
+    const result: Transaction | null = await axios
       .get(`${clientUrl}/transaction/${txId}`)
       .then((response) => (isErrorResponse(response.data) ? null : response.data))
 
@@ -73,7 +77,9 @@ export const getTransaction = async ({ clientUrl, txId }: TxHashParams): Promise
  * @param {string} clientUrl The haskoin API url.
  * @param {string} address The BCH address.
  * @param {TransactionsQueryParam} params The API query parameters.
- * @returns {Array<Transaction>|null}
+ * @returns {Array<Transaction>}
+ *
+ * @throws {"failed to query transactions"} thrown if failed to query transactions
  */
 export const getTransactions = async ({
   clientUrl,
@@ -102,7 +108,9 @@ export const getTransactions = async ({
  *
  * @param {string} clientUrl The haskoin API url.
  * @param {string} address The BCH address.
- * @returns {Array<Transaction>|null}
+ * @returns {Array<TxUnspent>}
+ *
+ * @throws {"failed to query unspent transactions"} thrown if failed to query unspent transactions
  */
 export const getUnspentTransactions = async ({ clientUrl, address }: AddressParams): Promise<TxUnspent[]> => {
   try {
