@@ -18,7 +18,7 @@ import {
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
 import { AssetBCH, baseAmount } from '@xchainjs/xchain-util/lib'
-import { getTransaction, getAccount, getTransactions } from './haskoin-api'
+import { getTransaction, getAccount, getTransactions, broadcastTx, getSuggestedFee } from './haskoin-api'
 
 /**
  * BitcoinCashClient Interface
@@ -246,12 +246,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @returns {boolean} `true` or `false`
    */
   validateAddress = (address: string): boolean => {
-    try {
-      bitcash.Address.fromString(address)
-      return true
-    } catch {
-      return false
-    }
+    return utils.validateAddress(address, this.getNetwork())
   }
 
   /**
@@ -264,7 +259,7 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
-      const account = await getAccount(this.getClientURL(), address || this.getAddress())
+      const account = await getAccount({ clientUrl: this.getClientURL(), address: address || this.getAddress() })
 
       if (!account) {
         throw new Error('Invalid address')
@@ -296,8 +291,8 @@ class Client implements BitcoinCashClient, XChainClient {
       offset = offset || 0
       limit = limit || 10
 
-      const account = await getAccount(this.getClientURL(), address)
-      const txs = await getTransactions(this.getClientURL(), address, { offset, limit })
+      const account = await getAccount({ clientUrl: this.getClientURL(), address })
+      const txs = await getTransactions({ clientUrl: this.getClientURL(), address, params: { offset, limit } })
 
       if (!account || !txs) {
         throw new Error('Invalid address')
@@ -322,7 +317,7 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const tx = await getTransaction(this.getClientURL(), txId)
+      const tx = await getTransaction({ clientUrl: this.getClientURL(), txId })
 
       if (!tx) {
         throw new Error('Invalid TxID')
@@ -340,8 +335,22 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} memo The memo to be used for fee calculation (optional)
    * @returns {FeesWithRates} The fees and rates
    */
-  getFeesWithRates = async (_memo?: string): Promise<FeesWithRates> => {
-    throw new Error('In progress')
+  getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
+    const nextBlockFeeRate = await getSuggestedFee()
+    const rates: FeeRates = {
+      fastest: nextBlockFeeRate * 5,
+      fast: nextBlockFeeRate * 1,
+      average: nextBlockFeeRate * 0.5,
+    }
+
+    const fees: Fees = {
+      type: 'byte',
+      fast: utils.calcFee(rates.fast, memo),
+      average: utils.calcFee(rates.average, memo),
+      fastest: utils.calcFee(rates.fastest, memo),
+    }
+
+    return { fees, rates }
   }
 
   /**
@@ -395,9 +404,16 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {TxParams&FeeRate} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async (_params: TxParams & { feeRate: FeeRate }): Promise<TxHash> => {
+  transfer = async (params: TxParams & { feeRate: FeeRate }): Promise<TxHash> => {
     try {
-      throw new Error('In progress')
+      const tx = await utils.buildTx({
+        ...params,
+        sender: this.getAddress(),
+        clientUrl: this.getClientURL(),
+        network: this.network,
+      })
+      const txHex = tx.sign(this.getPrivateKey(this.phrase)).toBuffer().toString('hex')
+      return await broadcastTx({ clientUrl: this.getClientURL(), txHex })
     } catch (e) {
       return Promise.reject(e)
     }
