@@ -8,6 +8,9 @@
 ### Update
 
 - Add `Service Providers` section in README.md
+- Add `scanUTXOs`, `transfer`, `getFees`
+- Update `Service Providers` in Readme.md
+- Update API mocked tests
 
 ### Fix
 

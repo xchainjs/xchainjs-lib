@@ -56,3 +56,15 @@ export type TransactionsQueryParam = {
   offset?: number
   limit?: number
 }
+
+export type TxUnspent = {
+  pkscript: string
+  value: number
+  address: string
+  block: {
+    height: number
+    position: number
+  }
+  index: number
+  txid: string
+}

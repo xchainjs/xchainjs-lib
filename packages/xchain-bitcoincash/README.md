@@ -14,12 +14,14 @@ yarn add @xchainjs/xchain-bitcoincash
 
 This package uses the following service providers:
 
-| Function                    | Service        | Notes                                                 |
-| --------------------------- | -------------- | ----------------------------------------------------- |
-| Balances                    | Haskoin        | https://api.haskoin.com/#/Address/getBalance          |
-| Transaction history         | Haskoin        | https://api.haskoin.com/#/Address/getAddressTxsFull   |
-| Transaction details by hash | Haskoin        | https://api.haskoin.com/#/Transaction/getTransaction  |
-| Transaction broadcast       | Haskoin        | https://api.haskoin.com/#/Transaction/postTransaction |
-| Explorer                    | Blockchain.com | https://www.blockchain.com                            |
+| Function                    | Service        | Notes                                                      |
+| --------------------------- | -------------- | ---------------------------------------------------------- |
+| Balances                    | Haskoin        | https://api.haskoin.com/#/Address/getBalance               |
+| Transaction history         | Haskoin        | https://api.haskoin.com/#/Address/getAddressTxsFull        |
+| Transaction details by hash | Haskoin        | https://api.haskoin.com/#/Transaction/getTransaction       |
+| Transaction fees            | Bitgo          | https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate |
+| Transaction broadcast       | Haskoin        | https://api.haskoin.com/#/Transaction/postTransaction      |
+| Explorer                    | Blockchain.com | https://www.blockchain.com                                 |
 
-Rate limits: No
+Haskoin API rate limits: No
+Bitgo API rate limits: https://app.bitgo.com/docs/#section/Rate-Limiting (10 requests/second)

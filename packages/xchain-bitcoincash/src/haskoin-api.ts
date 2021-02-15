@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { AddressBalance, Transaction, TransactionsQueryParam } from './types'
+import { AddressBalance, Transaction, TransactionsQueryParam, TxUnspent } from './types'
+import { DEFAULT_SUGGESTED_TRANSACTION_FEE } from './utils'
 
 /**
  * Check error response.
@@ -17,7 +18,7 @@ const isErrorResponse = (response: any): boolean => {
  *
  * @param {string} clientUrl The haskoin API url.
  * @param {string} address The BCH address.
- * @returns {AddressBalance|ErrorResponse}
+ * @returns {AddressBalance|null}
  */
 export const getAccount = async (clientUrl: string, address: string): Promise<AddressBalance | null> => {
   return axios
@@ -30,7 +31,7 @@ export const getAccount = async (clientUrl: string, address: string): Promise<Ad
  *
  * @param {string} clientUrl The haskoin API url.
  * @param {string} txId The transaction id.
- * @returns {Transaction|ErrorResponse}
+ * @returns {Transaction|null}
  */
 export const getTransaction = async (clientUrl: string, txId: string): Promise<Transaction | null> => {
   return axios
@@ -44,7 +45,7 @@ export const getTransaction = async (clientUrl: string, txId: string): Promise<T
  * @param {string} clientUrl The haskoin API url.
  * @param {string} address The BCH address.
  * @param {TransactionsQueryParam} params The API query parameters.
- * @returns {Array<Transaction>|ErrorResponse}
+ * @returns {Array<Transaction>|null}
  */
 export const getTransactions = async (
   clientUrl: string,
@@ -56,4 +57,64 @@ export const getTransactions = async (
       params,
     })
     .then((response) => (isErrorResponse(response.data) ? null : response.data))
+}
+
+/**
+ * Get unspent transactions.
+ *
+ * @param {string} clientUrl The haskoin API url.
+ * @param {string} address The BCH address.
+ * @returns {Array<Transaction>|null}
+ */
+export const getUnspentTransactions = async (clientUrl: string, address: string): Promise<TxUnspent[] | null> => {
+  // Get transacton count for a given address.
+  const account = await getAccount(clientUrl, address)
+
+  // Set limit to the transaction count.
+  return await axios
+    .get(`${clientUrl}/address/${address}/unspent?limit=${account?.txs}`)
+    .then((response) => (isErrorResponse(response.data) ? null : response.data))
+}
+
+/**
+ * Broadcast transaction.
+ *
+ * @param {string} clientUrl The haskoin API url.
+ * @param {string} txHex
+ * @returns {string} Transaction ID.
+ *
+ * @throws {"failed to broadcast a transaction"} thrown if failed to broadcast a transaction
+ */
+export const broadcastTx = async (clientUrl: string, txHex: string): Promise<string> => {
+  try {
+    const url = `${clientUrl}/transactions`
+    const result: { txid: string } | null = await axios
+      .post(url, txHex)
+      .then((response) => (isErrorResponse(response.data) ? null : response.data))
+
+    if (!result) {
+      throw new Error('failed to broadcast a transaction')
+    }
+
+    return result.txid
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+/**
+ * Get suggested fee amount for Bitcoin cash. (fee per byte)
+ *
+ * @returns {number} The Bitcoin cash stats.
+ */
+export const getSuggestedFee = async (): Promise<number> => {
+  //Note: Haskcoin does not provide fee rate related data
+  //So use Bitgo API for fee estimation
+  //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
+  try {
+    const response = await axios.get('https://app.bitgo.com/api/v2/bch/tx/fee')
+    return response.data.feePerKb / 1000 // feePerKb to feePerByte
+  } catch (error) {
+    return DEFAULT_SUGGESTED_TRANSACTION_FEE
+  }
 }

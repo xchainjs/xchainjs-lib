@@ -1,6 +1,14 @@
 import { Client } from '../src/client'
-import { mock_getBalance, mock_getTransactionData, mock_getTransactions } from '../__mocks__/api'
+import {
+  mock_broadcastTx,
+  mock_estimateFee,
+  mock_getBalance,
+  mock_getTransactionData,
+  mock_getTransactions,
+  mock_getUnspents,
+} from '../__mocks__/api'
 import { baseAmount } from '@xchainjs/xchain-util'
+import { BCH_DECIMAL } from '../src/utils'
 
 const bchClient = new Client({ network: 'mainnet' })
 
@@ -8,6 +16,7 @@ describe('BCHClient Test', () => {
   beforeEach(() => bchClient.purgeClient())
   afterEach(() => bchClient.purgeClient())
 
+  const MEMO = 'SWAP:THOR.RUNE'
   const phrase = 'atom green various power must another rent imitate gadget creek fat then'
   const testnet_address = 'bchtest:qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g'
   const mainnet_address = 'bitcoincash:qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
@@ -33,6 +42,8 @@ describe('BCHClient Test', () => {
     bchClient.setPhrase(phrase)
     expect(bchClient.getAddress()).toEqual(testnet_address)
     expect(bchClient.validateAddress(testnet_address)).toBeTruthy()
+
+    bchClient.setNetwork('mainnet')
     expect(bchClient.validateAddress(mainnet_address)).toBeTruthy()
   })
 
@@ -243,5 +254,103 @@ describe('BCHClient Test', () => {
     expect(txs.txs[0].to.length).toEqual(1)
     expect(txs.txs[0].to[0].to).toEqual('bchtest:qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
     expect(txs.txs[0].to[0].amount.amount().isEqualTo(baseAmount(4005704, 8).amount())).toBeTruthy()
+  })
+
+  it('should transfer bch', async () => {
+    bchClient.setNetwork('testnet')
+    bchClient.setPhrase(phrase)
+
+    mock_getBalance(
+      bchClient.getClientURL(),
+      bchClient.getAddress(),
+      {
+        received: 124442749359,
+        utxo: 1336,
+        address: bchClient.getAddress(),
+        txs: 1345,
+        unconfirmed: 0,
+        confirmed: 123817511737,
+      },
+      2,
+    )
+    mock_getUnspents(bchClient.getClientURL(), bchClient.getAddress(), [
+      {
+        pkscript: '76a914158b5d181552c9f4f267c0de68aae4963043993988ac',
+        value: 78125000,
+        address: bchClient.getAddress(),
+        block: {
+          height: 1434425,
+          position: 0,
+        },
+        index: 0,
+        txid: '85d3cddc7c910aebb8791f316ab4b1adff522208e901e7ec2578c1c8e4bb95f2',
+      },
+    ])
+    mock_estimateFee()
+    mock_broadcastTx(bchClient.getClientURL(), '82b65a0006697bff406c62ad0b3fd07db9f20ce6fbc468c81679d96aebc36f69')
+
+    const txId = await bchClient.transfer({
+      recipient: 'bchtest:qzt6sz836wdwscld0pgq2prcpck2pssmwge9q87pe9',
+      amount: baseAmount(100, BCH_DECIMAL),
+      feeRate: 1,
+    })
+    expect(txId).toEqual('82b65a0006697bff406c62ad0b3fd07db9f20ce6fbc468c81679d96aebc36f69')
+  })
+
+  it('returns fees and rates of a normal tx', async () => {
+    bchClient.setNetwork('testnet')
+    bchClient.setPhrase(phrase)
+
+    mock_estimateFee()
+
+    const { fees, rates } = await bchClient.getFeesWithRates()
+    // check fees
+    expect(fees.fast).toBeDefined()
+    expect(fees.fastest).toBeDefined()
+    expect(fees.average).toBeDefined()
+    // check rates
+    expect(rates.fast).toBeDefined()
+    expect(rates.fastest).toBeDefined()
+    expect(rates.average).toBeDefined()
+  })
+
+  it('returns fees and rates of a tx w/ memo', async () => {
+    bchClient.setNetwork('testnet')
+    bchClient.setPhrase(phrase)
+
+    mock_estimateFee()
+
+    const { fees, rates } = await bchClient.getFeesWithRates(MEMO)
+    // check fees
+    expect(fees.fast).toBeDefined()
+    expect(fees.fastest).toBeDefined()
+    expect(fees.average).toBeDefined()
+    // check rates
+    expect(rates.fast).toBeDefined()
+    expect(rates.fastest).toBeDefined()
+    expect(rates.average).toBeDefined()
+  })
+
+  it('should return estimated fees of a normal tx', async () => {
+    bchClient.setNetwork('testnet')
+    bchClient.setPhrase(phrase)
+
+    mock_estimateFee()
+
+    const estimates = await bchClient.getFees()
+    expect(estimates.fast).toBeDefined()
+    expect(estimates.fastest).toBeDefined()
+    expect(estimates.average).toBeDefined()
+  })
+
+  it('returns different fee rates for a normal tx', async () => {
+    bchClient.setNetwork('testnet')
+    bchClient.setPhrase(phrase)
+
+    mock_estimateFee()
+
+    const { fast, fastest, average } = await bchClient.getFeeRates()
+    expect(fast > average)
+    expect(fastest > fast)
   })
 })
