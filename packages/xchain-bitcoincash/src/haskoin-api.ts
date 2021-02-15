@@ -1,5 +1,13 @@
 import axios from 'axios'
-import { AddressBalance, Transaction, TransactionsQueryParam, TxUnspent } from './types'
+import {
+  AddressBalance,
+  AddressParams,
+  Transaction,
+  TransactionsQueryParam,
+  TxBroadcastParams,
+  TxHashParams,
+  TxUnspent,
+} from './types'
 import { DEFAULT_SUGGESTED_TRANSACTION_FEE } from './utils'
 
 /**
@@ -20,7 +28,7 @@ const isErrorResponse = (response: any): boolean => {
  * @param {string} address The BCH address.
  * @returns {AddressBalance|null}
  */
-export const getAccount = async (clientUrl: string, address: string): Promise<AddressBalance | null> => {
+export const getAccount = async ({ clientUrl, address }: AddressParams): Promise<AddressBalance | null> => {
   return axios
     .get(`${clientUrl}/address/${address}/balance`)
     .then((response) => (isErrorResponse(response.data) ? null : response.data))
@@ -33,7 +41,7 @@ export const getAccount = async (clientUrl: string, address: string): Promise<Ad
  * @param {string} txId The transaction id.
  * @returns {Transaction|null}
  */
-export const getTransaction = async (clientUrl: string, txId: string): Promise<Transaction | null> => {
+export const getTransaction = async ({ clientUrl, txId }: TxHashParams): Promise<Transaction | null> => {
   return axios
     .get(`${clientUrl}/transaction/${txId}`)
     .then((response) => (isErrorResponse(response.data) ? null : response.data))
@@ -47,11 +55,11 @@ export const getTransaction = async (clientUrl: string, txId: string): Promise<T
  * @param {TransactionsQueryParam} params The API query parameters.
  * @returns {Array<Transaction>|null}
  */
-export const getTransactions = async (
-  clientUrl: string,
-  address: string,
-  params: TransactionsQueryParam,
-): Promise<Transaction[] | null> => {
+export const getTransactions = async ({
+  clientUrl,
+  address,
+  params,
+}: AddressParams & { params: TransactionsQueryParam }): Promise<Transaction[] | null> => {
   return axios
     .get(`${clientUrl}/address/${address}/transactions/full`, {
       params,
@@ -66,9 +74,9 @@ export const getTransactions = async (
  * @param {string} address The BCH address.
  * @returns {Array<Transaction>|null}
  */
-export const getUnspentTransactions = async (clientUrl: string, address: string): Promise<TxUnspent[] | null> => {
+export const getUnspentTransactions = async ({ clientUrl, address }: AddressParams): Promise<TxUnspent[] | null> => {
   // Get transacton count for a given address.
-  const account = await getAccount(clientUrl, address)
+  const account = await getAccount({ clientUrl, address })
 
   // Set limit to the transaction count.
   return await axios
@@ -85,7 +93,7 @@ export const getUnspentTransactions = async (clientUrl: string, address: string)
  *
  * @throws {"failed to broadcast a transaction"} thrown if failed to broadcast a transaction
  */
-export const broadcastTx = async (clientUrl: string, txHex: string): Promise<string> => {
+export const broadcastTx = async ({ clientUrl, txHex }: TxBroadcastParams): Promise<string> => {
   try {
     const url = `${clientUrl}/transactions`
     const result: { txid: string } | null = await axios

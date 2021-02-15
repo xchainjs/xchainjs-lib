@@ -136,7 +136,7 @@ export const validateAddress = (address: string, network: Network): boolean => {
  * @returns {Array<UTXO>} The UTXOs of the given address.
  */
 export const scanUTXOs = async (clientUrl: string, address: Address): Promise<bitcash.Transaction.UnspentOutput[]> => {
-  const unspents = await getUnspentTransactions(clientUrl, address)
+  const unspents = await getUnspentTransactions({ clientUrl, address })
   return (unspents || []).map((unspent) =>
     bitcash.Transaction.UnspentOutput.fromObject({
       address: unspent.address,
@@ -174,7 +174,7 @@ export const buildTx = async ({
       return Promise.reject(Error('No utxos to send'))
     }
 
-    const bchBalance = (await getAccount(clientUrl, sender))?.confirmed
+    const bchBalance = (await getAccount({ clientUrl, address: sender }))?.confirmed
     if (!bchBalance) {
       return Promise.reject(new Error('No bchBalance found'))
     }

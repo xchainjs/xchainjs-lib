@@ -1,3 +1,20 @@
+import { TxHash } from '@xchainjs/xchain-client/lib'
+
+export type AddressParams = {
+  clientUrl: string
+  address: string
+}
+
+export type TxHashParams = {
+  clientUrl: string
+  txId: TxHash
+}
+
+export type TxBroadcastParams = {
+  clientUrl: string
+  txHex: string
+}
+
 export type ErrorResponse = {
   error: string
 }

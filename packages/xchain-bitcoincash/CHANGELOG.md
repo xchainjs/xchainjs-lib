@@ -4,6 +4,7 @@
 
 - Update @xchainjs/xchain-client package to 0.4.0
 - Update @xchainjs/xchain-crypto package to 0.2.3
+- Update parameters of haskcoin APIs ...
 
 ### Update
 

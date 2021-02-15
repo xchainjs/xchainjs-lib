@@ -259,7 +259,7 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
-      const account = await getAccount(this.getClientURL(), address || this.getAddress())
+      const account = await getAccount({ clientUrl: this.getClientURL(), address: address || this.getAddress() })
 
       if (!account) {
         throw new Error('Invalid address')
@@ -291,8 +291,8 @@ class Client implements BitcoinCashClient, XChainClient {
       offset = offset || 0
       limit = limit || 10
 
-      const account = await getAccount(this.getClientURL(), address)
-      const txs = await getTransactions(this.getClientURL(), address, { offset, limit })
+      const account = await getAccount({ clientUrl: this.getClientURL(), address })
+      const txs = await getTransactions({ clientUrl: this.getClientURL(), address, params: { offset, limit } })
 
       if (!account || !txs) {
         throw new Error('Invalid address')
@@ -317,7 +317,7 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const tx = await getTransaction(this.getClientURL(), txId)
+      const tx = await getTransaction({ clientUrl: this.getClientURL(), txId })
 
       if (!tx) {
         throw new Error('Invalid TxID')
@@ -413,7 +413,7 @@ class Client implements BitcoinCashClient, XChainClient {
         network: this.network,
       })
       const txHex = tx.sign(this.getPrivateKey(this.phrase)).toBuffer().toString('hex')
-      return await broadcastTx(this.getClientURL(), txHex)
+      return await broadcastTx({ clientUrl: this.getClientURL(), txHex })
     } catch (e) {
       return Promise.reject(e)
     }
