@@ -91,7 +91,3 @@ export type LtcBroadcastTransfer = {
   network: string
   txid: string
 }
-
-export interface ChainStatsLtc {
-  suggested_transaction_fee_per_byte_sat: number
-}

@@ -6,7 +6,6 @@ import {
   LtcAddressDTO,
   LtcGetBalanceDTO,
   LtcBroadcastTransfer,
-  ChainStatsLtc,
   Transaction,
   AddressParams,
   TxHashParams,
@@ -14,6 +13,8 @@ import {
 } from './types/sochain-api-types'
 import { assetToBase, assetAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { LTC_DECIMAL } from './utils'
+
+const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
 
 const toSochainNetwork = (net: string): string => {
   return net === 'testnet' ? 'LTCTEST' : 'LTC'
@@ -128,18 +129,18 @@ export const broadcastTx = async ({ nodeUrl, network, txHex }: TxBroadcastParams
 }
 
 /**
- * Get Litecoin stats.
+ * Get Litecoin suggested transaction fee.
  *
- * @param {string} baseUrl The sochain node url.
- * @returns {ChainStatsLtc} The Litecoin stats.
+ * @returns {number} The Litecoin suggested transaction fee per bytes in sat.
  */
-export const litecoinStats = async (): Promise<ChainStatsLtc> => {
+export const getSuggestedTxFee = async (): Promise<number> => {
   //Note: sochain does not provide fee rate related data
-  //so this number is hardcoded here based on blockchair's litecoin value
-  //Refer: https://api.blockchair.com/litecoin/stats
-  const stats: ChainStatsLtc = {
-    suggested_transaction_fee_per_byte_sat: 1,
+  //So use Bitgo API for fee estimation
+  //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
+  try {
+    const response = await axios.get('https://app.bitgo.com/api/v2/ltc/tx/fee')
+    return response.data.feePerKb / 1000 // feePerKb to feePerByte
+  } catch (error) {
+    return DEFAULT_SUGGESTED_TRANSACTION_FEE
   }
-
-  return Promise.resolve(stats)
 }

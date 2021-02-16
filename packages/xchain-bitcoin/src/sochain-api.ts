@@ -135,11 +135,11 @@ export const broadcastTx = async ({ nodeUrl, network, txHex }: TxBroadcastParams
  */
 export const getSuggestedTxFee = async (): Promise<number> => {
   //Note: sochain does not provide fee rate related data
-  //This number is from https://bitcoinfees.earn.com API
-  //Refer: https://bitcoinfees.earn.com/api
+  //So use Bitgo API for fee estimation
+  //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
   try {
-    const response = await axios.get('https://bitcoinfees.earn.com/api/v1/fees/recommended')
-    return response.data.fastestFee
+    const response = await axios.get('https://app.bitgo.com/api/v2/btc/tx/fee')
+    return response.data.feePerKb / 1000 // feePerKb to feePerByte
   } catch (error) {
     return DEFAULT_SUGGESTED_TRANSACTION_FEE
   }
