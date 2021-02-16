@@ -329,8 +329,7 @@ class Client implements LitecoinClient, XChainClient {
    * @returns {FeesWithRates} The fees and rates
    */
   getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
-    const ltcStats = await sochain.litecoinStats()
-    const nextBlockFeeRate = ltcStats.suggested_transaction_fee_per_byte_sat
+    const nextBlockFeeRate = await sochain.getSuggestedTxFee()
     const rates: FeeRates = {
       fastest: nextBlockFeeRate * 5,
       fast: nextBlockFeeRate * 1,
