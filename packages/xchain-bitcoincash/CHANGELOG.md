@@ -1,5 +1,7 @@
 # v.x.x.x
 
+# v.0.2.0
+
 ### Breaking change
 
 - Update @xchainjs/xchain-client package to 0.4.0
