@@ -78,6 +78,14 @@ describe('LitecoinClient Test', () => {
     expect(txid).toEqual(expect.any(String))
   })
 
+  it('should broadcast a normal transfer without feeRate', async () => {
+    ltcClient.setNetwork('testnet')
+    ltcClient.setPhrase(phraseOne)
+    const amount = baseAmount(2223)
+    const txid = await ltcClient.transfer({ asset: AssetLTC, recipient: addyTwo, amount })
+    expect(txid).toEqual(expect.any(String))
+  })
+
   it('should purge phrase and utxos', async () => {
     ltcClient.purgeClient()
     expect(() => ltcClient.getAddress()).toThrow('Phrase must be provided')

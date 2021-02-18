@@ -1,5 +1,9 @@
 # v.x.x.x
 
+### Breaking change
+- Make `feeRate` optional in `transfer()`, default is `fast`
+- Update README.md
+
 # v.0.2.0
 
 ### Breaking change
