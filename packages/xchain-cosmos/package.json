@@ -31,7 +31,9 @@
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
-    "cosmos-client": "^0.39.2"
+    "axios": "^0.21.0",
+    "cosmos-client": "^0.39.2",
+    "nock": "^13.0.5"
   },
   "publishConfig": {
     "access": "public"
@@ -39,11 +41,10 @@
   "dependencies": {
     "@xchainjs/xchain-client": "^0.4.0",
     "@xchainjs/xchain-crypto": "^0.2.3",
-    "@xchainjs/xchain-util": "^0.2.2",
-    "axios": "^0.21.0",
-    "nock": "^13.0.5"
+    "@xchainjs/xchain-util": "^0.2.2"
   },
   "peerDependencies": {
+    "axios": "^0.21.0",
     "cosmos-client": "^0.39.2"
   }
 }

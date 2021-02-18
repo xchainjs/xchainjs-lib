@@ -1,5 +1,9 @@
 # v.x.x.x (xxxx-xx-xx)
 
+### Fix
+
+- Fix `peerDependencies`
+
 # v.0.10.3 (2020-02-18)
 
 ### Update

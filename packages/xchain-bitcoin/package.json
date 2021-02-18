@@ -41,7 +41,15 @@
   "devDependencies": {
     "@types/bitcoinjs-lib": "^5.0.0",
     "@types/wif": "^2.0.1",
+    "axios": "^0.21.0",
+    "bitcoinjs-lib": "^5.2.0",
+    "wif": "^2.0.6",
     "axios-mock-adapter": "^1.19.0"
+  },
+  "peerDependencies": {
+    "axios": "^0.21.0",
+    "bitcoinjs-lib": "^5.2.0",
+    "wif": "^2.0.6"
   },
   "publishConfig": {
     "access": "public"

@@ -10,13 +10,11 @@
 yarn add @xchainjs/xchain-client
 ```
 
-Following dependencies will be installed into your project:
+Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-bitcoin`.
 
-- bitcoinjs-lib
-- bip39
-- wif
-- moment
-- axios
+```
+yarn add axios bitcoinjs-lib wif
+```
 
 ## Service Providers
 
@@ -40,6 +38,7 @@ Bitgo API rate limits: https://app.bitgo.com/docs/#section/Rate-Limiting (10 req
 Initialize client and use class methods:
 
 ```
+
 import { Client, Network } from '../src/client'
 
 // Create a new client interface
@@ -71,5 +70,9 @@ const transactions = await btcClient.getTransactions({ address: 'address here', 
 
 // Get a transaction with a given txId/hash
 const txData = await btcClient.getTransactionData('b660ee07167cfa32681e2623f3a29dc64a089cabd9a3a07dd17f9028ac956eb8')
+
+```
+
+```
 
 ```
