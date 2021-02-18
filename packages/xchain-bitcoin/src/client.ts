@@ -391,10 +391,13 @@ class Client implements BitcoinClient, XChainClient {
    * @param {TxParams&FeeRate} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async (params: TxParams & { feeRate: FeeRate }): Promise<TxHash> => {
+  transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
     try {
+      // set the default fee rate to `fast`
+      const feeRate = params.feeRate || (await this.getFeeRates()).fast
       const { psbt } = await Utils.buildTx({
         ...params,
+        feeRate,
         sender: this.getAddress(),
         nodeUrl: this.nodeUrl,
         network: this.net,
