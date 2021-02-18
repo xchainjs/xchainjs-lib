@@ -32,6 +32,7 @@ This package uses the following service providers:
 | Explorer                    | Blockstream | https://blockstream.info                                                         |
 
 Sochain API rate limits: https://sochain.com/api#rate-limits (300 requests/minute)
+
 Bitgo API rate limits: https://app.bitgo.com/docs/#section/Rate-Limiting (10 requests/second)
 
 ## Usage

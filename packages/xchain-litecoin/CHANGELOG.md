@@ -6,6 +6,8 @@
 - Update @xchainjs/xchain-crypto package to 0.2.3
 - Update parameters of Sochain APIs ...
 - Update `getSuggestedFee`
+- Make `feeRate` optional in `transfer()`, default is `fast`
+- Update README.md
 
 ### Update
 
