@@ -63,6 +63,14 @@ describe('BitcoinClient Test', () => {
     expect(txid).toEqual(expect.any(String))
   })
 
+  it('should broadcast a normal transfer without feeRate option', async () => {
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
+    const amount = baseAmount(2223)
+    const txid = await btcClient.transfer({ asset: AssetBTC, recipient: addyTwo, amount })
+    expect(txid).toEqual(expect.any(String))
+  })
+
   it('should purge phrase and utxos', async () => {
     btcClient.purgeClient()
     expect(() => btcClient.getAddress()).toThrow('Phrase must be provided')
