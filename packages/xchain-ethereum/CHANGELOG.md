@@ -1,11 +1,13 @@
 # v.x.x.x (xxxx-xx-xx)
 
+# v.0.10.3 (2020-02-18)
+
 ### Update
 
 - Update `getBalance` for error handling of invalid api key #224
 - Add `Service Providers` section in README.md
 
-### Breaking change
+### Fix
 
 - Fix `typings` from package.json
 
