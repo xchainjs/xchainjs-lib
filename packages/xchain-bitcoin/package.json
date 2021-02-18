@@ -33,10 +33,7 @@
   },
   "dependencies": {
     "@xchainjs/xchain-client": "^0.4.0",
-    "@xchainjs/xchain-crypto": "^0.2.3",
-    "axios": "^0.20.0",
-    "bitcoinjs-lib": "^5.2.0",
-    "wif": "^2.0.6"
+    "@xchainjs/xchain-crypto": "^0.2.3"
   },
   "devDependencies": {
     "@types/bitcoinjs-lib": "^5.0.0",
