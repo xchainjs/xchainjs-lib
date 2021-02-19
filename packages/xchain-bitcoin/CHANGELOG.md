@@ -1,8 +1,12 @@
-# v.x.x.x
+# v.0.10.0 (2021-02-19)
 
 ### Breaking change
 
+- Update @xchainjs/xchain-client package to 0.5.0
 - Make `feeRate` optional in `transfer()`, default is `fast`
+
+### Update
+
 - Update README.md
 
 ### Fix

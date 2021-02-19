@@ -1,4 +1,4 @@
-# v.x.x.x
+# v.4.5.0 (2021-02-19)
 
 ### Breaking change
 
@@ -7,6 +7,7 @@
 
 ### Update
 
+- Update @xchainjs/xchain-client package to 0.5.0
 - Add `Service Providers` section in README.md
 - Update `peerDependencies`
 

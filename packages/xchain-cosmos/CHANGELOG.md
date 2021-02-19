@@ -1,7 +1,12 @@
-# v.x.x.x
+# v.0.9.0 (2021-02-19)
+
+### Breaking change
+
+- Update @xchainjs/xchain-client package to 0.5.0
 
 ### Update
 
+- Update @xchainjs/xchain-client package to 0.5.0
 - Add `Service Providers` section in README.md
 
 ### Fix
