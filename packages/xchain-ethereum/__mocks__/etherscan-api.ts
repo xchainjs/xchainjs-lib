@@ -4,7 +4,7 @@ import { ETHTransactionInfo, TokenTransactionInfo, GasOracleResponse } from '../
 export const mock_etherscan_api = (url: string, method: string, result: string | Object) => {
   nock(url)
     .get('/api')
-    .query(param => param.module === 'proxy' && param.action === method)
+    .query((param) => param.module === 'proxy' && param.action === method)
     .reply(200, {
       jsonrpc: '2.0',
       result,
@@ -14,7 +14,7 @@ export const mock_etherscan_api = (url: string, method: string, result: string |
 export const mock_gastracker_api = (url: string, method: string, result: GasOracleResponse) => {
   nock(url)
     .get('/api')
-    .query(param => param.module === 'gastracker' && param.action === method)
+    .query((param) => param.module === 'gastracker' && param.action === method)
     .reply(200, {
       jsonrpc: '2.0',
       result,
@@ -25,7 +25,7 @@ export const mock_gastracker_api = (url: string, method: string, result: GasOrac
 export const mock_etherscan_balance_api = (url: string, result: string) => {
   nock(url)
     .get('/api')
-    .query(param => {
+    .query((param) => {
       return param.module === 'account' && param.action === 'balance'
     })
     .reply(200, {
@@ -38,7 +38,7 @@ export const mock_etherscan_balance_api = (url: string, result: string) => {
 export const mock_etherscan_tokenbalance_api = (url: string, result: string) => {
   nock(url)
     .get('/api')
-    .query(param => {
+    .query((param) => {
       return param.module === 'account' && param.action === 'tokenbalance'
     })
     .reply(200, {
@@ -51,21 +51,20 @@ export const mock_etherscan_tokenbalance_api = (url: string, result: string) => 
 export const mock_etherscan_eth_txs_api = (url: string, result: ETHTransactionInfo[]) => {
   nock(url)
     .get('/api')
-    .query(param => {
-      return param.module === 'account' && param.action === 'txlistinternal'
+    .query((param) => {
+      return param.module === 'account' && param.action === 'txlist'
     })
     .reply(200, {
       status: '1',
       message: 'OK',
       result,
     })
-  
 }
 
 export const mock_etherscan_token_txs_api = (url: string, result: TokenTransactionInfo[]) => {
   nock(url)
     .get('/api')
-    .query(param => {
+    .query((param) => {
       return param.module === 'account' && param.action === 'tokentx'
     })
     .reply(200, {
@@ -73,5 +72,4 @@ export const mock_etherscan_token_txs_api = (url: string, result: TokenTransacti
       message: 'OK',
       result,
     })
-  
 }
