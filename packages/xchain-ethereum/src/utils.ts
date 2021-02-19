@@ -167,7 +167,7 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
         amount: baseAmount(tx.value, ETH_DECIMAL),
       },
     ],
-    date: new Date(tx.timeStamp),
+    date: new Date(parseInt(tx.timeStamp) * 1000),
     type: 'transfer',
     hash: tx.hash,
   }

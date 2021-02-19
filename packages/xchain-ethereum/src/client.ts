@@ -437,6 +437,7 @@ export default class Client implements XChainClient, EthereumClient {
                 startblock: txInfo.blockNumber,
                 endblock: txInfo.blockNumber,
                 apiKey: this.etherscan.apiKey,
+                address: txInfo.from,
               })
             ).find((info) => info.hash === txId) ?? null
         }
