@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-ethereum",
-  "version": "0.10.3",
+  "version": "0.10.4",
   "description": "Ethereum client for XChainJS",
   "keywords": [
     "XChain",
