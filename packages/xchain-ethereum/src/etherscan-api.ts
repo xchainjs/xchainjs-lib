@@ -70,7 +70,7 @@ export const getETHTransactionHistory = async ({
   endblock,
   apiKey,
 }: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Txs> => {
-  let url = baseUrl + `/api?module=account&action=txlistinternal&sort=desc` + getApiKeyQueryParameter(apiKey)
+  let url = baseUrl + `/api?module=account&action=txlist&sort=desc` + getApiKeyQueryParameter(apiKey)
   if (address) url += `&address=${address}`
   if (offset) url += `&offset=${offset}`
   if (page) url += `&page=${page}`
