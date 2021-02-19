@@ -14,8 +14,11 @@
     "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests"
   },
-  "devDependencies": {},
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "@xchainjs/xchain-util": "^0.2.2"
+  },
+  "peerDependencies": {
     "@xchainjs/xchain-util": "^0.2.2"
   }
 }

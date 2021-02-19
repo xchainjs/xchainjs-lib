@@ -2158,10 +2158,10 @@
   dependencies:
     bitcoinjs-lib "*"
 
-"@types/bitcore-lib-cash@^8.23.1":
-  version "8.23.1"
-  resolved "https://registry.yarnpkg.com/@types/bitcore-lib-cash/-/bitcore-lib-cash-8.23.1.tgz#081305550176fc123378b82a43e6b1b730ac9253"
-  integrity sha512-hTk+R6WanFNLzvinfQudKLL/jFmn4pp05ctYbMa103P6jmqQ5Vo/VN1Hxkzt6s5ARMpFyGAqjvimT9ytMSY5nw==
+"@types/bitcore-lib-cash@^8.23.2":
+  version "8.23.2"
+  resolved "https://registry.yarnpkg.com/@types/bitcore-lib-cash/-/bitcore-lib-cash-8.23.2.tgz#1cbe5c20f6506019e9c420cf4ea54070f7a60272"
+  integrity sha512-FwzFjkKN60tagKK4iFXlBgsyNQcUSOtexB2q1Om8dKigVuc7gtLnqUhy3LbhH55NWp2BLD4ZCBIPpQj3ePLAMg==
   dependencies:
     "@types/node" "*"
 
@@ -2809,13 +2809,6 @@ axios@^0.19.0, axios@^0.19.2:
   dependencies:
     follow-redirects "1.5.10"
 
-axios@^0.20.0:
-  version "0.20.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.20.0.tgz#057ba30f04884694993a8cd07fa394cff11c50bd"
-  integrity sha512-ANA4rr2BDcmmAQLOKft2fufrtuvlqR+cXNNinUmvfeSNCOF98PZL+7M/v1zIdGo7OLjEA9J2gXJL+j4zGsl0bA==
-  dependencies:
-    follow-redirects "^1.10.0"
-
 axios@^0.21.0:
   version "0.21.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.0.tgz#26df088803a2350dff2c27f96fef99fe49442aca"
@@ -3019,12 +3012,12 @@ bitcoinjs-lib@*, bitcoinjs-lib@^5.2.0:
     varuint-bitcoin "^1.0.4"
     wif "^2.0.1"
 
-bitcore-lib-cash@^8.24.1:
-  version "8.24.1"
-  resolved "https://registry.yarnpkg.com/bitcore-lib-cash/-/bitcore-lib-cash-8.24.1.tgz#d101061bc1a3adf1f83f8f8036b8a8ce3c08fae8"
-  integrity sha512-zpzJs1+T2hzxJL5OLD+lWABhKTuJRWsj9r3jzkdfL+iSrHT54ZrGWEGkJJYReeQOqLe9wmi49B7Ur03qCMWygQ==
+bitcore-lib-cash@^8.24.2:
+  version "8.24.2"
+  resolved "https://registry.yarnpkg.com/bitcore-lib-cash/-/bitcore-lib-cash-8.24.2.tgz#3d6e94925d4fb1e03247d787a521d0a465ef5271"
+  integrity sha512-SZiDkEyQqQ5pyerDPgqqBA2orvk93txBFczPLfSBYJ7sUMRH5ylc9cHEvxo26n09Gt/+31AqEAiOshI3MtQiyg==
   dependencies:
-    bitcore-lib "^8.24.1"
+    bitcore-lib "^8.24.2"
     bn.js "=4.11.8"
     bs58 "^4.0.1"
     buffer-compare "=1.1.1"
@@ -3032,10 +3025,10 @@ bitcore-lib-cash@^8.24.1:
     inherits "=2.0.1"
     lodash "^4.17.20"
 
-bitcore-lib@^8.24.1:
-  version "8.24.1"
-  resolved "https://registry.yarnpkg.com/bitcore-lib/-/bitcore-lib-8.24.1.tgz#2456d25a0fcad8f73ef88ec81fef56d15f9b5f4c"
-  integrity sha512-dNwH9L1+xgUhEr02jqRNfJtIzOU3YQ7JGIPslKkFxsnVFxQublCcuYW5DWcYgvAclg/Ddcfv/DZk26lo41X+4g==
+bitcore-lib@^8.24.2:
+  version "8.24.2"
+  resolved "https://registry.yarnpkg.com/bitcore-lib/-/bitcore-lib-8.24.2.tgz#62d2b5dd6622c1ce6c3edc8945bcee462544ee17"
+  integrity sha512-jujnK/wsLs4ARe3VEfZmbzNrPRgLoirz7PYJn4uRVk2vP7zeiN8pStnbYUNSB0ZgNnB7lcB1F3ZnSBk2y1By/Q==
   dependencies:
     bech32 "=1.1.3"
     bn.js "=4.11.8"
@@ -3045,12 +3038,12 @@ bitcore-lib@^8.24.1:
     inherits "=2.0.1"
     lodash "^4.17.20"
 
-bitcore-mnemonic@^8.24.1:
-  version "8.24.1"
-  resolved "https://registry.yarnpkg.com/bitcore-mnemonic/-/bitcore-mnemonic-8.24.1.tgz#56a1fdca24b1d0151d8579706a0d37a5c6206037"
-  integrity sha512-mS3I7malGPWo7lJ1299BDs/Bmj8DBf7cnOjrD7e+wyMsY5du7XZ9OasQUHpt6zVZsQzk4oboZqSFUWOlmfjJLg==
+bitcore-mnemonic@^8.24.2:
+  version "8.24.2"
+  resolved "https://registry.yarnpkg.com/bitcore-mnemonic/-/bitcore-mnemonic-8.24.2.tgz#66f5b1b8bc167c825714fad1162eea0dfc81dfae"
+  integrity sha512-6CKb+XWcz0u40LZXIhNaIkcHGz4vICTIRwGwhfyIv2v/x31MElAxKyyEBzPmvSy9ySiNmnsB0Bcadfekr2nmGg==
   dependencies:
-    bitcore-lib "^8.24.1"
+    bitcore-lib "^8.24.2"
     unorm "^1.4.1"
 
 bl@^4.0.3:

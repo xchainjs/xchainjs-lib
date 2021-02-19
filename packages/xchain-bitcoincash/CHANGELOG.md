@@ -1,7 +1,15 @@
-# v.x.x.x
+# v.0.3.0 (2021-02-18)
 
 ### Breaking change
+
 - Make `feeRate` optional in `transfer()`, default is `fast`
+
+### Fix
+
+- Fix `peerDependencies`
+
+### Update
+
 - Update README.md
 
 # v.0.2.0
