@@ -18,6 +18,7 @@
 ### Fix
 
 - Fix derivation path
+- Fix `peerDependencies`
 
 # v.0.0.2 (2021-01-30)
 
