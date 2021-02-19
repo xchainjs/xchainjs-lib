@@ -1,4 +1,8 @@
-# v.x.x.x (xxxx-xx-xx)
+# v.0.11.0 (2021-02-19)
+
+### Breaking change
+
+- Update @xchainjs/xchain-client package to 0.5.0
 
 # v.0.10.4 (2020-02-19)
 
