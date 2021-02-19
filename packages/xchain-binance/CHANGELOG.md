@@ -8,6 +8,7 @@
 ### Update
 
 - Add `Service Providers` section in README.md
+- Update `peerDependencies`
 
 # v.4.4.2 (2021-01-30)
 

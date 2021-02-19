@@ -13,7 +13,7 @@ yarn add @xchainjs/xchain-client
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-bitcoin`.
 
 ```
-yarn add axios bitcoinjs-lib wif
+yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto axios bitcoinjs-lib wif
 ```
 
 ## Service Providers

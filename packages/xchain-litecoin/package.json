@@ -31,13 +31,12 @@
     "prepublishOnly": "yarn build",
     "postversion": "git push --follow-tags"
   },
-  "dependencies": {
-    "@xchainjs/xchain-client": "^0.4.0",
-    "@xchainjs/xchain-crypto": "^0.2.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/bitcoinjs-lib": "^5.0.0",
     "@types/wif": "^2.0.1",
+    "@xchainjs/xchain-client": "^0.4.0",
+    "@xchainjs/xchain-crypto": "^0.2.3",
     "axios-mock-adapter": "^1.19.0",
     "axios": "^0.21.0",
     "bitcoinjs-lib": "^5.2.0",
@@ -45,6 +44,8 @@
     "wif": "^2.0.6"
   },
   "peerDependencies": {
+    "@xchainjs/xchain-client": "^0.4.0",
+    "@xchainjs/xchain-crypto": "^0.2.3",
     "axios": "^0.21.0",
     "bitcoinjs-lib": "^5.2.0",
     "coininfo": "^5.1.0",

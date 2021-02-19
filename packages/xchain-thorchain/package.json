@@ -33,6 +33,9 @@
   },
   "devDependencies": {
     "@types/big.js": "^6.0.0",
+    "@xchainjs/xchain-client": "^0.4.0",
+    "@xchainjs/xchain-cosmos": "^0.8.1",
+    "@xchainjs/xchain-crypto": "^0.2.3",
     "axios": "^0.21.0",
     "cosmos-client": "^0.39.2",
     "nock": "^13.0.5"
@@ -40,12 +43,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {
+  "dependencies": {},
+  "peerDependencies": {
     "@xchainjs/xchain-client": "^0.4.0",
     "@xchainjs/xchain-cosmos": "^0.8.1",
-    "@xchainjs/xchain-crypto": "^0.2.3"
-  },
-  "peerDependencies": {
+    "@xchainjs/xchain-crypto": "^0.2.3",
     "axios": "^0.21.0",
     "cosmos-client": "^0.39.2"
   }

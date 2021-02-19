@@ -32,18 +32,19 @@
     "prepublishOnly": "yarn build",
     "postversion": "git push --follow-tags"
   },
-  "dependencies": {
-    "@xchainjs/xchain-client": "^0.4.0",
-    "@xchainjs/xchain-crypto": "^0.2.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/bitcore-lib-cash": "^8.23.2",
+    "@xchainjs/xchain-client": "^0.4.0",
+    "@xchainjs/xchain-crypto": "^0.2.3",
     "bitcore-mnemonic": "^8.24.2",
     "axios": "^0.21.0",
     "axios-mock-adapter": "^1.19.0",
     "bitcore-lib-cash": "^8.24.2"
   },
   "peerDependencies": {
+    "@xchainjs/xchain-client": "^0.4.0",
+    "@xchainjs/xchain-crypto": "^0.2.3",
     "axios": "^0.21.0",
     "bitcore-lib-cash": "^8.24.2",
     "bitcore-mnemonic": "^8.24.2"
