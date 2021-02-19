@@ -34,22 +34,26 @@
   },
   "devDependencies": {
     "@polkadot/api": "^3.1.1",
+    "@polkadot/util": "^5.1.1",
     "@types/big.js": "^4.0.5",
+    "@xchainjs/xchain-client": "^0.4.0",
+    "@xchainjs/xchain-crypto": "^0.2.3",
+    "@xchainjs/xchain-util": "^0.2.2",
+    "axios": "^0.21.0",
     "jest-websocket-mock": "^2.2.0",
-    "mock-socket": "9.0.3"
+    "mock-socket": "9.0.3",
+    "nock": "^13.0.4"
   },
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {
+  "dependencies": {},
+  "peerDependencies": {
+    "axios": "^0.21.0",
+    "@polkadot/api": "^3.1.1",
+    "@polkadot/util": "^5.1.1",
     "@xchainjs/xchain-client": "^0.4.0",
     "@xchainjs/xchain-crypto": "^0.2.3",
-    "@xchainjs/xchain-util": "^0.2.2",
-    "axios": "^0.19.2",
-    "nock": "^13.0.4"
-  },
-  "peerDependencies": {
-    "@polkadot/api": "^3.1.1",
-    "@polkadot/util": "^5.1.1"
+    "@xchainjs/xchain-util": "^0.2.2"
   }
 }

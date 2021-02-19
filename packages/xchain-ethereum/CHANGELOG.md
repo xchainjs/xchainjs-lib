@@ -7,6 +7,7 @@
 - Fix etherscan api url for getTransaction
 - Fix `getTransactionData`
 - Fix `getTxFromEthTransaction` to parse correct tx date
+- Fix `peerDependencies`
 
 # v.0.10.3 (2020-02-18)
 

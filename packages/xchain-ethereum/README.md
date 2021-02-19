@@ -10,10 +10,10 @@
 yarn add @xchainjs/xchain-ethereum
 ```
 
-`ethers` is a peer dependencies, but not part of `@xchainjs/xchain-ethereum`. It has to be installed into your project.
+Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-ethereum`.
 
 ```
-yarn add ethers
+yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios ethers
 ```
 
 ## Service Providers
@@ -23,7 +23,7 @@ This package uses the following service providers:
 | Function                  | Service   | Notes                                                                          |
 | ------------------------- | --------- | ------------------------------------------------------------------------------ |
 | ETH balances              | Etherscan | https://etherscan.io/apis#accounts (module=`account`, action=`balance`)        |
-| Token balances            | Etherscan | https://etherscan.io/apis#tokens   (module=`account`, action=`tokenbalance`)   |
+| Token balances            | Etherscan | https://etherscan.io/apis#tokens (module=`account`, action=`tokenbalance`)     |
 | ETH transaction history   | Etherscan | https://etherscan.io/apis#accounts (module=`account`, action=`txlistinternal`) |
 | Token transaction history | Etherscan | https://etherscan.io/apis#accounts (module=`account`, action=`tokentx`)        |
 | Transaction fees          | Etherscan | https://etherscan.io/apis#gastracker (module=`gastracker`, action=`gasoracle`) |
@@ -32,4 +32,4 @@ This package uses the following service providers:
 
 Etherscan API rate limits: https://info.etherscan.com/api-return-errors/
 
-* This package uses `etherjs` library, by defaut it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
+- This package uses `etherjs` library, by defaut it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
