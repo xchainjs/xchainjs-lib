@@ -1,6 +1,6 @@
-# v.0.x.x
+# v.0.5.0 (2021-02-19)
 
-### Update
+### Breaking change
 
 - Add @xchainjs/xchain-util to `peerDependencies`
 
