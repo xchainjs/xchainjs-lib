@@ -1,3 +1,9 @@
+# v.0.11.1 (2020-02-21)
+
+### Fix
+
+- Fix `estimateGasLimit` to consider memo
+
 # v.0.11.0 (2021-02-19)
 
 ### Breaking change
