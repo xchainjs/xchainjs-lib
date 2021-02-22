@@ -639,7 +639,7 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @throws {"Failed to estimate gas limit"} Thrown if failed to estimate gas limit.
    */
-  estimateGasLimit = async ({ asset, recipient, amount, gasPrice }: GasLimitParams): Promise<BigNumber> => {
+  estimateGasLimit = async ({ asset, recipient, amount, memo, gasPrice }: GasLimitParams): Promise<BigNumber> => {
     try {
       const txAmount = BigNumber.from(amount.amount().toString())
       // Gas price `Wei` as BigNumber
@@ -667,6 +667,7 @@ export default class Client implements XChainClient, EthereumClient {
           to: recipient,
           value: txAmount,
           gasPrice: gasPriceBN,
+          data: memo ? toUtf8Bytes(memo) : undefined,
         }
 
         estimate = await this.provider.estimateGas(transactionRequest)
@@ -717,6 +718,7 @@ export default class Client implements XChainClient, EthereumClient {
         asset: params.asset,
         amount: params.amount,
         recipient: params.recipient,
+        memo: params.memo,
         gasPrices,
       })
 
