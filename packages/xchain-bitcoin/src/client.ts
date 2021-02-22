@@ -29,7 +29,8 @@ interface BitcoinClient {
 }
 
 type BitcoinClientParams = XChainClientParams & {
-  nodeUrl?: string
+  sochainUrl?: string
+  blockstreamUrl?: string
 }
 
 /**
@@ -38,7 +39,8 @@ type BitcoinClientParams = XChainClientParams & {
 class Client implements BitcoinClient, XChainClient {
   private net: Network
   private phrase = ''
-  private nodeUrl = ''
+  private sochainUrl = ''
+  private blockstreamUrl = ''
 
   /**
    * Constructor
@@ -46,20 +48,49 @@ class Client implements BitcoinClient, XChainClient {
    *
    * @param {BitcoinClientParams} params
    */
-  constructor({ network = 'testnet', nodeUrl = '', phrase }: BitcoinClientParams) {
+  constructor({ network = 'testnet', sochainUrl, blockstreamUrl, phrase }: BitcoinClientParams) {
     this.net = network
-    this.setNodeURL(nodeUrl)
+    this.setSochainUrl(sochainUrl || this.getDefaultSochainUrl())
+    this.setBlockstreamUrl(blockstreamUrl || this.getDefaultBlockstreamUrl())
     phrase && this.setPhrase(phrase)
   }
 
   /**
-   * Set/Update the node url.
+   * Get the default sochain url.
    *
-   * @param {string} url The new node url.
+   * @returns {string} the default sochain url
+   */
+  getDefaultSochainUrl = (): string => {
+    return 'https://sochain.com/api/v2'
+  }
+
+  /**
+   * Set/Update the sochain url.
+   *
+   * @param {string} url The new sochain url.
    * @returns {void}
    */
-  setNodeURL = (url: string): void => {
-    this.nodeUrl = url
+  setSochainUrl = (url: string): void => {
+    this.sochainUrl = url
+  }
+
+  /**
+   * Get the default blockstream url.
+   *
+   * @returns {string} the default blockstream url
+   */
+  getDefaultBlockstreamUrl = (): string => {
+    return 'https://blockstream.info'
+  }
+
+  /**
+   * Set/Update the blockstream url.
+   *
+   * @param {string} url The new blockstream url.
+   * @returns {void}
+   */
+  setBlockstreamUrl = (url: string): void => {
+    this.blockstreamUrl = url
   }
 
   /**
@@ -225,7 +256,7 @@ class Client implements BitcoinClient, XChainClient {
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
-      return Utils.getBalance({ nodeUrl: this.nodeUrl, network: this.net, address: address || this.getAddress() })
+      return Utils.getBalance({ sochainUrl: this.sochainUrl, network: this.net, address: address || this.getAddress() })
     } catch (e) {
       return Promise.reject(e)
     }
@@ -247,7 +278,7 @@ class Client implements BitcoinClient, XChainClient {
       const address = params?.address ?? this.getAddress()
 
       const response = await sochain.getAddress({
-        nodeUrl: this.nodeUrl,
+        sochainUrl: this.sochainUrl,
         network: this.net,
         address,
       })
@@ -257,7 +288,7 @@ class Client implements BitcoinClient, XChainClient {
       const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
       for (const txItem of txs) {
         const rawTx = await sochain.getTx({
-          nodeUrl: this.nodeUrl,
+          sochainUrl: this.sochainUrl,
           network: this.net,
           hash: txItem.txid,
         })
@@ -296,7 +327,7 @@ class Client implements BitcoinClient, XChainClient {
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
       const rawTx = await sochain.getTx({
-        nodeUrl: this.nodeUrl,
+        sochainUrl: this.sochainUrl,
         network: this.net,
         hash: txId,
       })
@@ -399,7 +430,7 @@ class Client implements BitcoinClient, XChainClient {
         ...params,
         feeRate,
         sender: this.getAddress(),
-        nodeUrl: this.nodeUrl,
+        sochainUrl: this.sochainUrl,
         network: this.net,
       })
       const btcKeys = this.getBtcKeys(this.phrase)
@@ -407,7 +438,7 @@ class Client implements BitcoinClient, XChainClient {
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-      return await Utils.broadcastTx({ network: this.net, txHex, nodeUrl: this.nodeUrl })
+      return await Utils.broadcastTx({ network: this.net, txHex, blockstreamUrl: this.blockstreamUrl })
     } catch (e) {
       return Promise.reject(e)
     }

@@ -1,3 +1,9 @@
+# v.0.10.1 (2021-02-22)
+
+### Update
+
+- Uses BlockStream to submit transactions instead of Sochain
+
 # v.0.10.0 (2021-02-19)
 
 ### Breaking change
