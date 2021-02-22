@@ -10,7 +10,7 @@ export type VaultTxParams = NormalTxParams & { memo: string }
 
 export type GetChangeParams = {
   valueOut: number
-  nodeUrl: string
+  sochainUrl: string
   network: Network
   address: Address
 }

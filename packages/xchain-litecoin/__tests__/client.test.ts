@@ -5,7 +5,7 @@ import { baseAmount, AssetLTC } from '@xchainjs/xchain-util'
 import mockSochainApi from '../__mocks__/sochain'
 mockSochainApi.init()
 
-const ltcClient = new Client({ network: 'testnet', nodeUrl: 'https://sochain.com/api/v2' })
+const ltcClient = new Client({ network: 'testnet' })
 
 describe('LitecoinClient Test', () => {
   beforeEach(() => {

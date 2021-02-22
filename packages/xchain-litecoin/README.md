@@ -26,12 +26,14 @@ This package uses the following service providers:
 | Transaction history         | Sochain     | https://sochain.com/api#get-display-data-address, https://sochain.com/api#get-tx |
 | Transaction details by hash | Sochain     | https://sochain.com/api#get-tx                                                   |
 | Transaction fees            | Bitgo       | https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate                       |
-| Transaction broadcast       | Sochain     | https://sochain.com/api#send-transaction                                         |
+| Transaction broadcast       | Bitaps      | https://ltc.bitaps.com/broadcast                                                 |
 | Explorer                    | Blockstream | https://blockstream.info                                                         |
 
 Sochain API rate limits: https://sochain.com/api#rate-limits (300 requests/minute)
 
 Bitgo API rate limits: https://app.bitgo.com/docs/#section/Rate-Limiting (10 requests/second)
+
+Bitaps API rate limits: Standard limit 15 requests within 5 seconds for a single IP address.
 
 ## Usage
 
@@ -41,7 +43,7 @@ Initialize client and use class methods:
 import { Client, Network } from '../src/client'
 
 // Create a new client interface
-const ltcClient = new Client({ network: 'testnet', nodeUrl: 'https://sochain.com/api/v2' })
+const ltcClient = new Client({ network: 'testnet' })
 
 // Set phrase
 ltcClient.setPhrase('phrase here')

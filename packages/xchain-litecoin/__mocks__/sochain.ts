@@ -42,5 +42,17 @@ export default {
     mock.onPost(/\/send_tx/).reply(function () {
       return [200, { data: { txid: 'TEST_OK' } }]
     })
+
+    //Mock bitaps send tx
+    mock.onPost(/\/native/).reply(function () {
+      return [
+        200,
+        {
+          id: '1',
+          result: 'TEST_OK',
+          error: null,
+        },
+      ]
+    })
   },
 }

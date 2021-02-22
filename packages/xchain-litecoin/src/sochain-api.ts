@@ -5,11 +5,9 @@ import {
   LtcUnspentTxsDTO,
   LtcAddressDTO,
   LtcGetBalanceDTO,
-  LtcBroadcastTransfer,
   Transaction,
   AddressParams,
   TxHashParams,
-  TxBroadcastParams,
 } from './types/sochain-api-types'
 import { assetToBase, assetAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { LTC_DECIMAL } from './utils'
@@ -25,14 +23,14 @@ const toSochainNetwork = (net: string): string => {
  *
  * @see https://sochain.com/api#get-display-data-address
  *
- * @param {string} nodeUrl The sochain node url.
+ * @param {string} sochainUrl The sochain node url.
  * @param {string} network
  * @param {string} address
  * @returns {LtcAddressDTO}
  */
-export const getAddress = async ({ nodeUrl, network, address }: AddressParams): Promise<LtcAddressDTO> => {
+export const getAddress = async ({ sochainUrl, network, address }: AddressParams): Promise<LtcAddressDTO> => {
   try {
-    const url = `${nodeUrl}/address/${toSochainNetwork(network)}/${address}`
+    const url = `${sochainUrl}/address/${toSochainNetwork(network)}/${address}`
     const response = await axios.get(url)
     const addressResponse: SochainResponse<LtcAddressDTO> = response.data
     return addressResponse.data
@@ -46,14 +44,14 @@ export const getAddress = async ({ nodeUrl, network, address }: AddressParams): 
  *
  * @see https://sochain.com/api#get-tx
  *
- * @param {string} nodeUrl The sochain node url.
+ * @param {string} sochainUrl The sochain node url.
  * @param {string} network network id
  * @param {string} hash The transaction hash.
  * @returns {Transactions}
  */
-export const getTx = async ({ nodeUrl, network, hash }: TxHashParams): Promise<Transaction> => {
+export const getTx = async ({ sochainUrl, network, hash }: TxHashParams): Promise<Transaction> => {
   try {
-    const url = `${nodeUrl}/get_tx/${toSochainNetwork(network)}/${hash}`
+    const url = `${sochainUrl}/get_tx/${toSochainNetwork(network)}/${hash}`
     const response = await axios.get(url)
     const tx: SochainResponse<Transaction> = response.data
     return tx.data
@@ -67,14 +65,14 @@ export const getTx = async ({ nodeUrl, network, hash }: TxHashParams): Promise<T
  *
  * @see https://sochain.com/api#get-balance
  *
- * @param {string} nodeUrl The sochain node url.
+ * @param {string} sochainUrl The sochain node url.
  * @param {string} network
  * @param {string} address
  * @returns {number}
  */
-export const getBalance = async ({ nodeUrl, network, address }: AddressParams): Promise<BaseAmount> => {
+export const getBalance = async ({ sochainUrl, network, address }: AddressParams): Promise<BaseAmount> => {
   try {
-    const url = `${nodeUrl}/get_address_balance/${toSochainNetwork(network)}/${address}`
+    const url = `${sochainUrl}/get_address_balance/${toSochainNetwork(network)}/${address}`
     const response = await axios.get(url)
     const balanceResponse: SochainResponse<LtcGetBalanceDTO> = response.data
     const confirmed = assetAmount(balanceResponse.data.confirmed_balance, LTC_DECIMAL)
@@ -92,37 +90,16 @@ export const getBalance = async ({ nodeUrl, network, address }: AddressParams): 
  *
  * @see https://sochain.com/api#get-unspent-tx
  *
- * @param {string} nodeUrl The sochain node url.
+ * @param {string} sochainUrl The sochain node url.
  * @param {string} network
  * @param {string} address
  * @returns {LtcAddressUTXOs}
  */
-export const getUnspentTxs = async ({ nodeUrl, network, address }: AddressParams): Promise<LtcAddressUTXOs> => {
+export const getUnspentTxs = async ({ sochainUrl, network, address }: AddressParams): Promise<LtcAddressUTXOs> => {
   try {
-    const resp = await axios.get(`${nodeUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}`)
+    const resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}`)
     const response: SochainResponse<LtcUnspentTxsDTO> = resp.data
     return response.data.txs
-  } catch (error) {
-    return Promise.reject(error)
-  }
-}
-
-/**
- * Broadcast transaction.
- *
- * @see https://sochain.com/api#send-transaction
- *
- * @param {string} nodeUrl The sochain node url.
- * @param {string} network
- * @param {string} txHex
- * @returns {string} Transaction ID.
- */
-export const broadcastTx = async ({ nodeUrl, network, txHex }: TxBroadcastParams): Promise<string> => {
-  try {
-    const url = `${nodeUrl}/send_tx/${toSochainNetwork(network)}`
-    const data = { tx_hex: txHex }
-    const response: SochainResponse<LtcBroadcastTransfer> = (await axios.post(url, data)).data
-    return response.data.txid
   } catch (error) {
     return Promise.reject(error)
   }

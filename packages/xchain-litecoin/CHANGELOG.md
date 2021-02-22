@@ -1,3 +1,9 @@
+# v.x.x.x
+
+### Update
+
+- Uses Bitaps to submit transactions instead of Sochain
+
 # v.0.1.0 (2021-02-19)
 
 ### Breaking change

@@ -1,5 +1,6 @@
 import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as sochain from './sochain-api'
+import * as bitaps from './bitaps-api'
 import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
 import { AssetLTC, assetToString, BaseAmount, baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util'
 import { LtcAddressUTXOs, AddressParams } from './types/sochain-api-types'
@@ -117,9 +118,9 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
  * @param {GetChangeParams} params
  * @returns {number} The change amount.
  */
-const getChange = async ({ valueOut, nodeUrl, network, address }: GetChangeParams): Promise<number> => {
+const getChange = async ({ valueOut, sochainUrl, network, address }: GetChangeParams): Promise<number> => {
   try {
-    const balances = await getBalance({ nodeUrl, network, address })
+    const balances = await getBalance({ sochainUrl, network, address })
     const ltcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetLTC))
     let change = 0
 
@@ -183,20 +184,20 @@ export const buildTx = async ({
   feeRate,
   sender,
   network,
-  nodeUrl,
+  sochainUrl,
 }: TxParams & {
   feeRate: FeeRate
   sender: Address
   network: Network
-  nodeUrl: string
+  sochainUrl: string
 }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXOs }> => {
   try {
-    const utxos = await scanUTXOs({ nodeUrl, network, address: sender })
+    const utxos = await scanUTXOs({ sochainUrl, network, address: sender })
     if (utxos.length === 0) {
       return Promise.reject(Error('No utxos to send'))
     }
 
-    const balance = await getBalance({ nodeUrl, network, address: sender })
+    const balance = await getBalance({ sochainUrl, network, address: sender })
     const ltcBalance = balance.find((balance) => balance.asset.symbol === AssetLTC.symbol)
     if (!ltcBalance) {
       return Promise.reject(new Error('No ltcBalance found'))
@@ -223,7 +224,7 @@ export const buildTx = async ({
 
     // Outputs
     psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
-    const change = await getChange({ valueOut: amount.amount().toNumber() + fee, nodeUrl, network, address: sender })
+    const change = await getChange({ valueOut: amount.amount().toNumber() + fee, sochainUrl, network, address: sender })
     if (change > 0) {
       psbt.addOutput({ address: sender, value: change }) // Add change
     }
@@ -245,7 +246,7 @@ export const buildTx = async ({
  * @returns {TxHash} The transaction hash.
  */
 export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
-  return await sochain.broadcastTx(params)
+  return await bitaps.broadcastTx(params)
 }
 
 /**
