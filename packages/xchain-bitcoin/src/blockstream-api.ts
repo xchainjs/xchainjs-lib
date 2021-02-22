@@ -4,10 +4,9 @@ import { BroadcastTxParams } from './types/common'
 /**
  * Broadcast transaction.
  *
- * @see https://sochain.com/api#send-transaction
+ * @see https://github.com/Blockstream/esplora/blob/master/API.md#post-tx
  *
- * @param {string} network
- * @param {string} txHex
+ * @param {string} params
  * @returns {string} Transaction ID.
  */
 export const broadcastTx = async ({ network, txHex, blockstreamUrl }: BroadcastTxParams): Promise<string> => {
