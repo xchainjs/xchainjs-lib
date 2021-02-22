@@ -1,5 +1,6 @@
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as sochain from './sochain-api'
+import * as blockStream from './blockstream-api'
 import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
 import { assetAmount, AssetBTC, assetToBase, assetToString, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { AddressParams, BtcAddressUTXOs } from './types/sochain-api-types'
@@ -247,8 +248,8 @@ export const buildTx = async ({
  * @param {BroadcastTxParams} params The transaction broadcast options.
  * @returns {TxHash} The transaction hash.
  */
-export const broadcastTx = async ({ network, txHex, nodeUrl }: BroadcastTxParams): Promise<TxHash> => {
-  return await sochain.broadcastTx({ nodeUrl: nodeUrl, network, txHex })
+export const broadcastTx = async ({ network, txHex }: BroadcastTxParams): Promise<TxHash> => {
+  return await blockStream.broadcastTx({ network, txHex })
 }
 
 /**

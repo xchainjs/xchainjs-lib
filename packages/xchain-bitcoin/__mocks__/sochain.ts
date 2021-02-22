@@ -38,9 +38,9 @@ export default {
       return [200, resp]
     })
 
-    //Mock send_tx
-    mock.onPost(/\/send_tx/).reply(function () {
-      return [200, { data: { txid: 'TEST_OK' } }]
+    //Mock blockstream send tx
+    mock.onPost(/\/tx/).reply(function () {
+      return [200, 'TEST_OK']
     })
   },
 }

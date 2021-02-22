@@ -5,11 +5,9 @@ import {
   BtcUnspentTxsDTO,
   BtcAddressDTO,
   BtcGetBalanceDTO,
-  BtcBroadcastTransfer,
   Transaction,
   AddressParams,
   TxHashParams,
-  TxBroadcastParams,
 } from './types/sochain-api-types'
 import { assetToBase, assetAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { BTC_DECIMAL } from './utils'
@@ -102,27 +100,6 @@ export const getUnspentTxs = async ({ nodeUrl, network, address }: AddressParams
     const resp = await axios.get(`${nodeUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}`)
     const response: SochainResponse<BtcUnspentTxsDTO> = resp.data
     return response.data.txs
-  } catch (error) {
-    return Promise.reject(error)
-  }
-}
-
-/**
- * Broadcast transaction.
- *
- * @see https://sochain.com/api#send-transaction
- *
- * @param {string} nodeUrl The sochain node url.
- * @param {string} network
- * @param {string} txHex
- * @returns {string} Transaction ID.
- */
-export const broadcastTx = async ({ nodeUrl, network, txHex }: TxBroadcastParams): Promise<string> => {
-  try {
-    const url = `${nodeUrl}/send_tx/${toSochainNetwork(network)}`
-    const data = { tx_hex: txHex }
-    const response: SochainResponse<BtcBroadcastTransfer> = (await axios.post(url, data)).data
-    return response.data.txid
   } catch (error) {
     return Promise.reject(error)
   }
