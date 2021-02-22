@@ -5,7 +5,7 @@ import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 import mockSochainApi from '../__mocks__/sochain'
 mockSochainApi.init()
 
-const btcClient = new Client({ network: 'mainnet', nodeUrl: 'https://sochain.com/api/v2' })
+const btcClient = new Client({ network: 'mainnet', sochainUrl: 'https://sochain.com/api/v2' })
 
 describe('BitcoinClient Test', () => {
   beforeEach(() => {
