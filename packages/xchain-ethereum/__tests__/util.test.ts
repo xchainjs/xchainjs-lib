@@ -9,6 +9,7 @@ import {
   getPrefix,
   getTxFromTokenTransaction,
   getTxFromEthTransaction,
+  filterSelfTxs,
 } from '../src/utils'
 import { assetFromString, baseAmount, assetToString, AssetETH } from '@xchainjs/xchain-util'
 import { Network } from '../src/types'
@@ -167,6 +168,65 @@ describe('ethereum/util', () => {
       expect(tx.to[0].to).toEqual('0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e')
       expect(tx.to[0].amount.amount().isEqualTo(baseAmount('150023345036431545', ETH_DECIMAL).amount())).toBeTruthy()
       expect(tx.type).toEqual('transfer')
+    })
+  })
+
+  describe('filterSelfTxs', () => {
+    it('should return filtered transactions', () => {
+      const txs = filterSelfTxs([
+        {
+          blockNumber: '7937085',
+          timeStamp: '1611284369',
+          hash: '0x40565f6d4cbe1c339decce9769fc94fcc868be98faba4429b79aa4ad2bb26ab4',
+          from: '0x7a250d5630b4cf539739df2c5dacb4c659f2488d',
+          to: '0x7a250d5630b4cf539739df2c5dacb4c659f2488d',
+          value: '150023345036431545',
+          contractAddress: '',
+          input: '',
+          type: 'call',
+          gas: '0',
+          gasUsed: '0',
+          traceId: '0_1',
+          isError: '0',
+          errCode: '',
+        },
+        {
+          blockNumber: '7937085',
+          timeStamp: '1611284369',
+          hash: '0x40565f6d4cbe1c339decce9769fc94fcc868be98faba4429b79aa4ad2bb26ab4',
+          from: '0x7a250d5630b4cf539739df2c5dacb4c659f2488d',
+          to: '0x7a250d5630b4cf539739df2c5dacb4c659f2488d',
+          value: '150023345036431545',
+          contractAddress: '',
+          input: '',
+          type: 'call',
+          gas: '0',
+          gasUsed: '0',
+          traceId: '0_1',
+          isError: '0',
+          errCode: '',
+        },
+        {
+          blockNumber: '7937085',
+          timeStamp: '1611284369',
+          hash: '0x84f28d86da01417a35e448f62248b9dee40261be82496275495bb0f0de6c8a1e',
+          from: '0x7a250d5630b4cf539739df2c5dacb4c659f2488d',
+          to: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
+          value: '150023345036431545',
+          contractAddress: '',
+          input: '',
+          type: 'call',
+          gas: '0',
+          gasUsed: '0',
+          traceId: '0_1',
+          isError: '0',
+          errCode: '',
+        },
+      ])
+
+      expect(txs.length).toEqual(2)
+      expect(txs[0].hash).toEqual('0x84f28d86da01417a35e448f62248b9dee40261be82496275495bb0f0de6c8a1e')
+      expect(txs[1].hash).toEqual('0x40565f6d4cbe1c339decce9769fc94fcc868be98faba4429b79aa4ad2bb26ab4')
     })
   })
 })

@@ -249,3 +249,21 @@ export const getDefaultGasPrices = (asset?: Asset): GasPrices => {
  *
  **/
 export const getPrefix = () => '0x'
+
+/**
+ * Filter self txs
+ *
+ * @returns {T[]}
+ *
+ **/
+export const filterSelfTxs = <T extends { from: string; to: string; hash: string }>(txs: T[]): T[] => {
+  const filterTxs = txs.filter((tx) => tx.from !== tx.to)
+  let selfTxs = txs.filter((tx) => tx.from === tx.to)
+  while (selfTxs.length) {
+    const selfTx = selfTxs[0]
+    filterTxs.push(selfTx)
+    selfTxs = selfTxs.filter((tx) => tx.hash !== selfTx.hash)
+  }
+
+  return filterTxs
+}
