@@ -8,7 +8,7 @@ import {
 } from './types'
 import { BigNumberish } from 'ethers'
 import { Txs } from '@xchainjs/xchain-client/lib'
-import { getTxFromEthTransaction, getTxFromTokenTransaction } from './utils'
+import { filterSelfTxs, getTxFromEthTransaction, getTxFromTokenTransaction } from './utils'
 import { bn } from '@xchainjs/xchain-util/lib'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
@@ -78,14 +78,9 @@ export const getETHTransactionHistory = async ({
   if (endblock) url += `&endblock=${endblock}`
 
   const ethTransactions: ETHTransactionInfo[] = await axios.get(url).then((response) => response.data.result)
-  const filterTxs = ethTransactions.filter((tx) => tx.from !== tx.to)
-  let selfTxs = ethTransactions.filter((tx) => tx.from === tx.to)
-  while (selfTxs.length) {
-    const selfTx = selfTxs[0]
-    filterTxs.push(selfTx)
-    selfTxs = selfTxs.filter((tx) => tx.hash !== selfTx.hash)
-  }
-  return filterTxs.filter((tx) => !bn(tx.value).isZero()).map(getTxFromEthTransaction)
+  return filterSelfTxs(ethTransactions)
+    .filter((tx) => !bn(tx.value).isZero())
+    .map(getTxFromEthTransaction)
 }
 
 /**
@@ -118,14 +113,7 @@ export const getTokenTransactionHistory = async ({
   if (endblock) url += `&endblock=${endblock}`
 
   const tokenTransactions: TokenTransactionInfo[] = await axios.get(url).then((response) => response.data.result)
-  const filterTxs = tokenTransactions.filter((tx) => tx.from !== tx.to)
-  let selfTxs = tokenTransactions.filter((tx) => tx.from === tx.to)
-  while (selfTxs.length) {
-    const selfTx = selfTxs[0]
-    filterTxs.push(selfTx)
-    selfTxs = selfTxs.filter((tx) => tx.hash !== selfTx.hash)
-  }
-  return filterTxs
+  return filterSelfTxs(tokenTransactions)
     .filter((tx) => !bn(tx.value).isZero())
     .reduce((acc, cur) => {
       const tx = getTxFromTokenTransaction(cur)
