@@ -1,3 +1,9 @@
+# v.x.x.x
+
+### Fix
+
+- Remove trailing slashes from `getDefaultExplorerURL`. 
+
 # v.0.11.1 (2020-02-21)
 
 ### Fix
