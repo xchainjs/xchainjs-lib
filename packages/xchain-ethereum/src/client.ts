@@ -206,8 +206,8 @@ export default class Client implements XChainClient, EthereumClient {
    */
   private getDefaultExplorerURL = (): ExplorerUrl => {
     return {
-      testnet: 'https://ropsten.etherscan.io/',
-      mainnet: 'https://etherscan.io/',
+      testnet: 'https://ropsten.etherscan.io',
+      mainnet: 'https://etherscan.io',
     }
   }
 
