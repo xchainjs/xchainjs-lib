@@ -5,7 +5,7 @@ import { baseAmount, AssetLTC } from '@xchainjs/xchain-util'
 import mockSochainApi from '../__mocks__/sochain'
 mockSochainApi.init()
 
-const ltcClient = new Client({ network: 'testnet', nodeUrl: 'https://sochain.com/api/v2' })
+const ltcClient = new Client({ network: 'testnet' })
 
 describe('LitecoinClient Test', () => {
   beforeEach(() => {
@@ -262,29 +262,25 @@ describe('LitecoinClient Test', () => {
 
   it('should return valid explorer url', () => {
     ltcClient.setNetwork('mainnet')
-    expect(ltcClient.getExplorerUrl()).toEqual('https://blockstream.info')
+    expect(ltcClient.getExplorerUrl()).toEqual('https://ltc.bitaps.com')
 
     ltcClient.setNetwork('testnet')
-    expect(ltcClient.getExplorerUrl()).toEqual('https://blockstream.info/testnet')
+    expect(ltcClient.getExplorerUrl()).toEqual('https://tltc.bitaps.com')
   })
 
   it('should retrun valid explorer address url', () => {
     ltcClient.setNetwork('mainnet')
-    expect(ltcClient.getExplorerAddressUrl('testAddressHere')).toEqual(
-      'https://blockstream.info/address/testAddressHere',
-    )
+    expect(ltcClient.getExplorerAddressUrl('testAddressHere')).toEqual('https://ltc.bitaps.com/testAddressHere')
     ltcClient.setNetwork('testnet')
     expect(ltcClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
-      'https://blockstream.info/testnet/address/anotherTestAddressHere',
+      'https://tltc.bitaps.com/anotherTestAddressHere',
     )
   })
 
   it('should retrun valid explorer tx url', () => {
     ltcClient.setNetwork('mainnet')
-    expect(ltcClient.getExplorerTxUrl('testTxHere')).toEqual('https://blockstream.info/tx/testTxHere')
+    expect(ltcClient.getExplorerTxUrl('testTxHere')).toEqual('https://ltc.bitaps.com/testTxHere')
     ltcClient.setNetwork('testnet')
-    expect(ltcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
-      'https://blockstream.info/testnet/tx/anotherTestTxHere',
-    )
+    expect(ltcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual('https://tltc.bitaps.com/anotherTestTxHere')
   })
 })

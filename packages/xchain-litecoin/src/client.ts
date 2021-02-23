@@ -30,7 +30,8 @@ interface LitecoinClient {
 }
 
 type LitecoinClientParams = XChainClientParams & {
-  nodeUrl?: string
+  sochainUrl?: string
+  bitapsUrl?: string
 }
 
 /**
@@ -39,7 +40,8 @@ type LitecoinClientParams = XChainClientParams & {
 class Client implements LitecoinClient, XChainClient {
   private net: Network
   private phrase = ''
-  private nodeUrl = ''
+  private sochainUrl = ''
+  private bitapsUrl = ''
 
   /**
    * Constructor
@@ -47,20 +49,49 @@ class Client implements LitecoinClient, XChainClient {
    *
    * @param {LitecoinClientParams} params
    */
-  constructor({ network = 'testnet', nodeUrl = '', phrase }: LitecoinClientParams) {
+  constructor({ network = 'testnet', sochainUrl, bitapsUrl, phrase }: LitecoinClientParams) {
     this.net = network
-    this.setNodeURL(nodeUrl)
+    this.setSochainUrl(sochainUrl || this.getDefaultSochainUrl())
+    this.setBitapsUrl(bitapsUrl || this.getDefaultBitapsUrl())
     phrase && this.setPhrase(phrase)
   }
 
   /**
-   * Set/Update the node url.
+   * Get the default sochain url.
    *
-   * @param {string} url The new node url.
+   * @returns {string} the default sochain url
+   */
+  getDefaultSochainUrl = (): string => {
+    return 'https://sochain.com/api/v2'
+  }
+
+  /**
+   * Set/Update the sochain url.
+   *
+   * @param {string} url The new sochain url.
    * @returns {void}
    */
-  setNodeURL = (url: string): void => {
-    this.nodeUrl = url
+  setSochainUrl = (url: string): void => {
+    this.sochainUrl = url
+  }
+
+  /**
+   * Get the default blockstream url.
+   *
+   * @returns {string} the default blockstream url
+   */
+  getDefaultBitapsUrl = (): string => {
+    return 'https://api.bitaps.com'
+  }
+
+  /**
+   * Set/Update the blockstream url.
+   *
+   * @param {string} url The new blockstream url.
+   * @returns {void}
+   */
+  setBitapsUrl = (url: string): void => {
+    this.bitapsUrl = url
   }
 
   /**
@@ -133,8 +164,7 @@ class Client implements LitecoinClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl = (): string => {
-    const networkPath = Utils.isTestnet(this.net) ? '/testnet' : ''
-    return `https://blockstream.info${networkPath}`
+    return Utils.isTestnet(this.net) ? 'https://tltc.bitaps.com' : 'https://ltc.bitaps.com'
   }
 
   /**
@@ -144,7 +174,7 @@ class Client implements LitecoinClient, XChainClient {
    * @returns {string} The explorer url for the given address based on the network.
    */
   getExplorerAddressUrl = (address: Address): string => {
-    return `${this.getExplorerUrl()}/address/${address}`
+    return `${this.getExplorerUrl()}/${address}`
   }
 
   /**
@@ -154,7 +184,7 @@ class Client implements LitecoinClient, XChainClient {
    * @returns {string} The explorer url for the given transaction id based on the network.
    */
   getExplorerTxUrl = (txID: string): string => {
-    return `${this.getExplorerUrl()}/tx/${txID}`
+    return `${this.getExplorerUrl()}/${txID}`
   }
 
   /**
@@ -228,7 +258,7 @@ class Client implements LitecoinClient, XChainClient {
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
       return Utils.getBalance({
-        nodeUrl: this.nodeUrl,
+        sochainUrl: this.sochainUrl,
         network: this.net,
         address: address || this.getAddress(),
       })
@@ -252,7 +282,7 @@ class Client implements LitecoinClient, XChainClient {
       const address = params?.address ?? this.getAddress()
 
       const response = await sochain.getAddress({
-        nodeUrl: this.nodeUrl,
+        sochainUrl: this.sochainUrl,
         network: this.net,
         address,
       })
@@ -262,7 +292,7 @@ class Client implements LitecoinClient, XChainClient {
       const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
       for (const txItem of txs) {
         const rawTx = await sochain.getTx({
-          nodeUrl: this.nodeUrl,
+          sochainUrl: this.sochainUrl,
           network: this.net,
           hash: txItem.txid,
         })
@@ -302,7 +332,7 @@ class Client implements LitecoinClient, XChainClient {
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
       const rawTx = await sochain.getTx({
-        nodeUrl: this.nodeUrl,
+        sochainUrl: this.sochainUrl,
         network: this.net,
         hash: txId,
       })
@@ -404,7 +434,7 @@ class Client implements LitecoinClient, XChainClient {
         ...params,
         feeRate,
         sender: this.getAddress(),
-        nodeUrl: this.nodeUrl,
+        sochainUrl: this.sochainUrl,
         network: this.net,
       })
       const ltcKeys = this.getLtcKeys(this.phrase)
@@ -412,7 +442,7 @@ class Client implements LitecoinClient, XChainClient {
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-      return await Utils.broadcastTx({ network: this.net, txHex, nodeUrl: this.nodeUrl })
+      return await Utils.broadcastTx({ network: this.net, txHex, bitapsUrl: this.bitapsUrl })
     } catch (e) {
       return Promise.reject(e)
     }
