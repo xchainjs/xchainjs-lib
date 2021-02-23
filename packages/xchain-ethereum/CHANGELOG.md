@@ -3,6 +3,7 @@
 ### Fix
 
 - Fix `estimateGasLimit` to consider memo
+- Fix `getTransactions` self tx duplication issue
 
 # v.0.11.0 (2021-02-19)
 
