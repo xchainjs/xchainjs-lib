@@ -162,7 +162,7 @@ describe('BinanceClient Test', () => {
       sequence: 5,
     })
 
-    const balances = await bnbClient.getBalance('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', AssetBNB)
+    const balances = await bnbClient.getBalance('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', [AssetBNB])
     expect(balances.length).toEqual(1)
 
     const amount = balances[0].amount

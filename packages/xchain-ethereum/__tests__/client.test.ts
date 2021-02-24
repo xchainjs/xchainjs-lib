@@ -178,8 +178,8 @@ describe('Client Test', () => {
       '0x0000000000000000000000000000000000000000000000000000000000000012',
     )
 
-    const asset = assetFromString(`${ETHChain}.DAI-0xc7ad46e0b8a400bb3c915120d284aafba8fc4735`) ?? undefined
-    const balance = await ethClient.getBalance(undefined, asset)
+    const asset = assetFromString(`${ETHChain}.DAI-0xc7ad46e0b8a400bb3c915120d284aafba8fc4735`)
+    const balance = await ethClient.getBalance(undefined, asset ? [asset] : undefined)
     expect(balance.length).toEqual(1)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(asset ?? AssetETH))
     expect(balance[0].amount.decimal).toEqual(18)

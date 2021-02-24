@@ -350,7 +350,7 @@ class Client implements ThorchainClient, XChainClient {
    * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Array<Balance>} The balance of the address.
    */
-  getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
+  getBalance = async (address?: Address, assets?: Asset[]): Promise<Balances> => {
     try {
       const balances = await this.thorClient.getBalance(address || this.getAddress())
       return balances
@@ -358,7 +358,10 @@ class Client implements ThorchainClient, XChainClient {
           asset: (balance.denom && getAsset(balance.denom)) || AssetRune,
           amount: baseAmount(balance.amount, DECIMAL),
         }))
-        .filter((balance) => !asset || assetToString(balance.asset) === assetToString(asset))
+        .filter(
+          (balance) =>
+            !assets || assets.findIndex((asset) => assetToString(balance.asset) === assetToString(asset)) >= 0,
+        )
     } catch (error) {
       return Promise.reject(error)
     }
@@ -564,7 +567,7 @@ class Client implements ThorchainClient, XChainClient {
    */
   deposit = async ({ asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     try {
-      const assetBalance = await this.getBalance(this.getAddress(), asset)
+      const assetBalance = await this.getBalance(this.getAddress(), [asset])
 
       const signer = this.getAddress()
       const msgNativeTx = msgNativeTxFromJson({
@@ -610,7 +613,7 @@ class Client implements ThorchainClient, XChainClient {
     try {
       registerCodecs(this.network)
 
-      const assetBalance = await this.getBalance(this.getAddress(), asset)
+      const assetBalance = await this.getBalance(this.getAddress(), [asset])
       const fee = await this.getFees()
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
         throw new Error('insufficient funds')

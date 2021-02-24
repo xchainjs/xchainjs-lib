@@ -242,7 +242,7 @@ class Client implements CosmosClient, XChainClient {
    * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Array<Balance>} The balance of the address.
    */
-  getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
+  getBalance = async (address?: Address, assets?: Asset[]): Promise<Balances> => {
     try {
       const balances = await this.sdkClient.getBalance(address || this.getAddress())
       const mainAsset = this.getMainAsset()
@@ -254,7 +254,10 @@ class Client implements CosmosClient, XChainClient {
             amount: baseAmount(balance.amount, DECIMAL),
           }
         })
-        .filter((balance) => !asset || assetToString(balance.asset) === assetToString(asset))
+        .filter(
+          (balance) =>
+            !assets || assets.findIndex((asset) => assetToString(balance.asset) === assetToString(asset)) >= 0,
+        )
     } catch (error) {
       return Promise.reject(error)
     }
