@@ -1,3 +1,14 @@
+# v.0.11.1 (2021-02-24)
+
+### Breaking change
+
+- Update @xchainjs/xchain-cosmos package to 0.9.0
+
+### Fix
+
+- Fix `getTransactions` - sort transactions from latest
+- Fix `DECIMAL`
+
 # v.0.11.0 (2021-02-19)
 
 ### Breaking change
