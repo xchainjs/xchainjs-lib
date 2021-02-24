@@ -3,6 +3,7 @@
 ### Breaking change
 
 - Update @xchainjs/xchain-client package to 0.6.0
+- Update @xchainjs/xchain-cosmos package to 0.10.0
 - Update `getBalance`
 
 # v.0.11.1 (2021-02-24)
