@@ -123,8 +123,8 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
       if (isMsgSend(msg)) {
         const msgSend = msg as MsgSend
         const amount = msgSend.amount
-          .map((coin) => baseAmount(coin.amount, 6))
-          .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
+          .map((coin) => baseAmount(coin.amount, DECIMAL))
+          .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
 
         const from_index = from.findIndex((value) => value.from === msgSend.from_address.toBech32())
         if (from_index === -1) {
@@ -133,7 +133,7 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
             amount,
           })
         } else {
-          from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), 6)
+          from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
         }
 
         const to_index = to.findIndex((value) => value.to === msgSend.to_address.toBech32())
@@ -143,15 +143,15 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
             amount,
           })
         } else {
-          to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), 6)
+          to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
         }
       } else if (isMsgMultiSend(msg)) {
         const msgMultiSend = msg as MsgMultiSend
 
         msgMultiSend.inputs.map((input) => {
           const amount = input.coins
-            .map((coin) => baseAmount(coin.amount, 6))
-            .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
+            .map((coin) => baseAmount(coin.amount, DECIMAL))
+            .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
           const from_index = from.findIndex((value) => value.from === input.address)
           if (from_index === -1) {
             from.push({
@@ -159,14 +159,14 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
               amount,
             })
           } else {
-            from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), 6)
+            from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
           }
         })
 
         msgMultiSend.outputs.map((output) => {
           const amount = output.coins
-            .map((coin) => baseAmount(coin.amount, 6))
-            .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
+            .map((coin) => baseAmount(coin.amount, DECIMAL))
+            .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
           const to_index = to.findIndex((value) => value.to === output.address)
           if (to_index === -1) {
             to.push({
@@ -174,7 +174,7 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
               amount,
             })
           } else {
-            to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), 6)
+            to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
           }
         })
       }
