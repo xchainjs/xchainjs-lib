@@ -405,7 +405,7 @@ class Client implements ThorchainClient, XChainClient {
 
       let history: RPCTxResult[] = [...txIncomingHistory, ...txOutgoingHistory]
         .sort((a, b) => {
-          if (a.height !== b.height) return b.height > a.height ? 1 : -1
+          if (a.height !== b.height) return parseInt(b.height) > parseInt(a.height) ? 1 : -1
           if (a.hash !== b.hash) return a.hash > b.hash ? 1 : -1
           return 0
         })
