@@ -1,5 +1,11 @@
 # v.x.x.x
 
+# v.0.2.0 (2021-02-25)
+
+### Breaking change
+
+- Refactored Client.transfer to call node's JSON rpc
+
 ### Update
 
 - Uses Bitaps to submit transactions instead of Sochain
