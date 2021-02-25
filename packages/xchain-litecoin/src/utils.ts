@@ -1,6 +1,6 @@
 import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as sochain from './sochain-api'
-import * as bitaps from './bitaps-api'
+import * as nodeApi from './node-api'
 import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
 import { AssetLTC, assetToString, BaseAmount, baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util'
 import { LtcAddressUTXOs, AddressParams } from './types/sochain-api-types'
@@ -246,7 +246,7 @@ export const buildTx = async ({
  * @returns {TxHash} The transaction hash.
  */
 export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
-  return await bitaps.broadcastTx(params)
+  return await nodeApi.broadcastTx(params)
 }
 
 /**
