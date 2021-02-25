@@ -38,13 +38,8 @@ export default {
       return [200, resp]
     })
 
-    //Mock send_tx
-    mock.onPost(/\/send_tx/).reply(function () {
-      return [200, { data: { txid: 'TEST_OK' } }]
-    })
-
-    //Mock bitaps send tx
-    mock.onPost(/\/native/).reply(function () {
+    //Mock ltc node send tx
+    mock.onPost(/https:\/\/testnet.litecoin.thorchain.info/).reply(function () {
       return [
         200,
         {
