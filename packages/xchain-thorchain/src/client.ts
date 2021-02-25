@@ -358,10 +358,7 @@ class Client implements ThorchainClient, XChainClient {
           asset: (balance.denom && getAsset(balance.denom)) || AssetRune,
           amount: baseAmount(balance.amount, DECIMAL),
         }))
-        .filter(
-          (balance) =>
-            !assets || assets.findIndex((asset) => assetToString(balance.asset) === assetToString(asset)) >= 0,
-        )
+        .filter((balance) => !assets || assets.find((asset) => assetToString(balance.asset) === assetToString(asset)))
     } catch (error) {
       return Promise.reject(error)
     }
