@@ -254,7 +254,10 @@ class Client implements CosmosClient, XChainClient {
             amount: baseAmount(balance.amount, DECIMAL),
           }
         })
-        .filter((balance) => !assets || assets.find((asset) => assetToString(balance.asset) === assetToString(asset)))
+        .filter(
+          (balance) =>
+            !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
+        )
     } catch (error) {
       return Promise.reject(error)
     }

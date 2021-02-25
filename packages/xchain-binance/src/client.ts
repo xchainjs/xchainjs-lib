@@ -280,7 +280,10 @@ class Client implements BinanceClient, XChainClient {
             amount: assetToBase(assetAmount(balance.free, 8)),
           }
         })
-        .filter((balance) => !assets || assets.find((asset) => assetToString(balance.asset) === assetToString(asset)))
+        .filter(
+          (balance) =>
+            !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
+        )
     } catch (error) {
       return Promise.reject(error)
     }

@@ -284,7 +284,7 @@ class Client implements PolkadotClient, XChainClient {
 
       const account = response.data
 
-      return account && (!assets || assets.find((asset) => assetToString(AssetDOT) === assetToString(asset)))
+      return account && (!assets || assets.filter((asset) => assetToString(AssetDOT) === assetToString(asset)).length)
         ? [
             {
               asset: AssetDOT,
