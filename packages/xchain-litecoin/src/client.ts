@@ -54,7 +54,7 @@ class Client implements LitecoinClient, XChainClient {
    */
   constructor({ network = 'testnet', sochainUrl, phrase, nodeUrl, nodeAuth }: LitecoinClientParams) {
     this.net = network
-    this.nodeUrl = nodeUrl || this.getDefaultNodeUrl()
+    this.nodeUrl = !!nodeUrl ? nodeUrl : this.getDefaultNodeUrl()
     this.nodeAuth = nodeAuth || this.getDefaultNodeAuth()
     this.setSochainUrl(sochainUrl || this.getDefaultSochainUrl())
     phrase && this.setPhrase(phrase)
