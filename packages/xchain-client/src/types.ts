@@ -92,7 +92,7 @@ export interface XChainClient {
 
   setPhrase(phrase: string): Address
 
-  getBalance(address?: Address, asset?: Asset): Promise<Balances>
+  getBalance(address?: Address, assets?: Asset[]): Promise<Balances>
 
   getTransactions(params?: TxHistoryParams): Promise<TxsPage>
 

@@ -1,3 +1,9 @@
+# v.0.6.0 (2021-02-24)
+
+### Breaking change
+
+- Update `getBalance`
+
 # v.0.5.0 (2021-02-19)
 
 ### Breaking change

@@ -1,7 +1,7 @@
 import nock from 'nock'
 
 import { Client as BinanceClient } from '../src/client'
-import { AssetBNB, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetBNB, baseAmount, BNBChain } from '@xchainjs/xchain-util'
 import { Account, Fees, TransactionResult, TxPage } from '../src/types/binance'
 
 const mockGetAccount = (url: string, address: string, result: Account, ntimes = 1, status = 200) => {
@@ -157,17 +157,29 @@ describe('BinanceClient Test', () => {
           locked: '0.00000000',
           symbol: 'BNB',
         },
+        {
+          free: '12.89087510',
+          frozen: '0.10000000',
+          locked: '0.00000000',
+          symbol: 'RUNE',
+        },
       ],
       public_key: [],
       sequence: 5,
     })
 
-    const balances = await bnbClient.getBalance('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', AssetBNB)
-    expect(balances.length).toEqual(1)
+    const AssetRune: Asset = { chain: BNBChain, symbol: 'RUNE', ticker: 'RUNE' }
 
-    const amount = balances[0].amount
+    const balances = await bnbClient.getBalance('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', [AssetBNB, AssetRune])
+    expect(balances.length).toEqual(2)
+
+    let amount = balances[0].amount
 
     expect(amount.amount().isEqualTo(1289087500)).toBeTruthy()
+
+    amount = balances[1].amount
+
+    expect(amount.amount().isEqualTo(1289087510)).toBeTruthy()
   })
 
   it('fetches the transfer fees', async () => {

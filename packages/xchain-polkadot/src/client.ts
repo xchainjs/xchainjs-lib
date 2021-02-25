@@ -272,7 +272,7 @@ class Client implements PolkadotClient, XChainClient {
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Array<Balance>} The DOT balance of the address.
    */
-  getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
+  getBalance = async (address?: Address, assets?: Asset[]): Promise<Balances> => {
     try {
       const response: SubscanResponse<Account> = await axios
         .post(`${this.getClientUrl()}/api/open/account`, { address: address || this.getAddress() })
@@ -284,7 +284,7 @@ class Client implements PolkadotClient, XChainClient {
 
       const account = response.data
 
-      return account && (!asset || assetToString(asset) === assetToString(AssetDOT))
+      return account && (!assets || assets.filter((asset) => assetToString(AssetDOT) === assetToString(asset)).length)
         ? [
             {
               asset: AssetDOT,
@@ -423,7 +423,7 @@ class Client implements PolkadotClient, XChainClient {
       // Check balances
       const paymentInfo = await transaction.paymentInfo(this.getKeyringPair())
       const fee = baseAmount(paymentInfo.partialFee.toString(), getDecimal(this.network))
-      const balances = await this.getBalance(this.getAddress(), AssetDOT)
+      const balances = await this.getBalance(this.getAddress(), [AssetDOT])
 
       if (!balances || params.amount.amount().plus(fee.amount()).isGreaterThan(balances[0].amount.amount())) {
         throw new Error('insufficient balance')

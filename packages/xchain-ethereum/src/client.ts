@@ -317,45 +317,49 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @throws {"Invalid asset"} throws when the give asset is an invalid one
    */
-  getBalance = async (address?: Address, asset?: Asset): Promise<Balances> => {
+  getBalance = async (address?: Address, assets?: Asset[]): Promise<Balances> => {
     try {
-      address = address || this.getAddress()
+      const ethAddress = address || this.getAddress()
 
-      if (asset && assetToString(asset) !== assetToString(AssetETH)) {
-        // Handle token balances
-        const assetAddress = getTokenAddress(asset)
-        if (!assetAddress) {
-          throw new Error('Invalid asset')
-        }
+      const newAssets = assets || [AssetETH]
+      // Follow approach is only for testnet
+      // For mainnet, we will use ethplorer api(one request only)
+      // https://github.com/xchainjs/xchainjs-lib/issues/252
+      return Promise.all(
+        newAssets.map(async (asset) => {
+          if (assetToString(asset) !== assetToString(AssetETH)) {
+            // Handle token balances
+            const assetAddress = getTokenAddress(asset)
+            if (!assetAddress) {
+              throw new Error('Invalid asset')
+            }
 
-        const balance = await etherscanAPI.getTokenBalance({
-          baseUrl: this.etherscan.baseUrl,
-          address,
-          assetAddress,
-          apiKey: this.etherscan.apiKey,
-        })
-        const decimals = await this.call<BigNumberish>(assetAddress, erc20ABI, 'decimals', [])
-        return [
-          {
-            asset,
-            amount: baseAmount(balance.toString(), BigNumber.from(decimals).toNumber() || ETH_DECIMAL),
-          },
-        ]
-      } else {
-        // Handle ETH balances
-        const balance = await this.etherscan.getBalance(address)
-        return [
-          {
-            asset: AssetETH,
-            amount: baseAmount(balance.toString(), ETH_DECIMAL),
-          },
-        ]
-      }
+            const balance = await etherscanAPI.getTokenBalance({
+              baseUrl: this.etherscan.baseUrl,
+              address: ethAddress,
+              assetAddress,
+              apiKey: this.etherscan.apiKey,
+            })
+            const decimals = await this.call<BigNumberish>(assetAddress, erc20ABI, 'decimals', [])
+            return {
+              asset,
+              amount: baseAmount(balance.toString(), BigNumber.from(decimals).toNumber() || ETH_DECIMAL),
+            }
+          } else {
+            // Handle ETH balances
+            const balance = await this.etherscan.getBalance(ethAddress)
+            return {
+              asset: AssetETH,
+              amount: baseAmount(balance.toString(), ETH_DECIMAL),
+            }
+          }
+        }),
+      )
     } catch (error) {
       if (error.toString().includes('Invalid API Key')) {
         return Promise.reject(new Error('Invalid API Key'))
       }
-      return Promise.reject(new Error('Invalid address'))
+      return Promise.reject(error)
     }
   }
 
