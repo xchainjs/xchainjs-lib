@@ -33,7 +33,6 @@ interface LitecoinClient {
 type LitecoinClientParams = XChainClientParams & {
   sochainUrl?: string
   nodeUrl?: string
-  // Pass strict null to disable auth for node json rpc
   nodeAuth?: NodeAuth | null
 }
 
@@ -50,6 +49,7 @@ class Client implements LitecoinClient, XChainClient {
   /**
    * Constructor
    * Client is initialised with network type
+   * Pass strict null as nodeAuth to disable auth for node json rpc
    *
    * @param {LitecoinClientParams} params
    */
