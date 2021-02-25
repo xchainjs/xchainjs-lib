@@ -9,6 +9,7 @@
 ### Update
 
 - Uses Bitaps to submit transactions instead of Sochain
+- Updated LitecoinClientParams to provide optional nodeUrl and nodeAuth parameters
 
 ### Fix
 

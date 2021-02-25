@@ -22,10 +22,7 @@ export const broadcastTx = async ({ txHex, auth, nodeUrl }: BroadcastTxParams): 
           id: uniqueId,
         },
         {
-          auth: {
-            username: auth.userName,
-            password: auth.password,
-          },
+          auth,
         },
       )
     ).data

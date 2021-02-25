@@ -33,7 +33,8 @@ interface LitecoinClient {
 type LitecoinClientParams = XChainClientParams & {
   sochainUrl?: string
   nodeUrl?: string
-  nodeAuth?: NodeAuth
+  // Pass strict null to disable auth for node json rpc
+  nodeAuth?: NodeAuth | null
 }
 
 /**
@@ -44,7 +45,7 @@ class Client implements LitecoinClient, XChainClient {
   private phrase = ''
   private sochainUrl = ''
   private nodeUrl = ''
-  private nodeAuth: NodeAuth
+  private nodeAuth?: NodeAuth
 
   /**
    * Constructor
@@ -52,21 +53,31 @@ class Client implements LitecoinClient, XChainClient {
    *
    * @param {LitecoinClientParams} params
    */
-  constructor({ network = 'testnet', sochainUrl, phrase, nodeUrl, nodeAuth }: LitecoinClientParams) {
+  constructor({
+    network = 'testnet',
+    sochainUrl = 'https://sochain.com/api/v2',
+    phrase,
+    nodeUrl,
+    nodeAuth = {
+      username: 'thorchain',
+      password: 'password',
+    },
+  }: LitecoinClientParams) {
     this.net = network
-    this.nodeUrl = !!nodeUrl ? nodeUrl : this.getDefaultNodeUrl()
-    this.nodeAuth = nodeAuth || this.getDefaultNodeAuth()
-    this.setSochainUrl(sochainUrl || this.getDefaultSochainUrl())
-    phrase && this.setPhrase(phrase)
-  }
 
-  /**
-   * Get the default sochain url.
-   *
-   * @returns {string} the default sochain url
-   */
-  getDefaultSochainUrl = (): string => {
-    return 'https://sochain.com/api/v2'
+    this.nodeUrl = !!nodeUrl
+      ? nodeUrl
+      : network === 'mainnet'
+      ? 'https://mainnet.ltc.thorchain.info'
+      : 'https://testnet.ltc.thorchain.info'
+
+    this.nodeAuth =
+      // Leave possibility to send requests without auth info for user
+      // by strictly passing nodeAuth as null value
+      nodeAuth === null ? undefined : nodeAuth
+
+    this.setSochainUrl(sochainUrl)
+    phrase && this.setPhrase(phrase)
   }
 
   /**
@@ -77,34 +88,6 @@ class Client implements LitecoinClient, XChainClient {
    */
   setSochainUrl = (url: string): void => {
     this.sochainUrl = url
-  }
-
-  /**
-   * Get the default LTC node url.
-   *
-   * @returns {string} the default LTC node url
-   */
-  getDefaultNodeUrl = (): string => {
-    return this.getNetwork() === 'mainnet' ? 'https://mainnet.ltc.thorchain.info' : 'https://testnet.ltc.thorchain.info'
-  }
-
-  /**
-   * Get the default LTC node url.
-   *
-   * @returns {string} the default LTC node url
-   */
-  getDefaultNodeAuth = (): NodeAuth => ({
-    userName: 'thorchain',
-    password: 'password',
-  })
-
-  /**
-   * Get the default blockstream url.
-   *
-   * @returns {string} the default blockstream url
-   */
-  getDefaultBitapsUrl = (): string => {
-    return 'https://api.bitaps.com'
   }
 
   /**

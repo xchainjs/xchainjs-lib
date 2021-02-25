@@ -13,7 +13,7 @@ export type UTXO = {
 export type UTXOs = UTXO[]
 
 export type NodeAuth = {
-  userName: string
+  username: string
   password: string
 }
 
@@ -21,7 +21,7 @@ export type BroadcastTxParams = {
   network: Network
   txHex: string
   nodeUrl: string
-  auth: NodeAuth
+  auth?: NodeAuth
 }
 
 // We might extract it into xchain-client later
