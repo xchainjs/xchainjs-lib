@@ -1,10 +1,4 @@
-# v.0.2.0 (2021-02-24)
-
-### Breaking change
-
-- Update @xchainjs/xchain-client package to 0.6.0
-
-# v.0.2.0 (2021-02-25)
+# v.0.3.0 (2021-02-25)
 
 ### Breaking change
 
@@ -12,8 +6,17 @@
 
 ### Update
 
-- Uses Bitaps to submit transactions instead of Sochain
 - Updated LitecoinClientParams to provide optional nodeUrl and nodeAuth parameters
+
+# v.0.2.0 (2021-02-24)
+
+### Breaking change
+
+- Update @xchainjs/xchain-client package to 0.6.0
+
+### Update
+
+- Uses Bitaps to submit transactions instead of Sochain
 
 ### Fix
 
