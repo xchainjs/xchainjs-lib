@@ -16,6 +16,7 @@ import {
 } from '@xchainjs/xchain-client'
 import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
 import { AssetLTC, assetToBase, assetAmount } from '@xchainjs/xchain-util'
+import { NodeAuth } from './types'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 import { TxIO } from './types/sochain-api-types'
 
@@ -31,7 +32,8 @@ interface LitecoinClient {
 
 type LitecoinClientParams = XChainClientParams & {
   sochainUrl?: string
-  bitapsUrl?: string
+  nodeUrl?: string
+  nodeAuth?: NodeAuth | null
 }
 
 /**
@@ -41,28 +43,41 @@ class Client implements LitecoinClient, XChainClient {
   private net: Network
   private phrase = ''
   private sochainUrl = ''
-  private bitapsUrl = ''
+  private nodeUrl = ''
+  private nodeAuth?: NodeAuth
 
   /**
    * Constructor
    * Client is initialised with network type
+   * Pass strict null as nodeAuth to disable auth for node json rpc
    *
    * @param {LitecoinClientParams} params
    */
-  constructor({ network = 'testnet', sochainUrl, bitapsUrl, phrase }: LitecoinClientParams) {
+  constructor({
+    network = 'testnet',
+    sochainUrl = 'https://sochain.com/api/v2',
+    phrase,
+    nodeUrl,
+    nodeAuth = {
+      username: 'thorchain',
+      password: 'password',
+    },
+  }: LitecoinClientParams) {
     this.net = network
-    this.setSochainUrl(sochainUrl || this.getDefaultSochainUrl())
-    this.setBitapsUrl(bitapsUrl || this.getDefaultBitapsUrl())
-    phrase && this.setPhrase(phrase)
-  }
 
-  /**
-   * Get the default sochain url.
-   *
-   * @returns {string} the default sochain url
-   */
-  getDefaultSochainUrl = (): string => {
-    return 'https://sochain.com/api/v2'
+    this.nodeUrl = !!nodeUrl
+      ? nodeUrl
+      : network === 'mainnet'
+      ? 'https://mainnet.ltc.thorchain.info'
+      : 'https://testnet.ltc.thorchain.info'
+
+    this.nodeAuth =
+      // Leave possibility to send requests without auth info for user
+      // by strictly passing nodeAuth as null value
+      nodeAuth === null ? undefined : nodeAuth
+
+    this.setSochainUrl(sochainUrl)
+    phrase && this.setPhrase(phrase)
   }
 
   /**
@@ -73,25 +88,6 @@ class Client implements LitecoinClient, XChainClient {
    */
   setSochainUrl = (url: string): void => {
     this.sochainUrl = url
-  }
-
-  /**
-   * Get the default blockstream url.
-   *
-   * @returns {string} the default blockstream url
-   */
-  getDefaultBitapsUrl = (): string => {
-    return 'https://api.bitaps.com'
-  }
-
-  /**
-   * Set/Update the blockstream url.
-   *
-   * @param {string} url The new blockstream url.
-   * @returns {void}
-   */
-  setBitapsUrl = (url: string): void => {
-    this.bitapsUrl = url
   }
 
   /**
@@ -442,7 +438,12 @@ class Client implements LitecoinClient, XChainClient {
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-      return await Utils.broadcastTx({ network: this.net, txHex, bitapsUrl: this.bitapsUrl })
+      return await Utils.broadcastTx({
+        network: this.net,
+        txHex,
+        nodeUrl: this.nodeUrl,
+        auth: this.nodeAuth,
+      })
     } catch (e) {
       return Promise.reject(e)
     }

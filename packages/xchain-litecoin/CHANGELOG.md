@@ -4,9 +4,16 @@
 
 - Update @xchainjs/xchain-client package to 0.6.0
 
+# v.0.2.0 (2021-02-25)
+
+### Breaking change
+
+- Refactored Client.transfer to call node's JSON rpc
+
 ### Update
 
 - Uses Bitaps to submit transactions instead of Sochain
+- Updated LitecoinClientParams to provide optional nodeUrl and nodeAuth parameters
 
 ### Fix
 
