@@ -85,9 +85,7 @@ class Client implements LitecoinClient, XChainClient {
    * @returns {string} the default LTC node url
    */
   getDefaultNodeUrl = (): string => {
-    return this.getNetwork() === 'mainnet'
-      ? 'https://mainnet.litecoin.thorchain.info'
-      : 'https://testnet.litecoin.thorchain.info'
+    return this.getNetwork() === 'mainnet' ? 'https://mainnet.ltc.thorchain.info' : 'https://testnet.ltc.thorchain.info'
   }
 
   /**

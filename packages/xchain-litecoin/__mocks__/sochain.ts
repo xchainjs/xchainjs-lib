@@ -39,7 +39,7 @@ export default {
     })
 
     //Mock ltc node send tx
-    mock.onPost(/https:\/\/testnet.litecoin.thorchain.info/).reply(function () {
+    mock.onPost(/https:\/\/testnet.ltc.thorchain.info/).reply(function () {
       return [
         200,
         {
