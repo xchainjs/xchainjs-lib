@@ -322,6 +322,9 @@ export default class Client implements XChainClient, EthereumClient {
       const ethAddress = address || this.getAddress()
 
       const newAssets = assets || [AssetETH]
+      // Follow approach is only for testnet
+      // For mainnet, we will use ethplorer api(one request only)
+      // https://github.com/xchainjs/xchainjs-lib/issues/252
       return Promise.all(
         newAssets.map(async (asset) => {
           if (assetToString(asset) !== assetToString(AssetETH)) {
