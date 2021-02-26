@@ -42,6 +42,8 @@ export const compileMemo = (memo: string): Buffer => {
 /**
  * Get the transaction fee.
  *
+ * reference to https://github.com/Permissionless-Software-Foundation/bch-js/blob/acc0300a444059d612daec2564da743c11e27139/src/bitcoincash.js#L408
+ *
  * @param {number} inputs The inputs count.
  * @param {number} outputs The outputs count.
  * @param {FeeRate} feeRate The fee rate.
@@ -56,7 +58,6 @@ export function getFee(inputs: number, feeRate: FeeRate, data: Buffer | null = n
   if (data) {
     totalWeight += 9 + data.length
   }
-  totalWeight += 1
 
   return Math.ceil(totalWeight * feeRate)
 }
