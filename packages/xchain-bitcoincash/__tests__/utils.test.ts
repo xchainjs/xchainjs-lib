@@ -20,11 +20,11 @@ describe('Bitcoin Utils Test', () => {
 
   it('get the right vault fee', () => {
     const fee = utils.calcFee(1, memo)
-    expect(fee.amount().toNumber()).toEqual(104)
+    expect(fee.amount().toNumber()).toEqual(103)
   })
 
   it('get the right normal fee', () => {
     const fee = utils.calcFee(1)
-    expect(fee.amount().toNumber()).toEqual(79)
+    expect(fee.amount().toNumber()).toEqual(78)
   })
 })
