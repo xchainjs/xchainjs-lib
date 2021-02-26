@@ -136,7 +136,7 @@ export const getTxFromTokenTransaction = (tx: TokenTransactionInfo): Tx | null =
             amount: baseAmount(tx.value, decimals),
           },
         ],
-        date: new Date(tx.timeStamp),
+        date: new Date(parseInt(tx.timeStamp) * 1000),
         type: 'transfer',
         hash: tx.hash,
       }
