@@ -36,7 +36,7 @@
   "devDependencies": {
     "@psf/bitcoincashjs-lib": "^4.0.2",
     "@types/bchaddrjs": "0.4.0",
-    "@xchainjs/xchain-client": "^0.5.0",
+    "@xchainjs/xchain-client": "^0.6.0",
     "@xchainjs/xchain-crypto": "^0.2.3",
     "axios": "^0.21.0",
     "axios-mock-adapter": "^1.19.0",
