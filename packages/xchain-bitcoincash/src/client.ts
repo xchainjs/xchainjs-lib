@@ -56,35 +56,28 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   constructor({
     network = 'testnet',
-    haskoinUrl,
+    haskoinUrl = {
+      testnet: 'https://api.haskoin.com/bchtest',
+      mainnet: 'https://api.haskoin.com/bch',
+    },
     phrase,
-    nodeUrl,
+    nodeUrl = {
+      testnet: 'https://testnet.bch.thorchain.info',
+      mainnet: 'https://mainnet.bch.thorchain.info',
+    },
     nodeAuth = {
       username: 'thorchain',
       password: 'password',
     },
   }: BitcoinCashClientParams) {
     this.network = network
-    this.haskoinUrl = haskoinUrl || this.getDefaultHaskoinURL()
-    this.nodeUrl = nodeUrl || this.getDefaultNodeURL()
+    this.haskoinUrl = haskoinUrl
+    this.nodeUrl = nodeUrl
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
       // by strictly passing nodeAuth as null value
       nodeAuth === null ? undefined : nodeAuth
     phrase && this.setPhrase(phrase)
-  }
-
-  /**
-   * Get default haskoin url based on the network.
-   *
-   * @param {string} url The new node url.
-   * @returns {void}
-   */
-  getDefaultHaskoinURL = (): ClientUrl => {
-    return {
-      testnet: 'https://api.haskoin.com/bchtest',
-      mainnet: 'https://api.haskoin.com/bch',
-    }
   }
 
   /**
@@ -103,29 +96,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @returns {string} The haskoin url based on the current network.
    */
   getHaskoinURL = (): string => {
-    return this.getHaskoinUrlByNetwork(this.getNetwork())
-  }
-
-  /**
-   * Get the haskoin url.
-   *
-   * @returns {string} The haskoin url for ethereum based on the network.
-   */
-  getHaskoinUrlByNetwork = (network: Network): string => {
-    return this.haskoinUrl[network]
-  }
-
-  /**
-   * Get default node url based on the network.
-   *
-   * @param {string} url The new node url.
-   * @returns {void}
-   */
-  getDefaultNodeURL = (): ClientUrl => {
-    return {
-      testnet: 'https://testnet.bch.thorchain.info',
-      mainnet: 'https://mainnet.bch.thorchain.info',
-    }
+    return this.haskoinUrl[this.getNetwork()]
   }
 
   /**
@@ -144,16 +115,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @returns {string} The node url for thorchain based on the current network.
    */
   getNodeURL = (): string => {
-    return this.getNodeUrlByNetwork(this.getNetwork())
-  }
-
-  /**
-   * Get the client url.
-   *
-   * @returns {string} The client url for ethereum based on the network.
-   */
-  getNodeUrlByNetwork = (network: Network): string => {
-    return this.nodeUrl[network]
+    return this.nodeUrl[this.getNetwork()]
   }
 
   /**

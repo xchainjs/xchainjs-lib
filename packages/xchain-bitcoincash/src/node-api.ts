@@ -1,4 +1,5 @@
 import axios from 'axios'
+import uniqid from 'uniqid'
 import { TxBroadcastResponse, TxBroadcastParams } from './types'
 
 /**
@@ -10,7 +11,6 @@ import { TxBroadcastResponse, TxBroadcastParams } from './types'
  */
 export const broadcastTx = async ({ txHex, auth, nodeUrl }: TxBroadcastParams): Promise<string> => {
   try {
-    const uniqueId = new Date().getTime().toString() // for unique id
     const response: TxBroadcastResponse = (
       await axios.post(
         nodeUrl,
@@ -18,7 +18,7 @@ export const broadcastTx = async ({ txHex, auth, nodeUrl }: TxBroadcastParams): 
           jsonrpc: '2.0',
           method: 'sendrawtransaction',
           params: [txHex],
-          id: uniqueId,
+          id: uniqid(),
         },
         {
           auth,
