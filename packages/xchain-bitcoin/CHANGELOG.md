@@ -1,3 +1,9 @@
+# v.0.11.1 (2021-02-26)
+
+### Update
+
+- Export `scanUTXOs` + `buildTx`
+
 # v.0.11.0 (2021-02-24)
 
 ### Breaking change
