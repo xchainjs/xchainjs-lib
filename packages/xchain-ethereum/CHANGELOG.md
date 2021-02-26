@@ -1,3 +1,9 @@
+# v.0.12.1 (2021-02-26)
+
+### Fix
+
+- Fix `getTxFromTokenTransaction` to parse correct tx date
+
 # v.0.12.0 (2021-02-24)
 
 ### Breaking change
