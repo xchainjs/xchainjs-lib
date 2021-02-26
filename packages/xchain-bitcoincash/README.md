@@ -2,7 +2,7 @@
 
 ## Modules
 
-- `client` - Custom client for communicating with Bitcoin Cash by using [bitcore-lib-cash](https://github.com/bitpay/bitcore/tree/master/packages/bitcore-lib-cash)
+- `client` - Custom client for communicating with Bitcoin Cash by using [@psf/bitcoincashjs-lib](https://www.npmjs.com/package/@psf/bitcoincashjs-lib)
 
 ## Installation
 
@@ -13,21 +13,21 @@ yarn add @xchainjs/xchain-bitcoincash
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-bitcoincash`.
 
 ```
-yarn add axios bitcore-lib-cash bitcore-mnemonic
+yarn add axios @psf/bitcoincashjs-lib bchaddrjs
 ```
 
 ## Service Providers
 
 This package uses the following service providers:
 
-| Function                    | Service        | Notes                                                      |
-| --------------------------- | -------------- | ---------------------------------------------------------- |
-| Balances                    | Haskoin        | https://api.haskoin.com/#/Address/getBalance               |
-| Transaction history         | Haskoin        | https://api.haskoin.com/#/Address/getAddressTxsFull        |
-| Transaction details by hash | Haskoin        | https://api.haskoin.com/#/Transaction/getTransaction       |
-| Transaction fees            | Bitgo          | https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate |
-| Transaction broadcast       | Haskoin        | https://api.haskoin.com/#/Transaction/postTransaction      |
-| Explorer                    | Blockchain.com | https://www.blockchain.com                                 |
+| Function                    | Service           | Notes                                                               |
+| --------------------------- | ----------------- | ------------------------------------------------------------------- |
+| Balances                    | Haskoin           | https://api.haskoin.com/#/Address/getBalance                        |
+| Transaction history         | Haskoin           | https://api.haskoin.com/#/Address/getAddressTxsFull                 |
+| Transaction details by hash | Haskoin           | https://api.haskoin.com/#/Transaction/getTransaction                |
+| Transaction fees            | Bitgo             | https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate          |
+| Transaction broadcast       | Bitcoin Cash Node | https://developer.bitcoin.org/reference/rpc/sendrawtransaction.html |
+| Explorer                    | Blockchain.com    | https://www.blockchain.com                                          |
 
 Haskoin API rate limits: No
 
