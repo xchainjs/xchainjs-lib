@@ -1,3 +1,13 @@
+# v.0.6.0 (2021-02-26)
+
+### Breaking change
+
+- Change lib to `@psf/bitcoincashjs-lib`
+
+### Fix
+
+- Fix transaction broadcast causing cors error
+
 # v.0.5.0 (2021-02-24)
 
 ### Breaking change

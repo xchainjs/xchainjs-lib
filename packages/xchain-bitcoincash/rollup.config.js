@@ -34,5 +34,13 @@ export default {
       browser: true,
     }),
   ],
-  external: ['readable-stream', 'bitcore-lib-cash', 'buffer', 'stream', 'string_decoder', '@xchainjs/xchain-client'],
+  external: [
+    'readable-stream',
+    '@psf/bitcoincashjs-lib',
+    'bchaddrjs',
+    'buffer',
+    'stream',
+    'string_decoder',
+    '@xchainjs/xchain-client',
+  ],
 }

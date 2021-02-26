@@ -1,6 +1,5 @@
-const Mnemonic = require('bitcore-mnemonic')
+const bitcash = require('@psf/bitcoincashjs-lib')
 
-import * as bitcash from 'bitcore-lib-cash'
 import * as utils from './utils'
 import {
   Address,
@@ -15,10 +14,13 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { validatePhrase } from '@xchainjs/xchain-crypto'
+import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
+import { KeyPair } from './types/bitcoincashjs-types'
 import { AssetBCH, baseAmount } from '@xchainjs/xchain-util/lib'
-import { getTransaction, getAccount, getTransactions, broadcastTx, getSuggestedFee } from './haskoin-api'
+import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'
+import { NodeAuth } from './types'
+import { broadcastTx } from './node-api'
 
 /**
  * BitcoinCashClient Interface
@@ -31,7 +33,9 @@ interface BitcoinCashClient {
 }
 
 type BitcoinCashClientParams = XChainClientParams & {
-  clientUrl?: ClientUrl
+  haskoinUrl?: ClientUrl
+  nodeUrl?: ClientUrl
+  nodeAuth?: NodeAuth
 }
 
 /**
@@ -40,7 +44,9 @@ type BitcoinCashClientParams = XChainClientParams & {
 class Client implements BitcoinCashClient, XChainClient {
   private network: Network
   private phrase = ''
-  private clientUrl: ClientUrl
+  private haskoinUrl: ClientUrl
+  private nodeUrl: ClientUrl
+  private nodeAuth?: NodeAuth
 
   /**
    * Constructor
@@ -48,23 +54,49 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @param {BitcoinCashClientParams} params
    */
-  constructor({ network = 'testnet', clientUrl, phrase }: BitcoinCashClientParams) {
+  constructor({
+    network = 'testnet',
+    haskoinUrl = {
+      testnet: 'https://api.haskoin.com/bchtest',
+      mainnet: 'https://api.haskoin.com/bch',
+    },
+    phrase,
+    nodeUrl = {
+      testnet: 'https://testnet.bch.thorchain.info',
+      mainnet: 'https://mainnet.bch.thorchain.info',
+    },
+    nodeAuth = {
+      username: 'thorchain',
+      password: 'password',
+    },
+  }: BitcoinCashClientParams) {
     this.network = network
-    this.clientUrl = clientUrl || this.getDefaultClientURL()
+    this.haskoinUrl = haskoinUrl
+    this.nodeUrl = nodeUrl
+    this.nodeAuth =
+      // Leave possibility to send requests without auth info for user
+      // by strictly passing nodeAuth as null value
+      nodeAuth === null ? undefined : nodeAuth
     phrase && this.setPhrase(phrase)
   }
 
   /**
-   * Get default ClientURL based on the network.
+   * Set/Update the haskoin url.
    *
-   * @param {string} url The new node url.
+   * @param {string} url The new haskoin url.
    * @returns {void}
    */
-  getDefaultClientURL = (): ClientUrl => {
-    return {
-      testnet: 'https://api.haskoin.com/bchtest',
-      mainnet: 'https://api.haskoin.com/bch',
-    }
+  setHaskoinURL = (url: ClientUrl): void => {
+    this.haskoinUrl = url
+  }
+
+  /**
+   * Get the haskoin url.
+   *
+   * @returns {string} The haskoin url based on the current network.
+   */
+  getHaskoinURL = (): string => {
+    return this.haskoinUrl[this.getNetwork()]
   }
 
   /**
@@ -73,26 +105,17 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} url The new node url.
    * @returns {void}
    */
-  setClientURL = (url: ClientUrl): void => {
-    this.clientUrl = url
+  setNodeURL = (url: ClientUrl): void => {
+    this.nodeUrl = url
   }
 
   /**
-   * Get the client url.
+   * Get the node url.
    *
-   * @returns {string} The client url for thorchain based on the current network.
+   * @returns {string} The node url for thorchain based on the current network.
    */
-  getClientURL = (): string => {
-    return this.getClientUrlByNetwork(this.getNetwork())
-  }
-
-  /**
-   * Get the client url.
-   *
-   * @returns {string} The client url for ethereum based on the network.
-   */
-  getClientUrlByNetwork = (network: Network): string => {
-    return this.clientUrl[network]
+  getNodeURL = (): string => {
+    return this.nodeUrl[this.getNetwork()]
   }
 
   /**
@@ -200,13 +223,13 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if invalid phrase is provided.
    * */
-  private getPrivateKey = (phrase: string): bitcash.PrivateKey => {
+  private getBCHKeys = (phrase: string): KeyPair => {
     try {
-      const derive_path = this.derivePath()
-      const mnemonic = new Mnemonic(phrase)
-      const hdPrivKey: bitcash.HDPrivateKey = mnemonic.toHDPrivateKey().derive(derive_path)
+      const rootSeed = getSeed(phrase)
+      const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
 
-      return bitcash.PrivateKey.fromObject(hdPrivKey.privateKey)
+      const derive_path = this.derivePath()
+      return masterHDNode.derivePath(derive_path).keyPair
     } catch (error) {
       throw new Error('Invalid phrase')
     }
@@ -226,11 +249,10 @@ class Client implements BitcoinCashClient, XChainClient {
   getAddress = (): Address => {
     if (this.phrase) {
       try {
-        const privKey = this.getPrivateKey(this.phrase)
-        const pubKey = bitcash.PublicKey.fromPrivateKey(privKey)
-        const address = bitcash.Address.fromPublicKey(pubKey, utils.bchNetwork(this.getNetwork()))
+        const keys = this.getBCHKeys(this.phrase)
+        const address = keys.getAddress()
 
-        return address.toString()
+        return utils.toCashAddress(address)
       } catch (error) {
         throw new Error('Address not defined')
       }
@@ -246,7 +268,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @returns {boolean} `true` or `false`
    */
   validateAddress = (address: string): boolean => {
-    return utils.validateAddress(address, this.getNetwork())
+    return utils.validateAddress(address, this.network)
   }
 
   /**
@@ -259,7 +281,7 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
     try {
-      const account = await getAccount({ clientUrl: this.getClientURL(), address: address || this.getAddress() })
+      const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address: address || this.getAddress() })
 
       if (!account) {
         throw new Error('Invalid address')
@@ -291,8 +313,8 @@ class Client implements BitcoinCashClient, XChainClient {
       offset = offset || 0
       limit = limit || 10
 
-      const account = await getAccount({ clientUrl: this.getClientURL(), address })
-      const txs = await getTransactions({ clientUrl: this.getClientURL(), address, params: { offset, limit } })
+      const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address })
+      const txs = await getTransactions({ haskoinUrl: this.getHaskoinURL(), address, params: { offset, limit } })
 
       if (!account || !txs) {
         throw new Error('Invalid address')
@@ -317,7 +339,7 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const tx = await getTransaction({ clientUrl: this.getClientURL(), txId })
+      const tx = await getTransaction({ haskoinUrl: this.getHaskoinURL(), txId })
 
       if (!tx) {
         throw new Error('Invalid TxID')
@@ -407,19 +429,33 @@ class Client implements BitcoinCashClient, XChainClient {
   transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
     try {
       const feeRate = params.feeRate || (await this.getFeeRates()).fast
-      const tx = await utils.buildTx({
+      const { builder, utxos } = await utils.buildTx({
         ...params,
         feeRate,
         sender: this.getAddress(),
-        clientUrl: this.getClientURL(),
+        haskoinUrl: this.getHaskoinURL(),
         network: this.network,
       })
-      const txHex = tx.sign(this.getPrivateKey(this.phrase)).toBuffer().toString('hex')
-      return await broadcastTx({ clientUrl: this.getClientURL(), txHex })
+
+      const keyPair = this.getBCHKeys(this.phrase)
+
+      utxos.forEach((utxo, index) => {
+        builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)
+      })
+
+      const tx = builder.build()
+      const txHex = tx.toHex()
+
+      return await broadcastTx({
+        network: this.network,
+        txHex,
+        nodeUrl: this.getNodeURL(),
+        auth: this.nodeAuth,
+      })
     } catch (e) {
       return Promise.reject(e)
     }
   }
 }
 
-export { Client, Network }
+export { Client }

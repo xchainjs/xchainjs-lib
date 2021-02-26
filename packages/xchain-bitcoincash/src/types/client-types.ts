@@ -1,4 +1,4 @@
-import { FeeOptionKey, Fees } from '@xchainjs/xchain-client'
+import { Address, Balance, FeeOptionKey, Fees } from '@xchainjs/xchain-client'
 
 export type FeeRate = number
 export type FeeRates = Record<FeeOptionKey, FeeRate>
@@ -14,4 +14,24 @@ export type DerivePath = { mainnet: string; testnet: string }
 export type ClientUrl = {
   testnet: string
   mainnet: string
+}
+
+export type Witness = {
+  value: number
+  script: Buffer
+}
+
+export type UTXO = {
+  hash: string
+  index: number
+  witnessUtxo: Witness
+  address: Address
+  txHex: string
+}
+
+export type UTXOs = UTXO[]
+
+export type GetChangeParams = {
+  valueOut: number
+  bchBalance: Balance
 }

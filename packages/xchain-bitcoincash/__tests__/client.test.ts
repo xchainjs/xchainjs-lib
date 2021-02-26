@@ -3,6 +3,7 @@ import {
   mock_broadcastTx,
   mock_estimateFee,
   mock_getBalance,
+  mock_getRawTransactionData,
   mock_getTransactionData,
   mock_getTransactions,
   mock_getUnspents,
@@ -79,7 +80,7 @@ describe('BCHClient Test', () => {
     bchClient.setNetwork('testnet')
     bchClient.setPhrase(phrase)
 
-    mock_getBalance(bchClient.getClientURL(), bchClient.getAddress(), {
+    mock_getBalance(bchClient.getHaskoinURL(), bchClient.getAddress(), {
       received: 124442749359,
       utxo: 1336,
       address: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
@@ -96,7 +97,7 @@ describe('BCHClient Test', () => {
     bchClient.setNetwork('testnet')
     bchClient.setPhrase(phrase)
 
-    mock_getBalance(bchClient.getClientURL(), 'qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', {
+    mock_getBalance(bchClient.getHaskoinURL(), 'qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', {
       received: 123817511737,
       utxo: 1336,
       address: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
@@ -114,7 +115,7 @@ describe('BCHClient Test', () => {
     bchClient.setPhrase(phrase)
 
     mock_getTransactionData(
-      bchClient.getClientURL(),
+      bchClient.getHaskoinURL(),
       '0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b',
       {
         time: 1548767230,
@@ -183,7 +184,7 @@ describe('BCHClient Test', () => {
     bchClient.setNetwork('testnet')
     bchClient.setPhrase(phrase)
 
-    mock_getBalance(bchClient.getClientURL(), 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', {
+    mock_getBalance(bchClient.getHaskoinURL(), 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', {
       received: 124442749359,
       utxo: 1336,
       address: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
@@ -191,7 +192,7 @@ describe('BCHClient Test', () => {
       unconfirmed: 0,
       confirmed: 0,
     })
-    mock_getTransactions(bchClient.getClientURL(), 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', [
+    mock_getTransactions(bchClient.getHaskoinURL(), 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', [
       {
         time: 1548767230,
         size: 245,
@@ -261,33 +262,41 @@ describe('BCHClient Test', () => {
     bchClient.setPhrase(phrase)
 
     mock_getBalance(
-      bchClient.getClientURL(),
+      bchClient.getHaskoinURL(),
       bchClient.getAddress(),
       {
-        received: 124442749359,
-        utxo: 1336,
+        received: 12964626,
+        utxo: 1,
         address: bchClient.getAddress(),
-        txs: 1345,
+        txs: 13,
         unconfirmed: 0,
-        confirmed: 123817511737,
+        confirmed: 992999,
       },
       2,
     )
-    mock_getUnspents(bchClient.getClientURL(), bchClient.getAddress(), [
+    mock_getUnspents(bchClient.getHaskoinURL(), bchClient.getAddress(), [
       {
-        pkscript: '76a914158b5d181552c9f4f267c0de68aae4963043993988ac',
-        value: 78125000,
+        pkscript: '76a9145be96e4fbfd68370cfd30ad2f3458c580f09afb188ac',
+        value: 992999,
         address: bchClient.getAddress(),
         block: {
-          height: 1434425,
-          position: 0,
+          height: 1436370,
+          position: 4,
         },
-        index: 0,
-        txid: '85d3cddc7c910aebb8791f316ab4b1adff522208e901e7ec2578c1c8e4bb95f2',
+        index: 1,
+        txid: '66f090bd35b15a4a8ede2f71184cf4d2cc08483921752b845ba2fdee7b96ca79',
       },
     ])
+    mock_getRawTransactionData(
+      bchClient.getHaskoinURL(),
+      '66f090bd35b15a4a8ede2f71184cf4d2cc08483921752b845ba2fdee7b96ca79',
+      {
+        result:
+          '02000000010913175382c5014e69c174377320717629c736370d29e8d19e31c27609a03053010000006a4730440220748b74d61e2e0bbec73a5a9e7e475b502029606cf7affea499a3246d6011e155022056c4f2979df51e15e1745b614eb2e5ecd2a2353be9211a0beddbbf2a344ce8434121027887b7dbccb26dc0b7e3e4174b986cbb5011ade42654d3a92f7bdba3bd08c8f9ffffffff0264000000000000001976a91497a808f1d39ae863ed78500504780e2ca0c21b7288ace7260f00000000001976a9145be96e4fbfd68370cfd30ad2f3458c580f09afb188ac00000000',
+      },
+    )
     mock_estimateFee()
-    mock_broadcastTx(bchClient.getClientURL(), '82b65a0006697bff406c62ad0b3fd07db9f20ce6fbc468c81679d96aebc36f69')
+    mock_broadcastTx(bchClient.getNodeURL(), '82b65a0006697bff406c62ad0b3fd07db9f20ce6fbc468c81679d96aebc36f69')
 
     const txId = await bchClient.transfer({
       recipient: 'bchtest:qzt6sz836wdwscld0pgq2prcpck2pssmwge9q87pe9',
