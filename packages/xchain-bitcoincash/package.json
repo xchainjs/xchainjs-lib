@@ -34,20 +34,18 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/bitcore-lib-cash": "^8.23.2",
-    "@xchainjs/xchain-client": "^0.6.0",
+    "@psf/bitcoincashjs-lib": "^4.0.2",
+    "@types/bchaddrjs": "0.4.0",
+    "@xchainjs/xchain-client": "^0.5.0",
     "@xchainjs/xchain-crypto": "^0.2.3",
-    "bitcore-mnemonic": "^8.24.2",
     "axios": "^0.21.0",
     "axios-mock-adapter": "^1.19.0",
-    "bitcore-lib-cash": "^8.24.2"
+    "bchaddrjs": "0.5.2"
   },
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.6.0",
     "@xchainjs/xchain-crypto": "^0.2.3",
-    "axios": "^0.21.0",
-    "bitcore-lib-cash": "^8.24.2",
-    "bitcore-mnemonic": "^8.24.2"
+    "axios": "^0.21.0"
   },
   "publishConfig": {
     "access": "public"

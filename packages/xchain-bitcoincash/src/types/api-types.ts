@@ -1,18 +1,25 @@
-import { TxHash } from '@xchainjs/xchain-client/lib'
+import { Network, TxHash } from '@xchainjs/xchain-client/lib'
 
 export type AddressParams = {
-  clientUrl: string
+  haskoinUrl: string
   address: string
 }
 
 export type TxHashParams = {
-  clientUrl: string
+  haskoinUrl: string
   txId: TxHash
 }
 
+export type NodeAuth = {
+  username: string
+  password: string
+}
+
 export type TxBroadcastParams = {
-  clientUrl: string
+  network: Network
   txHex: string
+  nodeUrl: string
+  auth?: NodeAuth
 }
 
 export type ErrorResponse = {
@@ -67,6 +74,10 @@ export type Transaction = {
   deleted: boolean
   rbf: boolean
   txid: string
+}
+
+export type RawTransaction = {
+  result: string
 }
 
 export type TransactionsQueryParam = {
