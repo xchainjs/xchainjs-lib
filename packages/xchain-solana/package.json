@@ -6,7 +6,7 @@
     "XChain",
     "Solana"
   ],
-  "author": "XChainJS",
+  "author": "RSquad",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
   "main": "lib/index.js",

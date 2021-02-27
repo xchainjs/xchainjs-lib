@@ -234,21 +234,8 @@ export default class Client implements XChainClient {
       until?: string
     },
   ): Promise<TxsPage> {
-    // export declare type TxHistoryParams = {
-    //   address: Address
-    //   offset?: number
-    //   limit?: number
-    //   startTime?: Date
-    //   asset?: string
-    // }
     const { address, limit, before, until } = params || {}
     const addr = address || this.getAddress() // ???
-
-    // type TGetConfirmedSignaturesForAddress2Options = {
-    //   limit?: number
-    //   before?: string
-    //   until?: string
-    // }
 
     const options: TGetConfirmedSignaturesForAddress2Options = {}
     if (limit) {
@@ -268,15 +255,12 @@ export default class Client implements XChainClient {
 
       result.total = res.length
       result.txs = res.map((t) => ({
-        // export declare type Tx = {
-        asset: AssetSOL, // Asset;
-        from: [], // TxFrom[];
-        to: [], // TxTo[];
-        date: new Date(t.blockTime * 1000), // Date;
-        type: 'transfer', // TxType;
-        hash: t.signature, // string;
-        // input?: // string;
-        // };
+        asset: AssetSOL,
+        from: [],
+        to: [],
+        date: new Date(t.blockTime * 1000),
+        type: 'transfer',
+        hash: t.signature,
       }))
     } catch (error) {
       throw new Error(error)
@@ -301,25 +285,6 @@ export default class Client implements XChainClient {
       throw new Error('Unsupported asset')
     }
     const res = await this.api.getConfirmedTransaction(txId)
-
-    /*
-    function formatTx(item: SolanaTx) {
-      return {
-        ...item,
-        date: formatDate(+item.blockTime * 1000),
-        value: item.transaction.message.instructions[0].parsed.info.lamports,
-        formattedValue: baseToAsset(baseAmount(item.transaction.message.instructions[0].parsed.info.lamports, SOL_DECIMAL))
-          .amount()
-          .toFixed(SOL_DECIMAL),
-        signature: item.transaction.signatures[0],
-        fromAddress: item.transaction.message.instructions[0].parsed.info.source,
-        toAddress: item.transaction.message.instructions[0].parsed.info.destination,
-        formattedSignature: sliceString(item.transaction.signatures[0]),
-        formattedFromAddress: sliceString(item.transaction.message.instructions[0].parsed.info.source),
-        formattedToAddress: sliceString(item.transaction.message.instructions[0].parsed.info.destination),
-      }
-    }
-    */
 
     const { info } = res.transaction.message.instructions[0].parsed
     const { source, destination, lamports } = info
