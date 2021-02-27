@@ -38,6 +38,7 @@
     "@solana/web3.js": "^0.92.2"
   },
   "devDependencies": {
+    "@types/bs58": "^4.0.1",
     "@xchainjs/xchain-client": "^0.6.0",
     "@xchainjs/xchain-crypto": "^0.2.3",
     "@xchainjs/xchain-util": "^0.2.2",
