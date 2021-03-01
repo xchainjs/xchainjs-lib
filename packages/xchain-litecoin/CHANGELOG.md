@@ -1,3 +1,9 @@
+# v.x.x.x
+
+### Breaking change
+
+- replace `find`, `findIndex`
+  
 # v.0.3.0 (2021-02-25)
 
 ### Breaking change
