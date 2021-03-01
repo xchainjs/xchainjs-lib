@@ -38,6 +38,7 @@ describe('chain', () => {
     })
     it('returns string for SOL', () => {
       expect(chainToString('SOL')).toEqual('Solana')
+    })
     it('returns string for LTC', () => {
       expect(chainToString('LTC')).toEqual('Litecoin')
     })
