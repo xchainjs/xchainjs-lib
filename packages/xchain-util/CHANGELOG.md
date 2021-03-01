@@ -1,4 +1,8 @@
-# v.x.x.x
+# v.0.2.4 (2021-03-01)
+
+### Update
+
+- Update `chainToString` to support Bitcoin cash.
 
 # v.0.2.3 (2021-02-09)
 
