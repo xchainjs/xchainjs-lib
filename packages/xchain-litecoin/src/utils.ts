@@ -121,7 +121,7 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
 const getChange = async ({ valueOut, sochainUrl, network, address }: GetChangeParams): Promise<number> => {
   try {
     const balances = await getBalance({ sochainUrl, network, address })
-    const ltcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetLTC))
+    const [ltcBalance] = balances.filter((balance) => assetToString(balance.asset) === assetToString(AssetLTC))
     let change = 0
 
     if (ltcBalance && ltcBalance.amount.amount().minus(valueOut).isGreaterThan(DUST_THRESHOLD)) {
@@ -198,7 +198,7 @@ export const buildTx = async ({
     }
 
     const balance = await getBalance({ sochainUrl, network, address: sender })
-    const ltcBalance = balance.find((balance) => balance.asset.symbol === AssetLTC.symbol)
+    const [ltcBalance] = balance.filter((balance) => balance.asset.symbol === AssetLTC.symbol)
     if (!ltcBalance) {
       return Promise.reject(new Error('No ltcBalance found'))
     }

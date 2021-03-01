@@ -273,7 +273,7 @@ export const buildTx = async ({
     }
 
     const balance = await getBalance({ haskoinUrl, address: sender })
-    const bchBalance = balance.find((balance) => balance.asset.symbol === AssetBCH.symbol)
+    const [bchBalance] = balance.filter((balance) => balance.asset.symbol === AssetBCH.symbol)
     if (!bchBalance) {
       return Promise.reject(new Error('No bchBalance found'))
     }

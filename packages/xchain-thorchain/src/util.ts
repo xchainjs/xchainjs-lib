@@ -126,7 +126,12 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
           .map((coin) => baseAmount(coin.amount, DECIMAL))
           .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
 
-        const from_index = from.findIndex((value) => value.from === msgSend.from_address.toBech32())
+        let from_index = -1
+
+        from.forEach((value, index) => {
+          if (value.from === msgSend.from_address.toBech32()) from_index = index
+        })
+
         if (from_index === -1) {
           from.push({
             from: msgSend.from_address.toBech32(),
@@ -136,7 +141,12 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
           from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
         }
 
-        const to_index = to.findIndex((value) => value.to === msgSend.to_address.toBech32())
+        let to_index = -1
+
+        to.forEach((value, index) => {
+          if (value.to === msgSend.to_address.toBech32()) to_index = index
+        })
+
         if (to_index === -1) {
           to.push({
             to: msgSend.to_address.toBech32(),
@@ -152,7 +162,13 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
           const amount = input.coins
             .map((coin) => baseAmount(coin.amount, DECIMAL))
             .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
-          const from_index = from.findIndex((value) => value.from === input.address)
+
+          let from_index = -1
+
+          from.forEach((value, index) => {
+            if (value.from === input.address) from_index = index
+          })
+
           if (from_index === -1) {
             from.push({
               from: input.address,
@@ -167,7 +183,13 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
           const amount = output.coins
             .map((coin) => baseAmount(coin.amount, DECIMAL))
             .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
-          const to_index = to.findIndex((value) => value.to === output.address)
+
+          let to_index = -1
+
+          to.forEach((value, index) => {
+            if (value.to === output.address) to_index = index
+          })
+
           if (to_index === -1) {
             to.push({
               to: output.address,

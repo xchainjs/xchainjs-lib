@@ -122,7 +122,7 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
 const getChange = async ({ valueOut, sochainUrl, network, address }: GetChangeParams): Promise<number> => {
   try {
     const balances = await getBalance({ sochainUrl, network, address })
-    const btcBalance = balances.find((balance) => assetToString(balance.asset) === assetToString(AssetBTC))
+    const [btcBalance] = balances.filter((balance) => assetToString(balance.asset) === assetToString(AssetBTC))
     let change = 0
 
     if (btcBalance && btcBalance.amount.amount().minus(valueOut).isGreaterThan(DUST_THRESHOLD)) {
@@ -201,7 +201,7 @@ export const buildTx = async ({
     }
 
     const balance = await getBalance({ sochainUrl, network, address: sender })
-    const btcBalance = balance.find((balance) => balance.asset.symbol === AssetBTC.symbol)
+    const [btcBalance] = balance.filter((balance) => balance.asset.symbol === AssetBTC.symbol)
     if (!btcBalance) {
       return Promise.reject(new Error('No btcBalance found'))
     }

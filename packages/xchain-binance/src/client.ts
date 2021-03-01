@@ -376,7 +376,7 @@ class Client implements BinanceClient, XChainClient {
       }
 
       const txHistory = await this.searchTransactions({ address, blockHeight })
-      const transaction = txHistory.txs.find((tx) => (tx.hash = txId))
+      const [transaction] = txHistory.txs.filter((tx) => tx.hash === txId)
 
       if (!transaction) {
         throw new Error('transaction not found')
@@ -457,7 +457,7 @@ class Client implements BinanceClient, XChainClient {
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
         .then((response) => response.data)
 
-      const transferFee = feesArray.find(isTransferFee)
+      const [transferFee] = feesArray.filter(isTransferFee)
       if (!transferFee) {
         throw new Error('failed to get transfer fees')
       }
