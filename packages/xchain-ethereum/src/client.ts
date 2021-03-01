@@ -432,7 +432,7 @@ export default class Client implements XChainClient, EthereumClient {
                 endblock: txInfo.blockNumber,
                 apiKey: this.etherscan.apiKey,
               })
-            ).find((info) => info.hash === txId) ?? null
+            ).filter((info) => info.hash === txId)[0] ?? null
         } else {
           tx =
             (
@@ -443,7 +443,7 @@ export default class Client implements XChainClient, EthereumClient {
                 apiKey: this.etherscan.apiKey,
                 address: txInfo.from,
               })
-            ).find((info) => info.hash === txId) ?? null
+            ).filter((info) => info.hash === txId)[0] ?? null
         }
       }
 
