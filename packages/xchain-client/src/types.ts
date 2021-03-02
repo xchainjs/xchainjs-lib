@@ -96,7 +96,7 @@ export interface XChainClient {
 
   getTransactions(params?: TxHistoryParams): Promise<TxsPage>
 
-  getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
+  getTransactionData(txId: string, assetAddress?: Address): Promise<Tx>
 
   getFees(params?: FeesParams): Promise<Fees>
 
