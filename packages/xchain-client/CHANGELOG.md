@@ -1,3 +1,9 @@
+# v.0.7.0 (2021-03-02)
+
+### Breaking change
+
+- Add optional parameter for `getTransactionData`
+
 # v.0.6.0 (2021-02-24)
 
 ### Breaking change

@@ -416,7 +416,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Need to provide valid txId"}
    * Thrown if the given txId is invalid.
    */
-  getTransactionData = async (txId: string, assetAddress?: string): Promise<Tx> => {
+  getTransactionData = async (txId: string, assetAddress?: Address): Promise<Tx> => {
     try {
       let tx
       const txInfo = await this.etherscan.getTransaction(txId)
