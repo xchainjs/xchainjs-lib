@@ -1,3 +1,9 @@
+# v.0.7.0 (2021-03-02)
+
+### Breaking change
+
+- Update @xchainjs/xchain-client package to 0.7.0
+
 # v.0.6.0 (2021-02-24)
 
 ### Breaking change

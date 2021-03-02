@@ -1,8 +1,9 @@
-# v.x.x.x
+# v.4.7.0 (2021-03-02)
 
 ### Breaking change
 
 - replace `find`, `findIndex`
+- Update @xchainjs/xchain-client package to 0.7.0
 
 # v.4.6.0 (2021-02-24)
 
