@@ -571,7 +571,7 @@ export default class Client implements XChainClient, EthereumClient {
         const gasPrice = await this.estimateGasPrices()
           .then((prices) => prices[feeOptionKey])
           .catch(() => getDefaultGasPrices()[feeOptionKey])
-        const gasLimit = await this.estimateGasLimit({ asset, recipient, amount, gasPrice }).catch(
+        const gasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo, gasPrice }).catch(
           () => defaultGasLimit,
         )
 

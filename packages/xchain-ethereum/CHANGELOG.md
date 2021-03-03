@@ -1,3 +1,9 @@
+# v.0.13.1 (2021-03-03)
+
+### Fix
+
+- Fix `transfer` to consider memo
+
 # v.0.13.0 (2021-03-02)
 
 ### Breaking change
