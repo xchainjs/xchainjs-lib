@@ -33,7 +33,7 @@ import {
   FeeOptionKey,
   FeesParams as XFeesParams,
 } from '@xchainjs/xchain-client'
-import { AssetETH, baseAmount, BaseAmount, assetToString, Asset } from '@xchainjs/xchain-util'
+import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as etherscanAPI from './etherscan-api'
 import {
@@ -325,36 +325,43 @@ export default class Client implements XChainClient, EthereumClient {
       // Follow approach is only for testnet
       // For mainnet, we will use ethplorer api(one request only)
       // https://github.com/xchainjs/xchainjs-lib/issues/252
-      return Promise.all(
-        newAssets.map(async (asset) => {
-          if (assetToString(asset) !== assetToString(AssetETH)) {
-            // Handle token balances
-            const assetAddress = getTokenAddress(asset)
-            if (!assetAddress) {
-              throw new Error('Invalid asset')
-            }
-
-            const balance = await etherscanAPI.getTokenBalance({
-              baseUrl: this.etherscan.baseUrl,
-              address: ethAddress,
-              assetAddress,
-              apiKey: this.etherscan.apiKey,
-            })
-            const decimals = await this.call<BigNumberish>(assetAddress, erc20ABI, 'decimals', [])
-            return {
-              asset,
-              amount: baseAmount(balance.toString(), BigNumber.from(decimals).toNumber() || ETH_DECIMAL),
-            }
-          } else {
-            // Handle ETH balances
-            const balance = await this.etherscan.getBalance(ethAddress)
-            return {
-              asset: AssetETH,
-              amount: baseAmount(balance.toString(), ETH_DECIMAL),
-            }
+      // And to avoid etherscan api call limit, it gets balances in a sequence way, not in parallel
+      const balances = []
+      for (let i = 0; i < newAssets.length; i++) {
+        const asset = newAssets[i]
+        if (assetToString(asset) !== assetToString(AssetETH)) {
+          // Handle token balances
+          const assetAddress = getTokenAddress(asset)
+          if (!assetAddress) {
+            throw new Error(`Invalid asset ${asset}`)
           }
-        }),
-      )
+
+          const balance = await etherscanAPI.getTokenBalance({
+            baseUrl: this.etherscan.baseUrl,
+            address: ethAddress,
+            assetAddress,
+            apiKey: this.etherscan.apiKey,
+          })
+          const decimals = await this.call<BigNumberish>(assetAddress, erc20ABI, 'decimals', [])
+          balances.push({
+            asset,
+            amount: baseAmount(balance.toString(), BigNumber.from(decimals).toNumber() || ETH_DECIMAL),
+          })
+        } else {
+          // Handle ETH balances
+          const balance = await this.etherscan.getBalance(ethAddress)
+          balances.push({
+            asset: AssetETH,
+            amount: baseAmount(balance.toString(), ETH_DECIMAL),
+          })
+        }
+        // Due to etherscan api call limitation, put some delay before another call
+        // Free Etherscan api key limit: 5 calls per second
+        // So 0.3s delay is reasonable for now
+        await delay(300)
+      }
+
+      return balances
     } catch (error) {
       if (error.toString().includes('Invalid API Key')) {
         return Promise.reject(new Error('Invalid API Key'))
