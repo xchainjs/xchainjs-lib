@@ -1,3 +1,9 @@
+# v.0.13.2 (2021-03-03)
+
+### Update
+
+- update `getBalance` to get balances in a sequence way, not in parallel
+
 # v.0.13.1 (2021-03-03)
 
 ### Fix
