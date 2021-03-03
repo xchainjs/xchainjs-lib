@@ -325,6 +325,7 @@ export default class Client implements XChainClient, EthereumClient {
       // Follow approach is only for testnet
       // For mainnet, we will use ethplorer api(one request only)
       // https://github.com/xchainjs/xchainjs-lib/issues/252
+      // And to avoid etherscan api call limit, it gets balances in a sequence way, not in parallel
       const balances = []
       for (let i = 0; i < newAssets.length; i++) {
         const asset = newAssets[i]
@@ -354,6 +355,9 @@ export default class Client implements XChainClient, EthereumClient {
             amount: baseAmount(balance.toString(), ETH_DECIMAL),
           })
         }
+        // Due to etherscan api call limitation, put some delay before another call
+        // Free Etherscan api key limit: 5 calls per second
+        // So 0.3s delay is reasonable for now
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve(0)
