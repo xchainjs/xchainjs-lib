@@ -33,7 +33,7 @@ import {
   FeeOptionKey,
   FeesParams as XFeesParams,
 } from '@xchainjs/xchain-client'
-import { AssetETH, baseAmount, BaseAmount, assetToString, Asset } from '@xchainjs/xchain-util'
+import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as etherscanAPI from './etherscan-api'
 import {
@@ -333,7 +333,7 @@ export default class Client implements XChainClient, EthereumClient {
           // Handle token balances
           const assetAddress = getTokenAddress(asset)
           if (!assetAddress) {
-            throw new Error('Invalid asset')
+            throw new Error(`Invalid asset ${asset}`)
           }
 
           const balance = await etherscanAPI.getTokenBalance({
@@ -358,11 +358,7 @@ export default class Client implements XChainClient, EthereumClient {
         // Due to etherscan api call limitation, put some delay before another call
         // Free Etherscan api key limit: 5 calls per second
         // So 0.3s delay is reasonable for now
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(0)
-          }, 300)
-        })
+        await delay(300)
       }
 
       return balances

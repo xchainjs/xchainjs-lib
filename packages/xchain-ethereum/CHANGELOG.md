@@ -2,7 +2,7 @@
 
 ### Update
 
-- update `getBalance` to get balances in a sequence way, not in parallel
+- update `getBalance` to get balances in a sequence way, not in parallel(for testnet only)
 
 # v.0.13.1 (2021-03-03)
 
