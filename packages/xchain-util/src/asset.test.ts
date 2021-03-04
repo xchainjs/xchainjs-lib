@@ -289,33 +289,33 @@ describe('asset', () => {
     })
     it('formats amount of BNB', () => {
       const amount = assetAmount(10, 8)
-      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, decimal: 2 })).toEqual('10.00 (BNB)')
+      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, decimal: 2 })).toEqual('10.00 BNB')
     })
     it('formats amount by given decimal', () => {
       const amount = assetAmount(10, 8)
-      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, decimal: 4 })).toEqual('10.0000 (BNB)')
+      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, decimal: 4 })).toEqual('10.0000 BNB')
     })
     it('formats amount by given decimal, but it trims zeros', () => {
       const amount = assetAmount(10, 8)
-      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, decimal: 4, trimZeros: true })).toEqual('10 (BNB)')
+      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, decimal: 4, trimZeros: true })).toEqual('10 BNB')
     })
     it('formats amount by using decimal of asset (if decimal is not given)', () => {
       const amount = assetAmount(10, 8)
-      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB })).toEqual('10.00000000 (BNB)')
+      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB })).toEqual('10.00000000 BNB')
     })
     it('formats amount by using decimal of asset, but it trims zeros', () => {
       const amount = assetAmount(10.01, 8)
-      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, trimZeros: true })).toEqual('10.01 (BNB)')
+      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, trimZeros: true })).toEqual('10.01 BNB')
     })
 
     it('formats amount by using 0 decimal of asset', () => {
       const amount = assetAmount(10.01, 5)
-      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, decimal: 0 })).toEqual('10 (BNB)')
+      expect(formatAssetAmountCurrency({ amount, asset: AssetBNB, decimal: 0 })).toEqual('10 BNB')
     })
 
     it('formats an amount with 5 decimal for formatAssetAmountCurrency', () => {
       const amount = assetAmount(10.001, 0)
-      expect(formatAssetAmountCurrency({ amount, decimal: 5, asset: AssetBNB })).toEqual('10.00000 (BNB)')
+      expect(formatAssetAmountCurrency({ amount, decimal: 5, asset: AssetBNB })).toEqual('10.00000 BNB')
     })
   })
 
