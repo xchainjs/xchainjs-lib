@@ -486,6 +486,32 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
+   * Call a contract function.
+   * @template T The result interface.
+   * @param {Address} address The contract address.
+   * @param {ContractInterface} abi The contract ABI json.
+   * @param {string} func The function to be called.
+   * @param {Array<any>} params The parameters of the function.
+   * @returns {T} The result of the contract function call.
+   *
+   * @throws {"address must be provided"}
+   * Thrown if the given contract address is empty.
+   */
+  estimateCall = async (
+    address: Address,
+    abi: ethers.ContractInterface,
+    func: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params: Array<any>,
+  ): Promise<BigNumber> => {
+    if (!address) {
+      return Promise.reject(new Error('address must be provided'))
+    }
+    const contract = new ethers.Contract(address, abi, this.provider).connect(this.getWallet())
+    return contract.estimateGas[func](...params)
+  }
+
+  /**
    * Check allowance.
    *
    * @param {Address} spender The spender address.
