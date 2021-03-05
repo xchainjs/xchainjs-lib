@@ -75,10 +75,14 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
       return Promise.reject(new Error('No bchBalance found'))
     }
 
+    const confirmed = baseAmount(account.confirmed, BCH_DECIMAL)
+    const unconfirmed = baseAmount(account.unconfirmed, BCH_DECIMAL)
+
+    account.confirmed
     return [
       {
         asset: AssetBCH,
-        amount: baseAmount(account.confirmed, BCH_DECIMAL),
+        amount: baseAmount(confirmed.amount().plus(unconfirmed.amount()), BCH_DECIMAL),
       },
     ]
   } catch (error) {
