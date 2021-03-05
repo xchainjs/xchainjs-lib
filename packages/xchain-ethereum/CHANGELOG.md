@@ -4,9 +4,9 @@
 
 - Add `estimateCall` to estimate gaslimit for `call` function.
 
-### Fix
+### Breaking change
 
-- Fix gas limit estimation logic.
+- types of estimateGasLimit() + FeesWithGasPricesAndLimits have been changed
 
 # v.0.13.2 (2021-03-03)
 
