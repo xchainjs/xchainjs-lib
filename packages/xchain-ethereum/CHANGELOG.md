@@ -1,3 +1,13 @@
+# v.x.x.x
+
+### Update
+
+- Add `estimateCall` to estimate gaslimit for `call` function.
+
+### Fix
+
+- Fix gas limit estimation logic.
+
 # v.0.13.2 (2021-03-03)
 
 ### Update

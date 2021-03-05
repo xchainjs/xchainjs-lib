@@ -1,5 +1,6 @@
 import nock from 'nock'
-import { Wallet, providers } from 'ethers'
+import { Wallet, providers, BigNumber } from 'ethers'
+import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { baseAmount, AssetETH, assetToString, assetFromString, ETHChain } from '@xchainjs/xchain-util'
 import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
@@ -11,6 +12,7 @@ import {
   mock_etherscan_token_txs_api,
   mock_gastracker_api,
 } from '../__mocks__/etherscan-api'
+import erc20ABI from '../src/data/erc20.json'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
@@ -374,8 +376,6 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
       ropstenInfuraUrl,
@@ -397,7 +397,7 @@ describe('Client Test', () => {
     const txResult = await ethClient.transfer({
       recipient: '0x8ced5ad0d8da4ec211c17355ed3dbfec4cf0e5b9',
       amount: baseAmount(1000001, ETH_DECIMAL),
-      gasLimit: gasFee.gasLimits.fastest,
+      gasLimit: gasFee.gasLimit,
       gasPrice: gasFee.gasPrices.fastest,
     })
     expect(txResult).toEqual('0x48f098a17fe33032668b3780090752473a9e2d9a432699962e40ffed736803d0')
@@ -412,8 +412,6 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(
       etherscanUrl,
@@ -445,7 +443,7 @@ describe('Client Test', () => {
       recipient: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       amount: baseAmount('10000000000000', ETH_DECIMAL),
       asset: assetFromString(`${ETHChain}.DAI-0xc7ad46e0b8a400bb3c915120d284aafba8fc4735`) || undefined,
-      gasLimit: gasFee.gasLimits.fastest,
+      gasLimit: gasFee.gasLimit,
       gasPrice: gasFee.gasPrices.fastest,
     })
     expect(txHash).toEqual('0xea328780f0558b0bbf34baa142703957122678f5a5b9a0696102cff41a5d2682')
@@ -457,8 +455,6 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
@@ -490,8 +486,6 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
@@ -574,5 +568,78 @@ describe('Client Test', () => {
       baseAmount(100, ETH_DECIMAL),
     )
     expect(tx.hash).toEqual('0x2bf12770e674a9c1918a16f0bb9d85b1041ac2a7b8fca4066b5707252acdc05e')
+  })
+
+  it('estimate call', async () => {
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+    })
+
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+
+    const gasLimit = await ethClient.estimateCall('0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7', erc20ABI, 'transfer', [
+      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
+      {
+        from: ethClient.getAddress(),
+      },
+    ])
+
+    expect(gasLimit.toString()).toEqual('21000')
+  })
+
+  it('call', async () => {
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+    })
+
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(
+      etherscanUrl,
+      ropstenInfuraUrl,
+      ropstenAlchemyUrl,
+      'eth_call',
+      '0x0000000000000000000000000000000000000000000000000000000000000064',
+    )
+    mock_all_api(
+      etherscanUrl,
+      ropstenInfuraUrl,
+      ropstenAlchemyUrl,
+      'eth_sendRawTransaction',
+      '0xbc5f55b97b816d1c30138d26bce5434ff28828b15ee79aa79aebf70f786a3fe8',
+    )
+    mock_gastracker_api(etherscanUrl, 'gasoracle', {
+      LastBlock: '11745402',
+      SafeGasPrice: '51',
+      ProposeGasPrice: '59',
+      FastGasPrice: '76',
+    })
+
+    const prices = await ethClient.estimateGasPrices()
+
+    const txResult = await ethClient.call<TransactionResponse>(
+      '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
+      erc20ABI,
+      'transfer',
+      [
+        '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+        BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
+        // Here the tx overrides
+        {
+          from: ethClient.getAddress(),
+          gasPrice: BigNumber.from(prices.average.amount().toString()),
+        },
+      ],
+    )
+
+    expect(txResult.hash).toEqual('0xbc5f55b97b816d1c30138d26bce5434ff28828b15ee79aa79aebf70f786a3fe8')
   })
 })
