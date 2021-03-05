@@ -17,7 +17,6 @@ import {
 import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
 import { KeyPair } from './types/bitcoincashjs-types'
-import { AssetBCH, baseAmount } from '@xchainjs/xchain-util/lib'
 import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'
 import { NodeAuth } from './types'
 import { broadcastTx } from './node-api'
@@ -280,22 +279,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
   getBalance = async (address?: string): Promise<Balance[]> => {
-    try {
-      const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address: address || this.getAddress() })
-
-      if (!account) {
-        throw new Error('Invalid address')
-      }
-
-      return [
-        {
-          asset: AssetBCH,
-          amount: baseAmount(account.confirmed, utils.BCH_DECIMAL),
-        },
-      ]
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address: address || this.getAddress() })
   }
 
   /**
