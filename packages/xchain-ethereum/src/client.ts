@@ -522,7 +522,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   isApproved = async (spender: Address, sender: Address, amount: BaseAmount): Promise<boolean> => {
     try {
-      const txAmount = BigNumber.from(amount.amount().toString())
+      const txAmount = BigNumber.from(amount.amount().toFixed())
       const allowance = await this.call<BigNumberish>(sender, erc20ABI, 'allowance', [this.getAddress(), spender])
       return txAmount.lte(allowance)
     } catch (error) {
@@ -540,7 +540,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   approve = async (spender: Address, sender: Address, amount?: BaseAmount): Promise<TransactionResponse> => {
     try {
-      const txAmount = amount ? BigNumber.from(amount.amount().toString()) : MAX_APPROVAL
+      const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
       const txResult = await this.call<TransactionResponse>(sender, erc20ABI, 'approve', [
         spender,
         txAmount,
@@ -582,7 +582,7 @@ export default class Client implements XChainClient, EthereumClient {
     gasLimit?: BigNumber
   }): Promise<TxHash> => {
     try {
-      const txAmount = BigNumber.from(amount.amount().toString())
+      const txAmount = BigNumber.from(amount.amount().toFixed())
 
       let assetAddress
       if (asset && assetToString(asset) !== assetToString(AssetETH)) {
@@ -597,7 +597,7 @@ export default class Client implements XChainClient, EthereumClient {
 
       let overrides: TxOverrides = {
         gasLimit: gasLimit || defaultGasLimit,
-        gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toString()),
+        gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toFixed()),
       }
 
       // override `overrides` if `feeOptionKey` is provided
@@ -609,7 +609,7 @@ export default class Client implements XChainClient, EthereumClient {
 
         overrides = {
           gasLimit,
-          gasPrice: BigNumber.from(gasPrice.amount().toString()),
+          gasPrice: BigNumber.from(gasPrice.amount().toFixed()),
         }
       }
 
@@ -677,7 +677,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   estimateGasLimit = async ({ asset, recipient, amount, memo }: FeesParams): Promise<BigNumber> => {
     try {
-      const txAmount = BigNumber.from(amount.amount().toString())
+      const txAmount = BigNumber.from(amount.amount().toFixed())
 
       let assetAddress
       if (asset && assetToString(asset) !== assetToString(AssetETH)) {
