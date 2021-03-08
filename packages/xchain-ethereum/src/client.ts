@@ -10,10 +10,7 @@ import {
   ExplorerUrl,
   TxOverrides,
   GasPrices,
-  GasLimits,
   FeesParams,
-  GasLimitParams,
-  GasLimitsParams,
   FeesWithGasPricesAndLimits,
   InfuraCreds,
 } from './types'
@@ -56,9 +53,14 @@ import {
 export interface EthereumClient {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   call<T>(asset: Address, abi: ethers.ContractInterface, func: string, params: Array<any>): Promise<T>
-
-  estimateGasLimit(params: GasLimitParams): Promise<BigNumber>
-  estimateGasLimits(params: GasLimitsParams): Promise<GasLimits>
+  estimateCall(
+    asset: Address,
+    abi: ethers.ContractInterface,
+    func: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params: Array<any>,
+  ): Promise<BigNumber>
+  estimateGasLimit(params: FeesParams): Promise<BigNumber>
   estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits>
 
   isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
@@ -486,6 +488,31 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
+   * Call a contract function.
+   * @param {Address} address The contract address.
+   * @param {ContractInterface} abi The contract ABI json.
+   * @param {string} func The function to be called.
+   * @param {Array<any>} params The parameters of the function.
+   * @returns {BigNumber} The result of the contract function call.
+   *
+   * @throws {"address must be provided"}
+   * Thrown if the given contract address is empty.
+   */
+  estimateCall = async (
+    address: Address,
+    abi: ethers.ContractInterface,
+    func: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params: Array<any>,
+  ): Promise<BigNumber> => {
+    if (!address) {
+      return Promise.reject(new Error('address must be provided'))
+    }
+    const contract = new ethers.Contract(address, abi, this.provider).connect(this.getWallet())
+    return contract.estimateGas[func](...params)
+  }
+
+  /**
    * Check allowance.
    *
    * @param {Address} spender The spender address.
@@ -578,9 +605,7 @@ export default class Client implements XChainClient, EthereumClient {
         const gasPrice = await this.estimateGasPrices()
           .then((prices) => prices[feeOptionKey])
           .catch(() => getDefaultGasPrices()[feeOptionKey])
-        const gasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo, gasPrice }).catch(
-          () => defaultGasLimit,
-        )
+        const gasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo }).catch(() => defaultGasLimit)
 
         overrides = {
           gasLimit,
@@ -645,16 +670,14 @@ export default class Client implements XChainClient, EthereumClient {
   /**
    * Estimate gas.
    *
-   * @param {EstimateGasOpts} params The transaction options.
+   * @param {FeesParams} params The transaction options.
    * @returns {BaseAmount} The estimated gas fee.
    *
    * @throws {"Failed to estimate gas limit"} Thrown if failed to estimate gas limit.
    */
-  estimateGasLimit = async ({ asset, recipient, amount, memo, gasPrice }: GasLimitParams): Promise<BigNumber> => {
+  estimateGasLimit = async ({ asset, recipient, amount, memo }: FeesParams): Promise<BigNumber> => {
     try {
       const txAmount = BigNumber.from(amount.amount().toString())
-      // Gas price `Wei` as BigNumber
-      const gasPriceBN = BigNumber.from(gasPrice.amount().toString())
 
       let assetAddress
       if (asset && assetToString(asset) !== assetToString(AssetETH)) {
@@ -669,7 +692,6 @@ export default class Client implements XChainClient, EthereumClient {
 
         estimate = await contract.estimateGas.transfer(recipient, txAmount, {
           from: this.getAddress(),
-          gasPrice: gasPriceBN,
         })
       } else {
         // ETH gas estimate
@@ -677,7 +699,6 @@ export default class Client implements XChainClient, EthereumClient {
           from: this.getAddress(),
           to: recipient,
           value: txAmount,
-          gasPrice: gasPriceBN,
           data: memo ? toUtf8Bytes(memo) : undefined,
         }
 
@@ -688,26 +709,6 @@ export default class Client implements XChainClient, EthereumClient {
     } catch (error) {
       return Promise.reject(new Error(`Failed to estimate gas limit: ${error.msg ?? error.toString()}`))
     }
-  }
-
-  /**
-   * Estimate gas limits (average, fast fastest).
-   *
-   * @param {GasLimitsParams} params
-   * @returns {GasLimits} The estimated gas limits.
-   */
-  estimateGasLimits = async (params: GasLimitsParams): Promise<GasLimits> => {
-    const { gasPrices, ...otherParams } = params
-    const { fast, fastest, average } = gasPrices
-    return Promise.all([
-      this.estimateGasLimit({ ...otherParams, gasPrice: fast }),
-      this.estimateGasLimit({ ...otherParams, gasPrice: fastest }),
-      this.estimateGasLimit({ ...otherParams, gasPrice: average }),
-    ]).then(([fast, fastest, average]) => ({
-      average,
-      fast,
-      fastest,
-    }))
   }
 
   /**
@@ -725,25 +726,22 @@ export default class Client implements XChainClient, EthereumClient {
       const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
 
       // gas limits
-      const gasLimits = await this.estimateGasLimits({
+      const gasLimit = await this.estimateGasLimit({
         asset: params.asset,
         amount: params.amount,
         recipient: params.recipient,
         memo: params.memo,
-        gasPrices,
       })
-
-      const { fast: fastGL, fastest: fastestGL, average: averageGL } = gasLimits
 
       return {
         gasPrices,
-        gasLimits,
         fees: {
           type: 'byte',
-          average: getFee({ gasPrice: averageGP, gasLimit: averageGL }),
-          fast: getFee({ gasPrice: fastGP, gasLimit: fastGL }),
-          fastest: getFee({ gasPrice: fastestGP, gasLimit: fastestGL }),
+          average: getFee({ gasPrice: averageGP, gasLimit }),
+          fast: getFee({ gasPrice: fastGP, gasLimit }),
+          fastest: getFee({ gasPrice: fastestGP, gasLimit }),
         },
+        gasLimit,
       }
     } catch (error) {
       return Promise.reject(

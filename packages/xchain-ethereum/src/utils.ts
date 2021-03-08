@@ -194,30 +194,21 @@ export const estimateDefaultFeesWithGasPricesAndLimits = (asset?: Asset): FeesWi
     assetAddress = getTokenAddress(asset)
   }
 
-  let gasLimits
+  let gasLimit
   if (assetAddress && assetAddress !== ETHAddress) {
-    gasLimits = {
-      average: BigNumber.from(BASE_TOKEN_GAS_COST),
-      fast: BigNumber.from(BASE_TOKEN_GAS_COST),
-      fastest: BigNumber.from(BASE_TOKEN_GAS_COST),
-    }
+    gasLimit = BigNumber.from(BASE_TOKEN_GAS_COST)
   } else {
-    gasLimits = {
-      average: BigNumber.from(SIMPLE_GAS_COST),
-      fast: BigNumber.from(SIMPLE_GAS_COST),
-      fastest: BigNumber.from(SIMPLE_GAS_COST),
-    }
+    gasLimit = BigNumber.from(SIMPLE_GAS_COST)
   }
-  const { fast: fastGL, fastest: fastestGL, average: averageGL } = gasLimits
 
   return {
     gasPrices,
-    gasLimits,
+    gasLimit,
     fees: {
       type: 'byte',
-      average: getFee({ gasPrice: averageGP, gasLimit: averageGL }),
-      fast: getFee({ gasPrice: fastGP, gasLimit: fastGL }),
-      fastest: getFee({ gasPrice: fastestGP, gasLimit: fastestGL }),
+      average: getFee({ gasPrice: averageGP, gasLimit }),
+      fast: getFee({ gasPrice: fastGP, gasLimit }),
+      fastest: getFee({ gasPrice: fastestGP, gasLimit }),
     },
   }
 }
