@@ -1,3 +1,9 @@
+# v.0.13.3 (2021-03-09)
+
+### Update
+
+- update `getTokenAddress` to handle the address which starts with 0X as well
+
 # v.0.13.2 (2021-03-03)
 
 ### Update

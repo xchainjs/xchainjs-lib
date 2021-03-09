@@ -93,7 +93,8 @@ export const validateAddress = (address: Address): boolean => {
 export const getTokenAddress = (asset: Asset | null): string | null => {
   if (asset) {
     const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
-    if (validateAddress(assetAddress)) {
+    // toLowerCase is needed to handle the asset address which starts with 0X as well
+    if (validateAddress(assetAddress.toLowerCase())) {
       return assetAddress
     }
   }
