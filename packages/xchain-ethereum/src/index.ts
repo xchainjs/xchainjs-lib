@@ -5,6 +5,7 @@ export {
   getDefaultFees,
   getTokenAddress,
   getPrefix,
+  getFee,
   validateAddress,
   ETHAddress,
   ETH_DECIMAL,

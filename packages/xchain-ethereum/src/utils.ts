@@ -92,7 +92,7 @@ export const validateAddress = (address: Address): boolean => {
  */
 export const getTokenAddress = (asset: Asset | null): string | null => {
   if (asset) {
-    const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
+    const assetAddress = asset.symbol.slice(asset.ticker.length + 1).toLowerCase()
     if (validateAddress(assetAddress)) {
       return assetAddress
     }

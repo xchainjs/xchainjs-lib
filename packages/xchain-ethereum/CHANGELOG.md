@@ -1,5 +1,13 @@
 # v.x.x.x
 
+# v.0.14.2 (2021-03-09)
+
+### Fix
+
+- export Client.`estimateGasPrices`, Util.`getFee`
+- fix Util.`getTokenAddress`
+- save `etherscanApiKey` in Client
+
 # v.0.14.1 (2021-03-08)
 
 ### Fix

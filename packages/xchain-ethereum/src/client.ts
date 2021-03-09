@@ -60,6 +60,7 @@ export interface EthereumClient {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     params: Array<any>,
   ): Promise<BigNumber>
+  estimateGasPrices(): Promise<GasPrices>
   estimateGasLimit(params: FeesParams): Promise<BigNumber>
   estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits>
 
@@ -82,6 +83,7 @@ export default class Client implements XChainClient, EthereumClient {
   private wallet: ethers.Wallet | null = null
   private provider: Provider
   private etherscan: EtherscanProvider
+  private etherscanApiKey?: string
   private explorerUrl: ExplorerUrl
   private infuraCreds: InfuraCreds | null = null
 
@@ -92,6 +94,7 @@ export default class Client implements XChainClient, EthereumClient {
   constructor({ network = 'testnet', explorerUrl, phrase, etherscanApiKey, infuraCreds }: ClientParams) {
     this.network = xchainNetworkToEths(network)
 
+    this.etherscanApiKey = etherscanApiKey
     if (infuraCreds) {
       // Infura provider takes either a string of project id
       // or an object of id and secret
@@ -279,7 +282,7 @@ export default class Client implements XChainClient, EthereumClient {
         this.provider = getDefaultProvider(this.network)
       }
 
-      this.etherscan = new EtherscanProvider(this.network)
+      this.etherscan = new EtherscanProvider(this.network, this.etherscanApiKey)
     }
   }
 
