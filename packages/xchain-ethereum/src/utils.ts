@@ -92,6 +92,7 @@ export const validateAddress = (address: Address): boolean => {
  */
 export const getTokenAddress = (asset: Asset): string | null => {
   try {
+    // strip 0X only - 0x is still valid
     return ethers.utils.getAddress(asset.symbol.slice(asset.ticker.length + 1).replace(/^0X/, ''))
   } catch (err) {
     return null
