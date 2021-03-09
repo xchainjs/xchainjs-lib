@@ -44,12 +44,19 @@ describe('ethereum/util', () => {
 
   describe('getTokenAddress', () => {
     it('should return the token address ', () => {
-      const tokenAddress = getTokenAddress({
+      const tokenAddress1 = getTokenAddress({
         chain: ETHChain,
         symbol: 'USDT-0X4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
         ticker: 'USDT',
       })
-      expect(tokenAddress).toEqual('0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa')
+      expect(tokenAddress1).toEqual('0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa')
+
+      const tokenAddress2 = getTokenAddress({
+        chain: ETHChain,
+        symbol: 'USDT-0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+        ticker: 'USDT',
+      })
+      expect(tokenAddress2).toEqual('0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa')
     })
     it('should return null ', () => {
       const tokenAddress = getTokenAddress({

@@ -92,12 +92,7 @@ export const validateAddress = (address: Address): boolean => {
  */
 export const getTokenAddress = (asset: Asset): string | null => {
   try {
-    const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
-
-    if (assetAddress.startsWith('0x') || assetAddress.startsWith('0X'))
-      return ethers.utils.getAddress(assetAddress.substr(2))
-
-    return null
+    return ethers.utils.getAddress(asset.symbol.slice(asset.ticker.length + 1).replace(/^0X/, ''))
   } catch (err) {
     return null
   }
