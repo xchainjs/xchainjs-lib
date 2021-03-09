@@ -5,8 +5,11 @@
 ### Fix
 
 - export Client.`estimateGasPrices`, Util.`getFee`
-- fix Util.`getTokenAddress`
 - save `etherscanApiKey` in Client
+- update `getTokenAddress` to return checksum address
+
+### Breaking change
+- change parameter of `getTokenAddress`
 
 # v.0.14.1 (2021-03-08)
 

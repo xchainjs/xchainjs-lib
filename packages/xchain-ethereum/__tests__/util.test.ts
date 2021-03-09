@@ -11,7 +11,7 @@ import {
   getTxFromEthTransaction,
   filterSelfTxs,
 } from '../src/utils'
-import { assetFromString, baseAmount, assetToString, AssetETH } from '@xchainjs/xchain-util'
+import { baseAmount, assetToString, AssetETH, ETHChain } from '@xchainjs/xchain-util'
 import { Network } from '../src/types'
 
 describe('ethereum/util', () => {
@@ -44,11 +44,19 @@ describe('ethereum/util', () => {
 
   describe('getTokenAddress', () => {
     it('should return the token address ', () => {
-      const tokenAddress = getTokenAddress(assetFromString('ETH.USDT-0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa'))
-      expect(tokenAddress).toEqual('0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa')
+      const tokenAddress = getTokenAddress({
+        chain: ETHChain,
+        symbol: 'USDT-0X4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+        ticker: 'USDT',
+      })
+      expect(tokenAddress).toEqual('0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa')
     })
     it('should return null ', () => {
-      const tokenAddress = getTokenAddress(assetFromString('ETH.ETH'))
+      const tokenAddress = getTokenAddress({
+        chain: ETHChain,
+        symbol: 'ETH',
+        ticker: 'ETH',
+      })
       expect(tokenAddress).toBeNull()
     })
   })
