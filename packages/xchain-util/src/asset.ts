@@ -353,7 +353,7 @@ export const formatAssetAmountCurrency = ({
     regex = new RegExp('USD', 'i')
     if (ticker.match('USD')) return `${AssetCurrencySymbol.USD} ${amountFormatted}`
 
-    return `${amountFormatted} (${ticker})`
+    return `${amountFormatted} ${ticker}`
   }
 
   return `$ ${amountFormatted}`

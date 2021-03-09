@@ -1,8 +1,26 @@
-# v.0.13.3 (2021-03-09)
+# v.x.x.x
+
+# v.0.14.2 (2021-03-09)
 
 ### Update
 
 - update `getTokenAddress` to handle the address which starts with 0X as well
+
+# v.0.14.1 (2021-03-08)
+
+### Fix
+
+- Update conversion of BaseAmount
+
+# v.0.14.0 (2021-03-08)
+
+### Update
+
+- Add `estimateCall` to estimate gaslimit for `call` function.
+
+### Breaking change
+
+- types of estimateGasLimit() + FeesWithGasPricesAndLimits have been changed
 
 # v.0.13.2 (2021-03-03)
 

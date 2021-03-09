@@ -35,10 +35,7 @@ export type InfuraCreds = {
 }
 
 export type GasPrices = Record<C.FeeOptionKey, BaseAmount>
-export type GasLimits = Record<C.FeeOptionKey, BigNumber>
 
 export type FeesParams = C.FeesParams & C.TxParams
-export type GasLimitParams = FeesParams & { gasPrice: BaseAmount }
-export type GasLimitsParams = FeesParams & { gasPrices: GasPrices }
 
-export type FeesWithGasPricesAndLimits = { fees: C.Fees; gasPrices: GasPrices; gasLimits: GasLimits }
+export type FeesWithGasPricesAndLimits = { fees: C.Fees; gasPrices: GasPrices; gasLimit: BigNumber }
