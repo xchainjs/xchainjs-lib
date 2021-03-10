@@ -90,15 +90,13 @@ export const validateAddress = (address: Address): boolean => {
  * @param {Asset} asset
  * @returns {string|null} The token address.
  */
-export const getTokenAddress = (asset: Asset | null): string | null => {
-  if (asset) {
-    const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
-    if (validateAddress(assetAddress)) {
-      return assetAddress
-    }
+export const getTokenAddress = (asset: Asset): string | null => {
+  try {
+    // strip 0X only - 0x is still valid
+    return ethers.utils.getAddress(asset.symbol.slice(asset.ticker.length + 1).replace(/^0X/, ''))
+  } catch (err) {
+    return null
   }
-
-  return null
 }
 
 /**

@@ -1,7 +1,8 @@
 import nock from 'nock'
 import { ETHTransactionInfo, TokenTransactionInfo, GasOracleResponse } from '../src/types'
 
-export const mock_etherscan_api = (url: string, method: string, result: string | Object) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mock_etherscan_api = (url: string, method: string, result: any) => {
   nock(url)
     .get('/api')
     .query((param) => param.module === 'proxy' && param.action === method)
