@@ -1,3 +1,10 @@
+# v.0.4.1 (2021-03-14)
+
+### Fix
+
+- export Utils.`validateAddress`
+
+
 # v.0.4.0 (2021-03-02)
 
 ### Breaking change
