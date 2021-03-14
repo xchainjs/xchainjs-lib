@@ -9,5 +9,6 @@ export {
   BTC_DECIMAL,
   scanUTXOs,
   buildTx,
+  validateAddress,
 } from './utils'
 export { createTxInfo } from './ledger'
