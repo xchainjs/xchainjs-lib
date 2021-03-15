@@ -1,3 +1,7 @@
+# v.0.12.1 (2021-03-02)
+
+- Export `validateAddress`
+
 # v.0.12.0 (2021-03-02)
 
 ### Breaking change

@@ -68,7 +68,7 @@ class Client implements LitecoinClient, XChainClient {
     this.nodeUrl = !!nodeUrl
       ? nodeUrl
       : network === 'mainnet'
-      ? 'https://mainnet.ltc.thorchain.info'
+      ? 'https://ltc.thorchain.info'
       : 'https://testnet.ltc.thorchain.info'
 
     this.nodeAuth =

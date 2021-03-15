@@ -62,7 +62,7 @@ class Client implements BitcoinCashClient, XChainClient {
     phrase,
     nodeUrl = {
       testnet: 'https://testnet.bch.thorchain.info',
-      mainnet: 'https://mainnet.bch.thorchain.info',
+      mainnet: 'https://bch.thorchain.info',
     },
     nodeAuth = {
       username: 'thorchain',

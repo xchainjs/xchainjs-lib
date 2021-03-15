@@ -1,9 +1,15 @@
+# v.0.7.2 (2021-03-15)
+
+
+### Fix 
+
+- Fix default mainnet url
+
 # v.0.7.1 (2021-03-05)
 
 ### Update
 
 - Update `getBalance` to include unconfirmed balances.
-
 # v.0.7.0 (2021-03-02)
 
 ### Breaking change
