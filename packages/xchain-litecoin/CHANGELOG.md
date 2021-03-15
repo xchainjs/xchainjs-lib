@@ -3,6 +3,7 @@
 ### Fix
 
 - export Utils.`validateAddress`
+- Fix default mainnet url
 
 
 # v.0.4.0 (2021-03-02)
