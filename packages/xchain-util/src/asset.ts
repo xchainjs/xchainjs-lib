@@ -25,12 +25,21 @@ const ASSET_DECIMAL = 8
  * @returns {AssetAmount} The asset amount from the given value and decimal.
  *
  **/
-export const assetAmount = (value: string | number | BigNumber | undefined, decimal: number = ASSET_DECIMAL) =>
-  ({
+export const assetAmount = (
+  value: string | number | BigNumber | undefined,
+  decimal: number = ASSET_DECIMAL,
+): AssetAmount => {
+  const amount = fixedBN(value, decimal)
+  return {
     type: Denomination.ASSET,
     amount: () => fixedBN(value, decimal),
+    plus: (v: string | number | BigNumber) => assetAmount(amount.plus(v), decimal),
+    minus: (v: string | number | BigNumber) => assetAmount(amount.minus(v), decimal),
+    times: (v: string | number | BigNumber) => assetAmount(amount.times(v), decimal),
+    div: (v: string | number | BigNumber) => assetAmount(amount.div(v), decimal),
     decimal,
-  } as AssetAmount)
+  }
+}
 
 /**
  * Factory to create base amounts (e.g. tor)
@@ -39,12 +48,21 @@ export const assetAmount = (value: string | number | BigNumber | undefined, deci
  * @param {number} decimal The decimal places of its associated AssetAmount. (optional)
  * @returns {BaseAmount} The base amount from the given value and decimal.
  **/
-export const baseAmount = (value: string | number | BigNumber | undefined, decimal: number = ASSET_DECIMAL) =>
-  ({
+export const baseAmount = (
+  value: string | number | BigNumber | undefined,
+  decimal: number = ASSET_DECIMAL,
+): BaseAmount => {
+  const amount = fixedBN(value, 0)
+  return {
     type: Denomination.BASE,
-    amount: () => fixedBN(value, 0),
+    amount: () => amount,
+    plus: (v: string | number | BigNumber) => baseAmount(amount.plus(v), decimal),
+    minus: (v: string | number | BigNumber) => baseAmount(amount.minus(v), decimal),
+    times: (v: string | number | BigNumber) => baseAmount(amount.times(v), decimal),
+    div: (v: string | number | BigNumber) => baseAmount(amount.div(v), decimal),
     decimal,
-  } as BaseAmount)
+  }
+}
 
 /**
  * Helper to convert values for a asset from base values (e.g. RUNE from tor)

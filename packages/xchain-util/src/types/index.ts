@@ -15,6 +15,10 @@ export enum Denomination {
 type Amount<T> = {
   type: T
   amount: () => BigNumber
+  plus: (value: string | number | BigNumber) => Amount<T>
+  minus: (value: string | number | BigNumber) => Amount<T>
+  times: (value: string | number | BigNumber) => Amount<T>
+  div: (value: string | number | BigNumber) => Amount<T>
   decimal: number
 }
 

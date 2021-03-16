@@ -38,6 +38,26 @@ describe('asset', () => {
       expect(amount.amount()).toEqual(bn('10'))
       expect(amount.decimal).toEqual(18)
     })
+    it('should be able to add a value', () => {
+      const amount = assetAmount(10, 18).plus(100)
+      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.amount()).toEqual(bn('110'))
+    })
+    it('should be able to sub a value', () => {
+      const amount = assetAmount(10, 18).minus(5)
+      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.amount()).toEqual(bn('5'))
+    })
+    it('should be able to mul a value', () => {
+      const amount = assetAmount(10, 18).times(1e10)
+      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.amount()).toEqual(bn('100000000000'))
+    })
+    it('should be able to div a value', () => {
+      const amount = assetAmount(10, 18).div(5)
+      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.amount()).toEqual(bn('2'))
+    })
   })
 
   describe('baseAmount', () => {
@@ -45,6 +65,26 @@ describe('asset', () => {
       const amount = baseAmount(10)
       expect(amount.type).toEqual(Denomination.BASE)
       expect(amount.amount()).toEqual(bn('10'))
+    })
+    it('should be able to add a value', () => {
+      const amount = baseAmount(10).plus(100)
+      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.amount()).toEqual(bn('110'))
+    })
+    it('should be able to sub a value', () => {
+      const amount = baseAmount(10).minus(5)
+      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.amount()).toEqual(bn('5'))
+    })
+    it('should be able to mul a value', () => {
+      const amount = baseAmount(10).times(5)
+      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.amount()).toEqual(bn('50'))
+    })
+    it('should be able to div a value', () => {
+      const amount = baseAmount(10).div(5)
+      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.amount()).toEqual(bn('2'))
     })
   })
 
