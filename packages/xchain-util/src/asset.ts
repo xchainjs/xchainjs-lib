@@ -32,7 +32,7 @@ export const assetAmount = (
   const amount = fixedBN(value, decimal)
   return {
     type: Denomination.ASSET,
-    amount: () => fixedBN(value, decimal),
+    amount: () => amount,
     plus: (v: string | number | BigNumber) => assetAmount(amount.plus(v), decimal),
     minus: (v: string | number | BigNumber) => assetAmount(amount.minus(v), decimal),
     times: (v: string | number | BigNumber) => assetAmount(amount.times(v), decimal),
