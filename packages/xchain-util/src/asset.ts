@@ -42,19 +42,19 @@ export const assetAmount = (
   return {
     type: Denomination.ASSET,
     amount: () => amount,
-    plus: (v: BigNumber.Value | AssetAmount, d: number = decimal) =>
+    plus: (v: string | number | BigNumber | AssetAmount, d: number = decimal) =>
       assetAmount(amount.plus(isBigNumberValue(v) ? v : v.amount()), d),
-    minus: (v: BigNumber.Value | AssetAmount, d: number = decimal) =>
+    minus: (v: string | number | BigNumber | AssetAmount, d: number = decimal) =>
       assetAmount(amount.minus(isBigNumberValue(v) ? v : v.amount()), d),
-    times: (v: BigNumber.Value | AssetAmount, d: number = decimal) =>
+    times: (v: string | number | BigNumber | AssetAmount, d: number = decimal) =>
       assetAmount(amount.times(isBigNumberValue(v) ? v : v.amount()), d),
-    div: (v: BigNumber.Value | AssetAmount, d: number = decimal) =>
+    div: (v: string | number | BigNumber | AssetAmount, d: number = decimal) =>
       assetAmount(amount.div(isBigNumberValue(v) ? v : v.amount()), d),
-    lt: (v: BigNumber.Value | AssetAmount) => amount.lt(isBigNumberValue(v) ? v : v.amount()),
-    lte: (v: BigNumber.Value | AssetAmount) => amount.lte(isBigNumberValue(v) ? v : v.amount()),
-    gt: (v: BigNumber.Value | AssetAmount) => amount.gt(isBigNumberValue(v) ? v : v.amount()),
-    gte: (v: BigNumber.Value | AssetAmount) => amount.gte(isBigNumberValue(v) ? v : v.amount()),
-    eq: (v: BigNumber.Value | AssetAmount) => amount.eq(isBigNumberValue(v) ? v : v.amount()),
+    lt: (v: string | number | BigNumber | AssetAmount) => amount.lt(isBigNumberValue(v) ? v : v.amount()),
+    lte: (v: string | number | BigNumber | AssetAmount) => amount.lte(isBigNumberValue(v) ? v : v.amount()),
+    gt: (v: string | number | BigNumber | AssetAmount) => amount.gt(isBigNumberValue(v) ? v : v.amount()),
+    gte: (v: string | number | BigNumber | AssetAmount) => amount.gte(isBigNumberValue(v) ? v : v.amount()),
+    eq: (v: string | number | BigNumber | AssetAmount) => amount.eq(isBigNumberValue(v) ? v : v.amount()),
     decimal,
   }
 }
@@ -74,19 +74,19 @@ export const baseAmount = (
   return {
     type: Denomination.BASE,
     amount: () => amount,
-    plus: (v: BigNumber.Value | BaseAmount, d: number = decimal) =>
+    plus: (v: string | number | BigNumber | BaseAmount, d: number = decimal) =>
       baseAmount(amount.plus(isBigNumberValue(v) ? v : v.amount()), d),
-    minus: (v: BigNumber.Value | BaseAmount, d: number = decimal) =>
+    minus: (v: string | number | BigNumber | BaseAmount, d: number = decimal) =>
       baseAmount(amount.minus(isBigNumberValue(v) ? v : v.amount()), d),
-    times: (v: BigNumber.Value | BaseAmount, d: number = decimal) =>
+    times: (v: string | number | BigNumber | BaseAmount, d: number = decimal) =>
       baseAmount(amount.times(isBigNumberValue(v) ? v : v.amount()), d),
-    div: (v: BigNumber.Value | BaseAmount, d: number = decimal) =>
+    div: (v: string | number | BigNumber | BaseAmount, d: number = decimal) =>
       baseAmount(amount.div(isBigNumberValue(v) ? v : v.amount()), d),
-    lt: (v: BigNumber.Value | BaseAmount) => amount.lt(isBigNumberValue(v) ? v : v.amount()),
-    lte: (v: BigNumber.Value | BaseAmount) => amount.lte(isBigNumberValue(v) ? v : v.amount()),
-    gt: (v: BigNumber.Value | BaseAmount) => amount.gt(isBigNumberValue(v) ? v : v.amount()),
-    gte: (v: BigNumber.Value | BaseAmount) => amount.gte(isBigNumberValue(v) ? v : v.amount()),
-    eq: (v: BigNumber.Value | BaseAmount) => amount.eq(isBigNumberValue(v) ? v : v.amount()),
+    lt: (v: string | number | BigNumber | BaseAmount) => amount.lt(isBigNumberValue(v) ? v : v.amount()),
+    lte: (v: string | number | BigNumber | BaseAmount) => amount.lte(isBigNumberValue(v) ? v : v.amount()),
+    gt: (v: string | number | BigNumber | BaseAmount) => amount.gt(isBigNumberValue(v) ? v : v.amount()),
+    gte: (v: string | number | BigNumber | BaseAmount) => amount.gte(isBigNumberValue(v) ? v : v.amount()),
+    eq: (v: string | number | BigNumber | BaseAmount) => amount.eq(isBigNumberValue(v) ? v : v.amount()),
     decimal,
   }
 }
