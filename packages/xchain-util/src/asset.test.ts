@@ -20,10 +20,22 @@ import {
   AssetBTC,
   AssetETH,
   AssetBNB,
+  isBigNumberValue,
 } from './asset'
 import { Asset, Denomination } from './types'
 
 describe('asset', () => {
+  describe('isBigNumberValue', () => {
+    it('return true for BigNumber.Value', () => {
+      expect(isBigNumberValue(1)).toBeTruthy()
+      expect(isBigNumberValue('1')).toBeTruthy()
+      expect(isBigNumberValue(bn(1))).toBeTruthy()
+    })
+    it('return false for others', () => {
+      expect(isBigNumberValue(baseAmount(10))).toBeFalsy()
+      expect(isBigNumberValue(assetAmount(10))).toBeFalsy()
+    })
+  })
   describe('assetAmount', () => {
     it('should create asset amount by given value', () => {
       const amount = assetAmount(10)
@@ -70,17 +82,35 @@ describe('asset', () => {
       expect(amount.amount()).toEqual(bn('20'))
       expect(amount.decimal).toEqual(12)
     })
-    it('should be able to compare AssetAmount', () => {
-      expect(assetAmount(10).lt(assetAmount(11))).toEqual(true)
-      expect(assetAmount(10).lte(assetAmount(10))).toEqual(true)
-      expect(assetAmount(10).gt(assetAmount(9))).toEqual(true)
-      expect(assetAmount(10).gte(assetAmount(10))).toEqual(true)
-      expect(assetAmount(10).eq(assetAmount(10))).toEqual(true)
-      expect(assetAmount(10).lt(11)).toEqual(true)
-      expect(assetAmount(10).lte(10)).toEqual(true)
-      expect(assetAmount(10).gt(9)).toEqual(true)
-      expect(assetAmount(10).gte(10)).toEqual(true)
-      expect(assetAmount(10).eq(10)).toEqual(true)
+    it('should be able to check lt', () => {
+      expect(assetAmount(10).lt(assetAmount(11))).toBeTruthy()
+      expect(assetAmount(10).lt(11)).toBeTruthy()
+      expect(assetAmount(11).lt(10)).toBeFalsy()
+      expect(assetAmount(11, 10).lt(assetAmount(10, 8))).toBeFalsy()
+    })
+    it('should be able to check lte', () => {
+      expect(assetAmount(10).lte(10)).toBeTruthy()
+      expect(assetAmount(11).lte(10)).toBeFalsy()
+      expect(assetAmount(10).lte(assetAmount(10))).toBeTruthy()
+      expect(assetAmount(11, 10).lte(assetAmount(10, 8))).toBeFalsy()
+    })
+    it('should be able to check gt', () => {
+      expect(assetAmount(10).gt(9)).toBeTruthy()
+      expect(assetAmount(9).gt(10)).toBeFalsy()
+      expect(assetAmount(10).gt(assetAmount(9))).toBeTruthy()
+      expect(assetAmount(9, 10).gt(assetAmount(10, 8))).toBeFalsy()
+    })
+    it('should be able to check gte', () => {
+      expect(assetAmount(10).gte(10)).toBeTruthy()
+      expect(assetAmount(9).gte(10)).toBeFalsy()
+      expect(assetAmount(10).gte(assetAmount(10))).toBeTruthy()
+      expect(assetAmount(9, 10).gte(assetAmount(10, 8))).toBeFalsy()
+    })
+    it('should be able to check eq', () => {
+      expect(assetAmount(10).eq(10)).toBeTruthy()
+      expect(assetAmount(9).eq(10)).toBeFalsy()
+      expect(assetAmount(10).eq(assetAmount(10))).toBeTruthy()
+      expect(assetAmount(9, 10).eq(assetAmount(10, 8))).toBeFalsy()
     })
   })
 
@@ -122,17 +152,35 @@ describe('asset', () => {
       expect(amount.amount()).toEqual(bn('20'))
       expect(amount.decimal).toEqual(12)
     })
-    it('should be able to compare BaseAmount', () => {
-      expect(baseAmount(10).lt(baseAmount(11))).toEqual(true)
-      expect(baseAmount(10).lte(baseAmount(10))).toEqual(true)
-      expect(baseAmount(10).gt(baseAmount(9))).toEqual(true)
-      expect(baseAmount(10).gte(baseAmount(10))).toEqual(true)
-      expect(baseAmount(10).eq(baseAmount(10))).toEqual(true)
-      expect(baseAmount(10).lt(11)).toEqual(true)
-      expect(baseAmount(10).lte(10)).toEqual(true)
-      expect(baseAmount(10).gt(9)).toEqual(true)
-      expect(baseAmount(10).gte(10)).toEqual(true)
-      expect(baseAmount(10).eq(10)).toEqual(true)
+    it('should be able to check lt', () => {
+      expect(baseAmount(10).lt(11)).toBeTruthy()
+      expect(baseAmount(10).lt(9)).toBeFalsy()
+      expect(baseAmount(10).lt(baseAmount(11))).toBeTruthy()
+      expect(baseAmount(10, 10).lt(baseAmount(9, 8))).toBeFalsy()
+    })
+    it('should be able to check lte', () => {
+      expect(baseAmount(10).lte(10)).toBeTruthy()
+      expect(baseAmount(10).lte(9)).toBeFalsy()
+      expect(baseAmount(10).lte(baseAmount(10))).toBeTruthy()
+      expect(baseAmount(10, 10).lte(baseAmount(9, 8))).toBeFalsy()
+    })
+    it('should be able to check gt', () => {
+      expect(baseAmount(10).gt(9)).toBeTruthy()
+      expect(baseAmount(9).gt(10)).toBeFalsy()
+      expect(baseAmount(10).gt(baseAmount(9))).toBeTruthy()
+      expect(baseAmount(9, 10).gt(baseAmount(10, 8))).toBeFalsy()
+    })
+    it('should be able to check gte', () => {
+      expect(baseAmount(10).gte(10)).toBeTruthy()
+      expect(baseAmount(9).gte(10)).toBeFalsy()
+      expect(baseAmount(10).gte(baseAmount(10))).toBeTruthy()
+      expect(baseAmount(9, 10).gte(baseAmount(10, 8))).toBeFalsy()
+    })
+    it('should be able to check eq', () => {
+      expect(baseAmount(10).eq(10)).toBeTruthy()
+      expect(baseAmount(9).eq(10)).toBeFalsy()
+      expect(baseAmount(10).eq(baseAmount(10))).toBeTruthy()
+      expect(baseAmount(9, 10).eq(baseAmount(10, 8))).toBeFalsy()
     })
   })
 

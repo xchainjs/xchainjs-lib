@@ -15,15 +15,15 @@ export enum Denomination {
 type Amount<T> = {
   type: T
   amount: () => BigNumber
-  plus: (value: string | number | BigNumber | Amount<T>, decimal?: number) => Amount<T>
-  minus: (value: string | number | BigNumber | Amount<T>, decimal?: number) => Amount<T>
-  times: (value: string | number | BigNumber | Amount<T>, decimal?: number) => Amount<T>
-  div: (value: string | number | BigNumber | Amount<T>, decimal?: number) => Amount<T>
-  gt: (value: string | number | BigNumber | Amount<T>) => boolean
-  gte: (value: string | number | BigNumber | Amount<T>) => boolean
-  lt: (value: string | number | BigNumber | Amount<T>) => boolean
-  lte: (value: string | number | BigNumber | Amount<T>) => boolean
-  eq: (value: string | number | BigNumber | Amount<T>) => boolean
+  plus: (value: BigNumber.Value | Amount<T>, decimal?: number) => Amount<T>
+  minus: (value: BigNumber.Value | Amount<T>, decimal?: number) => Amount<T>
+  times: (value: BigNumber.Value | Amount<T>, decimal?: number) => Amount<T>
+  div: (value: BigNumber.Value | Amount<T>, decimal?: number) => Amount<T>
+  gt: (value: BigNumber.Value | Amount<T>) => boolean
+  gte: (value: BigNumber.Value | Amount<T>) => boolean
+  lt: (value: BigNumber.Value | Amount<T>) => boolean
+  lte: (value: BigNumber.Value | Amount<T>) => boolean
+  eq: (value: BigNumber.Value | Amount<T>) => boolean
   decimal: number
 }
 
