@@ -3,6 +3,7 @@
 ### Update
 
 - Extend BaseAmount/AssetAmount to support basic arithmetic operations(add, minus, times, div)
+- Extend BaseAmount/AssetAmount to support basic comparison
 
 # v.0.2.5 (2021-03-04)
 

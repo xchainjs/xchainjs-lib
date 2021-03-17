@@ -33,10 +33,36 @@ export const assetAmount = (
   return {
     type: Denomination.ASSET,
     amount: () => amount,
-    plus: (v: string | number | BigNumber) => assetAmount(amount.plus(v), decimal),
-    minus: (v: string | number | BigNumber) => assetAmount(amount.minus(v), decimal),
-    times: (v: string | number | BigNumber) => assetAmount(amount.times(v), decimal),
-    div: (v: string | number | BigNumber) => assetAmount(amount.div(v), decimal),
+    plus: (v: string | number | BigNumber | AssetAmount, d: number = decimal) =>
+      assetAmount(
+        amount.plus(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+        d,
+      ),
+    minus: (v: string | number | BigNumber | AssetAmount, d: number = decimal) =>
+      assetAmount(
+        amount.minus(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+        d,
+      ),
+    times: (v: string | number | BigNumber | AssetAmount, d: number = decimal) =>
+      assetAmount(
+        amount.times(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+        d,
+      ),
+    div: (v: string | number | BigNumber | AssetAmount, d: number = decimal) =>
+      assetAmount(
+        amount.div(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+        d,
+      ),
+    lt: (v: string | number | BigNumber | AssetAmount) =>
+      amount.lt(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+    lte: (v: string | number | BigNumber | AssetAmount) =>
+      amount.lte(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+    gt: (v: string | number | BigNumber | AssetAmount) =>
+      amount.gt(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+    gte: (v: string | number | BigNumber | AssetAmount) =>
+      amount.gte(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+    eq: (v: string | number | BigNumber | AssetAmount) =>
+      amount.eq(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
     decimal,
   }
 }
@@ -56,10 +82,36 @@ export const baseAmount = (
   return {
     type: Denomination.BASE,
     amount: () => amount,
-    plus: (v: string | number | BigNumber) => baseAmount(amount.plus(v), decimal),
-    minus: (v: string | number | BigNumber) => baseAmount(amount.minus(v), decimal),
-    times: (v: string | number | BigNumber) => baseAmount(amount.times(v), decimal),
-    div: (v: string | number | BigNumber) => baseAmount(amount.div(v), decimal),
+    plus: (v: string | number | BigNumber | BaseAmount, d: number = decimal) =>
+      baseAmount(
+        amount.plus(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+        d,
+      ),
+    minus: (v: string | number | BigNumber | BaseAmount, d: number = decimal) =>
+      baseAmount(
+        amount.minus(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+        d,
+      ),
+    times: (v: string | number | BigNumber | BaseAmount, d: number = decimal) =>
+      baseAmount(
+        amount.times(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+        d,
+      ),
+    div: (v: string | number | BigNumber | BaseAmount, d: number = decimal) =>
+      baseAmount(
+        amount.div(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+        d,
+      ),
+    lt: (v: string | number | BigNumber | BaseAmount) =>
+      amount.lt(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+    lte: (v: string | number | BigNumber | BaseAmount) =>
+      amount.lte(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+    gt: (v: string | number | BigNumber | BaseAmount) =>
+      amount.gt(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+    gte: (v: string | number | BigNumber | BaseAmount) =>
+      amount.gte(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
+    eq: (v: string | number | BigNumber | BaseAmount) =>
+      amount.eq(typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber ? v : v.amount()),
     decimal,
   }
 }
