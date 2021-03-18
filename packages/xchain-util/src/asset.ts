@@ -6,6 +6,15 @@ import { isChain } from './chain'
 import { Denomination, AssetAmount, BaseAmount, Amounts, Asset } from './types'
 
 /**
+ * Guard to check whether value is a BigNumber.Value or not
+ *
+ * @param {unknown} v
+ * @returns {boolean} `true` or `false`.
+ * */
+export const isBigNumberValue = (v: unknown): v is BigNumber.Value =>
+  typeof v === 'string' || typeof v === 'number' || v instanceof BigNumber
+
+/**
  * Default number of asset decimals
  * For history reason and by starting the project on Binance chain assets, it's 8 decimal.
  *
@@ -25,12 +34,27 @@ const ASSET_DECIMAL = 8
  * @returns {AssetAmount} The asset amount from the given value and decimal.
  *
  **/
-export const assetAmount = (value: string | number | BigNumber | undefined, decimal: number = ASSET_DECIMAL) =>
-  ({
+export const assetAmount = (value: BigNumber.Value | undefined, decimal: number = ASSET_DECIMAL): AssetAmount => {
+  const amount = fixedBN(value, decimal)
+  return {
     type: Denomination.ASSET,
-    amount: () => fixedBN(value, decimal),
+    amount: () => amount,
+    plus: (v: BigNumber.Value | AssetAmount, d: number = decimal) =>
+      assetAmount(amount.plus(isBigNumberValue(v) ? v : v.amount()), d),
+    minus: (v: BigNumber.Value | AssetAmount, d: number = decimal) =>
+      assetAmount(amount.minus(isBigNumberValue(v) ? v : v.amount()), d),
+    times: (v: BigNumber.Value | AssetAmount, d: number = decimal) =>
+      assetAmount(amount.times(isBigNumberValue(v) ? v : v.amount()), d),
+    div: (v: BigNumber.Value | AssetAmount, d: number = decimal) =>
+      assetAmount(amount.div(isBigNumberValue(v) ? v : v.amount()), d),
+    lt: (v: BigNumber.Value | AssetAmount) => amount.lt(isBigNumberValue(v) ? v : v.amount()),
+    lte: (v: BigNumber.Value | AssetAmount) => amount.lte(isBigNumberValue(v) ? v : v.amount()),
+    gt: (v: BigNumber.Value | AssetAmount) => amount.gt(isBigNumberValue(v) ? v : v.amount()),
+    gte: (v: BigNumber.Value | AssetAmount) => amount.gte(isBigNumberValue(v) ? v : v.amount()),
+    eq: (v: BigNumber.Value | AssetAmount) => amount.eq(isBigNumberValue(v) ? v : v.amount()),
     decimal,
-  } as AssetAmount)
+  }
+}
 
 /**
  * Factory to create base amounts (e.g. tor)
@@ -39,12 +63,27 @@ export const assetAmount = (value: string | number | BigNumber | undefined, deci
  * @param {number} decimal The decimal places of its associated AssetAmount. (optional)
  * @returns {BaseAmount} The base amount from the given value and decimal.
  **/
-export const baseAmount = (value: string | number | BigNumber | undefined, decimal: number = ASSET_DECIMAL) =>
-  ({
+export const baseAmount = (value: BigNumber.Value | undefined, decimal: number = ASSET_DECIMAL): BaseAmount => {
+  const amount = fixedBN(value, 0)
+  return {
     type: Denomination.BASE,
-    amount: () => fixedBN(value, 0),
+    amount: () => amount,
+    plus: (v: BigNumber.Value | BaseAmount, d: number = decimal) =>
+      baseAmount(amount.plus(isBigNumberValue(v) ? v : v.amount()), d),
+    minus: (v: BigNumber.Value | BaseAmount, d: number = decimal) =>
+      baseAmount(amount.minus(isBigNumberValue(v) ? v : v.amount()), d),
+    times: (v: BigNumber.Value | BaseAmount, d: number = decimal) =>
+      baseAmount(amount.times(isBigNumberValue(v) ? v : v.amount()), d),
+    div: (v: BigNumber.Value | BaseAmount, d: number = decimal) =>
+      baseAmount(amount.div(isBigNumberValue(v) ? v : v.amount()), d),
+    lt: (v: BigNumber.Value | BaseAmount) => amount.lt(isBigNumberValue(v) ? v : v.amount()),
+    lte: (v: BigNumber.Value | BaseAmount) => amount.lte(isBigNumberValue(v) ? v : v.amount()),
+    gt: (v: BigNumber.Value | BaseAmount) => amount.gt(isBigNumberValue(v) ? v : v.amount()),
+    gte: (v: BigNumber.Value | BaseAmount) => amount.gte(isBigNumberValue(v) ? v : v.amount()),
+    eq: (v: BigNumber.Value | BaseAmount) => amount.eq(isBigNumberValue(v) ? v : v.amount()),
     decimal,
-  } as BaseAmount)
+  }
+}
 
 /**
  * Helper to convert values for a asset from base values (e.g. RUNE from tor)

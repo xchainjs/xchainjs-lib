@@ -84,7 +84,7 @@ export const formatBNCurrency = (
  * @param {number} decimalPlaces The decimal place. (optional)
  * @returns {BigNumber} The BigNumber interface from the given value and decimal.
  * */
-export const fixedBN = (value: number | string | BigNumber | undefined, decimalPlaces = 2): BigNumber => {
+export const fixedBN = (value: BigNumber.Value | undefined, decimalPlaces = 2): BigNumber => {
   const n = bn(value || 0)
   const fixedBN = isValidBN(n) ? n.toFixed(decimalPlaces) : bn(0).toFixed(decimalPlaces)
   return bn(fixedBN)

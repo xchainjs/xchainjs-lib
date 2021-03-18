@@ -1,3 +1,11 @@
+# v.0.2.6 (2021-03-16)
+
+### Update
+
+- Extend BaseAmount/AssetAmount to support basic arithmetic operations(add, minus, times, div)
+- Extend BaseAmount/AssetAmount to support basic comparison
+- Add type guard `isBigNumberValue` for BigNumber.Value
+
 # v.0.2.5 (2021-03-04)
 
 ### Breaking change
