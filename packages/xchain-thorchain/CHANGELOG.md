@@ -1,3 +1,9 @@
+# v.0.13.1 (2021-03-18)
+
+### Fix
+
+- Changed `getDefaultExplorerUrl` to return valid urls
+
 # v.0.13.0 (2021-03-02)
 
 ### Breaking change

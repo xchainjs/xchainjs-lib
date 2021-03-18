@@ -202,8 +202,8 @@ class Client implements ThorchainClient, XChainClient {
    */
   private getDefaultExplorerUrl = (): ExplorerUrl => {
     return {
-      testnet: 'https://testnet.thorchain.net',
-      mainnet: 'https://thorchain.net',
+      testnet: 'https://testnet.thorchain.net/#',
+      mainnet: 'https://thorchain.net/#',
     }
   }
 
