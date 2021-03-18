@@ -476,38 +476,38 @@ describe('Client Test', () => {
   })
 
   it('should return valid explorer url', () => {
-    expect(thorClient.getExplorerUrl()).toEqual('https://testnet.thorchain.net')
+    expect(thorClient.getExplorerUrl()).toEqual('https://testnet.thorchain.net/#')
 
     thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerUrl()).toEqual('https://thorchain.net')
+    expect(thorClient.getExplorerUrl()).toEqual('https://thorchain.net/#')
   })
 
   it('should retrun valid explorer address url', () => {
     expect(thorClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
-      'https://testnet.thorchain.net/addresses/anotherTestAddressHere',
+      'https://testnet.thorchain.net/#/addresses/anotherTestAddressHere',
     )
 
     thorClient.setNetwork('mainnet')
     expect(thorClient.getExplorerAddressUrl('testAddressHere')).toEqual(
-      'https://thorchain.net/addresses/testAddressHere',
+      'https://thorchain.net/#/addresses/testAddressHere',
     )
   })
 
   it('should retrun valid explorer tx url', () => {
     expect(thorClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
-      'https://testnet.thorchain.net/txs/anotherTestTxHere',
+      'https://testnet.thorchain.net/#/txs/anotherTestTxHere',
     )
 
     thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerTxUrl('testTxHere')).toEqual('https://thorchain.net/txs/testTxHere')
+    expect(thorClient.getExplorerTxUrl('testTxHere')).toEqual('https://thorchain.net/#/txs/testTxHere')
   })
 
   it('should retrun valid explorer node url', () => {
     expect(thorClient.getExplorerNodeUrl('anotherTestNodeHere')).toEqual(
-      'https://testnet.thorchain.net/nodes/anotherTestNodeHere',
+      'https://testnet.thorchain.net/#/nodes/anotherTestNodeHere',
     )
 
     thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerNodeUrl('testNodeHere')).toEqual('https://thorchain.net/nodes/testNodeHere')
+    expect(thorClient.getExplorerNodeUrl('testNodeHere')).toEqual('https://thorchain.net/#/nodes/testNodeHere')
   })
 })
