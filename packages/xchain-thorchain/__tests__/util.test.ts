@@ -1,6 +1,14 @@
 import { AssetRune } from '../src/types'
-import { getDenom, getDenomWithChain, getAsset, getTxsFromHistory, isBroadcastSuccess } from '../src/util'
-import { baseAmount } from '@xchainjs/xchain-util'
+import {
+  getDenom,
+  getDenomWithChain,
+  getAsset,
+  getTxsFromHistory,
+  isBroadcastSuccess,
+  isAssetRune,
+  isSynthAsset,
+} from '../src/util'
+import { AssetBCH, baseAmount, THORChain } from '@xchainjs/xchain-util'
 import { RawTxResponse, TxResponse } from '@xchainjs/xchain-cosmos/src/cosmos/types'
 import { Msg } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
@@ -8,6 +16,38 @@ import { MsgSend } from 'cosmos-client/x/bank'
 import { StdTxFee } from 'cosmos-client/api'
 
 describe('thorchain/util', () => {
+  describe('isRuneAsset', () => {
+    it('should return true for RuneAsset', () => {
+      expect(isAssetRune(AssetRune)).toBeTruthy()
+    })
+    it('should return false for other assets', () => {
+      expect(isAssetRune(AssetBCH)).toBeFalsy()
+      expect(
+        isAssetRune({
+          chain: THORChain,
+          symbol: 'ETH/ETH',
+          ticker: 'ETH/ETH',
+        }),
+      ).toBeFalsy()
+    })
+  })
+
+  describe('isSynthAsset', () => {
+    it('should return true for SynthAsset', () => {
+      expect(
+        isSynthAsset({
+          chain: THORChain,
+          symbol: 'ETH/ETH',
+          ticker: 'ETH/ETH',
+        }),
+      ).toBeTruthy()
+    })
+    it('should return false for other assets', () => {
+      expect(isSynthAsset(AssetBCH)).toBeFalsy()
+      expect(isSynthAsset(AssetRune)).toBeFalsy()
+    })
+  })
+
   describe('Denom <-> Asset', () => {
     describe('getDenom', () => {
       it('get denom for AssetRune', () => {

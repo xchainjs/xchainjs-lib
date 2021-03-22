@@ -16,7 +16,7 @@ import {
   TxTo,
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
-import { Asset, baseAmount, assetToString, assetFromString } from '@xchainjs/xchain-util'
+import { Asset, baseAmount, assetToString } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { PrivKey, AccAddress } from 'cosmos-client'
@@ -36,6 +36,7 @@ import {
   getPrefix,
   registerCodecs,
   getTxType,
+  isAssetRune,
 } from './util'
 
 const MSG_SEND = 'send'
@@ -503,7 +504,7 @@ class Client implements ThorchainClient, XChainClient {
           to: result.observed_tx.tx.to_address,
           amount: baseAmount(coin.amount, DECIMAL),
         })
-        asset = assetFromString(coin.asset)
+        asset = getAsset(coin.asset)
       })
 
       return {
@@ -567,13 +568,15 @@ class Client implements ThorchainClient, XChainClient {
    */
   deposit = async ({ asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     try {
-      const assetBalance = await this.getBalance(this.getAddress(), [asset])
+      const assetBalances = await this.getBalance(this.getAddress())
+      const assetBalance = assetBalances.filter((balance) => assetToString(balance.asset) === assetToString(asset))
 
       const signer = this.getAddress()
+
       const msgNativeTx = msgNativeTxFromJson({
         coins: [
           {
-            asset: getDenomWithChain(asset),
+            asset: isAssetRune(asset) ? getDenomWithChain(asset) : getDenom(asset),
             amount: amount.amount().toString(),
           },
         ],
@@ -581,10 +584,24 @@ class Client implements ThorchainClient, XChainClient {
         signer,
       })
       const unsignedStdTx = await this.buildDepositTx(msgNativeTx)
-      const fee = unsignedStdTx.fee
+      const fee = unsignedStdTx.fee.gas ?? 0
 
-      if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.gas ?? 0))) {
-        throw new Error('insufficient funds')
+      if (isAssetRune(asset)) {
+        // amount + fee <= assetBalance(runeBalance)
+        if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee))) {
+          throw new Error('insufficient funds')
+        }
+      } else {
+        // amount <= assetBalance && fee <= runeBalance
+        const runeBalance = assetBalances.filter((balance) => isAssetRune(balance.asset))
+        if (
+          assetBalance.length === 0 ||
+          assetBalance[0].amount.amount().lt(amount.amount()) ||
+          runeBalance.length === 0 ||
+          runeBalance[0].amount.amount().lt(fee)
+        ) {
+          throw new Error('insufficient funds')
+        }
       }
 
       const transferResult = await this.thorClient.signAndBroadcast(
@@ -613,10 +630,24 @@ class Client implements ThorchainClient, XChainClient {
     try {
       registerCodecs(this.network)
 
-      const assetBalance = await this.getBalance(this.getAddress(), [asset])
-      const fee = await this.getFees()
-      if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
-        throw new Error('insufficient funds')
+      const assetBalances = await this.getBalance(this.getAddress())
+      const assetBalance = assetBalances.filter((balance) => assetToString(balance.asset) === assetToString(asset))
+      const fee = (await this.getFees()).average
+
+      if (isAssetRune(asset)) {
+        if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.amount()))) {
+          throw new Error('insufficient funds')
+        }
+      } else {
+        const runeBalance = assetBalances.filter((balance) => isAssetRune(balance.asset))
+        if (
+          assetBalance.length === 0 ||
+          assetBalance[0].amount.amount().lt(amount.amount()) ||
+          runeBalance.length === 0 ||
+          runeBalance[0].amount.amount().lt(fee.amount())
+        ) {
+          throw new Error('insufficient funds')
+        }
       }
 
       const transferResult = await this.thorClient.transfer({

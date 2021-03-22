@@ -9,6 +9,10 @@ import { StdTx } from 'cosmos-client/x/auth'
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '10000000'
 
+export const isAssetRune = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRune)
+
+export const isSynthAsset = (asset: Asset): boolean => asset.chain === THORChain && !isAssetRune(asset)
+
 /**
  * Get denomination from Asset
  *
@@ -16,8 +20,8 @@ export const DEFAULT_GAS_VALUE = '10000000'
  * @returns {string} The denomination of the given asset.
  */
 export const getDenom = (asset: Asset): string => {
-  if (assetToString(asset) === assetToString(AssetRune)) return 'rune'
-  return asset.symbol
+  if (isAssetRune(asset)) return 'rune'
+  return asset.symbol.toLowerCase()
 }
 
 /**
@@ -119,12 +123,21 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
 
     const from: TxFrom[] = []
     const to: TxTo[] = []
-    msgs.map((msg) => {
+
+    // Need to get correct asset from msg
+    let asset: Asset | null = null
+    for (const msg of msgs) {
       if (isMsgSend(msg)) {
         const msgSend = msg as MsgSend
         const amount = msgSend.amount
           .map((coin) => baseAmount(coin.amount, DECIMAL))
           .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
+
+        if (!asset) {
+          msgSend.amount.forEach((coin) => {
+            if (coin.denom) asset = getAsset(coin.denom) ?? asset
+          })
+        }
 
         let from_index = -1
 
@@ -163,6 +176,12 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
             .map((coin) => baseAmount(coin.amount, DECIMAL))
             .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
 
+          if (!asset) {
+            input.coins.forEach((coin) => {
+              if (coin.denom) asset = getAsset(coin.denom) ?? asset
+            })
+          }
+
           let from_index = -1
 
           from.forEach((value, index) => {
@@ -184,6 +203,12 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
             .map((coin) => baseAmount(coin.amount, DECIMAL))
             .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
 
+          if (!asset) {
+            output.coins.forEach((coin) => {
+              if (coin.denom) asset = getAsset(coin.denom) ?? asset
+            })
+          }
+
           let to_index = -1
 
           to.forEach((value, index) => {
@@ -200,12 +225,12 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
           }
         })
       }
-    })
+    }
 
     return [
       ...acc,
       {
-        asset: AssetRune,
+        asset: asset || AssetRune,
         from,
         to,
         date: new Date(tx.timestamp),
