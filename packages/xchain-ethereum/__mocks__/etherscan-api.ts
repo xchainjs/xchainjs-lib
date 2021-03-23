@@ -11,7 +11,18 @@ export const mock_etherscan_api = (url: string, method: string, result: any) => 
       result,
       id: 1,
     })
+
+  nock(url)
+    .post('/api', (body) => {
+      return body.module === 'proxy' && body.action === method
+    })
+    .reply(200, {
+      jsonrpc: '2.0',
+      result,
+      id: 1,
+    })
 }
+
 export const mock_gastracker_api = (url: string, method: string, result: GasOracleResponse) => {
   nock(url)
     .get('/api')

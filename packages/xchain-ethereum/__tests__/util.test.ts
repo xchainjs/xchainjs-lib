@@ -1,3 +1,4 @@
+import nock from 'nock'
 import {
   getTokenAddress,
   xchainNetworkToEths,
@@ -10,9 +11,12 @@ import {
   getTxFromTokenTransaction,
   getTxFromEthTransaction,
   filterSelfTxs,
+  getDecimal,
 } from '../src/utils'
 import { baseAmount, assetToString, AssetETH, ETHChain } from '@xchainjs/xchain-util'
 import { Network } from '../src/types'
+import { ethers } from 'ethers'
+import { mock_etherscan_api } from '../__mocks__/etherscan-api'
 
 describe('ethereum/util', () => {
   describe('xchainNetworkToEths', () => {
@@ -242,6 +246,32 @@ describe('ethereum/util', () => {
       expect(txs.length).toEqual(2)
       expect(txs[0].hash).toEqual('0x84f28d86da01417a35e448f62248b9dee40261be82496275495bb0f0de6c8a1e')
       expect(txs[1].hash).toEqual('0x40565f6d4cbe1c339decce9769fc94fcc868be98faba4429b79aa4ad2bb26ab4')
+    })
+  })
+
+  describe('getDecimal', () => {
+    it('getDecimal', async () => {
+      nock.disableNetConnect()
+      mock_etherscan_api(
+        'https://api-ropsten.etherscan.io',
+        'eth_call',
+        '0x0000000000000000000000000000000000000000000000000000000000000006',
+      )
+
+      const provider = new ethers.providers.EtherscanProvider(xchainNetworkToEths('testnet'))
+
+      const eth_decimal = await getDecimal(AssetETH, provider)
+      expect(eth_decimal).toEqual(ETH_DECIMAL)
+
+      const usdt_decimal = await getDecimal(
+        {
+          chain: ETHChain,
+          ticker: 'USDT',
+          symbol: 'USDT-0x62e273709da575835c7f6aef4a31140ca5b1d190',
+        },
+        provider,
+      )
+      expect(usdt_decimal).toEqual(6)
     })
   })
 })

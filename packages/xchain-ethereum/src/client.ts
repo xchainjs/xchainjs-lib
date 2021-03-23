@@ -64,8 +64,6 @@ export interface EthereumClient {
   estimateGasLimit(params: FeesParams): Promise<BigNumber>
   estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits>
 
-  getDecimal(asset: Asset): Promise<number>
-
   isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
   approve(spender: Address, sender: Address, amount?: BaseAmount): Promise<TransactionResponse>
 }
@@ -772,29 +770,6 @@ export default class Client implements XChainClient, EthereumClient {
     } catch (error) {
       return Promise.reject(new Error(`Failed to get fees: ${error.msg ?? error.toString()}`))
     }
-  }
-
-  /**
-   * Get Decimals
-   *
-   * @param {Asset} asset
-   * @returns {Number} the decimal of a given asset
-   *
-   * @throws {"Invalid asset"} Thrown if the given asset is invalid
-   */
-  getDecimal = async (asset: Asset): Promise<number> => {
-    if (assetToString(asset) === assetToString(AssetETH)) {
-      return ETH_DECIMAL
-    }
-
-    const assetAddress = getTokenAddress(asset)
-    if (!assetAddress) {
-      throw new Error(`Invalid asset ${asset}`)
-    }
-
-    const decimal = await this.call<BigNumberish>(assetAddress, erc20ABI, 'decimals', [])
-
-    return ethers.BigNumber.from(decimal).toNumber()
   }
 }
 
