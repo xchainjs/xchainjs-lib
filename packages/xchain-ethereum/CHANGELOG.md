@@ -1,5 +1,7 @@
 # v.x.x.x
 
+# v.0.15.0 (2021-03-23)
+
 ### Add
 
 - add `getDecimal(asset)`
