@@ -269,12 +269,12 @@ export const filterSelfTxs = <T extends { from: string; to: string; hash: string
  */
 export const getDecimal = async (asset: Asset, provider: providers.Provider): Promise<number> => {
   if (assetToString(asset) === assetToString(AssetETH)) {
-    return ETH_DECIMAL
+    return Promise.resolve(ETH_DECIMAL)
   }
 
   const assetAddress = getTokenAddress(asset)
   if (!assetAddress) {
-    throw new Error(`Invalid asset ${asset}`)
+    throw new Error(`Invalid asset ${assetToString(asset)}`)
   }
 
   try {
@@ -283,7 +283,6 @@ export const getDecimal = async (asset: Asset, provider: providers.Provider): Pr
 
     return ethers.BigNumber.from(decimal).toNumber()
   } catch (err) {
-    console.log(err)
     throw new Error(`Invalid provider: ${err}`)
   }
 }
