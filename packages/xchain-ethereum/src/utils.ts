@@ -8,6 +8,8 @@ import {
   BaseAmount,
   assetToString,
 } from '@xchainjs/xchain-util'
+import { ethers, BigNumber, providers } from 'ethers'
+import { parseUnits } from 'ethers/lib/utils'
 import {
   Network as EthNetwork,
   Address,
@@ -16,8 +18,7 @@ import {
   FeesWithGasPricesAndLimits,
   GasPrices,
 } from './types'
-import { ethers, BigNumber } from 'ethers'
-import { parseUnits } from 'ethers/lib/utils'
+import erc20ABI from './data/erc20.json'
 
 export const ETH_DECIMAL = 18
 export const ETHPLORER_FREEKEY = 'freekey'
@@ -255,4 +256,33 @@ export const filterSelfTxs = <T extends { from: string; to: string; hash: string
   }
 
   return filterTxs
+}
+
+/**
+ * Get Decimals
+ *
+ * @param {Asset} asset
+ * @returns {Number} the decimal of a given asset
+ *
+ * @throws {"Invalid asset"} Thrown if the given asset is invalid
+ * @throws {"Invalid provider"} Thrown if the given provider is invalid
+ */
+export const getDecimal = async (asset: Asset, provider: providers.Provider): Promise<number> => {
+  if (assetToString(asset) === assetToString(AssetETH)) {
+    return Promise.resolve(ETH_DECIMAL)
+  }
+
+  const assetAddress = getTokenAddress(asset)
+  if (!assetAddress) {
+    throw new Error(`Invalid asset ${assetToString(asset)}`)
+  }
+
+  try {
+    const contract: ethers.Contract = new ethers.Contract(assetAddress, erc20ABI, provider)
+    const decimal: ethers.BigNumberish = await contract.decimals()
+
+    return ethers.BigNumber.from(decimal).toNumber()
+  } catch (err) {
+    throw new Error(`Invalid provider: ${err}`)
+  }
 }

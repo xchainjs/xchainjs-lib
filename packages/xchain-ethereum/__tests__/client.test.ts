@@ -642,33 +642,4 @@ describe('Client Test', () => {
 
     expect(txResult.hash).toEqual('0xbc5f55b97b816d1c30138d26bce5434ff28828b15ee79aa79aebf70f786a3fe8')
   })
-
-  it('getDecimal', async () => {
-    const ethClient = new Client({
-      network: 'testnet',
-      phrase,
-    })
-
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_all_api(
-      etherscanUrl,
-      ropstenInfuraUrl,
-      ropstenAlchemyUrl,
-      'eth_call',
-      '0x0000000000000000000000000000000000000000000000000000000000000006',
-    )
-
-    const eth_decimal = await ethClient.getDecimal(AssetETH)
-    expect(eth_decimal).toEqual(ETH_DECIMAL)
-
-    const usdt_decimal = await ethClient.getDecimal({
-      chain: ETHChain,
-      ticker: 'USDT',
-      symbol: 'USDT-0x62e273709da575835c7f6aef4a31140ca5b1d190',
-    })
-    expect(usdt_decimal).toEqual(6)
-  })
 })

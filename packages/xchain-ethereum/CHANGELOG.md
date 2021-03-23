@@ -1,5 +1,11 @@
 # v.x.x.x
 
+# v.0.16.0 (2021-03-23)
+
+### Breaking change
+
+- move `getDecimal` from client to util
+
 # v.0.15.0 (2021-03-23)
 
 ### Add
