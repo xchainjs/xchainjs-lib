@@ -1,3 +1,9 @@
+# v.0.13.2 (2021-04-01)
+
+### Update
+
+- Updates `getDefaultClientUrl` to use new mainnet endpoints
+
 # v.0.13.1 (2021-03-18)
 
 ### Fix
@@ -11,7 +17,7 @@
 - replace `find`, `findIndex`
 - Update @xchainjs/xchain-client package to 0.7.0
 - Update @xchainjs/xchain-cosmos package to 0.11.0
-  
+
 # v.0.12.0 (2021-02-24)
 
 ### Breaking change
