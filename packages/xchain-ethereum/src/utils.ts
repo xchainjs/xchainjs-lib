@@ -7,6 +7,8 @@ import {
   ETHChain,
   BaseAmount,
   assetToString,
+  assetAmount,
+  assetToBase,
 } from '@xchainjs/xchain-util'
 import { ethers, BigNumber, providers } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
@@ -17,6 +19,8 @@ import {
   TokenTransactionInfo,
   FeesWithGasPricesAndLimits,
   GasPrices,
+  TransactionOperation,
+  TransactionInfo,
 } from './types'
 import erc20ABI from './data/erc20.json'
 
@@ -169,6 +173,69 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
     date: new Date(parseInt(tx.timeStamp) * 1000),
     type: 'transfer',
     hash: tx.hash,
+  }
+}
+
+/**
+ * Get transactions from operation
+ *
+ * @param {TransactionOperation} operation
+ * @returns {Tx|null} The parsed transaction.
+ */
+export const getTxFromEthplorerTokenOperation = (operation: TransactionOperation): Tx | null => {
+  const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
+  const { symbol, address } = operation.tokenInfo
+  if (validateSymbol(symbol) && validateAddress(address)) {
+    const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${address}`)
+    if (tokenAsset) {
+      return {
+        asset: tokenAsset,
+        from: [
+          {
+            from: operation.from,
+            amount: baseAmount(operation.value, decimals),
+          },
+        ],
+        to: [
+          {
+            to: operation.to,
+            amount: baseAmount(operation.value, decimals),
+          },
+        ],
+        date: new Date(operation.timestamp * 1000),
+        type: operation.type === 'transfer' ? 'transfer' : 'unknown',
+        hash: operation.transactionHash,
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Get transactions from ETH transaction
+ *
+ * @param {TransactionInfo} txInfo
+ * @returns {Tx} The parsed transaction.
+ */
+export const getTxFromEthplorerEthTransaction = (txInfo: TransactionInfo): Tx => {
+  return {
+    asset: AssetETH,
+    from: [
+      {
+        from: txInfo.from,
+        amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
+      },
+    ],
+    to: [
+      {
+        to: txInfo.to,
+        amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
+      },
+    ],
+    date: new Date(txInfo.timestamp * 1000),
+    type: 'transfer',
+    hash: txInfo.hash,
   }
 }
 

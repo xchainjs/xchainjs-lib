@@ -1,5 +1,12 @@
 # v.x.x.x
 
+# v.0.17.0 (2021-04-02)
+
+### Update
+
+- update `getBalance` to use ethplorer API for mainnet
+- update `getTransactionData` to use ethplorer API for mainnet
+
 # v.0.16.0 (2021-03-23)
 
 ### Breaking change
