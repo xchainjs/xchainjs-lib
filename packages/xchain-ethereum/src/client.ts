@@ -103,8 +103,8 @@ export default class Client implements XChainClient, EthereumClient {
   private etherscanApiKey?: string
   private explorerUrl: ExplorerUrl
   private infuraCreds: InfuraCreds | null = null
-  private ethplorerUrl = ''
-  private ethplorerApiKey = ''
+  private ethplorerUrl: string
+  private ethplorerApiKey: string
 
   /**
    * Constructor
@@ -112,8 +112,8 @@ export default class Client implements XChainClient, EthereumClient {
    */
   constructor({
     network = 'testnet',
-    ethplorerUrl = '',
-    ethplorerApiKey = '',
+    ethplorerUrl = 'https://api.ethplorer.io',
+    ethplorerApiKey = 'freekey',
     explorerUrl,
     phrase,
     etherscanApiKey,
@@ -133,8 +133,8 @@ export default class Client implements XChainClient, EthereumClient {
     }
 
     this.etherscan = new EtherscanProvider(this.network, etherscanApiKey)
-    this.setEthplorerURL(ethplorerUrl)
-    this.setEthplorerAPIKey(ethplorerApiKey)
+    this.ethplorerUrl = ethplorerUrl
+    this.ethplorerApiKey = ethplorerApiKey
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
 
     if (infuraCreds) {
@@ -155,26 +155,6 @@ export default class Client implements XChainClient, EthereumClient {
   purgeClient = (): void => {
     this.address = null
     this.wallet = null
-  }
-
-  /**
-   * Set/Update the ethplorer url.
-   *
-   * @param {string} url The new ethplorer url.
-   * @returns {void}
-   */
-  setEthplorerURL = (url: string): void => {
-    this.ethplorerUrl = url
-  }
-
-  /**
-   * Set/Update the ethplorer api key.
-   *
-   * @param {string} key The new ethplorer api key.
-   * @returns {void}
-   */
-  setEthplorerAPIKey = (key: string): void => {
-    this.ethplorerApiKey = key
   }
 
   /**
@@ -518,7 +498,7 @@ export default class Client implements XChainClient, EthereumClient {
         if (txInfo.operations && txInfo.operations.length > 0) {
           const tx = getTxFromEthplorerTokenOperation(txInfo.operations[0])
           if (!tx) {
-            throw new Error('Need to provide valid txId')
+            throw new Error('Could not parse transaction data')
           }
 
           return tx
@@ -556,7 +536,7 @@ export default class Client implements XChainClient, EthereumClient {
         }
 
         if (!tx) {
-          throw new Error('Need to provide valid txId')
+          throw new Error('Could not get transaction history')
         }
 
         return tx
