@@ -1,5 +1,13 @@
 # v.x.x.x
 
+# v.0.17.0 (2021-04-02)
+
+### Update
+
+- update `getBalance` to use ethplorer API for mainnet
+- update `getTransactionData` to use ethplorer API for mainnet
+- update dependencies (ethers, xchain-util)
+
 # v.0.16.0 (2021-03-23)
 
 ### Breaking change
@@ -21,6 +29,7 @@
 - update `getTokenAddress` to return checksum address
 
 ### Breaking change
+
 - change parameter of `getTokenAddress`
 
 # v.0.14.1 (2021-03-08)
@@ -57,7 +66,7 @@
 
 - replace `find`, `findIndex`
 - Update @xchainjs/xchain-client package to 0.7.0
-  
+
 # v.0.12.1 (2021-02-26)
 
 ### Fix
@@ -73,7 +82,7 @@
 
 ### Fix
 
-- Remove trailing slashes from `getDefaultExplorerURL`. 
+- Remove trailing slashes from `getDefaultExplorerURL`.
 
 # v.0.11.1 (2020-02-21)
 
