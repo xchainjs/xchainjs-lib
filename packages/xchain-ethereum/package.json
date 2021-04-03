@@ -37,15 +37,15 @@
   "devDependencies": {
     "@xchainjs/xchain-client": "^0.7.0",
     "@xchainjs/xchain-crypto": "^0.2.3",
-    "@xchainjs/xchain-util": "^0.2.2",
+    "@xchainjs/xchain-util": "^0.2.6",
     "axios": "^0.21.0",
-    "ethers": "^5.0.9"
+    "ethers": "^5.1.0"
   },
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.7.0",
     "@xchainjs/xchain-crypto": "^0.2.3",
-    "@xchainjs/xchain-util": "^0.2.2",
+    "@xchainjs/xchain-util": "^0.2.6",
     "axios": "^0.21.0",
-    "ethers": "^5.0.9"
+    "ethers": "^5.1.0"
   }
 }
