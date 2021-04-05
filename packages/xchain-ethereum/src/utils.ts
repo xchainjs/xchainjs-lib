@@ -1,4 +1,4 @@
-import { Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
+import { Balances, Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetETH,
@@ -21,6 +21,7 @@ import {
   GasPrices,
   TransactionOperation,
   TransactionInfo,
+  TokenBalance,
 } from './types'
 import erc20ABI from './data/erc20.json'
 
@@ -352,4 +353,32 @@ export const getDecimal = async (asset: Asset, provider: providers.Provider): Pr
   } catch (err) {
     throw new Error(`Invalid provider: ${err}`)
   }
+}
+
+/**
+ * Get Token Balances
+ *
+ * @param {Array<TokenBalance>} tokenBalances
+ * @returns {Array<Balance>} the parsed balances
+ *
+ */
+export const getTokenBalances = (tokenBalances: TokenBalance[]): Balances => {
+  return tokenBalances.reduce((acc, cur) => {
+    const decimals = parseInt(cur.tokenInfo.decimals)
+    const { symbol, address: tokenAddress } = cur.tokenInfo
+    if (validateSymbol(symbol) && validateAddress(tokenAddress)) {
+      const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${ethers.utils.getAddress(tokenAddress)}`)
+      if (tokenAsset) {
+        return [
+          ...acc,
+          {
+            asset: tokenAsset,
+            amount: baseAmount(cur.balance, decimals),
+          },
+        ]
+      }
+    }
+
+    return acc
+  }, [] as Balances)
 }

@@ -77,10 +77,21 @@ export const getETHTransactionHistory = async ({
   if (startblock) url += `&startblock=${startblock}`
   if (endblock) url += `&endblock=${endblock}`
 
-  const ethTransactions: ETHTransactionInfo[] = await axios.get(url).then((response) => response.data.result)
-  return filterSelfTxs(ethTransactions)
-    .filter((tx) => !bn(tx.value).isZero())
-    .map(getTxFromEthTransaction)
+  try {
+    const result = await axios.get(url).then((response) => response.data.result)
+    if (JSON.stringify(result).includes('Invalid API Key')) {
+      return Promise.reject(new Error('Invalid API Key'))
+    }
+    if (typeof result !== typeof []) {
+      throw new Error(result)
+    }
+
+    return filterSelfTxs<ETHTransactionInfo>(result)
+      .filter((tx) => !bn(tx.value).isZero())
+      .map(getTxFromEthTransaction)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 /**
@@ -112,11 +123,19 @@ export const getTokenTransactionHistory = async ({
   if (startblock) url += `&startblock=${startblock}`
   if (endblock) url += `&endblock=${endblock}`
 
-  const tokenTransactions: TokenTransactionInfo[] = await axios.get(url).then((response) => response.data.result)
-  return filterSelfTxs(tokenTransactions)
-    .filter((tx) => !bn(tx.value).isZero())
-    .reduce((acc, cur) => {
-      const tx = getTxFromTokenTransaction(cur)
-      return tx ? [...acc, tx] : acc
-    }, [] as Txs)
+  try {
+    const result = await axios.get(url).then((response) => response.data.result)
+    if (JSON.stringify(result).includes('Invalid API Key')) {
+      return Promise.reject(new Error('Invalid API Key'))
+    }
+
+    return filterSelfTxs<TokenTransactionInfo>(result)
+      .filter((tx) => !bn(tx.value).isZero())
+      .reduce((acc, cur) => {
+        const tx = getTxFromTokenTransaction(cur)
+        return tx ? [...acc, tx] : acc
+      }, [] as Txs)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
