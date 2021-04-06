@@ -9,7 +9,7 @@ import {
 import { BigNumberish } from 'ethers'
 import { Txs } from '@xchainjs/xchain-client/lib'
 import { filterSelfTxs, getTxFromEthTransaction, getTxFromTokenTransaction } from './utils'
-import { bn } from '@xchainjs/xchain-util/lib'
+import { bn, bnOrZero } from '@xchainjs/xchain-util/lib'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 
@@ -87,7 +87,7 @@ export const getETHTransactionHistory = async ({
     }
 
     return filterSelfTxs<ETHTransactionInfo>(result)
-      .filter((tx) => !bn(tx.value).isZero())
+      .filter((tx) => !bnOrZero(tx.value).isZero())
       .map(getTxFromEthTransaction)
   } catch (error) {
     return Promise.reject(error)
@@ -130,7 +130,7 @@ export const getTokenTransactionHistory = async ({
     }
 
     return filterSelfTxs<TokenTransactionInfo>(result)
-      .filter((tx) => !bn(tx.value).isZero())
+      .filter((tx) => !bnOrZero(tx.value).isZero())
       .reduce((acc, cur) => {
         const tx = getTxFromTokenTransaction(cur)
         return tx ? [...acc, tx] : acc
