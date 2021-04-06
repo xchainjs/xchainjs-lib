@@ -9,7 +9,7 @@ import {
 import { BigNumberish } from 'ethers'
 import { Txs } from '@xchainjs/xchain-client/lib'
 import { filterSelfTxs, getTxFromEthTransaction, getTxFromTokenTransaction } from './utils'
-import { bn, bnOrZero } from '@xchainjs/xchain-util/lib'
+import { bnOrZero } from '@xchainjs/xchain-util/lib'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 
