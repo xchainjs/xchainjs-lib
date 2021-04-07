@@ -620,6 +620,29 @@ export default class Client implements XChainClient, EthereumClient {
   }
 
   /**
+   * Estimate gas limit of approve.
+   *
+   * @param {Address} spender The spender address.
+   * @param {Address} sender The sender address.
+   * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
+   * @returns {BigNumber} The estimated gas limit.
+   */
+  estimateApprove = async (spender: Address, sender: Address, amount?: BaseAmount): Promise<BigNumber> => {
+    try {
+      const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
+      const gasLimit = await this.estimateCall(sender, erc20ABI, 'approve', [
+        spender,
+        txAmount,
+        { from: this.getAddress() },
+      ])
+
+      return gasLimit
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  /**
    * Transfer ETH.
    *
    * @param {TxParams} params The transfer options.

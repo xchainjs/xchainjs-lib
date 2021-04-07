@@ -543,6 +543,25 @@ describe('Client Test', () => {
     expect(isApproved).toEqual(false)
   })
 
+  it('estimateApprove', async () => {
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+    })
+
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+
+    const gasLimit = await ethClient.estimateApprove(
+      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      baseAmount(100, ETH_DECIMAL),
+    )
+    expect(gasLimit.eq(21000)).toBeTruthy()
+  })
+
   it('approve', async () => {
     const ethClient = new Client({
       network: 'testnet',
