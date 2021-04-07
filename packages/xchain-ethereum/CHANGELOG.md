@@ -1,5 +1,12 @@
 # v.x.x.x
 
+# v.0.17.1 (2021-04-06)
+
+### Update
+
+- update tests for utils
+- update error messages
+
 # v.0.17.0 (2021-04-02)
 
 ### Update

@@ -30,7 +30,7 @@ export interface TokenInfo {
   facebook?: string
   coingecko?: string
   ethTransfersCount: number
-  price: boolean | PriceInfo
+  price: boolean | PriceInfo | unknown
   publicTags?: string[]
   txsCount?: number
   transfersCount?: number

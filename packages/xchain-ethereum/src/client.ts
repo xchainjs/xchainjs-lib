@@ -39,8 +39,6 @@ import {
   delay,
   assetAmount,
   assetToBase,
-  assetFromString,
-  ETHChain,
 } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as ethplorerAPI from './ethplorer-api'
@@ -57,9 +55,9 @@ import {
   MAX_APPROVAL,
   ETHAddress,
   getDefaultGasPrices,
-  validateSymbol,
   getTxFromEthplorerTokenOperation,
   getTxFromEthplorerEthTransaction,
+  getTokenBalances,
 } from './utils'
 
 /**
@@ -365,19 +363,7 @@ export default class Client implements XChainClient, EthereumClient {
         ]
 
         if (account.tokens) {
-          account.tokens.forEach((token) => {
-            const decimals = parseInt(token.tokenInfo.decimals)
-            const { symbol, address: tokenAddress } = token.tokenInfo
-            if (validateSymbol(symbol) && this.validateAddress(tokenAddress)) {
-              const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${ethers.utils.getAddress(tokenAddress)}`)
-              if (tokenAsset) {
-                balances.push({
-                  asset: tokenAsset,
-                  amount: baseAmount(token.balance, decimals),
-                })
-              }
-            }
-          })
+          balances.push(...getTokenBalances(account.tokens))
         }
 
         return balances
