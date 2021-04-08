@@ -39,3 +39,9 @@ export type GasPrices = Record<C.FeeOptionKey, BaseAmount>
 export type FeesParams = C.FeesParams & C.TxParams
 
 export type FeesWithGasPricesAndLimits = { fees: C.Fees; gasPrices: GasPrices; gasLimit: BigNumber }
+
+export type ApproveParams = {
+  spender: Address
+  sender: Address
+  amount?: BaseAmount
+}
