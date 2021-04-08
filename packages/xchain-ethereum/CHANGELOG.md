@@ -1,6 +1,12 @@
 # v.x.x.x
 
-# v.0.17.2 (2021-04-06)
+# v.0.18.0 (2021-04-08)
+
+### breaking changes
+
+- change parameters of `approve` function to an object 
+
+### Update
 
 - update `approve` function to accept `feeOptionKey` parameter
 
