@@ -606,6 +606,7 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @param {Address} spender The spender address.
    * @param {Address} sender The sender address.
+   * @param {feeOptionKey} FeeOptionKey Fee option (optional)
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @returns {TransactionResponse} The transaction result.
    */
