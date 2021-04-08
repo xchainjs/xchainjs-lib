@@ -1,5 +1,9 @@
 # v.x.x.x
 
+# v.0.17.2 (2021-04-06)
+
+- update `approve` function to accept `feeOptionKey` parameter
+
 # v.0.17.1 (2021-04-06)
 
 ### Update
