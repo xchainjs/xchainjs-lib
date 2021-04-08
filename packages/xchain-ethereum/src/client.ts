@@ -610,14 +610,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @returns {TransactionResponse} The transaction result.
    */
-  approve = async ({
-    spender,
-    sender,
-    feeOptionKey,
-    amount,
-  }: ApproveParams & {
-    feeOptionKey?: FeeOptionKey
-  }): Promise<TransactionResponse> => {
+  approve = async ({ spender, sender, feeOptionKey, amount }: ApproveParams): Promise<TransactionResponse> => {
     const gasPrice =
       feeOptionKey &&
       BigNumber.from(
@@ -653,7 +646,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @returns {BigNumber} The estimated gas limit.
    */
-  estimateApprove = async ({ spender, sender, amount }: ApproveParams): Promise<BigNumber> => {
+  estimateApprove = async ({ spender, sender, amount }: Omit<ApproveParams, 'feeOptionKey'>): Promise<BigNumber> => {
     try {
       const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
       const gasLimit = await this.estimateCall(sender, erc20ABI, 'approve', [

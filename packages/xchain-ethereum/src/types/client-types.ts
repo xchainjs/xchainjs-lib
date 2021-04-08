@@ -1,6 +1,7 @@
 import { ethers, BigNumber } from 'ethers'
 import { BaseAmount } from '@xchainjs/xchain-util'
 import * as C from '@xchainjs/xchain-client'
+import { FeeOptionKey } from '@xchainjs/xchain-client'
 
 export type Address = string
 
@@ -43,5 +44,6 @@ export type FeesWithGasPricesAndLimits = { fees: C.Fees; gasPrices: GasPrices; g
 export type ApproveParams = {
   spender: Address
   sender: Address
+  feeOptionKey?: FeeOptionKey
   amount?: BaseAmount
 }
