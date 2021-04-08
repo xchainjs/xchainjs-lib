@@ -554,11 +554,11 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
 
-    const gasLimit = await ethClient.estimateApprove(
-      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      '0xdac17f958d2ee523a2206206994597c13d831ec7',
-      baseAmount(100, ETH_DECIMAL),
-    )
+    const gasLimit = await ethClient.estimateApprove({
+      spender: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      sender: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      amount: baseAmount(100, ETH_DECIMAL),
+    })
     expect(gasLimit.eq(21000)).toBeTruthy()
   })
 
@@ -577,15 +577,16 @@ describe('Client Test', () => {
       ropstenInfuraUrl,
       ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0x2bf12770e674a9c1918a16f0bb9d85b1041ac2a7b8fca4066b5707252acdc05e',
+      '0x168ecebeeca0cd33d7151fa334cf8279ccacb58e855ede8276dfe6f77cafd55c',
     )
 
-    const tx = await ethClient.approve(
-      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-      baseAmount(100, ETH_DECIMAL),
-    )
-    expect(tx.hash).toEqual('0x2bf12770e674a9c1918a16f0bb9d85b1041ac2a7b8fca4066b5707252acdc05e')
+    const tx = await ethClient.approve({
+      spender: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      sender: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
+      feeOptionKey: 'fastest',
+      amount: baseAmount(100, ETH_DECIMAL),
+    })
+    expect(tx.hash).toEqual('0x168ecebeeca0cd33d7151fa334cf8279ccacb58e855ede8276dfe6f77cafd55c')
   })
 
   it('estimate call', async () => {
