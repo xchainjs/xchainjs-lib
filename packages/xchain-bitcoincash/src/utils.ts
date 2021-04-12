@@ -147,7 +147,7 @@ export const bchNetwork = (network: Network): BCHNetwork => {
  * @returns {string} The address prefix based on the network.
  *
  **/
-export const getPrefix = (network: string) => (network === 'testnet' ? 'bchtest:' : 'bitcoincash:')
+export const getPrefix = (network: string) => (network === 'testnet' ? 'm' : '1')
 
 /**
  * Convert to Legacy Address.
@@ -157,16 +157,6 @@ export const getPrefix = (network: string) => (network === 'testnet' ? 'bchtest:
  */
 export const toLegacyAddress = (address: Address): Address => {
   return bchaddr.toLegacyAddress(address)
-}
-
-/**
- * Convert to Cash Address.
- *
- * @param {Address} address
- * @returns {Address} Cash address.
- */
-export const toCashAddress = (address: Address): Address => {
-  return bchaddr.toCashAddress(address)
 }
 
 /**
