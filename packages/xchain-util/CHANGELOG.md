@@ -2,7 +2,7 @@
 
 ### Breaking changes
 
-- remove decimal and round down
+- Remove decimal of division result + Round down
 
 # v.0.2.6 (2021-03-16)
 
