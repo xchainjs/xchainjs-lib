@@ -1,3 +1,9 @@
+# v.0.13.3 (2021-04-12)
+
+### Breaking changes
+
+- Change `/addresses` to `/address` for explorer url.
+
 # v.0.13.2 (2021-04-01)
 
 ### Update

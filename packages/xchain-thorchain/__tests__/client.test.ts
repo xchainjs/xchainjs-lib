@@ -484,12 +484,12 @@ describe('Client Test', () => {
 
   it('should retrun valid explorer address url', () => {
     expect(thorClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
-      'https://testnet.thorchain.net/#/addresses/anotherTestAddressHere',
+      'https://testnet.thorchain.net/#/address/anotherTestAddressHere',
     )
 
     thorClient.setNetwork('mainnet')
     expect(thorClient.getExplorerAddressUrl('testAddressHere')).toEqual(
-      'https://thorchain.net/#/addresses/testAddressHere',
+      'https://thorchain.net/#/address/testAddressHere',
     )
   })
 
