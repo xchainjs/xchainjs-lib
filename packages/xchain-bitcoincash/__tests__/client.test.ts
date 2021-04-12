@@ -19,8 +19,8 @@ describe('BCHClient Test', () => {
 
   const MEMO = 'SWAP:THOR.RUNE'
   const phrase = 'atom green various power must another rent imitate gadget creek fat then'
-  const testnet_address = 'bchtest:qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g'
-  const mainnet_address = 'bitcoincash:qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
+  const testnet_address = 'motwRaFk6Dj1FroSATNNLWYfYQHiz8z1oi'
+  const mainnet_address = '1Anw7uzLwXxBykMLeKb2BPAyTKsSfVDA8A'
 
   it('set phrase should return correct address', () => {
     bchClient.setNetwork('testnet')
