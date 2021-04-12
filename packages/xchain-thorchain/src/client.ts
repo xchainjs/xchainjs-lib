@@ -248,7 +248,7 @@ class Client implements ThorchainClient, XChainClient {
    * @returns {string} The explorer url for the given address.
    */
   getExplorerAddressUrl = (address: Address): string => {
-    return `${this.getExplorerUrl()}/addresses/${address}`
+    return `${this.getExplorerUrl()}/address/${address}`
   }
 
   /**
