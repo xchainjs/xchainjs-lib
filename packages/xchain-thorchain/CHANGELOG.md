@@ -3,6 +3,10 @@
 ### Breaking changes
 
 - Change `/addresses` to `/address` for explorer url.
+  
+### Update
+
+- Add util helpers for address/tx urls.
 
 # v.0.13.2 (2021-04-01)
 

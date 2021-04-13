@@ -1,7 +1,7 @@
 import { Asset, assetToString, baseAmount, assetFromString, THORChain } from '@xchainjs/xchain-util'
-import { AssetRune } from './types'
+import { AssetRune, ExplorerUrl } from './types'
 import { TxResponse, RawTxResponse } from '@xchainjs/xchain-cosmos'
-import { Txs, TxFrom, TxTo, Fees, Network } from '@xchainjs/xchain-client'
+import { Txs, TxFrom, TxTo, Fees, Network, Address } from '@xchainjs/xchain-client'
 import { AccAddress, codec, Msg } from 'cosmos-client'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 import { StdTx } from 'cosmos-client/x/auth'
@@ -240,4 +240,59 @@ export const getDefaultFees = (): Fees => {
  */
 export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string => {
   return Buffer.from(txData, encoding).toString().slice(4)
+}
+
+/**
+ * Get the explorer url.
+ *
+ * @returns {ExplorerUrl} The explorer url (both mainnet and testnet) for thorchain.
+ */
+export const getDefaultExplorerUrl = (): ExplorerUrl => {
+  return {
+    testnet: 'https://testnet.thorchain.net/#',
+    mainnet: 'https://thorchain.net/#',
+  }
+}
+
+/**
+ * Get the explorer url.
+ *
+ * @param {Network} network
+ * @returns {string} The explorer url for thorchain based on the given network.
+ */
+export const getExplorerUrl = (network: Network): string => {
+  return getDefaultExplorerUrl()[network]
+}
+
+/**
+ * Get the explorer url for the given address.
+ *
+ * @param {Network} network
+ * @param {Address} address
+ * @returns {string} The explorer url for the given address.
+ */
+export const getExplorerAddressUrl = (network: Network, address: Address): string => {
+  return `${getExplorerUrl(network)}/address/${address}`
+}
+
+/**
+ * Get the explorer url for the given node.
+ *
+ * @param {Network} network
+ * @param {Address} node address
+ * @returns {string} The explorer url for the given node.
+ */
+export const getExplorerNodeUrl = (network: Network, address: Address): string => {
+  return `${getExplorerUrl(network)}/nodes/${address}`
+}
+
+/**
+ * Get the explorer url for the given transaction id.
+ *
+ * @param {Network} network
+ * @param {string} txID
+ * @returns {string} The explorer url for the given transaction id.
+ */
+export const getExplorerTxUrl = (network: Network, txID: string): string => {
+  return `${getExplorerUrl(network)}/txs/${txID}`
 }
