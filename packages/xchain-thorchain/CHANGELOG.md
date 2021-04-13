@@ -6,7 +6,7 @@
   
 ### Update
 
-- Add util helpers for address/tx urls.
+- Add util helpers for explorer urls.
 
 # v.0.13.2 (2021-04-01)
 
