@@ -1,5 +1,15 @@
 import { AssetRune } from '../src/types'
-import { getDenom, getDenomWithChain, getAsset, getTxsFromHistory, isBroadcastSuccess } from '../src/util'
+import {
+  getDenom,
+  getDenomWithChain,
+  getAsset,
+  getTxsFromHistory,
+  isBroadcastSuccess,
+  getDefaultExplorerAddressUrl,
+  getDefaultExplorerTxUrl,
+  getDefaultExplorerNodeUrl,
+  getDefaultExplorerUrlByNetwork,
+} from '../src/util'
 import { baseAmount } from '@xchainjs/xchain-util'
 import { RawTxResponse, TxResponse } from '@xchainjs/xchain-cosmos/src/cosmos/types'
 import { Msg } from 'cosmos-client'
@@ -140,5 +150,37 @@ describe('thorchain/util', () => {
         })
       })
     })
+  })
+
+  it('should return valid explorer url', () => {
+    expect(getDefaultExplorerUrlByNetwork('testnet')).toEqual('https://testnet.thorchain.net/#')
+
+    expect(getDefaultExplorerUrlByNetwork('mainnet')).toEqual('https://thorchain.net/#')
+  })
+
+  it('should retrun valid explorer address url', () => {
+    expect(getDefaultExplorerAddressUrl('testnet', 'anotherTestAddressHere')).toEqual(
+      'https://testnet.thorchain.net/#/address/anotherTestAddressHere',
+    )
+
+    expect(getDefaultExplorerAddressUrl('mainnet', 'testAddressHere')).toEqual(
+      'https://thorchain.net/#/address/testAddressHere',
+    )
+  })
+
+  it('should retrun valid explorer tx url', () => {
+    expect(getDefaultExplorerTxUrl('testnet', 'anotherTestTxHere')).toEqual(
+      'https://testnet.thorchain.net/#/txs/anotherTestTxHere',
+    )
+
+    expect(getDefaultExplorerTxUrl('mainnet', 'testTxHere')).toEqual('https://thorchain.net/#/txs/testTxHere')
+  })
+
+  it('should retrun valid explorer node url', () => {
+    expect(getDefaultExplorerNodeUrl('testnet', 'anotherTestNodeHere')).toEqual(
+      'https://testnet.thorchain.net/#/nodes/anotherTestNodeHere',
+    )
+
+    expect(getDefaultExplorerNodeUrl('mainnet', 'testNodeHere')).toEqual('https://thorchain.net/#/nodes/testNodeHere')
   })
 })
