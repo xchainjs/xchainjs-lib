@@ -36,6 +36,7 @@ import {
   getPrefix,
   registerCodecs,
   getTxType,
+  getDefaultExplorerUrl,
 } from './util'
 
 const MSG_SEND = 'send'
@@ -81,7 +82,7 @@ class Client implements ThorchainClient, XChainClient {
   constructor({ network = 'testnet', phrase, clientUrl, explorerUrl }: XChainClientParams & ThorchainClientParams) {
     this.network = network
     this.clientUrl = clientUrl || this.getDefaultClientUrl()
-    this.explorerUrl = explorerUrl || this.getDefaultExplorerUrl()
+    this.explorerUrl = explorerUrl || getDefaultExplorerUrl()
     this.thorClient = this.getNewThorClient()
 
     if (phrase) this.setPhrase(phrase)
@@ -193,18 +194,6 @@ class Client implements ThorchainClient, XChainClient {
    */
   getExplorerUrl = (): string => {
     return this.getExplorerUrlByNetwork(this.network)
-  }
-
-  /**
-   * Get the explorer url.
-   *
-   * @returns {ExplorerUrl} The explorer url (both mainnet and testnet) for thorchain.
-   */
-  private getDefaultExplorerUrl = (): ExplorerUrl => {
-    return {
-      testnet: 'https://testnet.thorchain.net/#',
-      mainnet: 'https://thorchain.net/#',
-    }
   }
 
   /**

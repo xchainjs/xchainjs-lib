@@ -5,10 +5,10 @@ import {
   getAsset,
   getTxsFromHistory,
   isBroadcastSuccess,
-  getExplorerUrl,
-  getExplorerAddressUrl,
-  getExplorerTxUrl,
-  getExplorerNodeUrl,
+  getDefaultExplorerAddressUrl,
+  getDefaultExplorerTxUrl,
+  getDefaultExplorerNodeUrl,
+  getDefaultExplorerUrlByNetwork,
 } from '../src/util'
 import { baseAmount } from '@xchainjs/xchain-util'
 import { RawTxResponse, TxResponse } from '@xchainjs/xchain-cosmos/src/cosmos/types'
@@ -153,34 +153,34 @@ describe('thorchain/util', () => {
   })
 
   it('should return valid explorer url', () => {
-    expect(getExplorerUrl('testnet')).toEqual('https://testnet.thorchain.net/#')
+    expect(getDefaultExplorerUrlByNetwork('testnet')).toEqual('https://testnet.thorchain.net/#')
 
-    expect(getExplorerUrl('mainnet')).toEqual('https://thorchain.net/#')
+    expect(getDefaultExplorerUrlByNetwork('mainnet')).toEqual('https://thorchain.net/#')
   })
 
   it('should retrun valid explorer address url', () => {
-    expect(getExplorerAddressUrl('testnet', 'anotherTestAddressHere')).toEqual(
+    expect(getDefaultExplorerAddressUrl('testnet', 'anotherTestAddressHere')).toEqual(
       'https://testnet.thorchain.net/#/address/anotherTestAddressHere',
     )
 
-    expect(getExplorerAddressUrl('mainnet', 'testAddressHere')).toEqual(
+    expect(getDefaultExplorerAddressUrl('mainnet', 'testAddressHere')).toEqual(
       'https://thorchain.net/#/address/testAddressHere',
     )
   })
 
   it('should retrun valid explorer tx url', () => {
-    expect(getExplorerTxUrl('testnet', 'anotherTestTxHere')).toEqual(
+    expect(getDefaultExplorerTxUrl('testnet', 'anotherTestTxHere')).toEqual(
       'https://testnet.thorchain.net/#/txs/anotherTestTxHere',
     )
 
-    expect(getExplorerTxUrl('mainnet', 'testTxHere')).toEqual('https://thorchain.net/#/txs/testTxHere')
+    expect(getDefaultExplorerTxUrl('mainnet', 'testTxHere')).toEqual('https://thorchain.net/#/txs/testTxHere')
   })
 
   it('should retrun valid explorer node url', () => {
-    expect(getExplorerNodeUrl('testnet', 'anotherTestNodeHere')).toEqual(
+    expect(getDefaultExplorerNodeUrl('testnet', 'anotherTestNodeHere')).toEqual(
       'https://testnet.thorchain.net/#/nodes/anotherTestNodeHere',
     )
 
-    expect(getExplorerNodeUrl('mainnet', 'testNodeHere')).toEqual('https://thorchain.net/#/nodes/testNodeHere')
+    expect(getDefaultExplorerNodeUrl('mainnet', 'testNodeHere')).toEqual('https://thorchain.net/#/nodes/testNodeHere')
   })
 })

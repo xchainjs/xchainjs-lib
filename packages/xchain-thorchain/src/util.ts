@@ -260,7 +260,7 @@ export const getDefaultExplorerUrl = (): ExplorerUrl => {
  * @param {Network} network
  * @returns {string} The explorer url for thorchain based on the given network.
  */
-export const getExplorerUrl = (network: Network): string => {
+export const getDefaultExplorerUrlByNetwork = (network: Network): string => {
   return getDefaultExplorerUrl()[network]
 }
 
@@ -271,8 +271,8 @@ export const getExplorerUrl = (network: Network): string => {
  * @param {Address} address
  * @returns {string} The explorer url for the given address.
  */
-export const getExplorerAddressUrl = (network: Network, address: Address): string => {
-  return `${getExplorerUrl(network)}/address/${address}`
+export const getDefaultExplorerAddressUrl = (network: Network, address: Address): string => {
+  return `${getDefaultExplorerUrlByNetwork(network)}/address/${address}`
 }
 
 /**
@@ -282,8 +282,8 @@ export const getExplorerAddressUrl = (network: Network, address: Address): strin
  * @param {Address} node address
  * @returns {string} The explorer url for the given node.
  */
-export const getExplorerNodeUrl = (network: Network, address: Address): string => {
-  return `${getExplorerUrl(network)}/nodes/${address}`
+export const getDefaultExplorerNodeUrl = (network: Network, address: Address): string => {
+  return `${getDefaultExplorerUrlByNetwork(network)}/nodes/${address}`
 }
 
 /**
@@ -293,6 +293,6 @@ export const getExplorerNodeUrl = (network: Network, address: Address): string =
  * @param {string} txID
  * @returns {string} The explorer url for the given transaction id.
  */
-export const getExplorerTxUrl = (network: Network, txID: string): string => {
-  return `${getExplorerUrl(network)}/txs/${txID}`
+export const getDefaultExplorerTxUrl = (network: Network, txID: string): string => {
+  return `${getDefaultExplorerUrlByNetwork(network)}/txs/${txID}`
 }
