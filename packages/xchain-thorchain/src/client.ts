@@ -22,7 +22,7 @@ import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { PrivKey, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 
-import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, ExplorerUrl, NodeUrl } from './types'
+import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, ExplorerUrl, NodeUrl, Retry } from './types'
 import { MsgNativeTx, msgNativeTxFromJson, ThorchainDepositResponse, TxResult } from './types/messages'
 import {
   getDenom,
@@ -51,7 +51,7 @@ export interface ThorchainClient {
   setExplorerUrl(explorerUrl: ExplorerUrl): void
   getExplorerNodeUrl(node: Address): string
 
-  deposit(params: DepositParam): Promise<TxHash>
+  deposit(params: DepositParam & Retry): Promise<TxHash>
 }
 
 /**
@@ -304,13 +304,13 @@ class Client implements ThorchainClient, XChainClient {
    * Throws an error if phrase has not been set before
    * */
   private getPrivateKey = (): PrivKey => {
-    if (!this.privateKey) {
+    if (this.privateKey) {
       if (!this.phrase) throw new Error('Phrase not set')
 
       this.privateKey = this.thorClient.getPrivKeyFromMnemonic(this.phrase)
     }
 
-    return this.privateKey
+    return this.privateKey as PrivKey
   }
 
   /**
@@ -565,9 +565,14 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"insufficient funds"} Thrown if the wallet has insufficient funds.
    * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
    */
-  deposit = async ({ asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
+  deposit = async ({ asset = AssetRune, amount, memo, noRetry = 0 }: DepositParam & Retry): Promise<TxHash> => {
+    const MAX_NUMBER_RETRY = 3
     try {
       const assetBalance = await this.getBalance(this.getAddress(), [asset])
+
+      if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(DEFAULT_GAS_VALUE))) {
+        throw new Error('insufficient funds')
+      }
 
       const signer = this.getAddress()
       const msgNativeTx = msgNativeTxFromJson({
@@ -580,25 +585,35 @@ class Client implements ThorchainClient, XChainClient {
         memo,
         signer,
       })
+
       const unsignedStdTx = await this.buildDepositTx(msgNativeTx)
+      const privateKey = this.getPrivateKey()
+      const accAddress = AccAddress.fromBech32(signer)
       const fee = unsignedStdTx.fee
-      fee.gas = '1000000' // fee.gas temporarily hardcoded since the value returned is too high, causing "insufficient funds" errors for users with enough RUNE
+      // set gas to `auto`
+      fee.gas = 'auto'
 
-      if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.gas ?? 0))) {
-        throw new Error('insufficient funds')
-      }
-
-      const transferResult = await this.thorClient.signAndBroadcast(
-        unsignedStdTx,
-        this.getPrivateKey(),
-        AccAddress.fromBech32(signer),
-      )
-
-      if (!isBroadcastSuccess(transferResult)) {
-        throw new Error(`failed to broadcast transaction: ${transferResult.txhash}`)
-      }
-
-      return transferResult?.txhash || ''
+      // broadcast tx to the network
+      // Note: We have seen it might fail first, but with another try it goes out successfully
+      // That's why we will try to sent this tx up to three times
+      return this.thorClient
+        .signAndBroadcast(unsignedStdTx, privateKey, accAddress)
+        .then((result) => {
+          const txHash = result?.txhash ?? ''
+          if (!isBroadcastSuccess(result)) {
+            throw Error(`failed to broadcast transaction: ${txHash}`)
+          } else {
+            return txHash
+          }
+        })
+        .catch((error: Error) => {
+          // re-try sending tx (up to 3x defined in MAX_NUMBER_RETRY)
+          if (noRetry < MAX_NUMBER_RETRY) {
+            return this.deposit({ asset, amount, memo, noRetry: noRetry + 1 })
+          } else {
+            return Promise.reject(error)
+          }
+        })
     } catch (error) {
       return Promise.reject(error)
     }

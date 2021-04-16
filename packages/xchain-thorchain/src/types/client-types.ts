@@ -26,5 +26,9 @@ export type DepositParam = {
   memo: string
 }
 
+export type Retry = {
+  noRetry?: number
+}
+
 export const THORChain = 'THOR'
 export const AssetRune: Asset = { chain: THORChain, symbol: 'RUNE', ticker: 'RUNE' }
