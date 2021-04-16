@@ -1,3 +1,9 @@
+# v.0.13.3-1 (2021-04-16)
+
+### Update
+
+- Temporarily hardcodes `fee.gas` in deposit function since the value returned from buildDepositTx is too high, causing transactions from users with sufficient RUNE being rejected.
+
 # v.0.13.3 (2021-04-12)
 
 ### Breaking changes

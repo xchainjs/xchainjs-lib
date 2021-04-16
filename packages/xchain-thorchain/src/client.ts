@@ -582,6 +582,7 @@ class Client implements ThorchainClient, XChainClient {
       })
       const unsignedStdTx = await this.buildDepositTx(msgNativeTx)
       const fee = unsignedStdTx.fee
+      fee.gas = '1000000' // fee.gas temporarily hardcoded since the value returned is too high, causing "insufficient funds" errors for users with enough RUNE
 
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.gas ?? 0))) {
         throw new Error('insufficient funds')
