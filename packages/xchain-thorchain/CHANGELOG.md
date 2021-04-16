@@ -3,7 +3,7 @@
 ### Update
 
 - Temporarily hardcodes `fee.gas` in deposit function since the value returned from buildDepositTx is too high, causing transactions from users with sufficient RUNE being rejected.
-- Updates `DEFAULT_GAS_VALUE` to `20000000`
+- Updates `DEFAULT_GAS_VALUE` to `2000000`
 
 # v.0.13.3 (2021-04-12)
 
