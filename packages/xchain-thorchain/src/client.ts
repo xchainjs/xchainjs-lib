@@ -304,7 +304,7 @@ class Client implements ThorchainClient, XChainClient {
    * Throws an error if phrase has not been set before
    * */
   private getPrivateKey = (): PrivKey => {
-    if (this.privateKey) {
+    if (!this.privateKey) {
       if (!this.phrase) throw new Error('Phrase not set')
 
       this.privateKey = this.thorClient.getPrivKeyFromMnemonic(this.phrase)
