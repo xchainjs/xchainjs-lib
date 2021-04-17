@@ -7,7 +7,7 @@ import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 import { StdTx } from 'cosmos-client/x/auth'
 
 export const DECIMAL = 8
-export const DEFAULT_GAS_VALUE = '10000000'
+export const DEFAULT_GAS_VALUE = '2000000'
 
 /**
  * Get denomination from Asset

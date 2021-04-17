@@ -1,3 +1,11 @@
+# v.0.13.4 (2021-04-16)
+
+### Update
+
+- Set `fee.gas` to `auto` in `deposit`
+- Try sending `deposit` tx up to 3x
+- Updates `DEFAULT_GAS_VALUE` to `2000000`
+
 # v.0.13.3 (2021-04-12)
 
 ### Breaking changes
