@@ -1,3 +1,7 @@
+# v.0.12.2 (2021-04-19)
+
+- Export `calFee`
+
 # v.0.12.1 (2021-03-02)
 
 - Export `validateAddress`
