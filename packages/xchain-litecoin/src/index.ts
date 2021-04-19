@@ -8,5 +8,6 @@ export {
   getPrefix,
   LTC_DECIMAL,
   validateAddress,
+  calcFee,
 } from './utils'
 export { createTxInfo } from './ledger'
