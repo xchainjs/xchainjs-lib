@@ -1,3 +1,9 @@
+# v.0.13.5 (2021-04-16)
+
+### Update
+
+- Set `fee.gas` to `1000000` (one million) in `deposit`
+
 # v.0.13.4 (2021-04-16)
 
 ### Update
@@ -11,7 +17,7 @@
 ### Breaking changes
 
 - Change `/addresses` to `/address` for explorer url.
-  
+
 ### Update
 
 - Add util helpers for explorer urls.
