@@ -580,7 +580,7 @@ class Client implements ThorchainClient, XChainClient {
       const accAddress = AccAddress.fromBech32(signer)
       const fee = unsignedStdTx.fee
       // set gas to `auto`
-      fee.gas = '1000000'
+      fee.gas = '10000000'
 
       // broadcast tx to the network
       // Note: We have seen it might fail first, but with another try it goes out successfully
