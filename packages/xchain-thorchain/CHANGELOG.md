@@ -1,3 +1,9 @@
+# v.0.13.6 (2021-04-16)
+
+### Update
+
+- Set `fee.gas` to `10000000` (ten million) in `deposit` due to failing withdraw transactions
+
 # v.0.13.5 (2021-04-16)
 
 ### Update
