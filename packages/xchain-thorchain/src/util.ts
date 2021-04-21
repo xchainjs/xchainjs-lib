@@ -8,6 +8,9 @@ import { StdTx } from 'cosmos-client/x/auth'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'
+export const MSG_SEND = 'send'
+export const MSG_DEPOSIT = 'deposit'
+export const MAX_TX_COUNT = 100
 
 /**
  * Get denomination from Asset
