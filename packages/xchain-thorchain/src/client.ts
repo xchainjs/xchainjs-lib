@@ -39,9 +39,9 @@ import {
   getDefaultExplorerUrl,
 } from './util'
 
-const MSG_SEND = 'send'
-const MSG_DEPOSIT = 'deposit'
-const MAX_TX_COUNT = 100
+export const MSG_SEND = 'send'
+export const MSG_DEPOSIT = 'deposit'
+export const MAX_TX_COUNT = 100
 
 /**
  * Interface for custom Thorchain client
@@ -219,6 +219,14 @@ class Client implements ThorchainClient, XChainClient {
       prefix: getPrefix(this.network),
       derive_path: this.derive_path,
     })
+  }
+
+  /**
+   * Get cosmos clinet
+   * @returns {CosmosSDKClient} current cosmos client
+   */
+  getCosmosClient = (): CosmosSDKClient => {
+    return this.thorClient
   }
 
   /**
