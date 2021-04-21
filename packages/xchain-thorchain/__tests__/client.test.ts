@@ -99,6 +99,10 @@ describe('Client Test', () => {
     expect(thorClient.getAddress()).toEqual(mainnet_address)
   })
 
+  it('should allow to get the CosmosSDKClient', async () => {
+    expect(thorClient.getCosmosClient()).toBeTruthy()
+  })
+
   it('should update net', async () => {
     const client = new Client({ phrase, network: 'mainnet' })
     client.setNetwork('testnet')
