@@ -1,3 +1,11 @@
+# v.0.13.7 (2021-04-21)
+
+### Update
+
+- Export `MSG_SEND` `MSG_DEPOSIT` `MAX_COUNT`
+- Added `getCosmosClient()` 
+- Extend `getTransactions` parameters with an optional `filterFn`
+
 # v.0.13.6 (2021-04-16)
 
 ### Update

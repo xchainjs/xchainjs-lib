@@ -2,7 +2,7 @@ import nock from 'nock'
 
 import { TxsPage } from '@xchainjs/xchain-client'
 import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
-import { RPCResponse, RPCTxSearchResult, TxResponse } from '@xchainjs/xchain-cosmos'
+import { RPCResponse, RPCTxSearchResult, TxResponse, CosmosSDKClient } from '@xchainjs/xchain-cosmos'
 import { Msg } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 import { BroadcastTxCommitResult, Coin, BaseAccount, StdTxFee } from 'cosmos-client/api'
@@ -97,6 +97,10 @@ describe('Client Test', () => {
 
     thorClient.setNetwork('mainnet')
     expect(thorClient.getAddress()).toEqual(mainnet_address)
+  })
+
+  it('should allow to get the CosmosSDKClient', async () => {
+    expect(thorClient.getCosmosClient()).toBeInstanceOf(CosmosSDKClient)
   })
 
   it('should update net', async () => {

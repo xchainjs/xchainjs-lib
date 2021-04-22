@@ -37,11 +37,10 @@ import {
   registerCodecs,
   getTxType,
   getDefaultExplorerUrl,
+  MAX_TX_COUNT,
+  MSG_DEPOSIT,
+  MSG_SEND,
 } from './util'
-
-const MSG_SEND = 'send'
-const MSG_DEPOSIT = 'deposit'
-const MAX_TX_COUNT = 100
 
 /**
  * Interface for custom Thorchain client
@@ -51,6 +50,7 @@ export interface ThorchainClient {
   getClientUrl(): NodeUrl
   setExplorerUrl(explorerUrl: ExplorerUrl): void
   getExplorerNodeUrl(node: Address): string
+  getCosmosClient(): CosmosSDKClient
 
   deposit(params: DepositParam): Promise<TxHash>
 }
@@ -222,6 +222,14 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
+   * Get cosmos client
+   * @returns {CosmosSDKClient} current cosmos client
+   */
+  getCosmosClient = (): CosmosSDKClient => {
+    return this.thorClient
+  }
+
+  /**
    * Get the chain id.
    *
    * @returns {string} The chain id based on the network.
@@ -363,7 +371,9 @@ class Client implements ThorchainClient, XChainClient {
    * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
    */
-  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
+  getTransactions = async (
+    params?: TxHistoryParams & { filterFn?: (tx: RPCTxResult) => boolean },
+  ): Promise<TxsPage> => {
     const messageAction = undefined
     const address = (params && params.address) || this.getAddress()
     const offset = params?.offset || 0
@@ -405,10 +415,14 @@ class Client implements ThorchainClient, XChainClient {
           (acc, tx) => [...acc, ...(acc.length === 0 || acc[acc.length - 1].hash !== tx.hash ? [tx] : [])],
           [] as RPCTxResult[],
         )
-        .filter((tx) => {
-          const action = getTxType(tx.tx_result.data, 'base64')
-          return action === MSG_DEPOSIT || action === MSG_SEND
-        })
+        .filter(
+          params?.filterFn
+            ? params.filterFn
+            : (tx) => {
+                const action = getTxType(tx.tx_result.data, 'base64')
+                return action === MSG_DEPOSIT || action === MSG_SEND
+              },
+        )
         .filter((_, index) => index < MAX_TX_COUNT)
 
       const total = history.length
