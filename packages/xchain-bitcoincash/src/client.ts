@@ -43,6 +43,7 @@ type BitcoinCashClientParams = XChainClientParams & {
 class Client implements BitcoinCashClient, XChainClient {
   private network: Network
   private phrase = ''
+  private derivationPath: string =''
   private haskoinUrl: ClientUrl
   private nodeUrl: ClientUrl
   private nodeAuth?: NodeAuth
@@ -68,15 +69,17 @@ class Client implements BitcoinCashClient, XChainClient {
       username: 'thorchain',
       password: 'password',
     },
+    derivationPath,
   }: BitcoinCashClientParams) {
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
+    this.derivationPath = derivationPath || this.derivePath()
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
       // by strictly passing nodeAuth as null value
       nodeAuth === null ? undefined : nodeAuth
-    phrase && this.setPhrase(phrase)
+    phrase && this.setPhrase(phrase, this.derivationPath)
   }
 
   /**
@@ -121,14 +124,16 @@ class Client implements BitcoinCashClient, XChainClient {
    * Set/update a new phrase.
    *
    * @param {string} phrase A new phrase.
+   * @param {string} derivationPath bip44 derivation path
    * @returns {Address} The address from the given phrase
    *
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, derivationPath?: string): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
+      this.derivationPath = derivationPath || this.derivePath()
       const address = this.getAddress()
       return address
     } else {
@@ -218,16 +223,17 @@ class Client implements BitcoinCashClient, XChainClient {
    * Private function to get keyPair from the this.phrase
    *
    * @param {string} phrase The phrase to be used for generating privkey
+   * @param {string} derivationPath BIP44 derivation path
    * @returns {PrivateKey} The privkey generated from the given phrase
    *
    * @throws {"Invalid phrase"} Thrown if invalid phrase is provided.
    * */
-  private getBCHKeys = (phrase: string): KeyPair => {
+  private getBCHKeys = (phrase: string, derivationPath: string): KeyPair => {
     try {
       const rootSeed = getSeed(phrase)
       const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
 
-      const derive_path = this.derivePath()
+      const derive_path = derivationPath
       return masterHDNode.derivePath(derive_path).keyPair
     } catch (error) {
       throw new Error('Invalid phrase')
@@ -248,7 +254,7 @@ class Client implements BitcoinCashClient, XChainClient {
   getAddress = (): Address => {
     if (this.phrase) {
       try {
-        const keys = this.getBCHKeys(this.phrase)
+        const keys = this.getBCHKeys(this.phrase, this.derivationPath)
         const address = keys.getAddress()
 
         return utils.toLegacyAddress(address)
@@ -421,7 +427,7 @@ class Client implements BitcoinCashClient, XChainClient {
         network: this.network,
       })
 
-      const keyPair = this.getBCHKeys(this.phrase)
+      const keyPair = this.getBCHKeys(this.phrase, this.derivationPath)
 
       utxos.forEach((utxo, index) => {
         builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)
