@@ -58,7 +58,7 @@ describe('BinanceClient Test', () => {
   const mainnetaddress_path1 = 'bnb1vjlcrl5d9t8sexzajsr57taqmxf6jpmgng3gmn'
 
   const testnetaddress_path0 = 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj'
-  const testnetaddress_path1 = 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj'
+  const testnetaddress_path1 = 'tbnb1vjlcrl5d9t8sexzajsr57taqmxf6jpmgaacvmz'
 
   const singleTxFee = baseAmount(37500)
   const transferFee = { type: 'base', average: singleTxFee, fast: singleTxFee, fastest: singleTxFee }
@@ -78,7 +78,7 @@ describe('BinanceClient Test', () => {
   })
 
   afterEach(async () => {
-    if (bnbClient) bnbClient.purgeClient()
+    bnbClient.purgeClient()
   })
 
   it('should start with empty wallet', async () => {
@@ -101,7 +101,7 @@ describe('BinanceClient Test', () => {
     const bnbClientEmptyTest = new BinanceClient({ phrase, network: 'testnet', derivationPath: '0' })
     const addressTest = bnbClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnetaddress_path0)
-    const bnbClientEmptyTest_path1 = new BinanceClient({ phrase, network: 'mainnet', derivationPath: '1' })
+    const bnbClientEmptyTest_path1 = new BinanceClient({ phrase, network: 'testnet', derivationPath: '1' })
     expect(bnbClientEmptyTest_path1.getAddress()).toEqual(testnetaddress_path1)
   })
 

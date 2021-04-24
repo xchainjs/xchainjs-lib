@@ -232,7 +232,7 @@ class Client implements BinanceClient, XChainClient {
 
       this.privateKey = crypto.getPrivateKeyFromMnemonic(
         this.phrase,
-        this.derivationPath ? true : false,
+        this.derivationPath && true || undefined,
         this.derivationPath,
       )
     }
