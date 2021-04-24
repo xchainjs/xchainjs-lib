@@ -3,6 +3,7 @@ import { MIN_TX_FEE } from '../src/const'
 import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
+import { getDerivePath } from '../src/utils'
 mockSochainApi.init()
 
 const btcClient = new Client({ network: 'mainnet', sochainUrl: 'https://sochain.com/api/v2' })
@@ -16,17 +17,31 @@ describe('BitcoinClient Test', () => {
   const MEMO = 'SWAP:THOR.RUNE'
   // please don't touch the tBTC in these
   const phraseOne = 'atom green various power must another rent imitate gadget creek fat then'
-  const addyOne = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
+  // https://iancoleman.io/bip39/
+  // Select BTC - Bitcoin Testnet; BIP84
+  // m/84'/1'/0'/0/0
+  const addyOnePath0 = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
+  // m/84'/1'/0'/0/1
+  const addyOnePath1 = 'tb1qut59ufcscqnkp8fgac68pj2ps5dzjjg4qq2hsy'
   const addyTwo = 'tb1qz8q2lwfmp965cszdd5raq9m7gljs57hkzpw56d'
 
+  const phraseOneMainnet_path0 = 'bc1qvdux5606j2zh5f4724wvnywe6gcj2tcrzz7wdl'
+  const phraseOneMainnet_path1 = 'bc1qnnkssp3sgfjjk2m0z9thjay0psp6ehlt6dzd97'
+
   // Third ones is used only for balance verification
-  const phraseThree = 'quantum vehicle print stairs canvas kid erode grass baby orbit lake remove'
-  const addyThree = 'tb1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rzgjhra4'
+  const phraseTwo = 'quantum vehicle print stairs canvas kid erode grass baby orbit lake remove'
+  // m/84'/1'/0'/0/0
+  const addyThreePath0 = 'tb1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rzgjhra4'
+  // m/84'/1'/0'/0/1
+  const addyThreePath1 = 'tb1q99peqcxyhu4f2fehxxn6k5v704qe84y0nkcl5t'
+
+  const phraseTwoMainnet_path0 = 'bc1qsn4ujsja3ukdlzjmc9tcgpeaxeauq0ga83xmds'
+  const phraseTwoMainnet_path1 = 'bc1q7c58pf87g73pk07ryq996jfa5nqkx2ppzjz8kq'
 
   it('set phrase should return correct address', () => {
     btcClient.setNetwork('testnet')
     const result = btcClient.setPhrase(phraseOne)
-    expect(result).toEqual(addyOne)
+    expect(result).toEqual(addyOnePath0)
   })
 
   it('should throw an error for setting a bad phrase', () => {
@@ -42,14 +57,14 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     const address = btcClient.getAddress()
     const valid = btcClient.validateAddress(address)
-    expect(address).toEqual(addyOne)
+    expect(address).toEqual(addyOnePath0)
     expect(valid).toBeTruthy()
   })
 
   it('should get the right balance', async () => {
     const expectedBalance = 15446
     btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseThree)
+    btcClient.setPhrase(phraseTwo)
     const balance = await btcClient.getBalance()
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
@@ -85,7 +100,7 @@ describe('BitcoinClient Test', () => {
     try {
       const txid = await btcClient.transfer({
         asset: AssetBTC,
-        recipient: addyThree,
+        recipient: addyThreePath0,
         amount,
         memo: MEMO,
         feeRate: 1,
@@ -100,7 +115,7 @@ describe('BitcoinClient Test', () => {
   it('should get the balance of an address without phrase', async () => {
     btcClient.setNetwork('testnet')
     btcClient.purgeClient()
-    const balance = await btcClient.getBalance(addyThree)
+    const balance = await btcClient.getBalance(addyThreePath0)
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(15446)
   })
@@ -210,9 +225,9 @@ describe('BitcoinClient Test', () => {
   it('should get address transactions', async () => {
     btcClient.setNetwork('testnet')
 
-    const txPages = await btcClient.getTransactions({ address: addyThree, limit: 4 })
+    const txPages = await btcClient.getTransactions({ address: addyThreePath0, limit: 4 })
 
-    expect(txPages.total).toEqual(1) //there is 1 tx in addyThree
+    expect(txPages.total).toEqual(1) //there is 1 tx in addyThreePath0
     expect(txPages.txs[0].asset).toEqual(AssetBTC)
     expect(txPages.txs[0].date).toEqual(new Date('2020-12-13T11:39:55.000Z'))
     expect(txPages.txs[0].hash).toEqual('6e7071a09e82d72c6c84d253047c38dbd7fea531b93155adfe10acfba41bca63')
@@ -224,8 +239,8 @@ describe('BitcoinClient Test', () => {
   it('should get address transactions with limit', async () => {
     btcClient.setNetwork('testnet')
     // Limit should work
-    const txPages = await btcClient.getTransactions({ address: addyThree, limit: 1 })
-    return expect(txPages.total).toEqual(1) //there 1 tx in addyThree
+    const txPages = await btcClient.getTransactions({ address: addyThreePath0, limit: 1 })
+    return expect(txPages.total).toEqual(1) //there 1 tx in addyThreePath0
   })
 
   it('should get transaction with hash', async () => {
@@ -272,5 +287,26 @@ describe('BitcoinClient Test', () => {
     expect(btcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://blockstream.info/testnet/tx/anotherTestTxHere',
     )
+  })
+
+  it('should derivate the address correctly', () => {
+    btcClient.setNetwork('mainnet')
+    btcClient.setPhrase(phraseOne, getDerivePath(0).mainnet)
+    expect(btcClient.getAddress()).toEqual(phraseOneMainnet_path0)
+    btcClient.setPhrase(phraseOne, getDerivePath(1).mainnet)
+    expect(btcClient.getAddress()).toEqual(phraseOneMainnet_path1)
+    btcClient.setPhrase(phraseTwo, getDerivePath(0).mainnet)
+    expect(btcClient.getAddress()).toEqual(phraseTwoMainnet_path0)
+    btcClient.setPhrase(phraseTwo, getDerivePath(1).mainnet)
+    expect(btcClient.getAddress()).toEqual(phraseTwoMainnet_path1)
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne, getDerivePath(0).testnet)
+    expect(btcClient.getAddress()).toEqual(addyOnePath0)
+    btcClient.setPhrase(phraseOne, getDerivePath(1).testnet)
+    expect(btcClient.getAddress()).toEqual(addyOnePath1)
+    btcClient.setPhrase(phraseTwo, getDerivePath(0).testnet)
+    expect(btcClient.getAddress()).toEqual(addyThreePath0)
+    btcClient.setPhrase(phraseTwo, getDerivePath(1).testnet)
+    expect(btcClient.getAddress()).toEqual(addyThreePath1)
   })
 })
