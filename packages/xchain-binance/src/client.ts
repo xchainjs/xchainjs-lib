@@ -79,6 +79,7 @@ class Client implements BinanceClient, XChainClient {
   private network: Network
   private bncClient: BncClient
   private phrase = ''
+  private derivationPath: number | undefined = undefined
   private address: Address = '' // default address at index 0
   private privateKey: PrivKey | null = null // default private key at index 0
 
@@ -92,10 +93,12 @@ class Client implements BinanceClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor({ network = 'testnet', phrase }: XChainClientParams) {
+  constructor({ network = 'testnet', phrase, derivationPath }: XChainClientParams) {
+    if (derivationPath && isNaN(parseInt(derivationPath || ''))) {
+      throw new Error('Invalid `derivationPath`: this should be a stringified index number')
+    }
     this.network = network
-    if (phrase) this.setPhrase(phrase)
-
+    if (phrase) this.setPhrase(phrase, derivationPath ? parseInt(derivationPath) : undefined)
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
   }
@@ -107,6 +110,7 @@ class Client implements BinanceClient, XChainClient {
    */
   purgeClient(): void {
     this.phrase = ''
+    this.derivationPath = undefined
     this.address = ''
     this.privateKey = null
   }
@@ -198,13 +202,14 @@ class Client implements BinanceClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, derivationPath?: number): Address => {
     if (!this.phrase || this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
       }
 
       this.phrase = phrase
+      this.derivationPath = derivationPath
       this.privateKey = null
       this.address = ''
     }
@@ -225,7 +230,11 @@ class Client implements BinanceClient, XChainClient {
     if (!this.privateKey) {
       if (!this.phrase) throw new Error('Phrase not set')
 
-      this.privateKey = crypto.getPrivateKeyFromMnemonic(this.phrase)
+      this.privateKey = crypto.getPrivateKeyFromMnemonic(
+        this.phrase,
+        this.derivationPath ? true : false,
+        this.derivationPath,
+      )
     }
 
     return this.privateKey
