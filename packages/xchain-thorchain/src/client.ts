@@ -66,8 +66,8 @@ class Client implements ThorchainClient, XChainClient {
   private phrase = ''
   private address: Address = ''
   private privateKey: PrivKey | null = null
-
-  private derive_path = "44'/931'/0'/0/0"
+  private derivationPath = ''
+  private DEFAULT_DERIVE_PATH = "44'/931'/0'/0/0"
 
   /**
    * Constructor
@@ -79,13 +79,20 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor({ network = 'testnet', phrase, clientUrl, explorerUrl }: XChainClientParams & ThorchainClientParams) {
+  constructor({
+    network = 'testnet',
+    phrase,
+    clientUrl,
+    explorerUrl,
+    derivationPath,
+  }: XChainClientParams & ThorchainClientParams) {
     this.network = network
     this.clientUrl = clientUrl || this.getDefaultClientUrl()
     this.explorerUrl = explorerUrl || getDefaultExplorerUrl()
     this.thorClient = this.getNewThorClient()
+    this.derivationPath = derivationPath || this.DEFAULT_DERIVE_PATH
 
-    if (phrase) this.setPhrase(phrase)
+    if (phrase) this.setPhrase(phrase, this.derivationPath)
   }
 
   /**
@@ -217,7 +224,7 @@ class Client implements ThorchainClient, XChainClient {
       server: this.getClientUrl().node,
       chainId: this.getChainId(),
       prefix: getPrefix(this.network),
-      derive_path: this.derive_path,
+      derive_path: this.derivationPath,
     })
   }
 
@@ -277,15 +284,16 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
-    if (this.phrase !== phrase) {
+  setPhrase = (phrase: string, derivationPath?: string): Address => {
+    if (this.phrase !== phrase || this.derivationPath !== derivationPath) {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
       }
-
+      this.derivationPath = derivationPath || this.DEFAULT_DERIVE_PATH
       this.phrase = phrase
       this.privateKey = null
       this.address = ''
+      this.thorClient = this.getNewThorClient()
     }
 
     return this.getAddress()
