@@ -77,6 +77,7 @@ export type Fees = FeeOption & {
 export type XChainClientParams = {
   network?: Network
   phrase?: string
+  derivationPath?: string
 }
 
 export interface XChainClient {
