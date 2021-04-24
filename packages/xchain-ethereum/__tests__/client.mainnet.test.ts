@@ -5,6 +5,11 @@ import { ETH_DECIMAL } from '../src/utils'
 import { mock_ethplorer_api_getAddress, mock_ethplorer_api_getTxInfo } from '../__mocks__/ethplorer-api'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
+// https://iancoleman.io/bip39/
+// m/44'/60'/0'/0/0
+const addrPath0 = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E'
+// m/44'/60'/0'/0/1
+const addrPath1 = '0x1804137641b5CB781226b361976F15B4067ee0F9'
 const ethplorerUrl = 'https://api.ethplorer.io'
 
 /**
@@ -17,6 +22,24 @@ describe('Client Test', () => {
 
   afterEach(() => {
     nock.cleanAll()
+  })
+
+  it('derive path correctly with bip44', () => {
+    const ethClientPath0 = new Client({
+      network: 'mainnet',
+      phrase,
+      ethplorerUrl,
+    })
+
+    const ethClientPath1 = new Client({
+      network: 'mainnet',
+      phrase,
+      derivationPath: "m/44'/60'/0'/0/1",
+      ethplorerUrl,
+    })
+
+    expect(ethClientPath0.getAddress()).toEqual(addrPath0.toLowerCase())
+    expect(ethClientPath1.getAddress()).toEqual(addrPath1.toLowerCase())
   })
 
   it('gets a balance without address args', async () => {

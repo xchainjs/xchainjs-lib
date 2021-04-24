@@ -119,6 +119,7 @@ export default class Client implements XChainClient, EthereumClient {
     ethplorerApiKey = 'freekey',
     explorerUrl,
     phrase,
+    derivationPath,
     etherscanApiKey,
     infuraCreds,
   }: ClientParams) {
@@ -145,7 +146,7 @@ export default class Client implements XChainClient, EthereumClient {
     }
 
     if (phrase) {
-      this.setPhrase(phrase)
+      this.setPhrase(phrase, derivationPath)
       this.changeWallet(this.getWallet().connect(this.provider))
     }
   }
@@ -327,12 +328,12 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, derivationPath?: string): Address => {
     if (!Crypto.validatePhrase(phrase)) {
       throw new Error('Invalid phrase')
     }
 
-    this.changeWallet(ethers.Wallet.fromMnemonic(phrase))
+    this.changeWallet(ethers.Wallet.fromMnemonic(phrase, derivationPath))
     return this.getAddress()
   }
 
