@@ -3,6 +3,7 @@ import { MIN_TX_FEE } from '../src/const'
 import { baseAmount, AssetLTC } from '@xchainjs/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
+import { getDerivePath } from '../src/utils'
 mockSochainApi.init()
 
 const ltcClient = new Client({ network: 'testnet' })
@@ -16,6 +17,12 @@ describe('LitecoinClient Test', () => {
   const MEMO = 'SWAP:THOR.RUNE'
   const phraseOne = 'atom green various power must another rent imitate gadget creek fat then'
   const addyOne = 'tltc1q2pkall6rf6v6j0cvpady05xhy37erndv05de7g'
+
+  const testnet_address_path0 = 'tltc1q2pkall6rf6v6j0cvpady05xhy37erndv05de7g'
+  const testnet_address_path1 = 'tltc1qut59ufcscqnkp8fgac68pj2ps5dzjjg4eggfqd'
+  const mainnet_address_path0 = 'ltc1qll0eutk38yy3jms0c85v4ey68z83c78h3fmsh3'
+  const mainnet_address_path1 = 'ltc1qsr5wh2sudyc7axh087lg7py6dsagphef63acgq'
+
 
   // const phraseTwo = 'green atom various power must another rent imitate gadget creek fat then'
   const addyTwo = 'tltc1ql68zjjdjx37499luueaw09avednqtge4u23q36'
@@ -45,6 +52,26 @@ describe('LitecoinClient Test', () => {
     const valid = ltcClient.validateAddress(address)
     expect(address).toEqual(addyOne)
     expect(valid).toBeTruthy()
+  })
+
+  it('set phrase with derivation path should return correct address', () => {
+    ltcClient.setNetwork('testnet')
+    expect(ltcClient.setPhrase(phraseOne, getDerivePath(0).testnet)).toEqual(testnet_address_path0)
+
+    ltcClient.setNetwork('mainnet')
+    expect(ltcClient.setPhrase(phraseOne, getDerivePath(0).mainnet)).toEqual(mainnet_address_path0)
+
+    ltcClient.setNetwork('testnet')
+    expect(ltcClient.setPhrase(phraseOne, getDerivePath(1).testnet)).toEqual(testnet_address_path1)
+
+    const otherBchPath1Test = new Client({phrase: phraseOne, network: 'testnet', derivationPath: "m/84'/1'/0'/0/1"})
+    expect(otherBchPath1Test.getAddress()).toEqual(testnet_address_path1)
+
+    ltcClient.setNetwork('mainnet')
+    expect(ltcClient.setPhrase(phraseOne, getDerivePath(1).mainnet)).toEqual(mainnet_address_path1)
+
+    const otherBchPath1TestM = new Client({phrase: phraseOne, network: 'mainnet', derivationPath: "m/84'/2'/0'/0/1"})
+    expect(otherBchPath1TestM.getAddress()).toEqual(mainnet_address_path1)
   })
 
   it('should get the right balance', async () => {

@@ -42,6 +42,7 @@ type LitecoinClientParams = XChainClientParams & {
 class Client implements LitecoinClient, XChainClient {
   private net: Network
   private phrase = ''
+  private derivationPath = ''
   private sochainUrl = ''
   private nodeUrl = ''
   private nodeAuth?: NodeAuth
@@ -62,9 +63,10 @@ class Client implements LitecoinClient, XChainClient {
       username: 'thorchain',
       password: 'password',
     },
+    derivationPath,
   }: LitecoinClientParams) {
     this.net = network
-
+    this.derivationPath = derivationPath || this.derivePath()
     this.nodeUrl = !!nodeUrl
       ? nodeUrl
       : network === 'mainnet'
@@ -77,7 +79,7 @@ class Client implements LitecoinClient, XChainClient {
       nodeAuth === null ? undefined : nodeAuth
 
     this.setSochainUrl(sochainUrl)
-    phrase && this.setPhrase(phrase)
+    phrase && this.setPhrase(phrase, this.derivationPath)
   }
 
   /**
@@ -99,9 +101,10 @@ class Client implements LitecoinClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, derivationPath?: string): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
+      this.derivationPath = derivationPath || this.derivePath()
       const address = this.getAddress()
       return address
     } else {
@@ -197,7 +200,7 @@ class Client implements LitecoinClient, XChainClient {
   getAddress = (): Address => {
     if (this.phrase) {
       const ltcNetwork = Utils.ltcNetwork(this.net)
-      const ltcKeys = this.getLtcKeys(this.phrase)
+      const ltcKeys = this.getLtcKeys(this.phrase, this.derivationPath)
 
       const { address } = Litecoin.payments.p2wpkh({
         pubkey: ltcKeys.publicKey,
@@ -223,9 +226,9 @@ class Client implements LitecoinClient, XChainClient {
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating LTC keys from the given phrase
    * */
-  private getLtcKeys = (phrase: string): Litecoin.ECPairInterface => {
+  private getLtcKeys = (phrase: string, derivationPath: string): Litecoin.ECPairInterface => {
     const ltcNetwork = Utils.ltcNetwork(this.net)
-    const derive_path = this.derivePath()
+    const derive_path = derivationPath
 
     const seed = getSeed(phrase)
     const master = Litecoin.bip32.fromSeed(seed, ltcNetwork).derivePath(derive_path)
@@ -433,7 +436,7 @@ class Client implements LitecoinClient, XChainClient {
         sochainUrl: this.sochainUrl,
         network: this.net,
       })
-      const ltcKeys = this.getLtcKeys(this.phrase)
+      const ltcKeys = this.getLtcKeys(this.phrase, this.derivationPath)
       psbt.signAllInputs(ltcKeys) // Sign all inputs
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
