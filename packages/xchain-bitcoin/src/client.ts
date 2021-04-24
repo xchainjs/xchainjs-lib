@@ -39,7 +39,7 @@ type BitcoinClientParams = XChainClientParams & {
 class Client implements BitcoinClient, XChainClient {
   private net: Network
   private phrase = ''
-  private derivationPath: string | undefined = undefined
+  private derivationPath: string = ''
   private sochainUrl = ''
   private blockstreamUrl = ''
 
@@ -53,7 +53,8 @@ class Client implements BitcoinClient, XChainClient {
     this.net = network
     this.setSochainUrl(sochainUrl || this.getDefaultSochainUrl())
     this.setBlockstreamUrl(blockstreamUrl || this.getDefaultBlockstreamUrl())
-    phrase && this.setPhrase(phrase, derivationPath)
+    this.derivationPath = derivationPath || this.derivePath()
+    phrase && this.setPhrase(phrase, this.derivationPath)
   }
 
   /**
@@ -98,7 +99,6 @@ class Client implements BitcoinClient, XChainClient {
    * Set/update a new phrase.
    *
    * @param {string} phrase A new phrase.
-   * @param {string} derivationPath optional derivationpath
    * @returns {Address} The address from the given phrase
    *
    * @throws {"Invalid phrase"}
@@ -107,7 +107,7 @@ class Client implements BitcoinClient, XChainClient {
   setPhrase = (phrase: string, derivationPath?: string): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      this.derivationPath = derivationPath
+      this.derivationPath = derivationPath || this.derivePath()
       const address = this.getAddress()
       return address
     } else {
@@ -122,7 +122,6 @@ class Client implements BitcoinClient, XChainClient {
    */
   purgeClient = (): void => {
     this.phrase = ''
-    this.derivationPath = undefined
   }
 
   /**
@@ -230,9 +229,9 @@ class Client implements BitcoinClient, XChainClient {
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating BTC keys from the given phrase
    * */
-  private getBtcKeys = (phrase: string, derivationPath?: string): Bitcoin.ECPairInterface => {
+  private getBtcKeys = (phrase: string, derivationPath: string): Bitcoin.ECPairInterface => {
     const btcNetwork = Utils.btcNetwork(this.net)
-    const derive_path = derivationPath || this.derivePath()
+    const derive_path = derivationPath
 
     const seed = getSeed(phrase)
     const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(derive_path)
@@ -437,7 +436,7 @@ class Client implements BitcoinClient, XChainClient {
         sochainUrl: this.sochainUrl,
         network: this.net,
       })
-      const btcKeys = this.getBtcKeys(this.phrase)
+      const btcKeys = this.getBtcKeys(this.phrase, this.derivationPath)
       psbt.signAllInputs(btcKeys) // Sign all inputs
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
