@@ -203,7 +203,7 @@ class Client implements BinanceClient, XChainClient {
    * Thrown if the given phase is invalid.
    */
   setPhrase = (phrase: string, derivationPath?: number): Address => {
-    if (!this.phrase || this.phrase !== phrase) {
+    if (!this.phrase || this.phrase !== phrase || this.derivationPath !== derivationPath) {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
       }
@@ -232,7 +232,7 @@ class Client implements BinanceClient, XChainClient {
 
       this.privateKey = crypto.getPrivateKeyFromMnemonic(
         this.phrase,
-        this.derivationPath && true || undefined,
+        (this.derivationPath && true) || undefined,
         this.derivationPath,
       )
     }
