@@ -64,14 +64,14 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork('testnet')
     expect(ltcClient.setPhrase(phraseOne, getDerivePath(1).testnet)).toEqual(testnet_address_path1)
 
-    const otherBchPath1Test = new Client({phrase: phraseOne, network: 'testnet', derivationPath: "m/84'/1'/0'/0/1"})
-    expect(otherBchPath1Test.getAddress()).toEqual(testnet_address_path1)
+    const otherLtcPath1Test = new Client({phrase: phraseOne, network: 'testnet', derivationPath: "m/84'/1'/0'/0/1"})
+    expect(otherLtcPath1Test.getAddress()).toEqual(testnet_address_path1)
 
     ltcClient.setNetwork('mainnet')
     expect(ltcClient.setPhrase(phraseOne, getDerivePath(1).mainnet)).toEqual(mainnet_address_path1)
 
-    const otherBchPath1TestM = new Client({phrase: phraseOne, network: 'mainnet', derivationPath: "m/84'/2'/0'/0/1"})
-    expect(otherBchPath1TestM.getAddress()).toEqual(mainnet_address_path1)
+    const otherLtcPath1TestM = new Client({phrase: phraseOne, network: 'mainnet', derivationPath: "m/84'/2'/0'/0/1"})
+    expect(otherLtcPath1TestM.getAddress()).toEqual(mainnet_address_path1)
   })
 
   it('should get the right balance', async () => {
