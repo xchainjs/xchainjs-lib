@@ -264,6 +264,19 @@ export const getDerivePath = (index = 0): DerivePath => ({
 })
 
 /**
+ * Get default root paths
+ * @param {Network} network
+ * @returns default root path
+ */
+export const getRootPath = (net: Network): string => {
+  const rootPaths = {
+    mainnet: `84'/0'/0'/0/`,
+    testnet: `84'/1'/0'/0/`,
+  }
+  return rootPaths[net]
+}
+
+/**
  * Calculate fees based on fee rate and memo.
  *
  * @param {FeeRate} feeRate

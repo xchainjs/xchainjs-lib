@@ -3,7 +3,6 @@ import { MIN_TX_FEE } from '../src/const'
 import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
-import { getDerivePath } from '../src/utils'
 mockSochainApi.init()
 
 const btcClient = new Client({ network: 'mainnet', sochainUrl: 'https://sochain.com/api/v2' })
@@ -291,22 +290,22 @@ describe('BitcoinClient Test', () => {
 
   it('should derivate the address correctly', () => {
     btcClient.setNetwork('mainnet')
-    btcClient.setPhrase(phraseOne, getDerivePath(0).mainnet)
+    btcClient.setPhrase(phraseOne, 0)
     expect(btcClient.getAddress()).toEqual(phraseOneMainnet_path0)
-    btcClient.setPhrase(phraseOne, getDerivePath(1).mainnet)
+    btcClient.setPhrase(phraseOne, 1)
     expect(btcClient.getAddress()).toEqual(phraseOneMainnet_path1)
-    btcClient.setPhrase(phraseTwo, getDerivePath(0).mainnet)
+    btcClient.setPhrase(phraseTwo, 0)
     expect(btcClient.getAddress()).toEqual(phraseTwoMainnet_path0)
-    btcClient.setPhrase(phraseTwo, getDerivePath(1).mainnet)
+    btcClient.setPhrase(phraseTwo, 1)
     expect(btcClient.getAddress()).toEqual(phraseTwoMainnet_path1)
     btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseOne, getDerivePath(0).testnet)
+    btcClient.setPhrase(phraseOne, 0)
     expect(btcClient.getAddress()).toEqual(addyOnePath0)
-    btcClient.setPhrase(phraseOne, getDerivePath(1).testnet)
+    btcClient.setPhrase(phraseOne, 1)
     expect(btcClient.getAddress()).toEqual(addyOnePath1)
-    btcClient.setPhrase(phraseTwo, getDerivePath(0).testnet)
+    btcClient.setPhrase(phraseTwo, 0)
     expect(btcClient.getAddress()).toEqual(addyThreePath0)
-    btcClient.setPhrase(phraseTwo, getDerivePath(1).testnet)
+    btcClient.setPhrase(phraseTwo, 1)
     expect(btcClient.getAddress()).toEqual(addyThreePath1)
   })
 })

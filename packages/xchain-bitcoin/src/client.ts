@@ -39,6 +39,8 @@ type BitcoinClientParams = XChainClientParams & {
 class Client implements BitcoinClient, XChainClient {
   private net: Network
   private phrase = ''
+  private rootPath: string = ''
+  private index: number = 0
   private derivationPath: string = ''
   private sochainUrl = ''
   private blockstreamUrl = ''
@@ -49,12 +51,14 @@ class Client implements BitcoinClient, XChainClient {
    *
    * @param {BitcoinClientParams} params
    */
-  constructor({ network = 'testnet', sochainUrl, blockstreamUrl, phrase, derivationPath }: BitcoinClientParams) {
+  constructor({ network = 'testnet', sochainUrl, blockstreamUrl, phrase, rootPath, index = 0 }: BitcoinClientParams) {
     this.net = network
     this.setSochainUrl(sochainUrl || this.getDefaultSochainUrl())
     this.setBlockstreamUrl(blockstreamUrl || this.getDefaultBlockstreamUrl())
-    this.derivationPath = derivationPath || this.derivePath()
-    phrase && this.setPhrase(phrase, this.derivationPath)
+    this.rootPath = rootPath || Utils.getRootPath(network)
+    this.index = index
+    this.derivationPath = this.derivePath()
+    phrase && this.setPhrase(phrase, index)
   }
 
   /**
@@ -104,10 +108,11 @@ class Client implements BitcoinClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, derivationPath?: string): Address => {
+  setPhrase = (phrase: string, index: number = 0): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      this.derivationPath = derivationPath || this.derivePath()
+      this.index = index
+      this.derivationPath = this.derivePath()
       const address = this.getAddress()
       return address
     } else {
@@ -138,6 +143,8 @@ class Client implements BitcoinClient, XChainClient {
       throw new Error('Network must be provided')
     } else {
       this.net = net
+      this.rootPath = Utils.getRootPath(net)
+      this.derivationPath = this.derivePath()
     }
   }
 
@@ -156,7 +163,11 @@ class Client implements BitcoinClient, XChainClient {
    * @returns {string} The bitcoin derivation path based on the network.
    */
   derivePath(): string {
-    const { testnet, mainnet } = Utils.getDerivePath()
+    // if rootPath is set
+    if (this.rootPath) {
+      return `${this.rootPath}${this.index}`
+    }
+    const { testnet, mainnet } = Utils.getDerivePath(this.index)
     return Utils.isTestnet(this.net) ? testnet : mainnet
   }
 

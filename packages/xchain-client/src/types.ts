@@ -77,7 +77,8 @@ export type Fees = FeeOption & {
 export type XChainClientParams = {
   network?: Network
   phrase?: string
-  derivationPath?: string
+  rootPath?: string;
+  index?: number;
 }
 
 export interface XChainClient {
@@ -91,7 +92,7 @@ export interface XChainClient {
   validateAddress(address: string): boolean
   getAddress(): Address
 
-  setPhrase(phrase: string): Address
+  setPhrase(phrase: string, index?: number): Address
 
   getBalance(address?: Address, assets?: Asset[]): Promise<Balances>
 
