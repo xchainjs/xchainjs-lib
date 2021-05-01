@@ -359,3 +359,16 @@ export const getDefaultFees = (): Fees => {
   const { fees } = getDefaultFeesWithRates()
   return fees
 }
+
+/**
+ * Get default root paths
+ * @param {Network} network
+ * @returns default root path
+ */
+export const getRootPath = (net: Network): string => {
+  const rootPaths = {
+    mainnet: `m/44'/145'/0'/0/`,
+    testnet: `m/44'/1'/0'/0/`,
+  }
+  return rootPaths[net]
+}

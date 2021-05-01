@@ -9,7 +9,7 @@ import {
   mock_getUnspents,
 } from '../__mocks__/api'
 import { baseAmount } from '@xchainjs/xchain-util'
-import { BCH_DECIMAL, getDerivePath } from '../src/utils'
+import { BCH_DECIMAL } from '../src/utils'
 
 const bchClient = new Client({ network: 'mainnet' })
 
@@ -34,25 +34,23 @@ describe('BCHClient Test', () => {
 
   it('set phrase with derivation path should return correct address', () => {
     bchClient.setNetwork('testnet')
-    expect(bchClient.setPhrase(phrase, getDerivePath(0).testnet)).toEqual(testnet_address_path0)
+    expect(bchClient.setPhrase(phrase)).toEqual(testnet_address_path0)
 
     bchClient.setNetwork('mainnet')
-    expect(bchClient.setPhrase(phrase, getDerivePath(0).mainnet)).toEqual(mainnet_address_path0)
+    expect(bchClient.setPhrase(phrase)).toEqual(mainnet_address_path0)
 
     bchClient.setNetwork('testnet')
-    expect(bchClient.setPhrase(phrase, getDerivePath(1).testnet)).toEqual(testnet_address_path1)
+    expect(bchClient.setPhrase(phrase, 1)).toEqual(testnet_address_path1)
 
-    const otherBchPath1Test = new Client({phrase, network: 'testnet', derivationPath: "m/44'/1'/0'/0/1"})
+    const otherBchPath1Test = new Client({ phrase, network: 'testnet', rootPath: "m/44'/1'/0'/0/", index: 1 })
     expect(otherBchPath1Test.getAddress()).toEqual(testnet_address_path1)
 
     bchClient.setNetwork('mainnet')
-    expect(bchClient.setPhrase(phrase, getDerivePath(1).mainnet)).toEqual(mainnet_address_path1)
+    expect(bchClient.setPhrase(phrase, 1)).toEqual(mainnet_address_path1)
 
-    const otherBchPath1TestM = new Client({phrase, network: 'mainnet', derivationPath: "m/44'/145'/0'/0/1"})
+    const otherBchPath1TestM = new Client({ phrase, network: 'mainnet', rootPath: "m/44'/145'/0'/0/", index: 1 })
     expect(otherBchPath1TestM.getAddress()).toEqual(mainnet_address_path1)
   })
-
-
 
   it('should throw an error for setting a bad phrase', () => {
     expect(() => bchClient.setPhrase('cat')).toThrow()

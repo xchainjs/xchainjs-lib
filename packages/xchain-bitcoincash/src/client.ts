@@ -35,6 +35,8 @@ type BitcoinCashClientParams = XChainClientParams & {
   haskoinUrl?: ClientUrl
   nodeUrl?: ClientUrl
   nodeAuth?: NodeAuth
+  rootPath?: string
+  index?: number
 }
 
 /**
@@ -43,7 +45,9 @@ type BitcoinCashClientParams = XChainClientParams & {
 class Client implements BitcoinCashClient, XChainClient {
   private network: Network
   private phrase = ''
-  private derivationPath: string =''
+  private rootPath = ''
+  private index = 0
+  private derivationPath = ''
   private haskoinUrl: ClientUrl
   private nodeUrl: ClientUrl
   private nodeAuth?: NodeAuth
@@ -69,17 +73,21 @@ class Client implements BitcoinCashClient, XChainClient {
       username: 'thorchain',
       password: 'password',
     },
-    derivationPath,
+    rootPath,
+    index = 0,
   }: BitcoinCashClientParams) {
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
-    this.derivationPath = derivationPath || this.derivePath()
+    this.rootPath = rootPath || utils.getRootPath(network)
+    this.index = index
+    this.derivationPath = this.derivePath()
+    phrase && this.setPhrase(phrase, index)
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
       // by strictly passing nodeAuth as null value
       nodeAuth === null ? undefined : nodeAuth
-    phrase && this.setPhrase(phrase, this.derivationPath)
+    phrase && this.setPhrase(phrase, index)
   }
 
   /**
@@ -130,10 +138,11 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, derivationPath?: string): Address => {
+  setPhrase = (phrase: string, index = 0): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      this.derivationPath = derivationPath || this.derivePath()
+      this.index = index
+      this.derivationPath = this.derivePath()
       const address = this.getAddress()
       return address
     } else {
@@ -159,11 +168,13 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork = (network: Network): void => {
-    if (network) {
-      this.network = network
-    } else {
+  setNetwork = (net: Network): void => {
+    if (!net) {
       throw new Error('Network must be provided')
+    } else {
+      this.network = net
+      this.rootPath = utils.getRootPath(net)
+      this.derivationPath = this.derivePath()
     }
   }
 
@@ -182,7 +193,11 @@ class Client implements BitcoinCashClient, XChainClient {
    * @returns {string} The bitcoin cash derivation path based on the network.
    */
   derivePath(): string {
-    const { testnet, mainnet } = utils.getDerivePath()
+    // if rootPath is set
+    if (this.rootPath) {
+      return `${this.rootPath}${this.index}`
+    }
+    const { testnet, mainnet } = utils.getDerivePath(this.index)
     return utils.isTestnet(this.network) ? testnet : mainnet
   }
 
@@ -251,11 +266,11 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (): Address => {
+  getAddress = (index = 0): Address => {
     if (this.phrase) {
       try {
         const keys = this.getBCHKeys(this.phrase, this.derivationPath)
-        const address = keys.getAddress()
+        const address = keys.getAddress(index)
 
         return utils.toLegacyAddress(address)
       } catch (error) {
