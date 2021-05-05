@@ -72,7 +72,7 @@ export interface EthereumClient {
     asset: Address,
     abi: ethers.ContractInterface,
     func: string,
-    params: Array<any>,
+    params: Array<unknown>,
   ): Promise<T>
   estimateCall(
     walletIndex: number,
@@ -563,7 +563,7 @@ export default class Client implements XChainClient, EthereumClient {
     contractAddress: Address,
     abi: ethers.ContractInterface,
     func: string,
-    params: Array<any>,
+    params: Array<unknown>,
   ): Promise<T> => {
     if (!contractAddress) {
       return Promise.reject(new Error('contractAddress must be provided'))
