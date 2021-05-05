@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-litecoin",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "Custom Litecoin client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -35,7 +35,8 @@
   "devDependencies": {
     "@types/bitcoinjs-lib": "^5.0.0",
     "@types/wif": "^2.0.1",
-    "@xchainjs/xchain-client": "^0.7.0",
+    "@xchainjs/xchain-client": "^0.8.0",
+    "@xchainjs/xchain-util": "^0.2.7",
     "@xchainjs/xchain-crypto": "^0.2.3",
     "axios-mock-adapter": "^1.19.0",
     "axios": "^0.21.0",
@@ -44,7 +45,8 @@
     "wif": "^2.0.6"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.7.0",
+    "@xchainjs/xchain-client": "^0.8.0",
+    "@xchainjs/xchain-util": "^0.2.7",
     "@xchainjs/xchain-crypto": "^0.2.3",
     "axios": "^0.21.0",
     "bitcoinjs-lib": "^5.2.0",
