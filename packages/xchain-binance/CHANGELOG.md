@@ -1,3 +1,10 @@
+# v.5.0.0 (2021-05-05)
+
+### Breaking change
+
+- Latest @xchainjs/xchain-client@0.8.0
+- Latest @xchainjs/xchain-util@0.2.7
+
 # v.4.7.0 (2021-03-02)
 
 ### Breaking change

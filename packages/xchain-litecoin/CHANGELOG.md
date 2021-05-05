@@ -1,16 +1,22 @@
+# v.0.5.0 (2021-05-05)
+
+### Breaking change
+
+- Latest @xchainjs/xchain-client@0.8.0
+- Latest @xchainjs/xchain-util@0.2.7
+
 # v.0.4.2 (2021-04-19)
 
-### Fix
+### Update
 
 - export Utils.`calFee`
 
 # v.0.4.1 (2021-03-14)
 
-### Fix
+### Update
 
 - export Utils.`validateAddress`
 - Fix default mainnet url
-
 
 # v.0.4.0 (2021-03-02)
 
@@ -18,7 +24,7 @@
 
 - replace `find`, `findIndex`
 - Update @xchainjs/xchain-client package to 0.7.0
-  
+
 # v.0.3.0 (2021-02-25)
 
 ### Breaking change

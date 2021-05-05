@@ -1,9 +1,16 @@
+# v.0.14.0 (2021-05-05)
+
+### Breaking change
+
+- Latest @xchainjs/xchain-client@0.8.0
+- Latest @xchainjs/xchain-util@0.2.7
+
 # v.0.13.7 (2021-04-21)
 
 ### Update
 
 - Export `MSG_SEND` `MSG_DEPOSIT` `MAX_COUNT`
-- Added `getCosmosClient()` 
+- Added `getCosmosClient()`
 - Extend `getTransactions` parameters with an optional `filterFn`
 
 # v.0.13.6 (2021-04-16)

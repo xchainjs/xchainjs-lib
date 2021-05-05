@@ -1,3 +1,10 @@
+# v.0.9.0 (2021-05-05)
+
+### Breaking change
+
+- Latest @xchainjs/xchain-client@0.8.0
+- Latest @xchainjs/xchain-util@0.2.7
+
 # v.0.8.0 (2021-04-12)
 
 ### Breaking changes
@@ -6,7 +13,7 @@
 
 # v.0.7.2 (2021-03-15)
 
-### Fix 
+### Fix
 
 - Fix default mainnet url
 
@@ -15,13 +22,14 @@
 ### Update
 
 - Update `getBalance` to include unconfirmed balances.
+
 # v.0.7.0 (2021-03-02)
 
 ### Breaking change
 
 - replace `find`, `findIndex`
 - Update @xchainjs/xchain-client package to 0.7.0
-  
+
 # v.0.6.0 (2021-02-26)
 
 ### Breaking change

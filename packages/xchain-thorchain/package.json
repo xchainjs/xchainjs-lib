@@ -33,7 +33,8 @@
   },
   "devDependencies": {
     "@types/big.js": "^6.0.0",
-    "@xchainjs/xchain-client": "^0.7.0",
+    "@xchainjs/xchain-client": "^0.8.0",
+    "@xchainjs/xchain-util": "^0.2.7",
     "@xchainjs/xchain-cosmos": "^0.11.0",
     "@xchainjs/xchain-crypto": "^0.2.3",
     "axios": "^0.21.0",
@@ -45,7 +46,8 @@
   },
   "dependencies": {},
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.7.0",
+    "@xchainjs/xchain-client": "^0.8.0",
+    "@xchainjs/xchain-util": "^0.2.7",
     "@xchainjs/xchain-cosmos": "^0.11.0",
     "@xchainjs/xchain-crypto": "^0.2.3",
     "axios": "^0.21.0",
