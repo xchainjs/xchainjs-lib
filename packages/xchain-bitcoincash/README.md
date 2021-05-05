@@ -13,7 +13,7 @@ yarn add @xchainjs/xchain-bitcoincash
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-bitcoincash`.
 
 ```
-yarn add axios @psf/bitcoincashjs-lib bchaddrjs
+yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios @psf/bitcoincashjs-lib bchaddrjs
 ```
 
 ## Service Providers
