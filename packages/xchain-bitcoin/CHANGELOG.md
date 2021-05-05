@@ -1,8 +1,19 @@
+# v.0.13.0 (2021-05-05)
+
+### Breaking change
+
+- Latest @xchainjs/xchain-client@0.8.0
+- Latest @xchainjs/xchain-util@0.2.7
+
 # v.0.12.2 (2021-04-19)
+
+### Update
 
 - Export `calFee`
 
 # v.0.12.1 (2021-03-02)
+
+### Update
 
 - Export `validateAddress`
 
@@ -12,7 +23,7 @@
 
 - replace `find`, `findIndex`
 - Update @xchainjs/xchain-client package to 0.7.0
-  
+
 # v.0.11.1 (2021-02-26)
 
 ### Update
