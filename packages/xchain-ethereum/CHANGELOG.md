@@ -1,10 +1,17 @@
 # v.x.x.x
 
+# v.0.19.0 (2021-05-05)
+
+### Breaking change
+
+- Latest @xchainjs/xchain-client@0.8.0
+- Latest @xchainjs/xchain-util@0.2.7
+
 # v.0.18.0 (2021-04-08)
 
-### breaking changes
+### Breaking changes
 
-- change parameters of `approve` function to an object 
+- change parameters of `approve` function to an object
 
 ### Update
 
