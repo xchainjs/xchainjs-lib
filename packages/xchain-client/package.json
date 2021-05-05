@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-client",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "license": "MIT",
   "main": "lib/index",
   "types": "lib/index",
@@ -16,9 +16,9 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@xchainjs/xchain-util": "^0.2.2"
+    "@xchainjs/xchain-util": "^0.2.7"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-util": "^0.2.2"
+    "@xchainjs/xchain-util": "^0.2.7"
   }
 }

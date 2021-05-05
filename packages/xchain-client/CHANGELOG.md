@@ -1,3 +1,9 @@
+# v.0.8.0 (2021-05-05)
+
+### Breaking change
+
+- Update @xchainjs/xchain-util package to 0.2.7
+
 # v.0.7.0 (2021-03-02)
 
 ### Breaking change
