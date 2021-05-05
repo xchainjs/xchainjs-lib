@@ -25,7 +25,7 @@ import { broadcastTx } from './node-api'
  * BitcoinCashClient Interface
  */
 interface BitcoinCashClient {
-  derivePath(): string
+  // derivePath(): string
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
@@ -38,6 +38,10 @@ type BitcoinCashClientParams = XChainClientParams & {
   rootPath?: string
   index?: number
 }
+const rootPaths = {
+  mainnet: `m/44'/145'/0'/0/`,
+  testnet: `m/44'/1'/0'/0/`,
+}
 
 /**
  * Custom Bitcoin Cash client
@@ -45,9 +49,6 @@ type BitcoinCashClientParams = XChainClientParams & {
 class Client implements BitcoinCashClient, XChainClient {
   private network: Network
   private phrase = ''
-  private rootPath = ''
-  private index = 0
-  private derivationPath = ''
   private haskoinUrl: ClientUrl
   private nodeUrl: ClientUrl
   private nodeAuth?: NodeAuth
@@ -73,21 +74,15 @@ class Client implements BitcoinCashClient, XChainClient {
       username: 'thorchain',
       password: 'password',
     },
-    rootPath,
-    index = 0,
   }: BitcoinCashClientParams) {
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
-    this.rootPath = rootPath || utils.getRootPath(network)
-    this.index = index
-    this.derivationPath = this.derivePath()
-    phrase && this.setPhrase(phrase, index)
+    phrase && this.setPhrase(phrase)
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
       // by strictly passing nodeAuth as null value
       nodeAuth === null ? undefined : nodeAuth
-    phrase && this.setPhrase(phrase, index)
   }
 
   /**
@@ -138,13 +133,10 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, index = 0): Address => {
+  setPhrase = (phrase: string): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      this.index = index
-      this.derivationPath = this.derivePath()
-      const address = this.getAddress()
-      return address
+      return this.getAddress()
     } else {
       throw new Error('Invalid phrase')
     }
@@ -171,11 +163,8 @@ class Client implements BitcoinCashClient, XChainClient {
   setNetwork = (net: Network): void => {
     if (!net) {
       throw new Error('Network must be provided')
-    } else {
-      this.network = net
-      this.rootPath = utils.getRootPath(net)
-      this.derivationPath = this.derivePath()
     }
+    this.network = net
   }
 
   /**
@@ -187,19 +176,19 @@ class Client implements BitcoinCashClient, XChainClient {
     return this.network
   }
 
-  /**
-   * Get DerivePath
-   *
-   * @returns {string} The bitcoin cash derivation path based on the network.
-   */
-  derivePath(): string {
-    // if rootPath is set
-    if (this.rootPath) {
-      return `${this.rootPath}${this.index}`
-    }
-    const { testnet, mainnet } = utils.getDerivePath(this.index)
-    return utils.isTestnet(this.network) ? testnet : mainnet
-  }
+  // /**
+  //  * Get DerivePath
+  //  *
+  //  * @returns {string} The bitcoin cash derivation path based on the network.
+  //  */
+  // derivePath(): string {
+  //   // if rootPath is set
+  //   if (this.rootPath) {
+  //     return `${this.rootPath}${this.index}`
+  //   }
+  //   const { testnet, mainnet } = utils.getDerivePath(this.index)
+  //   return utils.isTestnet(this.network) ? testnet : mainnet
+  // }
 
   /**
    * Get the explorer url.
@@ -269,7 +258,8 @@ class Client implements BitcoinCashClient, XChainClient {
   getAddress = (index = 0): Address => {
     if (this.phrase) {
       try {
-        const keys = this.getBCHKeys(this.phrase, this.derivationPath)
+        const derivationPath = rootPaths[this.network] + `${index}`
+        const keys = this.getBCHKeys(this.phrase, derivationPath)
         const address = keys.getAddress(index)
 
         return utils.toLegacyAddress(address)
@@ -433,6 +423,9 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
     try {
+      const index = 0 //shoudl we be using index 0 here?
+      const derivationPath = rootPaths[this.network] + `${index}`
+
       const feeRate = params.feeRate || (await this.getFeeRates()).fast
       const { builder, utxos } = await utils.buildTx({
         ...params,
@@ -442,7 +435,7 @@ class Client implements BitcoinCashClient, XChainClient {
         network: this.network,
       })
 
-      const keyPair = this.getBCHKeys(this.phrase, this.derivationPath)
+      const keyPair = this.getBCHKeys(this.phrase, derivationPath)
 
       utxos.forEach((utxo, index) => {
         builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)

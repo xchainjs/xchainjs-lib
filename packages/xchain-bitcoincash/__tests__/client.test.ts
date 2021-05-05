@@ -35,21 +35,11 @@ describe('BCHClient Test', () => {
   it('set phrase with derivation path should return correct address', () => {
     bchClient.setNetwork('testnet')
     expect(bchClient.setPhrase(phrase)).toEqual(testnet_address_path0)
+    expect(bchClient.getAddress(1)).toEqual(testnet_address_path1)
 
     bchClient.setNetwork('mainnet')
     expect(bchClient.setPhrase(phrase)).toEqual(mainnet_address_path0)
-
-    bchClient.setNetwork('testnet')
-    expect(bchClient.setPhrase(phrase, 1)).toEqual(testnet_address_path1)
-
-    const otherBchPath1Test = new Client({ phrase, network: 'testnet', rootPath: "m/44'/1'/0'/0/", index: 1 })
-    expect(otherBchPath1Test.getAddress()).toEqual(testnet_address_path1)
-
-    bchClient.setNetwork('mainnet')
-    expect(bchClient.setPhrase(phrase, 1)).toEqual(mainnet_address_path1)
-
-    const otherBchPath1TestM = new Client({ phrase, network: 'mainnet', rootPath: "m/44'/145'/0'/0/", index: 1 })
-    expect(otherBchPath1TestM.getAddress()).toEqual(mainnet_address_path1)
+    expect(bchClient.getAddress(1)).toEqual(mainnet_address_path1)
   })
 
   it('should throw an error for setting a bad phrase', () => {

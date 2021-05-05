@@ -25,21 +25,14 @@ describe('Client Test', () => {
   })
 
   it('derive path correctly with bip44', () => {
-    const ethClientPath0 = new Client({
+    const ethClient = new Client({
       network: 'mainnet',
       phrase,
       ethplorerUrl,
     })
 
-    const ethClientPath1 = new Client({
-      network: 'mainnet',
-      phrase,
-      derivationPath: "m/44'/60'/0'/0/1",
-      ethplorerUrl,
-    })
-
-    expect(ethClientPath0.getAddress()).toEqual(addrPath0.toLowerCase())
-    expect(ethClientPath1.getAddress()).toEqual(addrPath1.toLowerCase())
+    expect(ethClient.getAddress(0)).toEqual(addrPath0.toLowerCase())
+    expect(ethClient.getAddress(1)).toEqual(addrPath1.toLowerCase())
   })
 
   it('gets a balance without address args', async () => {
@@ -125,7 +118,7 @@ describe('Client Test', () => {
       countTxs: 1,
     })
 
-    const balance = await ethClient.getBalance('0x12d4444f96c644385d8ab355f6ddf801315b6254')
+    const balance = await ethClient.getBalance(0)
     expect(balance.length).toEqual(2)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
     expect(balance[0].amount.amount().isEqualTo(baseAmount('100000000000000000000', ETH_DECIMAL).amount())).toBeTruthy()

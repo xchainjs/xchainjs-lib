@@ -103,12 +103,9 @@ describe('Client Test', () => {
     const addressMain1 = thorClientEmptyMain1.getAddress()
     expect(addressMain1).toEqual(mainnet_address_path1)
 
-
     const thorClientEmptyTest1 = new Client({ phrase, network: 'testnet', derivationPath: "44'/931'/0'/0/1" })
     const addressTest1 = thorClientEmptyTest1.getAddress()
     expect(addressTest1).toEqual(testnet_address_path1)
-
-
   })
 
   it('throws an error passing an invalid phrase', async () => {

@@ -5,7 +5,7 @@ import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xch
 import { assetAmount, AssetBTC, assetToBase, assetToString, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { AddressParams, BtcAddressUTXOs } from './types/sochain-api-types'
 import { FeeRate, FeeRates, FeesWithRates, GetChangeParams } from './types/client-types'
-import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
+import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
@@ -252,29 +252,29 @@ export const broadcastTx = async ({ network, txHex, blockstreamUrl }: BroadcastT
   return await blockStream.broadcastTx({ network, txHex, blockstreamUrl })
 }
 
-/**
- * Get DerivePath.
- *
- * @param {number} index (optional)
- * @returns {DerivePath} The bitcoin derivation path by the index. (both mainnet and testnet)
- */
-export const getDerivePath = (index = 0): DerivePath => ({
-  mainnet: `84'/0'/0'/0/${index}`,
-  testnet: `84'/1'/0'/0/${index}`,
-})
+// /**
+//  * Get DerivePath.
+//  *
+//  * @param {number} index (optional)
+//  * @returns {DerivePath} The bitcoin derivation path by the index. (both mainnet and testnet)
+//  */
+// export const getDerivePath = (index = 0): DerivePath => ({
+//   mainnet: `84'/0'/0'/0/${index}`,
+//   testnet: `84'/1'/0'/0/${index}`,
+// })
 
-/**
- * Get default root paths
- * @param {Network} network
- * @returns default root path
- */
-export const getRootPath = (net: Network): string => {
-  const rootPaths = {
-    mainnet: `84'/0'/0'/0/`,
-    testnet: `84'/1'/0'/0/`,
-  }
-  return rootPaths[net]
-}
+// /**
+//  * Get default root paths
+//  * @param {Network} network
+//  * @returns default root path
+//  */
+// export const getRootPath = (net: Network): string => {
+//   const rootPaths = {
+//     mainnet: `84'/0'/0'/0/`,
+//     testnet: `84'/1'/0'/0/`,
+//   }
+//   return rootPaths[net]
+// }
 
 /**
  * Calculate fees based on fee rate and memo.

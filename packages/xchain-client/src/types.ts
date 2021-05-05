@@ -27,7 +27,7 @@ export type TxFrom = {
 
 export type Tx = {
   asset: Asset // asset
-  from: TxFrom[] // list of "to" txs. BNC will have one `TxFrom` only, `BTC` might have many transactions going "in" (based on UTXO)
+  from: TxFrom[] // list of "from" txs. BNC will have one `TxFrom` only, `BTC` might have many transactions going "in" (based on UTXO)
   to: TxTo[] // list of "to" transactions. BNC will have one `TxTo` only, `BTC` might have many transactions going "out" (based on UTXO)
   date: Date // timestamp of tx
   type: TxType // type
@@ -42,7 +42,7 @@ export type TxsPage = {
 }
 
 export type TxHistoryParams = {
-  address: Address // Address to get history for
+  address: Address | number // Address or HD index to get history for
   offset?: number // Optional Offset
   limit?: number // Optional Limit of transactions
   startTime?: Date // Optional start time
@@ -50,6 +50,7 @@ export type TxHistoryParams = {
 }
 
 export type TxParams = {
+  from?: number // send from this HD index
   asset?: Asset
   amount: BaseAmount
   recipient: Address
@@ -74,11 +75,15 @@ export type Fees = FeeOption & {
   type: FeeType
 }
 
+export type RootDerivationPaths = {
+  mainnet: string
+  testnet: string
+}
+
 export type XChainClientParams = {
   network?: Network
   phrase?: string
-  rootPath?: string;
-  index?: number;
+  rootDerivationPaths?: RootDerivationPaths
 }
 
 export interface XChainClient {
@@ -90,11 +95,11 @@ export interface XChainClient {
   getExplorerTxUrl(txID: string): string
 
   validateAddress(address: string): boolean
-  getAddress(): Address
+  getAddress(index: number): Address
 
-  setPhrase(phrase: string, index?: number): Address
+  setPhrase(phrase: string): Address
 
-  getBalance(address?: Address, assets?: Asset[]): Promise<Balances>
+  getBalance(index: number, assets?: Asset[]): Promise<Balances>
 
   getTransactions(params?: TxHistoryParams): Promise<TxsPage>
 

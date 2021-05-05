@@ -5,7 +5,7 @@ import coininfo from 'coininfo'
 import { Address, Balance, Fees, Network, Tx, TxFrom, TxParams, TxTo } from '@xchainjs/xchain-client'
 import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util/lib'
 import {
-  DerivePath,
+  // DerivePath,
   FeeRate,
   FeeRates,
   FeesWithRates,
@@ -108,16 +108,16 @@ const getChange = async ({ valueOut, bchBalance }: GetChangeParams): Promise<num
   }
 }
 
-/**
- * Get DerivePath.
- *
- * @param {number} index (optional)
- * @returns {DerivePath} The bitcoin cash derivation path by the index. (both mainnet and testnet)
- */
-export const getDerivePath = (index = 0): DerivePath => ({
-  mainnet: `m/44'/145'/0'/0/${index}`,
-  testnet: `m/44'/1'/0'/0/${index}`,
-})
+// /**
+//  * Get DerivePath.
+//  *
+//  * @param {number} index (optional)
+//  * @returns {DerivePath} The bitcoin cash derivation path by the index. (both mainnet and testnet)
+//  */
+// export const getDerivePath = (index = 0): DerivePath => ({
+//   mainnet: `m/44'/145'/0'/0/${index}`,
+//   testnet: `m/44'/1'/0'/0/${index}`,
+// })
 
 /**
  * Check if give network is a testnet.
@@ -358,17 +358,4 @@ export const getDefaultFeesWithRates = (): FeesWithRates => {
 export const getDefaultFees = (): Fees => {
   const { fees } = getDefaultFeesWithRates()
   return fees
-}
-
-/**
- * Get default root paths
- * @param {Network} network
- * @returns default root path
- */
-export const getRootPath = (net: Network): string => {
-  const rootPaths = {
-    mainnet: `m/44'/145'/0'/0/`,
-    testnet: `m/44'/1'/0'/0/`,
-  }
-  return rootPaths[net]
 }

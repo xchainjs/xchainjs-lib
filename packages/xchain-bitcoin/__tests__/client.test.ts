@@ -64,7 +64,7 @@ describe('BitcoinClient Test', () => {
     const expectedBalance = 15446
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseTwo)
-    const balance = await btcClient.getBalance()
+    const balance = await btcClient.getBalance(0)
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
@@ -73,7 +73,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
-    const txid = await btcClient.transfer({ asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
+    const txid = await btcClient.transfer({ from: 0, asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
     expect(txid).toEqual(expect.any(String))
   })
 
@@ -111,12 +111,11 @@ describe('BitcoinClient Test', () => {
     }
   })
 
-  it('should get the balance of an address without phrase', async () => {
+  it('should NOT get the balance of an address without phrase', async () => {
     btcClient.setNetwork('testnet')
     btcClient.purgeClient()
-    const balance = await btcClient.getBalance(addyThreePath0)
-    expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(15446)
+    const expectedError = 'Phrase must be provided'
+    return expect(btcClient.getBalance(0)).rejects.toThrow(expectedError)
   })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
@@ -203,9 +202,9 @@ describe('BitcoinClient Test', () => {
   it('should error when an invalid address is used in getting balance', () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
-    const invalidAddress = 'error_address'
-    const expectedError = 'Invalid address'
-    return expect(btcClient.getBalance(invalidAddress)).rejects.toThrow(expectedError)
+    const invalidIndex = -1
+    const expectedError = 'index must be greater than zero'
+    return expect(btcClient.getBalance(invalidIndex)).rejects.toThrow(expectedError)
   })
 
   it('should error when an invalid address is used in transfer', () => {
@@ -290,22 +289,23 @@ describe('BitcoinClient Test', () => {
 
   it('should derivate the address correctly', () => {
     btcClient.setNetwork('mainnet')
-    btcClient.setPhrase(phraseOne, 0)
-    expect(btcClient.getAddress()).toEqual(phraseOneMainnet_path0)
-    btcClient.setPhrase(phraseOne, 1)
-    expect(btcClient.getAddress()).toEqual(phraseOneMainnet_path1)
-    btcClient.setPhrase(phraseTwo, 0)
-    expect(btcClient.getAddress()).toEqual(phraseTwoMainnet_path0)
-    btcClient.setPhrase(phraseTwo, 1)
-    expect(btcClient.getAddress()).toEqual(phraseTwoMainnet_path1)
+
+    btcClient.setPhrase(phraseOne)
+    expect(btcClient.getAddress(0)).toEqual(phraseOneMainnet_path0)
+    expect(btcClient.getAddress(1)).toEqual(phraseOneMainnet_path1)
+
+    btcClient.setPhrase(phraseTwo)
+    expect(btcClient.getAddress(0)).toEqual(phraseTwoMainnet_path0)
+    expect(btcClient.getAddress(1)).toEqual(phraseTwoMainnet_path1)
+
     btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseOne, 0)
-    expect(btcClient.getAddress()).toEqual(addyOnePath0)
-    btcClient.setPhrase(phraseOne, 1)
-    expect(btcClient.getAddress()).toEqual(addyOnePath1)
-    btcClient.setPhrase(phraseTwo, 0)
-    expect(btcClient.getAddress()).toEqual(addyThreePath0)
-    btcClient.setPhrase(phraseTwo, 1)
-    expect(btcClient.getAddress()).toEqual(addyThreePath1)
+
+    btcClient.setPhrase(phraseOne)
+    expect(btcClient.getAddress(0)).toEqual(addyOnePath0)
+    expect(btcClient.getAddress(1)).toEqual(addyOnePath1)
+
+    btcClient.setPhrase(phraseTwo)
+    expect(btcClient.getAddress(0)).toEqual(addyThreePath0)
+    expect(btcClient.getAddress(1)).toEqual(addyThreePath1)
   })
 })

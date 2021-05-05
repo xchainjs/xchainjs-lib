@@ -2,7 +2,7 @@ export * from './types'
 export * from './client'
 export {
   broadcastTx,
-  getDerivePath,
+  // getDerivePath,
   getDefaultFees,
   getDefaultFeesWithRates,
   getPrefix,

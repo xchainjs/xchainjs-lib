@@ -3,7 +3,7 @@ import { MIN_TX_FEE } from '../src/const'
 import { baseAmount, AssetLTC } from '@xchainjs/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
-import { getDerivePath } from '../src/utils'
+// import { getDerivePath } from '../src/utils'
 mockSochainApi.init()
 
 const ltcClient = new Client({ network: 'testnet' })
@@ -22,7 +22,6 @@ describe('LitecoinClient Test', () => {
   const testnet_address_path1 = 'tltc1qut59ufcscqnkp8fgac68pj2ps5dzjjg4eggfqd'
   const mainnet_address_path0 = 'ltc1qll0eutk38yy3jms0c85v4ey68z83c78h3fmsh3'
   const mainnet_address_path1 = 'ltc1qsr5wh2sudyc7axh087lg7py6dsagphef63acgq'
-
 
   // const phraseTwo = 'green atom various power must another rent imitate gadget creek fat then'
   const addyTwo = 'tltc1ql68zjjdjx37499luueaw09avednqtge4u23q36'
@@ -54,24 +53,17 @@ describe('LitecoinClient Test', () => {
     expect(valid).toBeTruthy()
   })
 
-  it('set phrase with derivation path should return correct address', () => {
+  it('set phrase should return correct address', () => {
     ltcClient.setNetwork('testnet')
-    expect(ltcClient.setPhrase(phraseOne, getDerivePath(0).testnet)).toEqual(testnet_address_path0)
+    expect(ltcClient.setPhrase(phraseOne)).toEqual(testnet_address_path0)
+    expect(ltcClient.getAddress(1)).toEqual(testnet_address_path1)
 
     ltcClient.setNetwork('mainnet')
-    expect(ltcClient.setPhrase(phraseOne, getDerivePath(0).mainnet)).toEqual(mainnet_address_path0)
+    expect(ltcClient.setPhrase(phraseOne)).toEqual(mainnet_address_path0)
+    expect(ltcClient.getAddress(1)).toEqual(mainnet_address_path1)
 
-    ltcClient.setNetwork('testnet')
-    expect(ltcClient.setPhrase(phraseOne, getDerivePath(1).testnet)).toEqual(testnet_address_path1)
-
-    const otherLtcPath1Test = new Client({phrase: phraseOne, network: 'testnet', derivationPath: "m/84'/1'/0'/0/1"})
-    expect(otherLtcPath1Test.getAddress()).toEqual(testnet_address_path1)
-
-    ltcClient.setNetwork('mainnet')
-    expect(ltcClient.setPhrase(phraseOne, getDerivePath(1).mainnet)).toEqual(mainnet_address_path1)
-
-    const otherLtcPath1TestM = new Client({phrase: phraseOne, network: 'mainnet', derivationPath: "m/84'/2'/0'/0/1"})
-    expect(otherLtcPath1TestM.getAddress()).toEqual(mainnet_address_path1)
+    // const otherLtcPath1TestM = new Client({ phrase: phraseOne, network: 'mainnet', derivationPath: "m/84'/2'/0'/0/1" })
+    // expect(otherLtcPath1TestM.getAddress()).toEqual(mainnet_address_path1)
   })
 
   it('should get the right balance', async () => {
@@ -139,13 +131,13 @@ describe('LitecoinClient Test', () => {
     }
   })
 
-  it('should get the balance of an address without phrase', async () => {
-    ltcClient.setNetwork('testnet')
-    ltcClient.purgeClient()
-    const balance = await ltcClient.getBalance(addyThree)
-    expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(2223)
-  })
+  // it('should get the balance of an address without phrase', async () => {
+  //   ltcClient.setNetwork('testnet')
+  //   ltcClient.purgeClient()
+  //   const balance = await ltcClient.getBalance(3)
+  //   expect(balance.length).toEqual(1)
+  //   expect(balance[0].amount.amount().toNumber()).toEqual(2223)
+  // })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
     ltcClient.setNetwork('testnet')
@@ -153,7 +145,7 @@ describe('LitecoinClient Test', () => {
 
     const asset = AssetLTC
     const amount = baseAmount(9999999999)
-    return expect(ltcClient.transfer({ asset, recipient: addyTwo, amount, feeRate: 1 })).rejects.toThrow(
+    return expect(ltcClient.transfer({ from: 0, asset, recipient: addyTwo, amount, feeRate: 1 })).rejects.toThrow(
       'Balance insufficient for transaction',
     )
   })
@@ -228,12 +220,10 @@ describe('LitecoinClient Test', () => {
     expect(fastest > fast)
   })
 
-  it('should error when an invalid address is used in getting balance', () => {
+  it('should error when an invalid index is used in getting balance', () => {
     ltcClient.setNetwork('testnet')
     ltcClient.setPhrase(phraseOne)
-    const invalidAddress = 'error_address'
-    const expectedError = 'Invalid address'
-    return expect(ltcClient.getBalance(invalidAddress)).rejects.toThrow(expectedError)
+    return expect(ltcClient.getBalance(-1)).rejects.toThrow()
   })
 
   it('should error when an invalid address is used in transfer', () => {
