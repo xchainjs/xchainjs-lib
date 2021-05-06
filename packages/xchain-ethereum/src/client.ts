@@ -31,16 +31,7 @@ import {
   FeeOptionKey,
   FeesParams as XFeesParams,
 } from '@xchainjs/xchain-client'
-import {
-  AssetETH,
-  baseAmount,
-  BaseAmount,
-  assetToString,
-  Asset,
-  delay,
-  assetAmount,
-  assetToBase,
-} from '@xchainjs/xchain-util'
+import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
 import * as Crypto from '@xchainjs/xchain-crypto'
 import * as ethplorerAPI from './ethplorer-api'
 import * as etherscanAPI from './etherscan-api'
@@ -357,13 +348,18 @@ export default class Client implements XChainClient, EthereumClient {
   getBalance = async (address?: Address, assets?: Asset[]): Promise<Balances> => {
     try {
       const ethAddress = address || this.getAddress()
+
+      // get ETH balance directly from provider
+      const ethBalance = await this.provider.getBalance(address)
+      const ethBalanceAmount = baseAmount(ethBalance.toString(), ETH_DECIMAL)
+
       if (this.getNetwork() === 'mainnet') {
         // use ethplorerAPI for mainnet - ignore assets
         const account = await ethplorerAPI.getAddress(this.ethplorerUrl, ethAddress, this.ethplorerApiKey)
         const balances: Balances = [
           {
             asset: AssetETH,
-            amount: assetToBase(assetAmount(account.ETH.balance, ETH_DECIMAL)),
+            amount: ethBalanceAmount,
           },
         ]
 
@@ -403,10 +399,9 @@ export default class Client implements XChainClient, EthereumClient {
             })
           } else {
             // Handle ETH balances
-            const balance = await this.etherscan.getBalance(ethAddress)
             balances.push({
               asset: AssetETH,
-              amount: baseAmount(balance.toString(), ETH_DECIMAL),
+              amount: ethBalanceAmount,
             })
           }
           // Due to etherscan api call limitation, put some delay before another call
