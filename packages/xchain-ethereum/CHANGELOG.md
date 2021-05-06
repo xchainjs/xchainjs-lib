@@ -1,5 +1,11 @@
 # v.x.x.x
 
+# v.0.20.0 (2021-05-06)
+
+### Fix
+
+- Get ETH balance directly from provider
+  
 # v.0.19.0 (2021-05-05)
 
 ### Breaking change
