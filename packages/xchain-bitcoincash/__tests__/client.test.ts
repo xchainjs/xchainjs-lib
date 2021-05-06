@@ -109,7 +109,7 @@ describe('BCHClient Test', () => {
     bchClient.setNetwork('testnet')
     bchClient.setPhrase(phrase)
 
-    mock_getBalance(bchClient.getHaskoinURL(), 'qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', {
+    mock_getBalance(bchClient.getHaskoinURL(), bchClient.getAddress(), {
       received: 123817511737,
       utxo: 1336,
       address: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
@@ -117,7 +117,7 @@ describe('BCHClient Test', () => {
       unconfirmed: 100000000000,
       confirmed: 123817511737,
     })
-    const balance = await bchClient.getBalance('qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf')
+    const balance = await bchClient.getBalance(0)
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().isEqualTo('223817511737')).toBeTruthy()
   })

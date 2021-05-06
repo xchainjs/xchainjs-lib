@@ -2,6 +2,7 @@ const bitcash = require('@psf/bitcoincashjs-lib')
 
 import * as utils from './utils'
 import {
+  RootDerivationPaths,
   Address,
   Balance,
   Network,
@@ -38,10 +39,6 @@ type BitcoinCashClientParams = XChainClientParams & {
   rootPath?: string
   index?: number
 }
-const rootPaths = {
-  mainnet: `m/44'/145'/0'/0/`,
-  testnet: `m/44'/1'/0'/0/`,
-}
 
 /**
  * Custom Bitcoin Cash client
@@ -52,6 +49,7 @@ class Client implements BitcoinCashClient, XChainClient {
   private haskoinUrl: ClientUrl
   private nodeUrl: ClientUrl
   private nodeAuth?: NodeAuth
+  private rootDerivationPaths: RootDerivationPaths
 
   /**
    * Constructor
@@ -74,10 +72,15 @@ class Client implements BitcoinCashClient, XChainClient {
       username: 'thorchain',
       password: 'password',
     },
+    rootDerivationPaths = {
+      mainnet: `m/44'/145'/0'/0/`,
+      testnet: `m/44'/1'/0'/0/`,
+    },
   }: BitcoinCashClientParams) {
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
+    this.rootDerivationPaths = rootDerivationPaths
     phrase && this.setPhrase(phrase)
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
@@ -258,7 +261,7 @@ class Client implements BitcoinCashClient, XChainClient {
   getAddress = (index = 0): Address => {
     if (this.phrase) {
       try {
-        const derivationPath = rootPaths[this.network] + `${index}`
+        const derivationPath = this.rootDerivationPaths[this.network] + `${index}`
         const keys = this.getBCHKeys(this.phrase, derivationPath)
         const address = keys.getAddress(index)
 
@@ -289,8 +292,9 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
-  getBalance = async (address?: string): Promise<Balance[]> => {
-    return utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address: address || this.getAddress() })
+  getBalance = async (index = 0): Promise<Balance[]> => {
+    const address = this.getAddress(index)
+    return utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address })
   }
 
   /**
@@ -304,12 +308,16 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getTransactions = async ({ address, offset, limit }: TxHistoryParams): Promise<TxsPage> => {
     try {
-      address = address || this.getAddress()
+      const theAddress = typeof address === 'number' ? this.getAddress(address) : address + ''
       offset = offset || 0
       limit = limit || 10
 
-      const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address })
-      const txs = await getTransactions({ haskoinUrl: this.getHaskoinURL(), address, params: { offset, limit } })
+      const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address: theAddress })
+      const txs = await getTransactions({
+        haskoinUrl: this.getHaskoinURL(),
+        address: theAddress,
+        params: { offset, limit },
+      })
 
       if (!account || !txs) {
         throw new Error('Invalid address')
@@ -423,8 +431,8 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
     try {
-      const index = 0 //shoudl we be using index 0 here?
-      const derivationPath = rootPaths[this.network] + `${index}`
+      const index = params.from || 0
+      const derivationPath = this.rootDerivationPaths[this.network] + `${index}`
 
       const feeRate = params.feeRate || (await this.getFeeRates()).fast
       const { builder, utxos } = await utils.buildTx({
