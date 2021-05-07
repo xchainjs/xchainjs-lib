@@ -92,17 +92,21 @@ describe('BinanceClient Test', () => {
   })
 
   it('should support derivation index as string', async () => {
-    const bnbClientEmptyMain = new BinanceClient({ phrase, network: 'mainnet', derivationPath: '0' })
+    const bnbForTxClientEmptyMain = new BinanceClient({ phrase: phraseForTX, network: 'testnet' })
+    const address_path0ForTx = bnbForTxClientEmptyMain.getAddress()
+    expect(address_path0ForTx).toEqual(testnetaddress_path0ForTx)
+
+    const bnbClientEmptyMain = new BinanceClient({ phrase, network: 'mainnet' })
     const addressMain = bnbClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnetaddress_path0)
-    const bnbClientEmptyMain_path1 = new BinanceClient({ phrase, network: 'mainnet', derivationPath: '1' })
-    expect(bnbClientEmptyMain_path1.getAddress()).toEqual(mainnetaddress_path1)
+    const bnbClientEmptyMain_path1 = new BinanceClient({ phrase, network: 'mainnet' })
+    expect(bnbClientEmptyMain_path1.getAddress(1)).toEqual(mainnetaddress_path1)
 
-    const bnbClientEmptyTest = new BinanceClient({ phrase, network: 'testnet', derivationPath: '0' })
+    const bnbClientEmptyTest = new BinanceClient({ phrase, network: 'testnet' })
     const addressTest = bnbClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnetaddress_path0)
-    const bnbClientEmptyTest_path1 = new BinanceClient({ phrase, network: 'testnet', derivationPath: '1' })
-    expect(bnbClientEmptyTest_path1.getAddress()).toEqual(testnetaddress_path1)
+    const bnbClientEmptyTest_path1 = new BinanceClient({ phrase, network: 'testnet' })
+    expect(bnbClientEmptyTest_path1.getAddress(1)).toEqual(testnetaddress_path1)
   })
 
   it('throws an error passing an invalid phrase', async () => {
@@ -113,6 +117,7 @@ describe('BinanceClient Test', () => {
 
   it('should have right address', async () => {
     expect(bnbClient.getAddress()).toEqual(mainnetaddress_path0)
+    expect(bnbClient.getAddress(1)).toEqual(mainnetaddress_path1)
   })
 
   it('should update net', () => {
@@ -191,6 +196,7 @@ describe('BinanceClient Test', () => {
     const AssetRune: Asset = { chain: BNBChain, symbol: 'RUNE', ticker: 'RUNE' }
 
     const balances = await bnbClient.getBalance('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', [AssetBNB, AssetRune])
+
     expect(balances.length).toEqual(2)
 
     let amount = balances[0].amount

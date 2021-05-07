@@ -35,7 +35,7 @@ import {
   BNBChain,
   assetToString,
 } from '@xchainjs/xchain-util'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
+import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { isTransferFee, parseTx, getPrefix } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 
@@ -52,7 +52,7 @@ export type MultiTransfer = {
 }
 
 export type MultiSendParams = {
-  address?: Address
+  address?: Address | number
   transactions: MultiTransfer[]
   memo?: string
 }
@@ -79,9 +79,6 @@ class Client implements BinanceClient, XChainClient {
   private network: Network
   private bncClient: BncClient
   private phrase = ''
-  private derivationPath: number | undefined = undefined
-  private address: Address = '' // default address at index 0
-  private privateKey: PrivKey | null = null // default private key at index 0
 
   /**
    * Constructor
@@ -93,12 +90,9 @@ class Client implements BinanceClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor({ network = 'testnet', phrase, derivationPath }: XChainClientParams) {
-    if (derivationPath && isNaN(parseInt(derivationPath || ''))) {
-      throw new Error('Invalid `derivationPath`: this should be a stringified index number')
-    }
+  constructor({ network = 'testnet', phrase = '' }: XChainClientParams) {
     this.network = network
-    if (phrase) this.setPhrase(phrase, derivationPath ? parseInt(derivationPath) : undefined)
+    this.phrase = phrase
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
   }
@@ -110,9 +104,6 @@ class Client implements BinanceClient, XChainClient {
    */
   purgeClient(): void {
     this.phrase = ''
-    this.derivationPath = undefined
-    this.address = ''
-    this.privateKey = null
   }
 
   /**
@@ -133,16 +124,13 @@ class Client implements BinanceClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork(network: Network): XChainClient {
+  setNetwork(network: Network): void {
     if (!network) {
       throw new Error('Network must be provided')
     } else {
       this.network = network
       this.bncClient = new BncClient(this.getClientUrl())
       this.bncClient.chooseNetwork(network)
-      this.address = ''
-
-      return this
     }
   }
 
@@ -202,42 +190,29 @@ class Client implements BinanceClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, derivationPath?: number): Address => {
-    if (!this.phrase || this.phrase !== phrase || this.derivationPath !== derivationPath) {
-      if (!xchainCrypto.validatePhrase(phrase)) {
-        throw new Error('Invalid phrase')
-      }
-
-      this.phrase = phrase
-      this.derivationPath = derivationPath
-      this.privateKey = null
-      this.address = ''
+  setPhrase = (phrase: string, index = 0): Address => {
+    if (!validatePhrase(phrase)) {
+      throw new Error('Invalid phrase')
     }
 
-    return this.getAddress()
+    this.phrase = phrase
+    return this.getAddress(index)
   }
 
   /**
    * @private
    * Get private key.
    *
+   * @param {number} index account index for the derivation path
    * @returns {PrivKey} The privkey generated from the given phrase
    *
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey = (): PrivKey => {
-    if (!this.privateKey) {
-      if (!this.phrase) throw new Error('Phrase not set')
+  private getPrivateKey = (index: number): PrivKey => {
+    if (!this.phrase) throw new Error('Phrase not set')
 
-      this.privateKey = crypto.getPrivateKeyFromMnemonic(
-        this.phrase,
-        (this.derivationPath && true) || undefined,
-        this.derivationPath,
-      )
-    }
-
-    return this.privateKey
+    return crypto.getPrivateKeyFromMnemonic(this.phrase, true, index)
   }
 
   /**
@@ -247,18 +222,15 @@ class Client implements BinanceClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (): string => {
-    if (!this.address) {
-      const address = crypto.getAddressFromPrivateKey(this.getPrivateKey(), getPrefix(this.network))
-      if (!address) {
-        throw new Error(
-          'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
-        )
-      }
-
-      this.address = address
+  getAddress = (index = 0): string => {
+    const address = crypto.getAddressFromPrivateKey(this.getPrivateKey(index), getPrefix(this.network))
+    if (!address) {
+      throw new Error(
+        'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
+      )
     }
-    return this.address
+
+    return address
   }
 
   /**
@@ -274,13 +246,14 @@ class Client implements BinanceClient, XChainClient {
   /**
    * Get the balance of a given address.
    *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
+   * @param {Address | number} address By default, it will return the balance of the current wallet. (optional)
    * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Array<Balance>} The balance of the address.
    */
-  getBalance = async (address?: Address, assets?: Asset[]): Promise<Balances> => {
+  getBalance = async (address: Address | number = 0, assets?: Asset[]): Promise<Balances> => {
     try {
-      const balances: BinanceBalances = await this.bncClient.getBalance(address || this.getAddress())
+      const derivedAddress: string = typeof address === 'number' ? this.getAddress(address) : address || ''
+      const balances: BinanceBalances = await this.bncClient.getBalance(derivedAddress)
 
       return balances
         .map((balance) => {
@@ -347,8 +320,10 @@ class Client implements BinanceClient, XChainClient {
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     try {
+      const address: string =
+        typeof params?.address === 'number' ? this.getAddress(params.address) : params?.address || ''
       return await this.searchTransactions({
-        address: params ? params.address : this.getAddress(),
+        address,
         limit: params && params.limit?.toString(),
         offset: params && params.offset?.toString(),
         startTime: params && params.startTime && params.startTime.getTime().toString(),
@@ -403,13 +378,14 @@ class Client implements BinanceClient, XChainClient {
    * @param {MultiSendParams} params The multi-send transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  multiSend = async ({ address, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
+  multiSend = async ({ address = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
     try {
+      const derivedAddress: string = typeof address === 'number' ? this.getAddress(address) : address || ''
       await this.bncClient.initChain()
-      await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error) => Promise.reject(error))
+      await this.bncClient.setPrivateKey(this.getPrivateKey(0)).catch((error) => Promise.reject(error))
 
       const transferResult = await this.bncClient.multiSend(
-        address || this.getAddress(),
+        derivedAddress,
         transactions.map((transaction) => {
           return {
             to: transaction.to,
@@ -436,10 +412,10 @@ class Client implements BinanceClient, XChainClient {
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
+  transfer = async ({ from, asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
       await this.bncClient.initChain()
-      await this.bncClient.setPrivateKey(this.getPrivateKey()).catch((error: Error) => Promise.reject(error))
+      await this.bncClient.setPrivateKey(this.getPrivateKey(from || 0)).catch((error: Error) => Promise.reject(error))
 
       const transferResult = await this.bncClient.transfer(
         this.getAddress(),
