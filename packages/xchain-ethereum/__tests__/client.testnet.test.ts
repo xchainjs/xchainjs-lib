@@ -154,7 +154,7 @@ describe('Client Test', () => {
       // ethplorerUrl: etherscanUrl,
     })
 
-    // mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
+    mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
 
     const balance = await ethClient.getBalance(0)
     expect(balance.length).toEqual(1)
