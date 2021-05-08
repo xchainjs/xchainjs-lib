@@ -59,14 +59,14 @@ describe('Client Test', () => {
   })
 
   it('should set new phrase', () => {
-    const ethClient = new Client({})
+    const ethClient = new Client({ phrase })
     const newWallet = ethClient.setPhrase(newPhrase)
     expect(ethClient.getWallet().mnemonic.phrase).toEqual(newPhrase)
     expect(newWallet).toBeTruthy()
   })
 
   it('should fail to set new phrase', () => {
-    const ethClient = new Client({})
+    const ethClient = new Client({ phrase })
     expect(() => ethClient.setPhrase('bad bad phrase')).toThrowError()
   })
 
@@ -118,17 +118,17 @@ describe('Client Test', () => {
   })
 
   it('should get network', () => {
-    const ethClient = new Client({ network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' })
     expect(ethClient.getNetwork()).toEqual('testnet')
   })
 
   it('should fail a bad address', () => {
-    const ethClient = new Client({ network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' })
     expect(ethClient.validateAddress('0xBADbadBad')).toBeFalsy()
   })
 
   it('should pass a good address', () => {
-    const ethClient = new Client({ network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' })
     const goodAddress = ethClient.validateAddress(address)
     expect(goodAddress).toBeTruthy()
   })
@@ -151,9 +151,10 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
+      // ethplorerUrl: etherscanUrl,
     })
 
-    mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
+    // mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
 
     const balance = await ethClient.getBalance(0)
     expect(balance.length).toEqual(1)

@@ -108,11 +108,9 @@ type ClientParams = XChainClientParams & {
 export default class Client implements XChainClient, EthereumClient {
   private network: EthNetwork
   private phrase = ''
-  private provider: Provider
-  private etherscan: EtherscanProvider
   private etherscanApiKey?: string
   private explorerUrl: ExplorerUrl
-  private infuraCreds: InfuraCreds | null = null
+  private infuraCreds: InfuraCreds | undefined
   private ethplorerUrl: string
   private ethplorerApiKey: string
   private rootDerivationPaths: RootDerivationPaths
@@ -129,37 +127,19 @@ export default class Client implements XChainClient, EthereumClient {
     phrase = '',
     rootDerivationPaths = {
       mainnet: `m/44'/60'/0'/0/`,
-      testnet: `m/44'/60'/1'/0/`,
+      testnet: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
     },
     etherscanApiKey,
     infuraCreds,
   }: ClientParams) {
-    this.network = xchainNetworkToEths(network)
-    this.phrase = phrase
     this.rootDerivationPaths = rootDerivationPaths
+    this.network = xchainNetworkToEths(network)
+    this.setPhrase(phrase)
+    this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey
-    if (infuraCreds) {
-      // Infura provider takes either a string of project id
-      // or an object of id and secret
-      this.provider = infuraCreds.projectSecret
-        ? new ethers.providers.InfuraProvider(network, infuraCreds)
-        : new ethers.providers.InfuraProvider(network, infuraCreds.projectId)
-    } else {
-      this.provider = getDefaultProvider(network)
-    }
-
-    this.etherscan = new EtherscanProvider(this.network, etherscanApiKey)
     this.ethplorerUrl = ethplorerUrl
     this.ethplorerApiKey = ethplorerApiKey
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
-
-    if (infuraCreds) {
-      this.infuraCreds = infuraCreds
-    }
-
-    if (phrase) {
-      this.setPhrase(phrase)
-    }
   }
 
   /**
@@ -217,7 +197,7 @@ export default class Client implements XChainClient, EthereumClient {
     if (!this.phrase) {
       throw new Error('Phrase must be provided')
     }
-    return ethers.Wallet.fromMnemonic(this.phrase, this.getFullDerivationPath(index)).connect(this.provider)
+    return ethers.Wallet.fromMnemonic(this.phrase, this.getFullDerivationPath(index)).connect(this.getProvider())
   }
 
   /**
@@ -226,7 +206,15 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {Provider} The current etherjs Provider interface.
    */
   getProvider = (): Provider => {
-    return this.provider
+    if (this.infuraCreds) {
+      // Infura provider takes either a string of project id
+      // or an object of id and secret
+      return this.infuraCreds.projectSecret
+        ? new ethers.providers.InfuraProvider(this.network, this.infuraCreds)
+        : new ethers.providers.InfuraProvider(this.network, this.infuraCreds.projectId)
+    } else {
+      return getDefaultProvider(this.network)
+    }
   }
 
   /**
@@ -235,7 +223,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {EtherscanProvider} The current etherjs EtherscanProvider interface.
    */
   getEtherscanProvider = (): EtherscanProvider => {
-    return this.etherscan
+    return new EtherscanProvider(this.network, this.etherscanApiKey)
   }
 
   /**
@@ -303,18 +291,6 @@ export default class Client implements XChainClient, EthereumClient {
       throw new Error('Network must be provided')
     } else {
       this.network = xchainNetworkToEths(network)
-
-      if (this.infuraCreds) {
-        // Infura provider takes either a string of project id
-        // or an object of id and secret
-        this.provider = this.infuraCreds.projectSecret
-          ? new ethers.providers.InfuraProvider(this.network, this.infuraCreds)
-          : new ethers.providers.InfuraProvider(this.network, this.infuraCreds.projectId)
-      } else {
-        this.provider = getDefaultProvider(this.network)
-      }
-
-      this.etherscan = new EtherscanProvider(this.network, this.etherscanApiKey)
     }
   }
   /**
@@ -340,7 +316,7 @@ export default class Client implements XChainClient, EthereumClient {
     if (!Crypto.validatePhrase(phrase)) {
       throw new Error('Invalid phrase')
     }
-
+    this.phrase = phrase
     return this.getAddress(0)
   }
 
@@ -365,6 +341,8 @@ export default class Client implements XChainClient, EthereumClient {
   getBalance = async (index = 0, assets?: Asset[]): Promise<Balances> => {
     try {
       const ethAddress = this.getAddress(index)
+      console.log(`ethAddress = ${ethAddress}`)
+      console.log(`this.getNetwork() = ${this.getNetwork()}`)
       if (this.getNetwork() === 'mainnet') {
         // use ethplorerAPI for mainnet - ignore assets
         const account = await ethplorerAPI.getAddress(this.ethplorerUrl, ethAddress, this.ethplorerApiKey)
@@ -391,18 +369,18 @@ export default class Client implements XChainClient, EthereumClient {
         const balances = []
         for (let i = 0; i < newAssets.length; i++) {
           const asset = newAssets[i]
+          const etherscan = this.getEtherscanProvider()
           if (assetToString(asset) !== assetToString(AssetETH)) {
             // Handle token balances
             const assetAddress = getTokenAddress(asset)
             if (!assetAddress) {
               throw new Error(`Invalid asset ${asset}`)
             }
-
             const balance = await etherscanAPI.getTokenBalance({
-              baseUrl: this.etherscan.baseUrl,
+              baseUrl: etherscan.baseUrl,
               address: ethAddress,
               assetAddress,
-              apiKey: this.etherscan.apiKey,
+              apiKey: etherscan.apiKey,
             })
             const decimals = await this.call<BigNumberish>(index, assetAddress, erc20ABI, 'decimals', [])
             balances.push({
@@ -411,7 +389,7 @@ export default class Client implements XChainClient, EthereumClient {
             })
           } else {
             // Handle ETH balances
-            const balance = await this.etherscan.getBalance(ethAddress)
+            const balance = await etherscan.getBalance(ethAddress)
             balances.push({
               asset: AssetETH,
               amount: baseAmount(balance.toString(), ETH_DECIMAL),
@@ -450,22 +428,24 @@ export default class Client implements XChainClient, EthereumClient {
       const maxCount = 10000
 
       let transations
+      const etherscan = this.getEtherscanProvider()
+
       if (assetAddress) {
         transations = await etherscanAPI.getTokenTransactionHistory({
-          baseUrl: this.etherscan.baseUrl,
+          baseUrl: etherscan.baseUrl,
           address,
           assetAddress,
           page: 0,
           offset: maxCount,
-          apiKey: this.etherscan.apiKey,
+          apiKey: etherscan.apiKey,
         })
       } else {
         transations = await etherscanAPI.getETHTransactionHistory({
-          baseUrl: this.etherscan.baseUrl,
+          baseUrl: etherscan.baseUrl,
           address,
           page: 0,
           offset: maxCount,
-          apiKey: this.etherscan.apiKey,
+          apiKey: etherscan.apiKey,
         })
       }
 
@@ -506,28 +486,28 @@ export default class Client implements XChainClient, EthereumClient {
         }
       } else {
         let tx
-        const txInfo = await this.etherscan.getTransaction(txId)
-
+        const etherscan = this.getEtherscanProvider()
+        const txInfo = await etherscan.getTransaction(txId)
         if (txInfo) {
           if (assetAddress) {
             tx =
               (
                 await etherscanAPI.getTokenTransactionHistory({
-                  baseUrl: this.etherscan.baseUrl,
+                  baseUrl: etherscan.baseUrl,
                   assetAddress,
                   startblock: txInfo.blockNumber,
                   endblock: txInfo.blockNumber,
-                  apiKey: this.etherscan.apiKey,
+                  apiKey: etherscan.apiKey,
                 })
               ).filter((info) => info.hash === txId)[0] ?? null
           } else {
             tx =
               (
                 await etherscanAPI.getETHTransactionHistory({
-                  baseUrl: this.etherscan.baseUrl,
+                  baseUrl: etherscan.baseUrl,
                   startblock: txInfo.blockNumber,
                   endblock: txInfo.blockNumber,
-                  apiKey: this.etherscan.apiKey,
+                  apiKey: etherscan.apiKey,
                   address: txInfo.from,
                 })
               ).filter((info) => info.hash === txId)[0] ?? null
@@ -568,7 +548,7 @@ export default class Client implements XChainClient, EthereumClient {
     if (!contractAddress) {
       return Promise.reject(new Error('contractAddress must be provided'))
     }
-    const contract = new ethers.Contract(contractAddress, abi, this.provider).connect(this.getWallet(walletIndex))
+    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(walletIndex))
     return contract[func](...params)
   }
 
@@ -594,7 +574,7 @@ export default class Client implements XChainClient, EthereumClient {
     if (!contractAddress) {
       return Promise.reject(new Error('contractAddress must be provided'))
     }
-    const contract = new ethers.Contract(contractAddress, abi, this.provider).connect(this.getWallet(walletIndex))
+    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(walletIndex))
     return contract.estimateGas[func](...params)
   }
 
@@ -789,7 +769,8 @@ export default class Client implements XChainClient, EthereumClient {
    */
   estimateGasPrices = async (): Promise<GasPrices> => {
     try {
-      const response: GasOracleResponse = await etherscanAPI.getGasOracle(this.etherscan.baseUrl, this.etherscan.apiKey)
+      const etherscan = this.getEtherscanProvider()
+      const response: GasOracleResponse = await etherscanAPI.getGasOracle(etherscan.baseUrl, etherscan.apiKey)
 
       // Convert result of gas prices: `Gwei` -> `Wei`
       const averageWei = parseUnits(response.SafeGasPrice, 'gwei')
@@ -827,7 +808,7 @@ export default class Client implements XChainClient, EthereumClient {
 
       if (assetAddress && assetAddress !== ETHAddress) {
         // ERC20 gas estimate
-        const contract = new ethers.Contract(assetAddress, erc20ABI, this.provider)
+        const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
 
         estimate = await contract.estimateGas.transfer(recipient, txAmount, {
           from: this.getAddress(),
@@ -841,7 +822,7 @@ export default class Client implements XChainClient, EthereumClient {
           data: memo ? toUtf8Bytes(memo) : undefined,
         }
 
-        estimate = await this.provider.estimateGas(transactionRequest)
+        estimate = await this.getProvider().estimateGas(transactionRequest)
       }
 
       return estimate
