@@ -81,6 +81,9 @@ describe('Client Test', () => {
     const cosmosClientEmptyTest = new Client({ phrase, network: 'testnet' })
     const addressTest = cosmosClientEmptyTest.getAddress()
     expect(addressTest).toEqual(address)
+
+    const addressTest1 = cosmosClientEmptyTest.getAddress(1)
+    expect(addressTest1).toEqual('cosmos1924f27fujxqnkt74u4d3ke3sfygugv9qp29hmk')
   })
 
   it('throws an error passing an invalid phrase', async () => {
@@ -126,7 +129,7 @@ describe('Client Test', () => {
   })
 
   it('has balances', async () => {
-    mockAccountsBalance(cosmosClient.getClientUrl(), 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv', {
+    mockAccountsBalance(cosmosClient.getClientUrl(), address, {
       height: 0,
       result: [
         {
@@ -135,8 +138,7 @@ describe('Client Test', () => {
         },
       ],
     })
-
-    const balances = await cosmosClient.getBalance('cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv')
+    const balances = await cosmosClient.getBalance(0)
     const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, 6).amount())
     expect(expected).toBeTruthy()
     expect(balances[0].asset).toEqual(AssetMuon)
@@ -158,7 +160,7 @@ describe('Client Test', () => {
       txs: [],
     })
 
-    const transactions = await cosmosClient.getTransactions()
+    const transactions = await cosmosClient.getTransactions({ address: 0 })
     expect(transactions).toEqual(expected)
   })
 

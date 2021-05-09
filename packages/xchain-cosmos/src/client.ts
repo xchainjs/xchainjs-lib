@@ -1,4 +1,5 @@
 import {
+  RootDerivationPaths,
   Address,
   Balances,
   Fees,
@@ -33,10 +34,12 @@ export interface CosmosClient {
  */
 class Client implements CosmosClient, XChainClient {
   private network: Network
-  private sdkClient: CosmosSDKClient
   private phrase = ''
-  private address: Address = '' // default address at index 0
-  private privateKey: PrivKey | null = null // default private key at index 0
+  private rootDerivationPaths: RootDerivationPaths
+
+  // private sdkClient: CosmosSDKClient
+  // private address: Address = '' // default address at index 0
+  // private privateKey: PrivKey | null = null // default private key at index 0
 
   /**
    * Constructor
@@ -48,9 +51,17 @@ class Client implements CosmosClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor({ network = 'testnet', phrase }: XChainClientParams) {
+  constructor({
+    network = 'testnet',
+    phrase,
+    rootDerivationPaths = {
+      mainnet: `44'/118'/0'/0/`,
+      testnet: `44'/118'/0'/0/`, //TODO: shoudn't this be 44'/118'/0'/1/ ?
+    },
+  }: XChainClientParams) {
     this.network = network
-    this.sdkClient = new CosmosSDKClient({ server: this.getClientUrl(), chainId: this.getChainId() })
+    // this.sdkClient = new CosmosSDKClient({ server: this.getClientUrl(), chainId: this.getChainId() })
+    this.rootDerivationPaths = rootDerivationPaths
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -62,8 +73,8 @@ class Client implements CosmosClient, XChainClient {
    */
   purgeClient(): void {
     this.phrase = ''
-    this.address = ''
-    this.privateKey = null
+    // this.address = ''
+    // this.privateKey = null
   }
 
   /**
@@ -75,15 +86,15 @@ class Client implements CosmosClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork = (network: Network): XChainClient => {
+  setNetwork = (network: Network): void => {
     if (!network) {
       throw new Error('Network must be provided')
     } else {
       this.network = network
-      this.sdkClient = new CosmosSDKClient({ server: this.getClientUrl(), chainId: this.getChainId() })
-      this.address = ''
+      // this.sdkClient = new CosmosSDKClient({ server: this.getClientUrl(), chainId: this.getChainId() })
+      // this.address = ''
 
-      return this
+      // return this
     }
   }
 
@@ -170,11 +181,11 @@ class Client implements CosmosClient, XChainClient {
       }
 
       this.phrase = phrase
-      this.privateKey = null
-      this.address = ''
+      // this.privateKey = null
+      // this.address = ''
     }
 
-    return this.getAddress()
+    return this.getAddress(0)
   }
 
   /**
@@ -186,14 +197,19 @@ class Client implements CosmosClient, XChainClient {
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey = (): PrivKey => {
-    if (!this.privateKey) {
-      if (!this.phrase) throw new Error('Phrase not set')
+  private getPrivateKey = (index = 0): PrivKey => {
+    if (!this.phrase) throw new Error('Phrase not set')
 
-      this.privateKey = this.sdkClient.getPrivKeyFromMnemonic(this.phrase)
-    }
-
-    return this.privateKey
+    return this.getCosmosClientSdk(index).getPrivKeyFromMnemonic(this.phrase)
+  }
+  /**
+   * Get getFullDerivationPath
+   *
+   * @param {number} index the HD wallet index
+   * @returns {string} The bitcoin derivation path based on the network.
+   */
+  getFullDerivationPath(index: number): string {
+    return this.rootDerivationPaths[this.network] + `${index}`
   }
 
   /**
@@ -203,19 +219,16 @@ class Client implements CosmosClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (): string => {
-    if (!this.address) {
-      const address = this.sdkClient.getAddressFromPrivKey(this.getPrivateKey())
-      if (!address) {
-        throw new Error('address not defined')
-      }
-
-      this.address = address
-    }
-
-    return this.address
+  getAddress = (index = 0): string => {
+    return this.getCosmosClientSdk(index).getAddressFromPrivKey(this.getPrivateKey(index))
   }
-
+  getCosmosClientSdk(index = 0): CosmosSDKClient {
+    return new CosmosSDKClient({
+      server: this.getClientUrl(),
+      chainId: this.getChainId(),
+      derive_path: this.getFullDerivationPath(index),
+    })
+  }
   /**
    * Validate the given address.
    *
@@ -223,7 +236,7 @@ class Client implements CosmosClient, XChainClient {
    * @returns {boolean} `true` or `false`
    */
   validateAddress = (address: Address): boolean => {
-    return this.sdkClient.checkAddress(address)
+    return this.getCosmosClientSdk(0).checkAddress(address)
   }
 
   /**
@@ -242,9 +255,9 @@ class Client implements CosmosClient, XChainClient {
    * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Array<Balance>} The balance of the address.
    */
-  getBalance = async (address?: Address, assets?: Asset[]): Promise<Balances> => {
+  getBalance = async (index = 0, assets?: Asset[]): Promise<Balances> => {
     try {
-      const balances = await this.sdkClient.getBalance(address || this.getAddress())
+      const balances = await this.getCosmosClientSdk(index).getBalance(this.getAddress(index))
       const mainAsset = this.getMainAsset()
 
       return balances
@@ -272,7 +285,7 @@ class Client implements CosmosClient, XChainClient {
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     const messageAction = undefined
-    const messageSender = (params && params.address) || this.getAddress()
+    const messageSender = typeof params?.address === 'number' ? this.getAddress(params.address) : params?.address + ''
     const page = (params && params.offset) || undefined
     const limit = (params && params.limit) || undefined
     const txMinHeight = undefined
@@ -282,7 +295,7 @@ class Client implements CosmosClient, XChainClient {
       this.registerCodecs()
 
       const mainAsset = this.getMainAsset()
-      const txHistory = await this.sdkClient.searchTx({
+      const txHistory = await this.getCosmosClientSdk(0).searchTx({
         messageAction,
         messageSender,
         page,
@@ -308,7 +321,7 @@ class Client implements CosmosClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const txResult = await this.sdkClient.txsHashGet(txId)
+      const txResult = await this.getCosmosClientSdk(0).txsHashGet(txId)
       const txs = getTxsFromHistory([txResult], this.getMainAsset())
 
       if (txs.length === 0) {
@@ -327,14 +340,15 @@ class Client implements CosmosClient, XChainClient {
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async ({ asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
+  transfer = async ({ from, asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
+      const fromAddressIndex = from || 0
       this.registerCodecs()
 
       const mainAsset = this.getMainAsset()
-      const transferResult = await this.sdkClient.transfer({
-        privkey: this.getPrivateKey(),
-        from: this.getAddress(),
+      const transferResult = await this.getCosmosClientSdk(fromAddressIndex).transfer({
+        privkey: this.getPrivateKey(fromAddressIndex),
+        from: this.getAddress(fromAddressIndex),
         to: recipient,
         amount: amount.amount().toString(),
         asset: getDenom(asset || mainAsset),
