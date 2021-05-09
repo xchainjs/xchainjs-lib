@@ -222,16 +222,8 @@ class Client implements BinanceClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): string => {
-    const address = crypto.getAddressFromPrivateKey(this.getPrivateKey(index), getPrefix(this.network))
-    if (!address) {
-      throw new Error(
-        'Address has to be set. Or set a phrase by calling `setPhrase` before to use an address of an imported key.',
-      )
-    }
-
-    return address
-  }
+  getAddress = (index = 0): string =>
+    crypto.getAddressFromPrivateKey(this.getPrivateKey(index), getPrefix(this.network))
 
   /**
    * Validate the given address.
