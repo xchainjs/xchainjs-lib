@@ -311,10 +311,8 @@ class Client implements BinanceClient, XChainClient {
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     try {
-      const address: string =
-        typeof params?.address === 'number' ? this.getAddress(params.address) : params?.address || ''
       return await this.searchTransactions({
-        address,
+        address: params?.address.toString(),
         limit: params && params.limit?.toString(),
         offset: params && params.offset?.toString(),
         startTime: params && params.startTime && params.startTime.getTime().toString(),
