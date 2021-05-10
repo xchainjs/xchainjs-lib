@@ -300,12 +300,10 @@ class Client implements BitcoinClient, XChainClient {
     const limit = params?.limit || 10
 
     try {
-      const address = typeof params?.address === 'number' ? this.getAddress(params.address) : params?.address + ''
-
       const response = await sochain.getAddress({
+        address: params?.address + '',
         sochainUrl: this.sochainUrl,
         network: this.net,
-        address,
       })
       const total = response.txs.length
       const transactions: Tx[] = []

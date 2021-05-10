@@ -42,7 +42,7 @@ export type TxsPage = {
 }
 
 export type TxHistoryParams = {
-  address: Address | number // Address or HD index to get history for
+  address: Address // Address to get history for
   offset?: number // Optional Offset
   limit?: number // Optional Limit of transactions
   startTime?: Date // Optional start time
