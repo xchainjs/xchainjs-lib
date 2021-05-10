@@ -92,7 +92,7 @@ class Client implements BinanceClient, XChainClient {
    */
   constructor({ network = 'testnet', phrase = '' }: XChainClientParams) {
     this.network = network
-    this.phrase = phrase
+    this.setPhrase(phrase)
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
   }

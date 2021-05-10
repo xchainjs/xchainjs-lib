@@ -341,8 +341,6 @@ export default class Client implements XChainClient, EthereumClient {
   getBalance = async (index = 0, assets?: Asset[]): Promise<Balances> => {
     try {
       const ethAddress = this.getAddress(index)
-      console.log(`ethAddress = ${ethAddress}`)
-      console.log(`this.getNetwork() = ${this.getNetwork()}`)
       if (this.getNetwork() === 'mainnet') {
         // use ethplorerAPI for mainnet - ignore assets
         const account = await ethplorerAPI.getAddress(this.ethplorerUrl, ethAddress, this.ethplorerApiKey)

@@ -418,6 +418,8 @@ class Client implements PolkadotClient, XChainClient {
       }
 
       const txHash = await transaction.signAndSend(this.getKeyringPair(fromAddress))
+      await api.disconnect()
+
       return txHash.toString()
     } catch (error) {
       return Promise.reject(error)
@@ -441,6 +443,7 @@ class Client implements PolkadotClient, XChainClient {
         .paymentInfo(this.getKeyringPair(fromAddress))
 
       const fee = baseAmount(info.partialFee.toString(), getDecimal(this.network))
+      await api.disconnect()
 
       return {
         type: 'byte',
