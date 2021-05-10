@@ -85,26 +85,26 @@ describe('Client Test', () => {
   })
 
   it('should derive address accordingly to the user param', async () => {
-    const thorClientEmptyMain = new Client({ phrase, network: 'mainnet', derivationPath: "44'/931'/0'/0/0" })
+    const thorClientEmptyMain = new Client({ phrase, network: 'mainnet' /*, derivationPath: "44'/931'/0'/0/0" */ })
     const addressMain = thorClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnet_address_path0)
 
-    const viaSetPhraseAddr1 = thorClientEmptyMain.setPhrase(phrase, "44'/931'/0'/0/1")
+    const viaSetPhraseAddr1 = thorClientEmptyMain.getAddress(1 /*, "44'/931'/0'/0/1" */)
     expect(viaSetPhraseAddr1).toEqual(mainnet_address_path1)
 
-    const thorClientEmptyTest = new Client({ phrase, network: 'testnet', derivationPath: "44'/931'/0'/0/0" })
+    const thorClientEmptyTest = new Client({ phrase, network: 'testnet' /*, derivationPath: "44'/931'/0'/0/0"*/ })
     const addressTest = thorClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnet_address_path0)
 
-    const viaSetPhraseAddr1Test = thorClientEmptyTest.setPhrase(phrase, "44'/931'/0'/0/1")
+    const viaSetPhraseAddr1Test = thorClientEmptyTest.getAddress(1 /*, "44'/931'/0'/0/1"*/)
     expect(viaSetPhraseAddr1Test).toEqual(testnet_address_path1)
 
-    const thorClientEmptyMain1 = new Client({ phrase, network: 'mainnet', derivationPath: "44'/931'/0'/0/1" })
-    const addressMain1 = thorClientEmptyMain1.getAddress()
+    const thorClientEmptyMain1 = new Client({ phrase, network: 'mainnet' /*, derivationPath: "44'/931'/0'/0/1"*/ })
+    const addressMain1 = thorClientEmptyMain1.getAddress(1)
     expect(addressMain1).toEqual(mainnet_address_path1)
 
-    const thorClientEmptyTest1 = new Client({ phrase, network: 'testnet', derivationPath: "44'/931'/0'/0/1" })
-    const addressTest1 = thorClientEmptyTest1.getAddress()
+    const thorClientEmptyTest1 = new Client({ phrase, network: 'testnet' /*, derivationPath: "44'/931'/0'/0/1"*/ })
+    const addressTest1 = thorClientEmptyTest1.getAddress(1)
     expect(addressTest1).toEqual(testnet_address_path1)
   })
 
@@ -175,7 +175,9 @@ describe('Client Test', () => {
 
   it('has balances', async () => {
     thorClient.setNetwork('mainnet')
-    mockAccountsBalance(thorClient.getClientUrl().node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
+    // mainnet - has balance: thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5
+    // mainnet - 0: thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws
+    mockAccountsBalance(thorClient.getClientUrl().node, 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws', {
       height: 0,
       result: [
         {
@@ -184,7 +186,11 @@ describe('Client Test', () => {
         },
       ],
     })
-    const balances = await thorClient.getBalance('thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5')
+
+    // Balance for the `thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5`
+    // const address = thorClient.getAddress(0)
+    // expect(address).toEqual('thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5')
+    const balances = await thorClient.getBalance(0 /*'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5'*/)
     expect(balances.length).toEqual(1)
     expect(balances[0].asset).toEqual(AssetRune)
     expect(balances[0].amount.amount().isEqualTo(baseAmount(100).amount())).toBeTruthy()
