@@ -255,9 +255,9 @@ class Client implements CosmosClient, XChainClient {
    * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Array<Balance>} The balance of the address.
    */
-  getBalance = async (index = 0, assets?: Asset[]): Promise<Balances> => {
+  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
-      const balances = await this.getCosmosClientSdk(index).getBalance(this.getAddress(index))
+      const balances = await this.getCosmosClientSdk().getBalance(address)
       const mainAsset = this.getMainAsset()
 
       return balances
@@ -285,7 +285,6 @@ class Client implements CosmosClient, XChainClient {
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     const messageAction = undefined
-    const messageSender = typeof params?.address === 'number' ? this.getAddress(params.address) : params?.address + ''
     const page = (params && params.offset) || undefined
     const limit = (params && params.limit) || undefined
     const txMinHeight = undefined
@@ -297,7 +296,7 @@ class Client implements CosmosClient, XChainClient {
       const mainAsset = this.getMainAsset()
       const txHistory = await this.getCosmosClientSdk(0).searchTx({
         messageAction,
-        messageSender,
+        messageSender: params?.address,
         page,
         limit,
         txMinHeight,

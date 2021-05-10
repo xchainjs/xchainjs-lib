@@ -338,12 +338,11 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @throws {"Invalid asset"} throws when the give asset is an invalid one
    */
-  getBalance = async (index = 0, assets?: Asset[]): Promise<Balances> => {
+  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
-      const ethAddress = this.getAddress(index)
       if (this.getNetwork() === 'mainnet') {
         // use ethplorerAPI for mainnet - ignore assets
-        const account = await ethplorerAPI.getAddress(this.ethplorerUrl, ethAddress, this.ethplorerApiKey)
+        const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
         const balances: Balances = [
           {
             asset: AssetETH,
@@ -376,18 +375,18 @@ export default class Client implements XChainClient, EthereumClient {
             }
             const balance = await etherscanAPI.getTokenBalance({
               baseUrl: etherscan.baseUrl,
-              address: ethAddress,
+              address,
               assetAddress,
               apiKey: etherscan.apiKey,
             })
-            const decimals = await this.call<BigNumberish>(index, assetAddress, erc20ABI, 'decimals', [])
+            const decimals = await this.call<BigNumberish>(0, assetAddress, erc20ABI, 'decimals', [])
             balances.push({
               asset,
               amount: baseAmount(balance.toString(), BigNumber.from(decimals).toNumber() || ETH_DECIMAL),
             })
           } else {
             // Handle ETH balances
-            const balance = await etherscan.getBalance(ethAddress)
+            const balance = await etherscan.getBalance(address)
             balances.push({
               asset: AssetETH,
               amount: baseAmount(balance.toString(), ETH_DECIMAL),
@@ -418,7 +417,6 @@ export default class Client implements XChainClient, EthereumClient {
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     try {
-      const address = typeof params?.address === 'number' ? this.getAddress(params.address) : params?.address + ''
       const page = params?.offset || 0
       const offset = params?.limit || 10
       const assetAddress = params?.asset
@@ -431,7 +429,7 @@ export default class Client implements XChainClient, EthereumClient {
       if (assetAddress) {
         transations = await etherscanAPI.getTokenTransactionHistory({
           baseUrl: etherscan.baseUrl,
-          address,
+          address: params?.address,
           assetAddress,
           page: 0,
           offset: maxCount,
@@ -440,7 +438,7 @@ export default class Client implements XChainClient, EthereumClient {
       } else {
         transations = await etherscanAPI.getETHTransactionHistory({
           baseUrl: etherscan.baseUrl,
-          address,
+          address: params?.address,
           page: 0,
           offset: maxCount,
           apiKey: etherscan.apiKey,

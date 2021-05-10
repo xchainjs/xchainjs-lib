@@ -124,7 +124,7 @@ describe('Client Test', () => {
       result: [],
     })
 
-    const result = await cosmosClient.getBalance()
+    const result = await cosmosClient.getBalance(address)
     expect(result).toEqual([])
   })
 
@@ -138,7 +138,7 @@ describe('Client Test', () => {
         },
       ],
     })
-    const balances = await cosmosClient.getBalance(0)
+    const balances = await cosmosClient.getBalance(address)
     const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, 6).amount())
     expect(expected).toBeTruthy()
     expect(balances[0].asset).toEqual(AssetMuon)
@@ -160,7 +160,7 @@ describe('Client Test', () => {
       txs: [],
     })
 
-    const transactions = await cosmosClient.getTransactions({ address: 0 })
+    const transactions = await cosmosClient.getTransactions({ address })
     expect(transactions).toEqual(expected)
   })
 

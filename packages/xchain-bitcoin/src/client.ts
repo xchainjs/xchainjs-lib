@@ -275,9 +275,8 @@ class Client implements BitcoinClient, XChainClient {
    * @param {number} index By default, it will return the balance of the 0th address
    * @returns {Array<Balance>} The BTC balance of the address.
    */
-  getBalance = async (index = 0): Promise<Balance[]> => {
+  getBalance = async (address: Address): Promise<Balance[]> => {
     try {
-      const address: Address = this.getAddress(index)
       return Utils.getBalance({
         sochainUrl: this.sochainUrl,
         network: this.net,
@@ -301,12 +300,10 @@ class Client implements BitcoinClient, XChainClient {
     const limit = params?.limit || 10
 
     try {
-      const address = typeof params?.address === 'number' ? this.getAddress(params.address) : params?.address + ''
-
       const response = await sochain.getAddress({
+        address: params?.address + '',
         sochainUrl: this.sochainUrl,
         network: this.net,
-        address,
       })
       const total = response.txs.length
       const transactions: Tx[] = []

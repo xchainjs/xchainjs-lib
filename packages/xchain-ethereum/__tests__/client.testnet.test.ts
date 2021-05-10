@@ -141,7 +141,7 @@ describe('Client Test', () => {
 
     mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
 
-    const balance = await ethClient.getBalance()
+    const balance = await ethClient.getBalance(ethClient.getAddress(0))
     expect(balance.length).toEqual(1)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
     expect(balance[0].amount.amount().isEqualTo(baseAmount('96713467036431545', ETH_DECIMAL).amount())).toBeTruthy()
@@ -156,7 +156,7 @@ describe('Client Test', () => {
 
     mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
 
-    const balance = await ethClient.getBalance(0)
+    const balance = await ethClient.getBalance(ethClient.getAddress(0))
     expect(balance.length).toEqual(1)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
     expect(balance[0].amount.amount().isEqualTo(baseAmount('96713467036431545', ETH_DECIMAL).amount())).toBeTruthy()
@@ -191,7 +191,7 @@ describe('Client Test', () => {
     if (asestUSDT) {
       assets.push(asestUSDT)
     }
-    const balance = await ethClient.getBalance(undefined, assets.length ? assets : undefined)
+    const balance = await ethClient.getBalance(address, assets.length ? assets : undefined)
     expect(balance.length).toEqual(2)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(assets[0] ?? AssetETH))
     expect(balance[0].amount.decimal).toEqual(18)
@@ -204,7 +204,7 @@ describe('Client Test', () => {
   it('throws error on bad index', async () => {
     const ethClient = new Client({ network: 'testnet', phrase })
 
-    const balances = ethClient.getBalance(-1)
+    const balances = ethClient.getBalance(ethClient.getAddress(-1))
     expect(balances).rejects.toThrowError()
   })
 

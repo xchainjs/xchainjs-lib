@@ -258,13 +258,12 @@ class Client implements LitecoinClient, XChainClient {
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Array<Balance>} The LTC balance of the address.
    */
-  getBalance = async (index = 0): Promise<Balance[]> => {
+  getBalance = async (address: Address): Promise<Balance[]> => {
     try {
-      const address: Address = this.getAddress(index)
       return Utils.getBalance({
         sochainUrl: this.sochainUrl,
         network: this.net,
-        address: address,
+        address,
       })
     } catch (e) {
       return Promise.reject(e)
@@ -283,12 +282,10 @@ class Client implements LitecoinClient, XChainClient {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
     try {
-      const address = typeof params?.address === 'number' ? this.getAddress(params.address) : params?.address + ''
-
       const response = await sochain.getAddress({
         sochainUrl: this.sochainUrl,
         network: this.net,
-        address,
+        address: `${params?.address}`,
       })
       const total = response.txs.length
       const transactions: Tx[] = []
