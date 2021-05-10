@@ -312,7 +312,7 @@ describe('BinanceClient Test', () => {
       3,
     )
 
-    const beforeTransfer = await client.getBalance()
+    const beforeTransfer = await client.getBalance(client.getAddress(0))
     expect(beforeTransfer.length).toEqual(1)
 
     mockNodeInfo(testnetClientURL)
@@ -340,7 +340,7 @@ describe('BinanceClient Test', () => {
       sequence: 0,
     })
 
-    const afterTransfer = await client.getBalance()
+    const afterTransfer = await client.getBalance(client.getAddress(0))
     expect(afterTransfer.length).toEqual(1)
 
     const expected = beforeTransfer[0].amount
@@ -374,7 +374,7 @@ describe('BinanceClient Test', () => {
       3,
     )
 
-    const beforeTransfer = await client.getBalance()
+    const beforeTransfer = await client.getBalance(client.getAddress(0))
     expect(beforeTransfer.length).toEqual(1)
 
     const transactions = [
@@ -428,7 +428,7 @@ describe('BinanceClient Test', () => {
       sequence: 0,
     })
 
-    const afterTransfer = await client.getBalance()
+    const afterTransfer = await client.getBalance(client.getAddress(0))
     expect(afterTransfer.length).toEqual(1)
 
     const expected = beforeTransfer[0].amount
