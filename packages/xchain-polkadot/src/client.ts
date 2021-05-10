@@ -259,9 +259,8 @@ class Client implements PolkadotClient, XChainClient {
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Array<Balance>} The DOT balance of the address.
    */
-  getBalance = async (index = 0, assets?: Asset[]): Promise<Balances> => {
+  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
-      const address = this.getAddress(index)
       const response: SubscanResponse<Account> = await axios
         .post(`${this.getClientUrl()}/api/open/account`, { address: address || this.getAddress() })
         .then((res) => res.data)
@@ -293,14 +292,13 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {TxsPage} The transaction history.
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const address = params?.address ?? this.getAddress()
     const limit = params?.limit ?? 10
     const offset = params?.offset ?? 0
 
     try {
       const response: SubscanResponse<TransfersResult> = await axios
         .post(`${this.getClientUrl()}/api/scan/transfers`, {
-          address: address,
+          address: params?.address,
           row: limit,
           page: offset,
         })
@@ -411,7 +409,7 @@ class Client implements PolkadotClient, XChainClient {
       // Check balances
       const paymentInfo = await transaction.paymentInfo(this.getKeyringPair(fromAddress))
       const fee = baseAmount(paymentInfo.partialFee.toString(), getDecimal(this.network))
-      const balances = await this.getBalance(fromAddress, [AssetDOT])
+      const balances = await this.getBalance(this.getAddress(fromAddress), [AssetDOT])
 
       if (!balances || params.amount.amount().plus(fee.amount()).isGreaterThan(balances[0].amount.amount())) {
         throw new Error('insufficient balance')
