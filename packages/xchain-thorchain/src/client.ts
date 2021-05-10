@@ -343,10 +343,9 @@ class Client implements ThorchainClient, XChainClient {
    * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Array<Balance>} The balance of the address.
    */
-  getBalance = async (index = 0, assets?: Asset[]): Promise<Balances> => {
+  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
-      const balances = await this.getNewThorClient(index).getBalance(this.getAddress(index))
-      console.log('#MARK - balances', balances)
+      const balances = await this.getNewThorClient().getBalance(address)
       return balances
         .map((balance) => ({
           asset: (balance.denom && getAsset(balance.denom)) || AssetRune,
@@ -376,33 +375,25 @@ class Client implements ThorchainClient, XChainClient {
     const limit = params?.limit || 10
     const txMinHeight = undefined
     const txMaxHeight = undefined
-    let sbuAccountIndex: number | undefined = undefined
-    let address = params?.address + ''
-    if (typeof params?.address === 'number') {
-      address = this.getAddress(params.address)
-      sbuAccountIndex = params?.address
-    } else {
-      sbuAccountIndex = 0
-    }
 
     try {
       registerCodecs(this.network)
 
       const txIncomingHistory = (
-        await this.getNewThorClient(sbuAccountIndex).searchTxFromRPC({
+        await this.getNewThorClient().searchTxFromRPC({
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
-          transferRecipient: address,
+          transferRecipient: params?.address,
           limit: MAX_TX_COUNT,
           txMinHeight,
           txMaxHeight,
         })
       ).txs
       const txOutgoingHistory = (
-        await this.getNewThorClient(sbuAccountIndex).searchTxFromRPC({
+        await this.getNewThorClient().searchTxFromRPC({
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
-          transferSender: address,
+          transferSender: params?.address,
           limit: MAX_TX_COUNT,
           txMinHeight,
           txMaxHeight,
@@ -574,7 +565,7 @@ class Client implements ThorchainClient, XChainClient {
    */
   deposit = async ({ from = 0, asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     try {
-      const assetBalance = await this.getBalance(from, [asset])
+      const assetBalance = await this.getBalance(this.getAddress(from), [asset])
 
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(DEFAULT_GAS_VALUE))) {
         throw new Error('insufficient funds')
@@ -617,7 +608,7 @@ class Client implements ThorchainClient, XChainClient {
     try {
       registerCodecs(this.network)
 
-      const assetBalance = await this.getBalance(from, [asset])
+      const assetBalance = await this.getBalance(this.getAddress(from), [asset])
       const fee = await this.getFees()
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
         throw new Error('insufficient funds')
