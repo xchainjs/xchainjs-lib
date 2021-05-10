@@ -292,8 +292,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
-  getBalance = async (index = 0): Promise<Balance[]> => {
-    const address = this.getAddress(index)
+  getBalance = async (address: Address): Promise<Balance[]> => {
     return utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address })
   }
 
@@ -308,14 +307,13 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getTransactions = async ({ address, offset, limit }: TxHistoryParams): Promise<TxsPage> => {
     try {
-      const theAddress = typeof address === 'number' ? this.getAddress(address) : address + ''
       offset = offset || 0
       limit = limit || 10
 
-      const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address: theAddress })
+      const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address })
       const txs = await getTransactions({
         haskoinUrl: this.getHaskoinURL(),
-        address: theAddress,
+        address,
         params: { offset, limit },
       })
 

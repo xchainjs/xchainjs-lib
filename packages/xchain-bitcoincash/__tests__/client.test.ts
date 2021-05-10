@@ -100,7 +100,7 @@ describe('BCHClient Test', () => {
       unconfirmed: 0,
       confirmed: 0,
     })
-    const balance = await bchClient.getBalance()
+    const balance = await bchClient.getBalance(bchClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(0)
   })
@@ -117,7 +117,7 @@ describe('BCHClient Test', () => {
       unconfirmed: 100000000000,
       confirmed: 123817511737,
     })
-    const balance = await bchClient.getBalance(0)
+    const balance = await bchClient.getBalance(bchClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().isEqualTo('223817511737')).toBeTruthy()
   })
