@@ -70,7 +70,7 @@ describe('LitecoinClient Test', () => {
     const expectedBalance = 2223
     ltcClient.setNetwork('testnet')
     ltcClient.setPhrase(phraseThree)
-    const balance = await ltcClient.getBalance()
+    const balance = await ltcClient.getBalance(ltcClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
@@ -80,11 +80,11 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork('testnet')
     ltcClient.setPhrase(phraseThree)
 
-    const balance = await ltcClient.getBalance()
+    const balance = await ltcClient.getBalance(ltcClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
 
-    const newBalance = await ltcClient.getBalance()
+    const newBalance = await ltcClient.getBalance(ltcClient.getAddress())
     expect(newBalance.length).toEqual(1)
     expect(newBalance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
@@ -108,7 +108,7 @@ describe('LitecoinClient Test', () => {
   it('should purge phrase and utxos', async () => {
     ltcClient.purgeClient()
     expect(() => ltcClient.getAddress()).toThrow('Phrase must be provided')
-    return expect(ltcClient.getBalance()).rejects.toThrow('Phrase must be provided')
+    return expect(ltcClient.getBalance(ltcClient.getAddress())).rejects.toThrow('Phrase must be provided')
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
@@ -223,7 +223,7 @@ describe('LitecoinClient Test', () => {
   it('should error when an invalid index is used in getting balance', () => {
     ltcClient.setNetwork('testnet')
     ltcClient.setPhrase(phraseOne)
-    return expect(ltcClient.getBalance(-1)).rejects.toThrow()
+    return expect(ltcClient.getBalance(ltcClient.getAddress(-1))).rejects.toThrow()
   })
 
   it('should error when an invalid address is used in transfer', () => {
