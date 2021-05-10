@@ -64,7 +64,7 @@ describe('Client Test', () => {
       countTxs: 1,
     })
 
-    const balances = await ethClient.getBalance()
+    const balances = await ethClient.getBalance(ethClient.getAddress())
     expect(balances.length).toEqual(1)
     expect(balances[0].asset).toEqual(AssetETH)
     expect(
