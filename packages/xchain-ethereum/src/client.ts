@@ -179,6 +179,9 @@ export default class Client implements XChainClient, EthereumClient {
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
   getAddress = (index = 0): Address => {
+    if (index < 0) {
+      throw new Error('index must be greater than zero')
+    }
     if (!this.phrase) {
       throw new Error('Phrase must be provided')
     }

@@ -203,9 +203,7 @@ describe('Client Test', () => {
 
   it('throws error on bad index', async () => {
     const ethClient = new Client({ network: 'testnet', phrase })
-
-    const balances = ethClient.getBalance(ethClient.getAddress(-1))
-    expect(balances).rejects.toThrowError()
+    expect(() => ethClient.getAddress(-1)).toThrow()
   })
 
   it('get eth transaction history', async () => {

@@ -88,7 +88,7 @@ describe('BitcoinClient Test', () => {
   it('should purge phrase and utxos', async () => {
     btcClient.purgeClient()
     expect(() => btcClient.getAddress()).toThrow('Phrase must be provided')
-    return expect(btcClient.getBalance(btcClient.getAddress())).rejects.toThrow('Phrase must be provided')
+    // return expect(btcClient.getBalance(btcClient.getAddress())).rejects.toThrow('Phrase must be provided')
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
@@ -109,13 +109,6 @@ describe('BitcoinClient Test', () => {
       console.log('ERR running test', err)
       throw err
     }
-  })
-
-  it('should NOT get the balance of an address without phrase', async () => {
-    btcClient.setNetwork('testnet')
-    btcClient.purgeClient()
-    const expectedError = 'Phrase must be provided'
-    return expect(btcClient.getBalance(btcClient.getAddress())).rejects.toThrow(expectedError)
   })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
@@ -204,7 +197,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     const invalidIndex = -1
     const expectedError = 'index must be greater than zero'
-    return expect(btcClient.getBalance(btcClient.getAddress(invalidIndex))).rejects.toThrow(expectedError)
+    expect(() => btcClient.getAddress(invalidIndex)).toThrow(expectedError)
   })
 
   it('should error when an invalid address is used in transfer', () => {

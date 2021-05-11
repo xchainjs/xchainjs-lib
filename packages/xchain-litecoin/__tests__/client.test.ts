@@ -108,7 +108,7 @@ describe('LitecoinClient Test', () => {
   it('should purge phrase and utxos', async () => {
     ltcClient.purgeClient()
     expect(() => ltcClient.getAddress()).toThrow('Phrase must be provided')
-    return expect(ltcClient.getBalance(ltcClient.getAddress())).rejects.toThrow('Phrase must be provided')
+    // return expect(ltcClient.getBalance(ltcClient.getAddress())).rejects.toThrow('Phrase must be provided')
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
@@ -220,10 +220,12 @@ describe('LitecoinClient Test', () => {
     expect(fastest > fast)
   })
 
-  it('should error when an invalid index is used in getting balance', () => {
+  it('should error when an invalid index is used in getting address', () => {
     ltcClient.setNetwork('testnet')
     ltcClient.setPhrase(phraseOne)
-    return expect(ltcClient.getBalance(ltcClient.getAddress(-1))).rejects.toThrow()
+
+    const expectedError = 'index must be greater than zero'
+    expect(() => ltcClient.getAddress(-1)).toThrow(expectedError)
   })
 
   it('should error when an invalid address is used in transfer', () => {

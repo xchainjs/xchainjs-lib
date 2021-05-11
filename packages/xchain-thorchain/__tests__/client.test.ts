@@ -177,7 +177,7 @@ describe('Client Test', () => {
     thorClient.setNetwork('mainnet')
     // mainnet - has balance: thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5
     // mainnet - 0: thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws
-    mockAccountsBalance(thorClient.getClientUrl().node, 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws', {
+    mockAccountsBalance(thorClient.getClientUrl().node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
       height: 0,
       result: [
         {

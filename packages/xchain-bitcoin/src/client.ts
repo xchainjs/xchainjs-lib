@@ -221,7 +221,7 @@ class Client implements BitcoinClient, XChainClient {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
-    if (this.phrase) {
+    if (this.phrase !== '') {
       const btcNetwork = Utils.btcNetwork(this.net)
       const btcKeys = this.getBtcKeys(this.phrase, index)
 
