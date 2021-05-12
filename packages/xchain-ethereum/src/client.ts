@@ -1,9 +1,9 @@
-import { ethers, BigNumberish, BigNumber } from 'ethers'
+import { ethers, BigNumberish, BigNumber, Wallet } from 'ethers'
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import erc20ABI from './data/erc20.json'
-import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
+import { toUtf8Bytes, parseUnits, HDNode } from 'ethers/lib/utils'
 import {
   GasOracleResponse,
   Network as EthNetwork,
@@ -75,7 +75,6 @@ export interface EthereumClient {
     params: Array<unknown>,
   ): Promise<T>
   estimateCall(
-    walletIndex: number,
     asset: Address,
     abi: ethers.ContractInterface,
     func: string,
@@ -86,7 +85,7 @@ export interface EthereumClient {
   estimateGasLimit(params: FeesParams): Promise<BigNumber>
   estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits>
 
-  isApproved(walletIndex: number, spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
+  isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
   approve(
     params: ApproveParams & {
       feeOptionKey?: FeeOptionKey
@@ -107,13 +106,14 @@ type ClientParams = XChainClientParams & {
  */
 export default class Client implements XChainClient, EthereumClient {
   private network: EthNetwork
-  private phrase = ''
+  private hdNode: HDNode
   private etherscanApiKey?: string
   private explorerUrl: ExplorerUrl
   private infuraCreds: InfuraCreds | undefined
   private ethplorerUrl: string
   private ethplorerApiKey: string
   private rootDerivationPaths: RootDerivationPaths
+  private providers: Map<XChainNetwork, Provider> = new Map<XChainNetwork, Provider>()
 
   /**
    * Constructor
@@ -134,12 +134,19 @@ export default class Client implements XChainClient, EthereumClient {
   }: ClientParams) {
     this.rootDerivationPaths = rootDerivationPaths
     this.network = xchainNetworkToEths(network)
-    this.setPhrase(phrase)
+
+    // NOTE: we need to duplicate this check here because setPhrase() also calls getAddress(0)
+    if (!Crypto.validatePhrase(phrase)) {
+      throw new Error('Invalid phrase')
+    }
+
+    this.hdNode = HDNode.fromMnemonic(phrase)
     this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey
     this.ethplorerUrl = ethplorerUrl
     this.ethplorerApiKey = ethplorerApiKey
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
+    this.setupProviders()
   }
 
   /**
@@ -148,7 +155,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {void}
    */
   purgeClient = (): void => {
-    this.phrase = ''
+    this.hdNode = HDNode.fromMnemonic('')
   }
 
   /**
@@ -182,10 +189,7 @@ export default class Client implements XChainClient, EthereumClient {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
-    if (!this.phrase) {
-      throw new Error('Phrase must be provided')
-    }
-    return this.getWallet(index).address.toLowerCase()
+    return this.hdNode.derivePath(this.getFullDerivationPath(index)).address.toLowerCase()
   }
 
   /**
@@ -197,10 +201,24 @@ export default class Client implements XChainClient, EthereumClient {
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
   getWallet = (index = 0): ethers.Wallet => {
-    if (!this.phrase) {
-      throw new Error('Phrase must be provided')
+    return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(index))).connect(this.getProvider())
+  }
+  setupProviders = (): void => {
+    if (this.infuraCreds) {
+      // Infura provider takes either a string of project id
+      // or an object of id and secret
+      const testnetProvider = this.infuraCreds.projectSecret
+        ? new ethers.providers.InfuraProvider(EthNetwork.TEST, this.infuraCreds)
+        : new ethers.providers.InfuraProvider(EthNetwork.TEST, this.infuraCreds.projectId)
+      const mainnetProvider = this.infuraCreds.projectSecret
+        ? new ethers.providers.InfuraProvider(EthNetwork.MAIN, this.infuraCreds)
+        : new ethers.providers.InfuraProvider(EthNetwork.MAIN, this.infuraCreds.projectId)
+      this.providers.set('testnet', testnetProvider)
+      this.providers.set('mainnet', mainnetProvider)
+    } else {
+      this.providers.set('testnet', getDefaultProvider(EthNetwork.TEST))
+      this.providers.set('mainnet', getDefaultProvider(EthNetwork.MAIN))
     }
-    return ethers.Wallet.fromMnemonic(this.phrase, this.getFullDerivationPath(index)).connect(this.getProvider())
   }
 
   /**
@@ -209,15 +227,8 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {Provider} The current etherjs Provider interface.
    */
   getProvider = (): Provider => {
-    if (this.infuraCreds) {
-      // Infura provider takes either a string of project id
-      // or an object of id and secret
-      return this.infuraCreds.projectSecret
-        ? new ethers.providers.InfuraProvider(this.network, this.infuraCreds)
-        : new ethers.providers.InfuraProvider(this.network, this.infuraCreds.projectId)
-    } else {
-      return getDefaultProvider(this.network)
-    }
+    const net = ethNetworkToXchains(this.network)
+    return this.providers.get(net) || getDefaultProvider(net)
   }
 
   /**
@@ -319,7 +330,7 @@ export default class Client implements XChainClient, EthereumClient {
     if (!Crypto.validatePhrase(phrase)) {
       throw new Error('Invalid phrase')
     }
-    this.phrase = phrase
+    this.hdNode = HDNode.fromMnemonic(phrase)
     return this.getAddress(0)
   }
 
@@ -563,7 +574,6 @@ export default class Client implements XChainClient, EthereumClient {
    * Thrown if the given contract address is empty.
    */
   estimateCall = async (
-    walletIndex = 0,
     contractAddress: Address,
     abi: ethers.ContractInterface,
     func: string,
@@ -573,7 +583,7 @@ export default class Client implements XChainClient, EthereumClient {
     if (!contractAddress) {
       return Promise.reject(new Error('contractAddress must be provided'))
     }
-    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(walletIndex))
+    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(0))
     return contract.estimateGas[func](...params)
   }
 
@@ -585,13 +595,10 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {BaseAmount} amount The amount of token.
    * @returns {boolean} `true` or `false`.
    */
-  isApproved = async (walletIndex = 0, spender: Address, sender: Address, amount: BaseAmount): Promise<boolean> => {
+  isApproved = async (spender: Address, sender: Address, amount: BaseAmount): Promise<boolean> => {
     try {
       const txAmount = BigNumber.from(amount.amount().toFixed())
-      const allowance = await this.call<BigNumberish>(walletIndex, sender, erc20ABI, 'allowance', [
-        this.getAddress(walletIndex),
-        spender,
-      ])
+      const allowance = await this.call<BigNumberish>(0, sender, erc20ABI, 'allowance', [spender, spender])
       return txAmount.lte(allowance)
     } catch (error) {
       return Promise.reject(error)
@@ -650,15 +657,10 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @returns {BigNumber} The estimated gas limit.
    */
-  estimateApprove = async ({
-    walletIndex = 0,
-    spender,
-    sender,
-    amount,
-  }: Omit<ApproveParams, 'feeOptionKey'>): Promise<BigNumber> => {
+  estimateApprove = async ({ spender, sender, amount }: Omit<ApproveParams, 'feeOptionKey'>): Promise<BigNumber> => {
     try {
       const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
-      const gasLimit = await this.estimateCall(walletIndex, sender, erc20ABI, 'approve', [
+      const gasLimit = await this.estimateCall(sender, erc20ABI, 'approve', [
         spender,
         txAmount,
         { from: this.getAddress() },
