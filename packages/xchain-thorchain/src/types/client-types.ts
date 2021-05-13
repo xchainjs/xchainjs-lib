@@ -21,7 +21,7 @@ export type ThorchainClientParams = {
 }
 
 export type DepositParam = {
-  from?: number
+  walletIndex?: number
   asset?: Asset
   amount: BaseAmount
   memo: string

@@ -51,6 +51,11 @@ export class CosmosSDKClient {
     this.sdk = new CosmosSDK(this.server, this.chainId)
   }
 
+  updatePrefix = (prefix: string) => {
+    this.prefix = prefix
+    this.setPrefix()
+  }
+
   setPrefix = (): void => {
     AccAddress.setBech32Prefix(
       this.prefix,
