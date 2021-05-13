@@ -339,9 +339,9 @@ class Client implements CosmosClient, XChainClient {
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async ({ from, asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
+  transfer = async ({ walletIndex, asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
-      const fromAddressIndex = from || 0
+      const fromAddressIndex = walletIndex || 0
       this.registerCodecs()
 
       const mainAsset = this.getMainAsset()
