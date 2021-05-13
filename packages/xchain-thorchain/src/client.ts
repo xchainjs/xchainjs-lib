@@ -604,17 +604,17 @@ class Client implements ThorchainClient, XChainClient {
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async ({ from = 0, asset = AssetRune, amount, recipient, memo }: TxParams): Promise<TxHash> => {
+  transfer = async ({ walletIndex = 0, asset = AssetRune, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
       registerCodecs(this.network)
 
-      const assetBalance = await this.getBalance(this.getAddress(from), [asset])
+      const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
       const fee = await this.getFees()
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
         throw new Error('insufficient funds')
       }
 
-      const transferResult = await this.getNewThorClient(from).transfer({
+      const transferResult = await this.getNewThorClient(walletIndex).transfer({
         privkey: this.getPrivateKey(),
         from: this.getAddress(),
         to: recipient,
