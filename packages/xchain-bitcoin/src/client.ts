@@ -447,7 +447,7 @@ class Client implements BitcoinClient, XChainClient {
    */
   transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
     try {
-      const fromAddressIndex = params?.from || 0
+      const fromAddressIndex = params?.walletIndex || 0
 
       // set the default fee rate to `fast`
       const feeRate = params.feeRate || (await this.getFeeRates()).fast
