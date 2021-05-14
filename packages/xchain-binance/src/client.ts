@@ -90,7 +90,10 @@ class Client implements BinanceClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor({ network = 'testnet', phrase = '' }: XChainClientParams) {
+  constructor({ network = 'testnet', phrase }: XChainClientParams) {
+    if (!phrase) {
+      throw new Error('Invalid phrase')
+    }
     this.network = network
     this.setPhrase(phrase)
     this.bncClient = new BncClient(this.getClientUrl())
@@ -312,7 +315,7 @@ class Client implements BinanceClient, XChainClient {
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     try {
       return await this.searchTransactions({
-        address: params?.address.toString(),
+        address: params && params.address,
         limit: params && params.limit?.toString(),
         offset: params && params.offset?.toString(),
         startTime: params && params.startTime && params.startTime.getTime().toString(),
@@ -369,9 +372,16 @@ class Client implements BinanceClient, XChainClient {
    */
   multiSend = async ({ address = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
     try {
-      const derivedAddress: string = typeof address === 'number' ? this.getAddress(address) : address || ''
+      let walletIndex = 0
+      let derivedAddress = `${address}`
+
+      if (typeof address === 'number') {
+        walletIndex = address
+        derivedAddress = this.getAddress(address)
+      }
+
       await this.bncClient.initChain()
-      await this.bncClient.setPrivateKey(this.getPrivateKey(0)).catch((error) => Promise.reject(error))
+      await this.bncClient.setPrivateKey(this.getPrivateKey(walletIndex)).catch((error) => Promise.reject(error))
 
       const transferResult = await this.bncClient.multiSend(
         derivedAddress,
@@ -401,10 +411,12 @@ class Client implements BinanceClient, XChainClient {
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async ({ from, asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
+  transfer = async ({ walletIndex, asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
       await this.bncClient.initChain()
-      await this.bncClient.setPrivateKey(this.getPrivateKey(from || 0)).catch((error: Error) => Promise.reject(error))
+      await this.bncClient
+        .setPrivateKey(this.getPrivateKey(walletIndex || 0))
+        .catch((error: Error) => Promise.reject(error))
 
       const transferResult = await this.bncClient.transfer(
         this.getAddress(),

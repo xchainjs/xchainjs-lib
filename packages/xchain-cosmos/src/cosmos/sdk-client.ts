@@ -1,7 +1,7 @@
 import axios from 'axios'
 import * as BIP32 from 'bip32'
 
-import { TxHistoryParams } from '@xchainjs/xchain-client'
+import { TxHistoryParams, RootDerivationPaths, Network } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 
 import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from 'cosmos-client'
@@ -27,17 +27,33 @@ export class CosmosSDKClient {
 
   server: string
   chainId: string
+  network: Network
 
   prefix = ''
-  derive_path = ''
+  rootDerivationPaths: RootDerivationPaths
 
   // by default, cosmos chain
-  constructor({ server, chainId, prefix = 'cosmos', derive_path = "44'/118'/0'/0/0" }: CosmosSDKClientParams) {
+  constructor({
+    server,
+    chainId,
+    prefix = 'cosmos',
+    network = 'testnet',
+    rootDerivationPaths = {
+      mainnet: "44'/118'/0'/0/",
+      testnet: "44'/118'/0'/0/",
+    },
+  }: CosmosSDKClientParams) {
     this.server = server
     this.chainId = chainId
     this.prefix = prefix
-    this.derive_path = derive_path
+    this.network = network
+    this.rootDerivationPaths = rootDerivationPaths
     this.sdk = new CosmosSDK(this.server, this.chainId)
+  }
+
+  updatePrefix = (prefix: string) => {
+    this.prefix = prefix
+    this.setPrefix()
   }
 
   setPrefix = (): void => {
@@ -57,16 +73,40 @@ export class CosmosSDKClient {
     return AccAddress.fromPublicKey(privkey.getPubKey()).toBech32()
   }
 
-  getPrivKeyFromMnemonic = (mnemonic: string): PrivKey => {
+  getAddressFromMnemonic = (mnemonic: string, walletIndex = 0): string => {
+    this.setPrefix()
+    const privKey = this.getPrivKeyFromMnemonic(mnemonic, walletIndex)
+
+    return AccAddress.fromPublicKey(privKey.getPubKey()).toBech32()
+  }
+
+  getPrivKeyFromMnemonic = (mnemonic: string, walletIndex = 0): PrivKey => {
     const seed = xchainCrypto.getSeed(mnemonic)
     const node = BIP32.fromSeed(seed)
-    const child = node.derivePath(this.derive_path)
+    const child = node.derivePath(`${this.rootDerivationPaths[this.network]}${walletIndex}`)
 
     if (!child.privateKey) {
       throw new Error('child does not have a privateKey')
     }
 
     return new PrivKeySecp256k1(child.privateKey)
+  }
+
+  /**
+   * Set/update the current network.
+   *
+   * @param {Network} network `mainnet` or `testnet`.
+   * @returns {void}
+   *
+   * @throws {"Network must be provided"}
+   * Thrown if network has not been set before.
+   */
+  setNetwork = (network: Network): void => {
+    if (!network) {
+      throw new Error('Network must be provided')
+    } else {
+      this.network = network
+    }
   }
 
   checkAddress = (address: string): boolean => {

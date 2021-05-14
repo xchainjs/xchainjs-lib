@@ -429,7 +429,7 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
     try {
-      const index = params.from || 0
+      const index = params.walletIndex || 0
       const derivationPath = this.rootDerivationPaths[this.network] + `${index}`
 
       const feeRate = params.feeRate || (await this.getFeeRates()).fast

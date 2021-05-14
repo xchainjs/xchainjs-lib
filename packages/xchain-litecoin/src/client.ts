@@ -430,7 +430,7 @@ class Client implements LitecoinClient, XChainClient {
    */
   transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
     try {
-      const fromAddressIndex = params?.from || 0
+      const fromAddressIndex = params?.walletIndex || 0
       const feeRate = params.feeRate || (await this.getFeeRates()).fast
       const { psbt } = await Utils.buildTx({
         ...params,

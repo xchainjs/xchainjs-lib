@@ -311,6 +311,7 @@ describe('BCHClient Test', () => {
     mock_broadcastTx(bchClient.getNodeURL(), '82b65a0006697bff406c62ad0b3fd07db9f20ce6fbc468c81679d96aebc36f69')
 
     const txId = await bchClient.transfer({
+      walletIndex: 0,
       recipient: 'bchtest:qzt6sz836wdwscld0pgq2prcpck2pssmwge9q87pe9',
       amount: baseAmount(100, BCH_DECIMAL),
       feeRate: 1,

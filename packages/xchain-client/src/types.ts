@@ -50,7 +50,7 @@ export type TxHistoryParams = {
 }
 
 export type TxParams = {
-  from?: number // send from this HD index
+  walletIndex?: number // send from this HD index
   asset?: Asset
   amount: BaseAmount
   recipient: Address

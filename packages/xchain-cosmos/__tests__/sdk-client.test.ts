@@ -63,27 +63,33 @@ describe('SDK Client Test', () => {
     server: 'https://api.cosmos.network',
     chainId: 'cosmoshub-3',
     prefix: 'cosmos',
-    derive_path: "44'/118'/0'/0/0",
+    network: 'mainnet',
   })
   const cosmosTestnetClient: CosmosSDKClient = new CosmosSDKClient({
     server: 'http://lcd.gaia.bigdipper.live:1317',
     chainId: 'gaia-3a',
     prefix: 'cosmos',
-    derive_path: "44'/118'/0'/0/0",
   })
 
   const thorMainnetClient: CosmosSDKClient = new CosmosSDKClient({
     server: 'http://104.248.96.152:1317',
     chainId: 'thorchain',
     prefix: 'thor',
-    derive_path: "44'/931'/0'/0/0",
+    network: 'mainnet',
+    rootDerivationPaths: {
+      mainnet: "m/44'/931'/0'/0/",
+      testnet: "m/44'/931'/0'/0/",
+    },
   })
 
   const thorTestnetClient: CosmosSDKClient = new CosmosSDKClient({
     server: 'http://13.238.212.224:1317',
     chainId: 'thorchain',
     prefix: 'tthor',
-    derive_path: "44'/931'/0'/0/0",
+    rootDerivationPaths: {
+      mainnet: "m/44'/931'/0'/0/",
+      testnet: "m/44'/931'/0'/0/",
+    },
   })
 
   const cosmos_phrase = 'foster blouse cattle fiction deputy social brown toast various sock awkward print'
@@ -97,11 +103,11 @@ describe('SDK Client Test', () => {
     let privKey = cosmosMainnetClient.getPrivKeyFromMnemonic(cosmos_phrase)
     expect(cosmosMainnetClient.getAddressFromPrivKey(privKey)).toEqual(cosmos_address)
 
-    privKey = cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase)
-    expect(cosmosTestnetClient.getAddressFromPrivKey(privKey)).toEqual(cosmos_address)
+    let address = cosmosTestnetClient.getAddressFromMnemonic(cosmos_phrase)
+    expect(address).toEqual(cosmos_address)
 
-    privKey = thorMainnetClient.getPrivKeyFromMnemonic(thor_phrase)
-    expect(thorMainnetClient.getAddressFromPrivKey(privKey)).toEqual(thor_mainnet_address)
+    address = thorMainnetClient.getAddressFromMnemonic(thor_phrase)
+    expect(address).toEqual(thor_mainnet_address)
 
     privKey = thorTestnetClient.getPrivKeyFromMnemonic(thor_phrase)
     expect(thorTestnetClient.getAddressFromPrivKey(privKey)).toEqual(thor_testnet_address)
