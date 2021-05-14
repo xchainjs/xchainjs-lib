@@ -688,7 +688,7 @@ export default class Client implements XChainClient, EthereumClient {
    * Thrown if the given asset is invalid.
    */
   transfer = async ({
-    from,
+    walletIndex = 0,
     asset,
     memo,
     amount,
@@ -736,7 +736,7 @@ export default class Client implements XChainClient, EthereumClient {
       let txResult
       if (assetAddress && !isETHAddress) {
         // Transfer ERC20
-        txResult = await this.call<TransactionResponse>(from, assetAddress, erc20ABI, 'transfer', [
+        txResult = await this.call<TransactionResponse>(walletIndex, assetAddress, erc20ABI, 'transfer', [
           recipient,
           txAmount,
           Object.assign({}, overrides),

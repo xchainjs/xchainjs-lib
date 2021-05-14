@@ -73,7 +73,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
-    const txid = await btcClient.transfer({ from: 0, asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
+    const txid = await btcClient.transfer({ walletIndex: 0, asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
     expect(txid).toEqual(expect.any(String))
   })
 

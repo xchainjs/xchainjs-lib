@@ -390,7 +390,7 @@ class Client implements PolkadotClient, XChainClient {
     try {
       const api = await this.getAPI()
       let transaction = null
-      const fromAddress = params.from ? params.from : 0
+      const walletIndex = params.walletIndex || 0
       // Createing a transfer
       const transfer = api.tx.balances.transfer(params.recipient, params.amount.amount().toString())
       if (!params.memo) {
@@ -407,15 +407,15 @@ class Client implements PolkadotClient, XChainClient {
       }
 
       // Check balances
-      const paymentInfo = await transaction.paymentInfo(this.getKeyringPair(fromAddress))
+      const paymentInfo = await transaction.paymentInfo(this.getKeyringPair(walletIndex))
       const fee = baseAmount(paymentInfo.partialFee.toString(), getDecimal(this.network))
-      const balances = await this.getBalance(this.getAddress(fromAddress), [AssetDOT])
+      const balances = await this.getBalance(this.getAddress(walletIndex), [AssetDOT])
 
       if (!balances || params.amount.amount().plus(fee.amount()).isGreaterThan(balances[0].amount.amount())) {
         throw new Error('insufficient balance')
       }
 
-      const txHash = await transaction.signAndSend(this.getKeyringPair(fromAddress))
+      const txHash = await transaction.signAndSend(this.getKeyringPair(walletIndex))
       await api.disconnect()
 
       return txHash.toString()
@@ -434,11 +434,11 @@ class Client implements PolkadotClient, XChainClient {
    */
   estimateFees = async (params: TxParams): Promise<Fees> => {
     try {
-      const fromAddress = params.from ? params.from : 0
+      const walletIndex = params.walletIndex ? params.walletIndex : 0
       const api = await this.getAPI()
       const info = await api.tx.balances
         .transfer(params.recipient, params.amount.amount().toNumber())
-        .paymentInfo(this.getKeyringPair(fromAddress))
+        .paymentInfo(this.getKeyringPair(walletIndex))
 
       const fee = baseAmount(info.partialFee.toString(), getDecimal(this.network))
       await api.disconnect()
