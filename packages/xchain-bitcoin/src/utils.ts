@@ -252,30 +252,6 @@ export const broadcastTx = async ({ network, txHex, blockstreamUrl }: BroadcastT
   return await blockStream.broadcastTx({ network, txHex, blockstreamUrl })
 }
 
-// /**
-//  * Get DerivePath.
-//  *
-//  * @param {number} index (optional)
-//  * @returns {DerivePath} The bitcoin derivation path by the index. (both mainnet and testnet)
-//  */
-// export const getDerivePath = (index = 0): DerivePath => ({
-//   mainnet: `84'/0'/0'/0/${index}`,
-//   testnet: `84'/1'/0'/0/${index}`,
-// })
-
-// /**
-//  * Get default root paths
-//  * @param {Network} network
-//  * @returns default root path
-//  */
-// export const getRootPath = (net: Network): string => {
-//   const rootPaths = {
-//     mainnet: `84'/0'/0'/0/`,
-//     testnet: `84'/1'/0'/0/`,
-//   }
-//   return rootPaths[net]
-// }
-
 /**
  * Calculate fees based on fee rate and memo.
  *

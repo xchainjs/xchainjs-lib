@@ -26,7 +26,6 @@ import { broadcastTx } from './node-api'
  * BitcoinCashClient Interface
  */
 interface BitcoinCashClient {
-  // derivePath(): string
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
@@ -178,20 +177,6 @@ class Client implements BitcoinCashClient, XChainClient {
   getNetwork = (): Network => {
     return this.network
   }
-
-  // /**
-  //  * Get DerivePath
-  //  *
-  //  * @returns {string} The bitcoin cash derivation path based on the network.
-  //  */
-  // derivePath(): string {
-  //   // if rootPath is set
-  //   if (this.rootPath) {
-  //     return `${this.rootPath}${this.index}`
-  //   }
-  //   const { testnet, mainnet } = utils.getDerivePath(this.index)
-  //   return utils.isTestnet(this.network) ? testnet : mainnet
-  // }
 
   /**
    * Get the explorer url.

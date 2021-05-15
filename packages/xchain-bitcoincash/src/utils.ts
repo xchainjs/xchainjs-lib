@@ -108,17 +108,6 @@ const getChange = async ({ valueOut, bchBalance }: GetChangeParams): Promise<num
   }
 }
 
-// /**
-//  * Get DerivePath.
-//  *
-//  * @param {number} index (optional)
-//  * @returns {DerivePath} The bitcoin cash derivation path by the index. (both mainnet and testnet)
-//  */
-// export const getDerivePath = (index = 0): DerivePath => ({
-//   mainnet: `m/44'/145'/0'/0/${index}`,
-//   testnet: `m/44'/1'/0'/0/${index}`,
-// })
-
 /**
  * Check if give network is a testnet.
  *

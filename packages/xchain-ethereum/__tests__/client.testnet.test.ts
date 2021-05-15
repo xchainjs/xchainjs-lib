@@ -151,7 +151,6 @@ describe('Client Test', () => {
     const ethClient = new Client({
       network: 'testnet',
       phrase,
-      // ethplorerUrl: etherscanUrl,
     })
 
     mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
@@ -528,7 +527,6 @@ describe('Client Test', () => {
     )
 
     let isApproved = await ethClient.isApproved(
-      // 0,
       '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
       baseAmount(100, ETH_DECIMAL),
@@ -536,7 +534,6 @@ describe('Client Test', () => {
     expect(isApproved).toEqual(true)
 
     isApproved = await ethClient.isApproved(
-      // 0,
       '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
       baseAmount(101, ETH_DECIMAL),
@@ -603,19 +600,13 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
 
-    const gasLimit = await ethClient.estimateCall(
-      // 0,
-      '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
-      erc20ABI,
-      'transfer',
-      [
-        '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-        BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
-        {
-          from: ethClient.getAddress(),
-        },
-      ],
-    )
+    const gasLimit = await ethClient.estimateCall('0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7', erc20ABI, 'transfer', [
+      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
+      {
+        from: ethClient.getAddress(),
+      },
+    ])
 
     expect(gasLimit.toString()).toEqual('21000')
   })
