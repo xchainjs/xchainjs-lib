@@ -63,7 +63,6 @@ describe('SDK Client Test', () => {
     server: 'https://api.cosmos.network',
     chainId: 'cosmoshub-3',
     prefix: 'cosmos',
-    network: 'mainnet',
   })
   const cosmosTestnetClient: CosmosSDKClient = new CosmosSDKClient({
     server: 'http://lcd.gaia.bigdipper.live:1317',
@@ -75,21 +74,12 @@ describe('SDK Client Test', () => {
     server: 'http://104.248.96.152:1317',
     chainId: 'thorchain',
     prefix: 'thor',
-    network: 'mainnet',
-    rootDerivationPaths: {
-      mainnet: "m/44'/931'/0'/0/",
-      testnet: "m/44'/931'/0'/0/",
-    },
   })
 
   const thorTestnetClient: CosmosSDKClient = new CosmosSDKClient({
     server: 'http://13.238.212.224:1317',
     chainId: 'thorchain',
     prefix: 'tthor',
-    rootDerivationPaths: {
-      mainnet: "m/44'/931'/0'/0/",
-      testnet: "m/44'/931'/0'/0/",
-    },
   })
 
   const cosmos_phrase = 'foster blouse cattle fiction deputy social brown toast various sock awkward print'
@@ -99,17 +89,28 @@ describe('SDK Client Test', () => {
   const thor_mainnet_address = 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws'
   const thor_testnet_address = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
 
+  const derivationPaths = {
+    thor: {
+      mainnet: `m/44'/931'/0'/0/0`,
+      testnet: `m/44'/931'/0'/0/0`,
+    },
+    cosmos: {
+      mainnet: `44'/118'/0'/0/`,
+      testnet: `44'/118'/0'/0/`,
+    },
+  }
+
   it('getPrivKeyFromMnemonic -> getAddressFromPrivKey', async () => {
-    let privKey = cosmosMainnetClient.getPrivKeyFromMnemonic(cosmos_phrase)
+    let privKey = cosmosMainnetClient.getPrivKeyFromMnemonic(cosmos_phrase, derivationPaths.cosmos.mainnet + '0')
     expect(cosmosMainnetClient.getAddressFromPrivKey(privKey)).toEqual(cosmos_address)
 
-    let address = cosmosTestnetClient.getAddressFromMnemonic(cosmos_phrase)
+    let address = cosmosTestnetClient.getAddressFromMnemonic(cosmos_phrase, derivationPaths.cosmos.testnet + '0')
     expect(address).toEqual(cosmos_address)
 
-    address = thorMainnetClient.getAddressFromMnemonic(thor_phrase)
+    address = thorMainnetClient.getAddressFromMnemonic(thor_phrase, derivationPaths.thor.mainnet + '0')
     expect(address).toEqual(thor_mainnet_address)
 
-    privKey = thorTestnetClient.getPrivKeyFromMnemonic(thor_phrase)
+    privKey = thorTestnetClient.getPrivKeyFromMnemonic(thor_phrase, derivationPaths.thor.testnet + '0')
     expect(thorTestnetClient.getAddressFromPrivKey(privKey)).toEqual(thor_testnet_address)
   })
 
@@ -316,7 +317,7 @@ describe('SDK Client Test', () => {
     codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
 
     const result = await cosmosTestnetClient.transfer({
-      privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase),
+      privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase, derivationPaths.cosmos.testnet + '0'),
       from: cosmos_address,
       to: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
       amount: 10000,

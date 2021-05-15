@@ -96,7 +96,6 @@ class Client implements ThorchainClient, XChainClient {
       server: this.getClientUrl().node,
       chainId: this.getChainId(),
       prefix: getPrefix(this.network),
-      rootDerivationPaths: this.rootDerivationPaths,
     })
 
     if (phrase) this.setPhrase(phrase)
@@ -127,7 +126,6 @@ class Client implements ThorchainClient, XChainClient {
 
     this.network = network
     this.cosmosClient.updatePrefix(getPrefix(this.network))
-    this.cosmosClient.setNetwork(network)
   }
 
   /**
@@ -299,7 +297,8 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey = (index = 0): PrivKey => this.cosmosClient.getPrivKeyFromMnemonic(this.phrase, index)
+  private getPrivateKey = (index = 0): PrivKey =>
+    this.cosmosClient.getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
 
   /**
    * Get the current address.
@@ -309,7 +308,7 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
   getAddress = (index = 0): string => {
-    const address = this.cosmosClient.getAddressFromMnemonic(this.phrase, index)
+    const address = this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
     if (!address) {
       throw new Error('address not defined')
     }
