@@ -67,7 +67,11 @@ describe('Client Test', () => {
   let cosmosClient: Client
 
   const phrase = 'foster blouse cattle fiction deputy social brown toast various sock awkward print'
-  const address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
+  const address0_mainnet = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
+  const address1_mainnet = 'cosmos1924f27fujxqnkt74u4d3ke3sfygugv9qp29hmk'
+
+  const address0_testnet = 'cosmos13hrqe0g38nqnjgnstkfrlm2zd790g5yegntshv'
+  const address1_testnet = 'cosmos1re8rf3sv2tkx88xx6825tjqtfntrrfj0h4u94u'
 
   beforeEach(() => {
     cosmosClient = new Client({ phrase, network: 'testnet' })
@@ -79,15 +83,12 @@ describe('Client Test', () => {
 
   it('should start with empty wallet', async () => {
     const cosmosClientEmptyMain = new Client({ phrase, network: 'mainnet' })
-    const addressMain = cosmosClientEmptyMain.getAddress()
-    expect(addressMain).toEqual(address)
+    expect(cosmosClientEmptyMain.getAddress()).toEqual(address0_mainnet)
+    expect(cosmosClientEmptyMain.getAddress(1)).toEqual(address1_mainnet)
 
     const cosmosClientEmptyTest = new Client({ phrase, network: 'testnet' })
-    const addressTest = cosmosClientEmptyTest.getAddress()
-    expect(addressTest).toEqual(address)
-
-    const addressTest1 = cosmosClientEmptyTest.getAddress(1)
-    expect(addressTest1).toEqual('cosmos1924f27fujxqnkt74u4d3ke3sfygugv9qp29hmk')
+    expect(cosmosClientEmptyTest.getAddress()).toEqual(address0_testnet)
+    expect(cosmosClientEmptyTest.getAddress(1)).toEqual(address1_testnet)
   })
 
   it('throws an error passing an invalid phrase', async () => {
@@ -101,7 +102,7 @@ describe('Client Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(cosmosClient.getAddress()).toEqual(address)
+    expect(cosmosClient.getAddress()).toEqual(address0_testnet)
   })
 
   it('should update net', async () => {
@@ -123,12 +124,12 @@ describe('Client Test', () => {
   it('has no balances', async () => {
     cosmosClient.setNetwork('mainnet')
 
-    mockAccountsBalance(getClientUrl(cosmosClient), address, {
+    mockAccountsBalance(getClientUrl(cosmosClient), address0_mainnet, {
       height: 0,
       result: [],
     })
 
-    const result = await cosmosClient.getBalance(address)
+    const result = await cosmosClient.getBalance(address0_mainnet)
     expect(result).toEqual([])
   })
 
@@ -155,7 +156,7 @@ describe('Client Test', () => {
       total: 0,
       txs: [],
     }
-    assertTxHstory(getClientUrl(cosmosClient), address, {
+    assertTxHstory(getClientUrl(cosmosClient), address0_mainnet, {
       count: 0,
       limit: 30,
       page_number: 1,
@@ -164,7 +165,7 @@ describe('Client Test', () => {
       txs: [],
     })
 
-    const transactions = await cosmosClient.getTransactions({ address })
+    const transactions = await cosmosClient.getTransactions({ address: address0_mainnet })
     expect(transactions).toEqual(expected)
   })
 

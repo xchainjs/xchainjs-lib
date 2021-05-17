@@ -88,7 +88,6 @@ describe('BitcoinClient Test', () => {
   it('should purge phrase and utxos', async () => {
     btcClient.purgeClient()
     expect(() => btcClient.getAddress()).toThrow('Phrase must be provided')
-    // return expect(btcClient.getBalance(btcClient.getAddress())).rejects.toThrow('Phrase must be provided')
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
@@ -109,6 +108,13 @@ describe('BitcoinClient Test', () => {
       console.log('ERR running test', err)
       throw err
     }
+  })
+  it('should get the balance of an address without phrase', async () => {
+    btcClient.setNetwork('testnet')
+    btcClient.purgeClient()
+    const balance = await btcClient.getBalance(addyThreePath0)
+    expect(balance.length).toEqual(1)
+    expect(balance[0].amount.amount().toNumber()).toEqual(15446)
   })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {

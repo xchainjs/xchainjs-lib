@@ -25,7 +25,6 @@ import { TxIO } from './types/sochain-api-types'
  * LitecoinClient Interface
  */
 interface LitecoinClient {
-  // derivePath(): string
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>

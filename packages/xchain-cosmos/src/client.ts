@@ -64,7 +64,7 @@ class Client implements CosmosClient, XChainClient {
     phrase,
     rootDerivationPaths = {
       mainnet: `44'/118'/0'/0/`,
-      testnet: `44'/118'/0'/0/`, //TODO: shoudn't this be 44'/118'/0'/1/ ?
+      testnet: `44'/118'/1'/0/`,
     },
   }: XChainClientParams) {
     this.network = network

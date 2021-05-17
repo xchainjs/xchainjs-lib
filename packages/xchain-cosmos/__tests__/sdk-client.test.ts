@@ -83,60 +83,95 @@ describe('SDK Client Test', () => {
   })
 
   const cosmos_phrase = 'foster blouse cattle fiction deputy social brown toast various sock awkward print'
-  const cosmos_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
+  const cosmos_mainnet_address0 = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
+  const cosmos_mainnet_address1 = 'cosmos1924f27fujxqnkt74u4d3ke3sfygugv9qp29hmk'
+
+  const cosmos_testnet_address0 = 'cosmos13hrqe0g38nqnjgnstkfrlm2zd790g5yegntshv'
+  const cosmos_testnet_address1 = 'cosmos1re8rf3sv2tkx88xx6825tjqtfntrrfj0h4u94u'
 
   const thor_phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
-  const thor_mainnet_address = 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws'
-  const thor_testnet_address = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
+  const thor_mainnet_address0 = 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws'
+  const thor_mainnet_address1 = 'thor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecgaf4nc'
+
+  const thor_testnet_address0 = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
+  const thor_testnet_address1 = 'tthor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecv2c92a'
 
   const derivationPaths = {
     thor: {
-      mainnet: `m/44'/931'/0'/0/0`,
-      testnet: `m/44'/931'/0'/0/0`,
+      mainnet: `m/44'/931'/0'/0/`,
+      testnet: `m/44'/931'/0'/0/`,
     },
     cosmos: {
       mainnet: `44'/118'/0'/0/`,
-      testnet: `44'/118'/0'/0/`,
+      testnet: `44'/118'/1'/0/`,
     },
   }
 
   it('getPrivKeyFromMnemonic -> getAddressFromPrivKey', async () => {
-    let privKey = cosmosMainnetClient.getPrivKeyFromMnemonic(cosmos_phrase, derivationPaths.cosmos.mainnet + '0')
-    expect(cosmosMainnetClient.getAddressFromPrivKey(privKey)).toEqual(cosmos_address)
+    //Cosmos Mainnet
+    let privKeyMainnet0 = cosmosMainnetClient.getPrivKeyFromMnemonic(
+      cosmos_phrase,
+      derivationPaths.cosmos.mainnet + '0',
+    )
+    expect(cosmosMainnetClient.getAddressFromPrivKey(privKeyMainnet0)).toEqual(cosmos_mainnet_address0)
 
-    let address = cosmosTestnetClient.getAddressFromMnemonic(cosmos_phrase, derivationPaths.cosmos.testnet + '0')
-    expect(address).toEqual(cosmos_address)
+    let privKeyMainnet1 = cosmosMainnetClient.getPrivKeyFromMnemonic(
+      cosmos_phrase,
+      derivationPaths.cosmos.mainnet + '1',
+    )
+    expect(cosmosMainnetClient.getAddressFromPrivKey(privKeyMainnet1)).toEqual(cosmos_mainnet_address1)
 
-    address = thorMainnetClient.getAddressFromMnemonic(thor_phrase, derivationPaths.thor.mainnet + '0')
-    expect(address).toEqual(thor_mainnet_address)
+    //Cosmos testnet
+    let privKeyTestnet0 = cosmosTestnetClient.getPrivKeyFromMnemonic(
+      cosmos_phrase,
+      derivationPaths.cosmos.testnet + '0',
+    )
+    expect(cosmosTestnetClient.getAddressFromPrivKey(privKeyTestnet0)).toEqual(cosmos_testnet_address0)
 
-    privKey = thorTestnetClient.getPrivKeyFromMnemonic(thor_phrase, derivationPaths.thor.testnet + '0')
-    expect(thorTestnetClient.getAddressFromPrivKey(privKey)).toEqual(thor_testnet_address)
+    let privKeyTestnet1 = cosmosTestnetClient.getPrivKeyFromMnemonic(
+      cosmos_phrase,
+      derivationPaths.cosmos.testnet + '1',
+    )
+    expect(cosmosTestnetClient.getAddressFromPrivKey(privKeyTestnet1)).toEqual(cosmos_testnet_address1)
+
+    //Thor Mainnet
+    privKeyMainnet0 = thorMainnetClient.getPrivKeyFromMnemonic(thor_phrase, derivationPaths.thor.mainnet + '0')
+    expect(thorMainnetClient.getAddressFromPrivKey(privKeyMainnet0)).toEqual(thor_mainnet_address0)
+
+    privKeyMainnet1 = thorMainnetClient.getPrivKeyFromMnemonic(thor_phrase, derivationPaths.thor.mainnet + '1')
+    expect(thorMainnetClient.getAddressFromPrivKey(privKeyMainnet1)).toEqual(thor_mainnet_address1)
+
+    //thor testnet
+    privKeyTestnet0 = thorTestnetClient.getPrivKeyFromMnemonic(thor_phrase, derivationPaths.thor.testnet + '0')
+    expect(thorTestnetClient.getAddressFromPrivKey(privKeyTestnet0)).toEqual(thor_testnet_address0)
+
+    privKeyTestnet1 = thorTestnetClient.getPrivKeyFromMnemonic(thor_phrase, derivationPaths.thor.testnet + '1')
+    expect(thorTestnetClient.getAddressFromPrivKey(privKeyTestnet1)).toEqual(thor_testnet_address1)
   })
 
   it('checkAddress', async () => {
-    expect(cosmosMainnetClient.checkAddress(cosmos_address)).toBeTruthy()
-    expect(cosmosTestnetClient.checkAddress(cosmos_address)).toBeTruthy()
+    expect(cosmosMainnetClient.checkAddress(cosmos_mainnet_address0)).toBeTruthy()
+    expect(cosmosTestnetClient.checkAddress(cosmos_testnet_address0)).toBeTruthy()
     expect(cosmosMainnetClient.checkAddress('thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws')).toBeFalsy()
     expect(cosmosTestnetClient.checkAddress('tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4')).toBeFalsy()
 
-    expect(thorMainnetClient.checkAddress('thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws')).toBeTruthy()
-    expect(thorTestnetClient.checkAddress('tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4')).toBeTruthy()
-    expect(thorMainnetClient.checkAddress(cosmos_address)).toBeFalsy()
-    expect(thorTestnetClient.checkAddress(cosmos_address)).toBeFalsy()
+    expect(thorMainnetClient.checkAddress(thor_mainnet_address0)).toBeTruthy()
+    expect(thorTestnetClient.checkAddress(thor_testnet_address0)).toBeTruthy()
+    expect(thorMainnetClient.checkAddress(cosmos_mainnet_address0)).toBeFalsy()
+    expect(thorTestnetClient.checkAddress(cosmos_testnet_address0)).toBeFalsy()
     expect(thorMainnetClient.checkAddress('tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4')).toBeFalsy()
     expect(thorTestnetClient.checkAddress('thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws')).toBeFalsy()
   })
 
   it('getBalance', async () => {
-    mockAccountsBalance(cosmosMainnetClient.server, cosmos_address, {
+    mockAccountsBalance(cosmosMainnetClient.server, cosmos_mainnet_address0, {
       height: 0,
       result: [],
     })
-    let balances = await cosmosMainnetClient.getBalance(cosmos_address)
+    let balances = await cosmosMainnetClient.getBalance(cosmos_mainnet_address0)
     expect(balances).toEqual([])
 
-    mockAccountsBalance(cosmosTestnetClient.server, 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv', {
+    mockAccountsBalance(cosmosTestnetClient.server, cosmos_testnet_address0, {
       height: 0,
       result: [
         {
@@ -145,11 +180,12 @@ describe('SDK Client Test', () => {
         },
       ],
     })
-    balances = await cosmosTestnetClient.getBalance('cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv')
+
+    balances = await cosmosTestnetClient.getBalance(cosmos_testnet_address0)
     expect(parseInt(balances[0].amount || '0')).toEqual(75000000)
     expect(balances[0].denom).toEqual('umuon')
 
-    mockAccountsBalance(thorMainnetClient.server, thor_mainnet_address, {
+    mockAccountsBalance(thorMainnetClient.server, thor_mainnet_address0, {
       height: 0,
       result: [
         {
@@ -158,21 +194,21 @@ describe('SDK Client Test', () => {
         },
       ],
     })
-    balances = await thorMainnetClient.getBalance(thor_mainnet_address)
+    balances = await thorMainnetClient.getBalance(thor_mainnet_address0)
     expect(balances.length).toEqual(1)
     expect(balances[0].denom).toEqual('thor')
     expect(parseInt(balances[0].amount || '0')).toEqual(100)
 
-    mockAccountsBalance(thorTestnetClient.server, thor_testnet_address, {
+    mockAccountsBalance(thorTestnetClient.server, thor_testnet_address0, {
       height: 0,
       result: [],
     })
-    balances = await thorTestnetClient.getBalance(thor_testnet_address)
+    balances = await thorTestnetClient.getBalance(thor_testnet_address0)
     expect(balances).toEqual([])
   })
 
   it('searchTx', async () => {
-    assertTxHstory(cosmosMainnetClient.server, cosmos_address, {
+    assertTxHstory(cosmosMainnetClient.server, cosmos_mainnet_address0, {
       count: 0,
       limit: 30,
       page_number: 1,
@@ -180,7 +216,7 @@ describe('SDK Client Test', () => {
       total_count: 0,
       txs: [],
     })
-    let txHistory = await cosmosMainnetClient.searchTx({ messageSender: cosmos_address })
+    let txHistory = await cosmosMainnetClient.searchTx({ messageSender: cosmos_mainnet_address0 })
     expect(parseInt(txHistory.total_count?.toString() || '0')).toEqual(0)
 
     assertTxHstory(cosmosTestnetClient.server, 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
@@ -204,7 +240,7 @@ describe('SDK Client Test', () => {
                   type: 'cosmos-sdk/MsgSend',
                   value: {
                     from_address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2',
-                    to_address: cosmos_address,
+                    to_address: cosmos_testnet_address0,
                     amount: [
                       {
                         denom: 'umuon',
@@ -223,7 +259,7 @@ describe('SDK Client Test', () => {
     txHistory = await cosmosTestnetClient.searchTx({ messageSender: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2' })
     expect(parseInt(txHistory.total_count?.toString() || '0')).toBeGreaterThan(0)
 
-    assertTxHstory(thorMainnetClient.server, thor_mainnet_address, {
+    assertTxHstory(thorMainnetClient.server, thor_mainnet_address0, {
       count: 0,
       limit: 30,
       page_number: 1,
@@ -231,10 +267,10 @@ describe('SDK Client Test', () => {
       total_count: 0,
       txs: [],
     })
-    txHistory = await thorMainnetClient.searchTx({ messageSender: thor_mainnet_address })
+    txHistory = await thorMainnetClient.searchTx({ messageSender: thor_mainnet_address0 })
     expect(parseInt(txHistory.total_count?.toString() || '0')).toEqual(0)
 
-    assertTxHstory(thorTestnetClient.server, thor_testnet_address, {
+    assertTxHstory(thorTestnetClient.server, thor_testnet_address0, {
       count: 1,
       limit: 30,
       page_number: 1,
@@ -272,7 +308,7 @@ describe('SDK Client Test', () => {
       ],
     })
 
-    txHistory = await thorTestnetClient.searchTx({ messageSender: thor_testnet_address })
+    txHistory = await thorTestnetClient.searchTx({ messageSender: thor_testnet_address0 })
     expect(parseInt(txHistory.total_count?.toString() || '0')).toEqual(1)
   })
 
@@ -284,7 +320,7 @@ describe('SDK Client Test', () => {
       height: 0,
     }
 
-    mockAccountsAddress(cosmosTestnetClient.server, cosmos_address, {
+    mockAccountsAddress(cosmosTestnetClient.server, cosmos_testnet_address0, {
       height: 0,
       result: {
         coins: [
@@ -300,7 +336,7 @@ describe('SDK Client Test', () => {
 
     assertTxsPost(
       cosmosTestnetClient.server,
-      cosmos_address,
+      cosmos_testnet_address0,
       'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
       'cosmos-sdk/MsgSend',
       [
@@ -318,7 +354,7 @@ describe('SDK Client Test', () => {
 
     const result = await cosmosTestnetClient.transfer({
       privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase, derivationPaths.cosmos.testnet + '0'),
-      from: cosmos_address,
+      from: cosmos_testnet_address0,
       to: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
       amount: 10000,
       asset: 'muon',
@@ -327,7 +363,7 @@ describe('SDK Client Test', () => {
 
     expect(result).toEqual(expected_txsPost_result)
 
-    mockAccountsAddress(thorTestnetClient.server, thor_testnet_address, {
+    mockAccountsAddress(thorTestnetClient.server, thor_testnet_address0, {
       height: 0,
       result: {
         coins: [
@@ -342,7 +378,7 @@ describe('SDK Client Test', () => {
     })
     assertTxsPost(
       thorTestnetClient.server,
-      thor_testnet_address,
+      thor_testnet_address0,
       'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
       'thorchain/MsgSend',
       [
@@ -371,7 +407,7 @@ describe('SDK Client Test', () => {
               type: 'cosmos-sdk/MsgSend',
               value: {
                 from_address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2',
-                to_address: cosmos_address,
+                to_address: cosmos_mainnet_address0,
                 amount: [
                   {
                     denom: 'thor',

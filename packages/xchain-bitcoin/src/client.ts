@@ -23,7 +23,6 @@ import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
  * BitcoinClient Interface
  */
 interface BitcoinClient {
-  // derivePath(): string
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
@@ -55,33 +54,18 @@ class Client implements BitcoinClient, XChainClient {
     sochainUrl = 'https://sochain.com/api/v2',
     blockstreamUrl = 'https://blockstream.info',
     rootDerivationPaths = {
-      mainnet: `m/44'/84'/0'/0'/0/`,
-      testnet: `m/44'/84'/1'/0'/0/`,
+      mainnet: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
+      testnet: `84'/1'/0'/0/`,
     },
     phrase,
   }: BitcoinClientParams) {
     this.net = network
-    this.rootDerivationPaths = this.fixRootPAths(rootDerivationPaths)
+    // this.rootDerivationPaths = this.fixRootPAths(rootDerivationPaths)
+    this.rootDerivationPaths = rootDerivationPaths
     this.setSochainUrl(sochainUrl)
     this.setBlockstreamUrl(blockstreamUrl)
     phrase && this.setPhrase(phrase)
   }
-
-  fixRootPAths(rootDerivationPaths: RootDerivationPaths) {
-    // for some reason the librarydoesn like the m/44' prefix, so if anyone passes that in we strip it
-    return {
-      mainnet: rootDerivationPaths.mainnet.replace("m/44'/", ''),
-      testnet: rootDerivationPaths.testnet.replace("m/44'/", ''),
-    }
-  }
-  // /**
-  //  * Get the default sochain url.
-  //  *
-  //  * @returns {string} the default sochain url
-  //  */
-  // getDefaultSochainUrl = (): string => {
-  //   return 'https://sochain.com/api/v2'
-  // }
 
   /**
    * Set/Update the sochain url.
@@ -92,15 +76,6 @@ class Client implements BitcoinClient, XChainClient {
   setSochainUrl = (url: string): void => {
     this.sochainUrl = url
   }
-
-  // /**
-  //  * Get the default blockstream url.
-  //  *
-  //  * @returns {string} the default blockstream url
-  //  */
-  // getDefaultBlockstreamUrl = (): string => {
-  //   return 'https://blockstream.info'
-  // }
 
   /**
    * Set/Update the blockstream url.
