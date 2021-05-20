@@ -104,10 +104,10 @@ class Client implements LitecoinClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      return this.getAddress(0)
+      return this.getAddress(walletIndex)
     } else {
       throw new Error('Invalid phrase')
     }

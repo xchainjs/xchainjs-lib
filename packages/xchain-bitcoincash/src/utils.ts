@@ -4,17 +4,7 @@ import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
 import { Address, Balance, Fees, Network, Tx, TxFrom, TxParams, TxTo } from '@xchainjs/xchain-client'
 import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util/lib'
-import {
-  // DerivePath,
-  FeeRate,
-  FeeRates,
-  FeesWithRates,
-  Transaction,
-  AddressParams,
-  GetChangeParams,
-  UTXOs,
-  UTXO,
-} from './types'
+import { FeeRate, FeeRates, FeesWithRates, Transaction, AddressParams, GetChangeParams, UTXOs, UTXO } from './types'
 import { getAccount, getRawTransaction, getUnspentTransactions } from './haskoin-api'
 import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'
 

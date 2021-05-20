@@ -127,7 +127,7 @@ describe('BinanceClient Test', () => {
     expect(client.getAddress()).toEqual(testnetaddress_path0)
   })
 
-  it('setPhrase should return addres', () => {
+  it('setPhrase should return address', () => {
     expect(bnbClient.setPhrase(phrase)).toEqual(mainnetaddress_path0)
 
     bnbClient.setNetwork('testnet')

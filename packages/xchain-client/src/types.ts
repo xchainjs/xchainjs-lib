@@ -95,9 +95,9 @@ export interface XChainClient {
   getExplorerTxUrl(txID: string): string
 
   validateAddress(address: string): boolean
-  getAddress(index: number): Address
+  getAddress(walletIndex: number): Address
 
-  setPhrase(phrase: string): Address
+  setPhrase(phrase: string, walletIndex: number): Address
 
   getBalance(address: Address, assets?: Asset[]): Promise<Balances>
 

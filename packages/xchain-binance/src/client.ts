@@ -52,7 +52,7 @@ export type MultiTransfer = {
 }
 
 export type MultiSendParams = {
-  address?: Address | number
+  walletIndex?: number
   transactions: MultiTransfer[]
   memo?: string
 }
@@ -63,8 +63,6 @@ export type MultiSendParams = {
 export interface BinanceClient {
   purgeClient(): void
   getBncClient(): BncClient
-
-  getAddress(): string
 
   getMultiSendFees(): Promise<Fees>
   getSingleAndMultiFees(): Promise<{ single: Fees; multi: Fees }>
@@ -91,11 +89,8 @@ class Client implements BinanceClient, XChainClient {
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
   constructor({ network = 'testnet', phrase }: XChainClientParams) {
-    if (!phrase) {
-      throw new Error('Invalid phrase')
-    }
     this.network = network
-    this.setPhrase(phrase)
+    this.setPhrase(phrase || '')
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
   }
@@ -193,13 +188,13 @@ class Client implements BinanceClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, index = 0): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Address => {
     if (!validatePhrase(phrase)) {
       throw new Error('Invalid phrase')
     }
 
     this.phrase = phrase
-    return this.getAddress(index)
+    return this.getAddress(walletIndex)
   }
 
   /**
@@ -370,15 +365,9 @@ class Client implements BinanceClient, XChainClient {
    * @param {MultiSendParams} params The multi-send transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  multiSend = async ({ address = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
+  multiSend = async ({ walletIndex = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
     try {
-      let walletIndex = 0
-      let derivedAddress = `${address}`
-
-      if (typeof address === 'number') {
-        walletIndex = address
-        derivedAddress = this.getAddress(address)
-      }
+      const derivedAddress = this.getAddress(walletIndex)
 
       await this.bncClient.initChain()
       await this.bncClient.setPrivateKey(this.getPrivateKey(walletIndex)).catch((error) => Promise.reject(error))

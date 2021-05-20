@@ -176,7 +176,7 @@ class Client implements PolkadotClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Address => {
     if (this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
@@ -184,7 +184,7 @@ class Client implements PolkadotClient, XChainClient {
       this.phrase = phrase
     }
 
-    return this.getAddress()
+    return this.getAddress(walletIndex)
   }
 
   /**

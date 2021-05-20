@@ -326,12 +326,12 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Address => {
     if (!Crypto.validatePhrase(phrase)) {
       throw new Error('Invalid phrase')
     }
     this.hdNode = HDNode.fromMnemonic(phrase)
-    return this.getAddress(0)
+    return this.getAddress(walletIndex)
   }
 
   /**

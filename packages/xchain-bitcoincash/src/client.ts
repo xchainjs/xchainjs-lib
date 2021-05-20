@@ -135,10 +135,10 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      return this.getAddress()
+      return this.getAddress(walletIndex)
     } else {
       throw new Error('Invalid phrase')
     }
@@ -225,10 +225,9 @@ class Client implements BitcoinCashClient, XChainClient {
       const rootSeed = getSeed(phrase)
       const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
 
-      const derive_path = derivationPath
-      return masterHDNode.derivePath(derive_path).keyPair
+      return masterHDNode.derivePath(derivationPath).keyPair
     } catch (error) {
-      throw new Error('Invalid phrase')
+      throw new Error(`Getting key pair failed: ${error?.message || error.toString()}`)
     }
   }
 

@@ -159,7 +159,7 @@ class Client implements CosmosClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Address => {
     if (this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
@@ -168,7 +168,7 @@ class Client implements CosmosClient, XChainClient {
       this.phrase = phrase
     }
 
-    return this.getAddress(0)
+    return this.getAddress(walletIndex)
   }
 
   /**
@@ -183,7 +183,7 @@ class Client implements CosmosClient, XChainClient {
   private getPrivateKey = (index = 0): PrivKey => {
     if (!this.phrase) throw new Error('Phrase not set')
 
-    return this.getSDKClient()?.getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+    return this.getSDKClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
   }
   getSDKClient = (): CosmosSDKClient => {
     return this.sdkClients.get(this.network) || TESTNET_SDK

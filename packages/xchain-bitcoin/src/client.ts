@@ -60,7 +60,6 @@ class Client implements BitcoinClient, XChainClient {
     phrase,
   }: BitcoinClientParams) {
     this.net = network
-    // this.rootDerivationPaths = this.fixRootPAths(rootDerivationPaths)
     this.rootDerivationPaths = rootDerivationPaths
     this.setSochainUrl(sochainUrl)
     this.setBlockstreamUrl(blockstreamUrl)
@@ -96,10 +95,10 @@ class Client implements BitcoinClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      return this.getAddress(0)
+      return this.getAddress(walletIndex)
     } else {
       throw new Error('Invalid phrase')
     }
@@ -196,7 +195,7 @@ class Client implements BitcoinClient, XChainClient {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
-    if (this.phrase !== '') {
+    if (this.phrase) {
       const btcNetwork = Utils.btcNetwork(this.net)
       const btcKeys = this.getBtcKeys(this.phrase, index)
 
@@ -247,7 +246,7 @@ class Client implements BitcoinClient, XChainClient {
   /**
    * Get the BTC balance of a given address.
    *
-   * @param {number} index By default, it will return the balance of the 0th address
+   * @param {Address} addres the BTC address
    * @returns {Array<Balance>} The BTC balance of the address.
    */
   getBalance = async (address: Address): Promise<Balance[]> => {
