@@ -553,7 +553,6 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
 
     const gasLimit = await ethClient.estimateApprove({
-      walletIndex: 0,
       spender: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       sender: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       amount: baseAmount(100, ETH_DECIMAL),

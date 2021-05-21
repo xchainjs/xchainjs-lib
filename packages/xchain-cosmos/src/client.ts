@@ -279,7 +279,7 @@ class Client implements CosmosClient, XChainClient {
       const mainAsset = this.getMainAsset()
       const txHistory = await this.getSDKClient().searchTx({
         messageAction,
-        messageSender: params?.address,
+        messageSender: (params && params.address) || this.getAddress(),
         page,
         limit,
         txMinHeight,

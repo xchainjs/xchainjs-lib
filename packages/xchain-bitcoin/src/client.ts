@@ -145,8 +145,6 @@ class Client implements BitcoinClient, XChainClient {
    * @returns {string} The bitcoin derivation path based on the network.
    */
   getFullDerivationPath(index: number): string {
-    // for some reason the bitcoinjs lib doesnt like the full path
-
     return this.rootDerivationPaths[this.net] + `${index}`
   }
 

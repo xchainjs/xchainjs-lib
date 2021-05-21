@@ -106,7 +106,7 @@ type ClientParams = XChainClientParams & {
  */
 export default class Client implements XChainClient, EthereumClient {
   private network: EthNetwork
-  private hdNode: HDNode
+  private hdNode!: HDNode
   private etherscanApiKey?: string
   private explorerUrl: ExplorerUrl
   private infuraCreds: InfuraCreds | undefined
@@ -134,13 +134,7 @@ export default class Client implements XChainClient, EthereumClient {
   }: ClientParams) {
     this.rootDerivationPaths = rootDerivationPaths
     this.network = xchainNetworkToEths(network)
-
-    // NOTE: we need to duplicate this check here because setPhrase() also calls getAddress(0)
-    if (!Crypto.validatePhrase(phrase)) {
-      throw new Error('Invalid phrase')
-    }
-
-    this.hdNode = HDNode.fromMnemonic(phrase)
+    this.setPhrase(phrase)
     this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey
     this.ethplorerUrl = ethplorerUrl
@@ -311,11 +305,10 @@ export default class Client implements XChainClient, EthereumClient {
    * Get getFullDerivationPath
    *
    * @param {number} index the HD wallet index
-   * @returns {string} The bitcoin derivation path based on the network.
+   * @returns {string} The derivation path based on the network.
    */
   getFullDerivationPath(index: number): string {
-    const network = this.network === EthNetwork.MAIN ? 'mainnet' : 'testnet'
-    return this.rootDerivationPaths[network] + `${index}`
+    return this.rootDerivationPaths[this.getNetwork()] + `${index}`
   }
   /**
    * Set/update a new phrase (Eg. If user wants to change wallet)
@@ -633,7 +626,7 @@ export default class Client implements XChainClient, EthereumClient {
           .amount()
           .toFixed(),
       )
-    const gasLimit = await this.estimateApprove({ walletIndex, spender, sender, amount }).catch(() => undefined)
+    const gasLimit = await this.estimateApprove({ spender, sender, amount }).catch(() => undefined)
 
     try {
       const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
@@ -657,7 +650,11 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @returns {BigNumber} The estimated gas limit.
    */
-  estimateApprove = async ({ spender, sender, amount }: Omit<ApproveParams, 'feeOptionKey'>): Promise<BigNumber> => {
+  estimateApprove = async ({
+    spender,
+    sender,
+    amount,
+  }: Omit<ApproveParams, 'feeOptionKey' | 'walletIndex'>): Promise<BigNumber> => {
     try {
       const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
       const gasLimit = await this.estimateCall(sender, erc20ABI, 'approve', [

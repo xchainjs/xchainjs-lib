@@ -3,7 +3,6 @@ import { MIN_TX_FEE } from '../src/const'
 import { baseAmount, AssetLTC } from '@xchainjs/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
-// import { getDerivePath } from '../src/utils'
 mockSochainApi.init()
 
 const ltcClient = new Client({ network: 'testnet' })
@@ -61,9 +60,6 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork('mainnet')
     expect(ltcClient.setPhrase(phraseOne)).toEqual(mainnet_address_path0)
     expect(ltcClient.getAddress(1)).toEqual(mainnet_address_path1)
-
-    // const otherLtcPath1TestM = new Client({ phrase: phraseOne, network: 'mainnet', derivationPath: "m/84'/2'/0'/0/1" })
-    // expect(otherLtcPath1TestM.getAddress()).toEqual(mainnet_address_path1)
   })
 
   it('should get the right balance', async () => {

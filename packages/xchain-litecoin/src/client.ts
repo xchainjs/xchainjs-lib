@@ -202,7 +202,7 @@ class Client implements LitecoinClient, XChainClient {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
-    if (this.phrase !== '') {
+    if (this.phrase) {
       const ltcNetwork = Utils.ltcNetwork(this.net)
       const ltcKeys = this.getLtcKeys(this.phrase, index)
 

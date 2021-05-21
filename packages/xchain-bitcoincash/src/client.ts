@@ -245,8 +245,7 @@ class Client implements BitcoinCashClient, XChainClient {
   getAddress = (index = 0): Address => {
     if (this.phrase) {
       try {
-        const derivationPath = this.rootDerivationPaths[this.network] + `${index}`
-        const keys = this.getBCHKeys(this.phrase, derivationPath)
+        const keys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
         const address = keys.getAddress(index)
 
         return utils.toLegacyAddress(address)
@@ -256,6 +255,16 @@ class Client implements BitcoinCashClient, XChainClient {
     }
 
     throw new Error('Phrase must be provided')
+  }
+
+  /**
+   * Get getFullDerivationPath
+   *
+   * @param {number} index the HD wallet index
+   * @returns {string} The derivation path based on the network.
+   */
+  getFullDerivationPath(index: number): string {
+    return this.rootDerivationPaths[this.network] + `${index}`
   }
 
   /**

@@ -188,9 +188,6 @@ describe('Client Test', () => {
       ],
     })
 
-    // Balance for the `thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5`
-    // const address = thorClient.getAddress(0)
-    // expect(address).toEqual('thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5')
     const balances = await thorMainClient.getBalance('thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5')
     expect(balances.length).toEqual(1)
     expect(balances[0].asset).toEqual(AssetRune)
