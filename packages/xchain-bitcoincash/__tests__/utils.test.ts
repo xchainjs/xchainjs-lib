@@ -41,7 +41,7 @@ describe('Bitcoin Cash Utils Test', () => {
   })
 
   it('should leave unprefixed address intact', () => {
-    const strip_address = utils.stripPrefix(testnet_address, 'testnet')
+    const strip_address = utils.stripPrefix('qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g', 'testnet')
     expect(strip_address).toEqual('qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g')
   })
 })
