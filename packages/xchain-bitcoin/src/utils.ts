@@ -196,6 +196,7 @@ export const buildTx = async ({
 }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXOs }> => {
   try {
     const utxos = await scanUTXOs({ sochainUrl, network, address: sender })
+    console.log(utxos)
     if (utxos.length === 0) {
       return Promise.reject(Error('No utxos to send'))
     }

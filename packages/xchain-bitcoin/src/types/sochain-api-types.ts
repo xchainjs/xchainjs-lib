@@ -4,6 +4,7 @@ export type AddressParams = {
   sochainUrl: string
   network: Network
   address: string
+  startingFromTxId?: string
 }
 
 export type TxHashParams = {

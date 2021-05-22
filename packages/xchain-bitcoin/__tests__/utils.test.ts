@@ -1,6 +1,8 @@
 import * as Utils from '../src/utils'
 import * as Bitcoin from 'bitcoinjs-lib'
 import { UTXOs } from '../src/types/common'
+import mockSochainApi from '../__mocks__/sochain'
+mockSochainApi.init()
 
 let utxos: UTXOs
 
@@ -43,5 +45,16 @@ describe('Bitcoin Utils Test', () => {
     expect(estimates.fast).toBeDefined()
     expect(estimates.fastest).toBeDefined()
     expect(estimates.average).toBeDefined()
+  })
+  it('should fetch as many uxtos as are associated with an address', async () => {
+    const address = '34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo'
+    const utxos: UTXOs = await Utils.scanUTXOs({
+      sochainUrl: 'https://sochain.com/api/v2',
+      network: 'mainnet',
+      address,
+    })
+    expect(utxos.length).toEqual(177)
+    expect(utxos?.[0].hash).toEqual('a79b970c17d97557357ec0661a2b9de44724440e1c635e1b603381c53ece725d')
+    expect(utxos?.[176].hash).toEqual('fca7fe2df9318fb17ab8e527429c900bcea16613e57ab65f323d0593f0c3919c')
   })
 })
