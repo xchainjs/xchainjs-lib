@@ -192,7 +192,7 @@ export const parseTransaction = (tx: Transaction): Tx => {
       .map(
         (input) =>
           ({
-            from: input.address,
+            from: input.address ? stripPrefix(input.address) : input.address,
             amount: baseAmount(input.value, BCH_DECIMAL),
           } as TxFrom),
       ),
@@ -201,7 +201,7 @@ export const parseTransaction = (tx: Transaction): Tx => {
       .map(
         (output) =>
           ({
-            to: output.address,
+            to: output.address ? stripPrefix(output.address) : output.address,
             amount: baseAmount(output.value, BCH_DECIMAL),
           } as TxTo),
       ),
