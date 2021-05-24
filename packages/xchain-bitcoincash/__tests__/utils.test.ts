@@ -31,17 +31,17 @@ describe('Bitcoin Cash Utils Test', () => {
   })
 
   it('should strip out the prefix from the testnet address', () => {
-    const strip_address = utils.stripPrefix(testnet_address, 'testnet')
+    const strip_address = utils.stripPrefix(testnet_address)
     expect(strip_address).toEqual('qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g')
   })
 
   it('should strip out the prefix from the testnet address', () => {
-    const strip_address = utils.stripPrefix(mainnet_address, 'mainnet')
+    const strip_address = utils.stripPrefix(mainnet_address)
     expect(strip_address).toEqual('qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj')
   })
 
   it('should leave unprefixed address intact', () => {
-    const strip_address = utils.stripPrefix('qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g', 'testnet')
+    const strip_address = utils.stripPrefix('qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g')
     expect(strip_address).toEqual('qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g')
   })
 })

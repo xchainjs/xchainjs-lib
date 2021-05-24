@@ -155,10 +155,7 @@ export const getPrefix = (network: string) => (network === 'testnet' ? 'bchtest:
  * @returns {Address} The address with prefix removed
  *
  */
-export const stripPrefix = (address: Address, network: Network): Address => {
-  const prefix = getPrefix(network)
-  return address.indexOf(prefix) === 0 ? address.substr(prefix.length, address.length) : address
-}
+export const stripPrefix = (address: Address): Address => address.replace(/(bchtest:|bitcoincash:)/, '')
 
 /**
  * Convert to Legacy Address.
