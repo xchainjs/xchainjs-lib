@@ -44,4 +44,15 @@ describe('Litecoin Utils Test', () => {
     expect(estimates.fastest).toBeDefined()
     expect(estimates.average).toBeDefined()
   })
+  it('should fetch as many uxtos as are associated with an address', async () => {
+    const address = 'M8T1B2Z97gVdvmfkQcAtYbEepune1tzGua'
+    const utxos: UTXOs = await Utils.scanUTXOs({
+      sochainUrl: 'https://sochain.com/api/v2',
+      network: 'mainnet',
+      address,
+    })
+    expect(utxos.length).toEqual(213)
+    expect(utxos?.[0].hash).toEqual('65b34acff41570854758adf6bdafc94c0c33f78194d7f49f1cf8d24314b4d47a')
+    expect(utxos?.[212].hash).toEqual('f180c1cd0a8e719456f3f033c497bae2cedc482d87443b668c0a5a277272b2ba')
+  })
 })
