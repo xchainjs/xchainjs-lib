@@ -1,3 +1,7 @@
+# v.0.10.1 (2021-05-24)
+
+- Fixed missed addresses' stripping out for `parseTransaction`
+
 # v.0.10.0 (2021-05-21)
 
 ### Breaking change
