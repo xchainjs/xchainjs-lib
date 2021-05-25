@@ -19,8 +19,8 @@ describe('BCHClient Test', () => {
 
   const MEMO = 'SWAP:THOR.RUNE'
   const phrase = 'atom green various power must another rent imitate gadget creek fat then'
-  const testnet_address = 'motwRaFk6Dj1FroSATNNLWYfYQHiz8z1oi'
-  const mainnet_address = '1Anw7uzLwXxBykMLeKb2BPAyTKsSfVDA8A'
+  const testnet_address = 'qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g'
+  const mainnet_address = 'qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
 
   it('set phrase should return correct address', () => {
     bchClient.setNetwork('testnet')
@@ -172,11 +172,11 @@ describe('BCHClient Test', () => {
     )
     expect(txData.hash).toEqual('0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b')
     expect(txData.from.length).toEqual(1)
-    expect(txData.from[0].from).toEqual('bchtest:qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
+    expect(txData.from[0].from).toEqual('qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
     expect(txData.from[0].amount.amount().isEqualTo(baseAmount(4008203, 8).amount())).toBeTruthy()
 
     expect(txData.to.length).toEqual(1)
-    expect(txData.to[0].to).toEqual('bchtest:qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
+    expect(txData.to[0].to).toEqual('qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
     expect(txData.to[0].amount.amount().isEqualTo(baseAmount(4005704, 8).amount())).toBeTruthy()
   })
 
@@ -250,10 +250,10 @@ describe('BCHClient Test', () => {
     expect(txs.total).toEqual(1345)
     expect(txs.txs[0].hash).toEqual('0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b')
     expect(txs.txs[0].from.length).toEqual(1)
-    expect(txs.txs[0].from[0].from).toEqual('bchtest:qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
+    expect(txs.txs[0].from[0].from).toEqual('qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
     expect(txs.txs[0].from[0].amount.amount().isEqualTo(baseAmount(4008203, 8).amount())).toBeTruthy()
     expect(txs.txs[0].to.length).toEqual(1)
-    expect(txs.txs[0].to[0].to).toEqual('bchtest:qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
+    expect(txs.txs[0].to[0].to).toEqual('qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
     expect(txs.txs[0].to[0].amount.amount().isEqualTo(baseAmount(4005704, 8).amount())).toBeTruthy()
   })
 

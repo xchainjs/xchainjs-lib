@@ -1,3 +1,17 @@
+# v.0.10.2 (2021-05-25)
+
+- Changed `utils/getPrefix` to return an empty string
+
+# v.0.10.1 (2021-05-24)
+
+- Fixed missed addresses' stripping out for `parseTransaction`
+
+# v.0.10.0 (2021-05-21)
+
+### Breaking change
+
+- Reverts prefix removal and legacy address usage
+
 # v.0.9.0 (2021-05-05)
 
 ### Breaking change

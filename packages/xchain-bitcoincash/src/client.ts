@@ -251,7 +251,7 @@ class Client implements BitcoinCashClient, XChainClient {
         const keys = this.getBCHKeys(this.phrase)
         const address = keys.getAddress()
 
-        return utils.toLegacyAddress(address)
+        return utils.stripPrefix(utils.toCashAddress(address))
       } catch (error) {
         throw new Error('Address not defined')
       }
