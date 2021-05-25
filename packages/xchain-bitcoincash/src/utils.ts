@@ -14,6 +14,8 @@ import {
   GetChangeParams,
   UTXOs,
   UTXO,
+  TransactionInput,
+  TransactionOutput,
 } from './types'
 import { getAccount, getRawTransaction, getUnspentTransactions } from './haskoin-api'
 import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'
@@ -188,20 +190,22 @@ export const parseTransaction = (tx: Transaction): Tx => {
   return {
     asset: AssetBCH,
     from: tx.inputs
-      .filter((input) => !!input.address)
+      // For correct type inference `Array.prototype.filter` needs manual type guard to be defined
+      .filter((input): input is Omit<TransactionInput, 'address'> & { address: string } => !!input.address)
       .map(
         (input) =>
           ({
-            from: input.address ? stripPrefix(input.address) : input.address,
+            from: stripPrefix(input.address),
             amount: baseAmount(input.value, BCH_DECIMAL),
           } as TxFrom),
       ),
     to: tx.outputs
-      .filter((output) => !!output.address)
+      // For correct type inference `Array.prototype.filter` needs manual type guard to be defined
+      .filter((output): output is Omit<TransactionOutput, 'address'> & { address: string } => !!output.address)
       .map(
         (output) =>
           ({
-            to: output.address ? stripPrefix(output.address) : output.address,
+            to: stripPrefix(output.address),
             amount: baseAmount(output.value, BCH_DECIMAL),
           } as TxTo),
       ),
