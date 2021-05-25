@@ -24,6 +24,7 @@ export type Witness = {
 export type UTXO = {
   hash: string
   index: number
+  value: number
   witnessUtxo: Witness
   address: Address
   txHex: string
