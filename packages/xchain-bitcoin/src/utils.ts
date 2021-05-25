@@ -11,7 +11,6 @@ import { MIN_TX_FEE } from './const'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import accumulative from 'coinselect/accumulative'
-import { PsbtTxOutput } from 'bitcoinjs-lib'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
@@ -217,7 +216,7 @@ export const buildTx = async ({
     )
 
     // Outputs
-    outputs.forEach((output: PsbtTxOutput) => {
+    outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
       if (!output.address) {
         //an empty address means this is the  change ddress
         output.address = sender
