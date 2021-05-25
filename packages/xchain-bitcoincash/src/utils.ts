@@ -142,13 +142,10 @@ export const bchNetwork = (network: Network): BCHNetwork => {
 }
 
 /**
- * Get address prefix based on the network.
- *
- * @param {string} network
- * @returns {string} The address prefix based on the network.
- *
+ * BCH new addresses strategy has no any prefixes.
+ * Any possible prefixes at the TX addresses will be stripped out with parseTransaction
  **/
-export const getPrefix = (network: string) => (network === 'testnet' ? 'bchtest:' : 'bitcoincash:')
+export const getPrefix = () => ''
 
 /**
  * Strips bchtest or bitcoincash prefix from address
