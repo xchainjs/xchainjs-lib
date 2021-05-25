@@ -1,8 +1,14 @@
-# v.0.10.0 (2021-05-17)
+# v.0.11.0 (2021-05-17)
 
 ### Breaking change
 
 - added support for HD wallets
+
+# v.0.10.0 (2021-05-21)
+
+### Breaking change
+
+- Reverts prefix removal and legacy address usage
 
 # v.0.9.0 (2021-05-05)
 

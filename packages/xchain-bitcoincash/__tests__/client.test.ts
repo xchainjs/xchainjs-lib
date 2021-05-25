@@ -19,10 +19,12 @@ describe('BCHClient Test', () => {
 
   const MEMO = 'SWAP:THOR.RUNE'
   const phrase = 'atom green various power must another rent imitate gadget creek fat then'
-  const testnet_address_path0 = 'motwRaFk6Dj1FroSATNNLWYfYQHiz8z1oi'
-  const testnet_address_path1 = 'n37RAZYoe55EMMKGwxdC66Wv88BN2buYsf'
-  const mainnet_address_path0 = '1Anw7uzLwXxBykMLeKb2BPAyTKsSfVDA8A'
-  const mainnet_address_path1 = '1NSGMPxARx2Y1qaX2JxiHEFCuYP3f1NFGf'
+  const testnet_address_path0 = 'qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g'
+  const testnet_address_path1 = 'qrkd7dhu7zcmn6wwvj3p4aueslycqchj5vxx3stmjz'
+  const mainnet_address_path0 = 'qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
+  const mainnet_address_path1 = 'qr4jrkhu3usuk8ghv60m7pg9eywuc79yqvd0wxt2lm'
+  // const testnet_address = ''
+  // const mainnet_address = ''
 
   it('set phrase should return correct address', () => {
     bchClient.setNetwork('testnet')
