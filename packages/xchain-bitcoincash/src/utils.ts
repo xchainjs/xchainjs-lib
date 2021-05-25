@@ -4,7 +4,18 @@ import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
 import { Address, Balance, Fees, Network, Tx, TxFrom, TxParams, TxTo } from '@xchainjs/xchain-client'
 import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util/lib'
-import { FeeRate, FeeRates, FeesWithRates, Transaction, AddressParams, GetChangeParams, UTXOs, UTXO } from './types'
+import {
+  FeeRate,
+  FeeRates,
+  FeesWithRates,
+  Transaction,
+  AddressParams,
+  GetChangeParams,
+  UTXOs,
+  UTXO,
+  TransactionInput,
+  TransactionOutput,
+} from './types'
 import { getAccount, getRawTransaction, getUnspentTransactions } from './haskoin-api'
 import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'
 
@@ -119,13 +130,10 @@ export const bchNetwork = (network: Network): BCHNetwork => {
 }
 
 /**
- * Get address prefix based on the network.
- *
- * @param {string} network
- * @returns {string} The address prefix based on the network.
- *
+ * BCH new addresses strategy has no any prefixes.
+ * Any possible prefixes at the TX addresses will be stripped out with parseTransaction
  **/
-export const getPrefix = (network: string) => (network === 'testnet' ? 'bchtest:' : 'bitcoincash:')
+export const getPrefix = () => ''
 
 /**
  * Strips bchtest or bitcoincash prefix from address
@@ -167,20 +175,22 @@ export const parseTransaction = (tx: Transaction): Tx => {
   return {
     asset: AssetBCH,
     from: tx.inputs
-      .filter((input) => !!input.address)
+      // For correct type inference `Array.prototype.filter` needs manual type guard to be defined
+      .filter((input): input is Omit<TransactionInput, 'address'> & { address: string } => !!input.address)
       .map(
         (input) =>
           ({
-            from: input.address,
+            from: stripPrefix(input.address),
             amount: baseAmount(input.value, BCH_DECIMAL),
           } as TxFrom),
       ),
     to: tx.outputs
-      .filter((output) => !!output.address)
+      // For correct type inference `Array.prototype.filter` needs manual type guard to be defined
+      .filter((output): output is Omit<TransactionOutput, 'address'> & { address: string } => !!output.address)
       .map(
         (output) =>
           ({
-            to: output.address,
+            to: stripPrefix(output.address),
             amount: baseAmount(output.value, BCH_DECIMAL),
           } as TxTo),
       ),

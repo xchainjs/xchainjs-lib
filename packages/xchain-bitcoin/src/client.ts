@@ -244,7 +244,7 @@ class Client implements BitcoinClient, XChainClient {
   /**
    * Get the BTC balance of a given address.
    *
-   * @param {Address} addres the BTC address
+   * @param {Address} the BTC address
    * @returns {Array<Balance>} The BTC balance of the address.
    */
   getBalance = async (address: Address): Promise<Balance[]> => {

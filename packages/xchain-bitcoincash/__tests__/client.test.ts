@@ -23,8 +23,6 @@ describe('BCHClient Test', () => {
   const testnet_address_path1 = 'qrkd7dhu7zcmn6wwvj3p4aueslycqchj5vxx3stmjz'
   const mainnet_address_path0 = 'qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
   const mainnet_address_path1 = 'qr4jrkhu3usuk8ghv60m7pg9eywuc79yqvd0wxt2lm'
-  // const testnet_address = ''
-  // const mainnet_address = ''
 
   it('set phrase should return correct address', () => {
     bchClient.setNetwork('testnet')
@@ -186,11 +184,11 @@ describe('BCHClient Test', () => {
     )
     expect(txData.hash).toEqual('0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b')
     expect(txData.from.length).toEqual(1)
-    expect(txData.from[0].from).toEqual('bchtest:qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
+    expect(txData.from[0].from).toEqual('qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
     expect(txData.from[0].amount.amount().isEqualTo(baseAmount(4008203, 8).amount())).toBeTruthy()
 
     expect(txData.to.length).toEqual(1)
-    expect(txData.to[0].to).toEqual('bchtest:qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
+    expect(txData.to[0].to).toEqual('qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
     expect(txData.to[0].amount.amount().isEqualTo(baseAmount(4005704, 8).amount())).toBeTruthy()
   })
 
@@ -264,10 +262,10 @@ describe('BCHClient Test', () => {
     expect(txs.total).toEqual(1345)
     expect(txs.txs[0].hash).toEqual('0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b')
     expect(txs.txs[0].from.length).toEqual(1)
-    expect(txs.txs[0].from[0].from).toEqual('bchtest:qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
+    expect(txs.txs[0].from[0].from).toEqual('qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
     expect(txs.txs[0].from[0].amount.amount().isEqualTo(baseAmount(4008203, 8).amount())).toBeTruthy()
     expect(txs.txs[0].to.length).toEqual(1)
-    expect(txs.txs[0].to[0].to).toEqual('bchtest:qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
+    expect(txs.txs[0].to[0].to).toEqual('qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
     expect(txs.txs[0].to[0].amount.amount().isEqualTo(baseAmount(4005704, 8).amount())).toBeTruthy()
   })
 

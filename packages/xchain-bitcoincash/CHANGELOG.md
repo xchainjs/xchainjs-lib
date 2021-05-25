@@ -3,6 +3,13 @@
 ### Breaking change
 
 - added support for HD wallets
+# v.0.10.2 (2021-05-25)
+
+- Changed `utils/getPrefix` to return an empty string
+
+# v.0.10.1 (2021-05-24)
+
+- Fixed missed addresses' stripping out for `parseTransaction`
 
 # v.0.10.0 (2021-05-21)
 
