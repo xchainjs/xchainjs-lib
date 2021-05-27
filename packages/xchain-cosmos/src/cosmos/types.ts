@@ -3,12 +3,14 @@ import { BigSource } from 'big.js'
 import { PrivKey, Msg, codec } from 'cosmos-client'
 import { BaseAccount, StdTx } from 'cosmos-client/x/auth'
 import { StdTxFee } from 'cosmos-client/api'
+import { RootDerivationPaths, Network } from '@xchainjs/xchain-client'
 
 export type CosmosSDKClientParams = {
   server: string
   chainId: string
   prefix?: string
-  derive_path?: string
+  network?: Network
+  rootDerivationPaths?: RootDerivationPaths
 }
 
 export type SearchTxParams = {

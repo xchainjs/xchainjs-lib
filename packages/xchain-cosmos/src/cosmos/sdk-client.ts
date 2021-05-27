@@ -29,15 +29,18 @@ export class CosmosSDKClient {
   chainId: string
 
   prefix = ''
-  derive_path = ''
 
   // by default, cosmos chain
-  constructor({ server, chainId, prefix = 'cosmos', derive_path = "44'/118'/0'/0/0" }: CosmosSDKClientParams) {
+  constructor({ server, chainId, prefix = 'cosmos' }: CosmosSDKClientParams) {
     this.server = server
     this.chainId = chainId
     this.prefix = prefix
-    this.derive_path = derive_path
     this.sdk = new CosmosSDK(this.server, this.chainId)
+  }
+
+  updatePrefix = (prefix: string) => {
+    this.prefix = prefix
+    this.setPrefix()
   }
 
   setPrefix = (): void => {
@@ -57,10 +60,17 @@ export class CosmosSDKClient {
     return AccAddress.fromPublicKey(privkey.getPubKey()).toBech32()
   }
 
-  getPrivKeyFromMnemonic = (mnemonic: string): PrivKey => {
+  getAddressFromMnemonic = (mnemonic: string, derivationPath: string): string => {
+    this.setPrefix()
+    const privKey = this.getPrivKeyFromMnemonic(mnemonic, derivationPath)
+
+    return AccAddress.fromPublicKey(privKey.getPubKey()).toBech32()
+  }
+
+  getPrivKeyFromMnemonic = (mnemonic: string, derivationPath: string): PrivKey => {
     const seed = xchainCrypto.getSeed(mnemonic)
     const node = BIP32.fromSeed(seed)
-    const child = node.derivePath(this.derive_path)
+    const child = node.derivePath(derivationPath)
 
     if (!child.privateKey) {
       throw new Error('child does not have a privateKey')

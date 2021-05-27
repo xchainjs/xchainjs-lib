@@ -8,6 +8,10 @@ import { Client } from '../src/client'
 import { getDenom } from '../src/util'
 import { TxHistoryResponse, TxResponse } from '../src/cosmos/types'
 
+const getClientUrl = (client: Client): string => {
+  return client.getNetwork() === 'testnet' ? 'http://lcd.gaia.bigdipper.live:1317' : 'https://api.cosmos.network'
+}
+
 const mockAccountsAddress = (
   url: string,
   address: string,
@@ -63,7 +67,11 @@ describe('Client Test', () => {
   let cosmosClient: Client
 
   const phrase = 'foster blouse cattle fiction deputy social brown toast various sock awkward print'
-  const address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
+  const address0_mainnet = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
+  const address1_mainnet = 'cosmos1924f27fujxqnkt74u4d3ke3sfygugv9qp29hmk'
+
+  const address0_testnet = 'cosmos13hrqe0g38nqnjgnstkfrlm2zd790g5yegntshv'
+  const address1_testnet = 'cosmos1re8rf3sv2tkx88xx6825tjqtfntrrfj0h4u94u'
 
   beforeEach(() => {
     cosmosClient = new Client({ phrase, network: 'testnet' })
@@ -75,12 +83,12 @@ describe('Client Test', () => {
 
   it('should start with empty wallet', async () => {
     const cosmosClientEmptyMain = new Client({ phrase, network: 'mainnet' })
-    const addressMain = cosmosClientEmptyMain.getAddress()
-    expect(addressMain).toEqual(address)
+    expect(cosmosClientEmptyMain.getAddress()).toEqual(address0_mainnet)
+    expect(cosmosClientEmptyMain.getAddress(1)).toEqual(address1_mainnet)
 
     const cosmosClientEmptyTest = new Client({ phrase, network: 'testnet' })
-    const addressTest = cosmosClientEmptyTest.getAddress()
-    expect(addressTest).toEqual(address)
+    expect(cosmosClientEmptyTest.getAddress()).toEqual(address0_testnet)
+    expect(cosmosClientEmptyTest.getAddress(1)).toEqual(address1_testnet)
   })
 
   it('throws an error passing an invalid phrase', async () => {
@@ -94,7 +102,7 @@ describe('Client Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(cosmosClient.getAddress()).toEqual(address)
+    expect(cosmosClient.getAddress()).toEqual(address0_testnet)
   })
 
   it('should update net', async () => {
@@ -116,17 +124,17 @@ describe('Client Test', () => {
   it('has no balances', async () => {
     cosmosClient.setNetwork('mainnet')
 
-    mockAccountsBalance(cosmosClient.getClientUrl(), address, {
+    mockAccountsBalance(getClientUrl(cosmosClient), address0_mainnet, {
       height: 0,
       result: [],
     })
 
-    const result = await cosmosClient.getBalance()
+    const result = await cosmosClient.getBalance(address0_mainnet)
     expect(result).toEqual([])
   })
 
   it('has balances', async () => {
-    mockAccountsBalance(cosmosClient.getClientUrl(), 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv', {
+    mockAccountsBalance(getClientUrl(cosmosClient), 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv', {
       height: 0,
       result: [
         {
@@ -135,7 +143,6 @@ describe('Client Test', () => {
         },
       ],
     })
-
     const balances = await cosmosClient.getBalance('cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv')
     const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, 6).amount())
     expect(expected).toBeTruthy()
@@ -149,7 +156,7 @@ describe('Client Test', () => {
       total: 0,
       txs: [],
     }
-    assertTxHstory(cosmosClient.getClientUrl(), address, {
+    assertTxHstory(getClientUrl(cosmosClient), address0_mainnet, {
       count: 0,
       limit: 30,
       page_number: 1,
@@ -158,12 +165,12 @@ describe('Client Test', () => {
       txs: [],
     })
 
-    const transactions = await cosmosClient.getTransactions()
+    const transactions = await cosmosClient.getTransactions({ address: address0_mainnet })
     expect(transactions).toEqual(expected)
   })
 
   it('has tx history', async () => {
-    assertTxHstory(cosmosClient.getClientUrl(), 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
+    assertTxHstory(getClientUrl(cosmosClient), 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
       count: 1,
       limit: 30,
       page_number: 1,
@@ -206,7 +213,7 @@ describe('Client Test', () => {
 
     cosmosClient.setNetwork('mainnet')
 
-    assertTxHstory(cosmosClient.getClientUrl(), 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z', {
+    assertTxHstory(getClientUrl(cosmosClient), 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z', {
       count: 1,
       limit: 30,
       page_number: 1,
@@ -260,7 +267,7 @@ describe('Client Test', () => {
       height: 0,
     }
 
-    mockAccountsAddress(cosmosClient.getClientUrl(), cosmosClient.getAddress(), {
+    mockAccountsAddress(getClientUrl(cosmosClient), cosmosClient.getAddress(), {
       height: 0,
       result: {
         coins: [
@@ -274,7 +281,7 @@ describe('Client Test', () => {
       },
     })
     assertTxsPost(
-      cosmosClient.getClientUrl(),
+      getClientUrl(cosmosClient),
       cosmosClient.getAddress(),
       to_address,
       [
@@ -300,7 +307,7 @@ describe('Client Test', () => {
   it('get transaction data', async () => {
     cosmosClient.setNetwork('mainnet')
 
-    assertTxHashGet(cosmosClient.getClientUrl(), '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {
+    assertTxHashGet(getClientUrl(cosmosClient), '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {
       height: 1047,
       txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
       data: '0A090A076465706F736974',

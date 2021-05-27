@@ -5,6 +5,11 @@ import { ETH_DECIMAL } from '../src/utils'
 import { mock_ethplorer_api_getAddress, mock_ethplorer_api_getTxInfo } from '../__mocks__/ethplorer-api'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
+// https://iancoleman.io/bip39/
+// m/44'/60'/0'/0/0
+const addrPath0 = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E'
+// m/44'/60'/0'/0/1
+const addrPath1 = '0x1804137641b5CB781226b361976F15B4067ee0F9'
 const ethplorerUrl = 'https://api.ethplorer.io'
 
 /**
@@ -17,6 +22,17 @@ describe('Client Test', () => {
 
   afterEach(() => {
     nock.cleanAll()
+  })
+
+  it('derive path correctly with bip44', () => {
+    const ethClient = new Client({
+      network: 'mainnet',
+      phrase,
+      ethplorerUrl,
+    })
+
+    expect(ethClient.getAddress(0)).toEqual(addrPath0.toLowerCase())
+    expect(ethClient.getAddress(1)).toEqual(addrPath1.toLowerCase())
   })
 
   it('gets a balance without address args', async () => {
@@ -48,7 +64,7 @@ describe('Client Test', () => {
       countTxs: 1,
     })
 
-    const balances = await ethClient.getBalance()
+    const balances = await ethClient.getBalance(ethClient.getAddress())
     expect(balances.length).toEqual(1)
     expect(balances[0].asset).toEqual(AssetETH)
     expect(
@@ -63,8 +79,8 @@ describe('Client Test', () => {
       ethplorerUrl,
     })
 
-    mock_ethplorer_api_getAddress(ethplorerUrl, '0x12d4444f96c644385d8ab355f6ddf801315b6254', {
-      address: '0x12d4444f96c644385d8ab355f6ddf801315b6254',
+    mock_ethplorer_api_getAddress(ethplorerUrl, '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e', {
+      address: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
       ETH: {
         balance: 100,
         price: {
@@ -101,8 +117,7 @@ describe('Client Test', () => {
       ],
       countTxs: 1,
     })
-
-    const balance = await ethClient.getBalance('0x12d4444f96c644385d8ab355f6ddf801315b6254')
+    const balance = await ethClient.getBalance(ethClient.getAddress(0))
     expect(balance.length).toEqual(2)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
     expect(balance[0].amount.amount().isEqualTo(baseAmount('100000000000000000000', ETH_DECIMAL).amount())).toBeTruthy()
