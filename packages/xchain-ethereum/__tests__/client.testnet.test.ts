@@ -59,14 +59,14 @@ describe('Client Test', () => {
   })
 
   it('should set new phrase', () => {
-    const ethClient = new Client({})
+    const ethClient = new Client({ phrase })
     const newWallet = ethClient.setPhrase(newPhrase)
     expect(ethClient.getWallet().mnemonic.phrase).toEqual(newPhrase)
     expect(newWallet).toBeTruthy()
   })
 
   it('should fail to set new phrase', () => {
-    const ethClient = new Client({})
+    const ethClient = new Client({ phrase })
     expect(() => ethClient.setPhrase('bad bad phrase')).toThrowError()
   })
 
@@ -118,17 +118,17 @@ describe('Client Test', () => {
   })
 
   it('should get network', () => {
-    const ethClient = new Client({ network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' })
     expect(ethClient.getNetwork()).toEqual('testnet')
   })
 
   it('should fail a bad address', () => {
-    const ethClient = new Client({ network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' })
     expect(ethClient.validateAddress('0xBADbadBad')).toBeFalsy()
   })
 
   it('should pass a good address', () => {
-    const ethClient = new Client({ network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' })
     const goodAddress = ethClient.validateAddress(address)
     expect(goodAddress).toBeTruthy()
   })
@@ -141,7 +141,7 @@ describe('Client Test', () => {
 
     mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
 
-    const balance = await ethClient.getBalance()
+    const balance = await ethClient.getBalance(ethClient.getAddress(0))
     expect(balance.length).toEqual(1)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
     expect(balance[0].amount.amount().isEqualTo(baseAmount('96713467036431545', ETH_DECIMAL).amount())).toBeTruthy()
@@ -155,7 +155,7 @@ describe('Client Test', () => {
 
     mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
 
-    const balance = await ethClient.getBalance('0x8d8ac01b3508ca869cb631bb2977202fbb574a0d')
+    const balance = await ethClient.getBalance(ethClient.getAddress(0))
     expect(balance.length).toEqual(1)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
     expect(balance[0].amount.amount().isEqualTo(baseAmount('96713467036431545', ETH_DECIMAL).amount())).toBeTruthy()
@@ -190,7 +190,7 @@ describe('Client Test', () => {
     if (asestUSDT) {
       assets.push(asestUSDT)
     }
-    const balance = await ethClient.getBalance(undefined, assets.length ? assets : undefined)
+    const balance = await ethClient.getBalance(address, assets.length ? assets : undefined)
     expect(balance.length).toEqual(2)
     expect(assetToString(balance[0].asset)).toEqual(assetToString(assets[0] ?? AssetETH))
     expect(balance[0].amount.decimal).toEqual(18)
@@ -200,11 +200,9 @@ describe('Client Test', () => {
     expect(balance[1].amount.amount().isEqualTo(baseAmount('96713467036431546', 18).amount())).toBeTruthy()
   })
 
-  it('throws error on bad address', async () => {
+  it('throws error on bad index', async () => {
     const ethClient = new Client({ network: 'testnet', phrase })
-
-    const balances = ethClient.getBalance('0xbad')
-    expect(balances).rejects.toThrowError()
+    expect(() => ethClient.getAddress(-1)).toThrow()
   })
 
   it('get eth transaction history', async () => {
@@ -581,6 +579,7 @@ describe('Client Test', () => {
     )
 
     const tx = await ethClient.approve({
+      walletIndex: 0,
       spender: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       sender: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
       feeOptionKey: 'fastest',
@@ -645,6 +644,7 @@ describe('Client Test', () => {
     const prices = await ethClient.estimateGasPrices()
 
     const txResult = await ethClient.call<TransactionResponse>(
+      0,
       '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
       erc20ABI,
       'transfer',

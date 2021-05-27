@@ -23,6 +23,3 @@ export type BroadcastTxParams = {
   nodeUrl: string
   auth?: NodeAuth
 }
-
-// We might extract it into xchain-client later
-export type DerivePath = { mainnet: string; testnet: string }

@@ -1,4 +1,8 @@
-# v.x.x.x
+# v.0.20.0 (2021-05-17)
+
+### Breaking change
+
+- added support for HD wallets
 
 # v.0.19.0 (2021-05-05)
 

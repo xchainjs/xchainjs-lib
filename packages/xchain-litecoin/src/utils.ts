@@ -5,7 +5,7 @@ import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xch
 import { AssetLTC, assetToString, BaseAmount, baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util'
 import { LtcAddressUTXOs, AddressParams } from './types/sochain-api-types'
 import { FeeRate, FeeRates, FeesWithRates, GetChangeParams } from './types/client-types'
-import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
+import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
 import coininfo from 'coininfo'
 
@@ -248,19 +248,6 @@ export const buildTx = async ({
 export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
   return await nodeApi.broadcastTx(params)
 }
-
-/**
- * Get DerivePath.
- *
- * @see https://github.com/satoshilabs/slips/blob/master/slip-0044.md
- *
- * @param {number} index (optional)
- * @returns {DerivePath} The litecoin derivation path by the index. (both mainnet and testnet)
- */
-export const getDerivePath = (index = 0): DerivePath => ({
-  mainnet: `84'/2'/0'/0/${index}`,
-  testnet: `84'/1'/0'/0/${index}`,
-})
 
 /**
  * Calculate fees based on fee rate and memo.

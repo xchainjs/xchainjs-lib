@@ -75,7 +75,7 @@ describe('Client Test', () => {
       data: null,
     })
 
-    const balances = await polkadotClient.getBalance()
+    const balances = await polkadotClient.getBalance(polkadotClient.getAddress())
     expect(balances.length).toEqual(0)
   })
 
@@ -91,7 +91,7 @@ describe('Client Test', () => {
       },
     })
 
-    const balances = await polkadotClient.getBalance()
+    const balances = await polkadotClient.getBalance(polkadotClient.getAddress())
     expect(balances.length).toEqual(1)
     expect(balances[0].amount.amount().isEqualTo(baseAmount('500000000000', 12).amount())).toBeTruthy()
   })
@@ -109,7 +109,7 @@ describe('Client Test', () => {
       },
     })
 
-    const txHistory = await polkadotClient.getTransactions()
+    const txHistory = await polkadotClient.getTransactions({ address: polkadotClient.getAddress() })
     expect(txHistory.total).toEqual(0)
     expect(txHistory.txs.length).toEqual(0)
   })

@@ -19,15 +19,27 @@ describe('BCHClient Test', () => {
 
   const MEMO = 'SWAP:THOR.RUNE'
   const phrase = 'atom green various power must another rent imitate gadget creek fat then'
-  const testnet_address = 'qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g'
-  const mainnet_address = 'qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
+  const testnet_address_path0 = 'qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g'
+  const testnet_address_path1 = 'qrkd7dhu7zcmn6wwvj3p4aueslycqchj5vxx3stmjz'
+  const mainnet_address_path0 = 'qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
+  const mainnet_address_path1 = 'qr4jrkhu3usuk8ghv60m7pg9eywuc79yqvd0wxt2lm'
 
   it('set phrase should return correct address', () => {
     bchClient.setNetwork('testnet')
-    expect(bchClient.setPhrase(phrase)).toEqual(testnet_address)
+    expect(bchClient.setPhrase(phrase)).toEqual(testnet_address_path0)
 
     bchClient.setNetwork('mainnet')
-    expect(bchClient.setPhrase(phrase)).toEqual(mainnet_address)
+    expect(bchClient.setPhrase(phrase)).toEqual(mainnet_address_path0)
+  })
+
+  it('set phrase with derivation path should return correct address', () => {
+    bchClient.setNetwork('testnet')
+    expect(bchClient.setPhrase(phrase)).toEqual(testnet_address_path0)
+    expect(bchClient.getAddress(1)).toEqual(testnet_address_path1)
+
+    bchClient.setNetwork('mainnet')
+    expect(bchClient.setPhrase(phrase)).toEqual(mainnet_address_path0)
+    expect(bchClient.getAddress(1)).toEqual(mainnet_address_path1)
   })
 
   it('should throw an error for setting a bad phrase', () => {
@@ -41,11 +53,11 @@ describe('BCHClient Test', () => {
   it('should validate the right address', () => {
     bchClient.setNetwork('testnet')
     bchClient.setPhrase(phrase)
-    expect(bchClient.getAddress()).toEqual(testnet_address)
-    expect(bchClient.validateAddress(testnet_address)).toBeTruthy()
+    expect(bchClient.getAddress()).toEqual(testnet_address_path0)
+    expect(bchClient.validateAddress(testnet_address_path0)).toBeTruthy()
 
     bchClient.setNetwork('mainnet')
-    expect(bchClient.validateAddress(mainnet_address)).toBeTruthy()
+    expect(bchClient.validateAddress(mainnet_address_path0)).toBeTruthy()
   })
 
   it('should return valid explorer url', () => {
@@ -88,7 +100,7 @@ describe('BCHClient Test', () => {
       unconfirmed: 0,
       confirmed: 0,
     })
-    const balance = await bchClient.getBalance()
+    const balance = await bchClient.getBalance(bchClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(0)
   })
@@ -97,7 +109,7 @@ describe('BCHClient Test', () => {
     bchClient.setNetwork('testnet')
     bchClient.setPhrase(phrase)
 
-    mock_getBalance(bchClient.getHaskoinURL(), 'qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', {
+    mock_getBalance(bchClient.getHaskoinURL(), bchClient.getAddress(), {
       received: 123817511737,
       utxo: 1336,
       address: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
@@ -105,7 +117,7 @@ describe('BCHClient Test', () => {
       unconfirmed: 100000000000,
       confirmed: 123817511737,
     })
-    const balance = await bchClient.getBalance('qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf')
+    const balance = await bchClient.getBalance(bchClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().isEqualTo('223817511737')).toBeTruthy()
   })
@@ -299,6 +311,7 @@ describe('BCHClient Test', () => {
     mock_broadcastTx(bchClient.getNodeURL(), '82b65a0006697bff406c62ad0b3fd07db9f20ce6fbc468c81679d96aebc36f69')
 
     const txId = await bchClient.transfer({
+      walletIndex: 0,
       recipient: 'bchtest:qzt6sz836wdwscld0pgq2prcpck2pssmwge9q87pe9',
       amount: baseAmount(100, BCH_DECIMAL),
       feeRate: 1,

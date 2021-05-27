@@ -2,6 +2,7 @@ import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoi
 import * as Utils from './utils'
 import * as sochain from './sochain-api'
 import {
+  RootDerivationPaths,
   TxHistoryParams,
   TxsPage,
   Address,
@@ -24,7 +25,6 @@ import { TxIO } from './types/sochain-api-types'
  * LitecoinClient Interface
  */
 interface LitecoinClient {
-  derivePath(): string
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
@@ -45,6 +45,7 @@ class Client implements LitecoinClient, XChainClient {
   private sochainUrl = ''
   private nodeUrl = ''
   private nodeAuth?: NodeAuth
+  private rootDerivationPaths: RootDerivationPaths
 
   /**
    * Constructor
@@ -62,9 +63,13 @@ class Client implements LitecoinClient, XChainClient {
       username: 'thorchain',
       password: 'password',
     },
+    rootDerivationPaths = {
+      mainnet: `m/84'/2'/0'/0/`,
+      testnet: `m/84'/1'/0'/0/`,
+    },
   }: LitecoinClientParams) {
     this.net = network
-
+    this.rootDerivationPaths = rootDerivationPaths
     this.nodeUrl = !!nodeUrl
       ? nodeUrl
       : network === 'mainnet'
@@ -99,11 +104,10 @@ class Client implements LitecoinClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      const address = this.getAddress()
-      return address
+      return this.getAddress(walletIndex)
     } else {
       throw new Error('Invalid phrase')
     }
@@ -145,13 +149,13 @@ class Client implements LitecoinClient, XChainClient {
   }
 
   /**
-   * Get DerivePath
+   * Get getFullDerivationPath
    *
-   * @returns {string} The litecoin derivation path based on the network.
+   * @param {number} index the HD wallet index
+   * @returns {string} The bitcoin derivation path based on the network.
    */
-  derivePath(): string {
-    const { testnet, mainnet } = Utils.getDerivePath()
-    return Utils.isTestnet(this.net) ? testnet : mainnet
+  getFullDerivationPath(index: number): string {
+    return this.rootDerivationPaths[this.net] + `${index}`
   }
 
   /**
@@ -194,10 +198,13 @@ class Client implements LitecoinClient, XChainClient {
    * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (): Address => {
+  getAddress = (index = 0): Address => {
+    if (index < 0) {
+      throw new Error('index must be greater than zero')
+    }
     if (this.phrase) {
       const ltcNetwork = Utils.ltcNetwork(this.net)
-      const ltcKeys = this.getLtcKeys(this.phrase)
+      const ltcKeys = this.getLtcKeys(this.phrase, index)
 
       const { address } = Litecoin.payments.p2wpkh({
         pubkey: ltcKeys.publicKey,
@@ -223,12 +230,11 @@ class Client implements LitecoinClient, XChainClient {
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating LTC keys from the given phrase
    * */
-  private getLtcKeys = (phrase: string): Litecoin.ECPairInterface => {
+  private getLtcKeys = (phrase: string, index = 0): Litecoin.ECPairInterface => {
     const ltcNetwork = Utils.ltcNetwork(this.net)
-    const derive_path = this.derivePath()
 
     const seed = getSeed(phrase)
-    const master = Litecoin.bip32.fromSeed(seed, ltcNetwork).derivePath(derive_path)
+    const master = Litecoin.bip32.fromSeed(seed, ltcNetwork).derivePath(this.getFullDerivationPath(index))
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
@@ -251,12 +257,12 @@ class Client implements LitecoinClient, XChainClient {
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Array<Balance>} The LTC balance of the address.
    */
-  getBalance = async (address?: string): Promise<Balance[]> => {
+  getBalance = async (address: Address): Promise<Balance[]> => {
     try {
       return Utils.getBalance({
         sochainUrl: this.sochainUrl,
         network: this.net,
-        address: address || this.getAddress(),
+        address,
       })
     } catch (e) {
       return Promise.reject(e)
@@ -275,12 +281,10 @@ class Client implements LitecoinClient, XChainClient {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
     try {
-      const address = params?.address ?? this.getAddress()
-
       const response = await sochain.getAddress({
         sochainUrl: this.sochainUrl,
         network: this.net,
-        address,
+        address: `${params?.address}`,
       })
       const total = response.txs.length
       const transactions: Tx[] = []
@@ -425,15 +429,16 @@ class Client implements LitecoinClient, XChainClient {
    */
   transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
     try {
+      const fromAddressIndex = params?.walletIndex || 0
       const feeRate = params.feeRate || (await this.getFeeRates()).fast
       const { psbt } = await Utils.buildTx({
         ...params,
         feeRate,
-        sender: this.getAddress(),
+        sender: this.getAddress(fromAddressIndex),
         sochainUrl: this.sochainUrl,
         network: this.net,
       })
-      const ltcKeys = this.getLtcKeys(this.phrase)
+      const ltcKeys = this.getLtcKeys(this.phrase, fromAddressIndex)
       psbt.signAllInputs(ltcKeys) // Sign all inputs
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex

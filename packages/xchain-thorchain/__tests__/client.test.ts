@@ -60,26 +60,55 @@ const assertTxHashGet = (url: string, hash: string, result: TxResponse): void =>
 
 describe('Client Test', () => {
   let thorClient: Client
+  let thorMainClient: Client
   const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
-  const mainnet_address = 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws'
-  const testnet_address = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
+  const mainnet_address_path0 = 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws'
+  const mainnet_address_path1 = 'thor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecgaf4nc'
+  const testnet_address_path0 = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
+  const testnet_address_path1 = 'tthor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecv2c92a'
 
   beforeEach(() => {
     thorClient = new Client({ phrase, network: 'testnet' })
+    thorMainClient = new Client({ phrase, network: 'mainnet' })
   })
 
   afterEach(() => {
     thorClient.purgeClient()
+    thorMainClient.purgeClient()
   })
 
   it('should start with empty wallet', async () => {
     const thorClientEmptyMain = new Client({ phrase, network: 'mainnet' })
     const addressMain = thorClientEmptyMain.getAddress()
-    expect(addressMain).toEqual(mainnet_address)
+    expect(addressMain).toEqual(mainnet_address_path0)
 
     const thorClientEmptyTest = new Client({ phrase, network: 'testnet' })
     const addressTest = thorClientEmptyTest.getAddress()
-    expect(addressTest).toEqual(testnet_address)
+    expect(addressTest).toEqual(testnet_address_path0)
+  })
+
+  it('should derive address accordingly to the user param', async () => {
+    const thorClientEmptyMain = new Client({ phrase, network: 'mainnet' /*, derivationPath: "44'/931'/0'/0/0" */ })
+    const addressMain = thorClientEmptyMain.getAddress()
+    expect(addressMain).toEqual(mainnet_address_path0)
+
+    const viaSetPhraseAddr1 = thorClientEmptyMain.getAddress(1 /*, "44'/931'/0'/0/1" */)
+    expect(viaSetPhraseAddr1).toEqual(mainnet_address_path1)
+
+    const thorClientEmptyTest = new Client({ phrase, network: 'testnet' /*, derivationPath: "44'/931'/0'/0/0"*/ })
+    const addressTest = thorClientEmptyTest.getAddress()
+    expect(addressTest).toEqual(testnet_address_path0)
+
+    const viaSetPhraseAddr1Test = thorClientEmptyTest.getAddress(1 /*, "44'/931'/0'/0/1"*/)
+    expect(viaSetPhraseAddr1Test).toEqual(testnet_address_path1)
+
+    const thorClientEmptyMain1 = new Client({ phrase, network: 'mainnet' /*, derivationPath: "44'/931'/0'/0/1"*/ })
+    const addressMain1 = thorClientEmptyMain1.getAddress(1)
+    expect(addressMain1).toEqual(mainnet_address_path1)
+
+    const thorClientEmptyTest1 = new Client({ phrase, network: 'testnet' /*, derivationPath: "44'/931'/0'/0/1"*/ })
+    const addressTest1 = thorClientEmptyTest1.getAddress(1)
+    expect(addressTest1).toEqual(testnet_address_path1)
   })
 
   it('throws an error passing an invalid phrase', async () => {
@@ -93,10 +122,9 @@ describe('Client Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(thorClient.getAddress()).toEqual(testnet_address)
+    expect(thorClient.getAddress()).toEqual(testnet_address_path0)
 
-    thorClient.setNetwork('mainnet')
-    expect(thorClient.getAddress()).toEqual(mainnet_address)
+    expect(thorMainClient.getAddress()).toEqual(mainnet_address_path0)
   })
 
   it('should allow to get the CosmosSDKClient', async () => {
@@ -104,12 +132,11 @@ describe('Client Test', () => {
   })
 
   it('should update net', async () => {
-    const client = new Client({ phrase, network: 'mainnet' })
-    client.setNetwork('testnet')
-    expect(client.getNetwork()).toEqual('testnet')
+    thorMainClient.setNetwork('testnet')
+    expect(thorMainClient.getNetwork()).toEqual('testnet')
 
-    const address = await client.getAddress()
-    expect(address).toEqual(testnet_address)
+    const address = await thorMainClient.getAddress()
+    expect(address).toEqual(testnet_address_path0)
   })
 
   it('should init, should have right prefix', async () => {
@@ -139,17 +166,19 @@ describe('Client Test', () => {
   })
 
   it('has no balances', async () => {
-    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address, {
+    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
       height: 0,
       result: [],
     })
-    const result = await thorClient.getBalance()
+    const result = await thorClient.getBalance(thorClient.getAddress(0))
     expect(result).toEqual([])
   })
 
   it('has balances', async () => {
-    thorClient.setNetwork('mainnet')
-    mockAccountsBalance(thorClient.getClientUrl().node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
+    thorMainClient.setNetwork('mainnet')
+    // mainnet - has balance: thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5
+    // mainnet - 0: thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws
+    mockAccountsBalance(thorMainClient.getClientUrl().node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
       height: 0,
       result: [
         {
@@ -158,7 +187,8 @@ describe('Client Test', () => {
         },
       ],
     })
-    const balances = await thorClient.getBalance('thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5')
+
+    const balances = await thorMainClient.getBalance('thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5')
     expect(balances.length).toEqual(1)
     expect(balances[0].asset).toEqual(AssetRune)
     expect(balances[0].amount.amount().isEqualTo(baseAmount(100).amount())).toBeTruthy()
@@ -326,7 +356,7 @@ describe('Client Test', () => {
       logs: [],
     }
 
-    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address, {
+    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address_path0, {
       height: 0,
       result: {
         coins: [
@@ -339,7 +369,7 @@ describe('Client Test', () => {
         sequence: '0',
       },
     })
-    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address, {
+    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
       height: 0,
       result: [
         {
@@ -372,7 +402,7 @@ describe('Client Test', () => {
       logs: [],
     }
 
-    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address, {
+    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address_path0, {
       height: 0,
       result: {
         coins: [
@@ -385,7 +415,7 @@ describe('Client Test', () => {
         sequence: '0',
       },
     })
-    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address, {
+    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
       height: 0,
       result: [
         {

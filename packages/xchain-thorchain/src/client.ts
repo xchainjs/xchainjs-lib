@@ -1,5 +1,6 @@
 import axios from 'axios'
 import {
+  RootDerivationPaths,
   Address,
   Balances,
   Fees,
@@ -62,12 +63,9 @@ class Client implements ThorchainClient, XChainClient {
   private network: Network
   private clientUrl: ClientUrl
   private explorerUrl: ExplorerUrl
-  private thorClient: CosmosSDKClient
   private phrase = ''
-  private address: Address = ''
-  private privateKey: PrivKey | null = null
-
-  private derive_path = "44'/931'/0'/0/0"
+  private rootDerivationPaths: RootDerivationPaths
+  private cosmosClient: CosmosSDKClient
 
   /**
    * Constructor
@@ -79,11 +77,26 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor({ network = 'testnet', phrase, clientUrl, explorerUrl }: XChainClientParams & ThorchainClientParams) {
+  constructor({
+    network = 'testnet',
+    phrase,
+    clientUrl,
+    explorerUrl,
+    rootDerivationPaths = {
+      mainnet: "44'/931'/0'/0/",
+      testnet: "44'/931'/0'/0/",
+    },
+  }: XChainClientParams & ThorchainClientParams) {
     this.network = network
     this.clientUrl = clientUrl || this.getDefaultClientUrl()
     this.explorerUrl = explorerUrl || getDefaultExplorerUrl()
-    this.thorClient = this.getNewThorClient()
+    this.rootDerivationPaths = rootDerivationPaths
+
+    this.cosmosClient = new CosmosSDKClient({
+      server: this.getClientUrl().node,
+      chainId: this.getChainId(),
+      prefix: getPrefix(this.network),
+    })
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -95,8 +108,6 @@ class Client implements ThorchainClient, XChainClient {
    */
   purgeClient = (): void => {
     this.phrase = ''
-    this.address = ''
-    this.privateKey = null
   }
 
   /**
@@ -108,16 +119,13 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork = (network: Network): XChainClient => {
+  setNetwork = (network: Network): void => {
     if (!network) {
       throw new Error('Network must be provided')
-    } else {
-      this.network = network
-      this.thorClient = this.getNewThorClient()
-      this.address = ''
-
-      return this
     }
+
+    this.network = network
+    this.cosmosClient.updatePrefix(getPrefix(this.network))
   }
 
   /**
@@ -137,7 +145,6 @@ class Client implements ThorchainClient, XChainClient {
    */
   setClientUrl = (clientUrl: ClientUrl): void => {
     this.clientUrl = clientUrl
-    this.thorClient = this.getNewThorClient()
   }
 
   /**
@@ -207,27 +214,10 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
-   * @private
-   * Get new thorchain client.
-   *
-   * @returns {CosmosSDKClient} The new thorchain client.
-   */
-  private getNewThorClient = (): CosmosSDKClient => {
-    return new CosmosSDKClient({
-      server: this.getClientUrl().node,
-      chainId: this.getChainId(),
-      prefix: getPrefix(this.network),
-      derive_path: this.derive_path,
-    })
-  }
-
-  /**
    * Get cosmos client
    * @returns {CosmosSDKClient} current cosmos client
    */
-  getCosmosClient = (): CosmosSDKClient => {
-    return this.thorClient
-  }
+  getCosmosClient = (): CosmosSDKClient => this.cosmosClient
 
   /**
    * Get the chain id.
@@ -277,18 +267,25 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Address => {
     if (this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
       }
-
       this.phrase = phrase
-      this.privateKey = null
-      this.address = ''
     }
 
-    return this.getAddress()
+    return this.getAddress(walletIndex)
+  }
+
+  /**
+   * Get getFullDerivationPath
+   *
+   * @param {number} index the HD wallet index
+   * @returns {string} The bitcoin derivation path based on the network.
+   */
+  getFullDerivationPath(index: number): string {
+    return this.rootDerivationPaths[this.network] + `${index}`
   }
 
   /**
@@ -300,15 +297,8 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey = (): PrivKey => {
-    if (!this.privateKey) {
-      if (!this.phrase) throw new Error('Phrase not set')
-
-      this.privateKey = this.thorClient.getPrivKeyFromMnemonic(this.phrase)
-    }
-
-    return this.privateKey as PrivKey
-  }
+  private getPrivateKey = (index = 0): PrivKey =>
+    this.cosmosClient.getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
 
   /**
    * Get the current address.
@@ -317,17 +307,13 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (): string => {
-    if (!this.address) {
-      const address = this.thorClient.getAddressFromPrivKey(this.getPrivateKey())
-      if (!address) {
-        throw new Error('address not defined')
-      }
-
-      this.address = address
+  getAddress = (index = 0): string => {
+    const address = this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+    if (!address) {
+      throw new Error('address not defined')
     }
 
-    return this.address
+    return address
   }
 
   /**
@@ -337,7 +323,7 @@ class Client implements ThorchainClient, XChainClient {
    * @returns {boolean} `true` or `false`
    */
   validateAddress = (address: Address): boolean => {
-    return this.thorClient.checkAddress(address)
+    return this.cosmosClient.checkAddress(address)
   }
 
   /**
@@ -347,9 +333,9 @@ class Client implements ThorchainClient, XChainClient {
    * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Array<Balance>} The balance of the address.
    */
-  getBalance = async (address?: Address, assets?: Asset[]): Promise<Balances> => {
+  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
-      const balances = await this.thorClient.getBalance(address || this.getAddress())
+      const balances = await this.cosmosClient.getBalance(address)
       return balances
         .map((balance) => ({
           asset: (balance.denom && getAsset(balance.denom)) || AssetRune,
@@ -375,7 +361,6 @@ class Client implements ThorchainClient, XChainClient {
     params?: TxHistoryParams & { filterFn?: (tx: RPCTxResult) => boolean },
   ): Promise<TxsPage> => {
     const messageAction = undefined
-    const address = (params && params.address) || this.getAddress()
     const offset = params?.offset || 0
     const limit = params?.limit || 10
     const txMinHeight = undefined
@@ -385,20 +370,20 @@ class Client implements ThorchainClient, XChainClient {
       registerCodecs(this.network)
 
       const txIncomingHistory = (
-        await this.thorClient.searchTxFromRPC({
+        await this.cosmosClient.searchTxFromRPC({
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
-          transferRecipient: address,
+          transferRecipient: params?.address,
           limit: MAX_TX_COUNT,
           txMinHeight,
           txMaxHeight,
         })
       ).txs
       const txOutgoingHistory = (
-        await this.thorClient.searchTxFromRPC({
+        await this.cosmosClient.searchTxFromRPC({
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
-          transferSender: address,
+          transferSender: params?.address,
           limit: MAX_TX_COUNT,
           txMinHeight,
           txMaxHeight,
@@ -451,7 +436,7 @@ class Client implements ThorchainClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const txResult = await this.thorClient.txsHashGet(txId)
+      const txResult = await this.cosmosClient.txsHashGet(txId)
       const action = getTxType(txResult.data, 'hex')
       let txs: Txs = []
 
@@ -568,15 +553,15 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"insufficient funds"} Thrown if the wallet has insufficient funds.
    * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
    */
-  deposit = async ({ asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
+  deposit = async ({ walletIndex = 0, asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     try {
-      const assetBalance = await this.getBalance(this.getAddress(), [asset])
+      const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
 
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(DEFAULT_GAS_VALUE))) {
         throw new Error('insufficient funds')
       }
 
-      const signer = this.getAddress()
+      const signer = this.getAddress(walletIndex)
       const msgNativeTx = msgNativeTxFromJson({
         coins: [
           {
@@ -589,13 +574,13 @@ class Client implements ThorchainClient, XChainClient {
       })
 
       const unsignedStdTx = await this.buildDepositTx(msgNativeTx)
-      const privateKey = this.getPrivateKey()
+      const privateKey = this.getPrivateKey(walletIndex)
       const accAddress = AccAddress.fromBech32(signer)
       const fee = unsignedStdTx.fee
       // max. gas
       fee.gas = '10000000'
 
-      return this.thorClient
+      return this.cosmosClient
         .signAndBroadcast(unsignedStdTx, privateKey, accAddress)
         .then((result) => result?.txhash ?? '')
     } catch (error) {
@@ -609,19 +594,19 @@ class Client implements ThorchainClient, XChainClient {
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async ({ asset = AssetRune, amount, recipient, memo }: TxParams): Promise<TxHash> => {
+  transfer = async ({ walletIndex = 0, asset = AssetRune, amount, recipient, memo }: TxParams): Promise<TxHash> => {
     try {
       registerCodecs(this.network)
 
-      const assetBalance = await this.getBalance(this.getAddress(), [asset])
+      const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
       const fee = await this.getFees()
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
         throw new Error('insufficient funds')
       }
 
-      const transferResult = await this.thorClient.transfer({
-        privkey: this.getPrivateKey(),
-        from: this.getAddress(),
+      const transferResult = await this.cosmosClient.transfer({
+        privkey: this.getPrivateKey(walletIndex),
+        from: this.getAddress(walletIndex),
         to: recipient,
         amount: amount.amount().toString(),
         asset: getDenom(asset),

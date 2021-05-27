@@ -2,6 +2,7 @@ import * as Bitcoin from 'bitcoinjs-lib'
 import * as Utils from './utils'
 import * as sochain from './sochain-api'
 import {
+  RootDerivationPaths,
   TxHistoryParams,
   TxsPage,
   Address,
@@ -22,7 +23,6 @@ import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
  * BitcoinClient Interface
  */
 interface BitcoinClient {
-  derivePath(): string
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
   getFeesWithMemo(memo: string): Promise<Fees>
   getFeeRates(): Promise<FeeRates>
@@ -41,6 +41,7 @@ class Client implements BitcoinClient, XChainClient {
   private phrase = ''
   private sochainUrl = ''
   private blockstreamUrl = ''
+  private rootDerivationPaths: RootDerivationPaths
 
   /**
    * Constructor
@@ -48,20 +49,21 @@ class Client implements BitcoinClient, XChainClient {
    *
    * @param {BitcoinClientParams} params
    */
-  constructor({ network = 'testnet', sochainUrl, blockstreamUrl, phrase }: BitcoinClientParams) {
+  constructor({
+    network = 'testnet',
+    sochainUrl = 'https://sochain.com/api/v2',
+    blockstreamUrl = 'https://blockstream.info',
+    rootDerivationPaths = {
+      mainnet: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
+      testnet: `84'/1'/0'/0/`,
+    },
+    phrase,
+  }: BitcoinClientParams) {
     this.net = network
-    this.setSochainUrl(sochainUrl || this.getDefaultSochainUrl())
-    this.setBlockstreamUrl(blockstreamUrl || this.getDefaultBlockstreamUrl())
+    this.rootDerivationPaths = rootDerivationPaths
+    this.setSochainUrl(sochainUrl)
+    this.setBlockstreamUrl(blockstreamUrl)
     phrase && this.setPhrase(phrase)
-  }
-
-  /**
-   * Get the default sochain url.
-   *
-   * @returns {string} the default sochain url
-   */
-  getDefaultSochainUrl = (): string => {
-    return 'https://sochain.com/api/v2'
   }
 
   /**
@@ -72,15 +74,6 @@ class Client implements BitcoinClient, XChainClient {
    */
   setSochainUrl = (url: string): void => {
     this.sochainUrl = url
-  }
-
-  /**
-   * Get the default blockstream url.
-   *
-   * @returns {string} the default blockstream url
-   */
-  getDefaultBlockstreamUrl = (): string => {
-    return 'https://blockstream.info'
   }
 
   /**
@@ -97,16 +90,15 @@ class Client implements BitcoinClient, XChainClient {
    * Set/update a new phrase.
    *
    * @param {string} phrase A new phrase.
-   * @returns {Address} The address from the given phrase
+   * @returns {Address} The first address from the given phrase
    *
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Address => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      const address = this.getAddress()
-      return address
+      return this.getAddress(walletIndex)
     } else {
       throw new Error('Invalid phrase')
     }
@@ -133,9 +125,8 @@ class Client implements BitcoinClient, XChainClient {
   setNetwork = (net: Network): void => {
     if (!net) {
       throw new Error('Network must be provided')
-    } else {
-      this.net = net
     }
+    this.net = net
   }
 
   /**
@@ -148,13 +139,13 @@ class Client implements BitcoinClient, XChainClient {
   }
 
   /**
-   * Get DerivePath
+   * Get getFullDerivationPath
    *
+   * @param {number} index the HD wallet index
    * @returns {string} The bitcoin derivation path based on the network.
    */
-  derivePath(): string {
-    const { testnet, mainnet } = Utils.getDerivePath()
-    return Utils.isTestnet(this.net) ? testnet : mainnet
+  getFullDerivationPath(index: number): string {
+    return this.rootDerivationPaths[this.net] + `${index}`
   }
 
   /**
@@ -198,10 +189,13 @@ class Client implements BitcoinClient, XChainClient {
    * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (): Address => {
+  getAddress = (index = 0): Address => {
+    if (index < 0) {
+      throw new Error('index must be greater than zero')
+    }
     if (this.phrase) {
       const btcNetwork = Utils.btcNetwork(this.net)
-      const btcKeys = this.getBtcKeys(this.phrase)
+      const btcKeys = this.getBtcKeys(this.phrase, index)
 
       const { address } = Bitcoin.payments.p2wpkh({
         pubkey: btcKeys.publicKey,
@@ -226,12 +220,11 @@ class Client implements BitcoinClient, XChainClient {
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating BTC keys from the given phrase
    * */
-  private getBtcKeys = (phrase: string): Bitcoin.ECPairInterface => {
+  private getBtcKeys = (phrase: string, index = 0): Bitcoin.ECPairInterface => {
     const btcNetwork = Utils.btcNetwork(this.net)
-    const derive_path = this.derivePath()
 
     const seed = getSeed(phrase)
-    const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(derive_path)
+    const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(this.getFullDerivationPath(index))
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
@@ -251,12 +244,16 @@ class Client implements BitcoinClient, XChainClient {
   /**
    * Get the BTC balance of a given address.
    *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
+   * @param {Address} the BTC address
    * @returns {Array<Balance>} The BTC balance of the address.
    */
-  getBalance = async (address?: string): Promise<Balance[]> => {
+  getBalance = async (address: Address): Promise<Balance[]> => {
     try {
-      return Utils.getBalance({ sochainUrl: this.sochainUrl, network: this.net, address: address || this.getAddress() })
+      return Utils.getBalance({
+        sochainUrl: this.sochainUrl,
+        network: this.net,
+        address: address,
+      })
     } catch (e) {
       return Promise.reject(e)
     }
@@ -275,12 +272,10 @@ class Client implements BitcoinClient, XChainClient {
     const limit = params?.limit || 10
 
     try {
-      const address = params?.address ?? this.getAddress()
-
       const response = await sochain.getAddress({
+        address: params?.address + '',
         sochainUrl: this.sochainUrl,
         network: this.net,
-        address,
       })
       const total = response.txs.length
       const transactions: Tx[] = []
@@ -424,16 +419,19 @@ class Client implements BitcoinClient, XChainClient {
    */
   transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
     try {
+      const fromAddressIndex = params?.walletIndex || 0
+
       // set the default fee rate to `fast`
       const feeRate = params.feeRate || (await this.getFeeRates()).fast
       const { psbt } = await Utils.buildTx({
         ...params,
         feeRate,
-        sender: this.getAddress(),
+        sender: this.getAddress(fromAddressIndex),
         sochainUrl: this.sochainUrl,
         network: this.net,
       })
-      const btcKeys = this.getBtcKeys(this.phrase)
+
+      const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
       psbt.signAllInputs(btcKeys) // Sign all inputs
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
