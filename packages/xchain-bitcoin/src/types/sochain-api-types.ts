@@ -98,3 +98,10 @@ export type TxConfirmedStatus = {
   confirmations: number
   is_confirmed: boolean
 }
+
+export type ScanUTXOParam = {
+  sochainUrl: string
+  network: Network
+  address: string
+  confirmedOnly?: boolean
+}

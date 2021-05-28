@@ -1,6 +1,7 @@
 import axios from 'axios'
 import {
   SochainResponse,
+  BtcAddressUTXO,
   BtcAddressUTXOs,
   BtcUnspentTxsDTO,
   BtcAddressDTO,
@@ -121,6 +122,50 @@ export const getIsTxConfirmed = async ({ sochainUrl, network, hash }: TxHashPara
     const resp = await axios.get(`${sochainUrl}/is_tx_confirmed/${toSochainNetwork(network)}/${hash}`)
     const response: SochainResponse<TxConfirmedStatus> = resp.data
     return response.data
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+/**
+ * Get unspent txs and filter out pending UTXOs
+ *
+ * @see https://sochain.com/api#get-unspent-tx
+ *
+ * @param {string} sochainUrl The sochain node url.
+ * @param {string} network
+ * @param {string} address
+ * @returns {BtcAddressUTXOs}
+ */
+export const getConfirmedUnspentTxs = async ({
+  sochainUrl,
+  network,
+  address,
+}: AddressParams): Promise<BtcAddressUTXOs> => {
+  try {
+    const txs = await getUnspentTxs({
+      sochainUrl,
+      network,
+      address,
+    })
+
+    const confirmedUTXOs: BtcAddressUTXOs = []
+
+    await Promise.all(
+      txs.map(async (tx: BtcAddressUTXO) => {
+        const isTxConfirmed = await getIsTxConfirmed({
+          sochainUrl,
+          network,
+          hash: tx.txid,
+        })
+
+        if (isTxConfirmed) {
+          confirmedUTXOs.push(tx)
+        }
+      }),
+    )
+
+    return confirmedUTXOs
   } catch (error) {
     return Promise.reject(error)
   }
