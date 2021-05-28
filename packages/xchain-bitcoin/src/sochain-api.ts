@@ -8,6 +8,7 @@ import {
   Transaction,
   AddressParams,
   TxHashParams,
+  TxConfirmedStatus,
 } from './types/sochain-api-types'
 import { assetToBase, assetAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { BTC_DECIMAL } from './utils'
@@ -100,6 +101,26 @@ export const getUnspentTxs = async ({ sochainUrl, network, address }: AddressPar
     const resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}`)
     const response: SochainResponse<BtcUnspentTxsDTO> = resp.data
     return response.data.txs
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+/**
+ * Get Tx Confirmation status
+ *
+ * @see https://sochain.com/api#get-is-tx-confirmed
+ *
+ * @param {string} sochainUrl The sochain node url.
+ * @param {string} network mainnet | testnet
+ * @param {string} hash tx id
+ * @returns {TxConfirmedStatus}
+ */
+export const getIsTxConfirmed = async ({ sochainUrl, network, hash }: TxHashParams): Promise<TxConfirmedStatus> => {
+  try {
+    const resp = await axios.get(`${sochainUrl}/is_tx_confirmed/${toSochainNetwork(network)}/${hash}`)
+    const response: SochainResponse<TxConfirmedStatus> = resp.data
+    return response.data
   } catch (error) {
     return Promise.reject(error)
   }
