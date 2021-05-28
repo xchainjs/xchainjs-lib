@@ -1,8 +1,7 @@
 import nock from 'nock'
-import { baseAmount, AssetETH, assetToString } from '@xchainjs/xchain-util'
+import { baseAmount } from '@xchainjs/xchain-util'
 import Client from '../src/client'
-import { ETH_DECIMAL } from '../src/utils'
-import { mock_ethplorer_api_getAddress, mock_ethplorer_api_getTxInfo } from '../__mocks__/ethplorer-api'
+import { mock_ethplorer_api_getTxInfo } from '../__mocks__/ethplorer-api'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 // https://iancoleman.io/bip39/
@@ -33,96 +32,6 @@ describe('Client Test', () => {
 
     expect(ethClient.getAddress(0)).toEqual(addrPath0.toLowerCase())
     expect(ethClient.getAddress(1)).toEqual(addrPath1.toLowerCase())
-  })
-
-  it('gets a balance without address args', async () => {
-    const ethClient = new Client({
-      network: 'mainnet',
-      phrase,
-      ethplorerUrl,
-    })
-
-    mock_ethplorer_api_getAddress(ethplorerUrl, ethClient.getAddress(), {
-      address: ethClient.getAddress(),
-      ETH: {
-        balance: 100,
-        price: {
-          rate: 1196.5425814145788,
-          diff: 11.71,
-          diff7d: 62.3,
-          ts: 1609987982,
-          marketCapUsd: 136582198332.62915,
-          availableSupply: 114147377.999,
-          volume24h: 44933107598.39366,
-          diff30d: 108.688017487141,
-          volDiff1: 7.230942506781318,
-          volDiff7: 81.97257329720685,
-          volDiff30: 16.64321146720964,
-        },
-      },
-      tokens: [],
-      countTxs: 1,
-    })
-
-    const balances = await ethClient.getBalance(ethClient.getAddress())
-    expect(balances.length).toEqual(1)
-    expect(balances[0].asset).toEqual(AssetETH)
-    expect(
-      balances[0].amount.amount().isEqualTo(baseAmount('100000000000000000000', ETH_DECIMAL).amount()),
-    ).toBeTruthy()
-  })
-
-  it('gets a balance from address', async () => {
-    const ethClient = new Client({
-      network: 'mainnet',
-      phrase,
-      ethplorerUrl,
-    })
-
-    mock_ethplorer_api_getAddress(ethplorerUrl, '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e', {
-      address: '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e',
-      ETH: {
-        balance: 100,
-        price: {
-          rate: 1196.5425814145788,
-          diff: 11.71,
-          diff7d: 62.3,
-          ts: 1609987982,
-          marketCapUsd: 136582198332.62915,
-          availableSupply: 114147377.999,
-          volume24h: 44933107598.39366,
-          diff30d: 108.688017487141,
-          volDiff1: 7.230942506781318,
-          volDiff7: 81.97257329720685,
-          volDiff30: 16.64321146720964,
-        },
-      },
-      tokens: [
-        {
-          balance: 1000,
-          tokenInfo: {
-            address: '0x2306934ca884caa042dc595371003093092b2bbf',
-            decimals: '18',
-            name: 'tomatos.finance',
-            owner: '0x',
-            symbol: 'TOMATOS',
-            totalSupply: '1000000000000000000000000000',
-            lastUpdated: 1609117980,
-            issuancesCount: 0,
-            holdersCount: 3181,
-            ethTransfersCount: 0,
-            price: false,
-          },
-        },
-      ],
-      countTxs: 1,
-    })
-    const balance = await ethClient.getBalance(ethClient.getAddress(0))
-    expect(balance.length).toEqual(2)
-    expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
-    expect(balance[0].amount.amount().isEqualTo(baseAmount('100000000000000000000', ETH_DECIMAL).amount())).toBeTruthy()
-    expect(balance[1].asset.symbol).toEqual('TOMATOS-0x2306934CA884CAA042DC595371003093092b2BBf')
-    expect(balance[1].amount.amount().isEqualTo(baseAmount(1000, 18).amount())).toBeTruthy()
   })
 
   it('get transaction data', async () => {

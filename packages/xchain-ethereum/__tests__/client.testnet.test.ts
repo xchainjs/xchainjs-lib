@@ -6,8 +6,6 @@ import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
 import { mock_all_api } from '../__mocks__'
 import {
-  mock_etherscan_balance_api,
-  mock_etherscan_tokenbalance_api,
   mock_etherscan_eth_txs_api,
   mock_etherscan_token_txs_api,
   mock_gastracker_api,
@@ -131,73 +129,6 @@ describe('Client Test', () => {
     const ethClient = new Client({ phrase, network: 'testnet' })
     const goodAddress = ethClient.validateAddress(address)
     expect(goodAddress).toBeTruthy()
-  })
-
-  it('gets a balance without address args', async () => {
-    const ethClient = new Client({
-      network: 'testnet',
-      phrase,
-    })
-
-    mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
-
-    const balance = await ethClient.getBalance(ethClient.getAddress(0))
-    expect(balance.length).toEqual(1)
-    expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
-    expect(balance[0].amount.amount().isEqualTo(baseAmount('96713467036431545', ETH_DECIMAL).amount())).toBeTruthy()
-  })
-
-  it('gets a balance from address', async () => {
-    const ethClient = new Client({
-      network: 'testnet',
-      phrase,
-    })
-
-    mock_etherscan_balance_api(etherscanUrl, '96713467036431545')
-
-    const balance = await ethClient.getBalance(ethClient.getAddress(0))
-    expect(balance.length).toEqual(1)
-    expect(assetToString(balance[0].asset)).toEqual(assetToString(AssetETH))
-    expect(balance[0].amount.amount().isEqualTo(baseAmount('96713467036431545', ETH_DECIMAL).amount())).toBeTruthy()
-  })
-
-  it('gets erc20 token balance', async () => {
-    const ethClient = new Client({
-      network: 'testnet',
-      phrase,
-    })
-
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
-    mock_etherscan_tokenbalance_api(etherscanUrl, '96713467036431545')
-    mock_etherscan_tokenbalance_api(etherscanUrl, '96713467036431546')
-    mock_all_api(
-      etherscanUrl,
-      ropstenInfuraUrl,
-      ropstenAlchemyUrl,
-      'eth_call',
-      '0x0000000000000000000000000000000000000000000000000000000000000012',
-    )
-
-    const assetDAI = assetFromString(`${ETHChain}.DAI-0xc7ad46e0b8a400bb3c915120d284aafba8fc4735`)
-    const asestUSDT = assetFromString(`${ETHChain}.USDT-0x62e273709da575835c7f6aef4a31140ca5b1d190`)
-    const assets = []
-    if (assetDAI) {
-      assets.push(assetDAI)
-    }
-    if (asestUSDT) {
-      assets.push(asestUSDT)
-    }
-    const balance = await ethClient.getBalance(address, assets.length ? assets : undefined)
-    expect(balance.length).toEqual(2)
-    expect(assetToString(balance[0].asset)).toEqual(assetToString(assets[0] ?? AssetETH))
-    expect(balance[0].amount.decimal).toEqual(18)
-    expect(balance[0].amount.amount().isEqualTo(baseAmount('96713467036431545', 18).amount())).toBeTruthy()
-    expect(assetToString(balance[1].asset)).toEqual(assetToString(assets[1] ?? AssetETH))
-    expect(balance[1].amount.decimal).toEqual(18)
-    expect(balance[1].amount.amount().isEqualTo(baseAmount('96713467036431546', 18).amount())).toBeTruthy()
   })
 
   it('throws error on bad index', async () => {
