@@ -1,3 +1,16 @@
+# v.0.15.0 (2021-05-28)
+
+### Breaking change
+
+- prevent spending unconfirmed UTXOs
+- update `client.transfer()` to pass `spendPendingUTXO` param to the `Utils.buildTx()` 
+- update `Utils.buildTx()` to spend only confirmed UTXO if memo exists
+- update `Utils.buildTx()` to build `psbt` using `accumulative` lib
+- add `getIsTxConfirmed`, `getConfirmedUnspentTxs` sochain api
+- add unit test for sochain apis
+- add unit test for both success and failed cases of `client.transfer()` to prevent spending unconfirmed UTXOs
+- add `accumulative` to devDependency and peerDependency
+  
 # v.0.14.0 (2021-05-17)
 
 ### Breaking change
