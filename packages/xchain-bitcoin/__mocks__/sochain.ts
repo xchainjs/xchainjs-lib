@@ -38,6 +38,13 @@ export default {
       return [200, resp]
     })
 
+    //Mock is_tx_confirmed
+    mock.onGet(/\/is_tx_confirmed\//).reply(function (config: MockConfig) {
+      const id = config.url?.split('/').pop() ?? ''
+      const resp = require(`./response/is-tx-confirmed/${id}.json`)
+      return [200, resp]
+    })
+
     //Mock blockstream send tx
     mock.onPost(/\/tx/).reply(function () {
       return [200, 'TEST_OK']

@@ -153,7 +153,7 @@ export const getConfirmedUnspentTxs = async ({
 
     await Promise.all(
       txs.map(async (tx: BtcAddressUTXO) => {
-        const isTxConfirmed = await getIsTxConfirmed({
+        const { is_confirmed: isTxConfirmed } = await getIsTxConfirmed({
           sochainUrl,
           network,
           hash: tx.txid,
