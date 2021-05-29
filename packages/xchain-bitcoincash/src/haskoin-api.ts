@@ -142,9 +142,9 @@ export const getUnspentTransactions = async ({ haskoinUrl, address }: AddressPar
     // Get transacton count for a given address.
     const account = await getAccount({ haskoinUrl, address })
 
-    // Set limit to the transaction count.
+    // Set limit to the transaction count to be all the utxos.
     const result: TxUnspent[] | null = await axios
-      .get(`${haskoinUrl}/address/${address}/unspent?limit=${account?.txs}`)
+      .get(`${haskoinUrl}/address/${address}/unspent?limit=${account?.utxo}`)
       .then((response) => (isErrorResponse(response.data) ? null : response.data))
 
     if (!result) {

@@ -10,7 +10,8 @@
 - add unit test for sochain apis
 - add unit test for both success and failed cases of `client.transfer()` to prevent spending unconfirmed UTXOs
 - add `accumulative` to devDependency and peerDependency
-  
+- Merged updates from PR [#324](https://github.com/xchainjs/xchainjs-lib/issues/322) to fix Issue [#322](https://github.com/xchainjs/xchainjs-lib/issues/322)
+    
 # v.0.14.0 (2021-05-17)
 
 ### Breaking change
