@@ -84,7 +84,7 @@ export interface EthereumClient {
   ): Promise<TransactionResponse>
 }
 
-export type ClientParams = XChainClientParams & {
+export type EthereumClientParams = XChainClientParams & {
   ethplorerUrl?: string
   ethplorerApiKey?: string
   explorerUrl?: ExplorerUrl
@@ -108,7 +108,7 @@ export default class Client implements XChainClient, EthereumClient {
 
   /**
    * Constructor
-   * @param {ClientParams} params
+   * @param {EthereumClientParams} params
    */
   constructor({
     network = 'testnet',
@@ -122,7 +122,7 @@ export default class Client implements XChainClient, EthereumClient {
     },
     etherscanApiKey,
     infuraCreds,
-  }: ClientParams) {
+  }: EthereumClientParams) {
     this.rootDerivationPaths = rootDerivationPaths
     this.network = xchainNetworkToEths(network)
     this.setPhrase(phrase)
