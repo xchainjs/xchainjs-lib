@@ -9,6 +9,7 @@ describe('Bitcoin Cash Utils Test', () => {
     address: 'bchtest:qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g',
     hash: '7fc1d2c1e4017a6aea030be1d4f5365d11abfd295f56c13615e49641c55c54b8',
     index: 0,
+    value: 1000,
     witnessUtxo: {
       value: 1000,
       script: Buffer.from('0014123f6562aa047dae2d38537327596cd8e9e21932', 'hex'),

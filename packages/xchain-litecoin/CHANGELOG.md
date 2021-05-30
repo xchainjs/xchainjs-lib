@@ -1,3 +1,9 @@
+# v.0.6.1 (2021-05-30)
+
+- add unit test for sochain apis
+- add `coinselect/accumulative` to devDependency and peerDependency, to select which utxos to use as inputs for transfer
+- add recursive call to https://sochain.com/api#get-unspent-tx to make sure we fetch ALL utxos
+
 # v.0.6.0 (2021-05-17)
 
 ### Breaking change

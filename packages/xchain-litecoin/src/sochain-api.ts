@@ -95,11 +95,35 @@ export const getBalance = async ({ sochainUrl, network, address }: AddressParams
  * @param {string} address
  * @returns {LtcAddressUTXOs}
  */
-export const getUnspentTxs = async ({ sochainUrl, network, address }: AddressParams): Promise<LtcAddressUTXOs> => {
+export const getUnspentTxs = async ({
+  sochainUrl,
+  network,
+  address,
+  startingFromTxId,
+}: AddressParams): Promise<LtcAddressUTXOs> => {
   try {
-    const resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}`)
+    let resp = null
+    if (startingFromTxId) {
+      resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}/${startingFromTxId}`)
+    } else {
+      resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}`)
+    }
     const response: SochainResponse<LtcUnspentTxsDTO> = resp.data
-    return response.data.txs
+    const txs = response.data.txs
+    if (txs.length === 100) {
+      //fetch the next batch
+      const lastTxId = txs[99].txid
+
+      const nextBatch = await getUnspentTxs({
+        sochainUrl,
+        network,
+        address,
+        startingFromTxId: lastTxId,
+      })
+      return txs.concat(nextBatch)
+    } else {
+      return txs
+    }
   } catch (error) {
     return Promise.reject(error)
   }

@@ -94,6 +94,13 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
 
+    /**
+     * All UTXO values: 8800 + 495777 + 15073
+     * Confirmed UTXO values: 8800 + 15073 = 23873
+     * Spend amount: 2223
+     * Expected: Successful
+     */
+
     const amount = baseAmount(2223)
     try {
       const txid = await btcClient.transfer({
@@ -108,6 +115,28 @@ describe('BitcoinClient Test', () => {
       console.log('ERR running test', err)
       throw err
     }
+  })
+  it('should prevent spending unconfirmed utxo if memo exists', async () => {
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
+
+    /**
+     * All UTXO values: 8800 + 495777 + 15073
+     * Confirmed UTXO values: 8800 + 15073 = 23873
+     * Spend amount: 25000
+     * Expected: Insufficient Balance
+     */
+
+    const amount = baseAmount(25000)
+    return expect(
+      btcClient.transfer({
+        asset: AssetBTC,
+        recipient: addyThreePath0,
+        amount,
+        memo: MEMO,
+        feeRate: 1,
+      }),
+    ).rejects.toThrow('Insufficient Balance for transaction')
   })
   it('should get the balance of an address without phrase', async () => {
     btcClient.setNetwork('testnet')
@@ -124,7 +153,7 @@ describe('BitcoinClient Test', () => {
     const asset = AssetBTC
     const amount = baseAmount(9999999999)
     return expect(btcClient.transfer({ asset, recipient: addyTwo, amount, feeRate: 1 })).rejects.toThrow(
-      'Balance insufficient for transaction',
+      'Insufficient Balance for transaction',
     )
   })
 

@@ -4,6 +4,7 @@ export type AddressParams = {
   sochainUrl: string
   network: Network
   address: string
+  startingFromTxId?: string
 }
 
 export type TxHashParams = {
@@ -90,4 +91,18 @@ export type BtcAddressUTXOs = BtcAddressUTXO[]
 export type BtcBroadcastTransfer = {
   network: string
   txid: string
+}
+
+export type TxConfirmedStatus = {
+  network: string
+  txid: string
+  confirmations: number
+  is_confirmed: boolean
+}
+
+export type ScanUTXOParam = {
+  sochainUrl: string
+  network: Network
+  address: string
+  confirmedOnly?: boolean
 }

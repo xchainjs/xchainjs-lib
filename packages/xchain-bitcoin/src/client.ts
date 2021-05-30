@@ -423,12 +423,20 @@ class Client implements BitcoinClient, XChainClient {
 
       // set the default fee rate to `fast`
       const feeRate = params.feeRate || (await this.getFeeRates()).fast
+
+      /**
+       * do not spend pending UTXOs when adding a memo
+       * https://github.com/xchainjs/xchainjs-lib/issues/330
+       */
+      const spendPendingUTXO: boolean = params.memo ? false : true
+
       const { psbt } = await Utils.buildTx({
         ...params,
         feeRate,
         sender: this.getAddress(fromAddressIndex),
         sochainUrl: this.sochainUrl,
         network: this.net,
+        spendPendingUTXO,
       })
 
       const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
