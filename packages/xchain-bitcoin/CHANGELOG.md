@@ -3,15 +3,16 @@
 ### Breaking change
 
 - prevent spending unconfirmed UTXOs
-- update `client.transfer()` to pass `spendPendingUTXO` param to the `Utils.buildTx()` 
+- update `client.transfer()` to pass `spendPendingUTXO` param to the `Utils.buildTx()`
 - update `Utils.buildTx()` to spend only confirmed UTXO if memo exists
 - update `Utils.buildTx()` to build `psbt` using `accumulative` lib
 - add `getIsTxConfirmed`, `getConfirmedUnspentTxs` sochain api
 - add unit test for sochain apis
 - add unit test for both success and failed cases of `client.transfer()` to prevent spending unconfirmed UTXOs
-- add `accumulative` to devDependency and peerDependency
+- add `coinselect/accumulative` to devDependency and peerDependency, to select which utxos to use as inputs for transfer
+- add recursive call to https://sochain.com/api#get-unspent-tx to make sure we fetch ALL utxos
 - Merged updates from PR [#324](https://github.com/xchainjs/xchainjs-lib/issues/322) to fix Issue [#322](https://github.com/xchainjs/xchainjs-lib/issues/322)
-    
+
 # v.0.14.0 (2021-05-17)
 
 ### Breaking change

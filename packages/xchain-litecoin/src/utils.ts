@@ -115,27 +115,6 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   }
 }
 
-// /**
-//  * Get the balance changes amount.
-//  *
-//  * @param {GetChangeParams} params
-//  * @returns {number} The change amount.
-//  */
-// const getChange = async ({ valueOut, sochainUrl, network, address }: GetChangeParams): Promise<number> => {
-//   try {
-//     const balances = await getBalance({ sochainUrl, network, address })
-//     const [ltcBalance] = balances.filter((balance) => assetToString(balance.asset) === assetToString(AssetLTC))
-//     let change = 0
-
-//     if (ltcBalance && ltcBalance.amount.amount().minus(valueOut).isGreaterThan(DUST_THRESHOLD)) {
-//       change = ltcBalance.amount.amount().minus(valueOut).toNumber()
-//     }
-//     return change
-//   } catch (e) {
-//     return Promise.reject(e)
-//   }
-// }
-
 /**
  * Validate the LTC address.
  *

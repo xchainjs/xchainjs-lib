@@ -1,8 +1,13 @@
+# v.0.11.1 (2021-05-30)
+
+- add `coinselect/accumulative` to devDependency and peerDependency, to select which utxos to use as inputs for transfer
+
 # v.0.11.0 (2021-05-17)
 
 ### Breaking change
 
 - added support for HD wallets
+
 # v.0.10.2 (2021-05-25)
 
 - Changed `utils/getPrefix` to return an empty string
