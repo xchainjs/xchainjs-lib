@@ -30,7 +30,7 @@ interface LitecoinClient {
   getFeeRates(): Promise<FeeRates>
 }
 
-type LitecoinClientParams = XChainClientParams & {
+export type LitecoinClientParams = XChainClientParams & {
   sochainUrl?: string
   nodeUrl?: string
   nodeAuth?: NodeAuth | null

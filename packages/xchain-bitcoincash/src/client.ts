@@ -31,7 +31,7 @@ interface BitcoinCashClient {
   getFeeRates(): Promise<FeeRates>
 }
 
-type BitcoinCashClientParams = XChainClientParams & {
+export type BitcoinCashClientParams = XChainClientParams & {
   haskoinUrl?: ClientUrl
   nodeUrl?: ClientUrl
   nodeAuth?: NodeAuth

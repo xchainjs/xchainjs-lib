@@ -84,7 +84,7 @@ export interface EthereumClient {
   ): Promise<TransactionResponse>
 }
 
-type ClientParams = XChainClientParams & {
+export type ClientParams = XChainClientParams & {
   ethplorerUrl?: string
   ethplorerApiKey?: string
   explorerUrl?: ExplorerUrl
