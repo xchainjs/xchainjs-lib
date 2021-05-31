@@ -2506,11 +2506,6 @@
     "@typescript-eslint/types" "4.18.0"
     eslint-visitor-keys "^2.0.0"
 
-"@xchainjs/xchain-client@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-client/-/xchain-client-0.7.0.tgz#c03419c63ea61f54af2b9f064159372aa538f4f8"
-  integrity sha512-Z+/TSiKBp0IRib9udlhc7yB1atecTt7Z1AN706YLAgbMSvO1XDmLU//KLhZ7MF47Ajg3hK3slq06FJmsAgZ4FA==
-
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@zkochan/cmd-shim/-/cmd-shim-3.1.0.tgz#2ab8ed81f5bb5452a85f25758eb9b8681982fd2e"
@@ -3563,7 +3558,7 @@ coininfo@^5.1.0:
   dependencies:
     safe-buffer "^5.1.1"
 
-coinselect@^3.1.12:
+coinselect@3.1.12, coinselect@^3.1.12:
   version "3.1.12"
   resolved "https://registry.yarnpkg.com/coinselect/-/coinselect-3.1.12.tgz#2255794c4002f7ecac9cf6d1cefe9f0adfd2fe7f"
   integrity sha512-XKnm9wwZzJRGuvR1BGNbFZEfa4SEr38do8Z5riq0797QwMT836EqhdPuhtbn8uAX8vCMqJ7+gS4CHa1G9M5xhw==
