@@ -1,3 +1,9 @@
+# v.0.15.2 (2021-05-31)
+
+### Breaking change
+- don't add memo output to `coinselect/accumulative`
+- add memo output by using `psbt.addOutput` 
+
 # v.0.15.0 (2021-05-28)
 
 ### Breaking change
