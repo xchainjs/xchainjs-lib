@@ -263,16 +263,11 @@ export const buildTx = async ({
     const compiledMemo = memo ? compileMemo(memo) : null
 
     const targetOutputs = []
-    //1. output to recipient
+    // output to recipient
     targetOutputs.push({
       address: recipient,
       value: amount.amount().toNumber(),
     })
-    //2. output memo (optional)
-    if (compiledMemo) {
-      // if memo exists
-      targetOutputs.push({ script: compiledMemo, value: 0 })
-    }
     const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
 
     // .inputs and .outputs will be undefined if no solution was found
@@ -301,6 +296,11 @@ export const buildTx = async ({
       }
       transactionBuilder.addOutput(out, output.value)
     })
+
+    // add output for memo
+    if (compiledMemo) {
+      transactionBuilder.addOutput(compiledMemo, 0) // Add OP_RETURN {script, value}
+    }
 
     return {
       builder: transactionBuilder,

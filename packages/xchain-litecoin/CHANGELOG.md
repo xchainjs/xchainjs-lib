@@ -1,3 +1,9 @@
+# v.0.6.3 (2021-05-31)
+
+### Breaking change
+- don't add memo output to `coinselect/accumulative`
+- add memo output by using `psbt.addOutput` 
+
 # v.0.6.1 (2021-05-30)
 
 - add unit test for sochain apis
