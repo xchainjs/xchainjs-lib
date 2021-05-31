@@ -211,15 +211,11 @@ export const buildTx = async ({
 
     const targetOutputs = []
 
-    //1. add output amount and recipient to targets
+    // add output amount and recipient to targets
     targetOutputs.push({
       address: recipient,
       value: amount.amount().toNumber(),
     })
-    //2. add output memo to targets (optional)
-    if (compiledMemo) {
-      targetOutputs.push({ script: compiledMemo, value: 0 })
-    }
 
     const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
 
@@ -247,6 +243,11 @@ export const buildTx = async ({
       }
       psbt.addOutput(output)
     })
+
+    //2. add output memo to targets (optional)
+    if (compiledMemo) {
+      psbt.addOutput({ script: compiledMemo, value: 0 })
+    }
 
     return { psbt, utxos }
   } catch (e) {
