@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-client",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "license": "MIT",
   "main": "lib/index",
   "types": "lib/index",
@@ -14,9 +14,8 @@
     "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests"
   },
-  "dependencies": {},
   "devDependencies": {
-    "@xchainjs/xchain-util": "^0.2.7"
+    "@xchainjs/xchain-util": "^0.2.8"
   },
   "peerDependencies": {
     "@xchainjs/xchain-util": "^0.2.7"
