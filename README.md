@@ -55,14 +55,14 @@ yarn test
 To test the publish via a dryrun:
 
 ```
-NPM_USERNAME="test123" NPM_PASSWORD="test123" NPM_EMAIL="test123@test123.com" dryrun_publish.sh
+NPM_USERNAME="test123" NPM_PASSWORD="test123" NPM_EMAIL="test123@test123.com" ./dryrun_publish.sh
 
 ```
 
 To publish:
 
 ```
-NPM_USERNAME="test123" NPM_PASSWORD="test123" NPM_EMAIL="test123@test123.com" publish.sh
+NPM_USERNAME="test123" NPM_PASSWORD="test123" NPM_EMAIL="test123@test123.com" ./publish.sh
 
 ```
 
