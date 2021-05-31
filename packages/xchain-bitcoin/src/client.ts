@@ -28,7 +28,7 @@ interface BitcoinClient {
   getFeeRates(): Promise<FeeRates>
 }
 
-type BitcoinClientParams = XChainClientParams & {
+export type BitcoinClientParams = XChainClientParams & {
   sochainUrl?: string
   blockstreamUrl?: string
 }
