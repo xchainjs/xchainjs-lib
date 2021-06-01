@@ -1,3 +1,7 @@
+# v.0.11.4 (2021-05-31)
+
+- refactor utils.buildTx() to include the memo for calculating inputs with accumulate() but re-adds it into outputs using `psbt.addOutput` to avoid dust attack error
+
 # v.0.11.3 (2021-05-31)
 
 ### Breaking Change
