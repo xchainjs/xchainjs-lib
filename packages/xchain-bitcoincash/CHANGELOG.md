@@ -1,3 +1,10 @@
+# v.0.11.3 (2021-05-31)
+
+### Breaking Change
+
+- remove adding memo to targetOutputs for `coinselect/accumulative`
+- add memo output by using `transactionBuilder`
+
 # v.0.11.1 (2021-05-30)
 
 - add `coinselect/accumulative` to devDependency and peerDependency, to select which utxos to use as inputs for transfer
