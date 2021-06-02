@@ -1,3 +1,7 @@
+# v.0.6.5 (2021-06-02)
+
+- fix adding duplicated memo output in the `Utils.buildTx()`
+
 # v.0.6.4 (2021-05-31)
 
 - refactor utils.buildTx() to include the memo for calculating inputs with accumulate() but re-adds it into outputs using `psbt.addOutput` to avoid dust attack error
