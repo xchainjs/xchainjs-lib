@@ -1,3 +1,7 @@
+# v.0.8.2 (2021-06-01)
+
+- updated peer deps
+
 # v.0.8.0 (2021-05-17)
 
 ### Breaking change

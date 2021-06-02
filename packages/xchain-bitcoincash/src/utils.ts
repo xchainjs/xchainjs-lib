@@ -263,16 +263,11 @@ export const buildTx = async ({
     const compiledMemo = memo ? compileMemo(memo) : null
 
     const targetOutputs = []
-    //1. output to recipient
+    // output to recipient
     targetOutputs.push({
       address: recipient,
       value: amount.amount().toNumber(),
     })
-    //2. add output memo to targets (optional)
-    if (compiledMemo) {
-      targetOutputs.push({ script: compiledMemo, value: 0 })
-    }
-
     const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
 
     // .inputs and .outputs will be undefined if no solution was found
@@ -290,17 +285,22 @@ export const buildTx = async ({
     // Outputs
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     outputs.forEach((output: any) => {
+      let out = undefined
       if (output.script) {
-        transactionBuilder.addOutput(compiledMemo, 0) // Add OP_RETURN {script, value}
+        out = compiledMemo
       } else if (!output.address) {
         //an empty address means this is the  change address
-        const out = bitcash.address.toOutputScript(toLegacyAddress(sender), bchNetwork(network))
-        transactionBuilder.addOutput(out, output.value)
+        out = bitcash.address.toOutputScript(toLegacyAddress(sender), bchNetwork(network))
       } else if (output.address) {
-        const out = bitcash.address.toOutputScript(toLegacyAddress(output.address), bchNetwork(network))
-        transactionBuilder.addOutput(out, output.value)
+        out = bitcash.address.toOutputScript(toLegacyAddress(output.address), bchNetwork(network))
       }
+      transactionBuilder.addOutput(out, output.value)
     })
+
+    // add output for memo
+    if (compiledMemo) {
+      transactionBuilder.addOutput(compiledMemo, 0) // Add OP_RETURN {script, value}
+    }
 
     return {
       builder: transactionBuilder,
