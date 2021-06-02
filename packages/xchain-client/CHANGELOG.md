@@ -1,3 +1,13 @@
+# v.0.9.2 (2021-06-02)
+
+### Update
+
+- Make `walletIndex` optional in `getAddress`
+
+# v.0.9.1 (2021-05-21)
+
+- No changes, just a bump to next minor version by an accident
+
 # v.0.9.0 (2021-05-17)
 
 ### Breaking change
