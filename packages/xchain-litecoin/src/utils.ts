@@ -231,11 +231,6 @@ export const buildTx = async ({
       }
     })
 
-    // if memo exists, add memo output
-    if (compiledMemo) {
-      psbt.addOutput({ script: compiledMemo, value: 0 }) // Add OP_RETURN {script, value}
-    }
-
     return { psbt, utxos }
   } catch (e) {
     return Promise.reject(e)
