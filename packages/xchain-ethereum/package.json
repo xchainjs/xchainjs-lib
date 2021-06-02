@@ -34,7 +34,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.9.32",
+    "@xchainjs/xchain-client": "^0.9.3",
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "^0.2.8",
     "axios": "^0.21.0",
