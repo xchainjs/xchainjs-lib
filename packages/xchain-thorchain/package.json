@@ -1,5 +1,5 @@
 {
-  "name": "@xchainjs/xchain-thorchain",
+  "name": "@thorwallet/xchain-thorchain",
   "version": "0.15.1",
   "description": "Custom Thorchain client and utilities used by XChainJS clients",
   "keywords": [

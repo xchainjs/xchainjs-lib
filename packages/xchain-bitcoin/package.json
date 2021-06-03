@@ -1,5 +1,5 @@
 {
-  "name": "@xchainjs/xchain-bitcoin",
+  "name": "@thorwallet/xchain-bitcoin",
   "version": "0.15.1",
   "description": "Custom Bitcoin client and utilities used by XChainJS clients",
   "keywords": [

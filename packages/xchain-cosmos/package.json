@@ -1,5 +1,5 @@
 {
-  "name": "@xchainjs/xchain-cosmos",
+  "name": "@thorwallet/xchain-cosmos",
   "version": "0.13.1",
   "description": "Custom Cosmos client and utilities used by XChainJS clients",
   "keywords": [

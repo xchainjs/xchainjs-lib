@@ -1,5 +1,5 @@
 {
-  "name": "@xchainjs/xchain-crypto",
+  "name": "@thorwallet/xchain-crypto",
   "version": "0.2.4",
   "description": "XChain Crypto is a crypto module needed by all XChain clients.",
   "main": "lib/index.js",

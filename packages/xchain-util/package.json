@@ -1,5 +1,5 @@
 {
-  "name": "@xchainjs/xchain-util",
+  "name": "@thorwallet/xchain-util",
   "version": "0.2.8",
   "description": "Helper utilities for XChain clients",
   "keywords": [

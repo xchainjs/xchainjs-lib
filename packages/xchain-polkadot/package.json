@@ -1,5 +1,5 @@
 {
-  "name": "@xchainjs/xchain-polkadot",
+  "name": "@thorwallet/xchain-polkadot",
   "version": "0.8.1",
   "description": "Custom Polkadot client and utilities used by XChainJS clients",
   "keywords": [

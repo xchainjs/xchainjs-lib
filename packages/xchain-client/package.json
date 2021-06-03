@@ -1,5 +1,5 @@
 {
-  "name": "@xchainjs/xchain-client",
+  "name": "@thorwallet/xchain-client",
   "version": "0.9.1",
   "license": "MIT",
   "main": "lib/index",
