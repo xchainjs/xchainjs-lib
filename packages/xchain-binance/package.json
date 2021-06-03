@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-binance",
-  "version": "5.2.0",
+  "version": "0.0.0",
   "description": "Custom Binance client and utilities used by XChainJS clients",
   "keywords": [
     "BNB",

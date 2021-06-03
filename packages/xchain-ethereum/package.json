@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-ethereum",
-  "version": "0.21.2",
+  "version": "0.0.0",
   "description": "Ethereum client for XChainJS",
   "keywords": [
     "XChain",
