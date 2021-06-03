@@ -1,3 +1,14 @@
+# v.0.11.4 (2021-05-31)
+
+- refactor utils.buildTx() to include the memo for calculating inputs with accumulate() but re-adds it into outputs using `psbt.addOutput` to avoid dust attack error
+
+# v.0.11.3 (2021-05-31)
+
+### Breaking Change
+
+- remove adding memo to targetOutputs for `coinselect/accumulative`
+- add memo output by using `transactionBuilder`
+
 # v.0.11.1 (2021-05-30)
 
 - add `coinselect/accumulative` to devDependency and peerDependency, to select which utxos to use as inputs for transfer

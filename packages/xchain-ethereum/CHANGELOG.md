@@ -1,3 +1,13 @@
+# v.0.21.2 (2021-06-02)
+
+### Fix
+
+- fixed `getTransactions`'s transactions filtering to match correct pagintaion's boundings
+
+### Update
+
+- updated `xchain-client` package version
+
 # v.0.21.0 (2021-05-27)
 
 ### Fix

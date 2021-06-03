@@ -193,9 +193,8 @@ export const buildTx = async ({
       address: recipient,
       value: amount.amount().toNumber(),
     })
-    //2. output memo (optional)
+    //2. add output memo to targets (optional)
     if (compiledMemo) {
-      // if memo exists
       targetOutputs.push({ script: compiledMemo, value: 0 })
     }
     const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
@@ -221,7 +220,15 @@ export const buildTx = async ({
         //an empty address means this is the  change ddress
         output.address = sender
       }
-      psbt.addOutput(output)
+      if (!output.script) {
+        psbt.addOutput(output)
+      } else {
+        //we need to add the compiled memo this way to
+        //avoid dust error tx when accumulating memo output with 0 value
+        if (compiledMemo) {
+          psbt.addOutput({ script: compiledMemo, value: 0 })
+        }
+      }
     })
 
     return { psbt, utxos }

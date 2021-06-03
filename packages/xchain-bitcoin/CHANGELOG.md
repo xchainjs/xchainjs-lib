@@ -1,3 +1,12 @@
+# v.0.15.3 (2021-05-31)
+
+- refactor utils.buildTx() to include the memo for calculating inputs with accumulate() but re-adds it into outputs using `psbt.addOutput` to avoid dust attack error
+
+# v.0.15.2 (2021-05-31)
+
+- don't add memo output to `coinselect/accumulative`
+- add memo output by using `psbt.addOutput`
+
 # v.0.15.0 (2021-05-28)
 
 ### Breaking change
