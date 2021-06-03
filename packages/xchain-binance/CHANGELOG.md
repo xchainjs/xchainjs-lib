@@ -1,3 +1,7 @@
+# v.5.2.1 (2021-06-01)
+
+- update peerDependencies
+
 # v.5.1.0 (2021-05-17)
 
 ### Breaking change
