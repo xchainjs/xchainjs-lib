@@ -1,12 +1,12 @@
 diff --git a/node_modules/pbkdf2/lib/sync-browser.js b/node_modules/pbkdf2/lib/sync-browser.js
-index 20a64b4..b668552 100644
+index 20a64b4..43014b8 100644
 --- a/node_modules/pbkdf2/lib/sync-browser.js
 +++ b/node_modules/pbkdf2/lib/sync-browser.js
 @@ -19,6 +19,8 @@ var sizes = {
    ripemd160: 20
  }
  
-+const hmacCache = {[key: string]: string} = {}
++const hmacCache  = {}
 +
  function Hmac (alg, key, saltLen) {
    var hash = getDigest(alg)
