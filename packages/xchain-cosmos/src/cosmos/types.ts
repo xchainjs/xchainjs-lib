@@ -3,7 +3,7 @@ import { BigSource } from 'big.js'
 import { PrivKey, Msg, codec } from 'cosmos-client'
 import { BaseAccount, StdTx } from 'cosmos-client/x/auth'
 import { StdTxFee } from 'cosmos-client/api'
-import { RootDerivationPaths, Network } from '@xchainjs/xchain-client'
+import { RootDerivationPaths, Network } from '@thorwallet/xchain-client'
 
 export type CosmosSDKClientParams = {
   server: string

@@ -1,4 +1,4 @@
-import { Address, Balance, FeeOptionKey, Fees } from '@xchainjs/xchain-client'
+import { Address, Balance, FeeOptionKey, Fees } from '@thorwallet/xchain-client'
 
 export type FeeRate = number
 export type FeeRates = Record<FeeOptionKey, FeeRate>

@@ -1,5 +1,5 @@
 import { Client } from '../src/client'
-import { baseAmount } from '@xchainjs/xchain-util'
+import { baseAmount } from '@thorwallet/xchain-util'
 import { Scope, mockWs } from '../__mocks__/ws'
 import { Constructor } from '@polkadot/types/types'
 import { Global } from '@polkadot/rpc-provider/mock/types'

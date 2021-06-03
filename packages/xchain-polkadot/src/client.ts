@@ -12,9 +12,9 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
-} from '@xchainjs/xchain-client'
-import { Asset, assetAmount, assetToString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
+} from '@thorwallet/xchain-client'
+import { Asset, assetAmount, assetToString, assetToBase, baseAmount } from '@thorwallet/xchain-util'
+import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
 import { ApiPromise, WsProvider, Keyring } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'

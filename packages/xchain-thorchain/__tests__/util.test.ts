@@ -10,8 +10,8 @@ import {
   getDefaultExplorerNodeUrl,
   getDefaultExplorerUrlByNetwork,
 } from '../src/util'
-import { baseAmount } from '@xchainjs/xchain-util'
-import { RawTxResponse, TxResponse } from '@xchainjs/xchain-cosmos/src/cosmos/types'
+import { baseAmount } from '@thorwallet/xchain-util'
+import { RawTxResponse, TxResponse } from '@thorwallet/xchain-cosmos/src/cosmos/types'
 import { Msg } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgSend } from 'cosmos-client/x/bank'

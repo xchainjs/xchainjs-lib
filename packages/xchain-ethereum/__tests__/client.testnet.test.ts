@@ -1,7 +1,7 @@
 import nock from 'nock'
 import { Wallet, providers, BigNumber } from 'ethers'
 import { TransactionResponse } from '@ethersproject/abstract-provider'
-import { baseAmount, AssetETH, assetToString, assetFromString, ETHChain } from '@xchainjs/xchain-util'
+import { baseAmount, AssetETH, assetToString, assetFromString, ETHChain } from '@thorwallet/xchain-util'
 import Client from '../src/client'
 import { ETH_DECIMAL } from '../src/utils'
 import { mock_all_api } from '../__mocks__'

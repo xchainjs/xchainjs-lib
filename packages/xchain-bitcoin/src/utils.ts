@@ -1,8 +1,8 @@
 import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as sochain from './sochain-api'
 import * as blockStream from './blockstream-api'
-import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
-import { assetAmount, AssetBTC, assetToBase, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Balance, Fees, Network, TxHash, TxParams } from '@thorwallet/xchain-client'
+import { assetAmount, AssetBTC, assetToBase, BaseAmount, baseAmount } from '@thorwallet/xchain-util'
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

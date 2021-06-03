@@ -1,5 +1,5 @@
-import { Fees, Network } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Fees, Network } from '@thorwallet/xchain-client'
+import { assetAmount, assetToBase } from '@thorwallet/xchain-util'
 
 /**
  * Check Subscan API response

@@ -9,7 +9,7 @@ import {
 } from '../src/util'
 import { TransferEvent, Transfer } from '../src/types/binance-ws'
 import { DexFees, Fee, TransferFee, Tx as BinanceTx } from '../src/types/binance'
-import { baseAmount } from '@xchainjs/xchain-util'
+import { baseAmount } from '@thorwallet/xchain-util'
 
 describe('binance/util', () => {
   describe('getHashFromTransfer', () => {

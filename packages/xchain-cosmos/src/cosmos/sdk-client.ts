@@ -1,8 +1,8 @@
 import axios from 'axios'
 import * as BIP32 from 'bip32'
 
-import { TxHistoryParams } from '@xchainjs/xchain-client'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
+import { TxHistoryParams } from '@thorwallet/xchain-client'
+import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
 import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from 'cosmos-client'
 import { BroadcastTxCommitResult, Coin, StdTxSignature } from 'cosmos-client/api'

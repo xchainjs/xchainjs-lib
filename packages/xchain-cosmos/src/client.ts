@@ -12,9 +12,9 @@ import {
   XChainClient,
   XChainClientParams,
   Network as XChainNetwork,
-} from '@xchainjs/xchain-client'
-import { Asset, baseAmount, assetToString } from '@xchainjs/xchain-util'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
+} from '@thorwallet/xchain-client'
+import { Asset, baseAmount, assetToString } from '@thorwallet/xchain-util'
+import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
 import { PrivKey, codec } from 'cosmos-client'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'

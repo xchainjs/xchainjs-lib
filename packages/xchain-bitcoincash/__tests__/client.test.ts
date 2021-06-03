@@ -8,7 +8,7 @@ import {
   mock_getTransactions,
   mock_getUnspents,
 } from '../__mocks__/api'
-import { baseAmount } from '@xchainjs/xchain-util'
+import { baseAmount } from '@thorwallet/xchain-util'
 import { BCH_DECIMAL } from '../src/utils'
 
 const bchClient = new Client({ network: 'mainnet' })

@@ -15,10 +15,10 @@ import {
   Txs,
   TxFrom,
   TxTo,
-} from '@xchainjs/xchain-client'
-import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
-import { Asset, baseAmount, assetToString, assetFromString } from '@xchainjs/xchain-util'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
+} from '@thorwallet/xchain-client'
+import { CosmosSDKClient, RPCTxResult } from '@thorwallet/xchain-cosmos'
+import { Asset, baseAmount, assetToString, assetFromString } from '@thorwallet/xchain-util'
+import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
 import { PrivKey, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'

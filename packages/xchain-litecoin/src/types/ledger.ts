@@ -1,4 +1,4 @@
-import { Address, Network, TxParams } from '@xchainjs/xchain-client'
+import { Address, Network, TxParams } from '@thorwallet/xchain-client'
 import { FeeRate } from './client-types'
 import { UTXOs } from './common'
 
