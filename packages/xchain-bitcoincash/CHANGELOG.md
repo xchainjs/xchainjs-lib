@@ -1,6 +1,7 @@
 # v.0.11.5 (2021-06-01)
 
 - update peer deps
+- refactor BCH utils.buildTx() to remove extra code
 
 # v.0.11.4 (2021-05-31)
 

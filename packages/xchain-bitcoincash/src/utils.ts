@@ -286,9 +286,7 @@ export const buildTx = async ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     outputs.forEach((output: any) => {
       let out = undefined
-      if (output.script) {
-        out = compiledMemo
-      } else if (!output.address) {
+      if (!output.address) {
         //an empty address means this is the  change address
         out = bitcash.address.toOutputScript(toLegacyAddress(sender), bchNetwork(network))
       } else if (output.address) {

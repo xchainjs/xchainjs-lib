@@ -1,6 +1,6 @@
-# v.0.6.5 (2021-06-01)
+# v.0.6.5 (2021-06-02)
 
-- update peer deps
+- fix adding duplicated memo output in the `Utils.buildTx()`
 
 # v.0.6.4 (2021-05-31)
 
