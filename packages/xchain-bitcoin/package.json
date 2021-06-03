@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-bitcoin",
-  "version": "0.0.1-alpha.792+b6e4e50",
+  "version": "0.0.1-alpha.793+4495b06",
   "description": "Custom Bitcoin client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -32,11 +32,11 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
+    "@thorwallet/xchain-client": "0.0.1-alpha.793+4495b06",
+    "@thorwallet/xchain-crypto": "0.0.1-alpha.793+4495b06",
+    "@thorwallet/xchain-util": "0.0.1-alpha.793+4495b06",
     "@types/bitcoinjs-lib": "^5.0.0",
     "@types/wif": "^2.0.1",
-    "@thorwallet/xchain-client": "0.0.1-alpha.792+b6e4e50",
-    "@thorwallet/xchain-crypto": "0.0.1-alpha.792+b6e4e50",
-    "@thorwallet/xchain-util": "0.0.1-alpha.792+b6e4e50",
     "axios": "^0.21.0",
     "axios-mock-adapter": "^1.19.0",
     "bitcoinjs-lib": "^5.2.0",
@@ -55,5 +55,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "b6e4e50ed4cd21dfdc2ab5b8b9c54a2bd8696091"
+  "gitHead": "4495b06d0327fc0a986a181460d95385a4bde989"
 }
