@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-ethereum",
-  "version": "0.0.1-alpha.799+c99be73",
+  "version": "0.0.1-alpha.800+b6c2717",
   "description": "Ethereum client for XChainJS",
   "keywords": [
     "XChain",
@@ -33,19 +33,16 @@
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {
-    "@thorwallet/xchain-client": "0.0.1-alpha.799+c99be73",
-    "@thorwallet/xchain-crypto": "0.0.1-alpha.799+c99be73",
-    "@thorwallet/xchain-util": "0.0.1-alpha.799+c99be73",
+  "dependencies": {
+    "@thorwallet/xchain-client": "0.0.1-alpha.800+b6c2717",
+    "@thorwallet/xchain-crypto": "0.0.1-alpha.800+b6c2717",
+    "@thorwallet/xchain-util": "0.0.1-alpha.800+b6c2717",
     "axios": "^0.21.0",
     "ethers": "^5.1.0"
   },
   "peerDependencies": {
-    "@thorwallet/xchain-client": "0.0.1-alpha.792+b6e4e50",
-    "@thorwallet/xchain-crypto": "0.0.1-alpha.792+b6e4e50",
-    "@thorwallet/xchain-util": "0.0.1-alpha.792+b6e4e50",
     "axios": "^0.21.0",
     "ethers": "^5.1.0"
   },
-  "gitHead": "c99be73b9feb545f4b8f306ed5033001c365e42a"
+  "gitHead": "b6c27174e98e39cad3a94302d47db5b547b19763"
 }
