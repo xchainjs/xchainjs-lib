@@ -1,7 +1,7 @@
 import { ethers, BigNumber } from 'ethers'
-import { BaseAmount } from '@xchainjs/xchain-util'
-import * as C from '@xchainjs/xchain-client'
-import { FeeOptionKey } from '@xchainjs/xchain-client'
+import { BaseAmount } from '@thorwallet/xchain-util'
+import * as C from '@thorwallet/xchain-client'
+import { FeeOptionKey } from '@thorwallet/xchain-client'
 
 export type Address = string
 

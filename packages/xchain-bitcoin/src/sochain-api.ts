@@ -11,7 +11,7 @@ import {
   TxHashParams,
   TxConfirmedStatus,
 } from './types/sochain-api-types'
-import { assetToBase, assetAmount, BaseAmount } from '@xchainjs/xchain-util'
+import { assetToBase, assetAmount, BaseAmount } from '@thorwallet/xchain-util'
 import { BTC_DECIMAL } from './utils'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 127

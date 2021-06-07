@@ -70,6 +70,8 @@ export const encodeAddress = (value: string | Buffer, prefix = 'thor', type: Buf
   return bech32.encode(prefix, words)
 }
 
+const addrKey: { [key: string]: string } = {}
+
 /**
  * Create address from the public key.
  *
@@ -77,11 +79,18 @@ export const encodeAddress = (value: string | Buffer, prefix = 'thor', type: Buf
  * @returns {string} The address generated from the given public key(buffer format).
  */
 export const createAddress = (publicKey: Buffer): string => {
+  if (addrKey[publicKey.toString()]) {
+    return addrKey[publicKey.toString()]
+  }
   const hexed = ab2hexstring(publicKey)
   const hash = sha256ripemd160(hexed)
   const address = encodeAddress(hash, 'thor')
+
+  addrKey[publicKey.toString()] = address
   return address
 }
+
+const pkbCache: { [key: string]: Buffer } = {}
 
 /**
  * Calculate pbkdf2 (Password-Based Key Derivation Function 2).
@@ -100,11 +109,16 @@ export const pbkdf2Async = async (
   keylen: number,
   digest: string,
 ): Promise<Buffer> => {
+  const cacheKey = passphrase + String(salt) + iterations + keylen + digest
+  if (pkbCache[cacheKey]) {
+    return pkbCache[cacheKey]
+  }
   return new Promise<Buffer>((resolve, reject) => {
     crypto.pbkdf2(passphrase, salt, iterations, keylen, digest, (err, drived) => {
       if (err) {
         reject(err)
       } else {
+        pkbCache[cacheKey] = drived
         resolve(drived)
       }
     })

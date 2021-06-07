@@ -14,8 +14,8 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
-} from '@xchainjs/xchain-client'
-import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
+} from '@thorwallet/xchain-client'
+import { validatePhrase, getSeed } from '@thorwallet/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'

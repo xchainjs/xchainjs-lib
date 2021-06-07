@@ -7,9 +7,9 @@ import {
   TokenBalanceParam,
 } from './types'
 import { BigNumberish } from 'ethers'
-import { Txs } from '@xchainjs/xchain-client/lib'
+import { Txs } from '@thorwallet/xchain-client/lib'
 import { filterSelfTxs, getTxFromEthTransaction, getTxFromTokenTransaction } from './utils'
-import { bnOrZero } from '@xchainjs/xchain-util/lib'
+import { bnOrZero } from '@thorwallet/xchain-util/lib'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 

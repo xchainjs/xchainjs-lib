@@ -60,6 +60,8 @@ export const validatePhrase = (phrase: string): boolean => {
   return bip39.validateMnemonic(phrase)
 }
 
+const seedCache: { [key: string]: Buffer } = {}
+
 /**
  * Get the seed from the given phrase.
  *
@@ -73,7 +75,15 @@ export const getSeed = (phrase: string): Buffer => {
     throw new Error('Invalid BIP39 phrase')
   }
 
-  return bip39.mnemonicToSeedSync(phrase)
+  if (seedCache[phrase]) {
+    return seedCache[phrase]
+  }
+
+  const result = bip39.mnemonicToSeedSync(phrase)
+
+  seedCache[phrase] = result
+
+  return result
 }
 
 /**

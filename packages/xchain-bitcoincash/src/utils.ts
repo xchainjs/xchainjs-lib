@@ -2,8 +2,8 @@ const bitcash = require('@psf/bitcoincashjs-lib')
 
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
-import { Address, Balance, Fees, Network, Tx, TxFrom, TxParams, TxTo } from '@xchainjs/xchain-client'
-import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util/lib'
+import { Address, Balance, Fees, Network, Tx, TxFrom, TxParams, TxTo } from '@thorwallet/xchain-client'
+import { AssetBCH, BaseAmount, baseAmount } from '@thorwallet/xchain-util/lib'
 import {
   FeeRate,
   FeeRates,

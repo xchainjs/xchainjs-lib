@@ -31,9 +31,9 @@ import {
   Network,
   FeeOptionKey,
   FeesParams as XFeesParams,
-} from '@xchainjs/xchain-client'
-import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
-import * as Crypto from '@xchainjs/xchain-crypto'
+} from '@thorwallet/xchain-client'
+import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@thorwallet/xchain-util'
+import * as Crypto from '@thorwallet/xchain-crypto'
 import * as ethplorerAPI from './ethplorer-api'
 import * as etherscanAPI from './etherscan-api'
 import {

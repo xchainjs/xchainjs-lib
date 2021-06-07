@@ -1,5 +1,5 @@
 import nock from 'nock'
-import { baseAmount } from '@xchainjs/xchain-util'
+import { baseAmount } from '@thorwallet/xchain-util'
 import Client from '../src/client'
 import { mock_ethplorer_api_getTxInfo } from '../__mocks__/ethplorer-api'
 

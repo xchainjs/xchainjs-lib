@@ -6,7 +6,7 @@ import { isChain } from './chain'
 import { Denomination, AssetAmount, BaseAmount, Amounts, Asset } from './types'
 
 /**
- * Guard to check whether value is a BigNumber.Value or not
+ * Guard whichs checks whether value is a BigNumber.Value or not
  *
  * @param {unknown} v
  * @returns {boolean} `true` or `false`.

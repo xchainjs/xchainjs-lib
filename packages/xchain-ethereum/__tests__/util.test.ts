@@ -16,7 +16,7 @@ import {
   getTxFromEthplorerEthTransaction,
   getTokenBalances,
 } from '../src/utils'
-import { baseAmount, assetToString, AssetETH, ETHChain } from '@xchainjs/xchain-util'
+import { baseAmount, assetToString, AssetETH, ETHChain } from '@thorwallet/xchain-util'
 import { Network } from '../src/types'
 import { ethers } from 'ethers'
 import { mock_etherscan_api } from '../__mocks__/etherscan-api'

@@ -1,5 +1,5 @@
-import { TxFrom, TxTo, Txs, Fees } from '@xchainjs/xchain-client'
-import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { TxFrom, TxTo, Txs, Fees } from '@thorwallet/xchain-client'
+import { Asset, assetToString, baseAmount } from '@thorwallet/xchain-util'
 
 import { Msg, codec } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'

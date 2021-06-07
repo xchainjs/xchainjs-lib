@@ -9,7 +9,7 @@ import {
   AddressParams,
   TxHashParams,
 } from './types/sochain-api-types'
-import { assetToBase, assetAmount, BaseAmount } from '@xchainjs/xchain-util'
+import { assetToBase, assetAmount, BaseAmount } from '@thorwallet/xchain-util'
 import { LTC_DECIMAL } from './utils'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1

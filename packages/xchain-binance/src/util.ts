@@ -1,7 +1,7 @@
 import { Transfer, TransferEvent } from './types/binance-ws'
 import { TransferFee, DexFees, Fee, TxType as BinanceTxType, Tx as BinanceTx } from './types/binance'
-import { TxType, Tx, Fees } from '@xchainjs/xchain-client'
-import { assetFromString, AssetBNB, assetToBase, assetAmount, baseAmount } from '@xchainjs/xchain-util'
+import { TxType, Tx, Fees } from '@thorwallet/xchain-client'
+import { assetFromString, AssetBNB, assetToBase, assetAmount, baseAmount } from '@thorwallet/xchain-util'
 import { DerivePath } from './types/common'
 
 /**

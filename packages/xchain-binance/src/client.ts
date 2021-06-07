@@ -22,7 +22,7 @@ import {
   TxHash,
   TxHistoryParams,
   TxsPage,
-} from '@xchainjs/xchain-client'
+} from '@thorwallet/xchain-client'
 import {
   Asset,
   AssetBNB,
@@ -34,8 +34,8 @@ import {
   baseToAsset,
   BNBChain,
   assetToString,
-} from '@xchainjs/xchain-util'
-import { validatePhrase } from '@xchainjs/xchain-crypto'
+} from '@thorwallet/xchain-util'
+import { validatePhrase } from '@thorwallet/xchain-crypto'
 import { isTransferFee, parseTx, getPrefix } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 

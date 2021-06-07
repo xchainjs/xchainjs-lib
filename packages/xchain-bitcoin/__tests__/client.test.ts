@@ -1,6 +1,6 @@
 import { Client } from '../src/client'
 import { MIN_TX_FEE } from '../src/const'
-import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
+import { baseAmount, AssetBTC } from '@thorwallet/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
 mockSochainApi.init()

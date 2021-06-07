@@ -1,4 +1,4 @@
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset } from '@thorwallet/xchain-util'
 
 export const Polkadot = 'THOR'
 export const AssetDOT: Asset = { chain: Polkadot, symbol: 'DOT', ticker: 'DOT' }

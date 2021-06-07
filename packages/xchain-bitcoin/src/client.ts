@@ -14,9 +14,9 @@ import {
   Network,
   Fees,
   XChainClientParams,
-} from '@xchainjs/xchain-client'
-import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
-import { AssetBTC, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+} from '@thorwallet/xchain-client'
+import { validatePhrase, getSeed } from '@thorwallet/xchain-crypto'
+import { AssetBTC, assetAmount, assetToBase } from '@thorwallet/xchain-util'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 
 /**
