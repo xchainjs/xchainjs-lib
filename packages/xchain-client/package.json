@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-client",
-  "version": "0.0.1-alpha.800+b6c2717",
+  "version": "0.0.1-alpha.799+c99be73",
   "license": "MIT",
   "main": "lib/index",
   "types": "lib/index",
@@ -15,10 +15,13 @@
     "test": "jest --passWithNoTests"
   },
   "devDependencies": {
-    "@thorwallet/xchain-util": "0.0.1-alpha.800+b6c2717"
+    "@thorwallet/xchain-util": "0.0.1-alpha.799+c99be73"
+  },
+  "peerDependencies": {
+    "@thorwallet/xchain-util": "0.0.1-alpha.792+b6e4e50"
   },
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "b6c27174e98e39cad3a94302d47db5b547b19763"
+  "gitHead": "c99be73b9feb545f4b8f306ed5033001c365e42a"
 }
