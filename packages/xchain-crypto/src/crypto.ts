@@ -39,15 +39,30 @@ export type Keystore = {
 }
 
 /**
+ * Determines if the current environment is node
+ *
+ * @returns {boolean} True if current environment is node
+ */
+ const _isNode = (): boolean => {
+  return typeof window === 'undefined'
+}
+
+/**
  * Generate a new phrase.
  *
  * @param {string} size The new phrase size.
  * @returns {string} The generated phrase based on the size.
  */
 export const generatePhrase = (size = 12): string => {
-  const entropy = size == 12 ? 128 : 256
-  const phrase = bip39.generateMnemonic(entropy)
-  return phrase
+  if (_isNode()) {
+    const bytes = crypto.randomBytes((size == 12 ? 128 : 256) / 8)
+    const phrase = bip39.entropyToMnemonic(bytes)
+    return phrase
+  } else {
+    const entropy = size == 12 ? 128 : 256
+    const phrase = bip39.generateMnemonic(entropy)
+    return phrase
+  }
 }
 
 /**
