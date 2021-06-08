@@ -43,7 +43,7 @@ export type Keystore = {
  *
  * @returns {boolean} True if current environment is node
  */
- const _isNode = (): boolean => {
+const _isNode = (): boolean => {
   return typeof window === 'undefined'
 }
 
