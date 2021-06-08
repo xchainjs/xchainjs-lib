@@ -7,6 +7,7 @@
 - [types] Refactored `ExplorerUrl`
 - [client] Constructor accepts `ExplorerUrls`
 - [client] Removed `getExplorerNodeUrl` (use `getExplorerAddressUrl` instead)
+- [client] Extract `getDefaultClientUrl` into `utils`
 - [utils] Renamed `getDefaultExplorerUrlByNetwork` -> `getDefaultExplorerUrl`
 - [utils] Removed `getDefaultExplorerAddressUrl`, `getDefaultExplorerNodeUrl`, `getDefaultExplorerTxUrl`
 - [utils] Added `getExplorerTxUrl`, `getExplorerAddressUrl`, `getExplorerUrl` helpers

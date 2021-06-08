@@ -268,7 +268,7 @@ const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
 /**
  * Get default explorer urls.
  *
- * @returns {ExplorerUrl} Default explorer urls (both mainnet and testnet) for thorchain.
+ * @returns {ExplorerUrls} Default explorer urls (both mainnet and testnet) for thorchain.
  */
 export const getDefaultExplorerUrls = (): ExplorerUrls => {
   const root: ExplorerUrl = {
