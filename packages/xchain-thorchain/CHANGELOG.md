@@ -1,4 +1,19 @@
+# v.0.16.0 (2021-06-08)
+
+### Breaking change
+
+- Use `viewblock` as default explorer
+- [types] Refactored structure of explorer urls (via `type ExplorerUrls`)
+- [types] Refactored `ExplorerUrl`
+- [client] Constructor accepts `ExplorerUrls`
+- [client] Removed `getExplorerNodeUrl` (use `getExplorerAddressUrl` instead)
+- [utils] Renamed `getDefaultExplorerUrlByNetwork` -> `getDefaultExplorerUrl`
+- [utils] Removed `getDefaultExplorerAddressUrl`, `getDefaultExplorerNodeUrl`, `getDefaultExplorerTxUrl`
+- [utils] Added `getExplorerTxUrl`, `getExplorerAddressUrl`, `getExplorerUrl` helpers
+
 # v.0.15.2 (2021-06-01)
+
+### Update
 
 - updated peer deps
 
