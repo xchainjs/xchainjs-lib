@@ -103,13 +103,14 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
  * @param {Address} address
  * @returns {Array<Balance>} The balances of the given address.
  */
-export const getBalance = async (address: string): Promise<Balance[]> => {
+export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   try {
-    const { received } = await haskoinApi.getBalance(address)
+    const balance =
+      params.network === 'testnet' ? await sochain.getBalance(params) : await haskoinApi.getBalance(params.address)
     return [
       {
         asset: AssetBTC,
-        amount: baseAmount(received, BTC_DECIMAL),
+        amount: balance,
       },
     ]
   } catch (error) {

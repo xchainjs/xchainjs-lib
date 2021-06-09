@@ -249,7 +249,11 @@ class Client implements BitcoinClient, XChainClient {
    */
   getBalance = async (address: Address): Promise<Balance[]> => {
     try {
-      return Utils.getBalance(address)
+      return Utils.getBalance({
+        sochainUrl: this.sochainUrl,
+        network: this.net,
+        address: address,
+      })
     } catch (e) {
       return Promise.reject(e)
     }
