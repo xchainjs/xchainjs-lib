@@ -1,3 +1,4 @@
+import { Address } from '@xchainjs/xchain-client/lib'
 import axios from 'axios'
 
 import { getIsTxConfirmed } from './sochain-api'
@@ -10,6 +11,21 @@ export type UtxoData = {
   index: number
   value: number
   pkscript: string
+}
+
+export type BalanceData = {
+  address: Address
+  confirmed: number
+  unconfirmed: number
+  utxo: number
+  txs: number
+  received: number
+}
+
+export const getBalance = async (address: string): Promise<BalanceData> => {
+  const { data: response } = await axios.get(`${HASKOIN_API_URL}/address/${address}/balance`)
+
+  return response
 }
 
 export const getUnspentTxs = async (address: string): Promise<UtxoData[]> => {
