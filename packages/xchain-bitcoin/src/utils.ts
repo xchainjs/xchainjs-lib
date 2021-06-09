@@ -105,7 +105,8 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   try {
-    const balance = await sochain.getBalance(params)
+    const balance =
+      params.network === 'testnet' ? await sochain.getBalance(params) : await haskoinApi.getBalance(params.address)
     return [
       {
         asset: AssetBTC,
