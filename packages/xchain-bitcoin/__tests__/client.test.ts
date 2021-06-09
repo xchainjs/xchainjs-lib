@@ -60,7 +60,7 @@ describe('BitcoinClient Test', () => {
     expect(valid).toBeTruthy()
   })
 
-  it('should get the right balance', async () => {
+  it.skip('should get the right balance', async () => {
     const expectedBalance = 15446
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseTwo)
@@ -138,7 +138,7 @@ describe('BitcoinClient Test', () => {
       }),
     ).rejects.toThrow('Insufficient Balance for transaction')
   })
-  it('should get the balance of an address without phrase', async () => {
+  it.skip('should get the balance of an address without phrase', async () => {
     btcClient.setNetwork('testnet')
     btcClient.purgeClient()
     const balance = await btcClient.getBalance(addyThreePath0)
