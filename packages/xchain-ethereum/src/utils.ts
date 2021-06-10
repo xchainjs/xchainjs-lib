@@ -365,8 +365,8 @@ export const getDecimal = async (asset: Asset, provider: providers.Provider): Pr
 export const getTokenBalances = (tokenBalances: TokenBalance[]): Balances => {
   return tokenBalances.reduce((acc, cur) => {
     const { symbol, address: tokenAddress } = cur.tokenInfo
-    if (validateSymbol(symbol) && validateAddress(tokenAddress)) {
-      const decimals = parseInt(cur?.tokenInfo?.decimals ?? NaN)
+    if (validateSymbol(symbol) && validateAddress(tokenAddress) && cur?.tokenInfo?.decimals !== undefined) {
+      const decimals = parseInt(cur.tokenInfo.decimals, 10)
       const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${ethers.utils.getAddress(tokenAddress)}`)
       if (tokenAsset) {
         return [

@@ -1,3 +1,21 @@
+# v.0.15.5 (2021-06-08)
+
+### BREAKING CHANGE
+
+#### Issue
+  [Sochain API](https://sochain.com/) is out of sync and it's reported to be fixed in a few days.
+  Report from Sochain: "WARNING: DATA SHOWN FOR BITCOIN NETWORK MAY BE OUTDATED
+We are working to resolve the issue in the next few days."
+
+#### Hotfix
+  - Replace `getBalance` and `getUnspentTxs` apis from sochain to haskoin for temporary purpose.
+  - Update `Utils.scanUTXOs` method using haskoin api
+  - Skip unit test for `utils` (it will be reverted after `sochain` api is recovered)
+
+# v.0.15.4 (2021-06-01)
+
+- updating peer deps
+
 # v.0.15.3 (2021-05-31)
 
 - refactor utils.buildTx() to include the memo for calculating inputs with accumulate() but re-adds it into outputs using `psbt.addOutput` to avoid dust attack error

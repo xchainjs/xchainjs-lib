@@ -5,10 +5,10 @@ import {
   getAsset,
   getTxsFromHistory,
   isBroadcastSuccess,
-  getDefaultExplorerAddressUrl,
-  getDefaultExplorerTxUrl,
-  getDefaultExplorerNodeUrl,
-  getDefaultExplorerUrlByNetwork,
+  getExplorerAddressUrl,
+  getExplorerTxUrl,
+  getExplorerUrl,
+  getDefaultExplorerUrls,
 } from '../src/util'
 import { baseAmount } from '@thorwallet/xchain-util'
 import { RawTxResponse, TxResponse } from '@thorwallet/xchain-cosmos/src/cosmos/types'
@@ -152,35 +152,33 @@ describe('thorchain/util', () => {
     })
   })
 
-  it('should return valid explorer url', () => {
-    expect(getDefaultExplorerUrlByNetwork('testnet')).toEqual('https://testnet.thorchain.net/#')
+  describe('explorer url', () => {
+    it('should return valid explorer url', () => {
+      expect(getExplorerUrl(getDefaultExplorerUrls(), 'testnet')).toEqual(
+        'https://viewblock.io/thorchain?network=testnet',
+      )
 
-    expect(getDefaultExplorerUrlByNetwork('mainnet')).toEqual('https://thorchain.net/#')
-  })
+      expect(getExplorerUrl(getDefaultExplorerUrls(), 'mainnet')).toEqual('https://viewblock.io/thorchain')
+    })
 
-  it('should retrun valid explorer address url', () => {
-    expect(getDefaultExplorerAddressUrl('testnet', 'anotherTestAddressHere')).toEqual(
-      'https://testnet.thorchain.net/#/address/anotherTestAddressHere',
-    )
+    it('should retrun valid explorer address url', () => {
+      expect(
+        getExplorerAddressUrl({ urls: getDefaultExplorerUrls(), network: 'testnet', address: 'tthorabc' }),
+      ).toEqual('https://viewblock.io/thorchain/address/tthorabc?network=testnet')
 
-    expect(getDefaultExplorerAddressUrl('mainnet', 'testAddressHere')).toEqual(
-      'https://thorchain.net/#/address/testAddressHere',
-    )
-  })
+      expect(getExplorerAddressUrl({ urls: getDefaultExplorerUrls(), network: 'mainnet', address: 'thorabc' })).toEqual(
+        'https://viewblock.io/thorchain/address/thorabc',
+      )
+    })
 
-  it('should retrun valid explorer tx url', () => {
-    expect(getDefaultExplorerTxUrl('testnet', 'anotherTestTxHere')).toEqual(
-      'https://testnet.thorchain.net/#/txs/anotherTestTxHere',
-    )
+    it('should retrun valid explorer tx url', () => {
+      expect(getExplorerTxUrl({ urls: getDefaultExplorerUrls(), network: 'testnet', txID: 'txhash' })).toEqual(
+        'https://viewblock.io/thorchain/tx/txhash?network=testnet',
+      )
 
-    expect(getDefaultExplorerTxUrl('mainnet', 'testTxHere')).toEqual('https://thorchain.net/#/txs/testTxHere')
-  })
-
-  it('should retrun valid explorer node url', () => {
-    expect(getDefaultExplorerNodeUrl('testnet', 'anotherTestNodeHere')).toEqual(
-      'https://testnet.thorchain.net/#/nodes/anotherTestNodeHere',
-    )
-
-    expect(getDefaultExplorerNodeUrl('mainnet', 'testNodeHere')).toEqual('https://thorchain.net/#/nodes/testNodeHere')
+      expect(getExplorerTxUrl({ urls: getDefaultExplorerUrls(), network: 'mainnet', txID: 'txhash' })).toEqual(
+        'https://viewblock.io/thorchain/tx/txhash',
+      )
+    })
   })
 })

@@ -13,6 +13,8 @@ import { FeeRate, FeeRates, FeesWithRates } from './types/client-types'
 import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
 
+import * as haskoinApi from './haskoin-api'
+
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
 const TX_INPUT_PUBKEYHASH = 107
@@ -103,7 +105,8 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   try {
-    const balance = await sochain.getBalance(params)
+    const balance =
+      params.network === 'testnet' ? await sochain.getBalance(params) : await haskoinApi.getBalance(params.address)
     return [
       {
         asset: AssetBTC,
@@ -145,28 +148,52 @@ export const scanUTXOs = async ({
   address,
   confirmedOnly = true, // default: scan only confirmed UTXOs
 }: ScanUTXOParam): Promise<UTXOs> => {
-  let utxos: BtcAddressUTXOs = []
-  const addressParam: AddressParams = {
-    sochainUrl,
-    network,
-    address,
+  if (network === 'testnet') {
+    let utxos: BtcAddressUTXOs = []
+
+    const addressParam: AddressParams = {
+      sochainUrl,
+      network,
+      address,
+    }
+
+    if (confirmedOnly) {
+      utxos = await sochain.getConfirmedUnspentTxs(addressParam)
+    } else {
+      utxos = await sochain.getUnspentTxs(addressParam)
+    }
+
+    return utxos.map(
+      (utxo) =>
+        ({
+          hash: utxo.txid,
+          index: utxo.output_no,
+          value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
+          witnessUtxo: {
+            value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
+            script: Buffer.from(utxo.script_hex, 'hex'),
+          },
+        } as UTXO),
+    )
   }
 
+  let utxos: haskoinApi.UtxoData[] = []
+
   if (confirmedOnly) {
-    utxos = await sochain.getConfirmedUnspentTxs(addressParam)
+    utxos = await haskoinApi.getConfirmedUnspentTxs(address)
   } else {
-    utxos = await sochain.getUnspentTxs(addressParam)
+    utxos = await haskoinApi.getUnspentTxs(address)
   }
 
   return utxos.map(
     (utxo) =>
       ({
         hash: utxo.txid,
-        index: utxo.output_no,
-        value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
+        index: utxo.index,
+        value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
         witnessUtxo: {
-          value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
-          script: Buffer.from(utxo.script_hex, 'hex'),
+          value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
+          script: Buffer.from(utxo.pkscript, 'hex'),
         },
       } as UTXO),
   )

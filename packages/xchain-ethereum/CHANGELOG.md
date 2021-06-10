@@ -1,3 +1,13 @@
+# v.0.21.4 (2021-06-07)
+
+### Fix
+
+- `utils:getTokenBalances` - added filtering out assets without `decimals`
+
+# v.0.21.3 (2021-05-27)
+
+- updated peer deps
+
 # v.0.21.2 (2021-06-02)
 
 ### Fix
