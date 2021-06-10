@@ -1,9 +1,9 @@
 import { TxFrom, TxTo, Txs, Fees } from '@thorwallet/xchain-client'
 import { Asset, assetToString, baseAmount } from '@thorwallet/xchain-util'
 
-import { Msg, codec } from 'cosmos-client'
-import { StdTx } from 'cosmos-client/x/auth'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
+import { Msg, codec } from '@thorwallet/cosmos-client'
+import { StdTx } from '@thorwallet/cosmos-client/x/auth'
+import { MsgMultiSend, MsgSend } from '@thorwallet/cosmos-client/x/bank'
 
 import { RawTxResponse, TxResponse, APIQueryParam } from './cosmos/types'
 import { AssetAtom, AssetMuon } from './types'

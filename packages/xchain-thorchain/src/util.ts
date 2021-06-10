@@ -3,9 +3,9 @@ import { Txs, TxFrom, TxTo, Fees, Network, Address } from '@thorwallet/xchain-cl
 import { AssetRune, ExplorerUrl, ClientUrl, ExplorerUrls } from './types'
 import { TxResponse, RawTxResponse } from '@thorwallet/xchain-cosmos'
 import { TxHash } from '@thorwallet/xchain-client'
-import { AccAddress, codec, Msg } from 'cosmos-client'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
-import { StdTx } from 'cosmos-client/x/auth'
+import { AccAddress, codec, Msg } from '@thorwallet/cosmos-client'
+import { MsgMultiSend, MsgSend } from '@thorwallet/cosmos-client/x/bank'
+import { StdTx } from '@thorwallet/cosmos-client/x/auth'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'

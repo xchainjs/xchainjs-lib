@@ -1,6 +1,6 @@
-import { Msg, AccAddress } from 'cosmos-client'
-import { StdTxFee } from 'cosmos-client/api'
-import { StdSignature } from 'cosmos-client/x/auth'
+import { Msg, AccAddress } from '@thorwallet/cosmos-client'
+import { StdTxFee } from '@thorwallet/cosmos-client/api'
+import { StdSignature } from '@thorwallet/cosmos-client/x/auth'
 
 export type MsgCoin = {
   asset: string

@@ -1,8 +1,8 @@
 import { BigSource } from 'big.js'
 
-import { PrivKey, Msg, codec } from 'cosmos-client'
-import { BaseAccount, StdTx } from 'cosmos-client/x/auth'
-import { StdTxFee } from 'cosmos-client/api'
+import { PrivKey, Msg, codec } from '@thorwallet/cosmos-client'
+import { BaseAccount, StdTx } from '@thorwallet/cosmos-client/x/auth'
+import { StdTxFee } from '@thorwallet/cosmos-client/api'
 import { RootDerivationPaths, Network } from '@thorwallet/xchain-client'
 
 export type CosmosSDKClientParams = {

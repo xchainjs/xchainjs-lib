@@ -2,7 +2,7 @@ import nock from 'nock'
 
 import { TxsPage } from '@thorwallet/xchain-client'
 import { baseAmount, BaseAmount } from '@thorwallet/xchain-util'
-import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
+import { BroadcastTxCommitResult, Coin, BaseAccount } from '@thorwallet/cosmos-client/api'
 import { AssetMuon } from '../src/types'
 import { Client } from '../src/client'
 import { getDenom } from '../src/util'

@@ -33,5 +33,5 @@ export default {
     }),
     commonjs(),
   ],
-  external: ['readable-stream', 'axios', 'buffer', 'cosmos-client', 'crypto', 'stream', 'string_decoder'],
+  external: ['readable-stream', 'axios', 'buffer', '@thorwallet/cosmos-client', 'crypto', 'stream', 'string_decoder'],
 }

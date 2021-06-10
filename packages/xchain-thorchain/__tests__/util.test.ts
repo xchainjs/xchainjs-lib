@@ -12,10 +12,10 @@ import {
 } from '../src/util'
 import { baseAmount } from '@thorwallet/xchain-util'
 import { RawTxResponse, TxResponse } from '@thorwallet/xchain-cosmos/src/cosmos/types'
-import { Msg } from 'cosmos-client'
-import { StdTx } from 'cosmos-client/x/auth'
-import { MsgSend } from 'cosmos-client/x/bank'
-import { StdTxFee } from 'cosmos-client/api'
+import { Msg } from '@thorwallet/cosmos-client'
+import { StdTx } from '@thorwallet/cosmos-client/x/auth'
+import { MsgSend } from '@thorwallet/cosmos-client/x/bank'
+import { StdTxFee } from '@thorwallet/cosmos-client/api'
 
 describe('thorchain/util', () => {
   describe('Denom <-> Asset', () => {

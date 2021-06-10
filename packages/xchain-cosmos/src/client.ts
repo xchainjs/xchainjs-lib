@@ -16,8 +16,8 @@ import {
 import { Asset, baseAmount, assetToString } from '@thorwallet/xchain-util'
 import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
-import { PrivKey, codec } from 'cosmos-client'
-import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
+import { PrivKey, codec } from '@thorwallet/cosmos-client'
+import { MsgSend, MsgMultiSend } from '@thorwallet/cosmos-client/x/bank'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './types'

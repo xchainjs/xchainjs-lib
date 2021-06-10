@@ -1,8 +1,8 @@
 import nock from 'nock'
 import { TxHistoryResponse, TxResponse } from '@thorwallet/xchain-cosmos'
-import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
-import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
-import { codec } from 'cosmos-client'
+import { BroadcastTxCommitResult, Coin, BaseAccount } from '@thorwallet/cosmos-client/api'
+import { MsgSend, MsgMultiSend } from '@thorwallet/cosmos-client/x/bank'
+import { codec } from '@thorwallet/cosmos-client'
 
 import { CosmosSDKClient } from '../src/cosmos/sdk-client'
 

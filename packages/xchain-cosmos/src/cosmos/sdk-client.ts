@@ -4,10 +4,10 @@ import * as BIP32 from 'bip32'
 import { TxHistoryParams } from '@thorwallet/xchain-client'
 import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
-import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from 'cosmos-client'
-import { BroadcastTxCommitResult, Coin, StdTxSignature } from 'cosmos-client/api'
-import { auth, StdTx, BaseAccount } from 'cosmos-client/x/auth'
-import { bank, MsgSend } from 'cosmos-client/x/bank'
+import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from '@thorwallet/cosmos-client'
+import { BroadcastTxCommitResult, Coin, StdTxSignature } from '@thorwallet/cosmos-client/api'
+import { auth, StdTx, BaseAccount } from '@thorwallet/cosmos-client/x/auth'
+import { bank, MsgSend } from '@thorwallet/cosmos-client/x/bank'
 
 import {
   APIQueryParam,

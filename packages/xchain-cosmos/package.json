@@ -35,7 +35,7 @@
     "@thorwallet/xchain-crypto": "0.0.1-alpha.799+c99be73",
     "@thorwallet/xchain-util": "0.0.1-alpha.799+c99be73",
     "axios": "^0.21.0",
-    "cosmos-client": "^0.39.13",
+    "@thorwallet/cosmos-client": "^0.39.15",
     "nock": "^13.0.5"
   },
   "publishConfig": {
@@ -46,7 +46,7 @@
     "@thorwallet/xchain-crypto": "0.0.1-alpha.792+b6e4e50",
     "@thorwallet/xchain-util": "0.0.1-alpha.792+b6e4e50",
     "axios": "^0.21.0",
-    "cosmos-client": "^0.39.13"
+    "@thorwallet/cosmos-client": "^0.39.15"
   },
   "gitHead": "c99be73b9feb545f4b8f306ed5033001c365e42a"
 }

@@ -20,8 +20,8 @@ import { CosmosSDKClient, RPCTxResult } from '@thorwallet/xchain-cosmos'
 import { Asset, baseAmount, assetToString, assetFromString } from '@thorwallet/xchain-util'
 import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
-import { PrivKey, AccAddress } from 'cosmos-client'
-import { StdTx } from 'cosmos-client/x/auth'
+import { PrivKey, AccAddress } from '@thorwallet/cosmos-client'
+import { StdTx } from '@thorwallet/cosmos-client/x/auth'
 
 import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, NodeUrl, ExplorerUrls } from './types'
 import { MsgNativeTx, msgNativeTxFromJson, ThorchainDepositResponse, TxResult } from './types/messages'
