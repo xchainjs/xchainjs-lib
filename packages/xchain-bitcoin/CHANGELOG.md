@@ -1,8 +1,12 @@
-# v.0.15.6 (2021-06-10)
+# v.0.15.7 (2021-06-10)
 
 #### Fix
 
-- [haskoin] Fix `getBalance`
+- [haskoin] Fix `getBalance` (incl. test)
+
+# v.0.15.6 (2021-06-09)
+
+- ???
 
 # v.0.15.5 (2021-06-08)
 
