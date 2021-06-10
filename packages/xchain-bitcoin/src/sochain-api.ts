@@ -143,10 +143,10 @@ export const getUnspentTxs = async ({
  */
 export const getIsTxConfirmed = async ({ sochainUrl, network, hash }: TxHashParams): Promise<TxConfirmedStatus> => {
   try {
-    const { data } = await axios.get<TxConfirmedStatus>(
+    const { data } = await axios.get<SochainResponse<TxConfirmedStatus>>(
       `${sochainUrl}/is_tx_confirmed/${toSochainNetwork(network)}/${hash}`,
     )
-    return data
+    return data.data
   } catch (error) {
     return Promise.reject(error)
   }
