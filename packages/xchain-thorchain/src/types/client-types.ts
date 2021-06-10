@@ -1,4 +1,5 @@
 import { Asset, BaseAmount } from '@thorwallet/xchain-util'
+import { Network } from '@thorwallet/xchain-client/lib'
 
 export type NodeUrl = {
   node: string
@@ -10,14 +11,17 @@ export type ClientUrl = {
   mainnet: NodeUrl
 }
 
-export type ExplorerUrl = {
-  testnet: string
-  mainnet: string
+export type ExplorerUrls = {
+  root: ExplorerUrl
+  tx: ExplorerUrl
+  address: ExplorerUrl
 }
+
+export type ExplorerUrl = Record<Network, string>
 
 export type ThorchainClientParams = {
   clientUrl?: ClientUrl
-  explorerUrl?: ExplorerUrl
+  explorerUrls?: ExplorerUrls
 }
 
 export type DepositParam = {

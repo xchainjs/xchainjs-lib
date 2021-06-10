@@ -1,3 +1,8 @@
+# v.0.11.5 (2021-06-01)
+
+- update peer deps
+- refactor BCH utils.buildTx() to remove extra code
+
 # v.0.11.4 (2021-05-31)
 
 - refactor utils.buildTx() to include the memo for calculating inputs with accumulate() but re-adds it into outputs using `psbt.addOutput` to avoid dust attack error

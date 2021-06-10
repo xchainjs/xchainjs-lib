@@ -359,7 +359,7 @@ export default class Client implements XChainClient, EthereumClient {
 
         return balances
       } else {
-        // use etherscan for mainnet
+        // use etherscan for testnet
 
         const newAssets = assets || [AssetETH]
         // Follow approach is only for testnet
@@ -382,11 +382,16 @@ export default class Client implements XChainClient, EthereumClient {
               assetAddress,
               apiKey: etherscan.apiKey,
             })
-            const decimals = await this.call<BigNumberish>(0, assetAddress, erc20ABI, 'decimals', [])
-            balances.push({
-              asset,
-              amount: baseAmount(balance.toString(), BigNumber.from(decimals).toNumber() || ETH_DECIMAL),
-            })
+            const decimals =
+              BigNumber.from(await this.call<BigNumberish>(0, assetAddress, erc20ABI, 'decimals', [])).toNumber() ||
+              ETH_DECIMAL
+
+            if (!Number.isNaN(decimals)) {
+              balances.push({
+                asset,
+                amount: baseAmount(balance.toString(), decimals),
+              })
+            }
           } else {
             balances.push({
               asset: AssetETH,
