@@ -25,14 +25,18 @@ export type BalanceData = {
 }
 
 export const getBalance = async (address: string): Promise<BaseAmount> => {
-  const { data } = await axios.get(`${HASKOIN_API_URL}/address/${address}/balance`)
-  const response = data as BalanceData
+  const {
+    data: { confirmed, unconfirmed },
+  } = await axios.get<BalanceData>(`${HASKOIN_API_URL}/address/${address}/balance`)
 
-  return baseAmount(response.received, BTC_DECIMAL)
+  const confirmedAmount = baseAmount(confirmed, BTC_DECIMAL)
+  const unconfirmedAmount = baseAmount(unconfirmed, BTC_DECIMAL)
+
+  return confirmedAmount.plus(unconfirmedAmount)
 }
 
 export const getUnspentTxs = async (address: string): Promise<UtxoData[]> => {
-  const { data: response } = await axios.get(`${HASKOIN_API_URL}/address/${address}/unspent`)
+  const { data: response } = await axios.get<UtxoData[]>(`${HASKOIN_API_URL}/address/${address}/unspent`)
 
   return response
 }
