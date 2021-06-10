@@ -2128,10 +2128,10 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@thorwallet/cosmos-client@^0.39.15":
-  version "0.39.15"
-  resolved "https://registry.yarnpkg.com/@thorwallet/cosmos-client/-/cosmos-client-0.39.15.tgz#1a7150ebc0273b306031893cf3ace65f397df650"
-  integrity sha512-hlCfoGQKLWYNt5+GolwYG+netvCu5jcfGyXwjkOWCgTWZWTSp7l7ty9BCgX4XqzkhiE0QpZklXlJkAfdl3o+2g==
+"@thorwallet/cosmos-client@^0.39.18":
+  version "0.39.18"
+  resolved "https://registry.yarnpkg.com/@thorwallet/cosmos-client/-/cosmos-client-0.39.18.tgz#99c2c40f6b1312eb6ccc6682f8cf867b227bf671"
+  integrity sha512-ZyPAgTFuYt/RatRTR5J3Z1K58hkWkGmTQzLFYBq3y1YeeKndUoJZGAPBjWoyHHE4eD1v8YXeoMVeJDbhqws0Lg==
   dependencies:
     axios "^0.19.2"
     bech32 "^1.1.3"
