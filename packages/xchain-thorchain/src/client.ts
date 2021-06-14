@@ -528,7 +528,7 @@ class Client implements ThorchainClient, XChainClient {
       const accAddress = AccAddress.fromBech32(signer)
       const fee = unsignedStdTx.fee
       // max. gas
-      fee.gas = '10000000'
+      fee.gas = '20000000'
 
       return this.cosmosClient
         .signAndBroadcast(unsignedStdTx, privateKey, accAddress)

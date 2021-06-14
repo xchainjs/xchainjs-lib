@@ -1,3 +1,9 @@
+# v.0.16.1 (2021-06-14)
+
+### Fix
+
+- Double `fee.gas to `20000000` (twenty million) to avoid failing withdraw transactions
+
 # v.0.16.0 (2021-06-08)
 
 ### Breaking change
