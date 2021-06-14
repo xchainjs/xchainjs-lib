@@ -1,7 +1,7 @@
 import { Asset, assetToString, baseAmount, assetFromString, THORChain } from '@xchainjs/xchain-util'
-import { AssetRune, ExplorerUrl } from './types'
+import { AssetRune, ExplorerUrl, ClientUrl, ExplorerUrls } from './types'
 import { TxResponse, RawTxResponse } from '@xchainjs/xchain-cosmos'
-import { Txs, TxFrom, TxTo, Fees, Network, Address } from '@xchainjs/xchain-client'
+import { Txs, TxFrom, TxTo, Fees, Network, Address, TxHash } from '@xchainjs/xchain-client'
 import { AccAddress, codec, Msg } from 'cosmos-client'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 import { StdTx } from 'cosmos-client/x/auth'
@@ -246,14 +246,50 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
 }
 
 /**
- * Get the explorer url.
+ * Get the client url.
  *
- * @returns {ExplorerUrl} The explorer url (both mainnet and testnet) for thorchain.
+ * @returns {ClientUrl} The client url (both mainnet and testnet) for thorchain.
  */
-export const getDefaultExplorerUrl = (): ExplorerUrl => {
+export const getDefaultClientUrl = (): ClientUrl => {
   return {
-    testnet: 'https://testnet.thorchain.net/#',
-    mainnet: 'https://thorchain.net/#',
+    testnet: {
+      node: 'https://testnet.thornode.thorchain.info',
+      rpc: 'https://testnet.rpc.thorchain.info',
+    },
+    mainnet: {
+      node: 'https://thornode.thorchain.info',
+      rpc: 'https://rpc.thorchain.info',
+    },
+  }
+}
+
+const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
+
+/**
+ * Get default explorer urls.
+ *
+ * @returns {ExplorerUrls} Default explorer urls (both mainnet and testnet) for thorchain.
+ */
+export const getDefaultExplorerUrls = (): ExplorerUrls => {
+  const root: ExplorerUrl = {
+    testnet: `${DEFAULT_EXPLORER_URL}?network=testnet`,
+    mainnet: DEFAULT_EXPLORER_URL,
+  }
+  const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
+  const tx: ExplorerUrl = {
+    testnet: txUrl,
+    mainnet: txUrl,
+  }
+  const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
+  const address: ExplorerUrl = {
+    testnet: addressUrl,
+    mainnet: addressUrl,
+  }
+
+  return {
+    root,
+    tx,
+    address,
   }
 }
 
@@ -261,41 +297,49 @@ export const getDefaultExplorerUrl = (): ExplorerUrl => {
  * Get the explorer url.
  *
  * @param {Network} network
+ * @param {ExplorerUrls} Explorer urls
  * @returns {string} The explorer url for thorchain based on the given network.
  */
-export const getDefaultExplorerUrlByNetwork = (network: Network): string => {
-  return getDefaultExplorerUrl()[network]
-}
+export const getExplorerUrl = ({ root }: ExplorerUrls, network: Network): string => root[network]
 
 /**
- * Get the explorer url for the given address.
+ * Get explorer address url.
  *
+ * @param {ExplorerUrls} Explorer urls
  * @param {Network} network
  * @param {Address} address
  * @returns {string} The explorer url for the given address.
  */
-export const getDefaultExplorerAddressUrl = (network: Network, address: Address): string => {
-  return `${getDefaultExplorerUrlByNetwork(network)}/address/${address}`
+export const getExplorerAddressUrl = ({
+  urls,
+  network,
+  address,
+}: {
+  urls: ExplorerUrls
+  network: Network
+  address: Address
+}): string => {
+  const url = `${urls.address[network]}/${address}`
+  return network === 'mainnet' ? url : `${url}?network=testnet`
 }
 
 /**
- * Get the explorer url for the given node.
+ * Get transaction url.
  *
+ * @param {ExplorerUrls} Explorer urls
  * @param {Network} network
- * @param {Address} node address
- * @returns {string} The explorer url for the given node.
- */
-export const getDefaultExplorerNodeUrl = (network: Network, address: Address): string => {
-  return `${getDefaultExplorerUrlByNetwork(network)}/nodes/${address}`
-}
-
-/**
- * Get the explorer url for the given transaction id.
- *
- * @param {Network} network
- * @param {string} txID
+ * @param {TxHash} txID
  * @returns {string} The explorer url for the given transaction id.
  */
-export const getDefaultExplorerTxUrl = (network: Network, txID: string): string => {
-  return `${getDefaultExplorerUrlByNetwork(network)}/txs/${txID}`
+export const getExplorerTxUrl = ({
+  urls,
+  network,
+  txID,
+}: {
+  urls: ExplorerUrls
+  network: Network
+  txID: TxHash
+}): string => {
+  const url = `${urls.tx[network]}/${txID}`
+  return network === 'mainnet' ? url : `${url}?network=testnet`
 }

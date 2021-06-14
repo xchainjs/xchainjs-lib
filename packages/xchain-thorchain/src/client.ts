@@ -23,7 +23,7 @@ import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { PrivKey, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 
-import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, ExplorerUrl, NodeUrl } from './types'
+import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, NodeUrl, ExplorerUrls } from './types'
 import { MsgNativeTx, msgNativeTxFromJson, ThorchainDepositResponse, TxResult } from './types/messages'
 import {
   getDenom,
@@ -37,10 +37,13 @@ import {
   getPrefix,
   registerCodecs,
   getTxType,
-  getDefaultExplorerUrl,
   MAX_TX_COUNT,
   MSG_DEPOSIT,
   MSG_SEND,
+  getDefaultClientUrl,
+  getDefaultExplorerUrls,
+  getExplorerAddressUrl,
+  getExplorerTxUrl,
 } from './util'
 
 /**
@@ -49,8 +52,7 @@ import {
 export interface ThorchainClient {
   setClientUrl(clientUrl: ClientUrl): void
   getClientUrl(): NodeUrl
-  setExplorerUrl(explorerUrl: ExplorerUrl): void
-  getExplorerNodeUrl(node: Address): string
+  setExplorerUrls(explorerUrls: ExplorerUrls): void
   getCosmosClient(): CosmosSDKClient
 
   deposit(params: DepositParam): Promise<TxHash>
@@ -62,7 +64,7 @@ export interface ThorchainClient {
 class Client implements ThorchainClient, XChainClient {
   private network: Network
   private clientUrl: ClientUrl
-  private explorerUrl: ExplorerUrl
+  private explorerUrls: ExplorerUrls
   private phrase = ''
   private rootDerivationPaths: RootDerivationPaths
   private cosmosClient: CosmosSDKClient
@@ -81,15 +83,15 @@ class Client implements ThorchainClient, XChainClient {
     network = 'testnet',
     phrase,
     clientUrl,
-    explorerUrl,
+    explorerUrls,
     rootDerivationPaths = {
       mainnet: "44'/931'/0'/0/",
       testnet: "44'/931'/0'/0/",
     },
   }: XChainClientParams & ThorchainClientParams) {
     this.network = network
-    this.clientUrl = clientUrl || this.getDefaultClientUrl()
-    this.explorerUrl = explorerUrl || getDefaultExplorerUrl()
+    this.clientUrl = clientUrl || getDefaultClientUrl()
+    this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
     this.rootDerivationPaths = rootDerivationPaths
 
     this.cosmosClient = new CosmosSDKClient({
@@ -152,46 +154,16 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @returns {NodeUrl} The client url for thorchain based on the current network.
    */
-  getClientUrl = (): NodeUrl => {
-    return this.getClientUrlByNetwork(this.network)
-  }
+  getClientUrl = (): NodeUrl => this.clientUrl[this.network]
 
   /**
-   * Get the client url.
+   * Set/update the explorer URLs.
    *
-   * @returns {ClientUrl} The client url (both mainnet and testnet) for thorchain.
-   */
-  private getDefaultClientUrl = (): ClientUrl => {
-    return {
-      testnet: {
-        node: 'https://testnet.thornode.thorchain.info',
-        rpc: 'https://testnet.rpc.thorchain.info',
-      },
-      mainnet: {
-        node: 'https://thornode.thorchain.info',
-        rpc: 'https://rpc.thorchain.info',
-      },
-    }
-  }
-
-  /**
-   * Get the client url.
-   *
-   * @param {Network} network
-   * @returns {NodeUrl} The client url (both node, rpc) for thorchain based on the network.
-   */
-  private getClientUrlByNetwork = (network: Network): NodeUrl => {
-    return this.clientUrl[network]
-  }
-
-  /**
-   * Set/update the explorer URL.
-   *
-   * @param {ExplorerUrl} explorerUrl The explorer url to be set.
+   * @param {ExplorerUrls} urls The explorer urls to be set.
    * @returns {void}
    */
-  setExplorerUrl = (explorerUrl: ExplorerUrl): void => {
-    this.explorerUrl = explorerUrl
+  setExplorerUrls = (urls: ExplorerUrls): void => {
+    this.explorerUrls = urls
   }
 
   /**
@@ -200,17 +172,7 @@ class Client implements ThorchainClient, XChainClient {
    * @returns {string} The explorer url for thorchain based on the current network.
    */
   getExplorerUrl = (): string => {
-    return this.getExplorerUrlByNetwork(this.network)
-  }
-
-  /**
-   * Get the explorer url.
-   *
-   * @param {Network} network
-   * @returns {string} The explorer url for thorchain based on the network.
-   */
-  private getExplorerUrlByNetwork = (network: Network): string => {
-    return this.explorerUrl[network]
+    return this.explorerUrls.root[this.network]
   }
 
   /**
@@ -234,19 +196,8 @@ class Client implements ThorchainClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address.
    */
-  getExplorerAddressUrl = (address: Address): string => {
-    return `${this.getExplorerUrl()}/address/${address}`
-  }
-
-  /**
-   * Get the explorer url for the given node.
-   *
-   * @param {Address} node address
-   * @returns {string} The explorer url for the given node.
-   */
-  getExplorerNodeUrl = (address: Address): string => {
-    return `${this.getExplorerUrl()}/nodes/${address}`
-  }
+  getExplorerAddressUrl = (address: Address): string =>
+    getExplorerAddressUrl({ urls: this.explorerUrls, network: this.network, address })
 
   /**
    * Get the explorer url for the given transaction id.
@@ -254,9 +205,8 @@ class Client implements ThorchainClient, XChainClient {
    * @param {string} txID
    * @returns {string} The explorer url for the given transaction id.
    */
-  getExplorerTxUrl = (txID: string): string => {
-    return `${this.getExplorerUrl()}/txs/${txID}`
-  }
+  getExplorerTxUrl = (txID: string): string =>
+    getExplorerTxUrl({ urls: this.explorerUrls, network: this.network, txID })
 
   /**
    * Set/update a new phrase
@@ -578,7 +528,7 @@ class Client implements ThorchainClient, XChainClient {
       const accAddress = AccAddress.fromBech32(signer)
       const fee = unsignedStdTx.fee
       // max. gas
-      fee.gas = '10000000'
+      fee.gas = '20000000'
 
       return this.cosmosClient
         .signAndBroadcast(unsignedStdTx, privateKey, accAddress)

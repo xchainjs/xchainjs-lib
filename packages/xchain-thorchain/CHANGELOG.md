@@ -1,4 +1,26 @@
+# v.0.16.1 (2021-06-14)
+
+### Fix
+
+- Double `fee.gas to `20000000` (twenty million) to avoid failing withdraw transactions
+
+# v.0.16.0 (2021-06-08)
+
+### Breaking change
+
+- Use `viewblock` as default explorer
+- [types] Refactored structure of explorer urls (via `type ExplorerUrls`)
+- [types] Refactored `ExplorerUrl`
+- [client] Constructor accepts `ExplorerUrls`
+- [client] Removed `getExplorerNodeUrl` (use `getExplorerAddressUrl` instead)
+- [client] Extract `getDefaultClientUrl` into `utils`
+- [utils] Renamed `getDefaultExplorerUrlByNetwork` -> `getDefaultExplorerUrl`
+- [utils] Removed `getDefaultExplorerAddressUrl`, `getDefaultExplorerNodeUrl`, `getDefaultExplorerTxUrl`
+- [utils] Added `getExplorerTxUrl`, `getExplorerAddressUrl`, `getExplorerUrl` helpers
+
 # v.0.15.2 (2021-06-01)
+
+### Update
 
 - updated peer deps
 

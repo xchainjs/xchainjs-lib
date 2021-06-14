@@ -510,38 +510,25 @@ describe('Client Test', () => {
   })
 
   it('should return valid explorer url', () => {
-    expect(thorClient.getExplorerUrl()).toEqual('https://testnet.thorchain.net/#')
+    expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain?network=testnet')
 
     thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerUrl()).toEqual('https://thorchain.net/#')
+    expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain')
   })
 
   it('should retrun valid explorer address url', () => {
-    expect(thorClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
-      'https://testnet.thorchain.net/#/address/anotherTestAddressHere',
+    expect(thorClient.getExplorerAddressUrl('tthorabc')).toEqual(
+      'https://viewblock.io/thorchain/address/tthorabc?network=testnet',
     )
 
     thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerAddressUrl('testAddressHere')).toEqual(
-      'https://thorchain.net/#/address/testAddressHere',
-    )
+    expect(thorClient.getExplorerAddressUrl('thorabc')).toEqual('https://viewblock.io/thorchain/address/thorabc')
   })
 
   it('should retrun valid explorer tx url', () => {
-    expect(thorClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
-      'https://testnet.thorchain.net/#/txs/anotherTestTxHere',
-    )
+    expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash?network=testnet')
 
     thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerTxUrl('testTxHere')).toEqual('https://thorchain.net/#/txs/testTxHere')
-  })
-
-  it('should retrun valid explorer node url', () => {
-    expect(thorClient.getExplorerNodeUrl('anotherTestNodeHere')).toEqual(
-      'https://testnet.thorchain.net/#/nodes/anotherTestNodeHere',
-    )
-
-    thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerNodeUrl('testNodeHere')).toEqual('https://thorchain.net/#/nodes/testNodeHere')
+    expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash')
   })
 })

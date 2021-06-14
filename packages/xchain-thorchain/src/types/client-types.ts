@@ -1,3 +1,4 @@
+import { Network } from '@xchainjs/xchain-client/lib'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
 export type NodeUrl = {
@@ -10,14 +11,17 @@ export type ClientUrl = {
   mainnet: NodeUrl
 }
 
-export type ExplorerUrl = {
-  testnet: string
-  mainnet: string
+export type ExplorerUrls = {
+  root: ExplorerUrl
+  tx: ExplorerUrl
+  address: ExplorerUrl
 }
+
+export type ExplorerUrl = Record<Network, string>
 
 export type ThorchainClientParams = {
   clientUrl?: ClientUrl
-  explorerUrl?: ExplorerUrl
+  explorerUrls?: ExplorerUrls
 }
 
 export type DepositParam = {
