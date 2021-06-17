@@ -3,7 +3,7 @@ import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import erc20ABI from './data/erc20.json'
-import { toUtf8Bytes, parseUnits, HDNode } from 'ethers/lib/utils'
+import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
 import {
   GasOracleResponse,
   Network as EthNetwork,
@@ -52,6 +52,7 @@ import {
   getTxFromEthplorerEthTransaction,
   getTokenBalances,
 } from './utils'
+import { HDNode } from './hdnode/hdnode'
 
 /**
  * Interface for custom Ethereum client
@@ -137,8 +138,8 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @returns {void}
    */
-  purgeClient = (): void => {
-    this.hdNode = HDNode.fromMnemonic('')
+  purgeClient = async (): Promise<void> => {
+    this.hdNode = await HDNode.fromMnemonic('')
   }
 
   /**
@@ -308,11 +309,11 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Promise<Address> => {
+  setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
     if (!Crypto.validatePhrase(phrase)) {
       throw new Error('Invalid phrase')
     }
-    this.hdNode = HDNode.fromMnemonic(phrase)
+    this.hdNode = await HDNode.fromMnemonic(phrase)
     return this.getAddress(walletIndex)
   }
 
