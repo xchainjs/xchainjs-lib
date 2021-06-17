@@ -2,7 +2,7 @@ const unorm = require('unorm')
 import RNSimple from 'react-native-simple-crypto'
 
 function salt(password: string) {
-  return 'mnemonic' + (unorm.nfkd(password) || '') // Use unorm until String.prototype.normalize gets better browser support
+  return 'mnemonic' + (unorm.nfkd(password) || '') // Us unorm until String.prototype.normalize gets better browser support
 }
 
 function lpad(str: string, padString: string, length: number) {
