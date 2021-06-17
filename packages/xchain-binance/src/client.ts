@@ -35,10 +35,10 @@ import {
   BNBChain,
   assetToString,
 } from '@thorwallet/xchain-util'
-import { validatePhrase } from '@thorwallet/xchain-crypto'
+import { getSeed, validatePhrase } from '@thorwallet/xchain-crypto'
 import { isTransferFee, parseTx, getPrefix } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
-
+import bip32 from 'bip32'
 type PrivKey = string
 
 export type Coin = {
@@ -196,6 +196,20 @@ class Client implements BinanceClient, XChainClient {
     return this.getAddress(walletIndex)
   }
 
+  private getPrivateKeyFromMnemonic = async (phrase: string, derive: boolean, index: number): Promise<string> => {
+    const HDPATH = "44'/714'/0'/0/"
+    const seed = await getSeed(phrase)
+    if (derive) {
+      const master = bip32.fromSeed(seed)
+      const child = master.derivePath(HDPATH + index)
+      if (!child.privateKey) {
+        throw new Error('child does not have a privateKey')
+      }
+
+      return child.privateKey.toString('hex')
+    }
+    return seed.toString('hex')
+  }
   /**
    * @private
    * Get private key.
@@ -206,10 +220,10 @@ class Client implements BinanceClient, XChainClient {
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey = (index: number): PrivKey => {
+  private getPrivateKey = (index: number): Promise<PrivKey> => {
     if (!this.phrase) throw new Error('Phrase not set')
 
-    return crypto.getPrivateKeyFromMnemonic(this.phrase, true, index)
+    return this.getPrivateKeyFromMnemonic(this.phrase, true, index)
   }
 
   /**
@@ -219,8 +233,8 @@ class Client implements BinanceClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): Promise<string> =>
-    Promise.resolve(crypto.getAddressFromPrivateKey(this.getPrivateKey(index), getPrefix(this.network)))
+  getAddress = async (index = 0): Promise<string> =>
+    Promise.resolve(crypto.getAddressFromPrivateKey(await this.getPrivateKey(index), getPrefix(this.network)))
 
   /**
    * Validate the given address.
@@ -369,7 +383,7 @@ class Client implements BinanceClient, XChainClient {
       const derivedAddress = await this.getAddress(walletIndex)
 
       await this.bncClient.initChain()
-      await this.bncClient.setPrivateKey(this.getPrivateKey(walletIndex)).catch((error) => Promise.reject(error))
+      await this.bncClient.setPrivateKey(await this.getPrivateKey(walletIndex)).catch((error) => Promise.reject(error))
 
       const transferResult = await this.bncClient.multiSend(
         derivedAddress,
@@ -403,7 +417,7 @@ class Client implements BinanceClient, XChainClient {
     try {
       await this.bncClient.initChain()
       await this.bncClient
-        .setPrivateKey(this.getPrivateKey(walletIndex || 0))
+        .setPrivateKey(await this.getPrivateKey(walletIndex || 0))
         .catch((error: Error) => Promise.reject(error))
 
       const transferResult = await this.bncClient.transfer(

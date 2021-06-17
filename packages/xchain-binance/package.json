@@ -37,7 +37,8 @@
     "@thorwallet/xchain-client": "0.0.1-alpha.819+d8eb54f",
     "@thorwallet/xchain-crypto": "0.0.1-alpha.819+d8eb54f",
     "@thorwallet/xchain-util": "0.0.1-alpha.819+d8eb54f",
-    "@types/big.js": "^4.0.5"
+    "@types/big.js": "^4.0.5",
+    "bip32": "^2.0.6"
   },
   "publishConfig": {
     "access": "public"
