@@ -176,7 +176,7 @@ class Client implements PolkadotClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Promise<Address> => {
     if (this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
@@ -249,8 +249,8 @@ class Client implements PolkadotClient, XChainClient {
    *
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (index = 0): Address => {
-    return this.getKeyringPair(index).address
+  getAddress = (index = 0): Promise<Address> => {
+    return Promise.resolve(this.getKeyringPair(index).address)
   }
 
   /**
@@ -409,7 +409,7 @@ class Client implements PolkadotClient, XChainClient {
       // Check balances
       const paymentInfo = await transaction.paymentInfo(this.getKeyringPair(walletIndex))
       const fee = baseAmount(paymentInfo.partialFee.toString(), getDecimal(this.network))
-      const balances = await this.getBalance(this.getAddress(walletIndex), [AssetDOT])
+      const balances = await this.getBalance(await this.getAddress(walletIndex), [AssetDOT])
 
       if (!balances || params.amount.amount().plus(fee.amount()).isGreaterThan(balances[0].amount.amount())) {
         throw new Error('insufficient balance')
@@ -461,7 +461,7 @@ class Client implements PolkadotClient, XChainClient {
    */
   getFees = async (): Promise<Fees> => {
     return await this.estimateFees({
-      recipient: this.getAddress(),
+      recipient: await this.getAddress(),
       amount: baseAmount(0, getDecimal(this.network)),
     })
   }

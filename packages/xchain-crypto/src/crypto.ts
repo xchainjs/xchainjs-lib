@@ -70,7 +70,7 @@ const seedCache: { [key: string]: Buffer } = {}
  *
  * @throws {"Invalid BIP39 phrase"} Thrown if phrase is an invalid one.
  */
-export const getSeed = (phrase: string): Buffer => {
+export const getSeed = async (phrase: string): Promise<Buffer> => {
   if (!validatePhrase(phrase)) {
     throw new Error('Invalid BIP39 phrase')
   }
@@ -79,7 +79,7 @@ export const getSeed = (phrase: string): Buffer => {
     return seedCache[phrase]
   }
 
-  const result = bip39.mnemonicToSeedSync(phrase)
+  const result = await bip39.mnemonicToSeed(phrase)
 
   seedCache[phrase] = result
 

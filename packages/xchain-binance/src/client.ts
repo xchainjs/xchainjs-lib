@@ -188,7 +188,7 @@ class Client implements BinanceClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Promise<Address> => {
     if (!validatePhrase(phrase)) {
       throw new Error('Invalid phrase')
     }
@@ -220,8 +220,8 @@ class Client implements BinanceClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): string =>
-    crypto.getAddressFromPrivateKey(this.getPrivateKey(index), getPrefix(this.network))
+  getAddress = (index = 0): Promise<string> =>
+    Promise.resolve(crypto.getAddressFromPrivateKey(this.getPrivateKey(index), getPrefix(this.network)))
 
   /**
    * Validate the given address.
@@ -367,7 +367,7 @@ class Client implements BinanceClient, XChainClient {
    */
   multiSend = async ({ walletIndex = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
     try {
-      const derivedAddress = this.getAddress(walletIndex)
+      const derivedAddress = await this.getAddress(walletIndex)
 
       await this.bncClient.initChain()
       await this.bncClient.setPrivateKey(this.getPrivateKey(walletIndex)).catch((error) => Promise.reject(error))
@@ -408,7 +408,7 @@ class Client implements BinanceClient, XChainClient {
         .catch((error: Error) => Promise.reject(error))
 
       const transferResult = await this.bncClient.transfer(
-        this.getAddress(),
+        await this.getAddress(),
         recipient,
         baseToAsset(amount).amount().toString(),
         asset ? asset.symbol : AssetBNB.symbol,

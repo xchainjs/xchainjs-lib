@@ -60,15 +60,15 @@ export class CosmosSDKClient {
     return AccAddress.fromPublicKey(privkey.getPubKey()).toBech32()
   }
 
-  getAddressFromMnemonic = (mnemonic: string, derivationPath: string): string => {
+  getAddressFromMnemonic = async (mnemonic: string, derivationPath: string): Promise<string> => {
     this.setPrefix()
     const privKey = this.getPrivKeyFromMnemonic(mnemonic, derivationPath)
 
-    return AccAddress.fromPublicKey(privKey.getPubKey()).toBech32()
+    return AccAddress.fromPublicKey((await privKey).getPubKey()).toBech32()
   }
 
-  getPrivKeyFromMnemonic = (mnemonic: string, derivationPath: string): PrivKey => {
-    const seed = xchainCrypto.getSeed(mnemonic)
+  getPrivKeyFromMnemonic = async (mnemonic: string, derivationPath: string): Promise<PrivKey> => {
+    const seed = await xchainCrypto.getSeed(mnemonic)
     const node = BIP32.fromSeed(seed)
     const child = node.derivePath(derivationPath)
 

@@ -95,7 +95,7 @@ class Client implements BitcoinClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
+  setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
       return this.getAddress(walletIndex)
@@ -189,13 +189,13 @@ class Client implements BitcoinClient, XChainClient {
    * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (index = 0): Address => {
+  getAddress = async (index = 0): Promise<Address> => {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
     if (this.phrase) {
       const btcNetwork = Utils.btcNetwork(this.net)
-      const btcKeys = this.getBtcKeys(this.phrase, index)
+      const btcKeys = await this.getBtcKeys(this.phrase, index)
 
       const { address } = Bitcoin.payments.p2wpkh({
         pubkey: btcKeys.publicKey,
@@ -220,10 +220,10 @@ class Client implements BitcoinClient, XChainClient {
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating BTC keys from the given phrase
    * */
-  private getBtcKeys = (phrase: string, index = 0): Bitcoin.ECPairInterface => {
+  private getBtcKeys = async (phrase: string, index = 0): Promise<Bitcoin.ECPairInterface> => {
     const btcNetwork = Utils.btcNetwork(this.net)
 
-    const seed = getSeed(phrase)
+    const seed = await getSeed(phrase)
     const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(this.getFullDerivationPath(index))
 
     if (!master.privateKey) {
@@ -433,14 +433,14 @@ class Client implements BitcoinClient, XChainClient {
       const { psbt } = await Utils.buildTx({
         ...params,
         feeRate,
-        sender: this.getAddress(fromAddressIndex),
+        sender: await this.getAddress(fromAddressIndex),
         sochainUrl: this.sochainUrl,
         network: this.net,
         spendPendingUTXO,
       })
 
       const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
-      psbt.signAllInputs(btcKeys) // Sign all inputs
+      psbt.signAllInputs(await btcKeys) // Sign all inputs
       psbt.finalizeAllInputs() // Finalise inputs
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 

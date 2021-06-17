@@ -159,7 +159,7 @@ class Client implements CosmosClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Promise<Address> => {
     if (this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
@@ -180,7 +180,7 @@ class Client implements CosmosClient, XChainClient {
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey = (index = 0): PrivKey => {
+  private getPrivateKey = (index = 0): Promise<PrivKey> => {
     if (!this.phrase) throw new Error('Phrase not set')
 
     return this.getSDKClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
@@ -206,7 +206,7 @@ class Client implements CosmosClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): string => {
+  getAddress = (index = 0): Promise<string> => {
     if (!this.phrase) throw new Error('Phrase not set')
 
     return this.getSDKClient().getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
@@ -279,7 +279,7 @@ class Client implements CosmosClient, XChainClient {
       const mainAsset = this.getMainAsset()
       const txHistory = await this.getSDKClient().searchTx({
         messageAction,
-        messageSender: (params && params.address) || this.getAddress(),
+        messageSender: (params && params.address) || (await this.getAddress()),
         page,
         limit,
         txMinHeight,
@@ -329,8 +329,8 @@ class Client implements CosmosClient, XChainClient {
 
       const mainAsset = this.getMainAsset()
       const transferResult = await this.getSDKClient().transfer({
-        privkey: this.getPrivateKey(fromAddressIndex),
-        from: this.getAddress(fromAddressIndex),
+        privkey: await this.getPrivateKey(fromAddressIndex),
+        from: await this.getAddress(fromAddressIndex),
         to: recipient,
         amount: amount.amount().toString(),
         asset: getDenom(asset || mainAsset),

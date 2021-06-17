@@ -217,7 +217,7 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Promise<Address> => {
     if (this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
@@ -247,7 +247,7 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey = (index = 0): PrivKey =>
+  private getPrivateKey = (index = 0): Promise<PrivKey> =>
     this.cosmosClient.getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
 
   /**
@@ -257,8 +257,8 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): string => {
-    const address = this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+  getAddress = async (index = 0): Promise<string> => {
+    const address = await this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
     if (!address) {
       throw new Error('address not defined')
     }
@@ -505,13 +505,13 @@ class Client implements ThorchainClient, XChainClient {
    */
   deposit = async ({ walletIndex = 0, asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     try {
-      const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
+      const assetBalance = await this.getBalance(await this.getAddress(walletIndex), [asset])
 
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(DEFAULT_GAS_VALUE))) {
         throw new Error('insufficient funds')
       }
 
-      const signer = this.getAddress(walletIndex)
+      const signer = await this.getAddress(walletIndex)
       const msgNativeTx = msgNativeTxFromJson({
         coins: [
           {
@@ -524,7 +524,7 @@ class Client implements ThorchainClient, XChainClient {
       })
 
       const unsignedStdTx = await this.buildDepositTx(msgNativeTx)
-      const privateKey = this.getPrivateKey(walletIndex)
+      const privateKey = await this.getPrivateKey(walletIndex)
       const accAddress = AccAddress.fromBech32(signer)
       const fee = unsignedStdTx.fee
       // max. gas
@@ -548,15 +548,15 @@ class Client implements ThorchainClient, XChainClient {
     try {
       registerCodecs(this.network)
 
-      const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
+      const assetBalance = await this.getBalance(await this.getAddress(walletIndex), [asset])
       const fee = await this.getFees()
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
         throw new Error('insufficient funds')
       }
 
       const transferResult = await this.cosmosClient.transfer({
-        privkey: this.getPrivateKey(walletIndex),
-        from: this.getAddress(walletIndex),
+        privkey: await this.getPrivateKey(walletIndex),
+        from: await this.getAddress(walletIndex),
         to: recipient,
         amount: amount.amount().toString(),
         asset: getDenom(asset),

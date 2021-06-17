@@ -170,11 +170,11 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Phrase must be provided"}
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): Address => {
+  getAddress = (index = 0): Promise<Address> => {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
-    return this.hdNode.derivePath(this.getFullDerivationPath(index)).address.toLowerCase()
+    return Promise.resolve(this.hdNode.derivePath(this.getFullDerivationPath(index)).address.toLowerCase())
   }
 
   /**
@@ -310,7 +310,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Promise<Address> => {
     if (!Crypto.validatePhrase(phrase)) {
       throw new Error('Invalid phrase')
     }
