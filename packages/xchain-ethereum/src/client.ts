@@ -115,7 +115,6 @@ export default class Client implements XChainClient, EthereumClient {
     ethplorerUrl = 'https://api.ethplorer.io',
     ethplorerApiKey = 'freekey',
     explorerUrl,
-    phrase = '',
     rootDerivationPaths = {
       mainnet: `m/44'/60'/0'/0/`,
       testnet: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
@@ -125,7 +124,6 @@ export default class Client implements XChainClient, EthereumClient {
   }: EthereumClientParams) {
     this.rootDerivationPaths = rootDerivationPaths
     this.network = xchainNetworkToEths(network)
-    this.setPhrase(phrase)
     this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey
     this.ethplorerUrl = ethplorerUrl

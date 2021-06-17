@@ -57,7 +57,6 @@ class Client implements LitecoinClient, XChainClient {
   constructor({
     network = 'testnet',
     sochainUrl = 'https://sochain.com/api/v2',
-    phrase,
     nodeUrl,
     nodeAuth = {
       username: 'thorchain',
@@ -82,7 +81,6 @@ class Client implements LitecoinClient, XChainClient {
       nodeAuth === null ? undefined : nodeAuth
 
     this.setSochainUrl(sochainUrl)
-    phrase && this.setPhrase(phrase)
   }
 
   /**

@@ -81,7 +81,6 @@ class Client implements ThorchainClient, XChainClient {
    */
   constructor({
     network = 'testnet',
-    phrase,
     clientUrl,
     explorerUrls,
     rootDerivationPaths = {
@@ -99,8 +98,6 @@ class Client implements ThorchainClient, XChainClient {
       chainId: this.getChainId(),
       prefix: getPrefix(this.network),
     })
-
-    if (phrase) this.setPhrase(phrase)
   }
 
   /**

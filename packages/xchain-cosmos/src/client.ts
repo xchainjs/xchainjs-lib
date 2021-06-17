@@ -61,7 +61,6 @@ class Client implements CosmosClient, XChainClient {
    */
   constructor({
     network = 'testnet',
-    phrase,
     rootDerivationPaths = {
       mainnet: `44'/118'/0'/0/`,
       testnet: `44'/118'/1'/0/`,
@@ -71,8 +70,6 @@ class Client implements CosmosClient, XChainClient {
     this.rootDerivationPaths = rootDerivationPaths
     this.sdkClients.set('testnet', TESTNET_SDK)
     this.sdkClients.set('mainnet', MAINNET_SDK)
-
-    if (phrase) this.setPhrase(phrase)
   }
 
   /**

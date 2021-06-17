@@ -48,7 +48,6 @@ class Client implements PolkadotClient, XChainClient {
    */
   constructor({
     network = 'testnet',
-    phrase,
     rootDerivationPaths = {
       mainnet: "44//354//0//0//0'", //TODO IS the root path we want to use?
       testnet: "44//354//0//0//0'",
@@ -56,8 +55,6 @@ class Client implements PolkadotClient, XChainClient {
   }: XChainClientParams) {
     this.network = network
     this.rootDerivationPaths = rootDerivationPaths
-
-    if (phrase) this.setPhrase(phrase)
   }
   /**
    * Get getFullDerivationPath

@@ -57,13 +57,11 @@ class Client implements BitcoinClient, XChainClient {
       mainnet: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
       testnet: `84'/1'/0'/0/`,
     },
-    phrase,
   }: BitcoinClientParams) {
     this.net = network
     this.rootDerivationPaths = rootDerivationPaths
     this.setSochainUrl(sochainUrl)
     this.setBlockstreamUrl(blockstreamUrl)
-    phrase && this.setPhrase(phrase)
   }
 
   /**
