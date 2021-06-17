@@ -53,15 +53,15 @@ function getLowerMask(bits: number): number {
   return (1 << bits) - 1
 }
 
-export async function mnemonicToSeed(mnemonic: string, password?: string): Promise<string> {
+export async function mnemonicToSeed(mnemonic: string, password?: string): Promise<Buffer> {
   if (!password) {
     password = ''
   }
 
   const salt = toUtf8Bytes('mnemonic' + password, UnicodeNormalizationForm.NFKD)
 
-  const buf = await RNSimple.PBKDF2.hash(mnemonic, salt, 2048, 64, 'SHA512')
-  return Buffer.from(buf).toString()
+  const buf = await RNSimple.PBKDF2.hash(toUtf8Bytes(mnemonic, UnicodeNormalizationForm.NFKD), salt, 2048, 64, 'SHA512')
+  return Buffer.from(buf)
 }
 
 export function mnemonicToEntropy(mnemonic: string, wordlist?: string | Wordlist): string {
