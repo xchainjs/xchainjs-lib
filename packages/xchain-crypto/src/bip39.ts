@@ -29,10 +29,9 @@ async function checksumBits(entropyBuffer: Buffer) {
 }
 
 import { generateSecureRandom } from 'react-native-securerandom'
+import { WORDLIST } from './wordlist'
 
 declare type RandomNumberGenerator = (size: number, callback: (err: Error | null, buf: Buffer) => void) => void
-
-const DEFAULT_WORDLIST = require('../wordlists/en.json')
 
 export async function mnemonicToSeed(mnemonic: string, password?: string): Promise<Buffer> {
   const mnemonicBuffer = Buffer.from(mnemonic, 'utf8')
@@ -41,16 +40,14 @@ export async function mnemonicToSeed(mnemonic: string, password?: string): Promi
   return Buffer.from(res)
 }
 
-async function mnemonicToEntropy(mnemonic: string, wordlist: string[]) {
-  wordlist = wordlist || DEFAULT_WORDLIST
-
+async function mnemonicToEntropy(mnemonic: string) {
   const words = mnemonic.split(' ')
   if (words.length % 3 !== 0) {
     throw new Error('Invalid mnemonic')
   }
 
   const belongToList = words.every(function (word) {
-    return wordlist.indexOf(word) > -1
+    return WORDLIST.indexOf(word) > -1
   })
 
   if (!belongToList) {
@@ -60,7 +57,7 @@ async function mnemonicToEntropy(mnemonic: string, wordlist: string[]) {
   // convert word indices to 11 bit binary strings
   const bits = words
     .map(function (word) {
-      const index = wordlist.indexOf(word)
+      const index = WORDLIST.indexOf(word)
       return lpad(index.toString(2), '0', 11)
     })
     .join('')
@@ -85,7 +82,7 @@ async function mnemonicToEntropy(mnemonic: string, wordlist: string[]) {
 }
 
 async function entropyToMnemonic(entropy: string, wordlist: string[]) {
-  wordlist = wordlist || DEFAULT_WORDLIST
+  wordlist = wordlist || WORDLIST
 
   const entropyBuffer = Buffer.from(entropy, 'hex')
   const entropyBits = bytesToBinary(entropyBuffer.slice(0))
@@ -127,7 +124,7 @@ export function generateMnemonic(strength?: number, rng?: RandomNumberGenerator,
 
 export async function validateMnemonic(mnemonic: string) {
   try {
-    await mnemonicToEntropy(mnemonic, DEFAULT_WORDLIST)
+    await mnemonicToEntropy(mnemonic)
   } catch (e) {
     return false
   }
