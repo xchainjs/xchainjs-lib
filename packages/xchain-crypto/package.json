@@ -53,12 +53,13 @@
   },
   "dependencies": {
     "bech32": "^1.1.4",
-    "bip39": "^3.0.2",
     "crypto-js": "^4.0.0",
     "foundry-primitives": "^0.2.1",
     "hdkey": "^2.0.1",
-    "react-native-simple-crypto": "^0.2.15",
-    "uuid": "^8.1.0"
+    "react-native-simple-crypto": "0.2.15",
+    "uuid": "^8.1.0",
+    "react-native-securerandom": "^1.0.0",
+    "unorm": "^1.6.0"
   },
   "publishConfig": {
     "access": "public"

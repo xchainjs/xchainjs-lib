@@ -1,9 +1,9 @@
 import crypto from 'crypto'
 import { pbkdf2Async } from './utils'
 
-import * as bip39 from 'bip39'
 import { blake256 } from 'foundry-primitives'
 import { v4 as uuidv4 } from 'uuid'
+import { generateMnemonic, mnemonicToSeed, validateMnemonic } from './bip39'
 
 // Constants
 const cipher = 'aes-128-ctr'
@@ -41,12 +41,12 @@ export type Keystore = {
 /**
  * Generate a new phrase.
  *
- * @param {string} size The new phrase size.
- * @returns {string} The generated phrase based on the size.
+ * @param {number} size The new phrase size.
+ * @returns {Promise<string>} The generated phrase based on the size.
  */
-export const generatePhrase = (size = 12): string => {
+export const generatePhrase = async (size = 12): Promise<string> => {
   const entropy = size == 12 ? 128 : 256
-  const phrase = bip39.generateMnemonic(entropy)
+  const phrase = await generateMnemonic(entropy)
   return phrase
 }
 
@@ -56,8 +56,8 @@ export const generatePhrase = (size = 12): string => {
  * @param {string} phrase
  * @returns {boolean} `true` or `false`
  */
-export const validatePhrase = (phrase: string): boolean => {
-  return bip39.validateMnemonic(phrase)
+export const validatePhrase = (phrase: string): Promise<boolean> => {
+  return validateMnemonic(phrase)
 }
 
 const seedCache: { [key: string]: Buffer } = {}
@@ -79,7 +79,7 @@ export const getSeed = async (phrase: string): Promise<Buffer> => {
     return seedCache[phrase]
   }
 
-  const result = await bip39.mnemonicToSeed(phrase)
+  const result = await mnemonicToSeed(phrase)
 
   seedCache[phrase] = result
 
