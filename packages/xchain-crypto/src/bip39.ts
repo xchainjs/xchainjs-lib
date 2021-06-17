@@ -104,17 +104,17 @@ async function entropyToMnemonic(entropy: string, wordlist: string[]) {
   return words.join(' ')
 }
 
-export function generateMnemonic(strength?: number, rng?: RandomNumberGenerator, wordlist?: string[]) {
+export function generateMnemonic(strength?: number, rng?: RandomNumberGenerator) {
   return new Promise<string>((resolve, reject) => {
     strength = strength || 128
     rng = rng || generateSecureRandom
     generateSecureRandom(strength / 8)
       .then((bytes) => {
-        if (!wordlist) {
+        if (!WORDLIST) {
           throw new Error('No wordlist')
         }
         const hexBuffer = Buffer.from(bytes).toString('hex')
-        resolve(entropyToMnemonic(hexBuffer, wordlist))
+        resolve(entropyToMnemonic(hexBuffer, WORDLIST))
       })
       .catch((err) => {
         reject(err)
