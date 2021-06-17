@@ -1,9 +1,8 @@
-import crypto from 'crypto'
 import * as bech32 from 'bech32'
 import sha256 from 'crypto-js/sha256'
 import ripemd160 from 'crypto-js/ripemd160'
 import hexEncoding from 'crypto-js/enc-hex'
-
+import RNSimple from 'react-native-simple-crypto'
 /**
  * Convert string to bytes.
  *
@@ -114,13 +113,14 @@ export const pbkdf2Async = async (
     return pkbCache[cacheKey]
   }
   return new Promise<Buffer>((resolve, reject) => {
-    crypto.pbkdf2(passphrase, salt, iterations, keylen, digest, (err, drived) => {
-      if (err) {
+    console.log('using RN crypto')
+    RNSimple.PBKDF2.hash(passphrase.toString(), salt.toString(), iterations, keylen, 'SHA512')
+      .then((drived) => {
+        pkbCache[cacheKey] = Buffer.from(drived)
+        resolve(pkbCache[cacheKey])
+      })
+      .catch((err) => {
         reject(err)
-      } else {
-        pkbCache[cacheKey] = drived
-        resolve(drived)
-      }
-    })
+      })
   })
 }
