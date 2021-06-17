@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-crypto",
-  "version": "0.0.1-alpha.817+563fb07",
+  "version": "0.0.1-alpha.819+d8eb54f",
   "description": "XChain Crypto is a crypto module needed by all XChain clients.",
   "main": "lib/index.js",
   "module": "lib/index.es.js",
@@ -57,11 +57,11 @@
     "crypto-js": "^4.0.0",
     "foundry-primitives": "^0.2.1",
     "hdkey": "^2.0.1",
-    "uuid": "^8.1.0",
-    "react-native-simple-crypto": "^0.2.15"
+    "react-native-simple-crypto": "^0.2.15",
+    "uuid": "^8.1.0"
   },
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "563fb0704c78cf5989b657904d2d1759479ed3f9"
+  "gitHead": "d8eb54f90a38622b2245eac42e957d2db22805a0"
 }
