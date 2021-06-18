@@ -1,15 +1,13 @@
 import { Asset, assetToString, baseAmount, assetFromString, THORChain } from '@xchainjs/xchain-util'
-import { AssetRune, ExplorerUrl, ClientUrl, ExplorerUrls } from './types'
-import { TxResponse, RawTxResponse } from '@xchainjs/xchain-cosmos'
-import { Txs, TxFrom, TxTo, Fees, Network, Address, TxHash } from '@xchainjs/xchain-client'
+import { AssetRune, ExplorerUrl, ClientUrl, ExplorerUrls, TxData } from './types'
+import { TxResponse, RawTxResponse, TxLog } from '@xchainjs/xchain-cosmos'
+import { TxFrom, TxTo, Fees, Network, Address, TxHash } from '@xchainjs/xchain-client'
 import { AccAddress, codec, Msg } from 'cosmos-client'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 import { StdTx } from 'cosmos-client/x/auth'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'
-export const MSG_SEND = 'send'
-export const MSG_DEPOSIT = 'deposit'
 export const MAX_TX_COUNT = 100
 
 /**
@@ -102,69 +100,102 @@ export const registerCodecs = (network: Network): void => {
   )
 }
 
+export const getDepositTxDataFromLogs = (logs: TxLog[]): TxData => {
+  const events = logs[0]?.events
+
+  if (!events) {
+    throw Error('No events in logs available')
+  }
+
+  let data = { sender: '', recipient: '', amount: baseAmount(0, DECIMAL) }
+  data = events.reduce((acc, { type, attributes }) => {
+    if (type === 'transfer') {
+      // FIXME (@veado) Currenlty it gets values from last entries only, but that's not correct
+      return attributes.reduce((acc2, { key, value }) => {
+        if (key === 'sender') acc.sender = value
+        if (key === 'recipient') acc.recipient = value
+        if (key === 'amount') acc.amount = baseAmount(value.replace(/rune/, ''), DECIMAL)
+        return acc2
+      }, acc)
+    }
+    return acc
+  }, data)
+
+  const { sender, recipient, amount } = data
+  return {
+    from: [{ amount, from: sender }],
+    to: [{ amount, to: recipient }],
+    type: 'transfer',
+  }
+}
+
 /**
  * Parse transaction type
  *
- * @param {Array<TxResponse>} txs The transaction response from the node.
- * @param {Asset} mainAsset Current main asset which depends on the network.
+ * @param {TxResponse} tx The transaction response from the node.
+ * @param {Network} network - current main asset which depends on the network.
  * @returns {Txs} The parsed transaction result.
  */
-export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs => {
+export const getTxDataFromResponse = (tx: TxResponse, network: Network): TxData => {
   registerCodecs(network)
 
-  return txs.reduce((acc, tx) => {
-    let msgs: Msg[] = []
-    if ((tx.tx as RawTxResponse).body === undefined) {
-      msgs = codec.fromJSONString(codec.toJSONString(tx.tx as StdTx)).msg
-    } else {
-      msgs = codec.fromJSONString(codec.toJSONString((tx.tx as RawTxResponse).body.messages))
-    }
+  let msgs: Msg[]
+  // StdTx
+  if ((tx.tx as StdTx).msg) {
+    msgs = codec.fromJSONString(codec.toJSONString(tx.tx as StdTx)).msg
+  }
+  // RawTxResponse
+  else if ((tx.tx as RawTxResponse).body) {
+    msgs = codec.fromJSONString(codec.toJSONString((tx.tx as RawTxResponse).body.messages))
+  }
+  // ignore others
+  else {
+    throw Error(`Could not parse messages from 'TxResponse' (TxId: ${tx.txhash})`)
+  }
 
-    const from: TxFrom[] = []
-    const to: TxTo[] = []
+  const from: TxFrom[] = []
+  const to: TxTo[] = []
+  if (msgs) {
     msgs.map((msg) => {
       if (isMsgSend(msg)) {
-        const msgSend = msg as MsgSend
-        const amount = msgSend.amount
+        const amount = msg.amount
           .map((coin) => baseAmount(coin.amount, DECIMAL))
-          .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
+          .reduce((acc, cur) => acc.plus(cur), baseAmount(0, DECIMAL))
 
         let from_index = -1
 
         from.forEach((value, index) => {
-          if (value.from === msgSend.from_address.toBech32()) from_index = index
+          if (value.from === msg.from_address.toBech32()) from_index = index
         })
 
         if (from_index === -1) {
           from.push({
-            from: msgSend.from_address.toBech32(),
+            from: msg.from_address.toBech32(),
             amount,
           })
         } else {
-          from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
+          from[from_index].amount = from[from_index].amount.plus(amount)
         }
 
         let to_index = -1
 
         to.forEach((value, index) => {
-          if (value.to === msgSend.to_address.toBech32()) to_index = index
+          if (value.to === msg.to_address.toBech32()) to_index = index
         })
 
         if (to_index === -1) {
           to.push({
-            to: msgSend.to_address.toBech32(),
+            to: msg.to_address.toBech32(),
             amount,
           })
         } else {
-          to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
+          to[to_index].amount = to[to_index].amount.plus(amount)
         }
       } else if (isMsgMultiSend(msg)) {
-        const msgMultiSend = msg as MsgMultiSend
-
-        msgMultiSend.inputs.map((input) => {
+        msg.inputs.map((input) => {
           const amount = input.coins
             .map((coin) => baseAmount(coin.amount, DECIMAL))
-            .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
+            .reduce((acc, cur) => acc.plus(cur), baseAmount(0, DECIMAL))
 
           let from_index = -1
 
@@ -178,14 +209,14 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
               amount,
             })
           } else {
-            from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
+            from[from_index].amount = from[from_index].amount.plus(amount)
           }
         })
 
-        msgMultiSend.outputs.map((output) => {
+        msg.outputs.map((output) => {
           const amount = output.coins
             .map((coin) => baseAmount(coin.amount, DECIMAL))
-            .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
+            .reduce((acc, cur) => acc.plus(cur), baseAmount(0, DECIMAL))
 
           let to_index = -1
 
@@ -199,24 +230,19 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, network: Network): Txs
               amount,
             })
           } else {
-            to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
+            to[to_index].amount = to[to_index].amount.plus(amount)
           }
         })
+      } else {
       }
     })
+  }
 
-    return [
-      ...acc,
-      {
-        asset: AssetRune,
-        from,
-        to,
-        date: new Date(tx.timestamp),
-        type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
-        hash: tx.txhash || '',
-      },
-    ]
-  }, [] as Txs)
+  return {
+    from,
+    to,
+    type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
+  }
 }
 
 /**

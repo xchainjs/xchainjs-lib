@@ -1,0 +1,59 @@
+{
+  "height": "1071801",
+  "txhash": "AB7DDB79CAFBB402B2E75D03FB15BB2E449B9A8A59563C74090D20D6A3F73627",
+  "data": "0A060A0473656E64",
+  "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"thor1ws0sltg9ayyxp2777xykkqakwv2hll5ywuwkzl\"},{\"key\":\"sender\",\"value\":\"thor1ws0sltg9ayyxp2777xykkqakwv2hll5ywuwkzl\"},{\"key\":\"module\",\"value\":\"governance\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"thor1dheycdevq39qlkxs2a6wuuzyn4aqxhve4qxtxt\"},{\"key\":\"sender\",\"value\":\"thor1ws0sltg9ayyxp2777xykkqakwv2hll5ywuwkzl\"},{\"key\":\"amount\",\"value\":\"2000000rune\"},{\"key\":\"recipient\",\"value\":\"thor1mryx88xxhvwu9yepmg968zcdaza2nzz4rltjcp\"},{\"key\":\"sender\",\"value\":\"thor1ws0sltg9ayyxp2777xykkqakwv2hll5ywuwkzl\"},{\"key\":\"amount\",\"value\":\"500000000rune\"}]}]}]",
+  "logs": [
+    {
+      "events": [
+        {
+          "type": "message",
+          "attributes": [
+            { "key": "action", "value": "send" },
+            { "key": "sender", "value": "thor1ws0sltg9ayyxp2777xykkqakwv2hll5ywuwkzl" },
+            { "key": "sender", "value": "thor1ws0sltg9ayyxp2777xykkqakwv2hll5ywuwkzl" },
+            { "key": "module", "value": "governance" }
+          ]
+        },
+        {
+          "type": "transfer",
+          "attributes": [
+            { "key": "recipient", "value": "thor1dheycdevq39qlkxs2a6wuuzyn4aqxhve4qxtxt" },
+            { "key": "sender", "value": "thor1ws0sltg9ayyxp2777xykkqakwv2hll5ywuwkzl" },
+            { "key": "amount", "value": "2000000rune" },
+            { "key": "recipient", "value": "thor1mryx88xxhvwu9yepmg968zcdaza2nzz4rltjcp" },
+            { "key": "sender", "value": "thor1ws0sltg9ayyxp2777xykkqakwv2hll5ywuwkzl" },
+            { "key": "amount", "value": "500000000rune" }
+          ]
+        }
+      ]
+    }
+  ],
+  "gas_wanted": "2000000",
+  "gas_used": "197638",
+  "tx": {
+    "type": "cosmos-sdk/StdTx",
+    "value": {
+      "msg": [
+        {
+          "type": "thorchain/MsgSend",
+          "value": {
+            "from_address": "thor1ws0sltg9ayyxp2777xykkqakwv2hll5ywuwkzl",
+            "to_address": "thor1mryx88xxhvwu9yepmg968zcdaza2nzz4rltjcp",
+            "amount": [{ "denom": "rune", "amount": "500000000" }]
+          }
+        }
+      ],
+      "fee": { "amount": [], "gas": "2000000" },
+      "signatures": [
+        {
+          "pub_key": { "type": "tendermint/PubKeySecp256k1", "value": "Ay/3Z8Ceun3Z4Qvx7OmojUAHPw/KokSjdUy6tEoW6h4/" },
+          "signature": "980AAdH7+neJ4WS/nBdCTOamMOJDYAo0pcrRDNOco+dtsNX2pm2pD8sy3Iyc77TaPa590QKpYS8MFldEBG91Jg=="
+        }
+      ],
+      "memo": "shrek:thor1ws0sltg9ayyxp2777xykkqakwv2hll5ywuwkzl",
+      "timeout_height": "0"
+    }
+  },
+  "timestamp": "2021-06-18T12:31:45Z"
+}
