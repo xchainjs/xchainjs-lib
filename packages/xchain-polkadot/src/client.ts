@@ -197,7 +197,7 @@ class Client implements PolkadotClient, XChainClient {
    *
    * @returns {KeyringPair} The keyring pair to be used to generate wallet address.
    * */
-  private getKeyringPair = (index: number): KeyringPair => {
+  private getKeyringPair = async (index: number): Promise<KeyringPair> => {
     const key = new Keyring({ ss58Format: this.getSS58Format(), type: 'ed25519' })
 
     return key.createFromUri(`${this.phrase}//${this.getFullDerivationPath(index)}`)
@@ -253,7 +253,7 @@ class Client implements PolkadotClient, XChainClient {
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
   getAddress = async (index = 0): Promise<Address> => {
-    return this.getKeyringPair(index).address
+    return (await this.getKeyringPair(index)).address
   }
 
   /**
@@ -410,7 +410,7 @@ class Client implements PolkadotClient, XChainClient {
       }
 
       // Check balances
-      const paymentInfo = await transaction.paymentInfo(this.getKeyringPair(walletIndex))
+      const paymentInfo = await transaction.paymentInfo(await this.getKeyringPair(walletIndex))
       const fee = baseAmount(paymentInfo.partialFee.toString(), getDecimal(this.network))
       const balances = await this.getBalance(await this.getAddress(walletIndex), [AssetDOT])
 
@@ -418,7 +418,7 @@ class Client implements PolkadotClient, XChainClient {
         throw new Error('insufficient balance')
       }
 
-      const txHash = await transaction.signAndSend(this.getKeyringPair(walletIndex))
+      const txHash = await transaction.signAndSend(await this.getKeyringPair(walletIndex))
       await api.disconnect()
 
       return txHash.toString()
@@ -441,7 +441,7 @@ class Client implements PolkadotClient, XChainClient {
       const api = await this.getAPI()
       const info = await api.tx.balances
         .transfer(params.recipient, params.amount.amount().toNumber())
-        .paymentInfo(this.getKeyringPair(walletIndex))
+        .paymentInfo(await this.getKeyringPair(walletIndex))
 
       const fee = baseAmount(info.partialFee.toString(), getDecimal(this.network))
       await api.disconnect()
