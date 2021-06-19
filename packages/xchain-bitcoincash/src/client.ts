@@ -126,7 +126,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {string} The node url for thorchain based on the current network.
    */
-  getNodeURL = (): string => {
+  getNodeURL = async (): Promise<string> => {
     return this.nodeUrl[this.getNetwork()]
   }
 
@@ -450,7 +450,7 @@ class Client implements BitcoinCashClient, XChainClient {
       return await broadcastTx({
         network: this.network,
         txHex,
-        nodeUrl: this.getNodeURL(),
+        nodeUrl: await this.getNodeURL(),
         auth: this.nodeAuth,
       })
     } catch (e) {
