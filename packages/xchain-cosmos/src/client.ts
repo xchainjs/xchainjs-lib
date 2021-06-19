@@ -27,7 +27,7 @@ import { DECIMAL, getDenom, getAsset, getTxsFromHistory } from './util'
  * Interface for custom Cosmos client
  */
 export interface CosmosClient {
-  getMainAsset(): Asset
+  getMainAsset(): Promise<Asset>
 }
 
 export type ClientParams = XChainClientParams
@@ -228,7 +228,7 @@ class Client implements CosmosClient, XChainClient {
    *
    * @returns {string} The main asset based on the network.
    */
-  getMainAsset = (): Asset => {
+  getMainAsset = async (): Promise<Asset> => {
     return this.network === 'testnet' ? AssetMuon : AssetAtom
   }
 
@@ -242,7 +242,7 @@ class Client implements CosmosClient, XChainClient {
   getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
       const balances = await this.getSDKClient().getBalance(address)
-      const mainAsset = this.getMainAsset()
+      const mainAsset = await this.getMainAsset()
 
       return balances
         .map((balance) => {
@@ -277,7 +277,7 @@ class Client implements CosmosClient, XChainClient {
     try {
       this.registerCodecs()
 
-      const mainAsset = this.getMainAsset()
+      const mainAsset = await this.getMainAsset()
       const txHistory = await this.getSDKClient().searchTx({
         messageAction,
         messageSender: (params && params.address) || (await this.getAddress()),
@@ -305,7 +305,7 @@ class Client implements CosmosClient, XChainClient {
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
       const txResult = await this.getSDKClient().txsHashGet(txId)
-      const txs = getTxsFromHistory([txResult], this.getMainAsset())
+      const txs = getTxsFromHistory([txResult], await this.getMainAsset())
 
       if (txs.length === 0) {
         throw new Error('transaction not found')
@@ -328,7 +328,7 @@ class Client implements CosmosClient, XChainClient {
       const fromAddressIndex = walletIndex || 0
       this.registerCodecs()
 
-      const mainAsset = this.getMainAsset()
+      const mainAsset = await this.getMainAsset()
       const transferResult = await this.getSDKClient().transfer({
         privkey: this.getPrivateKey(fromAddressIndex),
         from: await this.getAddress(fromAddressIndex),
