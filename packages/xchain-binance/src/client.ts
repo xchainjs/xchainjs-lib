@@ -62,7 +62,7 @@ export type MultiSendParams = {
  */
 export interface BinanceClient {
   purgeClient(): Promise<this>
-  getBncClient(): BncClient
+  getBncClient(): Promise<BncClient>
 
   getMultiSendFees(): Promise<Fees>
   getSingleAndMultiFees(): Promise<{ single: Fees; multi: Fees }>
@@ -117,7 +117,7 @@ class Client implements BinanceClient, XChainClient {
    *
    * @returns {BncClient} The BncClient from `@binance-chain/javascript-sdk`.
    */
-  getBncClient(): BncClient {
+  async getBncClient(): Promise<BncClient> {
     return this.bncClient
   }
 
