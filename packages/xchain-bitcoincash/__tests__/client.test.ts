@@ -96,7 +96,7 @@ describe('BCHClient Test', () => {
     await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
-    mock_getBalance(bchClient.getHaskoinURL(), await bchClient.getAddress(), {
+    mock_getBalance(await bchClient.getHaskoinURL(), await bchClient.getAddress(), {
       received: 124442749359,
       utxo: 1336,
       address: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
@@ -113,7 +113,7 @@ describe('BCHClient Test', () => {
     await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
-    mock_getBalance(bchClient.getHaskoinURL(), await bchClient.getAddress(), {
+    mock_getBalance(await bchClient.getHaskoinURL(), await bchClient.getAddress(), {
       received: 123817511737,
       utxo: 1336,
       address: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
@@ -131,7 +131,7 @@ describe('BCHClient Test', () => {
     await bchClient.setPhrase(phrase)
 
     mock_getTransactionData(
-      bchClient.getHaskoinURL(),
+      await bchClient.getHaskoinURL(),
       '0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b',
       {
         time: 1548767230,
@@ -200,7 +200,7 @@ describe('BCHClient Test', () => {
     await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
-    mock_getBalance(bchClient.getHaskoinURL(), 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', {
+    mock_getBalance(await bchClient.getHaskoinURL(), 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', {
       received: 124442749359,
       utxo: 1336,
       address: 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
@@ -208,7 +208,7 @@ describe('BCHClient Test', () => {
       unconfirmed: 0,
       confirmed: 0,
     })
-    mock_getTransactions(bchClient.getHaskoinURL(), 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', [
+    mock_getTransactions(await bchClient.getHaskoinURL(), 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', [
       {
         time: 1548767230,
         size: 245,
@@ -278,7 +278,7 @@ describe('BCHClient Test', () => {
     await bchClient.setPhrase(phrase)
 
     mock_getBalance(
-      bchClient.getHaskoinURL(),
+      await bchClient.getHaskoinURL(),
       await bchClient.getAddress(),
       {
         received: 12964626,
@@ -290,7 +290,7 @@ describe('BCHClient Test', () => {
       },
       2,
     )
-    mock_getUnspents(bchClient.getHaskoinURL(), await bchClient.getAddress(), [
+    mock_getUnspents(await bchClient.getHaskoinURL(), await bchClient.getAddress(), [
       {
         pkscript: '76a9145be96e4fbfd68370cfd30ad2f3458c580f09afb188ac',
         value: 992999,
@@ -304,7 +304,7 @@ describe('BCHClient Test', () => {
       },
     ])
     mock_getRawTransactionData(
-      bchClient.getHaskoinURL(),
+      await bchClient.getHaskoinURL(),
       '66f090bd35b15a4a8ede2f71184cf4d2cc08483921752b845ba2fdee7b96ca79',
       {
         result:

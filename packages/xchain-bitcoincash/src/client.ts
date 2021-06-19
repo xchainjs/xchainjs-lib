@@ -107,7 +107,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {string} The haskoin url based on the current network.
    */
-  getHaskoinURL = (): string => {
+  getHaskoinURL = async (): Promise<string> => {
     return this.haskoinUrl[this.getNetwork()]
   }
 
@@ -290,7 +290,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
   getBalance = async (address: Address): Promise<Balance[]> => {
-    return utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address })
+    return utils.getBalance({ haskoinUrl: await this.getHaskoinURL(), address })
   }
 
   /**
@@ -307,9 +307,9 @@ class Client implements BitcoinCashClient, XChainClient {
       offset = offset || 0
       limit = limit || 10
 
-      const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address })
+      const account = await getAccount({ haskoinUrl: await this.getHaskoinURL(), address })
       const txs = await getTransactions({
-        haskoinUrl: this.getHaskoinURL(),
+        haskoinUrl: await this.getHaskoinURL(),
         address,
         params: { offset, limit },
       })
@@ -337,7 +337,7 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const tx = await getTransaction({ haskoinUrl: this.getHaskoinURL(), txId })
+      const tx = await getTransaction({ haskoinUrl: await this.getHaskoinURL(), txId })
 
       if (!tx) {
         throw new Error('Invalid TxID')
@@ -434,7 +434,7 @@ class Client implements BitcoinCashClient, XChainClient {
         ...params,
         feeRate,
         sender: await this.getAddress(),
-        haskoinUrl: this.getHaskoinURL(),
+        haskoinUrl: await this.getHaskoinURL(),
         network: this.network,
       })
 
