@@ -49,7 +49,7 @@ import {
  * Interface for custom Thorchain client
  */
 export interface ThorchainClient {
-  setClientUrl(clientUrl: ClientUrl): void
+  setClientUrl(clientUrl: ClientUrl): Promise<this>
   getClientUrl(): Promise<NodeUrl>
   setExplorerUrls(explorerUrls: ExplorerUrls): Promise<this>
   getCosmosClient(): Promise<CosmosSDKClient>
@@ -153,8 +153,9 @@ class Client implements ThorchainClient, XChainClient {
    * @param {ClientUrl} clientUrl The client url to be set.
    * @returns {void}
    */
-  setClientUrl = (clientUrl: ClientUrl): void => {
+  setClientUrl = async (clientUrl: ClientUrl): Promise<this> => {
     this.clientUrl = clientUrl
+    return this
   }
 
   /**

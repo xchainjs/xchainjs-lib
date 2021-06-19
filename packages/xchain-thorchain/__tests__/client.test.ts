@@ -155,7 +155,7 @@ describe('Client Test', () => {
   })
 
   it('should have right client url', async () => {
-    thorClient.setClientUrl({
+    await thorClient.setClientUrl({
       mainnet: {
         node: 'new mainnet client',
         rpc: 'new mainnet client',
