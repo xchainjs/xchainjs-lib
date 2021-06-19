@@ -67,64 +67,72 @@ describe('Client Test', () => {
   const testnet_address_path0 = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
   const testnet_address_path1 = 'tthor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecv2c92a'
 
-  beforeEach(() => {
-    thorClient = new Client({ phrase, network: 'testnet' })
-    thorMainClient = new Client({ phrase, network: 'mainnet' })
+  beforeEach(async () => {
+    thorClient = await Client.create({ phrase, network: 'testnet' })
+    thorMainClient = await Client.create({ phrase, network: 'mainnet' })
   })
 
-  afterEach(() => {
-    thorClient.purgeClient()
-    thorMainClient.purgeClient()
+  afterEach(async () => {
+    await thorClient.purgeClient()
+    await thorMainClient.purgeClient()
   })
 
   it('should start with empty wallet', async () => {
-    const thorClientEmptyMain = new Client({ phrase, network: 'mainnet' })
-    const addressMain = thorClientEmptyMain.getAddress()
+    const thorClientEmptyMain = await Client.create({ phrase, network: 'mainnet' })
+    const addressMain = await thorClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnet_address_path0)
 
-    const thorClientEmptyTest = new Client({ phrase, network: 'testnet' })
-    const addressTest = thorClientEmptyTest.getAddress()
+    const thorClientEmptyTest = await Client.create({ phrase, network: 'testnet' })
+    const addressTest = await thorClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnet_address_path0)
   })
 
   it('should derive address accordingly to the user param', async () => {
-    const thorClientEmptyMain = new Client({ phrase, network: 'mainnet' /*, derivationPath: "44'/931'/0'/0/0" */ })
-    const addressMain = thorClientEmptyMain.getAddress()
+    const thorClientEmptyMain = await Client.create({
+      phrase,
+      network: 'mainnet' /*, derivationPath: "44'/931'/0'/0/0" */,
+    })
+    const addressMain = await thorClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnet_address_path0)
 
-    const viaSetPhraseAddr1 = thorClientEmptyMain.getAddress(1 /*, "44'/931'/0'/0/1" */)
+    const viaSetPhraseAddr1 = await thorClientEmptyMain.getAddress(1 /*, "44'/931'/0'/0/1" */)
     expect(viaSetPhraseAddr1).toEqual(mainnet_address_path1)
 
-    const thorClientEmptyTest = new Client({ phrase, network: 'testnet' /*, derivationPath: "44'/931'/0'/0/0"*/ })
-    const addressTest = thorClientEmptyTest.getAddress()
+    const thorClientEmptyTest = await Client.create({
+      phrase,
+      network: 'testnet' /*, derivationPath: "44'/931'/0'/0/0"*/,
+    })
+    const addressTest = await thorClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnet_address_path0)
 
-    const viaSetPhraseAddr1Test = thorClientEmptyTest.getAddress(1 /*, "44'/931'/0'/0/1"*/)
+    const viaSetPhraseAddr1Test = await thorClientEmptyTest.getAddress(1 /*, "44'/931'/0'/0/1"*/)
     expect(viaSetPhraseAddr1Test).toEqual(testnet_address_path1)
 
-    const thorClientEmptyMain1 = new Client({ phrase, network: 'mainnet' /*, derivationPath: "44'/931'/0'/0/1"*/ })
-    const addressMain1 = thorClientEmptyMain1.getAddress(1)
+    const thorClientEmptyMain1 = await Client.create({
+      phrase,
+      network: 'mainnet' /*, derivationPath: "44'/931'/0'/0/1"*/,
+    })
+    const addressMain1 = await thorClientEmptyMain1.getAddress(1)
     expect(addressMain1).toEqual(mainnet_address_path1)
 
-    const thorClientEmptyTest1 = new Client({ phrase, network: 'testnet' /*, derivationPath: "44'/931'/0'/0/1"*/ })
-    const addressTest1 = thorClientEmptyTest1.getAddress(1)
+    const thorClientEmptyTest1 = await Client.create({
+      phrase,
+      network: 'testnet' /*, derivationPath: "44'/931'/0'/0/1"*/,
+    })
+    const addressTest1 = await thorClientEmptyTest1.getAddress(1)
     expect(addressTest1).toEqual(testnet_address_path1)
   })
 
   it('throws an error passing an invalid phrase', async () => {
-    expect(() => {
-      new Client({ phrase: 'invalid phrase', network: 'mainnet' })
-    }).toThrow()
+    await expect(Client.create({ phrase: 'invalid phrase', network: 'mainnet' })).rejects.toThrow()
 
-    expect(() => {
-      new Client({ phrase: 'invalid phrase', network: 'testnet' })
-    }).toThrow()
+    await expect(Client.create({ phrase: 'invalid phrase', network: 'testnet' })).rejects.toThrow()
   })
 
   it('should have right address', async () => {
-    expect(thorClient.getAddress()).toEqual(testnet_address_path0)
+    expect(await thorClient.getAddress()).toEqual(testnet_address_path0)
 
-    expect(thorMainClient.getAddress()).toEqual(mainnet_address_path0)
+    expect(await thorMainClient.getAddress()).toEqual(mainnet_address_path0)
   })
 
   it('should allow to get the CosmosSDKClient', async () => {
@@ -140,10 +148,10 @@ describe('Client Test', () => {
   })
 
   it('should init, should have right prefix', async () => {
-    expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
+    expect(thorClient.validateAddress(await thorClient.getAddress())).toEqual(true)
 
     thorClient.setNetwork('mainnet')
-    expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
+    expect(thorClient.validateAddress(await thorClient.getAddress())).toEqual(true)
   })
 
   it('should have right client url', async () => {
@@ -170,7 +178,7 @@ describe('Client Test', () => {
       height: 0,
       result: [],
     })
-    const result = await thorClient.getBalance(thorClient.getAddress(0))
+    const result = await thorClient.getBalance(await thorClient.getAddress(0))
     expect(result).toEqual([])
   })
 

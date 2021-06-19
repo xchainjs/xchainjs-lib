@@ -41,14 +41,12 @@ describe('Client Test', () => {
     nock.cleanAll()
   })
 
-  it('should throw error on bad phrase', () => {
-    expect(() => {
-      new Client({ phrase: 'bad bad phrase' })
-    }).toThrowError()
+  it('should throw error on bad phrase', async () => {
+    await expect(Client.create({ phrase: 'bad bad phrase' })).rejects.toThrowError()
   })
 
-  it('should create a wallet from phrase', () => {
-    const ethClient = new Client({
+  it('should create a wallet from phrase', async () => {
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -56,20 +54,20 @@ describe('Client Test', () => {
     expect(ethClient.getWallet()._signingKey()).toMatchObject(wallet.signingKey)
   })
 
-  it('should set new phrase', () => {
-    const ethClient = new Client({ phrase })
-    const newWallet = ethClient.setPhrase(newPhrase)
+  it('should set new phrase', async () => {
+    const ethClient = await Client.create({ phrase })
+    const newWallet = await ethClient.setPhrase(newPhrase)
     expect(ethClient.getWallet().mnemonic.phrase).toEqual(newPhrase)
     expect(newWallet).toBeTruthy()
   })
 
-  it('should fail to set new phrase', () => {
-    const ethClient = new Client({ phrase })
-    expect(() => ethClient.setPhrase('bad bad phrase')).toThrowError()
+  it('should fail to set new phrase', async () => {
+    const ethClient = await Client.create({ phrase })
+    await expect(ethClient.setPhrase('bad bad phrase')).rejects.toThrowError()
   })
 
   it('should connect to specified network', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'mainnet',
       phrase,
     })
@@ -83,7 +81,7 @@ describe('Client Test', () => {
   })
 
   it('should connect to Infura provider', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'mainnet',
       phrase,
       infuraCreds: {
@@ -96,7 +94,7 @@ describe('Client Test', () => {
   })
 
   it('should set network', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -107,37 +105,37 @@ describe('Client Test', () => {
     expect(network.chainId).toEqual(3)
   })
 
-  it('should get address', () => {
-    const ethClient = new Client({
+  it('should get address', async () => {
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
-    expect(ethClient.getAddress()).toEqual(address)
+    expect(await ethClient.getAddress()).toEqual(address)
   })
 
-  it('should get network', () => {
-    const ethClient = new Client({ phrase, network: 'testnet' })
+  it('should get network', async () => {
+    const ethClient = await Client.create({ phrase, network: 'testnet' })
     expect(ethClient.getNetwork()).toEqual('testnet')
   })
 
-  it('should fail a bad address', () => {
-    const ethClient = new Client({ phrase, network: 'testnet' })
+  it('should fail a bad address', async () => {
+    const ethClient = await Client.create({ phrase, network: 'testnet' })
     expect(ethClient.validateAddress('0xBADbadBad')).toBeFalsy()
   })
 
-  it('should pass a good address', () => {
-    const ethClient = new Client({ phrase, network: 'testnet' })
+  it('should pass a good address', async () => {
+    const ethClient = await Client.create({ phrase, network: 'testnet' })
     const goodAddress = ethClient.validateAddress(address)
     expect(goodAddress).toBeTruthy()
   })
 
   it('throws error on bad index', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
-    expect(() => ethClient.getAddress(-1)).toThrow()
+    const ethClient = await Client.create({ network: 'testnet', phrase })
+    await expect(ethClient.getAddress(-1)).rejects.toThrow()
   })
 
   it('get eth transaction history', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -181,7 +179,7 @@ describe('Client Test', () => {
   })
 
   it('get token transaction history', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -230,7 +228,7 @@ describe('Client Test', () => {
   })
 
   it('get transaction data', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -295,7 +293,7 @@ describe('Client Test', () => {
   })
 
   it('ETH transfer', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -332,7 +330,7 @@ describe('Client Test', () => {
   })
 
   it('ERC20 transfer', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -378,7 +376,7 @@ describe('Client Test', () => {
   })
 
   it('estimate gas for eth transfer', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
+    const ethClient = await Client.create({ network: 'testnet', phrase })
 
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
@@ -409,7 +407,7 @@ describe('Client Test', () => {
   })
 
   it('estimate gas for erc20 transfer', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
+    const ethClient = await Client.create({ network: 'testnet', phrase })
 
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
@@ -441,7 +439,7 @@ describe('Client Test', () => {
   })
 
   it('isApproved', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -473,7 +471,7 @@ describe('Client Test', () => {
   })
 
   it('estimateApprove', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -492,7 +490,7 @@ describe('Client Test', () => {
   })
 
   it('approve', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -520,7 +518,7 @@ describe('Client Test', () => {
   })
 
   it('estimate call', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -534,7 +532,7 @@ describe('Client Test', () => {
       '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
       {
-        from: ethClient.getAddress(),
+        from: await ethClient.getAddress(),
       },
     ])
 
@@ -542,7 +540,7 @@ describe('Client Test', () => {
   })
 
   it('call', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'testnet',
       phrase,
     })
@@ -584,7 +582,7 @@ describe('Client Test', () => {
         BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
         // Here the tx overrides
         {
-          from: ethClient.getAddress(),
+          from: await ethClient.getAddress(),
           gasPrice: BigNumber.from(prices.average.amount().toString()),
         },
       ],

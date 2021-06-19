@@ -11,14 +11,13 @@ import {
   TxHistoryParams,
   TxsPage,
   XChainClient,
-  XChainClientParams,
   Txs,
   TxFrom,
   TxTo,
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
 import { Asset, baseAmount, assetToString, assetFromString } from '@xchainjs/xchain-util'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
+import { validatePhrase } from '@xchainjs/xchain-crypto'
 
 import { PrivKey, AccAddress } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
@@ -58,6 +57,8 @@ export interface ThorchainClient {
   deposit(params: DepositParam): Promise<TxHash>
 }
 
+export type ClientParams = ThorchainClientParams
+
 /**
  * Custom Thorchain Client
  */
@@ -75,20 +76,19 @@ class Client implements ThorchainClient, XChainClient {
    * Client has to be initialised with network type and phrase.
    * It will throw an error if an invalid phrase has been passed.
    *
-   * @param {XChainClientParams} params
+   * @param {ClientParams} params
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor({
+  protected constructor({
     network = 'testnet',
-    phrase,
     clientUrl,
     explorerUrls,
     rootDerivationPaths = {
       mainnet: "44'/931'/0'/0/",
       testnet: "44'/931'/0'/0/",
     },
-  }: XChainClientParams & ThorchainClientParams) {
+  }: ClientParams) {
     this.network = network
     this.clientUrl = clientUrl || getDefaultClientUrl()
     this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
@@ -99,8 +99,12 @@ class Client implements ThorchainClient, XChainClient {
       chainId: this.getChainId(),
       prefix: getPrefix(this.network),
     })
+  }
 
-    if (phrase) this.setPhrase(phrase)
+  static async create(params: ClientParams): Promise<Client> {
+    const out = new Client(params)
+    if (params.phrase !== undefined) await out.setPhrase(params.phrase)
+    return out
   }
 
   /**
@@ -108,8 +112,9 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @returns {void}
    */
-  purgeClient = (): void => {
+  purgeClient = async (): Promise<this> => {
     this.phrase = ''
+    return this
   }
 
   /**
@@ -217,15 +222,10 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (this.phrase !== phrase) {
-      if (!xchainCrypto.validatePhrase(phrase)) {
-        throw new Error('Invalid phrase')
-      }
-      this.phrase = phrase
-    }
-
-    return this.getAddress(walletIndex)
+  setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
+    if (!validatePhrase(phrase)) throw new Error('Invalid phrase')
+    this.phrase = phrase
+    return await this.getAddress(walletIndex)
   }
 
   /**
@@ -257,7 +257,7 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): string => {
+  getAddress = async (index = 0): Promise<string> => {
     const address = this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
     if (!address) {
       throw new Error('address not defined')
@@ -505,13 +505,13 @@ class Client implements ThorchainClient, XChainClient {
    */
   deposit = async ({ walletIndex = 0, asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     try {
-      const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
+      const assetBalance = await this.getBalance(await this.getAddress(walletIndex), [asset])
 
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(DEFAULT_GAS_VALUE))) {
         throw new Error('insufficient funds')
       }
 
-      const signer = this.getAddress(walletIndex)
+      const signer = await this.getAddress(walletIndex)
       const msgNativeTx = msgNativeTxFromJson({
         coins: [
           {
@@ -548,7 +548,7 @@ class Client implements ThorchainClient, XChainClient {
     try {
       registerCodecs(this.network)
 
-      const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
+      const assetBalance = await this.getBalance(await this.getAddress(walletIndex), [asset])
       const fee = await this.getFees()
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
         throw new Error('insufficient funds')
@@ -556,7 +556,7 @@ class Client implements ThorchainClient, XChainClient {
 
       const transferResult = await this.cosmosClient.transfer({
         privkey: this.getPrivateKey(walletIndex),
-        from: this.getAddress(walletIndex),
+        from: await this.getAddress(walletIndex),
         to: recipient,
         amount: amount.amount().toString(),
         asset: getDenom(asset),

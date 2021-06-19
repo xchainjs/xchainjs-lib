@@ -43,13 +43,13 @@ Initialize client and use class methods:
 import { Client, Network } from '../src/client'
 
 // Create a new client interface
-const ltcClient = new Client({ network: 'testnet' })
+const ltcClient = await Client.create({ network: 'testnet' })
 
 // Set phrase
-ltcClient.setPhrase('phrase here')
+await ltcClient.setPhrase('phrase here')
 
 // Get address
-const address = ltcClient.getAddress()
+const address = await ltcClient.getAddress()
 
 // Get balance
 const balance = await ltcClient.getBalance()

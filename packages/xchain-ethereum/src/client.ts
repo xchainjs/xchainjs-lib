@@ -33,7 +33,7 @@ import {
   FeesParams as XFeesParams,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
-import * as Crypto from '@xchainjs/xchain-crypto'
+import { validatePhrase } from '@xchainjs/xchain-crypto'
 import * as ethplorerAPI from './ethplorer-api'
 import * as etherscanAPI from './etherscan-api'
 import {
@@ -84,13 +84,14 @@ export interface EthereumClient {
   ): Promise<TransactionResponse>
 }
 
-export type EthereumClientParams = XChainClientParams & {
+export type ClientParams = XChainClientParams & {
   ethplorerUrl?: string
   ethplorerApiKey?: string
   explorerUrl?: ExplorerUrl
   etherscanApiKey?: string
   infuraCreds?: InfuraCreds
 }
+export type EthereumClientParams = ClientParams // backwards compat
 
 /**
  * Custom Ethereum client
@@ -108,24 +109,22 @@ export default class Client implements XChainClient, EthereumClient {
 
   /**
    * Constructor
-   * @param {EthereumClientParams} params
+   * @param {ClientParams} params
    */
-  constructor({
+  protected constructor({
     network = 'testnet',
     ethplorerUrl = 'https://api.ethplorer.io',
     ethplorerApiKey = 'freekey',
     explorerUrl,
-    phrase = '',
     rootDerivationPaths = {
       mainnet: `m/44'/60'/0'/0/`,
       testnet: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
     },
     etherscanApiKey,
     infuraCreds,
-  }: EthereumClientParams) {
+  }: ClientParams) {
     this.rootDerivationPaths = rootDerivationPaths
     this.network = xchainNetworkToEths(network)
-    this.setPhrase(phrase)
     this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey
     this.ethplorerUrl = ethplorerUrl
@@ -134,13 +133,20 @@ export default class Client implements XChainClient, EthereumClient {
     this.setupProviders()
   }
 
+  static async create(params: ClientParams): Promise<Client> {
+    const out = new Client(params)
+    if (params.phrase !== undefined) await out.setPhrase(params.phrase)
+    return out
+  }
+
   /**
    * Purge client.
    *
    * @returns {void}
    */
-  purgeClient = (): void => {
+  purgeClient = async (): Promise<this> => {
     this.hdNode = HDNode.fromMnemonic('')
+    return this
   }
 
   /**
@@ -170,7 +176,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Phrase must be provided"}
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): Address => {
+  getAddress = async (index = 0): Promise<Address> => {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
@@ -310,12 +316,10 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (!Crypto.validatePhrase(phrase)) {
-      throw new Error('Invalid phrase')
-    }
+  setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
+    if (!validatePhrase(phrase)) throw new Error('Invalid phrase')
     this.hdNode = HDNode.fromMnemonic(phrase)
-    return this.getAddress(walletIndex)
+    return await this.getAddress(walletIndex)
   }
 
   /**
@@ -338,7 +342,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
-      const ethAddress = address || this.getAddress()
+      const ethAddress = address || (await this.getAddress())
       // get ETH balance directly from provider
       const ethBalance: BigNumber = await this.getProvider().getBalance(ethAddress)
       const ethBalanceAmount = baseAmount(ethBalance.toString(), ETH_DECIMAL)

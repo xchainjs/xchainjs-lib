@@ -14,7 +14,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { Asset, assetAmount, assetToString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
+import { validatePhrase } from '@xchainjs/xchain-crypto'
 
 import { ApiPromise, WsProvider, Keyring } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'
@@ -32,6 +32,8 @@ export interface PolkadotClient {
   estimateFees(params: TxParams): Promise<Fees>
 }
 
+export type ClientParams = XChainClientParams
+
 /**
  * Custom Polkadot client
  */
@@ -44,21 +46,25 @@ class Client implements PolkadotClient, XChainClient {
    * Constructor
    * Client is initialised with network type and phrase (optional)
    *
-   * @param {XChainClientParams} params
+   * @param {ClientParams} params
    */
-  constructor({
+  protected constructor({
     network = 'testnet',
-    phrase,
     rootDerivationPaths = {
       mainnet: "44//354//0//0//0'", //TODO IS the root path we want to use?
       testnet: "44//354//0//0//0'",
     },
-  }: XChainClientParams) {
+  }: ClientParams) {
     this.network = network
     this.rootDerivationPaths = rootDerivationPaths
-
-    if (phrase) this.setPhrase(phrase)
   }
+
+  static async create(params: ClientParams): Promise<Client> {
+    const out = new Client(params)
+    if (params.phrase !== undefined) await out.setPhrase(params.phrase)
+    return out
+  }
+
   /**
    * Get getFullDerivationPath
    *
@@ -80,8 +86,9 @@ class Client implements PolkadotClient, XChainClient {
    *
    * @returns {void}
    */
-  purgeClient = (): void => {
+  purgeClient = async (): Promise<this> => {
     this.phrase = ''
+    return this
   }
 
   /**
@@ -176,15 +183,10 @@ class Client implements PolkadotClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (this.phrase !== phrase) {
-      if (!xchainCrypto.validatePhrase(phrase)) {
-        throw new Error('Invalid phrase')
-      }
-      this.phrase = phrase
-    }
-
-    return this.getAddress(walletIndex)
+  setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
+    if (!validatePhrase(phrase)) throw new Error('Invalid phrase')
+    this.phrase = phrase
+    return await this.getAddress(walletIndex)
   }
 
   /**
@@ -249,7 +251,7 @@ class Client implements PolkadotClient, XChainClient {
    *
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (index = 0): Address => {
+  getAddress = async (index = 0): Promise<Address> => {
     return this.getKeyringPair(index).address
   }
 
@@ -262,7 +264,7 @@ class Client implements PolkadotClient, XChainClient {
   getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
       const response: SubscanResponse<Account> = await axios
-        .post(`${this.getClientUrl()}/api/open/account`, { address: address || this.getAddress() })
+        .post(`${this.getClientUrl()}/api/open/account`, { address: address || (await this.getAddress()) })
         .then((res) => res.data)
 
       if (!isSuccess(response)) {
@@ -409,7 +411,7 @@ class Client implements PolkadotClient, XChainClient {
       // Check balances
       const paymentInfo = await transaction.paymentInfo(this.getKeyringPair(walletIndex))
       const fee = baseAmount(paymentInfo.partialFee.toString(), getDecimal(this.network))
-      const balances = await this.getBalance(this.getAddress(walletIndex), [AssetDOT])
+      const balances = await this.getBalance(await this.getAddress(walletIndex), [AssetDOT])
 
       if (!balances || params.amount.amount().plus(fee.amount()).isGreaterThan(balances[0].amount.amount())) {
         throw new Error('insufficient balance')
@@ -461,7 +463,7 @@ class Client implements PolkadotClient, XChainClient {
    */
   getFees = async (): Promise<Fees> => {
     return await this.estimateFees({
-      recipient: this.getAddress(),
+      recipient: await this.getAddress(),
       amount: baseAmount(0, getDecimal(this.network)),
     })
   }

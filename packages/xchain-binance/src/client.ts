@@ -61,7 +61,7 @@ export type MultiSendParams = {
  * Interface for custom Binance client
  */
 export interface BinanceClient {
-  purgeClient(): void
+  purgeClient(): Promise<this>
   getBncClient(): BncClient
 
   getMultiSendFees(): Promise<Fees>
@@ -69,6 +69,8 @@ export interface BinanceClient {
 
   multiSend(params: MultiSendParams): Promise<TxHash>
 }
+
+export type ClientParams = XChainClientParams
 
 /**
  * Custom Binance client
@@ -84,15 +86,20 @@ class Client implements BinanceClient, XChainClient {
    * Client has to be initialised with network type and phrase.
    * It will throw an error if an invalid phrase has been passed.
    *
-   * @param {XChainClientParams} params
+   * @param {ClientParams} params
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor({ network = 'testnet', phrase }: XChainClientParams) {
+  protected constructor({ network = 'testnet' }: ClientParams) {
     this.network = network
-    this.setPhrase(phrase || '')
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
+  }
+
+  static async create(params: ClientParams): Promise<Client> {
+    const out = new Client(params)
+    if (params.phrase !== undefined) await out.setPhrase(params.phrase)
+    return out
   }
 
   /**
@@ -100,8 +107,9 @@ class Client implements BinanceClient, XChainClient {
    *
    * @returns {void}
    */
-  purgeClient(): void {
+  async purgeClient(): Promise<this> {
     this.phrase = ''
+    return this
   }
 
   /**
@@ -188,13 +196,10 @@ class Client implements BinanceClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (!validatePhrase(phrase)) {
-      throw new Error('Invalid phrase')
-    }
-
+  setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
+    if (!validatePhrase(phrase)) throw new Error('Invalid phrase')
     this.phrase = phrase
-    return this.getAddress(walletIndex)
+    return await this.getAddress(walletIndex)
   }
 
   /**
@@ -220,7 +225,7 @@ class Client implements BinanceClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): string =>
+  getAddress = async (index = 0): Promise<string> =>
     crypto.getAddressFromPrivateKey(this.getPrivateKey(index), getPrefix(this.network))
 
   /**
@@ -367,7 +372,7 @@ class Client implements BinanceClient, XChainClient {
    */
   multiSend = async ({ walletIndex = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
     try {
-      const derivedAddress = this.getAddress(walletIndex)
+      const derivedAddress = await this.getAddress(walletIndex)
 
       await this.bncClient.initChain()
       await this.bncClient.setPrivateKey(this.getPrivateKey(walletIndex)).catch((error) => Promise.reject(error))
@@ -408,7 +413,7 @@ class Client implements BinanceClient, XChainClient {
         .catch((error: Error) => Promise.reject(error))
 
       const transferResult = await this.bncClient.transfer(
-        this.getAddress(),
+        await this.getAddress(),
         recipient,
         baseToAsset(amount).amount().toString(),
         asset ? asset.symbol : AssetBNB.symbol,

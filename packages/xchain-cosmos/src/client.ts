@@ -14,7 +14,7 @@ import {
   Network as XChainNetwork,
 } from '@xchainjs/xchain-client'
 import { Asset, baseAmount, assetToString } from '@xchainjs/xchain-util'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
+import { validatePhrase } from '@xchainjs/xchain-crypto'
 
 import { PrivKey, codec } from 'cosmos-client'
 import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
@@ -29,6 +29,8 @@ import { DECIMAL, getDenom, getAsset, getTxsFromHistory } from './util'
 export interface CosmosClient {
   getMainAsset(): Asset
 }
+
+export type ClientParams = XChainClientParams
 
 const MAINNET_SDK = new CosmosSDKClient({
   server: 'https://api.cosmos.network',
@@ -55,24 +57,27 @@ class Client implements CosmosClient, XChainClient {
    * Client has to be initialised with network type and phrase.
    * It will throw an error if an invalid phrase has been passed.
    *
-   * @param {XChainClientParams} params
+   * @param {ClientParams} params
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor({
+  protected constructor({
     network = 'testnet',
-    phrase,
     rootDerivationPaths = {
       mainnet: `44'/118'/0'/0/`,
       testnet: `44'/118'/1'/0/`,
     },
-  }: XChainClientParams) {
+  }: ClientParams) {
     this.network = network
     this.rootDerivationPaths = rootDerivationPaths
     this.sdkClients.set('testnet', TESTNET_SDK)
     this.sdkClients.set('mainnet', MAINNET_SDK)
+  }
 
-    if (phrase) this.setPhrase(phrase)
+  static async create(params: ClientParams): Promise<Client> {
+    const out = new Client(params)
+    if (params.phrase !== undefined) await out.setPhrase(params.phrase)
+    return out
   }
 
   /**
@@ -80,8 +85,9 @@ class Client implements CosmosClient, XChainClient {
    *
    * @returns {void}
    */
-  purgeClient(): void {
+  async purgeClient(): Promise<this> {
     this.phrase = ''
+    return this
   }
 
   /**
@@ -159,16 +165,10 @@ class Client implements CosmosClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (this.phrase !== phrase) {
-      if (!xchainCrypto.validatePhrase(phrase)) {
-        throw new Error('Invalid phrase')
-      }
-
-      this.phrase = phrase
-    }
-
-    return this.getAddress(walletIndex)
+  setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
+    if (!validatePhrase(phrase)) throw new Error('Invalid phrase')
+    this.phrase = phrase
+    return await this.getAddress(walletIndex)
   }
 
   /**
@@ -206,7 +206,7 @@ class Client implements CosmosClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): string => {
+  getAddress = async (index = 0): Promise<string> => {
     if (!this.phrase) throw new Error('Phrase not set')
 
     return this.getSDKClient().getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
@@ -279,7 +279,7 @@ class Client implements CosmosClient, XChainClient {
       const mainAsset = this.getMainAsset()
       const txHistory = await this.getSDKClient().searchTx({
         messageAction,
-        messageSender: (params && params.address) || this.getAddress(),
+        messageSender: (params && params.address) || (await this.getAddress()),
         page,
         limit,
         txMinHeight,
@@ -330,7 +330,7 @@ class Client implements CosmosClient, XChainClient {
       const mainAsset = this.getMainAsset()
       const transferResult = await this.getSDKClient().transfer({
         privkey: this.getPrivateKey(fromAddressIndex),
-        from: this.getAddress(fromAddressIndex),
+        from: await this.getAddress(fromAddressIndex),
         to: recipient,
         amount: amount.amount().toString(),
         asset: getDenom(asset || mainAsset),

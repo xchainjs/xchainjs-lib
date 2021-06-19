@@ -42,13 +42,13 @@ Initialize client and use class methods:
 import { Client, Network } from '../src/client'
 
 // Create a new client interface
-const btcClient = new Client({ network: 'mainnet', nodeUrl: 'https://sochain.com/api/v2' })
+const btcClient = await Client.create({ network: 'mainnet', nodeUrl: 'https://sochain.com/api/v2' })
 
 // Set phrase
-btcClient.setPhrase('phrase here')
+await btcClient.setPhrase('phrase here')
 
 // Get address
-const address = btcClient.getAddress()
+const address = await btcClient.getAddress()
 
 // Get balance
 const balance = await btcClient.getBalance()

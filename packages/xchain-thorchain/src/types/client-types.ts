@@ -1,4 +1,4 @@
-import { Network } from '@xchainjs/xchain-client/lib'
+import { Network, XChainClientParams } from '@xchainjs/xchain-client/lib'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
 export type NodeUrl = {
@@ -19,7 +19,7 @@ export type ExplorerUrls = {
 
 export type ExplorerUrl = Record<Network, string>
 
-export type ThorchainClientParams = {
+export type ThorchainClientParams = XChainClientParams & {
   clientUrl?: ClientUrl
   explorerUrls?: ExplorerUrls
 }

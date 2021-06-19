@@ -73,52 +73,48 @@ describe('Client Test', () => {
   const address0_testnet = 'cosmos13hrqe0g38nqnjgnstkfrlm2zd790g5yegntshv'
   const address1_testnet = 'cosmos1re8rf3sv2tkx88xx6825tjqtfntrrfj0h4u94u'
 
-  beforeEach(() => {
-    cosmosClient = new Client({ phrase, network: 'testnet' })
+  beforeEach(async () => {
+    cosmosClient = await Client.create({ phrase, network: 'testnet' })
   })
 
-  afterEach(() => {
-    cosmosClient.purgeClient()
+  afterEach(async () => {
+    await cosmosClient.purgeClient()
   })
 
   it('should start with empty wallet', async () => {
-    const cosmosClientEmptyMain = new Client({ phrase, network: 'mainnet' })
-    expect(cosmosClientEmptyMain.getAddress()).toEqual(address0_mainnet)
-    expect(cosmosClientEmptyMain.getAddress(1)).toEqual(address1_mainnet)
+    const cosmosClientEmptyMain = await Client.create({ phrase, network: 'mainnet' })
+    expect(await cosmosClientEmptyMain.getAddress()).toEqual(address0_mainnet)
+    expect(await cosmosClientEmptyMain.getAddress(1)).toEqual(address1_mainnet)
 
-    const cosmosClientEmptyTest = new Client({ phrase, network: 'testnet' })
-    expect(cosmosClientEmptyTest.getAddress()).toEqual(address0_testnet)
-    expect(cosmosClientEmptyTest.getAddress(1)).toEqual(address1_testnet)
+    const cosmosClientEmptyTest = await Client.create({ phrase, network: 'testnet' })
+    expect(await cosmosClientEmptyTest.getAddress()).toEqual(address0_testnet)
+    expect(await cosmosClientEmptyTest.getAddress(1)).toEqual(address1_testnet)
   })
 
   it('throws an error passing an invalid phrase', async () => {
-    expect(() => {
-      new Client({ phrase: 'invalid phrase', network: 'mainnet' })
-    }).toThrow()
+    await expect(Client.create({ phrase: 'invalid phrase', network: 'mainnet' })).rejects.toThrow()
 
-    expect(() => {
-      new Client({ phrase: 'invalid phrase', network: 'testnet' })
-    }).toThrow()
+    await expect(Client.create({ phrase: 'invalid phrase', network: 'testnet' })).rejects.toThrow()
   })
 
   it('should have right address', async () => {
-    expect(cosmosClient.getAddress()).toEqual(address0_testnet)
+    expect(await cosmosClient.getAddress()).toEqual(address0_testnet)
   })
 
   it('should update net', async () => {
-    const client = new Client({ phrase, network: 'mainnet' })
+    const client = await Client.create({ phrase, network: 'mainnet' })
     client.setNetwork('testnet')
     expect(client.getNetwork()).toEqual('testnet')
 
-    const address = client.getAddress()
+    const address = await client.getAddress()
     expect(address).toEqual(address)
   })
 
   it('should init, should have right prefix', async () => {
-    expect(cosmosClient.validateAddress(cosmosClient.getAddress())).toEqual(true)
+    expect(cosmosClient.validateAddress(await cosmosClient.getAddress())).toEqual(true)
 
     cosmosClient.setNetwork('mainnet')
-    expect(cosmosClient.validateAddress(cosmosClient.getAddress())).toEqual(true)
+    expect(cosmosClient.validateAddress(await cosmosClient.getAddress())).toEqual(true)
   })
 
   it('has no balances', async () => {
@@ -267,7 +263,7 @@ describe('Client Test', () => {
       height: 0,
     }
 
-    mockAccountsAddress(getClientUrl(cosmosClient), cosmosClient.getAddress(), {
+    mockAccountsAddress(getClientUrl(cosmosClient), await cosmosClient.getAddress(), {
       height: 0,
       result: {
         coins: [
@@ -282,7 +278,7 @@ describe('Client Test', () => {
     })
     assertTxsPost(
       getClientUrl(cosmosClient),
-      cosmosClient.getAddress(),
+      await cosmosClient.getAddress(),
       to_address,
       [
         {

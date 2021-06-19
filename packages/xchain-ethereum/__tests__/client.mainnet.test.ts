@@ -23,19 +23,19 @@ describe('Client Test', () => {
     nock.cleanAll()
   })
 
-  it('derive path correctly with bip44', () => {
-    const ethClient = new Client({
+  it('derive path correctly with bip44', async () => {
+    const ethClient = await Client.create({
       network: 'mainnet',
       phrase,
       ethplorerUrl,
     })
 
-    expect(ethClient.getAddress(0)).toEqual(addrPath0.toLowerCase())
-    expect(ethClient.getAddress(1)).toEqual(addrPath1.toLowerCase())
+    expect(await ethClient.getAddress(0)).toEqual(addrPath0.toLowerCase())
+    expect(await ethClient.getAddress(1)).toEqual(addrPath1.toLowerCase())
   })
 
   it('get transaction data', async () => {
-    const ethClient = new Client({
+    const ethClient = await Client.create({
       network: 'mainnet',
       phrase,
       ethplorerUrl,

@@ -28,10 +28,11 @@ interface BitcoinClient {
   getFeeRates(): Promise<FeeRates>
 }
 
-export type BitcoinClientParams = XChainClientParams & {
+export type ClientParams = XChainClientParams & {
   sochainUrl?: string
   blockstreamUrl?: string
 }
+export type BitcoinClientParams = ClientParams // backwards compat
 
 /**
  * Custom Bitcoin client
@@ -47,9 +48,9 @@ class Client implements BitcoinClient, XChainClient {
    * Constructor
    * Client is initialised with network type
    *
-   * @param {BitcoinClientParams} params
+   * @param {ClientParams} params
    */
-  constructor({
+  protected constructor({
     network = 'testnet',
     sochainUrl = 'https://sochain.com/api/v2',
     blockstreamUrl = 'https://blockstream.info',
@@ -57,13 +58,17 @@ class Client implements BitcoinClient, XChainClient {
       mainnet: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
       testnet: `84'/1'/0'/0/`,
     },
-    phrase,
-  }: BitcoinClientParams) {
+  }: ClientParams) {
     this.net = network
     this.rootDerivationPaths = rootDerivationPaths
     this.setSochainUrl(sochainUrl)
     this.setBlockstreamUrl(blockstreamUrl)
-    phrase && this.setPhrase(phrase)
+  }
+
+  static async create(params: ClientParams): Promise<Client> {
+    const out = new Client(params)
+    if (params.phrase !== undefined) await out.setPhrase(params.phrase)
+    return out
   }
 
   /**
@@ -95,13 +100,10 @@ class Client implements BitcoinClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (validatePhrase(phrase)) {
-      this.phrase = phrase
-      return this.getAddress(walletIndex)
-    } else {
-      throw new Error('Invalid phrase')
-    }
+  setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
+    if (!validatePhrase(phrase)) throw new Error('Invalid phrase')
+    this.phrase = phrase
+    return await this.getAddress(walletIndex)
   }
 
   /**
@@ -109,8 +111,9 @@ class Client implements BitcoinClient, XChainClient {
    *
    * @returns {void}
    */
-  purgeClient = (): void => {
+  purgeClient = async (): Promise<this> => {
     this.phrase = ''
+    return this
   }
 
   /**
@@ -189,7 +192,7 @@ class Client implements BitcoinClient, XChainClient {
    * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (index = 0): Address => {
+  getAddress = async (index = 0): Promise<Address> => {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
@@ -433,7 +436,7 @@ class Client implements BitcoinClient, XChainClient {
       const { psbt } = await Utils.buildTx({
         ...params,
         feeRate,
-        sender: this.getAddress(fromAddressIndex),
+        sender: await this.getAddress(fromAddressIndex),
         sochainUrl: this.sochainUrl,
         network: this.net,
         spendPendingUTXO,

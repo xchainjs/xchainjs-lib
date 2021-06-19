@@ -41,13 +41,13 @@ Initialize client and use class methods:
 import { Client, Network } from '../src/client'
 
 // Create a new client interface
-const bchClient = new Client({ network: 'mainnet' })
+const bchClient = await Client.create({ network: 'mainnet' })
 
 // Set phrase
-bchClient.setPhrase('phrase here')
+await bchClient.setPhrase('phrase here')
 
 // Get address
-const address = bchClient.getAddress()
+const address = await bchClient.getAddress()
 
 // Get balance
 const balance = await bchClient.getBalance()

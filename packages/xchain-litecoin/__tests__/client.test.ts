@@ -5,13 +5,15 @@ import { baseAmount, AssetLTC } from '@xchainjs/xchain-util'
 import mockSochainApi from '../__mocks__/sochain'
 mockSochainApi.init()
 
-const ltcClient = new Client({ network: 'testnet' })
+const ltcClientPromise = Client.create({ network: 'testnet' })
+let ltcClient: Client
 
 describe('LitecoinClient Test', () => {
-  beforeEach(() => {
-    ltcClient.purgeClient()
+  beforeEach(async () => {
+    ltcClient = await ltcClientPromise
+    await ltcClient.purgeClient()
   })
-  afterEach(() => ltcClient.purgeClient())
+  afterEach(async () => await ltcClient.purgeClient())
 
   const MEMO = 'SWAP:THOR.RUNE'
   const phraseOne = 'atom green various power must another rent imitate gadget creek fat then'
@@ -29,44 +31,44 @@ describe('LitecoinClient Test', () => {
   const phraseThree = 'quantum vehicle print stairs canvas kid erode grass baby orbit lake remove'
   const addyThree = 'tltc1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rz364adu'
 
-  it('set phrase should return correct address', () => {
+  it('set phrase should return correct address', async () => {
     ltcClient.setNetwork('testnet')
-    const result = ltcClient.setPhrase(phraseOne)
+    const result = await ltcClient.setPhrase(phraseOne)
     expect(result).toEqual(addyOne)
   })
 
-  it('should throw an error for setting a bad phrase', () => {
-    expect(() => ltcClient.setPhrase('cat')).toThrow()
+  it('should throw an error for setting a bad phrase', async () => {
+    await expect(ltcClient.setPhrase('cat')).rejects.toThrow()
   })
 
-  it('should not throw an error for setting a good phrase', () => {
-    expect(ltcClient.setPhrase(phraseOne)).toBeUndefined
+  it('should not throw an error for setting a good phrase', async () => {
+    expect(await ltcClient.setPhrase(phraseOne)).toBeUndefined
   })
 
-  it('should validate the right address', () => {
+  it('should validate the right address', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
-    const address = ltcClient.getAddress()
+    await ltcClient.setPhrase(phraseOne)
+    const address = await ltcClient.getAddress()
     const valid = ltcClient.validateAddress(address)
     expect(address).toEqual(addyOne)
     expect(valid).toBeTruthy()
   })
 
-  it('set phrase should return correct address', () => {
+  it('set phrase should return correct address', async () => {
     ltcClient.setNetwork('testnet')
-    expect(ltcClient.setPhrase(phraseOne)).toEqual(testnet_address_path0)
-    expect(ltcClient.getAddress(1)).toEqual(testnet_address_path1)
+    expect(await ltcClient.setPhrase(phraseOne)).toEqual(testnet_address_path0)
+    expect(await ltcClient.getAddress(1)).toEqual(testnet_address_path1)
 
     ltcClient.setNetwork('mainnet')
-    expect(ltcClient.setPhrase(phraseOne)).toEqual(mainnet_address_path0)
-    expect(ltcClient.getAddress(1)).toEqual(mainnet_address_path1)
+    expect(await ltcClient.setPhrase(phraseOne)).toEqual(mainnet_address_path0)
+    expect(await ltcClient.getAddress(1)).toEqual(mainnet_address_path1)
   })
 
   it('should get the right balance', async () => {
     const expectedBalance = 2223
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseThree)
-    const balance = await ltcClient.getBalance(ltcClient.getAddress())
+    await ltcClient.setPhrase(phraseThree)
+    const balance = await ltcClient.getBalance(await ltcClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
@@ -74,20 +76,20 @@ describe('LitecoinClient Test', () => {
   it('should get the right balance when scanUTXOs is called twice', async () => {
     const expectedBalance = 2223
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseThree)
+    await ltcClient.setPhrase(phraseThree)
 
-    const balance = await ltcClient.getBalance(ltcClient.getAddress())
+    const balance = await ltcClient.getBalance(await ltcClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
 
-    const newBalance = await ltcClient.getBalance(ltcClient.getAddress())
+    const newBalance = await ltcClient.getBalance(await ltcClient.getAddress())
     expect(newBalance.length).toEqual(1)
     expect(newBalance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
 
   it('should broadcast a normal transfer', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
+    await ltcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
     const txid = await ltcClient.transfer({ asset: AssetLTC, recipient: addyTwo, amount, feeRate: 1 })
     expect(txid).toEqual(expect.any(String))
@@ -95,20 +97,20 @@ describe('LitecoinClient Test', () => {
 
   it('should broadcast a normal transfer without feeRate', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
+    await ltcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
     const txid = await ltcClient.transfer({ asset: AssetLTC, recipient: addyTwo, amount })
     expect(txid).toEqual(expect.any(String))
   })
 
   it('should purge phrase and utxos', async () => {
-    ltcClient.purgeClient()
-    expect(() => ltcClient.getAddress()).toThrow('Phrase must be provided')
+    await ltcClient.purgeClient()
+    await expect(ltcClient.getAddress()).rejects.toThrow('Phrase must be provided')
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
+    await ltcClient.setPhrase(phraseOne)
 
     const amount = baseAmount(2223)
     try {
@@ -128,7 +130,7 @@ describe('LitecoinClient Test', () => {
 
   it('should get the balance of an address without phrase', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.purgeClient()
+    await ltcClient.purgeClient()
     const balance = await ltcClient.getBalance(addyThree)
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(2223)
@@ -136,7 +138,7 @@ describe('LitecoinClient Test', () => {
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
+    await ltcClient.setPhrase(phraseOne)
 
     const asset = AssetLTC
     const amount = baseAmount(9999999999)
@@ -147,7 +149,7 @@ describe('LitecoinClient Test', () => {
 
   it('returns fees and rates of a normal tx', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
+    await ltcClient.setPhrase(phraseOne)
     const { fees, rates } = await ltcClient.getFeesWithRates()
     // check fees
     expect(fees.fast).toBeDefined()
@@ -161,7 +163,7 @@ describe('LitecoinClient Test', () => {
 
   it('returns fees and rates of a tx w/ memo', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
+    await ltcClient.setPhrase(phraseOne)
     const { fees, rates } = await ltcClient.getFeesWithRates(MEMO)
     // check fees
     expect(fees.fast).toBeDefined()
@@ -175,7 +177,7 @@ describe('LitecoinClient Test', () => {
 
   it('should return estimated fees of a normal tx', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
+    await ltcClient.setPhrase(phraseOne)
     const estimates = await ltcClient.getFees()
     expect(estimates.fast).toBeDefined()
     expect(estimates.fastest).toBeDefined()
@@ -184,7 +186,7 @@ describe('LitecoinClient Test', () => {
 
   it('should return estimated fees of a vault tx that are more expensive than a normal tx (in case of > MIN_TX_FEE only)', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
+    await ltcClient.setPhrase(phraseOne)
     const normalTx = await ltcClient.getFees()
     const vaultTx = await ltcClient.getFeesWithMemo(MEMO)
 
@@ -209,23 +211,23 @@ describe('LitecoinClient Test', () => {
 
   it('returns different fee rates for a normal tx', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
+    await ltcClient.setPhrase(phraseOne)
     const { fast, fastest, average } = await ltcClient.getFeeRates()
     expect(fast > average)
     expect(fastest > fast)
   })
 
-  it('should error when an invalid address is used in getting balance', () => {
+  it('should error when an invalid address is used in getting balance', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
+    await ltcClient.setPhrase(phraseOne)
     const invalidAddress = 'error_address'
     const expectedError = 'Invalid address'
     return expect(ltcClient.getBalance(invalidAddress)).rejects.toThrow(expectedError)
   })
 
-  it('should error when an invalid address is used in transfer', () => {
+  it('should error when an invalid address is used in transfer', async () => {
     ltcClient.setNetwork('testnet')
-    ltcClient.setPhrase(phraseOne)
+    await ltcClient.setPhrase(phraseOne)
     const invalidAddress = 'error_address'
 
     const amount = baseAmount(99000)
@@ -274,7 +276,7 @@ describe('LitecoinClient Test', () => {
     expect(txData.to[1].amount.amount().isEqualTo(baseAmount(860365339, 8).amount())).toBeTruthy()
   })
 
-  it('should return valid explorer url', () => {
+  it('should return valid explorer url', async () => {
     ltcClient.setNetwork('mainnet')
     expect(ltcClient.getExplorerUrl()).toEqual('https://ltc.bitaps.com')
 
@@ -282,7 +284,7 @@ describe('LitecoinClient Test', () => {
     expect(ltcClient.getExplorerUrl()).toEqual('https://tltc.bitaps.com')
   })
 
-  it('should retrun valid explorer address url', () => {
+  it('should retrun valid explorer address url', async () => {
     ltcClient.setNetwork('mainnet')
     expect(ltcClient.getExplorerAddressUrl('testAddressHere')).toEqual('https://ltc.bitaps.com/testAddressHere')
     ltcClient.setNetwork('testnet')
@@ -291,7 +293,7 @@ describe('LitecoinClient Test', () => {
     )
   })
 
-  it('should retrun valid explorer tx url', () => {
+  it('should retrun valid explorer tx url', async () => {
     ltcClient.setNetwork('mainnet')
     expect(ltcClient.getExplorerTxUrl('testTxHere')).toEqual('https://ltc.bitaps.com/testTxHere')
     ltcClient.setNetwork('testnet')

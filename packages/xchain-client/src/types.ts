@@ -95,9 +95,9 @@ export interface XChainClient {
   getExplorerTxUrl(txID: string): string
 
   validateAddress(address: string): boolean
-  getAddress(walletIndex?: number): Address
+  getAddress(walletIndex?: number): Promise<Address>
 
-  setPhrase(phrase: string, walletIndex: number): Address
+  setPhrase(phrase: string, walletIndex: number): Promise<Address>
 
   getBalance(address: Address, assets?: Asset[]): Promise<Balances>
 
@@ -109,5 +109,14 @@ export interface XChainClient {
 
   transfer(params: TxParams): Promise<TxHash>
 
-  purgeClient(): void
+  purgeClient(): Promise<this>
 }
+
+export interface XChainClientFactory<T extends XChainClient, U extends XChainClientParams> {
+  create(params: U): Promise<T>
+}
+
+// These helper types make it easy to extract the specific Client and ClientParams
+// types an XChainClientFactory will create.
+export type XChainClientType<T> = T extends XChainClientFactory<infer R, any> ? R : never // eslint-disable-line @typescript-eslint/no-explicit-any
+export type XChainClientParamsType<T> = T extends XChainClientFactory<any, infer R> ? R : never // eslint-disable-line @typescript-eslint/no-explicit-any

@@ -31,13 +31,14 @@ interface BitcoinCashClient {
   getFeeRates(): Promise<FeeRates>
 }
 
-export type BitcoinCashClientParams = XChainClientParams & {
+export type ClientParams = XChainClientParams & {
   haskoinUrl?: ClientUrl
   nodeUrl?: ClientUrl
   nodeAuth?: NodeAuth
   rootPath?: string
   index?: number
 }
+export type BitcoinCashClientParams = ClientParams // backwards compat
 
 /**
  * Custom Bitcoin Cash client
@@ -54,15 +55,14 @@ class Client implements BitcoinCashClient, XChainClient {
    * Constructor
    * Client is initialised with network type
    *
-   * @param {BitcoinCashClientParams} params
+   * @param {ClientParams} params
    */
-  constructor({
+  protected constructor({
     network = 'testnet',
     haskoinUrl = {
       testnet: 'https://api.haskoin.com/bchtest',
       mainnet: 'https://api.haskoin.com/bch',
     },
-    phrase,
     nodeUrl = {
       testnet: 'https://testnet.bch.thorchain.info',
       mainnet: 'https://bch.thorchain.info',
@@ -75,16 +75,21 @@ class Client implements BitcoinCashClient, XChainClient {
       mainnet: `m/44'/145'/0'/0/`,
       testnet: `m/44'/1'/0'/0/`,
     },
-  }: BitcoinCashClientParams) {
+  }: ClientParams) {
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
     this.rootDerivationPaths = rootDerivationPaths
-    phrase && this.setPhrase(phrase)
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
       // by strictly passing nodeAuth as null value
       nodeAuth === null ? undefined : nodeAuth
+  }
+
+  static async create(params: ClientParams): Promise<Client> {
+    const out = new Client(params)
+    if (params.phrase !== undefined) await out.setPhrase(params.phrase)
+    return out
   }
 
   /**
@@ -135,13 +140,10 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (validatePhrase(phrase)) {
-      this.phrase = phrase
-      return this.getAddress(walletIndex)
-    } else {
-      throw new Error('Invalid phrase')
-    }
+  setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
+    if (!validatePhrase(phrase)) throw new Error('Invalid phrase')
+    this.phrase = phrase
+    return await this.getAddress(walletIndex)
   }
 
   /**
@@ -149,8 +151,9 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {void}
    */
-  purgeClient = (): void => {
+  purgeClient = async (): Promise<this> => {
     this.phrase = ''
+    return this
   }
 
   /**
@@ -242,7 +245,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (index = 0): Address => {
+  getAddress = async (index = 0): Promise<Address> => {
     if (this.phrase) {
       try {
         const keys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
@@ -429,7 +432,7 @@ class Client implements BitcoinCashClient, XChainClient {
       const { builder, utxos } = await utils.buildTx({
         ...params,
         feeRate,
-        sender: this.getAddress(),
+        sender: await this.getAddress(),
         haskoinUrl: this.getHaskoinURL(),
         network: this.network,
       })

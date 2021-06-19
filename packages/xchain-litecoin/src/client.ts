@@ -30,11 +30,12 @@ interface LitecoinClient {
   getFeeRates(): Promise<FeeRates>
 }
 
-export type LitecoinClientParams = XChainClientParams & {
+export type ClientParams = XChainClientParams & {
   sochainUrl?: string
   nodeUrl?: string
   nodeAuth?: NodeAuth | null
 }
+export type LitecoinClientParams = ClientParams // backwards compat
 
 /**
  * Custom Litecoin client
@@ -52,12 +53,11 @@ class Client implements LitecoinClient, XChainClient {
    * Client is initialised with network type
    * Pass strict null as nodeAuth to disable auth for node json rpc
    *
-   * @param {LitecoinClientParams} params
+   * @param {ClientParams} params
    */
-  constructor({
+  protected constructor({
     network = 'testnet',
     sochainUrl = 'https://sochain.com/api/v2',
-    phrase,
     nodeUrl,
     nodeAuth = {
       username: 'thorchain',
@@ -67,7 +67,7 @@ class Client implements LitecoinClient, XChainClient {
       mainnet: `m/84'/2'/0'/0/`,
       testnet: `m/84'/1'/0'/0/`,
     },
-  }: LitecoinClientParams) {
+  }: ClientParams) {
     this.net = network
     this.rootDerivationPaths = rootDerivationPaths
     this.nodeUrl = !!nodeUrl
@@ -82,7 +82,12 @@ class Client implements LitecoinClient, XChainClient {
       nodeAuth === null ? undefined : nodeAuth
 
     this.setSochainUrl(sochainUrl)
-    phrase && this.setPhrase(phrase)
+  }
+
+  static async create(params: ClientParams): Promise<Client> {
+    const out = new Client(params)
+    if (params.phrase !== undefined) await out.setPhrase(params.phrase)
+    return out
   }
 
   /**
@@ -104,13 +109,10 @@ class Client implements LitecoinClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (validatePhrase(phrase)) {
-      this.phrase = phrase
-      return this.getAddress(walletIndex)
-    } else {
-      throw new Error('Invalid phrase')
-    }
+  setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
+    if (!validatePhrase(phrase)) throw new Error('Invalid phrase')
+    this.phrase = phrase
+    return await this.getAddress(walletIndex)
   }
 
   /**
@@ -118,8 +120,9 @@ class Client implements LitecoinClient, XChainClient {
    *
    * @returns {void}
    */
-  purgeClient = (): void => {
+  purgeClient = async (): Promise<this> => {
     this.phrase = ''
+    return this
   }
 
   /**
@@ -198,7 +201,7 @@ class Client implements LitecoinClient, XChainClient {
    * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (index = 0): Address => {
+  getAddress = async (index = 0): Promise<Address> => {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
@@ -434,7 +437,7 @@ class Client implements LitecoinClient, XChainClient {
       const { psbt } = await Utils.buildTx({
         ...params,
         feeRate,
-        sender: this.getAddress(fromAddressIndex),
+        sender: await this.getAddress(fromAddressIndex),
         sochainUrl: this.sochainUrl,
         network: this.net,
       })
