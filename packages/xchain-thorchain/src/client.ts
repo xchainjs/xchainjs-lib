@@ -249,7 +249,7 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey = (index = 0): PrivKey =>
+  private getPrivateKey = async (index = 0): Promise<PrivKey> =>
     this.cosmosClient.getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
 
   /**
@@ -526,7 +526,7 @@ class Client implements ThorchainClient, XChainClient {
       })
 
       const unsignedStdTx = await this.buildDepositTx(msgNativeTx)
-      const privateKey = this.getPrivateKey(walletIndex)
+      const privateKey = await this.getPrivateKey(walletIndex)
       const accAddress = AccAddress.fromBech32(signer)
       const fee = unsignedStdTx.fee
       // max. gas
@@ -557,7 +557,7 @@ class Client implements ThorchainClient, XChainClient {
       }
 
       const transferResult = await this.cosmosClient.transfer({
-        privkey: this.getPrivateKey(walletIndex),
+        privkey: await this.getPrivateKey(walletIndex),
         from: await this.getAddress(walletIndex),
         to: recipient,
         amount: amount.amount().toString(),
