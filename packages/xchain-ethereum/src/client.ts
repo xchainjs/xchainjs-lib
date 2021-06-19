@@ -189,7 +189,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Phrase must be provided"}
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getWallet = (index = 0): ethers.Wallet => {
+  getWallet = async (index = 0): Promise<ethers.Wallet> => {
     return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(index))).connect(this.getProvider())
   }
   setupProviders = (): void => {
@@ -549,7 +549,9 @@ export default class Client implements XChainClient, EthereumClient {
     if (!contractAddress) {
       return Promise.reject(new Error('contractAddress must be provided'))
     }
-    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(walletIndex))
+    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(
+      await this.getWallet(walletIndex),
+    )
     return contract[func](...params)
   }
 
@@ -574,7 +576,7 @@ export default class Client implements XChainClient, EthereumClient {
     if (!contractAddress) {
       return Promise.reject(new Error('contractAddress must be provided'))
     }
-    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(0))
+    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(await this.getWallet(0))
     return contract.estimateGas[func](...params)
   }
 
@@ -746,7 +748,7 @@ export default class Client implements XChainClient, EthereumClient {
           },
         )
 
-        txResult = await this.getWallet().sendTransaction(transactionRequest)
+        txResult = await (await this.getWallet()).sendTransaction(transactionRequest)
       }
 
       return txResult.hash

@@ -50,14 +50,14 @@ describe('Client Test', () => {
       network: 'testnet',
       phrase,
     })
-    expect(ethClient.getWallet()).toBeInstanceOf(Wallet)
-    expect(ethClient.getWallet()._signingKey()).toMatchObject(wallet.signingKey)
+    expect(await ethClient.getWallet()).toBeInstanceOf(Wallet)
+    expect((await ethClient.getWallet())._signingKey()).toMatchObject(wallet.signingKey)
   })
 
   it('should set new phrase', async () => {
     const ethClient = await Client.create({ phrase })
     const newWallet = await ethClient.setPhrase(newPhrase)
-    expect(ethClient.getWallet().mnemonic.phrase).toEqual(newPhrase)
+    expect((await ethClient.getWallet()).mnemonic.phrase).toEqual(newPhrase)
     expect(newWallet).toBeTruthy()
   })
 
@@ -72,10 +72,10 @@ describe('Client Test', () => {
       phrase,
     })
 
-    expect(ethClient.getWallet()).toBeInstanceOf(Wallet)
-    expect(ethClient.getWallet().provider).toBeInstanceOf(providers.FallbackProvider)
-    expect(ethClient.getWallet()._signingKey()).toMatchObject(wallet.signingKey)
-    const network = await ethClient.getWallet().provider.getNetwork()
+    expect(await ethClient.getWallet()).toBeInstanceOf(Wallet)
+    expect((await ethClient.getWallet()).provider).toBeInstanceOf(providers.FallbackProvider)
+    expect((await ethClient.getWallet())._signingKey()).toMatchObject(wallet.signingKey)
+    const network = await (await ethClient.getWallet()).provider.getNetwork()
     expect(network.name).toEqual('homestead')
     expect(network.chainId).toEqual(1)
   })
@@ -90,7 +90,7 @@ describe('Client Test', () => {
       },
     })
 
-    expect(ethClient.getWallet().provider).toBeInstanceOf(providers.InfuraProvider)
+    expect((await ethClient.getWallet()).provider).toBeInstanceOf(providers.InfuraProvider)
   })
 
   it('should set network', async () => {
@@ -100,7 +100,7 @@ describe('Client Test', () => {
     })
     await ethClient.setNetwork('testnet')
 
-    const network = await ethClient.getWallet().provider.getNetwork()
+    const network = await (await ethClient.getWallet()).provider.getNetwork()
     expect(network.name).toEqual('ropsten')
     expect(network.chainId).toEqual(3)
   })
