@@ -54,7 +54,7 @@ public address: Address
 Used to set a type of `Network`, which is either `'mainnet'` or `'testnet'`. 
 
 ```ts
-setNetwork(net: Network): XChainClient
+setNetwork(net: Network): Promise<XChainClient>
 ```
 Returns the client. 
 

@@ -291,12 +291,13 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork = (network: XChainNetwork): void => {
+  setNetwork = async (network: XChainNetwork): Promise<this> => {
     if (!network) {
       throw new Error('Network must be provided')
     } else {
       this.network = xchainNetworkToEths(network)
     }
+    return this
   }
   /**
    * Get getFullDerivationPath

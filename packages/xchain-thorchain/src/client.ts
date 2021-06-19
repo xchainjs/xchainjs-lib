@@ -126,13 +126,15 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork = (network: Network): void => {
+  setNetwork = async (network: Network): Promise<this> => {
     if (!network) {
       throw new Error('Network must be provided')
     }
 
     this.network = network
     this.cosmosClient.updatePrefix(getPrefix(this.network))
+
+    return this
   }
 
   /**

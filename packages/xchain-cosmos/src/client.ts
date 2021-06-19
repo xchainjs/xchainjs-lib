@@ -99,12 +99,13 @@ class Client implements CosmosClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork = (network: Network): void => {
+  setNetwork = async (network: Network): Promise<this> => {
     if (!network) {
       throw new Error('Network must be provided')
     } else {
       this.network = network
     }
+    return this
   }
 
   /**

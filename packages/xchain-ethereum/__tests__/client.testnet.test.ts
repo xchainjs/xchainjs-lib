@@ -98,7 +98,7 @@ describe('Client Test', () => {
       network: 'testnet',
       phrase,
     })
-    ethClient.setNetwork('testnet')
+    await ethClient.setNetwork('testnet')
 
     const network = await ethClient.getWallet().provider.getNetwork()
     expect(network.name).toEqual('ropsten')

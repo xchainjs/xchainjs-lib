@@ -125,11 +125,12 @@ class Client implements BitcoinClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork = (net: Network): void => {
+  setNetwork = async (net: Network): Promise<this> => {
     if (!net) {
       throw new Error('Network must be provided')
     }
     this.net = net
+    return this
   }
 
   /**

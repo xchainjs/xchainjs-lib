@@ -39,12 +39,12 @@ describe('Client Test', () => {
   it('should have right address', async () => {
     expect(await polkadotClient.getAddress()).toEqual(testnet_address)
 
-    polkadotClient.setNetwork('mainnet')
+    await polkadotClient.setNetwork('mainnet')
     expect(await polkadotClient.getAddress()).toEqual(mainnet_address)
   })
 
   it('should update net', async () => {
-    polkadotClient.setNetwork('mainnet')
+    await polkadotClient.setNetwork('mainnet')
     expect(polkadotClient.getNetwork()).toEqual('mainnet')
 
     const address = await polkadotClient.getAddress()
@@ -52,17 +52,17 @@ describe('Client Test', () => {
   })
 
   it('should validate address', async () => {
-    polkadotClient.setNetwork('mainnet')
+    await polkadotClient.setNetwork('mainnet')
     expect(polkadotClient.validateAddress(testnet_address)).toEqual(false)
     expect(polkadotClient.validateAddress(mainnet_address)).toEqual(true)
 
-    polkadotClient.setNetwork('testnet')
+    await polkadotClient.setNetwork('testnet')
     expect(polkadotClient.validateAddress(mainnet_address)).toEqual(false)
     expect(polkadotClient.validateAddress(testnet_address)).toEqual(true)
   })
 
   it('no balances', async () => {
-    polkadotClient.setNetwork('mainnet')
+    await polkadotClient.setNetwork('mainnet')
 
     assertAccountsBalance(polkadotClient.getClientUrl(), mainnet_address, {
       code: 0,
@@ -93,7 +93,7 @@ describe('Client Test', () => {
   })
 
   it('no txHistory', async () => {
-    polkadotClient.setNetwork('mainnet')
+    await polkadotClient.setNetwork('mainnet')
 
     assertTxHistory(polkadotClient.getClientUrl(), mainnet_address, {
       code: 0,

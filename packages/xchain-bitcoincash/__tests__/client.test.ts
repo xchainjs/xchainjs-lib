@@ -29,19 +29,19 @@ describe('BCHClient Test', () => {
   const mainnet_address_path1 = 'qr4jrkhu3usuk8ghv60m7pg9eywuc79yqvd0wxt2lm'
 
   it('set phrase should return correct address', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     expect(await bchClient.setPhrase(phrase)).toEqual(testnet_address_path0)
 
-    bchClient.setNetwork('mainnet')
+    await bchClient.setNetwork('mainnet')
     expect(await bchClient.setPhrase(phrase)).toEqual(mainnet_address_path0)
   })
 
   it('set phrase with derivation path should return correct address', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     expect(await bchClient.setPhrase(phrase)).toEqual(testnet_address_path0)
     expect(await bchClient.getAddress(1)).toEqual(testnet_address_path1)
 
-    bchClient.setNetwork('mainnet')
+    await bchClient.setNetwork('mainnet')
     expect(await bchClient.setPhrase(phrase)).toEqual(mainnet_address_path0)
     expect(await bchClient.getAddress(1)).toEqual(mainnet_address_path1)
   })
@@ -55,45 +55,45 @@ describe('BCHClient Test', () => {
   })
 
   it('should validate the right address', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
     expect(await bchClient.getAddress()).toEqual(testnet_address_path0)
     expect(bchClient.validateAddress(testnet_address_path0)).toBeTruthy()
 
-    bchClient.setNetwork('mainnet')
+    await bchClient.setNetwork('mainnet')
     expect(bchClient.validateAddress(mainnet_address_path0)).toBeTruthy()
   })
 
-  it('should return valid explorer url', () => {
-    bchClient.setNetwork('mainnet')
+  it('should return valid explorer url', async () => {
+    await bchClient.setNetwork('mainnet')
     expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch')
 
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch-testnet')
   })
 
-  it('should retrun valid explorer address url', () => {
-    bchClient.setNetwork('mainnet')
+  it('should retrun valid explorer address url', async () => {
+    await bchClient.setNetwork('mainnet')
     expect(bchClient.getExplorerAddressUrl('testAddressHere')).toEqual(
       'https://www.blockchain.com/bch/address/testAddressHere',
     )
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     expect(bchClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
       'https://www.blockchain.com/bch-testnet/address/anotherTestAddressHere',
     )
   })
 
-  it('should retrun valid explorer tx url', () => {
-    bchClient.setNetwork('mainnet')
+  it('should retrun valid explorer tx url', async () => {
+    await bchClient.setNetwork('mainnet')
     expect(bchClient.getExplorerTxUrl('testTxHere')).toEqual('https://www.blockchain.com/bch/tx/testTxHere')
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     expect(bchClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://www.blockchain.com/bch-testnet/tx/anotherTestTxHere',
     )
   })
 
   it('should get the right balance', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
     mock_getBalance(bchClient.getHaskoinURL(), await bchClient.getAddress(), {
@@ -110,7 +110,7 @@ describe('BCHClient Test', () => {
   })
 
   it('should get the right balance', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
     mock_getBalance(bchClient.getHaskoinURL(), await bchClient.getAddress(), {
@@ -127,7 +127,7 @@ describe('BCHClient Test', () => {
   })
 
   it('should get transaction data', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
     mock_getTransactionData(
@@ -197,7 +197,7 @@ describe('BCHClient Test', () => {
   })
 
   it('should get transactions', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
     mock_getBalance(bchClient.getHaskoinURL(), 'bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf', {
@@ -274,7 +274,7 @@ describe('BCHClient Test', () => {
   })
 
   it('should transfer bch', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
     mock_getBalance(
@@ -324,7 +324,7 @@ describe('BCHClient Test', () => {
   })
 
   it('returns fees and rates of a normal tx', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
     mock_estimateFee()
@@ -341,7 +341,7 @@ describe('BCHClient Test', () => {
   })
 
   it('returns fees and rates of a tx w/ memo', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
     mock_estimateFee()
@@ -358,7 +358,7 @@ describe('BCHClient Test', () => {
   })
 
   it('should return estimated fees of a normal tx', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
     mock_estimateFee()
@@ -370,7 +370,7 @@ describe('BCHClient Test', () => {
   })
 
   it('returns different fee rates for a normal tx', async () => {
-    bchClient.setNetwork('testnet')
+    await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
 
     mock_estimateFee()

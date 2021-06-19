@@ -130,7 +130,7 @@ class Client implements BinanceClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork(network: Network): void {
+  async setNetwork(network: Network): Promise<this> {
     if (!network) {
       throw new Error('Network must be provided')
     } else {
@@ -138,6 +138,7 @@ class Client implements BinanceClient, XChainClient {
       this.bncClient = new BncClient(this.getClientUrl())
       this.bncClient.chooseNetwork(network)
     }
+    return this
   }
 
   /**

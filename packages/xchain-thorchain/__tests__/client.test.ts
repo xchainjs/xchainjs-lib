@@ -140,7 +140,7 @@ describe('Client Test', () => {
   })
 
   it('should update net', async () => {
-    thorMainClient.setNetwork('testnet')
+    await thorMainClient.setNetwork('testnet')
     expect(thorMainClient.getNetwork()).toEqual('testnet')
 
     const address = await thorMainClient.getAddress()
@@ -150,7 +150,7 @@ describe('Client Test', () => {
   it('should init, should have right prefix', async () => {
     expect(thorClient.validateAddress(await thorClient.getAddress())).toEqual(true)
 
-    thorClient.setNetwork('mainnet')
+    await thorClient.setNetwork('mainnet')
     expect(thorClient.validateAddress(await thorClient.getAddress())).toEqual(true)
   })
 
@@ -166,10 +166,10 @@ describe('Client Test', () => {
       },
     })
 
-    thorClient.setNetwork('mainnet')
+    await thorClient.setNetwork('mainnet')
     expect(thorClient.getClientUrl().node).toEqual('new mainnet client')
 
-    thorClient.setNetwork('testnet')
+    await thorClient.setNetwork('testnet')
     expect(thorClient.getClientUrl().node).toEqual('new testnet client')
   })
 
@@ -183,7 +183,7 @@ describe('Client Test', () => {
   })
 
   it('has balances', async () => {
-    thorMainClient.setNetwork('mainnet')
+    await thorMainClient.setNetwork('mainnet')
     // mainnet - has balance: thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5
     // mainnet - 0: thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws
     mockAccountsBalance(thorMainClient.getClientUrl().node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
@@ -517,26 +517,26 @@ describe('Client Test', () => {
     expect(tx.to[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
   })
 
-  it('should return valid explorer url', () => {
+  it('should return valid explorer url', async () => {
     expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain?network=testnet')
 
-    thorClient.setNetwork('mainnet')
+    await thorClient.setNetwork('mainnet')
     expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain')
   })
 
-  it('should retrun valid explorer address url', () => {
+  it('should retrun valid explorer address url', async () => {
     expect(thorClient.getExplorerAddressUrl('tthorabc')).toEqual(
       'https://viewblock.io/thorchain/address/tthorabc?network=testnet',
     )
 
-    thorClient.setNetwork('mainnet')
+    await thorClient.setNetwork('mainnet')
     expect(thorClient.getExplorerAddressUrl('thorabc')).toEqual('https://viewblock.io/thorchain/address/thorabc')
   })
 
-  it('should retrun valid explorer tx url', () => {
+  it('should retrun valid explorer tx url', async () => {
     expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash?network=testnet')
 
-    thorClient.setNetwork('mainnet')
+    await thorClient.setNetwork('mainnet')
     expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash')
   })
 })
