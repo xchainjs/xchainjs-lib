@@ -136,7 +136,7 @@ describe('Client Test', () => {
   })
 
   it('should allow to get the CosmosSDKClient', async () => {
-    expect(thorClient.getCosmosClient()).toBeInstanceOf(CosmosSDKClient)
+    expect(await thorClient.getCosmosClient()).toBeInstanceOf(CosmosSDKClient)
   })
 
   it('should update net', async () => {

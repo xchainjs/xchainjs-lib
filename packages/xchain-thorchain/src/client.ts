@@ -52,7 +52,7 @@ export interface ThorchainClient {
   setClientUrl(clientUrl: ClientUrl): void
   getClientUrl(): NodeUrl
   setExplorerUrls(explorerUrls: ExplorerUrls): void
-  getCosmosClient(): CosmosSDKClient
+  getCosmosClient(): Promise<CosmosSDKClient>
 
   deposit(params: DepositParam): Promise<TxHash>
 }
@@ -68,7 +68,7 @@ class Client implements ThorchainClient, XChainClient {
   private explorerUrls: ExplorerUrls
   private phrase = ''
   private rootDerivationPaths: RootDerivationPaths
-  private cosmosClient: CosmosSDKClient
+  private cosmosClient: Promise<CosmosSDKClient>
 
   /**
    * Constructor
@@ -94,11 +94,12 @@ class Client implements ThorchainClient, XChainClient {
     this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
     this.rootDerivationPaths = rootDerivationPaths
 
-    this.cosmosClient = new CosmosSDKClient({
-      server: this.getClientUrl().node,
-      chainId: this.getChainId(),
-      prefix: getPrefix(this.network),
-    })
+    this.cosmosClient = (async () =>
+      new CosmosSDKClient({
+        server: this.getClientUrl().node,
+        chainId: this.getChainId(),
+        prefix: getPrefix(await this.getNetwork()),
+      }))()
   }
 
   static async create(params: ClientParams): Promise<Client> {
@@ -132,7 +133,7 @@ class Client implements ThorchainClient, XChainClient {
     }
 
     this.network = network
-    this.cosmosClient.updatePrefix(getPrefix(this.network))
+    ;(await this.getCosmosClient()).updatePrefix(getPrefix(this.network))
 
     return this
   }
@@ -186,7 +187,7 @@ class Client implements ThorchainClient, XChainClient {
    * Get cosmos client
    * @returns {CosmosSDKClient} current cosmos client
    */
-  getCosmosClient = (): CosmosSDKClient => this.cosmosClient
+  getCosmosClient = async (): Promise<CosmosSDKClient> => await this.cosmosClient
 
   /**
    * Get the chain id.
@@ -250,7 +251,7 @@ class Client implements ThorchainClient, XChainClient {
    * Throws an error if phrase has not been set before
    * */
   private getPrivateKey = async (index = 0): Promise<PrivKey> =>
-    this.cosmosClient.getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+    (await this.getCosmosClient()).getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
 
   /**
    * Get the current address.
@@ -260,7 +261,10 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
   getAddress = async (index = 0): Promise<string> => {
-    const address = this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+    const address = (await this.getCosmosClient()).getAddressFromMnemonic(
+      this.phrase,
+      this.getFullDerivationPath(index),
+    )
     if (!address) {
       throw new Error('address not defined')
     }
@@ -275,7 +279,7 @@ class Client implements ThorchainClient, XChainClient {
    * @returns {boolean} `true` or `false`
    */
   validateAddress = async (address: Address): Promise<boolean> => {
-    return this.cosmosClient.checkAddress(address)
+    return (await this.getCosmosClient()).checkAddress(address)
   }
 
   /**
@@ -287,7 +291,7 @@ class Client implements ThorchainClient, XChainClient {
    */
   getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
-      const balances = await this.cosmosClient.getBalance(address)
+      const balances = await (await this.getCosmosClient()).getBalance(address)
       return balances
         .map((balance) => ({
           asset: (balance.denom && getAsset(balance.denom)) || AssetRune,
@@ -322,7 +326,7 @@ class Client implements ThorchainClient, XChainClient {
       registerCodecs(this.network)
 
       const txIncomingHistory = (
-        await this.cosmosClient.searchTxFromRPC({
+        await (await this.getCosmosClient()).searchTxFromRPC({
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
           transferRecipient: params?.address,
@@ -332,7 +336,7 @@ class Client implements ThorchainClient, XChainClient {
         })
       ).txs
       const txOutgoingHistory = (
-        await this.cosmosClient.searchTxFromRPC({
+        await (await this.getCosmosClient()).searchTxFromRPC({
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
           transferSender: params?.address,
@@ -388,7 +392,7 @@ class Client implements ThorchainClient, XChainClient {
    */
   getTransactionData = async (txId: string): Promise<Tx> => {
     try {
-      const txResult = await this.cosmosClient.txsHashGet(txId)
+      const txResult = await (await this.getCosmosClient()).txsHashGet(txId)
       const action = getTxType(txResult.data, 'hex')
       let txs: Txs = []
 
@@ -532,7 +536,7 @@ class Client implements ThorchainClient, XChainClient {
       // max. gas
       fee.gas = '20000000'
 
-      return this.cosmosClient
+      return (await this.getCosmosClient())
         .signAndBroadcast(unsignedStdTx, privateKey, accAddress)
         .then((result) => result?.txhash ?? '')
     } catch (error) {
@@ -556,7 +560,7 @@ class Client implements ThorchainClient, XChainClient {
         throw new Error('insufficient funds')
       }
 
-      const transferResult = await this.cosmosClient.transfer({
+      const transferResult = await (await this.getCosmosClient()).transfer({
         privkey: await this.getPrivateKey(walletIndex),
         from: await this.getAddress(walletIndex),
         to: recipient,
