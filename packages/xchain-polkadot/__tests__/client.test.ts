@@ -20,7 +20,7 @@ describe('Client Test', () => {
     polkadotClient = await Client.create({ phrase, network: 'testnet' })
 
     globalWs = global.WebSocket
-    mock = mockWs(polkadotClient.getWsEndpoint())
+    mock = mockWs(await polkadotClient.getWsEndpoint())
   })
 
   afterEach(async () => {

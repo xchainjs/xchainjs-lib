@@ -28,7 +28,7 @@ import { isSuccess, getDecimal } from './util'
  */
 export interface PolkadotClient {
   getSS58Format(): Promise<number>
-  getWsEndpoint(): string
+  getWsEndpoint(): Promise<string>
   estimateFees(params: TxParams): Promise<Fees>
 }
 
@@ -133,7 +133,7 @@ class Client implements PolkadotClient, XChainClient {
    *
    * @returns {string} The client WebSocket url based on the network.
    */
-  getWsEndpoint = (): string => {
+  getWsEndpoint = async (): Promise<string> => {
     return this.network === 'testnet' ? 'wss://westend-rpc.polkadot.io' : 'wss://rpc.polkadot.io'
   }
 
@@ -213,7 +213,7 @@ class Client implements PolkadotClient, XChainClient {
    * */
   private getAPI = async (): Promise<ApiPromise> => {
     try {
-      const api = new ApiPromise({ provider: new WsProvider(this.getWsEndpoint()) })
+      const api = new ApiPromise({ provider: new WsProvider(await this.getWsEndpoint()) })
       await api.isReady
 
       if (!api.isConnected) {
