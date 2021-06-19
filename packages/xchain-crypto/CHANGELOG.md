@@ -1,4 +1,6 @@
-# v.x.x.x (2021-XX-XX)
+# v.0.2.5 (2021-06-19)
+
+- added support to use the generatePhrase() in node
 
 # v.0.2.3 (2021-01-30)
 

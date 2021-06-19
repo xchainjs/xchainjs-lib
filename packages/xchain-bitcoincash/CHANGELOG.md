@@ -1,3 +1,7 @@
+# v.0.11.6 (2021-06-19)
+
+- changed rollupjs to treat axios as external lib
+
 # v.0.11.5 (2021-06-01)
 
 - update peer deps
