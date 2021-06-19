@@ -50,7 +50,7 @@ import {
  */
 export interface ThorchainClient {
   setClientUrl(clientUrl: ClientUrl): void
-  getClientUrl(): NodeUrl
+  getClientUrl(): Promise<NodeUrl>
   setExplorerUrls(explorerUrls: ExplorerUrls): void
   getCosmosClient(): Promise<CosmosSDKClient>
 
@@ -96,7 +96,7 @@ class Client implements ThorchainClient, XChainClient {
 
     this.cosmosClient = (async () =>
       new CosmosSDKClient({
-        server: this.getClientUrl().node,
+        server: (await this.getClientUrl()).node,
         chainId: this.getChainId(),
         prefix: getPrefix(await this.getNetwork()),
       }))()
@@ -162,7 +162,7 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @returns {NodeUrl} The client url for thorchain based on the current network.
    */
-  getClientUrl = (): NodeUrl => this.clientUrl[this.network]
+  getClientUrl = async (): Promise<NodeUrl> => this.clientUrl[this.network]
 
   /**
    * Set/update the explorer URLs.
@@ -327,7 +327,7 @@ class Client implements ThorchainClient, XChainClient {
 
       const txIncomingHistory = (
         await (await this.getCosmosClient()).searchTxFromRPC({
-          rpcEndpoint: this.getClientUrl().rpc,
+          rpcEndpoint: (await this.getClientUrl()).rpc,
           messageAction,
           transferRecipient: params?.address,
           limit: MAX_TX_COUNT,
@@ -337,7 +337,7 @@ class Client implements ThorchainClient, XChainClient {
       ).txs
       const txOutgoingHistory = (
         await (await this.getCosmosClient()).searchTxFromRPC({
-          rpcEndpoint: this.getClientUrl().rpc,
+          rpcEndpoint: (await this.getClientUrl()).rpc,
           messageAction,
           transferSender: params?.address,
           limit: MAX_TX_COUNT,
@@ -428,7 +428,7 @@ class Client implements ThorchainClient, XChainClient {
   getDepositTransaction = async (txId: string): Promise<Omit<Tx, 'date'>> => {
     try {
       const result: TxResult = await axios
-        .get(`${this.getClientUrl().node}/thorchain/tx/${txId}`)
+        .get(`${(await this.getClientUrl()).node}/thorchain/tx/${txId}`)
         .then((response) => response.data)
 
       if (!result || !result.observed_tx) {
@@ -473,7 +473,7 @@ class Client implements ThorchainClient, XChainClient {
   private buildDepositTx = async (msgNativeTx: MsgNativeTx): Promise<StdTx> => {
     try {
       const response: ThorchainDepositResponse = await axios
-        .post(`${this.getClientUrl().node}/thorchain/deposit`, {
+        .post(`${(await this.getClientUrl()).node}/thorchain/deposit`, {
           coins: msgNativeTx.coins,
           memo: msgNativeTx.memo,
           base_req: {

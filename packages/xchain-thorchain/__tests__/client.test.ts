@@ -167,14 +167,14 @@ describe('Client Test', () => {
     })
 
     await thorClient.setNetwork('mainnet')
-    expect(thorClient.getClientUrl().node).toEqual('new mainnet client')
+    expect((await thorClient.getClientUrl()).node).toEqual('new mainnet client')
 
     await thorClient.setNetwork('testnet')
-    expect(thorClient.getClientUrl().node).toEqual('new testnet client')
+    expect((await thorClient.getClientUrl()).node).toEqual('new testnet client')
   })
 
   it('has no balances', async () => {
-    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
+    mockAccountsBalance((await thorClient.getClientUrl()).node, testnet_address_path0, {
       height: 0,
       result: [],
     })
@@ -186,7 +186,7 @@ describe('Client Test', () => {
     await thorMainClient.setNetwork('mainnet')
     // mainnet - has balance: thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5
     // mainnet - 0: thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws
-    mockAccountsBalance(thorMainClient.getClientUrl().node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
+    mockAccountsBalance((await thorMainClient.getClientUrl()).node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
       height: 0,
       result: [
         {
@@ -208,7 +208,7 @@ describe('Client Test', () => {
       txs: [],
     }
 
-    mockTxHistory(thorClient.getClientUrl().rpc, {
+    mockTxHistory((await thorClient.getClientUrl()).rpc, {
       jsonrpc: '2.0',
       id: -1,
       result: {
@@ -225,7 +225,7 @@ describe('Client Test', () => {
   })
 
   it('has tx history', async () => {
-    mockTxHistory(thorClient.getClientUrl().rpc, {
+    mockTxHistory((await thorClient.getClientUrl()).rpc, {
       jsonrpc: '2.0',
       id: -1,
       result: {
@@ -301,7 +301,7 @@ describe('Client Test', () => {
     })
 
     assertTxHashGet(
-      thorClient.getClientUrl().node,
+      (await thorClient.getClientUrl()).node,
       '098E70A9529AC8F1A57AA0FE65D1D13040B0E803AB8BE7F3B32098164009DED3',
       {
         height: 0,
@@ -364,7 +364,7 @@ describe('Client Test', () => {
       logs: [],
     }
 
-    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address_path0, {
+    mockAccountsAddress((await thorClient.getClientUrl()).node, testnet_address_path0, {
       height: 0,
       result: {
         coins: [
@@ -377,7 +377,7 @@ describe('Client Test', () => {
         sequence: '0',
       },
     })
-    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
+    mockAccountsBalance((await thorClient.getClientUrl()).node, testnet_address_path0, {
       height: 0,
       result: [
         {
@@ -386,7 +386,7 @@ describe('Client Test', () => {
         },
       ],
     })
-    assertTxsPost(thorClient.getClientUrl().node, memo, expected_txsPost_result)
+    assertTxsPost((await thorClient.getClientUrl()).node, memo, expected_txsPost_result)
 
     const result = await thorClient.transfer({
       asset: AssetRune,
@@ -410,7 +410,7 @@ describe('Client Test', () => {
       logs: [],
     }
 
-    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address_path0, {
+    mockAccountsAddress((await thorClient.getClientUrl()).node, testnet_address_path0, {
       height: 0,
       result: {
         coins: [
@@ -423,7 +423,7 @@ describe('Client Test', () => {
         sequence: '0',
       },
     })
-    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
+    mockAccountsBalance((await thorClient.getClientUrl()).node, testnet_address_path0, {
       height: 0,
       result: [
         {
@@ -432,7 +432,7 @@ describe('Client Test', () => {
         },
       ],
     })
-    mockThorchainDeposit(thorClient.getClientUrl().node, {
+    mockThorchainDeposit((await thorClient.getClientUrl()).node, {
       type: 'cosmos-sdk/StdTx',
       value: {
         msg: [
@@ -459,7 +459,7 @@ describe('Client Test', () => {
         timeout_height: '0',
       },
     })
-    assertTxsPost(thorClient.getClientUrl().node, '', expected_txsPost_result)
+    assertTxsPost((await thorClient.getClientUrl()).node, '', expected_txsPost_result)
 
     const result = await thorClient.deposit({
       asset: AssetRune,
@@ -472,7 +472,7 @@ describe('Client Test', () => {
 
   it('get transaction data', async () => {
     assertTxHashGet(
-      thorClient.getClientUrl().node,
+      (await thorClient.getClientUrl()).node,
       '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
       {
         height: 0,
