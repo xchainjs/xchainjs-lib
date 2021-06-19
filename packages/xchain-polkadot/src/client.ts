@@ -27,7 +27,7 @@ import { isSuccess, getDecimal } from './util'
  * Interface for custom Polkadot client
  */
 export interface PolkadotClient {
-  getSS58Format(): number
+  getSS58Format(): Promise<number>
   getWsEndpoint(): string
   estimateFees(params: TxParams): Promise<Fees>
 }
@@ -171,7 +171,7 @@ class Client implements PolkadotClient, XChainClient {
    *
    * @returns {number} The SS58 format based on the network.
    */
-  getSS58Format = (): number => {
+  getSS58Format = async (): Promise<number> => {
     return this.network === 'testnet' ? 42 : 0
   }
 
@@ -198,7 +198,7 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {KeyringPair} The keyring pair to be used to generate wallet address.
    * */
   private getKeyringPair = async (index: number): Promise<KeyringPair> => {
-    const key = new Keyring({ ss58Format: this.getSS58Format(), type: 'ed25519' })
+    const key = new Keyring({ ss58Format: await this.getSS58Format(), type: 'ed25519' })
 
     return key.createFromUri(`${this.phrase}//${this.getFullDerivationPath(index)}`)
   }
@@ -235,7 +235,7 @@ class Client implements PolkadotClient, XChainClient {
    */
   validateAddress = async (address: Address): Promise<boolean> => {
     try {
-      const key = new Keyring({ ss58Format: this.getSS58Format(), type: 'ed25519' })
+      const key = new Keyring({ ss58Format: await this.getSS58Format(), type: 'ed25519' })
       return key.encodeAddress(isHex(address) ? hexToU8a(address) : key.decodeAddress(address)) === address
     } catch (error) {
       return false
