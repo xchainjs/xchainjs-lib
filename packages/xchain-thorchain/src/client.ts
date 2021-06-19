@@ -178,7 +178,7 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @returns {string} The explorer url for thorchain based on the current network.
    */
-  getExplorerUrl = (): string => {
+  getExplorerUrl = async (): Promise<string> => {
     return this.explorerUrls.root[this.network]
   }
 
@@ -203,7 +203,7 @@ class Client implements ThorchainClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address.
    */
-  getExplorerAddressUrl = (address: Address): string =>
+  getExplorerAddressUrl = async (address: Address): Promise<string> =>
     getExplorerAddressUrl({ urls: this.explorerUrls, network: this.network, address })
 
   /**
@@ -212,7 +212,7 @@ class Client implements ThorchainClient, XChainClient {
    * @param {string} txID
    * @returns {string} The explorer url for the given transaction id.
    */
-  getExplorerTxUrl = (txID: string): string =>
+  getExplorerTxUrl = async (txID: string): Promise<string> =>
     getExplorerTxUrl({ urls: this.explorerUrls, network: this.network, txID })
 
   /**

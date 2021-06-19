@@ -110,18 +110,18 @@ Returns the correctly formatted url string with paths for:
 
 The default Explorer URL can be hard-coded, or passed in as a service. It will be provided by `getExplorerUrl`
 ```ts
-getExplorerUrl(): string
+getExplorerUrl(): Promise<string>
 ```
 
 
 To get explorer's URL for an address, use `getExplorerAddressUrl` by passing an `address`.
 ```ts
-getExplorerAddressUrl = (address: Address): string 
+getExplorerAddressUrl = (address: Address): Promise<string>
 ```
 
 To get explorer's URL for a transaction, use `getExplorerTxUrl` by passing a transaction ID.
 ```ts
-getExplorerTxUrl = (txID: string): string
+getExplorerTxUrl = (txID: string): Promise<string>
 ```
 
 All functions should return the correctly formatted url string. 

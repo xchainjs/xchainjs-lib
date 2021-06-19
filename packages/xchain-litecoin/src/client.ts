@@ -167,7 +167,7 @@ class Client implements LitecoinClient, XChainClient {
    *
    * @returns {string} The explorer url based on the network.
    */
-  getExplorerUrl = (): string => {
+  getExplorerUrl = async (): Promise<string> => {
     return Utils.isTestnet(this.net) ? 'https://tltc.bitaps.com' : 'https://ltc.bitaps.com'
   }
 
@@ -177,8 +177,8 @@ class Client implements LitecoinClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address based on the network.
    */
-  getExplorerAddressUrl = (address: Address): string => {
-    return `${this.getExplorerUrl()}/${address}`
+  getExplorerAddressUrl = async (address: Address): Promise<string> => {
+    return `${await this.getExplorerUrl()}/${address}`
   }
 
   /**
@@ -187,8 +187,8 @@ class Client implements LitecoinClient, XChainClient {
    * @param {string} txID The transaction id
    * @returns {string} The explorer url for the given transaction id based on the network.
    */
-  getExplorerTxUrl = (txID: string): string => {
-    return `${this.getExplorerUrl()}/${txID}`
+  getExplorerTxUrl = async (txID: string): Promise<string> => {
+    return `${await this.getExplorerUrl()}/${txID}`
   }
 
   /**

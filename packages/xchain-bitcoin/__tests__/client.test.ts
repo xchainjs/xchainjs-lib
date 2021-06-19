@@ -291,28 +291,28 @@ describe('BitcoinClient Test', () => {
 
   it('should return valid explorer url', async () => {
     await btcClient.setNetwork('mainnet')
-    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info')
+    expect(await btcClient.getExplorerUrl()).toEqual('https://blockstream.info')
 
     await btcClient.setNetwork('testnet')
-    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info/testnet')
+    expect(await btcClient.getExplorerUrl()).toEqual('https://blockstream.info/testnet')
   })
 
   it('should retrun valid explorer address url', async () => {
     await btcClient.setNetwork('mainnet')
-    expect(btcClient.getExplorerAddressUrl('testAddressHere')).toEqual(
+    expect(await btcClient.getExplorerAddressUrl('testAddressHere')).toEqual(
       'https://blockstream.info/address/testAddressHere',
     )
     await btcClient.setNetwork('testnet')
-    expect(btcClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
+    expect(await btcClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
       'https://blockstream.info/testnet/address/anotherTestAddressHere',
     )
   })
 
   it('should retrun valid explorer tx url', async () => {
     await btcClient.setNetwork('mainnet')
-    expect(btcClient.getExplorerTxUrl('testTxHere')).toEqual('https://blockstream.info/tx/testTxHere')
+    expect(await btcClient.getExplorerTxUrl('testTxHere')).toEqual('https://blockstream.info/tx/testTxHere')
     await btcClient.setNetwork('testnet')
-    expect(btcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
+    expect(await btcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://blockstream.info/testnet/tx/anotherTestTxHere',
     )
   })

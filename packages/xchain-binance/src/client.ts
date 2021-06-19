@@ -164,7 +164,7 @@ class Client implements BinanceClient, XChainClient {
    *
    * @returns {string} The explorer url based on the network.
    */
-  getExplorerUrl = (): string => {
+  getExplorerUrl = async (): Promise<string> => {
     return this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
   }
 
@@ -174,8 +174,8 @@ class Client implements BinanceClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address based on the network.
    */
-  getExplorerAddressUrl = (address: Address): string => {
-    return `${this.getExplorerUrl()}/address/${address}`
+  getExplorerAddressUrl = async (address: Address): Promise<string> => {
+    return `${await this.getExplorerUrl()}/address/${address}`
   }
 
   /**
@@ -184,8 +184,8 @@ class Client implements BinanceClient, XChainClient {
    * @param {string} txID
    * @returns {string} The explorer url for the given transaction id based on the network.
    */
-  getExplorerTxUrl = (txID: string): string => {
-    return `${this.getExplorerUrl()}/tx/${txID}`
+  getExplorerTxUrl = async (txID: string): Promise<string> => {
+    return `${await this.getExplorerUrl()}/tx/${txID}`
   }
 
   /**

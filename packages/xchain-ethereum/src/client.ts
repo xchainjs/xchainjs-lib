@@ -236,7 +236,7 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @returns {string} The explorer url for ethereum based on the current network.
    */
-  getExplorerUrl = (): string => {
+  getExplorerUrl = async (): Promise<string> => {
     return this.getExplorerUrlByNetwork(this.getNetwork())
   }
 
@@ -268,8 +268,8 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address.
    */
-  getExplorerAddressUrl = (address: Address): string => {
-    return `${this.getExplorerUrl()}/address/${address}`
+  getExplorerAddressUrl = async (address: Address): Promise<string> => {
+    return `${await this.getExplorerUrl()}/address/${address}`
   }
 
   /**
@@ -278,8 +278,8 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {string} txID
    * @returns {string} The explorer url for the given transaction id.
    */
-  getExplorerTxUrl = (txID: string): string => {
-    return `${this.getExplorerUrl()}/tx/${txID}`
+  getExplorerTxUrl = async (txID: string): Promise<string> => {
+    return `${await this.getExplorerUrl()}/tx/${txID}`
   }
 
   /**

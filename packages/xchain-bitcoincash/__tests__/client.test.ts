@@ -66,28 +66,28 @@ describe('BCHClient Test', () => {
 
   it('should return valid explorer url', async () => {
     await bchClient.setNetwork('mainnet')
-    expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch')
+    expect(await bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch')
 
     await bchClient.setNetwork('testnet')
-    expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch-testnet')
+    expect(await bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch-testnet')
   })
 
   it('should retrun valid explorer address url', async () => {
     await bchClient.setNetwork('mainnet')
-    expect(bchClient.getExplorerAddressUrl('testAddressHere')).toEqual(
+    expect(await bchClient.getExplorerAddressUrl('testAddressHere')).toEqual(
       'https://www.blockchain.com/bch/address/testAddressHere',
     )
     await bchClient.setNetwork('testnet')
-    expect(bchClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
+    expect(await bchClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
       'https://www.blockchain.com/bch-testnet/address/anotherTestAddressHere',
     )
   })
 
   it('should retrun valid explorer tx url', async () => {
     await bchClient.setNetwork('mainnet')
-    expect(bchClient.getExplorerTxUrl('testTxHere')).toEqual('https://www.blockchain.com/bch/tx/testTxHere')
+    expect(await bchClient.getExplorerTxUrl('testTxHere')).toEqual('https://www.blockchain.com/bch/tx/testTxHere')
     await bchClient.setNetwork('testnet')
-    expect(bchClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
+    expect(await bchClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://www.blockchain.com/bch-testnet/tx/anotherTestTxHere',
     )
   })

@@ -343,29 +343,31 @@ describe('Client Test', () => {
 
   it('should return valid explorer url', async () => {
     // Client created with network === 'testnet'
-    expect(cosmosClient.getExplorerUrl()).toEqual('https://gaia.bigdipper.live')
+    expect(await cosmosClient.getExplorerUrl()).toEqual('https://gaia.bigdipper.live')
 
     await cosmosClient.setNetwork('mainnet')
-    expect(cosmosClient.getExplorerUrl()).toEqual('https://cosmos.bigdipper.live')
+    expect(await cosmosClient.getExplorerUrl()).toEqual('https://cosmos.bigdipper.live')
   })
 
   it('should retrun valid explorer address url', async () => {
-    expect(cosmosClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
+    expect(await cosmosClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
       'https://gaia.bigdipper.live/account/anotherTestAddressHere',
     )
 
     await cosmosClient.setNetwork('mainnet')
-    expect(cosmosClient.getExplorerAddressUrl('testAddressHere')).toEqual(
+    expect(await cosmosClient.getExplorerAddressUrl('testAddressHere')).toEqual(
       'https://cosmos.bigdipper.live/account/testAddressHere',
     )
   })
 
   it('should retrun valid explorer tx url', async () => {
-    expect(cosmosClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
+    expect(await cosmosClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://gaia.bigdipper.live/transactions/anotherTestTxHere',
     )
 
     await cosmosClient.setNetwork('mainnet')
-    expect(cosmosClient.getExplorerTxUrl('testTxHere')).toEqual('https://cosmos.bigdipper.live/transactions/testTxHere')
+    expect(await cosmosClient.getExplorerTxUrl('testTxHere')).toEqual(
+      'https://cosmos.bigdipper.live/transactions/testTxHere',
+    )
   })
 })

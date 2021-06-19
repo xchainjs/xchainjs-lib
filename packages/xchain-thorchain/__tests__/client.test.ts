@@ -518,25 +518,27 @@ describe('Client Test', () => {
   })
 
   it('should return valid explorer url', async () => {
-    expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain?network=testnet')
+    expect(await thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain?network=testnet')
 
     await thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain')
+    expect(await thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain')
   })
 
   it('should retrun valid explorer address url', async () => {
-    expect(thorClient.getExplorerAddressUrl('tthorabc')).toEqual(
+    expect(await thorClient.getExplorerAddressUrl('tthorabc')).toEqual(
       'https://viewblock.io/thorchain/address/tthorabc?network=testnet',
     )
 
     await thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerAddressUrl('thorabc')).toEqual('https://viewblock.io/thorchain/address/thorabc')
+    expect(await thorClient.getExplorerAddressUrl('thorabc')).toEqual('https://viewblock.io/thorchain/address/thorabc')
   })
 
   it('should retrun valid explorer tx url', async () => {
-    expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash?network=testnet')
+    expect(await thorClient.getExplorerTxUrl('txhash')).toEqual(
+      'https://viewblock.io/thorchain/tx/txhash?network=testnet',
+    )
 
     await thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash')
+    expect(await thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash')
   })
 })

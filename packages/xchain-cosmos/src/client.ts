@@ -133,7 +133,7 @@ class Client implements CosmosClient, XChainClient {
    *
    * @returns {string} The explorer url.
    */
-  getExplorerUrl = (): string => {
+  getExplorerUrl = async (): Promise<string> => {
     return this.network === 'testnet' ? 'https://gaia.bigdipper.live' : 'https://cosmos.bigdipper.live'
   }
 
@@ -143,8 +143,8 @@ class Client implements CosmosClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address.
    */
-  getExplorerAddressUrl = (address: Address): string => {
-    return `${this.getExplorerUrl()}/account/${address}`
+  getExplorerAddressUrl = async (address: Address): Promise<string> => {
+    return `${await this.getExplorerUrl()}/account/${address}`
   }
 
   /**
@@ -153,8 +153,8 @@ class Client implements CosmosClient, XChainClient {
    * @param {string} txID
    * @returns {string} The explorer url for the given transaction id.
    */
-  getExplorerTxUrl = (txID: string): string => {
-    return `${this.getExplorerUrl()}/transactions/${txID}`
+  getExplorerTxUrl = async (txID: string): Promise<string> => {
+    return `${await this.getExplorerUrl()}/transactions/${txID}`
   }
 
   /**

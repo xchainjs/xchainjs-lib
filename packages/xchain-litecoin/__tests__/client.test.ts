@@ -278,25 +278,25 @@ describe('LitecoinClient Test', () => {
 
   it('should return valid explorer url', async () => {
     await ltcClient.setNetwork('mainnet')
-    expect(ltcClient.getExplorerUrl()).toEqual('https://ltc.bitaps.com')
+    expect(await ltcClient.getExplorerUrl()).toEqual('https://ltc.bitaps.com')
 
     await ltcClient.setNetwork('testnet')
-    expect(ltcClient.getExplorerUrl()).toEqual('https://tltc.bitaps.com')
+    expect(await ltcClient.getExplorerUrl()).toEqual('https://tltc.bitaps.com')
   })
 
   it('should retrun valid explorer address url', async () => {
     await ltcClient.setNetwork('mainnet')
-    expect(ltcClient.getExplorerAddressUrl('testAddressHere')).toEqual('https://ltc.bitaps.com/testAddressHere')
+    expect(await ltcClient.getExplorerAddressUrl('testAddressHere')).toEqual('https://ltc.bitaps.com/testAddressHere')
     await ltcClient.setNetwork('testnet')
-    expect(ltcClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
+    expect(await ltcClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
       'https://tltc.bitaps.com/anotherTestAddressHere',
     )
   })
 
   it('should retrun valid explorer tx url', async () => {
     await ltcClient.setNetwork('mainnet')
-    expect(ltcClient.getExplorerTxUrl('testTxHere')).toEqual('https://ltc.bitaps.com/testTxHere')
+    expect(await ltcClient.getExplorerTxUrl('testTxHere')).toEqual('https://ltc.bitaps.com/testTxHere')
     await ltcClient.setNetwork('testnet')
-    expect(ltcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual('https://tltc.bitaps.com/anotherTestTxHere')
+    expect(await ltcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual('https://tltc.bitaps.com/anotherTestTxHere')
   })
 })

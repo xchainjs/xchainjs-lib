@@ -90,9 +90,9 @@ export interface XChainClient {
   setNetwork(net: Network): Promise<this>
   getNetwork(): Network
 
-  getExplorerUrl(): string
-  getExplorerAddressUrl(address: Address): string
-  getExplorerTxUrl(txID: string): string
+  getExplorerUrl(): Promise<string>
+  getExplorerAddressUrl(address: Address): Promise<string>
+  getExplorerTxUrl(txID: string): Promise<string>
 
   validateAddress(address: string): Promise<boolean>
   getAddress(walletIndex?: number): Promise<Address>

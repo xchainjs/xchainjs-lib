@@ -157,7 +157,7 @@ class Client implements BitcoinClient, XChainClient {
    *
    * @returns {string} The explorer url based on the network.
    */
-  getExplorerUrl = (): string => {
+  getExplorerUrl = async (): Promise<string> => {
     const networkPath = Utils.isTestnet(this.net) ? '/testnet' : ''
     return `https://blockstream.info${networkPath}`
   }
@@ -168,8 +168,8 @@ class Client implements BitcoinClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address based on the network.
    */
-  getExplorerAddressUrl = (address: Address): string => {
-    return `${this.getExplorerUrl()}/address/${address}`
+  getExplorerAddressUrl = async (address: Address): Promise<string> => {
+    return `${await this.getExplorerUrl()}/address/${address}`
   }
 
   /**
@@ -178,8 +178,8 @@ class Client implements BitcoinClient, XChainClient {
    * @param {string} txID The transaction id
    * @returns {string} The explorer url for the given transaction id based on the network.
    */
-  getExplorerTxUrl = (txID: string): string => {
-    return `${this.getExplorerUrl()}/tx/${txID}`
+  getExplorerTxUrl = async (txID: string): Promise<string> => {
+    return `${await this.getExplorerUrl()}/tx/${txID}`
   }
 
   /**
