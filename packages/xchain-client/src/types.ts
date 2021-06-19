@@ -88,7 +88,7 @@ export type XChainClientParams = {
 
 export interface XChainClient {
   setNetwork(net: Network): Promise<this>
-  getNetwork(): Network
+  getNetwork(): Promise<Network>
 
   getExplorerUrl(): Promise<string>
   getExplorerAddressUrl(address: Address): Promise<string>

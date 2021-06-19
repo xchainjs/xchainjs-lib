@@ -45,7 +45,7 @@ describe('Client Test', () => {
 
   it('should update net', async () => {
     await polkadotClient.setNetwork('mainnet')
-    expect(polkadotClient.getNetwork()).toEqual('mainnet')
+    expect(await polkadotClient.getNetwork()).toEqual('mainnet')
 
     const address = await polkadotClient.getAddress()
     expect(address).toEqual(mainnet_address)

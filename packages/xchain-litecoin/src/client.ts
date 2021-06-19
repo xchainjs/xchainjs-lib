@@ -148,7 +148,7 @@ class Client implements LitecoinClient, XChainClient {
    *
    * @returns {Network} The current network. (`mainnet` or `testnet`)
    */
-  getNetwork = (): Network => {
+  getNetwork = async (): Promise<Network> => {
     return this.net
   }
 

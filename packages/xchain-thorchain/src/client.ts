@@ -142,7 +142,7 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @returns {Network} The current network. (`mainnet` or `testnet`)
    */
-  getNetwork = (): Network => {
+  getNetwork = async (): Promise<Network> => {
     return this.network
   }
 

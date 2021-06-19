@@ -141,7 +141,7 @@ describe('Client Test', () => {
 
   it('should update net', async () => {
     await thorMainClient.setNetwork('testnet')
-    expect(thorMainClient.getNetwork()).toEqual('testnet')
+    expect(await thorMainClient.getNetwork()).toEqual('testnet')
 
     const address = await thorMainClient.getAddress()
     expect(address).toEqual(testnet_address_path0)

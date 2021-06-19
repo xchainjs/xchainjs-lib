@@ -115,7 +115,7 @@ describe('Client Test', () => {
 
   it('should get network', async () => {
     const ethClient = await Client.create({ phrase, network: 'testnet' })
-    expect(ethClient.getNetwork()).toEqual('testnet')
+    expect(await ethClient.getNetwork()).toEqual('testnet')
   })
 
   it('should fail a bad address', async () => {

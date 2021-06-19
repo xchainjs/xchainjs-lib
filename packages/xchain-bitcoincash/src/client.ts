@@ -108,7 +108,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @returns {string} The haskoin url based on the current network.
    */
   getHaskoinURL = async (): Promise<string> => {
-    return this.haskoinUrl[this.getNetwork()]
+    return this.haskoinUrl[await this.getNetwork()]
   }
 
   /**
@@ -127,7 +127,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @returns {string} The node url for thorchain based on the current network.
    */
   getNodeURL = async (): Promise<string> => {
-    return this.nodeUrl[this.getNetwork()]
+    return this.nodeUrl[await this.getNetwork()]
   }
 
   /**
@@ -178,7 +178,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {Network} The current network. (`mainnet` or `testnet`)
    */
-  getNetwork = (): Network => {
+  getNetwork = async (): Promise<Network> => {
     return this.network
   }
 

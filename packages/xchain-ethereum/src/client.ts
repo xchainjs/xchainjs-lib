@@ -162,7 +162,7 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @returns {Network} The current network. (`mainnet` or `testnet`)
    */
-  getNetwork = (): XChainNetwork => {
+  getNetwork = async (): Promise<Network> => {
     return this.network
   }
 
@@ -234,7 +234,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {string} The explorer url for ethereum based on the current network.
    */
   getExplorerUrl = async (): Promise<string> => {
-    return this.getExplorerUrlByNetwork(this.getNetwork())
+    return this.getExplorerUrlByNetwork(await this.getNetwork())
   }
 
   /**
@@ -300,7 +300,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {string} The derivation path based on the network.
    */
   async getFullDerivationPath(index: number): Promise<string> {
-    return this.rootDerivationPaths[this.getNetwork()] + `${index}`
+    return `${this.rootDerivationPaths[await this.getNetwork()]}${index}`
   }
   /**
    * Set/update a new phrase (Eg. If user wants to change wallet)
@@ -342,7 +342,7 @@ export default class Client implements XChainClient, EthereumClient {
       const ethBalance: BigNumber = await this.getProvider().getBalance(ethAddress)
       const ethBalanceAmount = baseAmount(ethBalance.toString(), ETH_DECIMAL)
 
-      if (this.getNetwork() === 'mainnet') {
+      if ((await this.getNetwork()) === 'mainnet') {
         // use ethplorerAPI for mainnet - ignore assets
         const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
         const balances: Balances = [
@@ -471,7 +471,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   getTransactionData = async (txId: string, assetAddress?: Address): Promise<Tx> => {
     try {
-      if (this.getNetwork() === 'mainnet') {
+      if ((await this.getNetwork()) === 'mainnet') {
         // use ethplorerAPI for mainnet - ignore assetAddress
         const txInfo = await ethplorerAPI.getTxInfo(this.ethplorerUrl, txId, this.ethplorerApiKey)
 

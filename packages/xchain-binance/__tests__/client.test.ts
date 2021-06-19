@@ -121,7 +121,7 @@ describe('BinanceClient Test', () => {
   it('should update net', async () => {
     const client = await BinanceClient.create({ phrase, network: 'mainnet' })
     await client.setNetwork('testnet')
-    expect(client.getNetwork()).toEqual('testnet')
+    expect(await client.getNetwork()).toEqual('testnet')
     expect(await client.getAddress()).toEqual(testnetaddress_path0)
   })
 
