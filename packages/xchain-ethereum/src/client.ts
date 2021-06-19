@@ -18,7 +18,7 @@ import {
 import {
   RootDerivationPaths,
   Address,
-  Network as XChainNetwork,
+  Network,
   Tx,
   TxsPage,
   XChainClient,
@@ -28,7 +28,6 @@ import {
   Fees,
   TxHistoryParams,
   Balances,
-  Network,
   FeeOptionKey,
   FeesParams as XFeesParams,
 } from '@xchainjs/xchain-client'
@@ -38,7 +37,6 @@ import * as ethplorerAPI from './ethplorer-api'
 import * as etherscanAPI from './etherscan-api'
 import {
   ETH_DECIMAL,
-  ethNetworkToXchains,
   xchainNetworkToEths,
   getTokenAddress,
   validateAddress,
@@ -97,7 +95,7 @@ export type EthereumClientParams = ClientParams // backwards compat
  * Custom Ethereum client
  */
 export default class Client implements XChainClient, EthereumClient {
-  private network: EthNetwork
+  private network: Network
   private hdNode!: HDNode
   private etherscanApiKey?: string
   private explorerUrl: ExplorerUrl
@@ -105,7 +103,7 @@ export default class Client implements XChainClient, EthereumClient {
   private ethplorerUrl: string
   private ethplorerApiKey: string
   private rootDerivationPaths: RootDerivationPaths
-  private providers: Map<XChainNetwork, Provider> = new Map<XChainNetwork, Provider>()
+  private providers: Map<Network, Provider> = new Map<Network, Provider>()
 
   /**
    * Constructor
@@ -124,7 +122,7 @@ export default class Client implements XChainClient, EthereumClient {
     infuraCreds,
   }: ClientParams) {
     this.rootDerivationPaths = rootDerivationPaths
-    this.network = xchainNetworkToEths(network)
+    this.network = network
     this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey
     this.ethplorerUrl = ethplorerUrl
@@ -165,7 +163,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {Network} The current network. (`mainnet` or `testnet`)
    */
   getNetwork = (): XChainNetwork => {
-    return ethNetworkToXchains(this.network)
+    return this.network
   }
 
   /**
@@ -218,8 +216,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {Provider} The current etherjs Provider interface.
    */
   getProvider = (): Provider => {
-    const net = ethNetworkToXchains(this.network)
-    return this.providers.get(net) || getDefaultProvider(net)
+    return this.providers.get(this.network) || getDefaultProvider(this.network)
   }
 
   /**
@@ -228,7 +225,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {EtherscanProvider} The current etherjs EtherscanProvider interface.
    */
   getEtherscanProvider = (): EtherscanProvider => {
-    return new EtherscanProvider(this.network, this.etherscanApiKey)
+    return new EtherscanProvider(xchainNetworkToEths(this.network), this.etherscanApiKey)
   }
 
   /**
@@ -291,12 +288,9 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork = async (network: XChainNetwork): Promise<this> => {
-    if (!network) {
-      throw new Error('Network must be provided')
-    } else {
-      this.network = xchainNetworkToEths(network)
-    }
+  setNetwork = async (network: Network): Promise<this> => {
+    if (!network) throw new Error('Network must be provided')
+    this.network = network
     return this
   }
   /**
