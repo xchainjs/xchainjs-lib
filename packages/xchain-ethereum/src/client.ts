@@ -178,7 +178,7 @@ export default class Client implements XChainClient, EthereumClient {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
-    return this.hdNode.derivePath(this.getFullDerivationPath(index)).address.toLowerCase()
+    return this.hdNode.derivePath(await this.getFullDerivationPath(index)).address.toLowerCase()
   }
 
   /**
@@ -190,7 +190,7 @@ export default class Client implements XChainClient, EthereumClient {
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
   getWallet = async (index = 0): Promise<ethers.Wallet> => {
-    return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(index))).connect(this.getProvider())
+    return new Wallet(this.hdNode.derivePath(await this.getFullDerivationPath(index))).connect(this.getProvider())
   }
   setupProviders = (): void => {
     if (this.infuraCreds) {
@@ -299,7 +299,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {number} index the HD wallet index
    * @returns {string} The derivation path based on the network.
    */
-  getFullDerivationPath(index: number): string {
+  async getFullDerivationPath(index: number): Promise<string> {
     return this.rootDerivationPaths[this.getNetwork()] + `${index}`
   }
   /**
