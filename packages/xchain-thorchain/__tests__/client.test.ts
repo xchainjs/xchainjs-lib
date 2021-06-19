@@ -148,10 +148,10 @@ describe('Client Test', () => {
   })
 
   it('should init, should have right prefix', async () => {
-    expect(thorClient.validateAddress(await thorClient.getAddress())).toEqual(true)
+    expect(await thorClient.validateAddress(await thorClient.getAddress())).toEqual(true)
 
     await thorClient.setNetwork('mainnet')
-    expect(thorClient.validateAddress(await thorClient.getAddress())).toEqual(true)
+    expect(await thorClient.validateAddress(await thorClient.getAddress())).toEqual(true)
   })
 
   it('should have right client url', async () => {

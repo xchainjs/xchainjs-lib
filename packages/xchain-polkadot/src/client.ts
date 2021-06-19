@@ -233,7 +233,7 @@ class Client implements PolkadotClient, XChainClient {
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  validateAddress = (address: string): boolean => {
+  validateAddress = async (address: Address): Promise<boolean> => {
     try {
       const key = new Keyring({ ss58Format: this.getSS58Format(), type: 'ed25519' })
       return key.encodeAddress(isHex(address) ? hexToU8a(address) : key.decodeAddress(address)) === address

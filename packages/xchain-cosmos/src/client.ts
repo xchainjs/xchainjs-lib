@@ -219,7 +219,7 @@ class Client implements CosmosClient, XChainClient {
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  validateAddress = (address: Address): boolean => {
+  validateAddress = async (address: Address): Promise<boolean> => {
     return this.getSDKClient().checkAddress(address)
   }
 

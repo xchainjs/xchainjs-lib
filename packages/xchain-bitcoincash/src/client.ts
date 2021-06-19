@@ -277,7 +277,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  validateAddress = (address: string): boolean => {
+  validateAddress = async (address: string): Promise<boolean> => {
     return utils.validateAddress(address, this.network)
   }
 

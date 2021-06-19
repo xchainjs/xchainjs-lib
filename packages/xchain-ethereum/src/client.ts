@@ -329,7 +329,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  validateAddress = (address: Address): boolean => {
+  validateAddress = async (address: Address): Promise<boolean> => {
     return validateAddress(address)
   }
 

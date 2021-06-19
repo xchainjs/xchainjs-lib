@@ -49,7 +49,7 @@ describe('LitecoinClient Test', () => {
     await ltcClient.setNetwork('testnet')
     await ltcClient.setPhrase(phraseOne)
     const address = await ltcClient.getAddress()
-    const valid = ltcClient.validateAddress(address)
+    const valid = await ltcClient.validateAddress(address)
     expect(address).toEqual(addyOne)
     expect(valid).toBeTruthy()
   })

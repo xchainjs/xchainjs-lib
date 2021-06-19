@@ -243,7 +243,7 @@ class Client implements BitcoinClient, XChainClient {
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  validateAddress = (address: string): boolean => Utils.validateAddress(address, this.net)
+  validateAddress = async (address: string): Promise<boolean> => Utils.validateAddress(address, this.net)
 
   /**
    * Get the BTC balance of a given address.

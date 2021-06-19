@@ -235,7 +235,7 @@ class Client implements BinanceClient, XChainClient {
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  validateAddress = (address: Address): boolean => {
+  validateAddress = async (address: Address): Promise<boolean> => {
     return this.bncClient.checkAddress(address, getPrefix(this.network))
   }
 

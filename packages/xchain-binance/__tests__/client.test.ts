@@ -133,10 +133,10 @@ describe('BinanceClient Test', () => {
   })
 
   it('should validate address', async () => {
-    expect(bnbClient.validateAddress(mainnetaddress_path0)).toBeTruthy()
+    expect(await bnbClient.validateAddress(mainnetaddress_path0)).toBeTruthy()
 
     await bnbClient.setNetwork('testnet')
-    expect(bnbClient.validateAddress(testnetaddress_path0)).toBeTruthy()
+    expect(await bnbClient.validateAddress(testnetaddress_path0)).toBeTruthy()
   })
 
   it('has no balances', async () => {

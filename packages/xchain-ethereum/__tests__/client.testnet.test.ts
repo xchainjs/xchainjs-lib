@@ -120,12 +120,12 @@ describe('Client Test', () => {
 
   it('should fail a bad address', async () => {
     const ethClient = await Client.create({ phrase, network: 'testnet' })
-    expect(ethClient.validateAddress('0xBADbadBad')).toBeFalsy()
+    expect(await ethClient.validateAddress('0xBADbadBad')).toBeFalsy()
   })
 
   it('should pass a good address', async () => {
     const ethClient = await Client.create({ phrase, network: 'testnet' })
-    const goodAddress = ethClient.validateAddress(address)
+    const goodAddress = await ethClient.validateAddress(address)
     expect(goodAddress).toBeTruthy()
   })
 

@@ -111,10 +111,10 @@ describe('Client Test', () => {
   })
 
   it('should init, should have right prefix', async () => {
-    expect(cosmosClient.validateAddress(await cosmosClient.getAddress())).toEqual(true)
+    expect(await cosmosClient.validateAddress(await cosmosClient.getAddress())).toEqual(true)
 
     await cosmosClient.setNetwork('mainnet')
-    expect(cosmosClient.validateAddress(await cosmosClient.getAddress())).toEqual(true)
+    expect(await cosmosClient.validateAddress(await cosmosClient.getAddress())).toEqual(true)
   })
 
   it('has no balances', async () => {

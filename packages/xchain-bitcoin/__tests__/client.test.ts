@@ -57,7 +57,7 @@ describe('BitcoinClient Test', () => {
     await btcClient.setNetwork('testnet')
     await btcClient.setPhrase(phraseOne)
     const address = await btcClient.getAddress()
-    const valid = btcClient.validateAddress(address)
+    const valid = await btcClient.validateAddress(address)
     expect(address).toEqual(addyOnePath0)
     expect(valid).toBeTruthy()
   })

@@ -58,10 +58,10 @@ describe('BCHClient Test', () => {
     await bchClient.setNetwork('testnet')
     await bchClient.setPhrase(phrase)
     expect(await bchClient.getAddress()).toEqual(testnet_address_path0)
-    expect(bchClient.validateAddress(testnet_address_path0)).toBeTruthy()
+    expect(await bchClient.validateAddress(testnet_address_path0)).toBeTruthy()
 
     await bchClient.setNetwork('mainnet')
-    expect(bchClient.validateAddress(mainnet_address_path0)).toBeTruthy()
+    expect(await bchClient.validateAddress(mainnet_address_path0)).toBeTruthy()
   })
 
   it('should return valid explorer url', async () => {

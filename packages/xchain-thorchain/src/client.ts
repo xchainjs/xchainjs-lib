@@ -274,7 +274,7 @@ class Client implements ThorchainClient, XChainClient {
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  validateAddress = (address: Address): boolean => {
+  validateAddress = async (address: Address): Promise<boolean> => {
     return this.cosmosClient.checkAddress(address)
   }
 
