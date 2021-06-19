@@ -51,7 +51,7 @@ import {
 export interface ThorchainClient {
   setClientUrl(clientUrl: ClientUrl): void
   getClientUrl(): Promise<NodeUrl>
-  setExplorerUrls(explorerUrls: ExplorerUrls): void
+  setExplorerUrls(explorerUrls: ExplorerUrls): Promise<this>
   getCosmosClient(): Promise<CosmosSDKClient>
 
   deposit(params: DepositParam): Promise<TxHash>
@@ -170,8 +170,9 @@ class Client implements ThorchainClient, XChainClient {
    * @param {ExplorerUrls} urls The explorer urls to be set.
    * @returns {void}
    */
-  setExplorerUrls = (urls: ExplorerUrls): void => {
+  setExplorerUrls = async (urls: ExplorerUrls): Promise<this> => {
     this.explorerUrls = urls
+    return this
   }
 
   /**
