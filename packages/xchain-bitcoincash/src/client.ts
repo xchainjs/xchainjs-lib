@@ -223,7 +223,7 @@ class Client implements BitcoinCashClient, XChainClient {
 
       const derived = await masterHDNode.derivePath(derivationPath)
       return {
-        getAddress: async (index: number) => (await derived.derive(index)).toBase58(),
+        getAddress: async (_index: number) => derived.toBase58(),
       }
     } catch (error) {
       throw new Error(`Getting key pair failed: ${error?.message || error.toString()}`)
