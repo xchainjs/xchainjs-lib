@@ -1,8 +1,12 @@
-# v.0.16.2 (2021-06-21)
+# v.0.17.0 (2021-06-21)
 
 ### Fix
 
 - Fix `to` / `from` addresses by parsing tx data from event logs
+
+### Breaking change
+
+- Remove deprecated `getTxDataFromResponse` helper
 
 # v.0.16.1 (2021-06-14)
 

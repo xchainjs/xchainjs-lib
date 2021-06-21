@@ -3,7 +3,6 @@ import {
   getDenom,
   getDenomWithChain,
   getAsset,
-  getTxDataFromResponse,
   isBroadcastSuccess,
   getExplorerAddressUrl,
   getExplorerTxUrl,
@@ -12,12 +11,7 @@ import {
   getDepositTxDataFromLogs,
   getTxType,
 } from '../src/util'
-import { assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
-import { RawTxResponse, TxResponse } from '@xchainjs/xchain-cosmos/src/cosmos/types'
-import { Msg } from 'cosmos-client'
-import { StdTx } from 'cosmos-client/x/auth'
-import { MsgSend } from 'cosmos-client/x/bank'
-import { StdTxFee } from 'cosmos-client/api'
+import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 describe('thorchain/util', () => {
   describe('Denom <-> Asset', () => {
@@ -55,109 +49,6 @@ describe('thorchain/util', () => {
   })
 
   describe('transaction util', () => {
-    describe('getTxDataFromResponse', () => {
-      const fee: StdTxFee = {
-        gas: '200000',
-        amount: [],
-      }
-      const from_address = 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
-      const to_address = 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly'
-
-      const tx1: TxResponse = {
-        height: 0,
-        txhash: '',
-        data: '0A060A0473656E64',
-        raw_log: '',
-        gas_wanted: '200000',
-        gas_used: '35000',
-        tx: {
-          msg: [
-            MsgSend.fromJSON({
-              from_address,
-              to_address,
-              amount: [
-                {
-                  denom: 'rune',
-                  amount: '1000',
-                },
-              ],
-            }),
-            MsgSend.fromJSON({
-              from_address,
-              to_address,
-              amount: [
-                {
-                  denom: 'rune',
-                  amount: '1000',
-                },
-              ],
-            }),
-          ] as Msg[],
-          fee: fee,
-          signatures: null,
-          memo: '',
-        } as StdTx,
-        timestamp: new Date().toString(),
-      }
-
-      const tx2: TxResponse = {
-        height: 0,
-        txhash: '',
-        data: '0A090A076465706F736974',
-        raw_log: '',
-        gas_wanted: '200000',
-        gas_used: '35000',
-        tx: {
-          body: {
-            messages: [
-              MsgSend.fromJSON({
-                from_address,
-                to_address,
-                amount: [
-                  {
-                    denom: 'rune',
-                    amount: '1000',
-                  },
-                ],
-              }),
-              MsgSend.fromJSON({
-                from_address,
-                to_address,
-                amount: [
-                  {
-                    denom: 'rune',
-                    amount: '1000',
-                  },
-                ],
-              }),
-            ] as Msg[],
-          },
-        } as RawTxResponse,
-        timestamp: new Date().toString(),
-      }
-
-      it('parses tx 1', () => {
-        const result = getTxDataFromResponse(tx1, 'testnet')
-
-        expect(result.from.length).toEqual(1)
-        expect(result.from[0].from).toEqual(from_address)
-        expect(result.from[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
-        expect(result.to.length).toEqual(1)
-        expect(result.to[0].to).toEqual(to_address)
-        expect(result.to[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
-      })
-      it('parses tx 2', () => {
-        const result = getTxDataFromResponse(tx2, 'testnet')
-
-        expect(result.from.length).toEqual(1)
-        expect(result.from[0].from).toEqual(from_address)
-        expect(result.from[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
-        expect(result.to.length).toEqual(1)
-        expect(result.to[0].to).toEqual(to_address)
-        expect(result.to[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
-      })
-    })
-
     describe('getDepositTxDataFromLogs', () => {
       it('returns data for IN tx (SWAP RUNE -> BTC)', () => {
         const tx = require('../__mocks__/responses/txs/swap-1C10434D59A460FD0BE76C46A333A583B8C7761094E26C0B2548D07A5AF28356.json')

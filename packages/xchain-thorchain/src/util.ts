@@ -1,10 +1,9 @@
 import { Asset, assetToString, baseAmount, assetFromString, THORChain, BaseAmount } from '@xchainjs/xchain-util'
 import { AssetRune, ExplorerUrl, ClientUrl, ExplorerUrls, TxData } from './types'
-import { TxResponse, RawTxResponse, TxLog } from '@xchainjs/xchain-cosmos'
-import { TxFrom, TxTo, Fees, Network, Address, TxHash } from '@xchainjs/xchain-client'
+import { TxLog } from '@xchainjs/xchain-cosmos'
+import { Fees, Network, Address, TxHash } from '@xchainjs/xchain-client'
 import { AccAddress, codec, Msg } from 'cosmos-client'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
-import { StdTx } from 'cosmos-client/x/auth'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'
@@ -100,6 +99,13 @@ export const registerCodecs = (network: Network): void => {
   )
 }
 
+/**
+ * Parse transaction data from event logs
+ *
+ * @param {TxLog[]} logs List of tx logs
+ * @param {Address} address - Address to get transaction data for
+ * @returns {TxData} Parsed transaction data
+ */
 export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxData => {
   const events = logs[0]?.events
 
@@ -137,122 +143,6 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
     )
 
   return txData
-}
-
-/**
- * Parse transaction type
- *
- * @param {TxResponse} tx The transaction response from the node.
- * @param {Network} network - current main asset which depends on the network.
- * @returns {Txs} The parsed transaction result.
- */
-export const getTxDataFromResponse = (tx: TxResponse, network: Network): TxData => {
-  registerCodecs(network)
-
-  let msgs: Msg[]
-  // StdTx
-  if ((tx.tx as StdTx).msg) {
-    msgs = codec.fromJSONString(codec.toJSONString(tx.tx as StdTx)).msg
-  }
-  // RawTxResponse
-  else if ((tx.tx as RawTxResponse).body) {
-    msgs = codec.fromJSONString(codec.toJSONString((tx.tx as RawTxResponse).body.messages))
-  }
-  // ignore others
-  else {
-    throw Error(`Could not parse messages from 'TxResponse' (TxId: ${tx.txhash})`)
-  }
-
-  const from: TxFrom[] = []
-  const to: TxTo[] = []
-  if (msgs) {
-    msgs.map((msg) => {
-      if (isMsgSend(msg)) {
-        const amount = msg.amount
-          .map((coin) => baseAmount(coin.amount, DECIMAL))
-          .reduce((acc, cur) => acc.plus(cur), baseAmount(0, DECIMAL))
-
-        let from_index = -1
-
-        from.forEach((value, index) => {
-          if (value.from === msg.from_address.toBech32()) from_index = index
-        })
-
-        if (from_index === -1) {
-          from.push({
-            from: msg.from_address.toBech32(),
-            amount,
-          })
-        } else {
-          from[from_index].amount = from[from_index].amount.plus(amount)
-        }
-
-        let to_index = -1
-
-        to.forEach((value, index) => {
-          if (value.to === msg.to_address.toBech32()) to_index = index
-        })
-
-        if (to_index === -1) {
-          to.push({
-            to: msg.to_address.toBech32(),
-            amount,
-          })
-        } else {
-          to[to_index].amount = to[to_index].amount.plus(amount)
-        }
-      } else if (isMsgMultiSend(msg)) {
-        msg.inputs.map((input) => {
-          const amount = input.coins
-            .map((coin) => baseAmount(coin.amount, DECIMAL))
-            .reduce((acc, cur) => acc.plus(cur), baseAmount(0, DECIMAL))
-
-          let from_index = -1
-
-          from.forEach((value, index) => {
-            if (value.from === input.address) from_index = index
-          })
-
-          if (from_index === -1) {
-            from.push({
-              from: input.address,
-              amount,
-            })
-          } else {
-            from[from_index].amount = from[from_index].amount.plus(amount)
-          }
-        })
-
-        msg.outputs.map((output) => {
-          const amount = output.coins
-            .map((coin) => baseAmount(coin.amount, DECIMAL))
-            .reduce((acc, cur) => acc.plus(cur), baseAmount(0, DECIMAL))
-
-          let to_index = -1
-
-          to.forEach((value, index) => {
-            if (value.to === output.address) to_index = index
-          })
-
-          if (to_index === -1) {
-            to.push({
-              to: output.address,
-              amount,
-            })
-          } else {
-            to[to_index].amount = to[to_index].amount.plus(amount)
-          }
-        })
-      } else {
-      }
-    })
-  }
-
-  return {
-    from,
-    to,
-    type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
-  }
 }
 
 /**
