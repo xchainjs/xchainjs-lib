@@ -1,4 +1,4 @@
-import { Asset, assetToString, baseAmount, assetFromString, THORChain } from '@xchainjs/xchain-util'
+import { Asset, assetToString, baseAmount, assetFromString, THORChain, BaseAmount } from '@xchainjs/xchain-util'
 import { AssetRune, ExplorerUrl, ClientUrl, ExplorerUrls, TxData } from './types'
 import { TxResponse, RawTxResponse, TxLog } from '@xchainjs/xchain-cosmos'
 import { TxFrom, TxTo, Fees, Network, Address, TxHash } from '@xchainjs/xchain-client'
@@ -100,33 +100,43 @@ export const registerCodecs = (network: Network): void => {
   )
 }
 
-export const getDepositTxDataFromLogs = (logs: TxLog[]): TxData => {
+export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxData => {
   const events = logs[0]?.events
 
   if (!events) {
     throw Error('No events in logs available')
   }
 
-  let data = { sender: '', recipient: '', amount: baseAmount(0, DECIMAL) }
-  data = events.reduce((acc, { type, attributes }) => {
+  type TransferData = { sender: string; recipient: string; amount: BaseAmount }
+  type TransferDataList = TransferData[]
+  const transferDataList: TransferDataList = events.reduce((acc: TransferDataList, { type, attributes }) => {
     if (type === 'transfer') {
-      // FIXME (@veado) Currenlty it gets values from last entries only, but that's not correct
-      return attributes.reduce((acc2, { key, value }) => {
-        if (key === 'sender') acc.sender = value
-        if (key === 'recipient') acc.recipient = value
-        if (key === 'amount') acc.amount = baseAmount(value.replace(/rune/, ''), DECIMAL)
+      return attributes.reduce((acc2, { key, value }, index) => {
+        if (index % 3 === 0) acc2.push({ sender: '', recipient: '', amount: baseAmount(0, DECIMAL) })
+        const newData = acc2[acc2.length - 1]
+        if (key === 'sender') newData.sender = value
+        if (key === 'recipient') newData.recipient = value
+        if (key === 'amount') newData.amount = baseAmount(value.replace(/rune/, ''), DECIMAL)
         return acc2
       }, acc)
     }
     return acc
-  }, data)
+  }, [])
 
-  const { sender, recipient, amount } = data
-  return {
-    from: [{ amount, from: sender }],
-    to: [{ amount, to: recipient }],
-    type: 'transfer',
-  }
+  const txData: TxData = transferDataList
+    // filter out txs which are not based on given address
+    .filter(({ sender, recipient }) => sender === address || recipient === address)
+    // transform `TransferData` -> `TxData`
+    .reduce(
+      (acc: TxData, { sender, recipient, amount }) => ({
+        ...acc,
+        from: [...acc.from, { amount, from: sender }],
+        to: [...acc.to, { amount, to: recipient }],
+      }),
+      { from: [], to: [], type: 'transfer' },
+    )
+
+  return txData
 }
 
 /**

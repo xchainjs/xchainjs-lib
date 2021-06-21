@@ -309,6 +309,7 @@ class Client implements ThorchainClient, XChainClient {
     const messageAction = undefined
     const offset = params?.offset || 0
     const limit = params?.limit || 10
+    const address = params?.address || this.getAddress()
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
@@ -319,7 +320,7 @@ class Client implements ThorchainClient, XChainClient {
         await this.cosmosClient.searchTxFromRPC({
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
-          transferRecipient: params?.address,
+          transferRecipient: address,
           limit: MAX_TX_COUNT,
           txMinHeight,
           txMaxHeight,
@@ -329,7 +330,7 @@ class Client implements ThorchainClient, XChainClient {
         await this.cosmosClient.searchTxFromRPC({
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
-          transferSender: params?.address,
+          transferSender: address,
           limit: MAX_TX_COUNT,
           txMinHeight,
           txMaxHeight,
@@ -349,11 +350,12 @@ class Client implements ThorchainClient, XChainClient {
         .filter(params?.filterFn ? params.filterFn : (tx) => tx)
         .filter((_, index) => index < MAX_TX_COUNT)
 
+      // get `total` before filtering txs out for pagination
       const total = history.length
 
       history = history.filter((_, index) => index >= offset && index < offset + limit)
 
-      const txs = await Promise.all(history.map(({ hash }) => this.getTransactionData(hash)))
+      const txs = await Promise.all(history.map(({ hash }) => this.getTransactionData(hash, address)))
 
       return {
         total,
@@ -370,16 +372,17 @@ class Client implements ThorchainClient, XChainClient {
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
-  getTransactionData = async (txId: string): Promise<Tx> => {
+  getTransactionData = async (txId: string, address: Address): Promise<Tx> => {
     try {
       const txResult = await this.cosmosClient.txsHashGet(txId)
-      const txData: TxData | null = txResult.logs ? getDepositTxDataFromLogs(txResult.logs) : null
+      const txData: TxData | null = txResult.logs ? getDepositTxDataFromLogs(txResult.logs, address) : null
 
       if (!txData) {
-        throw new Error(`Failed to parse transaction data from logs (TxId ${txId})`)
+        throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
       }
 
       const { from, to, type } = txData
+
       return {
         hash: txId,
         asset: AssetRune,
