@@ -1,3 +1,7 @@
+# v.0.15.8 (2021-06-18)
+
+- changed rollupjs to treat axios as external lib
+
 # v.0.15.7 (2021-06-10)
 
 #### Fix
