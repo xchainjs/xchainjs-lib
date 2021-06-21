@@ -16,7 +16,7 @@ import { computeAddress } from '@ethersproject/transactions'
 import { Wordlist, wordlists } from '@ethersproject/wordlists'
 
 import { Logger } from '@ethersproject/logger'
-import { bip32 } from '@xchainjs/xchain-crypto/lib'
+import { bip32 } from '@xchainjs/xchain-crypto'
 const version = 'hdnode/5.3.0'
 
 const logger = new Logger(version)

@@ -219,7 +219,7 @@ class Client implements BitcoinCashClient, XChainClient {
   private getBCHKeys = async (phrase: string, derivationPath: string): Promise<KeyPair> => {
     try {
       const rootSeed = await getSeed(phrase)
-      const masterHDNode = await bip32.fromSeed(rootSeed, utils.bchNetwork(this.network))
+      const masterHDNode = await bip32.fromSeed(Buffer.from(rootSeed.toString('hex')), utils.bchNetwork(this.network))
 
       const derived = await masterHDNode.derivePath(derivationPath)
       return {
