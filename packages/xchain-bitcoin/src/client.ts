@@ -15,7 +15,7 @@ import {
   Fees,
   XChainClientParams,
 } from '@thorwallet/xchain-client'
-import { validatePhrase, getSeed } from '@thorwallet/xchain-crypto'
+import { validatePhrase, getSeed, bip32 } from '@thorwallet/xchain-crypto'
 import { AssetBTC, assetAmount, assetToBase } from '@thorwallet/xchain-util'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 
@@ -222,7 +222,7 @@ class Client implements BitcoinClient, XChainClient {
     const btcNetwork = Utils.btcNetwork(this.net)
 
     const seed = await getSeed(phrase)
-    const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(this.getFullDerivationPath(index))
+    const master = await (await bip32.fromSeed(seed, btcNetwork)).derivePath(this.getFullDerivationPath(index))
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')

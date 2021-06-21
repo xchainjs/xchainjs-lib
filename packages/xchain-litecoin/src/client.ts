@@ -15,7 +15,7 @@ import {
   Fees,
   XChainClientParams,
 } from '@thorwallet/xchain-client'
-import { validatePhrase, getSeed } from '@thorwallet/xchain-crypto'
+import { validatePhrase, getSeed, bip32 } from '@thorwallet/xchain-crypto'
 import { AssetLTC, assetToBase, assetAmount } from '@thorwallet/xchain-util'
 import { NodeAuth } from './types'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
@@ -232,7 +232,7 @@ class Client implements LitecoinClient, XChainClient {
     const ltcNetwork = Utils.ltcNetwork(this.net)
 
     const seed = await getSeed(phrase)
-    const master = Litecoin.bip32.fromSeed(seed, ltcNetwork).derivePath(this.getFullDerivationPath(index))
+    const master = await (await bip32.fromSeed(seed, ltcNetwork)).derivePath(this.getFullDerivationPath(index))
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')

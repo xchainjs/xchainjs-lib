@@ -219,11 +219,11 @@ class Client implements BitcoinCashClient, XChainClient {
   private getBCHKeys = async (phrase: string, derivationPath: string): Promise<KeyPair> => {
     try {
       const rootSeed = await getSeed(phrase)
-      const masterHDNode = bip32.fromSeed(rootSeed, utils.bchNetwork(this.network))
+      const masterHDNode = await bip32.fromSeed(rootSeed, utils.bchNetwork(this.network))
 
-      const derived = masterHDNode.derivePath(derivationPath)
+      const derived = await masterHDNode.derivePath(derivationPath)
       return {
-        getAddress: (index: number) => derived.derive(index).toBase58(),
+        getAddress: async (index: number) => (await derived.derive(index)).toBase58(),
       }
     } catch (error) {
       throw new Error(`Getting key pair failed: ${error?.message || error.toString()}`)
@@ -245,7 +245,7 @@ class Client implements BitcoinCashClient, XChainClient {
     if (this.phrase) {
       try {
         const keys = await this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
-        const address = keys.getAddress(index)
+        const address = await keys.getAddress(index)
 
         return utils.stripPrefix(utils.toCashAddress(address))
       } catch (error) {

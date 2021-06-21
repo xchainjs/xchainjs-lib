@@ -6,6 +6,8 @@ import ecc from 'tiny-secp256k1'
 // @ts-expect-error no types
 import typeforce from 'typeforce'
 import wif from 'wif'
+// @ts-expect-error upstream
+import { NativeModules } from 'react-native'
 
 const createHash = require('create-hash')
 const createHmac = require('create-hmac')
@@ -19,8 +21,11 @@ export function hash160(buffer: Buffer): Buffer {
   }
 }
 
-export function hmacSHA512(key: Buffer, data: Buffer): Buffer {
-  return createHmac('sha512', key).update(data).digest()
+export async function hmacSHA512(key: Buffer, data: Buffer): Promise<Buffer> {
+  const hmac = await NativeModules.ThorCrypto.createHmac512(key.toString(), data.toString())
+  const nativeHmac = createHmac('sha512', key).update(data).digest()
+  console.log('RN hmac', hmac, Buffer.from(hmac), 'ORIGINAL', nativeHmac)
+  return nativeHmac
 }
 
 interface Network {
@@ -82,9 +87,9 @@ export interface BIP32Interface {
   neutered(): BIP32Interface
   toBase58(): string
   toWIF(): string
-  derive(index: number): BIP32Interface
-  deriveHardened(index: number): BIP32Interface
-  derivePath(path: string): BIP32Interface
+  derive(index: number): Promise<BIP32Interface>
+  deriveHardened(index: number): Promise<BIP32Interface>
+  derivePath(path: string): Promise<BIP32Interface>
   sign(hash: Buffer, lowR?: boolean): Buffer
   verify(hash: Buffer, signature: Buffer): boolean
 }
@@ -196,7 +201,7 @@ class BIP32 implements BIP32Interface {
   }
 
   // https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#child-key-derivation-ckd-functions
-  derive(index: number): BIP32Interface {
+  async derive(index: number): Promise<BIP32Interface> {
     typeforce(typeforce.UInt32, index)
 
     const isHardened = index >= HIGHEST_BIT
@@ -219,7 +224,7 @@ class BIP32 implements BIP32Interface {
       data.writeUInt32BE(index, 33)
     }
 
-    const I = hmacSHA512(this.chainCode, data)
+    const I = await hmacSHA512(this.chainCode, data)
     const IL = I.slice(0, 32)
     const IR = I.slice(32)
 
@@ -252,14 +257,14 @@ class BIP32 implements BIP32Interface {
     return hd
   }
 
-  deriveHardened(index: number): BIP32Interface {
+  deriveHardened(index: number): Promise<BIP32Interface> {
     typeforce(UInt31, index)
 
     // Only derives hardened private keys by default
     return this.derive(index + HIGHEST_BIT)
   }
 
-  derivePath(path: string): BIP32Interface {
+  async derivePath(path: string): Promise<BIP32Interface> {
     typeforce(BIP32Path, path)
 
     let splitPath = path.split('/')
@@ -269,16 +274,21 @@ class BIP32 implements BIP32Interface {
       splitPath = splitPath.slice(1)
     }
 
-    return splitPath.reduce((prevHd, indexStr) => {
-      let index
+    let index
+
+    let bip = this as BIP32Interface
+
+    for (const indexStr of splitPath) {
       if (indexStr.slice(-1) === `'`) {
         index = parseInt(indexStr.slice(0, -1), 10)
-        return prevHd.deriveHardened(index)
+        bip = await this.deriveHardened(index)
       } else {
         index = parseInt(indexStr, 10)
-        return prevHd.derive(index)
+        bip = await this.derive(index)
       }
-    }, this as BIP32Interface)
+    }
+
+    return bip
   }
 
   sign(hash: Buffer, lowR?: boolean): Buffer {
@@ -403,13 +413,13 @@ function fromPublicKeyLocal(
   return new BIP32(undefined, publicKey, chainCode, network, depth, index, parentFingerprint)
 }
 
-export function fromSeed(seed: Buffer, network?: Network): BIP32Interface {
+export async function fromSeed(seed: Buffer, network?: Network): Promise<BIP32Interface> {
   typeforce(typeforce.Buffer, seed)
   if (seed.length < 16) throw new TypeError('Seed should be at least 128 bits')
   if (seed.length > 64) throw new TypeError('Seed should be at most 512 bits')
   network = network || BITCOIN
 
-  const I = hmacSHA512(Buffer.from('Bitcoin seed', 'utf8'), seed)
+  const I = await hmacSHA512(Buffer.from('Bitcoin seed', 'utf8'), seed)
   const IL = I.slice(0, 32)
   const IR = I.slice(32)
 

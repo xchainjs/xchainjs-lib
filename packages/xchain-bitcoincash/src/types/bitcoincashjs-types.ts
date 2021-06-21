@@ -1,5 +1,5 @@
 export type KeyPair = {
-  getAddress(index: number): string
+  getAddress(index: number): Promise<string>
 }
 
 export type Transaction = {
