@@ -1,3 +1,5 @@
+const bitcash = require('@psf/bitcoincashjs-lib')
+
 import * as utils from './utils'
 import {
   RootDerivationPaths,
@@ -12,8 +14,8 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
-} from '@thorwallet/xchain-client'
-import { validatePhrase, getSeed, bip32 } from '@thorwallet/xchain-crypto'
+} from '@xchainjs/xchain-client'
+import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'
@@ -60,6 +62,7 @@ class Client implements BitcoinCashClient, XChainClient {
       testnet: 'https://api.haskoin.com/bchtest',
       mainnet: 'https://api.haskoin.com/bch',
     },
+    phrase,
     nodeUrl = {
       testnet: 'https://testnet.bch.thorchain.info',
       mainnet: 'https://bch.thorchain.info',
@@ -77,6 +80,7 @@ class Client implements BitcoinCashClient, XChainClient {
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
     this.rootDerivationPaths = rootDerivationPaths
+    phrase && this.setPhrase(phrase)
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
       // by strictly passing nodeAuth as null value
@@ -131,7 +135,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Promise<Address> => {
+  setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
       return this.getAddress(walletIndex)
@@ -216,15 +220,12 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if invalid phrase is provided.
    * */
-  private getBCHKeys = async (phrase: string, derivationPath: string): Promise<KeyPair> => {
+  private getBCHKeys = (phrase: string, derivationPath: string): KeyPair => {
     try {
-      const rootSeed = await getSeed(phrase)
-      const masterHDNode = await bip32.fromSeed(Buffer.from(rootSeed.toString('hex')), utils.bchNetwork(this.network))
+      const rootSeed = getSeed(phrase)
+      const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
 
-      const derived = await masterHDNode.derivePath(derivationPath)
-      return {
-        getAddress: async (_index: number) => derived.toBase58(),
-      }
+      return masterHDNode.derivePath(derivationPath).keyPair
     } catch (error) {
       throw new Error(`Getting key pair failed: ${error?.message || error.toString()}`)
     }
@@ -244,7 +245,7 @@ class Client implements BitcoinCashClient, XChainClient {
   getAddress = async (index = 0): Promise<Address> => {
     if (this.phrase) {
       try {
-        const keys = await this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
+        const keys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
         const address = await keys.getAddress(index)
 
         return utils.stripPrefix(utils.toCashAddress(address))
@@ -433,7 +434,7 @@ class Client implements BitcoinCashClient, XChainClient {
         network: this.network,
       })
 
-      const keyPair = await this.getBCHKeys(this.phrase, derivationPath)
+      const keyPair = this.getBCHKeys(this.phrase, derivationPath)
 
       utxos.forEach((utxo, index) => {
         builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)
