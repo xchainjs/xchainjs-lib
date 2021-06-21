@@ -199,7 +199,7 @@ class Client implements BinanceClient, XChainClient {
     const HDPATH = "44'/714'/0'/0/"
     const seed = await getSeed(phrase)
     if (derive) {
-      const master = await bip32.fromSeed(seed.toString('hex'))
+      const master = await bip32.fromSeed(seed)
       const child = await master.derivePath(HDPATH + index)
       if (!child.privateKey) {
         throw new Error('child does not have a privateKey')
