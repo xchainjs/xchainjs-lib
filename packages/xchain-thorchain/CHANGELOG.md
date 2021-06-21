@@ -1,3 +1,9 @@
+# v.0.16.2 (2021-06-21)
+
+### Fix
+
+- Fix `to` / `from` addresses by parsing tx data from event logs
+
 # v.0.16.1 (2021-06-14)
 
 ### Fix
