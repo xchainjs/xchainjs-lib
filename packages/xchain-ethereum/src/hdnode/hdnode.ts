@@ -11,7 +11,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { toUtf8Bytes, UnicodeNormalizationForm } from '@ethersproject/strings'
 import { defineReadOnly } from '@ethersproject/properties'
 import { SigningKey } from '@ethersproject/signing-key'
-import { computeHmac, ripemd160, sha256, SupportedAlgorithm } from '@ethersproject/sha2'
+import { ripemd160, sha256 } from '@ethersproject/sha2'
 import { computeAddress } from '@ethersproject/transactions'
 import { Wordlist, wordlists } from '@ethersproject/wordlists'
 
@@ -389,13 +389,6 @@ export class HDNode implements ExternallyOwnedAccount {
     }
 
     const hmac: Uint8Array = new Uint8Array(await bip32.hmacSHA512(Buffer.from(MasterSecret), Buffer.from(seedArray)))
-
-    const I: Uint8Array = arrayify(computeHmac(SupportedAlgorithm.sha512, MasterSecret, seedArray))
-
-    if (I.toString() !== hmac.toString()) {
-      console.log({ I, hmac })
-      throw new Error('wrong assumption')
-    }
 
     return new HDNode(
       _constructorGuard,
