@@ -22,12 +22,12 @@ export type TransactionBuilder = {
 }
 
 export type Network = {
-  messagePrefix: Buffer | string
+  messagePrefix: string
   bip32: {
-    public: Buffer
-    private: Buffer
+    public: number
+    private: number
   }
-  pubKeyHash: Buffer
-  scriptHash: Buffer
-  wif: Buffer
+  pubKeyHash: number
+  scriptHash: number
+  wif: number
 }

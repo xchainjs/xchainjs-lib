@@ -1,4 +1,9 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "strictPropertyInitialization": false,
+    "strictNullChecks": false,
+    "strict": false
+  }
 }

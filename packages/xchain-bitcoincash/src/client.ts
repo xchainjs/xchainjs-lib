@@ -1,5 +1,3 @@
-const bitcash = require('@psf/bitcoincashjs-lib')
-
 import * as utils from './utils'
 import {
   RootDerivationPaths,
@@ -15,7 +13,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@thorwallet/xchain-client'
-import { validatePhrase, getSeed } from '@thorwallet/xchain-crypto'
+import { validatePhrase, getSeed, bip32 } from '@thorwallet/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'
@@ -221,9 +219,12 @@ class Client implements BitcoinCashClient, XChainClient {
   private getBCHKeys = async (phrase: string, derivationPath: string): Promise<KeyPair> => {
     try {
       const rootSeed = await getSeed(phrase)
-      const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
+      const masterHDNode = bip32.fromSeed(rootSeed, utils.bchNetwork(this.network))
 
-      return masterHDNode.derivePath(derivationPath).keyPair
+      const derived = masterHDNode.derivePath(derivationPath)
+      return {
+        getAddress: (index: number) => derived.derive(index).toBase58(),
+      }
     } catch (error) {
       throw new Error(`Getting key pair failed: ${error?.message || error.toString()}`)
     }
