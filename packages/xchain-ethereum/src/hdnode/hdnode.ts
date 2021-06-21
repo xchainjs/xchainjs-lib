@@ -16,6 +16,7 @@ import { computeAddress } from '@ethersproject/transactions'
 import { Wordlist, wordlists } from '@ethersproject/wordlists'
 
 import { Logger } from '@ethersproject/logger'
+import { bip32 } from '@xchainjs/xchain-crypto/lib'
 const version = 'hdnode/5.3.0'
 
 const logger = new Logger(version)
@@ -380,20 +381,26 @@ export class HDNode implements ExternallyOwnedAccount {
     return result
   }
 
-  static _fromSeed(seed: BytesLike, mnemonic: Mnemonic): HDNode {
+  static async _fromSeed(seed: BytesLike, mnemonic: Mnemonic): Promise<HDNode> {
     const seedArray: Uint8Array = arrayify(seed)
     if (seedArray.length < 16 || seedArray.length > 64) {
       throw new Error('invalid seed')
     }
 
+    const hmac: Uint8Array = await bip32.hmacSHA512(Buffer.from(MasterSecret), Buffer.from(seedArray))
     const I: Uint8Array = arrayify(computeHmac(SupportedAlgorithm.sha512, MasterSecret, seedArray))
+
+    if (I.toString() !== hmac.toString()) {
+      console.log({ I, hmac })
+      throw new Error('wrong assumption')
+    }
 
     return new HDNode(
       _constructorGuard,
-      bytes32(I.slice(0, 32)),
+      bytes32(hmac.slice(0, 32)),
       null,
       '0x00000000',
-      bytes32(I.slice(32)),
+      bytes32(hmac.slice(32)),
       0,
       0,
       mnemonic,
