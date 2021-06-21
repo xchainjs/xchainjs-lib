@@ -20,8 +20,11 @@ export function hash160(buffer: Buffer): Buffer {
   }
 }
 
-export async function hmacSHA512(key: Buffer, data: Buffer): Promise<Buffer> {
-  const hmac = (await NativeModules.ThorCrypto.createHmac512(key.toString('base64'), data.toString('base64'))) as string
+export async function hmacSHA512(key: Buffer, myData: Buffer): Promise<Buffer> {
+  const hmac = (await NativeModules.ThorCrypto.createHmac512(
+    key.toString('base64'),
+    myData.toString('base64'),
+  )) as string
   return Buffer.from(hmac, 'base64')
 }
 
