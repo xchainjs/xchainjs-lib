@@ -10,7 +10,6 @@ import wif from 'wif'
 import { NativeModules } from 'react-native'
 
 const createHash = require('create-hash')
-const createHmac = require('create-hmac')
 
 export function hash160(buffer: Buffer): Buffer {
   const sha256Hash: Buffer = createHash('sha256').update(buffer).digest()
