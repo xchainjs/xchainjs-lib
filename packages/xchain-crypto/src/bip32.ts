@@ -424,5 +424,3 @@ export async function fromSeed(seed: Buffer, network?: Network): Promise<BIP32In
 
   return fromPrivateKey(IL, IR, network)
 }
-
-Buffer.from('fgdsfsd', 'utf8').toString('binary')
