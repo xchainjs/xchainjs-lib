@@ -1,5 +1,4 @@
 import axios from 'axios'
-import * as BIP32 from 'bip32'
 
 import { TxHistoryParams } from '@thorwallet/xchain-client'
 import * as xchainCrypto from '@thorwallet/xchain-crypto'
@@ -69,8 +68,8 @@ export class CosmosSDKClient {
 
   getPrivKeyFromMnemonic = async (mnemonic: string, derivationPath: string): Promise<PrivKey> => {
     const seed = await xchainCrypto.getSeed(mnemonic)
-    const node = BIP32.fromSeed(seed)
-    const child = node.derivePath(derivationPath)
+    const node = await xchainCrypto.bip32.fromSeed(seed)
+    const child = await node.derivePath(derivationPath)
 
     if (!child.privateKey) {
       throw new Error('child does not have a privateKey')
