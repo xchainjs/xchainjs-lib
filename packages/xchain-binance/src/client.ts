@@ -35,10 +35,9 @@ import {
   BNBChain,
   assetToString,
 } from '@thorwallet/xchain-util'
-import { getSeed, validatePhrase } from '@thorwallet/xchain-crypto'
+import { getSeed, validatePhrase, bip32 } from '@thorwallet/xchain-crypto'
 import { isTransferFee, parseTx, getPrefix } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
-import bip32 from 'bip32'
 type PrivKey = string
 
 export type Coin = {
@@ -200,8 +199,8 @@ class Client implements BinanceClient, XChainClient {
     const HDPATH = "44'/714'/0'/0/"
     const seed = await getSeed(phrase)
     if (derive) {
-      const master = bip32.fromSeed(seed)
-      const child = master.derivePath(HDPATH + index)
+      const master = await bip32.fromSeed(seed.toString('hex'))
+      const child = await master.derivePath(HDPATH + index)
       if (!child.privateKey) {
         throw new Error('child does not have a privateKey')
       }

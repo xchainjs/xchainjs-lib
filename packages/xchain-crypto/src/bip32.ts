@@ -21,11 +21,11 @@ export function hash160(buffer: Buffer): Buffer {
   }
 }
 
-export async function hmacSHA512(key: Buffer, data: Buffer): Promise<Buffer> {
-  console.log({ key, data, utf8: data.toString('utf8'), base64: data.toString('base64') })
-  const hmac = await NativeModules.ThorCrypto.createHmac512(key.toString(), data.toString())
+export async function hmacSHA512(key: string, data: string): Promise<Buffer> {
+  console.log({ key, data })
+  const hmac = await NativeModules.ThorCrypto.createHmac512(key, data)
   const nativeHmac = createHmac('sha512', key).update(data).digest()
-  console.log('RN hmac', hmac, Buffer.from(hmac), 'ORIGINAL', nativeHmac)
+  console.log('RN hmac', hmac, Buffer.from(hmac, 'base64'), 'ORIGINAL', nativeHmac)
   return nativeHmac
 }
 
@@ -224,8 +224,7 @@ class BIP32 implements BIP32Interface {
       this.publicKey.copy(data, 0)
       data.writeUInt32BE(index, 33)
     }
-
-    const I = await hmacSHA512(this.chainCode, data)
+    const I = await hmacSHA512(this.chainCode.toString('utf8'), data.toString('utf8'))
     const IL = I.slice(0, 32)
     const IR = I.slice(32)
 
@@ -414,13 +413,13 @@ function fromPublicKeyLocal(
   return new BIP32(undefined, publicKey, chainCode, network, depth, index, parentFingerprint)
 }
 
-export async function fromSeed(seed: Buffer, network?: Network): Promise<BIP32Interface> {
+export async function fromSeed(seed: string, network?: Network): Promise<BIP32Interface> {
   typeforce(typeforce.Buffer, seed)
   if (seed.length < 16) throw new TypeError('Seed should be at least 128 bits')
   if (seed.length > 64) throw new TypeError('Seed should be at most 512 bits')
   network = network || BITCOIN
 
-  const I = await hmacSHA512(Buffer.from('Bitcoin seed', 'utf8'), seed)
+  const I = await hmacSHA512('Bitcoin seed', seed)
   const IL = I.slice(0, 32)
   const IR = I.slice(32)
 

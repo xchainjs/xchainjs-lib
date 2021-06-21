@@ -222,7 +222,9 @@ class Client implements BitcoinClient, XChainClient {
     const btcNetwork = Utils.btcNetwork(this.net)
 
     const seed = await getSeed(phrase)
-    const master = await (await bip32.fromSeed(seed, btcNetwork)).derivePath(this.getFullDerivationPath(index))
+    const master = await (await bip32.fromSeed(seed.toString('hex'), btcNetwork)).derivePath(
+      this.getFullDerivationPath(index),
+    )
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')

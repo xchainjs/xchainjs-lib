@@ -68,7 +68,7 @@ export class CosmosSDKClient {
 
   getPrivKeyFromMnemonic = async (mnemonic: string, derivationPath: string): Promise<PrivKey> => {
     const seed = await xchainCrypto.getSeed(mnemonic)
-    const node = await xchainCrypto.bip32.fromSeed(seed)
+    const node = await xchainCrypto.bip32.fromSeed(seed.toString('hex'))
     const child = await node.derivePath(derivationPath)
 
     if (!child.privateKey) {

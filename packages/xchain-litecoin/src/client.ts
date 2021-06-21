@@ -232,7 +232,9 @@ class Client implements LitecoinClient, XChainClient {
     const ltcNetwork = Utils.ltcNetwork(this.net)
 
     const seed = await getSeed(phrase)
-    const master = await (await bip32.fromSeed(seed, ltcNetwork)).derivePath(this.getFullDerivationPath(index))
+    const master = await (await bip32.fromSeed(seed.toString('hex'), ltcNetwork)).derivePath(
+      this.getFullDerivationPath(index),
+    )
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
