@@ -421,7 +421,7 @@ export class HDNode implements ExternallyOwnedAccount {
     })
   }
 
-  static fromSeed(seed: BytesLike): HDNode {
+  static fromSeed(seed: BytesLike): Promise<HDNode> {
     return HDNode._fromSeed(seed, null)
   }
 
