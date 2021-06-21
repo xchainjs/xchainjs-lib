@@ -62,7 +62,6 @@ class Client implements BitcoinCashClient, XChainClient {
       testnet: 'https://api.haskoin.com/bchtest',
       mainnet: 'https://api.haskoin.com/bch',
     },
-    phrase,
     nodeUrl = {
       testnet: 'https://testnet.bch.thorchain.info',
       mainnet: 'https://bch.thorchain.info',
@@ -80,7 +79,6 @@ class Client implements BitcoinCashClient, XChainClient {
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
     this.rootDerivationPaths = rootDerivationPaths
-    phrase && this.setPhrase(phrase)
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
       // by strictly passing nodeAuth as null value
