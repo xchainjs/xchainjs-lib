@@ -169,11 +169,11 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Phrase must be provided"}
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): Promise<Address> => {
+  getAddress = async (index = 0): Promise<Address> => {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
-    return Promise.resolve(this.hdNode.derivePath(this.getFullDerivationPath(index)).address.toLowerCase())
+    return (await this.hdNode.derivePath(this.getFullDerivationPath(index))).address.toLowerCase()
   }
 
   /**
@@ -184,8 +184,8 @@ export default class Client implements XChainClient, EthereumClient {
    * @throws {"Phrase must be provided"}
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getWallet = (index = 0): ethers.Wallet => {
-    return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(index))).connect(this.getProvider())
+  getWallet = async (index = 0): Promise<ethers.Wallet> => {
+    return new Wallet(await this.hdNode.derivePath(this.getFullDerivationPath(index))).connect(this.getProvider())
   }
   setupProviders = (): void => {
     if (this.infuraCreds) {
@@ -549,7 +549,9 @@ export default class Client implements XChainClient, EthereumClient {
     if (!contractAddress) {
       return Promise.reject(new Error('contractAddress must be provided'))
     }
-    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(walletIndex))
+    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(
+      await this.getWallet(walletIndex),
+    )
     return contract[func](...params)
   }
 
@@ -574,7 +576,7 @@ export default class Client implements XChainClient, EthereumClient {
     if (!contractAddress) {
       return Promise.reject(new Error('contractAddress must be provided'))
     }
-    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(0))
+    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(await this.getWallet(0))
     return contract.estimateGas[func](...params)
   }
 
@@ -746,7 +748,7 @@ export default class Client implements XChainClient, EthereumClient {
           },
         )
 
-        txResult = await this.getWallet().sendTransaction(transactionRequest)
+        txResult = await (await this.getWallet()).sendTransaction(transactionRequest)
       }
 
       return txResult.hash

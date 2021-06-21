@@ -16,7 +16,7 @@ import { computeAddress } from '@ethersproject/transactions'
 import { Wordlist, wordlists } from '@ethersproject/wordlists'
 
 import { Logger } from '@ethersproject/logger'
-import { bip32 } from '@xchainjs/xchain-crypto'
+import { bip32 } from '@thorwallet/xchain-crypto'
 const version = 'hdnode/5.3.0'
 
 const logger = new Logger(version)
@@ -280,7 +280,7 @@ export class HDNode implements ExternallyOwnedAccount {
     )
   }
 
-  private _derive(index: number): HDNode {
+  private async _derive(index: number): Promise<HDNode> {
     if (index > 0xffffffff) {
       throw new Error('invalid index - ' + String(index))
     }
@@ -315,9 +315,10 @@ export class HDNode implements ExternallyOwnedAccount {
       data[33 + (i >> 3)] = (index >> (24 - i)) & 0xff
     }
 
-    const I = arrayify(computeHmac(SupportedAlgorithm.sha512, this.chainCode, data))
-    const IL = I.slice(0, 32)
-    const IR = I.slice(32)
+    const hmac: Uint8Array = new Uint8Array(await bip32.hmacSHA512(Buffer.from(this.chainCode), Buffer.from(data)))
+
+    const IL = hmac.slice(0, 32)
+    const IR = hmac.slice(32)
 
     // The private key
     let ki: string = null
@@ -346,7 +347,7 @@ export class HDNode implements ExternallyOwnedAccount {
     return new HDNode(_constructorGuard, ki, Ki, this.fingerprint, bytes32(IR), index, this.depth + 1, mnemonicOrPath)
   }
 
-  derivePath(path: string): HDNode {
+  async derivePath(path: string): Promise<Promise<HDNode>> {
     const components = path.split('/')
 
     if (components.length === 0 || (components[0] === 'm' && this.depth !== 0)) {
@@ -366,13 +367,13 @@ export class HDNode implements ExternallyOwnedAccount {
         if (index >= HardenedBit) {
           throw new Error('invalid path index - ' + component)
         }
-        result = result._derive(HardenedBit + index)
+        result = await result._derive(HardenedBit + index)
       } else if (component.match(/^[0-9]+$/)) {
         const index = parseInt(component)
         if (index >= HardenedBit) {
           throw new Error('invalid path index - ' + component)
         }
-        result = result._derive(index)
+        result = await result._derive(index)
       } else {
         throw new Error('invalid path component - ' + component)
       }
@@ -387,7 +388,8 @@ export class HDNode implements ExternallyOwnedAccount {
       throw new Error('invalid seed')
     }
 
-    const hmac: Uint8Array = await bip32.hmacSHA512(Buffer.from(MasterSecret), Buffer.from(seedArray))
+    const hmac: Uint8Array = new Uint8Array(await bip32.hmacSHA512(Buffer.from(MasterSecret), Buffer.from(seedArray)))
+
     const I: Uint8Array = arrayify(computeHmac(SupportedAlgorithm.sha512, MasterSecret, seedArray))
 
     if (I.toString() !== hmac.toString()) {
