@@ -218,9 +218,9 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if invalid phrase is provided.
    * */
-  private getBCHKeys = (phrase: string, derivationPath: string): KeyPair => {
+  private getBCHKeys = async (phrase: string, derivationPath: string): Promise<KeyPair> => {
     try {
-      const rootSeed = getSeed(phrase)
+      const rootSeed = await getSeed(phrase)
       const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
 
       return masterHDNode.derivePath(derivationPath).keyPair
@@ -243,7 +243,7 @@ class Client implements BitcoinCashClient, XChainClient {
   getAddress = async (index = 0): Promise<Address> => {
     if (this.phrase) {
       try {
-        const keys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
+        const keys = await this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
         const address = await keys.getAddress(index)
 
         return utils.stripPrefix(utils.toCashAddress(address))
@@ -432,7 +432,7 @@ class Client implements BitcoinCashClient, XChainClient {
         network: this.network,
       })
 
-      const keyPair = this.getBCHKeys(this.phrase, derivationPath)
+      const keyPair = await this.getBCHKeys(this.phrase, derivationPath)
 
       utxos.forEach((utxo, index) => {
         builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)
