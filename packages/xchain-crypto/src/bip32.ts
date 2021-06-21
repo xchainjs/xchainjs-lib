@@ -22,11 +22,8 @@ export function hash160(buffer: Buffer): Buffer {
 }
 
 export async function hmacSHA512(key: Buffer, data: Buffer): Promise<Buffer> {
-  console.log({ key, data })
-  const hmac = await NativeModules.ThorCrypto.createHmac512(key.toString('hex'), data.toString('hex'))
-  const nativeHmac = createHmac('sha512', key).update(data).digest()
-  console.log('RN hmac', hmac, Buffer.from(hmac, 'base64'), 'ORIGINAL', nativeHmac)
-  return nativeHmac
+  const hmac = (await NativeModules.ThorCrypto.createHmac512(key.toString('base64'), data.toString('base64'))) as string
+  return Buffer.from(hmac, 'base64')
 }
 
 interface Network {
@@ -425,3 +422,5 @@ export async function fromSeed(seed: Buffer, network?: Network): Promise<BIP32In
 
   return fromPrivateKey(IL, IR, network)
 }
+
+Buffer.from('fgdsfsd', 'utf8').toString('binary')
