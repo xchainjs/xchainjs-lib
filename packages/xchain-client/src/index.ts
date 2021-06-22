@@ -1,1 +1,6 @@
 export * from './types'
+export * from './delegate'
+export * from './client'
+export * from './utxoClient'
+export * from './multiAssetClient'
+export * from './util'

@@ -1,4 +1,4 @@
-import { TxFrom, TxTo, Txs, Fees } from '@xchainjs/xchain-client'
+import { TxFrom, TxTo, Tx, TxType } from '@xchainjs/xchain-client'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import { Msg, codec } from 'cosmos-client'
@@ -64,7 +64,7 @@ export const getAsset = (denom: string): Asset | null => {
  * @param {Asset} mainAsset Current main asset which depends on the network.
  * @returns {Txs} The parsed transaction result.
  */
-export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs => {
+export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Tx[] => {
   return txs.reduce((acc, tx) => {
     let msgs: Msg[] = []
     if ((tx.tx as RawTxResponse).body === undefined) {
@@ -158,18 +158,16 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
       }
     })
 
-    return [
-      ...acc,
-      {
-        asset: mainAsset,
-        from,
-        to,
-        date: new Date(tx.timestamp),
-        type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
-        hash: tx.txhash || '',
-      },
-    ]
-  }, [] as Txs)
+    acc.push({
+      asset: mainAsset,
+      from,
+      to,
+      date: new Date(tx.timestamp),
+      type: from.length > 0 || to.length > 0 ? TxType.Transfer : TxType.Unknown,
+      hash: tx.txhash || '',
+    })
+    return acc
+  }, [] as Tx[])
 }
 
 /**
@@ -184,25 +182,3 @@ export const getQueryString = (params: APIQueryParam): string => {
     .map((key) => (params[key] == null ? key : `${key}=${encodeURIComponent(params[key].toString())}`))
     .join('&')
 }
-
-/**
- * Get the default fee.
- *
- * @returns {Fees} The default fee.
- */
-export const getDefaultFees = (): Fees => {
-  return {
-    type: 'base',
-    fast: baseAmount(750, DECIMAL),
-    fastest: baseAmount(2500, DECIMAL),
-    average: baseAmount(0, DECIMAL),
-  }
-}
-
-/**
- * Get address prefix based on the network.
- *
- * @returns {string} The address prefix based on the network.
- *
- **/
-export const getPrefix = () => 'cosmos'
