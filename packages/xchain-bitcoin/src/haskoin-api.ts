@@ -1,9 +1,9 @@
-import { Address } from '@xchainjs/xchain-client/lib'
-import { BaseAmount, baseAmount } from '@xchainjs/xchain-util/lib'
+import { Address, Network } from '@xchainjs/xchain-client'
+import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
+import { BTC_DECIMAL } from './const'
 import { getIsTxConfirmed } from './sochain-api'
-import { BTC_DECIMAL } from './utils'
 
 const HASKOIN_API_URL = 'https://api.haskoin.com/btc'
 const SOCHAIN_API_URL = 'https://sochain.com/api/v2'
@@ -42,27 +42,22 @@ export const getUnspentTxs = async (address: string): Promise<UtxoData[]> => {
 }
 
 export const getConfirmedUnspentTxs = async (address: string): Promise<UtxoData[]> => {
-  try {
-    const allUtxos = await getUnspentTxs(address)
+  const txs = await getUnspentTxs(address)
 
-    const confirmedUTXOs: UtxoData[] = []
-
+  const confirmedUTXOs = (
     await Promise.all(
-      allUtxos.map(async (tx: UtxoData) => {
+      txs.map(async (tx) => {
         const { is_confirmed: isTxConfirmed } = await getIsTxConfirmed({
           sochainUrl: SOCHAIN_API_URL,
-          network: 'mainnet',
+          network: Network.Mainnet,
           hash: tx.txid,
         })
-
-        if (isTxConfirmed) {
-          confirmedUTXOs.push(tx)
-        }
+        return [tx, isTxConfirmed] as const
       }),
     )
+  )
+    .filter(([_, isTxConfirmed]) => isTxConfirmed)
+    .map(([tx, _]) => tx)
 
-    return confirmedUTXOs
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  return confirmedUTXOs
 }

@@ -1,4 +1,4 @@
-import { Network } from '../client'
+import { Network } from '@xchainjs/xchain-client'
 
 export type Witness = {
   value: number

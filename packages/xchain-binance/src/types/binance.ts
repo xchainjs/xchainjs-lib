@@ -526,8 +526,6 @@ export type Balance = {
   frozen: string
 }
 
-export type Balances = Balance[]
-
 export type Transfer = {
   code: number
   hash: string

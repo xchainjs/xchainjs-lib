@@ -1,7 +1,7 @@
-import { Address, FeeOptionKey, Fees, Network } from '@xchainjs/xchain-client'
+import { Address, FeeOption, Fees, Network } from '@xchainjs/xchain-client'
 
 export type FeeRate = number
-export type FeeRates = Record<FeeOptionKey, FeeRate>
+export type FeeRates = Record<FeeOption, FeeRate>
 
 export type FeesWithRates = { rates: FeeRates; fees: Fees }
 

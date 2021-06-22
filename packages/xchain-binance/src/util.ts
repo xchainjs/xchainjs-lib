@@ -1,8 +1,7 @@
 import { Transfer, TransferEvent } from './types/binance-ws'
 import { TransferFee, DexFees, Fee, TxType as BinanceTxType, Tx as BinanceTx } from './types/binance'
-import { TxType, Tx, Fees } from '@xchainjs/xchain-client'
+import { TxType, Tx, Fees, SingleFlatFee } from '@xchainjs/xchain-client'
 import { assetFromString, AssetBNB, assetToBase, assetAmount, baseAmount } from '@xchainjs/xchain-util'
-import { DerivePath } from './types/common'
 
 /**
  * Get `hash` from transfer event sent by Binance chain.
@@ -54,8 +53,8 @@ export const isDexFees = (v: Fee | TransferFee | DexFees): v is DexFees => (v as
  * @returns {TxType} `transfer` or `unknown`.
  */
 export const getTxType = (t: BinanceTxType): TxType => {
-  if (t === 'TRANSFER' || t === 'DEPOSIT') return 'transfer'
-  return 'unknown'
+  if (t === 'TRANSFER' || t === 'DEPOSIT') return TxType.Transfer
+  return TxType.Unknown
 }
 
 /**
@@ -90,34 +89,10 @@ export const parseTx = (tx: BinanceTx): Tx | null => {
 }
 
 /**
- * Get DerivePath
- *
- * @param {number} index (optional)
- * @returns {DerivePath} The binance derivation path by the index.
- */
-export const getDerivePath = (index = 0): DerivePath => [44, 714, 0, 0, index]
-
-/**
  * Get the default fee.
  *
  * @returns {Fees} The default fee.
  */
 export const getDefaultFees = (): Fees => {
-  const singleTxFee = baseAmount(37500)
-
-  return {
-    type: 'base',
-    fast: singleTxFee,
-    fastest: singleTxFee,
-    average: singleTxFee,
-  } as Fees
+  return SingleFlatFee(baseAmount(37500))
 }
-
-/**
- * Get address prefix based on the network.
- *
- * @param {string} network
- * @returns {string} The address prefix based on the network.
- *
- **/
-export const getPrefix = (network: string) => (network === 'testnet' ? 'tbnb' : 'bnb')
