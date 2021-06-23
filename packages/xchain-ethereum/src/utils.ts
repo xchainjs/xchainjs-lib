@@ -1,4 +1,4 @@
-import { Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
+import { Balances, Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetETH,
@@ -7,7 +7,11 @@ import {
   ETHChain,
   BaseAmount,
   assetToString,
+  assetAmount,
+  assetToBase,
 } from '@xchainjs/xchain-util'
+import { ethers, BigNumber, providers } from 'ethers'
+import { parseUnits } from 'ethers/lib/utils'
 import {
   Network as EthNetwork,
   Address,
@@ -15,9 +19,11 @@ import {
   TokenTransactionInfo,
   FeesWithGasPricesAndLimits,
   GasPrices,
+  TransactionOperation,
+  TransactionInfo,
+  TokenBalance,
 } from './types'
-import { ethers, BigNumber } from 'ethers'
-import { parseUnits } from 'ethers/lib/utils'
+import erc20ABI from './data/erc20.json'
 
 export const ETH_DECIMAL = 18
 export const ETHPLORER_FREEKEY = 'freekey'
@@ -172,6 +178,69 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
 }
 
 /**
+ * Get transactions from operation
+ *
+ * @param {TransactionOperation} operation
+ * @returns {Tx|null} The parsed transaction.
+ */
+export const getTxFromEthplorerTokenOperation = (operation: TransactionOperation): Tx | null => {
+  const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
+  const { symbol, address } = operation.tokenInfo
+  if (validateSymbol(symbol) && validateAddress(address)) {
+    const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${address}`)
+    if (tokenAsset) {
+      return {
+        asset: tokenAsset,
+        from: [
+          {
+            from: operation.from,
+            amount: baseAmount(operation.value, decimals),
+          },
+        ],
+        to: [
+          {
+            to: operation.to,
+            amount: baseAmount(operation.value, decimals),
+          },
+        ],
+        date: new Date(operation.timestamp * 1000),
+        type: operation.type === 'transfer' ? 'transfer' : 'unknown',
+        hash: operation.transactionHash,
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Get transactions from ETH transaction
+ *
+ * @param {TransactionInfo} txInfo
+ * @returns {Tx} The parsed transaction.
+ */
+export const getTxFromEthplorerEthTransaction = (txInfo: TransactionInfo): Tx => {
+  return {
+    asset: AssetETH,
+    from: [
+      {
+        from: txInfo.from,
+        amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
+      },
+    ],
+    to: [
+      {
+        to: txInfo.to,
+        amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
+      },
+    ],
+    date: new Date(txInfo.timestamp * 1000),
+    type: 'transfer',
+    hash: txInfo.hash,
+  }
+}
+
+/**
  * Calculate fees by multiplying .
  *
  * @returns {Fees} The default gas price.
@@ -255,4 +324,61 @@ export const filterSelfTxs = <T extends { from: string; to: string; hash: string
   }
 
   return filterTxs
+}
+
+/**
+ * Get Decimals
+ *
+ * @param {Asset} asset
+ * @returns {Number} the decimal of a given asset
+ *
+ * @throws {"Invalid asset"} Thrown if the given asset is invalid
+ * @throws {"Invalid provider"} Thrown if the given provider is invalid
+ */
+export const getDecimal = async (asset: Asset, provider: providers.Provider): Promise<number> => {
+  if (assetToString(asset) === assetToString(AssetETH)) {
+    return Promise.resolve(ETH_DECIMAL)
+  }
+
+  const assetAddress = getTokenAddress(asset)
+  if (!assetAddress) {
+    throw new Error(`Invalid asset ${assetToString(asset)}`)
+  }
+
+  try {
+    const contract: ethers.Contract = new ethers.Contract(assetAddress, erc20ABI, provider)
+    const decimal: ethers.BigNumberish = await contract.decimals()
+
+    return ethers.BigNumber.from(decimal).toNumber()
+  } catch (err) {
+    throw new Error(`Invalid provider: ${err}`)
+  }
+}
+
+/**
+ * Get Token Balances
+ *
+ * @param {Array<TokenBalance>} tokenBalances
+ * @returns {Array<Balance>} the parsed balances
+ *
+ */
+export const getTokenBalances = (tokenBalances: TokenBalance[]): Balances => {
+  return tokenBalances.reduce((acc, cur) => {
+    const { symbol, address: tokenAddress } = cur.tokenInfo
+    if (validateSymbol(symbol) && validateAddress(tokenAddress) && cur?.tokenInfo?.decimals !== undefined) {
+      const decimals = parseInt(cur.tokenInfo.decimals, 10)
+      const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${ethers.utils.getAddress(tokenAddress)}`)
+      if (tokenAsset) {
+        return [
+          ...acc,
+          {
+            asset: tokenAsset,
+            amount: baseAmount(cur.balance, decimals),
+          },
+        ]
+      }
+    }
+
+    return acc
+  }, [] as Balances)
 }

@@ -1,4 +1,78 @@
-# v.x.x.x
+# v.0.21.4 (2021-06-07)
+
+### Fix
+
+- `utils:getTokenBalances` - added filtering out assets without `decimals`
+
+# v.0.21.3 (2021-05-27)
+
+- updated peer deps
+
+# v.0.21.2 (2021-06-02)
+
+### Fix
+
+- fixed `getTransactions`'s transactions filtering to match correct pagintaion's boundings
+
+### Update
+
+- updated `xchain-client` package version
+
+# v.0.21.0 (2021-05-27)
+
+### Fix
+
+- Get ETH balance directly from provider
+
+# v.0.20.0 (2021-05-17)
+
+### Breaking change
+
+- added support for HD wallets
+
+# v.0.19.0 (2021-05-05)
+
+### Breaking change
+
+- Latest @xchainjs/xchain-client@0.8.0
+- Latest @xchainjs/xchain-util@0.2.7
+
+# v.0.18.0 (2021-04-08)
+
+### Breaking changes
+
+- change parameters of `approve` function to an object
+
+### Update
+
+- update `approve` function to accept `feeOptionKey` parameter
+
+# v.0.17.1 (2021-04-06)
+
+### Update
+
+- update tests for utils
+- update error messages
+
+# v.0.17.0 (2021-04-02)
+
+### Update
+
+- update `getBalance` to use ethplorer API for mainnet
+- update `getTransactionData` to use ethplorer API for mainnet
+- update dependencies (ethers, xchain-util)
+
+# v.0.16.0 (2021-03-23)
+
+### Breaking change
+
+- move `getDecimal` from client to util
+
+# v.0.15.0 (2021-03-23)
+
+### Add
+
+- add `getDecimal(asset)`
 
 # v.0.14.2 (2021-03-09)
 
@@ -9,6 +83,7 @@
 - update `getTokenAddress` to return checksum address
 
 ### Breaking change
+
 - change parameter of `getTokenAddress`
 
 # v.0.14.1 (2021-03-08)
@@ -45,7 +120,7 @@
 
 - replace `find`, `findIndex`
 - Update @xchainjs/xchain-client package to 0.7.0
-  
+
 # v.0.12.1 (2021-02-26)
 
 ### Fix
@@ -61,7 +136,7 @@
 
 ### Fix
 
-- Remove trailing slashes from `getDefaultExplorerURL`. 
+- Remove trailing slashes from `getDefaultExplorerURL`.
 
 # v.0.11.1 (2020-02-21)
 

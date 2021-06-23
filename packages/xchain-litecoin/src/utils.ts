@@ -2,21 +2,24 @@ import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoi
 import * as sochain from './sochain-api'
 import * as nodeApi from './node-api'
 import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
-import { AssetLTC, assetToString, BaseAmount, baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util'
+import { AssetLTC, BaseAmount, baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util'
 import { LtcAddressUTXOs, AddressParams } from './types/sochain-api-types'
-import { FeeRate, FeeRates, FeesWithRates, GetChangeParams } from './types/client-types'
-import { BroadcastTxParams, DerivePath, UTXO, UTXOs } from './types/common'
+import { FeeRate, FeeRates, FeesWithRates } from './types/client-types'
+import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
 import coininfo from 'coininfo'
 
 export const LTC_DECIMAL = 8
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import accumulative from 'coinselect/accumulative'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
 const TX_INPUT_PUBKEYHASH = 107
 const TX_OUTPUT_BASE = 8 + 1 //9
 const TX_OUTPUT_PUBKEYHASH = 25
-const DUST_THRESHOLD = 1000
 
 function inputBytes(input: UTXO): number {
   return TX_INPUT_BASE + (input.witnessUtxo.script ? input.witnessUtxo.script.length : TX_INPUT_PUBKEYHASH)
@@ -113,27 +116,6 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
 }
 
 /**
- * Get the balance changes amount.
- *
- * @param {GetChangeParams} params
- * @returns {number} The change amount.
- */
-const getChange = async ({ valueOut, sochainUrl, network, address }: GetChangeParams): Promise<number> => {
-  try {
-    const balances = await getBalance({ sochainUrl, network, address })
-    const [ltcBalance] = balances.filter((balance) => assetToString(balance.asset) === assetToString(AssetLTC))
-    let change = 0
-
-    if (ltcBalance && ltcBalance.amount.amount().minus(valueOut).isGreaterThan(DUST_THRESHOLD)) {
-      change = ltcBalance.amount.amount().minus(valueOut).toNumber()
-    }
-    return change
-  } catch (e) {
-    return Promise.reject(e)
-  }
-}
-
-/**
  * Validate the LTC address.
  *
  * @param {string} address
@@ -163,6 +145,7 @@ export const scanUTXOs = async (params: AddressParams): Promise<UTXOs> => {
       ({
         hash: utxo.txid,
         index: utxo.output_no,
+        value: assetToBase(assetAmount(utxo.value, LTC_DECIMAL)).amount().toNumber(),
         witnessUtxo: {
           value: assetToBase(assetAmount(utxo.value, LTC_DECIMAL)).amount().toNumber(),
           script: Buffer.from(utxo.script_hex, 'hex'),
@@ -192,29 +175,38 @@ export const buildTx = async ({
   sochainUrl: string
 }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXOs }> => {
   try {
+    if (!validateAddress(recipient, network)) {
+      return Promise.reject(new Error('Invalid address'))
+    }
+
     const utxos = await scanUTXOs({ sochainUrl, network, address: sender })
     if (utxos.length === 0) {
       return Promise.reject(Error('No utxos to send'))
     }
 
-    const balance = await getBalance({ sochainUrl, network, address: sender })
-    const [ltcBalance] = balance.filter((balance) => balance.asset.symbol === AssetLTC.symbol)
-    if (!ltcBalance) {
-      return Promise.reject(new Error('No ltcBalance found'))
-    }
-
-    if (!validateAddress(recipient, network)) {
-      return Promise.reject(new Error('Invalid address'))
-    }
     const feeRateWhole = Number(feeRate.toFixed(0))
     const compiledMemo = memo ? compileMemo(memo) : null
-    const fee = getFee(utxos, feeRateWhole, compiledMemo)
-    if (amount.amount().plus(fee).isGreaterThan(ltcBalance.amount.amount())) {
+
+    const targetOutputs = []
+    //1. output to recipient
+    targetOutputs.push({
+      address: recipient,
+      value: amount.amount().toNumber(),
+    })
+    //2. add output memo to targets (optional)
+    if (compiledMemo) {
+      targetOutputs.push({ script: compiledMemo, value: 0 })
+    }
+    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+
+    // .inputs and .outputs will be undefined if no solution was found
+    if (!inputs || !outputs) {
       return Promise.reject(Error('Balance insufficient for transaction'))
     }
+
     const psbt = new Litecoin.Psbt({ network: ltcNetwork(network) }) // Network-specific
     //Inputs
-    utxos.forEach((utxo) =>
+    inputs.forEach((utxo: UTXO) =>
       psbt.addInput({
         hash: utxo.hash,
         index: utxo.index,
@@ -223,15 +215,21 @@ export const buildTx = async ({
     )
 
     // Outputs
-    psbt.addOutput({ address: recipient, value: amount.amount().toNumber() }) // Add output {address, value}
-    const change = await getChange({ valueOut: amount.amount().toNumber() + fee, sochainUrl, network, address: sender })
-    if (change > 0) {
-      psbt.addOutput({ address: sender, value: change }) // Add change
-    }
-    if (compiledMemo) {
-      // if memo exists
-      psbt.addOutput({ script: compiledMemo, value: 0 }) // Add OP_RETURN {script, value}
-    }
+    outputs.forEach((output: Litecoin.PsbtTxOutput) => {
+      if (!output.address) {
+        //an empty address means this is the  change ddress
+        output.address = sender
+      }
+      if (!output.script) {
+        psbt.addOutput(output)
+      } else {
+        //we need to add the compiled memo this way to
+        //avoid dust error tx when accumulating memo output with 0 value
+        if (compiledMemo) {
+          psbt.addOutput({ script: compiledMemo, value: 0 })
+        }
+      }
+    })
 
     return { psbt, utxos }
   } catch (e) {
@@ -248,19 +246,6 @@ export const buildTx = async ({
 export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
   return await nodeApi.broadcastTx(params)
 }
-
-/**
- * Get DerivePath.
- *
- * @see https://github.com/satoshilabs/slips/blob/master/slip-0044.md
- *
- * @param {number} index (optional)
- * @returns {DerivePath} The litecoin derivation path by the index. (both mainnet and testnet)
- */
-export const getDerivePath = (index = 0): DerivePath => ({
-  mainnet: `84'/2'/0'/0/${index}`,
-  testnet: `84'/1'/0'/0/${index}`,
-})
 
 /**
  * Calculate fees based on fee rate and memo.

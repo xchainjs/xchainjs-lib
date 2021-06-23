@@ -1,3 +1,9 @@
+# v.0.2.7 (2021-03-16)
+
+### Breaking changes
+
+- Remove decimal of division result + Round down
+
 # v.0.2.6 (2021-03-16)
 
 ### Update

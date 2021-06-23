@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-binance",
-  "version": "4.7.0",
+  "version": "5.2.1",
   "description": "Custom Binance client and utilities used by XChainJS clients",
   "keywords": [
     "BNB",
@@ -32,19 +32,20 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build"
   },
-  "dependencies": {},
   "devDependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
     "@types/big.js": "^4.0.5",
-    "@xchainjs/xchain-client": "^0.7.0",
-    "@xchainjs/xchain-crypto": "^0.2.3"
+    "@xchainjs/xchain-client": "^0.9.3",
+    "@xchainjs/xchain-crypto": "^0.2.4",
+    "@xchainjs/xchain-util": "^0.2.8"
   },
   "publishConfig": {
     "access": "public"
   },
   "peerDependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
-    "@xchainjs/xchain-client": "^0.7.0",
-    "@xchainjs/xchain-crypto": "^0.2.3"
+    "@xchainjs/xchain-client": "^0.9.3",
+    "@xchainjs/xchain-crypto": "^0.2.4",
+    "@xchainjs/xchain-util": "^0.2.8"
   }
 }

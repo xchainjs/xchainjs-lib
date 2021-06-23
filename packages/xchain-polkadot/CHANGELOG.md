@@ -1,3 +1,13 @@
+# v.0.8.2 (2021-06-01)
+
+- updated peer deps
+
+# v.0.8.0 (2021-05-17)
+
+### Breaking change
+
+- added support for HD wallets
+
 # v.0.7.0 (2021-03-02)
 
 ### Breaking change

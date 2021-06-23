@@ -75,7 +75,7 @@ export const baseAmount = (value: BigNumber.Value | undefined, decimal: number =
     times: (v: BigNumber.Value | BaseAmount, d: number = decimal) =>
       baseAmount(amount.times(isBigNumberValue(v) ? v : v.amount()), d),
     div: (v: BigNumber.Value | BaseAmount, d: number = decimal) =>
-      baseAmount(amount.div(isBigNumberValue(v) ? v : v.amount()), d),
+      baseAmount(amount.div(isBigNumberValue(v) ? v : v.amount()).decimalPlaces(0, BigNumber.ROUND_DOWN), d),
     lt: (v: BigNumber.Value | BaseAmount) => amount.lt(isBigNumberValue(v) ? v : v.amount()),
     lte: (v: BigNumber.Value | BaseAmount) => amount.lte(isBigNumberValue(v) ? v : v.amount()),
     gt: (v: BigNumber.Value | BaseAmount) => amount.gt(isBigNumberValue(v) ? v : v.amount()),

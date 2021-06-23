@@ -1,14 +1,11 @@
 import nock from 'nock'
 
 import { TxsPage } from '@xchainjs/xchain-client'
-import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
-import { RPCResponse, RPCTxSearchResult, TxResponse } from '@xchainjs/xchain-cosmos'
-import { Msg } from 'cosmos-client'
-import { StdTx } from 'cosmos-client/x/auth'
-import { BroadcastTxCommitResult, Coin, BaseAccount, StdTxFee } from 'cosmos-client/api'
+import { assetAmount, assetToBase, baseAmount, BaseAmount } from '@xchainjs/xchain-util'
+import { RPCResponse, RPCTxSearchResult, TxResponse, CosmosSDKClient } from '@xchainjs/xchain-cosmos'
+import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
 import { AssetRune, ThorchainDepositResponse } from '../src/types'
 import { Client } from '../src/client'
-import { DECIMAL } from '../src/util'
 
 const mockAccountsAddress = (
   url: string,
@@ -60,26 +57,55 @@ const assertTxHashGet = (url: string, hash: string, result: TxResponse): void =>
 
 describe('Client Test', () => {
   let thorClient: Client
+  let thorMainClient: Client
   const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
-  const mainnet_address = 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws'
-  const testnet_address = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
+  const mainnet_address_path0 = 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws'
+  const mainnet_address_path1 = 'thor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecgaf4nc'
+  const testnet_address_path0 = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
+  const testnet_address_path1 = 'tthor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecv2c92a'
 
   beforeEach(() => {
     thorClient = new Client({ phrase, network: 'testnet' })
+    thorMainClient = new Client({ phrase, network: 'mainnet' })
   })
 
   afterEach(() => {
     thorClient.purgeClient()
+    thorMainClient.purgeClient()
   })
 
   it('should start with empty wallet', async () => {
     const thorClientEmptyMain = new Client({ phrase, network: 'mainnet' })
     const addressMain = thorClientEmptyMain.getAddress()
-    expect(addressMain).toEqual(mainnet_address)
+    expect(addressMain).toEqual(mainnet_address_path0)
 
     const thorClientEmptyTest = new Client({ phrase, network: 'testnet' })
     const addressTest = thorClientEmptyTest.getAddress()
-    expect(addressTest).toEqual(testnet_address)
+    expect(addressTest).toEqual(testnet_address_path0)
+  })
+
+  it('should derive address accordingly to the user param', async () => {
+    const thorClientEmptyMain = new Client({ phrase, network: 'mainnet' /*, derivationPath: "44'/931'/0'/0/0" */ })
+    const addressMain = thorClientEmptyMain.getAddress()
+    expect(addressMain).toEqual(mainnet_address_path0)
+
+    const viaSetPhraseAddr1 = thorClientEmptyMain.getAddress(1 /*, "44'/931'/0'/0/1" */)
+    expect(viaSetPhraseAddr1).toEqual(mainnet_address_path1)
+
+    const thorClientEmptyTest = new Client({ phrase, network: 'testnet' /*, derivationPath: "44'/931'/0'/0/0"*/ })
+    const addressTest = thorClientEmptyTest.getAddress()
+    expect(addressTest).toEqual(testnet_address_path0)
+
+    const viaSetPhraseAddr1Test = thorClientEmptyTest.getAddress(1 /*, "44'/931'/0'/0/1"*/)
+    expect(viaSetPhraseAddr1Test).toEqual(testnet_address_path1)
+
+    const thorClientEmptyMain1 = new Client({ phrase, network: 'mainnet' /*, derivationPath: "44'/931'/0'/0/1"*/ })
+    const addressMain1 = thorClientEmptyMain1.getAddress(1)
+    expect(addressMain1).toEqual(mainnet_address_path1)
+
+    const thorClientEmptyTest1 = new Client({ phrase, network: 'testnet' /*, derivationPath: "44'/931'/0'/0/1"*/ })
+    const addressTest1 = thorClientEmptyTest1.getAddress(1)
+    expect(addressTest1).toEqual(testnet_address_path1)
   })
 
   it('throws an error passing an invalid phrase', async () => {
@@ -93,19 +119,21 @@ describe('Client Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(thorClient.getAddress()).toEqual(testnet_address)
+    expect(thorClient.getAddress()).toEqual(testnet_address_path0)
 
-    thorClient.setNetwork('mainnet')
-    expect(thorClient.getAddress()).toEqual(mainnet_address)
+    expect(thorMainClient.getAddress()).toEqual(mainnet_address_path0)
+  })
+
+  it('should allow to get the CosmosSDKClient', async () => {
+    expect(thorClient.getCosmosClient()).toBeInstanceOf(CosmosSDKClient)
   })
 
   it('should update net', async () => {
-    const client = new Client({ phrase, network: 'mainnet' })
-    client.setNetwork('testnet')
-    expect(client.getNetwork()).toEqual('testnet')
+    thorMainClient.setNetwork('testnet')
+    expect(thorMainClient.getNetwork()).toEqual('testnet')
 
-    const address = await client.getAddress()
-    expect(address).toEqual(testnet_address)
+    const address = await thorMainClient.getAddress()
+    expect(address).toEqual(testnet_address_path0)
   })
 
   it('should init, should have right prefix', async () => {
@@ -135,17 +163,19 @@ describe('Client Test', () => {
   })
 
   it('has no balances', async () => {
-    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address, {
+    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
       height: 0,
       result: [],
     })
-    const result = await thorClient.getBalance()
+    const result = await thorClient.getBalance(thorClient.getAddress(0))
     expect(result).toEqual([])
   })
 
   it('has balances', async () => {
-    thorClient.setNetwork('mainnet')
-    mockAccountsBalance(thorClient.getClientUrl().node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
+    thorMainClient.setNetwork('mainnet')
+    // mainnet - has balance: thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5
+    // mainnet - 0: thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws
+    mockAccountsBalance(thorMainClient.getClientUrl().node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
       height: 0,
       result: [
         {
@@ -154,7 +184,8 @@ describe('Client Test', () => {
         },
       ],
     })
-    const balances = await thorClient.getBalance('thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5')
+
+    const balances = await thorMainClient.getBalance('thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5')
     expect(balances.length).toEqual(1)
     expect(balances[0].asset).toEqual(AssetRune)
     expect(balances[0].amount.amount().isEqualTo(baseAmount(100).amount())).toBeTruthy()
@@ -183,130 +214,33 @@ describe('Client Test', () => {
   })
 
   it('has tx history', async () => {
-    mockTxHistory(thorClient.getClientUrl().rpc, {
-      jsonrpc: '2.0',
-      id: -1,
-      result: {
-        txs: [
-          {
-            height: '1047',
-            hash: '098E70A9529AC8F1A57AA0FE65D1D13040B0E803AB8BE7F3B32098164009DED3',
-            index: 0,
-            tx_result: {
-              code: 0,
-              data: 'CgYKBHNlbmQ=',
-              log:
-                "[{'events:[{'type:'bond','attributes:[{'key:'amount','value:'100000000'},{'key:'bound_type','value:'\\u0000'},{'key:'id','value:'46A44C8556375FC41E7B44D1B796995DB2824D7F9C9FD25EA43B2A48493F365F'},{'key:'chain','value:'THOR'},{'key:'from','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'},{'key:'to','value:'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2'},{'key:'coin','value:'100000000 THOR.RUNE'},{'key:'memo','value:'BOND:tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'}]},{'type:'message','attributes:[{'key:'action','value:'deposit'},{'key:'sender','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'},{'key:'sender','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'}]},{'type:'new_node','attributes:[{'key:'address','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'}]},{'type:'transfer','attributes:[{'key:'recipient','value:'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw'},{'key:'sender','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'},{'key:'amount','value:'100000000rune'},{'key:'recipient','value:'tthor17gw75axcnr8747pkanye45pnrwk7p9c3uhzgff'},{'key:'sender','value:'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg'},{'key:'amount','value:'100000000rune'}]}]}]",
-              info: '',
-              gas_wanted: '100000000',
-              gas_used: '134091',
-              events: [
-                {
-                  type: 'message',
-                  attributes: [
-                    {
-                      key: 'action',
-                      value: 'native_tx',
-                    },
-                    {
-                      key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                    },
-                    {
-                      key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                    },
-                  ],
-                },
-                {
-                  type: 'transfer',
-                  attributes: [
-                    {
-                      key: 'recipient',
-                      value: 'tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw',
-                    },
-                    {
-                      key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                    },
-                    {
-                      key: 'amount',
-                      value: '100000000rune',
-                    },
-                    {
-                      key: 'recipient',
-                      value: 'tthor1g98cy3n9mmjrpn0sxmn63lztelera37nrytwp2',
-                    },
-                    {
-                      key: 'sender',
-                      value: 'tthor1dspn8ucrqfrnuxrgd5ljuc4elarurt0gkwxgly',
-                    },
-                    {
-                      key: 'amount',
-                      value: '200000000000rune',
-                    },
-                  ],
-                },
-              ],
-              codespace: '',
-            },
-            tx:
-              'CoEBCn8KES90eXBlcy5Nc2dEZXBvc2l0EmoKHwoSCgRUSE9SEgRSVU5FGgRSVU5FEgkxMDAwMDAwMDASMUJPTkQ6dHRob3IxM2d5bTk3dG13M2F4ajNocGV3ZGdneTJjcjI4OGQzcWZmcjhza2caFIoJsvl7dHppRuHLmoQRWBqOdsQJElcKTgpGCh8vY29zbW9zLmNyeXB0by5zZWNwMjU2azEuUHViS2V5EiMKIQI7KJDfjLCF1rQl8Dkb+vy9y1HjyC3FM1Qor9zkqywxFRIECgIIfxIFEIDC1y8aQNjQOr84kb74rCRs8TrwVhN89ftC80/6ZC+E9Oh3PVHxS3ngq6vtS3e+jJQXJqf2+1UVSpNZPhxVgxWbIpQRodQ=',
-          },
-        ],
-        total_count: '1',
-      },
+    const historyData = require('../__mocks__/responses/tx_search/sender-tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f.json')
+    const bondTxData = require('../__mocks__/responses/txs/bond-tn-9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C.json')
+    const address = 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f'
+    const txHash = '9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C'
+    mockTxHistory(thorClient.getClientUrl().rpc, historyData)
+
+    assertTxHashGet(thorClient.getClientUrl().node, txHash, bondTxData)
+
+    const txs = await thorClient.getTransactions({
+      address: 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f',
     })
 
-    assertTxHashGet(
-      thorClient.getClientUrl().node,
-      '098E70A9529AC8F1A57AA0FE65D1D13040B0E803AB8BE7F3B32098164009DED3',
-      {
-        height: 0,
-        txhash: '098E70A9529AC8F1A57AA0FE65D1D13040B0E803AB8BE7F3B32098164009DED3',
-        data: '0A060A0473656E64',
-        raw_log: '',
-        gas_wanted: '200000',
-        gas_used: '35000',
-        tx: {
-          msg: [
-            {
-              type: 'thorchain/MsgSend',
-              value: {
-                from_address: 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg',
-                to_address: 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg',
-                amount: [
-                  {
-                    denom: 'rune',
-                    amount: '100000000',
-                  },
-                ],
-              },
-            },
-          ] as Msg[],
-          fee: {
-            gas: '200000',
-            amount: [],
-          } as StdTxFee,
-          signatures: null,
-          memo: '',
-        } as StdTx,
-        timestamp: new Date().toString(),
-      },
-    )
+    expect(txs.total).toEqual(1)
 
-    const transactions = await thorClient.getTransactions({
-      address: 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg',
-    })
-    expect(transactions.total).toEqual(1)
+    const { type, hash, asset, from, to } = txs.txs[0]
 
-    expect(transactions.txs[0].type).toEqual('transfer')
-    expect(transactions.txs[0].hash).toEqual('098E70A9529AC8F1A57AA0FE65D1D13040B0E803AB8BE7F3B32098164009DED3')
-    expect(transactions.txs[0].asset).toEqual(AssetRune)
-    expect(transactions.txs[0].from[0].from).toEqual('tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg')
-    expect(transactions.txs[0].from[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
-    expect(transactions.txs[0].to[0].to).toEqual('tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg')
-    expect(transactions.txs[0].to[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
+    expect(type).toEqual('transfer')
+    expect(hash).toEqual(txHash)
+    expect(asset).toEqual(AssetRune)
+    expect(from[0].from).toEqual(address)
+    expect(from[0].amount.amount().toString()).toEqual(assetToBase(assetAmount(0.02)).amount().toString())
+    expect(from[1].from).toEqual(address)
+    expect(from[1].amount.amount().toString()).toEqual(assetToBase(assetAmount(1700)).amount().toString())
+    expect(to[0].to).toEqual('tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw')
+    expect(to[0].amount.amount().toString()).toEqual(assetToBase(assetAmount(0.02)).amount().toString())
+    expect(to[1].to).toEqual('tthor17gw75axcnr8747pkanye45pnrwk7p9c3uhzgff')
+    expect(to[1].amount.amount().toString()).toEqual(assetToBase(assetAmount(1700)).amount().toString())
   })
 
   it('transfer', async () => {
@@ -322,7 +256,7 @@ describe('Client Test', () => {
       logs: [],
     }
 
-    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address, {
+    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address_path0, {
       height: 0,
       result: {
         coins: [
@@ -335,7 +269,7 @@ describe('Client Test', () => {
         sequence: '0',
       },
     })
-    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address, {
+    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
       height: 0,
       result: [
         {
@@ -368,7 +302,7 @@ describe('Client Test', () => {
       logs: [],
     }
 
-    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address, {
+    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address_path0, {
       height: 0,
       result: {
         coins: [
@@ -381,7 +315,7 @@ describe('Client Test', () => {
         sequence: '0',
       },
     })
-    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address, {
+    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
       height: 0,
       result: [
         {
@@ -428,86 +362,46 @@ describe('Client Test', () => {
     expect(result).toEqual('EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D')
   })
 
-  it('get transaction data', async () => {
-    assertTxHashGet(
-      thorClient.getClientUrl().node,
-      '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
-      {
-        height: 0,
-        txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
-        data: '0A060A0473656E64',
-        raw_log: '',
-        gas_wanted: '200000',
-        gas_used: '35000',
-        tx: {
-          msg: [
-            {
-              type: 'thorchain/MsgSend',
-              value: {
-                from_address: 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg',
-                to_address: 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg',
-                amount: [
-                  {
-                    denom: 'rune',
-                    amount: '100000000',
-                  },
-                ],
-              },
-            },
-          ] as Msg[],
-          fee: {
-            gas: '200000',
-            amount: [],
-          } as StdTxFee,
-          signatures: null,
-          memo: '',
-        } as StdTx,
-        timestamp: new Date().toString(),
-      },
-    )
-    const tx = await thorClient.getTransactionData('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
-    expect(tx.type).toEqual('transfer')
-    expect(tx.hash).toEqual('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
-    expect(tx.asset).toEqual(AssetRune)
-    expect(tx.from[0].from).toEqual('tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg')
-    expect(tx.from[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
-    expect(tx.to[0].to).toEqual('tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg')
-    expect(tx.to[0].amount.amount().isEqualTo(baseAmount(100000000, DECIMAL).amount())).toEqual(true)
+  it('get transaction data for BOND tx', async () => {
+    const txData = require('../__mocks__/responses/txs/bond-tn-9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C.json')
+    const txHash = '9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C'
+    const address = 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f'
+    assertTxHashGet(thorClient.getClientUrl().node, txHash, txData)
+    const { type, hash, asset, from, to } = await thorClient.getTransactionData(txHash, address)
+
+    expect(type).toEqual('transfer')
+    expect(hash).toEqual(txHash)
+    expect(asset).toEqual(AssetRune)
+    expect(from[0].from).toEqual(address)
+    expect(from[0].amount.amount().toString()).toEqual(assetToBase(assetAmount(0.02)).amount().toString())
+    expect(from[1].from).toEqual(address)
+    expect(from[1].amount.amount().toString()).toEqual(assetToBase(assetAmount(1700)).amount().toString())
+    expect(to[0].to).toEqual('tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw')
+    expect(to[0].amount.amount().toString()).toEqual(assetToBase(assetAmount(0.02)).amount().toString())
+    expect(to[1].to).toEqual('tthor17gw75axcnr8747pkanye45pnrwk7p9c3uhzgff')
+    expect(to[1].amount.amount().toString()).toEqual(assetToBase(assetAmount(1700)).amount().toString())
   })
 
   it('should return valid explorer url', () => {
-    expect(thorClient.getExplorerUrl()).toEqual('https://testnet.thorchain.net/#')
+    expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain?network=testnet')
 
     thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerUrl()).toEqual('https://thorchain.net/#')
+    expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain')
   })
 
   it('should retrun valid explorer address url', () => {
-    expect(thorClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
-      'https://testnet.thorchain.net/#/addresses/anotherTestAddressHere',
+    expect(thorClient.getExplorerAddressUrl('tthorabc')).toEqual(
+      'https://viewblock.io/thorchain/address/tthorabc?network=testnet',
     )
 
     thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerAddressUrl('testAddressHere')).toEqual(
-      'https://thorchain.net/#/addresses/testAddressHere',
-    )
+    expect(thorClient.getExplorerAddressUrl('thorabc')).toEqual('https://viewblock.io/thorchain/address/thorabc')
   })
 
   it('should retrun valid explorer tx url', () => {
-    expect(thorClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
-      'https://testnet.thorchain.net/#/txs/anotherTestTxHere',
-    )
+    expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash?network=testnet')
 
     thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerTxUrl('testTxHere')).toEqual('https://thorchain.net/#/txs/testTxHere')
-  })
-
-  it('should retrun valid explorer node url', () => {
-    expect(thorClient.getExplorerNodeUrl('anotherTestNodeHere')).toEqual(
-      'https://testnet.thorchain.net/#/nodes/anotherTestNodeHere',
-    )
-
-    thorClient.setNetwork('mainnet')
-    expect(thorClient.getExplorerNodeUrl('testNodeHere')).toEqual('https://thorchain.net/#/nodes/testNodeHere')
+    expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash')
   })
 })

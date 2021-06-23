@@ -7,6 +7,7 @@ export type Witness = {
 export type UTXO = {
   hash: string
   index: number
+  value: number
   witnessUtxo: Witness
 }
 
@@ -23,6 +24,3 @@ export type BroadcastTxParams = {
   nodeUrl: string
   auth?: NodeAuth
 }
-
-// We might extract it into xchain-client later
-export type DerivePath = { mainnet: string; testnet: string }

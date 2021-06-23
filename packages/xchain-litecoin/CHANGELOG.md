@@ -1,10 +1,53 @@
+# v.0.6.6 (2021-06-19)
+
+- changed rollupjs to treat axios as external lib
+
+# v.0.6.5 (2021-06-02)
+
+- fix adding duplicated memo output in the `Utils.buildTx()`
+
+# v.0.6.4 (2021-05-31)
+
+- refactor utils.buildTx() to include the memo for calculating inputs with accumulate() but re-adds it into outputs using `psbt.addOutput` to avoid dust attack error
+
+# v.0.6.3 (2021-05-31)
+
+### Breaking change
+
+- don't add memo output to `coinselect/accumulative`
+- add memo output by using `psbt.addOutput`
+
+# v.0.6.1 (2021-05-30)
+
+- add unit test for sochain apis
+- add `coinselect/accumulative` to devDependency and peerDependency, to select which utxos to use as inputs for transfer
+- add recursive call to https://sochain.com/api#get-unspent-tx to make sure we fetch ALL utxos
+
+# v.0.6.0 (2021-05-17)
+
+### Breaking change
+
+- added support for HD wallets
+
+# v.0.5.0 (2021-05-05)
+
+### Breaking change
+
+- Latest @xchainjs/xchain-client@0.8.0
+- Latest @xchainjs/xchain-util@0.2.7
+
+# v.0.4.2 (2021-04-19)
+
+### Update
+
+- export Utils.`calFee`
+
 # v.0.4.1 (2021-03-14)
 
-### Fix
+### Update
 
 - export Utils.`validateAddress`
 - Fix default mainnet url
-
 
 # v.0.4.0 (2021-03-02)
 
@@ -12,7 +55,7 @@
 
 - replace `find`, `findIndex`
 - Update @xchainjs/xchain-client package to 0.7.0
-  
+
 # v.0.3.0 (2021-02-25)
 
 ### Breaking change

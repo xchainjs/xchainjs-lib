@@ -1,5 +1,6 @@
 import axios from 'axios'
 import {
+  RootDerivationPaths,
   Address,
   Balances,
   Fees,
@@ -37,9 +38,7 @@ export interface PolkadotClient {
 class Client implements PolkadotClient, XChainClient {
   private network: Network
   private phrase = ''
-  private address: Address = ''
-  private api: ApiPromise | null = null
-  private derivationPath = "44//354//0//0//0'"
+  private rootDerivationPaths: RootDerivationPaths
 
   /**
    * Constructor
@@ -47,22 +46,33 @@ class Client implements PolkadotClient, XChainClient {
    *
    * @param {XChainClientParams} params
    */
-  constructor({ network = 'testnet', phrase }: XChainClientParams) {
+  constructor({
+    network = 'testnet',
+    phrase,
+    rootDerivationPaths = {
+      mainnet: "44//354//0//0//0'", //TODO IS the root path we want to use?
+      testnet: "44//354//0//0//0'",
+    },
+  }: XChainClientParams) {
     this.network = network
+    this.rootDerivationPaths = rootDerivationPaths
 
     if (phrase) this.setPhrase(phrase)
   }
-
   /**
-   * @private
+   * Get getFullDerivationPath
    *
-   * Purge Provider.
-   *
-   * @returns {void}
+   * @param {number} index the HD wallet index
+   * @returns {string} The polkadot derivation path based on the network.
    */
-  private purgeProvider = (): void => {
-    this.api?.disconnect()
-    this.api = null
+  getFullDerivationPath(index = 0): string {
+    // console.log(this.rootDerivationPaths[this.network])
+    if (index === 0) {
+      // this should make the tests backwards compatible
+      return this.rootDerivationPaths[this.network]
+    } else {
+      return this.rootDerivationPaths[this.network] + `//${index}`
+    }
   }
 
   /**
@@ -71,33 +81,24 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {void}
    */
   purgeClient = (): void => {
-    this.purgeProvider()
-
     this.phrase = ''
-    this.address = ''
   }
 
   /**
    * Set/update the current network.
    *
    * @param {Network} network `mainnet` or `testnet`.
-   * @returns {XChainClient}
    *
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork(network: Network): XChainClient {
+  setNetwork(network: Network): void {
     if (!network) {
       throw new Error('Network must be provided')
     } else {
       if (network !== this.network) {
-        this.purgeProvider()
-
         this.network = network
-        this.address = ''
       }
-
-      return this
     }
   }
 
@@ -175,17 +176,15 @@ class Client implements PolkadotClient, XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string): Address => {
+  setPhrase = (phrase: string, walletIndex = 0): Address => {
     if (this.phrase !== phrase) {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
       }
-
       this.phrase = phrase
-      this.address = ''
     }
 
-    return this.getAddress()
+    return this.getAddress(walletIndex)
   }
 
   /**
@@ -195,10 +194,10 @@ class Client implements PolkadotClient, XChainClient {
    *
    * @returns {KeyringPair} The keyring pair to be used to generate wallet address.
    * */
-  private getKeyringPair = (): KeyringPair => {
+  private getKeyringPair = (index: number): KeyringPair => {
     const key = new Keyring({ ss58Format: this.getSS58Format(), type: 'ed25519' })
 
-    return key.createFromUri(`${this.phrase}//${this.derivationPath}`)
+    return key.createFromUri(`${this.phrase}//${this.getFullDerivationPath(index)}`)
   }
 
   /**
@@ -211,16 +210,14 @@ class Client implements PolkadotClient, XChainClient {
    * */
   private getAPI = async (): Promise<ApiPromise> => {
     try {
-      if (!this.api) {
-        this.api = new ApiPromise({ provider: new WsProvider(this.getWsEndpoint()) })
-        await this.api.isReady
+      const api = new ApiPromise({ provider: new WsProvider(this.getWsEndpoint()) })
+      await api.isReady
+
+      if (!api.isConnected) {
+        await api.connect()
       }
 
-      if (!this.api.isConnected) {
-        await this.api.connect()
-      }
-
-      return this.api
+      return api
     } catch (error) {
       return Promise.reject(error)
     }
@@ -252,18 +249,8 @@ class Client implements PolkadotClient, XChainClient {
    *
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (): Address => {
-    if (!this.address) {
-      const address = this.getKeyringPair().address
-
-      if (!address) {
-        throw new Error('Address not defined')
-      }
-
-      this.address = address
-    }
-
-    return this.address
+  getAddress = (index = 0): Address => {
+    return this.getKeyringPair(index).address
   }
 
   /**
@@ -272,7 +259,7 @@ class Client implements PolkadotClient, XChainClient {
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Array<Balance>} The DOT balance of the address.
    */
-  getBalance = async (address?: Address, assets?: Asset[]): Promise<Balances> => {
+  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
       const response: SubscanResponse<Account> = await axios
         .post(`${this.getClientUrl()}/api/open/account`, { address: address || this.getAddress() })
@@ -305,14 +292,13 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {TxsPage} The transaction history.
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    const address = params?.address ?? this.getAddress()
     const limit = params?.limit ?? 10
     const offset = params?.offset ?? 0
 
     try {
       const response: SubscanResponse<TransfersResult> = await axios
         .post(`${this.getClientUrl()}/api/scan/transfers`, {
-          address: address,
+          address: params?.address,
           row: limit,
           page: offset,
         })
@@ -404,7 +390,7 @@ class Client implements PolkadotClient, XChainClient {
     try {
       const api = await this.getAPI()
       let transaction = null
-
+      const walletIndex = params.walletIndex || 0
       // Createing a transfer
       const transfer = api.tx.balances.transfer(params.recipient, params.amount.amount().toString())
       if (!params.memo) {
@@ -421,15 +407,17 @@ class Client implements PolkadotClient, XChainClient {
       }
 
       // Check balances
-      const paymentInfo = await transaction.paymentInfo(this.getKeyringPair())
+      const paymentInfo = await transaction.paymentInfo(this.getKeyringPair(walletIndex))
       const fee = baseAmount(paymentInfo.partialFee.toString(), getDecimal(this.network))
-      const balances = await this.getBalance(this.getAddress(), [AssetDOT])
+      const balances = await this.getBalance(this.getAddress(walletIndex), [AssetDOT])
 
       if (!balances || params.amount.amount().plus(fee.amount()).isGreaterThan(balances[0].amount.amount())) {
         throw new Error('insufficient balance')
       }
 
-      const txHash = await transaction.signAndSend(this.getKeyringPair())
+      const txHash = await transaction.signAndSend(this.getKeyringPair(walletIndex))
+      await api.disconnect()
+
       return txHash.toString()
     } catch (error) {
       return Promise.reject(error)
@@ -446,12 +434,14 @@ class Client implements PolkadotClient, XChainClient {
    */
   estimateFees = async (params: TxParams): Promise<Fees> => {
     try {
+      const walletIndex = params.walletIndex ? params.walletIndex : 0
       const api = await this.getAPI()
       const info = await api.tx.balances
         .transfer(params.recipient, params.amount.amount().toNumber())
-        .paymentInfo(this.getKeyringPair())
+        .paymentInfo(this.getKeyringPair(walletIndex))
 
       const fee = baseAmount(info.partialFee.toString(), getDecimal(this.network))
+      await api.disconnect()
 
       return {
         type: 'byte',

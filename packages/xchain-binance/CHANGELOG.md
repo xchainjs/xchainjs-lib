@@ -1,3 +1,20 @@
+# v.5.2.1 (2021-06-01)
+
+- update peerDependencies
+
+# v.5.1.0 (2021-05-17)
+
+### Breaking change
+
+- added support for HD wallets
+
+# v.5.0.0 (2021-05-05)
+
+### Breaking change
+
+- Latest @xchainjs/xchain-client@0.8.0
+- Latest @xchainjs/xchain-util@0.2.7
+
 # v.4.7.0 (2021-03-02)
 
 ### Breaking change

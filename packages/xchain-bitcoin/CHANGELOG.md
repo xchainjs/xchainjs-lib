@@ -1,4 +1,83 @@
+# v.0.15.8 (2021-06-18)
+
+- changed rollupjs to treat axios as external lib
+
+# v.0.15.7 (2021-06-10)
+
+#### Fix
+
+- [haskoin] Fix `getBalance` (incl. test)
+
+# v.0.15.6 (2021-06-09)
+
+- ???
+
+# v.0.15.5 (2021-06-08)
+
+### BREAKING CHANGE
+
+#### Issue
+
+[Sochain API](https://sochain.com/) is out of sync and it's reported to be fixed in a few days.
+Report from Sochain: "WARNING: DATA SHOWN FOR BITCOIN NETWORK MAY BE OUTDATED
+We are working to resolve the issue in the next few days."
+
+#### Fix
+
+- Replace `getBalance` and `getUnspentTxs` apis from sochain to haskoin for temporary purpose.
+- Update `Utils.scanUTXOs` method using haskoin api
+- Skip unit test for `utils` (it will be reverted after `sochain` api is recovered)
+
+# v.0.15.4 (2021-06-01)
+
+- updating peer deps
+
+# v.0.15.3 (2021-05-31)
+
+- refactor utils.buildTx() to include the memo for calculating inputs with accumulate() but re-adds it into outputs using `psbt.addOutput` to avoid dust attack error
+
+# v.0.15.2 (2021-05-31)
+
+- don't add memo output to `coinselect/accumulative`
+- add memo output by using `psbt.addOutput`
+
+# v.0.15.0 (2021-05-28)
+
+### Breaking change
+
+- prevent spending unconfirmed UTXOs
+- update `client.transfer()` to pass `spendPendingUTXO` param to the `Utils.buildTx()`
+- update `Utils.buildTx()` to spend only confirmed UTXO if memo exists
+- update `Utils.buildTx()` to build `psbt` using `accumulative` lib
+- add `getIsTxConfirmed`, `getConfirmedUnspentTxs` sochain api
+- add unit test for sochain apis
+- add unit test for both success and failed cases of `client.transfer()` to prevent spending unconfirmed UTXOs
+- add `coinselect/accumulative` to devDependency and peerDependency, to select which utxos to use as inputs for transfer
+- add recursive call to https://sochain.com/api#get-unspent-tx to make sure we fetch ALL utxos
+- Merged updates from PR [#324](https://github.com/xchainjs/xchainjs-lib/issues/322) to fix Issue [#322](https://github.com/xchainjs/xchainjs-lib/issues/322)
+
+# v.0.14.0 (2021-05-17)
+
+### Breaking change
+
+- added support for HD wallets
+
+# v.0.13.0 (2021-05-05)
+
+### Breaking change
+
+- Latest @xchainjs/xchain-client@0.8.0
+- Latest @xchainjs/xchain-util@0.2.7
+
+# v.0.12.2 (2021-04-19)
+
+### Update
+
+- Export `calFee`
+
 # v.0.12.1 (2021-03-02)
+
+### Update
 
 - Export `validateAddress`
 
@@ -8,7 +87,7 @@
 
 - replace `find`, `findIndex`
 - Update @xchainjs/xchain-client package to 0.7.0
-  
+
 # v.0.11.1 (2021-02-26)
 
 ### Update

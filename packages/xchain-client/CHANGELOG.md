@@ -1,3 +1,29 @@
+# v.0.9.3 (2021-06-01)
+
+- updated peer deps
+
+# v.0.9.2 (2021-06-02)
+
+### Update
+
+- Make `walletIndex` optional in `getAddress`
+
+# v.0.9.1 (2021-05-21)
+
+- No changes, just a bump to next minor version by an accident
+
+# v.0.9.0 (2021-05-17)
+
+### Breaking change
+
+- added support for HD wallets
+
+# v.0.8.0 (2021-05-05)
+
+### Breaking change
+
+- Update @xchainjs/xchain-util package to 0.2.7
+
 # v.0.7.0 (2021-03-02)
 
 ### Breaking change

@@ -1,7 +1,7 @@
 node_modules
 dist
 results
-lerna-debug.log
+*.log
 .nyc_output
 *.tsbuildinfo
 .DS_Store

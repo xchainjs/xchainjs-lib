@@ -1,8 +1,101 @@
-# v.x.x.x 
+# v.0.17.1 (2021-06-22)
 
 ### Update
 
 - update `getTransactionHistory`, `transfer`, `deposit` to support synth assets.
+
+# v.0.17.0 (2021-06-21)
+
+### Fix
+
+- Fix `to` / `from` addresses by parsing tx data from event logs
+
+### Breaking change
+
+- Remove deprecated `getTxDataFromResponse` helper
+
+# v.0.16.1 (2021-06-14)
+
+### Fix
+
+- Double `fee.gas to `20000000` (twenty million) to avoid failing withdraw transactions
+
+# v.0.16.0 (2021-06-08)
+
+### Breaking change
+
+- Use `viewblock` as default explorer
+- [types] Refactored structure of explorer urls (via `type ExplorerUrls`)
+- [types] Refactored `ExplorerUrl`
+- [client] Constructor accepts `ExplorerUrls`
+- [client] Removed `getExplorerNodeUrl` (use `getExplorerAddressUrl` instead)
+- [client] Extract `getDefaultClientUrl` into `utils`
+- [utils] Renamed `getDefaultExplorerUrlByNetwork` -> `getDefaultExplorerUrl`
+- [utils] Removed `getDefaultExplorerAddressUrl`, `getDefaultExplorerNodeUrl`, `getDefaultExplorerTxUrl`
+- [utils] Added `getExplorerTxUrl`, `getExplorerAddressUrl`, `getExplorerUrl` helpers
+
+# v.0.15.2 (2021-06-01)
+
+### Update
+
+- updated peer deps
+
+# v.0.15.0 (2021-05-17)
+
+### Breaking change
+
+- added support for HD wallets
+
+# v.0.14.0 (2021-05-05)
+
+### Breaking change
+
+- Latest @xchainjs/xchain-client@0.8.0
+- Latest @xchainjs/xchain-util@0.2.7
+
+# v.0.13.7 (2021-04-21)
+
+### Update
+
+- Export `MSG_SEND` `MSG_DEPOSIT` `MAX_COUNT`
+- Added `getCosmosClient()`
+- Extend `getTransactions` parameters with an optional `filterFn`
+
+# v.0.13.6 (2021-04-16)
+
+### Update
+
+- Set `fee.gas` to `10000000` (ten million) in `deposit` due to failing withdraw transactions
+
+# v.0.13.5 (2021-04-16)
+
+### Update
+
+- Set `fee.gas` to `1000000` (one million) in `deposit`
+
+# v.0.13.4 (2021-04-16)
+
+### Update
+
+- Set `fee.gas` to `auto` in `deposit`
+- Try sending `deposit` tx up to 3x
+- Updates `DEFAULT_GAS_VALUE` to `2000000`
+
+# v.0.13.3 (2021-04-12)
+
+### Breaking changes
+
+- Change `/addresses` to `/address` for explorer url.
+
+### Update
+
+- Add util helpers for explorer urls.
+
+# v.0.13.2 (2021-04-01)
+
+### Update
+
+- Updates `getDefaultClientUrl` to use new mainnet endpoints
 
 # v.0.13.1 (2021-03-18)
 
@@ -17,7 +110,7 @@
 - replace `find`, `findIndex`
 - Update @xchainjs/xchain-client package to 0.7.0
 - Update @xchainjs/xchain-cosmos package to 0.11.0
-  
+
 # v.0.12.0 (2021-02-24)
 
 ### Breaking change

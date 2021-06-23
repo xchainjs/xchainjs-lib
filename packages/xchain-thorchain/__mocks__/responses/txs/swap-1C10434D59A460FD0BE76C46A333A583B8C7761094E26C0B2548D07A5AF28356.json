@@ -1,0 +1,58 @@
+{
+  "height": "1071825",
+  "txhash": "1C10434D59A460FD0BE76C46A333A583B8C7761094E26C0B2548D07A5AF28356",
+  "data": "0A090A076465706F736974",
+  "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"deposit\"},{\"key\":\"sender\",\"value\":\"thor1g3nvdxgmdte8cfhl8592lz5tuzjd9hjsglazhr\"},{\"key\":\"sender\",\"value\":\"thor1g3nvdxgmdte8cfhl8592lz5tuzjd9hjsglazhr\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"thor1dheycdevq39qlkxs2a6wuuzyn4aqxhve4qxtxt\"},{\"key\":\"sender\",\"value\":\"thor1g3nvdxgmdte8cfhl8592lz5tuzjd9hjsglazhr\"},{\"key\":\"amount\",\"value\":\"2000000rune\"},{\"key\":\"recipient\",\"value\":\"thor1g98cy3n9mmjrpn0sxmn63lztelera37n8n67c0\"},{\"key\":\"sender\",\"value\":\"thor1g3nvdxgmdte8cfhl8592lz5tuzjd9hjsglazhr\"},{\"key\":\"amount\",\"value\":\"3600000000000rune\"}]}]}]",
+  "logs": [
+    {
+      "events": [
+        {
+          "type": "message",
+          "attributes": [
+            { "key": "action", "value": "deposit" },
+            { "key": "sender", "value": "thor1g3nvdxgmdte8cfhl8592lz5tuzjd9hjsglazhr" },
+            { "key": "sender", "value": "thor1g3nvdxgmdte8cfhl8592lz5tuzjd9hjsglazhr" }
+          ]
+        },
+        {
+          "type": "transfer",
+          "attributes": [
+            { "key": "recipient", "value": "thor1dheycdevq39qlkxs2a6wuuzyn4aqxhve4qxtxt" },
+            { "key": "sender", "value": "thor1g3nvdxgmdte8cfhl8592lz5tuzjd9hjsglazhr" },
+            { "key": "amount", "value": "2000000rune" },
+            { "key": "recipient", "value": "thor1g98cy3n9mmjrpn0sxmn63lztelera37n8n67c0" },
+            { "key": "sender", "value": "thor1g3nvdxgmdte8cfhl8592lz5tuzjd9hjsglazhr" },
+            { "key": "amount", "value": "3600000000000rune" }
+          ]
+        }
+      ]
+    }
+  ],
+  "gas_wanted": "20000000",
+  "gas_used": "432661",
+  "tx": {
+    "type": "cosmos-sdk/StdTx",
+    "value": {
+      "msg": [
+        {
+          "type": "thorchain/MsgDeposit",
+          "value": {
+            "coins": [{ "asset": "THOR.RUNE", "amount": "3600000000000" }],
+            "memo": "SWAP:BTC.BTC:bc1qxnvnp47605ph7udsd45c49ya4xespq4nppr9gf:737605111",
+            "signer": "thor1g3nvdxgmdte8cfhl8592lz5tuzjd9hjsglazhr"
+          }
+        }
+      ],
+      "fee": { "amount": [], "gas": "20000000" },
+      "signatures": [
+        {
+          "pub_key": { "type": "tendermint/PubKeySecp256k1", "value": "Ak59ahiPACUIGsL+/x5WJLSwLclXG3S/hM3fjWTd70ue" },
+          "signature": "LeGmEvBnhBNEJjNiJVnI+tYKLZfCx0A9xhc/jFpR4gxVbTSdlDBBVuiiNz5gtjde+HbfATx9tcJASFXwMlSd2A=="
+        }
+      ],
+      "memo": "",
+      "timeout_height": "0"
+    }
+  },
+  "timestamp": "2021-06-18T12:34:01Z"
+}

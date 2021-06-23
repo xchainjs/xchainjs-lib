@@ -16,17 +16,31 @@ describe('BitcoinClient Test', () => {
   const MEMO = 'SWAP:THOR.RUNE'
   // please don't touch the tBTC in these
   const phraseOne = 'atom green various power must another rent imitate gadget creek fat then'
-  const addyOne = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
+  // https://iancoleman.io/bip39/
+  // Select BTC - Bitcoin Testnet; BIP84
+  // m/84'/1'/0'/0/0
+  const addyOnePath0 = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
+  // m/84'/1'/0'/0/1
+  const addyOnePath1 = 'tb1qut59ufcscqnkp8fgac68pj2ps5dzjjg4qq2hsy'
   const addyTwo = 'tb1qz8q2lwfmp965cszdd5raq9m7gljs57hkzpw56d'
 
+  const phraseOneMainnet_path0 = 'bc1qvdux5606j2zh5f4724wvnywe6gcj2tcrzz7wdl'
+  const phraseOneMainnet_path1 = 'bc1qnnkssp3sgfjjk2m0z9thjay0psp6ehlt6dzd97'
+
   // Third ones is used only for balance verification
-  const phraseThree = 'quantum vehicle print stairs canvas kid erode grass baby orbit lake remove'
-  const addyThree = 'tb1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rzgjhra4'
+  const phraseTwo = 'quantum vehicle print stairs canvas kid erode grass baby orbit lake remove'
+  // m/84'/1'/0'/0/0
+  const addyThreePath0 = 'tb1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rzgjhra4'
+  // m/84'/1'/0'/0/1
+  const addyThreePath1 = 'tb1q99peqcxyhu4f2fehxxn6k5v704qe84y0nkcl5t'
+
+  const phraseTwoMainnet_path0 = 'bc1qsn4ujsja3ukdlzjmc9tcgpeaxeauq0ga83xmds'
+  const phraseTwoMainnet_path1 = 'bc1q7c58pf87g73pk07ryq996jfa5nqkx2ppzjz8kq'
 
   it('set phrase should return correct address', () => {
     btcClient.setNetwork('testnet')
     const result = btcClient.setPhrase(phraseOne)
-    expect(result).toEqual(addyOne)
+    expect(result).toEqual(addyOnePath0)
   })
 
   it('should throw an error for setting a bad phrase', () => {
@@ -42,15 +56,15 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     const address = btcClient.getAddress()
     const valid = btcClient.validateAddress(address)
-    expect(address).toEqual(addyOne)
+    expect(address).toEqual(addyOnePath0)
     expect(valid).toBeTruthy()
   })
 
   it('should get the right balance', async () => {
     const expectedBalance = 15446
     btcClient.setNetwork('testnet')
-    btcClient.setPhrase(phraseThree)
-    const balance = await btcClient.getBalance()
+    btcClient.setPhrase(phraseTwo)
+    const balance = await btcClient.getBalance(btcClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
@@ -59,7 +73,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
-    const txid = await btcClient.transfer({ asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
+    const txid = await btcClient.transfer({ walletIndex: 0, asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
     expect(txid).toEqual(expect.any(String))
   })
 
@@ -74,18 +88,24 @@ describe('BitcoinClient Test', () => {
   it('should purge phrase and utxos', async () => {
     btcClient.purgeClient()
     expect(() => btcClient.getAddress()).toThrow('Phrase must be provided')
-    return expect(btcClient.getBalance()).rejects.toThrow('Phrase must be provided')
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
 
+    /**
+     * All UTXO values: 8800 + 495777 + 15073
+     * Confirmed UTXO values: 8800 + 15073 = 23873
+     * Spend amount: 2223
+     * Expected: Successful
+     */
+
     const amount = baseAmount(2223)
     try {
       const txid = await btcClient.transfer({
         asset: AssetBTC,
-        recipient: addyThree,
+        recipient: addyThreePath0,
         amount,
         memo: MEMO,
         feeRate: 1,
@@ -96,11 +116,32 @@ describe('BitcoinClient Test', () => {
       throw err
     }
   })
+  it('should prevent spending unconfirmed utxo if memo exists', async () => {
+    btcClient.setNetwork('testnet')
+    btcClient.setPhrase(phraseOne)
 
+    /**
+     * All UTXO values: 8800 + 495777 + 15073
+     * Confirmed UTXO values: 8800 + 15073 = 23873
+     * Spend amount: 25000
+     * Expected: Insufficient Balance
+     */
+
+    const amount = baseAmount(25000)
+    return expect(
+      btcClient.transfer({
+        asset: AssetBTC,
+        recipient: addyThreePath0,
+        amount,
+        memo: MEMO,
+        feeRate: 1,
+      }),
+    ).rejects.toThrow('Insufficient Balance for transaction')
+  })
   it('should get the balance of an address without phrase', async () => {
     btcClient.setNetwork('testnet')
     btcClient.purgeClient()
-    const balance = await btcClient.getBalance(addyThree)
+    const balance = await btcClient.getBalance(addyThreePath0)
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(15446)
   })
@@ -112,7 +153,7 @@ describe('BitcoinClient Test', () => {
     const asset = AssetBTC
     const amount = baseAmount(9999999999)
     return expect(btcClient.transfer({ asset, recipient: addyTwo, amount, feeRate: 1 })).rejects.toThrow(
-      'Balance insufficient for transaction',
+      'Insufficient Balance for transaction',
     )
   })
 
@@ -189,9 +230,9 @@ describe('BitcoinClient Test', () => {
   it('should error when an invalid address is used in getting balance', () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
-    const invalidAddress = 'error_address'
-    const expectedError = 'Invalid address'
-    return expect(btcClient.getBalance(invalidAddress)).rejects.toThrow(expectedError)
+    const invalidIndex = -1
+    const expectedError = 'index must be greater than zero'
+    expect(() => btcClient.getAddress(invalidIndex)).toThrow(expectedError)
   })
 
   it('should error when an invalid address is used in transfer', () => {
@@ -210,9 +251,9 @@ describe('BitcoinClient Test', () => {
   it('should get address transactions', async () => {
     btcClient.setNetwork('testnet')
 
-    const txPages = await btcClient.getTransactions({ address: addyThree, limit: 4 })
+    const txPages = await btcClient.getTransactions({ address: addyThreePath0, limit: 4 })
 
-    expect(txPages.total).toEqual(1) //there is 1 tx in addyThree
+    expect(txPages.total).toEqual(1) //there is 1 tx in addyThreePath0
     expect(txPages.txs[0].asset).toEqual(AssetBTC)
     expect(txPages.txs[0].date).toEqual(new Date('2020-12-13T11:39:55.000Z'))
     expect(txPages.txs[0].hash).toEqual('6e7071a09e82d72c6c84d253047c38dbd7fea531b93155adfe10acfba41bca63')
@@ -224,8 +265,8 @@ describe('BitcoinClient Test', () => {
   it('should get address transactions with limit', async () => {
     btcClient.setNetwork('testnet')
     // Limit should work
-    const txPages = await btcClient.getTransactions({ address: addyThree, limit: 1 })
-    return expect(txPages.total).toEqual(1) //there 1 tx in addyThree
+    const txPages = await btcClient.getTransactions({ address: addyThreePath0, limit: 1 })
+    return expect(txPages.total).toEqual(1) //there 1 tx in addyThreePath0
   })
 
   it('should get transaction with hash', async () => {
@@ -272,5 +313,27 @@ describe('BitcoinClient Test', () => {
     expect(btcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://blockstream.info/testnet/tx/anotherTestTxHere',
     )
+  })
+
+  it('should derivate the address correctly', () => {
+    btcClient.setNetwork('mainnet')
+
+    btcClient.setPhrase(phraseOne)
+    expect(btcClient.getAddress(0)).toEqual(phraseOneMainnet_path0)
+    expect(btcClient.getAddress(1)).toEqual(phraseOneMainnet_path1)
+
+    btcClient.setPhrase(phraseTwo)
+    expect(btcClient.getAddress(0)).toEqual(phraseTwoMainnet_path0)
+    expect(btcClient.getAddress(1)).toEqual(phraseTwoMainnet_path1)
+
+    btcClient.setNetwork('testnet')
+
+    btcClient.setPhrase(phraseOne)
+    expect(btcClient.getAddress(0)).toEqual(addyOnePath0)
+    expect(btcClient.getAddress(1)).toEqual(addyOnePath1)
+
+    btcClient.setPhrase(phraseTwo)
+    expect(btcClient.getAddress(0)).toEqual(addyThreePath0)
+    expect(btcClient.getAddress(1)).toEqual(addyThreePath1)
   })
 })
