@@ -1,4 +1,5 @@
 const bitcash = require('@psf/bitcoincashjs-lib')
+import * as Bitcoin from 'bitcoinjs-lib'
 
 import * as utils from './utils'
 import {
@@ -226,7 +227,15 @@ class Client implements BitcoinCashClient, XChainClient {
       const master = await (await bip32.fromSeed(rootSeed, utils.bchNetwork(this.network))).derivePath(derivationPath)
 
       const keyPair = await masterHDNode.derivePath(derivationPath).keyPair
-      console.log({ keyPair, master })
+      const masterKeyPair = bitcash.ECPair.fromPrivateKey(master.privateKey, {
+        network: utils.bchNetwork(this.network),
+      })
+      console.log({ keyPair, masterKeyPair })
+      const btcKeyPair = Bitcoin.ECPair.fromPrivateKey(master.privateKey as Buffer, {
+        // @ts-expect-error has no bech32
+        network: utils.bchNetwork(this.network),
+      })
+      console.log({ masterKeyPair, btcKeyPair })
       return keyPair
     } catch (error) {
       throw new Error(`Getting key pair failed: ${error?.message || error.toString()}`)

@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@psf/bitcoincashjs-lib": "^4.0.2",
+    "bitcoinjs-lib": "^5.2.0",
     "@thorwallet/xchain-client": "0.0.1-alpha.854+e11e7c0",
     "@thorwallet/xchain-crypto": "0.0.1-alpha.854+e11e7c0",
     "@thorwallet/xchain-util": "0.0.1-alpha.854+e11e7c0",
@@ -49,6 +50,7 @@
   },
   "peerDependencies": {
     "@psf/bitcoincashjs-lib": "^4.0.2",
+    "bitcoinjs-lib": "^5.2.0",
     "@thorwallet/xchain-client": "0.0.1-alpha.792+b6e4e50",
     "@thorwallet/xchain-crypto": "0.0.1-alpha.792+b6e4e50",
     "@thorwallet/xchain-util": "^0.0.1-alpha.792+b6e4e50",
