@@ -74,12 +74,12 @@ const addrKey: { [key: string]: string } = {}
  * @param {Buffer} publicKey The public key in Buffer format.
  * @returns {string} The address generated from the given public key(buffer format).
  */
-export const createAddress = (publicKey: Buffer): string => {
+export const createAddress = async (publicKey: Buffer): Promise<string> => {
   if (addrKey[publicKey.toString()]) {
     return addrKey[publicKey.toString()]
   }
   const hexed = ab2hexstring(publicKey)
-  const hash = sha256ripemd160(hexed)
+  const hash = await sha256ripemd160(hexed)
   const address = encodeAddress(hash, 'thor')
 
   addrKey[publicKey.toString()] = address

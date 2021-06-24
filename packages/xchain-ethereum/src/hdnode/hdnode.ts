@@ -116,7 +116,7 @@ export async function mnemonicToEntropy(mnemonic: string, wordlist?: string | Wo
   return hexlify(entropy.slice(0, entropyBits / 8))
 }
 
-export function entropyToMnemonic(entropy: BytesLike, wordlist?: string | Wordlist): string {
+export async function entropyToMnemonic(entropy: BytesLike, wordlist?: string | Wordlist): Promise<string> {
   wordlist = getWordlist(wordlist)
 
   entropy = arrayify(entropy)
@@ -150,7 +150,7 @@ export function entropyToMnemonic(entropy: BytesLike, wordlist?: string | Wordli
 
   // Compute the checksum bits
   const checksumBits = entropy.length / 4
-  const checksum = arrayify(sha256(entropy))[0] & getUpperMask(checksumBits)
+  const checksum = arrayify(await sha256(entropy))[0] & getUpperMask(checksumBits)
 
   // Shift the checksum into the word indices
   indices[indices.length - 1] <<= checksumBits
@@ -163,8 +163,8 @@ function bytes32(value: BigNumber | Uint8Array): string {
   return hexZeroPad(hexlify(value), 32)
 }
 
-function base58check(data: Uint8Array): string {
-  return Base58.encode(concat([data, hexDataSlice(sha256(sha256(data)), 0, 4)]))
+async function base58check(data: Uint8Array): Promise<Promise<string>> {
+  return Base58.encode(concat([data, hexDataSlice(await sha256(await sha256(data)), 0, 4)]))
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -182,7 +182,7 @@ export class HDNode implements ExternallyOwnedAccount {
   readonly privateKey: string
   readonly publicKey: string
 
-  readonly fingerprint: string
+  readonly fingerprint: () => Promise<string>
   readonly parentFingerprint: string
 
   readonly address: string
@@ -230,7 +230,7 @@ export class HDNode implements ExternallyOwnedAccount {
     }
 
     defineReadOnly(this, 'parentFingerprint', parentFingerprint)
-    defineReadOnly(this, 'fingerprint', hexDataSlice(ripemd160(sha256(this.publicKey)), 0, 4))
+    defineReadOnly(this, 'fingerprint', async () => hexDataSlice(ripemd160(await sha256(this.publicKey)), 0, 4))
 
     defineReadOnly(this, 'address', computeAddress(this.publicKey))
 
@@ -254,7 +254,7 @@ export class HDNode implements ExternallyOwnedAccount {
     }
   }
 
-  get extendedKey(): string {
+  async extendedKey(): Promise<string> {
     // We only support the mainnet values for now, but if anyone needs
     // testnet values, let me know. I believe current senitment is that
     // we should always use mainnet, and use BIP-44 to derive the network
@@ -354,7 +354,16 @@ export class HDNode implements ExternallyOwnedAccount {
       })
     }
 
-    return new HDNode(_constructorGuard, ki, Ki, this.fingerprint, bytes32(IR), index, this.depth + 1, mnemonicOrPath)
+    return new HDNode(
+      _constructorGuard,
+      ki,
+      Ki,
+      await this.fingerprint(),
+      bytes32(IR),
+      index,
+      this.depth + 1,
+      mnemonicOrPath,
+    )
   }
 
   async derivePath(path: string): Promise<Promise<HDNode>> {
@@ -417,7 +426,7 @@ export class HDNode implements ExternallyOwnedAccount {
     wordlist = getWordlist(wordlist)
 
     // Normalize the case and spacing in the mnemonic (throws if the mnemonic is invalid)
-    mnemonic = entropyToMnemonic(await mnemonicToEntropy(mnemonic, wordlist), wordlist)
+    mnemonic = await entropyToMnemonic(await mnemonicToEntropy(mnemonic, wordlist), wordlist)
 
     return HDNode._fromSeed(await mnemonicToSeed(mnemonic, password), {
       phrase: mnemonic,
@@ -430,10 +439,10 @@ export class HDNode implements ExternallyOwnedAccount {
     return HDNode._fromSeed(seed, null)
   }
 
-  static fromExtendedKey(extendedKey: string): HDNode {
+  static async fromExtendedKey(extendedKey: string): Promise<HDNode> {
     const bytes = Base58.decode(extendedKey)
 
-    if (bytes.length !== 82 || base58check(bytes.slice(0, 78)) !== extendedKey) {
+    if (bytes.length !== 82 || (await base58check(bytes.slice(0, 78))) !== extendedKey) {
       logger.throwArgumentError('invalid extended key', 'extendedKey', '[REDACTED]')
     }
 
