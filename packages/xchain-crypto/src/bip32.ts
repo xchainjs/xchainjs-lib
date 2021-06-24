@@ -8,11 +8,13 @@ import typeforce from 'typeforce'
 import wif from 'wif'
 // @ts-expect-error upstream
 import { NativeModules } from 'react-native'
+import RNSimple from 'react-native-simple-crypto'
 
 const createHash = require('create-hash')
 
-export function hash160(buffer: Buffer): Buffer {
-  const sha256Hash: Buffer = createHash('sha256').update(buffer).digest()
+export async function hash160(buffer: Buffer): Promise<Buffer> {
+  const sha256Hash: Buffer = Buffer.from(await RNSimple.SHA.sha256(buffer))
+
   try {
     return createHash('rmd160').update(sha256Hash).digest()
   } catch (err) {
@@ -81,8 +83,8 @@ export interface BIP32Interface {
   parentFingerprint: number
   publicKey: Buffer
   privateKey?: Buffer
-  identifier: Buffer
-  fingerprint: Buffer
+  identifier: () => Promise<Buffer>
+  fingerprint: () => Promise<Buffer>
   isNeutered(): boolean
   neutered(): BIP32Interface
   toBase58(): string
@@ -130,12 +132,12 @@ class BIP32 implements BIP32Interface {
     return this.__D
   }
 
-  get identifier(): Buffer {
+  async identifier(): Promise<Buffer> {
     return hash160(this.publicKey)
   }
 
-  get fingerprint(): Buffer {
-    return this.identifier.slice(0, 4)
+  async fingerprint(): Promise<Buffer> {
+    return (await this.identifier()).slice(0, 4)
   }
 
   get compressed(): boolean {
@@ -239,7 +241,7 @@ class BIP32 implements BIP32Interface {
       // In case ki == 0, proceed with the next value for i
       if (ki == null) return this.derive(index + 1)
 
-      hd = fromPrivateKeyLocal(ki, IR, this.network, this.depth + 1, index, this.fingerprint.readUInt32BE(0))
+      hd = fromPrivateKeyLocal(ki, IR, this.network, this.depth + 1, index, (await this.fingerprint()).readUInt32BE(0))
 
       // Public parent key -> public child key
     } else {
@@ -250,7 +252,7 @@ class BIP32 implements BIP32Interface {
       // In case Ki is the point at infinity, proceed with the next value for i
       if (Ki === null) return this.derive(index + 1)
 
-      hd = fromPublicKeyLocal(Ki, IR, this.network, this.depth + 1, index, this.fingerprint.readUInt32BE(0))
+      hd = fromPublicKeyLocal(Ki, IR, this.network, this.depth + 1, index, (await this.fingerprint()).readUInt32BE(0))
     }
 
     return hd

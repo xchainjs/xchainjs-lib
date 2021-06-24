@@ -1,5 +1,4 @@
 const bitcash = require('@psf/bitcoincashjs-lib')
-import * as Bitcoin from 'bitcoinjs-lib'
 
 import * as utils from './utils'
 import {
@@ -16,12 +15,16 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@thorwallet/xchain-client'
+
 import { validatePhrase, getSeed, bip32 } from '@thorwallet/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'
 import { NodeAuth } from './types'
 import { broadcastTx } from './node-api'
+
+const BigInteger = require('bigi')
+const ENABLE_FAST = true
 
 /**
  * BitcoinCashClient Interface
@@ -222,20 +225,18 @@ class Client implements BitcoinCashClient, XChainClient {
   private getBCHKeys = async (phrase: string, derivationPath: string): Promise<KeyPair> => {
     try {
       const rootSeed = await getSeed(phrase)
+      if (ENABLE_FAST) {
+        const master = await (await bip32.fromSeed(rootSeed, utils.bchNetwork(this.network))).derivePath(derivationPath)
+        const d: Buffer = BigInteger.fromBuffer(master.privateKey)
+        const btcKeyPair = new bitcash.ECPair(d, {
+          network: utils.bchNetwork(this.network),
+          compressed: true,
+        })
+        return btcKeyPair
+      }
+
       const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
-
-      const master = await (await bip32.fromSeed(rootSeed, utils.bchNetwork(this.network))).derivePath(derivationPath)
-
       const keyPair = await masterHDNode.derivePath(derivationPath).keyPair
-      const masterKeyPair = bitcash.ECPair.fromPrivateKey(master.privateKey, {
-        network: utils.bchNetwork(this.network),
-      })
-      console.log({ keyPair, masterKeyPair })
-      const btcKeyPair = Bitcoin.ECPair.fromPrivateKey(master.privateKey as Buffer, {
-        // @ts-expect-error has no bech32
-        network: utils.bchNetwork(this.network),
-      })
-      console.log({ masterKeyPair, btcKeyPair })
       return keyPair
     } catch (error) {
       throw new Error(`Getting key pair failed: ${error?.message || error.toString()}`)
