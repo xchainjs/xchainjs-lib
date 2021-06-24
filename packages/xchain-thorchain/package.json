@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-thorchain",
-  "version": "0.0.1-alpha.839+5069482",
+  "version": "0.0.1-alpha.854+e11e7c0",
   "description": "Custom Thorchain client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -33,10 +33,10 @@
   },
   "devDependencies": {
     "@thorwallet/cosmos-client": "^0.39.21",
-    "@thorwallet/xchain-client": "0.0.1-alpha.839+5069482",
-    "@thorwallet/xchain-cosmos": "0.0.1-alpha.839+5069482",
-    "@thorwallet/xchain-crypto": "0.0.1-alpha.839+5069482",
-    "@thorwallet/xchain-util": "0.0.1-alpha.839+5069482",
+    "@thorwallet/xchain-client": "0.0.1-alpha.854+e11e7c0",
+    "@thorwallet/xchain-cosmos": "0.0.1-alpha.854+e11e7c0",
+    "@thorwallet/xchain-crypto": "0.0.1-alpha.854+e11e7c0",
+    "@thorwallet/xchain-util": "0.0.1-alpha.854+e11e7c0",
     "@types/big.js": "^6.0.0",
     "axios": "^0.21.0",
     "nock": "^13.0.5"
@@ -52,5 +52,5 @@
     "@thorwallet/xchain-util": "0.0.1-alpha.792+b6e4e50",
     "axios": "^0.21.0"
   },
-  "gitHead": "5069482cccdcf06ed9b031344f6967964686e6c2"
+  "gitHead": "e11e7c05a539ad3fce341e6479cdfaaa23997fcc"
 }
