@@ -480,9 +480,9 @@ export class HDNode implements ExternallyOwnedAccount {
   }
 }
 
-export function isValidMnemonic(mnemonic: string, wordlist?: Wordlist): boolean {
+export async function isValidMnemonic(mnemonic: string, wordlist?: Wordlist): Promise<boolean> {
   try {
-    mnemonicToEntropy(mnemonic, wordlist)
+    await mnemonicToEntropy(mnemonic, wordlist)
     return true
   } catch (error) {}
   return false
