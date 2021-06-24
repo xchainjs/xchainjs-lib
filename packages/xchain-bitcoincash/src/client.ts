@@ -228,7 +228,7 @@ class Client implements BitcoinCashClient, XChainClient {
       if (ENABLE_FAST) {
         const master = await (await bip32.fromSeed(rootSeed, utils.bchNetwork(this.network))).derivePath(derivationPath)
         const d: Buffer = BigInteger.fromBuffer(master.privateKey)
-        const btcKeyPair = new bitcash.ECPair(d, {
+        const btcKeyPair = new bitcash.ECPair(d, null, {
           network: utils.bchNetwork(this.network),
           compressed: true,
         })
