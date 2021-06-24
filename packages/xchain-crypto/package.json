@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-crypto",
-  "version": "0.0.1-alpha.854+e11e7c0",
+  "version": "0.0.1-alpha.858+702bf67",
   "description": "XChain Crypto is a crypto module needed by all XChain clients.",
   "main": "lib/index.js",
   "module": "lib/index.es.js",
@@ -68,5 +68,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "e11e7c05a539ad3fce341e6479cdfaaa23997fcc"
+  "gitHead": "702bf673ea8f80e20e47a4af0ad994cf53235b1f"
 }
