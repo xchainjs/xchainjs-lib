@@ -250,7 +250,9 @@ export const buildTx = async ({
   utxos: UTXOs
 }> => {
   try {
-    if (!validateAddress(recipient, network)) {
+    // const recipientCashAddress = toCashAddress(recipient)
+    const recipientCashAddress = recipient
+    if (!validateAddress(recipientCashAddress, network)) {
       return Promise.reject(new Error('Invalid address'))
     }
 
@@ -265,7 +267,7 @@ export const buildTx = async ({
     const targetOutputs = []
     // output to recipient
     targetOutputs.push({
-      address: recipient,
+      address: recipientCashAddress,
       value: amount.amount().toNumber(),
     })
     const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)

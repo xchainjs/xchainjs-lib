@@ -1,3 +1,7 @@
+# v.0.11.7 (2021-06-24)
+
+- added support to send to legacy addresses
+
 # v.0.11.6 (2021-06-19)
 
 - changed rollupjs to treat axios as external lib
