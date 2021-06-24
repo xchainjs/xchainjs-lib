@@ -15,7 +15,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@thorwallet/xchain-client'
-import { validatePhrase, getSeed } from '@thorwallet/xchain-crypto'
+import { validatePhrase, getSeed, bip32 } from '@thorwallet/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'
@@ -223,7 +223,11 @@ class Client implements BitcoinCashClient, XChainClient {
       const rootSeed = await getSeed(phrase)
       const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
 
-      return masterHDNode.derivePath(derivationPath).keyPair
+      const master = await (await bip32.fromSeed(rootSeed, utils.bchNetwork(this.network))).derivePath(derivationPath)
+
+      const keyPair = await masterHDNode.derivePath(derivationPath).keyPair
+      console.log({ keyPair, master })
+      return keyPair
     } catch (error) {
       throw new Error(`Getting key pair failed: ${error?.message || error.toString()}`)
     }
