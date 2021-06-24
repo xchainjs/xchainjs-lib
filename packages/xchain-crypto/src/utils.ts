@@ -1,7 +1,5 @@
 import * as bech32 from 'bech32'
-import sha256 from 'crypto-js/sha256'
 import ripemd160 from 'crypto-js/ripemd160'
-import hexEncoding from 'crypto-js/enc-hex'
 import RNSimple from 'react-native-simple-crypto'
 /**
  * Convert string to bytes.
@@ -43,11 +41,10 @@ export const ab2hexstring = (arr: Buffer) => {
  * @throws {"sha256ripemd160 expects a string"} Thrown if non-string is provided.
  * @throws {"invalid hex string length"} Thrown if the given hex string is an invalid one.
  */
-export const sha256ripemd160 = (hex: string): string => {
+export const sha256ripemd160 = async (hex: string): Promise<string> => {
   if (typeof hex !== 'string') throw new Error('sha256ripemd160 expects a string')
   if (hex.length % 2 !== 0) throw new Error(`invalid hex string length: ${hex}`)
-  const hexEncoded = hexEncoding.parse(hex)
-  const ProgramSha256 = sha256(hexEncoded)
+  const ProgramSha256 = await RNSimple.SHA.sha256(hex)
   return ripemd160(ProgramSha256).toString()
 }
 

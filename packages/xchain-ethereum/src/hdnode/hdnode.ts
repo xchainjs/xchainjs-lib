@@ -11,7 +11,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { toUtf8Bytes, UnicodeNormalizationForm } from '@ethersproject/strings'
 import { defineReadOnly } from '@ethersproject/properties'
 import { SigningKey } from '@ethersproject/signing-key'
-import { ripemd160, sha256 } from '@ethersproject/sha2'
+import { ripemd160 } from '@ethersproject/sha2'
 import { computeAddress } from '@ethersproject/transactions'
 import { Wordlist, wordlists } from '@ethersproject/wordlists'
 
@@ -20,6 +20,16 @@ import { bip32 } from '@thorwallet/xchain-crypto'
 const version = 'hdnode/5.3.0'
 
 const logger = new Logger(version)
+
+function buf2hex(buffer: ArrayBuffer) {
+  // buffer is an ArrayBuffer
+  return [...new Uint8Array(buffer)].map((x) => x.toString(16).padStart(2, '0')).join('')
+}
+
+export async function sha256(data: BytesLike): Promise<string> {
+  const hash = await RNSimple.SHA.sha256(Buffer.from(arrayify(data)))
+  return '0x' + buf2hex(hash)
+}
 
 function getWordlist(wordlist: string | Wordlist): Wordlist {
   if (wordlist == null) {
@@ -65,7 +75,7 @@ export async function mnemonicToSeed(mnemonic: string, password?: string): Promi
   return Buffer.from(buf)
 }
 
-export function mnemonicToEntropy(mnemonic: string, wordlist?: string | Wordlist): string {
+export async function mnemonicToEntropy(mnemonic: string, wordlist?: string | Wordlist): Promise<string> {
   wordlist = getWordlist(wordlist)
 
   logger.checkNormalize()
@@ -97,7 +107,7 @@ export function mnemonicToEntropy(mnemonic: string, wordlist?: string | Wordlist
   const checksumBits = words.length / 3
   const checksumMask = getUpperMask(checksumBits)
 
-  const checksum = arrayify(sha256(entropy.slice(0, entropyBits / 8)))[0] & checksumMask
+  const checksum = new Uint8Array(await RNSimple.SHA.sha256(entropy.slice(0, entropyBits / 8)))[0] & checksumMask
 
   if (checksum !== (entropy[entropy.length - 1] & checksumMask)) {
     throw new Error('invalid checksum')
@@ -407,7 +417,7 @@ export class HDNode implements ExternallyOwnedAccount {
     wordlist = getWordlist(wordlist)
 
     // Normalize the case and spacing in the mnemonic (throws if the mnemonic is invalid)
-    mnemonic = entropyToMnemonic(mnemonicToEntropy(mnemonic, wordlist), wordlist)
+    mnemonic = entropyToMnemonic(await mnemonicToEntropy(mnemonic, wordlist), wordlist)
 
     return HDNode._fromSeed(await mnemonicToSeed(mnemonic, password), {
       phrase: mnemonic,
