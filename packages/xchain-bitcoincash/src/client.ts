@@ -437,6 +437,7 @@ class Client implements BitcoinCashClient, XChainClient {
       const keyPair = this.getBCHKeys(this.phrase, derivationPath)
 
       utxos.forEach((utxo, index) => {
+        console.log(JSON.stringify(utxo, null, ''))
         builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)
       })
 

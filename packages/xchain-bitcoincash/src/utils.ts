@@ -192,9 +192,10 @@ export const parseTransaction = (tx: Transaction): Tx => {
  */
 export const validateAddress = (address: string, network: Network): boolean => {
   try {
-    bitcash.address.toOutputScript(toLegacyAddress(address), bchNetwork(network))
-    return true
+    const toAddress = toCashAddress(address)
+    return bchaddr.isValidAddress(toAddress) && bchaddr.detectAddressNetwork(toAddress) === network
   } catch (error) {
+    console.log(error)
     return false
   }
 }
@@ -250,7 +251,8 @@ export const buildTx = async ({
   utxos: UTXOs
 }> => {
   try {
-    if (!validateAddress(recipient, network)) {
+    const recipientCashAddress = toCashAddress(recipient)
+    if (!validateAddress(recipientCashAddress, network)) {
       return Promise.reject(new Error('Invalid address'))
     }
 

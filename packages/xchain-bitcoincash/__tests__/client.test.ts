@@ -319,6 +319,54 @@ describe('BCHClient Test', () => {
     expect(txId).toEqual('82b65a0006697bff406c62ad0b3fd07db9f20ce6fbc468c81679d96aebc36f69')
   })
 
+  it('should transfer bch to a legacy address format', async () => {
+    bchClient.setNetwork('testnet')
+    bchClient.setPhrase(phrase)
+    mock_getBalance(
+      bchClient.getHaskoinURL(),
+      bchClient.getAddress(),
+      {
+        received: 12964626,
+        utxo: 1,
+        address: bchClient.getAddress(),
+        txs: 13,
+        unconfirmed: 0,
+        confirmed: 992999,
+      },
+      2,
+    )
+    mock_getUnspents(bchClient.getHaskoinURL(), bchClient.getAddress(), [
+      {
+        pkscript: '76a9145be96e4fbfd68370cfd30ad2f3458c580f09afb188ac',
+        value: 992999,
+        address: bchClient.getAddress(),
+        block: {
+          height: 1436370,
+          position: 4,
+        },
+        index: 1,
+        txid: '66f090bd35b15a4a8ede2f71184cf4d2cc08483921752b845ba2fdee7b96ca79',
+      },
+    ])
+    mock_getRawTransactionData(
+      bchClient.getHaskoinURL(),
+      '66f090bd35b15a4a8ede2f71184cf4d2cc08483921752b845ba2fdee7b96ca79',
+      {
+        result:
+          '02000000010913175382c5014e69c174377320717629c736370d29e8d19e31c27609a03053010000006a4730440220748b74d61e2e0bbec73a5a9e7e475b502029606cf7affea499a3246d6011e155022056c4f2979df51e15e1745b614eb2e5ecd2a2353be9211a0beddbbf2a344ce8434121027887b7dbccb26dc0b7e3e4174b986cbb5011ade42654d3a92f7bdba3bd08c8f9ffffffff0264000000000000001976a91497a808f1d39ae863ed78500504780e2ca0c21b7288ace7260f00000000001976a9145be96e4fbfd68370cfd30ad2f3458c580f09afb188ac00000000',
+      },
+    )
+    mock_estimateFee()
+    mock_broadcastTx(bchClient.getNodeURL(), '82b65a0006697bff406c62ad0b3fd07db9f20ce6fbc468c81679d96aebc36f69')
+
+    const txId = await bchClient.transfer({
+      walletIndex: 0,
+      recipient: '2N3oefVeg6stiTb5Kh3ozCSkaqmx91FDbsm',
+      amount: baseAmount(100, BCH_DECIMAL),
+      feeRate: 1,
+    })
+    expect(txId).toEqual('82b65a0006697bff406c62ad0b3fd07db9f20ce6fbc468c81679d96aebc36f69')
+  })
   it('returns fees and rates of a normal tx', async () => {
     bchClient.setNetwork('testnet')
     bchClient.setPhrase(phrase)
