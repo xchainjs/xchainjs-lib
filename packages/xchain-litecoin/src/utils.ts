@@ -1,11 +1,21 @@
 import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as sochain from './sochain-api'
 import * as nodeApi from './node-api'
-import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
+import {
+  Address,
+  Balance,
+  Fees,
+  FeeRate,
+  FeeRates,
+  FeesWithRates,
+  Network,
+  TxHash,
+  TxParams,
+  FeeType,
+} from '@xchainjs/xchain-client'
 import { AssetLTC, BaseAmount, baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util'
 import { LtcAddressUTXOs, AddressParams } from './types/sochain-api-types'
-import { FeeRate, FeeRates, FeesWithRates } from './types/client-types'
-import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
+import { BroadcastTxParams, UTXO } from './types/common'
 import { MIN_TX_FEE } from './const'
 import coininfo from 'coininfo'
 
@@ -44,7 +54,7 @@ export const compileMemo = (memo: string): Buffer => {
  * @param {Buffer} data The compiled memo (Optional).
  * @returns {number} The fee amount.
  */
-export function getFee(inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = null): number {
+export function getFee(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
   let sum =
     TX_EMPTY_SIZE +
     inputs.reduce(function (a, x) {
@@ -137,7 +147,7 @@ export const validateAddress = (address: Address, network: Network): boolean => 
  * @param {AddressParams} params
  * @returns {Array<UTXO>} The UTXOs of the given address.
  */
-export const scanUTXOs = async (params: AddressParams): Promise<UTXOs> => {
+export const scanUTXOs = async (params: AddressParams): Promise<UTXO[]> => {
   const utxos: LtcAddressUTXOs = await sochain.getUnspentTxs(params)
 
   return utxos.map(
@@ -173,7 +183,7 @@ export const buildTx = async ({
   sender: Address
   network: Network
   sochainUrl: string
-}): Promise<{ psbt: Litecoin.Psbt; utxos: UTXOs }> => {
+}): Promise<{ psbt: Litecoin.Psbt; utxos: UTXO[] }> => {
   try {
     if (!validateAddress(recipient, network)) {
       return Promise.reject(new Error('Invalid address'))
@@ -273,7 +283,7 @@ export const getDefaultFeesWithRates = (): FeesWithRates => {
   }
 
   const fees: Fees = {
-    type: 'byte',
+    type: FeeType.PerByte,
     fast: calcFee(rates.fast),
     average: calcFee(rates.average),
     fastest: calcFee(rates.fastest),

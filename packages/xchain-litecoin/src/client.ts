@@ -1,458 +1,178 @@
-import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
-import * as Utils from './utils'
-import * as sochain from './sochain-api'
 import {
-  RootDerivationPaths,
-  TxHistoryParams,
-  TxsPage,
   Address,
-  XChainClient,
+  Balance,
+  Client as BaseClient,
+  ClientFactory,
+  ClientParams as BaseClientParams,
+  Fees,
+  FeeOption,
+  FeeRate,
+  FeeRates,
+  FeeType,
+  FeesWithRates,
+  Network,
   Tx,
   TxParams,
   TxHash,
-  Balance,
-  Network,
-  Fees,
-  XChainClientParams,
+  TxHistoryParams,
+  TxsPage,
+  TxType,
+  UTXOClient,
+  Wallet,
 } from '@xchainjs/xchain-client'
-import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
 import { AssetLTC, assetToBase, assetAmount } from '@xchainjs/xchain-util'
+
+import * as sochain from './sochain-api'
 import { NodeAuth } from './types'
-import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 import { TxIO } from './types/sochain-api-types'
+import * as Utils from './utils'
 
-/**
- * LitecoinClient Interface
- */
-interface LitecoinClient {
-  getFeesWithRates(memo?: string): Promise<FeesWithRates>
-  getFeesWithMemo(memo: string): Promise<Fees>
-  getFeeRates(): Promise<FeeRates>
+export interface ClientParams extends BaseClientParams {
+  sochainUrl: string
+  nodeUrl: string
+  nodeAuth: NodeAuth
 }
 
-export type LitecoinClientParams = XChainClientParams & {
-  sochainUrl?: string
-  nodeUrl?: string
-  nodeAuth?: NodeAuth | null
+export const MAINNET_PARAMS: ClientParams = {
+  network: Network.Mainnet,
+  getFullDerivationPath: (index: number) => `84'/2'/0'/0/${index}`,
+  explorer: {
+    url: 'https://ltc.bitaps.com',
+    getAddressUrl(address: string) {
+      return `${this.url}/${address}`
+    },
+    getTxUrl(txid: string) {
+      return `${this.url}/${txid}`
+    },
+  },
+  sochainUrl: 'https://sochain.com/api/v2',
+  nodeUrl: 'https://ltc.thorchain.info',
+  nodeAuth: {
+    username: 'thorchain',
+    password: 'password',
+  },
 }
 
-/**
- * Custom Litecoin client
- */
-class Client implements LitecoinClient, XChainClient {
-  private net: Network
-  private phrase = ''
-  private sochainUrl = ''
-  private nodeUrl = ''
-  private nodeAuth?: NodeAuth
-  private rootDerivationPaths: RootDerivationPaths
+export const TESTNET_PARAMS: ClientParams = {
+  ...MAINNET_PARAMS,
+  network: Network.Testnet,
+  getFullDerivationPath: (index: number) => `84'/1'/0'/0/${index}`,
+  explorer: {
+    ...MAINNET_PARAMS.explorer,
+    url: 'https://tltc.bitaps.com',
+  },
+  nodeUrl: 'https://testnet.ltc.thorchain.info',
+}
 
-  /**
-   * Constructor
-   * Client is initialised with network type
-   * Pass strict null as nodeAuth to disable auth for node json rpc
-   *
-   * @param {LitecoinClientParams} params
-   */
-  constructor({
-    network = 'testnet',
-    sochainUrl = 'https://sochain.com/api/v2',
-    phrase,
-    nodeUrl,
-    nodeAuth = {
-      username: 'thorchain',
-      password: 'password',
-    },
-    rootDerivationPaths = {
-      mainnet: `m/84'/2'/0'/0/`,
-      testnet: `m/84'/1'/0'/0/`,
-    },
-  }: LitecoinClientParams) {
-    this.net = network
-    this.rootDerivationPaths = rootDerivationPaths
-    this.nodeUrl = !!nodeUrl
-      ? nodeUrl
-      : network === 'mainnet'
-      ? 'https://ltc.thorchain.info'
-      : 'https://testnet.ltc.thorchain.info'
+export class Client extends BaseClient<ClientParams, Wallet> implements UTXOClient<ClientParams, Wallet> {
+  static readonly create: ClientFactory<Client> = Client.bindFactory((x: ClientParams) => new Client(x))
 
-    this.nodeAuth =
-      // Leave possibility to send requests without auth info for user
-      // by strictly passing nodeAuth as null value
-      nodeAuth === null ? undefined : nodeAuth
-
-    this.setSochainUrl(sochainUrl)
-    phrase && this.setPhrase(phrase)
+  async validateAddress(address: string): Promise<boolean> {
+    return Utils.validateAddress(address, this.params.network)
   }
 
-  /**
-   * Set/Update the sochain url.
-   *
-   * @param {string} url The new sochain url.
-   * @returns {void}
-   */
-  setSochainUrl = (url: string): void => {
-    this.sochainUrl = url
+  async getBalance(address: Address): Promise<Balance[]> {
+    return Utils.getBalance({
+      sochainUrl: this.params.sochainUrl,
+      network: this.params.network,
+      address,
+    })
   }
 
-  /**
-   * Set/update a new phrase.
-   *
-   * @param {string} phrase A new phrase.
-   * @returns {Address} The address from the given phrase
-   *
-   * @throws {"Invalid phrase"}
-   * Thrown if the given phase is invalid.
-   */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (validatePhrase(phrase)) {
-      this.phrase = phrase
-      return this.getAddress(walletIndex)
-    } else {
-      throw new Error('Invalid phrase')
-    }
-  }
+  async getTransactions(params: TxHistoryParams): Promise<TxsPage> {
+    const offset = params.offset ?? 0
+    const limit = params.limit ?? 10
 
-  /**
-   * Purge client.
-   *
-   * @returns {void}
-   */
-  purgeClient = (): void => {
-    this.phrase = ''
-  }
+    const response = await sochain.getAddress({
+      sochainUrl: this.params.sochainUrl,
+      network: this.params.network,
+      address: `${params.address}`,
+    })
+    const total = response.txs.length
+    const transactions: Tx[] = []
 
-  /**
-   * Set/update the current network.
-   *
-   * @param {Network} network `mainnet` or `testnet`.
-   * @returns {void}
-   *
-   * @throws {"Network must be provided"}
-   * Thrown if network has not been set before.
-   */
-  setNetwork = (net: Network): void => {
-    if (!net) {
-      throw new Error('Network must be provided')
-    } else {
-      this.net = net
-    }
-  }
-
-  /**
-   * Get the current network.
-   *
-   * @returns {Network} The current network. (`mainnet` or `testnet`)
-   */
-  getNetwork = (): Network => {
-    return this.net
-  }
-
-  /**
-   * Get getFullDerivationPath
-   *
-   * @param {number} index the HD wallet index
-   * @returns {string} The bitcoin derivation path based on the network.
-   */
-  getFullDerivationPath(index: number): string {
-    return this.rootDerivationPaths[this.net] + `${index}`
-  }
-
-  /**
-   * Get the explorer url.
-   *
-   * @returns {string} The explorer url based on the network.
-   */
-  getExplorerUrl = (): string => {
-    return Utils.isTestnet(this.net) ? 'https://tltc.bitaps.com' : 'https://ltc.bitaps.com'
-  }
-
-  /**
-   * Get the explorer url for the given address.
-   *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address based on the network.
-   */
-  getExplorerAddressUrl = (address: Address): string => {
-    return `${this.getExplorerUrl()}/${address}`
-  }
-
-  /**
-   * Get the explorer url for the given transaction id.
-   *
-   * @param {string} txID The transaction id
-   * @returns {string} The explorer url for the given transaction id based on the network.
-   */
-  getExplorerTxUrl = (txID: string): string => {
-    return `${this.getExplorerUrl()}/${txID}`
-  }
-
-  /**
-   * Get the current address.
-   *
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
-   */
-  getAddress = (index = 0): Address => {
-    if (index < 0) {
-      throw new Error('index must be greater than zero')
-    }
-    if (this.phrase) {
-      const ltcNetwork = Utils.ltcNetwork(this.net)
-      const ltcKeys = this.getLtcKeys(this.phrase, index)
-
-      const { address } = Litecoin.payments.p2wpkh({
-        pubkey: ltcKeys.publicKey,
-        network: ltcNetwork,
-      })
-
-      if (!address) {
-        throw new Error('Address not defined')
-      }
-      return address
-    }
-    throw new Error('Phrase must be provided')
-  }
-
-  /**
-   * @private
-   * Get private key.
-   *
-   * Private function to get keyPair from the this.phrase
-   *
-   * @param {string} phrase The phrase to be used for generating privkey
-   * @returns {ECPairInterface} The privkey generated from the given phrase
-   *
-   * @throws {"Could not get private key from phrase"} Throws an error if failed creating LTC keys from the given phrase
-   * */
-  private getLtcKeys = (phrase: string, index = 0): Litecoin.ECPairInterface => {
-    const ltcNetwork = Utils.ltcNetwork(this.net)
-
-    const seed = getSeed(phrase)
-    const master = Litecoin.bip32.fromSeed(seed, ltcNetwork).derivePath(this.getFullDerivationPath(index))
-
-    if (!master.privateKey) {
-      throw new Error('Could not get private key from phrase')
-    }
-
-    return Litecoin.ECPair.fromPrivateKey(master.privateKey, { network: ltcNetwork })
-  }
-
-  /**
-   * Validate the given address.
-   *
-   * @param {Address} address
-   * @returns {boolean} `true` or `false`
-   */
-  validateAddress = (address: string): boolean => Utils.validateAddress(address, this.net)
-
-  /**
-   * Get the LTC balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balance>} The LTC balance of the address.
-   */
-  getBalance = async (address: Address): Promise<Balance[]> => {
-    try {
-      return Utils.getBalance({
-        sochainUrl: this.sochainUrl,
-        network: this.net,
-        address,
-      })
-    } catch (e) {
-      return Promise.reject(e)
-    }
-  }
-
-  /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   */
-  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
-    // Sochain API doesn't have pagination parameter
-    const offset = params?.offset ?? 0
-    const limit = params?.limit || 10
-    try {
-      const response = await sochain.getAddress({
-        sochainUrl: this.sochainUrl,
-        network: this.net,
-        address: `${params?.address}`,
-      })
-      const total = response.txs.length
-      const transactions: Tx[] = []
-
-      const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
-      for (const txItem of txs) {
-        const rawTx = await sochain.getTx({
-          sochainUrl: this.sochainUrl,
-          network: this.net,
-          hash: txItem.txid,
-        })
-        const tx: Tx = {
-          asset: AssetLTC,
-          from: rawTx.inputs.map((i: TxIO) => ({
-            from: i.address,
-            amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
-          })),
-          to: rawTx.outputs
-            // ignore tx with type 'nulldata'
-            .filter((i: TxIO) => i.type !== 'nulldata')
-            .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
-          date: new Date(rawTx.time * 1000),
-          type: 'transfer',
-          hash: rawTx.txid,
-        }
-        transactions.push(tx)
-      }
-
-      const result: TxsPage = {
-        total,
-        txs: transactions,
-      }
-      return result
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
-   * Get the transaction details of a given transaction id.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   */
-  getTransactionData = async (txId: string): Promise<Tx> => {
-    try {
+    const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
+    for (const txItem of txs) {
       const rawTx = await sochain.getTx({
-        sochainUrl: this.sochainUrl,
-        network: this.net,
-        hash: txId,
+        sochainUrl: this.params.sochainUrl,
+        network: this.params.network,
+        hash: txItem.txid,
       })
-      return {
+      const tx: Tx = {
         asset: AssetLTC,
-        from: rawTx.inputs.map((i) => ({
+        from: rawTx.inputs.map((i: TxIO) => ({
           from: i.address,
           amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
         })),
-        to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
+        to: rawTx.outputs
+          // ignore tx with type 'nulldata'
+          .filter((i: TxIO) => i.type !== 'nulldata')
+          .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
         date: new Date(rawTx.time * 1000),
-        type: 'transfer',
+        type: TxType.Transfer,
         hash: rawTx.txid,
       }
-    } catch (error) {
-      return Promise.reject(error)
+      transactions.push(tx)
+    }
+
+    const result: TxsPage = {
+      total,
+      txs: transactions,
+    }
+    return result
+  }
+
+  async getTransactionData(txId: string): Promise<Tx> {
+    const rawTx = await sochain.getTx({
+      sochainUrl: this.params.sochainUrl,
+      network: this.params.network,
+      hash: txId,
+    })
+    return {
+      asset: AssetLTC,
+      from: rawTx.inputs.map((i) => ({
+        from: i.address,
+        amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
+      })),
+      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
+      date: new Date(rawTx.time * 1000),
+      type: TxType.Transfer,
+      hash: rawTx.txid,
     }
   }
 
-  /**
-   * Get the rates and fees.
-   *
-   * @param {string} memo The memo to be used for fee calculation (optional)
-   * @returns {FeesWithRates} The fees and rates
-   */
-  getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
-    const nextBlockFeeRate = await sochain.getSuggestedTxFee()
-    const rates: FeeRates = {
-      fastest: nextBlockFeeRate * 5,
-      fast: nextBlockFeeRate * 1,
-      average: nextBlockFeeRate * 0.5,
-    }
+  async getFeesWithRates(memo?: string): Promise<FeesWithRates> {
+    const rates = await this.getFeeRates()
 
-    const fees: Fees = {
-      type: 'byte',
-      fast: Utils.calcFee(rates.fast, memo),
-      average: Utils.calcFee(rates.average, memo),
-      fastest: Utils.calcFee(rates.fastest, memo),
-    }
+    const fees = (Object.entries(rates) as Array<[FeeOption, FeeRate]>)
+      .map(([k, v]) => [k, Utils.calcFee(v, memo)] as const)
+      .reduce((a, [k, v]) => ((a[k] = v), a), { type: FeeType.PerByte } as Fees)
 
     return { fees, rates }
   }
 
-  /**
-   * Get the current fees.
-   *
-   * @returns {Fees} The fees without memo
-   */
-  getFees = async (): Promise<Fees> => {
-    try {
-      const { fees } = await this.getFeesWithRates()
-      return fees
-    } catch (error) {
-      return Promise.reject(error)
+  async getFees(): Promise<Fees> {
+    const { fees } = await this.getFeesWithRates()
+    return fees
+  }
+
+  async getFeesWithMemo(memo: string): Promise<Fees> {
+    const { fees } = await this.getFeesWithRates(memo)
+    return fees
+  }
+
+  async getFeeRates(): Promise<FeeRates> {
+    const nextBlockFeeRate = await sochain.getSuggestedTxFee()
+    return {
+      average: nextBlockFeeRate * 0.5,
+      fast: nextBlockFeeRate * 1,
+      fastest: nextBlockFeeRate * 5,
     }
   }
 
-  /**
-   * Get the fees for transactions with memo.
-   * If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
-   *
-   * @param {string} memo
-   * @returns {Fees} The fees with memo
-   */
-  getFeesWithMemo = async (memo: string): Promise<Fees> => {
-    try {
-      const { fees } = await this.getFeesWithRates(memo)
-      return fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
-   * Get the fee rates for transactions without a memo.
-   * If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
-   *
-   * @returns {FeeRates} The fee rate
-   */
-  getFeeRates = async (): Promise<FeeRates> => {
-    try {
-      const { rates } = await this.getFeesWithRates()
-      return rates
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
-   * Transfer LTC.
-   *
-   * @param {TxParams&FeeRate} params The transfer options.
-   * @returns {TxHash} The transaction hash.
-   */
-  transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
-    try {
-      const fromAddressIndex = params?.walletIndex || 0
-      const feeRate = params.feeRate || (await this.getFeeRates()).fast
-      const { psbt } = await Utils.buildTx({
-        ...params,
-        feeRate,
-        sender: this.getAddress(fromAddressIndex),
-        sochainUrl: this.sochainUrl,
-        network: this.net,
-      })
-      const ltcKeys = this.getLtcKeys(this.phrase, fromAddressIndex)
-      psbt.signAllInputs(ltcKeys) // Sign all inputs
-      psbt.finalizeAllInputs() // Finalise inputs
-      const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
-
-      return await Utils.broadcastTx({
-        network: this.net,
-        txHex,
-        nodeUrl: this.nodeUrl,
-        auth: this.nodeAuth,
-      })
-    } catch (e) {
-      return Promise.reject(e)
-    }
+  transfer(index: number, params: TxParams & { feeRate?: FeeRate }): Promise<TxHash>
+  transfer(params: TxParams & { walletIndex?: number; feeRate?: FeeRate }): Promise<TxHash>
+  transfer(indexOrParams: number | (TxParams & { walletIndex?: number }), maybeParams?: TxParams): Promise<TxHash> {
+    return super.transfer(...this.normalizeParams(indexOrParams, maybeParams))
   }
 }
-
-export { Client, Network }
