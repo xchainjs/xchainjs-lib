@@ -1,4 +1,4 @@
-import { Fees, Network } from '@xchainjs/xchain-client'
+import { Fees, Network, SingleFeePerByte } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 /**
@@ -27,19 +27,5 @@ export const getDecimal = (network: Network): number => {
 export const getDefaultFees = (network: Network): Fees => {
   const fee = assetToBase(assetAmount(0.015, getDecimal(network)))
 
-  return {
-    type: 'byte',
-    fast: fee,
-    fastest: fee,
-    average: fee,
-  }
+  return SingleFeePerByte(fee)
 }
-
-/**
- * Get address prefix based on the network.
- *
- * @param {string} network
- * @returns {string} The address prefix based on the network.
- *
- **/
-export const getPrefix = (network: string) => (network === 'testnet' ? '5' : '1')
