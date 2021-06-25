@@ -3,7 +3,7 @@ import nock from 'nock'
 import { TxsPage } from '@xchainjs/xchain-client'
 import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
-import { AssetMuon } from '../src/types'
+import { AssetAtom, AssetMuon } from '../src/types'
 import { Client } from '../src/client'
 import { getDenom } from '../src/util'
 import { TxHistoryResponse, TxResponse } from '../src/cosmos/types'
@@ -129,8 +129,10 @@ describe('Client Test', () => {
       result: [],
     })
 
-    const result = await cosmosClient.getBalance(address0_mainnet)
-    expect(result).toEqual([])
+    const balances = await cosmosClient.getBalance(address0_mainnet)
+    const expected = balances[0].amount.amount().isEqualTo(baseAmount(0, 6).amount())
+    expect(expected).toBeTruthy()
+    expect(balances[0].asset).toEqual(AssetAtom)
   })
 
   it('has balances', async () => {

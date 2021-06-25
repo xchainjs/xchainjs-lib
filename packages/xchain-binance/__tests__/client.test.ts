@@ -150,7 +150,12 @@ describe('BinanceClient Test', () => {
       sequence: 0,
     })
     let balances = await bnbClient.getBalance('bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku')
-    expect(balances).toEqual([])
+    expect(balances.length).toEqual(1)
+
+    let amount = balances[0].amount
+
+    expect(amount.amount().isEqualTo(0)).toBeTruthy()
+    expect(balances[0].asset.ticker === 'BNB').toBeTruthy()
 
     mockGetAccount(
       mainnetClientURL,
@@ -166,7 +171,13 @@ describe('BinanceClient Test', () => {
       404,
     )
     balances = await bnbClient.getBalance('bnb1ja07feunxx6z9kue3fn05dazt0gpn4y9e5t8rn')
-    expect(balances).toEqual([])
+
+    expect(balances.length).toEqual(1)
+
+    amount = balances[0].amount
+
+    expect(amount.amount().isEqualTo(0)).toBeTruthy()
+    expect(balances[0].asset.ticker === 'BNB').toBeTruthy()
   })
 
   it('has balances', async () => {
