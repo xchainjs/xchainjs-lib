@@ -2,19 +2,23 @@ const bitcash = require('@psf/bitcoincashjs-lib')
 
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
-import { Address, Balance, Fees, Network, Tx, TxFrom, TxParams, TxTo } from '@xchainjs/xchain-client'
-import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util/lib'
 import {
+  Address,
+  Balance,
+  Fees,
   FeeRate,
   FeeRates,
+  FeeType,
   FeesWithRates,
-  Transaction,
-  AddressParams,
-  UTXOs,
-  UTXO,
-  TransactionInput,
-  TransactionOutput,
-} from './types'
+  Network,
+  Tx,
+  TxFrom,
+  TxParams,
+  TxTo,
+  TxType,
+} from '@xchainjs/xchain-client'
+import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util/lib'
+import { Transaction, AddressParams, UTXO, TransactionInput, TransactionOutput } from './types'
 import { getAccount, getRawTransaction, getUnspentTransactions } from './haskoin-api'
 import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'
 
@@ -113,12 +117,6 @@ export const bchNetwork = (network: Network): BCHNetwork => {
 }
 
 /**
- * BCH new addresses strategy has no any prefixes.
- * Any possible prefixes at the TX addresses will be stripped out with parseTransaction
- **/
-export const getPrefix = () => ''
-
-/**
  * Strips bchtest or bitcoincash prefix from address
  *
  * @param {Address} address
@@ -178,7 +176,7 @@ export const parseTransaction = (tx: Transaction): Tx => {
           } as TxTo),
       ),
     date: new Date(tx.time * 1000),
-    type: 'transfer',
+    type: TxType.Transfer,
     hash: tx.txid,
   }
 }
@@ -205,9 +203,9 @@ export const validateAddress = (address: string, network: Network): boolean => {
  * @param {Address} address
  * @returns {Array<UTXO>} The UTXOs of the given address.
  */
-export const scanUTXOs = async (haskoinUrl: string, address: Address): Promise<UTXOs> => {
+export const scanUTXOs = async (haskoinUrl: string, address: Address): Promise<UTXO[]> => {
   const unspents = await getUnspentTransactions({ haskoinUrl, address })
-  const utxos: UTXOs = []
+  const utxos = [] as UTXO[]
 
   for (const utxo of unspents || []) {
     utxos.push({
@@ -247,7 +245,7 @@ export const buildTx = async ({
   haskoinUrl: string
 }): Promise<{
   builder: TransactionBuilder
-  utxos: UTXOs
+  utxos: UTXO[]
 }> => {
   try {
     if (!validateAddress(recipient, network)) {
@@ -317,7 +315,7 @@ export const buildTx = async ({
  * @param {UnspentOutput} utxos (optional)
  * @returns {BaseAmount} The calculated fees based on fee rate and the memo.
  */
-export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXOs = []): BaseAmount => {
+export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXO[] = []): BaseAmount => {
   const compiledMemo = memo ? compileMemo(memo) : null
   const fee = getFee(utxos.length, feeRate, compiledMemo)
   return baseAmount(fee)
@@ -337,7 +335,7 @@ export const getDefaultFeesWithRates = (): FeesWithRates => {
   }
 
   const fees: Fees = {
-    type: 'byte',
+    type: FeeType.PerByte,
     fast: calcFee(rates.fast),
     average: calcFee(rates.average),
     fastest: calcFee(rates.fastest),
