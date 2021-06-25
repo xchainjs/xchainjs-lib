@@ -167,8 +167,10 @@ describe('Client Test', () => {
       height: 0,
       result: [],
     })
-    const result = await thorClient.getBalance(thorClient.getAddress(0))
-    expect(result).toEqual([])
+    const balances = await thorClient.getBalance(thorClient.getAddress(0))
+    expect(balances.length).toEqual(1)
+    expect(balances[0].asset).toEqual(AssetRune)
+    expect(balances[0].amount.amount().isEqualTo(baseAmount(0).amount())).toBeTruthy()
   })
 
   it('has balances', async () => {

@@ -251,7 +251,7 @@ class Client implements CosmosClient, XChainClient {
       })
 
       // make sure we always have the main asset as balance in the array
-      if (assetBalances.length == 0) {
+      if (assetBalances.length === 0) {
         assetBalances = [
           {
             asset: mainAsset,

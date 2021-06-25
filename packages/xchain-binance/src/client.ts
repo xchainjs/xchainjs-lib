@@ -252,7 +252,7 @@ class Client implements BinanceClient, XChainClient {
       })
 
       // make sure we always have the bnb asset as balance in the array
-      if (assetBalances.length == 0) {
+      if (assetBalances.length === 0) {
         assetBalances = [
           {
             asset: AssetBNB,
