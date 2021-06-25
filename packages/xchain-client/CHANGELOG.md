@@ -1,3 +1,8 @@
+# v.0.9.4 (2021-06-25)
+
+- added BaseXChainClient
+- added support for fetch gas fees from thorchain
+
 # v.0.9.3 (2021-06-01)
 
 - updated peer deps
