@@ -1,4 +1,5 @@
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
+import { BigNumber } from 'ethers'
 
 export type Address = string
 
@@ -57,6 +58,13 @@ export type TxParams = {
   memo?: string // optional memo to pass
 }
 
+export type FeeOptions = {
+  feeOptionKey?: FeeOptionKey
+  feeRate?: number
+  gasPrice?: BaseAmount
+  gasLimit?: BigNumber
+}
+
 // In most cases, clients don't expect any paramter in `getFees`
 // but in some cases, they do (e.g. in xchain-ethereum).
 // To workaround this, we just define an "empty" (optional) param for now.
@@ -107,7 +115,7 @@ export interface XChainClient {
 
   getFees(params?: FeesParams): Promise<Fees>
 
-  transfer(params: TxParams): Promise<TxHash>
+  transfer(params: TxParams & FeeOptions): Promise<TxHash>
 
   purgeClient(): void
 }
