@@ -58,7 +58,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
     },
     phrase = '',
   }: BitcoinClientParams) {
-    super(network, 'BTC', phrase, rootDerivationPaths)
+    super('BTC', { network, rootDerivationPaths, phrase })
     this.setSochainUrl(sochainUrl)
     this.setBlockstreamUrl(blockstreamUrl)
   }

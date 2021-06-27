@@ -13,6 +13,7 @@ import {
   TxParams,
   TxsPage,
   XChainClient,
+  XChainClientParams,
 } from './types'
 import axios from 'axios'
 
@@ -23,7 +24,7 @@ export abstract class BaseXChainClient implements XChainClient {
   protected chain: Chain
   protected network: Network
   protected phrase = ''
-  protected rootDerivationPaths: RootDerivationPaths
+  protected rootDerivationPaths: RootDerivationPaths | undefined
 
   /**
    * Constructor
@@ -35,16 +36,11 @@ export abstract class BaseXChainClient implements XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor(
-    network: Network = 'testnet',
-    chain: Chain,
-    phrase: string | undefined,
-    rootDerivationPaths: RootDerivationPaths,
-  ) {
+  constructor(chain: Chain, params: XChainClientParams) {
     this.chain = chain
-    this.network = network
-    this.rootDerivationPaths = rootDerivationPaths
-    if (phrase) this.setPhrase(phrase)
+    this.network = params.network || 'testnet'
+    if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths
+    if (params.phrase) this.setPhrase(params.phrase)
   }
   /**
    * Set/update the current network.
@@ -55,7 +51,7 @@ export abstract class BaseXChainClient implements XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork = (network: Network): void => {
+  public setNetwork(network: Network): void {
     if (!network) {
       throw new Error('Network must be provided')
     }
@@ -67,7 +63,7 @@ export abstract class BaseXChainClient implements XChainClient {
    *
    * @returns {Network} The current network. (`mainnet` or `testnet`)
    */
-  getNetwork = (): Network => {
+  public getNetwork(): Network {
     return this.network
   }
   protected async getFeeRatesFromThorchain(): Promise<FeeRates> {
@@ -98,7 +94,7 @@ export abstract class BaseXChainClient implements XChainClient {
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
+  public setPhrase(phrase: string, walletIndex = 0): Address {
     if (this.phrase !== phrase) {
       if (!validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
@@ -115,15 +111,15 @@ export abstract class BaseXChainClient implements XChainClient {
    * @param {number} index the HD wallet index
    * @returns {string} The bitcoin derivation path based on the network.
    */
-  getFullDerivationPath(index: number): string {
-    return this.rootDerivationPaths[this.network] + `${index}`
+  protected getFullDerivationPath(index: number): string {
+    return this.rootDerivationPaths ? `${this.rootDerivationPaths[this.network]}${index}` : ''
   }
   /**
    * Purge client.
    *
    * @returns {void}
    */
-  purgeClient = (): void => {
+  public purgeClient(): void {
     this.phrase = ''
   }
   //individual clients will need to implement these
@@ -139,13 +135,3 @@ export abstract class BaseXChainClient implements XChainClient {
   abstract transfer(params: TxParams): Promise<string>
   // abstract purgeClient(): void
 }
-
-// /**
-//  * Broadcast transaction.
-//  *
-//  * @see https://github.com/Blockstream/esplora/blob/master/API.md#post-tx
-//  *
-//  * @param {string} params
-//  * @returns {string} Transaction ID.
-//  */
-// export const broadcastTx = async ({ network, txHex, blockstreamUrl }: BroadcastTxParams): Promise<string> => {}
