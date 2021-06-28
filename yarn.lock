@@ -2075,12 +2075,12 @@
 
 "@psf/bitcoincash-ops@^2.0.0":
   version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@psf/bitcoincash-ops/-/bitcoincash-ops-2.0.0.tgz#9d91fd4140b0908d8ab2a9244a0ecb2987780f9d"
+  resolved "https://registry.npmjs.org/@psf/bitcoincash-ops/-/bitcoincash-ops-2.0.0.tgz"
   integrity sha512-M3PWqRpeJq6rli2NqWGbas76z9TrdGOmNuDFACBWBMctPucEAsFQY2AmyFHRSa7hEwythwvrPh9AG/n6ehmEog==
 
 "@psf/bitcoincashjs-lib@^4.0.2":
   version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@psf/bitcoincashjs-lib/-/bitcoincashjs-lib-4.0.2.tgz#e390fad47ca9ca77ed99ea1380c80eef02776660"
+  resolved "https://registry.npmjs.org/@psf/bitcoincashjs-lib/-/bitcoincashjs-lib-4.0.2.tgz"
   integrity sha512-fTy9mW4H0NkQ+dojGtf+nPduA27F3V2YpBi5licYUVjdVRD/xpUCTgEN1cYRAupOaeDH/AYOWT0MWLkbQSTxAQ==
   dependencies:
     "@psf/bitcoincash-ops" "^2.0.0"
@@ -2101,7 +2101,7 @@
 
 "@psf/pushdata-bitcoin@^1.2.2":
   version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@psf/pushdata-bitcoin/-/pushdata-bitcoin-1.2.2.tgz#52b66aa31a4fcd3559ff4ff6bb78b2e666e7bf08"
+  resolved "https://registry.npmjs.org/@psf/pushdata-bitcoin/-/pushdata-bitcoin-1.2.2.tgz"
   integrity sha512-e1qkZLJFU6Ldg7TMBgSkiR5U1NfpRgSIr2ppk8BeED/Q9wUc9DEVAjXfPMD65xgXdqnlyFEtLbpPMWwyydMVUQ==
   dependencies:
     "@psf/bitcoincash-ops" "^2.0.0"
@@ -2995,7 +2995,7 @@ big.js@^5.2.2:
 
 bigi@^1.1.0, bigi@^1.4.0:
   version "1.4.2"
-  resolved "https://registry.yarnpkg.com/bigi/-/bigi-1.4.2.tgz#9c665a95f88b8b08fc05cfd731f561859d725825"
+  resolved "https://registry.npmjs.org/bigi/-/bigi-1.4.2.tgz"
   integrity sha1-nGZalfiLiwj8Bc/XMfVhhZ1yWCU=
 
 bignumber.js@^7.2.1:
@@ -4245,7 +4245,7 @@ ecc-jsbn@~0.1.1:
 
 ecurve@^1.0.0:
   version "1.0.6"
-  resolved "https://registry.yarnpkg.com/ecurve/-/ecurve-1.0.6.tgz#dfdabbb7149f8d8b78816be5a7d5b83fcf6de797"
+  resolved "https://registry.npmjs.org/ecurve/-/ecurve-1.0.6.tgz"
   integrity sha512-/BzEjNfiSuB7jIWKcS/z8FK9jNjmEWvUV2YZ4RLSmcDtP7Lq0m6FvDuSnJpBlDpGRpfRQeTLGLBI8H+kEv0r+w==
   dependencies:
     bigi "^1.1.0"

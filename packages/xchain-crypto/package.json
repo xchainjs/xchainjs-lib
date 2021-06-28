@@ -57,6 +57,7 @@
     "bs58check": "^2.1.2",
     "crypto-js": "^4.0.0",
     "foundry-primitives": "^0.2.1",
+    "create-hash": "^1.2.0",
     "hdkey": "^2.0.1",
     "react-native-securerandom": "^1.0.0",
     "react-native-simple-crypto": "0.2.15",
