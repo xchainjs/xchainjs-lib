@@ -191,13 +191,8 @@ export const parseTransaction = (tx: Transaction): Tx => {
  * @returns {boolean} `true` or `false`.
  */
 export const validateAddress = (address: string, network: Network): boolean => {
-  try {
-    const toAddress = toCashAddress(address)
-    return bchaddr.isValidAddress(toAddress) && bchaddr.detectAddressNetwork(toAddress) === network
-  } catch (error) {
-    console.log(error)
-    return false
-  }
+  const toAddress = toCashAddress(address)
+  return bchaddr.isValidAddress(toAddress) && bchaddr.detectAddressNetwork(toAddress) === network
 }
 /**
  * Scan UTXOs from sochain.
