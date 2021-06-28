@@ -325,7 +325,9 @@ export class HDNode implements ExternallyOwnedAccount {
       data[33 + (i >> 3)] = (index >> (24 - i)) & 0xff
     }
 
-    const hmac: Uint8Array = new Uint8Array(await bip32.hmacSHA512(Buffer.from(this.chainCode), Buffer.from(data)))
+    const hmac: Uint8Array = new Uint8Array(
+      await bip32.hmacSHA512(Buffer.from(arrayify(this.chainCode)), Buffer.from(data)),
+    )
 
     const IL = hmac.slice(0, 32)
     const IR = hmac.slice(32)
