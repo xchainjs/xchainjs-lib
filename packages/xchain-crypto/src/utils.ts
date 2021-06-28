@@ -66,26 +66,6 @@ export const encodeAddress = (value: string | Buffer, prefix = 'thor', type: Buf
   return bech32.encode(prefix, words)
 }
 
-const addrKey: { [key: string]: string } = {}
-
-/**
- * Create address from the public key.
- *
- * @param {Buffer} publicKey The public key in Buffer format.
- * @returns {string} The address generated from the given public key(buffer format).
- */
-export const createAddress = async (publicKey: Buffer): Promise<string> => {
-  if (addrKey[publicKey.toString()]) {
-    return addrKey[publicKey.toString()]
-  }
-  const hexed = ab2hexstring(publicKey)
-  const hash = await sha256ripemd160(hexed)
-  const address = encodeAddress(hash, 'thor')
-
-  addrKey[publicKey.toString()] = address
-  return address
-}
-
 const pkbCache: { [key: string]: Buffer } = {}
 
 /**
