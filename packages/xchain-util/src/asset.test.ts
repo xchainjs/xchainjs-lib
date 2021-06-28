@@ -40,46 +40,46 @@ describe('asset', () => {
   describe('assetAmount', () => {
     it('should create asset amount by given value', () => {
       const amount = assetAmount(10)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('10'))
       // default decimal == 8
       expect(amount.decimal).toEqual(8)
     })
     it('should creates asset amount by given value and decimal', () => {
       const amount = assetAmount(10, 18)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('10'))
       expect(amount.decimal).toEqual(18)
     })
     it('should be able to add a value', () => {
       const amount = assetAmount(10, 18).plus(100)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('110'))
     })
     it('should be able to sub a value', () => {
       const amount = assetAmount(10, 18).minus(5)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('5'))
     })
     it('should be able to mul a value', () => {
       const amount = assetAmount(10, 18).times(1e10)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('100000000000'))
     })
     it('should be able to div a value', () => {
       const amount = assetAmount(10, 18).div(5)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('2'))
     })
     it('should be able to add AssetAmount', () => {
       const amount = assetAmount(10, 18).plus(assetAmount(10, 10))
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('20'))
       expect(amount.decimal).toEqual(18)
     })
     it('should be able to set decimal', () => {
       const amount = assetAmount(10, 18).plus(assetAmount(10, 10), 12)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('20'))
       expect(amount.decimal).toEqual(12)
     })
@@ -118,38 +118,38 @@ describe('asset', () => {
   describe('baseAmount', () => {
     it('should create base amounts by given value', () => {
       const amount = baseAmount(10)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('10'))
     })
     it('should be able to add a value', () => {
       const amount = baseAmount(10).plus(100)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('110'))
     })
     it('should be able to sub a value', () => {
       const amount = baseAmount(10).minus(5)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('5'))
     })
     it('should be able to mul a value', () => {
       const amount = baseAmount(10).times(5)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('50'))
     })
     it('should be able to div a value', () => {
       const amount = baseAmount(10).div(5)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('2'))
     })
     it('should be able to add BaseAmount', () => {
       const amount = baseAmount(10, 18).plus(baseAmount(10, 10))
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('20'))
       expect(amount.decimal).toEqual(18)
     })
     it('should be able to set decimal', () => {
       const amount = baseAmount(10, 18).plus(baseAmount(10, 10), 12)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('20'))
       expect(amount.decimal).toEqual(12)
     })
@@ -188,14 +188,14 @@ describe('asset', () => {
   describe('baseToAsset', () => {
     it('should return asset by given base amounts', () => {
       const amount = baseToAsset(baseAmount(123))
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('0.00000123'))
       // 8 decimal by default
       expect(amount.decimal).toEqual(8)
     })
     it('should return asset by given base amounts and decimal', () => {
       const amount = baseToAsset(baseAmount(123, 18))
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('0.000000000000000123'))
       expect(amount.decimal).toEqual(18)
     })
@@ -204,13 +204,13 @@ describe('asset', () => {
   describe('assetToBase', () => {
     it('should return base amounts by given asset amounts', () => {
       const amount = assetToBase(assetAmount(22))
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.decimal).toEqual(8)
       expect(amount.amount()).toEqual(bn('2200000000'))
     })
     it('should return base amounts by given asset amounts', () => {
       const amount = assetToBase(assetAmount(22, 18))
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.decimal).toEqual(18)
       expect(amount.amount()).toEqual(bn('22000000000000000000'))
     })
