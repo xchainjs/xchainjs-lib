@@ -14,9 +14,6 @@ const createHash = require('create-hash')
 
 export async function hash160(buffer: Buffer): Promise<Buffer> {
   const sha256Hash: Buffer = Buffer.from(await RNSimple.SHA.sha256(buffer))
-  const sha256Hash2: Buffer = createHash('sha256').update(buffer).digest()
-  console.log({ sha256Hash: sha256Hash.toString('hex'), sha256Hash2: sha256Hash2.toString('hex') })
-
   try {
     return createHash('rmd160').update(sha256Hash).digest()
   } catch (err) {
