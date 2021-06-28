@@ -292,7 +292,7 @@ class Client implements ThorchainClient, XChainClient {
         assetBalances = [
           {
             asset: AssetRune,
-            amount: baseAmount('0.0', DECIMAL),
+            amount: baseAmount(0, DECIMAL),
           },
         ]
       }

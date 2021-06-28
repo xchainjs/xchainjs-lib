@@ -255,7 +255,7 @@ class Client implements CosmosClient, XChainClient {
         assetBalances = [
           {
             asset: mainAsset,
-            amount: baseAmount('0.0', DECIMAL),
+            amount: baseAmount(0, DECIMAL),
           },
         ]
       }

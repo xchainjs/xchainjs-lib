@@ -36,7 +36,7 @@ import {
   assetToString,
 } from '@xchainjs/xchain-util'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
-import { isTransferFee, parseTx, getPrefix } from './util'
+import { isTransferFee, parseTx, getPrefix, BNB_DECIMAL } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 
 type PrivKey = string
@@ -256,7 +256,7 @@ class Client implements BinanceClient, XChainClient {
         assetBalances = [
           {
             asset: AssetBNB,
-            amount: assetToBase(assetAmount('0.0', 8)),
+            amount: baseAmount(0, BNB_DECIMAL),
           },
         ]
       }
