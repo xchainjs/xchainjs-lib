@@ -1,6 +1,6 @@
 import { Address, Fees, Network, TxHash } from '@xchainjs/xchain-client'
 import { TxLog } from '@xchainjs/xchain-cosmos'
-import { Asset, BaseAmount, THORChain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, Chain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { AccAddress, Msg, codec } from 'cosmos-client'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
@@ -28,7 +28,7 @@ export const getDenom = (asset: Asset): string => {
  * @returns {string} The denomination with chainname of the given asset.
  */
 export const getDenomWithChain = (asset: Asset): string => {
-  return `${THORChain}.${asset.symbol.toUpperCase()}`
+  return `${Chain.THORChain}.${asset.symbol.toUpperCase()}`
 }
 
 /**
@@ -39,7 +39,7 @@ export const getDenomWithChain = (asset: Asset): string => {
  */
 export const getAsset = (denom: string): Asset | null => {
   if (denom === getDenom(AssetRune)) return AssetRune
-  return assetFromString(`${THORChain}.${denom.toUpperCase()}`)
+  return assetFromString(`${Chain.THORChain}.${denom.toUpperCase()}`)
 }
 
 /**

@@ -23,6 +23,7 @@ import {
 } from './asset'
 import { bn } from './index'
 import { Asset, Denomination } from './types'
+import { Chain } from './chain'
 
 describe('asset', () => {
   describe('isBigNumberValue', () => {
@@ -274,26 +275,26 @@ describe('asset', () => {
     it('returns RUNE asset with all values', () => {
       const result = assetFromString('BNB.RUNE-B1A')
       expect(result).toEqual({
-        chain: 'BNB',
+        chain: 'BNB' as Chain,
         symbol: 'RUNE-B1A',
         ticker: 'RUNE',
       })
     })
     it('returns RUNE with all values, even if chain and symbol are provided only', () => {
       const result = assetFromString('BNB.RUNE')
-      expect(result).toEqual({ chain: 'BNB', symbol: 'RUNE', ticker: 'RUNE' })
+      expect(result).toEqual({ chain: 'BNB' as Chain, symbol: 'RUNE', ticker: 'RUNE' })
     })
     it('returns a BTCB asset with all values, even if chain and symbol are provided only', () => {
       const result = assetFromString('BNB.BTCB-123')
-      expect(result).toEqual({ chain: 'BNB', symbol: 'BTCB-123', ticker: 'BTCB' })
+      expect(result).toEqual({ chain: 'BNB' as Chain, symbol: 'BTCB-123', ticker: 'BTCB' })
     })
     it('returns a WBTC asset with all values, even if chain and symbol are provided only', () => {
       const result = assetFromString('ETH.WBTC')
-      expect(result).toEqual({ chain: 'ETH', symbol: 'WBTC', ticker: 'WBTC' })
+      expect(result).toEqual({ chain: 'ETH' as Chain, symbol: 'WBTC', ticker: 'WBTC' })
     })
     it('returns a ETH asset with all values, even if chain and symbol are provided only', () => {
       const result = assetFromString('ETH.ETH')
-      expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH' })
+      expect(result).toEqual({ chain: 'ETH' as Chain, symbol: 'ETH', ticker: 'ETH' })
     })
     it('returns null if the string includes a value for a chain only', () => {
       const result = assetFromString('BNB')
@@ -323,22 +324,22 @@ describe('asset', () => {
 
   describe('assetToString', () => {
     it('returns a string for RUNE asset', () => {
-      const asset: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: 'RUNE' }
+      const asset: Asset = { chain: 'BNB' as Chain, symbol: 'RUNE-B1A', ticker: 'RUNE' }
       expect(assetToString(asset)).toEqual('BNB.RUNE-B1A')
     })
     it('returns a string for ETH asset', () => {
-      const asset: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH' }
+      const asset: Asset = { chain: 'ETH' as Chain, symbol: 'ETH', ticker: 'ETH' }
       expect(assetToString(asset)).toEqual('ETH.ETH')
     })
   })
 
   describe('isValidAsset', () => {
     it('returns false invalid asset data', () => {
-      expect(isValidAsset({ chain: 'BNB', symbol: '', ticker: 'RUNE' })).toBeFalsy()
-      expect(isValidAsset({ chain: 'BNB', symbol: 'RUNE-B1A', ticker: '' })).toBeFalsy()
+      expect(isValidAsset({ chain: 'BNB' as Chain, symbol: '', ticker: 'RUNE' })).toBeFalsy()
+      expect(isValidAsset({ chain: 'BNB' as Chain, symbol: 'RUNE-B1A', ticker: '' })).toBeFalsy()
     })
     it('returns true for valid `Asset` data', () => {
-      const asset: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: 'RUNE' }
+      const asset: Asset = { chain: 'BNB' as Chain, symbol: 'RUNE-B1A', ticker: 'RUNE' }
       expect(isValidAsset(asset)).toBeTruthy()
     })
   })
@@ -362,7 +363,7 @@ describe('asset', () => {
     })
 
     it('returns currency symbol for USD', () => {
-      expect(currencySymbolByAsset({ chain: 'BNB', symbol: 'BUSD-BAF', ticker: 'BUSD' })).toEqual('$')
+      expect(currencySymbolByAsset({ chain: 'BNB' as Chain, symbol: 'BUSD-BAF', ticker: 'BUSD' })).toEqual('$')
     })
     it('returns ticker as currency symbol for other assets', () => {
       expect(currencySymbolByAsset(AssetBNB)).toEqual('BNB')

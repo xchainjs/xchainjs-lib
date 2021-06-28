@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js'
 
-import { chains } from '../chain.const'
+import { Chain } from '../chain'
 
 export enum Denomination {
   /**
@@ -32,9 +32,6 @@ export type BaseAmount = Amount<Denomination.BASE>
 export type AssetAmount = Amount<Denomination.ASSET>
 
 export type Amounts = AssetAmount | BaseAmount
-
-// Chain type to includes types of all possible chains
-export type Chain = typeof chains[number]
 
 export type Asset = {
   chain: Chain

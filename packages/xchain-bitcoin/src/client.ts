@@ -16,7 +16,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { AssetBTC, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetBTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import { BTC_DECIMAL } from './const'
@@ -60,7 +60,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
     },
     phrase = '',
   }: BitcoinClientParams) {
-    super('BTC', { network, rootDerivationPaths, phrase })
+    super(Chain.Bitcoin, { network, rootDerivationPaths, phrase })
     this.setSochainUrl(sochainUrl)
     this.setBlockstreamUrl(blockstreamUrl)
   }

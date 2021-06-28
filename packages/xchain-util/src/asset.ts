@@ -1,8 +1,7 @@
 import BigNumber from 'bignumber.js'
 
 import { fixedBN, formatBN } from './bn'
-import { isChain } from './chain'
-import { BCHChain, BNBChain, BTCChain, ETHChain, LTCChain, THORChain } from './chain.const'
+import { Chain, isChain } from './chain'
 import { trimZeros as trimZerosHelper } from './string'
 import { Amounts, Asset, AssetAmount, BaseAmount, Denomination } from './types'
 
@@ -169,7 +168,7 @@ export const formatBaseAmount = (amount: BaseAmount) => formatBN(amount.amount()
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetBNB: Asset = { chain: BNBChain, symbol: 'BNB', ticker: 'BNB' }
+export const AssetBNB: Asset = { chain: Chain.Binance, symbol: 'BNB', ticker: 'BNB' }
 
 /**
  * Base "chain" asset on bitcoin main net.
@@ -177,7 +176,7 @@ export const AssetBNB: Asset = { chain: BNBChain, symbol: 'BNB', ticker: 'BNB' }
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetBTC: Asset = { chain: BTCChain, symbol: 'BTC', ticker: 'BTC' }
+export const AssetBTC: Asset = { chain: Chain.Bitcoin, symbol: 'BTC', ticker: 'BTC' }
 
 /**
  * Base "chain" asset on bitcoin cash main net.
@@ -185,7 +184,7 @@ export const AssetBTC: Asset = { chain: BTCChain, symbol: 'BTC', ticker: 'BTC' }
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetBCH: Asset = { chain: BCHChain, symbol: 'BCH', ticker: 'BCH' }
+export const AssetBCH: Asset = { chain: Chain.BitcoinCash, symbol: 'BCH', ticker: 'BCH' }
 
 /**
  * Base "chain" asset on litecoin main net.
@@ -193,7 +192,7 @@ export const AssetBCH: Asset = { chain: BCHChain, symbol: 'BCH', ticker: 'BCH' }
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetLTC: Asset = { chain: LTCChain, symbol: 'LTC', ticker: 'LTC' }
+export const AssetLTC: Asset = { chain: Chain.Litecoin, symbol: 'LTC', ticker: 'LTC' }
 
 /**
  * Base "chain" asset on ethereum main net.
@@ -201,7 +200,7 @@ export const AssetLTC: Asset = { chain: LTCChain, symbol: 'LTC', ticker: 'LTC' }
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetETH: Asset = { chain: ETHChain, symbol: 'ETH', ticker: 'ETH' }
+export const AssetETH: Asset = { chain: Chain.Ethereum, symbol: 'ETH', ticker: 'ETH' }
 
 export const RUNE_TICKER = 'RUNE'
 
@@ -211,7 +210,7 @@ export const RUNE_TICKER = 'RUNE'
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetRune67C: Asset = { chain: BNBChain, symbol: 'RUNE-67C', ticker: RUNE_TICKER }
+export const AssetRune67C: Asset = { chain: Chain.Binance, symbol: 'RUNE-67C', ticker: RUNE_TICKER }
 
 /**
  * Base "chain" asset for RUNE-B1A on Binance main net.
@@ -219,7 +218,7 @@ export const AssetRune67C: Asset = { chain: BNBChain, symbol: 'RUNE-67C', ticker
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetRuneB1A: Asset = { chain: BNBChain, symbol: 'RUNE-B1A', ticker: RUNE_TICKER }
+export const AssetRuneB1A: Asset = { chain: Chain.Binance, symbol: 'RUNE-B1A', ticker: RUNE_TICKER }
 
 /**
  * Base "chain" asset on thorchain main net.
@@ -227,7 +226,7 @@ export const AssetRuneB1A: Asset = { chain: BNBChain, symbol: 'RUNE-B1A', ticker
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetRuneNative: Asset = { chain: THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER }
+export const AssetRuneNative: Asset = { chain: Chain.THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER }
 
 /**
  * Base "chain" asset for RUNE on ethereum main net.
@@ -236,7 +235,7 @@ export const AssetRuneNative: Asset = { chain: THORChain, symbol: RUNE_TICKER, t
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
 export const AssetRuneERC20: Asset = {
-  chain: ETHChain,
+  chain: Chain.Ethereum,
   symbol: `${RUNE_TICKER}-0x3155ba85d5f96b2d030a4966af206230e46849cb`,
   ticker: RUNE_TICKER,
 }
@@ -248,7 +247,7 @@ export const AssetRuneERC20: Asset = {
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
 export const AssetRuneERC20Testnet: Asset = {
-  chain: ETHChain,
+  chain: Chain.Ethereum,
   symbol: `${RUNE_TICKER}-0xd601c6A3a36721320573885A8d8420746dA3d7A0`,
   ticker: RUNE_TICKER,
 }

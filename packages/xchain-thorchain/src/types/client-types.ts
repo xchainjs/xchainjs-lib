@@ -1,5 +1,5 @@
 import { Network, Tx } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
 
 export type NodeUrl = {
   node: string
@@ -31,7 +31,6 @@ export type DepositParam = {
   memo: string
 }
 
-export const THORChain = 'THOR'
-export const AssetRune: Asset = { chain: THORChain, symbol: 'RUNE', ticker: 'RUNE' }
+export const AssetRune: Asset = { chain: Chain.THORChain, symbol: 'RUNE', ticker: 'RUNE' }
 
 export type TxData = Pick<Tx, 'from' | 'to' | 'type'>

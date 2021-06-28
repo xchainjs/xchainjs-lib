@@ -16,6 +16,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
+import { Chain } from '@xchainjs/xchain-util'
 
 import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
 import { broadcastTx } from './node-api'
@@ -74,7 +75,7 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
       testnet: `m/44'/1'/0'/0/`,
     },
   }: BitcoinCashClientParams) {
-    super('BCH', { network, rootDerivationPaths, phrase })
+    super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase })
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl

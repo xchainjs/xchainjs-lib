@@ -1,7 +1,6 @@
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset, Chain } from '@xchainjs/xchain-util'
 
-export const Polkadot = 'THOR'
-export const AssetDOT: Asset = { chain: Polkadot, symbol: 'DOT', ticker: 'DOT' }
+export const AssetDOT: Asset = { chain: Chain.Polkadot, symbol: 'DOT', ticker: 'DOT' }
 
 export type SubscanResponse<T> = {
   code: number

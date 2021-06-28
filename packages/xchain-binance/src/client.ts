@@ -18,8 +18,8 @@ import {
 import {
   Asset,
   AssetBNB,
-  BNBChain,
   BaseAmount,
+  Chain,
   assetAmount,
   assetFromString,
   assetToBase,
@@ -86,7 +86,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
   constructor(params: XChainClientParams) {
-    super('BNB', params)
+    super(Chain.Binance, params)
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(this.getNetwork())
   }
@@ -202,7 +202,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     return balances
       .map((balance) => {
         return {
-          asset: assetFromString(`${BNBChain}.${balance.symbol}`) || AssetBNB,
+          asset: assetFromString(`${Chain.Binance}.${balance.symbol}`) || AssetBNB,
           amount: assetToBase(assetAmount(balance.free, 8)),
         }
       })
