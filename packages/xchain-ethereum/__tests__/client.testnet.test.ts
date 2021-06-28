@@ -1,5 +1,5 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
-import { AssetETH, ETHChain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { AssetETH, Chain, ETHChain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, providers } from 'ethers'
 import nock from 'nock'
 
@@ -383,7 +383,7 @@ describe('Client Test', () => {
     )
     mock_thornode_inbound_addresses_success(thornodeApiUrl, [
       {
-        chain: 'ETH',
+        chain: 'ETH' as Chain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: '0x8d1133a8cf23112fdb21f1efca340d727a98196e',
         router: '0xe0a63488e677151844e70623533c22007dc57c9e',
@@ -391,7 +391,7 @@ describe('Client Test', () => {
         gas_rate: '30',
       },
       {
-        chain: 'LTC',
+        chain: 'LTC' as Chain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: 'tltc1q3x76wl4gmwu4yzx682r30ej0a8e2tttaw6pv7u',
         halted: false,
@@ -611,7 +611,7 @@ describe('Client Test', () => {
     )
     mock_thornode_inbound_addresses_success(thornodeApiUrl, [
       {
-        chain: 'ETH',
+        chain: 'ETH' as Chain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: '0x8d1133a8cf23112fdb21f1efca340d727a98196e',
         router: '0xe0a63488e677151844e70623533c22007dc57c9e',
@@ -619,7 +619,7 @@ describe('Client Test', () => {
         gas_rate: '51',
       },
       {
-        chain: 'LTC',
+        chain: 'LTC' as Chain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: 'tltc1q3x76wl4gmwu4yzx682r30ej0a8e2tttaw6pv7u',
         halted: false,

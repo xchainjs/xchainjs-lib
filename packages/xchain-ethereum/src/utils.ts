@@ -3,7 +3,7 @@ import {
   Asset,
   AssetETH,
   BaseAmount,
-  ETHChain,
+  Chain,
   assetAmount,
   assetFromString,
   assetToBase,
@@ -125,7 +125,7 @@ export const getTxFromTokenTransaction = (tx: TokenTransactionInfo): Tx | null =
   const symbol = tx.tokenSymbol
   const address = tx.contractAddress
   if (validateSymbol(symbol) && validateAddress(address)) {
-    const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${address}`)
+    const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${address}`)
     if (tokenAsset) {
       return {
         asset: tokenAsset,
@@ -188,7 +188,7 @@ export const getTxFromEthplorerTokenOperation = (operation: TransactionOperation
   const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
   const { symbol, address } = operation.tokenInfo
   if (validateSymbol(symbol) && validateAddress(address)) {
-    const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${address}`)
+    const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${address}`)
     if (tokenAsset) {
       return {
         asset: tokenAsset,
@@ -359,7 +359,7 @@ export const getTokenBalances = (tokenBalances: TokenBalance[]): Balance[] => {
     const { symbol, address: tokenAddress } = cur.tokenInfo
     if (validateSymbol(symbol) && validateAddress(tokenAddress) && cur?.tokenInfo?.decimals !== undefined) {
       const decimals = parseInt(cur.tokenInfo.decimals, 10)
-      const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${ethers.utils.getAddress(tokenAddress)}`)
+      const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${ethers.utils.getAddress(tokenAddress)}`)
       if (tokenAsset) {
         return [
           ...acc,

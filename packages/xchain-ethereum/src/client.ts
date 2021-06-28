@@ -16,7 +16,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, AssetETH, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 import { BigNumber, BigNumberish, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
 
@@ -106,7 +106,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     etherscanApiKey,
     infuraCreds,
   }: EthereumClientParams) {
-    super('ETH', { network, rootDerivationPaths })
+    super(Chain.Ethereum, { network, rootDerivationPaths })
     this.ethNetwork = xchainNetworkToEths(network)
     this.rootDerivationPaths = rootDerivationPaths
     this.infuraCreds = infuraCreds

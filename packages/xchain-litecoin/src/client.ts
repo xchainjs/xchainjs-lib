@@ -16,7 +16,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { AssetLTC, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetLTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Litecoin from 'bitcoinjs-lib'
 
 import * as sochain from './sochain-api'
@@ -68,7 +68,7 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
       testnet: `m/84'/1'/0'/0/`,
     },
   }: LitecoinClientParams) {
-    super('LTC', { network, rootDerivationPaths, phrase })
+    super(Chain.Litecoin, { network, rootDerivationPaths, phrase })
     this.nodeUrl = !!nodeUrl
       ? nodeUrl
       : network === 'mainnet'
