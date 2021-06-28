@@ -16,7 +16,6 @@ import {
   ApproveParams,
 } from './types'
 import {
-  RootDerivationPaths,
   Address,
   Network as XChainNetwork,
   Tx,
@@ -31,14 +30,13 @@ import {
   Network,
   FeeOptionKey,
   FeesParams as XFeesParams,
+  BaseXChainClient,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
-import * as Crypto from '@xchainjs/xchain-crypto'
 import * as ethplorerAPI from './ethplorer-api'
 import * as etherscanAPI from './etherscan-api'
 import {
   ETH_DECIMAL,
-  ethNetworkToXchains,
   xchainNetworkToEths,
   getTokenAddress,
   validateAddress,
@@ -95,15 +93,14 @@ export type EthereumClientParams = XChainClientParams & {
 /**
  * Custom Ethereum client
  */
-export default class Client implements XChainClient, EthereumClient {
-  private network: EthNetwork
+export default class Client extends BaseXChainClient implements XChainClient, EthereumClient {
+  private ethNetwork: EthNetwork
   private hdNode!: HDNode
   private etherscanApiKey?: string
   private explorerUrl: ExplorerUrl
   private infuraCreds: InfuraCreds | undefined
   private ethplorerUrl: string
   private ethplorerApiKey: string
-  private rootDerivationPaths: RootDerivationPaths
   private providers: Map<XChainNetwork, Provider> = new Map<XChainNetwork, Provider>()
 
   /**
@@ -123,9 +120,9 @@ export default class Client implements XChainClient, EthereumClient {
     etherscanApiKey,
     infuraCreds,
   }: EthereumClientParams) {
+    super('ETH', { network, rootDerivationPaths, phrase })
+    this.ethNetwork = xchainNetworkToEths(network)
     this.rootDerivationPaths = rootDerivationPaths
-    this.network = xchainNetworkToEths(network)
-    this.setPhrase(phrase)
     this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey
     this.ethplorerUrl = ethplorerUrl
@@ -140,6 +137,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {void}
    */
   purgeClient = (): void => {
+    super.purgeClient()
     this.hdNode = HDNode.fromMnemonic('')
   }
 
@@ -151,15 +149,6 @@ export default class Client implements XChainClient, EthereumClient {
    */
   setExplorerURL = (url: ExplorerUrl): void => {
     this.explorerUrl = url
-  }
-
-  /**
-   * Get the current network.
-   *
-   * @returns {Network} The current network. (`mainnet` or `testnet`)
-   */
-  getNetwork = (): XChainNetwork => {
-    return ethNetworkToXchains(this.network)
   }
 
   /**
@@ -212,8 +201,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {Provider} The current etherjs Provider interface.
    */
   getProvider = (): Provider => {
-    const net = ethNetworkToXchains(this.network)
-    return this.providers.get(net) || getDefaultProvider(net)
+    return this.providers.get(this.network) || getDefaultProvider(this.network)
   }
 
   /**
@@ -222,7 +210,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {EtherscanProvider} The current etherjs EtherscanProvider interface.
    */
   getEtherscanProvider = (): EtherscanProvider => {
-    return new EtherscanProvider(this.network, this.etherscanApiKey)
+    return new EtherscanProvider(this.ethNetwork, this.etherscanApiKey)
   }
 
   /**
@@ -286,21 +274,10 @@ export default class Client implements XChainClient, EthereumClient {
    * Thrown if network has not been set before.
    */
   setNetwork = (network: XChainNetwork): void => {
-    if (!network) {
-      throw new Error('Network must be provided')
-    } else {
-      this.network = xchainNetworkToEths(network)
-    }
+    super.setNetwork(network)
+    this.ethNetwork = xchainNetworkToEths(network)
   }
-  /**
-   * Get getFullDerivationPath
-   *
-   * @param {number} index the HD wallet index
-   * @returns {string} The derivation path based on the network.
-   */
-  getFullDerivationPath(index: number): string {
-    return this.rootDerivationPaths[this.getNetwork()] + `${index}`
-  }
+
   /**
    * Set/update a new phrase (Eg. If user wants to change wallet)
    *
@@ -311,9 +288,7 @@ export default class Client implements XChainClient, EthereumClient {
    * Thrown if the given phase is invalid.
    */
   setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (!Crypto.validatePhrase(phrase)) {
-      throw new Error('Invalid phrase')
-    }
+    super.setPhrase(phrase, walletIndex)
     this.hdNode = HDNode.fromMnemonic(phrase)
     return this.getAddress(walletIndex)
   }
