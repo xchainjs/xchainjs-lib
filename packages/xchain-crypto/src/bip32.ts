@@ -281,10 +281,10 @@ class BIP32 implements BIP32Interface {
     for (const indexStr of splitPath) {
       if (indexStr.slice(-1) === `'`) {
         index = parseInt(indexStr.slice(0, -1), 10)
-        bip = await this.deriveHardened(index)
+        bip = await bip.deriveHardened(index)
       } else {
         index = parseInt(indexStr, 10)
-        bip = await this.derive(index)
+        bip = await bip.derive(index)
       }
     }
 
@@ -420,6 +420,7 @@ export async function fromSeed(seed: Buffer, network?: Network): Promise<BIP32In
   network = network || BITCOIN
 
   const I = await hmacSHA512(Buffer.from('Bitcoin seed', 'utf8'), seed)
+
   const IL = I.slice(0, 32)
   const IR = I.slice(32)
 
