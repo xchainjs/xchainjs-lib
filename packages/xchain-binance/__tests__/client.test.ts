@@ -1,7 +1,7 @@
 import nock from 'nock'
 
 import { Client as BinanceClient } from '../src/client'
-import { Asset, AssetBNB, baseAmount, BNBChain } from '@xchainjs/xchain-util'
+import { Asset, AssetBNB, assetToString, baseAmount, BNBChain } from '@xchainjs/xchain-util'
 import { Account, Fees, TransactionResult, TxPage } from '../src/types/binance'
 
 const mockGetAccount = (url: string, address: string, result: Account, ntimes = 1, status = 200) => {
@@ -155,7 +155,7 @@ describe('BinanceClient Test', () => {
     let amount = balances[0].amount
 
     expect(amount.amount().isEqualTo(0)).toBeTruthy()
-    expect(balances[0].asset.ticker === 'BNB').toBeTruthy()
+    expect(assetToString(balances[0].asset)).toEqual(assetToString(AssetBNB))
 
     mockGetAccount(
       mainnetClientURL,
@@ -177,7 +177,7 @@ describe('BinanceClient Test', () => {
     amount = balances[0].amount
 
     expect(amount.amount().isEqualTo(0)).toBeTruthy()
-    expect(balances[0].asset.ticker === 'BNB').toBeTruthy()
+    expect(assetToString(balances[0].asset)).toEqual(assetToString(AssetBNB))
   })
 
   it('has balances', async () => {
