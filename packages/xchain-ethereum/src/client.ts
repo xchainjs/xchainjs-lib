@@ -31,6 +31,7 @@ import {
   FeeOptionKey,
   FeesParams as XFeesParams,
   BaseXChainClient,
+  FeeRates,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
 import * as ethplorerAPI from './ethplorer-api'
@@ -120,7 +121,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     etherscanApiKey,
     infuraCreds,
   }: EthereumClientParams) {
-    super('ETH', { network, rootDerivationPaths, phrase })
+    super('ETH', { network, rootDerivationPaths })
     this.ethNetwork = xchainNetworkToEths(network)
     this.rootDerivationPaths = rootDerivationPaths
     this.infuraCreds = infuraCreds
@@ -129,6 +130,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     this.ethplorerApiKey = ethplorerApiKey
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
     this.setupProviders()
+    this.setPhrase(phrase)
   }
 
   /**
@@ -159,7 +161,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @throws {"Phrase must be provided"}
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): Address => {
+  getAddress(index = 0): Address {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
@@ -287,10 +289,9 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @throws {"Invalid phrase"}
    * Thrown if the given phase is invalid.
    */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    super.setPhrase(phrase, walletIndex)
+  setPhrase(phrase: string, walletIndex = 0): Address {
     this.hdNode = HDNode.fromMnemonic(phrase)
-    return this.getAddress(walletIndex)
+    return super.setPhrase(phrase, walletIndex)
   }
 
   /**
@@ -730,7 +731,6 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       return Promise.reject(error)
     }
   }
-
   /**
    * Estimate gas price.
    * @see https://etherscan.io/apis#gastracker
@@ -740,6 +740,31 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @throws {"Failed to estimate gas price"} Thrown if failed to estimate gas price.
    */
   estimateGasPrices = async (): Promise<GasPrices> => {
+    let rates: FeeRates | undefined = undefined
+
+    try {
+      rates = await this.getFeeRatesFromThorchain()
+      return {
+        average: baseAmount(rates.average, ETH_DECIMAL),
+        fast: baseAmount(rates.fast, ETH_DECIMAL),
+        fastest: baseAmount(rates.fastest, ETH_DECIMAL),
+      }
+    } catch (error) {
+      console.log(error)
+      console.warn(`Error pulling rates from thorchain, will try alternate`)
+    }
+    //should only get here if thor fails
+    return await this.estimateGasPricesFromEtherscan()
+  }
+  /**
+   * Estimate gas price.
+   * @see https://etherscan.io/apis#gastracker
+   *
+   * @returns {GasPrices} The gas prices (average, fast, fastest) in `Wei` (`BaseAmount`)
+   *
+   * @throws {"Failed to estimate gas price"} Thrown if failed to estimate gas price.
+   */
+  estimateGasPricesFromEtherscan = async (): Promise<GasPrices> => {
     try {
       const etherscan = this.getEtherscanProvider()
       const response: GasOracleResponse = await etherscanAPI.getGasOracle(etherscan.baseUrl, etherscan.apiKey)
