@@ -1,6 +1,6 @@
 # v.0.11.7 (2021-06-25)
 
-- accepting legacy bch addeses
+- accepting legacy BCH addresses
 
 # v.0.11.6 (2021-06-19)
 
