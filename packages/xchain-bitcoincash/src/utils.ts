@@ -2,7 +2,7 @@ const bitcash = require('@psf/bitcoincashjs-lib')
 
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
-import { Address, Balance, Fees, Network, Tx, TxFrom, TxParams, TxTo } from '@xchainjs/xchain-client'
+import { Address, Balance, Fees, Network as Network, Tx, TxFrom, TxParams, TxTo } from '@xchainjs/xchain-client'
 import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util/lib'
 import {
   FeeRate,
@@ -184,6 +184,15 @@ export const parseTransaction = (tx: Transaction): Tx => {
 }
 
 /**
+ * Converts `Network` to `bchaddr.Network`
+ *
+ * @param {Network} network
+ * @returns {string} bchaddr network
+ */
+export const toBCHAddressNetwork = (network: Network): string =>
+  network === 'testnet' ? bchaddr.Network.Testnet : bchaddr.Network.Mainnet
+
+/**
  * Validate the BCH address.
  *
  * @param {string} address
@@ -192,7 +201,7 @@ export const parseTransaction = (tx: Transaction): Tx => {
  */
 export const validateAddress = (address: string, network: Network): boolean => {
   const toAddress = toCashAddress(address)
-  return bchaddr.isValidAddress(toAddress) && bchaddr.detectAddressNetwork(toAddress) === network
+  return bchaddr.isValidAddress(toAddress) && bchaddr.detectAddressNetwork(toAddress) === toBCHAddressNetwork(network)
 }
 /**
  * Scan UTXOs from sochain.
