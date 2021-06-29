@@ -48,15 +48,19 @@ const client = new Client({ network: 'testnet', phrase: 'my secret phrase' })
 
 // get address
 const address = client.getAddress()
-console.log('address:', client.getAddress())
+console.log('address:', client.getAddress()) // address: tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg
 
 // get balances
 const balances = await client.getBalance(address)
-console.log('balances:', balances[0].amount.amount().toString())
+console.log('balances:', balances[0].amount.amount().toString()) // balance: 6968080395099
 
 // get transactions
-const txs = await client.getTransactions({ address })mark
-console.log('txs total:', txs.total)
+const txs = await client.getTransactions({ address })
+console.log('txs total:', txs.total) // txs total: 100
+
+// get transaction details
+const tx = await client.getTransactionData('any-tx-hash', address)
+console.log('tx asset:', tx.asset) // tx asset: { chain: 'THOR', symbol: 'RUNE', ticker: 'RUNE' }
 ```
 
 For more examples check out tests in `./__tests__/client.test.ts`
