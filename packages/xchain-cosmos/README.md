@@ -21,6 +21,8 @@ yarn install
 yarn test
 ```
 
+Important note: Make sure to install same version of `cosmos-client` as `xchain-cosmos` is using (currently `cosmos-client@0.39.2` ). In other case things might break.
+
 ## Service Providers
 
 This package uses the following service providers:
