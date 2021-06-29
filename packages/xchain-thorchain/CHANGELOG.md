@@ -4,6 +4,10 @@
 
 - Stick with `cosmos-client@0.39.2`
 
+### Add
+
+- Add examples to README
+
 # v.0.17.0 (2021-06-21)
 
 ### Fix
