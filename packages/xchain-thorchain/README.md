@@ -14,6 +14,8 @@ Following peer dependencies have to be installed into your project. These are no
 yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios cosmos-client
 ```
 
+Important note: Make sure to install same version of `cosmos-client` as `xchain-thorchain` is using (currently `cosmos-client@0.39.2` ). In other case things might break.
+
 ## Thorchain Client Testing
 
 ```
