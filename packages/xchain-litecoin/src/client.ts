@@ -2,7 +2,6 @@ import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoi
 import * as Utils from './utils'
 import * as sochain from './sochain-api'
 import {
-  RootDerivationPaths,
   TxHistoryParams,
   TxsPage,
   Address,
@@ -14,11 +13,14 @@ import {
   Network,
   Fees,
   XChainClientParams,
+  BaseXChainClient,
+  FeesWithRates,
+  FeeRates,
+  FeeRate,
 } from '@xchainjs/xchain-client'
-import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
+import { getSeed } from '@xchainjs/xchain-crypto'
 import { AssetLTC, assetToBase, assetAmount } from '@xchainjs/xchain-util'
 import { NodeAuth } from './types'
-import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 import { TxIO } from './types/sochain-api-types'
 
 /**
@@ -39,13 +41,10 @@ export type LitecoinClientParams = XChainClientParams & {
 /**
  * Custom Litecoin client
  */
-class Client implements LitecoinClient, XChainClient {
-  private net: Network
-  private phrase = ''
+class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
   private sochainUrl = ''
   private nodeUrl = ''
   private nodeAuth?: NodeAuth
-  private rootDerivationPaths: RootDerivationPaths
 
   /**
    * Constructor
@@ -68,8 +67,7 @@ class Client implements LitecoinClient, XChainClient {
       testnet: `m/84'/1'/0'/0/`,
     },
   }: LitecoinClientParams) {
-    this.net = network
-    this.rootDerivationPaths = rootDerivationPaths
+    super('LTC', { network, rootDerivationPaths, phrase })
     this.nodeUrl = !!nodeUrl
       ? nodeUrl
       : network === 'mainnet'
@@ -82,7 +80,6 @@ class Client implements LitecoinClient, XChainClient {
       nodeAuth === null ? undefined : nodeAuth
 
     this.setSochainUrl(sochainUrl)
-    phrase && this.setPhrase(phrase)
   }
 
   /**
@@ -96,75 +93,12 @@ class Client implements LitecoinClient, XChainClient {
   }
 
   /**
-   * Set/update a new phrase.
-   *
-   * @param {string} phrase A new phrase.
-   * @returns {Address} The address from the given phrase
-   *
-   * @throws {"Invalid phrase"}
-   * Thrown if the given phase is invalid.
-   */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (validatePhrase(phrase)) {
-      this.phrase = phrase
-      return this.getAddress(walletIndex)
-    } else {
-      throw new Error('Invalid phrase')
-    }
-  }
-
-  /**
-   * Purge client.
-   *
-   * @returns {void}
-   */
-  purgeClient = (): void => {
-    this.phrase = ''
-  }
-
-  /**
-   * Set/update the current network.
-   *
-   * @param {Network} network `mainnet` or `testnet`.
-   * @returns {void}
-   *
-   * @throws {"Network must be provided"}
-   * Thrown if network has not been set before.
-   */
-  setNetwork = (net: Network): void => {
-    if (!net) {
-      throw new Error('Network must be provided')
-    } else {
-      this.net = net
-    }
-  }
-
-  /**
-   * Get the current network.
-   *
-   * @returns {Network} The current network. (`mainnet` or `testnet`)
-   */
-  getNetwork = (): Network => {
-    return this.net
-  }
-
-  /**
-   * Get getFullDerivationPath
-   *
-   * @param {number} index the HD wallet index
-   * @returns {string} The bitcoin derivation path based on the network.
-   */
-  getFullDerivationPath(index: number): string {
-    return this.rootDerivationPaths[this.net] + `${index}`
-  }
-
-  /**
    * Get the explorer url.
    *
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl = (): string => {
-    return Utils.isTestnet(this.net) ? 'https://tltc.bitaps.com' : 'https://ltc.bitaps.com'
+    return Utils.isTestnet(this.network) ? 'https://tltc.bitaps.com' : 'https://ltc.bitaps.com'
   }
 
   /**
@@ -203,7 +137,7 @@ class Client implements LitecoinClient, XChainClient {
       throw new Error('index must be greater than zero')
     }
     if (this.phrase) {
-      const ltcNetwork = Utils.ltcNetwork(this.net)
+      const ltcNetwork = Utils.ltcNetwork(this.network)
       const ltcKeys = this.getLtcKeys(this.phrase, index)
 
       const { address } = Litecoin.payments.p2wpkh({
@@ -231,7 +165,7 @@ class Client implements LitecoinClient, XChainClient {
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating LTC keys from the given phrase
    * */
   private getLtcKeys = (phrase: string, index = 0): Litecoin.ECPairInterface => {
-    const ltcNetwork = Utils.ltcNetwork(this.net)
+    const ltcNetwork = Utils.ltcNetwork(this.network)
 
     const seed = getSeed(phrase)
     const master = Litecoin.bip32.fromSeed(seed, ltcNetwork).derivePath(this.getFullDerivationPath(index))
@@ -249,7 +183,7 @@ class Client implements LitecoinClient, XChainClient {
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  validateAddress = (address: string): boolean => Utils.validateAddress(address, this.net)
+  validateAddress = (address: string): boolean => Utils.validateAddress(address, this.network)
 
   /**
    * Get the LTC balance of a given address.
@@ -261,7 +195,7 @@ class Client implements LitecoinClient, XChainClient {
     try {
       return Utils.getBalance({
         sochainUrl: this.sochainUrl,
-        network: this.net,
+        network: this.network,
         address,
       })
     } catch (e) {
@@ -283,7 +217,7 @@ class Client implements LitecoinClient, XChainClient {
     try {
       const response = await sochain.getAddress({
         sochainUrl: this.sochainUrl,
-        network: this.net,
+        network: this.network,
         address: `${params?.address}`,
       })
       const total = response.txs.length
@@ -293,7 +227,7 @@ class Client implements LitecoinClient, XChainClient {
       for (const txItem of txs) {
         const rawTx = await sochain.getTx({
           sochainUrl: this.sochainUrl,
-          network: this.net,
+          network: this.network,
           hash: txItem.txid,
         })
         const tx: Tx = {
@@ -333,7 +267,7 @@ class Client implements LitecoinClient, XChainClient {
     try {
       const rawTx = await sochain.getTx({
         sochainUrl: this.sochainUrl,
-        network: this.net,
+        network: this.network,
         hash: txId,
       })
       return {
@@ -351,7 +285,6 @@ class Client implements LitecoinClient, XChainClient {
       return Promise.reject(error)
     }
   }
-
   /**
    * Get the rates and fees.
    *
@@ -359,12 +292,14 @@ class Client implements LitecoinClient, XChainClient {
    * @returns {FeesWithRates} The fees and rates
    */
   getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
-    const nextBlockFeeRate = await sochain.getSuggestedTxFee()
-    const rates: FeeRates = {
-      fastest: nextBlockFeeRate * 5,
-      fast: nextBlockFeeRate * 1,
-      average: nextBlockFeeRate * 0.5,
+    let rates: FeeRates | undefined = undefined
+    try {
+      rates = await this.getFeeRatesFromThorchain()
+    } catch (error) {
+      console.log(error)
+      console.warn(`Error pulling rates from thorchain, will try alternate`)
     }
+    rates = await this.getFeeRatesFromSoChain()
 
     const fees: Fees = {
       type: 'byte',
@@ -374,6 +309,16 @@ class Client implements LitecoinClient, XChainClient {
     }
 
     return { fees, rates }
+  }
+  private getFeeRatesFromSoChain = async (): Promise<FeeRates> => {
+    const nextBlockFeeRate = await sochain.getSuggestedTxFee()
+    const rates: FeeRates = {
+      fastest: nextBlockFeeRate * 5,
+      fast: nextBlockFeeRate * 1,
+      average: nextBlockFeeRate * 0.5,
+    }
+
+    return rates
   }
 
   /**
@@ -436,7 +381,7 @@ class Client implements LitecoinClient, XChainClient {
         feeRate,
         sender: this.getAddress(fromAddressIndex),
         sochainUrl: this.sochainUrl,
-        network: this.net,
+        network: this.network,
       })
       const ltcKeys = this.getLtcKeys(this.phrase, fromAddressIndex)
       psbt.signAllInputs(ltcKeys) // Sign all inputs
@@ -444,7 +389,7 @@ class Client implements LitecoinClient, XChainClient {
       const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
       return await Utils.broadcastTx({
-        network: this.net,
+        network: this.network,
         txHex,
         nodeUrl: this.nodeUrl,
         auth: this.nodeAuth,

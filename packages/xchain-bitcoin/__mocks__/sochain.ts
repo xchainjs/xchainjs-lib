@@ -59,5 +59,11 @@ export default {
     mock.onPost(/\/tx/).reply(function () {
       return [200, 'TEST_OK']
     })
+    //
+    //Mock horchain/inbound_addresses
+    mock.onGet(/\/thorchain\/inbound_addresses/).reply(function () {
+      const resp = require(`./response/thornode/inbound_addresses.json`)
+      return [200, resp]
+    })
   },
 }

@@ -66,6 +66,8 @@ export type FeesParams = { readonly empty?: '' }
 
 export type FeeOptionKey = 'average' | 'fast' | 'fastest'
 export type FeeOption = Record<FeeOptionKey, BaseAmount>
+export type FeeRate = number
+export type FeeRates = Record<FeeOptionKey, FeeRate>
 
 export type FeeType =
   | 'byte' // fee will be measured as `BaseAmount` per `byte`
@@ -74,6 +76,7 @@ export type FeeType =
 export type Fees = FeeOption & {
   type: FeeType
 }
+export type FeesWithRates = { rates: FeeRates; fees: Fees }
 
 export type RootDerivationPaths = {
   mainnet: string

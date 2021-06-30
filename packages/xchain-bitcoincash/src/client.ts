@@ -2,10 +2,8 @@ const bitcash = require('@psf/bitcoincashjs-lib')
 
 import * as utils from './utils'
 import {
-  RootDerivationPaths,
   Address,
   Balance,
-  Network,
   Fees,
   Tx,
   TxParams,
@@ -14,8 +12,9 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
+  BaseXChainClient,
 } from '@xchainjs/xchain-client'
-import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
+import { getSeed } from '@xchainjs/xchain-crypto'
 import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'
@@ -35,20 +34,16 @@ export type BitcoinCashClientParams = XChainClientParams & {
   haskoinUrl?: ClientUrl
   nodeUrl?: ClientUrl
   nodeAuth?: NodeAuth
-  rootPath?: string
-  index?: number
+  // index?: number
 }
 
 /**
  * Custom Bitcoin Cash client
  */
-class Client implements BitcoinCashClient, XChainClient {
-  private network: Network
-  private phrase = ''
+class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient {
   private haskoinUrl: ClientUrl
   private nodeUrl: ClientUrl
   private nodeAuth?: NodeAuth
-  private rootDerivationPaths: RootDerivationPaths
 
   /**
    * Constructor
@@ -76,6 +71,7 @@ class Client implements BitcoinCashClient, XChainClient {
       testnet: `m/44'/1'/0'/0/`,
     },
   }: BitcoinCashClientParams) {
+    super('BCH', { network, rootDerivationPaths, phrase })
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
@@ -93,7 +89,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} url The new haskoin url.
    * @returns {void}
    */
-  setHaskoinURL = (url: ClientUrl): void => {
+  setHaskoinURL(url: ClientUrl): void {
     this.haskoinUrl = url
   }
 
@@ -102,7 +98,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {string} The haskoin url based on the current network.
    */
-  getHaskoinURL = (): string => {
+  getHaskoinURL(): string {
     return this.haskoinUrl[this.getNetwork()]
   }
 
@@ -112,7 +108,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} url The new node url.
    * @returns {void}
    */
-  setNodeURL = (url: ClientUrl): void => {
+  setNodeURL(url: ClientUrl): void {
     this.nodeUrl = url
   }
 
@@ -121,61 +117,8 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {string} The node url for thorchain based on the current network.
    */
-  getNodeURL = (): string => {
+  getNodeURL(): string {
     return this.nodeUrl[this.getNetwork()]
-  }
-
-  /**
-   * Set/update a new phrase.
-   *
-   * @param {string} phrase A new phrase.
-   * @param {string} derivationPath bip44 derivation path
-   * @returns {Address} The address from the given phrase
-   *
-   * @throws {"Invalid phrase"}
-   * Thrown if the given phase is invalid.
-   */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (validatePhrase(phrase)) {
-      this.phrase = phrase
-      return this.getAddress(walletIndex)
-    } else {
-      throw new Error('Invalid phrase')
-    }
-  }
-
-  /**
-   * Purge client.
-   *
-   * @returns {void}
-   */
-  purgeClient = (): void => {
-    this.phrase = ''
-  }
-
-  /**
-   * Set/update the current network.
-   *
-   * @param {Network} network `mainnet` or `testnet`.
-   * @returns {void}
-   *
-   * @throws {"Network must be provided"}
-   * Thrown if network has not been set before.
-   */
-  setNetwork = (net: Network): void => {
-    if (!net) {
-      throw new Error('Network must be provided')
-    }
-    this.network = net
-  }
-
-  /**
-   * Get the current network.
-   *
-   * @returns {Network} The current network. (`mainnet` or `testnet`)
-   */
-  getNetwork = (): Network => {
-    return this.network
   }
 
   /**
@@ -183,7 +126,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {string} The explorer url based on the network.
    */
-  getExplorerUrl = (): string => {
+  getExplorerUrl(): string {
     const networkPath = utils.isTestnet(this.network) ? 'bch-testnet' : 'bch'
     return `https://www.blockchain.com/${networkPath}`
   }
@@ -194,7 +137,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address based on the network.
    */
-  getExplorerAddressUrl = (address: Address): string => {
+  getExplorerAddressUrl(address: Address): string {
     return `${this.getExplorerUrl()}/address/${address}`
   }
 
@@ -204,7 +147,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} txID The transaction id
    * @returns {string} The explorer url for the given transaction id based on the network.
    */
-  getExplorerTxUrl = (txID: string): string => {
+  getExplorerTxUrl(txID: string): string {
     return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
@@ -220,7 +163,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if invalid phrase is provided.
    * */
-  private getBCHKeys = (phrase: string, derivationPath: string): KeyPair => {
+  private getBCHKeys(phrase: string, derivationPath: string): KeyPair {
     try {
       const rootSeed = getSeed(phrase)
       const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
@@ -242,7 +185,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (index = 0): Address => {
+  getAddress(index = 0): Address {
     if (this.phrase) {
       try {
         const keys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
@@ -258,22 +201,12 @@ class Client implements BitcoinCashClient, XChainClient {
   }
 
   /**
-   * Get getFullDerivationPath
-   *
-   * @param {number} index the HD wallet index
-   * @returns {string} The derivation path based on the network.
-   */
-  getFullDerivationPath(index: number): string {
-    return this.rootDerivationPaths[this.network] + `${index}`
-  }
-
-  /**
    * Validate the given address.
    *
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  validateAddress = (address: string): boolean => {
+  validateAddress(address: string): boolean {
     return utils.validateAddress(address, this.network)
   }
 
@@ -285,7 +218,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
-  getBalance = async (address: Address): Promise<Balance[]> => {
+  async getBalance(address: Address): Promise<Balance[]> {
     return utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address })
   }
 
@@ -298,7 +231,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
-  getTransactions = async ({ address, offset, limit }: TxHistoryParams): Promise<TxsPage> => {
+  async getTransactions({ address, offset, limit }: TxHistoryParams): Promise<TxsPage> {
     try {
       offset = offset || 0
       limit = limit || 10
@@ -331,7 +264,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid TxID"} Thrown if the given transaction id is an invalid one.
    */
-  getTransactionData = async (txId: string): Promise<Tx> => {
+  async getTransactionData(txId: string): Promise<Tx> {
     try {
       const tx = await getTransaction({ haskoinUrl: this.getHaskoinURL(), txId })
 
@@ -351,14 +284,25 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} memo The memo to be used for fee calculation (optional)
    * @returns {FeesWithRates} The fees and rates
    */
-  getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
-    const nextBlockFeeRate = await getSuggestedFee()
-    const rates: FeeRates = {
-      fastest: nextBlockFeeRate * 5,
-      fast: nextBlockFeeRate * 1,
-      average: nextBlockFeeRate * 0.5,
+  async getFeesWithRates(memo?: string): Promise<FeesWithRates> {
+    let rates: FeeRates | undefined = undefined
+
+    try {
+      rates = await this.getFeeRatesFromThorchain()
+    } catch (error) {
+      console.log(error)
+      console.warn(`Error pulling rates from thorchain, will try alternate`)
     }
 
+    if (!rates) {
+      //backup in case throchain failed get rates
+      const txFee = await getSuggestedFee()
+      rates = {
+        fastest: txFee * 5,
+        fast: txFee * 1,
+        average: txFee * 0.5,
+      }
+    }
     const fees: Fees = {
       type: 'byte',
       fast: utils.calcFee(rates.fast, memo),
@@ -374,7 +318,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {Fees} The fees without memo
    */
-  getFees = async (): Promise<Fees> => {
+  async getFees(): Promise<Fees> {
     try {
       const { fees } = await this.getFeesWithRates()
       return fees
@@ -390,7 +334,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} memo
    * @returns {Fees} The fees with memo
    */
-  getFeesWithMemo = async (memo: string): Promise<Fees> => {
+  async getFeesWithMemo(memo: string): Promise<Fees> {
     try {
       const { fees } = await this.getFeesWithRates(memo)
       return fees
@@ -405,7 +349,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {FeeRates} The fee rate
    */
-  getFeeRates = async (): Promise<FeeRates> => {
+  async getFeeRates(): Promise<FeeRates> {
     try {
       const { rates } = await this.getFeesWithRates()
       return rates
@@ -420,10 +364,10 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {TxParams&FeeRate} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
+  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     try {
       const index = params.walletIndex || 0
-      const derivationPath = this.rootDerivationPaths[this.network] + `${index}`
+      const derivationPath = this.getFullDerivationPath(index)
 
       const feeRate = params.feeRate || (await this.getFeeRates()).fast
       const { builder, utxos } = await utils.buildTx({
