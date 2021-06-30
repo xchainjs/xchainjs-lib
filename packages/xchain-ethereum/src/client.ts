@@ -17,6 +17,7 @@ import {
   CallParams,
   IsApprovedParams,
   EstimateCallParams,
+  EstimateApproveParams,
 } from './types'
 import {
   Address,
@@ -65,7 +66,7 @@ export interface EthereumClient {
   estimateGasPrices(): Promise<GasPrices>
   estimateGasLimit(params: FeesParams): Promise<BigNumber>
   estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits>
-
+  estimateApprove(params: EstimateApproveParams): Promise<BigNumber>
   isApproved(params: IsApprovedParams): Promise<boolean>
   approve(params: ApproveParams): Promise<TransactionResponse>
 }
@@ -617,7 +618,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     amount,
     gasLimitFallback,
     walletIndex,
-  }: Omit<ApproveParams, 'feeOptionKey'>): Promise<BigNumber> => {
+  }: EstimateApproveParams): Promise<BigNumber> => {
     try {
       const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
       const gasLimit = await this.estimateCall({

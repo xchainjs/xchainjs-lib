@@ -51,6 +51,8 @@ export type ApproveParams = {
   gasLimitFallback?: ethers.BigNumberish
 }
 
+export type EstimateApproveParams = Omit<ApproveParams, 'feeOptionKey'>
+
 export type IsApprovedParams = { contractAddress: Address; spenderAddress: Address; amount?: BaseAmount }
 
 export type CallParams = {
