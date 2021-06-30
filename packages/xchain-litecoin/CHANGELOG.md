@@ -1,3 +1,7 @@
+# v.0.6.7 (2021-06-29)
+
+- added support for pulling fees from thornode.
+
 # v.0.6.6 (2021-06-19)
 
 - changed rollupjs to treat axios as external lib

@@ -1,3 +1,7 @@
+# v.0.21.5 (2021-06-29)
+
+- added support for pulling fees from thornode.
+
 # v.0.21.4 (2021-06-07)
 
 ### Fix

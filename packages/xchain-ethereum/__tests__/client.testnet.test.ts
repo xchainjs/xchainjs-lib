@@ -381,13 +381,6 @@ describe('Client Test', () => {
       },
     ])
 
-    // mock_gastracker_api(etherscanUrl, 'gasoracle', {
-    //   LastBlock: '11745402',
-    //   SafeGasPrice: '51',
-    //   ProposeGasPrice: '59',
-    //   FastGasPrice: '76',
-    // })
-
     const gasFee = await ethClient.estimateFeesWithGasPricesAndLimits({
       recipient: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       amount: baseAmount('10000000000000', ETH_DECIMAL),
@@ -610,12 +603,6 @@ describe('Client Test', () => {
         gas_rate: '49',
       },
     ])
-    // mock_gastracker_api(etherscanUrl, 'gasoracle', {
-    //   LastBlock: '11745402',
-    //   SafeGasPrice: '51',
-    //   ProposeGasPrice: '59',
-    //   FastGasPrice: '76',
-    // })
 
     const prices = await ethClient.estimateGasPrices()
 

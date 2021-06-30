@@ -110,7 +110,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  public setNetwork(network: Network): void {
+  setNetwork(network: Network): void {
     super.setNetwork(network)
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
@@ -177,7 +177,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  public getAddress(index = 0): string {
+  getAddress(index = 0): string {
     return crypto.getAddressFromPrivateKey(this.getPrivateKey(index), getPrefix(this.network))
   }
   /**
@@ -186,7 +186,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  public validateAddress(address: Address): boolean {
+  validateAddress(address: Address): boolean {
     return this.bncClient.checkAddress(address, getPrefix(this.network))
   }
 
@@ -197,7 +197,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Array<Balance>} The balance of the address.
    */
-  public async getBalance(address: Address, assets?: Asset[]): Promise<Balances> {
+  async getBalance(address: Address, assets?: Asset[]): Promise<Balances> {
     try {
       const balances: BinanceBalances = await this.bncClient.getBalance(address)
 
@@ -401,7 +401,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @returns {Fees} The current fee.
    */
-  public async getFees(): Promise<Fees> {
+  async getFees(): Promise<Fees> {
     let singleTxFee: BaseAmount | undefined = undefined
     try {
       const rates = await this.getFeeRatesFromThorchain()
@@ -428,7 +428,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @returns {Fees} The current fee for multi-send transaction.
    */
-  public async getMultiSendFees(): Promise<Fees> {
+  async getMultiSendFees(): Promise<Fees> {
     try {
       const transferFee = await this.getTransferFee()
       const multiTxFee = baseAmount(transferFee.multi_transfer_fee)

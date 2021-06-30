@@ -133,5 +133,4 @@ export abstract class BaseXChainClient implements XChainClient {
   abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
   abstract transfer(params: TxParams): Promise<string>
-  // abstract purgeClient(): void
 }
