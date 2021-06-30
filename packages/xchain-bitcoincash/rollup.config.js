@@ -42,5 +42,6 @@ export default {
     'stream',
     'string_decoder',
     '@xchainjs/xchain-client',
+    'axios',
   ],
 }

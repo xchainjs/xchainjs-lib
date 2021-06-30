@@ -12,7 +12,6 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
-  Txs,
   TxFrom,
   TxTo,
 } from '@thorwallet/xchain-client'
@@ -23,27 +22,24 @@ import * as xchainCrypto from '@thorwallet/xchain-crypto'
 import { PrivKey, AccAddress } from '@thorwallet/cosmos-client'
 import { StdTx } from '@thorwallet/cosmos-client/x/auth'
 
-import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, NodeUrl, ExplorerUrls } from './types'
+import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, NodeUrl, ExplorerUrls, TxData } from './types'
 import { MsgNativeTx, msgNativeTxFromJson, ThorchainDepositResponse, TxResult } from './types/messages'
 import {
   getDenom,
   getAsset,
   getDefaultFees,
-  getTxsFromHistory,
   DECIMAL,
   DEFAULT_GAS_VALUE,
   getDenomWithChain,
   isBroadcastSuccess,
   getPrefix,
   registerCodecs,
-  getTxType,
   MAX_TX_COUNT,
-  MSG_DEPOSIT,
-  MSG_SEND,
   getDefaultClientUrl,
   getDefaultExplorerUrls,
   getExplorerAddressUrl,
   getExplorerTxUrl,
+  getDepositTxDataFromLogs,
 } from './util'
 
 /**
@@ -310,6 +306,7 @@ class Client implements ThorchainClient, XChainClient {
     const messageAction = undefined
     const offset = params?.offset || 0
     const limit = params?.limit || 10
+    const address = params?.address || this.getAddress()
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
@@ -320,7 +317,7 @@ class Client implements ThorchainClient, XChainClient {
         await this.cosmosClient.searchTxFromRPC({
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
-          transferRecipient: params?.address,
+          transferRecipient: address,
           limit: MAX_TX_COUNT,
           txMinHeight,
           txMaxHeight,
@@ -330,7 +327,7 @@ class Client implements ThorchainClient, XChainClient {
         await this.cosmosClient.searchTxFromRPC({
           rpcEndpoint: this.getClientUrl().rpc,
           messageAction,
-          transferSender: params?.address,
+          transferSender: address,
           limit: MAX_TX_COUNT,
           txMinHeight,
           txMaxHeight,
@@ -347,24 +344,15 @@ class Client implements ThorchainClient, XChainClient {
           (acc, tx) => [...acc, ...(acc.length === 0 || acc[acc.length - 1].hash !== tx.hash ? [tx] : [])],
           [] as RPCTxResult[],
         )
-        .filter(
-          params?.filterFn
-            ? params.filterFn
-            : (tx) => {
-                const action = getTxType(tx.tx_result.data, 'base64')
-                return action === MSG_DEPOSIT || action === MSG_SEND
-              },
-        )
+        .filter(params?.filterFn ? params.filterFn : (tx) => tx)
         .filter((_, index) => index < MAX_TX_COUNT)
 
+      // get `total` before filtering txs out for pagination
       const total = history.length
 
       history = history.filter((_, index) => index >= offset && index < offset + limit)
 
-      const txs: Txs = []
-      for (const tx of history) {
-        txs.push(await this.getTransactionData(tx.hash))
-      }
+      const txs = await Promise.all(history.map(({ hash }) => this.getTransactionData(hash, address)))
 
       return {
         total,
@@ -381,28 +369,25 @@ class Client implements ThorchainClient, XChainClient {
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
-  getTransactionData = async (txId: string): Promise<Tx> => {
+  getTransactionData = async (txId: string, address: Address): Promise<Tx> => {
     try {
       const txResult = await this.cosmosClient.txsHashGet(txId)
-      const action = getTxType(txResult.data, 'hex')
-      let txs: Txs = []
+      const txData: TxData | null = txResult.logs ? getDepositTxDataFromLogs(txResult.logs, address) : null
 
-      if (action === MSG_DEPOSIT) {
-        txs = [
-          {
-            ...(await this.getDepositTransaction(txId)),
-            date: new Date(txResult.timestamp),
-          },
-        ]
-      } else {
-        txs = getTxsFromHistory([txResult], this.network)
+      if (!txData) {
+        throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
       }
 
-      if (txs.length === 0) {
-        throw new Error('transaction not found')
-      }
+      const { from, to, type } = txData
 
-      return txs[0]
+      return {
+        hash: txId,
+        asset: AssetRune,
+        from,
+        to,
+        date: new Date(txResult.timestamp),
+        type,
+      }
     } catch (error) {
       return Promise.reject(error)
     }
@@ -525,7 +510,7 @@ class Client implements ThorchainClient, XChainClient {
       const accAddress = AccAddress.fromBech32(signer)
       const fee = unsignedStdTx.fee
       // max. gas
-      fee.gas = '10000000'
+      fee.gas = '20000000'
 
       return this.cosmosClient
         .signAndBroadcast(unsignedStdTx, privateKey, accAddress)
