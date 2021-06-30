@@ -1,3 +1,7 @@
+# v.5.2.2 (2021-06-29)
+
+- added support for pulling fees from thornode.
+
 # v.5.2.1 (2021-06-01)
 
 - update peerDependencies

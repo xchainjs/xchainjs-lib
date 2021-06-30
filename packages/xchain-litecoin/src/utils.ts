@@ -1,10 +1,19 @@
 import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
 import * as sochain from './sochain-api'
 import * as nodeApi from './node-api'
-import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
+import {
+  Address,
+  Balance,
+  FeeRate,
+  FeeRates,
+  Fees,
+  FeesWithRates,
+  Network,
+  TxHash,
+  TxParams,
+} from '@xchainjs/xchain-client'
 import { AssetLTC, BaseAmount, baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util'
 import { LtcAddressUTXOs, AddressParams } from './types/sochain-api-types'
-import { FeeRate, FeeRates, FeesWithRates } from './types/client-types'
 import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
 import { MIN_TX_FEE } from './const'
 import coininfo from 'coininfo'

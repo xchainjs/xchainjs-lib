@@ -11,7 +11,10 @@ const mockGetAccount = (url: string, address: string, result: Account, ntimes = 
 const mockGetFees = (url: string, result: Fees) => {
   nock(url).get('/api/v1/fees').reply(200, result)
 }
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockThornodeGetFees = (url: string, result: any[]) => {
+  nock(url).get('/thorchain/inbound_addresses').reply(200, result)
+}
 const mockTxHash = (url: string, hash: string, result: TransactionResult) => {
   nock(url).get(`/api/v1/tx/${hash}?format=json`).reply(200, result)
 }
@@ -72,6 +75,7 @@ describe('BinanceClient Test', () => {
 
   const mainnetClientURL = 'https://dex.binance.org'
   const testnetClientURL = 'https://testnet-dex.binance.org'
+  const thornodeMainetClientURL = 'https://thornode.thorchain.info'
 
   beforeEach(async () => {
     bnbClient = new BinanceClient({ phrase, network: 'mainnet' })
@@ -209,20 +213,42 @@ describe('BinanceClient Test', () => {
   })
 
   it('fetches the transfer fees', async () => {
-    mockGetFees(mainnetClientURL, [
+    mockThornodeGetFees(thornodeMainetClientURL, [
       {
-        msg_type: 'tokensFreeze',
-        fee: 500000,
-        fee_for: 1,
+        chain: 'BCH',
+        pub_key: 'thorpub1addwnpepqgphxg4kqfwvcha2dr9m44r4k73cqm2yd74vumyvke78zjj80mzrwh4y6nw',
+        address: 'qzr0swflj9fq26ktjhxh6q0kl9ddvxljlye66s7lvx',
+        halted: false,
+        gas_rate: '3',
       },
       {
-        fixed_fee_params: {
-          msg_type: 'send',
-          fee: 37500,
-          fee_for: 1,
-        },
-        multi_transfer_fee: 30000,
-        lower_limit_as_multi: 2,
+        chain: 'BNB',
+        pub_key: 'thorpub1addwnpepqgphxg4kqfwvcha2dr9m44r4k73cqm2yd74vumyvke78zjj80mzrwh4y6nw',
+        address: 'bnb1smurj0u32gzk4ju4e47srahetttphuhe64gyg4',
+        halted: false,
+        gas_rate: '37500',
+      },
+      {
+        chain: 'BTC',
+        pub_key: 'thorpub1addwnpepqgphxg4kqfwvcha2dr9m44r4k73cqm2yd74vumyvke78zjj80mzrwh4y6nw',
+        address: 'bc1qsmurj0u32gzk4ju4e47srahetttphuhewtfrdk',
+        halted: false,
+        gas_rate: '72',
+      },
+      {
+        chain: 'ETH',
+        pub_key: 'thorpub1addwnpepqgphxg4kqfwvcha2dr9m44r4k73cqm2yd74vumyvke78zjj80mzrwh4y6nw',
+        address: '0xbcd3fd5588369d84f4fefde45ccfdc3e74d5a805',
+        router: '0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B',
+        halted: false,
+        gas_rate: '30',
+      },
+      {
+        chain: 'LTC',
+        pub_key: 'thorpub1addwnpepqgphxg4kqfwvcha2dr9m44r4k73cqm2yd74vumyvke78zjj80mzrwh4y6nw',
+        address: 'ltc1qsmurj0u32gzk4ju4e47srahetttphuhe2hn84x',
+        halted: false,
+        gas_rate: '75',
       },
     ])
 

@@ -1,6 +1,7 @@
-# v.0.11.7 (2021-06-25)
+# v.0.11.7 (2021-06-29)
 
 - accepting legacy BCH addresses
+- added support for pulling fees from thornode.
 
 # v.0.11.6 (2021-06-19)
 

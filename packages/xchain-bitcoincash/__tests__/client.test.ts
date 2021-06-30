@@ -2,6 +2,7 @@ import { Client } from '../src/client'
 import {
   mock_broadcastTx,
   mock_estimateFee,
+  mock_estimateFeeFromThor,
   mock_getBalance,
   mock_getRawTransactionData,
   mock_getTransactionData,
@@ -383,7 +384,22 @@ describe('BCHClient Test', () => {
     expect(rates.fastest).toBeDefined()
     expect(rates.average).toBeDefined()
   })
+  it('returns fees and rates(from thornodeAPI) of a normal tx', async () => {
+    bchClient.setNetwork('testnet')
+    bchClient.setPhrase(phrase)
 
+    mock_estimateFeeFromThor()
+
+    const { fees, rates } = await bchClient.getFeesWithRates()
+    // check fees
+    expect(fees.fast).toBeDefined()
+    expect(fees.fastest).toBeDefined()
+    expect(fees.average).toBeDefined()
+    // check rates
+    expect(rates.fast).toBeDefined()
+    expect(rates.fastest).toBeDefined()
+    expect(rates.average).toBeDefined()
+  })
   it('returns fees and rates of a tx w/ memo', async () => {
     bchClient.setNetwork('testnet')
     bchClient.setPhrase(phrase)

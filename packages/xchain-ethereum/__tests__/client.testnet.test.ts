@@ -10,6 +10,11 @@ import {
   mock_etherscan_token_txs_api,
   mock_gastracker_api,
 } from '../__mocks__/etherscan-api'
+
+import {
+  mock_thornode_inbound_addresses_fail,
+  mock_thornode_inbound_addresses_success,
+} from '../__mocks__/thornode-api'
 import erc20ABI from '../src/data/erc20.json'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
@@ -18,6 +23,8 @@ const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
 const etherscanUrl = 'https://api-ropsten.etherscan.io'
 const ropstenInfuraUrl = 'https://ropsten.infura.io/v3'
 const ropstenAlchemyUrl = 'https://eth-ropsten.alchemyapi.io/v2'
+const thornodeApiUrl = 'https://testnet.thornode.thorchain.info'
+
 const wallet = {
   signingKey: {
     curve: 'secp256k1',
@@ -311,6 +318,7 @@ describe('Client Test', () => {
       'eth_sendRawTransaction',
       '0x48f098a17fe33032668b3780090752473a9e2d9a432699962e40ffed736803d0',
     )
+    mock_thornode_inbound_addresses_fail(thornodeApiUrl)
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
       SafeGasPrice: '51',
@@ -353,14 +361,25 @@ describe('Client Test', () => {
       ropstenInfuraUrl,
       ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xea328780f0558b0bbf34baa142703957122678f5a5b9a0696102cff41a5d2682',
+      '0x937297c54a1d43d2df30ce4f8cd40b63f83905b74ad85d85cd7cab7610108c5e',
     )
-    mock_gastracker_api(etherscanUrl, 'gasoracle', {
-      LastBlock: '11745402',
-      SafeGasPrice: '51',
-      ProposeGasPrice: '59',
-      FastGasPrice: '76',
-    })
+    mock_thornode_inbound_addresses_success(thornodeApiUrl, [
+      {
+        chain: 'ETH',
+        pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
+        address: '0x8d1133a8cf23112fdb21f1efca340d727a98196e',
+        router: '0xe0a63488e677151844e70623533c22007dc57c9e',
+        halted: false,
+        gas_rate: '30',
+      },
+      {
+        chain: 'LTC',
+        pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
+        address: 'tltc1q3x76wl4gmwu4yzx682r30ej0a8e2tttaw6pv7u',
+        halted: false,
+        gas_rate: '49',
+      },
+    ])
 
     const gasFee = await ethClient.estimateFeesWithGasPricesAndLimits({
       recipient: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
@@ -374,7 +393,7 @@ describe('Client Test', () => {
       gasLimit: gasFee.gasLimit,
       gasPrice: gasFee.gasPrices.fastest,
     })
-    expect(txHash).toEqual('0xea328780f0558b0bbf34baa142703957122678f5a5b9a0696102cff41a5d2682')
+    expect(txHash).toEqual('0x937297c54a1d43d2df30ce4f8cd40b63f83905b74ad85d85cd7cab7610108c5e')
   })
 
   it('estimate gas for eth transfer', async () => {
@@ -384,6 +403,7 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_thornode_inbound_addresses_fail(thornodeApiUrl)
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
       SafeGasPrice: '51',
@@ -415,6 +435,7 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_thornode_inbound_addresses_fail(thornodeApiUrl)
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
       SafeGasPrice: '51',
@@ -568,14 +589,25 @@ describe('Client Test', () => {
       ropstenInfuraUrl,
       ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xbc5f55b97b816d1c30138d26bce5434ff28828b15ee79aa79aebf70f786a3fe8',
+      '0xce5ecad949751186a3342d131edcf36e2c235222153b162ec525354be8f1d540',
     )
-    mock_gastracker_api(etherscanUrl, 'gasoracle', {
-      LastBlock: '11745402',
-      SafeGasPrice: '51',
-      ProposeGasPrice: '59',
-      FastGasPrice: '76',
-    })
+    mock_thornode_inbound_addresses_success(thornodeApiUrl, [
+      {
+        chain: 'ETH',
+        pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
+        address: '0x8d1133a8cf23112fdb21f1efca340d727a98196e',
+        router: '0xe0a63488e677151844e70623533c22007dc57c9e',
+        halted: false,
+        gas_rate: '51',
+      },
+      {
+        chain: 'LTC',
+        pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
+        address: 'tltc1q3x76wl4gmwu4yzx682r30ej0a8e2tttaw6pv7u',
+        halted: false,
+        gas_rate: '49',
+      },
+    ])
 
     const prices = await ethClient.estimateGasPrices()
 
@@ -595,6 +627,6 @@ describe('Client Test', () => {
       ],
     })
 
-    expect(txResult.hash).toEqual('0xbc5f55b97b816d1c30138d26bce5434ff28828b15ee79aa79aebf70f786a3fe8')
+    expect(txResult.hash).toEqual('0xce5ecad949751186a3342d131edcf36e2c235222153b162ec525354be8f1d540')
   })
 })
