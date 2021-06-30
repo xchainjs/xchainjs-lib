@@ -547,7 +547,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   isApproved = async ({ contractAddress, spenderAddress, amount }: IsApprovedParams): Promise<boolean> => {
     // since amount is optional, set it to smallest amount by default
-    const txAmount = BigNumber.from(amount?.amount() ?? 1)
+    const txAmount = BigNumber.from(amount?.amount().toFixed() ?? 1)
     const owner = this.getAddress()
     const allowance = await this.call<BigNumberish>({
       contractAddress,
@@ -743,10 +743,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         fast: baseAmount(rates.fast, ETH_DECIMAL),
         fastest: baseAmount(rates.fastest, ETH_DECIMAL),
       }
-    } catch (error) {
-      console.log(error)
-      console.warn(`Error pulling rates from thorchain, will try alternate`)
-    }
+    } catch (error) {}
     //should only get here if thor fails
     return await this.estimateGasPricesFromEtherscan()
   }
