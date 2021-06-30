@@ -1,9 +1,9 @@
-import { Asset, assetToString, baseAmount, assetFromString, THORChain, BaseAmount } from '@xchainjs/xchain-util'
+import { Asset, assetToString, baseAmount, assetFromString, THORChain, BaseAmount } from '@thorwallet/xchain-util'
 import { AssetRune, ExplorerUrl, ClientUrl, ExplorerUrls, TxData } from './types'
-import { TxLog } from '@xchainjs/xchain-cosmos'
-import { Fees, Network, Address, TxHash } from '@xchainjs/xchain-client'
-import { AccAddress, codec, Msg } from 'cosmos-client'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
+import { TxLog } from '@thorwallet/xchain-cosmos'
+import { Fees, Network, Address, TxHash } from '@thorwallet/xchain-client'
+import { AccAddress, codec, Msg } from '@thorwallet/cosmos-client'
+import { MsgMultiSend, MsgSend } from '@thorwallet/cosmos-client/x/bank'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'

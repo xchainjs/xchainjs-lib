@@ -45,9 +45,9 @@
     "wif": "^2.0.6"
   },
   "peerDependencies": {
-    "@thorwallet/xchain-client": "0.0.1-alpha.792+b6e4e50",
-    "@thorwallet/xchain-crypto": "0.0.1-alpha.792+b6e4e50",
-    "@thorwallet/xchain-util": "0.0.1-alpha.792+b6e4e50",
+    "@thorwallet/xchain-client": "0.0.1-alpha.858+702bf67",
+    "@thorwallet/xchain-crypto": "0.0.1-alpha.858+702bf67",
+    "@thorwallet/xchain-util": "0.0.1-alpha.858+702bf67",
     "axios": "^0.21.0",
     "bitcoinjs-lib": "^5.2.0",
     "coininfo": "^5.1.0",

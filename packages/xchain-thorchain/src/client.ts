@@ -306,7 +306,7 @@ class Client implements ThorchainClient, XChainClient {
     const messageAction = undefined
     const offset = params?.offset || 0
     const limit = params?.limit || 10
-    const address = params?.address || this.getAddress()
+    const address = params?.address || (await this.getAddress())
     const txMinHeight = undefined
     const txMaxHeight = undefined
 

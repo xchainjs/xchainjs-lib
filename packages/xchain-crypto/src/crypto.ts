@@ -54,7 +54,7 @@ const _isNode = (): boolean => {
  * @param {number} size The new phrase size.
  * @returns {Promise<string>} The generated phrase based on the size.
  */
-export const generatePhrase = async (size = 12): string => {
+export const generatePhrase = async (size = 12): Promise<string> => {
   if (_isNode()) {
     const bytes = crypto.randomBytes((size == 12 ? 128 : 256) / 8)
     const phrase = bip39.entropyToMnemonic(bytes)

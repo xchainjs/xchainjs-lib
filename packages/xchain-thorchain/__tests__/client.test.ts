@@ -1,8 +1,8 @@
 import nock from 'nock'
 
-import { TxsPage } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase, baseAmount, BaseAmount } from '@xchainjs/xchain-util'
-import { RPCResponse, RPCTxSearchResult, TxResponse, CosmosSDKClient } from '@xchainjs/xchain-cosmos'
+import { TxsPage } from '@thorwallet/xchain-client'
+import { assetAmount, assetToBase, baseAmount, BaseAmount } from '@thorwallet/xchain-util'
+import { RPCResponse, RPCTxSearchResult, TxResponse, CosmosSDKClient } from '@thorwallet/xchain-cosmos'
 import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
 import { AssetRune, ThorchainDepositResponse } from '../src/types'
 import { Client } from '../src/client'

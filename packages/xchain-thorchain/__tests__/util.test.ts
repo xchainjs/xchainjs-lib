@@ -11,7 +11,7 @@ import {
   getDepositTxDataFromLogs,
   getTxType,
 } from '../src/util'
-import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase } from '@thorwallet/xchain-util'
 
 describe('thorchain/util', () => {
   describe('Denom <-> Asset', () => {
