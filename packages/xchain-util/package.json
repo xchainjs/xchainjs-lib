@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-util",
-  "version": "0.0.1-alpha.858+702bf67",
+  "version": "0.0.1-alpha.869+49db531",
   "description": "Helper utilities for XChain clients",
   "keywords": [
     "THORChain",
