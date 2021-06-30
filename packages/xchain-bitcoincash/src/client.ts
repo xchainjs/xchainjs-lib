@@ -370,7 +370,7 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
       const derivationPath = this.getFullDerivationPath(index)
 
       const feeRate = params.feeRate || (await this.getFeeRates()).fast
-      const { builder, utxos } = await utils.buildTx({
+      const { builder, inputUTXOs } = await utils.buildTx({
         ...params,
         feeRate,
         sender: this.getAddress(),
@@ -380,7 +380,7 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
 
       const keyPair = this.getBCHKeys(this.phrase, derivationPath)
 
-      utxos.forEach((utxo, index) => {
+      inputUTXOs.forEach((utxo, index) => {
         builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)
       })
 

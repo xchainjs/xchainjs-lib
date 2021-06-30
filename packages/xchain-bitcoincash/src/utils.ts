@@ -252,7 +252,7 @@ export const buildTx = async ({
   haskoinUrl: string
 }): Promise<{
   builder: TransactionBuilder
-  utxos: UTXOs
+  inputUTXOs: UTXOs
 }> => {
   try {
     const recipientCashAddress = toCashAddress(recipient)
@@ -308,7 +308,7 @@ export const buildTx = async ({
 
     return {
       builder: transactionBuilder,
-      utxos,
+      inputUTXOs: inputs,
     }
   } catch (e) {
     return Promise.reject(e)
