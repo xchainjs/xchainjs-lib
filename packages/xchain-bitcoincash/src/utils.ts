@@ -184,6 +184,15 @@ export const parseTransaction = (tx: Transaction): Tx => {
 }
 
 /**
+ * Converts `Network` to `bchaddr.Network`
+ *
+ * @param {Network} network
+ * @returns {string} bchaddr network
+ */
+export const toBCHAddressNetwork = (network: Network): string =>
+  network === 'testnet' ? bchaddr.Network.Testnet : bchaddr.Network.Mainnet
+
+/**
  * Validate the BCH address.
  *
  * @param {string} address
@@ -191,12 +200,8 @@ export const parseTransaction = (tx: Transaction): Tx => {
  * @returns {boolean} `true` or `false`.
  */
 export const validateAddress = (address: string, network: Network): boolean => {
-  try {
-    bitcash.address.toOutputScript(toLegacyAddress(address), bchNetwork(network))
-    return true
-  } catch (error) {
-    return false
-  }
+  const toAddress = toCashAddress(address)
+  return bchaddr.isValidAddress(toAddress) && bchaddr.detectAddressNetwork(toAddress) === toBCHAddressNetwork(network)
 }
 /**
  * Scan UTXOs from sochain.
@@ -250,7 +255,8 @@ export const buildTx = async ({
   utxos: UTXOs
 }> => {
   try {
-    if (!validateAddress(recipient, network)) {
+    const recipientCashAddress = toCashAddress(recipient)
+    if (!validateAddress(recipientCashAddress, network)) {
       return Promise.reject(new Error('Invalid address'))
     }
 
