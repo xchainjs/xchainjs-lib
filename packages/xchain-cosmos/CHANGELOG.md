@@ -1,7 +1,12 @@
-# v.0.13.3 (2021-06-30)
+# v.0.13.4 (2021-06-30)
 
 - update getBalance such that it always returns at least the mainAsset
 
+# v.0.13.3 (2021-06-29)
+
+### Fix
+
+- Stick with `cosmos-client@0.39.2`
 
 # v.0.13.1 (2021-06-01)
 
