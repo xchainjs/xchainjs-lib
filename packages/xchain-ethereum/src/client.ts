@@ -14,6 +14,9 @@ import {
   FeesWithGasPricesAndLimits,
   InfuraCreds,
   ApproveParams,
+  CallParams,
+  IsApprovedParams,
+  EstimateCallParams,
 } from './types'
 import {
   RootDerivationPaths,
@@ -58,30 +61,14 @@ import {
  */
 export interface EthereumClient {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  call<T>(
-    walletIndex: number,
-    asset: Address,
-    abi: ethers.ContractInterface,
-    func: string,
-    params: Array<unknown>,
-  ): Promise<T>
-  estimateCall(
-    asset: Address,
-    abi: ethers.ContractInterface,
-    func: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    params: Array<any>,
-  ): Promise<BigNumber>
+  call<T>(params: CallParams): Promise<T>
+  estimateCall(asset: EstimateCallParams): Promise<BigNumber>
   estimateGasPrices(): Promise<GasPrices>
   estimateGasLimit(params: FeesParams): Promise<BigNumber>
   estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits>
 
-  isApproved(spender: Address, sender: Address, amount: BaseAmount): Promise<boolean>
-  approve(
-    params: ApproveParams & {
-      feeOptionKey?: FeeOptionKey
-    },
-  ): Promise<TransactionResponse>
+  isApproved(params: IsApprovedParams): Promise<boolean>
+  approve(params: ApproveParams): Promise<TransactionResponse>
 }
 
 export type EthereumClientParams = XChainClientParams & {
@@ -383,8 +370,9 @@ export default class Client implements XChainClient, EthereumClient {
               apiKey: etherscan.apiKey,
             })
             const decimals =
-              BigNumber.from(await this.call<BigNumberish>(0, assetAddress, erc20ABI, 'decimals', [])).toNumber() ||
-              ETH_DECIMAL
+              BigNumber.from(
+                await this.call<BigNumberish>({ contractAddress: assetAddress, abi: erc20ABI, funcName: 'decimals' }),
+              ).toNumber() || ETH_DECIMAL
 
             if (!Number.isNaN(decimals)) {
               balances.push({
@@ -530,71 +518,68 @@ export default class Client implements XChainClient, EthereumClient {
   /**
    * Call a contract function.
    * @template T The result interface.
-   * @param {Address} address The contract address.
+   * @param {Address} contractAddress The contract address.
    * @param {ContractInterface} abi The contract ABI json.
-   * @param {string} func The function to be called.
-   * @param {Array<any>} params The parameters of the function.
+   * @param {string} funcName The function to be called.
+   * @param {Array<any>} funcParams The parameters of the function.
    * @returns {T} The result of the contract function call.
    *
    * @throws {"address must be provided"}
    * Thrown if the given contract address is empty.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  call = async <T>(
-    walletIndex = 0,
-    contractAddress: Address,
-    abi: ethers.ContractInterface,
-    func: string,
-    params: Array<unknown>,
-  ): Promise<T> => {
+  call = async <T>({ walletIndex = 0, contractAddress, abi, funcName, funcParams = [] }: CallParams): Promise<T> => {
     if (!contractAddress) {
       return Promise.reject(new Error('contractAddress must be provided'))
     }
     const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(walletIndex))
-    return contract[func](...params)
+    return contract[funcName](...funcParams)
   }
 
   /**
    * Call a contract function.
-   * @param {Address} address The contract address.
+   * @param {Address} contractAddress The contract address.
    * @param {ContractInterface} abi The contract ABI json.
-   * @param {string} func The function to be called.
-   * @param {Array<any>} params The parameters of the function.
+   * @param {string} funcName The function to be called.
+   * @param {Array<any>} funcParams The parameters of the function.
    * @returns {BigNumber} The result of the contract function call.
    *
    * @throws {"address must be provided"}
    * Thrown if the given contract address is empty.
    */
-  estimateCall = async (
-    contractAddress: Address,
-    abi: ethers.ContractInterface,
-    func: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    params: Array<any>,
-  ): Promise<BigNumber> => {
+  estimateCall = async ({
+    contractAddress,
+    abi,
+    funcName,
+    funcParams = [],
+    walletIndex = 0,
+  }: EstimateCallParams): Promise<BigNumber> => {
     if (!contractAddress) {
       return Promise.reject(new Error('contractAddress must be provided'))
     }
-    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(0))
-    return contract.estimateGas[func](...params)
+    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(walletIndex))
+    return contract.estimateGas[funcName](...funcParams)
   }
 
   /**
    * Check allowance.
    *
-   * @param {Address} spender The spender address.
-   * @param {Address} sender The sender address.
-   * @param {BaseAmount} amount The amount of token.
+   * @param {Address} contractAddress The spender address.
+   * @param {Address} spenderAddress The spender address.
+   * @param {BaseAmount} amount The amount to check if it's allowed to spend or not (optional).
    * @returns {boolean} `true` or `false`.
    */
-  isApproved = async (spender: Address, sender: Address, amount: BaseAmount): Promise<boolean> => {
-    try {
-      const txAmount = BigNumber.from(amount.amount().toFixed())
-      const allowance = await this.call<BigNumberish>(0, sender, erc20ABI, 'allowance', [spender, spender])
-      return txAmount.lte(allowance)
-    } catch (error) {
-      return Promise.reject(error)
-    }
+  isApproved = async ({ contractAddress, spenderAddress, amount }: IsApprovedParams): Promise<boolean> => {
+    // since amount is optional, set it to smallest amount by default
+    const txAmount = BigNumber.from(amount?.amount() ?? 1)
+    const owner = this.getAddress()
+    const allowance = await this.call<BigNumberish>({
+      contractAddress,
+      abi: erc20ABI,
+      funcName: 'allowance',
+      funcParams: [owner, spenderAddress],
+    })
+    return txAmount.lte(allowance)
   }
 
   /**
@@ -608,37 +593,38 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {TransactionResponse} The transaction result.
    */
   approve = async ({
-    walletIndex = 0,
-    spender,
-    sender,
-    feeOptionKey,
+    contractAddress,
+    spenderAddress,
+    feeOptionKey = 'fastest',
     amount,
+    walletIndex = 0,
+    gasLimitFallback,
   }: ApproveParams): Promise<TransactionResponse> => {
-    const gasPrice =
-      feeOptionKey &&
-      BigNumber.from(
-        (
-          await this.estimateGasPrices()
-            .then((prices) => prices[feeOptionKey])
-            .catch(() => getDefaultGasPrices()[feeOptionKey])
-        )
-          .amount()
-          .toFixed(),
+    const gasPrice = BigNumber.from(
+      (
+        await this.estimateGasPrices()
+          .then((prices) => prices[feeOptionKey])
+          .catch(() => getDefaultGasPrices()[feeOptionKey])
       )
-    const gasLimit = await this.estimateApprove({ spender, sender, amount }).catch(() => undefined)
+        .amount()
+        .toFixed(),
+    )
+    const gasLimit = await this.estimateApprove({
+      walletIndex,
+      spenderAddress,
+      contractAddress,
+      amount,
+      gasLimitFallback,
+    }).catch(() => undefined)
 
-    try {
-      const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
-      const txResult = await this.call<TransactionResponse>(walletIndex, sender, erc20ABI, 'approve', [
-        spender,
-        txAmount,
-        { from: this.getAddress(), gasPrice, gasLimit },
-      ])
-
-      return txResult
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
+    return await this.call<TransactionResponse>({
+      walletIndex,
+      contractAddress,
+      abi: erc20ABI,
+      funcName: 'approve',
+      funcParams: [spenderAddress, txAmount, { from: this.getAddress(), gasPrice, gasLimit }],
+    })
   }
 
   /**
@@ -650,20 +636,26 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {BigNumber} The estimated gas limit.
    */
   estimateApprove = async ({
-    spender,
-    sender,
+    contractAddress,
+    spenderAddress,
     amount,
-  }: Omit<ApproveParams, 'feeOptionKey' | 'walletIndex'>): Promise<BigNumber> => {
+    gasLimitFallback,
+    walletIndex,
+  }: Omit<ApproveParams, 'feeOptionKey'>): Promise<BigNumber> => {
     try {
       const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
-      const gasLimit = await this.estimateCall(sender, erc20ABI, 'approve', [
-        spender,
-        txAmount,
-        { from: this.getAddress() },
-      ])
+      const gasLimit = await this.estimateCall({
+        walletIndex,
+        contractAddress,
+        abi: erc20ABI,
+        funcName: 'approve',
+        funcParams: [spenderAddress, txAmount, { from: this.getAddress() }],
+      })
 
       return gasLimit
     } catch (error) {
+      // return `gasLimitFallback` if available
+      if (gasLimitFallback) return BigNumber.from(gasLimitFallback)
       return Promise.reject(error)
     }
   }
@@ -732,11 +724,13 @@ export default class Client implements XChainClient, EthereumClient {
       let txResult
       if (assetAddress && !isETHAddress) {
         // Transfer ERC20
-        txResult = await this.call<TransactionResponse>(walletIndex, assetAddress, erc20ABI, 'transfer', [
-          recipient,
-          txAmount,
-          Object.assign({}, overrides),
-        ])
+        txResult = await this.call<TransactionResponse>({
+          walletIndex,
+          contractAddress: assetAddress,
+          abi: erc20ABI,
+          funcName: 'transfer',
+          funcParams: [recipient, txAmount, Object.assign({}, overrides)],
+        })
       } else {
         // Transfer ETH
         const transactionRequest = Object.assign(

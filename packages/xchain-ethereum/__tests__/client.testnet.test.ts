@@ -457,18 +457,18 @@ describe('Client Test', () => {
       '0x0000000000000000000000000000000000000000000000000000000000000064',
     )
 
-    let isApproved = await ethClient.isApproved(
-      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-      baseAmount(100, ETH_DECIMAL),
-    )
+    let isApproved = await ethClient.isApproved({
+      contractAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      spenderAddress: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      amount: baseAmount(100, ETH_DECIMAL),
+    })
     expect(isApproved).toEqual(true)
 
-    isApproved = await ethClient.isApproved(
-      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-      baseAmount(101, ETH_DECIMAL),
-    )
+    isApproved = await ethClient.isApproved({
+      contractAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      spenderAddress: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      amount: baseAmount(101, ETH_DECIMAL),
+    })
     expect(isApproved).toEqual(false)
   })
 
@@ -484,8 +484,8 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
 
     const gasLimit = await ethClient.estimateApprove({
-      spender: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      sender: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      contractAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      spenderAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       amount: baseAmount(100, ETH_DECIMAL),
     })
     expect(gasLimit.eq(21000)).toBeTruthy()
@@ -511,8 +511,8 @@ describe('Client Test', () => {
 
     const tx = await ethClient.approve({
       walletIndex: 0,
-      spender: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      sender: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
+      contractAddress: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
+      spenderAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       feeOptionKey: 'fastest',
       amount: baseAmount(100, ETH_DECIMAL),
     })
@@ -530,13 +530,18 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
 
-    const gasLimit = await ethClient.estimateCall('0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7', erc20ABI, 'transfer', [
-      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
-      {
-        from: ethClient.getAddress(),
-      },
-    ])
+    const gasLimit = await ethClient.estimateCall({
+      contractAddress: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
+      abi: erc20ABI,
+      funcName: 'transfer',
+      funcParams: [
+        '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+        BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
+        {
+          from: ethClient.getAddress(),
+        },
+      ],
+    })
 
     expect(gasLimit.toString()).toEqual('21000')
   })
@@ -574,12 +579,12 @@ describe('Client Test', () => {
 
     const prices = await ethClient.estimateGasPrices()
 
-    const txResult = await ethClient.call<TransactionResponse>(
-      0,
-      '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
-      erc20ABI,
-      'transfer',
-      [
+    const txResult = await ethClient.call<TransactionResponse>({
+      walletIndex: 0,
+      contractAddress: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
+      abi: erc20ABI,
+      funcName: 'transfer',
+      funcParams: [
         '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
         BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
         // Here the tx overrides
@@ -588,7 +593,7 @@ describe('Client Test', () => {
           gasPrice: BigNumber.from(prices.average.amount().toString()),
         },
       ],
-    )
+    })
 
     expect(txResult.hash).toEqual('0xbc5f55b97b816d1c30138d26bce5434ff28828b15ee79aa79aebf70f786a3fe8')
   })

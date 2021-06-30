@@ -42,9 +42,23 @@ export type FeesParams = C.FeesParams & C.TxParams
 export type FeesWithGasPricesAndLimits = { fees: C.Fees; gasPrices: GasPrices; gasLimit: BigNumber }
 
 export type ApproveParams = {
-  walletIndex: number
-  spender: Address
-  sender: Address
+  walletIndex?: number
+  contractAddress: Address
+  spenderAddress: Address
   feeOptionKey?: FeeOptionKey
   amount?: BaseAmount
+  // Optional fallback for gasLimit
+  gasLimitFallback?: ethers.BigNumberish
 }
+
+export type IsApprovedParams = { contractAddress: Address; spenderAddress: Address; amount?: BaseAmount }
+
+export type CallParams = {
+  walletIndex?: number
+  contractAddress: Address
+  abi: ethers.ContractInterface
+  funcName: string
+  funcParams?: Array<unknown>
+}
+
+export type EstimateCallParams = Pick<CallParams, 'contractAddress' | 'abi' | 'funcName' | 'funcParams' | 'walletIndex'>
