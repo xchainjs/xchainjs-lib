@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-polkadot",
-  "version": "0.0.1-alpha.858+702bf67",
+  "version": "0.0.1-alpha.867+0d871f1",
   "description": "Custom Polkadot client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -35,9 +35,9 @@
   "devDependencies": {
     "@polkadot/api": "^3.1.1",
     "@polkadot/util": "^5.1.1",
-    "@thorwallet/xchain-client": "0.0.1-alpha.858+702bf67",
-    "@thorwallet/xchain-crypto": "0.0.1-alpha.858+702bf67",
-    "@thorwallet/xchain-util": "0.0.1-alpha.858+702bf67",
+    "@thorwallet/xchain-client": "0.0.1-alpha.867+0d871f1",
+    "@thorwallet/xchain-crypto": "0.0.1-alpha.867+0d871f1",
+    "@thorwallet/xchain-util": "0.0.1-alpha.867+0d871f1",
     "@types/big.js": "^4.0.5",
     "axios": "^0.21.0",
     "jest-websocket-mock": "^2.2.0",
@@ -55,5 +55,5 @@
     "@thorwallet/xchain-util": "0.0.1-alpha.792+b6e4e50",
     "axios": "^0.21.0"
   },
-  "gitHead": "702bf673ea8f80e20e47a4af0ad994cf53235b1f"
+  "gitHead": "0d871f1d15f4694e6416e10b123af7b37cc623cf"
 }
