@@ -66,6 +66,7 @@ export abstract class BaseXChainClient implements XChainClient {
   public getNetwork(): Network {
     return this.network
   }
+
   protected async getFeeRatesFromThorchain(): Promise<FeeRates> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const respData = (await this.thornodeAPIGet('/inbound_addresses')) as any[]
@@ -80,6 +81,7 @@ export abstract class BaseXChainClient implements XChainClient {
     }
     return feeRates
   }
+
   protected async thornodeAPIGet(endpoint: string): Promise<unknown> {
     const url = this.network === 'testnet' ? TESTNET_THORNODE_API_BASE : MAINNET_THORNODE_API_BASE
     return (await axios.get(url + endpoint)).data
@@ -89,6 +91,7 @@ export abstract class BaseXChainClient implements XChainClient {
    * Set/update a new phrase
    *
    * @param {string} phrase A new phrase.
+   * @param {number} walletIndex (optional) HD wallet index
    * @returns {Address} The address from the given phrase
    *
    * @throws {"Invalid phrase"}
@@ -108,11 +111,11 @@ export abstract class BaseXChainClient implements XChainClient {
   /**
    * Get getFullDerivationPath
    *
-   * @param {number} index the HD wallet index
+   * @param {number} walletIndex HD wallet index
    * @returns {string} The bitcoin derivation path based on the network.
    */
-  protected getFullDerivationPath(index: number): string {
-    return this.rootDerivationPaths ? `${this.rootDerivationPaths[this.network]}${index}` : ''
+  protected getFullDerivationPath(walletIndex: number): string {
+    return this.rootDerivationPaths ? `${this.rootDerivationPaths[this.network]}${walletIndex}` : ''
   }
   /**
    * Purge client.
