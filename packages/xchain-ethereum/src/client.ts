@@ -35,6 +35,7 @@ import {
   FeeOptionKey,
   FeesParams as XFeesParams,
   BaseXChainClient,
+  RootDerivationPaths,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
 import * as ethplorerAPI from './ethplorer-api'
@@ -89,6 +90,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   private infuraCreds: InfuraCreds | undefined
   private ethplorerUrl: string
   private ethplorerApiKey: string
+  private rootDerivationPaths: RootDerivationPaths
   private providers: Map<XChainNetwork, Provider> = new Map<XChainNetwork, Provider>()
 
   /**
@@ -117,7 +119,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     this.ethplorerApiKey = ethplorerApiKey
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
     this.setupProviders()
-    this.setPhrase(phrase)
+    phrase && this.setPhrase(phrase)
   }
 
   /**
