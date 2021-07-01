@@ -47,13 +47,18 @@ export type ApproveParams = {
   spenderAddress: Address
   feeOptionKey?: FeeOptionKey
   amount?: BaseAmount
-  // Optional fallback for gasLimit
+  // Optional fallback in case estimation for gas limit fails
   gasLimitFallback?: ethers.BigNumberish
 }
 
-export type EstimateApproveParams = Omit<ApproveParams, 'feeOptionKey'>
+export type EstimateApproveParams = Omit<ApproveParams, 'feeOptionKey' | 'gasLimitFallback'>
 
-export type IsApprovedParams = { contractAddress: Address; spenderAddress: Address; amount?: BaseAmount }
+export type IsApprovedParams = {
+  walletIndex?: number
+  contractAddress: Address
+  spenderAddress: Address
+  amount?: BaseAmount
+}
 
 export type CallParams = {
   walletIndex?: number

@@ -35,7 +35,6 @@ import {
   FeeOptionKey,
   FeesParams as XFeesParams,
   BaseXChainClient,
-  FeeRates,
 } from '@xchainjs/xchain-client'
 import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
 import * as ethplorerAPI from './ethplorer-api'
@@ -144,28 +143,30 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   /**
    * Get the current address.
    *
+   * @param {number} walletIndex (optional) HD wallet index
    * @returns {Address} The current address.
    *
    * @throws {"Phrase must be provided"}
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress(index = 0): Address {
-    if (index < 0) {
+  getAddress(walletIndex = 0): Address {
+    if (walletIndex < 0) {
       throw new Error('index must be greater than zero')
     }
-    return this.hdNode.derivePath(this.getFullDerivationPath(index)).address.toLowerCase()
+    return this.hdNode.derivePath(this.getFullDerivationPath(walletIndex)).address.toLowerCase()
   }
 
   /**
    * Get etherjs wallet interface.
    *
+   * @param {number} walletIndex (optional) HD wallet index
    * @returns {Wallet} The current etherjs wallet interface.
    *
    * @throws {"Phrase must be provided"}
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getWallet = (index = 0): ethers.Wallet => {
-    return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(index))).connect(this.getProvider())
+  getWallet = (walletIndex = 0): ethers.Wallet => {
+    return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(walletIndex))).connect(this.getProvider())
   }
   setupProviders = (): void => {
     if (this.infuraCreds) {
@@ -272,6 +273,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * Set/update a new phrase (Eg. If user wants to change wallet)
    *
    * @param {string} phrase A new phrase.
+   * @param {number} walletIndex (optional) HD wallet index
    * @returns {Address} The address from the given phrase
    *
    * @throws {"Invalid phrase"}
@@ -495,13 +497,14 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   /**
    * Call a contract function.
    * @template T The result interface.
+   * @param {number} walletIndex (optional) HD wallet index
    * @param {Address} contractAddress The contract address.
    * @param {ContractInterface} abi The contract ABI json.
    * @param {string} funcName The function to be called.
    * @param {Array<any>} funcParams The parameters of the function.
    * @returns {T} The result of the contract function call.
    *
-   * @throws {"address must be provided"}
+   * @throws {"contracAddress must be provided"}
    * Thrown if the given contract address is empty.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -519,6 +522,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @param {ContractInterface} abi The contract ABI json.
    * @param {string} funcName The function to be called.
    * @param {Array<any>} funcParams The parameters of the function.
+   * @param {number} walletIndex (optional) HD wallet index
    * @returns {BigNumber} The result of the contract function call.
    *
    * @throws {"address must be provided"}
@@ -544,12 +548,18 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @param {Address} contractAddress The spender address.
    * @param {Address} spenderAddress The spender address.
    * @param {BaseAmount} amount The amount to check if it's allowed to spend or not (optional).
+   * @param {number} walletIndex (optional) HD wallet index
    * @returns {boolean} `true` or `false`.
    */
-  isApproved = async ({ contractAddress, spenderAddress, amount }: IsApprovedParams): Promise<boolean> => {
+  isApproved = async ({
+    contractAddress,
+    spenderAddress,
+    amount,
+    walletIndex = 0,
+  }: IsApprovedParams): Promise<boolean> => {
     // since amount is optional, set it to smallest amount by default
     const txAmount = BigNumber.from(amount?.amount().toFixed() ?? 1)
-    const owner = this.getAddress()
+    const owner = this.getAddress(walletIndex)
     const allowance = await this.call<BigNumberish>({
       contractAddress,
       abi: erc20ABI,
@@ -562,11 +572,12 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   /**
    * Check allowance.
    *
-   * @param {number} walletIndex which wallet to use to make the call
-   * @param {Address} spender The spender index.
-   * @param {Address} sender The sender address.
+   * @param {Address} contractAddress The contract address.
+   * @param {Address} spenderAddress The spender address.
    * @param {feeOptionKey} FeeOptionKey Fee option (optional)
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
+   * @param {number} walletIndex (optional) HD wallet index
+   *
    * @returns {TransactionResponse} The transaction result.
    */
   approve = async ({
@@ -591,8 +602,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       spenderAddress,
       contractAddress,
       amount,
-      gasLimitFallback,
-    }).catch(() => undefined)
+    }).catch(() => BigNumber.from(gasLimitFallback))
 
     const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
     return await this.call<TransactionResponse>({
@@ -600,24 +610,24 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       contractAddress,
       abi: erc20ABI,
       funcName: 'approve',
-      funcParams: [spenderAddress, txAmount, { from: this.getAddress(), gasPrice, gasLimit }],
+      funcParams: [spenderAddress, txAmount, { from: this.getAddress(walletIndex), gasPrice, gasLimit }],
     })
   }
 
   /**
    * Estimate gas limit of approve.
    *
-   * @param {Address} spender The spender address.
-   * @param {Address} sender The sender address.
+   * @param {Address} contractAddress The contract address.
+   * @param {Address} spenderAddress The spender address.
+   * @param {number} walletIndex (optional) HD wallet index
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @returns {BigNumber} The estimated gas limit.
    */
   estimateApprove = async ({
     contractAddress,
     spenderAddress,
+    walletIndex = 0,
     amount,
-    gasLimitFallback,
-    walletIndex,
   }: EstimateApproveParams): Promise<BigNumber> => {
     try {
       const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
@@ -626,13 +636,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         contractAddress,
         abi: erc20ABI,
         funcName: 'approve',
-        funcParams: [spenderAddress, txAmount, { from: this.getAddress() }],
+        funcParams: [spenderAddress, txAmount, { from: this.getAddress(walletIndex) }],
       })
 
       return gasLimit
     } catch (error) {
-      // return `gasLimitFallback` if available
-      if (gasLimitFallback) return BigNumber.from(gasLimitFallback)
       return Promise.reject(error)
     }
   }
@@ -735,10 +743,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @throws {"Failed to estimate gas price"} Thrown if failed to estimate gas price.
    */
   estimateGasPrices = async (): Promise<GasPrices> => {
-    let rates: FeeRates | undefined = undefined
-
     try {
-      rates = await this.getFeeRatesFromThorchain()
+      const rates = await this.getFeeRatesFromThorchain()
       return {
         average: baseAmount(rates.average, ETH_DECIMAL),
         fast: baseAmount(rates.fast, ETH_DECIMAL),
@@ -779,7 +785,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   /**
    * Estimate gas.
    *
-   * @param {FeesParams} params The transaction options.
+   * @param {FeesParams} params The transaction and fees options.
    * @returns {BaseAmount} The estimated gas fee.
    *
    * @throws {"Failed to estimate gas limit"} Thrown if failed to estimate gas limit.
