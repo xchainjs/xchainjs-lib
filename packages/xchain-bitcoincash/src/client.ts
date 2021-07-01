@@ -279,7 +279,7 @@ class Client extends UTXOClient {
     const { builder, utxos } = await utils.buildTx({
       ...params,
       feeRate,
-      sender: this.getAddress(),
+      sender: this.getAddress(index),
       haskoinUrl: this.getHaskoinURL(),
       network: this.network,
     })
