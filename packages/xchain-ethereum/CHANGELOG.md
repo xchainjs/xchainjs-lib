@@ -1,6 +1,22 @@
+# v.0.22.0 (2021-06-30)
+
+### Fix
+
+- `isApproved` returned always `false`
+
+### Breaking change
+
+- Parameter object for `call`, `estimateCall`, `isApproved` methods
+
+### Add
+
+- Optional `gasLimitFallback` parameter for `approve` call
+
+
 # v.0.21.5 (2021-06-29)
 
 - added support for pulling fees from thornode.
+
 
 # v.0.21.4 (2021-06-07)
 
