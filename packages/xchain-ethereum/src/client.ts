@@ -4,6 +4,7 @@ import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import erc20ABI from './data/erc20.json'
 import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
+import pThrottle from 'p-throttle'
 import {
   GasOracleResponse,
   Network as EthNetwork,
@@ -31,8 +32,9 @@ import {
   Network,
   FeeOptionKey,
   FeesParams as XFeesParams,
+  Balance,
 } from '@thorwallet/xchain-client'
-import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@thorwallet/xchain-util'
+import { AssetETH, baseAmount, BaseAmount, assetToString, Asset } from '@thorwallet/xchain-util'
 import * as Crypto from '@thorwallet/xchain-crypto'
 import * as ethplorerAPI from './ethplorer-api'
 import * as etherscanAPI from './etherscan-api'
@@ -365,43 +367,46 @@ export default class Client implements XChainClient, EthereumClient {
         // For mainnet, we will use ethplorer api(one request only)
         // https://github.com/xchainjs/xchainjs-lib/issues/252
         // And to avoid etherscan api call limit, it gets balances in a sequence way, not in parallel
-        const balances = []
-        for (let i = 0; i < newAssets.length; i++) {
-          const asset = newAssets[i]
-          const etherscan = this.getEtherscanProvider()
-          if (assetToString(asset) !== assetToString(AssetETH)) {
-            // Handle token balances
-            const assetAddress = getTokenAddress(asset)
-            if (!assetAddress) {
-              throw new Error(`Invalid asset ${asset}`)
-            }
-            const balance = await etherscanAPI.getTokenBalance({
-              baseUrl: etherscan.baseUrl,
-              address,
-              assetAddress,
-              apiKey: etherscan.apiKey,
-            })
-            const decimals =
-              BigNumber.from(await this.call<BigNumberish>(0, assetAddress, erc20ABI, 'decimals', [])).toNumber() ||
-              ETH_DECIMAL
 
-            if (!Number.isNaN(decimals)) {
-              balances.push({
-                asset,
-                amount: baseAmount(balance.toString(), decimals),
+        const throttle = pThrottle({
+          limit: 5,
+          interval: 1000,
+        })
+
+        const getBalance = throttle(
+          async (asset: Asset): Promise<Balance> => {
+            const etherscan = this.getEtherscanProvider()
+            if (assetToString(asset) !== assetToString(AssetETH)) {
+              // Handle token balances
+              const assetAddress = getTokenAddress(asset)
+              if (!assetAddress) {
+                throw new Error(`Invalid asset ${asset}`)
+              }
+              const balance = await etherscanAPI.getTokenBalance({
+                baseUrl: etherscan.baseUrl,
+                address,
+                assetAddress,
+                apiKey: etherscan.apiKey,
               })
+              const decimals =
+                BigNumber.from(await this.call<BigNumberish>(0, assetAddress, erc20ABI, 'decimals', [])).toNumber() ||
+                ETH_DECIMAL
+
+              if (!Number.isNaN(decimals)) {
+                return {
+                  asset,
+                  amount: baseAmount(balance.toString(), decimals),
+                }
+              }
             }
-          } else {
-            balances.push({
+            return {
               asset: AssetETH,
               amount: ethBalanceAmount,
-            })
-          }
-          // Due to etherscan api call limitation, put some delay before another call
-          // Free Etherscan api key limit: 5 calls per second
-          // So 0.3s delay is reasonable for now
-          await delay(300)
-        }
+            }
+          },
+        )
+
+        const balances = await Promise.all(newAssets.map((asset) => getBalance(asset)))
 
         return balances
       }
