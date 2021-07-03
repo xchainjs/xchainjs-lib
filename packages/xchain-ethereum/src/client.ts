@@ -744,11 +744,14 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   estimateGasPrices = async (): Promise<GasPrices> => {
     try {
-      const rates = await this.getFeeRatesFromThorchain()
+      // Note: `rates` are in `gwei`
+      // @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/querier.go#L416-420
+      // To have all values in `BaseAmount`, they needs to be converted into `wei` (1 gwei = 1,000,000,000 wei = 1e9)
+      const ratesInGwei = await this.getFeeRatesFromThorchain()
       return {
-        average: baseAmount(rates.average, ETH_DECIMAL),
-        fast: baseAmount(rates.fast, ETH_DECIMAL),
-        fastest: baseAmount(rates.fastest, ETH_DECIMAL),
+        average: baseAmount(ratesInGwei.average * 10 ** 9, ETH_DECIMAL),
+        fast: baseAmount(ratesInGwei.fast * 10 ** 9, ETH_DECIMAL),
+        fastest: baseAmount(ratesInGwei.fastest * 10 ** 9, ETH_DECIMAL),
       }
     } catch (error) {}
     //should only get here if thor fails

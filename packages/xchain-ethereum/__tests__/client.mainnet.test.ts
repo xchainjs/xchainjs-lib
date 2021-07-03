@@ -2,6 +2,7 @@ import nock from 'nock'
 import { baseAmount } from '@xchainjs/xchain-util'
 import Client from '../src/client'
 import { mock_ethplorer_api_getTxInfo } from '../__mocks__/ethplorer-api'
+import { mock_thornode_inbound_addresses_success } from '../__mocks__/thornode-api'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 // https://iancoleman.io/bip39/
@@ -10,6 +11,7 @@ const addrPath0 = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E'
 // m/44'/60'/0'/0/1
 const addrPath1 = '0x1804137641b5CB781226b361976F15B4067ee0F9'
 const ethplorerUrl = 'https://api.ethplorer.io'
+const thornodeApiUrl = 'https://thornode.thorchain.info'
 
 /**
  * Wallet Tests
@@ -32,6 +34,24 @@ describe('Client Test', () => {
 
     expect(ethClient.getAddress(0)).toEqual(addrPath0.toLowerCase())
     expect(ethClient.getAddress(1)).toEqual(addrPath1.toLowerCase())
+  })
+
+  it('estimateGasPrices', async () => {
+    mock_thornode_inbound_addresses_success(
+      thornodeApiUrl,
+      require('../__mocks__/responses/inbound_addresses_mainnet.json'),
+    )
+
+    const ethClient = new Client({
+      network: 'mainnet',
+      phrase,
+    })
+
+    const { fast, fastest, average } = await ethClient.estimateGasPrices()
+
+    expect(fast.amount().toString()).toEqual('30000000000')
+    expect(fastest.amount().toString()).toEqual('150000000000')
+    expect(average.amount().toString()).toEqual('15000000000')
   })
 
   it('get transaction data', async () => {
