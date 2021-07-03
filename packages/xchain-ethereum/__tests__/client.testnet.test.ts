@@ -143,6 +143,24 @@ describe('Client Test', () => {
     expect(() => ethClient.getAddress(-1)).toThrow()
   })
 
+  it('estimateGasPrices', async () => {
+    mock_thornode_inbound_addresses_success(
+      thornodeApiUrl,
+      require('../__mocks__/responses/inbound_addresses_testnet.json'),
+    )
+
+    const ethClient = new Client({
+      network: 'testnet',
+      phrase,
+    })
+
+    const { fast, fastest, average } = await ethClient.estimateGasPrices()
+
+    expect(fast.amount().toString()).toEqual('30000000000')
+    expect(fastest.amount().toString()).toEqual('150000000000')
+    expect(average.amount().toString()).toEqual('15000000000')
+  })
+
   it('get eth transaction history', async () => {
     const ethClient = new Client({
       network: 'testnet',

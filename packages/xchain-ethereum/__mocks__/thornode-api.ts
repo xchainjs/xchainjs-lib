@@ -16,6 +16,7 @@ export const mock_thornode_inbound_addresses_success = (url: string, result: Inb
     .query((_) => true)
     .reply(200, result)
 }
+
 export const mock_thornode_inbound_addresses_fail = (url: string) => {
   nock(url)
     .get(`/thorchain/inbound_addresses`)
