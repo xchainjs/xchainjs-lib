@@ -379,7 +379,7 @@ describe('Client Test', () => {
       ropstenInfuraUrl,
       ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0x937297c54a1d43d2df30ce4f8cd40b63f83905b74ad85d85cd7cab7610108c5e',
+      '0xc24aafc2d180370610aedecf0c7de939ad9c2a2c0c0a810eae5f3b69362022c3',
     )
     mock_thornode_inbound_addresses_success(thornodeApiUrl, [
       {
@@ -411,7 +411,7 @@ describe('Client Test', () => {
       gasLimit: gasFee.gasLimit,
       gasPrice: gasFee.gasPrices.fastest,
     })
-    expect(txHash).toEqual('0x937297c54a1d43d2df30ce4f8cd40b63f83905b74ad85d85cd7cab7610108c5e')
+    expect(txHash).toEqual('0xc24aafc2d180370610aedecf0c7de939ad9c2a2c0c0a810eae5f3b69362022c3')
   })
 
   it('estimate gas for eth transfer', async () => {
@@ -607,7 +607,7 @@ describe('Client Test', () => {
       ropstenInfuraUrl,
       ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xce5ecad949751186a3342d131edcf36e2c235222153b162ec525354be8f1d540',
+      '0xdb8fa5020096459950024d4c0635d91754cb6c6623d23d95bdce7e9308c975df',
     )
     mock_thornode_inbound_addresses_success(thornodeApiUrl, [
       {
@@ -645,6 +645,6 @@ describe('Client Test', () => {
       ],
     })
 
-    expect(txResult.hash).toEqual('0xce5ecad949751186a3342d131edcf36e2c235222153b162ec525354be8f1d540')
+    expect(txResult.hash).toEqual('0xdb8fa5020096459950024d4c0635d91754cb6c6623d23d95bdce7e9308c975df')
   })
 })
