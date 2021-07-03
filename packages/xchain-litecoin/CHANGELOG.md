@@ -1,3 +1,7 @@
+# v.0.6.8 (2021-07-03)
+
+- refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
+
 # v.0.6.7 (2021-06-29)
 
 - added support for pulling fees from thornode.
