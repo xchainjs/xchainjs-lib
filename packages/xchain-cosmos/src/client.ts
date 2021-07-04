@@ -15,12 +15,11 @@ import {
 } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
-import { PrivKey, codec } from 'cosmos-client'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
+import { PrivKey } from 'cosmos-client'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './types'
-import { DECIMAL, getAsset, getDenom, getTxsFromHistory } from './util'
+import { DECIMAL, getAsset, getDenom, getTxsFromHistory, registerCodecs } from './util'
 
 /**
  * Interface for custom Cosmos client
@@ -107,17 +106,6 @@ class Client implements CosmosClient, XChainClient {
    */
   getNetwork(): Network {
     return this.network
-  }
-
-  /**
-   * @private
-   * Register message codecs.
-   *
-   * @returns {void}
-   */
-  private registerCodecs(): void {
-    codec.registerCodec('cosmos-sdk/MsgSend', MsgSend, MsgSend.fromJSON)
-    codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
   }
 
   /**
@@ -267,7 +255,7 @@ class Client implements CosmosClient, XChainClient {
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
-    this.registerCodecs()
+    registerCodecs()
 
     const mainAsset = this.getMainAsset()
     const txHistory = await this.getSDKClient().searchTx({
@@ -307,7 +295,7 @@ class Client implements CosmosClient, XChainClient {
    */
   async transfer({ walletIndex, asset, amount, recipient, memo }: TxParams): Promise<TxHash> {
     const fromAddressIndex = walletIndex || 0
-    this.registerCodecs()
+    registerCodecs()
 
     const mainAsset = this.getMainAsset()
     const transferResult = await this.getSDKClient().transfer({
