@@ -17,9 +17,9 @@ import erc20ABI from './data/erc20.json'
 import {
   Address,
   ETHTransactionInfo,
+  EthNetwork,
   FeesWithGasPricesAndLimits,
   GasPrices,
-  Network as EthNetwork,
   TokenBalance,
   TokenTransactionInfo,
   TransactionInfo,
@@ -52,9 +52,9 @@ export const xchainNetworkToEths = (network: XChainNetwork): EthNetwork => {
     // to be sure that ALL possible cases are
     // processed in a similar way to reverted ethNetworkToXchains
     case 'mainnet':
-      return EthNetwork.MAIN
+      return EthNetwork.Main
     case 'testnet':
-      return EthNetwork.TEST
+      return EthNetwork.Test
   }
 }
 
@@ -69,9 +69,9 @@ export const ethNetworkToXchains = (network: EthNetwork): XChainNetwork => {
     // DO NOT use switch/case's default branch
     // to be sure that ALL possible cases are
     // processed in a similar way to reverted xchainNetworkToEths
-    case EthNetwork.MAIN:
+    case EthNetwork.Main:
       return 'mainnet'
-    case EthNetwork.TEST:
+    case EthNetwork.Test:
       return 'testnet'
   }
 }

@@ -28,13 +28,13 @@ import {
   CallParams,
   EstimateApproveParams,
   EstimateCallParams,
+  EthNetwork,
   ExplorerUrl,
   FeesWithGasPricesAndLimits,
   GasOracleResponse,
   GasPrices,
   InfuraCreds,
   IsApprovedParams,
-  Network as EthNetwork,
   TxOverrides,
 } from './types'
 import {
@@ -171,16 +171,16 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       // Infura provider takes either a string of project id
       // or an object of id and secret
       const testnetProvider = this.infuraCreds.projectSecret
-        ? new ethers.providers.InfuraProvider(EthNetwork.TEST, this.infuraCreds)
-        : new ethers.providers.InfuraProvider(EthNetwork.TEST, this.infuraCreds.projectId)
+        ? new ethers.providers.InfuraProvider(EthNetwork.Test, this.infuraCreds)
+        : new ethers.providers.InfuraProvider(EthNetwork.Test, this.infuraCreds.projectId)
       const mainnetProvider = this.infuraCreds.projectSecret
-        ? new ethers.providers.InfuraProvider(EthNetwork.MAIN, this.infuraCreds)
-        : new ethers.providers.InfuraProvider(EthNetwork.MAIN, this.infuraCreds.projectId)
+        ? new ethers.providers.InfuraProvider(EthNetwork.Main, this.infuraCreds)
+        : new ethers.providers.InfuraProvider(EthNetwork.Main, this.infuraCreds.projectId)
       this.providers.set('testnet', testnetProvider)
       this.providers.set('mainnet', mainnetProvider)
     } else {
-      this.providers.set('testnet', getDefaultProvider(EthNetwork.TEST))
-      this.providers.set('mainnet', getDefaultProvider(EthNetwork.MAIN))
+      this.providers.set('testnet', getDefaultProvider(EthNetwork.Test))
+      this.providers.set('mainnet', getDefaultProvider(EthNetwork.Main))
     }
   }
 
