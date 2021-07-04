@@ -2,8 +2,8 @@ import { Address } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
+import { BTC_DECIMAL } from './const'
 import { getIsTxConfirmed } from './sochain-api'
-import { BTC_DECIMAL } from './utils'
 
 const HASKOIN_API_URL = 'https://api.haskoin.com/btc'
 const SOCHAIN_API_URL = 'https://sochain.com/api/v2'
