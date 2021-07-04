@@ -194,15 +194,11 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
    * @returns {Array<Balance>} The LTC balance of the address.
    */
   async getBalance(address: Address): Promise<Balance[]> {
-    try {
-      return Utils.getBalance({
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-        address,
-      })
-    } catch (e) {
-      return Promise.reject(e)
-    }
+    return Utils.getBalance({
+      sochainUrl: this.sochainUrl,
+      network: this.network,
+      address,
+    })
   }
 
   /**
@@ -216,47 +212,43 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
     // Sochain API doesn't have pagination parameter
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
-    try {
-      const response = await sochain.getAddress({
+    const response = await sochain.getAddress({
+      sochainUrl: this.sochainUrl,
+      network: this.network,
+      address: `${params?.address}`,
+    })
+    const total = response.txs.length
+    const transactions: Tx[] = []
+
+    const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
+    for (const txItem of txs) {
+      const rawTx = await sochain.getTx({
         sochainUrl: this.sochainUrl,
         network: this.network,
-        address: `${params?.address}`,
+        hash: txItem.txid,
       })
-      const total = response.txs.length
-      const transactions: Tx[] = []
-
-      const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
-      for (const txItem of txs) {
-        const rawTx = await sochain.getTx({
-          sochainUrl: this.sochainUrl,
-          network: this.network,
-          hash: txItem.txid,
-        })
-        const tx: Tx = {
-          asset: AssetLTC,
-          from: rawTx.inputs.map((i: TxIO) => ({
-            from: i.address,
-            amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
-          })),
-          to: rawTx.outputs
-            // ignore tx with type 'nulldata'
-            .filter((i: TxIO) => i.type !== 'nulldata')
-            .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
-          date: new Date(rawTx.time * 1000),
-          type: 'transfer',
-          hash: rawTx.txid,
-        }
-        transactions.push(tx)
+      const tx: Tx = {
+        asset: AssetLTC,
+        from: rawTx.inputs.map((i: TxIO) => ({
+          from: i.address,
+          amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
+        })),
+        to: rawTx.outputs
+          // ignore tx with type 'nulldata'
+          .filter((i: TxIO) => i.type !== 'nulldata')
+          .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
+        date: new Date(rawTx.time * 1000),
+        type: 'transfer',
+        hash: rawTx.txid,
       }
-
-      const result: TxsPage = {
-        total,
-        txs: transactions,
-      }
-      return result
-    } catch (error) {
-      return Promise.reject(error)
+      transactions.push(tx)
     }
+
+    const result: TxsPage = {
+      total,
+      txs: transactions,
+    }
+    return result
   }
 
   /**
@@ -266,25 +258,21 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string): Promise<Tx> {
-    try {
-      const rawTx = await sochain.getTx({
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-        hash: txId,
-      })
-      return {
-        asset: AssetLTC,
-        from: rawTx.inputs.map((i) => ({
-          from: i.address,
-          amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
-        })),
-        to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
-        date: new Date(rawTx.time * 1000),
-        type: 'transfer',
-        hash: rawTx.txid,
-      }
-    } catch (error) {
-      return Promise.reject(error)
+    const rawTx = await sochain.getTx({
+      sochainUrl: this.sochainUrl,
+      network: this.network,
+      hash: txId,
+    })
+    return {
+      asset: AssetLTC,
+      from: rawTx.inputs.map((i) => ({
+        from: i.address,
+        amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
+      })),
+      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
+      date: new Date(rawTx.time * 1000),
+      type: 'transfer',
+      hash: rawTx.txid,
     }
   }
   /**
@@ -329,12 +317,8 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
    * @returns {Fees} The fees without memo
    */
   async getFees(): Promise<Fees> {
-    try {
-      const { fees } = await this.getFeesWithRates()
-      return fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const { fees } = await this.getFeesWithRates()
+    return fees
   }
 
   /**
@@ -345,12 +329,8 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
    * @returns {Fees} The fees with memo
    */
   async getFeesWithMemo(memo: string): Promise<Fees> {
-    try {
-      const { fees } = await this.getFeesWithRates(memo)
-      return fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const { fees } = await this.getFeesWithRates(memo)
+    return fees
   }
 
   /**
@@ -360,12 +340,8 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
    * @returns {FeeRates} The fee rate
    */
   async getFeeRates(): Promise<FeeRates> {
-    try {
-      const { rates } = await this.getFeesWithRates()
-      return rates
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const { rates } = await this.getFeesWithRates()
+    return rates
   }
 
   /**
@@ -375,30 +351,26 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    try {
-      const fromAddressIndex = params?.walletIndex || 0
-      const feeRate = params.feeRate || (await this.getFeeRates()).fast
-      const { psbt } = await Utils.buildTx({
-        ...params,
-        feeRate,
-        sender: this.getAddress(fromAddressIndex),
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-      })
-      const ltcKeys = this.getLtcKeys(this.phrase, fromAddressIndex)
-      psbt.signAllInputs(ltcKeys) // Sign all inputs
-      psbt.finalizeAllInputs() // Finalise inputs
-      const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+    const fromAddressIndex = params?.walletIndex || 0
+    const feeRate = params.feeRate || (await this.getFeeRates()).fast
+    const { psbt } = await Utils.buildTx({
+      ...params,
+      feeRate,
+      sender: this.getAddress(fromAddressIndex),
+      sochainUrl: this.sochainUrl,
+      network: this.network,
+    })
+    const ltcKeys = this.getLtcKeys(this.phrase, fromAddressIndex)
+    psbt.signAllInputs(ltcKeys) // Sign all inputs
+    psbt.finalizeAllInputs() // Finalise inputs
+    const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-      return await Utils.broadcastTx({
-        network: this.network,
-        txHex,
-        nodeUrl: this.nodeUrl,
-        auth: this.nodeAuth,
-      })
-    } catch (e) {
-      return Promise.reject(e)
-    }
+    return await Utils.broadcastTx({
+      network: this.network,
+      txHex,
+      nodeUrl: this.nodeUrl,
+      auth: this.nodeAuth,
+    })
   }
 }
 

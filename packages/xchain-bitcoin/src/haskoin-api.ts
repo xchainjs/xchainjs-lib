@@ -42,27 +42,23 @@ export const getUnspentTxs = async (address: string): Promise<UtxoData[]> => {
 }
 
 export const getConfirmedUnspentTxs = async (address: string): Promise<UtxoData[]> => {
-  try {
-    const allUtxos = await getUnspentTxs(address)
+  const allUtxos = await getUnspentTxs(address)
 
-    const confirmedUTXOs: UtxoData[] = []
+  const confirmedUTXOs: UtxoData[] = []
 
-    await Promise.all(
-      allUtxos.map(async (tx: UtxoData) => {
-        const { is_confirmed: isTxConfirmed } = await getIsTxConfirmed({
-          sochainUrl: SOCHAIN_API_URL,
-          network: 'mainnet',
-          hash: tx.txid,
-        })
+  await Promise.all(
+    allUtxos.map(async (tx: UtxoData) => {
+      const { is_confirmed: isTxConfirmed } = await getIsTxConfirmed({
+        sochainUrl: SOCHAIN_API_URL,
+        network: 'mainnet',
+        hash: tx.txid,
+      })
 
-        if (isTxConfirmed) {
-          confirmedUTXOs.push(tx)
-        }
-      }),
-    )
+      if (isTxConfirmed) {
+        confirmedUTXOs.push(tx)
+      }
+    }),
+  )
 
-    return confirmedUTXOs
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  return confirmedUTXOs
 }

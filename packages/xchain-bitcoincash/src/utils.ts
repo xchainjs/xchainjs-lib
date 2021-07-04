@@ -72,25 +72,19 @@ export function getFee(inputs: number, feeRate: FeeRate, data: Buffer | null = n
  * @returns {Array<Balance>} The balances of the given address.
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
-  try {
-    const account = await getAccount(params)
-    if (!account) {
-      return Promise.reject(new Error('No bchBalance found'))
-    }
+  const account = await getAccount(params)
+  if (!account) throw new Error('No bchBalance found')
 
-    const confirmed = baseAmount(account.confirmed, BCH_DECIMAL)
-    const unconfirmed = baseAmount(account.unconfirmed, BCH_DECIMAL)
+  const confirmed = baseAmount(account.confirmed, BCH_DECIMAL)
+  const unconfirmed = baseAmount(account.unconfirmed, BCH_DECIMAL)
 
-    account.confirmed
-    return [
-      {
-        asset: AssetBCH,
-        amount: baseAmount(confirmed.amount().plus(unconfirmed.amount()), BCH_DECIMAL),
-      },
-    ]
-  } catch (error) {
-    return Promise.reject(new Error('Invalid address'))
-  }
+  account.confirmed
+  return [
+    {
+      asset: AssetBCH,
+      amount: baseAmount(confirmed.amount().plus(unconfirmed.amount()), BCH_DECIMAL),
+    },
+  ]
 }
 /**
  * Check if give network is a testnet.
@@ -254,64 +248,54 @@ export const buildTx = async ({
   builder: TransactionBuilder
   utxos: UTXOs
 }> => {
-  try {
-    const recipientCashAddress = toCashAddress(recipient)
-    if (!validateAddress(recipientCashAddress, network)) {
-      return Promise.reject(new Error('Invalid address'))
+  const recipientCashAddress = toCashAddress(recipient)
+  if (!validateAddress(recipientCashAddress, network)) throw new Error('Invalid address')
+
+  const utxos = await scanUTXOs(haskoinUrl, sender)
+  if (utxos.length === 0) throw new Error('No utxos to send')
+
+  const feeRateWhole = Number(feeRate.toFixed(0))
+  const compiledMemo = memo ? compileMemo(memo) : null
+
+  const targetOutputs = []
+  // output to recipient
+  targetOutputs.push({
+    address: recipient,
+    value: amount.amount().toNumber(),
+  })
+  const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+
+  // .inputs and .outputs will be undefined if no solution was found
+  if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
+
+  const transactionBuilder = new bitcash.TransactionBuilder(bchNetwork(network))
+
+  //Inputs
+  inputs.forEach((utxo: UTXO) =>
+    transactionBuilder.addInput(bitcash.Transaction.fromBuffer(Buffer.from(utxo.txHex, 'hex')), utxo.index),
+  )
+
+  // Outputs
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  outputs.forEach((output: any) => {
+    let out = undefined
+    if (!output.address) {
+      //an empty address means this is the  change address
+      out = bitcash.address.toOutputScript(toLegacyAddress(sender), bchNetwork(network))
+    } else if (output.address) {
+      out = bitcash.address.toOutputScript(toLegacyAddress(output.address), bchNetwork(network))
     }
+    transactionBuilder.addOutput(out, output.value)
+  })
 
-    const utxos = await scanUTXOs(haskoinUrl, sender)
-    if (utxos.length === 0) {
-      return Promise.reject(Error('No utxos to send'))
-    }
+  // add output for memo
+  if (compiledMemo) {
+    transactionBuilder.addOutput(compiledMemo, 0) // Add OP_RETURN {script, value}
+  }
 
-    const feeRateWhole = Number(feeRate.toFixed(0))
-    const compiledMemo = memo ? compileMemo(memo) : null
-
-    const targetOutputs = []
-    // output to recipient
-    targetOutputs.push({
-      address: recipient,
-      value: amount.amount().toNumber(),
-    })
-    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-
-    // .inputs and .outputs will be undefined if no solution was found
-    if (!inputs || !outputs) {
-      return Promise.reject(Error('Balance insufficient for transaction'))
-    }
-
-    const transactionBuilder = new bitcash.TransactionBuilder(bchNetwork(network))
-
-    //Inputs
-    inputs.forEach((utxo: UTXO) =>
-      transactionBuilder.addInput(bitcash.Transaction.fromBuffer(Buffer.from(utxo.txHex, 'hex')), utxo.index),
-    )
-
-    // Outputs
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    outputs.forEach((output: any) => {
-      let out = undefined
-      if (!output.address) {
-        //an empty address means this is the  change address
-        out = bitcash.address.toOutputScript(toLegacyAddress(sender), bchNetwork(network))
-      } else if (output.address) {
-        out = bitcash.address.toOutputScript(toLegacyAddress(output.address), bchNetwork(network))
-      }
-      transactionBuilder.addOutput(out, output.value)
-    })
-
-    // add output for memo
-    if (compiledMemo) {
-      transactionBuilder.addOutput(compiledMemo, 0) // Add OP_RETURN {script, value}
-    }
-
-    return {
-      builder: transactionBuilder,
-      utxos,
-    }
-  } catch (e) {
-    return Promise.reject(e)
+  return {
+    builder: transactionBuilder,
+    utxos,
   }
 }
 

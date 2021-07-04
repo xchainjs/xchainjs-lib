@@ -164,14 +164,10 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
    * @throws {"Invalid phrase"} Thrown if invalid phrase is provided.
    * */
   private getBCHKeys(phrase: string, derivationPath: string): KeyPair {
-    try {
-      const rootSeed = getSeed(phrase)
-      const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
+    const rootSeed = getSeed(phrase)
+    const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
 
-      return masterHDNode.derivePath(derivationPath).keyPair
-    } catch (error) {
-      throw new Error(`Getting key pair failed: ${error?.message || error.toString()}`)
-    }
+    return masterHDNode.derivePath(derivationPath).keyPair
   }
 
   /**
@@ -186,18 +182,15 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
   getAddress(index = 0): Address {
-    if (this.phrase) {
-      try {
-        const keys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
-        const address = keys.getAddress(index)
+    if (!this.phrase) throw new Error('Phrase must be provided')
+    try {
+      const keys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
+      const address = keys.getAddress(index)
 
-        return utils.stripPrefix(utils.toCashAddress(address))
-      } catch (error) {
-        throw new Error('Address not defined')
-      }
+      return utils.stripPrefix(utils.toCashAddress(address))
+    } catch (error) {
+      throw new Error('Address not defined')
     }
-
-    throw new Error('Phrase must be provided')
   }
 
   /**
@@ -232,27 +225,21 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
   async getTransactions({ address, offset, limit }: TxHistoryParams): Promise<TxsPage> {
-    try {
-      offset = offset || 0
-      limit = limit || 10
+    offset = offset || 0
+    limit = limit || 10
 
-      const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address })
-      const txs = await getTransactions({
-        haskoinUrl: this.getHaskoinURL(),
-        address,
-        params: { offset, limit },
-      })
+    const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address })
+    const txs = await getTransactions({
+      haskoinUrl: this.getHaskoinURL(),
+      address,
+      params: { offset, limit },
+    })
 
-      if (!account || !txs) {
-        throw new Error('Invalid address')
-      }
+    if (!account || !txs) throw new Error('Invalid address')
 
-      return {
-        total: account.txs,
-        txs: txs.map(utils.parseTransaction),
-      }
-    } catch (error) {
-      return Promise.reject(error)
+    return {
+      total: account.txs,
+      txs: txs.map(utils.parseTransaction),
     }
   }
 
@@ -265,17 +252,10 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
    * @throws {"Invalid TxID"} Thrown if the given transaction id is an invalid one.
    */
   async getTransactionData(txId: string): Promise<Tx> {
-    try {
-      const tx = await getTransaction({ haskoinUrl: this.getHaskoinURL(), txId })
+    const tx = await getTransaction({ haskoinUrl: this.getHaskoinURL(), txId })
+    if (!tx) throw new Error('Invalid TxID')
 
-      if (!tx) {
-        throw new Error('Invalid TxID')
-      }
-
-      return utils.parseTransaction(tx)
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return utils.parseTransaction(tx)
   }
 
   /**
@@ -319,12 +299,8 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
    * @returns {Fees} The fees without memo
    */
   async getFees(): Promise<Fees> {
-    try {
-      const { fees } = await this.getFeesWithRates()
-      return fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const { fees } = await this.getFeesWithRates()
+    return fees
   }
 
   /**
@@ -335,12 +311,8 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
    * @returns {Fees} The fees with memo
    */
   async getFeesWithMemo(memo: string): Promise<Fees> {
-    try {
-      const { fees } = await this.getFeesWithRates(memo)
-      return fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const { fees } = await this.getFeesWithRates(memo)
+    return fees
   }
 
   /**
@@ -350,12 +322,8 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
    * @returns {FeeRates} The fee rate
    */
   async getFeeRates(): Promise<FeeRates> {
-    try {
-      const { rates } = await this.getFeesWithRates()
-      return rates
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const { rates } = await this.getFeesWithRates()
+    return rates
   }
 
   /**
@@ -365,37 +333,33 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
    * @returns {TxHash} The transaction hash.
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    try {
-      const index = params.walletIndex || 0
-      const derivationPath = this.getFullDerivationPath(index)
+    const index = params.walletIndex || 0
+    const derivationPath = this.getFullDerivationPath(index)
 
-      const feeRate = params.feeRate || (await this.getFeeRates()).fast
-      const { builder, utxos } = await utils.buildTx({
-        ...params,
-        feeRate,
-        sender: this.getAddress(),
-        haskoinUrl: this.getHaskoinURL(),
-        network: this.network,
-      })
+    const feeRate = params.feeRate || (await this.getFeeRates()).fast
+    const { builder, utxos } = await utils.buildTx({
+      ...params,
+      feeRate,
+      sender: this.getAddress(),
+      haskoinUrl: this.getHaskoinURL(),
+      network: this.network,
+    })
 
-      const keyPair = this.getBCHKeys(this.phrase, derivationPath)
+    const keyPair = this.getBCHKeys(this.phrase, derivationPath)
 
-      utxos.forEach((utxo, index) => {
-        builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)
-      })
+    utxos.forEach((utxo, index) => {
+      builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)
+    })
 
-      const tx = builder.build()
-      const txHex = tx.toHex()
+    const tx = builder.build()
+    const txHex = tx.toHex()
 
-      return await broadcastTx({
-        network: this.network,
-        txHex,
-        nodeUrl: this.getNodeURL(),
-        auth: this.nodeAuth,
-      })
-    } catch (e) {
-      return Promise.reject(e)
-    }
+    return await broadcastTx({
+      network: this.network,
+      txHex,
+      nodeUrl: this.getNodeURL(),
+      auth: this.nodeAuth,
+    })
   }
 }
 

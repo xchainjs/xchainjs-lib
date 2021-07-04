@@ -120,7 +120,7 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
       },
     ]
   } catch (error) {
-    return Promise.reject(new Error('Invalid address'))
+    throw new Error('Invalid address')
   }
 }
 
@@ -183,67 +183,57 @@ export const buildTx = async ({
   network: Network
   sochainUrl: string
 }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXOs }> => {
-  try {
-    if (!validateAddress(recipient, network)) {
-      return Promise.reject(new Error('Invalid address'))
-    }
+  if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
-    const utxos = await scanUTXOs({ sochainUrl, network, address: sender })
-    if (utxos.length === 0) {
-      return Promise.reject(Error('No utxos to send'))
-    }
+  const utxos = await scanUTXOs({ sochainUrl, network, address: sender })
+  if (utxos.length === 0) throw new Error('No utxos to send')
 
-    const feeRateWhole = Number(feeRate.toFixed(0))
-    const compiledMemo = memo ? compileMemo(memo) : null
+  const feeRateWhole = Number(feeRate.toFixed(0))
+  const compiledMemo = memo ? compileMemo(memo) : null
 
-    const targetOutputs = []
-    //1. output to recipient
-    targetOutputs.push({
-      address: recipient,
-      value: amount.amount().toNumber(),
-    })
-    //2. add output memo to targets (optional)
-    if (compiledMemo) {
-      targetOutputs.push({ script: compiledMemo, value: 0 })
-    }
-    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-
-    // .inputs and .outputs will be undefined if no solution was found
-    if (!inputs || !outputs) {
-      return Promise.reject(Error('Balance insufficient for transaction'))
-    }
-
-    const psbt = new Litecoin.Psbt({ network: ltcNetwork(network) }) // Network-specific
-    //Inputs
-    inputs.forEach((utxo: UTXO) =>
-      psbt.addInput({
-        hash: utxo.hash,
-        index: utxo.index,
-        witnessUtxo: utxo.witnessUtxo,
-      }),
-    )
-
-    // Outputs
-    outputs.forEach((output: Litecoin.PsbtTxOutput) => {
-      if (!output.address) {
-        //an empty address means this is the  change ddress
-        output.address = sender
-      }
-      if (!output.script) {
-        psbt.addOutput(output)
-      } else {
-        //we need to add the compiled memo this way to
-        //avoid dust error tx when accumulating memo output with 0 value
-        if (compiledMemo) {
-          psbt.addOutput({ script: compiledMemo, value: 0 })
-        }
-      }
-    })
-
-    return { psbt, utxos }
-  } catch (e) {
-    return Promise.reject(e)
+  const targetOutputs = []
+  //1. output to recipient
+  targetOutputs.push({
+    address: recipient,
+    value: amount.amount().toNumber(),
+  })
+  //2. add output memo to targets (optional)
+  if (compiledMemo) {
+    targetOutputs.push({ script: compiledMemo, value: 0 })
   }
+  const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+
+  // .inputs and .outputs will be undefined if no solution was found
+  if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
+
+  const psbt = new Litecoin.Psbt({ network: ltcNetwork(network) }) // Network-specific
+  //Inputs
+  inputs.forEach((utxo: UTXO) =>
+    psbt.addInput({
+      hash: utxo.hash,
+      index: utxo.index,
+      witnessUtxo: utxo.witnessUtxo,
+    }),
+  )
+
+  // Outputs
+  outputs.forEach((output: Litecoin.PsbtTxOutput) => {
+    if (!output.address) {
+      //an empty address means this is the  change ddress
+      output.address = sender
+    }
+    if (!output.script) {
+      psbt.addOutput(output)
+    } else {
+      //we need to add the compiled memo this way to
+      //avoid dust error tx when accumulating memo output with 0 value
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+    }
+  })
+
+  return { psbt, utxos }
 }
 
 /**

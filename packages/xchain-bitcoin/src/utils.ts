@@ -113,18 +113,14 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
  * @returns {Array<Balance>} The balances of the given address.
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
-  try {
-    const balance =
-      params.network === 'testnet' ? await sochain.getBalance(params) : await haskoinApi.getBalance(params.address)
-    return [
-      {
-        asset: AssetBTC,
-        amount: balance,
-      },
-    ]
-  } catch (error) {
-    return Promise.reject(new Error('Invalid address'))
-  }
+  const balance =
+    params.network === 'testnet' ? await sochain.getBalance(params) : await haskoinApi.getBalance(params.address)
+  return [
+    {
+      asset: AssetBTC,
+      amount: balance,
+    },
+  ]
 }
 
 /**
@@ -229,72 +225,61 @@ export const buildTx = async ({
   sochainUrl: string
   spendPendingUTXO?: boolean
 }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXOs }> => {
-  try {
-    // search only confirmed UTXOs if pending UTXO is not allowed
-    const confirmedOnly = !spendPendingUTXO
-    const utxos = await scanUTXOs({ sochainUrl, network, address: sender, confirmedOnly })
+  // search only confirmed UTXOs if pending UTXO is not allowed
+  const confirmedOnly = !spendPendingUTXO
+  const utxos = await scanUTXOs({ sochainUrl, network, address: sender, confirmedOnly })
 
-    if (utxos.length === 0) {
-      return Promise.reject(Error('No utxos to send'))
-    }
+  if (utxos.length === 0) throw new Error('No utxos to send')
+  if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
-    if (!validateAddress(recipient, network)) {
-      return Promise.reject(new Error('Invalid address'))
-    }
+  const feeRateWhole = Number(feeRate.toFixed(0))
+  const compiledMemo = memo ? compileMemo(memo) : null
 
-    const feeRateWhole = Number(feeRate.toFixed(0))
-    const compiledMemo = memo ? compileMemo(memo) : null
+  const targetOutputs = []
 
-    const targetOutputs = []
-
-    //1. add output amount and recipient to targets
-    targetOutputs.push({
-      address: recipient,
-      value: amount.amount().toNumber(),
-    })
-    //2. add output memo to targets (optional)
-    if (compiledMemo) {
-      targetOutputs.push({ script: compiledMemo, value: 0 })
-    }
-    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-
-    // .inputs and .outputs will be undefined if no solution was found
-    if (!inputs || !outputs) {
-      return Promise.reject(Error('Insufficient Balance for transaction'))
-    }
-
-    const psbt = new Bitcoin.Psbt({ network: btcNetwork(network) }) // Network-specific
-
-    // psbt add input from accumulative inputs
-    inputs.forEach((utxo: UTXO) =>
-      psbt.addInput({
-        hash: utxo.hash,
-        index: utxo.index,
-        witnessUtxo: utxo.witnessUtxo,
-      }),
-    )
-
-    // psbt add outputs from accumulative outputs
-    outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
-      if (!output.address) {
-        //an empty address means this is the  change ddress
-        output.address = sender
-      }
-      if (!output.script) {
-        psbt.addOutput(output)
-      } else {
-        //we need to add the compiled memo this way to
-        //avoid dust error tx when accumulating memo output with 0 value
-        if (compiledMemo) {
-          psbt.addOutput({ script: compiledMemo, value: 0 })
-        }
-      }
-    })
-
-    return { psbt, utxos }
-  } catch (e) {
-    return Promise.reject(e)
+  //1. add output amount and recipient to targets
+  targetOutputs.push({
+    address: recipient,
+    value: amount.amount().toNumber(),
+  })
+  //2. add output memo to targets (optional)
+  if (compiledMemo) {
+    targetOutputs.push({ script: compiledMemo, value: 0 })
   }
+  const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+
+  // .inputs and .outputs will be undefined if no solution was found
+  if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
+
+  const psbt = new Bitcoin.Psbt({ network: btcNetwork(network) }) // Network-specific
+
+  // psbt add input from accumulative inputs
+  inputs.forEach((utxo: UTXO) =>
+    psbt.addInput({
+      hash: utxo.hash,
+      index: utxo.index,
+      witnessUtxo: utxo.witnessUtxo,
+    }),
+  )
+
+  // psbt add outputs from accumulative outputs
+  outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
+    if (!output.address) {
+      //an empty address means this is the  change ddress
+      output.address = sender
+    }
+    if (!output.script) {
+      psbt.addOutput(output)
+    } else {
+      //we need to add the compiled memo this way to
+      //avoid dust error tx when accumulating memo output with 0 value
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+    }
+  })
+
+  return { psbt, utxos }
 }
 
 /**

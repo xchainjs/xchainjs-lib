@@ -203,46 +203,42 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
 
-    try {
-      const response = await sochain.getAddress({
-        address: params?.address + '',
+    const response = await sochain.getAddress({
+      address: params?.address + '',
+      sochainUrl: this.sochainUrl,
+      network: this.network,
+    })
+    const total = response.txs.length
+    const transactions: Tx[] = []
+
+    const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
+    for (const txItem of txs) {
+      const rawTx = await sochain.getTx({
         sochainUrl: this.sochainUrl,
         network: this.network,
+        hash: txItem.txid,
       })
-      const total = response.txs.length
-      const transactions: Tx[] = []
-
-      const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
-      for (const txItem of txs) {
-        const rawTx = await sochain.getTx({
-          sochainUrl: this.sochainUrl,
-          network: this.network,
-          hash: txItem.txid,
-        })
-        const tx: Tx = {
-          asset: AssetBTC,
-          from: rawTx.inputs.map((i) => ({
-            from: i.address,
-            amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)),
-          })),
-          to: rawTx.outputs
-            .filter((i) => i.type !== 'nulldata')
-            .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
-          date: new Date(rawTx.time * 1000),
-          type: 'transfer',
-          hash: rawTx.txid,
-        }
-        transactions.push(tx)
+      const tx: Tx = {
+        asset: AssetBTC,
+        from: rawTx.inputs.map((i) => ({
+          from: i.address,
+          amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)),
+        })),
+        to: rawTx.outputs
+          .filter((i) => i.type !== 'nulldata')
+          .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
+        date: new Date(rawTx.time * 1000),
+        type: 'transfer',
+        hash: rawTx.txid,
       }
-
-      const result: TxsPage = {
-        total,
-        txs: transactions,
-      }
-      return result
-    } catch (error) {
-      return Promise.reject(error)
+      transactions.push(tx)
     }
+
+    const result: TxsPage = {
+      total,
+      txs: transactions,
+    }
+    return result
   }
 
   /**
@@ -252,25 +248,21 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string): Promise<Tx> {
-    try {
-      const rawTx = await sochain.getTx({
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-        hash: txId,
-      })
-      return {
-        asset: AssetBTC,
-        from: rawTx.inputs.map((i) => ({
-          from: i.address,
-          amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)),
-        })),
-        to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
-        date: new Date(rawTx.time * 1000),
-        type: 'transfer',
-        hash: rawTx.txid,
-      }
-    } catch (error) {
-      return Promise.reject(error)
+    const rawTx = await sochain.getTx({
+      sochainUrl: this.sochainUrl,
+      network: this.network,
+      hash: txId,
+    })
+    return {
+      asset: AssetBTC,
+      from: rawTx.inputs.map((i) => ({
+        from: i.address,
+        amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)),
+      })),
+      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
+      date: new Date(rawTx.time * 1000),
+      type: 'transfer',
+      hash: rawTx.txid,
     }
   }
 
