@@ -12,16 +12,12 @@ import { AddressInfo, TransactionInfo, TransactionOperation } from './types'
  * @returns {AddressInfo} The address information.
  */
 export const getAddress = async (baseUrl: string, address: string, apiKey?: string): Promise<AddressInfo> => {
-  try {
-    const response = await axios.get(`${baseUrl}/getAddressInfo/${address}`, {
-      params: {
-        apiKey: apiKey || 'freekey',
-      },
-    })
-    return response.data
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  const response = await axios.get(`${baseUrl}/getAddressInfo/${address}`, {
+    params: {
+      apiKey: apiKey || 'freekey',
+    },
+  })
+  return response.data
 }
 
 /**
@@ -35,16 +31,12 @@ export const getAddress = async (baseUrl: string, address: string, apiKey?: stri
  * @returns {Transactions} The transaction result.
  */
 export const getTxInfo = async (baseUrl: string, hash: string, apiKey?: string): Promise<TransactionInfo> => {
-  try {
-    const response = await axios.get(`${baseUrl}/getTxInfo/${hash}`, {
-      params: {
-        apiKey: apiKey || 'freekey',
-      },
-    })
-    return response.data
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  const response = await axios.get(`${baseUrl}/getTxInfo/${hash}`, {
+    params: {
+      apiKey: apiKey || 'freekey',
+    },
+  })
+  return response.data
 }
 
 /**
@@ -66,18 +58,14 @@ export const getAddressTransactions = async (
   timestamp?: number,
   apiKey?: string,
 ): Promise<TransactionInfo[]> => {
-  try {
-    const response = await axios.get(`${baseUrl}/getAddressTransactions/${address}`, {
-      params: {
-        apiKey: apiKey || 'freekey',
-        limit,
-        timestamp,
-      },
-    })
-    return response.data
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  const response = await axios.get(`${baseUrl}/getAddressTransactions/${address}`, {
+    params: {
+      apiKey: apiKey || 'freekey',
+      limit,
+      timestamp,
+    },
+  })
+  return response.data
 }
 
 /**
@@ -101,19 +89,15 @@ export const getAddressHistory = async (
   timestamp?: number,
   apiKey?: string,
 ): Promise<TransactionOperation[]> => {
-  try {
-    const response = await axios.get(`${baseUrl}/getAddressHistory/${address}`, {
-      params: {
-        apiKey: apiKey || 'freekey',
-        token,
-        limit,
-        timestamp,
-        showZeroValues: true,
-        type: 'transfer',
-      },
-    })
-    return response.data.operations
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  const response = await axios.get(`${baseUrl}/getAddressHistory/${address}`, {
+    params: {
+      apiKey: apiKey || 'freekey',
+      token,
+      limit,
+      timestamp,
+      showZeroValues: true,
+      type: 'transfer',
+    },
+  })
+  return response.data.operations
 }

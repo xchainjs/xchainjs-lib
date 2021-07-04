@@ -72,21 +72,17 @@ export class CosmosSDKClient {
     const node = BIP32.fromSeed(seed)
     const child = node.derivePath(derivationPath)
 
-    if (!child.privateKey) {
-      throw new Error('child does not have a privateKey')
-    }
+    if (!child.privateKey) throw new Error('child does not have a privateKey')
 
     return new PrivKeySecp256k1(child.privateKey)
   }
 
   checkAddress(address: string): boolean {
+    this.setPrefix()
+
+    if (!address.startsWith(this.prefix)) return false
+
     try {
-      this.setPrefix()
-
-      if (!address.startsWith(this.prefix)) {
-        return false
-      }
-
       return AccAddress.fromBech32(address).toBech32() === address
     } catch (err) {
       return false
@@ -94,15 +90,11 @@ export class CosmosSDKClient {
   }
 
   async getBalance(address: string): Promise<Coin[]> {
-    try {
-      this.setPrefix()
+    this.setPrefix()
 
-      const accAddress = AccAddress.fromBech32(address)
+    const accAddress = AccAddress.fromBech32(address)
 
-      return bank.balancesAddressGet(this.sdk, accAddress).then((res) => res.data.result)
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return (await bank.balancesAddressGet(this.sdk, accAddress)).data.result
   }
 
   async searchTx({
@@ -113,35 +105,29 @@ export class CosmosSDKClient {
     txMinHeight,
     txMaxHeight,
   }: SearchTxParams): Promise<TxHistoryResponse> {
-    try {
-      const queryParameter: APIQueryParam = {}
-      if (messageAction !== undefined) {
-        queryParameter['message.action'] = messageAction
-      }
-      if (messageSender !== undefined) {
-        queryParameter['message.sender'] = messageSender
-      }
-      if (page !== undefined) {
-        queryParameter['page'] = page.toString()
-      }
-      if (limit !== undefined) {
-        queryParameter['limit'] = limit.toString()
-      }
-      if (txMinHeight !== undefined) {
-        queryParameter['tx.minheight'] = txMinHeight.toString()
-      }
-      if (txMaxHeight !== undefined) {
-        queryParameter['tx.maxheight'] = txMaxHeight.toString()
-      }
-
-      this.setPrefix()
-
-      return await axios
-        .get<TxHistoryParams>(`${this.server}/txs?${getQueryString(queryParameter)}`)
-        .then((res) => res.data)
-    } catch (error) {
-      return Promise.reject(error)
+    const queryParameter: APIQueryParam = {}
+    if (messageAction !== undefined) {
+      queryParameter['message.action'] = messageAction
     }
+    if (messageSender !== undefined) {
+      queryParameter['message.sender'] = messageSender
+    }
+    if (page !== undefined) {
+      queryParameter['page'] = page.toString()
+    }
+    if (limit !== undefined) {
+      queryParameter['limit'] = limit.toString()
+    }
+    if (txMinHeight !== undefined) {
+      queryParameter['tx.minheight'] = txMinHeight.toString()
+    }
+    if (txMaxHeight !== undefined) {
+      queryParameter['tx.maxheight'] = txMaxHeight.toString()
+    }
+
+    this.setPrefix()
+
+    return (await axios.get<TxHistoryParams>(`${this.server}/txs?${getQueryString(queryParameter)}`)).data
   }
 
   async searchTxFromRPC({
@@ -157,56 +143,48 @@ export class CosmosSDKClient {
   }: SearchTxParams & {
     rpcEndpoint: string
   }): Promise<RPCTxSearchResult> {
-    try {
-      const queryParameter: string[] = []
-      if (messageAction !== undefined) {
-        queryParameter.push(`message.action='${messageAction}'`)
-      }
-      if (messageSender !== undefined) {
-        queryParameter.push(`message.sender='${messageSender}'`)
-      }
-      if (transferSender !== undefined) {
-        queryParameter.push(`transfer.sender='${transferSender}'`)
-      }
-      if (transferRecipient !== undefined) {
-        queryParameter.push(`transfer.recipient='${transferRecipient}'`)
-      }
-      if (txMinHeight !== undefined) {
-        queryParameter.push(`tx.height>='${txMinHeight}'`)
-      }
-      if (txMaxHeight !== undefined) {
-        queryParameter.push(`tx.height<='${txMaxHeight}'`)
-      }
-
-      const searchParameter: string[] = []
-      searchParameter.push(`query="${queryParameter.join(' AND ')}"`)
-
-      if (page !== undefined) {
-        searchParameter.push(`page="${page}"`)
-      }
-      if (limit !== undefined) {
-        searchParameter.push(`per_page="${limit}"`)
-      }
-      searchParameter.push(`order_by="desc"`)
-
-      const response: RPCResponse<RPCTxSearchResult> = await axios
-        .get(`${rpcEndpoint}/tx_search?${searchParameter.join('&')}`)
-        .then((res) => res.data)
-
-      return response.result
-    } catch (error) {
-      return Promise.reject(error)
+    const queryParameter: string[] = []
+    if (messageAction !== undefined) {
+      queryParameter.push(`message.action='${messageAction}'`)
     }
+    if (messageSender !== undefined) {
+      queryParameter.push(`message.sender='${messageSender}'`)
+    }
+    if (transferSender !== undefined) {
+      queryParameter.push(`transfer.sender='${transferSender}'`)
+    }
+    if (transferRecipient !== undefined) {
+      queryParameter.push(`transfer.recipient='${transferRecipient}'`)
+    }
+    if (txMinHeight !== undefined) {
+      queryParameter.push(`tx.height>='${txMinHeight}'`)
+    }
+    if (txMaxHeight !== undefined) {
+      queryParameter.push(`tx.height<='${txMaxHeight}'`)
+    }
+
+    const searchParameter: string[] = []
+    searchParameter.push(`query="${queryParameter.join(' AND ')}"`)
+
+    if (page !== undefined) {
+      searchParameter.push(`page="${page}"`)
+    }
+    if (limit !== undefined) {
+      searchParameter.push(`per_page="${limit}"`)
+    }
+    searchParameter.push(`order_by="desc"`)
+
+    const response: RPCResponse<RPCTxSearchResult> = (
+      await axios.get(`${rpcEndpoint}/tx_search?${searchParameter.join('&')}`)
+    ).data
+
+    return response.result
   }
 
   async txsHashGet(hash: string): Promise<TxResponse> {
-    try {
-      this.setPrefix()
+    this.setPrefix()
 
-      return await axios.get<TxResponse>(`${this.server}/txs/${hash}`).then((res) => res.data)
-    } catch (error) {
-      throw new Error('transaction not found')
-    }
+    return (await axios.get<TxResponse>(`${this.server}/txs/${hash}`)).data
   }
 
   async transfer({
@@ -221,56 +199,48 @@ export class CosmosSDKClient {
       gas: '200000',
     },
   }: TransferParams): Promise<BroadcastTxCommitResult> {
-    try {
-      this.setPrefix()
+    this.setPrefix()
 
-      const msg: Msg = [
-        MsgSend.fromJSON({
-          from_address: from,
-          to_address: to,
-          amount: [
-            {
-              amount: amount.toString(),
-              denom: asset,
-            },
-          ],
-        }),
-      ]
-      const signatures: StdTxSignature[] = []
+    const msg: Msg = [
+      MsgSend.fromJSON({
+        from_address: from,
+        to_address: to,
+        amount: [
+          {
+            amount: amount.toString(),
+            denom: asset,
+          },
+        ],
+      }),
+    ]
+    const signatures: StdTxSignature[] = []
 
-      const unsignedStdTx = StdTx.fromJSON({
-        msg,
-        fee,
-        signatures,
-        memo,
-      })
+    const unsignedStdTx = StdTx.fromJSON({
+      msg,
+      fee,
+      signatures,
+      memo,
+    })
 
-      return this.signAndBroadcast(unsignedStdTx, privkey, AccAddress.fromBech32(from))
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return this.signAndBroadcast(unsignedStdTx, privkey, AccAddress.fromBech32(from))
   }
 
   async signAndBroadcast(unsignedStdTx: StdTx, privkey: PrivKey, signer: AccAddress): Promise<BroadcastTxCommitResult> {
-    try {
-      this.setPrefix()
+    this.setPrefix()
 
-      let account: BaseAccount = await auth.accountsAddressGet(this.sdk, signer).then((res) => res.data.result)
-      if (account.account_number === undefined) {
-        account = BaseAccount.fromJSON((account as BaseAccountResponse).value)
-      }
-
-      const signedStdTx = auth.signStdTx(
-        this.sdk,
-        privkey,
-        unsignedStdTx,
-        account.account_number.toString(),
-        account.sequence.toString(),
-      )
-
-      return await auth.txsPost(this.sdk, signedStdTx, 'block').then((res) => res.data)
-    } catch (error) {
-      return Promise.reject(error)
+    let account: BaseAccount = (await auth.accountsAddressGet(this.sdk, signer)).data.result
+    if (account.account_number === undefined) {
+      account = BaseAccount.fromJSON((account as BaseAccountResponse).value)
     }
+
+    const signedStdTx = auth.signStdTx(
+      this.sdk,
+      privkey,
+      unsignedStdTx,
+      account.account_number.toString(),
+      account.sequence.toString(),
+    )
+
+    return (await auth.txsPost(this.sdk, signedStdTx, 'block')).data
   }
 }

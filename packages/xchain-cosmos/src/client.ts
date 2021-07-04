@@ -239,24 +239,19 @@ class Client implements CosmosClient, XChainClient {
    * @returns {Array<Balance>} The balance of the address.
    */
   async getBalance(address: Address, assets?: Asset[]): Promise<Balances> {
-    try {
-      const balances = await this.getSDKClient().getBalance(address)
-      const mainAsset = this.getMainAsset()
+    const balances = await this.getSDKClient().getBalance(address)
+    const mainAsset = this.getMainAsset()
 
-      return balances
-        .map((balance) => {
-          return {
-            asset: (balance.denom && getAsset(balance.denom)) || mainAsset,
-            amount: baseAmount(balance.amount, DECIMAL),
-          }
-        })
-        .filter(
-          (balance) =>
-            !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
-        )
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return balances
+      .map((balance) => {
+        return {
+          asset: (balance.denom && getAsset(balance.denom)) || mainAsset,
+          amount: baseAmount(balance.amount, DECIMAL),
+        }
+      })
+      .filter(
+        (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
+      )
   }
 
   /**
@@ -273,25 +268,21 @@ class Client implements CosmosClient, XChainClient {
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
-    try {
-      this.registerCodecs()
+    this.registerCodecs()
 
-      const mainAsset = this.getMainAsset()
-      const txHistory = await this.getSDKClient().searchTx({
-        messageAction,
-        messageSender: (params && params.address) || this.getAddress(),
-        page,
-        limit,
-        txMinHeight,
-        txMaxHeight,
-      })
+    const mainAsset = this.getMainAsset()
+    const txHistory = await this.getSDKClient().searchTx({
+      messageAction,
+      messageSender: (params && params.address) || this.getAddress(),
+      page,
+      limit,
+      txMinHeight,
+      txMaxHeight,
+    })
 
-      return {
-        total: parseInt(txHistory.total_count?.toString() || '0'),
-        txs: getTxsFromHistory(txHistory.txs || [], mainAsset),
-      }
-    } catch (error) {
-      return Promise.reject(error)
+    return {
+      total: parseInt(txHistory.total_count?.toString() || '0'),
+      txs: getTxsFromHistory(txHistory.txs || [], mainAsset),
     }
   }
 
@@ -302,18 +293,11 @@ class Client implements CosmosClient, XChainClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string): Promise<Tx> {
-    try {
-      const txResult = await this.getSDKClient().txsHashGet(txId)
-      const txs = getTxsFromHistory([txResult], this.getMainAsset())
+    const txResult = await this.getSDKClient().txsHashGet(txId)
+    const txs = getTxsFromHistory([txResult], this.getMainAsset())
+    if (txs.length === 0) throw new Error('transaction not found')
 
-      if (txs.length === 0) {
-        throw new Error('transaction not found')
-      }
-
-      return txs[0]
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return txs[0]
   }
 
   /**
@@ -323,24 +307,20 @@ class Client implements CosmosClient, XChainClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer({ walletIndex, asset, amount, recipient, memo }: TxParams): Promise<TxHash> {
-    try {
-      const fromAddressIndex = walletIndex || 0
-      this.registerCodecs()
+    const fromAddressIndex = walletIndex || 0
+    this.registerCodecs()
 
-      const mainAsset = this.getMainAsset()
-      const transferResult = await this.getSDKClient().transfer({
-        privkey: this.getPrivateKey(fromAddressIndex),
-        from: this.getAddress(fromAddressIndex),
-        to: recipient,
-        amount: amount.amount().toString(),
-        asset: getDenom(asset || mainAsset),
-        memo,
-      })
+    const mainAsset = this.getMainAsset()
+    const transferResult = await this.getSDKClient().transfer({
+      privkey: this.getPrivateKey(fromAddressIndex),
+      from: this.getAddress(fromAddressIndex),
+      to: recipient,
+      amount: amount.amount().toString(),
+      asset: getDenom(asset || mainAsset),
+      memo,
+    })
 
-      return transferResult?.txhash || ''
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return transferResult?.txhash || ''
   }
 
   /**
@@ -350,12 +330,12 @@ class Client implements CosmosClient, XChainClient {
    */
   async getFees(): Promise<Fees> {
     // there is no fixed fee, we set fee amount when creating a transaction.
-    return Promise.resolve({
+    return {
       type: 'base',
       fast: baseAmount(750, DECIMAL),
       fastest: baseAmount(2500, DECIMAL),
       average: baseAmount(0, DECIMAL),
-    })
+    }
   }
 }
 

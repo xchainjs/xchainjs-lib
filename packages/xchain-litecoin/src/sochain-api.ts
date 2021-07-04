@@ -29,14 +29,10 @@ const toSochainNetwork = (net: string): string => {
  * @returns {LtcAddressDTO}
  */
 export const getAddress = async ({ sochainUrl, network, address }: AddressParams): Promise<LtcAddressDTO> => {
-  try {
-    const url = `${sochainUrl}/address/${toSochainNetwork(network)}/${address}`
-    const response = await axios.get(url)
-    const addressResponse: SochainResponse<LtcAddressDTO> = response.data
-    return addressResponse.data
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  const url = `${sochainUrl}/address/${toSochainNetwork(network)}/${address}`
+  const response = await axios.get(url)
+  const addressResponse: SochainResponse<LtcAddressDTO> = response.data
+  return addressResponse.data
 }
 
 /**
@@ -50,14 +46,10 @@ export const getAddress = async ({ sochainUrl, network, address }: AddressParams
  * @returns {Transactions}
  */
 export const getTx = async ({ sochainUrl, network, hash }: TxHashParams): Promise<Transaction> => {
-  try {
-    const url = `${sochainUrl}/get_tx/${toSochainNetwork(network)}/${hash}`
-    const response = await axios.get(url)
-    const tx: SochainResponse<Transaction> = response.data
-    return tx.data
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  const url = `${sochainUrl}/get_tx/${toSochainNetwork(network)}/${hash}`
+  const response = await axios.get(url)
+  const tx: SochainResponse<Transaction> = response.data
+  return tx.data
 }
 
 /**
@@ -71,18 +63,14 @@ export const getTx = async ({ sochainUrl, network, hash }: TxHashParams): Promis
  * @returns {number}
  */
 export const getBalance = async ({ sochainUrl, network, address }: AddressParams): Promise<BaseAmount> => {
-  try {
-    const url = `${sochainUrl}/get_address_balance/${toSochainNetwork(network)}/${address}`
-    const response = await axios.get(url)
-    const balanceResponse: SochainResponse<LtcGetBalanceDTO> = response.data
-    const confirmed = assetAmount(balanceResponse.data.confirmed_balance, LTC_DECIMAL)
-    const unconfirmed = assetAmount(balanceResponse.data.unconfirmed_balance, LTC_DECIMAL)
-    const netAmt = confirmed.amount().plus(unconfirmed.amount())
-    const result = assetToBase(assetAmount(netAmt, LTC_DECIMAL))
-    return result
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  const url = `${sochainUrl}/get_address_balance/${toSochainNetwork(network)}/${address}`
+  const response = await axios.get(url)
+  const balanceResponse: SochainResponse<LtcGetBalanceDTO> = response.data
+  const confirmed = assetAmount(balanceResponse.data.confirmed_balance, LTC_DECIMAL)
+  const unconfirmed = assetAmount(balanceResponse.data.unconfirmed_balance, LTC_DECIMAL)
+  const netAmt = confirmed.amount().plus(unconfirmed.amount())
+  const result = assetToBase(assetAmount(netAmt, LTC_DECIMAL))
+  return result
 }
 
 /**
@@ -101,31 +89,27 @@ export const getUnspentTxs = async ({
   address,
   startingFromTxId,
 }: AddressParams): Promise<LtcAddressUTXOs> => {
-  try {
-    let resp = null
-    if (startingFromTxId) {
-      resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}/${startingFromTxId}`)
-    } else {
-      resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}`)
-    }
-    const response: SochainResponse<LtcUnspentTxsDTO> = resp.data
-    const txs = response.data.txs
-    if (txs.length === 100) {
-      //fetch the next batch
-      const lastTxId = txs[99].txid
+  let resp = null
+  if (startingFromTxId) {
+    resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}/${startingFromTxId}`)
+  } else {
+    resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}`)
+  }
+  const response: SochainResponse<LtcUnspentTxsDTO> = resp.data
+  const txs = response.data.txs
+  if (txs.length === 100) {
+    //fetch the next batch
+    const lastTxId = txs[99].txid
 
-      const nextBatch = await getUnspentTxs({
-        sochainUrl,
-        network,
-        address,
-        startingFromTxId: lastTxId,
-      })
-      return txs.concat(nextBatch)
-    } else {
-      return txs
-    }
-  } catch (error) {
-    return Promise.reject(error)
+    const nextBatch = await getUnspentTxs({
+      sochainUrl,
+      network,
+      address,
+      startingFromTxId: lastTxId,
+    })
+    return txs.concat(nextBatch)
+  } else {
+    return txs
   }
 }
 

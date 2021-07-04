@@ -209,18 +209,12 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {ApiPromise} The polkadotjs API provider based on the network.
    * */
   private async getAPI(): Promise<ApiPromise> {
-    try {
-      const api = new ApiPromise({ provider: new WsProvider(this.getWsEndpoint()) })
-      await api.isReady
+    const api = new ApiPromise({ provider: new WsProvider(this.getWsEndpoint()) })
+    await api.isReady
 
-      if (!api.isConnected) {
-        await api.connect()
-      }
+    if (!api.isConnected) await api.connect()
 
-      return api
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return api
   }
 
   /**
@@ -260,28 +254,22 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {Array<Balance>} The DOT balance of the address.
    */
   async getBalance(address: Address, assets?: Asset[]): Promise<Balances> {
-    try {
-      const response: SubscanResponse<Account> = await axios
-        .post(`${this.getClientUrl()}/api/open/account`, { address: address || this.getAddress() })
-        .then((res) => res.data)
+    const response: SubscanResponse<Account> = (
+      await axios.post(`${this.getClientUrl()}/api/open/account`, { address: address || this.getAddress() })
+    ).data
 
-      if (!isSuccess(response)) {
-        throw new Error('Invalid address')
-      }
+    if (!isSuccess(response)) throw new Error('Invalid address')
 
-      const account = response.data
+    const account = response.data
 
-      return account && (!assets || assets.filter((asset) => assetToString(AssetDOT) === assetToString(asset)).length)
-        ? [
-            {
-              asset: AssetDOT,
-              amount: assetToBase(assetAmount(account.balance, getDecimal(this.network))),
-            },
-          ]
-        : []
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return account && (!assets || assets.filter((asset) => assetToString(AssetDOT) === assetToString(asset)).length)
+      ? [
+          {
+            asset: AssetDOT,
+            amount: assetToBase(assetAmount(account.balance, getDecimal(this.network))),
+          },
+        ]
+      : []
   }
 
   /**
@@ -295,69 +283,20 @@ class Client implements PolkadotClient, XChainClient {
     const limit = params?.limit ?? 10
     const offset = params?.offset ?? 0
 
-    try {
-      const response: SubscanResponse<TransfersResult> = await axios
-        .post(`${this.getClientUrl()}/api/scan/transfers`, {
-          address: params?.address,
-          row: limit,
-          page: offset,
-        })
-        .then((res) => res.data)
+    const response: SubscanResponse<TransfersResult> = (
+      await axios.post(`${this.getClientUrl()}/api/scan/transfers`, {
+        address: params?.address,
+        row: limit,
+        page: offset,
+      })
+    ).data
+    if (!isSuccess(response) || !response.data) throw new Error('Failed to get transactions')
 
-      if (!isSuccess(response) || !response.data) {
-        throw new Error('Failed to get transactions')
-      }
+    const transferResult: TransfersResult = response.data
 
-      const transferResult: TransfersResult = response.data
-
-      return {
-        total: transferResult.count,
-        txs: (transferResult.transfers || []).map((transfer) => ({
-          asset: AssetDOT,
-          from: [
-            {
-              from: transfer.from,
-              amount: assetToBase(assetAmount(transfer.amount, getDecimal(this.network))),
-            },
-          ],
-          to: [
-            {
-              to: transfer.to,
-              amount: assetToBase(assetAmount(transfer.amount, getDecimal(this.network))),
-            },
-          ],
-          date: new Date(transfer.block_timestamp * 1000),
-          type: 'transfer',
-          hash: transfer.hash,
-        })),
-      }
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
-   * Get the transaction details of a given transaction id.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   */
-  async getTransactionData(txId: string): Promise<Tx> {
-    try {
-      const response: SubscanResponse<Extrinsic> = await axios
-        .post(`${this.getClientUrl()}/api/scan/extrinsic`, {
-          hash: txId,
-        })
-        .then((res) => res.data)
-
-      if (!isSuccess(response) || !response.data) {
-        throw new Error('Failed to get transactions')
-      }
-
-      const extrinsic: Extrinsic = response.data
-      const transfer: Transfer = extrinsic.transfer
-
-      return {
+    return {
+      total: transferResult.count,
+      txs: (transferResult.transfers || []).map((transfer) => ({
         asset: AssetDOT,
         from: [
           {
@@ -371,12 +310,45 @@ class Client implements PolkadotClient, XChainClient {
             amount: assetToBase(assetAmount(transfer.amount, getDecimal(this.network))),
           },
         ],
-        date: new Date(extrinsic.block_timestamp * 1000),
+        date: new Date(transfer.block_timestamp * 1000),
         type: 'transfer',
-        hash: extrinsic.extrinsic_hash,
-      }
-    } catch (error) {
-      return Promise.reject(error)
+        hash: transfer.hash,
+      })),
+    }
+  }
+
+  /**
+   * Get the transaction details of a given transaction id.
+   *
+   * @param {string} txId The transaction id.
+   * @returns {Tx} The transaction details of the given transaction id.
+   */
+  async getTransactionData(txId: string): Promise<Tx> {
+    const response: SubscanResponse<Extrinsic> = (
+      await axios.post(`${this.getClientUrl()}/api/scan/extrinsic`, { hash: txId })
+    ).data
+    if (!isSuccess(response) || !response.data) throw new Error('Failed to get transactions')
+
+    const extrinsic: Extrinsic = response.data
+    const transfer: Transfer = extrinsic.transfer
+
+    return {
+      asset: AssetDOT,
+      from: [
+        {
+          from: transfer.from,
+          amount: assetToBase(assetAmount(transfer.amount, getDecimal(this.network))),
+        },
+      ],
+      to: [
+        {
+          to: transfer.to,
+          amount: assetToBase(assetAmount(transfer.amount, getDecimal(this.network))),
+        },
+      ],
+      date: new Date(extrinsic.block_timestamp * 1000),
+      type: 'transfer',
+      hash: extrinsic.extrinsic_hash,
     }
   }
 
@@ -387,41 +359,37 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer(params: TxParams): Promise<TxHash> {
-    try {
-      const api = await this.getAPI()
-      let transaction = null
-      const walletIndex = params.walletIndex || 0
-      // Createing a transfer
-      const transfer = api.tx.balances.transfer(params.recipient, params.amount.amount().toString())
-      if (!params.memo) {
-        // Send a simple transfer
-        transaction = transfer
-      } else {
-        // Send a `utility.batch` with two Calls: i) Balance.Transfer ii) System.Remark
+    const api = await this.getAPI()
+    let transaction = null
+    const walletIndex = params.walletIndex || 0
+    // Createing a transfer
+    const transfer = api.tx.balances.transfer(params.recipient, params.amount.amount().toString())
+    if (!params.memo) {
+      // Send a simple transfer
+      transaction = transfer
+    } else {
+      // Send a `utility.batch` with two Calls: i) Balance.Transfer ii) System.Remark
 
-        // Creating a remark
-        const remark = api.tx.system.remark(params.memo)
+      // Creating a remark
+      const remark = api.tx.system.remark(params.memo)
 
-        // Send the Batch Transaction
-        transaction = api.tx.utility.batch([transfer, remark])
-      }
-
-      // Check balances
-      const paymentInfo = await transaction.paymentInfo(this.getKeyringPair(walletIndex))
-      const fee = baseAmount(paymentInfo.partialFee.toString(), getDecimal(this.network))
-      const balances = await this.getBalance(this.getAddress(walletIndex), [AssetDOT])
-
-      if (!balances || params.amount.amount().plus(fee.amount()).isGreaterThan(balances[0].amount.amount())) {
-        throw new Error('insufficient balance')
-      }
-
-      const txHash = await transaction.signAndSend(this.getKeyringPair(walletIndex))
-      await api.disconnect()
-
-      return txHash.toString()
-    } catch (error) {
-      return Promise.reject(error)
+      // Send the Batch Transaction
+      transaction = api.tx.utility.batch([transfer, remark])
     }
+
+    // Check balances
+    const paymentInfo = await transaction.paymentInfo(this.getKeyringPair(walletIndex))
+    const fee = baseAmount(paymentInfo.partialFee.toString(), getDecimal(this.network))
+    const balances = await this.getBalance(this.getAddress(walletIndex), [AssetDOT])
+
+    if (!balances || params.amount.amount().plus(fee.amount()).isGreaterThan(balances[0].amount.amount())) {
+      throw new Error('insufficient balance')
+    }
+
+    const txHash = await transaction.signAndSend(this.getKeyringPair(walletIndex))
+    await api.disconnect()
+
+    return txHash.toString()
   }
 
   /**
@@ -433,24 +401,20 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {Fees} The estimated fees with the transfer options.
    */
   async estimateFees(params: TxParams): Promise<Fees> {
-    try {
-      const walletIndex = params.walletIndex ? params.walletIndex : 0
-      const api = await this.getAPI()
-      const info = await api.tx.balances
-        .transfer(params.recipient, params.amount.amount().toNumber())
-        .paymentInfo(this.getKeyringPair(walletIndex))
+    const walletIndex = params.walletIndex ? params.walletIndex : 0
+    const api = await this.getAPI()
+    const info = await api.tx.balances
+      .transfer(params.recipient, params.amount.amount().toNumber())
+      .paymentInfo(this.getKeyringPair(walletIndex))
 
-      const fee = baseAmount(info.partialFee.toString(), getDecimal(this.network))
-      await api.disconnect()
+    const fee = baseAmount(info.partialFee.toString(), getDecimal(this.network))
+    await api.disconnect()
 
-      return {
-        type: 'byte',
-        average: fee,
-        fast: fee,
-        fastest: fee,
-      }
-    } catch (error) {
-      return Promise.reject(error)
+    return {
+      type: 'byte',
+      average: fee,
+      fast: fee,
+      fastest: fee,
     }
   }
 
