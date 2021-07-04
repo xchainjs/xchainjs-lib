@@ -3,7 +3,10 @@ import {
   Address,
   Balance,
   BaseXChainClient,
+  FeeRate,
+  FeeRates,
   Fees,
+  FeesWithRates,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -18,7 +21,7 @@ import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './
 import { broadcastTx } from './node-api'
 import { NodeAuth } from './types'
 import { KeyPair } from './types/bitcoincashjs-types'
-import { ClientUrl, FeeRate, FeeRates, FeesWithRates } from './types/client-types'
+import { ClientUrl } from './types/client-types'
 import * as utils from './utils'
 
 /**
