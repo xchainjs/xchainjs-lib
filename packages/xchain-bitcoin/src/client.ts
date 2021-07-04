@@ -69,7 +69,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {string} url The new sochain url.
    * @returns {void}
    */
-  setSochainUrl = (url: string): void => {
+  setSochainUrl(url: string): void {
     this.sochainUrl = url
   }
 
@@ -79,7 +79,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {string} url The new blockstream url.
    * @returns {void}
    */
-  setBlockstreamUrl = (url: string): void => {
+  setBlockstreamUrl(url: string): void {
     this.blockstreamUrl = url
   }
 
@@ -88,7 +88,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    *
    * @returns {string} The explorer url based on the network.
    */
-  getExplorerUrl = (): string => {
+  getExplorerUrl(): string {
     const networkPath = Utils.isTestnet(this.network) ? '/testnet' : ''
     return `https://blockstream.info${networkPath}`
   }
@@ -99,17 +99,19 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address based on the network.
    */
-  getExplorerAddressUrl = (address: Address): string => {
+  // getExplorerAddressUr(address: Address): string {
+  //   return `${this.getExplorerUrl()}/address/${address}`
+  // }
+  getExplorerAddressUrl(address: string): string {
     return `${this.getExplorerUrl()}/address/${address}`
   }
-
   /**
    * Get the explorer url for the given transaction id.
    *
    * @param {string} txID The transaction id
    * @returns {string} The explorer url for the given transaction id based on the network.
    */
-  getExplorerTxUrl = (txID: string): string => {
+  getExplorerTxUrl(txID: string): string {
     return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
@@ -124,7 +126,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (index = 0): Address => {
+  getAddress(index = 0): Address {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
@@ -155,7 +157,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating BTC keys from the given phrase
    * */
-  private getBtcKeys = (phrase: string, index = 0): Bitcoin.ECPairInterface => {
+  private getBtcKeys(phrase: string, index = 0): Bitcoin.ECPairInterface {
     const btcNetwork = Utils.btcNetwork(this.network)
 
     const seed = getSeed(phrase)
@@ -174,7 +176,9 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  validateAddress = (address: string): boolean => Utils.validateAddress(address, this.network)
+  validateAddress(address: string): boolean {
+    return Utils.validateAddress(address, this.network)
+  }
 
   /**
    * Get the BTC balance of a given address.
@@ -182,7 +186,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {Address} the BTC address
    * @returns {Array<Balance>} The BTC balance of the address.
    */
-  getBalance = async (address: Address): Promise<Balance[]> => {
+  async getBalance(address: Address): Promise<Balance[]> {
     return Utils.getBalance({
       sochainUrl: this.sochainUrl,
       network: this.network,
@@ -197,7 +201,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
    */
-  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
+  async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     // Sochain API doesn't have pagination parameter
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
@@ -250,7 +254,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
-  getTransactionData = async (txId: string): Promise<Tx> => {
+  async getTransactionData(txId: string): Promise<Tx> {
     try {
       const rawTx = await sochain.getTx({
         sochainUrl: this.sochainUrl,
@@ -279,7 +283,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {string} memo The memo to be used for fee calculation (optional)
    * @returns {FeesWithRates} The fees and rates
    */
-  getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
+  async getFeesWithRates(memo?: string): Promise<FeesWithRates> {
     let rates: FeeRates | undefined = undefined
 
     try {
@@ -313,7 +317,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    *
    * @returns {Fees} The fees without memo
    */
-  getFees = async (): Promise<Fees> => {
+  async getFees(): Promise<Fees> {
     const { fees } = await this.getFeesWithRates()
     return fees
   }
@@ -325,7 +329,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {string} memo
    * @returns {Fees} The fees with memo
    */
-  getFeesWithMemo = async (memo: string): Promise<Fees> => {
+  async getFeesWithMemo(memo: string): Promise<Fees> {
     const { fees } = await this.getFeesWithRates(memo)
     return fees
   }
@@ -336,7 +340,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    *
    * @returns {FeeRates} The fee rate
    */
-  getFeeRates = async (): Promise<FeeRates> => {
+  async getFeeRates(): Promise<FeeRates> {
     const { rates } = await this.getFeesWithRates()
     return rates
   }
@@ -347,7 +351,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {TxParams&FeeRate} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
+  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const fromAddressIndex = params?.walletIndex || 0
 
     // set the default fee rate to `fast`
