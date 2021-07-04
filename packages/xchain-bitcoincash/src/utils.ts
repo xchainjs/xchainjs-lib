@@ -1,21 +1,24 @@
 import * as bitcash from '@psf/bitcoincashjs-lib'
-import { Address, Balance, Fees, Network, Tx, TxFrom, TxParams, TxTo } from '@xchainjs/xchain-client'
+import {
+  Address,
+  Balance,
+  FeeRate,
+  FeeRates,
+  Fees,
+  FeesWithRates,
+  Network,
+  Tx,
+  TxFrom,
+  TxParams,
+  TxTo,
+} from '@xchainjs/xchain-client'
 import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'
 
 import { getAccount, getRawTransaction, getUnspentTransactions } from './haskoin-api'
-import {
-  AddressParams,
-  FeeRate,
-  FeeRates,
-  FeesWithRates,
-  Transaction,
-  TransactionInput,
-  TransactionOutput,
-  UTXO,
-} from './types'
+import { AddressParams, Transaction, TransactionInput, TransactionOutput, UTXO } from './types'
 import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'
 
 export const BCH_DECIMAL = 8
