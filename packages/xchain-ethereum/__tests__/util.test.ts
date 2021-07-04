@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import nock from 'nock'
 
 import { mock_etherscan_api } from '../__mocks__/etherscan-api'
-import { Network } from '../src/types'
+import { EthNetwork } from '../src/types'
 import {
   ETH_DECIMAL,
   ethNetworkToXchains,
@@ -25,19 +25,19 @@ import {
 describe('ethereum/util', () => {
   describe('xchainNetworkToEths', () => {
     it('should return mainnet ', () => {
-      expect(xchainNetworkToEths('mainnet')).toEqual(Network.MAIN)
+      expect(xchainNetworkToEths('mainnet')).toEqual(EthNetwork.Main)
     })
     it('should return testnet ', () => {
-      expect(xchainNetworkToEths('testnet')).toEqual(Network.TEST)
+      expect(xchainNetworkToEths('testnet')).toEqual(EthNetwork.Test)
     })
   })
 
   describe('ethNetworkToXchains', () => {
     it('should return mainnet ', () => {
-      expect(ethNetworkToXchains(Network.MAIN)).toEqual('mainnet')
+      expect(ethNetworkToXchains(EthNetwork.Main)).toEqual('mainnet')
     })
     it('should return testnet ', () => {
-      expect(ethNetworkToXchains(Network.TEST)).toEqual('testnet')
+      expect(ethNetworkToXchains(EthNetwork.Test)).toEqual('testnet')
     })
   })
 

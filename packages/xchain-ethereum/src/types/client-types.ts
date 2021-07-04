@@ -4,9 +4,9 @@ import { BigNumber, ethers } from 'ethers'
 
 export type Address = string
 
-export enum Network {
-  TEST = 'ropsten',
-  MAIN = 'homestead',
+export enum EthNetwork {
+  Test = 'ropsten',
+  Main = 'homestead',
 }
 
 export type ClientUrl = {
