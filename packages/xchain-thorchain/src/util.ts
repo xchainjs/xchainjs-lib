@@ -68,8 +68,11 @@ export const isMsgMultiSend = (msg: Msg): msg is MsgMultiSend =>
  * @param {any} response The response from the node.
  * @returns {boolean} `true` or `false`.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isBroadcastSuccess = (response: any): boolean => response.logs !== undefined
+export const isBroadcastSuccess = (response: unknown): boolean =>
+  typeof response === 'object' &&
+  response !== null &&
+  'logs' in response &&
+  (response as Record<string, unknown>).logs !== undefined
 
 /**
  * Get address prefix based on the network.
