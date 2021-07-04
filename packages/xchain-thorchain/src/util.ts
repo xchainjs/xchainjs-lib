@@ -1,4 +1,4 @@
-import { Address, Fees, Network, TxHash } from '@xchainjs/xchain-client'
+import { Address, Fees, Network, TxHash, TxType } from '@xchainjs/xchain-client'
 import { TxLog } from '@xchainjs/xchain-cosmos'
 import { Asset, BaseAmount, Chain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { AccAddress, Msg, codec } from 'cosmos-client'
@@ -142,7 +142,7 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
         from: [...acc.from, { amount, from: sender }],
         to: [...acc.to, { amount, to: recipient }],
       }),
-      { from: [], to: [], type: 'transfer' },
+      { from: [], to: [], type: TxType.Transfer },
     )
 
   return txData

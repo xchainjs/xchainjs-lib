@@ -10,6 +10,7 @@ import {
   TxHistoryParams,
   TxParams,
   TxTo,
+  TxType,
   TxsPage,
   XChainClient,
   XChainClientParams,
@@ -418,7 +419,7 @@ class Client implements ThorchainClient, XChainClient {
       asset: asset || AssetRune,
       from,
       to,
-      type: 'transfer',
+      type: TxType.Transfer,
       hash: txId,
     }
   }

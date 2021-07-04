@@ -11,6 +11,7 @@ import {
   TxHash,
   TxHistoryParams,
   TxParams,
+  TxType,
   TxsPage,
   XChainClient,
   XChainClientParams,
@@ -230,7 +231,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
           .filter((i) => i.type !== 'nulldata')
           .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)) })),
         date: new Date(rawTx.time * 1000),
-        type: 'transfer',
+        type: TxType.Transfer,
         hash: rawTx.txid,
       }
       transactions.push(tx)
@@ -263,7 +264,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
       })),
       to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)) })),
       date: new Date(rawTx.time * 1000),
-      type: 'transfer',
+      type: TxType.Transfer,
       hash: rawTx.txid,
     }
   }

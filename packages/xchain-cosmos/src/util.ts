@@ -1,4 +1,4 @@
-import { Fees, Tx, TxFrom, TxTo } from '@xchainjs/xchain-client'
+import { Fees, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { Msg, codec } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
@@ -164,7 +164,7 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
         from,
         to,
         date: new Date(tx.timestamp),
-        type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
+        type: from.length > 0 || to.length > 0 ? TxType.Transfer : TxType.Unknown,
         hash: tx.txhash || '',
       },
     ]

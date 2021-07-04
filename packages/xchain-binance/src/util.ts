@@ -55,8 +55,8 @@ export const isDexFees = (v: Fee | TransferFee | DexFees): v is DexFees => (v as
  * @returns {TxType} `transfer` or `unknown`.
  */
 export const getTxType = (t: BinanceTxType): TxType => {
-  if (t === 'TRANSFER' || t === 'DEPOSIT') return 'transfer'
-  return 'unknown'
+  if (t === 'TRANSFER' || t === 'DEPOSIT') return TxType.Transfer
+  return TxType.Unknown
 }
 
 /**

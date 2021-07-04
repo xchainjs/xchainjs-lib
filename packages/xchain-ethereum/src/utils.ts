@@ -1,4 +1,4 @@
-import { Balance, Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
+import { Balance, Fees, Network as XChainNetwork, Tx, TxType } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetETH,
@@ -142,7 +142,7 @@ export const getTxFromTokenTransaction = (tx: TokenTransactionInfo): Tx | null =
           },
         ],
         date: new Date(parseInt(tx.timeStamp) * 1000),
-        type: 'transfer',
+        type: TxType.Transfer,
         hash: tx.hash,
       }
     }
@@ -173,7 +173,7 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
       },
     ],
     date: new Date(parseInt(tx.timeStamp) * 1000),
-    type: 'transfer',
+    type: TxType.Transfer,
     hash: tx.hash,
   }
 }
@@ -205,7 +205,7 @@ export const getTxFromEthplorerTokenOperation = (operation: TransactionOperation
           },
         ],
         date: new Date(operation.timestamp * 1000),
-        type: operation.type === 'transfer' ? 'transfer' : 'unknown',
+        type: operation.type === 'transfer' ? TxType.Transfer : TxType.Unknown,
         hash: operation.transactionHash,
       }
     }
@@ -236,7 +236,7 @@ export const getTxFromEthplorerEthTransaction = (txInfo: TransactionInfo): Tx =>
       },
     ],
     date: new Date(txInfo.timestamp * 1000),
-    type: 'transfer',
+    type: TxType.Transfer,
     hash: txInfo.hash,
   }
 }

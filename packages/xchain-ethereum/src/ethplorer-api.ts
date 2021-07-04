@@ -1,3 +1,4 @@
+import { TxType } from '@xchainjs/xchain-client'
 import axios from 'axios'
 
 import { AddressInfo, TransactionInfo, TransactionOperation } from './types'
@@ -97,7 +98,7 @@ export const getAddressHistory = async (
       limit,
       timestamp,
       showZeroValues: true,
-      type: 'transfer',
+      type: TxType.Transfer,
     },
   })
   return response.data.operations
