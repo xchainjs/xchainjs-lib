@@ -1,6 +1,7 @@
 import { BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
+import { BTC_DECIMAL } from './const'
 import {
   AddressParams,
   BtcAddressDTO,
@@ -12,7 +13,6 @@ import {
   TxConfirmedStatus,
   TxHashParams,
 } from './types/sochain-api-types'
-import { BTC_DECIMAL } from './utils'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 127
 

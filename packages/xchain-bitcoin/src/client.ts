@@ -19,6 +19,7 @@ import { getSeed } from '@xchainjs/xchain-crypto'
 import { AssetBTC, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Bitcoin from 'bitcoinjs-lib'
 
+import { BTC_DECIMAL } from './const'
 import * as sochain from './sochain-api'
 import * as Utils from './utils'
 
@@ -223,11 +224,11 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
         asset: AssetBTC,
         from: rawTx.inputs.map((i) => ({
           from: i.address,
-          amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)),
+          amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)),
         })),
         to: rawTx.outputs
           .filter((i) => i.type !== 'nulldata')
-          .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
+          .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)) })),
         date: new Date(rawTx.time * 1000),
         type: 'transfer',
         hash: rawTx.txid,
@@ -258,9 +259,9 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
       asset: AssetBTC,
       from: rawTx.inputs.map((i) => ({
         from: i.address,
-        amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)),
+        amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)),
       })),
-      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
+      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)) })),
       date: new Date(rawTx.time * 1000),
       type: 'transfer',
       hash: rawTx.txid,
