@@ -1,12 +1,12 @@
 import * as Litecoin from 'bitcoinjs-lib'
 
 import mockSochainApi from '../__mocks__/sochain'
-import { UTXOs } from '../src/types/common'
+import { UTXO } from '../src/types/common'
 import * as Utils from '../src/utils'
 
 mockSochainApi.init()
 
-let utxos: UTXOs
+let utxos: UTXO[]
 
 describe('Litecoin Utils Test', () => {
   const witness = {
@@ -51,7 +51,7 @@ describe('Litecoin Utils Test', () => {
   })
   it('should fetch as many uxtos as are associated with an address', async () => {
     const address = 'M8T1B2Z97gVdvmfkQcAtYbEepune1tzGua'
-    const utxos: UTXOs = await Utils.scanUTXOs({
+    const utxos: UTXO[] = await Utils.scanUTXOs({
       sochainUrl: 'https://sochain.com/api/v2',
       network: 'mainnet',
       address,

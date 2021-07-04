@@ -2,7 +2,7 @@ import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 import {
   Address,
-  Balances,
+  Balance,
   BaseXChainClient,
   FeeOptionKey,
   Fees,
@@ -298,11 +298,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * Get the ETH balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balances>} The all balance of the address.
+   * @returns {Balance[]} The all balance of the address.
    *
    * @throws {"Invalid asset"} throws when the give asset is an invalid one
    */
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balances> {
+  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
     const ethAddress = address || this.getAddress()
     // get ETH balance directly from provider
     const ethBalance: BigNumber = await this.getProvider().getBalance(ethAddress)
@@ -311,7 +311,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     if (this.getNetwork() === 'mainnet') {
       // use ethplorerAPI for mainnet - ignore assets
       const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
-      const balances: Balances = [
+      const balances: Balance[] = [
         {
           asset: AssetETH,
           amount: ethBalanceAmount,
@@ -484,7 +484,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @param {Address} contractAddress The contract address.
    * @param {ContractInterface} abi The contract ABI json.
    * @param {string} funcName The function to be called.
-   * @param {Array<any>} funcParams The parameters of the function.
+   * @param {any[]} funcParams The parameters of the function.
    * @returns {T} The result of the contract function call.
    *
    * @throws {"contractAddress must be provided"}
@@ -502,7 +502,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @param {Address} contractAddress The contract address.
    * @param {ContractInterface} abi The contract ABI json.
    * @param {string} funcName The function to be called.
-   * @param {Array<any>} funcParams The parameters of the function.
+   * @param {any[]} funcParams The parameters of the function.
    * @param {number} walletIndex (optional) HD wallet index
    * @returns {BigNumber} The result of the contract function call.
    *

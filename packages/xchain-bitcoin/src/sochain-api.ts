@@ -5,7 +5,6 @@ import {
   AddressParams,
   BtcAddressDTO,
   BtcAddressUTXO,
-  BtcAddressUTXOs,
   BtcGetBalanceDTO,
   BtcUnspentTxsDTO,
   SochainResponse,
@@ -84,14 +83,14 @@ export const getBalance = async ({ sochainUrl, network, address }: AddressParams
  * @param {string} sochainUrl The sochain node url.
  * @param {string} network
  * @param {string} address
- * @returns {BtcAddressUTXOs}
+ * @returns {BtcAddressUTXO[]}
  */
 export const getUnspentTxs = async ({
   sochainUrl,
   network,
   address,
   startingFromTxId,
-}: AddressParams): Promise<BtcAddressUTXOs> => {
+}: AddressParams): Promise<BtcAddressUTXO[]> => {
   let resp = null
   if (startingFromTxId) {
     resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}/${startingFromTxId}`)
@@ -141,20 +140,20 @@ export const getIsTxConfirmed = async ({ sochainUrl, network, hash }: TxHashPara
  * @param {string} sochainUrl The sochain node url.
  * @param {string} network
  * @param {string} address
- * @returns {BtcAddressUTXOs}
+ * @returns {BtcAddressUTXO[]}
  */
 export const getConfirmedUnspentTxs = async ({
   sochainUrl,
   network,
   address,
-}: AddressParams): Promise<BtcAddressUTXOs> => {
+}: AddressParams): Promise<BtcAddressUTXO[]> => {
   const txs = await getUnspentTxs({
     sochainUrl,
     network,
     address,
   })
 
-  const confirmedUTXOs: BtcAddressUTXOs = []
+  const confirmedUTXOs: BtcAddressUTXO[] = []
 
   await Promise.all(
     txs.map(async (tx: BtcAddressUTXO) => {

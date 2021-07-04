@@ -15,7 +15,6 @@ import {
   TransactionInput,
   TransactionOutput,
   UTXO,
-  UTXOs,
 } from './types'
 import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'
 
@@ -66,7 +65,7 @@ export function getFee(inputs: number, feeRate: FeeRate, data: Buffer | null = n
  * Get the balances of an address.
  *
  * @param {AddressParams} params
- * @returns {Array<Balance>} The balances of the given address.
+ * @returns {Balance[]} The balances of the given address.
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   const account = await getAccount(params)
@@ -199,11 +198,11 @@ export const validateAddress = (address: string, network: Network): boolean => {
  *
  * @param {string} haskoinUrl sochain Node URL.
  * @param {Address} address
- * @returns {Array<UTXO>} The UTXOs of the given address.
+ * @returns {UTXO[]} The UTXOs of the given address.
  */
-export const scanUTXOs = async (haskoinUrl: string, address: Address): Promise<UTXOs> => {
+export const scanUTXOs = async (haskoinUrl: string, address: Address): Promise<UTXO[]> => {
   const unspents = await getUnspentTransactions({ haskoinUrl, address })
-  const utxos: UTXOs = []
+  const utxos: UTXO[] = []
 
   for (const utxo of unspents || []) {
     utxos.push({
@@ -243,7 +242,7 @@ export const buildTx = async ({
   haskoinUrl: string
 }): Promise<{
   builder: TransactionBuilder
-  utxos: UTXOs
+  utxos: UTXO[]
 }> => {
   const recipientCashAddress = toCashAddress(recipient)
   if (!validateAddress(recipientCashAddress, network)) throw new Error('Invalid address')
@@ -304,7 +303,7 @@ export const buildTx = async ({
  * @param {UnspentOutput} utxos (optional)
  * @returns {BaseAmount} The calculated fees based on fee rate and the memo.
  */
-export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXOs = []): BaseAmount => {
+export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXO[] = []): BaseAmount => {
   const compiledMemo = memo ? compileMemo(memo) : null
   const fee = getFee(utxos.length, feeRate, compiledMemo)
   return baseAmount(fee)

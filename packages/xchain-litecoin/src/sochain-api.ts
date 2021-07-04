@@ -4,7 +4,7 @@ import axios from 'axios'
 import {
   AddressParams,
   LtcAddressDTO,
-  LtcAddressUTXOs,
+  LtcAddressUTXO,
   LtcGetBalanceDTO,
   LtcUnspentTxsDTO,
   SochainResponse,
@@ -82,14 +82,14 @@ export const getBalance = async ({ sochainUrl, network, address }: AddressParams
  * @param {string} sochainUrl The sochain node url.
  * @param {string} network
  * @param {string} address
- * @returns {LtcAddressUTXOs}
+ * @returns {LtcAddressUTXO[]}
  */
 export const getUnspentTxs = async ({
   sochainUrl,
   network,
   address,
   startingFromTxId,
-}: AddressParams): Promise<LtcAddressUTXOs> => {
+}: AddressParams): Promise<LtcAddressUTXO[]> => {
   let resp = null
   if (startingFromTxId) {
     resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}/${startingFromTxId}`)

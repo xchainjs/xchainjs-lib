@@ -86,8 +86,6 @@ export type BtcUnspentTxsDTO = {
   txs: BtcAddressUTXO[]
 }
 
-export type BtcAddressUTXOs = BtcAddressUTXO[]
-
 export type BtcBroadcastTransfer = {
   network: string
   txid: string

@@ -3,7 +3,7 @@ import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 import {
   Address,
-  Balances,
+  Balance,
   BaseXChainClient,
   Fees,
   Network,
@@ -11,7 +11,6 @@ import {
   TxHash,
   TxHistoryParams,
   TxParams,
-  Txs,
   TxsPage,
   XChainClient,
   XChainClientParams,
@@ -31,7 +30,7 @@ import {
 import axios from 'axios'
 
 import {
-  Balances as BinanceBalances,
+  Balance as BinanceBalance,
   Fees as BinanceFees,
   TransactionResult,
   TransferFee,
@@ -195,10 +194,10 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @param {Address | number} address By default, it will return the balance of the current wallet. (optional)
    * @param {Asset} asset If not set, it will return all assets available. (optional)
-   * @returns {Array<Balance>} The balance of the address.
+   * @returns {Balance[]} The balance of the address.
    */
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balances> {
-    const balances: BinanceBalances = await this.bncClient.getBalance(address)
+  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
+    const balances: BinanceBalance[] = await this.bncClient.getBalance(address)
 
     return balances
       .map((balance) => {
@@ -244,7 +243,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
 
     return {
       total: txHistory.total,
-      txs: txHistory.tx.map(parseTx).filter(Boolean) as Txs,
+      txs: txHistory.tx.map(parseTx).filter(Boolean) as Tx[],
     }
   }
 

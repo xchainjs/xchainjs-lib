@@ -1,4 +1,4 @@
-import { Txs } from '@xchainjs/xchain-client'
+import { Tx } from '@xchainjs/xchain-client'
 import { bnOrZero } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { BigNumberish } from 'ethers'
@@ -60,7 +60,7 @@ export const getTokenBalance = async ({
  * @param {string} address The address.
  * @param {TransactionHistoryParam} params The search options.
  * @param {string} apiKey The etherscan API key. (optional)
- * @returns {Array<ETHTransactionInfo>} The ETH transaction history
+ * @returns {ETHTransactionInfo[]} The ETH transaction history
  */
 export const getETHTransactionHistory = async ({
   baseUrl,
@@ -70,7 +70,7 @@ export const getETHTransactionHistory = async ({
   startblock,
   endblock,
   apiKey,
-}: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Txs> => {
+}: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Tx[]> => {
   let url = baseUrl + `/api?module=account&action=txlist&sort=desc` + getApiKeyQueryParameter(apiKey)
   if (address) url += `&address=${address}`
   if (offset) url += `&offset=${offset}`
@@ -96,7 +96,7 @@ export const getETHTransactionHistory = async ({
  * @param {string} address The address.
  * @param {TransactionHistoryParam} params The search options.
  * @param {string} apiKey The etherscan API key. (optional)
- * @returns {Array<Tx>} The token transaction history
+ * @returns {Tx[]} The token transaction history
  */
 export const getTokenTransactionHistory = async ({
   baseUrl,
@@ -107,7 +107,7 @@ export const getTokenTransactionHistory = async ({
   startblock,
   endblock,
   apiKey,
-}: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Txs> => {
+}: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Tx[]> => {
   let url = baseUrl + `/api?module=account&action=tokentx&sort=desc` + getApiKeyQueryParameter(apiKey)
   if (address) url += `&address=${address}`
   if (assetAddress) url += `&contractaddress=${assetAddress}`
@@ -124,5 +124,5 @@ export const getTokenTransactionHistory = async ({
     .reduce((acc, cur) => {
       const tx = getTxFromTokenTransaction(cur)
       return tx ? [...acc, tx] : acc
-    }, [] as Txs)
+    }, [] as Tx[])
 }

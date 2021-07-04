@@ -42,11 +42,9 @@ export type Transfer = {
   to_account_display?: AccountDisplay
 }
 
-export type Transfers = Array<Transfer>
-
 export type TransfersResult = {
   count: number
-  transfers?: Array<Transfer> | null
+  transfers?: Transfer[] | null
 }
 
 export type ExtrinsicParam = {
@@ -84,9 +82,9 @@ export type Extrinsic = {
   nonce: number
   extrinsic_hash: string
   success: boolean
-  params: Array<ExtrinsicParam>
+  params: ExtrinsicParam[]
   transfer: Transfer
-  event: Array<ExtrinsicEvent>
+  event: ExtrinsicEvent[]
   fee: string
   error?: string | null
   finalized: true

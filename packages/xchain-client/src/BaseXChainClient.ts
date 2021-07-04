@@ -4,7 +4,7 @@ import axios from 'axios'
 
 import {
   Address,
-  Balances,
+  Balance,
   FeeRates,
   Fees,
   FeesParams,
@@ -133,7 +133,7 @@ export abstract class BaseXChainClient implements XChainClient {
   abstract getExplorerAddressUrl(address: string): string
   abstract getExplorerTxUrl(txID: string): string
   abstract validateAddress(address: string): boolean
-  abstract getBalance(address: string, assets?: Asset[]): Promise<Balances>
+  abstract getBalance(address: string, assets?: Asset[]): Promise<Balance[]>
   abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
   abstract transfer(params: TxParams): Promise<string>

@@ -1,6 +1,6 @@
 import {
   Address,
-  Balances,
+  Balance,
   Fees,
   Network,
   Network as XChainNetwork,
@@ -235,9 +235,9 @@ class Client implements CosmosClient, XChainClient {
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @param {Asset} asset If not set, it will return all assets available. (optional)
-   * @returns {Array<Balance>} The balance of the address.
+   * @returns {Balance[]} The balance of the address.
    */
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balances> {
+  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
     const balances = await this.getSDKClient().getBalance(address)
     const mainAsset = this.getMainAsset()
 

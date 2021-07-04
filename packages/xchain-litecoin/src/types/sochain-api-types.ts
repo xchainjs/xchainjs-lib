@@ -80,8 +80,6 @@ export type LtcUnspentTxsDTO = {
   txs: LtcAddressUTXO[]
 }
 
-export type LtcAddressUTXOs = LtcAddressUTXO[]
-
 export type LtcBroadcastTransfer = {
   network: string
   txid: string

@@ -1,9 +1,9 @@
 import { Address, FeeRate, Network, TxParams } from '@xchainjs/xchain-client'
 
-import { UTXOs } from './common'
+import { UTXO } from './common'
 
 export type LedgerTxInfo = {
-  utxos: UTXOs
+  utxos: UTXO[]
   newTxHex: string
 }
 

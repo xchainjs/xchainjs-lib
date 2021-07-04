@@ -207,7 +207,7 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
    * Get the BCH balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balance>} The BCH balance of the address.
+   * @returns {Balance[]} The BCH balance of the address.
    *
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */

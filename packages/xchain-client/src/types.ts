@@ -9,8 +9,6 @@ export type Balance = {
   amount: BaseAmount
 }
 
-export type Balances = Balance[]
-
 export type TxType = 'transfer' | 'unknown'
 
 export type TxHash = string
@@ -34,11 +32,9 @@ export type Tx = {
   hash: string // Tx hash
 }
 
-export type Txs = Tx[]
-
 export type TxsPage = {
   total: number
-  txs: Txs
+  txs: Tx[]
 }
 
 export type TxHistoryParams = {
@@ -102,7 +98,7 @@ export interface XChainClient {
 
   setPhrase(phrase: string, walletIndex: number): Address
 
-  getBalance(address: Address, assets?: Asset[]): Promise<Balances>
+  getBalance(address: Address, assets?: Asset[]): Promise<Balance[]>
 
   getTransactions(params?: TxHistoryParams): Promise<TxsPage>
 

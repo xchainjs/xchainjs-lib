@@ -78,7 +78,7 @@ export type TxHistoryResponse = {
   page_number?: number
   page_total?: number
   limit?: number
-  txs?: Array<TxResponse>
+  txs?: TxResponse[]
 }
 
 export type APIQueryParam = {

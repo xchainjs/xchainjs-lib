@@ -192,7 +192,7 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
    * Get the LTC balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balance>} The LTC balance of the address.
+   * @returns {Balance[]} The LTC balance of the address.
    */
   async getBalance(address: Address): Promise<Balance[]> {
     return Utils.getBalance({

@@ -191,7 +191,7 @@ export type TxPage = {
   /**
    * List of transactions
    */
-  tx: Txs
+  tx: Tx[]
 }
 
 export type FeeType =
@@ -248,7 +248,7 @@ export type DexFees = {
   dex_fee_fields: DexFee[]
 }
 
-export type Fees = Array<Fee | TransferFee | DexFees>
+export type Fees = (Fee | TransferFee | DexFees)[]
 
 /**
  * Tx
@@ -332,8 +332,6 @@ export type Tx = {
    */
   proposalId: string | null
 }
-
-export type Txs = Tx[]
 
 export type TxSide = 'RECEIVE' | 'SEND'
 
@@ -519,8 +517,6 @@ export type Balance = {
   frozen: string
 }
 
-export type Balances = Balance[]
-
 export type Transfer = {
   code: number
   hash: string
@@ -528,13 +524,12 @@ export type Transfer = {
   ok: boolean
 }
 
-export type Transfers = Transfer[]
 /**
  * Result of  `bncClient.transfer(...)`
  * to transfer tokens from one address to another.
  * See https://github.com/binance-chain/javascript-sdk/blob/master/docs/api-docs/classes/bncclient.md#transfer
  * */
-export type TransferResult = { result?: Transfers }
+export type TransferResult = { result?: Transfer[] }
 
 export type Network = keyof typeof NETWORK_PREFIX_MAPPING
 
@@ -546,8 +541,8 @@ export type AminoWrapping<T> = {
 }
 
 export type StdTransaction = {
-  msg: Array<AminoWrapping<Msg>>
-  signatures: Array<StdSignature>
+  msg: AminoWrapping<Msg>[]
+  signatures: StdSignature[]
   memo: string
   source: number
   data?: Buffer | null | string
