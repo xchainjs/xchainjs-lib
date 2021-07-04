@@ -11,6 +11,7 @@ import {
   TxFrom,
   TxParams,
   TxTo,
+  TxType,
 } from '@xchainjs/xchain-client'
 import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
@@ -171,7 +172,7 @@ export const parseTransaction = (tx: Transaction): Tx => {
           } as TxTo),
       ),
     date: new Date(tx.time * 1000),
-    type: 'transfer',
+    type: TxType.Transfer,
     hash: tx.txid,
   }
 }

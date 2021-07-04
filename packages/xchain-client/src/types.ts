@@ -9,7 +9,10 @@ export type Balance = {
   amount: BaseAmount
 }
 
-export type TxType = 'transfer' | 'unknown'
+export enum TxType {
+  Transfer = 'transfer',
+  Unknown = 'unknown',
+}
 
 export type TxHash = string
 

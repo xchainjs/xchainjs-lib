@@ -11,6 +11,7 @@ import {
   TxHash,
   TxHistoryParams,
   TxParams,
+  TxType,
   TxsPage,
   XChainClient,
   XChainClientParams,
@@ -310,7 +311,7 @@ class Client implements PolkadotClient, XChainClient {
           },
         ],
         date: new Date(transfer.block_timestamp * 1000),
-        type: 'transfer',
+        type: TxType.Transfer,
         hash: transfer.hash,
       })),
     }
@@ -346,7 +347,7 @@ class Client implements PolkadotClient, XChainClient {
         },
       ],
       date: new Date(extrinsic.block_timestamp * 1000),
-      type: 'transfer',
+      type: TxType.Transfer,
       hash: extrinsic.extrinsic_hash,
     }
   }
