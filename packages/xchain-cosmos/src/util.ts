@@ -1,4 +1,4 @@
-import { Fees, TxFrom, TxTo, Txs } from '@xchainjs/xchain-client'
+import { Fees, Tx, TxFrom, TxTo } from '@xchainjs/xchain-client'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { Msg, codec } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
@@ -59,11 +59,11 @@ export const getAsset = (denom: string): Asset | null => {
 /**
  * Parse transaction type
  *
- * @param {Array<TxResponse>} txs The transaction response from the node.
+ * @param {TxResponse[]} txs The transaction response from the node.
  * @param {Asset} mainAsset Current main asset which depends on the network.
- * @returns {Txs} The parsed transaction result.
+ * @returns {Tx[]} The parsed transaction result.
  */
-export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs => {
+export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => {
   return txs.reduce((acc, tx) => {
     let msgs: Msg[] = []
     if ((tx.tx as RawTxResponse).body === undefined) {
@@ -168,7 +168,7 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
         hash: tx.txhash || '',
       },
     ]
-  }, [] as Txs)
+  }, [] as Tx[])
 }
 
 /**

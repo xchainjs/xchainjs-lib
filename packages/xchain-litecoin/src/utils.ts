@@ -17,8 +17,8 @@ import accumulative from 'coinselect/accumulative'
 import { MIN_TX_FEE } from './const'
 import * as nodeApi from './node-api'
 import * as sochain from './sochain-api'
-import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
-import { AddressParams, LtcAddressUTXOs } from './types/sochain-api-types'
+import { BroadcastTxParams, UTXO } from './types/common'
+import { AddressParams, LtcAddressUTXO } from './types/sochain-api-types'
 
 export const LTC_DECIMAL = 8
 
@@ -46,12 +46,12 @@ export const compileMemo = (memo: string): Buffer => {
 /**
  * Get the transaction fee.
  *
- * @param {UTXOs} inputs The UTXOs.
+ * @param {UTXO[]} inputs The UTXOs.
  * @param {FeeRate} feeRate The fee rate.
  * @param {Buffer} data The compiled memo (Optional).
  * @returns {number} The fee amount.
  */
-export function getFee(inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = null): number {
+export function getFee(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
   let sum =
     TX_EMPTY_SIZE +
     inputs.reduce(function (a, x) {
@@ -73,10 +73,10 @@ export function getFee(inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = nu
 /**
  * Get the average value of an array.
  *
- * @param {Array<number>} array
+ * @param {number[]} array
  * @returns {number} The average value.
  */
-export function arrayAverage(array: Array<number>): number {
+export function arrayAverage(array: number[]): number {
   let sum = 0
   array.forEach((value) => (sum += value))
   return sum / array.length
@@ -106,7 +106,7 @@ export const ltcNetwork = (network: Network): Litecoin.Network => {
  * Get the balances of an address.
  *
  * @param {AddressParams} params
- * @returns {Array<Balance>} The balances of the given address.
+ * @returns {Balance[]} The balances of the given address.
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   try {
@@ -142,10 +142,10 @@ export const validateAddress = (address: Address, network: Network): boolean => 
  * Scan UTXOs from sochain.
  *
  * @param {AddressParams} params
- * @returns {Array<UTXO>} The UTXOs of the given address.
+ * @returns {UTXO[]} The UTXOs of the given address.
  */
-export const scanUTXOs = async (params: AddressParams): Promise<UTXOs> => {
-  const utxos: LtcAddressUTXOs = await sochain.getUnspentTxs(params)
+export const scanUTXOs = async (params: AddressParams): Promise<UTXO[]> => {
+  const utxos: LtcAddressUTXO[] = await sochain.getUnspentTxs(params)
 
   return utxos.map(
     (utxo) =>
@@ -180,7 +180,7 @@ export const buildTx = async ({
   sender: Address
   network: Network
   sochainUrl: string
-}): Promise<{ psbt: Litecoin.Psbt; utxos: UTXOs }> => {
+}): Promise<{ psbt: Litecoin.Psbt; utxos: UTXO[] }> => {
   if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
   const utxos = await scanUTXOs({ sochainUrl, network, address: sender })

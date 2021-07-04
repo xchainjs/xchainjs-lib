@@ -1,4 +1,4 @@
-import { Balances, Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
+import { Balance, Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetETH,
@@ -350,11 +350,11 @@ export const getDecimal = async (asset: Asset, provider: providers.Provider): Pr
 /**
  * Get Token Balances
  *
- * @param {Array<TokenBalance>} tokenBalances
- * @returns {Array<Balance>} the parsed balances
+ * @param {TokenBalance[]} tokenBalances
+ * @returns {Balance[]} the parsed balances
  *
  */
-export const getTokenBalances = (tokenBalances: TokenBalance[]): Balances => {
+export const getTokenBalances = (tokenBalances: TokenBalance[]): Balance[] => {
   return tokenBalances.reduce((acc, cur) => {
     const { symbol, address: tokenAddress } = cur.tokenInfo
     if (validateSymbol(symbol) && validateAddress(tokenAddress) && cur?.tokenInfo?.decimals !== undefined) {
@@ -372,5 +372,5 @@ export const getTokenBalances = (tokenBalances: TokenBalance[]): Balances => {
     }
 
     return acc
-  }, [] as Balances)
+  }, [] as Balance[])
 }

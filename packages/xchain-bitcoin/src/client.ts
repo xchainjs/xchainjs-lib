@@ -182,7 +182,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * Get the BTC balance of a given address.
    *
    * @param {Address} the BTC address
-   * @returns {Array<Balance>} The BTC balance of the address.
+   * @returns {Balance[]} The BTC balance of the address.
    */
   async getBalance(address: Address): Promise<Balance[]> {
     return Utils.getBalance({

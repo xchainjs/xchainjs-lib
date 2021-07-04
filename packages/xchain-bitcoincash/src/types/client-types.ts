@@ -30,8 +30,6 @@ export type UTXO = {
   txHex: string
 }
 
-export type UTXOs = UTXO[]
-
 export type GetChangeParams = {
   valueOut: number
   bchBalance: Balance

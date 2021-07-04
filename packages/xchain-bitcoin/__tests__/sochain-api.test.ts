@@ -3,7 +3,7 @@ import isTx1ConfirmedResponse from '../__mocks__/response/is-tx-confirmed/d5d4a0
 import unspentTxsResponse from '../__mocks__/response/unspent-txs/tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp.json'
 import mockSochainApi from '../__mocks__/sochain'
 import * as sochain from '../src/sochain-api'
-import { BtcAddressUTXOs } from '../src/types/sochain-api-types'
+import { BtcAddressUTXO } from '../src/types/sochain-api-types'
 
 mockSochainApi.init()
 
@@ -14,7 +14,7 @@ describe('Sochain API Test', () => {
   it('getUnspentTxs', async () => {
     const address = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
 
-    const utxos: BtcAddressUTXOs = await sochain.getUnspentTxs({
+    const utxos: BtcAddressUTXO[] = await sochain.getUnspentTxs({
       sochainUrl,
       network,
       address,

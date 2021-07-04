@@ -3,7 +3,7 @@ import { KeyringPair } from '@polkadot/keyring/types'
 import { hexToU8a, isHex } from '@polkadot/util'
 import {
   Address,
-  Balances,
+  Balance,
   Fees,
   Network,
   RootDerivationPaths,
@@ -250,9 +250,9 @@ class Client implements PolkadotClient, XChainClient {
    * Get the DOT balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balance>} The DOT balance of the address.
+   * @returns {Balance[]} The DOT balance of the address.
    */
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balances> {
+  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
     const response: SubscanResponse<Account> = (
       await axios.post(`${this.getClientUrl()}/api/open/account`, { address: address || this.getAddress() })
     ).data

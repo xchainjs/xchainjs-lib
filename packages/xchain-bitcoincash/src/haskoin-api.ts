@@ -75,7 +75,7 @@ export const getRawTransaction = async ({ haskoinUrl, txId }: TxHashParams): Pro
  * @param {string} haskoinUrl The haskoin API url.
  * @param {string} address The BCH address.
  * @param {TransactionsQueryParam} params The API query parameters.
- * @returns {Array<Transaction>}
+ * @returns {Transaction[]}
  *
  * @throws {"failed to query transactions"} thrown if failed to query transactions
  */
@@ -96,7 +96,7 @@ export const getTransactions = async ({
  *
  * @param {string} haskoinUrl The haskoin API url.
  * @param {string} address The BCH address.
- * @returns {Array<TxUnspent>}
+ * @returns {TxUnspent[]}
  *
  * @throws {"failed to query unspent transactions"} thrown if failed to query unspent transactions
  */

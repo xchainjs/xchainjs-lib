@@ -17,8 +17,8 @@ import * as blockStream from './blockstream-api'
 import { MIN_TX_FEE } from './const'
 import * as haskoinApi from './haskoin-api'
 import * as sochain from './sochain-api'
-import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
-import { AddressParams, BtcAddressUTXOs, ScanUTXOParam } from './types/sochain-api-types'
+import { BroadcastTxParams, UTXO } from './types/common'
+import { AddressParams, BtcAddressUTXO, ScanUTXOParam } from './types/sochain-api-types'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
@@ -46,12 +46,12 @@ export const compileMemo = (memo: string): Buffer => {
 /**
  * Get the transaction fee.
  *
- * @param {UTXOs} inputs The UTXOs.
+ * @param {UTXO[]} inputs The UTXOs.
  * @param {FeeRate} feeRate The fee rate.
  * @param {Buffer} data The compiled memo (Optional).
  * @returns {number} The fee amount.
  */
-export const getFee = (inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = null): number => {
+export const getFee = (inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number => {
   let sum =
     TX_EMPTY_SIZE +
     inputs.reduce((a, x) => a + inputBytes(x), 0) +
@@ -71,10 +71,10 @@ export const getFee = (inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = nu
 /**
  * Get the average value of an array.
  *
- * @param {Array<number>} array
+ * @param {number[]} array
  * @returns {number} The average value.
  */
-export const arrayAverage = (array: Array<number>): number => {
+export const arrayAverage = (array: number[]): number => {
   let sum = 0
   array.forEach((value) => (sum += value))
   return sum / array.length
@@ -106,7 +106,7 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
  * @param {string} sochainUrl sochain Node URL.
  * @param {Network} network
  * @param {Address} address
- * @returns {Array<Balance>} The balances of the given address.
+ * @returns {Balance[]} The balances of the given address.
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   const balance =
@@ -141,16 +141,16 @@ export const validateAddress = (address: Address, network: Network): boolean => 
  * @param {string} sochainUrl sochain Node URL.
  * @param {Network} network
  * @param {Address} address
- * @returns {Array<UTXO>} The UTXOs of the given address.
+ * @returns {UTXO[]} The UTXOs of the given address.
  */
 export const scanUTXOs = async ({
   sochainUrl,
   network,
   address,
   confirmedOnly = true, // default: scan only confirmed UTXOs
-}: ScanUTXOParam): Promise<UTXOs> => {
+}: ScanUTXOParam): Promise<UTXO[]> => {
   if (network === 'testnet') {
-    let utxos: BtcAddressUTXOs = []
+    let utxos: BtcAddressUTXO[] = []
 
     const addressParam: AddressParams = {
       sochainUrl,
@@ -220,7 +220,7 @@ export const buildTx = async ({
   network: Network
   sochainUrl: string
   spendPendingUTXO?: boolean
-}): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXOs }> => {
+}): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[] }> => {
   // search only confirmed UTXOs if pending UTXO is not allowed
   const confirmedOnly = !spendPendingUTXO
   const utxos = await scanUTXOs({ sochainUrl, network, address: sender, confirmedOnly })

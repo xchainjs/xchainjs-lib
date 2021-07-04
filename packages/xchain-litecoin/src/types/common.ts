@@ -11,8 +11,6 @@ export type UTXO = {
   witnessUtxo: Witness
 }
 
-export type UTXOs = UTXO[]
-
 export type NodeAuth = {
   username: string
   password: string

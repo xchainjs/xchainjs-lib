@@ -64,7 +64,7 @@ export type CallParams = {
   contractAddress: Address
   abi: ethers.ContractInterface
   funcName: string
-  funcParams?: Array<unknown>
+  funcParams?: unknown[]
 }
 
 export type EstimateCallParams = Pick<CallParams, 'contractAddress' | 'abi' | 'funcName' | 'funcParams' | 'walletIndex'>

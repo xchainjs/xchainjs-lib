@@ -108,7 +108,7 @@ describe('cosmos/util', () => {
     const from_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
     const to_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
 
-    const txs: Array<TxResponse> = [
+    const txs: TxResponse[] = [
       {
         height: 0,
         txhash: '',
