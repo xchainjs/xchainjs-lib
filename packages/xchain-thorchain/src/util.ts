@@ -84,15 +84,14 @@ export const isBroadcastSuccess = (response: unknown): boolean =>
 export const getPrefix = (network: string) => (network === 'testnet' ? 'tthor' : 'thor')
 
 /**
- * Register Codecs based on the network.
+ * Register Codecs based on the prefix.
  *
- * @param {Network}
+ * @param {string} prefix
  */
-export const registerCodecs = (network: Network): void => {
+export const registerCodecs = (prefix: string): void => {
   codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
   codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
 
-  const prefix = getPrefix(network)
   AccAddress.setBech32Prefix(
     prefix,
     prefix + 'pub',
