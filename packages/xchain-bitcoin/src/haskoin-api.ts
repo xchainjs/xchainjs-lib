@@ -1,5 +1,5 @@
-import { Address } from '@xchainjs/xchain-client/lib'
-import { BaseAmount, baseAmount } from '@xchainjs/xchain-util/lib'
+import { Address } from '@xchainjs/xchain-client'
+import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import { getIsTxConfirmed } from './sochain-api'

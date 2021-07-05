@@ -1,5 +1,5 @@
 import { validatePhrase } from '@xchainjs/xchain-crypto'
-import { Asset, Chain } from '@xchainjs/xchain-util/lib'
+import { Asset, Chain } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import {

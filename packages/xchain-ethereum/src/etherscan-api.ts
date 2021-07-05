@@ -1,5 +1,5 @@
-import { Txs } from '@xchainjs/xchain-client/lib'
-import { bnOrZero } from '@xchainjs/xchain-util/lib'
+import { Txs } from '@xchainjs/xchain-client'
+import { bnOrZero } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { BigNumberish } from 'ethers'
 

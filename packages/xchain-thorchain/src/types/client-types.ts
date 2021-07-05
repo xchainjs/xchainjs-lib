@@ -1,4 +1,4 @@
-import { Network, Tx } from '@xchainjs/xchain-client/lib'
+import { Network, Tx } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
 export type NodeUrl = {
