@@ -1,8 +1,11 @@
 import nock from 'nock'
 
-export const mock_infra_api = (url: string, method: string, result: string | Object) => {
+export const mock_infra_api = (url: string, method: string, result: string | Record<string, unknown>) => {
   nock(url)
-    .post(_ => true, body => body.method === method)
+    .post(
+      (_) => true,
+      (body) => body.method === method,
+    )
     .reply(200, {
       jsonrpc: '2.0',
       result,
