@@ -4,10 +4,10 @@
 import { Server, WebSocket } from 'mock-socket'
 
 export interface Scope {
-  body: { [index: string]: Record<string, any> }
+  body: { [index: string]: Record<string, unknown> }
   requests: number
   server: Server
-  done: any
+  done: () => void
 }
 
 global.WebSocket = WebSocket
@@ -26,7 +26,8 @@ function mockWs(wsUrl: string): Scope {
   }
 
   server.on('connection', (socket): void => {
-    socket.on('message', (body: any): void => {
+    socket.on('message', (body): void => {
+      if (typeof body !== 'string') throw new Error('expected body to be a string')
       const request = JSON.parse(body)
       console.log('request method', request.method)
       switch (request.method) {
