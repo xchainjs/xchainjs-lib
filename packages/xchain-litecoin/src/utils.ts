@@ -1,6 +1,3 @@
-import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
-import * as sochain from './sochain-api'
-import * as nodeApi from './node-api'
 import {
   Address,
   Balance,
@@ -12,17 +9,18 @@ import {
   TxHash,
   TxParams,
 } from '@xchainjs/xchain-client'
-import { AssetLTC, BaseAmount, baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util'
-import { LtcAddressUTXOs, AddressParams } from './types/sochain-api-types'
-import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
-import { MIN_TX_FEE } from './const'
+import { AssetLTC, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import * as Litecoin from 'bitcoinjs-lib'
 import coininfo from 'coininfo'
+import accumulative from 'coinselect/accumulative'
+
+import { MIN_TX_FEE } from './const'
+import * as nodeApi from './node-api'
+import * as sochain from './sochain-api'
+import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
+import { AddressParams, LtcAddressUTXOs } from './types/sochain-api-types'
 
 export const LTC_DECIMAL = 8
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import accumulative from 'coinselect/accumulative'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41

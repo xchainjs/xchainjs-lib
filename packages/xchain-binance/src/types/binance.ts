@@ -1,13 +1,6 @@
-import { BigSource } from 'big.js'
-
-/**
- * Type definitions for Binance Chain API
- * @see https://docs.binance.org/api-reference/dex-api/
- *
- */
-
 import { NETWORK_PREFIX_MAPPING } from '@binance-chain/javascript-sdk/lib/client'
 import { Msg, StdSignature } from '@binance-chain/javascript-sdk/lib/types'
+import { BigSource } from 'big.js'
 
 /**
  * Address

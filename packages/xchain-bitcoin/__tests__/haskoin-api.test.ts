@@ -1,6 +1,6 @@
+import mockHaskoinApi from '../__mocks__/haskoin'
 import * as haskoin from '../src/haskoin-api'
 
-import mockHaskoinApi from '../__mocks__/haskoin'
 mockHaskoinApi.init()
 
 // Mock address has to match with mock file in `__mocks__/response/balances/haskoin-{address}.json

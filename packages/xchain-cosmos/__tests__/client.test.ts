@@ -1,12 +1,12 @@
+import { TxsPage } from '@xchainjs/xchain-client'
+import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { BaseAccount, BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
 import nock from 'nock'
 
-import { TxsPage } from '@xchainjs/xchain-client'
-import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
-import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
-import { AssetMuon } from '../src/types'
 import { Client } from '../src/client'
-import { getDenom } from '../src/util'
 import { TxHistoryResponse, TxResponse } from '../src/cosmos/types'
+import { AssetMuon } from '../src/types'
+import { getDenom } from '../src/util'
 
 const getClientUrl = (client: Client): string => {
   return client.getNetwork() === 'testnet' ? 'http://lcd.gaia.bigdipper.live:1317' : 'https://api.cosmos.network'

@@ -1,15 +1,16 @@
-import axios from 'axios'
-import {
-  GasOracleResponse,
-  TransactionHistoryParam,
-  ETHTransactionInfo,
-  TokenTransactionInfo,
-  TokenBalanceParam,
-} from './types'
-import { BigNumberish } from 'ethers'
 import { Txs } from '@xchainjs/xchain-client/lib'
-import { filterSelfTxs, getTxFromEthTransaction, getTxFromTokenTransaction } from './utils'
 import { bnOrZero } from '@xchainjs/xchain-util/lib'
+import axios from 'axios'
+import { BigNumberish } from 'ethers'
+
+import {
+  ETHTransactionInfo,
+  GasOracleResponse,
+  TokenBalanceParam,
+  TokenTransactionInfo,
+  TransactionHistoryParam,
+} from './types'
+import { filterSelfTxs, getTxFromEthTransaction, getTxFromTokenTransaction } from './utils'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 

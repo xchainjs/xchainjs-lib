@@ -1,7 +1,8 @@
+import { Fees, Tx, TxType } from '@xchainjs/xchain-client'
+import { AssetBNB, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+
+import { DexFees, Fee, TransferFee, Tx as BinanceTx, TxType as BinanceTxType } from './types/binance'
 import { Transfer, TransferEvent } from './types/binance-ws'
-import { TransferFee, DexFees, Fee, TxType as BinanceTxType, Tx as BinanceTx } from './types/binance'
-import { TxType, Tx, Fees } from '@xchainjs/xchain-client'
-import { assetFromString, AssetBNB, assetToBase, assetAmount, baseAmount } from '@xchainjs/xchain-util'
 import { DerivePath } from './types/common'
 
 /**

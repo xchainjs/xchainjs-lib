@@ -2,28 +2,29 @@ import { Balances, Fees, Network as XChainNetwork, Tx } from '@xchainjs/xchain-c
 import {
   Asset,
   AssetETH,
-  assetFromString,
-  baseAmount,
-  ETHChain,
   BaseAmount,
-  assetToString,
+  ETHChain,
   assetAmount,
+  assetFromString,
   assetToBase,
+  assetToString,
+  baseAmount,
 } from '@xchainjs/xchain-util'
-import { ethers, BigNumber, providers } from 'ethers'
+import { BigNumber, ethers, providers } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
+
+import erc20ABI from './data/erc20.json'
 import {
-  Network as EthNetwork,
   Address,
   ETHTransactionInfo,
-  TokenTransactionInfo,
   FeesWithGasPricesAndLimits,
   GasPrices,
-  TransactionOperation,
-  TransactionInfo,
+  Network as EthNetwork,
   TokenBalance,
+  TokenTransactionInfo,
+  TransactionInfo,
+  TransactionOperation,
 } from './types'
-import erc20ABI from './data/erc20.json'
 
 export const ETH_DECIMAL = 18
 export const ETHPLORER_FREEKEY = 'freekey'

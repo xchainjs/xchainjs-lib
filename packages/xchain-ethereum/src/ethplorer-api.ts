@@ -1,4 +1,5 @@
 import axios from 'axios'
+
 import { AddressInfo, TransactionInfo, TransactionOperation } from './types'
 
 /**

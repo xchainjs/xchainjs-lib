@@ -1,9 +1,10 @@
-import { Client } from '../src/client'
-import { baseAmount } from '@xchainjs/xchain-util'
-import { Scope, mockWs } from '../__mocks__/ws'
-import { Constructor } from '@polkadot/types/types'
 import { Global } from '@polkadot/rpc-provider/mock/types'
+import { Constructor } from '@polkadot/types/types'
+import { baseAmount } from '@xchainjs/xchain-util'
+
 import { assertAccountsBalance, assertTxData, assertTxHistory } from '../__mocks__/subscan'
+import { Scope, mockWs } from '../__mocks__/ws'
+import { Client } from '../src/client'
 
 declare const global: Global
 

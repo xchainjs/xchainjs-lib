@@ -1,4 +1,5 @@
-import { Client } from '../src/client'
+import { baseAmount } from '@xchainjs/xchain-util'
+
 import {
   mock_broadcastTx,
   mock_estimateFee,
@@ -9,7 +10,7 @@ import {
   mock_getTransactions,
   mock_getUnspents,
 } from '../__mocks__/api'
-import { baseAmount } from '@xchainjs/xchain-util'
+import { Client } from '../src/client'
 import { BCH_DECIMAL } from '../src/utils'
 
 const bchClient = new Client({ network: 'mainnet' })

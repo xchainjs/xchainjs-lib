@@ -1,4 +1,5 @@
 import nock from 'nock'
+
 import { AddressInfo, TransactionInfo, TransactionOperation } from '../src/types'
 
 export const mock_ethplorer_api_getAddress = (url: string, address: string, result: AddressInfo) => {

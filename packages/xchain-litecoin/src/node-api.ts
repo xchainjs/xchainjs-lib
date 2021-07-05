@@ -1,6 +1,7 @@
 import axios from 'axios'
-import { TxBroadcastResponse } from './types/node-api-types'
+
 import { BroadcastTxParams } from './types/common'
+import { TxBroadcastResponse } from './types/node-api-types'
 
 /**
  * Broadcast transaction.

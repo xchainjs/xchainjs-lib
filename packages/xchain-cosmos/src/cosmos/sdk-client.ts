@@ -1,26 +1,25 @@
-import axios from 'axios'
-import * as BIP32 from 'bip32'
-
 import { TxHistoryParams } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-
-import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from 'cosmos-client'
+import axios from 'axios'
+import * as BIP32 from 'bip32'
+import { AccAddress, CosmosSDK, Msg, PrivKey, PrivKeySecp256k1 } from 'cosmos-client'
 import { BroadcastTxCommitResult, Coin, StdTxSignature } from 'cosmos-client/api'
-import { auth, StdTx, BaseAccount } from 'cosmos-client/x/auth'
-import { bank, MsgSend } from 'cosmos-client/x/bank'
+import { BaseAccount, StdTx, auth } from 'cosmos-client/x/auth'
+import { MsgSend, bank } from 'cosmos-client/x/bank'
+
+import { getQueryString } from '../util'
 
 import {
   APIQueryParam,
   BaseAccountResponse,
+  CosmosSDKClientParams,
+  RPCResponse,
+  RPCTxSearchResult,
   SearchTxParams,
   TransferParams,
   TxHistoryResponse,
-  CosmosSDKClientParams,
   TxResponse,
-  RPCTxSearchResult,
-  RPCResponse,
 } from './types'
-import { getQueryString } from '../util'
 
 export class CosmosSDKClient {
   sdk: CosmosSDK

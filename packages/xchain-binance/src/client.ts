@@ -1,43 +1,43 @@
-import axios from 'axios'
-import {
-  Balances as BinanceBalances,
-  Fees as BinanceFees,
-  TxPage as BinanceTxPage,
-  TransactionResult,
-  TransferFee,
-} from './types/binance'
-
-import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
+import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
+import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 import {
   Address,
-  XChainClient,
-  XChainClientParams,
   Balances,
+  BaseXChainClient,
   Fees,
   Network,
   Tx,
-  Txs,
-  TxParams,
   TxHash,
   TxHistoryParams,
+  TxParams,
+  Txs,
   TxsPage,
-  BaseXChainClient,
+  XChainClient,
+  XChainClientParams,
 } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetBNB,
+  BNBChain,
   BaseAmount,
-  assetFromString,
   assetAmount,
+  assetFromString,
   assetToBase,
+  assetToString,
   baseAmount,
   baseToAsset,
-  BNBChain,
-  assetToString,
 } from '@xchainjs/xchain-util'
-import { isTransferFee, parseTx, getPrefix } from './util'
-import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
+import axios from 'axios'
+
+import {
+  Balances as BinanceBalances,
+  Fees as BinanceFees,
+  TransactionResult,
+  TransferFee,
+  TxPage as BinanceTxPage,
+} from './types/binance'
+import { getPrefix, isTransferFee, parseTx } from './util'
 
 type PrivKey = string
 

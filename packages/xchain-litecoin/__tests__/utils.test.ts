@@ -1,7 +1,9 @@
-import * as Utils from '../src/utils'
 import * as Litecoin from 'bitcoinjs-lib'
-import { UTXOs } from '../src/types/common'
+
 import mockSochainApi from '../__mocks__/sochain'
+import { UTXOs } from '../src/types/common'
+import * as Utils from '../src/utils'
+
 mockSochainApi.init()
 
 let utxos: UTXOs

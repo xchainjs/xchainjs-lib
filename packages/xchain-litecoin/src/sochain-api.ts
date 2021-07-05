@@ -1,15 +1,16 @@
+import { BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import axios from 'axios'
+
 import {
-  SochainResponse,
-  LtcAddressUTXOs,
-  LtcUnspentTxsDTO,
-  LtcAddressDTO,
-  LtcGetBalanceDTO,
-  Transaction,
   AddressParams,
+  LtcAddressDTO,
+  LtcAddressUTXOs,
+  LtcGetBalanceDTO,
+  LtcUnspentTxsDTO,
+  SochainResponse,
+  Transaction,
   TxHashParams,
 } from './types/sochain-api-types'
-import { assetToBase, assetAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { LTC_DECIMAL } from './utils'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1

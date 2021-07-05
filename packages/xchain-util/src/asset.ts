@@ -1,9 +1,10 @@
 import BigNumber from 'bignumber.js'
+
 import { fixedBN, formatBN } from './bn'
-import { trimZeros as trimZerosHelper } from './string'
-import { BTCChain, LTCChain, BNBChain, ETHChain, THORChain, BCHChain } from './chain.const'
 import { isChain } from './chain'
-import { Denomination, AssetAmount, BaseAmount, Amounts, Asset } from './types'
+import { BCHChain, BNBChain, BTCChain, ETHChain, LTCChain, THORChain } from './chain.const'
+import { trimZeros as trimZerosHelper } from './string'
+import { Amounts, Asset, AssetAmount, BaseAmount, Denomination } from './types'
 
 /**
  * Guard to check whether value is a BigNumber.Value or not
