@@ -1,8 +1,9 @@
-import { Client } from '../src/client'
-import { MIN_TX_FEE } from '../src/const'
-import { baseAmount, AssetLTC } from '@xchainjs/xchain-util'
+import { AssetLTC, baseAmount } from '@xchainjs/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
+import { Client } from '../src/client'
+import { MIN_TX_FEE } from '../src/const'
+
 mockSochainApi.init()
 
 const ltcClient = new Client({ network: 'testnet' })

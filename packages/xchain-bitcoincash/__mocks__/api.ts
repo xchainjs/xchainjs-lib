@@ -1,4 +1,5 @@
 import nock from 'nock'
+
 import { AddressBalance, RawTransaction, Transaction, TxUnspent } from '../src/types'
 
 export const mock_getBalance = (url: string, address: string, result: AddressBalance, times = 1) => {

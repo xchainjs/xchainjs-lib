@@ -1,15 +1,16 @@
+import { baseAmount } from '@xchainjs/xchain-util'
+
+import { DexFees, Fee, TransferFee, Tx as BinanceTx } from '../src/types/binance'
+import { Transfer, TransferEvent } from '../src/types/binance-ws'
 import {
   getDefaultFees,
   getHashFromTransfer,
   getTxHashFromMemo,
+  isDexFees,
   isFee,
   isTransferFee,
-  isDexFees,
   parseTx,
 } from '../src/util'
-import { TransferEvent, Transfer } from '../src/types/binance-ws'
-import { DexFees, Fee, TransferFee, Tx as BinanceTx } from '../src/types/binance'
-import { baseAmount } from '@xchainjs/xchain-util'
 
 describe('binance/util', () => {
   describe('getHashFromTransfer', () => {

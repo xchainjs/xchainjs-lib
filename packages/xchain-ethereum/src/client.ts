@@ -1,58 +1,58 @@
-import { ethers, BigNumberish, BigNumber, Wallet } from 'ethers'
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
-
-import erc20ABI from './data/erc20.json'
-import { toUtf8Bytes, parseUnits, HDNode } from 'ethers/lib/utils'
-import {
-  GasOracleResponse,
-  Network as EthNetwork,
-  ExplorerUrl,
-  TxOverrides,
-  GasPrices,
-  FeesParams,
-  FeesWithGasPricesAndLimits,
-  InfuraCreds,
-  ApproveParams,
-  CallParams,
-  IsApprovedParams,
-  EstimateCallParams,
-  EstimateApproveParams,
-} from './types'
 import {
   Address,
+  Balances,
+  BaseXChainClient,
+  FeeOptionKey,
+  Fees,
+  FeesParams as XFeesParams,
   Network as XChainNetwork,
+  Network,
   Tx,
+  TxHash,
+  TxHistoryParams,
+  TxParams,
   TxsPage,
   XChainClient,
   XChainClientParams,
-  TxParams,
-  TxHash,
-  Fees,
-  TxHistoryParams,
-  Balances,
-  Network,
-  FeeOptionKey,
-  FeesParams as XFeesParams,
-  BaseXChainClient,
 } from '@xchainjs/xchain-client'
-import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
-import * as ethplorerAPI from './ethplorer-api'
+import { Asset, AssetETH, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import { BigNumber, BigNumberish, Wallet, ethers } from 'ethers'
+import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
+
+import erc20ABI from './data/erc20.json'
 import * as etherscanAPI from './etherscan-api'
+import * as ethplorerAPI from './ethplorer-api'
 import {
-  ETH_DECIMAL,
-  xchainNetworkToEths,
-  getTokenAddress,
-  validateAddress,
-  SIMPLE_GAS_COST,
+  ApproveParams,
+  CallParams,
+  EstimateApproveParams,
+  EstimateCallParams,
+  ExplorerUrl,
+  FeesParams,
+  FeesWithGasPricesAndLimits,
+  GasOracleResponse,
+  GasPrices,
+  InfuraCreds,
+  IsApprovedParams,
+  Network as EthNetwork,
+  TxOverrides,
+} from './types'
+import {
   BASE_TOKEN_GAS_COST,
-  getFee,
-  MAX_APPROVAL,
   ETHAddress,
+  ETH_DECIMAL,
+  MAX_APPROVAL,
+  SIMPLE_GAS_COST,
   getDefaultGasPrices,
-  getTxFromEthplorerTokenOperation,
-  getTxFromEthplorerEthTransaction,
+  getFee,
+  getTokenAddress,
   getTokenBalances,
+  getTxFromEthplorerEthTransaction,
+  getTxFromEthplorerTokenOperation,
+  validateAddress,
+  xchainNetworkToEths,
 } from './utils'
 
 /**

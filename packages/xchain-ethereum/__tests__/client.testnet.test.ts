@@ -1,21 +1,21 @@
-import nock from 'nock'
-import { Wallet, providers, BigNumber } from 'ethers'
 import { TransactionResponse } from '@ethersproject/abstract-provider'
-import { baseAmount, AssetETH, assetToString, assetFromString, ETHChain } from '@xchainjs/xchain-util'
-import Client from '../src/client'
-import { ETH_DECIMAL } from '../src/utils'
+import { AssetETH, ETHChain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { BigNumber, Wallet, providers } from 'ethers'
+import nock from 'nock'
+
 import { mock_all_api } from '../__mocks__'
 import {
   mock_etherscan_eth_txs_api,
   mock_etherscan_token_txs_api,
   mock_gastracker_api,
 } from '../__mocks__/etherscan-api'
-
 import {
   mock_thornode_inbound_addresses_fail,
   mock_thornode_inbound_addresses_success,
 } from '../__mocks__/thornode-api'
+import Client from '../src/client'
 import erc20ABI from '../src/data/erc20.json'
+import { ETH_DECIMAL } from '../src/utils'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'

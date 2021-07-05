@@ -1,6 +1,7 @@
 import axios from 'axios'
 import uniqid from 'uniqid'
-import { TxBroadcastResponse, TxBroadcastParams } from './types'
+
+import { TxBroadcastParams, TxBroadcastResponse } from './types'
 
 /**
  * Broadcast transaction.

@@ -1,9 +1,9 @@
-import crypto from 'crypto'
-import { pbkdf2Async } from './utils'
-
 import * as bip39 from 'bip39'
+import crypto from 'crypto'
 import { blake256 } from 'foundry-primitives'
 import { v4 as uuidv4 } from 'uuid'
+
+import { pbkdf2Async } from './utils'
 
 // Constants
 const cipher = 'aes-128-ctr'

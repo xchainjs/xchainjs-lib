@@ -1,5 +1,7 @@
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Asset, Chain } from '@xchainjs/xchain-util/lib'
+import axios from 'axios'
+
 import {
   Address,
   Balances,
@@ -15,7 +17,6 @@ import {
   XChainClient,
   XChainClientParams,
 } from './types'
-import axios from 'axios'
 
 const MAINNET_THORNODE_API_BASE = 'https://thornode.thorchain.info/thorchain'
 const TESTNET_THORNODE_API_BASE = 'https://testnet.thornode.thorchain.info/thorchain'

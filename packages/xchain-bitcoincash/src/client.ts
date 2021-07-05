@@ -1,25 +1,25 @@
-const bitcash = require('@psf/bitcoincashjs-lib')
-
-import * as utils from './utils'
+import * as bitcash from '@psf/bitcoincashjs-lib'
 import {
   Address,
   Balance,
+  BaseXChainClient,
   Fees,
   Tx,
-  TxParams,
   TxHash,
   TxHistoryParams,
+  TxParams,
   TxsPage,
   XChainClient,
   XChainClientParams,
-  BaseXChainClient,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
-import { KeyPair } from './types/bitcoincashjs-types'
-import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'
-import { NodeAuth } from './types'
+
+import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
 import { broadcastTx } from './node-api'
+import { NodeAuth } from './types'
+import { KeyPair } from './types/bitcoincashjs-types'
+import { ClientUrl, FeeRate, FeeRates, FeesWithRates } from './types/client-types'
+import * as utils from './utils'
 
 /**
  * BitcoinCashClient Interface

@@ -1,27 +1,26 @@
 import {
-  RootDerivationPaths,
   Address,
   Balances,
   Fees,
   Network,
+  Network as XChainNetwork,
+  RootDerivationPaths,
   Tx,
-  TxParams,
   TxHash,
   TxHistoryParams,
+  TxParams,
   TxsPage,
   XChainClient,
   XChainClientParams,
-  Network as XChainNetwork,
 } from '@xchainjs/xchain-client'
-import { Asset, baseAmount, assetToString } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-
+import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { PrivKey, codec } from 'cosmos-client'
-import { MsgSend, MsgMultiSend } from 'cosmos-client/x/bank'
+import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './types'
-import { DECIMAL, getDenom, getAsset, getTxsFromHistory } from './util'
+import { DECIMAL, getAsset, getDenom, getTxsFromHistory } from './util'
 
 /**
  * Interface for custom Cosmos client

@@ -1,11 +1,11 @@
+import { TxsPage } from '@xchainjs/xchain-client'
+import { CosmosSDKClient, RPCResponse, RPCTxSearchResult, TxResponse } from '@xchainjs/xchain-cosmos'
+import { BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { BaseAccount, BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
 import nock from 'nock'
 
-import { TxsPage } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase, baseAmount, BaseAmount } from '@xchainjs/xchain-util'
-import { RPCResponse, RPCTxSearchResult, TxResponse, CosmosSDKClient } from '@xchainjs/xchain-cosmos'
-import { BroadcastTxCommitResult, Coin, BaseAccount } from 'cosmos-client/api'
-import { AssetRune, ThorchainDepositResponse } from '../src/types'
 import { Client } from '../src/client'
+import { AssetRune, ThorchainDepositResponse } from '../src/types'
 
 const mockAccountsAddress = (
   url: string,

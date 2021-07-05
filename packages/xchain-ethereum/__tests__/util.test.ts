@@ -1,25 +1,26 @@
+import { AssetETH, ETHChain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { ethers } from 'ethers'
 import nock from 'nock'
+
+import { mock_etherscan_api } from '../__mocks__/etherscan-api'
+import { Network } from '../src/types'
 import {
-  getTokenAddress,
-  xchainNetworkToEths,
-  ethNetworkToXchains,
-  validateAddress,
-  validateSymbol,
-  getDefaultFees,
   ETH_DECIMAL,
-  getPrefix,
-  getTxFromTokenTransaction,
-  getTxFromEthTransaction,
+  ethNetworkToXchains,
   filterSelfTxs,
   getDecimal,
-  getTxFromEthplorerTokenOperation,
-  getTxFromEthplorerEthTransaction,
+  getDefaultFees,
+  getPrefix,
+  getTokenAddress,
   getTokenBalances,
+  getTxFromEthTransaction,
+  getTxFromEthplorerEthTransaction,
+  getTxFromEthplorerTokenOperation,
+  getTxFromTokenTransaction,
+  validateAddress,
+  validateSymbol,
+  xchainNetworkToEths,
 } from '../src/utils'
-import { baseAmount, assetToString, AssetETH, ETHChain } from '@xchainjs/xchain-util'
-import { Network } from '../src/types'
-import { ethers } from 'ethers'
-import { mock_etherscan_api } from '../__mocks__/etherscan-api'
 
 describe('ethereum/util', () => {
   describe('xchainNetworkToEths', () => {

@@ -1,5 +1,6 @@
-import * as utils from '../src/utils'
 import * as bchaddr from 'bchaddrjs'
+
+import * as utils from '../src/utils'
 
 describe('Bitcoin Cash Utils Test', () => {
   const testnet_address = 'bchtest:qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g'

@@ -1,28 +1,24 @@
-import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
-import * as sochain from './sochain-api'
-import * as blockStream from './blockstream-api'
 import {
   Address,
   Balance,
+  FeeRate,
+  FeeRates,
   Fees,
+  FeesWithRates,
   Network,
   TxHash,
   TxParams,
-  FeeRate,
-  FeeRates,
-  FeesWithRates,
 } from '@xchainjs/xchain-client'
-import { assetAmount, AssetBTC, assetToBase, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import { AssetBTC, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
-import { AddressParams, BtcAddressUTXOs, ScanUTXOParam } from './types/sochain-api-types'
-import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
+import * as blockStream from './blockstream-api'
 import { MIN_TX_FEE } from './const'
-
 import * as haskoinApi from './haskoin-api'
+import * as sochain from './sochain-api'
+import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
+import { AddressParams, BtcAddressUTXOs, ScanUTXOParam } from './types/sochain-api-types'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41

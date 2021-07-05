@@ -1,8 +1,9 @@
-import { Client } from '../src/client'
-import { MIN_TX_FEE } from '../src/const'
-import { baseAmount, AssetBTC } from '@xchainjs/xchain-util'
+import { AssetBTC, baseAmount } from '@xchainjs/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
+import { Client } from '../src/client'
+import { MIN_TX_FEE } from '../src/const'
+
 mockSochainApi.init()
 
 const btcClient = new Client({ network: 'mainnet', sochainUrl: 'https://sochain.com/api/v2' })

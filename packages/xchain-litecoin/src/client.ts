@@ -1,27 +1,28 @@
-import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
-import * as Utils from './utils'
-import * as sochain from './sochain-api'
 import {
-  TxHistoryParams,
-  TxsPage,
   Address,
-  XChainClient,
-  Tx,
-  TxParams,
-  TxHash,
   Balance,
-  Network,
-  Fees,
-  XChainClientParams,
   BaseXChainClient,
-  FeesWithRates,
-  FeeRates,
   FeeRate,
+  FeeRates,
+  Fees,
+  FeesWithRates,
+  Network,
+  Tx,
+  TxHash,
+  TxHistoryParams,
+  TxParams,
+  TxsPage,
+  XChainClient,
+  XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { AssetLTC, assetToBase, assetAmount } from '@xchainjs/xchain-util'
+import { AssetLTC, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import * as Litecoin from 'bitcoinjs-lib'
+
+import * as sochain from './sochain-api'
 import { NodeAuth } from './types'
 import { TxIO } from './types/sochain-api-types'
+import * as Utils from './utils'
 
 /**
  * LitecoinClient Interface

@@ -1,25 +1,26 @@
-import * as Bitcoin from 'bitcoinjs-lib'
-import * as Utils from './utils'
-import * as sochain from './sochain-api'
 import {
-  BaseXChainClient,
-  TxHistoryParams,
-  TxsPage,
   Address,
-  XChainClient,
-  Tx,
-  TxParams,
-  TxHash,
   Balance,
-  Network,
-  Fees,
-  XChainClientParams,
-  FeeRates,
+  BaseXChainClient,
   FeeRate,
+  FeeRates,
+  Fees,
   FeesWithRates,
+  Network,
+  Tx,
+  TxHash,
+  TxHistoryParams,
+  TxParams,
+  TxsPage,
+  XChainClient,
+  XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { AssetBTC, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import * as Bitcoin from 'bitcoinjs-lib'
+
+import * as sochain from './sochain-api'
+import * as Utils from './utils'
 
 /**
  * BitcoinClient Interface

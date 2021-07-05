@@ -1,4 +1,4 @@
-import { Msg, AccAddress } from 'cosmos-client'
+import { AccAddress, Msg } from 'cosmos-client'
 import { StdTxFee } from 'cosmos-client/api'
 import { StdSignature } from 'cosmos-client/x/auth'
 

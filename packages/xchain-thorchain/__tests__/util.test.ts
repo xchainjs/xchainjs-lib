@@ -1,17 +1,18 @@
+import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
+
 import { AssetRune } from '../src/types'
 import {
+  getAsset,
+  getDefaultExplorerUrls,
   getDenom,
   getDenomWithChain,
-  getAsset,
-  isBroadcastSuccess,
+  getDepositTxDataFromLogs,
   getExplorerAddressUrl,
   getExplorerTxUrl,
   getExplorerUrl,
-  getDefaultExplorerUrls,
-  getDepositTxDataFromLogs,
   getTxType,
+  isBroadcastSuccess,
 } from '../src/util'
-import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 describe('thorchain/util', () => {
   describe('Denom <-> Asset', () => {

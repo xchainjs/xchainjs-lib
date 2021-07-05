@@ -1,45 +1,44 @@
-import axios from 'axios'
 import {
-  RootDerivationPaths,
   Address,
   Balances,
   Fees,
   Network,
+  RootDerivationPaths,
   Tx,
-  TxParams,
+  TxFrom,
   TxHash,
   TxHistoryParams,
+  TxParams,
+  TxTo,
   TxsPage,
   XChainClient,
   XChainClientParams,
-  TxFrom,
-  TxTo,
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
-import { Asset, baseAmount, assetToString, assetFromString } from '@xchainjs/xchain-util'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-
-import { PrivKey, AccAddress } from 'cosmos-client'
+import { Asset, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import axios from 'axios'
+import { AccAddress, PrivKey } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 
-import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, NodeUrl, ExplorerUrls, TxData } from './types'
-import { MsgNativeTx, msgNativeTxFromJson, ThorchainDepositResponse, TxResult } from './types/messages'
+import { AssetRune, ClientUrl, DepositParam, ExplorerUrls, NodeUrl, ThorchainClientParams, TxData } from './types'
+import { MsgNativeTx, ThorchainDepositResponse, TxResult, msgNativeTxFromJson } from './types/messages'
 import {
-  getDenom,
-  getAsset,
-  getDefaultFees,
   DECIMAL,
   DEFAULT_GAS_VALUE,
-  getDenomWithChain,
-  isBroadcastSuccess,
-  getPrefix,
-  registerCodecs,
   MAX_TX_COUNT,
+  getAsset,
   getDefaultClientUrl,
   getDefaultExplorerUrls,
+  getDefaultFees,
+  getDenom,
+  getDenomWithChain,
+  getDepositTxDataFromLogs,
   getExplorerAddressUrl,
   getExplorerTxUrl,
-  getDepositTxDataFromLogs,
+  getPrefix,
+  isBroadcastSuccess,
+  registerCodecs,
 } from './util'
 
 /**
