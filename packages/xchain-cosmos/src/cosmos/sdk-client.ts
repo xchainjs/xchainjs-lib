@@ -38,12 +38,12 @@ export class CosmosSDKClient {
     this.sdk = new CosmosSDK(this.server, this.chainId)
   }
 
-  updatePrefix = (prefix: string) => {
+  updatePrefix(prefix: string) {
     this.prefix = prefix
     this.setPrefix()
   }
 
-  setPrefix = (): void => {
+  setPrefix(): void {
     AccAddress.setBech32Prefix(
       this.prefix,
       this.prefix + 'pub',
@@ -54,20 +54,20 @@ export class CosmosSDKClient {
     )
   }
 
-  getAddressFromPrivKey = (privkey: PrivKey): string => {
+  getAddressFromPrivKey(privkey: PrivKey): string {
     this.setPrefix()
 
     return AccAddress.fromPublicKey(privkey.getPubKey()).toBech32()
   }
 
-  getAddressFromMnemonic = (mnemonic: string, derivationPath: string): string => {
+  getAddressFromMnemonic(mnemonic: string, derivationPath: string): string {
     this.setPrefix()
     const privKey = this.getPrivKeyFromMnemonic(mnemonic, derivationPath)
 
     return AccAddress.fromPublicKey(privKey.getPubKey()).toBech32()
   }
 
-  getPrivKeyFromMnemonic = (mnemonic: string, derivationPath: string): PrivKey => {
+  getPrivKeyFromMnemonic(mnemonic: string, derivationPath: string): PrivKey {
     const seed = xchainCrypto.getSeed(mnemonic)
     const node = BIP32.fromSeed(seed)
     const child = node.derivePath(derivationPath)
@@ -79,7 +79,7 @@ export class CosmosSDKClient {
     return new PrivKeySecp256k1(child.privateKey)
   }
 
-  checkAddress = (address: string): boolean => {
+  checkAddress(address: string): boolean {
     try {
       this.setPrefix()
 
@@ -93,7 +93,7 @@ export class CosmosSDKClient {
     }
   }
 
-  getBalance = async (address: string): Promise<Coin[]> => {
+  async getBalance(address: string): Promise<Coin[]> {
     try {
       this.setPrefix()
 
@@ -105,14 +105,14 @@ export class CosmosSDKClient {
     }
   }
 
-  searchTx = async ({
+  async searchTx({
     messageAction,
     messageSender,
     page,
     limit,
     txMinHeight,
     txMaxHeight,
-  }: SearchTxParams): Promise<TxHistoryResponse> => {
+  }: SearchTxParams): Promise<TxHistoryResponse> {
     try {
       const queryParameter: APIQueryParam = {}
       if (messageAction !== undefined) {
@@ -144,7 +144,7 @@ export class CosmosSDKClient {
     }
   }
 
-  searchTxFromRPC = async ({
+  async searchTxFromRPC({
     messageAction,
     messageSender,
     transferSender,
@@ -156,7 +156,7 @@ export class CosmosSDKClient {
     rpcEndpoint,
   }: SearchTxParams & {
     rpcEndpoint: string
-  }): Promise<RPCTxSearchResult> => {
+  }): Promise<RPCTxSearchResult> {
     try {
       const queryParameter: string[] = []
       if (messageAction !== undefined) {
@@ -199,7 +199,7 @@ export class CosmosSDKClient {
     }
   }
 
-  txsHashGet = async (hash: string): Promise<TxResponse> => {
+  async txsHashGet(hash: string): Promise<TxResponse> {
     try {
       this.setPrefix()
 
@@ -209,7 +209,7 @@ export class CosmosSDKClient {
     }
   }
 
-  transfer = async ({
+  async transfer({
     privkey,
     from,
     to,
@@ -220,7 +220,7 @@ export class CosmosSDKClient {
       amount: [],
       gas: '200000',
     },
-  }: TransferParams): Promise<BroadcastTxCommitResult> => {
+  }: TransferParams): Promise<BroadcastTxCommitResult> {
     try {
       this.setPrefix()
 
@@ -251,11 +251,7 @@ export class CosmosSDKClient {
     }
   }
 
-  signAndBroadcast = async (
-    unsignedStdTx: StdTx,
-    privkey: PrivKey,
-    signer: AccAddress,
-  ): Promise<BroadcastTxCommitResult> => {
+  async signAndBroadcast(unsignedStdTx: StdTx, privkey: PrivKey, signer: AccAddress): Promise<BroadcastTxCommitResult> {
     try {
       this.setPrefix()
 
