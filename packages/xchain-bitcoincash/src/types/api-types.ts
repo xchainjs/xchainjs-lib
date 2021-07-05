@@ -1,4 +1,4 @@
-import { Network, TxHash } from '@xchainjs/xchain-client/lib'
+import { Network, TxHash } from '@xchainjs/xchain-client'
 
 export type AddressParams = {
   haskoinUrl: string
