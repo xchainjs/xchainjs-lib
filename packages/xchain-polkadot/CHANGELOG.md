@@ -1,3 +1,7 @@
+# v.0.8.3 (2021-07-05)
+
+- refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
+
 # v.0.8.2 (2021-06-01)
 
 - updated peer deps

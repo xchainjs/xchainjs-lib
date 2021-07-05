@@ -99,9 +99,6 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address based on the network.
    */
-  // getExplorerAddressUr(address: Address): string {
-  //   return `${this.getExplorerUrl()}/address/${address}`
-  // }
   getExplorerAddressUrl(address: string): string {
     return `${this.getExplorerUrl()}/address/${address}`
   }

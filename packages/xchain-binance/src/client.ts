@@ -264,7 +264,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
    */
-  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
+  async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     return await this.searchTransactions({
       address: params && params.address,
       limit: params && params.limit?.toString(),
@@ -280,7 +280,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
-  getTransactionData = async (txId: string): Promise<Tx> => {
+  async getTransactionData(txId: string): Promise<Tx> {
     try {
       const txResult: TransactionResult = await axios
         .get(`${this.getClientUrl()}/api/v1/tx/${txId}?format=json`)
@@ -318,7 +318,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @param {MultiSendParams} params The multi-send transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  multiSend = async ({ walletIndex = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
+  async multiSend({ walletIndex = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> {
     try {
       const derivedAddress = this.getAddress(walletIndex)
 
@@ -353,7 +353,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async ({ walletIndex, asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
+  async transfer({ walletIndex, asset, amount, recipient, memo }: TxParams): Promise<TxHash> {
     try {
       await this.bncClient.initChain()
       await this.bncClient
@@ -379,7 +379,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @returns {TransferFee} The current transfer fee.
    */
-  private getTransferFee = async (): Promise<TransferFee> => {
+  private async getTransferFee(): Promise<TransferFee> {
     try {
       const feesArray = await axios
         .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
@@ -449,7 +449,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @returns {SingleAndMultiFees} The current fee for both single and multi-send transaction.
    */
-  getSingleAndMultiFees = async (): Promise<{ single: Fees; multi: Fees }> => {
+  async getSingleAndMultiFees(): Promise<{ single: Fees; multi: Fees }> {
     try {
       const transferFee = await this.getTransferFee()
       const singleTxFee = baseAmount(transferFee.fixed_fee_params.fee)
