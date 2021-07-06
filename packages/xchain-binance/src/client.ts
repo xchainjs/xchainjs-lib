@@ -381,8 +381,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   async getFees(): Promise<Fees> {
     let singleTxFee: BaseAmount | undefined = undefined
     try {
-      const rates = await this.getFeeRatesFromThorchain()
-      singleTxFee = baseAmount(rates.fast)
+      singleTxFee = baseAmount(await this.getFeeRateFromThorchain())
     } catch (error) {
       console.log(error)
       console.warn(`Error pulling rates from thorchain, will try alternate`)
