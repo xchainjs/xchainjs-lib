@@ -72,7 +72,8 @@ export enum FeeType {
   PerByte = 'byte',
 }
 
-export type Fees = Record<FeeOption, BaseAmount> & {
+export type Fee = BaseAmount
+export type Fees = Record<FeeOption, Fee> & {
   type: FeeType
 }
 export type FeesWithRates = { rates: FeeRates; fees: Fees }

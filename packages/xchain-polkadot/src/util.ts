@@ -1,4 +1,4 @@
-import { FeeType, Fees, Network } from '@xchainjs/xchain-client'
+import { FeeType, Fees, Network, singleFee } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 /**
@@ -32,12 +32,7 @@ export const getDecimal = (network: Network): number => {
 export const getDefaultFees = (network: Network): Fees => {
   const fee = assetToBase(assetAmount(0.015, getDecimal(network)))
 
-  return {
-    type: FeeType.PerByte,
-    fast: fee,
-    fastest: fee,
-    average: fee,
-  }
+  return singleFee(FeeType.PerByte, fee)
 }
 
 /**

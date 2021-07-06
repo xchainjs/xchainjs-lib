@@ -3,7 +3,6 @@ import {
   Address,
   Balance,
   FeeRate,
-  FeeRates,
   Fees,
   FeesWithRates,
   Network,
@@ -12,6 +11,8 @@ import {
   TxParams,
   TxTo,
   TxType,
+  calcFees,
+  standardFeeRates,
 } from '@xchainjs/xchain-client'
 import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
@@ -322,21 +323,10 @@ export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXO[] = []): Ba
  */
 export const getDefaultFeesWithRates = (): FeesWithRates => {
   const nextBlockFeeRate = 1
-  const rates: FeeRates = {
-    fastest: nextBlockFeeRate * 5,
-    fast: nextBlockFeeRate * 1,
-    average: nextBlockFeeRate * 0.5,
-  }
-
-  const fees: Fees = {
-    type: FeeType.PerByte,
-    fast: calcFee(rates.fast),
-    average: calcFee(rates.average),
-    fastest: calcFee(rates.fastest),
-  }
+  const rates = standardFeeRates(nextBlockFeeRate)
 
   return {
-    fees,
+    fees: calcFees(rates, calcFee),
     rates,
   }
 }
