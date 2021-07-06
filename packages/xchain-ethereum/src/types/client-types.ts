@@ -1,4 +1,4 @@
-import { FeeOptionKey, Fees, FeesParams as BaseFeesParams, TxParams } from '@xchainjs/xchain-client'
+import { FeeOptionKey, Fees } from '@xchainjs/xchain-client'
 import { BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
@@ -35,8 +35,6 @@ export type InfuraCreds = {
 }
 
 export type GasPrices = Record<FeeOptionKey, BaseAmount>
-
-export type FeesParams = BaseFeesParams & TxParams
 
 export type FeesWithGasPricesAndLimits = { fees: Fees; gasPrices: GasPrices; gasLimit: BigNumber }
 

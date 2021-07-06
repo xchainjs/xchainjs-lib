@@ -53,13 +53,6 @@ export type TxParams = {
   memo?: string // optional memo to pass
 }
 
-// In most cases, clients don't expect any paramter in `getFees`
-// but in some cases, they do (e.g. in xchain-ethereum).
-// To workaround this, we just define an "empty" (optional) param for now.
-// If needed, any client can extend `FeeParams` to add more  (Check `xchain-ethereum` as an example)
-// Let me know if we can do it better ... :)
-export type FeesParams = { readonly empty?: '' }
-
 export type FeeOptionKey = 'average' | 'fast' | 'fastest'
 export type FeeOption = Record<FeeOptionKey, BaseAmount>
 export type FeeRate = number
@@ -104,7 +97,7 @@ export interface XChainClient {
 
   getTransactionData(txId: string, assetAddress?: Address): Promise<Tx>
 
-  getFees(params?: FeesParams): Promise<Fees>
+  getFees(): Promise<Fees>
 
   transfer(params: TxParams): Promise<TxHash>
 
