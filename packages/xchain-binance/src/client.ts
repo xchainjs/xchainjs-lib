@@ -15,6 +15,7 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
+  singleFee,
 } from '@xchainjs/xchain-client'
 import {
   Asset,
@@ -391,12 +392,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
       singleTxFee = baseAmount(transferFee.fixed_fee_params.fee)
     }
 
-    return {
-      type: 'base' as FeeType,
-      fast: singleTxFee,
-      fastest: singleTxFee,
-      average: singleTxFee,
-    } as Fees
+    return singleFee(FeeType.FlatFee, singleTxFee)
   }
 
   /**

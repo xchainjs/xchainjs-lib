@@ -16,6 +16,7 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
+  singleFee,
 } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { Asset, assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
@@ -431,12 +432,7 @@ class Client implements PolkadotClient, XChainClient {
     const fee = baseAmount(info.partialFee.toString(), getDecimal(this.network))
     await api.disconnect()
 
-    return {
-      type: FeeType.PerByte,
-      average: fee,
-      fast: fee,
-      fastest: fee,
-    }
+    return singleFee(FeeType.PerByte, fee)
   }
 
   /**
