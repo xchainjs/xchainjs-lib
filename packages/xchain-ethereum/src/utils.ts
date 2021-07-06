@@ -1,4 +1,4 @@
-import { Balance, Fees, Network as XChainNetwork, Tx, TxType } from '@xchainjs/xchain-client'
+import { Balance, Fees, Network, Tx, TxType } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetETH,
@@ -41,38 +41,32 @@ export const ETHAddress = '0x0000000000000000000000000000000000000000'
 export const MAX_APPROVAL = BigNumber.from(2).pow(256).sub(1)
 
 /**
- * XChainNetwork -> EthNetwork
+ * Network -> EthNetwork
  *
- * @param {XChainNetwork} network
+ * @param {Network} network
  * @returns {EthNetwork}
  */
-export const xchainNetworkToEths = (network: XChainNetwork): EthNetwork => {
+export const xchainNetworkToEths = (network: Network): EthNetwork => {
   switch (network) {
-    // DO NOT use switch/case's default branch
-    // to be sure that ALL possible cases are
-    // processed in a similar way to reverted ethNetworkToXchains
-    case 'mainnet':
+    case Network.Mainnet:
       return EthNetwork.Main
-    case 'testnet':
+    case Network.Testnet:
       return EthNetwork.Test
   }
 }
 
 /**
- * EthNetwork -> XChainNetwork
+ * EthNetwork -> Network
  *
  * @param {EthNetwork} network
- * @returns {XChainNetwork}
+ * @returns {Network}
  */
-export const ethNetworkToXchains = (network: EthNetwork): XChainNetwork => {
+export const ethNetworkToXchains = (network: EthNetwork): Network => {
   switch (network) {
-    // DO NOT use switch/case's default branch
-    // to be sure that ALL possible cases are
-    // processed in a similar way to reverted xchainNetworkToEths
     case EthNetwork.Main:
-      return 'mainnet'
+      return Network.Mainnet
     case EthNetwork.Test:
-      return 'testnet'
+      return Network.Testnet
   }
 }
 

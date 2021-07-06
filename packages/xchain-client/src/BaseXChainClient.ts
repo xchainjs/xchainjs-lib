@@ -38,14 +38,14 @@ export abstract class BaseXChainClient implements XChainClient {
    */
   constructor(chain: Chain, params: XChainClientParams) {
     this.chain = chain
-    this.network = params.network || 'testnet'
+    this.network = params.network || Network.Testnet
     if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths
     if (params.phrase) this.setPhrase(params.phrase)
   }
   /**
    * Set/update the current network.
    *
-   * @param {Network} network `mainnet` or `testnet`.
+   * @param {Network} network
    * @returns {void}
    *
    * @throws {"Network must be provided"}
@@ -61,7 +61,7 @@ export abstract class BaseXChainClient implements XChainClient {
   /**
    * Get the current network.
    *
-   * @returns {Network} The current network. (`mainnet` or `testnet`)
+   * @returns {Network}
    */
   public getNetwork(): Network {
     return this.network
@@ -83,7 +83,14 @@ export abstract class BaseXChainClient implements XChainClient {
   }
 
   protected async thornodeAPIGet(endpoint: string): Promise<unknown> {
-    const url = this.network === 'testnet' ? TESTNET_THORNODE_API_BASE : MAINNET_THORNODE_API_BASE
+    const url = (() => {
+      switch (this.network) {
+        case Network.Mainnet:
+          return MAINNET_THORNODE_API_BASE
+        case Network.Testnet:
+          return TESTNET_THORNODE_API_BASE
+      }
+    })()
     return (await axios.get(url + endpoint)).data
   }
 

@@ -2,7 +2,10 @@ import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
 export type Address = string
 
-export type Network = 'testnet' | 'mainnet'
+export enum Network {
+  Mainnet = 'mainnet',
+  Testnet = 'testnet',
+}
 
 export type Balance = {
   asset: Asset
@@ -70,10 +73,7 @@ export type Fees = FeeOption & {
 }
 export type FeesWithRates = { rates: FeeRates; fees: Fees }
 
-export type RootDerivationPaths = {
-  mainnet: string
-  testnet: string
-}
+export type RootDerivationPaths = Record<Network, string>
 
 export type XChainClientParams = {
   network?: Network

@@ -1,4 +1,5 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
+import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Chain, ETHChain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, providers } from 'ethers'
 import nock from 'nock'
@@ -56,7 +57,7 @@ describe('Client Test', () => {
 
   it('should create a wallet from phrase', () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
     expect(ethClient.getWallet()).toBeInstanceOf(Wallet)
@@ -77,7 +78,7 @@ describe('Client Test', () => {
 
   it('should connect to specified network', async () => {
     const ethClient = new Client({
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       phrase,
     })
 
@@ -91,7 +92,7 @@ describe('Client Test', () => {
 
   it('should connect to Infura provider', async () => {
     const ethClient = new Client({
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       phrase,
       infuraCreds: {
         projectId: '',
@@ -104,10 +105,10 @@ describe('Client Test', () => {
 
   it('should set network', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
-    ethClient.setNetwork('testnet')
+    ethClient.setNetwork('testnet' as Network)
 
     const network = await ethClient.getWallet().provider.getNetwork()
     expect(network.name).toEqual('ropsten')
@@ -116,30 +117,30 @@ describe('Client Test', () => {
 
   it('should get address', () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
     expect(ethClient.getAddress()).toEqual(address)
   })
 
   it('should get network', () => {
-    const ethClient = new Client({ phrase, network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' as Network })
     expect(ethClient.getNetwork()).toEqual('testnet')
   })
 
   it('should fail a bad address', () => {
-    const ethClient = new Client({ phrase, network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' as Network })
     expect(ethClient.validateAddress('0xBADbadBad')).toBeFalsy()
   })
 
   it('should pass a good address', () => {
-    const ethClient = new Client({ phrase, network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' as Network })
     const goodAddress = ethClient.validateAddress(address)
     expect(goodAddress).toBeTruthy()
   })
 
   it('throws error on bad index', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
+    const ethClient = new Client({ network: 'testnet' as Network, phrase })
     expect(() => ethClient.getAddress(-1)).toThrow()
   })
 
@@ -150,7 +151,7 @@ describe('Client Test', () => {
     )
 
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -163,7 +164,7 @@ describe('Client Test', () => {
 
   it('get eth transaction history', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -207,7 +208,7 @@ describe('Client Test', () => {
 
   it('get token transaction history', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -256,7 +257,7 @@ describe('Client Test', () => {
 
   it('get transaction data', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -321,7 +322,7 @@ describe('Client Test', () => {
 
   it('ETH transfer', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -359,7 +360,7 @@ describe('Client Test', () => {
 
   it('ERC20 transfer', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -415,7 +416,7 @@ describe('Client Test', () => {
   })
 
   it('estimate gas for eth transfer', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
+    const ethClient = new Client({ network: 'testnet' as Network, phrase })
 
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
@@ -447,7 +448,7 @@ describe('Client Test', () => {
   })
 
   it('estimate gas for erc20 transfer', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
+    const ethClient = new Client({ network: 'testnet' as Network, phrase })
 
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
@@ -481,7 +482,7 @@ describe('Client Test', () => {
 
   it('isApproved', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -513,7 +514,7 @@ describe('Client Test', () => {
 
   it('estimateApprove', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -532,7 +533,7 @@ describe('Client Test', () => {
 
   it('approve', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -560,7 +561,7 @@ describe('Client Test', () => {
 
   it('estimate call', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -587,7 +588,7 @@ describe('Client Test', () => {
 
   it('call', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 

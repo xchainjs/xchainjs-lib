@@ -1,4 +1,4 @@
-import { Address } from '@xchainjs/xchain-client'
+import { Address, Network } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
@@ -50,7 +50,7 @@ export const getConfirmedUnspentTxs = async (address: string): Promise<UtxoData[
     allUtxos.map(async (tx: UtxoData) => {
       const { is_confirmed: isTxConfirmed } = await getIsTxConfirmed({
         sochainUrl: SOCHAIN_API_URL,
-        network: 'mainnet',
+        network: Network.Mainnet,
         hash: tx.txid,
       })
 

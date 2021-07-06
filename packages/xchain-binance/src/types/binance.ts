@@ -1,4 +1,3 @@
-import { NETWORK_PREFIX_MAPPING } from '@binance-chain/javascript-sdk/lib/client'
 import { Msg, StdSignature } from '@binance-chain/javascript-sdk/lib/types'
 import { BigSource } from 'big.js'
 
@@ -530,10 +529,6 @@ export type Transfer = {
  * See https://github.com/binance-chain/javascript-sdk/blob/master/docs/api-docs/classes/bncclient.md#transfer
  * */
 export type TransferResult = { result?: Transfer[] }
-
-export type Network = keyof typeof NETWORK_PREFIX_MAPPING
-
-export type Prefix = typeof NETWORK_PREFIX_MAPPING[Network]
 
 export type AminoWrapping<T> = {
   type: string

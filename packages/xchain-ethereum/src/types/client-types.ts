@@ -1,4 +1,4 @@
-import { FeeOptionKey, Fees } from '@xchainjs/xchain-client'
+import { FeeOptionKey, Fees, Network } from '@xchainjs/xchain-client'
 import { BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
@@ -9,15 +9,8 @@ export enum EthNetwork {
   Main = 'homestead',
 }
 
-export type ClientUrl = {
-  testnet: string
-  mainnet: string
-}
-
-export type ExplorerUrl = {
-  testnet: string
-  mainnet: string
-}
+export type ClientUrl = Record<Network, string>
+export type ExplorerUrl = Record<Network, string>
 
 export type TxOverrides = {
   nonce?: ethers.BigNumberish

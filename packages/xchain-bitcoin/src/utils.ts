@@ -79,23 +79,18 @@ export const arrayAverage = (array: number[]): number => {
 }
 
 /**
- * Check if give network is a testnet.
- *
- * @param {Network} network
- * @returns {boolean} `true` or `false`
- */
-export const isTestnet = (network: Network): boolean => {
-  return network === 'testnet'
-}
-
-/**
  * Get Bitcoin network to be used with bitcoinjs.
  *
  * @param {Network} network
  * @returns {Bitcoin.Network} The BTC network.
  */
 export const btcNetwork = (network: Network): Bitcoin.Network => {
-  return isTestnet(network) ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+  switch (network) {
+    case Network.Mainnet:
+      return Bitcoin.networks.bitcoin
+    case Network.Testnet:
+      return Bitcoin.networks.testnet
+  }
 }
 
 /**
@@ -107,14 +102,22 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
  * @returns {Balance[]} The balances of the given address.
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
-  const balance =
-    params.network === 'testnet' ? await sochain.getBalance(params) : await haskoinApi.getBalance(params.address)
-  return [
-    {
-      asset: AssetBTC,
-      amount: balance,
-    },
-  ]
+  switch (params.network) {
+    case Network.Mainnet:
+      return [
+        {
+          asset: AssetBTC,
+          amount: await haskoinApi.getBalance(params.address),
+        },
+      ]
+    case Network.Testnet:
+      return [
+        {
+          asset: AssetBTC,
+          amount: await sochain.getBalance(params),
+        },
+      ]
+  }
 }
 
 /**
@@ -147,55 +150,58 @@ export const scanUTXOs = async ({
   address,
   confirmedOnly = true, // default: scan only confirmed UTXOs
 }: ScanUTXOParam): Promise<UTXO[]> => {
-  if (network === 'testnet') {
-    let utxos: BtcAddressUTXO[] = []
+  switch (network) {
+    case Network.Testnet: {
+      let utxos: BtcAddressUTXO[] = []
 
-    const addressParam: AddressParams = {
-      sochainUrl,
-      network,
-      address,
-    }
+      const addressParam: AddressParams = {
+        sochainUrl,
+        network,
+        address,
+      }
 
-    if (confirmedOnly) {
-      utxos = await sochain.getConfirmedUnspentTxs(addressParam)
-    } else {
-      utxos = await sochain.getUnspentTxs(addressParam)
-    }
+      if (confirmedOnly) {
+        utxos = await sochain.getConfirmedUnspentTxs(addressParam)
+      } else {
+        utxos = await sochain.getUnspentTxs(addressParam)
+      }
 
-    return utxos.map(
-      (utxo) =>
-        ({
-          hash: utxo.txid,
-          index: utxo.output_no,
-          value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
-          witnessUtxo: {
+      return utxos.map(
+        (utxo) =>
+          ({
+            hash: utxo.txid,
+            index: utxo.output_no,
             value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
-            script: Buffer.from(utxo.script_hex, 'hex'),
-          },
-        } as UTXO),
-    )
+            witnessUtxo: {
+              value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
+              script: Buffer.from(utxo.script_hex, 'hex'),
+            },
+          } as UTXO),
+      )
+    }
+    case Network.Mainnet: {
+      let utxos: haskoinApi.UtxoData[] = []
+
+      if (confirmedOnly) {
+        utxos = await haskoinApi.getConfirmedUnspentTxs(address)
+      } else {
+        utxos = await haskoinApi.getUnspentTxs(address)
+      }
+
+      return utxos.map(
+        (utxo) =>
+          ({
+            hash: utxo.txid,
+            index: utxo.index,
+            value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
+            witnessUtxo: {
+              value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
+              script: Buffer.from(utxo.pkscript, 'hex'),
+            },
+          } as UTXO),
+      )
+    }
   }
-
-  let utxos: haskoinApi.UtxoData[] = []
-
-  if (confirmedOnly) {
-    utxos = await haskoinApi.getConfirmedUnspentTxs(address)
-  } else {
-    utxos = await haskoinApi.getUnspentTxs(address)
-  }
-
-  return utxos.map(
-    (utxo) =>
-      ({
-        hash: utxo.txid,
-        index: utxo.index,
-        value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
-        witnessUtxo: {
-          value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
-          script: Buffer.from(utxo.pkscript, 'hex'),
-        },
-      } as UTXO),
-  )
 }
 /**
  * Build transcation.
@@ -341,4 +347,11 @@ export const getDefaultFees = (): Fees => {
  * @returns {string} The address prefix based on the network.
  *
  **/
-export const getPrefix = (network: Network) => (network === 'testnet' ? 'tb1' : 'bc1')
+export const getPrefix = (network: Network) => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'bc1'
+    case Network.Testnet:
+      return 'tb1'
+  }
+}

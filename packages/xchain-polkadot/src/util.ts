@@ -16,7 +16,12 @@ export const isSuccess = (response: { code: number }): boolean => !response.code
  * @returns {number} The decimal based on the network.
  */
 export const getDecimal = (network: Network): number => {
-  return network === 'testnet' ? 12 : 10
+  switch (network) {
+    case Network.Mainnet:
+      return 10
+    case Network.Testnet:
+      return 12
+  }
 }
 
 /**
@@ -38,8 +43,15 @@ export const getDefaultFees = (network: Network): Fees => {
 /**
  * Get address prefix based on the network.
  *
- * @param {string} network
+ * @param {Network} network
  * @returns {string} The address prefix based on the network.
  *
  **/
-export const getPrefix = (network: string) => (network === 'testnet' ? '5' : '1')
+export const getPrefix = (network: Network) => {
+  switch (network) {
+    case Network.Mainnet:
+      return '1'
+    case Network.Testnet:
+      return '5'
+  }
+}

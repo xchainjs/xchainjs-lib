@@ -111,7 +111,7 @@ type BitcoinClientParams = XChainClientParams & {
 class Client implements BitcoinClient, XChainClient {
 
   // passing url and key of API service into constructor
-  constructor({ network = 'testnet', nodeUrl = '', nodeApiKey = '', phrase }: BitcoinClientParams) {
+  constructor({ network = Network.Testnet, nodeUrl = '', nodeApiKey = '', phrase }: BitcoinClientParams) {
     ...
   }
 }

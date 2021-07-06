@@ -1,3 +1,4 @@
+import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, ETHChain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 import nock from 'nock'
@@ -25,19 +26,19 @@ import {
 describe('ethereum/util', () => {
   describe('xchainNetworkToEths', () => {
     it('should return mainnet ', () => {
-      expect(xchainNetworkToEths('mainnet')).toEqual(EthNetwork.Main)
+      expect(xchainNetworkToEths('mainnet' as Network)).toEqual(EthNetwork.Main)
     })
     it('should return testnet ', () => {
-      expect(xchainNetworkToEths('testnet')).toEqual(EthNetwork.Test)
+      expect(xchainNetworkToEths('testnet' as Network)).toEqual(EthNetwork.Test)
     })
   })
 
   describe('ethNetworkToXchains', () => {
     it('should return mainnet ', () => {
-      expect(ethNetworkToXchains(EthNetwork.Main)).toEqual('mainnet')
+      expect(ethNetworkToXchains(EthNetwork.Main)).toEqual('mainnet' as Network)
     })
     it('should return testnet ', () => {
-      expect(ethNetworkToXchains(EthNetwork.Test)).toEqual('testnet')
+      expect(ethNetworkToXchains(EthNetwork.Test)).toEqual('testnet' as Network)
     })
   })
 
@@ -415,7 +416,7 @@ describe('ethereum/util', () => {
         '0x0000000000000000000000000000000000000000000000000000000000000006',
       )
 
-      const provider = new ethers.providers.EtherscanProvider(xchainNetworkToEths('testnet'))
+      const provider = new ethers.providers.EtherscanProvider(xchainNetworkToEths('testnet' as Network))
 
       const eth_decimal = await getDecimal(AssetETH, provider)
       expect(eth_decimal).toEqual(ETH_DECIMAL)

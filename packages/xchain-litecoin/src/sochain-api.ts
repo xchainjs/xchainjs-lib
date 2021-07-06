@@ -1,3 +1,4 @@
+import { Network } from '@xchainjs/xchain-client'
 import { BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
@@ -15,8 +16,13 @@ import { LTC_DECIMAL } from './utils'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
 
-const toSochainNetwork = (net: string): string => {
-  return net === 'testnet' ? 'LTCTEST' : 'LTC'
+const toSochainNetwork = (network: Network): string => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'LTC'
+    case Network.Testnet:
+      return 'LTCTEST'
+  }
 }
 
 /**

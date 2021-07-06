@@ -103,7 +103,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   /**
    * Set/update the current network.
    *
-   * @param {Network} network `mainnet` or `testnet`.
+   * @param {Network} network
    * @returns {void}
    *
    * @throws {"Network must be provided"}
@@ -121,7 +121,12 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {string} The client url for binance chain based on the network.
    */
   private getClientUrl(): string {
-    return this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://dex.binance.org'
+      case Network.Testnet:
+        return 'https://testnet-dex.binance.org'
+    }
   }
 
   /**
@@ -130,7 +135,12 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    return this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://explorer.binance.org'
+      case Network.Testnet:
+        return 'https://testnet-explorer.binance.org'
+    }
   }
 
   /**
