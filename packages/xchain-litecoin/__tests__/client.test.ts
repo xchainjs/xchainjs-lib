@@ -219,7 +219,7 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork('testnet')
     ltcClient.setPhrase(phraseOne)
     const invalidAddress = 'error_address'
-    const expectedError = 'Invalid address'
+    const expectedError = 'Could not get balances for address error_address'
     return expect(ltcClient.getBalance(invalidAddress)).rejects.toThrow(expectedError)
   })
 
