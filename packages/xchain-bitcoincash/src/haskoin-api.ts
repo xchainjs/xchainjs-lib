@@ -34,7 +34,7 @@ const isErrorResponse = (response: any): response is ErrorResponse => {
  */
 export const getAccount = async ({ haskoinUrl, address }: AddressParams): Promise<AddressBalance> => {
   const result: AddressBalance | ErrorResponse = (await axios.get(`${haskoinUrl}/address/${address}/balance`)).data
-  if (!result || isErrorResponse(result)) throw new Error('failed to query account by a given address')
+  if (!result || isErrorResponse(result)) throw new Error(`failed to query account by given address ${address}`)
   return result
 }
 
@@ -49,7 +49,7 @@ export const getAccount = async ({ haskoinUrl, address }: AddressParams): Promis
  */
 export const getTransaction = async ({ haskoinUrl, txId }: TxHashParams): Promise<Transaction> => {
   const result: Transaction | ErrorResponse = (await axios.get(`${haskoinUrl}/transaction/${txId}`)).data
-  if (!result || isErrorResponse(result)) throw new Error('failed to query transaction by a given hash')
+  if (!result || isErrorResponse(result)) throw new Error(`failed to query transaction by a given hash ${txId}`)
   return result
 }
 
@@ -64,7 +64,7 @@ export const getTransaction = async ({ haskoinUrl, txId }: TxHashParams): Promis
  */
 export const getRawTransaction = async ({ haskoinUrl, txId }: TxHashParams): Promise<string> => {
   const result: RawTransaction | ErrorResponse = (await axios.get(`${haskoinUrl}/transaction/${txId}/raw`)).data
-  if (!result || isErrorResponse(result)) throw new Error('failed to query transaction by a given hash')
+  if (!result || isErrorResponse(result)) throw new Error(`failed to query transaction by a given hash ${txId}`)
   return result.result
 }
 

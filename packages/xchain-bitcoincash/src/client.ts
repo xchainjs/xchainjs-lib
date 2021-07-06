@@ -235,7 +235,8 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
       params: { offset, limit },
     })
 
-    if (!account || !txs) throw new Error('Invalid address')
+    if (!account) throw new Error(`Invalid address: ${address}`)
+    if (!txs) throw new Error(`Transactions could not found for address ${address}`)
 
     return {
       total: account.txs,

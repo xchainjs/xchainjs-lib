@@ -73,7 +73,7 @@ export function getFee(inputs: number, feeRate: FeeRate, data: Buffer | null = n
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   const account = await getAccount(params)
-  if (!account) throw new Error('No bchBalance found')
+  if (!account) throw new Error('BCH balance not found')
 
   const confirmed = baseAmount(account.confirmed, BCH_DECIMAL)
   const unconfirmed = baseAmount(account.unconfirmed, BCH_DECIMAL)
