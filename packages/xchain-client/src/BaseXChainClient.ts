@@ -7,7 +7,6 @@ import {
   Balance,
   FeeRates,
   Fees,
-  FeesParams,
   Network,
   RootDerivationPaths,
   Tx,
@@ -127,7 +126,7 @@ export abstract class BaseXChainClient implements XChainClient {
     this.phrase = ''
   }
   //individual clients will need to implement these
-  abstract getFees(params?: FeesParams): Promise<Fees>
+  abstract getFees(): Promise<Fees>
   abstract getAddress(walletIndex: number): string
   abstract getExplorerUrl(): string
   abstract getExplorerAddressUrl(address: string): string

@@ -6,7 +6,6 @@ import {
   BaseXChainClient,
   FeeOptionKey,
   Fees,
-  FeesParams as XFeesParams,
   Network as XChainNetwork,
   Network,
   Tx,
@@ -30,7 +29,6 @@ import {
   EstimateApproveParams,
   EstimateCallParams,
   ExplorerUrl,
-  FeesParams,
   FeesWithGasPricesAndLimits,
   GasOracleResponse,
   GasPrices,
@@ -63,8 +61,8 @@ export interface EthereumClient {
   call<T>(params: CallParams): Promise<T>
   estimateCall(asset: EstimateCallParams): Promise<BigNumber>
   estimateGasPrices(): Promise<GasPrices>
-  estimateGasLimit(params: FeesParams): Promise<BigNumber>
-  estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits>
+  estimateGasLimit(params: TxParams): Promise<BigNumber>
+  estimateFeesWithGasPricesAndLimits(params: TxParams): Promise<FeesWithGasPricesAndLimits>
   estimateApprove(params: EstimateApproveParams): Promise<BigNumber>
   isApproved(params: IsApprovedParams): Promise<boolean>
   approve(params: ApproveParams): Promise<TransactionResponse>
@@ -750,10 +748,10 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   /**
    * Estimate gas.
    *
-   * @param {FeesParams} params The transaction and fees options.
+   * @param {TxParams} params The transaction and fees options.
    * @returns {BaseAmount} The estimated gas fee.
    */
-  async estimateGasLimit({ asset, recipient, amount, memo }: FeesParams): Promise<BigNumber> {
+  async estimateGasLimit({ asset, recipient, amount, memo }: TxParams): Promise<BigNumber> {
     const txAmount = BigNumber.from(amount.amount().toFixed())
 
     let assetAddress
@@ -788,10 +786,10 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   /**
    * Estimate gas prices/limits (average, fast fastest).
    *
-   * @param {FeesParams} params
+   * @param {TxParams} params
    * @returns {FeesWithGasPricesAndLimits} The estimated gas prices/limits.
    */
-  async estimateFeesWithGasPricesAndLimits(params: FeesParams): Promise<FeesWithGasPricesAndLimits> {
+  async estimateFeesWithGasPricesAndLimits(params: TxParams): Promise<FeesWithGasPricesAndLimits> {
     // gas prices
     const gasPrices = await this.estimateGasPrices()
     const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
@@ -819,12 +817,14 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   /**
    * Get fees.
    *
-   * @param {FeesParams} params
+   * @param {TxParams} params
    * @returns {Fees} The average/fast/fastest fees.
    *
    * @throws {"Failed to get fees"} Thrown if failed to get fees.
    */
-  async getFees(params: XFeesParams & FeesParams): Promise<Fees> {
+  getFees(): never
+  getFees(params: TxParams): Promise<Fees>
+  async getFees(params?: TxParams): Promise<Fees> {
     if (!params) throw new Error('Params need to be passed')
 
     const { fees } = await this.estimateFeesWithGasPricesAndLimits(params)
