@@ -77,11 +77,18 @@ export const isBroadcastSuccess = (response: unknown): boolean =>
 /**
  * Get address prefix based on the network.
  *
- * @param {string} network
+ * @param {Network} network
  * @returns {string} The address prefix based on the network.
  *
  **/
-export const getPrefix = (network: string) => (network === 'testnet' ? 'tthor' : 'thor')
+export const getPrefix = (network: Network) => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'thor'
+    case Network.Testnet:
+      return 'tthor'
+  }
+}
 
 /**
  * Register Codecs based on the prefix.
@@ -181,11 +188,11 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
  */
 export const getDefaultClientUrl = (): ClientUrl => {
   return {
-    testnet: {
+    [Network.Testnet]: {
       node: 'https://testnet.thornode.thorchain.info',
       rpc: 'https://testnet.rpc.thorchain.info',
     },
-    mainnet: {
+    [Network.Mainnet]: {
       node: 'https://thornode.thorchain.info',
       rpc: 'https://rpc.thorchain.info',
     },
@@ -201,18 +208,18 @@ const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
  */
 export const getDefaultExplorerUrls = (): ExplorerUrls => {
   const root: ExplorerUrl = {
-    testnet: `${DEFAULT_EXPLORER_URL}?network=testnet`,
-    mainnet: DEFAULT_EXPLORER_URL,
+    [Network.Testnet]: `${DEFAULT_EXPLORER_URL}?network=testnet`,
+    [Network.Mainnet]: DEFAULT_EXPLORER_URL,
   }
   const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
   const tx: ExplorerUrl = {
-    testnet: txUrl,
-    mainnet: txUrl,
+    [Network.Testnet]: txUrl,
+    [Network.Mainnet]: txUrl,
   }
   const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
   const address: ExplorerUrl = {
-    testnet: addressUrl,
-    mainnet: addressUrl,
+    [Network.Testnet]: addressUrl,
+    [Network.Mainnet]: addressUrl,
   }
 
   return {
@@ -249,7 +256,12 @@ export const getExplorerAddressUrl = ({
   address: Address
 }): string => {
   const url = `${urls.address[network]}/${address}`
-  return network === 'mainnet' ? url : `${url}?network=testnet`
+  switch (network) {
+    case Network.Mainnet:
+      return url
+    case Network.Testnet:
+      return `${url}?network=testnet`
+  }
 }
 
 /**
@@ -270,5 +282,10 @@ export const getExplorerTxUrl = ({
   txID: TxHash
 }): string => {
   const url = `${urls.tx[network]}/${txID}`
-  return network === 'mainnet' ? url : `${url}?network=testnet`
+  switch (network) {
+    case Network.Mainnet:
+      return url
+    case Network.Testnet:
+      return `${url}?network=testnet`
+  }
 }

@@ -6,7 +6,6 @@ import {
   BaseXChainClient,
   FeeOptionKey,
   Fees,
-  Network as XChainNetwork,
   Network,
   Tx,
   TxHash,
@@ -87,21 +86,21 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   private infuraCreds: InfuraCreds | undefined
   private ethplorerUrl: string
   private ethplorerApiKey: string
-  private providers: Map<XChainNetwork, Provider> = new Map<XChainNetwork, Provider>()
+  private providers: Map<Network, Provider> = new Map<Network, Provider>()
 
   /**
    * Constructor
    * @param {EthereumClientParams} params
    */
   constructor({
-    network = 'testnet',
+    network = Network.Testnet,
     ethplorerUrl = 'https://api.ethplorer.io',
     ethplorerApiKey = 'freekey',
     explorerUrl,
     phrase = '',
     rootDerivationPaths = {
-      mainnet: `m/44'/60'/0'/0/`,
-      testnet: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
+      [Network.Mainnet]: `m/44'/60'/0'/0/`,
+      [Network.Testnet]: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
     },
     etherscanApiKey,
     infuraCreds,
@@ -176,11 +175,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       const mainnetProvider = this.infuraCreds.projectSecret
         ? new ethers.providers.InfuraProvider(EthNetwork.Main, this.infuraCreds)
         : new ethers.providers.InfuraProvider(EthNetwork.Main, this.infuraCreds.projectId)
-      this.providers.set('testnet', testnetProvider)
-      this.providers.set('mainnet', mainnetProvider)
+      this.providers.set(Network.Testnet, testnetProvider)
+      this.providers.set(Network.Mainnet, mainnetProvider)
     } else {
-      this.providers.set('testnet', getDefaultProvider(EthNetwork.Test))
-      this.providers.set('mainnet', getDefaultProvider(EthNetwork.Main))
+      this.providers.set(Network.Testnet, getDefaultProvider(EthNetwork.Test))
+      this.providers.set(Network.Mainnet, getDefaultProvider(EthNetwork.Main))
     }
   }
 
@@ -218,8 +217,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   private getDefaultExplorerURL(): ExplorerUrl {
     return {
-      testnet: 'https://ropsten.etherscan.io',
-      mainnet: 'https://etherscan.io',
+      [Network.Testnet]: 'https://ropsten.etherscan.io',
+      [Network.Mainnet]: 'https://etherscan.io',
     }
   }
 
@@ -256,13 +255,13 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   /**
    * Set/update the current network.
    *
-   * @param {Network} network `mainnet` or `testnet`.
+   * @param {Network} network
    * @returns {void}
    *
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork(network: XChainNetwork): void {
+  setNetwork(network: Network): void {
     super.setNetwork(network)
     this.ethNetwork = xchainNetworkToEths(network)
   }
@@ -306,69 +305,72 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     const ethBalance: BigNumber = await this.getProvider().getBalance(ethAddress)
     const ethBalanceAmount = baseAmount(ethBalance.toString(), ETH_DECIMAL)
 
-    if (this.getNetwork() === 'mainnet') {
-      // use ethplorerAPI for mainnet - ignore assets
-      const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
-      const balances: Balance[] = [
-        {
-          asset: AssetETH,
-          amount: ethBalanceAmount,
-        },
-      ]
-
-      if (account.tokens) {
-        balances.push(...getTokenBalances(account.tokens))
-      }
-
-      return balances
-    } else {
-      // use etherscan for testnet
-
-      const newAssets = assets || [AssetETH]
-      // Follow approach is only for testnet
-      // For mainnet, we will use ethplorer api(one request only)
-      // https://github.com/xchainjs/xchainjs-lib/issues/252
-      // And to avoid etherscan api call limit, it gets balances in a sequence way, not in parallel
-      const balances = []
-      for (let i = 0; i < newAssets.length; i++) {
-        const asset = newAssets[i]
-        const etherscan = this.getEtherscanProvider()
-        if (assetToString(asset) !== assetToString(AssetETH)) {
-          // Handle token balances
-          const assetAddress = getTokenAddress(asset)
-          if (!assetAddress) {
-            throw new Error(`Invalid asset ${asset}`)
-          }
-          const balance = await etherscanAPI.getTokenBalance({
-            baseUrl: etherscan.baseUrl,
-            address,
-            assetAddress,
-            apiKey: etherscan.apiKey,
-          })
-          const decimals =
-            BigNumber.from(
-              await this.call<BigNumberish>({ contractAddress: assetAddress, abi: erc20ABI, funcName: 'decimals' }),
-            ).toNumber() || ETH_DECIMAL
-
-          if (!Number.isNaN(decimals)) {
-            balances.push({
-              asset,
-              amount: baseAmount(balance.toString(), decimals),
-            })
-          }
-        } else {
-          balances.push({
+    switch (this.getNetwork()) {
+      case Network.Mainnet: {
+        // use ethplorerAPI for mainnet - ignore assets
+        const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
+        const balances: Balance[] = [
+          {
             asset: AssetETH,
             amount: ethBalanceAmount,
-          })
-        }
-        // Due to etherscan api call limitation, put some delay before another call
-        // Free Etherscan api key limit: 5 calls per second
-        // So 0.3s delay is reasonable for now
-        await delay(300)
-      }
+          },
+        ]
 
-      return balances
+        if (account.tokens) {
+          balances.push(...getTokenBalances(account.tokens))
+        }
+
+        return balances
+      }
+      case Network.Testnet: {
+        // use etherscan for testnet
+
+        const newAssets = assets || [AssetETH]
+        // Follow approach is only for testnet
+        // For mainnet, we will use ethplorer api(one request only)
+        // https://github.com/xchainjs/xchainjs-lib/issues/252
+        // And to avoid etherscan api call limit, it gets balances in a sequence way, not in parallel
+        const balances = []
+        for (let i = 0; i < newAssets.length; i++) {
+          const asset = newAssets[i]
+          const etherscan = this.getEtherscanProvider()
+          if (assetToString(asset) !== assetToString(AssetETH)) {
+            // Handle token balances
+            const assetAddress = getTokenAddress(asset)
+            if (!assetAddress) {
+              throw new Error(`Invalid asset ${asset}`)
+            }
+            const balance = await etherscanAPI.getTokenBalance({
+              baseUrl: etherscan.baseUrl,
+              address,
+              assetAddress,
+              apiKey: etherscan.apiKey,
+            })
+            const decimals =
+              BigNumber.from(
+                await this.call<BigNumberish>({ contractAddress: assetAddress, abi: erc20ABI, funcName: 'decimals' }),
+              ).toNumber() || ETH_DECIMAL
+
+            if (!Number.isNaN(decimals)) {
+              balances.push({
+                asset,
+                amount: baseAmount(balance.toString(), decimals),
+              })
+            }
+          } else {
+            balances.push({
+              asset: AssetETH,
+              amount: ethBalanceAmount,
+            })
+          }
+          // Due to etherscan api call limitation, put some delay before another call
+          // Free Etherscan api key limit: 5 calls per second
+          // So 0.3s delay is reasonable for now
+          await delay(300)
+        }
+
+        return balances
+      }
     }
   }
 
@@ -425,53 +427,49 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * Thrown if the given txId is invalid.
    */
   async getTransactionData(txId: string, assetAddress?: Address): Promise<Tx> {
-    if (this.getNetwork() === 'mainnet') {
-      // use ethplorerAPI for mainnet - ignore assetAddress
-      const txInfo = await ethplorerAPI.getTxInfo(this.ethplorerUrl, txId, this.ethplorerApiKey)
-
-      if (txInfo.operations && txInfo.operations.length > 0) {
+    switch (this.getNetwork()) {
+      case Network.Mainnet: {
+        // use ethplorerAPI for mainnet - ignore assetAddress
+        const txInfo = await ethplorerAPI.getTxInfo(this.ethplorerUrl, txId, this.ethplorerApiKey)
+        if (!txInfo.operations?.length) return getTxFromEthplorerEthTransaction(txInfo)
         const tx = getTxFromEthplorerTokenOperation(txInfo.operations[0])
-        if (!tx) {
-          throw new Error('Could not parse transaction data')
+        if (!tx) throw new Error('Could not parse transaction data')
+        return tx
+      }
+      case Network.Testnet: {
+        let tx
+        const etherscan = this.getEtherscanProvider()
+        const txInfo = await etherscan.getTransaction(txId)
+        if (txInfo) {
+          if (assetAddress) {
+            tx =
+              (
+                await etherscanAPI.getTokenTransactionHistory({
+                  baseUrl: etherscan.baseUrl,
+                  assetAddress,
+                  startblock: txInfo.blockNumber,
+                  endblock: txInfo.blockNumber,
+                  apiKey: etherscan.apiKey,
+                })
+              ).filter((info) => info.hash === txId)[0] ?? null
+          } else {
+            tx =
+              (
+                await etherscanAPI.getETHTransactionHistory({
+                  baseUrl: etherscan.baseUrl,
+                  startblock: txInfo.blockNumber,
+                  endblock: txInfo.blockNumber,
+                  apiKey: etherscan.apiKey,
+                  address: txInfo.from,
+                })
+              ).filter((info) => info.hash === txId)[0] ?? null
+          }
         }
+
+        if (!tx) throw new Error('Could not get transaction history')
 
         return tx
-      } else {
-        return getTxFromEthplorerEthTransaction(txInfo)
       }
-    } else {
-      let tx
-      const etherscan = this.getEtherscanProvider()
-      const txInfo = await etherscan.getTransaction(txId)
-      if (txInfo) {
-        if (assetAddress) {
-          tx =
-            (
-              await etherscanAPI.getTokenTransactionHistory({
-                baseUrl: etherscan.baseUrl,
-                assetAddress,
-                startblock: txInfo.blockNumber,
-                endblock: txInfo.blockNumber,
-                apiKey: etherscan.apiKey,
-              })
-            ).filter((info) => info.hash === txId)[0] ?? null
-        } else {
-          tx =
-            (
-              await etherscanAPI.getETHTransactionHistory({
-                baseUrl: etherscan.baseUrl,
-                startblock: txInfo.blockNumber,
-                endblock: txInfo.blockNumber,
-                apiKey: etherscan.apiKey,
-                address: txInfo.from,
-              })
-            ).filter((info) => info.hash === txId)[0] ?? null
-        }
-      }
-
-      if (!tx) throw new Error('Could not get transaction history')
-
-      return tx
     }
   }
 

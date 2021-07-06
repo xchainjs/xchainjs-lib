@@ -86,15 +86,6 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
     },
   ]
 }
-/**
- * Check if give network is a testnet.
- *
- * @param {Network} network
- * @returns {boolean} `true` or `false`
- */
-export const isTestnet = (network: Network): boolean => {
-  return network === 'testnet'
-}
 
 /**
  * Get BCH network to be used with bitcore-lib.
@@ -103,7 +94,12 @@ export const isTestnet = (network: Network): boolean => {
  * @returns {} The BCH network.
  */
 export const bchNetwork = (network: Network): BCHNetwork => {
-  return isTestnet(network) ? coininfo.bitcoincash.test.toBitcoinJS() : coininfo.bitcoincash.main.toBitcoinJS()
+  switch (network) {
+    case Network.Mainnet:
+      return coininfo.bitcoincash.main.toBitcoinJS()
+    case Network.Testnet:
+      return coininfo.bitcoincash.test.toBitcoinJS()
+  }
 }
 
 /**
@@ -183,8 +179,14 @@ export const parseTransaction = (tx: Transaction): Tx => {
  * @param {Network} network
  * @returns {string} bchaddr network
  */
-export const toBCHAddressNetwork = (network: Network): string =>
-  network === 'testnet' ? bchaddr.Network.Testnet : bchaddr.Network.Mainnet
+export const toBCHAddressNetwork = (network: Network): string => {
+  switch (network) {
+    case Network.Mainnet:
+      return bchaddr.Network.Mainnet
+    case Network.Testnet:
+      return bchaddr.Network.Testnet
+  }
+}
 
 /**
  * Validate the BCH address.

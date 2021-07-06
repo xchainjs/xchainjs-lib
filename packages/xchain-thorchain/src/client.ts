@@ -76,13 +76,13 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
   constructor({
-    network = 'testnet',
+    network = Network.Testnet,
     phrase,
     clientUrl,
     explorerUrls,
     rootDerivationPaths = {
-      mainnet: "44'/931'/0'/0/",
-      testnet: "44'/931'/0'/0/",
+      [Network.Mainnet]: "44'/931'/0'/0/",
+      [Network.Testnet]: "44'/931'/0'/0/",
     },
   }: XChainClientParams & ThorchainClientParams) {
     this.network = network
@@ -111,7 +111,7 @@ class Client implements ThorchainClient, XChainClient {
   /**
    * Set/update the current network.
    *
-   * @param {Network} network `mainnet` or `testnet`.
+   * @param {Network} network
    * @returns {void}
    *
    * @throws {"Network must be provided"}
@@ -129,7 +129,7 @@ class Client implements ThorchainClient, XChainClient {
   /**
    * Get the current network.
    *
-   * @returns {Network} The current network. (`mainnet` or `testnet`)
+   * @returns {Network}
    */
   getNetwork(): Network {
     return this.network

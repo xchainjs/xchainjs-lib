@@ -56,7 +56,7 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
    * @param {LitecoinClientParams} params
    */
   constructor({
-    network = 'testnet',
+    network = Network.Testnet,
     sochainUrl = 'https://sochain.com/api/v2',
     phrase,
     nodeUrl,
@@ -65,16 +65,21 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
       password: 'password',
     },
     rootDerivationPaths = {
-      mainnet: `m/84'/2'/0'/0/`,
-      testnet: `m/84'/1'/0'/0/`,
+      [Network.Mainnet]: `m/84'/2'/0'/0/`,
+      [Network.Testnet]: `m/84'/1'/0'/0/`,
     },
   }: LitecoinClientParams) {
     super(Chain.Litecoin, { network, rootDerivationPaths, phrase })
-    this.nodeUrl = !!nodeUrl
-      ? nodeUrl
-      : network === 'mainnet'
-      ? 'https://ltc.thorchain.info'
-      : 'https://testnet.ltc.thorchain.info'
+    this.nodeUrl =
+      nodeUrl ??
+      (() => {
+        switch (network) {
+          case Network.Mainnet:
+            return 'https://ltc.thorchain.info'
+          case Network.Testnet:
+            return 'https://testnet.ltc.thorchain.info'
+        }
+      })()
 
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
@@ -100,7 +105,12 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    return Utils.isTestnet(this.network) ? 'https://tltc.bitaps.com' : 'https://ltc.bitaps.com'
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://ltc.bitaps.com'
+      case Network.Testnet:
+        return 'https://tltc.bitaps.com'
+    }
   }
 
   /**
@@ -376,4 +386,4 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
   }
 }
 
-export { Client, Network }
+export { Client }

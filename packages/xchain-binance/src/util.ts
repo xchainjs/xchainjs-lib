@@ -1,4 +1,4 @@
-import { Fees, Tx, TxType } from '@xchainjs/xchain-client'
+import { Fees, Network, Tx, TxType } from '@xchainjs/xchain-client'
 import { AssetBNB, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
 import { DexFees, Fee, TransferFee, Tx as BinanceTx, TxType as BinanceTxType } from './types/binance'
@@ -117,8 +117,15 @@ export const getDefaultFees = (): Fees => {
 /**
  * Get address prefix based on the network.
  *
- * @param {string} network
+ * @param {Network} network
  * @returns {string} The address prefix based on the network.
  *
  **/
-export const getPrefix = (network: string) => (network === 'testnet' ? 'tbnb' : 'bnb')
+export const getPrefix = (network: Network) => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'bnb'
+    case Network.Testnet:
+      return 'tbnb'
+  }
+}

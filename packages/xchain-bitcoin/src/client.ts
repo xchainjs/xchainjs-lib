@@ -52,12 +52,12 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {BitcoinClientParams} params
    */
   constructor({
-    network = 'testnet',
+    network = Network.Testnet,
     sochainUrl = 'https://sochain.com/api/v2',
     blockstreamUrl = 'https://blockstream.info',
     rootDerivationPaths = {
-      mainnet: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
-      testnet: `84'/1'/0'/0/`,
+      [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
+      [Network.Testnet]: `84'/1'/0'/0/`,
     },
     phrase = '',
   }: BitcoinClientParams) {
@@ -92,8 +92,12 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    const networkPath = Utils.isTestnet(this.network) ? '/testnet' : ''
-    return `https://blockstream.info${networkPath}`
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://blockstream.info'
+      case Network.Testnet:
+        return 'https://blockstream.info/testnet'
+    }
   }
 
   /**
@@ -373,4 +377,4 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
   }
 }
 
-export { Client, Network }
+export { Client }

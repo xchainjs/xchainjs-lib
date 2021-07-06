@@ -1,3 +1,4 @@
+import { Network } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
@@ -28,7 +29,7 @@ describe('Client Test', () => {
 
   it('derive path correctly with bip44', () => {
     const ethClient = new Client({
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       phrase,
       ethplorerUrl,
     })
@@ -44,7 +45,7 @@ describe('Client Test', () => {
     )
 
     const ethClient = new Client({
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       phrase,
     })
 
@@ -57,7 +58,7 @@ describe('Client Test', () => {
 
   it('get transaction data', async () => {
     const ethClient = new Client({
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       phrase,
       ethplorerUrl,
     })

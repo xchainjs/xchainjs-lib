@@ -3,7 +3,6 @@ import {
   Balance,
   Fees,
   Network,
-  Network as XChainNetwork,
   RootDerivationPaths,
   Tx,
   TxHash,
@@ -45,7 +44,7 @@ class Client implements CosmosClient, XChainClient {
   private phrase = ''
   private rootDerivationPaths: RootDerivationPaths
 
-  private sdkClients: Map<XChainNetwork, CosmosSDKClient> = new Map<XChainNetwork, CosmosSDKClient>()
+  private sdkClients: Map<Network, CosmosSDKClient> = new Map<Network, CosmosSDKClient>()
 
   /**
    * Constructor
@@ -58,17 +57,17 @@ class Client implements CosmosClient, XChainClient {
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
   constructor({
-    network = 'testnet',
+    network = Network.Testnet,
     phrase,
     rootDerivationPaths = {
-      mainnet: `44'/118'/0'/0/`,
-      testnet: `44'/118'/1'/0/`,
+      [Network.Mainnet]: `44'/118'/0'/0/`,
+      [Network.Testnet]: `44'/118'/1'/0/`,
     },
   }: XChainClientParams) {
     this.network = network
     this.rootDerivationPaths = rootDerivationPaths
-    this.sdkClients.set('testnet', TESTNET_SDK)
-    this.sdkClients.set('mainnet', MAINNET_SDK)
+    this.sdkClients.set(Network.Testnet, TESTNET_SDK)
+    this.sdkClients.set(Network.Mainnet, MAINNET_SDK)
 
     if (phrase) this.setPhrase(phrase)
   }
@@ -85,7 +84,7 @@ class Client implements CosmosClient, XChainClient {
   /**
    * Set/update the current network.
    *
-   * @param {Network} network `mainnet` or `testnet`.
+   * @param {Network} network
    * @returns {void}
    *
    * @throws {"Network must be provided"}
@@ -102,7 +101,7 @@ class Client implements CosmosClient, XChainClient {
   /**
    * Get the current network.
    *
-   * @returns {Network} The current network. (`mainnet` or `testnet`)
+   * @returns {Network}
    */
   getNetwork(): Network {
     return this.network
@@ -114,7 +113,12 @@ class Client implements CosmosClient, XChainClient {
    * @returns {string} The explorer url.
    */
   getExplorerUrl(): string {
-    return this.network === 'testnet' ? 'https://gaia.bigdipper.live' : 'https://cosmos.bigdipper.live'
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://cosmos.bigdipper.live'
+      case Network.Testnet:
+        return 'https://gaia.bigdipper.live'
+    }
   }
 
   /**
@@ -215,7 +219,12 @@ class Client implements CosmosClient, XChainClient {
    * @returns {string} The main asset based on the network.
    */
   getMainAsset(): Asset {
-    return this.network === 'testnet' ? AssetMuon : AssetAtom
+    switch (this.network) {
+      case Network.Mainnet:
+        return AssetAtom
+      case Network.Testnet:
+        return AssetMuon
+    }
   }
 
   /**

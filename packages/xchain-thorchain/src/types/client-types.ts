@@ -6,10 +6,7 @@ export type NodeUrl = {
   rpc: string
 }
 
-export type ClientUrl = {
-  testnet: NodeUrl
-  mainnet: NodeUrl
-}
+export type ClientUrl = Record<Network, NodeUrl>
 
 export type ExplorerUrls = {
   root: ExplorerUrl

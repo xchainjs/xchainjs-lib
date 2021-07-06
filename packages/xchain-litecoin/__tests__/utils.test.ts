@@ -1,3 +1,4 @@
+import { Network } from '@xchainjs/xchain-client'
 import * as Litecoin from 'bitcoinjs-lib'
 
 import mockSochainApi from '../__mocks__/sochain'
@@ -53,7 +54,7 @@ describe('Litecoin Utils Test', () => {
     const address = 'M8T1B2Z97gVdvmfkQcAtYbEepune1tzGua'
     const utxos: UTXO[] = await Utils.scanUTXOs({
       sochainUrl: 'https://sochain.com/api/v2',
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       address,
     })
     expect(utxos.length).toEqual(213)

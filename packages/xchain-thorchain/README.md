@@ -44,7 +44,7 @@ Rate limits: No
 import { Client } from '@xchainjs/xchain-thorchain'
 
 // Create a `Client`
-const client = new Client({ network: 'testnet', phrase: 'my secret phrase' })
+const client = new Client({ network: Network.Testnet, phrase: 'my secret phrase' })
 
 // get address
 const address = client.getAddress()

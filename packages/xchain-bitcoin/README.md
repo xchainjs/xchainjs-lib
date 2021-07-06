@@ -42,7 +42,7 @@ Initialize client and use class methods:
 import { Client, Network } from '../src/client'
 
 // Create a new client interface
-const btcClient = new Client({ network: 'mainnet', nodeUrl: 'https://sochain.com/api/v2' })
+const btcClient = new Client({ network: Network.Mainnet, nodeUrl: 'https://sochain.com/api/v2' })
 
 // Set phrase
 btcClient.setPhrase('phrase here')

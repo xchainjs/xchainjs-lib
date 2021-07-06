@@ -7,6 +7,7 @@ import {
   FeeRates,
   Fees,
   FeesWithRates,
+  Network,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -56,23 +57,23 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
    * @param {BitcoinCashClientParams} params
    */
   constructor({
-    network = 'testnet',
+    network = Network.Testnet,
     haskoinUrl = {
-      testnet: 'https://api.haskoin.com/bchtest',
-      mainnet: 'https://api.haskoin.com/bch',
+      [Network.Testnet]: 'https://api.haskoin.com/bchtest',
+      [Network.Mainnet]: 'https://api.haskoin.com/bch',
     },
     phrase,
     nodeUrl = {
-      testnet: 'https://testnet.bch.thorchain.info',
-      mainnet: 'https://bch.thorchain.info',
+      [Network.Testnet]: 'https://testnet.bch.thorchain.info',
+      [Network.Mainnet]: 'https://bch.thorchain.info',
     },
     nodeAuth = {
       username: 'thorchain',
       password: 'password',
     },
     rootDerivationPaths = {
-      mainnet: `m/44'/145'/0'/0/`,
-      testnet: `m/44'/1'/0'/0/`,
+      [Network.Mainnet]: `m/44'/145'/0'/0/`,
+      [Network.Testnet]: `m/44'/1'/0'/0/`,
     },
   }: BitcoinCashClientParams) {
     super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase })
@@ -131,8 +132,12 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    const networkPath = utils.isTestnet(this.network) ? 'bch-testnet' : 'bch'
-    return `https://www.blockchain.com/${networkPath}`
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://www.blockchain.com/bch'
+      case Network.Testnet:
+        return 'https://www.blockchain.com/bch-testnet'
+    }
   }
 
   /**

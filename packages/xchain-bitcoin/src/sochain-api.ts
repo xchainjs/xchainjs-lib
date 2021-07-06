@@ -1,3 +1,4 @@
+import { Network } from '@xchainjs/xchain-client'
 import { BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
@@ -16,8 +17,13 @@ import {
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 127
 
-const toSochainNetwork = (net: string): string => {
-  return net === 'testnet' ? 'BTCTEST' : 'BTC'
+const toSochainNetwork = (network: Network): string => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'BTC'
+    case Network.Testnet:
+      return 'BTCTEST'
+  }
 }
 
 /**
@@ -121,7 +127,7 @@ export const getUnspentTxs = async ({
  * @see https://sochain.com/api#get-is-tx-confirmed
  *
  * @param {string} sochainUrl The sochain node url.
- * @param {string} network mainnet | testnet
+ * @param {Network} network
  * @param {string} hash tx id
  * @returns {TxConfirmedStatus}
  */
@@ -138,7 +144,7 @@ export const getIsTxConfirmed = async ({ sochainUrl, network, hash }: TxHashPara
  * @see https://sochain.com/api#get-unspent-tx
  *
  * @param {string} sochainUrl The sochain node url.
- * @param {string} network
+ * @param {Network} network
  * @param {string} address
  * @returns {BtcAddressUTXO[]}
  */

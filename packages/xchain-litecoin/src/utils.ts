@@ -83,23 +83,18 @@ export function arrayAverage(array: number[]): number {
 }
 
 /**
- * Check if give network is a testnet.
- *
- * @param {Network} network
- * @returns {boolean} `true` or `false`
- */
-export const isTestnet = (network: Network): boolean => {
-  return network === 'testnet'
-}
-
-/**
  * Get Litecoin network to be used with bitcoinjs.
  *
  * @param {Network} network
  * @returns {Litecoin.Network} The LTC network.
  */
 export const ltcNetwork = (network: Network): Litecoin.Network => {
-  return isTestnet(network) ? coininfo.litecoin.test.toBitcoinJS() : coininfo.litecoin.main.toBitcoinJS()
+  switch (network) {
+    case Network.Mainnet:
+      return coininfo.litecoin.main.toBitcoinJS()
+    case Network.Testnet:
+      return coininfo.litecoin.test.toBitcoinJS()
+  }
 }
 
 /**
@@ -295,8 +290,15 @@ export const getDefaultFees = (): Fees => {
 /**
  * Get address prefix based on the network.
  *
- * @param {string} network
+ * @param {Network} network
  * @returns {string} The address prefix based on the network.
  *
  **/
-export const getPrefix = (network: Network) => (network === 'testnet' ? 'tltc1' : 'ltc1')
+export const getPrefix = (network: Network) => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'ltc1'
+    case Network.Testnet:
+      return 'tltc1'
+  }
+}

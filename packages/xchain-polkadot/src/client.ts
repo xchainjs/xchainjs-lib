@@ -47,11 +47,11 @@ class Client implements PolkadotClient, XChainClient {
    * @param {XChainClientParams} params
    */
   constructor({
-    network = 'testnet',
+    network = Network.Testnet,
     phrase,
     rootDerivationPaths = {
-      mainnet: "44//354//0//0//0'", //TODO IS the root path we want to use?
-      testnet: "44//354//0//0//0'",
+      [Network.Mainnet]: "44//354//0//0//0'", //TODO IS the root path we want to use?
+      [Network.Testnet]: "44//354//0//0//0'",
     },
   }: XChainClientParams) {
     this.network = network
@@ -87,7 +87,7 @@ class Client implements PolkadotClient, XChainClient {
   /**
    * Set/update the current network.
    *
-   * @param {Network} network `mainnet` or `testnet`.
+   * @param {Network} network
    *
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
@@ -105,7 +105,7 @@ class Client implements PolkadotClient, XChainClient {
   /**
    * Get the current network.
    *
-   * @returns {Network} The current network. (`mainnet` or `testnet`)
+   * @returns {Network}
    */
   getNetwork(): Network {
     return this.network
@@ -117,7 +117,12 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {string} The client url based on the network.
    */
   getClientUrl(): string {
-    return this.network === 'testnet' ? 'https://westend.subscan.io' : 'https://polkadot.subscan.io'
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://polkadot.subscan.io'
+      case Network.Testnet:
+        return 'https://westend.subscan.io'
+    }
   }
 
   /**
@@ -126,7 +131,12 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {string} The client WebSocket url based on the network.
    */
   getWsEndpoint(): string {
-    return this.network === 'testnet' ? 'wss://westend-rpc.polkadot.io' : 'wss://rpc.polkadot.io'
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'wss://rpc.polkadot.io'
+      case Network.Testnet:
+        return 'wss://westend-rpc.polkadot.io'
+    }
   }
 
   /**
@@ -135,7 +145,12 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    return this.network === 'testnet' ? 'https://westend.subscan.io' : 'https://polkadot.subscan.io'
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://polkadot.subscan.io'
+      case Network.Testnet:
+        return 'https://westend.subscan.io'
+    }
   }
 
   /**
@@ -164,7 +179,12 @@ class Client implements PolkadotClient, XChainClient {
    * @returns {number} The SS58 format based on the network.
    */
   getSS58Format(): number {
-    return this.network === 'testnet' ? 42 : 0
+    switch (this.network) {
+      case Network.Mainnet:
+        return 0
+      case Network.Testnet:
+        return 42
+    }
   }
 
   /**
