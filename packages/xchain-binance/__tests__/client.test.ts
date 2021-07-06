@@ -1,4 +1,4 @@
-import { Network } from '@xchainjs/xchain-client'
+import { FeeType, Network } from '@xchainjs/xchain-client'
 import { Asset, AssetBNB, BNBChain, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
@@ -65,9 +65,9 @@ describe('BinanceClient Test', () => {
   const testnetaddress_path1 = 'tbnb1vjlcrl5d9t8sexzajsr57taqmxf6jpmgaacvmz'
 
   const singleTxFee = baseAmount(37500)
-  const transferFee = { type: 'base', average: singleTxFee, fast: singleTxFee, fastest: singleTxFee }
+  const transferFee = { type: 'base' as FeeType, average: singleTxFee, fast: singleTxFee, fastest: singleTxFee }
   const multiTxFee = baseAmount(30000)
-  const multiSendFee = { type: 'base', average: multiTxFee, fast: multiTxFee, fastest: multiTxFee }
+  const multiSendFee = { type: 'base' as FeeType, average: multiTxFee, fast: multiTxFee, fastest: multiTxFee }
 
   const transferAmount = baseAmount(1000000)
 

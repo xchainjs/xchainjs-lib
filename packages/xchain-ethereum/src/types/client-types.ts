@@ -1,4 +1,4 @@
-import { FeeOptionKey, Fees, Network } from '@xchainjs/xchain-client'
+import { FeeOption, Fees, Network } from '@xchainjs/xchain-client'
 import { BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
@@ -27,7 +27,7 @@ export type InfuraCreds = {
   projectSecret?: string
 }
 
-export type GasPrices = Record<FeeOptionKey, BaseAmount>
+export type GasPrices = Record<FeeOption, BaseAmount>
 
 export type FeesWithGasPricesAndLimits = { fees: Fees; gasPrices: GasPrices; gasLimit: BigNumber }
 
@@ -35,7 +35,7 @@ export type ApproveParams = {
   walletIndex?: number
   contractAddress: Address
   spenderAddress: Address
-  feeOptionKey?: FeeOptionKey
+  feeOptionKey?: FeeOption
   amount?: BaseAmount
   // Optional fallback in case estimation for gas limit fails
   gasLimitFallback?: ethers.BigNumberish

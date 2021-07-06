@@ -2,8 +2,10 @@ import {
   Address,
   Balance,
   BaseXChainClient,
+  FeeOption,
   FeeRate,
   FeeRates,
+  FeeType,
   Fees,
   FeesWithRates,
   Network,
@@ -304,7 +306,7 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
     rates = await this.getFeeRatesFromSoChain()
 
     const fees: Fees = {
-      type: 'byte',
+      type: FeeType.PerByte,
       fast: Utils.calcFee(rates.fast, memo),
       average: Utils.calcFee(rates.average, memo),
       fastest: Utils.calcFee(rates.fastest, memo),
@@ -364,7 +366,7 @@ class Client extends BaseXChainClient implements LitecoinClient, XChainClient {
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const fromAddressIndex = params?.walletIndex || 0
-    const feeRate = params.feeRate || (await this.getFeeRates()).fast
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     const { psbt } = await Utils.buildTx({
       ...params,
       feeRate,

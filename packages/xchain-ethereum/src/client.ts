@@ -4,7 +4,8 @@ import {
   Address,
   Balance,
   BaseXChainClient,
-  FeeOptionKey,
+  FeeOption,
+  FeeType,
   Fees,
   Network,
   Tx,
@@ -544,7 +545,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    *
    * @param {Address} contractAddress The contract address.
    * @param {Address} spenderAddress The spender address.
-   * @param {feeOptionKey} FeeOptionKey Fee option (optional)
+   * @param {feeOptionKey} FeeOption Fee option (optional)
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @param {number} walletIndex (optional) HD wallet index
    *
@@ -553,7 +554,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   async approve({
     contractAddress,
     spenderAddress,
-    feeOptionKey = 'fastest',
+    feeOptionKey: feeOption = FeeOption.Fastest,
     amount,
     walletIndex = 0,
     gasLimitFallback,
@@ -561,8 +562,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     const gasPrice = BigNumber.from(
       (
         await this.estimateGasPrices()
-          .then((prices) => prices[feeOptionKey])
-          .catch(() => getDefaultGasPrices()[feeOptionKey])
+          .then((prices) => prices[feeOption])
+          .catch(() => getDefaultGasPrices()[feeOption])
       )
         .amount()
         .toFixed(),
@@ -615,7 +616,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * Transfer ETH.
    *
    * @param {TxParams} params The transfer options.
-   * @param {feeOptionKey} FeeOptionKey Fee option (optional)
+   * @param {feeOptionKey} FeeOption Fee option (optional)
    * @param {gasPrice} BaseAmount Gas price (optional)
    * @param {gasLimit} BigNumber Gas limit (optional)
    *
@@ -629,11 +630,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     memo,
     amount,
     recipient,
-    feeOptionKey,
+    feeOptionKey: feeOption,
     gasPrice,
     gasLimit,
   }: TxParams & {
-    feeOptionKey?: FeeOptionKey
+    feeOptionKey?: FeeOption
     gasPrice?: BaseAmount
     gasLimit?: BigNumber
   }): Promise<TxHash> {
@@ -646,7 +647,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     const isETHAddress = assetAddress === ETHAddress
 
-    // feeOptionKey
+    // feeOption
 
     const defaultGasLimit: ethers.BigNumber = isETHAddress ? SIMPLE_GAS_COST : BASE_TOKEN_GAS_COST
 
@@ -655,11 +656,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toFixed()),
     }
 
-    // override `overrides` if `feeOptionKey` is provided
-    if (feeOptionKey) {
+    // override `overrides` if `feeOption` is provided
+    if (feeOption) {
       const gasPrice = await this.estimateGasPrices()
-        .then((prices) => prices[feeOptionKey])
-        .catch(() => getDefaultGasPrices()[feeOptionKey])
+        .then((prices) => prices[feeOption])
+        .catch(() => getDefaultGasPrices()[feeOption])
       const gasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo }).catch(() => defaultGasLimit)
 
       overrides = {
@@ -706,9 +707,9 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       // To have all values in `BaseAmount`, they needs to be converted into `wei` (1 gwei = 1,000,000,000 wei = 1e9)
       const ratesInGwei = await this.getFeeRatesFromThorchain()
       return {
-        average: baseAmount(ratesInGwei.average * 10 ** 9, ETH_DECIMAL),
-        fast: baseAmount(ratesInGwei.fast * 10 ** 9, ETH_DECIMAL),
-        fastest: baseAmount(ratesInGwei.fastest * 10 ** 9, ETH_DECIMAL),
+        [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, ETH_DECIMAL),
+        [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, ETH_DECIMAL),
+        [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, ETH_DECIMAL),
       }
     } catch (error) {}
     //should only get here if thor fails
@@ -803,7 +804,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     return {
       gasPrices,
       fees: {
-        type: 'byte',
+        type: FeeType.PerByte,
         average: getFee({ gasPrice: averageGP, gasLimit }),
         fast: getFee({ gasPrice: fastGP, gasLimit }),
         fastest: getFee({ gasPrice: fastestGP, gasLimit }),

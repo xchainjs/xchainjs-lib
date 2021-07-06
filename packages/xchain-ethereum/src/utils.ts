@@ -1,4 +1,4 @@
-import { Balance, Fees, Network, Tx, TxType } from '@xchainjs/xchain-client'
+import { Balance, FeeType, Fees, Network, Tx, TxType } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetETH,
@@ -267,7 +267,7 @@ export const estimateDefaultFeesWithGasPricesAndLimits = (asset?: Asset): FeesWi
     gasPrices,
     gasLimit,
     fees: {
-      type: 'byte',
+      type: FeeType.PerByte,
       average: getFee({ gasPrice: averageGP, gasLimit }),
       fast: getFee({ gasPrice: fastGP, gasLimit }),
       fastest: getFee({ gasPrice: fastestGP, gasLimit }),

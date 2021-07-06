@@ -4,6 +4,7 @@ import { hexToU8a, isHex } from '@polkadot/util'
 import {
   Address,
   Balance,
+  FeeType,
   Fees,
   Network,
   RootDerivationPaths,
@@ -431,7 +432,7 @@ class Client implements PolkadotClient, XChainClient {
     await api.disconnect()
 
     return {
-      type: 'byte',
+      type: FeeType.PerByte,
       average: fee,
       fast: fee,
       fastest: fee,

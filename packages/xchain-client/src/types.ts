@@ -59,16 +59,20 @@ export type TxParams = {
   memo?: string // optional memo to pass
 }
 
-export type FeeOptionKey = 'average' | 'fast' | 'fastest'
-export type FeeOption = Record<FeeOptionKey, BaseAmount>
+export enum FeeOption {
+  Average = 'average',
+  Fast = 'fast',
+  Fastest = 'fastest',
+}
 export type FeeRate = number
-export type FeeRates = Record<FeeOptionKey, FeeRate>
+export type FeeRates = Record<FeeOption, FeeRate>
 
-export type FeeType =
-  | 'byte' // fee will be measured as `BaseAmount` per `byte`
-  | 'base' // fee will be "flat" measured in `BaseAmount`
+export enum FeeType {
+  FlatFee = 'base',
+  PerByte = 'byte',
+}
 
-export type Fees = FeeOption & {
+export type Fees = Record<FeeOption, BaseAmount> & {
   type: FeeType
 }
 export type FeesWithRates = { rates: FeeRates; fees: Fees }
