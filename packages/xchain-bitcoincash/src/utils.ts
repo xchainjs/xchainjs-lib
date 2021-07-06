@@ -329,7 +329,7 @@ export const getDefaultFeesWithRates = (): FeesWithRates => {
   }
 
   const fees: Fees = {
-    type: 'byte',
+    type: FeeType.PerByte,
     fast: calcFee(rates.fast),
     average: calcFee(rates.average),
     fastest: calcFee(rates.fastest),

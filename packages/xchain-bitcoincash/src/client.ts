@@ -3,8 +3,10 @@ import {
   Address,
   Balance,
   BaseXChainClient,
+  FeeOption,
   FeeRate,
   FeeRates,
+  FeeType,
   Fees,
   FeesWithRates,
   Network,
@@ -294,7 +296,7 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
       }
     }
     const fees: Fees = {
-      type: 'byte',
+      type: FeeType.PerByte,
       fast: utils.calcFee(rates.fast, memo),
       average: utils.calcFee(rates.average, memo),
       fastest: utils.calcFee(rates.fastest, memo),
@@ -346,7 +348,7 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
     const index = params.walletIndex || 0
     const derivationPath = this.getFullDerivationPath(index)
 
-    const feeRate = params.feeRate || (await this.getFeeRates()).fast
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     const { builder, utxos } = await utils.buildTx({
       ...params,
       feeRate,

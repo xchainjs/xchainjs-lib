@@ -1,4 +1,4 @@
-import { Fees, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
+import { FeeType, Fees, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { Msg, codec } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
@@ -201,7 +201,7 @@ export const registerCodecs = () => {
  */
 export const getDefaultFees = (): Fees => {
   return {
-    type: 'base',
+    type: FeeType.FlatFee,
     fast: baseAmount(750, DECIMAL),
     fastest: baseAmount(2500, DECIMAL),
     average: baseAmount(0, DECIMAL),

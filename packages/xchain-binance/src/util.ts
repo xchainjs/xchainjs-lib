@@ -1,4 +1,4 @@
-import { Fees, Network, Tx, TxType } from '@xchainjs/xchain-client'
+import { FeeType, Fees, Network, Tx, TxType } from '@xchainjs/xchain-client'
 import { AssetBNB, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
 import { DexFees, Fee, TransferFee, Tx as BinanceTx, TxType as BinanceTxType } from './types/binance'
@@ -107,7 +107,7 @@ export const getDefaultFees = (): Fees => {
   const singleTxFee = baseAmount(37500)
 
   return {
-    type: 'base',
+    type: FeeType.FlatFee,
     fast: singleTxFee,
     fastest: singleTxFee,
     average: singleTxFee,

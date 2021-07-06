@@ -2,8 +2,10 @@ import {
   Address,
   Balance,
   BaseXChainClient,
+  FeeOption,
   FeeRate,
   FeeRates,
+  FeeType,
   Fees,
   FeesWithRates,
   Network,
@@ -299,7 +301,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
       }
     }
     const fees: Fees = {
-      type: 'byte',
+      type: FeeType.PerByte,
       fast: Utils.calcFee(rates.fast, memo),
       average: Utils.calcFee(rates.average, memo),
       fastest: Utils.calcFee(rates.fastest, memo),
@@ -351,7 +353,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
     const fromAddressIndex = params?.walletIndex || 0
 
     // set the default fee rate to `fast`
-    const feeRate = params.feeRate || (await this.getFeeRates()).fast
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
 
     /**
      * do not spend pending UTXOs when adding a memo

@@ -1,5 +1,5 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
-import { Network } from '@xchainjs/xchain-client'
+import { FeeOption, Network } from '@xchainjs/xchain-client'
 import { AssetETH, Chain, ETHChain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, providers } from 'ethers'
 import nock from 'nock'
@@ -553,7 +553,7 @@ describe('Client Test', () => {
       walletIndex: 0,
       contractAddress: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
       spenderAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      feeOptionKey: 'fastest',
+      feeOptionKey: 'fastest' as FeeOption,
       amount: baseAmount(100, ETH_DECIMAL),
     })
     expect(tx.hash).toEqual('0x168ecebeeca0cd33d7151fa334cf8279ccacb58e855ede8276dfe6f77cafd55c')

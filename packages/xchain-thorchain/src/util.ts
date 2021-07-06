@@ -1,4 +1,4 @@
-import { Address, Fees, Network, TxHash, TxType } from '@xchainjs/xchain-client'
+import { Address, FeeType, Fees, Network, TxHash, TxType } from '@xchainjs/xchain-client'
 import { TxLog } from '@xchainjs/xchain-cosmos'
 import { Asset, BaseAmount, Chain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { AccAddress, Msg, codec } from 'cosmos-client'
@@ -163,7 +163,7 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
 export const getDefaultFees = (): Fees => {
   const fee = baseAmount(DEFAULT_GAS_VALUE, DECIMAL)
   return {
-    type: 'base',
+    type: FeeType.FlatFee,
     fast: fee,
     fastest: fee,
     average: fee,

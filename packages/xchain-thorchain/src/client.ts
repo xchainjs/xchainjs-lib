@@ -1,6 +1,7 @@
 import {
   Address,
   Balance,
+  FeeOption,
   Fees,
   Network,
   RootDerivationPaths,
@@ -505,7 +506,10 @@ class Client implements ThorchainClient, XChainClient {
 
     const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
     const fee = await this.getFees()
-    if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
+    if (
+      assetBalance.length === 0 ||
+      assetBalance[0].amount.amount().lt(amount.amount().plus(fee[FeeOption.Average].amount()))
+    ) {
       throw new Error('insufficient funds')
     }
 

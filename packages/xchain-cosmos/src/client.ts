@@ -1,6 +1,7 @@
 import {
   Address,
   Balance,
+  FeeType,
   Fees,
   Network,
   RootDerivationPaths,
@@ -327,7 +328,7 @@ class Client implements CosmosClient, XChainClient {
   async getFees(): Promise<Fees> {
     // there is no fixed fee, we set fee amount when creating a transaction.
     return {
-      type: 'base',
+      type: FeeType.FlatFee,
       fast: baseAmount(750, DECIMAL),
       fastest: baseAmount(2500, DECIMAL),
       average: baseAmount(0, DECIMAL),

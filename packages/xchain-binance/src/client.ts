@@ -5,6 +5,7 @@ import {
   Address,
   Balance,
   BaseXChainClient,
+  FeeType,
   Fees,
   Network,
   Tx,
@@ -391,7 +392,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     }
 
     return {
-      type: 'base',
+      type: 'base' as FeeType,
       fast: singleTxFee,
       fastest: singleTxFee,
       average: singleTxFee,
@@ -408,7 +409,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     const multiTxFee = baseAmount(transferFee.multi_transfer_fee)
 
     return {
-      type: 'base',
+      type: 'base' as FeeType,
       average: multiTxFee,
       fast: multiTxFee,
       fastest: multiTxFee,
@@ -427,13 +428,13 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
 
     return {
       single: {
-        type: 'base',
+        type: 'base' as FeeType,
         fast: singleTxFee,
         fastest: singleTxFee,
         average: singleTxFee,
       } as Fees,
       multi: {
-        type: 'base',
+        type: 'base' as FeeType,
         average: multiTxFee,
         fast: multiTxFee,
         fastest: multiTxFee,
