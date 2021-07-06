@@ -5,7 +5,7 @@ import axios from 'axios'
 import {
   Address,
   Balance,
-  FeeRates,
+  FeeRate,
   Fees,
   Network,
   RootDerivationPaths,
@@ -67,19 +67,16 @@ export abstract class BaseXChainClient implements XChainClient {
     return this.network
   }
 
-  protected async getFeeRatesFromThorchain(): Promise<FeeRates> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const respData = (await this.thornodeAPIGet('/inbound_addresses')) as any[]
-    const chainData = respData.find((elem) => elem.chain === this.chain) || undefined
-    if (!chainData) {
-      throw new Error(`Thornode API /inbound_addresses does not cain fees for ${this.chain}`)
-    }
-    const feeRates: FeeRates = {
-      fastest: chainData.gas_rate * 5,
-      fast: chainData.gas_rate * 1,
-      average: chainData.gas_rate * 0.5,
-    }
-    return feeRates
+  protected async getFeeRateFromThorchain(): Promise<FeeRate> {
+    const respData = await this.thornodeAPIGet('/inbound_addresses')
+    if (!Array.isArray(respData)) throw new Error('bad response from Thornode API')
+
+    const chainData: { chain: Chain; gas_rate: string } = respData.find(
+      (elem) => elem.chain === this.chain && typeof elem.gas_rate === 'string',
+    )
+    if (!chainData) throw new Error(`Thornode API /inbound_addresses does not contain fees for ${this.chain}`)
+
+    return Number(chainData.gas_rate)
   }
 
   protected async thornodeAPIGet(endpoint: string): Promise<unknown> {

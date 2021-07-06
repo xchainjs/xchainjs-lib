@@ -15,6 +15,7 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
+  standardFeeRates,
 } from '@xchainjs/xchain-client'
 import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 import { BigNumber, BigNumberish, Wallet, ethers } from 'ethers'
@@ -694,6 +695,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     return txResult.hash
   }
+
   /**
    * Estimate gas price.
    * @see https://etherscan.io/apis#gastracker
@@ -705,7 +707,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       // Note: `rates` are in `gwei`
       // @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/querier.go#L416-420
       // To have all values in `BaseAmount`, they needs to be converted into `wei` (1 gwei = 1,000,000,000 wei = 1e9)
-      const ratesInGwei = await this.getFeeRatesFromThorchain()
+      const ratesInGwei = standardFeeRates(await this.getFeeRateFromThorchain())
       return {
         [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, ETH_DECIMAL),
         [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, ETH_DECIMAL),

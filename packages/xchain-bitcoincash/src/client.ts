@@ -2,20 +2,16 @@ import * as bitcash from '@psf/bitcoincashjs-lib'
 import {
   Address,
   Balance,
-  BaseXChainClient,
+  Fee,
   FeeOption,
   FeeRate,
-  FeeRates,
-  FeeType,
-  Fees,
-  FeesWithRates,
   Network,
   Tx,
   TxHash,
   TxHistoryParams,
   TxParams,
   TxsPage,
-  XChainClient,
+  UTXOClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
@@ -28,15 +24,6 @@ import { KeyPair } from './types/bitcoincashjs-types'
 import { ClientUrl } from './types/client-types'
 import * as utils from './utils'
 
-/**
- * BitcoinCashClient Interface
- */
-interface BitcoinCashClient {
-  getFeesWithRates(memo?: string): Promise<FeesWithRates>
-  getFeesWithMemo(memo: string): Promise<Fees>
-  getFeeRates(): Promise<FeeRates>
-}
-
 export type BitcoinCashClientParams = XChainClientParams & {
   haskoinUrl?: ClientUrl
   nodeUrl?: ClientUrl
@@ -47,7 +34,7 @@ export type BitcoinCashClientParams = XChainClientParams & {
 /**
  * Custom Bitcoin Cash client
  */
-class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient {
+class Client extends UTXOClient {
   private haskoinUrl: ClientUrl
   private nodeUrl: ClientUrl
   private nodeAuth?: NodeAuth
@@ -270,72 +257,12 @@ class Client extends BaseXChainClient implements BitcoinCashClient, XChainClient
     return utils.parseTransaction(tx)
   }
 
-  /**
-   * Get the rates and fees.
-   *
-   * @param {string} memo The memo to be used for fee calculation (optional)
-   * @returns {FeesWithRates} The fees and rates
-   */
-  async getFeesWithRates(memo?: string): Promise<FeesWithRates> {
-    let rates: FeeRates | undefined = undefined
-
-    try {
-      rates = await this.getFeeRatesFromThorchain()
-    } catch (error) {
-      console.log(error)
-      console.warn(`Error pulling rates from thorchain, will try alternate`)
-    }
-
-    if (!rates) {
-      //backup in case throchain failed get rates
-      const txFee = await getSuggestedFee()
-      rates = {
-        fastest: txFee * 5,
-        fast: txFee * 1,
-        average: txFee * 0.5,
-      }
-    }
-    const fees: Fees = {
-      type: FeeType.PerByte,
-      fast: utils.calcFee(rates.fast, memo),
-      average: utils.calcFee(rates.average, memo),
-      fastest: utils.calcFee(rates.fastest, memo),
-    }
-
-    return { fees, rates }
+  protected async getSuggestedFeeRate(): Promise<FeeRate> {
+    return await getSuggestedFee()
   }
 
-  /**
-   * Get the current fees.
-   *
-   * @returns {Fees} The fees without memo
-   */
-  async getFees(): Promise<Fees> {
-    const { fees } = await this.getFeesWithRates()
-    return fees
-  }
-
-  /**
-   * Get the fees for transactions with memo.
-   * If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
-   *
-   * @param {string} memo
-   * @returns {Fees} The fees with memo
-   */
-  async getFeesWithMemo(memo: string): Promise<Fees> {
-    const { fees } = await this.getFeesWithRates(memo)
-    return fees
-  }
-
-  /**
-   * Get the fee rates for transactions without a memo.
-   * If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
-   *
-   * @returns {FeeRates} The fee rate
-   */
-  async getFeeRates(): Promise<FeeRates> {
-    const { rates } = await this.getFeesWithRates()
-    return rates
+  protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
+    return utils.calcFee(feeRate, memo)
   }
 
   /**
