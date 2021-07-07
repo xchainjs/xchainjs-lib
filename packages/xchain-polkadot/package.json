@@ -36,9 +36,9 @@
     "@polkadot/api": "^3.1.1",
     "@polkadot/util": "^5.1.1",
     "@types/big.js": "^4.0.5",
-    "@xchainjs/xchain-client": "^0.9.2",
+    "@xchainjs/xchain-client": "^0.10.1",
     "@xchainjs/xchain-crypto": "^0.2.4",
-    "@xchainjs/xchain-util": "^0.2.8",
+    "@xchainjs/xchain-util": "^0.3.0",
     "axios": "^0.21.0",
     "jest-websocket-mock": "^2.2.0",
     "mock-socket": "9.0.3",
@@ -50,9 +50,9 @@
   "peerDependencies": {
     "@polkadot/api": "^3.1.1",
     "@polkadot/util": "^5.1.1",
-    "@xchainjs/xchain-client": "^0.9.2",
+    "@xchainjs/xchain-client": "^0.10.1",
     "@xchainjs/xchain-crypto": "^0.2.4",
-    "@xchainjs/xchain-util": "^0.2.8",
+    "@xchainjs/xchain-util": "^0.3.0",
     "axios": "^0.21.0"
   }
 }
