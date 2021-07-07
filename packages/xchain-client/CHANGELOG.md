@@ -3,7 +3,6 @@
 ### Breaking change
 
 - Introduce `Network`, `TxType`, `FeeOption` enums
-- added support for fetch gas fees from thorchain
 
 ### Add
 
