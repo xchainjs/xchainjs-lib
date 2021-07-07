@@ -1,3 +1,15 @@
+# v.0.3.0 (2021-07-07)
+
+### Breaking changes
+
+- Remove `chains` list (array)
+- Introduce `Chain`, `Denomination` enums
+- Extract `types` into different files (modules)
+
+### Add
+
+- Introduce `OnlyRequiredKeys` / `OnlyRequired` types
+
 # v.0.2.7 (2021-03-16)
 
 ### Breaking changes
