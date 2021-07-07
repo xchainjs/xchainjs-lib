@@ -1,3 +1,16 @@
+# v.0.10.0 (2021-07-07)
+
+### Breaking change
+
+- Introduce `Network`, `TxType`, `FeeOption` enums
+- added support for fetch gas fees from thorchain
+
+### Add
+
+- Introduce `UTXOClient`
+- Add fee rate helpers `singleFeeRate`, `standardFeeRates`
+- Add fee helpers `singleFee`, `standardFees`, `calcFee`, `calcFeesAsync`
+
 # v.0.9.4 (2021-06-25)
 
 - added BaseXChainClient
