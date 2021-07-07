@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain",
-  "version": "0.17.2",
+  "version": "0.17.3",
   "description": "Custom Thorchain client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -36,7 +36,7 @@
     "@xchainjs/xchain-client": "^0.9.2",
     "@xchainjs/xchain-cosmos": "^0.13.2",
     "@xchainjs/xchain-crypto": "^0.2.4",
-    "@xchainjs/xchain-util": "^0.2.8",
+    "@xchainjs/xchain-util": "^0.3.0",
     "axios": "^0.21.0",
     "cosmos-client": "0.39.2",
     "nock": "^13.0.5"
@@ -48,7 +48,7 @@
     "@xchainjs/xchain-client": "^0.9.2",
     "@xchainjs/xchain-cosmos": "^0.13.2",
     "@xchainjs/xchain-crypto": "^0.2.4",
-    "@xchainjs/xchain-util": "^0.2.8",
+    "@xchainjs/xchain-util": "^0.3.0",
     "axios": "^0.21.0",
     "cosmos-client": "0.39.2"
   }

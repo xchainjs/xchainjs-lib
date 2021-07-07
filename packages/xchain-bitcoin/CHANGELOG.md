@@ -1,6 +1,6 @@
 # v.0.15.11 (2021-07-07)
 
-- Use latest `xchain-client@0.10.0` + `xchain-util@0.3.0`
+- Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
 
 # v.0.15.10 (2021-07-03)
 

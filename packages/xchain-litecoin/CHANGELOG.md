@@ -1,3 +1,7 @@
+# v.0.6.9 (2021-07-07)
+
+- Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
+
 # v.0.6.8 (2021-07-03)
 
 - refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
