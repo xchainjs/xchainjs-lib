@@ -1,3 +1,9 @@
+# v.0.22.3 (2021-07-08)
+
+### Fix
+
+- Provide overridden `getFees` in `EthereumClient` interface
+
 # v.0.22.3 (2021-07-07)
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
