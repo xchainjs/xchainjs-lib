@@ -1,4 +1,4 @@
-import { generatePhrase, validatePhrase, encryptToKeyStore, decryptFromKeystore } from '../src/crypto'
+import { decryptFromKeystore, encryptToKeyStore, generatePhrase, validatePhrase } from '../src/crypto'
 
 describe('Generate Phrase', () => {
   it('Generates 12-word phrase', () => {

@@ -43,7 +43,7 @@ Initialize client and use class methods:
 import { Client, Network } from '../src/client'
 
 // Create a new client interface
-const ltcClient = new Client({ network: 'testnet' })
+const ltcClient = new Client({ network: Network.Testnet })
 
 // Set phrase
 ltcClient.setPhrase('phrase here')

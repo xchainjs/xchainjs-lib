@@ -1,11 +1,12 @@
 import { validatePhrase } from '@xchainjs/xchain-crypto'
-import { Asset, Chain } from '@xchainjs/xchain-util/lib'
+import { Asset, Chain } from '@xchainjs/xchain-util'
+import axios from 'axios'
+
 import {
   Address,
-  Balances,
-  FeeRates,
+  Balance,
+  FeeRate,
   Fees,
-  FeesParams,
   Network,
   RootDerivationPaths,
   Tx,
@@ -15,7 +16,6 @@ import {
   XChainClient,
   XChainClientParams,
 } from './types'
-import axios from 'axios'
 
 const MAINNET_THORNODE_API_BASE = 'https://thornode.thorchain.info/thorchain'
 const TESTNET_THORNODE_API_BASE = 'https://testnet.thornode.thorchain.info/thorchain'
@@ -38,14 +38,14 @@ export abstract class BaseXChainClient implements XChainClient {
    */
   constructor(chain: Chain, params: XChainClientParams) {
     this.chain = chain
-    this.network = params.network || 'testnet'
+    this.network = params.network || Network.Testnet
     if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths
     if (params.phrase) this.setPhrase(params.phrase)
   }
   /**
    * Set/update the current network.
    *
-   * @param {Network} network `mainnet` or `testnet`.
+   * @param {Network} network
    * @returns {void}
    *
    * @throws {"Network must be provided"}
@@ -61,29 +61,33 @@ export abstract class BaseXChainClient implements XChainClient {
   /**
    * Get the current network.
    *
-   * @returns {Network} The current network. (`mainnet` or `testnet`)
+   * @returns {Network}
    */
   public getNetwork(): Network {
     return this.network
   }
 
-  protected async getFeeRatesFromThorchain(): Promise<FeeRates> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const respData = (await this.thornodeAPIGet('/inbound_addresses')) as any[]
-    const chainData = respData.find((elem) => elem.chain === this.chain) || undefined
-    if (!chainData) {
-      throw new Error(`Thornode API /inbound_addresses does not cain fees for ${this.chain}`)
-    }
-    const feeRates: FeeRates = {
-      fastest: chainData.gas_rate * 5,
-      fast: chainData.gas_rate * 1,
-      average: chainData.gas_rate * 0.5,
-    }
-    return feeRates
+  protected async getFeeRateFromThorchain(): Promise<FeeRate> {
+    const respData = await this.thornodeAPIGet('/inbound_addresses')
+    if (!Array.isArray(respData)) throw new Error('bad response from Thornode API')
+
+    const chainData: { chain: Chain; gas_rate: string } = respData.find(
+      (elem) => elem.chain === this.chain && typeof elem.gas_rate === 'string',
+    )
+    if (!chainData) throw new Error(`Thornode API /inbound_addresses does not contain fees for ${this.chain}`)
+
+    return Number(chainData.gas_rate)
   }
 
   protected async thornodeAPIGet(endpoint: string): Promise<unknown> {
-    const url = this.network === 'testnet' ? TESTNET_THORNODE_API_BASE : MAINNET_THORNODE_API_BASE
+    const url = (() => {
+      switch (this.network) {
+        case Network.Mainnet:
+          return MAINNET_THORNODE_API_BASE
+        case Network.Testnet:
+          return TESTNET_THORNODE_API_BASE
+      }
+    })()
     return (await axios.get(url + endpoint)).data
   }
 
@@ -126,13 +130,13 @@ export abstract class BaseXChainClient implements XChainClient {
     this.phrase = ''
   }
   //individual clients will need to implement these
-  abstract getFees(params?: FeesParams): Promise<Fees>
+  abstract getFees(): Promise<Fees>
   abstract getAddress(walletIndex: number): string
   abstract getExplorerUrl(): string
   abstract getExplorerAddressUrl(address: string): string
   abstract getExplorerTxUrl(txID: string): string
   abstract validateAddress(address: string): boolean
-  abstract getBalance(address: string, assets?: Asset[]): Promise<Balances>
+  abstract getBalance(address: string, assets?: Asset[]): Promise<Balance[]>
   abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
   abstract transfer(params: TxParams): Promise<string>

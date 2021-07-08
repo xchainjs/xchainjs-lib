@@ -1,26 +1,27 @@
-const bitcash = require('@psf/bitcoincashjs-lib')
-
+import * as bitcash from '@psf/bitcoincashjs-lib'
+import {
+  Address,
+  Balance,
+  FeeRate,
+  Fees,
+  FeesWithRates,
+  Network,
+  Tx,
+  TxFrom,
+  TxParams,
+  TxTo,
+  TxType,
+  calcFees,
+  standardFeeRates,
+} from '@xchainjs/xchain-client'
+import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
-import { Address, Balance, Fees, Network, Tx, TxFrom, TxParams, TxTo } from '@xchainjs/xchain-client'
-import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util/lib'
-import {
-  FeeRate,
-  FeeRates,
-  FeesWithRates,
-  Transaction,
-  AddressParams,
-  UTXOs,
-  UTXO,
-  TransactionInput,
-  TransactionOutput,
-} from './types'
-import { getAccount, getRawTransaction, getUnspentTransactions } from './haskoin-api'
-import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import accumulative from 'coinselect/accumulative'
+
+import { getAccount, getRawTransaction, getUnspentTransactions } from './haskoin-api'
+import { AddressParams, Transaction, TransactionInput, TransactionOutput, UTXO } from './types'
+import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'
 
 export const BCH_DECIMAL = 8
 export const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
@@ -69,37 +70,22 @@ export function getFee(inputs: number, feeRate: FeeRate, data: Buffer | null = n
  * Get the balances of an address.
  *
  * @param {AddressParams} params
- * @returns {Array<Balance>} The balances of the given address.
+ * @returns {Balance[]} The balances of the given address.
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
-  try {
-    const account = await getAccount(params)
-    if (!account) {
-      return Promise.reject(new Error('No bchBalance found'))
-    }
+  const account = await getAccount(params)
+  if (!account) throw new Error('BCH balance not found')
 
-    const confirmed = baseAmount(account.confirmed, BCH_DECIMAL)
-    const unconfirmed = baseAmount(account.unconfirmed, BCH_DECIMAL)
+  const confirmed = baseAmount(account.confirmed, BCH_DECIMAL)
+  const unconfirmed = baseAmount(account.unconfirmed, BCH_DECIMAL)
 
-    account.confirmed
-    return [
-      {
-        asset: AssetBCH,
-        amount: baseAmount(confirmed.amount().plus(unconfirmed.amount()), BCH_DECIMAL),
-      },
-    ]
-  } catch (error) {
-    return Promise.reject(new Error('Invalid address'))
-  }
-}
-/**
- * Check if give network is a testnet.
- *
- * @param {Network} network
- * @returns {boolean} `true` or `false`
- */
-export const isTestnet = (network: Network): boolean => {
-  return network === 'testnet'
+  account.confirmed
+  return [
+    {
+      asset: AssetBCH,
+      amount: baseAmount(confirmed.amount().plus(unconfirmed.amount()), BCH_DECIMAL),
+    },
+  ]
 }
 
 /**
@@ -109,7 +95,12 @@ export const isTestnet = (network: Network): boolean => {
  * @returns {} The BCH network.
  */
 export const bchNetwork = (network: Network): BCHNetwork => {
-  return isTestnet(network) ? coininfo.bitcoincash.test.toBitcoinJS() : coininfo.bitcoincash.main.toBitcoinJS()
+  switch (network) {
+    case Network.Mainnet:
+      return coininfo.bitcoincash.main.toBitcoinJS()
+    case Network.Testnet:
+      return coininfo.bitcoincash.test.toBitcoinJS()
+  }
 }
 
 /**
@@ -178,7 +169,7 @@ export const parseTransaction = (tx: Transaction): Tx => {
           } as TxTo),
       ),
     date: new Date(tx.time * 1000),
-    type: 'transfer',
+    type: TxType.Transfer,
     hash: tx.txid,
   }
 }
@@ -189,8 +180,14 @@ export const parseTransaction = (tx: Transaction): Tx => {
  * @param {Network} network
  * @returns {string} bchaddr network
  */
-export const toBCHAddressNetwork = (network: Network): string =>
-  network === 'testnet' ? bchaddr.Network.Testnet : bchaddr.Network.Mainnet
+export const toBCHAddressNetwork = (network: Network): string => {
+  switch (network) {
+    case Network.Mainnet:
+      return bchaddr.Network.Mainnet
+    case Network.Testnet:
+      return bchaddr.Network.Testnet
+  }
+}
 
 /**
  * Validate the BCH address.
@@ -208,11 +205,11 @@ export const validateAddress = (address: string, network: Network): boolean => {
  *
  * @param {string} haskoinUrl sochain Node URL.
  * @param {Address} address
- * @returns {Array<UTXO>} The UTXOs of the given address.
+ * @returns {UTXO[]} The UTXOs of the given address.
  */
-export const scanUTXOs = async (haskoinUrl: string, address: Address): Promise<UTXOs> => {
+export const scanUTXOs = async (haskoinUrl: string, address: Address): Promise<UTXO[]> => {
   const unspents = await getUnspentTransactions({ haskoinUrl, address })
-  const utxos: UTXOs = []
+  const utxos: UTXO[] = []
 
   for (const utxo of unspents || []) {
     utxos.push({
@@ -252,66 +249,56 @@ export const buildTx = async ({
   haskoinUrl: string
 }): Promise<{
   builder: TransactionBuilder
-  inputUTXOs: UTXOs
+  inputUTXOs: UTXO[]
 }> => {
-  try {
-    const recipientCashAddress = toCashAddress(recipient)
-    if (!validateAddress(recipientCashAddress, network)) {
-      return Promise.reject(new Error('Invalid address'))
+  const recipientCashAddress = toCashAddress(recipient)
+  if (!validateAddress(recipientCashAddress, network)) throw new Error('Invalid address')
+
+  const utxos = await scanUTXOs(haskoinUrl, sender)
+  if (utxos.length === 0) throw new Error('No utxos to send')
+
+  const feeRateWhole = Number(feeRate.toFixed(0))
+  const compiledMemo = memo ? compileMemo(memo) : null
+
+  const targetOutputs = []
+  // output to recipient
+  targetOutputs.push({
+    address: recipient,
+    value: amount.amount().toNumber(),
+  })
+  const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+
+  // .inputs and .outputs will be undefined if no solution was found
+  if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
+
+  const transactionBuilder = new bitcash.TransactionBuilder(bchNetwork(network))
+
+  //Inputs
+  inputs.forEach((utxo: UTXO) =>
+    transactionBuilder.addInput(bitcash.Transaction.fromBuffer(Buffer.from(utxo.txHex, 'hex')), utxo.index),
+  )
+
+  // Outputs
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  outputs.forEach((output: any) => {
+    let out = undefined
+    if (!output.address) {
+      //an empty address means this is the  change address
+      out = bitcash.address.toOutputScript(toLegacyAddress(sender), bchNetwork(network))
+    } else if (output.address) {
+      out = bitcash.address.toOutputScript(toLegacyAddress(output.address), bchNetwork(network))
     }
+    transactionBuilder.addOutput(out, output.value)
+  })
 
-    const utxos = await scanUTXOs(haskoinUrl, sender)
-    if (utxos.length === 0) {
-      return Promise.reject(Error('No utxos to send'))
-    }
+  // add output for memo
+  if (compiledMemo) {
+    transactionBuilder.addOutput(compiledMemo, 0) // Add OP_RETURN {script, value}
+  }
 
-    const feeRateWhole = Number(feeRate.toFixed(0))
-    const compiledMemo = memo ? compileMemo(memo) : null
-
-    const targetOutputs = []
-    // output to recipient
-    targetOutputs.push({
-      address: recipient,
-      value: amount.amount().toNumber(),
-    })
-    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-
-    // .inputs and .outputs will be undefined if no solution was found
-    if (!inputs || !outputs) {
-      return Promise.reject(Error('Balance insufficient for transaction'))
-    }
-
-    const transactionBuilder = new bitcash.TransactionBuilder(bchNetwork(network))
-
-    //Inputs
-    inputs.forEach((utxo: UTXO) =>
-      transactionBuilder.addInput(bitcash.Transaction.fromBuffer(Buffer.from(utxo.txHex, 'hex')), utxo.index),
-    )
-
-    // Outputs
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    outputs.forEach((output: any) => {
-      let out = undefined
-      if (!output.address) {
-        //an empty address means this is the  change address
-        out = bitcash.address.toOutputScript(toLegacyAddress(sender), bchNetwork(network))
-      } else if (output.address) {
-        out = bitcash.address.toOutputScript(toLegacyAddress(output.address), bchNetwork(network))
-      }
-      transactionBuilder.addOutput(out, output.value)
-    })
-
-    // add output for memo
-    if (compiledMemo) {
-      transactionBuilder.addOutput(compiledMemo, 0) // Add OP_RETURN {script, value}
-    }
-
-    return {
-      builder: transactionBuilder,
-      inputUTXOs: inputs,
-    }
-  } catch (e) {
-    return Promise.reject(e)
+  return {
+    builder: transactionBuilder,
+    inputUTXOs: inputs,
   }
 }
 
@@ -323,7 +310,7 @@ export const buildTx = async ({
  * @param {UnspentOutput} utxos (optional)
  * @returns {BaseAmount} The calculated fees based on fee rate and the memo.
  */
-export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXOs = []): BaseAmount => {
+export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXO[] = []): BaseAmount => {
   const compiledMemo = memo ? compileMemo(memo) : null
   const fee = getFee(utxos.length, feeRate, compiledMemo)
   return baseAmount(fee)
@@ -336,21 +323,10 @@ export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXOs = []): Bas
  */
 export const getDefaultFeesWithRates = (): FeesWithRates => {
   const nextBlockFeeRate = 1
-  const rates: FeeRates = {
-    fastest: nextBlockFeeRate * 5,
-    fast: nextBlockFeeRate * 1,
-    average: nextBlockFeeRate * 0.5,
-  }
-
-  const fees: Fees = {
-    type: 'byte',
-    fast: calcFee(rates.fast),
-    average: calcFee(rates.average),
-    fastest: calcFee(rates.fastest),
-  }
+  const rates = standardFeeRates(nextBlockFeeRate)
 
   return {
-    fees,
+    fees: calcFees(rates, calcFee),
     rates,
   }
 }

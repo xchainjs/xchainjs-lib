@@ -1,8 +1,8 @@
-import crypto from 'crypto'
 import * as bech32 from 'bech32'
-import sha256 from 'crypto-js/sha256'
-import ripemd160 from 'crypto-js/ripemd160'
+import crypto from 'crypto'
 import hexEncoding from 'crypto-js/enc-hex'
+import ripemd160 from 'crypto-js/ripemd160'
+import sha256 from 'crypto-js/sha256'
 
 /**
  * Convert string to bytes.

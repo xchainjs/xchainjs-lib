@@ -1,6 +1,6 @@
-import { Address, Network } from '@xchainjs/xchain-client'
+import { Address, FeeRate, Network } from '@xchainjs/xchain-client'
 
-export type NormalTxParams = { addressTo: string; amount: number; feeRate: number }
+export type NormalTxParams = { addressTo: Address; amount: number; feeRate: FeeRate }
 export type VaultTxParams = NormalTxParams & { memo: string }
 
 export type GetChangeParams = {

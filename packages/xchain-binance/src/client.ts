@@ -1,43 +1,44 @@
-import axios from 'axios'
-import {
-  Balances as BinanceBalances,
-  Fees as BinanceFees,
-  TxPage as BinanceTxPage,
-  TransactionResult,
-  TransferFee,
-} from './types/binance'
-
-import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
+import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
+import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 import {
   Address,
-  XChainClient,
-  XChainClientParams,
-  Balances,
+  Balance,
+  BaseXChainClient,
+  FeeType,
   Fees,
   Network,
   Tx,
-  Txs,
-  TxParams,
   TxHash,
   TxHistoryParams,
+  TxParams,
   TxsPage,
-  BaseXChainClient,
+  XChainClient,
+  XChainClientParams,
+  singleFee,
 } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetBNB,
   BaseAmount,
-  assetFromString,
+  Chain,
   assetAmount,
+  assetFromString,
   assetToBase,
+  assetToString,
   baseAmount,
   baseToAsset,
-  BNBChain,
-  assetToString,
 } from '@xchainjs/xchain-util'
-import { isTransferFee, parseTx, getPrefix } from './util'
-import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
+import axios from 'axios'
+
+import {
+  Balance as BinanceBalance,
+  Fees as BinanceFees,
+  TransactionResult,
+  TransferFee,
+  TxPage as BinanceTxPage,
+} from './types/binance'
+import { getPrefix, isTransferFee, parseTx } from './util'
 
 type PrivKey = string
 
@@ -87,7 +88,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
   constructor(params: XChainClientParams) {
-    super('BNB', params)
+    super(Chain.Binance, params)
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(this.getNetwork())
   }
@@ -104,7 +105,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   /**
    * Set/update the current network.
    *
-   * @param {Network} network `mainnet` or `testnet`.
+   * @param {Network} network
    * @returns {void}
    *
    * @throws {"Network must be provided"}
@@ -122,7 +123,12 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {string} The client url for binance chain based on the network.
    */
   private getClientUrl(): string {
-    return this.network === 'testnet' ? 'https://testnet-dex.binance.org' : 'https://dex.binance.org'
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://dex.binance.org'
+      case Network.Testnet:
+        return 'https://testnet-dex.binance.org'
+    }
   }
 
   /**
@@ -131,7 +137,12 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    return this.network === 'testnet' ? 'https://testnet-explorer.binance.org' : 'https://explorer.binance.org'
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://explorer.binance.org'
+      case Network.Testnet:
+        return 'https://testnet-explorer.binance.org'
+    }
   }
 
   /**
@@ -195,26 +206,21 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @param {Address | number} address By default, it will return the balance of the current wallet. (optional)
    * @param {Asset} asset If not set, it will return all assets available. (optional)
-   * @returns {Array<Balance>} The balance of the address.
+   * @returns {Balance[]} The balance of the address.
    */
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balances> {
-    try {
-      const balances: BinanceBalances = await this.bncClient.getBalance(address)
+  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
+    const balances: BinanceBalance[] = await this.bncClient.getBalance(address)
 
-      return balances
-        .map((balance) => {
-          return {
-            asset: assetFromString(`${BNBChain}.${balance.symbol}`) || AssetBNB,
-            amount: assetToBase(assetAmount(balance.free, 8)),
-          }
-        })
-        .filter(
-          (balance) =>
-            !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
-        )
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return balances
+      .map((balance) => {
+        return {
+          asset: assetFromString(`${Chain.Binance}.${balance.symbol}`) || AssetBNB,
+          amount: assetToBase(assetAmount(balance.free, 8)),
+        }
+      })
+      .filter(
+        (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
+      )
   }
 
   /**
@@ -224,36 +230,32 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {Params} The parameters to be used for transaction search.
    * */
   private async searchTransactions(params?: { [x: string]: string | undefined }): Promise<TxsPage> {
-    try {
-      const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
-      const url = new URL(clientUrl)
+    const clientUrl = `${this.getClientUrl()}/api/v1/transactions`
+    const url = new URL(clientUrl)
 
-      const endTime = Date.now()
-      const diffTime = 90 * 24 * 60 * 60 * 1000
-      url.searchParams.set('endTime', endTime.toString())
-      url.searchParams.set('startTime', (endTime - diffTime).toString())
+    const endTime = Date.now()
+    const diffTime = 90 * 24 * 60 * 60 * 1000
+    url.searchParams.set('endTime', endTime.toString())
+    url.searchParams.set('startTime', (endTime - diffTime).toString())
 
-      for (const key in params) {
-        const value = params[key]
-        if (value) {
-          url.searchParams.set(key, value)
-          if (key === 'startTime' && !params['endTime']) {
-            url.searchParams.set('endTime', (parseInt(value) + diffTime).toString())
-          }
-          if (key === 'endTime' && !params['startTime']) {
-            url.searchParams.set('startTime', (parseInt(value) - diffTime).toString())
-          }
+    for (const key in params) {
+      const value = params[key]
+      if (value) {
+        url.searchParams.set(key, value)
+        if (key === 'startTime' && !params['endTime']) {
+          url.searchParams.set('endTime', (parseInt(value) + diffTime).toString())
+        }
+        if (key === 'endTime' && !params['startTime']) {
+          url.searchParams.set('startTime', (parseInt(value) - diffTime).toString())
         }
       }
+    }
 
-      const txHistory = await axios.get<BinanceTxPage>(url.toString()).then((response) => response.data)
+    const txHistory = (await axios.get<BinanceTxPage>(url.toString())).data
 
-      return {
-        total: txHistory.total,
-        txs: txHistory.tx.map(parseTx).filter(Boolean) as Txs,
-      }
-    } catch (error) {
-      return Promise.reject(error)
+    return {
+      total: txHistory.total,
+      txs: txHistory.tx.map(parseTx).filter(Boolean) as Tx[],
     }
   }
 
@@ -264,7 +266,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
    */
-  getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
+  async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     return await this.searchTransactions({
       address: params && params.address,
       limit: params && params.limit?.toString(),
@@ -280,36 +282,29 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
-  getTransactionData = async (txId: string): Promise<Tx> => {
-    try {
-      const txResult: TransactionResult = await axios
-        .get(`${this.getClientUrl()}/api/v1/tx/${txId}?format=json`)
-        .then((response) => response.data)
+  async getTransactionData(txId: string): Promise<Tx> {
+    const txResult: TransactionResult = (await axios.get(`${this.getClientUrl()}/api/v1/tx/${txId}?format=json`)).data
+    const blockHeight = txResult.height
 
-      const blockHeight = txResult.height
-
-      let address = ''
-      const msgs = txResult.tx.value.msg
-      if (msgs.length) {
-        const msg = msgs[0].value as SignedSend
-        if (msg.inputs && msg.inputs.length) {
-          address = msg.inputs[0].address
-        } else if (msg.outputs && msg.outputs.length) {
-          address = msg.outputs[0].address
-        }
+    let address = ''
+    const msgs = txResult.tx.value.msg
+    if (msgs.length) {
+      const msg = msgs[0].value as SignedSend
+      if (msg.inputs && msg.inputs.length) {
+        address = msg.inputs[0].address
+      } else if (msg.outputs && msg.outputs.length) {
+        address = msg.outputs[0].address
       }
-
-      const txHistory = await this.searchTransactions({ address, blockHeight })
-      const [transaction] = txHistory.txs.filter((tx) => tx.hash === txId)
-
-      if (!transaction) {
-        throw new Error('transaction not found')
-      }
-
-      return transaction
-    } catch (error) {
-      return Promise.reject(error)
     }
+
+    const txHistory = await this.searchTransactions({ address, blockHeight })
+    const [transaction] = txHistory.txs.filter((tx) => tx.hash === txId)
+
+    if (!transaction) {
+      throw new Error('transaction not found')
+    }
+
+    return transaction
   }
 
   /**
@@ -318,33 +313,29 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @param {MultiSendParams} params The multi-send transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  multiSend = async ({ walletIndex = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
-    try {
-      const derivedAddress = this.getAddress(walletIndex)
+  async multiSend({ walletIndex = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> {
+    const derivedAddress = this.getAddress(walletIndex)
 
-      await this.bncClient.initChain()
-      await this.bncClient.setPrivateKey(this.getPrivateKey(walletIndex)).catch((error) => Promise.reject(error))
+    await this.bncClient.initChain()
+    await this.bncClient.setPrivateKey(this.getPrivateKey(walletIndex))
 
-      const transferResult = await this.bncClient.multiSend(
-        derivedAddress,
-        transactions.map((transaction) => {
-          return {
-            to: transaction.to,
-            coins: transaction.coins.map((coin) => {
-              return {
-                denom: coin.asset.symbol,
-                amount: baseToAsset(coin.amount).amount().toString(),
-              }
-            }),
-          }
-        }),
-        memo,
-      )
+    const transferResult = await this.bncClient.multiSend(
+      derivedAddress,
+      transactions.map((transaction) => {
+        return {
+          to: transaction.to,
+          coins: transaction.coins.map((coin) => {
+            return {
+              denom: coin.asset.symbol,
+              amount: baseToAsset(coin.amount).amount().toString(),
+            }
+          }),
+        }
+      }),
+      memo,
+    )
 
-      return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
   }
 
   /**
@@ -353,25 +344,19 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async ({ walletIndex, asset, amount, recipient, memo }: TxParams): Promise<TxHash> => {
-    try {
-      await this.bncClient.initChain()
-      await this.bncClient
-        .setPrivateKey(this.getPrivateKey(walletIndex || 0))
-        .catch((error: Error) => Promise.reject(error))
+  async transfer({ walletIndex, asset, amount, recipient, memo }: TxParams): Promise<TxHash> {
+    await this.bncClient.initChain()
+    await this.bncClient.setPrivateKey(this.getPrivateKey(walletIndex || 0))
 
-      const transferResult = await this.bncClient.transfer(
-        this.getAddress(),
-        recipient,
-        baseToAsset(amount).amount().toString(),
-        asset ? asset.symbol : AssetBNB.symbol,
-        memo,
-      )
+    const transferResult = await this.bncClient.transfer(
+      this.getAddress(),
+      recipient,
+      baseToAsset(amount).amount().toString(),
+      asset ? asset.symbol : AssetBNB.symbol,
+      memo,
+    )
 
-      return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
   }
 
   /**
@@ -379,21 +364,13 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @returns {TransferFee} The current transfer fee.
    */
-  private getTransferFee = async (): Promise<TransferFee> => {
-    try {
-      const feesArray = await axios
-        .get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)
-        .then((response) => response.data)
+  private async getTransferFee(): Promise<TransferFee> {
+    const feesArray = (await axios.get<BinanceFees>(`${this.getClientUrl()}/api/v1/fees`)).data
 
-      const [transferFee] = feesArray.filter(isTransferFee)
-      if (!transferFee) {
-        throw new Error('failed to get transfer fees')
-      }
+    const [transferFee] = feesArray.filter(isTransferFee)
+    if (!transferFee) throw new Error('failed to get transfer fees')
 
-      return transferFee
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return transferFee
   }
 
   /**
@@ -404,8 +381,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   async getFees(): Promise<Fees> {
     let singleTxFee: BaseAmount | undefined = undefined
     try {
-      const rates = await this.getFeeRatesFromThorchain()
-      singleTxFee = baseAmount(rates.fast)
+      singleTxFee = baseAmount(await this.getFeeRateFromThorchain())
     } catch (error) {
       console.log(error)
       console.warn(`Error pulling rates from thorchain, will try alternate`)
@@ -415,12 +391,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
       singleTxFee = baseAmount(transferFee.fixed_fee_params.fee)
     }
 
-    return {
-      type: 'base',
-      fast: singleTxFee,
-      fastest: singleTxFee,
-      average: singleTxFee,
-    } as Fees
+    return singleFee(FeeType.FlatFee, singleTxFee)
   }
 
   /**
@@ -429,19 +400,15 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {Fees} The current fee for multi-send transaction.
    */
   async getMultiSendFees(): Promise<Fees> {
-    try {
-      const transferFee = await this.getTransferFee()
-      const multiTxFee = baseAmount(transferFee.multi_transfer_fee)
+    const transferFee = await this.getTransferFee()
+    const multiTxFee = baseAmount(transferFee.multi_transfer_fee)
 
-      return {
-        type: 'base',
-        average: multiTxFee,
-        fast: multiTxFee,
-        fastest: multiTxFee,
-      } as Fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return {
+      type: 'base' as FeeType,
+      average: multiTxFee,
+      fast: multiTxFee,
+      fastest: multiTxFee,
+    } as Fees
   }
 
   /**
@@ -449,28 +416,24 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @returns {SingleAndMultiFees} The current fee for both single and multi-send transaction.
    */
-  getSingleAndMultiFees = async (): Promise<{ single: Fees; multi: Fees }> => {
-    try {
-      const transferFee = await this.getTransferFee()
-      const singleTxFee = baseAmount(transferFee.fixed_fee_params.fee)
-      const multiTxFee = baseAmount(transferFee.multi_transfer_fee)
+  async getSingleAndMultiFees(): Promise<{ single: Fees; multi: Fees }> {
+    const transferFee = await this.getTransferFee()
+    const singleTxFee = baseAmount(transferFee.fixed_fee_params.fee)
+    const multiTxFee = baseAmount(transferFee.multi_transfer_fee)
 
-      return {
-        single: {
-          type: 'base',
-          fast: singleTxFee,
-          fastest: singleTxFee,
-          average: singleTxFee,
-        } as Fees,
-        multi: {
-          type: 'base',
-          average: multiTxFee,
-          fast: multiTxFee,
-          fastest: multiTxFee,
-        } as Fees,
-      }
-    } catch (error) {
-      return Promise.reject(error)
+    return {
+      single: {
+        type: 'base' as FeeType,
+        fast: singleTxFee,
+        fastest: singleTxFee,
+        average: singleTxFee,
+      } as Fees,
+      multi: {
+        type: 'base' as FeeType,
+        average: multiTxFee,
+        fast: multiTxFee,
+        fastest: multiTxFee,
+      } as Fees,
     }
   }
 }

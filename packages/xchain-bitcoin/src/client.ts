@@ -1,34 +1,26 @@
-import * as Bitcoin from 'bitcoinjs-lib'
-import * as Utils from './utils'
-import * as sochain from './sochain-api'
 import {
-  BaseXChainClient,
-  TxHistoryParams,
-  TxsPage,
   Address,
-  XChainClient,
-  Tx,
-  TxParams,
-  TxHash,
   Balance,
-  Network,
-  Fees,
-  XChainClientParams,
-  FeeRates,
+  Fee,
+  FeeOption,
   FeeRate,
-  FeesWithRates,
+  Network,
+  Tx,
+  TxHash,
+  TxHistoryParams,
+  TxParams,
+  TxType,
+  TxsPage,
+  UTXOClient,
+  XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { AssetBTC, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetBTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import * as Bitcoin from 'bitcoinjs-lib'
 
-/**
- * BitcoinClient Interface
- */
-interface BitcoinClient {
-  getFeesWithRates(memo?: string): Promise<FeesWithRates>
-  getFeesWithMemo(memo: string): Promise<Fees>
-  getFeeRates(): Promise<FeeRates>
-}
+import { BTC_DECIMAL } from './const'
+import * as sochain from './sochain-api'
+import * as Utils from './utils'
 
 export type BitcoinClientParams = XChainClientParams & {
   sochainUrl?: string
@@ -38,7 +30,7 @@ export type BitcoinClientParams = XChainClientParams & {
 /**
  * Custom Bitcoin client
  */
-class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
+class Client extends UTXOClient {
   private sochainUrl = ''
   private blockstreamUrl = ''
 
@@ -49,16 +41,16 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {BitcoinClientParams} params
    */
   constructor({
-    network = 'testnet',
+    network = Network.Testnet,
     sochainUrl = 'https://sochain.com/api/v2',
     blockstreamUrl = 'https://blockstream.info',
     rootDerivationPaths = {
-      mainnet: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
-      testnet: `84'/1'/0'/0/`,
+      [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
+      [Network.Testnet]: `84'/1'/0'/0/`,
     },
     phrase = '',
   }: BitcoinClientParams) {
-    super('BTC', { network, rootDerivationPaths, phrase })
+    super(Chain.Bitcoin, { network, rootDerivationPaths, phrase })
     this.setSochainUrl(sochainUrl)
     this.setBlockstreamUrl(blockstreamUrl)
   }
@@ -89,8 +81,12 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    const networkPath = Utils.isTestnet(this.network) ? '/testnet' : ''
-    return `https://blockstream.info${networkPath}`
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://blockstream.info'
+      case Network.Testnet:
+        return 'https://blockstream.info/testnet'
+    }
   }
 
   /**
@@ -99,9 +95,6 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address based on the network.
    */
-  // getExplorerAddressUr(address: Address): string {
-  //   return `${this.getExplorerUrl()}/address/${address}`
-  // }
   getExplorerAddressUrl(address: string): string {
     return `${this.getExplorerUrl()}/address/${address}`
   }
@@ -184,7 +177,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * Get the BTC balance of a given address.
    *
    * @param {Address} the BTC address
-   * @returns {Array<Balance>} The BTC balance of the address.
+   * @returns {Balance[]} The BTC balance of the address.
    */
   async getBalance(address: Address): Promise<Balance[]> {
     return Utils.getBalance({
@@ -206,46 +199,42 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
 
-    try {
-      const response = await sochain.getAddress({
-        address: params?.address + '',
+    const response = await sochain.getAddress({
+      address: params?.address + '',
+      sochainUrl: this.sochainUrl,
+      network: this.network,
+    })
+    const total = response.txs.length
+    const transactions: Tx[] = []
+
+    const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
+    for (const txItem of txs) {
+      const rawTx = await sochain.getTx({
         sochainUrl: this.sochainUrl,
         network: this.network,
+        hash: txItem.txid,
       })
-      const total = response.txs.length
-      const transactions: Tx[] = []
-
-      const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
-      for (const txItem of txs) {
-        const rawTx = await sochain.getTx({
-          sochainUrl: this.sochainUrl,
-          network: this.network,
-          hash: txItem.txid,
-        })
-        const tx: Tx = {
-          asset: AssetBTC,
-          from: rawTx.inputs.map((i) => ({
-            from: i.address,
-            amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)),
-          })),
-          to: rawTx.outputs
-            .filter((i) => i.type !== 'nulldata')
-            .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
-          date: new Date(rawTx.time * 1000),
-          type: 'transfer',
-          hash: rawTx.txid,
-        }
-        transactions.push(tx)
+      const tx: Tx = {
+        asset: AssetBTC,
+        from: rawTx.inputs.map((i) => ({
+          from: i.address,
+          amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)),
+        })),
+        to: rawTx.outputs
+          .filter((i) => i.type !== 'nulldata')
+          .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)) })),
+        date: new Date(rawTx.time * 1000),
+        type: TxType.Transfer,
+        hash: rawTx.txid,
       }
-
-      const result: TxsPage = {
-        total,
-        txs: transactions,
-      }
-      return result
-    } catch (error) {
-      return Promise.reject(error)
+      transactions.push(tx)
     }
+
+    const result: TxsPage = {
+      total,
+      txs: transactions,
+    }
+    return result
   }
 
   /**
@@ -255,94 +244,30 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string): Promise<Tx> {
-    try {
-      const rawTx = await sochain.getTx({
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-        hash: txId,
-      })
-      return {
-        asset: AssetBTC,
-        from: rawTx.inputs.map((i) => ({
-          from: i.address,
-          amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)),
-        })),
-        to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.BTC_DECIMAL)) })),
-        date: new Date(rawTx.time * 1000),
-        type: 'transfer',
-        hash: rawTx.txid,
-      }
-    } catch (error) {
-      return Promise.reject(error)
+    const rawTx = await sochain.getTx({
+      sochainUrl: this.sochainUrl,
+      network: this.network,
+      hash: txId,
+    })
+    return {
+      asset: AssetBTC,
+      from: rawTx.inputs.map((i) => ({
+        from: i.address,
+        amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)),
+      })),
+      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)) })),
+      date: new Date(rawTx.time * 1000),
+      type: TxType.Transfer,
+      hash: rawTx.txid,
     }
   }
 
-  /**
-   * Get the rates and fees.
-   *
-   * @param {string} memo The memo to be used for fee calculation (optional)
-   * @returns {FeesWithRates} The fees and rates
-   */
-  async getFeesWithRates(memo?: string): Promise<FeesWithRates> {
-    let rates: FeeRates | undefined = undefined
-
-    try {
-      rates = await this.getFeeRatesFromThorchain()
-    } catch (error) {
-      console.log(error)
-      console.warn(`Error pulling rates from thorchain, will try alternate`)
-    }
-
-    if (!rates) {
-      //backup in case throchain failed get yield rates
-      const txFee = await sochain.getSuggestedTxFee()
-      rates = {
-        fastest: txFee * 5,
-        fast: txFee * 1,
-        average: txFee * 0.5,
-      }
-    }
-    const fees: Fees = {
-      type: 'byte',
-      fast: Utils.calcFee(rates.fast, memo),
-      average: Utils.calcFee(rates.average, memo),
-      fastest: Utils.calcFee(rates.fastest, memo),
-    }
-
-    return { fees, rates }
+  protected async getSuggestedFeeRate(): Promise<FeeRate> {
+    return await sochain.getSuggestedTxFee()
   }
 
-  /**
-   * Get the current fees.
-   *
-   * @returns {Fees} The fees without memo
-   */
-  async getFees(): Promise<Fees> {
-    const { fees } = await this.getFeesWithRates()
-    return fees
-  }
-
-  /**
-   * Get the fees for transactions with memo.
-   * If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
-   *
-   * @param {string} memo
-   * @returns {Fees} The fees with memo
-   */
-  async getFeesWithMemo(memo: string): Promise<Fees> {
-    const { fees } = await this.getFeesWithRates(memo)
-    return fees
-  }
-
-  /**
-   * Get the fee rates for transactions without a memo.
-   * If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
-   *
-   * @returns {FeeRates} The fee rate
-   */
-  async getFeeRates(): Promise<FeeRates> {
-    const { rates } = await this.getFeesWithRates()
-    return rates
+  protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
+    return Utils.calcFee(feeRate, memo)
   }
 
   /**
@@ -355,7 +280,7 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
     const fromAddressIndex = params?.walletIndex || 0
 
     // set the default fee rate to `fast`
-    const feeRate = params.feeRate || (await this.getFeeRates()).fast
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
 
     /**
      * do not spend pending UTXOs when adding a memo
@@ -381,4 +306,4 @@ class Client extends BaseXChainClient implements BitcoinClient, XChainClient {
   }
 }
 
-export { Client, Network }
+export { Client }

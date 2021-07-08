@@ -1,4 +1,4 @@
-import { Network } from '../client'
+import { Network } from '@xchainjs/xchain-client'
 
 export type Witness = {
   value: number
@@ -10,8 +10,6 @@ export type UTXO = {
   value: number
   witnessUtxo: Witness
 }
-
-export type UTXOs = UTXO[]
 
 export type NodeAuth = {
   username: string

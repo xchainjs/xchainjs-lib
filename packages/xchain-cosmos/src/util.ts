@@ -1,11 +1,10 @@
-import { TxFrom, TxTo, Txs, Fees } from '@xchainjs/xchain-client'
+import { FeeType, Fees, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
-
 import { Msg, codec } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
-import { RawTxResponse, TxResponse, APIQueryParam } from './cosmos/types'
+import { APIQueryParam, RawTxResponse, TxResponse } from './cosmos/types'
 import { AssetAtom, AssetMuon } from './types'
 
 /**
@@ -60,11 +59,11 @@ export const getAsset = (denom: string): Asset | null => {
 /**
  * Parse transaction type
  *
- * @param {Array<TxResponse>} txs The transaction response from the node.
+ * @param {TxResponse[]} txs The transaction response from the node.
  * @param {Asset} mainAsset Current main asset which depends on the network.
- * @returns {Txs} The parsed transaction result.
+ * @returns {Tx[]} The parsed transaction result.
  */
-export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs => {
+export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => {
   return txs.reduce((acc, tx) => {
     let msgs: Msg[] = []
     if ((tx.tx as RawTxResponse).body === undefined) {
@@ -165,11 +164,11 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
         from,
         to,
         date: new Date(tx.timestamp),
-        type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
+        type: from.length > 0 || to.length > 0 ? TxType.Transfer : TxType.Unknown,
         hash: tx.txhash || '',
       },
     ]
-  }, [] as Txs)
+  }, [] as Tx[])
 }
 
 /**
@@ -186,13 +185,23 @@ export const getQueryString = (params: APIQueryParam): string => {
 }
 
 /**
+ * Register message codecs.
+ *
+ * @returns {void}
+ */
+export const registerCodecs = () => {
+  codec.registerCodec('cosmos-sdk/MsgSend', MsgSend, MsgSend.fromJSON)
+  codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
+}
+
+/**
  * Get the default fee.
  *
  * @returns {Fees} The default fee.
  */
 export const getDefaultFees = (): Fees => {
   return {
-    type: 'base',
+    type: FeeType.FlatFee,
     fast: baseAmount(750, DECIMAL),
     fastest: baseAmount(2500, DECIMAL),
     average: baseAmount(0, DECIMAL),

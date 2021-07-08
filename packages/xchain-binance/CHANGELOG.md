@@ -1,3 +1,11 @@
+# v.5.2.4 (2021-07-07)
+
+- Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
+
+# v.5.2.3 (2021-07-05)
+
+- refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
+
 # v.5.2.2 (2021-06-29)
 
 - added support for pulling fees from thornode.

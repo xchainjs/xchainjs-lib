@@ -1,5 +1,4 @@
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset, Chain } from '@xchainjs/xchain-util'
 
-export const CosmosChain = 'THOR'
-export const AssetAtom: Asset = { chain: CosmosChain, symbol: 'ATOM', ticker: 'ATOM' }
-export const AssetMuon: Asset = { chain: CosmosChain, symbol: 'MUON', ticker: 'MUON' }
+export const AssetAtom: Asset = { chain: Chain.Cosmos, symbol: 'ATOM', ticker: 'ATOM' }
+export const AssetMuon: Asset = { chain: Chain.Cosmos, symbol: 'MUON', ticker: 'MUON' }

@@ -1,5 +1,6 @@
 import nock from 'nock'
-import { SubscanResponse, Account, TransfersResult, Extrinsic } from '../src/types'
+
+import { Account, Extrinsic, SubscanResponse, TransfersResult } from '../src/types'
 
 export const assertAccountsBalance = (url: string, address: string, result: SubscanResponse<Account>) => {
   nock(url)

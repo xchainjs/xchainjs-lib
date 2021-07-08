@@ -1,8 +1,10 @@
-import nock from 'nock'
+import { Network } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
-import Client from '../src/client'
+import nock from 'nock'
+
 import { mock_ethplorer_api_getTxInfo } from '../__mocks__/ethplorer-api'
 import { mock_thornode_inbound_addresses_success } from '../__mocks__/thornode-api'
+import Client from '../src/client'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 // https://iancoleman.io/bip39/
@@ -27,7 +29,7 @@ describe('Client Test', () => {
 
   it('derive path correctly with bip44', () => {
     const ethClient = new Client({
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       phrase,
       ethplorerUrl,
     })
@@ -43,7 +45,7 @@ describe('Client Test', () => {
     )
 
     const ethClient = new Client({
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       phrase,
     })
 
@@ -56,7 +58,7 @@ describe('Client Test', () => {
 
   it('get transaction data', async () => {
     const ethClient = new Client({
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       phrase,
       ethplorerUrl,
     })

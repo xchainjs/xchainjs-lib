@@ -1,15 +1,16 @@
+import { Tx } from '@xchainjs/xchain-client'
+import { bnOrZero } from '@xchainjs/xchain-util'
 import axios from 'axios'
-import {
-  GasOracleResponse,
-  TransactionHistoryParam,
-  ETHTransactionInfo,
-  TokenTransactionInfo,
-  TokenBalanceParam,
-} from './types'
 import { BigNumberish } from 'ethers'
-import { Txs } from '@xchainjs/xchain-client/lib'
+
+import {
+  ETHTransactionInfo,
+  GasOracleResponse,
+  TokenBalanceParam,
+  TokenTransactionInfo,
+  TransactionHistoryParam,
+} from './types'
 import { filterSelfTxs, getTxFromEthTransaction, getTxFromTokenTransaction } from './utils'
-import { bnOrZero } from '@xchainjs/xchain-util/lib'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 
@@ -22,10 +23,10 @@ const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKe
  * @param {string} apiKey The etherscan API key. (optional)
  * @returns {GasOracleResponse} LastBlock, SafeGasPrice, ProposeGasPrice, FastGasPrice
  */
-export const getGasOracle = (baseUrl: string, apiKey?: string): Promise<GasOracleResponse> => {
+export const getGasOracle = async (baseUrl: string, apiKey?: string): Promise<GasOracleResponse> => {
   const url = baseUrl + '/api?module=gastracker&action=gasoracle'
 
-  return axios.get(url + getApiKeyQueryParameter(apiKey)).then((response) => response.data.result)
+  return (await axios.get(url + getApiKeyQueryParameter(apiKey))).data.result
 }
 
 /**
@@ -39,7 +40,7 @@ export const getGasOracle = (baseUrl: string, apiKey?: string): Promise<GasOracl
  * @param {string} apiKey The etherscan API key. (optional)
  * @returns {BigNumberish} The token balance
  */
-export const getTokenBalance = ({
+export const getTokenBalance = async ({
   baseUrl,
   address,
   assetAddress,
@@ -47,7 +48,7 @@ export const getTokenBalance = ({
 }: TokenBalanceParam & { baseUrl: string; apiKey?: string }): Promise<BigNumberish> => {
   const url = baseUrl + `/api?module=account&action=tokenbalance&contractaddress=${assetAddress}&address=${address}`
 
-  return axios.get(url + getApiKeyQueryParameter(apiKey)).then((response) => response.data.result)
+  return (await axios.get(url + getApiKeyQueryParameter(apiKey))).data.result
 }
 
 /**
@@ -59,7 +60,7 @@ export const getTokenBalance = ({
  * @param {string} address The address.
  * @param {TransactionHistoryParam} params The search options.
  * @param {string} apiKey The etherscan API key. (optional)
- * @returns {Array<ETHTransactionInfo>} The ETH transaction history
+ * @returns {ETHTransactionInfo[]} The ETH transaction history
  */
 export const getETHTransactionHistory = async ({
   baseUrl,
@@ -69,7 +70,7 @@ export const getETHTransactionHistory = async ({
   startblock,
   endblock,
   apiKey,
-}: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Txs> => {
+}: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Tx[]> => {
   let url = baseUrl + `/api?module=account&action=txlist&sort=desc` + getApiKeyQueryParameter(apiKey)
   if (address) url += `&address=${address}`
   if (offset) url += `&offset=${offset}`
@@ -77,21 +78,13 @@ export const getETHTransactionHistory = async ({
   if (startblock) url += `&startblock=${startblock}`
   if (endblock) url += `&endblock=${endblock}`
 
-  try {
-    const result = await axios.get(url).then((response) => response.data.result)
-    if (JSON.stringify(result).includes('Invalid API Key')) {
-      return Promise.reject(new Error('Invalid API Key'))
-    }
-    if (typeof result !== typeof []) {
-      throw new Error(result)
-    }
+  const result = (await axios.get(url)).data.result
+  if (JSON.stringify(result).includes('Invalid API Key')) throw new Error('Invalid API Key')
+  if (typeof result !== 'object') throw new Error(result)
 
-    return filterSelfTxs<ETHTransactionInfo>(result)
-      .filter((tx) => !bnOrZero(tx.value).isZero())
-      .map(getTxFromEthTransaction)
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  return filterSelfTxs<ETHTransactionInfo>(result)
+    .filter((tx) => !bnOrZero(tx.value).isZero())
+    .map(getTxFromEthTransaction)
 }
 
 /**
@@ -103,7 +96,7 @@ export const getETHTransactionHistory = async ({
  * @param {string} address The address.
  * @param {TransactionHistoryParam} params The search options.
  * @param {string} apiKey The etherscan API key. (optional)
- * @returns {Array<Tx>} The token transaction history
+ * @returns {Tx[]} The token transaction history
  */
 export const getTokenTransactionHistory = async ({
   baseUrl,
@@ -114,7 +107,7 @@ export const getTokenTransactionHistory = async ({
   startblock,
   endblock,
   apiKey,
-}: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Txs> => {
+}: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Tx[]> => {
   let url = baseUrl + `/api?module=account&action=tokentx&sort=desc` + getApiKeyQueryParameter(apiKey)
   if (address) url += `&address=${address}`
   if (assetAddress) url += `&contractaddress=${assetAddress}`
@@ -123,19 +116,13 @@ export const getTokenTransactionHistory = async ({
   if (startblock) url += `&startblock=${startblock}`
   if (endblock) url += `&endblock=${endblock}`
 
-  try {
-    const result = await axios.get(url).then((response) => response.data.result)
-    if (JSON.stringify(result).includes('Invalid API Key')) {
-      return Promise.reject(new Error('Invalid API Key'))
-    }
+  const result = (await axios.get(url)).data.result
+  if (JSON.stringify(result).includes('Invalid API Key')) throw new Error('Invalid API Key')
 
-    return filterSelfTxs<TokenTransactionInfo>(result)
-      .filter((tx) => !bnOrZero(tx.value).isZero())
-      .reduce((acc, cur) => {
-        const tx = getTxFromTokenTransaction(cur)
-        return tx ? [...acc, tx] : acc
-      }, [] as Txs)
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  return filterSelfTxs<TokenTransactionInfo>(result)
+    .filter((tx) => !bnOrZero(tx.value).isZero())
+    .reduce((acc, cur) => {
+      const tx = getTxFromTokenTransaction(cur)
+      return tx ? [...acc, tx] : acc
+    }, [] as Tx[])
 }

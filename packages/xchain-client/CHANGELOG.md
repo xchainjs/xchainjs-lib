@@ -1,3 +1,21 @@
+# v.0.10.1 (2021-07-07)
+
+### Update
+
+- Use latest `@xchainjs/xchain-util@0.3.0`
+
+# v.0.10.0 (2021-07-07)
+
+### Breaking change
+
+- Introduce `Network`, `TxType`, `FeeOption` enums
+
+### Add
+
+- Introduce `UTXOClient`
+- Add fee rate helpers `singleFeeRate`, `standardFeeRates`
+- Add fee helpers `singleFee`, `standardFees`, `calcFee`, `calcFeesAsync`
+
 # v.0.9.4 (2021-06-25)
 
 - added BaseXChainClient

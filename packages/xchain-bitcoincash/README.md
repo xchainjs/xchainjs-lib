@@ -41,7 +41,7 @@ Initialize client and use class methods:
 import { Client, Network } from '../src/client'
 
 // Create a new client interface
-const bchClient = new Client({ network: 'mainnet' })
+const bchClient = new Client({ network: Network.Mainnet })
 
 // Set phrase
 bchClient.setPhrase('phrase here')

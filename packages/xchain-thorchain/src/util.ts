@@ -1,9 +1,10 @@
-import { Asset, assetToString, baseAmount, assetFromString, THORChain, BaseAmount } from '@xchainjs/xchain-util'
-import { AssetRune, ExplorerUrl, ClientUrl, ExplorerUrls, TxData } from './types'
+import { Address, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { TxLog } from '@xchainjs/xchain-cosmos'
-import { Fees, Network, Address, TxHash } from '@xchainjs/xchain-client'
-import { AccAddress, codec, Msg } from 'cosmos-client'
+import { Asset, BaseAmount, Chain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { AccAddress, Msg, codec } from 'cosmos-client'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
+
+import { AssetRune, ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'
@@ -27,7 +28,7 @@ export const getDenom = (asset: Asset): string => {
  * @returns {string} The denomination with chainname of the given asset.
  */
 export const getDenomWithChain = (asset: Asset): string => {
-  return `${THORChain}.${asset.symbol.toUpperCase()}`
+  return `${Chain.THORChain}.${asset.symbol.toUpperCase()}`
 }
 
 /**
@@ -38,7 +39,7 @@ export const getDenomWithChain = (asset: Asset): string => {
  */
 export const getAsset = (denom: string): Asset | null => {
   if (denom === getDenom(AssetRune)) return AssetRune
-  return assetFromString(`${THORChain}.${denom.toUpperCase()}`)
+  return assetFromString(`${Chain.THORChain}.${denom.toUpperCase()}`)
 }
 
 /**
@@ -67,28 +68,37 @@ export const isMsgMultiSend = (msg: Msg): msg is MsgMultiSend =>
  * @param {any} response The response from the node.
  * @returns {boolean} `true` or `false`.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isBroadcastSuccess = (response: any): boolean => response.logs !== undefined
+export const isBroadcastSuccess = (response: unknown): boolean =>
+  typeof response === 'object' &&
+  response !== null &&
+  'logs' in response &&
+  (response as Record<string, unknown>).logs !== undefined
 
 /**
  * Get address prefix based on the network.
  *
- * @param {string} network
+ * @param {Network} network
  * @returns {string} The address prefix based on the network.
  *
  **/
-export const getPrefix = (network: string) => (network === 'testnet' ? 'tthor' : 'thor')
+export const getPrefix = (network: Network) => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'thor'
+    case Network.Testnet:
+      return 'tthor'
+  }
+}
 
 /**
- * Register Codecs based on the network.
+ * Register Codecs based on the prefix.
  *
- * @param {Network}
+ * @param {string} prefix
  */
-export const registerCodecs = (network: Network): void => {
+export const registerCodecs = (prefix: string): void => {
   codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
   codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
 
-  const prefix = getPrefix(network)
   AccAddress.setBech32Prefix(
     prefix,
     prefix + 'pub',
@@ -139,7 +149,7 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
         from: [...acc.from, { amount, from: sender }],
         to: [...acc.to, { amount, to: recipient }],
       }),
-      { from: [], to: [], type: 'transfer' },
+      { from: [], to: [], type: TxType.Transfer },
     )
 
   return txData
@@ -152,12 +162,7 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
  */
 export const getDefaultFees = (): Fees => {
   const fee = baseAmount(DEFAULT_GAS_VALUE, DECIMAL)
-  return {
-    type: 'base',
-    fast: fee,
-    fastest: fee,
-    average: fee,
-  }
+  return singleFee(FeeType.FlatFee, fee)
 }
 
 /**
@@ -178,11 +183,11 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
  */
 export const getDefaultClientUrl = (): ClientUrl => {
   return {
-    testnet: {
+    [Network.Testnet]: {
       node: 'https://testnet.thornode.thorchain.info',
       rpc: 'https://testnet.rpc.thorchain.info',
     },
-    mainnet: {
+    [Network.Mainnet]: {
       node: 'https://thornode.thorchain.info',
       rpc: 'https://rpc.thorchain.info',
     },
@@ -198,18 +203,18 @@ const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
  */
 export const getDefaultExplorerUrls = (): ExplorerUrls => {
   const root: ExplorerUrl = {
-    testnet: `${DEFAULT_EXPLORER_URL}?network=testnet`,
-    mainnet: DEFAULT_EXPLORER_URL,
+    [Network.Testnet]: `${DEFAULT_EXPLORER_URL}?network=testnet`,
+    [Network.Mainnet]: DEFAULT_EXPLORER_URL,
   }
   const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
   const tx: ExplorerUrl = {
-    testnet: txUrl,
-    mainnet: txUrl,
+    [Network.Testnet]: txUrl,
+    [Network.Mainnet]: txUrl,
   }
   const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
   const address: ExplorerUrl = {
-    testnet: addressUrl,
-    mainnet: addressUrl,
+    [Network.Testnet]: addressUrl,
+    [Network.Mainnet]: addressUrl,
   }
 
   return {
@@ -246,7 +251,12 @@ export const getExplorerAddressUrl = ({
   address: Address
 }): string => {
   const url = `${urls.address[network]}/${address}`
-  return network === 'mainnet' ? url : `${url}?network=testnet`
+  switch (network) {
+    case Network.Mainnet:
+      return url
+    case Network.Testnet:
+      return `${url}?network=testnet`
+  }
 }
 
 /**
@@ -267,5 +277,10 @@ export const getExplorerTxUrl = ({
   txID: TxHash
 }): string => {
   const url = `${urls.tx[network]}/${txID}`
-  return network === 'mainnet' ? url : `${url}?network=testnet`
+  switch (network) {
+    case Network.Mainnet:
+      return url
+    case Network.Testnet:
+      return `${url}?network=testnet`
+  }
 }
