@@ -58,7 +58,6 @@ import {
  * Interface for custom Ethereum client
  */
 export interface EthereumClient {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   call<T>(params: CallParams): Promise<T>
   estimateCall(asset: EstimateCallParams): Promise<BigNumber>
   estimateGasPrices(): Promise<GasPrices>
@@ -67,6 +66,8 @@ export interface EthereumClient {
   estimateApprove(params: EstimateApproveParams): Promise<BigNumber>
   isApproved(params: IsApprovedParams): Promise<boolean>
   approve(params: ApproveParams): Promise<TransactionResponse>
+  // `getFees` of `BaseXChainClient` needs to be overridden
+  getFees(params: TxParams): Promise<Fees>
 }
 
 export type EthereumClientParams = XChainClientParams & {
