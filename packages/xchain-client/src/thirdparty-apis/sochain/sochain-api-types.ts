@@ -1,21 +1,20 @@
-import { Network, TxHash } from '@xchainjs/xchain-client'
+import { Network, TxHash } from '../../types'
 
 export type AddressParams = {
-  sochainUrl: string
-  network: Network
   address: string
+  network: Network
+}
+export type UnspentTXsParams = {
+  address: string
+  network: Network
   startingFromTxId?: string
 }
-
 export type TxHashParams = {
-  sochainUrl: string
-  network: Network
   hash: TxHash
+  network: Network
 }
 
 export type TxBroadcastParams = {
-  sochainUrl: string
-  network: Network
   txHex: string
 }
 
@@ -43,7 +42,7 @@ export interface Transaction {
   outputs: TxIO[]
 }
 
-export type BtcAddressUTXO = {
+export type AddressUTXO = {
   txid: string
   output_no: number
   script_asm: string
@@ -53,7 +52,7 @@ export type BtcAddressUTXO = {
   time: number
 }
 
-export type BtcAddressTxDTO = {
+export type AddressTxDTO = {
   txid: string
   block_no: number
   confirmations: number
@@ -63,30 +62,30 @@ export type BtcAddressTxDTO = {
   script_hex: string
 }
 
-export type BtcAddressDTO = {
+export type AddressDTO = {
   network: string
   address: string
   balance: string
   received_value: string
   pending_value: string
   total_txs: number
-  txs: BtcAddressTxDTO[]
+  txs: AddressTxDTO[]
 }
 
-export type BtcGetBalanceDTO = {
+export type GetBalanceDTO = {
   network: string
   address: string
   confirmed_balance: string
   unconfirmed_balance: string
 }
 
-export type BtcUnspentTxsDTO = {
+export type UnspentTxsDTO = {
   network: string
   address: string
-  txs: BtcAddressUTXO[]
+  txs: AddressUTXO[]
 }
 
-export type BtcBroadcastTransfer = {
+export type BroadcastTransfer = {
   network: string
   txid: string
 }
@@ -99,8 +98,7 @@ export type TxConfirmedStatus = {
 }
 
 export type ScanUTXOParam = {
-  sochainUrl: string
-  network: Network
+  network: string
   address: string
   confirmedOnly?: boolean
 }

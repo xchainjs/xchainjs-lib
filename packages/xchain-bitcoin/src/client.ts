@@ -1,10 +1,12 @@
+/* eslint-disable ordered-imports/ordered-imports */
 import {
   Address,
-  Balance,
+  Explorers,
   Fee,
   FeeOption,
   FeeRate,
   Network,
+  SochainAPI,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -19,93 +21,32 @@ import { AssetBTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import { BTC_DECIMAL } from './const'
-import * as sochain from './sochain-api'
+
 import * as Utils from './utils'
 
-export type BitcoinClientParams = XChainClientParams & {
-  sochainUrl?: string
-  blockstreamUrl?: string
-}
+const SOCHAIN_API = new SochainAPI(Chain.Bitcoin)
 
 /**
  * Custom Bitcoin client
  */
 class Client extends UTXOClient {
-  private sochainUrl = ''
-  private blockstreamUrl = ''
-
   /**
    * Constructor
    * Client is initialised with network type
    *
-   * @param {BitcoinClientParams} params
+   * @param {XChainClientParams} params
    */
   constructor({
+    phrase = '',
     network = Network.Testnet,
-    sochainUrl = 'https://sochain.com/api/v2',
-    blockstreamUrl = 'https://blockstream.info',
+    providers,
+    explorer = Explorers.BTC.DEFAULT,
     rootDerivationPaths = {
       [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
       [Network.Testnet]: `84'/1'/0'/0/`,
     },
-    phrase = '',
-  }: BitcoinClientParams) {
-    super(Chain.Bitcoin, { network, rootDerivationPaths, phrase })
-    this.setSochainUrl(sochainUrl)
-    this.setBlockstreamUrl(blockstreamUrl)
-  }
-
-  /**
-   * Set/Update the sochain url.
-   *
-   * @param {string} url The new sochain url.
-   * @returns {void}
-   */
-  setSochainUrl(url: string): void {
-    this.sochainUrl = url
-  }
-
-  /**
-   * Set/Update the blockstream url.
-   *
-   * @param {string} url The new blockstream url.
-   * @returns {void}
-   */
-  setBlockstreamUrl(url: string): void {
-    this.blockstreamUrl = url
-  }
-
-  /**
-   * Get the explorer url.
-   *
-   * @returns {string} The explorer url based on the network.
-   */
-  getExplorerUrl(): string {
-    switch (this.network) {
-      case Network.Mainnet:
-        return 'https://blockstream.info'
-      case Network.Testnet:
-        return 'https://blockstream.info/testnet'
-    }
-  }
-
-  /**
-   * Get the explorer url for the given address.
-   *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address based on the network.
-   */
-  getExplorerAddressUrl(address: string): string {
-    return `${this.getExplorerUrl()}/address/${address}`
-  }
-  /**
-   * Get the explorer url for the given transaction id.
-   *
-   * @param {string} txID The transaction id
-   * @returns {string} The explorer url for the given transaction id based on the network.
-   */
-  getExplorerTxUrl(txID: string): string {
-    return `${this.getExplorerUrl()}/tx/${txID}`
+  }: XChainClientParams) {
+    super(Chain.Bitcoin, { network, rootDerivationPaths, phrase, explorer, providers })
   }
 
   /**
@@ -173,19 +114,19 @@ class Client extends UTXOClient {
     return Utils.validateAddress(address, this.network)
   }
 
-  /**
-   * Get the BTC balance of a given address.
-   *
-   * @param {Address} the BTC address
-   * @returns {Balance[]} The BTC balance of the address.
-   */
-  async getBalance(address: Address): Promise<Balance[]> {
-    return Utils.getBalance({
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-      address: address,
-    })
-  }
+  // /**
+  //  * Get the BTC balance of a given address.
+  //  *
+  //  * @param {Address} the BTC address
+  //  * @returns {Balance[]} The BTC balance of the address.
+  //  */
+  // async getBalance(address: Address): Promise<Balance[]> {
+  //   // return Utils.getBalance({
+  //   //   sochainUrl: this.sochainUrl,
+  //   //   network: this.network,
+  //   //   address: address,
+  //   // })
+  // }
 
   /**
    * Get transaction history of a given address with pagination options.
@@ -199,9 +140,8 @@ class Client extends UTXOClient {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
 
-    const response = await sochain.getAddress({
+    const response = await SOCHAIN_API.getAddress({
       address: params?.address + '',
-      sochainUrl: this.sochainUrl,
       network: this.network,
     })
     const total = response.txs.length
@@ -209,8 +149,7 @@ class Client extends UTXOClient {
 
     const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
     for (const txItem of txs) {
-      const rawTx = await sochain.getTx({
-        sochainUrl: this.sochainUrl,
+      const rawTx = await SOCHAIN_API.getTx({
         network: this.network,
         hash: txItem.txid,
       })
@@ -244,8 +183,7 @@ class Client extends UTXOClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string): Promise<Tx> {
-    const rawTx = await sochain.getTx({
-      sochainUrl: this.sochainUrl,
+    const rawTx = await SOCHAIN_API.getTx({
       network: this.network,
       hash: txId,
     })
@@ -263,7 +201,7 @@ class Client extends UTXOClient {
   }
 
   protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    return await sochain.getSuggestedTxFee()
+    return await SOCHAIN_API.getSuggestedTxFee()
   }
 
   protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
@@ -292,7 +230,6 @@ class Client extends UTXOClient {
       ...params,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
-      sochainUrl: this.sochainUrl,
       network: this.network,
       spendPendingUTXO,
     })
@@ -302,7 +239,7 @@ class Client extends UTXOClient {
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-    return await Utils.broadcastTx({ network: this.network, txHex, blockstreamUrl: this.blockstreamUrl })
+    return await Utils.broadcastTx({ network: this.network, txHex })
   }
 }
 

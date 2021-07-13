@@ -3,6 +3,7 @@ import axios from 'axios'
 
 import { BroadcastTxParams } from './types/common'
 
+const blockstreamUrl = 'https://blockstream.info'
 /**
  * Broadcast transaction.
  *
@@ -11,7 +12,7 @@ import { BroadcastTxParams } from './types/common'
  * @param {string} params
  * @returns {string} Transaction ID.
  */
-export const broadcastTx = async ({ network, txHex, blockstreamUrl }: BroadcastTxParams): Promise<string> => {
+export const broadcastTx = async ({ network, txHex }: BroadcastTxParams): Promise<string> => {
   const url = (() => {
     switch (network) {
       case Network.Mainnet:

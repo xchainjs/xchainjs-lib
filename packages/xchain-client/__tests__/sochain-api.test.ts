@@ -1,23 +1,24 @@
-import { Network } from '@xchainjs/xchain-client'
+/* eslint-disable ordered-imports/ordered-imports */
+import { Network, SochainAPI } from '@xchainjs/xchain-client'
+import { Chain } from '@xchainjs/xchain-util'
+
+import { AddressUTXO } from '../lib/thirdparty-apis/sochain/sochain-api-types'
 
 import isTx2ConfirmedResponse from '../__mocks__/response/is-tx-confirmed/8ef74ec4a6473caf7b3ddfcf38cf6db43995ff98c7cbc6d8cf317f3c22e35df2.json'
 import isTx1ConfirmedResponse from '../__mocks__/response/is-tx-confirmed/d5d4a0f07c5cc639e379caceb1e4e75f817b94daf698c9242f9c09a212df2fee.json'
 import unspentTxsResponse from '../__mocks__/response/unspent-txs/tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp.json'
 import mockSochainApi from '../__mocks__/sochain'
-import * as sochain from '../src/sochain-api'
-import { BtcAddressUTXO } from '../src/types/sochain-api-types'
 
 mockSochainApi.init()
 
-const sochainUrl = 'https://sochain.com/api/v2'
 const network = 'mainnet' as Network
 
+const sochainApi = new SochainAPI(Chain.Bitcoin)
 describe('Sochain API Test', () => {
   it('getUnspentTxs', async () => {
     const address = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
 
-    const utxos: BtcAddressUTXO[] = await sochain.getUnspentTxs({
-      sochainUrl,
+    const utxos: AddressUTXO[] = await sochainApi.getUnspentTxs({
       network,
       address,
     })
@@ -29,14 +30,12 @@ describe('Sochain API Test', () => {
     const confirmedTxId = 'd5d4a0f07c5cc639e379caceb1e4e75f817b94daf698c9242f9c09a212df2fee'
     const unconfirmedTxId = '8ef74ec4a6473caf7b3ddfcf38cf6db43995ff98c7cbc6d8cf317f3c22e35df2'
 
-    const isTx1Confirmed = await sochain.getIsTxConfirmed({
-      sochainUrl,
+    const isTx1Confirmed = await sochainApi.getIsTxConfirmed({
       network,
       hash: confirmedTxId,
     })
 
-    const isTx2Confirmed = await sochain.getIsTxConfirmed({
-      sochainUrl,
+    const isTx2Confirmed = await sochainApi.getIsTxConfirmed({
       network,
       hash: unconfirmedTxId,
     })
@@ -51,8 +50,7 @@ describe('Sochain API Test', () => {
 
     const confirmedUTXOs = unspentTxsResponse.data.txs.filter((data) => data.txid !== unconfirmedTxid)
 
-    const utxos = await sochain.getConfirmedUnspentTxs({
-      sochainUrl,
+    const utxos = await sochainApi.getConfirmedUnspentTxs({
       network,
       address,
     })

@@ -1,5 +1,8 @@
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
+import { Explorer } from './Explorer'
+import { ProviderParams } from './providers/Provider'
+
 export type Address = string
 
 export enum Network {
@@ -83,6 +86,8 @@ export type RootDerivationPaths = Record<Network, string>
 export type XChainClientParams = {
   network?: Network
   phrase?: string
+  explorer?: Explorer
+  providers?: ProviderParams
   rootDerivationPaths?: RootDerivationPaths
 }
 
@@ -90,7 +95,7 @@ export interface XChainClient {
   setNetwork(net: Network): void
   getNetwork(): Network
 
-  getExplorerUrl(): string
+  // getExplorerUrl(): string
   getExplorerAddressUrl(address: Address): string
   getExplorerTxUrl(txID: string): string
 
@@ -111,3 +116,29 @@ export interface XChainClient {
 
   purgeClient(): void
 }
+
+// export interface Provider {
+//   setNetwork(net: Network): void
+//   getNetwork(): Network
+
+//   getExplorerUrl(): string
+//   getExplorerAddressUrl(address: Address): string
+//   getExplorerTxUrl(txID: string): string
+
+//   validateAddress(address: string): boolean
+//   getAddress(walletIndex?: number): Address
+
+//   setPhrase(phrase: string, walletIndex: number): Address
+
+//   getBalance(address: Address, assets?: Asset[]): Promise<Balance[]>
+
+//   getTransactions(params?: TxHistoryParams): Promise<TxsPage>
+
+//   getTransactionData(txId: string, assetAddress?: Address): Promise<Tx>
+
+//   getFees(): Promise<Fees>
+
+//   transfer(params: TxParams): Promise<TxHash>
+
+//   purgeClient(): void
+// }

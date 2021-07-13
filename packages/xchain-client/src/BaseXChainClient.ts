@@ -1,3 +1,4 @@
+/* eslint-disable ordered-imports/ordered-imports */
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Asset, Chain } from '@xchainjs/xchain-util'
 import axios from 'axios'
@@ -17,6 +18,12 @@ import {
   XChainClientParams,
 } from './types'
 
+import { Explorer } from './Explorer'
+
+import { Explorers } from './Explorers'
+import { Provider, ProviderMap, ProviderParams } from './providers/Provider'
+import { DefaultProviders } from './providers/Providers'
+
 const MAINNET_THORNODE_API_BASE = 'https://thornode.thorchain.info/thorchain'
 const TESTNET_THORNODE_API_BASE = 'https://testnet.thornode.thorchain.info/thorchain'
 
@@ -25,6 +32,8 @@ export abstract class BaseXChainClient implements XChainClient {
   protected network: Network
   protected phrase = ''
   protected rootDerivationPaths: RootDerivationPaths | undefined
+  protected explorer: Explorer
+  protected providerMap: ProviderMap
 
   /**
    * Constructor
@@ -39,8 +48,16 @@ export abstract class BaseXChainClient implements XChainClient {
   constructor(chain: Chain, params: XChainClientParams) {
     this.chain = chain
     this.network = params.network || Network.Testnet
+    this.explorer = params.explorer || Explorers[chain].DEFAULT
+    this.providerMap = params.providers
+      ? this.overrideDefaultProvidersMap(params.providers)
+      : DefaultProviders[this.chain]
+
     if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths
     if (params.phrase) this.setPhrase(params.phrase)
+  }
+  overrideDefaultProvidersMap(override: ProviderParams): ProviderMap {
+    return { ...DefaultProviders[this.chain], ...override } as ProviderMap
   }
   /**
    * Set/update the current network.
@@ -129,14 +146,49 @@ export abstract class BaseXChainClient implements XChainClient {
   public purgeClient(): void {
     this.phrase = ''
   }
+  // ==================
+  // Explorer methods
+  // ==================
+  /**
+   * Get the explorer url for the given address.
+   *
+   * @param {Address} address
+   * @returns {string} The explorer url for the given address based on the network.
+   */
+  getExplorerAddressUrl(address: string): string {
+    return this.explorer.getExplorerAddressUrl(this.network, address)
+  }
+  /**
+   * Get the explorer url for the given transaction id.
+   *
+   * @param {string} txID The transaction id
+   * @returns {string} The explorer url for the given transaction id based on the network.
+   */
+  getExplorerTxUrl(txID: string): string {
+    return this.explorer.getExplorerAddressUrl(this.network, txID)
+  }
+  // ==================
+  // Provider methods
+  // ==================
+  async getBalance(address: string, assets?: Asset[]): Promise<Balance[]> {
+    const providers = this.providerMap.getBalance
+    for (let index = 0; index < providers.length; index++) {
+      const provider: Provider = providers[index]
+      try {
+        return await provider.getBalance(this.network, address, assets)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    //ALL attempts failed
+    throw new Error('unable to getBalance')
+  }
+
   //individual clients will need to implement these
   abstract getFees(): Promise<Fees>
   abstract getAddress(walletIndex: number): string
-  abstract getExplorerUrl(): string
-  abstract getExplorerAddressUrl(address: string): string
-  abstract getExplorerTxUrl(txID: string): string
   abstract validateAddress(address: string): boolean
-  abstract getBalance(address: string, assets?: Asset[]): Promise<Balance[]>
+  // abstract getBalance(address: string, assets?: Asset[]): Promise<Balance[]>
   abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
   abstract transfer(params: TxParams): Promise<string>

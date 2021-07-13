@@ -53,7 +53,6 @@ describe.skip('Bitcoin Utils Test', () => {
   it('should fetch as many uxtos as are associated with an address', async () => {
     const address = '34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo'
     const utxos: UTXO[] = await Utils.scanUTXOs({
-      sochainUrl: 'https://sochain.com/api/v2',
       network: 'mainnet' as Network,
       address,
       confirmedOnly: false, // get all confirmed & unconfirmed UTXOs
