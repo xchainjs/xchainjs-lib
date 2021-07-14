@@ -8,6 +8,7 @@ import {
   Fees,
   Network,
   RootDerivationPaths,
+  SignedTx,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -445,6 +446,17 @@ class Client implements PolkadotClient, XChainClient {
       recipient: this.getAddress(),
       amount: baseAmount(0, getDecimal(this.network)),
     })
+  }
+  // ==================
+  // TODO
+  // ==================
+  sign(params: TxParams): Promise<SignedTx> {
+    console.log(params)
+    throw new Error('Method not implemented.')
+  }
+  broadcastTx(params: SignedTx): Promise<string> {
+    console.log(params)
+    throw new Error('Method not implemented.')
   }
 }
 

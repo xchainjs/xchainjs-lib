@@ -2,29 +2,30 @@
 import { Asset, Chain } from '@xchainjs/xchain-util/lib'
 import { Balance, Network, Tx, TxHistoryParams, TxsPage } from '../types'
 
-export interface Provider {
+export interface CanGetBalance {
   getBalance(network: Network, address: string, assets?: Asset[]): Promise<Balance[]>
+}
+export interface CanGetTransactions {
   getTransactions(network: Network, params?: TxHistoryParams): Promise<TxsPage>
+}
+export interface CanGetTransactionData {
   getTransactionData(network: Network, txId: string, assetAddress?: string): Promise<Tx>
 }
 
-export abstract class BaseProvider implements Provider {
+export abstract class BaseProvider {
   protected chain: Chain
   constructor(chain: Chain) {
     this.chain = chain
   }
-  abstract getBalance(network: Network, address: string, assets?: Asset[]): Promise<Balance[]>
-  abstract getTransactions(network: Network, params?: TxHistoryParams): Promise<TxsPage>
-  abstract getTransactionData(network: Network, txId: string, assetAddress?: string): Promise<Tx>
 }
 
 export type ProviderMap = {
-  getBalance: Provider[]
-  getTransactions: Provider[]
-  getTransactionData: Provider[]
+  getBalance: CanGetBalance[]
+  getTransactions: CanGetTransactions[]
+  getTransactionData: CanGetTransactionData[]
 }
 export type ProviderParams = {
-  getBalance?: Provider[]
-  getTransactions?: Provider[]
-  getTransactionData?: Provider[]
+  getBalance?: CanGetBalance[]
+  getTransactions?: CanGetTransactions[]
+  getTransactionData?: CanGetTransactionData[]
 }

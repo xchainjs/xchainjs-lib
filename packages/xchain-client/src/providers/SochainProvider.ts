@@ -5,12 +5,12 @@ import { Balance, Network, Tx, TxHistoryParams, TxsPage } from '../types'
 
 import { SochainAPI } from '../thirdparty-apis/sochain/sochain-api'
 
-import { BaseProvider } from './Provider'
+import { BaseProvider, CanGetBalance, CanGetTransactionData, CanGetTransactions } from './Provider'
 
 const BTC_DECIMALS = 8
 const LTC_DECIMALS = 8
 
-export class SochainProvider extends BaseProvider {
+export class SochainProvider extends BaseProvider implements CanGetBalance, CanGetTransactions, CanGetTransactionData {
   private sochainApi: SochainAPI
 
   constructor(chain: Chain) {

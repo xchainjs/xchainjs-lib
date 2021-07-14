@@ -5,6 +5,7 @@ import {
   Fees,
   Network,
   RootDerivationPaths,
+  SignedTx,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -333,6 +334,17 @@ class Client implements CosmosClient, XChainClient {
       fastest: baseAmount(2500, DECIMAL),
       average: baseAmount(0, DECIMAL),
     }
+  }
+  // ==================
+  // TODO
+  // ==================
+  sign(params: TxParams): Promise<SignedTx> {
+    console.log(params)
+    throw new Error('Method not implemented.')
+  }
+  broadcastTx(params: SignedTx): Promise<string> {
+    console.log(params)
+    throw new Error('Method not implemented.')
   }
 }
 

@@ -61,6 +61,8 @@ export type TxParams = {
   recipient: Address
   memo?: string // optional memo to pass
 }
+// export type SignTxParams = {}
+export type SignedTx = Record<string, unknown>
 
 export enum FeeOption {
   Average = 'average',
@@ -95,50 +97,29 @@ export interface XChainClient {
   setNetwork(net: Network): void
   getNetwork(): Network
 
-  // getExplorerUrl(): string
-  getExplorerAddressUrl(address: Address): string
-  getExplorerTxUrl(txID: string): string
+  setPhrase(phrase: string, walletIndex: number): Address
+  purgeClient(): void
 
   validateAddress(address: string): boolean
   getAddress(walletIndex?: number): Address
 
-  setPhrase(phrase: string, walletIndex: number): Address
+  sign(params: TxParams): Promise<SignedTx>
 
+  // ===================================
+  // implemented by various online providers
+  // ===================================
   getBalance(address: Address, assets?: Asset[]): Promise<Balance[]>
-
   getTransactions(params?: TxHistoryParams): Promise<TxsPage>
-
   getTransactionData(txId: string, assetAddress?: Address): Promise<Tx>
-
   getFees(): Promise<Fees>
+  broadcastTx(params: SignedTx): Promise<TxHash>
 
+  // convenience method that does a sign + broadcast
   transfer(params: TxParams): Promise<TxHash>
 
-  purgeClient(): void
+  // ===================================
+  // implemented by various other online providers
+  // ===================================
+  getExplorerAddressUrl(address: Address): string
+  getExplorerTxUrl(txID: string): string
 }
-
-// export interface Provider {
-//   setNetwork(net: Network): void
-//   getNetwork(): Network
-
-//   getExplorerUrl(): string
-//   getExplorerAddressUrl(address: Address): string
-//   getExplorerTxUrl(txID: string): string
-
-//   validateAddress(address: string): boolean
-//   getAddress(walletIndex?: number): Address
-
-//   setPhrase(phrase: string, walletIndex: number): Address
-
-//   getBalance(address: Address, assets?: Asset[]): Promise<Balance[]>
-
-//   getTransactions(params?: TxHistoryParams): Promise<TxsPage>
-
-//   getTransactionData(txId: string, assetAddress?: Address): Promise<Tx>
-
-//   getFees(): Promise<Fees>
-
-//   transfer(params: TxParams): Promise<TxHash>
-
-//   purgeClient(): void
-// }

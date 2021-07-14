@@ -5,6 +5,7 @@ import {
   Fees,
   Network,
   RootDerivationPaths,
+  SignedTx,
   Tx,
   TxFrom,
   TxHash,
@@ -540,6 +541,17 @@ class Client implements ThorchainClient, XChainClient {
    */
   async getFees(): Promise<Fees> {
     return getDefaultFees()
+  }
+  // ==================
+  // TODO
+  // ==================
+  sign(params: TxParams): Promise<SignedTx> {
+    console.log(params)
+    throw new Error('Method not implemented.')
+  }
+  broadcastTx(params: SignedTx): Promise<string> {
+    console.log(params)
+    throw new Error('Method not implemented.')
   }
 }
 

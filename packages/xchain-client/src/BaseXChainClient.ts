@@ -10,6 +10,7 @@ import {
   Fees,
   Network,
   RootDerivationPaths,
+  SignedTx,
   Tx,
   TxHistoryParams,
   TxParams,
@@ -21,7 +22,13 @@ import {
 import { Explorer } from './Explorer'
 
 import { Explorers } from './Explorers'
-import { Provider, ProviderMap, ProviderParams } from './providers/Provider'
+import {
+  CanGetBalance,
+  CanGetTransactionData,
+  CanGetTransactions,
+  ProviderMap,
+  ProviderParams,
+} from './providers/Provider'
 import { DefaultProviders } from './providers/Providers'
 
 const MAINNET_THORNODE_API_BASE = 'https://thornode.thorchain.info/thorchain'
@@ -56,6 +63,7 @@ export abstract class BaseXChainClient implements XChainClient {
     if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths
     if (params.phrase) this.setPhrase(params.phrase)
   }
+
   overrideDefaultProvidersMap(override: ProviderParams): ProviderMap {
     return { ...DefaultProviders[this.chain], ...override } as ProviderMap
   }
@@ -167,13 +175,14 @@ export abstract class BaseXChainClient implements XChainClient {
   getExplorerTxUrl(txID: string): string {
     return this.explorer.getExplorerAddressUrl(this.network, txID)
   }
+
   // ==================
   // Provider methods
   // ==================
   async getBalance(address: string, assets?: Asset[]): Promise<Balance[]> {
-    const providers = this.providerMap.getBalance
-    for (let index = 0; index < providers.length; index++) {
-      const provider: Provider = providers[index]
+    const getBalanceProviders = this.providerMap.getBalance
+    for (let index = 0; index < getBalanceProviders.length; index++) {
+      const provider: CanGetBalance = getBalanceProviders[index]
       try {
         return await provider.getBalance(this.network, address, assets)
       } catch (error) {
@@ -183,13 +192,50 @@ export abstract class BaseXChainClient implements XChainClient {
     //ALL attempts failed
     throw new Error('unable to getBalance')
   }
+  async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
+    const getTransactionsProviders = this.providerMap.getTransactions
+    for (let index = 0; index < getTransactionsProviders.length; index++) {
+      const provider: CanGetTransactions = getTransactionsProviders[index]
+      try {
+        return await provider.getTransactions(this.network, params)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    //ALL attempts failed
+    throw new Error('unable to getTransactions')
+  }
+  async getTransactionData(txId: string, assetAddress?: string): Promise<Tx> {
+    const getTransactionDataProviders = this.providerMap.getTransactionData
+    for (let index = 0; index < getTransactionDataProviders.length; index++) {
+      const provider: CanGetTransactionData = getTransactionDataProviders[index]
+      try {
+        return await provider.getTransactionData(this.network, txId, assetAddress)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    //ALL attempts failed
+    throw new Error('unable to getTransactionData')
+  }
+  // ==================
+  // TODO
+  // ==================
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  sign(params: TxParams): Promise<SignedTx> {
+    throw new Error('Method not implemented.')
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  broadcastTx(params: SignedTx): Promise<string> {
+    throw new Error('Method not implemented.')
+  }
 
   //individual clients will need to implement these
   abstract getFees(): Promise<Fees>
   abstract getAddress(walletIndex: number): string
   abstract validateAddress(address: string): boolean
   // abstract getBalance(address: string, assets?: Asset[]): Promise<Balance[]>
-  abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
-  abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
+  // abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
+  // abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
   abstract transfer(params: TxParams): Promise<string>
 }

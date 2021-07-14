@@ -1,19 +1,13 @@
 /* eslint-disable ordered-imports/ordered-imports */
 import { Chain } from '@xchainjs/xchain-util/lib'
-import { Provider } from './Provider'
+import { ProviderMap } from './Provider'
 
 import { SochainProvider } from './SochainProvider'
 
 const sochainProviderBTC = new SochainProvider(Chain.Bitcoin)
 
-type ProviderDefaultMap = {
-  getBalance: Provider[]
-  getTransactions: Provider[]
-  getTransactionData: Provider[]
-}
-
 type ProvidersType = {
-  [index in Chain]: ProviderDefaultMap
+  [index in Chain]: ProviderMap
 }
 
 const DefaultProviders: ProvidersType = {
