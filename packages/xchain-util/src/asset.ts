@@ -373,10 +373,9 @@ export const formatAssetAmountCurrency = ({
 
   if (ticker) {
     // RUNE
-    let regex = new RegExp(`${AssetRune67C.ticker}|${AssetRuneB1A.ticker}|${AssetRuneNative.ticker}`, 'i')
-    if (ticker.match(regex)) return `${AssetCurrencySymbol.RUNE} ${amountFormatted}`
+    if (ticker === RUNE_TICKER) return `${AssetCurrencySymbol.RUNE} ${amountFormatted}`
     // BTC
-    regex = new RegExp(AssetBTC.ticker, 'i')
+    let regex = new RegExp(AssetBTC.ticker, 'i')
     if (ticker.match(new RegExp(AssetBTC.ticker, 'i'))) {
       const base = assetToBase(amount)
       // format all < ₿ 0.01 in statoshi
