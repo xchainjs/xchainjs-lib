@@ -1,3 +1,7 @@
+# v.0.17.5 (2021-07-18)
+
+- Updatedrollupjs to include axios to enlable usage on node
+
 # v.0.17.4 (2021-07-14)
 
 ### Fix

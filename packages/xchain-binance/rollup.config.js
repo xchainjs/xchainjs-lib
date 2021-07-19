@@ -33,5 +33,5 @@ export default {
     }),
     commonjs(),
   ],
-  external: ['readable-stream', 'buffer', 'crypto', 'stream', 'string_decoder'],
+  external: ['readable-stream', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios'],
 }

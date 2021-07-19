@@ -40,7 +40,13 @@ export abstract class BaseXChainClient implements XChainClient {
     this.chain = chain
     this.network = params.network || Network.Testnet
     if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths
-    if (params.phrase) this.setPhrase(params.phrase)
+    //NOTE: we don't call this.setPhrase() to vaoid generating an address and paying the perf penalty
+    if (params.phrase) {
+      if (!validatePhrase(params.phrase)) {
+        throw new Error('Invalid phrase')
+      }
+      this.phrase = params.phrase
+    }
   }
   /**
    * Set/update the current network.
