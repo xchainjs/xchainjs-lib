@@ -1,3 +1,7 @@
+# v.0.17.6 (2021-07-19)
+
+- bumping peer dependency "cosmos-client": "0.39.2" -> "cosmos-client": "^0.42.7"
+
 # v.0.17.5 (2021-07-18)
 
 - Updatedrollupjs to include axios to enlable usage on node
