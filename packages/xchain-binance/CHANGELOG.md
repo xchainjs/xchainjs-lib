@@ -1,3 +1,7 @@
+# v.5.2.5 (2021-07-18)
+
+- Updatedrollupjs to include axios to enlable usage on node
+
 # v.5.2.4 (2021-07-07)
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
