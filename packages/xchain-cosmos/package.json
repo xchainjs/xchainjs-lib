@@ -4,7 +4,7 @@
   "description": "Custom Cosmos client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
-    "Cosoms"
+    "Cosmos"
   ],
   "author": "XChainJS",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",

@@ -46,7 +46,7 @@
   },
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.10.1",
-    "@xchainjs/xchain-cosmos": "^0.13.2",
+    "@xchainjs/xchain-cosmos": "^0.13.7",
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "^0.3.0",
     "axios": "^0.21.0",
