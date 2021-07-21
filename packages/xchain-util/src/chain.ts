@@ -1,6 +1,7 @@
 export enum Chain {
   Binance = 'BNB',
   Bitcoin = 'BTC',
+  Decred = 'DCR',
   Ethereum = 'ETH',
   THORChain = 'THOR',
   Cosmos = 'GAIA',
@@ -17,6 +18,7 @@ export const CosmosChain = Chain.Cosmos
 export const PolkadotChain = Chain.Polkadot
 export const BCHChain = Chain.BitcoinCash
 export const LTCChain = Chain.Litecoin
+export const DCRChain = Chain.Decred
 
 /**
  * Type guard to check whether string  is based on type `Chain`
@@ -40,6 +42,7 @@ export const chainToString: ((chainId: Chain) => string) & Record<Chain, string>
   {
     [Chain.THORChain]: 'Thorchain',
     [Chain.Bitcoin]: 'Bitcoin',
+    [Chain.Decred]: 'Decred',
     [Chain.BitcoinCash]: 'Bitcoin Cash',
     [Chain.Litecoin]: 'Litecoin',
     [Chain.Ethereum]: 'Ethereum',
