@@ -1,6 +1,6 @@
 # v.5.2.6 (2021-07-26)
 
-- fixed missing walletIn in client.transfer()
+- fixed missing walletIndex in client.transfer()
 
 # v.5.2.5 (2021-07-18)
 
