@@ -1,10 +1,13 @@
-import * as Utils from '../src/utils'
+import { Network } from '@xchainjs/xchain-client'
 import * as Bitcoin from 'bitcoinjs-lib'
-import { UTXOs } from '../src/types/common'
+
 import mockSochainApi from '../__mocks__/sochain'
+import { UTXO } from '../src/types/common'
+import * as Utils from '../src/utils'
+
 mockSochainApi.init()
 
-let utxos: UTXOs
+let utxos: UTXO[]
 
 describe.skip('Bitcoin Utils Test', () => {
   const witness = {
@@ -49,9 +52,9 @@ describe.skip('Bitcoin Utils Test', () => {
   })
   it('should fetch as many uxtos as are associated with an address', async () => {
     const address = '34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo'
-    const utxos: UTXOs = await Utils.scanUTXOs({
+    const utxos: UTXO[] = await Utils.scanUTXOs({
       sochainUrl: 'https://sochain.com/api/v2',
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       address,
       confirmedOnly: false, // get all confirmed & unconfirmed UTXOs
     })

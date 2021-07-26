@@ -1,27 +1,28 @@
-import { bn } from './index'
 import {
-  assetAmount,
-  baseAmount,
-  isAssetAmount,
-  isBaseAmount,
-  baseToAsset,
-  assetToBase,
-  formatAssetAmount,
-  formatBaseAsAssetAmount,
-  formatAssetAmountCurrency,
-  assetFromString,
-  formatBaseAmount,
-  assetToString,
-  isValidAsset,
-  AssetRuneB1A,
-  AssetRuneNative,
-  AssetRune67C,
-  currencySymbolByAsset,
+  AssetBNB,
   AssetBTC,
   AssetETH,
-  AssetBNB,
+  AssetRune67C,
+  AssetRuneB1A,
+  AssetRuneNative,
+  assetAmount,
+  assetFromString,
+  assetToBase,
+  assetToString,
+  baseAmount,
+  baseToAsset,
+  currencySymbolByAsset,
+  formatAssetAmount,
+  formatAssetAmountCurrency,
+  formatBaseAmount,
+  formatBaseAsAssetAmount,
+  isAssetAmount,
+  isBaseAmount,
   isBigNumberValue,
+  isValidAsset,
 } from './asset'
+import { Chain, ETHChain } from './chain'
+import { bn } from './index'
 import { Asset, Denomination } from './types'
 
 describe('asset', () => {
@@ -39,46 +40,46 @@ describe('asset', () => {
   describe('assetAmount', () => {
     it('should create asset amount by given value', () => {
       const amount = assetAmount(10)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('10'))
       // default decimal == 8
       expect(amount.decimal).toEqual(8)
     })
     it('should creates asset amount by given value and decimal', () => {
       const amount = assetAmount(10, 18)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('10'))
       expect(amount.decimal).toEqual(18)
     })
     it('should be able to add a value', () => {
       const amount = assetAmount(10, 18).plus(100)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('110'))
     })
     it('should be able to sub a value', () => {
       const amount = assetAmount(10, 18).minus(5)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('5'))
     })
     it('should be able to mul a value', () => {
       const amount = assetAmount(10, 18).times(1e10)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('100000000000'))
     })
     it('should be able to div a value', () => {
       const amount = assetAmount(10, 18).div(5)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('2'))
     })
     it('should be able to add AssetAmount', () => {
       const amount = assetAmount(10, 18).plus(assetAmount(10, 10))
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('20'))
       expect(amount.decimal).toEqual(18)
     })
     it('should be able to set decimal', () => {
       const amount = assetAmount(10, 18).plus(assetAmount(10, 10), 12)
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('20'))
       expect(amount.decimal).toEqual(12)
     })
@@ -117,38 +118,38 @@ describe('asset', () => {
   describe('baseAmount', () => {
     it('should create base amounts by given value', () => {
       const amount = baseAmount(10)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('10'))
     })
     it('should be able to add a value', () => {
       const amount = baseAmount(10).plus(100)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('110'))
     })
     it('should be able to sub a value', () => {
       const amount = baseAmount(10).minus(5)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('5'))
     })
     it('should be able to mul a value', () => {
       const amount = baseAmount(10).times(5)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('50'))
     })
     it('should be able to div a value', () => {
       const amount = baseAmount(10).div(5)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('2'))
     })
     it('should be able to add BaseAmount', () => {
       const amount = baseAmount(10, 18).plus(baseAmount(10, 10))
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('20'))
       expect(amount.decimal).toEqual(18)
     })
     it('should be able to set decimal', () => {
       const amount = baseAmount(10, 18).plus(baseAmount(10, 10), 12)
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.amount()).toEqual(bn('20'))
       expect(amount.decimal).toEqual(12)
     })
@@ -187,14 +188,14 @@ describe('asset', () => {
   describe('baseToAsset', () => {
     it('should return asset by given base amounts', () => {
       const amount = baseToAsset(baseAmount(123))
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('0.00000123'))
       // 8 decimal by default
       expect(amount.decimal).toEqual(8)
     })
     it('should return asset by given base amounts and decimal', () => {
       const amount = baseToAsset(baseAmount(123, 18))
-      expect(amount.type).toEqual(Denomination.ASSET)
+      expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('0.000000000000000123'))
       expect(amount.decimal).toEqual(18)
     })
@@ -203,13 +204,13 @@ describe('asset', () => {
   describe('assetToBase', () => {
     it('should return base amounts by given asset amounts', () => {
       const amount = assetToBase(assetAmount(22))
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.decimal).toEqual(8)
       expect(amount.amount()).toEqual(bn('2200000000'))
     })
     it('should return base amounts by given asset amounts', () => {
       const amount = assetToBase(assetAmount(22, 18))
-      expect(amount.type).toEqual(Denomination.BASE)
+      expect(amount.type).toEqual(Denomination.Base)
       expect(amount.decimal).toEqual(18)
       expect(amount.amount()).toEqual(bn('22000000000000000000'))
     })
@@ -274,26 +275,26 @@ describe('asset', () => {
     it('returns RUNE asset with all values', () => {
       const result = assetFromString('BNB.RUNE-B1A')
       expect(result).toEqual({
-        chain: 'BNB',
+        chain: 'BNB' as Chain,
         symbol: 'RUNE-B1A',
         ticker: 'RUNE',
       })
     })
     it('returns RUNE with all values, even if chain and symbol are provided only', () => {
       const result = assetFromString('BNB.RUNE')
-      expect(result).toEqual({ chain: 'BNB', symbol: 'RUNE', ticker: 'RUNE' })
+      expect(result).toEqual({ chain: 'BNB' as Chain, symbol: 'RUNE', ticker: 'RUNE' })
     })
     it('returns a BTCB asset with all values, even if chain and symbol are provided only', () => {
       const result = assetFromString('BNB.BTCB-123')
-      expect(result).toEqual({ chain: 'BNB', symbol: 'BTCB-123', ticker: 'BTCB' })
+      expect(result).toEqual({ chain: 'BNB' as Chain, symbol: 'BTCB-123', ticker: 'BTCB' })
     })
     it('returns a WBTC asset with all values, even if chain and symbol are provided only', () => {
       const result = assetFromString('ETH.WBTC')
-      expect(result).toEqual({ chain: 'ETH', symbol: 'WBTC', ticker: 'WBTC' })
+      expect(result).toEqual({ chain: 'ETH' as Chain, symbol: 'WBTC', ticker: 'WBTC' })
     })
     it('returns a ETH asset with all values, even if chain and symbol are provided only', () => {
       const result = assetFromString('ETH.ETH')
-      expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH' })
+      expect(result).toEqual({ chain: 'ETH' as Chain, symbol: 'ETH', ticker: 'ETH' })
     })
     it('returns null if the string includes a value for a chain only', () => {
       const result = assetFromString('BNB')
@@ -323,22 +324,22 @@ describe('asset', () => {
 
   describe('assetToString', () => {
     it('returns a string for RUNE asset', () => {
-      const asset: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: 'RUNE' }
+      const asset: Asset = { chain: 'BNB' as Chain, symbol: 'RUNE-B1A', ticker: 'RUNE' }
       expect(assetToString(asset)).toEqual('BNB.RUNE-B1A')
     })
     it('returns a string for ETH asset', () => {
-      const asset: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH' }
+      const asset: Asset = { chain: 'ETH' as Chain, symbol: 'ETH', ticker: 'ETH' }
       expect(assetToString(asset)).toEqual('ETH.ETH')
     })
   })
 
   describe('isValidAsset', () => {
     it('returns false invalid asset data', () => {
-      expect(isValidAsset({ chain: 'BNB', symbol: '', ticker: 'RUNE' })).toBeFalsy()
-      expect(isValidAsset({ chain: 'BNB', symbol: 'RUNE-B1A', ticker: '' })).toBeFalsy()
+      expect(isValidAsset({ chain: 'BNB' as Chain, symbol: '', ticker: 'RUNE' })).toBeFalsy()
+      expect(isValidAsset({ chain: 'BNB' as Chain, symbol: 'RUNE-B1A', ticker: '' })).toBeFalsy()
     })
     it('returns true for valid `Asset` data', () => {
-      const asset: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: 'RUNE' }
+      const asset: Asset = { chain: 'BNB' as Chain, symbol: 'RUNE-B1A', ticker: 'RUNE' }
       expect(isValidAsset(asset)).toBeTruthy()
     })
   })
@@ -362,7 +363,7 @@ describe('asset', () => {
     })
 
     it('returns currency symbol for USD', () => {
-      expect(currencySymbolByAsset({ chain: 'BNB', symbol: 'BUSD-BAF', ticker: 'BUSD' })).toEqual('$')
+      expect(currencySymbolByAsset({ chain: 'BNB' as Chain, symbol: 'BUSD-BAF', ticker: 'BUSD' })).toEqual('$')
     })
     it('returns ticker as currency symbol for other assets', () => {
       expect(currencySymbolByAsset(AssetBNB)).toEqual('BNB')
@@ -379,7 +380,7 @@ describe('asset', () => {
       expect(formatAssetAmountCurrency({ amount })).toEqual('$ 0.00')
     })
 
-    it('formats amount of RUNE (mainnet)', () => {
+    it('formats amount of BNB.RUNE (mainnet)', () => {
       const amount = assetAmount(10, 8)
       expect(formatAssetAmountCurrency({ amount, asset: AssetRuneB1A })).toEqual('ᚱ 10.00000000')
     })
@@ -387,10 +388,22 @@ describe('asset', () => {
       const amount = assetAmount(10, 8)
       expect(formatAssetAmountCurrency({ amount, asset: AssetRuneNative })).toEqual('ᚱ 10.00000000')
     })
-    it('formats amount of RUNE (testnet', () => {
+    it('formats amount of BNB.RUNE (testnet)', () => {
       const amount = assetAmount(10, 8)
       expect(formatAssetAmountCurrency({ amount, asset: AssetRune67C })).toEqual('ᚱ 10.00000000')
     })
+
+    it.only('formats amount of ETH.XRUNE', () => {
+      const amount = assetAmount(10, 18)
+      expect(
+        formatAssetAmountCurrency({
+          amount,
+          asset: { chain: ETHChain, symbol: 'XRUNE-0X69FA0FEE221AD11012BAB0FDB45D444D3D2CE71C', ticker: 'XRUNE' },
+          decimal: 2,
+        }),
+      ).toEqual('10.00 XRUNE')
+    })
+
     it('formats amount of ETH', () => {
       const amount = assetAmount(10, 18)
       expect(formatAssetAmountCurrency({ amount, asset: AssetETH, decimal: 2 })).toEqual('Ξ 10.00')

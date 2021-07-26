@@ -1,9 +1,11 @@
-import { Client } from '../src/client'
-import { baseAmount } from '@xchainjs/xchain-util'
-import { Scope, mockWs } from '../__mocks__/ws'
-import { Constructor } from '@polkadot/types/types'
 import { Global } from '@polkadot/rpc-provider/mock/types'
+import { Constructor } from '@polkadot/types/types'
+import { Network } from '@xchainjs/xchain-client'
+import { baseAmount } from '@xchainjs/xchain-util'
+
 import { assertAccountsBalance, assertTxData, assertTxHistory } from '../__mocks__/subscan'
+import { Scope, mockWs } from '../__mocks__/ws'
+import { Client } from '../src/client'
 
 declare const global: Global
 
@@ -17,7 +19,7 @@ describe('Client Test', () => {
   const testnet_address = '5GkUsYdCeayvQhqeX8BfB5k7F2TAaY52VBPjxgRxtHcHp2sd'
 
   beforeEach(() => {
-    polkadotClient = new Client({ phrase, network: 'testnet' })
+    polkadotClient = new Client({ phrase, network: 'testnet' as Network })
 
     globalWs = global.WebSocket
     mock = mockWs(polkadotClient.getWsEndpoint())
@@ -32,23 +34,23 @@ describe('Client Test', () => {
 
   it('throws an error passing an invalid phrase', async () => {
     expect(() => {
-      new Client({ phrase: 'invalid phrase', network: 'mainnet' })
+      new Client({ phrase: 'invalid phrase', network: 'mainnet' as Network })
     }).toThrow()
 
     expect(() => {
-      new Client({ phrase: 'invalid phrase', network: 'testnet' })
+      new Client({ phrase: 'invalid phrase', network: 'testnet' as Network })
     }).toThrow()
   })
 
   it('should have right address', async () => {
     expect(polkadotClient.getAddress()).toEqual(testnet_address)
 
-    polkadotClient.setNetwork('mainnet')
+    polkadotClient.setNetwork('mainnet' as Network)
     expect(polkadotClient.getAddress()).toEqual(mainnet_address)
   })
 
   it('should update net', async () => {
-    polkadotClient.setNetwork('mainnet')
+    polkadotClient.setNetwork('mainnet' as Network)
     expect(polkadotClient.getNetwork()).toEqual('mainnet')
 
     const address = await polkadotClient.getAddress()
@@ -56,17 +58,17 @@ describe('Client Test', () => {
   })
 
   it('should validate address', async () => {
-    polkadotClient.setNetwork('mainnet')
+    polkadotClient.setNetwork('mainnet' as Network)
     expect(polkadotClient.validateAddress(testnet_address)).toEqual(false)
     expect(polkadotClient.validateAddress(mainnet_address)).toEqual(true)
 
-    polkadotClient.setNetwork('testnet')
+    polkadotClient.setNetwork('testnet' as Network)
     expect(polkadotClient.validateAddress(mainnet_address)).toEqual(false)
     expect(polkadotClient.validateAddress(testnet_address)).toEqual(true)
   })
 
   it('no balances', async () => {
-    polkadotClient.setNetwork('mainnet')
+    polkadotClient.setNetwork('mainnet' as Network)
 
     assertAccountsBalance(polkadotClient.getClientUrl(), mainnet_address, {
       code: 0,
@@ -97,7 +99,7 @@ describe('Client Test', () => {
   })
 
   it('no txHistory', async () => {
-    polkadotClient.setNetwork('mainnet')
+    polkadotClient.setNetwork('mainnet' as Network)
 
     assertTxHistory(polkadotClient.getClientUrl(), mainnet_address, {
       code: 0,

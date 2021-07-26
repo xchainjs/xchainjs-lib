@@ -1,1 +1,5 @@
+export * from './BaseXChainClient'
+export * from './UTXOClient'
 export * from './types'
+export * from './feeRates'
+export * from './fees'

@@ -1,12 +1,12 @@
 import {
-  default as bn,
-  isValidBN,
-  bnOrZero,
   SymbolPosition,
-  formatBN,
-  validBNOrZero,
-  formatBNCurrency,
+  bnOrZero,
+  default as bn,
   fixedBN,
+  formatBN,
+  formatBNCurrency,
+  isValidBN,
+  validBNOrZero,
 } from './bn'
 
 describe('util/bn', () => {

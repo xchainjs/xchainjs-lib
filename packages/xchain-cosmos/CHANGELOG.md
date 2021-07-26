@@ -1,6 +1,18 @@
-# v.0.13.4 (2021-06-30)
+# v.0.13.7 (2021-07-26)
 
 - update getBalance such that it always returns at least the mainAsset
+
+# v.0.13.6 (2021-07-18)
+
+- upgraded "cosmos-client": "0.42.7"
+
+# v.0.13.5 (2021-07-07)
+
+- Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
+
+# v.0.13.4 (2021-07-05)
+
+- refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
 
 # v.0.13.3 (2021-06-29)
 

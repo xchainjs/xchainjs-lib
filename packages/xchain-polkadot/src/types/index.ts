@@ -1,7 +1,6 @@
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset, Chain } from '@xchainjs/xchain-util'
 
-export const Polkadot = 'THOR'
-export const AssetDOT: Asset = { chain: Polkadot, symbol: 'DOT', ticker: 'DOT' }
+export const AssetDOT: Asset = { chain: Chain.Polkadot, symbol: 'DOT', ticker: 'DOT' }
 
 export type SubscanResponse<T> = {
   code: number
@@ -42,11 +41,9 @@ export type Transfer = {
   to_account_display?: AccountDisplay
 }
 
-export type Transfers = Array<Transfer>
-
 export type TransfersResult = {
   count: number
-  transfers?: Array<Transfer> | null
+  transfers?: Transfer[] | null
 }
 
 export type ExtrinsicParam = {
@@ -84,9 +81,9 @@ export type Extrinsic = {
   nonce: number
   extrinsic_hash: string
   success: boolean
-  params: Array<ExtrinsicParam>
+  params: ExtrinsicParam[]
   transfer: Transfer
-  event: Array<ExtrinsicEvent>
+  event: ExtrinsicEvent[]
   fee: string
   error?: string | null
   finalized: true

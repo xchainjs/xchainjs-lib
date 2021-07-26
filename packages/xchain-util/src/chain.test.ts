@@ -1,4 +1,4 @@
-import { chainToString, isChain } from './chain'
+import { Chain, chainToString, isChain } from './chain'
 
 describe('chain', () => {
   it('checks type Chain', () => {
@@ -15,28 +15,28 @@ describe('chain', () => {
   })
   describe('chainToString', () => {
     it('returns string for Thorchain', () => {
-      expect(chainToString('THOR')).toEqual('Thorchain')
+      expect(chainToString('THOR' as Chain)).toEqual('Thorchain')
     })
     it('returns string for BTC', () => {
-      expect(chainToString('BTC')).toEqual('Bitcoin')
+      expect(chainToString('BTC' as Chain)).toEqual('Bitcoin')
     })
     it('returns string for BCH', () => {
-      expect(chainToString('BCH')).toEqual('Bitcoin Cash')
+      expect(chainToString('BCH' as Chain)).toEqual('Bitcoin Cash')
     })
     it('returns string for ETH', () => {
-      expect(chainToString('ETH')).toEqual('Ethereum')
+      expect(chainToString('ETH' as Chain)).toEqual('Ethereum')
     })
     it('returns string for BNB', () => {
-      expect(chainToString('BNB')).toEqual('Binance Chain')
+      expect(chainToString('BNB' as Chain)).toEqual('Binance Chain')
     })
     it('returns string for GAIA', () => {
-      expect(chainToString('GAIA')).toEqual('Cosmos')
+      expect(chainToString('GAIA' as Chain)).toEqual('Cosmos')
     })
     it('returns string for POLKA', () => {
-      expect(chainToString('POLKA')).toEqual('Polkadot')
+      expect(chainToString('POLKA' as Chain)).toEqual('Polkadot')
     })
     it('returns string for LTC', () => {
-      expect(chainToString('LTC')).toEqual('Litecoin')
+      expect(chainToString('LTC' as Chain)).toEqual('Litecoin')
     })
   })
 })

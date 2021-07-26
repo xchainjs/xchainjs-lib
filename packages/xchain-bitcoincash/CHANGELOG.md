@@ -1,6 +1,11 @@
-# v.0.11.7 (2021-06-25)
+# v.0.11.8 (2021-07-07)
+
+- Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
+
+# v.0.11.7 (2021-06-29)
 
 - accepting legacy BCH addresses
+- added support for pulling fees from thornode.
 
 # v.0.11.6 (2021-06-19)
 

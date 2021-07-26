@@ -1,3 +1,41 @@
+# v.0.22.3 (2021-07-08)
+
+### Fix
+
+- Provide overridden `getFees` in `EthereumClient` interface
+
+# v.0.22.3 (2021-07-07)
+
+- Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
+
+# v.0.22.2 (2021-07-05)
+
+- refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
+
+# v.0.22.1 (2021-06-30)
+
+### Fix
+
+- Rates in `estimateGasPrices` need to be converted from `gwei` into `wei`
+
+# v.0.22.0 (2021-06-30)
+
+### Fix
+
+- `isApproved` returned always `false`
+
+### Breaking change
+
+- Parameter object for `call`, `estimateCall`, `isApproved` methods
+
+### Add
+
+- Optional `gasLimitFallback` parameter for `approve` call
+
+# v.0.21.5 (2021-06-29)
+
+- added support for pulling fees from thornode.
+
 # v.0.21.4 (2021-06-07)
 
 ### Fix

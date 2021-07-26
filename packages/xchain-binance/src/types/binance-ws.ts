@@ -15,8 +15,6 @@ export type Asset = {
   A: string
 }
 
-export type Assets = Asset[]
-
 /**
  * Event type of WS streams
  * @see https://docs.binance.org/api-reference/dex-api/ws-streams.html
@@ -77,13 +75,11 @@ export type Order = {
   O: number
 }
 
-export type Orders = Order[]
-
 /**
  * Orders event
  * @see https://docs.binance.org/api-reference/dex-api/ws-streams.html#1-orders
  */
-export type OrdersEvent = WSEvent<Orders>
+export type OrdersEvent = WSEvent<Order[]>
 
 export type Balance = {
   // Asset
@@ -96,24 +92,20 @@ export type Balance = {
   r: string
 }
 
-export type Balances = Balance[]
-
 export type Account = {
   // Event type
   e: string
   // Event height
   E: number
   // balances
-  B: Balances
+  B: Balance[]
 }
-
-export type Accounts = Account[]
 
 /**
  * Accounts event
  * @see https://docs.binance.org/api-reference/dex-api/ws-streams.html#2-account
  */
-export type AccountsEvent = WSEvent<Accounts>
+export type AccountsEvent = WSEvent<Account[]>
 
 export type AccountTrade = {
   /**
@@ -123,10 +115,8 @@ export type AccountTrade = {
   /**
    * Asset to trade
    */
-  c: Assets
+  c: Asset[]
 }
-
-export type AccountTrades = AccountTrade[]
 
 /**
  * Payload of a transfer event
@@ -153,7 +143,7 @@ export type Transfer = {
    * Sender address
    */
   f: string
-  t: AccountTrades
+  t: AccountTrade[]
 }
 
 /**
@@ -206,16 +196,10 @@ export type Trade = {
 }
 
 /**
- * Trades event payload
- * @see https://docs.binance.org/api-reference/dex-api/ws-streams.html#4-trades
- */
-export type Trades = Trade
-
-/**
  * Trade event
  * @see https://docs.binance.org/api-reference/dex-api/ws-streams.html#4-trades
  */
-export type TradesEvent = WSEvent<Trades>
+export type TradesEvent = WSEvent<Trade[]>
 
 export type Kline = {
   // Kline start time
@@ -323,13 +307,11 @@ export type SymbolTicker = {
  */
 export type SymbolTickerEvent = WSEvent<SymbolTicker>
 
-export type SymbolTickers = SymbolTicker[]
-
 /**
  * Symbol tickers event
  * @see https://docs.binance.org/api-reference/dex-api/ws-streams.html#9-all-symbols-ticker-streams
  */
-export type SymbolTickersEvent = WSEvent<SymbolTickers>
+export type SymbolTickersEvent = WSEvent<SymbolTicker[]>
 
 export type MiniTicker = {
   // Event type
@@ -358,14 +340,12 @@ export type MiniTicker = {
  */
 export type MiniTickerEvent = WSEvent<MiniTicker>
 
-export type MiniTickers = MiniTicker[]
-
 /**
  * Payload of a mini tickers event
  * @see https://docs.binance.org/api-reference/dex-api/ws-streams.html#10-individual-symbol-mini-ticker-streams
  */
 
-export type MiniTickersEvent = WSEvent<MiniTickers>
+export type MiniTickersEvent = WSEvent<MiniTicker[]>
 
 export type BlockHeight = { h: number }
 

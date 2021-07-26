@@ -1,7 +1,23 @@
-# v.5.2.2 (2021-06-30)
+# v.5.2.6 (2021-07-26)
 
 - update getBalance such that it always returns at least BNB
 
+
+# v.5.2.5 (2021-07-18)
+
+- Updatedrollupjs to include axios to enlable usage on node
+
+# v.5.2.4 (2021-07-07)
+
+- Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
+
+# v.5.2.3 (2021-07-05)
+
+- refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
+
+# v.5.2.2 (2021-06-29)
+
+- added support for pulling fees from thornode.
 
 # v.5.2.1 (2021-06-01)
 

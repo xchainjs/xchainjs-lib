@@ -1,16 +1,12 @@
 import { BigSource } from 'big.js'
-
-import { PrivKey, Msg, codec } from 'cosmos-client'
-import { BaseAccount, StdTx } from 'cosmos-client/x/auth'
+import { Msg, PrivKey, codec } from 'cosmos-client'
 import { StdTxFee } from 'cosmos-client/api'
-import { RootDerivationPaths, Network } from '@xchainjs/xchain-client'
+import { BaseAccount, StdTx } from 'cosmos-client/x/auth'
 
 export type CosmosSDKClientParams = {
   server: string
   chainId: string
   prefix?: string
-  network?: Network
-  rootDerivationPaths?: RootDerivationPaths
 }
 
 export type SearchTxParams = {
@@ -79,7 +75,7 @@ export type TxHistoryResponse = {
   page_number?: number
   page_total?: number
   limit?: number
-  txs?: Array<TxResponse>
+  txs?: TxResponse[]
 }
 
 export type APIQueryParam = {

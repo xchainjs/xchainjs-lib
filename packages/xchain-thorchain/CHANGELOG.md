@@ -1,3 +1,21 @@
+# v.0.17.5 (2021-07-18)
+
+- Updatedrollupjs to include axios to enlable usage on node
+
+# v.0.17.4 (2021-07-14)
+
+### Fix
+
+- Bump `fee.gas to `25000000` (twenty five million) to try to avoid failing withdraw txs
+
+# v.0.17.3 (2021-07-07)
+
+- Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
+
+# v.0.17.2 (2021-07-05)
+
+- refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
+
 # v.0.17.1 (2021-06-29)
 
 ### Fix

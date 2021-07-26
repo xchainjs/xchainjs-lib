@@ -1,5 +1,6 @@
 import nock from 'nock'
-import { ETHTransactionInfo, TokenTransactionInfo, GasOracleResponse } from '../src/types'
+
+import { ETHTransactionInfo, GasOracleResponse, TokenTransactionInfo } from '../src/types'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mock_etherscan_api = (url: string, method: string, result: any) => {

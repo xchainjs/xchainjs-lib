@@ -1,54 +1,43 @@
-const bitcash = require('@psf/bitcoincashjs-lib')
-
-import * as utils from './utils'
+import * as bitcash from '@psf/bitcoincashjs-lib'
 import {
-  RootDerivationPaths,
   Address,
   Balance,
+  Fee,
+  FeeOption,
+  FeeRate,
   Network,
-  Fees,
   Tx,
-  TxParams,
   TxHash,
   TxHistoryParams,
+  TxParams,
   TxsPage,
-  XChainClient,
+  UTXOClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { validatePhrase, getSeed } from '@xchainjs/xchain-crypto'
-import { FeesWithRates, FeeRate, FeeRates, ClientUrl } from './types/client-types'
-import { KeyPair } from './types/bitcoincashjs-types'
-import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'
-import { NodeAuth } from './types'
-import { broadcastTx } from './node-api'
+import { getSeed } from '@xchainjs/xchain-crypto'
+import { Chain } from '@xchainjs/xchain-util'
 
-/**
- * BitcoinCashClient Interface
- */
-interface BitcoinCashClient {
-  getFeesWithRates(memo?: string): Promise<FeesWithRates>
-  getFeesWithMemo(memo: string): Promise<Fees>
-  getFeeRates(): Promise<FeeRates>
-}
+import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
+import { broadcastTx } from './node-api'
+import { NodeAuth } from './types'
+import { KeyPair } from './types/bitcoincashjs-types'
+import { ClientUrl } from './types/client-types'
+import * as utils from './utils'
 
 export type BitcoinCashClientParams = XChainClientParams & {
   haskoinUrl?: ClientUrl
   nodeUrl?: ClientUrl
   nodeAuth?: NodeAuth
-  rootPath?: string
-  index?: number
+  // index?: number
 }
 
 /**
  * Custom Bitcoin Cash client
  */
-class Client implements BitcoinCashClient, XChainClient {
-  private network: Network
-  private phrase = ''
+class Client extends UTXOClient {
   private haskoinUrl: ClientUrl
   private nodeUrl: ClientUrl
   private nodeAuth?: NodeAuth
-  private rootDerivationPaths: RootDerivationPaths
 
   /**
    * Constructor
@@ -57,25 +46,26 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {BitcoinCashClientParams} params
    */
   constructor({
-    network = 'testnet',
+    network = Network.Testnet,
     haskoinUrl = {
-      testnet: 'https://api.haskoin.com/bchtest',
-      mainnet: 'https://api.haskoin.com/bch',
+      [Network.Testnet]: 'https://api.haskoin.com/bchtest',
+      [Network.Mainnet]: 'https://api.haskoin.com/bch',
     },
     phrase,
     nodeUrl = {
-      testnet: 'https://testnet.bch.thorchain.info',
-      mainnet: 'https://bch.thorchain.info',
+      [Network.Testnet]: 'https://testnet.bch.thorchain.info',
+      [Network.Mainnet]: 'https://bch.thorchain.info',
     },
     nodeAuth = {
       username: 'thorchain',
       password: 'password',
     },
     rootDerivationPaths = {
-      mainnet: `m/44'/145'/0'/0/`,
-      testnet: `m/44'/1'/0'/0/`,
+      [Network.Mainnet]: `m/44'/145'/0'/0/`,
+      [Network.Testnet]: `m/44'/1'/0'/0/`,
     },
   }: BitcoinCashClientParams) {
+    super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase })
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
@@ -93,7 +83,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} url The new haskoin url.
    * @returns {void}
    */
-  setHaskoinURL = (url: ClientUrl): void => {
+  setHaskoinURL(url: ClientUrl): void {
     this.haskoinUrl = url
   }
 
@@ -102,7 +92,7 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {string} The haskoin url based on the current network.
    */
-  getHaskoinURL = (): string => {
+  getHaskoinURL(): string {
     return this.haskoinUrl[this.getNetwork()]
   }
 
@@ -112,7 +102,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} url The new node url.
    * @returns {void}
    */
-  setNodeURL = (url: ClientUrl): void => {
+  setNodeURL(url: ClientUrl): void {
     this.nodeUrl = url
   }
 
@@ -121,61 +111,8 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {string} The node url for thorchain based on the current network.
    */
-  getNodeURL = (): string => {
+  getNodeURL(): string {
     return this.nodeUrl[this.getNetwork()]
-  }
-
-  /**
-   * Set/update a new phrase.
-   *
-   * @param {string} phrase A new phrase.
-   * @param {string} derivationPath bip44 derivation path
-   * @returns {Address} The address from the given phrase
-   *
-   * @throws {"Invalid phrase"}
-   * Thrown if the given phase is invalid.
-   */
-  setPhrase = (phrase: string, walletIndex = 0): Address => {
-    if (validatePhrase(phrase)) {
-      this.phrase = phrase
-      return this.getAddress(walletIndex)
-    } else {
-      throw new Error('Invalid phrase')
-    }
-  }
-
-  /**
-   * Purge client.
-   *
-   * @returns {void}
-   */
-  purgeClient = (): void => {
-    this.phrase = ''
-  }
-
-  /**
-   * Set/update the current network.
-   *
-   * @param {Network} network `mainnet` or `testnet`.
-   * @returns {void}
-   *
-   * @throws {"Network must be provided"}
-   * Thrown if network has not been set before.
-   */
-  setNetwork = (net: Network): void => {
-    if (!net) {
-      throw new Error('Network must be provided')
-    }
-    this.network = net
-  }
-
-  /**
-   * Get the current network.
-   *
-   * @returns {Network} The current network. (`mainnet` or `testnet`)
-   */
-  getNetwork = (): Network => {
-    return this.network
   }
 
   /**
@@ -183,9 +120,13 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @returns {string} The explorer url based on the network.
    */
-  getExplorerUrl = (): string => {
-    const networkPath = utils.isTestnet(this.network) ? 'bch-testnet' : 'bch'
-    return `https://www.blockchain.com/${networkPath}`
+  getExplorerUrl(): string {
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://www.blockchain.com/bch'
+      case Network.Testnet:
+        return 'https://www.blockchain.com/bch-testnet'
+    }
   }
 
   /**
@@ -194,7 +135,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address based on the network.
    */
-  getExplorerAddressUrl = (address: Address): string => {
+  getExplorerAddressUrl(address: Address): string {
     return `${this.getExplorerUrl()}/address/${address}`
   }
 
@@ -204,7 +145,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {string} txID The transaction id
    * @returns {string} The explorer url for the given transaction id based on the network.
    */
-  getExplorerTxUrl = (txID: string): string => {
+  getExplorerTxUrl(txID: string): string {
     return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
@@ -220,15 +161,11 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if invalid phrase is provided.
    * */
-  private getBCHKeys = (phrase: string, derivationPath: string): KeyPair => {
-    try {
-      const rootSeed = getSeed(phrase)
-      const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
+  private getBCHKeys(phrase: string, derivationPath: string): KeyPair {
+    const rootSeed = getSeed(phrase)
+    const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
 
-      return masterHDNode.derivePath(derivationPath).keyPair
-    } catch (error) {
-      throw new Error(`Getting key pair failed: ${error?.message || error.toString()}`)
-    }
+    return masterHDNode.derivePath(derivationPath).keyPair
   }
 
   /**
@@ -242,29 +179,16 @@ class Client implements BitcoinCashClient, XChainClient {
    * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (index = 0): Address => {
-    if (this.phrase) {
-      try {
-        const keys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
-        const address = keys.getAddress(index)
+  getAddress(index = 0): Address {
+    if (!this.phrase) throw new Error('Phrase must be provided')
+    try {
+      const keys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
+      const address = keys.getAddress(index)
 
-        return utils.stripPrefix(utils.toCashAddress(address))
-      } catch (error) {
-        throw new Error('Address not defined')
-      }
+      return utils.stripPrefix(utils.toCashAddress(address))
+    } catch (error) {
+      throw new Error('Address not defined')
     }
-
-    throw new Error('Phrase must be provided')
-  }
-
-  /**
-   * Get getFullDerivationPath
-   *
-   * @param {number} index the HD wallet index
-   * @returns {string} The derivation path based on the network.
-   */
-  getFullDerivationPath(index: number): string {
-    return this.rootDerivationPaths[this.network] + `${index}`
   }
 
   /**
@@ -273,7 +197,7 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {Address} address
    * @returns {boolean} `true` or `false`
    */
-  validateAddress = (address: string): boolean => {
+  validateAddress(address: string): boolean {
     return utils.validateAddress(address, this.network)
   }
 
@@ -281,11 +205,11 @@ class Client implements BitcoinCashClient, XChainClient {
    * Get the BCH balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balance>} The BCH balance of the address.
+   * @returns {Balance[]} The BCH balance of the address.
    *
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
-  getBalance = async (address: Address): Promise<Balance[]> => {
+  async getBalance(address: Address): Promise<Balance[]> {
     return utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address })
   }
 
@@ -298,28 +222,23 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
-  getTransactions = async ({ address, offset, limit }: TxHistoryParams): Promise<TxsPage> => {
-    try {
-      offset = offset || 0
-      limit = limit || 10
+  async getTransactions({ address, offset, limit }: TxHistoryParams): Promise<TxsPage> {
+    offset = offset || 0
+    limit = limit || 10
 
-      const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address })
-      const txs = await getTransactions({
-        haskoinUrl: this.getHaskoinURL(),
-        address,
-        params: { offset, limit },
-      })
+    const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address })
+    const txs = await getTransactions({
+      haskoinUrl: this.getHaskoinURL(),
+      address,
+      params: { offset, limit },
+    })
 
-      if (!account || !txs) {
-        throw new Error('Invalid address')
-      }
+    if (!account) throw new Error(`Invalid address: ${address}`)
+    if (!txs) throw new Error(`Transactions could not found for address ${address}`)
 
-      return {
-        total: account.txs,
-        txs: txs.map(utils.parseTransaction),
-      }
-    } catch (error) {
-      return Promise.reject(error)
+    return {
+      total: account.txs,
+      txs: txs.map(utils.parseTransaction),
     }
   }
 
@@ -331,87 +250,19 @@ class Client implements BitcoinCashClient, XChainClient {
    *
    * @throws {"Invalid TxID"} Thrown if the given transaction id is an invalid one.
    */
-  getTransactionData = async (txId: string): Promise<Tx> => {
-    try {
-      const tx = await getTransaction({ haskoinUrl: this.getHaskoinURL(), txId })
+  async getTransactionData(txId: string): Promise<Tx> {
+    const tx = await getTransaction({ haskoinUrl: this.getHaskoinURL(), txId })
+    if (!tx) throw new Error('Invalid TxID')
 
-      if (!tx) {
-        throw new Error('Invalid TxID')
-      }
-
-      return utils.parseTransaction(tx)
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return utils.parseTransaction(tx)
   }
 
-  /**
-   * Get the rates and fees.
-   *
-   * @param {string} memo The memo to be used for fee calculation (optional)
-   * @returns {FeesWithRates} The fees and rates
-   */
-  getFeesWithRates = async (memo?: string): Promise<FeesWithRates> => {
-    const nextBlockFeeRate = await getSuggestedFee()
-    const rates: FeeRates = {
-      fastest: nextBlockFeeRate * 5,
-      fast: nextBlockFeeRate * 1,
-      average: nextBlockFeeRate * 0.5,
-    }
-
-    const fees: Fees = {
-      type: 'byte',
-      fast: utils.calcFee(rates.fast, memo),
-      average: utils.calcFee(rates.average, memo),
-      fastest: utils.calcFee(rates.fastest, memo),
-    }
-
-    return { fees, rates }
+  protected async getSuggestedFeeRate(): Promise<FeeRate> {
+    return await getSuggestedFee()
   }
 
-  /**
-   * Get the current fees.
-   *
-   * @returns {Fees} The fees without memo
-   */
-  getFees = async (): Promise<Fees> => {
-    try {
-      const { fees } = await this.getFeesWithRates()
-      return fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
-   * Get the fees for transactions with memo.
-   * If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
-   *
-   * @param {string} memo
-   * @returns {Fees} The fees with memo
-   */
-  getFeesWithMemo = async (memo: string): Promise<Fees> => {
-    try {
-      const { fees } = await this.getFeesWithRates(memo)
-      return fees
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
-  /**
-   * Get the fee rates for transactions without a memo.
-   * If you want to get `Fees` and `FeeRates` at once, use `getFeesAndRates` method
-   *
-   * @returns {FeeRates} The fee rate
-   */
-  getFeeRates = async (): Promise<FeeRates> => {
-    try {
-      const { rates } = await this.getFeesWithRates()
-      return rates
-    } catch (error) {
-      return Promise.reject(error)
-    }
+  protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
+    return utils.calcFee(feeRate, memo)
   }
 
   /**
@@ -420,38 +271,34 @@ class Client implements BitcoinCashClient, XChainClient {
    * @param {TxParams&FeeRate} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  transfer = async (params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> => {
-    try {
-      const index = params.walletIndex || 0
-      const derivationPath = this.rootDerivationPaths[this.network] + `${index}`
+  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
+    const index = params.walletIndex || 0
+    const derivationPath = this.getFullDerivationPath(index)
 
-      const feeRate = params.feeRate || (await this.getFeeRates()).fast
-      const { builder, utxos } = await utils.buildTx({
-        ...params,
-        feeRate,
-        sender: this.getAddress(),
-        haskoinUrl: this.getHaskoinURL(),
-        network: this.network,
-      })
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    const { builder, utxos } = await utils.buildTx({
+      ...params,
+      feeRate,
+      sender: this.getAddress(index),
+      haskoinUrl: this.getHaskoinURL(),
+      network: this.network,
+    })
 
-      const keyPair = this.getBCHKeys(this.phrase, derivationPath)
+    const keyPair = this.getBCHKeys(this.phrase, derivationPath)
 
-      utxos.forEach((utxo, index) => {
-        builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)
-      })
+    utxos.forEach((utxo, index) => {
+      builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)
+    })
 
-      const tx = builder.build()
-      const txHex = tx.toHex()
+    const tx = builder.build()
+    const txHex = tx.toHex()
 
-      return await broadcastTx({
-        network: this.network,
-        txHex,
-        nodeUrl: this.getNodeURL(),
-        auth: this.nodeAuth,
-      })
-    } catch (e) {
-      return Promise.reject(e)
-    }
+    return await broadcastTx({
+      network: this.network,
+      txHex,
+      nodeUrl: this.getNodeURL(),
+      auth: this.nodeAuth,
+    })
   }
 }
 

@@ -1,3 +1,15 @@
+# v.0.15.11 (2021-07-07)
+
+- Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
+
+# v.0.15.10 (2021-07-03)
+
+- refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
+
+# v.0.15.9 (2021-06-29)
+
+- added support for pulling fees from thornode.
+
 # v.0.15.8 (2021-06-18)
 
 - changed rollupjs to treat axios as external lib

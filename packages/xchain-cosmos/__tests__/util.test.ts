@@ -1,11 +1,12 @@
+import { baseAmount } from '@xchainjs/xchain-util'
 import { Msg } from 'cosmos-client'
 import { StdTxFee } from 'cosmos-client/api'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
-import { baseAmount } from '@xchainjs/xchain-util'
-import { TxResponse, RawTxResponse, APIQueryParam } from '../src/cosmos/types'
-import { AssetMuon, AssetAtom } from '../src/types'
-import { isMsgMultiSend, isMsgSend, getDenom, getAsset, getTxsFromHistory, getQueryString } from '../src/util'
+
+import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
+import { AssetAtom, AssetMuon } from '../src/types'
+import { getAsset, getDenom, getQueryString, getTxsFromHistory, isMsgMultiSend, isMsgSend } from '../src/util'
 
 describe('cosmos/util', () => {
   describe('Msg type guards', () => {
@@ -107,7 +108,7 @@ describe('cosmos/util', () => {
     const from_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
     const to_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
 
-    const txs: Array<TxResponse> = [
+    const txs: TxResponse[] = [
       {
         height: 0,
         txhash: '',

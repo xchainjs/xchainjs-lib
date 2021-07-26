@@ -1,27 +1,32 @@
-import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
-import * as sochain from './sochain-api'
-import * as blockStream from './blockstream-api'
-import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
-import { assetAmount, AssetBTC, assetToBase, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import {
+  Address,
+  Balance,
+  FeeOption,
+  FeeRate,
+  Fees,
+  FeesWithRates,
+  Network,
+  TxHash,
+  TxParams,
+  calcFees,
+  standardFeeRates,
+} from '@xchainjs/xchain-client'
+import { AssetBTC, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
-import { AddressParams, BtcAddressUTXOs, ScanUTXOParam } from './types/sochain-api-types'
-import { FeeRate, FeeRates, FeesWithRates } from './types/client-types'
-import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
-import { MIN_TX_FEE } from './const'
-
+import * as blockStream from './blockstream-api'
+import { BTC_DECIMAL, MIN_TX_FEE } from './const'
 import * as haskoinApi from './haskoin-api'
+import * as sochain from './sochain-api'
+import { BroadcastTxParams, UTXO } from './types/common'
+import { AddressParams, BtcAddressUTXO, ScanUTXOParam } from './types/sochain-api-types'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
 const TX_INPUT_PUBKEYHASH = 107
 const TX_OUTPUT_BASE = 8 + 1 //9
 const TX_OUTPUT_PUBKEYHASH = 25
-
-export const BTC_DECIMAL = 8
 
 const inputBytes = (input: UTXO): number => {
   return TX_INPUT_BASE + (input.witnessUtxo.script ? input.witnessUtxo.script.length : TX_INPUT_PUBKEYHASH)
@@ -41,12 +46,12 @@ export const compileMemo = (memo: string): Buffer => {
 /**
  * Get the transaction fee.
  *
- * @param {UTXOs} inputs The UTXOs.
+ * @param {UTXO[]} inputs The UTXOs.
  * @param {FeeRate} feeRate The fee rate.
  * @param {Buffer} data The compiled memo (Optional).
  * @returns {number} The fee amount.
  */
-export const getFee = (inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = null): number => {
+export const getFee = (inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number => {
   let sum =
     TX_EMPTY_SIZE +
     inputs.reduce((a, x) => a + inputBytes(x), 0) +
@@ -66,23 +71,13 @@ export const getFee = (inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = nu
 /**
  * Get the average value of an array.
  *
- * @param {Array<number>} array
+ * @param {number[]} array
  * @returns {number} The average value.
  */
-export const arrayAverage = (array: Array<number>): number => {
+export const arrayAverage = (array: number[]): number => {
   let sum = 0
   array.forEach((value) => (sum += value))
   return sum / array.length
-}
-
-/**
- * Check if give network is a testnet.
- *
- * @param {Network} network
- * @returns {boolean} `true` or `false`
- */
-export const isTestnet = (network: Network): boolean => {
-  return network === 'testnet'
 }
 
 /**
@@ -92,7 +87,12 @@ export const isTestnet = (network: Network): boolean => {
  * @returns {Bitcoin.Network} The BTC network.
  */
 export const btcNetwork = (network: Network): Bitcoin.Network => {
-  return isTestnet(network) ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin
+  switch (network) {
+    case Network.Mainnet:
+      return Bitcoin.networks.bitcoin
+    case Network.Testnet:
+      return Bitcoin.networks.testnet
+  }
 }
 
 /**
@@ -101,20 +101,24 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
  * @param {string} sochainUrl sochain Node URL.
  * @param {Network} network
  * @param {Address} address
- * @returns {Array<Balance>} The balances of the given address.
+ * @returns {Balance[]} The balances of the given address.
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
-  try {
-    const balance =
-      params.network === 'testnet' ? await sochain.getBalance(params) : await haskoinApi.getBalance(params.address)
-    return [
-      {
-        asset: AssetBTC,
-        amount: balance,
-      },
-    ]
-  } catch (error) {
-    return Promise.reject(new Error('Invalid address'))
+  switch (params.network) {
+    case Network.Mainnet:
+      return [
+        {
+          asset: AssetBTC,
+          amount: await haskoinApi.getBalance(params.address),
+        },
+      ]
+    case Network.Testnet:
+      return [
+        {
+          asset: AssetBTC,
+          amount: await sochain.getBalance(params),
+        },
+      ]
   }
 }
 
@@ -140,63 +144,66 @@ export const validateAddress = (address: Address, network: Network): boolean => 
  * @param {string} sochainUrl sochain Node URL.
  * @param {Network} network
  * @param {Address} address
- * @returns {Array<UTXO>} The UTXOs of the given address.
+ * @returns {UTXO[]} The UTXOs of the given address.
  */
 export const scanUTXOs = async ({
   sochainUrl,
   network,
   address,
   confirmedOnly = true, // default: scan only confirmed UTXOs
-}: ScanUTXOParam): Promise<UTXOs> => {
-  if (network === 'testnet') {
-    let utxos: BtcAddressUTXOs = []
+}: ScanUTXOParam): Promise<UTXO[]> => {
+  switch (network) {
+    case Network.Testnet: {
+      let utxos: BtcAddressUTXO[] = []
 
-    const addressParam: AddressParams = {
-      sochainUrl,
-      network,
-      address,
-    }
+      const addressParam: AddressParams = {
+        sochainUrl,
+        network,
+        address,
+      }
 
-    if (confirmedOnly) {
-      utxos = await sochain.getConfirmedUnspentTxs(addressParam)
-    } else {
-      utxos = await sochain.getUnspentTxs(addressParam)
-    }
+      if (confirmedOnly) {
+        utxos = await sochain.getConfirmedUnspentTxs(addressParam)
+      } else {
+        utxos = await sochain.getUnspentTxs(addressParam)
+      }
 
-    return utxos.map(
-      (utxo) =>
-        ({
-          hash: utxo.txid,
-          index: utxo.output_no,
-          value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
-          witnessUtxo: {
+      return utxos.map(
+        (utxo) =>
+          ({
+            hash: utxo.txid,
+            index: utxo.output_no,
             value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
-            script: Buffer.from(utxo.script_hex, 'hex'),
-          },
-        } as UTXO),
-    )
+            witnessUtxo: {
+              value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
+              script: Buffer.from(utxo.script_hex, 'hex'),
+            },
+          } as UTXO),
+      )
+    }
+    case Network.Mainnet: {
+      let utxos: haskoinApi.UtxoData[] = []
+
+      if (confirmedOnly) {
+        utxos = await haskoinApi.getConfirmedUnspentTxs(address)
+      } else {
+        utxos = await haskoinApi.getUnspentTxs(address)
+      }
+
+      return utxos.map(
+        (utxo) =>
+          ({
+            hash: utxo.txid,
+            index: utxo.index,
+            value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
+            witnessUtxo: {
+              value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
+              script: Buffer.from(utxo.pkscript, 'hex'),
+            },
+          } as UTXO),
+      )
+    }
   }
-
-  let utxos: haskoinApi.UtxoData[] = []
-
-  if (confirmedOnly) {
-    utxos = await haskoinApi.getConfirmedUnspentTxs(address)
-  } else {
-    utxos = await haskoinApi.getUnspentTxs(address)
-  }
-
-  return utxos.map(
-    (utxo) =>
-      ({
-        hash: utxo.txid,
-        index: utxo.index,
-        value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
-        witnessUtxo: {
-          value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
-          script: Buffer.from(utxo.pkscript, 'hex'),
-        },
-      } as UTXO),
-  )
 }
 /**
  * Build transcation.
@@ -219,73 +226,62 @@ export const buildTx = async ({
   network: Network
   sochainUrl: string
   spendPendingUTXO?: boolean
-}): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXOs }> => {
-  try {
-    // search only confirmed UTXOs if pending UTXO is not allowed
-    const confirmedOnly = !spendPendingUTXO
-    const utxos = await scanUTXOs({ sochainUrl, network, address: sender, confirmedOnly })
+}): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[] }> => {
+  // search only confirmed UTXOs if pending UTXO is not allowed
+  const confirmedOnly = !spendPendingUTXO
+  const utxos = await scanUTXOs({ sochainUrl, network, address: sender, confirmedOnly })
 
-    if (utxos.length === 0) {
-      return Promise.reject(Error('No utxos to send'))
-    }
+  if (utxos.length === 0) throw new Error('No utxos to send')
+  if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
-    if (!validateAddress(recipient, network)) {
-      return Promise.reject(new Error('Invalid address'))
-    }
+  const feeRateWhole = Number(feeRate.toFixed(0))
+  const compiledMemo = memo ? compileMemo(memo) : null
 
-    const feeRateWhole = Number(feeRate.toFixed(0))
-    const compiledMemo = memo ? compileMemo(memo) : null
+  const targetOutputs = []
 
-    const targetOutputs = []
-
-    //1. add output amount and recipient to targets
-    targetOutputs.push({
-      address: recipient,
-      value: amount.amount().toNumber(),
-    })
-    //2. add output memo to targets (optional)
-    if (compiledMemo) {
-      targetOutputs.push({ script: compiledMemo, value: 0 })
-    }
-    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-
-    // .inputs and .outputs will be undefined if no solution was found
-    if (!inputs || !outputs) {
-      return Promise.reject(Error('Insufficient Balance for transaction'))
-    }
-
-    const psbt = new Bitcoin.Psbt({ network: btcNetwork(network) }) // Network-specific
-
-    // psbt add input from accumulative inputs
-    inputs.forEach((utxo: UTXO) =>
-      psbt.addInput({
-        hash: utxo.hash,
-        index: utxo.index,
-        witnessUtxo: utxo.witnessUtxo,
-      }),
-    )
-
-    // psbt add outputs from accumulative outputs
-    outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
-      if (!output.address) {
-        //an empty address means this is the  change ddress
-        output.address = sender
-      }
-      if (!output.script) {
-        psbt.addOutput(output)
-      } else {
-        //we need to add the compiled memo this way to
-        //avoid dust error tx when accumulating memo output with 0 value
-        if (compiledMemo) {
-          psbt.addOutput({ script: compiledMemo, value: 0 })
-        }
-      }
-    })
-
-    return { psbt, utxos }
-  } catch (e) {
-    return Promise.reject(e)
+  //1. add output amount and recipient to targets
+  targetOutputs.push({
+    address: recipient,
+    value: amount.amount().toNumber(),
+  })
+  //2. add output memo to targets (optional)
+  if (compiledMemo) {
+    targetOutputs.push({ script: compiledMemo, value: 0 })
   }
+  const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+
+  // .inputs and .outputs will be undefined if no solution was found
+  if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
+
+  const psbt = new Bitcoin.Psbt({ network: btcNetwork(network) }) // Network-specific
+
+  // psbt add input from accumulative inputs
+  inputs.forEach((utxo: UTXO) =>
+    psbt.addInput({
+      hash: utxo.hash,
+      index: utxo.index,
+      witnessUtxo: utxo.witnessUtxo,
+    }),
+  )
+
+  // psbt add outputs from accumulative outputs
+  outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
+    if (!output.address) {
+      //an empty address means this is the  change ddress
+      output.address = sender
+    }
+    if (!output.script) {
+      psbt.addOutput(output)
+    } else {
+      //we need to add the compiled memo this way to
+      //avoid dust error tx when accumulating memo output with 0 value
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+    }
+  })
+
+  return { psbt, utxos }
 }
 
 /**
@@ -317,21 +313,13 @@ export const calcFee = (feeRate: FeeRate, memo?: string): BaseAmount => {
  * @returns {FeesWithRates} The default fees and rates.
  */
 export const getDefaultFeesWithRates = (): FeesWithRates => {
-  const rates: FeeRates = {
-    fastest: 50,
-    fast: 20,
-    average: 10,
-  }
-
-  const fees: Fees = {
-    type: 'byte',
-    fast: calcFee(rates.fast),
-    average: calcFee(rates.average),
-    fastest: calcFee(rates.fastest),
+  const rates = {
+    ...standardFeeRates(20),
+    [FeeOption.Fastest]: 50,
   }
 
   return {
-    fees,
+    fees: calcFees(rates, calcFee),
     rates,
   }
 }
@@ -353,4 +341,11 @@ export const getDefaultFees = (): Fees => {
  * @returns {string} The address prefix based on the network.
  *
  **/
-export const getPrefix = (network: Network) => (network === 'testnet' ? 'tb1' : 'bc1')
+export const getPrefix = (network: Network) => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'bc1'
+    case Network.Testnet:
+      return 'tb1'
+  }
+}

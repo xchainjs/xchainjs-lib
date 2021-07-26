@@ -1,16 +1,22 @@
-import nock from 'nock'
-import { Wallet, providers, BigNumber } from 'ethers'
 import { TransactionResponse } from '@ethersproject/abstract-provider'
-import { baseAmount, AssetETH, assetToString, assetFromString, ETHChain } from '@xchainjs/xchain-util'
-import Client from '../src/client'
-import { ETH_DECIMAL } from '../src/utils'
+import { FeeOption, Network } from '@xchainjs/xchain-client'
+import { AssetETH, Chain, ETHChain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { BigNumber, Wallet, providers } from 'ethers'
+import nock from 'nock'
+
 import { mock_all_api } from '../__mocks__'
 import {
   mock_etherscan_eth_txs_api,
   mock_etherscan_token_txs_api,
   mock_gastracker_api,
 } from '../__mocks__/etherscan-api'
+import {
+  mock_thornode_inbound_addresses_fail,
+  mock_thornode_inbound_addresses_success,
+} from '../__mocks__/thornode-api'
+import Client from '../src/client'
 import erc20ABI from '../src/data/erc20.json'
+import { ETH_DECIMAL } from '../src/utils'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
@@ -18,6 +24,8 @@ const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
 const etherscanUrl = 'https://api-ropsten.etherscan.io'
 const ropstenInfuraUrl = 'https://ropsten.infura.io/v3'
 const ropstenAlchemyUrl = 'https://eth-ropsten.alchemyapi.io/v2'
+const thornodeApiUrl = 'https://testnet.thornode.thorchain.info'
+
 const wallet = {
   signingKey: {
     curve: 'secp256k1',
@@ -49,7 +57,7 @@ describe('Client Test', () => {
 
   it('should create a wallet from phrase', () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
     expect(ethClient.getWallet()).toBeInstanceOf(Wallet)
@@ -70,7 +78,7 @@ describe('Client Test', () => {
 
   it('should connect to specified network', async () => {
     const ethClient = new Client({
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       phrase,
     })
 
@@ -84,7 +92,7 @@ describe('Client Test', () => {
 
   it('should connect to Infura provider', async () => {
     const ethClient = new Client({
-      network: 'mainnet',
+      network: 'mainnet' as Network,
       phrase,
       infuraCreds: {
         projectId: '',
@@ -97,10 +105,10 @@ describe('Client Test', () => {
 
   it('should set network', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
-    ethClient.setNetwork('testnet')
+    ethClient.setNetwork('testnet' as Network)
 
     const network = await ethClient.getWallet().provider.getNetwork()
     expect(network.name).toEqual('ropsten')
@@ -109,36 +117,54 @@ describe('Client Test', () => {
 
   it('should get address', () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
     expect(ethClient.getAddress()).toEqual(address)
   })
 
   it('should get network', () => {
-    const ethClient = new Client({ phrase, network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' as Network })
     expect(ethClient.getNetwork()).toEqual('testnet')
   })
 
   it('should fail a bad address', () => {
-    const ethClient = new Client({ phrase, network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' as Network })
     expect(ethClient.validateAddress('0xBADbadBad')).toBeFalsy()
   })
 
   it('should pass a good address', () => {
-    const ethClient = new Client({ phrase, network: 'testnet' })
+    const ethClient = new Client({ phrase, network: 'testnet' as Network })
     const goodAddress = ethClient.validateAddress(address)
     expect(goodAddress).toBeTruthy()
   })
 
   it('throws error on bad index', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
+    const ethClient = new Client({ network: 'testnet' as Network, phrase })
     expect(() => ethClient.getAddress(-1)).toThrow()
+  })
+
+  it('estimateGasPrices', async () => {
+    mock_thornode_inbound_addresses_success(
+      thornodeApiUrl,
+      require('../__mocks__/responses/inbound_addresses_testnet.json'),
+    )
+
+    const ethClient = new Client({
+      network: 'testnet' as Network,
+      phrase,
+    })
+
+    const { fast, fastest, average } = await ethClient.estimateGasPrices()
+
+    expect(fast.amount().toString()).toEqual('30000000000')
+    expect(fastest.amount().toString()).toEqual('150000000000')
+    expect(average.amount().toString()).toEqual('15000000000')
   })
 
   it('get eth transaction history', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -182,7 +208,7 @@ describe('Client Test', () => {
 
   it('get token transaction history', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -231,7 +257,7 @@ describe('Client Test', () => {
 
   it('get transaction data', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -296,7 +322,7 @@ describe('Client Test', () => {
 
   it('ETH transfer', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -311,6 +337,7 @@ describe('Client Test', () => {
       'eth_sendRawTransaction',
       '0x48f098a17fe33032668b3780090752473a9e2d9a432699962e40ffed736803d0',
     )
+    mock_thornode_inbound_addresses_fail(thornodeApiUrl)
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
       SafeGasPrice: '51',
@@ -333,7 +360,7 @@ describe('Client Test', () => {
 
   it('ERC20 transfer', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -353,14 +380,25 @@ describe('Client Test', () => {
       ropstenInfuraUrl,
       ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xea328780f0558b0bbf34baa142703957122678f5a5b9a0696102cff41a5d2682',
+      '0xc24aafc2d180370610aedecf0c7de939ad9c2a2c0c0a810eae5f3b69362022c3',
     )
-    mock_gastracker_api(etherscanUrl, 'gasoracle', {
-      LastBlock: '11745402',
-      SafeGasPrice: '51',
-      ProposeGasPrice: '59',
-      FastGasPrice: '76',
-    })
+    mock_thornode_inbound_addresses_success(thornodeApiUrl, [
+      {
+        chain: 'ETH' as Chain,
+        pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
+        address: '0x8d1133a8cf23112fdb21f1efca340d727a98196e',
+        router: '0xe0a63488e677151844e70623533c22007dc57c9e',
+        halted: false,
+        gas_rate: '30',
+      },
+      {
+        chain: 'LTC' as Chain,
+        pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
+        address: 'tltc1q3x76wl4gmwu4yzx682r30ej0a8e2tttaw6pv7u',
+        halted: false,
+        gas_rate: '49',
+      },
+    ])
 
     const gasFee = await ethClient.estimateFeesWithGasPricesAndLimits({
       recipient: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
@@ -374,16 +412,17 @@ describe('Client Test', () => {
       gasLimit: gasFee.gasLimit,
       gasPrice: gasFee.gasPrices.fastest,
     })
-    expect(txHash).toEqual('0xea328780f0558b0bbf34baa142703957122678f5a5b9a0696102cff41a5d2682')
+    expect(txHash).toEqual('0xc24aafc2d180370610aedecf0c7de939ad9c2a2c0c0a810eae5f3b69362022c3')
   })
 
   it('estimate gas for eth transfer', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
+    const ethClient = new Client({ network: 'testnet' as Network, phrase })
 
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_thornode_inbound_addresses_fail(thornodeApiUrl)
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
       SafeGasPrice: '51',
@@ -409,12 +448,13 @@ describe('Client Test', () => {
   })
 
   it('estimate gas for erc20 transfer', async () => {
-    const ethClient = new Client({ network: 'testnet', phrase })
+    const ethClient = new Client({ network: 'testnet' as Network, phrase })
 
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_thornode_inbound_addresses_fail(thornodeApiUrl)
     mock_gastracker_api(etherscanUrl, 'gasoracle', {
       LastBlock: '11745402',
       SafeGasPrice: '51',
@@ -442,7 +482,7 @@ describe('Client Test', () => {
 
   it('isApproved', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -457,24 +497,24 @@ describe('Client Test', () => {
       '0x0000000000000000000000000000000000000000000000000000000000000064',
     )
 
-    let isApproved = await ethClient.isApproved(
-      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-      baseAmount(100, ETH_DECIMAL),
-    )
+    let isApproved = await ethClient.isApproved({
+      contractAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      spenderAddress: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      amount: baseAmount(100, ETH_DECIMAL),
+    })
     expect(isApproved).toEqual(true)
 
-    isApproved = await ethClient.isApproved(
-      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-      baseAmount(101, ETH_DECIMAL),
-    )
+    isApproved = await ethClient.isApproved({
+      contractAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      spenderAddress: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      amount: baseAmount(101, ETH_DECIMAL),
+    })
     expect(isApproved).toEqual(false)
   })
 
   it('estimateApprove', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -484,8 +524,8 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
 
     const gasLimit = await ethClient.estimateApprove({
-      spender: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      sender: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      contractAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      spenderAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       amount: baseAmount(100, ETH_DECIMAL),
     })
     expect(gasLimit.eq(21000)).toBeTruthy()
@@ -493,7 +533,7 @@ describe('Client Test', () => {
 
   it('approve', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -511,9 +551,9 @@ describe('Client Test', () => {
 
     const tx = await ethClient.approve({
       walletIndex: 0,
-      spender: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      sender: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
-      feeOptionKey: 'fastest',
+      contractAddress: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
+      spenderAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+      feeOptionKey: 'fastest' as FeeOption,
       amount: baseAmount(100, ETH_DECIMAL),
     })
     expect(tx.hash).toEqual('0x168ecebeeca0cd33d7151fa334cf8279ccacb58e855ede8276dfe6f77cafd55c')
@@ -521,7 +561,7 @@ describe('Client Test', () => {
 
   it('estimate call', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -530,20 +570,25 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
 
-    const gasLimit = await ethClient.estimateCall('0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7', erc20ABI, 'transfer', [
-      '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
-      {
-        from: ethClient.getAddress(),
-      },
-    ])
+    const gasLimit = await ethClient.estimateCall({
+      contractAddress: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
+      abi: erc20ABI,
+      funcName: 'transfer',
+      funcParams: [
+        '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+        BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
+        {
+          from: ethClient.getAddress(),
+        },
+      ],
+    })
 
     expect(gasLimit.toString()).toEqual('21000')
   })
 
   it('call', async () => {
     const ethClient = new Client({
-      network: 'testnet',
+      network: 'testnet' as Network,
       phrase,
     })
 
@@ -563,23 +608,34 @@ describe('Client Test', () => {
       ropstenInfuraUrl,
       ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xbc5f55b97b816d1c30138d26bce5434ff28828b15ee79aa79aebf70f786a3fe8',
+      '0xdb8fa5020096459950024d4c0635d91754cb6c6623d23d95bdce7e9308c975df',
     )
-    mock_gastracker_api(etherscanUrl, 'gasoracle', {
-      LastBlock: '11745402',
-      SafeGasPrice: '51',
-      ProposeGasPrice: '59',
-      FastGasPrice: '76',
-    })
+    mock_thornode_inbound_addresses_success(thornodeApiUrl, [
+      {
+        chain: 'ETH' as Chain,
+        pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
+        address: '0x8d1133a8cf23112fdb21f1efca340d727a98196e',
+        router: '0xe0a63488e677151844e70623533c22007dc57c9e',
+        halted: false,
+        gas_rate: '51',
+      },
+      {
+        chain: 'LTC' as Chain,
+        pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
+        address: 'tltc1q3x76wl4gmwu4yzx682r30ej0a8e2tttaw6pv7u',
+        halted: false,
+        gas_rate: '49',
+      },
+    ])
 
     const prices = await ethClient.estimateGasPrices()
 
-    const txResult = await ethClient.call<TransactionResponse>(
-      0,
-      '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
-      erc20ABI,
-      'transfer',
-      [
+    const txResult = await ethClient.call<TransactionResponse>({
+      walletIndex: 0,
+      contractAddress: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
+      abi: erc20ABI,
+      funcName: 'transfer',
+      funcParams: [
         '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
         BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
         // Here the tx overrides
@@ -588,8 +644,8 @@ describe('Client Test', () => {
           gasPrice: BigNumber.from(prices.average.amount().toString()),
         },
       ],
-    )
+    })
 
-    expect(txResult.hash).toEqual('0xbc5f55b97b816d1c30138d26bce5434ff28828b15ee79aa79aebf70f786a3fe8')
+    expect(txResult.hash).toEqual('0xdb8fa5020096459950024d4c0635d91754cb6c6623d23d95bdce7e9308c975df')
   })
 })

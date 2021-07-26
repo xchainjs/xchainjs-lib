@@ -1,4 +1,5 @@
 import axios from 'axios'
+
 import {
   AddressBalance,
   AddressParams,
@@ -10,6 +11,8 @@ import {
 } from './types'
 import { DEFAULT_SUGGESTED_TRANSACTION_FEE } from './utils'
 
+type ErrorResponse = { error: unknown }
+
 /**
  * Check error response.
  *
@@ -17,7 +20,7 @@ import { DEFAULT_SUGGESTED_TRANSACTION_FEE } from './utils'
  * @returns {boolean}
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isErrorResponse = (response: any): boolean => {
+const isErrorResponse = (response: any): response is ErrorResponse => {
   return !!response.error
 }
 
@@ -31,19 +34,9 @@ const isErrorResponse = (response: any): boolean => {
  * @throws {"failed to query account by a given address"} thrown if failed to query account by a given address
  */
 export const getAccount = async ({ haskoinUrl, address }: AddressParams): Promise<AddressBalance> => {
-  try {
-    const result: AddressBalance | null = await axios
-      .get(`${haskoinUrl}/address/${address}/balance`)
-      .then((response) => (isErrorResponse(response.data) ? null : response.data))
-
-    if (!result) {
-      throw new Error('failed to query account by a given address')
-    }
-
-    return result
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  const result: AddressBalance | ErrorResponse = (await axios.get(`${haskoinUrl}/address/${address}/balance`)).data
+  if (!result || isErrorResponse(result)) throw new Error(`failed to query account by given address ${address}`)
+  return result
 }
 
 /**
@@ -56,19 +49,9 @@ export const getAccount = async ({ haskoinUrl, address }: AddressParams): Promis
  * @throws {"failed to query transaction by a given hash"} thrown if failed to query transaction by a given hash
  */
 export const getTransaction = async ({ haskoinUrl, txId }: TxHashParams): Promise<Transaction> => {
-  try {
-    const result: Transaction | null = await axios
-      .get(`${haskoinUrl}/transaction/${txId}`)
-      .then((response) => (isErrorResponse(response.data) ? null : response.data))
-
-    if (!result) {
-      throw new Error('failed to query transaction by a given hash')
-    }
-
-    return result
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  const result: Transaction | ErrorResponse = (await axios.get(`${haskoinUrl}/transaction/${txId}`)).data
+  if (!result || isErrorResponse(result)) throw new Error(`failed to query transaction by a given hash ${txId}`)
+  return result
 }
 
 /**
@@ -81,19 +64,9 @@ export const getTransaction = async ({ haskoinUrl, txId }: TxHashParams): Promis
  * @throws {"failed to query transaction by a given hash"} thrown if failed to query raw transaction by a given hash
  */
 export const getRawTransaction = async ({ haskoinUrl, txId }: TxHashParams): Promise<string> => {
-  try {
-    const result: RawTransaction | null = await axios
-      .get(`${haskoinUrl}/transaction/${txId}/raw`)
-      .then((response) => (isErrorResponse(response.data) ? null : response.data))
-
-    if (!result) {
-      throw new Error('failed to query transaction by a given hash')
-    }
-
-    return result.result
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  const result: RawTransaction | ErrorResponse = (await axios.get(`${haskoinUrl}/transaction/${txId}/raw`)).data
+  if (!result || isErrorResponse(result)) throw new Error(`failed to query transaction by a given hash ${txId}`)
+  return result.result
 }
 
 /**
@@ -102,7 +75,7 @@ export const getRawTransaction = async ({ haskoinUrl, txId }: TxHashParams): Pro
  * @param {string} haskoinUrl The haskoin API url.
  * @param {string} address The BCH address.
  * @param {TransactionsQueryParam} params The API query parameters.
- * @returns {Array<Transaction>}
+ * @returns {Transaction[]}
  *
  * @throws {"failed to query transactions"} thrown if failed to query transactions
  */
@@ -111,21 +84,11 @@ export const getTransactions = async ({
   address,
   params,
 }: AddressParams & { params: TransactionsQueryParam }): Promise<Transaction[]> => {
-  try {
-    const result: Transaction[] | null = await axios
-      .get(`${haskoinUrl}/address/${address}/transactions/full`, {
-        params,
-      })
-      .then((response) => (isErrorResponse(response.data) ? null : response.data))
-
-    if (!result) {
-      throw new Error('failed to query transactions')
-    }
-
-    return result
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  const result: Transaction[] | ErrorResponse = (
+    await axios.get(`${haskoinUrl}/address/${address}/transactions/full`, { params })
+  ).data
+  if (!result || isErrorResponse(result)) throw new Error('failed to query transactions')
+  return result
 }
 
 /**
@@ -133,28 +96,20 @@ export const getTransactions = async ({
  *
  * @param {string} haskoinUrl The haskoin API url.
  * @param {string} address The BCH address.
- * @returns {Array<TxUnspent>}
+ * @returns {TxUnspent[]}
  *
  * @throws {"failed to query unspent transactions"} thrown if failed to query unspent transactions
  */
 export const getUnspentTransactions = async ({ haskoinUrl, address }: AddressParams): Promise<TxUnspent[]> => {
-  try {
-    // Get transacton count for a given address.
-    const account = await getAccount({ haskoinUrl, address })
+  // Get transacton count for a given address.
+  const account = await getAccount({ haskoinUrl, address })
 
-    // Set limit to the transaction count to be all the utxos.
-    const result: TxUnspent[] | null = await axios
-      .get(`${haskoinUrl}/address/${address}/unspent?limit=${account?.utxo}`)
-      .then((response) => (isErrorResponse(response.data) ? null : response.data))
-
-    if (!result) {
-      throw new Error('failed to query unspent transactions')
-    }
-
-    return result
-  } catch (error) {
-    return Promise.reject(error)
-  }
+  // Set limit to the transaction count to be all the utxos.
+  const result: TxUnspent[] | ErrorResponse = (
+    await axios.get(`${haskoinUrl}/address/${address}/unspent?limit${account?.utxo}`)
+  ).data
+  if (!result || isErrorResponse(result)) throw new Error('failed to query unspent transactions')
+  return result
 }
 
 /**

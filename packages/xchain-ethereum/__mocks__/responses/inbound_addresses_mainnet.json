@@ -1,0 +1,38 @@
+[
+  {
+    "chain": "BCH",
+    "pub_key": "thorpub1addwnpepqd73af5rmxc8n53nvwfjf0j95uvrqpq8gy2zlwzgytlxcexzl098uymemgf",
+    "address": "qrph20chpqgcvwp9fas0vrt9rnvpcykx0s7n0lqh6v",
+    "halted": false,
+    "gas_rate": "3"
+  },
+  {
+    "chain": "BNB",
+    "pub_key": "thorpub1addwnpepqd73af5rmxc8n53nvwfjf0j95uvrqpq8gy2zlwzgytlxcexzl098uymemgf",
+    "address": "bnb1cd6n79cgzxrrsf20vrmq6egumqwp93nuaytlqh",
+    "halted": false,
+    "gas_rate": "11250"
+  },
+  {
+    "chain": "BTC",
+    "pub_key": "thorpub1addwnpepqd73af5rmxc8n53nvwfjf0j95uvrqpq8gy2zlwzgytlxcexzl098uymemgf",
+    "address": "bc1qcd6n79cgzxrrsf20vrmq6egumqwp93nuf62c95",
+    "halted": false,
+    "gas_rate": "72"
+  },
+  {
+    "chain": "ETH",
+    "pub_key": "thorpub1addwnpepqd73af5rmxc8n53nvwfjf0j95uvrqpq8gy2zlwzgytlxcexzl098uymemgf",
+    "address": "0x7c29447cc7c5e767b23a9d1cfd41a05675c9d128",
+    "router": "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B",
+    "halted": false,
+    "gas_rate": "30"
+  },
+  {
+    "chain": "LTC",
+    "pub_key": "thorpub1addwnpepqd73af5rmxc8n53nvwfjf0j95uvrqpq8gy2zlwzgytlxcexzl098uymemgf",
+    "address": "ltc1qcd6n79cgzxrrsf20vrmq6egumqwp93nudxsuay",
+    "halted": false,
+    "gas_rate": "57"
+  }
+]

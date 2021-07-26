@@ -1,19 +1,28 @@
-import * as Litecoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoinjs-lib
-import * as sochain from './sochain-api'
-import * as nodeApi from './node-api'
-import { Address, Balance, Fees, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
-import { AssetLTC, BaseAmount, baseAmount, assetToBase, assetAmount } from '@xchainjs/xchain-util'
-import { LtcAddressUTXOs, AddressParams } from './types/sochain-api-types'
-import { FeeRate, FeeRates, FeesWithRates } from './types/client-types'
-import { BroadcastTxParams, UTXO, UTXOs } from './types/common'
-import { MIN_TX_FEE } from './const'
+import {
+  Address,
+  Balance,
+  FeeOption,
+  FeeRate,
+  Fees,
+  FeesWithRates,
+  Network,
+  TxHash,
+  TxParams,
+  calcFees,
+  standardFeeRates,
+} from '@xchainjs/xchain-client'
+import { AssetLTC, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import * as Litecoin from 'bitcoinjs-lib'
 import coininfo from 'coininfo'
+import accumulative from 'coinselect/accumulative'
+
+import { MIN_TX_FEE } from './const'
+import * as nodeApi from './node-api'
+import * as sochain from './sochain-api'
+import { BroadcastTxParams, UTXO } from './types/common'
+import { AddressParams, LtcAddressUTXO } from './types/sochain-api-types'
 
 export const LTC_DECIMAL = 8
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import accumulative from 'coinselect/accumulative'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
@@ -39,12 +48,12 @@ export const compileMemo = (memo: string): Buffer => {
 /**
  * Get the transaction fee.
  *
- * @param {UTXOs} inputs The UTXOs.
+ * @param {UTXO[]} inputs The UTXOs.
  * @param {FeeRate} feeRate The fee rate.
  * @param {Buffer} data The compiled memo (Optional).
  * @returns {number} The fee amount.
  */
-export function getFee(inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = null): number {
+export function getFee(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
   let sum =
     TX_EMPTY_SIZE +
     inputs.reduce(function (a, x) {
@@ -66,23 +75,13 @@ export function getFee(inputs: UTXOs, feeRate: FeeRate, data: Buffer | null = nu
 /**
  * Get the average value of an array.
  *
- * @param {Array<number>} array
+ * @param {number[]} array
  * @returns {number} The average value.
  */
-export function arrayAverage(array: Array<number>): number {
+export function arrayAverage(array: number[]): number {
   let sum = 0
   array.forEach((value) => (sum += value))
   return sum / array.length
-}
-
-/**
- * Check if give network is a testnet.
- *
- * @param {Network} network
- * @returns {boolean} `true` or `false`
- */
-export const isTestnet = (network: Network): boolean => {
-  return network === 'testnet'
 }
 
 /**
@@ -92,14 +91,19 @@ export const isTestnet = (network: Network): boolean => {
  * @returns {Litecoin.Network} The LTC network.
  */
 export const ltcNetwork = (network: Network): Litecoin.Network => {
-  return isTestnet(network) ? coininfo.litecoin.test.toBitcoinJS() : coininfo.litecoin.main.toBitcoinJS()
+  switch (network) {
+    case Network.Mainnet:
+      return coininfo.litecoin.main.toBitcoinJS()
+    case Network.Testnet:
+      return coininfo.litecoin.test.toBitcoinJS()
+  }
 }
 
 /**
  * Get the balances of an address.
  *
  * @param {AddressParams} params
- * @returns {Array<Balance>} The balances of the given address.
+ * @returns {Balance[]} The balances of the given address.
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   try {
@@ -111,7 +115,7 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
       },
     ]
   } catch (error) {
-    return Promise.reject(new Error('Invalid address'))
+    throw new Error(`Could not get balances for address ${params.address}`)
   }
 }
 
@@ -135,10 +139,10 @@ export const validateAddress = (address: Address, network: Network): boolean => 
  * Scan UTXOs from sochain.
  *
  * @param {AddressParams} params
- * @returns {Array<UTXO>} The UTXOs of the given address.
+ * @returns {UTXO[]} The UTXOs of the given address.
  */
-export const scanUTXOs = async (params: AddressParams): Promise<UTXOs> => {
-  const utxos: LtcAddressUTXOs = await sochain.getUnspentTxs(params)
+export const scanUTXOs = async (params: AddressParams): Promise<UTXO[]> => {
+  const utxos: LtcAddressUTXO[] = await sochain.getUnspentTxs(params)
 
   return utxos.map(
     (utxo) =>
@@ -173,68 +177,58 @@ export const buildTx = async ({
   sender: Address
   network: Network
   sochainUrl: string
-}): Promise<{ psbt: Litecoin.Psbt; utxos: UTXOs }> => {
-  try {
-    if (!validateAddress(recipient, network)) {
-      return Promise.reject(new Error('Invalid address'))
-    }
+}): Promise<{ psbt: Litecoin.Psbt; utxos: UTXO[] }> => {
+  if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
-    const utxos = await scanUTXOs({ sochainUrl, network, address: sender })
-    if (utxos.length === 0) {
-      return Promise.reject(Error('No utxos to send'))
-    }
+  const utxos = await scanUTXOs({ sochainUrl, network, address: sender })
+  if (utxos.length === 0) throw new Error('No utxos to send')
 
-    const feeRateWhole = Number(feeRate.toFixed(0))
-    const compiledMemo = memo ? compileMemo(memo) : null
+  const feeRateWhole = Number(feeRate.toFixed(0))
+  const compiledMemo = memo ? compileMemo(memo) : null
 
-    const targetOutputs = []
-    //1. output to recipient
-    targetOutputs.push({
-      address: recipient,
-      value: amount.amount().toNumber(),
-    })
-    //2. add output memo to targets (optional)
-    if (compiledMemo) {
-      targetOutputs.push({ script: compiledMemo, value: 0 })
-    }
-    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-
-    // .inputs and .outputs will be undefined if no solution was found
-    if (!inputs || !outputs) {
-      return Promise.reject(Error('Balance insufficient for transaction'))
-    }
-
-    const psbt = new Litecoin.Psbt({ network: ltcNetwork(network) }) // Network-specific
-    //Inputs
-    inputs.forEach((utxo: UTXO) =>
-      psbt.addInput({
-        hash: utxo.hash,
-        index: utxo.index,
-        witnessUtxo: utxo.witnessUtxo,
-      }),
-    )
-
-    // Outputs
-    outputs.forEach((output: Litecoin.PsbtTxOutput) => {
-      if (!output.address) {
-        //an empty address means this is the  change ddress
-        output.address = sender
-      }
-      if (!output.script) {
-        psbt.addOutput(output)
-      } else {
-        //we need to add the compiled memo this way to
-        //avoid dust error tx when accumulating memo output with 0 value
-        if (compiledMemo) {
-          psbt.addOutput({ script: compiledMemo, value: 0 })
-        }
-      }
-    })
-
-    return { psbt, utxos }
-  } catch (e) {
-    return Promise.reject(e)
+  const targetOutputs = []
+  //1. output to recipient
+  targetOutputs.push({
+    address: recipient,
+    value: amount.amount().toNumber(),
+  })
+  //2. add output memo to targets (optional)
+  if (compiledMemo) {
+    targetOutputs.push({ script: compiledMemo, value: 0 })
   }
+  const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+
+  // .inputs and .outputs will be undefined if no solution was found
+  if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
+
+  const psbt = new Litecoin.Psbt({ network: ltcNetwork(network) }) // Network-specific
+  //Inputs
+  inputs.forEach((utxo: UTXO) =>
+    psbt.addInput({
+      hash: utxo.hash,
+      index: utxo.index,
+      witnessUtxo: utxo.witnessUtxo,
+    }),
+  )
+
+  // Outputs
+  outputs.forEach((output: Litecoin.PsbtTxOutput) => {
+    if (!output.address) {
+      //an empty address means this is the  change ddress
+      output.address = sender
+    }
+    if (!output.script) {
+      psbt.addOutput(output)
+    } else {
+      //we need to add the compiled memo this way to
+      //avoid dust error tx when accumulating memo output with 0 value
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+    }
+  })
+
+  return { psbt, utxos }
 }
 
 /**
@@ -266,21 +260,13 @@ export const calcFee = (feeRate: FeeRate, memo?: string): BaseAmount => {
  * @returns {FeesWithRates} The default fees and rates.
  */
 export const getDefaultFeesWithRates = (): FeesWithRates => {
-  const rates: FeeRates = {
-    fastest: 50,
-    fast: 20,
-    average: 10,
-  }
-
-  const fees: Fees = {
-    type: 'byte',
-    fast: calcFee(rates.fast),
-    average: calcFee(rates.average),
-    fastest: calcFee(rates.fastest),
+  const rates = {
+    ...standardFeeRates(20),
+    [FeeOption.Fastest]: 50,
   }
 
   return {
-    fees,
+    fees: calcFees(rates, calcFee),
     rates,
   }
 }
@@ -298,8 +284,15 @@ export const getDefaultFees = (): Fees => {
 /**
  * Get address prefix based on the network.
  *
- * @param {string} network
+ * @param {Network} network
  * @returns {string} The address prefix based on the network.
  *
  **/
-export const getPrefix = (network: Network) => (network === 'testnet' ? 'tltc1' : 'ltc1')
+export const getPrefix = (network: Network) => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'ltc1'
+    case Network.Testnet:
+      return 'tltc1'
+  }
+}

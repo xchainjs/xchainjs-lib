@@ -1,24 +1,16 @@
-import { ethers, BigNumber } from 'ethers'
+import { FeeOption, Fees, Network } from '@xchainjs/xchain-client'
 import { BaseAmount } from '@xchainjs/xchain-util'
-import * as C from '@xchainjs/xchain-client'
-import { FeeOptionKey } from '@xchainjs/xchain-client'
+import { BigNumber, ethers } from 'ethers'
 
 export type Address = string
 
-export enum Network {
-  TEST = 'ropsten',
-  MAIN = 'homestead',
+export enum EthNetwork {
+  Test = 'ropsten',
+  Main = 'homestead',
 }
 
-export type ClientUrl = {
-  testnet: string
-  mainnet: string
-}
-
-export type ExplorerUrl = {
-  testnet: string
-  mainnet: string
-}
+export type ClientUrl = Record<Network, string>
+export type ExplorerUrl = Record<Network, string>
 
 export type TxOverrides = {
   nonce?: ethers.BigNumberish
@@ -35,16 +27,35 @@ export type InfuraCreds = {
   projectSecret?: string
 }
 
-export type GasPrices = Record<C.FeeOptionKey, BaseAmount>
+export type GasPrices = Record<FeeOption, BaseAmount>
 
-export type FeesParams = C.FeesParams & C.TxParams
-
-export type FeesWithGasPricesAndLimits = { fees: C.Fees; gasPrices: GasPrices; gasLimit: BigNumber }
+export type FeesWithGasPricesAndLimits = { fees: Fees; gasPrices: GasPrices; gasLimit: BigNumber }
 
 export type ApproveParams = {
-  walletIndex: number
-  spender: Address
-  sender: Address
-  feeOptionKey?: FeeOptionKey
+  walletIndex?: number
+  contractAddress: Address
+  spenderAddress: Address
+  feeOptionKey?: FeeOption
+  amount?: BaseAmount
+  // Optional fallback in case estimation for gas limit fails
+  gasLimitFallback?: ethers.BigNumberish
+}
+
+export type EstimateApproveParams = Omit<ApproveParams, 'feeOptionKey' | 'gasLimitFallback'>
+
+export type IsApprovedParams = {
+  walletIndex?: number
+  contractAddress: Address
+  spenderAddress: Address
   amount?: BaseAmount
 }
+
+export type CallParams = {
+  walletIndex?: number
+  contractAddress: Address
+  abi: ethers.ContractInterface
+  funcName: string
+  funcParams?: unknown[]
+}
+
+export type EstimateCallParams = Pick<CallParams, 'contractAddress' | 'abi' | 'funcName' | 'funcParams' | 'walletIndex'>
