@@ -349,7 +349,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     await this.bncClient.setPrivateKey(this.getPrivateKey(walletIndex || 0))
 
     const transferResult = await this.bncClient.transfer(
-      this.getAddress(),
+      this.getAddress(walletIndex),
       recipient,
       baseToAsset(amount).amount().toString(),
       asset ? asset.symbol : AssetBNB.symbol,

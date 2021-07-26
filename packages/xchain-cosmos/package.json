@@ -1,10 +1,10 @@
 {
   "name": "@xchainjs/xchain-cosmos",
-  "version": "0.13.6",
+  "version": "0.13.7",
   "description": "Custom Cosmos client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
-    "Cosoms"
+    "Cosmos"
   ],
   "author": "XChainJS",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
@@ -46,6 +46,6 @@
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "^0.3.0",
     "axios": "^0.21.0",
-    "cosmos-client": "0.42.7"
+    "cosmos-client": "0.39.2"
   }
 }

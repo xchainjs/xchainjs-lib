@@ -1,3 +1,11 @@
+# v.0.17.7 (2021-07-20)
+
+- cosmos 0.42.x has too many breaking changes that wren't caught in the last version, downgrade "cosmos-client": "0.39.2"
+
+# v.0.17.6 (2021-07-19)
+
+- bumping peer dependency "cosmos-client": "0.39.2" -> "cosmos-client": "^0.42.7"
+
 # v.0.17.5 (2021-07-18)
 
 - Updatedrollupjs to include axios to enlable usage on node
