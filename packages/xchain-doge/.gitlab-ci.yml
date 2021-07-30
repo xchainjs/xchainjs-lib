@@ -1,0 +1,39 @@
+image: node:13
+
+stages:
+  - lint
+  - build
+  - test
+  - deploy
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - .yarn
+
+before_script:
+  - apt-get update
+  - yarn install
+
+lint:
+  stage: lint
+  script: yarn lint
+
+build:
+  stage: build
+  script: yarn build
+
+test:
+  stage: test
+  script:
+    - yarn test
+
+publish:
+  stage: deploy
+  only:
+    - tags
+  script:
+    - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'>.npmrc
+    - npm publish
+
