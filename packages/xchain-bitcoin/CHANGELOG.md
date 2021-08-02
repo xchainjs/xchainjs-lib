@@ -1,16 +1,32 @@
+# v.0.15.8 (2021-06-18)
+
+- changed rollupjs to treat axios as external lib
+
+# v.0.15.7 (2021-06-10)
+
+#### Fix
+
+- [haskoin] Fix `getBalance` (incl. test)
+
+# v.0.15.6 (2021-06-09)
+
+- ???
+
 # v.0.15.5 (2021-06-08)
 
 ### BREAKING CHANGE
 
 #### Issue
-  [Sochain API](https://sochain.com/) is out of sync and it's reported to be fixed in a few days.
-  Report from Sochain: "WARNING: DATA SHOWN FOR BITCOIN NETWORK MAY BE OUTDATED
+
+[Sochain API](https://sochain.com/) is out of sync and it's reported to be fixed in a few days.
+Report from Sochain: "WARNING: DATA SHOWN FOR BITCOIN NETWORK MAY BE OUTDATED
 We are working to resolve the issue in the next few days."
 
-#### Hotfix
-  - Replace `getBalance` and `getUnspentTxs` apis from sochain to haskoin for temporary purpose.
-  - Update `Utils.scanUTXOs` method using haskoin api
-  - Skip unit test for `utils` (it will be reverted after `sochain` api is recovered)
+#### Fix
+
+- Replace `getBalance` and `getUnspentTxs` apis from sochain to haskoin for temporary purpose.
+- Update `Utils.scanUTXOs` method using haskoin api
+- Skip unit test for `utils` (it will be reverted after `sochain` api is recovered)
 
 # v.0.15.4 (2021-06-01)
 

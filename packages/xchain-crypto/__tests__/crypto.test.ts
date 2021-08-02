@@ -1,26 +1,26 @@
 import { generatePhrase, validatePhrase, encryptToKeyStore, decryptFromKeystore } from '../src/crypto'
 
 describe('Generate Phrase', () => {
-  it('Generates 12-word phrase', () => {
-    const phrase = generatePhrase()
+  it('Generates 12-word phrase', async () => {
+    const phrase = await generatePhrase()
     const words = phrase.split(' ')
     expect(words.length).toEqual(12)
   })
-  it('Generates 24-word phrase', () => {
-    const phrase = generatePhrase(24)
+  it('Generates 24-word phrase', async () => {
+    const phrase = await generatePhrase(24)
     const words = phrase.split(' ')
     expect(words.length).toEqual(24)
   })
 })
 
 describe('Validate Phrase', () => {
-  it('Validates 12-word Phrase', () => {
-    const phrase = generatePhrase()
+  it('Validates 12-word Phrase', async () => {
+    const phrase = await generatePhrase()
     const correctPhrase = validatePhrase(phrase)
     expect(correctPhrase).toBeTruthy()
   })
-  it('Validates 24-word Phrase', () => {
-    const phrase = generatePhrase(24)
+  it('Validates 24-word Phrase', async () => {
+    const phrase = await generatePhrase(24)
     const correctPhrase = validatePhrase(phrase)
     expect(correctPhrase).toBeTruthy()
   })
@@ -47,7 +47,7 @@ describe('Export Keystore', () => {
 
 describe('Import Keystore', () => {
   it('Decrypts Keystore', async () => {
-    const phrase = generatePhrase()
+    const phrase = await generatePhrase()
     const password = 'thorchain'
     const keystore = await encryptToKeyStore(phrase, password)
     const phraseDecrypted = await decryptFromKeystore(keystore, password)

@@ -12,3 +12,5 @@ packages/xchain-client/yarn-error.log
 
 packages/*/lib
 packages/*/yarn.lock
+
+.idea

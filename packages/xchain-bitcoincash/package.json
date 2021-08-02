@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-bitcoincash",
-  "version": "0.0.1-alpha.867+0d871f1",
+  "version": "0.0.1-alpha.869+49db531",
   "description": "Custom bitcoincash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -37,9 +37,9 @@
   },
   "devDependencies": {
     "@psf/bitcoincashjs-lib": "^4.0.2",
-    "@thorwallet/xchain-client": "0.0.1-alpha.867+0d871f1",
-    "@thorwallet/xchain-crypto": "0.0.1-alpha.867+0d871f1",
-    "@thorwallet/xchain-util": "0.0.1-alpha.867+0d871f1",
+    "@thorwallet/xchain-client": "0.0.1-alpha.869+49db531",
+    "@thorwallet/xchain-crypto": "0.0.1-alpha.869+49db531",
+    "@thorwallet/xchain-util": "0.0.1-alpha.869+49db531",
     "@types/bchaddrjs": "0.4.0",
     "@types/uniqid": "^5.2.0",
     "axios": "^0.21.0",
@@ -50,9 +50,9 @@
   },
   "peerDependencies": {
     "@psf/bitcoincashjs-lib": "^4.0.2",
-    "@thorwallet/xchain-client": "0.0.1-alpha.792+b6e4e50",
-    "@thorwallet/xchain-crypto": "0.0.1-alpha.792+b6e4e50",
-    "@thorwallet/xchain-util": "^0.0.1-alpha.792+b6e4e50",
+    "@thorwallet/xchain-client": "0.0.1-alpha.869+49db531",
+    "@thorwallet/xchain-crypto": "0.0.1-alpha.869+49db531",
+    "@thorwallet/xchain-util": "^0.0.1-alpha.869+49db531",
     "axios": "^0.21.0",
     "bchaddrjs": "^0.5.2",
     "bitcoinjs-lib": "^5.2.0",

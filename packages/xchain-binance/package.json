@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-binance",
-  "version": "0.0.1-alpha.867+0d871f1",
+  "version": "0.0.1-alpha.869+49db531",
   "description": "Custom Binance client and utilities used by XChainJS clients",
   "keywords": [
     "BNB",
@@ -34,9 +34,9 @@
   },
   "devDependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
-    "@thorwallet/xchain-client": "0.0.1-alpha.867+0d871f1",
-    "@thorwallet/xchain-crypto": "0.0.1-alpha.867+0d871f1",
-    "@thorwallet/xchain-util": "0.0.1-alpha.867+0d871f1",
+    "@thorwallet/xchain-client": "0.0.1-alpha.869+49db531",
+    "@thorwallet/xchain-crypto": "0.0.1-alpha.869+49db531",
+    "@thorwallet/xchain-util": "0.0.1-alpha.869+49db531",
     "@types/big.js": "^4.0.5",
     "bip32": "^2.0.6"
   },
@@ -45,9 +45,9 @@
   },
   "peerDependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
-    "@thorwallet/xchain-client": "0.0.1-alpha.792+b6e4e50",
-    "@thorwallet/xchain-crypto": "0.0.1-alpha.792+b6e4e50",
-    "@thorwallet/xchain-util": "0.0.1-alpha.792+b6e4e50"
+    "@thorwallet/xchain-client": "0.0.1-alpha.869+49db531",
+    "@thorwallet/xchain-crypto": "0.0.1-alpha.869+49db531",
+    "@thorwallet/xchain-util": "0.0.1-alpha.869+49db531"
   },
   "gitHead": "0d871f1d15f4694e6416e10b123af7b37cc623cf"
 }

@@ -1,3 +1,7 @@
+# v.0.6.6 (2021-06-19)
+
+- changed rollupjs to treat axios as external lib
+
 # v.0.6.5 (2021-06-02)
 
 - fix adding duplicated memo output in the `Utils.buildTx()`

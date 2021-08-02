@@ -1,3 +1,9 @@
+# v.0.13.3 (2021-06-29)
+
+### Fix
+
+- Stick with `cosmos-client@0.39.2`
+
 # v.0.13.1 (2021-06-01)
 
 - updated peer deps
