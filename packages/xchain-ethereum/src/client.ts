@@ -339,7 +339,7 @@ export default class Client implements XChainClient, EthereumClient {
    */
   getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
-      const ethAddress = address || this.getAddress()
+      const ethAddress = address || (await this.getAddress())
       // get ETH balance directly from provider
       const ethBalance: BigNumber = await this.getProvider().getBalance(ethAddress)
       const ethBalanceAmount = baseAmount(ethBalance.toString(), ETH_DECIMAL)
