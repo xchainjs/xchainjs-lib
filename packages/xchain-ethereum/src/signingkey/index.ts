@@ -2,7 +2,7 @@
 
 import { EC } from './elliptic'
 
-import { BytesLike, hexlify } from '@ethersproject/bytes'
+import { BytesLike, hexlify, arrayify } from '@ethersproject/bytes'
 import { defineReadOnly } from '@ethersproject/properties'
 
 let _curve: EC = null
@@ -18,7 +18,7 @@ const fromPrivateCache: { [key: string]: string } = {}
 const getPublicFromPrivate = (bytes: Uint8Array | string, compressed: boolean) => {
   const key = bytes.toString() + String(compressed)
   if (!fromPrivateCache[key]) {
-    fromPrivateCache[key] = getCurve().keyFromPrivate(bytes).getPublic(compressed, 'hex')
+    fromPrivateCache[key] = getCurve().keyFromPrivate(arrayify(bytes)).getPublic(compressed, 'hex')
   }
   return fromPrivateCache[key]
 }
