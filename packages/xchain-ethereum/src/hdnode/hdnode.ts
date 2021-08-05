@@ -10,13 +10,13 @@ import { arrayify, BytesLike, concat, hexDataSlice, hexZeroPad, hexlify } from '
 import { BigNumber } from '@ethersproject/bignumber'
 import { toUtf8Bytes, UnicodeNormalizationForm } from '@ethersproject/strings'
 import { defineReadOnly } from '@ethersproject/properties'
+import { SigningKey } from '@ethersproject/signing-key'
 import { ripemd160 } from '@ethersproject/sha2'
 import { computeAddress } from '@ethersproject/transactions'
 import { Wordlist, wordlists } from '@ethersproject/wordlists'
 
 import { Logger } from '@ethersproject/logger'
 import { bip32 } from '@thorwallet/xchain-crypto'
-import { SigningKey } from '../signingkey'
 const version = 'hdnode/5.3.0'
 
 const logger = new Logger(version)
@@ -178,19 +178,6 @@ export interface Mnemonic {
   readonly locale: string
 }
 
-const cache: { [key: string]: { priv: string; pub: string } } = {}
-
-const getKeysCached = (privateKey: string) => {
-  if (!cache[privateKey]) {
-    const signingKey = new SigningKey(privateKey)
-    cache[privateKey] = {
-      priv: signingKey.privateKey,
-      pub: signingKey.compressedPublicKey,
-    }
-  }
-  return cache[privateKey]
-}
-
 export class HDNode implements ExternallyOwnedAccount {
   readonly privateKey: string
   readonly publicKey: string
@@ -234,9 +221,9 @@ export class HDNode implements ExternallyOwnedAccount {
     }
 
     if (privateKey) {
-      const signingKey = getKeysCached(privateKey)
-      defineReadOnly(this, 'privateKey', signingKey.priv)
-      defineReadOnly(this, 'publicKey', signingKey.pub)
+      const signingKey = new SigningKey(privateKey)
+      defineReadOnly(this, 'privateKey', signingKey.privateKey)
+      defineReadOnly(this, 'publicKey', signingKey.compressedPublicKey)
     } else {
       defineReadOnly(this, 'privateKey', null)
       defineReadOnly(this, 'publicKey', hexlify(publicKey))
@@ -349,12 +336,13 @@ export class HDNode implements ExternallyOwnedAccount {
     let ki: string = null
 
     // The public key
-    const Ki: string = null
+    let Ki: string = null
 
     if (this.privateKey) {
       ki = bytes32(BigNumber.from(IL).add(this.privateKey).mod(N))
     } else {
-      throw new Error('[thorwallert] this is not implemented - oops!')
+      const ek = new SigningKey(hexlify(IL))
+      Ki = ek._addPoint(this.publicKey)
     }
 
     let mnemonicOrPath: Mnemonic | string = path
