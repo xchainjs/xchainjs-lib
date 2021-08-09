@@ -98,7 +98,7 @@ class Client implements BitcoinClient, XChainClient {
   setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      this.addrCache[this.phrase] = {}
+      this.addrCache[phrase] = {}
       return this.getAddress(walletIndex)
     } else {
       throw new Error('Invalid phrase')

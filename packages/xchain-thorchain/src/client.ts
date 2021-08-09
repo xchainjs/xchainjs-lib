@@ -217,8 +217,8 @@ class Client implements ThorchainClient, XChainClient {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
       }
-      this.addrCache[this.phrase] = {}
       this.phrase = phrase
+      this.addrCache[phrase] = {}
     }
 
     return this.getAddress(walletIndex)

@@ -181,7 +181,7 @@ class Client implements PolkadotClient, XChainClient {
         throw new Error('Invalid phrase')
       }
       this.phrase = phrase
-      this.addrCache[this.phrase] = {}
+      this.addrCache[phrase] = {}
     }
 
     return this.getAddress(walletIndex)

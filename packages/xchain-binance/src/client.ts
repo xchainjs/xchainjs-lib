@@ -194,7 +194,7 @@ class Client implements BinanceClient, XChainClient {
     }
 
     this.phrase = phrase
-    this.addrCache[this.phrase] = {}
+    this.addrCache[phrase] = {}
     return this.getAddress(walletIndex)
   }
 

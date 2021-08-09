@@ -164,7 +164,7 @@ class Client implements CosmosClient, XChainClient {
         throw new Error('Invalid phrase')
       }
 
-      this.addrCache[this.phrase] = {}
+      this.addrCache[phrase] = {}
       this.phrase = phrase
     }
 
