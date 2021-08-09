@@ -192,11 +192,12 @@ const getKeysCached = (privateKey: string) => {
   return cache[privateKey]
 }
 
+const isIos = require('react-native').Platform.OS === 'ios'
 const getAddressFromPublicKey = (publicKey: string) => {
-  const key = computeAddress(publicKey)
-  const addr = ethersComputeAddress(publicKey)
-  console.log({ key, addr })
-  return addr
+  if (isIos) {
+    return computeAddress(publicKey)
+  }
+  return ethersComputeAddress(publicKey)
 }
 
 export class HDNode implements ExternallyOwnedAccount {
