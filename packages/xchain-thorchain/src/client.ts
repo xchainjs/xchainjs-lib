@@ -254,10 +254,10 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
   getAddress = async (index = 0): Promise<string> => {
-    const address = await this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
     if (this.addrCache[this.phrase][index]) {
       return this.addrCache[this.phrase][index]
     }
+    const address = await this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
 
     if (!address) {
       throw new Error('address not defined')
