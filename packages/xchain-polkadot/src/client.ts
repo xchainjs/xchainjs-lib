@@ -39,6 +39,7 @@ class Client implements PolkadotClient, XChainClient {
   private network: Network
   private phrase = ''
   private rootDerivationPaths: RootDerivationPaths
+  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -55,6 +56,7 @@ class Client implements PolkadotClient, XChainClient {
   }: XChainClientParams) {
     this.network = network
     this.rootDerivationPaths = rootDerivationPaths
+    this.addrCache = {}
   }
   /**
    * Get getFullDerivationPath
@@ -179,6 +181,7 @@ class Client implements PolkadotClient, XChainClient {
         throw new Error('Invalid phrase')
       }
       this.phrase = phrase
+      this.addrCache[this.phrase] = {}
     }
 
     return this.getAddress(walletIndex)
@@ -246,8 +249,13 @@ class Client implements PolkadotClient, XChainClient {
    *
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
-  getAddress = (index = 0): Promise<Address> => {
-    return Promise.resolve(this.getKeyringPair(index).address)
+  getAddress = async (index = 0): Promise<Address> => {
+    if (this.addrCache[this.phrase][index]) {
+      return this.addrCache[this.phrase][index]
+    }
+    const address = await Promise.resolve(this.getKeyringPair(index).address)
+    this.addrCache[this.phrase][index] = address
+    return address
   }
 
   /**

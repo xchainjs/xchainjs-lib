@@ -64,6 +64,7 @@ class Client implements ThorchainClient, XChainClient {
   private phrase = ''
   private rootDerivationPaths: RootDerivationPaths
   private cosmosClient: CosmosSDKClient
+  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -88,6 +89,7 @@ class Client implements ThorchainClient, XChainClient {
     this.clientUrl = clientUrl || getDefaultClientUrl()
     this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
     this.rootDerivationPaths = rootDerivationPaths
+    this.addrCache = {}
 
     this.cosmosClient = new CosmosSDKClient({
       server: this.getClientUrl().node,
@@ -215,6 +217,7 @@ class Client implements ThorchainClient, XChainClient {
       if (!xchainCrypto.validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
       }
+      this.addrCache[this.phrase] = {}
       this.phrase = phrase
     }
 
@@ -252,10 +255,14 @@ class Client implements ThorchainClient, XChainClient {
    */
   getAddress = async (index = 0): Promise<string> => {
     const address = await this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+    if (this.addrCache[this.phrase][index]) {
+      return this.addrCache[this.phrase][index]
+    }
+
     if (!address) {
       throw new Error('address not defined')
     }
-
+    this.addrCache[this.phrase][index] = address
     return address
   }
 

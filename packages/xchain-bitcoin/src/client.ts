@@ -42,6 +42,7 @@ class Client implements BitcoinClient, XChainClient {
   private sochainUrl = ''
   private blockstreamUrl = ''
   private rootDerivationPaths: RootDerivationPaths
+  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -59,6 +60,7 @@ class Client implements BitcoinClient, XChainClient {
     },
   }: BitcoinClientParams) {
     this.net = network
+    this.addrCache = {}
     this.rootDerivationPaths = rootDerivationPaths
     this.setSochainUrl(sochainUrl)
     this.setBlockstreamUrl(blockstreamUrl)
@@ -96,6 +98,7 @@ class Client implements BitcoinClient, XChainClient {
   setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
+      this.addrCache[this.phrase] = {}
       return this.getAddress(walletIndex)
     } else {
       throw new Error('Invalid phrase')
@@ -192,6 +195,9 @@ class Client implements BitcoinClient, XChainClient {
       throw new Error('index must be greater than zero')
     }
     if (this.phrase) {
+      if (this.addrCache[this.phrase][index]) {
+        return this.addrCache[this.phrase][index]
+      }
       const btcNetwork = Utils.btcNetwork(this.net)
       const btcKeys = await this.getBtcKeys(this.phrase, index)
 
@@ -202,6 +208,7 @@ class Client implements BitcoinClient, XChainClient {
       if (!address) {
         throw new Error('Address not defined')
       }
+      this.addrCache[this.phrase][index] = address
       return address
     }
     throw new Error('Phrase must be provided')

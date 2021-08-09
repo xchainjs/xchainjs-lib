@@ -53,6 +53,7 @@ class Client implements BitcoinCashClient, XChainClient {
   private nodeUrl: ClientUrl
   private nodeAuth?: NodeAuth
   private rootDerivationPaths: RootDerivationPaths
+  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -83,6 +84,7 @@ class Client implements BitcoinCashClient, XChainClient {
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
     this.rootDerivationPaths = rootDerivationPaths
+    this.addrCache = {}
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
       // by strictly passing nodeAuth as null value
@@ -140,6 +142,7 @@ class Client implements BitcoinCashClient, XChainClient {
   setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
+      this.addrCache[this.phrase] = {}
       return this.getAddress(walletIndex)
     } else {
       throw new Error('Invalid phrase')
@@ -256,11 +259,16 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   getAddress = async (index = 0): Promise<Address> => {
     if (this.phrase) {
+      if (this.addrCache[this.phrase][index]) {
+        return this.addrCache[this.phrase][index]
+      }
       try {
         const keys = await this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
         const address = await keys.getAddress(index)
 
-        return utils.stripPrefix(utils.toCashAddress(address))
+        const addr = utils.stripPrefix(utils.toCashAddress(address))
+        this.addrCache[this.phrase][index] = addr
+        return addr
       } catch (error) {
         throw new Error('Address not defined')
       }

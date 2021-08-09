@@ -76,6 +76,7 @@ class Client implements BinanceClient, XChainClient {
   private network: Network
   private bncClient: BncClient
   private phrase = ''
+  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -91,6 +92,7 @@ class Client implements BinanceClient, XChainClient {
     this.network = network
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
+    this.addrCache = {}
   }
 
   /**
@@ -192,6 +194,7 @@ class Client implements BinanceClient, XChainClient {
     }
 
     this.phrase = phrase
+    this.addrCache[this.phrase] = {}
     return this.getAddress(walletIndex)
   }
 
@@ -232,8 +235,16 @@ class Client implements BinanceClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = async (index = 0): Promise<string> =>
-    Promise.resolve(crypto.getAddressFromPrivateKey(await this.getPrivateKey(index), getPrefix(this.network)))
+  getAddress = async (index = 0): Promise<string> => {
+    if (this.addrCache[this.phrase][index]) {
+      return this.addrCache[this.phrase][index]
+    }
+
+    const address = crypto.getAddressFromPrivateKey(await this.getPrivateKey(index), getPrefix(this.network))
+
+    this.addrCache[this.phrase][index] = address
+    return address
+  }
 
   /**
    * Validate the given address.

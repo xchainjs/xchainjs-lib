@@ -108,6 +108,7 @@ export default class Client implements XChainClient, EthereumClient {
   private ethplorerApiKey: string
   private rootDerivationPaths: RootDerivationPaths
   private providers: Map<XChainNetwork, Provider> = new Map<XChainNetwork, Provider>()
+  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -131,6 +132,7 @@ export default class Client implements XChainClient, EthereumClient {
     this.etherscanApiKey = etherscanApiKey
     this.ethplorerUrl = ethplorerUrl
     this.ethplorerApiKey = ethplorerApiKey
+    this.addrCache = {}
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
     this.setupProviders()
   }
@@ -175,7 +177,12 @@ export default class Client implements XChainClient, EthereumClient {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
-    return (await this.hdNode.derivePath(this.getFullDerivationPath(index))).address.toLowerCase()
+    if (this.addrCache[this.hdNode.address][index]) {
+      return this.addrCache[this.hdNode.address][index]
+    }
+    const address = (await this.hdNode.derivePath(this.getFullDerivationPath(index))).address.toLowerCase()
+    this.addrCache[this.hdNode.address][index] = address
+    return address
   }
 
   /**
@@ -316,6 +323,7 @@ export default class Client implements XChainClient, EthereumClient {
       throw new Error('Invalid phrase')
     }
     this.hdNode = await HDNode.fromMnemonic(phrase)
+    this.addrCache[this.hdNode.address] = {}
     return this.getAddress(walletIndex)
   }
 

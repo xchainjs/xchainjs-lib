@@ -46,6 +46,7 @@ class Client implements CosmosClient, XChainClient {
   private network: Network
   private phrase = ''
   private rootDerivationPaths: RootDerivationPaths
+  private addrCache: Record<string, Record<number, string>>
 
   private sdkClients: Map<XChainNetwork, CosmosSDKClient> = new Map<XChainNetwork, CosmosSDKClient>()
 
@@ -70,6 +71,7 @@ class Client implements CosmosClient, XChainClient {
     this.rootDerivationPaths = rootDerivationPaths
     this.sdkClients.set('testnet', TESTNET_SDK)
     this.sdkClients.set('mainnet', MAINNET_SDK)
+    this.addrCache = {}
   }
 
   /**
@@ -162,6 +164,7 @@ class Client implements CosmosClient, XChainClient {
         throw new Error('Invalid phrase')
       }
 
+      this.addrCache[this.phrase] = {}
       this.phrase = phrase
     }
 
@@ -203,10 +206,15 @@ class Client implements CosmosClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress = (index = 0): Promise<string> => {
+  getAddress = async (index = 0): Promise<string> => {
     if (!this.phrase) throw new Error('Phrase not set')
 
-    return this.getSDKClient().getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+    if (this.addrCache[this.phrase][index]) {
+      return this.addrCache[this.phrase][index]
+    }
+    const addr = await this.getSDKClient().getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+    this.addrCache[this.phrase][index] = addr
+    return addr
   }
 
   /**

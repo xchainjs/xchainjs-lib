@@ -46,6 +46,7 @@ class Client implements LitecoinClient, XChainClient {
   private nodeUrl = ''
   private nodeAuth?: NodeAuth
   private rootDerivationPaths: RootDerivationPaths
+  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -80,6 +81,7 @@ class Client implements LitecoinClient, XChainClient {
       // by strictly passing nodeAuth as null value
       nodeAuth === null ? undefined : nodeAuth
 
+    this.addrCache = {}
     this.setSochainUrl(sochainUrl)
   }
 
@@ -105,6 +107,7 @@ class Client implements LitecoinClient, XChainClient {
   setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
+      this.addrCache[phrase] = {}
       return this.getAddress(walletIndex)
     } else {
       throw new Error('Invalid phrase')
@@ -201,6 +204,9 @@ class Client implements LitecoinClient, XChainClient {
       throw new Error('index must be greater than zero')
     }
     if (this.phrase) {
+      if (this.addrCache[this.phrase][index]) {
+        return this.addrCache[this.phrase][index]
+      }
       const ltcNetwork = Utils.ltcNetwork(this.net)
       const ltcKeys = await this.getLtcKeys(this.phrase, index)
 
@@ -212,6 +218,7 @@ class Client implements LitecoinClient, XChainClient {
       if (!address) {
         throw new Error('Address not defined')
       }
+      this.addrCache[this.phrase][index] = address
       return address
     }
     throw new Error('Phrase must be provided')
