@@ -19,6 +19,9 @@ import { bip32 } from '@thorwallet/xchain-crypto'
 import { SigningKey } from '../signingkey'
 const version = 'hdnode/5.3.0'
 
+const isIos = require('react-native').Platform.OS === 'ios'
+const { NativeModules } = require('react-native').NativeModules
+
 const logger = new Logger(version)
 
 function buf2hex(buffer: ArrayBuffer) {
@@ -191,6 +194,13 @@ const getKeysCached = (privateKey: string) => {
   return cache[privateKey]
 }
 
+const getAddressFromPublicKey = (publicKey: string) => {
+  if (isIos) {
+    return NativeModules.getAddressFromPublicKey(publicKey)
+  }
+  return computeAddress(publicKey)
+}
+
 export class HDNode implements ExternallyOwnedAccount {
   readonly privateKey: string
   readonly publicKey: string
@@ -245,7 +255,7 @@ export class HDNode implements ExternallyOwnedAccount {
     defineReadOnly(this, 'parentFingerprint', parentFingerprint)
     defineReadOnly(this, 'fingerprint', async () => hexDataSlice(ripemd160(await sha256(this.publicKey)), 0, 4))
 
-    defineReadOnly(this, 'address', computeAddress(this.publicKey))
+    defineReadOnly(this, 'address', getAddressFromPublicKey(this.publicKey))
 
     defineReadOnly(this, 'chainCode', chainCode)
 
