@@ -20,5 +20,5 @@ export function computePublicKey(key: BytesLike, compressed?: boolean): string {
 }
 
 export const computeAddress = (publicKey: string) => {
-  return getAddress(hexDataSlice(keccak256(hexDataSlice(publicKey, 1)), 12))
+  return getAddress(hexDataSlice(keccak256(hexDataSlice(computePublicKey(publicKey), 1)), 12))
 }
