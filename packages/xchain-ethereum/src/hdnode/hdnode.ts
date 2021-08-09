@@ -11,16 +11,14 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { toUtf8Bytes, UnicodeNormalizationForm } from '@ethersproject/strings'
 import { defineReadOnly } from '@ethersproject/properties'
 import { ripemd160 } from '@ethersproject/sha2'
-import { computeAddress } from '@ethersproject/transactions'
 import { Wordlist, wordlists } from '@ethersproject/wordlists'
 
 import { Logger } from '@ethersproject/logger'
 import { bip32 } from '@thorwallet/xchain-crypto'
 import { SigningKey } from '../signingkey'
+import { computeAddress as ethersComputeAddress } from 'ethers/lib/utils'
+import { computeAddress } from '../signingkey/address'
 const version = 'hdnode/5.3.0'
-
-const isIos = require('react-native').Platform.OS === 'ios'
-const { NativeModules } = require('react-native').NativeModules
 
 const logger = new Logger(version)
 
@@ -195,10 +193,10 @@ const getKeysCached = (privateKey: string) => {
 }
 
 const getAddressFromPublicKey = (publicKey: string) => {
-  if (isIos) {
-    return NativeModules.getAddressFromPublicKey(publicKey)
-  }
-  return computeAddress(publicKey)
+  const key = computeAddress(publicKey)
+  const addr = ethersComputeAddress(publicKey)
+  console.log({ key, addr })
+  return addr
 }
 
 export class HDNode implements ExternallyOwnedAccount {
