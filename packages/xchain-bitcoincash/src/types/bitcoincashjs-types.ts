@@ -1,5 +1,7 @@
 export type KeyPair = {
   getAddress(index: number): string
+  getPublicKey(): Buffer
+  sign(hash: Buffer, lowR?: boolean): Promise<Buffer>
 }
 
 export type Transaction = {
