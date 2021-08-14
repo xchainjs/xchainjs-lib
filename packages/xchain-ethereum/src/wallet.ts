@@ -8,11 +8,11 @@ export interface Wallet extends BaseWallet {
 }
 
 class BoundSigner extends ethers.Signer {
-  private readonly wallet: DefaultWallet
+  private readonly wallet: BoundSignerWallet
   private readonly index: number
   readonly provider?: ethers.providers.Provider
 
-  constructor(wallet: DefaultWallet, index: number, provider?: ethers.providers.Provider) {
+  constructor(wallet: BoundSignerWallet, index: number, provider?: ethers.providers.Provider) {
     super()
     this.wallet = wallet
     this.index = index
@@ -36,12 +36,22 @@ class BoundSigner extends ethers.Signer {
   }
 }
 
-class DefaultWallet implements Wallet {
+export abstract class BoundSignerWallet implements Wallet {
+  async getSigner(index: number, provider?: ethers.providers.Provider): Promise<ethers.Signer> {
+    return new BoundSigner(this, index, provider)
+  }
+  abstract getAddress(index: number): Promise<Address>
+  abstract signMessage(index: number, message: ethers.Bytes | string): Promise<string>
+  abstract signTransaction(index: number, transaction: ethers.providers.TransactionRequest): Promise<string>
+}
+
+class DefaultWallet extends BoundSignerWallet {
   protected readonly params: WalletParams
   protected readonly hdNode: HDNode
   protected readonly hdNodeRevoker: () => void
 
   protected constructor(params: WalletParams, phrase: string) {
+    super()
     this.params = params
     const { proxy: hdNode, revoke: hdNodeRevoker } = Proxy.revocable(HDNode.fromMnemonic(phrase), {})
     this.hdNode = hdNode
@@ -69,10 +79,6 @@ class DefaultWallet implements Wallet {
 
   async getAddress(index: number): Promise<Address> {
     return this.hdNode.derivePath(this.params.getFullDerivationPath(index)).address.toLowerCase()
-  }
-
-  async getSigner(index: number, provider?: ethers.providers.Provider): Promise<ethers.Signer> {
-    return new BoundSigner(this, index, provider)
   }
 
   async signMessage(index: number, message: ethers.Bytes | string): Promise<string> {
