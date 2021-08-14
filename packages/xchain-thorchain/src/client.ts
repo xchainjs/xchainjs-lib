@@ -320,7 +320,7 @@ export class Client extends BaseClient<ClientParams, Wallet> implements MultiAss
     const accAddress = AccAddress.fromBech32(address)
     const fee = unsignedStdTx.fee
     // max. gas
-    fee.gas = '20000000'
+    fee.gas = '25000000'
 
     return this.cosmosClient
       .signAndBroadcast(unsignedStdTx, privateKey, accAddress)

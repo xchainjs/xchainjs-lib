@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-binance",
-  "version": "5.2.4",
+  "version": "5.2.6",
   "description": "Custom Binance client and utilities used by XChainJS clients",
   "keywords": [
     "BNB",

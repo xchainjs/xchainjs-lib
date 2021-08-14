@@ -1,3 +1,21 @@
+# v.0.17.7 (2021-07-20)
+
+- cosmos 0.42.x has too many breaking changes that wren't caught in the last version, downgrade "cosmos-client": "0.39.2"
+
+# v.0.17.6 (2021-07-19)
+
+- bumping peer dependency "cosmos-client": "0.39.2" -> "cosmos-client": "^0.42.7"
+
+# v.0.17.5 (2021-07-18)
+
+- Updatedrollupjs to include axios to enlable usage on node
+
+# v.0.17.4 (2021-07-14)
+
+### Fix
+
+- Bump `fee.gas to `25000000` (twenty five million) to try to avoid failing withdraw txs
+
 # v.0.17.3 (2021-07-07)
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`

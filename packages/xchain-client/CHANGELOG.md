@@ -1,3 +1,7 @@
+# v.0.10.2 (2021-07-18)
+
+- optimized BaseXchainClient to skip creating an addres that just gets thown away in the constructor
+
 # v.0.10.1 (2021-07-07)
 
 ### Update

@@ -22,7 +22,7 @@ import {
   isValidAsset,
 } from './asset'
 import { bn } from './index'
-import { Asset, Chain, Denomination } from './types'
+import { Asset, Chain, Denomination, ETHChain } from './types'
 
 describe('asset', () => {
   describe('isBigNumberValue', () => {
@@ -379,7 +379,7 @@ describe('asset', () => {
       expect(formatAssetAmountCurrency({ amount })).toEqual('$ 0.00')
     })
 
-    it('formats amount of RUNE (mainnet)', () => {
+    it('formats amount of BNB.RUNE (mainnet)', () => {
       const amount = assetAmount(10, 8)
       expect(formatAssetAmountCurrency({ amount, asset: AssetRuneB1A })).toEqual('ᚱ 10.00000000')
     })
@@ -387,10 +387,22 @@ describe('asset', () => {
       const amount = assetAmount(10, 8)
       expect(formatAssetAmountCurrency({ amount, asset: AssetRuneNative })).toEqual('ᚱ 10.00000000')
     })
-    it('formats amount of RUNE (testnet', () => {
+    it('formats amount of BNB.RUNE (testnet)', () => {
       const amount = assetAmount(10, 8)
       expect(formatAssetAmountCurrency({ amount, asset: AssetRune67C })).toEqual('ᚱ 10.00000000')
     })
+
+    it.only('formats amount of ETH.XRUNE', () => {
+      const amount = assetAmount(10, 18)
+      expect(
+        formatAssetAmountCurrency({
+          amount,
+          asset: { chain: ETHChain, symbol: 'XRUNE-0X69FA0FEE221AD11012BAB0FDB45D444D3D2CE71C', ticker: 'XRUNE' },
+          decimal: 2,
+        }),
+      ).toEqual('10.00 XRUNE')
+    })
+
     it('formats amount of ETH', () => {
       const amount = assetAmount(10, 18)
       expect(formatAssetAmountCurrency({ amount, asset: AssetETH, decimal: 2 })).toEqual('Ξ 10.00')

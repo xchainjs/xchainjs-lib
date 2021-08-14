@@ -1,3 +1,9 @@
+# v.0.3.1 (2021-07-14)
+
+### Fix
+
+- Fix `formatAssetAmountCurrency` for `XRUNE`
+
 # v.0.3.0 (2021-07-07)
 
 ### Breaking changes
