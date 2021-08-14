@@ -5,7 +5,19 @@ import * as Bitcoin from 'bitcoinjs-lib'
 import * as Utils from './utils'
 
 export interface Wallet extends BaseWallet {
-  getBtcKeys(index: number): Promise<Bitcoin.ECPairInterface>
+  getBtcKeys(index: number): Promise<Bitcoin.SignerAsync>
+}
+
+function asyncifySigner<T extends Bitcoin.Signer>(ecPair: T) {
+  const signAsync = async (hash: Buffer, lowR?: boolean) => {
+    return ecPair.sign(hash, lowR)
+  }
+  return (new Proxy(ecPair, {
+    get(target, p, receiver) {
+      if (p === 'sign') return signAsync
+      return Reflect.get(target, p, receiver)
+    },
+  }) as unknown) as Omit<T, 'sign'> & { sign: typeof signAsync }
 }
 
 class DefaultWallet implements Wallet {
@@ -37,13 +49,13 @@ class DefaultWallet implements Wallet {
     return address
   }
 
-  async getBtcKeys(index: number): Promise<Bitcoin.ECPairInterface> {
+  async getBtcKeys(index: number): Promise<Bitcoin.SignerAsync> {
     const btcNetwork = Utils.btcNetwork(this.params.network)
 
     const seed = getSeed(this.phrase)
     const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(this.params.getFullDerivationPath(index))
     if (!master.privateKey) throw new Error('Could not get private key from phrase')
-    return Bitcoin.ECPair.fromPrivateKey(master.privateKey, { network: btcNetwork })
+    return asyncifySigner(Bitcoin.ECPair.fromPrivateKey(master.privateKey, { network: btcNetwork }))
   }
 }
 

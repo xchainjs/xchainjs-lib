@@ -167,7 +167,7 @@ export class Client extends UTXOClient<ClientParams, Wallet> {
       sochainUrl: this.params.sochainUrl,
       network: this.params.network,
     })
-    psbt.signAllInputs(ltcKeys) // Sign all inputs
+    await psbt.signAllInputsAsync(ltcKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 

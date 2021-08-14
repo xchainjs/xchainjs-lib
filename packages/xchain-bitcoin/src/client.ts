@@ -170,7 +170,7 @@ export class Client extends UTXOClient<ClientParams, Wallet> {
     })
 
     const btcKeys = await this.wallet.getBtcKeys(index)
-    psbt.signAllInputs(btcKeys) // Sign all inputs
+    await psbt.signAllInputsAsync(btcKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 

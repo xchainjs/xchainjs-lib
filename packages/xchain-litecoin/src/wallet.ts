@@ -5,7 +5,19 @@ import * as Litecoin from 'bitcoinjs-lib'
 import * as Utils from './utils'
 
 export interface Wallet extends BaseWallet {
-  getLtcKeys(index: number): Promise<Litecoin.ECPairInterface>
+  getLtcKeys(index: number): Promise<Litecoin.SignerAsync>
+}
+
+function asyncifySigner<T extends Litecoin.Signer>(ecPair: T) {
+  const signAsync = async (hash: Buffer, lowR?: boolean) => {
+    return ecPair.sign(hash, lowR)
+  }
+  return (new Proxy(ecPair, {
+    get(target, p, receiver) {
+      if (p === 'sign') return signAsync
+      return Reflect.get(target, p, receiver)
+    },
+  }) as unknown) as Omit<T, 'sign'> & { sign: typeof signAsync }
 }
 
 class DefaultWallet implements Wallet {
@@ -37,7 +49,7 @@ class DefaultWallet implements Wallet {
     return address
   }
 
-  async getLtcKeys(index: number): Promise<Litecoin.ECPairInterface> {
+  async getLtcKeys(index: number): Promise<Litecoin.SignerAsync> {
     const ltcNetwork = Utils.ltcNetwork(this.params.network)
 
     const seed = getSeed(this.phrase)
@@ -45,7 +57,7 @@ class DefaultWallet implements Wallet {
 
     if (!master.privateKey) throw new Error('Could not get private key from phrase')
 
-    return Litecoin.ECPair.fromPrivateKey(master.privateKey, { network: ltcNetwork })
+    return asyncifySigner(Litecoin.ECPair.fromPrivateKey(master.privateKey, { network: ltcNetwork }))
   }
 }
 
