@@ -1,4 +1,4 @@
-import { ethers, BigNumberish, BigNumber, Wallet } from 'ethers'
+import { ethers, BigNumberish, BigNumber } from 'ethers'
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
@@ -55,6 +55,7 @@ import {
   getTokenBalances,
 } from './utils'
 import { HDNode } from './hdnode/hdnode'
+import { Wallet } from './wallet/wallet'
 
 /**
  * Interface for custom Ethereum client
@@ -194,7 +195,10 @@ export default class Client implements XChainClient, EthereumClient {
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
   getWallet = async (index = 0): Promise<ethers.Wallet> => {
-    return new Wallet(await this.hdNode.derivePath(this.getFullDerivationPath(index))).connect(this.getProvider())
+    const newHdNode = await this.hdNode.derivePath(this.getFullDerivationPath(index))
+    // @ts-expect-error make node compatible with wallet format
+    newHdNode.fingerprint = await newHdNode.fingerprint()
+    return new Wallet(newHdNode).connect(this.getProvider())
   }
   setupProviders = (): void => {
     if (this.infuraCreds) {

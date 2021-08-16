@@ -369,6 +369,7 @@ export class HDNode implements ExternallyOwnedAccount {
     let mnemonicOrPath: Mnemonic | string = path
 
     const srcMnemonic = this.mnemonic
+
     if (srcMnemonic) {
       mnemonicOrPath = Object.freeze({
         phrase: srcMnemonic.phrase,
