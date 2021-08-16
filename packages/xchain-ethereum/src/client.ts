@@ -196,8 +196,6 @@ export default class Client implements XChainClient, EthereumClient {
    */
   getWallet = async (index = 0): Promise<ethers.Wallet> => {
     const newHdNode = await this.hdNode.derivePath(this.getFullDerivationPath(index))
-    // @ts-expect-error make node compatible with wallet format
-    newHdNode.fingerprint = await newHdNode.fingerprint()
     return new Wallet(newHdNode).connect(this.getProvider())
   }
   setupProviders = (): void => {
