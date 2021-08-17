@@ -298,7 +298,7 @@ export const buildTx = async ({
 
   return {
     builder: transactionBuilder,
-    utxos,
+    utxos: inputs,
   }
 }
 
