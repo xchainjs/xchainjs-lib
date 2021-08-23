@@ -61,9 +61,9 @@ export class CosmosSDKClient {
 
   getAddressFromMnemonic = async (mnemonic: string, derivationPath: string): Promise<string> => {
     this.setPrefix()
-    const privKey = this.getPrivKeyFromMnemonic(mnemonic, derivationPath)
+    const privKey = await this.getPrivKeyFromMnemonic(mnemonic, derivationPath)
 
-    return AccAddress.fromPublicKey((await privKey).getPubKey()).toBech32()
+    return AccAddress.fromPublicKey(privKey.getPubKey()).toBech32()
   }
 
   getPrivKeyFromMnemonic = async (mnemonic: string, derivationPath: string): Promise<PrivKey> => {

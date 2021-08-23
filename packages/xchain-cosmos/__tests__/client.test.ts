@@ -115,10 +115,10 @@ describe('Client Test', () => {
   })
 
   it('should init, should have right prefix', async () => {
-    expect(cosmosClient.validateAddress(cosmosClient.getAddress())).toEqual(true)
+    expect(cosmosClient.validateAddress(await cosmosClient.getAddress())).toEqual(true)
 
     cosmosClient.setNetwork('mainnet')
-    expect(cosmosClient.validateAddress(cosmosClient.getAddress())).toEqual(true)
+    expect(cosmosClient.validateAddress(await cosmosClient.getAddress())).toEqual(true)
   })
 
   it('has no balances', async () => {
@@ -267,7 +267,7 @@ describe('Client Test', () => {
       height: 0,
     }
 
-    mockAccountsAddress(getClientUrl(cosmosClient), cosmosClient.getAddress(), {
+    mockAccountsAddress(getClientUrl(cosmosClient), await cosmosClient.getAddress(), {
       height: 0,
       result: {
         coins: [
@@ -282,7 +282,7 @@ describe('Client Test', () => {
     })
     assertTxsPost(
       getClientUrl(cosmosClient),
-      cosmosClient.getAddress(),
+      await cosmosClient.getAddress(),
       to_address,
       [
         {
