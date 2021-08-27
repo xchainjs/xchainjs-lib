@@ -173,6 +173,10 @@ export type Account = {
    */
   public_key: number[]
   /**
+   * indicate additional check for this account
+   */
+  flags: number
+  /**
    * sequence is for preventing replay attack
    */
   sequence: number

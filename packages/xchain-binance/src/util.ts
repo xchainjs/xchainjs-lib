@@ -1,7 +1,7 @@
 import { FeeType, Fees, Network, Tx, TxType, singleFee } from '@xchainjs/xchain-client'
 import { AssetBNB, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
-import { DexFees, Fee, TransferFee, Tx as BinanceTx, TxType as BinanceTxType } from './types/binance'
+import { Account, DexFees, Fee, TransferFee, Tx as BinanceTx, TxType as BinanceTxType } from './types/binance'
 import { Transfer, TransferEvent } from './types/binance-ws'
 import { DerivePath } from './types/common'
 
@@ -47,6 +47,20 @@ export const isTransferFee = (v: Fee | TransferFee | DexFees): v is TransferFee 
  * @returns {boolean} `true` or `false`.
  */
 export const isDexFees = (v: Fee | TransferFee | DexFees): v is DexFees => (v as DexFees)?.dex_fee_fields?.length > 0
+
+/**
+ * Type guard for `Account`
+ *
+ * @param {unknown} v
+ * @returns {boolean} `true` or `false`.
+ */
+export const isAccount = (v: unknown): v is Account =>
+  typeof (v as Account).account_number === 'number' &&
+  typeof (v as Account).address === 'string' &&
+  Array.isArray((v as Account).balances) &&
+  Array.isArray((v as Account).public_key) &&
+  typeof (v as Account).flags === 'number' &&
+  typeof (v as Account).sequence === 'number'
 
 /**
  * Get TxType
