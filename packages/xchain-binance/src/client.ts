@@ -187,6 +187,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   /**
    * Get the current address.
    *
+   * @param {number} index (optional) Account index for the derivation path
    * @returns {Address} The current address.
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
@@ -208,12 +209,15 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * Get account data of wallets or by given address.
    *
    * @param {Address} address (optional) By default, it will return account data of current wallet.
+   * @param {number} index (optional) Account index for the derivation path
+   *
    * @returns {Account} account details of given address.
    */
-  async getAccount(address?: Address): Promise<Account> {
-    const response = await this.bncClient.getAccount(address || this.getAddress())
+  async getAccount(address?: Address, index = 0): Promise<Account> {
+    const accountAddress = address || this.getAddress(index)
+    const response = await this.bncClient.getAccount(accountAddress)
     if (!response || !response.result || !isAccount(response.result))
-      return Promise.reject(Error(`Could not get account data for address ${address}`))
+      return Promise.reject(Error(`Could not get account data for address ${accountAddress}`))
 
     return response.result
   }
