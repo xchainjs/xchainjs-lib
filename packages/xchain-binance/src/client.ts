@@ -66,7 +66,7 @@ export interface BinanceClient {
   purgeClient(): void
   getBncClient(): BncClient
 
-  getAccount(address: Address): Promise<Account>
+  getAccount(address?: Address, index?: number): Promise<Account>
 
   getMultiSendFees(): Promise<Fees>
   getSingleAndMultiFees(): Promise<{ single: Fees; multi: Fees }>
