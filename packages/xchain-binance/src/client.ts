@@ -32,13 +32,14 @@ import {
 import axios from 'axios'
 
 import {
+  Account,
   Balance as BinanceBalance,
   Fees as BinanceFees,
   TransactionResult,
   TransferFee,
   TxPage as BinanceTxPage,
 } from './types/binance'
-import { getPrefix, isTransferFee, parseTx } from './util'
+import { getPrefix, isAccount, isTransferFee, parseTx } from './util'
 
 type PrivKey = string
 
@@ -64,6 +65,8 @@ export type MultiSendParams = {
 export interface BinanceClient {
   purgeClient(): void
   getBncClient(): BncClient
+
+  getAccount(address: Address): Promise<Account>
 
   getMultiSendFees(): Promise<Fees>
   getSingleAndMultiFees(): Promise<{ single: Fees; multi: Fees }>
@@ -202,9 +205,23 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   }
 
   /**
+   * Get account data of wallets or by given address.
+   *
+   * @param {Address} address (optional) By default, it will return account data of current wallet.
+   * @returns {Account} account details of given address.
+   */
+  async getAccount(address?: Address): Promise<Account> {
+    const response = await this.bncClient.getAccount(address || this.getAddress())
+    if (!response || !response.result || !isAccount(response.result))
+      return Promise.reject(Error(`Could not get account data for address ${address}`))
+
+    return response.result
+  }
+
+  /**
    * Get the balance of a given address.
    *
-   * @param {Address | number} address By default, it will return the balance of the current wallet. (optional)
+   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Balance[]} The balance of the address.
    */

@@ -1,3 +1,7 @@
+# v.5.3.0 (2021-08-27)
+
+- Add `getAccount`
+
 # v.5.2.6 (2021-07-26)
 
 - fixed missing walletIndex in client.transfer()

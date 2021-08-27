@@ -152,6 +152,7 @@ describe('BinanceClient Test', () => {
       address: 'bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku',
       balances: [],
       public_key: [],
+      flags: 0,
       sequence: 0,
     })
     let balances = await bnbClient.getBalance('bnb1v8cprldc948y7mge4yjept48xfqpa46mmcrpku')
@@ -165,6 +166,7 @@ describe('BinanceClient Test', () => {
         address: '',
         balances: [],
         public_key: [],
+        flags: 0,
         sequence: 0,
       },
       1,
@@ -195,6 +197,7 @@ describe('BinanceClient Test', () => {
         },
       ],
       public_key: [],
+      flags: 0,
       sequence: 5,
     })
 
@@ -211,6 +214,24 @@ describe('BinanceClient Test', () => {
     amount = balances[1].amount
 
     expect(amount.amount().isEqualTo(1289087510)).toBeTruthy()
+  })
+
+  it('fetches account data', async () => {
+    mockGetAccount(testnetClientURL, 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', {
+      account_number: 123,
+      address: 'tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj',
+      balances: [],
+      public_key: [],
+      flags: 0,
+      sequence: 5,
+    })
+
+    const { account_number, address, balances, flags, sequence } = await bnbClient.getAccount()
+    expect(account_number).toEqual(123)
+    expect(address).toEqual('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj')
+    expect(balances.length).toEqual(0)
+    expect(flags).toEqual(0)
+    expect(sequence).toEqual(5)
   })
 
   it('fetches the transfer fees', async () => {
@@ -334,6 +355,7 @@ describe('BinanceClient Test', () => {
           },
         ],
         public_key: [],
+        flags: 0,
         sequence: 0,
       },
       3,
@@ -364,6 +386,7 @@ describe('BinanceClient Test', () => {
         },
       ],
       public_key: [],
+      flags: 0,
       sequence: 0,
     })
 
@@ -396,6 +419,7 @@ describe('BinanceClient Test', () => {
           },
         ],
         public_key: [],
+        flags: 0,
         sequence: 0,
       },
       3,
@@ -452,6 +476,7 @@ describe('BinanceClient Test', () => {
         },
       ],
       public_key: [],
+      flags: 0,
       sequence: 0,
     })
 
