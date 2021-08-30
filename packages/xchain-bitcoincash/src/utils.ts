@@ -180,6 +180,14 @@ export const parseTransaction = (tx: Transaction): Tx => {
     date: new Date(tx.time * 1000),
     type: 'transfer',
     hash: tx.txid,
+    binanceFee: null,
+    confirmations: null,
+    ethCumulativeGasUsed: null,
+    ethGas: null,
+    ethGasPrice: null,
+    ethGasUsed: null,
+    ethTokenName: null,
+    ethTokenSymbol: null,
   }
 }
 

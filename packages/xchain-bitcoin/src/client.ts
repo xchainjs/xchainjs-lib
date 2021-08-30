@@ -304,6 +304,14 @@ class Client implements BitcoinClient, XChainClient {
           date: new Date(rawTx.time * 1000),
           type: 'transfer',
           hash: rawTx.txid,
+          binanceFee: null,
+          confirmations: rawTx.confirmations,
+          ethCumulativeGasUsed: null,
+          ethGas: null,
+          ethGasPrice: null,
+          ethGasUsed: null,
+          ethTokenName: null,
+          ethTokenSymbol: null,
         }
         transactions.push(tx)
       }
@@ -341,6 +349,14 @@ class Client implements BitcoinClient, XChainClient {
         date: new Date(rawTx.time * 1000),
         type: 'transfer',
         hash: rawTx.txid,
+        binanceFee: null,
+        confirmations: rawTx.confirmations,
+        ethCumulativeGasUsed: null,
+        ethGas: null,
+        ethGasPrice: null,
+        ethGasUsed: null,
+        ethTokenName: null,
+        ethTokenSymbol: null,
       }
     } catch (error) {
       return Promise.reject(error)

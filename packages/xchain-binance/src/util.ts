@@ -88,6 +88,14 @@ export const parseTx = (tx: BinanceTx): Tx | null => {
     date: new Date(tx.timeStamp),
     type: getTxType(tx.txType),
     hash: tx.txHash,
+    binanceFee: tx.txFee,
+    confirmations: tx.confirmBlocks,
+    ethCumulativeGasUsed: null,
+    ethGas: null,
+    ethGasPrice: null,
+    ethGasUsed: null,
+    ethTokenName: null,
+    ethTokenSymbol: null,
   }
 }
 

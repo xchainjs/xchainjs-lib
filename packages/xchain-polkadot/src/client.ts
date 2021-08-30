@@ -334,6 +334,14 @@ class Client implements PolkadotClient, XChainClient {
           date: new Date(transfer.block_timestamp * 1000),
           type: 'transfer',
           hash: transfer.hash,
+          binanceFee: null,
+          confirmations: null,
+          ethCumulativeGasUsed: null,
+          ethGas: null,
+          ethGasPrice: null,
+          ethGasUsed: null,
+          ethTokenName: null,
+          ethTokenSymbol: null,
         })),
       }
     } catch (error) {
@@ -379,6 +387,14 @@ class Client implements PolkadotClient, XChainClient {
         date: new Date(extrinsic.block_timestamp * 1000),
         type: 'transfer',
         hash: extrinsic.extrinsic_hash,
+        binanceFee: null,
+        confirmations: null,
+        ethCumulativeGasUsed: null,
+        ethGas: null,
+        ethGasPrice: null,
+        ethGasUsed: null,
+        ethTokenName: null,
+        ethTokenSymbol: null,
       }
     } catch (error) {
       return Promise.reject(error)

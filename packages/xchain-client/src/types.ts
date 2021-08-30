@@ -32,13 +32,14 @@ export type Tx = {
   date: Date // timestamp of tx
   type: TxType // type
   hash: string // Tx hash
-  ethTokenSymbol?: string
-  ethTokenName?: string
-  ethGasPrice?: string
-  ethGas?: string
-  ethGasUsed?: string
-  ethCumulativeGasUsed?: string
-  ethConfirmations?: string
+  ethTokenSymbol: string | null
+  ethTokenName: string | null
+  ethGasPrice: string | null
+  ethGas: string | null
+  ethGasUsed: string | null
+  ethCumulativeGasUsed: string | null
+  confirmations: number | null
+  binanceFee: string | null
 }
 
 export type Txs = Tx[]

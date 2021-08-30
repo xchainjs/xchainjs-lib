@@ -403,6 +403,14 @@ class Client implements ThorchainClient, XChainClient {
         to,
         date: new Date(txResult.timestamp),
         type,
+        binanceFee: null,
+        confirmations: null,
+        ethCumulativeGasUsed: null,
+        ethGas: null,
+        ethGasPrice: null,
+        ethGasUsed: null,
+        ethTokenName: null,
+        ethTokenSymbol: null,
       }
     } catch (error) {
       return Promise.reject(error)
@@ -448,6 +456,14 @@ class Client implements ThorchainClient, XChainClient {
         to,
         type: 'transfer',
         hash: txId,
+        binanceFee: null,
+        confirmations: null,
+        ethCumulativeGasUsed: null,
+        ethGas: null,
+        ethGasPrice: null,
+        ethGasUsed: null,
+        ethTokenName: null,
+        ethTokenSymbol: null,
       }
     } catch (error) {
       return Promise.reject(error)

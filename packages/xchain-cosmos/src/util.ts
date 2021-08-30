@@ -1,4 +1,4 @@
-import { TxFrom, TxTo, Txs, Fees } from '@thorwallet/xchain-client'
+import { TxFrom, TxTo, Txs, Fees, Tx } from '@thorwallet/xchain-client'
 import { Asset, assetToString, baseAmount } from '@thorwallet/xchain-util'
 
 import { Msg, codec } from '@thorwallet/cosmos-client'
@@ -158,17 +158,23 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
       }
     })
 
-    return [
-      ...acc,
-      {
-        asset: mainAsset,
-        from,
-        to,
-        date: new Date(tx.timestamp),
-        type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
-        hash: tx.txhash || '',
-      },
-    ]
+    const val: Tx = {
+      asset: mainAsset,
+      from,
+      to,
+      date: new Date(tx.timestamp),
+      type: from.length > 0 || to.length > 0 ? 'transfer' : 'unknown',
+      hash: tx.txhash || '',
+      binanceFee: null,
+      confirmations: null,
+      ethCumulativeGasUsed: null,
+      ethGas: null,
+      ethGasPrice: null,
+      ethGasUsed: null,
+      ethTokenName: null,
+      ethTokenSymbol: null,
+    }
+    return [...acc, val] as Tx[]
   }, [] as Txs)
 }
 

@@ -149,7 +149,8 @@ export const getTxFromTokenTransaction = (tx: TokenTransactionInfo): Tx | null =
         ethGas: tx.gas,
         ethGasUsed: tx.gasUsed,
         ethCumulativeGasUsed: tx.cumulativeGasUsed,
-        ethConfirmations: tx.confirmations,
+        confirmations: Number(tx.confirmations),
+        binanceFee: null,
       }
     }
   }
@@ -181,6 +182,14 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
     date: new Date(parseInt(tx.timeStamp) * 1000),
     type: 'transfer',
     hash: tx.hash,
+    confirmations: null,
+    binanceFee: null,
+    ethCumulativeGasUsed: null,
+    ethGasUsed: tx.gasUsed,
+    ethGas: tx.gas,
+    ethGasPrice: null,
+    ethTokenName: null,
+    ethTokenSymbol: null,
   }
 }
 
@@ -213,6 +222,14 @@ export const getTxFromEthplorerTokenOperation = (operation: TransactionOperation
         date: new Date(operation.timestamp * 1000),
         type: operation.type === 'transfer' ? 'transfer' : 'unknown',
         hash: operation.transactionHash,
+        confirmations: null,
+        binanceFee: null,
+        ethCumulativeGasUsed: null,
+        ethGas: null,
+        ethGasPrice: null,
+        ethGasUsed: null,
+        ethTokenName: null,
+        ethTokenSymbol: null,
       }
     }
   }
@@ -244,6 +261,14 @@ export const getTxFromEthplorerEthTransaction = (txInfo: TransactionInfo): Tx =>
     date: new Date(txInfo.timestamp * 1000),
     type: 'transfer',
     hash: txInfo.hash,
+    confirmations: txInfo.confirmations ?? null,
+    binanceFee: null,
+    ethCumulativeGasUsed: null,
+    ethGas: null,
+    ethGasUsed: String(txInfo.gasUsed),
+    ethGasPrice: null,
+    ethTokenName: null,
+    ethTokenSymbol: null,
   }
 }
 
