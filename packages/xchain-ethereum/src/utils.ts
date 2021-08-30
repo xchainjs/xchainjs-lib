@@ -143,6 +143,13 @@ export const getTxFromTokenTransaction = (tx: TokenTransactionInfo): Tx | null =
         date: new Date(parseInt(tx.timeStamp) * 1000),
         type: 'transfer',
         hash: tx.hash,
+        ethTokenSymbol: tx.tokenSymbol,
+        ethTokenName: tx.tokenName,
+        ethGasPrice: tx.gasPrice,
+        ethGas: tx.gas,
+        ethGasUsed: tx.gasUsed,
+        ethCumulativeGasUsed: tx.cumulativeGasUsed,
+        ethConfirmations: tx.confirmations,
       }
     }
   }
