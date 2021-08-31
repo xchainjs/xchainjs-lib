@@ -1,14 +1,31 @@
+# v.0.18.0 (2021-XX-XX)
+
+## Add
+
+- Make `buildDepositTx` public and overrides its fee
+- Add `DEPOSIT_GAS_VALUE`
+
+## Breaking change
+
+- Remove `AssetRune` in favour of using `AssetRuneNative` of `xchain-util` only
+
 # v.0.17.7 (2021-07-20)
+
+## Fix
 
 - cosmos 0.42.x has too many breaking changes that wren't caught in the last version, downgrade "cosmos-client": "0.39.2"
 
 # v.0.17.6 (2021-07-19)
 
+## Update
+
 - bumping peer dependency "cosmos-client": "0.39.2" -> "cosmos-client": "^0.42.7"
 
 # v.0.17.5 (2021-07-18)
 
-- Updatedrollupjs to include axios to enlable usage on node
+## Update
+
+- Updated rollupjs to include axios to enlable usage on node
 
 # v.0.17.4 (2021-07-14)
 
@@ -18,9 +35,13 @@
 
 # v.0.17.3 (2021-07-07)
 
+## Update
+
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
 
 # v.0.17.2 (2021-07-05)
+
+## Fix
 
 - refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
 
