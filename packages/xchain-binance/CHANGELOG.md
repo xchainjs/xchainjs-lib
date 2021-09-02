@@ -1,3 +1,7 @@
+# v.5.3.1 (2021-08-27)
+
+- updated to the latest dependencies
+
 # v.5.3.0 (2021-08-27)
 
 - Add `getAccount`
