@@ -32,6 +32,7 @@ import {
   DEPOSIT_GAS_VALUE,
   MAX_TX_COUNT,
   getAsset,
+  getChainId,
   getDefaultClientUrl,
   getDefaultExplorerUrls,
   getDefaultFees,
@@ -96,7 +97,7 @@ class Client implements ThorchainClient, XChainClient {
 
     this.cosmosClient = new CosmosSDKClient({
       server: this.getClientUrl().node,
-      chainId: this.getChainId(),
+      chainId: getChainId(),
       prefix: getPrefix(this.network),
     })
 
@@ -183,15 +184,6 @@ class Client implements ThorchainClient, XChainClient {
    */
   getCosmosClient(): CosmosSDKClient {
     return this.cosmosClient
-  }
-
-  /**
-   * Get the chain id.
-   *
-   * @returns {string} The chain id based on the network.
-   */
-  getChainId(): string {
-    return 'thorchain'
   }
 
   /**

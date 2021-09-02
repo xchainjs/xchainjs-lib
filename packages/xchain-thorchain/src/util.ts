@@ -100,6 +100,13 @@ export const getPrefix = (network: Network) => {
 }
 
 /**
+ * Get the chain id.
+ *
+ * @returns {string} The chain id based on the network.
+ */
+export const getChainId = () => 'thorchain'
+
+/**
  * Register Codecs based on the prefix.
  *
  * @param {string} prefix
