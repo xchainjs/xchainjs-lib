@@ -1,3 +1,7 @@
+# v.0.6.10 (2021-09-03)
+
+- updated to the latest dependencies
+
 # v.0.6.9 (2021-07-07)
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
