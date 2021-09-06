@@ -1,4 +1,4 @@
-# v.0.6.10 (2021-09-03)
+# v.0.6.10 (2021-09-06)
 
 - updated to the latest dependencies
 
