@@ -34,17 +34,17 @@
     "access": "public"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.10.1",
-    "@xchainjs/xchain-crypto": "^0.2.4",
-    "@xchainjs/xchain-util": "^0.3.0",
-    "axios": "^0.21.0",
+    "@xchainjs/xchain-client": "^0.10.3",
+    "@xchainjs/xchain-crypto": "^0.2.6",
+    "@xchainjs/xchain-util": "^0.3.1",
+    "axios": "^0.21.3",
     "ethers": "^5.1.0"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.10.1",
-    "@xchainjs/xchain-crypto": "^0.2.4",
-    "@xchainjs/xchain-util": "^0.3.0",
-    "axios": "^0.21.0",
+    "@xchainjs/xchain-client": "^0.10.3",
+    "@xchainjs/xchain-crypto": "^0.2.6",
+    "@xchainjs/xchain-util": "^0.3.1",
+    "axios": "^0.21.3",
     "ethers": "^5.1.0"
   }
 }
