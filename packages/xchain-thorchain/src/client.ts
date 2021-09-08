@@ -428,7 +428,7 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
    */
-  public async buildDepositTx(msgNativeTx: MsgNativeTx): Promise<StdTx> {
+  async buildDepositTx(msgNativeTx: MsgNativeTx): Promise<StdTx> {
     const response: ThorchainDepositResponse = (
       await axios.post(`${this.getClientUrl().node}/thorchain/deposit`, {
         coins: msgNativeTx.coins,
