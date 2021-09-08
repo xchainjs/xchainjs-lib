@@ -11,12 +11,7 @@ export class MsgNativeTx extends Msg {
   coins: MsgCoin[]
   memo: string
   signer: AccAddress
-  /**
-   *
-   * @param from_address
-   * @param to_address
-   * @param amount
-   */
+
   constructor(coins: MsgCoin[], memo: string, signer: AccAddress) {
     super()
 
