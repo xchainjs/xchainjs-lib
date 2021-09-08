@@ -15,11 +15,11 @@ import {
 } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
-import { PrivKey } from 'cosmos-client'
+import { proto } from 'cosmos-client'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './types'
-import { DECIMAL, getAsset, getDenom, getTxsFromHistory, registerCodecs } from './util'
+import { DECIMAL, getAsset, getDenom, getTxsFromHistory } from './util'
 
 /**
  * Interface for custom Cosmos client
@@ -172,7 +172,7 @@ class Client implements CosmosClient, XChainClient {
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey(index = 0): PrivKey {
+  private getPrivateKey(index = 0): proto.cosmos.crypto.secp256k1.PrivKey {
     if (!this.phrase) throw new Error('Phrase not set')
 
     return this.getSDKClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
@@ -265,7 +265,7 @@ class Client implements CosmosClient, XChainClient {
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
-    registerCodecs()
+    // registerCodecs()
 
     const mainAsset = this.getMainAsset()
     const txHistory = await this.getSDKClient().searchTx({
@@ -305,7 +305,7 @@ class Client implements CosmosClient, XChainClient {
    */
   async transfer({ walletIndex, asset, amount, recipient, memo }: TxParams): Promise<TxHash> {
     const fromAddressIndex = walletIndex || 0
-    registerCodecs()
+    // registerCodecs()
 
     const mainAsset = this.getMainAsset()
     const transferResult = await this.getSDKClient().transfer({
@@ -317,7 +317,7 @@ class Client implements CosmosClient, XChainClient {
       memo,
     })
 
-    return transferResult?.txhash || ''
+    return transferResult?.hash || ''
   }
 
   /**

@@ -31,21 +31,21 @@
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.10.1",
-    "@xchainjs/xchain-crypto": "^0.2.4",
-    "@xchainjs/xchain-util": "^0.3.0",
+    "@xchainjs/xchain-client": "^0.10.3",
+    "@xchainjs/xchain-crypto": "^0.2.5",
+    "@xchainjs/xchain-util": "^0.3.1",
     "axios": "^0.21.0",
-    "cosmos-client": "0.39.2",
+    "cosmos-client": "^0.42.14",
     "nock": "^13.0.5"
   },
   "publishConfig": {
     "access": "public"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.10.1",
-    "@xchainjs/xchain-crypto": "^0.2.4",
-    "@xchainjs/xchain-util": "^0.3.0",
+    "@xchainjs/xchain-client": "^0.10.3",
+    "@xchainjs/xchain-crypto": "^0.2.5",
+    "@xchainjs/xchain-util": "^0.3.1",
     "axios": "^0.21.0",
-    "cosmos-client": "0.39.2"
+    "cosmos-client": "^0.42.14"
   }
 }

@@ -1,78 +1,77 @@
+// import { Msg } from 'cosmos-client'
 import { baseAmount } from '@xchainjs/xchain-util'
-import { Msg } from 'cosmos-client'
-import { StdTxFee } from 'cosmos-client/api'
-import { StdTx } from 'cosmos-client/x/auth'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
+import { proto } from 'cosmos-client'
+import { StdTx } from 'cosmos-client/cjs/openapi/api'
 
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
 import { AssetAtom, AssetMuon } from '../src/types'
-import { getAsset, getDenom, getQueryString, getTxsFromHistory, isMsgMultiSend, isMsgSend } from '../src/util'
+import { getAsset, getDenom, getQueryString, getTxsFromHistory } from '../src/util'
 
 describe('cosmos/util', () => {
-  describe('Msg type guards', () => {
-    const msgMultiSend: MsgMultiSend = {
-      inputs: [
-        {
-          address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-          coins: [
-            {
-              denom: 'uatom',
-              amount: '100000',
-            },
-          ],
-        },
-        {
-          address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-          coins: [
-            {
-              denom: 'uatom',
-              amount: '300000',
-            },
-          ],
-        },
-      ],
-      outputs: [
-        {
-          address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-          coins: [
-            {
-              denom: 'uatom',
-              amount: '400000',
-            },
-          ],
-        },
-      ],
-    }
+  // describe('Msg type guards', () => {
+  //   const msgMultiSend: MsgMultiSend = {
+  //     inputs: [
+  //       {
+  //         address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+  //         coins: [
+  //           {
+  //             denom: 'uatom',
+  //             amount: '100000',
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+  //         coins: [
+  //           {
+  //             denom: 'uatom',
+  //             amount: '300000',
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //     outputs: [
+  //       {
+  //         address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+  //         coins: [
+  //           {
+  //             denom: 'uatom',
+  //             amount: '400000',
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //   }
 
-    const msgSend: MsgSend = MsgSend.fromJSON({
-      from_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-      to_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-      amount: [
-        {
-          denom: 'uatom',
-          amount: '100000',
-        },
-      ],
-    })
+  //   const msgSend: MsgSend = MsgSend.fromJSON({
+  //     from_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+  //     to_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+  //     amount: [
+  //       {
+  //         denom: 'uatom',
+  //         amount: '100000',
+  //       },
+  //     ],
+  //   })
 
-    describe('isMsgMultiSend', () => {
-      it('validates MsgMultiSend', () => {
-        expect(isMsgMultiSend(msgMultiSend)).toBeTruthy()
-      })
-      it('invalidates MsgMultiSend', () => {
-        expect(isMsgMultiSend(msgSend)).toBeFalsy()
-      })
-    })
+  //   describe('isMsgMultiSend', () => {
+  //     it('validates MsgMultiSend', () => {
+  //       expect(isMsgMultiSend(msgMultiSend)).toBeTruthy()
+  //     })
+  //     it('invalidates MsgMultiSend', () => {
+  //       expect(isMsgMultiSend(msgSend)).toBeFalsy()
+  //     })
+  //   })
 
-    describe('isMsgSend', () => {
-      it('validates MsgSend', () => {
-        expect(isMsgSend(msgSend)).toBeTruthy()
-      })
-      it('invalidates MsgSend', () => {
-        expect(isMsgSend(msgMultiSend)).toBeFalsy()
-      })
-    })
-  })
+  //   describe('isMsgSend', () => {
+  //     it('validates MsgSend', () => {
+  //       expect(isMsgSend(msgSend)).toBeTruthy()
+  //     })
+  //     it('invalidates MsgSend', () => {
+  //       expect(isMsgSend(msgMultiSend)).toBeFalsy()
+  //     })
+  //   })
+  // })
 
   describe('Denom <-> Asset', () => {
     describe('getDenom', () => {
@@ -101,13 +100,20 @@ describe('cosmos/util', () => {
   })
 
   describe('parse Tx', () => {
-    const fee: StdTxFee = {
-      gas: '200000',
-      amount: [],
-    }
+    const fee = '200000'
     const from_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
     const to_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
-
+    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+      from_address,
+      to_address,
+      amount: [
+        {
+          denom: 'uatom',
+          amount: '1000',
+        },
+      ],
+    })
+    const msgJsonString = JSON.stringify(msgSend.toJSON())
     const txs: TxResponse[] = [
       {
         height: 0,
@@ -117,28 +123,7 @@ describe('cosmos/util', () => {
         gas_wanted: '200000',
         gas_used: '35000',
         tx: {
-          msg: [
-            MsgSend.fromJSON({
-              from_address,
-              to_address,
-              amount: [
-                {
-                  denom: 'uatom',
-                  amount: '1000',
-                },
-              ],
-            }),
-            MsgSend.fromJSON({
-              from_address,
-              to_address,
-              amount: [
-                {
-                  denom: 'uatom',
-                  amount: '1000',
-                },
-              ],
-            }),
-          ] as Msg[],
+          msg: [msgJsonString, msgJsonString],
           fee: fee,
           signatures: null,
           memo: '',
@@ -154,28 +139,7 @@ describe('cosmos/util', () => {
         gas_used: '35000',
         tx: {
           body: {
-            messages: [
-              MsgSend.fromJSON({
-                from_address,
-                to_address,
-                amount: [
-                  {
-                    denom: 'uatom',
-                    amount: '1000',
-                  },
-                ],
-              }),
-              MsgSend.fromJSON({
-                from_address,
-                to_address,
-                amount: [
-                  {
-                    denom: 'uatom',
-                    amount: '1000',
-                  },
-                ],
-              }),
-            ] as Msg[],
+            messages: [msgSend, msgSend],
           },
         } as RawTxResponse,
         timestamp: new Date().toString(),

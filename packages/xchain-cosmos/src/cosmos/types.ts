@@ -1,7 +1,6 @@
 import { BigSource } from 'big.js'
-import { Msg, PrivKey, codec } from 'cosmos-client'
-import { StdTxFee } from 'cosmos-client/api'
-import { BaseAccount, StdTx } from 'cosmos-client/x/auth'
+import { proto } from 'cosmos-client'
+import { StdTx } from 'cosmos-client/cjs/openapi/api'
 
 export type CosmosSDKClientParams = {
   server: string
@@ -21,23 +20,23 @@ export type SearchTxParams = {
 }
 
 export type TransferParams = {
-  privkey: PrivKey
+  privkey: proto.cosmos.crypto.secp256k1.PrivKey
   from: string
   to: string
   amount: BigSource
   asset: string
   memo?: string
-  fee?: StdTxFee
+  fee?: string
 }
 
 export type BaseAccountResponse = {
   type?: string
-  value?: BaseAccount
+  value?: proto.cosmos.auth.v1beta1.BaseAccount
 }
 
 export type RawTxResponse = {
   body: {
-    messages: Msg[]
+    messages: proto.cosmos.bank.v1beta1.MsgSend[]
   }
 }
 
@@ -65,7 +64,7 @@ export type TxResponse = {
   logs?: TxLog[]
   gas_wanted?: string
   gas_used?: string
-  tx?: StdTx | RawTxResponse | codec.AminoWrapping
+  tx?: StdTx | RawTxResponse
   timestamp: string
 }
 
