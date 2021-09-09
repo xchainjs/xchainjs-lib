@@ -40,7 +40,7 @@ export type Tx = {
   ethCumulativeGasUsed: string | null
   confirmations: number | null
   binanceFee: string | null
-  binanceMemo: string | null
+  memo: string | null
 }
 
 export type Txs = Tx[]

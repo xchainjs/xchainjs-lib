@@ -95,7 +95,7 @@ export const parseTx = (tx: BinanceTx): Tx | null => {
     ethGasUsed: null,
     ethTokenName: null,
     ethTokenSymbol: null,
-    binanceMemo: tx.memo ?? null,
+    memo: tx.memo ?? null,
   }
 }
 

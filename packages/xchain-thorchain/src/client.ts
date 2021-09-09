@@ -411,7 +411,7 @@ class Client implements ThorchainClient, XChainClient {
         ethGasUsed: null,
         ethTokenName: null,
         ethTokenSymbol: null,
-        binanceMemo: null,
+        memo: null,
       }
     } catch (error) {
       return Promise.reject(error)
@@ -465,7 +465,7 @@ class Client implements ThorchainClient, XChainClient {
         ethGasUsed: null,
         ethTokenName: null,
         ethTokenSymbol: null,
-        binanceMemo: null,
+        memo: result.observed_tx.tx.memo,
       }
     } catch (error) {
       return Promise.reject(error)
