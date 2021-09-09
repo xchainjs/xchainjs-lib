@@ -173,6 +173,7 @@ export const getTxsFromHistory = (txs: Array<TxResponse>, mainAsset: Asset): Txs
       ethGasUsed: null,
       ethTokenName: null,
       ethTokenSymbol: null,
+      binanceMemo: null,
     }
     return [...acc, val] as Tx[]
   }, [] as Txs)

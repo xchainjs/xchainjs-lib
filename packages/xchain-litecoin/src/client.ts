@@ -322,6 +322,7 @@ class Client implements LitecoinClient, XChainClient {
           ethGasUsed: null,
           ethTokenName: null,
           ethTokenSymbol: null,
+          binanceMemo: null,
         }
         transactions.push(tx)
       }
@@ -367,6 +368,7 @@ class Client implements LitecoinClient, XChainClient {
         ethGasUsed: null,
         ethTokenName: null,
         ethTokenSymbol: null,
+        binanceMemo: null,
       }
     } catch (error) {
       return Promise.reject(error)

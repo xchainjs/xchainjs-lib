@@ -342,6 +342,7 @@ class Client implements PolkadotClient, XChainClient {
           ethGasUsed: null,
           ethTokenName: null,
           ethTokenSymbol: null,
+          binanceMemo: null,
         })),
       }
     } catch (error) {
@@ -395,6 +396,7 @@ class Client implements PolkadotClient, XChainClient {
         ethGasUsed: null,
         ethTokenName: null,
         ethTokenSymbol: null,
+        binanceMemo: null,
       }
     } catch (error) {
       return Promise.reject(error)

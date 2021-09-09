@@ -312,6 +312,7 @@ class Client implements BitcoinClient, XChainClient {
           ethGasUsed: null,
           ethTokenName: null,
           ethTokenSymbol: null,
+          binanceMemo: null,
         }
         transactions.push(tx)
       }
@@ -350,6 +351,7 @@ class Client implements BitcoinClient, XChainClient {
         type: 'transfer',
         hash: rawTx.txid,
         binanceFee: null,
+        binanceMemo: null,
         confirmations: rawTx.confirmations,
         ethCumulativeGasUsed: null,
         ethGas: null,

@@ -68,7 +68,6 @@ export const getTxType = (t: BinanceTxType): TxType => {
  */
 export const parseTx = (tx: BinanceTx): Tx | null => {
   const asset = assetFromString(`${AssetBNB.chain}.${tx.txAsset}`)
-
   if (!asset) return null
 
   return {
@@ -96,6 +95,7 @@ export const parseTx = (tx: BinanceTx): Tx | null => {
     ethGasUsed: null,
     ethTokenName: null,
     ethTokenSymbol: null,
+    binanceMemo: tx.memo ?? null,
   }
 }
 
