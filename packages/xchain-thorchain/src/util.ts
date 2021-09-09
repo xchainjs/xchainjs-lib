@@ -1,13 +1,22 @@
 import { Address, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { TxLog } from '@xchainjs/xchain-cosmos'
-import { Asset, BaseAmount, Chain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetRuneNative,
+  BaseAmount,
+  Chain,
+  assetFromString,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 import { AccAddress, Msg, codec } from 'cosmos-client'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
-import { AssetRune, ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
+import { ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'
+export const DEPOSIT_GAS_VALUE = '25000000'
 export const MAX_TX_COUNT = 100
 
 /**
@@ -17,7 +26,7 @@ export const MAX_TX_COUNT = 100
  * @returns {string} The denomination of the given asset.
  */
 export const getDenom = (asset: Asset): string => {
-  if (assetToString(asset) === assetToString(AssetRune)) return 'rune'
+  if (assetToString(asset) === assetToString(AssetRuneNative)) return 'rune'
   return asset.symbol
 }
 
@@ -38,7 +47,7 @@ export const getDenomWithChain = (asset: Asset): string => {
  * @returns {Asset|null} The asset of the given denomination.
  */
 export const getAsset = (denom: string): Asset | null => {
-  if (denom === getDenom(AssetRune)) return AssetRune
+  if (denom === getDenom(AssetRuneNative)) return AssetRuneNative
   return assetFromString(`${Chain.THORChain}.${denom.toUpperCase()}`)
 }
 
@@ -89,6 +98,13 @@ export const getPrefix = (network: Network) => {
       return 'tthor'
   }
 }
+
+/**
+ * Get the chain id.
+ *
+ * @returns {string} The chain id based on the network.
+ */
+export const getChainId = () => 'thorchain'
 
 /**
  * Register Codecs based on the prefix.
