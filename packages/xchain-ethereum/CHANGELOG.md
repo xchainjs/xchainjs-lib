@@ -2,7 +2,7 @@
 
 - updated to the latest dependencies
 
-# v.0.22.3 (2021-07-08)
+# v.0.22.4 (2021-07-08)
 
 ### Fix
 
