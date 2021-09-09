@@ -411,7 +411,7 @@ class Client implements ThorchainClient, XChainClient {
         ethGasUsed: null,
         ethTokenName: null,
         ethTokenSymbol: null,
-        memo: null,
+        memo: (txResult.tx as StdTx).memo ?? null,
       }
     } catch (error) {
       return Promise.reject(error)
