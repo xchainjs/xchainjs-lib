@@ -210,7 +210,7 @@ export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string):
       coins: msgNativeTx.coins,
       memo: msgNativeTx.memo,
       base_req: {
-        chain_id: 'thorchain',
+        chain_id: getChainId(),
         from: msgNativeTx.signer,
       },
     })
