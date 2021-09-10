@@ -72,6 +72,7 @@ const getCoinAmount = (coins?: proto.cosmos.base.v1beta1.ICoin[]) => {
  */
 export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => {
   return txs.reduce((acc, tx) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let msgs: any[]
     if ((tx.tx as RawTxResponse).body === undefined) {
       msgs = codec.packCosmosAny(tx.tx).msg
