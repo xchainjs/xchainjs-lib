@@ -1,7 +1,11 @@
 // import { Network, TxsPage } from '@xchainjs/xchain-client'
 // import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
-// import { BaseAccount, BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
+// import { proto } from 'cosmos-client'
+// import { BroadcastTxCommitResult, Coin } from 'cosmos-client/cjs/openapi/api'
+// import Long from 'long'
 // import nock from 'nock'
+
+// // import { BaseAccount, BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
 
 // import { Client } from '../src/client'
 // import { TxHistoryResponse, TxResponse } from '../src/cosmos/types'
@@ -17,7 +21,7 @@
 //   address: string,
 //   result: {
 //     height: number
-//     result: BaseAccount
+//     result: proto.cosmos.auth.v1beta1.IBaseAccount
 //   },
 // ) => {
 //   nock(url).get(`/auth/accounts/${address}`).reply(200, result)
@@ -28,7 +32,7 @@
 //   address: string,
 //   result: {
 //     height: number
-//     result: Coin[]
+//     balances: Coin[]
 //   },
 // ) => {
 //   nock(url).get(`/bank/balances/${address}`).reply(200, result)
@@ -126,7 +130,7 @@
 
 //     mockAccountsBalance(getClientUrl(cosmosClient), address0_mainnet, {
 //       height: 0,
-//       result: [],
+//       balances: [],
 //     })
 
 //     const result = await cosmosClient.getBalance(address0_mainnet)
@@ -136,7 +140,7 @@
 //   it('has balances', async () => {
 //     mockAccountsBalance(getClientUrl(cosmosClient), 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv', {
 //       height: 0,
-//       result: [
+//       balances: [
 //         {
 //           denom: 'muon',
 //           amount: '75000000',
@@ -263,21 +267,21 @@
 //     const expected_txsPost_result: BroadcastTxCommitResult = {
 //       check_tx: {},
 //       deliver_tx: {},
-//       txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
+//       // txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
 //       height: 0,
 //     }
 
 //     mockAccountsAddress(getClientUrl(cosmosClient), cosmosClient.getAddress(), {
 //       height: 0,
 //       result: {
-//         coins: [
-//           {
-//             denom: 'muon',
-//             amount: '21000',
-//           },
-//         ],
-//         account_number: '0',
-//         sequence: '0',
+//         // coins: [
+//         //   {
+//         //     denom: 'muon',
+//         //     amount: '21000',
+//         //   },
+//         // ],
+//         account_number: new Long(0),
+//         sequence: new Long(0),
 //       },
 //     })
 //     assertTxsPost(

@@ -2,6 +2,7 @@
 import { baseAmount } from '@xchainjs/xchain-util'
 import { proto } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/cjs/openapi/api'
+import { codec } from 'cosmos-client/cjs/types'
 
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
 import { AssetAtom, AssetMuon } from '../src/types'
@@ -113,7 +114,7 @@ describe('cosmos/util', () => {
         },
       ],
     })
-    const msgJsonString = JSON.stringify(msgSend.toJSON())
+    const encodedMsg = codec.packCosmosAny(msgSend)
     const txs: TxResponse[] = [
       {
         height: 0,
@@ -123,7 +124,7 @@ describe('cosmos/util', () => {
         gas_wanted: '200000',
         gas_used: '35000',
         tx: {
-          msg: [msgJsonString, msgJsonString],
+          msg: [encodedMsg, encodedMsg],
           fee: fee,
           signatures: null,
           memo: '',

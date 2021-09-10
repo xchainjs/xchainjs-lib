@@ -1,7 +1,6 @@
 import { FeeType, Fees, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { proto } from 'cosmos-client'
-import { StdTx } from 'cosmos-client/cjs/openapi/api'
 import { codec } from 'cosmos-client/cjs/types'
 
 import { APIQueryParam, RawTxResponse, TxResponse } from './cosmos/types'
@@ -73,15 +72,12 @@ const getCoinAmount = (coins?: proto.cosmos.base.v1beta1.ICoin[]) => {
  */
 export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => {
   return txs.reduce((acc, tx) => {
-    let msgs: proto.cosmos.bank.v1beta1.Msg[] = []
+    let msgs: any[]
     if ((tx.tx as RawTxResponse).body === undefined) {
-      msgs = codec.unpackCosmosAny(codec.packCosmosAny(tx.tx as StdTx)) as proto.cosmos.bank.v1beta1.Msg[]
+      msgs = codec.packCosmosAny(tx.tx).msg
     } else {
-      const tmp = codec.packCosmosAny((tx.tx as RawTxResponse).body.messages)
-      msgs = codec.unpackCosmosAny(tmp) as proto.cosmos.bank.v1beta1.Msg[]
+      msgs = codec.packCosmosAny(tx.tx).body.messages
     }
-
-    console.log(msgs)
 
     const from: TxFrom[] = []
     const to: TxTo[] = []

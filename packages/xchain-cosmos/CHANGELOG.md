@@ -1,3 +1,7 @@
+# v.0.14.0 (2021-09-09)
+
+- upgraded "cosmos-client": "0.42.14"
+
 # v.0.13.7 (2021-07-20)
 
 - cosmos 0.42.x has too many breaking changes that wren't caught in the last version, downgrade "cosmos-client": "0.39.2"

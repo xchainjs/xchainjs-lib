@@ -55,6 +55,7 @@ export type TxLog = {
   log: string
   events: TxEvent[]
 }
+// export class Msg {}
 
 export type TxResponse = {
   height?: number

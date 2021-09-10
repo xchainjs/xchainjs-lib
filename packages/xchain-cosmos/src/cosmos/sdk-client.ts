@@ -5,6 +5,7 @@ import * as BIP32 from 'bip32'
 import { cosmosclient, proto, rest } from 'cosmos-client'
 import { setBech32Prefix } from 'cosmos-client/cjs/config/module'
 import { BroadcastTxCommitResult, Coin } from 'cosmos-client/cjs/openapi/api'
+
 // import { BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
 // import { AccAddress, Msg } from 'cosmos-client'
 // import { BroadcastTxCommitResult, Coin, StdTxSignature } from 'cosmos-client/api'
@@ -96,11 +97,11 @@ export class CosmosSDKClient {
     this.setPrefix()
 
     const accAddress = cosmosclient.AccAddress.fromString(address)
-
-    return (await rest.cosmos.bank.allBalances(this.sdk, accAddress)).data.balances as Coin[]
+    const response = await rest.cosmos.bank.allBalances(this.sdk, accAddress)
+    return response.data.balances as Coin[]
   }
 
-  async getAccount(address: cosmosclient.AccAddress): Promise<proto.cosmos.auth.v1beta1.BaseAccount> {
+  async getAccount(address: cosmosclient.AccAddress): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> {
     const response = await rest.cosmos.auth.account(this.sdk, address)
     const account =
       response.data.account &&
@@ -257,9 +258,11 @@ export class CosmosSDKClient {
   async signAndBroadcast(
     txBuilder: cosmosclient.TxBuilder,
     privKey: proto.cosmos.crypto.secp256k1.PrivKey,
-    signerAccount: proto.cosmos.auth.v1beta1.BaseAccount,
+    signerAccount: proto.cosmos.auth.v1beta1.IBaseAccount,
   ): Promise<BroadcastTxCommitResult> {
     this.setPrefix()
+
+    if (!signerAccount || !signerAccount.account_number) throw new Error('Invalid Account')
 
     // sign
     const signDocBytes = txBuilder.signDocBytes(signerAccount.account_number)
