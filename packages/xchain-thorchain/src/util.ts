@@ -1,5 +1,5 @@
-import { Address, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
-import { TxLog } from '@xchainjs/xchain-cosmos'
+import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
+import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
   Asset,
   AssetRuneNative,
@@ -9,10 +9,14 @@ import {
   assetToString,
   baseAmount,
 } from '@xchainjs/xchain-util'
+import axios from 'axios'
 import { AccAddress, Msg, codec } from 'cosmos-client'
+import { StdTxFee } from 'cosmos-client/api'
+import { StdTx } from 'cosmos-client/x/auth'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
 import { ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
+import { MsgNativeTx, ThorchainDepositResponse } from './types/messages'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'
@@ -190,6 +194,70 @@ export const getDefaultFees = (): Fees => {
  */
 export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string => {
   return Buffer.from(txData, encoding).toString().slice(4)
+}
+
+/**
+ * Structure StdTx from MsgNativeTx.
+ *
+ * @param {string} txId The transaction id.
+ * @returns {Tx} The transaction details of the given transaction id.
+ *
+ * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
+ */
+export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string): Promise<StdTx> => {
+  const response: ThorchainDepositResponse = (
+    await axios.post(`${nodeUrl}/thorchain/deposit`, {
+      coins: msgNativeTx.coins,
+      memo: msgNativeTx.memo,
+      base_req: {
+        chain_id: getChainId(),
+        from: msgNativeTx.signer,
+      },
+    })
+  ).data
+
+  if (!response || !response.value) throw new Error('Invalid client url')
+
+  const fee: StdTxFee = response.value?.fee ?? { amount: [] }
+
+  const unsignedStdTx = StdTx.fromJSON({
+    msg: response.value.msg,
+    // override fee
+    fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
+    signatures: [],
+    memo: '',
+  })
+
+  return unsignedStdTx
+}
+
+/**
+ * Get the balance of a given address.
+ *
+ * @param {Address} address By default, it will return the balance of the current wallet. (optional)
+ * @param {Asset} asset If not set, it will return all assets available. (optional)
+ * @param {cosmosClient} CosmosSDKClient
+ *
+ * @returns {Balance[]} The balance of the address.
+ */
+export const getBalance = async ({
+  address,
+  assets,
+  cosmosClient,
+}: {
+  address: Address
+  assets?: Asset[]
+  cosmosClient: CosmosSDKClient
+}): Promise<Balance[]> => {
+  const balances = await cosmosClient.getBalance(address)
+  return balances
+    .map((balance) => ({
+      asset: (balance.denom && getAsset(balance.denom)) || AssetRuneNative,
+      amount: baseAmount(balance.amount, DECIMAL),
+    }))
+    .filter(
+      (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
+    )
 }
 
 /**

@@ -18,20 +18,19 @@ import {
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { Asset, AssetRuneNative, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetRuneNative, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { AccAddress, PrivKey } from 'cosmos-client'
-import { StdTxFee } from 'cosmos-client/api'
 import { StdTx } from 'cosmos-client/x/auth'
 
 import { ClientUrl, DepositParam, ExplorerUrls, NodeUrl, ThorchainClientParams, TxData } from './types'
-import { MsgNativeTx, ThorchainDepositResponse, TxResult, msgNativeTxFromJson } from './types/messages'
+import { TxResult, msgNativeTxFromJson } from './types/messages'
 import {
   DECIMAL,
   DEFAULT_GAS_VALUE,
-  DEPOSIT_GAS_VALUE,
   MAX_TX_COUNT,
-  getAsset,
+  buildDepositTx,
+  getBalance,
   getChainId,
   getDefaultClientUrl,
   getDefaultExplorerUrls,
@@ -54,7 +53,6 @@ export interface ThorchainClient {
   getClientUrl(): NodeUrl
   setExplorerUrls(explorerUrls: ExplorerUrls): void
   getCosmosClient(): CosmosSDKClient
-  buildDepositTx(msgNativeTx: MsgNativeTx): Promise<StdTx>
 
   deposit(params: DepositParam): Promise<TxHash>
 }
@@ -283,15 +281,7 @@ class Client implements ThorchainClient, XChainClient {
    * @returns {Balance[]} The balance of the address.
    */
   async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
-    const balances = await this.cosmosClient.getBalance(address)
-    return balances
-      .map((balance) => ({
-        asset: (balance.denom && getAsset(balance.denom)) || AssetRuneNative,
-        amount: baseAmount(balance.amount, DECIMAL),
-      }))
-      .filter(
-        (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
-      )
+    return getBalance({ address, assets, cosmosClient: this.getCosmosClient() })
   }
 
   /**
@@ -421,41 +411,6 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
-   * Structure StdTx from MsgNativeTx.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   *
-   * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
-   */
-  async buildDepositTx(msgNativeTx: MsgNativeTx): Promise<StdTx> {
-    const response: ThorchainDepositResponse = (
-      await axios.post(`${this.getClientUrl().node}/thorchain/deposit`, {
-        coins: msgNativeTx.coins,
-        memo: msgNativeTx.memo,
-        base_req: {
-          chain_id: 'thorchain',
-          from: msgNativeTx.signer,
-        },
-      })
-    ).data
-
-    if (!response || !response.value) throw new Error('Invalid client url')
-
-    const fee: StdTxFee = response.value?.fee ?? { amount: [] }
-
-    const unsignedStdTx = StdTx.fromJSON({
-      msg: response.value.msg,
-      // override fee
-      fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
-      signatures: [],
-      memo: '',
-    })
-
-    return unsignedStdTx
-  }
-
-  /**
    * Transaction with MsgNativeTx.
    *
    * @param {DepositParam} params The transaction options.
@@ -483,7 +438,7 @@ class Client implements ThorchainClient, XChainClient {
       signer,
     })
 
-    const unsignedStdTx: StdTx = await this.buildDepositTx(msgNativeTx)
+    const unsignedStdTx: StdTx = await buildDepositTx(msgNativeTx, this.getClientUrl().node)
     const privateKey = this.getPrivateKey(walletIndex)
     const accAddress = AccAddress.fromBech32(signer)
 
