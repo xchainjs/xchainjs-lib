@@ -83,7 +83,7 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
     const from: TxFrom[] = []
     const to: TxTo[] = []
     msgs.map((msg) => {
-      if (msg instanceof proto.cosmos.bank.v1beta1.MsgSend) {
+      if (msg.inputs === undefined) {
         const msgSend = msg as proto.cosmos.bank.v1beta1.MsgSend
         const amount = getCoinAmount(msgSend.amount)
 
@@ -116,7 +116,7 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
         } else {
           to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), 6)
         }
-      } else if (msg instanceof proto.cosmos.bank.v1beta1.MsgMultiSend) {
+      } else if (msg.inputs && msg.outputs) {
         const msgMultiSend = msg as proto.cosmos.bank.v1beta1.MsgMultiSend
 
         msgMultiSend.inputs.map((input) => {

@@ -1,13 +1,7 @@
-// import { TxHistoryResponse, TxResponse } from '@xchainjs/xchain-cosmos'
-// import { codec } from 'cosmos-client'
 import { proto } from 'cosmos-client'
-import { BroadcastTxCommitResult, Coin } from 'cosmos-client/cjs/openapi/api'
+import { Coin } from 'cosmos-client/cjs/openapi/api'
 import { codec } from 'cosmos-client/cjs/types'
-import Long from 'long'
 import nock from 'nock'
-
-// import { BaseAccount, BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
-// import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
 import { CosmosSDKClient } from '../src/cosmos/sdk-client'
 import { TxHistoryResponse, TxResponse } from '../src/cosmos/types'
@@ -16,18 +10,25 @@ const mockAccountsAddress = (
   url: string,
   address: string,
   result: {
-    height: number
-    result: proto.cosmos.auth.v1beta1.IBaseAccount
+    account: {
+      '@type': string
+      address: string
+      pub_key?: {
+        '@type': string
+        key: string
+      }
+      account_number: string
+      sequence: string
+    }
   },
 ) => {
-  nock(url).get(`/auth/accounts/${address}`).reply(200, result)
+  nock(url).get(`/cosmos/auth/v1beta1/accounts/${address}`).reply(200, result)
 }
 
 const mockAccountsBalance = (
   url: string,
   address: string,
   result: {
-    height: number
     balances: Coin[]
   },
 ) => {
@@ -36,21 +37,17 @@ const mockAccountsBalance = (
 
 const assertTxsPost = (
   url: string,
-  from_address: string,
-  to_address: string,
-  msg_type: string,
-  send_amount: Coin[],
-  memo: undefined | string,
-  result: BroadcastTxCommitResult,
+  result: {
+    tx_response: {
+      txhash: string
+    }
+  },
 ): void => {
   nock(url, { allowUnmocked: true })
-    .post(`/txs`, (body) => {
-      expect(body.tx.msg.length).toEqual(1)
-      expect(body.tx.msg[0].type).toEqual(msg_type)
-      expect(body.tx.msg[0].value.from_address).toEqual(from_address)
-      expect(body.tx.msg[0].value.to_address).toEqual(to_address)
-      expect(body.tx.msg[0].value.amount).toEqual(send_amount)
-      expect(body.tx.memo).toEqual(memo)
+    .post(`/cosmos/tx/v1beta1/txs`, (body) => {
+      const txData = JSON.parse(body)
+      expect(txData.mode).toEqual('BROADCAST_MODE_BLOCK')
+      expect(txData.tx_bytes.length).toBeGreaterThan(0)
       return true
     })
     .reply(200, result)
@@ -171,14 +168,12 @@ describe('SDK Client Test', () => {
 
   it('getBalance', async () => {
     mockAccountsBalance(cosmosMainnetClient.server, cosmos_mainnet_address0, {
-      height: 0,
       balances: [],
     })
     let balances = await cosmosMainnetClient.getBalance(cosmos_mainnet_address0)
     expect(balances).toEqual([])
 
     mockAccountsBalance(cosmosTestnetClient.server, cosmos_testnet_address0, {
-      height: 0,
       balances: [
         {
           denom: 'umuon',
@@ -192,7 +187,6 @@ describe('SDK Client Test', () => {
     expect(balances[0].denom).toEqual('umuon')
 
     mockAccountsBalance(thorMainnetClient.server, thor_mainnet_address0, {
-      height: 0,
       balances: [
         {
           denom: 'thor',
@@ -206,7 +200,6 @@ describe('SDK Client Test', () => {
     expect(parseInt(balances[0].amount || '0')).toEqual(100)
 
     mockAccountsBalance(thorTestnetClient.server, thor_testnet_address0, {
-      height: 0,
       balances: [],
     })
     balances = await thorTestnetClient.getBalance(thor_testnet_address0)
@@ -313,78 +306,58 @@ describe('SDK Client Test', () => {
   })
 
   it('transfer', async () => {
-    const expected_txsPost_result: BroadcastTxCommitResult = {
-      check_tx: {},
-      deliver_tx: {},
-      // txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
-      height: 0,
+    const expected_txsPost_result = {
+      tx_response: {
+        txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
+      },
     }
-
     mockAccountsAddress(cosmosTestnetClient.server, cosmos_testnet_address0, {
-      height: 0,
-      result: {
+      account: {
+        '@type': '/cosmos.auth.v1beta1.BaseAccount',
         address: cosmos_testnet_address0,
-        account_number: new Long(0),
-        sequence: new Long(0),
+        pub_key: {
+          '@type': '/cosmos.crypto.secp256k1.PubKey',
+          key: 'AyB84hKBjN2wsmdC2eF1Ppz6l3VxlfSKJpYsTaL4VrrE',
+        },
+        account_number: '0',
+        sequence: '0',
       },
     })
 
-    assertTxsPost(
-      cosmosTestnetClient.server,
-      cosmos_testnet_address0,
-      'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-      'cosmos-sdk/MsgSend',
-      [
-        {
-          denom: 'muon',
-          amount: '10000',
+    assertTxsPost(cosmosTestnetClient.server, expected_txsPost_result)
+
+    try {
+      const result = await cosmosTestnetClient.transfer({
+        privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase, derivationPaths.cosmos.testnet + '0'),
+        from: cosmos_testnet_address0,
+        to: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+        amount: 10000,
+        asset: 'muon',
+        memo: 'transfer',
+      })
+
+      expect(result).toEqual(expected_txsPost_result.tx_response.txhash)
+
+      mockAccountsAddress(thorTestnetClient.server, thor_testnet_address0, {
+        account: {
+          '@type': '/cosmos.auth.v1beta1.BaseAccount',
+          address: thor_testnet_address0,
+          pub_key: {
+            '@type': '/cosmos.crypto.secp256k1.PubKey',
+            key: 'AyB84hKBjN2wsmdC2eF1Ppz6l3VxlfSKJpYsTaL4VrrE',
+          },
+          account_number: '0',
+          sequence: '0',
         },
-      ],
-      'transfer',
-      expected_txsPost_result,
-    )
-
-    // codec.registerCodec('cosmos-sdk/MsgSend', MsgSend, MsgSend.fromJSON)
-    // codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
-
-    const result = await cosmosTestnetClient.transfer({
-      privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase, derivationPaths.cosmos.testnet + '0'),
-      from: cosmos_testnet_address0,
-      to: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-      amount: 10000,
-      asset: 'muon',
-      memo: 'transfer',
-    })
-
-    expect(result).toEqual(expected_txsPost_result)
-
-    mockAccountsAddress(thorTestnetClient.server, thor_testnet_address0, {
-      height: 0,
-      result: {
-        account_number: new Long(0),
-        sequence: new Long(0),
-      },
-    })
-    assertTxsPost(
-      thorTestnetClient.server,
-      thor_testnet_address0,
-      'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
-      'thorchain/MsgSend',
-      [
-        {
-          denom: 'thor',
-          amount: '10000',
-        },
-      ],
-      'transfer',
-      expected_txsPost_result,
-    )
+      })
+      assertTxsPost(thorTestnetClient.server, expected_txsPost_result)
+    } catch (error) {
+      console.error(error)
+    }
   })
 
   it('get transaction data', async () => {
     const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
-      // type: 'cosmos-sdk/MsgSend',
-      // value: {
       from_address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2',
       to_address: cosmos_mainnet_address0,
       amount: [
@@ -393,7 +366,6 @@ describe('SDK Client Test', () => {
           amount: '1000000',
         },
       ],
-      // },
     })
     const encodedMsg = codec.packCosmosAny(msgSend)
     assertTxHashGet(cosmosMainnetClient.server, '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {

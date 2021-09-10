@@ -265,8 +265,6 @@ class Client implements CosmosClient, XChainClient {
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
-    // registerCodecs()
-
     const mainAsset = this.getMainAsset()
     const txHistory = await this.getSDKClient().searchTx({
       messageAction,
@@ -305,7 +303,6 @@ class Client implements CosmosClient, XChainClient {
    */
   async transfer({ walletIndex, asset, amount, recipient, memo }: TxParams): Promise<TxHash> {
     const fromAddressIndex = walletIndex || 0
-    // registerCodecs()
 
     const mainAsset = this.getMainAsset()
     const transferResult = await this.getSDKClient().transfer({
@@ -317,7 +314,7 @@ class Client implements CosmosClient, XChainClient {
       memo,
     })
 
-    return transferResult?.hash || ''
+    return transferResult || ''
   }
 
   /**

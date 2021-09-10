@@ -4,19 +4,12 @@ import axios from 'axios'
 import * as BIP32 from 'bip32'
 import { cosmosclient, proto, rest } from 'cosmos-client'
 import { setBech32Prefix } from 'cosmos-client/cjs/config/module'
-import { BroadcastTxCommitResult, Coin } from 'cosmos-client/cjs/openapi/api'
-
-// import { BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
-// import { AccAddress, Msg } from 'cosmos-client'
-// import { BroadcastTxCommitResult, Coin, StdTxSignature } from 'cosmos-client/api'
-// import { BaseAccount, StdTx, auth } from 'cosmos-client/x/auth'
-// import { bank } from 'cosmos-client/x/bank'
+import { Coin } from 'cosmos-client/cjs/openapi/api'
 
 import { getQueryString } from '../util'
 
 import {
   APIQueryParam,
-  // BaseAccountResponse,
   CosmosSDKClientParams,
   RPCResponse,
   RPCTxSearchResult,
@@ -101,12 +94,11 @@ export class CosmosSDKClient {
     return response.data.balances as Coin[]
   }
 
-  async getAccount(address: cosmosclient.AccAddress): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> {
-    const response = await rest.cosmos.auth.account(this.sdk, address)
-    const account =
-      response.data.account &&
-      (cosmosclient.codec.unpackCosmosAny(response.data.account) as proto.cosmos.auth.v1beta1.BaseAccount)
-
+  private async getAccount(address: cosmosclient.AccAddress): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> {
+    const account = await rest.cosmos.auth
+      .account(this.sdk, address)
+      .then((res) => res.data.account && cosmosclient.codec.unpackCosmosAny(res.data.account))
+      .catch((_) => undefined)
     if (!(account instanceof proto.cosmos.auth.v1beta1.BaseAccount)) {
       throw Error('could not get account')
     }
@@ -202,29 +194,19 @@ export class CosmosSDKClient {
     return (await axios.get<TxResponse>(`${this.server}/txs/${hash}`)).data
   }
 
-  async transfer({
-    privkey,
-    from,
-    to,
-    amount,
-    asset,
-    memo = '',
-    fee = '200000',
-  }: TransferParams): Promise<BroadcastTxCommitResult> {
+  async transfer({ privkey, from, to, amount, asset, memo = '', fee = '200000' }: TransferParams): Promise<string> {
     this.setPrefix()
 
-    const msgSend = [
-      new proto.cosmos.bank.v1beta1.MsgSend({
-        from_address: from,
-        to_address: to,
-        amount: [
-          {
-            amount: amount.toString(),
-            denom: asset,
-          },
-        ],
-      }),
-    ]
+    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+      from_address: from,
+      to_address: to,
+      amount: [
+        {
+          amount: amount.toString(),
+          denom: asset,
+        },
+      ],
+    })
 
     const pubKey = privkey.pubKey()
     const signer = cosmosclient.AccAddress.fromPublicKey(pubKey)
@@ -259,7 +241,7 @@ export class CosmosSDKClient {
     txBuilder: cosmosclient.TxBuilder,
     privKey: proto.cosmos.crypto.secp256k1.PrivKey,
     signerAccount: proto.cosmos.auth.v1beta1.IBaseAccount,
-  ): Promise<BroadcastTxCommitResult> {
+  ): Promise<string> {
     this.setPrefix()
 
     if (!signerAccount || !signerAccount.account_number) throw new Error('Invalid Account')
@@ -273,6 +255,6 @@ export class CosmosSDKClient {
       tx_bytes: txBuilder.txBytes(),
       mode: rest.cosmos.tx.BroadcastTxMode.Block,
     })
-    return res.data as BroadcastTxCommitResult
+    return res.data.tx_response?.txhash || 'unknown'
   }
 }
