@@ -716,11 +716,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       }
     } catch (error) {}
     //should only get here if thor fails
-    try {
-      return await this.estimateGasPricesFromEtherscan()
-    } catch (error) {
-      return Promise.reject(new Error(`Failed to estimate gas price: ${error.msg ?? error.toString()}`))
-    }
+    // try {
+    return await this.estimateGasPricesFromEtherscan()
+    // } catch (error) {
+    //   throw new Error(`Failed to estimate gas price: ${error.msg ?? error.toString()}`)
+    // }
   }
 
   /**

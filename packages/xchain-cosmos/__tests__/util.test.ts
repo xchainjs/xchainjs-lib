@@ -1,4 +1,3 @@
-// import { Msg } from 'cosmos-client'
 import { baseAmount } from '@xchainjs/xchain-util'
 import { proto } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/cjs/openapi/api'
