@@ -5,73 +5,73 @@ import { codec } from 'cosmos-client/cjs/types'
 
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
 import { AssetAtom, AssetMuon } from '../src/types'
-import { getAsset, getDenom, getQueryString, getTxsFromHistory } from '../src/util'
+import { getAsset, getDenom, getQueryString, getTxsFromHistory, isMsgMultiSend, isMsgSend } from '../src/util'
 
 describe('cosmos/util', () => {
-  // describe('Msg type guards', () => {
-  //   const msgMultiSend: MsgMultiSend = {
-  //     inputs: [
-  //       {
-  //         address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-  //         coins: [
-  //           {
-  //             denom: 'uatom',
-  //             amount: '100000',
-  //           },
-  //         ],
-  //       },
-  //       {
-  //         address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-  //         coins: [
-  //           {
-  //             denom: 'uatom',
-  //             amount: '300000',
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //     outputs: [
-  //       {
-  //         address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-  //         coins: [
-  //           {
-  //             denom: 'uatom',
-  //             amount: '400000',
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   }
+  describe('Msg type guards', () => {
+    const msgMultiSend = new proto.cosmos.bank.v1beta1.MsgMultiSend({
+      inputs: [
+        {
+          address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+          coins: [
+            {
+              denom: 'uatom',
+              amount: '100000',
+            },
+          ],
+        },
+        {
+          address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+          coins: [
+            {
+              denom: 'uatom',
+              amount: '300000',
+            },
+          ],
+        },
+      ],
+      outputs: [
+        {
+          address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+          coins: [
+            {
+              denom: 'uatom',
+              amount: '400000',
+            },
+          ],
+        },
+      ],
+    })
 
-  //   const msgSend: MsgSend = MsgSend.fromJSON({
-  //     from_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-  //     to_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-  //     amount: [
-  //       {
-  //         denom: 'uatom',
-  //         amount: '100000',
-  //       },
-  //     ],
-  //   })
+    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+      from_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+      to_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
+      amount: [
+        {
+          denom: 'uatom',
+          amount: '100000',
+        },
+      ],
+    })
 
-  //   describe('isMsgMultiSend', () => {
-  //     it('validates MsgMultiSend', () => {
-  //       expect(isMsgMultiSend(msgMultiSend)).toBeTruthy()
-  //     })
-  //     it('invalidates MsgMultiSend', () => {
-  //       expect(isMsgMultiSend(msgSend)).toBeFalsy()
-  //     })
-  //   })
+    describe('isMsgMultiSend', () => {
+      it('validates MsgMultiSend', () => {
+        expect(isMsgMultiSend(msgMultiSend)).toBeTruthy()
+      })
+      it('invalidates MsgMultiSend', () => {
+        expect(isMsgMultiSend(msgSend)).toBeFalsy()
+      })
+    })
 
-  //   describe('isMsgSend', () => {
-  //     it('validates MsgSend', () => {
-  //       expect(isMsgSend(msgSend)).toBeTruthy()
-  //     })
-  //     it('invalidates MsgSend', () => {
-  //       expect(isMsgSend(msgMultiSend)).toBeFalsy()
-  //     })
-  //   })
-  // })
+    describe('isMsgSend', () => {
+      it('validates MsgSend', () => {
+        expect(isMsgSend(msgSend)).toBeTruthy()
+      })
+      it('invalidates MsgSend', () => {
+        expect(isMsgSend(msgMultiSend)).toBeFalsy()
+      })
+    })
+  })
 
   describe('Denom <-> Asset', () => {
     describe('getDenom', () => {
