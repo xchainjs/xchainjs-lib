@@ -39,7 +39,7 @@ export const getGasOracle = (baseUrl: string, apiKey?: string): Promise<GasOracl
  * @param {string} apiKey The etherscan API key. (optional)
  * @returns {BigNumberish} The token balance
  */
-export const getTokenBalance = ({
+export const getTokenBalance = async ({
   baseUrl,
   address,
   assetAddress,
@@ -47,7 +47,13 @@ export const getTokenBalance = ({
 }: TokenBalanceParam & { baseUrl: string; apiKey?: string }): Promise<BigNumberish> => {
   const url = baseUrl + `/api?module=account&action=tokenbalance&contractaddress=${assetAddress}&address=${address}`
 
-  return axios.get(url + getApiKeyQueryParameter(apiKey)).then((response) => response.data.result)
+  const response = await axios.get(url + getApiKeyQueryParameter(apiKey))
+
+  if (response.data.result.includes('Max rate limit reached')) {
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+    return getTokenBalance({ baseUrl, address, assetAddress, apiKey })
+  }
+  return response.data.result
 }
 
 /**
