@@ -94,7 +94,7 @@ export class CosmosSDKClient {
     return response.data.balances as Coin[]
   }
 
-  private async getAccount(address: cosmosclient.AccAddress): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> {
+  async getAccount(address: cosmosclient.AccAddress): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> {
     const account = await rest.cosmos.auth
       .account(this.sdk, address)
       .then((res) => res.data.account && cosmosclient.codec.unpackCosmosAny(res.data.account))

@@ -11,7 +11,6 @@ import {
   getExplorerTxUrl,
   getExplorerUrl,
   getTxType,
-  isBroadcastSuccess,
 } from '../src/util'
 
 describe('thorchain/util', () => {
@@ -97,15 +96,6 @@ describe('thorchain/util', () => {
         expect(to[1].to).toEqual('tthor17gw75axcnr8747pkanye45pnrwk7p9c3uhzgff')
         expect(to[1].amount.amount().toString()).toEqual(assetToBase(assetAmount(1700)).amount().toString())
         expect(type).toEqual('transfer')
-      })
-    })
-
-    describe('isBroadcastSuccess', () => {
-      it('validates isBroadcastSuccess', () => {
-        expect(isBroadcastSuccess({ logs: [] })).toBeTruthy()
-      })
-      it('invalidates isBroadcastSuccess', () => {
-        expect(isBroadcastSuccess({})).toBeFalsy()
       })
     })
   })

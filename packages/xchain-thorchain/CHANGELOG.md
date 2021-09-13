@@ -1,3 +1,8 @@
+# v.0.19.0 (2021-09-12)
+
+- upgraded "cosmos-client": "0.42.14"
+- changed class Client to extend BaseXChainClient
+
 # v.0.18.0 (2021-09-08)
 
 ## Add

@@ -1,18 +1,27 @@
-import { AccAddress, Msg } from 'cosmos-client'
-import { StdTxFee } from 'cosmos-client/api'
-import { StdSignature } from 'cosmos-client/x/auth'
+import { cosmosclient } from 'cosmos-client'
+import { Coin } from 'cosmos-client/cjs/openapi/api'
 
 export type MsgCoin = {
   asset: string
   amount: string
 }
+export class Msg {}
+
+export type StdSignature = {
+  pub_key: cosmosclient.PubKey
+  signature: string
+}
+export interface StdTxFee {
+  gas?: string
+  amount?: Array<Coin>
+}
 
 export class MsgNativeTx extends Msg {
   coins: MsgCoin[]
   memo: string
-  signer: AccAddress
+  signer: cosmosclient.AccAddress
 
-  constructor(coins: MsgCoin[], memo: string, signer: AccAddress) {
+  constructor(coins: MsgCoin[], memo: string, signer: cosmosclient.AccAddress) {
     super()
 
     this.coins = coins
@@ -28,7 +37,7 @@ export class MsgNativeTx extends Msg {
  * @returns {MsgNativeTx}
  */
 export const msgNativeTxFromJson = (value: { coins: MsgCoin[]; memo: string; signer: string }): MsgNativeTx => {
-  return new MsgNativeTx(value.coins, value.memo, AccAddress.fromBech32(value.signer))
+  return new MsgNativeTx(value.coins, value.memo, cosmosclient.AccAddress.fromString(value.signer))
 }
 
 export type AminoWrapping<T> = {

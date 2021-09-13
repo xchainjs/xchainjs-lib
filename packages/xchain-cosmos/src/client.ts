@@ -1,10 +1,10 @@
 import {
   Address,
   Balance,
+  BaseXChainClient,
   FeeType,
   Fees,
   Network,
-  RootDerivationPaths,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -13,8 +13,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { proto } from 'cosmos-client'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
@@ -40,11 +39,7 @@ const TESTNET_SDK = new CosmosSDKClient({
 /**
  * Custom Cosmos client
  */
-class Client implements CosmosClient, XChainClient {
-  private network: Network
-  private phrase = ''
-  private rootDerivationPaths: RootDerivationPaths
-
+class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   private sdkClients: Map<Network, CosmosSDKClient> = new Map<Network, CosmosSDKClient>()
 
   /**
@@ -59,53 +54,15 @@ class Client implements CosmosClient, XChainClient {
    */
   constructor({
     network = Network.Testnet,
-    phrase,
     rootDerivationPaths = {
       [Network.Mainnet]: `44'/118'/0'/0/`,
       [Network.Testnet]: `44'/118'/1'/0/`,
     },
+    phrase = '',
   }: XChainClientParams) {
-    this.network = network
-    this.rootDerivationPaths = rootDerivationPaths
+    super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
     this.sdkClients.set(Network.Testnet, TESTNET_SDK)
     this.sdkClients.set(Network.Mainnet, MAINNET_SDK)
-
-    if (phrase) this.setPhrase(phrase)
-  }
-
-  /**
-   * Purge client.
-   *
-   * @returns {void}
-   */
-  purgeClient(): void {
-    this.phrase = ''
-  }
-
-  /**
-   * Set/update the current network.
-   *
-   * @param {Network} network
-   * @returns {void}
-   *
-   * @throws {"Network must be provided"}
-   * Thrown if network has not been set before.
-   */
-  setNetwork(network: Network): void {
-    if (!network) {
-      throw new Error('Network must be provided')
-    } else {
-      this.network = network
-    }
-  }
-
-  /**
-   * Get the current network.
-   *
-   * @returns {Network}
-   */
-  getNetwork(): Network {
-    return this.network
   }
 
   /**
@@ -143,27 +100,6 @@ class Client implements CosmosClient, XChainClient {
   }
 
   /**
-   * Set/update a new phrase
-   *
-   * @param {string} phrase A new phrase.
-   * @returns {Address} The address from the given phrase
-   *
-   * @throws {"Invalid phrase"}
-   * Thrown if the given phase is invalid.
-   */
-  setPhrase(phrase: string, walletIndex = 0): Address {
-    if (this.phrase !== phrase) {
-      if (!xchainCrypto.validatePhrase(phrase)) {
-        throw new Error('Invalid phrase')
-      }
-
-      this.phrase = phrase
-    }
-
-    return this.getAddress(walletIndex)
-  }
-
-  /**
    * @private
    * Get private key.
    *
@@ -179,16 +115,6 @@ class Client implements CosmosClient, XChainClient {
   }
   getSDKClient(): CosmosSDKClient {
     return this.sdkClients.get(this.network) || TESTNET_SDK
-  }
-
-  /**
-   * Get getFullDerivationPath
-   *
-   * @param {number} index the HD wallet index
-   * @returns {string} The bitcoin derivation path based on the network.
-   */
-  getFullDerivationPath(index: number): string {
-    return this.rootDerivationPaths[this.network] + `${index}`
   }
 
   /**

@@ -188,16 +188,6 @@ export const getQueryString = (params: APIQueryParam): string => {
     .join('&')
 }
 
-// /**
-//  * Register message codecs.
-//  *
-//  * @returns {void}
-//  */
-// export const registerCodecs = () => {
-//   codec.registerCodec('cosmos-sdk/MsgSend', MsgSend, MsgSend.fromJSON)
-//   codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
-// }
-
 /**
  * Get the default fee.
  *
