@@ -20,10 +20,10 @@ import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
 import { Asset, AssetRuneNative, Chain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { cosmosclient, proto } from 'cosmos-client'
-import { StdTx } from 'cosmos-client/cjs/openapi/api'
 
 import { ClientUrl, DepositParam, ExplorerUrls, NodeUrl, ThorchainClientParams, TxData } from './types'
 import { TxResult, msgNativeTxFromJson } from './types/messages'
+import types from './types/proto/MsgDeposit'
 import {
   DECIMAL,
   DEFAULT_GAS_VALUE,
@@ -40,6 +40,7 @@ import {
   getExplorerAddressUrl,
   getExplorerTxUrl,
   getPrefix,
+  registerCodecs,
 } from './util'
 
 /**
@@ -92,6 +93,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       chainId: getChainId(),
       prefix: getPrefix(this.network),
     })
+    registerCodecs()
   }
 
   /**
@@ -367,6 +369,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @throws {"insufficient funds"} Thrown if the wallet has insufficient funds.
    * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
    */
+
   async deposit({ walletIndex = 0, asset = AssetRuneNative, amount, memo }: DepositParam): Promise<TxHash> {
     const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
 
@@ -388,11 +391,13 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       memo,
       signer: from,
     })
-    const unsignedStdTx: StdTx = await buildDepositTx(msgNativeTx, this.getClientUrl().node)
+    const unsignedStdTx = await buildDepositTx(msgNativeTx, this.getClientUrl().node)
+    const deposit = types.types.MsgDeposit.create(unsignedStdTx)
 
     const account = await this.getCosmosClient().getAccount(accAddress)
+
     const txBody = new proto.cosmos.tx.v1beta1.TxBody({
-      messages: [cosmosclient.codec.packAny(unsignedStdTx)],
+      messages: [cosmosclient.codec.packAny(deposit)],
       memo,
     })
     const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({

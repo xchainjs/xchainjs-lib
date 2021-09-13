@@ -9,8 +9,13 @@ export interface Scope {
   server: Server
   done: () => void
 }
+class FixedWebSockectMock extends WebSocket {
+  constructor(url: string | URL, protocols?: string | string[]) {
+    super(url.toString(), protocols)
+  }
+}
 
-global.WebSocket = WebSocket
+global.WebSocket = FixedWebSockectMock
 
 function mockWs(wsUrl: string): Scope {
   console.log(wsUrl)

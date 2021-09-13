@@ -11,9 +11,10 @@ import {
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { StdTx } from 'cosmos-client/cjs/openapi/api'
-// import { codec } from 'cosmos-client/cjs/types/codec'
+import { codec } from 'cosmos-client/cjs/types/codec'
 
 import { ClientUrl, ExplorerUrl, ExplorerUrls, MsgNativeTx, StdTxFee, ThorchainDepositResponse, TxData } from './types'
+import types from './types/proto/MsgDeposit'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'
@@ -75,15 +76,21 @@ export const getPrefix = (network: Network) => {
  */
 export const getChainId = () => 'thorchain'
 
-// /**
-//  * Register Codecs based on the prefix.
-//  *
-//  * @param {string} prefix
-//  */
-// export const registerCodecs = (prefix: string): void => {
-//   codec.register('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
-//   codec.register('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
-// }
+/**
+ * Register Codecs based on the prefix.
+ *
+ * @param {string} prefix
+ */
+
+export const registerCodecs = async (): Promise<void> => {
+  // const root = await protobuf.load('bundle.json')
+  // const MsgDeposit = root.lookupType('thorchain/MsgDeposit')
+  // console.log(MsgDeposit)
+  // proto.cosmos.bank.v1beta1.
+  codec.register('thorchain/MsgDeposit', types.types.MsgDeposit)
+  //  )
+  // codec.register('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
+}
 
 /**
  * Parse transaction data from event logs
