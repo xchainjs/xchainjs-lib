@@ -50,7 +50,7 @@ export const getTokenBalance = async ({
   const response = await axios.get(url + getApiKeyQueryParameter(apiKey))
 
   if (response.data.result.includes('Max rate limit reached')) {
-    console.log('reached rate limit for ', url, 'waiting 3s then trying again...')
+    console.log('reached rate limit for', url, 'waiting 3s then trying again...')
     await new Promise((resolve) => setTimeout(resolve, 3000))
     return getTokenBalance({ baseUrl, address, assetAddress, apiKey })
   }
