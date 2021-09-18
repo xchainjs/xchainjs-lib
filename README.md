@@ -46,6 +46,17 @@ For wallets that need even more flexibility (smart contract blockchains) the cli
 yarn test
 ```
 
+## Integration Tests
+
+There are a suite of integration test which work against test net. You will need to specifucy a phrase which possess testnet coins
+
+```bash
+export PHRASE="secret phrase here"
+yarn run integration_tests
+```
+
+### `unit`
+
 ## Development
 
 `lerna bootstrap`
