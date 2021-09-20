@@ -1,7 +1,7 @@
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
-import { Network, XChainClient } from '@xchainjs/xchain-client'
+import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
 import { Client as EthClient } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
@@ -64,8 +64,28 @@ describe('ThorChain Integration Tests', () => {
   it('should fetch balances', async () => {
     const address = xchainClients.THOR.getAddress(0)
     const balances = await xchainClients.THOR.getBalance(address)
-    console.log(balances)
+    balances.forEach((bal) => {
+      console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
+    })
     expect(balances.length).toBeGreaterThan(0)
+  })
+  it('should xfer rune from wallet 0 -> 1, with a memo', async () => {
+    try {
+      const addressTo = xchainClients.THOR.getAddress(1)
+      const transferTx: TxParams = {
+        walletIndex: 0,
+        asset: AssetRuneNative,
+        amount: baseAmount('1000000'),
+        recipient: addressTo,
+        memo: 'Hi!',
+      }
+      const hash = await xchainClients.THOR.transfer(transferTx)
+      expect(hash.length).toBeGreaterThan(0)
+      console.log(xchainClients.THOR.getExplorerTxUrl(hash))
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
   })
   it('should swap rune for BNB', async () => {
     const swap = makeSwapRuneFor('1000000', 'BNB.BNB')
@@ -74,8 +94,8 @@ describe('ThorChain Integration Tests', () => {
       const explorerUrl = await swapRuneTo(swap)
       expect(explorerUrl.length).toBeGreaterThan(5)
     } catch (error) {
-      console.error(error)
-      fail()
+      console.log(error)
+      throw error
     }
   })
 })
