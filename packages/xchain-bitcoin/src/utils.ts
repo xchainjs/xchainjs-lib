@@ -114,7 +114,7 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
       },
     ]
   } catch (error) {
-    return Promise.reject(new Error('Invalid address'))
+    return Promise.reject(error)
   }
 }
 
