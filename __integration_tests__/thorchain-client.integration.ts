@@ -2,6 +2,7 @@ import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
 import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
+import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as EthClient } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
@@ -46,7 +47,8 @@ function makeSwapRuneFor(amount: string, toAsset: string): Swap {
   }
   return swap
 }
-describe('ThorChain Integration Tests', () => {
+
+describe('thorchain Integration Tests', () => {
   beforeEach(() => {
     const settings = { network: 'testnet' as Network, phrase: process.env.PHRASE }
     xchainClients = {
@@ -56,12 +58,11 @@ describe('ThorChain Integration Tests', () => {
       THOR: new ThorClient(settings),
       LTC: new LtcClient(settings),
       BNB: new BnbClient(settings),
-      GAIA: new BnbClient(settings), //FAKE for now
+      GAIA: new CosmosClient(settings), //FAKE for now
       POLKA: new BnbClient(settings), //FAKE for now
     }
   })
-
-  it('should fetch balances', async () => {
+  it('should fetch thorchain balances', async () => {
     const address = xchainClients.THOR.getAddress(0)
     const balances = await xchainClients.THOR.getBalance(address)
     balances.forEach((bal) => {
@@ -69,6 +70,7 @@ describe('ThorChain Integration Tests', () => {
     })
     expect(balances.length).toBeGreaterThan(0)
   })
+
   it('should xfer rune from wallet 0 -> 1, with a memo', async () => {
     try {
       const addressTo = xchainClients.THOR.getAddress(1)
