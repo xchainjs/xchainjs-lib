@@ -29,11 +29,11 @@ export interface CosmosClient {
 
 const MAINNET_SDK = new CosmosSDKClient({
   server: 'https://api.cosmos.network',
-  chainId: 'cosmoshub-3',
+  chainId: 'cosmoshub-4',
 })
 const TESTNET_SDK = new CosmosSDKClient({
-  server: 'http://lcd.gaia.bigdipper.live:1317',
-  chainId: 'gaia-3a',
+  server: 'https://api.testnet.cosmos.network',
+  chainId: 'cosmoshub-testnet',
 })
 
 /**
