@@ -17,7 +17,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
-import { Asset, AssetRuneNative, Chain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetRuneNative, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { cosmosclient, proto } from 'cosmos-client'
 
@@ -29,7 +29,7 @@ import {
   DEFAULT_GAS_VALUE,
   MAX_TX_COUNT,
   buildDepositTx,
-  getAsset,
+  getBalance,
   getChainId,
   getDefaultClientUrl,
   getDefaultExplorerUrls,
@@ -51,7 +51,6 @@ export interface ThorchainClient {
   getClientUrl(): NodeUrl
   setExplorerUrls(explorerUrls: ExplorerUrls): void
   getCosmosClient(): CosmosSDKClient
-  // buildDepositTx(msgNativeTx: MsgNativeTx): Promise<StdTx>
 
   deposit(params: DepositParam): Promise<TxHash>
 }
@@ -223,15 +222,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @returns {Balance[]} The balance of the address.
    */
   async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
-    const balances = await this.cosmosClient.getBalance(address)
-    return balances
-      .map((balance) => ({
-        asset: (balance.denom && getAsset(balance.denom)) || AssetRuneNative,
-        amount: baseAmount(balance.amount, DECIMAL),
-      }))
-      .filter(
-        (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
-      )
+    return getBalance({ address, assets, cosmosClient: this.getCosmosClient() })
   }
 
   /**

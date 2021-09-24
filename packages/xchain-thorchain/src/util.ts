@@ -1,5 +1,5 @@
-import { Address, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
-import { TxLog } from '@xchainjs/xchain-cosmos'
+import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
+import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
   Asset,
   AssetRuneNative,
@@ -191,6 +191,35 @@ export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string):
   } as unknown as StdTx
 
   return unsignedStdTx
+}
+
+/**
+ * Get the balance of a given address.
+ *
+ * @param {Address} address By default, it will return the balance of the current wallet. (optional)
+ * @param {Asset} asset If not set, it will return all assets available. (optional)
+ * @param {cosmosClient} CosmosSDKClient
+ *
+ * @returns {Balance[]} The balance of the address.
+ */
+export const getBalance = async ({
+  address,
+  assets,
+  cosmosClient,
+}: {
+  address: Address
+  assets?: Asset[]
+  cosmosClient: CosmosSDKClient
+}): Promise<Balance[]> => {
+  const balances = await cosmosClient.getBalance(address)
+  return balances
+    .map((balance) => ({
+      asset: (balance.denom && getAsset(balance.denom)) || AssetRuneNative,
+      amount: baseAmount(balance.amount, DECIMAL),
+    }))
+    .filter(
+      (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
+    )
 }
 
 /**
