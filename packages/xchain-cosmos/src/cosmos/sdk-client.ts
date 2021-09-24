@@ -234,6 +234,7 @@ export class CosmosSDKClient {
 
     // sign
     const txBuilder = new cosmosclient.TxBuilder(this.sdk, txBody, authInfo)
+
     return this.signAndBroadcast(txBuilder, privkey, account)
   }
 
@@ -250,8 +251,12 @@ export class CosmosSDKClient {
     const signDocBytes = txBuilder.signDocBytes(signerAccount.account_number)
     txBuilder.addSignature(privKey.sign(signDocBytes))
 
-    // broadcast
-    const res = await rest.cosmos.tx.broadcastTx(this.sdk, {
+    //  this broadcast finction does not work!!
+    // const res = await rest.cosmos.tx.broadcastTx(this.sdk, {
+    //   tx_bytes: txBuilder.txBytes(),
+    //   mode: rest.cosmos.tx.BroadcastTxMode.Sync,
+    // })
+    const res = await axios.post(`${this.server}/cosmos/tx/v1beta1/txs`, {
       tx_bytes: txBuilder.txBytes(),
       mode: rest.cosmos.tx.BroadcastTxMode.Block,
     })

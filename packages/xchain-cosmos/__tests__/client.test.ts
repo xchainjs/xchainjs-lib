@@ -10,7 +10,7 @@ import { TxHistoryResponse, TxResponse } from '../src/cosmos/types'
 import { AssetMuon } from '../src/types'
 
 const getClientUrl = (client: Client): string => {
-  return client.getNetwork() === 'testnet' ? 'http://lcd.gaia.bigdipper.live:1317' : 'https://api.cosmos.network'
+  return client.getNetwork() === 'testnet' ? 'https://api.testnet.cosmos.network' : 'https://api.cosmos.network'
 }
 
 const mockAccountsAddress = (
@@ -52,9 +52,8 @@ const assertTxsPost = (
 ): void => {
   nock(url, { allowUnmocked: true })
     .post(`/cosmos/tx/v1beta1/txs`, (body) => {
-      const txData = JSON.parse(body)
-      expect(txData.mode).toEqual('BROADCAST_MODE_BLOCK')
-      expect(txData.tx_bytes.length).toBeGreaterThan(0)
+      expect(body.mode).toEqual('BROADCAST_MODE_BLOCK')
+      expect(body.tx_bytes.length).toBeGreaterThan(0)
       return true
     })
     .reply(200, result)

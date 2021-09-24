@@ -79,7 +79,7 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
     if ((tx.tx as RawTxResponse).body === undefined) {
       msgs = codec.packCosmosAny(tx.tx).msg
     } else {
-      msgs = codec.packCosmosAny(tx.tx).body.messages
+      msgs = codec.packCosmosAny((tx.tx as RawTxResponse).body.messages)
     }
 
     const from: TxFrom[] = []

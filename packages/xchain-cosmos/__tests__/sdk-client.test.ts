@@ -45,9 +45,8 @@ const assertTxsPost = (
 ): void => {
   nock(url, { allowUnmocked: true })
     .post(`/cosmos/tx/v1beta1/txs`, (body) => {
-      const txData = JSON.parse(body)
-      expect(txData.mode).toEqual('BROADCAST_MODE_BLOCK')
-      expect(txData.tx_bytes.length).toBeGreaterThan(0)
+      expect(body.mode).toEqual('BROADCAST_MODE_BLOCK')
+      expect(body.tx_bytes.length).toBeGreaterThan(0)
       return true
     })
     .reply(200, result)
@@ -68,8 +67,8 @@ describe('SDK Client Test', () => {
     prefix: 'cosmos',
   })
   const cosmosTestnetClient: CosmosSDKClient = new CosmosSDKClient({
-    server: 'http://lcd.gaia.bigdipper.live:1317',
-    chainId: 'gaia-3a',
+    server: 'https://api.testnet.cosmos.network',
+    chainId: 'cosmoshub-testnet',
     prefix: 'cosmos',
   })
 

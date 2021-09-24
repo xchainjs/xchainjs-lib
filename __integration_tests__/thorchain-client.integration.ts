@@ -70,6 +70,17 @@ describe('thorchain Integration Tests', () => {
     })
     expect(balances.length).toBeGreaterThan(0)
   })
+  it('should fetch thorchain txs', async () => {
+    const address = xchainClients.THOR.getAddress(0)
+    const txPage = await xchainClients.THOR.getTransactions({ address })
+    expect(txPage.total).toBeGreaterThan(0)
+    expect(txPage.txs.length).toBeGreaterThan(0)
+    txPage.txs.forEach((tx) => {
+      console.log(JSON.stringify(tx, null, 2))
+    })
+    const txData = await xchainClients.THOR.getTransactionData(txPage.txs[0].hash)
+    console.log(JSON.stringify(txData, null, 2))
+  })
 
   it('should xfer rune from wallet 0 -> 1, with a memo', async () => {
     try {
@@ -77,7 +88,7 @@ describe('thorchain Integration Tests', () => {
       const transferTx: TxParams = {
         walletIndex: 0,
         asset: AssetRuneNative,
-        amount: baseAmount('1000000'),
+        amount: baseAmount('100'),
         recipient: addressTo,
         memo: 'Hi!',
       }
@@ -90,7 +101,7 @@ describe('thorchain Integration Tests', () => {
     }
   })
   it('should swap rune for BNB', async () => {
-    const swap = makeSwapRuneFor('1000000', 'BNB.BNB')
+    const swap = makeSwapRuneFor('1000', 'BNB.BNB')
 
     try {
       const explorerUrl = await swapRuneTo(swap)

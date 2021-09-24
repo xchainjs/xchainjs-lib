@@ -32,7 +32,6 @@
     "start:example": "ts-node example/index.ts"
   },
   "devDependencies": {
-    "@types/big.js": "^6.1.1",
     "@xchainjs/xchain-client": "^0.10.3",
     "@xchainjs/xchain-cosmos": "^0.14.0",
     "@xchainjs/xchain-crypto": "^0.2.5",
