@@ -223,7 +223,7 @@ export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string):
   const unsignedStdTx = StdTx.fromJSON({
     msg: response.value.msg,
     // override fee
-    fee: { ...fee, gas: DEPOSIT_GAS_VALUE, limit: 1 },
+    fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
     signatures: [],
     memo: '',
   })
