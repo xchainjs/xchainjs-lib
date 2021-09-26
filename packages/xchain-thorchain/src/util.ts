@@ -20,7 +20,7 @@ import { MsgNativeTx, ThorchainDepositResponse } from './types/messages'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'
-export const DEPOSIT_GAS_VALUE = '25000000'
+export const DEPOSIT_GAS_VALUE = '30000000'
 export const MAX_TX_COUNT = 100
 
 /**
@@ -223,7 +223,7 @@ export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string):
   const unsignedStdTx = StdTx.fromJSON({
     msg: response.value.msg,
     // override fee
-    fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
+    fee: { ...fee, gas: DEPOSIT_GAS_VALUE, limit: 1 },
     signatures: [],
     memo: '',
   })

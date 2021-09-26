@@ -1,3 +1,9 @@
+# v.0.19.1 (2021-09-25)
+
+## Fix
+
+- Increase `gas` to `30,000,000` (thirty million)
+
 # v.0.19.0 (2021-09-10)
 
 ## Breaking change
