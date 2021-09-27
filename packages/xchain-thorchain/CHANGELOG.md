@@ -1,4 +1,10 @@
-# v.0.19.1 (2021-09-25)
+# Pre-release v.0.19.2-alpha1 (2021-09-27)
+
+## Fix
+
+- Increase `gas` to `500,000,000` (five hundred million)
+
+# v.0.19.1 (2021-09-26)
 
 ## Fix
 
