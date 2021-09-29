@@ -10,7 +10,7 @@
     "build": "lerna run build",
     "pub": "lerna publish",
     "test": "lerna run test",
-    "integration_tests": "jest --config jest.config.integration.js",
+    "e2e": "lerna run e2e",
     "lint": "lerna run lint"
   },
   "husky": {

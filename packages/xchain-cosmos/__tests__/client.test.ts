@@ -10,7 +10,7 @@ import { TxHistoryResponse, TxResponse } from '../src/cosmos/types'
 import { AssetMuon } from '../src/types'
 
 const getClientUrl = (client: Client): string => {
-  return client.getNetwork() === 'testnet' ? 'https://api.testnet.cosmos.network' : 'https://api.cosmos.network'
+  return client.getNetwork() === Network.Testnet ? 'https://api.testnet.cosmos.network' : 'https://api.cosmos.network'
 }
 
 const mockAccountsAddress = (

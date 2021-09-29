@@ -48,11 +48,11 @@ yarn test
 
 ## Integration Tests
 
-There are a suite of integration test which work against test net. You will need to specifucy a phrase which possess testnet coins
+There are a suite of integration test which work against testnet. You will need to specify a phrase which controls testnet coins
 
 ```bash
 export PHRASE="secret phrase here"
-yarn run integration_tests
+yarn run e2e
 ```
 
 ### `unit`

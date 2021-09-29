@@ -27,6 +27,7 @@
     "clean": "rimraf lib/**",
     "build": "yarn clean && rollup -c",
     "test": "jest",
+    "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build"
   },
