@@ -64,3 +64,17 @@ console.log('tx asset:', tx.asset) // tx asset: { chain: 'THOR', symbol: 'RUNE',
 ```
 
 For more examples check out tests in `./__tests__/client.test.ts`
+
+## Creating protobuffer typescript bindings
+
+in order for this library to de/serialize proto3 structures, you can use the following to create bindings
+
+1. `git clone https://gitlab.com/thorchain/thornode`
+2. run the following (adjust the paths acordingly) to generate a typecript file for MsgDeposit
+   ```bash
+   yarn run pbjs -w commonjs  -t static-module  <path to repo>/thornode/proto/thorchain/v1/x/thorchain/types/msg_deposit.proto <path to repo>/thornode/proto/thorchain/v1/common/common.proto -o src/types/MsgDeposit.js
+   ```
+3. run the following to generate the .d.ts file
+   ```bash
+   yarn run pbts -o src/types/MsgDeposit.d.ts src/types/MsgDeposit.js
+   ```
