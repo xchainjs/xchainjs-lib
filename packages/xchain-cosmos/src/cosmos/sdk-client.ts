@@ -1,5 +1,6 @@
-import { TxHistoryParams } from '@xchainjs/xchain-client'
+import { TxHash, TxHistoryParams } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
+import { baseAmount } from '@xchainjs/xchain-util/lib'
 import axios from 'axios'
 import * as BIP32 from 'bip32'
 import { cosmosclient, proto, rest } from 'cosmos-client'
@@ -19,6 +20,7 @@ import {
   TxResponse,
 } from './types'
 
+const DEFAULT_GAS_VALUE = baseAmount('200000', 8)
 export class CosmosSDKClient {
   sdk: cosmosclient.CosmosSDK
 
@@ -194,7 +196,15 @@ export class CosmosSDKClient {
     return (await axios.get<TxResponse>(`${this.server}/txs/${hash}`)).data
   }
 
-  async transfer({ privkey, from, to, amount, asset, memo = '', fee = '200000' }: TransferParams): Promise<string> {
+  async transfer({
+    privkey,
+    from,
+    to,
+    amount,
+    asset,
+    memo = '',
+    gasLimit = DEFAULT_GAS_VALUE,
+  }: TransferParams): Promise<TxHash> {
     this.setPrefix()
 
     const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
@@ -228,7 +238,7 @@ export class CosmosSDKClient {
         },
       ],
       fee: {
-        gas_limit: cosmosclient.Long.fromString(fee),
+        gas_limit: cosmosclient.Long.fromString(gasLimit.amount.toString()),
       },
     })
 
@@ -260,6 +270,9 @@ export class CosmosSDKClient {
       tx_bytes: txBuilder.txBytes(),
       mode: rest.cosmos.tx.BroadcastTxMode.Block,
     })
-    return res.data.tx_response?.txhash || 'unknown'
+    if (!res?.data?.tx_response?.txhash) {
+      throw new Error('No tx id returned from broadcast')
+    }
+    return res.data.tx_response.txhash
   }
 }

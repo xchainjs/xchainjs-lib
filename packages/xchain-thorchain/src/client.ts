@@ -242,8 +242,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
-    // registerCodecs(getPrefix(this.network))
-
     const txIncomingHistory = (
       await this.cosmosClient.searchTxFromRPC({
         rpcEndpoint: this.getClientUrl().rpc,
@@ -421,8 +419,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer({ walletIndex = 0, asset = AssetRuneNative, amount, recipient, memo }: TxParams): Promise<TxHash> {
-    // registerCodecs(getPrefix(this.network))
-
     const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
     const fee = await this.getFees()
     if (
@@ -439,7 +435,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       amount: amount.amount().toString(),
       asset: getDenom(asset),
       memo,
-      fee: DEFAULT_GAS_VALUE,
+      gasLimit: fee.fast,
     })
 
     if (!hash) {

@@ -1,3 +1,4 @@
+import { BaseAmount } from '@xchainjs/xchain-util/lib'
 import { BigSource } from 'big.js'
 import { proto } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/cjs/openapi/api'
@@ -26,7 +27,7 @@ export type TransferParams = {
   amount: BigSource
   asset: string
   memo?: string
-  fee?: string
+  gasLimit?: BaseAmount
 }
 
 export type BaseAccountResponse = {

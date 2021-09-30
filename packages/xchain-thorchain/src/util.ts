@@ -83,13 +83,7 @@ export const getChainId = () => 'thorchain'
  */
 
 export const registerCodecs = async (): Promise<void> => {
-  // const root = await protobuf.load('bundle.json')
-  // const MsgDeposit = root.lookupType('thorchain/MsgDeposit')
-  // console.log(MsgDeposit)
-  // proto.cosmos.bank.v1beta1.
   codec.register('thorchain/MsgDeposit', types.types.MsgDeposit)
-  //  )
-  // codec.register('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
 }
 
 /**
@@ -182,13 +176,13 @@ export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string):
 
   const fee: StdTxFee = response.value?.fee ?? { amount: [] }
 
-  const unsignedStdTx = {
+  const unsignedStdTx = ({
     msg: response.value.msg,
     // override fee
     fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
     signature: [],
     memo: '',
-  } as unknown as StdTx
+  } as unknown) as StdTx
 
   return unsignedStdTx
 }

@@ -5,7 +5,6 @@ export type MsgCoin = {
   asset: string
   amount: string
 }
-export class Msg {}
 
 export type StdSignature = {
   pub_key: cosmosclient.PubKey
@@ -16,14 +15,12 @@ export interface StdTxFee {
   amount?: Array<Coin>
 }
 
-export class MsgNativeTx extends Msg {
+export class MsgNativeTx {
   coins: MsgCoin[]
   memo: string
   signer: cosmosclient.AccAddress
 
   constructor(coins: MsgCoin[], memo: string, signer: cosmosclient.AccAddress) {
-    super()
-
     this.coins = coins
     this.memo = memo
     this.signer = signer

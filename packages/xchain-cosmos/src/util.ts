@@ -17,11 +17,10 @@ export const DECIMAL = 6
  * @param {Msg} msg
  * @returns {boolean} `true` or `false`.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isMsgSend = (msg: any): msg is proto.cosmos.bank.v1beta1.MsgSend =>
+export const isMsgSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.MsgSend =>
   (msg as proto.cosmos.bank.v1beta1.MsgSend)?.amount !== undefined &&
   (msg as proto.cosmos.bank.v1beta1.MsgSend)?.from_address !== undefined &&
-  (msg as unknown as proto.cosmos.bank.v1beta1.MsgSend)?.to_address !== undefined
+  ((msg as unknown) as proto.cosmos.bank.v1beta1.MsgSend)?.to_address !== undefined
 
 /**
  * Type guard for MsgMultiSend
@@ -29,8 +28,7 @@ export const isMsgSend = (msg: any): msg is proto.cosmos.bank.v1beta1.MsgSend =>
  * @param {Msg} msg
  * @returns {boolean} `true` or `false`.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isMsgMultiSend = (msg: any): msg is proto.cosmos.bank.v1beta1.MsgMultiSend =>
+export const isMsgMultiSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.MsgMultiSend =>
   (msg as proto.cosmos.bank.v1beta1.MsgMultiSend)?.inputs !== undefined &&
   (msg as proto.cosmos.bank.v1beta1.MsgMultiSend)?.outputs !== undefined
 
@@ -75,7 +73,7 @@ const getCoinAmount = (coins?: proto.cosmos.base.v1beta1.ICoin[]) => {
 export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => {
   return txs.reduce((acc, tx) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let msgs: any[]
+    let msgs: Array<proto.cosmos.bank.v1beta1.MsgSend | proto.cosmos.bank.v1beta1.MsgMultiSend>
     if ((tx.tx as RawTxResponse).body === undefined) {
       msgs = codec.packCosmosAny(tx.tx).msg
     } else {
@@ -86,18 +84,18 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
     const to: TxTo[] = []
     msgs.map((msg) => {
       if (isMsgSend(msg)) {
-        const msgSend = msg as proto.cosmos.bank.v1beta1.MsgSend
+        const msgSend = msg
         const amount = getCoinAmount(msgSend.amount)
 
         let from_index = -1
 
         from.forEach((value, index) => {
-          if (value.from === msgSend.from_address.toString()) from_index = index
+          if (value.from === msgSend.from_address) from_index = index
         })
 
         if (from_index === -1) {
           from.push({
-            from: msgSend.from_address.toString(),
+            from: msgSend.from_address,
             amount,
           })
         } else {
@@ -107,19 +105,19 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
         let to_index = -1
 
         to.forEach((value, index) => {
-          if (value.to === msgSend.to_address.toString()) to_index = index
+          if (value.to === msgSend.to_address) to_index = index
         })
 
         if (to_index === -1) {
           to.push({
-            to: msgSend.to_address.toString(),
+            to: msgSend.to_address,
             amount,
           })
         } else {
           to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), 6)
         }
       } else if (isMsgMultiSend(msg)) {
-        const msgMultiSend = msg as proto.cosmos.bank.v1beta1.MsgMultiSend
+        const msgMultiSend = msg
 
         msgMultiSend.inputs.map((input) => {
           const amount = getCoinAmount(input.coins || [])

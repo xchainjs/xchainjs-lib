@@ -715,12 +715,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, ETH_DECIMAL),
       }
     } catch (error) {}
-    //should only get here if thor fails
-    // try {
+
     return await this.estimateGasPricesFromEtherscan()
-    // } catch (error) {
-    //   throw new Error(`Failed to estimate gas price: ${error.msg ?? error.toString()}`)
-    // }
   }
 
   /**
