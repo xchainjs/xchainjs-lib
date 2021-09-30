@@ -25,15 +25,15 @@ describe('Cosmos Integration Tests', () => {
     console.log(address1)
   })
   //TODO failing, find the fix, probably to pull from RPC endpoint
-  // it('should fetch cosmos txs', async () => {
-  //   const address = xchainClient.getAddress(0)
-  //   const txPage = await xchainClient.getTransactions({ address })
-  //   expect(txPage.total).toBeGreaterThan(0)
-  //   expect(txPage.txs).toBeGreaterThan(0)
-  //   txPage.txs.forEach((tx) => {
-  //     console.log(JSON.stringify(tx, null, 2))
-  //   })
-  // })
+  it.skip('should fetch cosmos txs', async () => {
+    const address = xchainClient.getAddress(0)
+    const txPage = await xchainClient.getTransactions({ address })
+    expect(txPage.total).toBeGreaterThan(0)
+    expect(txPage.txs).toBeGreaterThan(0)
+    txPage.txs.forEach((tx) => {
+      console.log(JSON.stringify(tx, null, 2))
+    })
+  })
   it('should xfer atom from wallet 0 -> 1, with a memo', async () => {
     try {
       const addressTo = xchainClient.getAddress(1)
