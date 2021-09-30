@@ -18,7 +18,7 @@ import types from './types/proto/MsgDeposit'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'
-export const DEPOSIT_GAS_VALUE = '25000000'
+export const DEPOSIT_GAS_VALUE = '500000000'
 export const MAX_TX_COUNT = 100
 
 /**

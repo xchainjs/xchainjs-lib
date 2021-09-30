@@ -2,6 +2,17 @@
 
 - upgraded "cosmos-client": "0.42.14"
 - changed class Client to extend BaseXChainClient
+# v.0.19.2 (2021-09-27)
+
+## Fix
+
+- Increase `gas` to `500,000,000` (five hundred million)
+
+# v.0.19.1 (2021-09-26)
+
+## Fix
+
+- Increase `gas` to `30,000,000` (thirty million)
 
 # v.0.19.0 (2021-09-10)
 
