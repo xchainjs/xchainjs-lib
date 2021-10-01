@@ -259,6 +259,7 @@ describe('Client Test', () => {
     const expected_txsPost_result = {
       tx_response: {
         txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
+        code: 0,
       },
     }
 

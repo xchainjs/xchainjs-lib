@@ -40,6 +40,7 @@ const assertTxsPost = (
   result: {
     tx_response: {
       txhash: string
+      code: number
     }
   },
 ): void => {
@@ -308,6 +309,7 @@ describe('SDK Client Test', () => {
     const expected_txsPost_result = {
       tx_response: {
         txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
+        code: 0,
       },
     }
     mockAccountsAddress(cosmosTestnetClient.server, cosmos_testnet_address0, {
@@ -330,7 +332,7 @@ describe('SDK Client Test', () => {
         privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase, derivationPaths.cosmos.testnet + '0'),
         from: cosmos_testnet_address0,
         to: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-        amount: 10000,
+        amount: '10000',
         asset: 'muon',
         memo: 'transfer',
       })

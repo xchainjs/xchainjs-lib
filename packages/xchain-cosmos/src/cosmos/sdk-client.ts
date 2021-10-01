@@ -263,11 +263,10 @@ export class CosmosSDKClient {
       tx_bytes: txBuilder.txBytes(),
       mode: rest.cosmos.tx.BroadcastTxMode.Block,
     })
-    // console.log(res)
+
     if (res?.data?.tx_response?.code !== 0) {
       throw new Error('Error broadcasting: ' + res?.data?.tx_response?.raw_log)
     }
-    console.log(JSON.stringify(res.data, null, 2))
     return res.data.tx_response.txhash
   }
 }
