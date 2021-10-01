@@ -1,5 +1,3 @@
-import { BaseAmount } from '@xchainjs/xchain-util/lib'
-import { BigSource } from 'big.js'
 import { proto } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/cjs/openapi/api'
 
@@ -24,10 +22,10 @@ export type TransferParams = {
   privkey: proto.cosmos.crypto.secp256k1.PrivKey
   from: string
   to: string
-  amount: BigSource
+  amount: string
   asset: string
   memo?: string
-  gasLimit?: BaseAmount
+  fee?: proto.cosmos.tx.v1beta1.Fee
 }
 
 export type BaseAccountResponse = {

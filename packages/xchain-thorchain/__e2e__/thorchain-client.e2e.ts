@@ -9,7 +9,7 @@ export type Swap = {
 }
 
 const thorClient: XChainClient = new ThorClient({ network: Network.Testnet, phrase: process.env.PHRASE })
-const thorchainClient = (thorClient as unknown) as ThorchainClient
+const thorchainClient = thorClient as unknown as ThorchainClient
 const bnbClient: XChainClient = new BnbClient({ network: Network.Testnet, phrase: process.env.PHRASE })
 
 describe('thorchain Integration Tests', () => {
@@ -26,9 +26,9 @@ describe('thorchain Integration Tests', () => {
     const txPage = await thorClient.getTransactions({ address })
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
-    txPage.txs.forEach((tx) => {
-      console.log(JSON.stringify(tx, null, 2))
-    })
+    // txPage.txs.forEach((tx) => {
+    //   console.log(JSON.stringify(tx, null, 2))
+    // })
 
     const txData = await thorClient.getTransactionData(txPage.txs[0].hash)
     console.log(JSON.stringify(txData, null, 2))

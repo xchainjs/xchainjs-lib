@@ -1,58 +1,58 @@
-import { cosmosclient } from 'cosmos-client'
-import { Coin } from 'cosmos-client/cjs/openapi/api'
+// import { cosmosclient } from 'cosmos-client'
+// import { Coin } from 'cosmos-client/cjs/openapi/api'
 
-export type MsgCoin = {
-  asset: string
-  amount: string
-}
+// export type MsgCoin = {
+//   asset: string
+//   amount: string
+// }
 
-export type StdSignature = {
-  pub_key: cosmosclient.PubKey
-  signature: string
-}
-export interface StdTxFee {
-  gas?: string
-  amount?: Array<Coin>
-}
+// export type StdSignature = {
+//   pub_key: cosmosclient.PubKey
+//   signature: string
+// }
+// export interface StdTxFee {
+//   gas?: string
+//   amount?: Array<Coin>
+// }
 
-export class MsgNativeTx {
-  coins: MsgCoin[]
-  memo: string
-  signer: cosmosclient.AccAddress
+// export class MsgNativeTx {
+//   coins: MsgCoin[]
+//   memo: string
+//   signer: cosmosclient.AccAddress
 
-  constructor(coins: MsgCoin[], memo: string, signer: cosmosclient.AccAddress) {
-    this.coins = coins
-    this.memo = memo
-    this.signer = signer
-  }
-}
+//   constructor(coins: MsgCoin[], memo: string, signer: cosmosclient.AccAddress) {
+//     this.coins = coins
+//     this.memo = memo
+//     this.signer = signer
+//   }
+// }
 
-/**
- * This creates MsgNativeTx from json.
- *
- * @param value
- * @returns {MsgNativeTx}
- */
-export const msgNativeTxFromJson = (value: { coins: MsgCoin[]; memo: string; signer: string }): MsgNativeTx => {
-  return new MsgNativeTx(value.coins, value.memo, cosmosclient.AccAddress.fromString(value.signer))
-}
+// /**
+//  * This creates MsgNativeTx from json.
+//  *
+//  * @param value
+//  * @returns {MsgNativeTx}
+//  */
+// export const msgNativeTxFromJson = (value: { coins: MsgCoin[]; memo: string; signer: string }): MsgNativeTx => {
+//   return new MsgNativeTx(value.coins, value.memo, cosmosclient.AccAddress.fromString(value.signer))
+// }
 
-export type AminoWrapping<T> = {
-  type: string
-  value: T
-}
+// export type AminoWrapping<T> = {
+//   type: string
+//   value: T
+// }
 
-export type ThorchainDepositResponse = AminoWrapping<{
-  msg: AminoWrapping<{
-    coins: MsgCoin[]
-    memo: string
-    signer: string
-  }>[]
-  fee: StdTxFee
-  signatures: StdSignature[]
-  memo: string
-  timeout_height: string
-}>
+// export type ThorchainDepositResponse = AminoWrapping<{
+//   msg: AminoWrapping<{
+//     coins: MsgCoin[]
+//     memo: string
+//     signer: string
+//   }>[]
+//   fee: StdTxFee
+//   signatures: StdSignature[]
+//   memo: string
+//   timeout_height: string
+// }>
 
 export type TxResult = {
   observed_tx: {

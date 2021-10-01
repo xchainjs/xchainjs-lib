@@ -20,22 +20,25 @@ import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
 import { Asset, AssetRuneNative, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { cosmosclient, proto } from 'cosmos-client'
+// import { StdTx } from 'cosmos-client/cjs/openapi/api'
 
 import { ClientUrl, DepositParam, ExplorerUrls, NodeUrl, ThorchainClientParams, TxData } from './types'
-import { TxResult, msgNativeTxFromJson } from './types/messages'
+import { TxResult } from './types/messages'
 import types from './types/proto/MsgDeposit'
 import {
   DECIMAL,
   DEFAULT_GAS_VALUE,
   MAX_TX_COUNT,
-  buildDepositTx,
+  // buildDepositTx,
+  // buildDepositTx,
   getBalance,
   getChainId,
   getDefaultClientUrl,
   getDefaultExplorerUrls,
   getDefaultFees,
+  // getDenomWithChain,
   getDenom,
-  getDenomWithChain,
+  // getDenomWithChain,
   getDepositTxDataFromLogs,
   getExplorerAddressUrl,
   getExplorerTxUrl,
@@ -366,22 +369,35 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       throw new Error('insufficient funds')
     }
 
-    const signer = this.getPrivateKey(walletIndex)
+    const privKey = this.getPrivateKey(walletIndex)
     const from = this.getAddress(walletIndex)
-    const pubKey = signer.pubKey()
+    const signer = privKey.pubKey()
     const accAddress = cosmosclient.AccAddress.fromString(from)
-    const msgNativeTx = msgNativeTxFromJson({
+
+    // const msgNativeTx = msgNativeTxFromJson({
+    //   coins: [
+    //     {
+    //       asset: getDenomWithChain(asset),
+    //       amount: amount.amount().toString(),
+    //     },
+    //   ],
+    //   memo,
+    //   signer: from,
+    // })
+
+    // const unsignedStdTx: StdTx = await buildDepositTx(msgNativeTx, this.getClientUrl().node)
+
+    // console.log(JSON.stringify(unsignedStdTx, null, 2))
+    const deposit = types.types.MsgDeposit.fromObject({
       coins: [
         {
-          asset: getDenomWithChain(asset),
+          asset: { ...asset, synth: false }, //TODO change once synths are working
           amount: amount.amount().toString(),
         },
       ],
       memo,
-      signer: from,
+      signer: signer.address(),
     })
-    const unsignedStdTx = await buildDepositTx(msgNativeTx, this.getClientUrl().node)
-    const deposit = types.types.MsgDeposit.create(unsignedStdTx)
 
     const account = await this.getCosmosClient().getAccount(accAddress)
 
@@ -392,7 +408,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
       signer_infos: [
         {
-          public_key: cosmosclient.codec.packAny(pubKey),
+          public_key: cosmosclient.codec.packAny(signer),
           mode_info: {
             single: {
               mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
@@ -402,14 +418,16 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         },
       ],
       fee: {
-        gas_limit: cosmosclient.Long.fromString(DEFAULT_GAS_VALUE),
+        amount: null,
+        gas_limit: cosmosclient.Long.fromString('500000000'),
       },
     })
-
+    console.log(JSON.stringify(txBody, null, 2))
+    console.log(JSON.stringify(authInfo, null, 2))
     // sign
     const txBuilder = new cosmosclient.TxBuilder(this.getCosmosClient().sdk, txBody, authInfo)
 
-    return (await this.cosmosClient.signAndBroadcast(txBuilder, signer, account)) || ''
+    return (await this.cosmosClient.signAndBroadcast(txBuilder, privKey, account)) || ''
   }
 
   /**
@@ -435,7 +453,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       amount: amount.amount().toString(),
       asset: getDenom(asset),
       memo,
-      gasLimit: fee.fast,
     })
 
     if (!hash) {

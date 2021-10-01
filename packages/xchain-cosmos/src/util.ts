@@ -20,7 +20,7 @@ export const DECIMAL = 6
 export const isMsgSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.MsgSend =>
   (msg as proto.cosmos.bank.v1beta1.MsgSend)?.amount !== undefined &&
   (msg as proto.cosmos.bank.v1beta1.MsgSend)?.from_address !== undefined &&
-  ((msg as unknown) as proto.cosmos.bank.v1beta1.MsgSend)?.to_address !== undefined
+  (msg as proto.cosmos.bank.v1beta1.MsgSend)?.to_address !== undefined
 
 /**
  * Type guard for MsgMultiSend

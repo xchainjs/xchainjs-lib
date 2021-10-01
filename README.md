@@ -52,7 +52,7 @@ There are a suite of integration test which work against testnet. You will need 
 
 ```bash
 export PHRASE="secret phrase here"
-yarn run e2e
+yarn e2e
 ```
 
 ### `unit`

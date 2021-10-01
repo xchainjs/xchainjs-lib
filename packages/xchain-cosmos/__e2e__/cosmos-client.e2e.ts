@@ -34,7 +34,7 @@ describe('Cosmos Integration Tests', () => {
       console.log(JSON.stringify(tx, null, 2))
     })
   })
-  it('should xfer atom from wallet 0 -> 1, with a memo', async () => {
+  it('should xfer uphoton from wallet 0 -> 1, with a memo', async () => {
     try {
       const addressTo = xchainClient.getAddress(1)
       const transferTx: TxParams = {
@@ -50,6 +50,24 @@ describe('Cosmos Integration Tests', () => {
     } catch (error) {
       console.log(error)
       throw error
+    }
+  })
+  it('should fail xfer xxx from wallet 0 -> 1', async () => {
+    try {
+      const addressTo = xchainClient.getAddress(1)
+      const transferTx: TxParams = {
+        walletIndex: 0,
+        asset: { chain: Chain.Cosmos, ticker: 'GAIA', symbol: 'xxx' },
+        amount: baseAmount('100'),
+        recipient: addressTo,
+        memo: 'Hi!',
+      }
+      await xchainClient.transfer(transferTx)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      expect(e.message).toEqual(
+        'Error broadcasting: failed to execute message; message index: 0: 0xxx is smaller than 100xxx: insufficient funds',
+      )
     }
   })
 })

@@ -9,11 +9,9 @@ import {
   assetToString,
   baseAmount,
 } from '@xchainjs/xchain-util'
-import axios from 'axios'
-import { StdTx } from 'cosmos-client/cjs/openapi/api'
 import { codec } from 'cosmos-client/cjs/types/codec'
 
-import { ClientUrl, ExplorerUrl, ExplorerUrls, MsgNativeTx, StdTxFee, ThorchainDepositResponse, TxData } from './types'
+import { ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
 import types from './types/proto/MsgDeposit'
 
 export const DECIMAL = 8
@@ -83,7 +81,7 @@ export const getChainId = () => 'thorchain'
  */
 
 export const registerCodecs = async (): Promise<void> => {
-  codec.register('thorchain/MsgDeposit', types.types.MsgDeposit)
+  codec.register('/types.MsgDeposit', types.types.MsgDeposit)
 }
 
 /**
@@ -161,31 +159,32 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
  *
  * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
  */
-export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string): Promise<StdTx> => {
-  const response: ThorchainDepositResponse = (
-    await axios.post(`${nodeUrl}/thorchain/deposit`, {
-      coins: msgNativeTx.coins,
-      memo: msgNativeTx.memo,
-      base_req: {
-        chain_id: getChainId(),
-        from: msgNativeTx.signer,
-      },
-    })
-  ).data
-  if (!response || !response.value) throw new Error('Invalid client url')
+// export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string): Promise<StdTx> => {
+//   const response: ThorchainDepositResponse = (
+//     await axios.post(`${nodeUrl}/thorchain/deposit`, {
+//       coins: msgNativeTx.coins,
+//       memo: msgNativeTx.memo,
+//       base_req: {
+//         chain_id: getChainId(),
+//         from: msgNativeTx.signer,
+//       },
+//     })
+//   ).data
+//   if (!response || !response.value) throw new Error('Invalid client url')
 
-  const fee: StdTxFee = response.value?.fee ?? { amount: [] }
+//   console.log(JSON.stringify(response, null, 2))
+//   const fee: StdTxFee = response.value?.fee ?? { amount: [] }
 
-  const unsignedStdTx = ({
-    msg: response.value.msg,
-    // override fee
-    fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
-    signature: [],
-    memo: '',
-  } as unknown) as StdTx
+//   const unsignedStdTx = {
+//     msg: response.value.msg,
+//     // override fee
+//     fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
+//     signature: [],
+//     memo: '',
+//   } as unknown as StdTx
 
-  return unsignedStdTx
-}
+//   return unsignedStdTx
+// }
 
 /**
  * Get the balance of a given address.

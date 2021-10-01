@@ -1,6 +1,5 @@
 import { TxHash, TxHistoryParams } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { baseAmount } from '@xchainjs/xchain-util/lib'
 import axios from 'axios'
 import * as BIP32 from 'bip32'
 import { cosmosclient, proto, rest } from 'cosmos-client'
@@ -20,7 +19,10 @@ import {
   TxResponse,
 } from './types'
 
-const DEFAULT_GAS_VALUE = baseAmount('200000', 8)
+const DEFAULT_FEE = new proto.cosmos.tx.v1beta1.Fee({
+  amount: [],
+  gas_limit: cosmosclient.Long.fromString('200000'),
+})
 export class CosmosSDKClient {
   sdk: cosmosclient.CosmosSDK
 
@@ -196,15 +198,7 @@ export class CosmosSDKClient {
     return (await axios.get<TxResponse>(`${this.server}/txs/${hash}`)).data
   }
 
-  async transfer({
-    privkey,
-    from,
-    to,
-    amount,
-    asset,
-    memo = '',
-    gasLimit = DEFAULT_GAS_VALUE,
-  }: TransferParams): Promise<TxHash> {
+  async transfer({ privkey, from, to, amount, asset, memo = '', fee = DEFAULT_FEE }: TransferParams): Promise<TxHash> {
     this.setPrefix()
 
     const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
@@ -237,11 +231,10 @@ export class CosmosSDKClient {
           sequence: account.sequence,
         },
       ],
-      fee: {
-        gas_limit: cosmosclient.Long.fromString(gasLimit.amount.toString()),
-      },
+      fee,
     })
-
+    // console.log(JSON.stringify(txBody, null, 2))
+    // console.log(JSON.stringify(authInfo, null, 2))
     // sign
     const txBuilder = new cosmosclient.TxBuilder(this.sdk, txBody, authInfo)
 
@@ -270,9 +263,11 @@ export class CosmosSDKClient {
       tx_bytes: txBuilder.txBytes(),
       mode: rest.cosmos.tx.BroadcastTxMode.Block,
     })
-    if (!res?.data?.tx_response?.txhash) {
-      throw new Error('No tx id returned from broadcast')
+    // console.log(res)
+    if (res?.data?.tx_response?.code !== 0) {
+      throw new Error('Error broadcasting: ' + res?.data?.tx_response?.raw_log)
     }
+    console.log(JSON.stringify(res.data, null, 2))
     return res.data.tx_response.txhash
   }
 }
