@@ -17,7 +17,7 @@ const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKe
 const getAxiosWithRateLimitHandling = async (url: string): Promise<AxiosResponse<any>> => {
   const response = await axios.get(url)
 
-  if (response.data.result.includes('Max rate limit reached')) {
+  if (JSON.stringify(response.data).includes('Max rate limit reached')) {
     console.log('reached rate limit for', url, 'waiting 2s then trying again...')
     await new Promise((resolve) => setTimeout(resolve, 2000))
     return getAxiosWithRateLimitHandling(url)
