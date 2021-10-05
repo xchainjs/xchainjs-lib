@@ -13,6 +13,7 @@ import { bnOrZero } from '@thorwallet/xchain-util/lib'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getAxiosWithRateLimitHandling = async (url: string): Promise<AxiosResponse<any>> => {
   const response = await axios.get(url)
 
