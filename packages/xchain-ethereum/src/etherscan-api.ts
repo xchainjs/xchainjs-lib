@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import {
   GasOracleResponse,
   TransactionHistoryParam,
@@ -13,6 +13,16 @@ import { bnOrZero } from '@thorwallet/xchain-util/lib'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 
+const getAxiosWithRateLimitHandling = async (url: string): Promise<AxiosResponse<any>> => {
+  const response = await axios.get(url)
+
+  if (response.data.result.includes('Max rate limit reached')) {
+    console.log('reached rate limit for', url, 'waiting 2s then trying again...')
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    return getAxiosWithRateLimitHandling(url)
+  }
+  return response
+}
 /**
  * SafeGasPrice, ProposeGasPrice And FastGasPrice returned in string-Gwei
  *
@@ -25,7 +35,7 @@ const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKe
 export const getGasOracle = (baseUrl: string, apiKey?: string): Promise<GasOracleResponse> => {
   const url = baseUrl + '/api?module=gastracker&action=gasoracle'
 
-  return axios.get(url + getApiKeyQueryParameter(apiKey)).then((response) => response.data.result)
+  return getAxiosWithRateLimitHandling(url + getApiKeyQueryParameter(apiKey)).then((response) => response.data.result)
 }
 
 /**
@@ -47,13 +57,8 @@ export const getTokenBalance = async ({
 }: TokenBalanceParam & { baseUrl: string; apiKey?: string }): Promise<BigNumberish> => {
   const url = baseUrl + `/api?module=account&action=tokenbalance&contractaddress=${assetAddress}&address=${address}`
 
-  const response = await axios.get(url + getApiKeyQueryParameter(apiKey))
+  const response = await getAxiosWithRateLimitHandling(url + getApiKeyQueryParameter(apiKey))
 
-  if (response.data.result.includes('Max rate limit reached')) {
-    console.log('reached rate limit for', url, 'waiting 3s then trying again...')
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-    return getTokenBalance({ baseUrl, address, assetAddress, apiKey })
-  }
   return response.data.result
 }
 
@@ -85,7 +90,7 @@ export const getETHTransactionHistory = async ({
   if (endblock) url += `&endblock=${endblock}`
 
   try {
-    const result = await axios.get(url).then((response) => response.data.result)
+    const result = await getAxiosWithRateLimitHandling(url).then((response) => response.data.result)
     if (JSON.stringify(result).includes('Invalid API Key')) {
       return Promise.reject(new Error('Invalid API Key'))
     }
@@ -131,7 +136,7 @@ export const getTokenTransactionHistory = async ({
   if (endblock) url += `&endblock=${endblock}`
 
   try {
-    const result = await axios.get(url).then((response) => response.data.result)
+    const result = await getAxiosWithRateLimitHandling(url).then((response) => response.data.result)
     if (JSON.stringify(result).includes('Invalid API Key')) {
       return Promise.reject(new Error('Invalid API Key'))
     }
