@@ -64,6 +64,8 @@ export type TxParams = {
   amount: BaseAmount
   recipient: Address
   memo?: string // optional memo to pass
+  gasPrice?: string
+  gasLimit?: string
 }
 
 // In most cases, clients don't expect any paramter in `getFees`
