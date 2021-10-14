@@ -307,7 +307,16 @@ export const assetFromString = (s: string): Asset | null => {
  * @param {Asset} asset The given asset.
  * @returns {string} The string from the given asset.
  */
-export const assetToString = ({ chain, symbol }: Asset) => `${chain}.${symbol}`
+export const assetToString = ({ chain, symbol }: Asset) =>
+  `${chain}.${symbol
+    .split('-')
+    .map((x, i) => {
+      if (i === 0) {
+        return x
+      }
+      return x.toLowerCase()
+    })
+    .join('-')}`
 
 /**
  * Currency symbols currently supported

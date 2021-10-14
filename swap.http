@@ -1,0 +1,15 @@
+POST https://thornode.thorchain.info/thorchain/deposit
+Content-Type: application/json
+
+{
+"coins": [
+  {
+    "asset": "THOR.RUNE",
+    "amount": "100000000"
+  }
+],
+"memo": "SWAP:BNB.BNB:bnb1qs92ulyma4sgycyhxlau8r65tzqrpmv5nz83rz::thor1a427q3v96psuj4fnughdw8glt5r7j38lj7rkp8:10",
+"base_req": {
+  "chain_id": "thorchain",
+  "from": "thor1epmtxgnqydzjjeqwzrg492yltkautsnlxyj7cq"
+}}
