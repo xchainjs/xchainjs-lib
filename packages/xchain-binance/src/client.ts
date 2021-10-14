@@ -69,6 +69,20 @@ export interface BinanceClient {
   multiSend(params: MultiSendParams): Promise<TxHash>
 }
 
+const getTxWithRateLimitHandling = async (url: string): Promise<BinanceTxPage> => {
+  const response = await axios.get<BinanceTxPage>(url, {
+    validateStatus: (status) => {
+      return (status >= 200 && status < 300) || status === 429
+    },
+  })
+  if (response.status === 429) {
+    console.log('got 429 for ', url, 'waiting 2 seconds then retrying...')
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    return getTxWithRateLimitHandling(url)
+  }
+  return response.data
+}
+
 /**
  * Custom Binance client
  */
@@ -321,7 +335,7 @@ class Client implements BinanceClient, XChainClient {
         }
       }
 
-      const txHistory = await axios.get<BinanceTxPage>(url.toString()).then((response) => response.data)
+      const txHistory = await getTxWithRateLimitHandling(url.toString())
 
       return {
         total: txHistory.total,
