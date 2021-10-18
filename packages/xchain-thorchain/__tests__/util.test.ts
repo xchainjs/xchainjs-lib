@@ -1,7 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-import { AssetRune } from '../src/types'
 import {
   getAsset,
   getDefaultExplorerUrls,
@@ -19,19 +18,19 @@ describe('thorchain/util', () => {
   describe('Denom <-> Asset', () => {
     describe('getDenom', () => {
       it('get denom for AssetRune', () => {
-        expect(getDenom(AssetRune)).toEqual('rune')
+        expect(getDenom(AssetRuneNative)).toEqual('rune')
       })
     })
 
     describe('getDenomWithChain', () => {
       it('get denom for AssetRune', () => {
-        expect(getDenomWithChain(AssetRune)).toEqual('THOR.RUNE')
+        expect(getDenomWithChain(AssetRuneNative)).toEqual('THOR.RUNE')
       })
     })
 
     describe('getAsset', () => {
       it('get asset for rune', () => {
-        expect(getAsset('rune')).toEqual(AssetRune)
+        expect(getAsset('rune')).toEqual(AssetRuneNative)
       })
     })
 

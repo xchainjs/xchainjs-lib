@@ -32,13 +32,14 @@ import {
 import axios from 'axios'
 
 import {
+  Account,
   Balance as BinanceBalance,
   Fees as BinanceFees,
   TransactionResult,
   TransferFee,
   TxPage as BinanceTxPage,
 } from './types/binance'
-import { getPrefix, isTransferFee, parseTx } from './util'
+import { getPrefix, isAccount, isTransferFee, parseTx } from './util'
 
 type PrivKey = string
 
@@ -64,6 +65,8 @@ export type MultiSendParams = {
 export interface BinanceClient {
   purgeClient(): void
   getBncClient(): BncClient
+
+  getAccount(address?: Address, index?: number): Promise<Account>
 
   getMultiSendFees(): Promise<Fees>
   getSingleAndMultiFees(): Promise<{ single: Fees; multi: Fees }>
@@ -184,6 +187,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   /**
    * Get the current address.
    *
+   * @param {number} index (optional) Account index for the derivation path
    * @returns {Address} The current address.
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
@@ -202,9 +206,26 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   }
 
   /**
+   * Get account data of wallets or by given address.
+   *
+   * @param {Address} address (optional) By default, it will return account data of current wallet.
+   * @param {number} index (optional) Account index for the derivation path
+   *
+   * @returns {Account} account details of given address.
+   */
+  async getAccount(address?: Address, index = 0): Promise<Account> {
+    const accountAddress = address || this.getAddress(index)
+    const response = await this.bncClient.getAccount(accountAddress)
+    if (!response || !response.result || !isAccount(response.result))
+      return Promise.reject(Error(`Could not get account data for address ${accountAddress}`))
+
+    return response.result
+  }
+
+  /**
    * Get the balance of a given address.
    *
-   * @param {Address | number} address By default, it will return the balance of the current wallet. (optional)
+   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Balance[]} The balance of the address.
    */
