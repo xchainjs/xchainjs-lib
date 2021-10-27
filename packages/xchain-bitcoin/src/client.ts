@@ -17,7 +17,8 @@ import {
 } from '@thorwallet/xchain-client'
 import { validatePhrase, getSeed, bip32 } from '@thorwallet/xchain-crypto'
 import { AssetBTC, assetAmount, assetToBase } from '@thorwallet/xchain-util'
-import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
+import { FeesWithRates, FeeRate, FeeRates, Signature } from './types/client-types'
+import RNSimple from 'react-native-simple-crypto'
 
 /**
  * BitcoinClient Interface
@@ -432,6 +433,26 @@ class Client implements BitcoinClient, XChainClient {
     } catch (error) {
       return Promise.reject(error)
     }
+  }
+
+  /**
+   * Sign an arbitrary string message.
+   *
+   *
+   * @returns {Signature} The current address.
+   *
+   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
+   */
+  signMessage = async (msg: string): Promise<Signature> => {
+    const msgHash = await RNSimple.SHA.sha256(msg)
+
+    const msgBuffer = Buffer.from(msgHash, 'hex')
+
+    const keys = await this.getBtcKeys(this.phrase)
+    const signature = keys.sign(msgBuffer).toString('hex')
+    const pubKey = keys.publicKey.toString('hex')
+
+    return { signature, pubKey }
   }
 
   /**

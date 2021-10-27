@@ -14,3 +14,8 @@ export type GetChangeParams = {
   network: Network
   address: Address
 }
+
+export type Signature = {
+  signature: string
+  pubKey: string
+}
