@@ -22,6 +22,8 @@ import { KeyPair } from './types/bitcoincashjs-types'
 import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'
 import { NodeAuth } from './types'
 import { broadcastTx } from './node-api'
+import { Signature } from '@thorwallet/xchain-bitcoin/src'
+import RNSimple from 'react-native-simple-crypto'
 
 const BigInteger = require('bigi')
 const ENABLE_FAST = true
@@ -432,6 +434,29 @@ class Client implements BitcoinCashClient, XChainClient {
     } catch (error) {
       return Promise.reject(error)
     }
+  }
+
+  /**
+   * Sign an arbitrary string message.
+   *
+   *
+   * @returns {Signature} The current address.
+   *
+   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
+   */
+  signMessage = async (msg: string, index = 0): Promise<Signature> => {
+    const msgHash = await RNSimple.SHA.sha256(msg)
+
+    const msgBuffer = Buffer.from(msgHash, 'hex')
+
+    const keys = await this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
+
+    const signature = keys.sign(msgBuffer).toString('hex')
+    const pubKey = keys.getPublicKeyBuffer?.().toString('hex') ?? ''
+
+    console.log('KEYS', keys, 'PubKey', pubKey)
+
+    return { signature, pubKey }
   }
 
   /**

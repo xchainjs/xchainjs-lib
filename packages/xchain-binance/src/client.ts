@@ -38,6 +38,7 @@ import {
 import { getSeed, validatePhrase, bip32 } from '@thorwallet/xchain-crypto'
 import { isTransferFee, parseTx, getPrefix, BNB_DECIMAL } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
+import { Signature } from './types'
 type PrivKey = string
 
 export type Coin = {
@@ -438,6 +439,24 @@ class Client implements BinanceClient, XChainClient {
     } catch (error) {
       return Promise.reject(error)
     }
+  }
+
+  /**
+   * Sign an arbitrary string message.
+   *
+   *
+   * @returns {Signature} The current address.
+   *
+   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
+   */
+  signMessage = async (msg: string, index = 0): Promise<Signature> => {
+    const pk = await this.getPrivateKey(index)
+    if (!pk) {
+      throw new Error('Private Key not defined')
+    }
+    const signature = crypto.generateSignature(Buffer.from(msg).toString('hex'), pk).toString('hex')
+    const pubKey = crypto.getPublicKeyFromPrivateKey(pk)
+    return { signature, pubKey }
   }
 
   /**
