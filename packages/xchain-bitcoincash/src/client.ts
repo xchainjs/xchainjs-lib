@@ -458,8 +458,6 @@ class Client implements BitcoinCashClient, XChainClient {
     const signature = keys.sign(msgBuffer).toString('hex')
     const pubKey = keys.getPublicKeyBuffer?.().toString('hex') ?? ''
 
-    console.log('KEYS', keys, 'PubKey', pubKey)
-
     return { signature, pubKey }
   }
 
