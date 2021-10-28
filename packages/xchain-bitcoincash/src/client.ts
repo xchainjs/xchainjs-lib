@@ -22,8 +22,12 @@ import { KeyPair } from './types/bitcoincashjs-types'
 import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './haskoin-api'
 import { NodeAuth } from './types'
 import { broadcastTx } from './node-api'
-import { Signature } from '@thorwallet/xchain-bitcoin/src'
 import RNSimple from 'react-native-simple-crypto'
+
+type Signature = {
+  signature: string
+  pubKey: string
+}
 
 const BigInteger = require('bigi')
 const ENABLE_FAST = true
