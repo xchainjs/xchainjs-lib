@@ -35,3 +35,8 @@ export const THORChain = 'THOR'
 export const AssetRune: Asset = { chain: THORChain, symbol: 'RUNE', ticker: 'RUNE' }
 
 export type TxData = Pick<Tx, 'from' | 'to' | 'type'>
+
+export type Signature = {
+  signature: string
+  pubKey: string
+}

@@ -41,6 +41,9 @@ import {
   getExplorerTxUrl,
   getDepositTxDataFromLogs,
 } from './util'
+import { Signature } from './types'
+import RNSimple from 'react-native-simple-crypto'
+import ecc from 'tiny-secp256k1'
 
 /**
  * Interface for custom Thorchain client
@@ -552,6 +555,26 @@ class Client implements ThorchainClient, XChainClient {
     } catch (error) {
       return Promise.reject(error)
     }
+  }
+
+  /**
+   * Sign an arbitrary string message.
+   *
+   *
+   * @returns {Signature} The current address.
+   *
+   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
+   */
+  signMessage = async (msg: string, index = 0): Promise<Signature> => {
+    const msgHash = await RNSimple.SHA.sha256(msg)
+    const msgBuffer = Buffer.from(msgHash, 'hex')
+
+    const pk = await this.getPrivateKey(index)
+
+    const signature = ecc.sign(msgBuffer, pk.toBuffer()).toString('hex')
+    const pubKey = pk.getPubKey().toBuffer().toString('hex')
+
+    return { signature, pubKey }
   }
 
   /**
