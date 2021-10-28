@@ -53,7 +53,7 @@ export const getAddress = async ({ sochainUrl, network, address }: AddressParams
  */
 export const getTx = async ({ sochainUrl, network, hash }: TxHashParams): Promise<Transaction> => {
   try {
-    const url = `${sochainUrl}/get_tx/${toSochainNetwork(network)}/${hash}`
+    const url = `${sochainUrl}/get_tx/${toSochainNetwork(network)}/${hash.toLowerCase()}`
     const response = await axios.get(url)
     const tx: SochainResponse<Transaction> = response.data
     return tx.data
@@ -144,7 +144,7 @@ export const getUnspentTxs = async ({
 export const getIsTxConfirmed = async ({ sochainUrl, network, hash }: TxHashParams): Promise<TxConfirmedStatus> => {
   try {
     const { data } = await axios.get<SochainResponse<TxConfirmedStatus>>(
-      `${sochainUrl}/is_tx_confirmed/${toSochainNetwork(network)}/${hash}`,
+      `${sochainUrl}/is_tx_confirmed/${toSochainNetwork(network)}/${hash.toLowerCase()}`,
     )
     return data.data
   } catch (error) {
