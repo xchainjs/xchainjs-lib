@@ -43,7 +43,6 @@ import {
 } from './util'
 import { Signature } from './types'
 import RNSimple from 'react-native-simple-crypto'
-import ecc from 'tiny-secp256k1'
 
 /**
  * Interface for custom Thorchain client
@@ -570,8 +569,7 @@ class Client implements ThorchainClient, XChainClient {
     const msgBuffer = Buffer.from(msgHash, 'hex')
 
     const pk = await this.getPrivateKey(index)
-
-    const signature = ecc.sign(msgBuffer, pk.toBuffer()).toString('hex')
+    const signature = pk.sign(msgBuffer).toString('hex')
     const pubKey = pk.getPubKey().toBuffer().toString('hex')
 
     return { signature, pubKey }
