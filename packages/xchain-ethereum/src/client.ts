@@ -835,7 +835,7 @@ export default class Client implements XChainClient, EthereumClient {
       } else {
         // ETH gas estimate
         const transactionRequest = {
-          from: this.getAddress(),
+          from: from || (await this.getAddress()),
           to: recipient,
           value: txAmount,
           data: memo ? toUtf8Bytes(memo) : undefined,
