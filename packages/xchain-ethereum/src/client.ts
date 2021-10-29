@@ -808,7 +808,13 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @throws {"Failed to estimate gas limit"} Thrown if failed to estimate gas limit.
    */
-  estimateGasLimit = async ({ asset, recipient, amount, memo, from }: FeesParams): Promise<BigNumber> => {
+  estimateGasLimit = async ({
+    asset,
+    recipient,
+    amount,
+    memo,
+    from,
+  }: FeesParams & { from?: Address }): Promise<BigNumber> => {
     try {
       const txAmount = BigNumber.from(amount.amount().toFixed())
 
@@ -852,7 +858,9 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @throws {"Failed to estimate fees, gas price, gas limit"} Thrown if failed to estimate fees, gas price, gas limit.
    */
-  estimateFeesWithGasPricesAndLimits = async (params: FeesParams): Promise<FeesWithGasPricesAndLimits> => {
+  estimateFeesWithGasPricesAndLimits = async (
+    params: FeesParams & { from?: string },
+  ): Promise<FeesWithGasPricesAndLimits> => {
     try {
       // gas prices
       const gasPrices = await this.estimateGasPrices()
