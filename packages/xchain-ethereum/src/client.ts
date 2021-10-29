@@ -808,7 +808,7 @@ export default class Client implements XChainClient, EthereumClient {
    *
    * @throws {"Failed to estimate gas limit"} Thrown if failed to estimate gas limit.
    */
-  estimateGasLimit = async ({ asset, recipient, amount, memo }: FeesParams): Promise<BigNumber> => {
+  estimateGasLimit = async ({ asset, recipient, amount, memo, from }: FeesParams): Promise<BigNumber> => {
     try {
       const txAmount = BigNumber.from(amount.amount().toFixed())
 
@@ -824,7 +824,7 @@ export default class Client implements XChainClient, EthereumClient {
         const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
 
         estimate = await contract.estimateGas.transfer(recipient, txAmount, {
-          from: this.getAddress(),
+          from: from || (await this.getAddress()),
         })
       } else {
         // ETH gas estimate
@@ -864,6 +864,7 @@ export default class Client implements XChainClient, EthereumClient {
         amount: params.amount,
         recipient: params.recipient,
         memo: params.memo,
+        from: params.from,
       })
 
       return {
