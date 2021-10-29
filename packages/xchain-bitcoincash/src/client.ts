@@ -23,6 +23,7 @@ import { getTransaction, getAccount, getTransactions, getSuggestedFee } from './
 import { NodeAuth } from './types'
 import { broadcastTx } from './node-api'
 import RNSimple from 'react-native-simple-crypto'
+import { ECPair } from 'bitcoinjs-lib'
 
 type Signature = {
   signature: string
@@ -454,9 +455,13 @@ class Client implements BitcoinCashClient, XChainClient {
     const msgBuffer = Buffer.from(msgHash, 'hex')
 
     const keys = await this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
+    const wif = keys.toWIF()
 
-    const signature = keys.sign(msgBuffer).toString('hex')
-    const pubKey = keys.getPublicKeyBuffer?.().toString('hex') ?? ''
+    // use bitcoinjs-lib ECPair, because @psf/bitcoincashjs-lib library operates on lower cryptographic level
+    const ecpair = ECPair.fromWIF(wif, keys.getNetwork())
+
+    const signature = ecpair.sign(msgBuffer).toString('hex')
+    const pubKey = ecpair.publicKey.toString('hex')
 
     return { signature, pubKey }
   }

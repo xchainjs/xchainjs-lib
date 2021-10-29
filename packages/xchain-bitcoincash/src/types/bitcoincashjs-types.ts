@@ -2,6 +2,8 @@ export type KeyPair = {
   getAddress(index: number): Promise<string>
   sign(hash: Buffer, lowR?: boolean): Buffer
   getPublicKeyBuffer?(): Buffer
+  toWIF(): string
+  getNetwork(): Network
 }
 
 export type Transaction = {
@@ -25,6 +27,7 @@ export type TransactionBuilder = {
 
 export type Network = {
   messagePrefix: string
+  bech32: string
   bip32: {
     public: number
     private: number

@@ -33,6 +33,7 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
+    "bitcoinjs-lib": "^5.2.0",
     "uniqid": "^5.3.0"
   },
   "devDependencies": {
