@@ -8,7 +8,7 @@ import {
 } from './types'
 import { BigNumberish } from 'ethers'
 import { Txs } from '@thorwallet/xchain-client/lib'
-import { filterSelfTxs, getTxFromEthTransaction, getTxFromTokenTransaction } from './utils'
+import { getTxFromEthTransaction, getTxFromTokenTransaction } from './utils'
 import { bnOrZero } from '@thorwallet/xchain-util/lib'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
@@ -91,17 +91,17 @@ export const getETHTransactionHistory = async ({
   if (endblock) url += `&endblock=${endblock}`
 
   try {
-    const result = await getAxiosWithRateLimitHandling(url).then((response) => response.data.result)
+    const result: ETHTransactionInfo[] = await getAxiosWithRateLimitHandling(url).then(
+      (response) => response.data.result,
+    )
     if (JSON.stringify(result).includes('Invalid API Key')) {
       return Promise.reject(new Error('Invalid API Key'))
     }
     if (typeof result !== typeof []) {
-      throw new Error(result)
+      throw new Error(JSON.stringify(result))
     }
 
-    return filterSelfTxs<ETHTransactionInfo>(result)
-      .filter((tx) => !bnOrZero(tx.value).isZero())
-      .map(getTxFromEthTransaction)
+    return result.filter((tx) => !bnOrZero(tx.value).isZero()).map(getTxFromEthTransaction)
   } catch (error) {
     return Promise.reject(error)
   }
@@ -137,12 +137,14 @@ export const getTokenTransactionHistory = async ({
   if (endblock) url += `&endblock=${endblock}`
 
   try {
-    const result = await getAxiosWithRateLimitHandling(url).then((response) => response.data.result)
+    const result: TokenTransactionInfo[] = await getAxiosWithRateLimitHandling(url).then(
+      (response) => response.data.result,
+    )
     if (JSON.stringify(result).includes('Invalid API Key')) {
       return Promise.reject(new Error('Invalid API Key'))
     }
 
-    return filterSelfTxs<TokenTransactionInfo>(result)
+    return result
       .filter((tx) => !bnOrZero(tx.value).isZero())
       .reduce((acc, cur) => {
         const tx = getTxFromTokenTransaction(cur)
