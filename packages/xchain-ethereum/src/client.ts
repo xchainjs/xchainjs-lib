@@ -437,8 +437,6 @@ export default class Client implements XChainClient, EthereumClient {
    */
   getTransactions = async (params?: TxHistoryParams): Promise<TxsPage> => {
     try {
-      const offset = params?.offset || 0
-      const limit = params?.limit || 10
       const assetAddress = params?.asset
 
       const maxCount = 10000
@@ -467,7 +465,7 @@ export default class Client implements XChainClient, EthereumClient {
 
       return {
         total: transations.length,
-        txs: transations.filter((_, index) => index >= offset && index < offset + limit),
+        txs: transations,
       }
     } catch (error) {
       return Promise.reject(error)
