@@ -1,3 +1,9 @@
+# v.0.13.8 (2021-10-31)
+
+### Update
+
+- Use `sync` instead of `block` mode for broadcasting txs
+
 # v.0.13.7 (2021-07-20)
 
 - cosmos 0.42.x has too many breaking changes that wren't caught in the last version, downgrade "cosmos-client": "0.39.2"
