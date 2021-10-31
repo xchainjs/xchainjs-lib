@@ -1,3 +1,9 @@
+# v.0.19.3 (2021-10-31)
+
+## Update
+
+- Use latest `xchain-cosmos@0.13.8` to use `sync` mode for broadcasting txs
+
 # v.0.19.2 (2021-09-27)
 
 ## Fix

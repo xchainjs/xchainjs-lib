@@ -240,6 +240,6 @@ export class CosmosSDKClient {
       account.sequence.toString(),
     )
 
-    return (await auth.txsPost(this.sdk, signedStdTx, 'block')).data
+    return (await auth.txsPost(this.sdk, signedStdTx, 'sync')).data
   }
 }
