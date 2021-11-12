@@ -10,9 +10,9 @@ type MockConfig = {
 export default {
   restore: mock.restore,
   init: () => {
-    //Mock https://api.haskoin.com/btc/address/{address}/balance
+    //Mock https://api.haskoin.com/haskoin-store/btc/address/{address}/balance
     mock.onGet(/\/address\/\w+\/balance/).reply((config: MockConfig) => {
-      const address = config.url?.split('/')?.[5] ?? ''
+      const address = config.url?.split('/')?.[6] ?? ''
       const resp = require(`./response/balances/haskoin-${address}.json`)
       return [200, resp]
     })

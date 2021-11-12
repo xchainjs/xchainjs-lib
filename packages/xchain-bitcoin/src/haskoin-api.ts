@@ -5,7 +5,7 @@ import axios from 'axios'
 import { BTC_DECIMAL } from './const'
 import { getIsTxConfirmed } from './sochain-api'
 
-const HASKOIN_API_URL = 'https://api.haskoin.com/btc'
+const HASKOIN_API_URL = 'https://api.haskoin.com/haskoin-store/btc'
 const SOCHAIN_API_URL = 'https://sochain.com/api/v2'
 
 export type UtxoData = {
