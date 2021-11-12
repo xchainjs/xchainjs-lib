@@ -1,3 +1,7 @@
+# v.0.11.10 (2021-11-12)
+
+- updated haskoin api URL
+
 # v.0.11.9 (2021-09-06)
 
 - updated to the latest dependencies
