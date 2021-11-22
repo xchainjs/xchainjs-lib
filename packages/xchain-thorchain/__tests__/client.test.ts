@@ -174,6 +174,16 @@ describe('Client Test', () => {
     expect(thorClient.getClientUrl().node).toEqual('new testnet client')
   })
 
+  it('returns private key', async () => {
+    const privKey = thorClient.getPrivKey()
+    expect(privKey.toBase64()).toEqual('CHCbyYWorMZVRFtfJzt72DigvZeRNi3jo2c3hGEQ46I=')
+  })
+
+  it('returns public key', async () => {
+    const pubKey = thorClient.getPubKey()
+    expect(pubKey.toBase64()).toEqual('AsL4F+rvFMqDkZYpVVnZa0OBa0EXwscjNrODbBME42vC')
+  })
+
   it('has no balances', async () => {
     mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
       height: 0,

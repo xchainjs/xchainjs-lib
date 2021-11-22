@@ -1,3 +1,13 @@
+# v.0.19.4 (2021-11-22)
+
+## Add
+
+- Provide `getPubKey` method to access public key
+
+## Change
+
+- Make `getPrivKey` method `public` to access private key
+
 # v.0.19.3 (2021-10-31)
 
 ## Update

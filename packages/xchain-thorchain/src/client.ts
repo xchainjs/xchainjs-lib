@@ -20,7 +20,7 @@ import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { Asset, AssetRuneNative, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
-import { AccAddress, PrivKey } from 'cosmos-client'
+import { AccAddress, PrivKey, PubKey } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 
 import { ClientUrl, DepositParam, ExplorerUrls, NodeUrl, ThorchainClientParams, TxData } from './types'
@@ -235,16 +235,30 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
-   * @private
-   * Get private key.
+   * Get private key
    *
+   * @param {number} index the HD wallet index (optional)
    * @returns {PrivKey} The private key generated from the given phrase
    *
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey(index = 0): PrivKey {
+  getPrivKey(index = 0): PrivKey {
     return this.cosmosClient.getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+  }
+
+  /**
+   * Get public key
+   *
+   * @param {number} index the HD wallet index (optional)
+   *
+   * @returns {PubKey} The public key generated from the given phrase
+   *
+   * @throws {"Phrase not set"}
+   * Throws an error if phrase has not been set before
+   **/
+  getPubKey(index = 0): PubKey {
+    return this.getPrivKey(index).getPubKey()
   }
 
   /**
@@ -439,7 +453,7 @@ class Client implements ThorchainClient, XChainClient {
     })
 
     const unsignedStdTx: StdTx = await buildDepositTx(msgNativeTx, this.getClientUrl().node)
-    const privateKey = this.getPrivateKey(walletIndex)
+    const privateKey = this.getPrivKey(walletIndex)
     const accAddress = AccAddress.fromBech32(signer)
 
     return (await this.cosmosClient.signAndBroadcast(unsignedStdTx, privateKey, accAddress))?.txhash ?? ''
@@ -464,7 +478,7 @@ class Client implements ThorchainClient, XChainClient {
     }
 
     const transferResult = await this.cosmosClient.transfer({
-      privkey: this.getPrivateKey(walletIndex),
+      privkey: this.getPrivKey(walletIndex),
       from: this.getAddress(walletIndex),
       to: recipient,
       amount: amount.amount().toString(),
