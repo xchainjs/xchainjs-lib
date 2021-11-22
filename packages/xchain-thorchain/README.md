@@ -48,7 +48,17 @@ const client = new Client({ network: Network.Testnet, phrase: 'my secret phrase'
 
 // get address
 const address = client.getAddress()
-console.log('address:', client.getAddress()) // address: tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg
+console.log('address:', address) // address: tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg
+
+// get private key
+const privKey = client.getPrivKey()
+console.log('privKey:', privKey.toBase64()) // privKey: {your-private-key} base64 encoded
+console.log('privKey:', privKey.toBuffer()) // privKey: {your-private-key} as `Buffer`
+
+// get public key
+const pubKey = client.getPubKey()
+console.log('pubKey:', pubKey.toBase64()) // pubKey: {your-public-key} base64 encoded
+console.log('pubKey:', pubKey.toBuffer()) // pubKey: {your-public-key} as `Buffer`
 
 // get balances
 const balances = await client.getBalance(address)
