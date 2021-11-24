@@ -1,12 +1,24 @@
-import { Asset, assetToString, baseAmount, assetFromString, THORChain, BaseAmount } from '@thorwallet/xchain-util'
-import { AssetRune, ExplorerUrl, ClientUrl, ExplorerUrls, TxData } from './types'
-import { TxLog } from '@thorwallet/xchain-cosmos'
-import { Fees, Network, Address, TxHash } from '@thorwallet/xchain-client'
+import {
+  Asset,
+  assetToString,
+  baseAmount,
+  assetFromString,
+  THORChain,
+  BaseAmount,
+  AssetRuneNative,
+} from '@thorwallet/xchain-util'
+import { AssetRune, ExplorerUrl, ClientUrl, ExplorerUrls, TxData, MsgNativeTx, ThorchainDepositResponse } from './types'
+import { CosmosSDKClient, TxLog } from '@thorwallet/xchain-cosmos'
+import { Fees, Network, Address, TxHash, Balance } from '@thorwallet/xchain-client'
 import { AccAddress, codec, Msg } from '@thorwallet/cosmos-client'
 import { MsgMultiSend, MsgSend } from '@thorwallet/cosmos-client/x/bank'
+import { StdTxFee } from '@thorwallet/cosmos-client/api'
+import axios from 'axios'
+import { StdTx } from '@thorwallet/cosmos-client/x/auth'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'
+export const DEPOSIT_GAS_VALUE = '500000000'
 export const MAX_TX_COUNT = 100
 
 /**
@@ -78,6 +90,13 @@ export const isBroadcastSuccess = (response: any): boolean => response.logs !== 
  *
  **/
 export const getPrefix = (network: string) => (network === 'testnet' ? 'tthor' : 'thor')
+
+/**
+ * Get the chain id.
+ *
+ * @returns {string} The chain id based on the network.
+ */
+export const getChainId = () => 'thorchain'
 
 /**
  * Register Codecs based on the network.
@@ -169,6 +188,70 @@ export const getDefaultFees = (): Fees => {
  */
 export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string => {
   return Buffer.from(txData, encoding).toString().slice(4)
+}
+
+/**
+ * Structure StdTx from MsgNativeTx.
+ *
+ * @param {string} txId The transaction id.
+ * @returns {Tx} The transaction details of the given transaction id.
+ *
+ * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
+ */
+export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string): Promise<StdTx> => {
+  const response: ThorchainDepositResponse = (
+    await axios.post(`${nodeUrl}/thorchain/deposit`, {
+      coins: msgNativeTx.coins,
+      memo: msgNativeTx.memo,
+      base_req: {
+        chain_id: getChainId(),
+        from: msgNativeTx.signer,
+      },
+    })
+  ).data
+
+  if (!response || !response.value) throw new Error('Invalid client url')
+
+  const fee: StdTxFee = response.value?.fee ?? { amount: [] }
+
+  const unsignedStdTx = StdTx.fromJSON({
+    msg: response.value.msg,
+    // override fee
+    fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
+    signatures: [],
+    memo: '',
+  })
+
+  return unsignedStdTx
+}
+
+/**
+ * Get the balance of a given address.
+ *
+ * @param {Address} address By default, it will return the balance of the current wallet. (optional)
+ * @param {Asset} asset If not set, it will return all assets available. (optional)
+ * @param {cosmosClient} CosmosSDKClient
+ *
+ * @returns {Balance[]} The balance of the address.
+ */
+export const getBalance = async ({
+  address,
+  assets,
+  cosmosClient,
+}: {
+  address: Address
+  assets?: Asset[]
+  cosmosClient: CosmosSDKClient
+}): Promise<Balance[]> => {
+  const balances = await cosmosClient.getBalance(address)
+  return balances
+    .map((balance) => ({
+      asset: (balance.denom && getAsset(balance.denom)) || AssetRuneNative,
+      amount: baseAmount(balance.amount, DECIMAL),
+    }))
+    .filter(
+      (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
+    )
 }
 
 /**

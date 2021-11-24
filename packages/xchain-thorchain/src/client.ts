@@ -2,7 +2,6 @@ import axios from 'axios'
 import {
   RootDerivationPaths,
   Address,
-  Balances,
   Fees,
   Network,
   Tx,
@@ -14,22 +13,24 @@ import {
   XChainClientParams,
   TxFrom,
   TxTo,
+  Balance,
 } from '@thorwallet/xchain-client'
 import { CosmosSDKClient, RPCTxResult } from '@thorwallet/xchain-cosmos'
-import { Asset, baseAmount, assetToString, assetFromString } from '@thorwallet/xchain-util'
+import { Asset, baseAmount, assetFromString } from '@thorwallet/xchain-util'
 import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
-import { PrivKey, AccAddress } from '@thorwallet/cosmos-client'
+import { PrivKey, AccAddress, PubKey } from '@thorwallet/cosmos-client'
 import { StdTx } from '@thorwallet/cosmos-client/x/auth'
 
 import { AssetRune, DepositParam, ClientUrl, ThorchainClientParams, NodeUrl, ExplorerUrls, TxData } from './types'
-import { MsgNativeTx, msgNativeTxFromJson, ThorchainDepositResponse, TxResult } from './types/messages'
+import { msgNativeTxFromJson, TxResult } from './types/messages'
 import {
   getDenom,
-  getAsset,
   getDefaultFees,
+  getBalance,
   DECIMAL,
   DEFAULT_GAS_VALUE,
+  buildDepositTx,
   getDenomWithChain,
   isBroadcastSuccess,
   getPrefix,
@@ -49,8 +50,11 @@ import RNSimple from 'react-native-simple-crypto'
  */
 export interface ThorchainClient {
   setClientUrl(clientUrl: ClientUrl): void
+
   getClientUrl(): NodeUrl
+
   setExplorerUrls(explorerUrls: ExplorerUrls): void
+
   getCosmosClient(): CosmosSDKClient
 
   deposit(params: DepositParam): Promise<TxHash>
@@ -237,16 +241,31 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
-   * @private
-   * Get private key.
+   * Get private key
    *
+   * @param {number} index the HD wallet index (optional)
    * @returns {PrivKey} The private key generated from the given phrase
    *
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey = (index = 0): Promise<PrivKey> =>
-    this.cosmosClient.getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+  getPrivKey(index = 0): Promise<PrivKey> {
+    return this.cosmosClient.getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+  }
+
+  /**
+   * Get public key
+   *
+   * @param {number} index the HD wallet index (optional)
+   *
+   * @returns {PubKey} The public key generated from the given phrase
+   *
+   * @throws {"Phrase not set"}
+   * Throws an error if phrase has not been set before
+   **/
+  async getPubKey(index = 0): Promise<PubKey> {
+    return (await this.getPrivKey(index)).getPubKey()
+  }
 
   /**
    * Get the current address.
@@ -283,32 +302,10 @@ class Client implements ThorchainClient, XChainClient {
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @param {Asset} asset If not set, it will return all assets available. (optional)
-   * @returns {Array<Balance>} The balance of the address.
+   * @returns {Balance[]} The balance of the address.
    */
-  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
-    try {
-      const balances = await this.cosmosClient.getBalance(address)
-
-      let assetBalances = balances.map((balance) => ({
-        asset: (balance.denom && getAsset(balance.denom)) || AssetRune,
-        amount: baseAmount(balance.amount, DECIMAL),
-      }))
-
-      if (assetBalances.length === 0) {
-        assetBalances = [
-          {
-            asset: AssetRune,
-            amount: baseAmount(0, DECIMAL),
-          },
-        ]
-      }
-
-      return assetBalances.filter(
-        (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
-      )
-    } catch (error) {
-      return Promise.reject(error)
-    }
+  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
+    return getBalance({ address, assets, cosmosClient: this.getCosmosClient() })
   }
 
   /**
@@ -475,44 +472,6 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
-   * Structure StdTx from MsgNativeTx.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   *
-   * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
-   */
-  private buildDepositTx = async (msgNativeTx: MsgNativeTx): Promise<StdTx> => {
-    try {
-      const response: ThorchainDepositResponse = await axios
-        .post(`${this.getClientUrl().node}/thorchain/deposit`, {
-          coins: msgNativeTx.coins,
-          memo: msgNativeTx.memo,
-          base_req: {
-            chain_id: 'thorchain',
-            from: msgNativeTx.signer,
-          },
-        })
-        .then((response) => response.data)
-
-      if (!response || !response.value) {
-        throw new Error('Invalid client url')
-      }
-
-      const unsignedStdTx = StdTx.fromJSON({
-        msg: response.value.msg,
-        fee: response.value.fee,
-        signatures: [],
-        memo: '',
-      })
-
-      return unsignedStdTx
-    } catch (error) {
-      return Promise.reject(new Error('Invalid client url'))
-    }
-  }
-
-  /**
    * Transaction with MsgNativeTx.
    *
    * @param {DepositParam} params The transaction options.
@@ -522,38 +481,29 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
    */
   deposit = async ({ walletIndex = 0, asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
-    try {
-      const assetBalance = await this.getBalance(await this.getAddress(walletIndex), [asset])
+    const assetBalance = await this.getBalance(await this.getAddress(walletIndex), [asset])
 
-      if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(DEFAULT_GAS_VALUE))) {
-        throw new Error('insufficient funds')
-      }
-
-      const signer = await this.getAddress(walletIndex)
-      const msgNativeTx = msgNativeTxFromJson({
-        coins: [
-          {
-            asset: getDenomWithChain(asset),
-            amount: amount.amount().toString(),
-          },
-        ],
-        memo,
-        signer,
-      })
-
-      const unsignedStdTx = await this.buildDepositTx(msgNativeTx)
-      const privateKey = await this.getPrivateKey(walletIndex)
-      const accAddress = AccAddress.fromBech32(signer)
-      const fee = unsignedStdTx.fee
-      // max. gas
-      fee.gas = '20000000'
-
-      return this.cosmosClient
-        .signAndBroadcast(unsignedStdTx, privateKey, accAddress)
-        .then((result) => result?.txhash ?? '')
-    } catch (error) {
-      return Promise.reject(error)
+    if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(DEFAULT_GAS_VALUE))) {
+      throw new Error('insufficient funds')
     }
+
+    const signer = await this.getAddress(walletIndex)
+    const msgNativeTx = msgNativeTxFromJson({
+      coins: [
+        {
+          asset: getDenomWithChain(asset),
+          amount: amount.amount().toString(),
+        },
+      ],
+      memo,
+      signer,
+    })
+
+    const unsignedStdTx: StdTx = await buildDepositTx(msgNativeTx, this.getClientUrl().node)
+    const privateKey = await this.getPrivKey(walletIndex)
+    const accAddress = AccAddress.fromBech32(signer)
+
+    return (await this.cosmosClient.signAndBroadcast(unsignedStdTx, privateKey, accAddress))?.txhash ?? ''
   }
 
   /**
@@ -568,7 +518,7 @@ class Client implements ThorchainClient, XChainClient {
     const msgHash = await RNSimple.SHA.sha256(msg)
     const msgBuffer = Buffer.from(msgHash, 'hex')
 
-    const pk = await this.getPrivateKey(index)
+    const pk = await this.getPrivKey(index)
     const signature = pk.sign(msgBuffer).toString('hex')
     const pubKey = pk.getPubKey().toBuffer().toString('hex')
 
@@ -592,7 +542,7 @@ class Client implements ThorchainClient, XChainClient {
       }
 
       const transferResult = await this.cosmosClient.transfer({
-        privkey: await this.getPrivateKey(walletIndex),
+        privkey: await this.getPrivKey(walletIndex),
         from: await this.getAddress(walletIndex),
         to: recipient,
         amount: amount.amount().toString(),
