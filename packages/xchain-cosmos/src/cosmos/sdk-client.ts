@@ -224,7 +224,7 @@ export class CosmosSDKClient {
     return this.signAndBroadcast(unsignedStdTx, privkey, AccAddress.fromBech32(from))
   }
 
-  async signAndBroadcast(unsignedStdTx: StdTx, privkey: PrivKey, signer: AccAddress): Promise<BroadcastTxCommitResult> {
+  async sign(unsignedStdTx: StdTx, privkey: PrivKey, signer: AccAddress): Promise<StdTx> {
     this.setPrefix()
 
     let account: BaseAccount = (await auth.accountsAddressGet(this.sdk, signer)).data.result
@@ -232,14 +232,21 @@ export class CosmosSDKClient {
       account = BaseAccount.fromJSON((account as BaseAccountResponse).value)
     }
 
-    const signedStdTx = auth.signStdTx(
+    return auth.signStdTx(
       this.sdk,
       privkey,
       unsignedStdTx,
       account.account_number.toString(),
       account.sequence.toString(),
     )
+  }
 
+  async broadcast(signedStdTx: StdTx): Promise<BroadcastTxCommitResult> {
     return (await auth.txsPost(this.sdk, signedStdTx, 'sync')).data
+  }
+
+  async signAndBroadcast(unsignedStdTx: StdTx, privkey: PrivKey, signer: AccAddress): Promise<BroadcastTxCommitResult> {
+    const signedTx = await this.sign(unsignedStdTx, privkey, signer)
+    return await this.broadcast(signedTx)
   }
 }
