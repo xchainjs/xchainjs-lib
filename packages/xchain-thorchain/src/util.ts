@@ -244,7 +244,7 @@ export const getBalance = async ({
   cosmosClient: CosmosSDKClient
 }): Promise<Balance[]> => {
   const balances = await cosmosClient.getBalance(address)
-  return balances
+  let newBalances = balances
     .map((balance) => ({
       asset: (balance.denom && getAsset(balance.denom)) || AssetRuneNative,
       amount: baseAmount(balance.amount, DECIMAL),
@@ -252,6 +252,18 @@ export const getBalance = async ({
     .filter(
       (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
     )
+
+  // make sure we always have the bnb asset as balance in the array
+  if (newBalances.length === 0) {
+    newBalances = [
+      {
+        asset: AssetRuneNative,
+        amount: baseAmount(0, DECIMAL),
+      },
+    ]
+  }
+
+  return newBalances
 }
 
 /**
