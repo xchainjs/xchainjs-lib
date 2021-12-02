@@ -30,6 +30,18 @@ export type TransferParams = {
   fee?: StdTxFee
 }
 
+export type TransferOfflineParams = {
+  privkey: PrivKey
+  from: string
+  from_account_number: string
+  from_sequence: string
+  to: string
+  amount: BigSource
+  asset: string
+  memo?: string
+  fee?: StdTxFee
+}
+
 export type BaseAccountResponse = {
   type?: string
   value?: BaseAccount

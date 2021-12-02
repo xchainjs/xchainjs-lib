@@ -1,6 +1,7 @@
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Asset, Chain } from '@xchainjs/xchain-util'
 import axios from 'axios'
+import { StdTx } from 'cosmos-client/x/auth'
 
 import {
   Address,
@@ -11,6 +12,7 @@ import {
   RootDerivationPaths,
   Tx,
   TxHistoryParams,
+  TxOfflineParams,
   TxParams,
   TxsPage,
   XChainClient,
@@ -146,4 +148,5 @@ export abstract class BaseXChainClient implements XChainClient {
   abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
   abstract transfer(params: TxParams): Promise<string>
+  abstract transferOffline(params: TxOfflineParams): Promise<StdTx>
 }

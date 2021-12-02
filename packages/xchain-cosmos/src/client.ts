@@ -8,6 +8,7 @@ import {
   Tx,
   TxHash,
   TxHistoryParams,
+  TxOfflineParams,
   TxParams,
   TxsPage,
   XChainClient,
@@ -16,6 +17,7 @@ import {
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { PrivKey } from 'cosmos-client'
+import { StdTx } from 'cosmos-client/x/auth'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './types'
@@ -318,6 +320,37 @@ class Client implements CosmosClient, XChainClient {
     })
 
     return transferResult?.txhash || ''
+  }
+
+  /**
+   * Transfer offline balances.
+   *
+   * @param {TxOfflineParams} params The transfer offline options.
+   * @returns {StdTx} The signed transaction.
+   */
+  async transferOffline({
+    walletIndex,
+    asset,
+    amount,
+    recipient,
+    memo,
+    from_account_number,
+    from_sequence,
+  }: TxOfflineParams): Promise<StdTx> {
+    const fromAddressIndex = walletIndex || 0
+    registerCodecs()
+
+    const mainAsset = this.getMainAsset()
+    return await this.getSDKClient().transferSigned({
+      privkey: this.getPrivateKey(fromAddressIndex),
+      from: this.getAddress(fromAddressIndex),
+      from_account_number,
+      from_sequence,
+      to: recipient,
+      amount: amount.amount().toString(),
+      asset: getDenom(asset || mainAsset),
+      memo,
+    })
   }
 
   /**

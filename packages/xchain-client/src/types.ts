@@ -1,4 +1,5 @@
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
+import { StdTx } from 'cosmos-client/x/auth'
 
 export type Address = string
 
@@ -59,6 +60,17 @@ export type TxParams = {
   memo?: string // optional memo to pass
 }
 
+export type TxOfflineParams = {
+  walletIndex?: number // send from this HD index
+  asset?: Asset
+  amount: BaseAmount
+  recipient: Address
+  memo?: string // optional memo to pass
+  from_balance: string
+  from_account_number: string
+  from_sequence: string
+}
+
 export enum FeeOption {
   Average = 'average',
   Fast = 'fast',
@@ -108,6 +120,8 @@ export interface XChainClient {
   getFees(): Promise<Fees>
 
   transfer(params: TxParams): Promise<TxHash>
+
+  transferOffline(params: TxOfflineParams): Promise<StdTx>
 
   purgeClient(): void
 }
