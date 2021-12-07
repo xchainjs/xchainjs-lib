@@ -188,7 +188,7 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
     ethCumulativeGasUsed: null,
     ethGasUsed: tx.gasUsed,
     ethGas: tx.gas,
-    ethGasPrice: null,
+    ethGasPrice: tx.gasPrice,
     ethTokenName: null,
     ethTokenSymbol: null,
     memo: null,

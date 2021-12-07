@@ -53,6 +53,7 @@ export type ETHTransactionInfo = {
   type: string
   gas: string
   gasUsed: string
+  gasPrice: string
   traceId: string
   isError: string
   errCode: string
