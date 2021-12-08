@@ -195,6 +195,11 @@ export const AssetBCH: Asset = { chain: Chain.BitcoinCash, symbol: 'BCH', ticker
 export const AssetLTC: Asset = { chain: Chain.Litecoin, symbol: 'LTC', ticker: 'LTC' }
 
 /**
+ * Base "chain" asset on ZCash main net.
+ */
+export const AssetZEC: Asset = { chain: Chain.Zcash, symbol: 'ZEC', ticker: 'ZEC' }
+
+/**
  * Base "chain" asset on ethereum main net.
  *
  * Based on definition in Thorchain `common`

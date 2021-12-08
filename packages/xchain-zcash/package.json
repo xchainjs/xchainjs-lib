@@ -1,12 +1,12 @@
 {
-  "name": "@xchainjs/xchain-util",
-  "version": "0.3.2",
-  "description": "Helper utilities for XChain clients",
+  "name": "@xchainjs/xchain-zcash",
+  "version": "0.1.0",
+  "description": "Custom Zcash client and utilities used by XChainJS clients",
   "keywords": [
-    "THORChain",
-    "XChain"
+    "XChain",
+    "Zcash"
   ],
-  "author": "THORChain",
+  "author": "XChainJS",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
   "main": "lib/index.js",
@@ -28,13 +28,20 @@
     "build": "yarn clean && rollup -c",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build"
-  },
-  "peerDependencies": {
-    "bignumber.js": "9.x"
+    "prepublishOnly": "yarn build",
+    "postversion": "git push --follow-tags"
   },
   "devDependencies": {
-    "bignumber.js": "^9.0.0"
+    "@xchainjs/xchain-client": "^0.10.3",
+    "@xchainjs/xchain-crypto": "^0.2.6",
+    "@xchainjs/xchain-util": "^0.3.2",
+    "axios": "^0.21.1"
+  },
+  "peerDependencies": {
+    "@xchainjs/xchain-client": "^0.10.3",
+    "@xchainjs/xchain-crypto": "^0.2.6",
+    "@xchainjs/xchain-util": "^0.3.2",
+    "axios": "^0.21.1"
   },
   "publishConfig": {
     "access": "public"
