@@ -14,12 +14,14 @@ import {
 import { Chain } from '@xchainjs/xchain-util'
 
 import { ZcashClientParams } from './types'
+import * as Utils from './utils'
 
 /**
  * Custom Zcash client
  */
 class Client extends UTXOClient {
   private nodeUrl = ''
+  private sochainUrl = ''
 
   /**
    * Constructor
@@ -27,7 +29,12 @@ class Client extends UTXOClient {
    *
    * @param {ZcashClientParams} params
    */
-  constructor({ network = Network.Testnet, phrase, nodeUrl }: ZcashClientParams) {
+  constructor({
+    network = Network.Testnet,
+    phrase,
+    nodeUrl,
+    sochainUrl = 'https://sochain.com/api/v2',
+  }: ZcashClientParams) {
     super(Chain.Zcash, { network, phrase })
     this.nodeUrl =
       nodeUrl ??
@@ -43,6 +50,17 @@ class Client extends UTXOClient {
     // TODO: Remove it, needed to get rid of tsc warning
     // "'nodeUrl' is declared but its value is never read."
     console.log('nodeUrl', this.nodeUrl)
+    this.sochainUrl = sochainUrl
+  }
+
+  /**
+   * Set/Update the sochain url.
+   *
+   * @param {string} url The new sochain url.
+   * @returns {void}
+   */
+  setSochainUrl(url: string): void {
+    this.sochainUrl = url
   }
 
   /**
@@ -54,9 +72,9 @@ class Client extends UTXOClient {
     switch (this.network) {
       // TODO: Add urls
       case Network.Mainnet:
-        return ''
+        return 'https://zcashblockexplorer.com/'
       case Network.Testnet:
-        return ''
+        return 'https://www.sochain.com/testnet/zcash'
     }
   }
 
@@ -68,7 +86,7 @@ class Client extends UTXOClient {
    */
   getExplorerAddressUrl(address: Address): string {
     // TODO: Check/Update URL
-    return `${this.getExplorerUrl()}/${address}`
+    return `${this.getExplorerUrl()}/address/${address}`
   }
 
   /**
@@ -79,7 +97,7 @@ class Client extends UTXOClient {
    */
   getExplorerTxUrl(txID: string): string {
     // TODO: Check/Update URL
-    return `${this.getExplorerUrl()}/${txID}`
+    return `${this.getExplorerUrl()}/transactions/${txID}`
   }
 
   /**
@@ -114,7 +132,11 @@ class Client extends UTXOClient {
    * @returns {Balance[]} The LTC balance of the address.
    */
   async getBalance(address: Address): Promise<Balance[]> {
-    return Promise.reject(`getBalance needs to be implemented ${address}`)
+    return Utils.getBalance({
+      sochainUrl: this.sochainUrl,
+      network: this.network,
+      address,
+    })
   }
 
   /**
