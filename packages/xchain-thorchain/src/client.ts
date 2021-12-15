@@ -9,7 +9,6 @@ import {
   TxFrom,
   TxHash,
   TxHistoryParams,
-  TxOfflineParams,
   TxParams,
   TxTo,
   TxType,
@@ -17,7 +16,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
+import { CosmosSDKClient, RPCTxResult, TxOfflineParams } from '@xchainjs/xchain-cosmos'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { Asset, AssetRuneNative, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
@@ -510,7 +509,7 @@ class Client implements ThorchainClient, XChainClient {
     amount,
     recipient,
     memo,
-    from_balance = '0',
+    from_balance = baseAmount('0', DECIMAL),
     from_account_number = '0',
     from_sequence = '0',
   }: TxOfflineParams): Promise<StdTx> {
@@ -518,13 +517,13 @@ class Client implements ThorchainClient, XChainClient {
 
     const fee = await this.getFees()
     if (
-      from_balance === '0' ||
-      baseAmount(from_balance, DECIMAL).amount().lt(amount.amount().plus(fee[FeeOption.Average].amount()))
+      from_balance === baseAmount('0', DECIMAL) ||
+      from_balance.amount().lt(amount.amount().plus(fee[FeeOption.Average].amount()))
     ) {
       throw new Error('insufficient funds')
     }
 
-    const result = await this.cosmosClient.transferSigned({
+    const result = await this.cosmosClient.transferSignedOffline({
       privkey: this.getPrivKey(walletIndex),
       from: this.getAddress(walletIndex),
       from_account_number,

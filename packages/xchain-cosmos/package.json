@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-cosmos",
-  "version": "0.13.10",
+  "version": "0.14.0",
   "description": "Custom Cosmos client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -31,7 +31,7 @@
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "0.10.4",
+    "@xchainjs/xchain-client": "0.10.3",
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "^0.3.0",
     "axios": "^0.21.0",
@@ -42,7 +42,7 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "0.10.4",
+    "@xchainjs/xchain-client": "0.10.3",
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "^0.3.0",
     "axios": "^0.21.0",

@@ -187,8 +187,7 @@ export class CosmosSDKClient {
     return (await axios.get<TxResponse>(`${this.server}/txs/${hash}`)).data
   }
 
-  async transfer({
-    privkey,
+  unsignedStdTxGet({
     from,
     to,
     amount,
@@ -198,7 +197,7 @@ export class CosmosSDKClient {
       amount: [],
       gas: '200000',
     },
-  }: TransferParams): Promise<BroadcastTxCommitResult> {
+  }: TransferParams) {
     this.setPrefix()
 
     const msg: Msg = [
@@ -215,12 +214,27 @@ export class CosmosSDKClient {
     ]
     const signatures: StdTxSignature[] = []
 
-    const unsignedStdTx = StdTx.fromJSON({
+    return StdTx.fromJSON({
       msg,
       fee,
       signatures,
       memo,
     })
+  }
+
+  async transfer({
+    privkey,
+    from,
+    to,
+    amount,
+    asset,
+    memo = '',
+    fee = {
+      amount: [],
+      gas: '200000',
+    },
+  }: TransferParams): Promise<BroadcastTxCommitResult> {
+    const unsignedStdTx = this.unsignedStdTxGet({ privkey, from, to, amount, asset, memo, fee })
 
     return this.signAndBroadcast(unsignedStdTx, privkey, AccAddress.fromBech32(from))
   }
@@ -244,7 +258,7 @@ export class CosmosSDKClient {
     return (await auth.txsPost(this.sdk, signedStdTx, 'sync')).data
   }
 
-  async transferSigned({
+  async transferSignedOffline({
     privkey,
     from,
     from_account_number = '0',
@@ -258,39 +272,7 @@ export class CosmosSDKClient {
       gas: '200000',
     },
   }: TransferOfflineParams): Promise<StdTx> {
-    this.setPrefix()
-
-    const msg: Msg = [
-      MsgSend.fromJSON({
-        from_address: from,
-        to_address: to,
-        amount: [
-          {
-            amount: amount.toString(),
-            denom: asset,
-          },
-        ],
-      }),
-    ]
-    const signatures: StdTxSignature[] = []
-
-    const unsignedStdTx = StdTx.fromJSON({
-      msg,
-      fee,
-      signatures,
-      memo,
-    })
-
-    return await this.signedOffline(unsignedStdTx, privkey, from_account_number, from_sequence)
-  }
-
-  async signedOffline(
-    unsignedStdTx: StdTx,
-    privkey: PrivKey,
-    from_account_number: string,
-    from_sequence: string,
-  ): Promise<StdTx> {
-    this.setPrefix()
+    const unsignedStdTx = this.unsignedStdTxGet({ privkey, from, to, amount, asset, memo, fee })
 
     return auth.signStdTx(this.sdk, privkey, unsignedStdTx, from_account_number, from_sequence)
   }

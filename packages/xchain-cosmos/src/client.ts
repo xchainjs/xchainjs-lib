@@ -8,7 +8,6 @@ import {
   Tx,
   TxHash,
   TxHistoryParams,
-  TxOfflineParams,
   TxParams,
   TxsPage,
   XChainClient,
@@ -20,6 +19,7 @@ import { PrivKey } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
+import { TxOfflineParams } from './cosmos/types'
 import { AssetAtom, AssetMuon } from './types'
 import { DECIMAL, getAsset, getDenom, getTxsFromHistory, registerCodecs } from './util'
 
@@ -341,7 +341,7 @@ class Client implements CosmosClient, XChainClient {
     registerCodecs()
 
     const mainAsset = this.getMainAsset()
-    return await this.getSDKClient().transferSigned({
+    return await this.getSDKClient().transferSignedOffline({
       privkey: this.getPrivateKey(fromAddressIndex),
       from: this.getAddress(fromAddressIndex),
       from_account_number,

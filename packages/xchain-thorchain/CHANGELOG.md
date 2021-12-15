@@ -1,3 +1,9 @@
+# v.0.19.5 (2021-11-22)
+
+## Add
+
+- Provide `transferOffline` method
+
 # v.0.19.4 (2021-11-22)
 
 ## Add
