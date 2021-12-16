@@ -16,11 +16,11 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
+import { CosmosSDKClient, RPCTxResult, TxOfflineParams } from '@xchainjs/xchain-cosmos'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { Asset, AssetRuneNative, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
-import { AccAddress, PrivKey, PubKey } from 'cosmos-client'
+import { AccAddress, PrivKey, PubKey, codec } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 
 import { ClientUrl, DepositParam, ExplorerUrls, NodeUrl, ThorchainClientParams, TxData } from './types'
@@ -495,6 +495,50 @@ class Client implements ThorchainClient, XChainClient {
     }
 
     return transferResult?.txhash || ''
+  }
+
+  /**
+   * Transfer without broadcast balances with MsgSend
+   *
+   * @param {TxOfflineParams} params The transfer offline options.
+   * @returns {StdTx} The signed transaction.
+   */
+  async transferOffline({
+    walletIndex = 0,
+    asset = AssetRuneNative,
+    amount,
+    recipient,
+    memo,
+    from_balance = baseAmount('0', DECIMAL),
+    from_account_number = '0',
+    from_sequence = '0',
+  }: TxOfflineParams): Promise<StdTx> {
+    registerCodecs(getPrefix(this.network))
+
+    const fee = await this.getFees()
+    if (
+      from_balance === baseAmount('0', DECIMAL) ||
+      from_balance.amount().lt(amount.amount().plus(fee[FeeOption.Average].amount()))
+    ) {
+      throw new Error('insufficient funds')
+    }
+
+    const result = await this.cosmosClient.transferSignedOffline({
+      privkey: this.getPrivKey(walletIndex),
+      from: this.getAddress(walletIndex),
+      from_account_number,
+      from_sequence,
+      to: recipient,
+      amount: amount.amount().toString(),
+      asset: getDenom(asset),
+      memo,
+      fee: {
+        amount: [],
+        gas: DEFAULT_GAS_VALUE,
+      },
+    })
+
+    return JSON.parse(codec.toJSONString(result)).value
   }
 
   /**

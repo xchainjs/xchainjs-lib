@@ -5,6 +5,7 @@ results
 .nyc_output
 *.tsbuildinfo
 .DS_Store
+.idea
 
 # Core client
 packages/xchain-client/.DS_Store
