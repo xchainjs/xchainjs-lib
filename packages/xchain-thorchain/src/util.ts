@@ -98,6 +98,8 @@ export const getPrefix = (network: Network) => {
   switch (network) {
     case Network.Mainnet:
       return 'thor'
+    case Network.Stagenet:
+      return 'sthor'
     case Network.Testnet:
       return 'tthor'
   }
@@ -270,6 +272,10 @@ export const getDefaultClientUrl = (): ClientUrl => {
     [Network.Testnet]: {
       node: 'https://testnet.thornode.thorchain.info',
       rpc: 'https://testnet.rpc.thorchain.info',
+    },
+    [Network.Stagenet]: {
+      node: 'https://thornode.thorchain.info',
+      rpc: 'https://rpc.thorchain.info',
     },
     [Network.Mainnet]: {
       node: 'https://thornode.thorchain.info',
