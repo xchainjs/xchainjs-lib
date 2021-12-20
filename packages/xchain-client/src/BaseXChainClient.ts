@@ -18,6 +18,7 @@ import {
 } from './types'
 
 const MAINNET_THORNODE_API_BASE = 'https://thornode.thorchain.info/thorchain'
+const STAGENET_THORNODE_API_BASE = 'https://stagenet-thornode.ninerealms.com'
 const TESTNET_THORNODE_API_BASE = 'https://testnet.thornode.thorchain.info/thorchain'
 
 export abstract class BaseXChainClient implements XChainClient {
@@ -90,6 +91,8 @@ export abstract class BaseXChainClient implements XChainClient {
       switch (this.network) {
         case Network.Mainnet:
           return MAINNET_THORNODE_API_BASE
+        case Network.Stagenet:
+          return STAGENET_THORNODE_API_BASE
         case Network.Testnet:
           return TESTNET_THORNODE_API_BASE
       }

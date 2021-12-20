@@ -294,16 +294,19 @@ const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
 export const getDefaultExplorerUrls = (): ExplorerUrls => {
   const root: ExplorerUrl = {
     [Network.Testnet]: `${DEFAULT_EXPLORER_URL}?network=testnet`,
+    [Network.Stagenet]: `${DEFAULT_EXPLORER_URL}?network=stagenet`,
     [Network.Mainnet]: DEFAULT_EXPLORER_URL,
   }
   const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
   const tx: ExplorerUrl = {
     [Network.Testnet]: txUrl,
+    [Network.Stagenet]: txUrl,
     [Network.Mainnet]: txUrl,
   }
   const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
   const address: ExplorerUrl = {
     [Network.Testnet]: addressUrl,
+    [Network.Stagenet]: addressUrl,
     [Network.Mainnet]: addressUrl,
   }
 
@@ -344,6 +347,8 @@ export const getExplorerAddressUrl = ({
   switch (network) {
     case Network.Mainnet:
       return url
+    case Network.Stagenet:
+      return `${url}?network=stagenet`
     case Network.Testnet:
       return `${url}?network=testnet`
   }
@@ -370,6 +375,8 @@ export const getExplorerTxUrl = ({
   switch (network) {
     case Network.Mainnet:
       return url
+    case Network.Stagenet:
+      return `${url}?network=stagenet`
     case Network.Testnet:
       return `${url}?network=testnet`
   }
