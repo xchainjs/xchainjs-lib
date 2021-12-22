@@ -1,3 +1,4 @@
+/* eslint-disable ordered-imports/ordered-imports */
 import {
   Address,
   Balance,
@@ -11,13 +12,13 @@ import {
   TxsPage,
   UTXOClient,
 } from '@xchainjs/xchain-client'
+
+import * as UtxoLib from '@bitgo/utxo-lib'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Chain } from '@xchainjs/xchain-util'
 
-import * as UtxoLib from '@bitgo/utxo-lib'
-import * as Utils from './utils'
-
 import { ZcashClientParams } from './types'
+import * as Utils from './utils'
 
 /**
  * Custom Zcash client
