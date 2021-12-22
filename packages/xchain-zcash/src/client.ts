@@ -11,10 +11,13 @@ import {
   TxsPage,
   UTXOClient,
 } from '@xchainjs/xchain-client'
+import { getSeed } from '@xchainjs/xchain-crypto'
 import { Chain } from '@xchainjs/xchain-util'
 
-import { ZcashClientParams } from './types'
+import * as UtxoLib from '@bitgo/utxo-lib'
 import * as Utils from './utils'
+
+import { ZcashClientParams } from './types'
 
 /**
  * Custom Zcash client
@@ -102,9 +105,58 @@ class Client extends UTXOClient {
 
   /**
    * Get the current address.
+   *
+   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
+   * The address is then decoded into type P2WPKH and returned.
+   *
+   * @returns {Address} The current address.
+   *
+   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
+   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
    */
   getAddress(index = 0): Address {
-    throw new Error(`getAddress needs to be implemented ${index}`)
+    if (index < 0) {
+      throw new Error('index must be greater than zero')
+    }
+    if (this.phrase) {
+      const zecNetwork = Utils.zecNetwork(this.network)
+      const zecKeys = this.getZecKeys(this.phrase, index)
+
+      const { address } = UtxoLib.payments.p2wpkh({
+        pubkey: zecKeys.publicKey,
+        network: zecNetwork,
+      })
+
+      if (!address) {
+        throw new Error('Address not defined')
+      }
+      return address
+    }
+    throw new Error('Phrase must be provided')
+  }
+
+  /**
+   * @private
+   * Get private key.
+   *
+   * Private function to get keyPair from the this.phrase
+   *
+   * @param {string} phrase The phrase to be used for generating privkey
+   * @returns {ECPairInterface} The privkey generated from the given phrase
+   *
+   * @throws {"Could not get private key from phrase"} Throws an error if failed creating LTC keys from the given phrase
+   * */
+  private getZecKeys(phrase: string, index = 0): UtxoLib.ECPairInterface {
+    const ltcNetwork = Utils.zecNetwork(this.network)
+
+    const seed = getSeed(phrase)
+    const master = UtxoLib.bip32.fromSeed(seed, ltcNetwork).derivePath(this.getFullDerivationPath(index))
+
+    if (!master.privateKey) {
+      throw new Error('Could not get private key from phrase')
+    }
+
+    return UtxoLib.ECPair.fromPrivateKey(master.privateKey, { network: ltcNetwork })
   }
 
   /**

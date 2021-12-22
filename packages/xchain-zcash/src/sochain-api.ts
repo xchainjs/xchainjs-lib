@@ -44,7 +44,7 @@ export const getBalance = async ({ sochainUrl, network, address }: AddressParams
  * @param {string} sochainUrl The sochain node url.
  * @param {string} network
  * @param {string} address
- * @returns {LtcAddressDTO}
+ * @returns {ZecAddressDTO}
  */
 export const getAddress = async ({ sochainUrl, network, address }: AddressParams): Promise<ZecAddressDTO> => {
   const url = `${sochainUrl}/address/${toSochainNetwork(network)}/${address}`
