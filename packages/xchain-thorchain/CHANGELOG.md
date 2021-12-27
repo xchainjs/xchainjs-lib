@@ -1,3 +1,9 @@
+# v.0.19.6 (2021-12-27)
+
+## Add
+
+- Add stagenet environment variables to `xchain-client` and `xchain-thorchain`
+
 # v.0.19.5 (2021-11-22)
 
 ## Add
