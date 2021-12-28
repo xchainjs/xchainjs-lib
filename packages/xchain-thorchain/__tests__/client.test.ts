@@ -161,6 +161,10 @@ describe('Client Test', () => {
         node: 'new mainnet client',
         rpc: 'new mainnet client',
       },
+      stagenet: {
+        node: 'new stagenet client',
+        rpc: 'new stagenet client',
+      },
       testnet: {
         node: 'new testnet client',
         rpc: 'new testnet client',
@@ -172,6 +176,9 @@ describe('Client Test', () => {
 
     thorClient.setNetwork('testnet' as Network)
     expect(thorClient.getClientUrl().node).toEqual('new testnet client')
+
+    thorClient.setNetwork('stagenet' as Network)
+    expect(thorClient.getClientUrl().node).toEqual('new stagenet client')
   })
 
   it('returns private key', async () => {

@@ -65,6 +65,7 @@ class Client implements CosmosClient, XChainClient {
     rootDerivationPaths = {
       [Network.Mainnet]: `44'/118'/0'/0/`,
       [Network.Testnet]: `44'/118'/1'/0/`,
+      [Network.Stagenet]: `44'/118'/1'/0/`, // stagenet is not configured, use testnet value
     },
   }: XChainClientParams) {
     this.network = network
@@ -120,6 +121,8 @@ class Client implements CosmosClient, XChainClient {
       case Network.Mainnet:
         return 'https://cosmos.bigdipper.live'
       case Network.Testnet:
+        return 'https://gaia.bigdipper.live'
+      case Network.Stagenet: // stagenet is not configured, use testnet value
         return 'https://gaia.bigdipper.live'
     }
   }
@@ -226,6 +229,8 @@ class Client implements CosmosClient, XChainClient {
       case Network.Mainnet:
         return AssetAtom
       case Network.Testnet:
+        return AssetMuon
+      case Network.Stagenet: // stagenet is not configured, use testnet value
         return AssetMuon
     }
   }

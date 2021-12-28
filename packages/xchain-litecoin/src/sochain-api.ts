@@ -22,6 +22,8 @@ const toSochainNetwork = (network: Network): string => {
       return 'LTC'
     case Network.Testnet:
       return 'LTCTEST'
+    case Network.Stagenet: // stagenet is not configured, use testnet value
+      return 'LTCTEST'
   }
 }
 

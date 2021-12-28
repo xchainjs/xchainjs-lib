@@ -18,6 +18,9 @@ export const broadcastTx = async ({ network, txHex, blockstreamUrl }: BroadcastT
         return `${blockstreamUrl}/api/tx`
       case Network.Testnet:
         return `${blockstreamUrl}/testnet/api/tx`
+      case Network.Stagenet:
+        // stagenet is not configured, use testnet value
+        return `${blockstreamUrl}/testnet/api/tx`
     }
   })()
   const txid: string = (await axios.post(url, txHex)).data

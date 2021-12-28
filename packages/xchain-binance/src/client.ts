@@ -7,7 +7,6 @@ import {
   BaseXChainClient,
   FeeType,
   Fees,
-  Network,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -60,6 +59,18 @@ export type MultiSendParams = {
 }
 
 /**
+ * Binance-specific Network enum that excludes 'stagenet' because
+ * @binance-chain has type checks limited to 'mainnet' and 'testnet',
+ * but `xchain-client` has 'mainnet', 'stagenet', and 'testnet'
+ *
+ * Remove this once @binance-chain has stagenet support.
+ */
+export enum Network {
+  Mainnet = 'mainnet',
+  Testnet = 'testnet',
+}
+
+/**
  * Interface for custom Binance client
  */
 export interface BinanceClient {
@@ -106,6 +117,24 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   }
 
   /**
+   * Gets the current network, and enforces type limited to
+   * 'mainnet' and 'testnet', which conflicts with `xchain-client`
+   *
+   * Remove this once @binance-chain has stagenet support.
+   * @returns {Network}
+   */
+  getNetwork(): Network {
+    switch (super.getNetwork()) {
+      case Network.Mainnet:
+        return Network.Mainnet
+      case Network.Testnet:
+        return Network.Testnet
+      default:
+        return Network.Testnet
+    }
+  }
+
+  /**
    * Set/update the current network.
    *
    * @param {Network} network
@@ -131,6 +160,8 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
         return 'https://dex.binance.org'
       case Network.Testnet:
         return 'https://testnet-dex.binance.org'
+      default:
+        return 'https://testnet-dex.binance.org'
     }
   }
 
@@ -144,6 +175,8 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
       case Network.Mainnet:
         return 'https://explorer.binance.org'
       case Network.Testnet:
+        return 'https://testnet-explorer.binance.org'
+      default:
         return 'https://testnet-explorer.binance.org'
     }
   }

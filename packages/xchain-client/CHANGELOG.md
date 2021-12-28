@@ -1,6 +1,6 @@
 # v.0.10.4 (2021-12-27)
 
-- Add stagenet environment variables to `BaseXchainClient` for thorchain
+- Add stagenet environment variables to `BaseXChainClient` for thorchain
 
 # v.0.10.3 (2021-09-02)
 

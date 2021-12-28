@@ -1,3 +1,10 @@
+# v.0.14.1 (2021-12-27)
+
+### Update
+
+- updated to the latest dependencies
+- created mapping for stagenet environment (not configured) variables to default to testnet
+
 # v.0.14.0 (2021-12-15)
 
 ### Update
@@ -6,6 +13,7 @@
 - extract public part into `unsignedStdTxGet` to use it in `transfer` and `transferSignedOffline`
 
 ### Add
+
 - `TxOfflineParams` types
 - `transferSignedOffline` functions
 

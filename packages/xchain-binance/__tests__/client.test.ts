@@ -1,8 +1,8 @@
-import { FeeType, Network } from '@xchainjs/xchain-client'
+import { FeeType } from '@xchainjs/xchain-client'
 import { Asset, AssetBNB, BNBChain, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
-import { Client as BinanceClient } from '../src/client'
+import { Client as BinanceClient, Network } from '../src/client'
 import { Account, Fees, TransactionResult, TxPage } from '../src/types/binance'
 
 const mockGetAccount = (url: string, address: string, result: Account, ntimes = 1, status = 200) => {

@@ -134,5 +134,8 @@ export const getPrefix = (network: Network) => {
       return 'bnb'
     case Network.Testnet:
       return 'tbnb'
+    case Network.Stagenet:
+      // stagenet is not configured, use testnet value
+      return 'tbnb'
   }
 }

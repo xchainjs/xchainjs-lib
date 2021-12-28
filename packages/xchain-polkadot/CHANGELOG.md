@@ -1,3 +1,8 @@
+# v.0.8.5 (2021-12-27)
+
+- updated to the latest dependencies
+- created mapping for stagenet environment (not configured) variables to default to testnet
+
 # v.0.8.4 (2021-07-07)
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`

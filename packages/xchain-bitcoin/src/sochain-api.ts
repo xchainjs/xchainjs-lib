@@ -23,6 +23,8 @@ const toSochainNetwork = (network: Network): string => {
       return 'BTC'
     case Network.Testnet:
       return 'BTCTEST'
+    case Network.Stagenet: // stagenet is not configured, use testnet value
+      return 'BTCTEST'
   }
 }
 

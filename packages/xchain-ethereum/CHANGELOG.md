@@ -1,3 +1,8 @@
+# v.0.22.6 (2021-12-27)
+
+- updated to the latest dependencies
+- created mapping for stagenet environment (not configured) variables to default to testnet
+
 # v.0.22.5 (2021-09-09)
 
 - updated to the latest dependencies

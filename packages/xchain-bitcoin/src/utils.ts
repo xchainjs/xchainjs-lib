@@ -92,6 +92,9 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
       return Bitcoin.networks.bitcoin
     case Network.Testnet:
       return Bitcoin.networks.testnet
+    case Network.Stagenet:
+      // stagenet is not configured, use testnet value
+      return Bitcoin.networks.testnet
   }
 }
 
@@ -113,6 +116,14 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
         },
       ]
     case Network.Testnet:
+      return [
+        {
+          asset: AssetBTC,
+          amount: await sochain.getBalance(params),
+        },
+      ]
+    case Network.Stagenet:
+      // stagenet is not configured, use testnet value
       return [
         {
           asset: AssetBTC,
@@ -199,6 +210,35 @@ export const scanUTXOs = async ({
             witnessUtxo: {
               value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
               script: Buffer.from(utxo.pkscript, 'hex'),
+            },
+          } as UTXO),
+      )
+    }
+    // stagenet is not configured, use testnet value
+    case Network.Stagenet: {
+      let utxos: BtcAddressUTXO[] = []
+
+      const addressParam: AddressParams = {
+        sochainUrl,
+        network,
+        address,
+      }
+
+      if (confirmedOnly) {
+        utxos = await sochain.getConfirmedUnspentTxs(addressParam)
+      } else {
+        utxos = await sochain.getUnspentTxs(addressParam)
+      }
+
+      return utxos.map(
+        (utxo) =>
+          ({
+            hash: utxo.txid,
+            index: utxo.output_no,
+            value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
+            witnessUtxo: {
+              value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
+              script: Buffer.from(utxo.script_hex, 'hex'),
             },
           } as UTXO),
       )
@@ -346,6 +386,8 @@ export const getPrefix = (network: Network) => {
     case Network.Mainnet:
       return 'bc1'
     case Network.Testnet:
+      return 'tb1'
+    case Network.Stagenet: // stagenet is not configured, use testnet value
       return 'tb1'
   }
 }

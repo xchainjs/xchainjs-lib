@@ -1,3 +1,8 @@
+# v.0.15.14 (2021-12-27)
+
+- updated to the latest dependencies
+- created mapping for stagenet environment (not configured) variables to default to testnet
+
 # v.0.15.13 (2021-11-12)
 
 - updated haskoin api URL

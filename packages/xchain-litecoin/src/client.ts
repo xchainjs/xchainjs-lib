@@ -56,6 +56,7 @@ class Client extends UTXOClient {
     rootDerivationPaths = {
       [Network.Mainnet]: `m/84'/2'/0'/0/`,
       [Network.Testnet]: `m/84'/1'/0'/0/`,
+      [Network.Stagenet]: `m/84'/1'/0'/0/`, // stagenet is not configured, use testnet value
     },
   }: LitecoinClientParams) {
     super(Chain.Litecoin, { network, rootDerivationPaths, phrase })
@@ -66,6 +67,9 @@ class Client extends UTXOClient {
           case Network.Mainnet:
             return 'https://ltc.thorchain.info'
           case Network.Testnet:
+            return 'https://testnet.ltc.thorchain.info'
+          case Network.Stagenet:
+            // stagenet is not configured, use testnet value
             return 'https://testnet.ltc.thorchain.info'
         }
       })()
@@ -98,6 +102,9 @@ class Client extends UTXOClient {
       case Network.Mainnet:
         return 'https://ltc.bitaps.com'
       case Network.Testnet:
+        return 'https://tltc.bitaps.com'
+      case Network.Stagenet:
+        // stagenet is not configured, use testnet value
         return 'https://tltc.bitaps.com'
     }
   }
