@@ -2,7 +2,7 @@
 
 ## Breaking change
 
-- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to testnet values until stagenet is configured.
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
 
 # v.0.8.4 (2021-07-07)
 
