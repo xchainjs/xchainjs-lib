@@ -52,8 +52,8 @@ export const xchainNetworkToEths = (network: Network): EthNetwork => {
       return EthNetwork.Main
     case Network.Testnet:
       return EthNetwork.Test
-    case Network.Stagenet:
-      return EthNetwork.Test
+    case Network.Stagenet: // stagenet is not configured, default to mainnet
+      return EthNetwork.Main
   }
 }
 

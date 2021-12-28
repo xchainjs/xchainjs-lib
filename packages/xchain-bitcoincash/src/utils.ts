@@ -101,8 +101,8 @@ export const bchNetwork = (network: Network): BCHNetwork => {
     case Network.Testnet:
       return coininfo.bitcoincash.test.toBitcoinJS()
     case Network.Stagenet:
-      // stagenet is not configured, use testnet value
-      return coininfo.bitcoincash.test.toBitcoinJS()
+      // stagenet is not configured, default to mainnet value
+      return coininfo.bitcoincash.main.toBitcoinJS()
   }
 }
 
@@ -190,8 +190,8 @@ export const toBCHAddressNetwork = (network: Network): string => {
     case Network.Testnet:
       return bchaddr.Network.Testnet
     case Network.Stagenet:
-      // stagenet is not configured, use testnet value
-      return bchaddr.Network.Testnet
+      // stagenet is not configured, default to mainnet value
+      return bchaddr.Network.Mainnet
   }
 }
 

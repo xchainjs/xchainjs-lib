@@ -54,7 +54,7 @@ class Client implements PolkadotClient, XChainClient {
     rootDerivationPaths = {
       [Network.Mainnet]: "44//354//0//0//0'", //TODO IS the root path we want to use?
       [Network.Testnet]: "44//354//0//0//0'",
-      [Network.Stagenet]: "44//354//0//0//0'", // stagenet is not configured, use testnet value
+      [Network.Stagenet]: "44//354//0//0//0'", // stagenet is not configured, default to mainnet value
     },
   }: XChainClientParams) {
     this.network = network
@@ -125,8 +125,8 @@ class Client implements PolkadotClient, XChainClient {
         return 'https://polkadot.subscan.io'
       case Network.Testnet:
         return 'https://westend.subscan.io'
-      case Network.Stagenet: // stagenet is not configured, use testnet value
-        return 'https://westend.subscan.io'
+      case Network.Stagenet: // stagenet is not configured, default to mainnet value
+        return 'https://polkadot.subscan.io'
     }
   }
 
@@ -141,8 +141,8 @@ class Client implements PolkadotClient, XChainClient {
         return 'wss://rpc.polkadot.io'
       case Network.Testnet:
         return 'wss://westend-rpc.polkadot.io'
-      case Network.Stagenet: // stagenet is not configured, use testnet value
-        return 'wss://westend-rpc.polkadot.io'
+      case Network.Stagenet: // stagenet is not configured, default to mainnet value
+        return 'wss://rpc.polkadot.io'
     }
   }
 
@@ -157,8 +157,8 @@ class Client implements PolkadotClient, XChainClient {
         return 'https://polkadot.subscan.io'
       case Network.Testnet:
         return 'https://westend.subscan.io'
-      case Network.Stagenet: // stagenet is not configured, use testnet value
-        return 'https://westend.subscan.io'
+      case Network.Stagenet: // stagenet is not configured, default to mainnet value
+        return 'https://polkadot.subscan.io'
     }
   }
 
@@ -193,8 +193,8 @@ class Client implements PolkadotClient, XChainClient {
         return 0
       case Network.Testnet:
         return 42
-      case Network.Stagenet: // stagenet is not configured, use testnet value
-        return 42
+      case Network.Stagenet: // stagenet is not configured, default to mainnet value
+        return 0
     }
   }
 

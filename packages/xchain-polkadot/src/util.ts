@@ -21,8 +21,8 @@ export const getDecimal = (network: Network): number => {
       return 10
     case Network.Testnet:
       return 12
-    case Network.Stagenet: // stagenet is not configured, use testnet value
-      return 12
+    case Network.Stagenet: // stagenet is not configured, default to mainnet value
+      return 10
   }
 }
 
@@ -50,7 +50,7 @@ export const getPrefix = (network: Network) => {
       return '1'
     case Network.Testnet:
       return '5'
-    case Network.Stagenet: // stagenet is not configured, use testnet value
-      return '5'
+    case Network.Stagenet: // stagenet is not configured, default to mainnet value
+      return '1'
   }
 }

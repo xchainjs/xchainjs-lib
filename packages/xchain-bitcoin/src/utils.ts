@@ -93,8 +93,8 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
     case Network.Testnet:
       return Bitcoin.networks.testnet
     case Network.Stagenet:
-      // stagenet is not configured, use testnet value
-      return Bitcoin.networks.testnet
+      // stagenet is not configured, default to mainnet value
+      return Bitcoin.networks.bitcoin
   }
 }
 
@@ -123,11 +123,11 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
         },
       ]
     case Network.Stagenet:
-      // stagenet is not configured, use testnet value
+      // stagenet is not configured, default to mainnet value
       return [
         {
           asset: AssetBTC,
-          amount: await sochain.getBalance(params),
+          amount: await haskoinApi.getBalance(params.address),
         },
       ]
   }
@@ -214,31 +214,25 @@ export const scanUTXOs = async ({
           } as UTXO),
       )
     }
-    // stagenet is not configured, use testnet value
+    // stagenet is not configured, default to mainnet value
     case Network.Stagenet: {
-      let utxos: BtcAddressUTXO[] = []
-
-      const addressParam: AddressParams = {
-        sochainUrl,
-        network,
-        address,
-      }
+      let utxos: haskoinApi.UtxoData[] = []
 
       if (confirmedOnly) {
-        utxos = await sochain.getConfirmedUnspentTxs(addressParam)
+        utxos = await haskoinApi.getConfirmedUnspentTxs(address)
       } else {
-        utxos = await sochain.getUnspentTxs(addressParam)
+        utxos = await haskoinApi.getUnspentTxs(address)
       }
 
       return utxos.map(
         (utxo) =>
           ({
             hash: utxo.txid,
-            index: utxo.output_no,
-            value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
+            index: utxo.index,
+            value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
             witnessUtxo: {
-              value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
-              script: Buffer.from(utxo.script_hex, 'hex'),
+              value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
+              script: Buffer.from(utxo.pkscript, 'hex'),
             },
           } as UTXO),
       )
@@ -387,7 +381,7 @@ export const getPrefix = (network: Network) => {
       return 'bc1'
     case Network.Testnet:
       return 'tb1'
-    case Network.Stagenet: // stagenet is not configured, use testnet value
-      return 'tb1'
+    case Network.Stagenet: // stagenet is not configured, default to mainnet value
+      return 'bc1'
   }
 }

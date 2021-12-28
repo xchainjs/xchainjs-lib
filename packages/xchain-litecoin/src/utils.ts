@@ -97,7 +97,7 @@ export const ltcNetwork = (network: Network): Litecoin.Network => {
     case Network.Testnet:
       return coininfo.litecoin.test.toBitcoinJS()
     default:
-      return coininfo.litecoin.test.toBitcoinJS()
+      return coininfo.litecoin.main.toBitcoinJS()
   }
 }
 
@@ -296,7 +296,7 @@ export const getPrefix = (network: Network) => {
       return 'ltc1'
     case Network.Testnet:
       return 'tltc1'
-    case Network.Stagenet:
-      return 'tltc1'
+    case Network.Stagenet: // stagenet is not configured, default to mainnet value
+      return 'ltc1'
   }
 }

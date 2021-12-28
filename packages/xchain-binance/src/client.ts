@@ -130,7 +130,8 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
       case Network.Testnet:
         return Network.Testnet
       default:
-        return Network.Testnet
+        // stagenet is not configured, default to mainnet value
+        return Network.Mainnet
     }
   }
 
@@ -161,7 +162,8 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
       case Network.Testnet:
         return 'https://testnet-dex.binance.org'
       default:
-        return 'https://testnet-dex.binance.org'
+        // stagenet is not configured, default to mainnet value
+        return 'https://dex.binance.org'
     }
   }
 
@@ -177,7 +179,8 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
       case Network.Testnet:
         return 'https://testnet-explorer.binance.org'
       default:
-        return 'https://testnet-explorer.binance.org'
+        // stagenet is not configured, default to mainnet value
+        return 'https://explorer.binance.org'
     }
   }
 
