@@ -1,6 +1,8 @@
-# v.0.10.4 (2021-12-27)
+# v.0.11.0 (2021-12-28)
 
-- Add stagenet environment variables to `BaseXChainClient` for thorchain
+### Breaking change
+
+- Expand `Network` enum type to include stagenet and introduce stagenet environment variables to `BaseXChainClient` for thorchain.
 
 # v.0.10.3 (2021-09-02)
 

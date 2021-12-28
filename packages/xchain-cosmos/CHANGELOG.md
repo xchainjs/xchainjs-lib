@@ -1,9 +1,8 @@
-# v.0.14.1 (2021-12-27)
+# v.0.15.0 (2021-12-28)
 
-### Update
+## Breaking change
 
-- updated to the latest dependencies
-- created mapping for stagenet environment (not configured) variables to default to testnet
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to testnet values until stagenet is configured.
 
 # v.0.14.0 (2021-12-15)
 

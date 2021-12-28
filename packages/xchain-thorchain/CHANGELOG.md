@@ -1,8 +1,8 @@
-# v.0.19.6 (2021-12-27)
+# v.0.20.0 (2021-12-28)
 
-## Add
+## Breaking change
 
-- Add stagenet environment variables to `xchain-client` and `xchain-thorchain`
+- Add stagenet environment handling for `Network` and `BaseXChainClient` to client
 
 # v.0.19.5 (2021-11-22)
 
