@@ -50,13 +50,13 @@ class Client extends UTXOClient {
     haskoinUrl = {
       [Network.Testnet]: 'https://api.haskoin.com/haskoin-store/bch-testnet',
       [Network.Mainnet]: 'https://api.haskoin.com/haskoin-store/bch',
-      [Network.Stagenet]: 'https://api.haskoin.com/haskoin-store/bch', // stagenet is not configured, default to mainnet value
+      [Network.Stagenet]: 'https://api.haskoin.com/haskoin-store/bch',
     },
     phrase,
     nodeUrl = {
       [Network.Testnet]: 'https://testnet.bch.thorchain.info',
       [Network.Mainnet]: 'https://bch.thorchain.info',
-      [Network.Stagenet]: 'https://bch.thorchain.info', // stagenet is not configured, default to mainnet value
+      [Network.Stagenet]: 'https://bch.thorchain.info',
     },
     nodeAuth = {
       username: 'thorchain',
@@ -65,7 +65,7 @@ class Client extends UTXOClient {
     rootDerivationPaths = {
       [Network.Mainnet]: `m/44'/145'/0'/0/`,
       [Network.Testnet]: `m/44'/1'/0'/0/`,
-      [Network.Stagenet]: `m/44'/145'/0'/0/`, // stagenet is not configured, default to mainnet value
+      [Network.Stagenet]: `m/44'/145'/0'/0/`,
     },
   }: BitcoinCashClientParams) {
     super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase })

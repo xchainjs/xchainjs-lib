@@ -184,12 +184,10 @@ export const parseTransaction = (tx: Transaction): Tx => {
 export const toBCHAddressNetwork = (network: Network): string => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return bchaddr.Network.Mainnet
     case Network.Testnet:
       return bchaddr.Network.Testnet
-    case Network.Stagenet:
-      // stagenet is not configured, default to mainnet value
-      return bchaddr.Network.Mainnet
   }
 }
 

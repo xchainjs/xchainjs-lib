@@ -54,7 +54,7 @@ class Client implements PolkadotClient, XChainClient {
     rootDerivationPaths = {
       [Network.Mainnet]: "44//354//0//0//0'", //TODO IS the root path we want to use?
       [Network.Testnet]: "44//354//0//0//0'",
-      [Network.Stagenet]: "44//354//0//0//0'", // stagenet is not configured, default to mainnet value
+      [Network.Stagenet]: "44//354//0//0//0'",
     },
   }: XChainClientParams) {
     this.network = network

@@ -104,7 +104,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     rootDerivationPaths = {
       [Network.Mainnet]: `m/44'/60'/0'/0/`,
       [Network.Testnet]: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
-      [Network.Stagenet]: `m/44'/60'/0'/0/`, // stagenet is not configured, default to mainnet value
+      [Network.Stagenet]: `m/44'/60'/0'/0/`,
     },
     etherscanApiKey,
     infuraCreds,
@@ -223,7 +223,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     return {
       [Network.Testnet]: 'https://ropsten.etherscan.io',
       [Network.Mainnet]: 'https://etherscan.io',
-      [Network.Stagenet]: 'https://etherscan.io', // stagenet is not configured, default to mainnet value
+      [Network.Stagenet]: 'https://etherscan.io',
     }
   }
 

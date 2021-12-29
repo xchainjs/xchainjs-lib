@@ -65,7 +65,7 @@ class Client implements CosmosClient, XChainClient {
     rootDerivationPaths = {
       [Network.Mainnet]: `44'/118'/0'/0/`,
       [Network.Testnet]: `44'/118'/1'/0/`,
-      [Network.Stagenet]: `44'/118'/0'/0/`, // stagenet is not configured, default to mainnet value
+      [Network.Stagenet]: `44'/118'/0'/0/`,
     },
   }: XChainClientParams) {
     this.network = network
@@ -226,11 +226,10 @@ class Client implements CosmosClient, XChainClient {
   getMainAsset(): Asset {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return AssetAtom
       case Network.Testnet:
         return AssetMuon
-      case Network.Stagenet: // stagenet is not configured, default to mainnet value
-        return AssetAtom
     }
   }
 

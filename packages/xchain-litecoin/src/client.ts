@@ -56,7 +56,7 @@ class Client extends UTXOClient {
     rootDerivationPaths = {
       [Network.Mainnet]: `m/84'/2'/0'/0/`,
       [Network.Testnet]: `m/84'/1'/0'/0/`,
-      [Network.Stagenet]: `m/84'/2'/0'/0/`, // stagenet is not configured, default to mainnet value
+      [Network.Stagenet]: `m/84'/2'/0'/0/`,
     },
   }: LitecoinClientParams) {
     super(Chain.Litecoin, { network, rootDerivationPaths, phrase })

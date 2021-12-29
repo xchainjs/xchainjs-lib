@@ -107,6 +107,7 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   switch (params.network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return [
         {
           asset: AssetBTC,
@@ -118,14 +119,6 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
         {
           asset: AssetBTC,
           amount: await sochain.getBalance(params),
-        },
-      ]
-    case Network.Stagenet:
-      // stagenet is not configured, default to mainnet value
-      return [
-        {
-          asset: AssetBTC,
-          amount: await haskoinApi.getBalance(params.address),
         },
       ]
   }
@@ -354,10 +347,9 @@ export const getDefaultFees = (): Fees => {
 export const getPrefix = (network: Network) => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return 'bc1'
     case Network.Testnet:
       return 'tb1'
-    case Network.Stagenet: // stagenet is not configured, default to mainnet value
-      return 'bc1'
   }
 }
