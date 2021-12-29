@@ -1,3 +1,9 @@
+# v.0.20.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` to client
+
 # v.0.19.5 (2021-11-22)
 
 ## Add

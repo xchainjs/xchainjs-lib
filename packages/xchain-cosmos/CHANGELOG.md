@@ -1,3 +1,9 @@
+# v.0.15.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
+
 # v.0.14.0 (2021-12-15)
 
 ### Update
@@ -6,6 +12,7 @@
 - extract public part into `unsignedStdTxGet` to use it in `transfer` and `transferSignedOffline`
 
 ### Add
+
 - `TxOfflineParams` types
 - `transferSignedOffline` functions
 

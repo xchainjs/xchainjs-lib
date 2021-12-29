@@ -65,6 +65,7 @@ class Client implements CosmosClient, XChainClient {
     rootDerivationPaths = {
       [Network.Mainnet]: `44'/118'/0'/0/`,
       [Network.Testnet]: `44'/118'/1'/0/`,
+      [Network.Stagenet]: `44'/118'/0'/0/`,
     },
   }: XChainClientParams) {
     this.network = network
@@ -118,6 +119,7 @@ class Client implements CosmosClient, XChainClient {
   getExplorerUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://cosmos.bigdipper.live'
       case Network.Testnet:
         return 'https://gaia.bigdipper.live'
@@ -224,6 +226,7 @@ class Client implements CosmosClient, XChainClient {
   getMainAsset(): Asset {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return AssetAtom
       case Network.Testnet:
         return AssetMuon

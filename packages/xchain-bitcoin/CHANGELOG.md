@@ -1,3 +1,9 @@
+# v.0.16.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
+
 # v.0.15.13 (2021-11-12)
 
 - updated haskoin api URL

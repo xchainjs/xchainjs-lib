@@ -50,11 +50,13 @@ class Client extends UTXOClient {
     haskoinUrl = {
       [Network.Testnet]: 'https://api.haskoin.com/haskoin-store/bch-testnet',
       [Network.Mainnet]: 'https://api.haskoin.com/haskoin-store/bch',
+      [Network.Stagenet]: 'https://api.haskoin.com/haskoin-store/bch',
     },
     phrase,
     nodeUrl = {
       [Network.Testnet]: 'https://testnet.bch.thorchain.info',
       [Network.Mainnet]: 'https://bch.thorchain.info',
+      [Network.Stagenet]: 'https://bch.thorchain.info',
     },
     nodeAuth = {
       username: 'thorchain',
@@ -63,6 +65,7 @@ class Client extends UTXOClient {
     rootDerivationPaths = {
       [Network.Mainnet]: `m/44'/145'/0'/0/`,
       [Network.Testnet]: `m/44'/1'/0'/0/`,
+      [Network.Stagenet]: `m/44'/145'/0'/0/`,
     },
   }: BitcoinCashClientParams) {
     super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase })
@@ -123,6 +126,7 @@ class Client extends UTXOClient {
   getExplorerUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://www.blockchain.com/bch'
       case Network.Testnet:
         return 'https://www.blockchain.com/bch-testnet'

@@ -64,7 +64,7 @@ public address: Address
 
 ## Set Network
 
-Used to set a type of `Network`, which is either `'mainnet'` or `'testnet'`.
+Used to set a type of `Network`, which is either `'mainnet'`, `'stagenet'` or `'testnet'`.
 
 ```ts
 setNetwork(net: Network): XChainClient

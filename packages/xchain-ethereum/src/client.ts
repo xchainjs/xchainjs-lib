@@ -104,6 +104,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     rootDerivationPaths = {
       [Network.Mainnet]: `m/44'/60'/0'/0/`,
       [Network.Testnet]: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
+      [Network.Stagenet]: `m/44'/60'/0'/0/`,
     },
     etherscanApiKey,
     infuraCreds,
@@ -222,6 +223,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     return {
       [Network.Testnet]: 'https://ropsten.etherscan.io',
       [Network.Mainnet]: 'https://etherscan.io',
+      [Network.Stagenet]: 'https://etherscan.io',
     }
   }
 
@@ -309,7 +311,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     const ethBalanceAmount = baseAmount(ethBalance.toString(), ETH_DECIMAL)
 
     switch (this.getNetwork()) {
-      case Network.Mainnet: {
+      case Network.Mainnet:
+      case Network.Stagenet: {
         // use ethplorerAPI for mainnet - ignore assets
         const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
         const balances: Balance[] = [
@@ -431,7 +434,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   async getTransactionData(txId: string, assetAddress?: Address): Promise<Tx> {
     switch (this.getNetwork()) {
-      case Network.Mainnet: {
+      case Network.Mainnet:
+      case Network.Stagenet: {
         // use ethplorerAPI for mainnet - ignore assetAddress
         const txInfo = await ethplorerAPI.getTxInfo(this.ethplorerUrl, txId, this.ethplorerApiKey)
         if (!txInfo.operations?.length) return getTxFromEthplorerEthTransaction(txInfo)

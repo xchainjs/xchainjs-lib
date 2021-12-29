@@ -106,6 +106,23 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   }
 
   /**
+   * Gets the current network, and enforces type limited to
+   * 'mainnet' and 'testnet', which conflicts with `xchain-client`
+   *
+   * Remove this once @binance-chain has stagenet support.
+   * @returns {Network}
+   */
+  getNetwork(): Network.Mainnet | Network.Testnet {
+    switch (super.getNetwork()) {
+      case Network.Mainnet:
+      case Network.Stagenet:
+        return Network.Mainnet
+      case Network.Testnet:
+        return Network.Testnet
+    }
+  }
+
+  /**
    * Set/update the current network.
    *
    * @param {Network} network
@@ -114,7 +131,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork(network: Network): void {
+  setNetwork(network: Network.Mainnet | Network.Testnet): void {
     super.setNetwork(network)
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
@@ -126,7 +143,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {string} The client url for binance chain based on the network.
    */
   private getClientUrl(): string {
-    switch (this.network) {
+    switch (this.getNetwork()) {
       case Network.Mainnet:
         return 'https://dex.binance.org'
       case Network.Testnet:
@@ -140,7 +157,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    switch (this.network) {
+    switch (this.getNetwork()) {
       case Network.Mainnet:
         return 'https://explorer.binance.org'
       case Network.Testnet:

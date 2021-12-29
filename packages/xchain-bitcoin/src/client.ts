@@ -47,6 +47,7 @@ class Client extends UTXOClient {
     rootDerivationPaths = {
       [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
       [Network.Testnet]: `84'/1'/0'/0/`,
+      [Network.Stagenet]: `84'/0'/0'/0/`,
     },
     phrase = '',
   }: BitcoinClientParams) {
@@ -83,6 +84,7 @@ class Client extends UTXOClient {
   getExplorerUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://blockstream.info'
       case Network.Testnet:
         return 'https://blockstream.info/testnet'

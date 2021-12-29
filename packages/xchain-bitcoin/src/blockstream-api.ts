@@ -15,6 +15,7 @@ export const broadcastTx = async ({ network, txHex, blockstreamUrl }: BroadcastT
   const url = (() => {
     switch (network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return `${blockstreamUrl}/api/tx`
       case Network.Testnet:
         return `${blockstreamUrl}/testnet/api/tx`

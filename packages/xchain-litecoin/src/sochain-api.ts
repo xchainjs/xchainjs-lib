@@ -19,6 +19,7 @@ const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
 const toSochainNetwork = (network: Network): string => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return 'LTC'
     case Network.Testnet:
       return 'LTCTEST'

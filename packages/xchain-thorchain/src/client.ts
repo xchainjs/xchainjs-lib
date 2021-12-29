@@ -85,6 +85,7 @@ class Client implements ThorchainClient, XChainClient {
     explorerUrls,
     rootDerivationPaths = {
       [Network.Mainnet]: "44'/931'/0'/0/",
+      [Network.Stagenet]: "44'/931'/0'/0/",
       [Network.Testnet]: "44'/931'/0'/0/",
     },
   }: XChainClientParams & ThorchainClientParams) {

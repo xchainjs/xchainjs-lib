@@ -1,3 +1,9 @@
+# v.0.23.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
+
 # v.0.22.5 (2021-09-09)
 
 - updated to the latest dependencies
