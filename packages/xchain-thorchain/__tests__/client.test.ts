@@ -153,6 +153,9 @@ describe('Client Test', () => {
 
     thorClient.setNetwork('mainnet' as Network)
     expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
+
+    thorClient.setNetwork('stagenet' as Network)
+    expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
   })
 
   it('should have right client url', async () => {

@@ -48,7 +48,7 @@ export const mock_estimateFee = () => {
 }
 
 export const mock_estimateFeeFromThor = () => {
-  nock('https://thornode.thorchain.info')
+  nock('https://thornode.ninerealms.com')
     .get('/thorchain/inbound_addresses')
     .reply(200, [
       {

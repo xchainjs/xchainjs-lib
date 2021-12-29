@@ -17,8 +17,8 @@ import {
   XChainClientParams,
 } from './types'
 
-const MAINNET_THORNODE_API_BASE = 'https://thornode.ninerealms.com'
-const STAGENET_THORNODE_API_BASE = 'https://stagenet-thornode.ninerealms.com'
+const MAINNET_THORNODE_API_BASE = 'https://thornode.ninerealms.com/thorchain'
+const STAGENET_THORNODE_API_BASE = 'https://stagenet-thornode.ninerealms.com/thorchain'
 const TESTNET_THORNODE_API_BASE = 'https://testnet.thornode.thorchain.info/thorchain'
 
 export abstract class BaseXChainClient implements XChainClient {

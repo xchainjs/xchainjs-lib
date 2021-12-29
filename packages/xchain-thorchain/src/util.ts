@@ -278,7 +278,7 @@ export const getDefaultClientUrl = (): ClientUrl => {
       rpc: 'https://stagenet-rpc.ninerealms.com',
     },
     [Network.Mainnet]: {
-      node: 'https://thornode.thorchain.info',
+      node: 'https://thornode.ninerealms.com',
       rpc: 'https://rpc.thorchain.info',
     },
   }
