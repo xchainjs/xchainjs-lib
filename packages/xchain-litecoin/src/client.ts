@@ -65,12 +65,10 @@ class Client extends UTXOClient {
       (() => {
         switch (network) {
           case Network.Mainnet:
+          case Network.Stagenet:
             return 'https://ltc.thorchain.info'
           case Network.Testnet:
             return 'https://testnet.ltc.thorchain.info'
-          case Network.Stagenet:
-            // stagenet is not configured, default to mainnet value
-            return 'https://ltc.thorchain.info'
         }
       })()
 
@@ -100,12 +98,10 @@ class Client extends UTXOClient {
   getExplorerUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://ltc.bitaps.com'
       case Network.Testnet:
         return 'https://tltc.bitaps.com'
-      case Network.Stagenet:
-        // stagenet is not configured, default to mainnet value
-        return 'https://ltc.bitaps.com'
     }
   }
 

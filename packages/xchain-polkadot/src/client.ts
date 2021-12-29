@@ -122,11 +122,10 @@ class Client implements PolkadotClient, XChainClient {
   getClientUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://polkadot.subscan.io'
       case Network.Testnet:
         return 'https://westend.subscan.io'
-      case Network.Stagenet: // stagenet is not configured, default to mainnet value
-        return 'https://polkadot.subscan.io'
     }
   }
 
@@ -138,11 +137,10 @@ class Client implements PolkadotClient, XChainClient {
   getWsEndpoint(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'wss://rpc.polkadot.io'
       case Network.Testnet:
         return 'wss://westend-rpc.polkadot.io'
-      case Network.Stagenet: // stagenet is not configured, default to mainnet value
-        return 'wss://rpc.polkadot.io'
     }
   }
 
@@ -154,11 +152,10 @@ class Client implements PolkadotClient, XChainClient {
   getExplorerUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://polkadot.subscan.io'
       case Network.Testnet:
         return 'https://westend.subscan.io'
-      case Network.Stagenet: // stagenet is not configured, default to mainnet value
-        return 'https://polkadot.subscan.io'
     }
   }
 
@@ -190,11 +187,10 @@ class Client implements PolkadotClient, XChainClient {
   getSS58Format(): number {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 0
       case Network.Testnet:
         return 42
-      case Network.Stagenet: // stagenet is not configured, default to mainnet value
-        return 0
     }
   }
 

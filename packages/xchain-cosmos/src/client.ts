@@ -119,11 +119,10 @@ class Client implements CosmosClient, XChainClient {
   getExplorerUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://cosmos.bigdipper.live'
       case Network.Testnet:
         return 'https://gaia.bigdipper.live'
-      case Network.Stagenet: // stagenet is not configured, default to mainnet value
-        return 'https://cosmos.bigdipper.live'
     }
   }
 

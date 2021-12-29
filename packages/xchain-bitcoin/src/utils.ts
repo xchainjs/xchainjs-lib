@@ -89,12 +89,10 @@ export const arrayAverage = (array: number[]): number => {
 export const btcNetwork = (network: Network): Bitcoin.Network => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return Bitcoin.networks.bitcoin
     case Network.Testnet:
       return Bitcoin.networks.testnet
-    case Network.Stagenet:
-      // stagenet is not configured, default to mainnet value
-      return Bitcoin.networks.bitcoin
   }
 }
 
@@ -192,29 +190,7 @@ export const scanUTXOs = async ({
           } as UTXO),
       )
     }
-    case Network.Mainnet: {
-      let utxos: haskoinApi.UtxoData[] = []
-
-      if (confirmedOnly) {
-        utxos = await haskoinApi.getConfirmedUnspentTxs(address)
-      } else {
-        utxos = await haskoinApi.getUnspentTxs(address)
-      }
-
-      return utxos.map(
-        (utxo) =>
-          ({
-            hash: utxo.txid,
-            index: utxo.index,
-            value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
-            witnessUtxo: {
-              value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
-              script: Buffer.from(utxo.pkscript, 'hex'),
-            },
-          } as UTXO),
-      )
-    }
-    // stagenet is not configured, default to mainnet value
+    case Network.Mainnet:
     case Network.Stagenet: {
       let utxos: haskoinApi.UtxoData[] = []
 

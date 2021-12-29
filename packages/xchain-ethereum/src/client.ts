@@ -311,7 +311,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     const ethBalanceAmount = baseAmount(ethBalance.toString(), ETH_DECIMAL)
 
     switch (this.getNetwork()) {
-      case Network.Mainnet: {
+      case Network.Mainnet:
+      case Network.Stagenet: {
         // use ethplorerAPI for mainnet - ignore assets
         const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
         const balances: Balance[] = [
@@ -372,23 +373,6 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
           // Free Etherscan api key limit: 5 calls per second
           // So 0.3s delay is reasonable for now
           await delay(300)
-        }
-
-        return balances
-      }
-      // stagenet is not configured, default to mainnet value
-      case Network.Stagenet: {
-        // use ethplorerAPI for mainnet/stagenet - ignore assets
-        const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
-        const balances: Balance[] = [
-          {
-            asset: AssetETH,
-            amount: ethBalanceAmount,
-          },
-        ]
-
-        if (account.tokens) {
-          balances.push(...getTokenBalances(account.tokens))
         }
 
         return balances

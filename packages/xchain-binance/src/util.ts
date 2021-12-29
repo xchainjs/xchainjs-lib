@@ -131,11 +131,9 @@ export const getDefaultFees = (): Fees => {
 export const getPrefix = (network: Network) => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return 'bnb'
     case Network.Testnet:
       return 'tbnb'
-    case Network.Stagenet:
-      // stagenet is not configured, default to mainnet value
-      return 'bnb'
   }
 }

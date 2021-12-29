@@ -7,6 +7,7 @@ import {
   BaseXChainClient,
   FeeType,
   Fees,
+  Network,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -56,18 +57,6 @@ export type MultiSendParams = {
   walletIndex?: number
   transactions: MultiTransfer[]
   memo?: string
-}
-
-/**
- * Binance-specific Network enum that excludes 'stagenet' because
- * @binance-chain has type checks limited to 'mainnet' and 'testnet',
- * but `xchain-client` has 'mainnet', 'stagenet', and 'testnet'
- *
- * Remove this once @binance-chain has stagenet support.
- */
-export enum Network {
-  Mainnet = 'mainnet',
-  Testnet = 'testnet',
 }
 
 /**
@@ -123,15 +112,13 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * Remove this once @binance-chain has stagenet support.
    * @returns {Network}
    */
-  getNetwork(): Network {
+  getNetwork(): Network.Mainnet | Network.Testnet {
     switch (super.getNetwork()) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return Network.Mainnet
       case Network.Testnet:
         return Network.Testnet
-      default:
-        // stagenet is not configured, default to mainnet value
-        return Network.Mainnet
     }
   }
 
@@ -144,7 +131,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork(network: Network): void {
+  setNetwork(network: Network.Mainnet | Network.Testnet): void {
     super.setNetwork(network)
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
@@ -156,14 +143,11 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {string} The client url for binance chain based on the network.
    */
   private getClientUrl(): string {
-    switch (this.network) {
+    switch (this.getNetwork()) {
       case Network.Mainnet:
         return 'https://dex.binance.org'
       case Network.Testnet:
         return 'https://testnet-dex.binance.org'
-      default:
-        // stagenet is not configured, default to mainnet value
-        return 'https://dex.binance.org'
     }
   }
 
@@ -173,14 +157,11 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    switch (this.network) {
+    switch (this.getNetwork()) {
       case Network.Mainnet:
         return 'https://explorer.binance.org'
       case Network.Testnet:
         return 'https://testnet-explorer.binance.org'
-      default:
-        // stagenet is not configured, default to mainnet value
-        return 'https://explorer.binance.org'
     }
   }
 

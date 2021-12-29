@@ -18,11 +18,10 @@ export const isSuccess = (response: { code: number }): boolean => !response.code
 export const getDecimal = (network: Network): number => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return 10
     case Network.Testnet:
       return 12
-    case Network.Stagenet: // stagenet is not configured, default to mainnet value
-      return 10
   }
 }
 

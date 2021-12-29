@@ -17,7 +17,7 @@ import {
   XChainClientParams,
 } from './types'
 
-const MAINNET_THORNODE_API_BASE = 'https://thornode.thorchain.info/thorchain'
+const MAINNET_THORNODE_API_BASE = 'https://thornode.ninerealms.com'
 const STAGENET_THORNODE_API_BASE = 'https://stagenet-thornode.ninerealms.com'
 const TESTNET_THORNODE_API_BASE = 'https://testnet.thornode.thorchain.info/thorchain'
 

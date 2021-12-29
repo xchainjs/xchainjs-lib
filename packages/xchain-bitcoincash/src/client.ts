@@ -126,12 +126,10 @@ class Client extends UTXOClient {
   getExplorerUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://www.blockchain.com/bch'
       case Network.Testnet:
         return 'https://www.blockchain.com/bch-testnet'
-      case Network.Stagenet:
-        // stagenet is not configured, default to mainnet value
-        return 'https://www.blockchain.com/bch'
     }
   }
 

@@ -97,12 +97,10 @@ export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
 export const bchNetwork = (network: Network): BCHNetwork => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return coininfo.bitcoincash.main.toBitcoinJS()
     case Network.Testnet:
       return coininfo.bitcoincash.test.toBitcoinJS()
-    case Network.Stagenet:
-      // stagenet is not configured, default to mainnet value
-      return coininfo.bitcoincash.main.toBitcoinJS()
   }
 }
 
