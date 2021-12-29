@@ -434,7 +434,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   async getTransactionData(txId: string, assetAddress?: Address): Promise<Tx> {
     switch (this.getNetwork()) {
-      case Network.Mainnet: {
+      case Network.Mainnet:
+      case Network.Stagenet: {
         // use ethplorerAPI for mainnet - ignore assetAddress
         const txInfo = await ethplorerAPI.getTxInfo(this.ethplorerUrl, txId, this.ethplorerApiKey)
         if (!txInfo.operations?.length) return getTxFromEthplorerEthTransaction(txInfo)
@@ -474,14 +475,6 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
         if (!tx) throw new Error('Could not get transaction history')
 
-        return tx
-      }
-      case Network.Stagenet: {
-        // use ethplorerAPI for mainnet - ignore assetAddress
-        const txInfo = await ethplorerAPI.getTxInfo(this.ethplorerUrl, txId, this.ethplorerApiKey)
-        if (!txInfo.operations?.length) return getTxFromEthplorerEthTransaction(txInfo)
-        const tx = getTxFromEthplorerTokenOperation(txInfo.operations[0])
-        if (!tx) throw new Error('Could not parse transaction data')
         return tx
       }
     }
