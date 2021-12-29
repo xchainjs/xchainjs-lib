@@ -93,11 +93,10 @@ export function arrayAverage(array: number[]): number {
 export const ltcNetwork = (network: Network): Litecoin.Network => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return coininfo.litecoin.main.toBitcoinJS()
     case Network.Testnet:
       return coininfo.litecoin.test.toBitcoinJS()
-    default:
-      return coininfo.litecoin.main.toBitcoinJS()
   }
 }
 

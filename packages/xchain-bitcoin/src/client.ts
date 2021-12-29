@@ -47,7 +47,7 @@ class Client extends UTXOClient {
     rootDerivationPaths = {
       [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
       [Network.Testnet]: `84'/1'/0'/0/`,
-      [Network.Stagenet]: `84'/0'/0'/0/`, // stagenet is not configured, default to mainnet value
+      [Network.Stagenet]: `84'/0'/0'/0/`,
     },
     phrase = '',
   }: BitcoinClientParams) {
