@@ -1,3 +1,9 @@
+# v.0.23.1 (2022-01-05)
+
+## Fix
+
+- Fix default provider for `stagenet`
+
 # v.0.23.0 (2021-12-29)
 
 ## Breaking change
