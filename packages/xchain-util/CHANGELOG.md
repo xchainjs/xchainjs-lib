@@ -1,3 +1,10 @@
+# v.0.4.0 (2022-XX-XX)
+
+### Add
+
+- `Chain.Doge`
+- `AssetDOGE`
+
 # v.0.3.1 (2021-07-14)
 
 ### Fix

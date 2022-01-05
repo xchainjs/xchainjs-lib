@@ -15,28 +15,31 @@ describe('chain', () => {
   })
   describe('chainToString', () => {
     it('returns string for Thorchain', () => {
-      expect(chainToString('THOR' as Chain)).toEqual('Thorchain')
+      expect(chainToString(Chain.THORChain)).toEqual('Thorchain')
     })
     it('returns string for BTC', () => {
-      expect(chainToString('BTC' as Chain)).toEqual('Bitcoin')
+      expect(chainToString(Chain.Bitcoin)).toEqual('Bitcoin')
     })
     it('returns string for BCH', () => {
-      expect(chainToString('BCH' as Chain)).toEqual('Bitcoin Cash')
+      expect(chainToString(Chain.BitcoinCash)).toEqual('Bitcoin Cash')
     })
     it('returns string for ETH', () => {
-      expect(chainToString('ETH' as Chain)).toEqual('Ethereum')
+      expect(chainToString(Chain.Ethereum)).toEqual('Ethereum')
     })
     it('returns string for BNB', () => {
-      expect(chainToString('BNB' as Chain)).toEqual('Binance Chain')
+      expect(chainToString(Chain.Binance)).toEqual('Binance Chain')
     })
     it('returns string for GAIA', () => {
-      expect(chainToString('GAIA' as Chain)).toEqual('Cosmos')
+      expect(chainToString(Chain.Cosmos)).toEqual('Cosmos')
     })
     it('returns string for POLKA', () => {
-      expect(chainToString('POLKA' as Chain)).toEqual('Polkadot')
+      expect(chainToString(Chain.Polkadot)).toEqual('Polkadot')
     })
     it('returns string for LTC', () => {
-      expect(chainToString('LTC' as Chain)).toEqual('Litecoin')
+      expect(chainToString(Chain.Litecoin)).toEqual('Litecoin')
+    })
+    it('returns string for DOGE', () => {
+      expect(chainToString(Chain.Doge)).toEqual('Dogecoin')
     })
   })
 })
