@@ -18,7 +18,7 @@ describe('chain', () => {
       expect(chainToString(Chain.THORChain)).toEqual('Thorchain')
     })
     it('returns string for BTC', () => {
-      expect(chainToString(Chain.BitcoinCash)).toEqual('Bitcoin')
+      expect(chainToString(Chain.Bitcoin)).toEqual('Bitcoin')
     })
     it('returns string for BCH', () => {
       expect(chainToString(Chain.BitcoinCash)).toEqual('Bitcoin Cash')
@@ -39,7 +39,7 @@ describe('chain', () => {
       expect(chainToString(Chain.Litecoin)).toEqual('Litecoin')
     })
     it('returns string for DOGE', () => {
-      expect(chainToString(Chain.Litecoin)).toEqual('Dogecoin')
+      expect(chainToString(Chain.Doge)).toEqual('Dogecoin')
     })
   })
 })
