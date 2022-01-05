@@ -5,7 +5,6 @@ import axios from 'axios'
 import { getIsTxConfirmed } from './sochain-api'
 import { BTC_DECIMAL } from './utils'
 
-const HASKOIN_API_URL = 'https://api.haskoin.com/btc'
 const SOCHAIN_API_URL = 'https://sochain.com/api/v2'
 
 export type UtxoData = {
@@ -24,10 +23,16 @@ export type BalanceData = {
   received: number
 }
 
-export const getBalance = async (address: string): Promise<BaseAmount> => {
+export const getBalance = async ({
+  haskoinUrl,
+  address,
+}: {
+  haskoinUrl: string
+  address: string
+}): Promise<BaseAmount> => {
   const {
     data: { confirmed, unconfirmed },
-  } = await axios.get<BalanceData>(`${HASKOIN_API_URL}/address/${address}/balance`)
+  } = await axios.get<BalanceData>(`${haskoinUrl}/address/${address}/balance`)
 
   const confirmedAmount = baseAmount(confirmed, BTC_DECIMAL)
   const unconfirmedAmount = baseAmount(unconfirmed, BTC_DECIMAL)
@@ -35,15 +40,27 @@ export const getBalance = async (address: string): Promise<BaseAmount> => {
   return confirmedAmount.plus(unconfirmedAmount)
 }
 
-export const getUnspentTxs = async (address: string): Promise<UtxoData[]> => {
-  const { data: response } = await axios.get<UtxoData[]>(`${HASKOIN_API_URL}/address/${address}/unspent`)
+export const getUnspentTxs = async ({
+  haskoinUrl,
+  address,
+}: {
+  haskoinUrl: string
+  address: string
+}): Promise<UtxoData[]> => {
+  const { data: response } = await axios.get<UtxoData[]>(`${haskoinUrl}/address/${address}/unspent`)
 
   return response
 }
 
-export const getConfirmedUnspentTxs = async (address: string): Promise<UtxoData[]> => {
+export const getConfirmedUnspentTxs = async ({
+  haskoinUrl,
+  address,
+}: {
+  haskoinUrl: string
+  address: string
+}): Promise<UtxoData[]> => {
   try {
-    const allUtxos = await getUnspentTxs(address)
+    const allUtxos = await getUnspentTxs({ haskoinUrl, address })
 
     const confirmedUTXOs: UtxoData[] = []
 

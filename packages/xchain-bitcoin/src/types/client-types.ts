@@ -19,3 +19,5 @@ export type Signature = {
   signature: string
   pubKey: string
 }
+
+export type ClientUrl = Record<Network, string>

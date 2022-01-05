@@ -2,22 +2,22 @@ import * as Bitcoin from 'bitcoinjs-lib'
 import * as Utils from './utils'
 import * as sochain from './sochain-api'
 import {
-  RootDerivationPaths,
-  TxHistoryParams,
-  TxsPage,
   Address,
-  XChainClient,
-  Tx,
-  TxParams,
-  TxHash,
   Balance,
-  Network,
   Fees,
+  Network,
+  RootDerivationPaths,
+  Tx,
+  TxHash,
+  TxHistoryParams,
+  TxParams,
+  TxsPage,
+  XChainClient,
   XChainClientParams,
 } from '@thorwallet/xchain-client'
-import { validatePhrase, getSeed, bip32 } from '@thorwallet/xchain-crypto'
-import { AssetBTC, assetAmount, assetToBase } from '@thorwallet/xchain-util'
-import { FeesWithRates, FeeRate, FeeRates, Signature } from './types/client-types'
+import { bip32, getSeed, validatePhrase } from '@thorwallet/xchain-crypto'
+import { assetAmount, AssetBTC, assetToBase } from '@thorwallet/xchain-util'
+import { ClientUrl, FeeRate, FeeRates, FeesWithRates, Signature } from './types/client-types'
 import RNSimple from 'react-native-simple-crypto'
 
 /**
@@ -25,13 +25,16 @@ import RNSimple from 'react-native-simple-crypto'
  */
 interface BitcoinClient {
   getFeesWithRates(memo?: string): Promise<FeesWithRates>
+
   getFeesWithMemo(memo: string): Promise<Fees>
+
   getFeeRates(): Promise<FeeRates>
 }
 
 export type BitcoinClientParams = XChainClientParams & {
   sochainUrl?: string
   blockstreamUrl?: string
+  haskoinUrl?: ClientUrl
 }
 
 /**
@@ -44,6 +47,7 @@ class Client implements BitcoinClient, XChainClient {
   private blockstreamUrl = ''
   private rootDerivationPaths: RootDerivationPaths
   private addrCache: Record<string, Record<number, string>>
+  private haskoinUrl: ClientUrl
 
   /**
    * Constructor
@@ -55,6 +59,10 @@ class Client implements BitcoinClient, XChainClient {
     network = 'testnet',
     sochainUrl = 'https://sochain.com/api/v2',
     blockstreamUrl = 'https://blockstream.info',
+    haskoinUrl = {
+      ['testnet']: 'https://api.haskoin.com/btctest',
+      ['mainnet']: 'https://api.haskoin.com/btc',
+    },
     rootDerivationPaths = {
       mainnet: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
       testnet: `84'/1'/0'/0/`,
@@ -65,6 +73,7 @@ class Client implements BitcoinClient, XChainClient {
     this.rootDerivationPaths = rootDerivationPaths
     this.setSochainUrl(sochainUrl)
     this.setBlockstreamUrl(blockstreamUrl)
+    this.haskoinUrl = haskoinUrl
   }
 
   /**
@@ -255,11 +264,14 @@ class Client implements BitcoinClient, XChainClient {
    */
   getBalance = async (address: Address): Promise<Balance[]> => {
     try {
-      return Utils.getBalance({
-        sochainUrl: this.sochainUrl,
-        network: this.net,
-        address: address,
-      })
+      return Utils.getBalance(
+        {
+          sochainUrl: this.sochainUrl,
+          network: this.net,
+          address: address,
+        },
+        this.haskoinUrl[this.net],
+      )
     } catch (e) {
       return Promise.reject(e)
     }
@@ -479,6 +491,7 @@ class Client implements BitcoinClient, XChainClient {
         feeRate,
         sender: await this.getAddress(fromAddressIndex),
         sochainUrl: this.sochainUrl,
+        haskoinUrl: this.haskoinUrl[this.net],
         network: this.net,
         spendPendingUTXO,
       })

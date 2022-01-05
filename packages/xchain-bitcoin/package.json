@@ -36,9 +36,9 @@
     "@thorwallet/xchain-crypto": "^0.0.1-alpha.909+02a3ef3",
     "@thorwallet/xchain-util": "^0.0.1-alpha.909+02a3ef3",
     "@types/bitcoinjs-lib": "^5.0.0",
-    "@types/wif": "^2.0.1",
-    "axios": "^0.21.0",
-    "axios-mock-adapter": "^1.19.0",
+    "@types/wif": "^2.0.2",
+    "axios": "^0.21.1",
+    "axios-mock-adapter": "^1.20.0",
     "bitcoinjs-lib": "^5.2.0",
     "coinselect": "^3.1.12",
     "wif": "^2.0.6"
@@ -47,7 +47,7 @@
     "@thorwallet/xchain-client": "0.0.1-alpha.869+49db531",
     "@thorwallet/xchain-crypto": "0.0.1-alpha.869+49db531",
     "@thorwallet/xchain-util": "0.0.1-alpha.869+49db531",
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "bitcoinjs-lib": "^5.2.0",
     "coinselect": "^3.1.12",
     "wif": "^2.0.6"

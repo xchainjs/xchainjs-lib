@@ -1,3 +1,36 @@
+# v.0.17.0 (2022-01-05)
+
+## Breaking change
+
+- Make `haskoinUrl` configurable (change default haskoin url back to `https://api.haskoin.com/btc`)
+- `haskoinUrl` needs to be passed as parameter into misc. `utils` functions
+
+# v.0.16.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
+
+# v.0.15.13 (2021-11-12)
+
+- updated haskoin api URL
+
+# v.0.15.12 (2021-09-03)
+
+- updated to the latest dependencies
+
+# v.0.15.11 (2021-07-07)
+
+- Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
+
+# v.0.15.10 (2021-07-03)
+
+- refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
+
+# v.0.15.9 (2021-06-29)
+
+- added support for pulling fees from thornode.
+
 # v.0.15.8 (2021-06-18)
 
 - changed rollupjs to treat axios as external lib
