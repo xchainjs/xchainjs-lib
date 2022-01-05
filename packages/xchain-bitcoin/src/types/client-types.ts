@@ -9,3 +9,5 @@ export type GetChangeParams = {
   network: Network
   address: Address
 }
+
+export type ClientUrl = Record<Network, string>
