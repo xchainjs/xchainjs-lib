@@ -148,16 +148,16 @@ class Client extends UTXOClient {
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating LTC keys from the given phrase
    * */
   private getZecKeys(phrase: string, index = 0): UtxoLib.ECPairInterface {
-    const ltcNetwork = Utils.zecNetwork(this.network)
+    const zecNetwork = Utils.zecNetwork(this.network)
 
     const seed = getSeed(phrase)
-    const master = UtxoLib.bip32.fromSeed(seed, ltcNetwork).derivePath(this.getFullDerivationPath(index))
+    const master = UtxoLib.bip32.fromSeed(seed, zecNetwork).derivePath(this.getFullDerivationPath(index))
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
     }
 
-    return UtxoLib.ECPair.fromPrivateKey(master.privateKey, { network: ltcNetwork })
+    return UtxoLib.ECPair.fromPrivateKey(master.privateKey, { network: zecNetwork })
   }
 
   /**
