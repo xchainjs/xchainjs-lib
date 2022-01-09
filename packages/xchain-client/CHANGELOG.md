@@ -1,3 +1,10 @@
+# v.0.11.1 (2022-01-10)
+
+### Update
+
+- Use latest `@xchainjs/xchain-util@0.3.2`
+- made walletIndex in BaseXChainClient.getAddress(walletIndex?: number)
+
 # v.0.11.0 (2021-12-29)
 
 ### Breaking change

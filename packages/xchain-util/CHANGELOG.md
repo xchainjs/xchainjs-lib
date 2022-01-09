@@ -1,3 +1,9 @@
+# v.0.3.2 (2022-01-10)
+
+### Add
+
+- added support for terra
+
 # v.0.3.1 (2021-07-14)
 
 ### Fix
