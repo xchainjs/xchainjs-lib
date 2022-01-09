@@ -31,7 +31,7 @@
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.11.0",
+    "@xchainjs/xchain-client": "^0.11.1",
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "^0.3.0",
     "axios": "^0.21.4",
@@ -42,7 +42,7 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.11.0",
+    "@xchainjs/xchain-client": "^0.11.1",
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "^0.3.0",
     "axios": "^0.21.4",
