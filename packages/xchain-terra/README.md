@@ -11,7 +11,7 @@ yarn add @xchainjs/xchain-terra
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-terra`.
 
 ```
-yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios
+yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios @terra-money/terra.js
 ```
 
 ## Terra Client Testing
