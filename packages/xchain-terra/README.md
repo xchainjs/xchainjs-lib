@@ -1,64 +1,38 @@
-# `@xchainjs/xchain-thorchain`
+# `@xchainjs/xchain-terra`
 
-Thorchain Module for XChainJS Clients
+Terra Module for XChainJS Clients
 
 ## Installation
 
 ```
-yarn add @xchainjs/xchain-thorchain
+yarn add @xchainjs/xchain-terra
 ```
 
-Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-thorchain`.
+Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-terra`.
 
 ```
-yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util @xchainjs/xchain-cosmos axios cosmos-client
+yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios
 ```
 
-Important note: Make sure to install same version of `cosmos-client` as `xchain-thorchain` is using (currently `cosmos-client@0.39.2` ). In other case things might break.
-
-## Thorchain Client Testing
+## Terra Client Testing
 
 ```
 yarn install
 yarn test
 ```
 
-## Service Providers
-
-This package uses the following service providers:
-
-| Function                    | Service        | Notes                                                               |
-| --------------------------- | -------------- | ------------------------------------------------------------------- |
-| Balances                    | Cosmos RPC     | https://cosmos.network/rpc/v0.37.9 (`GET /bank/balances/{address}`) |
-| Transaction history         | Tendermint RPC | https://docs.tendermint.com/master/rpc/#/Info/tx_search             |
-| Transaction details by hash | Cosmos RPC     | https://cosmos.network/rpc/v0.37.9 (`GET /txs/{hash}`)              |
-| Transaction broadcast       | Cosmos RPC     | https://cosmos.network/rpc/v0.37.9 (`POST /txs`)                    |
-| Explorer                    | Thorchain.net  | https://thorchain.net                                               |
-
-Rate limits: No
-
 ## Examples
 
 ```ts
 // import `xchain-thorchain`
-import { Client } from '@xchainjs/xchain-thorchain'
+import { Client } from '@xchainjs/xchain-terra'
 
 // Create a `Client`
 const client = new Client({ network: Network.Testnet, phrase: 'my secret phrase' })
 
 // get address
 const address = client.getAddress()
-console.log('address:', address) // address: tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg
-
-// get private key
-const privKey = client.getPrivKey()
-console.log('privKey:', privKey.toBase64()) // privKey: {your-private-key} base64 encoded
-console.log('privKey:', privKey.toBuffer()) // privKey: {your-private-key} as `Buffer`
-
-// get public key
-const pubKey = client.getPubKey()
-console.log('pubKey:', pubKey.toBase64()) // pubKey: {your-public-key} base64 encoded
-console.log('pubKey:', pubKey.toBuffer()) // pubKey: {your-public-key} as `Buffer`
+console.log('address:', address) // address: terra1hf2j3w46zw8lg25awgan7x8wwsnc509sk0e6gr
 
 // get balances
 const balances = await client.getBalance(address)
