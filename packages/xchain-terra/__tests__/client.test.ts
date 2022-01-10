@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { Network } from '@xchainjs/xchain-client'
 
 import { Client } from '../src/client'

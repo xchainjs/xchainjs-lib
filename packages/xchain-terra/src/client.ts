@@ -1,4 +1,4 @@
-import { AccAddress, LCDClient, MnemonicKey, Wallet } from '@terra-money/terra.js'
+import { AccAddress, Coins, LCDClient, MnemonicKey, MsgSend } from '@terra-money/terra.js'
 import {
   Balance,
   BaseXChainClient,
@@ -7,11 +7,12 @@ import {
   Tx,
   TxHistoryParams,
   TxParams,
+  TxType,
   TxsPage,
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, Chain } from '@xchainjs/xchain-util/lib'
+import { Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 
 const CONFIG = {
   [Network.Mainnet]: {
@@ -36,14 +37,17 @@ const CONFIG = {
     ChainID: 'bombay-12',
   },
 }
+const ASSET_LUNA: Asset = {
+  chain: Chain.Terra,
+  symbol: 'LUNA',
+  ticker: 'LUNA',
+}
 
 /**
  * Terra Client
  */
 class Client extends BaseXChainClient implements XChainClient {
-  private mnemonicKey: MnemonicKey
   private lcdClient: LCDClient
-  private wallet: Wallet
 
   constructor({
     network = Network.Testnet,
@@ -55,23 +59,19 @@ class Client extends BaseXChainClient implements XChainClient {
     },
   }: XChainClientParams) {
     super(Chain.Litecoin, { network, rootDerivationPaths, phrase })
-    if (!this.phrase) throw new Error('Mnemonic phrase required in constructor')
 
-    this.mnemonicKey = new MnemonicKey({ mnemonic: phrase, index: 0 })
     this.lcdClient = new LCDClient({
       URL: CONFIG[this.network].cosmosAPIURL,
       chainID: CONFIG[this.network].ChainID,
     })
-    this.wallet = this.lcdClient.wallet(this.mnemonicKey)
-    this.wallet //TODO remove me
   }
 
   getFees(): Promise<Fees> {
     throw new Error('Method not implemented.')
   }
   getAddress(walletIndex = 0): string {
-    this.mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
-    return this.mnemonicKey.accAddress
+    const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
+    return mnemonicKey.accAddress
   }
   getExplorerUrl(): string {
     return CONFIG[this.network].explorerURL
@@ -94,14 +94,83 @@ class Client extends BaseXChainClient implements XChainClient {
     params
     throw new Error('Method not implemented.')
   }
-  getTransactionData(txId: string, assetAddress?: string): Promise<Tx> {
-    txId
-    assetAddress
-    throw new Error('Method not implemented.')
+  async getTransactionData(txId: string): Promise<Tx> {
+    const txInfo = await this.lcdClient.tx.txInfo(txId?.toUpperCase())
+    const msg = JSON.parse(txInfo.tx.body.messages[0].toJSON())
+    const msgType = msg['@type']
+    const amount = baseAmount(msg.amount[0].amount)
+    const denom = msg.amount[0].denom
+    const asset = this.getAsset(denom)
+    if (asset && msgType === '/cosmos.bank.v1beta1.MsgSend') {
+      return {
+        asset,
+        from: [
+          {
+            from: msg.from_address,
+            amount,
+          },
+        ],
+        to: [
+          {
+            to: msg.to_address,
+            amount,
+          },
+        ],
+        date: new Date(txInfo.timestamp),
+        type: TxType.Transfer,
+        hash: txInfo.txhash,
+      }
+    } else {
+      throw new Error(`unsupported asset ${denom} or msgType ${msgType}`)
+    }
   }
-  transfer(params: TxParams): Promise<string> {
-    params
-    throw new Error('Method not implemented.')
+  private getAsset(denom: string): Asset | undefined {
+    if (denom.includes('luna')) {
+      return {
+        chain: Chain.Terra,
+        symbol: 'LUNA',
+        ticker: 'LUNA',
+      }
+    }
+    if (denom.includes('usd')) {
+      return {
+        chain: Chain.Terra,
+        symbol: 'UST',
+        ticker: 'UST',
+      }
+    }
+    return undefined
+  }
+
+  async transfer({ walletIndex = 0, asset = ASSET_LUNA, amount, recipient, memo }: TxParams): Promise<string> {
+    if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
+
+    // TODO use fee?
+    // const fee = await this.getFees()
+
+    const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
+    const wallet = this.lcdClient.wallet(mnemonicKey)
+
+    let amountToSend: Coins.Input = {}
+
+    if (asset.chain === Chain.Terra && asset.symbol === 'LUNA' && asset.ticker === 'LUNA') {
+      amountToSend = {
+        uluna: `${amount.amount().toFixed()}`,
+      }
+    } else if (asset.chain === Chain.Terra && asset.symbol === 'UST' && asset.ticker === 'UST') {
+      amountToSend = {
+        uusd: `${amount.amount().toFixed()}`,
+      }
+    } else {
+      throw new Error('Only LUNA or UST transfers are currently supported on terra')
+    }
+    const send = new MsgSend(wallet.key.accAddress, recipient, amountToSend)
+    console.log(send.toJSON())
+    const tx = await wallet.createAndSignTx({ msgs: [send], memo })
+    console.log(JSON.stringify(tx.toData(), null, 2))
+    const result = await this.lcdClient.tx.broadcast(tx)
+    console.log(result.txhash)
+    return result.txhash
   }
 }
 
