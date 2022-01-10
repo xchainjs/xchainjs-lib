@@ -96,7 +96,7 @@ class Client implements ThorchainClient, XChainClient {
 
     this.cosmosClient = new CosmosSDKClient({
       server: this.getClientUrl().node,
-      chainId: getChainId(),
+      chainId: getChainId(this.network),
       prefix: getPrefix(this.network),
     })
 
