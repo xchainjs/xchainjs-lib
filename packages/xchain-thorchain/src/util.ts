@@ -218,7 +218,7 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
  * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
  */
 export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string): Promise<StdTx> => {
-  const nodeInfo = ThorchainNodeInfoResponse = (
+  const nodeInfo: ThorchainNodeInfoResponse = (
       await axios.get(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
   ).data
   const network = nodeInfo.default_node_info.network
