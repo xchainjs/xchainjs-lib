@@ -110,18 +110,6 @@ class Client extends BaseXChainClient implements XChainClient {
       return balances
     }
   }
-  private coinsToBalances(coins: Coins): Balance[] {
-    return (coins.toArray().map((c: Coin) => {
-      return {
-        asset: this.getTerraNativeAsset(c.denom),
-        amount: baseAmount(c.amount.toFixed(), 6),
-      }
-    }) as unknown) as Balance[]
-  }
-  getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    params
-    throw new Error('Method not implemented.')
-  }
   setNetwork(network: Network): void {
     super.setNetwork(network)
     this.lcdClient = new LCDClient({
@@ -129,6 +117,15 @@ class Client extends BaseXChainClient implements XChainClient {
       chainID: DEFAULT_CONFIG[this.network].ChainID,
     })
   }
+  getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
+    this.lcdClient.tx.search({
+      events: [{ key: 'key', value: 'value' }],
+      'pagination.key': 's',
+    })
+    params
+    throw new Error('Method not implemented.')
+  }
+
   async getTransactionData(txId: string): Promise<Tx> {
     const txInfo = await this.lcdClient.tx.txInfo(txId?.toUpperCase())
     const msg = JSON.parse(txInfo.tx.body.messages[0].toJSON())
@@ -161,27 +158,6 @@ class Client extends BaseXChainClient implements XChainClient {
       throw new Error(`unsupported asset ${denom} or msgType ${msgType}`)
     }
   }
-
-  private getTerraNativeAsset(denom: string): Asset | undefined {
-    if (denom.includes('luna')) {
-      return {
-        chain: Chain.Terra,
-        symbol: 'LUNA',
-        ticker: 'LUNA',
-      }
-    } else {
-      // native coins other than luna, UST, KRT, etc
-      // NOTE: https://docs.terra.money/Reference/Terra-core/Overview.html#currency-denominations
-      const standardDenom = denom.toUpperCase().slice(1, 3) + 'T'
-      return {
-        chain: Chain.Terra,
-        symbol: standardDenom,
-        ticker: standardDenom,
-      }
-    }
-    return undefined
-  }
-
   async transfer({ walletIndex = 0, asset = ASSET_LUNA, amount, recipient, memo }: TxParams): Promise<string> {
     if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
 
@@ -211,6 +187,33 @@ class Client extends BaseXChainClient implements XChainClient {
     const result = await this.lcdClient.tx.broadcast(tx)
     console.log(result.txhash)
     return result.txhash
+  }
+  private getTerraNativeAsset(denom: string): Asset | undefined {
+    if (denom.includes('luna')) {
+      return {
+        chain: Chain.Terra,
+        symbol: 'LUNA',
+        ticker: 'LUNA',
+      }
+    } else {
+      // native coins other than luna, UST, KRT, etc
+      // NOTE: https://docs.terra.money/Reference/Terra-core/Overview.html#currency-denominations
+      const standardDenom = denom.toUpperCase().slice(1, 3) + 'T'
+      return {
+        chain: Chain.Terra,
+        symbol: standardDenom,
+        ticker: standardDenom,
+      }
+    }
+    return undefined
+  }
+  private coinsToBalances(coins: Coins): Balance[] {
+    return (coins.toArray().map((c: Coin) => {
+      return {
+        asset: this.getTerraNativeAsset(c.denom),
+        amount: baseAmount(c.amount.toFixed(), 6),
+      }
+    }) as unknown) as Balance[]
   }
 }
 

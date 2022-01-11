@@ -5,6 +5,7 @@
 - Use latest `@xchainjs/xchain-util@0.3.2`
 - made walletIndex in BaseXChainClient.getAddress(walletIndex?: number)
 - upgrade axios dependency to latest
+- change TX.asset to allow Asset[]
 
 # v.0.11.0 (2021-12-29)
 

@@ -31,7 +31,7 @@ export type TxFrom = {
 }
 
 export type Tx = {
-  asset: Asset // asset
+  asset: Asset | Asset[] // asset
   from: TxFrom[] // list of "from" txs. BNC will have one `TxFrom` only, `BTC` might have many transactions going "in" (based on UTXO)
   to: TxTo[] // list of "to" transactions. BNC will have one `TxTo` only, `BTC` might have many transactions going "out" (based on UTXO)
   date: Date // timestamp of tx
