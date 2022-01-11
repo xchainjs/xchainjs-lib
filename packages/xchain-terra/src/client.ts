@@ -1,4 +1,4 @@
-import { AccAddress, Coins, LCDClient, MnemonicKey, MsgSend } from '@terra-money/terra.js'
+import { AccAddress, Coin, Coins, LCDClient, MnemonicKey, MsgSend } from '@terra-money/terra.js'
 import {
   Balance,
   BaseXChainClient,
@@ -14,7 +14,7 @@ import {
 } from '@xchainjs/xchain-client'
 import { Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 
-const CONFIG = {
+const DEFAULT_CONFIG = {
   [Network.Mainnet]: {
     explorerURL: 'https://finder.terra.money/mainnet',
     explorerAddressURL: 'https://finder.terra.money/mainnet/address/',
@@ -51,6 +51,7 @@ class Client extends BaseXChainClient implements XChainClient {
 
   constructor({
     network = Network.Testnet,
+
     phrase,
     rootDerivationPaths = {
       [Network.Mainnet]: "44'/330'/0'/0/",
@@ -60,9 +61,10 @@ class Client extends BaseXChainClient implements XChainClient {
   }: XChainClientParams) {
     super(Chain.Litecoin, { network, rootDerivationPaths, phrase })
 
+    //TODO add client variables to ctor to override DEFAULT_CONFIG
     this.lcdClient = new LCDClient({
-      URL: CONFIG[this.network].cosmosAPIURL,
-      chainID: CONFIG[this.network].ChainID,
+      URL: DEFAULT_CONFIG[this.network].cosmosAPIURL,
+      chainID: DEFAULT_CONFIG[this.network].ChainID,
     })
   }
 
@@ -74,33 +76,68 @@ class Client extends BaseXChainClient implements XChainClient {
     return mnemonicKey.accAddress
   }
   getExplorerUrl(): string {
-    return CONFIG[this.network].explorerURL
+    return DEFAULT_CONFIG[this.network].explorerURL
   }
   getExplorerAddressUrl(address: string): string {
-    return CONFIG[this.network].explorerAddressURL + address?.toLowerCase()
+    return DEFAULT_CONFIG[this.network].explorerAddressURL + address?.toLowerCase()
   }
   getExplorerTxUrl(txID: string): string {
-    return CONFIG[this.network].explorerAddressURL + txID?.toLowerCase()
+    return DEFAULT_CONFIG[this.network].explorerAddressURL + txID?.toLowerCase()
   }
   validateAddress(address: string): boolean {
     return AccAddress.validate(address)
   }
-  getBalance(address: string, assets?: Asset[]): Promise<Balance[]> {
-    address
-    assets
-    throw new Error('Method not implemented.')
+  async getBalance(address: string, assets?: Asset[]): Promise<Balance[]> {
+    // const x: PaginationOptions = {
+    //   'pagination.limit': '1',
+    //   'pagination.offset': '0',
+    //   'pagination.key': 's',
+    //   'pagination.count_total': 'false',
+    //   'pagination.reverse': 'false',
+    //   order_by: OrderBy.ORDER_BY_UNSPECIFIED,
+    // }
+
+    let balances: Balance[] = []
+    const [coins] = await this.lcdClient.bank.balance(address)
+    balances = balances.concat(this.coinsToBalances(coins))
+    //TODO add pagination
+    if (assets) {
+      return balances.filter((bal: Balance) => {
+        const exists = assets.find((asset) => asset.symbol === bal.asset.symbol)
+        return exists !== undefined
+      })
+    } else {
+      return balances
+    }
+  }
+  private coinsToBalances(coins: Coins): Balance[] {
+    return (coins.toArray().map((c: Coin) => {
+      return {
+        asset: this.getTerraNativeAsset(c.denom),
+        amount: baseAmount(c.amount.toFixed(), 6),
+      }
+    }) as unknown) as Balance[]
   }
   getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     params
     throw new Error('Method not implemented.')
   }
+  setNetwork(network: Network): void {
+    super.setNetwork(network)
+    this.lcdClient = new LCDClient({
+      URL: DEFAULT_CONFIG[this.network].cosmosAPIURL,
+      chainID: DEFAULT_CONFIG[this.network].ChainID,
+    })
+  }
   async getTransactionData(txId: string): Promise<Tx> {
     const txInfo = await this.lcdClient.tx.txInfo(txId?.toUpperCase())
     const msg = JSON.parse(txInfo.tx.body.messages[0].toJSON())
+
     const msgType = msg['@type']
-    const amount = baseAmount(msg.amount[0].amount)
+    const amount = baseAmount(msg.amount[0].amount, 6)
     const denom = msg.amount[0].denom
-    const asset = this.getAsset(denom)
+    const asset = this.getTerraNativeAsset(denom)
+
     if (asset && msgType === '/cosmos.bank.v1beta1.MsgSend') {
       return {
         asset,
@@ -124,19 +161,22 @@ class Client extends BaseXChainClient implements XChainClient {
       throw new Error(`unsupported asset ${denom} or msgType ${msgType}`)
     }
   }
-  private getAsset(denom: string): Asset | undefined {
+
+  private getTerraNativeAsset(denom: string): Asset | undefined {
     if (denom.includes('luna')) {
       return {
         chain: Chain.Terra,
         symbol: 'LUNA',
         ticker: 'LUNA',
       }
-    }
-    if (denom.includes('usd')) {
+    } else {
+      // native coins other than luna, UST, KRT, etc
+      // NOTE: https://docs.terra.money/Reference/Terra-core/Overview.html#currency-denominations
+      const standardDenom = denom.toUpperCase().slice(1, 3) + 'T'
       return {
         chain: Chain.Terra,
-        symbol: 'UST',
-        ticker: 'UST',
+        symbol: standardDenom,
+        ticker: standardDenom,
       }
     }
     return undefined
