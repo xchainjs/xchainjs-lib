@@ -36,12 +36,6 @@ export type AminoWrapping<T> = {
   value: T
 }
 
-export type ThorchainNodeInfoResponse = {
-  default_node_info: {
-    network: string
-  }
-}
-
 export type ThorchainDepositResponse = AminoWrapping<{
   msg: AminoWrapping<{
     coins: MsgCoin[]

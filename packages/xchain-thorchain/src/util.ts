@@ -16,7 +16,7 @@ import { StdTx } from 'cosmos-client/x/auth'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
 import { ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
-import { MsgNativeTx, ThorchainDepositResponse, ThorchainNodeInfoResponse } from './types/messages'
+import { MsgNativeTx, ThorchainDepositResponse } from './types/messages'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '2000000'
@@ -218,10 +218,8 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
  * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
  */
 export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string): Promise<StdTx> => {
-  const nodeInfo: ThorchainNodeInfoResponse = (
-      await axios.get(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
-  ).data
-  const chainId = nodeInfo.default_node_info.network
+  const { data } = await axios.get(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`);
+  const chainId = data.default_node_info.network
   if (!chainId || !(chainId == "thorchain" || chainId == "thorchain-stagenet" )) throw new Error("invalid network")
   
   const response: ThorchainDepositResponse = (
