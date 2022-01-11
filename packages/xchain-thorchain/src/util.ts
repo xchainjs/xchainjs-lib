@@ -221,15 +221,15 @@ export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string):
   const nodeInfo: ThorchainNodeInfoResponse = (
       await axios.get(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
   ).data
-  const network = nodeInfo.default_node_info.network
-  if (!network || !(network == "thorchain" || network == "thorchain-stagenet" )) throw new Error("invalid network")
+  const chainId = nodeInfo.default_node_info.network
+  if (!chainId || !(chainId == "thorchain" || chainId == "thorchain-stagenet" )) throw new Error("invalid network")
   
   const response: ThorchainDepositResponse = (
     await axios.post(`${nodeUrl}/thorchain/deposit`, {
       coins: msgNativeTx.coins,
       memo: msgNativeTx.memo,
       base_req: {
-        chain_id: getChainId(network),
+        chain_id: chainId,
         from: msgNativeTx.signer,
       },
     })
