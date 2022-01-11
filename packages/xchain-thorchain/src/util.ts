@@ -108,9 +108,20 @@ export const getPrefix = (network: Network) => {
 /**
  * Get the chain id.
  *
+ * @param {Network} network
  * @returns {string} The chain id based on the network.
+ *
  */
-export const getChainId = () => 'thorchain'
+export const getChainId = (network: Network) => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'thorchain'
+    case Network.Stagenet:
+      return 'thorchain-stagenet'
+    case Network.Testnet:
+      return 'thorchain'
+  }
+}
 
 /**
  * Register Codecs based on the prefix.
@@ -207,12 +218,16 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
  * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
  */
 export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string): Promise<StdTx> => {
+  const { data } = await axios.get(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
+  const chainId = data.default_node_info.network
+  if (!chainId || !(chainId == 'thorchain' || chainId == 'thorchain-stagenet')) throw new Error('invalid network')
+
   const response: ThorchainDepositResponse = (
     await axios.post(`${nodeUrl}/thorchain/deposit`, {
       coins: msgNativeTx.coins,
       memo: msgNativeTx.memo,
       base_req: {
-        chain_id: getChainId(),
+        chain_id: chainId,
         from: msgNativeTx.signer,
       },
     })
