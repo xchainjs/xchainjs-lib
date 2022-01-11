@@ -1,3 +1,9 @@
+# v0.20.1 (2022-01-11)
+
+## Fix
+
+- Get chain ID from THORNode before posting to deposit handler.
+
 # v.0.20.0 (2021-12-29)
 
 ## Breaking change
