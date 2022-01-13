@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-binance",
-  "version": "0.0.1-alpha.909+02a3ef3",
+  "version": "0.1.0-lazy.0",
   "description": "Custom Binance client and utilities used by XChainJS clients",
   "keywords": [
     "BNB",
@@ -34,9 +34,9 @@
   },
   "devDependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
-    "@thorwallet/xchain-client": "^0.0.1-alpha.909+02a3ef3",
-    "@thorwallet/xchain-crypto": "^0.0.1-alpha.909+02a3ef3",
-    "@thorwallet/xchain-util": "^0.0.1-alpha.909+02a3ef3",
+    "@thorwallet/xchain-client": "0.1.0-lazy.0",
+    "@thorwallet/xchain-crypto": "0.1.0-lazy.0",
+    "@thorwallet/xchain-util": "0.1.0-lazy.0",
     "@types/big.js": "^4.0.5",
     "bip32": "^2.0.6"
   },
