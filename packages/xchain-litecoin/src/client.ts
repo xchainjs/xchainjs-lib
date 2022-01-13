@@ -20,6 +20,7 @@ import { NodeAuth, Signature } from './types'
 import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
 import { TxIO } from './types/sochain-api-types'
 import RNSimple from 'react-native-simple-crypto'
+import { getAddress } from './get-address'
 
 /**
  * LitecoinClient Interface
@@ -108,7 +109,7 @@ class Client implements LitecoinClient, XChainClient {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
       this.addrCache[phrase] = {}
-      return this.getAddress(walletIndex)
+      return getAddress({ network: this.getNetwork(), phrase, index: walletIndex })
     } else {
       throw new Error('Invalid phrase')
     }
@@ -186,42 +187,6 @@ class Client implements LitecoinClient, XChainClient {
    */
   getExplorerTxUrl = (txID: string): string => {
     return `${this.getExplorerUrl()}/${txID}`
-  }
-
-  /**
-   * Get the current address.
-   *
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
-   */
-  getAddress = async (index = 0): Promise<Address> => {
-    if (index < 0) {
-      throw new Error('index must be greater than zero')
-    }
-    if (this.phrase) {
-      if (this.addrCache[this.phrase][index]) {
-        return this.addrCache[this.phrase][index]
-      }
-      const ltcNetwork = Utils.ltcNetwork(this.net)
-      const ltcKeys = await this.getLtcKeys(this.phrase, index)
-
-      const { address } = Litecoin.payments.p2wpkh({
-        pubkey: ltcKeys.publicKey,
-        network: ltcNetwork,
-      })
-
-      if (!address) {
-        throw new Error('Address not defined')
-      }
-      this.addrCache[this.phrase][index] = address
-      return address
-    }
-    throw new Error('Phrase must be provided')
   }
 
   /**
@@ -459,7 +424,7 @@ class Client implements LitecoinClient, XChainClient {
       const { psbt } = await Utils.buildTx({
         ...params,
         feeRate,
-        sender: await this.getAddress(fromAddressIndex),
+        sender: await getAddress({ network: this.getNetwork(), phrase: this.phrase, index: fromAddressIndex }),
         sochainUrl: this.sochainUrl,
         network: this.net,
       })

@@ -12,9 +12,15 @@ const getFullDerivationPath = (network: string, index: number): string => {
   )
 }
 
-export const getAddress = async (network: Network, phrase: string, index: number): Promise<string> => {
-  if (!phrase) throw new Error('Phrase not set')
-
+export const getAddress = async ({
+  network,
+  phrase,
+  index,
+}: {
+  network: Network
+  phrase: string
+  index: number
+}): Promise<string> => {
   if (addrCache[phrase][index]) {
     return addrCache[phrase][index]
   }

@@ -23,6 +23,7 @@ import { NodeAuth } from './types'
 import { broadcastTx } from './node-api'
 import RNSimple from 'react-native-simple-crypto'
 import { ECPair } from 'bitcoinjs-lib'
+import { getAddress } from './get-address'
 
 type Signature = {
   signature: string
@@ -149,7 +150,7 @@ class Client implements BitcoinCashClient, XChainClient {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
       this.addrCache[phrase] = {}
-      return this.getAddress(walletIndex)
+      return getAddress({ network: this.network, phrase: this.phrase, index: walletIndex })
     } else {
       throw new Error('Invalid phrase')
     }
@@ -250,37 +251,6 @@ class Client implements BitcoinCashClient, XChainClient {
     } catch (error) {
       throw new Error(`Getting key pair failed: ${error?.message || error.toString()}`)
     }
-  }
-
-  /**
-   * Get the current address.
-   *
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
-   */
-  getAddress = async (index = 0): Promise<Address> => {
-    if (this.phrase) {
-      if (this.addrCache[this.phrase][index]) {
-        return this.addrCache[this.phrase][index]
-      }
-      try {
-        const keys = await this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
-        const address = await keys.getAddress(index)
-
-        const addr = utils.stripPrefix(utils.toCashAddress(address))
-        this.addrCache[this.phrase][index] = addr
-        return addr
-      } catch (error) {
-        throw new Error('Address not defined')
-      }
-    }
-
-    throw new Error('Phrase must be provided')
   }
 
   /**
@@ -468,7 +438,7 @@ class Client implements BitcoinCashClient, XChainClient {
       const { builder, inputUTXOs } = await utils.buildTx({
         ...params,
         feeRate,
-        sender: await this.getAddress(),
+        sender: await getAddress({ network: this.network, phrase: this.phrase, index: 0 }),
         haskoinUrl: this.getHaskoinURL(),
         network: this.network,
       })

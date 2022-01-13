@@ -52,6 +52,7 @@ import {
 } from './utils'
 import { HDNode } from './hdnode/hdnode'
 import { Wallet } from './wallet/wallet'
+import { getAddress } from './get-address'
 
 /**
  * Interface for custom Ethereum client
@@ -103,6 +104,7 @@ export default class Client implements XChainClient, EthereumClient {
   private infuraCreds: InfuraCreds | undefined
   private ethplorerUrl: string
   private ethplorerApiKey: string
+  private phrase: string
   private rootDerivationPaths: RootDerivationPaths
   private providers: Map<XChainNetwork, Provider> = new Map<XChainNetwork, Provider>()
   private addrCache: Record<string, Record<number, string>>
@@ -160,26 +162,6 @@ export default class Client implements XChainClient, EthereumClient {
    */
   getNetwork = (): XChainNetwork => {
     return ethNetworkToXchains(this.network)
-  }
-
-  /**
-   * Get the current address.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"}
-   * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
-   */
-  getAddress = async (index = 0): Promise<Address> => {
-    if (index < 0) {
-      throw new Error('index must be greater than zero')
-    }
-    if (this.addrCache[this.hdNode.address][index]) {
-      return this.addrCache[this.hdNode.address][index]
-    }
-    const address = (await this.hdNode.derivePath(this.getFullDerivationPath(index))).address.toLowerCase()
-    this.addrCache[this.hdNode.address][index] = address
-    return address
   }
 
   /**
@@ -320,9 +302,10 @@ export default class Client implements XChainClient, EthereumClient {
     if (!Crypto.validatePhrase(phrase)) {
       throw new Error('Invalid phrase')
     }
+    this.phrase = phrase
     this.hdNode = await HDNode.fromMnemonic(phrase)
     this.addrCache[this.hdNode.address] = {}
-    return this.getAddress(walletIndex)
+    return getAddress({ network: this.getNetwork(), phrase, index: walletIndex })
   }
 
   /**
@@ -553,7 +536,15 @@ export default class Client implements XChainClient, EthereumClient {
       const txResult = await this.call<TransactionResponse>(walletIndex, sender, erc20ABI, 'approve', [
         spender,
         txAmount,
-        { from: this.getAddress(), gasPrice, gasLimit },
+        {
+          from: await getAddress({
+            index: 0,
+            network: this.getNetwork(),
+            phrase: this.phrase,
+          }),
+          gasPrice,
+          gasLimit,
+        },
       ])
 
       return txResult
@@ -580,7 +571,13 @@ export default class Client implements XChainClient, EthereumClient {
       const gasLimit = await this.estimateCall(sender, erc20ABI, 'approve', [
         spender,
         txAmount,
-        { from: this.getAddress() },
+        {
+          from: await getAddress({
+            index: 0,
+            network: this.getNetwork(),
+            phrase: this.phrase,
+          }),
+        },
       ])
 
       return gasLimit
@@ -735,12 +732,24 @@ export default class Client implements XChainClient, EthereumClient {
         const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
 
         estimate = await contract.estimateGas.transfer(recipient, txAmount, {
-          from: from || (await this.getAddress()),
+          from:
+            from ||
+            (await getAddress({
+              index: 0,
+              network: this.getNetwork(),
+              phrase: this.phrase,
+            })),
         })
       } else {
         // ETH gas estimate
         const transactionRequest = {
-          from: from || (await this.getAddress()),
+          from:
+            from ||
+            (await getAddress({
+              index: 0,
+              network: this.getNetwork(),
+              phrase: this.phrase,
+            })),
           to: recipient,
           value: txAmount,
           data: memo ? toUtf8Bytes(memo) : undefined,

@@ -43,6 +43,7 @@ import {
 import { Signature } from './types'
 import RNSimple from 'react-native-simple-crypto'
 import { getBalance } from './get-balance'
+import { getAddress } from './get-address'
 
 /**
  * Interface for custom Thorchain client
@@ -226,7 +227,7 @@ class Client implements ThorchainClient, XChainClient {
       this.addrCache[phrase] = {}
     }
 
-    return this.getAddress(walletIndex)
+    return getAddress({ phrase, network: this.getNetwork(), index: walletIndex })
   }
 
   /**
@@ -267,26 +268,6 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
-   * Get the current address.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
-   */
-  getAddress = async (index = 0): Promise<string> => {
-    if (this.addrCache[this.phrase][index]) {
-      return this.addrCache[this.phrase][index]
-    }
-    const address = await this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
-
-    if (!address) {
-      throw new Error('address not defined')
-    }
-    this.addrCache[this.phrase][index] = address
-    return address
-  }
-
-  /**
    * Validate the given address.
    *
    * @param {Address} address
@@ -309,7 +290,13 @@ class Client implements ThorchainClient, XChainClient {
     const messageAction = undefined
     const offset = params?.offset || 0
     const limit = params?.limit || 10
-    const address = params?.address || (await this.getAddress())
+    const address =
+      params?.address ||
+      (await getAddress({
+        index: 0,
+        network: this.getNetwork(),
+        phrase: this.phrase,
+      }))
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
@@ -470,7 +457,11 @@ class Client implements ThorchainClient, XChainClient {
    */
   deposit = async ({ walletIndex = 0, asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
     const assetBalance = await getBalance({
-      address: await this.getAddress(walletIndex),
+      address: await getAddress({
+        index: walletIndex,
+        network: this.getNetwork(),
+        phrase: this.phrase,
+      }),
       assets: [asset],
       network: this.network,
     })
@@ -479,7 +470,11 @@ class Client implements ThorchainClient, XChainClient {
       throw new Error('insufficient funds')
     }
 
-    const signer = await this.getAddress(walletIndex)
+    const signer = await getAddress({
+      index: walletIndex,
+      network: this.getNetwork(),
+      phrase: this.phrase,
+    })
     const msgNativeTx = msgNativeTxFromJson({
       coins: [
         {
@@ -528,7 +523,11 @@ class Client implements ThorchainClient, XChainClient {
       registerCodecs(this.network)
 
       const assetBalance = await getBalance({
-        address: await this.getAddress(walletIndex),
+        address: await getAddress({
+          index: walletIndex,
+          network: this.getNetwork(),
+          phrase: this.phrase,
+        }),
         assets: [asset],
         network: this.network,
       })
@@ -539,7 +538,11 @@ class Client implements ThorchainClient, XChainClient {
 
       const transferResult = await this.cosmosClient.transfer({
         privkey: await this.getPrivKey(walletIndex),
-        from: await this.getAddress(walletIndex),
+        from: await getAddress({
+          index: walletIndex,
+          network: this.getNetwork(),
+          phrase: this.phrase,
+        }),
         to: recipient,
         amount: amount.amount().toString(),
         asset: getDenom(asset),

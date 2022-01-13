@@ -1,5 +1,5 @@
+export { getAddress } from '@ethersproject/address'
 export { getBalance } from './get-balance'
-
 export * from './types'
 export * from './client'
 export {

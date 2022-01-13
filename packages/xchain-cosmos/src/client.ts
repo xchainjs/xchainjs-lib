@@ -160,7 +160,7 @@ class Client implements CosmosClient, XChainClient {
       this.phrase = phrase
     }
 
-    return getAddress(this.network, this.phrase, walletIndex)
+    return getAddress({ network: this.network, phrase: this.phrase, index: walletIndex })
   }
 
   /**
@@ -230,7 +230,8 @@ class Client implements CosmosClient, XChainClient {
       const mainAsset = this.getMainAsset()
       const txHistory = await this.getSDKClient().searchTx({
         messageAction,
-        messageSender: (params && params.address) || (await getAddress(this.network, this.phrase, 0)),
+        messageSender:
+          (params && params.address) || (await getAddress({ network: this.network, phrase: this.phrase, index: 0 })),
         page,
         limit,
         txMinHeight,
@@ -281,7 +282,7 @@ class Client implements CosmosClient, XChainClient {
       const mainAsset = this.getMainAsset()
       const transferResult = await this.getSDKClient().transfer({
         privkey: await this.getPrivateKey(fromAddressIndex),
-        from: await getAddress(this.network, this.phrase, fromAddressIndex),
+        from: await getAddress({ network: this.network, phrase: this.phrase, index: fromAddressIndex }),
         to: recipient,
         amount: amount.amount().toString(),
         asset: getDenom(asset || mainAsset),

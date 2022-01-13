@@ -21,6 +21,7 @@ import { getSeed, validatePhrase, bip32 } from '@thorwallet/xchain-crypto'
 import { isTransferFee, parseTx, getPrefix } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 import { Signature } from './types'
+import { getAddress } from './get-address'
 type PrivKey = string
 
 export type Coin = {
@@ -192,7 +193,7 @@ class Client implements BinanceClient, XChainClient {
 
     this.phrase = phrase
     this.addrCache[phrase] = {}
-    return this.getAddress(walletIndex)
+    return getAddress({ network: this.getNetwork(), phrase, index: walletIndex })
   }
 
   private getPrivateKeyFromMnemonic = async (phrase: string, derive: boolean, index: number): Promise<string> => {
@@ -223,24 +224,6 @@ class Client implements BinanceClient, XChainClient {
     if (!this.phrase) throw new Error('Phrase not set')
 
     return this.getPrivateKeyFromMnemonic(this.phrase, true, index)
-  }
-
-  /**
-   * Get the current address.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
-   */
-  getAddress = async (index = 0): Promise<string> => {
-    if (this.addrCache[this.phrase][index]) {
-      return this.addrCache[this.phrase][index]
-    }
-
-    const address = crypto.getAddressFromPrivateKey(await this.getPrivateKey(index), getPrefix(this.network))
-
-    this.addrCache[this.phrase][index] = address
-    return address
   }
 
   /**
@@ -360,7 +343,7 @@ class Client implements BinanceClient, XChainClient {
    */
   multiSend = async ({ walletIndex = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
     try {
-      const derivedAddress = await this.getAddress(walletIndex)
+      const derivedAddress = await getAddress({ network: this.getNetwork(), phrase: this.phrase, index: walletIndex })
 
       await this.bncClient.initChain()
       await this.bncClient.setPrivateKey(await this.getPrivateKey(walletIndex)).catch((error) => Promise.reject(error))
@@ -419,7 +402,7 @@ class Client implements BinanceClient, XChainClient {
         .catch((error: Error) => Promise.reject(error))
 
       const transferResult = await this.bncClient.transfer(
-        await this.getAddress(),
+        await getAddress({ index: 0, phrase: this.phrase, network: this.getNetwork() }),
         recipient,
         baseToAsset(amount).amount().toString(),
         asset ? asset.symbol : AssetBNB.symbol,

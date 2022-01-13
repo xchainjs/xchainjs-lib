@@ -1,3 +1,4 @@
+export { getAddress } from './sochain-api'
 export { getBalance } from './get-balance'
 
 export * from './types'
