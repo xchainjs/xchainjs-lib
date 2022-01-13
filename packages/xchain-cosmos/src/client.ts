@@ -22,6 +22,7 @@ import { MsgSend, MsgMultiSend } from '@thorwallet/cosmos-client/x/bank'
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './types'
 import { DECIMAL, getDenom, getAsset, getTxsFromHistory } from './util'
+import { getSdkBalance } from './cosmos/get-balance'
 
 /**
  * Interface for custom Cosmos client
@@ -245,7 +246,7 @@ class Client implements CosmosClient, XChainClient {
    */
   getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
     try {
-      const balances = await this.getSDKClient().getBalance(address)
+      const balances = await getSdkBalance({ address, network: this.network })
       const mainAsset = this.getMainAsset()
 
       let assetBalances = balances.map((balance) => {

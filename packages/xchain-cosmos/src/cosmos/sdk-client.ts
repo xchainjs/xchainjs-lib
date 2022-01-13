@@ -4,9 +4,9 @@ import { TxHistoryParams } from '@thorwallet/xchain-client'
 import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
 import { CosmosSDK, AccAddress, PrivKeySecp256k1, PrivKey, Msg } from '@thorwallet/cosmos-client'
-import { BroadcastTxCommitResult, Coin, StdTxSignature } from '@thorwallet/cosmos-client/api'
+import { BroadcastTxCommitResult, StdTxSignature } from '@thorwallet/cosmos-client/api'
 import { auth, StdTx, BaseAccount } from '@thorwallet/cosmos-client/x/auth'
-import { bank, MsgSend } from '@thorwallet/cosmos-client/x/bank'
+import { MsgSend } from '@thorwallet/cosmos-client/x/bank'
 
 import {
   APIQueryParam,
@@ -89,18 +89,6 @@ export class CosmosSDKClient {
       return AccAddress.fromBech32(address).toBech32() === address
     } catch (err) {
       return false
-    }
-  }
-
-  getBalance = async (address: string): Promise<Coin[]> => {
-    try {
-      this.setPrefix()
-
-      const accAddress = AccAddress.fromBech32(address)
-
-      return bank.balancesAddressGet(this.sdk, accAddress).then((res) => res.data.result)
-    } catch (error) {
-      return Promise.reject(error)
     }
   }
 

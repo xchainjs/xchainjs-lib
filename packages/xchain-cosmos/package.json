@@ -48,5 +48,8 @@
     "@thorwallet/xchain-util": "0.0.1-alpha.869+49db531",
     "axios": "^0.21.0"
   },
-  "gitHead": "02a3ef3995ed7eb9f0c429898d98288d1b3dac07"
+  "gitHead": "02a3ef3995ed7eb9f0c429898d98288d1b3dac07",
+  "dependencies": {
+    "rollup": "^2.63.0"
+  }
 }
