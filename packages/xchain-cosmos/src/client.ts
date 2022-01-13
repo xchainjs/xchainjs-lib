@@ -1,7 +1,6 @@
 import {
   RootDerivationPaths,
   Address,
-  Balances,
   Fees,
   Network,
   Tx,
@@ -13,7 +12,7 @@ import {
   XChainClientParams,
   Network as XChainNetwork,
 } from '@thorwallet/xchain-client'
-import { Asset, baseAmount, assetToString } from '@thorwallet/xchain-util'
+import { Asset, baseAmount } from '@thorwallet/xchain-util'
 import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
 import { PrivKey, codec } from '@thorwallet/cosmos-client'
@@ -21,8 +20,7 @@ import { MsgSend, MsgMultiSend } from '@thorwallet/cosmos-client/x/bank'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './types'
-import { DECIMAL, getDenom, getAsset, getTxsFromHistory } from './util'
-import { getSdkBalance } from './cosmos/get-balance'
+import { DECIMAL, getDenom, getTxsFromHistory } from './util'
 
 /**
  * Interface for custom Cosmos client
@@ -235,43 +233,6 @@ class Client implements CosmosClient, XChainClient {
    */
   getMainAsset = (): Asset => {
     return this.network === 'testnet' ? AssetMuon : AssetAtom
-  }
-
-  /**
-   * Get the balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @param {Asset} asset If not set, it will return all assets available. (optional)
-   * @returns {Array<Balance>} The balance of the address.
-   */
-  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
-    try {
-      const balances = await getSdkBalance({ address, network: this.network })
-      const mainAsset = this.getMainAsset()
-
-      let assetBalances = balances.map((balance) => {
-        return {
-          asset: (balance.denom && getAsset(balance.denom)) || mainAsset,
-          amount: baseAmount(balance.amount, DECIMAL),
-        }
-      })
-
-      // make sure we always have the main asset as balance in the array
-      if (assetBalances.length === 0) {
-        assetBalances = [
-          {
-            asset: mainAsset,
-            amount: baseAmount(0, DECIMAL),
-          },
-        ]
-      }
-
-      return assetBalances.filter(
-        (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
-      )
-    } catch (error) {
-      return Promise.reject(error)
-    }
   }
 
   /**

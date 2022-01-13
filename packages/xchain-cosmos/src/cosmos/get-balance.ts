@@ -6,10 +6,17 @@ import { Asset, assetToString, baseAmount } from '@thorwallet/xchain-util'
 import { DECIMAL, getAsset } from '../util'
 import { AssetAtom, AssetMuon } from '../types'
 
-const getPrefix = (network: string) => (network === 'testnet' ? 'tthor' : 'thor')
-
-export const getSdkBalance = async ({ address, network }: { address: string; network: Network }): Promise<Coin[]> => {
-  const prefix = getPrefix(network)
+export const getSdkBalance = async ({
+  address,
+  server,
+  chainId,
+  prefix,
+}: {
+  address: string
+  server: string
+  chainId: string
+  prefix: string
+}): Promise<Coin[]> => {
   AccAddress.setBech32Prefix(
     prefix,
     prefix + 'pub',
@@ -19,18 +26,29 @@ export const getSdkBalance = async ({ address, network }: { address: string; net
     prefix + 'valconspub',
   )
 
-  const server = network === 'mainnet' ? 'https://api.cosmos.network' : 'http://lcd.gaia.bigdipper.live:1317'
-  const chainId = network === 'mainnet' ? 'cosmoshub-3' : 'gaia-3a'
-
   const accAddress = AccAddress.fromBech32(address)
 
   const sdk = new CosmosSDK(server, chainId)
   return bank.balancesAddressGet(sdk, accAddress).then((res) => res.data.result)
 }
 
-export const getBalance = async (address: Address, network: Network, assets?: Asset[]): Promise<Balances> => {
+export const getGenericBalance = async ({
+  address,
+  network,
+  server,
+  chainId,
+  assets,
+  prefix,
+}: {
+  address: Address
+  network: Network
+  server: string
+  chainId: string
+  prefix: string
+  assets?: Asset[]
+}): Promise<Balances> => {
   try {
-    const balances = await getSdkBalance({ address, network })
+    const balances = await getSdkBalance({ address, server, chainId, prefix })
     const mainAsset = network === 'testnet' ? AssetMuon : AssetAtom
 
     let assetBalances = balances.map((balance) => {
@@ -56,4 +74,27 @@ export const getBalance = async (address: Address, network: Network, assets?: As
   } catch (error) {
     return Promise.reject(error)
   }
+}
+
+export const getBalance = ({
+  network,
+  address,
+  assets,
+}: {
+  address: Address
+  network: Network
+  assets?: Asset[]
+  prefix: string
+}) => {
+  const server = network === 'mainnet' ? 'https://api.cosmos.network' : 'http://lcd.gaia.bigdipper.live:1317'
+  const chainId = network === 'mainnet' ? 'cosmoshub-3' : 'gaia-3a'
+  const prefix = 'cosmos'
+  return getGenericBalance({
+    network,
+    chainId,
+    server,
+    address,
+    assets,
+    prefix,
+  })
 }

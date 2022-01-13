@@ -13,10 +13,9 @@ import {
   XChainClientParams,
   TxFrom,
   TxTo,
-  Balance,
 } from '@thorwallet/xchain-client'
 import { CosmosSDKClient, RPCTxResult } from '@thorwallet/xchain-cosmos'
-import { Asset, baseAmount, assetFromString } from '@thorwallet/xchain-util'
+import { baseAmount, assetFromString } from '@thorwallet/xchain-util'
 import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
 import { PrivKey, AccAddress, PubKey } from '@thorwallet/cosmos-client'
@@ -27,7 +26,6 @@ import { msgNativeTxFromJson, TxResult } from './types/messages'
 import {
   getDenom,
   getDefaultFees,
-  getBalance,
   DECIMAL,
   DEFAULT_GAS_VALUE,
   buildDepositTx,
@@ -44,6 +42,7 @@ import {
 } from './util'
 import { Signature } from './types'
 import RNSimple from 'react-native-simple-crypto'
+import { getBalance } from './get-balance'
 
 /**
  * Interface for custom Thorchain client
@@ -298,17 +297,6 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
-   * Get the balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @param {Asset} asset If not set, it will return all assets available. (optional)
-   * @returns {Balance[]} The balance of the address.
-   */
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
-    return getBalance({ address, assets, cosmosClient: this.getCosmosClient() })
-  }
-
-  /**
    * Get transaction history of a given address with pagination options.
    * By default it will return the transaction history of the current wallet.
    *
@@ -481,7 +469,11 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
    */
   deposit = async ({ walletIndex = 0, asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
-    const assetBalance = await this.getBalance(await this.getAddress(walletIndex), [asset])
+    const assetBalance = await getBalance({
+      address: await this.getAddress(walletIndex),
+      assets: [asset],
+      network: this.network,
+    })
 
     if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(DEFAULT_GAS_VALUE))) {
       throw new Error('insufficient funds')
@@ -535,7 +527,11 @@ class Client implements ThorchainClient, XChainClient {
     try {
       registerCodecs(this.network)
 
-      const assetBalance = await this.getBalance(await this.getAddress(walletIndex), [asset])
+      const assetBalance = await getBalance({
+        address: await this.getAddress(walletIndex),
+        assets: [asset],
+        network: this.network,
+      })
       const fee = await this.getFees()
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
         throw new Error('insufficient funds')
