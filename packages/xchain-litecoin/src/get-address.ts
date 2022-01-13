@@ -49,23 +49,23 @@ export const getAddress = async ({
   if (index < 0) {
     throw new Error('index must be greater than zero')
   }
-  if (phrase) {
-    if (addrCache[phrase][index]) {
-      return addrCache[phrase][index]
-    }
-    const ltcNetwork = Utils.ltcNetwork(network)
-    const ltcKeys = await getLtcKeys({ network, phrase, index })
-
-    const { address } = Litecoin.payments.p2wpkh({
-      pubkey: ltcKeys.publicKey,
-      network: ltcNetwork,
-    })
-
-    if (!address) {
-      throw new Error('Address not defined')
-    }
-    addrCache[phrase][index] = address
-    return address
+  if (addrCache[phrase] && addrCache[phrase][index]) {
+    return addrCache[phrase][index]
   }
-  throw new Error('Phrase must be provided')
+  const ltcNetwork = Utils.ltcNetwork(network)
+  const ltcKeys = await getLtcKeys({ network, phrase, index })
+
+  const { address } = Litecoin.payments.p2wpkh({
+    pubkey: ltcKeys.publicKey,
+    network: ltcNetwork,
+  })
+
+  if (!address) {
+    throw new Error('Address not defined')
+  }
+  if (!addrCache[phrase]) {
+    addrCache[phrase] = {}
+  }
+  addrCache[phrase][index] = address
+  return address
 }

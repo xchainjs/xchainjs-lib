@@ -21,13 +21,16 @@ export const getAddress = async ({
   phrase: string
   index: number
 }): Promise<string> => {
-  if (addrCache[phrase][index]) {
+  if (addrCache[phrase] && addrCache[phrase][index]) {
     return addrCache[phrase][index]
   }
 
   const sdk = network === 'mainnet' ? MAINNET_SDK : TESTNET_SDK
 
   const addr = await sdk.getAddressFromMnemonic(phrase, getFullDerivationPath(network, index))
+  if (!addrCache[phrase][index]) {
+    addrCache[phrase] = {}
+  }
   addrCache[phrase][index] = addr
   return addr
 }

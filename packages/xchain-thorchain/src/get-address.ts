@@ -23,7 +23,7 @@ export const getAddress = async ({
   phrase: string
   index: number
 }): Promise<string> => {
-  if (addrCache[phrase][index]) {
+  if (addrCache[phrase] && addrCache[phrase][index]) {
     return addrCache[phrase][index]
   }
   const cosmosClient = new CosmosSDKClient({
@@ -36,6 +36,9 @@ export const getAddress = async ({
 
   if (!address) {
     throw new Error('address not defined')
+  }
+  if (!addrCache[phrase]) {
+    addrCache[phrase] = {}
   }
   addrCache[phrase][index] = address
   return address

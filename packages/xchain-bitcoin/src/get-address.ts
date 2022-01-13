@@ -40,7 +40,7 @@ export const getAddress = async ({
   if (index < 0) {
     throw new Error('index must be greater than zero')
   }
-  if (addrCache[phrase][index]) {
+  if (addrCache[phrase] && addrCache[phrase][index]) {
     return addrCache[phrase][index]
   }
   const btcNetwork = Utils.btcNetwork(network)
@@ -52,6 +52,9 @@ export const getAddress = async ({
   })
   if (!address) {
     throw new Error('Address not defined')
+  }
+  if (!addrCache[phrase]) {
+    addrCache[phrase] = {}
   }
   addrCache[phrase][index] = address
   return address

@@ -48,7 +48,7 @@ export const getAddress = async ({
   phrase: string
   index?: number
 }): Promise<Address> => {
-  if (addrCache[phrase][index]) {
+  if (addrCache[phrase] && addrCache[phrase][index]) {
     return addrCache[phrase][index]
   }
   try {
@@ -56,6 +56,9 @@ export const getAddress = async ({
     const address = await keys.getAddress(index)
 
     const addr = utils.stripPrefix(utils.toCashAddress(address))
+    if (!addrCache[phrase]) {
+      addrCache[phrase] = {}
+    }
     addrCache[phrase][index] = addr
     return addr
   } catch (error) {
