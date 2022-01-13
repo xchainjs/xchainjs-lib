@@ -10,7 +10,6 @@ import {
   Tx,
   TxParams,
   TxHash,
-  Balance,
   Network,
   Fees,
   XChainClientParams,
@@ -256,24 +255,6 @@ class Client implements LitecoinClient, XChainClient {
    * @returns {boolean} `true` or `false`
    */
   validateAddress = (address: string): boolean => Utils.validateAddress(address, this.net)
-
-  /**
-   * Get the LTC balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balance>} The LTC balance of the address.
-   */
-  getBalance = async (address: Address): Promise<Balance[]> => {
-    try {
-      return Utils.getBalance({
-        sochainUrl: this.sochainUrl,
-        network: this.net,
-        address,
-      })
-    } catch (e) {
-      return Promise.reject(e)
-    }
-  }
 
   /**
    * Get transaction history of a given address with pagination options.

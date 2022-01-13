@@ -1,11 +1,5 @@
 import axios from 'axios'
-import {
-  Balances as BinanceBalances,
-  Fees as BinanceFees,
-  TxPage as BinanceTxPage,
-  TransactionResult,
-  TransferFee,
-} from './types/binance'
+import { Fees as BinanceFees, TxPage as BinanceTxPage, TransactionResult, TransferFee } from './types/binance'
 
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
@@ -13,7 +7,6 @@ import {
   Address,
   XChainClient,
   XChainClientParams,
-  Balances,
   Fees,
   Network,
   Tx,
@@ -23,20 +16,9 @@ import {
   TxHistoryParams,
   TxsPage,
 } from '@thorwallet/xchain-client'
-import {
-  Asset,
-  AssetBNB,
-  BaseAmount,
-  assetFromString,
-  assetAmount,
-  assetToBase,
-  baseAmount,
-  baseToAsset,
-  BNBChain,
-  assetToString,
-} from '@thorwallet/xchain-util'
+import { Asset, AssetBNB, BaseAmount, baseAmount, baseToAsset } from '@thorwallet/xchain-util'
 import { getSeed, validatePhrase, bip32 } from '@thorwallet/xchain-crypto'
-import { isTransferFee, parseTx, getPrefix, BNB_DECIMAL } from './util'
+import { isTransferFee, parseTx, getPrefix } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 import { Signature } from './types'
 type PrivKey = string
@@ -269,42 +251,6 @@ class Client implements BinanceClient, XChainClient {
    */
   validateAddress = (address: Address): boolean => {
     return this.bncClient.checkAddress(address, getPrefix(this.network))
-  }
-
-  /**
-   * Get the balance of a given address.
-   *
-   * @param {Address | number} address By default, it will return the balance of the current wallet. (optional)
-   * @param {Asset} asset If not set, it will return all assets available. (optional)
-   * @returns {Array<Balance>} The balance of the address.
-   */
-  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
-    try {
-      const balances: BinanceBalances = await this.bncClient.getBalance(address)
-
-      let assetBalances = balances.map((balance) => {
-        return {
-          asset: assetFromString(`${BNBChain}.${balance.symbol}`) || AssetBNB,
-          amount: assetToBase(assetAmount(balance.free, 8)),
-        }
-      })
-
-      // make sure we always have the bnb asset as balance in the array
-      if (assetBalances.length === 0) {
-        assetBalances = [
-          {
-            asset: AssetBNB,
-            amount: baseAmount(0, BNB_DECIMAL),
-          },
-        ]
-      }
-
-      return assetBalances.filter(
-        (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
-      )
-    } catch (error) {
-      return Promise.reject(error)
-    }
   }
 
   /**

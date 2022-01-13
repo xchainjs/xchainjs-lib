@@ -10,7 +10,6 @@ import {
   Tx,
   TxParams,
   TxHash,
-  Balance,
   Network,
   Fees,
   XChainClientParams,
@@ -246,24 +245,6 @@ class Client implements BitcoinClient, XChainClient {
    * @returns {boolean} `true` or `false`
    */
   validateAddress = (address: string): boolean => Utils.validateAddress(address, this.net)
-
-  /**
-   * Get the BTC balance of a given address.
-   *
-   * @param {Address} the BTC address
-   * @returns {Array<Balance>} The BTC balance of the address.
-   */
-  getBalance = async (address: Address): Promise<Balance[]> => {
-    try {
-      return Utils.getBalance({
-        sochainUrl: this.sochainUrl,
-        network: this.net,
-        address: address,
-      })
-    } catch (e) {
-      return Promise.reject(e)
-    }
-  }
 
   /**
    * Get transaction history of a given address with pagination options.

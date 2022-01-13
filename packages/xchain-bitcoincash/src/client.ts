@@ -4,7 +4,6 @@ import * as utils from './utils'
 import {
   RootDerivationPaths,
   Address,
-  Balance,
   Network,
   Fees,
   Tx,
@@ -302,18 +301,6 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   validateAddress = (address: string): boolean => {
     return utils.validateAddress(address, this.network)
-  }
-
-  /**
-   * Get the BCH balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balance>} The BCH balance of the address.
-   *
-   * @throws {"Invalid address"} Thrown if the given address is an invalid address.
-   */
-  getBalance = async (address: Address): Promise<Balance[]> => {
-    return utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address })
   }
 
   /**
