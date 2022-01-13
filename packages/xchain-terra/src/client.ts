@@ -1,4 +1,14 @@
-import { AccAddress, Coin, Coins, LCDClient, MnemonicKey, MsgSend } from '@terra-money/terra.js'
+import {
+  AccAddress,
+  Coin,
+  Coins,
+  LCDClient,
+  MnemonicKey,
+  MsgMultiSend,
+  MsgSend,
+  TxInfo,
+  TxSearchOptions,
+} from '@terra-money/terra.js'
 import {
   Balance,
   BaseXChainClient,
@@ -22,6 +32,7 @@ const DEFAULT_CONFIG = {
     explorerAddressURL: 'https://finder.terra.money/mainnet/address/',
     explorerTxURL: 'https://finder.terra.money/mainnet/tx/',
     cosmosAPIURL: 'https://lcd.terra.dev',
+    // cosmosAPIURL: 'https://terra.ninerealms.com',
     ChainID: 'columbus-5',
   },
   [Network.Stagenet]: {
@@ -44,7 +55,16 @@ const ASSET_LUNA: Asset = {
   symbol: 'LUNA',
   ticker: 'LUNA',
 }
-
+export type SearchTxParams = {
+  messageAction?: string
+  messageSender?: string
+  transferSender?: string
+  transferRecipient?: string
+  page?: number
+  limit?: number
+  txMinHeight?: number
+  txMaxHeight?: number
+}
 /**
  * Terra Client
  */
@@ -104,6 +124,7 @@ class Client extends BaseXChainClient implements XChainClient {
     balances = balances.concat(this.coinsToBalances(coins))
     //TODO add pagination
     if (assets) {
+      //filter out only the assets the user wants to see
       return balances.filter((bal: Balance) => {
         const exists = assets.find((asset) => asset.symbol === bal.asset.symbol)
         return exists !== undefined
@@ -119,72 +140,32 @@ class Client extends BaseXChainClient implements XChainClient {
       chainID: DEFAULT_CONFIG[this.network].ChainID,
     })
   }
-  getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    this.lcdClient.tx.search({
-      events: [{ key: 'key', value: 'value' }],
-      'pagination.key': 's',
-    })
-    params
-    throw new Error('Method not implemented.')
+  async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
+    const txSearchOptions: Partial<TxSearchOptions> = {
+      events: [
+        { key: 'message.sender', value: params?.address || this.getAddress() },
+        // { key: 'tx.height', value: '6063816' },
+      ],
+      'pagination.limit': params?.limit ? `${params?.limit}` : '50',
+      'pagination.offset': params?.offset ? `${params?.offset}` : '0',
+    }
+
+    //TODO filter by start time?
+    //TODO filter by asset
+
+    const results = await this.lcdClient.tx.search(txSearchOptions)
+    const txs: Tx[] = results.txs.map((txInfo) => this.convertTxInfoToTx(txInfo))
+    return {
+      total: results.pagination.total,
+      txs,
+    }
   }
 
   async getTransactionData(txId: string): Promise<Tx> {
     const txInfo = await this.lcdClient.tx.txInfo(txId?.toUpperCase())
-
-    //create super asset areas that can be pushed after extracting multicall, then mapped to export type
-    const SuperAsset: Asset[] = [] //idk what to do for the solution here
-    const superTo: TxTo[] = []
-    const superFrom: TxFrom[] = []
-    //let SuperAmount = []; //need to figure out what type it is first amount is interesting bc
-    //it is not part of the Promise<Tx> but is rather used to add metadata
-    //to the specific from and to arrays, as well construct a final asset
-
-    for (let i = 0; i < txInfo.tx.body.messages.length; i++) {
-      console.log('wrapped through the multicall ' + i + 'times')
-      const msg = JSON.parse(txInfo.tx.body.messages[i].toJSON())
-      const msgType = msg['@type']
-
-      if (msgType === '/cosmos.bank.v1beta1.MsgSend') {
-        console.log('did not skip to next indice')
-        const denom = msg.amount[0].denom //is it possible for one nested MsgSend to recieve multiple inputs? If so
-        // this code would break it assumes one. However since the txs are nested anyways
-        //maybe to send multiple points it just uses seperate MsgSend
-        const asset = this.getTerraNativeAsset(denom)
-        const amount = baseAmount(msg.amount[0].amount, 6) //see comment above for if 0 is acceptable
-
-        const msgSend = msg as MsgSend
-        //extract values at each indice
-        const indice_from = msgSend.from_address
-        const indice_to = msgSend.to_address
-
-        if (asset) {
-          SuperAsset.push(asset)
-        }
-        superTo.push({ to: indice_to, amount })
-        superFrom.push({ from: indice_from, amount })
-      }
-    }
-    /* If the an array that would fill, given at least one call msgType was 'MsgSend, is empty,
-    the return an error that the hash must be a multicall or tx that contains no supported msg types*/
-    if (superTo.length <= 0) {
-      throw new Error(`this hash only contains unsupported asset type(s) or msgType(s)`)
-    }
-
-    const asset = SuperAsset[0] //something weird with the optional not making it work
-    // const denom = SuperDenom[0]
-    // const asset = this.getAsset(denom)
-    const from = superFrom
-    const to = superTo
-
-    return {
-      asset,
-      from,
-      to,
-      date: new Date(txInfo.timestamp),
-      type: TxType.Transfer,
-      hash: txInfo.txhash,
-    }
+    return this.convertTxInfoToTx(txInfo)
   }
+
   async transfer({ walletIndex = 0, asset = ASSET_LUNA, amount, recipient, memo }: TxParams): Promise<string> {
     if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
 
@@ -241,6 +222,102 @@ class Client extends BaseXChainClient implements XChainClient {
         amount: baseAmount(c.amount.toFixed(), 6),
       }
     }) as unknown) as Balance[]
+  }
+  private convertTxInfoToTx(txInfo: TxInfo): Tx {
+    let from: TxFrom[] = []
+    let to: TxTo[] = []
+    txInfo.tx.body.messages.forEach((msg) => {
+      const msgObject = JSON.parse(msg.toJSON())
+      if (msgObject['@type'] === '/cosmos.bank.v1beta1.MsgSend') {
+        const xfers = this.convertMsgSend(msg as MsgSend)
+        from = from.concat(xfers.from)
+        to = to.concat(xfers.to)
+      } else if (msgObject['@type'] === '/cosmos.bank.v1beta1.MsgMultiSend') {
+        const xfers = this.convertMsgMultiSend(msg as MsgMultiSend)
+        from = from.concat(xfers.from)
+        to = to.concat(xfers.to)
+      } else {
+        //we ignore every other type of msg
+        console.log(msgObject['@type'])
+      }
+    })
+    return {
+      // NOTE: since multiple assettypes can be xfered in one tx, this asset should not really exist
+      // TODO we shoudl consider refactoring xchain-client.Tx to remove the top level Asset...
+      asset: {
+        chain: Chain.Terra,
+        symbol: '',
+        ticker: '',
+      },
+      from,
+      to,
+      date: new Date(txInfo.timestamp),
+      type: TxType.Transfer,
+      hash: txInfo.txhash,
+    }
+  }
+  private convertMsgSend(msgSend: MsgSend): { from: TxFrom[]; to: TxTo[] } {
+    const from: TxFrom[] = []
+    const to: TxTo[] = []
+    msgSend.amount.toArray().forEach((coin) => {
+      //ensure this is in base units ex uluna, uusd
+      const baseCoin = coin.toIntCoin()
+      const asset = this.getTerraNativeAsset(baseCoin.denom)
+      const amount = baseAmount(baseCoin.amount.toFixed(), 6)
+      if (asset) {
+        // NOTE: this will only populate native terra Assets
+        from.push({
+          from: msgSend.from_address,
+          amount,
+          asset,
+        })
+        to.push({
+          to: msgSend.to_address,
+          amount,
+          asset,
+        })
+      }
+    })
+
+    return { from, to }
+  }
+  private convertMsgMultiSend(msgMultiSend: MsgMultiSend): { from: TxFrom[]; to: TxTo[] } {
+    const from: TxFrom[] = []
+    const to: TxTo[] = []
+    msgMultiSend.inputs.forEach((input) => {
+      input.coins.toArray().forEach((coin) => {
+        //ensure this is in base units ex uluna, uusd
+        const baseCoin = coin.toIntCoin()
+        const asset = this.getTerraNativeAsset(baseCoin.denom)
+        const amount = baseAmount(baseCoin.amount.toFixed(), 6)
+        if (asset) {
+          // NOTE: this will only populate native terra Assets
+          from.push({
+            from: input.address,
+            amount,
+            asset,
+          })
+        }
+      })
+    })
+    msgMultiSend.outputs.forEach((output) => {
+      output.coins.toArray().forEach((coin) => {
+        //ensure this is in base units ex uluna, uusd
+        const baseCoin = coin.toIntCoin()
+        const asset = this.getTerraNativeAsset(baseCoin.denom)
+        const amount = baseAmount(baseCoin.amount.toFixed(), 6)
+        if (asset) {
+          // NOTE: this will only populate native terra Assets
+          to.push({
+            to: output.address,
+            amount,
+            asset,
+          })
+        }
+      })
+    })
+
+    return { from, to }
   }
 }
 

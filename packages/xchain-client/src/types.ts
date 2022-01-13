@@ -23,15 +23,17 @@ export type TxHash = string
 export type TxTo = {
   to: Address // address
   amount: BaseAmount // amount
+  asset?: Asset // asset
 }
 
 export type TxFrom = {
   from: Address | TxHash // address or tx id
   amount: BaseAmount // amount
+  asset?: Asset // asset
 }
 
 export type Tx = {
-  asset: Asset | Asset[] // asset
+  asset: Asset // asset
   from: TxFrom[] // list of "from" txs. BNC will have one `TxFrom` only, `BTC` might have many transactions going "in" (based on UTXO)
   to: TxTo[] // list of "to" transactions. BNC will have one `TxTo` only, `BTC` might have many transactions going "out" (based on UTXO)
   date: Date // timestamp of tx
