@@ -5,8 +5,10 @@ import {
   Fees,
   Network,
   Tx,
+  TxFrom,
   TxHistoryParams,
   TxParams,
+  TxTo,
   TxType,
   TxsPage,
   XChainClient,
@@ -128,34 +130,59 @@ class Client extends BaseXChainClient implements XChainClient {
 
   async getTransactionData(txId: string): Promise<Tx> {
     const txInfo = await this.lcdClient.tx.txInfo(txId?.toUpperCase())
-    const msg = JSON.parse(txInfo.tx.body.messages[0].toJSON())
 
-    const msgType = msg['@type']
-    const amount = baseAmount(msg.amount[0].amount, 6)
-    const denom = msg.amount[0].denom
-    const asset = this.getTerraNativeAsset(denom)
+    //create super asset areas that can be pushed after extracting multicall, then mapped to export type
+    const SuperAsset: Asset[] = [] //idk what to do for the solution here
+    const superTo: TxTo[] = []
+    const superFrom: TxFrom[] = []
+    //let SuperAmount = []; //need to figure out what type it is first amount is interesting bc
+    //it is not part of the Promise<Tx> but is rather used to add metadata
+    //to the specific from and to arrays, as well construct a final asset
 
-    if (asset && msgType === '/cosmos.bank.v1beta1.MsgSend') {
-      return {
-        asset,
-        from: [
-          {
-            from: msg.from_address,
-            amount,
-          },
-        ],
-        to: [
-          {
-            to: msg.to_address,
-            amount,
-          },
-        ],
-        date: new Date(txInfo.timestamp),
-        type: TxType.Transfer,
-        hash: txInfo.txhash,
+    for (let i = 0; i < txInfo.tx.body.messages.length; i++) {
+      console.log('wrapped through the multicall ' + i + 'times')
+      const msg = JSON.parse(txInfo.tx.body.messages[i].toJSON())
+      const msgType = msg['@type']
+
+      if (msgType === '/cosmos.bank.v1beta1.MsgSend') {
+        console.log('did not skip to next indice')
+        const denom = msg.amount[0].denom //is it possible for one nested MsgSend to recieve multiple inputs? If so
+        // this code would break it assumes one. However since the txs are nested anyways
+        //maybe to send multiple points it just uses seperate MsgSend
+        const asset = this.getTerraNativeAsset(denom)
+        const amount = baseAmount(msg.amount[0].amount, 6) //see comment above for if 0 is acceptable
+
+        const msgSend = msg as MsgSend
+        //extract values at each indice
+        const indice_from = msgSend.from_address
+        const indice_to = msgSend.to_address
+
+        if (asset) {
+          SuperAsset.push(asset)
+        }
+        superTo.push({ to: indice_to, amount })
+        superFrom.push({ from: indice_from, amount })
       }
-    } else {
-      throw new Error(`unsupported asset ${denom} or msgType ${msgType}`)
+    }
+    /* If the an array that would fill, given at least one call msgType was 'MsgSend, is empty,
+    the return an error that the hash must be a multicall or tx that contains no supported msg types*/
+    if (superTo.length <= 0) {
+      throw new Error(`this hash only contains unsupported asset type(s) or msgType(s)`)
+    }
+
+    const asset = SuperAsset[0] //something weird with the optional not making it work
+    // const denom = SuperDenom[0]
+    // const asset = this.getAsset(denom)
+    const from = superFrom
+    const to = superTo
+
+    return {
+      asset,
+      from,
+      to,
+      date: new Date(txInfo.timestamp),
+      type: TxType.Transfer,
+      hash: txInfo.txhash,
     }
   }
   async transfer({ walletIndex = 0, asset = ASSET_LUNA, amount, recipient, memo }: TxParams): Promise<string> {
