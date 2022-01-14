@@ -2,7 +2,6 @@ import {
   Address,
   Balance,
   Fee,
-  // FeeOption,
   FeeRate,
   Network,
   Tx,
@@ -327,9 +326,6 @@ class Client extends UTXOClient {
         sochainUrl: this.sochainUrl,
         address: this.getAddress(fromAddressIndex),
       }),
-      // TODO: Check this before production
-      // nodeUrl: this.nodeUrl,
-      // auth: this.nodeAuth,
     })
   }
 }
