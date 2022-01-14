@@ -1,13 +1,13 @@
 {
   "name": "@xchainjs/xchain-doge",
   "version": "0.1.0",
-  "description": "Custom Doge client and utilities used by Thorswap clients",
+  "description": "Custom Doge client and utilities used by XChain clients",
   "keywords": [
     "Xchain",
     "Doge"
   ],
   "author": "XChainJS",
-  "homepage": "https://github.com/thorswap/xchainjs-lib",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:thorswap/xchainjs.git"
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
     "clean": "rimraf lib/**",
@@ -32,11 +32,11 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
-    "@types/bitcoinjs-lib": "^5.0.0",
-    "@types/wif": "^2.0.2",
     "@xchainjs/xchain-client": "^0.11.0",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.4.0-alpha",
+    "@types/bitcoinjs-lib": "^5.0.0",
+    "@types/wif": "^2.0.2",
     "axios": "^0.21.1",
     "axios-mock-adapter": "^1.20.0",
     "bitcoinjs-lib": "^5.2.0",
@@ -56,14 +56,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
-    "@xchainjs/xchain-client": "^0.11.0",
-    "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.4.0-alpha",
-    "axios": "^0.24.0",
-    "bitcoinjs-lib": "^5.2.0",
-    "coininfo": "^5.1.0",
-    "wif": "^2.0.6"
   }
 }
