@@ -1,5 +1,8 @@
-# v.0.23.1 (2022-01-10)
+# v.0.23.1 (2022-01-05)
 
+## Fix
+
+- Fix default provider for `stagenet`
 - upgrade axios dependency to latest
 
 # v.0.23.0 (2021-12-29)

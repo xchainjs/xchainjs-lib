@@ -1,8 +1,11 @@
-# v.0.3.2 (2022-01-10)
+# v.0.4.0 (2022-XX-XX)
 
 ### Add
 
+- `Chain.Doge`
+- `AssetDOGE`
 - added support for terra
+
 
 # v.0.3.1 (2021-07-14)
 

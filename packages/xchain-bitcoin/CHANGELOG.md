@@ -1,6 +1,15 @@
-# v.0.16.1 (2022-01-10)
+# v.0.17.1 (2022-01-XX)
+
+## Fix
 
 - upgrade axios dependency to latest
+# v.0.17.0 (2022-01-05)
+
+## Breaking change
+
+- Make `haskoinUrl` configurable (change default haskoin url back to `https://api.haskoin.com/btc`)
+- `haskoinUrl` needs to be passed as parameter into misc. `utils` functions
+
 
 # v.0.16.0 (2021-12-29)
 
