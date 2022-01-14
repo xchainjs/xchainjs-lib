@@ -1,7 +1,6 @@
 import {
   Address,
   Balance,
-  FeeOption,
   FeeRate,
   Fees,
   FeesWithRates,
@@ -54,7 +53,6 @@ export const compileMemo = (memo: string): Buffer => {
  * @returns {number} The fee amount.
  */
 export function getFee(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
-  // TODO: Check this
   let sum =
     TX_EMPTY_SIZE +
     inputs.reduce(function (a) {
@@ -89,13 +87,13 @@ export function arrayAverage(array: number[]): number {
  * Get Dogecoin network to be used with bitcoinjs.
  *
  * @param {Network} network
- * @returns {Dogecoin.Network} The Doge network.
+ * @returns {Dogecoin.networks.Network} The Doge network.
  */
-
-// TODO fix typing Dogecoin.Network as return statement
-export const dogeNetwork = (network: Network) => {
+export const dogeNetwork = (network: Network): Dogecoin.networks.Network => {
   switch (network) {
     case Network.Mainnet:
+      return coininfo.dogecoin.main.toBitcoinJS()
+    case Network.Stagenet:
       return coininfo.dogecoin.main.toBitcoinJS()
     case Network.Testnet: {
       // Latest coininfo on NPM doesn't contain dogetest config information
@@ -210,8 +208,9 @@ export const buildTx = async ({
   if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
 
   const psbt = new Dogecoin.Psbt({ network: dogeNetwork(network) }) // Network-specific
-  // TODO: Doge recommended fees is greater than the recommended by Bitcoinjs-lib, so we need to increase the maximum fee rate
-  psbt.setMaximumFeeRate(650000000)
+  // TODO: Doge recommended fees is greater than the recommended by Bitcoinjs-lib (for BTC),
+  //       so we need to increase the maximum fee rate. Currently, the fast rate fee is near ~650000sats/byte
+  psbt.setMaximumFeeRate(650000)
   const params = { sochainUrl, network, address: sender }
 
   for (const utxo of inputs) {
@@ -249,9 +248,11 @@ export const buildTx = async ({
  * @returns {TxHash} The transaction hash.
  */
 export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
-  return await nodeApi.broadcastTxToSochain(params)
-  // TODO: Check this before prod
-  // return await nodeApi.broadcastTx(params)
+  if (params.network === 'testnet') {
+    return await nodeApi.broadcastTxToSochain(params)
+  } else {
+    return await nodeApi.broadcastTxToBlockCypher(params)
+  }
 }
 
 /**
@@ -274,8 +275,7 @@ export const calcFee = (feeRate: FeeRate, memo?: string): BaseAmount => {
  */
 export const getDefaultFeesWithRates = (): FeesWithRates => {
   const rates = {
-    ...standardFeeRates(20),
-    [FeeOption.Fastest]: 50,
+    ...standardFeeRates(MIN_TX_FEE),
   }
 
   return {

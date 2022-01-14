@@ -14,7 +14,7 @@ import {
 } from './types/sochain-api-types'
 import { DOGE_DECIMAL } from './utils'
 
-const DEFAULT_SUGGESTED_TRANSACTION_FEE = 100000
+const DEFAULT_SUGGESTED_TRANSACTION_FEE = 150000
 
 const toSochainNetwork = (network: Network): string => {
   switch (network) {
@@ -28,7 +28,11 @@ const toSochainNetwork = (network: Network): string => {
 }
 
 export const getSendTxUrl = ({ sochainUrl, network }: AddressParams) => {
-  return `${sochainUrl}/send_tx/${toSochainNetwork(network)}`
+  if (network === 'testnet') {
+    return `${sochainUrl}/send_tx/${toSochainNetwork(network)}`
+  } else {
+    return `https://api.blockcypher.com/v1/doge/main/txs/push`
+  }
 }
 
 /**
