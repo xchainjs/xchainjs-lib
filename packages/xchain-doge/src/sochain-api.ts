@@ -20,6 +20,7 @@ const DEFAULT_SUGGESTED_TRANSACTION_FEE = 127
 const toSochainNetwork = (network: Network): string => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return 'BTC'
     case Network.Testnet:
       return 'BTCTEST'

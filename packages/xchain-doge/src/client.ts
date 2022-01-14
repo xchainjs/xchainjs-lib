@@ -44,6 +44,7 @@ class Client extends UTXOClient {
     sochainUrl = 'https://sochain.com/api/v2',
     rootDerivationPaths = {
       [Network.Mainnet]: `m/44'/3'/0'/0`,
+      [Network.Stagenet]: `m/44'/3'/0'/0`,
       [Network.Testnet]: `m/44'/1'/0'/0`,
     },
     phrase = '',
@@ -70,6 +71,7 @@ class Client extends UTXOClient {
   getExplorerUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://blockexplorer.one/dogecoin/mainnet'
       case Network.Testnet:
         return 'https://blockexplorer.one/dogecoin/testnet'
