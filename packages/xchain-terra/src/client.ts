@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AccAddress, Coin, Coins, LCDClient, MnemonicKey, MsgMultiSend, MsgSend, TxInfo } from '@terra-money/terra.js'
 import {
   Balance,
@@ -206,11 +207,11 @@ class Client extends BaseXChainClient implements XChainClient {
       }
     }) as unknown) as Balance[]
   }
-  private convertSearchResultTxToTx(tx: unknown): Tx {
+  private convertSearchResultTxToTx(tx: any): Tx {
     let from: TxFrom[] = []
     let to: TxTo[] = []
     // console.log(tx)
-    tx.tx.value.msg.forEach((msg: unknown) => {
+    tx.tx.value.msg.forEach((msg: any) => {
       console.log(msg)
       if (msg.type === 'bank/MsgSend') {
         const xfers = this.convertMsgSend(MsgSend.fromAmino(msg))
