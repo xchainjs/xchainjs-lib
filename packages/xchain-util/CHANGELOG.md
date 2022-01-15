@@ -6,7 +6,6 @@
 - `AssetDOGE`
 - added support for terra
 
-
 # v.0.3.1 (2021-07-14)
 
 ### Fix

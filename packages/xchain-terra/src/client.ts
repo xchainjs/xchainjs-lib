@@ -1,14 +1,4 @@
-import {
-  AccAddress,
-  Coin,
-  Coins,
-  LCDClient,
-  MnemonicKey,
-  MsgMultiSend,
-  MsgSend,
-  TxInfo,
-  TxSearchOptions,
-} from '@terra-money/terra.js'
+import { AccAddress, Coin, Coins, LCDClient, MnemonicKey, MsgMultiSend, MsgSend, TxInfo } from '@terra-money/terra.js'
 import {
   Balance,
   BaseXChainClient,
@@ -25,28 +15,28 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
+import axios from 'axios'
 
 const DEFAULT_CONFIG = {
   [Network.Mainnet]: {
     explorerURL: 'https://finder.terra.money/mainnet',
     explorerAddressURL: 'https://finder.terra.money/mainnet/address/',
     explorerTxURL: 'https://finder.terra.money/mainnet/tx/',
-    cosmosAPIURL: 'https://lcd.terra.dev',
-    // cosmosAPIURL: 'https://terra.ninerealms.com',
+    cosmosAPIURL: 'https://fcd.terra.dev',
     ChainID: 'columbus-5',
   },
   [Network.Stagenet]: {
     explorerURL: 'https://finder.terra.money/mainnet',
     explorerAddressURL: 'https://finder.terra.money/mainnet/address/',
     explorerTxURL: 'https://finder.terra.money/mainnet/tx/',
-    cosmosAPIURL: 'https://lcd.terra.dev',
+    cosmosAPIURL: 'https://fcd.terra.dev',
     ChainID: 'columbus-5',
   },
   [Network.Testnet]: {
     explorerURL: 'https://finder.terra.money/testnet',
     explorerAddressURL: 'https://finder.terra.money/testnet/address/',
     explorerTxURL: 'https://finder.terra.money/testnet/tx/',
-    cosmosAPIURL: 'https://bombay-lcd.terra.dev',
+    cosmosAPIURL: 'https://bombay-fcd.terra.dev',
     ChainID: 'bombay-12',
   },
 }
@@ -70,7 +60,6 @@ export type SearchTxParams = {
  */
 class Client extends BaseXChainClient implements XChainClient {
   private lcdClient: LCDClient
-
   constructor({
     network = Network.Testnet,
 
@@ -91,6 +80,7 @@ class Client extends BaseXChainClient implements XChainClient {
   }
 
   getFees(): Promise<Fees> {
+    // TODO
     throw new Error('Method not implemented.')
   }
   getAddress(walletIndex = 0): string {
@@ -110,19 +100,14 @@ class Client extends BaseXChainClient implements XChainClient {
     return AccAddress.validate(address)
   }
   async getBalance(address: string, assets?: Asset[]): Promise<Balance[]> {
-    // const x: PaginationOptions = {
-    //   'pagination.limit': '1',
-    //   'pagination.offset': '0',
-    //   'pagination.key': 's',
-    //   'pagination.count_total': 'false',
-    //   'pagination.reverse': 'false',
-    //   order_by: OrderBy.ORDER_BY_UNSPECIFIED,
-    // }
-
     let balances: Balance[] = []
-    const [coins] = await this.lcdClient.bank.balance(address)
+    let [coins, pagination] = await this.lcdClient.bank.balance(address)
     balances = balances.concat(this.coinsToBalances(coins))
-    //TODO add pagination
+    while (pagination.next_key) {
+      ;[coins, pagination] = await this.lcdClient.bank.balance(address, { 'pagination.offset': pagination.next_key })
+      balances = balances.concat(this.coinsToBalances(coins))
+    }
+
     if (assets) {
       //filter out only the assets the user wants to see
       return balances.filter((bal: Balance) => {
@@ -141,22 +126,20 @@ class Client extends BaseXChainClient implements XChainClient {
     })
   }
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const txSearchOptions: Partial<TxSearchOptions> = {
-      events: [
-        { key: 'message.sender', value: params?.address || this.getAddress() },
-        // { key: 'tx.height', value: '6063816' },
-      ],
-      'pagination.limit': params?.limit ? `${params?.limit}` : '50',
-      'pagination.offset': params?.offset ? `${params?.offset}` : '0',
-    }
-
     //TODO filter by start time?
     //TODO filter by asset
+    const address = params?.address || this.getAddress()
+    const offset = params?.offset ? `${params?.offset}` : '0'
+    const limit = params?.limit ? `${params?.limit}` : '100'
+    const results = (
+      await axios.get(
+        `${DEFAULT_CONFIG[this.network].cosmosAPIURL}/v1/txs?offset=${offset}&limit=${limit}&account=${address}`,
+      )
+    ).data
 
-    const results = await this.lcdClient.tx.search(txSearchOptions)
-    const txs: Tx[] = results.txs.map((txInfo) => this.convertTxInfoToTx(txInfo))
+    const txs: Tx[] = results.txs.map((tx: unknown) => this.convertSearchResultTxToTx(tx))
     return {
-      total: results.pagination.total,
+      total: results.txs.length,
       txs,
     }
   }
@@ -222,6 +205,41 @@ class Client extends BaseXChainClient implements XChainClient {
         amount: baseAmount(c.amount.toFixed(), 6),
       }
     }) as unknown) as Balance[]
+  }
+  private convertSearchResultTxToTx(tx: unknown): Tx {
+    let from: TxFrom[] = []
+    let to: TxTo[] = []
+    // console.log(tx)
+    tx.tx.value.msg.forEach((msg: unknown) => {
+      console.log(msg)
+      if (msg.type === 'bank/MsgSend') {
+        const xfers = this.convertMsgSend(MsgSend.fromAmino(msg))
+        from = from.concat(xfers.from)
+        to = to.concat(xfers.to)
+      } else if (msg.type === 'bank/MsgMultiSend') {
+        const xfers = this.convertMsgMultiSend(MsgMultiSend.fromAmino(msg))
+        from = from.concat(xfers.from)
+        to = to.concat(xfers.to)
+      } else {
+        // we ignore every other type of msg
+        //TODO remove this log after testing
+        console.log(msg.type)
+      }
+    })
+    return {
+      // NOTE: since multiple assettypes can be xfered in one tx, this asset should not really exist
+      // TODO we shoudl consider refactoring xchain-client.Tx to remove the top level Asset...
+      asset: {
+        chain: Chain.Terra,
+        symbol: '',
+        ticker: '',
+      },
+      from,
+      to,
+      date: new Date(tx.timestamp),
+      type: TxType.Transfer,
+      hash: tx.txhash,
+    }
   }
   private convertTxInfoToTx(txInfo: TxInfo): Tx {
     let from: TxFrom[] = []

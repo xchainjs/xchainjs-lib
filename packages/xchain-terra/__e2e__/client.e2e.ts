@@ -119,7 +119,7 @@ describe('Client Test', () => {
     try {
       terraClient.setNetwork('mainnet' as Network)
 
-      const address = 'terra1fex9f78reuwhfsnc8sun6mz8rl9zwqh03fhwf3'
+      const address = 'terra1sffpgwnyg69y93es86rdz8uvz4fdjtqcaxnjdp'
       const txs = await terraClient.getTransactions({ address })
       txs.txs.forEach((tx: Tx) => {
         console.log(JSON.stringify(tx, null, 2))
@@ -153,36 +153,36 @@ describe('Client Test', () => {
 
       //Inputs
       expect(tx.from[0].from).toEqual('terra1fex9f78reuwhfsnc8sun6mz8rl9zwqh03fhwf3')
-      expect(tx.from[0].asset.symbol).toEqual('KRT')
+      expect(tx.from[0].asset?.symbol).toEqual('KRT')
       expect(tx.from[0].amount.amount().toFixed()).toEqual('1')
       expect(tx.from[1].from).toEqual('terra1l6834ha5h5l5dxkr0vl82hjcucfht3gpwlflq6')
-      expect(tx.from[1].asset.symbol).toEqual('KRT')
+      expect(tx.from[1].asset?.symbol).toEqual('KRT')
       expect(tx.from[1].amount.amount().toFixed()).toEqual('41948000000')
       expect(tx.from[2].from).toEqual('terra1fex9f78reuwhfsnc8sun6mz8rl9zwqh03fhwf3')
-      expect(tx.from[2].asset.symbol).toEqual('KRT')
+      expect(tx.from[2].asset?.symbol).toEqual('KRT')
       expect(tx.from[2].amount.amount().toFixed()).toEqual('3000000000')
       expect(tx.from[3].from).toEqual('terra1dtcvy52ma8gl5f2lx4klpqzcyfw90tujp66yp7')
-      expect(tx.from[3].asset.symbol).toEqual('KRT')
+      expect(tx.from[3].asset?.symbol).toEqual('KRT')
       expect(tx.from[3].amount.amount().toFixed()).toEqual('17000000000')
       expect(tx.from[4].from).toEqual('terra1fex9f78reuwhfsnc8sun6mz8rl9zwqh03fhwf3')
-      expect(tx.from[4].asset.symbol).toEqual('KRT')
+      expect(tx.from[4].asset?.symbol).toEqual('KRT')
       expect(tx.from[4].amount.amount().toFixed()).toEqual('25000000000')
 
       //outputs
       expect(tx.to[0].to).toEqual('terra1fex9f78reuwhfsnc8sun6mz8rl9zwqh03fhwf3')
-      expect(tx.to[0].asset.symbol).toEqual('KRT')
+      expect(tx.to[0].asset?.symbol).toEqual('KRT')
       expect(tx.to[0].amount.amount().toFixed()).toEqual('1')
       expect(tx.to[1].to).toEqual('terra1fd3yy3dlg6gm0fkapyqzcunl26zkwdnal0y2cq')
-      expect(tx.to[1].asset.symbol).toEqual('KRT')
+      expect(tx.to[1].asset?.symbol).toEqual('KRT')
       expect(tx.to[1].amount.amount().toFixed()).toEqual('41948000000')
       expect(tx.to[2].to).toEqual('terra1l6834ha5h5l5dxkr0vl82hjcucfht3gpwlflq6')
-      expect(tx.to[2].asset.symbol).toEqual('KRT')
+      expect(tx.to[2].asset?.symbol).toEqual('KRT')
       expect(tx.to[2].amount.amount().toFixed()).toEqual('3000000000')
       expect(tx.to[3].to).toEqual('terra1fd3yy3dlg6gm0fkapyqzcunl26zkwdnal0y2cq')
-      expect(tx.to[3].asset.symbol).toEqual('KRT')
+      expect(tx.to[3].asset?.symbol).toEqual('KRT')
       expect(tx.to[3].amount.amount().toFixed()).toEqual('17000000000')
       expect(tx.to[4].to).toEqual('terra1nqnmgh6vkrcq8e4sscjxwnyu740g5xuxlk9edr')
-      expect(tx.to[4].asset.symbol).toEqual('KRT')
+      expect(tx.to[4].asset?.symbol).toEqual('KRT')
       expect(tx.to[4].amount.amount().toFixed()).toEqual('25000000000')
     } catch (error) {
       console.error(error)
@@ -204,17 +204,17 @@ describe('Client Test', () => {
       expect(tx.to.length).toEqual(2)
 
       expect(tx.from[0].from).toEqual('terra1saynp5x60tr03sy4awr2rzt3wgmqrqahuahccv')
-      expect(tx.from[0].asset.symbol).toEqual('KRT')
+      expect(tx.from[0].asset?.symbol).toEqual('KRT')
       expect(tx.from[0].amount.amount().toFixed()).toEqual('1000000')
       expect(tx.to[0].to).toEqual('terra1ltnkx0mv7lf2rca9f8w740ashu93ujughy4s7p')
-      expect(tx.to[0].asset.symbol).toEqual('KRT')
+      expect(tx.to[0].asset?.symbol).toEqual('KRT')
       expect(tx.to[0].amount.amount().toFixed()).toEqual('1000000')
 
       expect(tx.from[1].from).toEqual('terra1saynp5x60tr03sy4awr2rzt3wgmqrqahuahccv')
-      expect(tx.from[1].asset.symbol).toEqual('KRT')
+      expect(tx.from[1].asset?.symbol).toEqual('KRT')
       expect(tx.from[1].amount.amount().toFixed()).toEqual('1000000')
       expect(tx.to[1].to).toEqual('terra1j6fey5tl70k9fvrv7mea7ahfr8u2yv7l23w5e6')
-      expect(tx.to[1].asset.symbol).toEqual('KRT')
+      expect(tx.to[1].asset?.symbol).toEqual('KRT')
       expect(tx.to[1].amount.amount().toFixed()).toEqual('1000000')
     } catch (error) {
       console.error(error)
