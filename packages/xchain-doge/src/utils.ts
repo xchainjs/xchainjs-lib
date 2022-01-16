@@ -15,13 +15,11 @@ import * as Dogecoin from 'bitcoinjs-lib'
 import coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'
 
-import { MIN_TX_FEE } from './const'
+import { DOGE_DECIMAL, MIN_TX_FEE } from './const'
 import * as nodeApi from './node-api'
 import * as sochain from './sochain-api'
 import { BroadcastTxParams, UTXO } from './types/common'
 import { AddressParams, DogeAddressUTXO } from './types/sochain-api-types'
-
-export const DOGE_DECIMAL = 8
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
