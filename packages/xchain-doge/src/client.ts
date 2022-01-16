@@ -17,15 +17,16 @@ import { getSeed } from '@xchainjs/xchain-crypto'
 import { AssetDOGE, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Dogecoin from 'bitcoinjs-lib'
 
+import * as blockcypher from './blockcypher-api'
+import { DOGE_DECIMAL } from './const'
 import * as sochain from './sochain-api'
-import { NodeAuth } from './types'
 import { TxIO } from './types/sochain-api-types'
 import * as Utils from './utils'
 
 export type DogecoinClientParams = XChainClientParams & {
   sochainUrl?: string
   nodeUrl?: string
-  nodeAuth?: NodeAuth | null
+  blockcypherUrl?: string
 }
 
 /**
@@ -33,8 +34,8 @@ export type DogecoinClientParams = XChainClientParams & {
  */
 class Client extends UTXOClient {
   private sochainUrl = ''
+  private blockcypherUrl = ''
   public nodeUrl: string | undefined = ''
-  public nodeAuth?: NodeAuth
 
   /**
    * Constructor
@@ -46,12 +47,9 @@ class Client extends UTXOClient {
   constructor({
     network = Network.Testnet,
     sochainUrl = 'https://sochain.com/api/v2',
+    blockcypherUrl = 'https://api.blockcypher.com/v1',
     phrase,
     nodeUrl,
-    nodeAuth = {
-      username: 'thorchain',
-      password: 'password',
-    },
     rootDerivationPaths = {
       [Network.Mainnet]: `m/44'/3'/0'/0/`,
       [Network.Stagenet]: `m/44'/3'/0'/0/`,
@@ -59,26 +57,9 @@ class Client extends UTXOClient {
     },
   }: DogecoinClientParams) {
     super(Chain.Doge, { network, rootDerivationPaths, phrase })
-    this.nodeUrl =
-      nodeUrl ??
-      (() => {
-        // TODO: CHECK THIS
-        switch (network) {
-          case Network.Mainnet:
-            return 'https://doge.thorchain.info'
-          case Network.Stagenet:
-            return 'https://doge.thorchain.info'
-          case Network.Testnet:
-            return 'https://testnet.doge.thorchain.info'
-        }
-      })()
-
-    this.nodeAuth =
-      // Leave possibility to send requests without auth info for user
-      // by strictly passing nodeAuth as null value
-      nodeAuth === null ? undefined : nodeAuth
-
+    this.nodeUrl = nodeUrl
     this.setSochainUrl(sochainUrl)
+    this.setBlockcypherUrl(blockcypherUrl)
   }
 
   /**
@@ -89,6 +70,16 @@ class Client extends UTXOClient {
    */
   setSochainUrl(url: string): void {
     this.sochainUrl = url
+  }
+
+  /**
+   * Set/Update the blockcypher url.
+   *
+   * @param {string} url The new blockcypher url.
+   * @returns {void}
+   */
+  setBlockcypherUrl(url: string): void {
+    this.blockcypherUrl = url
   }
 
   /**
@@ -244,12 +235,12 @@ class Client extends UTXOClient {
         asset: AssetDOGE,
         from: rawTx.inputs.map((i: TxIO) => ({
           from: i.address,
-          amount: assetToBase(assetAmount(i.value, Utils.DOGE_DECIMAL)),
+          amount: assetToBase(assetAmount(i.value, DOGE_DECIMAL)),
         })),
         to: rawTx.outputs
           // ignore tx with type 'nulldata'
           .filter((i: TxIO) => i.type !== 'nulldata')
-          .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.DOGE_DECIMAL)) })),
+          .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, DOGE_DECIMAL)) })),
         date: new Date(rawTx.time * 1000),
         type: TxType.Transfer,
         hash: rawTx.txid,
@@ -280,9 +271,9 @@ class Client extends UTXOClient {
       asset: AssetDOGE,
       from: rawTx.inputs.map((i) => ({
         from: i.address,
-        amount: assetToBase(assetAmount(i.value, Utils.DOGE_DECIMAL)),
+        amount: assetToBase(assetAmount(i.value, DOGE_DECIMAL)),
       })),
-      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.DOGE_DECIMAL)) })),
+      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, DOGE_DECIMAL)) })),
       date: new Date(rawTx.time * 1000),
       type: TxType.Transfer,
       hash: rawTx.txid,
@@ -290,7 +281,7 @@ class Client extends UTXOClient {
   }
 
   protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    return await sochain.getSuggestedTxFee()
+    return await blockcypher.getSuggestedTxFee({ blockcypherUrl: this.blockcypherUrl })
   }
 
   protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
@@ -318,14 +309,21 @@ class Client extends UTXOClient {
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-    return await Utils.broadcastTx({
-      network: this.network,
-      txHex,
-      nodeUrl: sochain.getSendTxUrl({
+    let nodeUrl: string
+    if (this.network === Network.Testnet) {
+      nodeUrl = sochain.getSendTxUrl({
         network: this.network,
         sochainUrl: this.sochainUrl,
         address: this.getAddress(fromAddressIndex),
-      }),
+      })
+    } else {
+      nodeUrl = blockcypher.getSendTxUrl({ network: this.network, blockcypherUrl: this.blockcypherUrl })
+    }
+
+    return await Utils.broadcastTx({
+      network: this.network,
+      txHex,
+      nodeUrl,
     })
   }
 }
