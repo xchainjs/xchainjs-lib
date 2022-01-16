@@ -4,13 +4,10 @@ import { AssetDOGE, baseAmount } from '@xchainjs/xchain-util'
 import mockSochainApi from '../__mocks__/sochain'
 import { Client } from '../src/client'
 import { MIN_TX_FEE } from '../src/const'
-// import { MIN_TX_FEE } from '../src/const'
 
 mockSochainApi.init()
 
 const dogeClient = new Client({ network: 'testnet' as Network })
-// dogeClient.setPhrase('ship country company mistake figure photo file riot expire always rare tell')
-// console.log(dogeClient.getAddress(0))
 
 describe('DogecoinClient Test', () => {
   beforeEach(() => {
