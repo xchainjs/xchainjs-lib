@@ -7,7 +7,7 @@ import { MIN_TX_FEE } from '../src/const'
 
 mockSochainApi.init()
 
-const dogeClient = new Client({ network: 'testnet' as Network })
+const dogeClient = new Client({ network: Network.Testnet })
 
 describe('DogecoinClient Test', () => {
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe('DogecoinClient Test', () => {
   const mainnet_address_path1 = 'DToAEBCvzfxqsZX2u4xkLfMXVbkyAwebkn'
 
   it('set phrase should return correct address', () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     const result = dogeClient.setPhrase(phraseOne)
     expect(result).toEqual(testnet_address_path0)
   })
@@ -43,7 +43,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('should validate the right address', () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const address = dogeClient.getAddress()
     const valid = dogeClient.validateAddress(address)
@@ -52,7 +52,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('should invalidate the address', () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const invalid1 = dogeClient.validateAddress('NFVTM2HBZ4RV1FHBVTQI5HGWRRZY5RQMLV')
     const invalid2 = dogeClient.validateAddress('nfvtm2hbz4rv1fhbvtqi5hgwrrzy5rqmlv')
@@ -61,7 +61,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('set phrase should return correct address', () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     expect(dogeClient.setPhrase(phraseOne)).toEqual(testnet_address_path0)
     expect(dogeClient.getAddress(1)).toEqual(testnet_address_path1)
 
@@ -72,7 +72,7 @@ describe('DogecoinClient Test', () => {
 
   it('should get the right balance', async () => {
     const expectedBalance = 10000000000
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const balance = await dogeClient.getBalance(dogeClient.getAddress())
     expect(balance.length).toEqual(1)
@@ -80,7 +80,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('should get the balance of an address without phrase', async () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.purgeClient()
     const balance = await dogeClient.getBalance('nkJ3JHmpuWqu3eHyXByh67YmwDGep9bD3N')
     expect(balance.length).toEqual(1)
@@ -89,7 +89,7 @@ describe('DogecoinClient Test', () => {
 
   it('should get the right balance when scanUTXOs is called twice', async () => {
     const expectedBalance = 10000000000
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
 
     const balance = await dogeClient.getBalance(dogeClient.getAddress())
@@ -103,7 +103,7 @@ describe('DogecoinClient Test', () => {
 
   // Some random 404 and useless error?
   // it('should broadcast a normal transfer', async () => {
-  //   dogeClient.setNetwork('testnet' as Network)
+  //   dogeClient.setNetwork(Network.Testnet)
   //   dogeClient.setPhrase(phraseOne)
   //   const amount = baseAmount(5000000000)
   //   const txid = await dogeClient.transfer({ asset: AssetDoge, recipient: testnet_address_path1, amount, feeRate: 1 })
@@ -112,7 +112,7 @@ describe('DogecoinClient Test', () => {
 
   // Some random 404 and useless error?
   // it('should broadcast a normal transfer without feeRate', async () => {
-  //   dogeClient.setNetwork('testnet' as Network)
+  //   dogeClient.setNetwork(Network.Testnet)
   //   dogeClient.setPhrase(phraseOne)
   //   const amount = baseAmount(100)
   //   const txid = await dogeClient.transfer({ asset: AssetDoge, recipient: testnet_address_path0, amount })
@@ -121,7 +121,7 @@ describe('DogecoinClient Test', () => {
 
   // Even weirder 404 error
   // it('should do broadcast a vault transfer with a memo', async () => {
-  //   dogeClient.setNetwork('testnet' as Network)
+  //   dogeClient.setNetwork(Network.Testnet)
   //   dogeClient.setPhrase(phraseOne)
 
   //   const amount = baseAmount(2223)
@@ -141,7 +141,7 @@ describe('DogecoinClient Test', () => {
   // })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
 
     const asset = AssetDOGE
@@ -152,7 +152,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('returns fees and rates of a normal tx', async () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const { fees, rates } = await dogeClient.getFeesWithRates()
     // check fees
@@ -166,7 +166,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('returns fees and rates of a tx w/ memo', async () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const { fees, rates } = await dogeClient.getFeesWithRates(MEMO)
     // check fees
@@ -180,7 +180,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('should return estimated fees of a normal tx', async () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const estimates = await dogeClient.getFees()
     expect(estimates.fast).toBeDefined()
@@ -189,7 +189,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('should return estimated fees of a vault tx that are more expensive than a normal tx (in case of > MIN_TX_FEE only)', async () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const normalTx = await dogeClient.getFees()
     const vaultTx = await dogeClient.getFeesWithMemo(MEMO)
@@ -214,7 +214,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('returns different fee rates for a normal tx', async () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const { fast, fastest, average } = await dogeClient.getFeeRates()
     expect(fast > average)
@@ -222,7 +222,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('should error when an invalid address is used in getting balance', () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const invalidAddress = 'error_address'
     const expectedError = 'Could not get balances for address error_address'
@@ -230,7 +230,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('should error when an invalid address is used in transfer', () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const invalidAddress = 'error_address'
 
@@ -243,7 +243,7 @@ describe('DogecoinClient Test', () => {
   })
 
   it('should get address transactions', async () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
 
     const txPages = await dogeClient.getTransactions({ address: 'nVhTSAcDWg5PihJA7FCx6G6jLexRz7qhsB', limit: 4 })
 
@@ -258,7 +258,7 @@ describe('DogecoinClient Test', () => {
 
   // Almost works: limit does not seem to work
   it('should get address transactions with limit', async () => {
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
 
     // Limit should work
     const txPages = await dogeClient.getTransactions({ address: 'nVhTSAcDWg5PihJA7FCx6G6jLexRz7qhsB', limit: 1 })
@@ -267,7 +267,7 @@ describe('DogecoinClient Test', () => {
 
   it('should get transaction with hash', async () => {
     const hash = 'ff0323c5574ba0b90c543dc1aa3153c07ee4be74400c50870b8086499c76fed9'
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     const txData = await dogeClient.getTransactionData(hash)
 
     expect(txData.hash).toEqual(hash)
@@ -286,7 +286,7 @@ describe('DogecoinClient Test', () => {
     dogeClient.setNetwork('mainnet' as Network)
     expect(dogeClient.getExplorerUrl()).toEqual('https://blockchair.com/dogecoin')
 
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     expect(dogeClient.getExplorerUrl()).toEqual('https://blockexplorer.one/dogecoin/testnet')
   })
 
@@ -296,7 +296,7 @@ describe('DogecoinClient Test', () => {
       'https://blockchair.com/dogecoin/address/testAddressHere',
     )
 
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     expect(dogeClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
       'https://blockexplorer.one/dogecoin/testnet/address/anotherTestAddressHere',
     )
@@ -306,7 +306,7 @@ describe('DogecoinClient Test', () => {
     dogeClient.setNetwork('mainnet' as Network)
     expect(dogeClient.getExplorerTxUrl('testTxHere')).toEqual('https://blockchair.com/dogecoin/transaction/testTxHere')
 
-    dogeClient.setNetwork('testnet' as Network)
+    dogeClient.setNetwork(Network.Testnet)
     expect(dogeClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://blockexplorer.one/dogecoin/testnet/tx/anotherTestTxHere',
     )
