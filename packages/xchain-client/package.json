@@ -14,8 +14,10 @@
     "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests"
   },
+  "dependencies": {
+    "@ethersproject/logger": "^5.5.0"
+  },
   "devDependencies": {
-    "@ethersproject/logger": "^5.5.0",
     "@thorwallet/xchain-util": "0.1.0-lazy.0"
   },
   "peerDependencies": {
