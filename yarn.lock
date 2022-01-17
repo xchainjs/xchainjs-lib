@@ -278,10 +278,10 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@binance-chain/javascript-sdk@^4.1.1":
-  version "4.1.1"
-  resolved "https://registry.npmjs.org/@binance-chain/javascript-sdk/-/javascript-sdk-4.1.1.tgz"
-  integrity sha512-UeHRv1r7KiTZ3XnSrBLv5IxydDcZnEzykyQ9MJrxBXkUxApc4liZ4VW5g+32eOWfqFHNlyfb58f+MNhPntal2A==
+"@binance-chain/javascript-sdk@^4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@binance-chain/javascript-sdk/-/javascript-sdk-4.2.0.tgz#9f05e39209d45344c998ad0fe9497f2533413545"
+  integrity sha512-TGBZ2M1e7XnDCsNfHvNf0Zj8diH81scUzhkiPJ+4cJRZmOZL4yBy6g9dhM4SLUAB3R8t87arexd2BD3C/sfjjQ==
   dependencies:
     "@babel/runtime" "^7.10.4"
     "@ledgerhq/hw-transport-u2f" "^5.9.0"

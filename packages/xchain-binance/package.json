@@ -37,7 +37,8 @@
     "@thorwallet/xchain-crypto": "0.1.0-lazy.0",
     "@thorwallet/xchain-util": "0.1.0-lazy.0",
     "@types/big.js": "^4.0.5",
-    "bip32": "^2.0.6"
+    "bip32": "^2.0.6",
+    "typescript": "^4.2.3"
   },
   "publishConfig": {
     "access": "public"
@@ -48,5 +49,8 @@
     "@thorwallet/xchain-crypto": "0.0.1-alpha.869+49db531",
     "@thorwallet/xchain-util": "0.0.1-alpha.869+49db531"
   },
-  "gitHead": "02a3ef3995ed7eb9f0c429898d98288d1b3dac07"
+  "gitHead": "02a3ef3995ed7eb9f0c429898d98288d1b3dac07",
+  "dependencies": {
+    "@binance-chain/javascript-sdk": "^4.2.0"
+  }
 }
