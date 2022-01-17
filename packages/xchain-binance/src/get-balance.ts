@@ -1,4 +1,4 @@
-import { BncClient } from '@binance-chain/javascript-sdk'
+import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
 import { Balances } from '@thorwallet/xchain-client/lib'
 import {
   Asset,

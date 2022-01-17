@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 // @ts-expect-error no types
 import bs58check from 'bs58check'
-import ecc from 'tiny-secp256k1'
+// @ts-expect-error no types
+import ecc from 'tiny-secp256k1/js'
 // @ts-expect-error no types
 import typeforce from 'typeforce'
 import wif from 'wif'
@@ -305,7 +306,6 @@ class BIP32 implements BIP32Interface {
       while (sig[0] > 0x7f) {
         counter++
         extraData.writeUIntLE(counter, 0, 6)
-        // @ts-expect-error types wrong
         sig = ecc.signWithEntropy(hash, this.privateKey, extraData)
       }
       return sig
