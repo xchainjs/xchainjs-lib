@@ -37,7 +37,9 @@
     "@types/bitcoinjs-lib": "^5.0.0",
     "@types/wif": "^2.0.1",
     "axios": "^0.21.0",
-    "axios-mock-adapter": "^1.19.0",
+    "axios-mock-adapter": "^1.19.0"
+  },
+  "dependencies": {
     "bitcoinjs-lib": "^5.2.0",
     "coinselect": "^3.1.12",
     "wif": "^2.0.6"

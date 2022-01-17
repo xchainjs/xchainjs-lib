@@ -32,7 +32,7 @@
   "peerDependencies": {
     "bignumber.js": "9.x"
   },
-  "devDependencies": {
+  "dependencies": {
     "bignumber.js": "^9.0.0"
   },
   "publishConfig": {

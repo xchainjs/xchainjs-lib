@@ -35,7 +35,9 @@
   "devDependencies": {
     "@thorwallet/xchain-client": "0.1.0-lazy.0",
     "@thorwallet/xchain-crypto": "0.1.0-lazy.0",
-    "@thorwallet/xchain-util": "0.1.0-lazy.0",
+    "@thorwallet/xchain-util": "0.1.0-lazy.0"
+  },
+  "dependencies": {
     "axios": "^0.21.0",
     "ethers": "^5.1.0",
     "p-throttle": "^4.1.1",

@@ -37,14 +37,16 @@
     "@thorwallet/xchain-client": "0.1.0-lazy.0",
     "@thorwallet/xchain-crypto": "0.1.0-lazy.0",
     "@thorwallet/xchain-util": "0.1.0-lazy.0",
-    "@types/big.js": "^4.0.5",
+    "@types/big.js": "^4.0.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
     "axios": "^0.21.0",
     "jest-websocket-mock": "^2.2.0",
     "mock-socket": "9.0.3",
     "nock": "^13.0.4"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "peerDependencies": {
     "@polkadot/api": "^3.1.1",

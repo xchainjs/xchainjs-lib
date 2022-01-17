@@ -33,7 +33,9 @@
     "@thorwallet/cosmos-client": "^0.39.21",
     "@thorwallet/xchain-client": "0.1.0-lazy.0",
     "@thorwallet/xchain-crypto": "0.1.0-lazy.0",
-    "@thorwallet/xchain-util": "0.1.0-lazy.0",
+    "@thorwallet/xchain-util": "0.1.0-lazy.0"
+  },
+  "dependencies": {
     "axios": "^0.21.0",
     "nock": "^13.0.5"
   },

@@ -32,13 +32,10 @@
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
-    "@binance-chain/javascript-sdk": "^4.1.1",
     "@thorwallet/xchain-client": "0.1.0-lazy.0",
     "@thorwallet/xchain-crypto": "0.1.0-lazy.0",
     "@thorwallet/xchain-util": "0.1.0-lazy.0",
-    "@types/big.js": "^4.0.5",
-    "bip32": "^2.0.6",
-    "typescript": "^4.2.3"
+    "@types/big.js": "^4.0.5"
   },
   "publishConfig": {
     "access": "public"
@@ -51,6 +48,8 @@
   },
   "gitHead": "02a3ef3995ed7eb9f0c429898d98288d1b3dac07",
   "dependencies": {
-    "@binance-chain/javascript-sdk": "^4.2.0"
+    "@binance-chain/javascript-sdk": "^4.2.0",
+    "bip32": "^2.0.6",
+    "typescript": "^4.2.3"
   }
 }

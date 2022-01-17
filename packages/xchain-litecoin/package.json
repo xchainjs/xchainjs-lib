@@ -35,7 +35,9 @@
     "@thorwallet/xchain-crypto": "0.1.0-lazy.0",
     "@thorwallet/xchain-util": "0.1.0-lazy.0",
     "@types/bitcoinjs-lib": "^5.0.0",
-    "@types/wif": "^2.0.1",
+    "@types/wif": "^2.0.1"
+  },
+  "dependencies": {
     "axios": "^0.21.0",
     "axios-mock-adapter": "^1.19.0",
     "bitcoinjs-lib": "^5.2.0",
