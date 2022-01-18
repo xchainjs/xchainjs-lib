@@ -413,7 +413,14 @@ function fromPublicKeyLocal(
   return new BIP32(undefined, publicKey, chainCode, network, depth, index, parentFingerprint)
 }
 
+const seedCache: Record<string, BIP32Interface> = {}
+
 export async function fromSeed(seed: Buffer, network?: Network): Promise<BIP32Interface> {
+  const seedAsString = seed.toString('base64')
+  if (seedCache[seedAsString]) {
+    return seedCache[seedAsString]
+  }
+
   typeforce(typeforce.Buffer, seed)
   if (seed.length < 16) throw new TypeError('Seed should be at least 128 bits')
   if (seed.length > 64) throw new TypeError('Seed should be at most 512 bits')
@@ -424,5 +431,9 @@ export async function fromSeed(seed: Buffer, network?: Network): Promise<BIP32In
   const IL = I.slice(0, 32)
   const IR = I.slice(32)
 
-  return fromPrivateKey(IL, IR, network)
+  const bip32Interface = fromPrivateKey(IL, IR, network)
+
+  seedCache[seedAsString] = bip32Interface
+
+  return bip32Interface
 }
