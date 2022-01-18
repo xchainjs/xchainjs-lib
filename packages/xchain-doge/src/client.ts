@@ -25,7 +25,6 @@ import * as Utils from './utils'
 
 export type DogecoinClientParams = XChainClientParams & {
   sochainUrl?: string
-  nodeUrl?: string
   blockcypherUrl?: string
 }
 
@@ -35,7 +34,6 @@ export type DogecoinClientParams = XChainClientParams & {
 class Client extends UTXOClient {
   private sochainUrl = ''
   private blockcypherUrl = ''
-  public nodeUrl: string | undefined = ''
 
   /**
    * Constructor
@@ -49,7 +47,6 @@ class Client extends UTXOClient {
     sochainUrl = 'https://sochain.com/api/v2',
     blockcypherUrl = 'https://api.blockcypher.com/v1',
     phrase,
-    nodeUrl,
     rootDerivationPaths = {
       [Network.Mainnet]: `m/44'/3'/0'/0/`,
       [Network.Stagenet]: `m/44'/3'/0'/0/`,
@@ -57,7 +54,6 @@ class Client extends UTXOClient {
     },
   }: DogecoinClientParams) {
     super(Chain.Doge, { network, rootDerivationPaths, phrase })
-    this.nodeUrl = nodeUrl
     this.setSochainUrl(sochainUrl)
     this.setBlockcypherUrl(blockcypherUrl)
   }
