@@ -20,7 +20,6 @@ import {
   SignatureLike,
 } from '@ethersproject/bytes'
 import { hashMessage, _TypedDataEncoder } from '@ethersproject/hash'
-import { defaultPath, entropyToMnemonic, Mnemonic } from '@ethersproject/hdnode'
 import { keccak256 } from '@ethersproject/keccak256'
 import { defineReadOnly, resolveProperties } from '@ethersproject/properties'
 import { randomBytes } from '@ethersproject/random'
@@ -35,7 +34,7 @@ import { computeAddress, recoverAddress, serialize, UnsignedTransaction } from '
 import { Wordlist } from '@ethersproject/wordlists'
 
 import { Logger } from '@ethersproject/logger'
-import { HDNode } from '../hdnode/hdnode'
+import { defaultPath, entropyToMnemonic, HDNode, Mnemonic } from '../hdnode/hdnode'
 const logger = new Logger('THORWALLET_ETHERS_WALLET')
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -192,7 +191,7 @@ export class Wallet extends Signer implements ExternallyOwnedAccount, TypedDataS
    *  Static methods to create Wallet instances.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static createRandom(options?: any): Promise<Wallet> {
+  static async createRandom(options?: any): Promise<Wallet> {
     let entropy: Uint8Array = randomBytes(16)
 
     if (!options) {
@@ -203,7 +202,7 @@ export class Wallet extends Signer implements ExternallyOwnedAccount, TypedDataS
       entropy = arrayify(hexDataSlice(keccak256(concat([entropy, options.extraEntropy])), 0, 16))
     }
 
-    const mnemonic = entropyToMnemonic(entropy, options.locale)
+    const mnemonic = await entropyToMnemonic(entropy, options.locale)
     return Wallet.fromMnemonic(mnemonic, options.path, options.locale)
   }
 
