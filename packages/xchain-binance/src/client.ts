@@ -74,7 +74,6 @@ class Client implements BinanceClient, XChainClient {
   private network: Network
   private bncClient: BncClient
   private phrase = ''
-  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -90,7 +89,6 @@ class Client implements BinanceClient, XChainClient {
     this.network = network
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
-    this.addrCache = {}
   }
 
   /**
@@ -192,7 +190,6 @@ class Client implements BinanceClient, XChainClient {
     }
 
     this.phrase = phrase
-    this.addrCache[phrase] = {}
     return getAddress({ network: this.getNetwork(), phrase, index: walletIndex })
   }
 

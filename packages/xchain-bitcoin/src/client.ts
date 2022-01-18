@@ -43,7 +43,6 @@ class Client implements BitcoinClient, XChainClient {
   private sochainUrl = ''
   private blockstreamUrl = ''
   private rootDerivationPaths: RootDerivationPaths
-  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -61,7 +60,6 @@ class Client implements BitcoinClient, XChainClient {
     },
   }: BitcoinClientParams) {
     this.net = network
-    this.addrCache = {}
     this.rootDerivationPaths = rootDerivationPaths
     this.setSochainUrl(sochainUrl)
     this.setBlockstreamUrl(blockstreamUrl)
@@ -99,7 +97,6 @@ class Client implements BitcoinClient, XChainClient {
   setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      this.addrCache[phrase] = {}
       return getAddress({ phrase, network: this.getNetwork(), index: walletIndex })
     } else {
       throw new Error('Invalid phrase')

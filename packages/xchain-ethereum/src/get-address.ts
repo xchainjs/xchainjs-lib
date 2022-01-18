@@ -22,7 +22,6 @@ export const getAddress = async ({
   phrase: string
   index: number
 }): Promise<Address> => {
-  // TODO: from phrase
   if (addrCache[phrase] && addrCache[phrase][index]) {
     return addrCache[phrase][index]
   }

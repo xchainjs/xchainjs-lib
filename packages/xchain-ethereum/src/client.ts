@@ -107,7 +107,6 @@ export default class Client implements XChainClient, EthereumClient {
   private phrase: string
   private rootDerivationPaths: RootDerivationPaths
   private providers: Map<XChainNetwork, Provider> = new Map<XChainNetwork, Provider>()
-  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -131,7 +130,6 @@ export default class Client implements XChainClient, EthereumClient {
     this.etherscanApiKey = etherscanApiKey
     this.ethplorerUrl = ethplorerUrl
     this.ethplorerApiKey = ethplorerApiKey
-    this.addrCache = {}
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
     this.setupProviders()
   }
@@ -304,7 +302,6 @@ export default class Client implements XChainClient, EthereumClient {
     }
     this.phrase = phrase
     this.hdNode = await HDNode.fromMnemonic(phrase)
-    this.addrCache[this.hdNode.address] = {}
     return getAddress({ network: this.getNetwork(), phrase, index: walletIndex })
   }
 

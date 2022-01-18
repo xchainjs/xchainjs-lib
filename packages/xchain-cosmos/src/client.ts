@@ -38,7 +38,6 @@ class Client implements CosmosClient, XChainClient {
   private network: Network
   private phrase = ''
   private rootDerivationPaths: RootDerivationPaths
-  private addrCache: Record<string, Record<number, string>>
 
   private sdkClients: Map<XChainNetwork, CosmosSDKClient> = new Map<XChainNetwork, CosmosSDKClient>()
 
@@ -63,7 +62,6 @@ class Client implements CosmosClient, XChainClient {
     this.rootDerivationPaths = rootDerivationPaths
     this.sdkClients.set('testnet', TESTNET_SDK)
     this.sdkClients.set('mainnet', MAINNET_SDK)
-    this.addrCache = {}
   }
 
   /**
@@ -156,7 +154,6 @@ class Client implements CosmosClient, XChainClient {
         throw new Error('Invalid phrase')
       }
 
-      this.addrCache[phrase] = {}
       this.phrase = phrase
     }
 

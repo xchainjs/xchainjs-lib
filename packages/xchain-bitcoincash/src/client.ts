@@ -60,7 +60,6 @@ class Client implements BitcoinCashClient, XChainClient {
   private nodeUrl: ClientUrl
   private nodeAuth?: NodeAuth
   private rootDerivationPaths: RootDerivationPaths
-  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -91,7 +90,6 @@ class Client implements BitcoinCashClient, XChainClient {
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
     this.rootDerivationPaths = rootDerivationPaths
-    this.addrCache = {}
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
       // by strictly passing nodeAuth as null value
@@ -149,7 +147,7 @@ class Client implements BitcoinCashClient, XChainClient {
   setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      this.addrCache[phrase] = {}
+
       return getAddress({ network: this.network, phrase: this.phrase, index: walletIndex })
     } else {
       throw new Error('Invalid phrase')

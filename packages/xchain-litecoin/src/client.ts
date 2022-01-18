@@ -47,7 +47,6 @@ class Client implements LitecoinClient, XChainClient {
   private nodeUrl = ''
   private nodeAuth?: NodeAuth
   private rootDerivationPaths: RootDerivationPaths
-  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -82,7 +81,6 @@ class Client implements LitecoinClient, XChainClient {
       // by strictly passing nodeAuth as null value
       nodeAuth === null ? undefined : nodeAuth
 
-    this.addrCache = {}
     this.setSochainUrl(sochainUrl)
   }
 
@@ -108,7 +106,6 @@ class Client implements LitecoinClient, XChainClient {
   setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      this.addrCache[phrase] = {}
       return getAddress({ network: this.getNetwork(), phrase, index: walletIndex })
     } else {
       throw new Error('Invalid phrase')

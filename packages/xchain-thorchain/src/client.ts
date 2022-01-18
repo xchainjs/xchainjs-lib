@@ -70,7 +70,6 @@ class Client implements ThorchainClient, XChainClient {
   private phrase = ''
   private rootDerivationPaths: RootDerivationPaths
   private cosmosClient: CosmosSDKClient
-  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -95,7 +94,6 @@ class Client implements ThorchainClient, XChainClient {
     this.clientUrl = clientUrl || getDefaultClientUrl()
     this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
     this.rootDerivationPaths = rootDerivationPaths
-    this.addrCache = {}
 
     this.cosmosClient = new CosmosSDKClient({
       server: this.getClientUrl().node,
@@ -224,7 +222,6 @@ class Client implements ThorchainClient, XChainClient {
         throw new Error('Invalid phrase')
       }
       this.phrase = phrase
-      this.addrCache[phrase] = {}
     }
 
     return getAddress({ phrase, network: this.getNetwork(), index: walletIndex })
