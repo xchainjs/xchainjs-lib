@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-doge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Custom Doge client and utilities used by XChain clients",
   "keywords": [
     "Xchain",
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@xchainjs/xchain-client": "^0.11.0",
     "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.4.0-alpha",
+    "@xchainjs/xchain-util": "^0.4.0",
     "@types/bitcoinjs-lib": "^5.0.0",
     "@types/wif": "^2.0.2",
     "axios": "^0.21.1",
@@ -47,7 +47,7 @@
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.11.0",
     "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.4.0-alpha",
+    "@xchainjs/xchain-util": "^0.4.0",
     "axios": "^0.21.1",
     "bitcoinjs-lib": "^5.2.0",
     "coininfo": "5.1.0",
