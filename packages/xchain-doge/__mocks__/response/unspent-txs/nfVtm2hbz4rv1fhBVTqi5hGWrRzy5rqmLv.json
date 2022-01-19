@@ -1,0 +1,18 @@
+{
+  "status": "success",
+  "data": {
+    "network": "DOGETEST",
+    "address": "nfVtm2hbz4rv1fhBVTqi5hGWrRzy5rqmLv",
+    "txs": [
+      {
+        "txid": "69756fa084188cd0adfe49e0a0da8354ace82c0edd42d0a2cc7fe3c77b310429",
+        "output_no": 1,
+        "script_asm": "OP_DUP OP_HASH160 7c03edc051c130839f383d604f30df48efd94cbb OP_EQUALVERIFY OP_CHECKSIG",
+        "script_hex": "76a9147c03edc051c130839f383d604f30df48efd94cbb88ac",
+        "value": "100.00000000",
+        "confirmations": 296,
+        "time": 1640194997
+      }
+    ]
+  }
+}
