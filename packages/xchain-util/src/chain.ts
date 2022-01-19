@@ -7,7 +7,7 @@ export enum Chain {
   Polkadot = 'POLKA',
   BitcoinCash = 'BCH',
   Litecoin = 'LTC',
-  Terra = 'LUNA',
+  Terra = 'TERRA',
   Doge = 'DOGE',
 }
 
