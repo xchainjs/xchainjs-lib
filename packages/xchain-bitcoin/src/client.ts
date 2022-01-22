@@ -57,8 +57,8 @@ class Client implements BitcoinClient, XChainClient {
     sochainUrl = 'https://sochain.com/api/v2',
     blockstreamUrl = 'https://blockstream.info',
     haskoinUrl = {
-      ['testnet']: 'https://api.haskoin.com/btctest',
-      ['mainnet']: 'https://api.haskoin.com/btc',
+      ['testnet']: 'https://haskoin.ninerealms.com/btctest',
+      ['mainnet']: 'https://haskoin.ninerealms.com/btc',
     },
     rootDerivationPaths = {
       mainnet: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets

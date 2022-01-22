@@ -103,13 +103,16 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
  * @param {Address} address
  * @returns {Array<Balance>} The balances of the given address.
  */
-export const getBalance = async (params: AddressParams, haskoinUrl: string): Promise<Balance[]> => {
+export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
   switch (params.network) {
     case 'mainnet':
       return [
         {
           asset: AssetBTC,
-          amount: await haskoinApi.getBalance({ haskoinUrl, address: params.address }),
+          amount: await haskoinApi.getBalance({
+            haskoinUrl: 'https://haskoin.ninerealms.com/btc',
+            address: params.address,
+          }),
         },
       ]
     case 'testnet':
