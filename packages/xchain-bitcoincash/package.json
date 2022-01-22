@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-bitcoincash",
-  "version": "0.1.0-lazy.0",
+  "version": "0.1.1-lazy.0",
   "description": "Custom bitcoincash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -32,19 +32,19 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "bitcoinjs-lib": "^5.2.0",
-    "uniqid": "^5.3.0",
     "axios": "^0.21.0",
     "axios-mock-adapter": "^1.19.0",
     "bchaddrjs": "^0.5.2",
+    "bitcoinjs-lib": "^5.2.0",
     "coininfo": "^5.1.0",
-    "coinselect": "3.1.12"
+    "coinselect": "3.1.12",
+    "uniqid": "^5.3.0"
   },
   "devDependencies": {
     "@psf/bitcoincashjs-lib": "^4.0.2",
-    "@thorwallet/xchain-client": "0.1.0-lazy.0",
-    "@thorwallet/xchain-crypto": "0.1.0-lazy.0",
-    "@thorwallet/xchain-util": "0.1.0-lazy.0",
+    "@thorwallet/xchain-client": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-crypto": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-util": "^0.1.1-lazy.0",
     "@types/bchaddrjs": "0.4.0",
     "@types/uniqid": "^5.2.0"
   },

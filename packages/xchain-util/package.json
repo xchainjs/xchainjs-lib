@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-util",
-  "version": "0.1.0-lazy.0",
+  "version": "0.1.1-lazy.0",
   "description": "Helper utilities for XChain clients",
   "keywords": [
     "THORChain",

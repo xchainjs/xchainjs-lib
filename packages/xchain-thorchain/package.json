@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-thorchain",
-  "version": "0.1.0-lazy.0",
+  "version": "0.1.1-lazy.0",
   "description": "Custom Thorchain client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -32,10 +32,10 @@
   },
   "devDependencies": {
     "@thorwallet/cosmos-client": "^0.39.21",
-    "@thorwallet/xchain-client": "0.1.0-lazy.0",
-    "@thorwallet/xchain-cosmos": "0.1.0-lazy.0",
-    "@thorwallet/xchain-crypto": "0.1.0-lazy.0",
-    "@thorwallet/xchain-util": "0.1.0-lazy.0",
+    "@thorwallet/xchain-client": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-cosmos": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-crypto": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-util": "^0.1.1-lazy.0",
     "@types/big.js": "^6.0.0"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-litecoin",
-  "version": "0.1.0-lazy.0",
+  "version": "0.1.1-lazy.0",
   "description": "Custom Litecoin client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -31,9 +31,9 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
-    "@thorwallet/xchain-client": "0.1.0-lazy.0",
-    "@thorwallet/xchain-crypto": "0.1.0-lazy.0",
-    "@thorwallet/xchain-util": "0.1.0-lazy.0",
+    "@thorwallet/xchain-client": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-crypto": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-util": "^0.1.1-lazy.0",
     "@types/bitcoinjs-lib": "^5.0.0",
     "@types/wif": "^2.0.1"
   },
