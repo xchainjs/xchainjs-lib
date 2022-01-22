@@ -102,6 +102,7 @@ export type TxConfirmedStatus = {
 
 export type ScanUTXOParam = {
   sochainUrl: string
+  haskoinUrl: string
   network: Network
   address: string
   confirmedOnly?: boolean

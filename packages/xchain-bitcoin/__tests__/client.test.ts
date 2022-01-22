@@ -3,6 +3,7 @@ import { MIN_TX_FEE } from '../src/const'
 import { baseAmount, AssetBTC } from '@thorwallet/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
+
 mockSochainApi.init()
 
 const btcClient = new Client({ network: 'mainnet', sochainUrl: 'https://sochain.com/api/v2' })
@@ -51,10 +52,10 @@ describe('BitcoinClient Test', () => {
     expect(btcClient.setPhrase(phraseOne)).toBeUndefined
   })
 
-  it('should validate the right address', () => {
+  it('should validate the right address', async () => {
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseOne)
-    const address = btcClient.getAddress()
+    const address = await btcClient.getAddress()
     const valid = btcClient.validateAddress(address)
     expect(address).toEqual(addyOnePath0)
     expect(valid).toBeTruthy()
@@ -64,7 +65,7 @@ describe('BitcoinClient Test', () => {
     const expectedBalance = 15446
     btcClient.setNetwork('testnet')
     btcClient.setPhrase(phraseTwo)
-    const balance = await btcClient.getBalance(btcClient.getAddress())
+    const balance = await btcClient.getBalance(await btcClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })

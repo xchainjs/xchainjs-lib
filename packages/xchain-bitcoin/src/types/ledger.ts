@@ -12,4 +12,5 @@ export type LedgerTxInfoParams = Pick<TxParams, 'amount' | 'recipient'> & {
   sender: Address
   network: Network
   sochainUrl: string
+  haskoinUrl: string
 }

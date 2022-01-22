@@ -103,18 +103,22 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
  * @param {Address} address
  * @returns {Array<Balance>} The balances of the given address.
  */
-export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
-  try {
-    const balance =
-      params.network === 'testnet' ? await sochain.getBalance(params) : await haskoinApi.getBalance(params.address)
-    return [
-      {
-        asset: AssetBTC,
-        amount: balance,
-      },
-    ]
-  } catch (error) {
-    return Promise.reject(error)
+export const getBalance = async (params: AddressParams, haskoinUrl: string): Promise<Balance[]> => {
+  switch (params.network) {
+    case 'mainnet':
+      return [
+        {
+          asset: AssetBTC,
+          amount: await haskoinApi.getBalance({ haskoinUrl, address: params.address }),
+        },
+      ]
+    case 'testnet':
+      return [
+        {
+          asset: AssetBTC,
+          amount: await sochain.getBalance(params),
+        },
+      ]
   }
 }
 
@@ -144,6 +148,7 @@ export const validateAddress = (address: Address, network: Network): boolean => 
  */
 export const scanUTXOs = async ({
   sochainUrl,
+  haskoinUrl,
   network,
   address,
   confirmedOnly = true, // default: scan only confirmed UTXOs
@@ -180,9 +185,9 @@ export const scanUTXOs = async ({
   let utxos: haskoinApi.UtxoData[] = []
 
   if (confirmedOnly) {
-    utxos = await haskoinApi.getConfirmedUnspentTxs(address)
+    utxos = await haskoinApi.getConfirmedUnspentTxs({ address, haskoinUrl })
   } else {
-    utxos = await haskoinApi.getUnspentTxs(address)
+    utxos = await haskoinApi.getUnspentTxs({ address, haskoinUrl })
   }
 
   return utxos.map(
@@ -212,18 +217,20 @@ export const buildTx = async ({
   sender,
   network,
   sochainUrl,
+  haskoinUrl,
   spendPendingUTXO = false, // default: prevent spending uncomfirmed UTXOs
 }: TxParams & {
   feeRate: FeeRate
   sender: Address
   network: Network
   sochainUrl: string
+  haskoinUrl: string
   spendPendingUTXO?: boolean
-}): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXOs }> => {
+}): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[] }> => {
   try {
     // search only confirmed UTXOs if pending UTXO is not allowed
     const confirmedOnly = !spendPendingUTXO
-    const utxos = await scanUTXOs({ sochainUrl, network, address: sender, confirmedOnly })
+    const utxos = await scanUTXOs({ sochainUrl, haskoinUrl, network, address: sender, confirmedOnly })
 
     if (utxos.length === 0) {
       return Promise.reject(Error('No utxos to send'))
