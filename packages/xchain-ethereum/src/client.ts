@@ -14,7 +14,7 @@ import {
   TxParams,
   TxsPage,
   XChainClient,
-  XChainClientParams
+  XChainClientParams,
 } from '@thorwallet/xchain-client'
 import * as Crypto from '@thorwallet/xchain-crypto'
 import { AssetETH, assetToString, baseAmount, BaseAmount } from '@thorwallet/xchain-util'
@@ -34,7 +34,7 @@ import {
   GasPrices,
   InfuraCreds,
   Network as EthNetwork,
-  TxOverrides
+  TxOverrides,
 } from './types'
 import {
   BASE_TOKEN_GAS_COST,
@@ -49,7 +49,7 @@ import {
   MAX_APPROVAL,
   SIMPLE_GAS_COST,
   validateAddress,
-  xchainNetworkToEths
+  xchainNetworkToEths,
 } from './utils'
 import { Wallet } from './wallet/wallet'
 
