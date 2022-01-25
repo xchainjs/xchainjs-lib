@@ -1,29 +1,31 @@
+import { EtherscanProvider } from '@ethersproject/providers'
 import { Balance, Balances, Network } from '@thorwallet/xchain-client'
 import { Asset, AssetETH, assetToString, baseAmount } from '@thorwallet/xchain-util'
 import { BigNumber, BigNumberish, ethers } from 'ethers'
 import pThrottle from 'p-throttle'
+import erc20ABI from './data/erc20.json'
+import * as etherscanAPI from './etherscan-api'
+import * as ethplorerAPI from './ethplorer-api'
 import { Address } from './types'
 import { ETH_DECIMAL, getTokenAddress, getTokenBalances } from './utils'
-import * as ethplorerAPI from './ethplorer-api'
-import * as etherscanAPI from './etherscan-api'
-import erc20ABI from './data/erc20.json'
-import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
-const getProvider = (network: Network) => {
-  return getDefaultProvider(network)
-}
-
-const call = async <T>(
-  network: Network,
-  contractAddress: Address,
-  abi: ethers.ContractInterface,
-  func: string,
-  params: Array<unknown>,
-): Promise<T> => {
+const call = async <T>({
+  contractAddress,
+  abi,
+  func,
+  params,
+  provider,
+}: {
+  contractAddress: Address
+  abi: ethers.ContractInterface
+  func: string
+  params: Array<unknown>
+  provider: ethers.providers.BaseProvider
+}): Promise<T> => {
   if (!contractAddress) {
     return Promise.reject(new Error('contractAddress must be provided'))
   }
-  const contract = new ethers.Contract(contractAddress, abi, getProvider(network))
+  const contract = new ethers.Contract(contractAddress, abi, provider)
   return contract[func](...params)
 }
 
@@ -34,6 +36,7 @@ export const getBalance = async ({
   ethplorerUrl,
   ethplorerApiKey,
   etherscanApiKey,
+  provider,
 }: {
   address: Address
   network: Network
@@ -41,9 +44,10 @@ export const getBalance = async ({
   ethplorerUrl: string
   ethplorerApiKey: string
   etherscanApiKey: string
+  provider: ethers.providers.BaseProvider
 }): Promise<Balances> => {
   // get ETH balance directly from provider
-  const ethBalance: BigNumber = await getProvider(network).getBalance(address)
+  const ethBalance: BigNumber = await provider.getBalance(address)
   const ethBalanceAmount = baseAmount(ethBalance.toString(), ETH_DECIMAL)
 
   if (network === 'mainnet') {
@@ -92,8 +96,15 @@ export const getBalance = async ({
           apiKey: etherscan.apiKey,
         })
         const decimals =
-          BigNumber.from(await call<BigNumberish>(network, assetAddress, erc20ABI, 'decimals', [])).toNumber() ||
-          ETH_DECIMAL
+          BigNumber.from(
+            await call<BigNumberish>({
+              contractAddress: assetAddress,
+              abi: erc20ABI,
+              func: 'decimals',
+              params: [],
+              provider,
+            }),
+          ).toNumber() || ETH_DECIMAL
 
         if (!Number.isNaN(decimals)) {
           return {

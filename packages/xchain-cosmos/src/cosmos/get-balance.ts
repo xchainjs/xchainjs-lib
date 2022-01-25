@@ -1,10 +1,10 @@
-import { bank } from '@thorwallet/cosmos-client/x/bank'
 import { AccAddress, CosmosSDK } from '@thorwallet/cosmos-client'
 import { Coin } from '@thorwallet/cosmos-client/api'
+import { bank } from '@thorwallet/cosmos-client/x/bank'
 import { Address, Balances, Network } from '@thorwallet/xchain-client'
 import { Asset, assetToString, baseAmount } from '@thorwallet/xchain-util'
-import { DECIMAL, getAsset } from '../util'
 import { AssetAtom, AssetMuon } from '../types'
+import { DECIMAL, getAsset } from '../util'
 
 export const getSdkBalance = async ({
   address,
@@ -34,46 +34,43 @@ export const getSdkBalance = async ({
 
 export const getGenericBalance = async ({
   address,
-  network,
   server,
   chainId,
   assets,
   prefix,
+  fallbackAsset,
+  decimals,
 }: {
   address: Address
-  network: Network
   server: string
   chainId: string
   prefix: string
   assets?: Asset[]
+  fallbackAsset: Asset
+  decimals: number
 }): Promise<Balances> => {
-  try {
-    const balances = await getSdkBalance({ address, server, chainId, prefix })
-    const mainAsset = network === 'testnet' ? AssetMuon : AssetAtom
+  const balances = await getSdkBalance({ address, server, chainId, prefix })
 
-    let assetBalances = balances.map((balance) => {
-      return {
-        asset: (balance.denom && getAsset(balance.denom)) || mainAsset,
-        amount: baseAmount(balance.amount, DECIMAL),
-      }
-    })
-
-    // make sure we always have the main asset as balance in the array
-    if (assetBalances.length === 0) {
-      assetBalances = [
-        {
-          asset: mainAsset,
-          amount: baseAmount(0, DECIMAL),
-        },
-      ]
+  let assetBalances = balances.map((balance) => {
+    return {
+      asset: (balance.denom && getAsset(balance.denom)) || fallbackAsset,
+      amount: baseAmount(balance.amount, decimals),
     }
+  })
 
-    return assetBalances.filter(
-      (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
-    )
-  } catch (error) {
-    return Promise.reject(error)
+  // make sure we always have the main asset as balance in the array
+  if (assetBalances.length === 0) {
+    assetBalances = [
+      {
+        asset: fallbackAsset,
+        amount: baseAmount(0, decimals),
+      },
+    ]
   }
+
+  return assetBalances.filter(
+    (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
+  )
 }
 
 export const getBalance = ({
@@ -90,11 +87,12 @@ export const getBalance = ({
   const chainId = network === 'mainnet' ? 'cosmoshub-3' : 'gaia-3a'
   const prefix = 'cosmos'
   return getGenericBalance({
-    network,
     chainId,
     server,
     address,
     assets,
     prefix,
+    fallbackAsset: network === 'testnet' ? AssetMuon : AssetAtom,
+    decimals: DECIMAL,
   })
 }

@@ -1,58 +1,57 @@
-import { ethers, BigNumberish, BigNumber } from 'ethers'
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
-import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
-
-import erc20ABI from './data/erc20.json'
-import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
+import { EtherscanProvider } from '@ethersproject/providers'
 import {
-  GasOracleResponse,
-  Network as EthNetwork,
-  ExplorerUrl,
-  TxOverrides,
-  GasPrices,
-  FeesParams,
-  FeesWithGasPricesAndLimits,
-  InfuraCreds,
-  ApproveParams,
-} from './types'
-import {
-  RootDerivationPaths,
   Address,
+  FeeOptionKey,
+  Fees,
+  FeesParams as XFeesParams,
+  Network,
   Network as XChainNetwork,
+  RootDerivationPaths,
   Tx,
+  TxHash,
+  TxHistoryParams,
+  TxParams,
   TxsPage,
   XChainClient,
-  XChainClientParams,
-  TxParams,
-  TxHash,
-  Fees,
-  TxHistoryParams,
-  Network,
-  FeeOptionKey,
-  FeesParams as XFeesParams,
+  XChainClientParams
 } from '@thorwallet/xchain-client'
-import { AssetETH, baseAmount, BaseAmount, assetToString } from '@thorwallet/xchain-util'
 import * as Crypto from '@thorwallet/xchain-crypto'
-import * as ethplorerAPI from './ethplorer-api'
+import { AssetETH, assetToString, baseAmount, BaseAmount } from '@thorwallet/xchain-util'
+import { BigNumber, BigNumberish, ethers } from 'ethers'
+import { parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
+import erc20ABI from './data/erc20.json'
 import * as etherscanAPI from './etherscan-api'
-import {
-  ETH_DECIMAL,
-  ethNetworkToXchains,
-  xchainNetworkToEths,
-  getTokenAddress,
-  validateAddress,
-  SIMPLE_GAS_COST,
-  BASE_TOKEN_GAS_COST,
-  getFee,
-  MAX_APPROVAL,
-  ETHAddress,
-  getDefaultGasPrices,
-  getTxFromEthplorerTokenOperation,
-  getTxFromEthplorerEthTransaction,
-} from './utils'
-import { HDNode } from './hdnode/hdnode'
-import { Wallet } from './wallet/wallet'
+import * as ethplorerAPI from './ethplorer-api'
 import { getAddress } from './get-address'
+import { HDNode } from './hdnode/hdnode'
+import {
+  ApproveParams,
+  ExplorerUrl,
+  FeesParams,
+  FeesWithGasPricesAndLimits,
+  GasOracleResponse,
+  GasPrices,
+  InfuraCreds,
+  Network as EthNetwork,
+  TxOverrides
+} from './types'
+import {
+  BASE_TOKEN_GAS_COST,
+  ETHAddress,
+  ethNetworkToXchains,
+  ETH_DECIMAL,
+  getDefaultGasPrices,
+  getFee,
+  getTokenAddress,
+  getTxFromEthplorerEthTransaction,
+  getTxFromEthplorerTokenOperation,
+  MAX_APPROVAL,
+  SIMPLE_GAS_COST,
+  validateAddress,
+  xchainNetworkToEths
+} from './utils'
+import { Wallet } from './wallet/wallet'
 
 /**
  * Interface for custom Ethereum client
@@ -91,6 +90,7 @@ export type EthereumClientParams = XChainClientParams & {
   explorerUrl?: ExplorerUrl
   etherscanApiKey?: string
   infuraCreds?: InfuraCreds
+  provider: Provider
 }
 
 /**
@@ -101,12 +101,11 @@ export default class Client implements XChainClient, EthereumClient {
   private hdNode!: HDNode
   private etherscanApiKey?: string
   private explorerUrl: ExplorerUrl
-  private infuraCreds: InfuraCreds | undefined
   private ethplorerUrl: string
   private ethplorerApiKey: string
   private phrase: string
   private rootDerivationPaths: RootDerivationPaths
-  private providers: Map<XChainNetwork, Provider> = new Map<XChainNetwork, Provider>()
+  private provider: Provider
 
   /**
    * Constructor
@@ -122,16 +121,15 @@ export default class Client implements XChainClient, EthereumClient {
       testnet: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
     },
     etherscanApiKey,
-    infuraCreds,
+    provider,
   }: EthereumClientParams) {
     this.rootDerivationPaths = rootDerivationPaths
     this.network = xchainNetworkToEths(network)
-    this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey
     this.ethplorerUrl = ethplorerUrl
     this.ethplorerApiKey = ethplorerApiKey
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
-    this.setupProviders()
+    this.provider = provider
   }
 
   /**
@@ -174,23 +172,6 @@ export default class Client implements XChainClient, EthereumClient {
     const newHdNode = await this.hdNode.derivePath(this.getFullDerivationPath(index))
     return new Wallet(newHdNode).connect(this.getProvider())
   }
-  setupProviders = (): void => {
-    if (this.infuraCreds) {
-      // Infura provider takes either a string of project id
-      // or an object of id and secret
-      const testnetProvider = this.infuraCreds.projectSecret
-        ? new ethers.providers.InfuraProvider(EthNetwork.TEST, this.infuraCreds)
-        : new ethers.providers.InfuraProvider(EthNetwork.TEST, this.infuraCreds.projectId)
-      const mainnetProvider = this.infuraCreds.projectSecret
-        ? new ethers.providers.InfuraProvider(EthNetwork.MAIN, this.infuraCreds)
-        : new ethers.providers.InfuraProvider(EthNetwork.MAIN, this.infuraCreds.projectId)
-      this.providers.set('testnet', testnetProvider)
-      this.providers.set('mainnet', mainnetProvider)
-    } else {
-      this.providers.set('testnet', getDefaultProvider(EthNetwork.TEST))
-      this.providers.set('mainnet', getDefaultProvider(EthNetwork.MAIN))
-    }
-  }
 
   /**
    * Get etherjs Provider interface.
@@ -198,8 +179,7 @@ export default class Client implements XChainClient, EthereumClient {
    * @returns {Provider} The current etherjs Provider interface.
    */
   getProvider = (): Provider => {
-    const net = ethNetworkToXchains(this.network)
-    return this.providers.get(net) || getDefaultProvider(net)
+    return this.provider
   }
 
   /**

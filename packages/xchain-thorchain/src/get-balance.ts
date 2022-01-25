@@ -1,6 +1,6 @@
 import { Balance, Network } from '@thorwallet/xchain-client/lib'
-import { getGenericBalance as getCosmosBalance } from '@thorwallet/xchain-cosmos/lib'
-import { Asset, AssetRuneNative, assetToString, baseAmount } from '@thorwallet/xchain-util/lib'
+import { getGenericBalance as getCosmosBalance } from '@thorwallet/xchain-cosmos'
+import { Asset, AssetRuneNative, assetToString, baseAmount } from '@thorwallet/xchain-util'
 import { DECIMAL, getDefaultClientUrl } from './util'
 
 const getPrefix = (network: string) => (network === 'testnet' ? 'tthor' : 'thor')
@@ -16,10 +16,11 @@ export const getBalance = async ({
 }): Promise<Balance[]> => {
   const balances = await getCosmosBalance({
     address,
-    network,
     chainId: 'thorchain',
     prefix: getPrefix(network),
     server: getDefaultClientUrl()[network].node,
+    fallbackAsset: AssetRuneNative,
+    decimals: DECIMAL,
   })
   let newBalances = balances.filter(
     (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
