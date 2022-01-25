@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-thorchain",
-  "version": "0.0.1-alpha.909+02a3ef3",
+  "version": "0.1.1-lazy.0",
   "description": "Custom Thorchain client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -10,8 +10,7 @@
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
   "main": "lib/index.js",
-  "module": "lib/index.esm.js",
-  "typings": "lib/index.d.ts",
+  "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -25,7 +24,7 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "yarn clean && rollup -c",
+    "build": "tsc",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",
@@ -33,11 +32,13 @@
   },
   "devDependencies": {
     "@thorwallet/cosmos-client": "^0.39.21",
-    "@thorwallet/xchain-client": "^0.0.1-alpha.909+02a3ef3",
-    "@thorwallet/xchain-cosmos": "^0.0.1-alpha.909+02a3ef3",
-    "@thorwallet/xchain-crypto": "^0.0.1-alpha.909+02a3ef3",
-    "@thorwallet/xchain-util": "^0.0.1-alpha.909+02a3ef3",
-    "@types/big.js": "^6.0.0",
+    "@thorwallet/xchain-client": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-cosmos": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-crypto": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-util": "^0.1.1-lazy.0",
+    "@types/big.js": "^6.0.0"
+  },
+  "dependencies": {
     "axios": "^0.21.0",
     "nock": "^13.0.5"
   },

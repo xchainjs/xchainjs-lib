@@ -1,7 +1,6 @@
 import {
   RootDerivationPaths,
   Address,
-  Balances,
   Fees,
   Network,
   Tx,
@@ -13,7 +12,7 @@ import {
   XChainClientParams,
   Network as XChainNetwork,
 } from '@thorwallet/xchain-client'
-import { Asset, baseAmount, assetToString } from '@thorwallet/xchain-util'
+import { Asset, baseAmount } from '@thorwallet/xchain-util'
 import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
 import { PrivKey, codec } from '@thorwallet/cosmos-client'
@@ -21,7 +20,9 @@ import { MsgSend, MsgMultiSend } from '@thorwallet/cosmos-client/x/bank'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './types'
-import { DECIMAL, getDenom, getAsset, getTxsFromHistory } from './util'
+import { DECIMAL, getDenom, getTxsFromHistory } from './util'
+import { MAINNET_SDK, TESTNET_SDK } from './sdk-clients'
+import { getAddress } from './cosmos/get-address'
 
 /**
  * Interface for custom Cosmos client
@@ -30,15 +31,6 @@ export interface CosmosClient {
   getMainAsset(): Asset
 }
 
-const MAINNET_SDK = new CosmosSDKClient({
-  server: 'https://api.cosmos.network',
-  chainId: 'cosmoshub-3',
-})
-const TESTNET_SDK = new CosmosSDKClient({
-  server: 'http://lcd.gaia.bigdipper.live:1317',
-  chainId: 'gaia-3a',
-})
-
 /**
  * Custom Cosmos client
  */
@@ -46,7 +38,6 @@ class Client implements CosmosClient, XChainClient {
   private network: Network
   private phrase = ''
   private rootDerivationPaths: RootDerivationPaths
-  private addrCache: Record<string, Record<number, string>>
 
   private sdkClients: Map<XChainNetwork, CosmosSDKClient> = new Map<XChainNetwork, CosmosSDKClient>()
 
@@ -71,7 +62,6 @@ class Client implements CosmosClient, XChainClient {
     this.rootDerivationPaths = rootDerivationPaths
     this.sdkClients.set('testnet', TESTNET_SDK)
     this.sdkClients.set('mainnet', MAINNET_SDK)
-    this.addrCache = {}
   }
 
   /**
@@ -164,11 +154,10 @@ class Client implements CosmosClient, XChainClient {
         throw new Error('Invalid phrase')
       }
 
-      this.addrCache[phrase] = {}
       this.phrase = phrase
     }
 
-    return this.getAddress(walletIndex)
+    return getAddress({ network: this.network, phrase: this.phrase, index: walletIndex })
   }
 
   /**
@@ -200,24 +189,6 @@ class Client implements CosmosClient, XChainClient {
   }
 
   /**
-   * Get the current address.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
-   */
-  getAddress = async (index = 0): Promise<string> => {
-    if (!this.phrase) throw new Error('Phrase not set')
-
-    if (this.addrCache[this.phrase][index]) {
-      return this.addrCache[this.phrase][index]
-    }
-    const addr = await this.getSDKClient().getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
-    this.addrCache[this.phrase][index] = addr
-    return addr
-  }
-
-  /**
    * Validate the given address.
    *
    * @param {Address} address
@@ -234,43 +205,6 @@ class Client implements CosmosClient, XChainClient {
    */
   getMainAsset = (): Asset => {
     return this.network === 'testnet' ? AssetMuon : AssetAtom
-  }
-
-  /**
-   * Get the balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @param {Asset} asset If not set, it will return all assets available. (optional)
-   * @returns {Array<Balance>} The balance of the address.
-   */
-  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
-    try {
-      const balances = await this.getSDKClient().getBalance(address)
-      const mainAsset = this.getMainAsset()
-
-      let assetBalances = balances.map((balance) => {
-        return {
-          asset: (balance.denom && getAsset(balance.denom)) || mainAsset,
-          amount: baseAmount(balance.amount, DECIMAL),
-        }
-      })
-
-      // make sure we always have the main asset as balance in the array
-      if (assetBalances.length === 0) {
-        assetBalances = [
-          {
-            asset: mainAsset,
-            amount: baseAmount(0, DECIMAL),
-          },
-        ]
-      }
-
-      return assetBalances.filter(
-        (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
-      )
-    } catch (error) {
-      return Promise.reject(error)
-    }
   }
 
   /**
@@ -293,7 +227,8 @@ class Client implements CosmosClient, XChainClient {
       const mainAsset = this.getMainAsset()
       const txHistory = await this.getSDKClient().searchTx({
         messageAction,
-        messageSender: (params && params.address) || (await this.getAddress()),
+        messageSender:
+          (params && params.address) || (await getAddress({ network: this.network, phrase: this.phrase, index: 0 })),
         page,
         limit,
         txMinHeight,
@@ -344,7 +279,7 @@ class Client implements CosmosClient, XChainClient {
       const mainAsset = this.getMainAsset()
       const transferResult = await this.getSDKClient().transfer({
         privkey: await this.getPrivateKey(fromAddressIndex),
-        from: await this.getAddress(fromAddressIndex),
+        from: await getAddress({ network: this.network, phrase: this.phrase, index: fromAddressIndex }),
         to: recipient,
         amount: amount.amount().toString(),
         asset: getDenom(asset || mainAsset),

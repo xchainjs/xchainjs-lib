@@ -13,10 +13,9 @@ import {
   XChainClientParams,
   TxFrom,
   TxTo,
-  Balance,
 } from '@thorwallet/xchain-client'
 import { CosmosSDKClient, RPCTxResult } from '@thorwallet/xchain-cosmos'
-import { Asset, baseAmount, assetFromString } from '@thorwallet/xchain-util'
+import { baseAmount, assetFromString } from '@thorwallet/xchain-util'
 import * as xchainCrypto from '@thorwallet/xchain-crypto'
 
 import { PrivKey, AccAddress, PubKey } from '@thorwallet/cosmos-client'
@@ -27,7 +26,6 @@ import { msgNativeTxFromJson, TxResult } from './types/messages'
 import {
   getDenom,
   getDefaultFees,
-  getBalance,
   DECIMAL,
   DEFAULT_GAS_VALUE,
   buildDepositTx,
@@ -44,6 +42,8 @@ import {
 } from './util'
 import { Signature } from './types'
 import RNSimple from 'react-native-simple-crypto'
+import { getBalance } from './get-balance'
+import { getAddress } from './get-address'
 
 /**
  * Interface for custom Thorchain client
@@ -70,7 +70,6 @@ class Client implements ThorchainClient, XChainClient {
   private phrase = ''
   private rootDerivationPaths: RootDerivationPaths
   private cosmosClient: CosmosSDKClient
-  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -95,7 +94,6 @@ class Client implements ThorchainClient, XChainClient {
     this.clientUrl = clientUrl || getDefaultClientUrl()
     this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
     this.rootDerivationPaths = rootDerivationPaths
-    this.addrCache = {}
 
     this.cosmosClient = new CosmosSDKClient({
       server: this.getClientUrl().node,
@@ -224,10 +222,9 @@ class Client implements ThorchainClient, XChainClient {
         throw new Error('Invalid phrase')
       }
       this.phrase = phrase
-      this.addrCache[phrase] = {}
     }
 
-    return this.getAddress(walletIndex)
+    return getAddress({ phrase, network: this.getNetwork(), index: walletIndex })
   }
 
   /**
@@ -268,26 +265,6 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
-   * Get the current address.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
-   */
-  getAddress = async (index = 0): Promise<string> => {
-    if (this.addrCache[this.phrase][index]) {
-      return this.addrCache[this.phrase][index]
-    }
-    const address = await this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
-
-    if (!address) {
-      throw new Error('address not defined')
-    }
-    this.addrCache[this.phrase][index] = address
-    return address
-  }
-
-  /**
    * Validate the given address.
    *
    * @param {Address} address
@@ -295,17 +272,6 @@ class Client implements ThorchainClient, XChainClient {
    */
   validateAddress = (address: Address): boolean => {
     return this.cosmosClient.checkAddress(address)
-  }
-
-  /**
-   * Get the balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @param {Asset} asset If not set, it will return all assets available. (optional)
-   * @returns {Balance[]} The balance of the address.
-   */
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
-    return getBalance({ address, assets, cosmosClient: this.getCosmosClient() })
   }
 
   /**
@@ -321,7 +287,13 @@ class Client implements ThorchainClient, XChainClient {
     const messageAction = undefined
     const offset = params?.offset || 0
     const limit = params?.limit || 10
-    const address = params?.address || (await this.getAddress())
+    const address =
+      params?.address ||
+      (await getAddress({
+        index: 0,
+        network: this.getNetwork(),
+        phrase: this.phrase,
+      }))
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
@@ -481,13 +453,25 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
    */
   deposit = async ({ walletIndex = 0, asset = AssetRune, amount, memo }: DepositParam): Promise<TxHash> => {
-    const assetBalance = await this.getBalance(await this.getAddress(walletIndex), [asset])
+    const assetBalance = await getBalance({
+      address: await getAddress({
+        index: walletIndex,
+        network: this.getNetwork(),
+        phrase: this.phrase,
+      }),
+      assets: [asset],
+      network: this.network,
+    })
 
     if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(DEFAULT_GAS_VALUE))) {
       throw new Error('insufficient funds')
     }
 
-    const signer = await this.getAddress(walletIndex)
+    const signer = await getAddress({
+      index: walletIndex,
+      network: this.getNetwork(),
+      phrase: this.phrase,
+    })
     const msgNativeTx = msgNativeTxFromJson({
       coins: [
         {
@@ -535,7 +519,15 @@ class Client implements ThorchainClient, XChainClient {
     try {
       registerCodecs(this.network)
 
-      const assetBalance = await this.getBalance(await this.getAddress(walletIndex), [asset])
+      const assetBalance = await getBalance({
+        address: await getAddress({
+          index: walletIndex,
+          network: this.getNetwork(),
+          phrase: this.phrase,
+        }),
+        assets: [asset],
+        network: this.network,
+      })
       const fee = await this.getFees()
       if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(fee.average.amount()))) {
         throw new Error('insufficient funds')
@@ -543,7 +535,11 @@ class Client implements ThorchainClient, XChainClient {
 
       const transferResult = await this.cosmosClient.transfer({
         privkey: await this.getPrivKey(walletIndex),
-        from: await this.getAddress(walletIndex),
+        from: await getAddress({
+          index: walletIndex,
+          network: this.getNetwork(),
+          phrase: this.phrase,
+        }),
         to: recipient,
         amount: amount.amount().toString(),
         asset: getDenom(asset),

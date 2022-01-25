@@ -1,11 +1,5 @@
 import axios from 'axios'
-import {
-  Balances as BinanceBalances,
-  Fees as BinanceFees,
-  TxPage as BinanceTxPage,
-  TransactionResult,
-  TransferFee,
-} from './types/binance'
+import { Fees as BinanceFees, TxPage as BinanceTxPage, TransactionResult, TransferFee } from './types/binance'
 
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
@@ -13,7 +7,6 @@ import {
   Address,
   XChainClient,
   XChainClientParams,
-  Balances,
   Fees,
   Network,
   Tx,
@@ -23,22 +16,12 @@ import {
   TxHistoryParams,
   TxsPage,
 } from '@thorwallet/xchain-client'
-import {
-  Asset,
-  AssetBNB,
-  BaseAmount,
-  assetFromString,
-  assetAmount,
-  assetToBase,
-  baseAmount,
-  baseToAsset,
-  BNBChain,
-  assetToString,
-} from '@thorwallet/xchain-util'
+import { Asset, AssetBNB, BaseAmount, baseAmount, baseToAsset } from '@thorwallet/xchain-util'
 import { getSeed, validatePhrase, bip32 } from '@thorwallet/xchain-crypto'
-import { isTransferFee, parseTx, getPrefix, BNB_DECIMAL } from './util'
+import { isTransferFee, parseTx, getPrefix } from './util'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 import { Signature } from './types'
+import { getAddress } from './get-address'
 type PrivKey = string
 
 export type Coin = {
@@ -91,7 +74,6 @@ class Client implements BinanceClient, XChainClient {
   private network: Network
   private bncClient: BncClient
   private phrase = ''
-  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -107,7 +89,6 @@ class Client implements BinanceClient, XChainClient {
     this.network = network
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
-    this.addrCache = {}
   }
 
   /**
@@ -209,8 +190,7 @@ class Client implements BinanceClient, XChainClient {
     }
 
     this.phrase = phrase
-    this.addrCache[phrase] = {}
-    return this.getAddress(walletIndex)
+    return getAddress({ network: this.getNetwork(), phrase, index: walletIndex })
   }
 
   private getPrivateKeyFromMnemonic = async (phrase: string, derive: boolean, index: number): Promise<string> => {
@@ -244,24 +224,6 @@ class Client implements BinanceClient, XChainClient {
   }
 
   /**
-   * Get the current address.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
-   */
-  getAddress = async (index = 0): Promise<string> => {
-    if (this.addrCache[this.phrase][index]) {
-      return this.addrCache[this.phrase][index]
-    }
-
-    const address = crypto.getAddressFromPrivateKey(await this.getPrivateKey(index), getPrefix(this.network))
-
-    this.addrCache[this.phrase][index] = address
-    return address
-  }
-
-  /**
    * Validate the given address.
    *
    * @param {Address} address
@@ -269,42 +231,6 @@ class Client implements BinanceClient, XChainClient {
    */
   validateAddress = (address: Address): boolean => {
     return this.bncClient.checkAddress(address, getPrefix(this.network))
-  }
-
-  /**
-   * Get the balance of a given address.
-   *
-   * @param {Address | number} address By default, it will return the balance of the current wallet. (optional)
-   * @param {Asset} asset If not set, it will return all assets available. (optional)
-   * @returns {Array<Balance>} The balance of the address.
-   */
-  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
-    try {
-      const balances: BinanceBalances = await this.bncClient.getBalance(address)
-
-      let assetBalances = balances.map((balance) => {
-        return {
-          asset: assetFromString(`${BNBChain}.${balance.symbol}`) || AssetBNB,
-          amount: assetToBase(assetAmount(balance.free, 8)),
-        }
-      })
-
-      // make sure we always have the bnb asset as balance in the array
-      if (assetBalances.length === 0) {
-        assetBalances = [
-          {
-            asset: AssetBNB,
-            amount: baseAmount(0, BNB_DECIMAL),
-          },
-        ]
-      }
-
-      return assetBalances.filter(
-        (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
-      )
-    } catch (error) {
-      return Promise.reject(error)
-    }
   }
 
   /**
@@ -414,7 +340,7 @@ class Client implements BinanceClient, XChainClient {
    */
   multiSend = async ({ walletIndex = 0, transactions, memo = '' }: MultiSendParams): Promise<TxHash> => {
     try {
-      const derivedAddress = await this.getAddress(walletIndex)
+      const derivedAddress = await getAddress({ network: this.getNetwork(), phrase: this.phrase, index: walletIndex })
 
       await this.bncClient.initChain()
       await this.bncClient.setPrivateKey(await this.getPrivateKey(walletIndex)).catch((error) => Promise.reject(error))
@@ -473,7 +399,7 @@ class Client implements BinanceClient, XChainClient {
         .catch((error: Error) => Promise.reject(error))
 
       const transferResult = await this.bncClient.transfer(
-        await this.getAddress(),
+        await getAddress({ index: 0, phrase: this.phrase, network: this.getNetwork() }),
         recipient,
         baseToAsset(amount).amount().toString(),
         asset ? asset.symbol : AssetBNB.symbol,

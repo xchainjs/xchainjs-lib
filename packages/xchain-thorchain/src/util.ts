@@ -1,15 +1,7 @@
-import {
-  Asset,
-  assetToString,
-  baseAmount,
-  assetFromString,
-  THORChain,
-  BaseAmount,
-  AssetRuneNative,
-} from '@thorwallet/xchain-util'
+import { Asset, assetToString, baseAmount, assetFromString, THORChain, BaseAmount } from '@thorwallet/xchain-util'
 import { AssetRune, ExplorerUrl, ClientUrl, ExplorerUrls, TxData, MsgNativeTx, ThorchainDepositResponse } from './types'
-import { CosmosSDKClient, TxLog } from '@thorwallet/xchain-cosmos'
-import { Fees, Network, Address, TxHash, Balance } from '@thorwallet/xchain-client'
+import { TxLog } from '@thorwallet/xchain-cosmos'
+import { Fees, Network, Address, TxHash } from '@thorwallet/xchain-client'
 import { AccAddress, codec, Msg } from '@thorwallet/cosmos-client'
 import { MsgMultiSend, MsgSend } from '@thorwallet/cosmos-client/x/bank'
 import { StdTxFee } from '@thorwallet/cosmos-client/api'
@@ -223,47 +215,6 @@ export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string):
   })
 
   return unsignedStdTx
-}
-
-/**
- * Get the balance of a given address.
- *
- * @param {Address} address By default, it will return the balance of the current wallet. (optional)
- * @param {Asset} asset If not set, it will return all assets available. (optional)
- * @param {cosmosClient} CosmosSDKClient
- *
- * @returns {Balance[]} The balance of the address.
- */
-export const getBalance = async ({
-  address,
-  assets,
-  cosmosClient,
-}: {
-  address: Address
-  assets?: Asset[]
-  cosmosClient: CosmosSDKClient
-}): Promise<Balance[]> => {
-  const balances = await cosmosClient.getBalance(address)
-  let newBalances = balances
-    .map((balance) => ({
-      asset: (balance.denom && getAsset(balance.denom)) || AssetRuneNative,
-      amount: baseAmount(balance.amount, DECIMAL),
-    }))
-    .filter(
-      (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
-    )
-
-  // make sure we always have the bnb asset as balance in the array
-  if (newBalances.length === 0) {
-    newBalances = [
-      {
-        asset: AssetRuneNative,
-        amount: baseAmount(0, DECIMAL),
-      },
-    ]
-  }
-
-  return newBalances
 }
 
 /**

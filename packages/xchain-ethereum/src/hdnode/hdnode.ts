@@ -83,7 +83,7 @@ export async function mnemonicToEntropy(mnemonic: string, wordlist?: string | Wo
 
   const words = wordlist.split(mnemonic)
   if (words.length % 3 !== 0) {
-    throw new Error('invalid mnemonic')
+    throw new Error('invalid mnemonic (HDNode), word length not divisable by 3')
   }
 
   const entropy = arrayify(new Uint8Array(Math.ceil((11 * words.length) / 8)))
@@ -92,7 +92,7 @@ export async function mnemonicToEntropy(mnemonic: string, wordlist?: string | Wo
   for (let i = 0; i < words.length; i++) {
     const index = wordlist.getWordIndex(words[i].normalize('NFKD'))
     if (index === -1) {
-      throw new Error('invalid mnemonic')
+      throw new Error('invalid mnemonic (HDNODE), not every word in list')
     }
 
     for (let bit = 0; bit < 11; bit++) {

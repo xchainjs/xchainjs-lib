@@ -1,9 +1,9 @@
 {
   "name": "@thorwallet/xchain-client",
-  "version": "0.0.1-alpha.909+02a3ef3",
+  "version": "0.1.1-lazy.0",
   "license": "MIT",
-  "main": "lib/index",
-  "types": "lib/index",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "lib"
   ],
@@ -14,8 +14,11 @@
     "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests"
   },
+  "dependencies": {
+    "@ethersproject/logger": "^5.5.0"
+  },
   "devDependencies": {
-    "@thorwallet/xchain-util": "^0.0.1-alpha.909+02a3ef3"
+    "@thorwallet/xchain-util": "^0.1.1-lazy.0"
   },
   "peerDependencies": {
     "@thorwallet/xchain-util": "0.0.1-alpha.869+49db531"

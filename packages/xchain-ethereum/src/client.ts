@@ -4,7 +4,6 @@ import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
 import erc20ABI from './data/erc20.json'
 import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
-import pThrottle from 'p-throttle'
 import {
   GasOracleResponse,
   Network as EthNetwork,
@@ -28,13 +27,11 @@ import {
   TxHash,
   Fees,
   TxHistoryParams,
-  Balances,
   Network,
   FeeOptionKey,
   FeesParams as XFeesParams,
-  Balance,
 } from '@thorwallet/xchain-client'
-import { AssetETH, baseAmount, BaseAmount, assetToString, Asset } from '@thorwallet/xchain-util'
+import { AssetETH, baseAmount, BaseAmount, assetToString } from '@thorwallet/xchain-util'
 import * as Crypto from '@thorwallet/xchain-crypto'
 import * as ethplorerAPI from './ethplorer-api'
 import * as etherscanAPI from './etherscan-api'
@@ -52,10 +49,10 @@ import {
   getDefaultGasPrices,
   getTxFromEthplorerTokenOperation,
   getTxFromEthplorerEthTransaction,
-  getTokenBalances,
 } from './utils'
 import { HDNode } from './hdnode/hdnode'
 import { Wallet } from './wallet/wallet'
+import { getAddress } from './get-address'
 
 /**
  * Interface for custom Ethereum client
@@ -107,9 +104,9 @@ export default class Client implements XChainClient, EthereumClient {
   private infuraCreds: InfuraCreds | undefined
   private ethplorerUrl: string
   private ethplorerApiKey: string
+  private phrase: string
   private rootDerivationPaths: RootDerivationPaths
   private providers: Map<XChainNetwork, Provider> = new Map<XChainNetwork, Provider>()
-  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -133,7 +130,6 @@ export default class Client implements XChainClient, EthereumClient {
     this.etherscanApiKey = etherscanApiKey
     this.ethplorerUrl = ethplorerUrl
     this.ethplorerApiKey = ethplorerApiKey
-    this.addrCache = {}
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
     this.setupProviders()
   }
@@ -164,26 +160,6 @@ export default class Client implements XChainClient, EthereumClient {
    */
   getNetwork = (): XChainNetwork => {
     return ethNetworkToXchains(this.network)
-  }
-
-  /**
-   * Get the current address.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"}
-   * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
-   */
-  getAddress = async (index = 0): Promise<Address> => {
-    if (index < 0) {
-      throw new Error('index must be greater than zero')
-    }
-    if (this.addrCache[this.hdNode.address][index]) {
-      return this.addrCache[this.hdNode.address][index]
-    }
-    const address = (await this.hdNode.derivePath(this.getFullDerivationPath(index))).address.toLowerCase()
-    this.addrCache[this.hdNode.address][index] = address
-    return address
   }
 
   /**
@@ -324,9 +300,9 @@ export default class Client implements XChainClient, EthereumClient {
     if (!Crypto.validatePhrase(phrase)) {
       throw new Error('Invalid phrase')
     }
+    this.phrase = phrase
     this.hdNode = await HDNode.fromMnemonic(phrase)
-    this.addrCache[this.hdNode.address] = {}
-    return this.getAddress(walletIndex)
+    return getAddress({ network: this.getNetwork(), phrase, index: walletIndex })
   }
 
   /**
@@ -337,95 +313,6 @@ export default class Client implements XChainClient, EthereumClient {
    */
   validateAddress = (address: Address): boolean => {
     return validateAddress(address)
-  }
-
-  /**
-   * Get the ETH balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balances>} The all balance of the address.
-   *
-   * @throws {"Invalid asset"} throws when the give asset is an invalid one
-   */
-  getBalance = async (address: Address, assets?: Asset[]): Promise<Balances> => {
-    try {
-      const ethAddress = address || (await this.getAddress())
-      // get ETH balance directly from provider
-      const ethBalance: BigNumber = await this.getProvider().getBalance(ethAddress)
-      const ethBalanceAmount = baseAmount(ethBalance.toString(), ETH_DECIMAL)
-
-      if (this.getNetwork() === 'mainnet') {
-        // use ethplorerAPI for mainnet - ignore assets
-        const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
-        const balances: Balances = [
-          {
-            asset: AssetETH,
-            amount: ethBalanceAmount,
-          },
-        ]
-
-        if (account.tokens) {
-          balances.push(...getTokenBalances(account.tokens))
-        }
-
-        return balances
-      } else {
-        // use etherscan for testnet
-
-        const newAssets = assets || [AssetETH]
-        // Follow approach is only for testnet
-        // For mainnet, we will use ethplorer api(one request only)
-        // https://github.com/xchainjs/xchainjs-lib/issues/252
-        // And to avoid etherscan api call limit, it gets balances in a sequence way, not in parallel
-
-        const throttle = pThrottle({
-          limit: 5,
-          interval: 1000,
-        })
-
-        const getBalance = throttle(
-          async (asset: Asset): Promise<Balance> => {
-            const etherscan = this.getEtherscanProvider()
-            if (assetToString(asset) !== assetToString(AssetETH)) {
-              // Handle token balances
-              const assetAddress = getTokenAddress(asset)
-              if (!assetAddress) {
-                throw new Error(`Invalid asset ${asset}`)
-              }
-              const balance = await etherscanAPI.getTokenBalance({
-                baseUrl: etherscan.baseUrl,
-                address,
-                assetAddress,
-                apiKey: etherscan.apiKey,
-              })
-              const decimals =
-                BigNumber.from(await this.call<BigNumberish>(0, assetAddress, erc20ABI, 'decimals', [])).toNumber() ||
-                ETH_DECIMAL
-
-              if (!Number.isNaN(decimals)) {
-                return {
-                  asset,
-                  amount: baseAmount(balance.toString(), decimals),
-                }
-              }
-            }
-            return {
-              asset: AssetETH,
-              amount: ethBalanceAmount,
-            }
-          },
-        )
-
-        const balances = await Promise.all(newAssets.map((asset) => getBalance(asset)))
-
-        return balances
-      }
-    } catch (error) {
-      if (error.toString().includes('Invalid API Key')) {
-        return Promise.reject(new Error('Invalid API Key'))
-      }
-      return Promise.reject(error)
-    }
   }
 
   /**
@@ -646,7 +533,15 @@ export default class Client implements XChainClient, EthereumClient {
       const txResult = await this.call<TransactionResponse>(walletIndex, sender, erc20ABI, 'approve', [
         spender,
         txAmount,
-        { from: this.getAddress(), gasPrice, gasLimit },
+        {
+          from: await getAddress({
+            index: 0,
+            network: this.getNetwork(),
+            phrase: this.phrase,
+          }),
+          gasPrice,
+          gasLimit,
+        },
       ])
 
       return txResult
@@ -673,7 +568,13 @@ export default class Client implements XChainClient, EthereumClient {
       const gasLimit = await this.estimateCall(sender, erc20ABI, 'approve', [
         spender,
         txAmount,
-        { from: this.getAddress() },
+        {
+          from: await getAddress({
+            index: 0,
+            network: this.getNetwork(),
+            phrase: this.phrase,
+          }),
+        },
       ])
 
       return gasLimit
@@ -828,12 +729,24 @@ export default class Client implements XChainClient, EthereumClient {
         const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
 
         estimate = await contract.estimateGas.transfer(recipient, txAmount, {
-          from: from || (await this.getAddress()),
+          from:
+            from ||
+            (await getAddress({
+              index: 0,
+              network: this.getNetwork(),
+              phrase: this.phrase,
+            })),
         })
       } else {
         // ETH gas estimate
         const transactionRequest = {
-          from: from || (await this.getAddress()),
+          from:
+            from ||
+            (await getAddress({
+              index: 0,
+              network: this.getNetwork(),
+              phrase: this.phrase,
+            })),
           to: recipient,
           value: txAmount,
           data: memo ? toUtf8Bytes(memo) : undefined,

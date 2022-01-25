@@ -43,7 +43,7 @@ export async function mnemonicToSeed(mnemonic: string, password?: string): Promi
 async function mnemonicToEntropy(mnemonic: string) {
   const words = mnemonic.split(' ')
   if (words.length % 3 !== 0) {
-    throw new Error('Invalid mnemonic')
+    throw new Error('Invalid mnemonic, word length not divisible by 3')
   }
 
   const belongToList = words.every(function (word) {
@@ -51,7 +51,7 @@ async function mnemonicToEntropy(mnemonic: string) {
   })
 
   if (!belongToList) {
-    throw new Error('Invalid mnemonic')
+    throw new Error('Invalid mnemonic, not every word belongs to list')
   }
 
   // convert word indices to 11 bit binary strings

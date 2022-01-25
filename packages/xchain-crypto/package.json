@@ -1,10 +1,8 @@
 {
   "name": "@thorwallet/xchain-crypto",
-  "version": "0.0.1-alpha.909+02a3ef3",
+  "version": "0.1.1-lazy.0",
   "description": "XChain Crypto is a crypto module needed by all XChain clients.",
   "main": "lib/index.js",
-  "module": "lib/index.es.js",
-  "jsnext:main": "lib/index.es.js",
   "types": "lib/index.d.ts",
   "files": [
     "lib",
@@ -12,7 +10,7 @@
   ],
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "yarn clean && rollup -c",
+    "build": "tsc",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "test": "jest --coverage",
     "prepublishOnly": "yarn build"

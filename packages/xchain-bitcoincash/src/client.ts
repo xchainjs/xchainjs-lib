@@ -4,7 +4,6 @@ import * as utils from './utils'
 import {
   RootDerivationPaths,
   Address,
-  Balance,
   Network,
   Fees,
   Tx,
@@ -24,6 +23,7 @@ import { NodeAuth } from './types'
 import { broadcastTx } from './node-api'
 import RNSimple from 'react-native-simple-crypto'
 import { ECPair } from 'bitcoinjs-lib'
+import { getAddress } from './get-address'
 
 type Signature = {
   signature: string
@@ -60,7 +60,6 @@ class Client implements BitcoinCashClient, XChainClient {
   private nodeUrl: ClientUrl
   private nodeAuth?: NodeAuth
   private rootDerivationPaths: RootDerivationPaths
-  private addrCache: Record<string, Record<number, string>>
 
   /**
    * Constructor
@@ -91,7 +90,6 @@ class Client implements BitcoinCashClient, XChainClient {
     this.haskoinUrl = haskoinUrl
     this.nodeUrl = nodeUrl
     this.rootDerivationPaths = rootDerivationPaths
-    this.addrCache = {}
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
       // by strictly passing nodeAuth as null value
@@ -149,8 +147,8 @@ class Client implements BitcoinCashClient, XChainClient {
   setPhrase = async (phrase: string, walletIndex = 0): Promise<Address> => {
     if (validatePhrase(phrase)) {
       this.phrase = phrase
-      this.addrCache[phrase] = {}
-      return this.getAddress(walletIndex)
+
+      return getAddress({ network: this.network, phrase: this.phrase, index: walletIndex })
     } else {
       throw new Error('Invalid phrase')
     }
@@ -254,37 +252,6 @@ class Client implements BitcoinCashClient, XChainClient {
   }
 
   /**
-   * Get the current address.
-   *
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
-   */
-  getAddress = async (index = 0): Promise<Address> => {
-    if (this.phrase) {
-      if (this.addrCache[this.phrase][index]) {
-        return this.addrCache[this.phrase][index]
-      }
-      try {
-        const keys = await this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
-        const address = await keys.getAddress(index)
-
-        const addr = utils.stripPrefix(utils.toCashAddress(address))
-        this.addrCache[this.phrase][index] = addr
-        return addr
-      } catch (error) {
-        throw new Error('Address not defined')
-      }
-    }
-
-    throw new Error('Phrase must be provided')
-  }
-
-  /**
    * Get getFullDerivationPath
    *
    * @param {number} index the HD wallet index
@@ -302,18 +269,6 @@ class Client implements BitcoinCashClient, XChainClient {
    */
   validateAddress = (address: string): boolean => {
     return utils.validateAddress(address, this.network)
-  }
-
-  /**
-   * Get the BCH balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Array<Balance>} The BCH balance of the address.
-   *
-   * @throws {"Invalid address"} Thrown if the given address is an invalid address.
-   */
-  getBalance = async (address: Address): Promise<Balance[]> => {
-    return utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address })
   }
 
   /**
@@ -481,7 +436,7 @@ class Client implements BitcoinCashClient, XChainClient {
       const { builder, inputUTXOs } = await utils.buildTx({
         ...params,
         feeRate,
-        sender: await this.getAddress(),
+        sender: await getAddress({ network: this.network, phrase: this.phrase, index: 0 }),
         haskoinUrl: this.getHaskoinURL(),
         network: this.network,
       })

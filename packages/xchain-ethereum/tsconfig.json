@@ -3,7 +3,9 @@
   "compilerOptions": {
     "strict": false,
     "strictPropertyInitialization": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "rootDir": "src",
+    "outDir": "lib"
   },
   "include": ["src/**/*"]
 }

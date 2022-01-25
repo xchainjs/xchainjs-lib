@@ -1,6 +1,6 @@
 {
   "name": "@thorwallet/xchain-bitcoincash",
-  "version": "0.0.1-alpha.909+02a3ef3",
+  "version": "0.1.1-lazy.0",
   "description": "Custom bitcoincash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -11,8 +11,7 @@
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
   "main": "lib/index.js",
-  "module": "lib/index.esm.js",
-  "typings": "lib/index.d.ts",
+  "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -26,28 +25,28 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "yarn clean && rollup -c",
+    "build": "tsc",
     "test": "jest",
     "lint": "eslint \"{src,__tests__,__mocks__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "bitcoinjs-lib": "^5.2.0",
-    "uniqid": "^5.3.0"
-  },
-  "devDependencies": {
-    "@psf/bitcoincashjs-lib": "^4.0.2",
-    "@thorwallet/xchain-client": "^0.0.1-alpha.909+02a3ef3",
-    "@thorwallet/xchain-crypto": "^0.0.1-alpha.909+02a3ef3",
-    "@thorwallet/xchain-util": "^0.0.1-alpha.909+02a3ef3",
-    "@types/bchaddrjs": "0.4.0",
-    "@types/uniqid": "^5.2.0",
     "axios": "^0.21.0",
     "axios-mock-adapter": "^1.19.0",
     "bchaddrjs": "^0.5.2",
     "bitcoinjs-lib": "^5.2.0",
-    "coinselect": "3.1.12"
+    "coininfo": "^5.1.0",
+    "coinselect": "3.1.12",
+    "uniqid": "^5.3.0"
+  },
+  "devDependencies": {
+    "@psf/bitcoincashjs-lib": "^4.0.2",
+    "@thorwallet/xchain-client": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-crypto": "^0.1.1-lazy.0",
+    "@thorwallet/xchain-util": "^0.1.1-lazy.0",
+    "@types/bchaddrjs": "0.4.0",
+    "@types/uniqid": "^5.2.0"
   },
   "peerDependencies": {
     "@psf/bitcoincashjs-lib": "^4.0.2",

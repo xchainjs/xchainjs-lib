@@ -1,3 +1,6 @@
+export { getBalance } from './get-balance'
+export { getAddress } from './get-address'
+
 export * from './types'
 export * from './client'
 export {
