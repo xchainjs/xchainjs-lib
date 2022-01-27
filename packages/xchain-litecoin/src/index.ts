@@ -2,6 +2,7 @@ export * from './types'
 export * from './client'
 export {
   broadcastTx,
+  buildTx,
   getDefaultFees,
   getDefaultFeesWithRates,
   getPrefix,
