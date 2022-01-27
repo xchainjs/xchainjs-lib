@@ -1,3 +1,9 @@
+# v.0.7.1 (2021-01-27)
+
+## Update
+
+- Export `buildTx`
+
 # v.0.7.0 (2021-12-29)
 
 ## Breaking change
