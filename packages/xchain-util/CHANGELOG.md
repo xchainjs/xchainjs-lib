@@ -1,3 +1,17 @@
+# v.0.5.0 (2022-xx-xx)
+
+### Breaking change
+
+- Add `synth` property to `Asset`
+
+### Update
+
+- Support synths in `assetFromString` + `assetToString` helpers
+
+### Add
+
+- `isSynth` helper
+
 # v.0.4.0 (2022-01-19)
 
 ### Add
