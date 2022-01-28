@@ -1,3 +1,9 @@
+# v.0.15.1 (2022-xx-xx)
+
+## Update
+
+- Use @xchainjs/xchain-util@0.5.0
+
 # v.0.15.0 (2021-12-29)
 
 ## Breaking change
