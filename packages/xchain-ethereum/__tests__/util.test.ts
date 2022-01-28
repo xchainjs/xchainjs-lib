@@ -57,6 +57,7 @@ describe('ethereum/util', () => {
         chain: ETHChain,
         symbol: 'USDT-0X4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
         ticker: 'USDT',
+        synth: false,
       })
       expect(tokenAddress1).toEqual('0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa')
 
@@ -64,6 +65,7 @@ describe('ethereum/util', () => {
         chain: ETHChain,
         symbol: 'USDT-0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
         ticker: 'USDT',
+        synth: false,
       })
       expect(tokenAddress2).toEqual('0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa')
     })
@@ -72,6 +74,7 @@ describe('ethereum/util', () => {
         chain: ETHChain,
         symbol: 'ETH',
         ticker: 'ETH',
+        synth: false,
       })
       expect(tokenAddress).toBeNull()
     })
@@ -426,6 +429,7 @@ describe('ethereum/util', () => {
           chain: ETHChain,
           ticker: 'USDT',
           symbol: 'USDT-0x62e273709da575835c7f6aef4a31140ca5b1d190',
+          synth: false,
         },
         provider,
       )

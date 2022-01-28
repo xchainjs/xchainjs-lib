@@ -168,7 +168,7 @@ export const formatBaseAmount = (amount: BaseAmount) => formatBN(amount.amount()
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetBNB: Asset = { chain: Chain.Binance, symbol: 'BNB', ticker: 'BNB' }
+export const AssetBNB: Asset = { chain: Chain.Binance, symbol: 'BNB', ticker: 'BNB', synth: false }
 
 /**
  * Base "chain" asset on bitcoin main net.
@@ -176,7 +176,7 @@ export const AssetBNB: Asset = { chain: Chain.Binance, symbol: 'BNB', ticker: 'B
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetBTC: Asset = { chain: Chain.Bitcoin, symbol: 'BTC', ticker: 'BTC' }
+export const AssetBTC: Asset = { chain: Chain.Bitcoin, symbol: 'BTC', ticker: 'BTC', synth: false }
 
 /**
  * Base "chain" asset on bitcoin cash main net.
@@ -184,7 +184,7 @@ export const AssetBTC: Asset = { chain: Chain.Bitcoin, symbol: 'BTC', ticker: 'B
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetBCH: Asset = { chain: Chain.BitcoinCash, symbol: 'BCH', ticker: 'BCH' }
+export const AssetBCH: Asset = { chain: Chain.BitcoinCash, symbol: 'BCH', ticker: 'BCH', synth: false }
 
 /**
  * Base "chain" asset on litecoin main net.
@@ -192,14 +192,14 @@ export const AssetBCH: Asset = { chain: Chain.BitcoinCash, symbol: 'BCH', ticker
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetLTC: Asset = { chain: Chain.Litecoin, symbol: 'LTC', ticker: 'LTC' }
+export const AssetLTC: Asset = { chain: Chain.Litecoin, symbol: 'LTC', ticker: 'LTC', synth: false }
 
 /**
  * Dogecoin asset
  * Based on definition in Thorchain
  * @see https://gitlab.com/thorchain/thornode/-/blob/781-add-doge-chain/common/asset.go#L24
  */
-export const AssetDOGE: Asset = { chain: Chain.Doge, symbol: 'DOGE', ticker: 'DOGE' }
+export const AssetDOGE: Asset = { chain: Chain.Doge, symbol: 'DOGE', ticker: 'DOGE', synth: false }
 
 export const RUNE_TICKER = 'RUNE'
 
@@ -209,7 +209,7 @@ export const RUNE_TICKER = 'RUNE'
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetETH: Asset = { chain: Chain.Ethereum, symbol: 'ETH', ticker: 'ETH' }
+export const AssetETH: Asset = { chain: Chain.Ethereum, symbol: 'ETH', ticker: 'ETH', synth: false }
 
 /**
  * Base "chain" asset for RUNE-67C on Binance test net.
@@ -217,7 +217,7 @@ export const AssetETH: Asset = { chain: Chain.Ethereum, symbol: 'ETH', ticker: '
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetRune67C: Asset = { chain: Chain.Binance, symbol: 'RUNE-67C', ticker: RUNE_TICKER }
+export const AssetRune67C: Asset = { chain: Chain.Binance, symbol: 'RUNE-67C', ticker: RUNE_TICKER, synth: false }
 
 /**
  * Base "chain" asset for RUNE-B1A on Binance main net.
@@ -225,7 +225,7 @@ export const AssetRune67C: Asset = { chain: Chain.Binance, symbol: 'RUNE-67C', t
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetRuneB1A: Asset = { chain: Chain.Binance, symbol: 'RUNE-B1A', ticker: RUNE_TICKER }
+export const AssetRuneB1A: Asset = { chain: Chain.Binance, symbol: 'RUNE-B1A', ticker: RUNE_TICKER, synth: false }
 
 /**
  * Base "chain" asset on thorchain main net.
@@ -233,7 +233,7 @@ export const AssetRuneB1A: Asset = { chain: Chain.Binance, symbol: 'RUNE-B1A', t
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetRuneNative: Asset = { chain: Chain.THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER }
+export const AssetRuneNative: Asset = { chain: Chain.THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
 
 /**
  * Base "chain" asset for RUNE on ethereum main net.
@@ -245,6 +245,7 @@ export const AssetRuneERC20: Asset = {
   chain: Chain.Ethereum,
   symbol: `${RUNE_TICKER}-0x3155ba85d5f96b2d030a4966af206230e46849cb`,
   ticker: RUNE_TICKER,
+  synth: false,
 }
 
 /**
@@ -257,6 +258,7 @@ export const AssetRuneERC20Testnet: Asset = {
   chain: Chain.Ethereum,
   symbol: `${RUNE_TICKER}-0xd601c6A3a36721320573885A8d8420746dA3d7A0`,
   ticker: RUNE_TICKER,
+  synth: false,
 }
 
 /**
@@ -266,6 +268,17 @@ export const AssetRuneERC20Testnet: Asset = {
  * @returns {boolean} `true` or `false`
  */
 export const isValidAsset = (asset: Asset): boolean => !!asset.chain && !!asset.ticker && !!asset.symbol
+
+/**
+ * Helper to check whether an asset is synth asset
+ *
+ * @param {Asset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isSynthAsset = ({ synth }: Asset): boolean => synth
+
+const SYNTH_DELIMITER = '/'
+const NON_SYNTH_DELIMITER = '.'
 
 /**
  * Creates an `Asset` by a given string
@@ -285,7 +298,9 @@ export const isValidAsset = (asset: Asset): boolean => !!asset.chain && !!asset.
  * @returns {Asset|null} The asset from the given string.
  */
 export const assetFromString = (s: string): Asset | null => {
-  const data = s.split('.')
+  const isSynth = s.includes(SYNTH_DELIMITER)
+  const delimiter = isSynth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
+  const data = s.split(delimiter)
   if (data.length <= 1 || data[1]?.length < 1) {
     return null
   }
@@ -297,7 +312,7 @@ export const assetFromString = (s: string): Asset | null => {
   const symbol = data[1]
   const ticker = symbol.split('-')[0]
 
-  return { chain, symbol, ticker }
+  return { chain, symbol, ticker, synth: isSynth }
 }
 
 /**
@@ -308,13 +323,17 @@ export const assetFromString = (s: string): Asset | null => {
  * chain: `AAA`
  * ticker (optional): `BBB`
  * symbol: `BBB-CCC` or `CCC` (if no ticker available)
+ * symbol (synth): `BBB/CCC` or `CCC` (if no ticker available)
  *
  * @see https://docs.thorchain.org/developers/transaction-memos#asset-notation
  *
  * @param {Asset} asset The given asset.
  * @returns {string} The string from the given asset.
  */
-export const assetToString = ({ chain, symbol }: Asset) => `${chain}.${symbol}`
+export const assetToString = ({ chain, symbol, synth }: Asset) => {
+  const delimiter = synth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
+  return `${chain}${delimiter}${symbol}`
+}
 
 /**
  * Currency symbols currently supported
