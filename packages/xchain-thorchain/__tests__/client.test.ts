@@ -404,7 +404,7 @@ describe('Client Test', () => {
   })
 
   it('deposit', async () => {
-    const send_amount: BaseAmount = baseAmount(10000, 6)
+    const send_amount: BaseAmount = baseAmount(10000, 8)
     const memo = 'swap:BNB.BNB:tbnb1ftzhmpzr4t8ta3etu4x7nwujf9jqckp3th2lh0'
 
     const expected_txsPost_result = {

@@ -13,6 +13,7 @@
 ## Add
 
 - `isAssetNativeRune` helper
+- Add `TxOfflineParams` type
 
 ## Fix
 

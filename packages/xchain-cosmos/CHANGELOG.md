@@ -1,4 +1,8 @@
-# v.0.15.1 (2022-01-28)
+# v.0.16.0 (2022-xx-xx)
+
+## Breaking change
+
+- Remove `from_balance` from `TxOfflineParams`
 
 ## Update
 
