@@ -18,7 +18,7 @@ import {
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCTxResult, TxOfflineParams } from '@xchainjs/xchain-cosmos'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { Asset, AssetRuneNative, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetRuneNative, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { AccAddress, PrivKey, PubKey, codec } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
@@ -41,6 +41,7 @@ import {
   getExplorerAddressUrl,
   getExplorerTxUrl,
   getPrefix,
+  isAssetRuneNative,
   isBroadcastSuccess,
   registerCodecs,
 } from './util'
@@ -445,7 +446,7 @@ class Client implements ThorchainClient, XChainClient {
     const msgNativeTx = msgNativeTxFromJson({
       coins: [
         {
-          asset: assetToString(asset) === assetToString(AssetRuneNative)? getDenomWithChain(asset): getDenom(asset),
+          asset: isAssetRuneNative(asset) ? getDenomWithChain(asset) : getDenom(asset),
           amount: amount.amount().toString(),
         },
       ],
@@ -483,7 +484,7 @@ class Client implements ThorchainClient, XChainClient {
       from: this.getAddress(walletIndex),
       to: recipient,
       amount: amount.amount().toString(),
-      asset: assetToString(asset) === assetToString(AssetRuneNative)? getDenomWithChain(asset): getDenom(asset),
+      asset: isAssetRuneNative(asset) ? getDenomWithChain(asset) : getDenom(asset),
       memo,
       fee: {
         amount: [],
@@ -531,7 +532,7 @@ class Client implements ThorchainClient, XChainClient {
       from_sequence,
       to: recipient,
       amount: amount.amount().toString(),
-      asset: assetToString(asset) === assetToString(AssetRuneNative)? getDenomWithChain(asset): getDenom(asset),
+      asset: isAssetRuneNative(asset) ? getDenomWithChain(asset) : getDenom(asset),
       memo,
       fee: {
         amount: [],
