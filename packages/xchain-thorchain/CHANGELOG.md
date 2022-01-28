@@ -5,6 +5,14 @@
 - xchain-util@0.5.0
 - xchain-cosmos@0.15.1
 
+## Add
+
+- `isAssetNativeRune` helper
+
+## Fix
+
+- Fix synth notation in `transfer|transferOffline|deposit` #473
+
 # v0.20.1 (2022-01-11)
 
 ## Fix
