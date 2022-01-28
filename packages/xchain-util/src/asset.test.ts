@@ -19,6 +19,7 @@ import {
   isAssetAmount,
   isBaseAmount,
   isBigNumberValue,
+  isSynthAsset,
   isValidAsset,
 } from './asset'
 import { BNBChain, ETHChain } from './chain'
@@ -347,6 +348,25 @@ describe('asset', () => {
     it('BNB/BNB', () => {
       const asset: Asset = { chain: BNBChain, symbol: 'BNB', ticker: 'BNB', synth: true }
       expect(assetToString(asset)).toEqual('BNB/BNB')
+    })
+  })
+
+  describe('isSynthAsset', () => {
+    it('false for "standard" asset', () => {
+      expect(isSynthAsset({ chain: BNBChain, symbol: 'BNB', ticker: 'BNB', synth: false })).toBeFalsy()
+    })
+    it('true for synths', () => {
+      expect(isValidAsset({ chain: BNBChain, symbol: 'BNB', ticker: 'BNB', synth: true })).toBeTruthy()
+    })
+    it('composable usage', () => {
+      const assets: Asset[] = [
+        { chain: BNBChain, symbol: 'BNB', ticker: 'BNB', synth: false },
+        { chain: BNBChain, symbol: 'BNB', ticker: 'BNB', synth: true },
+        { chain: ETHChain, symbol: 'ETH', ticker: 'ETH', synth: false },
+      ]
+      const list = assets.filter(isSynthAsset)
+      expect(list.length).toEqual(1)
+      expect(list[0]).toEqual({ chain: BNBChain, symbol: 'BNB', ticker: 'BNB', synth: true })
     })
   })
 

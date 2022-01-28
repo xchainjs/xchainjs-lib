@@ -269,6 +269,14 @@ export const AssetRuneERC20Testnet: Asset = {
  */
 export const isValidAsset = (asset: Asset): boolean => !!asset.chain && !!asset.ticker && !!asset.symbol
 
+/**
+ * Helper to check whether an asset is synth asset
+ *
+ * @param {Asset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isSynthAsset = ({ synth }: Asset): boolean => synth
+
 const SYNTH_DELIMITER = '/'
 const NON_SYNTH_DELIMITER = '.'
 

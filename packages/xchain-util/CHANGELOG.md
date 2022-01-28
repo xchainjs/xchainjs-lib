@@ -10,7 +10,7 @@
 
 ### Add
 
-- `isSynth` helper
+- `isSynthAsset` helper
 
 # v.0.4.0 (2022-01-19)
 
