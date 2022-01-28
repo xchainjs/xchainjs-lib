@@ -1,3 +1,13 @@
+# v.0.23.2 (2022-xx-xx)
+
+## Update
+
+- xchain-util@0.5.0
+
+## Add
+
+- `isAssetNativeRune` helper
+
 # v.0.23.1 (2022-01-05)
 
 ## Fix
