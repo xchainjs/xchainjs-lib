@@ -1,4 +1,9 @@
-# v.0.20.2 (2022-xx-xx)
+# v.0.21.0 (2022-xx-xx)
+
+## Breaking change
+
+- Remove `getDenomWithChain`
+- Rename `getAsset` -> `assetFromDenom` (incl. fix to get synth asset properly)
 
 ## Update
 
