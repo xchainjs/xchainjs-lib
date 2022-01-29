@@ -26,7 +26,6 @@ import * as Utils from './utils'
 class Client extends UTXOClient {
   private nodeUrl = ''
   private sochainUrl = ''
-
   /**
    * Constructor
    * Client is initialised with network type
@@ -37,9 +36,13 @@ class Client extends UTXOClient {
     network = Network.Testnet,
     phrase,
     nodeUrl,
+    rootDerivationPaths = {
+      [Network.Mainnet]: `44'/133'/0'/0/`,
+      [Network.Testnet]: `44'/133'/1'/0/`,
+    },
     sochainUrl = 'https://sochain.com/api/v2',
   }: ZcashClientParams) {
-    super(Chain.Zcash, { network, phrase })
+    super(Chain.Zcash, { network, phrase, rootDerivationPaths })
     this.nodeUrl =
       nodeUrl ??
       (() => {
@@ -105,6 +108,20 @@ class Client extends UTXOClient {
   }
 
   /**
+   * Get getFullDerivationPath
+   *
+   * @param {number} index the HD wallet index
+   * @returns {string} The bitcoin derivation path based on the network.
+   */
+  getFullDerivationPath(index: number): string {
+    if (this.rootDerivationPaths) {
+      return (this.rootDerivationPaths[this.network] + `${index}`) as string
+    } else {
+      return ''
+    }
+  }
+
+  /**
    * Get the current address.
    *
    * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
@@ -150,9 +167,11 @@ class Client extends UTXOClient {
   private getZecKeys(phrase: string, index = 0): UtxoLib.ECPairInterface {
     const zecNetwork = Utils.zecNetwork(this.network)
 
+    console.log('zecNetwork', zecNetwork)
     const seed = getSeed(phrase)
+    console.log('seed', seed)
     const master = UtxoLib.bip32.fromSeed(seed, zecNetwork).derivePath(this.getFullDerivationPath(index))
-
+    console.log('master', master)
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
     }
@@ -182,7 +201,7 @@ class Client extends UTXOClient {
    * Get the LTC balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Balance[]} The LTC balance of the address.
+   * @returns {Balance[]} The ZEC balance of the address.
    */
   async getBalance(address: Address): Promise<Balance[]> {
     return Utils.getBalance({
