@@ -41,6 +41,7 @@ import {
   getExplorerAddressUrl,
   getExplorerTxUrl,
   getPrefix,
+  isAssetRuneNative,
   isBroadcastSuccess,
   registerCodecs,
 } from './util'
@@ -445,7 +446,7 @@ class Client implements ThorchainClient, XChainClient {
     const msgNativeTx = msgNativeTxFromJson({
       coins: [
         {
-          asset: getDenomWithChain(asset),
+          asset: isAssetRuneNative(asset) ? getDenomWithChain(asset) : getDenom(asset),
           amount: amount.amount().toString(),
         },
       ],
@@ -483,7 +484,7 @@ class Client implements ThorchainClient, XChainClient {
       from: this.getAddress(walletIndex),
       to: recipient,
       amount: amount.amount().toString(),
-      asset: getDenom(asset),
+      asset: isAssetRuneNative(asset) ? getDenomWithChain(asset) : getDenom(asset),
       memo,
       fee: {
         amount: [],
@@ -531,7 +532,7 @@ class Client implements ThorchainClient, XChainClient {
       from_sequence,
       to: recipient,
       amount: amount.amount().toString(),
-      asset: getDenom(asset),
+      asset: isAssetRuneNative(asset) ? getDenomWithChain(asset) : getDenom(asset),
       memo,
       fee: {
         amount: [],

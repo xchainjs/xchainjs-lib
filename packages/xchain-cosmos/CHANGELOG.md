@@ -1,6 +1,12 @@
-# v.0.15.1 (2022-01-10)
+# v.0.15.2 (2022-01-10)
 
 - upgrade axios dependency to latest
+
+# v.0.15.1 (2022-01-28)
+
+## Update
+
+- Use @xchainjs/xchain-util@0.5.0
 
 # v.0.15.0 (2021-12-29)
 

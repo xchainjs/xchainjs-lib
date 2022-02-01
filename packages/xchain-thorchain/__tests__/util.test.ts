@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import {
   getAsset,
@@ -12,10 +12,22 @@ import {
   getExplorerUrl,
   getPrefix,
   getTxType,
+  isAssetRuneNative,
   isBroadcastSuccess,
 } from '../src/util'
 
 describe('thorchain/util', () => {
+  describe('isAssetRuneNative', () => {
+    it('true for AssetRuneNative', () => {
+      expect(isAssetRuneNative(AssetRuneNative)).toBeTruthy()
+    })
+    it('false for ETH', () => {
+      expect(isAssetRuneNative(AssetETH)).toBeFalsy()
+    })
+    it('false for ETH synth', () => {
+      expect(isAssetRuneNative({ ...AssetETH, synth: true })).toBeFalsy()
+    })
+  })
   describe('Denom <-> Asset', () => {
     describe('getDenom', () => {
       it('get denom for AssetRune', () => {

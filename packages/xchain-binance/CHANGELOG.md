@@ -1,3 +1,9 @@
+# v.5.4.1 (2021-xx-xx)
+
+## Update
+
+- xchain-util@0.5.0
+
 # v.5.4.0 (2021-12-29)
 
 ## Breaking change

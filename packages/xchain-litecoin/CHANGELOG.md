@@ -1,7 +1,13 @@
-# v.0.7.1 (2022-01-10)
+# v.0.7.2 (2022-01-10)
 
 - upgrade axios dependency to latest
 - export buildTx in index
+
+# v.0.7.1 (2021-01-27)
+
+## Update
+
+- Export `buildTx`
 
 # v.0.7.0 (2021-12-29)
 

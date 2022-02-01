@@ -24,13 +24,21 @@ export const DEPOSIT_GAS_VALUE = '500000000'
 export const MAX_TX_COUNT = 100
 
 /**
+ * Checks whether an asset is `AssetRuneNative`
+ *
+ * @param {Asset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
+
+/**
  * Get denomination from Asset
  *
  * @param {Asset} asset
  * @returns {string} The denomination of the given asset.
  */
 export const getDenom = (asset: Asset): string => {
-  if (assetToString(asset) === assetToString(AssetRuneNative)) return 'rune'
+  if (isAssetRuneNative(asset)) return 'rune'
   return asset.symbol
 }
 
