@@ -193,13 +193,19 @@ export const AssetBCH: Asset = { chain: Chain.BitcoinCash, symbol: 'BCH', ticker
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
 export const AssetLTC: Asset = { chain: Chain.Litecoin, symbol: 'LTC', ticker: 'LTC', synth: false }
-
 /**
  * Dogecoin asset
  * Based on definition in Thorchain
  * @see https://gitlab.com/thorchain/thornode/-/blob/781-add-doge-chain/common/asset.go#L24
  */
 export const AssetDOGE: Asset = { chain: Chain.Doge, symbol: 'DOGE', ticker: 'DOGE', synth: false }
+
+/**
+ * Luna asset
+ * Based on definition in Thorchain
+ * @see TBD
+ */
+export const AssetLUNA: Asset = { chain: Chain.Terra, symbol: 'LUNA', ticker: 'LUNA', synth: false }
 
 export const RUNE_TICKER = 'RUNE'
 

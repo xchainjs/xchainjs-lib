@@ -15,7 +15,7 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetLUNA, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 const DEFAULT_CONFIG = {
@@ -41,11 +41,7 @@ const DEFAULT_CONFIG = {
     ChainID: 'bombay-12',
   },
 }
-const ASSET_LUNA: Asset = {
-  chain: Chain.Terra,
-  symbol: 'LUNA',
-  ticker: 'LUNA',
-}
+
 export type SearchTxParams = {
   messageAction?: string
   messageSender?: string
@@ -150,7 +146,7 @@ class Client extends BaseXChainClient implements XChainClient {
     return this.convertTxInfoToTx(txInfo)
   }
 
-  async transfer({ walletIndex = 0, asset = ASSET_LUNA, amount, recipient, memo }: TxParams): Promise<string> {
+  async transfer({ walletIndex = 0, asset = AssetLUNA, amount, recipient, memo }: TxParams): Promise<string> {
     if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
 
     // TODO use fee?
@@ -182,11 +178,7 @@ class Client extends BaseXChainClient implements XChainClient {
   }
   private getTerraNativeAsset(denom: string): Asset | undefined {
     if (denom.includes('luna')) {
-      return {
-        chain: Chain.Terra,
-        symbol: 'LUNA',
-        ticker: 'LUNA',
-      }
+      return AssetLUNA
     } else {
       // native coins other than luna, UST, KRT, etc
       // NOTE: https://docs.terra.money/Reference/Terra-core/Overview.html#currency-denominations
@@ -195,6 +187,7 @@ class Client extends BaseXChainClient implements XChainClient {
         chain: Chain.Terra,
         symbol: standardDenom,
         ticker: standardDenom,
+        synth: false,
       }
     }
     return undefined
@@ -234,6 +227,7 @@ class Client extends BaseXChainClient implements XChainClient {
         chain: Chain.Terra,
         symbol: '',
         ticker: '',
+        synth: false,
       },
       from,
       to,
@@ -267,6 +261,7 @@ class Client extends BaseXChainClient implements XChainClient {
         chain: Chain.Terra,
         symbol: '',
         ticker: '',
+        synth: false,
       },
       from,
       to,

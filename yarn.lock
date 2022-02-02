@@ -2608,6 +2608,11 @@
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.3.1.tgz#90fb81379d6c8eca83c7500684108b3dc4a1479f"
   integrity sha512-mUHFtiC62eYBWgPW/0oU/UQHIE5cKsSB6CRECnzkvvSoekpCJgZ8dfLLRCLgLX/uMRVqYX/YQoJiwh23x4gFMQ==
 
+"@xchainjs/xchain-util@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.4.0.tgz#9c09a95ef6825d4dc381779a806218cf89a15ad9"
+  integrity sha512-3voTcfnuiiUtp1dDZ+hvh5Ov5r84zTIOXKfDZAGYcwNMBZOCiHU2PzlVAkJs3fYIdhPMrPfSbouU8JWM7LJ27g==
+
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@zkochan/cmd-shim/-/cmd-shim-3.1.0.tgz#2ab8ed81f5bb5452a85f25758eb9b8681982fd2e"
@@ -2944,7 +2949,7 @@ axios@^0.19.0, axios@^0.19.2:
   dependencies:
     follow-redirects "1.5.10"
 
-axios@^0.21.1, axios@^0.21.4:
+axios@^0.21.1, axios@^0.21.3, axios@^0.21.4:
   version "0.21.4"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
   integrity sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==
