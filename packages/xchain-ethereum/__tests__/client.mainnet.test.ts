@@ -13,7 +13,7 @@ const addrPath0 = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E'
 // m/44'/60'/0'/0/1
 const addrPath1 = '0x1804137641b5CB781226b361976F15B4067ee0F9'
 const ethplorerUrl = 'https://api.ethplorer.io'
-const thornodeApiUrl = 'https://thornode.thorchain.info'
+const thornodeApiUrl = 'https://thornode.ninerealms.com'
 
 /**
  * Wallet Tests

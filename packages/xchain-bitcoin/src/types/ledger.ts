@@ -13,4 +13,5 @@ export type LedgerTxInfoParams = OnlyRequired<TxParams> & {
   sender: Address
   network: Network
   sochainUrl: string
+  haskoinUrl: string
 }

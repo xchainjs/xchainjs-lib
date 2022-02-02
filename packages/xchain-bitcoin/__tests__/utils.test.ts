@@ -54,6 +54,7 @@ describe.skip('Bitcoin Utils Test', () => {
     const address = '34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo'
     const utxos: UTXO[] = await Utils.scanUTXOs({
       sochainUrl: 'https://sochain.com/api/v2',
+      haskoinUrl: 'https://api.haskoin.com/haskoin-store/btc',
       network: 'mainnet' as Network,
       address,
       confirmedOnly: false, // get all confirmed & unconfirmed UTXOs

@@ -1,3 +1,9 @@
+# v.0.11.0 (2021-12-29)
+
+### Breaking change
+
+- Expand `Network` enum type to include stagenet and introduce stagenet environment variables to `BaseXChainClient` for thorchain.
+
 # v.0.10.3 (2021-09-02)
 
 - updated to the latest dependencies

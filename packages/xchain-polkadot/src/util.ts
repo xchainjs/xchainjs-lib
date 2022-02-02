@@ -18,6 +18,7 @@ export const isSuccess = (response: { code: number }): boolean => !response.code
 export const getDecimal = (network: Network): number => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return 10
     case Network.Testnet:
       return 12
@@ -45,6 +46,7 @@ export const getDefaultFees = (network: Network): Fees => {
 export const getPrefix = (network: Network) => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return '1'
     case Network.Testnet:
       return '5'

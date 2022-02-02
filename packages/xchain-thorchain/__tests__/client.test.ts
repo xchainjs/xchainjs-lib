@@ -1,6 +1,15 @@
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCResponse, RPCTxSearchResult, TxResponse } from '@xchainjs/xchain-cosmos'
-import { AssetRuneNative, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetBNB,
+  AssetRuneNative,
+  BNBChain,
+  BaseAmount,
+  assetAmount,
+  assetToBase,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 import { BaseAccount, BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
 import nock from 'nock'
 
@@ -31,6 +40,17 @@ const mockAccountsBalance = (
 
 const mockThorchainDeposit = (url: string, result: ThorchainDepositResponse) => {
   nock(url).post('/thorchain/deposit').reply(200, result)
+}
+
+const mockTendermintNodeInfo = (
+  url: string,
+  result: {
+    default_node_info: {
+      network: string
+    }
+  },
+) => {
+  nock(url).get('/cosmos/base/tendermint/v1beta1/node_info').reply(200, result)
 }
 
 const assertTxsPost = (url: string, memo: undefined | string, result: BroadcastTxCommitResult): void => {
@@ -65,8 +85,8 @@ describe('Client Test', () => {
   const testnet_address_path1 = 'tthor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecv2c92a'
 
   beforeEach(() => {
-    thorClient = new Client({ phrase, network: 'testnet' as Network })
-    thorMainClient = new Client({ phrase, network: 'mainnet' as Network })
+    thorClient = new Client({ phrase, network: Network.Testnet })
+    thorMainClient = new Client({ phrase, network: Network.Mainnet })
   })
 
   afterEach(() => {
@@ -75,11 +95,11 @@ describe('Client Test', () => {
   })
 
   it('should start with empty wallet', async () => {
-    const thorClientEmptyMain = new Client({ phrase, network: 'mainnet' as Network })
+    const thorClientEmptyMain = new Client({ phrase, network: Network.Mainnet })
     const addressMain = thorClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnet_address_path0)
 
-    const thorClientEmptyTest = new Client({ phrase, network: 'testnet' as Network })
+    const thorClientEmptyTest = new Client({ phrase, network: Network.Testnet })
     const addressTest = thorClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnet_address_path0)
   })
@@ -87,7 +107,7 @@ describe('Client Test', () => {
   it('should derive address accordingly to the user param', async () => {
     const thorClientEmptyMain = new Client({
       phrase,
-      network: 'mainnet' as Network /*, derivationPath: "44'/931'/0'/0/0" */,
+      network: Network.Mainnet /*, derivationPath: "44'/931'/0'/0/0" */,
     })
     const addressMain = thorClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnet_address_path0)
@@ -97,7 +117,7 @@ describe('Client Test', () => {
 
     const thorClientEmptyTest = new Client({
       phrase,
-      network: 'testnet' as Network /*, derivationPath: "44'/931'/0'/0/0"*/,
+      network: Network.Testnet /*, derivationPath: "44'/931'/0'/0/0"*/,
     })
     const addressTest = thorClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnet_address_path0)
@@ -107,14 +127,14 @@ describe('Client Test', () => {
 
     const thorClientEmptyMain1 = new Client({
       phrase,
-      network: 'mainnet' as Network /*, derivationPath: "44'/931'/0'/0/1"*/,
+      network: Network.Mainnet /*, derivationPath: "44'/931'/0'/0/1"*/,
     })
     const addressMain1 = thorClientEmptyMain1.getAddress(1)
     expect(addressMain1).toEqual(mainnet_address_path1)
 
     const thorClientEmptyTest1 = new Client({
       phrase,
-      network: 'testnet' as Network /*, derivationPath: "44'/931'/0'/0/1"*/,
+      network: Network.Testnet /*, derivationPath: "44'/931'/0'/0/1"*/,
     })
     const addressTest1 = thorClientEmptyTest1.getAddress(1)
     expect(addressTest1).toEqual(testnet_address_path1)
@@ -122,11 +142,11 @@ describe('Client Test', () => {
 
   it('throws an error passing an invalid phrase', async () => {
     expect(() => {
-      new Client({ phrase: 'invalid phrase', network: 'mainnet' as Network })
+      new Client({ phrase: 'invalid phrase', network: Network.Mainnet })
     }).toThrow()
 
     expect(() => {
-      new Client({ phrase: 'invalid phrase', network: 'testnet' as Network })
+      new Client({ phrase: 'invalid phrase', network: Network.Testnet })
     }).toThrow()
   })
 
@@ -141,7 +161,7 @@ describe('Client Test', () => {
   })
 
   it('should update net', async () => {
-    thorMainClient.setNetwork('testnet' as Network)
+    thorMainClient.setNetwork(Network.Testnet)
     expect(thorMainClient.getNetwork()).toEqual('testnet')
 
     const address = await thorMainClient.getAddress()
@@ -151,7 +171,10 @@ describe('Client Test', () => {
   it('should init, should have right prefix', async () => {
     expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
 
-    thorClient.setNetwork('mainnet' as Network)
+    thorClient.setNetwork(Network.Mainnet)
+    expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
+
+    thorClient.setNetwork(Network.Stagenet)
     expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
   })
 
@@ -161,17 +184,24 @@ describe('Client Test', () => {
         node: 'new mainnet client',
         rpc: 'new mainnet client',
       },
+      stagenet: {
+        node: 'new stagenet client',
+        rpc: 'new stagenet client',
+      },
       testnet: {
         node: 'new testnet client',
         rpc: 'new testnet client',
       },
     })
 
-    thorClient.setNetwork('mainnet' as Network)
+    thorClient.setNetwork(Network.Mainnet)
     expect(thorClient.getClientUrl().node).toEqual('new mainnet client')
 
-    thorClient.setNetwork('testnet' as Network)
+    thorClient.setNetwork(Network.Testnet)
     expect(thorClient.getClientUrl().node).toEqual('new testnet client')
+
+    thorClient.setNetwork(Network.Stagenet)
+    expect(thorClient.getClientUrl().node).toEqual('new stagenet client')
   })
 
   it('returns private key', async () => {
@@ -194,7 +224,7 @@ describe('Client Test', () => {
   })
 
   it('has balances', async () => {
-    thorMainClient.setNetwork('mainnet' as Network)
+    thorMainClient.setNetwork(Network.Mainnet)
     // mainnet - has balance: thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5
     // mainnet - 0: thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws
     mockAccountsBalance(thorMainClient.getClientUrl().node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
@@ -211,6 +241,67 @@ describe('Client Test', () => {
     expect(balances.length).toEqual(1)
     expect(balances[0].asset).toEqual(AssetRuneNative)
     expect(balances[0].amount.amount().isEqualTo(baseAmount(100).amount())).toBeTruthy()
+  })
+
+  it('rune + synth balances', async () => {
+    thorClient.setNetwork(Network.Testnet)
+    mockAccountsBalance(thorClient.getClientUrl().node, 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg', {
+      height: 0,
+      result: [
+        {
+          denom: 'bnb/bnb',
+          amount: '100',
+        },
+        {
+          denom: 'bnb/busd-74e',
+          amount: '200',
+        },
+        {
+          denom: 'rune',
+          amount: '200',
+        },
+      ],
+    })
+
+    const balances = await thorClient.getBalance('tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg')
+    expect(balances.length).toEqual(3)
+    // BNB synth
+    expect(balances[0].asset).toEqual({ ...AssetBNB, synth: true })
+    expect(balances[0].amount.amount().isEqualTo(baseAmount(100).amount()))
+    // BUSD synth
+    expect(balances[1].asset).toEqual({ chain: 'BNB', symbol: 'BUSD-74E', ticker: 'BUSD', synth: true })
+    expect(balances[1].amount.amount().isEqualTo(baseAmount(200).amount()))
+    // RUNE
+    expect(balances[2].asset).toEqual(AssetRuneNative)
+    expect(balances[2].amount.amount().isEqualTo(baseAmount(300).amount()))
+  })
+
+  it('filter BUSD synth balances', async () => {
+    const BUSD_ASSET_SYNTH: Asset = { chain: BNBChain, symbol: 'BUSD-74E', ticker: 'BUSD', synth: true }
+    thorClient.setNetwork(Network.Testnet)
+    mockAccountsBalance(thorClient.getClientUrl().node, 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg', {
+      height: 0,
+      result: [
+        {
+          denom: 'bnb/bnb',
+          amount: '100',
+        },
+        {
+          denom: 'bnb/busd-74e',
+          amount: '200',
+        },
+        {
+          denom: 'rune',
+          amount: '200',
+        },
+      ],
+    })
+
+    const balances = await thorClient.getBalance('tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg', [BUSD_ASSET_SYNTH])
+    expect(balances.length).toEqual(1)
+    // BUSD synth
+    expect(balances[0].asset).toEqual(BUSD_ASSET_SYNTH)
+    expect(balances[0].amount.amount().isEqualTo(baseAmount(200).amount()))
   })
 
   it('has an empty tx history', async () => {
@@ -313,7 +404,7 @@ describe('Client Test', () => {
   })
 
   it('deposit', async () => {
-    const send_amount: BaseAmount = baseAmount(10000, 6)
+    const send_amount: BaseAmount = baseAmount(10000, 8)
     const memo = 'swap:BNB.BNB:tbnb1ftzhmpzr4t8ta3etu4x7nwujf9jqckp3th2lh0'
 
     const expected_txsPost_result = {
@@ -373,6 +464,11 @@ describe('Client Test', () => {
         timeout_height: '0',
       },
     })
+    mockTendermintNodeInfo(thorClient.getClientUrl().node, {
+      default_node_info: {
+        network: 'thorchain',
+      },
+    })
     assertTxsPost(thorClient.getClientUrl().node, '', expected_txsPost_result)
 
     const result = await thorClient.deposit({
@@ -407,7 +503,7 @@ describe('Client Test', () => {
   it('should return valid explorer url', () => {
     expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain?network=testnet')
 
-    thorClient.setNetwork('mainnet' as Network)
+    thorClient.setNetwork(Network.Mainnet)
     expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain')
   })
 
@@ -416,14 +512,14 @@ describe('Client Test', () => {
       'https://viewblock.io/thorchain/address/tthorabc?network=testnet',
     )
 
-    thorClient.setNetwork('mainnet' as Network)
+    thorClient.setNetwork(Network.Mainnet)
     expect(thorClient.getExplorerAddressUrl('thorabc')).toEqual('https://viewblock.io/thorchain/address/thorabc')
   })
 
   it('should retrun valid explorer tx url', () => {
     expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash?network=testnet')
 
-    thorClient.setNetwork('mainnet' as Network)
+    thorClient.setNetwork(Network.Mainnet)
     expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash')
   })
 })

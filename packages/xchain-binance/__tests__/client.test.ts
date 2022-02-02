@@ -76,7 +76,7 @@ describe('BinanceClient Test', () => {
 
   const mainnetClientURL = 'https://dex.binance.org'
   const testnetClientURL = 'https://testnet-dex.binance.org'
-  const thornodeMainetClientURL = 'https://thornode.thorchain.info'
+  const thornodeMainetClientURL = 'https://thornode.ninerealms.com'
 
   beforeEach(async () => {
     bnbClient = new BinanceClient({ phrase, network: 'mainnet' as Network })
@@ -201,7 +201,7 @@ describe('BinanceClient Test', () => {
       sequence: 5,
     })
 
-    const AssetRune: Asset = { chain: BNBChain, symbol: 'RUNE', ticker: 'RUNE' }
+    const AssetRune: Asset = { chain: BNBChain, symbol: 'RUNE', ticker: 'RUNE', synth: false }
 
     const balances = await bnbClient.getBalance('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', [AssetBNB, AssetRune])
 

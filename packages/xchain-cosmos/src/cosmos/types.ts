@@ -1,3 +1,4 @@
+import { TxParams } from '@xchainjs/xchain-client'
 import { BigSource } from 'big.js'
 import { Msg, PrivKey, codec } from 'cosmos-client'
 import { StdTxFee } from 'cosmos-client/api'
@@ -28,6 +29,16 @@ export type TransferParams = {
   asset: string
   memo?: string
   fee?: StdTxFee
+}
+
+export type TransferOfflineParams = TransferParams & {
+  from_account_number: string
+  from_sequence: string
+}
+
+export type TxOfflineParams = TxParams & {
+  from_account_number: string
+  from_sequence: string
 }
 
 export type BaseAccountResponse = {

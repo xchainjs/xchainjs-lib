@@ -4,6 +4,7 @@ export type Address = string
 
 export enum Network {
   Mainnet = 'mainnet',
+  Stagenet = 'stagenet',
   Testnet = 'testnet',
 }
 

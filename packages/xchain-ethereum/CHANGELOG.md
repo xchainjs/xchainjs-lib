@@ -1,3 +1,25 @@
+# v.0.23.2 (2022-02-02)
+
+## Update
+
+- xchain-util@0.5.0
+
+## Add
+
+- `isAssetNativeRune` helper
+
+# v.0.23.1 (2022-01-05)
+
+## Fix
+
+- Fix default provider for `stagenet`
+
+# v.0.23.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
+
 # v.0.22.5 (2021-09-09)
 
 - updated to the latest dependencies

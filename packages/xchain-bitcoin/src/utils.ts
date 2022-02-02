@@ -89,6 +89,7 @@ export const arrayAverage = (array: number[]): number => {
 export const btcNetwork = (network: Network): Bitcoin.Network => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return Bitcoin.networks.bitcoin
     case Network.Testnet:
       return Bitcoin.networks.testnet
@@ -103,13 +104,14 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
  * @param {Address} address
  * @returns {Balance[]} The balances of the given address.
  */
-export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
+export const getBalance = async (params: AddressParams, haskoinUrl: string): Promise<Balance[]> => {
   switch (params.network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return [
         {
           asset: AssetBTC,
-          amount: await haskoinApi.getBalance(params.address),
+          amount: await haskoinApi.getBalance({ haskoinUrl, address: params.address }),
         },
       ]
     case Network.Testnet:
@@ -148,6 +150,7 @@ export const validateAddress = (address: Address, network: Network): boolean => 
  */
 export const scanUTXOs = async ({
   sochainUrl,
+  haskoinUrl,
   network,
   address,
   confirmedOnly = true, // default: scan only confirmed UTXOs
@@ -181,13 +184,14 @@ export const scanUTXOs = async ({
           } as UTXO),
       )
     }
-    case Network.Mainnet: {
+    case Network.Mainnet:
+    case Network.Stagenet: {
       let utxos: haskoinApi.UtxoData[] = []
 
       if (confirmedOnly) {
-        utxos = await haskoinApi.getConfirmedUnspentTxs(address)
+        utxos = await haskoinApi.getConfirmedUnspentTxs({ address, haskoinUrl })
       } else {
-        utxos = await haskoinApi.getUnspentTxs(address)
+        utxos = await haskoinApi.getUnspentTxs({ address, haskoinUrl })
       }
 
       return utxos.map(
@@ -219,17 +223,19 @@ export const buildTx = async ({
   sender,
   network,
   sochainUrl,
+  haskoinUrl,
   spendPendingUTXO = false, // default: prevent spending uncomfirmed UTXOs
 }: TxParams & {
   feeRate: FeeRate
   sender: Address
   network: Network
   sochainUrl: string
+  haskoinUrl: string
   spendPendingUTXO?: boolean
 }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[] }> => {
   // search only confirmed UTXOs if pending UTXO is not allowed
   const confirmedOnly = !spendPendingUTXO
-  const utxos = await scanUTXOs({ sochainUrl, network, address: sender, confirmedOnly })
+  const utxos = await scanUTXOs({ sochainUrl, haskoinUrl, network, address: sender, confirmedOnly })
 
   if (utxos.length === 0) throw new Error('No utxos to send')
   if (!validateAddress(recipient, network)) throw new Error('Invalid address')
@@ -344,6 +350,7 @@ export const getDefaultFees = (): Fees => {
 export const getPrefix = (network: Network) => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return 'bc1'
     case Network.Testnet:
       return 'tb1'

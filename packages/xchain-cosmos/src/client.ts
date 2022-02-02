@@ -16,8 +16,10 @@ import {
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { PrivKey } from 'cosmos-client'
+import { StdTx } from 'cosmos-client/x/auth'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
+import { TxOfflineParams } from './cosmos/types'
 import { AssetAtom, AssetMuon } from './types'
 import { DECIMAL, getAsset, getDenom, getTxsFromHistory, registerCodecs } from './util'
 
@@ -63,6 +65,7 @@ class Client implements CosmosClient, XChainClient {
     rootDerivationPaths = {
       [Network.Mainnet]: `44'/118'/0'/0/`,
       [Network.Testnet]: `44'/118'/1'/0/`,
+      [Network.Stagenet]: `44'/118'/0'/0/`,
     },
   }: XChainClientParams) {
     this.network = network
@@ -116,6 +119,7 @@ class Client implements CosmosClient, XChainClient {
   getExplorerUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://cosmos.bigdipper.live'
       case Network.Testnet:
         return 'https://gaia.bigdipper.live'
@@ -222,6 +226,7 @@ class Client implements CosmosClient, XChainClient {
   getMainAsset(): Asset {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return AssetAtom
       case Network.Testnet:
         return AssetMuon
@@ -318,6 +323,37 @@ class Client implements CosmosClient, XChainClient {
     })
 
     return transferResult?.txhash || ''
+  }
+
+  /**
+   * Transfer offline balances.
+   *
+   * @param {TxOfflineParams} params The transfer offline options.
+   * @returns {StdTx} The signed transaction.
+   */
+  async transferOffline({
+    walletIndex,
+    asset,
+    amount,
+    recipient,
+    memo,
+    from_account_number,
+    from_sequence,
+  }: TxOfflineParams): Promise<StdTx> {
+    const fromAddressIndex = walletIndex || 0
+    registerCodecs()
+
+    const mainAsset = this.getMainAsset()
+    return await this.getSDKClient().transferSignedOffline({
+      privkey: this.getPrivateKey(fromAddressIndex),
+      from: this.getAddress(fromAddressIndex),
+      from_account_number,
+      from_sequence,
+      to: recipient,
+      amount: amount.amount().toString(),
+      asset: getDenom(asset || mainAsset),
+      memo,
+    })
   }
 
   /**

@@ -1,3 +1,15 @@
+# v.0.7.1 (2021-01-27)
+
+## Update
+
+- Export `buildTx`
+
+# v.0.7.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
+
 # v.0.6.10 (2021-09-06)
 
 - updated to the latest dependencies

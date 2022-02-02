@@ -4,10 +4,10 @@ import {
   Asset,
   AssetRuneNative,
   BaseAmount,
-  Chain,
   assetFromString,
   assetToString,
   baseAmount,
+  isSynthAsset,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { AccAddress, Msg, codec } from 'cosmos-client'
@@ -24,24 +24,24 @@ export const DEPOSIT_GAS_VALUE = '500000000'
 export const MAX_TX_COUNT = 100
 
 /**
+ * Checks whether an asset is `AssetRuneNative`
+ *
+ * @param {Asset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
+
+const DENOM_RUNE_NATIVE = 'rune'
+/**
  * Get denomination from Asset
  *
  * @param {Asset} asset
  * @returns {string} The denomination of the given asset.
  */
 export const getDenom = (asset: Asset): string => {
-  if (assetToString(asset) === assetToString(AssetRuneNative)) return 'rune'
-  return asset.symbol
-}
-
-/**
- * Get denomination with chainname from Asset
- *
- * @param {Asset} asset
- * @returns {string} The denomination with chainname of the given asset.
- */
-export const getDenomWithChain = (asset: Asset): string => {
-  return `${Chain.THORChain}.${asset.symbol.toUpperCase()}`
+  if (isAssetRuneNative(asset)) return DENOM_RUNE_NATIVE
+  if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
+  return asset.symbol.toLowerCase()
 }
 
 /**
@@ -50,9 +50,9 @@ export const getDenomWithChain = (asset: Asset): string => {
  * @param {string} denom
  * @returns {Asset|null} The asset of the given denomination.
  */
-export const getAsset = (denom: string): Asset | null => {
-  if (denom === getDenom(AssetRuneNative)) return AssetRuneNative
-  return assetFromString(`${Chain.THORChain}.${denom.toUpperCase()}`)
+export const assetFromDenom = (denom: string): Asset | null => {
+  if (denom === DENOM_RUNE_NATIVE) return AssetRuneNative
+  return assetFromString(denom.toUpperCase())
 }
 
 /**
@@ -98,6 +98,8 @@ export const getPrefix = (network: Network) => {
   switch (network) {
     case Network.Mainnet:
       return 'thor'
+    case Network.Stagenet:
+      return 'sthor'
     case Network.Testnet:
       return 'tthor'
   }
@@ -106,9 +108,20 @@ export const getPrefix = (network: Network) => {
 /**
  * Get the chain id.
  *
+ * @param {Network} network
  * @returns {string} The chain id based on the network.
+ *
  */
-export const getChainId = () => 'thorchain'
+export const getChainId = (network: Network) => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'thorchain'
+    case Network.Stagenet:
+      return 'thorchain-stagenet'
+    case Network.Testnet:
+      return 'thorchain'
+  }
+}
 
 /**
  * Register Codecs based on the prefix.
@@ -205,12 +218,16 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
  * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
  */
 export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string): Promise<StdTx> => {
+  const { data } = await axios.get(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
+  const chainId = data.default_node_info.network
+  if (!chainId || !(chainId == 'thorchain' || chainId == 'thorchain-stagenet')) throw new Error('invalid network')
+
   const response: ThorchainDepositResponse = (
     await axios.post(`${nodeUrl}/thorchain/deposit`, {
       coins: msgNativeTx.coins,
       memo: msgNativeTx.memo,
       base_req: {
-        chain_id: getChainId(),
+        chain_id: chainId,
         from: msgNativeTx.signer,
       },
     })
@@ -252,7 +269,7 @@ export const getBalance = async ({
   const balances = await cosmosClient.getBalance(address)
   return balances
     .map((balance) => ({
-      asset: (balance.denom && getAsset(balance.denom)) || AssetRuneNative,
+      asset: (balance.denom && assetFromDenom(balance.denom)) || AssetRuneNative,
       amount: baseAmount(balance.amount, DECIMAL),
     }))
     .filter(
@@ -271,8 +288,12 @@ export const getDefaultClientUrl = (): ClientUrl => {
       node: 'https://testnet.thornode.thorchain.info',
       rpc: 'https://testnet.rpc.thorchain.info',
     },
+    [Network.Stagenet]: {
+      node: 'https://stagenet-thornode.ninerealms.com',
+      rpc: 'https://stagenet-rpc.ninerealms.com',
+    },
     [Network.Mainnet]: {
-      node: 'https://thornode.thorchain.info',
+      node: 'https://thornode.ninerealms.com',
       rpc: 'https://rpc.thorchain.info',
     },
   }
@@ -288,16 +309,19 @@ const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
 export const getDefaultExplorerUrls = (): ExplorerUrls => {
   const root: ExplorerUrl = {
     [Network.Testnet]: `${DEFAULT_EXPLORER_URL}?network=testnet`,
+    [Network.Stagenet]: `${DEFAULT_EXPLORER_URL}?network=stagenet`,
     [Network.Mainnet]: DEFAULT_EXPLORER_URL,
   }
   const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
   const tx: ExplorerUrl = {
     [Network.Testnet]: txUrl,
+    [Network.Stagenet]: txUrl,
     [Network.Mainnet]: txUrl,
   }
   const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
   const address: ExplorerUrl = {
     [Network.Testnet]: addressUrl,
+    [Network.Stagenet]: addressUrl,
     [Network.Mainnet]: addressUrl,
   }
 
@@ -338,6 +362,8 @@ export const getExplorerAddressUrl = ({
   switch (network) {
     case Network.Mainnet:
       return url
+    case Network.Stagenet:
+      return `${url}?network=stagenet`
     case Network.Testnet:
       return `${url}?network=testnet`
   }
@@ -364,6 +390,8 @@ export const getExplorerTxUrl = ({
   switch (network) {
     case Network.Mainnet:
       return url
+    case Network.Stagenet:
+      return `${url}?network=stagenet`
     case Network.Testnet:
       return `${url}?network=testnet`
   }

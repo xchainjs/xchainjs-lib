@@ -1,8 +1,29 @@
-# v.0.3.2 (2021-xx-xx)
+# v.0.5.1 (2022-xx-xx)
 
 ### Add
 
 - Add `Chain.ZCash` + `Asset.ZEC`
+
+# v.0.5.0 (2022-02-02)
+
+### Breaking change
+
+- Add `synth` property to `Asset`
+
+### Update
+
+- Support synths in `assetFromString` + `assetToString` helpers
+
+### Add
+
+- `isSynthAsset` helper
+
+# v.0.4.0 (2022-01-19)
+
+### Add
+
+- `Chain.Doge`
+- `AssetDOGE`
 
 # v.0.3.1 (2021-07-14)
 

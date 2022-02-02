@@ -54,6 +54,7 @@ class Client implements PolkadotClient, XChainClient {
     rootDerivationPaths = {
       [Network.Mainnet]: "44//354//0//0//0'", //TODO IS the root path we want to use?
       [Network.Testnet]: "44//354//0//0//0'",
+      [Network.Stagenet]: "44//354//0//0//0'",
     },
   }: XChainClientParams) {
     this.network = network
@@ -121,6 +122,7 @@ class Client implements PolkadotClient, XChainClient {
   getClientUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://polkadot.subscan.io'
       case Network.Testnet:
         return 'https://westend.subscan.io'
@@ -135,6 +137,7 @@ class Client implements PolkadotClient, XChainClient {
   getWsEndpoint(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'wss://rpc.polkadot.io'
       case Network.Testnet:
         return 'wss://westend-rpc.polkadot.io'
@@ -149,6 +152,7 @@ class Client implements PolkadotClient, XChainClient {
   getExplorerUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://polkadot.subscan.io'
       case Network.Testnet:
         return 'https://westend.subscan.io'
@@ -183,6 +187,7 @@ class Client implements PolkadotClient, XChainClient {
   getSS58Format(): number {
     switch (this.network) {
       case Network.Mainnet:
+      case Network.Stagenet:
         return 0
       case Network.Testnet:
         return 42

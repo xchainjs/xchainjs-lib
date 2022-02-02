@@ -1,3 +1,42 @@
+# v.0.21.0 (2022-02-02)
+
+## Breaking change
+
+- Remove `getDenomWithChain`
+- Rename `getAsset` -> `assetFromDenom` (incl. fix to get synth asset properly)
+
+## Update
+
+- xchain-util@0.5.0
+- xchain-cosmos@0.16.0
+
+## Add
+
+- `isAssetNativeRune` helper
+- Add `TxOfflineParams` type
+
+## Fix
+
+- Fix synth notation in `transfer|transferOffline|deposit` #473
+
+# v0.20.1 (2022-01-11)
+
+## Fix
+
+- Get chain ID from THORNode before posting to deposit handler.
+
+# v.0.20.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` to client
+
+# v.0.19.5 (2021-11-22)
+
+## Add
+
+- Provide `transferOffline` method
+
 # v.0.19.4 (2021-11-22)
 
 ## Add

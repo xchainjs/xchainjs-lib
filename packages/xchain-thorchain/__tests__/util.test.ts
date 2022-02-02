@@ -1,39 +1,50 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetBNB, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import {
-  getAsset,
+  assetFromDenom,
   getDefaultExplorerUrls,
   getDenom,
-  getDenomWithChain,
   getDepositTxDataFromLogs,
   getExplorerAddressUrl,
   getExplorerTxUrl,
   getExplorerUrl,
+  getPrefix,
   getTxType,
+  isAssetRuneNative,
   isBroadcastSuccess,
 } from '../src/util'
 
 describe('thorchain/util', () => {
+  describe('isAssetRuneNative', () => {
+    it('true for AssetRuneNative', () => {
+      expect(isAssetRuneNative(AssetRuneNative)).toBeTruthy()
+    })
+    it('false for ETH', () => {
+      expect(isAssetRuneNative(AssetETH)).toBeFalsy()
+    })
+    it('false for ETH synth', () => {
+      expect(isAssetRuneNative({ ...AssetETH, synth: true })).toBeFalsy()
+    })
+  })
   describe('Denom <-> Asset', () => {
     describe('getDenom', () => {
       it('get denom for AssetRune', () => {
         expect(getDenom(AssetRuneNative)).toEqual('rune')
       })
-    })
-
-    describe('getDenomWithChain', () => {
-      it('get denom for AssetRune', () => {
-        expect(getDenomWithChain(AssetRuneNative)).toEqual('THOR.RUNE')
+      it('get denom for BNB synth', () => {
+        expect(getDenom({ ...AssetBNB, synth: true })).toEqual('bnb/bnb')
       })
     })
 
     describe('getAsset', () => {
-      it('get asset for rune', () => {
-        expect(getAsset('rune')).toEqual(AssetRuneNative)
+      it('rune', () => {
+        expect(assetFromDenom('rune')).toEqual(AssetRuneNative)
+      })
+      it('bnb/bnb', () => {
+        expect(assetFromDenom('bnb/bnb')).toEqual({ ...AssetBNB, synth: true })
       })
     })
-
     describe('getTxType', () => {
       it('deposit', () => {
         expect(getTxType('CgkKB2RlcG9zaXQ=', 'base64')).toEqual('deposit')
@@ -45,6 +56,14 @@ describe('thorchain/util', () => {
 
       it('unknown', () => {
         expect(getTxType('"abc', 'base64')).toEqual('')
+      })
+    })
+
+    describe('getPrefix', () => {
+      it('should return the correct prefix based on network', () => {
+        expect(getPrefix(Network.Mainnet) === 'thor')
+        expect(getPrefix(Network.Stagenet) === 'sthor')
+        expect(getPrefix(Network.Testnet) === 'tthor')
       })
     })
   })
