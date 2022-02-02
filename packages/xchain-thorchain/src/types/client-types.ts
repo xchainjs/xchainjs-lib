@@ -1,4 +1,4 @@
-import { Network, Tx } from '@xchainjs/xchain-client'
+import { Network, Tx, TxParams } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
 export type NodeUrl = {
@@ -29,3 +29,17 @@ export type DepositParam = {
 }
 
 export type TxData = Pick<Tx, 'from' | 'to' | 'type'>
+
+export type TxOfflineParams = TxParams & {
+  /**
+   * Balance of Rune to send from
+   */
+  from_rune_balance: BaseAmount
+  /**
+   * Balance of asset to send from
+   * Optional: It can be ignored if asset to send from is RUNE
+   */
+  from_asset_balance?: BaseAmount
+  from_account_number: string
+  from_sequence: string
+}

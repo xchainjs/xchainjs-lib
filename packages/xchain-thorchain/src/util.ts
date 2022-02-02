@@ -4,10 +4,10 @@ import {
   Asset,
   AssetRuneNative,
   BaseAmount,
-  Chain,
   assetFromString,
   assetToString,
   baseAmount,
+  isSynthAsset,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { AccAddress, Msg, codec } from 'cosmos-client'
@@ -31,6 +31,7 @@ export const MAX_TX_COUNT = 100
  */
 export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
 
+const DENOM_RUNE_NATIVE = 'rune'
 /**
  * Get denomination from Asset
  *
@@ -38,18 +39,9 @@ export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset)
  * @returns {string} The denomination of the given asset.
  */
 export const getDenom = (asset: Asset): string => {
-  if (isAssetRuneNative(asset)) return 'rune'
-  return asset.symbol
-}
-
-/**
- * Get denomination with chainname from Asset
- *
- * @param {Asset} asset
- * @returns {string} The denomination with chainname of the given asset.
- */
-export const getDenomWithChain = (asset: Asset): string => {
-  return `${Chain.THORChain}.${asset.symbol.toUpperCase()}`
+  if (isAssetRuneNative(asset)) return DENOM_RUNE_NATIVE
+  if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
+  return asset.symbol.toLowerCase()
 }
 
 /**
@@ -58,9 +50,9 @@ export const getDenomWithChain = (asset: Asset): string => {
  * @param {string} denom
  * @returns {Asset|null} The asset of the given denomination.
  */
-export const getAsset = (denom: string): Asset | null => {
-  if (denom === getDenom(AssetRuneNative)) return AssetRuneNative
-  return assetFromString(`${Chain.THORChain}.${denom.toUpperCase()}`)
+export const assetFromDenom = (denom: string): Asset | null => {
+  if (denom === DENOM_RUNE_NATIVE) return AssetRuneNative
+  return assetFromString(denom.toUpperCase())
 }
 
 /**
@@ -277,7 +269,7 @@ export const getBalance = async ({
   const balances = await cosmosClient.getBalance(address)
   return balances
     .map((balance) => ({
-      asset: (balance.denom && getAsset(balance.denom)) || AssetRuneNative,
+      asset: (balance.denom && assetFromDenom(balance.denom)) || AssetRuneNative,
       amount: baseAmount(balance.amount, DECIMAL),
     }))
     .filter(
