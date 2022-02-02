@@ -2517,6 +2517,11 @@
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.3.1.tgz#90fb81379d6c8eca83c7500684108b3dc4a1479f"
   integrity sha512-mUHFtiC62eYBWgPW/0oU/UQHIE5cKsSB6CRECnzkvvSoekpCJgZ8dfLLRCLgLX/uMRVqYX/YQoJiwh23x4gFMQ==
 
+"@xchainjs/xchain-util@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.4.0.tgz#9c09a95ef6825d4dc381779a806218cf89a15ad9"
+  integrity sha512-3voTcfnuiiUtp1dDZ+hvh5Ov5r84zTIOXKfDZAGYcwNMBZOCiHU2PzlVAkJs3fYIdhPMrPfSbouU8JWM7LJ27g==
+
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@zkochan/cmd-shim/-/cmd-shim-3.1.0.tgz#2ab8ed81f5bb5452a85f25758eb9b8681982fd2e"
