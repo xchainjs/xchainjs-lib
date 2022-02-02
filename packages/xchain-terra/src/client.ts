@@ -3,6 +3,7 @@ import { AccAddress, Coin, Coins, LCDClient, MnemonicKey, MsgMultiSend, MsgSend,
 import {
   Balance,
   BaseXChainClient,
+  FeeType,
   Fees,
   Network,
   Tx,
@@ -18,7 +19,7 @@ import {
 import { Asset, AssetLUNA, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
-const DEFAULT_CONFIG = {
+const DEFAULT_CONFIG: Record<Network, TerraClientConfig> = {
   [Network.Mainnet]: {
     explorerURL: 'https://finder.terra.money/mainnet',
     explorerAddressURL: 'https://finder.terra.money/mainnet/address/',
@@ -52,46 +53,74 @@ export type SearchTxParams = {
   txMinHeight?: number
   txMaxHeight?: number
 }
+export type TerraClientConfig = {
+  explorerURL: string
+  explorerAddressURL: string
+  explorerTxURL: string
+  cosmosAPIURL: string
+  ChainID: string
+}
+export type TerraClientParams = {
+  explorerURL?: string
+  explorerAddressURL?: string
+  explorerTxURL?: string
+  cosmosAPIURL?: string
+  ChainID?: string
+}
+
+const DECIMALS = 6
+
 /**
  * Terra Client
  */
 class Client extends BaseXChainClient implements XChainClient {
   private lcdClient: LCDClient
+  private config: Record<Network, TerraClientConfig>
   constructor({
     network = Network.Testnet,
-
     phrase,
     rootDerivationPaths = {
       [Network.Mainnet]: "44'/330'/0'/0/",
       [Network.Stagenet]: "44'/330'/0'/0/",
       [Network.Testnet]: "44'/330'/0'/0/",
     },
-  }: XChainClientParams) {
+    explorerURL,
+    explorerAddressURL,
+    explorerTxURL,
+    cosmosAPIURL,
+    ChainID,
+  }: TerraClientParams & XChainClientParams) {
     super(Chain.Litecoin, { network, rootDerivationPaths, phrase })
+    this.config = { ...DEFAULT_CONFIG, ...{ explorerURL, explorerAddressURL, explorerTxURL, cosmosAPIURL, ChainID } }
 
-    //TODO add client variables to ctor to override DEFAULT_CONFIG
     this.lcdClient = new LCDClient({
-      URL: DEFAULT_CONFIG[this.network].cosmosAPIURL,
-      chainID: DEFAULT_CONFIG[this.network].ChainID,
+      URL: this.config[this.network].cosmosAPIURL,
+      chainID: this.config[this.network].ChainID,
     })
   }
 
-  getFees(): Promise<Fees> {
-    // TODO
-    throw new Error('Method not implemented.')
+  async getFees(): Promise<Fees> {
+    const feesArray = (await axios.get(`${this.config[this.network].cosmosAPIURL}/v1/txs/gas_prices`)).data
+    const baseFeeInLuna = baseAmount(feesArray['uluna'], DECIMALS)
+    return {
+      type: FeeType.FlatFee,
+      average: baseFeeInLuna,
+      fast: baseFeeInLuna,
+      fastest: baseFeeInLuna,
+    }
   }
   getAddress(walletIndex = 0): string {
     const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
     return mnemonicKey.accAddress
   }
   getExplorerUrl(): string {
-    return DEFAULT_CONFIG[this.network].explorerURL
+    return this.config[this.network].explorerURL
   }
   getExplorerAddressUrl(address: string): string {
-    return DEFAULT_CONFIG[this.network].explorerAddressURL + address?.toLowerCase()
+    return this.config[this.network].explorerAddressURL + address?.toLowerCase()
   }
   getExplorerTxUrl(txID: string): string {
-    return DEFAULT_CONFIG[this.network].explorerAddressURL + txID?.toLowerCase()
+    return this.config[this.network].explorerAddressURL + txID?.toLowerCase()
   }
   validateAddress(address: string): boolean {
     return AccAddress.validate(address)
@@ -118,8 +147,8 @@ class Client extends BaseXChainClient implements XChainClient {
   setNetwork(network: Network): void {
     super.setNetwork(network)
     this.lcdClient = new LCDClient({
-      URL: DEFAULT_CONFIG[this.network].cosmosAPIURL,
-      chainID: DEFAULT_CONFIG[this.network].ChainID,
+      URL: this.config[this.network].cosmosAPIURL,
+      chainID: this.config[this.network].ChainID,
     })
   }
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
@@ -130,7 +159,7 @@ class Client extends BaseXChainClient implements XChainClient {
     const limit = params?.limit ? `${params?.limit}` : '100'
     const results = (
       await axios.get(
-        `${DEFAULT_CONFIG[this.network].cosmosAPIURL}/v1/txs?offset=${offset}&limit=${limit}&account=${address}`,
+        `${this.config[this.network].cosmosAPIURL}/v1/txs?offset=${offset}&limit=${limit}&account=${address}`,
       )
     ).data
 
@@ -169,11 +198,11 @@ class Client extends BaseXChainClient implements XChainClient {
       throw new Error('Only LUNA or UST transfers are currently supported on terra')
     }
     const send = new MsgSend(wallet.key.accAddress, recipient, amountToSend)
-    console.log(send.toJSON())
+    // console.log(send.toJSON())
     const tx = await wallet.createAndSignTx({ msgs: [send], memo })
-    console.log(JSON.stringify(tx.toData(), null, 2))
+    // console.log(JSON.stringify(tx.toData(), null, 2))
     const result = await this.lcdClient.tx.broadcast(tx)
-    console.log(result.txhash)
+    // console.log(result.txhash)
     return result.txhash
   }
   private getTerraNativeAsset(denom: string): Asset | undefined {
@@ -196,7 +225,7 @@ class Client extends BaseXChainClient implements XChainClient {
     return (coins.toArray().map((c: Coin) => {
       return {
         asset: this.getTerraNativeAsset(c.denom),
-        amount: baseAmount(c.amount.toFixed(), 6),
+        amount: baseAmount(c.amount.toFixed(), DECIMALS),
       }
     }) as unknown) as Balance[]
   }
@@ -277,7 +306,7 @@ class Client extends BaseXChainClient implements XChainClient {
       //ensure this is in base units ex uluna, uusd
       const baseCoin = coin.toIntCoin()
       const asset = this.getTerraNativeAsset(baseCoin.denom)
-      const amount = baseAmount(baseCoin.amount.toFixed(), 6)
+      const amount = baseAmount(baseCoin.amount.toFixed(), DECIMALS)
       if (asset) {
         // NOTE: this will only populate native terra Assets
         from.push({
@@ -303,7 +332,7 @@ class Client extends BaseXChainClient implements XChainClient {
         //ensure this is in base units ex uluna, uusd
         const baseCoin = coin.toIntCoin()
         const asset = this.getTerraNativeAsset(baseCoin.denom)
-        const amount = baseAmount(baseCoin.amount.toFixed(), 6)
+        const amount = baseAmount(baseCoin.amount.toFixed(), DECIMALS)
         if (asset) {
           // NOTE: this will only populate native terra Assets
           from.push({
@@ -319,7 +348,7 @@ class Client extends BaseXChainClient implements XChainClient {
         //ensure this is in base units ex uluna, uusd
         const baseCoin = coin.toIntCoin()
         const asset = this.getTerraNativeAsset(baseCoin.denom)
-        const amount = baseAmount(baseCoin.amount.toFixed(), 6)
+        const amount = baseAmount(baseCoin.amount.toFixed(), DECIMALS)
         if (asset) {
           // NOTE: this will only populate native terra Assets
           to.push({
