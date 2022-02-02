@@ -38,6 +38,7 @@ class Client extends UTXOClient {
     nodeUrl,
     rootDerivationPaths = {
       [Network.Mainnet]: `44'/133'/0'/0/`,
+      [Network.Stagenet]: `44'/133'/0'/0/`,
       [Network.Testnet]: `44'/133'/1'/0/`,
     },
     sochainUrl = 'https://sochain.com/api/v2',
@@ -48,6 +49,7 @@ class Client extends UTXOClient {
       (() => {
         switch (network) {
           case Network.Mainnet:
+          case Network.Stagenet:
             return 'https://zec.thorchain.info'
           case Network.Testnet:
             return 'https://testnet.zec.thorchain.info'
@@ -79,6 +81,7 @@ class Client extends UTXOClient {
     switch (this.network) {
       // TODO: Add urls
       case Network.Mainnet:
+      case Network.Stagenet:
         return 'https://zcashblockexplorer.com/'
       case Network.Testnet:
         return 'https://www.sochain.com/testnet/zcash'

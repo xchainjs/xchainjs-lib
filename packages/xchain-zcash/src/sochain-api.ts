@@ -10,6 +10,7 @@ import { ZEC_DECIMAL } from './utils'
 const toSochainNetwork = (network: Network): string => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return 'ZEC'
     case Network.Testnet:
       return 'ZECTEST'

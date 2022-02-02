@@ -206,7 +206,7 @@ export const RUNE_TICKER = 'RUNE'
 /**
  * Base "chain" asset on ZCash main net.
  */
-export const AssetZEC: Asset = { chain: Chain.Zcash, symbol: 'ZEC', ticker: 'ZEC' }
+export const AssetZEC: Asset = { chain: Chain.Zcash, symbol: 'ZEC', ticker: 'ZEC', synth: false }
 
 /**
  * Base "chain" asset on ethereum main net.

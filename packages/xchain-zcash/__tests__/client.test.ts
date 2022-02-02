@@ -2,7 +2,7 @@ import { Network } from '@xchainjs/xchain-client'
 
 import { Client } from '../src/client'
 
-const client = new Client({ network: 'testnet' as Network })
+const client = new Client({ network: Network.Testnet })
 
 describe('ZcashClient Test', () => {
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe('ZcashClient Test', () => {
 
   fit('should get the right balance from phrase', async () => {
     const expectedBalance = 2223
-    client.setNetwork('testnet' as Network)
+    client.setNetwork(Network.Testnet)
     client.setPhrase(phrase)
     console.log('before getbalance')
     const balance = await client.getBalance(client.getAddress())

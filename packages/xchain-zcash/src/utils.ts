@@ -17,6 +17,7 @@ export const ZEC_DECIMAL = 8
 export const zecNetwork = (network: Network): UtxoLib.Network => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return UtxoLib.networks.zcash
     case Network.Testnet:
       return UtxoLib.networks.zcashTest
