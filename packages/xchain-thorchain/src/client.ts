@@ -509,7 +509,7 @@ class Client implements ThorchainClient, XChainClient {
       from: this.getAddress(walletIndex),
       to: recipient,
       amount: amount.amount().toString(),
-      asset: isAssetRuneNative(asset) ? assetToString(AssetRuneNative) : getDenom(asset),
+      asset: getDenom(asset),
       memo,
       fee: {
         amount: [],
@@ -564,7 +564,7 @@ class Client implements ThorchainClient, XChainClient {
       from_sequence,
       to: recipient,
       amount: amount.amount().toString(),
-      asset: isAssetRuneNative(asset) ? assetToString(AssetRuneNative) : getDenom(asset),
+      asset: getDenom(asset),
       memo,
       fee: {
         amount: [],
