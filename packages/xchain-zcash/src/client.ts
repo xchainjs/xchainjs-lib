@@ -145,7 +145,7 @@ class Client extends UTXOClient {
 
       const { address } = UtxoLib.payments.p2wpkh({
         pubkey: zecKeys.publicKey,
-        network: zecNetwork as UtxoLib.Payment['network'],
+        network: zecNetwork,
       })
 
       if (!address) {
@@ -179,7 +179,7 @@ class Client extends UTXOClient {
       throw new Error('Could not get private key from phrase')
     }
 
-    return UtxoLib.ECPair.fromPrivateKey(master.privateKey, { network: zecNetwork as UtxoLib.Payment['network'] })
+    return UtxoLib.ECPair.fromPrivateKey(master.privateKey, { network: zecNetwork })
   }
 
   /**
