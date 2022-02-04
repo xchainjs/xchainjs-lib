@@ -1,3 +1,10 @@
+# v.5.4.2 (2022-02-04)
+
+## Update
+
+- xchain-util@0.5.1
+- xchain-client@0.11.1
+
 # v.5.4.1 (2022-02-02)
 
 ## Update

@@ -3,6 +3,9 @@
 ## Fix
 
 - Use latest axios@0.25.0
+- xchain-client@0.11.1
+- @xchainjs/xchain-util@0.5.1
+- @xchainjs/xchain-cosmos@0.16.1
 
 # v.0.21.1 (2022-02-04)
 

@@ -1,8 +1,9 @@
-# v.0.17.1 (2022-xx-XX)
+# v.0.17.1 (2022-02-04)
 
-## Fix
+## Update
 
-- Use latest axios@0.25.0
+- xchain-util@0.5.1
+- xchain-client@0.11.1
 
 # v.0.17.0 (2022-01-05)
 
