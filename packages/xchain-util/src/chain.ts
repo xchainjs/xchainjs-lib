@@ -19,7 +19,7 @@ export const CosmosChain = Chain.Cosmos
 export const PolkadotChain = Chain.Polkadot
 export const BCHChain = Chain.BitcoinCash
 export const LTCChain = Chain.Litecoin
-export const LUNAChain = Chain.Terra
+export const TerraChain = Chain.Terra
 export const DOGEChain = Chain.Doge
 
 /**

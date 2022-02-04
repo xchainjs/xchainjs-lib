@@ -1,3 +1,9 @@
+# v.0.6.0 (2022-02-04)
+
+### Breaking change
+
+- Rename `LUNAChain`-> `TerraChain` #482
+
 # v.0.5.1 (2022-02-04)
 
 ### Add

@@ -19,7 +19,8 @@ import {
 import { Asset, AssetLUNA, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
-import { TerraNativeAsset, getTerraMicroDenom, isTerraAsset } from './util'
+import { TERRA_DECIMAL } from './const'
+import { TerraNativeAsset, getTerraMicroDenom } from './util'
 
 const DEFAULT_CONFIG: Record<Network, TerraClientConfig> = {
   [Network.Mainnet]: {
@@ -70,8 +71,6 @@ export type TerraClientParams = {
   ChainID?: string
 }
 
-const DECIMALS = 6
-
 /**
  * Terra Client
  */
@@ -92,7 +91,7 @@ class Client extends BaseXChainClient implements XChainClient {
     cosmosAPIURL,
     ChainID,
   }: XChainClientParams & TerraClientParams) {
-    super(Chain.Litecoin, { network, rootDerivationPaths, phrase })
+    super(Chain.Terra, { network, rootDerivationPaths, phrase })
     this.config = { ...DEFAULT_CONFIG, ...{ explorerURL, explorerAddressURL, explorerTxURL, cosmosAPIURL, ChainID } }
 
     this.lcdClient = new LCDClient({
@@ -103,7 +102,7 @@ class Client extends BaseXChainClient implements XChainClient {
 
   async getFees(): Promise<Fees> {
     const feesArray = (await axios.get(`${this.config[this.network].cosmosAPIURL}/v1/txs/gas_prices`)).data
-    const baseFeeInLuna = baseAmount(feesArray['uluna'], DECIMALS)
+    const baseFeeInLuna = baseAmount(feesArray['uluna'], TERRA_DECIMAL)
     return {
       type: FeeType.FlatFee,
       average: baseFeeInLuna,
@@ -179,12 +178,14 @@ class Client extends BaseXChainClient implements XChainClient {
 
   async transfer({ walletIndex = 0, asset = AssetLUNA, amount, recipient, memo }: TxParams): Promise<string> {
     if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
-    if (!isTerraAsset(asset)) throw new Error(`${assetToString(asset)} is not a valid terra chain`)
 
     const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
     const wallet = this.lcdClient.wallet(mnemonicKey)
 
     const terraMicroDenom = getTerraMicroDenom(asset.symbol as TerraNativeAsset)
+
+    if (!terraMicroDenom) throw new Error(`${assetToString(asset)} is not a valid terra chain asset`)
+
     const amountToSend: Coins.Input = {
       [terraMicroDenom]: `${amount.amount().toFixed()}`,
     }
@@ -198,7 +199,7 @@ class Client extends BaseXChainClient implements XChainClient {
       return AssetLUNA
     } else {
       // native coins other than luna, UST, KRT, etc
-      // NOTE: https://docs.terra.money/Reference/Terra-core/Overview.html#currency-denominations
+      // NOTE: https://docs.terra.money/docs/develop/module-specifications/README.html#currency-denominations
       const standardDenom = denom.toUpperCase().slice(1, 3) + 'T'
       return {
         chain: Chain.Terra,
@@ -208,14 +209,16 @@ class Client extends BaseXChainClient implements XChainClient {
       }
     }
   }
+
   private coinsToBalances(coins: Coins): Balance[] {
     return (coins.toArray().map((c: Coin) => {
       return {
         asset: this.getTerraNativeAsset(c.denom),
-        amount: baseAmount(c.amount.toFixed(), DECIMALS),
+        amount: baseAmount(c.amount.toFixed(), TERRA_DECIMAL),
       }
     }) as unknown) as Balance[]
   }
+
   private convertSearchResultTxToTx(tx: any): Tx {
     let from: TxFrom[] = []
     let to: TxTo[] = []
@@ -284,7 +287,7 @@ class Client extends BaseXChainClient implements XChainClient {
       //ensure this is in base units ex uluna, uusd
       const baseCoin = coin.toIntCoin()
       const asset = this.getTerraNativeAsset(baseCoin.denom)
-      const amount = baseAmount(baseCoin.amount.toFixed(), DECIMALS)
+      const amount = baseAmount(baseCoin.amount.toFixed(), TERRA_DECIMAL)
       if (asset) {
         // NOTE: this will only populate native terra Assets
         from.push({
@@ -310,7 +313,7 @@ class Client extends BaseXChainClient implements XChainClient {
         //ensure this is in base units ex uluna, uusd
         const baseCoin = coin.toIntCoin()
         const asset = this.getTerraNativeAsset(baseCoin.denom)
-        const amount = baseAmount(baseCoin.amount.toFixed(), DECIMALS)
+        const amount = baseAmount(baseCoin.amount.toFixed(), TERRA_DECIMAL)
         if (asset) {
           // NOTE: this will only populate native terra Assets
           from.push({
@@ -326,7 +329,7 @@ class Client extends BaseXChainClient implements XChainClient {
         //ensure this is in base units ex uluna, uusd
         const baseCoin = coin.toIntCoin()
         const asset = this.getTerraNativeAsset(baseCoin.denom)
-        const amount = baseAmount(baseCoin.amount.toFixed(), DECIMALS)
+        const amount = baseAmount(baseCoin.amount.toFixed(), TERRA_DECIMAL)
         if (asset) {
           // NOTE: this will only populate native terra Assets
           to.push({

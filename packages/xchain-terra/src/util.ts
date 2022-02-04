@@ -1,4 +1,5 @@
 import { Asset, Chain } from '@xchainjs/xchain-util/lib'
+
 export enum TerraNativeAsset {
   LUNA = 'LUNA',
   SDT = 'SDT',
@@ -25,6 +26,15 @@ export enum TerraNativeAsset {
   TWT = 'TWT',
 }
 
+/**
+ * Type guard to check whether string is a valid `TerraNativeAsset`
+ *
+ * @param {string} denom Denomination.
+ * @returns {boolean} `true` or `false`
+ */
+const isTerraNativeAsset = (denom: string): denom is TerraNativeAsset =>
+  (Object.values(TerraNativeAsset) as string[]).includes(denom)
+
 const DENOM_MAP: Record<TerraNativeAsset, string> = {
   LUNA: 'uluna',
   SDT: 'usdr',
@@ -50,13 +60,9 @@ const DENOM_MAP: Record<TerraNativeAsset, string> = {
   MYT: 'umyr',
   TWT: 'utwd',
 }
-export function isTerraAsset(asset: Asset) {
-  return (
-    asset.chain === Chain.Terra &&
-    DENOM_MAP[asset.symbol as TerraNativeAsset] &&
-    DENOM_MAP[asset.ticker as TerraNativeAsset]
-  )
-}
-export function getTerraMicroDenom(assetDenom: TerraNativeAsset): string {
-  return DENOM_MAP[assetDenom]
-}
+
+export const isTerraAsset = ({ chain, symbol, ticker, synth }: Asset): boolean =>
+  chain === Chain.Terra && isTerraNativeAsset(symbol) && isTerraNativeAsset(ticker as TerraNativeAsset) && !synth
+
+export const getTerraMicroDenom = (assetDenom: string): string | null =>
+  isTerraNativeAsset(assetDenom) ? DENOM_MAP[assetDenom] : null
