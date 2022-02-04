@@ -37,7 +37,7 @@
     "@xchainjs/xchain-util": "^0.4.0",
     "@types/bitcoinjs-lib": "^5.0.0",
     "@types/wif": "^2.0.2",
-    "axios": "^0.21.1",
+    "axios": "^0.25.0",
     "axios-mock-adapter": "^1.20.0",
     "bitcoinjs-lib": "^5.2.0",
     "coininfo": "5.1.0",

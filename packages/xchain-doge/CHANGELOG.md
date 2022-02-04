@@ -1,6 +1,6 @@
-# v.0.1.2 (2022-01-10)
+# v.0.1.2 (2022-xx-xx)
 
-- upgrade axios dependency to latest
+- Use latest axios@0.25.0
 
 # v.0.1.1 (2022-01-19)
 

@@ -1,3 +1,9 @@
+# v0.21.2 (2022-xx-xx)
+
+## Fix
+
+- Use latest axios@0.25.0
+
 # v.0.21.1 (2022-02-04)
 
 ## Fix
@@ -34,7 +40,6 @@
 
 ## Fix
 
-- upgrade axios dependency to latest
 - Get chain ID from THORNode before posting to deposit handler.
 
 # v.0.20.0 (2021-12-29)

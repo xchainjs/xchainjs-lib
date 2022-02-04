@@ -1,8 +1,8 @@
-# v.0.17.1 (2022-01-XX)
+# v.0.17.1 (2022-xx-XX)
 
 ## Fix
 
-- upgrade axios dependency to latest
+- Use latest axios@0.25.0
 
 # v.0.17.0 (2022-01-05)
 
