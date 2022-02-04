@@ -15,13 +15,13 @@
     "test": "jest --passWithNoTests"
   },
   "devDependencies": {
-    "@xchainjs/xchain-util": "^0.3.1",
+    "@xchainjs/xchain-util": "^0.5.0",
     "@xchainjs/xchain-crypto": "^0.2.6",
-    "axios": "^0.21.4"
+    "axios": "^0.25.0"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-util": "^0.3.1",
+    "@xchainjs/xchain-util": "^0.5.0",
     "@xchainjs/xchain-crypto": "^0.2.6",
-    "axios": "^0.21.4"
+    "axios": "^0.25.0"
   }
 }

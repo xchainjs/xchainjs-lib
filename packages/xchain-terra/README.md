@@ -24,7 +24,7 @@ yarn test
 ## Examples
 
 ```ts
-// import `xchain-thorchain`
+// import `xchain-terra`
 import { Client } from '@xchainjs/xchain-terra'
 
 // Create a `Client`
@@ -44,7 +44,7 @@ console.log('txs total:', txs.total) // txs total: 100
 
 // get transaction details
 const tx = await client.getTransactionData('any-tx-hash', address)
-console.log('tx asset:', tx.asset) // tx asset: { chain: 'THOR', symbol: 'RUNE', ticker: 'RUNE' }
+console.log('tx asset:', tx.asset) // tx asset: { chain: 'TERRA', symbol: 'LUNA', ticker: 'LUNA' }
 ```
 
 For more examples check out tests in `./__tests__/client.test.ts`

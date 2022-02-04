@@ -55,7 +55,7 @@ describe('Client Test', () => {
   let thorMainClient: Client
   const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
 
-  // Note: Terra testnet/mainnet addresses are the same?
+  // Note: Terra testnet/mainnet addresses are the same
 
   const mainnet_address_path0 = 'terra1hf2j3w46zw8lg25awgan7x8wwsnc509sk0e6gr'
   const mainnet_address_path1 = 'terra1f5p4qskczjt6hww3c3c04vhpy7uwq76upufkcy'
@@ -85,7 +85,7 @@ describe('Client Test', () => {
   it('should derive address accordingly to the user param', async () => {
     const terraClientEmptyMain = new Client({
       phrase,
-      network: 'mainnet' as Network /*, derivationPath: "44'/931'/0'/0/0" */,
+      network: Network.Mainnet /*, derivationPath: "44'/931'/0'/0/0" */,
     })
     const addressMain = terraClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnet_address_path0)

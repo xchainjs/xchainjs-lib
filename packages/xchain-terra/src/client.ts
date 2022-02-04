@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AccAddress, Coin, Coins, LCDClient, MnemonicKey, MsgMultiSend, MsgSend, TxInfo } from '@terra-money/terra.js'
 import {
   Balance,
@@ -16,8 +15,10 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, AssetLUNA, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetLUNA, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
+
+import { TerraNativeAsset, getTerraMicroDenom, isTerraAsset } from './util'
 
 const DEFAULT_CONFIG: Record<Network, TerraClientConfig> = {
   [Network.Mainnet]: {
@@ -89,7 +90,7 @@ class Client extends BaseXChainClient implements XChainClient {
     explorerTxURL,
     cosmosAPIURL,
     ChainID,
-  }: TerraClientParams & XChainClientParams) {
+  }: XChainClientParams & TerraClientParams) {
     super(Chain.Litecoin, { network, rootDerivationPaths, phrase })
     this.config = { ...DEFAULT_CONFIG, ...{ explorerURL, explorerAddressURL, explorerTxURL, cosmosAPIURL, ChainID } }
 
@@ -171,42 +172,28 @@ class Client extends BaseXChainClient implements XChainClient {
   }
 
   async getTransactionData(txId: string): Promise<Tx> {
-    const txInfo = await this.lcdClient.tx.txInfo(txId?.toUpperCase())
+    const txInfo = await this.lcdClient.tx.txInfo(txId.toUpperCase())
     return this.convertTxInfoToTx(txInfo)
   }
 
   async transfer({ walletIndex = 0, asset = AssetLUNA, amount, recipient, memo }: TxParams): Promise<string> {
     if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
-
-    // TODO use fee?
-    // const fee = await this.getFees()
+    if (!isTerraAsset(asset)) throw new Error(`${assetToString(asset)} is not a valid terra chain`)
 
     const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
     const wallet = this.lcdClient.wallet(mnemonicKey)
 
-    let amountToSend: Coins.Input = {}
-
-    if (asset.chain === Chain.Terra && asset.symbol === 'LUNA' && asset.ticker === 'LUNA') {
-      amountToSend = {
-        uluna: `${amount.amount().toFixed()}`,
-      }
-    } else if (asset.chain === Chain.Terra && asset.symbol === 'UST' && asset.ticker === 'UST') {
-      amountToSend = {
-        uusd: `${amount.amount().toFixed()}`,
-      }
-    } else {
-      throw new Error('Only LUNA or UST transfers are currently supported on terra')
+    const terraMicroDenom = getTerraMicroDenom(asset.symbol as TerraNativeAsset)
+    const amountToSend: Coins.Input = {
+      [terraMicroDenom]: `${amount.amount().toFixed()}`,
     }
     const send = new MsgSend(wallet.key.accAddress, recipient, amountToSend)
-    // console.log(send.toJSON())
     const tx = await wallet.createAndSignTx({ msgs: [send], memo })
-    // console.log(JSON.stringify(tx.toData(), null, 2))
     const result = await this.lcdClient.tx.broadcast(tx)
-    // console.log(result.txhash)
     return result.txhash
   }
-  private getTerraNativeAsset(denom: string): Asset | undefined {
-    if (denom.includes('luna')) {
+  private getTerraNativeAsset(denom: string): Asset {
+    if (denom.toLowerCase().includes('luna')) {
       return AssetLUNA
     } else {
       // native coins other than luna, UST, KRT, etc
@@ -219,7 +206,6 @@ class Client extends BaseXChainClient implements XChainClient {
         synth: false,
       }
     }
-    return undefined
   }
   private coinsToBalances(coins: Coins): Balance[] {
     return (coins.toArray().map((c: Coin) => {
@@ -232,9 +218,7 @@ class Client extends BaseXChainClient implements XChainClient {
   private convertSearchResultTxToTx(tx: any): Tx {
     let from: TxFrom[] = []
     let to: TxTo[] = []
-    // console.log(tx)
     tx.tx.value.msg.forEach((msg: any) => {
-      console.log(msg)
       if (msg.type === 'bank/MsgSend') {
         const xfers = this.convertMsgSend(MsgSend.fromAmino(msg))
         from = from.concat(xfers.from)
@@ -243,10 +227,6 @@ class Client extends BaseXChainClient implements XChainClient {
         const xfers = this.convertMsgMultiSend(MsgMultiSend.fromAmino(msg))
         from = from.concat(xfers.from)
         to = to.concat(xfers.to)
-      } else {
-        // we ignore every other type of msg
-        //TODO remove this log after testing
-        console.log(msg.type)
       }
     })
     return {
@@ -278,9 +258,6 @@ class Client extends BaseXChainClient implements XChainClient {
         const xfers = this.convertMsgMultiSend(msg as MsgMultiSend)
         from = from.concat(xfers.from)
         to = to.concat(xfers.to)
-      } else {
-        //we ignore every other type of msg
-        console.log(msgObject['@type'])
       }
     })
     return {
