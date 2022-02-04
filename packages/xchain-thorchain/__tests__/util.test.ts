@@ -1,11 +1,10 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetBNB, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import {
-  getAsset,
+  assetFromDenom,
   getDefaultExplorerUrls,
   getDenom,
-  getDenomWithChain,
   getDepositTxDataFromLogs,
   getExplorerAddressUrl,
   getExplorerTxUrl,
@@ -33,20 +32,19 @@ describe('thorchain/util', () => {
       it('get denom for AssetRune', () => {
         expect(getDenom(AssetRuneNative)).toEqual('rune')
       })
-    })
-
-    describe('getDenomWithChain', () => {
-      it('get denom for AssetRune', () => {
-        expect(getDenomWithChain(AssetRuneNative)).toEqual('THOR.RUNE')
+      it('get denom for BNB synth', () => {
+        expect(getDenom({ ...AssetBNB, synth: true })).toEqual('bnb/bnb')
       })
     })
 
     describe('getAsset', () => {
-      it('get asset for rune', () => {
-        expect(getAsset('rune')).toEqual(AssetRuneNative)
+      it('rune', () => {
+        expect(assetFromDenom('rune')).toEqual(AssetRuneNative)
+      })
+      it('bnb/bnb', () => {
+        expect(assetFromDenom('bnb/bnb')).toEqual({ ...AssetBNB, synth: true })
       })
     })
-
     describe('getTxType', () => {
       it('deposit', () => {
         expect(getTxType('CgkKB2RlcG9zaXQ=', 'base64')).toEqual('deposit')

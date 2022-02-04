@@ -1,13 +1,19 @@
-# v.0.20.2 (2022-xx-xx)
+# v.0.21.0 (2022-02-02)
+
+## Breaking change
+
+- Remove `getDenomWithChain`
+- Rename `getAsset` -> `assetFromDenom` (incl. fix to get synth asset properly)
 
 ## Update
 
 - xchain-util@0.5.0
-- xchain-cosmos@0.15.1
+- xchain-cosmos@0.16.0
 
 ## Add
 
 - `isAssetNativeRune` helper
+- Add `TxOfflineParams` type
 
 ## Fix
 

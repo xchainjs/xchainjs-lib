@@ -1,7 +1,6 @@
 import {
   Address,
   Balance,
-  FeeOption,
   Fees,
   Network,
   RootDerivationPaths,
@@ -16,14 +15,14 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { CosmosSDKClient, RPCTxResult, TxOfflineParams } from '@xchainjs/xchain-cosmos'
+import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { Asset, AssetRuneNative, assetFromString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetRuneNative, BaseAmount, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { AccAddress, PrivKey, PubKey, codec } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 
-import { ClientUrl, DepositParam, ExplorerUrls, NodeUrl, ThorchainClientParams, TxData } from './types'
+import { ClientUrl, DepositParam, ExplorerUrls, NodeUrl, ThorchainClientParams, TxData, TxOfflineParams } from './types'
 import { TxResult, msgNativeTxFromJson } from './types/messages'
 import {
   DECIMAL,
@@ -36,7 +35,6 @@ import {
   getDefaultExplorerUrls,
   getDefaultFees,
   getDenom,
-  getDenomWithChain,
   getDepositTxDataFromLogs,
   getExplorerAddressUrl,
   getExplorerTxUrl,
@@ -436,17 +434,32 @@ class Client implements ThorchainClient, XChainClient {
    * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
    */
   async deposit({ walletIndex = 0, asset = AssetRuneNative, amount, memo }: DepositParam): Promise<TxHash> {
-    const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
+    const balances = await this.getBalance(this.getAddress(walletIndex))
+    const runeBalance: BaseAmount =
+      balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
+    const assetBalance: BaseAmount =
+      balances.filter(({ asset: assetInList }) => assetToString(assetInList) === assetToString(asset))[0]?.amount ??
+      baseAmount(0, DECIMAL)
 
-    if (assetBalance.length === 0 || assetBalance[0].amount.amount().lt(amount.amount().plus(DEFAULT_GAS_VALUE))) {
-      throw new Error('insufficient funds')
+    const fee = baseAmount(DEFAULT_GAS_VALUE, DECIMAL)
+
+    if (isAssetRuneNative(asset)) {
+      // amount + fee < runeBalance
+      if (runeBalance.lt(amount.plus(fee))) {
+        throw new Error('insufficient funds')
+      }
+    } else {
+      // amount < assetBalances && runeBalance < fee
+      if (assetBalance.lt(amount) || runeBalance.lt(fee)) {
+        throw new Error('insufficient funds')
+      }
     }
 
     const signer = this.getAddress(walletIndex)
     const msgNativeTx = msgNativeTxFromJson({
       coins: [
         {
-          asset: isAssetRuneNative(asset) ? getDenomWithChain(asset) : getDenom(asset),
+          asset: isAssetRuneNative(asset) ? assetToString(AssetRuneNative) : getDenom(asset),
           amount: amount.amount().toString(),
         },
       ],
@@ -470,13 +483,25 @@ class Client implements ThorchainClient, XChainClient {
   async transfer({ walletIndex = 0, asset = AssetRuneNative, amount, recipient, memo }: TxParams): Promise<TxHash> {
     registerCodecs(getPrefix(this.network))
 
-    const assetBalance = await this.getBalance(this.getAddress(walletIndex), [asset])
-    const fee = await this.getFees()
-    if (
-      assetBalance.length === 0 ||
-      assetBalance[0].amount.amount().lt(amount.amount().plus(fee[FeeOption.Average].amount()))
-    ) {
-      throw new Error('insufficient funds')
+    const balances = await this.getBalance(this.getAddress(walletIndex))
+    const runeBalance: BaseAmount =
+      balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
+    const assetBalance: BaseAmount =
+      balances.filter(({ asset: assetInList }) => assetToString(assetInList) === assetToString(asset))[0]?.amount ??
+      baseAmount(0, DECIMAL)
+
+    const fee = (await this.getFees()).average
+
+    if (isAssetRuneNative(asset)) {
+      // amount + fee < runeBalance
+      if (runeBalance.lt(amount.plus(fee))) {
+        throw new Error('insufficient funds')
+      }
+    } else {
+      // amount < assetBalances && runeBalance < fee
+      if (assetBalance.lt(amount) || runeBalance.lt(fee)) {
+        throw new Error('insufficient funds')
+      }
     }
 
     const transferResult = await this.cosmosClient.transfer({
@@ -484,7 +509,7 @@ class Client implements ThorchainClient, XChainClient {
       from: this.getAddress(walletIndex),
       to: recipient,
       amount: amount.amount().toString(),
-      asset: isAssetRuneNative(asset) ? getDenomWithChain(asset) : getDenom(asset),
+      asset: getDenom(asset),
       memo,
       fee: {
         amount: [],
@@ -511,18 +536,25 @@ class Client implements ThorchainClient, XChainClient {
     amount,
     recipient,
     memo,
-    from_balance = baseAmount('0', DECIMAL),
+    from_rune_balance,
+    from_asset_balance = baseAmount(0, DECIMAL),
     from_account_number = '0',
     from_sequence = '0',
   }: TxOfflineParams): Promise<StdTx> {
     registerCodecs(getPrefix(this.network))
 
-    const fee = await this.getFees()
-    if (
-      from_balance === baseAmount('0', DECIMAL) ||
-      from_balance.amount().lt(amount.amount().plus(fee[FeeOption.Average].amount()))
-    ) {
-      throw new Error('insufficient funds')
+    const fee = (await this.getFees()).average
+
+    if (isAssetRuneNative(asset)) {
+      // amount + fee < runeBalance
+      if (from_rune_balance.lt(amount.plus(fee))) {
+        throw new Error('insufficient funds')
+      }
+    } else {
+      // amount < assetBalances && runeBalance < fee
+      if (from_asset_balance.lt(amount) || from_rune_balance.lt(fee)) {
+        throw new Error('insufficient funds')
+      }
     }
 
     const result = await this.cosmosClient.transferSignedOffline({
@@ -532,7 +564,7 @@ class Client implements ThorchainClient, XChainClient {
       from_sequence,
       to: recipient,
       amount: amount.amount().toString(),
-      asset: isAssetRuneNative(asset) ? getDenomWithChain(asset) : getDenom(asset),
+      asset: getDenom(asset),
       memo,
       fee: {
         amount: [],

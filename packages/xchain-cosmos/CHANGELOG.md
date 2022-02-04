@@ -1,8 +1,12 @@
-# v.0.15.2 (2022-01-10)
+# v.0.16.1 (2022-02-03)
 
 - upgrade axios dependency to latest
 
-# v.0.15.1 (2022-01-28)
+# v.0.16.0 (2022-02-02)
+
+## Breaking change
+
+- Remove `from_balance` from `TxOfflineParams`
 
 ## Update
 
