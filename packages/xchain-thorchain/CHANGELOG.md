@@ -1,3 +1,14 @@
+# v.0.21.1 (2022-02-04)
+
+## Fix
+
+- Fix chain id for `testnet` #477
+
+## Add
+
+- Helper `isChainId`
+- `enum ChainId`
+
 # v.0.21.0 (2022-02-02)
 
 ## Breaking change

@@ -3,6 +3,7 @@ import { AssetBNB, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@
 
 import {
   assetFromDenom,
+  getChainId,
   getDefaultExplorerUrls,
   getDenom,
   getDepositTxDataFromLogs,
@@ -13,6 +14,7 @@ import {
   getTxType,
   isAssetRuneNative,
   isBroadcastSuccess,
+  isChainId,
 } from '../src/util'
 
 describe('thorchain/util', () => {
@@ -156,6 +158,34 @@ describe('thorchain/util', () => {
       expect(
         getExplorerTxUrl({ urls: getDefaultExplorerUrls(), network: 'mainnet' as Network, txID: 'txhash' }),
       ).toEqual('https://viewblock.io/thorchain/tx/txhash')
+    })
+  })
+
+  describe('isChainId', () => {
+    it('mainnet', () => {
+      expect(isChainId('thorchain')).toBeTruthy()
+    })
+    it('stagenet', () => {
+      expect(isChainId('thorchain-stagenet')).toBeTruthy()
+    })
+    it('testnet', () => {
+      expect(isChainId('thorchain-v1')).toBeTruthy()
+    })
+    it('unknown', () => {
+      expect(isChainId('thorchain-unknown')).toBeFalsy()
+      expect(isChainId('aynthing')).toBeFalsy()
+    })
+  })
+
+  describe('getChainId', () => {
+    it('mainnet', () => {
+      expect(getChainId(Network.Mainnet)).toEqual('thorchain')
+    })
+    it('stagenet', () => {
+      expect(getChainId(Network.Stagenet)).toEqual('thorchain-stagenet')
+    })
+    it('testnet', () => {
+      expect(getChainId(Network.Testnet)).toEqual('thorchain-v1')
     })
   })
 })

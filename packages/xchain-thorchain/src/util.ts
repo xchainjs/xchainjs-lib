@@ -105,6 +105,20 @@ export const getPrefix = (network: Network) => {
   }
 }
 
+export enum ChainId {
+  Mainnet = 'thorchain',
+  Stagenet = 'thorchain-stagenet',
+  Testnet = 'thorchain-v1',
+}
+
+/**
+ * Type guard to check whether string is a valid `ChainId`
+ *
+ * @param {string} id Chain id.
+ * @returns {boolean} `true` or `false`
+ */
+export const isChainId = (id: string): id is ChainId => (Object.values(ChainId) as string[]).includes(id)
+
 /**
  * Get the chain id.
  *
@@ -112,14 +126,14 @@ export const getPrefix = (network: Network) => {
  * @returns {string} The chain id based on the network.
  *
  */
-export const getChainId = (network: Network) => {
+export const getChainId = (network: Network): ChainId => {
   switch (network) {
     case Network.Mainnet:
-      return 'thorchain'
+      return ChainId.Mainnet
     case Network.Stagenet:
-      return 'thorchain-stagenet'
+      return ChainId.Stagenet
     case Network.Testnet:
-      return 'thorchain'
+      return ChainId.Testnet
   }
 }
 
@@ -220,7 +234,7 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
 export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string): Promise<StdTx> => {
   const { data } = await axios.get(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
   const chainId = data.default_node_info.network
-  if (!chainId || !(chainId == 'thorchain' || chainId == 'thorchain-stagenet')) throw new Error('invalid network')
+  if (!chainId || !isChainId(chainId)) throw new Error('invalid network')
 
   const response: ThorchainDepositResponse = (
     await axios.post(`${nodeUrl}/thorchain/deposit`, {
