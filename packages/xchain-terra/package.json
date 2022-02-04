@@ -1,10 +1,9 @@
 {
-  "name": "@xchainjs/xchain-binance",
-  "version": "5.4.1",
-  "description": "Custom Binance client and utilities used by XChainJS clients",
+  "name": "@xchainjs/xchain-terra",
+  "version": "0.1.0-alpha.1",
+  "description": "Custom Terra client and utilities used by XChainJS clients",
   "keywords": [
-    "BNB",
-    "Binance",
+    "THORChain",
     "XChain"
   ],
   "author": "THORChain",
@@ -28,24 +27,27 @@
     "clean": "rimraf lib/**",
     "build": "yarn clean && rollup -c",
     "test": "jest",
-    "compile": "tsc -p tsconfig.build.json",
+    "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "yarn build",
+    "start:example": "ts-node example/index.ts"
   },
   "devDependencies": {
-    "@binance-chain/javascript-sdk": "^4.2.0",
-    "@types/big.js": "^4.0.5",
+    "@types/big.js": "^6.0.0",
     "@xchainjs/xchain-client": "^0.11.1",
-    "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.5.0"
+    "@xchainjs/xchain-util": "^0.5.0",
+    "@terra-money/terra.js": "^3.0.2",
+    "axios": "^0.25.0",
+    "nock": "^13.0.5"
   },
   "publishConfig": {
     "access": "public"
   },
   "peerDependencies": {
-    "@binance-chain/javascript-sdk": "^4.2.0",
     "@xchainjs/xchain-client": "^0.11.1",
-    "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.5.0"
-  }
+    "@xchainjs/xchain-util": "^0.5.0",
+    "@terra-money/terra.js": "^3.0.2",
+    "axios": "^0.25.0"
+  },
+  "dependencies": {}
 }

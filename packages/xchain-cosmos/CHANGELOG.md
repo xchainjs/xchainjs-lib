@@ -1,3 +1,7 @@
+# v.0.16.1 (2022-xx-xx)
+
+- Use latest axios@0.25.0
+
 # v.0.16.0 (2022-02-02)
 
 ## Breaking change

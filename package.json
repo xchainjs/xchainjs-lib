@@ -10,6 +10,7 @@
     "build": "lerna run build",
     "pub": "lerna publish",
     "test": "lerna run test",
+    "e2e": "lerna run e2e",
     "lint": "lerna run lint"
   },
   "husky": {

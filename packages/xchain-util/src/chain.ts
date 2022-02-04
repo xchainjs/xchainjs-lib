@@ -7,6 +7,7 @@ export enum Chain {
   Polkadot = 'POLKA',
   BitcoinCash = 'BCH',
   Litecoin = 'LTC',
+  Terra = 'TERRA',
   Doge = 'DOGE',
 }
 
@@ -18,6 +19,7 @@ export const CosmosChain = Chain.Cosmos
 export const PolkadotChain = Chain.Polkadot
 export const BCHChain = Chain.BitcoinCash
 export const LTCChain = Chain.Litecoin
+export const LUNAChain = Chain.Terra
 export const DOGEChain = Chain.Doge
 
 /**
@@ -48,6 +50,7 @@ export const chainToString: ((chainId: Chain) => string) & Record<Chain, string>
     [Chain.Binance]: 'Binance Chain',
     [Chain.Cosmos]: 'Cosmos',
     [Chain.Polkadot]: 'Polkadot',
+    [Chain.Terra]: 'Terra',
     [Chain.Doge]: 'Dogecoin',
   },
 )

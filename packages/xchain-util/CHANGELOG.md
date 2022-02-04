@@ -1,3 +1,10 @@
+# v.0.5.1 (2022-xx-xx)
+
+### Add
+
+- `Chain.Terra`
+- `AssetLUNA`
+
 # v.0.5.0 (2022-02-02)
 
 ### Breaking change

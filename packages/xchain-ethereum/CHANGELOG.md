@@ -1,3 +1,9 @@
+# v.0.23.3 (2022-xx-xx)
+
+## Update
+
+- Use latest axios@0.25.0
+
 # v.0.23.2 (2022-02-02)
 
 ## Update

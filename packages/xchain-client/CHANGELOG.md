@@ -1,3 +1,12 @@
+# v.0.11.1 (2022-xx-xx)
+
+### Update
+
+- Use latest `@xchainjs/xchain-util@0.5.0`
+- made walletIndex optional in BaseXChainClient.getAddress(walletIndex?: number)
+- Use latest axios@0.25.0
+- change TxFrom/TxTo to have optional Asset, to support Terra's multiple native asset types (UST, KRT, LUNA, etc)
+
 # v.0.11.0 (2021-12-29)
 
 ### Breaking change
