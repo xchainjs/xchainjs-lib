@@ -15,7 +15,7 @@ import { StdTxFee } from 'cosmos-client/api'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
-import { ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
+import { ChainId, ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
 import { MsgNativeTx, ThorchainDepositResponse } from './types/messages'
 
 export const DECIMAL = 8
@@ -102,38 +102,6 @@ export const getPrefix = (network: Network) => {
       return 'sthor'
     case Network.Testnet:
       return 'tthor'
-  }
-}
-
-export enum ChainId {
-  Mainnet = 'thorchain',
-  Stagenet = 'thorchain-stagenet',
-  Testnet = 'thorchain-v1',
-}
-
-/**
- * Type guard to check whether string is a valid `ChainId`
- *
- * @param {string} id Chain id.
- * @returns {boolean} `true` or `false`
- */
-export const isChainId = (id: string): id is ChainId => (Object.values(ChainId) as string[]).includes(id)
-
-/**
- * Get the chain id.
- *
- * @param {Network} network
- * @returns {string} The chain id based on the network.
- *
- */
-export const getChainId = (network: Network): ChainId => {
-  switch (network) {
-    case Network.Mainnet:
-      return ChainId.Mainnet
-    case Network.Stagenet:
-      return ChainId.Stagenet
-    case Network.Testnet:
-      return ChainId.Testnet
   }
 }
 
@@ -226,15 +194,27 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
 /**
  * Structure StdTx from MsgNativeTx.
  *
- * @param {string} txId The transaction id.
+ * @param {MsgNativeTx} msgNativeTx Msg of type `MsgNativeTx`.
+ * @param {string} nodeUrl Node url
+ * @param {chainId} ChainId Chain id of the network
+ *
  * @returns {Tx} The transaction details of the given transaction id.
  *
  * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
  */
-export const buildDepositTx = async (msgNativeTx: MsgNativeTx, nodeUrl: string): Promise<StdTx> => {
+export const buildDepositTx = async ({
+  msgNativeTx,
+  nodeUrl,
+  chainId,
+}: {
+  msgNativeTx: MsgNativeTx
+  nodeUrl: string
+  chainId: ChainId
+}): Promise<StdTx> => {
   const { data } = await axios.get(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
-  const chainId = data.default_node_info.network
-  if (!chainId || !isChainId(chainId)) throw new Error('invalid network')
+  const networkChainId = data.default_node_info.network
+  if (!networkChainId || chainId !== networkChainId)
+    throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
 
   const response: ThorchainDepositResponse = (
     await axios.post(`${nodeUrl}/thorchain/deposit`, {

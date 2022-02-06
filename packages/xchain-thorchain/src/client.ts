@@ -22,7 +22,17 @@ import axios from 'axios'
 import { AccAddress, PrivKey, PubKey, codec } from 'cosmos-client'
 import { StdTx } from 'cosmos-client/x/auth'
 
-import { ClientUrl, DepositParam, ExplorerUrls, NodeUrl, ThorchainClientParams, TxData, TxOfflineParams } from './types'
+import {
+  ChainId,
+  ChainIds,
+  ClientUrl,
+  DepositParam,
+  ExplorerUrls,
+  NodeUrl,
+  ThorchainClientParams,
+  TxData,
+  TxOfflineParams,
+} from './types'
 import { TxResult, msgNativeTxFromJson } from './types/messages'
 import {
   DECIMAL,
@@ -30,7 +40,6 @@ import {
   MAX_TX_COUNT,
   buildDepositTx,
   getBalance,
-  getChainId,
   getDefaultClientUrl,
   getDefaultExplorerUrls,
   getDefaultFees,
@@ -63,6 +72,7 @@ class Client implements ThorchainClient, XChainClient {
   private network: Network
   private clientUrl: ClientUrl
   private explorerUrls: ExplorerUrls
+  private chainIds: ChainIds
   private phrase = ''
   private rootDerivationPaths: RootDerivationPaths
   private cosmosClient: CosmosSDKClient
@@ -87,15 +97,21 @@ class Client implements ThorchainClient, XChainClient {
       [Network.Stagenet]: "44'/931'/0'/0/",
       [Network.Testnet]: "44'/931'/0'/0/",
     },
+    chainIds = {
+      [Network.Mainnet]: 'thorchain',
+      [Network.Stagenet]: 'thorchain-stagenet',
+      [Network.Testnet]: 'thorchain-v1',
+    },
   }: XChainClientParams & ThorchainClientParams) {
     this.network = network
     this.clientUrl = clientUrl || getDefaultClientUrl()
     this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
+    this.chainIds = chainIds
     this.rootDerivationPaths = rootDerivationPaths
 
     this.cosmosClient = new CosmosSDKClient({
       server: this.getClientUrl().node,
-      chainId: getChainId(this.network),
+      chainId: this.getChainId(this.network),
       prefix: getPrefix(this.network),
     })
 
@@ -174,6 +190,29 @@ class Client implements ThorchainClient, XChainClient {
    */
   getExplorerUrl(): string {
     return this.explorerUrls.root[this.network]
+  }
+
+  /**
+   * Sets chain id
+   *
+   * @param {ChainId} chainId Chain id to update
+   * @param {Network} network (optional) Network for given chainId. If `network`not set, current network of the client is used
+   *
+   * @returns {void}
+   */
+  setChainId(chainId: ChainId, network?: Network): void {
+    this.chainIds = { ...this.chainIds, [network || this.network]: chainId }
+  }
+
+  /**
+   * Gets chain id
+   *
+   * @param {Network} network (optional) Network to get chain id from. If `network`not set, current network of the client is used
+   *
+   * @returns {ChainId} Chain id based on the current network.
+   */
+  getChainId(network?: Network): ChainId {
+    return this.chainIds[network || this.network]
   }
 
   /**
@@ -467,7 +506,11 @@ class Client implements ThorchainClient, XChainClient {
       signer,
     })
 
-    const unsignedStdTx: StdTx = await buildDepositTx(msgNativeTx, this.getClientUrl().node)
+    const unsignedStdTx: StdTx = await buildDepositTx({
+      msgNativeTx,
+      nodeUrl: this.getClientUrl().node,
+      chainId: this.getChainId(),
+    })
     const privateKey = this.getPrivKey(walletIndex)
     const accAddress = AccAddress.fromBech32(signer)
 

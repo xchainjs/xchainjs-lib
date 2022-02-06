@@ -169,13 +169,13 @@ describe('Client Test', () => {
   })
 
   it('should init, should have right prefix', async () => {
-    expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
+    expect(thorClient.validateAddress(thorClient.getAddress())).toBeTruthy()
 
     thorClient.setNetwork(Network.Mainnet)
-    expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
+    expect(thorClient.validateAddress(thorClient.getAddress())).toBeTruthy()
 
     thorClient.setNetwork(Network.Stagenet)
-    expect(thorClient.validateAddress(thorClient.getAddress())).toEqual(true)
+    expect(thorClient.validateAddress(thorClient.getAddress())).toBeTruthy()
   })
 
   it('should have right client url', async () => {
@@ -207,6 +207,62 @@ describe('Client Test', () => {
   it('returns private key', async () => {
     const privKey = thorClient.getPrivKey()
     expect(privKey.toBase64()).toEqual('CHCbyYWorMZVRFtfJzt72DigvZeRNi3jo2c3hGEQ46I=')
+  })
+
+  describe('chainId', () => {
+    it('get chainId (testnet by default for testnetClient)', () => {
+      const chainId = thorClient.getChainId()
+      expect(chainId).toEqual('thorchain-v1')
+    })
+    it('update chainId (testnet by default for testnetClient)', () => {
+      thorClient.setChainId('another-testnet-id')
+      const chainId = thorClient.getChainId()
+      expect(chainId).toEqual('another-testnet-id')
+    })
+    it('update chainId for testnet', () => {
+      thorClient.setChainId('another-testnet-id', Network.Testnet)
+      const chainId = thorClient.getChainId(Network.Testnet)
+      expect(chainId).toEqual('another-testnet-id')
+    })
+    it('get default chainId for stagenet', () => {
+      const chainId = thorClient.getChainId(Network.Stagenet)
+      expect(chainId).toEqual('thorchain-stagenet')
+    })
+    it('update chainId for stagenet', () => {
+      thorClient.setChainId('another-stagenet-id', Network.Stagenet)
+      const chainId = thorClient.getChainId(Network.Stagenet)
+      expect(chainId).toEqual('another-stagenet-id')
+    })
+    it('get default chainId for mainnet', () => {
+      const chainId = thorClient.getChainId(Network.Mainnet)
+      expect(chainId).toEqual('thorchain')
+    })
+    it('update chainId for mainnet', () => {
+      thorClient.setChainId('another-mainnet-id', Network.Mainnet)
+      const chainId = thorClient.getChainId(Network.Mainnet)
+      expect(chainId).toEqual('another-mainnet-id')
+    })
+
+    it('set chainId by initialization of client', () => {
+      const chainIds = {
+        [Network.Mainnet]: 'mainnet-id',
+        [Network.Stagenet]: 'stagenet-id',
+        [Network.Testnet]: 'testnet-id',
+      }
+      const client = new Client({ phrase, network: Network.Testnet, chainIds })
+      // chainId for testnet by default
+      let chainId = client.getChainId()
+      expect(chainId).toEqual('testnet-id')
+      // ask testnet
+      chainId = client.getChainId(Network.Testnet)
+      expect(chainId).toEqual('testnet-id')
+      // ask for mainnet
+      chainId = client.getChainId(Network.Mainnet)
+      expect(chainId).toEqual('mainnet-id')
+      // ask for stagenet
+      chainId = client.getChainId(Network.Stagenet)
+      expect(chainId).toEqual('stagenet-id')
+    })
   })
 
   it('returns public key', async () => {
@@ -466,7 +522,7 @@ describe('Client Test', () => {
     })
     mockTendermintNodeInfo(thorClient.getClientUrl().node, {
       default_node_info: {
-        network: 'thorchain',
+        network: 'thorchain-v1',
       },
     })
     assertTxsPost(thorClient.getClientUrl().node, '', expected_txsPost_result)

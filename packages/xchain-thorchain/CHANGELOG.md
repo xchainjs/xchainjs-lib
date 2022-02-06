@@ -1,3 +1,15 @@
+# v0.22.0 (2022-02-06)
+
+## Add
+
+- Option to pass `ChainIds` into constructor
+- getter / setter for `chainId` in `Client`
+
+## Breaking change
+
+- `buildDepositTx` needs `chainId` to be passed - all params are set as object
+- Remove `enum ChainId` + `getChainId` + `isChainId` from `utils`
+
 # v0.21.2 (2022-02-04)
 
 ## Fix
