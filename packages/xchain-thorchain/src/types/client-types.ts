@@ -16,9 +16,13 @@ export type ExplorerUrls = {
 
 export type ExplorerUrl = Record<Network, string>
 
+export type ChainId = string
+export type ChainIds = Record<Network, ChainId>
+
 export type ThorchainClientParams = {
   clientUrl?: ClientUrl
   explorerUrls?: ExplorerUrls
+  chainIds?: ChainIds
 }
 
 export type DepositParam = {
