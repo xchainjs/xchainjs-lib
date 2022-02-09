@@ -25,7 +25,6 @@ import * as Utils from './utils'
 
 export type BitcoinClientParams = XChainClientParams & {
   sochainUrl?: string
-  blockstreamUrl?: string
   haskoinUrl?: ClientUrl
 }
 
@@ -34,7 +33,6 @@ export type BitcoinClientParams = XChainClientParams & {
  */
 class Client extends UTXOClient {
   private sochainUrl = ''
-  private blockstreamUrl = ''
   private haskoinUrl: ClientUrl
 
   /**
@@ -46,7 +44,6 @@ class Client extends UTXOClient {
   constructor({
     network = Network.Testnet,
     sochainUrl = 'https://sochain.com/api/v2',
-    blockstreamUrl = 'https://blockstream.info',
     haskoinUrl = {
       [Network.Testnet]: 'https://api.haskoin.com/btctest',
       [Network.Mainnet]: 'https://api.haskoin.com/btc',
@@ -61,7 +58,6 @@ class Client extends UTXOClient {
   }: BitcoinClientParams) {
     super(Chain.Bitcoin, { network, rootDerivationPaths, phrase })
     this.setSochainUrl(sochainUrl)
-    this.setBlockstreamUrl(blockstreamUrl)
     this.haskoinUrl = haskoinUrl
   }
 
@@ -73,16 +69,6 @@ class Client extends UTXOClient {
    */
   setSochainUrl(url: string): void {
     this.sochainUrl = url
-  }
-
-  /**
-   * Set/Update the blockstream url.
-   *
-   * @param {string} url The new blockstream url.
-   * @returns {void}
-   */
-  setBlockstreamUrl(url: string): void {
-    this.blockstreamUrl = url
   }
 
   /**
@@ -318,7 +304,7 @@ class Client extends UTXOClient {
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-    return await Utils.broadcastTx({ network: this.network, txHex, blockstreamUrl: this.blockstreamUrl })
+    return await Utils.broadcastTx({ txHex, haskoinUrl: this.haskoinUrl[this.network] })
   }
 }
 

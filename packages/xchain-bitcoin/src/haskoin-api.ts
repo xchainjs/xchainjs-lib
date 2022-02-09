@@ -7,10 +7,11 @@
 
 import { Network, TxHash } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 import { BTC_DECIMAL } from './const'
 import { getIsTxConfirmed } from './sochain-api'
+import type { BroadcastTxParams } from './types/common'
 import type { BalanceData, UtxoData } from './types/haskoin-api-types'
 
 export const getBalance = async ({
@@ -110,3 +111,14 @@ export const getConfirmedUnspentTxs = async ({
 
   return confirmedUTXOs
 }
+
+/**
+ * Broadcast transaction.
+ *
+ * @see https://app.swaggerhub.com/apis/eligecode/blockchain-api/0.0.1-oas3#/blockchain/sendTransaction
+ *
+ * @param {BroadcastTxParams} params
+ * @returns {TxHash} Transaction hash.
+ */
+export const broadcastTx = async ({ txHex, haskoinUrl }: BroadcastTxParams): Promise<TxHash> =>
+  (await axios.post<string, AxiosResponse<{ txid: string }>>(`${haskoinUrl}/transactions`, txHex)).data.txid

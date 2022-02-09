@@ -12,6 +12,8 @@
 ## Breaking change
 
 - Accept `confirmedOnly` for misc. balance helpers
+- Broadcast txs via `Haskoin`
+- Remove `blockstream` as API dependency
 - Remove deprecated Ledger files (\*\*/\*\*/ledger.ts)
 
 # v.0.17.1 (2022-02-04)

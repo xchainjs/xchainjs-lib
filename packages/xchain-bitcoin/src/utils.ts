@@ -15,7 +15,6 @@ import { AssetBTC, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xch
 import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
-import * as blockStream from './blockstream-api'
 import { BTC_DECIMAL, MIN_TX_FEE } from './const'
 import * as haskoinApi from './haskoin-api'
 import * as sochain from './sochain-api'
@@ -327,8 +326,8 @@ export const buildTx = async ({
  * @param {BroadcastTxParams} params The transaction broadcast options.
  * @returns {TxHash} The transaction hash.
  */
-export const broadcastTx = async ({ network, txHex, blockstreamUrl }: BroadcastTxParams): Promise<TxHash> => {
-  return await blockStream.broadcastTx({ network, txHex, blockstreamUrl })
+export const broadcastTx = async ({ haskoinUrl, txHex }: BroadcastTxParams): Promise<TxHash> => {
+  return await haskoinApi.broadcastTx({ haskoinUrl, txHex })
 }
 
 /**
