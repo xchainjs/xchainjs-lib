@@ -1,3 +1,8 @@
+# v.0.17.2 (2022-02-09)
+
+- fetch `txHex` for scanning UTXOs
+- return `inputs` UTXOs in the `buildTx` method
+
 # v.0.17.1 (2022-02-04)
 
 ## Update

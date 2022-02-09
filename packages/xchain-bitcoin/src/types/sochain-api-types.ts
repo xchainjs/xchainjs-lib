@@ -39,6 +39,7 @@ export interface Transaction {
   confirmations: number
   time: number
 
+  tx_hex: string
   inputs: TxIO[]
   outputs: TxIO[]
 }
@@ -104,4 +105,5 @@ export type ScanUTXOParam = {
   network: Network
   address: string
   confirmedOnly?: boolean
+  fetchTxHex?: boolean
 }
