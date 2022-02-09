@@ -6,6 +6,8 @@
 - return `inputs` UTXOs in the `buildTx` method #489
 - Extract `Haskoin` types
 - Export `getBalance`
+- Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same data
+- Cache `confirmed` status in `getConfirmedUnspentTxs` to avoid same requests for same data
 
 ## Breaking change
 

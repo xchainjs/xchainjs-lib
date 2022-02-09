@@ -152,16 +152,18 @@ export const validateAddress = (address: Address, network: Network): boolean => 
 // Stores list of txHex in memory to avoid requesting same data
 const txHexMap: Record<TxHash, string> = {}
 
-type GetTxHexParams = {
-  sochainUrl: string
-  txHash: TxHash
-  network: Network
-}
-
 /**
  * Helper to use cached `txHex` values
  */
-const getTxHexFromCache = async ({ txHash, sochainUrl, network }: GetTxHexParams): Promise<string> => {
+const getTxHexFromCache = async ({
+  txHash,
+  sochainUrl,
+  network,
+}: {
+  sochainUrl: string
+  txHash: TxHash
+  network: Network
+}): Promise<string> => {
   // try to get it from cache
   let txHex = txHexMap[txHash]
   if (txHex) return txHex
