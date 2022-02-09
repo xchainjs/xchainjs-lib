@@ -9,7 +9,7 @@ export type UTXO = {
   index: number
   value: number
   witnessUtxo: Witness
-  txHex: string
+  txHex?: string
 }
 
 export type BroadcastTxParams = { network: Network; txHex: string; blockstreamUrl: string }
