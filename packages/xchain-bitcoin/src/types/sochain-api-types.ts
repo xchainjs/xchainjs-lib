@@ -105,5 +105,5 @@ export type ScanUTXOParam = {
   network: Network
   address: string
   confirmedOnly?: boolean
-  fetchTxHex?: boolean
+  withTxHex?: boolean
 }

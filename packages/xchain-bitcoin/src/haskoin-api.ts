@@ -1,34 +1,26 @@
-import { Address, Network } from '@xchainjs/xchain-client'
+/**
+ * Module to interact with Haskoin API
+ *
+ * Doc (SwaggerHub) https://app.swaggerhub.com/apis/eligecode/blockchain-api/0.0.1-oas3
+ *
+ */
+
+import { Network } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import { BTC_DECIMAL } from './const'
 import { getIsTxConfirmed } from './sochain-api'
-
-const SOCHAIN_API_URL = 'https://sochain.com/api/v2'
-
-export type UtxoData = {
-  txid: string
-  index: number
-  value: number
-  pkscript: string
-}
-
-export type BalanceData = {
-  address: Address
-  confirmed: number
-  unconfirmed: number
-  utxo: number
-  txs: number
-  received: number
-}
+import type { BalanceData, UtxoData } from './types/haskoin-api-types'
 
 export const getBalance = async ({
   haskoinUrl,
   address,
+  confirmedOnly,
 }: {
   haskoinUrl: string
   address: string
+  confirmedOnly: boolean
 }): Promise<BaseAmount> => {
   const {
     data: { confirmed, unconfirmed },
@@ -37,7 +29,7 @@ export const getBalance = async ({
   const confirmedAmount = baseAmount(confirmed, BTC_DECIMAL)
   const unconfirmedAmount = baseAmount(unconfirmed, BTC_DECIMAL)
 
-  return confirmedAmount.plus(unconfirmedAmount)
+  return confirmedOnly ? confirmedAmount : confirmedAmount.plus(unconfirmedAmount)
 }
 
 export const getUnspentTxs = async ({
@@ -54,10 +46,14 @@ export const getUnspentTxs = async ({
 
 export const getConfirmedUnspentTxs = async ({
   haskoinUrl,
+  sochainUrl,
   address,
+  network,
 }: {
   haskoinUrl: string
+  sochainUrl: string
   address: string
+  network: Network
 }): Promise<UtxoData[]> => {
   const allUtxos = await getUnspentTxs({ haskoinUrl, address })
 
@@ -66,8 +62,8 @@ export const getConfirmedUnspentTxs = async ({
   await Promise.all(
     allUtxos.map(async (tx: UtxoData) => {
       const { is_confirmed: isTxConfirmed } = await getIsTxConfirmed({
-        sochainUrl: SOCHAIN_API_URL,
-        network: Network.Mainnet,
+        sochainUrl,
+        network,
         hash: tx.txid,
       })
 

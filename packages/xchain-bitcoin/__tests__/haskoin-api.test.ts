@@ -8,8 +8,14 @@ const MOCK_ADDRESS = 'bc1address'
 const MOCK_URL = 'https://api.haskoin.com/haskoin-store/btc'
 
 describe('Haskoin API Test', () => {
-  it('getBalance', async () => {
-    const balance = await haskoin.getBalance({ address: MOCK_ADDRESS, haskoinUrl: MOCK_URL })
-    expect(balance.amount().toString()).toEqual('3300000')
+  describe('getBalance', () => {
+    it('confirmed + unconfirmed', async () => {
+      const balance = await haskoin.getBalance({ address: MOCK_ADDRESS, haskoinUrl: MOCK_URL, confirmedOnly: false })
+      expect(balance.amount().toString()).toEqual('3300000')
+    })
+    it('confirmed only', async () => {
+      const balance = await haskoin.getBalance({ address: MOCK_ADDRESS, haskoinUrl: MOCK_URL, confirmedOnly: true })
+      expect(balance.amount().toString()).toEqual('1100000')
+    })
   })
 })

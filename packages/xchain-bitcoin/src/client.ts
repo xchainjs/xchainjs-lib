@@ -191,14 +191,15 @@ class Client extends UTXOClient {
    * @returns {Balance[]} The BTC balance of the address.
    */
   async getBalance(address: Address): Promise<Balance[]> {
-    return Utils.getBalance(
-      {
+    return Utils.getBalance({
+      params: {
         sochainUrl: this.sochainUrl,
         network: this.network,
         address: address,
       },
-      this.haskoinUrl[this.network],
-    )
+      haskoinUrl: this.haskoinUrl[this.network],
+      confirmedOnly: false,
+    })
   }
 
   /**

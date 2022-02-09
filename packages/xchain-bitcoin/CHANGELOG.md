@@ -1,7 +1,16 @@
-# v.0.17.2 (2022-02-09)
+# v.0.18.0 (2022-xx-xx)
 
-- fetch `txHex` for scanning UTXOs
-- return `inputs` UTXOs in the `buildTx` method
+## Update
+
+- fetch `txHex` for scanning UTXOs #489
+- return `inputs` UTXOs in the `buildTx` method #489
+- Extract `Haskoin` types
+- Export `getBalance`
+
+## Breaking change
+
+- Accept `confirmedOnly` for misc. balance helpers
+- Remove deprecated Ledger files (\*\*/\*\*/ledger.ts)
 
 # v.0.17.1 (2022-02-04)
 
