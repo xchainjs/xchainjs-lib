@@ -1,19 +1,24 @@
 import { Network } from '@xchainjs/xchain-client'
 import { AssetBTC, baseAmount } from '@xchainjs/xchain-util'
 
+import mockHaskoinApi from '../__mocks__/haskoin'
 import mockSochainApi from '../__mocks__/sochain'
 import { Client } from '../src/client'
 import { MIN_TX_FEE } from '../src/const'
 
-mockSochainApi.init()
-
-const btcClient = new Client({ network: 'mainnet' as Network, sochainUrl: 'https://sochain.com/api/v2' })
+const btcClient = new Client({ network: Network.Mainnet, sochainUrl: 'https://sochain.com/api/v2' })
 
 describe('BitcoinClient Test', () => {
   beforeEach(() => {
+    mockHaskoinApi.init()
+    mockSochainApi.init()
     btcClient.purgeClient()
   })
-  afterEach(() => btcClient.purgeClient())
+  afterEach(() => {
+    mockHaskoinApi.restore()
+    mockSochainApi.restore()
+    btcClient.purgeClient()
+  })
 
   const MEMO = 'SWAP:THOR.RUNE'
   // please don't touch the tBTC in these
@@ -40,7 +45,7 @@ describe('BitcoinClient Test', () => {
   const phraseTwoMainnet_path1 = 'bc1q7c58pf87g73pk07ryq996jfa5nqkx2ppzjz8kq'
 
   it('set phrase should return correct address', () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     const result = btcClient.setPhrase(phraseOne)
     expect(result).toEqual(addyOnePath0)
   })
@@ -54,7 +59,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should validate the right address', () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const address = btcClient.getAddress()
     const valid = btcClient.validateAddress(address)
@@ -64,27 +69,11 @@ describe('BitcoinClient Test', () => {
 
   it('should get the right balance', async () => {
     const expectedBalance = 15446
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseTwo)
     const balance = await btcClient.getBalance(btcClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
-  })
-
-  it('should broadcast a normal transfer', async () => {
-    btcClient.setNetwork('testnet' as Network)
-    btcClient.setPhrase(phraseOne)
-    const amount = baseAmount(2223)
-    const txid = await btcClient.transfer({ walletIndex: 0, asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
-    expect(txid).toEqual(expect.any(String))
-  })
-
-  it('should broadcast a normal transfer without feeRate option', async () => {
-    btcClient.setNetwork('testnet' as Network)
-    btcClient.setPhrase(phraseOne)
-    const amount = baseAmount(2223)
-    const txid = await btcClient.transfer({ asset: AssetBTC, recipient: addyTwo, amount })
-    expect(txid).toEqual(expect.any(String))
   })
 
   it('should purge phrase and utxos', async () => {
@@ -92,34 +81,8 @@ describe('BitcoinClient Test', () => {
     expect(() => btcClient.getAddress()).toThrow('Phrase must be provided')
   })
 
-  it('should do broadcast a vault transfer with a memo', async () => {
-    btcClient.setNetwork('testnet' as Network)
-    btcClient.setPhrase(phraseOne)
-
-    /**
-     * All UTXO values: 8800 + 495777 + 15073
-     * Confirmed UTXO values: 8800 + 15073 = 23873
-     * Spend amount: 2223
-     * Expected: Successful
-     */
-
-    const amount = baseAmount(2223)
-    try {
-      const txid = await btcClient.transfer({
-        asset: AssetBTC,
-        recipient: addyThreePath0,
-        amount,
-        memo: MEMO,
-        feeRate: 1,
-      })
-      expect(txid).toEqual(expect.any(String))
-    } catch (err) {
-      console.log('ERR running test', err)
-      throw err
-    }
-  })
   it('should prevent spending unconfirmed utxo if memo exists', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
 
     /**
@@ -141,7 +104,7 @@ describe('BitcoinClient Test', () => {
     ).rejects.toThrow('Insufficient Balance for transaction')
   })
   it('should get the balance of an address without phrase', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.purgeClient()
     const balance = await btcClient.getBalance(addyThreePath0)
     expect(balance.length).toEqual(1)
@@ -149,7 +112,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
 
     const asset = AssetBTC
@@ -160,7 +123,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('returns fees and rates of a normal tx', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const { fees, rates } = await btcClient.getFeesWithRates()
     // check fees
@@ -174,7 +137,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('returns fees and rates of a tx w/ memo', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const { fees, rates } = await btcClient.getFeesWithRates(MEMO)
     // check fees
@@ -188,7 +151,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should return estimated fees of a normal tx', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const estimates = await btcClient.getFees()
     expect(estimates.fast).toBeDefined()
@@ -197,7 +160,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should return estimated fees of a vault tx that are more expensive than a normal tx (in case of > MIN_TX_FEE only)', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const normalTx = await btcClient.getFees()
     const vaultTx = await btcClient.getFeesWithMemo(MEMO)
@@ -222,7 +185,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('returns different fee rates for a normal tx', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const { fast, fastest, average } = await btcClient.getFeeRates()
     expect(fast > average)
@@ -230,7 +193,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should error when an invalid address is used in getting balance', () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const invalidIndex = -1
     const expectedError = 'index must be greater than zero'
@@ -238,7 +201,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should error when an invalid address is used in transfer', () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const invalidAddress = 'error_address'
 
@@ -251,7 +214,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should get address transactions', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
 
     const txPages = await btcClient.getTransactions({ address: addyThreePath0, limit: 4 })
 
@@ -265,14 +228,14 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should get address transactions with limit', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     // Limit should work
     const txPages = await btcClient.getTransactions({ address: addyThreePath0, limit: 1 })
     return expect(txPages.total).toEqual(1) //there 1 tx in addyThreePath0
   })
 
   it('should get transaction with hash', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     const txData = await btcClient.getTransactionData(
       'b660ee07167cfa32681e2623f3a29dc64a089cabd9a3a07dd17f9028ac956eb8',
     )
@@ -290,35 +253,35 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should return valid explorer url', () => {
-    btcClient.setNetwork('mainnet' as Network)
+    btcClient.setNetwork(Network.Mainnet)
     expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info')
 
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info/testnet')
   })
 
   it('should retrun valid explorer address url', () => {
-    btcClient.setNetwork('mainnet' as Network)
+    btcClient.setNetwork(Network.Mainnet)
     expect(btcClient.getExplorerAddressUrl('testAddressHere')).toEqual(
       'https://blockstream.info/address/testAddressHere',
     )
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     expect(btcClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
       'https://blockstream.info/testnet/address/anotherTestAddressHere',
     )
   })
 
   it('should retrun valid explorer tx url', () => {
-    btcClient.setNetwork('mainnet' as Network)
+    btcClient.setNetwork(Network.Mainnet)
     expect(btcClient.getExplorerTxUrl('testTxHere')).toEqual('https://blockstream.info/tx/testTxHere')
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     expect(btcClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://blockstream.info/testnet/tx/anotherTestTxHere',
     )
   })
 
   it('should derivate the address correctly', () => {
-    btcClient.setNetwork('mainnet' as Network)
+    btcClient.setNetwork(Network.Mainnet)
 
     btcClient.setPhrase(phraseOne)
     expect(btcClient.getAddress(0)).toEqual(phraseOneMainnet_path0)
@@ -328,7 +291,7 @@ describe('BitcoinClient Test', () => {
     expect(btcClient.getAddress(0)).toEqual(phraseTwoMainnet_path0)
     expect(btcClient.getAddress(1)).toEqual(phraseTwoMainnet_path1)
 
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
 
     btcClient.setPhrase(phraseOne)
     expect(btcClient.getAddress(0)).toEqual(addyOnePath0)

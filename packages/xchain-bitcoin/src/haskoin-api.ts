@@ -120,5 +120,9 @@ export const getConfirmedUnspentTxs = async ({
  * @param {BroadcastTxParams} params
  * @returns {TxHash} Transaction hash.
  */
-export const broadcastTx = async ({ txHex, haskoinUrl }: BroadcastTxParams): Promise<TxHash> =>
-  (await axios.post<string, AxiosResponse<{ txid: string }>>(`${haskoinUrl}/transactions`, txHex)).data.txid
+export const broadcastTx = async ({ txHex, haskoinUrl }: BroadcastTxParams): Promise<TxHash> => {
+  const {
+    data: { txid },
+  } = await axios.post<string, AxiosResponse<{ txid: string }>>(`${haskoinUrl}/transactions`, txHex)
+  return txid
+}

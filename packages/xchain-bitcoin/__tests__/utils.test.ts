@@ -9,7 +9,7 @@ mockSochainApi.init()
 
 let utxos: UTXO[]
 
-describe.skip('Bitcoin Utils Test', () => {
+describe('Bitcoin Utils Test', () => {
   const witness = {
     script: Buffer.from('0014123f6562aa047dae2d38537327596cd8e9e21932'),
     value: 10000,
@@ -50,12 +50,13 @@ describe.skip('Bitcoin Utils Test', () => {
     expect(estimates.fastest).toBeDefined()
     expect(estimates.average).toBeDefined()
   })
+
   it('should fetch as many uxtos as are associated with an address', async () => {
     const address = '34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo'
     const utxos: UTXO[] = await Utils.scanUTXOs({
       sochainUrl: 'https://sochain.com/api/v2',
       haskoinUrl: 'https://api.haskoin.com/haskoin-store/btc',
-      network: 'mainnet' as Network,
+      network: Network.Testnet,
       address,
       confirmedOnly: false, // get all confirmed & unconfirmed UTXOs
     })

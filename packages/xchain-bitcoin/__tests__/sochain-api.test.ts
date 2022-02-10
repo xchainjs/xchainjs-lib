@@ -7,12 +7,16 @@ import mockSochainApi from '../__mocks__/sochain'
 import * as sochain from '../src/sochain-api'
 import { BtcAddressUTXO } from '../src/types/sochain-api-types'
 
-mockSochainApi.init()
-
 const sochainUrl = 'https://sochain.com/api/v2'
-const network = 'mainnet' as Network
+const network = Network.Mainnet
 
 describe('Sochain API Test', () => {
+  beforeEach(() => {
+    mockSochainApi.init()
+  })
+  afterEach(() => {
+    mockSochainApi.restore()
+  })
   it('getUnspentTxs', async () => {
     const address = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
 

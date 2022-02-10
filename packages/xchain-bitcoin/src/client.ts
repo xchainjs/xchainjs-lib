@@ -289,12 +289,14 @@ class Client extends UTXOClient {
      */
     const spendPendingUTXO: boolean = params.memo ? false : true
 
+    const haskoinUrl = this.haskoinUrl[this.network]
+
     const { psbt } = await Utils.buildTx({
       ...params,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
       sochainUrl: this.sochainUrl,
-      haskoinUrl: this.haskoinUrl[this.network],
+      haskoinUrl,
       network: this.network,
       spendPendingUTXO,
     })
@@ -304,7 +306,7 @@ class Client extends UTXOClient {
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-    return await Utils.broadcastTx({ txHex, haskoinUrl: this.haskoinUrl[this.network] })
+    return await Utils.broadcastTx({ txHex, haskoinUrl })
   }
 }
 
