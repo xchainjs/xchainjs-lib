@@ -1,15 +1,22 @@
 import { Network } from '@xchainjs/xchain-client'
 import * as Bitcoin from 'bitcoinjs-lib'
 
+import mockHaskoinApi from '../__mocks__/haskoin'
 import mockSochainApi from '../__mocks__/sochain'
 import { UTXO } from '../src/types/common'
 import * as Utils from '../src/utils'
 
-mockSochainApi.init()
-
 let utxos: UTXO[]
 
 describe('Bitcoin Utils Test', () => {
+  beforeEach(() => {
+    mockHaskoinApi.init()
+    mockSochainApi.init()
+  })
+  afterEach(() => {
+    mockHaskoinApi.restore()
+    mockSochainApi.restore()
+  })
   const witness = {
     script: Buffer.from('0014123f6562aa047dae2d38537327596cd8e9e21932'),
     value: 10000,
@@ -63,5 +70,12 @@ describe('Bitcoin Utils Test', () => {
     expect(utxos.length).toEqual(177)
     expect(utxos?.[0].hash).toEqual('a79b970c17d97557357ec0661a2b9de44724440e1c635e1b603381c53ece725d')
     expect(utxos?.[176].hash).toEqual('fca7fe2df9318fb17ab8e527429c900bcea16613e57ab65f323d0593f0c3919c')
+  })
+
+  describe('broadcastTx', () => {
+    it('returns txHash', async () => {
+      const txHash = await Utils.broadcastTx({ txHex: '0xdead', haskoinUrl: 'haskoin-url' })
+      expect(txHash).toEqual('mock-txid')
+    })
   })
 })

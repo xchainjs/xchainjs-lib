@@ -76,6 +76,49 @@ describe('BitcoinClient Test', () => {
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
 
+  it('should broadcast a normal transfer', async () => {
+    btcClient.setNetwork('testnet' as Network)
+    btcClient.setPhrase(phraseOne)
+    const amount = baseAmount(2223)
+    const txid = await btcClient.transfer({ walletIndex: 0, asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
+    expect(txid).toEqual('mock-txid')
+  })
+
+  it('should broadcast a normal transfer without feeRate option', async () => {
+    btcClient.setNetwork('testnet' as Network)
+    btcClient.setPhrase(phraseOne)
+    const amount = baseAmount(2223)
+    const txid = await btcClient.transfer({ asset: AssetBTC, recipient: addyTwo, amount })
+    expect(txid).toEqual('mock-txid')
+  })
+
+  it('should do broadcast a vault transfer with a memo', async () => {
+    btcClient.setNetwork('testnet' as Network)
+    btcClient.setPhrase(phraseOne)
+
+    /**
+     * All UTXO values: 8800 + 495777 + 15073
+     * Confirmed UTXO values: 8800 + 15073 = 23873
+     * Spend amount: 2223
+     * Expected: Successful
+     */
+
+    const amount = baseAmount(2223)
+    try {
+      const txid = await btcClient.transfer({
+        asset: AssetBTC,
+        recipient: addyThreePath0,
+        amount,
+        memo: MEMO,
+        feeRate: 1,
+      })
+      expect(txid).toEqual('mock-txid')
+    } catch (err) {
+      console.log('ERR running test', err)
+      throw err
+    }
+  })
+
   it('should purge phrase and utxos', async () => {
     btcClient.purgeClient()
     expect(() => btcClient.getAddress()).toThrow('Phrase must be provided')
