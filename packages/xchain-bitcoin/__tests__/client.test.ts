@@ -152,13 +152,13 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
 
     /**
-     * All UTXO values: 8800 + 495777 + 15073
-     * Confirmed UTXO values: 8800 + 15073 = 23873
-     * Spend amount: 25000
+     * All UTXO values: 519650 (confirmed) + 10350 (unconfirmed)
+     * ^ defined in mock file `balances/{address}.json`)
+     * Spend amount: 520000 (> `confirmed` balances)
      * Expected: Insufficient Balance
      */
 
-    const amount = baseAmount(25000)
+    const amount = baseAmount(520000)
     return expect(
       btcClient.transfer({
         asset: AssetBTC,

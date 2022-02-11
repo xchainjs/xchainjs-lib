@@ -292,7 +292,7 @@ class Client extends UTXOClient {
      * do not spend pending UTXOs when adding a memo
      * https://github.com/xchainjs/xchainjs-lib/issues/330
      */
-    const spendPendingUTXO: boolean = params.memo ? false : true
+    const spendPendingUTXO = !params.memo
 
     const haskoinUrl = this.haskoinUrl[this.network]
 
