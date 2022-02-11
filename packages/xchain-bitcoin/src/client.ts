@@ -15,7 +15,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { AssetBTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Asset, AssetBTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import { BTC_DECIMAL } from './const'
@@ -171,12 +171,17 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Get the BTC balance of a given address.
+   * Gets BTC balances of a given address.
    *
-   * @param {Address} the BTC address
-   * @returns {Balance[]} The BTC balance of the address.
+   * @param {Address} BTC address to get balances from
+   * @param {undefined} Needed for legacy only to be in common with `XChainClient` interface - will be removed by a next version
+   * @param {confirmedOnly} Flag to get balances of confirmed txs only
+   *
+   * @returns {Balance[]} BTC balances
    */
-  async getBalance(address: Address): Promise<Balance[]> {
+  // TODO (@xchain-team|@veado) Change params to be an object to be extendable more easily
+  // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
+  async getBalance(address: Address, _assets?: Asset[] /* not used */, confirmedOnly?: boolean): Promise<Balance[]> {
     return Utils.getBalance({
       params: {
         sochainUrl: this.sochainUrl,
@@ -184,7 +189,7 @@ class Client extends UTXOClient {
         address: address,
       },
       haskoinUrl: this.haskoinUrl[this.network],
-      confirmedOnly: false,
+      confirmedOnly: !!confirmedOnly,
     })
   }
 

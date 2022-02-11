@@ -67,17 +67,40 @@ describe('BitcoinClient Test', () => {
     expect(valid).toBeTruthy()
   })
 
-  it('should get the right balance', async () => {
-    const expectedBalance = 15446
+  it('all balances', async () => {
     btcClient.setNetwork(Network.Testnet)
-    btcClient.setPhrase(phraseTwo)
+    btcClient.setPhrase(phraseOne)
     const balance = await btcClient.getBalance(btcClient.getAddress())
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
+    expect(balance[0].amount.amount().toNumber()).toEqual(530000)
+  })
+
+  it('confirmed balances only', async () => {
+    btcClient.setNetwork(Network.Testnet)
+    btcClient.setPhrase(phraseOne)
+    const balance = await btcClient.getBalance(btcClient.getAddress(), undefined, true)
+    expect(balance.length).toEqual(1)
+    expect(balance[0].amount.amount().toNumber()).toEqual(519650)
+  })
+
+  it('all balances of an address, but without phrase', async () => {
+    btcClient.setNetwork(Network.Testnet)
+    btcClient.purgeClient()
+    const balance = await btcClient.getBalance(addyThreePath0)
+    expect(balance.length).toEqual(1)
+    expect(balance[0].amount.amount().toNumber()).toEqual(20000)
+  })
+
+  it('confirmed balances of an address, but without phrase', async () => {
+    btcClient.setNetwork(Network.Testnet)
+    btcClient.purgeClient()
+    const balance = await btcClient.getBalance(addyThreePath0, undefined, true)
+    expect(balance.length).toEqual(1)
+    expect(balance[0].amount.amount().toNumber()).toEqual(15446)
   })
 
   it('should broadcast a normal transfer', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
     const txid = await btcClient.transfer({ walletIndex: 0, asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
@@ -85,7 +108,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should broadcast a normal transfer without feeRate option', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
     const txid = await btcClient.transfer({ asset: AssetBTC, recipient: addyTwo, amount })
@@ -93,7 +116,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
-    btcClient.setNetwork('testnet' as Network)
+    btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
 
     /**
@@ -145,13 +168,6 @@ describe('BitcoinClient Test', () => {
         feeRate: 1,
       }),
     ).rejects.toThrow('Insufficient Balance for transaction')
-  })
-  it('should get the balance of an address without phrase', async () => {
-    btcClient.setNetwork(Network.Testnet)
-    btcClient.purgeClient()
-    const balance = await btcClient.getBalance(addyThreePath0)
-    expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(15446)
   })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
@@ -206,7 +222,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const normalTx = await btcClient.getFees()
-    const vaultTx = await btcClient.getFeesWithMemo(MEMO)
+    const vaultTx = await btcClient.getFees(MEMO)
 
     if (vaultTx.average.amount().isGreaterThan(MIN_TX_FEE)) {
       expect(vaultTx.average.amount().isGreaterThan(normalTx.average.amount())).toBeTruthy()
