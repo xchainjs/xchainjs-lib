@@ -152,9 +152,11 @@ export const validateAddress = (address: Address, network: Network): boolean => 
 const txHexMap: Record<TxHash, string> = {}
 
 /**
- * Helper to use cached `txHex` values
+ * Helper to get `hex` of `Tx`
+ *
+ * It will try to get it from cache before requesting it from Sochain
  */
-const getTxHexFromCache = async ({
+const getTxHex = async ({
   txHash,
   sochainUrl,
   network,
@@ -163,14 +165,14 @@ const getTxHexFromCache = async ({
   txHash: TxHash
   network: Network
 }): Promise<string> => {
-  // try to get it from cache
-  let txHex = txHexMap[txHash]
-  if (txHex) return txHex
+  // try to get hex from cache
+  const txHex = txHexMap[txHash]
+  if (!!txHex) return txHex
   // or get it from Sochain
-  txHex = (await sochain.getTx({ hash: txHash, sochainUrl, network })).tx_hex
+  const { tx_hex } = await sochain.getTx({ hash: txHash, sochainUrl, network })
   // cache it
-  txHexMap[txHash] = txHex
-  return txHex
+  txHexMap[txHash] = tx_hex
+  return tx_hex
 }
 
 /**
@@ -211,7 +213,7 @@ export const scanUTXOs = async ({
             value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
             script: Buffer.from(utxo.script_hex, 'hex'),
           },
-          txHex: withTxHex ? await getTxHexFromCache({ txHash: utxo.txid, sochainUrl, network }) : undefined,
+          txHex: withTxHex ? await getTxHex({ txHash: utxo.txid, sochainUrl, network }) : undefined,
         })),
       )
     }
@@ -231,7 +233,7 @@ export const scanUTXOs = async ({
             value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
             script: Buffer.from(utxo.pkscript, 'hex'),
           },
-          txHex: withTxHex ? await getTxHexFromCache({ txHash: utxo.txid, sochainUrl, network }) : undefined,
+          txHex: withTxHex ? await getTxHex({ txHash: utxo.txid, sochainUrl, network }) : undefined,
         })),
       )
     }

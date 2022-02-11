@@ -10,7 +10,7 @@ import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import axios, { AxiosResponse } from 'axios'
 
 import { BTC_DECIMAL } from './const'
-import { getIsTxConfirmed } from './sochain-api'
+import { getConfirmedTxStatus } from './sochain-api'
 import type { BroadcastTxParams } from './types/common'
 import type { BalanceData, UtxoData } from './types/haskoin-api-types'
 
@@ -43,41 +43,6 @@ export const getUnspentTxs = async ({
   const { data: response } = await axios.get<UtxoData[]>(`${haskoinUrl}/address/${address}/unspent`)
 
   return response
-}
-
-/**
- * List of confirmed txs
- *
- * Stores a list of confirmed txs (hashes) in memory to avoid requesting same data
- *
- */
-const confirmedTxs: Array<TxHash> = []
-
-/**
- * Helper to get `confirmed` status of a tx.
- *
- * It will get it from cache or try to get it from Sochain (if not cached before)
- */
-const getConfirmedTxStatus = async ({
-  txHash,
-  sochainUrl,
-  network,
-}: {
-  sochainUrl: string
-  txHash: TxHash
-  network: Network
-}): Promise<boolean> => {
-  // try to get it from cache
-  if (confirmedTxs.includes(txHash)) return true
-  // or get status from Sochain
-  const { is_confirmed } = await await getIsTxConfirmed({
-    sochainUrl,
-    network,
-    hash: txHash,
-  })
-  // cache status
-  confirmedTxs.push(txHash)
-  return is_confirmed
 }
 
 export const getConfirmedUnspentTxs = async ({

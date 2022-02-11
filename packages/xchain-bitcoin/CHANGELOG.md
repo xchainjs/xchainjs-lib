@@ -3,18 +3,17 @@
 ## Update
 
 - Fetch `txHex` optionally by scanning UTXOs #489
-- Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same data
-- Cache `confirmed` status in `getConfirmedUnspentTxs` to avoid same requests for same data
+- Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same data #490
+- Cache `confirmed` status in `getConfirmedUnspentTxs` to avoid same requests for same data #490
 - Return `inputs` UTXOs from `buildTx` #489
-- Extract `Haskoin` types
-- Add optional `confirmedOnly` param to `Client.getBalance` and to misc. `balance*` helpers
+- Extract `Haskoin` types #490
 
 ## Breaking change
 
-- Accept `confirmedOnly` for misc. balance helpers
-- Broadcast txs via `Haskoin`
-- Remove `blockstream` as API dependency
-- Remove deprecated Ledger files (\*\*/\*\*/ledger.ts)
+- Add `confirmedOnly` param to `Client.getBalance` and to misc. `balance*` helpers #490
+- Broadcast txs via `Haskoin` #490
+- Remove `blockstream` as API dependency #490
+- Remove deprecated Ledger files (\*\*/\*\*/ledger.ts) #490
 
 # v.0.17.1 (2022-02-04)
 
