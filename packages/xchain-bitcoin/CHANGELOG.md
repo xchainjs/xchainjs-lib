@@ -2,12 +2,12 @@
 
 ## Update
 
-- fetch `txHex` for scanning UTXOs #489
-- return `inputs` UTXOs in the `buildTx` method #489
-- Extract `Haskoin` types
-- Export `getBalance`
+- Fetch `txHex` optionally by scanning UTXOs #489
 - Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same data
 - Cache `confirmed` status in `getConfirmedUnspentTxs` to avoid same requests for same data
+- Return `inputs` UTXOs from `buildTx` #489
+- Extract `Haskoin` types
+- Add optional `confirmedOnly` param to `Client.getBalance` and to misc. `balance*` helpers
 
 ## Breaking change
 
