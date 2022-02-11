@@ -1,4 +1,4 @@
-import { Network } from '@xchainjs/xchain-client'
+import { Network, TxHash } from '@xchainjs/xchain-client'
 import { BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
@@ -67,18 +67,24 @@ export const getTx = async ({ sochainUrl, network, hash }: TxHashParams): Promis
  * @see https://sochain.com/api#get-balance
  *
  * @param {string} sochainUrl The sochain node url.
- * @param {string} network
- * @param {string} address
+ * @param {string} network Network
+ * @param {string} address Address
+ * @param {boolean} confirmedOnly Flag whether to get balances of confirmed txs only or for all
  * @returns {number}
  */
-export const getBalance = async ({ sochainUrl, network, address }: AddressParams): Promise<BaseAmount> => {
+export const getBalance = async ({
+  sochainUrl,
+  network,
+  address,
+  confirmedOnly,
+}: AddressParams & { confirmedOnly: boolean }): Promise<BaseAmount> => {
   const url = `${sochainUrl}/get_address_balance/${toSochainNetwork(network)}/${address}`
   const response = await axios.get(url)
   const balanceResponse: SochainResponse<BtcGetBalanceDTO> = response.data
   const confirmed = assetAmount(balanceResponse.data.confirmed_balance, BTC_DECIMAL)
   const unconfirmed = assetAmount(balanceResponse.data.unconfirmed_balance, BTC_DECIMAL)
-  const netAmt = confirmed.amount().plus(unconfirmed.amount())
-  const result = assetToBase(assetAmount(netAmt, BTC_DECIMAL))
+  const netAmt = confirmedOnly ? confirmed : confirmed.plus(unconfirmed)
+  const result = assetToBase(netAmt)
   return result
 }
 
@@ -98,12 +104,16 @@ export const getUnspentTxs = async ({
   address,
   startingFromTxId,
 }: AddressParams): Promise<BtcAddressUTXO[]> => {
-  let resp = null
-  if (startingFromTxId) {
-    resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}/${startingFromTxId}`)
-  } else {
-    resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}`)
-  }
+  const url = [
+    sochainUrl,
+    'get_tx_unspent',
+    toSochainNetwork(network),
+    address,
+    startingFromTxId ? startingFromTxId : null,
+  ]
+    .filter((v) => !!v)
+    .join('/')
+  const resp = await axios.get(url)
   const response: SochainResponse<BtcUnspentTxsDTO> = resp.data
   const txs = response.data.txs
   if (txs.length === 100) {
@@ -140,6 +150,40 @@ export const getIsTxConfirmed = async ({ sochainUrl, network, hash }: TxHashPara
 }
 
 /**
+ * List of confirmed txs
+ *
+ * Stores a list of confirmed txs (hashes) in memory to avoid requesting same data
+ */
+const confirmedTxs: Array<TxHash> = []
+
+/**
+ * Helper to get `confirmed` status of a tx.
+ *
+ * It will get it from cache or try to get it from Sochain (if not cached before)
+ */
+export const getConfirmedTxStatus = async ({
+  txHash,
+  sochainUrl,
+  network,
+}: {
+  sochainUrl: string
+  txHash: TxHash
+  network: Network
+}): Promise<boolean> => {
+  // try to get it from cache
+  if (confirmedTxs.includes(txHash)) return true
+  // or get status from Sochain
+  const { is_confirmed } = await await getIsTxConfirmed({
+    sochainUrl,
+    network,
+    hash: txHash,
+  })
+  // cache status
+  confirmedTxs.push(txHash)
+  return is_confirmed
+}
+
+/**
  * Get unspent txs and filter out pending UTXOs
  *
  * @see https://sochain.com/api#get-unspent-tx
@@ -164,13 +208,13 @@ export const getConfirmedUnspentTxs = async ({
 
   await Promise.all(
     txs.map(async (tx: BtcAddressUTXO) => {
-      const { is_confirmed: isTxConfirmed } = await getIsTxConfirmed({
+      const confirmed = await getConfirmedTxStatus({
         sochainUrl,
         network,
-        hash: tx.txid,
+        txHash: tx.txid,
       })
 
-      if (isTxConfirmed) {
+      if (confirmed) {
         confirmedUTXOs.push(tx)
       }
     }),

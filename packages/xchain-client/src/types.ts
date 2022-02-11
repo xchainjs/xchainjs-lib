@@ -102,6 +102,8 @@ export interface XChainClient {
 
   setPhrase(phrase: string, walletIndex: number): Address
 
+  // TODO (@xchain-team|@veado) Change params to be an object to be extendable more easily
+  // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
   getBalance(address: Address, assets?: Asset[]): Promise<Balance[]>
 
   getTransactions(params?: TxHistoryParams): Promise<TxsPage>

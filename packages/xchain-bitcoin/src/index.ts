@@ -10,5 +10,5 @@ export {
   buildTx,
   validateAddress,
   calcFee,
+  getBalance,
 } from './utils'
-export { createTxInfo } from './ledger'

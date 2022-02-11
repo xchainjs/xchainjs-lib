@@ -1,7 +1,19 @@
-# v.0.17.2 (2022-02-09)
+# v.0.18.0 (2022-xx-xx)
 
-- fetch `txHex` for scanning UTXOs
-- return `inputs` UTXOs in the `buildTx` method
+## Update
+
+- Fetch `txHex` optionally by scanning UTXOs #489
+- Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same data #490
+- Cache `confirmed` status in `getConfirmedUnspentTxs` to avoid same requests for same data #490
+- Return `inputs` UTXOs from `buildTx` #489
+- Extract `Haskoin` types #490
+
+## Breaking change
+
+- Add `confirmedOnly` param to `Client.getBalance` and to misc. `balance*` helpers #490
+- Broadcast txs via `Haskoin` #490
+- Remove `blockstream` as API dependency #490
+- Remove deprecated Ledger files (\*\*/\*\*/ledger.ts) #490
 
 # v.0.17.1 (2022-02-04)
 
