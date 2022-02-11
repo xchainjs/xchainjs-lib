@@ -20,7 +20,7 @@ import { Asset, AssetLUNA, Chain, assetToString, baseAmount } from '@xchainjs/xc
 import axios from 'axios'
 
 import { TERRA_DECIMAL } from './const'
-import { TerraNativeAsset, getTerraMicroDenom } from './util'
+import { getTerraMicroDenom } from './util'
 
 const DEFAULT_CONFIG: Record<Network, TerraClientConfig> = {
   [Network.Mainnet]: {
@@ -179,13 +179,11 @@ class Client extends BaseXChainClient implements XChainClient {
   async transfer({ walletIndex = 0, asset = AssetLUNA, amount, recipient, memo }: TxParams): Promise<string> {
     if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
 
-    const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
-    const wallet = this.lcdClient.wallet(mnemonicKey)
-
-    const terraMicroDenom = getTerraMicroDenom(asset.symbol as TerraNativeAsset)
-
+    const terraMicroDenom = getTerraMicroDenom(asset.symbol)
     if (!terraMicroDenom) throw new Error(`${assetToString(asset)} is not a valid terra chain asset`)
 
+    const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
+    const wallet = this.lcdClient.wallet(mnemonicKey)
     const amountToSend: Coins.Input = {
       [terraMicroDenom]: `${amount.amount().toFixed()}`,
     }
