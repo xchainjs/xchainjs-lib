@@ -19,6 +19,7 @@ import { Chain } from '@xchainjs/xchain-util'
 
 import { ZcashClientParams } from './types'
 import * as Utils from './utils'
+import * as zcash from 'bitcoinjs-lib'
 
 /**
  * Custom Zcash client
@@ -82,7 +83,7 @@ class Client extends UTXOClient {
       // TODO: Add urls
       case Network.Mainnet:
       case Network.Stagenet:
-        return 'https://zcashblockexplorer.com/'
+        return 'https://zcashblockexplorer.com'
       case Network.Testnet:
         return 'https://www.sochain.com/testnet/zcash'
     }
@@ -167,19 +168,24 @@ class Client extends UTXOClient {
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating LTC keys from the given phrase
    * */
-  private getZecKeys(phrase: string, index = 0): UtxoLib.ECPairInterface {
+  private getZecKeys(phrase: string, index = 0): zcash.ECPairInterface {
     const zecNetwork = Utils.zecNetwork(this.network)
+    // const zec = coininfo.zcash.main
+    // const zecBitcoinJsLib = zec.toBitcoinJS()
 
     console.log('zecNetwork', zecNetwork)
     const seed = getSeed(phrase)
     console.log('seed', seed)
-    const master = UtxoLib.bip32.fromSeed(seed, zecNetwork).derivePath(this.getFullDerivationPath(index))
+    // const masterHDNode = zcash.HDNode.fromSeedBuffer(seed, zecNetwork)
+    // console.log('masterHDNode', masterHDNode)
+    // console.log('masterHDNode.derivePath', masterHDNode.derivePath(this.getFullDerivationPath(index)).keyPair)
+    const master = zcash.bip32.fromSeed(seed, zecNetwork).derivePath(this.getFullDerivationPath(index))
     console.log('master', master)
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
     }
 
-    return UtxoLib.ECPair.fromPrivateKey(master.privateKey, { network: zecNetwork })
+    return zcash.ECPair.fromPrivateKey(master.privateKey, { network: zecNetwork })
   }
 
   /**
@@ -196,12 +202,16 @@ class Client extends UTXOClient {
     return Promise.reject(`getSuggestedFeeRate needs to be implemented`)
   }
 
-  protected calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
-    return Promise.reject(`calcFee needs to be implemented ${JSON.stringify({ feeRate, memo }, null, 2)}`)
+  // protected calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
+  //   return Promise.reject(`calcFee needs to be implemented ${JSON.stringify({ feeRate, memo }, null, 2)}`)
+  // }
+
+  protected async calcFee(): Fee {
+    return Utils.getFee()
   }
 
   /**
-   * Get the LTC balance of a given address.
+   * Get the ZEC balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @returns {Balance[]} The ZEC balance of the address.
@@ -236,7 +246,7 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Transfer LTC.
+   * Transfer ZEC.
    *
    * @param {TxParams&FeeRate} params The transfer options.
    * @returns {TxHash} The transaction hash.
