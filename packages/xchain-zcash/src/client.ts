@@ -179,13 +179,15 @@ class Client extends UTXOClient {
     // const masterHDNode = zcash.HDNode.fromSeedBuffer(seed, zecNetwork)
     // console.log('masterHDNode', masterHDNode)
     // console.log('masterHDNode.derivePath', masterHDNode.derivePath(this.getFullDerivationPath(index)).keyPair)
-    const master = zcash.bip32.fromSeed(seed, zecNetwork).derivePath(this.getFullDerivationPath(index))
+    const master = UtxoLib.bip32.fromSeed(seed, zecNetwork).derivePath(this.getFullDerivationPath(index))
+    // const master = zcash.bip32.fromSeed(seed, zecNetwork).derivePath(this.getFullDerivationPath(index))
     console.log('master', master)
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
     }
 
-    return zcash.ECPair.fromPrivateKey(master.privateKey, { network: zecNetwork })
+    return UtxoLib.ECPair.fromPrivateKey(master.privateKey, { network: zecNetwork })
+    // return zcash.ECPair.fromPrivateKey(master.privateKey, { network: zecNetwork })
   }
 
   /**
