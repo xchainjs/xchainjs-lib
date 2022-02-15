@@ -202,12 +202,8 @@ class Client extends UTXOClient {
     return Promise.reject(`getSuggestedFeeRate needs to be implemented`)
   }
 
-  // protected calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
-  //   return Promise.reject(`calcFee needs to be implemented ${JSON.stringify({ feeRate, memo }, null, 2)}`)
-  // }
-
-  protected async calcFee(): Fee {
-    return Utils.getFee()
+  protected calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
+    return Promise.reject(`calcFee needs to be implemented ${JSON.stringify({ feeRate, memo }, null, 2)}`)
   }
 
   /**
