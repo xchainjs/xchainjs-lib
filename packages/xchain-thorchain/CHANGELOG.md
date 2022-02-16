@@ -1,3 +1,9 @@
+# v0.22.1 (2022-02-16)
+
+## Fix
+
+- Increase limit for `DEFAULT_GAS_VALUE` from 2000000 to 3000000 to accommodate recent increases in gas used that go above the old limit
+
 # v0.22.0 (2022-02-06)
 
 ## Add
