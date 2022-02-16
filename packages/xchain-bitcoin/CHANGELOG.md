@@ -8,6 +8,10 @@
 - Return `inputs` UTXOs from `buildTx` #489
 - Extract `Haskoin` types #490
 
+## Fix
+
+- Broadcast same tx several times to Haskoin in case of `500` error #492
+
 ## Breaking change
 
 - Add `confirmedOnly` param to `Client.getBalance` and to misc. `balance*` helpers #490
