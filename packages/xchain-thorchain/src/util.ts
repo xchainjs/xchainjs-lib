@@ -19,7 +19,7 @@ import { ChainId, ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
 import { MsgNativeTx, ThorchainDepositResponse } from './types/messages'
 
 export const DECIMAL = 8
-export const DEFAULT_GAS_VALUE = '2000000'
+export const DEFAULT_GAS_VALUE = '3000000'
 export const DEPOSIT_GAS_VALUE = '500000000'
 export const MAX_TX_COUNT = 100
 
