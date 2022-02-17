@@ -396,11 +396,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     const maxCount = 10000
 
-    let transations
+    let transactions
     const etherscan = this.getEtherscanProvider()
 
     if (assetAddress) {
-      transations = await etherscanAPI.getTokenTransactionHistory({
+      transactions = await etherscanAPI.getTokenTransactionHistory({
         baseUrl: etherscan.baseUrl,
         address: params?.address,
         assetAddress,
@@ -409,7 +409,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         apiKey: etherscan.apiKey,
       })
     } else {
-      transations = await etherscanAPI.getETHTransactionHistory({
+      transactions = await etherscanAPI.getETHTransactionHistory({
         baseUrl: etherscan.baseUrl,
         address: params?.address,
         page: 0,
@@ -419,8 +419,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     }
 
     return {
-      total: transations.length,
-      txs: transations.filter((_, index) => index >= offset && index < offset + limit),
+      total: transactions.length,
+      txs: transactions.filter((_, index) => index >= offset && index < offset + limit),
     }
   }
 

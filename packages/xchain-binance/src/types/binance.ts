@@ -51,11 +51,11 @@ export type Market = {
    */
   list_price: string
   /**
-   * Minimium price change in decimal form, e.g. 0.00000001
+   * Minimum price change in decimal form, e.g. 0.00000001
    */
   tick_size: string
   /**
-   * Minimium trading quantity in decimal form, e.g. 1.00000000
+   * Minimum trading quantity in decimal form, e.g. 1.00000000
    */
   lot_size: string
 }
@@ -267,11 +267,11 @@ export type Tx = {
    */
   code: number
   /**
-   * _no offical description_
+   * _no official description_
    */
   confirmBlocks: number
   /**
-   * _no offical description_
+   * _no official description_
    */
   data: string | null
   /**
@@ -291,15 +291,15 @@ export type Tx = {
    */
   toAddr: Address
   /**
-   * _no offical description_
+   * _no official description_
    */
   txAge: number
   /**
-   * _no offical description_
+   * _no official description_
    */
   txAsset: string
   /**
-   * _no offical description_
+   * _no official description_
    */
   txFee: string
   /**
@@ -319,11 +319,11 @@ export type Tx = {
    */
   value: string
   /**
-   * _no offical description_
+   * _no official description_
    */
   source: number
   /**
-   * _no offical description_
+   * _no official description_
    */
   sequence: number
   /**
@@ -331,7 +331,7 @@ export type Tx = {
    */
   swapId?: string
   /**
-   * _no offical description_
+   * _no official description_
    */
   proposalId: string | null
 }

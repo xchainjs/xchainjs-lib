@@ -16,7 +16,7 @@ type ErrorResponse = { error: unknown }
 /**
  * Check error response.
  *
- * @param {any} response The api resonse.
+ * @param {any} response The api response.
  * @returns {boolean}
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,7 +101,7 @@ export const getTransactions = async ({
  * @throws {"failed to query unspent transactions"} thrown if failed to query unspent transactions
  */
 export const getUnspentTransactions = async ({ haskoinUrl, address }: AddressParams): Promise<TxUnspent[]> => {
-  // Get transacton count for a given address.
+  // Get transaction count for a given address.
   const account = await getAccount({ haskoinUrl, address })
 
   // Set limit to the transaction count to be all the utxos.
