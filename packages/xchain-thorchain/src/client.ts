@@ -1,6 +1,7 @@
 import {
   Address,
   Balance,
+  FeeType,
   Fees,
   Network,
   RootDerivationPaths,
@@ -14,6 +15,7 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
+  singleFee,
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
@@ -30,6 +32,7 @@ import {
   ExplorerUrls,
   NodeUrl,
   ThorchainClientParams,
+  ThorchainConstantsResponse,
   TxData,
   TxOfflineParams,
 } from './types'
@@ -480,7 +483,7 @@ class Client implements ThorchainClient, XChainClient {
       balances.filter(({ asset: assetInList }) => assetToString(assetInList) === assetToString(asset))[0]?.amount ??
       baseAmount(0, DECIMAL)
 
-    const fee = baseAmount(DEFAULT_GAS_VALUE, DECIMAL)
+    const { average: fee } = await this.getFees()
 
     if (isAssetRuneNative(asset)) {
       // amount + fee < runeBalance
@@ -619,12 +622,25 @@ class Client implements ThorchainClient, XChainClient {
   }
 
   /**
-   * Get the fees.
+   * Gets fees from Node
    *
    * @returns {Fees}
    */
   async getFees(): Promise<Fees> {
-    return getDefaultFees()
+    try {
+      const {
+        data: {
+          int_64_values: { NativeTransactionFee: fee },
+        },
+      } = await axios.get<ThorchainConstantsResponse>(`${this.getClientUrl().node}/thorchain/constants`)
+
+      // validate data
+      if (!fee || isNaN(fee) || fee <= 0) throw Error(`Invalid fee: ${fee.toString()}`)
+
+      return singleFee(FeeType.FlatFee, baseAmount(fee))
+    } catch {
+      return getDefaultFees()
+    }
   }
 }
 

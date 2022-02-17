@@ -1,3 +1,10 @@
+# v0.22.2 (2022-02-17)
+
+## Fix
+
+- Request fees from THORChain and use `defaultFees` in case of server errors only
+- Fix `defaultFees` to be 0.02 RUNE
+
 # v0.22.1 (2022-02-16)
 
 ## Fix

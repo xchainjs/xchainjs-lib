@@ -4,7 +4,9 @@ import {
   Asset,
   AssetRuneNative,
   BaseAmount,
+  assetAmount,
   assetFromString,
+  assetToBase,
   assetToString,
   baseAmount,
   isSynthAsset,
@@ -176,7 +178,7 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
  * @returns {Fees} The default fee.
  */
 export const getDefaultFees = (): Fees => {
-  const fee = baseAmount(DEFAULT_GAS_VALUE, DECIMAL)
+  const fee = assetToBase(assetAmount(0.02 /* 0.02 RUNE */, DECIMAL))
   return singleFee(FeeType.FlatFee, fee)
 }
 

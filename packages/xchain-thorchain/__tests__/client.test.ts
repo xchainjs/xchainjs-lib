@@ -42,6 +42,11 @@ const mockThorchainDeposit = (url: string, result: ThorchainDepositResponse) => 
   nock(url).post('/thorchain/deposit').reply(200, result)
 }
 
+const mockThorchainConstants = (url: string) => {
+  const response = require('../__mocks__/responses/thorchain/constants.json')
+  nock(url).get('/thorchain/constants').reply(200, response)
+}
+
 const mockTendermintNodeInfo = (
   url: string,
   result: {
@@ -425,7 +430,9 @@ describe('Client Test', () => {
       logs: [],
     }
 
-    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address_path0, {
+    const nodeUrl = thorClient.getClientUrl().node
+
+    mockAccountsAddress(nodeUrl, testnet_address_path0, {
       height: 0,
       result: {
         coins: [
@@ -438,7 +445,7 @@ describe('Client Test', () => {
         sequence: '0',
       },
     })
-    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
+    mockAccountsBalance(nodeUrl, testnet_address_path0, {
       height: 0,
       result: [
         {
@@ -447,6 +454,8 @@ describe('Client Test', () => {
         },
       ],
     })
+    mockThorchainConstants(nodeUrl)
+
     assertTxsPost(thorClient.getClientUrl().node, memo, expected_txsPost_result)
 
     const result = await thorClient.transfer({
@@ -471,7 +480,9 @@ describe('Client Test', () => {
       logs: [],
     }
 
-    mockAccountsAddress(thorClient.getClientUrl().node, testnet_address_path0, {
+    const nodeUrl = thorClient.getClientUrl().node
+
+    mockAccountsAddress(nodeUrl, testnet_address_path0, {
       height: 0,
       result: {
         coins: [
@@ -484,7 +495,7 @@ describe('Client Test', () => {
         sequence: '0',
       },
     })
-    mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
+    mockAccountsBalance(nodeUrl, testnet_address_path0, {
       height: 0,
       result: [
         {
@@ -493,7 +504,7 @@ describe('Client Test', () => {
         },
       ],
     })
-    mockThorchainDeposit(thorClient.getClientUrl().node, {
+    mockThorchainDeposit(nodeUrl, {
       type: 'cosmos-sdk/StdTx',
       value: {
         msg: [
@@ -520,12 +531,15 @@ describe('Client Test', () => {
         timeout_height: '0',
       },
     })
-    mockTendermintNodeInfo(thorClient.getClientUrl().node, {
+    mockTendermintNodeInfo(nodeUrl, {
       default_node_info: {
         network: 'thorchain-v1',
       },
     })
-    assertTxsPost(thorClient.getClientUrl().node, '', expected_txsPost_result)
+
+    mockThorchainConstants(nodeUrl)
+
+    assertTxsPost(nodeUrl, '', expected_txsPost_result)
 
     const result = await thorClient.deposit({
       asset: AssetRuneNative,
@@ -577,5 +591,27 @@ describe('Client Test', () => {
 
     thorClient.setNetwork(Network.Mainnet)
     expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash')
+  })
+
+  it('fetches fees from client', async () => {
+    const url = thorClient.getClientUrl().node
+    mockThorchainConstants(url)
+
+    const fees = await thorClient.getFees()
+
+    expect(fees.average.amount().toString()).toEqual('2000000')
+    expect(fees.fast.amount().toString()).toEqual('2000000')
+    expect(fees.fastest.amount().toString()).toEqual('2000000')
+  })
+
+  it('retuns default fees if client is not available', async () => {
+    const url = thorClient.getClientUrl().node
+    nock(url).get('/thorchain/constants').reply(404)
+
+    const fees = await thorClient.getFees()
+
+    expect(fees.average.amount().toString()).toEqual('2000000')
+    expect(fees.fast.amount().toString()).toEqual('2000000')
+    expect(fees.fastest.amount().toString()).toEqual('2000000')
   })
 })
