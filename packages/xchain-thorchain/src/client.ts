@@ -635,7 +635,7 @@ class Client implements ThorchainClient, XChainClient {
       } = await axios.get<ThorchainConstantsResponse>(`${this.getClientUrl().node}/thorchain/constants`)
 
       // validate data
-      if (!fee || isNaN(fee) || fee <= 0) throw Error(`Invalid fee: ${fee.toString()}`)
+      if (!fee || isNaN(fee) || fee < 0) throw Error(`Invalid fee: ${fee.toString()}`)
 
       return singleFee(FeeType.FlatFee, baseAmount(fee))
     } catch {
