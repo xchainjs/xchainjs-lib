@@ -284,7 +284,7 @@ describe('LitecoinClient Test', () => {
     expect(ltcClient.getExplorerUrl()).toEqual('https://tltc.bitaps.com')
   })
 
-  it('should retrun valid explorer address url', () => {
+  it('should return valid explorer address url', () => {
     ltcClient.setNetwork('mainnet' as Network)
     expect(ltcClient.getExplorerAddressUrl('testAddressHere')).toEqual('https://ltc.bitaps.com/testAddressHere')
     ltcClient.setNetwork('testnet' as Network)
@@ -293,7 +293,7 @@ describe('LitecoinClient Test', () => {
     )
   })
 
-  it('should retrun valid explorer tx url', () => {
+  it('should return valid explorer tx url', () => {
     ltcClient.setNetwork('mainnet' as Network)
     expect(ltcClient.getExplorerTxUrl('testTxHere')).toEqual('https://ltc.bitaps.com/testTxHere')
     ltcClient.setNetwork('testnet' as Network)

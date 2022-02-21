@@ -389,7 +389,7 @@ class Client implements PolkadotClient, XChainClient {
     const api = await this.getAPI()
     let transaction = null
     const walletIndex = params.walletIndex || 0
-    // Createing a transfer
+    // Creating a transfer
     const transfer = api.tx.balances.transfer(params.recipient, params.amount.amount().toString())
     if (!params.memo) {
       // Send a simple transfer

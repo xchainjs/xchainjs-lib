@@ -71,7 +71,7 @@ describe('BCHClient Test', () => {
     expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch-testnet')
   })
 
-  it('should retrun valid explorer address url', () => {
+  it('should return valid explorer address url', () => {
     bchClient.setNetwork('mainnet' as Network)
     expect(bchClient.getExplorerAddressUrl('testAddressHere')).toEqual(
       'https://www.blockchain.com/bch/address/testAddressHere',
@@ -82,7 +82,7 @@ describe('BCHClient Test', () => {
     )
   })
 
-  it('should retrun valid explorer tx url', () => {
+  it('should return valid explorer tx url', () => {
     bchClient.setNetwork('mainnet' as Network)
     expect(bchClient.getExplorerTxUrl('testTxHere')).toEqual('https://www.blockchain.com/bch/tx/testTxHere')
     bchClient.setNetwork('testnet' as Network)

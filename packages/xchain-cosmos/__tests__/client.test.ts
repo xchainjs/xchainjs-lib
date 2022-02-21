@@ -353,7 +353,7 @@ describe('Client Test', () => {
     expect(cosmosClient.getExplorerUrl()).toEqual('https://cosmos.bigdipper.live')
   })
 
-  it('should retrun valid explorer address url', () => {
+  it('should return valid explorer address url', () => {
     expect(cosmosClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
       'https://gaia.bigdipper.live/account/anotherTestAddressHere',
     )
@@ -364,7 +364,7 @@ describe('Client Test', () => {
     )
   })
 
-  it('should retrun valid explorer tx url', () => {
+  it('should return valid explorer tx url', () => {
     expect(cosmosClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://gaia.bigdipper.live/transactions/anotherTestTxHere',
     )
