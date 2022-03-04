@@ -2,8 +2,8 @@
 
 ## Update
 
-- Fetch `txHex` optionally by scanning UTXOs
-- Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same datarequests for same data
+- Fetch `txHex` optionally while scanning UTXOs
+- Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same data
 
 ## Fix
 
