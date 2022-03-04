@@ -99,9 +99,9 @@ class Client extends UTXOClient {
     switch (this.network) {
       case Network.Mainnet:
       case Network.Stagenet:
-        return 'https://ltc.bitaps.com'
+        return 'https://blockchair.com/litecoin'
       case Network.Testnet:
-        return 'https://tltc.bitaps.com'
+        return 'https://blockexplorer.one/litecoin/testnet'
     }
   }
 
@@ -112,7 +112,7 @@ class Client extends UTXOClient {
    * @returns {string} The explorer url for the given address based on the network.
    */
   getExplorerAddressUrl(address: Address): string {
-    return `${this.getExplorerUrl()}/${address}`
+    return `${this.getExplorerUrl()}/address/${address}`
   }
 
   /**
@@ -122,7 +122,15 @@ class Client extends UTXOClient {
    * @returns {string} The explorer url for the given transaction id based on the network.
    */
   getExplorerTxUrl(txID: string): string {
-    return `${this.getExplorerUrl()}/${txID}`
+    switch (this.network) {
+      case Network.Mainnet:
+      case Network.Stagenet:
+        // blockchair
+        return `${this.getExplorerUrl()}/transaction/${txID}`
+      case Network.Testnet:
+        // blockexplorer.one
+        return `${this.getExplorerUrl()}/blockHash/${txID}`
+    }
   }
 
   /**
@@ -310,7 +318,6 @@ class Client extends UTXOClient {
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
     return await Utils.broadcastTx({
-      network: this.network,
       txHex,
       nodeUrl: this.nodeUrl,
       auth: this.nodeAuth,

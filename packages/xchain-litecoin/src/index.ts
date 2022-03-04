@@ -10,4 +10,3 @@ export {
   validateAddress,
   calcFee,
 } from './utils'
-export { createTxInfo } from './ledger'

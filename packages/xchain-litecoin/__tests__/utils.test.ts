@@ -2,14 +2,22 @@ import { Network } from '@xchainjs/xchain-client'
 import * as Litecoin from 'bitcoinjs-lib'
 
 import mockSochainApi from '../__mocks__/sochain'
+import mockThornodeApi from '../__mocks__/thornode-api'
 import { UTXO } from '../src/types/common'
 import * as Utils from '../src/utils'
-
-mockSochainApi.init()
 
 let utxos: UTXO[]
 
 describe('Litecoin Utils Test', () => {
+  beforeEach(() => {
+    mockSochainApi.init()
+    mockThornodeApi.init()
+  })
+  afterEach(() => {
+    mockSochainApi.restore()
+    mockThornodeApi.restore()
+  })
+
   const witness = {
     script: Buffer.from('0014123f6562aa047dae2d38537327596cd8e9e21932'),
     value: 10000,
@@ -60,5 +68,12 @@ describe('Litecoin Utils Test', () => {
     expect(utxos.length).toEqual(213)
     expect(utxos?.[0].hash).toEqual('65b34acff41570854758adf6bdafc94c0c33f78194d7f49f1cf8d24314b4d47a')
     expect(utxos?.[212].hash).toEqual('f180c1cd0a8e719456f3f033c497bae2cedc482d87443b668c0a5a277272b2ba')
+  })
+
+  describe('broadcastTx', () => {
+    it('returns txHash', async () => {
+      const txHash = await Utils.broadcastTx({ txHex: '0xdead', nodeUrl: 'https://ltc.thorchain.info' })
+      expect(txHash).toEqual('mock-txid')
+    })
   })
 })

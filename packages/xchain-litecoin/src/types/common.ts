@@ -1,5 +1,3 @@
-import { Network } from '@xchainjs/xchain-client'
-
 export type Witness = {
   value: number
   script: Buffer
@@ -17,7 +15,6 @@ export type NodeAuth = {
 }
 
 export type BroadcastTxParams = {
-  network: Network
   txHex: string
   nodeUrl: string
   auth?: NodeAuth
