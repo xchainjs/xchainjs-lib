@@ -7,6 +7,7 @@ export type UTXO = {
   index: number
   value: number
   witnessUtxo: Witness
+  txHex?: string
 }
 
 export type NodeAuth = {
