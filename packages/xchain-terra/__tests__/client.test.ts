@@ -415,7 +415,7 @@ describe('Client Test', () => {
   //   expect(terraClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain')
   // })
 
-  // it('should retrun valid explorer address url', () => {
+  // it('should return valid explorer address url', () => {
   //   expect(terraClient.getExplorerAddressUrl('tthorabc')).toEqual(
   //     'https://viewblock.io/thorchain/address/tthorabc?network=testnet',
   //   )
@@ -424,7 +424,7 @@ describe('Client Test', () => {
   //   expect(terraClient.getExplorerAddressUrl('thorabc')).toEqual('https://viewblock.io/thorchain/address/thorabc')
   // })
 
-  // it('should retrun valid explorer tx url', () => {
+  // it('should return valid explorer tx url', () => {
   //   expect(terraClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash?network=testnet')
 
   //   terraClient.setNetwork('mainnet' as Network)

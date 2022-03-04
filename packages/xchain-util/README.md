@@ -1,12 +1,12 @@
 # `@xchainjs/xchain-util`
 
-Utitity helpers for XChain clients
+Utility helpers for XChain clients
 
 ## Modules (in alphabetical order)
 
 - `asset` - Utilities for handling assets
-- `async` - Utitilies for `async` handling
-- `bn` - Utitilies for using `bignumber.js`
+- `async` - Utilities for `async` handling
+- `bn` - Utilities for using `bignumber.js`
 - `chain` - Utilities for multi-chain
 - `string` - Utilities for strings
 

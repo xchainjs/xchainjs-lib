@@ -233,7 +233,7 @@ class Client extends BaseXChainClient implements XChainClient {
     })
     return {
       // NOTE: since multiple assettypes can be xfered in one tx, this asset should not really exist
-      // TODO we shoudl consider refactoring xchain-client.Tx to remove the top level Asset...
+      // TODO we should consider refactoring xchain-client.Tx to remove the top level Asset...
       asset: {
         chain: Chain.Terra,
         symbol: '',
@@ -264,7 +264,7 @@ class Client extends BaseXChainClient implements XChainClient {
     })
     return {
       // NOTE: since multiple assettypes can be xfered in one tx, this asset should not really exist
-      // TODO we shoudl consider refactoring xchain-client.Tx to remove the top level Asset...
+      // TODO we should consider refactoring xchain-client.Tx to remove the top level Asset...
       asset: {
         chain: Chain.Terra,
         symbol: '',
