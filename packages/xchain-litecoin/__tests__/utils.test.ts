@@ -62,7 +62,7 @@ describe('Litecoin Utils Test', () => {
     const address = 'M8T1B2Z97gVdvmfkQcAtYbEepune1tzGua'
     const utxos: UTXO[] = await Utils.scanUTXOs({
       sochainUrl: 'https://sochain.com/api/v2',
-      network: 'mainnet' as Network,
+      network: Network.Mainnet,
       address,
     })
     expect(utxos.length).toEqual(213)

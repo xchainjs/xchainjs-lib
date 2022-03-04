@@ -2,9 +2,8 @@
 
 ## Update
 
-- Fetch `txHex` optionally by scanning UTXOs #489
-- Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same data
-- Cache `confirmed` status in `getConfirmedUnspentTxs` to avoid same requests for same data
+- Fetch `txHex` optionally by scanning UTXOs
+- Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same datarequests for same data
 
 ## Fix
 
