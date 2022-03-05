@@ -1,7 +1,4 @@
-import axios from 'axios'
-import MockAdapter from 'axios-mock-adapter'
-
-const mock = new MockAdapter(axios)
+import mock from './axios-adapter'
 
 type MockConfig = {
   url?: string
@@ -46,18 +43,6 @@ export default {
       }
       const resp = require(filePath)
       return [200, resp]
-    })
-
-    //Mock ltc node send tx
-    mock.onPost(/https:\/\/testnet.ltc.thorchain.info/).reply(function () {
-      return [
-        200,
-        {
-          id: '1',
-          result: 'TEST_OK',
-          error: null,
-        },
-      ]
     })
   },
 }

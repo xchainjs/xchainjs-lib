@@ -7,6 +7,13 @@ export type AddressParams = {
   startingFromTxId?: string
 }
 
+export type ScanUTXOParam = {
+  sochainUrl: string
+  network: Network
+  address: string
+  withTxHex?: boolean
+}
+
 export type TxHashParams = {
   sochainUrl: string
   network: Network
@@ -33,6 +40,7 @@ export interface Transaction {
   confirmations: number
   time: number
 
+  tx_hex: string
   inputs: TxIO[]
   outputs: TxIO[]
 }

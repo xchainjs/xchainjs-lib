@@ -1,3 +1,18 @@
+# v.0.8.0 (2022-xx-xx)
+
+## Update
+
+- Fetch `txHex` optionally while scanning UTXOs
+- Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same data
+
+## Fix
+
+- Change explorers to `blockchair` (mainnet) / `blockexplorer.one` (testnet) to get rid of broken `ltc.bitaps.com`
+
+## Breaking change
+
+- Remove deprecated Ledger files (\*\*/\*\*/ledger.ts)
+
 # v.0.7.2 (2022-02-04)
 
 - Use latest axios@0.25.0
