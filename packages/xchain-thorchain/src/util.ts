@@ -17,7 +17,7 @@ import { StdTxFee } from 'cosmos-client/api'
 import { StdTx } from 'cosmos-client/x/auth'
 import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
-import { ChainId, ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
+import { ChainId, ChainIds, ClientUrl, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx, ThorchainDepositResponse } from './types/messages'
 
 export const DECIMAL = 8
@@ -194,6 +194,31 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
 }
 
 /**
+ * Helper to get THORChain's chain id
+ * @param {string} nodeUrl THORNode url
+ */
+export const getChainId = async (nodeUrl: string): Promise<ChainId> => {
+  const { data } = await axios.get<NodeInfoResponse>(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
+  return data?.default_node_info?.network || Promise.reject('Could not parse chain id')
+}
+
+/**
+ * Helper to get all THORChain's chain id
+ * @param {ClientUrl} client urls (use `getDefaultClientUrl()` if you don't need to use custom urls)
+ */
+export const getChainIds = async (client: ClientUrl): Promise<ChainIds> => {
+  return Promise.all([
+    getChainId(client[Network.Testnet].node),
+    getChainId(client[Network.Stagenet].node),
+    getChainId(client[Network.Mainnet].node),
+  ]).then(([testnetId, stagenetId, mainnetId]) => ({
+    testnet: testnetId,
+    stagenet: stagenetId,
+    mainnet: mainnetId,
+  }))
+}
+
+/**
  * Structure StdTx from MsgNativeTx.
  *
  * @param {MsgNativeTx} msgNativeTx Msg of type `MsgNativeTx`.
@@ -213,8 +238,7 @@ export const buildDepositTx = async ({
   nodeUrl: string
   chainId: ChainId
 }): Promise<StdTx> => {
-  const { data } = await axios.get(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
-  const networkChainId = data.default_node_info.network
+  const networkChainId = await getChainId(nodeUrl)
   if (!networkChainId || chainId !== networkChainId)
     throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
 

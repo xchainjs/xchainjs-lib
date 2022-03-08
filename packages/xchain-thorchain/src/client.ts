@@ -100,11 +100,7 @@ class Client implements ThorchainClient, XChainClient {
       [Network.Stagenet]: "44'/931'/0'/0/",
       [Network.Testnet]: "44'/931'/0'/0/",
     },
-    chainIds = {
-      [Network.Mainnet]: 'thorchain',
-      [Network.Stagenet]: 'thorchain-stagenet',
-      [Network.Testnet]: 'thorchain-v1',
-    },
+    chainIds,
   }: XChainClientParams & ThorchainClientParams) {
     this.network = network
     this.clientUrl = clientUrl || getDefaultClientUrl()

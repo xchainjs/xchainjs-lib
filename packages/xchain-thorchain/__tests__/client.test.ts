@@ -13,8 +13,16 @@ import {
 import { BaseAccount, BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
 import nock from 'nock'
 
+import { mockTendermintNodeInfo } from '../__mocks__/thornode-api'
 import { Client } from '../src/client'
 import { ThorchainDepositResponse } from '../src/types'
+
+// Mock chain ids
+const chainIds = {
+  [Network.Mainnet]: 'chain-id-mainnet',
+  [Network.Stagenet]: 'chain-id-stagenet',
+  [Network.Testnet]: 'chain-id-testnet',
+}
 
 const mockAccountsAddress = (
   url: string,
@@ -45,17 +53,6 @@ const mockThorchainDeposit = (url: string, result: ThorchainDepositResponse) => 
 const mockThorchainConstants = (url: string) => {
   const response = require('../__mocks__/responses/thorchain/constants.json')
   nock(url).get('/thorchain/constants').reply(200, response)
-}
-
-const mockTendermintNodeInfo = (
-  url: string,
-  result: {
-    default_node_info: {
-      network: string
-    }
-  },
-) => {
-  nock(url).get('/cosmos/base/tendermint/v1beta1/node_info').reply(200, result)
 }
 
 const assertTxsPost = (url: string, memo: undefined | string, result: BroadcastTxCommitResult): void => {
@@ -90,8 +87,8 @@ describe('Client Test', () => {
   const testnet_address_path1 = 'tthor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecv2c92a'
 
   beforeEach(() => {
-    thorClient = new Client({ phrase, network: Network.Testnet })
-    thorMainClient = new Client({ phrase, network: Network.Mainnet })
+    thorClient = new Client({ phrase, network: Network.Testnet, chainIds })
+    thorMainClient = new Client({ phrase, network: Network.Mainnet, chainIds })
   })
 
   afterEach(() => {
@@ -100,11 +97,11 @@ describe('Client Test', () => {
   })
 
   it('should start with empty wallet', async () => {
-    const thorClientEmptyMain = new Client({ phrase, network: Network.Mainnet })
+    const thorClientEmptyMain = new Client({ phrase, network: Network.Mainnet, chainIds })
     const addressMain = thorClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnet_address_path0)
 
-    const thorClientEmptyTest = new Client({ phrase, network: Network.Testnet })
+    const thorClientEmptyTest = new Client({ phrase, network: Network.Testnet, chainIds })
     const addressTest = thorClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnet_address_path0)
   })
@@ -113,6 +110,7 @@ describe('Client Test', () => {
     const thorClientEmptyMain = new Client({
       phrase,
       network: Network.Mainnet /*, derivationPath: "44'/931'/0'/0/0" */,
+      chainIds,
     })
     const addressMain = thorClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnet_address_path0)
@@ -123,6 +121,7 @@ describe('Client Test', () => {
     const thorClientEmptyTest = new Client({
       phrase,
       network: Network.Testnet /*, derivationPath: "44'/931'/0'/0/0"*/,
+      chainIds,
     })
     const addressTest = thorClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnet_address_path0)
@@ -133,6 +132,7 @@ describe('Client Test', () => {
     const thorClientEmptyMain1 = new Client({
       phrase,
       network: Network.Mainnet /*, derivationPath: "44'/931'/0'/0/1"*/,
+      chainIds,
     })
     const addressMain1 = thorClientEmptyMain1.getAddress(1)
     expect(addressMain1).toEqual(mainnet_address_path1)
@@ -140,6 +140,7 @@ describe('Client Test', () => {
     const thorClientEmptyTest1 = new Client({
       phrase,
       network: Network.Testnet /*, derivationPath: "44'/931'/0'/0/1"*/,
+      chainIds,
     })
     const addressTest1 = thorClientEmptyTest1.getAddress(1)
     expect(addressTest1).toEqual(testnet_address_path1)
@@ -147,11 +148,11 @@ describe('Client Test', () => {
 
   it('throws an error passing an invalid phrase', async () => {
     expect(() => {
-      new Client({ phrase: 'invalid phrase', network: Network.Mainnet })
+      new Client({ phrase: 'invalid phrase', network: Network.Mainnet, chainIds })
     }).toThrow()
 
     expect(() => {
-      new Client({ phrase: 'invalid phrase', network: Network.Testnet })
+      new Client({ phrase: 'invalid phrase', network: Network.Testnet, chainIds })
     }).toThrow()
   })
 
@@ -215,11 +216,11 @@ describe('Client Test', () => {
   })
 
   describe('chainId', () => {
-    it('get chainId (testnet by default for testnetClient)', () => {
+    it('get chainId', () => {
       const chainId = thorClient.getChainId()
-      expect(chainId).toEqual('thorchain-v1')
+      expect(chainId).toEqual('chain-id-testnet')
     })
-    it('update chainId (testnet by default for testnetClient)', () => {
+    it('update chainId', () => {
       thorClient.setChainId('another-testnet-id')
       const chainId = thorClient.getChainId()
       expect(chainId).toEqual('another-testnet-id')
@@ -231,7 +232,7 @@ describe('Client Test', () => {
     })
     it('get default chainId for stagenet', () => {
       const chainId = thorClient.getChainId(Network.Stagenet)
-      expect(chainId).toEqual('thorchain-stagenet')
+      expect(chainId).toEqual('chain-id-stagenet')
     })
     it('update chainId for stagenet', () => {
       thorClient.setChainId('another-stagenet-id', Network.Stagenet)
@@ -240,7 +241,7 @@ describe('Client Test', () => {
     })
     it('get default chainId for mainnet', () => {
       const chainId = thorClient.getChainId(Network.Mainnet)
-      expect(chainId).toEqual('thorchain')
+      expect(chainId).toEqual('chain-id-mainnet')
     })
     it('update chainId for mainnet', () => {
       thorClient.setChainId('another-mainnet-id', Network.Mainnet)
@@ -533,7 +534,7 @@ describe('Client Test', () => {
     })
     mockTendermintNodeInfo(nodeUrl, {
       default_node_info: {
-        network: 'thorchain-v1',
+        network: chainIds[Network.Testnet],
       },
     })
 

@@ -22,7 +22,7 @@ export type ChainIds = Record<Network, ChainId>
 export type ThorchainClientParams = {
   clientUrl?: ClientUrl
   explorerUrls?: ExplorerUrls
-  chainIds?: ChainIds
+  chainIds: ChainIds
 }
 
 export type DepositParam = {
@@ -55,5 +55,15 @@ export type ThorchainConstantsResponse = {
   int_64_values: {
     // We are in fee interested only - ignore all other values
     NativeTransactionFee: number
+  }
+}
+
+/**
+ * Response of `/cosmos/base/tendermint/v1beta1/node_info`
+ * Note: We are interested in `network` (aka chain id) only
+ */
+export type NodeInfoResponse = {
+  default_node_info: {
+    network: string
   }
 }
