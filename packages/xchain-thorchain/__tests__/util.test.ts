@@ -1,8 +1,13 @@
 import { Network } from '@xchainjs/xchain-client'
 import { AssetBNB, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+// import nock from 'nock'
 
+import { mockTendermintNodeInfo } from '../__mocks__/thornode-api'
 import {
   assetFromDenom,
+  getChainId,
+  getChainIds,
+  getDefaultClientUrl,
   getDefaultExplorerUrls,
   getDenom,
   getDepositTxDataFromLogs,
@@ -156,6 +161,81 @@ describe('thorchain/util', () => {
       expect(
         getExplorerTxUrl({ urls: getDefaultExplorerUrls(), network: 'mainnet' as Network, txID: 'txhash' }),
       ).toEqual('https://viewblock.io/thorchain/tx/txhash')
+    })
+  })
+
+  describe('getChainId', () => {
+    it('testnet', async () => {
+      const id = 'chain-id-testnet'
+      const url = getDefaultClientUrl().testnet.node
+      // Mock chain id
+      mockTendermintNodeInfo(url, {
+        default_node_info: {
+          network: id,
+        },
+      })
+      const result = await getChainId(url)
+
+      expect(result).toEqual(id)
+    })
+
+    it('stagenet', async () => {
+      const id = 'chain-id-stagenet'
+
+      const url = getDefaultClientUrl().stagenet.node
+      // Mock chain id
+      mockTendermintNodeInfo(url, {
+        default_node_info: {
+          network: id,
+        },
+      })
+      const result = await getChainId(url)
+
+      expect(result).toEqual(id)
+    })
+
+    it('mainnet', async () => {
+      const id = 'chain-id-mainnet'
+      const url = getDefaultClientUrl().mainnet.node
+      // Mock chain id
+      mockTendermintNodeInfo(url, {
+        default_node_info: {
+          network: id,
+        },
+      })
+      const result = await getChainId(url)
+
+      expect(result).toEqual(id)
+    })
+  })
+
+  describe('getChainIds', () => {
+    it('all chain ids', async () => {
+      const testnetId = 'chain-id-testnet'
+      const stagenetId = 'chain-id-stagenet'
+      const mainnetId = 'chain-id-mainnet'
+      // Mock chain ids
+      mockTendermintNodeInfo(getDefaultClientUrl().mainnet.node, {
+        default_node_info: {
+          network: mainnetId,
+        },
+      })
+      mockTendermintNodeInfo(getDefaultClientUrl().stagenet.node, {
+        default_node_info: {
+          network: stagenetId,
+        },
+      })
+      mockTendermintNodeInfo(getDefaultClientUrl().testnet.node, {
+        default_node_info: {
+          network: testnetId,
+        },
+      })
+
+      const result = await getChainIds(getDefaultClientUrl())
+
+      expect(result.mainnet).toEqual(mainnetId)
+      expect(result.stagenet).toEqual(stagenetId)
+      expect(result.testnet).toEqual(testnetId)
     })
   })
 })

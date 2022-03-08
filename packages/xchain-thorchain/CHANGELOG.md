@@ -1,3 +1,18 @@
+# v0.23.0 (2022-03-08)
+
+## Add
+
+- Helpers `getChainId` + `getChainIds`
+
+## Breaking change
+
+- `chainIds: ChainIds` is required to initialize `Client`
+
+## Fix
+
+- Request fees from THORChain and use `defaultFees` in case of server errors only
+- Fix `defaultFees` to be 0.02 RUNE
+
 # v0.22.2 (2022-02-17)
 
 ## Fix
