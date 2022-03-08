@@ -179,6 +179,14 @@ export const AssetBNB: Asset = { chain: Chain.Binance, symbol: 'BNB', ticker: 'B
 export const AssetBTC: Asset = { chain: Chain.Bitcoin, symbol: 'BTC', ticker: 'BTC', synth: false }
 
 /**
+ * Base "chain" asset on decred main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see TBD (PR not merged)
+ */
+export const AssetDCR: Asset = { chain: Chain.Decred, symbol: 'DCR', ticker: 'DCR' }
+
+/**
  * Base "chain" asset on bitcoin cash main net.
  *
  * Based on definition in Thorchain `common`

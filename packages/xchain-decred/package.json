@@ -1,0 +1,61 @@
+{
+  "name": "@xchainjs/xchain-decred",
+  "version": "0.1.0",
+  "description": "Custom Decred client and utilities used by XChainJS clients",
+  "keywords": [
+    "XChain",
+    "Decred"
+  ],
+  "author": "XChainJS",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
+  "scripts": {
+    "clean": "rimraf lib/**",
+    "build": "yarn clean && rollup -c",
+    "test": "jest",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "prepublishOnly": "yarn build",
+    "postversion": "git push --follow-tags"
+  },
+  "devDependencies": {
+    "@types/bitcoinjs-lib": "^5.0.0",
+    "@types/wif": "^2.0.1",
+    "@xchainjs/xchain-client": "^0.10.1",
+    "@xchainjs/xchain-crypto": "^0.2.4",
+    "@xchainjs/xchain-util": "^0.3.0",
+    "axios": "^0.21.0",
+    "axios-mock-adapter": "^1.19.0",
+    "decredjs-lib": "git://github.com/vikingshield/decredjs-lib#59714ef765734d3a943e04d1585799c3dc30a26f",
+
+    "coinselect": "^3.1.12",
+    "wif": "^2.0.6",
+    "unorm": "^1.6.0"
+  },
+  "peerDependencies": {
+    "@xchainjs/xchain-client": "^0.10.1",
+    "@xchainjs/xchain-crypto": "^0.2.4",
+    "@xchainjs/xchain-util": "^0.3.0",
+    "axios": "^0.21.0",
+    "decredjs-lib": "git://github.com/vikingshield/decredjs-lib#59714ef765734d3a943e04d1585799c3dc30a26f",
+    "coinselect": "^3.1.12",
+    "wif": "^2.0.6",
+    "unorm": "^1.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
