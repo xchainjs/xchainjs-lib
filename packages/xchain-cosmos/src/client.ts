@@ -32,8 +32,8 @@ const MAINNET_SDK = new CosmosSDKClient({
   chainId: 'cosmoshub-4',
 })
 const TESTNET_SDK = new CosmosSDKClient({
-  server: 'https://api.testnet.cosmos.network',
-  chainId: 'cosmoshub-testnet',
+  server: 'https://rest.sentry-02.theta-testnet.polypore.xyz', //'https://api.testnet.cosmos.network',
+  chainId: 'vega-testnet',
 })
 
 /**
@@ -56,7 +56,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     network = Network.Testnet,
     rootDerivationPaths = {
       [Network.Mainnet]: `44'/118'/0'/0/`,
-      [Network.Testnet]: `44'/118'/1'/0/`,
+      [Network.Testnet]: `44'/118'/0'/0/`,
     },
     phrase = '',
   }: XChainClientParams) {
