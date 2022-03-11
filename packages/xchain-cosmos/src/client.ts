@@ -32,8 +32,8 @@ const MAINNET_SDK = new CosmosSDKClient({
   chainId: 'cosmoshub-4',
 })
 const TESTNET_SDK = new CosmosSDKClient({
-  server: 'https://rest.sentry-02.theta-testnet.polypore.xyz', //'https://api.testnet.cosmos.network',
-  chainId: 'vega-testnet',
+  server: 'https://rest.sentry-02.theta-testnet.polypore.xyz',
+  chainId: 'theta-testnet-001',
 })
 
 /**
