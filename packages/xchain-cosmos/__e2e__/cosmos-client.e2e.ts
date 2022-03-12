@@ -12,6 +12,7 @@ describe('Cosmos Integration Tests', () => {
   it('should fetch cosmos balances', async () => {
     const address = xchainClient.getAddress(0)
     const balances = await xchainClient.getBalance(address)
+
     balances.forEach((bal) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
@@ -34,19 +35,19 @@ describe('Cosmos Integration Tests', () => {
       console.log(JSON.stringify(tx, null, 2))
     })
   })
-  it('should xfer uphoton from wallet 0 -> 1, with a memo', async () => {
+  it('should xfer uatom from wallet 0 -> 1, with a memo', async () => {
     try {
       const addressTo = xchainClient.getAddress(1)
       const transferTx: TxParams = {
         walletIndex: 0,
-        asset: { chain: Chain.Cosmos, ticker: 'GAIA', symbol: 'uphoton' },
-        amount: baseAmount('100'),
+        asset: { chain: Chain.Cosmos, ticker: 'ATOM', symbol: 'uatom' },
+        amount: baseAmount('100', 6),
         recipient: addressTo,
         memo: 'Hi!',
       }
       const hash = await xchainClient.transfer(transferTx)
       expect(hash.length).toBeGreaterThan(0)
-      console.log(xchainClient.getExplorerTxUrl(hash))
+      
     } catch (error) {
       console.log(error)
       throw error

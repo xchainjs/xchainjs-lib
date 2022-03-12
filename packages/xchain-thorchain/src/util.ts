@@ -9,7 +9,7 @@ import {
   assetToString,
   baseAmount,
 } from '@xchainjs/xchain-util'
-import { codec } from 'cosmos-client/cjs/types/codec'
+import { codec } from '@cosmos-client/core/cjs/types/codec'
 
 import { ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
 import types from './types/proto/MsgDeposit'

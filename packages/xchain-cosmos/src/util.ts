@@ -1,9 +1,9 @@
+import { proto } from '@cosmos-client/core'
 import { FeeType, Fees, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
-import { proto } from 'cosmos-client'
-import { codec } from 'cosmos-client/cjs/types'
+// import { codec } from '@cosmos-client/core/cjs/types'
 
-import { APIQueryParam, RawTxResponse, TxResponse } from './cosmos/types'
+import { APIQueryParam, TxResponse } from './cosmos/types'
 import { AssetAtom, AssetMuon } from './types'
 
 /**
@@ -73,12 +73,12 @@ const getCoinAmount = (coins?: proto.cosmos.base.v1beta1.ICoin[]) => {
 export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => {
   return txs.reduce((acc, tx) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let msgs: Array<proto.cosmos.bank.v1beta1.MsgSend | proto.cosmos.bank.v1beta1.MsgMultiSend>
-    if ((tx.tx as RawTxResponse).body === undefined) {
-      msgs = codec.packCosmosAny(tx.tx).msg
-    } else {
-      msgs = codec.packCosmosAny((tx.tx as RawTxResponse).body.messages)
-    }
+    const msgs: Array<proto.cosmos.bank.v1beta1.MsgSend | proto.cosmos.bank.v1beta1.MsgMultiSend> = []
+    // if ((tx.tx as RawTxResponse).body === undefined) {
+    //   msgs = codec.packCosmosAny(tx.tx).msg
+    // } else {
+    //   msgs = codec.packCosmosAny((tx.tx as RawTxResponse).body.messages)
+    // }
 
     const from: TxFrom[] = []
     const to: TxTo[] = []

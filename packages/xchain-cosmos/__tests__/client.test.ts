@@ -1,8 +1,8 @@
+import { proto } from '@cosmos-client/core'
+import { Coin } from '@cosmos-client/core/cjs/openapi/api'
+import { codec } from '@cosmos-client/core/cjs/types'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
-import { proto } from 'cosmos-client'
-import { Coin } from 'cosmos-client/cjs/openapi/api'
-import { codec } from 'cosmos-client/cjs/types'
 import nock from 'nock'
 
 import { Client } from '../src/client'
@@ -10,7 +10,9 @@ import { TxHistoryResponse, TxResponse } from '../src/cosmos/types'
 import { AssetMuon } from '../src/types'
 
 const getClientUrl = (client: Client): string => {
-  return client.getNetwork() === Network.Testnet ? 'https://api.testnet.cosmos.network' : 'https://api.cosmos.network'
+  return client.getNetwork() === Network.Testnet
+    ? 'https://rest.sentry-02.theta-testnet.polypore.xyz/'
+    : 'https://api.cosmos.network'
 }
 
 const mockAccountsAddress = (
@@ -200,7 +202,8 @@ describe('Client Test', () => {
           gas_used: '148996',
           tx: {
             body: {
-              messages: [encodedMsg],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              messages: [encodedMsg as any],
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -239,7 +242,8 @@ describe('Client Test', () => {
           gas_used: '148996',
           tx: {
             body: {
-              messages: [encodedMsg2],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              messages: [encodedMsg2 as any],
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -311,7 +315,8 @@ describe('Client Test', () => {
       gas_used: '148996',
       tx: {
         body: {
-          messages: [encodedMsg],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          messages: [encodedMsg as any],
         },
       },
       timestamp: '2020-09-25T06:09:15Z',

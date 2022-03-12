@@ -1,6 +1,6 @@
-import { proto } from 'cosmos-client'
-import { Coin } from 'cosmos-client/cjs/openapi/api'
-import { codec } from 'cosmos-client/cjs/types'
+import { proto } from '@cosmos-client/core'
+import { Coin } from '@cosmos-client/core/cjs/openapi/api'
+import { codec } from '@cosmos-client/core/cjs/types'
 import nock from 'nock'
 
 import { CosmosSDKClient } from '../src/cosmos/sdk-client'
@@ -68,7 +68,7 @@ describe('SDK Client Test', () => {
     prefix: 'cosmos',
   })
   const cosmosTestnetClient: CosmosSDKClient = new CosmosSDKClient({
-    server: 'https://api.testnet.cosmos.network',
+    server: 'https://rest.sentry-02.theta-testnet.polypore.xyz/',
     chainId: 'cosmoshub-testnet',
     prefix: 'cosmos',
   })

@@ -1,3 +1,4 @@
+import { proto } from '@cosmos-client/core'
 import {
   Address,
   Balance,
@@ -14,7 +15,6 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
-import { proto } from 'cosmos-client'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { AssetAtom, AssetMuon } from './types'

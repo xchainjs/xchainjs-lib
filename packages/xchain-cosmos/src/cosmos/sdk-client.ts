@@ -1,10 +1,10 @@
+import { cosmosclient, proto, rest } from '@cosmos-client/core'
+import { setBech32Prefix } from '@cosmos-client/core/cjs/config/module'
+import { Coin } from '@cosmos-client/core/cjs/openapi/api'
 import { TxHash, TxHistoryParams } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import axios from 'axios'
 import * as BIP32 from 'bip32'
-import { cosmosclient, proto, rest } from 'cosmos-client'
-import { setBech32Prefix } from 'cosmos-client/cjs/config/module'
-import { Coin } from 'cosmos-client/cjs/openapi/api'
 
 import { getQueryString } from '../util'
 
@@ -36,7 +36,7 @@ export class CosmosSDKClient {
     this.server = server
     this.chainId = chainId
     this.prefix = prefix
-    this.sdk = new cosmosclient.CosmosSDK(this.server, this.chainId)
+    this.sdk = new cosmosclient.CosmosSDK(server, this.chainId)
   }
 
   updatePrefix(prefix: string) {
@@ -94,12 +94,12 @@ export class CosmosSDKClient {
     this.setPrefix()
 
     const accAddress = cosmosclient.AccAddress.fromString(address)
-    const response = await rest.cosmos.bank.allBalances(this.sdk, accAddress)
+    const response = await rest.bank.allBalances(this.sdk, accAddress)
     return response.data.balances as Coin[]
   }
 
   async getAccount(address: cosmosclient.AccAddress): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> {
-    const account = await rest.cosmos.auth
+    const account = await rest.auth
       .account(this.sdk, address)
       .then((res) => res.data.account && cosmosclient.codec.unpackCosmosAny(res.data.account))
       .catch((_) => undefined)
@@ -261,7 +261,7 @@ export class CosmosSDKClient {
     // })
     const res = await axios.post(`${this.server}/cosmos/tx/v1beta1/txs`, {
       tx_bytes: txBuilder.txBytes(),
-      mode: rest.cosmos.tx.BroadcastTxMode.Block,
+      mode: rest.tx.BroadcastTxMode.Block,
     })
 
     if (res?.data?.tx_response?.code !== 0) {

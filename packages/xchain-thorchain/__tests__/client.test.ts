@@ -1,7 +1,7 @@
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCResponse, RPCTxSearchResult, TxResponse } from '@xchainjs/xchain-cosmos'
 import { AssetRuneNative, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
-import { Coin } from 'cosmos-client/cjs/openapi/api'
+import { Coin } from '@cosmos-client/core/cjs/openapi/api'
 import nock from 'nock'
 
 import { Client } from '../src/client'

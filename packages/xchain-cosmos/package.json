@@ -37,7 +37,7 @@
     "@xchainjs/xchain-util": "^0.3.1",
     "axios": "^0.21.1",
     "bignumber.js": "^9.0.0",
-    "cosmos-client": "^0.42.14",
+    "@cosmos-client/core": "^0.44.4",
     "nock": "^13.0.5"
   },
   "publishConfig": {
@@ -49,6 +49,6 @@
     "@xchainjs/xchain-util": "^0.3.1",
     "axios": "^0.21.1",
     "bignumber.js": "9.x",
-    "cosmos-client": "^0.42.14"
+    "@cosmos-client/core": "^0.44.4"
   }
 }

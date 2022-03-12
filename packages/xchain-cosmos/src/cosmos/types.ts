@@ -1,5 +1,5 @@
-import { proto } from 'cosmos-client'
-import { StdTx } from 'cosmos-client/cjs/openapi/api'
+import { proto } from '@cosmos-client/core'
+import { StdTx } from '@cosmos-client/core/cjs/openapi/api'
 
 export type CosmosSDKClientParams = {
   server: string

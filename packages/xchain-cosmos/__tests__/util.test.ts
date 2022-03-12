@@ -1,7 +1,7 @@
+import { proto } from '@cosmos-client/core'
+import { StdTx } from '@cosmos-client/core/cjs/openapi/api'
+import { codec } from '@cosmos-client/core/cjs/types'
 import { baseAmount } from '@xchainjs/xchain-util'
-import { proto } from 'cosmos-client'
-import { StdTx } from 'cosmos-client/cjs/openapi/api'
-import { codec } from 'cosmos-client/cjs/types'
 
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
 import { AssetAtom, AssetMuon } from '../src/types'
