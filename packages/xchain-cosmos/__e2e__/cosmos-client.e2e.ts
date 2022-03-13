@@ -22,18 +22,12 @@ describe('Cosmos Integration Tests', () => {
   it('should generate cosmos addreses', async () => {
     const address0 = xchainClient.getAddress(0)
     const address1 = xchainClient.getAddress(1)
-    console.log(address0)
-    console.log(address1)
-  })
-  //TODO failing, find the fix, probably to pull from RPC endpoint
-  it.skip('should fetch cosmos txs', async () => {
-    const address = xchainClient.getAddress(0)
-    const txPage = await xchainClient.getTransactions({ address })
-    expect(txPage.total).toBeGreaterThan(0)
-    expect(txPage.txs).toBeGreaterThan(0)
-    txPage.txs.forEach((tx) => {
-      console.log(JSON.stringify(tx, null, 2))
-    })
+
+    expect(address0.length).toBeGreaterThan(0)
+    expect(address0.startsWith('cosmos')).toBeTruthy()
+
+    expect(address1.length).toBeGreaterThan(0)
+    expect(address1.startsWith('cosmos')).toBeTruthy()
   })
   it('should xfer uatom from wallet 0 -> 1, with a memo', async () => {
     try {
@@ -47,17 +41,22 @@ describe('Cosmos Integration Tests', () => {
       }
       const hash = await xchainClient.transfer(transferTx)
       expect(hash.length).toBeGreaterThan(0)
-      
+
     } catch (error) {
-      console.log(error)
       throw error
     }
   })
+  it('should fetch cosmos txs', async () => {
+    const address = xchainClient.getAddress(0)
+    const txPage = await xchainClient.getTransactions({ address })
+    expect(txPage.total).toBeGreaterThan(0)
+    expect(txPage.txs.length).toBeGreaterThan(0)
+  })
   it('should fail xfer xxx from wallet 0 -> 1', async () => {
     try {
-      const addressTo = xchainClient.getAddress(1)
+      const addressTo = xchainClient.getAddress(0)
       const transferTx: TxParams = {
-        walletIndex: 0,
+        walletIndex: 1,
         asset: { chain: Chain.Cosmos, ticker: 'GAIA', symbol: 'xxx' },
         amount: baseAmount('100'),
         recipient: addressTo,

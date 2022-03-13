@@ -52,7 +52,7 @@ describe('thorchain Integration Tests', () => {
       throw error
     }
   })
-  it.skip('should swap some rune for BNB', async () => {
+  it('should swap some rune for BNB', async () => {
     try {
       const address = await bnbClient.getAddress()
       const memo = `=:BNB.BNB:${address}`

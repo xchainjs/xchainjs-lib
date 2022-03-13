@@ -1,3 +1,4 @@
+import { codec } from '@cosmos-client/core/cjs/types/codec'
 import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
@@ -9,7 +10,6 @@ import {
   assetToString,
   baseAmount,
 } from '@xchainjs/xchain-util'
-import { codec } from '@cosmos-client/core/cjs/types/codec'
 
 import { ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
 import types from './types/proto/MsgDeposit'

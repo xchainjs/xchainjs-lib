@@ -1,3 +1,4 @@
+import { cosmosclient, proto } from '@cosmos-client/core'
 import {
   Address,
   Balance,
@@ -19,7 +20,6 @@ import {
 import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
 import { Asset, AssetRuneNative, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
-import { cosmosclient, proto } from '@cosmos-client/core'
 // import { StdTx } from 'cosmos-client/cjs/openapi/api'
 
 import { ClientUrl, DepositParam, ExplorerUrls, NodeUrl, ThorchainClientParams, TxData } from './types'
