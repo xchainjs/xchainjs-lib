@@ -1,10 +1,11 @@
+import { proto } from '@cosmos-client/core'
 import {
   Address,
   Balance,
+  BaseXChainClient,
   FeeType,
   Fees,
   Network,
-  RootDerivationPaths,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -13,15 +14,11 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
-import { PrivKey } from 'cosmos-client'
-import { StdTx } from 'cosmos-client/x/auth'
+import { Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
-import { TxOfflineParams } from './cosmos/types'
 import { AssetAtom, AssetMuon } from './types'
-import { DECIMAL, getAsset, getDenom, getTxsFromHistory, registerCodecs } from './util'
+import { DECIMAL, getAsset, getDenom, getTxsFromHistory } from './util'
 
 /**
  * Interface for custom Cosmos client
@@ -32,21 +29,17 @@ export interface CosmosClient {
 
 const MAINNET_SDK = new CosmosSDKClient({
   server: 'https://api.cosmos.network',
-  chainId: 'cosmoshub-3',
+  chainId: 'cosmoshub-4',
 })
 const TESTNET_SDK = new CosmosSDKClient({
-  server: 'http://lcd.gaia.bigdipper.live:1317',
-  chainId: 'gaia-3a',
+  server: 'https://rest.sentry-02.theta-testnet.polypore.xyz',
+  chainId: 'theta-testnet-001',
 })
 
 /**
  * Custom Cosmos client
  */
-class Client implements CosmosClient, XChainClient {
-  private network: Network
-  private phrase = ''
-  private rootDerivationPaths: RootDerivationPaths
-
+class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   private sdkClients: Map<Network, CosmosSDKClient> = new Map<Network, CosmosSDKClient>()
 
   /**
@@ -64,51 +57,13 @@ class Client implements CosmosClient, XChainClient {
     phrase,
     rootDerivationPaths = {
       [Network.Mainnet]: `44'/118'/0'/0/`,
-      [Network.Testnet]: `44'/118'/1'/0/`,
+      [Network.Testnet]: `44'/118'/0'/0/`,
       [Network.Stagenet]: `44'/118'/0'/0/`,
     },
   }: XChainClientParams) {
-    this.network = network
-    this.rootDerivationPaths = rootDerivationPaths
+    super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
     this.sdkClients.set(Network.Testnet, TESTNET_SDK)
     this.sdkClients.set(Network.Mainnet, MAINNET_SDK)
-
-    if (phrase) this.setPhrase(phrase)
-  }
-
-  /**
-   * Purge client.
-   *
-   * @returns {void}
-   */
-  purgeClient(): void {
-    this.phrase = ''
-  }
-
-  /**
-   * Set/update the current network.
-   *
-   * @param {Network} network
-   * @returns {void}
-   *
-   * @throws {"Network must be provided"}
-   * Thrown if network has not been set before.
-   */
-  setNetwork(network: Network): void {
-    if (!network) {
-      throw new Error('Network must be provided')
-    } else {
-      this.network = network
-    }
-  }
-
-  /**
-   * Get the current network.
-   *
-   * @returns {Network}
-   */
-  getNetwork(): Network {
-    return this.network
   }
 
   /**
@@ -122,7 +77,7 @@ class Client implements CosmosClient, XChainClient {
       case Network.Stagenet:
         return 'https://cosmos.bigdipper.live'
       case Network.Testnet:
-        return 'https://gaia.bigdipper.live'
+        return 'https://explorer.theta-testnet.polypore.xyz/'
     }
   }
 
@@ -147,27 +102,6 @@ class Client implements CosmosClient, XChainClient {
   }
 
   /**
-   * Set/update a new phrase
-   *
-   * @param {string} phrase A new phrase.
-   * @returns {Address} The address from the given phrase
-   *
-   * @throws {"Invalid phrase"}
-   * Thrown if the given phase is invalid.
-   */
-  setPhrase(phrase: string, walletIndex = 0): Address {
-    if (this.phrase !== phrase) {
-      if (!xchainCrypto.validatePhrase(phrase)) {
-        throw new Error('Invalid phrase')
-      }
-
-      this.phrase = phrase
-    }
-
-    return this.getAddress(walletIndex)
-  }
-
-  /**
    * @private
    * Get private key.
    *
@@ -176,23 +110,13 @@ class Client implements CosmosClient, XChainClient {
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey(index = 0): PrivKey {
+  private getPrivateKey(index = 0): proto.cosmos.crypto.secp256k1.PrivKey {
     if (!this.phrase) throw new Error('Phrase not set')
 
     return this.getSDKClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
   }
   getSDKClient(): CosmosSDKClient {
     return this.sdkClients.get(this.network) || TESTNET_SDK
-  }
-
-  /**
-   * Get getFullDerivationPath
-   *
-   * @param {number} index the HD wallet index
-   * @returns {string} The bitcoin derivation path based on the network.
-   */
-  getFullDerivationPath(index: number): string {
-    return this.rootDerivationPaths[this.network] + `${index}`
   }
 
   /**
@@ -270,8 +194,6 @@ class Client implements CosmosClient, XChainClient {
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
-    registerCodecs()
-
     const mainAsset = this.getMainAsset()
     const txHistory = await this.getSDKClient().searchTx({
       messageAction,
@@ -283,8 +205,8 @@ class Client implements CosmosClient, XChainClient {
     })
 
     return {
-      total: parseInt(txHistory.total_count?.toString() || '0'),
-      txs: getTxsFromHistory(txHistory.txs || [], mainAsset),
+      total: parseInt(txHistory.pagination?.total || '0'),
+      txs: getTxsFromHistory(txHistory.tx_responses || [], mainAsset),
     }
   }
 
@@ -310,7 +232,6 @@ class Client implements CosmosClient, XChainClient {
    */
   async transfer({ walletIndex, asset, amount, recipient, memo }: TxParams): Promise<TxHash> {
     const fromAddressIndex = walletIndex || 0
-    registerCodecs()
 
     const mainAsset = this.getMainAsset()
     const transferResult = await this.getSDKClient().transfer({
@@ -322,39 +243,38 @@ class Client implements CosmosClient, XChainClient {
       memo,
     })
 
-    return transferResult?.txhash || ''
+    return transferResult || ''
   }
 
-  /**
-   * Transfer offline balances.
-   *
-   * @param {TxOfflineParams} params The transfer offline options.
-   * @returns {StdTx} The signed transaction.
-   */
-  async transferOffline({
-    walletIndex,
-    asset,
-    amount,
-    recipient,
-    memo,
-    from_account_number,
-    from_sequence,
-  }: TxOfflineParams): Promise<StdTx> {
-    const fromAddressIndex = walletIndex || 0
-    registerCodecs()
+  // /**
+  //  * Transfer offline balances.
+  //  *
+  //  * @param {TxOfflineParams} params The transfer offline options.
+  //  * @returns {StdTx} The signed transaction.
+  //  */
+  // async transferOffline({
+  //   walletIndex,
+  //   asset,
+  //   amount,
+  //   recipient,
+  //   memo,
+  //   from_account_number,
+  //   from_sequence,
+  // }: TxOfflineParams): Promise<StdTx> {
+  //   const fromAddressIndex = walletIndex || 0
 
-    const mainAsset = this.getMainAsset()
-    return await this.getSDKClient().transferSignedOffline({
-      privkey: this.getPrivateKey(fromAddressIndex),
-      from: this.getAddress(fromAddressIndex),
-      from_account_number,
-      from_sequence,
-      to: recipient,
-      amount: amount.amount().toString(),
-      asset: getDenom(asset || mainAsset),
-      memo,
-    })
-  }
+  //   const mainAsset = this.getMainAsset()
+  //   return await this.getSDKClient().transferSignedOffline({
+  //     privkey: this.getPrivateKey(fromAddressIndex),
+  //     from: this.getAddress(fromAddressIndex),
+  //     from_account_number,
+  //     from_sequence,
+  //     to: recipient,
+  //     amount: amount.amount().toString(),
+  //     asset: getDenom(asset || mainAsset),
+  //     memo,
+  //   })
+  // }
 
   /**
    * Get the current fee.

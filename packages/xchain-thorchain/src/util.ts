@@ -1,3 +1,4 @@
+import { codec } from '@cosmos-client/core/cjs/types/codec'
 import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
@@ -12,13 +13,8 @@ import {
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
-import { AccAddress, Msg, codec } from 'cosmos-client'
-import { StdTxFee } from 'cosmos-client/api'
-import { StdTx } from 'cosmos-client/x/auth'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
-
 import { ChainId, ChainIds, ClientUrl, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
-import { MsgNativeTx, ThorchainDepositResponse } from './types/messages'
+import types from './types/proto/MsgDeposit'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '3000000'
@@ -57,25 +53,25 @@ export const assetFromDenom = (denom: string): Asset | null => {
   return assetFromString(denom.toUpperCase())
 }
 
-/**
- * Type guard for MsgSend
- *
- * @param {Msg} msg
- * @returns {boolean} `true` or `false`.
- */
-export const isMsgSend = (msg: Msg): msg is MsgSend =>
-  (msg as MsgSend)?.amount !== undefined &&
-  (msg as MsgSend)?.from_address !== undefined &&
-  (msg as MsgSend)?.to_address !== undefined
+// /**
+//  * Type guard for MsgSend
+//  *
+//  * @param {Msg} msg
+//  * @returns {boolean} `true` or `false`.
+//  */
+// export const isMsgSend = (msg: Msg): msg is MsgSend =>
+//   (msg as MsgSend)?.amount !== undefined &&
+//   (msg as MsgSend)?.from_address !== undefined &&
+//   (msg as MsgSend)?.to_address !== undefined
 
-/**
- * Type guard for MsgMultiSend
- *
- * @param {Msg} msg
- * @returns {boolean} `true` or `false`.
- */
-export const isMsgMultiSend = (msg: Msg): msg is MsgMultiSend =>
-  (msg as MsgMultiSend)?.inputs !== undefined && (msg as MsgMultiSend)?.outputs !== undefined
+// /**
+//  * Type guard for MsgMultiSend
+//  *
+//  * @param {Msg} msg
+//  * @returns {boolean} `true` or `false`.
+//  */
+// export const isMsgMultiSend = (msg: Msg): msg is MsgMultiSend =>
+//   (msg as MsgMultiSend)?.inputs !== undefined && (msg as MsgMultiSend)?.outputs !== undefined
 
 /**
  * Response guard for transaction broadcast
@@ -112,18 +108,8 @@ export const getPrefix = (network: Network) => {
  *
  * @param {string} prefix
  */
-export const registerCodecs = (prefix: string): void => {
-  codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
-  codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
-
-  AccAddress.setBech32Prefix(
-    prefix,
-    prefix + 'pub',
-    prefix + 'valoper',
-    prefix + 'valoperpub',
-    prefix + 'valcons',
-    prefix + 'valconspub',
-  )
+export const registerCodecs = async (): Promise<void> => {
+  codec.register('/types.MsgDeposit', types.types.MsgDeposit)
 }
 
 /**
@@ -163,7 +149,7 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
     .reduce(
       (acc: TxData, { sender, recipient, amount }) => ({
         ...acc,
-        from: [...acc.from, { amount, from: sender }],
+        from: [...acc, { amount, from: sender }],
         to: [...acc.to, { amount, to: recipient }],
       }),
       { from: [], to: [], type: TxType.Transfer },
@@ -218,55 +204,55 @@ export const getChainIds = async (client: ClientUrl): Promise<ChainIds> => {
   }))
 }
 
-/**
- * Structure StdTx from MsgNativeTx.
- *
- * @param {MsgNativeTx} msgNativeTx Msg of type `MsgNativeTx`.
- * @param {string} nodeUrl Node url
- * @param {chainId} ChainId Chain id of the network
- *
- * @returns {Tx} The transaction details of the given transaction id.
- *
- * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
- */
-export const buildDepositTx = async ({
-  msgNativeTx,
-  nodeUrl,
-  chainId,
-}: {
-  msgNativeTx: MsgNativeTx
-  nodeUrl: string
-  chainId: ChainId
-}): Promise<StdTx> => {
-  const networkChainId = await getChainId(nodeUrl)
-  if (!networkChainId || chainId !== networkChainId)
-    throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
+// /**
+//  * Structure StdTx from MsgNativeTx.
+//  *
+//  * @param {MsgNativeTx} msgNativeTx Msg of type `MsgNativeTx`.
+//  * @param {string} nodeUrl Node url
+//  * @param {chainId} ChainId Chain id of the network
+//  *
+//  * @returns {Tx} The transaction details of the given transaction id.
+//  *
+//  * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
+//  */
+// export const buildDepositTx = async ({
+//   msgNativeTx,
+//   nodeUrl,
+//   chainId,
+// }: {
+//   msgNativeTx: MsgNativeTx
+//   nodeUrl: string
+//   chainId: ChainId
+// }): Promise<StdTx> => {
+//   const networkChainId = await getChainId(nodeUrl)
+//   if (!networkChainId || chainId !== networkChainId)
+//     throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
 
-  const response: ThorchainDepositResponse = (
-    await axios.post(`${nodeUrl}/thorchain/deposit`, {
-      coins: msgNativeTx.coins,
-      memo: msgNativeTx.memo,
-      base_req: {
-        chain_id: chainId,
-        from: msgNativeTx.signer,
-      },
-    })
-  ).data
+//   const response: ThorchainDepositResponse = (
+//     await axios.post(`${nodeUrl}/thorchain/deposit`, {
+//       coins: msgNativeTx.coins,
+//       memo: msgNativeTx.memo,
+//       base_req: {
+//         chain_id: chainId,
+//         from: msgNativeTx.signer,
+//       },
+//     })
+//   ).data
 
-  if (!response || !response.value) throw new Error('Invalid client url')
+//   if (!response || !response.value) throw new Error('Invalid client url')
 
-  const fee: StdTxFee = response.value?.fee ?? { amount: [] }
+//   const fee: StdTxFee = response.value?.fee ?? { amount: [] }
 
-  const unsignedStdTx = StdTx.fromJSON({
-    msg: response.value.msg,
-    // override fee
-    fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
-    signatures: [],
-    memo: '',
-  })
+//   const unsignedStdTx = StdTx.fromJSON({
+//     msg: response.value.msg,
+//     // override fee
+//     fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
+//     signatures: [],
+//     memo: '',
+//   })
 
-  return unsignedStdTx
-}
+//   return unsignedStdTx
+// }
 
 /**
  * Get the balance of a given address.

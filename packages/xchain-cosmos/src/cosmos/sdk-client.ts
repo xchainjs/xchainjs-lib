@@ -1,29 +1,30 @@
-import { TxHistoryParams } from '@xchainjs/xchain-client'
+import { cosmosclient, proto, rest } from '@cosmos-client/core'
+import { setBech32Prefix } from '@cosmos-client/core/cjs/config/module'
+import { Coin } from '@cosmos-client/core/cjs/openapi/api'
+import { TxHash, TxHistoryParams } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import axios from 'axios'
 import * as BIP32 from 'bip32'
-import { AccAddress, CosmosSDK, Msg, PrivKey, PrivKeySecp256k1 } from 'cosmos-client'
-import { BroadcastTxCommitResult, Coin, StdTxSignature } from 'cosmos-client/api'
-import { BaseAccount, StdTx, auth } from 'cosmos-client/x/auth'
-import { MsgSend, bank } from 'cosmos-client/x/bank'
 
 import { getQueryString } from '../util'
 
 import {
   APIQueryParam,
-  BaseAccountResponse,
   CosmosSDKClientParams,
   RPCResponse,
   RPCTxSearchResult,
   SearchTxParams,
-  TransferOfflineParams,
   TransferParams,
   TxHistoryResponse,
   TxResponse,
 } from './types'
 
+const DEFAULT_FEE = new proto.cosmos.tx.v1beta1.Fee({
+  amount: [],
+  gas_limit: cosmosclient.Long.fromString('200000'),
+})
 export class CosmosSDKClient {
-  sdk: CosmosSDK
+  sdk: cosmosclient.CosmosSDK
 
   server: string
   chainId: string
@@ -35,7 +36,7 @@ export class CosmosSDKClient {
     this.server = server
     this.chainId = chainId
     this.prefix = prefix
-    this.sdk = new CosmosSDK(this.server, this.chainId)
+    this.sdk = new cosmosclient.CosmosSDK(server, this.chainId)
   }
 
   updatePrefix(prefix: string) {
@@ -44,37 +45,37 @@ export class CosmosSDKClient {
   }
 
   setPrefix(): void {
-    AccAddress.setBech32Prefix(
-      this.prefix,
-      this.prefix + 'pub',
-      this.prefix + 'valoper',
-      this.prefix + 'valoperpub',
-      this.prefix + 'valcons',
-      this.prefix + 'valconspub',
-    )
+    setBech32Prefix({
+      accAddr: this.prefix,
+      accPub: this.prefix + 'pub',
+      valAddr: this.prefix + 'valoper',
+      valPub: this.prefix + 'valoperpub',
+      consAddr: this.prefix + 'valcons',
+      consPub: this.prefix + 'valconspub',
+    })
   }
 
-  getAddressFromPrivKey(privkey: PrivKey): string {
+  getAddressFromPrivKey(privkey: proto.cosmos.crypto.secp256k1.PrivKey): string {
     this.setPrefix()
 
-    return AccAddress.fromPublicKey(privkey.getPubKey()).toBech32()
+    return cosmosclient.AccAddress.fromPublicKey(privkey.pubKey()).toString()
   }
 
   getAddressFromMnemonic(mnemonic: string, derivationPath: string): string {
     this.setPrefix()
     const privKey = this.getPrivKeyFromMnemonic(mnemonic, derivationPath)
 
-    return AccAddress.fromPublicKey(privKey.getPubKey()).toBech32()
+    return cosmosclient.AccAddress.fromPublicKey(privKey.pubKey()).toString()
   }
 
-  getPrivKeyFromMnemonic(mnemonic: string, derivationPath: string): PrivKey {
+  getPrivKeyFromMnemonic(mnemonic: string, derivationPath: string): proto.cosmos.crypto.secp256k1.PrivKey {
     const seed = xchainCrypto.getSeed(mnemonic)
     const node = BIP32.fromSeed(seed)
     const child = node.derivePath(derivationPath)
 
     if (!child.privateKey) throw new Error('child does not have a privateKey')
 
-    return new PrivKeySecp256k1(child.privateKey)
+    return new proto.cosmos.crypto.secp256k1.PrivKey({ key: child.privateKey })
   }
 
   checkAddress(address: string): boolean {
@@ -83,7 +84,7 @@ export class CosmosSDKClient {
     if (!address.startsWith(this.prefix)) return false
 
     try {
-      return AccAddress.fromBech32(address).toBech32() === address
+      return cosmosclient.AccAddress.fromString(address).toString() === address
     } catch (err) {
       return false
     }
@@ -92,25 +93,36 @@ export class CosmosSDKClient {
   async getBalance(address: string): Promise<Coin[]> {
     this.setPrefix()
 
-    const accAddress = AccAddress.fromBech32(address)
-
-    return (await bank.balancesAddressGet(this.sdk, accAddress)).data.result
+    const accAddress = cosmosclient.AccAddress.fromString(address)
+    const response = await rest.bank.allBalances(this.sdk, accAddress)
+    return response.data.balances as Coin[]
   }
 
-  async searchTx({
-    messageAction,
-    messageSender,
-    page,
-    limit,
-    txMinHeight,
-    txMaxHeight,
-  }: SearchTxParams): Promise<TxHistoryResponse> {
+  async getAccount(address: cosmosclient.AccAddress): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> {
+    const account = await rest.auth
+      .account(this.sdk, address)
+      .then((res) => res.data.account && cosmosclient.codec.unpackCosmosAny(res.data.account))
+      .catch((_) => undefined)
+    if (!(account instanceof proto.cosmos.auth.v1beta1.BaseAccount)) {
+      throw Error('could not get account')
+    }
+    return account
+  }
+  async searchTx({ messageAction, messageSender, page, limit }: SearchTxParams): Promise<TxHistoryResponse> {
     const queryParameter: APIQueryParam = {}
+
+    if (!messageAction && !messageSender) {
+      throw new Error('One of messageAction or messageSender must be specified')
+    }
+
+    let eventsParam = ''
+
     if (messageAction !== undefined) {
-      queryParameter['message.action'] = messageAction
+      eventsParam = `message.action='${messageAction}'`
     }
     if (messageSender !== undefined) {
-      queryParameter['message.sender'] = messageSender
+      const prefix = eventsParam.length > 0 ? ',' : ''
+      eventsParam = `${eventsParam}${prefix}message.sender='${messageSender}'`
     }
     if (page !== undefined) {
       queryParameter['page'] = page.toString()
@@ -118,16 +130,13 @@ export class CosmosSDKClient {
     if (limit !== undefined) {
       queryParameter['limit'] = limit.toString()
     }
-    if (txMinHeight !== undefined) {
-      queryParameter['tx.minheight'] = txMinHeight.toString()
-    }
-    if (txMaxHeight !== undefined) {
-      queryParameter['tx.maxheight'] = txMaxHeight.toString()
-    }
+
+    queryParameter['events'] = eventsParam
 
     this.setPrefix()
 
-    return (await axios.get<TxHistoryParams>(`${this.server}/txs?${getQueryString(queryParameter)}`)).data
+    return (await axios.get<TxHistoryParams>(`${this.server}/cosmos/tx/v1beta1/txs?${getQueryString(queryParameter)}`))
+      .data
   }
 
   async searchTxFromRPC({
@@ -184,96 +193,72 @@ export class CosmosSDKClient {
   async txsHashGet(hash: string): Promise<TxResponse> {
     this.setPrefix()
 
-    return (await axios.get<TxResponse>(`${this.server}/txs/${hash}`)).data
+    return (await axios.get<TxResponse>(`${this.server}/cosmos/tx/v1beta1/txs/${hash}`)).data
   }
 
-  unsignedStdTxGet({
-    from,
-    to,
-    amount,
-    asset,
-    memo = '',
-    fee = {
-      amount: [],
-      gas: '200000',
-    },
-  }: TransferParams) {
+  async transfer({ privkey, from, to, amount, asset, memo = '', fee = DEFAULT_FEE }: TransferParams): Promise<TxHash> {
     this.setPrefix()
 
-    const msg: Msg = [
-      MsgSend.fromJSON({
-        from_address: from,
-        to_address: to,
-        amount: [
-          {
-            amount: amount.toString(),
-            denom: asset,
-          },
-        ],
-      }),
-    ]
-    const signatures: StdTxSignature[] = []
+    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+      from_address: from,
+      to_address: to,
+      amount: [
+        {
+          amount: amount.toString(),
+          denom: asset,
+        },
+      ],
+    })
 
-    return StdTx.fromJSON({
-      msg,
-      fee,
-      signatures,
+    const pubKey = privkey.pubKey()
+    const signer = cosmosclient.AccAddress.fromPublicKey(pubKey)
+    const account = await this.getAccount(signer)
+    const txBody = new proto.cosmos.tx.v1beta1.TxBody({
+      messages: [cosmosclient.codec.packAny(msgSend)],
       memo,
     })
+    const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
+      signer_infos: [
+        {
+          public_key: cosmosclient.codec.packAny(pubKey),
+          mode_info: {
+            single: {
+              mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+            },
+          },
+          sequence: account.sequence,
+        },
+      ],
+      fee,
+    })
+
+    const txBuilder = new cosmosclient.TxBuilder(this.sdk, txBody, authInfo)
+
+    return this.signAndBroadcast(txBuilder, privkey, account)
   }
 
-  async transfer({
-    privkey,
-    from,
-    to,
-    amount,
-    asset,
-    memo = '',
-    fee = {
-      amount: [],
-      gas: '200000',
-    },
-  }: TransferParams): Promise<BroadcastTxCommitResult> {
-    const unsignedStdTx = this.unsignedStdTxGet({ privkey, from, to, amount, asset, memo, fee })
-
-    return this.signAndBroadcast(unsignedStdTx, privkey, AccAddress.fromBech32(from))
-  }
-
-  async signAndBroadcast(unsignedStdTx: StdTx, privkey: PrivKey, signer: AccAddress): Promise<BroadcastTxCommitResult> {
+  async signAndBroadcast(
+    txBuilder: cosmosclient.TxBuilder,
+    privKey: proto.cosmos.crypto.secp256k1.PrivKey,
+    signerAccount: proto.cosmos.auth.v1beta1.IBaseAccount,
+  ): Promise<string> {
     this.setPrefix()
 
-    let account: BaseAccount = (await auth.accountsAddressGet(this.sdk, signer)).data.result
-    if (account.account_number === undefined) {
-      account = BaseAccount.fromJSON((account as BaseAccountResponse).value)
+    if (!signerAccount || !signerAccount.account_number) throw new Error('Invalid Account')
+
+    // sign
+    const signDocBytes = txBuilder.signDocBytes(signerAccount.account_number)
+    txBuilder.addSignature(privKey.sign(signDocBytes))
+
+    // braodcast
+    const res = await rest.tx.broadcastTx(this.sdk, {
+      tx_bytes: txBuilder.txBytes(),
+      mode: rest.tx.BroadcastTxMode.Block,
+    })
+
+    if (res?.data?.tx_response?.code !== 0) {
+      throw new Error('Error broadcasting: ' + res?.data?.tx_response?.raw_log)
     }
-
-    const signedStdTx = auth.signStdTx(
-      this.sdk,
-      privkey,
-      unsignedStdTx,
-      account.account_number.toString(),
-      account.sequence.toString(),
-    )
-
-    return (await auth.txsPost(this.sdk, signedStdTx, 'sync')).data
-  }
-
-  async transferSignedOffline({
-    privkey,
-    from,
-    from_account_number = '0',
-    from_sequence = '0',
-    to,
-    amount,
-    asset,
-    memo = '',
-    fee = {
-      amount: [],
-      gas: '200000',
-    },
-  }: TransferOfflineParams): Promise<StdTx> {
-    const unsignedStdTx = this.unsignedStdTxGet({ privkey, from, to, amount, asset, memo, fee })
-
-    return auth.signStdTx(this.sdk, privkey, unsignedStdTx, from_account_number, from_sequence)
+    return res.data.tx_response.txhash || ''
   }
 }
