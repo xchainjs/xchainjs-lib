@@ -78,7 +78,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       case Network.Stagenet:
         return 'https://cosmos.bigdipper.live'
       case Network.Testnet:
-        return 'https://explorer.theta-testnet.polypore.xyz/'
+        return 'https://explorer.theta-testnet.polypore.xyz'
     }
   }
 

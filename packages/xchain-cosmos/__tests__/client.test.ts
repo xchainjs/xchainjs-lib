@@ -11,7 +11,7 @@ import { AssetMuon } from '../src/types'
 
 const getClientUrl = (client: Client): string => {
   return client.getNetwork() === Network.Testnet
-    ? 'https://rest.sentry-02.theta-testnet.polypore.xyz/'
+    ? 'https://rest.sentry-02.theta-testnet.polypore.xyz'
     : 'https://api.cosmos.network'
 }
 
@@ -336,7 +336,7 @@ describe('Client Test', () => {
 
   it('should return valid explorer url', () => {
     // Client created with network === 'testnet'
-    expect(cosmosClient.getExplorerUrl()).toEqual('https://gaia.bigdipper.live')
+    expect(cosmosClient.getExplorerUrl()).toEqual('https://explorer.theta-testnet.polypore.xyz')
 
     cosmosClient.setNetwork('mainnet' as Network)
     expect(cosmosClient.getExplorerUrl()).toEqual('https://cosmos.bigdipper.live')
@@ -344,7 +344,7 @@ describe('Client Test', () => {
 
   it('should retrun valid explorer address url', () => {
     expect(cosmosClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
-      'https://gaia.bigdipper.live/account/anotherTestAddressHere',
+      'https://explorer.theta-testnet.polypore.xyz/account/anotherTestAddressHere',
     )
 
     cosmosClient.setNetwork('mainnet' as Network)
@@ -355,7 +355,7 @@ describe('Client Test', () => {
 
   it('should retrun valid explorer tx url', () => {
     expect(cosmosClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
-      'https://gaia.bigdipper.live/transactions/anotherTestTxHere',
+      'https://explorer.theta-testnet.polypore.xyz/transactions/anotherTestTxHere',
     )
 
     cosmosClient.setNetwork('mainnet' as Network)

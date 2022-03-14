@@ -226,7 +226,7 @@ describe('Client Test', () => {
 
   it('returns private key', async () => {
     const privKey = thorClient.getPrivateKey()
-    expect(privKey.bytes.toString()).toEqual('CHCbyYWorMZVRFtfJzt72DigvZeRNi3jo2c3hGEQ46I=')
+    expect(Buffer.from(privKey.bytes()).toString('base64')).toEqual('CHCbyYWorMZVRFtfJzt72DigvZeRNi3jo2c3hGEQ46I=')
   })
 
   describe('chainId', () => {

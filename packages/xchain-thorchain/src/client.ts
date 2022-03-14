@@ -40,12 +40,13 @@ import {
   ThorchainClientParams,
   ThorchainConstantsResponse,
   TxData,
-  TxOfflineParams
+  TxOfflineParams,
 } from './types'
 import { TxResult } from './types/messages'
 import types from './types/proto/MsgDeposit'
 import {
   DECIMAL,
+  DEFAULT_GAS_VALUE,
   MAX_TX_COUNT,
   getBalance,
   getDefaultClientUrl,
@@ -57,7 +58,7 @@ import {
   getExplorerTxUrl,
   getPrefix,
   isAssetRuneNative,
-  DEFAULT_GAS_VALUE
+  registerCodecs
 } from './util'
 
 /**
@@ -418,6 +419,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
    */
   async deposit({ walletIndex = 0, asset = AssetRuneNative, amount, memo }: DepositParam): Promise<TxHash> {
+    registerCodecs()
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
       balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
@@ -447,7 +449,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     const deposit = types.types.MsgDeposit.fromObject({
       coins: [
         {
-          asset: isAssetRuneNative(asset) ? assetToString(AssetRuneNative) : getDenom(asset),
+          asset: asset,
           amount: amount.amount().toString(),
         },
       ],
@@ -545,7 +547,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     from_account_number = '0',
     from_sequence = '0',
   }: TxOfflineParams): Promise<string> {
-
     const fee = (await this.getFees()).average
 
     if (isAssetRuneNative(asset)) {
