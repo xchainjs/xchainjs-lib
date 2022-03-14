@@ -285,11 +285,6 @@ export const buildTx = async ({
   const recipientCashAddress = toCashAddress(recipient)
   if (!validateAddress(recipientCashAddress, network)) throw new Error('Invalid address')
 
-  // make sure to convert recipient to Legacy address
-  if (isCashAddress(recipient)) {
-    recipient = toLegacyAddress(recipient)
-  }
-
   const utxos = await scanUTXOs({ haskoinUrl, address: sender })
   if (utxos.length === 0) throw new Error('No utxos to send')
 

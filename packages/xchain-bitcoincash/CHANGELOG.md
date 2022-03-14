@@ -1,3 +1,9 @@
+# v.0.13.0 (2022-xx-xx)
+
+- Cache `tx hex`
+- Helper `isCashAddress`
+- Export `node-api`
+
 # v.0.12.1 (2022-02-04)
 
 - Use latest axios@0.25.0
