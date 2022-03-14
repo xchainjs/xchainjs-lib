@@ -18,7 +18,7 @@ export type ExplorerUrl = Record<Network, string>
 
 export type ThorchainClientParams = {
   clientUrl?: ClientUrl
-  explorerUrls?: ExplorerUrls,
+  explorerUrls?: ExplorerUrls
   chainId?: string
 }
 

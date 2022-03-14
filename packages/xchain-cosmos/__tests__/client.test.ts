@@ -161,12 +161,13 @@ describe('Client Test', () => {
       txs: [],
     }
     assertTxHstory(getClientUrl(cosmosClient), address0_mainnet, {
-      count: 0,
+      pagination: {
+        total: "0"
+      },
       limit: 30,
       page_number: 1,
       page_total: 1,
-      total_count: 0,
-      txs: [],
+      tx_responses: [],
     })
 
     const transactions = await cosmosClient.getTransactions({ address: address0_mainnet })
@@ -187,12 +188,13 @@ describe('Client Test', () => {
     const encodedMsg = codec.packCosmosAny(msgSend)
 
     assertTxHstory(getClientUrl(cosmosClient), 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
-      count: 1,
+      pagination: {
+        total: "1"
+      },
       limit: 30,
       page_number: 1,
       page_total: 1,
-      total_count: 1,
-      txs: [
+      tx_responses: [
         {
           height: 1047,
           txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
@@ -227,12 +229,13 @@ describe('Client Test', () => {
     })
     const encodedMsg2 = codec.packCosmosAny(msgSend2)
     assertTxHstory(getClientUrl(cosmosClient), 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z', {
-      count: 1,
+      pagination: {
+        total: "1"
+      },
       limit: 30,
       page_number: 1,
       page_total: 1,
-      total_count: 1,
-      txs: [
+      tx_responses: [
         {
           height: 1047,
           txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',

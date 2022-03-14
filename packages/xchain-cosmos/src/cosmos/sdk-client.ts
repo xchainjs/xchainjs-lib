@@ -108,12 +108,7 @@ export class CosmosSDKClient {
     }
     return account
   }
-  async searchTx({
-    messageAction,
-    messageSender,
-    page,
-    limit
-  }: SearchTxParams): Promise<TxHistoryResponse> {
+  async searchTx({ messageAction, messageSender, page, limit }: SearchTxParams): Promise<TxHistoryResponse> {
     const queryParameter: APIQueryParam = {}
 
     if (!messageAction && !messageSender) {
@@ -126,7 +121,7 @@ export class CosmosSDKClient {
       eventsParam = `message.action='${messageAction}'`
     }
     if (messageSender !== undefined) {
-      let prefix = eventsParam.length > 0 ? ',' : ''
+      const prefix = eventsParam.length > 0 ? ',' : ''
       eventsParam = `${eventsParam}${prefix}message.sender='${messageSender}'`
     }
     if (page !== undefined) {
@@ -140,7 +135,8 @@ export class CosmosSDKClient {
 
     this.setPrefix()
 
-    return (await axios.get<TxHistoryParams>(`${this.server}/cosmos/tx/v1beta1/txs?${getQueryString(queryParameter)}`)).data
+    return (await axios.get<TxHistoryParams>(`${this.server}/cosmos/tx/v1beta1/txs?${getQueryString(queryParameter)}`))
+      .data
   }
 
   async searchTxFromRPC({
@@ -259,7 +255,7 @@ export class CosmosSDKClient {
     // braodcast
     const res = await rest.tx.broadcastTx(this.sdk, {
       tx_bytes: txBuilder.txBytes(),
-      mode: rest.tx.BroadcastTxMode.Sync,
+      mode: rest.tx.BroadcastTxMode.Block,
     })
 
     if (res?.data?.tx_response?.code !== 0) {

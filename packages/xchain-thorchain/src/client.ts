@@ -84,7 +84,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     phrase = '',
     clientUrl,
     explorerUrls,
-    chainId = 'thorchain'
+    chainId = 'thorchain',
   }: XChainClientParams & ThorchainClientParams) {
     super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
     this.clientUrl = clientUrl || getDefaultClientUrl()

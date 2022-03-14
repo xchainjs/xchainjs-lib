@@ -208,15 +208,16 @@ describe('SDK Client Test', () => {
 
   it('searchTx', async () => {
     assertTxHstory(cosmosMainnetClient.server, cosmos_mainnet_address0, {
-      count: 0,
+      pagination: {
+        total: "0"
+      },
       limit: 30,
       page_number: 1,
       page_total: 1,
-      total_count: 0,
-      txs: [],
+      tx_responses: [],
     })
     let txHistory = await cosmosMainnetClient.searchTx({ messageSender: cosmos_mainnet_address0 })
-    expect(parseInt(txHistory.total_count?.toString() || '0')).toEqual(0)
+    expect(parseInt(txHistory.pagination?.total?.toString() || '0')).toEqual(0)
 
     const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2',
@@ -228,14 +229,15 @@ describe('SDK Client Test', () => {
         },
       ],
     })
-    const encodedMsg = codec.packCosmosAny(msgSend)
+    const encodedMsg = codec.packAnyFromCosmosJSON(msgSend)
     assertTxHstory(cosmosTestnetClient.server, 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
-      count: 1,
+      pagination: {
+        total: "1"
+      },
       limit: 30,
       page_number: 1,
       page_total: 1,
-      total_count: 1,
-      txs: [
+      tx_responses: [
         {
           height: 1047,
           txhash: '098E70A9529AC8F1A57AA0FE65D1D13040B0E803AB8BE7F3B32098164009DED3',
@@ -253,18 +255,19 @@ describe('SDK Client Test', () => {
       ],
     })
     txHistory = await cosmosTestnetClient.searchTx({ messageSender: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2' })
-    expect(parseInt(txHistory.total_count?.toString() || '0')).toBeGreaterThan(0)
+    expect(parseInt(txHistory.pagination?.total?.toString() || '0')).toBeGreaterThan(0)
 
     assertTxHstory(thorMainnetClient.server, thor_mainnet_address0, {
-      count: 0,
+      pagination: {
+        total: "0"
+      },
       limit: 30,
       page_number: 1,
       page_total: 1,
-      total_count: 0,
-      txs: [],
+      tx_responses: [],
     })
     txHistory = await thorMainnetClient.searchTx({ messageSender: thor_mainnet_address0 })
-    expect(parseInt(txHistory.total_count?.toString() || '0')).toEqual(0)
+    expect(parseInt(txHistory.pagination?.total?.toString() || '0')).toEqual(0)
 
     const msgSend2 = new proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
@@ -276,14 +279,15 @@ describe('SDK Client Test', () => {
         },
       ],
     })
-    const encodedMsg2 = codec.packCosmosAny(msgSend2)
+    const encodedMsg2 = codec.packAnyFromCosmosJSON(msgSend2)
     assertTxHstory(thorTestnetClient.server, thor_testnet_address0, {
-      count: 1,
+      pagination: {
+        total: "1"
+      },
       limit: 30,
       page_number: 1,
       page_total: 1,
-      total_count: 1,
-      txs: [
+      tx_responses: [
         {
           height: 1047,
           txhash: '098E70A9529AC8F1A57AA0FE65D1D13040B0E803AB8BE7F3B32098164009DED3',
@@ -302,7 +306,7 @@ describe('SDK Client Test', () => {
     })
 
     txHistory = await thorTestnetClient.searchTx({ messageSender: thor_testnet_address0 })
-    expect(parseInt(txHistory.total_count?.toString() || '0')).toEqual(1)
+    expect(parseInt(txHistory.pagination?.total?.toString() || '0')).toEqual(1)
   })
 
   it('transfer', async () => {
@@ -368,7 +372,7 @@ describe('SDK Client Test', () => {
         },
       ],
     })
-    const encodedMsg = codec.packCosmosAny(msgSend)
+    const encodedMsg = codec.packAnyFromCosmosJSON(msgSend)
     assertTxHashGet(cosmosMainnetClient.server, '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {
       height: 45582,
       txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
@@ -397,7 +401,7 @@ describe('SDK Client Test', () => {
         },
       ],
     })
-    const encodedMsg2 = codec.packCosmosAny(msgSend2)
+    const encodedMsg2 = codec.packAnyFromCosmosJSON(msgSend2)
     const txHashData: TxResponse = {
       height: 1047,
       txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',

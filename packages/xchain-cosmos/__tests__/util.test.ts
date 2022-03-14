@@ -123,9 +123,9 @@ describe('cosmos/util', () => {
         gas_wanted: '200000',
         gas_used: '35000',
         tx: {
-          msg: [encodedMsg, encodedMsg],
+          msg: [encodedMsg.toString(), encodedMsg.toString()],
           fee: fee,
-          signatures: null,
+          signature: undefined,
           memo: '',
         } as StdTx,
         timestamp: new Date().toString(),
