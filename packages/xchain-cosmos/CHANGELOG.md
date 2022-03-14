@@ -1,3 +1,11 @@
+# v.0.10.0 (2022-03-13)
+
+- upgraded to "@cosmos-client/core": "0.44.4"
+
+## Breaking changes
+
+- Remove ``
+
 # v.0.16.1 (2022-02-04)
 
 - Use latest axios@0.25.0
