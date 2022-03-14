@@ -35,10 +35,6 @@ const mockAccountsBalance = (
   nock(url).get(`/cosmos/bank/v1beta1/balances/${address}`).reply(200, result)
 }
 
-// const mockThorchainDeposit = (url: string, result: ThorchainDepositResponse) => {
-//   nock(url).post('/thorchain/deposit').reply(200, result)
-// }
-
 const assertTxsPost = (
   url: string,
   result: {
@@ -66,7 +62,7 @@ const mockTxHistory = (url: string, result: RPCResponse<RPCTxSearchResult>): voi
 }
 
 const assertTxHashGet = (url: string, hash: string, result: TxResponse): void => {
-  nock(url).get(`/txs/${hash}`).reply(200, result)
+  nock(url).get(`/cosmos/tx/v1beta1/txs/${hash}`).reply(200, result)
 }
 
 describe('Client Test', () => {

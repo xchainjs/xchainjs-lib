@@ -54,11 +54,11 @@ const assertTxsPost = (
 }
 
 const assertTxHstory = (url: string, address: string, result: TxHistoryResponse): void => {
-  nock(url).get(`/txs?message.sender=${address}`).reply(200, result)
+  nock(url).get(`/cosmos/tx/v1beta1/txs?events=message.sender='${address}'`).reply(200, result)
 }
 
 const assertTxHashGet = (url: string, hash: string, result: TxResponse): void => {
-  nock(url).get(`/txs/${hash}`).reply(200, result)
+  nock(url).get(`/cosmos/tx/v1beta1/txs/${hash}`).reply(200, result)
 }
 
 describe('SDK Client Test', () => {
@@ -68,8 +68,8 @@ describe('SDK Client Test', () => {
     prefix: 'cosmos',
   })
   const cosmosTestnetClient: CosmosSDKClient = new CosmosSDKClient({
-    server: 'https://rest.sentry-02.theta-testnet.polypore.xyz/',
-    chainId: 'cosmoshub-testnet',
+    server: 'https://rest.sentry-02.theta-testnet.polypore.xyz',
+    chainId: 'theta-testnet-001',
     prefix: 'cosmos',
   })
 
@@ -209,7 +209,7 @@ describe('SDK Client Test', () => {
   it('searchTx', async () => {
     assertTxHstory(cosmosMainnetClient.server, cosmos_mainnet_address0, {
       pagination: {
-        total: "0"
+        total: '0',
       },
       limit: 30,
       page_number: 1,
@@ -232,7 +232,7 @@ describe('SDK Client Test', () => {
     const encodedMsg = codec.packAnyFromCosmosJSON(msgSend)
     assertTxHstory(cosmosTestnetClient.server, 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
       pagination: {
-        total: "1"
+        total: '1',
       },
       limit: 30,
       page_number: 1,
@@ -259,7 +259,7 @@ describe('SDK Client Test', () => {
 
     assertTxHstory(thorMainnetClient.server, thor_mainnet_address0, {
       pagination: {
-        total: "0"
+        total: '0',
       },
       limit: 30,
       page_number: 1,
@@ -282,7 +282,7 @@ describe('SDK Client Test', () => {
     const encodedMsg2 = codec.packAnyFromCosmosJSON(msgSend2)
     assertTxHstory(thorTestnetClient.server, thor_testnet_address0, {
       pagination: {
-        total: "1"
+        total: '1',
       },
       limit: 30,
       page_number: 1,

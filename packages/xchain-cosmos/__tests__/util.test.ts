@@ -113,7 +113,7 @@ describe('cosmos/util', () => {
         },
       ],
     })
-    const encodedMsg = codec.packCosmosAny(msgSend)
+    const encodedMsg = codec.packAnyFromCosmosJSON(msgSend)
     const txs: TxResponse[] = [
       {
         height: 0,
@@ -123,7 +123,7 @@ describe('cosmos/util', () => {
         gas_wanted: '200000',
         gas_used: '35000',
         tx: {
-          msg: [encodedMsg.toString(), encodedMsg.toString()],
+          msg: [encodedMsg, encodedMsg],
           fee: fee,
           signature: undefined,
           memo: '',

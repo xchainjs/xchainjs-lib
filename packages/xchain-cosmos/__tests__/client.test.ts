@@ -62,11 +62,11 @@ const assertTxsPost = (
 }
 
 const assertTxHstory = (url: string, address: string, result: TxHistoryResponse): void => {
-  nock(url).get(`/txs?message.sender=${address}`).reply(200, result)
+  nock(url).get(`/cosmos/tx/v1beta1/txs?events=message.sender='${address}'`).reply(200, result)
 }
 
 const assertTxHashGet = (url: string, hash: string, result: TxResponse): void => {
-  nock(url).get(`/txs/${hash}`).reply(200, result)
+  nock(url).get(`/cosmos/tx/v1beta1/txs/${hash}`).reply(200, result)
 }
 
 describe('Client Test', () => {
@@ -76,8 +76,8 @@ describe('Client Test', () => {
   const address0_mainnet = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
   const address1_mainnet = 'cosmos1924f27fujxqnkt74u4d3ke3sfygugv9qp29hmk'
 
-  const address0_testnet = 'cosmos13hrqe0g38nqnjgnstkfrlm2zd790g5yegntshv'
-  const address1_testnet = 'cosmos1re8rf3sv2tkx88xx6825tjqtfntrrfj0h4u94u'
+  const address0_testnet = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
+  const address1_testnet = 'cosmos1924f27fujxqnkt74u4d3ke3sfygugv9qp29hmk'
 
   beforeEach(() => {
     cosmosClient = new Client({ phrase, network: 'testnet' as Network })
@@ -162,7 +162,7 @@ describe('Client Test', () => {
     }
     assertTxHstory(getClientUrl(cosmosClient), address0_mainnet, {
       pagination: {
-        total: "0"
+        total: '0',
       },
       limit: 30,
       page_number: 1,
@@ -189,7 +189,7 @@ describe('Client Test', () => {
 
     assertTxHstory(getClientUrl(cosmosClient), 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
       pagination: {
-        total: "1"
+        total: '1',
       },
       limit: 30,
       page_number: 1,
@@ -230,7 +230,7 @@ describe('Client Test', () => {
     const encodedMsg2 = codec.packCosmosAny(msgSend2)
     assertTxHstory(getClientUrl(cosmosClient), 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z', {
       pagination: {
-        total: "1"
+        total: '1',
       },
       limit: 30,
       page_number: 1,

@@ -193,7 +193,7 @@ export class CosmosSDKClient {
   async txsHashGet(hash: string): Promise<TxResponse> {
     this.setPrefix()
 
-    return (await axios.get<TxResponse>(`${this.server}/txs/${hash}`)).data
+    return (await axios.get<TxResponse>(`${this.server}/cosmos/tx/v1beta1/txs/${hash}`)).data
   }
 
   async transfer({ privkey, from, to, amount, asset, memo = '', fee = DEFAULT_FEE }: TransferParams): Promise<TxHash> {
