@@ -13,6 +13,7 @@ import {
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
+
 import { ChainId, ChainIds, ClientUrl, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import types from './types/proto/MsgDeposit'
 
@@ -149,7 +150,7 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
     .reduce(
       (acc: TxData, { sender, recipient, amount }) => ({
         ...acc,
-        from: [...acc, { amount, from: sender }],
+        from: [...acc.from, { amount, from: sender }],
         to: [...acc.to, { amount, to: recipient }],
       }),
       { from: [], to: [], type: TxType.Transfer },

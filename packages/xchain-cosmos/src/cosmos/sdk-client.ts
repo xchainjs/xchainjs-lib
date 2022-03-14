@@ -14,6 +14,7 @@ import {
   RPCResponse,
   RPCTxSearchResult,
   SearchTxParams,
+  TransferOfflineParams,
   TransferParams,
   TxHistoryResponse,
   TxResponse,
@@ -21,7 +22,7 @@ import {
 
 const DEFAULT_FEE = new proto.cosmos.tx.v1beta1.Fee({
   amount: [],
-  gas_limit: cosmosclient.Long.fromString('200000'),
+  gas_limit: cosmosclient.Long.fromString('300000'),
 })
 export class CosmosSDKClient {
   sdk: cosmosclient.CosmosSDK
@@ -88,6 +89,24 @@ export class CosmosSDKClient {
     } catch (err) {
       return false
     }
+  }
+
+  getUnsignedTxBody({ from, to, amount, asset, memo = '' }: TransferParams): proto.cosmos.tx.v1beta1.TxBody {
+    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+      from_address: from,
+      to_address: to,
+      amount: [
+        {
+          amount: amount.toString(),
+          denom: asset,
+        },
+      ],
+    })
+
+    return new proto.cosmos.tx.v1beta1.TxBody({
+      messages: [cosmosclient.codec.packAny(msgSend)],
+      memo,
+    })
   }
 
   async getBalance(address: string): Promise<Coin[]> {
@@ -235,6 +254,40 @@ export class CosmosSDKClient {
     const txBuilder = new cosmosclient.TxBuilder(this.sdk, txBody, authInfo)
 
     return this.signAndBroadcast(txBuilder, privkey, account)
+  }
+
+  async transferSignedOffline({
+    privkey,
+    from,
+    from_account_number = '0',
+    from_sequence = '0',
+    to,
+    amount,
+    asset,
+    memo = '',
+    fee = DEFAULT_FEE,
+  }: TransferOfflineParams): Promise<string> {
+    const txBody = this.getUnsignedTxBody({ privkey, from, to, amount, asset, memo })
+
+    const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
+      signer_infos: [
+        {
+          public_key: cosmosclient.codec.packAny(privkey.pubKey()),
+          mode_info: {
+            single: {
+              mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+            },
+          },
+          sequence: cosmosclient.Long.fromString(from_sequence),
+        },
+      ],
+      fee,
+    })
+
+    const txBuilder = new cosmosclient.TxBuilder(this.sdk, txBody, authInfo)
+    const signDocBytes = txBuilder.signDocBytes(cosmosclient.Long.fromString(from_account_number))
+    txBuilder.addSignature(privkey.sign(signDocBytes))
+    return txBuilder.txBytes()
   }
 
   async signAndBroadcast(

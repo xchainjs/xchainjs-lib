@@ -17,6 +17,7 @@ import {
 import { Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import { CosmosSDKClient } from './cosmos/sdk-client'
+import { TxOfflineParams } from './cosmos/types'
 import { AssetAtom, AssetMuon } from './types'
 import { DECIMAL, getAsset, getDenom, getTxsFromHistory } from './util'
 
@@ -246,35 +247,35 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     return transferResult || ''
   }
 
-  // /**
-  //  * Transfer offline balances.
-  //  *
-  //  * @param {TxOfflineParams} params The transfer offline options.
-  //  * @returns {StdTx} The signed transaction.
-  //  */
-  // async transferOffline({
-  //   walletIndex,
-  //   asset,
-  //   amount,
-  //   recipient,
-  //   memo,
-  //   from_account_number,
-  //   from_sequence,
-  // }: TxOfflineParams): Promise<StdTx> {
-  //   const fromAddressIndex = walletIndex || 0
+  /**
+   * Transfer offline balances.
+   *
+   * @param {TxOfflineParams} params The transfer offline options.
+   * @returns {string} The signed transaction bytes.
+   */
+  async transferOffline({
+    walletIndex,
+    asset,
+    amount,
+    recipient,
+    memo,
+    from_account_number,
+    from_sequence,
+  }: TxOfflineParams): Promise<string> {
+    const fromAddressIndex = walletIndex || 0
 
-  //   const mainAsset = this.getMainAsset()
-  //   return await this.getSDKClient().transferSignedOffline({
-  //     privkey: this.getPrivateKey(fromAddressIndex),
-  //     from: this.getAddress(fromAddressIndex),
-  //     from_account_number,
-  //     from_sequence,
-  //     to: recipient,
-  //     amount: amount.amount().toString(),
-  //     asset: getDenom(asset || mainAsset),
-  //     memo,
-  //   })
-  // }
+    const mainAsset = this.getMainAsset()
+    return await this.getSDKClient().transferSignedOffline({
+      privkey: this.getPrivateKey(fromAddressIndex),
+      from: this.getAddress(fromAddressIndex),
+      from_account_number,
+      from_sequence,
+      to: recipient,
+      amount: amount.amount().toString(),
+      asset: getDenom(asset || mainAsset),
+      memo,
+    })
+  }
 
   /**
    * Get the current fee.
