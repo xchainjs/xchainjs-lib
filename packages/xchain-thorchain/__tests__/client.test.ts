@@ -285,10 +285,11 @@ describe('Client Test', () => {
     })
   })
 
-  // it('returns public key', async () => {
-  //   const pubKey = thorClient.getPubKey()
-  //   expect(pubKey.toBase64()).toEqual('AsL4F+rvFMqDkZYpVVnZa0OBa0EXwscjNrODbBME42vC')
-  // })
+  it('returns public key', async () => {
+    const pubKey = thorClient.getPubKey()
+    const pkString = Buffer.from(pubKey.bytes()).toString('base64')
+    expect(pkString).toEqual('AsL4F+rvFMqDkZYpVVnZa0OBa0EXwscjNrODbBME42vC')
+  })
 
   it('has no balances', async () => {
     mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {

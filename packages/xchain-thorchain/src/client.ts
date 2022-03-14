@@ -40,6 +40,7 @@ import {
   ThorchainClientParams,
   ThorchainConstantsResponse,
   TxData,
+  TxOfflineParams
 } from './types'
 import { TxResult } from './types/messages'
 import types from './types/proto/MsgDeposit'
@@ -56,6 +57,7 @@ import {
   getExplorerTxUrl,
   getPrefix,
   isAssetRuneNative,
+  DEFAULT_GAS_VALUE
 } from './util'
 
 /**
@@ -229,19 +231,20 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     return this.cosmosClient.getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
   }
 
-  // /**
-  //  * Get public key
-  //  *
-  //  * @param {number} index the HD wallet index (optional)
-  //  *
-  //  * @returns {PubKey} The public key generated from the given phrase
-  //  *
-  //  * @throws {"Phrase not set"}
-  //  * Throws an error if phrase has not been set before
-  //  **/
-  // getPubKey(index = 0): proto.cosmos.crypto.secp256k1.PubKey {
-  //   return this.getPrivateKey(index).pubKey()
-  // }
+  /**
+   * Get public key
+   *
+   * @param {number} index the HD wallet index (optional)
+   *
+   * @returns {PubKey} The public key generated from the given phrase
+   *
+   * @throws {"Phrase not set"}
+   * Throws an error if phrase has not been set before
+   **/
+  getPubKey(index = 0): cosmosclient.PubKey {
+    const privKey = this.getPrivateKey(index)
+    return privKey.pubKey()
+  }
 
   /**
    * Get the current address.
@@ -525,56 +528,55 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     return hash || ''
   }
 
-  // /**
-  //  * Transfer without broadcast balances with MsgSend
-  //  *
-  //  * @param {TxOfflineParams} params The transfer offline options.
-  //  * @returns {StdTx} The signed transaction.
-  //  */
-  // async transferOffline({
-  //   walletIndex = 0,
-  //   asset = AssetRuneNative,
-  //   amount,
-  //   recipient,
-  //   memo,
-  //   from_rune_balance,
-  //   from_asset_balance = baseAmount(0, DECIMAL),
-  //   from_account_number = '0',
-  //   from_sequence = '0',
-  // }: TxOfflineParams): Promise<StdTx> {
-  //   // registerCodecs(getPrefix(this.network))
+  /**
+   * Transfer without broadcast balances with MsgSend
+   *
+   * @param {TxOfflineParams} params The transfer offline options.
+   * @returns {string} The signed transaction bytes.
+   */
+  async transferOffline({
+    walletIndex = 0,
+    asset = AssetRuneNative,
+    amount,
+    recipient,
+    memo,
+    from_rune_balance,
+    from_asset_balance = baseAmount(0, DECIMAL),
+    from_account_number = '0',
+    from_sequence = '0',
+  }: TxOfflineParams): Promise<string> {
 
-  //   const fee = (await this.getFees()).average
+    const fee = (await this.getFees()).average
 
-  //   if (isAssetRuneNative(asset)) {
-  //     // amount + fee < runeBalance
-  //     if (from_rune_balance.lt(amount.plus(fee))) {
-  //       throw new Error('insufficient funds')
-  //     }
-  //   } else {
-  //     // amount < assetBalances && runeBalance < fee
-  //     if (from_asset_balance.lt(amount) || from_rune_balance.lt(fee)) {
-  //       throw new Error('insufficient funds')
-  //     }
-  //   }
+    if (isAssetRuneNative(asset)) {
+      // amount + fee < runeBalance
+      if (from_rune_balance.lt(amount.plus(fee))) {
+        throw new Error('insufficient funds')
+      }
+    } else {
+      // amount < assetBalances && runeBalance < fee
+      if (from_asset_balance.lt(amount) || from_rune_balance.lt(fee)) {
+        throw new Error('insufficient funds')
+      }
+    }
 
-  //   const result = await this.cosmosClient.transferSignedOffline({
-  //     privkey: this.getPrivateKey(walletIndex),
-  //     from: this.getAddress(walletIndex),
-  //     from_account_number,
-  //     from_sequence,
-  //     to: recipient,
-  //     amount: amount.amount().toString(),
-  //     asset: getDenom(asset),
-  //     memo,
-  //     fee: {
-  //       amount: [],
-  //       gas: DEFAULT_GAS_VALUE,
-  //     },
-  //   })
+    const result = await this.cosmosClient.transferSignedOffline({
+      privkey: this.getPrivateKey(walletIndex),
+      from: this.getAddress(walletIndex),
+      from_account_number,
+      from_sequence,
+      to: recipient,
+      amount: amount.amount().toString(),
+      asset: getDenom(asset),
+      memo,
+      fee: new proto.cosmos.tx.v1beta1.Fee({
+        amount: [],
+        gas_limit: cosmosclient.Long.fromString(DEFAULT_GAS_VALUE),
+      }),
+    })
 
-  //   return JSON.parse(codec.toJSONString(result)).value
-  // }
+    return result
+  }
 
   /**
    * Gets fees from Node
