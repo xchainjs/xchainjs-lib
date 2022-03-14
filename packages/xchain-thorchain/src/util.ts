@@ -54,26 +54,6 @@ export const assetFromDenom = (denom: string): Asset | null => {
   return assetFromString(denom.toUpperCase())
 }
 
-// /**
-//  * Type guard for MsgSend
-//  *
-//  * @param {Msg} msg
-//  * @returns {boolean} `true` or `false`.
-//  */
-// export const isMsgSend = (msg: Msg): msg is MsgSend =>
-//   (msg as MsgSend)?.amount !== undefined &&
-//   (msg as MsgSend)?.from_address !== undefined &&
-//   (msg as MsgSend)?.to_address !== undefined
-
-// /**
-//  * Type guard for MsgMultiSend
-//  *
-//  * @param {Msg} msg
-//  * @returns {boolean} `true` or `false`.
-//  */
-// export const isMsgMultiSend = (msg: Msg): msg is MsgMultiSend =>
-//   (msg as MsgMultiSend)?.inputs !== undefined && (msg as MsgMultiSend)?.outputs !== undefined
-
 /**
  * Response guard for transaction broadcast
  *
@@ -205,56 +185,6 @@ export const getChainIds = async (client: ClientUrl): Promise<ChainIds> => {
   }))
 }
 
-// /**
-//  * Structure StdTx from MsgNativeTx.
-//  *
-//  * @param {MsgNativeTx} msgNativeTx Msg of type `MsgNativeTx`.
-//  * @param {string} nodeUrl Node url
-//  * @param {chainId} ChainId Chain id of the network
-//  *
-//  * @returns {Tx} The transaction details of the given transaction id.
-//  *
-//  * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
-//  */
-// export const buildDepositTx = async ({
-//   msgNativeTx,
-//   nodeUrl,
-//   chainId,
-// }: {
-//   msgNativeTx: MsgNativeTx
-//   nodeUrl: string
-//   chainId: ChainId
-// }): Promise<StdTx> => {
-//   const networkChainId = await getChainId(nodeUrl)
-//   if (!networkChainId || chainId !== networkChainId)
-//     throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
-
-//   const response: ThorchainDepositResponse = (
-//     await axios.post(`${nodeUrl}/thorchain/deposit`, {
-//       coins: msgNativeTx.coins,
-//       memo: msgNativeTx.memo,
-//       base_req: {
-//         chain_id: chainId,
-//         from: msgNativeTx.signer,
-//       },
-//     })
-//   ).data
-
-//   if (!response || !response.value) throw new Error('Invalid client url')
-
-//   const fee: StdTxFee = response.value?.fee ?? { amount: [] }
-
-//   const unsignedStdTx = StdTx.fromJSON({
-//     msg: response.value.msg,
-//     // override fee
-//     fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
-//     signatures: [],
-//     memo: '',
-//   })
-
-//   return unsignedStdTx
-// }
-
 /**
  * Get the balance of a given address.
  *
@@ -293,7 +223,7 @@ export const getDefaultClientUrl = (): ClientUrl => {
   return {
     [Network.Testnet]: {
       node: 'https://testnet.thornode.thorchain.info',
-      rpc: 'https://testnet.rpc.thorchain.info',
+      rpc: 'https://testnet-rpc.ninerealms.com',
     },
     [Network.Stagenet]: {
       node: 'https://stagenet-thornode.ninerealms.com',
@@ -301,7 +231,7 @@ export const getDefaultClientUrl = (): ClientUrl => {
     },
     [Network.Mainnet]: {
       node: 'https://thornode.ninerealms.com',
-      rpc: 'https://rpc.thorchain.info',
+      rpc: 'https://rpc.ninerealms.com',
     },
   }
 }

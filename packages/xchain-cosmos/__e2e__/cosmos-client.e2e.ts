@@ -56,10 +56,11 @@ describe('Cosmos Integration Tests', () => {
   it('should fail xfer xxx from wallet 0 -> 1', async () => {
     try {
       const addressTo = xchainClient.getAddress(0)
+      console.log('addressTo: ', addressTo)
       const transferTx: TxParams = {
         walletIndex: 1,
         asset: { chain: Chain.Cosmos, ticker: 'GAIA', symbol: 'xxx', synth: false },
-        amount: baseAmount('100'),
+        amount: baseAmount('100', 6),
         recipient: addressTo,
         memo: 'Hi!',
       }

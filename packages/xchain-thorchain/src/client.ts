@@ -58,7 +58,7 @@ import {
   getExplorerTxUrl,
   getPrefix,
   isAssetRuneNative,
-  registerCodecs
+  registerCodecs,
 } from './util'
 
 /**
