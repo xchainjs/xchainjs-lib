@@ -8,6 +8,7 @@ import {
   Network,
   Tx,
   TxFrom,
+  TxHash,
   TxParams,
   TxTo,
   TxType,
@@ -140,6 +141,16 @@ export const toCashAddress = (address: Address): Address => {
 }
 
 /**
+ * Checks whether address is Cash Address
+ *
+ * @param {Address} address
+ * @returns {boolean} Is cash address.
+ */
+export const isCashAddress = (address: Address): boolean => {
+  return bchaddr.isCashAddress(address)
+}
+
+/**
  * Parse transaction.
  *
  * @param {Transaction} tx
@@ -202,6 +213,26 @@ export const validateAddress = (address: string, network: Network): boolean => {
   const toAddress = toCashAddress(address)
   return bchaddr.isValidAddress(toAddress) && bchaddr.detectAddressNetwork(toAddress) === toBCHAddressNetwork(network)
 }
+
+// Stores list of txHex in memory to avoid requesting same data
+const txHexMap: Record<TxHash, string> = {}
+
+/**
+ * Helper to get `hex` of `Tx`
+ *
+ * It will try to get it from cache before requesting it from Sochain
+ */
+const getTxHex = async ({ txHash, haskoinUrl }: { haskoinUrl: string; txHash: TxHash }): Promise<string> => {
+  // try to get hex from cache
+  let txHex = txHexMap[txHash]
+  if (!!txHex) return txHex
+  // or get it from Haskoin
+  txHex = await getRawTransaction({ haskoinUrl, txId: txHash })
+  // cache it
+  txHexMap[txHash] = txHex
+  return txHex
+}
+
 /**
  * Scan UTXOs from sochain.
  *
@@ -209,12 +240,11 @@ export const validateAddress = (address: string, network: Network): boolean => {
  * @param {Address} address
  * @returns {UTXO[]} The UTXOs of the given address.
  */
-export const scanUTXOs = async (haskoinUrl: string, address: Address): Promise<UTXO[]> => {
-  const unspents = await getUnspentTransactions({ haskoinUrl, address })
-  const utxos: UTXO[] = []
+export const scanUTXOs = async ({ haskoinUrl, address }: { haskoinUrl: string; address: Address }): Promise<UTXO[]> => {
+  const unspentUtxos = await getUnspentTransactions({ haskoinUrl, address })
 
-  for (const utxo of unspents || []) {
-    utxos.push({
+  return await Promise.all(
+    unspentUtxos.map(async (utxo) => ({
       hash: utxo.txid,
       value: utxo.value,
       index: utxo.index,
@@ -223,11 +253,9 @@ export const scanUTXOs = async (haskoinUrl: string, address: Address): Promise<U
         script: bitcash.script.compile(Buffer.from(utxo.pkscript, 'hex')),
       },
       address: utxo.address,
-      txHex: await getRawTransaction({ haskoinUrl, txId: utxo.txid }),
-    } as UTXO)
-  }
-
-  return utxos
+      txHex: await getTxHex({ haskoinUrl, txHash: utxo.txid }),
+    })),
+  )
 }
 
 /**
@@ -252,11 +280,17 @@ export const buildTx = async ({
 }): Promise<{
   builder: TransactionBuilder
   utxos: UTXO[]
+  inputs: UTXO[]
 }> => {
   const recipientCashAddress = toCashAddress(recipient)
   if (!validateAddress(recipientCashAddress, network)) throw new Error('Invalid address')
 
-  const utxos = await scanUTXOs(haskoinUrl, sender)
+  // make sure to convert recipient to Legacy address
+  if (isCashAddress(recipient)) {
+    recipient = toLegacyAddress(recipient)
+  }
+
+  const utxos = await scanUTXOs({ haskoinUrl, address: sender })
   if (utxos.length === 0) throw new Error('No utxos to send')
 
   const feeRateWhole = Number(feeRate.toFixed(0))
@@ -300,7 +334,8 @@ export const buildTx = async ({
 
   return {
     builder: transactionBuilder,
-    utxos: inputs,
+    utxos,
+    inputs,
   }
 }
 

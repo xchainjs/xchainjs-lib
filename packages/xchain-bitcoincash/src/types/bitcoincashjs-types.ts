@@ -19,6 +19,7 @@ export type TransactionBuilder = {
     signatureAlgorithm?: string,
   ): void
   build(): Transaction
+  buildIncomplete(): Transaction
 }
 
 export type Network = {
