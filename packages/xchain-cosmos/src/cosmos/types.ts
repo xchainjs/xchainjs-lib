@@ -68,12 +68,13 @@ export type TxResponse = {
 }
 
 export type TxHistoryResponse = {
-  total_count?: number
-  count?: number
   page_number?: number
   page_total?: number
   limit?: number
-  txs?: TxResponse[]
+  pagination?: {
+    total: string
+  }
+  tx_responses?: TxResponse[]
 }
 
 export type APIQueryParam = {

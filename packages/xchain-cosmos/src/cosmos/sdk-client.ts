@@ -112,16 +112,22 @@ export class CosmosSDKClient {
     messageAction,
     messageSender,
     page,
-    limit,
-    txMinHeight,
-    txMaxHeight,
+    limit
   }: SearchTxParams): Promise<TxHistoryResponse> {
     const queryParameter: APIQueryParam = {}
+
+    if (!messageAction && !messageSender) {
+      throw new Error('One of messageAction or messageSender must be specified')
+    }
+
+    let eventsParam = ''
+
     if (messageAction !== undefined) {
-      queryParameter['message.action'] = messageAction
+      eventsParam = `message.action='${messageAction}'`
     }
     if (messageSender !== undefined) {
-      queryParameter['message.sender'] = messageSender
+      let prefix = eventsParam.length > 0 ? ',' : ''
+      eventsParam = `${eventsParam}${prefix}message.sender='${messageSender}'`
     }
     if (page !== undefined) {
       queryParameter['page'] = page.toString()
@@ -129,16 +135,12 @@ export class CosmosSDKClient {
     if (limit !== undefined) {
       queryParameter['limit'] = limit.toString()
     }
-    if (txMinHeight !== undefined) {
-      queryParameter['tx.minheight'] = txMinHeight.toString()
-    }
-    if (txMaxHeight !== undefined) {
-      queryParameter['tx.maxheight'] = txMaxHeight.toString()
-    }
+
+    queryParameter['events'] = eventsParam
 
     this.setPrefix()
 
-    return (await axios.get<TxHistoryParams>(`${this.server}/txs?${getQueryString(queryParameter)}`)).data
+    return (await axios.get<TxHistoryParams>(`${this.server}/cosmos/tx/v1beta1/txs?${getQueryString(queryParameter)}`)).data
   }
 
   async searchTxFromRPC({

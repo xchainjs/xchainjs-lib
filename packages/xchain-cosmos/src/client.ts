@@ -202,8 +202,8 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     })
 
     return {
-      total: parseInt(txHistory.total_count?.toString() || '0'),
-      txs: getTxsFromHistory(txHistory.txs || [], mainAsset),
+      total: parseInt(txHistory.pagination?.total || '0'),
+      txs: getTxsFromHistory(txHistory.tx_responses || [], mainAsset),
     }
   }
 

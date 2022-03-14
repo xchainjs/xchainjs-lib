@@ -49,6 +49,7 @@ describe('Cosmos Integration Tests', () => {
   it('should fetch cosmos txs', async () => {
     const address = xchainClient.getAddress(0)
     const txPage = await xchainClient.getTransactions({ address })
+
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })

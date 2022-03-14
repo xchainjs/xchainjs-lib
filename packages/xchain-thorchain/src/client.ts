@@ -32,7 +32,6 @@ import {
   // buildDepositTx,
   // buildDepositTx,
   getBalance,
-  getChainId,
   getDefaultClientUrl,
   getDefaultExplorerUrls,
   getDefaultFees,
@@ -85,6 +84,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     phrase = '',
     clientUrl,
     explorerUrls,
+    chainId = 'thorchain'
   }: XChainClientParams & ThorchainClientParams) {
     super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
     this.clientUrl = clientUrl || getDefaultClientUrl()
@@ -92,7 +92,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
 
     this.cosmosClient = new CosmosSDKClient({
       server: this.getClientUrl().node,
-      chainId: getChainId(),
+      chainId: chainId,
       prefix: getPrefix(this.network),
     })
     registerCodecs()
@@ -422,8 +422,8 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         gas_limit: cosmosclient.Long.fromString('500000000'),
       },
     })
-    console.log(JSON.stringify(txBody, null, 2))
-    console.log(JSON.stringify(authInfo, null, 2))
+    console.log('tx body', JSON.stringify(txBody, null, 2))
+    console.log('auth info', JSON.stringify(authInfo, null, 2))
     // sign
     const txBuilder = new cosmosclient.TxBuilder(this.getCosmosClient().sdk, txBody, authInfo)
 
