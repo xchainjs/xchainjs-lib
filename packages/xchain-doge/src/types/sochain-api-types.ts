@@ -1,12 +1,5 @@
 import { Network, TxHash } from '@xchainjs/xchain-client'
 
-export type AddressParams = {
-  sochainUrl: string
-  network: Network
-  address: string
-  startingFromTxId?: string
-}
-
 export type TxHashParams = {
   sochainUrl: string
   network: Network

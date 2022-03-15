@@ -1,3 +1,14 @@
+# v.0.2.0 (2022-xx-xx)
+
+## Update
+
+- Fetch `txHex` optionally by scanning UTXOs #489
+- Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same data #490
+
+## Breaking change
+
+- Remove unspecific `AddressParams` type
+
 # v.0.1.2 (2022-02-04)
 
 - Use latest axios@0.25.0

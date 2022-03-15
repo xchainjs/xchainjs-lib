@@ -2,6 +2,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { AssetDOGE, baseAmount } from '@xchainjs/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
+import mockThornodeApi from '../__mocks__/thornode'
 import { Client } from '../src/client'
 import { MIN_TX_FEE } from '../src/const'
 
@@ -11,9 +12,15 @@ const dogeClient = new Client({ network: Network.Testnet })
 
 describe('DogecoinClient Test', () => {
   beforeEach(() => {
+    mockThornodeApi.init()
+    mockSochainApi.init()
     dogeClient.purgeClient()
   })
-  afterEach(() => dogeClient.purgeClient())
+  afterEach(() => {
+    mockThornodeApi.restore()
+    mockSochainApi.restore()
+    dogeClient.purgeClient()
+  })
 
   const MEMO = 'SWAP:THOR.RUNE'
   const phraseOne = 'ship country company mistake figure photo file riot expire always rare tell'
@@ -101,44 +108,40 @@ describe('DogecoinClient Test', () => {
     expect(newBalance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
 
-  // Some random 404 and useless error?
-  // it('should broadcast a normal transfer', async () => {
-  //   dogeClient.setNetwork(Network.Testnet)
-  //   dogeClient.setPhrase(phraseOne)
-  //   const amount = baseAmount(5000000000)
-  //   const txid = await dogeClient.transfer({ asset: AssetDoge, recipient: testnet_address_path1, amount, feeRate: 1 })
-  //   expect(txid).toEqual(expect.any(String))
-  // })
+  it('should broadcast a normal transfer', async () => {
+    dogeClient.setNetwork(Network.Testnet)
+    dogeClient.setPhrase(phraseOne)
+    const amount = baseAmount(5000000000)
+    const txid = await dogeClient.transfer({ recipient: testnet_address_path1, amount, feeRate: 1 })
+    expect(txid).toEqual('mock-txid')
+  })
 
-  // Some random 404 and useless error?
-  // it('should broadcast a normal transfer without feeRate', async () => {
-  //   dogeClient.setNetwork(Network.Testnet)
-  //   dogeClient.setPhrase(phraseOne)
-  //   const amount = baseAmount(100)
-  //   const txid = await dogeClient.transfer({ asset: AssetDoge, recipient: testnet_address_path0, amount })
-  //   expect(txid).toEqual(expect.any(String))
-  // })
+  it('should broadcast a normal transfer without feeRate', async () => {
+    dogeClient.setNetwork(Network.Testnet)
+    dogeClient.setPhrase(phraseOne)
+    const amount = baseAmount(100)
+    const txid = await dogeClient.transfer({ recipient: testnet_address_path0, amount })
+    expect(txid).toEqual('mock-txid')
+  })
 
-  // Even weirder 404 error
-  // it('should do broadcast a vault transfer with a memo', async () => {
-  //   dogeClient.setNetwork(Network.Testnet)
-  //   dogeClient.setPhrase(phraseOne)
+  it('should do broadcast a vault transfer with a memo', async () => {
+    dogeClient.setNetwork(Network.Testnet)
+    dogeClient.setPhrase(phraseOne)
 
-  //   const amount = baseAmount(2223)
-  //   try {
-  //     const txid = await dogeClient.transfer({
-  //       asset: AssetDoge,
-  //       recipient: testnet_address_path0,
-  //       amount,
-  //       memo: MEMO,
-  //       feeRate: 1,
-  //     })
-  //     expect(txid).toEqual(expect.any(String))
-  //   } catch (err) {
-  //     console.log('ERR running test', err)
-  //     throw err
-  //   }
-  // })
+    const amount = baseAmount(2223)
+    try {
+      const txid = await dogeClient.transfer({
+        recipient: testnet_address_path0,
+        amount,
+        memo: MEMO,
+        feeRate: 1,
+      })
+      expect(txid).toEqual('mock-txid')
+    } catch (err) {
+      console.log('ERR running test', err)
+      throw err
+    }
+  })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
     dogeClient.setNetwork(Network.Testnet)
@@ -237,9 +240,7 @@ describe('DogecoinClient Test', () => {
     const amount = baseAmount(99000)
     const expectedError = 'Invalid address'
 
-    return expect(
-      dogeClient.transfer({ asset: AssetDOGE, recipient: invalidAddress, amount, feeRate: 1 }),
-    ).rejects.toThrow(expectedError)
+    return expect(dogeClient.transfer({ recipient: invalidAddress, amount, feeRate: 1 })).rejects.toThrow(expectedError)
   })
 
   it('should get address transactions', async () => {
