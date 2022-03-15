@@ -1,3 +1,4 @@
+import { TxHash } from '@xchainjs/xchain-client/lib'
 import axios from 'axios'
 import uniqid from 'uniqid'
 
@@ -10,7 +11,7 @@ import { TxBroadcastParams, TxBroadcastResponse } from './types'
  *
  * @returns {string} Transaction ID.
  */
-export const broadcastTx = async ({ txHex, auth, nodeUrl }: TxBroadcastParams): Promise<string> => {
+export const broadcastTx = async ({ txHex, auth, nodeUrl }: TxBroadcastParams): Promise<TxHash> => {
   const response: TxBroadcastResponse = (
     await axios.post(
       nodeUrl,
@@ -25,6 +26,7 @@ export const broadcastTx = async ({ txHex, auth, nodeUrl }: TxBroadcastParams): 
       },
     )
   ).data
+
   if (response.error) {
     throw new Error(`failed to broadcast a transaction: ${response.error}`)
   }
