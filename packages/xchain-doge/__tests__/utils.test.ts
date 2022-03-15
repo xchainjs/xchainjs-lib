@@ -1,14 +1,22 @@
-// import { Network } from '@xchainjs/xchain-client'
+import { Network, TxHash } from '@xchainjs/xchain-client'
 
+import mockBlockcypherApi from '../__mocks__/blockcypher'
 import mockSochainApi from '../__mocks__/sochain'
 import { UTXO } from '../src/types/common'
 import * as Utils from '../src/utils'
 
-mockSochainApi.init()
-
 let utxos: UTXO[]
 
 describe('Dogecoin Utils Test', () => {
+  beforeEach(() => {
+    mockSochainApi.init()
+    mockBlockcypherApi.init()
+  })
+  afterEach(() => {
+    mockSochainApi.restore()
+    mockBlockcypherApi.restore()
+  })
+
   const witness = {
     script: Buffer.from('0014123f6562aa047dae2d38537327596cd8e9e21932'),
     value: 10000,
@@ -42,15 +50,37 @@ describe('Dogecoin Utils Test', () => {
     expect(estimates.fastest).toBeDefined()
     expect(estimates.average).toBeDefined()
   })
-  //   it('should fetch as many uxtos as are associated with an address', async () => {
-  //     const address = 'DGCSsYo3wZM62KEW476BpLTswmEGZ2dx5f'
-  //     const utxos: UTXO[] = await Utils.scanUTXOs({
-  //       sochainUrl: 'https://sochain.com/api/v2',
-  //       network: 'mainnet' as Network,
-  //       address,
-  //     })
-  //     expect(utxos.length).toEqual(111)
-  //     expect(utxos?.[0].hash).toEqual('c1ca99fdf24dbcb0ecf8d988e057e096c80459ce6fb10301c783ba04df9ea674')
-  //     expect(utxos?.[utxos.length - 1].hash).toEqual('dc6328cf9f6004c85c1eeac28e42a0e24ac3deda2bf76a8b6f38129fe704c7c6')
-  //   })
+
+  it('should fetch as many uxtos as are associated with an address', async () => {
+    const address = 'DRapidDiBYggT1zdrELnVhNDqyAHn89cRi'
+    const utxos: UTXO[] = await Utils.scanUTXOs({
+      sochainUrl: 'https://sochain.com/api/v2',
+      network: Network.Mainnet,
+      address,
+      withTxHex: false,
+    })
+    expect(utxos.length).toEqual(1)
+    expect(utxos?.[0].hash).toEqual('f65aa58332a0d491d7f96ccb96cc513ad622f18ad88cbe123096b23963569da0')
+    expect(utxos?.[0].value).toEqual(100000000)
+  })
+
+  it('broadcastTx (mainnet / blockcypher)', async () => {
+    const txHash: TxHash = await Utils.broadcastTx({
+      nodeUrl: 'https://api.blockcypher.com/v1/txs/push',
+      network: Network.Mainnet,
+      txHex:
+        '01000000011935b41d12936df99d322ac8972b74ecff7b79408bbccaf1b2eb8015228beac8000000006b483045022100921fc36b911094280f07d8504a80fbab9b823a25f102e2bc69b14bcd369dfc7902200d07067d47f040e724b556e5bc3061af132d5a47bd96e901429d53c41e0f8cca012102152e2bb5b273561ece7bbe8b1df51a4c44f5ab0bc940c105045e2cc77e618044ffffffff0240420f00000000001976a9145fb1af31edd2aa5a2bbaa24f6043d6ec31f7e63288ac20da3c00000000001976a914efec6de6c253e657a9d5506a78ee48d89762fb3188ac00000000',
+    })
+    expect(txHash).toEqual('mock-txid-blockcypher')
+  })
+
+  it('broadcastTx (testnet / sochain)', async () => {
+    const txHash: TxHash = await Utils.broadcastTx({
+      nodeUrl: 'https://sochain.com/api/v2/send_tx',
+      network: Network.Testnet,
+      txHex:
+        '01000000011935b41d12936df99d322ac8972b74ecff7b79408bbccaf1b2eb8015228beac8000000006b483045022100921fc36b911094280f07d8504a80fbab9b823a25f102e2bc69b14bcd369dfc7902200d07067d47f040e724b556e5bc3061af132d5a47bd96e901429d53c41e0f8cca012102152e2bb5b273561ece7bbe8b1df51a4c44f5ab0bc940c105045e2cc77e618044ffffffff0240420f00000000001976a9145fb1af31edd2aa5a2bbaa24f6043d6ec31f7e63288ac20da3c00000000001976a914efec6de6c253e657a9d5506a78ee48d89762fb3188ac00000000',
+    })
+    expect(txHash).toEqual('mock-txid-sochain')
+  })
 })

@@ -4,7 +4,6 @@ import axios from 'axios'
 
 import { DOGE_DECIMAL } from './const'
 import {
-  AddressParams,
   DogeAddressDTO,
   DogeAddressUTXO,
   DogeGetBalanceDTO,
@@ -25,7 +24,7 @@ const toSochainNetwork = (network: Network): string => {
   }
 }
 
-export const getSendTxUrl = ({ sochainUrl, network }: AddressParams) => {
+export const getSendTxUrl = ({ sochainUrl, network }: { sochainUrl: string; network: Network }) => {
   return `${sochainUrl}/send_tx/${toSochainNetwork(network)}`
 }
 
@@ -39,7 +38,15 @@ export const getSendTxUrl = ({ sochainUrl, network }: AddressParams) => {
  * @param {string} address
  * @returns {DogeAddressDTO}
  */
-export const getAddress = async ({ sochainUrl, network, address }: AddressParams): Promise<DogeAddressDTO> => {
+export const getAddress = async ({
+  sochainUrl,
+  network,
+  address,
+}: {
+  sochainUrl: string
+  network: Network
+  address: string
+}): Promise<DogeAddressDTO> => {
   const url = `${sochainUrl}/address/${toSochainNetwork(network)}/${address}`
   const response = await axios.get(url)
   const addressResponse: SochainResponse<DogeAddressDTO> = response.data
@@ -73,7 +80,15 @@ export const getTx = async ({ sochainUrl, network, hash }: TxHashParams): Promis
  * @param {string} address
  * @returns {number}
  */
-export const getBalance = async ({ sochainUrl, network, address }: AddressParams): Promise<BaseAmount> => {
+export const getBalance = async ({
+  sochainUrl,
+  network,
+  address,
+}: {
+  sochainUrl: string
+  network: Network
+  address: string
+}): Promise<BaseAmount> => {
   const url = `${sochainUrl}/get_address_balance/${toSochainNetwork(network)}/${address}`
   const response = await axios.get(url)
   const balanceResponse: SochainResponse<DogeGetBalanceDTO> = response.data
@@ -99,7 +114,12 @@ export const getUnspentTxs = async ({
   network,
   address,
   startingFromTxId,
-}: AddressParams): Promise<DogeAddressUTXO[]> => {
+}: {
+  sochainUrl: string
+  network: Network
+  address: string
+  startingFromTxId?: string
+}): Promise<DogeAddressUTXO[]> => {
   let resp = null
   if (startingFromTxId) {
     resp = await axios.get(`${sochainUrl}/get_tx_unspent/${toSochainNetwork(network)}/${address}/${startingFromTxId}`)

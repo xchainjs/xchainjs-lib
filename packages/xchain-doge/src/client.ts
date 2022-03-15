@@ -293,12 +293,16 @@ class Client extends UTXOClient {
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const fromAddressIndex = params?.walletIndex || 0
     const feeRate = params.feeRate || (await this.getSuggestedFeeRate())
+
     const { psbt } = await Utils.buildTx({
-      ...params,
+      amount: params.amount,
+      recipient: params.recipient,
+      memo: params.memo,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
       sochainUrl: this.sochainUrl,
       network: this.network,
+      withTxHex: false,
     })
     const dogeKeys = this.getDogeKeys(this.phrase, fromAddressIndex)
     psbt.signAllInputs(dogeKeys) // Sign all inputs
@@ -310,7 +314,6 @@ class Client extends UTXOClient {
       nodeUrl = sochain.getSendTxUrl({
         network: this.network,
         sochainUrl: this.sochainUrl,
-        address: this.getAddress(fromAddressIndex),
       })
     } else {
       nodeUrl = blockcypher.getSendTxUrl({ network: this.network, blockcypherUrl: this.blockcypherUrl })
