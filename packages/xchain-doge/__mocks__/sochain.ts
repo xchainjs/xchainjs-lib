@@ -52,7 +52,7 @@ export default {
         {
           data: {
             network: 'DOGE',
-            txid: 'mock-txid',
+            txid: 'mock-txid-sochain',
           },
         },
       ]

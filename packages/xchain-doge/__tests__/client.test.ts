@@ -113,7 +113,7 @@ describe('DogecoinClient Test', () => {
     dogeClient.setPhrase(phraseOne)
     const amount = baseAmount(5000000000)
     const txid = await dogeClient.transfer({ recipient: testnet_address_path1, amount, feeRate: 1 })
-    expect(txid).toEqual('mock-txid')
+    expect(txid).toEqual('mock-txid-sochain')
   })
 
   it('should broadcast a normal transfer without feeRate', async () => {
@@ -121,7 +121,7 @@ describe('DogecoinClient Test', () => {
     dogeClient.setPhrase(phraseOne)
     const amount = baseAmount(100)
     const txid = await dogeClient.transfer({ recipient: testnet_address_path0, amount })
-    expect(txid).toEqual('mock-txid')
+    expect(txid).toEqual('mock-txid-sochain')
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
@@ -136,7 +136,7 @@ describe('DogecoinClient Test', () => {
         memo: MEMO,
         feeRate: 1,
       })
-      expect(txid).toEqual('mock-txid')
+      expect(txid).toEqual('mock-txid-sochain')
     } catch (err) {
       console.log('ERR running test', err)
       throw err

@@ -4,6 +4,7 @@
 
 - Fetch `txHex` optionally by scanning UTXOs #489
 - Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same data #490
+- Export `buildTx` (from `utils`) and `getSendTxUrl` (from `blockcypher-api`)
 
 ## Breaking change
 
