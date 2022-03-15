@@ -272,7 +272,7 @@ export const buildTx = async ({
   if (utxos.length === 0) throw new Error('No utxos to send')
   if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
-  const feeRateWhole = Number(feeRate.toFixed(0))
+  const feeRateWhole = Math.ceil(feeRate)
   const compiledMemo = memo ? compileMemo(memo) : null
 
   const targetOutputs = []
