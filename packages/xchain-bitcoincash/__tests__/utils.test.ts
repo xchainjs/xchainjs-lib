@@ -39,10 +39,10 @@ describe('Bitcoin Cash Utils Test', () => {
 
   describe('toBCHAddressNetwork', () => {
     it('returns `bchaddr.Network.Mainnet` in case of `mainnet', () => {
-      expect(utils.toBCHAddressNetwork('mainnet' as Network)).toEqual(bchaddr.Network.Mainnet)
+      expect(utils.toBCHAddressNetwork(Network.Mainnet)).toEqual(bchaddr.Network.Mainnet)
     })
     it('returns `bchaddr.Network.Testnet` in case of `testnet', () => {
-      expect(utils.toBCHAddressNetwork('testnet' as Network)).toEqual(bchaddr.Network.Testnet)
+      expect(utils.toBCHAddressNetwork(Network.Testnet)).toEqual(bchaddr.Network.Testnet)
     })
   })
 })
