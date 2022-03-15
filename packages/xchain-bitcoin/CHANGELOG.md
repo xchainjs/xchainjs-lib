@@ -1,3 +1,9 @@
+# v.0.18.1 (2022-03-15)
+
+## Fix
+
+- [Bug] Incorrect fee estimation by rounding down #503
+
 # v.0.18.0 (2022-03-08)
 
 ## Update
