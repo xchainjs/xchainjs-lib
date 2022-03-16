@@ -1,6 +1,5 @@
 import { TxHash } from '@xchainjs/xchain-client/lib'
-import { delay } from '@xchainjs/xchain-util'
-import axios, { AxiosError, AxiosResponse } from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 import {
   AddressBalance,
@@ -137,44 +136,14 @@ export const getSuggestedFee = async (): Promise<number> => {
  *
  * @see https://app.swaggerhub.com/apis/eligecode/blockchain-api/0.0.1-oas3#/blockchain/sendTransaction
  *
- * Note: Because of an Haskoin issue (@see https://github.com/haskoin/haskoin-store/issues/25),
- * we need to broadcast same tx several times in case of `500` errors
- * Similar to https://github.com/xchainjs/xchainjs-lib/issues/492
- *
  * @param {BroadcastTxParams} params
  * @returns {TxHash} Transaction hash.
  */
+
 export const broadcastTx = async ({ txHex, haskoinUrl }: BroadcastTxParams): Promise<TxHash> => {
-  const instance = axios.create()
+  const {
+    data: { txid },
+  } = await axios.post<string, AxiosResponse<{ txid: string }>>(`${haskoinUrl}/transactions`, txHex)
 
-  const MAX = 5
-  let counter = 0
-
-  const onFullfilled = (res: AxiosResponse): AxiosResponse => res
-  const onRejected = async (error: AxiosError): Promise<AxiosResponse> => {
-    const config = error.config
-    if (counter < MAX && error.response?.status === 500) {
-      counter++
-      await delay(200 * counter)
-      return instance.request(config)
-    }
-    return Promise.reject(error)
-  }
-  // All logic for re-sending same tx is handled by Axios' response interceptor
-  // https://github.com/axios/axios#interceptors
-  const id = instance.interceptors.response.use(onFullfilled, onRejected)
-
-  const url = `${haskoinUrl}/transactions`
-  try {
-    const {
-      data: { txid },
-    } = await instance.post<string, AxiosResponse<{ txid: string }>>(url, txHex)
-    // clean up interceptor from axios instance
-    instance.interceptors.response.eject(id)
-    return txid
-  } catch (error: unknown) {
-    // clean up interceptor from axios instance
-    instance.interceptors.response.eject(id)
-    return Promise.reject(error)
-  }
+  return txid
 }
