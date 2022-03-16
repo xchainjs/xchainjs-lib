@@ -207,7 +207,6 @@ export const buildDepositTx = async ({
   nodeUrl: string
   chainId: ChainId
 }): Promise<proto.cosmos.tx.v1beta1.TxBody> => {
-  
   const networkChainId = await getChainId(nodeUrl)
   if (!networkChainId || chainId !== networkChainId)
     throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
@@ -215,7 +214,7 @@ export const buildDepositTx = async ({
   const depositMsg = types.types.MsgDeposit.fromObject(msgNativeTx)
 
   return new proto.cosmos.tx.v1beta1.TxBody({
-    messages: [cosmosclient.codec.packAny(depositMsg)]
+    messages: [cosmosclient.codec.packAny(depositMsg)],
   })
 }
 

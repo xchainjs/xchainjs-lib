@@ -1,6 +1,4 @@
 import { cosmosclient, proto, rest } from '@cosmos-client/core'
-import { setBech32Prefix } from '@cosmos-client/core/cjs/config/module'
-import { Coin } from '@cosmos-client/core/cjs/openapi/api'
 import { TxHash, TxHistoryParams } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import axios from 'axios'
@@ -46,7 +44,7 @@ export class CosmosSDKClient {
   }
 
   setPrefix(): void {
-    setBech32Prefix({
+    cosmosclient.config.setBech32Prefix({
       accAddr: this.prefix,
       accPub: this.prefix + 'pub',
       valAddr: this.prefix + 'valoper',
@@ -109,12 +107,12 @@ export class CosmosSDKClient {
     })
   }
 
-  async getBalance(address: string): Promise<Coin[]> {
+  async getBalance(address: string): Promise<proto.cosmos.base.v1beta1.Coin[]> {
     this.setPrefix()
 
     const accAddress = cosmosclient.AccAddress.fromString(address)
     const response = await rest.bank.allBalances(this.sdk, accAddress)
-    return response.data.balances as Coin[]
+    return response.data.balances as proto.cosmos.base.v1beta1.Coin[]
   }
 
   async getAccount(address: cosmosclient.AccAddress): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> {
