@@ -15,11 +15,7 @@ export type NodeAuth = {
   password: string
 }
 
-export type TxBroadcastParams = {
-  txHex: string
-  nodeUrl: string
-  auth?: NodeAuth
-}
+export type BroadcastTxParams = { txHex: string; haskoinUrl: string }
 
 export type ErrorResponse = {
   error: string

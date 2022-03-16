@@ -20,8 +20,8 @@ import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'
 
-import { getAccount, getRawTransaction, getUnspentTransactions } from './haskoin-api'
-import { AddressParams, Transaction, TransactionInput, TransactionOutput, UTXO } from './types'
+import * as haskoinApi from './haskoin-api'
+import { AddressParams, BroadcastTxParams, Transaction, TransactionInput, TransactionOutput, UTXO } from './types'
 import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'
 
 export const BCH_DECIMAL = 8
@@ -74,7 +74,7 @@ export function getFee(inputs: number, feeRate: FeeRate, data: Buffer | null = n
  * @returns {Balance[]} The balances of the given address.
  */
 export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
-  const account = await getAccount(params)
+  const account = await haskoinApi.getAccount(params)
   if (!account) throw new Error('BCH balance not found')
 
   const confirmed = baseAmount(account.confirmed, BCH_DECIMAL)
@@ -227,7 +227,7 @@ const getTxHex = async ({ txHash, haskoinUrl }: { haskoinUrl: string; txHash: Tx
   let txHex = txHexMap[txHash]
   if (!!txHex) return txHex
   // or get it from Haskoin
-  txHex = await getRawTransaction({ haskoinUrl, txId: txHash })
+  txHex = await haskoinApi.getRawTransaction({ haskoinUrl, txId: txHash })
   // cache it
   txHexMap[txHash] = txHex
   return txHex
@@ -241,7 +241,7 @@ const getTxHex = async ({ txHash, haskoinUrl }: { haskoinUrl: string; txHash: Tx
  * @returns {UTXO[]} The UTXOs of the given address.
  */
 export const scanUTXOs = async ({ haskoinUrl, address }: { haskoinUrl: string; address: Address }): Promise<UTXO[]> => {
-  const unspentUtxos = await getUnspentTransactions({ haskoinUrl, address })
+  const unspentUtxos = await haskoinApi.getUnspentTransactions({ haskoinUrl, address })
 
   return await Promise.all(
     unspentUtxos.map(async (utxo) => ({
@@ -332,6 +332,16 @@ export const buildTx = async ({
     utxos,
     inputs,
   }
+}
+
+/**
+ * Broadcast the transaction.
+ *
+ * @param {BroadcastTxParams} params The transaction broadcast options.
+ * @returns {TxHash} The transaction hash.
+ */
+export const broadcastTx = async ({ haskoinUrl, txHex }: BroadcastTxParams): Promise<TxHash> => {
+  return await haskoinApi.broadcastTx({ haskoinUrl, txHex })
 }
 
 /**
