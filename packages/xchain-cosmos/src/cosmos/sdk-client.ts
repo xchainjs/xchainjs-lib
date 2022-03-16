@@ -251,6 +251,8 @@ export class CosmosSDKClient {
       fee,
     })
 
+    console.log('txBody: ', txBody)
+
     const txBuilder = new cosmosclient.TxBuilder(this.sdk, txBody, authInfo)
 
     return this.signAndBroadcast(txBuilder, privkey, account)
@@ -303,6 +305,11 @@ export class CosmosSDKClient {
     const signDocBytes = txBuilder.signDocBytes(signerAccount.account_number)
     txBuilder.addSignature(privKey.sign(signDocBytes))
 
+    console.log('tx payload: ', {
+      tx_bytes: txBuilder.txBytes(),
+      mode: rest.tx.BroadcastTxMode.Block,
+    })
+
     // broadcast
     const res = await rest.tx.broadcastTx(this.sdk, {
       tx_bytes: txBuilder.txBytes(),
@@ -312,6 +319,7 @@ export class CosmosSDKClient {
     if (res?.data?.tx_response?.code !== 0) {
       throw new Error('Error broadcasting: ' + res?.data?.tx_response?.raw_log)
     }
+
     return res.data.tx_response.txhash || ''
   }
 }

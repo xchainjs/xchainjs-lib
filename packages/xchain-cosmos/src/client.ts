@@ -235,7 +235,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     const fromAddressIndex = walletIndex || 0
 
     const mainAsset = this.getMainAsset()
-    const transferResult = await this.getSDKClient().transfer({
+    return this.getSDKClient().transfer({
       privkey: this.getPrivateKey(fromAddressIndex),
       from: this.getAddress(fromAddressIndex),
       to: recipient,
@@ -244,7 +244,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       memo,
     })
 
-    return transferResult || ''
+    // return transferResult || ''
   }
 
   /**

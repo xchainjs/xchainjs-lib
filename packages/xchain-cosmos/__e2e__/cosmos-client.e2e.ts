@@ -39,10 +39,12 @@ describe('Cosmos Integration Tests', () => {
         recipient: addressTo,
         memo: 'Hi!',
       }
-      const hash = await xchainClient.transfer(transferTx)
-      expect(hash.length).toBeGreaterThan(0)
+      const res = await xchainClient.transfer(transferTx)
+      console.log('res: ', res)
+      expect(res.length).toBeGreaterThan(0)
 
     } catch (error) {
+      console.log('transfer error: ', error)
       throw error
     }
   })
@@ -64,9 +66,12 @@ describe('Cosmos Integration Tests', () => {
         recipient: addressTo,
         memo: 'Hi!',
       }
-      await xchainClient.transfer(transferTx)
+      const result = await xchainClient.transfer(transferTx)
+      console.log('result: ', result)
+      expect(result).toEqual('')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
+      console.log('error: ', e)
       expect(e.message).toEqual(
         'Error broadcasting: failed to execute message; message index: 0: 0xxx is smaller than 100xxx: insufficient funds',
       )
