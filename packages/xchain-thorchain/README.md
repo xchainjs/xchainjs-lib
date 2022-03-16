@@ -67,7 +67,7 @@ For more examples check out tests in `./__tests__/client.test.ts`
 
 ## Creating protobuffer typescript bindings
 
-in order for this library to de/serialize proto3 structures, you can use the following to create bindings
+In order for this library to de/serialize proto3 structures, you can use the following to create bindings
 
 1. `git clone https://gitlab.com/thorchain/thornode`
 2. run the following (adjust the paths acordingly) to generate a typecript file for MsgDeposit
@@ -78,3 +78,6 @@ in order for this library to de/serialize proto3 structures, you can use the fol
    ```bash
    yarn run pbts -o src/types/MsgDeposit.d.ts src/types/MsgDeposit.js
    ```
+
+Alternatively, you can run the convenience script: `genMsgDeposit.sh`, which will overwrite the proto/js files in types/proto. You can also run `npm run enerate:MsgDeposit` to accomplish the same thing. This should only be done and checked in if changes were made to the upstream Msg in the THORNode repo. 
+
