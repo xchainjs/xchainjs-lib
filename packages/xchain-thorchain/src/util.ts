@@ -1,5 +1,5 @@
+import { cosmosclient, proto } from '@cosmos-client/core'
 import { codec } from '@cosmos-client/core/cjs/types/codec'
-import { proto, cosmosclient } from '@cosmos-client/core'
 import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
@@ -198,7 +198,7 @@ export const getChainIds = async (client: ClientUrl): Promise<ChainIds> => {
  *
  * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
  */
- export const buildDepositTx = async ({
+export const buildDepositTx = async ({
   msgNativeTx,
   nodeUrl,
   chainId,
@@ -213,6 +213,7 @@ export const getChainIds = async (client: ClientUrl): Promise<ChainIds> => {
     throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
 
   const depositMsg = types.types.MsgDeposit.fromObject(msgNativeTx)
+
   return new proto.cosmos.tx.v1beta1.TxBody({
     messages: [cosmosclient.codec.packAny(depositMsg)]
   })
