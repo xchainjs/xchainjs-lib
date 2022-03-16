@@ -1,8 +1,10 @@
-import axios from 'axios'
+import { TxHash } from '@xchainjs/xchain-client/lib'
+import axios, { AxiosResponse } from 'axios'
 
 import {
   AddressBalance,
   AddressParams,
+  BroadcastTxParams,
   RawTransaction,
   Transaction,
   TransactionsQueryParam,
@@ -127,4 +129,21 @@ export const getSuggestedFee = async (): Promise<number> => {
   } catch (error) {
     return DEFAULT_SUGGESTED_TRANSACTION_FEE
   }
+}
+
+/**
+ * Broadcast transaction.
+ *
+ * @see https://app.swaggerhub.com/apis/eligecode/blockchain-api/0.0.1-oas3#/blockchain/sendTransaction
+ *
+ * @param {BroadcastTxParams} params
+ * @returns {TxHash} Transaction hash.
+ */
+
+export const broadcastTx = async ({ txHex, haskoinUrl }: BroadcastTxParams): Promise<TxHash> => {
+  const {
+    data: { txid },
+  } = await axios.post<string, AxiosResponse<{ txid: string }>>(`${haskoinUrl}/transactions`, txHex)
+
+  return txid
 }

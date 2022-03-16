@@ -18,17 +18,12 @@ import { getSeed } from '@xchainjs/xchain-crypto'
 import { Chain } from '@xchainjs/xchain-util'
 
 import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
-import { broadcastTx } from './node-api'
-import { NodeAuth } from './types'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { ClientUrl } from './types/client-types'
 import * as utils from './utils'
 
 export type BitcoinCashClientParams = XChainClientParams & {
   haskoinUrl?: ClientUrl
-  nodeUrl?: ClientUrl
-  nodeAuth?: NodeAuth
-  // index?: number
 }
 
 /**
@@ -36,8 +31,6 @@ export type BitcoinCashClientParams = XChainClientParams & {
  */
 class Client extends UTXOClient {
   private haskoinUrl: ClientUrl
-  private nodeUrl: ClientUrl
-  private nodeAuth?: NodeAuth
 
   /**
    * Constructor
@@ -48,20 +41,11 @@ class Client extends UTXOClient {
   constructor({
     network = Network.Testnet,
     haskoinUrl = {
-      [Network.Testnet]: 'https://api.haskoin.com/haskoin-store/bch-testnet',
-      [Network.Mainnet]: 'https://api.haskoin.com/haskoin-store/bch',
-      [Network.Stagenet]: 'https://api.haskoin.com/haskoin-store/bch',
+      [Network.Testnet]: 'https://haskoin.ninerealms.com/bchtest',
+      [Network.Mainnet]: 'https://haskoin.ninerealms.com/bch',
+      [Network.Stagenet]: 'https://haskoin.ninerealms.com/bch',
     },
     phrase,
-    nodeUrl = {
-      [Network.Testnet]: 'https://testnet.bch.thorchain.info',
-      [Network.Mainnet]: 'https://bch.thorchain.info',
-      [Network.Stagenet]: 'https://bch.thorchain.info',
-    },
-    nodeAuth = {
-      username: 'thorchain',
-      password: 'password',
-    },
     rootDerivationPaths = {
       [Network.Mainnet]: `m/44'/145'/0'/0/`,
       [Network.Testnet]: `m/44'/1'/0'/0/`,
@@ -71,13 +55,8 @@ class Client extends UTXOClient {
     super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase })
     this.network = network
     this.haskoinUrl = haskoinUrl
-    this.nodeUrl = nodeUrl
     this.rootDerivationPaths = rootDerivationPaths
     phrase && this.setPhrase(phrase)
-    this.nodeAuth =
-      // Leave possibility to send requests without auth info for user
-      // by strictly passing nodeAuth as null value
-      nodeAuth === null ? undefined : nodeAuth
   }
 
   /**
@@ -97,25 +76,6 @@ class Client extends UTXOClient {
    */
   getHaskoinURL(): string {
     return this.haskoinUrl[this.getNetwork()]
-  }
-
-  /**
-   * Set/Update the node url.
-   *
-   * @param {string} url The new node url.
-   * @returns {void}
-   */
-  setNodeURL(url: ClientUrl): void {
-    this.nodeUrl = url
-  }
-
-  /**
-   * Get the node url.
-   *
-   * @returns {string} The node url for thorchain based on the current network.
-   */
-  getNodeURL(): string {
-    return this.nodeUrl[this.getNetwork()]
   }
 
   /**
@@ -296,10 +256,9 @@ class Client extends UTXOClient {
 
     const txHex = builder.build().toHex()
 
-    return await broadcastTx({
+    return await utils.broadcastTx({
       txHex,
-      nodeUrl: this.getNodeURL(),
-      auth: this.nodeAuth,
+      haskoinUrl: this.getHaskoinURL(),
     })
   }
 }
