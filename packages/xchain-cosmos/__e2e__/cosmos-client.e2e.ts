@@ -78,7 +78,7 @@ describe('Cosmos Integration Tests', () => {
       await wait(30 * 1000)
 
       const txResult = await xchainClient.getSDKClient().txsHashGet(txHash)
-      expect(txResult.tx_response.raw_log).toEqual('failed to execute message; message index: 0: 0xxx is smaller than 100xxx: insufficient funds')
+      expect(txResult.raw_log).toEqual('failed to execute message; message index: 0: 0xxx is smaller than 100xxx: insufficient funds')
 
     } catch (error) {
       throw error

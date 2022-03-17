@@ -28,24 +28,6 @@ describe('thorchain Integration Tests', () => {
     })
     expect(balances.length).toBeGreaterThan(0)
   })
-  it('should swap some rune for BNB', async () => {
-    try {
-      const address = await bnbClient.getAddress()
-      console.log('bnb address: ', address)
-      const memo = `=:BNB.BNB:${address}`
-
-      const hash = await thorchainClient.deposit({
-        walletIndex: 0,
-        amount: baseAmount('100'),
-        asset: AssetRuneNative,
-        memo,
-      })
-      expect(hash.length).toBeGreaterThan(5)
-    } catch (error) {
-      console.log(error)
-      throw error
-    }
-  })
   it('should xfer rune from wallet 0 -> 1, with a memo', async () => {
     try {
       const addressTo = thorClient.getAddress(1)
@@ -58,6 +40,25 @@ describe('thorchain Integration Tests', () => {
       }
       const hash = await thorClient.transfer(transferTx)
       expect(hash.length).toBeGreaterThan(0)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  })
+  it('should swap some rune for BNB', async () => {
+    try {
+      const address = await bnbClient.getAddress()
+      const memo = `=:BNB.BNB:${address}`
+
+      const hash = await thorchainClient.deposit({
+        walletIndex: 0,
+        amount: baseAmount('100'),
+        asset: AssetRuneNative,
+        memo,
+      })
+
+      expect(hash.length).toBeGreaterThan(5)
+
     } catch (error) {
       console.log(error)
       throw error

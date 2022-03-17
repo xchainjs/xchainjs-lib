@@ -16,6 +16,7 @@ import {
   TransferOfflineParams,
   TransferParams,
   TxHistoryResponse,
+  TxResponse,
   UnsignedTxParams,
 } from './types'
 
@@ -210,10 +211,10 @@ export class CosmosSDKClient {
     return response.result
   }
 
-  async txsHashGet(hash: string): Promise<GetTxByHashResponse> {
+  async txsHashGet(hash: string): Promise<TxResponse> {
     this.setPrefix()
 
-    return (await axios.get<GetTxByHashResponse>(`${this.server}/cosmos/tx/v1beta1/txs/${hash}`)).data
+    return (await axios.get<GetTxByHashResponse>(`${this.server}/cosmos/tx/v1beta1/txs/${hash}`)).data.tx_response
   }
 
   async transfer({ privkey, from, to, amount, asset, memo = '', fee = DEFAULT_FEE }: TransferParams): Promise<TxHash> {
@@ -308,13 +309,6 @@ export class CosmosSDKClient {
     const signDocBytes = txBuilder.signDocBytes(signerAccount.account_number)
     txBuilder.addSignature(privKey.sign(signDocBytes))
 
-    console.log('final tx: ', txBuilder.cosmosJSONStringify(2))
-
-    console.log('payload: ', {
-      tx_bytes: txBuilder.txBytes(),
-      mode: rest.tx.BroadcastTxMode.Sync,
-    })
-
     // broadcast
     const res = await rest.tx.broadcastTx(this.sdk, {
       tx_bytes: txBuilder.txBytes(),
@@ -324,8 +318,6 @@ export class CosmosSDKClient {
     if (res?.data?.tx_response?.code !== 0) {
       throw new Error('Error broadcasting: ' + res?.data?.tx_response?.raw_log)
     }
-
-    console.log('res.data: ', res.data)
 
     return res.data.tx_response.txhash || ''
   }

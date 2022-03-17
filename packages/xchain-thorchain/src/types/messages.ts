@@ -1,7 +1,8 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
+import { Asset } from '@xchainjs/xchain-util'
 
 export type MsgCoin = {
-  asset: string
+  asset: Asset
   amount: string
 }
 

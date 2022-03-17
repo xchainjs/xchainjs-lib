@@ -222,11 +222,11 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   async getTransactionData(txId: string): Promise<Tx> {
     const txResult = await this.getSDKClient().txsHashGet(txId)
 
-    if (!txResult || txResult.tx_response.txhash === '') {
+    if (!txResult || txResult.txhash === '') {
       throw new Error('transaction not found')
     }
 
-    const txs = getTxsFromHistory([txResult.tx_response], this.getMainAsset())
+    const txs = getTxsFromHistory([txResult], this.getMainAsset())
     if (txs.length === 0) throw new Error('transaction not found')
 
     return txs[0]

@@ -13,11 +13,12 @@ import {
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
+import { CosmosSDK } from '@cosmos-client/core/cjs/sdk'
+import bech32 from 'bech32-buffer'
 
 import { ChainId, ChainIds, ClientUrl, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx } from './types/messages'
 import types from './types/proto/MsgCompiled'
-// import msgTypes from './types/proto/msg_send/MsgSend'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '3000000'
@@ -197,7 +198,51 @@ export const getChainIds = async (client: ClientUrl): Promise<ChainIds> => {
 }
 
 /**
- * Structure StdTx from MsgNativeTx.
+ * Builds final unsigned TX
+ *
+ * @param cosmosSdk - CosmosSDK
+ * @param txBody - txBody with encoded Msgs
+ * @param signerPubkey - signerPubkey string
+ * @param sequence - account sequence
+ * @param gasLimit - transaction gas limit
+ * @returns
+ */
+export const buildUnsignedTx = ({
+  cosmosSdk,
+  txBody,
+  signerPubkey,
+  sequence,
+  gasLimit,
+}: {
+  cosmosSdk: CosmosSDK
+  txBody: proto.cosmos.tx.v1beta1.TxBody
+  signerPubkey: cosmosclient.PubKey
+  sequence: cosmosclient.Long
+  gasLimit: string
+}): cosmosclient.TxBuilder => {
+  const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
+    signer_infos: [
+      {
+        public_key: cosmosclient.codec.packAny(signerPubkey),
+        mode_info: {
+          single: {
+            mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+          },
+        },
+        sequence: sequence,
+      },
+    ],
+    fee: {
+      amount: null,
+      gas_limit: cosmosclient.Long.fromString(gasLimit),
+    },
+  })
+
+  return new cosmosclient.TxBuilder(cosmosSdk, txBody, authInfo)
+}
+
+/**
+ * Structure a MsgDeposit
  *
  * @param {MsgNativeTx} msgNativeTx Msg of type `MsgNativeTx`.
  * @param {string} nodeUrl Node url
@@ -217,13 +262,79 @@ export const buildDepositTx = async ({
   chainId: ChainId
 }): Promise<proto.cosmos.tx.v1beta1.TxBody> => {
   const networkChainId = await getChainId(nodeUrl)
-  if (!networkChainId || chainId !== networkChainId)
+  if (!networkChainId || chainId !== networkChainId) {
     throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
+  }
 
-  const depositMsg = types.types.MsgDeposit.fromObject(msgNativeTx)
+  const signerAddr = msgNativeTx.signer.toString()
+  const signerDecoded = bech32.decode(signerAddr)
+
+  const msgDepositObj = {
+    coins: msgNativeTx.coins,
+    memo: msgNativeTx.memo,
+    signer: signerDecoded.data,
+  }
+
+  const depositMsg = types.types.MsgDeposit.fromObject(msgDepositObj)
 
   return new proto.cosmos.tx.v1beta1.TxBody({
     messages: [cosmosclient.codec.packAny(depositMsg)],
+    memo: msgNativeTx.memo,
+  })
+}
+
+/**
+ * Structure a MsgSend
+ *
+ * @param fromAddress - required, from address string
+ * @param toAddress - required, to address string
+ * @param assetAmount - required, asset amount string (e.g. "10000")
+ * @param assetDenom - required, asset denom string (e.g. "rune")
+ * @param memo - optional, memo string
+ *
+ * @returns
+ */
+export const buildTransferTx = async ({
+  fromAddress,
+  toAddress,
+  assetAmount,
+  assetDenom,
+  memo = '',
+  nodeUrl,
+  chainId,
+}: {
+  fromAddress: string
+  toAddress: string
+  assetAmount: string
+  assetDenom: string
+  memo: string | undefined
+  nodeUrl: string
+  chainId: ChainId
+}): Promise<proto.cosmos.tx.v1beta1.TxBody> => {
+  const networkChainId = await getChainId(nodeUrl)
+  if (!networkChainId || chainId !== networkChainId) {
+    throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
+  }
+
+  const fromDecoded = bech32.decode(fromAddress)
+  const toDecoded = bech32.decode(toAddress)
+
+  const transferObj = {
+    fromAddress: fromDecoded.data,
+    toAddress: toDecoded.data,
+    amount: [
+      {
+        amount: assetAmount,
+        denom: assetDenom,
+      },
+    ],
+  }
+
+  const transferMsg = types.types.MsgSend.fromObject(transferObj)
+
+  return new proto.cosmos.tx.v1beta1.TxBody({
+    messages: [cosmosclient.codec.packAny(transferMsg)],
+    memo,
   })
 }
 

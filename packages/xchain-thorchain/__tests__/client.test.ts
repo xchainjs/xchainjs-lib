@@ -42,6 +42,15 @@ const mockAccountsAddress = (
   nock(url).get(`/cosmos/auth/v1beta1/accounts/${address}`).reply(200, result)
 }
 
+const mockGetChainId = (url: string, chainId: string) => {
+  const response = {
+    default_node_info: {
+      network: chainId,
+    },
+  }
+  nock(url).get('/cosmos/base/tendermint/v1beta1/node_info').reply(200, response)
+}
+
 const mockAccountsBalance = (
   url: string,
   address: string,
@@ -51,10 +60,6 @@ const mockAccountsBalance = (
 ) => {
   nock(url).get(`/cosmos/bank/v1beta1/balances/${address}`).reply(200, result)
 }
-
-// const mockThorchainDeposit = (url: string, result: ThorchainDepositResponse) => {
-//   nock(url).post('/thorchain/deposit').reply(200, result)
-// }
 
 const mockThorchainConstants = (url: string) => {
   const response = require('../__mocks__/responses/thorchain/constants.json')
@@ -87,7 +92,7 @@ const mockTxHistory = (url: string, result: RPCResponse<RPCTxSearchResult>): voi
     .reply(200, result)
 }
 
-const assertTxHashGet = (url: string, hash: string, result: TxResponse): void => {
+const assertTxHashGet = (url: string, hash: string, result: { tx_response: TxResponse }): void => {
   nock(url).get(`/cosmos/tx/v1beta1/txs/${hash}`).reply(200, result)
 }
 
@@ -103,6 +108,7 @@ describe('Client Test', () => {
   beforeEach(() => {
     thorClient = new Client({ phrase, network: Network.Testnet, chainIds })
     thorMainClient = new Client({ phrase, network: Network.Mainnet, chainIds })
+    mockGetChainId(thorClient.getClientUrl().node, chainIds[Network.Testnet])
   })
 
   afterEach(() => {
@@ -406,7 +412,7 @@ describe('Client Test', () => {
     const txHash = '9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C'
     mockTxHistory(thorClient.getClientUrl().rpc, historyData)
 
-    assertTxHashGet(thorClient.getClientUrl().node, txHash, bondTxData)
+    assertTxHashGet(thorClient.getClientUrl().node, txHash, { tx_response: bondTxData })
 
     const txs = await thorClient.getTransactions({
       address: 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f',
@@ -533,7 +539,7 @@ describe('Client Test', () => {
     const txData = require('../__mocks__/responses/txs/bond-tn-9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C.json')
     const txHash = '9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C'
     const address = 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f'
-    assertTxHashGet(thorClient.getClientUrl().node, txHash, txData)
+    assertTxHashGet(thorClient.getClientUrl().node, txHash, { tx_response: txData })
     const { type, hash, asset, from, to } = await thorClient.getTransactionData(txHash, address)
 
     expect(type).toEqual('transfer')
