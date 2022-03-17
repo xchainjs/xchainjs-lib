@@ -72,7 +72,7 @@ const assertTxsPost = (
 ): void => {
   nock(url, { allowUnmocked: true })
     .post(`/cosmos/tx/v1beta1/txs`, (body) => {
-      expect(body.mode).toEqual('BROADCAST_MODE_BLOCK')
+      expect(body.mode).toEqual('BROADCAST_MODE_SYNC')
       expect(body.tx_bytes.length).toBeGreaterThan(0)
       return true
     })

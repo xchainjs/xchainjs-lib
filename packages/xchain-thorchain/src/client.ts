@@ -43,7 +43,7 @@ import {
   TxOfflineParams,
 } from './types'
 import { TxResult } from './types/messages'
-import types from './types/proto/MsgDeposit'
+import types from './types/proto/MsgCompiled'
 import {
   DECIMAL,
   DEFAULT_GAS_VALUE,
@@ -58,7 +58,8 @@ import {
   getExplorerTxUrl,
   getPrefix,
   isAssetRuneNative,
-  registerCodecs,
+  registerDespositCodecs,
+  registerSendCodecs,
 } from './util'
 
 /**
@@ -357,8 +358,9 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    */
   async getTransactionData(txId: string, address: Address): Promise<Tx> {
     const txResult = await this.cosmosClient.txsHashGet(txId)
-    const txData: TxData | null = txResult.logs ? getDepositTxDataFromLogs(txResult.logs, address) : null
-    if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
+    const txData: TxData | null =
+      txResult && txResult.tx_response.logs ? getDepositTxDataFromLogs(txResult.tx_response.logs, address) : null
+    if (!txResult || !txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
 
     const { from, to, type } = txData
 
@@ -367,7 +369,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       asset: AssetRuneNative,
       from,
       to,
-      date: new Date(txResult.timestamp),
+      date: new Date(txResult.tx_response.timestamp),
       type,
     }
   }
@@ -419,7 +421,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
    */
   async deposit({ walletIndex = 0, asset = AssetRuneNative, amount, memo }: DepositParam): Promise<TxHash> {
-    registerCodecs()
+    await registerDespositCodecs()
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
       balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
@@ -443,8 +445,10 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
 
     const privKey = this.getPrivateKey(walletIndex)
     const from = this.getAddress(walletIndex)
-    const signer = privKey.pubKey()
+    const signerPubkey = privKey.pubKey()
     const accAddress = cosmosclient.AccAddress.fromString(from)
+
+    // const denom = getDenom(asset)
 
     const deposit = types.types.MsgDeposit.fromObject({
       coins: [
@@ -454,7 +458,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         },
       ],
       memo,
-      signer,
+      signer: from,
     })
 
     const account = await this.getCosmosClient().getAccount(accAddress)
@@ -467,7 +471,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
       signer_infos: [
         {
-          public_key: cosmosclient.codec.packAny(signer),
+          public_key: cosmosclient.codec.packAny(signerPubkey),
           mode_info: {
             single: {
               mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
@@ -493,6 +497,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer({ walletIndex = 0, asset = AssetRuneNative, amount, recipient, memo }: TxParams): Promise<TxHash> {
+    await registerSendCodecs()
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
       balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
@@ -513,21 +518,65 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         throw new Error('insufficient funds')
       }
     }
+    const privKey = this.getPrivateKey(walletIndex)
+    const from = this.getAddress(walletIndex)
+    const signerPubkey = privKey.pubKey()
+    const accAddress = cosmosclient.AccAddress.fromString(from)
 
-    const hash = await this.cosmosClient.transfer({
-      privkey: this.getPrivateKey(walletIndex),
-      from: this.getAddress(walletIndex),
-      to: recipient,
-      amount: amount.amount().toString(),
-      asset: getDenom(asset),
+    const denom = getDenom(asset)
+
+    const sendMsg = types.types.MsgSend.fromObject({
+      fromAddress: from,
+      toAddress: recipient,
+      amount: [
+        {
+          amount: amount.amount().toString(),
+          denom: denom,
+        },
+      ],
+    })
+
+    // console.log('send Msg: ', sendMsg.toJSON())
+
+    const account = await this.getCosmosClient().getAccount(accAddress)
+
+    const txBody = new proto.cosmos.tx.v1beta1.TxBody({
+      messages: [cosmosclient.codec.packAny(sendMsg)],
       memo,
     })
 
-    if (!hash) {
-      throw new Error(`failed to broadcast transaction`)
-    }
+    console.log('txBody: ', txBody.toJSON())
+    console.log('account: ', account)
 
-    return hash || ''
+    const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
+      signer_infos: [
+        {
+          public_key: cosmosclient.codec.packAny(signerPubkey),
+          mode_info: {
+            single: {
+              mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+            },
+          },
+          sequence: account.sequence,
+        },
+      ],
+      fee: new proto.cosmos.tx.v1beta1.Fee({
+        amount: [],
+        gas_limit: cosmosclient.Long.fromString(DEFAULT_GAS_VALUE),
+      }),
+    })
+
+    const txBuilder = new cosmosclient.TxBuilder(this.getCosmosClient().sdk, txBody, authInfo)
+
+    console.log('tx: ', txBuilder.cosmosJSONStringify(2))
+
+    return (await this.cosmosClient.signAndBroadcast(txBuilder, privKey, account)) || ''
+
+    // if (!hash) {
+    //   throw new Error(`failed to broadcast transaction`)
+    // }
+
+    // return hash || ''
   }
 
   /**

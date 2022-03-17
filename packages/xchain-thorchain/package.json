@@ -31,7 +31,7 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",
     "start:example": "ts-node example/index.ts",
-    "generate:MsgDeposit": "./genMsgDeposit.sh"
+    "generate:ThorchainMsgs": "./genMsgs.sh"
   },
   "devDependencies": {
     "@types/big.js": "^6.0.0",
@@ -39,8 +39,8 @@
     "@xchainjs/xchain-cosmos": "^0.17.0",
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "^0.5.1",
-    "axios": "^0.25.0",
     "@cosmos-client/core": "^0.44.4",
+    "axios": "^0.25.0",
     "nock": "^13.0.5"
   },
   "publishConfig": {
@@ -51,7 +51,7 @@
     "@xchainjs/xchain-cosmos": "^0.17.0",
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "^0.5.1",
-    "axios": "^0.25.0",
-    "@cosmos-client/core": "^0.44.4"
+    "@cosmos-client/core": "^0.44.4",
+    "axios": "^0.25.0"
   }
 }

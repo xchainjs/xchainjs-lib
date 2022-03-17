@@ -1,6 +1,4 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
-// import { StdTxFee } from '@cosmos-client/core/cjs/openapi'
-// import { StdSignature } from '@cosmos-client/core/'
 
 export type MsgCoin = {
   asset: string

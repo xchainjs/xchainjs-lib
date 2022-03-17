@@ -1,6 +1,5 @@
-import { proto } from '@cosmos-client/core'
+import { cosmosclient, proto } from '@cosmos-client/core'
 import { StdTx } from '@cosmos-client/core/cjs/openapi/api'
-import { codec } from '@cosmos-client/core/cjs/types'
 import { baseAmount } from '@xchainjs/xchain-util'
 
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
@@ -113,7 +112,7 @@ describe('cosmos/util', () => {
         },
       ],
     })
-    const encodedMsg = codec.packAnyFromCosmosJSON(msgSend)
+    const encodedMsg = cosmosclient.codec.packAnyFromCosmosJSON(msgSend)
     const txs: TxResponse[] = [
       {
         height: 0,

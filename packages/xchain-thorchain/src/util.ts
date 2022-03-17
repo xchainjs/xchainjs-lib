@@ -1,5 +1,4 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
-import { codec } from '@cosmos-client/core/cjs/types/codec'
 import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
@@ -17,7 +16,8 @@ import axios from 'axios'
 
 import { ChainId, ChainIds, ClientUrl, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx } from './types/messages'
-import types from './types/proto/MsgDeposit'
+import types from './types/proto/MsgCompiled'
+// import msgTypes from './types/proto/msg_send/MsgSend'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '3000000'
@@ -91,8 +91,17 @@ export const getPrefix = (network: Network) => {
  *
  * @param {string} prefix
  */
-export const registerCodecs = async (): Promise<void> => {
-  codec.register('/types.MsgDeposit', types.types.MsgDeposit)
+export const registerDespositCodecs = async (): Promise<void> => {
+  cosmosclient.codec.register('/types.MsgDeposit', types.types.MsgDeposit)
+}
+
+/**
+ * Register Codecs based on the prefix.
+ *
+ * @param {string} prefix
+ */
+export const registerSendCodecs = async (): Promise<void> => {
+  cosmosclient.codec.register('/types.MsgSend', types.types.MsgSend)
 }
 
 /**

@@ -9,13 +9,14 @@ import { getQueryString } from '../util'
 import {
   APIQueryParam,
   CosmosSDKClientParams,
+  GetTxByHashResponse,
   RPCResponse,
   RPCTxSearchResult,
   SearchTxParams,
   TransferOfflineParams,
   TransferParams,
   TxHistoryResponse,
-  TxResponse,
+  UnsignedTxParams,
 } from './types'
 
 const DEFAULT_FEE = new proto.cosmos.tx.v1beta1.Fee({
@@ -34,8 +35,9 @@ export class CosmosSDKClient {
   constructor({ server, chainId, prefix = 'cosmos' }: CosmosSDKClientParams) {
     this.server = server
     this.chainId = chainId
-    this.prefix = prefix
     this.sdk = new cosmosclient.CosmosSDK(server, this.chainId)
+
+    this.updatePrefix(prefix)
   }
 
   updatePrefix(prefix: string) {
@@ -68,6 +70,7 @@ export class CosmosSDKClient {
   }
 
   getPrivKeyFromMnemonic(mnemonic: string, derivationPath: string): proto.cosmos.crypto.secp256k1.PrivKey {
+    this.setPrefix()
     const seed = xchainCrypto.getSeed(mnemonic)
     const node = BIP32.fromSeed(seed)
     const child = node.derivePath(derivationPath)
@@ -89,13 +92,13 @@ export class CosmosSDKClient {
     }
   }
 
-  getUnsignedTxBody({ from, to, amount, asset, memo = '' }: TransferParams): proto.cosmos.tx.v1beta1.TxBody {
+  getUnsignedTxBody({ from, to, amount, asset, memo = '' }: UnsignedTxParams): proto.cosmos.tx.v1beta1.TxBody {
     const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
       from_address: from,
       to_address: to,
       amount: [
         {
-          amount: amount.toString(),
+          amount: amount,
           denom: asset,
         },
       ],
@@ -207,10 +210,10 @@ export class CosmosSDKClient {
     return response.result
   }
 
-  async txsHashGet(hash: string): Promise<TxResponse> {
+  async txsHashGet(hash: string): Promise<GetTxByHashResponse> {
     this.setPrefix()
 
-    return (await axios.get<TxResponse>(`${this.server}/cosmos/tx/v1beta1/txs/${hash}`)).data
+    return (await axios.get<GetTxByHashResponse>(`${this.server}/cosmos/tx/v1beta1/txs/${hash}`)).data
   }
 
   async transfer({ privkey, from, to, amount, asset, memo = '', fee = DEFAULT_FEE }: TransferParams): Promise<TxHash> {
@@ -221,7 +224,7 @@ export class CosmosSDKClient {
       to_address: to,
       amount: [
         {
-          amount: amount.toString(),
+          amount: amount,
           denom: asset,
         },
       ],
@@ -229,11 +232,14 @@ export class CosmosSDKClient {
 
     const pubKey = privkey.pubKey()
     const signer = cosmosclient.AccAddress.fromPublicKey(pubKey)
+
     const account = await this.getAccount(signer)
+
     const txBody = new proto.cosmos.tx.v1beta1.TxBody({
       messages: [cosmosclient.codec.packAny(msgSend)],
       memo,
     })
+
     const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
       signer_infos: [
         {
@@ -248,8 +254,6 @@ export class CosmosSDKClient {
       ],
       fee,
     })
-
-    console.log('txBody: ', txBody)
 
     const txBuilder = new cosmosclient.TxBuilder(this.sdk, txBody, authInfo)
 
@@ -267,7 +271,7 @@ export class CosmosSDKClient {
     memo = '',
     fee = DEFAULT_FEE,
   }: TransferOfflineParams): Promise<string> {
-    const txBody = this.getUnsignedTxBody({ privkey, from, to, amount, asset, memo })
+    const txBody = this.getUnsignedTxBody({ from, to, amount, asset, memo })
 
     const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
       signer_infos: [
@@ -285,6 +289,7 @@ export class CosmosSDKClient {
     })
 
     const txBuilder = new cosmosclient.TxBuilder(this.sdk, txBody, authInfo)
+
     const signDocBytes = txBuilder.signDocBytes(cosmosclient.Long.fromString(from_account_number))
     txBuilder.addSignature(privkey.sign(signDocBytes))
     return txBuilder.txBytes()
@@ -303,20 +308,24 @@ export class CosmosSDKClient {
     const signDocBytes = txBuilder.signDocBytes(signerAccount.account_number)
     txBuilder.addSignature(privKey.sign(signDocBytes))
 
-    console.log('tx payload: ', {
+    console.log('final tx: ', txBuilder.cosmosJSONStringify(2))
+
+    console.log('payload: ', {
       tx_bytes: txBuilder.txBytes(),
-      mode: rest.tx.BroadcastTxMode.Block,
+      mode: rest.tx.BroadcastTxMode.Sync,
     })
 
     // broadcast
     const res = await rest.tx.broadcastTx(this.sdk, {
       tx_bytes: txBuilder.txBytes(),
-      mode: rest.tx.BroadcastTxMode.Block,
+      mode: rest.tx.BroadcastTxMode.Sync,
     })
 
     if (res?.data?.tx_response?.code !== 0) {
       throw new Error('Error broadcasting: ' + res?.data?.tx_response?.raw_log)
     }
+
+    console.log('res.data: ', res.data)
 
     return res.data.tx_response.txhash || ''
   }

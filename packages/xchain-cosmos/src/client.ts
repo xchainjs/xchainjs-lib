@@ -26,6 +26,7 @@ import { DECIMAL, getAsset, getDenom, getTxsFromHistory } from './util'
  */
 export interface CosmosClient {
   getMainAsset(): Asset
+  getSDKClient(): CosmosSDKClient
 }
 
 const MAINNET_SDK = new CosmosSDKClient({
@@ -116,6 +117,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
 
     return this.getSDKClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
   }
+
   getSDKClient(): CosmosSDKClient {
     return this.sdkClients.get(this.network) || TESTNET_SDK
   }
@@ -219,7 +221,12 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    */
   async getTransactionData(txId: string): Promise<Tx> {
     const txResult = await this.getSDKClient().txsHashGet(txId)
-    const txs = getTxsFromHistory([txResult], this.getMainAsset())
+
+    if (!txResult || txResult.tx_response.txhash === '') {
+      throw new Error('transaction not found')
+    }
+
+    const txs = getTxsFromHistory([txResult.tx_response], this.getMainAsset())
     if (txs.length === 0) throw new Error('transaction not found')
 
     return txs[0]

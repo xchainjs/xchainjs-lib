@@ -1,5 +1,4 @@
-import { proto } from '@cosmos-client/core'
-import { codec } from '@cosmos-client/core/cjs/types'
+import { cosmosclient, proto } from '@cosmos-client/core'
 import { FeeType, Fees, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
@@ -75,9 +74,9 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let msgs: Array<proto.cosmos.bank.v1beta1.MsgSend | proto.cosmos.bank.v1beta1.MsgMultiSend>
     if ((tx.tx as RawTxResponse).body === undefined) {
-      msgs = codec.packAnyFromCosmosJSON(tx.tx).msg
+      msgs = cosmosclient.codec.packAnyFromCosmosJSON(tx.tx).msg
     } else {
-      msgs = codec.packAnyFromCosmosJSON((tx.tx as RawTxResponse).body.messages)
+      msgs = cosmosclient.codec.packAnyFromCosmosJSON((tx.tx as RawTxResponse).body.messages)
     }
 
     const from: TxFrom[] = []

@@ -1,7 +1,6 @@
 import { proto } from '@cosmos-client/core'
 import { StdTx } from '@cosmos-client/core/cjs/openapi/api'
 import { TxParams } from '@xchainjs/xchain-client'
-import { BigSource } from 'big.js'
 
 export type CosmosSDKClientParams = {
   server: string
@@ -20,11 +19,19 @@ export type SearchTxParams = {
   txMaxHeight?: number
 }
 
+export type UnsignedTxParams = {
+  from: string
+  to: string
+  amount: string
+  asset: string
+  memo?: string
+}
+
 export type TransferParams = {
   privkey: proto.cosmos.crypto.secp256k1.PrivKey
   from: string
   to: string
-  amount: BigSource
+  amount: string
   asset: string
   memo?: string
   fee?: proto.cosmos.tx.v1beta1.Fee
@@ -65,6 +72,10 @@ export type TxLog = {
   msg_index: number
   log: string
   events: TxEvent[]
+}
+
+export type GetTxByHashResponse = {
+  tx_response: TxResponse
 }
 
 export type TxResponse = {

@@ -1,8 +1,16 @@
-import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
+import { Network, TxParams } from '@xchainjs/xchain-client'
 import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
-let xchainClient: XChainClient = new CosmosClient({})
+let xchainClient: CosmosClient = new CosmosClient({})
+
+function wait(time: number) {
+  return new Promise(res => {
+      setTimeout(() => {
+          res(null);
+      }, time);
+  });
+}
 
 describe('Cosmos Integration Tests', () => {
   beforeEach(() => {
@@ -40,11 +48,9 @@ describe('Cosmos Integration Tests', () => {
         memo: 'Hi!',
       }
       const res = await xchainClient.transfer(transferTx)
-      console.log('res: ', res)
       expect(res.length).toBeGreaterThan(0)
 
     } catch (error) {
-      console.log('transfer error: ', error)
       throw error
     }
   })
@@ -58,7 +64,6 @@ describe('Cosmos Integration Tests', () => {
   it('should fail xfer xxx from wallet 0 -> 1', async () => {
     try {
       const addressTo = xchainClient.getAddress(0)
-      console.log('addressTo: ', addressTo)
       const transferTx: TxParams = {
         walletIndex: 1,
         asset: { chain: Chain.Cosmos, ticker: 'GAIA', symbol: 'xxx', synth: false },
@@ -66,15 +71,17 @@ describe('Cosmos Integration Tests', () => {
         recipient: addressTo,
         memo: 'Hi!',
       }
-      const result = await xchainClient.transfer(transferTx)
-      console.log('result: ', result)
-      expect(result).toEqual('')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      console.log('error: ', e)
-      expect(e.message).toEqual(
-        'Error broadcasting: failed to execute message; message index: 0: 0xxx is smaller than 100xxx: insufficient funds',
-      )
+      const txHash = await xchainClient.transfer(transferTx)
+      expect(txHash.length).toBeGreaterThan(0)
+
+      // Wait 30 seconds for the tx to process
+      await wait(30 * 1000)
+
+      const txResult = await xchainClient.getSDKClient().txsHashGet(txHash)
+      expect(txResult.tx_response.raw_log).toEqual('failed to execute message; message index: 0: 0xxx is smaller than 100xxx: insufficient funds')
+
+    } catch (error) {
+      throw error
     }
   })
 })

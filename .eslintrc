@@ -4,20 +4,30 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": ["prettier", "ordered-imports"],
+  "plugins": [
+    "prettier",
+    "ordered-imports"
+  ],
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "prettier/@typescript-eslint",
     "plugin:prettier/recommended",
     "plugin:ordered-imports/recommended"
   ],
+  "ignorePatterns": "**/*.d.ts",
   "rules": {
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-use-before-define": "warn",
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
-    "@typescript-eslint/no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_"
+      }
+    ],
     "@typescript-eslint/no-var-requires": "off",
     "no-duplicate-imports": "error",
     "no-undef": "off",
@@ -25,12 +35,27 @@
       "error",
       {
         "symbols-first": false,
-        "declaration-ordering": ["source", "lowercase-last"],
+        "declaration-ordering": [
+          "source",
+          "lowercase-last"
+        ],
         "specifier-ordering": "lowercase-last",
         "group-ordering": [
-          { "name": "parent directories", "match": "^\\.\\.", "order": 30 },
-          { "name": "current directory", "match": "^\\.", "order": 40 },
-          { "name": "third-party", "match": ".*", "order": 10 }
+          {
+            "name": "parent directories",
+            "match": "^\\.\\.",
+            "order": 30
+          },
+          {
+            "name": "current directory",
+            "match": "^\\.",
+            "order": 40
+          },
+          {
+            "name": "third-party",
+            "match": ".*",
+            "order": 10
+          }
         ]
       }
     ]
