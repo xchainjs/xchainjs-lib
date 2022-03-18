@@ -1,4 +1,5 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
+import { CosmosSDK } from '@cosmos-client/core/cjs/sdk'
 import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
@@ -13,7 +14,6 @@ import {
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
-import { CosmosSDK } from '@cosmos-client/core/cjs/sdk'
 import bech32 from 'bech32-buffer'
 
 import { ChainId, ChainIds, ClientUrl, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
@@ -216,14 +216,14 @@ export const buildUnsignedTx = ({
 }: {
   cosmosSdk: CosmosSDK
   txBody: proto.cosmos.tx.v1beta1.TxBody
-  signerPubkey: cosmosclient.PubKey
+  signerPubkey: proto.google.protobuf.Any
   sequence: cosmosclient.Long
   gasLimit: string
 }): cosmosclient.TxBuilder => {
   const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
     signer_infos: [
       {
-        public_key: cosmosclient.codec.packAny(signerPubkey),
+        public_key: signerPubkey,
         mode_info: {
           single: {
             mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,

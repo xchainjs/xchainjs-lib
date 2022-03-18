@@ -1,4 +1,5 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
+import { codec } from '@cosmos-client/core/cjs/types'
 import {
   Address,
   Balance,
@@ -469,7 +470,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: depositTxBody,
-      signerPubkey: signerPubkey,
+      signerPubkey: codec.packAny(signerPubkey),
       gasLimit: DEPOSIT_GAS_VALUE,
       sequence: account.sequence || cosmosclient.Long.ZERO,
     })
@@ -528,48 +529,10 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: txBody,
       gasLimit: DEFAULT_GAS_VALUE,
-      signerPubkey: signerPubkey,
+      signerPubkey: codec.packAny(signerPubkey),
       sequence: account.sequence || cosmosclient.Long.ZERO,
     })
 
-    // const fromBech32Decoded = bech32.decode(from)
-    // const toBech32Decoded = bech32.decode(recipient)
-
-    // const sendMsg = types.types.MsgSend.fromObject({
-    //   fromAddress: fromBech32Decoded.data,
-    //   toAddress: toBech32Decoded.data,
-    //   amount: [
-    //     {
-    //       amount: amount.amount().toString(),
-    //       denom: denom,
-    //     },
-    //   ],
-    // })
-
-    // const txBody = new proto.cosmos.tx.v1beta1.TxBody({
-    //   messages: [cosmosclient.codec.packAny(sendMsg)],
-    //   memo,
-    // })
-
-    // const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
-    //   signer_infos: [
-    //     {
-    //       public_key: cosmosclient.codec.packAny(signerPubkey),
-    //       mode_info: {
-    //         single: {
-    //           mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
-    //         },
-    //       },
-    //       sequence: account.sequence,
-    //     },
-    //   ],
-    //   fee: new proto.cosmos.tx.v1beta1.Fee({
-    //     amount: [],
-    //     gas_limit: cosmosclient.Long.fromString(DEFAULT_GAS_VALUE),
-    //   }),
-    // })
-
-    // const txBuilder = new cosmosclient.TxBuilder(this.getCosmosClient().sdk, txBody, authInfo)
     return (await this.cosmosClient.signAndBroadcast(txBuilder, privKey, account)) || ''
   }
 
@@ -604,22 +567,29 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       }
     }
 
-    const result = await this.cosmosClient.transferSignedOffline({
-      privkey: this.getPrivateKey(walletIndex),
-      from: this.getAddress(walletIndex),
-      from_account_number,
-      from_sequence,
-      to: recipient,
-      amount: amount.amount().toString(),
-      asset: getDenom(asset),
-      memo,
-      fee: new proto.cosmos.tx.v1beta1.Fee({
-        amount: [],
-        gas_limit: cosmosclient.Long.fromString(DEFAULT_GAS_VALUE),
-      }),
+    const txBody = await buildTransferTx({
+      fromAddress: this.getAddress(walletIndex),
+      toAddress: recipient,
+      memo: memo,
+      assetAmount: amount.amount().toString(),
+      assetDenom: getDenom(asset),
+      chainId: this.getChainId(),
+      nodeUrl: this.getClientUrl().node,
     })
 
-    return result
+    const privKey = this.getPrivateKey(walletIndex)
+
+    const txBuilder = buildUnsignedTx({
+      cosmosSdk: this.getCosmosClient().sdk,
+      txBody: txBody,
+      gasLimit: DEFAULT_GAS_VALUE,
+      signerPubkey: codec.packAny(privKey.pubKey()),
+      sequence: cosmosclient.Long.fromString(from_sequence)  || cosmosclient.Long.ZERO,
+    })
+
+    const signDocBytes = txBuilder.signDocBytes(cosmosclient.Long.fromString(from_account_number))
+    txBuilder.addSignature(privKey.sign(signDocBytes))
+    return txBuilder.txBytes()
   }
 
   /**
