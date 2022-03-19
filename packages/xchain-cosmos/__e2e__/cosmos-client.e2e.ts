@@ -66,8 +66,8 @@ describe('Cosmos Integration Tests', () => {
       const txHash = await xchainClient.transfer(transferTx)
       expect(txHash.length).toBeGreaterThan(0)
 
-      // Wait 30 seconds for the tx to process
-      await delay(30 * 1000)
+      // Wait 35 seconds for the tx to process
+      await delay(35 * 1000)
 
       const txResult = await xchainClient.getSDKClient().txsHashGet(txHash)
       expect(txResult.raw_log).toEqual('failed to execute message; message index: 0: 0xxx is smaller than 100xxx: insufficient funds')

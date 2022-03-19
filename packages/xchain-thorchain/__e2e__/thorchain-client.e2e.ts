@@ -1,7 +1,7 @@
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
-import { Asset, AssetRuneNative, BaseAmount, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetRuneNative, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 
 export type Swap = {
   fromBaseAmount: BaseAmount
@@ -47,6 +47,10 @@ describe('thorchain Integration Tests', () => {
   })
   it('should swap some rune for BNB', async () => {
     try {
+
+      // Wait 10 seconds, make sure previous test has finished to avoid sequnce conflict
+      await delay(10 * 1000)
+
       const address = await bnbClient.getAddress()
       const memo = `=:BNB.BNB:${address}`
 

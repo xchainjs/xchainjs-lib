@@ -13,7 +13,7 @@ import {
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
-import bech32 from 'bech32-buffer'
+import * as bech32Buffer from 'bech32-buffer'
 
 import { ChainId, ChainIds, ClientUrl, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx } from './types/messages'
@@ -266,7 +266,7 @@ export const buildDepositTx = async ({
   }
 
   const signerAddr = msgNativeTx.signer.toString()
-  const signerDecoded = bech32.decode(signerAddr)
+  const signerDecoded = bech32Buffer.decode(signerAddr)
 
   const msgDepositObj = {
     coins: msgNativeTx.coins,
@@ -315,8 +315,8 @@ export const buildTransferTx = async ({
     throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
   }
 
-  const fromDecoded = bech32.decode(fromAddress)
-  const toDecoded = bech32.decode(toAddress)
+  const fromDecoded = bech32Buffer.decode(fromAddress)
+  const toDecoded = bech32Buffer.decode(toAddress)
 
   const transferObj = {
     fromAddress: fromDecoded.data,

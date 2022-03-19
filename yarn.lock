@@ -332,10 +332,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@cosmos-client/core@^0.44.4":
-  version "0.44.4"
-  resolved "https://registry.yarnpkg.com/@cosmos-client/core/-/core-0.44.4.tgz#9dfef086df83966bd7b8ad312ee586a0c743784d"
-  integrity sha512-AkY19ILFRYU4Vakrq5A5heWoRIc5O4zff7dUIyRrT4mH6rlJWr7/8jHLMWC+Q3xIGrKNBWDsk909IXGdL6dqNQ==
+"@cosmos-client/core@^0.45.1":
+  version "0.45.1"
+  resolved "https://registry.yarnpkg.com/@cosmos-client/core/-/core-0.45.1.tgz#c57dbf861b7300203616362207fde24c58de6f32"
+  integrity sha512-AAf+UBwzcJvMpOFy6bBUGlF+wiGko32yekYtC/J3fxnC/NyAsOsqzPDLxgat6lveOfYESRdZslw78UMbKz7oQA==
   dependencies:
     axios "^0.23.0"
     bech32 "^1.1.4"
