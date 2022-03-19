@@ -1,3 +1,12 @@
+# v.0.17.0 (2022-03-13)
+
+- upgraded to "@cosmos-client/core": "0.44.4"
+- xchain-cosmos and xchain-thorchain now extend BaseXChainClient
+
+## Breaking changes
+
+- Remove `minheight` and `maxheight` params from `CosmosSDKClient.searchTx` (params were removed from the API)
+
 # v.0.16.1 (2022-02-04)
 
 - Use latest axios@0.25.0

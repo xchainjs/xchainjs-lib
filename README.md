@@ -13,7 +13,7 @@ The interface is [defined here.](https://github.com/xchainjs/xchainjs-lib/blob/m
 
 The interface supports as a minimum the following functions for each blockchain:
 
-1. Initialise with a valid BIP39 phrase and specified network (testnet/stagenet/mainnet)
+1. Initialise with a valid BIP39 phrase and specified network (testnet/mainnet)
 2. Get the address, with support for BIP44 path derivations (default is Index 0)
 3. Get the balance (UTXO or account-based)
 4. Get transaction history for that address
@@ -54,6 +54,8 @@ There are a suite of integration test which work against testnet. You will need 
 export PHRASE="secret phrase here"
 yarn e2e
 ```
+
+### `unit`
 
 ## Development
 

@@ -1,8 +1,5 @@
+import { cosmosclient, proto } from '@cosmos-client/core'
 import { baseAmount } from '@xchainjs/xchain-util'
-import { Msg } from 'cosmos-client'
-import { StdTxFee } from 'cosmos-client/api'
-import { StdTx } from 'cosmos-client/x/auth'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
 import { AssetAtom, AssetMuon } from '../src/types'
@@ -10,7 +7,7 @@ import { getAsset, getDenom, getQueryString, getTxsFromHistory, isMsgMultiSend, 
 
 describe('cosmos/util', () => {
   describe('Msg type guards', () => {
-    const msgMultiSend: MsgMultiSend = {
+    const msgMultiSend = new proto.cosmos.bank.v1beta1.MsgMultiSend({
       inputs: [
         {
           address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
@@ -42,9 +39,9 @@ describe('cosmos/util', () => {
           ],
         },
       ],
-    }
+    })
 
-    const msgSend: MsgSend = MsgSend.fromJSON({
+    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
       to_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
       amount: [
@@ -101,13 +98,19 @@ describe('cosmos/util', () => {
   })
 
   describe('parse Tx', () => {
-    const fee: StdTxFee = {
-      gas: '200000',
-      amount: [],
-    }
     const from_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
     const to_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
-
+    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+      from_address,
+      to_address,
+      amount: [
+        {
+          denom: 'uatom',
+          amount: '1000',
+        },
+      ],
+    })
+    const encodedMsg = cosmosclient.codec.packAnyFromCosmosJSON(msgSend)
     const txs: TxResponse[] = [
       {
         height: 0,
@@ -117,32 +120,10 @@ describe('cosmos/util', () => {
         gas_wanted: '200000',
         gas_used: '35000',
         tx: {
-          msg: [
-            MsgSend.fromJSON({
-              from_address,
-              to_address,
-              amount: [
-                {
-                  denom: 'uatom',
-                  amount: '1000',
-                },
-              ],
-            }),
-            MsgSend.fromJSON({
-              from_address,
-              to_address,
-              amount: [
-                {
-                  denom: 'uatom',
-                  amount: '1000',
-                },
-              ],
-            }),
-          ] as Msg[],
-          fee: fee,
-          signatures: null,
-          memo: '',
-        } as StdTx,
+          body: {
+            messages: [encodedMsg, encodedMsg],
+          },
+        } as RawTxResponse,
         timestamp: new Date().toString(),
       },
       {
@@ -154,28 +135,7 @@ describe('cosmos/util', () => {
         gas_used: '35000',
         tx: {
           body: {
-            messages: [
-              MsgSend.fromJSON({
-                from_address,
-                to_address,
-                amount: [
-                  {
-                    denom: 'uatom',
-                    amount: '1000',
-                  },
-                ],
-              }),
-              MsgSend.fromJSON({
-                from_address,
-                to_address,
-                amount: [
-                  {
-                    denom: 'uatom',
-                    amount: '1000',
-                  },
-                ],
-              }),
-            ] as Msg[],
+            messages: [msgSend, msgSend],
           },
         } as RawTxResponse,
         timestamp: new Date().toString(),

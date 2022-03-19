@@ -1,3 +1,4 @@
+import { proto } from '@cosmos-client/core'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCResponse, RPCTxSearchResult, TxResponse } from '@xchainjs/xchain-cosmos'
 import {
@@ -10,12 +11,10 @@ import {
   assetToBase,
   baseAmount,
 } from '@xchainjs/xchain-util'
-import { BaseAccount, BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
 import nock from 'nock'
 
 import { mockTendermintNodeInfo } from '../__mocks__/thornode-api'
 import { Client } from '../src/client'
-import { ThorchainDepositResponse } from '../src/types'
 
 // Mock chain ids
 const chainIds = {
@@ -28,26 +27,38 @@ const mockAccountsAddress = (
   url: string,
   address: string,
   result: {
-    height: number
-    result: BaseAccount
+    account: {
+      '@type': string
+      address: string
+      pub_key?: {
+        '@type': string
+        key: string
+      }
+      account_number: string
+      sequence: string
+    }
   },
 ) => {
-  nock(url).get(`/auth/accounts/${address}`).reply(200, result)
+  nock(url).get(`/cosmos/auth/v1beta1/accounts/${address}`).reply(200, result)
+}
+
+const mockGetChainId = (url: string, chainId: string) => {
+  const response = {
+    default_node_info: {
+      network: chainId,
+    },
+  }
+  nock(url).get('/cosmos/base/tendermint/v1beta1/node_info').reply(200, response)
 }
 
 const mockAccountsBalance = (
   url: string,
   address: string,
   result: {
-    height: number
-    result: Coin[]
+    balances: proto.cosmos.base.v1beta1.Coin[]
   },
 ) => {
-  nock(url).get(`/bank/balances/${address}`).reply(200, result)
-}
-
-const mockThorchainDeposit = (url: string, result: ThorchainDepositResponse) => {
-  nock(url).post('/thorchain/deposit').reply(200, result)
+  nock(url).get(`/cosmos/bank/v1beta1/balances/${address}`).reply(200, result)
 }
 
 const mockThorchainConstants = (url: string) => {
@@ -55,11 +66,19 @@ const mockThorchainConstants = (url: string) => {
   nock(url).get('/thorchain/constants').reply(200, response)
 }
 
-const assertTxsPost = (url: string, memo: undefined | string, result: BroadcastTxCommitResult): void => {
-  nock(url)
-    .post(`/txs`, (body) => {
-      expect(body.tx.msg.length).toEqual(1)
-      expect(body.tx.memo).toEqual(memo)
+const assertTxsPost = (
+  url: string,
+  result: {
+    tx_response: {
+      txhash: string
+      code: number
+    }
+  },
+): void => {
+  nock(url, { allowUnmocked: true })
+    .post(`/cosmos/tx/v1beta1/txs`, (body) => {
+      expect(body.mode).toEqual('BROADCAST_MODE_SYNC')
+      expect(body.tx_bytes.length).toBeGreaterThan(0)
       return true
     })
     .reply(200, result)
@@ -73,8 +92,8 @@ const mockTxHistory = (url: string, result: RPCResponse<RPCTxSearchResult>): voi
     .reply(200, result)
 }
 
-const assertTxHashGet = (url: string, hash: string, result: TxResponse): void => {
-  nock(url).get(`/txs/${hash}`).reply(200, result)
+const assertTxHashGet = (url: string, hash: string, result: { tx_response: TxResponse }): void => {
+  nock(url).get(`/cosmos/tx/v1beta1/txs/${hash}`).reply(200, result)
 }
 
 describe('Client Test', () => {
@@ -89,6 +108,7 @@ describe('Client Test', () => {
   beforeEach(() => {
     thorClient = new Client({ phrase, network: Network.Testnet, chainIds })
     thorMainClient = new Client({ phrase, network: Network.Mainnet, chainIds })
+    mockGetChainId(thorClient.getClientUrl().node, chainIds[Network.Testnet])
   })
 
   afterEach(() => {
@@ -211,8 +231,8 @@ describe('Client Test', () => {
   })
 
   it('returns private key', async () => {
-    const privKey = thorClient.getPrivKey()
-    expect(privKey.toBase64()).toEqual('CHCbyYWorMZVRFtfJzt72DigvZeRNi3jo2c3hGEQ46I=')
+    const privKey = thorClient.getPrivateKey()
+    expect(Buffer.from(privKey.bytes()).toString('base64')).toEqual('CHCbyYWorMZVRFtfJzt72DigvZeRNi3jo2c3hGEQ46I=')
   })
 
   describe('chainId', () => {
@@ -273,13 +293,13 @@ describe('Client Test', () => {
 
   it('returns public key', async () => {
     const pubKey = thorClient.getPubKey()
-    expect(pubKey.toBase64()).toEqual('AsL4F+rvFMqDkZYpVVnZa0OBa0EXwscjNrODbBME42vC')
+    const pkString = Buffer.from(pubKey.bytes()).toString('base64')
+    expect(pkString).toEqual('AsL4F+rvFMqDkZYpVVnZa0OBa0EXwscjNrODbBME42vC')
   })
 
   it('has no balances', async () => {
     mockAccountsBalance(thorClient.getClientUrl().node, testnet_address_path0, {
-      height: 0,
-      result: [],
+      balances: [],
     })
     const result = await thorClient.getBalance(thorClient.getAddress(0))
     expect(result).toEqual([])
@@ -290,12 +310,11 @@ describe('Client Test', () => {
     // mainnet - has balance: thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5
     // mainnet - 0: thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws
     mockAccountsBalance(thorMainClient.getClientUrl().node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
-      height: 0,
-      result: [
-        {
+      balances: [
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
           amount: '100',
-        },
+        }),
       ],
     })
 
@@ -308,20 +327,19 @@ describe('Client Test', () => {
   it('rune + synth balances', async () => {
     thorClient.setNetwork(Network.Testnet)
     mockAccountsBalance(thorClient.getClientUrl().node, 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg', {
-      height: 0,
-      result: [
-        {
+      balances: [
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'bnb/bnb',
           amount: '100',
-        },
-        {
+        }),
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'bnb/busd-74e',
           amount: '200',
-        },
-        {
+        }),
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
           amount: '200',
-        },
+        }),
       ],
     })
 
@@ -342,20 +360,19 @@ describe('Client Test', () => {
     const BUSD_ASSET_SYNTH: Asset = { chain: BNBChain, symbol: 'BUSD-74E', ticker: 'BUSD', synth: true }
     thorClient.setNetwork(Network.Testnet)
     mockAccountsBalance(thorClient.getClientUrl().node, 'tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg', {
-      height: 0,
-      result: [
-        {
+      balances: [
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'bnb/bnb',
           amount: '100',
-        },
-        {
+        }),
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'bnb/busd-74e',
           amount: '200',
-        },
-        {
+        }),
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
           amount: '200',
-        },
+        }),
       ],
     })
 
@@ -395,7 +412,7 @@ describe('Client Test', () => {
     const txHash = '9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C'
     mockTxHistory(thorClient.getClientUrl().rpc, historyData)
 
-    assertTxHashGet(thorClient.getClientUrl().node, txHash, bondTxData)
+    assertTxHashGet(thorClient.getClientUrl().node, txHash, { tx_response: bondTxData })
 
     const txs = await thorClient.getTransactions({
       address: 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f',
@@ -424,40 +441,37 @@ describe('Client Test', () => {
     const memo = 'transfer'
 
     const expected_txsPost_result = {
-      check_tx: {},
-      deliver_tx: {},
-      txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
-      height: 0,
-      logs: [],
+      tx_response: {
+        txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
+        code: 0,
+      },
     }
 
     const nodeUrl = thorClient.getClientUrl().node
 
     mockAccountsAddress(nodeUrl, testnet_address_path0, {
-      height: 0,
-      result: {
-        coins: [
-          {
-            denom: 'rune',
-            amount: '210000000',
-          },
-        ],
+      account: {
+        '@type': '/cosmos.auth.v1beta1.BaseAccount',
+        address: testnet_address_path0,
+        pub_key: {
+          '@type': '/cosmos.crypto.secp256k1.PubKey',
+          key: 'AyB84hKBjN2wsmdC2eF1Ppz6l3VxlfSKJpYsTaL4VrrE',
+        },
         account_number: '0',
         sequence: '0',
       },
     })
     mockAccountsBalance(nodeUrl, testnet_address_path0, {
-      height: 0,
-      result: [
-        {
+      balances: [
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
           amount: '210000000',
-        },
+        }),
       ],
     })
     mockThorchainConstants(nodeUrl)
 
-    assertTxsPost(thorClient.getClientUrl().node, memo, expected_txsPost_result)
+    assertTxsPost(thorClient.getClientUrl().node, expected_txsPost_result)
 
     const result = await thorClient.transfer({
       asset: AssetRuneNative,
@@ -474,63 +488,33 @@ describe('Client Test', () => {
     const memo = 'swap:BNB.BNB:tbnb1ftzhmpzr4t8ta3etu4x7nwujf9jqckp3th2lh0'
 
     const expected_txsPost_result = {
-      check_tx: {},
-      deliver_tx: {},
-      txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
-      height: 0,
-      logs: [],
+      tx_response: {
+        txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
+        code: 0,
+      },
     }
 
     const nodeUrl = thorClient.getClientUrl().node
 
     mockAccountsAddress(nodeUrl, testnet_address_path0, {
-      height: 0,
-      result: {
-        coins: [
-          {
-            denom: 'rune',
-            amount: '210000000',
-          },
-        ],
+      account: {
+        '@type': '/cosmos.auth.v1beta1.BaseAccount',
+        address: testnet_address_path0,
+        pub_key: {
+          '@type': '/cosmos.crypto.secp256k1.PubKey',
+          key: 'AyB84hKBjN2wsmdC2eF1Ppz6l3VxlfSKJpYsTaL4VrrE',
+        },
         account_number: '0',
         sequence: '0',
       },
     })
     mockAccountsBalance(nodeUrl, testnet_address_path0, {
-      height: 0,
-      result: [
-        {
+      balances: [
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
           amount: '210000000',
-        },
+        }),
       ],
-    })
-    mockThorchainDeposit(nodeUrl, {
-      type: 'cosmos-sdk/StdTx',
-      value: {
-        msg: [
-          {
-            type: 'thorchain/MsgDeposit',
-            value: {
-              coins: [
-                {
-                  asset: 'THOR.RUNE',
-                  amount: '10000',
-                },
-              ],
-              memo: 'swap:BNB.BNB:tbnb1ftzhmpzr4t8ta3etu4x7nwujf9jqckp3th2lh0',
-              signer: 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
-            },
-          },
-        ],
-        fee: {
-          amount: [],
-          gas: '100000000',
-        },
-        signatures: [],
-        memo: '',
-        timeout_height: '0',
-      },
     })
     mockTendermintNodeInfo(nodeUrl, {
       default_node_info: {
@@ -540,7 +524,7 @@ describe('Client Test', () => {
 
     mockThorchainConstants(nodeUrl)
 
-    assertTxsPost(nodeUrl, '', expected_txsPost_result)
+    assertTxsPost(nodeUrl, expected_txsPost_result)
 
     const result = await thorClient.deposit({
       asset: AssetRuneNative,
@@ -555,7 +539,7 @@ describe('Client Test', () => {
     const txData = require('../__mocks__/responses/txs/bond-tn-9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C.json')
     const txHash = '9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C'
     const address = 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f'
-    assertTxHashGet(thorClient.getClientUrl().node, txHash, txData)
+    assertTxHashGet(thorClient.getClientUrl().node, txHash, { tx_response: txData })
     const { type, hash, asset, from, to } = await thorClient.getTransactionData(txHash, address)
 
     expect(type).toEqual('transfer')

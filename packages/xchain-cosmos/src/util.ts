@@ -1,8 +1,6 @@
+import { cosmosclient, proto } from '@cosmos-client/core'
 import { FeeType, Fees, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
 import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
-import { Msg, codec } from 'cosmos-client'
-import { StdTx } from 'cosmos-client/x/auth'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
 
 import { APIQueryParam, RawTxResponse, TxResponse } from './cosmos/types'
 import { AssetAtom, AssetMuon } from './types'
@@ -18,10 +16,10 @@ export const DECIMAL = 6
  * @param {Msg} msg
  * @returns {boolean} `true` or `false`.
  */
-export const isMsgSend = (msg: Msg): msg is MsgSend =>
-  (msg as MsgSend)?.amount !== undefined &&
-  (msg as MsgSend)?.from_address !== undefined &&
-  (msg as MsgSend)?.to_address !== undefined
+export const isMsgSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.MsgSend =>
+  (msg as proto.cosmos.bank.v1beta1.MsgSend)?.amount !== undefined &&
+  (msg as proto.cosmos.bank.v1beta1.MsgSend)?.from_address !== undefined &&
+  (msg as proto.cosmos.bank.v1beta1.MsgSend)?.to_address !== undefined
 
 /**
  * Type guard for MsgMultiSend
@@ -29,8 +27,9 @@ export const isMsgSend = (msg: Msg): msg is MsgSend =>
  * @param {Msg} msg
  * @returns {boolean} `true` or `false`.
  */
-export const isMsgMultiSend = (msg: Msg): msg is MsgMultiSend =>
-  (msg as MsgMultiSend)?.inputs !== undefined && (msg as MsgMultiSend)?.outputs !== undefined
+export const isMsgMultiSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.MsgMultiSend =>
+  (msg as proto.cosmos.bank.v1beta1.MsgMultiSend)?.inputs !== undefined &&
+  (msg as proto.cosmos.bank.v1beta1.MsgMultiSend)?.outputs !== undefined
 
 /**
  * Get denomination from Asset
@@ -56,6 +55,13 @@ export const getAsset = (denom: string): Asset | null => {
   return null
 }
 
+const getCoinAmount = (coins?: proto.cosmos.base.v1beta1.ICoin[]) => {
+  return coins
+    ? coins
+        .map((coin) => baseAmount(coin.amount || 0, DECIMAL))
+        .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
+    : baseAmount(0, DECIMAL)
+}
 /**
  * Parse transaction type
  *
@@ -65,58 +71,55 @@ export const getAsset = (denom: string): Asset | null => {
  */
 export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => {
   return txs.reduce((acc, tx) => {
-    let msgs: Msg[] = []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let msgs: Array<proto.cosmos.bank.v1beta1.MsgSend | proto.cosmos.bank.v1beta1.MsgMultiSend>
     if ((tx.tx as RawTxResponse).body === undefined) {
-      msgs = codec.fromJSONString(codec.toJSONString(tx.tx as StdTx)).msg
+      msgs = cosmosclient.codec.packAnyFromCosmosJSON(tx.tx).msg
     } else {
-      msgs = codec.fromJSONString(codec.toJSONString((tx.tx as RawTxResponse).body.messages))
+      msgs = cosmosclient.codec.packAnyFromCosmosJSON((tx.tx as RawTxResponse).body.messages)
     }
 
     const from: TxFrom[] = []
     const to: TxTo[] = []
     msgs.map((msg) => {
       if (isMsgSend(msg)) {
-        const msgSend = msg as MsgSend
-        const amount = msgSend.amount
-          .map((coin) => baseAmount(coin.amount, 6))
-          .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
+        const msgSend = msg
+        const amount = getCoinAmount(msgSend.amount)
 
         let from_index = -1
 
         from.forEach((value, index) => {
-          if (value.from === msgSend.from_address.toBech32()) from_index = index
+          if (value.from === msgSend.from_address) from_index = index
         })
 
         if (from_index === -1) {
           from.push({
-            from: msgSend.from_address.toBech32(),
+            from: msgSend.from_address,
             amount,
           })
         } else {
-          from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), 6)
+          from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
         }
 
         let to_index = -1
 
         to.forEach((value, index) => {
-          if (value.to === msgSend.to_address.toBech32()) to_index = index
+          if (value.to === msgSend.to_address) to_index = index
         })
 
         if (to_index === -1) {
           to.push({
-            to: msgSend.to_address.toBech32(),
+            to: msgSend.to_address,
             amount,
           })
         } else {
-          to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), 6)
+          to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
         }
       } else if (isMsgMultiSend(msg)) {
-        const msgMultiSend = msg as MsgMultiSend
+        const msgMultiSend = msg
 
         msgMultiSend.inputs.map((input) => {
-          const amount = input.coins
-            .map((coin) => baseAmount(coin.amount, 6))
-            .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
+          const amount = getCoinAmount(input.coins || [])
 
           let from_index = -1
 
@@ -126,18 +129,16 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
 
           if (from_index === -1) {
             from.push({
-              from: input.address,
+              from: input.address || '',
               amount,
             })
           } else {
-            from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), 6)
+            from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
           }
         })
 
         msgMultiSend.outputs.map((output) => {
-          const amount = output.coins
-            .map((coin) => baseAmount(coin.amount, 6))
-            .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
+          const amount = getCoinAmount(output.coins || [])
 
           let to_index = -1
 
@@ -147,11 +148,11 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
 
           if (to_index === -1) {
             to.push({
-              to: output.address,
+              to: output.address || '',
               amount,
             })
           } else {
-            to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), 6)
+            to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
           }
         })
       }
@@ -182,16 +183,6 @@ export const getQueryString = (params: APIQueryParam): string => {
     .filter((key) => key.length > 0)
     .map((key) => (params[key] == null ? key : `${key}=${encodeURIComponent(params[key].toString())}`))
     .join('&')
-}
-
-/**
- * Register message codecs.
- *
- * @returns {void}
- */
-export const registerCodecs = () => {
-  codec.registerCodec('cosmos-sdk/MsgSend', MsgSend, MsgSend.fromJSON)
-  codec.registerCodec('cosmos-sdk/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
 }
 
 /**

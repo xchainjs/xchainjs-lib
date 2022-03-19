@@ -1,3 +1,4 @@
+import { cosmosclient, proto } from '@cosmos-client/core'
 import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
@@ -12,13 +13,11 @@ import {
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
-import { AccAddress, Msg, codec } from 'cosmos-client'
-import { StdTxFee } from 'cosmos-client/api'
-import { StdTx } from 'cosmos-client/x/auth'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
+import * as bech32Buffer from 'bech32-buffer'
 
 import { ChainId, ChainIds, ClientUrl, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
-import { MsgNativeTx, ThorchainDepositResponse } from './types/messages'
+import { MsgNativeTx } from './types/messages'
+import types from './types/proto/MsgCompiled'
 
 export const DECIMAL = 8
 export const DEFAULT_GAS_VALUE = '3000000'
@@ -58,26 +57,6 @@ export const assetFromDenom = (denom: string): Asset | null => {
 }
 
 /**
- * Type guard for MsgSend
- *
- * @param {Msg} msg
- * @returns {boolean} `true` or `false`.
- */
-export const isMsgSend = (msg: Msg): msg is MsgSend =>
-  (msg as MsgSend)?.amount !== undefined &&
-  (msg as MsgSend)?.from_address !== undefined &&
-  (msg as MsgSend)?.to_address !== undefined
-
-/**
- * Type guard for MsgMultiSend
- *
- * @param {Msg} msg
- * @returns {boolean} `true` or `false`.
- */
-export const isMsgMultiSend = (msg: Msg): msg is MsgMultiSend =>
-  (msg as MsgMultiSend)?.inputs !== undefined && (msg as MsgMultiSend)?.outputs !== undefined
-
-/**
  * Response guard for transaction broadcast
  *
  * @param {any} response The response from the node.
@@ -112,18 +91,17 @@ export const getPrefix = (network: Network) => {
  *
  * @param {string} prefix
  */
-export const registerCodecs = (prefix: string): void => {
-  codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
-  codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
+export const registerDespositCodecs = async (): Promise<void> => {
+  cosmosclient.codec.register('/types.MsgDeposit', types.types.MsgDeposit)
+}
 
-  AccAddress.setBech32Prefix(
-    prefix,
-    prefix + 'pub',
-    prefix + 'valoper',
-    prefix + 'valoperpub',
-    prefix + 'valcons',
-    prefix + 'valconspub',
-  )
+/**
+ * Register Codecs based on the prefix.
+ *
+ * @param {string} prefix
+ */
+export const registerSendCodecs = async (): Promise<void> => {
+  cosmosclient.codec.register('/types.MsgSend', types.types.MsgSend)
 }
 
 /**
@@ -219,7 +197,51 @@ export const getChainIds = async (client: ClientUrl): Promise<ChainIds> => {
 }
 
 /**
- * Structure StdTx from MsgNativeTx.
+ * Builds final unsigned TX
+ *
+ * @param cosmosSdk - CosmosSDK
+ * @param txBody - txBody with encoded Msgs
+ * @param signerPubkey - signerPubkey string
+ * @param sequence - account sequence
+ * @param gasLimit - transaction gas limit
+ * @returns
+ */
+export const buildUnsignedTx = ({
+  cosmosSdk,
+  txBody,
+  signerPubkey,
+  sequence,
+  gasLimit,
+}: {
+  cosmosSdk: cosmosclient.CosmosSDK
+  txBody: proto.cosmos.tx.v1beta1.TxBody
+  signerPubkey: proto.google.protobuf.Any
+  sequence: cosmosclient.Long
+  gasLimit: string
+}): cosmosclient.TxBuilder => {
+  const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
+    signer_infos: [
+      {
+        public_key: signerPubkey,
+        mode_info: {
+          single: {
+            mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+          },
+        },
+        sequence: sequence,
+      },
+    ],
+    fee: {
+      amount: null,
+      gas_limit: cosmosclient.Long.fromString(gasLimit),
+    },
+  })
+
+  return new cosmosclient.TxBuilder(cosmosSdk, txBody, authInfo)
+}
+
+/**
+ * Structure a MsgDeposit
  *
  * @param {MsgNativeTx} msgNativeTx Msg of type `MsgNativeTx`.
  * @param {string} nodeUrl Node url
@@ -237,35 +259,82 @@ export const buildDepositTx = async ({
   msgNativeTx: MsgNativeTx
   nodeUrl: string
   chainId: ChainId
-}): Promise<StdTx> => {
+}): Promise<proto.cosmos.tx.v1beta1.TxBody> => {
   const networkChainId = await getChainId(nodeUrl)
-  if (!networkChainId || chainId !== networkChainId)
+  if (!networkChainId || chainId !== networkChainId) {
     throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
+  }
 
-  const response: ThorchainDepositResponse = (
-    await axios.post(`${nodeUrl}/thorchain/deposit`, {
-      coins: msgNativeTx.coins,
-      memo: msgNativeTx.memo,
-      base_req: {
-        chain_id: chainId,
-        from: msgNativeTx.signer,
-      },
-    })
-  ).data
+  const signerAddr = msgNativeTx.signer.toString()
+  const signerDecoded = bech32Buffer.decode(signerAddr)
 
-  if (!response || !response.value) throw new Error('Invalid client url')
+  const msgDepositObj = {
+    coins: msgNativeTx.coins,
+    memo: msgNativeTx.memo,
+    signer: signerDecoded.data,
+  }
 
-  const fee: StdTxFee = response.value?.fee ?? { amount: [] }
+  const depositMsg = types.types.MsgDeposit.fromObject(msgDepositObj)
 
-  const unsignedStdTx = StdTx.fromJSON({
-    msg: response.value.msg,
-    // override fee
-    fee: { ...fee, gas: DEPOSIT_GAS_VALUE },
-    signatures: [],
-    memo: '',
+  return new proto.cosmos.tx.v1beta1.TxBody({
+    messages: [cosmosclient.codec.packAny(depositMsg)],
+    memo: msgNativeTx.memo,
   })
+}
 
-  return unsignedStdTx
+/**
+ * Structure a MsgSend
+ *
+ * @param fromAddress - required, from address string
+ * @param toAddress - required, to address string
+ * @param assetAmount - required, asset amount string (e.g. "10000")
+ * @param assetDenom - required, asset denom string (e.g. "rune")
+ * @param memo - optional, memo string
+ *
+ * @returns
+ */
+export const buildTransferTx = async ({
+  fromAddress,
+  toAddress,
+  assetAmount,
+  assetDenom,
+  memo = '',
+  nodeUrl,
+  chainId,
+}: {
+  fromAddress: Address
+  toAddress: Address
+  assetAmount: BaseAmount
+  assetDenom: string
+  memo?: string
+  nodeUrl: string
+  chainId: ChainId
+}): Promise<proto.cosmos.tx.v1beta1.TxBody> => {
+  const networkChainId = await getChainId(nodeUrl)
+  if (!networkChainId || chainId !== networkChainId) {
+    throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
+  }
+
+  const fromDecoded = bech32Buffer.decode(fromAddress)
+  const toDecoded = bech32Buffer.decode(toAddress)
+
+  const transferObj = {
+    fromAddress: fromDecoded.data,
+    toAddress: toDecoded.data,
+    amount: [
+      {
+        amount: assetAmount.amount().toString(),
+        denom: assetDenom,
+      },
+    ],
+  }
+
+  const transferMsg = types.types.MsgSend.fromObject(transferObj)
+
+  return new proto.cosmos.tx.v1beta1.TxBody({
+    messages: [cosmosclient.codec.packAny(transferMsg)],
+    memo,
+  })
 }
 
 /**
@@ -306,7 +375,7 @@ export const getDefaultClientUrl = (): ClientUrl => {
   return {
     [Network.Testnet]: {
       node: 'https://testnet.thornode.thorchain.info',
-      rpc: 'https://testnet.rpc.thorchain.info',
+      rpc: 'https://testnet-rpc.ninerealms.com',
     },
     [Network.Stagenet]: {
       node: 'https://stagenet-thornode.ninerealms.com',
@@ -314,7 +383,7 @@ export const getDefaultClientUrl = (): ClientUrl => {
     },
     [Network.Mainnet]: {
       node: 'https://thornode.ninerealms.com',
-      rpc: 'https://rpc.thorchain.info',
+      rpc: 'https://rpc.ninerealms.com',
     },
   }
 }

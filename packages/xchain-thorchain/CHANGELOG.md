@@ -1,3 +1,9 @@
+# v0.24.0 (2022-03-15)
+
+## Breaking Changes
+
+- `buildDepositTx` now returns `proto.cosmos.tx.v1beta1.TxBody` from `@cosmos-client/core`
+
 # v0.23.0 (2022-03-08)
 
 ## Add
