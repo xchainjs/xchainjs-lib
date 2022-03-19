@@ -584,7 +584,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       txBody: txBody,
       gasLimit: DEFAULT_GAS_VALUE,
       signerPubkey: codec.packAny(privKey.pubKey()),
-      sequence: cosmosclient.Long.fromString(from_sequence)  || cosmosclient.Long.ZERO,
+      sequence: cosmosclient.Long.fromString(from_sequence) || cosmosclient.Long.ZERO,
     })
 
     const signDocBytes = txBuilder.signDocBytes(cosmosclient.Long.fromString(from_account_number))
