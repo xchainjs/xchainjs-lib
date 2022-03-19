@@ -1,5 +1,4 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
-import { StdTx } from '@cosmos-client/core/cjs/openapi/api'
 import { baseAmount } from '@xchainjs/xchain-util'
 
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
@@ -99,7 +98,6 @@ describe('cosmos/util', () => {
   })
 
   describe('parse Tx', () => {
-    const fee = '200000'
     const from_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
     const to_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
     const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
@@ -122,11 +120,10 @@ describe('cosmos/util', () => {
         gas_wanted: '200000',
         gas_used: '35000',
         tx: {
-          msg: [encodedMsg, encodedMsg],
-          fee: fee,
-          signature: undefined,
-          memo: '',
-        } as StdTx,
+          body: {
+            messages: [encodedMsg, encodedMsg],
+          }
+        } as RawTxResponse,
         timestamp: new Date().toString(),
       },
       {

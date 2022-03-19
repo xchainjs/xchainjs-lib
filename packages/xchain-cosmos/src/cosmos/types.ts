@@ -1,5 +1,4 @@
 import { proto } from '@cosmos-client/core'
-import { StdTx } from '@cosmos-client/core/cjs/openapi/api'
 import { TxParams } from '@xchainjs/xchain-client'
 
 export type CosmosSDKClientParams = {
@@ -54,7 +53,7 @@ export type BaseAccountResponse = {
 
 export type RawTxResponse = {
   body: {
-    messages: proto.cosmos.bank.v1beta1.MsgSend[]
+    messages: proto.cosmos.bank.v1beta1.MsgSend[],
   }
 }
 
@@ -86,7 +85,7 @@ export type TxResponse = {
   logs?: TxLog[]
   gas_wanted?: string
   gas_used?: string
-  tx?: StdTx | RawTxResponse
+  tx?: RawTxResponse
   timestamp: string
 }
 
