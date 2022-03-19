@@ -58,9 +58,9 @@ export const getAsset = (denom: string): Asset | null => {
 const getCoinAmount = (coins?: proto.cosmos.base.v1beta1.ICoin[]) => {
   return coins
     ? coins
-        .map((coin) => baseAmount(coin.amount || 0, 6))
-        .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), 6), baseAmount(0, 6))
-    : baseAmount(0, 6)
+        .map((coin) => baseAmount(coin.amount || 0, DECIMAL))
+        .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
+    : baseAmount(0, DECIMAL)
 }
 /**
  * Parse transaction type
@@ -98,7 +98,7 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
             amount,
           })
         } else {
-          from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), 6)
+          from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
         }
 
         let to_index = -1
@@ -113,7 +113,7 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
             amount,
           })
         } else {
-          to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), 6)
+          to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
         }
       } else if (isMsgMultiSend(msg)) {
         const msgMultiSend = msg
@@ -133,7 +133,7 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
               amount,
             })
           } else {
-            from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), 6)
+            from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
           }
         })
 
@@ -152,7 +152,7 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
               amount,
             })
           } else {
-            to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), 6)
+            to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
           }
         })
       }

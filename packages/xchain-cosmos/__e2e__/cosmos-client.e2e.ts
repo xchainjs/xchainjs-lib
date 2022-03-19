@@ -1,16 +1,8 @@
 import { Network, TxParams } from '@xchainjs/xchain-client'
 import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
-import { Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Chain, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 
 let xchainClient: CosmosClient = new CosmosClient({})
-
-function wait(time: number) {
-  return new Promise(res => {
-      setTimeout(() => {
-          res(null);
-      }, time);
-  });
-}
 
 describe('Cosmos Integration Tests', () => {
   beforeEach(() => {
@@ -75,7 +67,7 @@ describe('Cosmos Integration Tests', () => {
       expect(txHash.length).toBeGreaterThan(0)
 
       // Wait 30 seconds for the tx to process
-      await wait(30 * 1000)
+      await delay(30 * 1000)
 
       const txResult = await xchainClient.getSDKClient().txsHashGet(txHash)
       expect(txResult.raw_log).toEqual('failed to execute message; message index: 0: 0xxx is smaller than 100xxx: insufficient funds')

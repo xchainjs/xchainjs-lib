@@ -1,5 +1,4 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
-import { Coin } from '@cosmos-client/core/cjs/openapi/api'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
@@ -37,7 +36,7 @@ const mockAccountsBalance = (
   url: string,
   address: string,
   result: {
-    balances: Coin[]
+    balances: proto.cosmos.base.v1beta1.Coin[]
   },
 ) => {
   nock(url).get(`/cosmos/bank/v1beta1/balances/${address}`).reply(200, result)
@@ -140,10 +139,10 @@ describe('Client Test', () => {
   it('has balances', async () => {
     mockAccountsBalance(getClientUrl(cosmosClient), 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv', {
       balances: [
-        {
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'muon',
           amount: '75000000',
-        },
+        }),
       ],
     })
     const balances = await cosmosClient.getBalance('cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv')

@@ -1,5 +1,4 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
-import { CosmosSDK } from '@cosmos-client/core/cjs/sdk'
 import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
@@ -214,7 +213,7 @@ export const buildUnsignedTx = ({
   sequence,
   gasLimit,
 }: {
-  cosmosSdk: CosmosSDK
+  cosmosSdk: cosmosclient.CosmosSDK
   txBody: proto.cosmos.tx.v1beta1.TxBody
   signerPubkey: proto.google.protobuf.Any
   sequence: cosmosclient.Long
@@ -303,11 +302,11 @@ export const buildTransferTx = async ({
   nodeUrl,
   chainId,
 }: {
-  fromAddress: string
-  toAddress: string
-  assetAmount: string
+  fromAddress: Address
+  toAddress: Address
+  assetAmount: BaseAmount
   assetDenom: string
-  memo: string | undefined
+  memo?: string
   nodeUrl: string
   chainId: ChainId
 }): Promise<proto.cosmos.tx.v1beta1.TxBody> => {
@@ -324,7 +323,7 @@ export const buildTransferTx = async ({
     toAddress: toDecoded.data,
     amount: [
       {
-        amount: assetAmount,
+        amount: assetAmount.amount().toString(),
         denom: assetDenom,
       },
     ],

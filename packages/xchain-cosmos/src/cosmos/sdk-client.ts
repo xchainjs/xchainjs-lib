@@ -319,6 +319,10 @@ export class CosmosSDKClient {
       throw new Error('Error broadcasting: ' + res?.data?.tx_response?.raw_log)
     }
 
-    return res.data.tx_response.txhash || ''
+    if (!res.data?.tx_response.txhash || res.data?.tx_response.txhash === '') {
+      throw new Error('Error broadcasting, txhash not present on response')
+    }
+
+    return res.data.tx_response.txhash
   }
 }

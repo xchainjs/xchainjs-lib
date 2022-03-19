@@ -250,8 +250,6 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       asset: getDenom(asset || mainAsset),
       memo,
     })
-
-    // return transferResult || ''
   }
 
   /**
