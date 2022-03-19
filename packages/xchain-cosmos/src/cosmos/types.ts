@@ -53,7 +53,7 @@ export type BaseAccountResponse = {
 
 export type RawTxResponse = {
   body: {
-    messages: proto.cosmos.bank.v1beta1.MsgSend[],
+    messages: proto.cosmos.bank.v1beta1.MsgSend[]
   }
 }
 

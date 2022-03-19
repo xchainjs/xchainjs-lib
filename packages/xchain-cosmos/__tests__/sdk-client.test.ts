@@ -1,5 +1,4 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
-import { Coin } from '@cosmos-client/core/cjs/openapi/api'
 import nock from 'nock'
 
 import { CosmosSDKClient } from '../src/cosmos/sdk-client'
@@ -28,7 +27,7 @@ const mockAccountsBalance = (
   url: string,
   address: string,
   result: {
-    balances: Coin[]
+    balances: proto.cosmos.base.v1beta1.Coin[]
   },
 ) => {
   nock(url).get(`/cosmos/bank/v1beta1/balances/${address}`).reply(200, result)
@@ -174,10 +173,10 @@ describe('SDK Client Test', () => {
 
     mockAccountsBalance(cosmosTestnetClient.server, cosmos_testnet_address0, {
       balances: [
-        {
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'umuon',
           amount: '75000000',
-        },
+        }),
       ],
     })
 
@@ -187,10 +186,10 @@ describe('SDK Client Test', () => {
 
     mockAccountsBalance(thorMainnetClient.server, thor_mainnet_address0, {
       balances: [
-        {
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'thor',
           amount: '100',
-        },
+        }),
       ],
     })
     balances = await thorMainnetClient.getBalance(thor_mainnet_address0)

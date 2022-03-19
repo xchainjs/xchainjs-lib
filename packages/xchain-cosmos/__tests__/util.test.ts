@@ -122,7 +122,7 @@ describe('cosmos/util', () => {
         tx: {
           body: {
             messages: [encodedMsg, encodedMsg],
-          }
+          },
         } as RawTxResponse,
         timestamp: new Date().toString(),
       },
