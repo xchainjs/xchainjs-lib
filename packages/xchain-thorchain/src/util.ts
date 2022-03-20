@@ -86,21 +86,9 @@ export const getPrefix = (network: Network) => {
   }
 }
 
-/**
- * Register Codecs based on the prefix.
- *
- * @param {string} prefix
- */
-export const registerDespositCodecs = async (): Promise<void> => {
+// Register types for encoding custom Thorchain messages
+export const registerCodecs = (): void => {
   cosmosclient.codec.register('/types.MsgDeposit', types.types.MsgDeposit)
-}
-
-/**
- * Register Codecs based on the prefix.
- *
- * @param {string} prefix
- */
-export const registerSendCodecs = async (): Promise<void> => {
   cosmosclient.codec.register('/types.MsgSend', types.types.MsgSend)
 }
 
