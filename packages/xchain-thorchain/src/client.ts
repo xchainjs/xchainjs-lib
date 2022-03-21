@@ -59,7 +59,8 @@ import {
   getExplorerTxUrl,
   getPrefix,
   isAssetRuneNative,
-  registerCodecs
+  registerDepositCodecs,
+  registerSendCodecs,
 } from './util'
 
 /**
@@ -110,7 +111,8 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
     this.chainIds = chainIds
 
-    registerCodecs()
+    registerSendCodecs()
+    registerDepositCodecs()
 
     this.cosmosClient = new CosmosSDKClient({
       server: this.getClientUrl().node,
