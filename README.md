@@ -20,27 +20,6 @@ A single common interface:
 5. Make a simple transfer
 6. Get blockchain fee information (standard, fast, fastest)
 
-### Importing
-
-ESLINT
-```js
-import clientPkg from '@xchainjs/xchain-thorchain'
-const { getDefaultClientUrl, Client, getChainIds } = clientPkg
-import pkg from '@xchainjs/xchain-client';
-const { Network } = pkg;
-import * as utils from '@xchainjs/xchain-util'
-import * as assetClient from '@xchainjs/xchain-binance'
-```
-
-NodeJS
-```js
-// put this in your package.json: "type": "module", 
-const { getDefaultClientUrl, Client } = require('@xchainjs/xchain-thorchain')
-const { Network } = require('@xchainjs/xchain-client')
-const utils = require('@xchainjs/xchain-util')
-const assetClient = require('@xchainjs/xchain-binance')
-```
-
 ## Examples
 
 ### Generate a phrase, then save the encrypted keystore
@@ -150,6 +129,27 @@ const getFeeData = async () => {
     let assetAmount = (utils.baseToAsset(fees.fastest)).amount()
     console.log(`The fastest fee amount is ${assetAmount} ETH`)
 }
+```
+
+### Importing
+
+ESLINT
+```js
+import clientPkg from '@xchainjs/xchain-thorchain'
+const { getDefaultClientUrl, Client, getChainIds } = clientPkg
+import pkg from '@xchainjs/xchain-client';
+const { Network } = pkg;
+import * as utils from '@xchainjs/xchain-util'
+import * as assetClient from '@xchainjs/xchain-binance'
+```
+
+NodeJS
+```js
+// put this in your package.json: "type": "module", 
+const { getDefaultClientUrl, Client } = require('@xchainjs/xchain-thorchain')
+const { Network } = require('@xchainjs/xchain-client')
+const utils = require('@xchainjs/xchain-util')
+const assetClient = require('@xchainjs/xchain-binance')
 ```
 
 ## Advanced Features
