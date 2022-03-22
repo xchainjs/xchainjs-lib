@@ -59,7 +59,7 @@ import {
   getExplorerTxUrl,
   getPrefix,
   isAssetRuneNative,
-  registerDespositCodecs,
+  registerDepositCodecs,
   registerSendCodecs,
 } from './util'
 
@@ -110,6 +110,9 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     this.clientUrl = clientUrl || getDefaultClientUrl()
     this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
     this.chainIds = chainIds
+
+    registerSendCodecs()
+    registerDepositCodecs()
 
     this.cosmosClient = new CosmosSDKClient({
       server: this.getClientUrl().node,
@@ -421,7 +424,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
    */
   async deposit({ walletIndex = 0, asset = AssetRuneNative, amount, memo }: DepositParam): Promise<TxHash> {
-    await registerDespositCodecs()
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
       balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
@@ -484,7 +486,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer({ walletIndex = 0, asset = AssetRuneNative, amount, recipient, memo }: TxParams): Promise<TxHash> {
-    await registerSendCodecs()
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
       balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)

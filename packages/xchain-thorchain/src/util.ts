@@ -87,20 +87,16 @@ export const getPrefix = (network: Network) => {
 }
 
 /**
- * Register Codecs based on the prefix.
- *
- * @param {string} prefix
+ * Register type for encoding `MsgDeposit` messages
  */
-export const registerDespositCodecs = async (): Promise<void> => {
+export const registerDepositCodecs = () => {
   cosmosclient.codec.register('/types.MsgDeposit', types.types.MsgDeposit)
 }
 
 /**
- * Register Codecs based on the prefix.
- *
- * @param {string} prefix
+ * Register type for encoding `MsgSend` messages
  */
-export const registerSendCodecs = async (): Promise<void> => {
+export const registerSendCodecs = () => {
   cosmosclient.codec.register('/types.MsgSend', types.types.MsgSend)
 }
 
