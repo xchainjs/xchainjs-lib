@@ -1,4 +1,9 @@
-# v0.24.0 (2022-03-15)
+# v0.24.0 (2022-03-23)
+
+## Update
+
+- upgraded to "@cosmos-client/core": "0.45.1"
+- client now extend BaseXChainClient
 
 ## Breaking Changes
 
