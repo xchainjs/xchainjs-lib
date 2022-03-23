@@ -1,7 +1,9 @@
-# v.0.17.0 (2022-03-13)
+# v.0.17.0 (2022-03-23)
 
-- upgraded to "@cosmos-client/core": "0.44.4"
-- xchain-cosmos and xchain-thorchain now extend BaseXChainClient
+## Update
+
+- upgraded to "@cosmos-client/core": "0.45.1"
+- client now extend BaseXChainClient
 
 ## Breaking changes
 
