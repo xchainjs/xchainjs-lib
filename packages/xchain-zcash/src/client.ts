@@ -13,13 +13,12 @@ import {
   UTXOClient,
 } from '@xchainjs/xchain-client'
 
-import * as UtxoLib from '@bitgo/utxo-lib'
+import * as zcash from 'bitcoinjs-lib-zcash'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Chain } from '@xchainjs/xchain-util'
 
 import { ZcashClientParams } from './types'
 import * as Utils from './utils'
-import * as zcash from 'bitcoinjs-lib'
 
 /**
  * Custom Zcash client
@@ -80,7 +79,6 @@ class Client extends UTXOClient {
    */
   getExplorerUrl(): string {
     switch (this.network) {
-      // TODO: Add urls
       case Network.Mainnet:
       case Network.Stagenet:
         return 'https://zcashblockexplorer.com'
@@ -141,14 +139,9 @@ class Client extends UTXOClient {
       throw new Error('index must be greater than zero')
     }
     if (this.phrase) {
-      const zecNetwork = Utils.zecNetwork(this.network)
       const zecKeys = this.getZecKeys(this.phrase, index)
 
-      const { address } = UtxoLib.payments.p2wpkh({
-        pubkey: zecKeys.publicKey,
-        network: zecNetwork,
-      })
-
+      const address = zecKeys.getAddress(index)
       if (!address) {
         throw new Error('Address not defined')
       }
@@ -168,26 +161,12 @@ class Client extends UTXOClient {
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating LTC keys from the given phrase
    * */
-  private getZecKeys(phrase: string, index = 0): zcash.ECPairInterface {
+  private getZecKeys(phrase: string, index = 0) {
     const zecNetwork = Utils.zecNetwork(this.network)
-    // const zec = coininfo.zcash.main
-    // const zecBitcoinJsLib = zec.toBitcoinJS()
-
-    console.log('zecNetwork', zecNetwork)
     const seed = getSeed(phrase)
-    console.log('seed', seed)
-    // const masterHDNode = zcash.HDNode.fromSeedBuffer(seed, zecNetwork)
-    // console.log('masterHDNode', masterHDNode)
-    // console.log('masterHDNode.derivePath', masterHDNode.derivePath(this.getFullDerivationPath(index)).keyPair)
-    const master = UtxoLib.bip32.fromSeed(seed, zecNetwork).derivePath(this.getFullDerivationPath(index))
-    // const master = zcash.bip32.fromSeed(seed, zecNetwork).derivePath(this.getFullDerivationPath(index))
-    console.log('master', master)
-    if (!master.privateKey) {
-      throw new Error('Could not get private key from phrase')
-    }
+    const masterHDNode = zcash.HDNode.fromSeedBuffer(seed, zecNetwork)
 
-    return UtxoLib.ECPair.fromPrivateKey(master.privateKey, { network: zecNetwork })
-    // return zcash.ECPair.fromPrivateKey(master.privateKey, { network: zecNetwork })
+    return masterHDNode.derivePath(this.getFullDerivationPath(index)).keyPair
   }
 
   /**

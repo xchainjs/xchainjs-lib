@@ -1,11 +1,10 @@
 /* eslint-disable ordered-imports/ordered-imports */
-// import * as UtxoLib from '@bitgo/utxo-lib'
 import { Balance, Network } from '@xchainjs/xchain-client'
 import { AssetZEC, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as sochain from './sochain-api'
 import { AddressParams, ZecAddressDTO } from './types/sochain-api-types'
 import { Network as ZecNetwork } from './types/zcashjs-types'
-import coininfo from 'coininfo'
+import * as zcash from 'bitcoinjs-lib-zcash'
 import { TX_FEE } from './const'
 
 export const ZEC_DECIMAL = 8
@@ -20,11 +19,9 @@ export const zecNetwork = (network: Network): ZecNetwork => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
-      // return UtxoLib.networks.zcash
-      return coininfo.zcash.main.toBitcoinJS()
+      return zcash.networks.zcash
     case Network.Testnet:
-      // return UtxoLib.networks.zcashTest
-      return coininfo.zcash.main.toBitcoinJS()
+      return zcash.networks.zcashTest
   }
 }
 

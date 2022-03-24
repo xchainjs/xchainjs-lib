@@ -28,21 +28,17 @@ describe('ZcashClient Test', () => {
 
   it('should get the right balance from address', async () => {
     const expectedBalance = 100000000
-    console.log('before getbalance')
     const balance = await client.getBalance('tmYxZZuywTGenNA9bQrVb3t7W3zegyZXXeT')
-    console.log('balance', balance[0].amount.amount().toNumber())
 
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
 
-  fit('should get the right balance from phrase', async () => {
-    const expectedBalance = 2223
+  it('should get the right balance from phrase', async () => {
+    const expectedBalance = 0
     client.setNetwork(Network.Testnet)
     client.setPhrase(phrase)
-    console.log('before getbalance')
     const balance = await client.getBalance(client.getAddress())
-    console.log('balance', balance[0].amount.amount().toNumber())
 
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
