@@ -136,7 +136,7 @@ Client function getFees() returns object
 
 ```ts
 //Get Fees - returns FeeOption & fee in BaseAmount 
-`Fees Fast: 0.00001 Fastest: 0.0000468 Average: 0.00001`
+` Fees Fast: 0.00001 Fastest: 0.0000468 Average: 0.00001 `
     try{
         const { fast, fastest, average } = await btcClient.getFees()
         console.log(`Fees Fast: ${baseToAsset(fast).amount()} Fastest: ${baseToAsset(fastest).amount()} Average: ${baseToAsset(average).amount()}`)
@@ -146,7 +146,7 @@ Client function getFees() returns object
     }
 
 //Get FeeRates - returns FeeOption & rate  
-`Fast: 12, Fastest 60, Average: 6`
+` Fast: 12, Fastest 60, Average: 6 `
 
     try{
         const { fast, fastest, average } = await btcClient.getFeeRates()
