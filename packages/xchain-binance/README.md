@@ -44,9 +44,11 @@ const connectWallet = async () => {
 ```
 
 ## Transfer bnb using BncClient 
+
 Create new instance of BncClient
 Set correct amount using `xchain-util` helper functions
-Build new transaction using TxParams and call transfer. 
+Build new transaction using TxParams and call transfer.
+
 ```ts
 const transferBnb = async () => {
     let amountToTransfer = 0.0001
@@ -72,9 +74,11 @@ const transferBnb = async () => {
 ```
 
 ## Get transaction Data & transaction History 
+
 Create new BncClient instance
 Call getTransactionData(hash) returns `[object object]`
 Retrieve relevant data
+
 ```ts
     let hash = "insert hash string"
     try {
@@ -99,6 +103,7 @@ Retrieve relevant data
 ```
 
 ## Get current fees
+
 Bnc is a fixed fee client, average, fast and fastest return the same value.
 getFees() returns current fees for the network 
 getMultiSendFees() returns current fees for a multi send tx 
@@ -117,6 +122,7 @@ getMultiSendFees() returns current fees for a multi send tx
 ```
 
 ## Multisend Transaction
+
 Building a multisend transaction with BncClient
 Build transaction with transactions taking a Array of objects. 
 
