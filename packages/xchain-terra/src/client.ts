@@ -121,7 +121,7 @@ class Client extends BaseXChainClient implements XChainClient {
     return this.config[this.network].explorerAddressURL + address?.toLowerCase()
   }
   getExplorerTxUrl(txID: string): string {
-    return this.config[this.network].explorerAddressURL + txID?.toLowerCase()
+    return this.config[this.network].explorerTxURL + txID?.toLowerCase()
   }
   validateAddress(address: string): boolean {
     return AccAddress.validate(address)
