@@ -3,7 +3,7 @@
 Terra Module for XChainJS Clients
 
 ## Modules
-Terra.js a JavaScript SDK for writing applications that interact with the Terra blockchain `@terra-money/terra.js` [`https://www.npmjs.com/package/@terra-money/terra.js`]
+Terra.js a JavaScript SDK for writing applications that interact with the Terra blockchain `@terra-money/terra.js`, [`https://www.npmjs.com/package/@terra-money/terra.js`]
 Exposes the Terra API through [`LCDClient`](https://docs.terra.money/docs/develop/sdks/terra-js/query-data.html)
 
 ## Installation
@@ -64,7 +64,7 @@ Build new transaction using TxParams and call transfer.
 
 ```ts
 const transferTerra = async () => {
-    let recipient = "terra1wx3cxtx0gglfzvs4enm4vqhsg2d6w0qp9dnxs3"
+    let recipient = await getRecipientAddress() 
     let amountToTransfer = 0.01
     let amount = assetToBase(assetAmount(amountToTransfer, TERRA_DECIMAL))
     let phrase = await decryptFromKeystore(keystore1, password)
@@ -183,3 +183,5 @@ This package uses the following service providers:
 
 
 ## Extras
+
+Tested with node v 16.4.0 
