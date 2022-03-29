@@ -50,7 +50,7 @@ const connectWallet = async () => {
 
 ## Transfer using BitcoinCash Client
 Transaction parameters. Default fee rate is: 1 
-Returns transaction hash
+Returns transaction hash string
 ```ts
 
 //Imports 
@@ -77,7 +77,6 @@ const transferBitcoinCash = async () => {
 }
 
 // Build transaction with feeRate adjustment
-
 const feeRates = await bchClient.getFeeRates()
 console.log(feeRates.average, feeRates.fast, feeRates.fastest)
 
@@ -98,7 +97,7 @@ try {
 ## Get current fees & fee rates. 
 
 getFees() returns fees in base amount i.e BCH `Fees Fast: 0.00000234 Fastest: 0.0000117 Average: 0.00000117`
-getFeeRates returns feeRates as `number`
+getFeeRates() returns feeRates as `number`
 
 ```ts
 // Query client for fees and fee rates
