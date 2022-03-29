@@ -16,6 +16,140 @@ Following peer dependencies have to be installed into your project. These are no
 yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios @psf/bitcoincashjs-lib bchaddrjs
 ```
 
+## Basic Usage Example 
+
+## Connect wallet to new Bitcoincash Client
+
+```ts
+// Imports
+import { Client } from "@xchainjs/xchain-bitcoincash"
+import { Network } from "@xchainjs/xchain-client"
+import { decryptFromKeystore } from "@xchainjs/xchain-crypto"
+
+// Connect wallet to new BitcoinCash Client & validate address
+const connectWallet = async () => {
+    let phrase = await decryptFromKeystore(keystore1, password)
+    const bchClient = new Client({network: Network.Mainnet, phrase})
+    let address = bchClient.getAddress()
+    let isValid = bchClient.validateAddress(address)
+    if( isValid === true ){
+        try {
+            const balance = await bchClient.getBalance(address)
+            let assetAmount = (baseToAsset(balance[0].amount)).amount()
+            console.log(`With balance: ${assetAmount}`)
+    
+        } catch (error) {
+            console.log(`Caught: ${error}`)
+        }
+    } else {
+        console.log(`Address ${address} is not valid`)
+    }
+}
+
+```
+
+## Transfer using BitcoinCash Client
+Transaction parameters. Default fee rate is: 1 
+Returns transaction hash string
+```ts
+
+//Imports 
+import { assetToBase, assetAmount, AssetBCH } from "@xchainjs/xchain-util"
+
+// Convert amount to transfer to BaseAmount using helper functions  
+const transferBitcoinCash = async () => {
+    let amountToTransfer = 0.01
+    let recipient = await getRecipientAddress()
+    let phrase = await decryptFromKeystore(keystore1, password)
+    const bchClient = new Client({network: Network.Mainnet, phrase })
+    let amount = assetToBase(assetAmount(amountToTransfer, BCH_DECIMAL))
+    console.log("Building transaction")
+    try {
+        const txid = await bchClient.transfer({ 
+            "asset": AssetBCH,
+            "amount": amount,
+            "recipient":recipient,
+        })
+        console.log(`Transaction sent: ${txid}`)
+    } catch (error) {
+        console.log(`Caught: ${error}`)
+    } 
+}
+
+// Build transaction with feeRate adjustment
+const feeRates = await bchClient.getFeeRates()
+console.log(feeRates.average, feeRates.fast, feeRates.fastest)
+
+try {
+        const txid = await bchClient.transfer({ 
+            "asset": AssetBCH,
+            "amount": amount,
+            "recipient":recipient,
+            feeRate: feeRates.average // default is 1
+        })
+        console.log(`Transaction sent: ${txid}`)
+    } catch (error) {
+        console.log(`Caught: ${error}`)
+    } 
+
+```
+
+## Get current fees & fee rates. 
+
+getFees() returns fees in base amount i.e BCH `Fees Fast: 0.00000234 Fastest: 0.0000117 Average: 0.00000117`
+getFeeRates() returns feeRates as `number`
+
+```ts
+// Query client for fees and fee rates
+const returnFees = async () => {
+    let phrase = await decryptFromKeystore(keystore1, password)
+    const bchClient = new Client({network: Network.Mainnet, phrase })
+    try {
+        const {fast, fastest, average} = await bchClient.getFees()
+        console.log(`Fees Fast: ${baseToAsset(fast).amount()} Fastest: ${baseToAsset(fastest).amount()} Average: ${baseToAsset(average).amount()}`)
+        const feeRates = await bchClient.getFeeRates()
+        console.log(feeRates.average, feeRates.fast, feeRates.fastest)
+    } catch (error) {
+        console.log(`Caught: ${error}`)
+    }
+
+```
+
+## Get transaction Data & transaction History
+
+```ts
+
+// Returns transaction object for a particular txId
+const transactionData = async () => {
+    let phrase = await decryptFromKeystore(keystore1, password)
+    const bchClient = new Client({network: Network.Mainnet, phrase })
+    let hash = "insert hash"
+
+    try {
+        const txData = await bchClient.getTransactionData(hash)
+        console.log(`From ${JSON.stringify(txData)}`)
+    } catch (error) {
+        console.log(`Caught: ${error}`)
+    }
+}
+
+// Returns transaction history for a particular address
+const transactionHistory = async () => {
+    let phrase = await decryptFromKeystore(keystore1, password)
+    const bchClient = new Client({network: Network.Mainnet, phrase })
+    let Address = bchClient.getAddress()
+
+    try {
+        const txHistory = await bchClient.getTransactions({address: Address, limit: 4 })
+        console.log(`Found ${txHistory.total.toString()}`)
+        txHistory.txs.forEach(tx => console.log(tx.hash))
+    } catch (error) {
+        console.log(`Caught: ${error}`)
+    }
+}
+
+```
+
 ## Service Providers
 
 This package uses the following service providers:
@@ -33,41 +167,5 @@ Haskoin API rate limits: No
 
 Bitgo API rate limits: https://app.bitgo.com/docs/#section/Rate-Limiting (10 requests/second)
 
-## Usage
 
-Initialize client and use class methods:
-
-```
-import { Client, Network } from '../src/client'
-
-// Create a new client interface
-const bchClient = new Client({ network: Network.Mainnet })
-
-// Set phrase
-bchClient.setPhrase('phrase here')
-
-// Get address
-const address = bchClient.getAddress()
-
-// Get balance
-const balance = await bchClient.getBalance()
-
-// Transfer with feeRate
-const txid = await bchClient.transfer({ asset: AssetBCH, recipient: 'recipient address here', amount: baseAmount(100, BCH_DECIMAL), feeRate: 1 })
-
-// Transfer with default feeRate (default is `fast`)
-const txid = await bchClient.transfer({ asset: AssetBCH, recipient: 'recipient address here', amount: baseAmount(100, BCH_DECIMAL) })
-
-// Get fee estimations
-const { fast, fastest, average } = await bchClient.getFees()
-
-// Get feeRate estimations
-const { fast, fastest, average } = await bchClient.getFeeRates()
-
-// Search transactions
-const transactions = await bchClient.getTransactions({ address: 'address here', limit: 4 })
-
-// Get a transaction with a given txId/hash
-const txData = await bchClient.getTransactionData('b660ee07167cfa32681e2623f3a29dc64a089cabd9a3a07dd17f9028ac956eb8')
-
-```
+## Extras
