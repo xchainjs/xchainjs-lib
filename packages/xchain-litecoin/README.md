@@ -125,7 +125,7 @@ or transaction history
 
 ```ts
 
-// Return trasanction data from a txid/hash
+// Return transanction data from a txid/hash
 const transactionData = async () => {
     let phrase = await decryptFromKeystore(keystore1, password)
     const ltcClient = new Client({network: Network.Mainnet, phrase})
