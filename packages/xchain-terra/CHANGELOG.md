@@ -1,4 +1,8 @@
-# v.0.1.0-alpha.3 (2022-xx-xx)
+# v.0.1.0-alpha.3 (2022-03-28)
+
+## FIX
+
+- Fix `getExplorerTxUrl` returning `explorerAddressURL`
 
 ## Update
 
