@@ -60,7 +60,7 @@ Default fee is set to 1
 
 ```ts
 //Imports
-import { assetToBase, baseToAsset, assetAmount, AssetBTC } from "@xchainjs/xchain-util"
+import { assetToBase, baseToAsset, assetAmount} from "@xchainjs/xchain-util"
 
 // Call Transfer with TxParams
 const transferDoge = async () => {
