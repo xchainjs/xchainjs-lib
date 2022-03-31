@@ -20,6 +20,7 @@ import {
 import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 import { BigNumber, BigNumberish, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
+import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 
 import erc20ABI from './data/erc20.json'
 import * as etherscanAPI from './etherscan-api'
@@ -97,6 +98,10 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   constructor({
     network = Network.Testnet,
+    feeBounds = {
+      lower: LOWER_FEE_BOUND,
+      upper: UPPER_FEE_BOUND
+    },
     ethplorerUrl = 'https://api.ethplorer.io',
     ethplorerApiKey = 'freekey',
     explorerUrl,
@@ -109,7 +114,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     etherscanApiKey,
     infuraCreds,
   }: EthereumClientParams) {
-    super(Chain.Ethereum, { network, rootDerivationPaths })
+    super(Chain.Ethereum, { network, rootDerivationPaths, feeBounds })
     this.ethNetwork = xchainNetworkToEths(network)
     this.rootDerivationPaths = rootDerivationPaths
     this.infuraCreds = infuraCreds
@@ -714,7 +719,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       // Note: `rates` are in `gwei`
       // @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/querier.go#L416-420
       // To have all values in `BaseAmount`, they needs to be converted into `wei` (1 gwei = 1,000,000,000 wei = 1e9)
-      const ratesInGwei = standardFeeRates(await this.getFeeRateFromThorchain())
+      const ratesInGwei = standardFeeRates(await this.getFeeRateFromThorchain(), this.feeBounds)
       return {
         [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, ETH_DECIMAL),
         [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, ETH_DECIMAL),

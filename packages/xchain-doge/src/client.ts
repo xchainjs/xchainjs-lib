@@ -18,7 +18,7 @@ import { AssetDOGE, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-uti
 import * as Dogecoin from 'bitcoinjs-lib'
 
 import * as blockcypher from './blockcypher-api'
-import { DOGE_DECIMAL } from './const'
+import { DOGE_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import * as sochain from './sochain-api'
 import { TxIO } from './types/sochain-api-types'
 import * as Utils from './utils'
@@ -44,6 +44,10 @@ class Client extends UTXOClient {
    */
   constructor({
     network = Network.Testnet,
+    feeBounds = {
+      lower: LOWER_FEE_BOUND,
+      upper: UPPER_FEE_BOUND
+    },
     sochainUrl = 'https://sochain.com/api/v2',
     blockcypherUrl = 'https://api.blockcypher.com/v1',
     phrase,
@@ -53,7 +57,7 @@ class Client extends UTXOClient {
       [Network.Testnet]: `m/44'/1'/0'/0/`,
     },
   }: DogecoinClientParams) {
-    super(Chain.Doge, { network, rootDerivationPaths, phrase })
+    super(Chain.Doge, { network, rootDerivationPaths, phrase, feeBounds })
     this.setSochainUrl(sochainUrl)
     this.setBlockcypherUrl(blockcypherUrl)
   }

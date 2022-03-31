@@ -53,7 +53,7 @@ describe('Litecoin Utils Test', () => {
   })
 
   it('should return default fees of a normal tx', async () => {
-    const estimates = Utils.getDefaultFees()
+    const estimates = Utils.getDefaultFees({ lower: 1, upper: Infinity })
     expect(estimates.fast).toBeDefined()
     expect(estimates.fastest).toBeDefined()
     expect(estimates.average).toBeDefined()

@@ -5,6 +5,7 @@ import axios from 'axios'
 import {
   Address,
   Balance,
+  FeeBounds,
   FeeRate,
   Fees,
   Network,
@@ -24,6 +25,7 @@ const TESTNET_THORNODE_API_BASE = 'https://testnet.thornode.thorchain.info/thorc
 export abstract class BaseXChainClient implements XChainClient {
   protected chain: Chain
   protected network: Network
+  protected feeBounds: FeeBounds
   protected phrase = ''
   protected rootDerivationPaths: RootDerivationPaths | undefined
 
@@ -40,6 +42,7 @@ export abstract class BaseXChainClient implements XChainClient {
   constructor(chain: Chain, params: XChainClientParams) {
     this.chain = chain
     this.network = params.network || Network.Testnet
+    this.feeBounds = params.feeBounds || { lower: 1, upper: Infinity }
     // Fire off a warning in the console to indicate that stagenet and real assets are being used.
     if (this.network === Network.Stagenet) console.warn('WARNING: This is using stagenet! Real assets are being used!')
     if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths

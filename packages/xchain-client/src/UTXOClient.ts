@@ -38,6 +38,6 @@ export abstract class UTXOClient extends Client {
       return await this.getSuggestedFeeRate()
     })()
 
-    return standardFeeRates(feeRate)
+    return standardFeeRates(feeRate, this.feeBounds)
   }
 }

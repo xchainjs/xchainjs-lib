@@ -17,6 +17,7 @@ import {
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { AssetLTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Litecoin from 'bitcoinjs-lib'
+import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 
 import * as sochain from './sochain-api'
 import { NodeAuth } from './types'
@@ -46,6 +47,10 @@ class Client extends UTXOClient {
    */
   constructor({
     network = Network.Testnet,
+    feeBounds = {
+      lower: LOWER_FEE_BOUND,
+      upper: UPPER_FEE_BOUND
+    },
     sochainUrl = 'https://sochain.com/api/v2',
     phrase,
     nodeUrl,
@@ -59,7 +64,7 @@ class Client extends UTXOClient {
       [Network.Stagenet]: `m/84'/2'/0'/0/`,
     },
   }: LitecoinClientParams) {
-    super(Chain.Litecoin, { network, rootDerivationPaths, phrase })
+    super(Chain.Litecoin, { network, rootDerivationPaths, phrase, feeBounds })
     this.nodeUrl =
       nodeUrl ??
       (() => {

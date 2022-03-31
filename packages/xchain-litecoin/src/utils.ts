@@ -10,6 +10,7 @@ import {
   TxParams,
   calcFees,
   standardFeeRates,
+  FeeBounds,
 } from '@xchainjs/xchain-client'
 import { AssetLTC, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import * as Litecoin from 'bitcoinjs-lib'
@@ -299,9 +300,9 @@ export const calcFee = (feeRate: FeeRate, memo?: string): BaseAmount => {
  *
  * @returns {FeesWithRates} The default fees and rates.
  */
-export const getDefaultFeesWithRates = (): FeesWithRates => {
+export const getDefaultFeesWithRates = (feeBounds: FeeBounds): FeesWithRates => {
   const rates = {
-    ...standardFeeRates(20),
+    ...standardFeeRates(20, feeBounds),
     [FeeOption.Fastest]: 50,
   }
 
@@ -316,8 +317,8 @@ export const getDefaultFeesWithRates = (): FeesWithRates => {
  *
  * @returns {Fees} The default fees.
  */
-export const getDefaultFees = (): Fees => {
-  const { fees } = getDefaultFeesWithRates()
+export const getDefaultFees = (feeBounds: FeeBounds): Fees => {
+  const { fees } = getDefaultFeesWithRates(feeBounds)
   return fees
 }
 

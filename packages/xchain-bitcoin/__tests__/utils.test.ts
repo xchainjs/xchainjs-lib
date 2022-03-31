@@ -52,10 +52,16 @@ describe('Bitcoin Utils Test', () => {
   })
 
   it('should return default fees of a normal tx', async () => {
-    const estimates = Utils.getDefaultFees()
+    const estimates = Utils.getDefaultFees({ lower: 1, upper: Infinity})
     expect(estimates.fast).toBeDefined()
     expect(estimates.fastest).toBeDefined()
     expect(estimates.average).toBeDefined()
+  })
+
+  it('should fail with out of bound fees', async () => {
+    expect(() => {
+      Utils.getDefaultFees({ lower: 1, upper: 2 })
+    }).toThrow()
   })
 
   it('should fetch as many uxtos as are associated with an address', async () => {
