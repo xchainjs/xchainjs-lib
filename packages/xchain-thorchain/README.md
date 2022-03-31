@@ -61,39 +61,42 @@ Build transaction.
 
 //Imports
 import { assetToBase, baseToAsset, assetAmount } from "@xchainjs/xchain-util"
-
-// Transaction parameters also include but not
+ 
 const transferRune = async () => {
     const chainIds = await getChainIds(getDefaultClientUrl())
     let phrase = await decryptFromKeystore(keystore1, password)
     const thorClient = new Client({network: Network.Mainnet, phrase: phrase, chainIds})
     let amountToTransfer = 0.1
     let amount = assetToBase(assetAmount(amountToTransfer, DECIMAL ))
-    let recipient = await getRecipientAddress()
+    let recipient = "thor1cf4dsll8rema8y3xvvsn2t786xrkhp3d679qxh" 
     try {
         const txid = await thorClient.transfer({
             "amount": amount,
             "recipient": recipient,
             "memo": "test",
+            "asset": AssetRuneNative,
+            "walletIndex": 0 
         })
         console.log(`Transaction sent: ${JSON.stringify(txid)}`)
     } catch (error) {
         console.log(`Caught ${error}`)
     }
+}
 
 
 ```
 
 ## Get transaction Data & transaction History
 
-Retrieve transaction data using transaction hash and address 
+Retrieve transaction data using transaction hash and address
+
 ```ts
 
 const transactionData = async () => {
     const chainIds = await getChainIds(getDefaultClientUrl())
     let phrase = await decryptFromKeystore(keystore1, password)
     const thorClient = new Client({network: Network.Mainnet, phrase: phrase, chainIds})
-    let hash = "76523972494541DE97C6B9FD2409748C80763F95B24E9D512B2E6A8CB620F6A7"
+    let hash = "insert hash"
     let address = thorClient.getAddress()
     try {
         const txData = await thorClient.getTransactionData(hash, address)
@@ -102,7 +105,7 @@ const transactionData = async () => {
         console.log(`Caught ${error}`)
     }
 }
-// By default getTransactions() returns the tranactions of current wallet
+// By default getTransactions() returns the tranactions for the current address
 const transactionHistory = async () => {
     const chainIds = await getChainIds(getDefaultClientUrl())
     let phrase = await decryptFromKeystore(keystore1, password)
@@ -141,7 +144,7 @@ const fee = async () => {
 
 ```ts
 // Query thorchain client for network data and explorer data
- 
+
 const explorerUrl = async () => {
     const chainIds = await getChainIds(getDefaultClientUrl())
     let phrase = await decryptFromKeystore(keystore1, password)
