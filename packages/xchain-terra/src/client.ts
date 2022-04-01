@@ -1,17 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AccAddress, Coin, Coins, LCDClient, MnemonicKey, MsgMultiSend, MsgSend, TxInfo } from '@terra-money/terra.js'
-import {
+import { BaseXChainClient, FeeType, Network, TxType } from '@xchainjs/xchain-client'
+import type {
   Balance,
-  BaseXChainClient,
-  FeeType,
   Fees,
-  Network,
   Tx,
   TxFrom,
   TxHistoryParams,
   TxParams,
   TxTo,
-  TxType,
   TxsPage,
   XChainClient,
   XChainClientParams,
@@ -20,79 +16,30 @@ import { Asset, AssetLUNA, Chain, assetToString, baseAmount } from '@xchainjs/xc
 import axios from 'axios'
 
 import { TERRA_DECIMAL } from './const'
-import { getTerraMicroDenom } from './util'
-
-const DEFAULT_CONFIG: Record<Network, TerraClientConfig> = {
-  [Network.Mainnet]: {
-    explorerURL: 'https://finder.terra.money/mainnet',
-    explorerAddressURL: 'https://finder.terra.money/mainnet/address/',
-    explorerTxURL: 'https://finder.terra.money/mainnet/tx/',
-    cosmosAPIURL: 'https://fcd.terra.dev',
-    ChainID: 'columbus-5',
-  },
-  [Network.Stagenet]: {
-    explorerURL: 'https://finder.terra.money/mainnet',
-    explorerAddressURL: 'https://finder.terra.money/mainnet/address/',
-    explorerTxURL: 'https://finder.terra.money/mainnet/tx/',
-    cosmosAPIURL: 'https://fcd.terra.dev',
-    ChainID: 'columbus-5',
-  },
-  [Network.Testnet]: {
-    explorerURL: 'https://finder.terra.money/testnet',
-    explorerAddressURL: 'https://finder.terra.money/testnet/address/',
-    explorerTxURL: 'https://finder.terra.money/testnet/tx/',
-    cosmosAPIURL: 'https://bombay-fcd.terra.dev',
-    ChainID: 'bombay-12',
-  },
-}
-
-export type SearchTxParams = {
-  messageAction?: string
-  messageSender?: string
-  transferSender?: string
-  transferRecipient?: string
-  page?: number
-  limit?: number
-  txMinHeight?: number
-  txMaxHeight?: number
-}
-export type TerraClientConfig = {
-  explorerURL: string
-  explorerAddressURL: string
-  explorerTxURL: string
-  cosmosAPIURL: string
-  ChainID: string
-}
-export type TerraClientParams = {
-  explorerURL?: string
-  explorerAddressURL?: string
-  explorerTxURL?: string
-  cosmosAPIURL?: string
-  ChainID?: string
-}
+import type { ClientConfig, ClientParams } from './types/client'
+import { getDefaultClientConfig, getDefaultRootDerivationPaths, getTerraMicroDenom } from './util'
 
 /**
  * Terra Client
  */
 class Client extends BaseXChainClient implements XChainClient {
   private lcdClient: LCDClient
-  private config: Record<Network, TerraClientConfig>
+  private config: Record<Network, ClientConfig>
   constructor({
     network = Network.Testnet,
     phrase,
-    rootDerivationPaths = {
-      [Network.Mainnet]: "44'/330'/0'/0/",
-      [Network.Stagenet]: "44'/330'/0'/0/",
-      [Network.Testnet]: "44'/330'/0'/0/",
-    },
+    rootDerivationPaths = getDefaultRootDerivationPaths(),
     explorerURL,
     explorerAddressURL,
     explorerTxURL,
     cosmosAPIURL,
     ChainID,
-  }: XChainClientParams & TerraClientParams) {
+  }: XChainClientParams & ClientParams) {
     super(Chain.Terra, { network, rootDerivationPaths, phrase })
-    this.config = { ...DEFAULT_CONFIG, ...{ explorerURL, explorerAddressURL, explorerTxURL, cosmosAPIURL, ChainID } }
+    this.config = {
+      ...getDefaultClientConfig(),
+      ...{ explorerURL, explorerAddressURL, explorerTxURL, cosmosAPIURL, ChainID },
+    }
 
     this.lcdClient = new LCDClient({
       URL: this.config[this.network].cosmosAPIURL,
@@ -217,9 +164,13 @@ class Client extends BaseXChainClient implements XChainClient {
     }) as unknown) as Balance[]
   }
 
+  // (@xchain-contributors) TODO: Fix `tx` type to avoid `any`
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private convertSearchResultTxToTx(tx: any): Tx {
     let from: TxFrom[] = []
     let to: TxTo[] = []
+    // (@xchain-contributors) TODO: Fix `msg` type to avoid `any`
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tx.tx.value.msg.forEach((msg: any) => {
       if (msg.type === 'bank/MsgSend') {
         const xfers = this.convertMsgSend(MsgSend.fromAmino(msg))

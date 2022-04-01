@@ -4,10 +4,7 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": [
-    "prettier",
-    "ordered-imports"
-  ],
+  "plugins": ["prettier", "ordered-imports"],
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "prettier/@typescript-eslint",
@@ -29,16 +26,13 @@
       }
     ],
     "@typescript-eslint/no-var-requires": "off",
-    "no-duplicate-imports": "error",
+    "@typescript-eslint/no-duplicate-imports": "error",
     "no-undef": "off",
     "ordered-imports/ordered-imports": [
       "error",
       {
         "symbols-first": false,
-        "declaration-ordering": [
-          "source",
-          "lowercase-last"
-        ],
+        "declaration-ordering": ["source", "lowercase-last"],
         "specifier-ordering": "lowercase-last",
         "group-ordering": [
           {
