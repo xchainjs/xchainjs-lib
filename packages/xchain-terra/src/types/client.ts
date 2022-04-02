@@ -16,7 +16,7 @@ export type ClientParams = {
   explorerAddressURL?: string
   explorerTxURL?: string
   cosmosAPIURL?: string
-  ChainID?: string
+  chainID?: string
 }
 
 export type ClientConfig = {
@@ -24,7 +24,7 @@ export type ClientConfig = {
   explorerAddressURL: string
   explorerTxURL: string
   cosmosAPIURL: string
-  ChainID: string
+  chainID: string
 }
 
 export type ClientConfigs = Record<Network, ClientConfig>

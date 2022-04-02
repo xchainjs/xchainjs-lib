@@ -33,17 +33,27 @@ class Client extends BaseXChainClient implements XChainClient {
     explorerAddressURL,
     explorerTxURL,
     cosmosAPIURL,
-    ChainID,
+    chainID,
   }: XChainClientParams & ClientParams) {
     super(Chain.Terra, { network, rootDerivationPaths, phrase })
+    const defaultClientConfigs = getDefaultClientConfig()
+    const defaultClientConfig = defaultClientConfigs[network]
     this.config = {
-      ...getDefaultClientConfig(),
-      ...{ explorerURL, explorerAddressURL, explorerTxURL, cosmosAPIURL, ChainID },
+      ...defaultClientConfigs,
+      // override default config of given network with given values
+      [network]: {
+        ...defaultClientConfig,
+        explorerURL: explorerURL || defaultClientConfig.explorerURL,
+        explorerAddressURL: explorerAddressURL || defaultClientConfig.explorerAddressURL,
+        explorerTxURL: explorerTxURL || defaultClientConfig.explorerTxURL,
+        cosmosAPIURL: cosmosAPIURL || defaultClientConfig.cosmosAPIURL,
+        chainID: chainID || defaultClientConfig.chainID,
+      },
     }
 
     this.lcdClient = new LCDClient({
-      URL: this.config[this.network].cosmosAPIURL,
-      chainID: this.config[this.network].ChainID,
+      URL: defaultClientConfig.cosmosAPIURL,
+      chainID: defaultClientConfig.chainID,
     })
   }
 
@@ -96,7 +106,7 @@ class Client extends BaseXChainClient implements XChainClient {
     super.setNetwork(network)
     this.lcdClient = new LCDClient({
       URL: this.config[this.network].cosmosAPIURL,
-      chainID: this.config[this.network].ChainID,
+      chainID: this.config[this.network].chainID,
     })
   }
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {

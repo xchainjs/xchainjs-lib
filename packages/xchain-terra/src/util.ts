@@ -86,21 +86,21 @@ export const getDefaultClientConfig = (): Record<Network, ClientConfig> => ({
     explorerAddressURL: 'https://finder.terra.money/mainnet/address/',
     explorerTxURL: 'https://finder.terra.money/mainnet/tx/',
     cosmosAPIURL: 'https://fcd.terra.dev',
-    ChainID: 'columbus-5',
+    chainID: 'columbus-5',
   },
   [Network.Stagenet]: {
     explorerURL: 'https://finder.terra.money/mainnet',
     explorerAddressURL: 'https://finder.terra.money/mainnet/address/',
     explorerTxURL: 'https://finder.terra.money/mainnet/tx/',
     cosmosAPIURL: 'https://fcd.terra.dev',
-    ChainID: 'columbus-5',
+    chainID: 'columbus-5',
   },
   [Network.Testnet]: {
     explorerURL: 'https://finder.terra.money/testnet',
     explorerAddressURL: 'https://finder.terra.money/testnet/address/',
     explorerTxURL: 'https://finder.terra.money/testnet/tx/',
     cosmosAPIURL: 'https://bombay-fcd.terra.dev',
-    ChainID: 'bombay-12',
+    chainID: 'bombay-12',
   },
 })
 
@@ -129,13 +129,13 @@ export const getTerraChains = async (url = 'https://assets.terra.money'): Promis
  * Helper to merge `ChainIds` into given `ClientConfigs`
  */
 export const mergeChainIds = (chains: Terra.ChainIds, config: ClientConfigs): Record<Network, ClientConfig> => {
-  const mainnet: ClientConfig = { ...config.mainnet, ChainID: chains.mainnet }
+  const mainnet: ClientConfig = { ...config.mainnet, chainID: chains.mainnet }
   return {
     [Network.Mainnet]: mainnet,
     [Network.Stagenet]: mainnet,
     [Network.Testnet]: {
       ...config.mainnet,
-      ChainID: chains.testnet,
+      chainID: chains.testnet,
     },
   }
 }
