@@ -1,3 +1,20 @@
+# v.0.1.0-alpha.4 (2022-04-02)
+
+## Add
+
+- Helper `getDefaultClientConfig`
+- Helper `getTerraChains`
+- Helper `getDefaultRootDerivationPaths`
+
+## Fix
+
+- Fix destructering of default config in `Client` constructor to override values properly
+
+## Breaking change
+
+- Extract client related types from `client` to `types/client` (incl. some renaming)
+- Rename `ChainID` -> `chainID` in `ClientParams`
+
 # v.0.1.0-alpha.3 (2022-03-28)
 
 ## FIX
