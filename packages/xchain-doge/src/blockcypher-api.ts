@@ -1,4 +1,4 @@
-import { Network } from '@xchainjs/xchain-client/lib'
+import { Network } from '@xchainjs/xchain-client'
 import axios from 'axios'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 150000

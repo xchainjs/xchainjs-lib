@@ -1,3 +1,9 @@
+# v.0.1.0-alpha.6 (2022-xx-xx)
+
+## Fix
+
+- Fix import of `xchain-client|util`
+
 # v.0.1.0-alpha.5 (2022-04-03)
 
 ## Add

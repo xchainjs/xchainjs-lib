@@ -1,7 +1,6 @@
 import { FeeType, Fees, Network, singleFee } from '@xchainjs/xchain-client'
 import type { RootDerivationPaths } from '@xchainjs/xchain-client'
-import { Chain } from '@xchainjs/xchain-util'
-import { Asset, assetAmount, assetToBase } from '@xchainjs/xchain-util/lib'
+import { Asset, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import { TERRA_DECIMAL } from './const'

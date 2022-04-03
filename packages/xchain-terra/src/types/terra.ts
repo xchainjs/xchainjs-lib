@@ -1,4 +1,4 @@
-import { Network } from '@xchainjs/xchain-client/lib'
+import { Network } from '@xchainjs/xchain-client'
 
 /**
  * Chain types at Terra
