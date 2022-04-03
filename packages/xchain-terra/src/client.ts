@@ -17,7 +17,7 @@ import axios from 'axios'
 
 import { TERRA_DECIMAL } from './const'
 import type { ClientConfig, ClientParams } from './types/client'
-import { getDefaultClientConfig, getDefaultRootDerivationPaths, getTerraMicroDenom } from './util'
+import { getDefaultClientConfig, getDefaultFees, getDefaultRootDerivationPaths, getTerraMicroDenom } from './util'
 
 /**
  * Terra Client
@@ -58,13 +58,17 @@ class Client extends BaseXChainClient implements XChainClient {
   }
 
   async getFees(): Promise<Fees> {
-    const feesArray = (await axios.get(`${this.config[this.network].cosmosAPIURL}/v1/txs/gas_prices`)).data
-    const baseFeeInLuna = baseAmount(feesArray['uluna'], TERRA_DECIMAL)
-    return {
-      type: FeeType.FlatFee,
-      average: baseFeeInLuna,
-      fast: baseFeeInLuna,
-      fastest: baseFeeInLuna,
+    try {
+      const feesArray = (await axios.get(`${this.config[this.network].cosmosAPIURL}/v1/txs/gas_prices`)).data
+      const baseFeeInLuna = baseAmount(feesArray['uluna'], TERRA_DECIMAL)
+      return {
+        type: FeeType.FlatFee,
+        average: baseFeeInLuna,
+        fast: baseFeeInLuna,
+        fastest: baseFeeInLuna,
+      }
+    } catch {
+      return getDefaultFees()
     }
   }
   getAddress(walletIndex = 0): string {

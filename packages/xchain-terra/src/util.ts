@@ -1,9 +1,10 @@
-import { Network } from '@xchainjs/xchain-client'
+import { FeeType, Fees, Network, singleFee } from '@xchainjs/xchain-client'
 import type { RootDerivationPaths } from '@xchainjs/xchain-client'
-import type { Asset } from '@xchainjs/xchain-util/lib'
-import { Chain } from '@xchainjs/xchain-util/lib'
+import { Chain } from '@xchainjs/xchain-util'
+import { Asset, assetAmount, assetToBase } from '@xchainjs/xchain-util/lib'
 import axios from 'axios'
 
+import { TERRA_DECIMAL } from './const'
 import type { ClientConfig, ClientConfigs } from './types'
 import type * as Terra from './types/terra'
 
@@ -138,4 +139,22 @@ export const mergeChainIds = (chains: Terra.ChainIds, config: ClientConfigs): Re
       chainID: chains.testnet,
     },
   }
+}
+
+/**
+ * Get address prefix
+ *
+ * @returns {string} Prefix of an address
+ *
+ */
+export const getPrefix = () => 'terra'
+
+/**
+ * Returns default fee in LUNA.
+ *
+ * @returns {Fees} The default fee (in LUNA).
+ */
+export const getDefaultFees = (): Fees => {
+  const fee = assetToBase(assetAmount(0.1133 /* LUNA */, TERRA_DECIMAL))
+  return singleFee(FeeType.FlatFee, fee)
 }

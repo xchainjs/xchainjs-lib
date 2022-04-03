@@ -1,3 +1,14 @@
+# v.0.1.0-alpha.5 (2022-04-03)
+
+## Add
+
+- Helper `getPrefix`
+- Helper `getDefaultFees`
+
+## Update
+
+- `Client.getFees` returns default fees in case of failure (similar to other xchain-\* clients)
+
 # v.0.1.0-alpha.4 (2022-04-02)
 
 ## Add
