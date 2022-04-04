@@ -35,7 +35,7 @@
   "devDependencies": {
     "@types/big.js": "^6.0.0",
     "@xchainjs/xchain-client": "^0.11.1",
-    "@xchainjs/xchain-util": "^0.6.0",
+    "@xchainjs/xchain-util": "^0.5.1",
     "@terra-money/terra.js": "^3.0.2",
     "axios": "^0.25.0",
     "nock": "^13.0.5"
@@ -45,7 +45,7 @@
   },
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.11.1",
-    "@xchainjs/xchain-util": "^0.6.0",
+    "@xchainjs/xchain-util": "^0.5.1",
     "@terra-money/terra.js": "^3.0.2",
     "axios": "^0.25.0"
   },
