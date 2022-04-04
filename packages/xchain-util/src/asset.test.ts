@@ -22,7 +22,7 @@ import {
   isSynthAsset,
   isValidAsset,
 } from './asset'
-import { BNBChain, ETHChain } from './chain'
+import { BNBChain, ETHChain, TerraChain } from './chain'
 import { bn } from './index'
 import { Asset, Denomination } from './types'
 
@@ -394,13 +394,14 @@ describe('asset', () => {
     it('returns currency symbol for BTC', () => {
       expect(currencySymbolByAsset(AssetBTC)).toEqual('₿')
     })
-
     it('returns currency symbol for ETH', () => {
       expect(currencySymbolByAsset(AssetETH)).toEqual('Ξ')
     })
-
-    it('returns currency symbol for USD', () => {
+    it('returns $ for USD', () => {
       expect(currencySymbolByAsset({ chain: BNBChain, symbol: 'BUSD-BAF', ticker: 'BUSD', synth: false })).toEqual('$')
+    })
+    it('returns $ for UST', () => {
+      expect(currencySymbolByAsset({ chain: TerraChain, symbol: 'UST', ticker: 'UST', synth: false })).toEqual('$')
     })
     it('returns ticker as currency symbol for other assets', () => {
       expect(currencySymbolByAsset(AssetBNB)).toEqual('BNB')
