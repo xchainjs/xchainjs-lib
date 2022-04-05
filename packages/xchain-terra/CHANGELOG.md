@@ -1,8 +1,24 @@
 # v.0.1.0-alpha.6 (2022-xx-xx)
 
+## Add
+
+- Helper `getFees`, `getFeesByAsset` (incl. tests)
+- Add types `Denom` + `FeesResponse`
+- Add all native `Asset{XYZ}` (e.g. `AssetLUNA`, `AssetUST` etc.) to `./const`
+
+## Update
+
+- Improve `isTerraNativeAsset` check
+
 ## Fix
 
+- Fix fee convertion #544
 - Fix import of `xchain-client|util`
+
+## Breaking change
+
+- Rename `getTerraMicroDenom` -> `getTerraDenom`
+- Remove `TerraNativeAsset` + `DENOM_MAP` in favour of `TERRA_NATIVE_ASSET_MAP`
 
 # v.0.1.0-alpha.5 (2022-04-03)
 

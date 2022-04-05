@@ -1,221 +1,222 @@
-import { AssetLUNA, Chain } from '@xchainjs/xchain-util'
+import { AssetBTC } from '@xchainjs/xchain-util'
 
-import { TerraNativeAsset, getTerraMicroDenom, isTerraAsset } from '../src/util'
+import mockTerraApi from '../__mocks__/terra'
+import {
+  AssetAUT,
+  AssetCAT,
+  AssetCHT,
+  AssetCNT,
+  AssetDKT,
+  AssetEUT,
+  AssetGBT,
+  AssetHKT,
+  AssetIDT,
+  AssetINT,
+  AssetJPT,
+  AssetKRT,
+  AssetLUNA,
+  AssetLUNASynth,
+  AssetMNT,
+  AssetMYT,
+  AssetNOT,
+  AssetPHT,
+  AssetSDT,
+  AssetSET,
+  AssetSGT,
+  AssetTBT,
+  AssetTWT,
+  AssetUST,
+  AssetUSTSynth,
+} from '../src/const'
+import { getFees, getFeesByAsset, getTerraDenom, isTerraNativeAsset } from '../src/util'
 
 describe('terra/util', () => {
-  describe('getTerraMicroDenom', () => {
+  beforeEach(() => {
+    mockTerraApi.init()
+  })
+  afterEach(() => {
+    mockTerraApi.restore()
+  })
+
+  describe('getTerraDenom', () => {
     it('LUNA', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.LUNA)).toEqual('uluna')
+      expect(getTerraDenom(AssetLUNA)).toEqual('uluna')
     })
     it('SDT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.SDT)).toEqual('usdr')
+      expect(getTerraDenom(AssetSDT)).toEqual('usdr')
     })
     it('UST', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.UST)).toEqual('uusd')
+      expect(getTerraDenom(AssetUST)).toEqual('uusd')
     })
     it('KRT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.KRT)).toEqual('ukrw')
+      expect(getTerraDenom(AssetKRT)).toEqual('ukrw')
     })
     it('MNT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.MNT)).toEqual('umnt')
+      expect(getTerraDenom(AssetMNT)).toEqual('umnt')
     })
     it('EUT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.EUT)).toEqual('ueur')
+      expect(getTerraDenom(AssetEUT)).toEqual('ueur')
     })
     it('CNT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.CNT)).toEqual('ucny')
+      expect(getTerraDenom(AssetCNT)).toEqual('ucny')
     })
     it('JPT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.JPT)).toEqual('ujpy')
+      expect(getTerraDenom(AssetJPT)).toEqual('ujpy')
     })
     it('GBT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.GBT)).toEqual('ugbp')
+      expect(getTerraDenom(AssetGBT)).toEqual('ugbp')
     })
     it('INT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.INT)).toEqual('uinr')
+      expect(getTerraDenom(AssetINT)).toEqual('uinr')
     })
     it('CAT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.CAT)).toEqual('ucad')
+      expect(getTerraDenom(AssetCAT)).toEqual('ucad')
     })
     it('CHT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.CHT)).toEqual('uchf')
+      expect(getTerraDenom(AssetCHT)).toEqual('uchf')
     })
     it('AUT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.AUT)).toEqual('uaud')
+      expect(getTerraDenom(AssetAUT)).toEqual('uaud')
     })
     it('SGT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.SGT)).toEqual('usgd')
+      expect(getTerraDenom(AssetSGT)).toEqual('usgd')
     })
     it('TBT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.TBT)).toEqual('uthb')
+      expect(getTerraDenom(AssetTBT)).toEqual('uthb')
     })
     it('SET', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.SET)).toEqual('usek')
+      expect(getTerraDenom(AssetSET)).toEqual('usek')
     })
     it('NOT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.NOT)).toEqual('unok')
+      expect(getTerraDenom(AssetNOT)).toEqual('unok')
     })
     it('DKT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.DKT)).toEqual('udkk')
+      expect(getTerraDenom(AssetDKT)).toEqual('udkk')
     })
     it('IDT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.IDT)).toEqual('uidr')
+      expect(getTerraDenom(AssetIDT)).toEqual('uidr')
     })
     it('PHT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.PHT)).toEqual('uphp')
+      expect(getTerraDenom(AssetPHT)).toEqual('uphp')
     })
     it('HKT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.HKT)).toEqual('uhkd')
+      expect(getTerraDenom(AssetHKT)).toEqual('uhkd')
     })
     it('MYT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.MYT)).toEqual('umyr')
+      expect(getTerraDenom(AssetMYT)).toEqual('umyr')
     })
     it('TWT', () => {
-      expect(getTerraMicroDenom(TerraNativeAsset.TWT)).toEqual('utwd')
+      expect(getTerraDenom(AssetTWT)).toEqual('utwd')
     })
     it('BTC', () => {
-      expect(getTerraMicroDenom('BTC')).toBeNull()
+      expect(getTerraDenom(AssetBTC)).toBeUndefined()
     })
   })
 
-  describe('isTerraAsset', () => {
+  describe('isTerraNativeAsset', () => {
     it('LUNA', () => {
-      expect(isTerraAsset(AssetLUNA)).toBeTruthy()
+      expect(isTerraNativeAsset(AssetLUNA)).toBeTruthy()
     })
     it('LUNA synth', () => {
-      expect(isTerraAsset({ ...AssetLUNA, synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetLUNASynth)).toBeFalsy()
     })
     it('SDT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'SDT', ticker: 'SDT', synth: false })).toBeTruthy()
-    })
-    it('SDT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'SDT', ticker: 'SDT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetSDT)).toBeTruthy()
     })
     it('UST', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'UST', ticker: 'UST', synth: false })).toBeTruthy()
+      expect(isTerraNativeAsset(AssetUST)).toBeTruthy()
     })
     it('UST synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'UST', ticker: 'UST', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetUSTSynth)).toBeFalsy()
     })
     it('KRT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'KRT', ticker: 'KRT', synth: false })).toBeTruthy()
-    })
-    it('KRT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'KRT', ticker: 'KRT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetKRT)).toBeTruthy()
     })
     it('MNT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'MNT', ticker: 'MNT', synth: false })).toBeTruthy()
-    })
-    it('MNT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'MNT', ticker: 'MNT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetMNT)).toBeTruthy()
     })
     it('EUT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'EUT', ticker: 'EUT', synth: false })).toBeTruthy()
-    })
-    it('EUT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'EUT', ticker: 'EUT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetEUT)).toBeTruthy()
     })
     it('CNT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'CNT', ticker: 'CNT', synth: false })).toBeTruthy()
-    })
-    it('CNT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'CNT', ticker: 'CNT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetCNT)).toBeTruthy()
     })
     it('JPT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'JPT', ticker: 'JPT', synth: false })).toBeTruthy()
+      expect(isTerraNativeAsset(AssetJPT)).toBeTruthy()
     })
-    it('JPT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'JPT', ticker: 'JPT', synth: true })).toBeFalsy()
-    })
+
     it('GBT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'GBT', ticker: 'GBT', synth: false })).toBeTruthy()
-    })
-    it('GBT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'GBT', ticker: 'GBT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetGBT)).toBeTruthy()
     })
     it('INT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'INT', ticker: 'INT', synth: false })).toBeTruthy()
-    })
-    it('INT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'INT', ticker: 'INT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetINT)).toBeTruthy()
     })
     it('CAT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'CAT', ticker: 'CAT', synth: false })).toBeTruthy()
-    })
-    it('CAT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'CAT', ticker: 'CAT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetCAT)).toBeTruthy()
     })
     it('CHT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'CHT', ticker: 'CHT', synth: false })).toBeTruthy()
-    })
-    it('CHT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'CHT', ticker: 'CHT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetCHT)).toBeTruthy()
     })
     it('AUT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'AUT', ticker: 'AUT', synth: false })).toBeTruthy()
-    })
-    it('AUT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'AUT', ticker: 'AUT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetAUT)).toBeTruthy()
     })
     it('SGT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'SGT', ticker: 'SGT', synth: false })).toBeTruthy()
-    })
-    it('SGT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'SGT', ticker: 'SGT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetSGT)).toBeTruthy()
     })
     it('TBT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'TBT', ticker: 'TBT', synth: false })).toBeTruthy()
-    })
-    it('TBT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'TBT', ticker: 'TBT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetTBT)).toBeTruthy()
     })
     it('SET', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'SET', ticker: 'SET', synth: false })).toBeTruthy()
-    })
-    it('SET synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'SET', ticker: 'SET', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetSET)).toBeTruthy()
     })
     it('NOT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'NOT', ticker: 'NOT', synth: false })).toBeTruthy()
-    })
-    it('NOT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'NOT', ticker: 'NOT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetNOT)).toBeTruthy()
     })
     it('DKT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'DKT', ticker: 'DKT', synth: false })).toBeTruthy()
-    })
-    it('DKT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'DKT', ticker: 'DKT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetDKT)).toBeTruthy()
     })
     it('IDT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'IDT', ticker: 'IDT', synth: false })).toBeTruthy()
-    })
-    it('IDT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'IDT', ticker: 'IDT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetIDT)).toBeTruthy()
     })
     it('PHT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'PHT', ticker: 'PHT', synth: false })).toBeTruthy()
-    })
-    it('PHT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'PHT', ticker: 'PHT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetPHT)).toBeTruthy()
     })
     it('HKT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'HKT', ticker: 'HKT', synth: false })).toBeTruthy()
-    })
-    it('HKT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'HKT', ticker: 'HKT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetHKT)).toBeTruthy()
     })
     it('MYT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'MYT', ticker: 'MYT', synth: false })).toBeTruthy()
-    })
-    it('MYT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'MYT', ticker: 'MYT', synth: true })).toBeFalsy()
+      expect(isTerraNativeAsset(AssetMYT)).toBeTruthy()
     })
     it('TWT', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'TWT', ticker: 'TWT', synth: false })).toBeTruthy()
+      expect(isTerraNativeAsset(AssetTWT)).toBeTruthy()
     })
-    it('TWT synth', () => {
-      expect(isTerraAsset({ chain: Chain.Terra, symbol: 'TWT', ticker: 'TWT', synth: true })).toBeFalsy()
+  })
+
+  describe.only('fees', () => {
+    const url = 'https://bombay-fcd.terra.dev/v1/txs/gas_prices'
+
+    describe('getFeesByAsset', () => {
+      it('fees -> LUNA', async () => {
+        const fees = await getFeesByAsset(url, AssetLUNA)
+        expect(fees.average.amount().toString()).toEqual('11330')
+      })
+
+      it('fees -> UST', async () => {
+        const fees = await getFeesByAsset(url, AssetUST)
+        expect(fees.average.amount().toString()).toEqual('150000')
+      })
+
+      it('fees -> AUT', async () => {
+        const fees = await getFeesByAsset(url, AssetAUT)
+        expect(fees.average.amount().toString()).toEqual('190000')
+      })
+    })
+
+    describe('getFees', () => {
+      it('LUNA (only)', async () => {
+        const fees = await getFees(url)
+        expect(fees.average.amount().toString()).toEqual('11330')
+      })
     })
   })
 })

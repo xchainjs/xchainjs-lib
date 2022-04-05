@@ -25,3 +25,30 @@ export type ChainId = string
  * Parsed result of `ChainsResponse`
  */
 export type ChainIds = Record<Network, ChainId>
+
+export type Denom =
+  | 'uluna'
+  | 'usdr'
+  | 'uusd'
+  | 'ukrw'
+  | 'umnt'
+  | 'ueur'
+  | 'ucny'
+  | 'ujpy'
+  | 'ugbp'
+  | 'uinr'
+  | 'ucad'
+  | 'uchf'
+  | 'uaud'
+  | 'usgd'
+  | 'uthb'
+  | 'usek'
+  | 'unok'
+  | 'udkk'
+  | 'uidr'
+  | 'uphp'
+  | 'uhkd'
+  | 'umyr'
+  | 'utwd'
+
+export type FeesResponse = Record<Denom, number>

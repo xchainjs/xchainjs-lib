@@ -1,5 +1,5 @@
 import { AccAddress, Coin, Coins, LCDClient, MnemonicKey, MsgMultiSend, MsgSend, TxInfo } from '@terra-money/terra.js'
-import { BaseXChainClient, FeeType, Network, TxType } from '@xchainjs/xchain-client'
+import { BaseXChainClient, Network, TxType } from '@xchainjs/xchain-client'
 import type {
   Balance,
   Fees,
@@ -12,12 +12,12 @@ import type {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, AssetLUNA, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
-import { TERRA_DECIMAL } from './const'
+import { AssetLUNA, TERRA_DECIMAL } from './const'
 import type { ClientConfig, ClientParams } from './types/client'
-import { getDefaultClientConfig, getDefaultFees, getDefaultRootDerivationPaths, getTerraMicroDenom } from './util'
+import { getDefaultClientConfig, getDefaultFees, getDefaultRootDerivationPaths, getFees, getTerraDenom } from './util'
 
 /**
  * Terra Client
@@ -59,18 +59,13 @@ class Client extends BaseXChainClient implements XChainClient {
 
   async getFees(): Promise<Fees> {
     try {
-      const feesArray = (await axios.get(`${this.config[this.network].cosmosAPIURL}/v1/txs/gas_prices`)).data
-      const baseFeeInLuna = baseAmount(feesArray['uluna'], TERRA_DECIMAL)
-      return {
-        type: FeeType.FlatFee,
-        average: baseFeeInLuna,
-        fast: baseFeeInLuna,
-        fastest: baseFeeInLuna,
-      }
+      const url = `${this.config[this.network].cosmosAPIURL}/v1/txs/gas_prices`
+      return getFees(url)
     } catch {
       return getDefaultFees()
     }
   }
+
   getAddress(walletIndex = 0): string {
     const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
     return mnemonicKey.accAddress
@@ -140,7 +135,7 @@ class Client extends BaseXChainClient implements XChainClient {
   async transfer({ walletIndex = 0, asset = AssetLUNA, amount, recipient, memo }: TxParams): Promise<string> {
     if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
 
-    const terraMicroDenom = getTerraMicroDenom(asset.symbol)
+    const terraMicroDenom = getTerraDenom(asset)
     if (!terraMicroDenom) throw new Error(`${assetToString(asset)} is not a valid terra chain asset`)
 
     const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
@@ -153,6 +148,7 @@ class Client extends BaseXChainClient implements XChainClient {
     const result = await this.lcdClient.tx.broadcast(tx)
     return result.txhash
   }
+
   private getTerraNativeAsset(denom: string): Asset {
     if (denom.toLowerCase().includes('luna')) {
       return AssetLUNA

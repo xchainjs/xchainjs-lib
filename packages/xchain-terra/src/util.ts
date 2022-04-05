@@ -1,78 +1,66 @@
 import { FeeType, Fees, Network, singleFee } from '@xchainjs/xchain-client'
 import type { RootDerivationPaths } from '@xchainjs/xchain-client'
-import { Asset, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
-import { TERRA_DECIMAL } from './const'
-import type { ClientConfig, ClientConfigs } from './types'
+import {
+  AssetAUT,
+  AssetCAT,
+  AssetCHT,
+  AssetCNT,
+  AssetDKT,
+  AssetEUT,
+  AssetGBT,
+  AssetHKT,
+  AssetIDT,
+  AssetINT,
+  AssetJPT,
+  AssetKRT,
+  AssetLUNA,
+  AssetMNT,
+  AssetMYT,
+  AssetNOT,
+  AssetPHT,
+  AssetSDT,
+  AssetSET,
+  AssetSGT,
+  AssetTBT,
+  AssetTWT,
+  AssetUST,
+  TERRA_DECIMAL,
+} from './const'
+import type { ClientConfig, ClientConfigs, Denom, FeesResponse } from './types'
 import type * as Terra from './types/terra'
 
-export enum TerraNativeAsset {
-  LUNA = 'LUNA',
-  SDT = 'SDT',
-  UST = 'UST',
-  KRT = 'KRT',
-  MNT = 'MNT',
-  EUT = 'EUT',
-  CNT = 'CNT',
-  JPT = 'JPT',
-  GBT = 'GBT',
-  INT = 'INT',
-  CAT = 'CAT',
-  CHT = 'CHT',
-  AUT = 'AUT',
-  SGT = 'SGT',
-  TBT = 'TBT',
-  SET = 'SET',
-  NOT = 'NOT',
-  DKT = 'DKT',
-  IDT = 'IDT',
-  PHT = 'PHT',
-  HKT = 'HKT',
-  MYT = 'MYT',
-  TWT = 'TWT',
-}
+const TERRA_NATIVE_ASSET_MAP: Map<Asset, Denom> = new Map([
+  [AssetLUNA, 'uluna'],
+  [AssetSDT, 'usdr'],
+  [AssetUST, 'uusd'],
+  [AssetKRT, 'ukrw'],
+  [AssetMNT, 'umnt'],
+  [AssetEUT, 'ueur'],
+  [AssetCNT, 'ucny'],
+  [AssetJPT, 'ujpy'],
+  [AssetGBT, 'ugbp'],
+  [AssetINT, 'uinr'],
+  [AssetCAT, 'ucad'],
+  [AssetCHT, 'uchf'],
+  [AssetAUT, 'uaud'],
+  [AssetSGT, 'usgd'],
+  [AssetTBT, 'uthb'],
+  [AssetSET, 'usek'],
+  [AssetNOT, 'unok'],
+  [AssetDKT, 'udkk'],
+  [AssetIDT, 'uidr'],
+  [AssetPHT, 'uphp'],
+  [AssetHKT, 'uhkd'],
+  [AssetMYT, 'umyr'],
+  [AssetTWT, 'utwd'],
+])
 
-/**
- * Type guard to check whether string is a valid `TerraNativeAsset`
- *
- * @param {string} denom Denomination.
- * @returns {boolean} `true` or `false`
- */
-const isTerraNativeAsset = (denom: string): denom is TerraNativeAsset =>
-  (Object.values(TerraNativeAsset) as string[]).includes(denom)
+export const isTerraNativeAsset = (asset: Asset): boolean => TERRA_NATIVE_ASSET_MAP.has(asset) && !asset.synth
 
-const DENOM_MAP: Record<TerraNativeAsset, string> = {
-  LUNA: 'uluna',
-  SDT: 'usdr',
-  UST: 'uusd',
-  KRT: 'ukrw',
-  MNT: 'umnt',
-  EUT: 'ueur',
-  CNT: 'ucny',
-  JPT: 'ujpy',
-  GBT: 'ugbp',
-  INT: 'uinr',
-  CAT: 'ucad',
-  CHT: 'uchf',
-  AUT: 'uaud',
-  SGT: 'usgd',
-  TBT: 'uthb',
-  SET: 'usek',
-  NOT: 'unok',
-  DKT: 'udkk',
-  IDT: 'uidr',
-  PHT: 'uphp',
-  HKT: 'uhkd',
-  MYT: 'umyr',
-  TWT: 'utwd',
-}
-
-export const isTerraAsset = ({ chain, symbol, ticker, synth }: Asset): boolean =>
-  chain === Chain.Terra && isTerraNativeAsset(symbol) && isTerraNativeAsset(ticker as TerraNativeAsset) && !synth
-
-export const getTerraMicroDenom = (assetDenom: string): string | null =>
-  isTerraNativeAsset(assetDenom) ? DENOM_MAP[assetDenom] : null
+export const getTerraDenom = (asset: Asset): Denom | undefined => TERRA_NATIVE_ASSET_MAP.get(asset)
 
 export const getDefaultRootDerivationPaths = (): RootDerivationPaths => ({
   [Network.Mainnet]: "44'/330'/0'/0/",
@@ -157,3 +145,25 @@ export const getDefaultFees = (): Fees => {
   const fee = assetToBase(assetAmount(0.1133 /* LUNA */, TERRA_DECIMAL))
   return singleFee(FeeType.FlatFee, fee)
 }
+
+export const getFeesByAsset = async (url: string, asset: Asset): Promise<Fees> => {
+  const denom = getTerraDenom(asset)
+  if (!denom) throw Error(`Invalid Terra asset to ask fees for (asset: ${assetToString(asset)})`)
+
+  const { data: feesArray } = await axios.get<FeesResponse>(`${url}/v1/txs/gas_prices`)
+  const fee = assetToBase(assetAmount(feesArray[denom], TERRA_DECIMAL))
+  return {
+    type: FeeType.FlatFee,
+    average: fee,
+    fast: fee,
+    fastest: fee,
+  }
+}
+
+/**
+ * Returns fees in LUNA.
+ * For any other Terra asset than LUNA use `getFeesByAsset`
+ *
+ * @returns {Fees} The default fee (in LUNA).
+ */
+export const getFees = async (url: string): Promise<Fees> => getFeesByAsset(url, AssetLUNA)
