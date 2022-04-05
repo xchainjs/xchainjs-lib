@@ -203,7 +203,7 @@ export const AssetDOGE: Asset = { chain: Chain.Doge, symbol: 'DOGE', ticker: 'DO
 /**
  * Luna asset
  * Based on definition in Thorchain
- * @see TBD
+ * @deprecated Use `AssetLUNA` from `xchain-terra`
  */
 export const AssetLUNA: Asset = { chain: Chain.Terra, symbol: 'LUNA', ticker: 'LUNA', synth: false }
 
