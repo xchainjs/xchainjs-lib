@@ -14,10 +14,10 @@ XChainJS is a library with a common interface for multiple blockchains, built fo
 [![License](https://img.shields.io/badge/MIT-xchainjs-green)]()
 
 
-### Telegram 
-
-Join the conversation!
-https://t.me/xchainjs
+Telegram group: https://t.me/xchainj
+Homepage: https://xchainjs.org
+Docs: http://docs.xchainjs.org/overview/
+Twitter: https://twitter.com/xchainjs
 
 ## Interface
 
@@ -65,6 +65,17 @@ For wallets that need even more flexibility (smart contract blockchains) the cli
 
 ## Tests
 
+Make sure Jest and Lerna is installed
+```
+yarn add --dev jest lerna
+```
+
+Start with
+```
+yarn
+yarn build
+```
+
 ### `unit`
 
 ```bash
@@ -79,8 +90,6 @@ There are a suite of integration test which work against testnet. You will need 
 export PHRASE="secret phrase here"
 yarn e2e
 ```
-
-### `unit`
 
 ## Development
 
@@ -104,9 +113,9 @@ NPM_USERNAME="TODO Use real npm username" NPM_PASSWORD="TODO Use real npm passwo
 
 ## Contributing
 
-Please see the Contributing Guidelines here (_coming soon_).
+Please ask in the telegram group to be added as a contributor.
 
 ## Bug Reports
 
-Please see the Bug Report Process here (_coming soon_).
+Please submit an issue and flag in the telegram group.
 
