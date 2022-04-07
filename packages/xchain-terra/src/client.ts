@@ -1,5 +1,15 @@
-import { AccAddress, Coin, Coins, LCDClient, MnemonicKey, MsgMultiSend, MsgSend, TxInfo } from '@terra-money/terra.js'
-import { BaseXChainClient, Network, TxType } from '@xchainjs/xchain-client'
+import {
+  AccAddress,
+  Coin,
+  Coins,
+  CreateTxOptions,
+  LCDClient,
+  MnemonicKey,
+  MsgMultiSend,
+  MsgSend,
+  TxInfo,
+} from '@terra-money/terra.js'
+import { BaseXChainClient, FeeType, Network, TxType, singleFee } from '@xchainjs/xchain-client'
 import type {
   Balance,
   Fees,
@@ -17,12 +27,28 @@ import axios from 'axios'
 
 import { AssetLUNA, TERRA_DECIMAL } from './const'
 import type { ClientConfig, ClientParams } from './types/client'
-import { getDefaultClientConfig, getDefaultFees, getDefaultRootDerivationPaths, getFees, getTerraDenom } from './util'
+import {
+  getDefaultClientConfig,
+  getDefaultRootDerivationPaths,
+  getEstimatedFee,
+  getEstimatedGas,
+  getGasPriceByAsset,
+  getTerraNativeAsset,
+  getTerraNativeDenom,
+} from './util'
+
+/**
+ * Interface for Terra client
+ */
+export interface TerraClient {
+  // `getFees` of `BaseXChainClient` needs to be overridden
+  getFees(params: { options: CreateTxOptions; feeAsset: Asset }): Promise<Fees>
+}
 
 /**
  * Terra Client
  */
-class Client extends BaseXChainClient implements XChainClient {
+class Client extends BaseXChainClient implements XChainClient, TerraClient {
   private lcdClient: LCDClient
   private config: Record<Network, ClientConfig>
   constructor({
@@ -57,13 +83,32 @@ class Client extends BaseXChainClient implements XChainClient {
     })
   }
 
-  async getFees(): Promise<Fees> {
-    try {
-      const url = `${this.config[this.network].cosmosAPIURL}/v1/txs/gas_prices`
-      return getFees(url)
-    } catch {
-      return getDefaultFees()
-    }
+  /**
+   * Get fees.
+   *
+   * @param {Asset} feeAsset Asset to pay fees
+   * @param {CreateTxOptions} options Options to create a simulated tx to estimate fees
+   * @returns {Fees} The average/fast/fastest fees.
+   */
+  async getFees(params?: { options: CreateTxOptions; feeAsset: Asset }): Promise<Fees> {
+    if (!params) throw new Error('Params need to be passed')
+    const { options, feeAsset } = params
+    // denom
+    const denom = getTerraNativeDenom(feeAsset)
+    if (!denom) throw Error(`Invalid fee asset ${assetToString(feeAsset)}`)
+    // gas price
+    const gasPrice = await getGasPriceByAsset({
+      url: this.config[this.network].cosmosAPIURL,
+      asset: feeAsset,
+      network: this.network,
+    })
+    if (!gasPrice) throw Error(`Could not get gas price for ${assetToString(feeAsset)}`)
+    // estimated gas
+    const estimatedGas = await getEstimatedGas({ lcd: this.lcdClient, address: this.getAddress(), options })
+    // estimated fee
+    const estimatedFee = getEstimatedFee(estimatedGas, gasPrice)
+
+    return singleFee(FeeType.PerByte, estimatedFee)
   }
 
   getAddress(walletIndex = 0): string {
@@ -108,6 +153,7 @@ class Client extends BaseXChainClient implements XChainClient {
       chainID: this.config[this.network].chainID,
     })
   }
+
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     //TODO filter by start time?
     //TODO filter by asset
@@ -135,13 +181,13 @@ class Client extends BaseXChainClient implements XChainClient {
   async transfer({ walletIndex = 0, asset = AssetLUNA, amount, recipient, memo }: TxParams): Promise<string> {
     if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
 
-    const terraMicroDenom = getTerraDenom(asset)
-    if (!terraMicroDenom) throw new Error(`${assetToString(asset)} is not a valid terra chain asset`)
+    const terraDenom = getTerraNativeDenom(asset)
+    if (!terraDenom) throw Error(`Invalid asset ${assetToString(asset)} - Terra native asset are supported only`)
 
     const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
     const wallet = this.lcdClient.wallet(mnemonicKey)
     const amountToSend: Coins.Input = {
-      [terraMicroDenom]: `${amount.amount().toFixed()}`,
+      [terraDenom]: `${amount.amount().toFixed()}`,
     }
     const send = new MsgSend(wallet.key.accAddress, recipient, amountToSend)
     const tx = await wallet.createAndSignTx({ msgs: [send], memo })
@@ -149,31 +195,17 @@ class Client extends BaseXChainClient implements XChainClient {
     return result.txhash
   }
 
-  private getTerraNativeAsset(denom: string): Asset {
-    if (denom.toLowerCase().includes('luna')) {
-      return AssetLUNA
-    } else {
-      // native coins other than luna, UST, KRT, etc
-      // NOTE: https://docs.terra.money/docs/develop/module-specifications/README.html#currency-denominations
-      const standardDenom = denom.toUpperCase().slice(1, 3) + 'T'
-      return {
-        chain: Chain.Terra,
-        symbol: standardDenom,
-        ticker: standardDenom,
-        synth: false,
-      }
-    }
-  }
-
+  // TODO (xchain-contributors) Extract to `util` + add tests
   private coinsToBalances(coins: Coins): Balance[] {
     return (coins.toArray().map((c: Coin) => {
       return {
-        asset: this.getTerraNativeAsset(c.denom),
+        asset: getTerraNativeAsset(c.denom),
         amount: baseAmount(c.amount.toFixed(), TERRA_DECIMAL),
       }
     }) as unknown) as Balance[]
   }
 
+  // TODO (xchain-contributors) Extract to `util` + add tests
   // (@xchain-contributors) TODO: Fix `tx` type to avoid `any`
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private convertSearchResultTxToTx(tx: any): Tx {
@@ -208,6 +240,8 @@ class Client extends BaseXChainClient implements XChainClient {
       hash: tx.txhash,
     }
   }
+
+  // TODO (xchain-contributors) Extract to `util` + add tests
   private convertTxInfoToTx(txInfo: TxInfo): Tx {
     let from: TxFrom[] = []
     let to: TxTo[] = []
@@ -239,13 +273,15 @@ class Client extends BaseXChainClient implements XChainClient {
       hash: txInfo.txhash,
     }
   }
+
+  // TODO (xchain-contributors) Extract to `util` + add tests
   private convertMsgSend(msgSend: MsgSend): { from: TxFrom[]; to: TxTo[] } {
     const from: TxFrom[] = []
     const to: TxTo[] = []
     msgSend.amount.toArray().forEach((coin) => {
       //ensure this is in base units ex uluna, uusd
       const baseCoin = coin.toIntCoin()
-      const asset = this.getTerraNativeAsset(baseCoin.denom)
+      const asset = getTerraNativeAsset(baseCoin.denom)
       const amount = baseAmount(baseCoin.amount.toFixed(), TERRA_DECIMAL)
       if (asset) {
         // NOTE: this will only populate native terra Assets
@@ -264,6 +300,8 @@ class Client extends BaseXChainClient implements XChainClient {
 
     return { from, to }
   }
+
+  // TODO (xchain-contributors) Extract to `util` + add tests
   private convertMsgMultiSend(msgMultiSend: MsgMultiSend): { from: TxFrom[]; to: TxTo[] } {
     const from: TxFrom[] = []
     const to: TxTo[] = []
@@ -271,7 +309,7 @@ class Client extends BaseXChainClient implements XChainClient {
       input.coins.toArray().forEach((coin) => {
         //ensure this is in base units ex uluna, uusd
         const baseCoin = coin.toIntCoin()
-        const asset = this.getTerraNativeAsset(baseCoin.denom)
+        const asset = getTerraNativeAsset(baseCoin.denom)
         const amount = baseAmount(baseCoin.amount.toFixed(), TERRA_DECIMAL)
         if (asset) {
           // NOTE: this will only populate native terra Assets
@@ -287,8 +325,9 @@ class Client extends BaseXChainClient implements XChainClient {
       output.coins.toArray().forEach((coin) => {
         //ensure this is in base units ex uluna, uusd
         const baseCoin = coin.toIntCoin()
-        const asset = this.getTerraNativeAsset(baseCoin.denom)
+        const asset = getTerraNativeAsset(baseCoin.denom)
         const amount = baseAmount(baseCoin.amount.toFixed(), TERRA_DECIMAL)
+        // TODO (xchain-contributors) Double check: Why is check of asset needed? `asset` will never fail ...
         if (asset) {
           // NOTE: this will only populate native terra Assets
           to.push({

@@ -1,4 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
+import { BaseAmount } from '@xchainjs/xchain-util/lib'
 
 /**
  * Chain types at Terra
@@ -26,29 +27,179 @@ export type ChainId = string
  */
 export type ChainIds = Record<Network, ChainId>
 
-export type Denom =
-  | 'uluna'
-  | 'usdr'
-  | 'uusd'
-  | 'ukrw'
-  | 'umnt'
-  | 'ueur'
-  | 'ucny'
-  | 'ujpy'
-  | 'ugbp'
-  | 'uinr'
-  | 'ucad'
-  | 'uchf'
-  | 'uaud'
-  | 'usgd'
-  | 'uthb'
-  | 'usek'
-  | 'unok'
-  | 'udkk'
-  | 'uidr'
-  | 'uphp'
-  | 'uhkd'
-  | 'umyr'
-  | 'utwd'
+/**
+ * Denominatioins of all Terra native assets
+ * Based on https://github.com/terra-kitchen/utils/blob/main/src/currencies.json
+ */
+const TERRA_NATIVE_DENOMS = [
+  'uluna',
+  'usdr',
+  'uaed',
+  'uafn',
+  'uall',
+  'uamd',
+  'uang',
+  'uaoa',
+  'uars',
+  'uaud',
+  'uawg',
+  'uazn',
+  'ubam',
+  'ubbd',
+  'ubdt',
+  'ubgn',
+  'ubhd',
+  'ubif',
+  'ubmd',
+  'ubnd',
+  'ubob',
+  'ubrl',
+  'ubsd',
+  'ubtn',
+  'ubwp',
+  'ubyn',
+  'ubzd',
+  'ucad',
+  'ucdf',
+  'uchf',
+  'uclp',
+  'ucny',
+  'ucop',
+  'ucrc',
+  'ucup',
+  'ucve',
+  'uczk',
+  'udjf',
+  'udkk',
+  'udop',
+  'udzd',
+  'uegp',
+  'uern',
+  'uetb',
+  'ueur',
+  'ufjd',
+  'ufkp',
+  'ugbp',
+  'ugel',
+  'uggp',
+  'ughs',
+  'ugip',
+  'ugmd',
+  'ugnf',
+  'ugtq',
+  'ugyd',
+  'uhkd',
+  'uhnl',
+  'uhrk',
+  'uhtg',
+  'uhuf',
+  'uidr',
+  'uils',
+  'uimp',
+  'uinr',
+  'uiqd',
+  'uirr',
+  'uisk',
+  'ujep',
+  'ujmd',
+  'ujod',
+  'ujpy',
+  'ukes',
+  'ukgs',
+  'ukhr',
+  'ukmf',
+  'ukpw',
+  'ukrw',
+  'ukwd',
+  'ukyd',
+  'ukzt',
+  'ulak',
+  'ulbp',
+  'ulkr',
+  'ulrd',
+  'ulsl',
+  'ulyd',
+  'umad',
+  'umdl',
+  'umga',
+  'umkd',
+  'ummk',
+  'umnt',
+  'umop',
+  'umru',
+  'umur',
+  'umvr',
+  'umwk',
+  'umxn',
+  'umyr',
+  'umzn',
+  'unad',
+  'ungn',
+  'unio',
+  'unok',
+  'unpr',
+  'unzd',
+  'uomr',
+  'upen',
+  'upgk',
+  'uphp',
+  'upkr',
+  'upln',
+  'upyg',
+  'uqar',
+  'uron',
+  'ursd',
+  'urub',
+  'urwf',
+  'usar',
+  'usbd',
+  'uscr',
+  'usdg',
+  'usek',
+  'usgd',
+  'ushp',
+  'usll',
+  'usos',
+  'usrd',
+  'ussp',
+  'ustn',
+  'usyp',
+  'uszl',
+  'uthb',
+  'utjs',
+  'utmt',
+  'utnd',
+  'utop',
+  'utry',
+  'uttd',
+  'utwd',
+  'utzs',
+  'uuah',
+  'uugx',
+  'uusd',
+  'uuyu',
+  'uuzs',
+  'uves',
+  'uvnd',
+  'uvuv',
+  'uwst',
+  'uxaf',
+  'uxcd',
+  'uxdr',
+  'uxof',
+  'uxpf',
+  'uyer',
+  'uzar',
+  'uzmw',
+] as const
 
-export type FeesResponse = Record<Denom, number>
+export type TerraNativeDenom = typeof TERRA_NATIVE_DENOMS[number]
+
+/**
+ * Type guard to check a given string is a `Denom`
+ */
+export const isTerraNativeDenom = (value: string): value is TerraNativeDenom =>
+  TERRA_NATIVE_DENOMS.includes(value as TerraNativeDenom)
+
+export type GasPricesResponse = Record<TerraNativeDenom, number>
+export type GasPrices = Map<TerraNativeDenom, BaseAmount>

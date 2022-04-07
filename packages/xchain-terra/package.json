@@ -36,7 +36,7 @@
     "@terra-money/terra.js": "^3.0.2",
     "@types/big.js": "^6.0.0",
     "@xchainjs/xchain-client": "^0.11.1",
-    "@xchainjs/xchain-util": "^0.6.0",
+    "@xchainjs/xchain-util": "^0.7.0",
     "axios": "^0.25.0",
     "axios-mock-adapter": "^1.20.0",
     "nock": "^13.0.5"
