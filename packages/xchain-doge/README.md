@@ -18,8 +18,9 @@ yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util a
 
 ## Documentation
 
-[`How it works`](http://docs.xchainjs.org/xchain-client/xchain-doge/how-it-works.html)
-[`How to use`](http://docs.xchainjs.org/xchain-client/xchain-doge/how-to-use.html)
+### [`xchain doge`](http://docs.xchainjs.org/xchain-client/xchain-doge/)
+[`How xchain-doge works`](http://docs.xchainjs.org/xchain-client/xchain-doge/how-it-works.html)\
+[`How to use xchain-doge`](http://docs.xchainjs.org/xchain-client/xchain-doge/how-to-use.html)
 
 
 ## Service Providers

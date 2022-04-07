@@ -4,5 +4,6 @@ A specification for a generalised interface for crypto wallets clients, to be us
 
 ## Documentation
 
-[`Overview`](http://docs.xchainjs.org/xchain-client/overview.html)
-[`Interface`](http://docs.xchainjs.org/xchain-client/interface.html)
+### [`xchain client`](http://docs.xchainjs.org/xchain-client/)
+[`Overview of xchain-client`](http://docs.xchainjs.org/xchain-client/overview.html)\
+[`Interface of xchain-client`](http://docs.xchainjs.org/xchain-client/interface.html)

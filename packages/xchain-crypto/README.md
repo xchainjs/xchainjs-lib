@@ -16,8 +16,9 @@ yarn add @xchainjs/xchain-crypto
 
 ## Documentation
 
-[`How it works`](http://docs.xchainjs.org/xchain-crypto/how-it-works.html)
-[`how to use`](http://docs.xchainjs.org/xchain-crypto/how-to-use.html)
+### [`xchain crypto`](http://docs.xchainjs.org/xchain-crypto/)
+[`How xchain-crypto works`](http://docs.xchainjs.org/xchain-crypto/how-it-works.html)\
+[`How to use xchain-crypto`](http://docs.xchainjs.org/xchain-crypto/how-to-use.html)
 
 
 ## Build

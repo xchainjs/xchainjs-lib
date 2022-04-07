@@ -18,8 +18,9 @@ yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util a
 
 ## Documentation
 
-[`How it works`](http://docs.xchainjs.org/xchain-client/xchain-litecoin/how-it-works.html)
-[`How to use`](http://docs.xchainjs.org/xchain-client/xchain-litecoin/how-to-use.html)
+### [`xchain litecoin`](http://docs.xchainjs.org/xchain-client/xchain-litecoin/)
+[`How xchain-litecoin works`](http://docs.xchainjs.org/xchain-client/xchain-litecoin/how-it-works.html)\
+[`How to use xchain-litecoin`](http://docs.xchainjs.org/xchain-client/xchain-litecoin/how-to-use.html)
 
 
 ## Service Providers

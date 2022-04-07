@@ -18,8 +18,9 @@ yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util a
 
 ## Documentation
 
-[`How it works`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/how-it-works.html)
-[`How to use`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/how-to-use.html)
+### [`xchain bitcoin`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/)
+[`How xchain-bitcoin works`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/how-it-works.html)\
+[`How to use xchain-bitcoin`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/how-to-use.html)
 
 
 ## Service Providers

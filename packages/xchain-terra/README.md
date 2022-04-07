@@ -28,8 +28,9 @@ yarn test
 
 ## Documentation
 
-[`How it works`](http://docs.xchainjs.org/xchain-client/xchain-terra/how-it-works.html)
-[`How to use`](http://docs.xchainjs.org/xchain-client/xchain-terra/how-to-use.html)
+### [`xchain terra`](http://docs.xchainjs.org/xchain-client/xchain-terra/)
+[`How xchain-terra works`](http://docs.xchainjs.org/xchain-client/xchain-terra/how-it-works.html)\
+[`How to use xchain-terra`](http://docs.xchainjs.org/xchain-client/xchain-terra/how-to-use.html)
 
 
 ## Service Providers

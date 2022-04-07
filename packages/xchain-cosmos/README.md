@@ -23,8 +23,9 @@ yarn test
 ```
 ## Documentation
 
-[`How it works`](http://docs.xchainjs.org/xchain-client/xchain-cosmos/how-it-works.html)
-[`How to use`](http://docs.xchainjs.org/xchain-client/xchain-cosmos/how-to-use.html)
+### [`xchain cosmos`](http://docs.xchainjs.org/xchain-client/xchain-cosmos/)
+[`How xchain-cosmos works`](http://docs.xchainjs.org/xchain-client/xchain-cosmos/how-it-works.html)\
+[`How to use xchain-cosmos`](http://docs.xchainjs.org/xchain-client/xchain-cosmos/how-to-use.html)
 
 
 ## Service Providers

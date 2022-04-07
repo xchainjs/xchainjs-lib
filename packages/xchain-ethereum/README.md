@@ -17,8 +17,9 @@ yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util a
 ```
 ## Documentation
 
-[`How it works`](http://docs.xchainjs.org/xchain-client/xchain-ethereum/how-it-works.html)
-[`How to use`](http://docs.xchainjs.org/xchain-client/xchain-ethereum/how-to-use.html)
+### [`xchain ethereum`](http://docs.xchainjs.org/xchain-client/xchain-ethereum/)
+[`How xchain-ethereum works`](http://docs.xchainjs.org/xchain-client/xchain-ethereum/how-it-works.html)\
+[`How to use xchain-ethereum`](http://docs.xchainjs.org/xchain-client/xchain-ethereum/how-to-use.html)
 
 
 ## Service Providers

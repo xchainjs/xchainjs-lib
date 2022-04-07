@@ -22,8 +22,9 @@ yarn add @binance-chain/javascript-sdk @xchainjs/xchain-client @xchainjs/xchain-
 
 ## Documentation
 
-[`How it works`](http://docs.xchainjs.org/xchain-client/xchain-binance/how-it-works.html)
-[`How to use`](http://docs.xchainjs.org/xchain-client/xchain-binance/how-to-use.html)
+### [`xchain binance`](http://docs.xchainjs.org/xchain-client/xchain-binance/)
+[`How xchain-binance works`](http://docs.xchainjs.org/xchain-client/xchain-binance/how-it-works.html)\
+[`How to use xchain-binance`](http://docs.xchainjs.org/xchain-client/xchain-binance/how-to-use.html)
 
 ## Service Providers
 
