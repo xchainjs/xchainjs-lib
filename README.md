@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://xchainjs.org/" target="_blank" rel="noopener noreferrer"><img width="500" src="https://github.com/xchainjs/xchainjs-org.github.io/blob/master/assets/img/logo.png" alt="xchainjs logo"></a>
+  <a href="https://xchainjs.org/" target="_blank" rel="noopener noreferrer"><img width="400" height="300" src="https://github.com/xchainjs/xchainjs-org.github.io/blob/master/assets/img/logo.png" alt="xchainjs logo"></a>
 </p>
 <h1 align="center">
     XChainJS - xchainjs Library 
@@ -9,12 +9,15 @@
 
 XChainJS is a library with a common interface for multiple blockchains, built for simple and fast integration for wallets and more.
 
-Join the conversation!
-https://t.me/xchainjs
-
+## License
 
 [![License](https://img.shields.io/badge/MIT-xchainjs-green)]()
 
+
+### Telegram 
+
+Join the conversation!
+https://t.me/xchainjs
 
 ## Interface
 
