@@ -20,8 +20,9 @@ Following peer dependencies have to be installed into your project. These are no
 yarn add @binance-chain/javascript-sdk @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util
 ```
 
-## Basic Usage Examples
+## Documentation
 
+[`How it works`](http://docs.xchainjs.org/xchain-client/xchain-binance/how-it-works.html)
 [`How to use`](http://docs.xchainjs.org/xchain-client/xchain-binance/how-to-use.html)
 
 ## Service Providers
@@ -39,5 +40,3 @@ This package uses the following service providers:
 
 This package gets the node information (`https://docs.binance.org/api-reference/dex-api/paths.html#apiv1node-info`) to transfer tokens.
 
-
-## Extras
