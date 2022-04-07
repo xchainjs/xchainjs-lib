@@ -83,6 +83,38 @@ const transferRune = async () => {
     }
 }
 
+```
+
+## Deposit RUNE into THORChain using Thor Client
+
+Create new Thorchain client instance
+Convert amount to transfer to base amount 
+Build transaction. 
+
+```ts
+
+//Imports
+import { assetToBase, baseToAsset, assetAmount } from "@xchainjs/xchain-util"
+ 
+const transferRune = async () => {
+    const chainIds = await getChainIds(getDefaultClientUrl())
+    let phrase = await decryptFromKeystore(keystore1, password)
+    const thorClient = new Client({network: Network.Mainnet, phrase: phrase, chainIds})
+    let amountToTransfer = 0.1
+    let addLiquidityMemo = "add:BTC.BTC"
+    let amount = assetToBase(assetAmount(amountToTransfer, DECIMAL ))
+    try {
+        const txid = await thorClient.deposit({
+            "amount": amount,
+            "memo": addLiquidityMemo,
+            "asset": AssetRuneNative,
+            "walletIndex": 0 
+        })
+        console.log(`Transaction sent: ${JSON.stringify(txid)}`)
+    } catch (error) {
+        console.log(`Caught ${error}`)
+    }
+}
 
 ```
 
