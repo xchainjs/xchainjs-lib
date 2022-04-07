@@ -34,8 +34,8 @@ yarn add @xchainjs/xchain-crypto
 
 ### Generate new phrase and encrypt
 
-Create a new phrase using generatePhrase() 
-Check phrase validity using validatePhrase()
+Create a new phrase using generatePhrase()\ 
+Check phrase validity using validatePhrase()\
 Encrypt to keystore using encryptToKeyStore() > takes two arguements (phrase, password)
 
 ```js

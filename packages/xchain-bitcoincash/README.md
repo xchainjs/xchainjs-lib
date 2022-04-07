@@ -161,7 +161,7 @@ This package uses the following service providers:
 | Transaction details by hash | Haskoin           | https://api.haskoin.com/#/Transaction/getTransaction                |
 | Transaction fees            | Bitgo             | https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate          |
 | Transaction broadcast       | Bitcoin Cash Node | https://developer.bitcoin.org/reference/rpc/sendrawtransaction.html |
-| Explorer                    | Blockchain.com    | https://www.blockchain.com                                          |
+| Explorer                    | Blockchain.com    | https://www.blockchain.com/explorer?view=bch                                          |
 
 Haskoin API rate limits: No
 

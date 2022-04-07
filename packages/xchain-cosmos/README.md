@@ -11,7 +11,8 @@ yarn add @xchainjs/xchain-cosmos
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-cosmos`.
 
 ```
-yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios cosmos-client
+yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios cosmos-client/core
+
 ```
 
 ## Cosmos Client Testing
@@ -21,7 +22,7 @@ yarn install
 yarn test
 ```
 
-Important note: Make sure to install same version of `cosmos-client` as `xchain-cosmos` is using (currently `cosmos-client@0.39.2` ). In other case things might break.
+
 
 ## Service Providers
 
@@ -36,3 +37,7 @@ This package uses the following service providers:
 | Explorer                    | BigDipper  | https://cosmos.bigdipper.live                                       |
 
 Rate limits: No
+
+
+## Extras
+Important note: Make sure to install same version of `cosmos-client/core` as `xchain-cosmos` is using (currently `"@cosmos-client/core": "^0.45.1",` ). In other case things might break.
