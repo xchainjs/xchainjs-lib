@@ -19,8 +19,9 @@ Important note: Make sure to install same version of `@cosmos-client/core` as `x
 
 ## Documentation
 
-[`How it works`](http://docs.xchainjs.org/xchain-client/xchain-thorchain/how-it-works.html)
-[`How to use`](http://docs.xchainjs.org/xchain-client/xchain-thorchain/how-to-use.html)
+### [`XCHAIN THORCHAIN`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/)
+[`How thorchain client works`](http://docs.xchainjs.org/xchain-client/xchain-thorchain/how-it-works.html)\
+[`How to use thorchain client`](http://docs.xchainjs.org/xchain-client/xchain-thorchain/how-to-use.html)
 
 
 For more examples check out tests in `./__tests__/client.test.ts`
