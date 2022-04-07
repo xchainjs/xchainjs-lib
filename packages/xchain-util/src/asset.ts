@@ -200,13 +200,6 @@ export const AssetLTC: Asset = { chain: Chain.Litecoin, symbol: 'LTC', ticker: '
  */
 export const AssetDOGE: Asset = { chain: Chain.Doge, symbol: 'DOGE', ticker: 'DOGE', synth: false }
 
-/**
- * Luna asset
- * Based on definition in Thorchain
- * @deprecated Use `AssetLUNA` from `xchain-terra`
- */
-export const AssetLUNA: Asset = { chain: Chain.Terra, symbol: 'LUNA', ticker: 'LUNA', synth: false }
-
 export const RUNE_TICKER = 'RUNE'
 
 /**
@@ -447,3 +440,12 @@ export const formatBaseAsAssetAmount = ({
   decimal?: number
   trimZeros?: boolean
 }) => formatAssetAmount({ amount: baseToAsset(amount), decimal, trimZeros })
+
+/**
+ * Checks equality of two `Assets`
+ * @param {Asset} a Asset one
+ * @param {Asset} b Asset two
+ * @return {boolean} Result of equality check
+ */
+export const eqAsset = (a: Asset, b: Asset) =>
+  a.chain === b.chain && a.symbol === b.symbol && a.ticker === b.ticker && a.synth === b.synth
