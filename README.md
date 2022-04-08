@@ -1,11 +1,26 @@
-# XChainJS
+<p align="center">
+  <a href="https://xchainjs.org/" target="_blank" rel="noopener noreferrer"><img width="400" height="300" src="https://github.com/xchainjs/xchainjs-org.github.io/blob/master/assets/img/logo.png" alt="xchainjs logo"></a>
+</p>
+<h1 align="center">
+    XChainJS - xchainjs Library 
+</h1>
+
+*:star: Developed / Developing by [xchainjs](https://xchainjs.org/)*
 
 XChainJS is a library with a common interface for multiple blockchains, built for simple and fast integration for wallets and more.
 
-Telegram group: https://t.me/xchainjs
-Homepage: https://xchainjs.org
-Docs: http://docs.xchainjs.org/overview/
-Twitter: https://twitter.com/xchainjs
+
+## License
+
+[![License](https://img.shields.io/badge/MIT-xchainjs-green)]()
+
+
+Telegram group: https://t.me/xchainj \
+Homepage: https://xchainjs.org \
+Docs: http://docs.xchainjs.org/overview/ \
+
+
+
 
 ## Interface
 
@@ -22,137 +37,20 @@ A single common interface:
 5. Make a simple transfer
 6. Get blockchain fee information (standard, fast, fastest)
 
-## Examples
-
-### Generate a phrase, then save the encrypted keystore
-```js
-const fs = require('fs');
-const crypto = require('@xchainjs/xchain-crypto')
-
-const saveWallet = async () => {
-    const phrase = crypto.generatePhrase()
-    let password = 'Changeme!'
-    const keystore = await crypto.encryptToKeyStore(phrase, password)
-    fs.writeFileSync(`./keystore.json`, JSON.stringify(keystore, null, 4), 'utf8')
-}
-```
-
-### Import a wallet, then log the address and balance
-```js
-const bnbClient = require('@xchainjs/xchain-binance');
-const utils = require('@xchainjs/xchain-util')
-
-const connectWallet = async () => {
-    let BNBClient = new binanceClient.Client({network: Network.Mainnet, phrase:MY_PHRASE})
-    let address = BNBClient.getAddress()
-    console.log(`Asset Address is: ${address}`)
-
-    let balances = await BNBClient.getBalance(address)
-    try {
-        let assetAmount = (utils.baseToAsset(balances[0].amount)).amount()
-        console.log(`with balance: ${assetAmount}`)
-    } catch (error) {
-        console.log('no balance')
-    }
-}
-```
-
-
-### Make a BTC transfer
-```js
-const btcClient = require('@xchainjs/xchain-bitcoin')
-const { AssetBTC } = require('@xchainjs/xchain-util')
-
-let amountToTransfer = 0.0001
-let recipient = 'bc1qlmdkft6vd88kpvhunze5pa8k74hahm4fklgnpj'
-...
-const transfer = async () => {
-    let BTCClient = new btcClient.Client({network: Network.Mainnet, MY_PHRASE})
-    let amount = utils.assetToBase(utils.assetAmount(amountToTransfer, 8))
-    try {
-        const result = await BTCClient.transfer({
-            'asset': AssetBTC,
-            'recipient': recipient,
-            'amount': amount,
-            'memo': "payment",
-        })
-        console.log(`${amount.amount().toString()} ${AssetObject.symbol} transfer made ${result}`)
-    } catch (error) {
-        console.log('deposit failed ', error)
-    }
-}
-```
-
-### Get transaction details of an address
-```js
-const { getDefaultClientUrl, Client } = require('@xchainjs/xchain-thorchain')
-...
-const txHistory = async () => {
-    let settings = { clientUrl: getDefaultClientUrl(), network: Network.Mainnet, MY_PHRASE, chainIds: getChainIds }
-    let THORClient = new Client(settings)
-    let address = THORClient.getAddress()
-    let txData = await THORClient.getTransactions({address:address})
-    let lastTx = txData.txs[0]
-    console.log(`${txData.total} transactions found, last is a ${lastTx.type} with txId ${lastTx.hash}`)
-}
-```
-
-### Get share links
-```js
-const ltcClient = require('@xchainjs/xchain-litecoin')
-...
-const getLinks = async () => {
-    let LTCClient = new ltcClient.Client({network: Network.Mainnet, phrase:process.env.PHRASE})
-    let addressLink = LTCClient.getExplorerAddressUrl(LTCClient.getAddress())
-    console.log(`LTC Address Link is: ${addressLink}`)
-    let txLink = LTCClient.getExplorerTxUrl("hash")
-    console.log(`LTC TX Link is: ${txLink}`)
-}
-```
-
-### Get Fee Data
-```js
-const { AssetETH } = require('@xchainjs/xchain-util')
-const ethClient = require('@xchainjs/xchain-ethereum');
-
-const getFeeData = async () => {
-    let ETHClient = new ethClient.Client({network: Network.Mainnet, phrase:process.env.PHRASE})
-    let rates = await ETHClient.estimateGasPrices()
-    let fastRateGWei = rates.fast.amount().toString()
-    console.log(`The fast fee rate is ${fastRateGWei} GWEI`)
-
-    let tx = {
-        asset : AssetETH, 
-        recipient : '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E',
-        amount : utils.baseAmount(100000),
-        memo : "tesh"
-    }
-    let fees = await ETHClient.getFees(tx)
-    let assetAmount = (utils.baseToAsset(fees.fastest)).amount()
-    console.log(`The fastest fee amount is ${assetAmount} ETH`)
-}
-```
-
-### Importing
-
-ESLINT
-```js
-import clientPkg from '@xchainjs/xchain-thorchain'
-const { getDefaultClientUrl, Client, getChainIds } = clientPkg
-import pkg from '@xchainjs/xchain-client';
-const { Network } = pkg;
-import * as utils from '@xchainjs/xchain-util'
-import * as assetClient from '@xchainjs/xchain-binance'
-```
-
-NodeJS
-```js
-// put this in your package.json: "type": "module", 
-const { getDefaultClientUrl, Client } = require('@xchainjs/xchain-thorchain')
-const { Network } = require('@xchainjs/xchain-client')
-const utils = require('@xchainjs/xchain-util')
-const assetClient = require('@xchainjs/xchain-binance')
-```
+### Packages
+* [`xchain-binance`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-binance)
+* [`xchain-bitcoin`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoin)
+* [`xchain-bitcoincash`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoincash)
+* [`xchain-client`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-client)
+* [`xchain-cosmos`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cosmos)
+* [`xchain-crypto`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-crypto)
+* [`xchain-doge`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-doge)
+* [`xchain-ethereum`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-ethereum)
+* [`xchain-litecoin`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-litecoin)
+* [`xchain-polkadot`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-polkadot)
+* [`xchain-terra`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-terra)
+* [`xchain-thorchain`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain)
+* [`xchain-util`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-util)
 
 ## Advanced Features
 
@@ -196,8 +94,6 @@ export PHRASE="secret phrase here"
 yarn e2e
 ```
 
-### `unit`
-
 ## Development
 
 `lerna bootstrap`
@@ -226,6 +122,4 @@ Please ask in the telegram group to be added as a contributor.
 
 Please submit an issue and flag in the telegram group.
 
-## License
 
-MIT [XChainJS](https://github.com/xchainjs)
