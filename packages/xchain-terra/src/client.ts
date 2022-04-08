@@ -1,14 +1,4 @@
-import {
-  AccAddress,
-  Coin,
-  Coins,
-  CreateTxOptions,
-  LCDClient,
-  MnemonicKey,
-  MsgMultiSend,
-  MsgSend,
-  TxInfo,
-} from '@terra-money/terra.js'
+import { AccAddress, Coin, Coins, LCDClient, MnemonicKey, MsgMultiSend, MsgSend, TxInfo } from '@terra-money/terra.js'
 import { BaseXChainClient, FeeType, Network, TxType, singleFee } from '@xchainjs/xchain-client'
 import type {
   Balance,
@@ -26,13 +16,11 @@ import { Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import { AssetLUNA, TERRA_DECIMAL } from './const'
-import type { ClientConfig, ClientParams } from './types/client'
+import type { ClientConfig, ClientParams, FeeParams } from './types/client'
 import {
   getDefaultClientConfig,
   getDefaultRootDerivationPaths,
   getEstimatedFee,
-  getEstimatedGas,
-  getGasPriceByAsset,
   getTerraNativeAsset,
   getTerraNativeDenom,
 } from './util'
@@ -42,7 +30,7 @@ import {
  */
 export interface TerraClient {
   // `getFees` of `BaseXChainClient` needs to be overridden
-  getFees(params: { options: CreateTxOptions; feeAsset: Asset }): Promise<Fees>
+  getFees(params: FeeParams): Promise<Fees>
 }
 
 /**
@@ -90,24 +78,23 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
    * @param {CreateTxOptions} options Options to create a simulated tx to estimate fees
    * @returns {Fees} The average/fast/fastest fees.
    */
-  async getFees(params?: { options: CreateTxOptions; feeAsset: Asset }): Promise<Fees> {
+  async getFees(params?: FeeParams): Promise<Fees> {
     if (!params) throw new Error('Params need to be passed')
-    const { options, feeAsset } = params
-    // denom
-    const denom = getTerraNativeDenom(feeAsset)
-    if (!denom) throw Error(`Invalid fee asset ${assetToString(feeAsset)}`)
-    // gas price
-    const gasPrice = await getGasPriceByAsset({
-      url: this.config[this.network].cosmosAPIURL,
-      asset: feeAsset,
+
+    const { feeAsset, sender, recipient, asset, amount, memo } = params
+
+    const config = this.config[this.network]
+    const estimatedFee = await getEstimatedFee({
+      chainId: config.chainID,
+      cosmosAPIURL: config.cosmosAPIURL,
+      sender,
+      recipient,
+      amount,
+      asset,
+      feeAsset,
+      memo,
       network: this.network,
     })
-    if (!gasPrice) throw Error(`Could not get gas price for ${assetToString(feeAsset)}`)
-    // estimated gas
-    const estimatedGas = await getEstimatedGas({ lcd: this.lcdClient, address: this.getAddress(), options })
-    // estimated fee
-    const estimatedFee = getEstimatedFee(estimatedGas, gasPrice)
-
     return singleFee(FeeType.PerByte, estimatedFee)
   }
 

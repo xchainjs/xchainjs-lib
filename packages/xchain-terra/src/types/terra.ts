@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { BaseAmount } from '@xchainjs/xchain-util/lib'
+import BigNumber from 'bignumber.js'
 
 /**
  * Chain types at Terra
@@ -202,4 +202,5 @@ export const isTerraNativeDenom = (value: string): value is TerraNativeDenom =>
   TERRA_NATIVE_DENOMS.includes(value as TerraNativeDenom)
 
 export type GasPricesResponse = Record<TerraNativeDenom, number>
-export type GasPrices = Map<TerraNativeDenom, BaseAmount>
+export type GasPrice = { denom: TerraNativeDenom; price: BigNumber }
+export type GasPrices = Map<TerraNativeDenom, BigNumber>

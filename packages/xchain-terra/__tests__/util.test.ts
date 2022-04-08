@@ -41,19 +41,19 @@ describe('terra/util', () => {
     })
   })
 
-  describe('fees', () => {
+  describe('getGasPriceByAsset', () => {
     const url = 'https://bombay-fcd.terra.dev/v1/txs/gas_prices'
 
-    describe('getFeesByAsset', () => {
-      it('fees -> LUNA', async () => {
-        const result = await getGasPriceByAsset({ url, asset: AssetLUNA, network: Network.Testnet })
-        expect(result?.amount().toString()).toEqual('11330')
-      })
+    it('LUNA', async () => {
+      const result = await getGasPriceByAsset({ url, asset: AssetLUNA, network: Network.Testnet })
+      expect(result?.denom).toEqual('uluna')
+      expect(result?.price.toString()).toEqual('0.01133')
+    })
 
-      it('fees -> UST', async () => {
-        const result = await getGasPriceByAsset({ url, asset: AssetUST, network: Network.Testnet })
-        expect(result?.amount().toString()).toEqual('150000')
-      })
+    it('UST', async () => {
+      const result = await getGasPriceByAsset({ url, asset: AssetUST, network: Network.Testnet })
+      expect(result?.denom).toEqual('uusd')
+      expect(result?.price.toString()).toEqual('0.15')
     })
   })
 })

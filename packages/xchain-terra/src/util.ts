@@ -1,21 +1,11 @@
-import { Coins, CreateTxOptions, LCDClient } from '@terra-money/terra.js'
+import { Account, Coins, CreateTxOptions, LCDClient, MsgSend } from '@terra-money/terra.js'
 import { Address, Network } from '@xchainjs/xchain-client'
 import type { RootDerivationPaths } from '@xchainjs/xchain-client'
-import {
-  Asset,
-  BaseAmount,
-  TerraChain,
-  assetAmount,
-  assetToBase,
-  assetToString,
-  baseAmount,
-  bnOrZero,
-  eqAsset,
-} from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, TerraChain, assetToString, baseAmount, bn, bnOrZero, eqAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 
-import { AssetLUNA, AssetUST, TERRA_DECIMAL } from './const'
+import { AssetLUNA, AssetUST, DEFAULT_GAS_ADJUSTMENT, TERRA_DECIMAL } from './const'
 import type { ClientConfig, ClientConfigs, GasPrices, GasPricesResponse, TerraNativeDenom } from './types'
 import * as Terra from './types/terra'
 
@@ -153,7 +143,7 @@ export const getGasPrices = async ({
 }: {
   url: string
   network: Network
-  cacheTime: number
+  cacheTime?: number
 }): Promise<GasPrices> => {
   // Current time
   const now = new Date().getTime()
@@ -169,10 +159,7 @@ export const getGasPrices = async ({
     // validate `denom`
     .filter(([denom, _]) => Terra.isTerraNativeDenom(denom))
     // transfrom prices `number` -> `BaseAmount`
-    .map<[TerraNativeDenom, BaseAmount]>(([denom, price]) => [
-      denom as TerraNativeDenom,
-      assetToBase(assetAmount(price, TERRA_DECIMAL)),
-    ])
+    .map<[TerraNativeDenom, BigNumber]>(([denom, price]) => [denom as TerraNativeDenom, bn(price)])
 
   const gasPricesMap = new Map(gasPrices)
   cachedGasPrices = gasPricesMap
@@ -200,31 +187,110 @@ export const getGasPriceByAsset = async ({
   asset: Asset
   network: Network
   cacheTime?: number
-}): Promise<BaseAmount | undefined> => {
+}): Promise<Terra.GasPrice | null> => {
   const denom = getTerraNativeDenom(asset)
-  if (!denom) throw Error(`Invalid asset ${assetToString(asset)} - Terra native asset are supported only`)
+  if (!denom)
+    throw Error(`Invalid asset ${assetToString(asset)} - Terra native asset are supported to get gas price only`)
   const gasPricesMap = await getGasPrices({ url, network, cacheTime })
-  return gasPricesMap.get(denom)
+  const price = gasPricesMap.get(denom)
+  return price ? { denom, price } : null
 }
 
-export const gasPricesToCoins = (gasPrices: GasPrices): Coins.AminoDict => {
+export const gasPricesToCoins = (gasPrices: GasPrices): Coins.AminoDict /* onion type of Coins.Input */ => {
   const dict: Coins.AminoDict = {}
-  gasPrices.forEach((price, denom) => (dict[denom] = price.amount().toNumber()))
+  gasPrices.forEach((price, denom) => (dict[denom] = price.toString()))
   return dict
 }
 
-export const getEstimatedGas = async ({
-  lcd,
-  address,
-  options,
-}: {
-  lcd: LCDClient
-  address: Address
-  options: CreateTxOptions
-}): Promise<BigNumber> => {
-  const unsignedTx = await lcd.tx.create([{ address }], options)
-  return bnOrZero(unsignedTx.auth_info.fee.gas_limit)
+export const gasPriceToCoins = ({ denom, price }: Terra.GasPrice): Coins.Input => ({
+  [denom]: price.toString(),
+})
+
+/**
+ * Calculates fee by given estimated gas and gas price
+ */
+export const calcFee = (estimatedGas: BigNumber, gasPrice: BigNumber): BaseAmount => {
+  // ceil result - similar to terra.js
+  // @see https://github.com/terra-money/terra.js/blob/0af752555245a309a4cb590e0750ee187bee1f78/src/client/lcd/api/TxAPI.ts#L313
+  const fee = estimatedGas.multipliedBy(gasPrice).toFixed(0, BigNumber.ROUND_CEIL)
+  return baseAmount(fee, TERRA_DECIMAL)
 }
 
-export const getEstimatedFee = (estimatedGas: BigNumber, gasPrice: BaseAmount): BaseAmount =>
-  baseAmount(estimatedGas.toString(), TERRA_DECIMAL).times(gasPrice)
+/**
+ * Estimates fee paid by given Terra native (fee) asset
+ *
+ * Note: `terra.js` provides an `estimateFee` as well,
+ * but it's more complex behind the scenes
+ * (more data / more requests are needed)
+ *
+ * Simplified way here:
+ * 1. Get gas prices
+ * 2. Create (dummy) transaction
+ * 3. Estimate gas of this transaction
+ * 4. Calculate fee (gas price * estimated gas) based on given `feeAsset` (Note: At Terra you can pay fees with any Terra native asset)
+ *
+ * Very similar to approach in `terra-station` (`Tx.tsx`/`SendForm.tsx`)
+ * @see https://github.com/terra-money/station/blob/main/src/txs/Tx.tsx
+ * @see https://github.com/terra-money/station/blob/main/src/txs/send/SendForm.tsx
+ */
+export const getEstimatedFee = async ({
+  chainId,
+  cosmosAPIURL,
+  sender,
+  recipient,
+  amount,
+  asset,
+  feeAsset,
+  memo,
+  network,
+}: {
+  chainId: string
+  cosmosAPIURL: string
+  sender: Address
+  recipient: Address
+  amount: BaseAmount
+  asset: Asset
+  feeAsset: Asset
+  memo?: string
+  network: Network
+}): Promise<BaseAmount> => {
+  const denom = getTerraNativeDenom(asset)
+  if (!denom)
+    throw Error(`Invalid asset ${assetToString(asset)} - Terra native asset are supported to estimate fee only`)
+
+  const feeDenom = getTerraNativeDenom(feeAsset)
+  if (!feeDenom)
+    throw Error(`Invalid fee asset ${assetToString(feeAsset)} - Terra native asset are supported to estimate fee only`)
+
+  const gasPrices = await getGasPrices({ url: cosmosAPIURL, network })
+  const gasPricesAsCoins = gasPricesToCoins(gasPrices)
+
+  const gasPrice = await getGasPriceByAsset({ url: cosmosAPIURL, network, asset: feeAsset /* cacheTime: 0 */ })
+  if (!gasPrice) throw Error(`Could not get gas price for ${assetToString(feeAsset)}`)
+
+  const msgAmount: Coins.Input = { [denom]: amount.amount().toString() }
+  const msg: MsgSend = new MsgSend(sender, recipient, msgAmount)
+
+  const lcd = new LCDClient({
+    chainID: chainId,
+    URL: cosmosAPIURL,
+    gasPrices: gasPricesAsCoins,
+  })
+
+  const options: CreateTxOptions = {
+    msgs: [msg],
+    memo,
+    gasPrices: gasPricesAsCoins,
+    feeDenoms: [feeDenom],
+    gasAdjustment: DEFAULT_GAS_ADJUSTMENT,
+  }
+
+  const unsignedTx = await lcd.tx.create([{ address: sender }], options)
+
+  const estimatedGas = bnOrZero(unsignedTx.auth_info.fee.gas_limit)
+
+  return calcFee(estimatedGas, gasPrice.price)
+}
+
+export const getAccountInfo = async (address: Address, lcd: LCDClient): Promise<Account> =>
+  await lcd.auth.accountInfo(address)
