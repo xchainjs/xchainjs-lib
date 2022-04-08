@@ -1,3 +1,9 @@
+# v.0.6.1 (2022-04-04)
+
+### Fix
+
+- Support `UST` in `currencySymbolByAsset`
+
 # v.0.6.0 (2022-02-04)
 
 ### Breaking change

@@ -366,7 +366,7 @@ export const currencySymbolByAsset = ({ ticker }: Asset) => {
       return AssetCurrencySymbol.BTC
     case ticker === AssetETH.ticker:
       return AssetCurrencySymbol.ETH
-    case ticker.includes('USD'):
+    case ticker.includes('USD') || ticker.includes('UST'):
       return AssetCurrencySymbol.USD
     default:
       return ticker

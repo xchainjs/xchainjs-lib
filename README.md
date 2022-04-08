@@ -9,6 +9,7 @@
 
 XChainJS is a library with a common interface for multiple blockchains, built for simple and fast integration for wallets and more.
 
+
 ## License
 
 [![License](https://img.shields.io/badge/MIT-xchainjs-green)]()
@@ -17,7 +18,9 @@ XChainJS is a library with a common interface for multiple blockchains, built fo
 Telegram group: https://t.me/xchainj \
 Homepage: https://xchainjs.org \
 Docs: http://docs.xchainjs.org/overview/ \
-Twitter: https://twitter.com/xchainjs
+
+
+
 
 ## Interface
 
@@ -118,4 +121,5 @@ Please ask in the telegram group to be added as a contributor.
 ## Bug Reports
 
 Please submit an issue and flag in the telegram group.
+
 
