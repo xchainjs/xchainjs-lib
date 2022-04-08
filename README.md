@@ -17,7 +17,7 @@ XChainJS is a library with a common interface for multiple blockchains, built fo
 
 Telegram group: https://t.me/xchainjs \
 Homepage: https://xchainjs.org \
-Docs: http://docs.xchainjs.org/overview/ \
+Docs: http://docs.xchainjs.org/overview/
 
 
 
