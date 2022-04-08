@@ -7,8 +7,6 @@ import { AssetLUNA, AssetUST, Client, TERRA_DECIMAL } from '../src'
 
 const phrase = process.env.PHRASE
 
-console.log('phrase:', phrase)
-
 describe('Client Test', () => {
   let terraClient: Client
 
