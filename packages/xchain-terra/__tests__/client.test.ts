@@ -1,6 +1,9 @@
 import { Network } from '@xchainjs/xchain-client'
+import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
+import mockTerraApi from '../__mocks__/terra'
 import { Client } from '../src/client'
+import { AssetLUNA, AssetUST } from '../src/const'
 
 // const mockAccountsAddress = (
 //   url: string,
@@ -52,34 +55,35 @@ import { Client } from '../src/client'
 
 describe('Client Test', () => {
   let terraClient: Client
-  let thorMainClient: Client
+  let terraMainClient: Client
   const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
 
   // Note: Terra testnet/mainnet addresses are the same
-
-  const mainnet_address_path0 = 'terra1hf2j3w46zw8lg25awgan7x8wwsnc509sk0e6gr'
-  const mainnet_address_path1 = 'terra1f5p4qskczjt6hww3c3c04vhpy7uwq76upufkcy'
-  const testnet_address_path0 = 'terra1hf2j3w46zw8lg25awgan7x8wwsnc509sk0e6gr'
-  const testnet_address_path1 = 'terra1f5p4qskczjt6hww3c3c04vhpy7uwq76upufkcy'
+  const address_path0 = 'terra1hf2j3w46zw8lg25awgan7x8wwsnc509sk0e6gr'
+  const address_path1 = 'terra1f5p4qskczjt6hww3c3c04vhpy7uwq76upufkcy'
 
   beforeEach(() => {
-    terraClient = new Client({ phrase, network: 'testnet' as Network })
-    thorMainClient = new Client({ phrase, network: 'mainnet' as Network })
+    mockTerraApi.init()
+
+    terraClient = new Client({ phrase, network: Network.Testnet })
+    terraMainClient = new Client({ phrase, network: Network.Mainnet })
   })
 
   afterEach(() => {
+    mockTerraApi.restore()
+
     terraClient.purgeClient()
-    thorMainClient.purgeClient()
+    terraMainClient.purgeClient()
   })
 
   it('should start with empty wallet', async () => {
     const terraClientEmptyMain = new Client({ phrase, network: 'mainnet' as Network })
     const addressMain = terraClientEmptyMain.getAddress()
-    expect(addressMain).toEqual(mainnet_address_path0)
+    expect(addressMain).toEqual(address_path0)
 
     const terraClientEmptyTest = new Client({ phrase, network: 'testnet' as Network })
     const addressTest = terraClientEmptyTest.getAddress()
-    expect(addressTest).toEqual(testnet_address_path0)
+    expect(addressTest).toEqual(address_path0)
   })
 
   it('should derive address accordingly to the user param', async () => {
@@ -88,34 +92,34 @@ describe('Client Test', () => {
       network: Network.Mainnet /*, derivationPath: "44'/931'/0'/0/0" */,
     })
     const addressMain = terraClientEmptyMain.getAddress()
-    expect(addressMain).toEqual(mainnet_address_path0)
+    expect(addressMain).toEqual(address_path0)
 
     const viaSetPhraseAddr1 = terraClientEmptyMain.getAddress(1 /*, "44'/931'/0'/0/1" */)
-    expect(viaSetPhraseAddr1).toEqual(mainnet_address_path1)
+    expect(viaSetPhraseAddr1).toEqual(address_path1)
 
     const terraClientEmptyTest = new Client({
       phrase,
       network: 'testnet' as Network /*, derivationPath: "44'/931'/0'/0/0"*/,
     })
     const addressTest = terraClientEmptyTest.getAddress()
-    expect(addressTest).toEqual(testnet_address_path0)
+    expect(addressTest).toEqual(address_path0)
 
     const viaSetPhraseAddr1Test = terraClientEmptyTest.getAddress(1 /*, "44'/931'/0'/0/1"*/)
-    expect(viaSetPhraseAddr1Test).toEqual(testnet_address_path1)
+    expect(viaSetPhraseAddr1Test).toEqual(address_path1)
 
     const terraClientEmptyMain1 = new Client({
       phrase,
       network: 'mainnet' as Network /*, derivationPath: "44'/931'/0'/0/1"*/,
     })
     const addressMain1 = terraClientEmptyMain1.getAddress(1)
-    expect(addressMain1).toEqual(mainnet_address_path1)
+    expect(addressMain1).toEqual(address_path1)
 
     const terraClientEmptyTest1 = new Client({
       phrase,
       network: 'testnet' as Network /*, derivationPath: "44'/931'/0'/0/1"*/,
     })
     const addressTest1 = terraClientEmptyTest1.getAddress(1)
-    expect(addressTest1).toEqual(testnet_address_path1)
+    expect(addressTest1).toEqual(address_path1)
   })
 
   it('throws an error passing an invalid phrase', async () => {
@@ -129,17 +133,17 @@ describe('Client Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(terraClient.getAddress()).toEqual(testnet_address_path0)
+    expect(terraClient.getAddress()).toEqual(address_path0)
 
-    expect(thorMainClient.getAddress()).toEqual(mainnet_address_path0)
+    expect(terraMainClient.getAddress()).toEqual(address_path0)
   })
 
   it('should update net', async () => {
-    thorMainClient.setNetwork('testnet' as Network)
-    expect(thorMainClient.getNetwork()).toEqual('testnet')
+    terraMainClient.setNetwork('testnet' as Network)
+    expect(terraMainClient.getNetwork()).toEqual('testnet')
 
-    const address = await thorMainClient.getAddress()
-    expect(address).toEqual(testnet_address_path0)
+    const address = await terraMainClient.getAddress()
+    expect(address).toEqual(address_path0)
   })
 
   it('should init, should have right prefix', async () => {
@@ -189,7 +193,7 @@ describe('Client Test', () => {
   // })
 
   // it('has no balances', async () => {
-  //   mockAccountsBalance(terraClient.getClientUrl().node, testnet_address_path0, {
+  //   mockAccountsBalance(terraClient.getClientUrl().node, address_path0, {
   //     height: 0,
   //     result: [],
   //   })
@@ -282,7 +286,7 @@ describe('Client Test', () => {
   //     logs: [],
   //   }
 
-  //   mockAccountsAddress(terraClient.getClientUrl().node, testnet_address_path0, {
+  //   mockAccountsAddress(terraClient.getClientUrl().node, address_path0, {
   //     height: 0,
   //     result: {
   //       coins: [
@@ -295,7 +299,7 @@ describe('Client Test', () => {
   //       sequence: '0',
   //     },
   //   })
-  //   mockAccountsBalance(terraClient.getClientUrl().node, testnet_address_path0, {
+  //   mockAccountsBalance(terraClient.getClientUrl().node, address_path0, {
   //     height: 0,
   //     result: [
   //       {
@@ -328,7 +332,7 @@ describe('Client Test', () => {
   //     logs: [],
   //   }
 
-  //   mockAccountsAddress(terraClient.getClientUrl().node, testnet_address_path0, {
+  //   mockAccountsAddress(terraClient.getClientUrl().node, address_path0, {
   //     height: 0,
   //     result: {
   //       coins: [
@@ -341,7 +345,7 @@ describe('Client Test', () => {
   //       sequence: '0',
   //     },
   //   })
-  //   mockAccountsBalance(terraClient.getClientUrl().node, testnet_address_path0, {
+  //   mockAccountsBalance(terraClient.getClientUrl().node, address_path0, {
   //     height: 0,
   //     result: [
   //       {
@@ -430,4 +434,35 @@ describe('Client Test', () => {
   //   terraClient.setNetwork('mainnet' as Network)
   //   expect(terraClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash')
   // })
+
+  describe('getFees', () => {
+    it('LUNA fees', async () => {
+      const result = await terraClient.getFees({
+        asset: AssetUST,
+        feeAsset: AssetLUNA,
+        amount: assetToBase(assetAmount(1)),
+        sender: terraClient.getAddress(0),
+        recipient: 'terra1f5p4qskczjt6hww3c3c04vhpy7uwq76upufkcy',
+      })
+
+      // gas price (uluna) * estimated gas (tx) * DEFAULT_GAS_ADJUSTMENT
+      // 0.01133 * 100000 * 2
+      expect(result.average.amount().toString()).toEqual('2266')
+    })
+
+    it('USDT fees', async () => {
+      console.log('terraClient - network:', terraClient.getNetwork())
+      const result = await terraClient.getFees({
+        asset: AssetUST,
+        feeAsset: AssetUST,
+        amount: assetToBase(assetAmount(1)),
+        sender: terraClient.getAddress(0),
+        recipient: 'terra1f5p4qskczjt6hww3c3c04vhpy7uwq76upufkcy',
+      })
+
+      // gas price (uusd) * estimated gas (tx) * DEFAULT_GAS_ADJUSTMENT
+      // 0.15 * 100000 * 2
+      expect(result.average.amount().toString()).toEqual('30000')
+    })
+  })
 })

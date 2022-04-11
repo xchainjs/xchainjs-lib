@@ -84,7 +84,7 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
     const { feeAsset, sender, recipient, asset, amount, memo } = params
 
     const config = this.config[this.network]
-    const estimatedFee = await getEstimatedFee({
+    const feeAmount = await getEstimatedFee({
       chainId: config.chainID,
       cosmosAPIURL: config.cosmosAPIURL,
       sender,
@@ -95,7 +95,7 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
       memo,
       network: this.network,
     })
-    return singleFee(FeeType.PerByte, estimatedFee)
+    return singleFee(FeeType.PerByte, feeAmount)
   }
 
   getAddress(walletIndex = 0): string {

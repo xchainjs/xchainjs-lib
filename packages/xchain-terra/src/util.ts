@@ -1,18 +1,13 @@
 import { Account, Coins, CreateTxOptions, LCDClient, MsgSend } from '@terra-money/terra.js'
 import { Address, Network } from '@xchainjs/xchain-client'
 import type { RootDerivationPaths } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, TerraChain, assetToString, baseAmount, bn, bnOrZero, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, TerraChain, assetToString, baseAmount, bn, eqAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 
 import { AssetLUNA, AssetUST, DEFAULT_GAS_ADJUSTMENT, TERRA_DECIMAL } from './const'
 import type { ClientConfig, ClientConfigs, GasPrices, GasPricesResponse, TerraNativeDenom } from './types'
 import * as Terra from './types/terra'
-
-/**
- * Special case UST
- */
-// const isDenomUST = (string = '') => string === 'uusd'
 
 export const isAssetUST = (asset: Asset) => eqAsset(asset, AssetUST)
 export const denomUST: TerraNativeDenom = 'uusd'
@@ -153,7 +148,8 @@ export const getGasPrices = async ({
     return cachedGasPrices
   }
 
-  const { data: gasPriceNumbers } = await axios.get<GasPricesResponse>(`${url}/v1/txs/gas_prices`)
+  const gasPricesUrl = `${url}/v1/txs/gas_prices`
+  const { data: gasPriceNumbers } = await axios.get<GasPricesResponse>(gasPricesUrl)
 
   const gasPrices = Object.entries(gasPriceNumbers)
     // validate `denom`
@@ -219,19 +215,12 @@ export const calcFee = (estimatedGas: BigNumber, gasPrice: BigNumber): BaseAmoun
 /**
  * Estimates fee paid by given Terra native (fee) asset
  *
- * Note: `terra.js` provides an `estimateFee` as well,
- * but it's more complex behind the scenes
- * (more data / more requests are needed)
- *
- * Simplified way here:
+ * Steps:
  * 1. Get gas prices
- * 2. Create (dummy) transaction
- * 3. Estimate gas of this transaction
- * 4. Calculate fee (gas price * estimated gas) based on given `feeAsset` (Note: At Terra you can pay fees with any Terra native asset)
+ * 2. Get account info
+ * 3. Estimate fee
  *
- * Very similar to approach in `terra-station` (`Tx.tsx`/`SendForm.tsx`)
- * @see https://github.com/terra-money/station/blob/main/src/txs/Tx.tsx
- * @see https://github.com/terra-money/station/blob/main/src/txs/send/SendForm.tsx
+ * @returns {BaseAmount} Fee amount
  */
 export const getEstimatedFee = async ({
   chainId,
@@ -285,11 +274,28 @@ export const getEstimatedFee = async ({
     gasAdjustment: DEFAULT_GAS_ADJUSTMENT,
   }
 
-  const unsignedTx = await lcd.tx.create([{ address: sender }], options)
+  // accountInfo
+  // https://github.com/terra-money/terra.js/blob/0af752555245a309a4cb590e0750ee187bee1f78/src/client/lcd/api/AuthAPI.ts#L17
+  const account = await lcd.auth.accountInfo(sender)
 
-  const estimatedGas = bnOrZero(unsignedTx.auth_info.fee.gas_limit)
+  // estimateFee
+  // https://github.com/terra-money/terra.js/blob/0af752555245a309a4cb590e0750ee187bee1f78/src/client/lcd/api/TxAPI.ts#L275
+  const fee = await lcd.tx.estimateFee(
+    [
+      {
+        sequenceNumber: account.getSequenceNumber(),
+        publicKey: account.getPublicKey(),
+      },
+    ],
+    options,
+  )
 
-  return calcFee(estimatedGas, gasPrice.price)
+  // Get first fee, because we handle one fee here only
+  const { denom: _feeDenom, amount: feeAmount } = fee.toData().amount[0]
+
+  if (feeDenom !== _feeDenom) throw Error(`Fee denom mismatched! Got ${feeDenom}, but LCDClient returns ${_feeDenom}`)
+
+  return baseAmount(feeAmount)
 }
 
 export const getAccountInfo = async (address: Address, lcd: LCDClient): Promise<Account> =>
