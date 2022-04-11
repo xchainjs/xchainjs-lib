@@ -1,3 +1,4 @@
+import { PublicKey } from '@terra-money/terra.js'
 import { Network } from '@xchainjs/xchain-client'
 import BigNumber from 'bignumber.js'
 
@@ -204,3 +205,9 @@ export const isTerraNativeDenom = (value: string): value is TerraNativeDenom =>
 export type GasPricesResponse = Record<TerraNativeDenom, number>
 export type GasPrice = { denom: TerraNativeDenom; price: BigNumber }
 export type GasPrices = Map<TerraNativeDenom, BigNumber>
+
+/**
+ * Account
+ * Includes sequence, account number and public key
+ */
+export type Account = { sequence: number; number: number; publicKey: PublicKey | null }

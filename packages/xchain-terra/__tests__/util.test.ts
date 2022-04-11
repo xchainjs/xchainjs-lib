@@ -1,9 +1,10 @@
+import { LCDClient } from '@terra-money/terra.js'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetBTC } from '@xchainjs/xchain-util'
 
 import mockTerraApi from '../__mocks__/terra'
 import { AssetLUNA, AssetLUNASynth, AssetUST, AssetUSTSynth } from '../src/const'
-import { getGasPriceByAsset, getTerraNativeDenom, isTerraNativeAsset } from '../src/util'
+import { getAccount, getGasPriceByAsset, getTerraNativeDenom, isTerraNativeAsset } from '../src/util'
 
 describe('terra/util', () => {
   beforeEach(() => {
@@ -54,6 +55,22 @@ describe('terra/util', () => {
       const result = await getGasPriceByAsset({ url, asset: AssetUST, network: Network.Testnet })
       expect(result?.denom).toEqual('uusd')
       expect(result?.price.toString()).toEqual('0.15')
+    })
+  })
+
+  describe('getAccount', () => {
+    it('returns all values of an account', async () => {
+      const lcdClient = new LCDClient({
+        chainID: 'bombay-12',
+        URL: 'https://bombay-fcd.terra.dev',
+      })
+
+      const address = 'terra1hf2j3w46zw8lg25awgan7x8wwsnc509sk0e6gr'
+
+      const { sequence, publicKey, number } = await getAccount(address, lcdClient)
+      expect(sequence).toEqual(5)
+      expect(number).toEqual(198482)
+      expect(publicKey?.address()).toEqual(address)
     })
   })
 })

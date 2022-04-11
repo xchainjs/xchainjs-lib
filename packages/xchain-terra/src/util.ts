@@ -1,4 +1,4 @@
-import { Account, Coins, CreateTxOptions, LCDClient, MsgSend } from '@terra-money/terra.js'
+import { Coins, CreateTxOptions, LCDClient, MsgSend } from '@terra-money/terra.js'
 import { Address, Network } from '@xchainjs/xchain-client'
 import type { RootDerivationPaths } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount, TerraChain, assetToString, baseAmount, bn, eqAsset } from '@xchainjs/xchain-util'
@@ -213,6 +213,18 @@ export const calcFee = (estimatedGas: BigNumber, gasPrice: BigNumber): BaseAmoun
 }
 
 /**
+ * Returns account infos
+ */
+export const getAccount = async (address: Address, lcd: LCDClient): Promise<Terra.Account> => {
+  const account = await lcd.auth.accountInfo(address)
+  return {
+    publicKey: account.getPublicKey(),
+    sequence: account.getSequenceNumber(),
+    number: account.getAccountNumber(),
+  }
+}
+
+/**
  * Estimates fee paid by given Terra native (fee) asset
  *
  * Steps:
@@ -276,15 +288,15 @@ export const getEstimatedFee = async ({
 
   // accountInfo
   // https://github.com/terra-money/terra.js/blob/0af752555245a309a4cb590e0750ee187bee1f78/src/client/lcd/api/AuthAPI.ts#L17
-  const account = await lcd.auth.accountInfo(sender)
+  const { sequence: sequenceNumber, publicKey } = await getAccount(sender, lcd)
 
   // estimateFee
   // https://github.com/terra-money/terra.js/blob/0af752555245a309a4cb590e0750ee187bee1f78/src/client/lcd/api/TxAPI.ts#L275
   const fee = await lcd.tx.estimateFee(
     [
       {
-        sequenceNumber: account.getSequenceNumber(),
-        publicKey: account.getPublicKey(),
+        sequenceNumber,
+        publicKey,
       },
     ],
     options,
@@ -297,6 +309,3 @@ export const getEstimatedFee = async ({
 
   return baseAmount(feeAmount)
 }
-
-export const getAccountInfo = async (address: Address, lcd: LCDClient): Promise<Account> =>
-  await lcd.auth.accountInfo(address)

@@ -83,7 +83,7 @@ describe('Client Test', () => {
       fail()
     }
   })
-  it.only('get fees - testnet', async () => {
+  it('get fees - testnet', async () => {
     try {
       terraClient.setNetwork(Network.Testnet)
 

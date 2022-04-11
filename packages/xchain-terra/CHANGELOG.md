@@ -2,9 +2,10 @@
 
 ## Add
 
-- Helper `getFees`, `getFeesByAsset` (incl. tests)
-- Add types `Denom` + `FeesResponse`
-- Add all native `Asset{XYZ}` (e.g. `AssetLUNA`, `AssetUST` etc.) to `./const`
+- Helper `getEstimatedFee` to estimate fees based on any (not just LUNA) Terra native asset
+- More fee / account helpers: `getAccount`, `calcFee`, `gasPriceToCoins`, `gasPricesToCoins`, `getGasPrices`, `getGasPriceByAsset`
+- More asset helpers: `isAssetUST`, `getTerraNativeAsset`, `isTerraNativeAsset`, `getTerraNativeDenom`
+- Add `Denom` + `FeesResponse` types
 
 ## Update
 
@@ -17,8 +18,8 @@
 
 ## Breaking change
 
-- Rename `getTerraMicroDenom` -> `getTerraDenom`
-- Remove `TerraNativeAsset` + `DENOM_MAP` in favour of `TERRA_NATIVE_ASSET_MAP`
+- Rename `getTerraMicroDenom` -> `getTerraNativeDenom`
+- Remove `TerraNativeAsset` + `DENOM_MAP` in favour of `getTerraNativeAsset`
 
 # v.0.1.0-alpha.5 (2022-04-03)
 
