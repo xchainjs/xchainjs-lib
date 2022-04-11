@@ -4,6 +4,7 @@ import {
   Address,
   Balance,
   BaseXChainClient,
+  DepositParams,
   FeeOption,
   FeeType,
   Fees,
@@ -17,11 +18,21 @@ import {
   XChainClientParams,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetETH,
+  BaseAmount,
+  Chain,
+  assetToString,
+  baseAmount,
+  delay,
+  getInboundDetails,
+} from '@xchainjs/xchain-util'
 import { BigNumber, BigNumberish, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
 
 import erc20ABI from './data/erc20.json'
+import { TCRopstenAbi } from './data/thorchain.abi'
 import * as etherscanAPI from './etherscan-api'
 import * as ethplorerAPI from './ethplorer-api'
 import {
@@ -421,6 +432,76 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     return {
       total: transactions.length,
       txs: transactions.filter((_, index) => index >= offset && index < offset + limit),
+    }
+  }
+
+  /**
+   * Transaction to THORChain inbound address.
+   *
+   * @param {DepositParams} params The transaction options.
+   * @returns {TxHash} The transaction hash.
+   *
+   * @throws {"halted chain"} Thrown if chain is halted.
+   * @throws {"halted trading"} Thrown if trading is halted.
+   * @throws {"amount is not approved"} Thrown if the amount is not allowed to spend
+   * @throws {"router address is not defined"} Thrown if router address is not defined
+   */
+  async deposit({ walletIndex = 0, asset = AssetETH, amount, memo }: DepositParams): Promise<TxHash> {
+    const inboundDetails = await getInboundDetails(asset.chain)
+
+    if (inboundDetails.haltedChain) {
+      throw new Error('halted chain')
+    }
+    if (inboundDetails.haltedTrading) {
+      throw new Error('halted trading')
+    }
+    if (!inboundDetails.router) {
+      throw new Error('router address is not defined')
+    }
+
+    const abi = TCRopstenAbi
+    const address = this.getAddress(walletIndex)
+    const gasPrice = await this.estimateGasPrices()
+
+    if (asset.ticker.toUpperCase() === 'ETH') {
+      const contract = new ethers.Contract(inboundDetails.router, abi)
+      const unsignedTx = await contract.populateTransaction.deposit(
+        inboundDetails.vault,
+        '0x0000000000000000000000000000000000000000',
+        amount.amount().toFixed(),
+        memo,
+        {
+          from: address,
+          value: 0,
+          gasPrice: gasPrice.fast.amount().toFixed(),
+        },
+      )
+      const response = await this.getWallet(walletIndex).sendTransaction(unsignedTx)
+      return typeof response === 'string' ? response : response.hash
+    } else {
+      const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
+      const strip0x = assetAddress.substr(2)
+      const isApproved = await this.isApproved({
+        amount: baseAmount(amount.amount()),
+        spenderAddress: inboundDetails.router,
+        contractAddress: strip0x,
+        walletIndex,
+      })
+
+      if (!isApproved) {
+        throw new Error('The amount is not allowed to spend')
+      }
+
+      const checkSummedAddress = ethers.utils.getAddress(strip0x)
+      const params = [inboundDetails.vault, checkSummedAddress, amount.amount().toFixed(), memo]
+      const vaultContract = new ethers.Contract(inboundDetails.router, abi)
+      const unsignedTx = await vaultContract.populateTransaction.deposit(...params, {
+        from: address,
+        value: 0,
+        gasPrice: gasPrice.fast.amount().toFixed(),
+      })
+      const response = await this.getWallet(walletIndex).sendTransaction(unsignedTx)
+      return typeof response === 'string' ? response : response.hash
     }
   }
 

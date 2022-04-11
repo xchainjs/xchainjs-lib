@@ -1,6 +1,7 @@
 import {
   Address,
   Balance,
+  DepositParams,
   Fee,
   FeeOption,
   FeeRate,
@@ -15,7 +16,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Asset, AssetBTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Asset, AssetBTC, Chain, assetAmount, assetToBase, getInboundDetails } from '@xchainjs/xchain-util'
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import { BTC_DECIMAL } from './const'
@@ -312,6 +313,36 @@ class Client extends UTXOClient {
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
     return await Utils.broadcastTx({ txHex, haskoinUrl })
+  }
+
+  /**
+   * Transaction to THORChain inbound address.
+   *
+   * @param {DepositParams} params The transaction options.
+   * @returns {TxHash} The transaction hash.
+   *
+   * @throws {"halted chain"} Thrown if chain is halted.
+   * @throws {"halted trading"} Thrown if trading is halted.
+   */
+  async deposit({ walletIndex = 0, asset = AssetBTC, amount, memo }: DepositParams): Promise<TxHash> {
+    const inboundDetails = await getInboundDetails(asset.chain)
+
+    if (inboundDetails.haltedChain) {
+      throw new Error('halted chain')
+    }
+    if (inboundDetails.haltedTrading) {
+      throw new Error('halted trading')
+    }
+
+    const txHash = await this.transfer({
+      walletIndex,
+      asset,
+      amount,
+      recipient: inboundDetails.vault,
+      memo,
+    })
+
+    return txHash
   }
 }
 
