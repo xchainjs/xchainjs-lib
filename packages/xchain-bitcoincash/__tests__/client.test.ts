@@ -28,6 +28,14 @@ describe('BCHClient Test', () => {
   const mainnet_address_path0 = 'qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
   const mainnet_address_path1 = 'qr4jrkhu3usuk8ghv60m7pg9eywuc79yqvd0wxt2lm'
 
+  it('should not throw on a client without a phrase', () => {
+    expect(() => {
+      new Client({
+        network: Network.Testnet,
+      })
+    }).not.toThrow()
+  })
+
   it('set phrase should return correct address', () => {
     bchClient.setNetwork(Network.Testnet)
     expect(bchClient.setPhrase(phrase)).toEqual(testnet_address_path0)

@@ -50,6 +50,14 @@ describe('BitcoinClient Test', () => {
     expect(result).toEqual(addyOnePath0)
   })
 
+  it('should not throw on a client without a phrase', () => {
+    expect(() => {
+      new Client({
+        network: Network.Testnet,
+      })
+    }).not.toThrow()
+  })
+
   it('should throw an error for setting a bad phrase', () => {
     expect(() => btcClient.setPhrase('cat')).toThrow()
   })
