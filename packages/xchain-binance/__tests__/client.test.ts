@@ -1,5 +1,5 @@
 import { FeeType, Network } from '@xchainjs/xchain-client'
-import { Asset, AssetBNB, BNBChain, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, assetAmount, AssetBNB, assetToBase, baseAmount, BNBChain, Chain } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { Client as BinanceClient } from '../src/client'
@@ -649,5 +649,20 @@ describe('BinanceClient Test', () => {
 
     bnbClient.setNetwork(Network.Testnet)
     expect(bnbClient.getExplorerTxUrl('testTxHere')).toEqual('https://testnet-explorer.binance.org/tx/testTxHere')
+  })
+
+  it('should broadcast a deposit to thorchain inbound address', async () => {
+    bnbClient.setNetwork(Network.Testnet)
+    const txHash = await bnbClient.deposit({
+      asset: {
+        chain: Chain.Binance,
+        synth: false,
+        symbol: 'BUSD-74E',
+        ticker: 'BUSD',
+      },
+      amount: assetToBase(assetAmount(1)),
+      memo: '=:THOR.RUNE:tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
+    })
+    expect(txHash).toEqual(expect.any(String))
   })
 })

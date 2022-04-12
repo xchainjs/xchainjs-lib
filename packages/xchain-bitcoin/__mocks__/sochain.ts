@@ -57,9 +57,15 @@ export default {
       return [200, 'TEST_OK']
     })
     //
-    //Mock horchain/inbound_addresses
+    //Mock thorchain/inbound_addresses
     mock.onGet(/\/thorchain\/inbound_addresses/).reply(function () {
       const resp = require(`./response/thornode/inbound_addresses.json`)
+      return [200, resp]
+    })
+
+    //Mock thorchain/mimir
+    mock.onGet(/\/thorchain\/mimir/).reply(function () {
+      const resp = require(`./response/thornode/mimir.json`)
       return [200, resp]
     })
   },
