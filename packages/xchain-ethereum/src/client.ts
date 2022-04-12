@@ -447,7 +447,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @throws {"router address is not defined"} Thrown if router address is not defined
    */
   async deposit({ walletIndex = 0, asset = AssetETH, amount, memo }: DepositParams): Promise<TxHash> {
-    const inboundDetails = await getInboundDetails(asset.chain)
+    const inboundDetails = await getInboundDetails(asset.chain, this.network)
 
     if (inboundDetails.haltedChain) {
       throw new Error('halted chain')

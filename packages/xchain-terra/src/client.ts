@@ -318,7 +318,7 @@ class Client extends BaseXChainClient implements XChainClient {
    * @throws {"halted trading"} Thrown if trading is halted.
    */
   async deposit({ walletIndex = 0, asset = AssetLUNA, amount, memo }: DepositParams): Promise<TxHash> {
-    const inboundDetails = await getInboundDetails(asset.chain)
+    const inboundDetails = await getInboundDetails(asset.chain, this.network)
 
     if (inboundDetails.haltedChain) {
       throw new Error('halted chain')

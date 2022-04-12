@@ -325,7 +325,7 @@ class Client extends UTXOClient {
    * @throws {"halted trading"} Thrown if trading is halted.
    */
   async deposit({ walletIndex = 0, asset = AssetBTC, amount, memo }: DepositParams): Promise<TxHash> {
-    const inboundDetails = await getInboundDetails(asset.chain)
+    const inboundDetails = await getInboundDetails(asset.chain, this.network)
 
     if (inboundDetails.haltedChain) {
       throw new Error('halted chain')
