@@ -1,10 +1,16 @@
 import { LCDClient } from '@terra-money/terra.js'
 import { Network } from '@xchainjs/xchain-client'
-import { AssetBTC } from '@xchainjs/xchain-util'
+import { AssetBTC, TerraChain } from '@xchainjs/xchain-util'
 
 import mockTerraApi from '../__mocks__/terra'
 import { AssetLUNA, AssetLUNASynth, AssetUST, AssetUSTSynth } from '../src/const'
-import { getAccount, getGasPriceByAsset, getTerraNativeDenom, isTerraNativeAsset } from '../src/util'
+import {
+  getAccount,
+  getGasPriceByAsset,
+  getTerraNativeAsset,
+  getTerraNativeDenom,
+  isTerraNativeAsset,
+} from '../src/util'
 
 describe('terra/util', () => {
   beforeEach(() => {
@@ -18,12 +24,36 @@ describe('terra/util', () => {
     it('LUNA', () => {
       expect(getTerraNativeDenom(AssetLUNA)).toEqual('uluna')
     })
-
     it('UST', () => {
       expect(getTerraNativeDenom(AssetUST)).toEqual('uusd')
     })
+    it('AUT', () => {
+      expect(getTerraNativeDenom({ chain: TerraChain, symbol: 'AUT', ticker: 'AUT', synth: false })).toEqual('uaud')
+    })
+    it('EUT', () => {
+      expect(getTerraNativeDenom({ chain: TerraChain, symbol: 'EUT', ticker: 'EUT', synth: false })).toEqual('ueur')
+    })
+
     it('BTC', () => {
       expect(getTerraNativeDenom(AssetBTC)).toBeNull()
+    })
+  })
+
+  describe('getTerraNativeAsset', () => {
+    it('LUNA', () => {
+      expect(getTerraNativeAsset('uluna')).toEqual(AssetLUNA)
+    })
+    it('UST', () => {
+      expect(getTerraNativeAsset('uusd')).toEqual(AssetUST)
+    })
+    it('AUT', () => {
+      expect(getTerraNativeAsset('uaud')).toEqual({ chain: TerraChain, symbol: 'AUT', ticker: 'AUT', synth: false })
+    })
+    it('EUT', () => {
+      expect(getTerraNativeAsset('ueur')).toEqual({ chain: TerraChain, symbol: 'EUT', ticker: 'EUT', synth: false })
+    })
+    it('unknown', () => {
+      expect(getTerraNativeAsset('unknown')).toBeNull()
     })
   })
 

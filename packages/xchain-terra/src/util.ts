@@ -1,45 +1,46 @@
 import { Coins, CreateTxOptions, LCDClient, MsgSend } from '@terra-money/terra.js'
 import { Address, Network } from '@xchainjs/xchain-client'
 import type { RootDerivationPaths } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, TerraChain, assetToString, baseAmount, bn, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, assetToString, baseAmount, bn, eqAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 
-import { AssetLUNA, AssetUST, DEFAULT_GAS_ADJUSTMENT, TERRA_DECIMAL } from './const'
+import { AssetUST, DEFAULT_GAS_ADJUSTMENT, TERRA_DECIMAL, getTerraNativeAssetsMap } from './const'
 import type { ClientConfig, ClientConfigs, GasPrices, GasPricesResponse, TerraNativeDenom } from './types'
 import * as Terra from './types/terra'
 
 export const isAssetUST = (asset: Asset) => eqAsset(asset, AssetUST)
 export const denomUST: TerraNativeDenom = 'uusd'
 
+/**
+ * Checks wether asset is a Terra Native asset
+ */
 export const isTerraNativeAsset = (asset: Asset): boolean => {
-  // Special case UST ()
-  if (isAssetUST(asset)) return true
-  // TerraChain only
-  if (asset.chain !== TerraChain) return false
-  // No synth only
-  if (asset.synth) return false
-
-  return Terra.isTerraNativeDenom(`u${asset.symbol.toLowerCase()}`)
-}
-
-export const getTerraNativeAsset = (denom: string): Asset => {
-  if (denom.toLowerCase().includes('luna')) return AssetLUNA
-
-  if (denom === denomUST) return AssetUST
-
-  const symbol = denom.toUpperCase().slice(1)
-  return {
-    chain: TerraChain,
-    symbol,
-    ticker: symbol,
-    synth: false,
+  for (const v of getTerraNativeAssetsMap().values()) {
+    if (eqAsset(v, asset)) return true
   }
+  return false
 }
 
+/**
+ * Returns Terra Native asset from denom
+ */
+export const getTerraNativeAsset = (denom: string): Asset | null => {
+  if (Terra.isTerraNativeDenom(denom)) {
+    const asset = getTerraNativeAssetsMap().get(denom)
+    return asset || null
+  }
+  return null
+}
+
+/**
+ * Returns Terra Native asset from denom
+ */
 export const getTerraNativeDenom = (asset: Asset): TerraNativeDenom | null => {
-  const denom = isAssetUST(asset) ? denomUST : `u${asset.symbol.toLowerCase()}`
-  return Terra.isTerraNativeDenom(denom) ? denom : null
+  for (const [key, value] of getTerraNativeAssetsMap().entries()) {
+    if (eqAsset(value, asset)) return key
+  }
+  return null
 }
 
 export const getDefaultRootDerivationPaths = (): RootDerivationPaths => ({

@@ -32,7 +32,7 @@ export type ChainIds = Record<Network, ChainId>
  * Denominatioins of all Terra native assets
  * Based on https://github.com/terra-kitchen/utils/blob/main/src/currencies.json
  */
-const TERRA_NATIVE_DENOMS = [
+export const TERRA_NATIVE_DENOMS = [
   'uluna',
   'usdr',
   'uaed',
