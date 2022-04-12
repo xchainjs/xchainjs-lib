@@ -1,5 +1,5 @@
-import axios from 'axios'
-// eslint-disable-next-line ordered-imports/ordered-imports
+import { Network } from '@xchainjs/xchain-client'
+const axios = require('axios')
 import { Chain } from './chain'
 import { InboundDetail, ServerInboundDetail } from './types'
 
@@ -23,35 +23,43 @@ import { InboundDetail, ServerInboundDetail } from './types'
  */
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const midgardBaseUrls = {
-  primary: 'https://midgard.ninerealms.com',
-  backup: 'https://midgard.thorswap.net',
+const midgardBaseUrls: { [key: string]: Array<string> } = {
+  [Network.Testnet]: ['https://testnet.midgard.thorchain.info'],
+  [Network.Mainnet]: ['https://midgard.ninerealms.com', 'https://midgard.thorswap.net'],
 }
 
-export const getMimirDetails = async () => {
+export const getMimirDetails = async (network = Network.Mainnet) => {
   const path = '/v2/thorchain/mimir'
-  try {
-    const { data } = await axios.get(`${midgardBaseUrls.primary}${path}`)
-    return data
-  } catch (e) {
-    const { data } = await axios.get(`${midgardBaseUrls.backup}${path}`)
-    return data
+
+  for (const baseUrl of midgardBaseUrls[network]) {
+    try {
+      const { data } = await axios.get(`${baseUrl}${path}`)
+      return data
+    } catch (e) {
+      console.error(e)
+    }
   }
+
+  throw new Error('Midgard not responding')
 }
 
-export const getAllInboundDetails = async (): Promise<Array<ServerInboundDetail>> => {
+export const getAllInboundDetails = async (network = Network.Mainnet): Promise<Array<ServerInboundDetail>> => {
   const path = '/v2/thorchain/inbound_addresses'
-  try {
-    const { data } = await axios.get(`${midgardBaseUrls.primary}${path}`)
-    return data
-  } catch (e) {
-    const { data } = await axios.get(`${midgardBaseUrls.backup}${path}`)
-    return data
+
+  for (const baseUrl of midgardBaseUrls[network]) {
+    try {
+      const { data } = await axios.get(`${baseUrl}${path}`)
+      return data
+    } catch (e) {
+      console.error(e)
+    }
   }
+
+  throw new Error('Midgard not responding')
 }
 
-export const getInboundDetails = async (chain: Chain): Promise<InboundDetail> => {
-  const [mimirDetails, allInboundDetails] = await Promise.all([getMimirDetails(), getAllInboundDetails()])
+export const getInboundDetails = async (chain: Chain, network = Network.Mainnet): Promise<InboundDetail> => {
+  const [mimirDetails, allInboundDetails] = await Promise.all([getMimirDetails(network), getAllInboundDetails(network)])
   const inboundDetail = allInboundDetails?.find((item: ServerInboundDetail) => item.chain === chain)
 
   const details: InboundDetail = {

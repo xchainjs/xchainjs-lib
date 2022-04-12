@@ -31,10 +31,12 @@
     "prepublishOnly": "yarn build"
   },
   "peerDependencies": {
-    "bignumber.js": "9.x"
+    "bignumber.js": "9.x",
+    "@xchainjs/xchain-client": "^0.11.1"
   },
   "devDependencies": {
-    "bignumber.js": "^9.0.0"
+    "bignumber.js": "^9.0.0",
+    "@xchainjs/xchain-client": "^0.11.1"
   },
   "publishConfig": {
     "access": "public"
