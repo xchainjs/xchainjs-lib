@@ -1,5 +1,5 @@
 import { FeeType, Network } from '@xchainjs/xchain-client'
-import { Asset, assetAmount, AssetBNB, assetToBase, baseAmount, BNBChain, Chain } from '@xchainjs/xchain-util'
+import { Asset, AssetBNB, BNBChain, Chain, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { Client as BinanceClient } from '../src/client'
