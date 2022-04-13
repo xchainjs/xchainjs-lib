@@ -1,0 +1,35 @@
+{
+  "name": "@xchainjs/xchain-swap",
+  "version": "1.0.0",
+  "description": "Custom swap module that utilizes Asgardex-util to perfrom smart swaps",
+  "keywords": [
+    "THORChain",
+    "XChain"
+  ],
+  "author": "THORChain",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "bugs": {
+    "url": "https://github.com/xchainjs/xchainjs-lib/issues"
+  },
+  "dependencies": {
+    "@thorchain/asgardex-util": "^0.10.0"
+  }
+}
