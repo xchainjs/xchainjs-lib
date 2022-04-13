@@ -444,14 +444,12 @@ describe('Client Test', () => {
         sender: terraClient.getAddress(0),
         recipient: 'terra1f5p4qskczjt6hww3c3c04vhpy7uwq76upufkcy',
       })
-
       // gas price (uluna) * estimated gas (tx) * DEFAULT_GAS_ADJUSTMENT
       // 0.01133 * 100000 * 2
       expect(result.average.amount().toString()).toEqual('2266')
     })
 
     it('USDT fees', async () => {
-      console.log('terraClient - network:', terraClient.getNetwork())
       const result = await terraClient.getFees({
         asset: AssetUST,
         feeAsset: AssetUST,

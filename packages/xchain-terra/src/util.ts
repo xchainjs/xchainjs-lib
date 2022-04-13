@@ -1,7 +1,7 @@
 import { Coins, CreateTxOptions, LCDClient, MsgSend } from '@terra-money/terra.js'
 import { Address, Network } from '@xchainjs/xchain-client'
 import type { RootDerivationPaths } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, assetToString, baseAmount, bn, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, assetToString, baseAmount, bn, bnOrZero, eqAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 
@@ -135,7 +135,7 @@ const cachedGasPricesTime: Record<Network, number> = {
 export const getGasPrices = async ({
   url,
   network,
-  cacheTime = 1000 * 60 * 60 * 60 /* one hour */,
+  cacheTime = 1000 * 60 * 60 /* one hour */,
 }: {
   url: string
   network: Network
@@ -143,13 +143,15 @@ export const getGasPrices = async ({
 }): Promise<GasPrices> => {
   // Current time
   const now = new Date().getTime()
-  // Use cache
-  if (cachedGasPrices && now - cachedGasPricesTime[network] <= cacheTime) {
-    cachedGasPricesTime[network] = now
+  // Check to use cache (YES if prices are requested before + still in cacheTime)
+  if (!!cachedGasPrices?.size && now - cachedGasPricesTime[network] <= cacheTime) {
     return cachedGasPrices
   }
+  // update cache time
+  cachedGasPricesTime[network] = now
 
   const gasPricesUrl = `${url}/v1/txs/gas_prices`
+
   const { data: gasPriceNumbers } = await axios.get<GasPricesResponse>(gasPricesUrl)
 
   const gasPrices = Object.entries(gasPriceNumbers)
@@ -158,9 +160,8 @@ export const getGasPrices = async ({
     // transfrom prices `number` -> `BaseAmount`
     .map<[TerraNativeDenom, BigNumber]>(([denom, price]) => [denom as TerraNativeDenom, bn(price)])
 
-  const gasPricesMap = new Map(gasPrices)
-  cachedGasPrices = gasPricesMap
-  return gasPricesMap
+  cachedGasPrices = new Map(gasPrices)
+  return cachedGasPrices
 }
 
 /**
@@ -178,7 +179,7 @@ export const getGasPriceByAsset = async ({
   url,
   asset,
   network,
-  cacheTime = 1000 * 60 * 60 * 60 /* one hour */,
+  cacheTime = 1000 * 60 * 60 /* one hour */,
 }: {
   url: string
   asset: Asset
@@ -228,9 +229,12 @@ export const getAccount = async (address: Address, lcd: LCDClient): Promise<Terr
 /**
  * Estimates fee paid by given Terra native (fee) asset
  *
+ * Note: LCDClient (via `terra.js`) supports already an `estimateFee` function, but it requires another request to get data of `AccountInfo`
+ * However, there is a more simple way (very similar to `terra-station` - check its `src/txs/Tx.tsx` + `src/txs/send/SendForm.tsx`)
+ *
  * Steps:
  * 1. Get gas prices
- * 2. Get account info
+ * 2. Estimate gas
  * 3. Estimate fee
  *
  * @returns {BaseAmount} Fee amount
@@ -287,26 +291,13 @@ export const getEstimatedFee = async ({
     gasAdjustment: DEFAULT_GAS_ADJUSTMENT,
   }
 
-  // accountInfo
-  // https://github.com/terra-money/terra.js/blob/0af752555245a309a4cb590e0750ee187bee1f78/src/client/lcd/api/AuthAPI.ts#L17
-  const { sequence: sequenceNumber, publicKey } = await getAccount(sender, lcd)
+  // create Tx
+  // https://github.com/terra-money/terra.js/blob/0af752555245a309a4cb590e0750ee187bee1f78/src/client/lcd/api/TxAPI.ts#L213
+  const unsignedTx = await lcd.tx.create([{ address: sender }], options)
 
-  // estimateFee
-  // https://github.com/terra-money/terra.js/blob/0af752555245a309a4cb590e0750ee187bee1f78/src/client/lcd/api/TxAPI.ts#L275
-  const fee = await lcd.tx.estimateFee(
-    [
-      {
-        sequenceNumber,
-        publicKey,
-      },
-    ],
-    options,
-  )
+  const estimatedGas = bnOrZero(unsignedTx.auth_info.fee.gas_limit)
 
-  // Get first fee, because we handle one fee here only
-  const { denom: _feeDenom, amount: feeAmount } = fee.toData().amount[0]
+  const fee = calcFee(estimatedGas, gasPrice.price)
 
-  if (feeDenom !== _feeDenom) throw Error(`Fee denom mismatched! Got ${feeDenom}, but LCDClient returns ${_feeDenom}`)
-
-  return baseAmount(feeAmount)
+  return fee
 }
