@@ -1,4 +1,5 @@
-import type { Network } from '@xchainjs/xchain-client'
+import type { Address, Network } from '@xchainjs/xchain-client'
+import { Asset, BaseAmount } from '@xchainjs/xchain-util/lib'
 
 export type SearchTxParams = {
   messageAction?: string
@@ -28,3 +29,12 @@ export type ClientConfig = {
 }
 
 export type ClientConfigs = Record<Network, ClientConfig>
+
+export type FeeParams = {
+  asset: Asset
+  feeAsset: Asset
+  amount: BaseAmount
+  recipient: Address
+  sender: Address
+  memo?: string
+}

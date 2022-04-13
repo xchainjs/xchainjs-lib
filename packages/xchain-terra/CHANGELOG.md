@@ -1,8 +1,25 @@
-# v.0.1.0-alpha.6 (2022-xx-xx)
+# v.0.1.0-alpha.6 (2022-04-13)
+
+## Add
+
+- Helper `getEstimatedFee` to estimate fees based on any (not just LUNA) Terra native asset
+- More fee / account helpers: `getAccount`, `calcFee`, `gasPriceToCoins`, `gasPricesToCoins`, `getGasPrices`, `getGasPriceByAsset`
+- More asset helpers: `isAssetUST`, `getTerraNativeAsset`, `isTerraNativeAsset`, `getTerraNativeDenom`
+- Add `Denom` + `FeesResponse` types
+
+## Update
+
+- Improve `isTerraNativeAsset` check
 
 ## Fix
 
+- Fix fee convertion #544
 - Fix import of `xchain-client|util`
+
+## Breaking change
+
+- Rename `getTerraMicroDenom` -> `getTerraNativeDenom`
+- Remove `TerraNativeAsset` + `DENOM_MAP` in favour of `getTerraNativeAsset`
 
 # v.0.1.0-alpha.5 (2022-04-03)
 
