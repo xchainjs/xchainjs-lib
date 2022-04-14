@@ -3,13 +3,22 @@ import { PoolData } from './swap'
 import BigNumber from 'bignumber.js'
 
 export type UnitData = {
-  stakeUnits: BaseAmount
+  liquidityUnits: BaseAmount
   totalUnits: BaseAmount
 }
 
 export type LiquidityData = {
   asset: BaseAmount
   rune: BaseAmount
+}
+
+export type Block = {
+  current: number
+  lastAdded: number
+}
+
+export type Coverage = {
+  poolRatio: BigNumber
 }
 
 export const getLiquidityUnits = (liquidity: LiquidityData, pool: PoolData): BaseAmount => {
@@ -30,7 +39,7 @@ export const getLiquidityUnits = (liquidity: LiquidityData, pool: PoolData): Bas
 
 export const getPoolShare = (unitData: UnitData, pool: PoolData): LiquidityData => {
   // formula: (rune * part) / total; (asset * part) / total
-  const units = unitData.stakeUnits.amount()
+  const units = unitData.liquidityUnits.amount()
   const total = unitData.totalUnits.amount()
   const R = pool.runeBalance.amount()
   const T = pool.assetBalance.amount()
@@ -43,10 +52,10 @@ export const getPoolShare = (unitData: UnitData, pool: PoolData): LiquidityData 
   return LiquidityData
 }
 
-export const getSlipOnLiquidity = (stake: LiquidityData, pool: PoolData): BigNumber => {
+export const getSlipOnLiquidity = (liquidity: LiquidityData, pool: PoolData): BigNumber => {
   // formula: (t * R - T * r)/ (T*r + R*T)
-  const r = stake.rune.amount()
-  const t = stake.asset.amount()
+  const r = liquidity.rune.amount()
+  const t = liquidity.asset.amount()
   const R = pool.runeBalance.amount()
   const T = pool.assetBalance.amount()
   const numerator = t.times(R).minus(T.times(r))
@@ -55,5 +64,18 @@ export const getSlipOnLiquidity = (stake: LiquidityData, pool: PoolData): BigNum
   return result
 }
 
-
-export const 
+// Blocks for full protection 144000 // 100 days
+export const getLiquidityProtectionData = (liquidity: LiquidityData, block: Block): BigNumber => {
+  // formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
+  const R0 = liquidity.rune.amount() // symetrical value of rune deposit
+  const A0 = liquidity.asset.amount() // symetrical value of asset deposit
+  //const R1 = // rune to redeem
+  //const A1 =  // asset to redeem
+  //const coverage = ((A0.times(R1).div(A1).plus(R0)).minus(R1.plus(R1)))
+  const currentHeight = block.current
+  const heightLastAdded = block.lastAdded
+  const blocksforfullprotection = 1440000
+  const protectionProgress = (currentHeight - heightLastAdded)/blocksforfullprotection
+  const result = (protectionProgress * coverage) // impermanent loss protection result
+  return result
+}
