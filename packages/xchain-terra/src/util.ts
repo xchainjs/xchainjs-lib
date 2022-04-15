@@ -259,7 +259,7 @@ export const getEstimatedFee = async ({
   feeAsset: Asset
   memo?: string
   network: Network
-}): Promise<BaseAmount> => {
+}): Promise<Terra.EstimatedFee> => {
   const denom = getTerraNativeDenom(asset)
   if (!denom)
     throw Error(`Invalid asset ${assetToString(asset)} - Terra native asset are supported to estimate fee only`)
@@ -274,7 +274,7 @@ export const getEstimatedFee = async ({
   const gasPrice = await getGasPriceByAsset({ url: cosmosAPIURL, network, asset: feeAsset /* cacheTime: 0 */ })
   if (!gasPrice) throw Error(`Could not get gas price for ${assetToString(feeAsset)}`)
 
-  const msgAmount: Coins.Input = { [denom]: amount.amount().toString() }
+  const msgAmount: Coins.Input = { [denom]: amount.amount().toFixed() }
   const msg: MsgSend = new MsgSend(sender, recipient, msgAmount)
 
   const lcd = new LCDClient({
@@ -299,5 +299,5 @@ export const getEstimatedFee = async ({
 
   const fee = calcFee(estimatedGas, gasPrice.price)
 
-  return fee
+  return { amount: fee, asset: feeAsset, gasLimit: estimatedGas }
 }

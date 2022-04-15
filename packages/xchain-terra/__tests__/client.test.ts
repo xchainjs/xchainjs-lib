@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, eqAsset } from '@xchainjs/xchain-util'
 
 import mockTerraApi from '../__mocks__/terra'
 import { Client } from '../src/client'
@@ -434,6 +434,75 @@ describe('Client Test', () => {
   //   terraClient.setNetwork('mainnet' as Network)
   //   expect(terraClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash')
   // })
+
+  describe('getEstimatedFee', () => {
+    it('LUNA asset + fees', async () => {
+      const feeAsset = AssetLUNA
+      const { amount, asset, gasLimit } = await terraClient.getEstimatedFee({
+        asset: AssetLUNA,
+        feeAsset,
+        amount: assetToBase(assetAmount(1)),
+        sender: terraClient.getAddress(0),
+        recipient: 'terra1f5p4qskczjt6hww3c3c04vhpy7uwq76upufkcy',
+      })
+      // gas price (uluna) * estimated gas (tx) * DEFAULT_GAS_ADJUSTMENT
+      // 0.01133 * 100000 * 2
+      expect(amount.amount().toString()).toEqual('2266')
+      expect(eqAsset(asset, feeAsset)).toBeTruthy()
+      expect(gasLimit.toFixed()).toEqual('200000')
+    })
+
+    it('LUNA asset + USDT fees', async () => {
+      const feeAsset = AssetUST
+      const { amount, asset, gasLimit } = await terraClient.getEstimatedFee({
+        asset: AssetLUNA,
+        feeAsset,
+        amount: assetToBase(assetAmount(1)),
+        sender: terraClient.getAddress(0),
+        recipient: 'terra1f5p4qskczjt6hww3c3c04vhpy7uwq76upufkcy',
+      })
+
+      // gas price (uusd) * estimated gas (tx) * DEFAULT_GAS_ADJUSTMENT
+      // 0.15 * 100000 * 2
+      expect(amount.amount().toString()).toEqual('30000')
+      expect(eqAsset(asset, feeAsset)).toBeTruthy()
+      expect(gasLimit.toFixed()).toEqual('200000')
+    })
+
+    it('USDT asset + fees', async () => {
+      const feeAsset = AssetUST
+      const { amount, asset, gasLimit } = await terraClient.getEstimatedFee({
+        asset: AssetUST,
+        feeAsset,
+        amount: assetToBase(assetAmount(1)),
+        sender: terraClient.getAddress(0),
+        recipient: 'terra1f5p4qskczjt6hww3c3c04vhpy7uwq76upufkcy',
+      })
+
+      // gas price (uusd) * estimated gas (tx) * DEFAULT_GAS_ADJUSTMENT
+      // 0.15 * 100000 * 2
+      expect(amount.amount().toString()).toEqual('30000')
+      expect(eqAsset(asset, feeAsset)).toBeTruthy()
+      expect(gasLimit.toFixed()).toEqual('200000')
+    })
+
+    it('USDT asset + LUNA fees', async () => {
+      const feeAsset = AssetLUNA
+      const { amount, asset, gasLimit } = await terraClient.getEstimatedFee({
+        asset: AssetUST,
+        feeAsset,
+        amount: assetToBase(assetAmount(1)),
+        sender: terraClient.getAddress(0),
+        recipient: 'terra1f5p4qskczjt6hww3c3c04vhpy7uwq76upufkcy',
+      })
+
+      // gas price (uluna) * estimated gas (tx) * DEFAULT_GAS_ADJUSTMENT
+      // 0.01133 * 100000 * 2
+      expect(amount.amount().toString()).toEqual('2266')
+      expect(eqAsset(asset, feeAsset)).toBeTruthy()
+      expect(gasLimit.toFixed()).toEqual('200000')
+    })
+  })
 
   describe('getFees', () => {
     it('LUNA fees', async () => {

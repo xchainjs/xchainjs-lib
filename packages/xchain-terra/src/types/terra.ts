@@ -1,5 +1,6 @@
 import { PublicKey } from '@terra-money/terra.js'
 import { Network } from '@xchainjs/xchain-client'
+import { Asset, BaseAmount } from '@xchainjs/xchain-util/lib'
 import BigNumber from 'bignumber.js'
 
 /**
@@ -211,3 +212,15 @@ export type GasPrices = Map<TerraNativeDenom, BigNumber>
  * Includes sequence, account number and public key
  */
 export type Account = { sequence: number; number: number; publicKey: PublicKey | null }
+
+/**
+ * Estimated fee
+ */
+export type EstimatedFee = {
+  /* Fee amount */
+  amount: BaseAmount
+  /* Fee asset */
+  asset: Asset
+  /* Gas limit asset */
+  gasLimit: BigNumber
+}

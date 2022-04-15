@@ -1,4 +1,15 @@
-import { AccAddress, Coin, Coins, LCDClient, MnemonicKey, MsgMultiSend, MsgSend, TxInfo } from '@terra-money/terra.js'
+import {
+  AccAddress,
+  Coin,
+  Coins,
+  CreateTxOptions,
+  Fee,
+  LCDClient,
+  MnemonicKey,
+  MsgMultiSend,
+  MsgSend,
+  TxInfo,
+} from '@terra-money/terra.js'
 import { BaseXChainClient, FeeType, Network, TxType, singleFee } from '@xchainjs/xchain-client'
 import type {
   Balance,
@@ -16,6 +27,7 @@ import { Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import { AssetLUNA, TERRA_DECIMAL } from './const'
+import { EstimatedFee } from './types'
 import type { ClientConfig, ClientParams, FeeParams } from './types/client'
 import {
   getDefaultClientConfig,
@@ -31,6 +43,7 @@ import {
 export interface TerraClient {
   // `getFees` of `BaseXChainClient` needs to be overridden
   getFees(params: FeeParams): Promise<Fees>
+  getEstimatedFee(params: FeeParams): Promise<EstimatedFee>
 }
 
 /**
@@ -72,19 +85,19 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
   }
 
   /**
-   * Get fees.
+   * Get estimated fee.
    *
    * @param {Asset} feeAsset Asset to pay fees
    * @param {CreateTxOptions} options Options to create a simulated tx to estimate fees
-   * @returns {Fees} The average/fast/fastest fees.
+   * @returns {EstimatedFee} Estimated fee
    */
-  async getFees(params?: FeeParams): Promise<Fees> {
+  async getEstimatedFee(params: FeeParams): Promise<EstimatedFee> {
     if (!params) throw new Error('Params need to be passed')
 
     const { feeAsset, sender, recipient, asset, amount, memo } = params
 
     const config = this.config[this.network]
-    const feeAmount = await getEstimatedFee({
+    return await getEstimatedFee({
       chainId: config.chainID,
       cosmosAPIURL: config.cosmosAPIURL,
       sender,
@@ -95,6 +108,17 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
       memo,
       network: this.network,
     })
+  }
+
+  /**
+   * Get fees.
+   *
+   * @param {FeeParams} Fee params (required - they are defined as optional function parameters to fit XChainClient interface only
+   * @returns {Fees} The average/fast/fastest fees.
+   */
+  async getFees(params?: FeeParams): Promise<Fees> {
+    if (!params) throw new Error('Params need to be passed')
+    const { amount: feeAmount } = await this.getEstimatedFee(params)
     return singleFee(FeeType.PerByte, feeAmount)
   }
 
@@ -165,20 +189,47 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
     return this.convertTxInfoToTx(txInfo)
   }
 
-  async transfer({ walletIndex = 0, asset = AssetLUNA, amount, recipient, memo }: TxParams): Promise<string> {
+  /**
+   * Transfer
+   * Note: For paying fees in other than Terra native `Asset`, `estimatedFee` is required. Use `getEstimatedFee` from `utils` to get this data.
+   */
+  async transfer({
+    walletIndex = 0,
+    asset = AssetLUNA,
+    amount,
+    recipient,
+    memo,
+    estimatedFee,
+  }: TxParams & { estimatedFee?: EstimatedFee }): Promise<string> {
     if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
 
     const terraDenom = getTerraNativeDenom(asset)
-    if (!terraDenom) throw Error(`Invalid asset ${assetToString(asset)} - Terra native asset are supported only`)
+    if (!terraDenom)
+      throw Error(`Invalid asset ${assetToString(asset)} - Only Terra native asset are supported to transfer`)
 
     const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
     const wallet = this.lcdClient.wallet(mnemonicKey)
     const amountToSend: Coins.Input = {
-      [terraDenom]: `${amount.amount().toFixed()}`,
+      [terraDenom]: amount.amount().toFixed(),
     }
     const send = new MsgSend(wallet.key.accAddress, recipient, amountToSend)
-    const tx = await wallet.createAndSignTx({ msgs: [send], memo })
-    const result = await this.lcdClient.tx.broadcast(tx)
+
+    const txOptions: CreateTxOptions = { msgs: [send], memo }
+
+    if (estimatedFee) {
+      const { amount: feeAmount, asset: feeAsset, gasLimit } = estimatedFee
+      const feeDenom = getTerraNativeDenom(feeAsset)
+      if (!feeDenom)
+        throw Error(`Invalid asset ${assetToString(feeAsset)} - Only Terra native assets are supported to pay fees`)
+
+      const gasFee: Coin.Data = { amount: feeAmount.amount().toFixed(), denom: feeDenom }
+      const gasCoins = new Coins([Coin.fromData(gasFee)])
+      txOptions.fee = new Fee(gasLimit.toNumber(), gasCoins)
+    }
+
+    const tx = await wallet.createAndSignTx(txOptions)
+    // broadcast (`sync` mode)
+    const result = await this.lcdClient.tx.broadcastSync(tx)
     return result.txhash
   }
 

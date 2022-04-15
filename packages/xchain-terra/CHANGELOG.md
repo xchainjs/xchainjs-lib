@@ -1,3 +1,14 @@
+# v.0.1.0-alpha.7 (2022-04-15)
+
+## Add
+
+- Add optional `estimatedFee` param to `transfer` to pay fees in any other Terra native asset
+- Add `getEstimatedFee` to `Client`
+
+## Breaking change
+
+- `getEstimatedFee` (in `util`) returns `Promise<EstimatedFee>`
+
 # v.0.1.0-alpha.6 (2022-04-13)
 
 ## Add
