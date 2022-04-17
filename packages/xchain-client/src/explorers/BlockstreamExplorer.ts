@@ -1,7 +1,7 @@
 /* eslint-disable ordered-imports/ordered-imports */
 import { Chain } from '@xchainjs/xchain-util/lib'
 
-import { BaseExplorer } from '../Explorer'
+import { BaseExplorer } from './Explorer'
 
 import { Network } from '../types'
 

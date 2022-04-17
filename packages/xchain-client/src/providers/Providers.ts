@@ -51,6 +51,16 @@ const DefaultProviders: ProvidersType = {
     getTransactions: [sochainProviderBTC],
     getTransactionData: [sochainProviderBTC],
   },
+  TERRA: {
+    getBalance: [],
+    getTransactions: [],
+    getTransactionData: [],
+  },
+  DOGE: {
+    getBalance: [],
+    getTransactions: [],
+    getTransactionData: [],
+  },
 }
 
 export { DefaultProviders }

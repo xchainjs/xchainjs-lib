@@ -1,6 +1,6 @@
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
-import { Explorer } from './Explorer'
+import { Explorer } from './explorers/Explorer'
 import { ProviderParams } from './providers/Provider'
 
 export type Address = string
@@ -95,35 +95,37 @@ export type XChainClientParams = {
   providers?: ProviderParams
   rootDerivationPaths?: RootDerivationPaths
 }
-
-export interface XChainClient {
-  setNetwork(net: Network): void
-  getNetwork(): Network
-
-  setPhrase(phrase: string, walletIndex: number): Address
-  purgeClient(): void
-
-  validateAddress(address: string): boolean
+export interface WalletProvider {
   getAddress(walletIndex?: number): Address
-
-  sign(params: TxParams): Promise<SignedTx>
+  signTx(params: TxParams): Promise<SignedTx>
+}
+export interface XChainClient {
+  // chain specific addres validation
+  validateAddress(address: string): boolean
 
   // ===================================
-  // implemented by various online providers
+  // Implemented by WalletProvider
   // ===================================
-  // TODO (@xchain-team|@veado) Change params to be an object to be extendable more easily
-  // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
+  getAddress(walletIndex?: number): Address
+  signTx(params: TxParams): Promise<SignedTx>
+
+  // ===================================
+  // implemented by chain specific OnlineProviders
+  // ===================================
   getBalance(address: Address, assets?: Asset[]): Promise<Balance[]>
   getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   getTransactionData(txId: string, assetAddress?: Address): Promise<Tx>
   getFees(): Promise<Fees>
   broadcastTx(params: SignedTx): Promise<TxHash>
 
-  // convenience method that does a sign + broadcast
+  // ===================================
+  // convenience method
+  //  sign() + broadcast() using Providers
+  // ===================================
   transfer(params: TxParams): Promise<TxHash>
 
   // ===================================
-  // implemented by various other online providers
+  // implemented by chain specific OnlineExplorers
   // ===================================
   getExplorerAddressUrl(address: Address): string
   getExplorerTxUrl(txID: string): string

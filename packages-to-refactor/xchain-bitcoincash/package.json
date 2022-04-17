@@ -1,0 +1,62 @@
+{
+  "name": "@xchainjs/xchain-bitcoincash",
+  "version": "0.13.0",
+  "description": "Custom bitcoincash client and utilities used by XChainJS clients",
+  "keywords": [
+    "XChain",
+    "Bitcoin",
+    "Cash"
+  ],
+  "author": "XChainJS",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
+  "scripts": {
+    "clean": "rimraf lib/**",
+    "build": "yarn clean && rollup -c",
+    "test": "jest",
+    "lint": "eslint \"{src,__tests__,__mocks__}/**/*.ts\" --fix --max-warnings 0",
+    "prepublishOnly": "yarn build",
+    "postversion": "git push --follow-tags"
+  },
+  "dependencies": {
+    "uniqid": "^5.4.0"
+  },
+  "devDependencies": {
+    "@psf/bitcoincashjs-lib": "^4.0.2",
+    "@types/bchaddrjs": "0.4.0",
+    "@types/uniqid": "^5.3.1",
+    "@xchainjs/xchain-client": "^0.11.1",
+    "@xchainjs/xchain-crypto": "^0.2.6",
+    "@xchainjs/xchain-util": "^0.5.1",
+    "axios": "^0.25.0",
+    "axios-mock-adapter": "^1.20.0",
+    "bchaddrjs": "^0.5.2",
+    "coinselect": "3.1.12"
+  },
+  "peerDependencies": {
+    "@psf/bitcoincashjs-lib": "^4.0.2",
+    "@xchainjs/xchain-client": "^0.11.1",
+    "@xchainjs/xchain-crypto": "^0.2.6",
+    "@xchainjs/xchain-util": "^0.5.1",
+    "axios": "^0.25.0",
+    "bchaddrjs": "^0.5.2",
+    "coinselect": "3.1.12"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -19,9 +19,9 @@ import {
   XChainClientParams,
 } from './types'
 
-import { Explorer } from './Explorer'
+import { Explorer } from './explorers/Explorer'
 
-import { Explorers } from './Explorers'
+import { Explorers } from './explorers/Explorers'
 import {
   CanGetBalance,
   CanGetTransactionData,
@@ -71,6 +71,9 @@ export abstract class BaseXChainClient implements XChainClient {
       }
       this.phrase = params.phrase
     }
+  }
+  signTx(params: TxParams): Promise<SignedTx> {
+    throw new Error('Method not implemented.')
   }
 
   overrideDefaultProvidersMap(override: ProviderParams): ProviderMap {

@@ -1,0 +1,58 @@
+{
+  "name": "@xchainjs/xchain-polkadot",
+  "version": "0.9.1",
+  "description": "Custom Polkadot client and utilities used by XChainJS clients",
+  "keywords": [
+    "THORChain",
+    "XChain",
+    "Polkadot"
+  ],
+  "author": "THORChain",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
+  "scripts": {
+    "clean": "rimraf lib/**",
+    "build": "yarn clean && rollup -c",
+    "test": "jest --detectOpenHandles --runInBand --forceExit",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "prepublishOnly": "yarn build",
+    "start:example": "ts-node example/index.ts"
+  },
+  "devDependencies": {
+    "@polkadot/api": "^3.1.1",
+    "@polkadot/util": "^5.1.1",
+    "@types/big.js": "^4.0.5",
+    "@xchainjs/xchain-client": "^0.11.1",
+    "@xchainjs/xchain-crypto": "^0.2.4",
+    "@xchainjs/xchain-util": "^0.3.0",
+    "axios": "^0.25.0",
+    "jest-websocket-mock": "^2.2.0",
+    "mock-socket": "9.0.3",
+    "nock": "^13.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@polkadot/api": "^3.1.1",
+    "@polkadot/util": "^5.1.1",
+    "@xchainjs/xchain-client": "^0.11.1",
+    "@xchainjs/xchain-crypto": "^0.2.4",
+    "@xchainjs/xchain-util": "^0.3.0",
+    "axios": "^0.25.0"
+  }
+}
