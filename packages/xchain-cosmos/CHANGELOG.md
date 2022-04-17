@@ -1,3 +1,68 @@
+# v.0.17.0 (2022-03-23)
+
+## Update
+
+- upgraded to "@cosmos-client/core": "0.45.1"
+- client now extend BaseXChainClient
+
+## Breaking changes
+
+- Remove `minheight` and `maxheight` params from `CosmosSDKClient.searchTx` (params were removed from the API)
+
+# v.0.16.1 (2022-02-04)
+
+- Use latest axios@0.25.0
+- xchain-client@0.11.1
+- @xchainjs/xchain-util@0.5.1
+
+# v.0.16.0 (2022-02-02)
+
+## Breaking change
+
+- Remove `from_balance` from `TxOfflineParams`
+
+## Update
+
+- Use @xchainjs/xchain-util@0.5.0
+
+# v.0.15.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
+
+# v.0.14.0 (2021-12-15)
+
+### Update
+
+- [CosmosSDKClient] revert Extract `sign` and `broadcast` from `signAndBroadcast`
+- extract public part into `unsignedStdTxGet` to use it in `transfer` and `transferSignedOffline`
+
+### Add
+
+- `TxOfflineParams` types
+- `transferSignedOffline` functions
+
+# v.0.13.9 (2021-11-30)
+
+### Update
+
+- [CosmosSDKClient] Extract `sign` and `broadcast` from `signAndBroadcast`
+
+# v.0.13.8 (2021-10-31)
+
+### Update
+
+- Use `sync` instead of `block` mode for broadcasting txs
+
+# v.0.13.7 (2021-07-20)
+
+- cosmos 0.42.x has too many breaking changes that wren't caught in the last version, downgrade "cosmos-client": "0.39.2"
+
+# v.0.13.6 (2021-07-18)
+
+- upgraded "cosmos-client": "0.42.7"
+
 # v.0.13.5 (2021-07-07)
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`

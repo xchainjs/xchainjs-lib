@@ -15,6 +15,12 @@ Following peer dependencies have to be installed into your project. These are no
 ```
 yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios ethers
 ```
+## Documentation
+
+### [`xchain ethereum`](http://docs.xchainjs.org/xchain-client/xchain-ethereum/)
+[`How xchain-ethereum works`](http://docs.xchainjs.org/xchain-client/xchain-ethereum/how-it-works.html)\
+[`How to use xchain-ethereum`](http://docs.xchainjs.org/xchain-client/xchain-ethereum/how-to-use.html)
+
 
 ## Service Providers
 
@@ -32,4 +38,4 @@ This package uses the following service providers:
 
 Etherscan API rate limits: https://info.etherscan.com/api-return-errors/
 
-- This package uses `etherjs` library, by defaut it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
+- This package uses `etherjs` library, by default it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)

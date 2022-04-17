@@ -1,40 +1,55 @@
 import { Network } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetBNB, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+// import nock from 'nock'
 
-import { AssetRune } from '../src/types'
+import { mockTendermintNodeInfo } from '../__mocks__/thornode-api'
 import {
-  getAsset,
+  assetFromDenom,
+  getChainId,
+  getChainIds,
+  getDefaultClientUrl,
   getDefaultExplorerUrls,
   getDenom,
-  getDenomWithChain,
   getDepositTxDataFromLogs,
   getExplorerAddressUrl,
   getExplorerTxUrl,
   getExplorerUrl,
+  getPrefix,
   getTxType,
+  isAssetRuneNative,
   isBroadcastSuccess,
 } from '../src/util'
 
 describe('thorchain/util', () => {
+  describe('isAssetRuneNative', () => {
+    it('true for AssetRuneNative', () => {
+      expect(isAssetRuneNative(AssetRuneNative)).toBeTruthy()
+    })
+    it('false for ETH', () => {
+      expect(isAssetRuneNative(AssetETH)).toBeFalsy()
+    })
+    it('false for ETH synth', () => {
+      expect(isAssetRuneNative({ ...AssetETH, synth: true })).toBeFalsy()
+    })
+  })
   describe('Denom <-> Asset', () => {
     describe('getDenom', () => {
       it('get denom for AssetRune', () => {
-        expect(getDenom(AssetRune)).toEqual('rune')
+        expect(getDenom(AssetRuneNative)).toEqual('rune')
       })
-    })
-
-    describe('getDenomWithChain', () => {
-      it('get denom for AssetRune', () => {
-        expect(getDenomWithChain(AssetRune)).toEqual('THOR.RUNE')
+      it('get denom for BNB synth', () => {
+        expect(getDenom({ ...AssetBNB, synth: true })).toEqual('bnb/bnb')
       })
     })
 
     describe('getAsset', () => {
-      it('get asset for rune', () => {
-        expect(getAsset('rune')).toEqual(AssetRune)
+      it('rune', () => {
+        expect(assetFromDenom('rune')).toEqual(AssetRuneNative)
+      })
+      it('bnb/bnb', () => {
+        expect(assetFromDenom('bnb/bnb')).toEqual({ ...AssetBNB, synth: true })
       })
     })
-
     describe('getTxType', () => {
       it('deposit', () => {
         expect(getTxType('CgkKB2RlcG9zaXQ=', 'base64')).toEqual('deposit')
@@ -46,6 +61,14 @@ describe('thorchain/util', () => {
 
       it('unknown', () => {
         expect(getTxType('"abc', 'base64')).toEqual('')
+      })
+    })
+
+    describe('getPrefix', () => {
+      it('should return the correct prefix based on network', () => {
+        expect(getPrefix(Network.Mainnet) === 'thor')
+        expect(getPrefix(Network.Stagenet) === 'sthor')
+        expect(getPrefix(Network.Testnet) === 'tthor')
       })
     })
   })
@@ -120,7 +143,7 @@ describe('thorchain/util', () => {
       expect(getExplorerUrl(getDefaultExplorerUrls(), 'mainnet' as Network)).toEqual('https://viewblock.io/thorchain')
     })
 
-    it('should retrun valid explorer address url', () => {
+    it('should return valid explorer address url', () => {
       expect(
         getExplorerAddressUrl({ urls: getDefaultExplorerUrls(), network: 'testnet' as Network, address: 'tthorabc' }),
       ).toEqual('https://viewblock.io/thorchain/address/tthorabc?network=testnet')
@@ -130,7 +153,7 @@ describe('thorchain/util', () => {
       ).toEqual('https://viewblock.io/thorchain/address/thorabc')
     })
 
-    it('should retrun valid explorer tx url', () => {
+    it('should return valid explorer tx url', () => {
       expect(
         getExplorerTxUrl({ urls: getDefaultExplorerUrls(), network: 'testnet' as Network, txID: 'txhash' }),
       ).toEqual('https://viewblock.io/thorchain/tx/txhash?network=testnet')
@@ -138,6 +161,81 @@ describe('thorchain/util', () => {
       expect(
         getExplorerTxUrl({ urls: getDefaultExplorerUrls(), network: 'mainnet' as Network, txID: 'txhash' }),
       ).toEqual('https://viewblock.io/thorchain/tx/txhash')
+    })
+  })
+
+  describe('getChainId', () => {
+    it('testnet', async () => {
+      const id = 'chain-id-testnet'
+      const url = getDefaultClientUrl().testnet.node
+      // Mock chain id
+      mockTendermintNodeInfo(url, {
+        default_node_info: {
+          network: id,
+        },
+      })
+      const result = await getChainId(url)
+
+      expect(result).toEqual(id)
+    })
+
+    it('stagenet', async () => {
+      const id = 'chain-id-stagenet'
+
+      const url = getDefaultClientUrl().stagenet.node
+      // Mock chain id
+      mockTendermintNodeInfo(url, {
+        default_node_info: {
+          network: id,
+        },
+      })
+      const result = await getChainId(url)
+
+      expect(result).toEqual(id)
+    })
+
+    it('mainnet', async () => {
+      const id = 'chain-id-mainnet'
+      const url = getDefaultClientUrl().mainnet.node
+      // Mock chain id
+      mockTendermintNodeInfo(url, {
+        default_node_info: {
+          network: id,
+        },
+      })
+      const result = await getChainId(url)
+
+      expect(result).toEqual(id)
+    })
+  })
+
+  describe('getChainIds', () => {
+    it('all chain ids', async () => {
+      const testnetId = 'chain-id-testnet'
+      const stagenetId = 'chain-id-stagenet'
+      const mainnetId = 'chain-id-mainnet'
+      // Mock chain ids
+      mockTendermintNodeInfo(getDefaultClientUrl().mainnet.node, {
+        default_node_info: {
+          network: mainnetId,
+        },
+      })
+      mockTendermintNodeInfo(getDefaultClientUrl().stagenet.node, {
+        default_node_info: {
+          network: stagenetId,
+        },
+      })
+      mockTendermintNodeInfo(getDefaultClientUrl().testnet.node, {
+        default_node_info: {
+          network: testnetId,
+        },
+      })
+
+      const result = await getChainIds(getDefaultClientUrl())
+
+      expect(result.mainnet).toEqual(mainnetId)
+      expect(result.stagenet).toEqual(stagenetId)
+      expect(result.testnet).toEqual(testnetId)
     })
   })
 })

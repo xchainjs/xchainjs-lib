@@ -1,8 +1,10 @@
-import axios from 'axios'
+import { TxHash } from '@xchainjs/xchain-client/lib'
+import axios, { AxiosResponse } from 'axios'
 
 import {
   AddressBalance,
   AddressParams,
+  BroadcastTxParams,
   RawTransaction,
   Transaction,
   TransactionsQueryParam,
@@ -16,7 +18,7 @@ type ErrorResponse = { error: unknown }
 /**
  * Check error response.
  *
- * @param {any} response The api resonse.
+ * @param {any} response The api response.
  * @returns {boolean}
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,7 +103,7 @@ export const getTransactions = async ({
  * @throws {"failed to query unspent transactions"} thrown if failed to query unspent transactions
  */
 export const getUnspentTransactions = async ({ haskoinUrl, address }: AddressParams): Promise<TxUnspent[]> => {
-  // Get transacton count for a given address.
+  // Get transaction count for a given address.
   const account = await getAccount({ haskoinUrl, address })
 
   // Set limit to the transaction count to be all the utxos.
@@ -127,4 +129,21 @@ export const getSuggestedFee = async (): Promise<number> => {
   } catch (error) {
     return DEFAULT_SUGGESTED_TRANSACTION_FEE
   }
+}
+
+/**
+ * Broadcast transaction.
+ *
+ * @see https://app.swaggerhub.com/apis/eligecode/blockchain-api/0.0.1-oas3#/blockchain/sendTransaction
+ *
+ * @param {BroadcastTxParams} params
+ * @returns {TxHash} Transaction hash.
+ */
+
+export const broadcastTx = async ({ txHex, haskoinUrl }: BroadcastTxParams): Promise<TxHash> => {
+  const {
+    data: { txid },
+  } = await axios.post<string, AxiosResponse<{ txid: string }>>(`${haskoinUrl}/transactions`, txHex)
+
+  return txid
 }

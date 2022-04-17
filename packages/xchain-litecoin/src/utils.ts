@@ -20,7 +20,7 @@ import { MIN_TX_FEE } from './const'
 import * as nodeApi from './node-api'
 import * as sochain from './sochain-api'
 import { BroadcastTxParams, UTXO } from './types/common'
-import { AddressParams, LtcAddressUTXO } from './types/sochain-api-types'
+import { AddressParams, LtcAddressUTXO, ScanUTXOParam } from './types/sochain-api-types'
 
 export const LTC_DECIMAL = 8
 
@@ -93,6 +93,7 @@ export function arrayAverage(array: number[]): number {
 export const ltcNetwork = (network: Network): Litecoin.Network => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return coininfo.litecoin.main.toBitcoinJS()
     case Network.Testnet:
       return coininfo.litecoin.test.toBitcoinJS()
@@ -135,26 +136,63 @@ export const validateAddress = (address: Address, network: Network): boolean => 
   }
 }
 
+// Stores list of txHex in memory to avoid requesting same data
+const txHexMap: Record<TxHash, string> = {}
+
+/**
+ * Helper to get `hex` of `Tx`
+ *
+ * It will try to get it from cache before requesting it from Sochain
+ */
+const getTxHex = async ({
+  txHash,
+  sochainUrl,
+  network,
+}: {
+  sochainUrl: string
+  txHash: TxHash
+  network: Network
+}): Promise<string> => {
+  // try to get hex from cache
+  const txHex = txHexMap[txHash]
+  if (!!txHex) return txHex
+  // or get it from Sochain
+  const { tx_hex } = await sochain.getTx({ hash: txHash, sochainUrl, network })
+  // cache it
+  txHexMap[txHash] = tx_hex
+  return tx_hex
+}
+
 /**
  * Scan UTXOs from sochain.
  *
- * @param {AddressParams} params
+ * @param {ScanUTXOParam} params
  * @returns {UTXO[]} The UTXOs of the given address.
  */
-export const scanUTXOs = async (params: AddressParams): Promise<UTXO[]> => {
-  const utxos: LtcAddressUTXO[] = await sochain.getUnspentTxs(params)
+export const scanUTXOs = async ({
+  sochainUrl,
+  network,
+  address,
+  withTxHex = false,
+}: ScanUTXOParam): Promise<UTXO[]> => {
+  const addressParam: AddressParams = {
+    sochainUrl,
+    network,
+    address,
+  }
+  const utxos: LtcAddressUTXO[] = await sochain.getUnspentTxs(addressParam)
 
-  return utxos.map(
-    (utxo) =>
-      ({
-        hash: utxo.txid,
-        index: utxo.output_no,
+  return await Promise.all(
+    utxos.map(async (utxo) => ({
+      hash: utxo.txid,
+      index: utxo.output_no,
+      value: assetToBase(assetAmount(utxo.value, LTC_DECIMAL)).amount().toNumber(),
+      witnessUtxo: {
         value: assetToBase(assetAmount(utxo.value, LTC_DECIMAL)).amount().toNumber(),
-        witnessUtxo: {
-          value: assetToBase(assetAmount(utxo.value, LTC_DECIMAL)).amount().toNumber(),
-          script: Buffer.from(utxo.script_hex, 'hex'),
-        },
-      } as UTXO),
+        script: Buffer.from(utxo.script_hex, 'hex'),
+      },
+      txHex: withTxHex ? await getTxHex({ txHash: utxo.txid, network, sochainUrl }) : undefined,
+    })),
   )
 }
 
@@ -172,15 +210,17 @@ export const buildTx = async ({
   sender,
   network,
   sochainUrl,
+  withTxHex = false,
 }: TxParams & {
   feeRate: FeeRate
   sender: Address
   network: Network
   sochainUrl: string
+  withTxHex?: boolean
 }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXO[] }> => {
   if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
-  const utxos = await scanUTXOs({ sochainUrl, network, address: sender })
+  const utxos = await scanUTXOs({ sochainUrl, network, address: sender, withTxHex })
   if (utxos.length === 0) throw new Error('No utxos to send')
 
   const feeRateWhole = Number(feeRate.toFixed(0))
@@ -214,7 +254,7 @@ export const buildTx = async ({
   // Outputs
   outputs.forEach((output: Litecoin.PsbtTxOutput) => {
     if (!output.address) {
-      //an empty address means this is the  change ddress
+      //an empty address means this is the  change address
       output.address = sender
     }
     if (!output.script) {
@@ -291,6 +331,7 @@ export const getDefaultFees = (): Fees => {
 export const getPrefix = (network: Network) => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return 'ltc1'
     case Network.Testnet:
       return 'tltc1'

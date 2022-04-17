@@ -27,22 +27,38 @@ const SOCHAIN_API = new SochainAPI(Chain.Bitcoin)
 export const getBalance = async (address: string): Promise<BaseAmount> => {
   const {
     data: { confirmed, unconfirmed },
-  } = await axios.get<BalanceData>(`${HASKOIN_API_URL}/address/${address}/balance`)
+  } = await axios.get<BalanceData>(`${haskoinUrl}/address/${address}/balance`)
 
   const confirmedAmount = baseAmount(confirmed, BTC_DECIMAL)
   const unconfirmedAmount = baseAmount(unconfirmed, BTC_DECIMAL)
 
-  return confirmedAmount.plus(unconfirmedAmount)
+  return confirmedOnly ? confirmedAmount : confirmedAmount.plus(unconfirmedAmount)
 }
 
-export const getUnspentTxs = async (address: string): Promise<UtxoData[]> => {
-  const { data: response } = await axios.get<UtxoData[]>(`${HASKOIN_API_URL}/address/${address}/unspent`)
+export const getUnspentTxs = async ({
+  haskoinUrl,
+  address,
+}: {
+  haskoinUrl: string
+  address: string
+}): Promise<UtxoData[]> => {
+  const { data: response } = await axios.get<UtxoData[]>(`${haskoinUrl}/address/${address}/unspent`)
 
   return response
 }
 
-export const getConfirmedUnspentTxs = async (address: string): Promise<UtxoData[]> => {
-  const allUtxos = await getUnspentTxs(address)
+export const getConfirmedUnspentTxs = async ({
+  haskoinUrl,
+  sochainUrl,
+  address,
+  network,
+}: {
+  haskoinUrl: string
+  sochainUrl: string
+  address: string
+  network: Network
+}): Promise<UtxoData[]> => {
+  const allUtxos = await getUnspentTxs({ haskoinUrl, address })
 
   const confirmedUTXOs: UtxoData[] = []
 
@@ -51,13 +67,64 @@ export const getConfirmedUnspentTxs = async (address: string): Promise<UtxoData[
       const { is_confirmed: isTxConfirmed } = await SOCHAIN_API.getIsTxConfirmed({
         network: Network.Mainnet,
         hash: tx.txid,
+      const confirmed = await getConfirmedTxStatus({
+        sochainUrl,
+        network,
+        txHash: tx.txid,
       })
 
-      if (isTxConfirmed) {
+      if (confirmed) {
         confirmedUTXOs.push(tx)
       }
     }),
   )
 
   return confirmedUTXOs
+}
+
+/**
+ * Broadcast transaction.
+ *
+ * @see https://app.swaggerhub.com/apis/eligecode/blockchain-api/0.0.1-oas3#/blockchain/sendTransaction
+ *
+ * Note: Because of an Haskoin issue (@see https://github.com/haskoin/haskoin-store/issues/25),
+ * we need to broadcast same tx several times in case of `500` errors
+ * @see https://github.com/xchainjs/xchainjs-lib/issues/492
+ *
+ * @param {BroadcastTxParams} params
+ * @returns {TxHash} Transaction hash.
+ */
+export const broadcastTx = async ({ txHex, haskoinUrl }: BroadcastTxParams): Promise<TxHash> => {
+  const instance = axios.create()
+
+  const MAX = 5
+  let counter = 0
+
+  const onFullfilled = (res: AxiosResponse): AxiosResponse => res
+  const onRejected = async (error: AxiosError): Promise<AxiosResponse> => {
+    const config = error.config
+    if (counter < MAX && error.response?.status === 500) {
+      counter++
+      await delay(200 * counter)
+      return instance.request(config)
+    }
+    return Promise.reject(error)
+  }
+  // All logic for re-sending same tx is handled by Axios' response interceptor
+  // https://github.com/axios/axios#interceptors
+  const id = instance.interceptors.response.use(onFullfilled, onRejected)
+
+  const url = `${haskoinUrl}/transactions`
+  try {
+    const {
+      data: { txid },
+    } = await instance.post<string, AxiosResponse<{ txid: string }>>(url, txHex)
+    // clean up interceptor from axios instance
+    instance.interceptors.response.eject(id)
+    return txid
+  } catch (error: unknown) {
+    // clean up interceptor from axios instance
+    instance.interceptors.response.eject(id)
+    return Promise.reject(error)
+  }
 }

@@ -11,17 +11,20 @@ yarn add @xchainjs/xchain-thorchain
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-thorchain`.
 
 ```
-yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util @xchainjs/xchain-cosmos axios cosmos-client
+yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util @xchainjs/xchain-cosmos axios @cosmos-client/core bech32-buffer
 ```
 
-Important note: Make sure to install same version of `cosmos-client` as `xchain-thorchain` is using (currently `cosmos-client@0.39.2` ). In other case things might break.
+Important note: Make sure to install same version of `@cosmos-client/core` as `xchain-thorchain` is using (currently `@cosmos-client/core@0.45.1` ). In other case things might break.
 
-## Thorchain Client Testing
 
-```
-yarn install
-yarn test
-```
+## Documentation
+
+### [`xchain thorchain`](http://docs.xchainjs.org/xchain-client/xchain-thorchain/)
+[`How xchain-thorchain works`](http://docs.xchainjs.org/xchain-client/xchain-thorchain/how-it-works.html)\
+[`How to use xchain-thorchain`](http://docs.xchainjs.org/xchain-client/xchain-thorchain/how-to-use.html)
+
+
+For more examples check out tests in `./__tests__/client.test.ts`
 
 ## Service Providers
 
@@ -37,30 +40,21 @@ This package uses the following service providers:
 
 Rate limits: No
 
-## Examples
+## Extras
 
-```ts
-// import `xchain-thorchain`
-import { Client } from '@xchainjs/xchain-thorchain'
+## Creating protobuffer typescript bindings
 
-// Create a `Client`
-const client = new Client({ network: Network.Testnet, phrase: 'my secret phrase' })
+In order for this library to de/serialize proto3 structures, you can use the following to create bindings
 
-// get address
-const address = client.getAddress()
-console.log('address:', client.getAddress()) // address: tthor13gym97tmw3axj3hpewdggy2cr288d3qffr8skg
+1. `git clone https://gitlab.com/thorchain/thornode`
+2. run the following (adjust the paths acordingly) to generate a typecript file for MsgDeposit
+   ```bash
+   yarn run pbjs -w commonjs  -t static-module  <path to repo>/thornode/proto/thorchain/v1/x/thorchain/types/msg_deposit.proto <path to repo>/thornode/proto/thorchain/v1/common/common.proto <path to repo>/thornode/proto/thorchain/v1/x/thorchain/types/msg_send.proto <path to repo>/thornode/third_party/proto/cosmos/base/v1beta1/coin.proto -o src/types/proto/MsgCompiled.js
+   ```
+3. run the following to generate the .d.ts file
+   ```bash
+   yarn run pbts src/types/proto/MsgCompiled.js -o src/types/proto/MsgCompiled.d.ts
+   ```
 
-// get balances
-const balances = await client.getBalance(address)
-console.log('balances:', balances[0].amount.amount().toString()) // balance: 6968080395099
+Alternatively, you can run the convenience script: `genMsgs.sh`, which will overwrite the proto/js files in types/proto. This should only be done and checked in if changes were made to the upstream Msg in the THORNode repo. 
 
-// get transactions
-const txs = await client.getTransactions({ address })
-console.log('txs total:', txs.total) // txs total: 100
-
-// get transaction details
-const tx = await client.getTransactionData('any-tx-hash', address)
-console.log('tx asset:', tx.asset) // tx asset: { chain: 'THOR', symbol: 'RUNE', ticker: 'RUNE' }
-```
-
-For more examples check out tests in `./__tests__/client.test.ts`

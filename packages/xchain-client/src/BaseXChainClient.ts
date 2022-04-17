@@ -31,7 +31,8 @@ import {
 } from './providers/Provider'
 import { DefaultProviders } from './providers/Providers'
 
-const MAINNET_THORNODE_API_BASE = 'https://thornode.thorchain.info/thorchain'
+const MAINNET_THORNODE_API_BASE = 'https://thornode.ninerealms.com/thorchain'
+const STAGENET_THORNODE_API_BASE = 'https://stagenet-thornode.ninerealms.com/thorchain'
 const TESTNET_THORNODE_API_BASE = 'https://testnet.thornode.thorchain.info/thorchain'
 
 export abstract class BaseXChainClient implements XChainClient {
@@ -60,8 +61,16 @@ export abstract class BaseXChainClient implements XChainClient {
       ? this.overrideDefaultProvidersMap(params.providers)
       : DefaultProviders[this.chain]
 
+    // Fire off a warning in the console to indicate that stagenet and real assets are being used.
+    if (this.network === Network.Stagenet) console.warn('WARNING: This is using stagenet! Real assets are being used!')
     if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths
-    if (params.phrase) this.setPhrase(params.phrase)
+    //NOTE: we don't call this.setPhrase() to vaoid generating an address and paying the perf penalty
+    if (params.phrase) {
+      if (!validatePhrase(params.phrase)) {
+        throw new Error('Invalid phrase')
+      }
+      this.phrase = params.phrase
+    }
   }
 
   overrideDefaultProvidersMap(override: ProviderParams): ProviderMap {
@@ -81,6 +90,8 @@ export abstract class BaseXChainClient implements XChainClient {
       throw new Error('Network must be provided')
     }
     this.network = network
+    // Fire off a warning in the console to indicate that stagenet and real assets are being used.
+    if (this.network === Network.Stagenet) console.warn('WARNING: This is using stagenet! Real assets are being used!')
   }
 
   /**
@@ -109,6 +120,8 @@ export abstract class BaseXChainClient implements XChainClient {
       switch (this.network) {
         case Network.Mainnet:
           return MAINNET_THORNODE_API_BASE
+        case Network.Stagenet:
+          return STAGENET_THORNODE_API_BASE
         case Network.Testnet:
           return TESTNET_THORNODE_API_BASE
       }

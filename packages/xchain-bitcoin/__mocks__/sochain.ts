@@ -1,7 +1,4 @@
-import axios from 'axios'
-import MockAdapter from 'axios-mock-adapter'
-
-const mock = new MockAdapter(axios)
+import mock from './axios-adapter'
 
 type MockConfig = {
   url?: string
@@ -35,12 +32,12 @@ export default {
     mock.onGet(/\/get_tx_unspent\//).reply(function (config: MockConfig) {
       const split = config.url?.split('/')
 
-      //the address is always the 7th, the optional 8th param would bethe startgin from txid to allow paging
+      //the address is always the 7th, the optional 8th param would be starting from txid to allow paging
       const address = split?.[7] || ''
       const startingfromTxId = split?.length == 9 ? split?.[8] : ''
       let filePath = `./response/unspent-txs/${address}.json`
       if (startingfromTxId) {
-        // this allows you to page utxos startign from a given txid
+        // this allows you to page utxos starting from a given txid
         filePath = `./response/unspent-txs/${address}/${startingfromTxId}.json`
       }
       const resp = require(filePath)

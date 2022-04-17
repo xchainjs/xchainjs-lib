@@ -2,6 +2,7 @@ export * from './types'
 export * from './client'
 export {
   broadcastTx,
+  buildTx,
   getDefaultFees,
   getDefaultFeesWithRates,
   getPrefix,
@@ -9,4 +10,3 @@ export {
   validateAddress,
   calcFee,
 } from './utils'
-export { createTxInfo } from './ledger'

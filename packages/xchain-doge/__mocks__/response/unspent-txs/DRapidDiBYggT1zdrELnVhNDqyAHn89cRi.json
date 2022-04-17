@@ -1,0 +1,18 @@
+{
+  "status": "success",
+  "data": {
+    "network": "DOGE",
+    "address": "DRapidDiBYggT1zdrELnVhNDqyAHn89cRi",
+    "txs": [
+      {
+        "txid": "f65aa58332a0d491d7f96ccb96cc513ad622f18ad88cbe123096b23963569da0",
+        "output_no": 0,
+        "script_asm": "OP_DUP OP_HASH160 e0401fae9ec7f860ceefd71b17205d219f55f283 OP_EQUALVERIFY OP_CHECKSIG",
+        "script_hex": "76a914e0401fae9ec7f860ceefd71b17205d219f55f28388ac",
+        "value": "1.00000000",
+        "confirmations": 697583,
+        "time": 1603109261
+      }
+    ]
+  }
+}

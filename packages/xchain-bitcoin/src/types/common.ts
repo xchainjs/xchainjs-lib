@@ -9,10 +9,10 @@ export type UTXO = {
   index: number
   value: number
   witnessUtxo: Witness
-  txHex: string
+  txHex?: string
 }
 
-export type BroadcastTxParams = { network: Network; txHex: string }
+export type BroadcastTxParams = { txHex: string; haskoinUrl: string }
 
 // We might extract it into xchain-client later
 export type DerivePath = Record<Network, string>

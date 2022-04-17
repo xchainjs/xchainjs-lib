@@ -11,10 +11,17 @@ import mockSochainApi from '../__mocks__/sochain'
 
 mockSochainApi.init()
 
-const network = 'mainnet' as Network
+// const sochainUrl = 'https://sochain.com/api/v2'
+const network = Network.Mainnet
 
 const sochainApi = new SochainAPI(Chain.Bitcoin)
 describe('Sochain API Test', () => {
+  beforeEach(() => {
+    mockSochainApi.init()
+  })
+  afterEach(() => {
+    mockSochainApi.restore()
+  })
   it('getUnspentTxs', async () => {
     const address = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
 

@@ -30,7 +30,7 @@ export const bnOrZero = (value: string | number | undefined) => {
 
 /**
  * Helper to validate a possible BigNumber
- * If the given valie is invalid or undefined, 0 is returned as a BigNumber
+ * If the given value is invalid or undefined, 0 is returned as a BigNumber
  *
  * @param {BigNumber|undefined} value
  * @returns {boolean} `true` or `false`.

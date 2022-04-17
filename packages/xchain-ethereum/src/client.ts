@@ -58,7 +58,6 @@ import {
  * Interface for custom Ethereum client
  */
 export interface EthereumClient {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   call<T>(params: CallParams): Promise<T>
   estimateCall(asset: EstimateCallParams): Promise<BigNumber>
   estimateGasPrices(): Promise<GasPrices>
@@ -67,6 +66,8 @@ export interface EthereumClient {
   estimateApprove(params: EstimateApproveParams): Promise<BigNumber>
   isApproved(params: IsApprovedParams): Promise<boolean>
   approve(params: ApproveParams): Promise<TransactionResponse>
+  // `getFees` of `BaseXChainClient` needs to be overridden
+  getFees(params: TxParams): Promise<Fees>
 }
 
 export type EthereumClientParams = XChainClientParams & {
@@ -103,6 +104,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     rootDerivationPaths = {
       [Network.Mainnet]: `m/44'/60'/0'/0/`,
       [Network.Testnet]: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
+      [Network.Stagenet]: `m/44'/60'/0'/0/`,
     },
     etherscanApiKey,
     infuraCreds,
@@ -179,9 +181,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         : new ethers.providers.InfuraProvider(EthNetwork.Main, this.infuraCreds.projectId)
       this.providers.set(Network.Testnet, testnetProvider)
       this.providers.set(Network.Mainnet, mainnetProvider)
+      this.providers.set(Network.Stagenet, mainnetProvider)
     } else {
       this.providers.set(Network.Testnet, getDefaultProvider(EthNetwork.Test))
       this.providers.set(Network.Mainnet, getDefaultProvider(EthNetwork.Main))
+      this.providers.set(Network.Stagenet, getDefaultProvider(EthNetwork.Main))
     }
   }
 
@@ -221,6 +225,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     return {
       [Network.Testnet]: 'https://ropsten.etherscan.io',
       [Network.Mainnet]: 'https://etherscan.io',
+      [Network.Stagenet]: 'https://etherscan.io',
     }
   }
 
@@ -308,7 +313,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     const ethBalanceAmount = baseAmount(ethBalance.toString(), ETH_DECIMAL)
 
     switch (this.getNetwork()) {
-      case Network.Mainnet: {
+      case Network.Mainnet:
+      case Network.Stagenet: {
         // use ethplorerAPI for mainnet - ignore assets
         const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
         const balances: Balance[] = [
@@ -390,11 +396,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     const maxCount = 10000
 
-    let transations
+    let transactions
     const etherscan = this.getEtherscanProvider()
 
     if (assetAddress) {
-      transations = await etherscanAPI.getTokenTransactionHistory({
+      transactions = await etherscanAPI.getTokenTransactionHistory({
         baseUrl: etherscan.baseUrl,
         address: params?.address,
         assetAddress,
@@ -403,7 +409,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         apiKey: etherscan.apiKey,
       })
     } else {
-      transations = await etherscanAPI.getETHTransactionHistory({
+      transactions = await etherscanAPI.getETHTransactionHistory({
         baseUrl: etherscan.baseUrl,
         address: params?.address,
         page: 0,
@@ -413,8 +419,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     }
 
     return {
-      total: transations.length,
-      txs: transations.filter((_, index) => index >= offset && index < offset + limit),
+      total: transactions.length,
+      txs: transactions.filter((_, index) => index >= offset && index < offset + limit),
     }
   }
 
@@ -430,7 +436,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   async getTransactionData(txId: string, assetAddress?: Address): Promise<Tx> {
     switch (this.getNetwork()) {
-      case Network.Mainnet: {
+      case Network.Mainnet:
+      case Network.Stagenet: {
         // use ethplorerAPI for mainnet - ignore assetAddress
         const txInfo = await ethplorerAPI.getTxInfo(this.ethplorerUrl, txId, this.ethplorerApiKey)
         if (!txInfo.operations?.length) return getTxFromEthplorerEthTransaction(txInfo)

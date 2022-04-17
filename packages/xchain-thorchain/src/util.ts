@@ -1,15 +1,38 @@
-import { Address, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
-import { TxLog } from '@xchainjs/xchain-cosmos'
-import { Asset, BaseAmount, Chain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
-import { AccAddress, Msg, codec } from 'cosmos-client'
-import { MsgMultiSend, MsgSend } from 'cosmos-client/x/bank'
+import { cosmosclient, proto } from '@cosmos-client/core'
+import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
+import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
+import {
+  Asset,
+  AssetRuneNative,
+  BaseAmount,
+  assetAmount,
+  assetFromString,
+  assetToBase,
+  assetToString,
+  baseAmount,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
+import axios from 'axios'
+import * as bech32Buffer from 'bech32-buffer'
 
-import { AssetRune, ClientUrl, ExplorerUrl, ExplorerUrls, TxData } from './types'
+import { ChainId, ChainIds, ClientUrl, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
+import { MsgNativeTx } from './types/messages'
+import types from './types/proto/MsgCompiled'
 
 export const DECIMAL = 8
-export const DEFAULT_GAS_VALUE = '2000000'
+export const DEFAULT_GAS_VALUE = '3000000'
+export const DEPOSIT_GAS_VALUE = '500000000'
 export const MAX_TX_COUNT = 100
 
+/**
+ * Checks whether an asset is `AssetRuneNative`
+ *
+ * @param {Asset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
+
+const DENOM_RUNE_NATIVE = 'rune'
 /**
  * Get denomination from Asset
  *
@@ -17,18 +40,9 @@ export const MAX_TX_COUNT = 100
  * @returns {string} The denomination of the given asset.
  */
 export const getDenom = (asset: Asset): string => {
-  if (assetToString(asset) === assetToString(AssetRune)) return 'rune'
-  return asset.symbol
-}
-
-/**
- * Get denomination with chainname from Asset
- *
- * @param {Asset} asset
- * @returns {string} The denomination with chainname of the given asset.
- */
-export const getDenomWithChain = (asset: Asset): string => {
-  return `${Chain.THORChain}.${asset.symbol.toUpperCase()}`
+  if (isAssetRuneNative(asset)) return DENOM_RUNE_NATIVE
+  if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
+  return asset.symbol.toLowerCase()
 }
 
 /**
@@ -37,30 +51,10 @@ export const getDenomWithChain = (asset: Asset): string => {
  * @param {string} denom
  * @returns {Asset|null} The asset of the given denomination.
  */
-export const getAsset = (denom: string): Asset | null => {
-  if (denom === getDenom(AssetRune)) return AssetRune
-  return assetFromString(`${Chain.THORChain}.${denom.toUpperCase()}`)
+export const assetFromDenom = (denom: string): Asset | null => {
+  if (denom === DENOM_RUNE_NATIVE) return AssetRuneNative
+  return assetFromString(denom.toUpperCase())
 }
-
-/**
- * Type guard for MsgSend
- *
- * @param {Msg} msg
- * @returns {boolean} `true` or `false`.
- */
-export const isMsgSend = (msg: Msg): msg is MsgSend =>
-  (msg as MsgSend)?.amount !== undefined &&
-  (msg as MsgSend)?.from_address !== undefined &&
-  (msg as MsgSend)?.to_address !== undefined
-
-/**
- * Type guard for MsgMultiSend
- *
- * @param {Msg} msg
- * @returns {boolean} `true` or `false`.
- */
-export const isMsgMultiSend = (msg: Msg): msg is MsgMultiSend =>
-  (msg as MsgMultiSend)?.inputs !== undefined && (msg as MsgMultiSend)?.outputs !== undefined
 
 /**
  * Response guard for transaction broadcast
@@ -85,28 +79,25 @@ export const getPrefix = (network: Network) => {
   switch (network) {
     case Network.Mainnet:
       return 'thor'
+    case Network.Stagenet:
+      return 'sthor'
     case Network.Testnet:
       return 'tthor'
   }
 }
 
 /**
- * Register Codecs based on the prefix.
- *
- * @param {string} prefix
+ * Register type for encoding `MsgDeposit` messages
  */
-export const registerCodecs = (prefix: string): void => {
-  codec.registerCodec('thorchain/MsgSend', MsgSend, MsgSend.fromJSON)
-  codec.registerCodec('thorchain/MsgMultiSend', MsgMultiSend, MsgMultiSend.fromJSON)
+export const registerDepositCodecs = () => {
+  cosmosclient.codec.register('/types.MsgDeposit', types.types.MsgDeposit)
+}
 
-  AccAddress.setBech32Prefix(
-    prefix,
-    prefix + 'pub',
-    prefix + 'valoper',
-    prefix + 'valoperpub',
-    prefix + 'valcons',
-    prefix + 'valconspub',
-  )
+/**
+ * Register type for encoding `MsgSend` messages
+ */
+export const registerSendCodecs = () => {
+  cosmosclient.codec.register('/types.MsgSend', types.types.MsgSend)
 }
 
 /**
@@ -161,7 +152,7 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
  * @returns {Fees} The default fee.
  */
 export const getDefaultFees = (): Fees => {
-  const fee = baseAmount(DEFAULT_GAS_VALUE, DECIMAL)
+  const fee = assetToBase(assetAmount(0.02 /* 0.02 RUNE */, DECIMAL))
   return singleFee(FeeType.FlatFee, fee)
 }
 
@@ -177,6 +168,201 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
 }
 
 /**
+ * Helper to get THORChain's chain id
+ * @param {string} nodeUrl THORNode url
+ */
+export const getChainId = async (nodeUrl: string): Promise<ChainId> => {
+  const { data } = await axios.get<NodeInfoResponse>(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
+  return data?.default_node_info?.network || Promise.reject('Could not parse chain id')
+}
+
+/**
+ * Helper to get all THORChain's chain id
+ * @param {ClientUrl} client urls (use `getDefaultClientUrl()` if you don't need to use custom urls)
+ */
+export const getChainIds = async (client: ClientUrl): Promise<ChainIds> => {
+  return Promise.all([
+    getChainId(client[Network.Testnet].node),
+    getChainId(client[Network.Stagenet].node),
+    getChainId(client[Network.Mainnet].node),
+  ]).then(([testnetId, stagenetId, mainnetId]) => ({
+    testnet: testnetId,
+    stagenet: stagenetId,
+    mainnet: mainnetId,
+  }))
+}
+
+/**
+ * Builds final unsigned TX
+ *
+ * @param cosmosSdk - CosmosSDK
+ * @param txBody - txBody with encoded Msgs
+ * @param signerPubkey - signerPubkey string
+ * @param sequence - account sequence
+ * @param gasLimit - transaction gas limit
+ * @returns
+ */
+export const buildUnsignedTx = ({
+  cosmosSdk,
+  txBody,
+  signerPubkey,
+  sequence,
+  gasLimit,
+}: {
+  cosmosSdk: cosmosclient.CosmosSDK
+  txBody: proto.cosmos.tx.v1beta1.TxBody
+  signerPubkey: proto.google.protobuf.Any
+  sequence: cosmosclient.Long
+  gasLimit: string
+}): cosmosclient.TxBuilder => {
+  const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
+    signer_infos: [
+      {
+        public_key: signerPubkey,
+        mode_info: {
+          single: {
+            mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+          },
+        },
+        sequence: sequence,
+      },
+    ],
+    fee: {
+      amount: null,
+      gas_limit: cosmosclient.Long.fromString(gasLimit),
+    },
+  })
+
+  return new cosmosclient.TxBuilder(cosmosSdk, txBody, authInfo)
+}
+
+/**
+ * Structure a MsgDeposit
+ *
+ * @param {MsgNativeTx} msgNativeTx Msg of type `MsgNativeTx`.
+ * @param {string} nodeUrl Node url
+ * @param {chainId} ChainId Chain id of the network
+ *
+ * @returns {Tx} The transaction details of the given transaction id.
+ *
+ * @throws {"Invalid client url"} Thrown if the client url is an invalid one.
+ */
+export const buildDepositTx = async ({
+  msgNativeTx,
+  nodeUrl,
+  chainId,
+}: {
+  msgNativeTx: MsgNativeTx
+  nodeUrl: string
+  chainId: ChainId
+}): Promise<proto.cosmos.tx.v1beta1.TxBody> => {
+  const networkChainId = await getChainId(nodeUrl)
+  if (!networkChainId || chainId !== networkChainId) {
+    throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
+  }
+
+  const signerAddr = msgNativeTx.signer.toString()
+  const signerDecoded = bech32Buffer.decode(signerAddr)
+
+  const msgDepositObj = {
+    coins: msgNativeTx.coins,
+    memo: msgNativeTx.memo,
+    signer: signerDecoded.data,
+  }
+
+  const depositMsg = types.types.MsgDeposit.fromObject(msgDepositObj)
+
+  return new proto.cosmos.tx.v1beta1.TxBody({
+    messages: [cosmosclient.codec.packAny(depositMsg)],
+    memo: msgNativeTx.memo,
+  })
+}
+
+/**
+ * Structure a MsgSend
+ *
+ * @param fromAddress - required, from address string
+ * @param toAddress - required, to address string
+ * @param assetAmount - required, asset amount string (e.g. "10000")
+ * @param assetDenom - required, asset denom string (e.g. "rune")
+ * @param memo - optional, memo string
+ *
+ * @returns
+ */
+export const buildTransferTx = async ({
+  fromAddress,
+  toAddress,
+  assetAmount,
+  assetDenom,
+  memo = '',
+  nodeUrl,
+  chainId,
+}: {
+  fromAddress: Address
+  toAddress: Address
+  assetAmount: BaseAmount
+  assetDenom: string
+  memo?: string
+  nodeUrl: string
+  chainId: ChainId
+}): Promise<proto.cosmos.tx.v1beta1.TxBody> => {
+  const networkChainId = await getChainId(nodeUrl)
+  if (!networkChainId || chainId !== networkChainId) {
+    throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
+  }
+
+  const fromDecoded = bech32Buffer.decode(fromAddress)
+  const toDecoded = bech32Buffer.decode(toAddress)
+
+  const transferObj = {
+    fromAddress: fromDecoded.data,
+    toAddress: toDecoded.data,
+    amount: [
+      {
+        amount: assetAmount.amount().toString(),
+        denom: assetDenom,
+      },
+    ],
+  }
+
+  const transferMsg = types.types.MsgSend.fromObject(transferObj)
+
+  return new proto.cosmos.tx.v1beta1.TxBody({
+    messages: [cosmosclient.codec.packAny(transferMsg)],
+    memo,
+  })
+}
+
+/**
+ * Get the balance of a given address.
+ *
+ * @param {Address} address By default, it will return the balance of the current wallet. (optional)
+ * @param {Asset} asset If not set, it will return all assets available. (optional)
+ * @param {cosmosClient} CosmosSDKClient
+ *
+ * @returns {Balance[]} The balance of the address.
+ */
+export const getBalance = async ({
+  address,
+  assets,
+  cosmosClient,
+}: {
+  address: Address
+  assets?: Asset[]
+  cosmosClient: CosmosSDKClient
+}): Promise<Balance[]> => {
+  const balances = await cosmosClient.getBalance(address)
+  return balances
+    .map((balance) => ({
+      asset: (balance.denom && assetFromDenom(balance.denom)) || AssetRuneNative,
+      amount: baseAmount(balance.amount, DECIMAL),
+    }))
+    .filter(
+      (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
+    )
+}
+
+/**
  * Get the client url.
  *
  * @returns {ClientUrl} The client url (both mainnet and testnet) for thorchain.
@@ -185,11 +371,15 @@ export const getDefaultClientUrl = (): ClientUrl => {
   return {
     [Network.Testnet]: {
       node: 'https://testnet.thornode.thorchain.info',
-      rpc: 'https://testnet.rpc.thorchain.info',
+      rpc: 'https://testnet-rpc.ninerealms.com',
+    },
+    [Network.Stagenet]: {
+      node: 'https://stagenet-thornode.ninerealms.com',
+      rpc: 'https://stagenet-rpc.ninerealms.com',
     },
     [Network.Mainnet]: {
-      node: 'https://thornode.thorchain.info',
-      rpc: 'https://rpc.thorchain.info',
+      node: 'https://thornode.ninerealms.com',
+      rpc: 'https://rpc.ninerealms.com',
     },
   }
 }
@@ -204,16 +394,19 @@ const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
 export const getDefaultExplorerUrls = (): ExplorerUrls => {
   const root: ExplorerUrl = {
     [Network.Testnet]: `${DEFAULT_EXPLORER_URL}?network=testnet`,
+    [Network.Stagenet]: `${DEFAULT_EXPLORER_URL}?network=stagenet`,
     [Network.Mainnet]: DEFAULT_EXPLORER_URL,
   }
   const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
   const tx: ExplorerUrl = {
     [Network.Testnet]: txUrl,
+    [Network.Stagenet]: txUrl,
     [Network.Mainnet]: txUrl,
   }
   const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
   const address: ExplorerUrl = {
     [Network.Testnet]: addressUrl,
+    [Network.Stagenet]: addressUrl,
     [Network.Mainnet]: addressUrl,
   }
 
@@ -254,6 +447,8 @@ export const getExplorerAddressUrl = ({
   switch (network) {
     case Network.Mainnet:
       return url
+    case Network.Stagenet:
+      return `${url}?network=stagenet`
     case Network.Testnet:
       return `${url}?network=testnet`
   }
@@ -280,6 +475,8 @@ export const getExplorerTxUrl = ({
   switch (network) {
     case Network.Mainnet:
       return url
+    case Network.Stagenet:
+      return `${url}?network=stagenet`
     case Network.Testnet:
       return `${url}?network=testnet`
   }

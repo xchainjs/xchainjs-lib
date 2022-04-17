@@ -1,3 +1,44 @@
+# v.0.13.0 (2022-03-23)
+
+## Add
+
+- Cache `tx hex`
+- Helper `isCashAddress`
+- Helper `broadcastTx`
+
+## Breaking change
+
+- Use `haskoin.ninerealms.com` for `haskoinUrl` by default
+- Broadcast txs using `haskoin` endpoint
+- Remove `nodeUrl` / `nodeAuth` / `setNodeURL` / `getNodeURL` from `Client`
+- Remove `node-api` module (incl. types)
+
+## Internal
+
+- Refactor tests to remove `nock` dependencies in favour of `axios-mock-adapter`
+- Add more tests
+
+# v.0.12.1 (2022-02-04)
+
+## Update
+
+- Use latest axios@0.25.0
+- xchain-client@0.11.1
+
+# v.0.12.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
+
+# v.0.11.10 (2021-11-12)
+
+- updated haskoin api URL
+
+# v.0.11.9 (2021-09-06)
+
+- updated to the latest dependencies
+
 # v.0.11.8 (2021-07-07)
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`

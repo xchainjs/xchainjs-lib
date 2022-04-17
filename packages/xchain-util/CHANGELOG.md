@@ -1,3 +1,60 @@
+# v.0.7.0 (2022-04-13)
+
+### Add
+
+- Helper `eqAsset`
+- Estimate fees using any native Terra asset
+
+### Breaking change
+
+- Remove `AssetLuna` (will be supported by `xchain-terra`)
+
+# v.0.6.1 (2022-04-04)
+
+### Fix
+
+- Support `UST` in `currencySymbolByAsset`
+
+# v.0.6.0 (2022-02-04)
+
+### Breaking change
+
+- Rename `LUNAChain`-> `TerraChain` #482
+
+# v.0.5.1 (2022-02-04)
+
+### Add
+
+- `Chain.Terra`
+- `AssetLUNA`
+
+# v.0.5.0 (2022-02-02)
+
+### Breaking change
+
+- Add `synth` property to `Asset`
+
+### Update
+
+- Support synths in `assetFromString` + `assetToString` helpers
+
+### Add
+
+- `isSynthAsset` helper
+
+# v.0.4.0 (2022-01-19)
+
+### Add
+
+- `Chain.Doge`
+- `AssetDOGE`
+
+# v.0.3.1 (2021-07-14)
+
+### Fix
+
+- Fix `formatAssetAmountCurrency` for `XRUNE`
+
 # v.0.3.0 (2021-07-07)
 
 ### Breaking changes

@@ -49,6 +49,7 @@ export const MAX_APPROVAL = BigNumber.from(2).pow(256).sub(1)
 export const xchainNetworkToEths = (network: Network): EthNetwork => {
   switch (network) {
     case Network.Mainnet:
+    case Network.Stagenet:
       return EthNetwork.Main
     case Network.Testnet:
       return EthNetwork.Test

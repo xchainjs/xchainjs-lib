@@ -1,8 +1,196 @@
+# v0.24.0 (2022-03-23)
+
+## Update
+
+- upgraded to "@cosmos-client/core": "0.45.1"
+- client now extend BaseXChainClient
+
+## Breaking Changes
+
+- `buildDepositTx` now returns `proto.cosmos.tx.v1beta1.TxBody` from `@cosmos-client/core`
+
+# v0.23.0 (2022-03-08)
+
+## Add
+
+- Helpers `getChainId` + `getChainIds`
+
+## Breaking change
+
+- `chainIds: ChainIds` is required to initialize `Client`
+
+## Fix
+
+- Request fees from THORChain and use `defaultFees` in case of server errors only
+- Fix `defaultFees` to be 0.02 RUNE
+
+# v0.22.2 (2022-02-17)
+
+## Fix
+
+- Request fees from THORChain and use `defaultFees` in case of server errors only
+- Fix `defaultFees` to be 0.02 RUNE
+
+# v0.22.1 (2022-02-16)
+
+## Fix
+
+- Increase limit for `DEFAULT_GAS_VALUE` from 2000000 to 3000000 to accommodate recent increases in gas used that go above the old limit
+
+# v0.22.0 (2022-02-06)
+
+## Add
+
+- Option to pass `ChainIds` into constructor
+- getter / setter for `chainId` in `Client`
+
+## Breaking change
+
+- `buildDepositTx` needs `chainId` to be passed - all params are set as object
+- Remove `enum ChainId` + `getChainId` + `isChainId` from `utils`
+
+# v0.21.2 (2022-02-04)
+
+## Fix
+
+- Use latest axios@0.25.0
+- xchain-client@0.11.1
+- @xchainjs/xchain-util@0.5.1
+- @xchainjs/xchain-cosmos@0.16.1
+
+# v.0.21.1 (2022-02-04)
+
+## Fix
+
+- Fix chain id for `testnet` #477
+
+## Add
+
+- Helper `isChainId`
+- `enum ChainId`
+
+# v.0.21.0 (2022-02-02)
+
+## Breaking change
+
+- Remove `getDenomWithChain`
+- Rename `getAsset` -> `assetFromDenom` (incl. fix to get synth asset properly)
+
+## Update
+
+- xchain-util@0.5.0
+- xchain-cosmos@0.16.0
+
+## Add
+
+- `isAssetNativeRune` helper
+- Add `TxOfflineParams` type
+
+## Fix
+
+- Fix synth notation in `transfer|transferOffline|deposit` #473
+
+# v0.20.1 (2022-01-11)
+
+## Fix
+
+- Get chain ID from THORNode before posting to deposit handler.
+
+# v.0.20.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` to client
+
+# v.0.19.5 (2021-11-22)
+
+## Add
+
+- Provide `transferOffline` method
+
+# v.0.19.4 (2021-11-22)
+
+## Add
+
+- Provide `getPubKey` method to access public key
+
+## Change
+
+- Make `getPrivKey` method `public` to access private key
+
+# v.0.19.3 (2021-10-31)
+
+## Update
+
+- Use latest `xchain-cosmos@0.13.8` to use `sync` mode for broadcasting txs
+
+# v.0.19.2 (2021-09-27)
+
+## Fix
+
+- Increase `gas` to `500,000,000` (five hundred million)
+
+# v.0.19.1 (2021-09-26)
+
+## Fix
+
+- Increase `gas` to `30,000,000` (thirty million)
+
+# v.0.19.0 (2021-09-10)
+
+## Breaking change
+
+- Extract `buildDepositTx` from `Client` into `utils`
+
+## Add
+
+- Add `getBalance` to `utils`
+
+# v.0.18.0 (2021-09-08)
+
+## Add
+
+- Make `buildDepositTx` public and overrides its fee
+- Add `DEPOSIT_GAS_VALUE`
+
+## Breaking change
+
+- Remove `AssetRune` in favour of using `AssetRuneNative` of `xchain-util` only
+- Extract `getChainId` into `util` module
+
+# v.0.17.7 (2021-07-20)
+
+## Fix
+
+- cosmos 0.42.x has too many breaking changes that wren't caught in the last version, downgrade "cosmos-client": "0.39.2"
+
+# v.0.17.6 (2021-07-19)
+
+## Update
+
+- bumping peer dependency "cosmos-client": "0.39.2" -> "cosmos-client": "^0.42.7"
+
+# v.0.17.5 (2021-07-18)
+
+## Update
+
+- Updated rollupjs to include axios to enlable usage on node
+
+# v.0.17.4 (2021-07-14)
+
+### Fix
+
+- Bump `fee.gas to `25000000` (twenty five million) to try to avoid failing withdraw txs
+
 # v.0.17.3 (2021-07-07)
+
+## Update
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
 
 # v.0.17.2 (2021-07-05)
+
+## Fix
 
 - refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
 

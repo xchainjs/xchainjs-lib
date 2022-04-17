@@ -7,6 +7,7 @@ export type Address = string
 
 export enum Network {
   Mainnet = 'mainnet',
+  Stagenet = 'stagenet',
   Testnet = 'testnet',
 }
 
@@ -25,11 +26,13 @@ export type TxHash = string
 export type TxTo = {
   to: Address // address
   amount: BaseAmount // amount
+  asset?: Asset // asset
 }
 
 export type TxFrom = {
   from: Address | TxHash // address or tx id
   amount: BaseAmount // amount
+  asset?: Asset // asset
 }
 
 export type Tx = {
@@ -108,6 +111,8 @@ export interface XChainClient {
   // ===================================
   // implemented by various online providers
   // ===================================
+  // TODO (@xchain-team|@veado) Change params to be an object to be extendable more easily
+  // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
   getBalance(address: Address, assets?: Asset[]): Promise<Balance[]>
   getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   getTransactionData(txId: string, assetAddress?: Address): Promise<Tx>

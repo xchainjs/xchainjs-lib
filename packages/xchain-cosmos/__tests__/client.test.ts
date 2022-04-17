@@ -1,66 +1,70 @@
+import { cosmosclient, proto } from '@cosmos-client/core'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
-import { BaseAccount, BroadcastTxCommitResult, Coin } from 'cosmos-client/api'
 import nock from 'nock'
 
 import { Client } from '../src/client'
-import { TxHistoryResponse, TxResponse } from '../src/cosmos/types'
+import { GetTxByHashResponse, TxHistoryResponse } from '../src/cosmos/types'
 import { AssetMuon } from '../src/types'
-import { getDenom } from '../src/util'
 
 const getClientUrl = (client: Client): string => {
-  return client.getNetwork() === 'testnet' ? 'http://lcd.gaia.bigdipper.live:1317' : 'https://api.cosmos.network'
+  return client.getNetwork() === Network.Testnet
+    ? 'https://rest.sentry-02.theta-testnet.polypore.xyz'
+    : 'https://api.cosmos.network'
 }
 
 const mockAccountsAddress = (
   url: string,
   address: string,
   result: {
-    height: number
-    result: BaseAccount
+    account: {
+      '@type': string
+      address: string
+      pub_key?: {
+        '@type': string
+        key: string
+      }
+      account_number: string
+      sequence: string
+    }
   },
 ) => {
-  nock(url).get(`/auth/accounts/${address}`).reply(200, result)
+  nock(url).get(`/cosmos/auth/v1beta1/accounts/${address}`).reply(200, result)
 }
 
 const mockAccountsBalance = (
   url: string,
   address: string,
   result: {
-    height: number
-    result: Coin[]
+    balances: proto.cosmos.base.v1beta1.Coin[]
   },
 ) => {
-  nock(url).get(`/bank/balances/${address}`).reply(200, result)
+  nock(url).get(`/cosmos/bank/v1beta1/balances/${address}`).reply(200, result)
 }
 
 const assertTxsPost = (
   url: string,
-  from_address: string,
-  to_address: string,
-  send_amount: Coin[],
-  memo: undefined | string,
-  result: BroadcastTxCommitResult,
-) => {
+  result: {
+    tx_response: {
+      txhash: string
+    }
+  },
+): void => {
   nock(url, { allowUnmocked: true })
-    .post(`/txs`, (body) => {
-      expect(body.tx.msg.length).toEqual(1)
-      expect(body.tx.msg[0].type).toEqual('cosmos-sdk/MsgSend')
-      expect(body.tx.msg[0].value.from_address).toEqual(from_address)
-      expect(body.tx.msg[0].value.to_address).toEqual(to_address)
-      expect(body.tx.msg[0].value.amount).toEqual(send_amount)
-      expect(body.tx.memo).toEqual(memo)
+    .post(`/cosmos/tx/v1beta1/txs`, (body) => {
+      expect(body.mode).toEqual('BROADCAST_MODE_SYNC')
+      expect(body.tx_bytes.length).toBeGreaterThan(0)
       return true
     })
     .reply(200, result)
 }
 
 const assertTxHstory = (url: string, address: string, result: TxHistoryResponse): void => {
-  nock(url).get(`/txs?message.sender=${address}`).reply(200, result)
+  nock(url).get(`/cosmos/tx/v1beta1/txs?events=message.sender='${address}'`).reply(200, result)
 }
 
-const assertTxHashGet = (url: string, hash: string, result: TxResponse): void => {
-  nock(url).get(`/txs/${hash}`).reply(200, result)
+const assertTxHashGet = (url: string, hash: string, result: GetTxByHashResponse): void => {
+  nock(url).get(`/cosmos/tx/v1beta1/txs/${hash}`).reply(200, result)
 }
 
 describe('Client Test', () => {
@@ -70,8 +74,8 @@ describe('Client Test', () => {
   const address0_mainnet = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
   const address1_mainnet = 'cosmos1924f27fujxqnkt74u4d3ke3sfygugv9qp29hmk'
 
-  const address0_testnet = 'cosmos13hrqe0g38nqnjgnstkfrlm2zd790g5yegntshv'
-  const address1_testnet = 'cosmos1re8rf3sv2tkx88xx6825tjqtfntrrfj0h4u94u'
+  const address0_testnet = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
+  const address1_testnet = 'cosmos1924f27fujxqnkt74u4d3ke3sfygugv9qp29hmk'
 
   beforeEach(() => {
     cosmosClient = new Client({ phrase, network: 'testnet' as Network })
@@ -125,8 +129,7 @@ describe('Client Test', () => {
     cosmosClient.setNetwork('mainnet' as Network)
 
     mockAccountsBalance(getClientUrl(cosmosClient), address0_mainnet, {
-      height: 0,
-      result: [],
+      balances: [],
     })
 
     const result = await cosmosClient.getBalance(address0_mainnet)
@@ -135,12 +138,11 @@ describe('Client Test', () => {
 
   it('has balances', async () => {
     mockAccountsBalance(getClientUrl(cosmosClient), 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv', {
-      height: 0,
-      result: [
-        {
+      balances: [
+        new proto.cosmos.base.v1beta1.Coin({
           denom: 'muon',
           amount: '75000000',
-        },
+        }),
       ],
     })
     const balances = await cosmosClient.getBalance('cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv')
@@ -157,12 +159,13 @@ describe('Client Test', () => {
       txs: [],
     }
     assertTxHstory(getClientUrl(cosmosClient), address0_mainnet, {
-      count: 0,
+      pagination: {
+        total: '0',
+      },
       limit: 30,
       page_number: 1,
       page_total: 1,
-      total_count: 0,
-      txs: [],
+      tx_responses: [],
     })
 
     const transactions = await cosmosClient.getTransactions({ address: address0_mainnet })
@@ -170,13 +173,26 @@ describe('Client Test', () => {
   })
 
   it('has tx history', async () => {
+    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+      from_address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2',
+      to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
+      amount: [
+        {
+          denom: 'umuon',
+          amount: '4318994970',
+        },
+      ],
+    })
+    const encodedMsg = cosmosclient.codec.packCosmosAny(msgSend)
+
     assertTxHstory(getClientUrl(cosmosClient), 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
-      count: 1,
+      pagination: {
+        total: '1',
+      },
       limit: 30,
       page_number: 1,
       page_total: 1,
-      total_count: 1,
-      txs: [
+      tx_responses: [
         {
           height: 1047,
           txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
@@ -186,21 +202,8 @@ describe('Client Test', () => {
           gas_used: '148996',
           tx: {
             body: {
-              messages: [
-                {
-                  type: 'cosmos-sdk/MsgSend',
-                  value: {
-                    from_address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2',
-                    to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
-                    amount: [
-                      {
-                        denom: 'umuon',
-                        amount: 4318994970,
-                      },
-                    ],
-                  },
-                },
-              ],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              messages: [encodedMsg as any],
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -212,14 +215,25 @@ describe('Client Test', () => {
     expect(transactions.total).toBeGreaterThan(0)
 
     cosmosClient.setNetwork('mainnet' as Network)
-
+    const msgSend2 = new proto.cosmos.bank.v1beta1.MsgSend({
+      from_address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z',
+      to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
+      amount: [
+        {
+          denom: 'uatom',
+          amount: '4318994970',
+        },
+      ],
+    })
+    const encodedMsg2 = cosmosclient.codec.packCosmosAny(msgSend2)
     assertTxHstory(getClientUrl(cosmosClient), 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z', {
-      count: 1,
+      pagination: {
+        total: '1',
+      },
       limit: 30,
       page_number: 1,
       page_total: 1,
-      total_count: 1,
-      txs: [
+      tx_responses: [
         {
           height: 1047,
           txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
@@ -229,21 +243,8 @@ describe('Client Test', () => {
           gas_used: '148996',
           tx: {
             body: {
-              messages: [
-                {
-                  type: 'cosmos-sdk/MsgSend',
-                  value: {
-                    from_address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z',
-                    to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
-                    amount: [
-                      {
-                        denom: 'uatom',
-                        amount: 4318994970,
-                      },
-                    ],
-                  },
-                },
-              ],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              messages: [encodedMsg2 as any],
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -260,39 +261,26 @@ describe('Client Test', () => {
     const send_amount: BaseAmount = baseAmount(10000, 6)
     const memo = 'transfer'
 
-    const expected_txsPost_result: BroadcastTxCommitResult = {
-      check_tx: {},
-      deliver_tx: {},
-      txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
-      height: 0,
+    const expected_txsPost_result = {
+      tx_response: {
+        txhash: 'EA2FAC9E82290DCB9B1374B4C95D7C4DD8B9614A96FACD38031865EB1DBAE24D',
+        code: 0,
+      },
     }
 
     mockAccountsAddress(getClientUrl(cosmosClient), cosmosClient.getAddress(), {
-      height: 0,
-      result: {
-        coins: [
-          {
-            denom: 'muon',
-            amount: '21000',
-          },
-        ],
+      account: {
+        '@type': '/cosmos.auth.v1beta1.BaseAccount',
+        address: cosmosClient.getAddress(),
+        pub_key: {
+          '@type': '/cosmos.crypto.secp256k1.PubKey',
+          key: 'AyB84hKBjN2wsmdC2eF1Ppz6l3VxlfSKJpYsTaL4VrrE',
+        },
         account_number: '0',
         sequence: '0',
       },
     })
-    assertTxsPost(
-      getClientUrl(cosmosClient),
-      cosmosClient.getAddress(),
-      to_address,
-      [
-        {
-          denom: getDenom(AssetMuon),
-          amount: send_amount.amount().toString(),
-        },
-      ],
-      memo,
-      expected_txsPost_result,
-    )
+    assertTxsPost(getClientUrl(cosmosClient), expected_txsPost_result)
 
     const result = await cosmosClient.transfer({
       asset: AssetMuon,
@@ -307,33 +295,34 @@ describe('Client Test', () => {
   it('get transaction data', async () => {
     cosmosClient.setNetwork('mainnet' as Network)
 
-    assertTxHashGet(getClientUrl(cosmosClient), '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {
-      height: 1047,
-      txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
-      data: '0A090A076465706F736974',
-      raw_log: 'transaction logs',
-      gas_wanted: '5000000000000000',
-      gas_used: '148996',
-      tx: {
-        body: {
-          messages: [
-            {
-              type: 'cosmos-sdk/MsgSend',
-              value: {
-                from_address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z',
-                to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
-                amount: [
-                  {
-                    denom: 'uatom',
-                    amount: 4318994970,
-                  },
-                ],
-              },
-            },
-          ],
+    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+      from_address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z',
+      to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
+      amount: [
+        {
+          denom: 'uatom',
+          amount: '4318994970',
         },
+      ],
+    })
+    const encodedMsg = cosmosclient.codec.packCosmosAny(msgSend)
+
+    assertTxHashGet(getClientUrl(cosmosClient), '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {
+      tx_response: {
+        height: 1047,
+        txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
+        data: '0A090A076465706F736974',
+        raw_log: 'transaction logs',
+        gas_wanted: '5000000000000000',
+        gas_used: '148996',
+        tx: {
+          body: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            messages: [encodedMsg as any],
+          },
+        },
+        timestamp: '2020-09-25T06:09:15Z',
       },
-      timestamp: '2020-09-25T06:09:15Z',
     })
 
     const tx = await cosmosClient.getTransactionData('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
@@ -347,7 +336,7 @@ describe('Client Test', () => {
 
   it('should return valid explorer url', () => {
     // Client created with network === 'testnet'
-    expect(cosmosClient.getExplorerUrl()).toEqual('https://gaia.bigdipper.live')
+    expect(cosmosClient.getExplorerUrl()).toEqual('https://explorer.theta-testnet.polypore.xyz')
 
     cosmosClient.setNetwork('mainnet' as Network)
     expect(cosmosClient.getExplorerUrl()).toEqual('https://cosmos.bigdipper.live')
@@ -355,7 +344,7 @@ describe('Client Test', () => {
 
   it('should retrun valid explorer address url', () => {
     expect(cosmosClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
-      'https://gaia.bigdipper.live/account/anotherTestAddressHere',
+      'https://explorer.theta-testnet.polypore.xyz/account/anotherTestAddressHere',
     )
 
     cosmosClient.setNetwork('mainnet' as Network)
@@ -366,7 +355,7 @@ describe('Client Test', () => {
 
   it('should retrun valid explorer tx url', () => {
     expect(cosmosClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
-      'https://gaia.bigdipper.live/transactions/anotherTestTxHere',
+      'https://explorer.theta-testnet.polypore.xyz/transactions/anotherTestTxHere',
     )
 
     cosmosClient.setNetwork('mainnet' as Network)

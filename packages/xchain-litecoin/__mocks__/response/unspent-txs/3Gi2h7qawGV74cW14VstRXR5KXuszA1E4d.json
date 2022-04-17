@@ -1,0 +1,27 @@
+{
+  "status": "success",
+  "data": {
+    "network": "LTC",
+    "address": "3Gi2h7qawGV74cW14VstRXR5KXuszA1E4d",
+    "txs": [
+      {
+        "txid": "f526f60ef4495a86b4e3d103efed4474119096e4f42acf54ef24dd535380d781",
+        "output_no": 0,
+        "script_asm": "OP_HASH160 a4baf1bae58d11536548d437713b99d47f9213f4 OP_EQUAL",
+        "script_hex": "a914a4baf1bae58d11536548d437713b99d47f9213f487",
+        "value": "0.05914792",
+        "confirmations": 4,
+        "time": 1646416011
+      },
+      {
+        "txid": "3e7316a6d1d0f079d92b3921f29101b51108e95962e0d6716afed95fd545b162",
+        "output_no": 0,
+        "script_asm": "OP_HASH160 a4baf1bae58d11536548d437713b99d47f9213f4 OP_EQUAL",
+        "script_hex": "a914a4baf1bae58d11536548d437713b99d47f9213f487",
+        "value": "0.05123093",
+        "confirmations": 4,
+        "time": 1646416011
+      }
+    ]
+  }
+}

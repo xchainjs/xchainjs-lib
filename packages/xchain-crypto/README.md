@@ -6,20 +6,34 @@ XCHAIN-CRYPTO encrypts a master phrase to a keystore. This keystore can then be 
 
 Users can export their phrase and import them into other wallets since it is a BIP39 compatible phrase.
 
-## Design
+## Installation
 
-Typically keystore files encrypt a `seed` to a file, however this is not appropriate or UX friendly, since the phrase cannot be recovered after the fact.
+- Install `@xchainjs/xchain-crypto` from `npm`
 
-Crypto design:
+```bash
+yarn add @xchainjs/xchain-crypto
+```
 
-[entropy] -> [phrase] -> [seed] -> [privateKey] -> [publicKey] -> [address]
+## Documentation
 
-Instead, XCHAIN-CRYPTO stores the phrase in a keystore file, then decrypts and passes this phrase to other clients:
+### [`xchain crypto`](http://docs.xchainjs.org/xchain-crypto/)
+[`How xchain-crypto works`](http://docs.xchainjs.org/xchain-crypto/how-it-works.html)\
+[`How to use xchain-crypto`](http://docs.xchainjs.org/xchain-crypto/how-to-use.html)
 
-[keystore] -> XCHAIN-CRYPTO -> [phrase] -> ChainClient
 
-The ChainClients can then convert this into their respective key-pairs and addresses.
-Users can also export their phrases after the fact, ensuring they have saved it securely. This could enhance UX onboarding since users aren't forced to write their phrases down immediately for empty or test wallets.
+## Build
+
+```bash
+yarn build
+```
+
+## Tests
+
+```bash
+yarn test
+```
+
+### Constants
 
 ```js
 // Crypto Constants for xchain
@@ -32,29 +46,7 @@ const hashFunction = 'sha256'
 const meta = 'xchain-keystore'
 ```
 
-## Installation
-
-- Install `@xchainjs/xchain-crypto` from `npm`
-
-```bash
-yarn add @xchainjs/xchain-crypto
-```
-
-## Usage
-
-### Basic usage
-
-```js
-import { generatePhrase, validatePhrase, encryptToKeyStore, decryptFromKeystore } from '../src/crypto'
-
-const phrase = generatePhrase()
-const isCorrect = validatePhrase(phrase)
-const password = 'thorchain'
-const keystore = await encryptToKeyStore(phrase, password)
-const phraseDecrypted = await decryptFromKeystore(keystore, password)
-```
-
-Keystore Type
+### Keystore Type
 
 ```js
 export type Keystore = {
@@ -80,18 +72,3 @@ export type Keystore = {
 }
 ```
 
-### Error handling
-
-## Development
-
-### Build
-
-```bash
-yarn build
-```
-
-### Tests
-
-```bash
-yarn test
-```

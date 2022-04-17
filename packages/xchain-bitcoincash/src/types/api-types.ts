@@ -1,4 +1,4 @@
-import { Network, TxHash } from '@xchainjs/xchain-client'
+import { TxHash } from '@xchainjs/xchain-client'
 
 export type AddressParams = {
   haskoinUrl: string
@@ -15,12 +15,7 @@ export type NodeAuth = {
   password: string
 }
 
-export type TxBroadcastParams = {
-  network: Network
-  txHex: string
-  nodeUrl: string
-  auth?: NodeAuth
-}
+export type BroadcastTxParams = { txHex: string; haskoinUrl: string }
 
 export type ErrorResponse = {
   error: string

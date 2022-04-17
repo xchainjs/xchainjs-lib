@@ -1,5 +1,4 @@
 import { Address, FeeRate, Network, TxParams } from '@xchainjs/xchain-client'
-import { OnlyRequired } from '@xchainjs/xchain-util'
 
 import { UTXO } from './common'
 
@@ -8,9 +7,10 @@ export type LedgerTxInfo = {
   newTxHex: string
 }
 
-export type LedgerTxInfoParams = OnlyRequired<TxParams> & {
+export type LedgerTxInfoParams = Pick<TxParams, 'amount' | 'recipient'> & {
   feeRate: FeeRate
   sender: Address
   network: Network
   sochainUrl: string
+  nodeApiKey: string
 }

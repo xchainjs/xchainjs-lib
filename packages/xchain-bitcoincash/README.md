@@ -16,6 +16,13 @@ Following peer dependencies have to be installed into your project. These are no
 yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios @psf/bitcoincashjs-lib bchaddrjs
 ```
 
+## Documentation
+
+### [`xchain bitcoincash`](http://docs.xchainjs.org/xchain-client/xchain-bitcoincash/)
+[`How xchain-bitcoincash works`](http://docs.xchainjs.org/xchain-client/xchain-bitcoincash/how-it-works.html)\
+[`How to use xchain-bitcoincash`](http://docs.xchainjs.org/xchain-client/xchain-bitcoincash/how-to-use.html)
+
+
 ## Service Providers
 
 This package uses the following service providers:
@@ -27,47 +34,11 @@ This package uses the following service providers:
 | Transaction details by hash | Haskoin           | https://api.haskoin.com/#/Transaction/getTransaction                |
 | Transaction fees            | Bitgo             | https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate          |
 | Transaction broadcast       | Bitcoin Cash Node | https://developer.bitcoin.org/reference/rpc/sendrawtransaction.html |
-| Explorer                    | Blockchain.com    | https://www.blockchain.com                                          |
+| Explorer                    | Blockchain.com    | https://www.blockchain.com/explorer?view=bch                                          |
 
 Haskoin API rate limits: No
 
 Bitgo API rate limits: https://app.bitgo.com/docs/#section/Rate-Limiting (10 requests/second)
 
-## Usage
 
-Initialize client and use class methods:
-
-```
-import { Client, Network } from '../src/client'
-
-// Create a new client interface
-const bchClient = new Client({ network: Network.Mainnet })
-
-// Set phrase
-bchClient.setPhrase('phrase here')
-
-// Get address
-const address = bchClient.getAddress()
-
-// Get balance
-const balance = await bchClient.getBalance()
-
-// Transfer with feeRate
-const txid = await bchClient.transfer({ asset: AssetBCH, recipient: 'recipient address here', amount: baseAmount(100, BCH_DECIMAL), feeRate: 1 })
-
-// Transfer with default feeRate (default is `fast`)
-const txid = await bchClient.transfer({ asset: AssetBCH, recipient: 'recipient address here', amount: baseAmount(100, BCH_DECIMAL) })
-
-// Get fee estimations
-const { fast, fastest, average } = await bchClient.getFees()
-
-// Get feeRate estimations
-const { fast, fastest, average } = await bchClient.getFeeRates()
-
-// Search transactions
-const transactions = await bchClient.getTransactions({ address: 'address here', limit: 4 })
-
-// Get a transaction with a given txId/hash
-const txData = await bchClient.getTransactionData('b660ee07167cfa32681e2623f3a29dc64a089cabd9a3a07dd17f9028ac956eb8')
-
-```
+## Extras

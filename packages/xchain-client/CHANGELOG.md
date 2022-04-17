@@ -1,3 +1,26 @@
+# v.0.11.1 (2022-02-04)
+
+### Update
+
+- Use latest `@xchainjs/xchain-util@0.5.1`
+- made walletIndex optional in BaseXChainClient.getAddress(walletIndex?: number)
+- Use latest axios@0.25.0
+- change TxFrom/TxTo to have optional Asset, to support Terra's multiple native asset types (UST, KRT, LUNA, etc)
+
+# v.0.11.0 (2021-12-29)
+
+### Breaking change
+
+- Expand `Network` enum type to include stagenet and introduce stagenet environment variables to `BaseXChainClient` for thorchain.
+
+# v.0.10.3 (2021-09-02)
+
+- updated to the latest dependencies
+
+# v.0.10.2 (2021-07-18)
+
+- optimized BaseXchainClient to skip creating an addres that just gets thown away in the constructor
+
 # v.0.10.1 (2021-07-07)
 
 ### Update

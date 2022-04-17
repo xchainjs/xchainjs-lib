@@ -17,7 +17,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { AssetBTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Asset, AssetBTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import { BTC_DECIMAL } from './const'
@@ -25,11 +25,22 @@ import { BTC_DECIMAL } from './const'
 import * as Utils from './utils'
 
 const SOCHAIN_API = new SochainAPI(Chain.Bitcoin)
+// import * as sochain from './sochain-api'
+import { ClientUrl } from './types/client-types'
+import * as Utils from './utils'
+
+export type BitcoinClientParams = XChainClientParams & {
+  sochainUrl?: string
+  haskoinUrl?: ClientUrl
+}
 
 /**
  * Custom Bitcoin client
  */
 class Client extends UTXOClient {
+  private sochainUrl = ''
+  private haskoinUrl: ClientUrl
+
   /**
    * Constructor
    * Client is initialised with network type
@@ -41,12 +52,68 @@ class Client extends UTXOClient {
     network = Network.Testnet,
     providers,
     explorer = Explorers.BTC.DEFAULT,
+    // sochainUrl = 'https://sochain.com/api/v2',
+    // haskoinUrl = {
+    //   [Network.Testnet]: 'https://api.haskoin.com/btctest',
+    //   [Network.Mainnet]: 'https://api.haskoin.com/btc',
+    //   [Network.Stagenet]: 'https://api.haskoin.com/btc',
+    // },
     rootDerivationPaths = {
       [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
       [Network.Testnet]: `84'/1'/0'/0/`,
+      [Network.Stagenet]: `84'/0'/0'/0/`,
     },
   }: XChainClientParams) {
     super(Chain.Bitcoin, { network, rootDerivationPaths, phrase, explorer, providers })
+    phrase = '',
+  // }: BitcoinClientParams) {
+  //   super(Chain.Bitcoin, { network, rootDerivationPaths, phrase })
+  //   this.setSochainUrl(sochainUrl)
+  //   this.haskoinUrl = haskoinUrl
+  }
+
+  /**
+   * Set/Update the sochain url.
+   *
+   * @param {string} url The new sochain url.
+   * @returns {void}
+   */
+  setSochainUrl(url: string): void {
+    this.sochainUrl = url
+  }
+
+  /**
+   * Get the explorer url.
+   *
+   * @returns {string} The explorer url based on the network.
+   */
+  getExplorerUrl(): string {
+    switch (this.network) {
+      case Network.Mainnet:
+      case Network.Stagenet:
+        return 'https://blockstream.info'
+      case Network.Testnet:
+        return 'https://blockstream.info/testnet'
+    }
+  }
+
+  /**
+   * Get the explorer url for the given address.
+   *
+   * @param {Address} address
+   * @returns {string} The explorer url for the given address based on the network.
+   */
+  getExplorerAddressUrl(address: string): string {
+    return `${this.getExplorerUrl()}/address/${address}`
+  }
+  /**
+   * Get the explorer url for the given transaction id.
+   *
+   * @param {string} txID The transaction id
+   * @returns {string} The explorer url for the given transaction id based on the network.
+   */
+  getExplorerTxUrl(txID: string): string {
+    return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
   /**
@@ -114,19 +181,28 @@ class Client extends UTXOClient {
     return Utils.validateAddress(address, this.network)
   }
 
-  // /**
-  //  * Get the BTC balance of a given address.
-  //  *
-  //  * @param {Address} the BTC address
-  //  * @returns {Balance[]} The BTC balance of the address.
-  //  */
-  // async getBalance(address: Address): Promise<Balance[]> {
-  //   // return Utils.getBalance({
-  //   //   sochainUrl: this.sochainUrl,
-  //   //   network: this.network,
-  //   //   address: address,
-  //   // })
-  // }
+  /**
+   * Gets BTC balances of a given address.
+   *
+   * @param {Address} BTC address to get balances from
+   * @param {undefined} Needed for legacy only to be in common with `XChainClient` interface - will be removed by a next version
+   * @param {confirmedOnly} Flag to get balances of confirmed txs only
+   *
+   * @returns {Balance[]} BTC balances
+   */
+  // TODO (@xchain-team|@veado) Change params to be an object to be extendable more easily
+  // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
+  async getBalance(address: Address, _assets?: Asset[] /* not used */, confirmedOnly?: boolean): Promise<Balance[]> {
+    return Utils.getBalance({
+      params: {
+        sochainUrl: this.sochainUrl,
+        network: this.network,
+        address: address,
+      },
+      haskoinUrl: this.haskoinUrl[this.network],
+      confirmedOnly: !!confirmedOnly,
+    })
+  }
 
   /**
    * Get transaction history of a given address with pagination options.
@@ -224,7 +300,9 @@ class Client extends UTXOClient {
      * do not spend pending UTXOs when adding a memo
      * https://github.com/xchainjs/xchainjs-lib/issues/330
      */
-    const spendPendingUTXO: boolean = params.memo ? false : true
+    const spendPendingUTXO = !params.memo
+
+    const haskoinUrl = this.haskoinUrl[this.network]
 
     const { psbt } = await Utils.buildTx({
       ...params,

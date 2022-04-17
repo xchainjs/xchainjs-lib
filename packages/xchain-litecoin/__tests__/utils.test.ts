@@ -2,14 +2,22 @@ import { Network } from '@xchainjs/xchain-client'
 import * as Litecoin from 'bitcoinjs-lib'
 
 import mockSochainApi from '../__mocks__/sochain'
+import mockThornodeApi from '../__mocks__/thornode-api'
 import { UTXO } from '../src/types/common'
 import * as Utils from '../src/utils'
-
-mockSochainApi.init()
 
 let utxos: UTXO[]
 
 describe('Litecoin Utils Test', () => {
+  beforeEach(() => {
+    mockSochainApi.init()
+    mockThornodeApi.init()
+  })
+  afterEach(() => {
+    mockSochainApi.restore()
+    mockThornodeApi.restore()
+  })
+
   const witness = {
     script: Buffer.from('0014123f6562aa047dae2d38537327596cd8e9e21932'),
     value: 10000,
@@ -54,11 +62,45 @@ describe('Litecoin Utils Test', () => {
     const address = 'M8T1B2Z97gVdvmfkQcAtYbEepune1tzGua'
     const utxos: UTXO[] = await Utils.scanUTXOs({
       sochainUrl: 'https://sochain.com/api/v2',
-      network: 'mainnet' as Network,
+      network: Network.Mainnet,
       address,
     })
     expect(utxos.length).toEqual(213)
     expect(utxos?.[0].hash).toEqual('65b34acff41570854758adf6bdafc94c0c33f78194d7f49f1cf8d24314b4d47a')
     expect(utxos?.[212].hash).toEqual('f180c1cd0a8e719456f3f033c497bae2cedc482d87443b668c0a5a277272b2ba')
+  })
+
+  it('fetches uxtos with tx hashes', async () => {
+    const utxos: UTXO[] = await Utils.scanUTXOs({
+      sochainUrl: 'https://sochain.com/api/v2',
+      network: Network.Mainnet,
+      address: '3Gi2h7qawGV74cW14VstRXR5KXuszA1E4d',
+      withTxHex: true,
+    })
+    expect(utxos.length).toEqual(2)
+    expect(utxos?.[0].txHex).toEqual(
+      '01000000000102b553e93f0c927d44b7b4916257b1ede3b7c651fa70527bad25f20db55c1b50aa0000000000fdffffff77b26316ac212fbebf3abc440278e5b603b60b1c5733ae621d3c6c003e73115c0000000000feffffff01a8405a000000000017a914a4baf1bae58d11536548d437713b99d47f9213f4870247304402201e13756ffd74f2c89542f6a4d022f298181d6dc5b7f84c8d76aa1afbac786fa30220561bff0da6037e3e9d2792a1b0a05dc00775858a437c8b644e9f401df9192739012103df2365318e86e7d4971a825b3265cc80b28235c0c77612d155968390b7ec57e502473044022042df93024ef970f2ef70fcb2f352266215fb1072069bf81bdfcb7e741c280b0e0220405f98570e0a462f11d89b4595e4811f5def3010a9858e7d5659052bb084a8c0012103df2365318e86e7d4971a825b3265cc80b28235c0c77612d155968390b7ec57e500000000',
+    )
+    expect(utxos?.[1].txHex).toEqual(
+      '010000000001020d7a2258f321d17dc7571f18d55abe59f493c89138e8b5de43e3683e3085c8b60000000000fdffffff8d8e6f61a9732fe6bba7927591136d3b4004a28515420c25ff7ce8a1db8e6b600000000000feffffff01152c4e000000000017a914a4baf1bae58d11536548d437713b99d47f9213f48702483045022100ec4250332f0f2b9f05078ea1d58c1b577ec9614eff3e70249fd932774949d2d102207391e6b99391d899755be23b8592c4ac7798250c36691350d9c56b76fa395d3b012103d0635c580ef041ba12686d621d6cd193dc08dd1a627458222a84eae78a396658024830450221008638423e93857fc18cab6679184d21cf0d76b59f58e5ebffb2a3d02b7452419c022063d0b4e256c3d70d05ad4698c3ff463558a379349fee8188f477e40bc7dd0695012103d0635c580ef041ba12686d621d6cd193dc08dd1a627458222a84eae78a39665800000000',
+    )
+  })
+
+  it('fetches uxtos without tx hashes', async () => {
+    const utxos: UTXO[] = await Utils.scanUTXOs({
+      sochainUrl: 'https://sochain.com/api/v2',
+      network: Network.Mainnet,
+      address: '3Gi2h7qawGV74cW14VstRXR5KXuszA1E4d',
+    })
+    expect(utxos.length).toEqual(2)
+    expect(utxos?.[0].txHex).toBeUndefined()
+    expect(utxos?.[1].txHex).toBeUndefined()
+  })
+
+  describe('broadcastTx', () => {
+    it('returns txHash', async () => {
+      const txHash = await Utils.broadcastTx({ txHex: '0xdead', nodeUrl: 'https://ltc.thorchain.info' })
+      expect(txHash).toEqual('mock-txid')
+    })
   })
 })

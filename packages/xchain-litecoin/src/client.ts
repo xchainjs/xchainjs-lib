@@ -56,6 +56,7 @@ class Client extends UTXOClient {
     rootDerivationPaths = {
       [Network.Mainnet]: `m/84'/2'/0'/0/`,
       [Network.Testnet]: `m/84'/1'/0'/0/`,
+      [Network.Stagenet]: `m/84'/2'/0'/0/`,
     },
   }: LitecoinClientParams) {
     super(Chain.Litecoin, { network, rootDerivationPaths, phrase })
@@ -64,6 +65,7 @@ class Client extends UTXOClient {
       (() => {
         switch (network) {
           case Network.Mainnet:
+          case Network.Stagenet:
             return 'https://ltc.thorchain.info'
           case Network.Testnet:
             return 'https://testnet.ltc.thorchain.info'
@@ -96,9 +98,10 @@ class Client extends UTXOClient {
   getExplorerUrl(): string {
     switch (this.network) {
       case Network.Mainnet:
-        return 'https://ltc.bitaps.com'
+      case Network.Stagenet:
+        return 'https://blockchair.com/litecoin'
       case Network.Testnet:
-        return 'https://tltc.bitaps.com'
+        return 'https://blockexplorer.one/litecoin/testnet'
     }
   }
 
@@ -109,7 +112,7 @@ class Client extends UTXOClient {
    * @returns {string} The explorer url for the given address based on the network.
    */
   getExplorerAddressUrl(address: Address): string {
-    return `${this.getExplorerUrl()}/${address}`
+    return `${this.getExplorerUrl()}/address/${address}`
   }
 
   /**
@@ -119,7 +122,15 @@ class Client extends UTXOClient {
    * @returns {string} The explorer url for the given transaction id based on the network.
    */
   getExplorerTxUrl(txID: string): string {
-    return `${this.getExplorerUrl()}/${txID}`
+    switch (this.network) {
+      case Network.Mainnet:
+      case Network.Stagenet:
+        // blockchair
+        return `${this.getExplorerUrl()}/transaction/${txID}`
+      case Network.Testnet:
+        // blockexplorer.one
+        return `${this.getExplorerUrl()}/blockHash/${txID}`
+    }
   }
 
   /**
@@ -307,7 +318,6 @@ class Client extends UTXOClient {
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
     return await Utils.broadcastTx({
-      network: this.network,
       txHex,
       nodeUrl: this.nodeUrl,
       auth: this.nodeAuth,

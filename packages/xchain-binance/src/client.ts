@@ -32,13 +32,14 @@ import {
 import axios from 'axios'
 
 import {
+  Account,
   Balance as BinanceBalance,
   Fees as BinanceFees,
   TransactionResult,
   TransferFee,
   TxPage as BinanceTxPage,
 } from './types/binance'
-import { getPrefix, isTransferFee, parseTx } from './util'
+import { getPrefix, isAccount, isTransferFee, parseTx } from './util'
 
 type PrivKey = string
 
@@ -64,6 +65,8 @@ export type MultiSendParams = {
 export interface BinanceClient {
   purgeClient(): void
   getBncClient(): BncClient
+
+  getAccount(address?: Address, index?: number): Promise<Account>
 
   getMultiSendFees(): Promise<Fees>
   getSingleAndMultiFees(): Promise<{ single: Fees; multi: Fees }>
@@ -103,6 +106,23 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   }
 
   /**
+   * Gets the current network, and enforces type limited to
+   * 'mainnet' and 'testnet', which conflicts with `xchain-client`
+   *
+   * Remove this once @binance-chain has stagenet support.
+   * @returns {Network}
+   */
+  getNetwork(): Network.Mainnet | Network.Testnet {
+    switch (super.getNetwork()) {
+      case Network.Mainnet:
+      case Network.Stagenet:
+        return Network.Mainnet
+      case Network.Testnet:
+        return Network.Testnet
+    }
+  }
+
+  /**
    * Set/update the current network.
    *
    * @param {Network} network
@@ -111,7 +131,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @throws {"Network must be provided"}
    * Thrown if network has not been set before.
    */
-  setNetwork(network: Network): void {
+  setNetwork(network: Network.Mainnet | Network.Testnet): void {
     super.setNetwork(network)
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(network)
@@ -123,7 +143,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {string} The client url for binance chain based on the network.
    */
   private getClientUrl(): string {
-    switch (this.network) {
+    switch (this.getNetwork()) {
       case Network.Mainnet:
         return 'https://dex.binance.org'
       case Network.Testnet:
@@ -137,7 +157,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    switch (this.network) {
+    switch (this.getNetwork()) {
       case Network.Mainnet:
         return 'https://explorer.binance.org'
       case Network.Testnet:
@@ -184,6 +204,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   /**
    * Get the current address.
    *
+   * @param {number} index (optional) Account index for the derivation path
    * @returns {Address} The current address.
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
@@ -202,9 +223,26 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   }
 
   /**
+   * Get account data of wallets or by given address.
+   *
+   * @param {Address} address (optional) By default, it will return account data of current wallet.
+   * @param {number} index (optional) Account index for the derivation path
+   *
+   * @returns {Account} account details of given address.
+   */
+  async getAccount(address?: Address, index = 0): Promise<Account> {
+    const accountAddress = address || this.getAddress(index)
+    const response = await this.bncClient.getAccount(accountAddress)
+    if (!response || !response.result || !isAccount(response.result))
+      return Promise.reject(Error(`Could not get account data for address ${accountAddress}`))
+
+    return response.result
+  }
+
+  /**
    * Get the balance of a given address.
    *
-   * @param {Address | number} address By default, it will return the balance of the current wallet. (optional)
+   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
    * @param {Asset} asset If not set, it will return all assets available. (optional)
    * @returns {Balance[]} The balance of the address.
    */
@@ -349,7 +387,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     await this.bncClient.setPrivateKey(this.getPrivateKey(walletIndex || 0))
 
     const transferResult = await this.bncClient.transfer(
-      this.getAddress(),
+      this.getAddress(walletIndex),
       recipient,
       baseToAsset(amount).amount().toString(),
       asset ? asset.symbol : AssetBNB.symbol,

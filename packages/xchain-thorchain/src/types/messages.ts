@@ -1,25 +1,17 @@
-import { AccAddress, Msg } from 'cosmos-client'
-import { StdTxFee } from 'cosmos-client/api'
-import { StdSignature } from 'cosmos-client/x/auth'
+import { cosmosclient, proto } from '@cosmos-client/core'
+import { Asset } from '@xchainjs/xchain-util'
 
 export type MsgCoin = {
-  asset: string
+  asset: Asset
   amount: string
 }
 
-export class MsgNativeTx extends Msg {
+export class MsgNativeTx {
   coins: MsgCoin[]
   memo: string
-  signer: AccAddress
-  /**
-   *
-   * @param from_address
-   * @param to_address
-   * @param amount
-   */
-  constructor(coins: MsgCoin[], memo: string, signer: AccAddress) {
-    super()
+  signer: cosmosclient.AccAddress
 
+  constructor(coins: MsgCoin[], memo: string, signer: cosmosclient.AccAddress) {
     this.coins = coins
     this.memo = memo
     this.signer = signer
@@ -33,7 +25,7 @@ export class MsgNativeTx extends Msg {
  * @returns {MsgNativeTx}
  */
 export const msgNativeTxFromJson = (value: { coins: MsgCoin[]; memo: string; signer: string }): MsgNativeTx => {
-  return new MsgNativeTx(value.coins, value.memo, AccAddress.fromBech32(value.signer))
+  return new MsgNativeTx(value.coins, value.memo, cosmosclient.AccAddress.fromString(value.signer))
 }
 
 export type AminoWrapping<T> = {
@@ -47,8 +39,8 @@ export type ThorchainDepositResponse = AminoWrapping<{
     memo: string
     signer: string
   }>[]
-  fee: StdTxFee
-  signatures: StdSignature[]
+  fee: proto.cosmos.tx.v1beta1.Fee
+  signatures: string[]
   memo: string
   timeout_height: string
 }>

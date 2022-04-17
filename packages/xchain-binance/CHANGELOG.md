@@ -1,3 +1,38 @@
+# v.5.4.2 (2022-02-04)
+
+## Update
+
+- xchain-util@0.5.1
+- xchain-client@0.11.1
+
+# v.5.4.1 (2022-02-02)
+
+## Update
+
+- xchain-util@0.5.0
+
+# v.5.4.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
+
+# v.5.3.1 (2021-09-03)
+
+- updated to the latest dependencies
+
+# v.5.3.0 (2021-08-27)
+
+- Add `getAccount`
+
+# v.5.2.6 (2021-07-26)
+
+- fixed missing walletIndex in client.transfer()
+
+# v.5.2.5 (2021-07-18)
+
+- Updatedrollupjs to include axios to enlable usage on node
+
 # v.5.2.4 (2021-07-07)
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`

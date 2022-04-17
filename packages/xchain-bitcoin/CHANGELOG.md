@@ -1,3 +1,58 @@
+# v.0.18.1 (2022-03-15)
+
+## Fix
+
+- [Bug] Incorrect fee estimation by rounding down #503
+
+# v.0.18.0 (2022-03-08)
+
+## Update
+
+- Fetch `txHex` optionally by scanning UTXOs #489
+- Cache list of `txHex`s in `getTxHexFromCache` to avoid same requests for same data #490
+- Cache `confirmed` status in `getConfirmedUnspentTxs` to avoid same requests for same data #490
+- Return `inputs` UTXOs from `buildTx` #489
+- Extract `Haskoin` types #490
+
+## Fix
+
+- Broadcast same tx several times to Haskoin in case of `500` error #492
+
+## Breaking change
+
+- Add `confirmedOnly` param to `Client.getBalance` and to misc. `balance*` helpers #490
+- Broadcast txs via `Haskoin` #490
+- Remove `blockstream` as API dependency #490
+- Remove deprecated Ledger files (\*\*/\*\*/ledger.ts) #490
+
+# v.0.17.1 (2022-02-04)
+
+## Update
+
+- xchain-util@0.5.1
+- xchain-client@0.11.1
+
+# v.0.17.0 (2022-01-05)
+
+## Breaking change
+
+- Make `haskoinUrl` configurable (change default haskoin url back to `https://api.haskoin.com/btc`)
+- `haskoinUrl` needs to be passed as parameter into misc. `utils` functions
+
+# v.0.16.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
+
+# v.0.15.13 (2021-11-12)
+
+- updated haskoin api URL
+
+# v.0.15.12 (2021-09-03)
+
+- updated to the latest dependencies
+
 # v.0.15.11 (2021-07-07)
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`

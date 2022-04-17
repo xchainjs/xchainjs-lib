@@ -1,6 +1,8 @@
 # `@xchainjs/xchain-polkadot`
 
-Polkadot Module for XChainJS Clients
+Polkadot Module for XChainJS Clients 
+
+*:star: Currently not supported*
 
 ## Installation
 

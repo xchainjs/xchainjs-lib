@@ -1,4 +1,4 @@
-# `@xchainjs/xchain-client`
+# `@xchainjs/xchain-bitcoin`
 
 ## Modules
 
@@ -15,6 +15,13 @@ Following peer dependencies have to be installed into your project. These are no
 ```
 yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios bitcoinjs-lib wif
 ```
+
+## Documentation
+
+### [`xchain bitcoin`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/)
+[`How xchain-bitcoin works`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/how-it-works.html)\
+[`How to use xchain-bitcoin`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/how-to-use.html)
+
 
 ## Service Providers
 
@@ -33,46 +40,7 @@ Sochain API rate limits: https://sochain.com/api#rate-limits (300 requests/minut
 
 Bitgo API rate limits: https://app.bitgo.com/docs/#section/Rate-Limiting (10 requests/second)
 
-## Usage
 
-Initialize client and use class methods:
 
-```
 
-import { Client, Network } from '../src/client'
 
-// Create a new client interface
-const btcClient = new Client({ network: Network.Mainnet, nodeUrl: 'https://sochain.com/api/v2' })
-
-// Set phrase
-btcClient.setPhrase('phrase here')
-
-// Get address
-const address = btcClient.getAddress()
-
-// Get balance
-const balance = await btcClient.getBalance()
-
-// Transfer with feeRate
-const txid = await btcClient.transfer({ asset: AssetBTC, recipient: 'recipient address here', amount: baseAmount(100, BTC_DECIMAL), feeRate: 1 })
-
-// Transfer with default feeRate (default is `fast`)
-const txid = await btcClient.transfer({ asset: AssetBTC, recipient: 'recipient address here', amount: baseAmount(100, BTC_DECIMAL) })
-
-// Get fee estimations
-const { fast, fastest, average } = await btcClient.getFees()
-
-// Get feeRate estimations
-const { fast, fastest, average } = await btcClient.getFeeRates()
-
-// Search transactions
-const transactions = await btcClient.getTransactions({ address: 'address here', limit: 4 })
-
-// Get a transaction with a given txId/hash
-const txData = await btcClient.getTransactionData('b660ee07167cfa32681e2623f3a29dc64a089cabd9a3a07dd17f9028ac956eb8')
-
-```
-
-```
-
-```

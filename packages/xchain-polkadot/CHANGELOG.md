@@ -1,3 +1,13 @@
+# v.0.9.1 (2022-xx-xx)
+
+- Use latest axios@0.25.0
+
+# v.0.9.0 (2021-12-29)
+
+## Breaking change
+
+- Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
+
 # v.0.8.4 (2021-07-07)
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`

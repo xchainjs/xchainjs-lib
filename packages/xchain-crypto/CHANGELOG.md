@@ -1,3 +1,7 @@
+# v.0.2.6 (2021-09-02)
+
+- updated to the latest dependencies
+
 # v.0.2.5 (2021-06-19)
 
 - added support to use the generatePhrase() in node
