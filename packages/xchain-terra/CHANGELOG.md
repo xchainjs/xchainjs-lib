@@ -1,3 +1,7 @@
+# v.0.1.0 (2022-04-19)
+
+Official release - includes everything from `v.0.1.0-alpha.1` to `v.0.1.0-alpha.8`
+
 # v.0.1.0-alpha.8 (2022-04-19)
 
 ## Add
