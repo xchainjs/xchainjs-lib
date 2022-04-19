@@ -1,6 +1,5 @@
 import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
 import { PoolData } from './swap'
-import BigNumber from 'bignumber.js'
 
 export type UnitData = {
   liquidityUnits: BaseAmount
@@ -18,7 +17,7 @@ export type Block = {
 }
 
 export type Coverage = {
-  poolRatio: BigNumber
+  poolRatio: BaseAmount
 }
 
 export const getLiquidityUnits = (liquidity: LiquidityData, pool: PoolData): BaseAmount => {
@@ -65,17 +64,18 @@ export const getSlipOnLiquidity = (liquidity: LiquidityData, pool: PoolData): Bi
 }
 
 // Blocks for full protection 144000 // 100 days
-export const getLiquidityProtectionData = (liquidity: LiquidityData, block: Block): BigNumber => {
+export const getLiquidityProtectionData = (liquidity: LiquidityData, block: Block, pool: PoolData): Number => {
   // formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
   const R0 = liquidity.rune.amount() // symetrical value of rune deposit
   const A0 = liquidity.asset.amount() // symetrical value of asset deposit
-  //const R1 = // rune to redeem
-  //const A1 =  // asset to redeem
-  //const coverage = ((A0.times(R1).div(A1).plus(R0)).minus(R1.plus(R1)))
+  const R1 = pool.runeBalance.amount() // rune to redeem
+  const A1 = pool.assetBalance.amount() // asset to redeem
+  const P1 = R1.div(A1) // Pool ratio at withdrawal
+  const coverage = ((A0.times(P1).plus(R0)).minus(A1.times(P1).plus(R1)))
   const currentHeight = block.current
   const heightLastAdded = block.lastAdded
-  const blocksforfullprotection = 1440000
+  const blocksforfullprotection = 1440000 // or retrieve from midgard constants
   const protectionProgress = (currentHeight - heightLastAdded)/blocksforfullprotection
-  const result = (protectionProgress * coverage) // impermanent loss protection result
+  const result = protectionProgress * coverage.toNumber() // impermanent loss protection result
   return result
 }
