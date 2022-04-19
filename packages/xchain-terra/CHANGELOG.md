@@ -3,10 +3,11 @@
 ## Add
 
 - Add `getConfig` to `Client`
+- Improve internal handling of fees in `transfer`
 
 ## Breaking change
 
-- `transfer` in `Client` accepts optional `feeAsset`, `feeAmount` and `gasLimit`
+- Remove `estimatedGas` param in `transfer` in favour to accept optional `feeAsset`, `feeAmount` and `gasLimit`
 
 # v.0.1.0-alpha.7 (2022-04-15)
 

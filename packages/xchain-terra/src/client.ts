@@ -219,14 +219,10 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
     if (!assetDenom)
       throw Error(`Invalid asset ${assetToString(asset)} - Only Terra native asset are supported to transfer`)
 
-    console.log('assetDenom:', assetDenom)
-
     const _feeAsset = feeAsset || asset
     const feeDenom = getTerraNativeDenom(_feeAsset)
     if (!feeDenom)
       throw Error(`Invalid asset ${assetToString(_feeAsset)} - Only Terra native assets are supported to pay fees`)
-
-    console.log('feeDenom:', feeDenom)
 
     const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
     const wallet = this.lcdClient.wallet(mnemonicKey)
@@ -273,7 +269,6 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
     const tx = await wallet.createAndSignTx(txOptions)
     // broadcast (`async` mode)
     const result = await this.lcdClient.tx.broadcastAsync(tx)
-    console.log('result:', result)
     return result.txhash
   }
 
