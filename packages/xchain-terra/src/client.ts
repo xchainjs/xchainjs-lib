@@ -194,7 +194,9 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
 
   /**
    * Transfer
-   * Note: For paying fees in other than Terra native `Asset`, `estimatedFee` is required. Use `getEstimatedFee` from `utils` to get this data.
+   *
+   * Note: For paying fees other than `LUNA` (by default), `estimatedFee` parameter is required.
+   * Use `getEstimatedFee` helper from `utils` to get all needed data for `estimatedFee`.
    */
   async transfer({
     walletIndex = 0,
