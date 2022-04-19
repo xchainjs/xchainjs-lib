@@ -1,3 +1,9 @@
+# v.0.1.0-alpha.8 (2022-xx-xx)
+
+## Add
+
+- Add `getConfig` to `Client`
+
 # v.0.1.0-alpha.7 (2022-04-15)
 
 ## Add

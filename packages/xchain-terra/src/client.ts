@@ -10,7 +10,7 @@ import {
   MsgSend,
   TxInfo,
 } from '@terra-money/terra.js'
-import { BaseXChainClient, FeeType, Network, TxType, singleFee } from '@xchainjs/xchain-client'
+import { BaseXChainClient, FeeType, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import type {
   Balance,
   Fees,
@@ -157,6 +157,7 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
       return balances
     }
   }
+
   setNetwork(network: Network): void {
     super.setNetwork(network)
     this.lcdClient = new LCDClient({
@@ -164,6 +165,8 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
       chainID: this.config[this.network].chainID,
     })
   }
+
+  getConfig = (): ClientConfig => this.config[this.network]
 
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     //TODO filter by start time?
@@ -200,17 +203,17 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
     recipient,
     memo,
     estimatedFee,
-  }: TxParams & { estimatedFee?: EstimatedFee }): Promise<string> {
+  }: TxParams & { estimatedFee?: EstimatedFee }): Promise<TxHash> {
     if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
 
-    const terraDenom = getTerraNativeDenom(asset)
-    if (!terraDenom)
+    const assetDenom = getTerraNativeDenom(asset)
+    if (!assetDenom)
       throw Error(`Invalid asset ${assetToString(asset)} - Only Terra native asset are supported to transfer`)
 
     const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
     const wallet = this.lcdClient.wallet(mnemonicKey)
     const amountToSend: Coins.Input = {
-      [terraDenom]: amount.amount().toFixed(),
+      [assetDenom]: amount.amount().toFixed(),
     }
     const send = new MsgSend(wallet.key.accAddress, recipient, amountToSend)
 
