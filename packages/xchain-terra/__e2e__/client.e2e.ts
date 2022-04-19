@@ -218,7 +218,7 @@ describe('Client Test', () => {
     }
   })
 
-  it('transfers LUNA, w/ memo , fee LUNA ', async () => {
+  it('transfers LUNA, w/ memo, fee LUNA by default', async () => {
     console.log('### transfer LUNA (fee: LUNA)')
     try {
       terraClient.setNetwork(Network.Testnet)
@@ -241,35 +241,20 @@ describe('Client Test', () => {
     console.log('### END transfer LUNA (fee: LUNA)')
   })
 
-  it('transfers LUNA, w/ memo, fee UST ', async () => {
+  it('transfers LUNA, w/ memo, fee UST', async () => {
     console.log('### transfer LUNA (fee: UST)')
     try {
-      const network = Network.Testnet
-      terraClient.setNetwork(network)
-
-      const asset = AssetLUNA
-      const feeAsset = AssetUST
+      terraClient.setNetwork(Network.Testnet)
+      console.log(terraClient.getAddress(0))
+      console.log(terraClient.getAddress(1))
       const recipient = terraClient.getAddress(1)
-      const memo = 'fee-ust'
-      const amount = baseAmount(1, TERRA_DECIMAL)
-      const { chainID, cosmosAPIURL } = terraClient.getConfig()
-      const estimatedFee = await getEstimatedFee({
-        chainId: chainID,
-        cosmosAPIURL,
-        sender: terraClient.getAddress(0),
-        recipient,
-        amount,
-        asset,
-        feeAsset,
-        network,
-      })
       const txHash = await terraClient.transfer({
         walletIndex: 0,
-        asset,
-        amount,
+        asset: AssetLUNA,
+        amount: baseAmount(1, TERRA_DECIMAL),
         recipient,
-        memo,
-        estimatedFee,
+        memo: 'fee-luna',
+        feeAsset: AssetUST,
       })
       console.info('tx', terraClient.getExplorerTxUrl(txHash))
       expect(txHash).toBeDefined()
@@ -280,42 +265,19 @@ describe('Client Test', () => {
     console.log('### END transfer LUNA (fee: UST)')
   })
 
-  it('transfers UST, w/ memo , fee LUNA ', async () => {
-    console.log('### transfer UST (fee: LUNA)')
-    try {
-      terraClient.setNetwork(Network.Testnet)
-      console.log(terraClient.getAddress(0))
-      console.log(terraClient.getAddress(1))
-      const recipient = terraClient.getAddress(1)
-      const txHash = await terraClient.transfer({
-        walletIndex: 0,
-        asset: AssetUST,
-        amount: assetToBase(assetAmount(0.01, TERRA_DECIMAL)), // 0.01 UST
-        recipient,
-        memo: 'fee-luna',
-      })
-      console.info('tx', terraClient.getExplorerTxUrl(txHash))
-      expect(txHash).toBeDefined()
-    } catch (error) {
-      console.error(error)
-      fail()
-    }
-    console.log('### END transfer UST (fee: LUNA)')
-  })
-
-  it('transfers UST. w/ memo, fee UST ', async () => {
-    console.log('### transfer UST (fee: UST)')
+  it('transfers LUNA, w/ memo, estimated fee UST ', async () => {
+    console.log('### transfer LUNA (estimated fee: UST)')
     try {
       const network = Network.Testnet
       terraClient.setNetwork(network)
 
-      const asset = AssetUST
+      const asset = AssetLUNA
       const feeAsset = AssetUST
       const recipient = terraClient.getAddress(1)
-      const memo = 'fee-ust'
-      const amount = assetToBase(assetAmount(0.01, TERRA_DECIMAL))
+      const memo = 'est-fee-ust'
+      const amount = baseAmount(1, TERRA_DECIMAL)
       const { chainID, cosmosAPIURL } = terraClient.getConfig()
-      const estimatedFee = await getEstimatedFee({
+      const { amount: feeAmount, gasLimit } = await getEstimatedFee({
         chainId: chainID,
         cosmosAPIURL,
         sender: terraClient.getAddress(0),
@@ -328,10 +290,33 @@ describe('Client Test', () => {
       const txHash = await terraClient.transfer({
         walletIndex: 0,
         asset,
-        amount, // 0.01 UST
+        amount,
         recipient,
         memo,
-        estimatedFee,
+        feeAsset,
+        feeAmount,
+        gasLimit,
+      })
+      console.info('tx', terraClient.getExplorerTxUrl(txHash))
+      expect(txHash).toBeDefined()
+    } catch (error) {
+      console.error(error)
+      fail()
+    }
+    console.log('### END transfer LUNA (estimated fee: UST)')
+  })
+
+  it('transfers UST, w/ memo , fee UST by default', async () => {
+    console.log('### transfer UST (fee: UST)')
+    try {
+      terraClient.setNetwork(Network.Testnet)
+      const recipient = terraClient.getAddress(1)
+      const txHash = await terraClient.transfer({
+        walletIndex: 0,
+        asset: AssetUST,
+        amount: assetToBase(assetAmount(0.01, TERRA_DECIMAL)), // 0.01 UST
+        recipient,
+        memo: 'fee-ust',
       })
       console.info('tx', terraClient.getExplorerTxUrl(txHash))
       expect(txHash).toBeDefined()
@@ -342,8 +327,71 @@ describe('Client Test', () => {
     console.log('### END transfer UST (fee: UST)')
   })
 
-  it('transfers EUT, fee LUNA ', async () => {
-    console.log('### transfer EUT (fee: LUNA)')
+  it('transfers UST, w/ memo, fee LUNA ', async () => {
+    console.log('### transfer UST (fee: LUNA)')
+    try {
+      terraClient.setNetwork(Network.Testnet)
+      const recipient = terraClient.getAddress(1)
+      const txHash = await terraClient.transfer({
+        walletIndex: 0,
+        asset: AssetUST,
+        amount: assetToBase(assetAmount(0.01, TERRA_DECIMAL)), // 0.01 UST
+        recipient,
+        memo: 'fee-luna',
+        feeAsset: AssetLUNA,
+      })
+      console.info('tx', terraClient.getExplorerTxUrl(txHash))
+      expect(txHash).toBeDefined()
+    } catch (error) {
+      console.error(error)
+      fail()
+    }
+    console.log('### END transfer UST (fee: LUNA)')
+  })
+
+  it('transfers UST. w/ memo, estimated fee LUNA ', async () => {
+    console.log('### transfer UST (estimated fee: LUNA)')
+    try {
+      const network = Network.Testnet
+      terraClient.setNetwork(network)
+
+      const asset = AssetUST
+      const feeAsset = AssetUST
+      const recipient = terraClient.getAddress(1)
+      const memo = 'est-fee-luna'
+      const amount = assetToBase(assetAmount(0.01, TERRA_DECIMAL))
+      const { chainID, cosmosAPIURL } = terraClient.getConfig()
+      const { amount: feeAmount, gasLimit } = await getEstimatedFee({
+        chainId: chainID,
+        cosmosAPIURL,
+        sender: terraClient.getAddress(0),
+        recipient,
+        amount,
+        asset,
+        feeAsset,
+        network,
+      })
+      const txHash = await terraClient.transfer({
+        walletIndex: 0,
+        asset,
+        amount,
+        recipient,
+        memo,
+        feeAsset,
+        feeAmount,
+        gasLimit,
+      })
+      console.info('tx', terraClient.getExplorerTxUrl(txHash))
+      expect(txHash).toBeDefined()
+    } catch (error) {
+      console.error(error)
+      fail()
+    }
+    console.log('### END transfer UST (estimated fee: LUNA)')
+  })
+
+  it('transfers EUT, fee EUT by default ', async () => {
+    console.log('### transfer EUT (fee: EUT)')
     try {
       terraClient.setNetwork(Network.Testnet)
       const recipient = terraClient.getAddress(1)
@@ -360,37 +408,21 @@ describe('Client Test', () => {
       console.error(error)
       fail()
     }
-    console.log('### END transfer EUT (fee: LUNA)')
+    console.log('### END transfer EUT (fee: EUT)')
   })
 
-  it('transfers EUT, fee EUT ', async () => {
-    console.log('### transfer EUT (fee: EUT)')
+  it('transfers EUT, fee LUNA ', async () => {
+    console.log('### transfer EUT (fee: LUNA)')
     try {
-      const network = Network.Testnet
-      terraClient.setNetwork(network)
-
-      const assetEUT = { chain: Chain.Terra, symbol: 'EUT', ticker: 'EUT', synth: false }
+      terraClient.setNetwork(Network.Testnet)
       const recipient = terraClient.getAddress(1)
-      const memo = 'fee-eut'
-      const amount = assetToBase(assetAmount(0.01, TERRA_DECIMAL))
-      const { chainID, cosmosAPIURL } = terraClient.getConfig()
-      const estimatedFee = await getEstimatedFee({
-        chainId: chainID,
-        cosmosAPIURL,
-        sender: terraClient.getAddress(0),
-        recipient,
-        amount,
-        asset: assetEUT,
-        feeAsset: assetEUT,
-        network,
-      })
       const txHash = await terraClient.transfer({
         walletIndex: 0,
-        asset: assetEUT,
-        amount,
+        asset: { chain: Chain.Terra, symbol: 'EUT', ticker: 'EUT', synth: false },
+        amount: assetToBase(assetAmount(0.01, TERRA_DECIMAL)), // 0.01 EUT
         recipient,
-        memo,
-        estimatedFee,
+        memo: 'fee-luna',
+        feeAsset: AssetLUNA,
       })
       console.info('tx', terraClient.getExplorerTxUrl(txHash))
       expect(txHash).toBeDefined()
@@ -398,6 +430,47 @@ describe('Client Test', () => {
       console.error(error)
       fail()
     }
-    console.log('### END transfer EUT (fee: EUT)')
+    console.log('### END transfer EUT (fee: LUNA)')
+  })
+
+  it('transfers EUT, estimated fee LUNA ', async () => {
+    console.log('### transfer EUT (estimated fee: LUNA)')
+    try {
+      const network = Network.Testnet
+      terraClient.setNetwork(network)
+
+      const asset = { chain: Chain.Terra, symbol: 'EUT', ticker: 'EUT', synth: false }
+      const feeAsset = AssetLUNA
+      const recipient = terraClient.getAddress(1)
+      const memo = 'est-fee-luna'
+      const amount = assetToBase(assetAmount(0.01, TERRA_DECIMAL))
+      const { chainID, cosmosAPIURL } = terraClient.getConfig()
+      const { amount: feeAmount, gasLimit } = await getEstimatedFee({
+        chainId: chainID,
+        cosmosAPIURL,
+        sender: terraClient.getAddress(0),
+        recipient,
+        amount,
+        asset,
+        feeAsset,
+        network,
+      })
+      const txHash = await terraClient.transfer({
+        walletIndex: 0,
+        asset,
+        amount,
+        recipient,
+        memo,
+        feeAsset,
+        feeAmount,
+        gasLimit,
+      })
+      console.info('tx', terraClient.getExplorerTxUrl(txHash))
+      expect(txHash).toBeDefined()
+    } catch (error) {
+      console.error(error)
+      fail()
+    }
+    console.log('### END transfer EUT (estimated fee: EUT)')
   })
 })

@@ -1,8 +1,12 @@
-# v.0.1.0-alpha.8 (2022-xx-xx)
+# v.0.1.0-alpha.8 (2022-04-14)
 
 ## Add
 
 - Add `getConfig` to `Client`
+
+## Breaking change
+
+- `transfer` in `Client` accepts optional `feeAsset`, `feeAmount` and `gasLimit`
 
 # v.0.1.0-alpha.7 (2022-04-15)
 
