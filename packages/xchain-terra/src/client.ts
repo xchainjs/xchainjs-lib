@@ -10,7 +10,7 @@ import {
   MsgSend,
   TxInfo,
 } from '@terra-money/terra.js'
-import { BaseXChainClient, FeeType, Network, TxType, singleFee } from '@xchainjs/xchain-client'
+import { BaseXChainClient, FeeType, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import type {
   Balance,
   Fees,
@@ -23,8 +23,9 @@ import type {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
+import BigNumber from 'bignumber.js'
 
 import { AssetLUNA, TERRA_DECIMAL } from './const'
 import { EstimatedFee } from './types'
@@ -157,6 +158,7 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
       return balances
     }
   }
+
   setNetwork(network: Network): void {
     super.setNetwork(network)
     this.lcdClient = new LCDClient({
@@ -164,6 +166,8 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
       chainID: this.config[this.network].chainID,
     })
   }
+
+  getConfig = (): ClientConfig => this.config[this.network]
 
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     //TODO filter by start time?
@@ -191,7 +195,13 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
 
   /**
    * Transfer
-   * Note: For paying fees in other than Terra native `Asset`, `estimatedFee` is required. Use `getEstimatedFee` from `utils` to get this data.
+   *
+   * Note: For paying fees in other than given `asset` (which is used for paying fee by default),
+   * `feeAsset`, `feeAmount`, `gasLimit` parameter are required.
+   * to get all needed data for these three parameters ^,
+   * use `getEstimatedFee` helper from `utils`.
+   *
+   * By passing just `feeAsset` (but not `feeAmount` and `gasLimit`), `feeAmount` and `gasLimit` will be calcaluated internally in `transfer` method.
    */
   async transfer({
     walletIndex = 0,
@@ -199,37 +209,66 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
     amount,
     recipient,
     memo,
-    estimatedFee,
-  }: TxParams & { estimatedFee?: EstimatedFee }): Promise<string> {
+    feeAsset,
+    feeAmount,
+    gasLimit,
+  }: TxParams & { feeAmount?: BaseAmount; feeAsset?: Asset; gasLimit?: BigNumber }): Promise<TxHash> {
     if (!this.validateAddress(recipient)) throw new Error(`${recipient} is not a valid terra address`)
 
-    const terraDenom = getTerraNativeDenom(asset)
-    if (!terraDenom)
+    const assetDenom = getTerraNativeDenom(asset)
+    if (!assetDenom)
       throw Error(`Invalid asset ${assetToString(asset)} - Only Terra native asset are supported to transfer`)
+
+    const _feeAsset = feeAsset || asset
+    const feeDenom = getTerraNativeDenom(_feeAsset)
+    if (!feeDenom)
+      throw Error(`Invalid asset ${assetToString(_feeAsset)} - Only Terra native assets are supported to pay fees`)
 
     const mnemonicKey = new MnemonicKey({ mnemonic: this.phrase, index: walletIndex })
     const wallet = this.lcdClient.wallet(mnemonicKey)
     const amountToSend: Coins.Input = {
-      [terraDenom]: amount.amount().toFixed(),
+      [assetDenom]: amount.amount().toFixed(),
     }
-    const send = new MsgSend(wallet.key.accAddress, recipient, amountToSend)
+    const sender = wallet.key.accAddress
+    const send = new MsgSend(sender, recipient, amountToSend)
 
-    const txOptions: CreateTxOptions = { msgs: [send], memo }
+    let _feeAmount = feeAmount
+    let _gasLimit = gasLimit
+    // Estimate fee amount + gas limit if not passed as params
+    if (!_feeAmount && !_gasLimit) {
+      const { chainID, cosmosAPIURL } = this.getConfig()
+      const { amount: feeAmount, gasLimit } = await getEstimatedFee({
+        chainId: chainID,
+        cosmosAPIURL,
+        sender,
+        recipient,
+        amount,
+        asset,
+        feeAsset: _feeAsset,
+        memo,
+        network: this.getNetwork(),
+      })
 
-    if (estimatedFee) {
-      const { amount: feeAmount, asset: feeAsset, gasLimit } = estimatedFee
-      const feeDenom = getTerraNativeDenom(feeAsset)
-      if (!feeDenom)
-        throw Error(`Invalid asset ${assetToString(feeAsset)} - Only Terra native assets are supported to pay fees`)
+      _feeAmount = feeAmount
+      _gasLimit = gasLimit
+    }
 
-      const gasFee: Coin.Data = { amount: feeAmount.amount().toFixed(), denom: feeDenom }
-      const gasCoins = new Coins([Coin.fromData(gasFee)])
-      txOptions.fee = new Fee(gasLimit.toNumber(), gasCoins)
+    if (!_feeAmount || !_gasLimit) throw Error(`Missing fee amount and/or gas limit`)
+
+    const gasFee: Coin.Data = { amount: _feeAmount.amount().toFixed(), denom: feeDenom }
+    const gasCoins = new Coins([Coin.fromData(gasFee)])
+    const fee = new Fee(_gasLimit.toNumber(), gasCoins)
+
+    const txOptions: CreateTxOptions = {
+      msgs: [send],
+      memo,
+      feeDenoms: [feeDenom],
+      fee,
     }
 
     const tx = await wallet.createAndSignTx(txOptions)
-    // broadcast (`sync` mode)
-    const result = await this.lcdClient.tx.broadcastSync(tx)
+    // broadcast (`async` mode)
+    const result = await this.lcdClient.tx.broadcastAsync(tx)
     return result.txhash
   }
 

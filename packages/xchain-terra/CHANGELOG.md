@@ -1,3 +1,14 @@
+# v.0.1.0-alpha.8 (2022-04-19)
+
+## Add
+
+- Add `getConfig` to `Client`
+- Improve internal handling of fees in `transfer`
+
+## Breaking change
+
+- Remove `estimatedGas` param in `transfer` in favour to accept optional `feeAsset`, `feeAmount` and `gasLimit`
+
 # v.0.1.0-alpha.7 (2022-04-15)
 
 ## Add
