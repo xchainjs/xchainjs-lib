@@ -30,6 +30,7 @@
     "url": "https://github.com/xchainjs/xchainjs-lib/issues"
   },
   "dependencies": {
-    "@thorchain/asgardex-util": "^0.10.0"
+    "@thorchain/asgardex-util": "^0.10.0",
+    "@xchainjs/xchain-util": "^0.7.0"
   }
 }
