@@ -1,4 +1,4 @@
-import { FeeBounds, FeeOption, FeeRate, FeeRates } from './types'
+import { FeeOption, FeeRate, FeeRates, FeeBounds } from './types'
 
 export function singleFeeRate(rate: FeeRate): FeeRates {
   return Object.values(FeeOption).reduce<Partial<FeeRates>>((a, x) => ((a[x] = rate), a), {}) as FeeRates
@@ -11,12 +11,8 @@ export function standardFeeRates(rate: FeeRate, feeBounds: FeeBounds = { lower: 
     [FeeOption.Fastest]: rate * 5.0,
   }
 
-  // sanity check fee rates 
-  Object.values(result).forEach(it => {
-    if (it < feeBounds.lower || it > feeBounds.upper) {
-      throw Error(`Fee outside of predetermined bounds: ${it.toString()}`)
-    } 
-  }) 
-  
-  return result
+export function checkFeeBounds(feeBounds: FeeBounds, feeRate: FeeRate): void {
+  if (feeRate < feeBounds.lower || feeRate > feeBounds.upper) {
+    throw Error(`Fee outside of predetermined bounds: ${feeRate.toString()}`)
+  } 
 }

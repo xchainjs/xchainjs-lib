@@ -16,6 +16,7 @@ import {
   XChainClient,
   XChainClientParams,
   standardFeeRates,
+  checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 import { BigNumber, BigNumberish, Wallet, ethers } from 'ethers'
@@ -589,6 +590,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     }).catch(() => BigNumber.from(gasLimitFallback))
 
     const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
+    checkFeeBounds(this.feeBounds, gasPrice.toNumber())
     return await this.call<TransactionResponse>({
       walletIndex,
       contractAddress,
@@ -681,6 +683,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         gasPrice: BigNumber.from(gasPrice.amount().toFixed()),
       }
     }
+
+    checkFeeBounds(this.feeBounds, BigNumber.from(overrides.gasPrice).toNumber())
 
     let txResult
     if (assetAddress && !isETHAddress) {

@@ -13,6 +13,7 @@ import {
   TxsPage,
   UTXOClient,
   XChainClientParams,
+  checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Chain } from '@xchainjs/xchain-util'
@@ -245,6 +246,8 @@ class Client extends UTXOClient {
     const derivationPath = this.getFullDerivationPath(index)
 
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
+    
     const { builder, inputs } = await utils.buildTx({
       ...params,
       feeRate,

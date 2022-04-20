@@ -12,6 +12,7 @@ import {
   TxsPage,
   UTXOClient,
   XChainClientParams,
+  checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { AssetDOGE, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
@@ -297,6 +298,7 @@ class Client extends UTXOClient {
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const fromAddressIndex = params?.walletIndex || 0
     const feeRate = params.feeRate || (await this.getSuggestedFeeRate())
+    checkFeeBounds(this.feeBounds, feeRate)
 
     const { psbt } = await Utils.buildTx({
       amount: params.amount,

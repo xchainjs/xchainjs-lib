@@ -13,6 +13,7 @@ import {
   TxsPage,
   UTXOClient,
   XChainClientParams,
+  checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Asset, AssetBTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
@@ -291,6 +292,7 @@ class Client extends UTXOClient {
 
     // set the default fee rate to `fast`
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
 
     /**
      * do not spend pending UTXOs when adding a memo
