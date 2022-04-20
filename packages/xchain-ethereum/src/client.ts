@@ -16,10 +16,12 @@ import {
   XChainClient,
   XChainClientParams,
   standardFeeRates,
+  checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 import { BigNumber, BigNumberish, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
+import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 
 import erc20ABI from './data/erc20.json'
 import * as etherscanAPI from './etherscan-api'
@@ -97,6 +99,10 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   constructor({
     network = Network.Testnet,
+    feeBounds = {
+      lower: LOWER_FEE_BOUND,
+      upper: UPPER_FEE_BOUND
+    },
     ethplorerUrl = 'https://api.ethplorer.io',
     ethplorerApiKey = 'freekey',
     explorerUrl,
@@ -109,7 +115,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     etherscanApiKey,
     infuraCreds,
   }: EthereumClientParams) {
-    super(Chain.Ethereum, { network, rootDerivationPaths })
+    super(Chain.Ethereum, { network, rootDerivationPaths, feeBounds })
     this.ethNetwork = xchainNetworkToEths(network)
     this.rootDerivationPaths = rootDerivationPaths
     this.infuraCreds = infuraCreds
@@ -584,6 +590,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     }).catch(() => BigNumber.from(gasLimitFallback))
 
     const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
+    checkFeeBounds(this.feeBounds, gasPrice.toNumber())
     return await this.call<TransactionResponse>({
       walletIndex,
       contractAddress,
@@ -676,6 +683,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         gasPrice: BigNumber.from(gasPrice.amount().toFixed()),
       }
     }
+
+    checkFeeBounds(this.feeBounds, BigNumber.from(overrides.gasPrice).toNumber())
 
     let txResult
     if (assetAddress && !isETHAddress) {

@@ -13,12 +13,13 @@ import {
   TxsPage,
   UTXOClient,
   XChainClientParams,
+  checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Asset, AssetBTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Bitcoin from 'bitcoinjs-lib'
 
-import { BTC_DECIMAL } from './const'
+import { BTC_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import * as sochain from './sochain-api'
 import { ClientUrl } from './types/client-types'
 import * as Utils from './utils'
@@ -43,6 +44,10 @@ class Client extends UTXOClient {
    */
   constructor({
     network = Network.Testnet,
+    feeBounds = {
+      lower: LOWER_FEE_BOUND,
+      upper: UPPER_FEE_BOUND
+    },
     sochainUrl = 'https://sochain.com/api/v2',
     haskoinUrl = {
       [Network.Testnet]: 'https://api.haskoin.com/btctest',
@@ -56,7 +61,7 @@ class Client extends UTXOClient {
     },
     phrase = '',
   }: BitcoinClientParams) {
-    super(Chain.Bitcoin, { network, rootDerivationPaths, phrase })
+    super(Chain.Bitcoin, { network, rootDerivationPaths, phrase, feeBounds })
     this.setSochainUrl(sochainUrl)
     this.haskoinUrl = haskoinUrl
   }
@@ -287,6 +292,7 @@ class Client extends UTXOClient {
 
     // set the default fee rate to `fast`
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
 
     /**
      * do not spend pending UTXOs when adding a memo
