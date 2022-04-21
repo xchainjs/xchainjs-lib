@@ -105,6 +105,14 @@ describe('Client Test', () => {
     }).toThrow()
   })
 
+  it('should not throw on a client without a phrase', () => {
+    expect(() => {
+      new Client({
+        network: Network.Testnet,
+      })
+    }).not.toThrow()
+  })
+
   it('should have right address', async () => {
     expect(cosmosClient.getAddress()).toEqual(address0_testnet)
   })

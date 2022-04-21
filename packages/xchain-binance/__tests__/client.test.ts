@@ -114,6 +114,14 @@ describe('BinanceClient Test', () => {
     expect(bnbClientEmptyTest_path1.getAddress(1)).toEqual(testnetaddress_path1)
   })
 
+  it('should not throw on a client without a phrase', () => {
+    expect(() => {
+      new BinanceClient({
+        network: Network.Testnet,
+      })
+    }).not.toThrow()
+  })
+
   it('throws an error passing an invalid phrase', async () => {
     expect(() => {
       new BinanceClient({ phrase: 'invalid phrase', network: 'mainnet' as Network })

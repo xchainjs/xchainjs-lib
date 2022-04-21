@@ -44,6 +44,14 @@ describe('DogecoinClient Test', () => {
     expect(dogeClient.setPhrase(phraseOne)).toBeUndefined
   })
 
+  it('should not throw on a client without a phrase', () => {
+    expect(() => {
+      new Client({
+        network: Network.Testnet,
+      })
+    }).not.toThrow()
+  })
+
   it('should purge phrase and utxos', async () => {
     dogeClient.purgeClient()
     expect(() => dogeClient.getAddress()).toThrow('Phrase must be provided')

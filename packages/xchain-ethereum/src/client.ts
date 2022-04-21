@@ -83,7 +83,7 @@ export type EthereumClientParams = XChainClientParams & {
  */
 export default class Client extends BaseXChainClient implements XChainClient, EthereumClient {
   private ethNetwork: EthNetwork
-  private hdNode!: HDNode
+  private hdNode?: HDNode
   private etherscanApiKey?: string
   private explorerUrl: ExplorerUrl
   private infuraCreds: InfuraCreds | undefined
@@ -111,14 +111,13 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   }: EthereumClientParams) {
     super(Chain.Ethereum, { network, rootDerivationPaths })
     this.ethNetwork = xchainNetworkToEths(network)
-    this.rootDerivationPaths = rootDerivationPaths
     this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey
     this.ethplorerUrl = ethplorerUrl
     this.ethplorerApiKey = ethplorerApiKey
     this.explorerUrl = explorerUrl || this.getDefaultExplorerURL()
     this.setupProviders()
-    this.setPhrase(phrase)
+    phrase && this.setPhrase(phrase)
   }
 
   /**
@@ -128,7 +127,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   purgeClient(): void {
     super.purgeClient()
-    this.hdNode = HDNode.fromMnemonic('')
+    this.hdNode = undefined
   }
 
   /**
@@ -154,6 +153,9 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     if (walletIndex < 0) {
       throw new Error('index must be greater than zero')
     }
+    if (!this.hdNode) {
+      throw new Error('Phrase must be provided')
+    }
     return this.hdNode.derivePath(this.getFullDerivationPath(walletIndex)).address.toLowerCase()
   }
 
@@ -167,6 +169,9 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
   getWallet(walletIndex = 0): ethers.Wallet {
+    if (!this.hdNode) {
+      throw new Error('Phrase must be provided')
+    }
     return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(walletIndex))).connect(this.getProvider())
   }
   setupProviders(): void {
