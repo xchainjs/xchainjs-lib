@@ -1,21 +1,28 @@
 import { BigNumber } from 'bignumber.js';
-import { baseAmount, BaseAmount } from '@xchainjs/xchain-util'
-import { PoolData } from '../entities/swap'
-
+import { baseAmount, BaseAmount } from '@xchainjs/xchain-util';
+import { PoolData } from './swap';
+import { BLOCKSFORFULLPROTECTION } from '../constants';
 
 export type UnitData = {
   liquidityUnits: BaseAmount
   totalUnits: BaseAmount
 }
 
+export type PoolData = {
+
+}
+
 export type LiquidityData = {
-  asset: BaseAmount
+  assetDeposit: BaseAmount
   rune: BaseAmount
+  current: number
+  lastAdded: number
 }
 
 export type Block = {
   current: number
   lastAdded: number
+  fullProtection: number
 }
 
 export type Coverage = {
@@ -76,7 +83,7 @@ export const getLiquidityProtectionData = (liquidity: LiquidityData, block: Bloc
   const coverage = ((A0.times(P1).plus(R0)).minus(A1.times(P1).plus(R1)))
   const currentHeight = block.current
   const heightLastAdded = block.lastAdded
-  const blocksforfullprotection = 1440000 // or retrieve from midgard constants
+  const blocksforfullprotection = BLOCKSFORFULLPROTECTION
   const protectionProgress = (currentHeight - heightLastAdded)/blocksforfullprotection
   const result = protectionProgress * coverage.toNumber() // impermanent loss protection result
   return result
