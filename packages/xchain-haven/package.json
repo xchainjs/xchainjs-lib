@@ -1,0 +1,49 @@
+{
+  "name": "@xchainjs/xchain-haven",
+  "version": "0.17.0",
+  "description": "Custom Haven client used by XChainJS clients",
+  "keywords": [
+    "XChain",
+    "Haven"
+  ],
+  "author": "XChainJS",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
+  "scripts": {
+    "clean": "rimraf lib/**",
+    "build": "yarn clean && rollup -c",
+    "test": "jest",
+    "e2e": "jest --config jest.config.e2e.js",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "prepublishOnly": "yarn build"
+  },
+  "devDependencies": {
+    "@cosmos-client/core": "^0.45.1",
+    "@xchainjs/xchain-client": "^0.11.1",
+    "@xchainjs/xchain-crypto": "^0.2.4",
+    "@xchainjs/xchain-util": "^0.5.1",
+    "haven-core-js": "github:haven-protocol-org/haven-core-js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@xchainjs/xchain-client": "^0.11.1",
+    "@xchainjs/xchain-crypto": "^0.2.4",
+    "@xchainjs/xchain-util": "^0.5.1"
+  }
+}
