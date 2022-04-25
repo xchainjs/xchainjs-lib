@@ -9,9 +9,12 @@ import {
   XChainClient,
 } from '@xchainjs/xchain-client'
 
+import { HavenCoreClient } from './haven-core-client'
+
 import { HavenClient } from './types/client-types'
 
 class Client extends BaseXChainClient implements XChainClient, HavenClient {
+  protected havenCoreClient = new HavenCoreClient()
   getFees(): Promise<Fees> {
     throw new Error('Method not implemented.')
   }
@@ -37,7 +40,10 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     throw new Error('Method not implemented.')
   }
   transfer(params: TxParams): Promise<TxHash> {
-    throw new Error('Method not implemented.')
+    const { amount, asset, recipient, memo } = params
+    if (asset === undefined) throw 'Haven has multiple assets, please set it for transfer'
+    const amountString = amount.amount.toString()
+    return this.havenCoreClient.transfer(amountString, asset.ticker, recipient, memo)
   }
   isSyncing(): boolean {
     return true
