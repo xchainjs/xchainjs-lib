@@ -11,7 +11,12 @@ const INIT_REQUEST = {
   },
 }
 
-export const login = (address: string, view_key: string, generated_locally: string, create_account = true) => {
+export const login = (
+  address: string,
+  view_key: string,
+  generated_locally: string,
+  create_account = true,
+): Promise<any> => {
   const params = { address, view_key, generated_locally, create_account }
   return fetch(`${API_URL}/login`, { ...INIT_REQUEST, body: JSON.stringify(params) }).then((result) => result.json())
 }
@@ -21,7 +26,7 @@ export const login = (address: string, view_key: string, generated_locally: stri
  * @param address
  * @param view_key
  */
-export const keepAlive = (address: string, view_key: string) => {
+export const keepAlive = (address: string, view_key: string): Promise<any> => {
   const params = { address, view_key }
   return fetch(`${API_URL}/ping`, { ...INIT_REQUEST, body: JSON.stringify(params) }).then((result) => result.json())
 }
@@ -31,7 +36,7 @@ export const keepAlive = (address: string, view_key: string) => {
  * @param address
  * @param view_key
  */
-export const getAddressInfo = (address: string, view_key: string) => {
+export const getAddressInfo = (address: string, view_key: string): Promise<any> => {
   const params = { address, view_key }
   return fetch(`${API_URL}/get_address_info`, { ...INIT_REQUEST, body: JSON.stringify(params) }).then((result) =>
     result.json(),
@@ -43,7 +48,7 @@ export const getAddressInfo = (address: string, view_key: string) => {
  * @param address
  * @param view_key
  */
-export const getAddressTxs = (address: string, view_key: string) => {
+export const getAddressTxs = (address: string, view_key: string): Promise<any> => {
   const params = { address, view_key }
   return fetch(`${API_URL}/get_address_txs`, { ...INIT_REQUEST, body: JSON.stringify(params) }).then((result) =>
     result.json(),
@@ -55,7 +60,7 @@ export const getAddressTxs = (address: string, view_key: string) => {
 // params are prepared by havenWallet
 //
 
-export const getUnspentOuts = (getUnspentOutsParams: any) => {
+export const getUnspentOuts = (getUnspentOutsParams: any): Promise<any> => {
   //    const amount = 0;
   //    const mixin = 0;
   //    const use_dust = false;
@@ -68,14 +73,14 @@ export const getUnspentOuts = (getUnspentOutsParams: any) => {
   }).then((result) => result.json())
 }
 
-export const getRandomOuts = (getRandomOutsParams: any) => {
+export const getRandomOuts = (getRandomOutsParams: any): Promise<any> => {
   return fetch(`${API_URL}/get_random_outs`, {
     ...INIT_REQUEST,
     body: JSON.stringify(getRandomOutsParams),
   }).then((result) => result.json())
 }
 
-export const submitRawTx = (signedTx: any) => {
+export const submitRawTx = (signedTx: any): Promise<any> => {
   return fetch(`${API_URL}/submit_raw_tx`, { ...INIT_REQUEST, body: JSON.stringify(signedTx) }).then((result) =>
     result.json(),
   )
