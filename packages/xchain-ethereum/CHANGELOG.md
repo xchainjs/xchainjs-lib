@@ -1,3 +1,9 @@
+# v.0.24.0 (2022-04-20)
+
+## Fix
+
+- Make phrase optional on Client ([#550](https://github.com/xchainjs/xchainjs-lib/pull/550))
+
 # v.0.23.3 (2022-02-04)
 
 ## Update

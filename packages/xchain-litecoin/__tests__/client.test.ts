@@ -50,6 +50,14 @@ describe('LitecoinClient Test', () => {
     expect(ltcClient.setPhrase(phraseOne)).toBeUndefined
   })
 
+  it('should not throw on a client without a phrase', () => {
+    expect(() => {
+      new Client({
+        network: Network.Testnet,
+      })
+    }).not.toThrow()
+  })
+
   it('should validate the right address', () => {
     ltcClient.setNetwork(Network.Testnet)
     ltcClient.setPhrase(phraseOne)
