@@ -37,9 +37,9 @@
   },
   {
     "chain": "DOGE",
-    "pub_key": "testpubkey",
-    "address": "nc2rgdpVN1fBEnq9TTagLe8hHmrLGUSQJW",
+    "pub_key": "thorpub1addwnpepqdu4xzy70svza4xqvm6svas0yvdqkzg4wfhw6llxfxesv2pc0z23jtpml2x",
+    "address": "nkJ3JHmpuWqu3eHyXByh67YmwDGep9bD3N",
     "halted": false,
-    "gas_rate": "345"
+    "gas_rate": "324108"
   }
 ]

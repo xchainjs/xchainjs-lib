@@ -375,7 +375,7 @@ describe('BitcoinClient Test', () => {
     const txHash = await btcClient.deposit({
       asset: AssetBTC,
       amount: baseAmount(2223),
-      memo: '=:THOR.RUNE:tthor1puhn8fclwvmmzh7uj7546wnxz5h3zar8e66sc5', // TODO change address
+      memo: '=:THOR.RUNE:tthor1puhn8fclwvmmzh7uj7546wnxz5h3zar8e66sc5',
     })
     expect(txHash).toEqual('mock-txid')
   })
