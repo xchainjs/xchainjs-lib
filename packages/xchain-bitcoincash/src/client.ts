@@ -16,7 +16,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { AssetBCH, Chain, getInboundDetails } from '@xchainjs/xchain-util'
+import { AssetBCH, Chain, assetToString, getInboundDetails } from '@xchainjs/xchain-util'
 
 import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
 import { KeyPair } from './types/bitcoincashjs-types'
@@ -276,10 +276,10 @@ class Client extends UTXOClient {
     const inboundDetails = await getInboundDetails(asset.chain, this.network)
 
     if (inboundDetails.haltedChain) {
-      throw new Error('halted chain')
+      throw new Error(`Halted chain for ${assetToString(asset)}`)
     }
     if (inboundDetails.haltedTrading) {
-      throw new Error('halted trading')
+      throw new Error(`Halted trading for ${assetToString(asset)}`)
     }
 
     const txHash = await this.transfer({

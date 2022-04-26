@@ -10,7 +10,7 @@ import {
   MsgSend,
   TxInfo,
 } from '@terra-money/terra.js'
-import { BaseXChainClient, FeeType, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
+import { BaseXChainClient, DepositParams, FeeType, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import type {
   Balance,
   Fees,
@@ -23,7 +23,7 @@ import type {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, Chain, assetToString, baseAmount, getInboundDetails } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 
@@ -417,6 +417,36 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
     })
 
     return { from, to }
+  }
+
+  /**
+   * Transaction to THORChain inbound address.
+   *
+   * @param {DepositParams} params The transaction options.
+   * @returns {TxHash} The transaction hash.
+   *
+   * @throws {"halted chain"} Thrown if chain is halted.
+   * @throws {"halted trading"} Thrown if trading is halted.
+   */
+  async deposit({ walletIndex = 0, asset = AssetLUNA, amount, memo }: DepositParams): Promise<TxHash> {
+    const inboundDetails = await getInboundDetails(asset.chain, this.network)
+
+    if (inboundDetails.haltedChain) {
+      throw new Error(`Halted chain for ${assetToString(asset)}`)
+    }
+    if (inboundDetails.haltedTrading) {
+      throw new Error(`Halted trading for ${assetToString(asset)}`)
+    }
+
+    const txHash = await this.transfer({
+      walletIndex,
+      asset,
+      amount,
+      recipient: inboundDetails.vault,
+      memo,
+    })
+
+    return txHash
   }
 }
 

@@ -15,7 +15,7 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { AssetDOGE, Chain, assetAmount, assetToBase, getInboundDetails } from '@xchainjs/xchain-util'
+import { AssetDOGE, Chain, assetAmount, assetToBase, assetToString, getInboundDetails } from '@xchainjs/xchain-util'
 import * as Dogecoin from 'bitcoinjs-lib'
 
 import * as blockcypher from './blockcypher-api'
@@ -340,10 +340,10 @@ class Client extends UTXOClient {
     const inboundDetails = await getInboundDetails(asset.chain, this.network)
 
     if (inboundDetails.haltedChain) {
-      throw new Error('halted chain')
+      throw new Error(`Halted chain for ${assetToString(asset)}`)
     }
     if (inboundDetails.haltedTrading) {
-      throw new Error('halted trading')
+      throw new Error(`Halted trading for ${assetToString(asset)}`)
     }
 
     const txHash = await this.transfer({

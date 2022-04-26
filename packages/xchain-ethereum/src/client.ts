@@ -32,7 +32,7 @@ import { BigNumber, BigNumberish, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
 
 import erc20ABI from './data/erc20.json'
-import { TCRopstenAbi } from './data/thorchain.abi'
+import routerABI from './data/routerABI.json'
 import * as etherscanAPI from './etherscan-api'
 import * as ethplorerAPI from './ethplorer-api'
 import {
@@ -455,24 +455,23 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     const inboundDetails = await getInboundDetails(asset.chain, this.network)
 
     if (inboundDetails.haltedChain) {
-      throw new Error('halted chain')
+      throw new Error(`Halted chain for ${assetToString(asset)}`)
     }
     if (inboundDetails.haltedTrading) {
-      throw new Error('halted trading')
+      throw new Error(`Halted trading for ${assetToString(asset)}`)
     }
     if (!inboundDetails.router) {
       throw new Error('router address is not defined')
     }
 
-    const abi = TCRopstenAbi
     const address = this.getAddress(walletIndex)
     const gasPrice = await this.estimateGasPrices()
 
     if (asset.ticker.toUpperCase() === 'ETH') {
-      const contract = new ethers.Contract(inboundDetails.router, abi)
+      const contract = new ethers.Contract(inboundDetails.router, routerABI)
       const unsignedTx = await contract.populateTransaction.deposit(
         inboundDetails.vault,
-        '0x0000000000000000000000000000000000000000',
+        ETHAddress,
         amount.amount().toFixed(),
         memo,
         {
@@ -499,7 +498,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
       const checkSummedAddress = ethers.utils.getAddress(strip0x)
       const params = [inboundDetails.vault, checkSummedAddress, amount.amount().toFixed(), memo]
-      const vaultContract = new ethers.Contract(inboundDetails.router, abi)
+      const vaultContract = new ethers.Contract(inboundDetails.router, routerABI)
       const unsignedTx = await vaultContract.populateTransaction.deposit(...params, {
         from: address,
         value: 0,

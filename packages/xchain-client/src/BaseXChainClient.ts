@@ -5,7 +5,6 @@ import axios from 'axios'
 import {
   Address,
   Balance,
-  DepositParams,
   FeeRate,
   Fees,
   Network,
@@ -154,5 +153,4 @@ export abstract class BaseXChainClient implements XChainClient {
   abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
   abstract transfer(params: TxParams): Promise<string>
-  abstract deposit(params: DepositParams): Promise<string>
 }
