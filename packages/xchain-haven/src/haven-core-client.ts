@@ -1,24 +1,31 @@
 /**
  * keeps an instance to the light wallet module and takes care about the backend communication
  */
-import { CoreBridgeClass, ASSET, ASSET_LIST, HavenTransferParams, HavenTransferResponse, index as havenWallet, NETTYPE } from 'haven-core-js'
+import {
+  ASSET,
+  ASSET_LIST,
+  CoreBridgeClass,
+  HavenTransferParams,
+  HavenTransferResponse,
+  KeysFromMnemonic,
+  NETTYPE,
+  SerializedTransaction,
+  index as havenWallet,
+} from 'haven-core-js'
 
-import { getRandomOuts, getUnspentOuts, keepAlive, login, submitRawTx } from './api'
+import { getAddressInfo, getAddressTxs, getRandomOuts, getUnspentOuts, keepAlive, login, submitRawTx } from './api'
 
 export class HavenCoreClient {
-  private netType: NETTYPE;
-  private ownAddress: string;
-  private seed: string;
-
+  private netType: NETTYPE
+  private ownAddress: string
+  private seed: string
 
   constructor(seed: string, netType: NETTYPE) {
-
-    this.seed = seed;
-    this.netType = netType;
-
+    this.seed = seed
+    this.netType = netType
   }
 
-  transfer = async (amount: string, transferAsset: ASSET, toAddress: string, memo?: string): Promise<string> => {
+  async transfer(amount: string, transferAsset: ASSET, toAddress: string, memo?: string): Promise<string> {
     // define promise function for return value
     let promiseResolve: (txHash: string) => void, promiseReject: (errMessage: string) => void
 
@@ -36,15 +43,16 @@ export class HavenCoreClient {
     }
 
     const coreModule = await this.getCoreModule()
+    const keys = await this.getKeys()
 
     const transferParams: HavenTransferParams = {
       amount,
       from_address_string: this.ownAddress,
       to_address_string: toAddress,
       is_sweeping: false,
-      sec_viewKey_string: '',
-      sec_spendKey_string: '',
-      pub_spendKey_string: '',
+      sec_viewKey_string: keys.sec_viewKey_string,
+      sec_spendKey_string: keys.sec_spendKey_string,
+      pub_spendKey_string: keys.pub_spendKey_string,
       nettype: this.netType,
       memo_string: memo,
       from_asset_string: transferAsset,
@@ -62,14 +70,33 @@ export class HavenCoreClient {
     return promise
   }
 
-  private async getCoreModule (): Promise<CoreBridgeClass>  {
+  async getTransactions(): Promise<SerializedTransaction[]> {
+    const coreModule = await this.getCoreModule()
+    const keys = await this.getKeys()
+    const { sec_viewKey_string, address_string, pub_spendKey_string, sec_spendKey_string } = keys
+    const rawTransactionData = await getAddressTxs(address_string, sec_viewKey_string)
+
+    const serializedData = havenWallet.api_response_parser_utils.Parsed_AddressTransactions__sync__keyImageManaged(
+      rawTransactionData,
+      address_string,
+      sec_viewKey_string,
+      pub_spendKey_string,
+      sec_spendKey_string,
+      coreModule,
+    )
+
+    return serializedData.serialized_transactions
+  }
+
+  private async getCoreModule(): Promise<CoreBridgeClass> {
     const coreModule = await havenWallet.haven_utils_promise
     return coreModule
   }
 
-  private async getKeys(): Promise<any>  {
-    const coreModule = await this.getCoreModule();
-    const keys = coreModule.address_and_keys_from_seed(this.seed, this.netType);
+  private async getKeys(): Promise<KeysFromMnemonic> {
+    const coreModule = await this.getCoreModule()
+    const keys = await coreModule.seed_and_keys_from_mnemonic(this.seed, this.netType)
+    return keys
   }
 }
 
@@ -77,19 +104,19 @@ const updateStatus = (status: any) => {
   console.log(status)
 }
 
-const getRandomOutsReq = (reqParams: any, cb:(err: string | null , res: any | null) => {
-  getRandomOuts(reqParams: any)
+const getRandomOutsReq = (reqParams: any, cb: (err: any, res: any) => void) => {
+  getRandomOuts(reqParams)
     .then((res) => cb(null, res))
     .catch((err) => cb(err, null))
 }
 
-const getUnspentOutsReq = (reqParams, cb) => {
+const getUnspentOutsReq = (reqParams: any, cb: (err: any, res: any) => void) => {
   getUnspentOuts(reqParams)
     .then((res) => cb(null, res))
     .catch((err) => cb(err, null))
 }
 
-const submitRawTxReq = (reqParams, cb) => {
+const submitRawTxReq = (reqParams: any, cb: (err: any, res: any) => void) => {
   submitRawTx(reqParams)
     .then((res) => cb(null, res))
     .catch((err) => cb(err, null))
