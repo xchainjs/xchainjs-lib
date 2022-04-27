@@ -1,3 +1,9 @@
+# v.0.1.1 (2022-04-27)
+
+## Fix
+
+- `coinsToBalances` adds `null` for invalid `Asset`s #559
+
 # v.0.1.0 (2022-04-19)
 
 Official release - includes everything from `v.0.1.0-alpha.1` to `v.0.1.0-alpha.8`

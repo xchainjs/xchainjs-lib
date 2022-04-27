@@ -31,6 +31,7 @@ import { AssetLUNA, TERRA_DECIMAL } from './const'
 import { EstimatedFee } from './types'
 import type { ClientConfig, ClientParams, FeeParams } from './types/client'
 import {
+  coinsToBalances,
   getDefaultClientConfig,
   getDefaultRootDerivationPaths,
   getEstimatedFee,
@@ -142,10 +143,10 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
   async getBalance(address: string, assets?: Asset[]): Promise<Balance[]> {
     let balances: Balance[] = []
     let [coins, pagination] = await this.lcdClient.bank.balance(address)
-    balances = balances.concat(this.coinsToBalances(coins))
+    balances = balances.concat(coinsToBalances(coins))
     while (pagination.next_key) {
       ;[coins, pagination] = await this.lcdClient.bank.balance(address, { 'pagination.offset': pagination.next_key })
-      balances = balances.concat(this.coinsToBalances(coins))
+      balances = balances.concat(coinsToBalances(coins))
     }
 
     if (assets) {
@@ -270,16 +271,6 @@ class Client extends BaseXChainClient implements XChainClient, TerraClient {
     // broadcast (`async` mode)
     const result = await this.lcdClient.tx.broadcastAsync(tx)
     return result.txhash
-  }
-
-  // TODO (xchain-contributors) Extract to `util` + add tests
-  private coinsToBalances(coins: Coins): Balance[] {
-    return (coins.toArray().map((c: Coin) => {
-      return {
-        asset: getTerraNativeAsset(c.denom),
-        amount: baseAmount(c.amount.toFixed(), TERRA_DECIMAL),
-      }
-    }) as unknown) as Balance[]
   }
 
   // TODO (xchain-contributors) Extract to `util` + add tests

@@ -1,10 +1,11 @@
-import { LCDClient } from '@terra-money/terra.js'
+import { Coin, Coins, LCDClient } from '@terra-money/terra.js'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetBTC, TerraChain } from '@xchainjs/xchain-util'
 
 import mockTerraApi from '../__mocks__/terra'
 import { AssetLUNA, AssetLUNASynth, AssetUST, AssetUSTSynth } from '../src/const'
 import {
+  coinsToBalances,
   getAccount,
   getGasPriceByAsset,
   getTerraNativeAsset,
@@ -101,6 +102,39 @@ describe('terra/util', () => {
       expect(sequence).toEqual(5)
       expect(number).toEqual(198482)
       expect(publicKey?.address()).toEqual(address)
+    })
+  })
+
+  describe('coinsToBalances', () => {
+    it('includes native Terra assets', async () => {
+      const coinA: Coin = new Coin('uusd', 1)
+      const coinB: Coin = new Coin('uluna', 2)
+      const coins = new Coins([coinA, coinB])
+      const result = coinsToBalances(coins)
+      expect(result).toHaveLength(2)
+      const b0 = result[0]
+      expect(b0.asset).toEqual(AssetLUNA)
+      expect(b0.amount.amount().toNumber()).toEqual(2)
+      const b1 = result[1]
+      expect(b1.asset).toEqual(AssetUST)
+      expect(b1.amount.amount().toNumber()).toEqual(1)
+    })
+
+    it('ingore non-native or invalid assets', async () => {
+      const coinA: Coin = new Coin('invalid', 1)
+      const coinB: Coin = new Coin('uluna', 2)
+      const coins = new Coins([coinA, coinB])
+      const result = coinsToBalances(coins)
+      expect(result).toHaveLength(1)
+      const b0 = result[0]
+      expect(b0.asset).toEqual(AssetLUNA)
+      expect(b0.amount.amount().toNumber()).toEqual(2)
+    })
+
+    it('accepts empty list', async () => {
+      const coins = new Coins([])
+      const result = coinsToBalances(coins)
+      expect(result).toHaveLength(0)
     })
   })
 })

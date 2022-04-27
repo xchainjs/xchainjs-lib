@@ -1,5 +1,5 @@
-import { Coins, CreateTxOptions, LCDClient, MsgSend } from '@terra-money/terra.js'
-import { Address, Network } from '@xchainjs/xchain-client'
+import { Coin, Coins, CreateTxOptions, LCDClient, MsgSend } from '@terra-money/terra.js'
+import { Address, Balance, Network } from '@xchainjs/xchain-client'
 import type { RootDerivationPaths } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount, assetToString, baseAmount, bn, bnOrZero, eqAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
@@ -301,3 +301,15 @@ export const getEstimatedFee = async ({
 
   return { amount: fee, asset: feeAsset, gasLimit: estimatedGas }
 }
+
+export const coinsToBalances = (coins: Coins): Balance[] =>
+  coins.toArray().reduce<Balance[]>((acc, curr: Coin) => {
+    const asset = getTerraNativeAsset(curr.denom)
+    if (!!asset) {
+      acc.push({
+        asset,
+        amount: baseAmount(curr.amount.toFixed(), TERRA_DECIMAL),
+      })
+    }
+    return acc
+  }, [])
