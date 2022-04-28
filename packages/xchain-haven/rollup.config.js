@@ -33,5 +33,5 @@ export default {
     }),
     commonjs(),
   ],
-  external: [],
+  external: ['readable-stream', 'buffer', 'haven-core-js', 'crypto', 'stream', 'string_decoder'],
 }
