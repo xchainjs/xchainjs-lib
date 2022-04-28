@@ -1,31 +1,34 @@
 /**
  * keeps an instance to the light wallet module and takes care about the backend communication
  */
-import {
-  ASSET,
-  ASSET_LIST,
-  CoreBridgeClass,
+
+import type {
   HavenTransferParams,
   HavenTransferResponse,
   KeysFromMnemonic,
-  NETTYPE,
+  MyMoneroCoreBridgeClass,
   SerializedTransaction,
-  index as havenWallet,
 } from 'haven-core-js'
+import * as havenWallet from 'haven-core-js'
 
-import { getAddressInfo, getAddressTxs, getRandomOuts, getUnspentOuts, keepAlive, login, submitRawTx } from './api'
+//import type { ParserUtils } from 'haven-core-js'
+import { getAddressTxs, getRandomOuts, getUnspentOuts, submitRawTx } from '../api'
+
+enum NetTypes {
+  mainnet,
+  testnet,
+  stagenet,
+}
 
 export class HavenCoreClient {
-  private netType: NETTYPE
-  private ownAddress: string
+  private netTypeId: number
   private seed: string
-
-  constructor(seed: string, netType: NETTYPE) {
+  constructor(seed: string, netType: string | number) {
+    this.netTypeId = typeof netType === 'number' ? netType : (NetTypes[netType as keyof typeof NetTypes] as number)
     this.seed = seed
-    this.netType = netType
+    //this.netTypeId = netType
   }
-
-  async transfer(amount: string, transferAsset: ASSET, toAddress: string, memo?: string): Promise<string> {
+  async transfer(amount: string, transferAsset: string, toAddress: string, memo?: string): Promise<string> {
     // define promise function for return value
     let promiseResolve: (txHash: string) => void, promiseReject: (errMessage: string) => void
 
@@ -47,13 +50,13 @@ export class HavenCoreClient {
 
     const transferParams: HavenTransferParams = {
       amount,
-      from_address_string: this.ownAddress,
+      from_address_string: 'keys',
       to_address_string: toAddress,
       is_sweeping: false,
       sec_viewKey_string: keys.sec_viewKey_string,
       sec_spendKey_string: keys.sec_spendKey_string,
       pub_spendKey_string: keys.pub_spendKey_string,
-      nettype: this.netType,
+      nettype: this.netTypeId,
       memo_string: memo,
       from_asset_string: transferAsset,
       to_asset_string: transferAsset,
@@ -75,7 +78,6 @@ export class HavenCoreClient {
     const keys = await this.getKeys()
     const { sec_viewKey_string, address_string, pub_spendKey_string, sec_spendKey_string } = keys
     const rawTransactionData = await getAddressTxs(address_string, sec_viewKey_string)
-
     const serializedData = havenWallet.api_response_parser_utils.Parsed_AddressTransactions__sync__keyImageManaged(
       rawTransactionData,
       address_string,
@@ -88,14 +90,14 @@ export class HavenCoreClient {
     return serializedData.serialized_transactions
   }
 
-  private async getCoreModule(): Promise<CoreBridgeClass> {
+  private async getCoreModule(): Promise<MyMoneroCoreBridgeClass> {
     const coreModule = await havenWallet.haven_utils_promise
     return coreModule
   }
 
   private async getKeys(): Promise<KeysFromMnemonic> {
     const coreModule = await this.getCoreModule()
-    const keys = await coreModule.seed_and_keys_from_mnemonic(this.seed, this.netType)
+    const keys = await coreModule.seed_and_keys_from_mnemonic(this.seed, this.netTypeId)
     return keys
   }
 }
