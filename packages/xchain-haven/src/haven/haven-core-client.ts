@@ -3,6 +3,7 @@
  */
 
 import type {
+  HavenTicker,
   HavenTransferParams,
   HavenTransferResponse,
   KeysFromMnemonic,
@@ -11,14 +12,8 @@ import type {
 } from 'haven-core-js'
 import * as havenWallet from 'haven-core-js'
 
-//import type { ParserUtils } from 'haven-core-js'
-import { getAddressTxs, getRandomOuts, getUnspentOuts, submitRawTx } from '../api'
-
-enum NetTypes {
-  mainnet,
-  testnet,
-  stagenet,
-}
+import { getAddressInfo, getAddressTxs, getRandomOuts, getUnspentOuts, submitRawTx } from './api'
+import { HavenBalance, NetTypes } from './types'
 
 export class HavenCoreClient {
   private netTypeId: number
@@ -28,7 +23,51 @@ export class HavenCoreClient {
     this.seed = seed
     //this.netTypeId = netType
   }
-  async transfer(amount: string, transferAsset: string, toAddress: string, memo?: string): Promise<string> {
+
+  init(): Promise<boolean> {}
+
+  async getBalance(): Promise<HavenBalance> {
+    const coreModule = await this.getCoreModule()
+    const keys = await this.getKeys()
+    const { sec_viewKey_string, address_string, pub_spendKey_string, sec_spendKey_string } = keys
+
+    const rawAddressData = await getAddressInfo(address_string, sec_viewKey_string)
+
+    const serializedData = havenWallet.api_response_parser_utils.Parsed_AddressInfo__sync__keyImageManaged(
+      rawAddressData,
+      address_string,
+      sec_viewKey_string,
+      pub_spendKey_string,
+      sec_spendKey_string,
+      coreModule,
+    )
+
+    const havenBalance: HavenBalance = {} as HavenBalance
+
+    const { total_received_String, total_sent_String, total_received_unlocked_String } = serializedData
+
+    Object.keys(serializedData.total_received_String).forEach((assetType) => {
+      const balance = havenWallet
+        .JSBigInt(total_received_String[assetType as HavenTicker])
+        .subtract(havenWallet.JSBigInt(total_sent_String[assetType as HavenTicker]))
+
+      const unlockedBalance = havenWallet
+        .JSBigInt(total_received_unlocked_String[assetType as HavenTicker])
+        .subtract(havenWallet.JSBigInt(total_sent_String[assetType as HavenTicker]))
+
+      const lockedBalance = balance.subtract(unlockedBalance)
+
+      havenBalance[assetType as HavenTicker] = {
+        balance: balance.toString(),
+        lockedBalance: lockedBalance.toString(),
+        unlockedBalance: unlockedBalance.toString(),
+      }
+    })
+
+    return havenBalance
+  }
+
+  async transfer(amount: string, transferAsset: HavenTicker, toAddress: string, memo?: string): Promise<string> {
     // define promise function for return value
     let promiseResolve: (txHash: string) => void, promiseReject: (errMessage: string) => void
 

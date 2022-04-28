@@ -2,6 +2,7 @@ import {
   Balance,
   BaseXChainClient,
   Fees,
+  Network,
   Tx,
   TxFrom,
   TxHash,
@@ -11,11 +12,11 @@ import {
   TxType,
   TxsPage,
   XChainClient,
-} from '@xchainjs/xchain-client/src'
-import { Asset, baseAmount } from '@xchainjs/xchain-util'
+} from '@xchainjs/xchain-client'
+import { Asset, AssetBTC, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 
-import { getAsset } from './assets'
 import { HavenCoreClient } from './haven/haven-core-client'
+import { HavenBalance, HavenTicker } from './haven/types'
 import { HavenClient } from './types/client-types'
 
 class Client extends BaseXChainClient implements XChainClient, HavenClient {
@@ -24,39 +25,58 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   getFees(): Promise<Fees> {
     throw new Error('Method not implemented.')
   }
-  getAddress(walletIndex?: number): string {
+  getAddress(_walletIndex?: number): string {
     throw new Error('please use getAddressAsync')
   }
-  async getAddressAsync(walletIndex: number): Promise<string> {
+  async getAddressAsync(_walletIndex?: number): Promise<string> {
     throw new Error('please use getAddressAsync')
   }
   getExplorerUrl(): string {
-    throw new Error('Method not implemented.')
+    const explorerLink = `https://explorer${
+      this.network === Network.Mainnet ? '' : '-' + this.network
+    }.havenprotocol.org`
+    return explorerLink
   }
-  getExplorerAddressUrl(address: string): string {
-    throw new Error('Method not implemented.')
+  getExplorerAddressUrl(_address: string): string {
+    throw new Error('cannot lookup addresses in explorer for haven')
   }
   getExplorerTxUrl(txID: string): string {
-    throw new Error('Method not implemented.')
+    return this.getExplorerUrl() + `/tx/${txID}`
   }
-  getBalance(address: string, assets?: Asset[]): Promise<Balance[]> {
-    throw new Error('Method not implemented.')
+  async getBalance(_address: string, assets?: Asset[]): Promise<Balance[]> {
+    const havenBalance: HavenBalance = await this.havenCoreClient.getBalance()
+
+    //TODO return all asset balances when no assets param provided?
+    const balances: Balance[] = []
+
+    if (assets) {
+      assets.forEach((asset) => {
+        const assetBalance: Balance = {
+          asset,
+          amount: baseAmount(havenBalance[asset.ticker as HavenTicker].balance),
+        }
+        balances.push(assetBalance)
+      })
+    }
+
+    return balances
   }
 
-  validateAddress(address: string): boolean {
+  validateAddress(_address: string): boolean {
     throw new Error('Method not implemented.')
   }
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
+    const asset: Asset = params?.asset ? assetFromString(params.asset)! : AssetBTC
+    const ticker = asset.ticker
     let transactions = await this.havenCoreClient.getTransactions()
-
     // filter if we either send or received coins for requested asset
-    transactions = params?.asset
+    transactions = ticker
       ? transactions.filter((tx, _) => {
-          if (tx.from_asset_type == params.asset && baseAmount(tx.fromAmount).gte('0')) {
+          if (tx.from_asset_type == ticker && baseAmount(tx.fromAmount).gte('0')) {
             return true
           }
 
-          if (tx.to_asset_type == params.asset && baseAmount(tx.toAmount).gte('0')) {
+          if (tx.to_asset_type == ticker && baseAmount(tx.toAmount).gte('0')) {
             return true
           }
 
@@ -87,11 +107,9 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
         (params?.asset === undefined || (params?.asset !== undefined && havenTx.to_asset_type == params.asset))
 
       const from: Array<TxFrom> = isOut
-        ? [{ amount: baseAmount(havenTx.fromAmount), asset: getAsset(havenTx.from_asset_type), from: havenTx.hash }]
+        ? [{ amount: baseAmount(havenTx.fromAmount), asset: undefined, from: havenTx.hash }]
         : []
-      const to: Array<TxTo> = isIn
-        ? [{ amount: baseAmount(havenTx.toAmount), asset: getAsset(havenTx.to_asset_type), to: havenTx.hash }]
-        : []
+      const to: Array<TxTo> = isIn ? [{ amount: baseAmount(havenTx.toAmount), asset: undefined, to: havenTx.hash }] : []
 
       const tx: Tx = {
         hash: havenTx.hash,
@@ -99,7 +117,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
         type: isIn && isOut ? TxType.Unknown : TxType.Transfer,
         from,
         to,
-        asset: getAsset(havenTx.from_asset_type),
+        asset: asset,
       }
 
       return tx
@@ -111,14 +129,14 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     }
     return txPages
   }
-  getTransactionData(txId: string, assetAddress?: string): Promise<Tx> {
+  getTransactionData(_txId: string, _assetAddress?: string): Promise<Tx> {
     throw new Error('Method not implemented.')
   }
   transfer(params: TxParams): Promise<TxHash> {
     const { amount, asset, recipient, memo } = params
     if (asset === undefined) throw 'please specify asset it in Client.transfer() for Haven'
     const amountString = amount.amount.toString()
-    return this.havenCoreClient.transfer(amountString, asset.ticker, recipient, memo)
+    return this.havenCoreClient.transfer(amountString, asset.ticker as HavenTicker, recipient, memo)
   }
   isSyncing(): boolean {
     throw new Error('Method not implemented.')
