@@ -1,29 +1,34 @@
 import {
+  Balance,
   BaseXChainClient,
   Fees,
   Tx,
+  TxFrom,
   TxHash,
   TxHistoryParams,
   TxParams,
+  TxTo,
+  TxType,
   TxsPage,
   XChainClient,
-} from '@xchainjs/xchain-client'
-import { TxFrom, TxTo, TxType } from '@xchainjs/xchain-client/src'
-import { baseAmount } from '@xchainjs/xchain-util/src'
+} from '@xchainjs/xchain-client/src'
+import { Asset, baseAmount } from '@xchainjs/xchain-util'
 
 import { getAsset } from './assets'
-
-import { HavenCoreClient } from './haven-core-client'
-
+import { HavenCoreClient } from './haven/haven-core-client'
 import { HavenClient } from './types/client-types'
 
 class Client extends BaseXChainClient implements XChainClient, HavenClient {
-  protected havenCoreClient = new HavenCoreClient()
+  protected havenCoreClient: HavenCoreClient = new HavenCoreClient(this.phrase, this.network)
+
   getFees(): Promise<Fees> {
     throw new Error('Method not implemented.')
   }
   getAddress(walletIndex?: number): string {
-    throw new Error('Method not implemented.')
+    throw new Error('please use getAddressAsync')
+  }
+  async getAddressAsync(walletIndex: number): Promise<string> {
+    throw new Error('please use getAddressAsync')
   }
   getExplorerUrl(): string {
     throw new Error('Method not implemented.')
@@ -34,6 +39,10 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   getExplorerTxUrl(txID: string): string {
     throw new Error('Method not implemented.')
   }
+  getBalance(address: string, assets?: Asset[]): Promise<Balance[]> {
+    throw new Error('Method not implemented.')
+  }
+
   validateAddress(address: string): boolean {
     throw new Error('Method not implemented.')
   }
@@ -112,12 +121,13 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     return this.havenCoreClient.transfer(amountString, asset.ticker, recipient, memo)
   }
   isSyncing(): boolean {
-    return true
+    throw new Error('Method not implemented.')
   }
   syncHeight(): number {
-    return 0
+    throw new Error('Method not implemented.')
   }
   blockHeight(): number {
-    return 0
+    throw new Error('Method not implemented.')
   }
 }
+export { Client }
