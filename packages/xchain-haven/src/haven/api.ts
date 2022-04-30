@@ -1,24 +1,34 @@
+import axios from 'axios'
+
 /**
  * endpoints for openhaven/backend communication
  */
 
-const API_URL = 'EMPTY'
+let API_URL = ''
 
-const INIT_REQUEST = {
-  method: 'POST',
+export const setAPI_URL = (url: string) => {
+  API_URL = url
+}
+
+const CONFIG = {
+  Accept: 'application/json',
   headers: {
     'Content-Type': 'application/json',
   },
 }
 
+export const get_version = (): Promise<any> => {
+  return axios.post(`${API_URL}/get_version`, {}, CONFIG).then((result) => result.data)
+}
+
 export const login = (
   address: string,
   view_key: string,
-  generated_locally: string,
+  generated_locally: boolean,
   create_account = true,
 ): Promise<any> => {
   const params = { address, view_key, generated_locally, create_account }
-  return fetch(`${API_URL}/login`, { ...INIT_REQUEST, body: JSON.stringify(params) }).then((result) => result.json())
+  return axios.post(`${API_URL}/login`, params, CONFIG).then((result) => result.data)
 }
 
 /**
@@ -28,7 +38,7 @@ export const login = (
  */
 export const keepAlive = (address: string, view_key: string): Promise<any> => {
   const params = { address, view_key }
-  return fetch(`${API_URL}/ping`, { ...INIT_REQUEST, body: JSON.stringify(params) }).then((result) => result.json())
+  return axios.post(`${API_URL}/ping`, params, CONFIG).then((result) => result.data)
 }
 
 /**
@@ -38,9 +48,7 @@ export const keepAlive = (address: string, view_key: string): Promise<any> => {
  */
 export const getAddressInfo = (address: string, view_key: string): Promise<any> => {
   const params = { address, view_key }
-  return fetch(`${API_URL}/get_address_info`, { ...INIT_REQUEST, body: JSON.stringify(params) }).then((result) =>
-    result.json(),
-  )
+  return axios.post(`${API_URL}/get_address_info`, params, CONFIG).then((result) => result.data)
 }
 
 /**
@@ -50,9 +58,7 @@ export const getAddressInfo = (address: string, view_key: string): Promise<any> 
  */
 export const getAddressTxs = (address: string, view_key: string): Promise<any> => {
   const params = { address, view_key }
-  return fetch(`${API_URL}/get_address_txs`, { ...INIT_REQUEST, body: JSON.stringify(params) }).then((result) =>
-    result.json(),
-  )
+  return axios.post(`${API_URL}/get_address_txs`, params, CONFIG).then((result) => result.data)
 }
 
 //
@@ -67,21 +73,13 @@ export const getUnspentOuts = (getUnspentOutsParams: any): Promise<any> => {
   //    const dust_threshold = "1000000000";
 
   //const params = {address, view_key, amount, mixin, use_dust, dust_threshold};
-  return fetch(`${API_URL}/get_unspent_outs`, {
-    ...INIT_REQUEST,
-    body: JSON.stringify(getUnspentOutsParams),
-  }).then((result) => result.json())
+  return axios.post(`${API_URL}/get_unspent_outs`, getUnspentOutsParams, CONFIG).then((result) => result.data)
 }
 
 export const getRandomOuts = (getRandomOutsParams: any): Promise<any> => {
-  return fetch(`${API_URL}/get_random_outs`, {
-    ...INIT_REQUEST,
-    body: JSON.stringify(getRandomOutsParams),
-  }).then((result) => result.json())
+  return axios.post(`${API_URL}/get_random_outs`, getRandomOutsParams, CONFIG).then((result) => result.data)
 }
 
 export const submitRawTx = (signedTx: any): Promise<any> => {
-  return fetch(`${API_URL}/submit_raw_tx`, { ...INIT_REQUEST, body: JSON.stringify(signedTx) }).then((result) =>
-    result.json(),
-  )
+  return axios.post(`${API_URL}/submit_raw_tx`, signedTx.CONFIG).then((result) => result.data)
 }
