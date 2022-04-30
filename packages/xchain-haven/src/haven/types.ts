@@ -10,3 +10,8 @@ export enum NetTypes {
 export type BalanceType = 'balance' | 'unlockedBalance' | 'lockedBalance'
 
 export type HavenBalance = Record<HavenTicker, Record<BalanceType, string>>
+
+export type SyncStats = {
+  scannedHeight: number
+  blockHeight: number
+}
