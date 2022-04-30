@@ -12,15 +12,21 @@ import {
   TxType,
   TxsPage,
   XChainClient,
+  XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, AssetBTC, assetFromString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetBTC, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 
 import { HavenCoreClient } from './haven/haven-core-client'
 import { HavenBalance, HavenTicker } from './haven/types'
 import { HavenClient } from './types/client-types'
 
 class Client extends BaseXChainClient implements XChainClient, HavenClient {
-  protected havenCoreClient: HavenCoreClient = new HavenCoreClient(this.phrase, this.network)
+  protected havenCoreClient: HavenCoreClient
+  constructor(chain: Chain, params: XChainClientParams) {
+    super(chain, params)
+    this.havenCoreClient = new HavenCoreClient()
+    this.havenCoreClient.init(params.phrase!, params.network!)
+  }
 
   getFees(): Promise<Fees> {
     throw new Error('Method not implemented.')
@@ -53,7 +59,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
       assets.forEach((asset) => {
         const assetBalance: Balance = {
           asset,
-          amount: baseAmount(havenBalance[asset.ticker as HavenTicker].balance),
+          amount: baseAmount(havenBalance[asset.ticker as HavenTicker].balance, 12),
         }
         balances.push(assetBalance)
       })
@@ -72,11 +78,11 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     // filter if we either send or received coins for requested asset
     transactions = ticker
       ? transactions.filter((tx, _) => {
-          if (tx.from_asset_type == ticker && baseAmount(tx.fromAmount).gte('0')) {
+          if (tx.from_asset_type == ticker && baseAmount(tx.fromAmount, 12).gte('0')) {
             return true
           }
 
-          if (tx.to_asset_type == ticker && baseAmount(tx.toAmount).gte('0')) {
+          if (tx.to_asset_type == ticker && baseAmount(tx.toAmount, 12).gte('0')) {
             return true
           }
 
@@ -99,17 +105,19 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
       // if we exchanged to ourself in the past with Havens own exchange mechanics, we have an out and incoming tx
       // if request is limited by an asset, we will only take by the one which matches it
       const isOut: boolean =
-        baseAmount(havenTx.fromAmount).gte('0') &&
+        baseAmount(havenTx.fromAmount, 12).gte('0') &&
         (params?.asset === undefined || (params?.asset !== undefined && havenTx.from_asset_type == params.asset))
 
       const isIn: boolean =
-        baseAmount(havenTx.toAmount).gte('0') &&
+        baseAmount(havenTx.toAmount, 12).gte('0') &&
         (params?.asset === undefined || (params?.asset !== undefined && havenTx.to_asset_type == params.asset))
 
       const from: Array<TxFrom> = isOut
-        ? [{ amount: baseAmount(havenTx.fromAmount), asset: undefined, from: havenTx.hash }]
+        ? [{ amount: baseAmount(havenTx.fromAmount, 12), asset: undefined, from: havenTx.hash }]
         : []
-      const to: Array<TxTo> = isIn ? [{ amount: baseAmount(havenTx.toAmount), asset: undefined, to: havenTx.hash }] : []
+      const to: Array<TxTo> = isIn
+        ? [{ amount: baseAmount(havenTx.toAmount, 12), asset: undefined, to: havenTx.hash }]
+        : []
 
       const tx: Tx = {
         hash: havenTx.hash,
