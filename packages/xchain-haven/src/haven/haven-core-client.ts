@@ -12,19 +12,71 @@ import type {
 } from 'haven-core-js'
 import * as havenWallet from 'haven-core-js'
 
-import { getAddressInfo, getAddressTxs, getRandomOuts, getUnspentOuts, submitRawTx } from './api'
-import { HavenBalance, NetTypes } from './types'
+import {
+  getAddressInfo,
+  getAddressTxs,
+  getRandomOuts,
+  getUnspentOuts,
+  keepAlive,
+  login,
+  setAPI_URL,
+  submitRawTx,
+} from './api'
+import { HavenBalance, NetTypes, SyncStats } from './types'
+
+function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
+  if (val === undefined || val === null) {
+    throw new Error(`Expected 'val' to be defined, but received ${val}`)
+  }
+}
+
+const TestNetApiUrl = 'http://142.93.249.35:1984'
+const MainnetApiUrl = ''
 
 export class HavenCoreClient {
-  private netTypeId: number
-  private seed: string
-  constructor(seed: string, netType: string | number) {
+  private netTypeId: number | undefined
+  private seed: string | undefined
+  private scannedHeight = 0
+  private blockHeight = 0
+  private pingServerIntervalID: ReturnType<typeof setInterval> | undefined
+  private coreModule: MyMoneroCoreBridgeClass | undefined
+
+  async init(seed: string, netType: string | number): Promise<boolean> {
+    //this.netTypeId = netTypePromise<boolean> {
+    // login and fire up keep_alive
+    this.purgeClient()
+
     this.netTypeId = typeof netType === 'number' ? netType : (NetTypes[netType as keyof typeof NetTypes] as number)
     this.seed = seed
-    //this.netTypeId = netType
+    const apiUrl = this.netTypeId === NetTypes.mainnet ? MainnetApiUrl : TestNetApiUrl
+    setAPI_URL(apiUrl)
+
+    const keys = await this.getKeys()
+    await login(keys.address_string, keys.sec_viewKey_string, true)
+    const addressInfoResponse = await getAddressInfo(keys.address_string, keys.sec_viewKey_string)
+
+    this.scannedHeight = addressInfoResponse.scanned_block_height
+    this.blockHeight = addressInfoResponse.blockchain_height
+
+    this.pingServerIntervalID = setInterval(this.pingServer, 60 * 1000)
+
+    return true
   }
 
-  init(): Promise<boolean> {}
+  purgeClient() {
+    this.netTypeId = undefined
+    this.seed = undefined
+    this.scannedHeight = 0
+    this.blockHeight = 0
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    clearInterval(this.pingServerIntervalID)
+  }
+
+  async getAddress(): Promise<string> {
+    const keys = await this.getKeys()
+    return keys.address_string
+  }
 
   async getBalance(): Promise<HavenBalance> {
     const coreModule = await this.getCoreModule()
@@ -67,8 +119,10 @@ export class HavenCoreClient {
     return havenBalance
   }
 
-  async transfer(amount: string, transferAsset: HavenTicker, toAddress: string, memo?: string): Promise<string> {
+  async transfer(amount: string, transferAsset: HavenTicker, toAddress: string): Promise<string> {
+    console.log(amount, transferAsset, toAddress)
     // define promise function for return value
+    assertIsDefined<number | undefined>(this.netTypeId)
     let promiseResolve: (txHash: string) => void, promiseReject: (errMessage: string) => void
 
     const promise: Promise<string> = new Promise(function (resolve, reject) {
@@ -81,6 +135,7 @@ export class HavenCoreClient {
     }
 
     const sendFundsFailed = (err: string) => {
+      console.log(err)
       promiseReject(err)
     }
 
@@ -88,19 +143,20 @@ export class HavenCoreClient {
     const keys = await this.getKeys()
 
     const transferParams: HavenTransferParams = {
-      amount,
-      from_address_string: 'keys',
+      sending_amount: amount,
+      from_address_string: keys.address_string,
       to_address_string: toAddress,
       is_sweeping: false,
+      payment_id_string: '',
       sec_viewKey_string: keys.sec_viewKey_string,
       sec_spendKey_string: keys.sec_spendKey_string,
       pub_spendKey_string: keys.pub_spendKey_string,
       nettype: this.netTypeId,
-      memo_string: memo,
-      from_asset_string: transferAsset,
-      to_asset_string: transferAsset,
-      priority: 2,
+      from_asset_type: transferAsset,
+      to_asset_type: transferAsset,
+      priority: '1',
       unlock_time: 0,
+      blockchain_height: this.blockHeight,
       get_unspent_outs_fn: getUnspentOutsReq,
       get_random_outs_fn: getRandomOutsReq,
       submit_raw_tx_fn: submitRawTxReq,
@@ -108,6 +164,7 @@ export class HavenCoreClient {
       error_fn: sendFundsFailed,
       success_fn: sendFundsSucceed,
     }
+    console.log(transferParams)
     coreModule.async__send_funds(transferParams)
     return promise
   }
@@ -129,15 +186,28 @@ export class HavenCoreClient {
     return serializedData.serialized_transactions
   }
 
+  getSyncStats(): SyncStats {
+    return { blockHeight: this.blockHeight, scannedHeight: this.scannedHeight }
+  }
+
   private async getCoreModule(): Promise<MyMoneroCoreBridgeClass> {
-    const coreModule = await havenWallet.haven_utils_promise
-    return coreModule
+    if (!this.coreModule) {
+      this.coreModule = await havenWallet.haven_utils_promise
+    }
+    return this.coreModule
   }
 
   private async getKeys(): Promise<KeysFromMnemonic> {
+    assertIsDefined<string | undefined>(this.seed)
+    assertIsDefined<number | undefined>(this.netTypeId)
     const coreModule = await this.getCoreModule()
-    const keys = await coreModule.seed_and_keys_from_mnemonic(this.seed, this.netTypeId)
+    const keys = coreModule.seed_and_keys_from_mnemonic(this.seed, this.netTypeId)
     return keys
+  }
+  private async pingServer(): Promise<void> {
+    const keys = await this.getKeys()
+
+    keepAlive(keys.address_string, keys.sec_viewKey_string)
   }
 }
 
