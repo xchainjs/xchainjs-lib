@@ -12,23 +12,9 @@ import type {
 } from 'haven-core-js'
 import * as havenWallet from 'haven-core-js'
 
-import {
-  getAddressInfo,
-  getAddressTxs,
-  getRandomOuts,
-  getUnspentOuts,
-  keepAlive,
-  login,
-  setAPI_URL,
-  submitRawTx,
-} from './api'
+import { getAddressInfo, getAddressTxs, keepAlive, login, setAPI_URL } from './api'
 import { HavenBalance, NetTypes, SyncStats } from './types'
-
-function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
-  if (val === undefined || val === null) {
-    throw new Error(`Expected 'val' to be defined, but received ${val}`)
-  }
-}
+import { assertIsDefined, getRandomOutsReq, getUnspentOutsReq, submitRawTxReq, updateStatus } from './utils'
 
 const TestNetApiUrl = 'http://142.93.249.35:1984'
 const MainnetApiUrl = ''
@@ -78,6 +64,17 @@ export class HavenCoreClient {
     return keys.address_string
   }
 
+  async validateAddress(address: string): Promise<boolean> {
+    const module = await this.getCoreModule()
+    let response: string | Record<string, unknown>
+    try {
+      response = module.decode_address(address, this.netTypeId!)
+    } catch (e) {
+      return false
+    }
+    return response.hasOwnProperty('spend')
+  }
+
   async getBalance(): Promise<HavenBalance> {
     const coreModule = await this.getCoreModule()
     const keys = await this.getKeys()
@@ -119,7 +116,7 @@ export class HavenCoreClient {
     return havenBalance
   }
 
-  async transfer(amount: string, transferAsset: HavenTicker, toAddress: string): Promise<string> {
+  async transfer(amount: string, transferAsset: HavenTicker, toAddress: string, memo = ''): Promise<string> {
     console.log(amount, transferAsset, toAddress)
     // define promise function for return value
     assertIsDefined<number | undefined>(this.netTypeId)
@@ -153,6 +150,7 @@ export class HavenCoreClient {
       pub_spendKey_string: keys.pub_spendKey_string,
       nettype: this.netTypeId,
       from_asset_type: transferAsset,
+      memo_string: memo,
       to_asset_type: transferAsset,
       priority: '1',
       unlock_time: 0,
@@ -164,7 +162,6 @@ export class HavenCoreClient {
       error_fn: sendFundsFailed,
       success_fn: sendFundsSucceed,
     }
-    console.log(transferParams)
     coreModule.async__send_funds(transferParams)
     return promise
   }
@@ -209,26 +206,4 @@ export class HavenCoreClient {
 
     keepAlive(keys.address_string, keys.sec_viewKey_string)
   }
-}
-
-const updateStatus = (status: any) => {
-  console.log(status)
-}
-
-const getRandomOutsReq = (reqParams: any, cb: (err: any, res: any) => void) => {
-  getRandomOuts(reqParams)
-    .then((res) => cb(null, res))
-    .catch((err) => cb(err, null))
-}
-
-const getUnspentOutsReq = (reqParams: any, cb: (err: any, res: any) => void) => {
-  getUnspentOuts(reqParams)
-    .then((res) => cb(null, res))
-    .catch((err) => cb(err, null))
-}
-
-const submitRawTxReq = (reqParams: any, cb: (err: any, res: any) => void) => {
-  submitRawTx(reqParams)
-    .then((res) => cb(null, res))
-    .catch((err) => cb(err, null))
 }
