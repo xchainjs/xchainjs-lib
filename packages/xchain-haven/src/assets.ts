@@ -1,20 +1,20 @@
 import { Asset, Chain } from '@xchainjs/xchain-util'
 
-const xhvAsset: Asset = {
+export const AssetXHV: Asset = {
   symbol: 'XHV',
   ticker: 'XHV',
   synth: false,
   chain: Chain.Haven,
 }
 
-const xUSDAsset: Asset = {
-  symbol: 'xUSD',
-  ticker: 'xUSD',
+export const AssetXUSD: Asset = {
+  symbol: 'XUSD',
+  ticker: 'XUSD',
   synth: true,
   chain: Chain.Haven,
 }
 
-const assets = [xhvAsset, xUSDAsset]
+const assets = [AssetXHV, AssetXUSD]
 
 export const getAsset = (ticker: string): Asset => {
   const asset = assets.find((asset: Asset) => ticker.toLowerCase() === asset.ticker.toLowerCase())
