@@ -61,6 +61,17 @@ export const getAddressTxs = (address: string, view_key: string): Promise<any> =
   return axios.post(`${API_URL}/get_address_txs`, params, CONFIG).then((result) => result.data)
 }
 
+/**
+ * returns tx pf given hash
+ * @param address
+ * @param view_key
+ * @param tx_hash
+ */
+export const getTx = (address: string, view_key: string, tx_hash: string): Promise<any> => {
+  const params = { address, view_key, tx_hash }
+  return axios.post(`${API_URL}/get_tx`, params, CONFIG).then((result) => result.data)
+}
+
 //
 // API endpoints for sending funds
 // params are prepared by havenWallet

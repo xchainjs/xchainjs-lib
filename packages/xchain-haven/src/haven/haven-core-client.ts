@@ -12,7 +12,7 @@ import type {
 } from 'haven-core-js'
 import * as havenWallet from 'haven-core-js'
 
-import { getAddressInfo, getAddressTxs, keepAlive, login, setAPI_URL } from './api'
+import { getAddressInfo, getAddressTxs, getTx, keepAlive, login, setAPI_URL } from './api'
 import { HavenBalance, NetTypes, SyncStats } from './types'
 import { assertIsDefined, getRandomOutsReq, getUnspentOutsReq, submitRawTxReq, updateStatus } from './utils'
 
@@ -181,6 +181,28 @@ export class HavenCoreClient {
     )
 
     return serializedData.serialized_transactions
+  }
+
+  async getTx(hash: string): Promise<SerializedTransaction> {
+    const coreModule = await this.getCoreModule()
+    const keys = await this.getKeys()
+    const { sec_viewKey_string, address_string, pub_spendKey_string, sec_spendKey_string } = keys
+
+    const rawTx = getTx(address_string, sec_viewKey_string, hash)
+    const rawTransactionData = {
+      transactions: [rawTx],
+    }
+
+    const serializedData = havenWallet.api_response_parser_utils.Parsed_AddressTransactions__sync__keyImageManaged(
+      rawTransactionData,
+      address_string,
+      sec_viewKey_string,
+      pub_spendKey_string,
+      sec_spendKey_string,
+      coreModule,
+    )
+
+    return serializedData.serialized_transactions[0]
   }
 
   getSyncStats(): SyncStats {

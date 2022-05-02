@@ -19,7 +19,7 @@ import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Asset, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import { convertBip39ToHavenMnemonic } from 'mnemonicconverter'
 
-import { AssetXHV } from './assets'
+import { AssetXHV, getAssetByTicker } from './assets'
 import { HavenCoreClient } from './haven/haven-core-client'
 import { HavenBalance, HavenTicker } from './haven/types'
 import { HavenClient } from './types/client-types'
@@ -158,11 +158,11 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
       // if we exchanged to ourself in the past with Havens own exchange mechanics, we have an out and incoming tx
       // if request is limited by an asset, we will only take by the one which matches it
       const isOut: boolean =
-        baseAmount(havenTx.fromAmount, 12).gte('0') &&
+        baseAmount(havenTx.fromAmount, 12).gt('0') &&
         (params?.asset === undefined || (params?.asset !== undefined && havenTx.from_asset_type == params.asset))
 
       const isIn: boolean =
-        baseAmount(havenTx.toAmount, 12).gte('0') &&
+        baseAmount(havenTx.toAmount, 12).gt('0') &&
         (params?.asset === undefined || (params?.asset !== undefined && havenTx.to_asset_type == params.asset))
 
       const from: Array<TxFrom> = isOut
@@ -190,8 +190,30 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     }
     return txPages
   }
-  getTransactionData(_txId: string, _assetAddress?: string): Promise<Tx> {
-    throw new Error('Method not implemented.')
+  async getTransactionData(txId: string, _assetAddress?: string): Promise<Tx> {
+    const havenTx = await this.havenCoreClient.getTx(txId)
+
+    const isOut: boolean = baseAmount(havenTx.fromAmount, 12).gt('0')
+    const isIn: boolean = baseAmount(havenTx.toAmount, 12).gt('0')
+
+    const from: Array<TxFrom> = isOut
+      ? [{ amount: baseAmount(havenTx.fromAmount, 12), asset: undefined, from: havenTx.hash }]
+      : []
+    const to: Array<TxTo> = isIn
+      ? [{ amount: baseAmount(havenTx.toAmount, 12), asset: undefined, to: havenTx.hash }]
+      : []
+
+    const asset: Asset = isOut ? getAssetByTicker(havenTx.from_asset_type) : getAssetByTicker(havenTx.to_asset_type)
+
+    const tx: Tx = {
+      hash: havenTx.hash,
+      date: new Date(havenTx.timestamp),
+      type: isIn && isOut ? TxType.Unknown : TxType.Transfer,
+      from,
+      to,
+      asset,
+    }
+    return tx
   }
   transfer(params: TxParams): Promise<TxHash> {
     const { amount, asset, recipient, memo } = params
