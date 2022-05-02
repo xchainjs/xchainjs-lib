@@ -1,4 +1,5 @@
 import {
+  Address,
   Balance,
   BaseXChainClient,
   Fees,
@@ -14,18 +15,47 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, AssetBTC, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
+import { validatePhrase } from '@xchainjs/xchain-crypto'
+import { Asset, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
+import { convertBip39ToHavenMnemonic } from 'mnemonicconverter'
 
+import { AssetXHV } from './assets'
 import { HavenCoreClient } from './haven/haven-core-client'
 import { HavenBalance, HavenTicker } from './haven/types'
 import { HavenClient } from './types/client-types'
 
+// rootDerivationPaths = {
+//   [Network.Mainnet]: `m/44'/60'/0'/0/`,
+//   [Network.Testnet]: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
+//   [Network.Stagenet]: `m/44'/60'/0'/0/`,
+
 class Client extends BaseXChainClient implements XChainClient, HavenClient {
   protected havenCoreClient: HavenCoreClient
-  constructor(chain: Chain, params: XChainClientParams) {
-    super(chain, params)
+
+  /**
+   * Constructor
+   *
+   * Client has to be initialised with network type and phrase.
+   * It will throw an error if an invalid phrase has been passed.
+   *
+   * @param {XChainClientParams} params
+   *
+   * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
+   */
+  constructor({
+    network = Network.Testnet,
+    rootDerivationPaths = {
+      [Network.Mainnet]: `m/44'/535'/0'/0/`,
+      [Network.Testnet]: `m/44'/535'/0'/0/`,
+      [Network.Stagenet]: `m/44'/535'/0'/0/`,
+    },
+    phrase = '',
+  }: XChainClientParams) {
+    super(Chain.Haven, { network, rootDerivationPaths, phrase })
     this.havenCoreClient = new HavenCoreClient()
-    this.havenCoreClient.init(params.phrase!, params.network!)
+    if (this.phrase) {
+      this.initCoreClient(this.phrase, this.network)
+    }
   }
 
   getFees(): Promise<Fees> {
@@ -34,8 +64,9 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   getAddress(_walletIndex?: number): string {
     throw new Error('please use getAddressAsync')
   }
-  async getAddressAsync(_walletIndex?: number): Promise<string> {
-    throw new Error('please use getAddressAsync')
+  async getAddressAsync(_walletIndex?: number): Promise<Address> {
+    const address = await this.havenCoreClient.getAddress()
+    return address
   }
   getExplorerUrl(): string {
     const explorerLink = `https://explorer${
@@ -47,7 +78,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     throw new Error('cannot lookup addresses in explorer for haven')
   }
   getExplorerTxUrl(txID: string): string {
-    return this.getExplorerUrl() + `/tx/${txID}`
+    return `${this.getExplorerUrl()}/tx/${txID}`
   }
   async getBalance(_address: string, assets?: Asset[]): Promise<Balance[]> {
     const havenBalance: HavenBalance = await this.havenCoreClient.getBalance()
@@ -69,20 +100,42 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   }
 
   validateAddress(_address: string): boolean {
-    throw new Error('Method not implemented.')
+    throw new Error('please use validateAsync')
   }
+
+  async validateAddressAsync(address: string): Promise<boolean> {
+    const isValid = await this.havenCoreClient.validateAddress(address)
+    return isValid
+  }
+
+  override setPhrase(_phrase: string, _walletIndex?: number): Address {
+    throw new Error('please use setPhraseAsync')
+  }
+
+  async setPhraseAsync(phrase: string, _walletIndex?: number): Promise<Address> {
+    if (this.phrase !== phrase) {
+      if (!validatePhrase(phrase)) {
+        throw new Error('Invalid phrase')
+      }
+      this.phrase = phrase
+      await this.initCoreClient(this.phrase, this.network)
+    }
+    const address = await this.getAddressAsync()
+    return address
+  }
+
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const asset: Asset = params?.asset ? assetFromString(params.asset)! : AssetBTC
+    const asset: Asset = params?.asset ? assetFromString(params.asset)! : AssetXHV
     const ticker = asset.ticker
     let transactions = await this.havenCoreClient.getTransactions()
     // filter if we either send or received coins for requested asset
     transactions = ticker
       ? transactions.filter((tx, _) => {
-          if (tx.from_asset_type == ticker && baseAmount(tx.fromAmount, 12).gte('0')) {
+          if (tx.from_asset_type == ticker && baseAmount(tx.fromAmount, 12).gt('0')) {
             return true
           }
 
-          if (tx.to_asset_type == ticker && baseAmount(tx.toAmount, 12).gte('0')) {
+          if (tx.to_asset_type == ticker && baseAmount(tx.toAmount, 12).gt('0')) {
             return true
           }
 
@@ -154,6 +207,11 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   }
   blockHeight(): number {
     throw new Error('Method not implemented.')
+  }
+
+  private async initCoreClient(phrase: string, network: Network) {
+    const havenSeed = await convertBip39ToHavenMnemonic(phrase, '')
+    this.havenCoreClient.init(havenSeed, network)
   }
 }
 export { Client }
