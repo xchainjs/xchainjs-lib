@@ -16,7 +16,7 @@ export const AssetXUSD: Asset = {
 
 const assets = [AssetXHV, AssetXUSD]
 
-export const getAsset = (ticker: string): Asset => {
+export const getAssetByTicker = (ticker: string): Asset => {
   const asset = assets.find((asset: Asset) => ticker.toLowerCase() === asset.ticker.toLowerCase())
   if (!asset) {
     throw 'no asset added in assets.ts for ticker ' + ticker
