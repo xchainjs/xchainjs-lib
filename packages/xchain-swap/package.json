@@ -24,7 +24,7 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "bugs": {
     "url": "https://github.com/xchainjs/xchainjs-lib/issues"

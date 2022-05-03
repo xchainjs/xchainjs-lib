@@ -1,22 +1,17 @@
+import { BLOCKSFORFULLPROTECTION } from './../constants/decimals';
 import { BigNumber } from 'bignumber.js';
 import { baseAmount, BaseAmount } from '@xchainjs/xchain-util';
 import { PoolData } from './swap';
-import { BLOCKSFORFULLPROTECTION } from '../constants';
 
 export type UnitData = {
   liquidityUnits: BaseAmount
   totalUnits: BaseAmount
 }
 
-export type PoolData = {
-
-}
-
 export type LiquidityData = {
   assetDeposit: BaseAmount
   rune: BaseAmount
-  current: number
-  lastAdded: number
+  asset: BaseAmount
 }
 
 export type Block = {
@@ -73,7 +68,7 @@ export const getSlipOnLiquidity = (liquidity: LiquidityData, pool: PoolData): Bi
 }
 
 // Blocks for full protection 144000 // 100 days
-export const getLiquidityProtectionData = (liquidity: LiquidityData, block: Block, pool: PoolData): Number => {
+export const getLiquidityProtectionData = (liquidity: LiquidityData, pool: PoolData): Number => {
   // formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
   const R0 = liquidity.rune.amount() // symetrical value of rune deposit
   const A0 = liquidity.asset.amount() // symetrical value of asset deposit
@@ -81,8 +76,8 @@ export const getLiquidityProtectionData = (liquidity: LiquidityData, block: Bloc
   const A1 = pool.assetBalance.amount() // asset to redeem
   const P1 = R1.div(A1) // Pool ratio at withdrawal
   const coverage = ((A0.times(P1).plus(R0)).minus(A1.times(P1).plus(R1)))
-  const currentHeight = block.current
-  const heightLastAdded = block.lastAdded
+  const currentHeight = pool.currentBlock
+  const heightLastAdded = pool.lastBlock
   const blocksforfullprotection = BLOCKSFORFULLPROTECTION
   const protectionProgress = (currentHeight - heightLastAdded)/blocksforfullprotection
   const result = protectionProgress * coverage.toNumber() // impermanent loss protection result

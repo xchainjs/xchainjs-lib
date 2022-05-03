@@ -4,6 +4,8 @@ import BigNumber from 'bignumber.js'
 export type PoolData = {
   assetBalance: BaseAmount
   runeBalance: BaseAmount
+  lastBlock: number
+  currentBlock: number
 }
 
 export const getSwapOutput = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): BaseAmount => {
