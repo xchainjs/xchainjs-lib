@@ -1,4 +1,4 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
+import { cosmosclient, proto, rest } from '@cosmos-client/core'
 import {
   Address,
   Balance,
@@ -73,6 +73,8 @@ export interface ThorchainClient {
   getCosmosClient(): CosmosSDKClient
 
   deposit(params: DepositParam): Promise<TxHash>
+  transferOffline(params: TxOfflineParams): Promise<string>
+  getGasExpectedForTx(txBytes: string): Promise<string | undefined>
 }
 
 /**
@@ -554,7 +556,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     from_sequence = '0',
   }: TxOfflineParams): Promise<string> {
     const fee = (await this.getFees()).average
-
+    console.log('fee=' + JSON.stringify(fee.amount()))
     if (isAssetRuneNative(asset)) {
       // amount + fee < runeBalance
       if (from_rune_balance.lt(amount.plus(fee))) {
@@ -612,6 +614,11 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     } catch {
       return getDefaultFees()
     }
+  }
+
+  async getGasExpectedForTx(txBytes: string): Promise<string | undefined> {
+    const resp = await rest.tx.simulate(this.cosmosClient.sdk, { tx_bytes: txBytes })
+    return resp.data.gas_info?.gas_used
   }
 }
 

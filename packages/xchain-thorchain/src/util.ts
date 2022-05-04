@@ -1,4 +1,4 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
+import { cosmosclient, proto, rest } from '@cosmos-client/core'
 import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
@@ -235,7 +235,13 @@ export const buildUnsignedTx = ({
 
   return new cosmosclient.TxBuilder(cosmosSdk, txBody, authInfo)
 }
-
+export const getGasExpectedForTx = async (
+  cosmosSdk: cosmosclient.CosmosSDK,
+  txBytes: string,
+): Promise<string | undefined> => {
+  const resp = await rest.tx.simulate(cosmosSdk, { tx_bytes: txBytes })
+  return resp.data.gas_info?.gas_used
+}
 /**
  * Structure a MsgDeposit
  *

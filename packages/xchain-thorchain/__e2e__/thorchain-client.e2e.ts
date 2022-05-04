@@ -1,5 +1,5 @@
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
-import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
+import { Address, Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { Asset, AssetRuneNative, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 
@@ -15,8 +15,12 @@ const chainIds = {
   [Network.Testnet]: 'thorchain-testnet-v2',
 }
 
-const thorClient: XChainClient = new ThorClient({ network: Network.Testnet, phrase: process.env.PHRASE, chainIds: chainIds })
-const thorchainClient = thorClient as unknown as ThorchainClient
+const thorClient: XChainClient = new ThorClient({
+  network: Network.Testnet,
+  phrase: process.env.PHRASE,
+  chainIds: chainIds,
+})
+const thorchainClient = (thorClient as unknown) as ThorchainClient
 const bnbClient: XChainClient = new BnbClient({ network: Network.Testnet, phrase: process.env.PHRASE })
 
 describe('thorchain Integration Tests', () => {
@@ -47,7 +51,6 @@ describe('thorchain Integration Tests', () => {
   })
   it('should swap some rune for BNB', async () => {
     try {
-
       // Wait 10 seconds, make sure previous test has finished to avoid sequnce conflict
       await delay(10 * 1000)
 
@@ -62,7 +65,6 @@ describe('thorchain Integration Tests', () => {
       })
 
       expect(hash.length).toBeGreaterThan(5)
-
     } catch (error) {
       console.log(error)
       throw error
@@ -73,5 +75,28 @@ describe('thorchain Integration Tests', () => {
     const txPage = await thorClient.getTransactions({ address })
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
+  })
+  it('should get gas limit ', async () => {
+    try {
+      const addressTo = thorClient.getAddress(1) as Address
+      const transferTx = {
+        walletIndex: 0,
+        asset: AssetRuneNative,
+        from_account_number: '0',
+        from_sequence: '0',
+        from_rune_balance: baseAmount('100000000', 8),
+        amount: baseAmount('100000', 8),
+        recipient: addressTo,
+        memo: 'Hi!',
+      }
+      const bytes = await thorchainClient.transferOffline(transferTx)
+      const gas = await thorchainClient.getGasExpectedForTx(bytes)
+      console.log(gas)
+
+      // const bytes = await thorchainClient.transferOffline(transferTx)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
   })
 })
