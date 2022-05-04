@@ -82,8 +82,8 @@ describe('thorchain Integration Tests', () => {
       const transferTx = {
         walletIndex: 0,
         asset: AssetRuneNative,
-        from_account_number: '0',
-        from_sequence: '0',
+        from_account_number: addressTo,
+        from_sequence: '52',
         from_rune_balance: baseAmount('100000000', 8),
         amount: baseAmount('100000', 8),
         recipient: addressTo,
