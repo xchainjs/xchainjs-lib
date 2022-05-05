@@ -1,3 +1,9 @@
+# v.0.11.2 (2022-05-05)
+
+## Update
+
+- Add `DepositParams` type to `types.ts`
+
 # v.0.11.1 (2022-02-04)
 
 ### Update

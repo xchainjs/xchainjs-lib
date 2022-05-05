@@ -1,3 +1,12 @@
+# v.0.18.2 (2022-05-05)
+
+## Update
+
+- Add `deposit` function to Bitcoin `Client`
+- Update latest dependencies
+- Add tests for `deposit` 
+
+
 # v.0.18.1 (2022-03-15)
 
 ## Fix

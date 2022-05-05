@@ -1,4 +1,10 @@
-# v.0.2.1 (2022-xx-xx)
+# v.0.2.1 (2022-05-05)
+
+## Update
+
+- Add `deposit` function to Doge `Client`
+- Update latest dependencies
+- Add tests for `deposit` 
 
 ## Fix
 

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-terra",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Custom Terra client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
