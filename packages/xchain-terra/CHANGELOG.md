@@ -1,3 +1,12 @@
+# v.0.1.2 (2022-05-05)
+
+## Update
+
+- Add `deposit` function to Terra `Client` 
+- Update latest dependencies
+- Add tests for `deposit` 
+
+
 # v.0.1.1 (2022-04-27)
 
 ## Fix

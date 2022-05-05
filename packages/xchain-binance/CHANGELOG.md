@@ -1,3 +1,12 @@
+# v.5.4.3 (2022-05-05)
+
+## Update
+
+- Add `deposit` to Binance `Client`
+- Update latest dependencies
+- Add tests for `deposit` 
+
+
 # v.5.4.2 (2022-02-04)
 
 ## Update
