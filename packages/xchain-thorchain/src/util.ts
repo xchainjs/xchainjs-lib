@@ -20,8 +20,9 @@ import { MsgNativeTx } from './types/messages'
 import types from './types/proto/MsgCompiled'
 
 export const DECIMAL = 8
-export const DEFAULT_GAS_VALUE = '4000000'
-export const DEPOSIT_GAS_VALUE = '500000000'
+export const DEFAULT_GAS_ESTIMATE_MULTIPLIER = 2
+export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
+export const DEPOSIT_GAS_LIMIT_VALUE = '500000000'
 export const MAX_TX_COUNT = 100
 
 /**

@@ -46,8 +46,9 @@ import {
 import { TxResult } from './types/messages'
 import {
   DECIMAL,
-  DEFAULT_GAS_VALUE,
-  DEPOSIT_GAS_VALUE,
+  DEFAULT_GAS_ESTIMATE_MULTIPLIER,
+  DEFAULT_GAS_LIMIT_VALUE,
+  DEPOSIT_GAS_LIMIT_VALUE,
   MAX_TX_COUNT,
   getBalance,
   getDefaultClientUrl,
@@ -74,7 +75,13 @@ export interface ThorchainClient {
 
   deposit(params: DepositParam): Promise<TxHash>
   transferOffline(params: TxOfflineParams): Promise<string>
-  getGasExpectedForTx(txBytes: string): Promise<string | undefined>
+  getGasExpectedForTx({
+    txBody,
+    privKey,
+  }: {
+    txBody: proto.cosmos.tx.v1beta1.TxBody
+    privKey: proto.cosmos.crypto.secp256k1.PrivKey
+  }): Promise<string | undefined>
 }
 
 /**
@@ -469,12 +476,17 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     })
 
     const account = await this.getCosmosClient().getAccount(fromAddressAcc)
-
+    const gasLimit = await this.determineGasLmit({
+      txBody: depositTxBody,
+      privKey,
+      multiplier: DEFAULT_GAS_ESTIMATE_MULTIPLIER,
+      fallbackGasLimit: DEPOSIT_GAS_LIMIT_VALUE,
+    })
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: depositTxBody,
       signerPubkey: cosmosclient.codec.packAny(signerPubkey),
-      gasLimit: DEPOSIT_GAS_VALUE,
+      gasLimit,
       sequence: account.sequence || cosmosclient.Long.ZERO,
     })
 
@@ -525,12 +537,17 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       nodeUrl: this.getClientUrl().node,
     })
 
+    const gasLimit = await this.determineGasLmit({
+      txBody,
+      privKey,
+      multiplier: DEFAULT_GAS_ESTIMATE_MULTIPLIER,
+      fallbackGasLimit: DEFAULT_GAS_LIMIT_VALUE,
+    })
     const account = await this.getCosmosClient().getAccount(accAddress)
-
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: txBody,
-      gasLimit: DEFAULT_GAS_VALUE,
+      gasLimit,
       signerPubkey: cosmosclient.codec.packAny(signerPubkey),
       sequence: account.sequence || cosmosclient.Long.ZERO,
     })
@@ -578,13 +595,18 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       chainId: this.getChainId(),
       nodeUrl: this.getClientUrl().node,
     })
-
     const privKey = this.getPrivateKey(walletIndex)
+    const gasLimit = await this.determineGasLmit({
+      txBody,
+      privKey,
+      multiplier: DEFAULT_GAS_ESTIMATE_MULTIPLIER,
+      fallbackGasLimit: DEFAULT_GAS_LIMIT_VALUE,
+    })
 
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: txBody,
-      gasLimit: DEFAULT_GAS_VALUE,
+      gasLimit: gasLimit,
       signerPubkey: cosmosclient.codec.packAny(privKey.pubKey()),
       sequence: cosmosclient.Long.fromString(from_sequence) || cosmosclient.Long.ZERO,
     })
@@ -616,8 +638,53 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     }
   }
 
-  async getGasExpectedForTx(txBytes: string): Promise<string | undefined> {
-    const resp = await rest.tx.simulate(this.cosmosClient.sdk, { tx_bytes: txBytes })
+  async determineGasLmit({
+    txBody,
+    privKey,
+    multiplier,
+    fallbackGasLimit,
+  }: {
+    txBody: proto.cosmos.tx.v1beta1.TxBody
+    privKey: proto.cosmos.crypto.secp256k1.PrivKey
+    multiplier: number
+    fallbackGasLimit: string
+  }): Promise<string> {
+    try {
+      const gas_expected = await this.getGasExpectedForTx({ txBody, privKey })
+      if (gas_expected === undefined) {
+        throw new Error('could not estimate gas limit required for TX')
+      }
+      const gasLimit = cosmosclient.Long.fromString(gas_expected).multiply(multiplier).toString()
+      console.log('mike2-->' + gasLimit)
+      return gasLimit
+    } catch (error) {
+      console.error(error)
+      console.warn(`Using the fallbackGasLimit of ${fallbackGasLimit} `)
+      return fallbackGasLimit
+    }
+  }
+  async getGasExpectedForTx({
+    txBody,
+    privKey,
+  }: {
+    txBody: proto.cosmos.tx.v1beta1.TxBody
+    privKey: proto.cosmos.crypto.secp256k1.PrivKey
+  }): Promise<string | undefined> {
+    const accAddress = cosmosclient.AccAddress.fromPublicKey(privKey.pubKey())
+    const account = await this.getCosmosClient().getAccount(accAddress)
+    const txBuilder = buildUnsignedTx({
+      cosmosSdk: this.getCosmosClient().sdk,
+      txBody: txBody,
+      gasLimit: DEFAULT_GAS_LIMIT_VALUE, // NOTE: this should not matter since we are just doign an estimate
+      signerPubkey: cosmosclient.codec.packAny(privKey.pubKey()),
+      sequence: account.sequence || cosmosclient.Long.ZERO,
+    })
+    const signDocBytes = txBuilder.signDocBytes(account.account_number || 0)
+    txBuilder.addSignature(privKey.sign(signDocBytes))
+
+    const resp = await rest.tx.simulate(this.cosmosClient.sdk, { tx_bytes: txBuilder.txBytes() })
+    console.log('mike-->' + resp.data.gas_info?.gas_used)
+
     return resp.data.gas_info?.gas_used
   }
 }
