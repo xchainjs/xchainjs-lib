@@ -567,7 +567,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     from_sequence = '0',
   }: TxOfflineParams): Promise<string> {
     const fee = (await this.getFees()).average
-    console.log('fee=' + JSON.stringify(fee.amount()))
+
     if (isAssetRuneNative(asset)) {
       // amount + fee < runeBalance
       if (from_rune_balance.lt(amount.plus(fee))) {
