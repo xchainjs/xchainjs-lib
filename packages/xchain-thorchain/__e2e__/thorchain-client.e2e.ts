@@ -1,5 +1,5 @@
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
-import { Address, Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
+import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { Asset, AssetRuneNative, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 
@@ -10,7 +10,7 @@ export type Swap = {
 
 // Mock chain ids
 const chainIds = {
-  [Network.Mainnet]: 'chain-id-mainnet',
+  [Network.Mainnet]: 'thorchain-mainnet-v1',
   [Network.Stagenet]: 'chain-id-stagenet',
   [Network.Testnet]: 'thorchain-testnet-v2',
 }
@@ -75,28 +75,5 @@ describe('thorchain Integration Tests', () => {
     const txPage = await thorClient.getTransactions({ address })
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
-  })
-  it('should get gas limit ', async () => {
-    try {
-      const addressTo = thorClient.getAddress(1) as Address
-      const transferTx = {
-        walletIndex: 0,
-        asset: AssetRuneNative,
-        from_account_number: addressTo,
-        from_sequence: '52',
-        from_rune_balance: baseAmount('100000000', 8),
-        amount: baseAmount('100000', 8),
-        recipient: addressTo,
-        memo: 'Hi!',
-      }
-      const bytes = await thorchainClient.transferOffline(transferTx)
-      const gas = await thorchainClient.getGasExpectedForTx(bytes)
-      console.log(gas)
-
-      // const bytes = await thorchainClient.transferOffline(transferTx)
-    } catch (error) {
-      console.log(error)
-      throw error
-    }
   })
 })
