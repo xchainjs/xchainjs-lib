@@ -1,5 +1,4 @@
 import { assetToBase, assetAmount, baseAmount, BaseAmount, baseToAsset } from '@xchainjs/xchain-util'
-import BigNumber from 'bignumber.js'
 
 export type PoolData = {
   assetBalance: BaseAmount
@@ -7,6 +6,7 @@ export type PoolData = {
   lastBlock: number
   currentBlock: number
 }
+
 
 export const getSwapOutput = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): BaseAmount => {
   // formula: (x * X * Y) / (x + X) ^ 2
@@ -153,4 +153,12 @@ export const getValueOfAsset1InAsset2 = (inputAsset: BaseAmount, pool1: PoolData
   const result = A2perR.amount().times(RperA1.amount())
   // transform result back from `AssetAmount` into `BaseAmount`
   return assetToBase(assetAmount(result))
+}
+
+export const prepareSwap = (inputAsset: BaseAmount, pool1: PoolData, pool2: PoolData): {
+
+}
+
+export const doSwap = (inputAsset: BaseAmount, pool1: PoolData, pool2: PoolData ): {
+
 }

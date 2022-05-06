@@ -1,18 +1,33 @@
+import { BigNumber } from 'bignumber.js';
 import { Amount, Asset } from '@xchainjs/xchain-util'
 
 import { Midgard } from `@thorswap-lib/midgard-sdk`
 
-export interface IPool {
-  readonly asset: Asset
-  readonly runeDepth: Amount
-  readonly assetDepth: Amount
-  readonly assetUSDPrice: Amount
-  readonly detail: PoolDetail
+
+
+/**
+ * Get asset depth from midgard
+ * @param {Asset} string
+ * @param {Pool} string
+ * @param {period} string
+ */
+export const getPoolDepth = (Asset: string): Asset => {
+
+  return
 }
 
-export class Pool implements IPool {
+/**
+* Get rune depth from midgard
+*/
 
-  public readonly asset: Asset
-  public readonly runeDepth: Amount
-  public readonly
+export const getRuneDepth = async () => {
+
+}
+
+
+/**
+ *
+ */
+export const getTradingStatus = async () => {
+
 }
