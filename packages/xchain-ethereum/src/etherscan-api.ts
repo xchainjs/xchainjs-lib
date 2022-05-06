@@ -88,6 +88,43 @@ export const getETHTransactionHistory = async ({
 }
 
 /**
+ * Get ETH 'Internal' transaction history
+ *
+ * @see https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-internal-transactions-by-address
+ *
+ *
+ * @param {string} baseUrl The etherscan node url.
+ * @param {string} address The address.
+ * @param {TransactionHistoryParam} params The search options.
+ * @param {string} apiKey The etherscan API key. (optional)
+ * @returns {ETHTransactionInfo[]} The ETH transaction history
+ */
+export const getETHInternalTransactionHistory = async ({
+  baseUrl,
+  address,
+  page,
+  offset,
+  startblock,
+  endblock,
+  apiKey,
+}: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Tx[]> => {
+  let url = baseUrl + `/api?module=account&action=txlistinternal&sort=desc` + getApiKeyQueryParameter(apiKey)
+  if (address) url += `&address=${address}`
+  if (offset) url += `&offset=${offset}`
+  if (page) url += `&page=${page}`
+  if (startblock) url += `&startblock=${startblock}`
+  if (endblock) url += `&endblock=${endblock}`
+
+  const result = (await axios.get(url)).data.result
+  if (JSON.stringify(result).includes('Invalid API Key')) throw new Error('Invalid API Key')
+  if (typeof result !== 'object') throw new Error(result)
+
+  return filterSelfTxs<ETHTransactionInfo>(result)
+    .filter((tx) => !bnOrZero(tx.value).isZero())
+    .map(getTxFromEthTransaction)
+}
+
+/**
  * Get token transaction history
  *
  * @see https://etherscan.io/apis#accounts
