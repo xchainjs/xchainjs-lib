@@ -8,41 +8,39 @@
  * PrepareSwap()
  * 
  * Inputs:
- * @param sourceAsset
+ * @param sourceAsset  - chain.asset
  * @param inputAmount
- * @param destinationAsset
- * @param affiliateFee
+ * @param destinationAsset  - chain.asset
+ * @param affiliateFee (in %)
  * 
  * Returns in json:
- *  @param inboundFee
- *  @param outboundFee
- *  @param swapFee
- *  @param slip
+ *  @param totalFees object (denoted in destinationAsset amount)
+ *    { total, inboundFee, swapFee , outboundFee, affiliateFee}
+ *  @param slip (in %)
  *  @param expectedReturnedDestinationAsset
  *  @param expectedWait
-  *  @param halted
+ *  @param halted
  * 
  * Logic
- *  Validate the request
+ *  Validate the request(see below)
  * 
- *  call inbound_address from midgard and store
- *      inbound fee = source asset fee
- *      oubound fee *3 inbound fee
+ *  Call inbound_address from midgard and store
+ *      inbound fee = sourceAsset fee
+ *      oubound fee * 3 inbound fee of destinationAsset
  *      Pool Halted Status
  * 
- *  If sourceAsset !RUNE && inputAmount !RUNE then dobule swap.
+ *  If sourceAsset !RUNE && destinationAsset !RUNE then dobule swap.
  * 
  * if double swap
- *  Swap(sourceAsset, RUNE)
- *  Swap(RUNE, destinationAsset)
+ *  Get Pool Depths from Midgard
+ *  outputRUNE = Swap(sourceAsset, RUNE)
+ *  outputAmount = Swap(RUNE, destinationAsset)
+ *  Get total Swap Fee and Slip
  * else 
- *  Swap(sourceAsset, destinationAsset)
+ *  outputAmount = Swap(sourceAsset, destinationAsset)
+ *  Get total Swap Fee and Slip
  * 
- * for each swap conducted 
- *     Get Pool Depths from Midgard
- *     Get Swap Fee and Slip 
- * 
- *  calc affiliateFee
+ * calc affiliateFee
  * 
  * 
  * totalFee = 
@@ -50,13 +48,14 @@
  *  swapFee +
  *  outboundFee +
  *  affiliateFee
- *     
- *  Ensure inbound amount is greater than total fee amount
- *      expectedReturnedDestinationAsset = inboundAsset - totalFee
  * 
- * Expected Wait
- * 1. Work out requried confi time for inbound + outbound (https://docs.thorchain.org/chain-clients/overview#confirmation-counting)
- * 2. Work out outbound throttle time. Max 1000 RNE per block, up to 720 blocks. (Copy logic from manager_txout_current.calcTxOutHeight()L599 this part can be in version 2).
+ *  Ensure outputAmount is greater than total fee amount
+ *     if outputAmount >= totalFee
+ *         "not enough inboundAmount to conduct swap"
+ *     
+ *  expectedReturnedDestinationAsset = inputAmount - totalFee
+ * 
+ * Call Expected Wait (see below)
  * 
  * Return values
 */
@@ -67,7 +66,7 @@
  * doSwap()
  * 
  * Inputs:
- * @param sourceAsset
+ * @param sourceAsset  - chain.asset
  * @param inputAmount
  * @param destinationAsset - chain.asset
  * @param destinationAddress
@@ -82,35 +81,39 @@
  * 
  * 
  * Logic
- *  Check inbound and asset types are valid. inputAmount != 0.
+ *  Validate the request(see below)
+ *  Validate Address are correct type
  *
- *  call inbound_address and store
- *      inbound address from source asset (or router if ERC20)
- *      gasRate for inbound and oubound asset types
- *      Pool Halted Status
- *  
- * Constuct Memo
- *  Find Inbound Asset Chain
- *  Find Outboud Asset Chain
+ *  Call inbound_address from midgard and store
+ *      inbound fee = sourceAsset fee
+ *      oubound fee * 3 inbound fee of destinationAsset
+ *      Pool Halted Status for pool(s)
  * 
-
  *  Get LIM
- *      Force LIM to 1% of the inboundasset value
+ *      Force LIM to 1% of the destinationAsset value
  *  LIM = 8 numbers
  * 
- * Get trading of pool(s) from inbound_address
+ * 
  * totalFee = 
  *  inboundFee + 
  *  outboundFee +
  *  affiliateFee
  *     
- *  Ensure inbound amount is greater than total fees
- *      expectedReturnedDestinationAsset = InboundAsset - totalFee
- * *  Memo = "=:{destinationAsset}:destinationAddress:LIM&interfaceID:affiliateAddress:affiliateFee" 
+ *  If valueInRUNE(totalFee) > valueInRUNE(inputAmount)
+ *      "not enough inboundAmount to conduct swap"
  * 
- * construct TX with Memo
+ * Constuct Memo
+ *   Memo = "=:{destinationAsset}:destinationAddress:LIM&interfaceID:affiliateAddress:affiliateFee" 
+ * 
+ *  If destinationAsset = BTC.BTC and Memo.Length() > 80 // drop affiliate and use shortened assets 
+ *             Memo = "=:{destinationAsset}:destinationAddress:LIM&interfaceID" 
+ * 
+ * construct TX with Memo and inbound gas_rate
  * Send Tx to correct asgardVault or router
  *  
+ * Call Expected Wait (see below)
+
+ * 
  * Return Tx, expectedWait
  * 
 */
@@ -118,9 +121,9 @@
 /**validateRequest
  * basic validation of a request before 
  *
- * @param sourceAsset
+ * @param sourceAsset  - chain.asset
  * @param inputAmount
- * @param destinationAsset
+ * @param destinationAsset  - chain.asset
  * @param affiliateFee
  * 
  * 
@@ -143,7 +146,40 @@
  *  return "affiliateFee is invalid"
  * 
  *  
- * 
 */
 
+/**Expected Wait
+ * Works out the expected wait time for any transaction based on the conf counting and outbound throttling. 
+ * 1. Work out requried confi time for inbound + outbound (https://docs.thorchain.org/chain-clients/overview#confirmation-counting)
+ * 2. Work out outbound throttle time. Max 1000 RNE per block, up to 720 blocks. (Copy logic from manager_txout_current.calcTxOutHeight()L599 this part can be in version 2).
+ * 
+ * @param sourceAsset  - chain.asset
+ * @param inputAmount
+ * @param destinationAsset - chain.asset
+ * @param destinationAddress
+ * 
+ * Returns:
+ * @param WaitTime (either TC blocks or Mins)
+ * 
+ * Required Confs time =
+ * 
+ * Layout the blocktime in seconds of each chain. E.g.
+ *  THORChain = 5.5 seconds
+ *  BNB 5 sec
+ *  ETH 14 Sec
+ *  BTC 36000 seconds
+ * layout the block reward of each chain
+ * 
+ * BTC = 6.25
+ * ETH = 3
+ * BNB = 
+ * THORChain = 
+ * 
+ * 
+ * required confs = ceil (txValue in Asset / BlockReward for the chain)
+ * 
+ * Time in secs = required confs * blocktime
+ *   
+ * 
+*/
 
