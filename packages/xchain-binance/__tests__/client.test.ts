@@ -1,5 +1,5 @@
 import { FeeType, Network } from '@xchainjs/xchain-client'
-import { Asset, AssetBNB, BNBChain, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetBNB, BNBChain, Chain, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { Client as BinanceClient } from '../src/client'
@@ -112,6 +112,14 @@ describe('BinanceClient Test', () => {
     expect(addressTest).toEqual(testnetaddress_path0)
     const bnbClientEmptyTest_path1 = new BinanceClient({ phrase, network: Network.Testnet })
     expect(bnbClientEmptyTest_path1.getAddress(1)).toEqual(testnetaddress_path1)
+  })
+
+  it('should not throw on a client without a phrase', () => {
+    expect(() => {
+      new BinanceClient({
+        network: Network.Testnet,
+      })
+    }).not.toThrow()
   })
 
   it('throws an error passing an invalid phrase', async () => {
@@ -649,5 +657,74 @@ describe('BinanceClient Test', () => {
 
     bnbClient.setNetwork(Network.Testnet)
     expect(bnbClient.getExplorerTxUrl('testTxHere')).toEqual('https://testnet-explorer.binance.org/tx/testTxHere')
+  })
+
+  it('should broadcast a deposit to thorchain inbound address', async () => {
+    const client = new BinanceClient({ phrase: phraseForTX, network: Network.Testnet })
+    expect(client.getAddress()).toEqual(testnetaddress_path0ForTx)
+
+    mockGetAccount(
+      testnetClientURL,
+      testnetaddress_path0ForTx,
+      {
+        account_number: 0,
+        address: testnetaddress_path0ForTx,
+        balances: [
+          {
+            free: '1.00037500',
+            frozen: '0.10000000',
+            locked: '0.00000000',
+            symbol: 'BNB',
+          },
+        ],
+        public_key: [],
+        flags: 0,
+        sequence: 0,
+      },
+      3,
+    )
+
+    const beforeTransfer = await client.getBalance(client.getAddress(0))
+    expect(beforeTransfer.length).toEqual(1)
+
+    mockNodeInfo(testnetClientURL)
+    mockTxSend(testnetClientURL)
+
+    const txHash = await client.deposit({
+      asset: {
+        chain: Chain.Binance,
+        synth: false,
+        symbol: 'BUSD-74E',
+        ticker: 'BUSD',
+      },
+      amount: assetToBase(assetAmount(1)),
+      memo: '=:THOR.RUNE:tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4',
+    })
+    expect(txHash).toEqual(expect.any(String))
+
+    mockGetAccount(testnetClientURL, testnetaddress_path0ForTx, {
+      account_number: 0,
+      address: testnetaddress_path0ForTx,
+      balances: [
+        {
+          free: '1.00000000',
+          frozen: '0.10000000',
+          locked: '0.00000000',
+          symbol: 'BNB',
+        },
+      ],
+      public_key: [],
+      flags: 0,
+      sequence: 0,
+    })
+
+    const afterTransfer = await client.getBalance(client.getAddress(0))
+    expect(afterTransfer.length).toEqual(1)
+
+    const expected = beforeTransfer[0].amount
+      .amount()
+      .minus(transferFee.average.amount())
+      .isEqualTo(afterTransfer[0].amount.amount())
+    expect(expected).toBeTruthy()
   })
 })

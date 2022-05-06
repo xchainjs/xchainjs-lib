@@ -12,6 +12,7 @@ import {
   baseAmount,
   baseToAsset,
   currencySymbolByAsset,
+  eqAsset,
   formatAssetAmount,
   formatAssetAmountCurrency,
   formatBaseAmount,
@@ -526,6 +527,21 @@ describe('asset', () => {
       const amount = baseAmount(123400, 8)
       const result = formatBaseAsAssetAmount({ amount, decimal: 6, trimZeros: true })
       expect(result).toEqual('0.001234')
+    })
+  })
+
+  describe('eqAsset', () => {
+    it('equal', () => {
+      expect(eqAsset(AssetBNB, AssetBNB)).toBeTruthy()
+      expect(eqAsset(AssetBTC, AssetBTC)).toBeTruthy()
+      expect(eqAsset(AssetETH, AssetETH)).toBeTruthy()
+      expect(eqAsset(AssetRuneNative, AssetRuneNative)).toBeTruthy()
+    })
+    it('non equal', () => {
+      expect(eqAsset(AssetBNB, { ...AssetBNB, synth: true })).toBeFalsy()
+      expect(eqAsset(AssetBNB, AssetBTC)).toBeFalsy()
+      expect(eqAsset(AssetRuneNative, AssetBTC)).toBeFalsy()
+      expect(eqAsset(AssetETH, AssetBNB)).toBeFalsy()
     })
   })
 })

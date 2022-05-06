@@ -1,3 +1,9 @@
+# v0.24.1 (2022-04-23)
+
+## Fix
+
+- Increase `DEFAULT_GAS_VALUE` to `4000000` (before `3000000`)
+
 # v0.24.0 (2022-03-23)
 
 ## Update
