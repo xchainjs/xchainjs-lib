@@ -15,3 +15,9 @@ export type SyncStats = {
   scannedHeight: number
   blockHeight: number
 }
+
+export interface SyncObserver {
+  next(value: SyncStats): void
+  error(err: string): void
+  complete(value: SyncStats): void
+}

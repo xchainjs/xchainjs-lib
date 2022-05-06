@@ -14,11 +14,12 @@ import type {
 import * as havenWallet from 'haven-core-js'
 
 import { getAddressInfo, getAddressTxs, getTx, get_version, keepAlive, login, setAPI_URL } from './api'
-import { HavenBalance, NetTypes, SyncStats } from './types'
+import { HavenBalance, NetTypes, SyncObserver, SyncStats } from './types'
 import { assertIsDefined, getRandomOutsReq, getUnspentOutsReq, submitRawTxReq, updateStatus } from './utils'
 
 const TestNetApiUrl = 'http://142.93.249.35:1984'
 const MainnetApiUrl = ''
+//const SYNC_THRESHOLD = 10
 
 export class HavenCoreClient {
   private netTypeId: number | undefined
@@ -26,9 +27,11 @@ export class HavenCoreClient {
   private scannedHeight = 0
   private blockHeight = 0
   private pingServerIntervalID: ReturnType<typeof setInterval> | undefined
+  private updateSyncProgressIntervalID: ReturnType<typeof setInterval> | undefined
   private coreModule: MyMoneroCoreBridgeClass | undefined
   private base_fee: number | undefined
   private fork_version: number | undefined
+  private observers: SyncObserver[] = []
 
   /**
    * static function to create a new wallet without initalizing any backend communication,
@@ -54,13 +57,17 @@ export class HavenCoreClient {
     setAPI_URL(apiUrl)
 
     const keys = await this.getKeys()
-    await login(keys.address_string, keys.sec_viewKey_string, true)
+    await login(keys.address_string, keys.sec_viewKey_string, false)
     const addressInfoResponse = await getAddressInfo(keys.address_string, keys.sec_viewKey_string)
 
     this.scannedHeight = addressInfoResponse.scanned_block_height
     this.blockHeight = addressInfoResponse.blockchain_height
 
-    this.pingServerIntervalID = setInterval(this.pingServer, 60 * 1000)
+    if (this.scannedHeight < this.blockHeight) {
+      this.updateSyncProgressIntervalID = setInterval(() => this.updateSyncProgress(), 5 * 1000)
+    }
+
+    this.pingServerIntervalID = setInterval(() => this.pingServer(), 60 * 1000)
 
     return true
   }
@@ -70,9 +77,13 @@ export class HavenCoreClient {
     this.seed = undefined
     this.scannedHeight = 0
     this.blockHeight = 0
+    this.observers = []
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     clearInterval(this.pingServerIntervalID)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    clearInterval(this.updateSyncProgressIntervalID)
   }
 
   async getAddress(): Promise<string> {
@@ -91,12 +102,49 @@ export class HavenCoreClient {
     return response.hasOwnProperty('spend')
   }
 
+  subscribeSyncProgress(observer: SyncObserver) {
+    this.observers.push(observer)
+    console.log(this.scannedHeight)
+    console.log(this.blockHeight)
+    observer.next({ scannedHeight: this.scannedHeight, blockHeight: this.blockHeight })
+  }
+
+  async updateSyncProgress() {
+    console.log('--------updateSyncProgress----------')
+    // will update scanned and block height as well
+    await this.getBalance()
+
+    console.log('------------scannedHeight------------')
+    console.log(this.scannedHeight)
+    console.log('------------blockHeight------------')
+    console.log(this.blockHeight)
+
+    this.observers.forEach((observer) => {
+      observer.next({ scannedHeight: this.scannedHeight, blockHeight: this.blockHeight })
+    })
+
+    if (this.scannedHeight === this.blockHeight) {
+      this.observers.forEach((observer) => {
+        observer.complete({ scannedHeight: this.scannedHeight, blockHeight: this.blockHeight })
+      })
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      clearInterval(this.updateSyncProgressIntervalID) // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      clearInterval(this.updateSyncProgressIntervalID)
+    }
+  }
+
   async getBalance(): Promise<HavenBalance> {
     const coreModule = await this.getCoreModule()
     const keys = await this.getKeys()
     const { sec_viewKey_string, address_string, pub_spendKey_string, sec_spendKey_string } = keys
 
     const rawAddressData = await getAddressInfo(address_string, sec_viewKey_string)
+
+    this.blockHeight = rawAddressData.blockchain_height
+    this.scannedHeight = rawAddressData.scanned_block_height
 
     const serializedData = havenWallet.api_response_parser_utils.Parsed_AddressInfo__sync__keyImageManaged(
       rawAddressData,
@@ -139,7 +187,6 @@ export class HavenCoreClient {
       const version = await get_version()
       this.fork_version = version.fork_version as number
       this.base_fee = version.per_byte_fee as number
-      console.log(version)
     }
 
     const feeParams: FeeEstimationParams = {
@@ -267,6 +314,7 @@ export class HavenCoreClient {
     const keys = coreModule.seed_and_keys_from_mnemonic(this.seed, this.netTypeId)
     return keys
   }
+
   private async pingServer(): Promise<void> {
     const keys = await this.getKeys()
 
