@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js'
 import { SerializedTransaction } from 'haven-core-js'
 
 import { HavenCoreClient } from '../src/haven/haven-core-client'
-import { HavenBalance, NetTypes } from '../src/haven/types'
+import { HavenBalance, NetTypes, SyncObserver, SyncStats } from '../src/haven/types'
 
 const client = new HavenCoreClient()
 
@@ -18,17 +18,17 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
 
   const address = 'hvta6D5QfukiUdeidKdRw4AQ9Ddvt4o9e5jPg2CzkGhdeQGkZkU4RKDW7hajbbBLwsURMLu3S3DH6d5c8QYVYYSA6jy6XRzfPv'
 
-  it('should init haven core client without error', async () => {
+  xit('should init haven core client without error', async () => {
     const response = await client.init(mnenomonic, NetTypes.testnet)
     expect(response).toBeTruthy()
   })
 
-  it('should return correct address', async () => {
+  xit('should return correct address', async () => {
     const response = await client.getAddress()
     expect(response).toBe(address)
   })
 
-  it('should validate address', async () => {
+  xit('should validate address', async () => {
     const isValid = await client.validateAddress(
       'hvta6D5QfukiUdeidKdRw4AQ9Ddvt4o9e5jPg2CzkGhdeQGkZkU4RKDW7hajbbBLwsURMLu3S3DH6d5c8QYVYYSA6jy6XRzfPv',
     )
@@ -40,12 +40,12 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
     expect(isValid).toBeFalsy()
   })
 
-  it('should return balance', async () => {
+  xit('should return balance', async () => {
     balance = await client.getBalance()
     expect(new BigNumber(balance.XUSD.balance).isGreaterThan(0))
   })
 
-  it('should return transaction history', async () => {
+  xit('should return transaction history', async () => {
     const transactions: SerializedTransaction[] = await client.getTransactions()
     expect(transactions.length).toBeGreaterThan(0)
   })
@@ -63,13 +63,7 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
     expect(response).not.toBe('')
   })
 
-  xit('should create a new haven wallet', async () => {
-    const mnemonic = await HavenCoreClient.createWallet(NetTypes.testnet)
-    expect(typeof mnemonic).toBe('string')
-    expect(mnemonic).not.toBe('')
-  })
-
-  it('should return fees', async () => {
+  xit('should return fees', async () => {
     // testing from low to high priority
     const defaultFees = parseFloat(await client.estimateFees(1))
     expect(defaultFees).toBeGreaterThan(0)
@@ -86,4 +80,35 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
 
     expect(fastFees).toBeGreaterThan(defaultFees)
   })
+
+  xit('should create a new haven wallet', async () => {
+    const newMnemonic = await HavenCoreClient.createWallet(NetTypes.testnet)
+    expect(typeof newMnemonic).toBe('string')
+    expect(newMnemonic).not.toBe('')
+  })
+
+  it('should sync a new wallet over time', async (done) => {
+    const newMnemonic = await HavenCoreClient.createWallet(NetTypes.testnet)
+
+    await client.init(newMnemonic, NetTypes.testnet)
+
+    const observer: SyncObserver = {
+      next: (syncState: SyncStats) => {
+        console.log('---------syncState------------')
+        console.log(syncState)
+        expect(syncState.scannedHeight).toBeGreaterThanOrEqual(0)
+        expect(syncState.blockHeight).toBeGreaterThan(0)
+      },
+      complete: (syncState: SyncStats) => {
+        expect(syncState.blockHeight).toBe(syncState.scannedHeight)
+
+        done()
+      },
+      error: (_errMessage: string) => {
+        done()
+      },
+    }
+
+    client.subscribeSyncProgress(observer)
+  }, 100000)
 })
