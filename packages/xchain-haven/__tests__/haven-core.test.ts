@@ -62,4 +62,28 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
     expect(typeof response).toBe('string')
     expect(response).not.toBe('')
   })
+
+  xit('should create a new haven wallet', async () => {
+    const mnemonic = await HavenCoreClient.createWallet(NetTypes.testnet)
+    expect(typeof mnemonic).toBe('string')
+    expect(mnemonic).not.toBe('')
+  })
+
+  it('should return fees', async () => {
+    // testing from low to high priority
+    const defaultFees = parseFloat(await client.estimateFees(1))
+    expect(defaultFees).toBeGreaterThan(0)
+    const lowFees = parseFloat(await client.estimateFees(2))
+    expect(lowFees).toBeGreaterThan(0)
+    const fastFees = parseFloat(await client.estimateFees(3))
+    expect(fastFees).toBeGreaterThan(0)
+    const fastestFees = parseFloat(await client.estimateFees(4))
+    expect(fastestFees).toBeGreaterThan(0)
+
+    expect(fastestFees).toBeGreaterThan(fastFees)
+
+    expect(fastFees).toBeGreaterThan(lowFees)
+
+    expect(fastFees).toBeGreaterThan(defaultFees)
+  })
 })

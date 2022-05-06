@@ -2,6 +2,8 @@ import {
   Address,
   Balance,
   BaseXChainClient,
+  FeeOption,
+  FeeType,
   Fees,
   Network,
   Tx,
@@ -58,8 +60,24 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     }
   }
 
-  getFees(): Promise<Fees> {
-    throw new Error('Method not implemented.')
+  async getFees(): Promise<Fees> {
+    // map xchains Fee options to Havens priorites
+    const feePriorities = {
+      [FeeOption.Average]: 1,
+      [FeeOption.Fast]: 2,
+      [FeeOption.Fastest]: 4,
+    }
+
+    const fees: Fees = {} as Fees
+
+    Object.entries(feePriorities).forEach(async ([feeOption, priority]) => {
+      const feeAmount = await this.havenCoreClient.estimateFees(priority)
+      const feeBaseAmount = baseAmount(feeAmount, 12)
+      fees[feeOption as FeeOption] = feeBaseAmount
+    })
+
+    fees.type = FeeType.PerByte
+    return fees
   }
   getAddress(_walletIndex?: number): string {
     throw new Error('please use getAddressAsync')
