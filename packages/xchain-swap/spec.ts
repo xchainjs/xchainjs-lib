@@ -89,9 +89,9 @@
  *      oubound fee * 3 inbound fee of destinationAsset
  *      Pool Halted Status for pool(s)
  * 
- *  Get LIM
- *      Force LIM to 1% of the destinationAsset value
- *  LIM = 8 numbers
+ * LIM is (1-limit% * outputAmount value), eg if 1% -> 99% * outoutAmount
+ *      Then remove the last 3 digits, and replace with the 3-digit interface ID
+ *      12341234 -> 12341xxx, where xxx is interfaceID
  * 
  * 
  * totalFee = 
