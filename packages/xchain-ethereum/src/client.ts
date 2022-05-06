@@ -425,13 +425,21 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         apiKey: etherscan.apiKey,
       })
     } else {
-      transactions = await etherscanAPI.getETHTransactionHistory({
+      const txs = await etherscanAPI.getETHTransactionHistory({
         baseUrl: etherscan.baseUrl,
         address: params?.address,
         page: 0,
         offset: maxCount,
         apiKey: etherscan.apiKey,
       })
+      const internalTxs = await etherscanAPI.getETHInternalTransactionHistory({
+        baseUrl: etherscan.baseUrl,
+        address: params?.address,
+        page: 0,
+        offset: maxCount,
+        apiKey: etherscan.apiKey,
+      })
+      transactions = [...txs, ...internalTxs]
     }
 
     return {
