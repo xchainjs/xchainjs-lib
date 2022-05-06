@@ -3,6 +3,7 @@
  */
 
 import type {
+  FeeEstimationParams,
   HavenTicker,
   HavenTransferParams,
   HavenTransferResponse,
@@ -12,7 +13,7 @@ import type {
 } from 'haven-core-js'
 import * as havenWallet from 'haven-core-js'
 
-import { getAddressInfo, getAddressTxs, getTx, keepAlive, login, setAPI_URL } from './api'
+import { getAddressInfo, getAddressTxs, getTx, get_version, keepAlive, login, setAPI_URL } from './api'
 import { HavenBalance, NetTypes, SyncStats } from './types'
 import { assertIsDefined, getRandomOutsReq, getUnspentOutsReq, submitRawTxReq, updateStatus } from './utils'
 
@@ -26,6 +27,21 @@ export class HavenCoreClient {
   private blockHeight = 0
   private pingServerIntervalID: ReturnType<typeof setInterval> | undefined
   private coreModule: MyMoneroCoreBridgeClass | undefined
+  private base_fee: number | undefined
+  private fork_version: number | undefined
+
+  /**
+   * static function to create a new wallet without initalizing any backend communication,
+   * the returned mnemonic canbe used to init the wallet
+   * @param netType
+   * @returns mnemonic
+   */
+  static async createWallet(netType: string | number): Promise<string> {
+    const netTypeId = typeof netType === 'number' ? netType : (NetTypes[netType as keyof typeof NetTypes] as number)
+    const module = await havenWallet.haven_utils_promise
+    const keys = module.newly_created_wallet('en', netTypeId)
+    return keys.mnemonic_string
+  }
 
   async init(seed: string, netType: string | number): Promise<boolean> {
     //this.netTypeId = netTypePromise<boolean> {
@@ -114,6 +130,34 @@ export class HavenCoreClient {
     })
 
     return havenBalance
+  }
+
+  async estimateFees(priority: number): Promise<string> {
+    const coreModule = await this.getCoreModule()
+
+    if (this.base_fee === undefined || this.fork_version === undefined) {
+      const version = await get_version()
+      this.fork_version = version.fork_version as number
+      this.base_fee = version.per_byte_fee as number
+      console.log(version)
+    }
+
+    const feeParams: FeeEstimationParams = {
+      use_per_byte_fee: true,
+      use_rct: true,
+      n_inputs: 2,
+      mixin: 10,
+      n_outputs: 2,
+      extra_size: 0,
+      bulletproof: true,
+      base_fee: this.base_fee,
+      fee_quantization_mask: 10000,
+      priority,
+      fork_version: this.fork_version,
+      clsag: true,
+    }
+    const fees = coreModule.estimate_fee(feeParams)
+    return fees
   }
 
   async transfer(amount: string, transferAsset: HavenTicker, toAddress: string, memo = ''): Promise<string> {

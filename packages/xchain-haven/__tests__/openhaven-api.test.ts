@@ -11,6 +11,7 @@ xdescribe('Openhaven API Test', () => {
   // const publicViewkey = '770a38f508ae11fd50d74cc00aa3eeb947c4eca3f5d7b4664100e76847977d95'
 
   const address = 'hvta6D5QfukiUdeidKdRw4AQ9Ddvt4o9e5jPg2CzkGhdeQGkZkU4RKDW7hajbbBLwsURMLu3S3DH6d5c8QYVYYSA6jy6XRzfPv'
+  let txHash: string | undefined
 
   beforeAll(() => openhaven.setAPI_URL(TestNetApiUrl))
 
@@ -18,24 +19,31 @@ xdescribe('Openhaven API Test', () => {
     const version = await openhaven.get_version()
     console.log(version)
     expect(version.testnet).toBeTruthy()
+    expect(version.fork_version).toBeGreaterThan(15)
+    expect(version.per_byte_fee).toBeGreaterThan(0)
   })
 
   it('login/create account', async () => {
     const loginResponse = await openhaven.login(address, secretViewkey, false)
-    console.log(loginResponse)
     expect(loginResponse.status).toBe('success')
   })
 
   it('get address info', async () => {
     const addressInnfo = await openhaven.getAddressInfo(address, secretViewkey)
-    console.log(addressInnfo)
     expect(addressInnfo.status).toBe('success')
   })
 
   it('get txs data', async () => {
     const addressTxs = await openhaven.getAddressTxs(address, secretViewkey)
-    console.log(addressTxs)
     expect(addressTxs.status).toBe('success')
+    expect(addressTxs.transactions.length).toBeGreaterThan(0)
+    txHash = addressTxs.transactions[0].hash
+  })
+  it('get tx info', async () => {
+    expect(txHash).toBeDefined()
+    const txInfo = await openhaven.getTx(address, secretViewkey, txHash!)
+    console.log(txInfo)
+    expect(txInfo.status).toBe('success')
   })
 
   it('keep search thread alive', async () => {
