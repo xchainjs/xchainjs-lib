@@ -62,6 +62,13 @@ export type TxParams = {
   memo?: string // optional memo to pass
 }
 
+export type DepositParams = {
+  walletIndex?: number // send from this HD index
+  asset?: Asset
+  amount: BaseAmount
+  memo: string
+}
+
 export enum FeeOption {
   Average = 'average',
   Fast = 'fast',

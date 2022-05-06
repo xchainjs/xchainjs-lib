@@ -62,5 +62,11 @@ export default {
       const resp = require(`./response/thornode/inbound_addresses.json`)
       return [200, resp]
     })
+
+    //Mock thorchain/mimir
+    mock.onGet(/\/thorchain\/mimir/).reply(function () {
+      const resp = require(`./response/thornode/mimir.json`)
+      return [200, resp]
+    })
   },
 }

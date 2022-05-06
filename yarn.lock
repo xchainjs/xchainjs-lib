@@ -2717,9 +2717,10 @@
   "resolved" "https://registry.npmjs.org/@xchainjs/xchain-util/-/xchain-util-0.7.0.tgz"
   "version" "0.7.0"
 
-"@xchainjs/xchain-util@file:/mnt/c/Users/User/Documents/Code_projects/xchainjs/xchainjs-lib/packages/xchain-util":
-  "resolved" "file:packages/xchain-util"
-  "version" "0.6.1"
+"@xchainjs/xchain-util@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.5.1.tgz#70903205589ff10c2794df6bd8937edca8d961e7"
+  integrity sha512-DeHWi2xmW/QFc+gz7uxy2bfFvtzFBy3YNUmNv1+Zmiq2yRaXhDHrlfjASxQaqg8S/M2pZBaevJOOOimEUNq1gg==
 
 "@zkochan/cmd-shim@^3.1.0":
   "integrity" "sha512-o8l0+x7C7sMZU3v9GuJIAU10qQLtwR1dtRQIOmlNMtyaqhmpXOzx1HWiYoWfmmf9HHZoAkXpc9TM9PQYF9d4Jg=="

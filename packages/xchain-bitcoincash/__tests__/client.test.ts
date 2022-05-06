@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { baseAmount } from '@xchainjs/xchain-util'
+import { AssetBCH, baseAmount } from '@xchainjs/xchain-util'
 
 import mockBitgoApi from '../__mocks__/bitgo'
 import mockHaskoinApi from '../__mocks__/haskoin'
@@ -27,6 +27,14 @@ describe('BCHClient Test', () => {
   const testnet_address_path1 = 'qrkd7dhu7zcmn6wwvj3p4aueslycqchj5vxx3stmjz'
   const mainnet_address_path0 = 'qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
   const mainnet_address_path1 = 'qr4jrkhu3usuk8ghv60m7pg9eywuc79yqvd0wxt2lm'
+
+  it('should not throw on a client without a phrase', () => {
+    expect(() => {
+      new Client({
+        network: Network.Testnet,
+      })
+    }).not.toThrow()
+  })
 
   it('set phrase should return correct address', () => {
     bchClient.setNetwork(Network.Testnet)
@@ -223,5 +231,18 @@ describe('BCHClient Test', () => {
     const { fast, fastest, average } = await bchClient.getFeeRates()
     expect(fast > average)
     expect(fastest > fast)
+  })
+
+  it('should broadcast a deposit to thorchain inbound address', async () => {
+    bchClient.setNetwork(Network.Testnet)
+    bchClient.setPhrase(phrase)
+
+    const txHash = await bchClient.deposit({
+      asset: AssetBCH,
+      amount: baseAmount(100, 8),
+      memo: '=:THOR.RUNE:tthor1puhn8fclwvmmzh7uj7546wnxz5h3zar8e66sc5', // TODO change address
+    })
+
+    expect(txHash).toEqual('mock-txid-haskoin')
   })
 })

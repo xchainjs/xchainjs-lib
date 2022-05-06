@@ -71,19 +71,56 @@ describe('Client Test', () => {
     nock.cleanAll()
   })
 
-  it('should throw error on bad phrase', () => {
-    expect(() => {
-      new Client({ phrase: 'bad bad phrase' })
-    }).toThrowError()
+  describe('#constructor', () => {
+    it('should throw error on bad phrase', () => {
+      expect(() => {
+        new Client({ phrase: 'bad bad phrase' })
+      }).toThrowError()
+    })
+
+    it('should not throw on a client without a phrase', () => {
+      expect(() => {
+        new Client({
+          network: Network.Testnet,
+        })
+      }).not.toThrow()
+    })
   })
 
-  it('should create a wallet from phrase', () => {
-    const ethClient = new Client({
-      network: 'testnet' as Network,
-      phrase,
+  describe('#purgeClient', () => {
+    it('should not have a phrase after purging', () => {
+      const ethClient = new Client({
+        network: Network.Testnet,
+        phrase,
+      })
+
+      expect(ethClient['phrase']).toEqual(phrase)
+      ethClient.purgeClient()
+      expect(ethClient['phrase']).toEqual('')
     })
-    expect(ethClient.getWallet()).toBeInstanceOf(Wallet)
-    expect(ethClient.getWallet()._signingKey()).toMatchObject(wallet.signingKey)
+  })
+
+  describe('#getWallet', () => {
+    let ethClient: Client
+
+    beforeEach(() => {
+      ethClient = new Client({
+        network: Network.Testnet,
+        phrase,
+      })
+    })
+
+    it('should create a wallet from phrase', () => {
+      expect(ethClient.getWallet()).toBeInstanceOf(Wallet)
+      expect(ethClient.getWallet()._signingKey()).toMatchObject(wallet.signingKey)
+    })
+
+    it('should throw errors if phrase is not present', () => {
+      ethClient.purgeClient()
+      expect(() => {
+        ethClient.getAddress()
+      }).toThrow()
+    })
   })
 
   it('should set new phrase', () => {
@@ -137,12 +174,30 @@ describe('Client Test', () => {
     expect(network.chainId).toEqual(3)
   })
 
-  it('should get address', () => {
-    const ethClient = new Client({
-      network: 'testnet' as Network,
-      phrase,
+  describe('#getAddress', () => {
+    let ethClient: Client
+
+    beforeEach(() => {
+      ethClient = new Client({
+        network: Network.Testnet,
+        phrase,
+      })
     })
-    expect(ethClient.getAddress()).toEqual(address)
+
+    it('should get address', () => {
+      expect(ethClient.getAddress()).toEqual(address)
+    })
+
+    it('throws error on bad index', async () => {
+      expect(() => ethClient.getAddress(-1)).toThrow()
+    })
+
+    it('should throw errors if phrase is not present', () => {
+      ethClient.purgeClient()
+      expect(() => {
+        ethClient.getAddress()
+      }).toThrow()
+    })
   })
 
   it('should get network', () => {
@@ -159,11 +214,6 @@ describe('Client Test', () => {
     const ethClient = new Client({ phrase, network: 'testnet' as Network })
     const goodAddress = ethClient.validateAddress(address)
     expect(goodAddress).toBeTruthy()
-  })
-
-  it('throws error on bad index', async () => {
-    const ethClient = new Client({ network: 'testnet' as Network, phrase })
-    expect(() => ethClient.getAddress(-1)).toThrow()
   })
 
   it('estimateGasPrices', async () => {
