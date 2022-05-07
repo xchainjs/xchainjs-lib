@@ -2,6 +2,7 @@ import * as bitcash from '@psf/bitcoincashjs-lib'
 import {
   Address,
   Balance,
+  DepositParams,
   Fee,
   FeeOption,
   FeeRate,
@@ -16,7 +17,7 @@ import {
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Chain } from '@xchainjs/xchain-util'
+import { AssetBCH, Chain, assetToString, getInboundDetails } from '@xchainjs/xchain-util'
 import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 
 import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
@@ -268,6 +269,36 @@ class Client extends UTXOClient {
       txHex,
       haskoinUrl: this.getHaskoinURL(),
     })
+  }
+
+  /**
+   * Transaction to THORChain inbound address.
+   *
+   * @param {DepositParams} params The transaction options.
+   * @returns {TxHash} The transaction hash.
+   *
+   * @throws {"halted chain"} Thrown if chain is halted.
+   * @throws {"halted trading"} Thrown if trading is halted.
+   */
+  async deposit({ walletIndex = 0, asset = AssetBCH, amount, memo }: DepositParams): Promise<TxHash> {
+    const inboundDetails = await getInboundDetails(asset.chain, this.network)
+
+    if (inboundDetails.haltedChain) {
+      throw new Error(`Halted chain for ${assetToString(asset)}`)
+    }
+    if (inboundDetails.haltedTrading) {
+      throw new Error(`Halted trading for ${assetToString(asset)}`)
+    }
+
+    const txHash = await this.transfer({
+      walletIndex,
+      asset,
+      amount,
+      recipient: inboundDetails.vault,
+      memo,
+    })
+
+    return txHash
   }
 }
 

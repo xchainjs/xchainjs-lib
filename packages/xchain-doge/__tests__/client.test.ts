@@ -44,6 +44,14 @@ describe('DogecoinClient Test', () => {
     expect(dogeClient.setPhrase(phraseOne)).toBeUndefined
   })
 
+  it('should not throw on a client without a phrase', () => {
+    expect(() => {
+      new Client({
+        network: Network.Testnet,
+      })
+    }).not.toThrow()
+  })
+
   it('should purge phrase and utxos', async () => {
     dogeClient.purgeClient()
     expect(() => dogeClient.getAddress()).toThrow('Phrase must be provided')
@@ -311,5 +319,16 @@ describe('DogecoinClient Test', () => {
     expect(dogeClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://blockexplorer.one/dogecoin/testnet/tx/anotherTestTxHere',
     )
+  })
+
+  it('should broadcast a deposit to thorchain inbound address', async () => {
+    dogeClient.setNetwork(Network.Testnet)
+    dogeClient.setPhrase(phraseOne)
+    const txid = await dogeClient.deposit({
+      asset: AssetDOGE,
+      amount: baseAmount(5000000000),
+      memo: '=:THOR.RUNE:tthor1puhn8fclwvmmzh7uj7546wnxz5h3zar8e66sc5',
+    })
+    expect(txid).toEqual('mock-txid-sochain')
   })
 })

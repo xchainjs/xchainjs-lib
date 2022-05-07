@@ -1,3 +1,29 @@
+# v.0.7.1 (2022-05-05)
+
+## Update
+
+- Add new types `InboundDetail`, `ServerInboundDetail`
+- Add `midgard.ts` to src 
+- Add `midgard` tests 
+
+
+# v.0.7.0 (2022-04-13)
+
+### Add
+
+- Helper `eqAsset`
+- Estimate fees using any native Terra asset
+
+### Breaking change
+
+- Remove `AssetLuna` (will be supported by `xchain-terra`)
+
+# v.0.6.1 (2022-04-04)
+
+### Fix
+
+- Support `UST` in `currencySymbolByAsset`
+
 # v.0.6.0 (2022-02-04)
 
 ### Breaking change

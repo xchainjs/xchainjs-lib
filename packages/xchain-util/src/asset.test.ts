@@ -12,6 +12,7 @@ import {
   baseAmount,
   baseToAsset,
   currencySymbolByAsset,
+  eqAsset,
   formatAssetAmount,
   formatAssetAmountCurrency,
   formatBaseAmount,
@@ -22,7 +23,7 @@ import {
   isSynthAsset,
   isValidAsset,
 } from './asset'
-import { BNBChain, ETHChain } from './chain'
+import { BNBChain, ETHChain, TerraChain } from './chain'
 import { bn } from './index'
 import { Asset, Denomination } from './types'
 
@@ -394,13 +395,14 @@ describe('asset', () => {
     it('returns currency symbol for BTC', () => {
       expect(currencySymbolByAsset(AssetBTC)).toEqual('₿')
     })
-
     it('returns currency symbol for ETH', () => {
       expect(currencySymbolByAsset(AssetETH)).toEqual('Ξ')
     })
-
-    it('returns currency symbol for USD', () => {
+    it('returns $ for USD', () => {
       expect(currencySymbolByAsset({ chain: BNBChain, symbol: 'BUSD-BAF', ticker: 'BUSD', synth: false })).toEqual('$')
+    })
+    it('returns $ for UST', () => {
+      expect(currencySymbolByAsset({ chain: TerraChain, symbol: 'UST', ticker: 'UST', synth: false })).toEqual('$')
     })
     it('returns ticker as currency symbol for other assets', () => {
       expect(currencySymbolByAsset(AssetBNB)).toEqual('BNB')
@@ -525,6 +527,21 @@ describe('asset', () => {
       const amount = baseAmount(123400, 8)
       const result = formatBaseAsAssetAmount({ amount, decimal: 6, trimZeros: true })
       expect(result).toEqual('0.001234')
+    })
+  })
+
+  describe('eqAsset', () => {
+    it('equal', () => {
+      expect(eqAsset(AssetBNB, AssetBNB)).toBeTruthy()
+      expect(eqAsset(AssetBTC, AssetBTC)).toBeTruthy()
+      expect(eqAsset(AssetETH, AssetETH)).toBeTruthy()
+      expect(eqAsset(AssetRuneNative, AssetRuneNative)).toBeTruthy()
+    })
+    it('non equal', () => {
+      expect(eqAsset(AssetBNB, { ...AssetBNB, synth: true })).toBeFalsy()
+      expect(eqAsset(AssetBNB, AssetBTC)).toBeFalsy()
+      expect(eqAsset(AssetRuneNative, AssetBTC)).toBeFalsy()
+      expect(eqAsset(AssetETH, AssetBNB)).toBeFalsy()
     })
   })
 })

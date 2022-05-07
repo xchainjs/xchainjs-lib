@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-terra",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.2",
   "description": "Custom Terra client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -33,10 +33,10 @@
     "start:example": "ts-node example/index.ts"
   },
   "devDependencies": {
-    "@types/big.js": "^6.0.0",
-    "@xchainjs/xchain-client": "^0.11.1",
-    "@xchainjs/xchain-util": "^0.6.0",
     "@terra-money/terra.js": "^3.0.2",
+    "@types/big.js": "^6.0.0",
+    "@xchainjs/xchain-client": "^0.11.2",
+    "@xchainjs/xchain-util": "^0.7.1",
     "axios": "^0.25.0",
     "nock": "^13.0.5"
   },
@@ -44,9 +44,9 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.11.1",
-    "@xchainjs/xchain-util": "^0.6.0",
     "@terra-money/terra.js": "^3.0.2",
+    "@xchainjs/xchain-client": "^0.11.2",
+    "@xchainjs/xchain-util": "^0.7.1",
     "axios": "^0.25.0"
   },
   "dependencies": {}
