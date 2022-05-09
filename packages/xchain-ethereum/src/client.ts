@@ -31,8 +31,8 @@ import {
 } from '@xchainjs/xchain-util'
 import { BigNumber, BigNumberish, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
-import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 
+import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import erc20ABI from './data/erc20.json'
 import routerABI from './data/routerABI.json'
 import * as etherscanAPI from './etherscan-api'
