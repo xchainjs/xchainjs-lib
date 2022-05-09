@@ -52,7 +52,7 @@ Return "Success"
 ```
 
 ## requiredConfTime()
-Works out the expected wait time for any transaction, in or outm based on the conf counting. Call twice to find the in + out bound time due to conf counting. 
+Works out the expected wait time for any transaction, in or out based on the conf counting. Call twice to find the in + out bound time due to conf counting. 
 
 Note: conf counting is done in the ChainClient interface within THORChain, so it might be best to have this function in each chain cliednt. e.g.  = chain.RequiredConfTime(inputAmount)
 Should return the just the time in seconds. 
@@ -133,7 +133,7 @@ return minBlocks * 6 // THORChain block time, can also do Constants.BlocksPerYea
 
 ### Overview
 Gathers all the information for a Swap. Can be called mutiple times within an interface. 
-Informs user of the fees and expected outbound value, wait time and if over the set slip Limit
+Informs user of the fees and expected outbound value, wait time and if over the set slip limit
 This is for information only, hence the memo or addresses are not required.
 Will need to convert asset amounts to RUNE to do comparisons.
 
@@ -211,7 +211,14 @@ See
 
  expectedReturnedDestinationAsset = inputAmount - totalFee
 
-expectedWait = requiredConfTime() + outboundDelay()
+confiTIme = requiredConfTime(inputAmount) + requiredConfTime(expectedReturnedDestinationAsset) 
+outboundDelay = outboundDelay(expectedReturnedDestinationAsset)
+
+// conf counting is independent of outboundDelay, so need to find out which is longer. 
+If outboundDelay > confiTIme
+  expectedWait = outboundDelay
+else
+  expectedWait = confiTIme
 
 Return values
 ```
@@ -272,8 +279,14 @@ Constuct Memo - LIM is set at 1%. Add interface ID
 ```
 Calc the waitTime then send the TX to THORChain Asgard Vault
 ```
-expectedWait = RequiredConfTime
-expectedWait = expectedWait + outboundDelay
+confiTIme = requiredConfTime(inputAmount) + requiredConfTime(expectedReturnedDestinationAsset) 
+outboundDelay = outboundDelay(expectedReturnedDestinationAsset)
+
+// conf counting is independent of outboundDelay, so need to find out which is longer. 
+If outboundDelay > confiTIme
+  expectedWait = outboundDelay
+else
+  expectedWait = confiTIme
 
 construct TX with Memo and inbound gas_rate
 Send Tx to correct asgardVault or router
