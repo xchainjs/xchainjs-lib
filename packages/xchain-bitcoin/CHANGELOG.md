@@ -1,3 +1,8 @@
+# v.0.18.3(2022-xx-xx)
+
+## Fix 
+- Edit utxo error message for grammar and syntax. 
+
 # v.0.18.2 (2022-05-05)
 
 ## Update
