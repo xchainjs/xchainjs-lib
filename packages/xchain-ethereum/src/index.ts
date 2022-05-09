@@ -11,4 +11,3 @@ export {
   ETHAddress,
   ETH_DECIMAL,
 } from './utils'
-export * from './const'
