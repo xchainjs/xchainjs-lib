@@ -19,8 +19,8 @@ import {
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { AssetLTC, Chain, assetAmount, assetToBase, assetToString, getInboundDetails } from '@xchainjs/xchain-util'
 import * as Litecoin from 'bitcoinjs-lib'
-import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 
+import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import * as sochain from './sochain-api'
 import { NodeAuth } from './types'
 import { TxIO } from './types/sochain-api-types'
@@ -313,7 +313,7 @@ class Client extends UTXOClient {
     const fromAddressIndex = params?.walletIndex || 0
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
-    
+
     const { psbt } = await Utils.buildTx({
       ...params,
       feeRate,

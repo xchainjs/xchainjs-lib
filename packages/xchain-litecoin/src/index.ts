@@ -10,3 +10,4 @@ export {
   validateAddress,
   calcFee,
 } from './utils'
+export * from './const'
