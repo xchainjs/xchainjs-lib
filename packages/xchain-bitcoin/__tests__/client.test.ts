@@ -155,6 +155,20 @@ describe('BitcoinClient Test', () => {
     expect(() => btcClient.getAddress()).toThrow('Phrase must be provided')
   })
 
+  it('should fail with out of bound fees', async () => {
+    btcClient.setNetwork(Network.Testnet)
+    btcClient.setPhrase(phraseOne)
+  
+    const amount = baseAmount(2223)
+    expect(btcClient.transfer({
+        asset: AssetBTC,
+        recipient: addyThreePath0,
+        amount,
+        memo: MEMO,
+        feeRate: 99999999 })
+    ).rejects.toThrow()
+  })
+
   it('should prevent spending unconfirmed utxo if memo exists', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
@@ -367,5 +381,16 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseTwo)
     expect(btcClient.getAddress(0)).toEqual(addyThreePath0)
     expect(btcClient.getAddress(1)).toEqual(addyThreePath1)
+  })
+
+  it('should broadcast a deposit to thorchain inbound address', async () => {
+    btcClient.setNetwork(Network.Testnet)
+    btcClient.setPhrase(phraseOne)
+    const txHash = await btcClient.deposit({
+      asset: AssetBTC,
+      amount: baseAmount(2223),
+      memo: '=:THOR.RUNE:tthor1puhn8fclwvmmzh7uj7546wnxz5h3zar8e66sc5',
+    })
+    expect(txHash).toEqual('mock-txid')
   })
 })

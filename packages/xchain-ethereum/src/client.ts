@@ -4,6 +4,7 @@ import {
   Address,
   Balance,
   BaseXChainClient,
+  DepositParams,
   FeeOption,
   FeeType,
   Fees,
@@ -16,12 +17,24 @@ import {
   XChainClient,
   XChainClientParams,
   standardFeeRates,
+  checkFeeBounds,
 } from '@xchainjs/xchain-client'
-import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetETH,
+  BaseAmount,
+  Chain,
+  assetToString,
+  baseAmount,
+  delay,
+  getInboundDetails,
+} from '@xchainjs/xchain-util'
 import { BigNumber, BigNumberish, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
+import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 
 import erc20ABI from './data/erc20.json'
+import routerABI from './data/routerABI.json'
 import * as etherscanAPI from './etherscan-api'
 import * as ethplorerAPI from './ethplorer-api'
 import {
@@ -97,6 +110,10 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   constructor({
     network = Network.Testnet,
+    feeBounds = {
+      lower: LOWER_FEE_BOUND,
+      upper: UPPER_FEE_BOUND
+    },
     ethplorerUrl = 'https://api.ethplorer.io',
     ethplorerApiKey = 'freekey',
     explorerUrl,
@@ -109,7 +126,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     etherscanApiKey,
     infuraCreds,
   }: EthereumClientParams) {
-    super(Chain.Ethereum, { network, rootDerivationPaths })
+    super(Chain.Ethereum, { network, rootDerivationPaths, feeBounds })
     this.ethNetwork = xchainNetworkToEths(network)
     this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey
@@ -430,6 +447,75 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   }
 
   /**
+   * Transaction to THORChain inbound address.
+   *
+   * @param {DepositParams} params The transaction options.
+   * @returns {TxHash} The transaction hash.
+   *
+   * @throws {"halted chain"} Thrown if chain is halted.
+   * @throws {"halted trading"} Thrown if trading is halted.
+   * @throws {"amount is not approved"} Thrown if the amount is not allowed to spend
+   * @throws {"router address is not defined"} Thrown if router address is not defined
+   */
+  async deposit({ walletIndex = 0, asset = AssetETH, amount, memo }: DepositParams): Promise<TxHash> {
+    const inboundDetails = await getInboundDetails(asset.chain, this.network)
+
+    if (inboundDetails.haltedChain) {
+      throw new Error(`Halted chain for ${assetToString(asset)}`)
+    }
+    if (inboundDetails.haltedTrading) {
+      throw new Error(`Halted trading for ${assetToString(asset)}`)
+    }
+    if (!inboundDetails.router) {
+      throw new Error('router address is not defined')
+    }
+
+    const address = this.getAddress(walletIndex)
+    const gasPrice = await this.estimateGasPrices()
+
+    if (asset.ticker.toUpperCase() === 'ETH') {
+      const contract = new ethers.Contract(inboundDetails.router, routerABI)
+      const unsignedTx = await contract.populateTransaction.deposit(
+        inboundDetails.vault,
+        ETHAddress,
+        amount.amount().toFixed(),
+        memo,
+        {
+          from: address,
+          value: 0,
+          gasPrice: gasPrice.fast.amount().toFixed(),
+        },
+      )
+      const response = await this.getWallet(walletIndex).sendTransaction(unsignedTx)
+      return typeof response === 'string' ? response : response.hash
+    } else {
+      const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
+      const strip0x = assetAddress.substr(2)
+      const isApproved = await this.isApproved({
+        amount: baseAmount(amount.amount()),
+        spenderAddress: inboundDetails.router,
+        contractAddress: strip0x,
+        walletIndex,
+      })
+
+      if (!isApproved) {
+        throw new Error('The amount is not allowed to spend')
+      }
+
+      const checkSummedAddress = ethers.utils.getAddress(strip0x)
+      const params = [inboundDetails.vault, checkSummedAddress, amount.amount().toFixed(), memo]
+      const vaultContract = new ethers.Contract(inboundDetails.router, routerABI)
+      const unsignedTx = await vaultContract.populateTransaction.deposit(...params, {
+        from: address,
+        value: 0,
+        gasPrice: gasPrice.fast.amount().toFixed(),
+      })
+      const response = await this.getWallet(walletIndex).sendTransaction(unsignedTx)
+      return typeof response === 'string' ? response : response.hash
+    }
+  }
+
+  /**
    * Get the transaction details of a given transaction id.
    *
    * @param {string} txId The transaction id.
@@ -589,6 +675,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     }).catch(() => BigNumber.from(gasLimitFallback))
 
     const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
+    checkFeeBounds(this.feeBounds, gasPrice.toNumber())
     return await this.call<TransactionResponse>({
       walletIndex,
       contractAddress,
@@ -681,6 +768,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         gasPrice: BigNumber.from(gasPrice.amount().toFixed()),
       }
     }
+
+    checkFeeBounds(this.feeBounds, BigNumber.from(overrides.gasPrice).toNumber())
 
     let txResult
     if (assetAddress && !isETHAddress) {

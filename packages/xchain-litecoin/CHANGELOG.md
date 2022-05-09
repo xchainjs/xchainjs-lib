@@ -1,3 +1,12 @@
+# v.0.8.1
+
+## Update
+
+- Add `deposit` function to Litecoin `Client` 
+- Update to latest dependencies
+- Add tests for `deposit` 
+
+
 # v.0.8.0 (2022-03-08)
 
 ## Update

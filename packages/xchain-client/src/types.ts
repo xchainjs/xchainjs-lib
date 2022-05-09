@@ -62,6 +62,13 @@ export type TxParams = {
   memo?: string // optional memo to pass
 }
 
+export type DepositParams = {
+  walletIndex?: number // send from this HD index
+  asset?: Asset
+  amount: BaseAmount
+  memo: string
+}
+
 export enum FeeOption {
   Average = 'average',
   Fast = 'fast',
@@ -81,11 +88,14 @@ export type Fees = Record<FeeOption, Fee> & {
 }
 export type FeesWithRates = { rates: FeeRates; fees: Fees }
 
+export type FeeBounds = { lower: number, upper: number }
+
 export type RootDerivationPaths = Record<Network, string>
 
 export type XChainClientParams = {
   network?: Network
   phrase?: string
+  feeBounds?: FeeBounds
   rootDerivationPaths?: RootDerivationPaths
 }
 

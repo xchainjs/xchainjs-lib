@@ -1,3 +1,13 @@
+# v.0.24.1 (2022-05-05)
+
+## Update 
+
+- Add `deposit` function to Ethereum `client` 
+- Add `routerABI.json`
+- Update latest dependencies
+- Add tests for `deposit` 
+
+
 # v.0.24.0 (2022-04-20)
 
 ## Fix
