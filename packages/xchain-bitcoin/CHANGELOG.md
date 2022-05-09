@@ -1,4 +1,4 @@
-# v.0.18.3(2022-xx-xx)
+# v.0.18.3(2022-07-05)
 
 ## Fix 
 - Edit utxo error message for grammar and syntax. 
