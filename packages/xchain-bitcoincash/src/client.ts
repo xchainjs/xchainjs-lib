@@ -18,8 +18,8 @@ import {
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { AssetBCH, Chain, assetToString, getInboundDetails } from '@xchainjs/xchain-util'
-import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 
+import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { ClientUrl } from './types/client-types'
@@ -248,7 +248,7 @@ class Client extends UTXOClient {
 
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
-    
+
     const { builder, inputs } = await utils.buildTx({
       ...params,
       feeRate,
