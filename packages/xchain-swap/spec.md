@@ -236,10 +236,11 @@ Will need to convert asset amounts to RUNE to do comparisons
 1. `affiliateFee`
 1. `affiliateAddress`
 1. `interfaceID` - 3 numbers (Thorswap - 111; Asgardex - 999; Defispot: ?; Thorwallet: ?; Ferz wallet: ?; Shapeshift: ?; Rango: ? )
+1. `slipLimit`
 
 ### Returns in json:
- `transactionID` - for inbound asset.
- `expectedWait` - for outbound asset.
+ 1. `transactionID` - for the Tx created
+ 1. `expectedWait` - expected total wait time.
 
 
 ### Midgard Requirements
@@ -265,9 +266,9 @@ Will need to convert asset amounts to RUNE to do comparisons
     If valueInRUNE(totalFee) > valueInRUNE(inputAmount)
         "not enough inboundAmount to conduct swap"
 ```
-Constuct Memo - LIM is set at 1%. Add interface ID
+Constuct Memo - Work out LIM. Add interface ID
 ```
-    LIM is (1-limit%outputAmount value), eg if 1% -> 99%outoutAmount
+    LIM is (1-slipLimit%outputAmount value), eg if slip limit = 1% than LIM (output amount) is  99% 
         Then remove the last 3 digits, and replace with the 3-digit interface ID
         12341234 -> 12341xxx, where xxx is interfaceID
 
@@ -279,8 +280,8 @@ Constuct Memo - LIM is set at 1%. Add interface ID
 ```
 Calc the waitTime then send the TX to THORChain Asgard Vault
 ```
-confiTIme = requiredConfTime(inputAmount) + requiredConfTime(expectedReturnedDestinationAsset) 
-outboundDelay = outboundDelay(expectedReturnedDestinationAsset)
+confiTIme = requiredConfTime(inputAmount) + requiredConfTime(LIM) 
+outboundDelay = outboundDelay(LIM)
 
 // conf counting is independent of outboundDelay, so need to find out which is longer. 
 If outboundDelay > confiTIme
