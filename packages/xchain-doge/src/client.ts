@@ -13,13 +13,14 @@ import {
   TxsPage,
   UTXOClient,
   XChainClientParams,
+  checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { AssetDOGE, Chain, assetAmount, assetToBase, assetToString, getInboundDetails } from '@xchainjs/xchain-util'
 import * as Dogecoin from 'bitcoinjs-lib'
 
 import * as blockcypher from './blockcypher-api'
-import { DOGE_DECIMAL } from './const'
+import { DOGE_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import * as sochain from './sochain-api'
 import { TxIO } from './types/sochain-api-types'
 import * as Utils from './utils'
@@ -45,6 +46,10 @@ class Client extends UTXOClient {
    */
   constructor({
     network = Network.Testnet,
+    feeBounds = {
+      lower: LOWER_FEE_BOUND,
+      upper: UPPER_FEE_BOUND
+    },
     sochainUrl = 'https://sochain.com/api/v2',
     blockcypherUrl = 'https://api.blockcypher.com/v1',
     phrase,
@@ -54,7 +59,7 @@ class Client extends UTXOClient {
       [Network.Testnet]: `m/44'/1'/0'/0/`,
     },
   }: DogecoinClientParams) {
-    super(Chain.Doge, { network, rootDerivationPaths, phrase })
+    super(Chain.Doge, { network, rootDerivationPaths, phrase, feeBounds })
     this.setSochainUrl(sochainUrl)
     this.setBlockcypherUrl(blockcypherUrl)
   }
@@ -294,6 +299,7 @@ class Client extends UTXOClient {
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const fromAddressIndex = params?.walletIndex || 0
     const feeRate = params.feeRate || (await this.getSuggestedFeeRate())
+    checkFeeBounds(this.feeBounds, feeRate)
 
     const { psbt } = await Utils.buildTx({
       amount: params.amount,

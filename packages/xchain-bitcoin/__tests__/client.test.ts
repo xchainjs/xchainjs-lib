@@ -155,6 +155,20 @@ describe('BitcoinClient Test', () => {
     expect(() => btcClient.getAddress()).toThrow('Phrase must be provided')
   })
 
+  it('should fail with out of bound fees', async () => {
+    btcClient.setNetwork(Network.Testnet)
+    btcClient.setPhrase(phraseOne)
+  
+    const amount = baseAmount(2223)
+    expect(btcClient.transfer({
+        asset: AssetBTC,
+        recipient: addyThreePath0,
+        amount,
+        memo: MEMO,
+        feeRate: 99999999 })
+    ).rejects.toThrow()
+  })
+
   it('should prevent spending unconfirmed utxo if memo exists', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
