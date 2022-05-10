@@ -1,8 +1,14 @@
-# v0.24.2 (2022-05-8)
+# v0.25.0 (2022-05-10)
 
 ## Fix
 
-- Fetch gass value from thorchain using `/cosmos/tx/v1beta1/simulate`, if the call fails then fallback to use `DEFAULT_GAS_VALUE`
+- Before sending a transaction, gas limits are estimated
+- Helper `getEstimatedGas`
+
+## Breaking changes
+
+- Client's `transferOffline` requires `fromAccountNumber` and `fromSequence`
+- Rename parameters in `transferOffline` to keep names in camel case (not snake case)
 
 # v0.24.1 (2022-04-23)
 

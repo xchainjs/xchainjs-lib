@@ -1,3 +1,4 @@
+import { cosmosclient } from '@cosmos-client/core'
 import { Network, Tx, TxParams } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
@@ -38,14 +39,14 @@ export type TxOfflineParams = TxParams & {
   /**
    * Balance of Rune to send from
    */
-  from_rune_balance: BaseAmount
+  fromRuneBalance: BaseAmount
   /**
    * Balance of asset to send from
    * Optional: It can be ignored if asset to send from is RUNE
    */
-  from_asset_balance?: BaseAmount
-  from_account_number: string
-  from_sequence: string
+  fromAssetBalance?: BaseAmount
+  fromAccountNumber: cosmosclient.Long.Long
+  fromSequence: cosmosclient.Long.Long
 }
 
 /**
