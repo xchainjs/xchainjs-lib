@@ -48,7 +48,7 @@ class Client extends UTXOClient {
     network = Network.Testnet,
     feeBounds = {
       lower: LOWER_FEE_BOUND,
-      upper: UPPER_FEE_BOUND
+      upper: UPPER_FEE_BOUND,
     },
     sochainUrl = 'https://sochain.com/api/v2',
     blockcypherUrl = 'https://api.blockcypher.com/v1',

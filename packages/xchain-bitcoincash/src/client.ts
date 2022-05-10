@@ -45,7 +45,7 @@ class Client extends UTXOClient {
     network = Network.Testnet,
     feeBounds = {
       lower: LOWER_FEE_BOUND,
-      upper: UPPER_FEE_BOUND
+      upper: UPPER_FEE_BOUND,
     },
     haskoinUrl = {
       [Network.Testnet]: 'https://haskoin.ninerealms.com/bchtest',

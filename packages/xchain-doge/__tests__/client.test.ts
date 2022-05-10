@@ -4,7 +4,7 @@ import { AssetDOGE, baseAmount } from '@xchainjs/xchain-util'
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode'
 import { Client } from '../src/client'
-import { MIN_TX_FEE, LOWER_FEE_BOUND } from '../src/const'
+import { LOWER_FEE_BOUND, MIN_TX_FEE } from '../src/const'
 
 mockSochainApi.init()
 
@@ -158,7 +158,13 @@ describe('DogecoinClient Test', () => {
     const asset = AssetDOGE
     const amount = baseAmount(9999999999)
     return expect(
-      dogeClient.transfer({ walletIndex: 0, asset, recipient: testnet_address_path1, amount, feeRate: LOWER_FEE_BOUND }),
+      dogeClient.transfer({
+        walletIndex: 0,
+        asset,
+        recipient: testnet_address_path1,
+        amount,
+        feeRate: LOWER_FEE_BOUND,
+      }),
     ).rejects.toThrow('Balance insufficient for transaction')
   })
 
@@ -248,7 +254,9 @@ describe('DogecoinClient Test', () => {
     const amount = baseAmount(99000)
     const expectedError = 'Invalid address'
 
-    return expect(dogeClient.transfer({ recipient: invalidAddress, amount, feeRate: LOWER_FEE_BOUND })).rejects.toThrow(expectedError)
+    return expect(dogeClient.transfer({ recipient: invalidAddress, amount, feeRate: LOWER_FEE_BOUND })).rejects.toThrow(
+      expectedError,
+    )
   })
 
   it('should get address transactions', async () => {
