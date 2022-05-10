@@ -67,3 +67,12 @@ export type NodeInfoResponse = {
     network: string
   }
 }
+/**
+ * Response of `/cosmos/tx/v1beta1/simulateo`
+ * Note: We are interested in `network` (aka chain id) only
+ */
+export type SimulateResponse = {
+  gas_info: {
+    gas_used: string
+  }
+}

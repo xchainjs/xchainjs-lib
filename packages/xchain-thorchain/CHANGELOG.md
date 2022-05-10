@@ -1,3 +1,9 @@
+# v0.24.2 (2022-05-8)
+
+## Fix
+
+- Fetch gass value from thorchain using `/cosmos/tx/v1beta1/simulate`, if the call fails then fallback to use `DEFAULT_GAS_VALUE`
+
 # v0.24.1 (2022-04-23)
 
 ## Fix
