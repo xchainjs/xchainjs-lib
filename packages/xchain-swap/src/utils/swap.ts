@@ -1,13 +1,44 @@
+import { BigNumber } from 'bignumber.js';
 import { assetToBase, assetAmount, baseAmount, BaseAmount, baseToAsset } from '@xchainjs/xchain-util'
 
+
+// Pool data should come from midgard.ts issue #569.
 export type PoolData = {
   assetBalance: BaseAmount
   runeBalance: BaseAmount
-  lastBlock: number
-  currentBlock: number
 }
 
+export type SwapOutput = {
+  output: BaseAmount
+  swapFee: BaseAmount
+  slip: BigNumber
+}
 
+/**
+ *
+ * @param inputAmount
+ * @param pool
+ * @returns
+ */
+export const getSingleSwap = (inputAmount: BaseAmount, pool: PoolData ):  SwapOutput => {
+  const output = getSwapOutput(inputAmount, pool, false )
+  const fee = getSwapFee(inputAmount, pool, false)
+  const slip = getSwapSlip(inputAmount, pool, false)
+  const SwapOutput = {
+    output: output,
+    swapFee: fee,
+    slip: slip
+  }
+  return SwapOutput
+}
+
+/**
+ *
+ * @param inputAmount
+ * @param pool
+ * @param toRune
+ * @returns
+ */
 export const getSwapOutput = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): BaseAmount => {
   // formula: (x * X * Y) / (x + X) ^ 2
   const x = inputAmount.amount()
@@ -18,6 +49,45 @@ export const getSwapOutput = (inputAmount: BaseAmount, pool: PoolData, toRune: b
   const result = numerator.div(denominator)
   return baseAmount(result)
 }
+
+/**
+ *
+ * @param inputAmount
+ * @param pool
+ * @param toRune
+ * @returns
+ */
+export const getSwapFee = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): BaseAmount => {
+  // formula: (x * x * Y) / (x + X) ^ 2
+  const x = inputAmount.amount()
+  const X = toRune ? pool.assetBalance.amount() : pool.runeBalance.amount() // input is asset if toRune
+  const Y = toRune ? pool.runeBalance.amount() : pool.assetBalance.amount() // output is rune if toRune
+  const numerator = x.times(x).multipliedBy(Y)
+  const denominator = x.plus(X).pow(2)
+  const result = numerator.div(denominator)
+  return baseAmount(result)
+}
+
+/**
+ *
+ * @param inputAmount
+ * @param pool
+ * @param toRune
+ * @returns
+ */
+export const getSwapSlip = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): BigNumber => {
+  // formula: (x) / (x + X)
+  const x = inputAmount.amount()
+  const X = toRune ? pool.assetBalance.amount() : pool.runeBalance.amount() // input is asset if toRune
+  const result = x.div(x.plus(X))
+  return result
+}
+
+
+/**
+ * Not sure if the below functions will be used.
+ */
+
 
 export const getSwapOutputWithFee = (
   inputAmount: BaseAmount,
@@ -56,24 +126,8 @@ export const getSwapInput = (toRune: boolean, pool: PoolData, outputAmount: Base
   return baseAmount(result)
 }
 
-export const getSwapSlip = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): BigNumber => {
-  // formula: (x) / (x + X)
-  const x = inputAmount.amount()
-  const X = toRune ? pool.assetBalance.amount() : pool.runeBalance.amount() // input is asset if toRune
-  const result = x.div(x.plus(X))
-  return result
-}
 
-export const getSwapFee = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): BaseAmount => {
-  // formula: (x * x * Y) / (x + X) ^ 2
-  const x = inputAmount.amount()
-  const X = toRune ? pool.assetBalance.amount() : pool.runeBalance.amount() // input is asset if toRune
-  const Y = toRune ? pool.runeBalance.amount() : pool.assetBalance.amount() // output is rune if toRune
-  const numerator = x.times(x).multipliedBy(Y)
-  const denominator = x.plus(X).pow(2)
-  const result = numerator.div(denominator)
-  return baseAmount(result)
-}
+
 
 export const getValueOfAssetInRune = (inputAsset: BaseAmount, pool: PoolData): BaseAmount => {
   // formula: ((a * R) / A) => R per A (Runeper$)
@@ -155,10 +209,3 @@ export const getValueOfAsset1InAsset2 = (inputAsset: BaseAmount, pool1: PoolData
   return assetToBase(assetAmount(result))
 }
 
-export const prepareSwap = (inputAsset: BaseAmount, pool1: PoolData, pool2: PoolData): {
-
-}
-
-export const doSwap = (inputAsset: BaseAmount, pool1: PoolData, pool2: PoolData ): {
-
-}
