@@ -1,3 +1,9 @@
+# v.0.18.3 (2022-05-08)
+
+## Fix
+- Add improvement to error message on utxo pending
+
+
 # v.0.18.2 (2022-05-05)
 
 ## Update
