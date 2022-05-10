@@ -46,7 +46,7 @@ import {
 import { TxResult } from './types/messages'
 import {
   DECIMAL,
-  DEFAULT_GAS_ESTIMATE_MULTIPLIER,
+  DEFAULT_GAS_ADJUSTMENT,
   DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
   MAX_TX_COUNT,
@@ -58,7 +58,7 @@ import {
   getDepositTxDataFromLogs,
   getExplorerAddressUrl,
   getExplorerTxUrl,
-  getGasExpectedForTx,
+  getEstimateGas,
   getPrefix,
   isAssetRuneNative,
   registerDepositCodecs,
@@ -470,10 +470,11 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     })
 
     const account = await this.getCosmosClient().getAccount(fromAddressAcc)
-    const gasLimit = await this.determineGasLmit({
+    const gasLimit = await this.estimateGasLimit({
       txBody: depositTxBody,
       privKey,
-      multiplier: DEFAULT_GAS_ESTIMATE_MULTIPLIER,
+      account,
+      multiplier: DEFAULT_GAS_ADJUSTMENT,
       fallbackGasLimit: DEPOSIT_GAS_LIMIT_VALUE,
     })
     const txBuilder = buildUnsignedTx({
@@ -530,14 +531,14 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       chainId: this.getChainId(),
       nodeUrl: this.getClientUrl().node,
     })
-
-    const gasLimit = await this.determineGasLmit({
+    const account = await this.getCosmosClient().getAccount(accAddress)
+    const gasLimit = await this.estimateGasLimit({
       txBody,
       privKey,
-      multiplier: DEFAULT_GAS_ESTIMATE_MULTIPLIER,
+      account,
+      multiplier: DEFAULT_GAS_ADJUSTMENT,
       fallbackGasLimit: DEFAULT_GAS_LIMIT_VALUE,
     })
-    const account = await this.getCosmosClient().getAccount(accAddress)
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: txBody,
@@ -590,10 +591,10 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       nodeUrl: this.getClientUrl().node,
     })
     const privKey = this.getPrivateKey(walletIndex)
-    const gasLimit = await this.determineGasLmit({
+    const gasLimit = await this.estimateGasLimit({
       txBody,
       privKey,
-      multiplier: DEFAULT_GAS_ESTIMATE_MULTIPLIER,
+      multiplier: DEFAULT_GAS_ADJUSTMENT,
       fallbackGasLimit: DEFAULT_GAS_LIMIT_VALUE,
     })
 
@@ -632,19 +633,21 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     }
   }
 
-  private async determineGasLmit({
+  private async estimateGasLimit({
     txBody,
     privKey,
+    account,
     multiplier,
     fallbackGasLimit,
   }: {
     txBody: proto.cosmos.tx.v1beta1.TxBody
     privKey: proto.cosmos.crypto.secp256k1.PrivKey
+    account?: proto.cosmos.auth.v1beta1.IBaseAccount
     multiplier: number
     fallbackGasLimit: string
   }): Promise<string> {
     try {
-      const gas_expected = await getGasExpectedForTx({ cosmosSDKClient: this.getCosmosClient(), txBody, privKey })
+      const gas_expected = await getEstimateGas({ cosmosSDKClient: this.getCosmosClient(), txBody, privKey, account })
       if (gas_expected === undefined) {
         throw new Error('could not estimate gas limit required for TX')
       }

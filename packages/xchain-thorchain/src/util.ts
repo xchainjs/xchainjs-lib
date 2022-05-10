@@ -20,7 +20,7 @@ import { MsgNativeTx } from './types/messages'
 import types from './types/proto/MsgCompiled'
 
 export const DECIMAL = 8
-export const DEFAULT_GAS_ESTIMATE_MULTIPLIER = 2
+export const DEFAULT_GAS_ADJUSTMENT = 2
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
 export const DEPOSIT_GAS_LIMIT_VALUE = '500000000'
 export const MAX_TX_COUNT = 100
@@ -236,25 +236,27 @@ export const buildUnsignedTx = ({
 
   return new cosmosclient.TxBuilder(cosmosSdk, txBody, authInfo)
 }
-export const getGasExpectedForTx = async ({
+export const getEstimateGas = async ({
   cosmosSDKClient,
   txBody,
   privKey,
+  account,
 }: {
   cosmosSDKClient: CosmosSDKClient
   txBody: proto.cosmos.tx.v1beta1.TxBody
   privKey: proto.cosmos.crypto.secp256k1.PrivKey
+  account?: proto.cosmos.auth.v1beta1.IBaseAccount
 }): Promise<string | undefined> => {
   const accAddress = cosmosclient.AccAddress.fromPublicKey(privKey.pubKey())
-  const account = await cosmosSDKClient.getAccount(accAddress)
+  const acc = account ?? (await cosmosSDKClient.getAccount(accAddress))
   const txBuilder = buildUnsignedTx({
     cosmosSdk: cosmosSDKClient.sdk,
     txBody: txBody,
     gasLimit: DEFAULT_GAS_LIMIT_VALUE, // NOTE: this should not matter since we are just doign an estimate
     signerPubkey: cosmosclient.codec.packAny(privKey.pubKey()),
-    sequence: account.sequence || cosmosclient.Long.ZERO,
+    sequence: acc.sequence || cosmosclient.Long.ZERO,
   })
-  const signDocBytes = txBuilder.signDocBytes(account.account_number || 0)
+  const signDocBytes = txBuilder.signDocBytes(acc.account_number || 0)
   txBuilder.addSignature(privKey.sign(signDocBytes))
 
   const resp = await rest.tx.simulate(cosmosSDKClient.sdk, { tx_bytes: txBuilder.txBytes() })
