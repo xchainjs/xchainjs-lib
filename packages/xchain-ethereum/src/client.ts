@@ -16,8 +16,8 @@ import {
   TxsPage,
   XChainClient,
   XChainClientParams,
-  standardFeeRates,
   checkFeeBounds,
+  standardFeeRates,
 } from '@xchainjs/xchain-client'
 import {
   Asset,
@@ -112,7 +112,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     network = Network.Testnet,
     feeBounds = {
       lower: LOWER_FEE_BOUND,
-      upper: UPPER_FEE_BOUND
+      upper: UPPER_FEE_BOUND,
     },
     ethplorerUrl = 'https://api.ethplorer.io',
     ethplorerApiKey = 'freekey',

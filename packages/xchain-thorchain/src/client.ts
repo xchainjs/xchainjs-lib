@@ -46,8 +46,6 @@ import {
 import { TxResult } from './types/messages'
 import {
   DECIMAL,
-  DEFAULT_GAS_VALUE,
-  DEPOSIT_GAS_VALUE,
   MAX_TX_COUNT,
   getBalance,
   getDefaultClientUrl,
@@ -55,6 +53,7 @@ import {
   getDefaultFees,
   getDenom,
   getDepositTxDataFromLogs,
+  getEstimatedGas,
   getExplorerAddressUrl,
   getExplorerTxUrl,
   getPrefix,
@@ -73,6 +72,7 @@ export interface ThorchainClient {
   getCosmosClient(): CosmosSDKClient
 
   deposit(params: DepositParam): Promise<TxHash>
+  transferOffline(params: TxOfflineParams): Promise<string>
 }
 
 /**
@@ -467,12 +467,21 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     })
 
     const account = await this.getCosmosClient().getAccount(fromAddressAcc)
+    const accountSequence = account.sequence || cosmosclient.Long.ZERO
+    const accountNumber = account.account_number || cosmosclient.Long.ZERO
 
+    const gasLimit = await getEstimatedGas({
+      cosmosSDKClient: this.getCosmosClient(),
+      txBody: depositTxBody,
+      privKey,
+      accountNumber,
+      accountSequence,
+    })
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: depositTxBody,
       signerPubkey: cosmosclient.codec.packAny(signerPubkey),
-      gasLimit: DEPOSIT_GAS_VALUE,
+      gasLimit,
       sequence: account.sequence || cosmosclient.Long.ZERO,
     })
 
@@ -522,15 +531,24 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       chainId: this.getChainId(),
       nodeUrl: this.getClientUrl().node,
     })
-
     const account = await this.getCosmosClient().getAccount(accAddress)
+    const accountSequence = account.sequence || cosmosclient.Long.ZERO
+    const accountNumber = account.account_number || cosmosclient.Long.ZERO
+
+    const gasLimit = await getEstimatedGas({
+      cosmosSDKClient: this.getCosmosClient(),
+      txBody,
+      privKey,
+      accountNumber,
+      accountSequence,
+    })
 
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: txBody,
-      gasLimit: DEFAULT_GAS_VALUE,
+      gasLimit,
       signerPubkey: cosmosclient.codec.packAny(signerPubkey),
-      sequence: account.sequence || cosmosclient.Long.ZERO,
+      sequence: accountSequence,
     })
 
     return (await this.cosmosClient.signAndBroadcast(txBuilder, privKey, account)) || ''
@@ -548,10 +566,10 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     amount,
     recipient,
     memo,
-    from_rune_balance,
-    from_asset_balance = baseAmount(0, DECIMAL),
-    from_account_number = '0',
-    from_sequence = '0',
+    fromRuneBalance: from_rune_balance,
+    fromAssetBalance: from_asset_balance = baseAmount(0, DECIMAL),
+    fromAccountNumber = cosmosclient.Long.ZERO,
+    fromSequence = cosmosclient.Long.ZERO,
   }: TxOfflineParams): Promise<string> {
     const fee = (await this.getFees()).average
 
@@ -576,18 +594,24 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       chainId: this.getChainId(),
       nodeUrl: this.getClientUrl().node,
     })
-
     const privKey = this.getPrivateKey(walletIndex)
+    const gasLimit = await getEstimatedGas({
+      cosmosSDKClient: this.getCosmosClient(),
+      txBody,
+      privKey,
+      accountNumber: fromAccountNumber,
+      accountSequence: fromSequence,
+    })
 
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: txBody,
-      gasLimit: DEFAULT_GAS_VALUE,
+      gasLimit: gasLimit,
       signerPubkey: cosmosclient.codec.packAny(privKey.pubKey()),
-      sequence: cosmosclient.Long.fromString(from_sequence) || cosmosclient.Long.ZERO,
+      sequence: fromSequence,
     })
 
-    const signDocBytes = txBuilder.signDocBytes(cosmosclient.Long.fromString(from_account_number))
+    const signDocBytes = txBuilder.signDocBytes(fromAccountNumber)
     txBuilder.addSignature(privKey.sign(signDocBytes))
     return txBuilder.txBytes()
   }

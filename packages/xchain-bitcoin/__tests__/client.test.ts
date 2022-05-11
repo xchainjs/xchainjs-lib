@@ -158,14 +158,16 @@ describe('BitcoinClient Test', () => {
   it('should fail with out of bound fees', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
-  
+
     const amount = baseAmount(2223)
-    expect(btcClient.transfer({
+    expect(
+      btcClient.transfer({
         asset: AssetBTC,
         recipient: addyThreePath0,
         amount,
         memo: MEMO,
-        feeRate: 99999999 })
+        feeRate: 99999999,
+      }),
     ).rejects.toThrow()
   })
 
