@@ -3,4 +3,6 @@
 
 //const client = new HavenClient()
 
-xdescribe('Haven xCHAIN Integration Test', () => {})
+describe('Haven xCHAIN Integration Test', () => {
+  it('should initialize wallet with valid bip39 phrase', () => {})
+})
