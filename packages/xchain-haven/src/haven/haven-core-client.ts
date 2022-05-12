@@ -13,29 +13,27 @@ import type {
 } from 'haven-core-js'
 import * as havenWallet from 'haven-core-js'
 
-import { getAddressInfo, getAddressTxs, getTx, get_version, keepAlive, login, setAPI_URL } from './api'
+import { getAddressInfo, getAddressTxs, getTx, get_version, keepAlive, login, setAPI_URL, setCredentials } from './api'
+import { SyncHandler } from './sync-handler'
 import { HavenBalance, NetTypes, SyncObserver, SyncStats } from './types'
 import { assertIsDefined, getRandomOutsReq, getUnspentOutsReq, submitRawTxReq, updateStatus } from './utils'
 
 const TestNetApiUrl = 'http://142.93.249.35:1984'
 const MainnetApiUrl = ''
-//const SYNC_THRESHOLD = 10
 
 export class HavenCoreClient {
+  private syncHandler: SyncHandler
   private netTypeId: number | undefined
   private seed: string | undefined
-  private scannedHeight = 0
   private blockHeight = 0
   private pingServerIntervalID: ReturnType<typeof setInterval> | undefined
-  private updateSyncProgressIntervalID: ReturnType<typeof setInterval> | undefined
   private coreModule: MyMoneroCoreBridgeClass | undefined
   private base_fee: number | undefined
   private fork_version: number | undefined
-  private observers: SyncObserver[] = []
 
   /**
    * static function to create a new wallet without initalizing any backend communication,
-   * the returned mnemonic canbe used to init the wallet
+   * the returned mnemonic can be used to init the wallet
    * @param netType
    * @returns mnemonic
    */
@@ -44,6 +42,10 @@ export class HavenCoreClient {
     const module = await havenWallet.haven_utils_promise
     const keys = module.newly_created_wallet('en', netTypeId)
     return keys.mnemonic_string
+  }
+
+  constructor() {
+    this.syncHandler = new SyncHandler()
   }
 
   async init(seed: string, netType: string | number): Promise<boolean> {
@@ -55,17 +57,11 @@ export class HavenCoreClient {
     this.seed = seed
     const apiUrl = this.netTypeId === NetTypes.mainnet ? MainnetApiUrl : TestNetApiUrl
     setAPI_URL(apiUrl)
+    const keys = this.getKeys()
 
-    const keys = await this.getKeys()
-    await login(keys.address_string, keys.sec_viewKey_string, false)
-    const addressInfoResponse = await getAddressInfo(keys.address_string, keys.sec_viewKey_string)
+    setCredentials(keys.address_string, keys.sec_viewKey_string)
 
-    this.scannedHeight = addressInfoResponse.scanned_block_height
-    this.blockHeight = addressInfoResponse.blockchain_height
-
-    if (this.scannedHeight < this.blockHeight) {
-      this.updateSyncProgressIntervalID = setInterval(() => this.updateSyncProgress(), 5 * 1000)
-    }
+    await login(false)
 
     this.pingServerIntervalID = setInterval(() => this.pingServer(), 60 * 1000)
 
@@ -75,24 +71,19 @@ export class HavenCoreClient {
   purgeClient() {
     this.netTypeId = undefined
     this.seed = undefined
-    this.scannedHeight = 0
-    this.blockHeight = 0
-    this.observers = []
+    this.syncHandler.purge()
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     clearInterval(this.pingServerIntervalID)
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    clearInterval(this.updateSyncProgressIntervalID)
   }
 
-  async getAddress(): Promise<string> {
-    const keys = await this.getKeys()
+  getAddress(): string {
+    const keys = this.getKeys()
     return keys.address_string
   }
 
-  async validateAddress(address: string): Promise<boolean> {
-    const module = await this.getCoreModule()
+  validateAddress(address: string): boolean {
+    const module = this.getCoreModule()
     let response: string | Record<string, unknown>
     try {
       response = module.decode_address(address, this.netTypeId!)
@@ -102,49 +93,16 @@ export class HavenCoreClient {
     return response.hasOwnProperty('spend')
   }
 
-  subscribeSyncProgress(observer: SyncObserver) {
-    this.observers.push(observer)
-    console.log(this.scannedHeight)
-    console.log(this.blockHeight)
-    observer.next({ scannedHeight: this.scannedHeight, blockHeight: this.blockHeight })
-  }
-
-  async updateSyncProgress() {
-    console.log('--------updateSyncProgress----------')
-    // will update scanned and block height as well
-    await this.getBalance()
-
-    console.log('------------scannedHeight------------')
-    console.log(this.scannedHeight)
-    console.log('------------blockHeight------------')
-    console.log(this.blockHeight)
-
-    this.observers.forEach((observer) => {
-      observer.next({ scannedHeight: this.scannedHeight, blockHeight: this.blockHeight })
-    })
-
-    if (this.scannedHeight === this.blockHeight) {
-      this.observers.forEach((observer) => {
-        observer.complete({ scannedHeight: this.scannedHeight, blockHeight: this.blockHeight })
-      })
-
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      clearInterval(this.updateSyncProgressIntervalID) // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      clearInterval(this.updateSyncProgressIntervalID)
-    }
-  }
+  subscribeSyncProgress = async (observer: SyncObserver): Promise<void> =>
+    this.syncHandler.subscribeSyncProgress(observer)
+  getSyncState = async (): Promise<SyncStats> => this.syncHandler.getSyncState()
 
   async getBalance(): Promise<HavenBalance> {
-    const coreModule = await this.getCoreModule()
-    const keys = await this.getKeys()
+    const coreModule = this.getCoreModule()
+    const keys = this.getKeys()
     const { sec_viewKey_string, address_string, pub_spendKey_string, sec_spendKey_string } = keys
 
-    const rawAddressData = await getAddressInfo(address_string, sec_viewKey_string)
-
-    this.blockHeight = rawAddressData.blockchain_height
-    this.scannedHeight = rawAddressData.scanned_block_height
+    const rawAddressData = await getAddressInfo()
 
     const serializedData = havenWallet.api_response_parser_utils.Parsed_AddressInfo__sync__keyImageManaged(
       rawAddressData,
@@ -181,7 +139,7 @@ export class HavenCoreClient {
   }
 
   async estimateFees(priority: number): Promise<string> {
-    const coreModule = await this.getCoreModule()
+    const coreModule = this.getCoreModule()
 
     if (this.base_fee === undefined || this.fork_version === undefined) {
       const version = await get_version()
@@ -208,7 +166,6 @@ export class HavenCoreClient {
   }
 
   async transfer(amount: string, transferAsset: HavenTicker, toAddress: string, memo = ''): Promise<string> {
-    console.log(amount, transferAsset, toAddress)
     // define promise function for return value
     assertIsDefined<number | undefined>(this.netTypeId)
     let promiseResolve: (txHash: string) => void, promiseReject: (errMessage: string) => void
@@ -223,12 +180,11 @@ export class HavenCoreClient {
     }
 
     const sendFundsFailed = (err: string) => {
-      console.log(err)
       promiseReject(err)
     }
 
-    const coreModule = await this.getCoreModule()
-    const keys = await this.getKeys()
+    const coreModule = this.getCoreModule()
+    const keys = this.getKeys()
 
     const transferParams: HavenTransferParams = {
       sending_amount: amount,
@@ -258,10 +214,10 @@ export class HavenCoreClient {
   }
 
   async getTransactions(): Promise<SerializedTransaction[]> {
-    const coreModule = await this.getCoreModule()
-    const keys = await this.getKeys()
+    const coreModule = this.getCoreModule()
+    const keys = this.getKeys()
     const { sec_viewKey_string, address_string, pub_spendKey_string, sec_spendKey_string } = keys
-    const rawTransactionData = await getAddressTxs(address_string, sec_viewKey_string)
+    const rawTransactionData = await getAddressTxs()
     const serializedData = havenWallet.api_response_parser_utils.Parsed_AddressTransactions__sync__keyImageManaged(
       rawTransactionData,
       address_string,
@@ -279,7 +235,7 @@ export class HavenCoreClient {
     const keys = await this.getKeys()
     const { sec_viewKey_string, address_string, pub_spendKey_string, sec_spendKey_string } = keys
 
-    const rawTx = getTx(address_string, sec_viewKey_string, hash)
+    const rawTx = getTx(hash)
     const rawTransactionData = {
       transactions: [rawTx],
     }
@@ -296,28 +252,25 @@ export class HavenCoreClient {
     return serializedData.serialized_transactions[0]
   }
 
-  getSyncStats(): SyncStats {
-    return { blockHeight: this.blockHeight, scannedHeight: this.scannedHeight }
+  async preloadClient(): Promise<void> {
+    this.coreModule = await havenWallet.haven_utils_promise
+    return
   }
 
-  private async getCoreModule(): Promise<MyMoneroCoreBridgeClass> {
-    if (!this.coreModule) {
-      this.coreModule = await havenWallet.haven_utils_promise
-    }
+  private getCoreModule(): MyMoneroCoreBridgeClass {
+    assertIsDefined(this.coreModule)
     return this.coreModule
   }
 
-  private async getKeys(): Promise<KeysFromMnemonic> {
+  private getKeys(): KeysFromMnemonic {
     assertIsDefined<string | undefined>(this.seed)
     assertIsDefined<number | undefined>(this.netTypeId)
-    const coreModule = await this.getCoreModule()
+    const coreModule = this.getCoreModule()
     const keys = coreModule.seed_and_keys_from_mnemonic(this.seed, this.netTypeId)
     return keys
   }
 
-  private async pingServer(): Promise<void> {
-    const keys = await this.getKeys()
-
-    keepAlive(keys.address_string, keys.sec_viewKey_string)
+  private pingServer(): void {
+    keepAlive()
   }
 }
