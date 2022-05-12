@@ -7,7 +7,7 @@ export function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
 }
 
 /**
- * callback functions for sending transfers, used by haven-core-client.ts
+ * callback functions for sending transfers procedure, used by haven-core-client.ts
  */
 
 export const updateStatus = (status: any) => {
