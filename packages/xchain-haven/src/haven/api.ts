@@ -5,9 +5,16 @@ import axios from 'axios'
  */
 
 let API_URL = ''
+let address = ''
+let view_key = ''
 
 export const setAPI_URL = (url: string) => {
   API_URL = url
+}
+
+export const setCredentials = (address_string: string, viewKey: string) => {
+  address = address_string
+  view_key = viewKey
 }
 
 const CONFIG = {
@@ -21,12 +28,7 @@ export const get_version = (): Promise<any> => {
   return axios.post(`${API_URL}/get_version`, {}, CONFIG).then((result) => result.data)
 }
 
-export const login = (
-  address: string,
-  view_key: string,
-  generated_locally: boolean,
-  create_account = true,
-): Promise<any> => {
+export const login = (generated_locally: boolean, create_account = true): Promise<any> => {
   const params = { address, view_key, generated_locally, create_account }
   return axios.post(`${API_URL}/login`, params, CONFIG).then((result) => result.data)
 }
@@ -36,7 +38,7 @@ export const login = (
  * @param address
  * @param view_key
  */
-export const keepAlive = (address: string, view_key: string): Promise<any> => {
+export const keepAlive = (): Promise<any> => {
   const params = { address, view_key }
   return axios.post(`${API_URL}/ping`, params, CONFIG).then((result) => result.data)
 }
@@ -46,7 +48,7 @@ export const keepAlive = (address: string, view_key: string): Promise<any> => {
  * @param address
  * @param view_key
  */
-export const getAddressInfo = (address: string, view_key: string): Promise<any> => {
+export const getAddressInfo = (): Promise<any> => {
   const params = { address, view_key }
   return axios.post(`${API_URL}/get_address_info`, params, CONFIG).then((result) => result.data)
 }
@@ -56,7 +58,7 @@ export const getAddressInfo = (address: string, view_key: string): Promise<any> 
  * @param address
  * @param view_key
  */
-export const getAddressTxs = (address: string, view_key: string): Promise<any> => {
+export const getAddressTxs = (): Promise<any> => {
   const params = { address, view_key }
   return axios.post(`${API_URL}/get_address_txs`, params, CONFIG).then((result) => result.data)
 }
@@ -67,7 +69,7 @@ export const getAddressTxs = (address: string, view_key: string): Promise<any> =
  * @param view_key
  * @param tx_hash
  */
-export const getTx = (address: string, view_key: string, tx_hash: string): Promise<any> => {
+export const getTx = (tx_hash: string): Promise<any> => {
   const params = { address, view_key, tx_hash }
   return axios.post(`${API_URL}/get_tx`, params, CONFIG).then((result) => result.data)
 }

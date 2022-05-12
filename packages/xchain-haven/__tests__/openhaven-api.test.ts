@@ -13,7 +13,10 @@ xdescribe('Openhaven API Test', () => {
   const address = 'hvta6D5QfukiUdeidKdRw4AQ9Ddvt4o9e5jPg2CzkGhdeQGkZkU4RKDW7hajbbBLwsURMLu3S3DH6d5c8QYVYYSA6jy6XRzfPv'
   let txHash: string | undefined
 
-  beforeAll(() => openhaven.setAPI_URL(TestNetApiUrl))
+  beforeAll(() => {
+    openhaven.setAPI_URL(TestNetApiUrl)
+    openhaven.setCredentials(address, secretViewkey)
+  })
 
   it('returns version', async () => {
     const version = await openhaven.get_version()
@@ -24,30 +27,30 @@ xdescribe('Openhaven API Test', () => {
   })
 
   it('login/create account', async () => {
-    const loginResponse = await openhaven.login(address, secretViewkey, false)
+    const loginResponse = await openhaven.login(false)
     expect(loginResponse.status).toBe('success')
   })
 
   it('get address info', async () => {
-    const addressInnfo = await openhaven.getAddressInfo(address, secretViewkey)
+    const addressInnfo = await openhaven.getAddressInfo()
     expect(addressInnfo.status).toBe('success')
   })
 
   it('get txs data', async () => {
-    const addressTxs = await openhaven.getAddressTxs(address, secretViewkey)
+    const addressTxs = await openhaven.getAddressTxs()
     expect(addressTxs.status).toBe('success')
     expect(addressTxs.transactions.length).toBeGreaterThan(0)
     txHash = addressTxs.transactions[0].hash
   })
   it('get tx info', async () => {
     expect(txHash).toBeDefined()
-    const txInfo = await openhaven.getTx(address, secretViewkey, txHash!)
+    const txInfo = await openhaven.getTx(txHash!)
     console.log(txInfo)
     expect(txInfo.status).toBe('success')
   })
 
   it('keep search thread alive', async () => {
-    const pingResponse = await openhaven.keepAlive(address, secretViewkey)
+    const pingResponse = await openhaven.keepAlive()
     console.log(pingResponse)
     expect(pingResponse.status).toBe('success')
   })
