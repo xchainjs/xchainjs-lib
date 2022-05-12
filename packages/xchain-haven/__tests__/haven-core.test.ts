@@ -18,17 +18,21 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
 
   const address = 'hvta6D5QfukiUdeidKdRw4AQ9Ddvt4o9e5jPg2CzkGhdeQGkZkU4RKDW7hajbbBLwsURMLu3S3DH6d5c8QYVYYSA6jy6XRzfPv'
 
-  xit('should init haven core client without error', async () => {
+  beforeAll(async () => {
+    await client.preloadClient()
+  })
+
+  it('should init haven core client without error', async () => {
     const response = await client.init(mnenomonic, NetTypes.testnet)
     expect(response).toBeTruthy()
   })
 
-  xit('should return correct address', async () => {
-    const response = await client.getAddress()
+  it('should return correct address', () => {
+    const response = client.getAddress()
     expect(response).toBe(address)
   })
 
-  xit('should validate address', async () => {
+  it('should validate address', async () => {
     const isValid = await client.validateAddress(
       'hvta6D5QfukiUdeidKdRw4AQ9Ddvt4o9e5jPg2CzkGhdeQGkZkU4RKDW7hajbbBLwsURMLu3S3DH6d5c8QYVYYSA6jy6XRzfPv',
     )
@@ -40,12 +44,12 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
     expect(isValid).toBeFalsy()
   })
 
-  xit('should return balance', async () => {
+  it('should return balance', async () => {
     balance = await client.getBalance()
     expect(new BigNumber(balance.XUSD.balance).isGreaterThan(0))
   })
 
-  xit('should return transaction history', async () => {
+  it('should return transaction history', async () => {
     const transactions: SerializedTransaction[] = await client.getTransactions()
     expect(transactions.length).toBeGreaterThan(0)
   })
@@ -63,7 +67,7 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
     expect(response).not.toBe('')
   })
 
-  xit('should return fees', async () => {
+  it('should return fees', async () => {
     // testing from low to high priority
     const defaultFees = parseFloat(await client.estimateFees(1))
     expect(defaultFees).toBeGreaterThan(0)
@@ -81,7 +85,7 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
     expect(fastFees).toBeGreaterThan(defaultFees)
   })
 
-  xit('should create a new haven wallet', async () => {
+  it('should create a new haven wallet', async () => {
     const newMnemonic = await HavenCoreClient.createWallet(NetTypes.testnet)
     expect(typeof newMnemonic).toBe('string')
     expect(newMnemonic).not.toBe('')
@@ -94,13 +98,11 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
 
     const observer: SyncObserver = {
       next: (syncState: SyncStats) => {
-        console.log('---------syncState------------')
-        console.log(syncState)
-        expect(syncState.scannedHeight).toBeGreaterThanOrEqual(0)
+        expect(syncState.syncedHeight).toBeGreaterThanOrEqual(0)
         expect(syncState.blockHeight).toBeGreaterThan(0)
       },
       complete: (syncState: SyncStats) => {
-        expect(syncState.blockHeight).toBe(syncState.scannedHeight)
+        expect(syncState.blockHeight).toBe(syncState.syncedHeight)
 
         done()
       },
