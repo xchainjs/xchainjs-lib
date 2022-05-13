@@ -19,7 +19,7 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
   const address = 'hvta6D5QfukiUdeidKdRw4AQ9Ddvt4o9e5jPg2CzkGhdeQGkZkU4RKDW7hajbbBLwsURMLu3S3DH6d5c8QYVYYSA6jy6XRzfPv'
 
   beforeAll(async () => {
-    await client.preloadClient()
+    await client.preloadModule()
   })
 
   it('should init haven core client without error', async () => {
@@ -67,7 +67,7 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
     expect(response).not.toBe('')
   })
 
-  it('should return fees', async () => {
+  xit('should return fees', async () => {
     // testing from low to high priority
     const defaultFees = parseFloat(await client.estimateFees(1))
     expect(defaultFees).toBeGreaterThan(0)
@@ -91,7 +91,7 @@ balding annoyed lumber vary welders navy laboratory maverick olympics`
     expect(newMnemonic).not.toBe('')
   })
 
-  it('should sync a new wallet over time', async (done) => {
+  xit('should sync a new wallet over time', async (done) => {
     const newMnemonic = await HavenCoreClient.createWallet(NetTypes.testnet)
 
     await client.init(newMnemonic, NetTypes.testnet)
