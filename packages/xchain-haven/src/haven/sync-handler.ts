@@ -49,7 +49,7 @@ class SyncHandler {
     return this.scannedHeight + SYNC_THRESHOLD < this.blockHeight
   }
 
-  async getSyncState(): Promise<SyncStats> {
+  getSyncState(): SyncStats {
     assertIsDefined(this.blockHeight)
     assertIsDefined(this.scannedHeight)
 

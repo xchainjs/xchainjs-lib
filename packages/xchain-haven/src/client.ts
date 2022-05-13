@@ -23,7 +23,8 @@ import { convertBip39ToHavenMnemonic } from 'mnemonicconverter'
 
 import { AssetXHV, getAssetByTicker } from './assets'
 import { HavenCoreClient } from './haven/haven-core-client'
-import { HavenBalance, HavenTicker } from './haven/types'
+import { HavenBalance, HavenTicker, SyncObserver, SyncStats } from './haven/types'
+import { assertIsDefined } from './haven/utils'
 import { HavenClient } from './types/client-types'
 
 // rootDerivationPaths = {
@@ -32,7 +33,8 @@ import { HavenClient } from './types/client-types'
 //   [Network.Stagenet]: `m/44'/60'/0'/0/`,
 
 class Client extends BaseXChainClient implements XChainClient, HavenClient {
-  protected havenCoreClient: HavenCoreClient
+  private havenSDK: HavenCoreClient
+  private syncState: SyncStats | undefined
 
   /**
    * Constructor
@@ -54,9 +56,9 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     phrase = '',
   }: XChainClientParams) {
     super(Chain.Haven, { network, rootDerivationPaths, phrase })
-    this.havenCoreClient = new HavenCoreClient()
+    this.havenSDK = new HavenCoreClient()
     if (this.phrase) {
-      this.initCoreClient(this.phrase, this.network)
+      this.initSDK(this.phrase, this.network)
     }
   }
 
@@ -71,7 +73,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     const fees: Fees = {} as Fees
 
     Object.entries(feePriorities).forEach(async ([feeOption, priority]) => {
-      const feeAmount = await this.havenCoreClient.estimateFees(priority)
+      const feeAmount = await this.havenSDK.estimateFees(priority)
       const feeBaseAmount = baseAmount(feeAmount, 12)
       fees[feeOption as FeeOption] = feeBaseAmount
     })
@@ -83,9 +85,10 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     throw new Error('please use getAddressAsync')
   }
   async getAddressAsync(_walletIndex?: number): Promise<Address> {
-    const address = await this.havenCoreClient.getAddress()
+    const address = this.havenSDK.getAddress()
     return address
   }
+
   getExplorerUrl(): string {
     const explorerLink = `https://explorer${
       this.network === Network.Mainnet ? '' : '-' + this.network
@@ -99,7 +102,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     return `${this.getExplorerUrl()}/tx/${txID}`
   }
   async getBalance(_address: string, assets?: Asset[]): Promise<Balance[]> {
-    const havenBalance: HavenBalance = await this.havenCoreClient.getBalance()
+    const havenBalance: HavenBalance = await this.havenSDK.getBalance()
 
     //TODO return all asset balances when no assets param provided?
     const balances: Balance[] = []
@@ -117,35 +120,28 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     return balances
   }
 
-  validateAddress(_address: string): boolean {
-    throw new Error('please use validateAsync')
-  }
-
-  async validateAddressAsync(address: string): Promise<boolean> {
-    const isValid = await this.havenCoreClient.validateAddress(address)
+  validateAddress(address: string): boolean {
+    const isValid = this.havenSDK.validateAddress(address)
     return isValid
   }
 
-  override setPhrase(_phrase: string, _walletIndex?: number): Address {
-    throw new Error('please use setPhraseAsync')
-  }
-
-  async setPhraseAsync(phrase: string, _walletIndex?: number): Promise<Address> {
+  override setPhrase(phrase: string, _walletIndex?: number): Address {
     if (this.phrase !== phrase) {
       if (!validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
       }
       this.phrase = phrase
-      await this.initCoreClient(this.phrase, this.network)
+      const havenMnemonic = convertBip39ToHavenMnemonic(phrase, '')
+      this.initSDK(havenMnemonic, this.network)
     }
-    const address = await this.getAddressAsync()
+    const address = this.getAddress()
     return address
   }
 
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const asset: Asset = params?.asset ? assetFromString(params.asset)! : AssetXHV
     const ticker = asset.ticker
-    let transactions = await this.havenCoreClient.getTransactions()
+    let transactions = await this.havenSDK.getTransactions()
     // filter if we either send or received coins for requested asset
     transactions = ticker
       ? transactions.filter((tx, _) => {
@@ -209,7 +205,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     return txPages
   }
   async getTransactionData(txId: string, _assetAddress?: string): Promise<Tx> {
-    const havenTx = await this.havenCoreClient.getTx(txId)
+    const havenTx = await this.havenSDK.getTx(txId)
 
     const isOut: boolean = baseAmount(havenTx.fromAmount, 12).gt('0')
     const isIn: boolean = baseAmount(havenTx.toAmount, 12).gt('0')
@@ -233,25 +229,56 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     }
     return tx
   }
+
   transfer(params: TxParams): Promise<TxHash> {
     const { amount, asset, recipient, memo } = params
     if (asset === undefined) throw 'please specify asset it in Client.transfer() for Haven'
     const amountString = amount.amount.toString()
-    return this.havenCoreClient.transfer(amountString, asset.ticker as HavenTicker, recipient, memo)
-  }
-  isSyncing(): boolean {
-    throw new Error('Method not implemented.')
-  }
-  syncHeight(): number {
-    throw new Error('Method not implemented.')
-  }
-  blockHeight(): number {
-    throw new Error('Method not implemented.')
+    return this.havenSDK.transfer(amountString, asset.ticker as HavenTicker, recipient, memo)
   }
 
-  private async initCoreClient(phrase: string, network: Network) {
-    const havenSeed = await convertBip39ToHavenMnemonic(phrase, '')
-    this.havenCoreClient.init(havenSeed, network)
+  purgeClient(): void {
+    super.purgeClient()
+    this.havenSDK.purgeClient()
+  }
+
+  /**
+   * checks if syncing is going on which can take up to a few seconds or hours
+   * @returns boolean
+   */
+  async isSyncing(): Promise<boolean> {
+    return this.havenSDK.isSyncing()
+  }
+
+  /**
+   * subscribe sync progress which updates every X seconds with SyncStats
+   * and notifys on completion
+   * @param observer
+   */
+  subscribeSyncProgress(observer: SyncObserver): void {
+    this.havenSDK.subscribeSyncProgress(observer)
+  }
+
+  /**
+   * preloads the sdk once, so that we can use it in a synchron style,
+   * function must be called and awaited once after this class is initalized
+   */
+  async preloadSDK(): Promise<boolean> {
+    await this.havenSDK.preloadModule()
+    return true
+  }
+
+  /**
+   * haven SDK needs to be reinitialized when we use new phrase/account
+   * client takes care of it on itself
+   * @param phrase
+   * @param network
+   */
+  private async initSDK(phrase: string, network: Network) {
+    assertIsDefined(phrase)
+    assertIsDefined(network)
+    const havenSeed = convertBip39ToHavenMnemonic(phrase, '')
+    await this.havenSDK.init(havenSeed, network)
   }
 }
 export { Client }

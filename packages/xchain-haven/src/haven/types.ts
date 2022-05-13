@@ -12,8 +12,10 @@ export type BalanceType = 'balance' | 'unlockedBalance' | 'lockedBalance'
 export type HavenBalance = Record<HavenTicker, Record<BalanceType, string>>
 
 export type SyncStats = {
-  scannedHeight: number
+  syncedHeight: number
   blockHeight: number
+  syncProgress: number
+  isSyncing: boolean
 }
 
 export interface SyncObserver {
