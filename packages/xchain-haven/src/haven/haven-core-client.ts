@@ -61,7 +61,7 @@ export class HavenCoreClient {
 
     setCredentials(keys.address_string, keys.sec_viewKey_string)
 
-    await login(false)
+    await login(true)
 
     this.pingServerIntervalID = setInterval(() => this.pingServer(), 60 * 1000)
 
@@ -96,6 +96,7 @@ export class HavenCoreClient {
   subscribeSyncProgress = async (observer: SyncObserver): Promise<void> =>
     this.syncHandler.subscribeSyncProgress(observer)
   getSyncState = async (): Promise<SyncStats> => this.syncHandler.getSyncState()
+  isSyncing = async (): Promise<boolean> => this.syncHandler.isSyncing()
 
   async getBalance(): Promise<HavenBalance> {
     const coreModule = this.getCoreModule()
@@ -252,7 +253,7 @@ export class HavenCoreClient {
     return serializedData.serialized_transactions[0]
   }
 
-  async preloadClient(): Promise<void> {
+  async preloadModule(): Promise<void> {
     this.coreModule = await havenWallet.haven_utils_promise
     return
   }

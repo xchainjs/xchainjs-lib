@@ -1,6 +1,7 @@
+import { SyncObserver } from '../haven/types'
+
 export interface HavenClient {
-  isSyncing(): boolean
-  syncHeight(): number
-  blockHeight(): number
-  getAddressAsync(walletIndex?: number): Promise<string>
+  isSyncing(): Promise<boolean>
+  subscribeSyncProgress(observer: SyncObserver): void
+  preloadSDK(): Promise<boolean>
 }
