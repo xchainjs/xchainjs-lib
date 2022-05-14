@@ -23,7 +23,7 @@ import { convertBip39ToHavenMnemonic } from 'mnemonicconverter'
 
 import { AssetXHV, getAssetByTicker } from './assets'
 import { HavenCoreClient } from './haven/haven-core-client'
-import { HavenBalance, HavenTicker, SyncObserver, SyncStats } from './haven/types'
+import { HavenBalance, HavenTicker, SyncObserver } from './haven/types'
 import { assertIsDefined } from './haven/utils'
 import { HavenClient } from './types/client-types'
 
@@ -34,7 +34,7 @@ import { HavenClient } from './types/client-types'
 
 class Client extends BaseXChainClient implements XChainClient, HavenClient {
   private havenSDK: HavenCoreClient
-  private syncState: SyncStats | undefined
+  private havenMnemonic: string | undefined
 
   /**
    * Constructor
@@ -58,7 +58,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     super(Chain.Haven, { network, rootDerivationPaths, phrase })
     this.havenSDK = new HavenCoreClient()
     if (this.phrase) {
-      this.initSDK(this.phrase, this.network)
+      this.initSDK()
     }
   }
 
@@ -82,9 +82,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     return fees
   }
   getAddress(_walletIndex?: number): string {
-    throw new Error('please use getAddressAsync')
-  }
-  async getAddressAsync(_walletIndex?: number): Promise<Address> {
+    assertIsDefined(this.phrase)
     const address = this.havenSDK.getAddress()
     return address
   }
@@ -131,8 +129,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
         throw new Error('Invalid phrase')
       }
       this.phrase = phrase
-      const havenMnemonic = convertBip39ToHavenMnemonic(phrase, '')
-      this.initSDK(havenMnemonic, this.network)
+      this.initSDK()
     }
     const address = this.getAddress()
     return address
@@ -239,7 +236,8 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
 
   purgeClient(): void {
     super.purgeClient()
-    this.havenSDK.purgeClient()
+    this.havenSDK.purge()
+    this.havenMnemonic = undefined
   }
 
   /**
@@ -269,16 +267,23 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   }
 
   /**
+   *
+   * @returns {string} havenMnemonic
+   */
+  getHavenMnemonic(): string {
+    assertIsDefined(this.havenMnemonic)
+    return this.havenMnemonic
+  }
+
+  /**
    * haven SDK needs to be reinitialized when we use new phrase/account
    * client takes care of it on itself
-   * @param phrase
-   * @param network
    */
-  private async initSDK(phrase: string, network: Network) {
-    assertIsDefined(phrase)
-    assertIsDefined(network)
-    const havenSeed = convertBip39ToHavenMnemonic(phrase, '')
-    await this.havenSDK.init(havenSeed, network)
+  private async initSDK() {
+    assertIsDefined(this.phrase)
+    assertIsDefined(this.network)
+    this.havenMnemonic = convertBip39ToHavenMnemonic(this.phrase, '')
+    await this.havenSDK.init(this.havenMnemonic, this.network)
   }
 }
 export { Client }

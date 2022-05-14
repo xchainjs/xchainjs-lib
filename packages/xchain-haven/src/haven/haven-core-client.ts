@@ -51,7 +51,7 @@ export class HavenCoreClient {
   async init(seed: string, netType: string | number): Promise<boolean> {
     //this.netTypeId = netTypePromise<boolean> {
     // login and fire up keep_alive
-    this.purgeClient()
+    this.purge()
 
     this.netTypeId = typeof netType === 'number' ? netType : (NetTypes[netType as keyof typeof NetTypes] as number)
     this.seed = seed
@@ -68,7 +68,7 @@ export class HavenCoreClient {
     return true
   }
 
-  purgeClient() {
+  purge() {
     this.netTypeId = undefined
     this.seed = undefined
     this.syncHandler.purge()

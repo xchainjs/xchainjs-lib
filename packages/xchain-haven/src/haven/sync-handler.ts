@@ -17,7 +17,7 @@ class SyncHandler {
     }
 
     this.syncObservers.push(newObserver)
-    const syncState = await this.getSyncState()
+    const syncState = this.getSyncState()
     this.updateSyncObservers([newObserver], syncState)
   }
 
