@@ -1,0 +1,25 @@
+{
+  "amount": "100000000000000",
+  "fork_version": 19,
+  "new_address": false,
+  "outputs": [
+    {
+      "amount": "100000000000000",
+      "asset_index": 118133,
+      "asset_type": "XHV",
+      "global_index": 120194,
+      "height": 58687,
+      "index": 1,
+      "public_key": "8b8dae1d4fb32d6d3315b526bb268f885b296b8da9d590d1525f7881b9bbadce",
+      "rct": "2c03a5e50f798c42ce3c301723cf827e3c407e7e01f4974a71c088986f5af725fd7ff5544d3b91b4",
+      "spend_key_images": [],
+      "timestamp": 1652538560000,
+      "tx_hash": "45fa5f859207dab663d6b0e7ef827b3b9d477685e56d0aad54ae3dd71de5ee24",
+      "tx_id": 7,
+      "tx_prefix_hash": "90da392778e48e4e584e6144d6bb193b4eeb68982b8607f1c8796f791f37dcae",
+      "tx_pub_key": "c66947a57a63fda746f880a98b27fc80c7fdd49c1c37ff52e469dfe8748c758b"
+    }
+  ],
+  "per_byte_fee": 208892,
+  "status": "success"
+}
