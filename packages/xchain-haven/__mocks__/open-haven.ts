@@ -3,9 +3,15 @@ import mock from './axios-adapter'
 export default {
   restore: mock.restore,
   init: () => {
+    console.log('init mock adapter')
     //Mock login
     mock.onPost(/\/login\//).reply(function () {
       const resp = require(`./response/login.json`)
+      return [200, resp]
+    })
+
+    mock.onPost(/\/get_version\//).reply(function () {
+      const resp = require(`./response/get_version.json`)
       return [200, resp]
     })
 

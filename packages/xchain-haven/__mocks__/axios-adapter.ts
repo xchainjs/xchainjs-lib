@@ -1,6 +1,7 @@
-import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 
-const mock = new MockAdapter(axios)
+import { dataAPI } from '../src/haven/api'
+
+const mock = new MockAdapter(dataAPI)
 
 export default mock
