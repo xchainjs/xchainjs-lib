@@ -56,6 +56,7 @@ import {
   ETHAddress,
   ETH_DECIMAL,
   MAX_APPROVAL,
+  MIN_TOKEN_AMOUNT_TO_LIST,
   SIMPLE_GAS_COST,
   getDefaultGasPrices,
   getFee,
@@ -333,75 +334,66 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     // get ETH balance directly from provider
     const ethBalance: BigNumber = await this.getProvider().getBalance(ethAddress)
     const ethBalanceAmount = baseAmount(ethBalance.toString(), ETH_DECIMAL)
+    const balances: Balance[] = []
 
-    switch (this.getNetwork()) {
-      case Network.Mainnet:
-      case Network.Stagenet: {
-        // use ethplorerAPI for mainnet - ignore assets
-        const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
-        const balances: Balance[] = [
-          {
-            asset: AssetETH,
-            amount: ethBalanceAmount,
-          },
-        ]
+    if (this.getNetwork() === Network.Testnet) {
+      // use etherscan for testnet
+      const newAssets = assets || [AssetETH]
+      // Follow approach is only for testnet
+      // For mainnet, we will use ethplorer api(one request only)
+      // https://github.com/xchainjs/xchainjs-lib/issues/252
+      // And to avoid etherscan api call limit, it gets balances in a sequence way, not in parallel
+      for (let i = 0; i < newAssets.length; i++) {
+        const asset = newAssets[i]
+        const etherscan = this.getEtherscanProvider()
+        if (assetToString(asset) !== assetToString(AssetETH)) {
+          // Handle token balances
+          const assetAddress = getTokenAddress(asset)
+          if (!assetAddress) {
+            throw new Error(`Invalid asset ${asset}`)
+          }
+          const balance = await etherscanAPI.getTokenBalance({
+            baseUrl: etherscan.baseUrl,
+            address,
+            assetAddress,
+            apiKey: etherscan.apiKey,
+          })
+          const decimals =
+            BigNumber.from(
+              await this.call<BigNumberish>({ contractAddress: assetAddress, abi: erc20ABI, funcName: 'decimals' }),
+            ).toNumber() || ETH_DECIMAL
 
-        if (account.tokens) {
-          balances.push(...getTokenBalances(account.tokens))
-        }
-
-        return balances
-      }
-      case Network.Testnet: {
-        // use etherscan for testnet
-
-        const newAssets = assets || [AssetETH]
-        // Follow approach is only for testnet
-        // For mainnet, we will use ethplorer api(one request only)
-        // https://github.com/xchainjs/xchainjs-lib/issues/252
-        // And to avoid etherscan api call limit, it gets balances in a sequence way, not in parallel
-        const balances = []
-        for (let i = 0; i < newAssets.length; i++) {
-          const asset = newAssets[i]
-          const etherscan = this.getEtherscanProvider()
-          if (assetToString(asset) !== assetToString(AssetETH)) {
-            // Handle token balances
-            const assetAddress = getTokenAddress(asset)
-            if (!assetAddress) {
-              throw new Error(`Invalid asset ${asset}`)
-            }
-            const balance = await etherscanAPI.getTokenBalance({
-              baseUrl: etherscan.baseUrl,
-              address,
-              assetAddress,
-              apiKey: etherscan.apiKey,
-            })
-            const decimals =
-              BigNumber.from(
-                await this.call<BigNumberish>({ contractAddress: assetAddress, abi: erc20ABI, funcName: 'decimals' }),
-              ).toNumber() || ETH_DECIMAL
-
-            if (!Number.isNaN(decimals)) {
-              balances.push({
-                asset,
-                amount: baseAmount(balance.toString(), decimals),
-              })
-            }
-          } else {
+          if (!Number.isNaN(decimals)) {
             balances.push({
-              asset: AssetETH,
-              amount: ethBalanceAmount,
+              asset,
+              amount: baseAmount(balance.toString(), decimals),
             })
           }
-          // Due to etherscan api call limitation, put some delay before another call
-          // Free Etherscan api key limit: 5 calls per second
-          // So 0.3s delay is reasonable for now
-          await delay(300)
+        } else {
+          balances.push({
+            asset: AssetETH,
+            amount: ethBalanceAmount,
+          })
         }
+        // Due to etherscan api call limitation, put some delay before another call
+        // Free Etherscan api key limit: 5 calls per second
+        // So 0.3s delay is reasonable for now
+        await delay(300)
+      }
+    } else {
+      // use ethplorerAPI for mainnet/stagenet - ignore assets
+      const account = await ethplorerAPI.getAddress(this.ethplorerUrl, address, this.ethplorerApiKey)
+      balances.push({
+        asset: AssetETH,
+        amount: ethBalanceAmount,
+      })
 
-        return balances
+      if (account.tokens) {
+        balances.push(...getTokenBalances(account.tokens))
       }
     }
+    //remove any bakances below a threshold
+    return balances.filter((balance) => balance.amount.gt(MIN_TOKEN_AMOUNT_TO_LIST))
   }
 
   /**

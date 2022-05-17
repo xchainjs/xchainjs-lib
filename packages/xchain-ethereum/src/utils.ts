@@ -39,7 +39,7 @@ export const DEFAULT_GAS_PRICE = 50
 
 export const ETHAddress = '0x0000000000000000000000000000000000000000'
 export const MAX_APPROVAL = BigNumber.from(2).pow(256).sub(1)
-
+export const MIN_TOKEN_AMOUNT_TO_LIST = baseAmount(0.0001, ETH_DECIMAL)
 /**
  * Network -> EthNetwork
  *
