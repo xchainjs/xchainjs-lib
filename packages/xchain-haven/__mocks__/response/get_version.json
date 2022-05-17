@@ -1,0 +1,12 @@
+{
+  "api": 65542,
+  "blockchain_height": 60924,
+  "fork_version": 19,
+  "git_branch_name": "master",
+  "last_git_commit_date": "2022-05-05",
+  "last_git_commit_hash": "0e64bd4",
+  "monero_version_full": "2.2.3-3819844, based on Monero 0.16.0.3-release",
+  "network_type": 1,
+  "per_byte_fee": 208829,
+  "testnet": true
+}
