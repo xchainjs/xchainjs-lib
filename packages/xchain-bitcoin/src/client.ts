@@ -295,6 +295,8 @@ class Client extends UTXOClient {
    *
    * @param {TxParams&FeeRate} params The transfer options.
    * @returns {TxHash} The transaction hash.
+   *
+   * @throws {"memo too long"} Thrown if memo longer than  80 chars.
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const fromAddressIndex = params?.walletIndex || 0
@@ -337,6 +339,7 @@ class Client extends UTXOClient {
    *
    * @throws {"halted chain"} Thrown if chain is halted.
    * @throws {"halted trading"} Thrown if trading is halted.
+   * @throws {"memo too long"} Thrown if memo longer than  80 chars.
    */
   async deposit({ walletIndex = 0, asset = AssetBTC, amount, memo }: DepositParams): Promise<TxHash> {
     const inboundDetails = await getInboundDetails(asset.chain, this.network)

@@ -269,7 +269,11 @@ export const buildTx = async ({
   const confirmedOnly = !spendPendingUTXO
   const utxos = await scanUTXOs({ sochainUrl, haskoinUrl, network, address: sender, confirmedOnly, withTxHex })
 
-  if (utxos.length === 0) throw new Error('No confirmed UTXOs. Please wait until your balance has been confirmed on-chain.')
+  if (memo && memo.length > 80) {
+    throw new Error('memo too long, must not be longer than 80 chars.')
+  }
+  if (utxos.length === 0)
+    throw new Error('No confirmed UTXOs. Please wait until your balance has been confirmed on-chain.')
   if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
   const feeRateWhole = Math.ceil(feeRate)
