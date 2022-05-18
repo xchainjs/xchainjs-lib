@@ -210,7 +210,11 @@ export class HavenCoreClient {
       error_fn: sendFundsFailed,
       success_fn: sendFundsSucceed,
     }
-    coreModule.async__send_funds(transferParams)
+    try {
+      coreModule.async__send_funds(transferParams)
+    } catch (e) {
+      throw 'tx rejected'
+    }
     return promise
   }
 
