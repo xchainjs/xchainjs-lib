@@ -46,7 +46,7 @@ export interface Action {
      */
     'in': Array<Transaction>;
     /**
-     * 
+     *
      * @type {Metadata}
      * @memberof Action
      */
@@ -64,7 +64,7 @@ export interface Action {
      */
     'pools': Array<string>;
     /**
-     * Indicates if the action is completed or if related outbound transactions are still pending. 
+     * Indicates if the action is completed or if related outbound transactions are still pending.
      * @type {string}
      * @memberof Action
      */
@@ -95,45 +95,45 @@ export const ActionTypeEnum = {
 export type ActionTypeEnum = typeof ActionTypeEnum[keyof typeof ActionTypeEnum];
 
 /**
- * 
+ *
  * @export
  * @interface AddLiquidityMetadata
  */
 export interface AddLiquidityMetadata {
     /**
-     * Int64, amount of liquidity units assigned to the member as result of the liquidity deposit 
+     * Int64, amount of liquidity units assigned to the member as result of the liquidity deposit
      * @type {string}
      * @memberof AddLiquidityMetadata
      */
     'liquidityUnits': string;
 }
 /**
- * 
+ *
  * @export
  * @interface BlockRewards
  */
 export interface BlockRewards {
     /**
-     * 
+     *
      * @type {string}
      * @memberof BlockRewards
      */
     'blockReward': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof BlockRewards
      */
     'bondReward': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof BlockRewards
      */
     'poolReward': string;
 }
 /**
- * 
+ *
  * @export
  * @interface BondMetrics
  */
@@ -200,13 +200,13 @@ export interface BondMetrics {
     'totalStandbyBond': string;
 }
 /**
- * 
+ *
  * @export
  * @interface BoolConstants
  */
 export interface BoolConstants {
     /**
-     * 
+     *
      * @type {boolean}
      * @memberof BoolConstants
      */
@@ -232,51 +232,51 @@ export interface Coin {
     'asset': string;
 }
 /**
- * 
+ *
  * @export
  * @interface Constants
  */
 export interface Constants {
     /**
-     * 
+     *
      * @type {BoolConstants}
      * @memberof Constants
      */
     'bool_values': BoolConstants;
     /**
-     * 
+     *
      * @type {Int64Constants}
      * @memberof Constants
      */
     'int_64_values': Int64Constants;
     /**
-     * 
+     *
      * @type {StringConstants}
      * @memberof Constants
      */
     'string_values': StringConstants;
 }
 /**
- * 
+ *
  * @export
  * @interface DepthHistory
  */
 export interface DepthHistory {
     /**
-     * 
+     *
      * @type {Array<DepthHistoryItem>}
      * @memberof DepthHistory
      */
     'intervals': Array<DepthHistoryItem>;
     /**
-     * 
+     *
      * @type {DepthHistoryMeta}
      * @memberof DepthHistory
      */
     'meta': DepthHistoryMeta;
 }
 /**
- * 
+ *
  * @export
  * @interface DepthHistoryItem
  */
@@ -312,7 +312,7 @@ export interface DepthHistoryItem {
      */
     'liquidityUnits': string;
     /**
-     * Float, The liquidity unit value index. Sqrt(assetDepth * runeDepth)/liquidity units 
+     * Float, The liquidity unit value index. Sqrt(assetDepth * runeDepth)/liquidity units
      * @type {string}
      * @memberof DepthHistoryItem
      */
@@ -342,20 +342,20 @@ export interface DepthHistoryItem {
      */
     'synthUnits': string;
     /**
-     * Int64, Total Units (synthUnits + liquidityUnits) in the pool at the end of the interval 
+     * Int64, Total Units (synthUnits + liquidityUnits) in the pool at the end of the interval
      * @type {string}
      * @memberof DepthHistoryItem
      */
     'units': string;
 }
 /**
- * 
+ *
  * @export
  * @interface DepthHistoryMeta
  */
 export interface DepthHistoryMeta {
     /**
-     * Int64(e8), the amount of Asset in the pool at the end of the interval at time endTime 
+     * Int64(e8), the amount of Asset in the pool at the end of the interval at time endTime
      * @type {string}
      * @memberof DepthHistoryMeta
      */
@@ -367,7 +367,7 @@ export interface DepthHistoryMeta {
      */
     'endLPUnits': string;
     /**
-     * Int64(e8), the amount of Rune in the pool at the end of the interval at time endTime 
+     * Int64(e8), the amount of Rune in the pool at the end of the interval at time endTime
      * @type {string}
      * @memberof DepthHistoryMeta
      */
@@ -385,7 +385,7 @@ export interface DepthHistoryMeta {
      */
     'endTime': string;
     /**
-     * Float, The liquidity unit value index increase between the first and last depth item 
+     * Float, The liquidity unit value index increase between the first and last depth item
      * @type {string}
      * @memberof DepthHistoryMeta
      */
@@ -397,25 +397,25 @@ export interface DepthHistoryMeta {
      */
     'priceShiftLoss': string;
     /**
-     * Int64(e8), the amount of Asset in the pool at the start of the interval at time startTime 
+     * Int64(e8), the amount of Asset in the pool at the start of the interval at time startTime
      * @type {string}
      * @memberof DepthHistoryMeta
      */
     'startAssetDepth': string;
     /**
-     * Int64, Liquidity Units in the pool at the start of the interval at time startTime 
+     * Int64, Liquidity Units in the pool at the start of the interval at time startTime
      * @type {string}
      * @memberof DepthHistoryMeta
      */
     'startLPUnits': string;
     /**
-     * Int64(e8), the amount of Rune in the pool at the start of the interval at time startTime 
+     * Int64(e8), the amount of Rune in the pool at the start of the interval at time startTime
      * @type {string}
      * @memberof DepthHistoryMeta
      */
     'startRuneDepth': string;
     /**
-     * Int64, Synth Units in the pool at the start of the interval at time startTime 
+     * Int64, Synth Units in the pool at the start of the interval at time startTime
      * @type {string}
      * @memberof DepthHistoryMeta
      */
@@ -428,26 +428,26 @@ export interface DepthHistoryMeta {
     'startTime': string;
 }
 /**
- * 
+ *
  * @export
  * @interface EarningsHistory
  */
 export interface EarningsHistory {
     /**
-     * 
+     *
      * @type {Array<EarningsHistoryItem>}
      * @memberof EarningsHistory
      */
     'intervals': Array<EarningsHistoryItem>;
     /**
-     * 
+     *
      * @type {EarningsHistoryItem}
      * @memberof EarningsHistory
      */
     'meta': EarningsHistoryItem;
 }
 /**
- * 
+ *
  * @export
  * @interface EarningsHistoryItem
  */
@@ -471,7 +471,7 @@ export interface EarningsHistoryItem {
      */
     'bondingEarnings': string;
     /**
-     * Int64(e8), System income generated during the time interval. It is the sum of liquidity fees and block rewards 
+     * Int64(e8), System income generated during the time interval. It is the sum of liquidity fees and block rewards
      * @type {string}
      * @memberof EarningsHistoryItem
      */
@@ -489,7 +489,7 @@ export interface EarningsHistoryItem {
      */
     'liquidityEarnings': string;
     /**
-     * Int64(e8), Total liquidity fees, converted to RUNE, collected during the time interval 
+     * Int64(e8), Total liquidity fees, converted to RUNE, collected during the time interval
      * @type {string}
      * @memberof EarningsHistoryItem
      */
@@ -501,7 +501,7 @@ export interface EarningsHistoryItem {
      */
     'pools': Array<EarningsHistoryItemPool>;
     /**
-     * Float, the price of Rune based on the deepest USD pool at the end of the interval. 
+     * Float, the price of Rune based on the deepest USD pool at the end of the interval.
      * @type {string}
      * @memberof EarningsHistoryItem
      */
@@ -538,7 +538,7 @@ export interface EarningsHistoryItemPool {
      */
     'pool': string;
     /**
-     * Int64(e8), RUNE amount sent to (positive) or taken from (negative) the pool as a result of balancing it\'s share of system income each block 
+     * Int64(e8), RUNE amount sent to (positive) or taken from (negative) the pool as a result of balancing it\'s share of system income each block
      * @type {string}
      * @memberof EarningsHistoryItemPool
      */
@@ -550,14 +550,14 @@ export interface EarningsHistoryItemPool {
      */
     'runeLiquidityFees': string;
     /**
-     * Int64(e8), total liquidity fees (assetFees + runeFees) collected, shown in RUNE 
+     * Int64(e8), total liquidity fees (assetFees + runeFees) collected, shown in RUNE
      * @type {string}
      * @memberof EarningsHistoryItemPool
      */
     'totalLiquidityFeesRune': string;
 }
 /**
- * 
+ *
  * @export
  * @interface Health
  */
@@ -575,25 +575,25 @@ export interface Health {
      */
     'inSync': boolean;
     /**
-     * 
+     *
      * @type {HeightTS}
      * @memberof Health
      */
     'lastAggregated': HeightTS;
     /**
-     * 
+     *
      * @type {HeightTS}
      * @memberof Health
      */
     'lastCommitted': HeightTS;
     /**
-     * 
+     *
      * @type {HeightTS}
      * @memberof Health
      */
     'lastFetched': HeightTS;
     /**
-     * 
+     *
      * @type {HeightTS}
      * @memberof Health
      */
@@ -606,7 +606,7 @@ export interface Health {
     'scannerHeight': string;
 }
 /**
- * 
+ *
  * @export
  * @interface HeightTS
  */
@@ -625,25 +625,25 @@ export interface HeightTS {
     'timestamp': number;
 }
 /**
- * 
+ *
  * @export
  * @interface InboundAddressesItem
  */
 export interface InboundAddressesItem {
     /**
-     * 
+     *
      * @type {string}
      * @memberof InboundAddressesItem
      */
     'address': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof InboundAddressesItem
      */
     'chain': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof InboundAddressesItem
      */
@@ -655,26 +655,26 @@ export interface InboundAddressesItem {
      */
     'halted': boolean;
     /**
-     * 
+     *
      * @type {string}
      * @memberof InboundAddressesItem
      */
     'pub_key': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof InboundAddressesItem
      */
     'router'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface InlineResponse200
  */
 export interface InlineResponse200 {
     /**
-     * 
+     *
      * @type {Array<Action>}
      * @memberof InlineResponse200
      */
@@ -687,304 +687,304 @@ export interface InlineResponse200 {
     'count': string;
 }
 /**
- * 
+ *
  * @export
  * @interface Int64Constants
  */
 export interface Int64Constants {
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'AsgardSize': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'BadValidatorRate': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'BadValidatorRedline': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'BlocksPerYear': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'ChurnInterval': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'ChurnRetryInterval': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'DesiredValidatorSet': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'DoubleSignMaxAge': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'EmissionCurve': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'FailKeygenSlashPoints': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'FailKeysignSlashPoints': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'FullImpLossProtectionBlocks': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'FundMigrationInterval': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'IncentiveCurve': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'JailTimeKeygen': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'JailTimeKeysign': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'LackOfObservationPenalty': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'LiquidityLockUpBlocks': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'MaxAvailablePools': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'MaxSwapsPerBlock': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'MinRunePoolDepth': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'MinSlashPointsForBadValidator': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'MinSwapsPerBlock': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'MinimumBondInRune': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'MinimumNodesForBFT': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'MinimumNodesForYggdrasil': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'NativeTransactionFee': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'NewPoolCycle'?: number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'ObservationDelayFlexibility': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'ObserveSlashPoints': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'OldValidatorRate': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'OutboundTransactionFee': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'PoolCycle': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'SigningTransactionPeriod': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'VirtualMultSynths': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Int64Constants
      */
     'YggFundLimit': number;
 }
 /**
- * 
+ *
  * @export
  * @interface LastblockItem
  */
 export interface LastblockItem {
     /**
-     * 
+     *
      * @type {string}
      * @memberof LastblockItem
      */
     'chain': string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof LastblockItem
      */
     'last_observed_in': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof LastblockItem
      */
     'last_signed_out': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof LastblockItem
      */
     'thorchain': number;
 }
 /**
- * 
+ *
  * @export
  * @interface LiquidityHistory
  */
 export interface LiquidityHistory {
     /**
-     * 
+     *
      * @type {Array<LiquidityHistoryItem>}
      * @memberof LiquidityHistory
      */
     'intervals': Array<LiquidityHistoryItem>;
     /**
-     * 
+     *
      * @type {LiquidityHistoryItem}
      * @memberof LiquidityHistory
      */
     'meta': LiquidityHistoryItem;
 }
 /**
- * 
+ *
  * @export
  * @interface LiquidityHistoryItem
  */
 export interface LiquidityHistoryItem {
     /**
-     * Int64(e8), total assets deposited during the time interval. Denoted in Rune using the price at deposit time. 
+     * Int64(e8), total assets deposited during the time interval. Denoted in Rune using the price at deposit time.
      * @type {string}
      * @memberof LiquidityHistoryItem
      */
     'addAssetLiquidityVolume': string;
     /**
-     * Int64, number of deposits during the time interval. 
+     * Int64, number of deposits during the time interval.
      * @type {string}
      * @memberof LiquidityHistoryItem
      */
     'addLiquidityCount': string;
     /**
-     * Int64(e8), total of rune and asset deposits. Denoted in Rune (using the price at deposit time). 
+     * Int64(e8), total of rune and asset deposits. Denoted in Rune (using the price at deposit time).
      * @type {string}
      * @memberof LiquidityHistoryItem
      */
     'addLiquidityVolume': string;
     /**
-     * Int64(e8), total Rune deposited during the time interval. 
+     * Int64(e8), total Rune deposited during the time interval.
      * @type {string}
      * @memberof LiquidityHistoryItem
      */
@@ -996,19 +996,19 @@ export interface LiquidityHistoryItem {
      */
     'endTime': string;
     /**
-     * Int64(e8), part of the withdrawRuneVolume which was payed because of impermanent loss protection. 
+     * Int64(e8), part of the withdrawRuneVolume which was payed because of impermanent loss protection.
      * @type {string}
      * @memberof LiquidityHistoryItem
      */
     'impermanentLossProtectionPaid': string;
     /**
-     * Int64(e8), net liquidity changes (withdrawals - deposits) during the time interval 
+     * Int64(e8), net liquidity changes (withdrawals - deposits) during the time interval
      * @type {string}
      * @memberof LiquidityHistoryItem
      */
     'net': string;
     /**
-     * Float, the price of Rune based on the deepest USD pool at the end of the interval. 
+     * Float, the price of Rune based on the deepest USD pool at the end of the interval.
      * @type {string}
      * @memberof LiquidityHistoryItem
      */
@@ -1020,32 +1020,32 @@ export interface LiquidityHistoryItem {
      */
     'startTime': string;
     /**
-     * Int64(e8), total assets withdrawn during the time interval. Denoted in Rune using the price at withdraw time. 
+     * Int64(e8), total assets withdrawn during the time interval. Denoted in Rune using the price at withdraw time.
      * @type {string}
      * @memberof LiquidityHistoryItem
      */
     'withdrawAssetVolume': string;
     /**
-     * Int64, number of withdraw during the time interval. 
+     * Int64, number of withdraw during the time interval.
      * @type {string}
      * @memberof LiquidityHistoryItem
      */
     'withdrawCount': string;
     /**
-     * Int64(e8), total Rune withdrawn during the time interval. 
+     * Int64(e8), total Rune withdrawn during the time interval.
      * @type {string}
      * @memberof LiquidityHistoryItem
      */
     'withdrawRuneVolume': string;
     /**
-     * Int64(e8), total of rune and asset withdrawals. Denoted in Rune (using the price at withdraw time). 
+     * Int64(e8), total of rune and asset withdrawals. Denoted in Rune (using the price at withdraw time).
      * @type {string}
      * @memberof LiquidityHistoryItem
      */
     'withdrawVolume': string;
 }
 /**
- * 
+ *
  * @export
  * @interface MemberDetails
  */
@@ -1058,7 +1058,7 @@ export interface MemberDetails {
     'pools': Array<MemberPool>;
 }
 /**
- * 
+ *
  * @export
  * @interface MemberPool
  */
@@ -1076,7 +1076,7 @@ export interface MemberPool {
      */
     'assetAddress': string;
     /**
-     * Int64(e8), asset sent but not added yet, it will be added when the rune pair arrives 
+     * Int64(e8), asset sent but not added yet, it will be added when the rune pair arrives
      * @type {string}
      * @memberof MemberPool
      */
@@ -1124,7 +1124,7 @@ export interface MemberPool {
      */
     'runeAddress': string;
     /**
-     * Int64(e8), Rune sent but not added yet, it will be added when the asset pair arrives 
+     * Int64(e8), Rune sent but not added yet, it will be added when the asset pair arrives
      * @type {string}
      * @memberof MemberPool
      */
@@ -1137,44 +1137,44 @@ export interface MemberPool {
     'runeWithdrawn': string;
 }
 /**
- * 
+ *
  * @export
  * @interface Metadata
  */
 export interface Metadata {
     /**
-     * 
+     *
      * @type {AddLiquidityMetadata}
      * @memberof Metadata
      */
     'addLiquidity'?: AddLiquidityMetadata;
     /**
-     * 
+     *
      * @type {RefundMetadata}
      * @memberof Metadata
      */
     'refund'?: RefundMetadata;
     /**
-     * 
+     *
      * @type {SwapMetadata}
      * @memberof Metadata
      */
     'swap'?: SwapMetadata;
     /**
-     * 
+     *
      * @type {WithdrawMetadata}
      * @memberof Metadata
      */
     'withdraw'?: WithdrawMetadata;
 }
 /**
- * 
+ *
  * @export
  * @interface Network
  */
 export interface Network {
     /**
-     * Array of rune amounts (e8) bonded by each active node. 
+     * Array of rune amounts (e8) bonded by each active node.
      * @type {Array<string>}
      * @memberof Network
      */
@@ -1186,25 +1186,25 @@ export interface Network {
      */
     'activeNodeCount': string;
     /**
-     * 
+     *
      * @type {BlockRewards}
      * @memberof Network
      */
     'blockRewards': BlockRewards;
     /**
-     * 
+     *
      * @type {BondMetrics}
      * @memberof Network
      */
     'bondMetrics': BondMetrics;
     /**
-     * Float, E.g. 0.01 = 1%. Estimate of the compounded bonding earnings based on the current reserve size, emmission curve, blocks per year and pool share factor = (WeeklyBondIncome/BondAmount + 1)^52 - 1 
+     * Float, E.g. 0.01 = 1%. Estimate of the compounded bonding earnings based on the current reserve size, emmission curve, blocks per year and pool share factor = (WeeklyBondIncome/BondAmount + 1)^52 - 1
      * @type {string}
      * @memberof Network
      */
     'bondingAPY': string;
     /**
-     * Float, E.g. 0.01 = 1%. Estimate of the compounded  liquidity provider earnings based on the current reserve size, emmission curve, blocks per year and pool share factor = (WeeklyLiquidityIncome/(totalPooledRune*2) + 1)^52 - 1 
+     * Float, E.g. 0.01 = 1%. Estimate of the compounded  liquidity provider earnings based on the current reserve size, emmission curve, blocks per year and pool share factor = (WeeklyLiquidityIncome/(totalPooledRune*2) + 1)^52 - 1
      * @type {string}
      * @memberof Network
      */
@@ -1222,25 +1222,25 @@ export interface Network {
      */
     'poolActivationCountdown': string;
     /**
-     * Float [0..1], the ratio which is used to split earnings between liquidity provider and nodes. LPIncome = rewards * poolShareFactor ; BondIncome :=  rewards * (1 - poolShareFactor) 
+     * Float [0..1], the ratio which is used to split earnings between liquidity provider and nodes. LPIncome = rewards * poolShareFactor ; BondIncome :=  rewards * (1 - poolShareFactor)
      * @type {string}
      * @memberof Network
      */
     'poolShareFactor': string;
     /**
-     * Array of rune amounts (e8) bonded by each standby node. 
+     * Array of rune amounts (e8) bonded by each standby node.
      * @type {Array<string>}
      * @memberof Network
      */
     'standbyBonds': Array<string>;
     /**
-     * Int64, Number of standby nodes, some of them might become active at the next churn. 
+     * Int64, Number of standby nodes, some of them might become active at the next churn.
      * @type {string}
      * @memberof Network
      */
     'standbyNodeCount': string;
     /**
-     * Int64(e8), total Rune in all pools. Because asset and Rune value is the same amount in every pool (by definition), the total amount pooled is totalPooledRune*2. 
+     * Int64(e8), total Rune in all pools. Because asset and Rune value is the same amount in every pool (by definition), the total amount pooled is totalPooledRune*2.
      * @type {string}
      * @memberof Network
      */
@@ -1253,7 +1253,7 @@ export interface Network {
     'totalReserve': string;
 }
 /**
- * 
+ *
  * @export
  * @interface Node
  */
@@ -1278,32 +1278,32 @@ export interface Node {
     'secp256k1': string;
 }
 /**
- * 
+ *
  * @export
  * @interface ObservedChain
  */
 export interface ObservedChain {
     /**
-     * 
+     *
      * @type {string}
      * @memberof ObservedChain
      */
     'chain': string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof ObservedChain
      */
     'height': number;
 }
 /**
- * 
+ *
  * @export
  * @interface PoolDetail
  */
 export interface PoolDetail {
     /**
-     * 
+     *
      * @type {string}
      * @memberof PoolDetail
      */
@@ -1333,7 +1333,7 @@ export interface PoolDetail {
      */
     'liquidityUnits': string;
     /**
-     * Float, Average Percentage Yield: annual return estimated using last weeks income, taking compound interest into account. 
+     * Float, Average Percentage Yield: annual return estimated using last weeks income, taking compound interest into account.
      * @type {string}
      * @memberof PoolDetail
      */
@@ -1369,14 +1369,14 @@ export interface PoolDetail {
      */
     'units': string;
     /**
-     * Int64(e8), the total volume of swaps in the last 24h to and from Rune denoted in Rune. Doesn\'t include synth mint or burn. 
+     * Int64(e8), the total volume of swaps in the last 24h to and from Rune denoted in Rune. Doesn\'t include synth mint or burn.
      * @type {string}
      * @memberof PoolDetail
      */
     'volume24h': string;
 }
 /**
- * 
+ *
  * @export
  * @interface PoolStatsDetail
  */
@@ -1406,7 +1406,7 @@ export interface PoolStatsDetail {
      */
     'addRuneLiquidityVolume': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof PoolStatsDetail
      */
@@ -1430,13 +1430,13 @@ export interface PoolStatsDetail {
      */
     'assetPriceUSD': string;
     /**
-     * Float64 (Basis points, 0-10000, where 10000=100%), same as history/swaps:averageSlip 
+     * Float64 (Basis points, 0-10000, where 10000=100%), same as history/swaps:averageSlip
      * @type {string}
      * @memberof PoolStatsDetail
      */
     'averageSlip': string;
     /**
-     * Int64(e8), part of the withdrawRuneVolume which was payed because of impermanent loss protection. 
+     * Int64(e8), part of the withdrawRuneVolume which was payed because of impermanent loss protection.
      * @type {string}
      * @memberof PoolStatsDetail
      */
@@ -1448,7 +1448,7 @@ export interface PoolStatsDetail {
      */
     'liquidityUnits': string;
     /**
-     * Float, Average Percentage Yield: annual return estimated using last weeks income, taking compound interest into account. 
+     * Float, Average Percentage Yield: annual return estimated using last weeks income, taking compound interest into account.
      * @type {string}
      * @memberof PoolStatsDetail
      */
@@ -1490,7 +1490,7 @@ export interface PoolStatsDetail {
      */
     'synthUnits': string;
     /**
-     * Float64 (Basis points, 0-10000, where 10000=100%), same as history/swaps:toAssetAverageSlip 
+     * Float64 (Basis points, 0-10000, where 10000=100%), same as history/swaps:toAssetAverageSlip
      * @type {string}
      * @memberof PoolStatsDetail
      */
@@ -1514,7 +1514,7 @@ export interface PoolStatsDetail {
      */
     'toAssetVolume': string;
     /**
-     * Float64 (Basis points, 0-10000, where 10000=100%), same as history/swaps:toRuneAverageSlip 
+     * Float64 (Basis points, 0-10000, where 10000=100%), same as history/swaps:toRuneAverageSlip
      * @type {string}
      * @memberof PoolStatsDetail
      */
@@ -1587,216 +1587,216 @@ export interface PoolStatsDetail {
     'withdrawVolume': string;
 }
 /**
- * 
+ *
  * @export
  * @interface PreflightStatus
  */
 export interface PreflightStatus {
     /**
-     * 
+     *
      * @type {number}
      * @memberof PreflightStatus
      */
     'code': number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof PreflightStatus
      */
     'reason': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof PreflightStatus
      */
     'status': string;
 }
 /**
- * 
+ *
  * @export
  * @interface ProxiedNode
  */
 export interface ProxiedNode {
     /**
-     * 
+     *
      * @type {number}
      * @memberof ProxiedNode
      */
     'active_block_height': number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ProxiedNode
      */
     'bond': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ProxiedNode
      */
     'bond_address': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ProxiedNode
      */
     'current_award': string;
     /**
-     * 
+     *
      * @type {boolean}
      * @memberof ProxiedNode
      */
     'forced_to_leave': boolean;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ProxiedNode
      */
     'ip_address': string;
     /**
-     * 
+     *
      * @type {ProxiedNodeJail}
      * @memberof ProxiedNode
      */
     'jail': ProxiedNodeJail;
     /**
-     * 
+     *
      * @type {number}
      * @memberof ProxiedNode
      */
     'leave_height': number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ProxiedNode
      */
     'node_address': string;
     /**
-     * 
+     *
      * @type {Array<ObservedChain>}
      * @memberof ProxiedNode
      */
     'observe_chains': Array<ObservedChain>;
     /**
-     * 
+     *
      * @type {PreflightStatus}
      * @memberof ProxiedNode
      */
     'preflight_status': PreflightStatus;
     /**
-     * 
+     *
      * @type {ProxiedNodePubKeySet}
      * @memberof ProxiedNode
      */
     'pub_key_set': ProxiedNodePubKeySet;
     /**
-     * 
+     *
      * @type {boolean}
      * @memberof ProxiedNode
      */
     'requested_to_leave': boolean;
     /**
-     * 
+     *
      * @type {Array<string>}
      * @memberof ProxiedNode
      */
     'signer_membership': Array<string>;
     /**
-     * 
+     *
      * @type {number}
      * @memberof ProxiedNode
      */
     'slash_points': number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ProxiedNode
      */
     'status': string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof ProxiedNode
      */
     'status_since': number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ProxiedNode
      */
     'validator_cons_pub_key': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ProxiedNode
      */
     'version': string;
 }
 /**
- * 
+ *
  * @export
  * @interface ProxiedNodeJail
  */
 export interface ProxiedNodeJail {
     /**
-     * 
+     *
      * @type {string}
      * @memberof ProxiedNodeJail
      */
     'node_address'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface ProxiedNodePubKeySet
  */
 export interface ProxiedNodePubKeySet {
     /**
-     * 
+     *
      * @type {string}
      * @memberof ProxiedNodePubKeySet
      */
     'ed25519': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ProxiedNodePubKeySet
      */
     'secp256k1': string;
 }
 /**
- * 
+ *
  * @export
  * @interface Queue
  */
 export interface Queue {
     /**
-     * 
+     *
      * @type {number}
      * @memberof Queue
      */
     'internal': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Queue
      */
     'outbound': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Queue
      */
     'swap': number;
 }
 /**
- * 
+ *
  * @export
  * @interface RefundMetadata
  */
 export interface RefundMetadata {
     /**
-     * List of network fees associated to an action. One network fee is charged for each outbound transaction 
+     * List of network fees associated to an action. One network fee is charged for each outbound transaction
      * @type {Array<Coin>}
      * @memberof RefundMetadata
      */
@@ -1809,7 +1809,7 @@ export interface RefundMetadata {
     'reason': string;
 }
 /**
- * 
+ *
  * @export
  * @interface StatsData
  */
@@ -1821,7 +1821,7 @@ export interface StatsData {
      */
     'addLiquidityCount': string;
     /**
-     * Int64(e8), total of deposits since beginning. 
+     * Int64(e8), total of deposits since beginning.
      * @type {string}
      * @memberof StatsData
      */
@@ -1833,7 +1833,7 @@ export interface StatsData {
      */
     'dailyActiveUsers': string;
     /**
-     * Int64(e8), impermanent loss protection paid out. 
+     * Int64(e8), impermanent loss protection paid out.
      * @type {string}
      * @memberof StatsData
      */
@@ -1923,52 +1923,52 @@ export interface StatsData {
      */
     'withdrawCount': string;
     /**
-     * Int64(e8), total of withdraws since beginning. 
+     * Int64(e8), total of withdraws since beginning.
      * @type {string}
      * @memberof StatsData
      */
     'withdrawVolume': string;
 }
 /**
- * 
+ *
  * @export
  * @interface StringConstants
  */
 export interface StringConstants {
     /**
-     * 
+     *
      * @type {string}
      * @memberof StringConstants
      */
     'DefaultPoolStatus': string;
 }
 /**
- * 
+ *
  * @export
  * @interface SwapHistory
  */
 export interface SwapHistory {
     /**
-     * 
+     *
      * @type {Array<SwapHistoryItem>}
      * @memberof SwapHistory
      */
     'intervals': Array<SwapHistoryItem>;
     /**
-     * 
+     *
      * @type {SwapHistoryItem}
      * @memberof SwapHistory
      */
     'meta': SwapHistoryItem;
 }
 /**
- * 
+ *
  * @export
  * @interface SwapHistoryItem
  */
 export interface SwapHistoryItem {
     /**
-     * Float64 (Basis points, 0-10000, where 10000=100%), the weighted average (by count) of toAssetAverageSlip, toRuneAverageSlip, synthMintAverageSlip, synthRedeemAverageSlip. Big swaps have the same weight as small swaps. 
+     * Float64 (Basis points, 0-10000, where 10000=100%), the weighted average (by count) of toAssetAverageSlip, toRuneAverageSlip, synthMintAverageSlip, synthRedeemAverageSlip. Big swaps have the same weight as small swaps.
      * @type {string}
      * @memberof SwapHistoryItem
      */
@@ -1980,7 +1980,7 @@ export interface SwapHistoryItem {
      */
     'endTime': string;
     /**
-     * Float, the price of Rune based on the deepest USD pool at the end of the interval. 
+     * Float, the price of Rune based on the deepest USD pool at the end of the interval.
      * @type {string}
      * @memberof SwapHistoryItem
      */
@@ -1992,7 +1992,7 @@ export interface SwapHistoryItem {
      */
     'startTime': string;
     /**
-     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps from rune to synthetic asset. Big swaps have the same weight as small swaps 
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps from rune to synthetic asset. Big swaps have the same weight as small swaps
      * @type {string}
      * @memberof SwapHistoryItem
      */
@@ -2004,7 +2004,7 @@ export interface SwapHistoryItem {
      */
     'synthMintCount': string;
     /**
-     * Int64(e8), the fees collected from swaps from rune to synthetic asset (in rune) 
+     * Int64(e8), the fees collected from swaps from rune to synthetic asset (in rune)
      * @type {string}
      * @memberof SwapHistoryItem
      */
@@ -2016,7 +2016,7 @@ export interface SwapHistoryItem {
      */
     'synthMintVolume': string;
     /**
-     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps from synthetic asset to rune. Big swaps have the same weight as small swaps 
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps from synthetic asset to rune. Big swaps have the same weight as small swaps
      * @type {string}
      * @memberof SwapHistoryItem
      */
@@ -2028,7 +2028,7 @@ export interface SwapHistoryItem {
      */
     'synthRedeemCount': string;
     /**
-     * Int64(e8), the fees collected from swaps from synthetic asset to rune (in rune) 
+     * Int64(e8), the fees collected from swaps from synthetic asset to rune (in rune)
      * @type {string}
      * @memberof SwapHistoryItem
      */
@@ -2040,7 +2040,7 @@ export interface SwapHistoryItem {
      */
     'synthRedeemVolume': string;
     /**
-     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps from rune to asset. Big swaps have the same weight as small swaps 
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps from rune to asset. Big swaps have the same weight as small swaps
      * @type {string}
      * @memberof SwapHistoryItem
      */
@@ -2064,7 +2064,7 @@ export interface SwapHistoryItem {
      */
     'toAssetVolume': string;
     /**
-     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps from asset to rune. Big swaps have the same weight as small swaps 
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps from asset to rune. Big swaps have the same weight as small swaps
      * @type {string}
      * @memberof SwapHistoryItem
      */
@@ -2100,14 +2100,14 @@ export interface SwapHistoryItem {
      */
     'totalFees': string;
     /**
-     * Int64(e8), toAssetVolume + toRuneVolume + synthMintVolume + synthRedeemVolume (denoted in rune) 
+     * Int64(e8), toAssetVolume + toRuneVolume + synthMintVolume + synthRedeemVolume (denoted in rune)
      * @type {string}
      * @memberof SwapHistoryItem
      */
     'totalVolume': string;
 }
 /**
- * 
+ *
  * @export
  * @interface SwapMetadata
  */
@@ -2131,7 +2131,7 @@ export interface SwapMetadata {
      */
     'liquidityFee': string;
     /**
-     * List of network fees associated to an action. One network fee is charged for each outbound transaction 
+     * List of network fees associated to an action. One network fee is charged for each outbound transaction
      * @type {Array<Coin>}
      * @memberof SwapMetadata
      */
@@ -2150,7 +2150,7 @@ export interface SwapMetadata {
     'swapTarget': string;
 }
 /**
- * 
+ *
  * @export
  * @interface THORNameDetails
  */
@@ -2175,7 +2175,7 @@ export interface THORNameDetails {
     'owner': string;
 }
 /**
- * 
+ *
  * @export
  * @interface THORNameEntry
  */
@@ -2194,26 +2194,26 @@ export interface THORNameEntry {
     'chain': string;
 }
 /**
- * 
+ *
  * @export
  * @interface TVLHistory
  */
 export interface TVLHistory {
     /**
-     * 
+     *
      * @type {Array<TVLHistoryItem>}
      * @memberof TVLHistory
      */
     'intervals': Array<TVLHistoryItem>;
     /**
-     * 
+     *
      * @type {TVLHistoryItem}
      * @memberof TVLHistory
      */
     'meta': TVLHistoryItem;
 }
 /**
- * 
+ *
  * @export
  * @interface TVLHistoryItem
  */
@@ -2225,7 +2225,7 @@ export interface TVLHistoryItem {
      */
     'endTime': string;
     /**
-     * Float, the price of Rune based on the deepest USD pool at the end of the interval. 
+     * Float, the price of Rune based on the deepest USD pool at the end of the interval.
      * @type {string}
      * @memberof TVLHistoryItem
      */
@@ -2237,19 +2237,19 @@ export interface TVLHistoryItem {
      */
     'startTime': string;
     /**
-     * Int64(e8), the total amount of bonds (both active and standby) at the end of the interval 
+     * Int64(e8), the total amount of bonds (both active and standby) at the end of the interval
      * @type {string}
      * @memberof TVLHistoryItem
      */
     'totalValueBonded'?: string;
     /**
-     * Int64(e8), total value locked in the chain (in rune) This equals `totalPooledValue + totalBondedValue`, as it combines the liquidity pools and bonds of the nodes. 
+     * Int64(e8), total value locked in the chain (in rune) This equals `totalPooledValue + totalBondedValue`, as it combines the liquidity pools and bonds of the nodes.
      * @type {string}
      * @memberof TVLHistoryItem
      */
     'totalValueLocked'?: string;
     /**
-     * Int64(e8) in rune, the total pooled value (both assets and rune) in all of the pools at the end of the interval. Note: this is twice the aggregate Rune depth of all pools. 
+     * Int64(e8) in rune, the total pooled value (both assets and rune) in all of the pools at the end of the interval. Note: this is twice the aggregate Rune depth of all pools.
      * @type {string}
      * @memberof TVLHistoryItem
      */
@@ -2268,32 +2268,32 @@ export interface Transaction {
      */
     'address': string;
     /**
-     * 
+     *
      * @type {Array<Coin>}
      * @memberof Transaction
      */
     'coins': Array<Coin>;
     /**
-     * Transaction id hash. Some transactions (such as outbound transactions made in the native asset) may have a zero value. 
+     * Transaction id hash. Some transactions (such as outbound transactions made in the native asset) may have a zero value.
      * @type {string}
      * @memberof Transaction
      */
     'txID': string;
 }
 /**
- * 
+ *
  * @export
  * @interface WithdrawMetadata
  */
 export interface WithdrawMetadata {
     /**
-     * Decimal (-1.0 <=> 1.0), indicates how assymetrical the withdrawal was. 0 means totally symetrical 
+     * Decimal (-1.0 <=> 1.0), indicates how assymetrical the withdrawal was. 0 means totally symetrical
      * @type {string}
      * @memberof WithdrawMetadata
      */
     'asymmetry': string;
     /**
-     * Int64 (Basis points, 0-10000, where 10000=100%), percentage of total pool ownership withdrawn 
+     * Int64 (Basis points, 0-10000, where 10000=100%), percentage of total pool ownership withdrawn
      * @type {string}
      * @memberof WithdrawMetadata
      */
@@ -2305,13 +2305,13 @@ export interface WithdrawMetadata {
      */
     'impermanentLossProtection': string;
     /**
-     * Int64, amount of liquidity units removed from the member as result of the withdrawal 
+     * Int64, amount of liquidity units removed from the member as result of the withdrawal
      * @type {string}
      * @memberof WithdrawMetadata
      */
     'liquidityUnits': string;
     /**
-     * List of network fees associated to an action. One network fee is charged for each outbound transaction 
+     * List of network fees associated to an action. One network fee is charged for each outbound transaction
      * @type {Array<Coin>}
      * @memberof WithdrawMetadata
      */
@@ -2325,13 +2325,13 @@ export interface WithdrawMetadata {
 export const DefaultApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * List actions along with their related transactions. An action is generated by one or more inbound transactions with the intended action set in the transaction memo. The action may result in one or more outbound transactions. Results are paginated by sets of 50. Filters may be applied to query actions. 
+         * List actions along with their related transactions. An action is generated by one or more inbound transactions with the intended action set in the transaction memo. The action may result in one or more outbound transactions. Results are paginated by sets of 50. Filters may be applied to query actions.
          * @summary Actions List
-         * @param {string} [address] Comma separated list. Address of sender or recipient of any in/out transaction related to the action. 
+         * @param {string} [address] Comma separated list. Address of sender or recipient of any in/out transaction related to the action.
          * @param {string} [txid] ID of any in/out tx related to the action
          * @param {string} [asset] Any asset that is part of the action (CHAIN.SYMBOL)
-         * @param {string} [type] One or more comma separated unique types of action (swap, addLiquidity, withdraw, donate, refund, switch) 
-         * @param {string} [affiliateAddress] Affiliate address of the action (swap) 
+         * @param {string} [type] One or more comma separated unique types of action (swap, addLiquidity, withdraw, donate, refund, switch)
+         * @param {string} [affiliateAddress] Affiliate address of the action (swap)
          * @param {number} [limit] number of actions returned, default is 50
          * @param {number} [offset] pagination offset, default is 0
          * @param {*} [options] Override http request option.
@@ -2379,7 +2379,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2390,12 +2390,12 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Returns the asset and rune depths and price. The values report the state at the end of each interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns the asset and rune depths and price. The values report the state at the end of each interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Depth and Price History
          * @param {string} pool Return stats for this single pool.
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2433,7 +2433,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2444,11 +2444,11 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Returns earnings data for the specified interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns earnings data for the specified interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Earnings History
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2483,7 +2483,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2494,7 +2494,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Returns an object containing the health response of the API. Meaning of heights:  lastThorNode - Latest block as reported by ThorNode.  lastFetched - Latest block fetched from ThorNode.  lastCommitted - Latest block commited to the DB but not fully processed yet.  lastAggregated - Latest block fully processed and aggregated. 
+         * Returns an object containing the health response of the API. Meaning of heights:  lastThorNode - Latest block as reported by ThorNode.  lastFetched - Latest block fetched from ThorNode.  lastCommitted - Latest block commited to the DB but not fully processed yet.  lastAggregated - Latest block fully processed and aggregated.
          * @summary Health Info
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2513,7 +2513,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2524,12 +2524,12 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Returns withdrawals and deposits for given time interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns withdrawals and deposits for given time interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Liquidity Changes History
          * @param {string} [pool] Return stats for given pool. Returns sum of all pools if missing
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400]
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2568,7 +2568,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2579,9 +2579,9 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Returns an array of statistics for all the liquidity providers associated with a given member address. 
+         * Returns an array of statistics for all the liquidity providers associated with a given member address.
          * @summary Member Details
-         * @param {string} address Address to match liquidity providers. Either a rune or an asset address may be given. 
+         * @param {string} address Address to match liquidity providers. Either a rune or an asset address may be given.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2602,7 +2602,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2613,7 +2613,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Returns an array containing the addresses for all pool members. Addresses are only shown once. If there\'s both a RUNE address and an asset address for a member, only the RUNE address will be shown. 
+         * Returns an array containing the addresses for all pool members. Addresses are only shown once. If there\'s both a RUNE address and an asset address for a member, only the RUNE address will be shown.
          * @summary Members List
          * @param {string} [pool] Return only members present in the pool.
          * @param {*} [options] Override http request option.
@@ -2637,7 +2637,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2667,7 +2667,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2697,7 +2697,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2708,7 +2708,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Returns details of the pool: depths, price, 24h volume, APY. 
+         * Returns details of the pool: depths, price, 24h volume, APY.
          * @summary Details of a Pool
          * @param {string} asset pool name
          * @param {*} [options] Override http request option.
@@ -2731,7 +2731,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2742,10 +2742,10 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Statistics about the pool. The description of the fields have pointers about the corresponding v2/history location. Visit the history endpoint for drilldowns. 
+         * Statistics about the pool. The description of the fields have pointers about the corresponding v2/history location. Visit the history endpoint for drilldowns.
          * @summary Pool Statistics
          * @param {string} asset pool name
-         * @param {'1h' | '24h' | '7d' | '30d' | '90d' | '365d' | 'all'} [period] Restricts aggregation type fields to the last period only. Default is 30d. 
+         * @param {'1h' | '24h' | '7d' | '30d' | '90d' | '365d' | 'all'} [period] Restricts aggregation type fields to the last period only. Default is 30d.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2770,7 +2770,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2805,7 +2805,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2835,7 +2835,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2846,7 +2846,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Inbound addresses will return a list of address , one per chain. The address might change frequently if THORChain has multiple asgards. 
+         * Inbound addresses will return a list of address , one per chain. The address might change frequently if THORChain has multiple asgards.
          * @summary Proxied THORChain Inbound Addresses
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2865,7 +2865,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2895,7 +2895,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2925,7 +2925,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2955,7 +2955,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2985,7 +2985,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2996,12 +2996,12 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Returns swap count, volume, fees, slip in specified interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns swap count, volume, fees, slip in specified interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Swaps History
          * @param {string} [pool] Return history given pool. Returns sum of all pools if missing.
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3040,7 +3040,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3074,7 +3074,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3108,7 +3108,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3119,11 +3119,11 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Returns total pool depths, total bonds, and total value locked in specified interval.  Total Value Locked = Total Bonds + 2 * Total Pool Depths  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.  * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns total pool depths, total bonds, and total value locked in specified interval.  Total Value Locked = Total Bonds + 2 * Total Pool Depths  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.  * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Total Value Locked History
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3158,7 +3158,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3179,13 +3179,13 @@ export const DefaultApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = DefaultApiAxiosParamCreator(configuration)
     return {
         /**
-         * List actions along with their related transactions. An action is generated by one or more inbound transactions with the intended action set in the transaction memo. The action may result in one or more outbound transactions. Results are paginated by sets of 50. Filters may be applied to query actions. 
+         * List actions along with their related transactions. An action is generated by one or more inbound transactions with the intended action set in the transaction memo. The action may result in one or more outbound transactions. Results are paginated by sets of 50. Filters may be applied to query actions.
          * @summary Actions List
-         * @param {string} [address] Comma separated list. Address of sender or recipient of any in/out transaction related to the action. 
+         * @param {string} [address] Comma separated list. Address of sender or recipient of any in/out transaction related to the action.
          * @param {string} [txid] ID of any in/out tx related to the action
          * @param {string} [asset] Any asset that is part of the action (CHAIN.SYMBOL)
-         * @param {string} [type] One or more comma separated unique types of action (swap, addLiquidity, withdraw, donate, refund, switch) 
-         * @param {string} [affiliateAddress] Affiliate address of the action (swap) 
+         * @param {string} [type] One or more comma separated unique types of action (swap, addLiquidity, withdraw, donate, refund, switch)
+         * @param {string} [affiliateAddress] Affiliate address of the action (swap)
          * @param {number} [limit] number of actions returned, default is 50
          * @param {number} [offset] pagination offset, default is 0
          * @param {*} [options] Override http request option.
@@ -3196,12 +3196,12 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns the asset and rune depths and price. The values report the state at the end of each interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns the asset and rune depths and price. The values report the state at the end of each interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Depth and Price History
          * @param {string} pool Return stats for this single pool.
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3211,11 +3211,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns earnings data for the specified interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns earnings data for the specified interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Earnings History
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3225,7 +3225,7 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns an object containing the health response of the API. Meaning of heights:  lastThorNode - Latest block as reported by ThorNode.  lastFetched - Latest block fetched from ThorNode.  lastCommitted - Latest block commited to the DB but not fully processed yet.  lastAggregated - Latest block fully processed and aggregated. 
+         * Returns an object containing the health response of the API. Meaning of heights:  lastThorNode - Latest block as reported by ThorNode.  lastFetched - Latest block fetched from ThorNode.  lastCommitted - Latest block commited to the DB but not fully processed yet.  lastAggregated - Latest block fully processed and aggregated.
          * @summary Health Info
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3235,12 +3235,12 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns withdrawals and deposits for given time interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns withdrawals and deposits for given time interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Liquidity Changes History
          * @param {string} [pool] Return stats for given pool. Returns sum of all pools if missing
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400]
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3250,9 +3250,9 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns an array of statistics for all the liquidity providers associated with a given member address. 
+         * Returns an array of statistics for all the liquidity providers associated with a given member address.
          * @summary Member Details
-         * @param {string} address Address to match liquidity providers. Either a rune or an asset address may be given. 
+         * @param {string} address Address to match liquidity providers. Either a rune or an asset address may be given.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3261,7 +3261,7 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns an array containing the addresses for all pool members. Addresses are only shown once. If there\'s both a RUNE address and an asset address for a member, only the RUNE address will be shown. 
+         * Returns an array containing the addresses for all pool members. Addresses are only shown once. If there\'s both a RUNE address and an asset address for a member, only the RUNE address will be shown.
          * @summary Members List
          * @param {string} [pool] Return only members present in the pool.
          * @param {*} [options] Override http request option.
@@ -3292,7 +3292,7 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns details of the pool: depths, price, 24h volume, APY. 
+         * Returns details of the pool: depths, price, 24h volume, APY.
          * @summary Details of a Pool
          * @param {string} asset pool name
          * @param {*} [options] Override http request option.
@@ -3303,10 +3303,10 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Statistics about the pool. The description of the fields have pointers about the corresponding v2/history location. Visit the history endpoint for drilldowns. 
+         * Statistics about the pool. The description of the fields have pointers about the corresponding v2/history location. Visit the history endpoint for drilldowns.
          * @summary Pool Statistics
          * @param {string} asset pool name
-         * @param {'1h' | '24h' | '7d' | '30d' | '90d' | '365d' | 'all'} [period] Restricts aggregation type fields to the last period only. Default is 30d. 
+         * @param {'1h' | '24h' | '7d' | '30d' | '90d' | '365d' | 'all'} [period] Restricts aggregation type fields to the last period only. Default is 30d.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3336,7 +3336,7 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Inbound addresses will return a list of address , one per chain. The address might change frequently if THORChain has multiple asgards. 
+         * Inbound addresses will return a list of address , one per chain. The address might change frequently if THORChain has multiple asgards.
          * @summary Proxied THORChain Inbound Addresses
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3386,12 +3386,12 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns swap count, volume, fees, slip in specified interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns swap count, volume, fees, slip in specified interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Swaps History
          * @param {string} [pool] Return history given pool. Returns sum of all pools if missing.
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3423,11 +3423,11 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns total pool depths, total bonds, and total value locked in specified interval.  Total Value Locked = Total Bonds + 2 * Total Pool Depths  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.  * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns total pool depths, total bonds, and total value locked in specified interval.  Total Value Locked = Total Bonds + 2 * Total Pool Depths  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.  * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Total Value Locked History
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3447,13 +3447,13 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = DefaultApiFp(configuration)
     return {
         /**
-         * List actions along with their related transactions. An action is generated by one or more inbound transactions with the intended action set in the transaction memo. The action may result in one or more outbound transactions. Results are paginated by sets of 50. Filters may be applied to query actions. 
+         * List actions along with their related transactions. An action is generated by one or more inbound transactions with the intended action set in the transaction memo. The action may result in one or more outbound transactions. Results are paginated by sets of 50. Filters may be applied to query actions.
          * @summary Actions List
-         * @param {string} [address] Comma separated list. Address of sender or recipient of any in/out transaction related to the action. 
+         * @param {string} [address] Comma separated list. Address of sender or recipient of any in/out transaction related to the action.
          * @param {string} [txid] ID of any in/out tx related to the action
          * @param {string} [asset] Any asset that is part of the action (CHAIN.SYMBOL)
-         * @param {string} [type] One or more comma separated unique types of action (swap, addLiquidity, withdraw, donate, refund, switch) 
-         * @param {string} [affiliateAddress] Affiliate address of the action (swap) 
+         * @param {string} [type] One or more comma separated unique types of action (swap, addLiquidity, withdraw, donate, refund, switch)
+         * @param {string} [affiliateAddress] Affiliate address of the action (swap)
          * @param {number} [limit] number of actions returned, default is 50
          * @param {number} [offset] pagination offset, default is 0
          * @param {*} [options] Override http request option.
@@ -3463,12 +3463,12 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getActions(address, txid, asset, type, affiliateAddress, limit, offset, options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns the asset and rune depths and price. The values report the state at the end of each interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns the asset and rune depths and price. The values report the state at the end of each interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Depth and Price History
          * @param {string} pool Return stats for this single pool.
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3477,11 +3477,11 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getDepthHistory(pool, interval, count, to, from, options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns earnings data for the specified interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns earnings data for the specified interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Earnings History
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3490,7 +3490,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getEarningsHistory(interval, count, to, from, options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns an object containing the health response of the API. Meaning of heights:  lastThorNode - Latest block as reported by ThorNode.  lastFetched - Latest block fetched from ThorNode.  lastCommitted - Latest block commited to the DB but not fully processed yet.  lastAggregated - Latest block fully processed and aggregated. 
+         * Returns an object containing the health response of the API. Meaning of heights:  lastThorNode - Latest block as reported by ThorNode.  lastFetched - Latest block fetched from ThorNode.  lastCommitted - Latest block commited to the DB but not fully processed yet.  lastAggregated - Latest block fully processed and aggregated.
          * @summary Health Info
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3499,12 +3499,12 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getHealth(options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns withdrawals and deposits for given time interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns withdrawals and deposits for given time interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Liquidity Changes History
          * @param {string} [pool] Return stats for given pool. Returns sum of all pools if missing
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400]
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3513,9 +3513,9 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getLiquidityHistory(pool, interval, count, to, from, options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns an array of statistics for all the liquidity providers associated with a given member address. 
+         * Returns an array of statistics for all the liquidity providers associated with a given member address.
          * @summary Member Details
-         * @param {string} address Address to match liquidity providers. Either a rune or an asset address may be given. 
+         * @param {string} address Address to match liquidity providers. Either a rune or an asset address may be given.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3523,7 +3523,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getMemberDetail(address, options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns an array containing the addresses for all pool members. Addresses are only shown once. If there\'s both a RUNE address and an asset address for a member, only the RUNE address will be shown. 
+         * Returns an array containing the addresses for all pool members. Addresses are only shown once. If there\'s both a RUNE address and an asset address for a member, only the RUNE address will be shown.
          * @summary Members List
          * @param {string} [pool] Return only members present in the pool.
          * @param {*} [options] Override http request option.
@@ -3551,7 +3551,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getNodes(options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns details of the pool: depths, price, 24h volume, APY. 
+         * Returns details of the pool: depths, price, 24h volume, APY.
          * @summary Details of a Pool
          * @param {string} asset pool name
          * @param {*} [options] Override http request option.
@@ -3561,10 +3561,10 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getPool(asset, options).then((request) => request(axios, basePath));
         },
         /**
-         * Statistics about the pool. The description of the fields have pointers about the corresponding v2/history location. Visit the history endpoint for drilldowns. 
+         * Statistics about the pool. The description of the fields have pointers about the corresponding v2/history location. Visit the history endpoint for drilldowns.
          * @summary Pool Statistics
          * @param {string} asset pool name
-         * @param {'1h' | '24h' | '7d' | '30d' | '90d' | '365d' | 'all'} [period] Restricts aggregation type fields to the last period only. Default is 30d. 
+         * @param {'1h' | '24h' | '7d' | '30d' | '90d' | '365d' | 'all'} [period] Restricts aggregation type fields to the last period only. Default is 30d.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3591,7 +3591,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getProxiedConstants(options).then((request) => request(axios, basePath));
         },
         /**
-         * Inbound addresses will return a list of address , one per chain. The address might change frequently if THORChain has multiple asgards. 
+         * Inbound addresses will return a list of address , one per chain. The address might change frequently if THORChain has multiple asgards.
          * @summary Proxied THORChain Inbound Addresses
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3636,12 +3636,12 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getStats(options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns swap count, volume, fees, slip in specified interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns swap count, volume, fees, slip in specified interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Swaps History
          * @param {string} [pool] Return history given pool. Returns sum of all pools if missing.
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3670,11 +3670,11 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getTHORNamesByAddress(address, options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns total pool depths, total bonds, and total value locked in specified interval.  Total Value Locked = Total Bonds + 2 * Total Pool Depths  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.  * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+         * Returns total pool depths, total bonds, and total value locked in specified interval.  Total Value Locked = Total Bonds + 2 * Total Pool Depths  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.  * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
          * @summary Total Value Locked History
          * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
          * @param {number} [count] Number of intervals to return. Should be between [1..400].
-         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+         * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
          * @param {number} [from] Start time of the query as unix timestamp
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3693,13 +3693,13 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
  */
 export class DefaultApi extends BaseAPI {
     /**
-     * List actions along with their related transactions. An action is generated by one or more inbound transactions with the intended action set in the transaction memo. The action may result in one or more outbound transactions. Results are paginated by sets of 50. Filters may be applied to query actions. 
+     * List actions along with their related transactions. An action is generated by one or more inbound transactions with the intended action set in the transaction memo. The action may result in one or more outbound transactions. Results are paginated by sets of 50. Filters may be applied to query actions.
      * @summary Actions List
-     * @param {string} [address] Comma separated list. Address of sender or recipient of any in/out transaction related to the action. 
+     * @param {string} [address] Comma separated list. Address of sender or recipient of any in/out transaction related to the action.
      * @param {string} [txid] ID of any in/out tx related to the action
      * @param {string} [asset] Any asset that is part of the action (CHAIN.SYMBOL)
-     * @param {string} [type] One or more comma separated unique types of action (swap, addLiquidity, withdraw, donate, refund, switch) 
-     * @param {string} [affiliateAddress] Affiliate address of the action (swap) 
+     * @param {string} [type] One or more comma separated unique types of action (swap, addLiquidity, withdraw, donate, refund, switch)
+     * @param {string} [affiliateAddress] Affiliate address of the action (swap)
      * @param {number} [limit] number of actions returned, default is 50
      * @param {number} [offset] pagination offset, default is 0
      * @param {*} [options] Override http request option.
@@ -3711,12 +3711,12 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Returns the asset and rune depths and price. The values report the state at the end of each interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+     * Returns the asset and rune depths and price. The values report the state at the end of each interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
      * @summary Depth and Price History
      * @param {string} pool Return stats for this single pool.
      * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
      * @param {number} [count] Number of intervals to return. Should be between [1..400].
-     * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+     * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
      * @param {number} [from] Start time of the query as unix timestamp
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3727,11 +3727,11 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Returns earnings data for the specified interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+     * Returns earnings data for the specified interval.  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
      * @summary Earnings History
      * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
      * @param {number} [count] Number of intervals to return. Should be between [1..400].
-     * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+     * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
      * @param {number} [from] Start time of the query as unix timestamp
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3742,7 +3742,7 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Returns an object containing the health response of the API. Meaning of heights:  lastThorNode - Latest block as reported by ThorNode.  lastFetched - Latest block fetched from ThorNode.  lastCommitted - Latest block commited to the DB but not fully processed yet.  lastAggregated - Latest block fully processed and aggregated. 
+     * Returns an object containing the health response of the API. Meaning of heights:  lastThorNode - Latest block as reported by ThorNode.  lastFetched - Latest block fetched from ThorNode.  lastCommitted - Latest block commited to the DB but not fully processed yet.  lastAggregated - Latest block fully processed and aggregated.
      * @summary Health Info
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3753,12 +3753,12 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Returns withdrawals and deposits for given time interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+     * Returns withdrawals and deposits for given time interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
      * @summary Liquidity Changes History
      * @param {string} [pool] Return stats for given pool. Returns sum of all pools if missing
      * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
      * @param {number} [count] Number of intervals to return. Should be between [1..400]
-     * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now 
+     * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now
      * @param {number} [from] Start time of the query as unix timestamp
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3769,9 +3769,9 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Returns an array of statistics for all the liquidity providers associated with a given member address. 
+     * Returns an array of statistics for all the liquidity providers associated with a given member address.
      * @summary Member Details
-     * @param {string} address Address to match liquidity providers. Either a rune or an asset address may be given. 
+     * @param {string} address Address to match liquidity providers. Either a rune or an asset address may be given.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
@@ -3781,7 +3781,7 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Returns an array containing the addresses for all pool members. Addresses are only shown once. If there\'s both a RUNE address and an asset address for a member, only the RUNE address will be shown. 
+     * Returns an array containing the addresses for all pool members. Addresses are only shown once. If there\'s both a RUNE address and an asset address for a member, only the RUNE address will be shown.
      * @summary Members List
      * @param {string} [pool] Return only members present in the pool.
      * @param {*} [options] Override http request option.
@@ -3815,7 +3815,7 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Returns details of the pool: depths, price, 24h volume, APY. 
+     * Returns details of the pool: depths, price, 24h volume, APY.
      * @summary Details of a Pool
      * @param {string} asset pool name
      * @param {*} [options] Override http request option.
@@ -3827,10 +3827,10 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Statistics about the pool. The description of the fields have pointers about the corresponding v2/history location. Visit the history endpoint for drilldowns. 
+     * Statistics about the pool. The description of the fields have pointers about the corresponding v2/history location. Visit the history endpoint for drilldowns.
      * @summary Pool Statistics
      * @param {string} asset pool name
-     * @param {'1h' | '24h' | '7d' | '30d' | '90d' | '365d' | 'all'} [period] Restricts aggregation type fields to the last period only. Default is 30d. 
+     * @param {'1h' | '24h' | '7d' | '30d' | '90d' | '365d' | 'all'} [period] Restricts aggregation type fields to the last period only. Default is 30d.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
@@ -3863,7 +3863,7 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Inbound addresses will return a list of address , one per chain. The address might change frequently if THORChain has multiple asgards. 
+     * Inbound addresses will return a list of address , one per chain. The address might change frequently if THORChain has multiple asgards.
      * @summary Proxied THORChain Inbound Addresses
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3918,12 +3918,12 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Returns swap count, volume, fees, slip in specified interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+     * Returns swap count, volume, fees, slip in specified interval. If pool is not specified returns for all pools  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.   * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
      * @summary Swaps History
      * @param {string} [pool] Return history given pool. Returns sum of all pools if missing.
      * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
      * @param {number} [count] Number of intervals to return. Should be between [1..400].
-     * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+     * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
      * @param {number} [from] Start time of the query as unix timestamp
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3958,11 +3958,11 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Returns total pool depths, total bonds, and total value locked in specified interval.  Total Value Locked = Total Bonds + 2 * Total Pool Depths  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.  * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters 
+     * Returns total pool depths, total bonds, and total value locked in specified interval.  Total Value Locked = Total Bonds + 2 * Total Pool Depths  History endpoint has two modes: * With Interval parameter it returns a series of time buckets. From and To dates will   be rounded to the Interval boundaries. * Without Interval parameter a single From..To search is performed with exact timestamps.  * Interval: possible values: 5min, hour, day, week, month, quarter, year. * count: [1..400]. Defines number of intervals. Don\'t provide if Interval is missing. * from/to: optional int, unix second.  Possible usages with interval. * last 10 days: `?interval=day&count=10` * last 10 days before to: `?interval=day&count=10&to=1608825600` * next 10 days after from: `?interval=day&count=10&from=1606780800` * Days between from and to. From defaults to start of chain, to defaults to now.   Only the first 400 intervals are returned:   `interval=day&from=1606780800&to=1608825600`  Pagination is possible with from&count and then using the returned meta.endTime as the From parameter of the next query.  Possible configurations without interval: * exact search for one time frame: `?from=1606780899&to=1608825600` * one time frame until now: `?from=1606780899` * from chain start until now: no query parameters
      * @summary Total Value Locked History
      * @param {'5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'} [interval] Interval of calculations
      * @param {number} [count] Number of intervals to return. Should be between [1..400].
-     * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now. 
+     * @param {number} [to] End time of the query as unix timestamp. If only count is given, defaults to now.
      * @param {number} [from] Start time of the query as unix timestamp
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -4000,7 +4000,7 @@ export const SpecificationApiAxiosParamCreator = function (configuration?: Confi
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4030,7 +4030,7 @@ export const SpecificationApiAxiosParamCreator = function (configuration?: Confi
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
