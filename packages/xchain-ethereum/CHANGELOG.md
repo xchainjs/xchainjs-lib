@@ -1,12 +1,24 @@
+# v.0.25.0 (2022-xx-xx)
+
+## Breaking changes
+
+- `client.approve`: Add `fromAddress` to parameters
+- `client.estimateApprove`: Add `fromAddress` to parameters
+- `client.isApproved`: Add `fromAddress` to parameters
+
+## Add
+
+- Add `isApproved` to `utils`
+- `strip0x` helper
+
 # v.0.24.1 (2022-05-05)
 
-## Update 
+## Update
 
-- Add `deposit` function to Ethereum `client` 
+- Add `deposit` function to Ethereum `client`
 - Add `routerABI.json`
 - Update latest dependencies
-- Add tests for `deposit` 
-
+- Add tests for `deposit`
 
 # v.0.24.0 (2022-04-20)
 

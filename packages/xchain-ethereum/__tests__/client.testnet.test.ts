@@ -111,8 +111,8 @@ describe('Client Test', () => {
     })
 
     it('should create a wallet from phrase', () => {
-      expect(ethClient.getWallet()).toBeInstanceOf(Wallet)
-      expect(ethClient.getWallet()._signingKey()).toMatchObject(wallet.signingKey)
+      expect(ethClient.getWallet(0)).toBeInstanceOf(Wallet)
+      expect(ethClient.getWallet(0)._signingKey()).toMatchObject(wallet.signingKey)
     })
 
     it('should throw errors if phrase is not present', () => {
@@ -126,7 +126,7 @@ describe('Client Test', () => {
   it('should set new phrase', () => {
     const ethClient = new Client({ phrase })
     const newWallet = ethClient.setPhrase(newPhrase)
-    expect(ethClient.getWallet().mnemonic.phrase).toEqual(newPhrase)
+    expect(ethClient.getWallet(0).mnemonic.phrase).toEqual(newPhrase)
     expect(newWallet).toBeTruthy()
   })
 
@@ -141,10 +141,10 @@ describe('Client Test', () => {
       phrase,
     })
 
-    expect(ethClient.getWallet()).toBeInstanceOf(Wallet)
-    expect(ethClient.getWallet().provider).toBeInstanceOf(providers.FallbackProvider)
-    expect(ethClient.getWallet()._signingKey()).toMatchObject(wallet.signingKey)
-    const network = await ethClient.getWallet().provider.getNetwork()
+    const wallet = ethClient.getWallet(0)
+    expect(wallet).toBeInstanceOf(Wallet)
+    expect(wallet.provider).toBeInstanceOf(providers.FallbackProvider)
+    const network = await ethClient.getWallet(0).provider.getNetwork()
     expect(network.name).toEqual('homestead')
     expect(network.chainId).toEqual(1)
   })
@@ -159,7 +159,7 @@ describe('Client Test', () => {
       },
     })
 
-    expect(ethClient.getWallet().provider).toBeInstanceOf(providers.InfuraProvider)
+    expect(ethClient.getWallet(0).provider).toBeInstanceOf(providers.InfuraProvider)
   })
 
   it('should set network', async () => {
@@ -169,7 +169,7 @@ describe('Client Test', () => {
     })
     ethClient.setNetwork('testnet' as Network)
 
-    const network = await ethClient.getWallet().provider.getNetwork()
+    const network = await ethClient.getWallet(0).provider.getNetwork()
     expect(network.name).toEqual('ropsten')
     expect(network.chainId).toEqual(3)
   })
@@ -554,36 +554,50 @@ describe('Client Test', () => {
     expect(gasEstimate.fees.fastest.amount().toString()).toEqual(baseAmount('1596000000000000', 18).amount().toString())
   })
 
-  it('isApproved', async () => {
-    const ethClient = new Client({
-      network: 'testnet' as Network,
+  describe('isApproved', () => {
+    const contractAddress = '0xA3910454bF2Cb59b8B3a401589A3bAcC5cA42306' // USDT
+    const spenderAddress = '0xeB005a0aa5027F66c8D195C77f7B01324C48501C' // router
+    const client = new Client({
+      network: Network.Testnet,
       phrase,
     })
 
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0xa7cac8')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x0')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0x5969ec91')
-    mock_all_api(
-      etherscanUrl,
-      ropstenInfuraUrl,
-      ropstenAlchemyUrl,
-      'eth_call',
-      '0x0000000000000000000000000000000000000000000000000000000000000064',
-    )
-
-    let isApproved = await ethClient.isApproved({
-      contractAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      spenderAddress: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-      amount: baseAmount(100, ETH_DECIMAL),
+    beforeEach(() => {
+      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0xa7cac8')
+      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x0')
+      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0x5969ec91')
+      mock_all_api(
+        etherscanUrl,
+        ropstenInfuraUrl,
+        ropstenAlchemyUrl,
+        'eth_call',
+        '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
+      )
     })
-    expect(isApproved).toEqual(true)
 
-    isApproved = await ethClient.isApproved({
-      contractAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      spenderAddress: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-      amount: baseAmount(101, ETH_DECIMAL),
+    afterEach(async () => {
+      nock.cleanAll()
     })
-    expect(isApproved).toEqual(false)
+
+    it('approved', async () => {
+      const result = await client.isApproved({
+        contractAddress,
+        spenderAddress,
+        amount: baseAmount(100, 6),
+        walletIndex: 0,
+      })
+      expect(result).toBeTruthy()
+    })
+
+    it('not approved', async () => {
+      const result = await client.isApproved({
+        contractAddress,
+        spenderAddress,
+        amount: baseAmount(101, 6),
+        walletIndex: 0,
+      })
+      expect(result).toBeFalsy()
+    })
   })
 
   it('estimateApprove', async () => {
@@ -597,7 +611,9 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
 
+    const fromAddress = ethClient.getAddress(0)
     const gasLimit = await ethClient.estimateApprove({
+      fromAddress,
       contractAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       spenderAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       amount: baseAmount(100, ETH_DECIMAL),
@@ -624,9 +640,10 @@ describe('Client Test', () => {
       'eth_sendRawTransaction',
       '0x06784c7a4652148d55d83002d967c2d0dab9447425f60b69d53cc79e15a17c2f',
     )
-
+    const fromAddress = ethClient.getAddress(0)
     const tx = await ethClient.approve({
       walletIndex: 0,
+      fromAddress,
       contractAddress: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
       spenderAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       feeOptionKey: 'fastest' as FeeOption,
@@ -654,7 +671,7 @@ describe('Client Test', () => {
         '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
         BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
         {
-          from: ethClient.getAddress(),
+          from: ethClient.getAddress(0),
         },
       ],
     })

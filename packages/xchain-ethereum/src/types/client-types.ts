@@ -35,6 +35,7 @@ export type ApproveParams = {
   walletIndex?: number
   contractAddress: Address
   spenderAddress: Address
+  fromAddress: Address
   feeOptionKey?: FeeOption
   amount?: BaseAmount
   // Optional fallback in case estimation for gas limit fails
