@@ -1,8 +1,22 @@
 import axios from 'axios'
 
+// axios.interceptors.request.use((request) => {
+//   // console.log('Starting Request', JSON.stringify(request, null, 2))
+//   console.log(request.url)
+//   return request
+// })
+
+// axios.interceptors.response.use((response) => {
+//   console.log('Response:', JSON.stringify(response.data, null, 2))
+//   //console.log(response.data)
+//   return response
+// })
+
 /**
  * endpoints for openhaven/backend communication
  */
+
+export const dataAPI = axios.create()
 
 let API_URL = ''
 let address = ''
@@ -25,12 +39,12 @@ const CONFIG = {
 }
 
 export const get_version = (): Promise<any> => {
-  return axios.post(`${API_URL}/get_version`, {}, CONFIG).then((result) => result.data)
+  return dataAPI.post(`${API_URL}/get_version`, {}, CONFIG).then((result) => result.data)
 }
 
 export const login = (generated_locally: boolean, create_account = true): Promise<any> => {
   const params = { address, view_key, generated_locally, create_account }
-  return axios.post(`${API_URL}/login`, params, CONFIG).then((result) => result.data)
+  return dataAPI.post(`${API_URL}/login`, params, CONFIG).then((result) => result.data)
 }
 
 /**
@@ -40,7 +54,7 @@ export const login = (generated_locally: boolean, create_account = true): Promis
  */
 export const keepAlive = (): Promise<any> => {
   const params = { address, view_key }
-  return axios.post(`${API_URL}/ping`, params, CONFIG).then((result) => result.data)
+  return dataAPI.post(`${API_URL}/ping`, params, CONFIG).then((result) => result.data)
 }
 
 /**
@@ -50,7 +64,7 @@ export const keepAlive = (): Promise<any> => {
  */
 export const getAddressInfo = (): Promise<any> => {
   const params = { address, view_key }
-  return axios.post(`${API_URL}/get_address_info`, params, CONFIG).then((result) => result.data)
+  return dataAPI.post(`${API_URL}/get_address_info`, params, CONFIG).then((result) => result.data)
 }
 
 /**
@@ -60,7 +74,7 @@ export const getAddressInfo = (): Promise<any> => {
  */
 export const getAddressTxs = (): Promise<any> => {
   const params = { address, view_key }
-  return axios.post(`${API_URL}/get_address_txs`, params, CONFIG).then((result) => result.data)
+  return dataAPI.post(`${API_URL}/get_address_txs`, params, CONFIG).then((result) => result.data)
 }
 
 /**
@@ -71,7 +85,7 @@ export const getAddressTxs = (): Promise<any> => {
  */
 export const getTx = (tx_hash: string): Promise<any> => {
   const params = { address, view_key, tx_hash }
-  return axios.post(`${API_URL}/get_tx`, params, CONFIG).then((result) => result.data)
+  return dataAPI.post(`${API_URL}/get_tx`, params, CONFIG).then((result) => result.data)
 }
 
 //
@@ -86,13 +100,13 @@ export const getUnspentOuts = (getUnspentOutsParams: any): Promise<any> => {
   //    const dust_threshold = "1000000000";
 
   //const params = {address, view_key, amount, mixin, use_dust, dust_threshold};
-  return axios.post(`${API_URL}/get_unspent_outs`, getUnspentOutsParams, CONFIG).then((result) => result.data)
+  return dataAPI.post(`${API_URL}/get_unspent_outs`, getUnspentOutsParams, CONFIG).then((result) => result.data)
 }
 
 export const getRandomOuts = (getRandomOutsParams: any): Promise<any> => {
-  return axios.post(`${API_URL}/get_random_outs`, getRandomOutsParams, CONFIG).then((result) => result.data)
+  return dataAPI.post(`${API_URL}/get_random_outs`, getRandomOutsParams, CONFIG).then((result) => result.data)
 }
 
 export const submitRawTx = (signedTx: any): Promise<any> => {
-  return axios.post(`${API_URL}/submit_raw_tx`, signedTx.CONFIG).then((result) => result.data)
+  return dataAPI.post(`${API_URL}/submit_raw_tx`, signedTx.CONFIG).then((result) => result.data)
 }
