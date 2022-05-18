@@ -611,9 +611,8 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
 
-    const fromAddress = ethClient.getAddress(0)
     const gasLimit = await ethClient.estimateApprove({
-      fromAddress,
+      walletIndex: 0,
       contractAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       spenderAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       amount: baseAmount(100, ETH_DECIMAL),
@@ -640,10 +639,8 @@ describe('Client Test', () => {
       'eth_sendRawTransaction',
       '0x06784c7a4652148d55d83002d967c2d0dab9447425f60b69d53cc79e15a17c2f',
     )
-    const fromAddress = ethClient.getAddress(0)
     const tx = await ethClient.approve({
       walletIndex: 0,
-      fromAddress,
       contractAddress: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
       spenderAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       feeOptionKey: 'fastest' as FeeOption,
