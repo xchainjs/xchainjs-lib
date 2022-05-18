@@ -21,7 +21,7 @@ import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Asset, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import { convertBip39ToHavenMnemonic } from 'mnemonicconverter'
 
-import { AssetXHV, getAssetByTicker } from './assets'
+import { getAssetByTicker } from './assets'
 import { HavenCoreClient } from './haven/haven-core-client'
 import { HavenBalance, HavenTicker, SyncObserver } from './haven/types'
 import { assertIsDefined } from './haven/utils'
@@ -72,12 +72,12 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
 
     const fees: Fees = {} as Fees
 
-    Object.entries(feePriorities).forEach(async ([feeOption, priority]) => {
+    for (const feeOption in feePriorities) {
+      const priority = feePriorities[feeOption as FeeOption]
       const feeAmount = await this.havenSDK.estimateFees(priority)
       const feeBaseAmount = baseAmount(feeAmount, 12)
       fees[feeOption as FeeOption] = feeBaseAmount
-    })
-
+    }
     fees.type = FeeType.PerByte
     return fees
   }
@@ -136,9 +136,10 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   }
 
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const asset: Asset = params?.asset ? assetFromString(params.asset)! : AssetXHV
-    const ticker = asset.ticker
+    const asset: Asset | undefined = params?.asset ? assetFromString(params.asset)! : undefined
+    const ticker = asset?.ticker
     let transactions = await this.havenSDK.getTransactions()
+
     // filter if we either send or received coins for requested asset
     transactions = ticker
       ? transactions.filter((tx, _) => {
@@ -163,33 +164,45 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     const limit = params?.limit ? params.limit + offset : undefined
 
     // filter by offset/limit
-    transactions = limit ? transactions.filter((_, index) => index >= offset && index <= limit) : transactions
+    transactions = limit ? transactions.filter((_, index) => index >= offset && index < limit) : transactions
 
     const txs: Tx[] = transactions.map((havenTx, _) => {
       // if we exchanged to ourself in the past with Havens own exchange mechanics, we have an out and incoming tx
       // if request is limited by an asset, we will only take by the one which matches it
       const isOut: boolean =
-        baseAmount(havenTx.fromAmount, 12).gt('0') &&
+        baseAmount(havenTx.total_sent[havenTx.from_asset_type], 12).gt('0') &&
         (params?.asset === undefined || (params?.asset !== undefined && havenTx.from_asset_type == params.asset))
 
       const isIn: boolean =
-        baseAmount(havenTx.toAmount, 12).gt('0') &&
+        baseAmount(havenTx.total_received[havenTx.to_asset_type], 12).gt('0') &&
         (params?.asset === undefined || (params?.asset !== undefined && havenTx.to_asset_type == params.asset))
 
       const from: Array<TxFrom> = isOut
-        ? [{ amount: baseAmount(havenTx.fromAmount, 12), asset: undefined, from: havenTx.hash }]
+        ? [
+            {
+              amount: baseAmount(havenTx.fromAmount, 12),
+              asset: getAssetByTicker(havenTx.from_asset_type),
+              from: havenTx.hash,
+            },
+          ]
         : []
       const to: Array<TxTo> = isIn
-        ? [{ amount: baseAmount(havenTx.toAmount, 12), asset: undefined, to: havenTx.hash }]
+        ? [
+            {
+              amount: baseAmount(havenTx.toAmount, 12),
+              asset: getAssetByTicker(havenTx.to_asset_type),
+              to: havenTx.hash,
+            },
+          ]
         : []
 
       const tx: Tx = {
         hash: havenTx.hash,
         date: new Date(havenTx.timestamp),
-        type: isIn && isOut ? TxType.Unknown : TxType.Transfer,
+        type: havenTx.from_asset_type === havenTx.to_asset_type ? TxType.Transfer : TxType.Unknown,
         from,
         to,
-        asset: asset,
+        asset: isOut ? getAssetByTicker(havenTx.from_asset_type) : getAssetByTicker(havenTx.to_asset_type),
       }
 
       return tx
@@ -204,14 +217,27 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   async getTransactionData(txId: string, _assetAddress?: string): Promise<Tx> {
     const havenTx = await this.havenSDK.getTx(txId)
 
-    const isOut: boolean = baseAmount(havenTx.fromAmount, 12).gt('0')
-    const isIn: boolean = baseAmount(havenTx.toAmount, 12).gt('0')
+    const isOut: boolean = baseAmount(havenTx.total_sent[havenTx.from_asset_type], 12).gt('0')
+
+    const isIn: boolean = baseAmount(havenTx.total_received[havenTx.to_asset_type], 12).gt('0')
 
     const from: Array<TxFrom> = isOut
-      ? [{ amount: baseAmount(havenTx.fromAmount, 12), asset: undefined, from: havenTx.hash }]
+      ? [
+          {
+            amount: baseAmount(havenTx.fromAmount, 12),
+            asset: getAssetByTicker(havenTx.from_asset_type),
+            from: havenTx.hash,
+          },
+        ]
       : []
     const to: Array<TxTo> = isIn
-      ? [{ amount: baseAmount(havenTx.toAmount, 12), asset: undefined, to: havenTx.hash }]
+      ? [
+          {
+            amount: baseAmount(havenTx.toAmount, 12),
+            asset: getAssetByTicker(havenTx.to_asset_type),
+            to: havenTx.hash,
+          },
+        ]
       : []
 
     const asset: Asset = isOut ? getAssetByTicker(havenTx.from_asset_type) : getAssetByTicker(havenTx.to_asset_type)
@@ -231,7 +257,13 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     const { amount, asset, recipient, memo } = params
     if (asset === undefined) throw 'please specify asset it in Client.transfer() for Haven'
     const amountString = amount.amount.toString()
-    return this.havenSDK.transfer(amountString, asset.ticker as HavenTicker, recipient, memo)
+    let txHash
+    try {
+      txHash = this.havenSDK.transfer(amountString, asset.ticker as HavenTicker, recipient, memo)
+      return txHash
+    } catch (e) {
+      return Promise.reject('Tx could not be sent')
+    }
   }
 
   purgeClient(): void {
