@@ -3,49 +3,63 @@ import mock from './axios-adapter'
 export default {
   restore: mock.restore,
   init: () => {
-    console.log('init mock adapter')
     //Mock login
-    mock.onPost(/\/login\//).reply(function () {
+    const login_uri = '/login'
+    mock.onPost(new RegExp(`${login_uri}/*`)).reply(function () {
       const resp = require(`./response/login.json`)
       return [200, resp]
     })
 
-    mock.onPost(/\/get_version\//).reply(function () {
+    const get_version_uri = '/get_version'
+    mock.onPost(new RegExp(`${get_version_uri}/*`)).reply(function () {
       const resp = require(`./response/get_version.json`)
       return [200, resp]
     })
 
     //Mock get_address_info
-    mock.onPost(/\/get_address_info\//).reply(function () {
+    const get_address_info_uri = '/get_address_info'
+    mock.onPost(new RegExp(`${get_address_info_uri}/*`)).reply(function () {
       const resp = require(`./response/get_address_info.json`)
       return [200, resp]
     })
 
     //Mock get_address_txs
-    mock.onPost(/\/get_address_txs\//).reply(function () {
+    const get_address_txs_uri = '/get_address_txs'
+    mock.onPost(new RegExp(`${get_address_txs_uri}/*`)).reply(function () {
       const resp = require(`./response/get_address_txs.json`)
       return [200, resp]
     })
 
+    //Mock get_tx
+    const get_tx_uri = '/get_tx'
+    mock.onPost(new RegExp(`${get_tx_uri}/*`)).reply(function () {
+      const resp = require(`./response/get_tx.json`)
+      return [200, resp]
+    })
+
     //Mock get_unspent_outs
-    mock.onPost(/\/get_unspent_outs\//).reply(function () {
+    const get_unspent_outs_uri = '/get_unspent_outs'
+    mock.onPost(new RegExp(`${get_unspent_outs_uri}/*`)).reply(function () {
       const resp = require(`./response/get_unspent_outs.json`)
       return [200, resp]
     })
 
     //Mock get_random_outs
-    mock.onPost(/\/get_random_outs\//).reply(function () {
+    const get_random_outs_uri = '/get_random_outs'
+    mock.onPost(new RegExp(`${get_random_outs_uri}/*`)).reply(function () {
       const resp = require(`./response/get_random_outs.json`)
       return [200, resp]
     })
 
     //Mock submit tx
-    mock.onPost(/\/submit_raw_tx/).reply(function () {
+    const submit_raw_tx_uri = '/submit_raw_tx'
+    mock.onPost(new RegExp(`${submit_raw_tx_uri}/*`)).reply(function () {
       return [200, null]
     })
 
-    //Mock submit tx
-    mock.onPost(/\/ping/).reply(function () {
+    //Mock ping
+    const ping_uri = '/ping'
+    mock.onPost(new RegExp(`${ping_uri}/*`)).reply(function () {
       const resp = require(`./response/ping.json`)
       return [200, resp]
     })
