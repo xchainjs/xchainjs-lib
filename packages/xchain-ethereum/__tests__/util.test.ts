@@ -9,6 +9,7 @@ import { EthNetwork } from '../src/types'
 import {
   ETH_DECIMAL,
   MAX_APPROVAL,
+  call,
   estimateApprove,
   estimateCall,
   ethNetworkToXchains,
@@ -570,6 +571,29 @@ describe('ethereum/util', () => {
     it('max (amount is zero)', () => {
       const result = getApprovalAmount(baseAmount(0, ETH_DECIMAL))
       expect(result.eq(MAX_APPROVAL)).toBeTruthy()
+    })
+  })
+
+  describe('call', () => {
+    it('`decimals`', async () => {
+      nock.disableNetConnect()
+      mock_etherscan_api(
+        'https://api-ropsten.etherscan.io',
+        'eth_call',
+        '0x0000000000000000000000000000000000000000000000000000000000000006', // 6
+      )
+
+      const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
+
+      const decimal = await call({
+        provider,
+        contractAddress: '0x6EE856Ae55B6E1A249f04cd3b947141bc146273c',
+        abi: erc20ABI,
+        funcName: 'decimals',
+      })
+      expect(ethers.BigNumber.from(decimal).toString()).toEqual('6')
+
+      nock.cleanAll()
     })
   })
 })

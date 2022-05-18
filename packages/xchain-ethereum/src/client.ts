@@ -29,7 +29,7 @@ import {
   delay,
   getInboundDetails,
 } from '@xchainjs/xchain-util'
-import { BigNumber, BigNumberish, Wallet, ethers } from 'ethers'
+import { BigNumber, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
 
 import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
@@ -56,9 +56,11 @@ import {
   ETHAddress,
   ETH_DECIMAL,
   SIMPLE_GAS_COST,
+  call,
   estimateApprove,
   estimateCall,
   getApprovalAmount,
+  getDecimal,
   getDefaultGasPrices,
   getFee,
   getTokenAddress,
@@ -361,13 +363,14 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         // use etherscan for testnet
 
         const newAssets = assets || [AssetETH]
+        const provider = this.getProvider()
         // Follow approach is only for testnet
         // For mainnet, we will use ethplorer api(one request only)
         // https://github.com/xchainjs/xchainjs-lib/issues/252
         // And to avoid etherscan api call limit, it gets balances in a sequence way, not in parallel
         const balances = []
         for (let i = 0; i < newAssets.length; i++) {
-          const asset = newAssets[i]
+          const asset: Asset = newAssets[i]
           const etherscan = this.getEtherscanProvider()
           if (assetToString(asset) !== assetToString(AssetETH)) {
             // Handle token balances
@@ -381,10 +384,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
               assetAddress,
               apiKey: etherscan.apiKey,
             })
-            const decimals =
-              BigNumber.from(
-                await this.call<BigNumberish>({ contractAddress: assetAddress, abi: erc20ABI, funcName: 'decimals' }),
-              ).toNumber() || ETH_DECIMAL
+            const decimals = (await getDecimal(asset, provider)) || ETH_DECIMAL
 
             if (!Number.isNaN(decimals)) {
               balances.push({
@@ -580,21 +580,18 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
   /**
    * Call a contract function.
-   * @template T The result interface.
-   * @param {number} walletIndex (optional) HD wallet index
+
+   * @param {signer} Signer of the transaction (optional - needed for sending transactions only)
    * @param {Address} contractAddress The contract address.
    * @param {ContractInterface} abi The contract ABI json.
    * @param {string} funcName The function to be called.
-   * @param {any[]} funcParams The parameters of the function.
-   * @returns {T} The result of the contract function call.
+   * @param {unknown[]} funcParams (optional) The parameters of the function.
    *
-   * @throws {"contractAddress must be provided"}
-   * Thrown if the given contract address is empty.
+   * @returns {T} The result of the contract function call.
    */
-  async call<T>({ walletIndex = 0, contractAddress, abi, funcName, funcParams = [] }: CallParams): Promise<T> {
-    if (!contractAddress) throw new Error('contractAddress must be provided')
-    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(walletIndex))
-    return contract[funcName](...funcParams)
+  async call<T>({ signer, contractAddress, abi, funcName, funcParams = [] }: CallParams): Promise<T> {
+    const provider = this.getProvider()
+    return call({ provider, signer, contractAddress, abi, funcName, funcParams })
   }
 
   /**
@@ -681,7 +678,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     checkFeeBounds(this.feeBounds, gasPrice.toNumber())
 
     return await this.call<TransactionResponse>({
-      walletIndex,
+      signer: this.getWallet(walletIndex),
       contractAddress,
       abi: erc20ABI,
       funcName: 'approve',
@@ -774,11 +771,13 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     checkFeeBounds(this.feeBounds, BigNumber.from(overrides.gasPrice).toNumber())
 
+    const signer = this.getWallet(walletIndex)
+
     let txResult: TransactionResponse
     if (assetAddress && !isETHAddress) {
       // Transfer ERC20
       txResult = await this.call<TransactionResponse>({
-        walletIndex,
+        signer,
         contractAddress: assetAddress,
         abi: erc20ABI,
         funcName: 'transfer',
@@ -794,7 +793,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         },
       )
 
-      txResult = await this.getWallet(walletIndex).sendTransaction(transactionRequest)
+      txResult = await signer.sendTransaction(transactionRequest)
     }
 
     return txResult.hash

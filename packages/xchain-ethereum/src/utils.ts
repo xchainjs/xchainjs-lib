@@ -10,7 +10,7 @@ import {
   assetToString,
   baseAmount,
 } from '@xchainjs/xchain-util'
-import { ethers, providers } from 'ethers'
+import { Signer, ethers, providers } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
 
 import erc20ABI from './data/erc20.json'
@@ -355,6 +355,42 @@ export const estimateCall = async ({
 }): Promise<ethers.BigNumber> => {
   const contract: ethers.Contract = new ethers.Contract(contractAddress, abi, provider)
   return await contract.estimateGas[funcName](...funcParams)
+}
+
+/**
+ * Calls a contract function.
+ *
+ * @param {Provider} provider Provider to interact with the contract.
+ * @param {signer} Signer of the transaction (optional - needed for sending transactions only)
+ * @param {Address} contractAddress The contract address.
+ * @param {ContractInterface} abi The contract ABI json.
+ * @param {string} funcName The function to be called.
+ * @param {unknow[]} funcParams (optional) The parameters of the function.
+ *
+ * @returns {T} The result of the contract function call.
+
+ */
+export const call = async <T>({
+  provider,
+  signer,
+  contractAddress,
+  abi,
+  funcName,
+  funcParams = [],
+}: {
+  provider: providers.Provider
+  signer?: Signer
+  contractAddress: Address
+  abi: ethers.ContractInterface
+  funcName: string
+  funcParams?: unknown[]
+}): Promise<T> => {
+  let contract = new ethers.Contract(contractAddress, abi, provider)
+  if (signer) {
+    // For sending transactions a signer is needed
+    contract = contract.connect(signer)
+  }
+  return contract[funcName](...funcParams)
 }
 
 /**
