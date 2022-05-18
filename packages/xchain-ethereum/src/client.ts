@@ -63,6 +63,8 @@ import {
   getTokenBalances,
   getTxFromEthplorerEthTransaction,
   getTxFromEthplorerTokenOperation,
+  isApproved,
+  strip0x,
   validateAddress,
   xchainNetworkToEths,
 } from './utils'
@@ -81,6 +83,7 @@ export interface EthereumClient {
   approve(params: ApproveParams): Promise<TransactionResponse>
   // `getFees` of `BaseXChainClient` needs to be overridden
   getFees(params: TxParams): Promise<Fees>
+  getWallet(walletIndex?: number): ethers.Wallet
 }
 
 export type EthereumClientParams = XChainClientParams & {
@@ -458,15 +461,15 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @throws {"router address is not defined"} Thrown if router address is not defined
    */
   async deposit({ walletIndex = 0, asset = AssetETH, amount, memo }: DepositParams): Promise<TxHash> {
-    const inboundDetails = await getInboundDetails(asset.chain, this.network)
+    const { haltedChain, haltedTrading, router, vault } = await getInboundDetails(asset.chain, this.network)
 
-    if (inboundDetails.haltedChain) {
+    if (haltedChain) {
       throw new Error(`Halted chain for ${assetToString(asset)}`)
     }
-    if (inboundDetails.haltedTrading) {
+    if (haltedTrading) {
       throw new Error(`Halted trading for ${assetToString(asset)}`)
     }
-    if (!inboundDetails.router) {
+    if (!router) {
       throw new Error('router address is not defined')
     }
 
@@ -474,9 +477,9 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     const gasPrice = await this.estimateGasPrices()
 
     if (asset.ticker.toUpperCase() === 'ETH') {
-      const contract = new ethers.Contract(inboundDetails.router, routerABI)
+      const contract = new ethers.Contract(router, routerABI)
       const unsignedTx = await contract.populateTransaction.deposit(
-        inboundDetails.vault,
+        vault,
         ETHAddress,
         amount.amount().toFixed(),
         memo,
@@ -490,28 +493,28 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       return typeof response === 'string' ? response : response.hash
     } else {
       const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
-      const strip0x = assetAddress.substr(2)
-      const isApproved = await this.isApproved({
+      const contractAddress = strip0x(assetAddress)
+      const isApprovedResult = await this.isApproved({
         amount: baseAmount(amount.amount()),
-        spenderAddress: inboundDetails.router,
-        contractAddress: strip0x,
+        spenderAddress: router,
+        contractAddress,
         walletIndex,
       })
 
-      if (!isApproved) {
+      if (!isApprovedResult) {
         throw new Error('The amount is not allowed to spend')
       }
 
-      const checkSummedAddress = ethers.utils.getAddress(strip0x)
-      const params = [inboundDetails.vault, checkSummedAddress, amount.amount().toFixed(), memo]
-      const vaultContract = new ethers.Contract(inboundDetails.router, routerABI)
+      const checkSummedContractAddress = ethers.utils.getAddress(contractAddress)
+      const params = [vault, checkSummedContractAddress, amount.amount().toFixed(), memo]
+      const vaultContract = new ethers.Contract(router, routerABI)
       const unsignedTx = await vaultContract.populateTransaction.deposit(...params, {
         from: address,
         value: 0,
         gasPrice: gasPrice.fast.amount().toFixed(),
       })
-      const response = await this.getWallet(walletIndex).sendTransaction(unsignedTx)
-      return typeof response === 'string' ? response : response.hash
+      const { hash } = await this.getWallet(walletIndex).sendTransaction(unsignedTx)
+      return hash
     }
   }
 
@@ -586,7 +589,6 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @throws {"contractAddress must be provided"}
    * Thrown if the given contract address is empty.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async call<T>({ walletIndex = 0, contractAddress, abi, funcName, funcParams = [] }: CallParams): Promise<T> {
     if (!contractAddress) throw new Error('contractAddress must be provided')
     const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(walletIndex))
@@ -626,24 +628,23 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @param {number} walletIndex (optional) HD wallet index
    * @returns {boolean} `true` or `false`.
    */
-  async isApproved({ contractAddress, spenderAddress, amount, walletIndex = 0 }: IsApprovedParams): Promise<boolean> {
-    // since amount is optional, set it to smallest amount by default
-    const txAmount = BigNumber.from(amount?.amount().toFixed() ?? 1)
-    const owner = this.getAddress(walletIndex)
-    const allowance = await this.call<BigNumberish>({
+  async isApproved({ contractAddress, spenderAddress, amount, walletIndex }: IsApprovedParams): Promise<boolean> {
+    const allowance = await isApproved({
+      provider: this.getProvider(),
+      amount,
+      spenderAddress,
       contractAddress,
-      abi: erc20ABI,
-      funcName: 'allowance',
-      funcParams: [owner, spenderAddress],
+      fromAddress: this.getAddress(walletIndex),
     })
-    return txAmount.lte(allowance)
-  }
 
+    return allowance
+  }
   /**
    * Check allowance.
    *
    * @param {Address} contractAddress The contract address.
    * @param {Address} spenderAddress The spender address.
+   * @param {Address} fromAddress The address a transaction is send from.
    * @param {feeOptionKey} FeeOption Fee option (optional)
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @param {number} walletIndex (optional) HD wallet index
@@ -653,6 +654,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   async approve({
     contractAddress,
     spenderAddress,
+    fromAddress,
     feeOptionKey: feeOption = FeeOption.Fastest,
     amount,
     walletIndex = 0,
@@ -667,21 +669,24 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         .amount()
         .toFixed(),
     )
+
     const gasLimit = await this.estimateApprove({
       walletIndex,
       spenderAddress,
       contractAddress,
+      fromAddress,
       amount,
     }).catch(() => BigNumber.from(gasLimitFallback))
 
-    const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
+    const txAmount: BigNumber = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
     checkFeeBounds(this.feeBounds, gasPrice.toNumber())
+
     return await this.call<TransactionResponse>({
       walletIndex,
       contractAddress,
       abi: erc20ABI,
       funcName: 'approve',
-      funcParams: [spenderAddress, txAmount, { from: this.getAddress(walletIndex), gasPrice, gasLimit }],
+      funcParams: [spenderAddress, txAmount, { from: fromAddress, gasPrice, gasLimit }],
     })
   }
 
@@ -697,16 +702,15 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   async estimateApprove({
     contractAddress,
     spenderAddress,
-    walletIndex = 0,
+    fromAddress,
     amount,
   }: EstimateApproveParams): Promise<BigNumber> {
     const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
     const gasLimit = await this.estimateCall({
-      walletIndex,
       contractAddress,
       abi: erc20ABI,
       funcName: 'approve',
-      funcParams: [spenderAddress, txAmount, { from: this.getAddress(walletIndex) }],
+      funcParams: [spenderAddress, txAmount, { from: fromAddress }],
     })
 
     return gasLimit
@@ -771,7 +775,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     checkFeeBounds(this.feeBounds, BigNumber.from(overrides.gasPrice).toNumber())
 
-    let txResult
+    let txResult: TransactionResponse
     if (assetAddress && !isETHAddress) {
       // Transfer ERC20
       txResult = await this.call<TransactionResponse>({
@@ -791,7 +795,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         },
       )
 
-      txResult = await this.getWallet().sendTransaction(transactionRequest)
+      txResult = await this.getWallet(walletIndex).sendTransaction(transactionRequest)
     }
 
     return txResult.hash
@@ -819,7 +823,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     try {
       return await this.estimateGasPricesFromEtherscan()
     } catch (error) {
-      return Promise.reject(new Error(`Failed to estimate gas price: ${error.msg ?? error.toString()}`))
+      return Promise.reject(new Error(`Failed to estimate gas price: ${error}`))
     }
   }
 

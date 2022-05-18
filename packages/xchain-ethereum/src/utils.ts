@@ -343,6 +343,36 @@ export const getDecimal = async (asset: Asset, provider: providers.Provider): Pr
 }
 
 /**
+ * Check allowance.
+ *
+ * @param {Address} contractAddress The contract (ERC20 token) address.
+ * @param {Address} spenderAddress The spender address (router).
+ * @param {Address} fromAddress The address a transaction is sent from.
+ * @param {BaseAmount} amount The amount to check if it's allowed to spend or not (optional).
+ * @param {number} walletIndex (optional) HD wallet index
+ * @returns {boolean} `true` or `false`.
+ */
+export const isApproved = async ({
+  provider,
+  contractAddress,
+  spenderAddress,
+  fromAddress,
+  amount,
+}: {
+  provider: providers.Provider
+  contractAddress: Address
+  spenderAddress: Address
+  fromAddress: Address
+  amount?: BaseAmount
+}): Promise<boolean> => {
+  const txAmount = BigNumber.from(amount?.amount().toFixed() ?? 1)
+  const contract: ethers.Contract = new ethers.Contract(contractAddress, erc20ABI, provider)
+  const allowance: ethers.BigNumberish = await contract.allowance(fromAddress, spenderAddress)
+
+  return txAmount.lte(allowance)
+}
+
+/**
  * Get Token Balances
  *
  * @param {TokenBalance[]} tokenBalances
@@ -369,3 +399,5 @@ export const getTokenBalances = (tokenBalances: TokenBalance[]): Balance[] => {
     return acc
   }, [] as Balance[])
 }
+
+export const strip0x = (addr: Address) => addr.replace(/^0(x|X)/, '')
