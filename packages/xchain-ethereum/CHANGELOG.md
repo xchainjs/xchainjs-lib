@@ -1,4 +1,4 @@
-# v.0.24.2 (2022-xx-xx)
+# v.0.25.0 (2022-xx-xx)
 
 ## Add
 
@@ -7,6 +7,11 @@
 - Helper `utils.estimateApprove`
 - Helper `utils.strip0x`
 - Helper `utils.getApprovalAmount`
+- Helper `utils.call`
+
+## Breaking change
+
+- Remove `walletIndex` parameter from `client.call` in favour of `signer`
 
 # v.0.24.1 (2022-05-05)
 

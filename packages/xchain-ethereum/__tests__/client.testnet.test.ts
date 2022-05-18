@@ -720,9 +720,9 @@ describe('Client Test', () => {
     ])
 
     const prices = await ethClient.estimateGasPrices()
-
+    const signer = ethClient.getWallet(0)
     const txResult = await ethClient.call<TransactionResponse>({
-      walletIndex: 0,
+      signer,
       contractAddress: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
       abi: erc20ABI,
       funcName: 'transfer',
