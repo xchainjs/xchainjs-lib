@@ -1,15 +1,12 @@
-# v.0.25.0 (2022-xx-xx)
-
-## Breaking changes
-
-- `client.approve`: Add `fromAddress` to parameters
-- `client.estimateApprove`: Add `fromAddress` to parameters
-- `client.isApproved`: Add `fromAddress` to parameters
+# v.0.24.2 (2022-xx-xx)
 
 ## Add
 
-- Add `isApproved` to `utils`
-- `strip0x` helper
+- Helper `utils.isApproved`
+- Helper `utils.estimateCall`
+- Helper `utils.estimateApprove`
+- Helper `utils.strip0x`
+- Helper `utils.getApprovalAmount`
 
 # v.0.24.1 (2022-05-05)
 

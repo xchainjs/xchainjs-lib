@@ -1,14 +1,19 @@
 import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, ETHChain, assetToString, baseAmount } from '@xchainjs/xchain-util'
-import { providers } from 'ethers'
+import { ethers, providers } from 'ethers'
 import nock from 'nock'
 
 import { mock_etherscan_api } from '../__mocks__/etherscan-api'
+import erc20ABI from '../src/data/erc20.json'
 import { EthNetwork } from '../src/types'
 import {
   ETH_DECIMAL,
+  MAX_APPROVAL,
+  estimateApprove,
+  estimateCall,
   ethNetworkToXchains,
   filterSelfTxs,
+  getApprovalAmount,
   getDecimal,
   getDefaultFees,
   getPrefix,
@@ -496,6 +501,75 @@ describe('ethereum/util', () => {
         amount: baseAmount(101, 6),
       })
       expect(result).toBeFalsy()
+    })
+  })
+
+  describe('estimateCall', () => {
+    it('estimate transfer', async () => {
+      mock_etherscan_api('https://api-ropsten.etherscan.io', 'eth_estimateGas', '0x5208') // 2100
+
+      const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
+      const fromAddress = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E'
+      const contractAddress = '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7'
+
+      const gas: ethers.BigNumber = await estimateCall({
+        provider,
+        contractAddress,
+        abi: erc20ABI,
+        funcName: 'transfer',
+        funcParams: [
+          '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+          ethers.BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
+          {
+            from: fromAddress,
+          },
+        ],
+      })
+
+      expect(gas.toString()).toEqual('21000')
+
+      nock.cleanAll()
+    })
+  })
+
+  describe('estimateApprove', () => {
+    it('estimate transfer', async () => {
+      mock_etherscan_api('https://api-ropsten.etherscan.io', 'eth_estimateGas', '0x5208') // 2100
+
+      const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
+      const fromAddress = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E'
+      const contractAddress = '0xA3910454bF2Cb59b8B3a401589A3bAcC5cA42306' // USDT
+      const spenderAddress = '0xeB005a0aa5027F66c8D195C77f7B01324C48501C' // router
+
+      const gas: ethers.BigNumber = await estimateApprove({
+        provider,
+        contractAddress,
+        spenderAddress,
+        abi: erc20ABI,
+        fromAddress,
+        amount: baseAmount(100, ETH_DECIMAL),
+      })
+
+      expect(gas.toString()).toEqual('21000')
+
+      nock.cleanAll()
+    })
+  })
+
+  describe('getApprovalAmount', () => {
+    it('10', () => {
+      const result = getApprovalAmount(baseAmount(100, ETH_DECIMAL))
+      const expected = ethers.BigNumber.from('100')
+      expect(result.toString()).toEqual('100')
+      expect(result.eq(expected)).toBeTruthy()
+    })
+    it('max (amount not set)', () => {
+      const result = getApprovalAmount()
+      expect(result.eq(MAX_APPROVAL)).toBeTruthy()
+    })
+    it('max (amount is zero)', () => {
+      const result = getApprovalAmount(baseAmount(0, ETH_DECIMAL))
+      expect(result.eq(MAX_APPROVAL)).toBeTruthy()
     })
   })
 })

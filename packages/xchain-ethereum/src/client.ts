@@ -55,8 +55,10 @@ import {
   BASE_TOKEN_GAS_COST,
   ETHAddress,
   ETH_DECIMAL,
-  MAX_APPROVAL,
   SIMPLE_GAS_COST,
+  estimateApprove,
+  estimateCall,
+  getApprovalAmount,
   getDefaultGasPrices,
   getFee,
   getTokenAddress,
@@ -602,21 +604,18 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @param {string} funcName The function to be called.
    * @param {any[]} funcParams The parameters of the function.
    * @param {number} walletIndex (optional) HD wallet index
-   * @returns {BigNumber} The result of the contract function call.
    *
-   * @throws {"contractAddress must be provided"}
-   * Thrown if the given contract address is empty.
+   * @returns {BigNumber} The result of the contract function call.
+
    */
-  async estimateCall({
-    contractAddress,
-    abi,
-    funcName,
-    funcParams = [],
-    walletIndex = 0,
-  }: EstimateCallParams): Promise<BigNumber> {
-    if (!contractAddress) throw new Error('contractAddress must be provided')
-    const contract = new ethers.Contract(contractAddress, abi, this.getProvider()).connect(this.getWallet(walletIndex))
-    return contract.estimateGas[funcName](...funcParams)
+  async estimateCall({ contractAddress, abi, funcName, funcParams = [] }: EstimateCallParams): Promise<BigNumber> {
+    return estimateCall({
+      provider: this.getProvider(),
+      contractAddress,
+      abi,
+      funcName,
+      funcParams,
+    })
   }
 
   /**
@@ -654,7 +653,6 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   async approve({
     contractAddress,
     spenderAddress,
-    fromAddress,
     feeOptionKey: feeOption = FeeOption.Fastest,
     amount,
     walletIndex = 0,
@@ -670,15 +668,16 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         .toFixed(),
     )
 
+    const fromAddress = this.getAddress(walletIndex)
+
     const gasLimit = await this.estimateApprove({
-      walletIndex,
       spenderAddress,
       contractAddress,
-      fromAddress,
+      walletIndex,
       amount,
     }).catch(() => BigNumber.from(gasLimitFallback))
 
-    const txAmount: BigNumber = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
+    const txAmount: BigNumber = getApprovalAmount(amount)
     checkFeeBounds(this.feeBounds, gasPrice.toNumber())
 
     return await this.call<TransactionResponse>({
@@ -691,29 +690,29 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   }
 
   /**
-   * Estimate gas limit of approve.
+   * Estimate gas for calling `approve`.
    *
    * @param {Address} contractAddress The contract address.
    * @param {Address} spenderAddress The spender address.
-   * @param {number} walletIndex (optional) HD wallet index
+   * @param {Address} fromAddress The spender address.
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
-   * @returns {BigNumber} The estimated gas limit.
+   *
+   * @returns {BigNumber} Estimated gas
    */
   async estimateApprove({
+    walletIndex = 0,
     contractAddress,
     spenderAddress,
-    fromAddress,
     amount,
   }: EstimateApproveParams): Promise<BigNumber> {
-    const txAmount = amount ? BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
-    const gasLimit = await this.estimateCall({
+    return await estimateApprove({
+      provider: this.getProvider(),
       contractAddress,
+      spenderAddress,
+      fromAddress: this.getAddress(walletIndex),
       abi: erc20ABI,
-      funcName: 'approve',
-      funcParams: [spenderAddress, txAmount, { from: fromAddress }],
+      amount,
     })
-
-    return gasLimit
   }
 
   /**
