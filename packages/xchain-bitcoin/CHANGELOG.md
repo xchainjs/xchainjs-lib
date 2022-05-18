@@ -1,3 +1,9 @@
+# v.0.18.4 (2022-05-17)
+
+## Update
+
+- throw error if memo is longer than 80 chars
+
 # v.0.18.3 (2022-05-08)
 
 ## Fix
