@@ -6,27 +6,25 @@ Midgard Module for XChainJS Clients
 
 Midgard module has been created using openapi-generator-cli auto-generation reading from "https://midgard.thorchain.info/v2/swagger.json" This library exposes all the midgard api functions defined in the swagger doc "https://midgard.thorchain.info/v2/swagger.json"
 
-## Examples
 
-```
 
-```
 ## Installation
 
 ```
 yarn add @xchainjs/xchain-midgard
 ```
-## Midgard Testing
+
+## Examples
+Request data from midgardApi
 
 ```
-yarn install
-yarn test
-```
+import { Midgard } from '@xchainjs/xchain-midgard'
 
-## Re-generate Client
+const midgardApi = new Midgard()
+console.log(midgardApi.getBaseUrl()) // Returns "https://midgard.thorchain.info"
+const getBtcPool  = await midgardApi.getPool("BTC.BTC") 
+console.log(getBtcPool)
 
-```
-yarn generate:types
 ```
 
 ## Documentation
