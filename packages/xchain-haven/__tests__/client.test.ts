@@ -162,7 +162,7 @@ describe('Haven xCHAIN Integration Test', () => {
     return expect(txPages.total).toEqual(1)
   })
 
-  it('should only get xUSD transactions', async () => {
+  it('should only get XUSD transactions', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     // Limit should work
@@ -171,8 +171,18 @@ describe('Haven xCHAIN Integration Test', () => {
     return expect(txPages.txs[0].asset).toEqual(AssetXUSD)
   })
 
-  xit('should get transaction with hash', async () => {
+  it('should only get XHV transactions', async () => {
     havenClient.setNetwork(Network.Testnet)
+    havenClient.setPhrase(bip39Mnemonic)
+    // Limit should work
+    const xhvAsset = AssetXHV
+    const txPages = await havenClient.getTransactions({ address: 'ignored', asset: assetToString(xhvAsset) })
+    return expect(txPages.txs[0].asset).toEqual(AssetXHV)
+  })
+
+  it('should get transaction with hash', async () => {
+    havenClient.setNetwork(Network.Testnet)
+    havenClient.setPhrase(bip39Mnemonic)
     const txData = await havenClient.getTransactionData(
       '45fa5f859207dab663d6b0e7ef827b3b9d477685e56d0aad54ae3dd71de5ee24',
     )
