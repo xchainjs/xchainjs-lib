@@ -1,6 +1,6 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { FeeOption, Network } from '@xchainjs/xchain-client'
-import { AssetETH, Chain, ETHChain, assetFromString, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import { AssetETH, Chain, ETHChain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, providers } from 'ethers'
 import nock from 'nock'
 
@@ -562,7 +562,7 @@ describe('Client Test', () => {
       phrase,
     })
 
-    beforeEach(() => {
+    it('approved', async () => {
       mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0xa7cac8')
       mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x0')
       mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0x5969ec91')
@@ -573,13 +573,7 @@ describe('Client Test', () => {
         'eth_call',
         '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
       )
-    })
 
-    afterEach(async () => {
-      delay(300)
-    })
-
-    it('approved', async () => {
       const result = await client.isApproved({
         contractAddress,
         spenderAddress,
@@ -590,6 +584,17 @@ describe('Client Test', () => {
     })
 
     it('not approved', async () => {
+      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0xa7cac8')
+      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x0')
+      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0x5969ec91')
+      mock_all_api(
+        etherscanUrl,
+        ropstenInfuraUrl,
+        ropstenAlchemyUrl,
+        'eth_call',
+        '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
+      )
+
       const result = await client.isApproved({
         contractAddress,
         spenderAddress,
