@@ -1,6 +1,5 @@
-import { BLOCKSFORFULLPROTECTION } from '@thorswap-lib/midgard-sdk';
 import { BigNumber } from 'bignumber.js';
-import { baseAmount, BaseAmount } from '@xchainjs/xchain-util';
+import { BaseAmount } from '@xchainjs/xchain-util';
 import { PoolData } from './swap';
 
 export type UnitData = {
@@ -37,7 +36,7 @@ export const getLiquidityUnits = (liquidity: LiquidityData, pool: PoolData): Bas
   const numerator = part1.times(part2.plus(part3))
   const denominator = R.times(T).times(4)
   const result = numerator.div(denominator)
-  return baseAmount(result)
+  return BaseAmount(result)
 }
 
 export const getPoolShare = (unitData: UnitData, pool: PoolData): LiquidityData => {
@@ -49,8 +48,8 @@ export const getPoolShare = (unitData: UnitData, pool: PoolData): LiquidityData 
   const asset = T.times(units).div(total)
   const rune = R.times(units).div(total)
   const LiquidityData = {
-    asset: baseAmount(asset),
-    rune: baseAmount(rune)
+    asset: BaseAmount(asset),
+    rune: BaseAmount(rune)
   }
   return LiquidityData
 }
@@ -78,7 +77,7 @@ export const getLiquidityProtectionData = (liquidity: LiquidityData, pool: PoolD
   const coverage = ((A0.times(P1).plus(R0)).minus(A1.times(P1).plus(R1)))
   const currentHeight = block.current
   const heightLastAdded = block.lastAdded
-  const blocksforfullprotection = BLOCKSFORFULLPROTECTION
+  const blocksforfullprotection = //
   const protectionProgress = (currentHeight - heightLastAdded)/blocksforfullprotection
   const result = protectionProgress * coverage.toNumber() // impermanent loss protection result
   return result

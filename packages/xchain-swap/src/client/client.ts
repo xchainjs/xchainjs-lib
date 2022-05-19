@@ -1,9 +1,7 @@
-import { SwapOutputData } from './client';
 import { BigNumber } from 'bignumber.js';
-import { Asset, BaseAmount } from "@xchainjs/xchain-util";
-import { getSingleSwap } from "../utils";
-
-
+import { Asset, BaseAmount, AssetRuneNative } from "@xchainjs/xchain-util";
+//import { getSingleSwap } from "../utils";
+import { Midgard } from '../../../../../../xchainjs_test/src'
 
 
 export type TotalFees = {
@@ -24,13 +22,15 @@ export type SwapOutputData = {
   transactionId: string
   expectedWait: string // or maybe a datetime type
 }
+const midgardApi = new Midgard()
 
-
-export const prepareSwap = (sourceAsset: Asset, inputAmount: BaseAmount, destinationAsset: Asset, affiliateFee: BigNumber, slipLimit: BigNumber ): SwapEstimate => {
-  //const PoolData1 = midgard(sourceAsset)// not yet implemented
-  //const PoolData2 = midgard(destinationAsset)// not yet implemented
-  const isHalted = checkStatus(sourceAsset)// only for those chains that are not Thor.
+export const estimateSwap = (sourceAsset: Asset, inputAmount: BaseAmount, destinationAsset: Asset, affiliateFee: BigNumber, slipLimit: BigNumber ): SwapEstimate => {
+  const isHalted = checkChainStatus(sourceAsset)// only for those chains that are not Thor.
   const isDoubleSwap = sourceAsset.symbol != "RUNE" // if source and destination != rune then its a double swap.
+
+  const PoolData1 = midgardApi.getPool(sourceAsset.symbol)// not yet implemented
+  //const PoolData2 = midgard(destinationAsset)// not yet implemented
+
   //const getslip = getSlipOnLiquidity()
   // const inBoundFee = inputAmount.minus(inputFee > from midgard)
   // const netInput = netInputAmount.minus(inBoundFee)
@@ -72,25 +72,52 @@ export const prepareSwap = (sourceAsset: Asset, inputAmount: BaseAmount, destina
 }
 
 
-export const checkStatus = (sourceAsset: Asset): Boolean => {
-  const midgardApi = new Midgard({ network: "mainnet"}) // until midgard is built
-  if( sourceAsset.symbol === "RUNE"){
-    return true
+export const checkChainStatus = (sourceAsset: Asset): Boolean => {
+  const midgardApi = new Midgard() // until midgard is built
+  if(sourceAsset == AssetRuneNative){
+    return true;
   }else{
-    const halted = (await midgardApi.getInboundDataByChain(`${sourceAsset.symbol}`)).halted
-    return halted
+    const data = await midgardApi.getProxiedInboundAddresses()
+    const isHalted = data.find(e => e.chain == sourceAsset.chain)
+    return isHalted?.halted!
   }
 }
 
 
-export const doSwap = (sourceAsset: Asset, inputAmount: BaseAmount, destinationAsset: Asset, affiliateFee: BigNumber, slipLimit: BigNumber): SwapOutputData => {
-  // perform swap
-  // const txid = await
-  // const wait = estimate wait time.
-  const SwapOutputData = {
-    transactionId: txid,
-    expectedWait: wait
-  }
+// export const doSwap = (sourceAsset: Asset, inputAmount: BaseAmount, destinationAsset: Asset, affiliateFee: BigNumber, slipLimit: BigNumber): SwapOutputData => {
+//   // perform swap
+//   // const txid = await
+//   // const wait = estimate wait time.
+//   const SwapOutputData = {
+//     transactionId: txid,
+//     expectedWait: wait
+//   }
 
-  return SwapOutputData
-}
+//   return SwapOutputData
+// }
+
+
+// export const getChainAsset = (chain: Chain): Asset => {
+//   switch (chain) {
+//     case BNBChain:
+//       return AssetBNB
+//     case BTCChain:
+//       return AssetBTC
+//     case ETHChain:
+//       return AssetETH
+//     case THORChain:
+//       return AssetRuneNative
+//     case CosmosChain:
+//       throw Error('Cosmos is not supported yet')
+//     case BCHChain:
+//       return AssetBCH
+//     case LTCChain:
+//       return AssetLTC
+//     case DOGEChain:
+//       return AssetDOGE
+//     case TerraChain:
+//       throw Error(`Terra no longer exists`)
+//     case PolkadotChain:
+//       throw Error('Polkadot is not supported yet')
+//   }
+// }
