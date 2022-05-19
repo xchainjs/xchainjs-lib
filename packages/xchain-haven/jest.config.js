@@ -1,5 +1,6 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/js-with-ts',
   testEnvironment: 'node',
-  testPathIgnorePatterns: ['<rootDir>/node_modules', '<rootDir>/lib'],
+  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+  transformIgnorePatterns: ['node_modules/(?!mnemonicconverter)'],
 }
