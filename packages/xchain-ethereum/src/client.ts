@@ -29,7 +29,7 @@ import {
   delay,
   getInboundDetails,
 } from '@xchainjs/xchain-util'
-import { BigNumber, Wallet, ethers } from 'ethers'
+import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
 
 import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
@@ -640,7 +640,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    *
    * @param {Address} contractAddress The contract address.
    * @param {Address} spenderAddress The spender address.
-   * @param {Address} fromAddress The address a transaction is send from.
+   * @param {signer} Signer (optional) The address a transaction is send from. If not set, signer will be defined based on `walletIndex`
    * @param {feeOptionKey} FeeOption Fee option (optional)
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @param {number} walletIndex (optional) HD wallet index
@@ -653,6 +653,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     feeOptionKey: feeOption = FeeOption.Fastest,
     amount,
     walletIndex = 0,
+    signer: txSigner,
     gasLimitFallback,
   }: ApproveParams): Promise<TransactionResponse> {
     const gasPrice = BigNumber.from(
@@ -665,12 +666,14 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         .toFixed(),
     )
 
-    const fromAddress = this.getAddress(walletIndex)
+    const signer = txSigner || this.getWallet(walletIndex)
+
+    const fromAddress = await signer.getAddress()
 
     const gasLimit = await this.estimateApprove({
       spenderAddress,
       contractAddress,
-      walletIndex,
+      fromAddress,
       amount,
     }).catch(() => BigNumber.from(gasLimitFallback))
 
@@ -678,7 +681,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     checkFeeBounds(this.feeBounds, gasPrice.toNumber())
 
     return await this.call<TransactionResponse>({
-      signer: this.getWallet(walletIndex),
+      signer,
       contractAddress,
       abi: erc20ABI,
       funcName: 'approve',
@@ -691,13 +694,13 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    *
    * @param {Address} contractAddress The contract address.
    * @param {Address} spenderAddress The spender address.
-   * @param {Address} fromAddress The spender address.
+   * @param {Address} fromAddress The address the approve transaction is sent from.
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    *
    * @returns {BigNumber} Estimated gas
    */
   async estimateApprove({
-    walletIndex = 0,
+    fromAddress,
     contractAddress,
     spenderAddress,
     amount,
@@ -706,16 +709,17 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       provider: this.getProvider(),
       contractAddress,
       spenderAddress,
-      fromAddress: this.getAddress(walletIndex),
+      fromAddress,
       abi: erc20ABI,
       amount,
     })
   }
 
   /**
-   * Transfer ETH.
+   * Transfers ETH or ERC20 token
    *
    * @param {TxParams} params The transfer options.
+   * @param {signer} Signer (optional) The address a transaction is send from. If not set, signer will be defined based on `walletIndex`
    * @param {feeOptionKey} FeeOption Fee option (optional)
    * @param {gasPrice} BaseAmount Gas price (optional)
    * @param {gasLimit} BigNumber Gas limit (optional)
@@ -726,6 +730,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   async transfer({
     walletIndex = 0,
+    signer: txSigner,
     asset,
     memo,
     amount,
@@ -734,6 +739,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     gasPrice,
     gasLimit,
   }: TxParams & {
+    signer?: Signer
     feeOptionKey?: FeeOption
     gasPrice?: BaseAmount
     gasLimit?: BigNumber
@@ -771,7 +777,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     checkFeeBounds(this.feeBounds, BigNumber.from(overrides.gasPrice).toNumber())
 
-    const signer = this.getWallet(walletIndex)
+    const signer = txSigner || this.getWallet(walletIndex)
 
     let txResult: TransactionResponse
     if (assetAddress && !isETHAddress) {

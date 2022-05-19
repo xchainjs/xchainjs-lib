@@ -8,9 +8,12 @@
 - Helper `utils.strip0x`
 - Helper `utils.getApprovalAmount`
 - Helper `utils.call`
+- Add optional `signer` params to `client.approve`
+- Add optional `signer` params to `client.transfer`
 
 ## Breaking change
 
+- Remove `walletIndex` parameter from `client.estimateApprove` in favour of `fromAddress`
 - Remove `walletIndex` parameter from `client.call` in favour of `signer`
 
 # v.0.24.1 (2022-05-05)
