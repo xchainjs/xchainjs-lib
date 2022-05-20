@@ -1,7 +1,15 @@
 import mock from './axios-adapter'
 
 export default {
-  restore: mock.restore,
+  restore: () => {
+    mock.restore()
+  },
+  reset: () => {
+    mock.reset()
+  },
+  resetHistory: () => {
+    mock.resetHistory()
+  },
   init: () => {
     //Mock login
     const login_uri = '/login'
@@ -19,7 +27,15 @@ export default {
     //Mock get_address_info
     const get_address_info_uri = '/get_address_info'
     mock.onPost(new RegExp(`${get_address_info_uri}/*`)).reply(function () {
+      //simulate syncing behaviour, by increasing scanned_block_height on subsequent requests
+      // this will only effect unit tests for syncing
+      const numRequest = mock.history.post.filter((axiosConfig) =>
+        axiosConfig.url?.includes(get_address_info_uri),
+      ).length
       const resp = require(`./response/get_address_info.json`)
+      //overriding scanned_block_height by number of requests to simulate backend syncing behaviour
+      resp.scanned_block_height = Math.min(numRequest * 10000, resp.blockchain_height)
+
       return [200, resp]
     })
 

@@ -1,20 +1,26 @@
 import { Network } from '@xchainjs/xchain-client/lib'
-import { assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import mockOpenHaven from '../__mocks__/open-haven'
 import { AssetXHV, AssetXUSD } from '../src/assets'
 import { Client as HavenClient } from '../src/client'
+import { SyncObserver, SyncStats } from '../src/haven/types'
 
 const havenClient = new HavenClient({ network: Network.Testnet })
 
-describe('Haven xCHAIN Integration Test', () => {
+xdescribe('Haven xCHAIN Integration Test', () => {
   beforeAll(async () => {
-    mockOpenHaven.init()
     await havenClient.preloadSDK()
   })
 
   beforeEach(() => {
     havenClient.purgeClient()
+    mockOpenHaven.init()
+  })
+
+  afterEach(() => {
+    mockOpenHaven.reset()
+    //mockOpenHaven.resetHistory()
   })
 
   const MEMO = 'SWAP:THOR.RUNE'
@@ -27,14 +33,14 @@ describe('Haven xCHAIN Integration Test', () => {
   const havenAddress2 =
     'hvta6D5QfukiUdeidKdRw4AQ9Ddvt4o9e5jPg2CzkGhdeQGkZkU4RKDW7hajbbBLwsURMLu3S3DH6d5c8QYVYYSA6jy6XRzfPv'
 
-  xit('set phrase should generate correct haven mnemonic', () => {
+  it('set phrase should generate correct haven mnemonic', () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const result = havenClient.getHavenMnemonic()
     expect(result).toEqual(havenMnemonic)
   })
 
-  xit('set phrase should return correct address', () => {
+  it('set phrase should return correct address', () => {
     havenClient.setNetwork(Network.Testnet)
     const result = havenClient.setPhrase(bip39Mnemonic)
     expect(result).toEqual(havenAddress)
@@ -48,11 +54,11 @@ describe('Haven xCHAIN Integration Test', () => {
     }).not.toThrow()
   })
 
-  xit('should throw an error for setting a bad phrase', () => {
+  it('should throw an error for setting a bad phrase', () => {
     expect(() => havenClient.setPhrase('very bad phrase')).toThrow()
   })
 
-  xit('should not throw an error for setting a good phrase', () => {
+  it('should not throw an error for setting a good phrase', () => {
     expect(havenClient.setPhrase(bip39Mnemonic)).toBeUndefined
   })
 
@@ -65,7 +71,34 @@ describe('Haven xCHAIN Integration Test', () => {
     expect(valid).toBeTruthy()
   })
 
-  xit('all balances', async () => {
+  it('should sync over time', async (done) => {
+    havenClient.setNetwork(Network.Mainnet)
+    havenClient.setPhrase(bip39Mnemonic)
+
+    // mock is configured to simulate syncing behaviour
+    const isSyncing = await havenClient.isSyncing()
+    expect(isSyncing).toBeTruthy()
+
+    const observer: SyncObserver = {
+      next: (syncState: SyncStats) => {
+        expect(syncState.syncedHeight).toBeGreaterThanOrEqual(0)
+        expect(syncState.blockHeight).toBeGreaterThan(0)
+      },
+      complete: (syncState: SyncStats) => {
+        expect(syncState.blockHeight).toBe(syncState.syncedHeight)
+        havenClient.isSyncing().then((isSyncing) => {
+          expect(isSyncing).toBeFalsy()
+          done()
+        })
+      },
+      error: (_errMessage: string) => {
+        done()
+      },
+    }
+    havenClient.subscribeSyncProgress(observer)
+  })
+
+  it('all balances', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const xhvBalance = await havenClient.getBalance('ignored', [AssetXHV])
@@ -80,67 +113,71 @@ describe('Haven xCHAIN Integration Test', () => {
     expect(xusdAndXhvdBalance.length).toEqual(2)
   })
 
-  xit('should send funds', async () => {
+  it('should send funds', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
-    const amount = baseAmount(2223)
+    const amount = baseAmount(2223, 12)
     const txid = await havenClient.transfer({ asset: AssetXHV, recipient: havenAddress2, amount })
-    expect(txid).toEqual('mock-txid')
+    expect(typeof txid).toBe('string')
+    expect(txid).not.toBe('')
+    //should not contain white spaces
+    expect(txid.indexOf(' ')).toBeLessThan(0)
   })
 
-  xit('should do broadcast a transfer with a memo', async () => {
+  it('should send funds with a memo', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
 
-    const amount = baseAmount(2223)
-    try {
-      const txid = await havenClient.transfer({
-        asset: AssetXHV,
-        recipient: havenAddress2,
-        amount,
-        memo: MEMO,
-      })
-      expect(txid).toEqual('mock-txid')
-    } catch (err) {
-      console.log('ERR running test', err)
-      throw err
-    }
+    const amount = baseAmount(2223, 12)
+    const txid = await havenClient.transfer({ asset: AssetXHV, recipient: havenAddress2, amount, memo: MEMO })
+    expect(typeof txid).toBe('string')
+    expect(txid).not.toBe('')
+    //should not contain white spaces
+    expect(txid.indexOf(' ')).toBeLessThan(0)
   })
 
-  xit('should purge phrase', async () => {
+  it('should purge phrase', async () => {
     havenClient.purgeClient()
+
     expect(() => havenClient.getAddress()).toThrow()
-  })
-
-  xit('should prevent a tx when amount exceed balance', async () => {
-    havenClient.setNetwork(Network.Testnet)
-    havenClient.setPhrase(bip39Mnemonic)
-
-    const asset = AssetXHV
-    const amount = baseAmount(99999999999999)
-    expect(havenClient.transfer({ asset, recipient: havenAddress2, amount })).rejects
-    // expect(1).toEqual(1)
   })
 
   it('should return estimated fees of a normal tx', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const estimates = await havenClient.getFees()
+
     expect(estimates.fast).toBeDefined()
     expect(estimates.fastest).toBeDefined()
     expect(estimates.average).toBeDefined()
   })
 
-  xit('should error when an invalid address is used in transfer', () => {
+  it('should reject a tx when amount exceed balance', () => {
+    havenClient.setNetwork(Network.Testnet)
+    havenClient.setPhrase(bip39Mnemonic)
+    const asset = AssetXHV
+    const amount = baseAmount(9999999999999999, 12)
+
+    expect(havenClient.transfer({ asset, recipient: havenAddress2, amount })).rejects
+  })
+
+  it('should reject when an invalid address is used in transfer', () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const invalidAddress = 'error_address'
-
-    const amount = baseAmount(99000)
+    const amount = baseAmount(99000, 12)
     expect(havenClient.transfer({ asset: AssetXHV, recipient: invalidAddress, amount })).rejects
   })
 
-  xit('should get address transactions', async () => {
+  it('should reject when no asset is set in transfer', () => {
+    havenClient.setNetwork(Network.Testnet)
+    havenClient.setPhrase(bip39Mnemonic)
+    const amount = baseAmount(99000, 12)
+
+    expect(havenClient.transfer({ recipient: havenAddress2, amount })).rejects
+  })
+
+  it('should get address transactions', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const txPages = await havenClient.getTransactions({ address: 'ignored' })
@@ -154,7 +191,7 @@ describe('Haven xCHAIN Integration Test', () => {
     expect(txPages.txs[0].from.length).toEqual(0)
   })
 
-  xit('should get address transactions with limit', async () => {
+  it('should get address transactions with limit', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     // Limit should work
@@ -184,16 +221,17 @@ describe('Haven xCHAIN Integration Test', () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const txData = await havenClient.getTransactionData(
-      '45fa5f859207dab663d6b0e7ef827b3b9d477685e56d0aad54ae3dd71de5ee24',
+      '4d4f7a5c151a7bf927388adc9d146eb9662338f52561241c48ffa127cc80733f',
     )
 
-    expect(txData.hash).toEqual('45fa5f859207dab663d6b0e7ef827b3b9d477685e56d0aad54ae3dd71de5ee24')
+    expect(txData.hash).toEqual('4d4f7a5c151a7bf927388adc9d146eb9662338f52561241c48ffa127cc80733f')
     expect(txData.to.length).toEqual(1)
-    expect(txData.to[0].to).toEqual(havenAddress)
-    expect(txData.to[0].amount.amount().isEqualTo(baseAmount(100, 12).amount())).toBeTruthy()
+    expect(txData.to[0].to).toEqual('4d4f7a5c151a7bf927388adc9d146eb9662338f52561241c48ffa127cc80733f')
+    //100 coins ( in human readable form aka asset amount ) should be received
+    expect(txData.to[0].amount.amount().isEqualTo(assetToBase(assetAmount(100, 12)).amount())).toBeTruthy()
   })
 
-  xit('should return valid explorer url', () => {
+  it('should return valid explorer url', () => {
     havenClient.setNetwork(Network.Mainnet)
     expect(havenClient.getExplorerUrl()).toEqual('https://explorer.havenprotocol.org')
 
@@ -201,7 +239,7 @@ describe('Haven xCHAIN Integration Test', () => {
     expect(havenClient.getExplorerUrl()).toEqual('https://explorer-testnet.havenprotocol.org')
   })
 
-  xit('should return valid explorer tx url', () => {
+  it('should return valid explorer tx url', () => {
     havenClient.setNetwork(Network.Mainnet)
     expect(havenClient.getExplorerTxUrl('testTxHere')).toEqual('https://explorer.havenprotocol.org/tx/testTxHere')
     havenClient.setNetwork(Network.Testnet)
