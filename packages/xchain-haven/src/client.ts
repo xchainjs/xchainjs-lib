@@ -143,11 +143,11 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     // filter if we either send or received coins for requested asset
     transactions = ticker
       ? transactions.filter((tx, _) => {
-          if (tx.from_asset_type == ticker && baseAmount(tx.fromAmount, 12).gt('0')) {
+          if (tx.from_asset_type == ticker && baseAmount(tx.total_sent[tx.from_asset_type], 12).gt('0')) {
             return true
           }
 
-          if (tx.to_asset_type == ticker && baseAmount(tx.toAmount, 12).gt('0')) {
+          if (tx.to_asset_type == ticker && baseAmount(tx.total_received[tx.to_asset_type], 12).gt('0')) {
             return true
           }
 
@@ -218,7 +218,6 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     const havenTx = await this.havenSDK.getTx(txId)
 
     const isOut: boolean = baseAmount(havenTx.total_sent[havenTx.from_asset_type], 12).gt('0')
-
     const isIn: boolean = baseAmount(havenTx.total_received[havenTx.to_asset_type], 12).gt('0')
 
     const from: Array<TxFrom> = isOut
@@ -253,13 +252,14 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     return tx
   }
 
-  transfer(params: TxParams): Promise<TxHash> {
+  async transfer(params: TxParams): Promise<TxHash> {
+    console.log('Client.transfer() called')
     const { amount, asset, recipient, memo } = params
-    if (asset === undefined) throw 'please specify asset it in Client.transfer() for Haven'
-    const amountString = amount.amount.toString()
+    if (asset === undefined) return Promise.reject('please specify asset it in Client.transfer() for Haven')
+    const amountString = amount.amount().toString()
     let txHash
     try {
-      txHash = this.havenSDK.transfer(amountString, asset.ticker as HavenTicker, recipient, memo)
+      txHash = await this.havenSDK.transfer(amountString, asset.ticker as HavenTicker, recipient, memo)
       return txHash
     } catch (e) {
       return Promise.reject('Tx could not be sent')

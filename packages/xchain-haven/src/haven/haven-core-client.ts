@@ -236,11 +236,11 @@ export class HavenCoreClient {
   }
 
   async getTx(hash: string): Promise<SerializedTransaction> {
-    const coreModule = await this.getCoreModule()
-    const keys = await this.getKeys()
+    const coreModule = this.getCoreModule()
+    const keys = this.getKeys()
     const { sec_viewKey_string, address_string, pub_spendKey_string, sec_spendKey_string } = keys
 
-    const rawTx = getTx(hash)
+    const rawTx = await getTx(hash)
     const rawTransactionData = {
       transactions: [rawTx],
     }
