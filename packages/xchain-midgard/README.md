@@ -20,10 +20,8 @@ Request data from midgardApi
 ```
 import { Midgard } from '@xchainjs/xchain-midgard'
 
-const midgardApi = new Midgard()
-console.log(midgardApi.getBaseUrl()) // Returns "https://midgard.thorchain.info"
-const getBtcPool  = await midgardApi.getPool("BTC.BTC") 
-console.log(getBtcPool)
+this.baseUrl = MIDGARD_API_URL;
+this.apiConfig = new Configuration({ basePath: this.baseUrl });
 
 ```
 
