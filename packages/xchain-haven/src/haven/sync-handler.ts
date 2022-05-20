@@ -2,7 +2,7 @@ import { getAddressInfo } from './api'
 import { SyncObserver, SyncStats } from './types'
 import { assertIsDefined } from './utils'
 
-const SYNC_THRESHOLD = 1000
+const SYNC_THRESHOLD = 300
 
 class SyncHandler {
   private scannedHeight: number | undefined = undefined
