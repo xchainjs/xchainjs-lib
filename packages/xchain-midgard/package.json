@@ -1,11 +1,14 @@
 {
-  "name": "xchain-midgard",
+  "name": "@xchainjs/xchain-midgard",
   "version": "0.1.0-alpha",
   "description": "Midgard module that  auto-generates all the client code using openapi-generator-cli",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf lib/**",
-    "build": "yarn clean",
+    "clean": "rimraf -rf ./lib",
+    "build": "yarn run clean && yarn run compile",
+    "compile": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "yarn run build",
+    "test": "jest --passWithNoTests",
     "generate:types": "yarn clean:types:midgard && yarn generate:types:midgard",
     "generate:types:midgard": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://midgard.thorchain.info/v2/swagger.json -g typescript-axios -o ./src/generated/midgardApi --reserved-words-mappings in=in",
     "clean:types:midgard": "rimraf ./src/generated/midgardApi"
