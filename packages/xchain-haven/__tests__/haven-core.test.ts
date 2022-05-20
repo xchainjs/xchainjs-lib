@@ -7,7 +7,7 @@ import { HavenBalance, NetTypes, SyncObserver, SyncStats } from '../src/haven/ty
 
 const client = new HavenCoreClient()
 
-xdescribe('Haven Core Client Tests', () => {
+describe('Haven Core Client Tests', () => {
   let balance: HavenBalance
 
   const mnenomonic =
@@ -20,7 +20,15 @@ xdescribe('Haven Core Client Tests', () => {
 
   beforeAll(async () => {
     await client.preloadModule()
+  })
+
+  beforeEach(async () => {
+    client.purge()
     mockopenhaven.init()
+  })
+
+  afterEach(() => {
+    mockopenhaven.reset()
   })
 
   it('should init haven core client without error', async () => {
@@ -29,32 +37,38 @@ xdescribe('Haven Core Client Tests', () => {
   })
 
   it('should return correct address', () => {
+    client.init(mnenomonic, NetTypes.testnet)
     const response = client.getAddress()
     expect(response).toBe(address)
   })
 
   it('should validate address', () => {
+    client.init(mnenomonic, NetTypes.testnet)
     const isValid = client.validateAddress(
       'hvtaKeraSrv8KGdn7Vp6qsQwBZLkKVQAi5fMuVynVe8HE9h7B8gdjQpMeGC1QHm4G25TBNcaXHfzSbe4G8uGTF6b5FoNTbnY5z',
     )
     expect(isValid).toBeTruthy()
   })
   it('should invalidate address', () => {
+    client.init(mnenomonic, NetTypes.testnet)
     const isValid = client.validateAddress('drlgjrnvkrsuvusekhvusehvuhksuevksekuvhseuvhskedueahdkeaudhakuedhk')
     expect(isValid).toBeFalsy()
   })
 
   it('should return balance', async () => {
+    client.init(mnenomonic, NetTypes.testnet)
     balance = await client.getBalance()
     expect(new BigNumber(balance.XUSD.balance).isGreaterThan(0))
   })
 
   it('should return transaction history', async () => {
+    client.init(mnenomonic, NetTypes.testnet)
     const transactions: SerializedTransaction[] = await client.getTransactions()
     expect(transactions.length).toBeGreaterThan(0)
   })
 
-  xit('should transfer funds', async () => {
+  it('should transfer funds', async () => {
+    client.init(mnenomonic, NetTypes.testnet)
     // is equal to 0.1 XHV
     const transferAmount = new BigNumber(10).exponentiatedBy(12).dividedBy(100)
     const response = await client.transfer(transferAmount.toString(), 'XHV', address)
@@ -63,6 +77,7 @@ xdescribe('Haven Core Client Tests', () => {
   })
 
   it('should transfer funds with memo', async () => {
+    client.init(mnenomonic, NetTypes.testnet)
     // is equal to 0.1 XHV
     const transferAmount = new BigNumber(10).exponentiatedBy(12).dividedBy(100)
     const response = await client.transfer(transferAmount.toString(), 'XHV', address, 'SWAP:THOR.RUNE')
@@ -70,7 +85,8 @@ xdescribe('Haven Core Client Tests', () => {
     expect(response).not.toBe('')
   })
 
-  xit('should return fees', async () => {
+  it('should return fees', async () => {
+    client.init(mnenomonic, NetTypes.testnet)
     // testing from low to high priority
     const defaultFees = parseFloat(await client.estimateFees(1))
     expect(defaultFees).toBeGreaterThan(0)
@@ -94,7 +110,7 @@ xdescribe('Haven Core Client Tests', () => {
     expect(newMnemonic).not.toBe('')
   })
 
-  xit('should sync a new wallet over time', async (done) => {
+  it('should sync a new wallet over time', async (done) => {
     const newMnemonic = await HavenCoreClient.createWallet(NetTypes.testnet)
 
     await client.init(newMnemonic, NetTypes.testnet)
@@ -115,5 +131,5 @@ xdescribe('Haven Core Client Tests', () => {
     }
 
     client.subscribeSyncProgress(observer)
-  }, 100000)
+  })
 })
