@@ -149,10 +149,45 @@ describe('BitcoinClient Test', () => {
       throw err
     }
   })
+  it('should fail with memo too long exception', async () => {
+    btcClient.setNetwork(Network.Testnet)
+    btcClient.setPhrase(phraseOne)
+
+    const amount = baseAmount(2223)
+    try {
+      await btcClient.transfer({
+        asset: AssetBTC,
+        recipient: addyThreePath0,
+        amount,
+        memo: 'too long too long too long too long too long too long too long too long too long too long',
+        feeRate: 1,
+      })
+      fail()
+    } catch (err) {
+      const message = err.message as string
+      expect(message.includes('memo too long')).toBeTruthy()
+    }
+  })
 
   it('should purge phrase and utxos', async () => {
     btcClient.purgeClient()
     expect(() => btcClient.getAddress()).toThrow('Phrase must be provided')
+  })
+
+  it('should fail with out of bound fees', async () => {
+    btcClient.setNetwork(Network.Testnet)
+    btcClient.setPhrase(phraseOne)
+
+    const amount = baseAmount(2223)
+    expect(
+      btcClient.transfer({
+        asset: AssetBTC,
+        recipient: addyThreePath0,
+        amount,
+        memo: MEMO,
+        feeRate: 99999999,
+      }),
+    ).rejects.toThrow()
   })
 
   it('should prevent spending unconfirmed utxo if memo exists', async () => {

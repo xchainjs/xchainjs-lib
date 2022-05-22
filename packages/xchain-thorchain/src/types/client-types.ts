@@ -1,3 +1,4 @@
+import { cosmosclient } from '@cosmos-client/core'
 import { Network, Tx, TxParams } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 
@@ -38,14 +39,14 @@ export type TxOfflineParams = TxParams & {
   /**
    * Balance of Rune to send from
    */
-  from_rune_balance: BaseAmount
+  fromRuneBalance: BaseAmount
   /**
    * Balance of asset to send from
    * Optional: It can be ignored if asset to send from is RUNE
    */
-  from_asset_balance?: BaseAmount
-  from_account_number: string
-  from_sequence: string
+  fromAssetBalance?: BaseAmount
+  fromAccountNumber: cosmosclient.Long.Long
+  fromSequence: cosmosclient.Long.Long
 }
 
 /**
@@ -65,5 +66,14 @@ export type ThorchainConstantsResponse = {
 export type NodeInfoResponse = {
   default_node_info: {
     network: string
+  }
+}
+/**
+ * Response of `/cosmos/tx/v1beta1/simulateo`
+ * Note: We are interested in `network` (aka chain id) only
+ */
+export type SimulateResponse = {
+  gas_info: {
+    gas_used: string
   }
 }

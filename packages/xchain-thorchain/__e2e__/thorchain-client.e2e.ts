@@ -10,13 +10,17 @@ export type Swap = {
 
 // Mock chain ids
 const chainIds = {
-  [Network.Mainnet]: 'chain-id-mainnet',
+  [Network.Mainnet]: 'thorchain-mainnet-v1',
   [Network.Stagenet]: 'chain-id-stagenet',
   [Network.Testnet]: 'thorchain-testnet-v2',
 }
 
-const thorClient: XChainClient = new ThorClient({ network: Network.Testnet, phrase: process.env.PHRASE, chainIds: chainIds })
-const thorchainClient = thorClient as unknown as ThorchainClient
+const thorClient: XChainClient = new ThorClient({
+  network: Network.Testnet,
+  phrase: process.env.PHRASE,
+  chainIds: chainIds,
+})
+const thorchainClient = (thorClient as unknown) as ThorchainClient
 const bnbClient: XChainClient = new BnbClient({ network: Network.Testnet, phrase: process.env.PHRASE })
 
 describe('thorchain Integration Tests', () => {
@@ -47,7 +51,6 @@ describe('thorchain Integration Tests', () => {
   })
   it('should swap some rune for BNB', async () => {
     try {
-
       // Wait 10 seconds, make sure previous test has finished to avoid sequnce conflict
       await delay(10 * 1000)
 
@@ -62,7 +65,6 @@ describe('thorchain Integration Tests', () => {
       })
 
       expect(hash.length).toBeGreaterThan(5)
-
     } catch (error) {
       console.log(error)
       throw error

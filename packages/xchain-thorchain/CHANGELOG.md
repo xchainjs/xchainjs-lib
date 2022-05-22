@@ -1,3 +1,15 @@
+# v0.25.0 (2022-05-10)
+
+## Fix
+
+- Before sending a transaction, gas limits are estimated
+- Helper `getEstimatedGas`
+
+## Breaking changes
+
+- Client's `transferOffline` requires `fromAccountNumber` and `fromSequence`
+- Rename parameters in `transferOffline` to keep names in camel case (not snake case)
+
 # v0.24.1 (2022-04-23)
 
 ## Fix

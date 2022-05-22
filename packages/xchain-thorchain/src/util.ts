@@ -1,4 +1,4 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
+import { cosmosclient, proto, rest } from '@cosmos-client/core'
 import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
@@ -20,8 +20,9 @@ import { MsgNativeTx } from './types/messages'
 import types from './types/proto/MsgCompiled'
 
 export const DECIMAL = 8
-export const DEFAULT_GAS_VALUE = '4000000'
-export const DEPOSIT_GAS_VALUE = '500000000'
+export const DEFAULT_GAS_ADJUSTMENT = 2
+export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
+export const DEPOSIT_GAS_LIMIT_VALUE = '500000000'
 export const MAX_TX_COUNT = 100
 
 /**
@@ -212,8 +213,8 @@ export const buildUnsignedTx = ({
   cosmosSdk: cosmosclient.CosmosSDK
   txBody: proto.cosmos.tx.v1beta1.TxBody
   signerPubkey: proto.google.protobuf.Any
-  sequence: cosmosclient.Long
-  gasLimit: string
+  sequence: cosmosclient.Long.Long
+  gasLimit?: cosmosclient.Long.Long
 }): cosmosclient.TxBuilder => {
   const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
     signer_infos: [
@@ -229,13 +230,49 @@ export const buildUnsignedTx = ({
     ],
     fee: {
       amount: null,
-      gas_limit: cosmosclient.Long.fromString(gasLimit),
+      gas_limit: gasLimit || null,
     },
   })
 
   return new cosmosclient.TxBuilder(cosmosSdk, txBody, authInfo)
 }
 
+export const getEstimatedGas = async ({
+  cosmosSDKClient,
+  txBody,
+  privKey,
+  accountNumber,
+  accountSequence,
+  multiplier,
+}: {
+  cosmosSDKClient: CosmosSDKClient
+  txBody: proto.cosmos.tx.v1beta1.TxBody
+  privKey: proto.cosmos.crypto.secp256k1.PrivKey
+  accountNumber: cosmosclient.Long.Long
+  accountSequence: cosmosclient.Long.Long
+  multiplier?: number
+}): Promise<cosmosclient.Long.Long | undefined> => {
+  const pubKey = privKey.pubKey()
+  const txBuilder = buildUnsignedTx({
+    cosmosSdk: cosmosSDKClient.sdk,
+    txBody: txBody,
+    signerPubkey: cosmosclient.codec.packAny(pubKey),
+    sequence: accountSequence,
+  })
+
+  const signDocBytes = txBuilder.signDocBytes(accountNumber)
+  txBuilder.addSignature(privKey.sign(signDocBytes))
+
+  const resp = await rest.tx.simulate(cosmosSDKClient.sdk, { tx_bytes: txBuilder.txBytes() })
+
+  const estimatedGas = resp.data?.gas_info?.gas_used ?? null
+
+  if (!estimatedGas) {
+    throw new Error('Could not get data of estimated gas')
+  }
+
+  return cosmosclient.Long.fromString(estimatedGas).multiply(multiplier || DEFAULT_GAS_ADJUSTMENT)
+}
 /**
  * Structure a MsgDeposit
  *

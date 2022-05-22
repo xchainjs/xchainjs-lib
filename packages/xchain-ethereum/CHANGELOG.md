@@ -1,12 +1,26 @@
+# v.0.25.0 (2022-xx-xx)
+
+## Add
+
+- Helper `utils.isApproved`
+- Helper `utils.estimateCall`
+- Helper `utils.estimateApprove`
+- Helper `utils.strip0x`
+- Helper `utils.getApprovalAmount`
+- Helper `utils.call`
+
+## Breaking change
+
+- Remove `walletIndex` parameter from `client.call` in favour of `signer`
+
 # v.0.24.1 (2022-05-05)
 
-## Update 
+## Update
 
-- Add `deposit` function to Ethereum `client` 
+- Add `deposit` function to Ethereum `client`
 - Add `routerABI.json`
 - Update latest dependencies
-- Add tests for `deposit` 
-
+- Add tests for `deposit`
 
 # v.0.24.0 (2022-04-20)
 

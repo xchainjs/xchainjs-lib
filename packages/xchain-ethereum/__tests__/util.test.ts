@@ -1,14 +1,20 @@
 import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, ETHChain, assetToString, baseAmount } from '@xchainjs/xchain-util'
-import { ethers } from 'ethers'
+import { ethers, providers } from 'ethers'
 import nock from 'nock'
 
 import { mock_etherscan_api } from '../__mocks__/etherscan-api'
+import erc20ABI from '../src/data/erc20.json'
 import { EthNetwork } from '../src/types'
 import {
   ETH_DECIMAL,
+  MAX_APPROVAL,
+  call,
+  estimateApprove,
+  estimateCall,
   ethNetworkToXchains,
   filterSelfTxs,
+  getApprovalAmount,
   getDecimal,
   getDefaultFees,
   getPrefix,
@@ -18,6 +24,8 @@ import {
   getTxFromEthplorerEthTransaction,
   getTxFromEthplorerTokenOperation,
   getTxFromTokenTransaction,
+  isApproved,
+  strip0x,
   validateAddress,
   validateSymbol,
   xchainNetworkToEths,
@@ -411,29 +419,181 @@ describe('ethereum/util', () => {
   })
 
   describe('getDecimal', () => {
-    it('getDecimal', async () => {
+    it('ETH - testnet', async () => {
+      const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
+
+      const decimal = await getDecimal(AssetETH, provider)
+      expect(decimal).toEqual(ETH_DECIMAL)
+    })
+
+    it('USDT - testnet', async () => {
       nock.disableNetConnect()
       mock_etherscan_api(
         'https://api-ropsten.etherscan.io',
         'eth_call',
-        '0x0000000000000000000000000000000000000000000000000000000000000006',
+        '0x0000000000000000000000000000000000000000000000000000000000000006', // 6
       )
 
-      const provider = new ethers.providers.EtherscanProvider(xchainNetworkToEths('testnet' as Network))
+      const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
 
-      const eth_decimal = await getDecimal(AssetETH, provider)
-      expect(eth_decimal).toEqual(ETH_DECIMAL)
-
-      const usdt_decimal = await getDecimal(
+      const decimal = await getDecimal(
         {
           chain: ETHChain,
           ticker: 'USDT',
-          symbol: 'USDT-0x62e273709da575835c7f6aef4a31140ca5b1d190',
+          symbol: 'USDT-0x6EE856Ae55B6E1A249f04cd3b947141bc146273c',
           synth: false,
         },
         provider,
       )
-      expect(usdt_decimal).toEqual(6)
+      expect(decimal).toEqual(6)
+
+      nock.cleanAll()
+    })
+  })
+
+  describe('strip0x', () => {
+    it('removes 0x', () => {
+      expect(strip0x('0xabc123')).toEqual('abc123')
+    })
+    it('removes 0X', () => {
+      expect(strip0x('0Xabc123')).toEqual('abc123')
+    })
+    it('does not remove anything', () => {
+      expect(strip0x('abc123')).toEqual('abc123')
+    })
+  })
+
+  describe('isApproved', () => {
+    const fromAddress = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E' // wallet address (as same address as in `client.testnet.test.ts`)
+    const contractAddress = '0xA3910454bF2Cb59b8B3a401589A3bAcC5cA42306' // USDT
+    const spenderAddress = '0xeB005a0aa5027F66c8D195C77f7B01324C48501C' // router
+    const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
+
+    beforeEach(() => {
+      nock.disableNetConnect()
+      mock_etherscan_api(
+        'https://api-ropsten.etherscan.io',
+        'eth_call',
+        '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
+      )
+    })
+
+    afterEach(() => {
+      nock.cleanAll()
+    })
+
+    it('is approved', async () => {
+      const result = await isApproved({
+        provider,
+        fromAddress,
+        contractAddress,
+        spenderAddress,
+        amount: baseAmount(100, 6),
+      })
+      expect(result).toBeTruthy()
+    })
+
+    it('is not approved', async () => {
+      const result = await isApproved({
+        provider,
+        fromAddress,
+        contractAddress,
+        spenderAddress,
+        amount: baseAmount(101, 6),
+      })
+      expect(result).toBeFalsy()
+    })
+  })
+
+  describe('estimateCall', () => {
+    it('estimate transfer', async () => {
+      mock_etherscan_api('https://api-ropsten.etherscan.io', 'eth_estimateGas', '0x5208') // 2100
+
+      const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
+      const fromAddress = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E'
+      const contractAddress = '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7'
+
+      const gas: ethers.BigNumber = await estimateCall({
+        provider,
+        contractAddress,
+        abi: erc20ABI,
+        funcName: 'transfer',
+        funcParams: [
+          '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
+          ethers.BigNumber.from(baseAmount('10000000000000', ETH_DECIMAL).amount().toString()),
+          {
+            from: fromAddress,
+          },
+        ],
+      })
+
+      expect(gas.toString()).toEqual('21000')
+
+      nock.cleanAll()
+    })
+  })
+
+  describe('estimateApprove', () => {
+    it('estimate transfer', async () => {
+      mock_etherscan_api('https://api-ropsten.etherscan.io', 'eth_estimateGas', '0x5208') // 2100
+
+      const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
+      const fromAddress = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E'
+      const contractAddress = '0xA3910454bF2Cb59b8B3a401589A3bAcC5cA42306' // USDT
+      const spenderAddress = '0xeB005a0aa5027F66c8D195C77f7B01324C48501C' // router
+
+      const gas: ethers.BigNumber = await estimateApprove({
+        provider,
+        contractAddress,
+        spenderAddress,
+        abi: erc20ABI,
+        fromAddress,
+        amount: baseAmount(100, ETH_DECIMAL),
+      })
+
+      expect(gas.toString()).toEqual('21000')
+
+      nock.cleanAll()
+    })
+  })
+
+  describe('getApprovalAmount', () => {
+    it('10', () => {
+      const result = getApprovalAmount(baseAmount(100, ETH_DECIMAL))
+      const expected = ethers.BigNumber.from('100')
+      expect(result.toString()).toEqual('100')
+      expect(result.eq(expected)).toBeTruthy()
+    })
+    it('max (amount not set)', () => {
+      const result = getApprovalAmount()
+      expect(result.eq(MAX_APPROVAL)).toBeTruthy()
+    })
+    it('max (amount is zero)', () => {
+      const result = getApprovalAmount(baseAmount(0, ETH_DECIMAL))
+      expect(result.eq(MAX_APPROVAL)).toBeTruthy()
+    })
+  })
+
+  describe('call', () => {
+    it('`decimals`', async () => {
+      nock.disableNetConnect()
+      mock_etherscan_api(
+        'https://api-ropsten.etherscan.io',
+        'eth_call',
+        '0x0000000000000000000000000000000000000000000000000000000000000006', // 6
+      )
+
+      const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
+
+      const decimal = await call({
+        provider,
+        contractAddress: '0x6EE856Ae55B6E1A249f04cd3b947141bc146273c',
+        abi: erc20ABI,
+        funcName: 'decimals',
+      })
+      expect(ethers.BigNumber.from(decimal).toString()).toEqual('6')
+
+      nock.cleanAll()
     })
   })
 })

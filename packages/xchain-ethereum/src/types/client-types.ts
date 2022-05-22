@@ -1,6 +1,6 @@
 import { FeeOption, Fees, Network } from '@xchainjs/xchain-client'
 import { BaseAmount } from '@xchainjs/xchain-util'
-import { BigNumber, ethers } from 'ethers'
+import { BigNumber, Signer, ethers } from 'ethers'
 
 export type Address = string
 
@@ -51,11 +51,11 @@ export type IsApprovedParams = {
 }
 
 export type CallParams = {
-  walletIndex?: number
+  signer?: Signer
   contractAddress: Address
   abi: ethers.ContractInterface
   funcName: string
   funcParams?: unknown[]
 }
 
-export type EstimateCallParams = Pick<CallParams, 'contractAddress' | 'abi' | 'funcName' | 'funcParams' | 'walletIndex'>
+export type EstimateCallParams = Pick<CallParams, 'contractAddress' | 'abi' | 'funcName' | 'funcParams'>

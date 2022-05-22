@@ -13,7 +13,7 @@ import {
 } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
-import { mockTendermintNodeInfo } from '../__mocks__/thornode-api'
+import { mockTendermintNodeInfo, mockTendermintSimulate } from '../__mocks__/thornode-api'
 import { Client } from '../src/client'
 
 // Mock chain ids
@@ -479,7 +479,12 @@ describe('Client Test', () => {
       ],
     })
     mockThorchainConstants(nodeUrl)
-
+    console.log('mike-->' + JSON.stringify(thorClient.getClientUrl()))
+    mockTendermintSimulate(nodeUrl, {
+      gas_info: {
+        gas_used: '1000000',
+      },
+    })
     assertTxsPost(thorClient.getClientUrl().node, expected_txsPost_result)
 
     const result = await thorClient.transfer({
@@ -530,9 +535,12 @@ describe('Client Test', () => {
         network: chainIds[Network.Testnet],
       },
     })
-
     mockThorchainConstants(nodeUrl)
-
+    mockTendermintSimulate(nodeUrl, {
+      gas_info: {
+        gas_used: '1000000',
+      },
+    })
     assertTxsPost(nodeUrl, expected_txsPost_result)
 
     const result = await thorClient.deposit({

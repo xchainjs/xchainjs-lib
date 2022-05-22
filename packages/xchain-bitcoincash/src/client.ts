@@ -14,10 +14,12 @@ import {
   TxsPage,
   UTXOClient,
   XChainClientParams,
+  checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { AssetBCH, Chain, assetToString, getInboundDetails } from '@xchainjs/xchain-util'
 
+import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { ClientUrl } from './types/client-types'
@@ -41,6 +43,10 @@ class Client extends UTXOClient {
    */
   constructor({
     network = Network.Testnet,
+    feeBounds = {
+      lower: LOWER_FEE_BOUND,
+      upper: UPPER_FEE_BOUND,
+    },
     haskoinUrl = {
       [Network.Testnet]: 'https://haskoin.ninerealms.com/bchtest',
       [Network.Mainnet]: 'https://haskoin.ninerealms.com/bch',
@@ -53,7 +59,7 @@ class Client extends UTXOClient {
       [Network.Stagenet]: `m/44'/145'/0'/0/`,
     },
   }: BitcoinCashClientParams) {
-    super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase })
+    super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase, feeBounds })
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.rootDerivationPaths = rootDerivationPaths
@@ -241,6 +247,8 @@ class Client extends UTXOClient {
     const derivationPath = this.getFullDerivationPath(index)
 
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
+
     const { builder, inputs } = await utils.buildTx({
       ...params,
       feeRate,
