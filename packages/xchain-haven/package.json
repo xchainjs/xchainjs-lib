@@ -36,8 +36,8 @@
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "file:../xchain-util",
     "babel-jest": "^28.1.0",
-    "haven-core-js": "haven-protocol-org/haven-core-js#a113ba0cf45b7f6f4b16bab2a0602edfb9d4faa0",
-    "mnemonicconverter": "haven-protocol-org/bip39mnemonicConverter#43837518c0c55fe84d17cc4cf1a971c318b92a00"
+    "haven-core-js": "haven-protocol-org/haven-core-js#3d8b853f207c307a79b146c6f2b0ce9702f462ae",
+    "mnemonicconverter": "haven-protocol-org/bip39mnemonicConverter#b12a9c0eac4a23b9bcc007ae9494220c5c316556"
   },
   "publishConfig": {
     "access": "public"
@@ -46,7 +46,7 @@
     "@xchainjs/xchain-client": "^0.11.1",
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "file:../xchain-util",
-    "haven-core-js": "haven-protocol-org/haven-core-js#a113ba0cf45b7f6f4b16bab2a0602edfb9d4faa0",
-    "mnemonicconverter": "haven-protocol-org/bip39mnemonicConverter#43837518c0c55fe84d17cc4cf1a971c318b92a00"
+    "haven-core-js": "haven-protocol-org/haven-core-js#3d8b853f207c307a79b146c6f2b0ce9702f462ae",
+    "mnemonicconverter": "haven-protocol-org/bip39mnemonicConverter#b12a9c0eac4a23b9bcc007ae9494220c5c316556"
   }
 }
