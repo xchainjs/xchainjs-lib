@@ -4,4 +4,5 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   transformIgnorePatterns: ['node_modules/(?!mnemonicconverter)'],
   setupFilesAfterEnv: ['./jest.setup.js'],
+  silent: true,
 }

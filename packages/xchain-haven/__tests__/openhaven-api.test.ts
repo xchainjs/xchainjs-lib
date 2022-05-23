@@ -1,6 +1,6 @@
 import * as openhaven from '../src/haven/api'
 
-xdescribe('Openhaven API Test', () => {
+describe('Openhaven API Test', () => {
   const TestNetApiUrl = 'http://142.93.249.35:1984'
 
   // const mnenomonic = `haggled rekindle pimple pebbles dozen zippers perfect olympics
@@ -22,7 +22,6 @@ xdescribe('Openhaven API Test', () => {
 
   it('returns version', async () => {
     const version = await openhaven.get_version()
-    console.log(version)
     expect(version.testnet).toBeTruthy()
     expect(version.fork_version).toBeGreaterThan(15)
     expect(version.per_byte_fee).toBeGreaterThan(0)
