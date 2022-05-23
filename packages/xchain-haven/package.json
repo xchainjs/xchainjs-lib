@@ -35,7 +35,9 @@
     "@xchainjs/xchain-client": "^0.11.1",
     "@xchainjs/xchain-crypto": "^0.2.4",
     "@xchainjs/xchain-util": "file:../xchain-util",
-    "babel-jest": "^28.1.0"
+    "babel-jest": "^28.1.0",
+    "haven-core-js": "haven-protocol-org/haven-core-js#a113ba0cf45b7f6f4b16bab2a0602edfb9d4faa0",
+    "mnemonicconverter": "haven-protocol-org/bip39mnemonicConverter#43837518c0c55fe84d17cc4cf1a971c318b92a00"
   },
   "publishConfig": {
     "access": "public"
@@ -43,9 +45,7 @@
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.11.1",
     "@xchainjs/xchain-crypto": "^0.2.4",
-    "@xchainjs/xchain-util": "file:../xchain-util"
-  },
-  "dependencies": {
+    "@xchainjs/xchain-util": "file:../xchain-util",
     "haven-core-js": "haven-protocol-org/haven-core-js#a113ba0cf45b7f6f4b16bab2a0602edfb9d4faa0",
     "mnemonicconverter": "haven-protocol-org/bip39mnemonicConverter#43837518c0c55fe84d17cc4cf1a971c318b92a00"
   }
