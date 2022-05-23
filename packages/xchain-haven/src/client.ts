@@ -253,16 +253,15 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   }
 
   async transfer(params: TxParams): Promise<TxHash> {
-    console.log('Client.transfer() called')
     const { amount, asset, recipient, memo } = params
-    if (asset === undefined) return Promise.reject('please specify asset it in Client.transfer() for Haven')
+    if (asset === undefined) throw new Error('please specify asset it in Client.transfer() for Haven')
     const amountString = amount.amount().toString()
     let txHash
     try {
       txHash = await this.havenSDK.transfer(amountString, asset.ticker as HavenTicker, recipient, memo)
       return txHash
     } catch (e) {
-      return Promise.reject('Tx could not be sent')
+      throw new Error('Tx could not be sent')
     }
   }
 
