@@ -1,6 +1,5 @@
-import { BigNumber } from 'bignumber.js';
-import { assetToBase, assetAmount, baseAmount, BaseAmount, baseToAsset } from '@xchainjs/xchain-util'
-
+import { BaseAmount, assetAmount, assetToBase, baseAmount, baseToAsset } from '@xchainjs/xchain-util'
+import BigNumber from 'bignumber.js'
 
 // Pool data should come from midgard.ts issue #569.
 export type PoolData = {
@@ -20,14 +19,14 @@ export type SwapOutput = {
  * @param pool
  * @returns
  */
-export const getSingleSwap = (inputAmount: BaseAmount, pool: PoolData ):  SwapOutput => {
-  const output = getSwapOutput(inputAmount, pool, false )
+export const getSingleSwap = (inputAmount: BaseAmount, pool: PoolData): SwapOutput => {
+  const output = getSwapOutput(inputAmount, pool, false)
   const fee = getSwapFee(inputAmount, pool, false)
   const slip = getSwapSlip(inputAmount, pool, false)
   const SwapOutput = {
     output: output,
     swapFee: fee,
-    slip: slip
+    slip: slip,
   }
   return SwapOutput
 }
@@ -83,17 +82,15 @@ export const getSwapSlip = (inputAmount: BaseAmount, pool: PoolData, toRune: boo
   return result
 }
 
-
 /**
  * Not sure if the below functions will be used.
  */
-
 
 export const getSwapOutputWithFee = (
   inputAmount: BaseAmount,
   pool: PoolData,
   toRune: boolean,
-  transactionFee: BaseAmount = assetToBase(assetAmount(1))
+  transactionFee: BaseAmount = assetToBase(assetAmount(1)),
 ): BaseAmount => {
   // formula: getSwapOutput() - one RUNE
   const x = inputAmount.amount()
@@ -101,11 +98,11 @@ export const getSwapOutputWithFee = (
   const poolAfterTransaction: PoolData = toRune // used to get rune fee price after swap
     ? {
         assetBalance: baseAmount(pool.assetBalance.amount().plus(x)), // add asset input amount to pool
-        runeBalance: baseAmount(pool.runeBalance.amount().minus(r.amount())) // get input price in RUNE and subtract from pool
+        runeBalance: baseAmount(pool.runeBalance.amount().minus(r.amount())), // get input price in RUNE and subtract from pool
       }
     : {
         runeBalance: baseAmount(pool.runeBalance.amount().plus(x)), // add RUNE input amount to pool
-        assetBalance: baseAmount(pool.assetBalance.amount().minus(r.amount())) // get input price in RUNE and subtract from pool
+        assetBalance: baseAmount(pool.assetBalance.amount().minus(r.amount())), // get input price in RUNE and subtract from pool
       }
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const runeFee = toRune ? transactionFee : getValueOfRuneInAsset(transactionFee, poolAfterTransaction) // toRune its one Rune else its asset(oneRune)
@@ -125,9 +122,6 @@ export const getSwapInput = (toRune: boolean, pool: PoolData, outputAmount: Base
   const result = part1.minus(part1.pow(2).minus(part2).sqrt()).div(2)
   return baseAmount(result)
 }
-
-
-
 
 export const getValueOfAssetInRune = (inputAsset: BaseAmount, pool: PoolData): BaseAmount => {
   // formula: ((a * R) / A) => R per A (Runeper$)
@@ -158,14 +152,14 @@ export const getDoubleSwapOutputWithFee = (
   inputAmount: BaseAmount,
   pool1: PoolData,
   pool2: PoolData,
-  transactionFee: BaseAmount = assetToBase(assetAmount(1))
+  transactionFee: BaseAmount = assetToBase(assetAmount(1)),
 ): BaseAmount => {
   // formula: (getSwapOutput(pool1) => getSwapOutput(pool2)) - runeFee
   const r = getSwapOutput(inputAmount, pool1, true)
   const output = getSwapOutput(r, pool2, false)
   const poolAfterTransaction: PoolData = {
     runeBalance: baseAmount(pool2.runeBalance.amount().plus(r.amount())), // add RUNE output amount to pool
-    assetBalance: baseAmount(pool2.assetBalance.amount().minus(output.amount())) // subtract input amount from pool
+    assetBalance: baseAmount(pool2.assetBalance.amount().minus(output.amount())), // subtract input amount from pool
   }
   const runeFee = getValueOfRuneInAsset(transactionFee, poolAfterTransaction) // asset(oneRune)
   const result = output.amount().minus(runeFee.amount()) // remove asset(oneRune)
@@ -208,4 +202,3 @@ export const getValueOfAsset1InAsset2 = (inputAsset: BaseAmount, pool1: PoolData
   // transform result back from `AssetAmount` into `BaseAmount`
   return assetToBase(assetAmount(result))
 }
-
