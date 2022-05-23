@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { Asset, BaseAmount, AssetRuneNative } from "@xchainjs/xchain-util";
 //import { getSingleSwap } from "../utils";
-import { Midgard } from '../../../../../../xchainjs_test/src'
+//import { Midgard } from '../../../../../../xchainjs_test/src'
 import { getValueOfAssetInRune, getSingleSwap } from '../utils/swap'
 
 
