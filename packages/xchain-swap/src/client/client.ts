@@ -1,10 +1,8 @@
 import { BigNumber } from 'bignumber.js';
 import { Asset, BaseAmount, AssetRuneNative } from "@xchainjs/xchain-util";
-//import { getSingleSwap } from "../utils";
-//import { Midgard } from '../../../../../../xchainjs_test/src'
 import { getValueOfAssetInRune, getSingleSwap } from '../utils/swap'
+import { Configuration, MIDGARD_API_TS_URL, MidgardApi } from '@xchainjs/xchain-midgard'
 
-import { Configuration, MIDGARD_API_TS_URL, MidgardApi } from '@xchainjs/xchain-midgard/lib'
 
 
 export type TotalFees = {
@@ -25,7 +23,8 @@ export type SwapOutputData = {
   transactionId: string
   expectedWait: string // or maybe a datetime type
 }
-const midgardApi = new Midgard()
+
+const midgardApi = new MidgardApi(new Configuration({ basePath: MIDGARD_API_TS_URL }))
 
 export const estimateSwap = (sourceAsset: Asset, inputAmount: BaseAmount, destinationAsset: Asset, affiliateFee: BigNumber, slipLimit: BigNumber ): SwapEstimate => {
 

@@ -1,5 +1,6 @@
+import { BigNumber } from 'bignumber.js';
 import { BaseAmount, assetAmount, assetToBase, baseAmount, baseToAsset } from '@xchainjs/xchain-util'
-import BigNumber from 'bignumber.js'
+
 
 // Pool data should come from midgard.ts issue #569.
 export type PoolData = {
@@ -79,7 +80,7 @@ export const getSwapSlip = (inputAmount: BaseAmount, pool: PoolData, toRune: boo
   const x = inputAmount.amount()
   const X = toRune ? pool.assetBalance.amount() : pool.runeBalance.amount() // input is asset if toRune
   const result = x.div(x.plus(X))
-  return result
+  return new BigNumber(result)
 }
 
 /**

@@ -1,4 +1,4 @@
-import { Configuration, MIDGARD_API_TS_URL, MidgardApi } from '@xchainjs/xchain-midgard/lib'
+import { Configuration, MIDGARD_API_TS_URL, MidgardApi } from '@xchainjs/xchain-midgard'
 
 import { LiquidityPool } from './LiquidityPool'
 

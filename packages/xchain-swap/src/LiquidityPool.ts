@@ -1,4 +1,4 @@
-import { PoolDetail } from '@xchainjs/xchain-midgard/lib/generated/midgardApi'
+import { PoolDetail } from '@xchainjs/xchain-midgard'
 import {
   Asset,
   AssetAmount,
