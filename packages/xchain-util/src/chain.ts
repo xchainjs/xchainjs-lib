@@ -39,7 +39,7 @@ export const isEnabledChain = (chain: Chain) => chain.includes(chain)
  * @param b chain b
  * @returns boolean: True if equal else False
  */
-export const eqAsset = (a: Chain, b: Chain) => {
+export const eqChain = (a: Chain, b: Chain) => {
   return a.toString == b.toString
 }
 
@@ -71,39 +71,39 @@ export const chainToString: ((chainId: Chain) => string) & Record<Chain, string>
 /**
  * Check whether chain is BTC chain
  */
-export const isBtcChain = (chain: Chain): boolean => eqAsset(chain, BTCChain)
+export const isBtcChain = (chain: Chain): boolean => eqChain(chain, BTCChain)
 
 /**
  * Check whether chain is LTC chain
  */
-export const isLtcChain = (chain: Chain): boolean => eqAsset(chain, LTCChain)
+export const isLtcChain = (chain: Chain): boolean => eqChain(chain, LTCChain)
 
 /**
  * Check whether chain is THOR chain
  */
-export const isThorChain = (chain: Chain): boolean => eqAsset(chain, THORChain)
+export const isThorChain = (chain: Chain): boolean => eqChain(chain, THORChain)
 
 /**
  * Check whether chain is BNB chain
  */
-export const isBnbChain = (chain: Chain): boolean => eqAsset(chain, BNBChain)
+export const isBnbChain = (chain: Chain): boolean => eqChain(chain, BNBChain)
 
 /**
  * Check whether chain is ETH chain
  */
-export const isEthChain = (chain: Chain): boolean => eqAsset(chain, ETHChain)
+export const isEthChain = (chain: Chain): boolean => eqChain(chain, ETHChain)
 
 /**
  * Check whether chain is BCH chain
  */
-export const isBchChain = (chain: Chain): boolean => eqAsset(chain, BCHChain)
+export const isBchChain = (chain: Chain): boolean => eqChain(chain, BCHChain)
 
 /**
  * Check whether chain is DOGE chain
  */
-export const isDogeChain = (chain: Chain): boolean => eqAsset(chain, DOGEChain)
+export const isDogeChain = (chain: Chain): boolean => eqChain(chain, DOGEChain)
 
 /**
  * Check whether chain is TERRA chain
  */
-export const isTerraChain = (chain: Chain): boolean => eqAsset(chain, TerraChain)
+export const isTerraChain = (chain: Chain): boolean => eqChain(chain, TerraChain)
