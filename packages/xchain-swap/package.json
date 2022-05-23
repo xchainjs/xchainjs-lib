@@ -23,7 +23,10 @@
     "type": "git",
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
-  "scripts": {
+  "scripts": {    "clean": "rimraf -rf ./lib",
+    "build": "yarn run clean && yarn run compile",
+    "compile": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests"
   },
   "bugs": {
