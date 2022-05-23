@@ -8,7 +8,7 @@ import { SyncObserver, SyncStats } from '../src/haven/types'
 
 const havenClient = new HavenClient({ network: Network.Testnet })
 
-xdescribe('Haven xCHAIN Integration Test', () => {
+describe('Haven xCHAIN Integration Test', () => {
   beforeAll(async () => {
     await havenClient.preloadSDK()
   })
@@ -46,7 +46,7 @@ xdescribe('Haven xCHAIN Integration Test', () => {
     expect(result).toEqual(havenAddress)
   })
 
-  xit('should not throw on a client without a phrase', () => {
+  it('should not throw on a client without a phrase', () => {
     expect(() => {
       new HavenClient({
         network: Network.Testnet,
@@ -62,7 +62,7 @@ xdescribe('Haven xCHAIN Integration Test', () => {
     expect(havenClient.setPhrase(bip39Mnemonic)).toBeUndefined
   })
 
-  xit('should validate the right address', () => {
+  it('should validate the right address', () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const address = havenClient.getAddress()
@@ -152,29 +152,29 @@ xdescribe('Haven xCHAIN Integration Test', () => {
     expect(estimates.average).toBeDefined()
   })
 
-  it('should reject a tx when amount exceed balance', () => {
+  it('should reject a tx when amount exceed balance', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const asset = AssetXHV
     const amount = baseAmount(9999999999999999, 12)
 
-    expect(havenClient.transfer({ asset, recipient: havenAddress2, amount })).rejects
+    await expect(havenClient.transfer({ asset, recipient: havenAddress2, amount })).rejects.toThrow()
   })
 
-  it('should reject when an invalid address is used in transfer', () => {
+  it('should reject when an invalid address is used in transfer', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const invalidAddress = 'error_address'
     const amount = baseAmount(99000, 12)
-    expect(havenClient.transfer({ asset: AssetXHV, recipient: invalidAddress, amount })).rejects
+    await expect(havenClient.transfer({ asset: AssetXHV, recipient: invalidAddress, amount })).rejects.toThrow()
   })
 
-  it('should reject when no asset is set in transfer', () => {
+  it('should reject when no asset is set in transfer', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const amount = baseAmount(99000, 12)
 
-    expect(havenClient.transfer({ recipient: havenAddress2, amount })).rejects
+    await expect(havenClient.transfer({ recipient: havenAddress2, amount })).rejects.toThrow()
   })
 
   it('should get address transactions', async () => {
@@ -246,5 +246,10 @@ xdescribe('Haven xCHAIN Integration Test', () => {
     expect(havenClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://explorer-testnet.havenprotocol.org/tx/anotherTestTxHere',
     )
+  })
+
+  it('should throw an error for getExplorerAddressUrl', () => {
+    havenClient.setNetwork(Network.Mainnet)
+    expect(() => havenClient.getExplorerAddressUrl(havenAddress)).toThrow()
   })
 })
