@@ -13,10 +13,22 @@ import type {
 } from 'haven-core-js'
 import * as havenWallet from 'haven-core-js'
 
-import { getAddressInfo, getAddressTxs, getTx, get_version, keepAlive, login, setAPI_URL, setCredentials } from './api'
+import {
+  getAddressInfo,
+  getAddressTxs,
+  getRandomOuts,
+  getTx,
+  getUnspentOuts,
+  get_version,
+  keepAlive,
+  login,
+  setAPI_URL,
+  setCredentials,
+  submitRawTx,
+} from './api'
 import { SyncHandler } from './sync-handler'
 import { HavenBalance, NetTypes, SyncObserver, SyncStats } from './types'
-import { assertIsDefined, getRandomOutsReq, getUnspentOutsReq, submitRawTxReq, updateStatus } from './utils'
+import { assertIsDefined } from './utils'
 
 const TestNetApiUrl = 'http://142.93.249.35:1984'
 const MainnetApiUrl = ''
@@ -278,4 +290,30 @@ export class HavenCoreClient {
   private pingServer(): void {
     keepAlive()
   }
+}
+
+/**
+ * callback functions for sending transfers procedure, used by haven-core-client.ts
+ */
+
+const updateStatus = (_status: any) => {
+  //console.log(status)
+}
+
+const getRandomOutsReq = (reqParams: any, cb: (err: any, res: any) => void) => {
+  getRandomOuts(reqParams)
+    .then((res) => cb(null, res))
+    .catch((err) => cb(err, null))
+}
+
+const getUnspentOutsReq = (reqParams: any, cb: (err: any, res: any) => void) => {
+  getUnspentOuts(reqParams)
+    .then((res) => cb(null, res))
+    .catch((err) => cb(err, null))
+}
+
+const submitRawTxReq = (reqParams: any, cb: (err: any, res: any) => void) => {
+  submitRawTx(reqParams)
+    .then((res) => cb(null, res))
+    .catch((err) => cb(err, null))
 }
