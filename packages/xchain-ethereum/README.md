@@ -15,12 +15,13 @@ Following peer dependencies have to be installed into your project. These are no
 ```
 yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios ethers
 ```
+
 ## Documentation
 
 ### [`xchain ethereum`](http://docs.xchainjs.org/xchain-client/xchain-ethereum/)
+
 [`How xchain-ethereum works`](http://docs.xchainjs.org/xchain-client/xchain-ethereum/how-it-works.html)\
 [`How to use xchain-ethereum`](http://docs.xchainjs.org/xchain-client/xchain-ethereum/how-to-use.html)
-
 
 ## Service Providers
 

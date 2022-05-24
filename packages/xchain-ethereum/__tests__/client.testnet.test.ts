@@ -229,8 +229,8 @@ describe('Client Test', () => {
 
     const { fast, fastest, average } = await ethClient.estimateGasPrices()
 
-    expect(fast.amount().toString()).toEqual('30000000000')
-    expect(fastest.amount().toString()).toEqual('150000000000')
+    expect(fast.amount().toString()).toEqual('60000000000')
+    expect(fastest.amount().toString()).toEqual('450000000000')
     expect(average.amount().toString()).toEqual('15000000000')
   })
 
@@ -454,7 +454,7 @@ describe('Client Test', () => {
       ropstenInfuraUrl,
       ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0x4479b2af29590d5ad1b591ddfbb479dba37a5857c2a250b41c16bb2cecb7d08c',
+      '0xfa8f7c124948dbb47f300f56d26a9810217a932db5a8eae2b9d68809e56b3937',
     )
     mock_thornode_inbound_addresses_success(thornodeApiUrl, [
       {
@@ -486,7 +486,7 @@ describe('Client Test', () => {
       gasLimit: gasFee.gasLimit,
       gasPrice: gasFee.gasPrices.fastest,
     })
-    expect(txHash).toEqual('0x4479b2af29590d5ad1b591ddfbb479dba37a5857c2a250b41c16bb2cecb7d08c')
+    expect(txHash).toEqual('0xfa8f7c124948dbb47f300f56d26a9810217a932db5a8eae2b9d68809e56b3937')
   })
 
   it('estimate gas for eth transfer', async () => {
@@ -540,7 +540,7 @@ describe('Client Test', () => {
       ropstenInfuraUrl,
       ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xea328780f0558b0bbf34baa142703957122678f5a5b9a0696102cff41a5d2682',
+      '0x92f7a7ecc80b955647988b705ad6a3607044226b64f2ce6a7ef2753296692a5b',
     )
 
     const gasEstimate = await ethClient.estimateFeesWithGasPricesAndLimits({
@@ -562,7 +562,7 @@ describe('Client Test', () => {
       phrase,
     })
 
-    beforeEach(() => {
+    it('approved', async () => {
       mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0xa7cac8')
       mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x0')
       mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0x5969ec91')
@@ -573,13 +573,7 @@ describe('Client Test', () => {
         'eth_call',
         '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
       )
-    })
 
-    afterEach(async () => {
-      nock.cleanAll()
-    })
-
-    it('approved', async () => {
       const result = await client.isApproved({
         contractAddress,
         spenderAddress,
@@ -590,6 +584,17 @@ describe('Client Test', () => {
     })
 
     it('not approved', async () => {
+      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0xa7cac8')
+      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x0')
+      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0x5969ec91')
+      mock_all_api(
+        etherscanUrl,
+        ropstenInfuraUrl,
+        ropstenAlchemyUrl,
+        'eth_call',
+        '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
+      )
+
       const result = await client.isApproved({
         contractAddress,
         spenderAddress,
@@ -609,10 +614,12 @@ describe('Client Test', () => {
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0x3c6de5')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x10')
     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0xb2d05e00')
-    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208')
+    mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_estimateGas', '0x5208') // 2100
+
+    const fromAddress = ethClient.getAddress(0)
 
     const gasLimit = await ethClient.estimateApprove({
-      walletIndex: 0,
+      fromAddress,
       contractAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       spenderAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       amount: baseAmount(100, ETH_DECIMAL),
@@ -637,18 +644,21 @@ describe('Client Test', () => {
       ropstenInfuraUrl,
       ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0x06784c7a4652148d55d83002d967c2d0dab9447425f60b69d53cc79e15a17c2f',
+      '0x9df14ad5cf1a14d625cc6a6f2b5af4b410183387f85d9109985d7779ea07c869',
     )
+
+    const contractAddress = '0xA3910454bF2Cb59b8B3a401589A3bAcC5cA42306' // USDT
+    const spenderAddress = '0xeB005a0aa5027F66c8D195C77f7B01324C48501C' // router
+
     const tx = await ethClient.approve({
       walletIndex: 0,
-      contractAddress: '0xd15ffaef3112460bf3bcd81087fcbbce394e2ae7',
-      spenderAddress: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
-      feeOptionKey: 'fastest' as FeeOption,
+      contractAddress,
+      spenderAddress,
+      feeOptionKey: FeeOption.Fastest,
       amount: baseAmount(100, ETH_DECIMAL),
     })
-    expect(tx.hash).toEqual('0x06784c7a4652148d55d83002d967c2d0dab9447425f60b69d53cc79e15a17c2f')
+    expect(tx.hash).toEqual('0x9df14ad5cf1a14d625cc6a6f2b5af4b410183387f85d9109985d7779ea07c869')
   })
-
   it('estimate call', async () => {
     const ethClient = new Client({
       network: 'testnet' as Network,
