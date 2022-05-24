@@ -1,2 +1,3 @@
-export { DefaultApi as MidgardApi, Configuration  } from './generated/midgardApi';
+export { DefaultApi as MidgardApi} from './generated/midgardApi';
+export * from './generated/midgardApi'
 export * from './config';
