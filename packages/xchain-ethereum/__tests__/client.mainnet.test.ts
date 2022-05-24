@@ -18,7 +18,7 @@ const thornodeApiUrl = 'https://thornode.ninerealms.com'
 /**
  * Wallet Tests
  */
-describe.skip('Client Test', () => {
+describe('Client Test', () => {
   beforeEach(() => {
     nock.disableNetConnect()
   })

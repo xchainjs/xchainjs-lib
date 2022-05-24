@@ -31,7 +31,7 @@ import {
   xchainNetworkToEths,
 } from '../src/utils'
 
-describe.skip('ethereum/util', () => {
+describe('ethereum/util', () => {
   beforeEach(() => {
     nock.disableNetConnect()
   })
