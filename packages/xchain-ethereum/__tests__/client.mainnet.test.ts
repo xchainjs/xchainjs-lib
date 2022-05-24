@@ -29,7 +29,7 @@ describe('Client Test', () => {
 
   it('derive path correctly with bip44', () => {
     const ethClient = new Client({
-      network: 'mainnet' as Network,
+      network: Network.Mainnet,
       phrase,
       ethplorerUrl,
     })
@@ -51,8 +51,8 @@ describe('Client Test', () => {
 
     const { fast, fastest, average } = await ethClient.estimateGasPrices()
 
-    expect(fast.amount().toString()).toEqual('30000000000')
-    expect(fastest.amount().toString()).toEqual('150000000000')
+    expect(fast.amount().toString()).toEqual('60000000000')
+    expect(fastest.amount().toString()).toEqual('450000000000')
     expect(average.amount().toString()).toEqual('15000000000')
   })
 

@@ -1,3 +1,9 @@
+# v.0.11.3 (2022-05-24)
+
+## Update
+
+- Add tx fee bounds b76d430
+
 # v.0.11.2 (2022-05-05)
 
 ## Update

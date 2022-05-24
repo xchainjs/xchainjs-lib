@@ -32,6 +32,14 @@ import {
 } from '../src/utils'
 
 describe('ethereum/util', () => {
+  beforeEach(() => {
+    nock.disableNetConnect()
+  })
+
+  afterEach(() => {
+    nock.cleanAll()
+  })
+
   describe('xchainNetworkToEths', () => {
     it('should return mainnet ', () => {
       expect(xchainNetworkToEths('mainnet' as Network)).toEqual(EthNetwork.Main)
@@ -427,7 +435,6 @@ describe('ethereum/util', () => {
     })
 
     it('USDT - testnet', async () => {
-      nock.disableNetConnect()
       mock_etherscan_api(
         'https://api-ropsten.etherscan.io',
         'eth_call',
@@ -446,8 +453,6 @@ describe('ethereum/util', () => {
         provider,
       )
       expect(decimal).toEqual(6)
-
-      nock.cleanAll()
     })
   })
 
@@ -469,20 +474,12 @@ describe('ethereum/util', () => {
     const spenderAddress = '0xeB005a0aa5027F66c8D195C77f7B01324C48501C' // router
     const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
 
-    beforeEach(() => {
-      nock.disableNetConnect()
+    it('is approved', async () => {
       mock_etherscan_api(
         'https://api-ropsten.etherscan.io',
         'eth_call',
         '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
       )
-    })
-
-    afterEach(() => {
-      nock.cleanAll()
-    })
-
-    it('is approved', async () => {
       const result = await isApproved({
         provider,
         fromAddress,
@@ -494,6 +491,11 @@ describe('ethereum/util', () => {
     })
 
     it('is not approved', async () => {
+      mock_etherscan_api(
+        'https://api-ropsten.etherscan.io',
+        'eth_call',
+        '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
+      )
       const result = await isApproved({
         provider,
         fromAddress,
@@ -528,8 +530,6 @@ describe('ethereum/util', () => {
       })
 
       expect(gas.toString()).toEqual('21000')
-
-      nock.cleanAll()
     })
   })
 
@@ -552,8 +552,6 @@ describe('ethereum/util', () => {
       })
 
       expect(gas.toString()).toEqual('21000')
-
-      nock.cleanAll()
     })
   })
 
@@ -576,7 +574,6 @@ describe('ethereum/util', () => {
 
   describe('call', () => {
     it('`decimals`', async () => {
-      nock.disableNetConnect()
       mock_etherscan_api(
         'https://api-ropsten.etherscan.io',
         'eth_call',
@@ -592,8 +589,6 @@ describe('ethereum/util', () => {
         funcName: 'decimals',
       })
       expect(ethers.BigNumber.from(decimal).toString()).toEqual('6')
-
-      nock.cleanAll()
     })
   })
 })

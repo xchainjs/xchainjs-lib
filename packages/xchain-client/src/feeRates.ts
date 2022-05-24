@@ -1,4 +1,4 @@
-import { FeeOption, FeeRate, FeeRates, FeeBounds } from './types'
+import { FeeBounds, FeeOption, FeeRate, FeeRates } from './types'
 
 export function singleFeeRate(rate: FeeRate): FeeRates {
   return Object.values(FeeOption).reduce<Partial<FeeRates>>((a, x) => ((a[x] = rate), a), {}) as FeeRates
