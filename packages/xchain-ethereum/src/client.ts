@@ -6,6 +6,7 @@ import {
   BaseXChainClient,
   DepositParams,
   FeeOption,
+  FeeRates,
   FeeType,
   Fees,
   Network,
@@ -88,6 +89,8 @@ export interface EthereumClient {
   // `getFees` of `BaseXChainClient` needs to be overridden
   getFees(params: TxParams): Promise<Fees>
   getWallet(walletIndex?: number): ethers.Wallet
+  getProvider(): Provider
+  getEtherscanProvider(): EtherscanProvider
 }
 
 export type EthereumClientParams = XChainClientParams & {
@@ -198,6 +201,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     }
     return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(walletIndex))).connect(this.getProvider())
   }
+
   setupProviders(): void {
     if (this.infuraCreds) {
       // Infura provider takes either a string of project id
@@ -656,7 +660,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     signer: txSigner,
     gasLimitFallback,
   }: ApproveParams): Promise<TransactionResponse> {
-    const gasPrice = BigNumber.from(
+    const gasPrice: BigNumber = BigNumber.from(
       (
         await this.estimateGasPrices()
           .then((prices) => prices[feeOption])
@@ -670,23 +674,38 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     const fromAddress = await signer.getAddress()
 
-    const gasLimit = await this.estimateApprove({
+    const gasLimit: BigNumber = await this.estimateApprove({
       spenderAddress,
       contractAddress,
       fromAddress,
       amount,
-    }).catch(() => BigNumber.from(gasLimitFallback))
+    }).catch((error) => {
+      if (gasLimitFallback) {
+        return BigNumber.from(gasLimitFallback)
+      }
 
-    const txAmount: BigNumber = getApprovalAmount(amount)
+      throw Error(`Could not estimate gas to send approve transaction ${error}`)
+    })
+
     checkFeeBounds(this.feeBounds, gasPrice.toNumber())
 
-    return await this.call<TransactionResponse>({
-      signer,
-      contractAddress,
-      abi: erc20ABI,
-      funcName: 'approve',
-      funcParams: [spenderAddress, txAmount, { from: fromAddress, gasPrice, gasLimit }],
+    const valueToApprove: BigNumber = getApprovalAmount(amount)
+
+    const contract = new ethers.Contract(contractAddress, erc20ABI, this.getProvider())
+
+    const unsignedTx: ethers.PopulatedTransaction /* as same as ethers.TransactionResponse expected by `sendTransaction` */ = await contract.populateTransaction.approve(
+      spenderAddress,
+      valueToApprove,
+    )
+
+    const result = await signer.sendTransaction({
+      ...unsignedTx,
+      from: fromAddress,
+      gasPrice,
+      gasLimit,
     })
+
+    return result
   }
 
   /**
@@ -764,7 +783,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     // override `overrides` if `feeOption` is provided
     if (feeOption) {
-      const gasPrice = await this.estimateGasPrices()
+      const gasPrice: BaseAmount = await this.estimateGasPrices()
         .then((prices) => prices[feeOption])
         .catch(() => getDefaultGasPrices()[feeOption])
       const gasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo }).catch(() => defaultGasLimit)
@@ -775,7 +794,10 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       }
     }
 
-    checkFeeBounds(this.feeBounds, BigNumber.from(overrides.gasPrice).toNumber())
+    // FIXME (xchain-devs): `gasPrice` can be `undefined, but needs to be set to run `checkFeeBounds`
+    if (overrides.gasPrice) {
+      checkFeeBounds(this.feeBounds, BigNumber.from(overrides.gasPrice).toNumber())
+    }
 
     const signer = txSigner || this.getWallet(walletIndex)
 
@@ -816,11 +838,13 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       // Note: `rates` are in `gwei`
       // @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/querier.go#L416-420
       // To have all values in `BaseAmount`, they needs to be converted into `wei` (1 gwei = 1,000,000,000 wei = 1e9)
-      const ratesInGwei = standardFeeRates(await this.getFeeRateFromThorchain())
+      const ratesInGwei: FeeRates = standardFeeRates(await this.getFeeRateFromThorchain())
+      // Note 2:
+      // `Fast` + `Fastest` needs to be increased by 2x or 3x (similar to `utils.estimateDefaultFeesWithGasPricesAndLimits`)
       return {
         [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, ETH_DECIMAL),
-        [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, ETH_DECIMAL),
-        [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, ETH_DECIMAL),
+        [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, ETH_DECIMAL).times(2),
+        [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, ETH_DECIMAL).times(3),
       }
     } catch (error) {}
     //should only get here if thor fails
