@@ -1,4 +1,4 @@
-import { PoolDetail } from '@xchainjs/xchain-midgard'
+import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
 import {
   Asset,
   AssetAmount,
@@ -45,6 +45,24 @@ export class LiquidityPool {
     const price = otherAssetPool.currentPriceInAsset.amount().multipliedBy(this.currentPriceInRune.amount())
     return assetAmount(price)
   }
+  //   /**
+  //  *
+  //  * @param inputAmount
+  //  * @param pool
+  //  * @param toRune
+  //  * @returns
+  //  */
+  // getSwapOutput(inputAmount: BaseAmount, inputAsset: Asset): BaseAmount {
+  //   // formula: (x * X * Y) / (x + X) ^ 2
+
+  //   const x = inputAmount.amount()
+  //   const X = toRune ? pool.assetBalance.amount() : pool.runeBalance.amount() // input is asset if toRune
+  //   const Y = toRune ? pool.runeBalance.amount() : pool.assetBalance.amount() // output is rune if toRune
+  //   const numerator = x.times(X).times(Y)
+  //   const denominator = x.plus(X).pow(2)
+  //   const result = numerator.div(denominator)
+  //   return baseAmount(result)
+  // }
   public get currentPriceInAsset(): AssetAmount {
     return this._currentPriceInAsset
   }

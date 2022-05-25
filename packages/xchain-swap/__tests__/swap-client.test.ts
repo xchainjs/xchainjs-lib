@@ -1,5 +1,6 @@
 import { baseAmount } from '@xchainjs/xchain-util'
-import { PoolData, getSwapOutput, getSwapSlip, getSwapFee } from '../src/utils/swap'
+
+import { PoolData, getSwapFee, getSwapOutput, getSwapSlip } from '../src/utils/swap'
 
 const btcPool: PoolData = {
   assetBalance: baseAmount(100),
@@ -7,13 +8,11 @@ const btcPool: PoolData = {
 }
 const inputAmount = baseAmount(1) // 1 BTC
 
-
-
 describe('Swap Cal Tests', () => {
   it('should calculate correct swap output', async () => {
     const swapOutputValue = getSwapOutput(inputAmount, btcPool, true)
-    var correctOutput = baseAmount(24507.4, 8)
-    expect(swapOutputValue.amount().toNumber()).toEqual(correctOutput.amount().toNumber())// output in RUNE
+    const correctOutput = baseAmount(24507.4, 8)
+    expect(swapOutputValue.amount().toNumber()).toEqual(correctOutput.amount().toNumber()) // output in RUNE
   })
   it('should calculate correct slip percentage', async () => {
     const slip = getSwapSlip(inputAmount, btcPool, true)
@@ -26,5 +25,4 @@ describe('Swap Cal Tests', () => {
     const expectedSlipFee = 242.64752475247524752475247524752
     expect(slipFee.amount().toNumber()).toEqual(expectedSlipFee)
   })
-
 })
