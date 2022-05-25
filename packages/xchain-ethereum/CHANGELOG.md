@@ -8,13 +8,23 @@
 - Helper `utils.strip0x`
 - Helper `utils.getApprovalAmount`
 - Helper `utils.call`
+- Helper `util.getAssetAddress`
+- Helper `util.isEthAsset`
 - Add optional `signer` params to `client.approve`
 - Add optional `signer` params to `client.transfer`
+- Export ERC20 + router ABI's
 
 ## Breaking change
 
 - Remove `walletIndex` parameter from `client.estimateApprove` in favour of `fromAddress`
 - Remove `walletIndex` parameter from `client.call` in favour of `signer`
+- Rename `feeOptionKey` parameter to `feeOption` in `client.approve` / `client.transfer`
+- `feeOption` is `FeeOption.Fast` by default in `client.transfer`
+- `AssetETH` is default `asset` in `client.transfer` (optional before)
+
+## Fix
+
+- `gasPrice` can be `undefined` in `client.transfer`, but needed by `checkFeeBounds`
 
 # v.0.24.1 (2022-05-05)
 

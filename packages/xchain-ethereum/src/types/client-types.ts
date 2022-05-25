@@ -36,7 +36,7 @@ export type ApproveParams = {
   signer?: Signer
   contractAddress: Address
   spenderAddress: Address
-  feeOptionKey?: FeeOption
+  feeOption?: FeeOption
   amount?: BaseAmount
   // Optional fallback in case estimation for gas limit fails
   gasLimitFallback?: ethers.BigNumberish

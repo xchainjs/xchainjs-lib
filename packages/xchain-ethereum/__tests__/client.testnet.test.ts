@@ -654,7 +654,7 @@ describe('Client Test', () => {
       walletIndex: 0,
       contractAddress,
       spenderAddress,
-      feeOptionKey: FeeOption.Fastest,
+      feeOption: FeeOption.Fastest,
       amount: baseAmount(100, ETH_DECIMAL),
     })
     expect(tx.hash).toEqual('0x9df14ad5cf1a14d625cc6a6f2b5af4b410183387f85d9109985d7779ea07c869')

@@ -61,6 +61,7 @@ import {
   estimateApprove,
   estimateCall,
   getApprovalAmount,
+  getAssetAddress,
   getDecimal,
   getDefaultGasPrices,
   getFee,
@@ -69,6 +70,7 @@ import {
   getTxFromEthplorerEthTransaction,
   getTxFromEthplorerTokenOperation,
   isApproved,
+  isEthAsset,
   strip0x,
   validateAddress,
   xchainNetworkToEths,
@@ -173,15 +175,17 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @param {number} walletIndex (optional) HD wallet index
    * @returns {Address} The current address.
    *
-   * @throws {"Phrase must be provided"}
-   * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
+   * @throws Error
+   * Thrown if HDNode is not defined. Note: A phrase is needed to create a wallet and to derive an address from it.
+   * @throws Error
+   * Thrown if wallet index < 0.
    */
   getAddress(walletIndex = 0): Address {
     if (walletIndex < 0) {
-      throw new Error('index must be greater than zero')
+      throw new Error('index must be greater than or equal to zero')
     }
     if (!this.hdNode) {
-      throw new Error('Phrase must be provided')
+      throw new Error('HDNode is not defined. Make sure phrase has been provided.')
     }
     return this.hdNode.derivePath(this.getFullDerivationPath(walletIndex)).address.toLowerCase()
   }
@@ -192,12 +196,12 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @param {number} walletIndex (optional) HD wallet index
    * @returns {Wallet} The current etherjs wallet interface.
    *
-   * @throws {"Phrase must be provided"}
-   * Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
+   * @throws Error
+   * Thrown if HDNode is not defined. Note: A phrase is needed to create a wallet and to derive an address from it.
    */
   getWallet(walletIndex = 0): ethers.Wallet {
     if (!this.hdNode) {
-      throw new Error('Phrase must be provided')
+      throw new Error('HDNode is not defined. Make sure phrase has been provided.')
     }
     return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(walletIndex))).connect(this.getProvider())
   }
@@ -376,7 +380,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         for (let i = 0; i < newAssets.length; i++) {
           const asset: Asset = newAssets[i]
           const etherscan = this.getEtherscanProvider()
-          if (assetToString(asset) !== assetToString(AssetETH)) {
+          if (!isEthAsset(asset)) {
             // Handle token balances
             const assetAddress = getTokenAddress(asset)
             if (!assetAddress) {
@@ -645,16 +649,18 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @param {Address} contractAddress The contract address.
    * @param {Address} spenderAddress The spender address.
    * @param {signer} Signer (optional) The address a transaction is send from. If not set, signer will be defined based on `walletIndex`
-   * @param {feeOptionKey} FeeOption Fee option (optional)
+   * @param {feeOption} FeeOption Fee option (optional)
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @param {number} walletIndex (optional) HD wallet index
+   *
+   * @throws Error If gas could not been estimated
    *
    * @returns {TransactionResponse} The transaction result.
    */
   async approve({
     contractAddress,
     spenderAddress,
-    feeOptionKey: feeOption = FeeOption.Fastest,
+    feeOption = FeeOption.Fastest,
     amount,
     walletIndex = 0,
     signer: txSigner,
@@ -737,82 +743,63 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   /**
    * Transfers ETH or ERC20 token
    *
+   * Note: A given `feeOption` wins over `gasPrice` and `gasLimit`
+   *
    * @param {TxParams} params The transfer options.
    * @param {signer} Signer (optional) The address a transaction is send from. If not set, signer will be defined based on `walletIndex`
-   * @param {feeOptionKey} FeeOption Fee option (optional)
+   * @param {feeOption} FeeOption Fee option (optional)
    * @param {gasPrice} BaseAmount Gas price (optional)
    * @param {gasLimit} BigNumber Gas limit (optional)
    *
-   * A given `feeOptionKey` wins over `gasPrice` and `gasLimit`
+   * @throws Error Thrown if address of given `Asset` could not be parsed
    *
    * @returns {TxHash} The transaction hash.
    */
   async transfer({
     walletIndex = 0,
     signer: txSigner,
-    asset,
+    asset = AssetETH,
     memo,
     amount,
     recipient,
-    feeOptionKey: feeOption,
+    feeOption = FeeOption.Fast,
     gasPrice,
     gasLimit,
   }: TxParams & {
     signer?: Signer
-    feeOptionKey?: FeeOption
+    feeOption?: FeeOption
     gasPrice?: BaseAmount
     gasLimit?: BigNumber
   }): Promise<TxHash> {
     const txAmount = BigNumber.from(amount.amount().toFixed())
 
-    let assetAddress
-    if (asset && assetToString(asset) !== assetToString(AssetETH)) {
-      assetAddress = getTokenAddress(asset)
+    const isETH = isEthAsset(asset)
+    const assetAddress = getAssetAddress(asset)
+    if (!assetAddress) throw Error(`Can't parse address from asset ${assetToString(asset)}`)
+
+    const txGasPrice: BigNumber = gasPrice
+      ? BigNumber.from(gasPrice.amount().toFixed())
+      : await this.estimateGasPrices()
+          .then((prices) => prices[feeOption])
+          .catch(() => getDefaultGasPrices()[feeOption])
+          .then((gp) => BigNumber.from(gp.amount().toFixed()))
+
+    const defaultGasLimit: ethers.BigNumber = isETH ? SIMPLE_GAS_COST : BASE_TOKEN_GAS_COST
+    const txGasLimit =
+      gasLimit || (await this.estimateGasLimit({ asset, recipient, amount, memo }).catch(() => defaultGasLimit))
+
+    type SafeTxOverrides = Omit<TxOverrides, 'gasPrice'> & { gasPrice: ethers.BigNumber }
+    const overrides: SafeTxOverrides = {
+      gasLimit: txGasLimit,
+      gasPrice: txGasPrice,
     }
 
-    const isETHAddress = assetAddress === ETHAddress
-
-    // feeOption
-
-    const defaultGasLimit: ethers.BigNumber = isETHAddress ? SIMPLE_GAS_COST : BASE_TOKEN_GAS_COST
-
-    let overrides: TxOverrides = {
-      gasLimit: gasLimit || defaultGasLimit,
-      gasPrice: gasPrice && BigNumber.from(gasPrice.amount().toFixed()),
-    }
-
-    // override `overrides` if `feeOption` is provided
-    if (feeOption) {
-      const gasPrice: BaseAmount = await this.estimateGasPrices()
-        .then((prices) => prices[feeOption])
-        .catch(() => getDefaultGasPrices()[feeOption])
-      const gasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo }).catch(() => defaultGasLimit)
-
-      overrides = {
-        gasLimit,
-        gasPrice: BigNumber.from(gasPrice.amount().toFixed()),
-      }
-    }
-
-    // FIXME (xchain-devs): `gasPrice` can be `undefined, but needs to be set to run `checkFeeBounds`
-    if (overrides.gasPrice) {
-      checkFeeBounds(this.feeBounds, BigNumber.from(overrides.gasPrice).toNumber())
-    }
+    checkFeeBounds(this.feeBounds, overrides.gasPrice.toNumber())
 
     const signer = txSigner || this.getWallet(walletIndex)
 
-    let txResult: TransactionResponse
-    if (assetAddress && !isETHAddress) {
-      // Transfer ERC20
-      txResult = await this.call<TransactionResponse>({
-        signer,
-        contractAddress: assetAddress,
-        abi: erc20ABI,
-        funcName: 'transfer',
-        funcParams: [recipient, txAmount, Object.assign({}, overrides)],
-      })
-    } else {
-      // Transfer ETH
+    // Transfer ETH
+    if (isETH) {
       const transactionRequest = Object.assign(
         { to: recipient, value: txAmount },
         {
@@ -821,10 +808,20 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         },
       )
 
-      txResult = await signer.sendTransaction(transactionRequest)
-    }
+      const { hash } = await signer.sendTransaction(transactionRequest)
 
-    return txResult.hash
+      return hash
+    }
+    // Transfer ERC20
+    const { hash } = await this.call<TransactionResponse>({
+      signer,
+      contractAddress: assetAddress,
+      abi: erc20ABI,
+      funcName: 'transfer',
+      funcParams: [recipient, txAmount, Object.assign({}, overrides)],
+    })
+
+    return hash
   }
 
   /**
@@ -883,38 +880,34 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * Estimate gas.
    *
    * @param {TxParams} params The transaction and fees options.
+   *
+   * @throws Error Thrown if address could not parsed from given ERC20 asset
+   *
    * @returns {BaseAmount} The estimated gas fee.
    */
-  async estimateGasLimit({ asset, recipient, amount, memo }: TxParams): Promise<BigNumber> {
+  async estimateGasLimit({ asset = AssetETH, recipient, amount, memo }: TxParams): Promise<BigNumber> {
     const txAmount = BigNumber.from(amount.amount().toFixed())
 
-    let assetAddress
-    if (asset && assetToString(asset) !== assetToString(AssetETH)) {
-      assetAddress = getTokenAddress(asset)
-    }
-
-    let estimate
-
-    if (assetAddress && assetAddress !== ETHAddress) {
+    if (!isEthAsset(asset)) {
       // ERC20 gas estimate
+      const assetAddress = getTokenAddress(asset)
+      if (!assetAddress) throw Error(`Can't get address from asset ${assetToString(asset)}`)
       const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
 
-      estimate = await contract.estimateGas.transfer(recipient, txAmount, {
+      return await contract.estimateGas.transfer(recipient, txAmount, {
         from: this.getAddress(),
       })
-    } else {
-      // ETH gas estimate
-      const transactionRequest = {
-        from: this.getAddress(),
-        to: recipient,
-        value: txAmount,
-        data: memo ? toUtf8Bytes(memo) : undefined,
-      }
-
-      estimate = await this.getProvider().estimateGas(transactionRequest)
     }
 
-    return estimate
+    // ETH gas estimate
+    const transactionRequest = {
+      from: this.getAddress(),
+      to: recipient,
+      value: txAmount,
+      data: memo ? toUtf8Bytes(memo) : undefined,
+    }
+
+    return await this.getProvider().estimateGas(transactionRequest)
   }
 
   /**
@@ -954,7 +947,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @param {TxParams} params
    * @returns {Fees} The average/fast/fastest fees.
    *
-   * @throws {"Failed to get fees"} Thrown if failed to get fees.
+   * @throws {"Params need to be passed"} Thrown if params are not set
    */
   getFees(): never
   getFees(params: TxParams): Promise<Fees>
