@@ -24,11 +24,12 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
-    "clean": "rimraf -rf ./lib",
-    "build": "yarn run clean && yarn run compile",
+    "clean": "rimraf lib/**",
+    "build": "yarn clean && rollup -c",
     "test": "jest",
-    "compile": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "yarn run build"
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "prepublishOnly": "yarn build",
+    "postversion": "git push --follow-tags"
   },
   "bugs": {
     "url": "https://github.com/xchainjs/xchainjs-lib/issues"
