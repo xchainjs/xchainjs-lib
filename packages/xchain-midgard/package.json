@@ -9,16 +9,16 @@
   ],
   "author": "THORChain",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
-  "main": "lib/index",
-  "types": "lib/index",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
   "files": [
     "lib"
   ],
   "scripts": {
-    "clean": "rimraf -rf ./lib",
-    "build": "yarn run clean && yarn run compile",
-    "compile": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "yarn run build",
+    "clean": "rimraf lib/**",
+    "build": "yarn clean && rollup -c",
+    "prepublishOnly": "yarn build",
     "test": "jest --passWithNoTests",
     "generate:types": "yarn clean:types:midgard && yarn generate:types:midgard",
     "generate:types:midgard": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://midgard.thorchain.info/v2/swagger.json -g typescript-axios -o ./src/generated/midgardApi --reserved-words-mappings in=in",
