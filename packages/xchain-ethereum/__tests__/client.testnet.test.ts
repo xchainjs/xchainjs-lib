@@ -229,8 +229,8 @@ describe('Client Test', () => {
 
     const { fast, fastest, average } = await ethClient.estimateGasPrices()
 
-    expect(fast.amount().toString()).toEqual('60000000000')
-    expect(fastest.amount().toString()).toEqual('450000000000')
+    expect(fast.amount().toString()).toEqual('30000000000')
+    expect(fastest.amount().toString()).toEqual('150000000000')
     expect(average.amount().toString()).toEqual('15000000000')
   })
 
@@ -454,7 +454,7 @@ describe('Client Test', () => {
       ropstenInfuraUrl,
       ropstenAlchemyUrl,
       'eth_sendRawTransaction',
-      '0xfa8f7c124948dbb47f300f56d26a9810217a932db5a8eae2b9d68809e56b3937',
+      '0x4479b2af29590d5ad1b591ddfbb479dba37a5857c2a250b41c16bb2cecb7d08c',
     )
     mock_thornode_inbound_addresses_success(thornodeApiUrl, [
       {
@@ -486,7 +486,7 @@ describe('Client Test', () => {
       gasLimit: gasFee.gasLimit,
       gasPrice: gasFee.gasPrices.fastest,
     })
-    expect(txHash).toEqual('0xfa8f7c124948dbb47f300f56d26a9810217a932db5a8eae2b9d68809e56b3937')
+    expect(txHash).toEqual('0x4479b2af29590d5ad1b591ddfbb479dba37a5857c2a250b41c16bb2cecb7d08c')
   })
 
   it('estimate gas for eth transfer', async () => {

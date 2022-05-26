@@ -836,12 +836,10 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       // @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/querier.go#L416-420
       // To have all values in `BaseAmount`, they needs to be converted into `wei` (1 gwei = 1,000,000,000 wei = 1e9)
       const ratesInGwei: FeeRates = standardFeeRates(await this.getFeeRateFromThorchain())
-      // Note 2:
-      // `Fast` + `Fastest` needs to be increased by 2x or 3x (similar to `utils.estimateDefaultFeesWithGasPricesAndLimits`)
       return {
         [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, ETH_DECIMAL),
-        [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, ETH_DECIMAL).times(2),
-        [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, ETH_DECIMAL).times(3),
+        [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, ETH_DECIMAL),
+        [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, ETH_DECIMAL),
       }
     } catch (error) {}
     //should only get here if thor fails
