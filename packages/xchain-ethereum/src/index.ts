@@ -6,6 +6,7 @@ export {
   estimateCall,
   estimateDefaultFeesWithGasPricesAndLimits,
   getApprovalAmount,
+  getAssetAddress,
   getDecimal,
   getDefaultFees,
   getDefaultGasPrices,
@@ -13,6 +14,7 @@ export {
   getPrefix,
   getFee,
   isApproved,
+  isEthAsset,
   strip0x,
   validateAddress,
   ETHAddress,
@@ -20,3 +22,11 @@ export {
   ETHPLORER_FREEKEY,
   MAX_APPROVAL,
 } from './utils'
+
+import erc20ABI from './data/erc20.json'
+import routerABI from './data/routerABI.json'
+
+export const abi = {
+  router: routerABI,
+  erc20: erc20ABI,
+}

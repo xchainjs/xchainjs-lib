@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetETH, ETHChain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { AssetETH, AssetRuneERC20, AssetRuneNative, ETHChain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { ethers, providers } from 'ethers'
 import nock from 'nock'
 
@@ -7,6 +7,7 @@ import { mock_etherscan_api } from '../__mocks__/etherscan-api'
 import erc20ABI from '../src/data/erc20.json'
 import { EthNetwork } from '../src/types'
 import {
+  ETHAddress,
   ETH_DECIMAL,
   MAX_APPROVAL,
   call,
@@ -15,6 +16,7 @@ import {
   ethNetworkToXchains,
   filterSelfTxs,
   getApprovalAmount,
+  getAssetAddress,
   getDecimal,
   getDefaultFees,
   getPrefix,
@@ -25,6 +27,7 @@ import {
   getTxFromEthplorerTokenOperation,
   getTxFromTokenTransaction,
   isApproved,
+  isEthAsset,
   strip0x,
   validateAddress,
   validateSymbol,
@@ -589,6 +592,30 @@ describe('ethereum/util', () => {
         funcName: 'decimals',
       })
       expect(ethers.BigNumber.from(decimal).toString()).toEqual('6')
+    })
+  })
+
+  describe('isEthAsset', () => {
+    it('true (ETH)', () => {
+      expect(isEthAsset(AssetETH)).toBeTruthy()
+    })
+    it('false (AssetRuneERC20)', () => {
+      expect(isEthAsset(AssetRuneERC20)).toBeFalsy()
+    })
+    it('false (RuneNative)', () => {
+      expect(isEthAsset(AssetRuneNative)).toBeFalsy()
+    })
+  })
+
+  describe('getAssetAddress', () => {
+    it('ETH', () => {
+      expect(getAssetAddress(AssetETH)).toEqual(ETHAddress)
+    })
+    it('ETH.THOR', () => {
+      expect(getAssetAddress(AssetRuneERC20)).toEqual('0x3155BA85D5F96b2d030a4966AF206230e46849cb')
+    })
+    it('null (RuneNative)', () => {
+      expect(getAssetAddress(AssetRuneNative)).toBeNull()
     })
   })
 })
