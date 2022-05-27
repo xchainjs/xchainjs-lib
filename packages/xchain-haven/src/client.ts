@@ -19,18 +19,13 @@ import {
 } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Asset, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
-import { convertBip39ToHavenMnemonic } from 'mnemonicconverter'
+import { convertBip39ToHavenMnemonic } from 'mnemonic-converter'
 
 import { getAssetByTicker } from './assets'
 import { HavenCoreClient } from './haven/haven-core-client'
 import { HavenBalance, HavenTicker, SyncObserver } from './haven/types'
 import { assertIsDefined } from './haven/utils'
 import { HavenClient } from './types/client-types'
-
-// rootDerivationPaths = {
-//   [Network.Mainnet]: `m/44'/60'/0'/0/`,
-//   [Network.Testnet]: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
-//   [Network.Stagenet]: `m/44'/60'/0'/0/`,
 
 class Client extends BaseXChainClient implements XChainClient, HavenClient {
   private havenSDK: HavenCoreClient
