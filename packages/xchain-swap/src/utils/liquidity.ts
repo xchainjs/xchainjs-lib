@@ -1,5 +1,5 @@
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 import { PoolData } from './swap'
 

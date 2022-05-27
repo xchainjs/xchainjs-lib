@@ -32,3 +32,10 @@ export type EstimateSwapParams = {
   affiliateFee: BigNumber
   slipLimit: BigNumber
 }
+
+export type DepositParams = {
+  walletIndex?: number // send from this HD index
+  asset: Asset
+  amount: BaseAmount
+  memo: string
+}

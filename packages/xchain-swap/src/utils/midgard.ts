@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
+import { Chain, InboundDetail, ServerInboundDetail } from '@xchainjs/xchain-util/lib'
+
 const axios = require('axios')
-import { Chain } from './chain'
-import { InboundDetail, ServerInboundDetail } from './types'
 
 const midgardBaseUrls: { [key: string]: Array<string> } = {
   [Network.Testnet]: ['https://testnet.midgard.thorchain.info'],

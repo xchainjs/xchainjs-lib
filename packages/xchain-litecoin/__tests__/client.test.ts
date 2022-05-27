@@ -316,15 +316,4 @@ describe('LitecoinClient Test', () => {
       'https://blockexplorer.one/litecoin/testnet/blockHash/anotherTestTxHere',
     )
   })
-
-  it('should broadcast a deposit to thorchain inbound address', async () => {
-    ltcClient.setNetwork(Network.Testnet)
-    ltcClient.setPhrase(phraseOne)
-    const txid = await ltcClient.deposit({
-      asset: AssetLTC,
-      amount: baseAmount(2223),
-      memo: '=:THOR.RUNE:tthor1puhn8fclwvmmzh7uj7546wnxz5h3zar8e66sc5',
-    })
-    expect(txid).toEqual('mock-txid')
-  })
 })

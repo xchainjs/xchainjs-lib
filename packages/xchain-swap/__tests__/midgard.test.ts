@@ -1,7 +1,7 @@
 import nock from 'nock'
 
-import { Chain } from './chain'
-import { getAllInboundDetails, getInboundDetails, getMimirDetails } from './midgard'
+import { Chain } from '../../xchain-util/src/chain'
+import { getAllInboundDetails, getInboundDetails, getMimirDetails } from '../src/utils/midgard'
 
 describe('functions from Midgard', () => {
   it('should return error', async function () {
