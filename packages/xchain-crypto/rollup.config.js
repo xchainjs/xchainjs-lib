@@ -34,6 +34,7 @@ export default {
     commonjs({
       include: /node_modules/,
       exclude: '**/*.json',
+      namedExports: { 'ethereumjs-util/dist.browser/index.js': ['keccak256'] },
     }),
   ],
   external: ['buffer', 'crypto'],

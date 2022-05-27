@@ -1,4 +1,5 @@
 import { bech32 } from 'bech32'
+import { convertBip39ToHavenMnemonic } from 'bip39-converter'
 import crypto from 'crypto'
 import hexEncoding from 'crypto-js/enc-hex'
 import ripemd160 from 'crypto-js/ripemd160'
@@ -109,4 +110,14 @@ export const pbkdf2Async = async (
       }
     })
   })
+}
+
+/**
+ * Converts bip39 phrase to Haven mnemonic
+ * @param phrase
+ * @param passphrase
+ * @returns {string} Haven mnemonic
+ */
+export const convertToHavenMnemonic = (phrase: string, passphrase = ''): string => {
+  return convertBip39ToHavenMnemonic(phrase, passphrase)
 }

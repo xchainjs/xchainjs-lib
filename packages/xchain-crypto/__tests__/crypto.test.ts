@@ -1,4 +1,5 @@
 import { decryptFromKeystore, encryptToKeyStore, generatePhrase, validatePhrase } from '../src/crypto'
+import { convertToHavenMnemonic } from '../src/utils'
 
 describe('Generate Phrase', () => {
   it('Generates 12-word phrase', () => {
@@ -52,5 +53,14 @@ describe('Import Keystore', () => {
     const keystore = await encryptToKeyStore(phrase, password)
     const phraseDecrypted = await decryptFromKeystore(keystore, password)
     expect(phraseDecrypted).toEqual(phrase)
+  })
+})
+
+describe('Convert Bip39 Phrase', () => {
+  it('Convert Bip39 Phrase to Haven Mnemonic', () => {
+    const bip39Phrase = 'venture expose swim treat swap defense magic toy blast hover neck permit'
+    const havenMnemonic =
+      'juvenile kickoff king glass scoop lair iris token truth puzzled amaze corrode justice autumn pimple turnip cafe oyster hover baffles giddy farming vector western pimple'
+    expect(convertToHavenMnemonic(bip39Phrase)).toEqual(havenMnemonic)
   })
 })

@@ -22,11 +22,14 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "jest": {
-    "preset": "ts-jest",
+    "preset": "ts-jest/presets/js-with-ts",
     "testEnvironment": "node",
     "testPathIgnorePatterns": [
       "<rootDir>/lib",
       "<rootDir>/node_modules/"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(bip39-converter)/)"
     ]
   },
   "husky": {
@@ -54,6 +57,7 @@
   "dependencies": {
     "bech32": "^2.0.0",
     "bip39": "^3.0.4",
+    "bip39-converter": "^1.0.3",
     "crypto-js": "^4.1.1",
     "foundry-primitives": "^0.2.1",
     "hdkey": "^2.0.1",
