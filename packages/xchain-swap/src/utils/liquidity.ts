@@ -1,7 +1,7 @@
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
-import { PoolData } from './swap'
+import { PoolData } from '../types'
 
 export type UnitData = {
   liquidityUnits: BaseAmount

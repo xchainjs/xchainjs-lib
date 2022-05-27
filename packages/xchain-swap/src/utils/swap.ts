@@ -1,17 +1,8 @@
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
+import { PoolData, SwapOutput } from '../types'
 
-// Pool data should come from midgard.ts issue #569.
-export type PoolData = {
-  assetBalance: BaseAmount
-  runeBalance: BaseAmount
-}
 
-export type SwapOutput = {
-  output: BaseAmount
-  swapFee: BaseAmount
-  slip: BigNumber
-}
 
 /**
  *
@@ -69,10 +60,10 @@ export const getSwapOutput = (inputAmount: BaseAmount, pool: PoolData, toRune: b
  * @param pool
  * @returns
  */
-export const getSingleSwap = (inputAmount: BaseAmount, pool: PoolData): SwapOutput => {
-  const output = getSwapOutput(inputAmount, pool, false)
-  const fee = getSwapFee(inputAmount, pool, false)
-  const slip = getSwapSlip(inputAmount, pool, false)
+export const getSingleSwap = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): SwapOutput => {
+  const output = getSwapOutput(inputAmount, pool, toRune)
+  const fee = getSwapFee(inputAmount, pool, toRune)
+  const slip = getSwapSlip(inputAmount, pool, toRune)
   const SwapOutput = {
     output: output,
     swapFee: fee,
@@ -80,6 +71,22 @@ export const getSingleSwap = (inputAmount: BaseAmount, pool: PoolData): SwapOutp
   }
   return SwapOutput
 }
+
+export const getDoubleSwapOutput = (inputAmount: BaseAmount, pool1: PoolData, pool2: PoolData): BaseAmount => {
+  // formula: getSwapOutput(pool1) => getSwapOutput(pool2)
+  const r = getSwapOutput(inputAmount, pool1, true)
+  const output = getSwapOutput(r, pool2, false)
+  return output
+}
+
+export const getDoubleSwapSlip = (inputAmount: BaseAmount, pool1: PoolData, pool2: PoolData): BigNumber => {
+  // formula: getSwapSlip1(input1) + getSwapSlip2(getSwapOutput1 => input2)
+  const swapOutput1 = getSingleSwap(inputAmount, pool1, true)
+  const swapOutput2 = getSingleSwap(swapOutput1.output, pool2, false)
+  const result = swapOutput2.slip.plus(swapOutput1.slip)
+  return result
+}
+
 
 /**
  * Not sure if the below functions will be used.

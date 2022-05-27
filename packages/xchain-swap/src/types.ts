@@ -39,3 +39,14 @@ export type DepositParams = {
   amount: BaseAmount
   memo: string
 }
+
+export type PoolData = {
+  assetBalance: BaseAmount
+  runeBalance: BaseAmount
+}
+
+export type SwapOutput = {
+  output: BaseAmount
+  swapFee: BaseAmount
+  slip: BigNumber
+}
