@@ -3,7 +3,7 @@ module.exports = {
   testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   testPathIgnorePatterns: ['<rootDir>/node_modules', '<rootDir>/lib'],
-  transformIgnorePatterns: ['node_modules/(?!mnemonicconverter)'],
+  transformIgnorePatterns: ['node_modules/(?!mnemonic-converter)'],
   setupFilesAfterEnv: ['./jest.setup.js'],
   silent: true,
 }
