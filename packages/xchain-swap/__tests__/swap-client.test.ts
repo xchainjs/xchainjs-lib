@@ -1,6 +1,14 @@
 import { assetToBase, baseToAsset, assetAmount} from '@xchainjs/xchain-util'
-import { getSwapFee, getSwapOutput, getSwapSlip, getDoubleSwapOutput, getDoubleSwapSlip } from '../src/utils/swap'
-import { PoolData } from '../src/types'
+import {
+  getSwapOutput,
+  getSwapSlip,
+  getSwapFee,
+  getDoubleSwapOutput,
+  getDoubleSwapSlip,
+  getDoubleSwapFee,
+  getSingleSwap,
+  getDoubleSwap} from '../src/utils/swap'
+import { PoolData, SwapOutput } from '../src/types'
 import { BigNumber } from 'bignumber.js'
 
 
@@ -17,6 +25,7 @@ const inputAmount =  assetToBase(assetAmount(1)) // 1 BTC
 
 
 describe('Swap Cal Tests', () => {
+
   it('should calculate correct swap output', async () => {
     const swapOutputValue = getSwapOutput(inputAmount, btcPool, true)
     const correctOutput = new BigNumber(24507.40123517)
@@ -34,6 +43,18 @@ describe('Swap Cal Tests', () => {
     expect(baseToAsset(swapFee).amount()).toEqual(expectedSlipFee)
   })
 
+  it('Should calculate correct get single swap object', async () => {
+    const singleSwap = getSingleSwap(inputAmount, btcPool, true)
+    const correctOutput: SwapOutput = {
+      output: assetToBase(assetAmount(24507.40123517)),
+      swapFee: assetToBase(assetAmount(245.07401235)),
+      slip: new BigNumber(0.00990099009900990099)
+    }
+    expect(baseToAsset(singleSwap.output).amount()).toEqual(baseToAsset(correctOutput.output).amount())
+    expect(baseToAsset(singleSwap.swapFee).amount()).toEqual(baseToAsset(correctOutput.swapFee).amount())
+    expect(singleSwap.slip.toFixed(8)).toEqual(correctOutput.slip.toFixed(8))
+  })
+
   it('should calculate correct double swap', async () => {
     const doubleSwapOutput = getDoubleSwapOutput(inputAmount, btcPool, ethPool)
     const expectedDoubleSwapOutput = new BigNumber(35.75077791)
@@ -45,4 +66,26 @@ describe('Swap Cal Tests', () => {
     const correctDoubleSwapOutputSlip = new BigNumber(0.01384520)
     expect(doubleSwapOutputSlip.toFixed(8)).toEqual(correctDoubleSwapOutputSlip.toFixed(8))
   })
+
+  it('Should calculate correct double swap fee', async () => {
+    const doubleSwapOutputFee = getDoubleSwapFee(inputAmount, btcPool, ethPool)
+    const correctdoubleSwapOutputFee = new BigNumber(0.50191181)
+    expect(baseToAsset(doubleSwapOutputFee).amount()).toEqual(correctdoubleSwapOutputFee)
+  })
+
+  it(`Should caculate double swap object`, async () => {
+    const doubleswap = getDoubleSwap(inputAmount, btcPool, ethPool)
+
+    const correctOutput: SwapOutput = {
+      output: assetToBase(assetAmount(35.75077791)),
+      swapFee: assetToBase(assetAmount(0.50191181)),
+      slip: new BigNumber(0.01384520)
+    }
+
+    expect(baseToAsset(doubleswap.output).amount()).toEqual(baseToAsset(correctOutput.output).amount())
+    expect(baseToAsset(doubleswap.swapFee).amount()).toEqual(baseToAsset(correctOutput.swapFee).amount())
+    expect(doubleswap.slip.toFixed(8)).toEqual(correctOutput.slip.toFixed(8))
+  })
+
+
 })

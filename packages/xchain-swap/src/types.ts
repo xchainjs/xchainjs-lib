@@ -1,5 +1,5 @@
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
-import BigNumber from 'bignumber.js'
+import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
 

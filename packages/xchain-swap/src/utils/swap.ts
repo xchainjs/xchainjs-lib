@@ -1,7 +1,45 @@
+import { BigNumber } from 'bignumber.js';
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
-import { BigNumber } from 'bignumber.js'
 import { PoolData, SwapOutput } from '../types'
 
+
+/**
+ *
+ * @param inputAmount
+ * @param pool
+ * @returns
+ */
+ export const getSingleSwap = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): SwapOutput => {
+  const output = getSwapOutput(inputAmount, pool, toRune)
+  const fee = getSwapFee(inputAmount, pool, toRune)
+  const slip = getSwapSlip(inputAmount, pool, toRune)
+  const SwapOutput = {
+    output: output,
+    swapFee: fee,
+    slip: slip,
+  }
+  return SwapOutput
+}
+
+/**
+ *
+ * @param inputAmount
+ * @param pool
+ * @param toRune
+ * @returns
+ */
+
+export const getDoubleSwap = (inputAmount: BaseAmount, pool1: PoolData, pool2:PoolData ): SwapOutput => {
+  const doubleOutput = getDoubleSwapOutput(inputAmount, pool1, pool2)
+  const doubleFee = getDoubleSwapFee(inputAmount, pool1, pool2)
+  const doubleSlip = getDoubleSwapSlip(inputAmount, pool1, pool2)
+  const SwapOutput = {
+    output: doubleOutput,
+    swapFee: doubleFee,
+    slip: doubleSlip,
+  }
+  return SwapOutput
+}
 
 
 /**
@@ -54,23 +92,6 @@ export const getSwapOutput = (inputAmount: BaseAmount, pool: PoolData, toRune: b
   const result = numerator.div(denominator)
   return baseAmount(result)
 }
-/**
- *
- * @param inputAmount
- * @param pool
- * @returns
- */
-export const getSingleSwap = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): SwapOutput => {
-  const output = getSwapOutput(inputAmount, pool, toRune)
-  const fee = getSwapFee(inputAmount, pool, toRune)
-  const slip = getSwapSlip(inputAmount, pool, toRune)
-  const SwapOutput = {
-    output: output,
-    swapFee: fee,
-    slip: slip,
-  }
-  return SwapOutput
-}
 
 export const getDoubleSwapOutput = (inputAmount: BaseAmount, pool1: PoolData, pool2: PoolData): BaseAmount => {
   // formula: getSwapOutput(pool1) => getSwapOutput(pool2)
@@ -86,6 +107,26 @@ export const getDoubleSwapSlip = (inputAmount: BaseAmount, pool1: PoolData, pool
   const result = swapOutput2.slip.plus(swapOutput1.slip)
   return result
 }
+
+export const getDoubleSwapFee = (inputAmount: BaseAmount, pool1: PoolData, pool2: PoolData): BaseAmount => {
+  // formula: getSwapFee1 + getSwapFee2
+  const fee1 = getSwapFee(inputAmount, pool1, true)
+  const r = getSwapOutput(inputAmount, pool1, true)
+  const fee2 = getSwapFee(r, pool2, false)
+  const fee1Asset = getValueOfRuneInAsset(fee1, pool2)
+  const result = fee2.amount().plus(fee1Asset.amount())
+  return baseAmount(result)
+}
+
+export const getValueOfRuneInAsset = (inputRune: BaseAmount, pool: PoolData): BaseAmount => {
+  // formula: ((r * A) / R) => A per R ($perRune)
+  const r = inputRune.amount()
+  const R = pool.runeBalance.amount()
+  const A = pool.assetBalance.amount()
+  const result = r.times(A).div(R)
+  return baseAmount(result)
+}
+
 
 
 /**
@@ -145,13 +186,6 @@ export const getDoubleSwapSlip = (inputAmount: BaseAmount, pool1: PoolData, pool
 //   const A = pool.assetBalance.amount()
 //   const result = r.times(A).div(R)
 //   return baseAmount(result)
-// }
-
-// export const getDoubleSwapOutput = (inputAmount: BaseAmount, pool1: PoolData, pool2: PoolData): BaseAmount => {
-//   // formula: getSwapOutput(pool1) => getSwapOutput(pool2)
-//   const r = getSwapOutput(inputAmount, pool1, true)
-//   const output = getSwapOutput(r, pool2, false)
-//   return output
 // }
 
 // export const getDoubleSwapOutputWithFee = (
