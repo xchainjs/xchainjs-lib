@@ -13,9 +13,6 @@ describe('Haven Core Client Tests', () => {
   const mnenomonic =
     'juvenile kickoff king glass scoop lair iris token truth puzzled amaze corrode justice autumn pimple turnip cafe oyster hover baffles giddy farming vector western pimple'
 
-  //const secretViewkey = '34975f014cde57cf52f6aec3e91aab35af427f4a8a2002acebe7b45e634d7304'
-  // const publicViewkey = '770a38f508ae11fd50d74cc00aa3eeb947c4eca3f5d7b4664100e76847977d95'
-
   const address = 'hvtaKeraSrv8KGdn7Vp6qsQwBZLkKVQAi5fMuVynVe8HE9h7B8gdjQpMeGC1QHm4G25TBNcaXHfzSbe4G8uGTF6b5FoNTbnY5z'
 
   beforeAll(async () => {
@@ -129,7 +126,6 @@ describe('Haven Core Client Tests', () => {
         done()
       },
     }
-
     client.subscribeSyncProgress(observer)
   })
 })
