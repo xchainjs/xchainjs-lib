@@ -50,3 +50,25 @@ export type SwapOutput = {
   swapFee: BaseAmount
   slip: BigNumber
 }
+
+export type UnitData = {
+  liquidityUnits: BaseAmount
+  totalUnits: BaseAmount
+}
+
+export type LiquidityData = {
+  // assetDeposit: BaseAmount
+  rune: BaseAmount
+  asset: BaseAmount
+}
+
+export type Block = {
+  current: number
+  lastAdded: number
+  fullProtection: number
+}
+
+export type Coverage = {
+  poolRatio: BaseAmount
+}
+

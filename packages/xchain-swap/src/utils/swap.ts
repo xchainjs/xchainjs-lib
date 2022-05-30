@@ -5,9 +5,9 @@ import { PoolData, SwapOutput } from '../types'
 
 /**
  *
- * @param inputAmount
- * @param pool
- * @returns
+ * @param inputAmount - amount to swap
+ * @param pool - Pool Data, RUNE and ASSET Depths
+ * @returns swap output object - output - fee - slip
  */
  export const getSingleSwap = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): SwapOutput => {
   const output = getSwapOutput(inputAmount, pool, toRune)
@@ -23,10 +23,10 @@ import { PoolData, SwapOutput } from '../types'
 
 /**
  *
- * @param inputAmount
- * @param pool
- * @param toRune
- * @returns
+ * @param inputAmount - amount to swap
+ * @param pool - Pool Data, RUNE and ASSET Depths
+ * @param toRune - Direction of Swap. True if swapping to RUNE.
+ * @returns swap output object - output - fee - slip
  */
 
 export const getDoubleSwap = (inputAmount: BaseAmount, pool1: PoolData, pool2:PoolData ): SwapOutput => {
@@ -41,12 +41,11 @@ export const getDoubleSwap = (inputAmount: BaseAmount, pool1: PoolData, pool2:Po
   return SwapOutput
 }
 
-
 /**
  *
- * @param inputAmount
- * @param pool
- * @param toRune
+ * @param inputAmount - amount to swap
+ * @param pool - Pool Data, RUNE and ASSET Depths
+ * @param toRune - Direction of Swap. True if swapping to RUNE.
  * @returns
  */
 export const getSwapFee = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): BaseAmount => {
@@ -61,11 +60,12 @@ export const getSwapFee = (inputAmount: BaseAmount, pool: PoolData, toRune: bool
 }
 
 /**
+ * Works out the swap slip for a given swap.
  *
- * @param inputAmount
- * @param pool
- * @param toRune
- * @returns
+ * @param inputAmount - amount to swap
+ * @param pool - Pool Data, RUNE and ASSET Depths
+ * @param toRune - Direction of Swap. True if swapping to RUNE.
+ * @returns The amount of slip. Needs to * 100 to get percentage.
  */
 export const getSwapSlip = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): BigNumber => {
   // formula: (x) / (x + X)
@@ -77,10 +77,10 @@ export const getSwapSlip = (inputAmount: BaseAmount, pool: PoolData, toRune: boo
 
 /**
  *
- * @param inputAmount
- * @param pool
- * @param toRune
- * @returns
+ * @param inputAmount - amount to swap
+ * @param pool - Pool Data, RUNE and ASSET Depths
+ * @param toRune - Direction of Swap. True if swapping to RUNE.
+ * @returns The output amount
  */
 export const getSwapOutput = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): BaseAmount => {
   // formula: (x * X * Y) / (x + X) ^ 2

@@ -1,29 +1,13 @@
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
+import { PoolData, LiquidityData, UnitData, Block } from '../types'
 
-import { PoolData } from '../types'
-
-export type UnitData = {
-  liquidityUnits: BaseAmount
-  totalUnits: BaseAmount
-}
-
-export type LiquidityData = {
-  // assetDeposit: BaseAmount
-  rune: BaseAmount
-  asset: BaseAmount
-}
-
-export type Block = {
-  current: number
-  lastAdded: number
-  fullProtection: number
-}
-
-export type Coverage = {
-  poolRatio: BaseAmount
-}
-
+/**
+ *
+ * @param liquidity - asset amount added
+ * @param pool  - pool depths
+ * @returns liquidity units
+ */
 export const getLiquidityUnits = (liquidity: LiquidityData, pool: PoolData): BaseAmount => {
   // formula: ((R + T) (r T + R t))/(4 R T)
   // part1 * (part2 + part3) / denominator
@@ -40,6 +24,12 @@ export const getLiquidityUnits = (liquidity: LiquidityData, pool: PoolData): Bas
   return baseAmount(result)
 }
 
+/**
+ *
+ * @param unitData
+ * @param pool
+ * @returns
+ */
 export const getPoolShare = (unitData: UnitData, pool: PoolData): LiquidityData => {
   // formula: (rune * part) / total; (asset * part) / total
   const units = unitData.liquidityUnits.amount()
@@ -55,6 +45,12 @@ export const getPoolShare = (unitData: UnitData, pool: PoolData): LiquidityData 
   return liquidityData
 }
 
+/**
+ *
+ * @param liquidity
+ * @param pool
+ * @returns
+ */
 export const getSlipOnLiquidity = (liquidity: LiquidityData, pool: PoolData): BigNumber => {
   // formula: (t * R - T * r)/ (T*r + R*T)
   const r = liquidity.rune.amount()
@@ -67,6 +63,14 @@ export const getSlipOnLiquidity = (liquidity: LiquidityData, pool: PoolData): Bi
   return result
 }
 
+
+/**
+ *
+ * @param liquidity
+ * @param pool
+ * @param block
+ * @returns
+ */
 // Blocks for full protection 144000 // 100 days
 export const getLiquidityProtectionData = (liquidity: LiquidityData, pool: PoolData, block: Block): number => {
   // formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
