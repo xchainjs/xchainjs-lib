@@ -6,7 +6,7 @@ import { LiquidityPool } from './LiquidityPool'
 export type TotalFees = {
   inboundFee: BaseAmount
   swapFee: BaseAmount
-  outBoundFee: BaseAmount
+  outboundFee: BaseAmount
   affiliateFee: BaseAmount
 }
 
@@ -72,3 +72,20 @@ export type Coverage = {
   poolRatio: BaseAmount
 }
 
+export type InboundDetail = {
+  vault: string
+  router?: string
+  haltedChain: boolean
+  haltedTrading: boolean
+  haltedLP: boolean
+  gas_rate: BigNumber
+}
+
+export type ServerInboundDetail = {
+  chain: string
+  pub_key: string
+  address: string
+  halted: boolean
+  gas_rate: string
+  router?: string
+}

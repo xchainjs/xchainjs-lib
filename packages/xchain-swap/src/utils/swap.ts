@@ -1,45 +1,7 @@
-import { BigNumber } from 'bignumber.js';
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { BigNumber } from 'bignumber.js'
+
 import { PoolData, SwapOutput } from '../types'
-
-
-/**
- *
- * @param inputAmount - amount to swap
- * @param pool - Pool Data, RUNE and ASSET Depths
- * @returns swap output object - output - fee - slip
- */
- export const getSingleSwap = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): SwapOutput => {
-  const output = getSwapOutput(inputAmount, pool, toRune)
-  const fee = getSwapFee(inputAmount, pool, toRune)
-  const slip = getSwapSlip(inputAmount, pool, toRune)
-  const SwapOutput = {
-    output: output,
-    swapFee: fee,
-    slip: slip,
-  }
-  return SwapOutput
-}
-
-/**
- *
- * @param inputAmount - amount to swap
- * @param pool - Pool Data, RUNE and ASSET Depths
- * @param toRune - Direction of Swap. True if swapping to RUNE.
- * @returns swap output object - output - fee - slip
- */
-
-export const getDoubleSwap = (inputAmount: BaseAmount, pool1: PoolData, pool2:PoolData ): SwapOutput => {
-  const doubleOutput = getDoubleSwapOutput(inputAmount, pool1, pool2)
-  const doubleFee = getDoubleSwapFee(inputAmount, pool1, pool2)
-  const doubleSlip = getDoubleSwapSlip(inputAmount, pool1, pool2)
-  const SwapOutput = {
-    output: doubleOutput,
-    swapFee: doubleFee,
-    slip: doubleSlip,
-  }
-  return SwapOutput
-}
 
 /**
  *
@@ -100,6 +62,23 @@ export const getDoubleSwapOutput = (inputAmount: BaseAmount, pool1: PoolData, po
   return output
 }
 
+/**
+ *
+ * @param inputAmount - amount to swap
+ * @param pool - Pool Data, RUNE and ASSET Depths
+ * @returns swap output object - output - fee - slip
+ */
+export const getSingleSwap = (inputAmount: BaseAmount, pool: PoolData, toRune: boolean): SwapOutput => {
+  const output = getSwapOutput(inputAmount, pool, toRune)
+  const fee = getSwapFee(inputAmount, pool, toRune)
+  const slip = getSwapSlip(inputAmount, pool, toRune)
+  const SwapOutput = {
+    output: output,
+    swapFee: fee,
+    slip: slip,
+  }
+  return SwapOutput
+}
 export const getDoubleSwapSlip = (inputAmount: BaseAmount, pool1: PoolData, pool2: PoolData): BigNumber => {
   // formula: getSwapSlip1(input1) + getSwapSlip2(getSwapOutput1 => input2)
   const swapOutput1 = getSingleSwap(inputAmount, pool1, true)
@@ -107,7 +86,14 @@ export const getDoubleSwapSlip = (inputAmount: BaseAmount, pool1: PoolData, pool
   const result = swapOutput2.slip.plus(swapOutput1.slip)
   return result
 }
-
+export const getValueOfRuneInAsset = (inputRune: BaseAmount, pool: PoolData): BaseAmount => {
+  // formula: ((r * A) / R) => A per R ($perRune)
+  const r = inputRune.amount()
+  const R = pool.runeBalance.amount()
+  const A = pool.assetBalance.amount()
+  const result = r.times(A).div(R)
+  return baseAmount(result)
+}
 export const getDoubleSwapFee = (inputAmount: BaseAmount, pool1: PoolData, pool2: PoolData): BaseAmount => {
   // formula: getSwapFee1 + getSwapFee2
   const fee1 = getSwapFee(inputAmount, pool1, true)
@@ -118,16 +104,25 @@ export const getDoubleSwapFee = (inputAmount: BaseAmount, pool1: PoolData, pool2
   return baseAmount(result)
 }
 
-export const getValueOfRuneInAsset = (inputRune: BaseAmount, pool: PoolData): BaseAmount => {
-  // formula: ((r * A) / R) => A per R ($perRune)
-  const r = inputRune.amount()
-  const R = pool.runeBalance.amount()
-  const A = pool.assetBalance.amount()
-  const result = r.times(A).div(R)
-  return baseAmount(result)
+/**
+ *
+ * @param inputAmount - amount to swap
+ * @param pool - Pool Data, RUNE and ASSET Depths
+ * @param toRune - Direction of Swap. True if swapping to RUNE.
+ * @returns swap output object - output - fee - slip
+ */
+
+export const getDoubleSwap = (inputAmount: BaseAmount, pool1: PoolData, pool2: PoolData): SwapOutput => {
+  const doubleOutput = getDoubleSwapOutput(inputAmount, pool1, pool2)
+  const doubleFee = getDoubleSwapFee(inputAmount, pool1, pool2)
+  const doubleSlip = getDoubleSwapSlip(inputAmount, pool1, pool2)
+  const SwapOutput = {
+    output: doubleOutput,
+    swapFee: doubleFee,
+    slip: doubleSlip,
+  }
+  return SwapOutput
 }
-
-
 
 /**
  * Not sure if the below functions will be used.

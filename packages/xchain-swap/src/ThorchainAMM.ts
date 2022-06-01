@@ -1,10 +1,11 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Configuration, MidgardApi } from '@xchainjs/xchain-midgard'
-import { baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetETH, BaseAmount, Chain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
 import { EstimateSwapParams, PoolCache, SwapEstimate, ThorchainAMMConfig } from './types'
+import { getInboundDetails } from './utils/midgard'
 
 const defaultThorchainAMMConfig: Record<Network, ThorchainAMMConfig> = {
   mainnet: {
@@ -33,9 +34,29 @@ export class ThorchainAMM {
     this.midgardApi = new MidgardApi(new Configuration({ basePath: this.config.midgardBaseUrl }))
     this.refereshPoolCache()
   }
+  /**
+   *
+   * @param params - amount to swap
 
-  estimateSwap(params: EstimateSwapParams): SwapEstimate {
+   * @returns The SwapEstimate
+   */
+  async estimateSwap(params: EstimateSwapParams): Promise<SwapEstimate> {
     console.log(params)
+    let inboundFee: BaseAmount
+    let outboundFee: BaseAmount
+    let isHalted = false
+    if (params.sourceAsset.chain === Chain.THORChain) {
+      //flat rune fee
+      inboundFee = baseAmount(2000000)
+      outboundFee = inboundFee.times(3)
+    } else {
+      const inboundDetails = await getInboundDetails(params.sourceAsset.chain)
+      isHalted = inboundDetails.haltedChain || inboundDetails.haltedTrading
+      inboundFee = this.calcInboundFee(params.sourceAsset, inboundDetails.gas_rate)
+      outboundFee = inboundFee.times(3)
+    }
+
+    // const
 
     //   // ---------- Checks -----------
     //   const isHalted = checkChainStatus(sourceAsset)// only for those chains that are not Thor.
@@ -95,16 +116,42 @@ export class ThorchainAMM {
     //   return SwapEstimate
     return {
       totalFees: {
-        inboundFee: baseAmount(1),
+        inboundFee,
+        outboundFee,
         swapFee: baseAmount(1),
-        outBoundFee: baseAmount(1),
         affiliateFee: baseAmount(1),
       },
       slipPercentage: new BigNumber(0.1),
       netOutput: baseAmount(1),
-      isHalted: false,
+      isHalted,
     }
   }
+  private calcInboundFee(sourceAsset: Asset, gasRate: BigNumber): BaseAmount {
+    // https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
+
+    switch (sourceAsset.chain) {
+      case Chain.Bitcoin:
+      case Chain.BitcoinCash:
+      case Chain.Litecoin:
+      case Chain.Doge:
+        // NOTE: UTXO chains estimate fees with a 250 byte size
+        return baseAmount(gasRate.multipliedBy(250))
+        break
+      case Chain.Binance:
+        //flat fee
+        return baseAmount(gasRate)
+        break
+      case Chain.Ethereum:
+        if (eqAsset(sourceAsset, AssetETH)) {
+          return baseAmount(gasRate.multipliedBy(35000).multipliedBy(10 ** 9))
+        } else {
+          return baseAmount(gasRate.multipliedBy(70000).multipliedBy(10 ** 9))
+        }
+        break
+    }
+    throw new Error(`could not calculate inbound fee for ${sourceAsset.chain}`)
+  }
+
   async getPoolCache(): Promise<PoolCache | undefined> {
     const millisSinceLastRefeshed = Date.now() - (this.poolCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.config.expirePoolCacheMillis) {
