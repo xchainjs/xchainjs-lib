@@ -1,7 +1,8 @@
+import { Int } from '@terra-money/terra.js'
 import { Network } from '@xchainjs/xchain-client'
 import { Configuration, MidgardApi } from '@xchainjs/xchain-midgard'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
-import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, AssetBTC, AssetETH, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
@@ -67,10 +68,6 @@ export class ThorchainAMM {
       }
       outboundFee = inboundFee.times(3)
     }
-
-    if (isAssetRuneNative(params.sourceAsset) == false) {
-    }
-
     // // ---------- Remove Fees from inbound before doing the swap -----------
     //   take the inbound fee away from the inbound amount
     let inputNetAmount = params.inputAmount.minus(inboundFee) // are of the same type so this works.
@@ -155,6 +152,57 @@ export class ThorchainAMM {
     }
     return SwapEstimate
   }
+
+  public doSwap(
+    params: EstimateSwapParams,
+    destinationAddress: string,
+    affiliateAddress: string,
+    interfaceID: Int,
+  ): string {
+    let limPercentage = new BigNumber(1)
+    let lim = new BigNumber(1)
+    let memo: string
+    let inboundFee
+    let outboundFee
+    let isHalted
+
+    if (params.sourceAsset.chain === Chain.THORChain) {
+      //flat rune fee
+      inboundFee = baseAmount(2000000)
+      outboundFee = inboundFee.times(3)
+    } else {
+      //   check if the chain for that asset is halted and gets the fees
+      const sourceAssetInboundDetails = await getInboundDetails(params.sourceAsset.chain)
+      isHalted = sourceAssetInboundDetails.haltedChain || sourceAssetInboundDetails.haltedTrading
+      inboundFee = this.calcInboundFee(params.sourceAsset, sourceAssetInboundDetails.gas_rate)
+      // if the sourceAsset is BNB, then check the Binance Chain. Will need a asset to chain map or something.
+      // if the source or desingation asset is halted, return an error.
+      if (isHalted == true) {
+        throw new Error(`Halted chain for ${assetToString(params.sourceAsset)}`)
+      }
+      outboundFee = inboundFee.times(3)
+    }
+
+    limPercentage = lim.minus(params.slipLimit)
+    lim = params.inputAmount.times(limPercentage) // need to get output value of this.
+    // need to trip lim and add interfaceID
+
+    //   // remove any affiliateFee. netInput * affiliateFee (%age) of the desitnaiton asset type
+    const affiliateFeeAmount = inputNetAmount.times(params.affiliateFee)
+
+    memo = `:${params.destinationAsset.chain.toString}.${params.destinationAsset.symbol}:${destinationAddress}:${lim}:${affiliateAddress}:${affiliateFeeAmount}`
+
+    if (params.destinationAsset == AssetBTC && memo.length > 80) {
+      // if memo length is too long for BTC, need to trim it
+      memo = `:${params.destinationAsset.chain.toString}.${params.destinationAsset.symbol}:${destinationAddress}`
+    }
+
+    // send transaction from the wallet using the transfer function. Will need to set it to the asgard vault.
+    // TODO estimates wait time.
+    const TxId: string = params.sourceAsset.Transfer()
+    return TxId
+  }
+
   private calcInboundFee(sourceAsset: Asset, gasRate: BigNumber): BaseAmount {
     // https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
 
