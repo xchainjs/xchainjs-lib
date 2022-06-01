@@ -9,6 +9,7 @@ import {
   //   baseToAsset,
 } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
+import { PoolData } from './types'
 
 const BN_1 = new BigNumber(1)
 
@@ -38,7 +39,7 @@ export class LiquidityPool {
     this._currentPriceInRune = assetAmount(runeToAssetRatio)
     this._currentPriceInAsset = assetAmount(BN_1.dividedBy(runeToAssetRatio))
   }
-  isAvailable() {
+  isAvailable(): boolean {
     return this.pool.status.toLowerCase() === 'available'
   }
   getPriceIn(otherAssetPool: LiquidityPool): AssetAmount {
@@ -74,5 +75,12 @@ export class LiquidityPool {
   }
   public get assetString(): string {
     return this._assetString
+  }
+  public get poolDate(): PoolData {
+    const poolData: PoolData = {
+      assetBalance: this.assetBaseAmount,
+      runeBalance: this.runeBaseAmount,
+    }
+    return poolData
   }
 }

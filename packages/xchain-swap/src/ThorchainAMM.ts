@@ -1,11 +1,13 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Configuration, MidgardApi } from '@xchainjs/xchain-midgard'
-import { Asset, AssetETH, BaseAmount, Chain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
+import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
-import { EstimateSwapParams, PoolCache, SwapEstimate, ThorchainAMMConfig } from './types'
+import { EstimateSwapParams, PoolCache, SwapEstimate, SwapOutput, ThorchainAMMConfig, TotalFees } from './types'
 import { getInboundDetails } from './utils/midgard'
+import { getDoubleSwap, getSingleSwap } from './utils/swap'
 
 const defaultThorchainAMMConfig: Record<Network, ThorchainAMMConfig> = {
   mainnet: {
@@ -45,86 +47,113 @@ export class ThorchainAMM {
     let inboundFee: BaseAmount
     let outboundFee: BaseAmount
     let isHalted = false
+    let affiliateFeeAmount: BaseAmount
+    let isDoubleSwap: boolean
+    let swapOutput: SwapOutput
+
     if (params.sourceAsset.chain === Chain.THORChain) {
       //flat rune fee
       inboundFee = baseAmount(2000000)
       outboundFee = inboundFee.times(3)
     } else {
-      const inboundDetails = await getInboundDetails(params.sourceAsset.chain)
-      isHalted = inboundDetails.haltedChain || inboundDetails.haltedTrading
-      inboundFee = this.calcInboundFee(params.sourceAsset, inboundDetails.gas_rate)
+      //   check if the chain for that asset is halted and gets the fees
+      const sourceAssetInboundDetails = await getInboundDetails(params.sourceAsset.chain)
+      isHalted = sourceAssetInboundDetails.haltedChain || sourceAssetInboundDetails.haltedTrading
+      inboundFee = this.calcInboundFee(params.sourceAsset, sourceAssetInboundDetails.gas_rate)
+      // if the sourceAsset is BNB, then check the Binance Chain. Will need a asset to chain map or something.
+      // if the source or desingation asset is halted, return an error.
+      if (isHalted == true) {
+        throw new Error(`Halted chain for ${assetToString(params.sourceAsset)}`)
+      }
       outboundFee = inboundFee.times(3)
     }
 
-    // const
-
-    //   // ---------- Checks -----------
-    //   const isHalted = checkChainStatus(sourceAsset)// only for those chains that are not Thor.
-    //       // checkChainStatus should live in chain-utils or something. Within xchain-util
-    // // ---------- Remove Fees from inbound before doing the swap -----------
-    //   //get inbound Fee from proxyInbound_address then calc the fee as per https://dev.thorchain.org/thorchain-dev/thorchain-and-fees
-    //   const inBoundFee = inputAmount.minus(inputFee)
-    //   // take the inbound fee away from the inbound amount
-    //   const netInput = netInputAmount.minus(inBoundFee)
-    //   // remove any affiliateFee. netInput * affiliateFee (%age) of the desitnaiton asset type
-    //   const affiliateFeeAmount = netInput.times(affiliateFee)
-    //   // remove the affiliate fee from the input.
-    //    const netInputAmount = netInputAmount.minus(affiliateFeeAmount)
-    //   // now netInputAmount = inputAmount.minus(inboundFee + affiliateFeeAmount)
-    //   /// ------- Doing the swap ------------------------
-    //   // if source and destination != rune then its a double swap.
-    //   const isDoubleSwap = sourceAsset.symbol != "RUNE" && destinationAsset.symbol != "RUNE"
-    //    if (!isDoubleSwap) { // if not doulbe swap, e.g a single swap
-    //     // Need to work out which pool from the source asset. This could prob go in a util function
-    //     // I assume Leena's idea is just to work the pool instead of a UI passing it down
-    //       if(sourceAsset != RUNE)
-    //        const poolName = new string(sourceAsset.Chain & "." & sourceAsset.ticker) // e.g. BTC.BTC
-    //       else
-    //       poolName = new string(destinationAsset.Chain & "." & destinationAsset.ticker) // e.g. BTC.BTC
-    //       const PoolData1 = midgardApi.getPool(poolName)
-    //       const swapOutput = getSingleSwap(netInputAmount, PoolData1)
-    //    }
-    //    else {
-    //       pool1Name = new string(sourceAsset.Chain & "." & sourceAsset.ticker) // e.g. BTC.BTC
-    //       pool2Name = new string(destinationAsset.Chain & "." & destinationAsset.ticker) // e.g. BTC.ETH
-    //       const PoolData1 = midgardApi.getPool(pool1Name) // first pool data
-    //       const PoolData2 = midgardApi.getPool(pool2Name) // second pool data
-    //       const swapOutput1 = getSingleSwap(netInputAmount, PoolData1)
-    //       const swapOutput2 = getSingleSwap(swapOutput1.output, PoolData1)
-    //       // add up swap1 and swap 2 fees / slips
-    //    }
-    // if (totalSlip > slipLimit){
-    //   }else {
-    //     throw error "slip is too high at : & totalSlip"
-    //   }
-    //   /// ---------------- Remove Outbound Fee ---------------------- //////
-    //    //get data from proxyInbound_address then calc the fee as per https://dev.thorchain.org/thorchain-dev/thorchain-and-fees
-    //    // for BNB and RUNE it is fixed. For the rest it is 3* inbound fee
-    //    const outBoundFee = inputAmount.minus(outBoundFee)
-    //   const TotalFees = {
-    //     inboundFee: inboundFee,
-    //     swapFee: swapFee,
-    //     outBoundFee: outboundFee,
-    //     affiliateFee: affiliateFee
-    //   }
-    //   const SwapEstimate = {
-    //     totalFees: TotalFees,
-    //     slipPercentage: slipOnLiquidity,
-    //     netOutput: netOutput,
-    //     isHalted: isHalted
-    //   }
-    //   return SwapEstimate
-    return {
-      totalFees: {
-        inboundFee,
-        outboundFee,
-        swapFee: baseAmount(1),
-        affiliateFee: baseAmount(1),
-      },
-      slipPercentage: new BigNumber(0.1),
-      netOutput: baseAmount(1),
-      isHalted,
+    if (isAssetRuneNative(params.sourceAsset) == false) {
     }
+
+    // // ---------- Remove Fees from inbound before doing the swap -----------
+    //   take the inbound fee away from the inbound amount
+    let inputNetAmount = params.inputAmount.minus(inboundFee) // are of the same type so this works.
+
+    //   // remove any affiliateFee. netInput * affiliateFee (%age) of the desitnaiton asset type
+    affiliateFeeAmount = inputNetAmount.times(params.affiliateFee)
+    // remove the affiliate fee from the input.
+    inputNetAmount = inputNetAmount.minus(affiliateFeeAmount)
+    // now netInputAmount should be inputAmount.minus(inboundFee + affiliateFeeAmount)
+
+    //   /// ------- Doing the swap ------------------------
+    this.refereshPoolCache()
+    let liquidityPool: LiquidityPool
+
+    if (isAssetRuneNative(params.sourceAsset) == true) {
+      // cannot be double swap and destination HAS to be asset.
+      // const poolName = params.destinationAsset.chain + "." + params.sourceAsset.ticker // e.g. BTC.BTC
+      liquidityPool = this.poolCache?.pools.find((obj) => {
+        //  how to find a pool with a given asset?
+        return obj.asset === params.destinationAsset // get the pool by name?
+      })
+      if (liquidityPool.isAvailable == false) {
+        throw new Error(`Liquidity Pool not active`)
+      }
+      swapOutput = getSingleSwap(params.inputAmount, liquidityPool.poolDate, false)
+
+      if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip to High!`) // just an example
+    }
+    // is it a double swap? if source and destination != rune then its a double swap.
+    isDoubleSwap = false
+    if (isAssetRuneNative(params.sourceAsset) == false && isAssetRuneNative(params.destinationAsset) == false) {
+      isDoubleSwap = true
+    }
+    if (isDoubleSwap == false) {
+      // It is a single swap and must be asset to RUNE swap. Repeat the above but change the direction of the swap.
+      liquidityPool = this.poolCache?.pools.find((obj) => {
+        //  how to find a pool with a given asset?
+        return obj.asset === params.sourceAsset // get the pool by name?
+      })
+      if (liquidityPool.isAvailable == false) {
+        throw new Error(`Liquidity Pool not active`)
+      }
+      swapOutput = getSingleSwap(params.inputAmount, liquidityPool.poolDate, true)
+
+      if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip to High!`) // just an example
+    } else {
+      // process a double swap
+      // Get source asset pool
+      const liquidityPool1 = this.poolCache?.pools.find((obj) => {
+        //  how to find a pool with a given asset?
+        return obj.asset === params.sourceAsset // get the pool by name?
+      })
+      if (liquidityPool1.isAvailable == false) {
+        throw new Error(`Liquidity Pool not active`)
+      }
+      // Get desitnation asset pool
+      const liquidityPool2 = this.poolCache?.pools.find((obj) => {
+        //  how to find a pool with a given asset?
+        return obj.asset === params.destinationAsset // get the pool by name?
+      })
+      if (liquidityPool2.isAvailable == false) {
+        throw new Error(`Liquidity Pool not active`)
+      }
+      swapOutput = getDoubleSwap(params.inputAmount, liquidityPool1.poolDate, liquidityPool2.poolData)
+      if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip to High!`) // just an example
+    }
+    // ---------------- Remove Outbound Fee ---------------------- / /////
+    let netOutput: BaseAmount
+    netOutput = swapOutput.output.minus(outboundFee) // swap outbout and outbound fee should be in the same type also
+
+    const totalFees: TotalFees = {
+      inboundFee: inboundFee,
+      swapFee: swapOutput.swapFee,
+      outboundFee: outboundFee,
+      affiliateFee: affiliateFeeAmount,
+    }
+    const SwapEstimate = {
+      totalFees: totalFees,
+      slipPercentage: swapOutput.slip,
+      netOutput: netOutput,
+      isHalted: isHalted,
+    }
+    return SwapEstimate
   }
   private calcInboundFee(sourceAsset: Asset, gasRate: BigNumber): BaseAmount {
     // https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
