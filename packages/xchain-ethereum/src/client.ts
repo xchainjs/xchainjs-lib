@@ -589,16 +589,25 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   /**
    * Call a contract function.
 
-   * @param {signer} Signer of the transaction (optional - needed for sending transactions only)
+   * @param {signer} Signer (optional) The address a transaction is send from. If not set, signer will be defined based on `walletIndex`
    * @param {Address} contractAddress The contract address.
+   * @param {number} walletIndex (optional) HD wallet index
    * @param {ContractInterface} abi The contract ABI json.
    * @param {string} funcName The function to be called.
    * @param {unknown[]} funcParams (optional) The parameters of the function.
    *
    * @returns {T} The result of the contract function call.
    */
-  async call<T>({ signer, contractAddress, abi, funcName, funcParams = [] }: CallParams): Promise<T> {
+  async call<T>({
+    signer: txSigner,
+    contractAddress,
+    walletIndex = 0,
+    abi,
+    funcName,
+    funcParams = [],
+  }: CallParams): Promise<T> {
     const provider = this.getProvider()
+    const signer = txSigner || this.getWallet(walletIndex)
     return call({ provider, signer, contractAddress, abi, funcName, funcParams })
   }
 
@@ -626,7 +635,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
   /**
    * Check allowance.
    *
-   * @param {Address} contractAddress The spender address.
+   * @param {Address} contractAddress The contract address.
    * @param {Address} spenderAddress The spender address.
    * @param {BaseAmount} amount The amount to check if it's allowed to spend or not (optional).
    * @param {number} walletIndex (optional) HD wallet index
