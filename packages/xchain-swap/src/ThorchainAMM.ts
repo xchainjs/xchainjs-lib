@@ -2,7 +2,17 @@ import { Int } from '@terra-money/terra.js'
 import { Network } from '@xchainjs/xchain-client'
 import { Configuration, MidgardApi } from '@xchainjs/xchain-midgard'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
-import { Asset, AssetBTC, AssetETH, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetBTC,
+  AssetETH,
+  AssetRuneNative,
+  BaseAmount,
+  Chain,
+  assetToString,
+  baseAmount,
+  eqAsset,
+} from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
@@ -12,14 +22,17 @@ import { getDoubleSwap, getSingleSwap } from './utils/swap'
 
 const defaultThorchainAMMConfig: Record<Network, ThorchainAMMConfig> = {
   mainnet: {
+    waitMillisBetweenFetchFailures: 3000,
     expirePoolCacheMillis: 6000,
     midgardBaseUrl: 'https://midgard.thorchain.info/',
   },
   stagenet: {
+    waitMillisBetweenFetchFailures: 3000,
     expirePoolCacheMillis: 6000,
     midgardBaseUrl: 'https://stagenet-midgard.ninerealms.com/',
   },
   testnet: {
+    waitMillisBetweenFetchFailures: 3000,
     expirePoolCacheMillis: 6000,
     midgardBaseUrl: 'https://testnet.midgard.thorchain.info/',
   },
@@ -35,7 +48,45 @@ export class ThorchainAMM {
     this.network = network
     this.config = defaultThorchainAMMConfig[this.network]
     this.midgardApi = new MidgardApi(new Configuration({ basePath: this.config.midgardBaseUrl }))
+    //initialize the cache
     this.refereshPoolCache()
+  }
+  private async validateSwapEstimate(params: EstimateSwapParams) {
+    const pools = await this.getPools()
+    const sourceAssetString = assetToString(params.sourceAsset)
+    const sourcePool = pools[sourceAssetString]
+    const destinationAssetString = assetToString(params.destinationAsset)
+    const destinationPool = pools[destinationAssetString]
+
+    if (eqAsset(params.sourceAsset, params.destinationAsset))
+      throw Error(`sourceAsset and destinationAsset cannot be the same`)
+
+    if (params.inputAmount.lte(0)) throw Error('inputAmount must be greater than 0')
+
+    if (params.affiliateFeePercent && (params.affiliateFeePercent < 0 || params.affiliateFeePercent > 0.1))
+      throw Error(`affiliateFee must be between 0 and 1000`)
+
+    if (!eqAsset(params.sourceAsset, AssetRuneNative) && !sourcePool.isAvailable())
+      throw Error(`sourceAsset ${sourceAssetString} does not have a liquidity pool`)
+
+    if (!eqAsset(params.destinationAsset, AssetRuneNative) && !destinationPool.isAvailable())
+      throw Error(`destinationAsset ${destinationAssetString} does not have a liquidity pool`)
+
+    // TODO implement the following
+    //  If valueofRUNE(inbound fee + outbound fee) > valueOfRUNE(inboundAsset)
+    //   return "insufficent inbound asset amount "
+
+    //   If (sourceAsset.chainType != RUNE)
+    //      sourceInboundDetails = getInboundDetails(Mainnet, destinationAsset.chainType).isHalted
+    //          If (inboundDetails.isHalted)
+    //           return "source chain halted"
+
+    //  If (destinationAsset.chainType != RUNE)
+    //      destinationInboundDetails = getInboundDetails(Mainnet, sourceAsset.chainType).isHalted
+    //          if (destinationInboundDetails.isHalted)
+    //              return "Desitnation chain halted"
+
+    //  Return "Success"
   }
   /**
    *
@@ -48,7 +99,7 @@ export class ThorchainAMM {
     let inboundFee: BaseAmount
     let outboundFee: BaseAmount
     let isHalted = false
-    let affiliateFeeAmount: BaseAmount
+    let affiliateFeeAmount: BaseAmount = baseAmount(0)
     let isDoubleSwap: boolean
     let swapOutput: SwapOutput
 
@@ -73,7 +124,7 @@ export class ThorchainAMM {
     let inputNetAmount = params.inputAmount.minus(inboundFee) // are of the same type so this works.
 
     //   // remove any affiliateFee. netInput * affiliateFee (%age) of the desitnaiton asset type
-    affiliateFeeAmount = inputNetAmount.times(params.affiliateFee)
+    affiliateFeeAmount = inputNetAmount.times(params.affiliateFeePercent || 0)
     // remove the affiliate fee from the input.
     inputNetAmount = inputNetAmount.minus(affiliateFeeAmount)
     // now netInputAmount should be inputAmount.minus(inboundFee + affiliateFeeAmount)
@@ -89,12 +140,12 @@ export class ThorchainAMM {
         //  how to find a pool with a given asset?
         return obj.asset === params.destinationAsset // get the pool by name?
       })
-      if (liquidityPool.isAvailable == false) {
+      if (liquidityPool.isAvailable() == false) {
         throw new Error(`Liquidity Pool not active`)
       }
-      swapOutput = getSingleSwap(params.inputAmount, liquidityPool.poolDate, false)
+      swapOutput = getSingleSwap(params.inputAmount, liquidityPool, false)
 
-      if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip to High!`) // just an example
+      if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip too High!`) // just an example
     }
     // is it a double swap? if source and destination != rune then its a double swap.
     isDoubleSwap = false
@@ -107,12 +158,12 @@ export class ThorchainAMM {
         //  how to find a pool with a given asset?
         return obj.asset === params.sourceAsset // get the pool by name?
       })
-      if (liquidityPool.isAvailable == false) {
+      if (liquidityPool.isAvailable() == false) {
         throw new Error(`Liquidity Pool not active`)
       }
-      swapOutput = getSingleSwap(params.inputAmount, liquidityPool.poolDate, true)
+      swapOutput = getSingleSwap(params.inputAmount, liquidityPool, true)
 
-      if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip to High!`) // just an example
+      if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip too High!`) // just an example
     } else {
       // process a double swap
       // Get source asset pool
@@ -131,8 +182,8 @@ export class ThorchainAMM {
       if (liquidityPool2.isAvailable == false) {
         throw new Error(`Liquidity Pool not active`)
       }
-      swapOutput = getDoubleSwap(params.inputAmount, liquidityPool1.poolDate, liquidityPool2.poolData)
-      if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip to High!`) // just an example
+      swapOutput = getDoubleSwap(params.inputAmount, liquidityPool1, liquidityPool2)
+      if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip too High!`) // just an example
     }
     // ---------------- Remove Outbound Fee ---------------------- / /////
     let netOutput: BaseAmount
@@ -229,27 +280,41 @@ export class ThorchainAMM {
     throw new Error(`could not calculate inbound fee for ${sourceAsset.chain}`)
   }
 
-  async getPoolCache(): Promise<PoolCache | undefined> {
+  async getPools(attempts?: number): Promise<Record<string, LiquidityPool>> {
     const millisSinceLastRefeshed = Date.now() - (this.poolCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.config.expirePoolCacheMillis) {
-      await this.refereshPoolCache()
+      try {
+        await this.refereshPoolCache()
+      } catch (error) {
+        if (attempts && attempts < 5) {
+          // try up to 5 times
+          setTimeout(this.getPools.bind(this), this.config.waitMillisBetweenFetchFailures, [attempts++])
+        }
+      }
     }
-    return this.poolCache
+    if (this.poolCache) {
+      return this.poolCache?.pools
+    } else {
+      throw Error(`Could not refresh Pools after ${attempts} attempts`)
+    }
   }
 
+  /**
+   * do not call refereshPoolCache() directly, call getPools() instead
+   * which will refresh the cache if it's expired
+   */
   private async refereshPoolCache(): Promise<void> {
-    try {
-      const pools = (await this.midgardApi.getPools()).data
-      if (pools) {
-        const lps = pools.map((pool) => new LiquidityPool(pool))
-        this.poolCache = {
-          lastRefreshed: Date.now(),
-          pools: lps,
-        }
-        console.log('updated pool cache')
+    const pools = (await this.midgardApi.getPools()).data
+    const poolMap: Record<string, LiquidityPool> = {}
+    if (pools) {
+      for (const pool of pools) {
+        poolMap[pool.asset] = new LiquidityPool(pool)
       }
-    } catch (error) {
-      console.error(error)
+      this.poolCache = {
+        lastRefreshed: Date.now(),
+        pools: poolMap,
+      }
+      console.log('updated pool cache')
     }
   }
 }

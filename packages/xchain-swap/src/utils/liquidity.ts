@@ -1,6 +1,8 @@
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
-import { PoolData, LiquidityData, UnitData, Block } from '../types'
+
+import { LiquidityPool } from '../LiquidityPool'
+import { Block, LiquidityData, UnitData } from '../types'
 
 /**
  *
@@ -8,7 +10,7 @@ import { PoolData, LiquidityData, UnitData, Block } from '../types'
  * @param pool  - pool depths
  * @returns liquidity units
  */
-export const getLiquidityUnits = (liquidity: LiquidityData, pool: PoolData): BaseAmount => {
+export const getLiquidityUnits = (liquidity: LiquidityData, pool: LiquidityPool): BaseAmount => {
   // formula: ((R + T) (r T + R t))/(4 R T)
   // part1 * (part2 + part3) / denominator
   const r = liquidity.rune.amount()
@@ -30,7 +32,7 @@ export const getLiquidityUnits = (liquidity: LiquidityData, pool: PoolData): Bas
  * @param pool
  * @returns
  */
-export const getPoolShare = (unitData: UnitData, pool: PoolData): LiquidityData => {
+export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): LiquidityData => {
   // formula: (rune * part) / total; (asset * part) / total
   const units = unitData.liquidityUnits.amount()
   const total = unitData.totalUnits.amount()
@@ -51,7 +53,7 @@ export const getPoolShare = (unitData: UnitData, pool: PoolData): LiquidityData 
  * @param pool
  * @returns
  */
-export const getSlipOnLiquidity = (liquidity: LiquidityData, pool: PoolData): BigNumber => {
+export const getSlipOnLiquidity = (liquidity: LiquidityData, pool: LiquidityPool): BigNumber => {
   // formula: (t * R - T * r)/ (T*r + R*T)
   const r = liquidity.rune.amount()
   const t = liquidity.asset.amount()
@@ -63,7 +65,6 @@ export const getSlipOnLiquidity = (liquidity: LiquidityData, pool: PoolData): Bi
   return result
 }
 
-
 /**
  *
  * @param liquidity
@@ -72,7 +73,7 @@ export const getSlipOnLiquidity = (liquidity: LiquidityData, pool: PoolData): Bi
  * @returns
  */
 // Blocks for full protection 144000 // 100 days
-export const getLiquidityProtectionData = (liquidity: LiquidityData, pool: PoolData, block: Block): number => {
+export const getLiquidityProtectionData = (liquidity: LiquidityData, pool: LiquidityPool, block: Block): number => {
   // formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
   const R0 = liquidity.rune.amount() // symetrical value of rune deposit
   const A0 = liquidity.asset.amount() // symetrical value of asset deposit

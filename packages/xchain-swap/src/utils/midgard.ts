@@ -6,7 +6,7 @@ import { InboundDetail, ServerInboundDetail } from '../types'
 
 const axios = require('axios')
 
-const midgardBaseUrls: { [key: string]: Array<string> } = {
+const midgardBaseUrls: Record<string, string[]> = {
   [Network.Testnet]: ['https://testnet.midgard.thorchain.info'],
   [Network.Mainnet]: ['https://midgard.ninerealms.com', 'https://midgard.thorswap.net'],
 }
