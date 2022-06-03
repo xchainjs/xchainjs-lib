@@ -5,11 +5,10 @@ import {
   BaseAmount,
   assetAmount,
   assetFromString,
-  baseAmount,
-  //   baseToAsset,
+  baseAmount
 } from '@xchainjs/xchain-util'
-import BigNumber from 'bignumber.js'
-// import { PoolData } from './types'
+import { BigNumber } from 'bignumber.js'
+
 
 const BN_1 = new BigNumber(1)
 

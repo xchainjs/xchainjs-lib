@@ -1,6 +1,6 @@
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
 import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
-import BigNumber from 'bignumber.js'
+import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
 import { EstimateSwapParams, InboundDetail, PoolCache, SwapEstimate, SwapOutput, TotalFees } from './types'
