@@ -44,7 +44,7 @@ export class ThorchainAMM {
       if (sourceInboundDetails.haltedChain || sourceInboundDetails.haltedTrading) errors.push(`source pool is halted`)
     }
     if (!isAssetRuneNative(params.destinationAsset)) {
-      if (destinationPool?.isAvailable())
+      if (!destinationPool?.isAvailable())
         errors.push(`destinationAsset ${params.destinationAsset.ticker} does not have a valid liquidity pool`)
       if (destinationInboundDetails.haltedChain || destinationInboundDetails.haltedTrading)
         errors.push(`destination pool is halted`)
