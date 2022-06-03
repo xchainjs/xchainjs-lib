@@ -1,7 +1,8 @@
 import { assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { PoolData, SwapOutput } from '../src/types'
+import { LiquidityPool } from '../src/LiquidityPool'
+import { SwapOutput } from '../src/types'
 import {
   getDoubleSwap,
   getDoubleSwapFee,
@@ -13,15 +14,37 @@ import {
   getSwapSlip,
 } from '../src/utils/swap'
 
-const btcPool: PoolData = {
-  assetBalance: assetToBase(assetAmount(100)),
-  runeBalance: assetToBase(assetAmount(2500000)),
+const btcPoolDetails = {
+  asset: 'BTC.BTC',
+  assetDepth: assetToBase(assetAmount(100)).amount().toFixed(),
+  assetPrice: '11121.24920535084',
+  assetPriceUSD: '30458.124870650492',
+  liquidityUnits: '536087715332333',
+  poolAPY: '0.1001447237777584',
+  runeDepth: assetToBase(assetAmount(2500000)).amount().toFixed(),
+  status: 'available',
+  synthSupply: '3304301605',
+  synthUnits: '10309541238596',
+  units: '546397256570929',
+  volume24h: '16202006480711',
 }
+const ethPoolDetails = {
+  asset: 'ETH.ETH',
+  assetDepth: assetToBase(assetAmount(9100)).amount().toFixed(),
+  assetPrice: '663.6697871509878',
+  assetPriceUSD: '1817.6139097932505',
+  liquidityUnits: '262338362121353',
+  poolAPY: '0.10844053560303157',
+  runeDepth: assetToBase(assetAmount(6189000)).amount().toFixed(),
+  status: 'available',
+  synthSupply: '11035203002',
+  synthUnits: '1634889648287',
+  units: '263973251769640',
+  volume24h: '8122016881297',
+}
+const btcPool = new LiquidityPool(btcPoolDetails)
+const ethPool = new LiquidityPool(ethPoolDetails)
 
-const ethPool: PoolData = {
-  assetBalance: assetToBase(assetAmount(9100)),
-  runeBalance: assetToBase(assetAmount(6189000)),
-}
 const inputAmount = assetToBase(assetAmount(1)) // 1 BTC
 
 describe('Swap Cal Tests', () => {

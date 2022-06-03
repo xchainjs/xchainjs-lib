@@ -6,7 +6,6 @@ import { Client as DogeClient } from '@xchainjs/xchain-doge'
 import { Client as EthClient, EthereumClient } from '@xchainjs/xchain-ethereum'
 import { ETHAddress, strip0x } from '@xchainjs/xchain-ethereum/src'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
-import { Configuration, MIDGARD_API_TS_URL, MidgardApi } from '@xchainjs/xchain-midgard'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard/src/generated/midgardApi'
 import { Client as TerraClient } from '@xchainjs/xchain-terra'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
@@ -15,7 +14,7 @@ import { ethers } from 'ethers'
 
 import routerABI from './abi/routerABI.json'
 import { DepositParams } from './types'
-import { getInboundDetails } from './utils/midgard'
+import { Midgard } from './utils/midgard'
 
 export type Swap = {
   fromBaseAmount: BaseAmount
@@ -42,12 +41,12 @@ export class Wallet {
   private network: Network
   clients: Record<string, XChainClient>
   private asgardAssets: InboundAddressesItem[] = []
-  private midgardApi: MidgardApi
+  private midgard: Midgard
 
   constructor(network: Network, phrase: string) {
     this.network = network
     const settings = { network, phrase }
-    this.midgardApi = new MidgardApi(new Configuration({ basePath: MIDGARD_API_TS_URL }))
+    this.midgard = new Midgard(this.network)
     this.clients = {
       BCH: new BchClient(settings),
       BTC: new BtcClient(settings),
@@ -65,7 +64,7 @@ export class Wallet {
   }
   private async updateAsgardAddresses(checkTimeMs: number) {
     try {
-      this.asgardAssets = await (await this.midgardApi.getProxiedInboundAddresses()).data
+      this.asgardAssets = await this.midgard.getAllInboundAddresses()
     } catch (error) {
       console.error(error)
     }
@@ -148,7 +147,7 @@ export class Wallet {
    */
   async sendETHDeposit({ walletIndex = 0, asset = AssetETH, amount, memo }: DepositParams): Promise<TxHash> {
     const ethClient = (this.clients.ETH as unknown) as EthereumClient
-    const { haltedChain, haltedTrading, router, vault } = await getInboundDetails(asset.chain, this.network)
+    const { haltedChain, haltedTrading, router, vault } = (await this.midgard.getInboundDetails([asset.chain]))[0]
 
     if (haltedChain) {
       throw new Error(`Halted chain for ${assetToString(asset)}`)

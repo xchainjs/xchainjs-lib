@@ -54,6 +54,7 @@
     "@xchainjs/xchain-thorchain": "^0.25.0",
     "@xchainjs/xchain-util": "^0.7.1",
     "axios": "^0.25.0",
+    "axios-retry": "^3.2.5",
     "bchaddrjs": "^0.5.2",
     "bech32": "^2.0.0",
     "bech32-buffer": "^0.2.0",

@@ -14,16 +14,17 @@ export type SwapEstimate = {
   totalFees: TotalFees
   slipPercentage: BigNumber
   netOutput: BaseAmount
-  isHalted: boolean
+  canSwap: boolean
+  errors?: string[]
+  // isHalted: boolean
 }
 export type PoolCache = {
   lastRefreshed: number
   pools: Record<string, LiquidityPool>
 }
-export type ThorchainAMMConfig = {
-  waitMillisBetweenFetchFailures: number
-  expirePoolCacheMillis: number
-  midgardBaseUrl: string
+export type MidgardConfig = {
+  apiRetries: number
+  midgardBaseUrls: string[]
 }
 
 export type EstimateSwapParams = {
@@ -40,11 +41,6 @@ export type DepositParams = {
   amount: BaseAmount
   memo: string
 }
-
-// export type PoolData = {
-//   assetBalance: BaseAmount
-//   runeBalance: BaseAmount
-// }
 
 export type SwapOutput = {
   output: BaseAmount
