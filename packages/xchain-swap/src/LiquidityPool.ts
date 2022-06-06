@@ -5,10 +5,10 @@ import {
   BaseAmount,
   assetAmount,
   assetFromString,
-  baseAmount
+  baseAmount,
+  baseToAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
-
 
 const BN_1 = new BigNumber(1)
 
@@ -24,7 +24,6 @@ export class LiquidityPool {
 
   constructor(pool: PoolDetail) {
     this.pool = pool
-    // console.log(this.pool.asset)
     const asset = assetFromString(this.pool.asset)
     if (!asset) throw new Error(`could not parse ${this.pool.asset}`)
 
@@ -34,16 +33,15 @@ export class LiquidityPool {
     this.assetBalance = baseAmount(this.pool.assetDepth)
     this.runeBalance = baseAmount(this.pool.runeDepth) //Rune is always 8 decimals
 
-    const runeToAssetRatio = this.runeBalance.amount().div(this.assetBalance.amount())
-    this._currentPriceInRune = assetAmount(runeToAssetRatio)
-    this._currentPriceInAsset = assetAmount(BN_1.dividedBy(runeToAssetRatio))
+    const runeToAssetRatio = this.runeBalance.div(this.assetBalance)
+    this._currentPriceInRune = baseToAsset(runeToAssetRatio)
+    this._currentPriceInAsset = assetAmount(BN_1.dividedBy(runeToAssetRatio.amount()))
   }
   isAvailable(): boolean {
     return this.pool.status.toLowerCase() === 'available'
   }
   getPriceIn(otherAssetPool: LiquidityPool): AssetAmount {
-    const price = otherAssetPool.currentPriceInAsset.amount().multipliedBy(this.currentPriceInRune.amount())
-    return assetAmount(price)
+    return otherAssetPool.currentPriceInAsset.times(this.currentPriceInRune)
   }
   public get currentPriceInAsset(): AssetAmount {
     return this._currentPriceInAsset
@@ -57,11 +55,4 @@ export class LiquidityPool {
   public get assetString(): string {
     return this._assetString
   }
-  // public get poolDate(): PoolData {
-  //   const poolData: PoolData = {
-  //     assetBalance: this.assetBaseAmount,
-  //     runeBalance: this.runeBaseAmount,
-  //   }
-  //   return poolData
-  // }
 }

@@ -16,7 +16,6 @@ export type SwapEstimate = {
   netOutput: BaseAmount
   canSwap: boolean
   errors?: string[]
-  // isHalted: boolean
 }
 export type PoolCache = {
   lastRefreshed: number
@@ -76,13 +75,4 @@ export type InboundDetail = {
   haltedTrading: boolean
   haltedLP: boolean
   gas_rate: BigNumber
-}
-
-export type ServerInboundDetail = {
-  chain: string
-  pub_key: string
-  address: string
-  halted: boolean
-  gas_rate: string
-  router?: string
 }

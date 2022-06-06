@@ -168,117 +168,10 @@ export class ThorchainAMM {
     }
     return swapEstimate
   }
+  // async getSwapEstimateInUSD(){
 
-  // async estimateSwapOld(params: EstimateSwapParams): Promise<SwapEstimate> {
-  //   console.log(params)
-  //   let inboundFee: BaseAmount
-  //   let outboundFee: BaseAmount
-  //   let isHalted = false
-  //   let affiliateFeeAmount: BaseAmount = baseAmount(0)
-  //   let isDoubleSwap: boolean
-  //   let swapOutput: SwapOutput
-
-  //   if (params.sourceAsset.chain === Chain.THORChain) {
-  //     //flat rune fee
-  //     inboundFee = baseAmount(2000000)
-  //     outboundFee = inboundFee.times(3)
-  //   } else {
-  //     //   check if the chain for that asset is halted and gets the fees
-  //     const sourceAssetInboundDetails = await getInboundDetails(params.sourceAsset.chain)
-  //     isHalted = sourceAssetInboundDetails.haltedChain || sourceAssetInboundDetails.haltedTrading
-  //     inboundFee = this.calcInboundFee(params.sourceAsset, sourceAssetInboundDetails.gas_rate)
-  //     // if the sourceAsset is BNB, then check the Binance Chain. Will need a asset to chain map or something.
-  //     // if the source or desingation asset is halted, return an error.
-  //     if (isHalted == true) {
-  //       throw new Error(`Halted chain for ${assetToString(params.sourceAsset)}`)
-  //     }
-  //     outboundFee = inboundFee.times(3)
-  //   }
-  //   // // ---------- Remove Fees from inbound before doing the swap -----------
-  //   //   take the inbound fee away from the inbound amount
-  //   let inputNetAmount = params.inputAmount.minus(inboundFee) // are of the same type so this works.
-
-  //   //   // remove any affiliateFee. netInput * affiliateFee (%age) of the desitnaiton asset type
-  //   affiliateFeeAmount = inputNetAmount.times(params.affiliateFeePercent || 0)
-  //   // remove the affiliate fee from the input.
-  //   inputNetAmount = inputNetAmount.minus(affiliateFeeAmount)
-  //   // now netInputAmount should be inputAmount.minus(inboundFee + affiliateFeeAmount)
-
-  //   //   /// ------- Doing the swap ------------------------
-  //   this.refereshPoolCache()
-  //   let liquidityPool: LiquidityPool
-
-  //   if (isAssetRuneNative(params.sourceAsset) == true) {
-  //     // cannot be double swap and destination HAS to be asset.
-  //     // const poolName = params.destinationAsset.chain + "." + params.sourceAsset.ticker // e.g. BTC.BTC
-  //     liquidityPool = this.poolCache?.pools.find((obj) => {
-  //       //  how to find a pool with a given asset?
-  //       return obj.asset === params.destinationAsset // get the pool by name?
-  //     })
-  //     if (liquidityPool.isAvailable() == false) {
-  //       throw new Error(`Liquidity Pool not active`)
-  //     }
-  //     swapOutput = getSingleSwap(params.inputAmount, liquidityPool, false)
-
-  //     if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip too High!`) // just an example
-  //   }
-  //   // is it a double swap? if source and destination != rune then its a double swap.
-  //   isDoubleSwap = false
-  //   if (isAssetRuneNative(params.sourceAsset) == false && isAssetRuneNative(params.destinationAsset) == false) {
-  //     isDoubleSwap = true
-  //   }
-  //   if (isDoubleSwap == false) {
-  //     // It is a single swap and must be asset to RUNE swap. Repeat the above but change the direction of the swap.
-  //     liquidityPool = this.poolCache?.pools.find((obj) => {
-  //       //  how to find a pool with a given asset?
-  //       return obj.asset === params.sourceAsset // get the pool by name?
-  //     })
-  //     if (liquidityPool.isAvailable() == false) {
-  //       throw new Error(`Liquidity Pool not active`)
-  //     }
-  //     swapOutput = getSingleSwap(params.inputAmount, liquidityPool, true)
-
-  //     if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip too High!`) // just an example
-  //   } else {
-  //     // process a double swap
-  //     // Get source asset pool
-  //     const liquidityPool1 = this.poolCache?.pools.find((obj) => {
-  //       //  how to find a pool with a given asset?
-  //       return obj.asset === params.sourceAsset // get the pool by name?
-  //     })
-  //     if (liquidityPool1.isAvailable == false) {
-  //       throw new Error(`Liquidity Pool not active`)
-  //     }
-  //     // Get desitnation asset pool
-  //     const liquidityPool2 = this.poolCache?.pools.find((obj) => {
-  //       //  how to find a pool with a given asset?
-  //       return obj.asset === params.destinationAsset // get the pool by name?
-  //     })
-  //     if (liquidityPool2.isAvailable == false) {
-  //       throw new Error(`Liquidity Pool not active`)
-  //     }
-  //     swapOutput = getDoubleSwap(params.inputAmount, liquidityPool1, liquidityPool2)
-  //     if (swapOutput.slip >= params.slipLimit) throw new Error(`Slip too High!`) // just an example
-  //   }
-  //   // ---------------- Remove Outbound Fee ---------------------- / /////
-  //   let netOutput: BaseAmount
-  //   netOutput = swapOutput.output.minus(outboundFee) // swap outbout and outbound fee should be in the same type also
-
-  //   const totalFees: TotalFees = {
-  //     inboundFee: inboundFee,
-  //     swapFee: swapOutput.swapFee,
-  //     outboundFee: outboundFee,
-  //     affiliateFee: affiliateFeeAmount,
-  //   }
-  //   const SwapEstimate = {
-  //     totalFees: totalFees,
-  //     slipPercentage: swapOutput.slip,
-  //     netOutput: netOutput,
-  //     isHalted: isHalted,
-  //   }
-  //   return SwapEstimate
+  //   const pools = await this.getPools()
   // }
-
   // public doSwap(
   //   params: EstimateSwapParams,
   //   destinationAddress: string,
@@ -360,6 +253,7 @@ export class ThorchainAMM {
     if (millisSinceLastRefeshed > this.expirePoolCacheMillis) {
       try {
         await this.refereshPoolCache()
+        console.log('updated pool cache')
       } catch (e) {
         console.error(e)
       }
@@ -386,7 +280,6 @@ export class ThorchainAMM {
         lastRefreshed: Date.now(),
         pools: poolMap,
       }
-      console.log('updated pool cache')
     }
   }
 }
