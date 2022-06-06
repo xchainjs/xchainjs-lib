@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetBTC, AssetETH, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetBTC, AssetETH, assetAmount, assetToBase, AssetRuneNative } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { ThorchainAMM } from '../src/ThorchainAMM'
@@ -24,6 +24,7 @@ function print(estimate: SwapEstimate) {
   }
   console.log(expanded)
 }
+// Test User Functions - single and double swap.
 describe('xchain-swap Integration Tests', () => {
   it('should estimate a swap of 1 BTC to ETH', async () => {
     const swapParams: EstimateSwapParams = {
@@ -37,4 +38,58 @@ describe('xchain-swap Integration Tests', () => {
     expect(estimate).toBeTruthy()
     print(estimate)
   })
+  it(`Should estimate single swap of 1000 RUNE To BTC `, async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetRuneNative,
+      destinationAsset: AssetBTC,
+      inputAmount: assetToBase(assetAmount(1000))
+      }
+      const estimate = await thorchainAmm.estimateSwap(swapParams)
+      expect(estimate).toBeTruthy()
+      print(estimate)
+  })
+
+  // Test Conditions - Test to make sure the swap has no input errors
+
+  it('Should fail swap from BTC to ETH if source asset is the same as destination asset', async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetBTC,
+      destinationAsset: AssetBTC,
+      inputAmount: assetToBase(assetAmount(0))
+    }
+    try{
+      const estimate = await thorchainAmm.estimateSwap(swapParams)
+      print(estimate)
+    }catch(error){
+      expect(error.message).toEqual(`sourceAsset and destinationAsset cannot be the same`)
+    }
+  })
+  it('Should fail swap from BTC to ETH if input amount is 0', async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetBTC,
+      destinationAsset: AssetETH,
+      inputAmount: assetToBase(assetAmount(0))
+    }
+    try{
+      const estimate = await thorchainAmm.estimateSwap(swapParams)
+      print(estimate)
+    }catch(error){
+      expect(error.message).toEqual(`inputAmount must be greater than 0`)
+    }
+  })
+  it('Should fail swap from BTC to ETH if affiliate fee is outside bounds 0 and 1000', async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetBTC,
+      destinationAsset: AssetETH,
+      inputAmount: assetToBase(assetAmount(1)),
+      affiliateFeePercent: 0 || 1001
+    }
+    try{
+      const estimate = await thorchainAmm.estimateSwap(swapParams)
+      print(estimate)
+    }catch(error){
+      expect(error.message).toEqual(`affiliateFee must be between 0 and 1000`)
+    }
+  })
+
 })

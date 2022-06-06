@@ -70,25 +70,36 @@ export class Midgard {
     const [mimirDetails, allInboundDetails] = await Promise.all([this.getMimirDetails(), this.getAllInboundAddresses()])
     const inboundDetails: InboundDetail[] = []
     for (const chain of chains) {
-      const inboundDetail = allInboundDetails?.find((item: InboundAddressesItem) => item.chain === chain)
-      if (inboundDetail) {
-        if (!inboundDetail.gas_rate) throw new Error(`Could not get gas_rate for  ${chain}`)
-        const details: InboundDetail = {
-          vault: inboundDetail.address,
-          gas_rate: new BigNumber(inboundDetail.gas_rate),
-          haltedChain:
-            inboundDetail?.halted || !!mimirDetails[`HALT${chain}CHAIN`] || !!mimirDetails['HALTCHAINGLOBAL'],
-          haltedTrading: !!mimirDetails['HALTTRADING'] || !!mimirDetails[`HALT${chain}TRADING`],
-          haltedLP: !!mimirDetails['PAUSELP'] || !!mimirDetails[`PAUSELP${chain}`],
+      if(chain != Chain.THORChain){
+        const inboundDetail = allInboundDetails?.find((item: InboundAddressesItem) => item.chain === chain)
+        if (inboundDetail) {
+          if (!inboundDetail.gas_rate) throw new Error(`Could not get gas_rate for ${chain}`)
+          const details: InboundDetail = {
+            vault: inboundDetail.address,
+            gas_rate: new BigNumber(inboundDetail.gas_rate),
+            haltedChain:
+              inboundDetail?.halted || !!mimirDetails[`HALT${chain}CHAIN`] || !!mimirDetails['HALTCHAINGLOBAL'],
+            haltedTrading: !!mimirDetails['HALTTRADING'] || !!mimirDetails[`HALT${chain}TRADING`],
+            haltedLP: !!mimirDetails['PAUSELP'] || !!mimirDetails[`PAUSELP${chain}`],
+          }
+
+          if (inboundDetail?.router) details.router = inboundDetail.router
+          inboundDetails.push(details)
+        } else {
+          throw new Error(`Could not get chain details for ${chain}`)
         }
 
-        if (inboundDetail?.router) details.router = inboundDetail.router
+      }else {
+        const details: InboundDetail = {
+          vault: '',
+          gas_rate: new BigNumber(0),
+          haltedChain: false,
+          haltedTrading:!!mimirDetails['HALTTRADING'],
+          haltedLP: false, //
+        }
         inboundDetails.push(details)
-      } else {
-        throw new Error(`Could not get chain details for ${chain}`)
       }
     }
-
     return inboundDetails
   }
 }
