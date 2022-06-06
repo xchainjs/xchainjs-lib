@@ -1,6 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetBTC, AssetETH, assetAmount, assetToBase, AssetRuneNative } from '@xchainjs/xchain-util'
+import { AssetBTC, AssetETH, assetAmount, assetToBase, AssetRuneNative, Chain, Asset} from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
+import { AssetLUNA } from '@xchainjs/xchain-terra'
 
 import { ThorchainAMM } from '../src/ThorchainAMM'
 import { EstimateSwapParams, SwapEstimate } from '../src/types'
@@ -51,7 +52,7 @@ describe('xchain-swap Integration Tests', () => {
 
   // Test Conditions - Test to make sure the swap has no input errors
 
-  it('Should fail swap from BTC to ETH if source asset is the same as destination asset', async () => {
+  it('Should fail estimate swap from BTC to BTC if source asset is the same as destination asset', async () => {
     const swapParams: EstimateSwapParams = {
       sourceAsset: AssetBTC,
       destinationAsset: AssetBTC,
@@ -64,7 +65,7 @@ describe('xchain-swap Integration Tests', () => {
       expect(error.message).toEqual(`sourceAsset and destinationAsset cannot be the same`)
     }
   })
-  it('Should fail swap from BTC to ETH if input amount is 0', async () => {
+  it('Should fail estimate swap from BTC to ETH if input amount is 0', async () => {
     const swapParams: EstimateSwapParams = {
       sourceAsset: AssetBTC,
       destinationAsset: AssetETH,
@@ -77,7 +78,7 @@ describe('xchain-swap Integration Tests', () => {
       expect(error.message).toEqual(`inputAmount must be greater than 0`)
     }
   })
-  it('Should fail swap from BTC to ETH if affiliate fee is outside bounds 0 and 1000', async () => {
+  it('Should fail estimate swap from BTC to ETH if affiliate fee is outside bounds 0 and 1000', async () => {
     const swapParams: EstimateSwapParams = {
       sourceAsset: AssetBTC,
       destinationAsset: AssetETH,
@@ -92,4 +93,67 @@ describe('xchain-swap Integration Tests', () => {
     }
   })
 
+  it('Should fail estimate swap because slip tolerance is too high ', async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetBTC,
+      destinationAsset: AssetETH,
+      inputAmount: assetToBase(assetAmount(50)),
+      affiliateFeePercent: 0.03, //optional
+      slipLimit: new BigNumber(0.02), //optional
+    }
+    try{
+      const estimate = await thorchainAmm.estimateSwap(swapParams)
+      expect(estimate.errors).toEqual(`expected slip: ${estimate.slipPercentage.toFixed()} is greater than your slip limit:${swapParams.slipLimit?.toFixed()} `)
+    }catch(error){
+
+    }
+  })
+  it('Should fail estimate swap because destination chain is halted ', async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetETH,
+      destinationAsset: AssetLUNA,
+      inputAmount: assetToBase(assetAmount(2)),
+    }
+    try{
+      const estimate = await thorchainAmm.estimateSwap(swapParams)
+      print(estimate)
+    }catch(error){
+      expect(error.message).toEqual(`destination pool is halted`)
+    }
+  })
+
+  it('Should fail estimate swap because source chain is halted ', async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetETH,
+      destinationAsset: AssetLUNA,
+      inputAmount: assetToBase(assetAmount(2)),
+    }
+    try{
+      const estimate = await thorchainAmm.estimateSwap(swapParams)
+      print(estimate)
+    }catch(error){
+      expect(error.message).toEqual(`source pool is halted`)
+    }
+  })
+
+  it('Should fail estimate swap if source pool has not enough liquidity ', async () => {
+
+    let assetHOT: Asset = {
+      chain: Chain.Ethereum,
+      symbol: "ETH",
+      ticker: "HOT",
+      synth: false
+    }
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetETH,
+      destinationAsset: assetHOT,
+      inputAmount: assetToBase(assetAmount(2)),
+    }
+    try{
+      const estimate = await thorchainAmm.estimateSwap(swapParams)
+      expect(estimate.errors).toEqual(`sourceAsset ${swapParams.sourceAsset.ticker} does not have a valid liquidity pool`)
+    }catch(error){
+      throw error
+    }
+  })
 })

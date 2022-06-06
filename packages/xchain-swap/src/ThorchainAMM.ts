@@ -244,6 +244,9 @@ export class ThorchainAMM {
           return baseAmount(gasRate.multipliedBy(70000).multipliedBy(10 ** 9))
         }
         break
+      case Chain.Terra:
+        return baseAmount(gasRate)
+        break
     }
     throw new Error(`could not calculate inbound fee for ${sourceAsset.chain}`)
   }
