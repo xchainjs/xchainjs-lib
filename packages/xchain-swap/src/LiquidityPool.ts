@@ -1,4 +1,5 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
+import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
 import {
   Asset,
   AssetAmount,
@@ -54,5 +55,14 @@ export class LiquidityPool {
   }
   public get assetString(): string {
     return this._assetString
+  }
+  public getValueInRUNE(asset: Asset, assetAmount: BaseAmount): BaseAmount {
+    if (isAssetRuneNative(asset)) {
+      return assetAmount
+    }
+    if (asset != this._asset) {
+      throw new Error(`wrong asset for the pool`)
+    }
+    return assetAmount.times(this.runeBalance.div(this.assetBalance))
   }
 }

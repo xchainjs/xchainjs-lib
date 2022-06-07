@@ -221,6 +221,68 @@ export class ThorchainAMM {
   //   return TxId
   // }
 
+  /**
+   * Works out how long an outbound Tx will be held by THORChain before sending.
+   * @param asset
+   * @param outboundAmount
+   * @returns
+   */
+
+  /*
+  private outboundDelay(liquidtyPool: LiquidityPool, asset: Asset, outboundAmount: BaseAmount): Promise<BigNumber> {
+    //Get the Mimir values
+    // want to do something like this in THORChainAMM Class
+    // let minTxOutVolumeThreshold = this.midgard.getMimirValueByName(minTxOutVolumeThreshold)
+
+    const minTxOutVolumeThreshold = 1000 // RUNE
+    const maxTxOutOffset = 720
+    let txOutDelayRate = 25
+
+    const runeValue = liquidtyPool.getValueInRUNE(asset, outboundAmount) // same thing as with confcounting
+    if (runeValue.lt(minTxOutVolumeThreshold)) {
+      return new BigNumber(6)
+    }
+    const sumValue = runeValue.plus(this.midgard.getScheduledOutboundValue())
+    //https://midgard.thorswap.net/v2/thorchain/queue) "scheduled_outbound_value"
+
+    // reduce delay rate relative to the total scheduled value. In high volume
+    // scenarios, this causes the network to send outbound transactions slower,
+    // giving the community & NOs time to analyze and react. In an attack
+    // scenario, the attacker is likely going to move as much value as possible
+    // (as we've seen in the past). The act of doing this will slow down their
+    // own transaction(s), reducing the attack's effectiveness.
+    txOutDelayRate -= sumValue / minTxOutVolumeThreshold
+
+    // calculate the minimum number of blocks in the future the txn has to be
+    let minBlocks = runeValue / txOutDelayRate
+
+    if (minBlocks > maxTxOutOffset) {
+      minBlocks = maxTxOutOffset
+    }
+    return new BigNumber(minBlocks).times(6)
+  }
+*/
+  /**
+   *
+   * @param Assset - really only need the chain here TBH
+   * @param amount - the amount of asset (any asset). This really should be converted to the native asset token
+   * @returns time in seconds before a Tx is confirmed by THORChain
+   */
+  /*
+  private confCounting(asset: Asset, amount: BaseAmount): Int {
+    const blockReward = asset.chain.blockReward // need a constant here or in Chain Client
+    const blockTime = asset.chain.blockTime // need a constant here or in Chain Client
+
+    let requiredConfs
+
+    // amount needs to be in gas type.
+    work out, given the asset.chain, what is the gas asset for that chain.
+    convert amount into gas asset value
+
+    requiredConfs = Math.ceil(amount.div(blockReward))
+    return requiredConfs.divide(blockTime)
+  }
+*/
   private calcInboundFee(sourceAsset: Asset, gasRate: BigNumber): BaseAmount {
     // https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
 

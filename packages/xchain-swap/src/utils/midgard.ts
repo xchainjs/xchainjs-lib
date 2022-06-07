@@ -46,6 +46,10 @@ export class Midgard {
 
     throw new Error('Midgard not responding')
   }
+  /**
+   *
+   * @returns an array of PoolDetails
+   */
   async getPools(): Promise<PoolDetail[]> {
     for (const api of this.midgardApis) {
       try {
@@ -66,6 +70,12 @@ export class Midgard {
     }
     throw Error(`Midgard not responding`)
   }
+  /**
+   * Gets the Inbound Details for a given array of Chains.
+   * Will check if chain is THOR.
+   * @param chains - external chains
+   * @returns inbound details of given chains
+   */
   async getInboundDetails(chains: Chain[]): Promise<InboundDetail[]> {
     const [mimirDetails, allInboundDetails] = await Promise.all([this.getMimirDetails(), this.getAllInboundAddresses()])
     const inboundDetails: InboundDetail[] = []
@@ -101,4 +111,50 @@ export class Midgard {
     }
     return inboundDetails
   }
+
+  private async getConstantsDetails() {
+    for (const api of this.midgardApis) {
+      try {
+        return (await api.getProxiedConstants()).data
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    throw new Error('Midgard not responding')
+  }
+
+  /**
+   *
+   * @returns the outbound Tx Value in RUNE
+   */
+  async getScheduledOutboundValue() {
+    const path = 'v2/thorchain/queue'
+
+    for (const baseUrl of this.config.midgardBaseUrls) {
+      try {
+        const { data } = await axios.get(`${baseUrl}${path}`)
+        return data['scheduled_outbound_value']
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    throw new Error('Midgard not responding')
+  }
+  /**
+  // want to do something like this in THORChainAMM Class
+  //let minTxOutVolumeThreshold = this.midgard.getMimirValueByName(minTxOutVolumeThreshold)
+  getMimirValueByName(mimirName: string) {
+    let mimirDetails: Promise<string> = ''
+    mimirDetails = this.getMimirDetails()
+    return mimirDetails[mimirValue]
+  }
+
+  // same thing
+  async getConstantValueByName(constantName: string): Promise<Constants> {
+    let consts = this.getConstantsDetails
+    consts.
+  }
+
+  */
 }
