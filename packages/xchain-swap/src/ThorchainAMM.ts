@@ -116,6 +116,7 @@ export class ThorchainAMM {
       // RUNE->Asset
       return getSingleSwap(netInputAmount, destinationPool, false)
     }
+    throw Error('cannot calcSwapOutput')
   }
   /**
    *
