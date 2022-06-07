@@ -70,7 +70,7 @@ export class Midgard {
     const [mimirDetails, allInboundDetails] = await Promise.all([this.getMimirDetails(), this.getAllInboundAddresses()])
     const inboundDetails: InboundDetail[] = []
     for (const chain of chains) {
-      if(chain != Chain.THORChain){
+      if (chain != Chain.THORChain) {
         const inboundDetail = allInboundDetails?.find((item: InboundAddressesItem) => item.chain === chain)
         if (inboundDetail) {
           if (!inboundDetail.gas_rate) throw new Error(`Could not get gas_rate for ${chain}`)
@@ -88,13 +88,12 @@ export class Midgard {
         } else {
           throw new Error(`Could not get chain details for ${chain}`)
         }
-
-      }else {
+      } else {
         const details: InboundDetail = {
           vault: '',
           gas_rate: new BigNumber(0),
           haltedChain: false,
-          haltedTrading:!!mimirDetails['HALTTRADING'],
+          haltedTrading: !!mimirDetails['HALTTRADING'],
           haltedLP: false, //
         }
         inboundDetails.push(details)

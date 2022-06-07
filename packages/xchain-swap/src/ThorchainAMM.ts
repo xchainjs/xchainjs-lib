@@ -61,8 +61,8 @@ export class ThorchainAMM {
   private calcSwapEstimate(
     params: EstimateSwapParams,
     sourceInboundDetails: InboundDetail,
-    sourcePool: LiquidityPool,
-    destinationPool: LiquidityPool,
+    sourcePool: LiquidityPool | undefined,
+    destinationPool: LiquidityPool | undefined,
   ): SwapEstimate {
     let inboundFee: BaseAmount
     let outboundFee: BaseAmount
@@ -83,13 +83,7 @@ export class ThorchainAMM {
     // remove the affiliate fee from the input.
     inputNetAmount = inputNetAmount.minus(affiliateFee)
     //now we calculate swapfee based on inputNetAmount
-    const swapOutput = this.calcSwapOutput(
-      inputNetAmount,
-      params.sourceAsset,
-      sourcePool,
-      params.destinationAsset,
-      destinationPool,
-    )
+    const swapOutput = this.calcSwapOutput(inputNetAmount, sourcePool, destinationPool)
 
     // ---------------- Remove Outbound Fee ---------------------- /
     const netOutput = swapOutput.output.minus(outboundFee) // swap outbout and outbound fee should be in the same type also
@@ -110,25 +104,19 @@ export class ThorchainAMM {
   }
   private calcSwapOutput(
     netInputAmount: BaseAmount,
-    sourceAsset: Asset,
-    sourcePool: LiquidityPool,
-    destAsset: Asset,
-    destinationPool: LiquidityPool,
+    sourcePool: LiquidityPool | undefined,
+    destinationPool: LiquidityPool | undefined,
   ): SwapOutput {
-    let swapOutput: SwapOutput
-
-    if (isAssetRuneNative(sourceAsset)) {
-      // cannot be double swap and destination HAS to be asset.
-      swapOutput = getSingleSwap(netInputAmount, destinationPool, false)
+    if (sourcePool && destinationPool) {
+      return getDoubleSwap(netInputAmount, sourcePool, destinationPool)
+    } else if (sourcePool && !destinationPool) {
+      // Asset->RUNE
+      return getSingleSwap(netInputAmount, sourcePool, true)
+    } else if (!sourcePool && destinationPool) {
+      // RUNE->Asset
+      return getSingleSwap(netInputAmount, destinationPool, false)
     }
-    // is it a double swap? if source and destination != rune then its a double swap.
-    const isDoubleSwap = (!isAssetRuneNative(sourceAsset) && !isAssetRuneNative(destAsset)) ?? false
-    if (isDoubleSwap) {
-      swapOutput = getDoubleSwap(netInputAmount, sourcePool, destinationPool)
-    } else {
-      swapOutput = getSingleSwap(netInputAmount, destinationPool, true)
-    }
-    return swapOutput
+    throw Error('should not reach this')
   }
   /**
    *
@@ -140,16 +128,18 @@ export class ThorchainAMM {
     //first make sure the swap has no input errors
     this.isValidSwap(params)
 
-    //now get the pools involved
-    const pools = await this.getPools()
     const [sourceInboundDetails, destinationInboundDetails] = await this.midgard.getInboundDetails([
       params.sourceAsset.chain,
       params.destinationAsset.chain,
     ])
-    const sourceAssetString = assetToString(params.sourceAsset)
-    const sourcePool = pools[sourceAssetString]
-    const destinationAssetString = assetToString(params.destinationAsset)
-    const destinationPool = pools[destinationAssetString]
+    const sourcePool = await this.getPoolForAsset(params.sourceAsset)
+    const destinationPool = await this.getPoolForAsset(params.destinationAsset)
+
+    // throw errors is either pools is not found, excpet if the chain is thor, which does not have a pool
+    if (params.sourceAsset.chain !== Chain.THORChain && !sourcePool)
+      throw Error(`No liquidity pool exists for: ${assetToString(params.sourceAsset)}`)
+    if (params.sourceAsset.chain !== Chain.THORChain && !destinationPool)
+      throw Error(`No liquidity pool exists for: ${assetToString(params.destinationAsset)}`)
 
     const swapEstimate = this.calcSwapEstimate(params, sourceInboundDetails, sourcePool, destinationPool)
     const errors = this.getSwapEstimateErrors(
@@ -250,7 +240,11 @@ export class ThorchainAMM {
     }
     throw new Error(`could not calculate inbound fee for ${sourceAsset.chain}`)
   }
-
+  async getPoolForAsset(asset: Asset): Promise<LiquidityPool | undefined> {
+    const pools = await this.getPools()
+    const assetString = assetToString(asset)
+    return pools[assetString]
+  }
   async getPools(): Promise<Record<string, LiquidityPool>> {
     const millisSinceLastRefeshed = Date.now() - (this.poolCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.expirePoolCacheMillis) {
