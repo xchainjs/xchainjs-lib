@@ -1,6 +1,15 @@
 import { Network } from '@xchainjs/xchain-client'
 import { AssetLUNA } from '@xchainjs/xchain-terra'
-import { Asset, AssetBTC, AssetETH, AssetRuneNative, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetBTC,
+  AssetETH,
+  AssetRuneNative,
+  Chain,
+  assetAmount,
+  assetFromString,
+  assetToBase,
+} from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { ThorchainAMM } from '../src/ThorchainAMM'
@@ -31,6 +40,22 @@ describe('xchain-swap Integration Tests', () => {
     const swapParams: EstimateSwapParams = {
       sourceAsset: AssetBTC,
       destinationAsset: AssetETH,
+      inputAmount: assetToBase(assetAmount(1)),
+      affiliateFeePercent: 0.03, //optional
+      slipLimit: new BigNumber(0.02), //optional
+    }
+    const estimate = await thorchainAmm.estimateSwap(swapParams)
+    expect(estimate).toBeTruthy()
+    print(estimate)
+  })
+  it('should estimate a swap of 1 sBTC to sETH', async () => {
+    const sBTC = assetFromString('BTC/BTC')
+    const sETH = assetFromString('ETH/ETH')
+    if (!sBTC || !sETH) throw Error('err')
+
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: sBTC,
+      destinationAsset: sETH,
       inputAmount: assetToBase(assetAmount(1)),
       affiliateFeePercent: 0.03, //optional
       slipLimit: new BigNumber(0.02), //optional
