@@ -112,11 +112,10 @@ export class ThorchainAMM {
     } else if (sourcePool && !destinationPool) {
       // Asset->RUNE
       return getSingleSwap(netInputAmount, sourcePool, true)
-    } else if (!sourcePool && destinationPool) {
+    } else if (destinationPool) {
       // RUNE->Asset
       return getSingleSwap(netInputAmount, destinationPool, false)
     }
-    throw Error('should not reach this')
   }
   /**
    *
