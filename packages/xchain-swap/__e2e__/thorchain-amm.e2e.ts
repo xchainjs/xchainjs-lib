@@ -149,8 +149,8 @@ describe('xchain-swap Integration Tests', () => {
 
   it('Should fail estimate swap because source chain is halted ', async () => {
     const swapParams: EstimateSwapParams = {
-      sourceAsset: AssetETH,
-      destinationAsset: AssetLUNA,
+      sourceAsset: AssetLUNA,
+      destinationAsset: AssetETH,
       inputAmount: assetToBase(assetAmount(2)),
     }
     try {
