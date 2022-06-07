@@ -99,6 +99,15 @@ export const getValueOfRuneInAsset = (inputRune: BaseAmount, pool: LiquidityPool
   const result = r.times(A).div(R)
   return baseAmount(result)
 }
+
+export const getValueOfAssetInRune = (inputAsset: BaseAmount, pool: LiquidityPool): BaseAmount => {
+  // formula: ((a * R) / A) => R per A (Runeper$)
+  const t = inputAsset.amount()
+  const R = pool.runeBalance.amount()
+  const A = pool.assetBalance.amount()
+  const result = t.times(R).div(A)
+  return baseAmount(result)
+}
 export const getDoubleSwapFee = (inputAmount: BaseAmount, pool1: LiquidityPool, pool2: LiquidityPool): BaseAmount => {
   // formula: getSwapFee1 + getSwapFee2
   const fee1 = getSwapFee(inputAmount, pool1, true)

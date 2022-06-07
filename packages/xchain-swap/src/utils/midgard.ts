@@ -112,16 +112,16 @@ export class Midgard {
     return inboundDetails
   }
 
-  private async getConstantsDetails() {
-    for (const api of this.midgardApis) {
-      try {
-        return (await api.getProxiedConstants()).data
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    throw new Error('Midgard not responding')
-  }
+  // private async getConstantsDetails() {
+  //   for (const api of this.midgardApis) {
+  //     try {
+  //       return (await api.getProxiedConstants()).data
+  //     } catch (e) {
+  //       console.error(e)
+  //     }
+  //   }
+  //   throw new Error('Midgard not responding')
+  // }
 
   /**
    *

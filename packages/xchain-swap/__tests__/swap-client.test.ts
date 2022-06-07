@@ -12,6 +12,7 @@ import {
   getSwapFee,
   getSwapOutput,
   getSwapSlip,
+  getValueOfAssetInRune
 } from '../src/utils/swap'
 
 const btcPoolDetails = {
@@ -46,6 +47,7 @@ const btcPool = new LiquidityPool(btcPoolDetails)
 const ethPool = new LiquidityPool(ethPoolDetails)
 
 const inputAmount = assetToBase(assetAmount(1)) // 1 BTC
+const feeAmount = assetToBase(assetAmount(0.00003750)) // sats
 
 describe('Swap Cal Tests', () => {
   it('should calculate correct swap output', async () => {
@@ -95,7 +97,7 @@ describe('Swap Cal Tests', () => {
     expect(baseToAsset(doubleSwapOutputFee).amount()).toEqual(correctdoubleSwapOutputFee)
   })
 
-  it(`Should caculate double swap object`, async () => {
+  it(`Should calculate double swap object`, async () => {
     const doubleswap = getDoubleSwap(inputAmount, btcPool, ethPool)
 
     const correctOutput: SwapOutput = {
@@ -107,5 +109,10 @@ describe('Swap Cal Tests', () => {
     expect(baseToAsset(doubleswap.output).amount()).toEqual(baseToAsset(correctOutput.output).amount())
     expect(baseToAsset(doubleswap.swapFee).amount()).toEqual(baseToAsset(correctOutput.swapFee).amount())
     expect(doubleswap.slip.toFixed(8)).toEqual(correctOutput.slip.toFixed(8))
+  })
+  it('should calculate value of asset in rune', async () => {
+    const satsToRune = getValueOfAssetInRune(feeAmount, btcPool)
+    const correctRuneAmount = assetToBase(assetAmount(0.9375))
+    expect(baseToAsset(satsToRune).amount()).toEqual(baseToAsset(correctRuneAmount).amount())
   })
 })
