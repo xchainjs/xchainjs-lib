@@ -8,7 +8,6 @@ import {
   assetFromString,
   baseAmount,
   baseToAsset,
-  eqAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -70,7 +69,7 @@ export class LiquidityPool {
     if (isAssetRuneNative(asset)) {
       return assetAmount
     }
-    if (!eqAsset(asset, this._asset)) {
+    if (asset.ticker != this._asset.ticker) {
       throw new Error(`wrong asset for the pool`)
     }
     return assetAmount.times(this.runeBalance.div(this.assetBalance))

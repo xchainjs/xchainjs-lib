@@ -85,7 +85,15 @@ export class ThorchainAMM {
     // TODO implement the following
     //  If valueofRUNE(inbound fee + outbound fee) > valueOfRUNE(inboundAsset)
     //   return "insufficent inbound asset amount "
-    //if(sourcePool?.getValueInRUNE(params.sourceAsset ,estimate.totalFees.inboundFee))
+
+    if (sourcePool?.isAvailable() && destinationPool?.isAvailable()) {
+      const inboundFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.inboundFee)
+      const outboundFeeInRune = destinationPool.getValueInRUNE(params.destinationAsset, estimate.totalFees.outboundFee)
+      const swapFeeInRune = sourcePool.getValueInRUNE(params.sourceAsset, estimate.totalFees.swapFee)
+      const totalSwapFeesInRune = inboundFeeInRune.plus(outboundFeeInRune).plus(swapFeeInRune)
+      if (totalSwapFeesInRune > params.inputAmount)
+        errors.push(`Input amount ${params.inputAmount} is less that total swap fees`)
+    }
     return errors
   }
   private calcSwapEstimate(
