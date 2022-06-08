@@ -1,3 +1,4 @@
+import { eqAsset } from './../../xchain-util/src/asset';
 import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
 import {
@@ -60,8 +61,8 @@ export class LiquidityPool {
     if (isAssetRuneNative(asset)) {
       return assetAmount
     }
-    if (asset != this._asset) {
-      throw new Error(`wrong asset for the pool`)
+    if (!eqAsset(asset, this._asset)) {
+      throw new Error(`wrong asset for the pool`) // something is wrong here. does not pass
     }
     return assetAmount.times(this.runeBalance.div(this.assetBalance))
   }

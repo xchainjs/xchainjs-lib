@@ -1,4 +1,4 @@
-import { assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, baseToAsset, AssetRuneNative, AssetBTC } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from '../src/LiquidityPool'
@@ -21,6 +21,8 @@ const btcPoolDetails = {
 }
 
 const btcPool = new LiquidityPool(btcPoolDetails)
+const runeInput = assetToBase(assetAmount(2000000))
+const btcInput = assetToBase(assetAmount(1))
 
 const liquidityUnits: LiquidityData = {
   asset: assetToBase(assetAmount(1)),
@@ -43,4 +45,17 @@ describe(`Liquidity calc tests`, () => {
     expect(baseToAsset(getLPoolShare.asset).amount()).toEqual(baseToAsset(liquidityUnits.asset).amount())
     expect(baseToAsset(getLPoolShare.rune).amount()).toEqual(baseToAsset(liquidityUnits.rune).amount())
   })
+
+  it(`Should calculate correct rune fee`, async () => {
+    const runeFee = btcPool.getValueInRUNE(AssetRuneNative, runeInput)
+    const correctOutput = new BigNumber(2000000)
+    expect(baseToAsset(runeFee).amount()).toEqual(correctOutput)
+  })
+
+  it(`Should calculate correct asset fee`, async () => {
+    const runeFee = btcPool.getValueInRUNE(AssetBTC, btcInput)
+    const correctOutput = new BigNumber(25000) // 25000 RUNE expected for 1 BTC input
+    expect(baseToAsset(runeFee).amount()).toEqual(correctOutput)
+  })
+
 })

@@ -65,6 +65,7 @@ export class ThorchainAMM {
     // TODO implement the following
     //  If valueofRUNE(inbound fee + outbound fee) > valueOfRUNE(inboundAsset)
     //   return "insufficent inbound asset amount "
+    //if(sourcePool?.getValueInRUNE(params.sourceAsset ,estimate.totalFees.inboundFee))
     return errors
   }
   private calcSwapEstimate(
@@ -224,7 +225,7 @@ export class ThorchainAMM {
   /**
    * Works out how long an outbound Tx will be held by THORChain before sending.
    * @param asset
-   * @param outboundAmount
+   * @param outBoundAmount
    * @returns
    */
 
@@ -238,7 +239,7 @@ export class ThorchainAMM {
     const maxTxOutOffset = 720
     let txOutDelayRate = 25
 
-    const runeValue = liquidtyPool.getValueInRUNE(asset, outboundAmount) // same thing as with confcounting
+    const runeValue = liquidtyPool.getValueInRUNE(asset, outBoundAmount) // same thing as with confcounting
     if (runeValue.lt(minTxOutVolumeThreshold)) {
       return new BigNumber(6)
     }
