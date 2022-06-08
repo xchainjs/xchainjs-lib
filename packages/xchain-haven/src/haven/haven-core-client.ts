@@ -33,6 +33,27 @@ import { assertIsDefined } from './utils'
 const TestNetApiUrl = 'http://142.93.249.35:1984'
 const MainnetApiUrl = ''
 
+/**
+ * callback functions for sending transfers procedure, used by haven-core-client.ts
+ */
+const getRandomOutsReq = (reqParams: unknown, cb: (err: string | null, res: unknown) => void) => {
+  getRandomOuts(reqParams)
+    .then((res) => cb(null, res))
+    .catch((err) => cb(err, null))
+}
+
+const getUnspentOutsReq = (reqParams: unknown, cb: (err: string | null, res: unknown) => void) => {
+  getUnspentOuts(reqParams)
+    .then((res) => cb(null, res))
+    .catch((err) => cb(err, null))
+}
+
+const submitRawTxReq = (reqParams: unknown, cb: (err: string | null, res: unknown) => void) => {
+  submitRawTx(reqParams)
+    .then((res) => cb(null, res))
+    .catch((err) => cb(err, null))
+}
+
 export class HavenCoreClient {
   private syncHandler: SyncHandler
   private netTypeId: number | undefined
@@ -61,8 +82,6 @@ export class HavenCoreClient {
   }
 
   async init(seed: string, netType: string | number): Promise<boolean> {
-    //this.netTypeId = netTypePromise<boolean> {
-    // login and fire up keep_alive
     this.purge()
 
     this.netTypeId = typeof netType === 'number' ? netType : (NetTypes[netType as keyof typeof NetTypes] as number)
@@ -84,8 +103,6 @@ export class HavenCoreClient {
     this.netTypeId = undefined
     this.seed = undefined
     this.syncHandler.purge()
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
     clearInterval(this.pingServerIntervalID)
   }
 
@@ -95,10 +112,11 @@ export class HavenCoreClient {
   }
 
   validateAddress(address: string): boolean {
+    assertIsDefined(this.netTypeId)
     const module = this.getCoreModule()
     let response: string | Record<string, unknown>
     try {
-      response = module.decode_address(address, this.netTypeId!)
+      response = module.decode_address(address, this.netTypeId)
     } catch (e) {
       return false
     }
@@ -218,7 +236,7 @@ export class HavenCoreClient {
       get_unspent_outs_fn: getUnspentOutsReq,
       get_random_outs_fn: getRandomOutsReq,
       submit_raw_tx_fn: submitRawTxReq,
-      status_update_fn: updateStatus,
+      status_update_fn: (_status) => {},
       error_fn: sendFundsFailed,
       success_fn: sendFundsSucceed,
     }
@@ -290,30 +308,4 @@ export class HavenCoreClient {
   private pingServer(): void {
     keepAlive()
   }
-}
-
-/**
- * callback functions for sending transfers procedure, used by haven-core-client.ts
- */
-
-const updateStatus = (_status: any) => {
-  //console.log(status)
-}
-
-const getRandomOutsReq = (reqParams: any, cb: (err: any, res: any) => void) => {
-  getRandomOuts(reqParams)
-    .then((res) => cb(null, res))
-    .catch((err) => cb(err, null))
-}
-
-const getUnspentOutsReq = (reqParams: any, cb: (err: any, res: any) => void) => {
-  getUnspentOuts(reqParams)
-    .then((res) => cb(null, res))
-    .catch((err) => cb(err, null))
-}
-
-const submitRawTxReq = (reqParams: any, cb: (err: any, res: any) => void) => {
-  submitRawTx(reqParams)
-    .then((res) => cb(null, res))
-    .catch((err) => cb(err, null))
 }

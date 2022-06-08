@@ -27,13 +27,11 @@ class SyncHandler {
     assertIsDefined(this.scannedHeight)
     assertIsDefined(this.blockHeight)
 
-    const syncState: SyncStats = await this.getSyncState()
+    const syncState: SyncStats = this.getSyncState()
     this.updateSyncObservers(this.syncObservers, syncState)
 
     if (!(await this.isSyncing())) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      clearInterval(this.updateSyncProgressIntervalID) // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      clearInterval(this.updateSyncProgressIntervalID)
       this.updateSyncProgressIntervalID = undefined
     }
   }
