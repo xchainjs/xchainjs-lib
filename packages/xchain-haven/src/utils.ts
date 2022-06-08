@@ -1,6 +1,6 @@
 import { convertBip39ToHavenMnemonic } from 'bip39-converter'
 
-export const HAVEN_DECIMAL = 12
+export const XHV_DECIMAL = 12
 
 /**
  * Converts bip39 phrase to Haven mnemonic
