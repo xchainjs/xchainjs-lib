@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Configuration, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
-import { Chain } from '@xchainjs/xchain-util'
+import { BaseAmount, Chain } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import BigNumber from 'bignumber.js'
@@ -112,22 +112,22 @@ export class Midgard {
     return inboundDetails
   }
 
-  // private async getConstantsDetails() {
-  //   for (const api of this.midgardApis) {
-  //     try {
-  //       return (await api.getProxiedConstants()).data
-  //     } catch (e) {
-  //       console.error(e)
-  //     }
-  //   }
-  //   throw new Error('Midgard not responding')
-  // }
+  public async getConstantsDetails() {
+    for (const api of this.midgardApis) {
+      try {
+        return (await api.getProxiedConstants()).data
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    throw new Error('Midgard not responding')
+  }
 
   /**
    *
-   * @returns the outbound Tx Value in RUNE
+   * @returns the outbound Tx Value in RUNE (Basemount)
    */
-  async getScheduledOutboundValue() {
+  async getScheduledOutboundValue(): Promise<BaseAmount> {
     const path = 'v2/thorchain/queue'
 
     for (const baseUrl of this.config.midgardBaseUrls) {
@@ -141,20 +141,14 @@ export class Midgard {
 
     throw new Error('Midgard not responding')
   }
-  /**
+}
+/**
   // want to do something like this in THORChainAMM Class
   //let minTxOutVolumeThreshold = this.midgard.getMimirValueByName(minTxOutVolumeThreshold)
-  getMimirValueByName(mimirName: string) {
-    let mimirDetails: Promise<string> = ''
-    mimirDetails = this.getMimirDetails()
-    return mimirDetails[mimirValue]
+  public async getMimirValueByName(mimirName: string): Promise<string> {
+    const mimirDetails = await Promise.all([this.getMimirDetails()])
+    const mimrValue = mimirDetails[`${mimirName}`]
+    return mimrValue
   }
-
-  // same thing
-  async getConstantValueByName(constantName: string): Promise<Constants> {
-    let consts = this.getConstantsDetails
-    consts.
-  }
-
-  */
 }
+*/

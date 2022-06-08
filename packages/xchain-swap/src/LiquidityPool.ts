@@ -1,4 +1,3 @@
-import { eqAsset } from './../../xchain-util/src/asset';
 import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
 import {
@@ -9,6 +8,7 @@ import {
   assetFromString,
   baseAmount,
   baseToAsset,
+  eqAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -57,12 +57,21 @@ export class LiquidityPool {
   public get assetString(): string {
     return this._assetString
   }
+  /**
+   * Returns the rune value.
+   * If the asset passed in is NativeRune, assetAmount is returned back
+   * If the asset passed in does not match the pool's asset, thow an error, else convert assetAmount into rune value.
+   *
+   * @param asset asset type. Should match the asset of the pool
+   * @param assetAmount - the amount of asset in the value of RUNE
+   * @returns
+   */
   public getValueInRUNE(asset: Asset, assetAmount: BaseAmount): BaseAmount {
     if (isAssetRuneNative(asset)) {
       return assetAmount
     }
     if (!eqAsset(asset, this._asset)) {
-      throw new Error(`wrong asset for the pool`) // something is wrong here. does not pass
+      throw new Error(`wrong asset for the pool`)
     }
     return assetAmount.times(this.runeBalance.div(this.assetBalance))
   }
