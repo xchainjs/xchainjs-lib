@@ -19,13 +19,13 @@ import {
 } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Asset, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
-import { convertBip39ToHavenMnemonic } from 'mnemonic-converter'
 
 import { getAssetByTicker } from './assets'
 import { HavenCoreClient } from './haven/haven-core-client'
 import { HavenBalance, HavenTicker, SyncObserver } from './haven/types'
 import { assertIsDefined } from './haven/utils'
 import { HavenClient } from './types/client-types'
+import { HAVEN_DECIMAL, convertToHavenMnemonic } from './utils'
 
 class Client extends BaseXChainClient implements XChainClient, HavenClient {
   private havenSDK: HavenCoreClient
@@ -104,7 +104,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
       assets.forEach((asset) => {
         const assetBalance: Balance = {
           asset,
-          amount: baseAmount(havenBalance[asset.ticker as HavenTicker].balance, 12),
+          amount: baseAmount(havenBalance[asset.ticker as HavenTicker].balance, HAVEN_DECIMAL),
         }
         balances.push(assetBalance)
       })
@@ -118,7 +118,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     return isValid
   }
 
-  override setPhrase(phrase: string, _walletIndex?: number): Address {
+  setPhrase(phrase: string, _walletIndex?: number): Address {
     if (this.phrase !== phrase) {
       if (!validatePhrase(phrase)) {
         throw new Error('Invalid phrase')
@@ -131,7 +131,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   }
 
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const asset: Asset | undefined = params?.asset ? assetFromString(params.asset)! : undefined
+    const asset: Asset | null = params?.asset ? assetFromString(params.asset) : null
     const ticker = asset?.ticker
     let transactions = await this.havenSDK.getTransactions()
 
@@ -151,9 +151,8 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
       : transactions
 
     //filter by date
-    transactions = params?.startTime
-      ? transactions.filter((tx, _) => new Date(tx.timestamp) >= params.startTime!)
-      : transactions
+    const startTime = params?.startTime
+    transactions = startTime ? transactions.filter((tx, _) => new Date(tx.timestamp) >= startTime) : transactions
 
     const offset = params?.offset ? params.offset : 0
     const limit = params?.limit ? params.limit + offset : undefined
@@ -163,13 +162,13 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
 
     const txs: Tx[] = transactions.map((havenTx, _) => {
       // if we exchanged to ourself in the past with Havens own exchange mechanics, we have an out and incoming tx
-      // if request is limited by an asset, we will only take by the one which matches it
+      // if request is limited by an asset, we will only take the one which matches it
       const isOut: boolean =
-        baseAmount(havenTx.total_sent[havenTx.from_asset_type], 12).gt('0') &&
+        baseAmount(havenTx.total_sent[havenTx.from_asset_type], HAVEN_DECIMAL).gt('0') &&
         (params?.asset === undefined || (params?.asset !== undefined && havenTx.from_asset_type == params.asset))
 
       const isIn: boolean =
-        baseAmount(havenTx.total_received[havenTx.to_asset_type], 12).gt('0') &&
+        baseAmount(havenTx.total_received[havenTx.to_asset_type], HAVEN_DECIMAL).gt('0') &&
         (params?.asset === undefined || (params?.asset !== undefined && havenTx.to_asset_type == params.asset))
 
       const from: Array<TxFrom> = isOut
@@ -212,8 +211,8 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   async getTransactionData(txId: string, _assetAddress?: string): Promise<Tx> {
     const havenTx = await this.havenSDK.getTx(txId)
 
-    const isOut: boolean = baseAmount(havenTx.total_sent[havenTx.from_asset_type], 12).gt('0')
-    const isIn: boolean = baseAmount(havenTx.total_received[havenTx.to_asset_type], 12).gt('0')
+    const isOut: boolean = baseAmount(havenTx.total_sent[havenTx.from_asset_type], HAVEN_DECIMAL).gt('0')
+    const isIn: boolean = baseAmount(havenTx.total_received[havenTx.to_asset_type], HAVEN_DECIMAL).gt('0')
 
     const from: Array<TxFrom> = isOut
       ? [
@@ -277,7 +276,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   /**
    * subscribe sync progress which updates every X seconds with SyncStats
    * and notifys on completion
-   * @param observer
+   * @param {SyncObserver} observer
    */
   subscribeSyncProgress(observer: SyncObserver): void {
     this.havenSDK.subscribeSyncProgress(observer)
@@ -286,6 +285,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   /**
    * preloads the sdk once, so that we can use it in a synchron style,
    * function must be called and awaited once after this class is initalized
+   * @returns {Promise<boolean>}
    */
   async preloadSDK(): Promise<boolean> {
     await this.havenSDK.preloadModule()
@@ -293,7 +293,6 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   }
 
   /**
-   *
    * @returns {string} havenMnemonic
    */
   getHavenMnemonic(): string {
@@ -308,7 +307,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   private async initSDK() {
     assertIsDefined(this.phrase)
     assertIsDefined(this.network)
-    this.havenMnemonic = convertBip39ToHavenMnemonic(this.phrase, '')
+    this.havenMnemonic = convertToHavenMnemonic(this.phrase, '')
     await this.havenSDK.init(this.havenMnemonic, this.network)
   }
 }
