@@ -1,20 +1,14 @@
 import axios from 'axios'
-
-// axios.interceptors.request.use((request) => {
-//   // console.log('Starting Request', JSON.stringify(request, null, 2))
-//   console.log(request.url)
-//   return request
-// })
-
-// axios.interceptors.response.use((response) => {
-//   console.log('Response:', JSON.stringify(response.data, null, 2))
-//   //console.log(response.data)
-//   return response
-// })
-
-/**
- * endpoints for openhaven/backend communication
- */
+import {
+  ApiAddressInfoResponse,
+  ApiAddressTxsResponse,
+  ApiLoginResponse,
+  ApiPingResponse,
+  ApiRandomOutsResponse,
+  ApiTxResponse,
+  ApiUnspentOutsResponse,
+  ApiVersionResponse,
+} from 'haven-core-js'
 
 export const dataAPI = axios.create()
 
@@ -38,75 +32,61 @@ const CONFIG = {
   },
 }
 
-export const get_version = (): Promise<any> => {
-  return dataAPI.post(`${API_URL}/get_version`, {}, CONFIG).then((result) => result.data)
+export const get_version = async (): Promise<ApiVersionResponse> => {
+  const result = await dataAPI.post(`${API_URL}/get_version`, {}, CONFIG)
+  return result.data
 }
 
-export const login = (generated_locally: boolean, create_account = true): Promise<any> => {
+export const login = async (generated_locally: boolean, create_account = true): Promise<ApiLoginResponse> => {
   const params = { address, view_key, generated_locally, create_account }
-  return dataAPI.post(`${API_URL}/login`, params, CONFIG).then((result) => result.data)
+  const result = await dataAPI.post(`${API_URL}/login`, params, CONFIG)
+  return result.data
 }
 
 /**
  * ping the backend to keep the tx search thread on backend alive for this account
- * @param address
- * @param view_key
  */
-export const keepAlive = (): Promise<any> => {
+export const keepAlive = async (): Promise<ApiPingResponse> => {
   const params = { address, view_key }
-  return dataAPI.post(`${API_URL}/ping`, params, CONFIG).then((result) => result.data)
+  const result = await dataAPI.post(`${API_URL}/ping`, params, CONFIG)
+  return result.data
 }
 
 /**
  * get the list of all possible spendings, used when calculate the wallet balance
- * @param address
- * @param view_key
  */
-export const getAddressInfo = (): Promise<any> => {
+export const getAddressInfo = async (): Promise<ApiAddressInfoResponse> => {
   const params = { address, view_key }
   return dataAPI.post(`${API_URL}/get_address_info`, params, CONFIG).then((result) => result.data)
 }
 
 /**
  * return all txs for account ( for the scanned block height )
- * @param address
- * @param view_key
  */
-export const getAddressTxs = (): Promise<any> => {
+export const getAddressTxs = async (): Promise<ApiAddressTxsResponse> => {
   const params = { address, view_key }
   return dataAPI.post(`${API_URL}/get_address_txs`, params, CONFIG).then((result) => result.data)
 }
 
 /**
  * returns tx pf given hash
- * @param address
- * @param view_key
  * @param tx_hash
  */
-export const getTx = (tx_hash: string): Promise<any> => {
+export const getTx = async (tx_hash: string): Promise<ApiTxResponse> => {
   const params = { address, view_key, tx_hash }
   return dataAPI.post(`${API_URL}/get_tx`, params, CONFIG).then((result) => result.data)
 }
 
-//
 // API endpoints for sending funds
-// params are prepared by havenWallet
-//
-
-export const getUnspentOuts = (getUnspentOutsParams: any): Promise<any> => {
-  //    const amount = 0;
-  //    const mixin = 0;
-  //    const use_dust = false;
-  //    const dust_threshold = "1000000000";
-
-  //const params = {address, view_key, amount, mixin, use_dust, dust_threshold};
+// params are prepared by haven-core-js
+export const getUnspentOuts = async (getUnspentOutsParams: unknown): Promise<ApiUnspentOutsResponse> => {
   return dataAPI.post(`${API_URL}/get_unspent_outs`, getUnspentOutsParams, CONFIG).then((result) => result.data)
 }
 
-export const getRandomOuts = (getRandomOutsParams: any): Promise<any> => {
+export const getRandomOuts = async (getRandomOutsParams: unknown): Promise<ApiRandomOutsResponse> => {
   return dataAPI.post(`${API_URL}/get_random_outs`, getRandomOutsParams, CONFIG).then((result) => result.data)
 }
 
-export const submitRawTx = (signedTx: any): Promise<any> => {
-  return dataAPI.post(`${API_URL}/submit_raw_tx`, signedTx.CONFIG).then((result) => result.data)
+export const submitRawTx = async (signedTx: unknown): Promise<null> => {
+  return dataAPI.post(`${API_URL}/submit_raw_tx`, signedTx, CONFIG).then((result) => result.data)
 }
