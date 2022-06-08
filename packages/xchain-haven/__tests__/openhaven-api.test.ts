@@ -5,7 +5,7 @@ describe('Openhaven API Test', () => {
 
   const secretViewkey = '41198d176ecedf97d48481be2723e426991eece4dd136b5cdd26645aed3ac504'
   const address = 'hvtaKeraSrv8KGdn7Vp6qsQwBZLkKVQAi5fMuVynVe8HE9h7B8gdjQpMeGC1QHm4G25TBNcaXHfzSbe4G8uGTF6b5FoNTbnY5z'
-  let txHash: string | undefined
+  const firstTxHash = '4d4f7a5c151a7bf927388adc9d146eb9662338f52561241c48ffa127cc80733f'
 
   beforeAll(async () => {
     openhaven.setAPI_URL(TestNetApiUrl)
@@ -29,12 +29,12 @@ describe('Openhaven API Test', () => {
     const addressTxs = await openhaven.getAddressTxs()
     expect(addressTxs.status).toBe('success')
     expect(addressTxs.transactions.length).toBeGreaterThan(0)
-    txHash = addressTxs.transactions[0].hash
+    const txHash = addressTxs.transactions[0].hash
+    expect(firstTxHash).toEqual(txHash)
   })
 
   it('get tx info', async () => {
-    expect(txHash).toBeDefined()
-    const txInfo = await openhaven.getTx(txHash!)
+    const txInfo = await openhaven.getTx(firstTxHash)
     expect(txInfo.status).toBe('success')
   })
 
