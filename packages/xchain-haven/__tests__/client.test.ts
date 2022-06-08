@@ -1,10 +1,11 @@
 import { Network } from '@xchainjs/xchain-client/lib'
-import { assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
 import mockOpenHaven from '../__mocks__/open-haven'
 import { AssetXHV, AssetXUSD } from '../src/assets'
 import { Client as HavenClient } from '../src/client'
 import { SyncObserver, SyncStats } from '../src/haven/types'
+import { HAVEN_DECIMAL as XHV_DECIMAL } from '../src/utils'
 
 const havenClient = new HavenClient({ network: Network.Testnet })
 
@@ -20,7 +21,6 @@ describe('Haven xCHAIN Integration Test', () => {
 
   afterEach(() => {
     mockOpenHaven.reset()
-    //mockOpenHaven.resetHistory()
   })
 
   const MEMO = 'SWAP:THOR.RUNE'
@@ -59,7 +59,7 @@ describe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should not throw an error for setting a good phrase', () => {
-    expect(havenClient.setPhrase(bip39Mnemonic)).toBeUndefined
+    expect(havenClient.setPhrase(bip39Mnemonic)).not.toThrow()
   })
 
   it('should validate the right address', () => {
@@ -116,7 +116,7 @@ describe('Haven xCHAIN Integration Test', () => {
   it('should send funds', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
-    const amount = baseAmount(2223, 12)
+    const amount = baseAmount(2223, XHV_DECIMAL)
     const txid = await havenClient.transfer({ asset: AssetXHV, recipient: havenAddress2, amount })
     expect(typeof txid).toBe('string')
     expect(txid).not.toBe('')
@@ -128,7 +128,7 @@ describe('Haven xCHAIN Integration Test', () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
 
-    const amount = baseAmount(2223, 12)
+    const amount = baseAmount(2223, XHV_DECIMAL)
     const txid = await havenClient.transfer({ asset: AssetXHV, recipient: havenAddress2, amount, memo: MEMO })
     expect(typeof txid).toBe('string')
     expect(txid).not.toBe('')
@@ -156,7 +156,7 @@ describe('Haven xCHAIN Integration Test', () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const asset = AssetXHV
-    const amount = baseAmount(9999999999999999, 12)
+    const amount = baseAmount(9999999999999999, XHV_DECIMAL)
 
     await expect(havenClient.transfer({ asset, recipient: havenAddress2, amount })).rejects.toThrow()
   })
@@ -165,14 +165,14 @@ describe('Haven xCHAIN Integration Test', () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
     const invalidAddress = 'error_address'
-    const amount = baseAmount(99000, 12)
+    const amount = baseAmount(99000, XHV_DECIMAL)
     await expect(havenClient.transfer({ asset: AssetXHV, recipient: invalidAddress, amount })).rejects.toThrow()
   })
 
   it('should reject when no asset is set in transfer', async () => {
     havenClient.setNetwork(Network.Testnet)
     havenClient.setPhrase(bip39Mnemonic)
-    const amount = baseAmount(99000, 12)
+    const amount = baseAmount(99000, XHV_DECIMAL)
 
     await expect(havenClient.transfer({ recipient: havenAddress2, amount })).rejects.toThrow()
   })
@@ -214,7 +214,7 @@ describe('Haven xCHAIN Integration Test', () => {
     // Limit should work
     const xhvAsset = AssetXHV
     const txPages = await havenClient.getTransactions({ address: 'ignored', asset: assetToString(xhvAsset) })
-    return expect(txPages.txs[0].asset).toEqual(AssetXHV)
+    return expect(eqAsset(txPages.txs[0].asset, AssetXHV)).toBeTruthy()
   })
 
   it('should get transaction with hash', async () => {
@@ -228,7 +228,7 @@ describe('Haven xCHAIN Integration Test', () => {
     expect(txData.to.length).toEqual(1)
     expect(txData.to[0].to).toEqual('4d4f7a5c151a7bf927388adc9d146eb9662338f52561241c48ffa127cc80733f')
     //100 coins ( in human readable form aka asset amount ) should be received
-    expect(txData.to[0].amount.amount().isEqualTo(assetToBase(assetAmount(100, 12)).amount())).toBeTruthy()
+    expect(txData.to[0].amount.amount().isEqualTo(assetToBase(assetAmount(100, XHV_DECIMAL)).amount())).toBeTruthy()
   })
 
   it('should return valid explorer url', () => {
