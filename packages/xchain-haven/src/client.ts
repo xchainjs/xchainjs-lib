@@ -25,7 +25,7 @@ import { HavenCoreClient } from './haven/haven-core-client'
 import { HavenBalance, HavenTicker, SyncObserver } from './haven/types'
 import { assertIsDefined } from './haven/utils'
 import { HavenClient } from './types/client-types'
-import { HAVEN_DECIMAL, convertToHavenMnemonic } from './utils'
+import { XHV_DECIMAL, convertToHavenMnemonic } from './utils'
 
 class Client extends BaseXChainClient implements XChainClient, HavenClient {
   private havenSDK: HavenCoreClient
@@ -83,10 +83,14 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   }
 
   getExplorerUrl(): string {
-    const explorerLink = `https://explorer${
-      this.network === Network.Mainnet ? '' : '-' + this.network
-    }.havenprotocol.org`
-    return explorerLink
+    switch (this.network) {
+      case Network.Mainnet:
+        return 'https://explorer.havenprotocol.org'
+      case Network.Testnet:
+        return 'https://explorer-testnet.havenprotocol.org'
+      case Network.Stagenet:
+        return 'https://explorer.havenprotocol.org'
+    }
   }
   getExplorerAddressUrl(_address: string): string {
     throw new Error('cannot lookup addresses in explorer for haven')
@@ -97,14 +101,13 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   async getBalance(_address: string, assets?: Asset[]): Promise<Balance[]> {
     const havenBalance: HavenBalance = await this.havenSDK.getBalance()
 
-    //TODO return all asset balances when no assets param provided?
     const balances: Balance[] = []
 
     if (assets) {
       assets.forEach((asset) => {
         const assetBalance: Balance = {
           asset,
-          amount: baseAmount(havenBalance[asset.ticker as HavenTicker].balance, HAVEN_DECIMAL),
+          amount: baseAmount(havenBalance[asset.ticker as HavenTicker].balance, XHV_DECIMAL),
         }
         balances.push(assetBalance)
       })
@@ -164,11 +167,11 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
       // if we exchanged to ourself in the past with Havens own exchange mechanics, we have an out and incoming tx
       // if request is limited by an asset, we will only take the one which matches it
       const isOut: boolean =
-        baseAmount(havenTx.total_sent[havenTx.from_asset_type], HAVEN_DECIMAL).gt('0') &&
+        baseAmount(havenTx.total_sent[havenTx.from_asset_type], XHV_DECIMAL).gt('0') &&
         (params?.asset === undefined || (params?.asset !== undefined && havenTx.from_asset_type == params.asset))
 
       const isIn: boolean =
-        baseAmount(havenTx.total_received[havenTx.to_asset_type], HAVEN_DECIMAL).gt('0') &&
+        baseAmount(havenTx.total_received[havenTx.to_asset_type], XHV_DECIMAL).gt('0') &&
         (params?.asset === undefined || (params?.asset !== undefined && havenTx.to_asset_type == params.asset))
 
       const from: Array<TxFrom> = isOut
@@ -211,8 +214,8 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   async getTransactionData(txId: string, _assetAddress?: string): Promise<Tx> {
     const havenTx = await this.havenSDK.getTx(txId)
 
-    const isOut: boolean = baseAmount(havenTx.total_sent[havenTx.from_asset_type], HAVEN_DECIMAL).gt('0')
-    const isIn: boolean = baseAmount(havenTx.total_received[havenTx.to_asset_type], HAVEN_DECIMAL).gt('0')
+    const isOut: boolean = baseAmount(havenTx.total_sent[havenTx.from_asset_type], XHV_DECIMAL).gt('0')
+    const isIn: boolean = baseAmount(havenTx.total_received[havenTx.to_asset_type], XHV_DECIMAL).gt('0')
 
     const from: Array<TxFrom> = isOut
       ? [
