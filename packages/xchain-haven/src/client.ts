@@ -20,12 +20,12 @@ import {
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Asset, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 
-import { getAssetByTicker } from './assets'
+import { createAssetByTicker } from './assets'
 import { HavenCoreClient } from './haven/haven-core-client'
 import { HavenBalance, HavenTicker, SyncObserver } from './haven/types'
 import { assertIsDefined } from './haven/utils'
 import { HavenClient } from './types/client-types'
-import { XHV_DECIMAL, convertToHavenMnemonic } from './utils'
+import { XHV_DECIMAL, convertToHavenMnemonic, isHavenTicker } from './utils'
 
 class Client extends BaseXChainClient implements XChainClient, HavenClient {
   private havenSDK: HavenCoreClient
@@ -104,13 +104,29 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     const balances: Balance[] = []
 
     if (assets) {
-      assets.forEach((asset) => {
+      for (const asset of assets) {
+        if (!isHavenTicker(asset.ticker)) {
+          throw new Error(`${asset.ticker} is not a valid Haven Asset`)
+        }
         const assetBalance: Balance = {
           asset,
-          amount: baseAmount(havenBalance[asset.ticker as HavenTicker].balance, XHV_DECIMAL),
+          amount: baseAmount(havenBalance[asset.ticker].balance, XHV_DECIMAL),
         }
         balances.push(assetBalance)
-      })
+      }
+    } else {
+      const havenTickerList = Object.keys(havenBalance)
+
+      for (const ticker of havenTickerList) {
+        if (!isHavenTicker(ticker)) {
+          throw new Error(`${ticker} is not a valid Haven Asset`)
+        }
+        const assetBalance: Balance = {
+          asset: createAssetByTicker(ticker),
+          amount: baseAmount(havenBalance[ticker].balance, XHV_DECIMAL),
+        }
+        balances.push(assetBalance)
+      }
     }
 
     return balances
@@ -178,7 +194,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
         ? [
             {
               amount: baseAmount(havenTx.fromAmount, 12),
-              asset: getAssetByTicker(havenTx.from_asset_type),
+              asset: createAssetByTicker(havenTx.from_asset_type),
               from: havenTx.hash,
             },
           ]
@@ -187,7 +203,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
         ? [
             {
               amount: baseAmount(havenTx.toAmount, 12),
-              asset: getAssetByTicker(havenTx.to_asset_type),
+              asset: createAssetByTicker(havenTx.to_asset_type),
               to: havenTx.hash,
             },
           ]
@@ -199,7 +215,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
         type: havenTx.from_asset_type === havenTx.to_asset_type ? TxType.Transfer : TxType.Unknown,
         from,
         to,
-        asset: isOut ? getAssetByTicker(havenTx.from_asset_type) : getAssetByTicker(havenTx.to_asset_type),
+        asset: isOut ? createAssetByTicker(havenTx.from_asset_type) : createAssetByTicker(havenTx.to_asset_type),
       }
 
       return tx
@@ -221,7 +237,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
       ? [
           {
             amount: baseAmount(havenTx.fromAmount, 12),
-            asset: getAssetByTicker(havenTx.from_asset_type),
+            asset: createAssetByTicker(havenTx.from_asset_type),
             from: havenTx.hash,
           },
         ]
@@ -230,13 +246,15 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
       ? [
           {
             amount: baseAmount(havenTx.toAmount, 12),
-            asset: getAssetByTicker(havenTx.to_asset_type),
+            asset: createAssetByTicker(havenTx.to_asset_type),
             to: havenTx.hash,
           },
         ]
       : []
 
-    const asset: Asset = isOut ? getAssetByTicker(havenTx.from_asset_type) : getAssetByTicker(havenTx.to_asset_type)
+    const asset: Asset = isOut
+      ? createAssetByTicker(havenTx.from_asset_type)
+      : createAssetByTicker(havenTx.to_asset_type)
 
     const tx: Tx = {
       hash: havenTx.hash,
@@ -283,6 +301,14 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
    */
   subscribeSyncProgress(observer: SyncObserver): void {
     this.havenSDK.subscribeSyncProgress(observer)
+  }
+
+  /**
+   * unsubscribe sync progress
+   * @param {SyncObserver} observer
+   */
+  unsubscribeSyncProgress(observer: SyncObserver): void {
+    this.havenSDK.unsubscribeSyncProgress(observer)
   }
 
   /**
