@@ -1,14 +1,5 @@
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
-import {
-  Asset,
-  AssetETH,
-  BaseAmount,
-  Chain,
-  // assetFromString,
-  assetToString,
-  baseAmount,
-  eqAsset,
-} from '@xchainjs/xchain-util'
+import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
@@ -313,7 +304,6 @@ export class ThorchainAMM {
   }
   async getPoolForAsset(asset: Asset): Promise<LiquidityPool | undefined> {
     const pools = await this.getPools()
-    // const assetString = assetToString(asset)
     return pools[asset.ticker]
   }
   async getPools(): Promise<Record<string, LiquidityPool>> {

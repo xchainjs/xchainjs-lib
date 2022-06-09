@@ -2,6 +2,7 @@ import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
 import { Balance, Network, TxHash, XChainClient } from '@xchainjs/xchain-client'
+import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
 import { Client as EthClient, EthereumClient } from '@xchainjs/xchain-ethereum'
 import { ETHAddress, strip0x } from '@xchainjs/xchain-ethereum/src'
@@ -56,19 +57,10 @@ export class Wallet {
       THOR: new ThorClient({ ...settings, chainIds }),
       LTC: new LtcClient(settings),
       BNB: new BnbClient(settings),
-      // GAIA: new CosmosClient(settings), //FAKE for now
-      // POLKA: new PolkadotClient(settings), //FAKE for now
+      GAIA: new CosmosClient(settings),
     }
 
     this.updateAsgardAddresses(60 * 1000)
-  }
-  private async updateAsgardAddresses(checkTimeMs: number) {
-    try {
-      this.asgardAssets = await this.midgard.getAllInboundAddresses()
-    } catch (error) {
-      console.error(error)
-    }
-    setTimeout(this.updateAsgardAddresses.bind(this), checkTimeMs)
   }
 
   async getAllBalances(): Promise<AllBalances[]> {
@@ -133,6 +125,14 @@ export class Wallet {
     // console.log(JSON.stringify(params, null, 2))
     const hash = await client.transfer(params)
     return { hash, url: client.getExplorerTxUrl(hash) }
+  }
+  private async updateAsgardAddresses(checkTimeMs: number) {
+    try {
+      this.asgardAssets = await this.midgard.getAllInboundAddresses()
+    } catch (error) {
+      console.error(error)
+    }
+    setTimeout(this.updateAsgardAddresses.bind(this), checkTimeMs)
   }
   /**
    * Transaction to THORChain inbound address.
@@ -206,36 +206,4 @@ export class Wallet {
       return hash
     }
   }
-  //   /**
-  //    * Transaction to THORChain inbound address.
-  //    *
-  //    * @param {DepositParams} params The transaction options.
-  //    * @returns {TxHash} The transaction hash.
-  //    *
-  //    * @throws {"halted chain"} Thrown if chain is halted.
-  //    * @throws {"halted trading"} Thrown if trading is halted.
-  //    */
-  //    async deposit({ walletIndex = 0, asset, amount, memo }: DepositParams): Promise<TxHash> {
-  //     const inboundDetails = await getInboundDetails(asset.chain, this.network)
-
-  //     if (inboundDetails.haltedChain) {
-  //       throw new Error(`Halted chain for ${assetToString(asset)}`)
-  //     }
-  //     if (inboundDetails.haltedTrading) {
-  //       throw new Error(`Halted trading for ${assetToString(asset)}`)
-  //     }
-  //     if (asset?.chain === Chain.Ethereum) {
-  //       throw new Error('must be an ethereum asset')
-  //     }
-
-  //     const txHash = await this.transfer({
-  //       walletIndex,
-  //       asset,
-  //       amount,
-  //       recipient: inboundDetails.vault,
-  //       memo,
-  //     })
-
-  //     return txHash
-  //   }
 }
