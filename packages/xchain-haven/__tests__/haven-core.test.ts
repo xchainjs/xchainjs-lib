@@ -1,7 +1,7 @@
+import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 import { SerializedTransaction } from 'haven-core-js'
 
-import { assetAmount } from '@xchainjs/xchain-util'
 import mockopenhaven from '../__mocks__/open-haven'
 import { HavenCoreClient } from '../src/haven/haven-core-client'
 import { HavenBalance, NetTypes, SyncObserver, SyncStats } from '../src/haven/types'
@@ -68,18 +68,16 @@ describe('Haven Core Client Tests', () => {
 
   it('should transfer funds', async () => {
     client.init(mnenomonic, NetTypes.testnet)
-    // is equal to 0.1 XHV
-    const transferAmount = assetAmount(0.1, XHV_DECIMAL)
-    const response = await client.transfer(transferAmount.toString(), 'XHV', address)
+    const transferAmount = assetToBase(assetAmount(0.1, XHV_DECIMAL))
+    const response = await client.transfer(transferAmount.amount().toString(), 'XHV', address)
     expect(typeof response).toBe('string')
     expect(response).not.toBe('')
   })
 
   it('should transfer funds with memo', async () => {
     client.init(mnenomonic, NetTypes.testnet)
-    // is equal to 0.1 XHV
-    const transferAmount = assetAmount(0.1, XHV_DECIMAL)
-    const response = await client.transfer(transferAmount.toString(), 'XHV', address, 'SWAP:THOR.RUNE')
+    const transferAmount = assetToBase(assetAmount(0.1, XHV_DECIMAL))
+    const response = await client.transfer(transferAmount.amount().toString(), 'XHV', address, 'SWAP:THOR.RUNE')
     expect(typeof response).toBe('string')
     expect(response).not.toBe('')
   })
