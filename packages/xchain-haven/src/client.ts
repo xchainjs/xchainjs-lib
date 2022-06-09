@@ -22,7 +22,7 @@ import { Asset, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util
 
 import { createAssetByTicker } from './assets'
 import { HavenCoreClient } from './haven/haven-core-client'
-import { HavenBalance, HavenTicker, SyncObserver } from './haven/types'
+import { HavenBalance, SyncObserver } from './haven/types'
 import { assertIsDefined } from './haven/utils'
 import { HavenClient } from './types/client-types'
 import { XHV_DECIMAL, convertToHavenMnemonic, isHavenTicker } from './utils'
@@ -270,10 +270,11 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   async transfer(params: TxParams): Promise<TxHash> {
     const { amount, asset, recipient, memo } = params
     if (asset === undefined) throw new Error('please specify asset it in Client.transfer() for Haven')
+    if (!isHavenTicker(asset.ticker)) throw new Error(`${asset.ticker} is not a valid Haven Asset`)
     const amountString = amount.amount().toString()
     let txHash
     try {
-      txHash = await this.havenSDK.transfer(amountString, asset.ticker as HavenTicker, recipient, memo)
+      txHash = await this.havenSDK.transfer(amountString, asset.ticker, recipient, memo)
       return txHash
     } catch (e) {
       throw new Error('Tx could not be sent')
