@@ -1,5 +1,7 @@
 import { Asset, Chain } from '@xchainjs/xchain-util'
 
+import { isHavenTicker } from './utils'
+
 export const AssetXHV: Asset = {
   symbol: 'XHV',
   ticker: 'XHV',
@@ -14,13 +16,17 @@ export const AssetXUSD: Asset = {
   chain: Chain.Haven,
 }
 
-const assets = [AssetXHV, AssetXUSD]
-
-export const getAssetByTicker = (ticker: string): Asset => {
-  const asset = assets.find((asset: Asset) => ticker.toLowerCase() === asset.ticker.toLowerCase())
-  if (!asset) {
-    throw 'no asset added in assets.ts for ticker ' + ticker
+export const createAssetByTicker = (ticker: string): Asset => {
+  if (isHavenTicker(ticker)) {
+    throw Error(`${ticker} is not a valid Haven Asset`)
   }
 
-  return asset
+  const isSynth = ticker !== 'XHV'
+
+  return {
+    symbol: ticker,
+    ticker,
+    chain: Chain.Haven,
+    synth: isSynth,
+  }
 }
