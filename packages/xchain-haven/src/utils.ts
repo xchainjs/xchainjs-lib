@@ -1,4 +1,5 @@
 import { convertBip39ToHavenMnemonic } from 'bip39-converter'
+import { ASSET_LIST, HavenTicker } from 'haven-core-js'
 
 export const XHV_DECIMAL = 12
 
@@ -11,3 +12,10 @@ export const XHV_DECIMAL = 12
 export const convertToHavenMnemonic = (phrase: string, passphrase = ''): string => {
   return convertBip39ToHavenMnemonic(phrase, passphrase)
 }
+
+/**
+ * Guard for type HavenTicker
+ * @param ticker
+ * @returns
+ */
+export const isHavenTicker = (ticker: string): ticker is HavenTicker => ASSET_LIST.includes(ticker)
