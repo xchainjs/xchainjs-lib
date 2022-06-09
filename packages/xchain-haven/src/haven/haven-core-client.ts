@@ -125,6 +125,8 @@ export class HavenCoreClient {
 
   subscribeSyncProgress = async (observer: SyncObserver): Promise<void> =>
     this.syncHandler.subscribeSyncProgress(observer)
+  unsubscribeSyncProgress = async (observer: SyncObserver): Promise<void> =>
+    this.syncHandler.unsubscribeSyncProgress(observer)
   getSyncState = async (): Promise<SyncStats> => this.syncHandler.getSyncState()
   isSyncing = async (): Promise<boolean> => this.syncHandler.isSyncing()
 
