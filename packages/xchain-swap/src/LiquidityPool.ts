@@ -1,13 +1,14 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
-import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
 import {
   Asset,
   AssetAmount,
+  AssetRuneNative,
   BaseAmount,
   assetAmount,
   assetFromString,
   baseAmount,
   baseToAsset,
+  eqAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -66,7 +67,7 @@ export class LiquidityPool {
    * @returns
    */
   public getValueInRUNE(asset: Asset, assetAmount: BaseAmount): BaseAmount {
-    if (isAssetRuneNative(asset)) {
+    if (eqAsset(AssetRuneNative, asset)) {
       return assetAmount
     }
     if (asset.ticker != this._asset.ticker) {

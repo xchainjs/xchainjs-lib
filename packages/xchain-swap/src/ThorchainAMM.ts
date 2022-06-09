@@ -22,8 +22,6 @@ import {
   PolkadotChain,
   THORChain,
   TerraChain,
-  assetAmount,
-  assetToBase,
   assetToString,
   baseAmount,
   baseToAsset,
@@ -136,6 +134,7 @@ export class ThorchainAMM {
       totalFees: totalFees,
       slipPercentage: swapOutput.slip,
       netOutput: netOutput,
+      waitTime: 0,
       canSwap: false, //assume false for now, the getSwapEstimateErrors() step will flip this flag if required
     }
     return swapEstimate
@@ -171,7 +170,7 @@ export class ThorchainAMM {
       params.destinationAsset.chain,
     ])
     const sourcePool = await this.getPoolForAsset(params.sourceAsset)
-    const destinationPool = await this.getPoolForAsset(params.destinationAsset)
+    const destinationPool = (await this.getPoolForAsset(params.destinationAsset)) as LiquidityPool
 
     // throw errors is either pools is not found, excpet if the chain is thor, which does not have a pool
     if (params.sourceAsset.chain !== Chain.THORChain && !sourcePool)
@@ -193,6 +192,26 @@ export class ThorchainAMM {
       swapEstimate.errors = errors
     } else {
       swapEstimate.canSwap = true
+    }
+    // ---------------- Work out total Wait Time for Swap ---------------------- /
+    if (swapEstimate.canSwap) {
+      const confCountTime = (await this.confCounting(params.destinationAsset, swapEstimate.netOutput)) as number
+      const outboundDelay = (await this.outboundDelay(
+        destinationPool,
+        params.destinationAsset,
+        swapEstimate.netOutput,
+      )) as number
+
+      let waitTime: number
+      // Find the biggest delay for the outbound Tx
+      if (confCountTime > outboundDelay) {
+        waitTime = confCountTime
+      } else {
+        waitTime = outboundDelay
+      }
+      // Add the Tx in Time
+      swapEstimate.waitTime = (waitTime + (await this.confCounting(params.sourceAsset, params.inputAmount))) as number
+      console.log(`WaitTime is: ${swapEstimate.waitTime.toString}`)
     }
     return swapEstimate
   }
@@ -264,25 +283,24 @@ export class ThorchainAMM {
     //Get the Mimir values
     // want to do something like this in THORChainAMM Class
 
-    // Require Midgard CLass update to do
+    // TO Do:
+    // Require Midgard Class update to do
     //this.midgard.getConstantValueByName(string)
     //this.midgard.getMimirValueByName(string)
 
     const minTxOutVolumeThreshold = new BigNumber(1000) // RUNE
-    const maxTxOutOffset = 720
-    let txOutDelayRate: BigNumber = new BigNumber(25)
+    const maxTxOutOffset = 720 //max blocks an outbound can be delayed
+    let txOutDelayRate: BigNumber = new BigNumber(25) // current delay rate
     const thorChainblocktime = 6
 
-    const runeValue: BaseAmount = liquidtyPool.getValueInRUNE(asset, outboundAmount) // same thing as with confcounting
+    const runeValue: BaseAmount = liquidtyPool.getValueInRUNE(asset, outboundAmount)
     if (runeValue.lt(minTxOutVolumeThreshold)) {
       return thorChainblocktime
     }
     //https://midgard.thorswap.net/v2/thorchain/queue) "scheduled_outbound_value" // Rune value in the outbound queue
     const getScheduledOutboundValue = await this.midgard.getScheduledOutboundValue()
-    // like to get a simpler way to do this
-    const sumValue = assetToBase(
-      assetAmount(baseToAsset(runeValue).amount().plus(baseToAsset(getScheduledOutboundValue).amount())),
-    )
+    // Add outboundAmount in RUNE to the oubound queue
+    const sumValue = runeValue.plus(getScheduledOutboundValue)
 
     // reduce delay rate relative to the total scheduled value. In high volume
     // scenarios, this causes the network to send outbound transactions slower,
@@ -314,20 +332,26 @@ export class ThorchainAMM {
    * @param amount - the amount of asset (any asset).
    * @returns time in seconds before a Tx is confirmed by THORChain
    */
-
   async confCounting(asset: Asset, amount: BaseAmount): Promise<number> {
-    // get the pool for the asset being sent
-    const amountPool = (await this.getPoolForAsset(asset)) as LiquidityPool
+    let amountInGasAsset
+    // If it is Native RUNE
+    if (eqAsset(AssetRuneNative, asset)) {
+      amountInGasAsset = baseToAsset(amount)
+    } else {
+      // get the pool for the asset being sent
+      const amountPool = (await this.getPoolForAsset(asset)) as LiquidityPool
 
-    // Find the amount in RUNE
-    const amountInRUNE = amountPool.getValueInRUNE(asset, amount) as BaseAmount
+      // Find the amount in RUNE
+      const amountInRUNE = amountPool.getValueInRUNE(asset, amount) as BaseAmount
 
-    // find the gasAsset for the asset and convert the amountInRUNE into amountInGasAsset
-    const chainGasAsset = this.getChainAsset(asset.chain) as Asset
-    const gasChainPool = (await this.getPoolForAsset(chainGasAsset)) as LiquidityPool
-    const amountInGasAsset = gasChainPool.currentPriceInAsset.times(baseToAsset(amountInRUNE).amount())
+      // find the gasAsset for the asset and convert the amountInRUNE into amountInGasAsset
+      const chainGasAsset = this.getChainAsset(asset.chain) as Asset
+      const gasChainPool = (await this.getPoolForAsset(chainGasAsset)) as LiquidityPool
+      amountInGasAsset = gasChainPool.currentPriceInAsset.times(baseToAsset(amountInRUNE).amount())
+    }
 
-    // ============== Const that need to be added for this to work ==============     Made up values to get it to work
+    // TO Do:
+    // ============== Const that need to be added for this to work.  Made up values to get it to work
     // const blockReward = asset.chain.blockReward // need a constant here or in Chain Client
     // const blockTime = asset.chain.blockTime // need a constant here or in Chain Client
 

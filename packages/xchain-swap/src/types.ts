@@ -14,6 +14,7 @@ export type SwapEstimate = {
   totalFees: TotalFees
   slipPercentage: BigNumber
   netOutput: BaseAmount
+  waitTime: number
   canSwap: boolean
   errors?: string[]
 }
