@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-haven",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Custom Haven client used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -37,8 +37,8 @@
     "@xchainjs/xchain-util": "^0.7.1",
     "axios-mock-adapter": "^1.20.0",
     "babel-jest": "^28.1.0",
-    "haven-core-js": "^1.0.0",
-    "mnemonic-converter": "^1.0.1"
+    "haven-core-js": "^1.0.4",
+    "bip39-converter": "^1.0.4"
   },
   "publishConfig": {
     "access": "public"
@@ -47,7 +47,7 @@
     "@xchainjs/xchain-client": "^0.11.2",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.7.1",
-    "haven-core-js": "^1.0.0",
-    "mnemonic-converter": "^1.0.1"
+    "haven-core-js": "^1.0.4",
+    "bip39-converter": "^1.0.4"
   }
 }
