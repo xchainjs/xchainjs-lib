@@ -21,6 +21,11 @@ class SyncHandler {
     this.updateSyncObservers([newObserver], syncState)
   }
 
+  unsubscribeSyncProgress(delObserver: SyncObserver) {
+    const observerIndex = this.syncObservers.indexOf(delObserver)
+    this.syncObservers.splice(observerIndex, 1)
+  }
+
   async updateSyncProgress() {
     await this.fetchSyncProgress()
 
