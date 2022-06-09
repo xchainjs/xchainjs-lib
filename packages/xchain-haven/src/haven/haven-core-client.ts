@@ -89,11 +89,8 @@ export class HavenCoreClient {
     const apiUrl = this.netTypeId === NetTypes.mainnet ? MainnetApiUrl : TestNetApiUrl
     setAPI_URL(apiUrl)
     const keys = this.getKeys()
-
     setCredentials(keys.address_string, keys.sec_viewKey_string)
-
     await login(true)
-
     this.pingServerIntervalID = setInterval(() => this.pingServer(), 60 * 1000)
 
     return true
@@ -152,16 +149,16 @@ export class HavenCoreClient {
 
     Object.keys(serializedData.total_received_String).forEach((assetType) => {
       const balance = havenWallet
-        .JSBigInt(total_received_String[assetType as HavenTicker])
-        .subtract(havenWallet.JSBigInt(total_sent_String[assetType as HavenTicker]))
+        .JSBigInt(total_received_String[assetType])
+        .subtract(havenWallet.JSBigInt(total_sent_String[assetType]))
 
       const unlockedBalance = havenWallet
-        .JSBigInt(total_received_unlocked_String[assetType as HavenTicker])
-        .subtract(havenWallet.JSBigInt(total_sent_String[assetType as HavenTicker]))
+        .JSBigInt(total_received_unlocked_String[assetType])
+        .subtract(havenWallet.JSBigInt(total_sent_String[assetType]))
 
       const lockedBalance = balance.subtract(unlockedBalance)
 
-      havenBalance[assetType as HavenTicker] = {
+      havenBalance[assetType] = {
         balance: balance.toString(),
         lockedBalance: lockedBalance.toString(),
         unlockedBalance: unlockedBalance.toString(),
@@ -176,8 +173,8 @@ export class HavenCoreClient {
 
     if (this.base_fee === undefined || this.fork_version === undefined) {
       const version = await get_version()
-      this.fork_version = version.fork_version as number
-      this.base_fee = version.per_byte_fee as number
+      this.fork_version = version.fork_version
+      this.base_fee = version.per_byte_fee
     }
 
     const feeParams: FeeEstimationParams = {
