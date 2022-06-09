@@ -17,7 +17,7 @@ export const AssetXUSD: Asset = {
 }
 
 export const createAssetByTicker = (ticker: string): Asset => {
-  if (isHavenTicker(ticker)) {
+  if (!isHavenTicker(ticker)) {
     throw Error(`${ticker} is not a valid Haven Asset`)
   }
 
