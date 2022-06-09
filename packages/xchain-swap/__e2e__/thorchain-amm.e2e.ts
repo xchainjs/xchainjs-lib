@@ -180,17 +180,19 @@ describe('xchain-swap Integration Tests', () => {
       throw error
     }
   })
-  // it('Should calculate total swap fees in rune and throw and error if its greater than input amount', async () => {
-  //   const swapParams: EstimateSwapParams = {
-  //     sourceAsset: AssetBTC,
-  //     destinationAsset: AssetETH,
-  //     inputAmount: assetToBase(assetAmount(0.000001)),
-  //   }
-  //   try {
-  //     const feesToHigh = await thorchainAmm.estimateSwap(swapParams)
-  //     expect(feesToHigh.errors).toEqual(`Input amount ${swapParams.inputAmount} is less that total swap fees`)
-  //   } catch (error) {
-  //     throw error
-  //   }
-  // })
+
+  it('Should calculate total swap fees in rune and throw and error if its greater than input amount', async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetBTC,
+      destinationAsset: AssetETH,
+      inputAmount: assetToBase(assetAmount(0.001)),
+      affiliateFeePercent: 0.1,
+    }
+    try {
+      const feesToHigh = await thorchainAmm.estimateSwap(swapParams)
+      print(feesToHigh)
+    } catch (error) {
+      expect(error.message).toEqual(`Input amount ${swapParams.inputAmount} is less that total swap fees`)
+    }
+  })
 })

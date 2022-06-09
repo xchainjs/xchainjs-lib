@@ -12,7 +12,7 @@ import {
   getSwapFee,
   getSwapOutput,
   getSwapSlip,
-  getValueOfAssetInRune
+  getValueOfAssetInRune,
 } from '../src/utils/swap'
 
 const btcPoolDetails = {
@@ -47,7 +47,7 @@ const btcPool = new LiquidityPool(btcPoolDetails)
 const ethPool = new LiquidityPool(ethPoolDetails)
 
 const inputAmount = assetToBase(assetAmount(1)) // 1 BTC
-const feeAmount = assetToBase(assetAmount(0.00003750)) // sats
+const feeAmount = assetToBase(assetAmount(0.0000375)) // sats
 
 describe('Swap Cal Tests', () => {
   it('should calculate correct swap output', async () => {

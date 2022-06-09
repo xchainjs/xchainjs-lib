@@ -1,4 +1,4 @@
-import { assetAmount, assetToBase, baseToAsset, AssetRuneNative, AssetBTC } from '@xchainjs/xchain-util'
+import { AssetBTC, AssetRuneNative, assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from '../src/LiquidityPool'
@@ -57,5 +57,4 @@ describe(`Liquidity calc tests`, () => {
     const correctOutput = new BigNumber(25000) // 25000 RUNE expected for 1 BTC input
     expect(baseToAsset(runeFee).amount()).toEqual(correctOutput)
   })
-
 })

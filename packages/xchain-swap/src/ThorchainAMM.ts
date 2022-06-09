@@ -88,9 +88,10 @@ export class ThorchainAMM {
       const inboundFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.inboundFee)
       const outboundFeeInRune = destinationPool.getValueInRUNE(params.destinationAsset, estimate.totalFees.outboundFee)
       const swapFeeInRune = sourcePool.getValueInRUNE(params.sourceAsset, estimate.totalFees.swapFee)
-      const totalSwapFeesInRune = inboundFeeInRune.plus(outboundFeeInRune).plus(swapFeeInRune)
-      if (totalSwapFeesInRune > params.inputAmount)
-        errors.push(`Input amount ${params.inputAmount} is less that total swap fees`)
+      const affiliateFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.affiliateFee)
+      const totalSwapFeesInRune = inboundFeeInRune.plus(outboundFeeInRune).plus(swapFeeInRune).plus(affiliateFeeInRune)
+      if (totalSwapFeesInRune >= params.inputAmount)
+        errors.push(`Input amount ${params.inputAmount} is less than or equal too total swap fees`)
     }
     return errors
   }
