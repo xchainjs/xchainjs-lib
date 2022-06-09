@@ -1,5 +1,34 @@
+import { AssetLUNA } from '@xchainjs/xchain-terra/lib'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
-import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetBCH,
+  AssetBNB,
+  AssetBTC,
+  // assetFromString,
+  AssetDOGE,
+  AssetETH,
+  AssetLTC,
+  AssetRuneNative,
+  BCHChain,
+  BNBChain,
+  BTCChain,
+  BaseAmount,
+  Chain,
+  CosmosChain,
+  DOGEChain,
+  ETHChain,
+  LTCChain,
+  PolkadotChain,
+  THORChain,
+  TerraChain,
+  assetAmount,
+  assetToBase,
+  assetToString,
+  baseAmount,
+  baseToAsset,
+  eqAsset,
+} from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
@@ -56,6 +85,15 @@ export class ThorchainAMM {
     // TODO implement the following
     //  If valueofRUNE(inbound fee + outbound fee) > valueOfRUNE(inboundAsset)
     //   return "insufficent inbound asset amount "
+
+    if (sourcePool?.isAvailable() && destinationPool?.isAvailable()) {
+      const inboundFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.inboundFee)
+      const outboundFeeInRune = destinationPool.getValueInRUNE(params.destinationAsset, estimate.totalFees.outboundFee)
+      const swapFeeInRune = sourcePool.getValueInRUNE(params.sourceAsset, estimate.totalFees.swapFee)
+      const totalSwapFeesInRune = inboundFeeInRune.plus(outboundFeeInRune).plus(swapFeeInRune)
+      if (totalSwapFeesInRune > params.inputAmount)
+        errors.push(`Input amount ${params.inputAmount} is less that total swap fees`)
+    }
     return errors
   }
   private calcSwapEstimate(
@@ -214,27 +252,37 @@ export class ThorchainAMM {
 
   /**
    * Works out how long an outbound Tx will be held by THORChain before sending.
+   *
+   * Needs to be tested
+   *
    * @param asset
-   * @param outboundAmount
+   * @param outBoundAmount
    * @returns
    */
 
-  /*
-  private outboundDelay(liquidtyPool: LiquidityPool, asset: Asset, outboundAmount: BaseAmount): Promise<BigNumber> {
+  public async outboundDelay(liquidtyPool: LiquidityPool, asset: Asset, outboundAmount: BaseAmount): Promise<number> {
     //Get the Mimir values
     // want to do something like this in THORChainAMM Class
-    // let minTxOutVolumeThreshold = this.midgard.getMimirValueByName(minTxOutVolumeThreshold)
 
-    const minTxOutVolumeThreshold = 1000 // RUNE
+    // Require Midgard CLass update to do
+    //this.midgard.getConstantValueByName(string)
+    //this.midgard.getMimirValueByName(string)
+
+    const minTxOutVolumeThreshold = new BigNumber(1000) // RUNE
     const maxTxOutOffset = 720
-    let txOutDelayRate = 25
+    let txOutDelayRate: BigNumber = new BigNumber(25)
+    const thorChainblocktime = 6
 
-    const runeValue = liquidtyPool.getValueInRUNE(asset, outboundAmount) // same thing as with confcounting
+    const runeValue: BaseAmount = liquidtyPool.getValueInRUNE(asset, outboundAmount) // same thing as with confcounting
     if (runeValue.lt(minTxOutVolumeThreshold)) {
-      return new BigNumber(6)
+      return thorChainblocktime
     }
-    const sumValue = runeValue.plus(this.midgard.getScheduledOutboundValue())
-    //https://midgard.thorswap.net/v2/thorchain/queue) "scheduled_outbound_value"
+    //https://midgard.thorswap.net/v2/thorchain/queue) "scheduled_outbound_value" // Rune value in the outbound queue
+    const getScheduledOutboundValue = await this.midgard.getScheduledOutboundValue()
+    // like to get a simpler way to do this
+    const sumValue = assetToBase(
+      assetAmount(baseToAsset(runeValue).amount().plus(baseToAsset(getScheduledOutboundValue).amount())),
+    )
 
     // reduce delay rate relative to the total scheduled value. In high volume
     // scenarios, this causes the network to send outbound transactions slower,
@@ -242,38 +290,58 @@ export class ThorchainAMM {
     // scenario, the attacker is likely going to move as much value as possible
     // (as we've seen in the past). The act of doing this will slow down their
     // own transaction(s), reducing the attack's effectiveness.
-    txOutDelayRate -= sumValue / minTxOutVolumeThreshold
+    // txOutDelayRate -= sumValue / minTxOutVolumeThreshold
+    txOutDelayRate = txOutDelayRate.minus(sumValue.amount()).dividedBy(minTxOutVolumeThreshold)
 
     // calculate the minimum number of blocks in the future the txn has to be
-    let minBlocks = runeValue / txOutDelayRate
+    let minBlocks = runeValue.div(txOutDelayRate).amount()
 
-    if (minBlocks > maxTxOutOffset) {
-      minBlocks = maxTxOutOffset
+    if (minBlocks.isGreaterThan(maxTxOutOffset)) {
+      minBlocks = new BigNumber(maxTxOutOffset)
+    } else {
+      minBlocks = minBlocks.times(new BigNumber(thorChainblocktime))
     }
-    return new BigNumber(minBlocks).times(6)
+    return minBlocks.toNumber()
   }
-*/
+
   /**
+   * Finds the required confCount required for an inbound or outbound Tx to THORChain
    *
-   * @param Assset - really only need the chain here TBH
-   * @param amount - the amount of asset (any asset). This really should be converted to the native asset token
+   * Finds the gas asset of the given asset (e.g. BUSD is on BNB), finds the value of asset in Gas Asset then finds the required conformation count.
+   * ConfCount is then times by 6 seconds.
+   *
+   * @param Assset - asset of the outbound amount.
+   * @param amount - the amount of asset (any asset).
    * @returns time in seconds before a Tx is confirmed by THORChain
    */
-  /*
-  private confCounting(asset: Asset, amount: BaseAmount): Int {
-    const blockReward = asset.chain.blockReward // need a constant here or in Chain Client
-    const blockTime = asset.chain.blockTime // need a constant here or in Chain Client
 
-    let requiredConfs
+  async confCounting(asset: Asset, amount: BaseAmount): Promise<number> {
+    // get the pool for the asset being sent
+    const amountPool = (await this.getPoolForAsset(asset)) as LiquidityPool
 
-    // amount needs to be in gas type.
-    work out, given the asset.chain, what is the gas asset for that chain.
-    convert amount into gas asset value
+    // Find the amount in RUNE
+    const amountInRUNE = amountPool.getValueInRUNE(asset, amount) as BaseAmount
 
-    requiredConfs = Math.ceil(amount.div(blockReward))
-    return requiredConfs.divide(blockTime)
+    // find the gasAsset for the asset and convert the amountInRUNE into amountInGasAsset
+    const chainGasAsset = this.getChainAsset(asset.chain) as Asset
+    const gasChainPool = (await this.getPoolForAsset(chainGasAsset)) as LiquidityPool
+    const amountInGasAsset = gasChainPool.currentPriceInAsset.times(baseToAsset(amountInRUNE).amount())
+
+    // ============== Const that need to be added for this to work ==============     Made up values to get it to work
+    // const blockReward = asset.chain.blockReward // need a constant here or in Chain Client
+    // const blockTime = asset.chain.blockTime // need a constant here or in Chain Client
+
+    const btcBlockTime = new BigNumber(600) // 600 seconds =  10 mins
+    const btcBlockReward = new BigNumber(6.25)
+    //=========================================================================================
+
+    // requiredConfs = ceil (inputAmount in Asset / BlockReward for the chain)
+    const requiredConfs = new BigNumber(amountInGasAsset.div(btcBlockReward).amount(), BigNumber.ROUND_CEIL)
+
+    // returns (requiredConfs * chainBlockTime)
+    return requiredConfs.times(btcBlockTime).toNumber()
   }
-*/
+
   private calcInboundFee(sourceAsset: Asset, gasRate: BigNumber): BaseAmount {
     // https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
 
@@ -339,6 +407,38 @@ export class ThorchainAMM {
         lastRefreshed: Date.now(),
         pools: poolMap,
       }
+    }
+  }
+
+  /**
+   * return the chain for a given Asset This method should live somewhere else.
+   * @param chain
+   * @returns the gas asset type for the given chain
+   */
+  getChainAsset = (chain: Chain): Asset => {
+    switch (chain) {
+      case BNBChain:
+        return AssetBNB
+      case BTCChain:
+        return AssetBTC
+      case ETHChain:
+        return AssetETH
+      case THORChain:
+        return AssetRuneNative
+      case CosmosChain:
+        throw Error('Cosmos is not supported yet')
+      case BCHChain:
+        return AssetBCH
+      case LTCChain:
+        return AssetLTC
+      case DOGEChain:
+        return AssetDOGE
+      case TerraChain:
+        return AssetLUNA
+      case PolkadotChain:
+        throw Error('Polkadot is not supported yet')
+      default:
+        throw Error('Unknown chains')
     }
   }
 }

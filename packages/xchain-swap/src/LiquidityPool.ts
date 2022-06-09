@@ -56,11 +56,20 @@ export class LiquidityPool {
   public get assetString(): string {
     return this._assetString
   }
+  /**
+   * Returns the rune value.
+   * If the asset passed in is NativeRune, assetAmount is returned back
+   * If the asset passed in does not match the pool's asset, thow an error, else convert assetAmount into rune value.
+   *
+   * @param asset asset type. Should match the asset of the pool
+   * @param assetAmount - the amount of asset in the value of RUNE
+   * @returns
+   */
   public getValueInRUNE(asset: Asset, assetAmount: BaseAmount): BaseAmount {
     if (isAssetRuneNative(asset)) {
       return assetAmount
     }
-    if (asset != this._asset) {
+    if (asset.ticker != this._asset.ticker) {
       throw new Error(`wrong asset for the pool`)
     }
     return assetAmount.times(this.runeBalance.div(this.assetBalance))
