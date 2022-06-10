@@ -17,7 +17,6 @@ import {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Asset, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 
 import { createAssetByTicker } from './assets'
@@ -32,7 +31,31 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   private havenMnemonic: string | undefined
 
   /**
-   * Constructor
+   * Static factory method which is the only permitted way to create Client instances
+   *
+   * @param {XChainClientParams} params
+   * @returns {Client}
+   */
+  static async init({
+    network = Network.Testnet,
+    rootDerivationPaths = {
+      [Network.Mainnet]: `m/44'/535'/0'/0/`,
+      [Network.Testnet]: `m/44'/535'/0'/0/`,
+      [Network.Stagenet]: `m/44'/535'/0'/0/`,
+    },
+    phrase,
+  }: XChainClientParams): Promise<Client> {
+    if (!phrase) {
+      throw new Error('Phrase must be provided')
+    }
+    const havenClient = new Client({ network, rootDerivationPaths, phrase })
+    await havenClient.preloadSDK()
+    await havenClient.initSDK()
+    return havenClient
+  }
+
+  /**
+   * Private Constructor
    *
    * Client has to be initialised with network type and phrase.
    * It will throw an error if an invalid phrase has been passed.
@@ -41,7 +64,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor({
+  private constructor({
     network = Network.Testnet,
     rootDerivationPaths = {
       [Network.Mainnet]: `m/44'/535'/0'/0/`,
@@ -52,9 +75,6 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
   }: XChainClientParams) {
     super(Chain.Haven, { network, rootDerivationPaths, phrase })
     this.havenSDK = new HavenCoreClient()
-    if (this.phrase) {
-      this.initSDK()
-    }
   }
 
   async getFees(): Promise<Fees> {
@@ -137,16 +157,12 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     return isValid
   }
 
-  setPhrase(phrase: string, _walletIndex?: number): Address {
-    if (this.phrase !== phrase) {
-      if (!validatePhrase(phrase)) {
-        throw new Error('Invalid phrase')
-      }
-      this.phrase = phrase
-      this.initSDK()
-    }
-    const address = this.getAddress()
-    return address
+  setPhrase(_phrase: string, _walletIndex?: number): Address {
+    throw new Error('please provide phrase at instantion via Client.init()')
+  }
+
+  setNetwork(_network: Network): void {
+    throw new Error('please provide network at instancion via Client.init()')
   }
 
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
@@ -317,7 +333,7 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
    * function must be called and awaited once after this class is initalized
    * @returns {Promise<boolean>}
    */
-  async preloadSDK(): Promise<boolean> {
+  private async preloadSDK(): Promise<boolean> {
     await this.havenSDK.preloadModule()
     return true
   }
