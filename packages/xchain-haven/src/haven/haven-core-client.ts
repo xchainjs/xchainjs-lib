@@ -13,6 +13,8 @@ import type {
 } from 'haven-core-js'
 import * as havenWallet from 'haven-core-js'
 
+import { isHavenTicker } from '../utils'
+
 import {
   getAddressInfo,
   getAddressTxs,
@@ -147,7 +149,10 @@ export class HavenCoreClient {
 
     const { total_received_String, total_sent_String, total_received_unlocked_String } = serializedData
 
-    Object.keys(serializedData.total_received_String).forEach((assetType) => {
+    Object.keys(total_received_String).forEach((assetType) => {
+      if (!isHavenTicker(assetType)) {
+        return
+      }
       const balance = havenWallet
         .JSBigInt(total_received_String[assetType])
         .subtract(havenWallet.JSBigInt(total_sent_String[assetType]))
