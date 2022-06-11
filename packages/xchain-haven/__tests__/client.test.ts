@@ -7,13 +7,17 @@ import { Client as HavenClient } from '../src/client'
 import { SyncObserver, SyncStats } from '../src/haven/types'
 import { XHV_DECIMAL } from '../src/utils'
 
-xdescribe('Haven xCHAIN Integration Test', () => {
+let havenClient: HavenClient
+describe('Haven xCHAIN Integration Test', () => {
   beforeEach(() => {
     mockOpenHaven.init()
   })
 
   afterEach(() => {
     mockOpenHaven.reset()
+    if (havenClient) {
+      havenClient.purgeClient()
+    }
   })
 
   const MEMO = 'SWAP:THOR.RUNE'
@@ -41,21 +45,21 @@ xdescribe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should give back correct haven mnemonic', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const result = havenClient.getHavenMnemonic()
     expect(result).toEqual(havenMnemonic)
   })
 
   it('should validate the right address', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const address = havenClient.getAddress()
     const valid = havenClient.validateAddress(address)
     expect(address).toEqual(havenAddress)
     expect(valid).toBeTruthy()
   })
 
-  xit('should sync over time', async (done) => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+  it('should sync over time', async (done) => {
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
 
     // mock is configured to simulate syncing behaviour
     const isSyncing = await havenClient.isSyncing()
@@ -80,8 +84,34 @@ xdescribe('Haven xCHAIN Integration Test', () => {
     havenClient.subscribeSyncProgress(observer)
   })
 
+  it('should stop receiving syncing progress after unsubscribe', async (done) => {
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+
+    // unsubscribe after first next() call -> we end up with 1 assertion total
+    expect.assertions(1)
+
+    const observer: SyncObserver = {
+      next: (syncState: SyncStats) => {
+        expect(syncState.syncedHeight).toBeGreaterThanOrEqual(0)
+        havenClient.unsubscribeSyncProgress(observer)
+      },
+      complete: (_syncState: SyncStats) => {
+        // let the test fail if complete is called
+        expect(true).toBeFalsy()
+      },
+      error: (_errMessage: string) => {
+        expect(true).toBeFalsy()
+      },
+    }
+    havenClient.subscribeSyncProgress(observer)
+
+    // wait 50 seconds to check if unsubscribe was successfull
+    await new Promise((r) => setTimeout(r, 50000))
+    done()
+  })
+
   it('all balances', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
 
     //fetch balance of all 10 asset
     const allBalances = await havenClient.getBalance('ignored')
@@ -101,7 +131,7 @@ xdescribe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should send funds', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const amount = assetToBase(assetAmount(0.1, XHV_DECIMAL))
     const txid = await havenClient.transfer({ asset: AssetXHV, recipient: havenAddress2, amount })
     expect(typeof txid).toBe('string')
@@ -111,7 +141,7 @@ xdescribe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should send funds with a memo', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const amount = assetToBase(assetAmount(0.1, XHV_DECIMAL))
     const txid = await havenClient.transfer({ asset: AssetXHV, recipient: havenAddress2, amount, memo: MEMO })
     expect(typeof txid).toBe('string')
@@ -121,13 +151,13 @@ xdescribe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should purge client', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     havenClient.purgeClient()
     expect(() => havenClient.getAddress()).toThrow()
   })
 
   it('should return estimated fees of a normal tx', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const estimates = await havenClient.getFees()
     expect(estimates.fast).toBeDefined()
     expect(estimates.fastest).toBeDefined()
@@ -135,7 +165,7 @@ xdescribe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should reject a tx when amount exceed balance', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const asset = AssetXHV
     const amount = assetToBase(assetAmount(100000, XHV_DECIMAL))
 
@@ -143,20 +173,20 @@ xdescribe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should reject when an invalid address is used in transfer', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const invalidAddress = 'error_address'
     const amount = assetToBase(assetAmount(0.1, XHV_DECIMAL))
     await expect(havenClient.transfer({ asset: AssetXHV, recipient: invalidAddress, amount })).rejects.toThrow()
   })
 
   it('should reject when no asset is set in transfer', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const amount = assetToBase(assetAmount(0.1, XHV_DECIMAL))
     await expect(havenClient.transfer({ recipient: havenAddress2, amount })).rejects.toThrow()
   })
 
   it('should reject when invalid asset is used in transfer', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const invalidAsset: Asset = {
       ticker: 'ZZZ',
       symbol: 'ZZZ',
@@ -168,7 +198,7 @@ xdescribe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should get address transactions', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const txPages = await havenClient.getTransactions({ address: 'ignored' })
 
     expect(txPages.total).toEqual(2)
@@ -181,28 +211,28 @@ xdescribe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should get address transactions with limit', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     // Limit should work
     const txPages = await havenClient.getTransactions({ address: 'ignored', limit: 1 })
     return expect(txPages.total).toEqual(1)
   })
 
   it('should only get XUSD transactions', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const xusdAsset = AssetXUSD
     const txPages = await havenClient.getTransactions({ address: 'ignored', asset: assetToString(xusdAsset) })
     return expect(txPages.txs[0].asset).toEqual(AssetXUSD)
   })
 
   it('should only get XHV transactions', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const xhvAsset = AssetXHV
     const txPages = await havenClient.getTransactions({ address: 'ignored', asset: assetToString(xhvAsset) })
     return expect(eqAsset(txPages.txs[0].asset, AssetXHV)).toBeTruthy()
   })
 
   it('should get transaction with hash', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     const txData = await havenClient.getTransactionData(
       '4d4f7a5c151a7bf927388adc9d146eb9662338f52561241c48ffa127cc80733f',
     )
@@ -214,7 +244,7 @@ xdescribe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should return valid explorer url', async () => {
-    let havenClient = await HavenClient.init({ network: Network.Mainnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Mainnet, phrase: bip39Mnemonic })
     expect(havenClient.getExplorerUrl()).toEqual('https://explorer.havenprotocol.org')
     havenClient.purgeClient()
     havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
@@ -222,7 +252,7 @@ xdescribe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should return valid explorer tx url', async () => {
-    let havenClient = await HavenClient.init({ network: Network.Mainnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Mainnet, phrase: bip39Mnemonic })
     expect(havenClient.getExplorerTxUrl('testTxHere')).toEqual('https://explorer.havenprotocol.org/tx/testTxHere')
     havenClient.purgeClient()
     havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
@@ -232,7 +262,7 @@ xdescribe('Haven xCHAIN Integration Test', () => {
   })
 
   it('should throw an error for getExplorerAddressUrl', async () => {
-    const havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
+    havenClient = await HavenClient.init({ network: Network.Testnet, phrase: bip39Mnemonic })
     expect(() => havenClient.getExplorerAddressUrl(havenAddress)).toThrow()
   })
 })
