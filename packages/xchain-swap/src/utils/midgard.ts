@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Configuration, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
-import { BaseAmount, Chain } from '@xchainjs/xchain-util'
+import { BaseAmount, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import BigNumber from 'bignumber.js'
@@ -133,7 +133,8 @@ export class Midgard {
     for (const baseUrl of this.config.midgardBaseUrls) {
       try {
         const { data } = await axios.get(`${baseUrl}${path}`)
-        return data['scheduled_outbound_value']
+        const value = baseAmount(data['scheduled_outbound_value'])
+        return value
       } catch (e) {
         console.error(e)
       }

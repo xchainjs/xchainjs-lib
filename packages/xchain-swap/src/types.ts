@@ -35,6 +35,18 @@ export type EstimateSwapParams = {
   slipLimit?: BigNumber
 }
 
+export type ExecuiteSwap = {
+  fromBaseAmount: BaseAmount
+  from: Asset
+  to: Asset
+  memo: string
+}
+export type SwapSubmitted = {
+  hash: string
+  url: string
+  //waittime: number
+}
+
 export type DepositParams = {
   walletIndex?: number // send from this HD index
   asset: Asset

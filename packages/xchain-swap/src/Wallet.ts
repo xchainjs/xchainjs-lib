@@ -10,23 +10,13 @@ import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard/src/generated/midgardApi'
 import { Client as TerraClient } from '@xchainjs/xchain-terra'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
-import { Asset, AssetETH, AssetRuneNative, BaseAmount, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { AssetETH, AssetRuneNative, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import routerABI from './abi/routerABI.json'
-import { DepositParams } from './types'
+import { DepositParams, ExecuiteSwap, SwapSubmitted } from './types'
 import { Midgard } from './utils/midgard'
 
-export type Swap = {
-  fromBaseAmount: BaseAmount
-  from: Asset
-  to: Asset
-  limit: BaseAmount | undefined
-}
-export type SwapSubmitted = {
-  hash: string
-  url: string
-}
 type AllBalances = {
   chain: Chain
   address: string
@@ -79,7 +69,14 @@ export class Wallet {
     )
     return allBalances
   }
-  async swap(swap: Swap): Promise<SwapSubmitted> {
+  /**
+   * Execuites a Swap from THORChainAMM.doSwap()
+   *
+   * @param swap object with all the required details for a swap.
+   * @returns transaction details and explorer url
+   * @see ThorchainAMM.doSwap()
+   */
+  async execuiteSwap(swap: ExecuiteSwap): Promise<SwapSubmitted> {
     if (swap.from.chain === Chain.THORChain) {
       return await this.swapRuneTo(swap)
     } else {
@@ -87,26 +84,20 @@ export class Wallet {
     }
   }
 
-  private async swapRuneTo(swap: Swap): Promise<SwapSubmitted> {
+  private async swapRuneTo(swap: ExecuiteSwap): Promise<SwapSubmitted> {
     const thorClient = (this.clients.THOR as unknown) as ThorchainClient
-    let memo = `=:${assetToString(swap.to)}:${await this.clients[swap.to.chain].getAddress()}`
-    if (swap.limit) {
-      memo = memo + `:${swap.limit.amount().toFixed()}`
-    }
+
     const hash = await thorClient.deposit({
       amount: swap.fromBaseAmount,
       asset: AssetRuneNative,
-      memo,
+      memo: swap.memo,
     })
 
     return { hash, url: this.clients.THOR.getExplorerTxUrl(hash) }
   }
-  private async swapNonRune(swap: Swap): Promise<SwapSubmitted> {
+  private async swapNonRune(swap: ExecuiteSwap): Promise<SwapSubmitted> {
     const client = this.clients[swap.from.chain]
-    let memo = `=:${assetToString(swap.to)}:${await this.clients[swap.to.chain].getAddress()}`
-    if (swap.limit) {
-      memo = memo + `:${swap.limit.amount().toFixed()}`
-    }
+
     const inboundAsgard = this.asgardAssets.find((item: InboundAddressesItem) => {
       return item.chain === swap.from.chain
     })
@@ -119,7 +110,7 @@ export class Wallet {
       asset: swap.from,
       amount: swap.fromBaseAmount,
       recipient: inboundAsgard?.address || '',
-      memo: memo,
+      memo: swap.memo,
     }
 
     // console.log(JSON.stringify(params, null, 2))

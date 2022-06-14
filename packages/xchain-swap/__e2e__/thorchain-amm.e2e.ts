@@ -29,6 +29,7 @@ function print(estimate: SwapEstimate) {
     },
     slipPercentage: estimate.slipPercentage.toFixed(),
     netOutput: estimate.netOutput.amount().toFixed(),
+    waitTime: estimate.waitTime.toFixed(),
     canSwap: estimate.canSwap,
     errors: estimate.errors,
   }
@@ -72,6 +73,7 @@ describe('xchain-swap Integration Tests', () => {
     }
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate).toBeTruthy()
+    expect(estimate.waitTime === 600)
     print(estimate)
   })
 
