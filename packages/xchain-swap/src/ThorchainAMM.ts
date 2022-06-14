@@ -35,7 +35,6 @@ import { LiquidityPool } from './LiquidityPool'
 import { Wallet } from './Wallet'
 import {
   EstimateSwapParams,
-  ExecuiteSwap,
   InboundDetail,
   PoolCache,
   SwapEstimate,
@@ -176,7 +175,7 @@ export class ThorchainAMM {
 
    * @returns The SwapEstimate
    */
-  async estimateSwap(params: EstimateSwapParams): Promise<SwapEstimate> {
+  public async estimateSwap(params: EstimateSwapParams): Promise<SwapEstimate> {
     //first make sure the swap has no input errors
     this.isValidSwap(params)
 
@@ -239,10 +238,6 @@ export class ThorchainAMM {
     }
     return swapEstimate
   }
-  // async getSwapEstimateInUSD(){
-
-  //   const pools = await this.getPools()
-  // }
   /**
    * Conducts a swap with the given inputs
    *
@@ -251,7 +246,7 @@ export class ThorchainAMM {
    * @param destinationAddress
    * @param affiliateAddress
    * @param interfaceID
-   * @returns
+   * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
   public async doSwap(
     wallet: Wallet,
@@ -271,15 +266,12 @@ export class ThorchainAMM {
       memo = `:${params.destinationAsset.chain.toString}.${params.destinationAsset.symbol}:${destinationAddress}`
     }
 
-    const swap: ExecuiteSwap = {
+    return wallet.execuiteSwap({
       fromBaseAmount: params.inputAmount,
       from: params.sourceAsset,
       to: params.destinationAsset,
       memo: memo,
-    }
-
-    const swapSubmitted = wallet.execuiteSwap(swap)
-    return swapSubmitted
+    })
   }
 
   /**
@@ -290,9 +282,9 @@ export class ThorchainAMM {
    * @param asset asset being sent.
    * @param outBoundAmount the amount of that asset
    * @returns required delay in seconds
+   * @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/manager_txout_current.go#L548
    */
-
-  public async outboundDelay(liquidtyPool: LiquidityPool, asset: Asset, outboundAmount: BaseAmount): Promise<number> {
+  private async outboundDelay(liquidtyPool: LiquidityPool, asset: Asset, outboundAmount: BaseAmount): Promise<number> {
     //Get the Mimir values
     // want to do something like this in THORChainAMM Class
 
@@ -301,20 +293,26 @@ export class ThorchainAMM {
     //this.midgard.getConstantValueByName(string)
     //this.midgard.getMimirValueByName(string)
 
-    const minTxOutVolumeThreshold = new BigNumber(1000) // RUNE
+    const minTxOutVolumeThreshold = 1000 // RUNE per Block
     const maxTxOutOffset = 720 //max blocks an outbound can be delayed
-    let txOutDelayRate: BigNumber = new BigNumber(100) // current delay rate
+    let txOutDelayRate = 100 // current delay rate
     const thorChainblocktime = 6
 
-    let runeValue
+    let runeValue: BaseAmount
     if (eqAsset(AssetRuneNative, asset)) {
+      // Asset is RUNE, no need to convert to RUNE
       runeValue = outboundAmount
     } else {
+      console.log(`BTC Output is ${baseToAsset(outboundAmount).amount().toFixed()}`)
       runeValue = liquidtyPool.getValueInRUNE(asset, outboundAmount)
     }
-    console.log(`outboundDelay: Rune Value is ${baseToAsset(runeValue).amount().toFixed()}`)
 
-    if (runeValue.lt(minTxOutVolumeThreshold)) {
+    console.log(
+      `outboundDelay: Is Rune Value: ${baseToAsset(runeValue)
+        .amount()
+        .toNumber()} is less than minTxOutVolumeThreshold: ${minTxOutVolumeThreshold}`,
+    )
+    if (baseToAsset(runeValue).amount().toNumber() < minTxOutVolumeThreshold) {
       return thorChainblocktime
     }
 
@@ -340,8 +338,12 @@ export class ThorchainAMM {
     const a = sumValue.amount().dividedBy(minTxOutVolumeThreshold)
     console.log(`outboundDelay: a is ${a.toFixed()}`)
     console.log(`outboundDelay: txOutDelayRate is ${txOutDelayRate.toFixed()}`)
-    txOutDelayRate = txOutDelayRate.minus(a)
 
+    txOutDelayRate = txOutDelayRate - a.toNumber()
+    if (txOutDelayRate < 1) {
+      txOutDelayRate = 1
+    }
+    console.log(`outboundDelay: txOutDelayRate is ${txOutDelayRate.toFixed()} post sums`)
     // calculate the minimum number of blocks in the future the txn has to be
     let minBlocks = runeValue.div(txOutDelayRate).amount()
 
@@ -351,7 +353,7 @@ export class ThorchainAMM {
     } else {
       minBlocks = minBlocks.times(new BigNumber(thorChainblocktime))
     }
-    return 1 * thorChainblocktime
+    return minBlocks.toNumber() * thorChainblocktime
   }
 
   /**
@@ -364,7 +366,7 @@ export class ThorchainAMM {
    * @param amount - the amount of asset (any asset).
    * @returns time in seconds before a Tx is confirmed by THORChain
    */
-  async confCounting(asset: Asset, amount: BaseAmount): Promise<number> {
+  private async confCounting(asset: Asset, amount: BaseAmount): Promise<number> {
     let amountInGasAsset: BaseAmount
     // If it is Native RUNE
     if (eqAsset(AssetRuneNative, asset)) {
@@ -489,7 +491,7 @@ export class ThorchainAMM {
    * @param chain
    * @returns the gas asset type for the given chain
    */
-  getChainAsset = (chain: Chain): Asset => {
+  protected getChainAsset = (chain: Chain): Asset => {
     switch (chain) {
       case BNBChain:
         return AssetBNB
@@ -512,7 +514,7 @@ export class ThorchainAMM {
       case PolkadotChain:
         throw Error('Polkadot is not supported yet')
       default:
-        throw Error('Unknown chains')
+        throw Error('Unknown chain')
     }
   }
 }

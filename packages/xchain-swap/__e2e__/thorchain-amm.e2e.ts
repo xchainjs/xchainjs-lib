@@ -197,4 +197,15 @@ describe('xchain-swap Integration Tests', () => {
       expect(error.message).toEqual(`Input amount ${swapParams.inputAmount} is less that total swap fees`)
     }
   })
+  it(`Should estimate calc wait time of a very large swap swap of 100,000 RUNE To BTC `, async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetRuneNative,
+      destinationAsset: AssetBTC,
+      inputAmount: assetToBase(assetAmount(100000)),
+    }
+    const estimate = await thorchainAmm.estimateSwap(swapParams)
+    expect(estimate).toBeTruthy()
+    expect(estimate.waitTime > 600)
+    print(estimate)
+  })
 })
