@@ -5,7 +5,6 @@ import {
   AssetAmount,
   AssetBCH,
   AssetBNB,
-  // assetFromString,
   AssetBTC,
   AssetDOGE,
   AssetETH,
@@ -69,6 +68,18 @@ export class ThorchainAMM {
       throw Error(`affiliateFee must be between 0 and 1000`)
   }
 
+  /**
+   * Looks for errors or issues within swap prams before doing the swap.
+   *
+   *
+   * @param params
+   * @param estimate
+   * @param sourcePool
+   * @param sourceInboundDetails
+   * @param destinationPool
+   * @param destinationInboundDetails
+   * @returns
+   */
   private getSwapEstimateErrors(
     params: EstimateSwapParams,
     estimate: SwapEstimate,
@@ -93,10 +104,7 @@ export class ThorchainAMM {
       errors.push(
         `expected slip: ${estimate.slipPercentage.toFixed()} is greater than your slip limit:${params.slipLimit?.toFixed()} `,
       )
-    // TODO implement the following
-    //  If valueofRUNE(inbound fee + outbound fee) > valueOfRUNE(inboundAsset)
-    //   return "insufficent inbound asset amount "
-
+    // Sees if the inputAmount value is enough to cover all the fees.
     if (sourcePool?.isAvailable() && destinationPool?.isAvailable()) {
       const inboundFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.inboundFee)
       const outboundFeeInRune = destinationPool.getValueInRUNE(params.destinationAsset, estimate.totalFees.outboundFee)
@@ -104,7 +112,7 @@ export class ThorchainAMM {
       const affiliateFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.affiliateFee)
       const totalSwapFeesInRune = inboundFeeInRune.plus(outboundFeeInRune).plus(swapFeeInRune).plus(affiliateFeeInRune)
       if (totalSwapFeesInRune >= params.inputAmount)
-        errors.push(`Input amount ${params.inputAmount} is less than or equal too total swap fees`)
+        errors.push(`Input amount ${params.inputAmount} is less than or equal to total swap fees`)
     }
     return errors
   }
@@ -148,7 +156,7 @@ export class ThorchainAMM {
       totalFees: totalFees,
       slipPercentage: swapOutput.slip,
       netOutput: netOutput,
-      waitTime: 0,
+      waitTime: 0, // will be set within EstimateSwap if canSwap = true
       canSwap: false, //assume false for now, the getSwapEstimateErrors() step will flip this flag if required
     }
     return swapEstimate
@@ -170,6 +178,8 @@ export class ThorchainAMM {
     throw Error('cannot calcSwapOutput')
   }
   /**
+   * Provides a swap estimate for the given swap detail. Will check the params for errors before trying to get the estimate.
+   * Uses current pool data, works out inbound and outboud fee, affiliate fees and works out the expected wait time for the swap (in and out)
    *
    * @param params - amount to swap
 
@@ -229,11 +239,11 @@ export class ThorchainAMM {
           waitTime = outboundDelay
         }
         // Add the Tx in Time
-        const inboundDelay = await this.confCounting(params.sourceAsset, params.inputAmount)
-        if (!inboundDelay) {
-          throw Error(`Could not get conf count for ${params.sourceAsset}`)
-        }
-        swapEstimate.waitTime = waitTime + inboundDelay
+        // const inboundDelay = await this.confCounting(params.sourceAsset, params.inputAmount)
+        // if (!inboundDelay) {
+        //   throw Error(`Could not get conf count for ${params.sourceAsset}`)
+        // }
+        swapEstimate.waitTime = waitTime
       }
     }
     return swapEstimate
@@ -255,8 +265,11 @@ export class ThorchainAMM {
     affiliateAddress: string,
     interfaceID = 999,
   ): Promise<SwapSubmitted> {
+    //first make sure the swap has no input errors
+    this.isValidSwap(params)
     const swapEstimate = await this.estimateSwap(params) // only called to work out swapEstimate.totalFees.affiliateFee
 
+    // Work out LIM from the slip percentage
     const limPercentage = BN_1.minus(params.slipLimit || 1)
     const lim = `${limPercentage.toFixed(6)}${interfaceID.toFixed(3)}`
     let memo = `:${params.destinationAsset.chain.toString}.${params.destinationAsset.symbol}:${destinationAddress}:${lim}:${affiliateAddress}:${swapEstimate.totalFees.affiliateFee}`
@@ -299,26 +312,24 @@ export class ThorchainAMM {
     const thorChainblocktime = 6
 
     let runeValue: BaseAmount
+    console.log(`BTC Output is: ${baseToAsset(outboundAmount).amount().toFixed()}`)
     if (eqAsset(AssetRuneNative, asset)) {
       // Asset is RUNE, no need to convert to RUNE
       runeValue = outboundAmount
     } else {
-      console.log(`BTC Output is ${baseToAsset(outboundAmount).amount().toFixed()}`)
       runeValue = liquidtyPool.getValueInRUNE(asset, outboundAmount)
     }
 
     console.log(
       `outboundDelay: Is Rune Value: ${baseToAsset(runeValue)
         .amount()
-        .toNumber()} is less than minTxOutVolumeThreshold: ${minTxOutVolumeThreshold}`,
+        .toNumber()} is less than minTxOutVolumeThreshold: ${minTxOutVolumeThreshold} ?`,
     )
     if (baseToAsset(runeValue).amount().toNumber() < minTxOutVolumeThreshold) {
       return thorChainblocktime
     }
-
     //https://midgard.thorswap.net/v2/thorchain/queue) "scheduled_outbound_value" // Rune value in the outbound queue
     const getScheduledOutboundValue = await this.midgard.getScheduledOutboundValue()
-    console.log(`outboundDelay: getScheduledOutboundValue is  ${getScheduledOutboundValue.amount().toFixed()}`)
     if (getScheduledOutboundValue.amount().toNumber() < 0 || undefined) {
       throw new Error(
         `Could not get getScheduledOutboundValue. Value is:  ${getScheduledOutboundValue.amount.toString()}`,
@@ -337,23 +348,20 @@ export class ThorchainAMM {
     console.log(`outboundDelay: sumValue is ${sumValue.amount().toFixed()}`)
     const a = sumValue.amount().dividedBy(minTxOutVolumeThreshold)
     console.log(`outboundDelay: a is ${a.toFixed()}`)
-    console.log(`outboundDelay: txOutDelayRate is ${txOutDelayRate.toFixed()}`)
-
     txOutDelayRate = txOutDelayRate - a.toNumber()
+    console.log(`outboundDelay: txOutDelayRate is ${txOutDelayRate.toFixed()}`)
     if (txOutDelayRate < 1) {
       txOutDelayRate = 1
     }
-    console.log(`outboundDelay: txOutDelayRate is ${txOutDelayRate.toFixed()} post sums`)
     // calculate the minimum number of blocks in the future the txn has to be
-    let minBlocks = runeValue.div(txOutDelayRate).amount()
+    let minBlocks = baseToAsset(runeValue).div(txOutDelayRate).amount().toNumber()
 
     console.log(`outboundDelay: minBlocks is ${minBlocks}`)
-    if (minBlocks.isGreaterThan(maxTxOutOffset)) {
-      minBlocks = new BigNumber(maxTxOutOffset)
-    } else {
-      minBlocks = minBlocks.times(new BigNumber(thorChainblocktime))
+    // if min block is bigger than max blocks it can be delayed
+    if (minBlocks > maxTxOutOffset) {
+      minBlocks = maxTxOutOffset
     }
-    return minBlocks.toNumber() * thorChainblocktime
+    return minBlocks * thorChainblocktime
   }
 
   /**
@@ -387,7 +395,7 @@ export class ThorchainAMM {
       const chainGasAsset = this.getChainAsset(asset.chain)
       //console.log(`confCounting: Chain asset ${asset.chain.toString()} for asset is ${chainGasAsset.ticker}`)
       if (eqAsset(chainGasAsset, asset)) {
-        // asset is alreay the chain asset
+        // asset is already the chain asset
         amountInGasAsset = amount
       } else {
         const gasChainPool = await this.getPoolForAsset(chainGasAsset)
@@ -410,10 +418,9 @@ export class ThorchainAMM {
 
     // requiredConfs = ceil (inputAmount in Asset / BlockReward for the chain)
 
-    // console.log(`confCounting: Amount in amountInGasAsset is: ${baseToAsset(amountInGasAsset).amount().toFixed()}`)
-    const amountInGasAssetasBN = new BigNumber(baseToAsset(amountInGasAsset).amount())
-    const requiredConfs = Math.ceil(amountInGasAssetasBN.div(btcBlockReward).toNumber())
-    // console.log(`confCounting: requiredConfs are: ${requiredConfs}`)
+    const amountInGasAssetInAsset: AssetAmount = baseToAsset(amountInGasAsset)
+    const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(btcBlockReward).toNumber())
+    console.log(`confCounting: requiredConfs are: ${requiredConfs}`)
     // returns (requiredConfs * chainBlockTime)
     return requiredConfs * btcBlockTime
   }
