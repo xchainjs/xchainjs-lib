@@ -62,7 +62,7 @@ const assertTxHashGet = (url: string, hash: string, result: GetTxByHashResponse)
 describe('SDK Client Test', () => {
   const cosmosMainnetClient: CosmosSDKClient = new CosmosSDKClient({
     server: 'https://api.cosmos.network',
-    chainId: 'cosmoshub-3',
+    chainId: 'cosmoshub-4',
     prefix: 'cosmos',
   })
   const cosmosTestnetClient: CosmosSDKClient = new CosmosSDKClient({

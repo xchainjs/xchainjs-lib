@@ -1,3 +1,9 @@
+# v.0.17.1 (2022-06-15)
+
+## Update
+
+- server url of cosmosSDKClient can be set on client instantiation
+
 # v.0.17.0 (2022-03-23)
 
 ## Update
