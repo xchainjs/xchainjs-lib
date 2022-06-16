@@ -1,12 +1,12 @@
-import { Balance, FeeType, Fees, Network, Tx, TxType } from '@xchainjs/xchain-client'
+import { FeeType, Fees } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetETH,
   BaseAmount,
-  Chain,
-  assetAmount,
-  assetFromString,
-  assetToBase,
+  // Chain,
+  // assetAmount,
+  // assetFromString,
+  // assetToBase,
   assetToString,
   baseAmount,
   eqAsset,
@@ -17,14 +17,14 @@ import { parseUnits } from 'ethers/lib/utils'
 import erc20ABI from './data/erc20.json'
 import {
   Address,
-  ETHTransactionInfo,
-  EthNetwork,
+  // ETHTransactionInfo,
+  // EthNetwork,
   FeesWithGasPricesAndLimits,
   GasPrices,
-  TokenBalance,
-  TokenTransactionInfo,
-  TransactionInfo,
-  TransactionOperation,
+  // TokenBalance,
+  // TokenTransactionInfo,
+  // TransactionInfo,
+  // TransactionOperation,
 } from './types'
 
 export const ETH_DECIMAL = 18
@@ -41,36 +41,36 @@ export const DEFAULT_GAS_PRICE = 50
 export const ETHAddress = '0x0000000000000000000000000000000000000000'
 export const MAX_APPROVAL: ethers.BigNumber = ethers.BigNumber.from(2).pow(256).sub(1)
 
-/**
- * Network -> EthNetwork
- *
- * @param {Network} network
- * @returns {EthNetwork}
- */
-export const xchainNetworkToEths = (network: Network): EthNetwork => {
-  switch (network) {
-    case Network.Mainnet:
-    case Network.Stagenet:
-      return EthNetwork.Main
-    case Network.Testnet:
-      return EthNetwork.Test
-  }
-}
+// /**
+//  * Network -> EthNetwork
+//  *
+//  * @param {Network} network
+//  * @returns {EthNetwork}
+//  */
+// export const xchainNetworkToEths = (network: Network): EthNetwork => {
+//   switch (network) {
+//     case Network.Mainnet:
+//     case Network.Stagenet:
+//       return EthNetwork.Main
+//     case Network.Testnet:
+//       return EthNetwork.Test
+//   }
+// }
 
-/**
- * EthNetwork -> Network
- *
- * @param {EthNetwork} network
- * @returns {Network}
- */
-export const ethNetworkToXchains = (network: EthNetwork): Network => {
-  switch (network) {
-    case EthNetwork.Main:
-      return Network.Mainnet
-    case EthNetwork.Test:
-      return Network.Testnet
-  }
-}
+// /**
+//  * EthNetwork -> Network
+//  *
+//  * @param {EthNetwork} network
+//  * @returns {Network}
+//  */
+// export const ethNetworkToXchains = (network: EthNetwork): Network => {
+//   switch (network) {
+//     case EthNetwork.Main:
+//       return Network.Mainnet
+//     case EthNetwork.Test:
+//       return Network.Testnet
+//   }
+// }
 
 /**
  * Validate the given address.
@@ -130,132 +130,132 @@ export const getAssetAddress = (asset: Asset): Address | null => {
  */
 export const validateSymbol = (symbol?: string | null): boolean => (symbol ? symbol.length >= 3 : false)
 
-/**
- * Get transactions from token tx
- *
- * @param {TokenTransactionInfo} tx
- * @returns {Tx|null} The parsed transaction.
- */
-export const getTxFromTokenTransaction = (tx: TokenTransactionInfo): Tx | null => {
-  const decimals = parseInt(tx.tokenDecimal) || ETH_DECIMAL
-  const symbol = tx.tokenSymbol
-  const address = tx.contractAddress
-  if (validateSymbol(symbol) && validateAddress(address)) {
-    const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${address}`)
-    if (tokenAsset) {
-      return {
-        asset: tokenAsset,
-        from: [
-          {
-            from: tx.from,
-            amount: baseAmount(tx.value, decimals),
-          },
-        ],
-        to: [
-          {
-            to: tx.to,
-            amount: baseAmount(tx.value, decimals),
-          },
-        ],
-        date: new Date(parseInt(tx.timeStamp) * 1000),
-        type: TxType.Transfer,
-        hash: tx.hash,
-      }
-    }
-  }
+// /**
+//  * Get transactions from token tx
+//  *
+//  * @param {TokenTransactionInfo} tx
+//  * @returns {Tx|null} The parsed transaction.
+//  */
+// export const getTxFromTokenTransaction = (tx: TokenTransactionInfo): Tx | null => {
+//   const decimals = parseInt(tx.tokenDecimal) || ETH_DECIMAL
+//   const symbol = tx.tokenSymbol
+//   const address = tx.contractAddress
+//   if (validateSymbol(symbol) && validateAddress(address)) {
+//     const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${address}`)
+//     if (tokenAsset) {
+//       return {
+//         asset: tokenAsset,
+//         from: [
+//           {
+//             from: tx.from,
+//             amount: baseAmount(tx.value, decimals),
+//           },
+//         ],
+//         to: [
+//           {
+//             to: tx.to,
+//             amount: baseAmount(tx.value, decimals),
+//           },
+//         ],
+//         date: new Date(parseInt(tx.timeStamp) * 1000),
+//         type: TxType.Transfer,
+//         hash: tx.hash,
+//       }
+//     }
+//   }
 
-  return null
-}
+//   return null
+// }
 
-/**
- * Get transactions from ETH transaction
- *
- * @param {ETHTransactionInfo} tx
- * @returns {Tx} The parsed transaction.
- */
-export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
-  return {
-    asset: AssetETH,
-    from: [
-      {
-        from: tx.from,
-        amount: baseAmount(tx.value, ETH_DECIMAL),
-      },
-    ],
-    to: [
-      {
-        to: tx.to,
-        amount: baseAmount(tx.value, ETH_DECIMAL),
-      },
-    ],
-    date: new Date(parseInt(tx.timeStamp) * 1000),
-    type: TxType.Transfer,
-    hash: tx.hash,
-  }
-}
+// /**
+//  * Get transactions from ETH transaction
+//  *
+//  * @param {ETHTransactionInfo} tx
+//  * @returns {Tx} The parsed transaction.
+//  */
+// export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
+//   return {
+//     asset: AssetETH,
+//     from: [
+//       {
+//         from: tx.from,
+//         amount: baseAmount(tx.value, ETH_DECIMAL),
+//       },
+//     ],
+//     to: [
+//       {
+//         to: tx.to,
+//         amount: baseAmount(tx.value, ETH_DECIMAL),
+//       },
+//     ],
+//     date: new Date(parseInt(tx.timeStamp) * 1000),
+//     type: TxType.Transfer,
+//     hash: tx.hash,
+//   }
+// }
 
-/**
- * Get transactions from operation
- *
- * @param {TransactionOperation} operation
- * @returns {Tx|null} The parsed transaction.
- */
-export const getTxFromEthplorerTokenOperation = (operation: TransactionOperation): Tx | null => {
-  const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
-  const { symbol, address } = operation.tokenInfo
-  if (validateSymbol(symbol) && validateAddress(address)) {
-    const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${address}`)
-    if (tokenAsset) {
-      return {
-        asset: tokenAsset,
-        from: [
-          {
-            from: operation.from,
-            amount: baseAmount(operation.value, decimals),
-          },
-        ],
-        to: [
-          {
-            to: operation.to,
-            amount: baseAmount(operation.value, decimals),
-          },
-        ],
-        date: new Date(operation.timestamp * 1000),
-        type: operation.type === 'transfer' ? TxType.Transfer : TxType.Unknown,
-        hash: operation.transactionHash,
-      }
-    }
-  }
+// /**
+//  * Get transactions from operation
+//  *
+//  * @param {TransactionOperation} operation
+//  * @returns {Tx|null} The parsed transaction.
+//  */
+// export const getTxFromEthplorerTokenOperation = (operation: TransactionOperation): Tx | null => {
+//   const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
+//   const { symbol, address } = operation.tokenInfo
+//   if (validateSymbol(symbol) && validateAddress(address)) {
+//     const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${address}`)
+//     if (tokenAsset) {
+//       return {
+//         asset: tokenAsset,
+//         from: [
+//           {
+//             from: operation.from,
+//             amount: baseAmount(operation.value, decimals),
+//           },
+//         ],
+//         to: [
+//           {
+//             to: operation.to,
+//             amount: baseAmount(operation.value, decimals),
+//           },
+//         ],
+//         date: new Date(operation.timestamp * 1000),
+//         type: operation.type === 'transfer' ? TxType.Transfer : TxType.Unknown,
+//         hash: operation.transactionHash,
+//       }
+//     }
+//   }
 
-  return null
-}
+//   return null
+// }
 
-/**
- * Get transactions from ETH transaction
- *
- * @param {TransactionInfo} txInfo
- * @returns {Tx} The parsed transaction.
- */
-export const getTxFromEthplorerEthTransaction = (txInfo: TransactionInfo): Tx => {
-  return {
-    asset: AssetETH,
-    from: [
-      {
-        from: txInfo.from,
-        amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
-      },
-    ],
-    to: [
-      {
-        to: txInfo.to,
-        amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
-      },
-    ],
-    date: new Date(txInfo.timestamp * 1000),
-    type: TxType.Transfer,
-    hash: txInfo.hash,
-  }
-}
+// /**
+//  * Get transactions from ETH transaction
+//  *
+//  * @param {TransactionInfo} txInfo
+//  * @returns {Tx} The parsed transaction.
+//  */
+// export const getTxFromEthplorerEthTransaction = (txInfo: TransactionInfo): Tx => {
+//   return {
+//     asset: AssetETH,
+//     from: [
+//       {
+//         from: txInfo.from,
+//         amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
+//       },
+//     ],
+//     to: [
+//       {
+//         to: txInfo.to,
+//         amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
+//       },
+//     ],
+//     date: new Date(txInfo.timestamp * 1000),
+//     type: TxType.Transfer,
+//     hash: txInfo.hash,
+//   }
+// }
 
 /**
  * Calculate fees by multiplying .
@@ -501,33 +501,33 @@ export const isApproved = async ({
   return txAmount.lte(allowance)
 }
 
-/**
- * Get Token Balances
- *
- * @param {TokenBalance[]} tokenBalances
- * @returns {Balance[]} the parsed balances
- *
- */
-export const getTokenBalances = (tokenBalances: TokenBalance[]): Balance[] => {
-  return tokenBalances.reduce((acc, cur) => {
-    const { symbol, address: tokenAddress } = cur.tokenInfo
-    if (validateSymbol(symbol) && validateAddress(tokenAddress) && cur?.tokenInfo?.decimals !== undefined) {
-      const decimals = parseInt(cur.tokenInfo.decimals, 10)
-      const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${ethers.utils.getAddress(tokenAddress)}`)
-      if (tokenAsset) {
-        return [
-          ...acc,
-          {
-            asset: tokenAsset,
-            amount: baseAmount(cur.balance, decimals),
-          },
-        ]
-      }
-    }
+// /**
+//  * Get Token Balances
+//  *
+//  * @param {TokenBalance[]} tokenBalances
+//  * @returns {Balance[]} the parsed balances
+//  *
+//  */
+// export const getTokenBalances = (tokenBalances: TokenBalance[]): Balance[] => {
+//   return tokenBalances.reduce((acc, cur) => {
+//     const { symbol, address: tokenAddress } = cur.tokenInfo
+//     if (validateSymbol(symbol) && validateAddress(tokenAddress) && cur?.tokenInfo?.decimals !== undefined) {
+//       const decimals = parseInt(cur.tokenInfo.decimals, 10)
+//       const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${ethers.utils.getAddress(tokenAddress)}`)
+//       if (tokenAsset) {
+//         return [
+//           ...acc,
+//           {
+//             asset: tokenAsset,
+//             amount: baseAmount(cur.balance, decimals),
+//           },
+//         ]
+//       }
+//     }
 
-    return acc
-  }, [] as Balance[])
-}
+//     return acc
+//   }, [] as Balance[])
+// }
 
 /**
  * Removes `0x` or `0X` from address

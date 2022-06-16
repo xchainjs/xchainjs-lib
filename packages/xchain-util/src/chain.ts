@@ -1,4 +1,5 @@
 export enum Chain {
+  Avalanche = 'AVAX',
   Binance = 'BNB',
   Bitcoin = 'BTC',
   Ethereum = 'ETH',
@@ -11,7 +12,7 @@ export enum Chain {
   Doge = 'DOGE',
   Avax = 'AVAX',
 }
-
+export const AvalancheChain = Chain.Avalanche
 export const BNBChain = Chain.Binance
 export const BTCChain = Chain.Bitcoin
 export const ETHChain = Chain.Ethereum
@@ -44,6 +45,7 @@ export const chainToString: ((chainId: Chain) => string) & Record<Chain, string>
     return chainToString[chainId]
   },
   {
+    [Chain.Avalanche]: 'Avalanche',
     [Chain.THORChain]: 'Thorchain',
     [Chain.Bitcoin]: 'Bitcoin',
     [Chain.BitcoinCash]: 'Bitcoin Cash',

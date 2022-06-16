@@ -4,19 +4,19 @@ import { AssetETH, Chain, ETHChain, assetFromString, assetToString, baseAmount }
 import { BigNumber, Wallet, providers } from 'ethers'
 import nock from 'nock'
 
-import { mock_all_api } from '../__mocks__'
-import {
-  mock_etherscan_eth_txs_api,
-  mock_etherscan_token_txs_api,
-  mock_gastracker_api,
-} from '../__mocks__/etherscan-api'
-import {
-  mock_thornode_inbound_addresses_fail,
-  mock_thornode_inbound_addresses_success,
-} from '../__mocks__/thornode-api'
-import Client from '../src/client'
-import erc20ABI from '../src/data/erc20.json'
-import { ETH_DECIMAL } from '../src/utils'
+// import { mock_all_api } from '../__mocks__'
+// import {
+//   mock_etherscan_eth_txs_api,
+//   mock_etherscan_token_txs_api,
+//   mock_gastracker_api,
+// } from '../__mocks__/etherscan-api'
+// import {
+//   mock_thornode_inbound_addresses_fail,
+//   mock_thornode_inbound_addresses_success,
+// } from '../__mocks__/thornode-api'
+import Client from '../../src/client'
+// import erc20ABI from '../src/data/erc20.json'
+// import { ETH_DECIMAL } from '../src/utils'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
@@ -26,39 +26,65 @@ const ropstenInfuraUrl = 'https://ropsten.infura.io/v3'
 const ropstenAlchemyUrl = 'https://eth-ropsten.alchemyapi.io/v2'
 const thornodeApiUrl = 'https://testnet.thornode.thorchain.info'
 
-const wallet = {
-  signingKey: {
-    curve: 'secp256k1',
-    privateKey: '0x739172c3520ea86ad6238b4f303cc09da6ca7254c76af1a1e8fa3fb00eb5c16f',
-    publicKey:
-      '0x04ef84375983ef666afdf0e430929574510aa56fb5ee0ee8c02a73f2d2c12ff8f7eee6cdaf9ab6d14fdeebc7ff3d7890f5f98376dac0e5d816dca347bc71d2aec8',
-    compressedPublicKey: '0x02ef84375983ef666afdf0e430929574510aa56fb5ee0ee8c02a73f2d2c12ff8f7',
-    _isSigningKey: true,
+// const wallet = {
+//   signingKey: {
+//     curve: 'secp256k1',
+//     privateKey: '0x739172c3520ea86ad6238b4f303cc09da6ca7254c76af1a1e8fa3fb00eb5c16f',
+//     publicKey:
+//       '0x04ef84375983ef666afdf0e430929574510aa56fb5ee0ee8c02a73f2d2c12ff8f7eee6cdaf9ab6d14fdeebc7ff3d7890f5f98376dac0e5d816dca347bc71d2aec8',
+//     compressedPublicKey: '0x02ef84375983ef666afdf0e430929574510aa56fb5ee0ee8c02a73f2d2c12ff8f7',
+//     _isSigningKey: true,
+//   },
+// }
+
+// const sampleBlock = {
+//   gasLimit: '0x7a1200',
+//   baseFeePerGas: '0x21be0',
+//   difficulty: '0x1e2bc010',
+//   extraData: '0xd883010a08846765746888676f312e31362e35856c696e7578',
+//   gasUsed: '0x79fbf9',
+//   hash: '0x989219f6686ee98fd459fad2de7b4233ad48903c4eb8ce39484a4205fc165fa5',
+//   logsBloom:
+//     '0x41208401000104020801001080010240961008004100022c4591421000020008000000800000000c8008080810010000048221028140c020424000400824000006000510401204000a000008005200200011425800140040000800b08000008000301001021804900000006008800b0440c0081240205314002400900201c04400808040000000000040000000000000120410812118008802008050040004000200800000020400d00000040010500008080040010511900804082603204000400880624040800040004000400604004008000000000010018910c0540061470030404811041000001040200284002842002002000000400001800e08808004',
+//   miner: '0x9ffed2297c7b81293413550db675073ab46980b2',
+//   mixHash: '0xa5d01de4503d87aeed68fda0a977846cbdb13fcbf9ae63d23b246aa6abd33d4c',
+//   nonce: '0xfc28d6e03af2d6cf',
+//   number: '0xa7cac8',
+//   parentHash: '0x5019f700259c66171da9ad0cdd2a856423802de934eb81bddb2f727115556d93',
+//   receiptsRoot: '0xcfedb0bf81ec15c2858f9cf5348da06ef0f312e341532a48918498b4f0e2a23d',
+//   sha3Uncles: '0xee98d83db96d242b1b523a9fd9818cb805edd014ed154660e3d575dbaf54292e',
+//   size: '0x1b8d1',
+//   stateRoot: '0x2e7cd7660bf740c99f83fd3bf31ad1b5c2631483032e4626a1577ac6e9eef43d',
+//   timestamp: '0x6138dbd2',
+//   totalDifficulty: '0x7b5aae13f0a664',
+// }
+
+const avaxParams = {
+  chain: Chain.Avalanche,
+  providers: {
+    [Network.Mainnet]: `m/44'/60'/0'/0/`,
+    [Network.Testnet]: `m/44'/60'/0'/0/`,
+    [Network.Stagenet]: `m/44'/60'/0'/0/`,
+  },
+  explorerProviders: {
+    [Network.Mainnet]: `m/44'/60'/0'/0/`,
+    [Network.Testnet]: `m/44'/60'/0'/0/`,
+    [Network.Stagenet]: `m/44'/60'/0'/0/`,
+  },
+  dataProviders: {
+    [Network.Mainnet]: `m/44'/60'/0'/0/`,
+    [Network.Testnet]: `m/44'/60'/0'/0/`,
+    [Network.Stagenet]: `m/44'/60'/0'/0/`,
+  },
+  network: Network.Testnet,
+  phrase: '',
+  feeBounds: {},
+  rootDerivationPaths: {
+    [Network.Mainnet]: `m/44'/60'/0'/0/`,
+    [Network.Testnet]: `m/44'/60'/0'/0/`,
+    [Network.Stagenet]: `m/44'/60'/0'/0/`,
   },
 }
-
-const sampleBlock = {
-  gasLimit: '0x7a1200',
-  baseFeePerGas: '0x21be0',
-  difficulty: '0x1e2bc010',
-  extraData: '0xd883010a08846765746888676f312e31362e35856c696e7578',
-  gasUsed: '0x79fbf9',
-  hash: '0x989219f6686ee98fd459fad2de7b4233ad48903c4eb8ce39484a4205fc165fa5',
-  logsBloom:
-    '0x41208401000104020801001080010240961008004100022c4591421000020008000000800000000c8008080810010000048221028140c020424000400824000006000510401204000a000008005200200011425800140040000800b08000008000301001021804900000006008800b0440c0081240205314002400900201c04400808040000000000040000000000000120410812118008802008050040004000200800000020400d00000040010500008080040010511900804082603204000400880624040800040004000400604004008000000000010018910c0540061470030404811041000001040200284002842002002000000400001800e08808004',
-  miner: '0x9ffed2297c7b81293413550db675073ab46980b2',
-  mixHash: '0xa5d01de4503d87aeed68fda0a977846cbdb13fcbf9ae63d23b246aa6abd33d4c',
-  nonce: '0xfc28d6e03af2d6cf',
-  number: '0xa7cac8',
-  parentHash: '0x5019f700259c66171da9ad0cdd2a856423802de934eb81bddb2f727115556d93',
-  receiptsRoot: '0xcfedb0bf81ec15c2858f9cf5348da06ef0f312e341532a48918498b4f0e2a23d',
-  sha3Uncles: '0xee98d83db96d242b1b523a9fd9818cb805edd014ed154660e3d575dbaf54292e',
-  size: '0x1b8d1',
-  stateRoot: '0x2e7cd7660bf740c99f83fd3bf31ad1b5c2631483032e4626a1577ac6e9eef43d',
-  timestamp: '0x6138dbd2',
-  totalDifficulty: '0x7b5aae13f0a664',
-}
-
 /**
  * Wallet Tests
  */

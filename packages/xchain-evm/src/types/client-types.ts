@@ -4,11 +4,6 @@ import { BigNumber, Signer, ethers } from 'ethers'
 
 export type Address = string
 
-export enum EthNetwork {
-  Test = 'ropsten',
-  Main = 'homestead',
-}
-
 export type ClientUrl = Record<Network, string>
 export type ExplorerUrl = Record<Network, string>
 
@@ -22,10 +17,6 @@ export type TxOverrides = {
   value?: ethers.BigNumberish
 }
 
-export type InfuraCreds = {
-  projectId: string
-  projectSecret?: string
-}
 
 export type GasPrices = Record<FeeOption, BaseAmount>
 
