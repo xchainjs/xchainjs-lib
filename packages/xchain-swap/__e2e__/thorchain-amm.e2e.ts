@@ -208,4 +208,47 @@ describe('xchain-swap Integration Tests', () => {
     expect(estimate.waitTime > 600)
     print(estimate)
   })
+  it(`Convert BTC to ETH `, async () => {
+    const inputAsset = AssetBTC
+    const outboundAsset = AssetETH
+    const inputAmount = assetAmount(0.5)
+
+    const outboundETHAmount = await thorchainAmm.assetToAsset(inputAsset, inputAmount, outboundAsset)
+    expect(outboundETHAmount).toBeTruthy()
+
+    expect(outboundETHAmount.gt(5))
+    console.log(`0.5 BTC to ETH is: ${outboundETHAmount.amount().toFixed()} ETH`)
+  })
+  it(`Convert BTC to RUNE `, async () => {
+    const inputAsset = AssetBTC
+    const outboundAsset = AssetRuneNative
+    const inputAmount = assetAmount(0.5)
+
+    const outboundETHAmount = await thorchainAmm.assetToAsset(inputAsset, inputAmount, outboundAsset)
+    expect(outboundETHAmount).toBeTruthy()
+
+    expect(outboundETHAmount.amount().toNumber() > 1000) // this does not work!
+    console.log(`0.5 BTC to RUNE is: ${outboundETHAmount.amount().toFixed()} RUNE`)
+  })
+
+  it(`Should estimate run Do Swap `, async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetRuneNative,
+      destinationAsset: AssetBTC,
+      inputAmount: assetToBase(assetAmount(100000)),
+      affiliateFeePercent: 0.03, //optional
+      slipLimit: new BigNumber(0.1), //optional
+    }
+    const estimate = await thorchainAmm.estimateSwap(swapParams)
+    expect(estimate).toBeTruthy()
+    //const wallet: Wallet = new Wallet(Network.Testnet, ``)
+    await thorchainAmm.doSwap(
+      swapParams,
+      `bnb1tdnmq5hdy0pgescqav4y8klgrrvqmf6jwpp2n2`, // Destination Address
+      `thor1dze0zlff7gwxpkaynh8fn8nscy7qtnt4aquuh8`, // affiliate Address
+      700, // Interface ID
+    )
+    expect(estimate.waitTime > 600)
+    print(estimate)
+  })
 })

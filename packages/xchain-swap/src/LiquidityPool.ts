@@ -35,9 +35,9 @@ export class LiquidityPool {
     this.assetBalance = baseAmount(this.pool.assetDepth)
     this.runeBalance = baseAmount(this.pool.runeDepth) //Rune is always 8 decimals
 
-    const runeToAssetRatio = this.runeBalance.div(this.assetBalance)
+    const runeToAssetRatio = this.runeBalance.div(this.assetBalance) // RUNE/Asset gets `assetPrice` of a pool (how much rune to 1 asset)
     this._currentPriceInRune = baseToAsset(runeToAssetRatio)
-    this._currentPriceInAsset = assetAmount(BN_1.dividedBy(runeToAssetRatio.amount()))
+    this._currentPriceInAsset = assetAmount(BN_1.dividedBy(runeToAssetRatio.amount())) // Asset/RUNE gets inverset asset price
   }
   isAvailable(): boolean {
     return this.pool.status.toLowerCase() === 'available'
@@ -48,6 +48,10 @@ export class LiquidityPool {
   public get currentPriceInAsset(): AssetAmount {
     return this._currentPriceInAsset
   }
+  /**
+   * Returns the 'assetPrice' for the pool
+   *
+   */
   public get currentPriceInRune(): AssetAmount {
     return this._currentPriceInRune
   }
@@ -57,6 +61,21 @@ export class LiquidityPool {
   public get assetString(): string {
     return this._assetString
   }
+  public get assetPrice(): BaseAmount {
+    return this.runeBalance.div(this.assetBalance)
+  }
+  public get inverseAssetPrice(): BigNumber {
+    // return this.assetBalance.div(this.runeBalance) // always results in 0.0000000 which is wrong so using something else.
+    const iAssetPrice = this.assetBalance.amount().toNumber() / this.runeBalance.amount().toNumber()
+    console.log(
+      `at inverseAssetPrice: for pool: ${
+        this._asset.ticker
+      }. AssetBalance is ${this.assetBalance.amount()} and Rune Balance is ${this.runeBalance.amount()} \n Result is ${iAssetPrice}`,
+    )
+
+    return new BigNumber(iAssetPrice)
+  }
+
   /**
    * Returns the rune value.
    * If the asset passed in is NativeRune, assetAmount is returned back

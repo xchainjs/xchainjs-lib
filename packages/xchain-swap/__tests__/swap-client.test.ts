@@ -18,7 +18,7 @@ import {
 const btcPoolDetails = {
   asset: 'BTC.BTC',
   assetDepth: assetToBase(assetAmount(100)).amount().toFixed(),
-  assetPrice: '11121.24920535084',
+  assetPrice: '25000',
   assetPriceUSD: '30458.124870650492',
   liquidityUnits: '536087715332333',
   poolAPY: '0.1001447237777584',
@@ -32,7 +32,7 @@ const btcPoolDetails = {
 const ethPoolDetails = {
   asset: 'ETH.ETH',
   assetDepth: assetToBase(assetAmount(9100)).amount().toFixed(),
-  assetPrice: '663.6697871509878',
+  assetPrice: '680.10989011',
   assetPriceUSD: '1817.6139097932505',
   liquidityUnits: '262338362121353',
   poolAPY: '0.10844053560303157',
@@ -43,8 +43,23 @@ const ethPoolDetails = {
   units: '263973251769640',
   volume24h: '8122016881297',
 }
+const busdPoolDetails = {
+  asset: 'BNB.BUSD',
+  assetDepth: assetToBase(assetAmount(10000000)).amount().toFixed(),
+  assetPrice: '10.0',
+  assetPriceUSD: '10.0',
+  liquidityUnits: '1000000',
+  poolAPY: '0.10844053560303157',
+  runeDepth: assetToBase(assetAmount(1000000)).amount().toFixed(),
+  status: 'available',
+  synthSupply: '0',
+  synthUnits: '0',
+  units: '26397325176964',
+  volume24h: '812201681297',
+}
 const btcPool = new LiquidityPool(btcPoolDetails)
 const ethPool = new LiquidityPool(ethPoolDetails)
+const busdPool = new LiquidityPool(busdPoolDetails)
 
 const inputAmount = assetToBase(assetAmount(1)) // 1 BTC
 const feeAmount = assetToBase(assetAmount(0.0000375)) // sats
@@ -114,5 +129,19 @@ describe('Swap Cal Tests', () => {
     const satsToRune = getValueOfAssetInRune(feeAmount, btcPool)
     const correctRuneAmount = assetToBase(assetAmount(0.9375))
     expect(baseToAsset(satsToRune).amount()).toEqual(baseToAsset(correctRuneAmount).amount())
+  })
+
+  it(`Should calculate double swap with BUSD`, async () => {
+    const doubleswap = getDoubleSwap(inputAmount, btcPool, busdPool)
+
+    const correctOutput: SwapOutput = {
+      output: assetToBase(assetAmount(233489.3417208)),
+      swapFee: assetToBase(assetAmount(8172.95710519)),
+      slip: new BigNumber(0.03382215),
+    }
+
+    expect(baseToAsset(doubleswap.output).amount()).toEqual(baseToAsset(correctOutput.output).amount())
+    expect(baseToAsset(doubleswap.swapFee).amount()).toEqual(baseToAsset(correctOutput.swapFee).amount())
+    expect(doubleswap.slip.toFixed(8)).toEqual(correctOutput.slip.toFixed(8))
   })
 })

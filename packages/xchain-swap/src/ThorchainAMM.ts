@@ -31,7 +31,6 @@ import {
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
-import { Wallet } from './Wallet'
 import {
   EstimateSwapParams,
   InboundDetail,
@@ -43,7 +42,6 @@ import {
 } from './types'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'
-
 const BN_1 = new BigNumber(1)
 
 export class ThorchainAMM {
@@ -259,32 +257,101 @@ export class ThorchainAMM {
    * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
   public async doSwap(
-    wallet: Wallet,
+    //  wallet: Wallet,
     params: EstimateSwapParams,
     destinationAddress: string,
     affiliateAddress: string,
     interfaceID = 999,
   ): Promise<SwapSubmitted> {
     //first make sure the swap has no input errors
-    this.isValidSwap(params)
+    //this.isValidSwap(params)
     const swapEstimate = await this.estimateSwap(params) // only called to work out swapEstimate.totalFees.affiliateFee
 
     // Work out LIM from the slip percentage
-    const limPercentage = BN_1.minus(params.slipLimit || 1)
-    const lim = `${limPercentage.toFixed(6)}${interfaceID.toFixed(3)}`
-    let memo = `:${params.destinationAsset.chain.toString}.${params.destinationAsset.symbol}:${destinationAddress}:${lim}:${affiliateAddress}:${swapEstimate.totalFees.affiliateFee}`
+    let limPercentage: BigNumber = BN_1
+    if (params.slipLimit) {
+      limPercentage = BN_1.minus(params.slipLimit || 1)
+      // need to get output value here.
+    } // else allowed slip is 100%
 
-    if (params.destinationAsset == AssetBTC && memo.length > 80) {
-      // if memo length is too long for BTC, need to trim it
-      memo = `:${params.destinationAsset.chain.toString}.${params.destinationAsset.symbol}:${destinationAddress}`
+    const limInputAmount: BaseAmount = params.inputAmount.times(limPercentage)
+    const limAssetAmount = await this.assetToAsset(
+      params.sourceAsset,
+      baseToAsset(limInputAmount),
+      params.destinationAsset,
+    )
+    if (!limAssetAmount) {
+      throw new Error(`Could not convert ${params.sourceAsset} to ${params.destinationAsset}`)
     }
+    let limstring = ``
 
-    return wallet.execuiteSwap({
-      fromBaseAmount: params.inputAmount,
-      from: params.sourceAsset,
-      to: params.destinationAsset,
-      memo: memo,
-    })
+    // // Convert RUNE to Outbound Asset, limAmount is in RUNE. Need to get the assetPrice then * by RUNE amount.
+    // // Need to do lim RUNE ammount * (AssetPool: Asset Depth / RUNE Depth)
+    // if (eqAsset(params.sourceAsset, AssetRuneNative)) {
+    //   // Get the destination Pool.
+    //   const destinationAssetPool = await this.getPoolForAsset(params.destinationAsset)
+    //   if (!destinationAssetPool) {
+    //     throw new Error(`Could not find Pool for asset: ${params.destinationAsset}`)
+    //   }
+    //   // get Asset/RUNE
+    //   const RUNEPerAsset = destinationAssetPool.currentPriceInAsset
+    //   // covert from RUNE to Asset
+    //   limAssetAmount = baseToAsset(limInputAmount).times(RUNEPerAsset.amount())
+    // } // Convert Asset to RUNE Amount
+    // else if (eqAsset(params.destinationAsset, AssetRuneNative)) {
+    //   const sourceAssetPool = await this.getPoolForAsset(params.sourceAsset)
+    //   if (!sourceAssetPool) {
+    //     throw new Error(`Could not find Liquidity Pool`)
+    //   }
+    //   // Find the asset amount for the RUNE
+    //   limAssetAmount = baseToAsset(sourceAssetPool.getValueInRUNE(params.sourceAsset, limInputAmount))
+    //   if (!limAssetAmount) {
+    //     throw new Error(`Could get value in RUNE for asset: ${params.sourceAsset}`)
+    //   }
+    // } // Convert Asset to Asset
+    // else (!eqAsset(params.destinationAsset, AssetRuneNative) && !eqAsset(params.destinationAsset, AssetRuneNative)) {
+    //   const sourceAssetPool = await this.getPoolForAsset(params.sourceAsset)
+    //   if (!sourceAssetPool) {
+    //     throw new Error(`Could not find Liquidity Pool`)
+    //   }
+    //   const destinationAssetPool = await this.getPoolForAsset(params.destinationAsset)
+    //   if (!destinationAssetPool) {
+    //     throw new Error(`Could not find Pool for asset: ${params.destinationAsset}`)
+    //   }
+    //   // get source assetPrice
+    //   const sourceAssetPrice = sourceAssetPool?.currentPriceInRune
+    //   const desitnationPriceInAsset = destinationAssetPool?.currentPriceInAsset
+
+    //   //(BTC Pool Rune Depth / BTC Depth) * (BUSD Depth/ BUSD Pool Rune Depth)
+    //   const assetToAssetRatio = sourceAssetPrice?.times(desitnationPriceInAsset)
+    //   limAssetAmount = baseToAsset(limInputAmount).times(assetToAssetRatio)
+    // }
+    limstring = limAssetAmount.amount().toFixed()
+
+    // create LIM with interface ID
+    const lim = limstring.substring(0, limstring.length - 3).concat(interfaceID.toString())
+    // create the full memo
+    const memo = `=:${params.destinationAsset.chain}.${
+      params.destinationAsset.symbol
+    }:${destinationAddress}:${lim}:${affiliateAddress}:${swapEstimate.totalFees.affiliateFee.amount().toFixed()}`
+    // if (params.destinationAsset == AssetBTC && memo.length > 80) {
+    //   // if memo length is too long for BTC, need to trim it
+    //   memo = `:${params.destinationAsset.chain}.${params.destinationAsset.symbol}:${destinationAddress}`
+    // }
+    console.log(`DoSwap: memo is: ${memo.toString()}`)
+
+    const msgDepositSubmitted: SwapSubmitted = {
+      hash: ``,
+      url: ``,
+    }
+    return msgDepositSubmitted
+
+    // return wallet.execuiteSwap({
+    //   fromBaseAmount: params.inputAmount,
+    //   from: params.sourceAsset,
+    //   to: params.destinationAsset,
+    //   memo: memo,
+    // })
   }
 
   /**
@@ -388,7 +455,7 @@ export class ThorchainAMM {
       // Find the amount in RUNE
       const amountInRUNE = amountPool.getValueInRUNE(asset, amount)
       if (!amountInRUNE) {
-        throw new Error(`Could not find Pool for asset: ${asset}`)
+        throw new Error(`Could get value in RUNE for asset: ${asset}`)
       }
 
       // find the gasAsset for the asset and convert the amountInRUNE into amountInGasAsset
@@ -494,6 +561,77 @@ export class ThorchainAMM {
   }
 
   /**
+   * Takes and Asset and converts it to the value of the other asset.
+   * E.g. ETH, 5, BTC works out 5 ETH is worth in BTC.
+   *      BTC, 1, BUSD works how much 1 BTC is worth in BUSD
+   *
+   * @param sourceAsset
+   * @param inputAssetAmount
+   * @param destinationAsset
+   * @returns
+   */
+  public async assetToAsset(
+    sourceAsset: Asset,
+    inputAssetAmount: AssetAmount,
+    destinationAsset: Asset,
+  ): Promise<AssetAmount> {
+    this.refereshPoolCache()
+    let amountInDestnationAsset: AssetAmount
+    // Convert RUNE to Outbound Asset, limAmount is in RUNE. Need to get the assetPrice then * by RUNE amount.
+    // Need to do lim RUNE ammount * (AssetPool: Asset Depth / RUNE Depth)
+    if (eqAsset(sourceAsset, AssetRuneNative)) {
+      // Get the destination Pool.
+      const destinationAssetPool = await this.getPoolForAsset(destinationAsset)
+      if (!destinationAssetPool) {
+        throw new Error(`Could not find Liquidity Pool for asset: ${destinationAsset}`)
+      }
+      // get Asset/RUNE
+      const RUNEPerAsset = destinationAssetPool.currentPriceInAsset
+      // covert from RUNE to Asset
+      amountInDestnationAsset = inputAssetAmount.times(RUNEPerAsset)
+    } // Convert Asset to RUNE Amount
+    else if (eqAsset(destinationAsset, AssetRuneNative)) {
+      const sourceAssetPool = await this.getPoolForAsset(sourceAsset)
+      if (!sourceAssetPool) {
+        throw new Error(`Could not find Liquidity Pool for asset: ${destinationAsset}`)
+      }
+      // Find the asset amount for the RUNE
+      amountInDestnationAsset = baseToAsset(sourceAssetPool.getValueInRUNE(sourceAsset, assetToBase(inputAssetAmount)))
+      if (!amountInDestnationAsset) {
+        throw new Error(`Could get value in RUNE for asset: ${sourceAsset}`)
+      }
+    } // Convert Asset to Asset // (!eqAsset(destinationAsset, AssetRuneNative) && !eqAsset(destinationAsset, AssetRuneNative))
+    else {
+      const sourceAssetPool = await this.getPoolForAsset(sourceAsset)
+      if (!sourceAssetPool) {
+        throw new Error(`Could not find Liquidity Pool for asset: ${destinationAsset}`)
+      }
+      const destinationAssetPool = await this.getPoolForAsset(destinationAsset)
+      if (!destinationAssetPool) {
+        throw new Error(`Could not find Liquidity Pool for asset: ${destinationAsset}`)
+      }
+      // get source assetPrice
+      const sourceAssetPrice = sourceAssetPool.assetPrice
+      //const desitnationInverseAssetPrice = 0.001562671614285836
+
+      // console.log(`BTC inputAmount is : ${inputAssetAmount.amount()}`)
+
+      console.log(`BTC Asset Price is : ${sourceAssetPrice.amount()}`)
+      console.log(`ETH Price inverseAssetPrice is : ${destinationAssetPool.inverseAssetPrice}`)
+      console.log(`ETH Price currentPriceInAsset is : ${destinationAssetPool.currentPriceInAsset.amount()}`)
+      console.log(`ETH Price currentPriceInRune is : ${destinationAssetPool.currentPriceInRune.amount()}`)
+
+      // Asset to Asset is
+      //(sourceAssetPool Rune Depth / sourceAssetPool Asset Depth) * (destinationAssetPool Asset Depth/ destinationAssetPool Rune Depth)
+      const assetToAssetRatio = sourceAssetPool.assetPrice.times(destinationAssetPool.inverseAssetPrice)
+      console.log(`assetToAssetRatio : ${assetToAssetRatio.amount().toFixed(8)}`)
+      // then times the assetAmount
+      amountInDestnationAsset = inputAssetAmount.times(assetToAssetRatio.amount().toNumber())
+    }
+    return amountInDestnationAsset
+  }
+
+  /**
    * return the chain for a given Asset This method should live somewhere else.
    * @param chain
    * @returns the gas asset type for the given chain
@@ -524,4 +662,26 @@ export class ThorchainAMM {
         throw Error('Unknown chain')
     }
   }
+
+  // public async addLiquidity(sourceAssets: Asset[], inputAmount: BaseAmount[]): Promise<MsgDepositSubmitted> {
+  //   let memo
+
+  //   if (sourceAssets.length != inputAmount.length) {
+  //     new Error('Invalid Params, sourceAssets count does not match inputAmount count')
+  //   }
+  //   // Asym into Asset
+  //   if (sourceAssets.length == 1 && inputAmount.length == 1) {
+  //     const pool: LiquidityPool = this.getPoolForAsset(sourceAssets[0])
+  //     memo = `+:${sourceAssets[0].chain}}`
+  //   }
+
+  //   for (const asset of sourceAssets) {
+  //     const pool = this.getPoolForAsset(asset)
+  //   }
+
+  //   return MsgDepositSubmitted({
+  //     hash: 0,
+  //     url: '',
+  //   })
+  // }
 }
