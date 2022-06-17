@@ -22,7 +22,7 @@ import types from './types/proto/MsgCompiled'
 export const DECIMAL = 8
 export const DEFAULT_GAS_ADJUSTMENT = 2
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
-export const DEPOSIT_GAS_LIMIT_VALUE = '500000000'
+export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 export const MAX_TX_COUNT = 100
 
 /**
@@ -237,6 +237,13 @@ export const buildUnsignedTx = ({
   return new cosmosclient.TxBuilder(cosmosSdk, txBody, authInfo)
 }
 
+/**
+ * Estimates usage of gas
+ *
+ * Note: Be careful by using this helper function,
+ * it's still experimental and result might be incorrect.
+ * Change `multiplier` to get a valid estimation of gas.
+ */
 export const getEstimatedGas = async ({
   cosmosSDKClient,
   txBody,
