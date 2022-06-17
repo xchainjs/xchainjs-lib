@@ -1,3 +1,10 @@
+# v0.25.1 (2022-06-17)
+
+## Fix
+
+- Remove estimation of gas in `transfer` and `deposit` (introduced by #564) in favour of using `DEFAULT_GAS_LIMIT_VALUE` or `DEPOSIT_GAS_LIMIT_VALUE` (both can be overridden by users in `transfer` or `deposit`)
+- Increase `DEPOSIT_GAS_VALUE` to `600000000` (before `500000000`)
+
 # v0.25.0 (2022-06-16)
 
 ## Fix
@@ -9,6 +16,8 @@
 
 - Client's `transferOffline` requires `fromAccountNumber` and `fromSequence`
 - Rename parameters in `transferOffline` to keep names in camel case (not snake case)
+- Rename `DEFAULT_GAS_VALUE` to `DEFAULT_GAS_LIMIT_VALUE`
+- Rename `DEPOSIT_GAS_VALUE` to `DEPOSIT_GAS_LIMIT_VALUE`
 
 # v0.24.1 (2022-04-23)
 

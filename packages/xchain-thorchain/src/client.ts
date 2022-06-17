@@ -29,6 +29,7 @@ import {
   baseAmount,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
+import BigNumber from 'bignumber.js'
 
 import { buildDepositTx, buildTransferTx, buildUnsignedTx } from '.'
 import {
@@ -46,6 +47,8 @@ import {
 import { TxResult } from './types/messages'
 import {
   DECIMAL,
+  DEFAULT_GAS_LIMIT_VALUE,
+  DEPOSIT_GAS_LIMIT_VALUE,
   MAX_TX_COUNT,
   getBalance,
   getDefaultClientUrl,
@@ -53,7 +56,6 @@ import {
   getDefaultFees,
   getDenom,
   getDepositTxDataFromLogs,
-  getEstimatedGas,
   getExplorerAddressUrl,
   getExplorerTxUrl,
   getPrefix,
@@ -421,9 +423,15 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @returns {TxHash} The transaction hash.
    *
    * @throws {"insufficient funds"} Thrown if the wallet has insufficient funds.
-   * @throws {"failed to broadcast transaction"} Thrown if failed to broadcast transaction.
+   * @throws {"Invalid transaction hash"} Thrown by missing tx hash
    */
-  async deposit({ walletIndex = 0, asset = AssetRuneNative, amount, memo }: DepositParam): Promise<TxHash> {
+  async deposit({
+    walletIndex = 0,
+    asset = AssetRuneNative,
+    amount,
+    memo,
+    gasLimit = new BigNumber(DEPOSIT_GAS_LIMIT_VALUE),
+  }: DepositParam): Promise<TxHash> {
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
       balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
@@ -467,25 +475,20 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     })
 
     const account = await this.getCosmosClient().getAccount(fromAddressAcc)
-    const accountSequence = account.sequence || cosmosclient.Long.ZERO
-    const accountNumber = account.account_number || cosmosclient.Long.ZERO
 
-    const gasLimit = await getEstimatedGas({
-      cosmosSDKClient: this.getCosmosClient(),
-      txBody: depositTxBody,
-      privKey,
-      accountNumber,
-      accountSequence,
-    })
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: depositTxBody,
       signerPubkey: cosmosclient.codec.packAny(signerPubkey),
-      gasLimit,
+      gasLimit: cosmosclient.Long.fromString(gasLimit.toFixed(0)),
       sequence: account.sequence || cosmosclient.Long.ZERO,
     })
 
-    return (await this.getCosmosClient().signAndBroadcast(txBuilder, privKey, account)) || ''
+    const txHash = await this.getCosmosClient().signAndBroadcast(txBuilder, privKey, account)
+
+    if (!txHash) throw Error(`Invalid transaction hash: ${txHash}`)
+
+    return txHash
   }
 
   /**
@@ -493,8 +496,18 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    *
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
+   *
+   * @throws {"insufficient funds"} Thrown if the wallet has insufficient funds.
+   * @throws {"Invalid transaction hash"} Thrown by missing tx hash
    */
-  async transfer({ walletIndex = 0, asset = AssetRuneNative, amount, recipient, memo }: TxParams): Promise<TxHash> {
+  async transfer({
+    walletIndex = 0,
+    asset = AssetRuneNative,
+    amount,
+    recipient,
+    memo,
+    gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
+  }: TxParams & { gasLimit?: BigNumber }): Promise<TxHash> {
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
       balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
@@ -533,25 +546,20 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     })
     const account = await this.getCosmosClient().getAccount(accAddress)
     const accountSequence = account.sequence || cosmosclient.Long.ZERO
-    const accountNumber = account.account_number || cosmosclient.Long.ZERO
-
-    const gasLimit = await getEstimatedGas({
-      cosmosSDKClient: this.getCosmosClient(),
-      txBody,
-      privKey,
-      accountNumber,
-      accountSequence,
-    })
 
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: txBody,
-      gasLimit,
+      gasLimit: cosmosclient.Long.fromString(gasLimit.toString()),
       signerPubkey: cosmosclient.codec.packAny(signerPubkey),
       sequence: accountSequence,
     })
 
-    return (await this.cosmosClient.signAndBroadcast(txBuilder, privKey, account)) || ''
+    const txHash = await this.cosmosClient.signAndBroadcast(txBuilder, privKey, account)
+
+    if (!txHash) throw Error(`Invalid transaction hash: ${txHash}`)
+
+    return txHash
   }
 
   /**
@@ -570,6 +578,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     fromAssetBalance: from_asset_balance = baseAmount(0, DECIMAL),
     fromAccountNumber = cosmosclient.Long.ZERO,
     fromSequence = cosmosclient.Long.ZERO,
+    gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
   }: TxOfflineParams): Promise<string> {
     const fee = (await this.getFees()).average
 
@@ -595,18 +604,11 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       nodeUrl: this.getClientUrl().node,
     })
     const privKey = this.getPrivateKey(walletIndex)
-    const gasLimit = await getEstimatedGas({
-      cosmosSDKClient: this.getCosmosClient(),
-      txBody,
-      privKey,
-      accountNumber: fromAccountNumber,
-      accountSequence: fromSequence,
-    })
 
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: txBody,
-      gasLimit: gasLimit,
+      gasLimit: cosmosclient.Long.fromString(gasLimit.toFixed(0)),
       signerPubkey: cosmosclient.codec.packAny(privKey.pubKey()),
       sequence: fromSequence,
     })
