@@ -1,14 +1,10 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
-import { FeeType, Fees, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
-import { Asset, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { FeeType, Fees, Network, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
+import { Asset, CosmosChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
+import { DECIMAL } from './const'
 import { APIQueryParam, RawTxResponse, TxResponse } from './cosmos/types'
-import { AssetAtom, AssetMuon } from './types'
-
-/**
- * The decimal for cosmos chain.
- */
-export const DECIMAL = 6
+import { AssetAtom, AssetMuon, ChainIds, ClientUrls as ClientUrls } from './types'
 
 /**
  * Type guard for MsgSend
@@ -38,8 +34,8 @@ export const isMsgMultiSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.M
  * @returns {string} The denomination of the given asset.
  */
 export const getDenom = (asset: Asset): string => {
-  if (assetToString(asset) === assetToString(AssetAtom)) return 'uatom'
-  if (assetToString(asset) === assetToString(AssetMuon)) return 'umuon'
+  if (eqAsset(asset, AssetAtom)) return 'uatom'
+  if (eqAsset(asset, AssetMuon)) return 'umuon'
   return asset.symbol
 }
 
@@ -52,6 +48,18 @@ export const getDenom = (asset: Asset): string => {
 export const getAsset = (denom: string): Asset | null => {
   if (denom === getDenom(AssetAtom)) return AssetAtom
   if (denom === getDenom(AssetMuon)) return AssetMuon
+  // IBC assets
+  if (denom.startsWith('ibc/'))
+    // Note: Don't use `assetFromString` here, it will interpret `/` as synth
+    return {
+      chain: CosmosChain,
+      symbol: denom.toUpperCase(),
+      // TODO (xchain-contributors)
+      // Get ticker (real asset name) from denom
+      // At the meantime ticker will be empty
+      ticker: '',
+      synth: false,
+    }
   return null
 }
 
@@ -206,3 +214,35 @@ export const getDefaultFees = (): Fees => {
  *
  **/
 export const getPrefix = () => 'cosmos'
+
+/**
+ * Default client urls
+ *
+ * @returns {ClientUrls} The client urls for Cosmos.
+ */
+export const getDefaultClientUrls = (): ClientUrls => {
+  const mainClientUrl = 'https://api.cosmos.network'
+  // Note: In case anyone facing into CORS issue, try the following URLs
+  // https://lcd-cosmos.cosmostation.io/
+  // https://lcd-cosmoshub.keplr.app/
+  // @see (Discord #xchainjs) https://discord.com/channels/838986635756044328/988096545926828082/988103739967688724
+  return {
+    [Network.Testnet]: 'https://rest.sentry-02.theta-testnet.polypore.xyz',
+    [Network.Stagenet]: mainClientUrl,
+    [Network.Mainnet]: mainClientUrl,
+  }
+}
+
+/**
+ * Default chain ids
+ *
+ * @returns {ChainIds} Chain ids for Cosmos.
+ */
+export const getDefaultChainIds = (): ChainIds => {
+  const mainChainId = 'cosmoshub-4'
+  return {
+    [Network.Testnet]: 'theta-testnet-001',
+    [Network.Stagenet]: mainChainId,
+    [Network.Mainnet]: mainChainId,
+  }
+}

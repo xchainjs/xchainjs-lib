@@ -4,6 +4,7 @@ import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import axios from 'axios'
 import * as BIP32 from 'bip32'
 
+import { DEFAULT_GAS_LIMIT } from '../const'
 import { getQueryString } from '../util'
 
 import {
@@ -22,8 +23,9 @@ import {
 
 const DEFAULT_FEE = new proto.cosmos.tx.v1beta1.Fee({
   amount: [],
-  gas_limit: cosmosclient.Long.fromString('300000'),
+  gas_limit: cosmosclient.Long.fromString(DEFAULT_GAS_LIMIT),
 })
+
 export class CosmosSDKClient {
   sdk: cosmosclient.CosmosSDK
 
@@ -116,7 +118,14 @@ export class CosmosSDKClient {
 
     const accAddress = cosmosclient.AccAddress.fromString(address)
     const response = await rest.bank.allBalances(this.sdk, accAddress)
-    return response.data.balances as proto.cosmos.base.v1beta1.Coin[]
+    const balances: proto.cosmos.base.v1beta1.Coin[] =
+      response.data.balances?.reduce(
+        (acc: proto.cosmos.base.v1beta1.Coin[], { amount, denom }) =>
+          !!amount && !!denom ? [...acc, new proto.cosmos.base.v1beta1.Coin({ amount, denom })] : acc,
+        [],
+      ) || []
+    console.log('SDK getBalance() balances ', balances)
+    return balances
   }
 
   async getAccount(address: cosmosclient.AccAddress): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> {

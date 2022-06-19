@@ -1,5 +1,6 @@
 import { proto } from '@cosmos-client/core'
 import { TxParams } from '@xchainjs/xchain-client'
+import BigNumber from 'bignumber.js'
 
 export type CosmosSDKClientParams = {
   server: string
@@ -44,6 +45,7 @@ export type TransferOfflineParams = TransferParams & {
 export type TxOfflineParams = TxParams & {
   from_account_number: string
   from_sequence: string
+  gasLimit?: BigNumber
 }
 
 export type BaseAccountResponse = {

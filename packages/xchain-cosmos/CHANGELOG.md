@@ -1,3 +1,26 @@
+# v.0.17.1-alpha.1 (2022-xx-xx)
+
+## Add
+
+- const `DEFAULT_GAS_LIMIT`
+- const `DEFAULT_FEE`
+- Optional parameter `gasLimit` in `transfer` and `transferOffline`
+- Params `clientUrls`, `chainIds` for constructor
+- Helper `getDefaultClientUrls`
+- Helper `getDefaultChainIds`
+- Setter `setNetwork`
+
+## Fix
+
+- `getFees` returns values based on `DEFAULT_FEE`
+- Initial one instance of `CosmosSDKClient` only depending on network
+- Support IBC assets in `getBalances` (#596)
+- Get IBC assets from denom in `getAsset`
+
+## Update
+
+- Move all `const` into `const.ts`
+
 # v.0.17.0 (2022-03-23)
 
 ## Update
