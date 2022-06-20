@@ -1,11 +1,8 @@
 import { Address, Balance, Fees, Network, Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 
-export interface ExplorerProvider {
-  getExplorerUrl(): string
-  getExplorerAddressUrl(address: Address): string
-  getExplorerTxUrl(txID: string): string
-}
+import { ExplorerProvider } from '../providers/explorer-provider'
+
 export interface OnlineDataProvider {
   getBalance(address: Address, assets?: Asset[]): Promise<Balance[]>
   getTransactions(params?: TxHistoryParams): Promise<TxsPage>

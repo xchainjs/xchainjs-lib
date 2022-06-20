@@ -1,4 +1,4 @@
-import { FeeType, Fees } from '@xchainjs/xchain-client'
+import { Address, FeeType, Fees } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetETH,
@@ -16,7 +16,6 @@ import { parseUnits } from 'ethers/lib/utils'
 
 import erc20ABI from './data/erc20.json'
 import {
-  Address,
   // ETHTransactionInfo,
   // EthNetwork,
   FeesWithGasPricesAndLimits,

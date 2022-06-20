@@ -36,6 +36,7 @@ import { HDNode, toUtf8Bytes } from 'ethers/lib/utils'
 
 // import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import erc20ABI from './data/erc20.json'
+import { ExplorerProvider } from './providers/explorer-provider'
 import {
   ApproveParams,
   CallParams,
@@ -50,7 +51,7 @@ import {
   IsApprovedParams,
   TxOverrides,
 } from './types'
-import { ExplorerProvider, ExplorerProviders, OnlineDataProvider, OnlineDataProviders } from './types/provider-types'
+import { ExplorerProviders, OnlineDataProvider, OnlineDataProviders } from './types/provider-types'
 import {
   BASE_TOKEN_GAS_COST,
   // ETHAddress,
@@ -110,7 +111,6 @@ export type EVMClientParams = {
  */
 export default class Client extends BaseXChainClient implements XChainClient, EVMClient {
   private hdNode?: HDNode
-  // private providers: Map<Network, Provider> = new Map<Network, Provider>()
   private explorerProviders: Record<Network, ExplorerProvider>
   private dataProviders: Record<Network, OnlineDataProvider>
   private providers: Record<Network, Provider>
@@ -124,9 +124,9 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
     providers,
     phrase = '',
     rootDerivationPaths = {
-      [Network.Mainnet]: `m/44'/60'/0'/0/`,
-      [Network.Testnet]: `m/44'/60'/0'/0/`, // this is INCORRECT but makes the unit tests pass
-      [Network.Stagenet]: `m/44'/60'/0'/0/`,
+      [Network.Mainnet]: `m/44'/9000'/0'/0/`,
+      [Network.Testnet]: `m/44'/9000'/0'/0/`, // this is INCORRECT but makes the unit tests pass
+      [Network.Stagenet]: `m/44'/9000'/0'/0/`,
     },
     explorerProviders,
     dataProviders,

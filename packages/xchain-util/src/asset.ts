@@ -163,6 +163,12 @@ export const formatAssetAmount = ({
 export const formatBaseAmount = (amount: BaseAmount) => formatBN(amount.amount(), 0)
 
 /**
+ * Base "chain" asset of Avalanche chain.
+ *
+ */
+export const AssetAVAX: Asset = { chain: Chain.Avalanche, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+
+/**
  * Base "chain" asset of Binance chain.
  *
  * Based on definition in Thorchain `common`
