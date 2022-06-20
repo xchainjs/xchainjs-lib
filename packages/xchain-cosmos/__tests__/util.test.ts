@@ -1,8 +1,8 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
-import { baseAmount } from '@xchainjs/xchain-util'
+import { baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
+import { AssetAtom } from '../src/const'
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
-import { AssetAtom, AssetMuon } from '../src/types'
 import { getAsset, getDenom, getQueryString, getTxsFromHistory, isMsgMultiSend, isMsgSend } from '../src/util'
 
 describe('cosmos/util', () => {
@@ -76,23 +76,21 @@ describe('cosmos/util', () => {
       it('get denom for AssetAtom', () => {
         expect(getDenom(AssetAtom)).toEqual('uatom')
       })
-
-      it('get denom for AssetMuon', () => {
-        expect(getDenom(AssetMuon)).toEqual('umuon')
-      })
     })
 
     describe('getAsset', () => {
-      it('get asset for umuon', () => {
-        expect(getAsset('umuon')).toEqual(AssetMuon)
-      })
-
       it('get asset for uatom', () => {
-        expect(getAsset('uatom')).toEqual(AssetAtom)
+        const asset = getAsset('uatom')
+        const result = asset !== null && eqAsset(asset, AssetAtom)
+        expect(result).toBeTruthy()
       })
 
-      it('get asset for unknown', () => {
-        expect(getAsset('unknown')).toBeNull()
+      it('get asset for ibc asset (BTSG - Bitsong)', () => {
+        // see https://github.com/bitsongofficial/docs.bitsong.io/blob/main/relayer.md#official-bitsong-ibc-channels
+        const denom = 'ibc/E7D5E9D0E9BF8B7354929A817DD28D4D017E745F638954764AA88522A7A409EC'
+        const asset = getAsset(denom)
+        const expected = { ...AssetAtom, symbol: denom, ticker: '' }
+        expect(asset !== null && eqAsset(asset, expected)).toBeTruthy()
       })
     })
   })
