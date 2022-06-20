@@ -18,17 +18,16 @@ import {
 import { Asset, Chain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
-import { DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT } from './const'
+import { AssetAtom, DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT } from './const'
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { TxOfflineParams } from './cosmos/types'
-import { AssetAtom, AssetMuon, ChainIds, ClientUrls, CosmosClientParams } from './types'
+import { ChainIds, ClientUrls, CosmosClientParams } from './types'
 import { getAsset, getDefaultChainIds, getDefaultClientUrls, getDenom, getTxsFromHistory } from './util'
 
 /**
  * Interface for custom Cosmos client
  */
 export interface CosmosClient {
-  getMainAsset(): Asset
   getSDKClient(): CosmosSDKClient
 }
 
@@ -167,21 +166,6 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   }
 
   /**
-   * Get the main asset based on the network.
-   *
-   * @returns {string} The main asset based on the network.
-   */
-  getMainAsset(): Asset {
-    switch (this.network) {
-      case Network.Mainnet:
-      case Network.Stagenet:
-        return AssetAtom
-      case Network.Testnet:
-        return AssetMuon
-    }
-  }
-
-  /**
    * Get the balance of a given address.
    *
    * @param {Address} address By default, it will return the balance of the current wallet. (optional)
@@ -202,7 +186,8 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   }
 
   /**
-   * Get transaction history of a given address with pagination options.
+   * Get transaction history of a given address and asset with pagination options.
+   * If `asset` is not set, history will include `ATOM` txs only
    * By default it will return the transaction history of the current wallet.
    *
    * @param {TxHistoryParams} params The options to get transaction history. (optional)
@@ -214,11 +199,12 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     const limit = (params && params.limit) || undefined
     const txMinHeight = undefined
     const txMaxHeight = undefined
+    const asset = getAsset(params?.asset ?? '') || AssetAtom
+    const messageSender = params?.address ?? this.getAddress()
 
-    const mainAsset = this.getMainAsset()
     const txHistory = await this.getSDKClient().searchTx({
       messageAction,
-      messageSender: (params && params.address) || this.getAddress(),
+      messageSender,
       page,
       limit,
       txMinHeight,
@@ -227,12 +213,12 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
 
     return {
       total: parseInt(txHistory.pagination?.total || '0'),
-      txs: getTxsFromHistory(txHistory.tx_responses || [], mainAsset),
+      txs: getTxsFromHistory(txHistory.tx_responses || [], asset),
     }
   }
 
   /**
-   * Get the transaction details of a given transaction id.
+   * Get the transaction details of a given transaction id. Supports `ATOM` txs only.
    *
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
@@ -244,7 +230,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       throw new Error('transaction not found')
     }
 
-    const txs = getTxsFromHistory([txResult], this.getMainAsset())
+    const txs = getTxsFromHistory([txResult], AssetAtom)
     if (txs.length === 0) throw new Error('transaction not found')
 
     return txs[0]
@@ -258,15 +244,13 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    */
   async transfer({
     walletIndex,
-    asset,
+    asset = AssetAtom,
     amount,
     recipient,
     memo,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT),
   }: TxParams & { gasLimit?: BigNumber }): Promise<TxHash> {
     const fromAddressIndex = walletIndex || 0
-
-    const mainAsset = this.getMainAsset()
 
     const fee = new proto.cosmos.tx.v1beta1.Fee({
       amount: [],
@@ -278,7 +262,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       from: this.getAddress(fromAddressIndex),
       to: recipient,
       amount: amount.amount().toString(),
-      asset: getDenom(asset || mainAsset),
+      asset: getDenom(asset),
       memo,
       fee,
     })
@@ -292,7 +276,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    */
   async transferOffline({
     walletIndex,
-    asset,
+    asset = AssetAtom,
     amount,
     recipient,
     memo,
@@ -314,7 +298,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       from_sequence,
       to: recipient,
       amount: amount.amount().toString(),
-      asset: getDenom(asset || this.getMainAsset()),
+      asset: getDenom(asset),
       memo,
       fee,
     })

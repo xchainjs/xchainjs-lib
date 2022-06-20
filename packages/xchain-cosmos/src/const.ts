@@ -1,9 +1,11 @@
-import { baseAmount } from '@xchainjs/xchain-util'
+import { Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 
 /**
  * The decimal for cosmos chain.
  */
 export const DECIMAL = 6
+
+export const AssetAtom: Asset = { chain: Chain.Cosmos, symbol: 'ATOM', ticker: 'ATOM', synth: false }
 
 /**
  * Default gas limit

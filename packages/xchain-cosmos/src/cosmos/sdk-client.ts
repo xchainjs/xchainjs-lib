@@ -124,7 +124,6 @@ export class CosmosSDKClient {
           !!amount && !!denom ? [...acc, new proto.cosmos.base.v1beta1.Coin({ amount, denom })] : acc,
         [],
       ) || []
-    console.log('SDK getBalance() balances ', balances)
     return balances
   }
 

@@ -4,8 +4,8 @@ import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { Client } from '../src/client'
+import { AssetAtom } from '../src/const'
 import { GetTxByHashResponse, TxHistoryResponse } from '../src/cosmos/types'
-import { AssetMuon } from '../src/types'
 
 const getClientUrl = (client: Client): string => {
   return client.getNetwork() === Network.Testnet
@@ -148,7 +148,7 @@ describe('Client Test', () => {
     mockAccountsBalance(getClientUrl(cosmosClient), 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv', {
       balances: [
         new proto.cosmos.base.v1beta1.Coin({
-          denom: 'umuon',
+          denom: 'uatom',
           amount: '75000000',
         }),
       ],
@@ -157,7 +157,7 @@ describe('Client Test', () => {
 
     const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, 6).amount())
     expect(expected).toBeTruthy()
-    expect(balances[0].asset).toEqual(AssetMuon)
+    expect(balances[0].asset).toEqual(AssetAtom)
   })
 
   it('has an empty tx history', async () => {
@@ -187,7 +187,7 @@ describe('Client Test', () => {
       to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
       amount: [
         {
-          denom: 'umuon',
+          denom: 'uatom',
           amount: '4318994970',
         },
       ],
@@ -292,7 +292,7 @@ describe('Client Test', () => {
     assertTxsPost(getClientUrl(cosmosClient), expected_txsPost_result)
 
     const result = await cosmosClient.transfer({
-      asset: AssetMuon,
+      asset: AssetAtom,
       recipient: to_address,
       amount: send_amount,
       memo,

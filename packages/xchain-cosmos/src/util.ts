@@ -1,10 +1,10 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
 import { FeeType, Fees, Network, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
-import { Asset, CosmosChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, CosmosChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
-import { DECIMAL } from './const'
-import { APIQueryParam, RawTxResponse, TxResponse } from './cosmos/types'
-import { AssetAtom, AssetMuon, ChainIds, ClientUrls as ClientUrls } from './types'
+import { AssetAtom, DECIMAL } from './const'
+import { APIQueryParam, TxResponse } from './cosmos/types'
+import { ChainIds, ClientUrls as ClientUrls } from './types'
 
 /**
  * Type guard for MsgSend
@@ -35,7 +35,6 @@ export const isMsgMultiSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.M
  */
 export const getDenom = (asset: Asset): string => {
   if (eqAsset(asset, AssetAtom)) return 'uatom'
-  if (eqAsset(asset, AssetMuon)) return 'umuon'
   return asset.symbol
 }
 
@@ -47,15 +46,14 @@ export const getDenom = (asset: Asset): string => {
  */
 export const getAsset = (denom: string): Asset | null => {
   if (denom === getDenom(AssetAtom)) return AssetAtom
-  if (denom === getDenom(AssetMuon)) return AssetMuon
   // IBC assets
   if (denom.startsWith('ibc/'))
     // Note: Don't use `assetFromString` here, it will interpret `/` as synth
     return {
       chain: CosmosChain,
-      symbol: denom.toUpperCase(),
+      symbol: denom,
       // TODO (xchain-contributors)
-      // Get ticker (real asset name) from denom
+      // Get readable ticker for IBC assets from denom #600 https://github.com/xchainjs/xchainjs-lib/issues/600
       // At the meantime ticker will be empty
       ticker: '',
       synth: false,
@@ -63,28 +61,49 @@ export const getAsset = (denom: string): Asset | null => {
   return null
 }
 
-const getCoinAmount = (coins?: proto.cosmos.base.v1beta1.ICoin[]) => {
-  return coins
-    ? coins
-        .map((coin) => baseAmount(coin.amount || 0, DECIMAL))
-        .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
-    : baseAmount(0, DECIMAL)
-}
 /**
- * Parse transaction type
+ * Parses amount from `ICoin[]`
+ *
+ * @param {ICoin[]} coinst List of coins
+ *
+ * @returns {BaseAmount} Coin amount
+ */
+const getCoinAmount = (coins: proto.cosmos.base.v1beta1.ICoin[]): BaseAmount =>
+  coins
+    .map((coin) => baseAmount(coin.amount || 0, DECIMAL))
+    .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
+
+/**
+ * Filters `ICoin[]` by given `Asset`
+ *
+ * @param {ICoin[]} coinst List of coins
+ * @param {Asset} asset Asset to filter coins
+ *
+ * @returns {ICoin[]} Filtered list
+ */
+const getCoinsByAsset = (coins: proto.cosmos.base.v1beta1.ICoin[], asset: Asset): proto.cosmos.base.v1beta1.ICoin[] =>
+  coins.filter(({ denom }) => {
+    const coinAsset = !!denom ? getAsset(denom) : null
+    return !!coinAsset ? eqAsset(coinAsset, asset) : false
+  })
+
+/**
+ * Parses transaction history
  *
  * @param {TxResponse[]} txs The transaction response from the node.
- * @param {Asset} mainAsset Current main asset which depends on the network.
- * @returns {Tx[]} The parsed transaction result.
+ * @param {Asset} asset Asset to get history of transactions from
+ *
+ * @returns {Tx[]} List of transactions
  */
-export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => {
+export const getTxsFromHistory = (txs: TxResponse[], asset: Asset): Tx[] => {
   return txs.reduce((acc, tx) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let msgs: Array<proto.cosmos.bank.v1beta1.MsgSend | proto.cosmos.bank.v1beta1.MsgMultiSend>
-    if ((tx.tx as RawTxResponse).body === undefined) {
-      msgs = cosmosclient.codec.packAnyFromCosmosJSON(tx.tx).msg
-    } else {
-      msgs = cosmosclient.codec.packAnyFromCosmosJSON((tx.tx as RawTxResponse).body.messages)
+    let msgs: Array<proto.cosmos.bank.v1beta1.MsgSend | proto.cosmos.bank.v1beta1.MsgMultiSend> = []
+    if (tx.tx) {
+      if (!tx.tx.body) {
+        msgs = cosmosclient.codec.packAnyFromCosmosJSON(tx.tx).msg
+      } else {
+        msgs = cosmosclient.codec.packAnyFromCosmosJSON(tx.tx.body.messages)
+      }
     }
 
     const from: TxFrom[] = []
@@ -92,7 +111,8 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
     msgs.map((msg) => {
       if (isMsgSend(msg)) {
         const msgSend = msg
-        const amount = getCoinAmount(msgSend.amount)
+        const coins = getCoinsByAsset(msgSend.amount, asset)
+        const amount = getCoinAmount(coins)
 
         let from_index = -1
 
@@ -127,7 +147,8 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
         const msgMultiSend = msg
 
         msgMultiSend.inputs.map((input) => {
-          const amount = getCoinAmount(input.coins || [])
+          const coins = getCoinsByAsset(input.coins || [], asset)
+          const amount = getCoinAmount(coins)
 
           let from_index = -1
 
@@ -146,7 +167,8 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
         })
 
         msgMultiSend.outputs.map((output) => {
-          const amount = getCoinAmount(output.coins || [])
+          const coins = getCoinsByAsset(output.coins || [], asset)
+          const amount = getCoinAmount(coins)
 
           let to_index = -1
 
@@ -169,7 +191,7 @@ export const getTxsFromHistory = (txs: TxResponse[], mainAsset: Asset): Tx[] => 
     return [
       ...acc,
       {
-        asset: mainAsset,
+        asset,
         from,
         to,
         date: new Date(tx.timestamp),

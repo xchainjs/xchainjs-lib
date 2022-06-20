@@ -1,4 +1,4 @@
-# v.0.17.1-alpha.1 (2022-xx-xx)
+# v.0.18.0-alpha.1 (2022-06-20)
 
 ## Add
 
@@ -19,7 +19,13 @@
 
 ## Update
 
-- Move all `const` into `const.ts`
+- Result of `getTxsFromHistory` is filtered by given asset
+- Move misc. constants into `const.ts`
+
+## Breaking change
+
+- Remove deprecated `AssetMuon`
+- Remove deprecated `Client.getMainAsset`
 
 # v.0.17.0 (2022-03-23)
 
