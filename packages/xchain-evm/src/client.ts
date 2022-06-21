@@ -6,6 +6,7 @@ import {
   // DepositParams,
   FeeBounds,
   FeeOption,
+  // FeeRates,
   FeeRates,
   FeeType,
   Fees,
@@ -16,10 +17,11 @@ import {
   TxHistoryParams,
   TxParams,
   TxsPage,
-  XChainClient,
   // XChainClientParams,
+  XChainClient,
   checkFeeBounds,
   standardFeeRates,
+  // standardFeeRates,
 } from '@xchainjs/xchain-client'
 import {
   Asset,
@@ -28,6 +30,7 @@ import {
   Chain,
   assetToString,
   baseAmount,
+  eqAsset,
   // delay,
   // getInboundDetails,
 } from '@xchainjs/xchain-util'
@@ -55,7 +58,7 @@ import { ExplorerProviders, OnlineDataProvider, OnlineDataProviders } from './ty
 import {
   BASE_TOKEN_GAS_COST,
   // ETHAddress,
-  ETH_DECIMAL,
+  // ETH_DECIMAL,
   SIMPLE_GAS_COST,
   call,
   estimateApprove,
@@ -97,6 +100,8 @@ export interface EVMClient {
 
 export type EVMClientParams = {
   chain: Chain
+  gasAsset: Asset
+  gasAssetDecimals: number
   providers: Record<Network, Provider>
   explorerProviders: ExplorerProviders
   dataProviders: OnlineDataProviders
@@ -110,6 +115,8 @@ export type EVMClientParams = {
  * Custom EVM client
  */
 export default class Client extends BaseXChainClient implements XChainClient, EVMClient {
+  private gasAsset: Asset
+  private gasAssetDecimals: number
   private hdNode?: HDNode
   private explorerProviders: Record<Network, ExplorerProvider>
   private dataProviders: Record<Network, OnlineDataProvider>
@@ -119,19 +126,20 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
    * @param {EVMClientParams} params
    */
   constructor({
+    chain,
+    gasAsset,
+    gasAssetDecimals,
     network = Network.Testnet,
     feeBounds,
     providers,
     phrase = '',
-    rootDerivationPaths = {
-      [Network.Mainnet]: `m/44'/9000'/0'/0/`,
-      [Network.Testnet]: `m/44'/9000'/0'/0/`, // this is INCORRECT but makes the unit tests pass
-      [Network.Stagenet]: `m/44'/9000'/0'/0/`,
-    },
+    rootDerivationPaths,
     explorerProviders,
     dataProviders,
   }: EVMClientParams) {
-    super(Chain.Ethereum, { network, rootDerivationPaths, feeBounds })
+    super(chain, { network, rootDerivationPaths, feeBounds })
+    this.gasAsset = gasAsset
+    this.gasAssetDecimals = gasAssetDecimals
     this.explorerProviders = explorerProviders
     this.dataProviders = dataProviders
     this.providers = providers
@@ -353,7 +361,15 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
    * @returns {TxsPage} The transaction history.
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    return await this.dataProviders[this.network].getTransactions(params)
+    const filteredParams: TxHistoryParams = {
+      address: params?.address || this.getAddress(),
+      offset: params?.offset,
+      limit: params?.limit,
+      startTime: params?.startTime,
+      asset: params?.asset,
+    }
+
+    return await this.dataProviders[this.network].getTransactions(filteredParams)
   }
   // async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
   //   const offset = params?.offset || 0
@@ -709,22 +725,25 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
       // Note: `rates` are in `gwei`
       // @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/querier.go#L416-420
       // To have all values in `BaseAmount`, they needs to be converted into `wei` (1 gwei = 1,000,000,000 wei = 1e9)
+      // TODO make this non eth specific
       const ratesInGwei: FeeRates = standardFeeRates(await this.getFeeRateFromThorchain())
       return {
-        [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, ETH_DECIMAL),
-        [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, ETH_DECIMAL),
-        [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, ETH_DECIMAL),
+        [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, this.gasAssetDecimals),
+        [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, this.gasAssetDecimals),
+        [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, this.gasAssetDecimals),
       }
-    } catch (error) {}
-    throw Error('could not get gas prices')
-    //should only get here if thor fails
-    // try {
-    //   return await this.estimateGasPricesFromEtherscan()
-    // } catch (error) {
-    //   return Promise.reject(new Error(`Failed to estimate gas price: ${error}`))
-    // }
-  }
+    } catch (error) {
+      console.warn(error)
+    }
 
+    try {
+      return await this.dataProviders[this.network].estimateGasPrices()
+    } catch (error) {
+      console.warn(error)
+    }
+    //should only get here if both gas estimates fails
+    throw Error(`Failed to estimate gas price`)
+  }
   // /**
   //  * Estimate gas price.
   //  * @see https://etherscan.io/apis#gastracker
@@ -758,13 +777,13 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
    *
    * @returns {BaseAmount} The estimated gas fee.
    */
-  async estimateGasLimit({ asset = AssetETH, recipient, amount, memo }: TxParams): Promise<BigNumber> {
+  async estimateGasLimit({ asset, recipient, amount, memo }: TxParams): Promise<BigNumber> {
     const txAmount = BigNumber.from(amount.amount().toFixed())
-
-    if (!isEthAsset(asset)) {
+    const theAsset = asset ?? this.gasAsset
+    if (!this.isGasAsset(theAsset)) {
       // ERC20 gas estimate
-      const assetAddress = getTokenAddress(asset)
-      if (!assetAddress) throw Error(`Can't get address from asset ${assetToString(asset)}`)
+      const assetAddress = getTokenAddress(theAsset)
+      if (!assetAddress) throw Error(`Can't get address from asset ${assetToString(theAsset)}`)
       const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
 
       return await contract.estimateGas.transfer(recipient, txAmount, {
@@ -781,6 +800,9 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
     }
 
     return await this.getProvider().estimateGas(transactionRequest)
+  }
+  private isGasAsset(asset: Asset): boolean {
+    return eqAsset(this.gasAsset, asset)
   }
 
   /**

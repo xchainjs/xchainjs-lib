@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Chain, assetToString } from '@xchainjs/xchain-util'
+import { AssetAVAX, Chain, assetToString } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import { Client, EVMClientParams } from '../src/client'
@@ -19,8 +19,9 @@ const ethersJSProviders = {
 }
 // =====Ethers providers=====
 // =====ONLINE providers=====
-const AVAX_ONLINE_PROVIDER_MAINNET = new CovalentProvider(process.env.COVALENT_API_KEY || '', Chain.Avalanche, 43114)
-const AVAX_ONLINE_PROVIDER_TESTNET = new CovalentProvider(process.env.COVALENT_API_KEY || '', Chain.Avalanche, 43113)
+const API_KEY = process.env.COVALENT_API_KEY || ''
+const AVAX_ONLINE_PROVIDER_MAINNET = new CovalentProvider(API_KEY, Chain.Avalanche, 43114, AssetAVAX, 18)
+const AVAX_ONLINE_PROVIDER_TESTNET = new CovalentProvider(API_KEY, Chain.Avalanche, 43113, AssetAVAX, 18)
 const avaxProviders = {
   [Network.Mainnet]: AVAX_ONLINE_PROVIDER_MAINNET,
   [Network.Testnet]: AVAX_ONLINE_PROVIDER_TESTNET,
@@ -46,10 +47,15 @@ const avaxExplorerProviders = {
 }
 // =====Explorers=====
 
-const rootDerivationPaths = {
-  [Network.Mainnet]: `m/44'/9000'/0'/0/`,
-  [Network.Testnet]: `m/44'/9000'/0'/0/`,
-  [Network.Stagenet]: `m/44'/9000'/0'/0/`,
+// const avaxRootDerivationPaths = {
+//   [Network.Mainnet]: `m/44'/9000'/0'/0/`,
+//   [Network.Testnet]: `m/44'/9000'/0'/0/`,
+//   [Network.Stagenet]: `m/44'/9000'/0'/0/`,
+// }
+const ethRootDerivationPaths = {
+  [Network.Mainnet]: `m/44'/60'/0'/0/`,
+  [Network.Testnet]: `m/44'/60'/0'/0/`,
+  [Network.Stagenet]: `m/44'/60'/0'/0/`,
 }
 const avaxParams: EVMClientParams = {
   chain: Chain.Avalanche,
@@ -62,7 +68,7 @@ const avaxParams: EVMClientParams = {
     lower: 1,
     upper: 1,
   },
-  rootDerivationPaths,
+  rootDerivationPaths: ethRootDerivationPaths,
 }
 const client = new Client(avaxParams)
 
@@ -77,8 +83,9 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     expect(balances.length).toBeGreaterThan(0)
   })
   it('should fetch thorchain txs', async () => {
-    const address = client.getAddress(0)
+    const address = '0x55aEd0ce035883626e536254dda2F23a5b5D977f'
     const txPage = await client.getTransactions({ address })
+    console.log(JSON.stringify(txPage, null, 2))
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })

@@ -29,6 +29,14 @@
     "gas_rate": "30"
   },
   {
+    "chain": "AVAX",
+    "pub_key": "tthorpub1addwnpepqg6kkej4g452lgexlwqzzpxjqua6p2y60us3g4vv42c6xcrljmg7spdscfc",
+    "address": "0x9ad0047d14b4a2bae732921656e3077fa5d3d23c",
+    "router": "0xe0a63488e677151844e70623533c22007dc57c9e",
+    "halted": false,
+    "gas_rate": "5"
+  },
+  {
     "chain": "LTC",
     "pub_key": "tthorpub1addwnpepqg6kkej4g452lgexlwqzzpxjqua6p2y60us3g4vv42c6xcrljmg7spdscfc",
     "address": "tltc1qh0p4g55yttj5txr5560hszpf4jq8ucrekyq3h9",
