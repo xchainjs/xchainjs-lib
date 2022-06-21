@@ -1,3 +1,14 @@
+# v0.25.2 (2022-xx-xx)
+
+## Update
+
+- Latest `@cosmos-client/core@0.45.10`
+- Latest "xchain-cosmos@0.18.0-alpha.2"
+
+## Fix
+
+- Fix `setNetwork` to create new instance of SDK client
+
 # v0.25.1 (2022-06-17)
 
 ## Fix

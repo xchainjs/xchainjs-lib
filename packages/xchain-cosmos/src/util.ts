@@ -1,4 +1,4 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
+import { proto } from '@cosmos-client/core'
 import { FeeType, Fees, Network, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount, CosmosChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
@@ -96,110 +96,69 @@ const getCoinsByAsset = (coins: proto.cosmos.base.v1beta1.ICoin[], asset: Asset)
  * @returns {Tx[]} List of transactions
  */
 export const getTxsFromHistory = (txs: TxResponse[], asset: Asset): Tx[] => {
-  return txs.reduce((acc, tx) => {
-    let msgs: Array<proto.cosmos.bank.v1beta1.MsgSend | proto.cosmos.bank.v1beta1.MsgMultiSend> = []
-    if (tx.tx) {
-      if (!tx.tx.body) {
-        msgs = cosmosclient.codec.packAnyFromCosmosJSON(tx.tx).msg
-      } else {
-        msgs = cosmosclient.codec.packAnyFromCosmosJSON(tx.tx.body.messages)
-      }
-    }
+  return (
+    txs
+      // order list to have latest txs first in list
+      .sort((a, b) => {
+        if (a.timestamp === b.timestamp) return 0
+        return a.timestamp > b.timestamp ? -1 : 1
+      })
+      .reduce((acc, tx) => {
+        const msgs = tx.tx?.body.messages ?? []
 
-    const from: TxFrom[] = []
-    const to: TxTo[] = []
-    msgs.map((msg) => {
-      if (isMsgSend(msg)) {
-        const msgSend = msg
-        const coins = getCoinsByAsset(msgSend.amount, asset)
-        const amount = getCoinAmount(coins)
+        const from: TxFrom[] = []
+        const to: TxTo[] = []
+        msgs.map((msg) => {
+          if (isMsgSend(msg)) {
+            const msgSend = msg
+            const coins = getCoinsByAsset(msgSend.amount, asset)
+            const amount = getCoinAmount(coins)
 
-        let from_index = -1
+            let from_index = -1
 
-        from.forEach((value, index) => {
-          if (value.from === msgSend.from_address) from_index = index
-        })
-
-        if (from_index === -1) {
-          from.push({
-            from: msgSend.from_address,
-            amount,
-          })
-        } else {
-          from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
-        }
-
-        let to_index = -1
-
-        to.forEach((value, index) => {
-          if (value.to === msgSend.to_address) to_index = index
-        })
-
-        if (to_index === -1) {
-          to.push({
-            to: msgSend.to_address,
-            amount,
-          })
-        } else {
-          to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
-        }
-      } else if (isMsgMultiSend(msg)) {
-        const msgMultiSend = msg
-
-        msgMultiSend.inputs.map((input) => {
-          const coins = getCoinsByAsset(input.coins || [], asset)
-          const amount = getCoinAmount(coins)
-
-          let from_index = -1
-
-          from.forEach((value, index) => {
-            if (value.from === input.address) from_index = index
-          })
-
-          if (from_index === -1) {
-            from.push({
-              from: input.address || '',
-              amount,
+            from.forEach((value, index) => {
+              if (value.from === msgSend.from_address) from_index = index
             })
-          } else {
-            from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
+
+            if (from_index === -1) {
+              from.push({
+                from: msgSend.from_address,
+                amount,
+              })
+            } else {
+              from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
+            }
+
+            let to_index = -1
+
+            to.forEach((value, index) => {
+              if (value.to === msgSend.to_address) to_index = index
+            })
+
+            if (to_index === -1) {
+              to.push({
+                to: msgSend.to_address,
+                amount,
+              })
+            } else {
+              to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
+            }
           }
         })
 
-        msgMultiSend.outputs.map((output) => {
-          const coins = getCoinsByAsset(output.coins || [], asset)
-          const amount = getCoinAmount(coins)
-
-          let to_index = -1
-
-          to.forEach((value, index) => {
-            if (value.to === output.address) to_index = index
-          })
-
-          if (to_index === -1) {
-            to.push({
-              to: output.address || '',
-              amount,
-            })
-          } else {
-            to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
-          }
-        })
-      }
-    })
-
-    return [
-      ...acc,
-      {
-        asset,
-        from,
-        to,
-        date: new Date(tx.timestamp),
-        type: from.length > 0 || to.length > 0 ? TxType.Transfer : TxType.Unknown,
-        hash: tx.txhash || '',
-      },
-    ]
-  }, [] as Tx[])
+        return [
+          ...acc,
+          {
+            asset,
+            from,
+            to,
+            date: new Date(tx.timestamp),
+            type: from.length > 0 || to.length > 0 ? TxType.Transfer : TxType.Unknown,
+            hash: tx.txhash || '',
+          },
+        ]
+      }, [] as Tx[])
+  )
 }
 
 /**

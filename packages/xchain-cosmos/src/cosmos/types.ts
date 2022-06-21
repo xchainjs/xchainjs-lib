@@ -1,5 +1,6 @@
 import { proto } from '@cosmos-client/core'
 import { TxParams } from '@xchainjs/xchain-client'
+import { BaseAmount } from '@xchainjs/xchain-util/lib'
 import BigNumber from 'bignumber.js'
 
 export type CosmosSDKClientParams = {
@@ -46,16 +47,12 @@ export type TxOfflineParams = TxParams & {
   from_account_number: string
   from_sequence: string
   gasLimit?: BigNumber
-}
-
-export type BaseAccountResponse = {
-  type?: string
-  value?: proto.cosmos.auth.v1beta1.BaseAccount
+  feeAmount?: BaseAmount
 }
 
 export type RawTxResponse = {
   body: {
-    messages: proto.cosmos.bank.v1beta1.MsgSend[]
+    messages: proto.cosmos.bank.v1beta1.IMsgSend[]
   }
 }
 
