@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-cosmos",
-  "version": "0.18.0-alpha.1",
+  "version": "0.18.0-alpha.2",
   "description": "Custom Cosmos client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -35,7 +35,7 @@
     "@xchainjs/xchain-client": "^0.11.3",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.7.1",
-    "@cosmos-client/core": "^0.45.1",
+    "@cosmos-client/core": "^0.45.10",
     "axios": "^0.25.0",
     "nock": "^13.0.5"
   },
@@ -46,7 +46,7 @@
     "@xchainjs/xchain-client": "^0.11.3",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.7.1",
-    "@cosmos-client/core": "^0.45.1",
+    "@cosmos-client/core": "^0.45.10",
     "axios": "^0.25.0"
   }
 }

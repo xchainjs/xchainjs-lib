@@ -1,4 +1,4 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
+import { proto } from '@cosmos-client/core'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
@@ -192,7 +192,6 @@ describe('Client Test', () => {
         },
       ],
     })
-    const encodedMsg = cosmosclient.codec.packCosmosAny(msgSend)
 
     assertTxHstory(getClientUrl(cosmosClient), 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
       pagination: {
@@ -211,8 +210,7 @@ describe('Client Test', () => {
           gas_used: '148996',
           tx: {
             body: {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              messages: [encodedMsg as any],
+              messages: [msgSend],
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -234,7 +232,6 @@ describe('Client Test', () => {
         },
       ],
     })
-    const encodedMsg2 = cosmosclient.codec.packCosmosAny(msgSend2)
     assertTxHstory(getClientUrl(cosmosClient), 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z', {
       pagination: {
         total: '1',
@@ -252,8 +249,7 @@ describe('Client Test', () => {
           gas_used: '148996',
           tx: {
             body: {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              messages: [encodedMsg2 as any],
+              messages: [msgSend2],
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -314,7 +310,6 @@ describe('Client Test', () => {
         },
       ],
     })
-    const encodedMsg = cosmosclient.codec.packCosmosAny(msgSend)
 
     assertTxHashGet(getClientUrl(cosmosClient), '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {
       tx_response: {
@@ -326,8 +321,7 @@ describe('Client Test', () => {
         gas_used: '148996',
         tx: {
           body: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            messages: [encodedMsg as any],
+            messages: [msgSend],
           },
         },
         timestamp: '2020-09-25T06:09:15Z',

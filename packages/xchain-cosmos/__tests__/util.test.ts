@@ -1,4 +1,4 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
+import { proto } from '@cosmos-client/core'
 import { baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
 import { AssetAtom } from '../src/const'
@@ -108,7 +108,6 @@ describe('cosmos/util', () => {
         },
       ],
     })
-    const encodedMsg = cosmosclient.codec.packAnyFromCosmosJSON(msgSend)
     const txs: TxResponse[] = [
       {
         height: 0,
@@ -119,7 +118,7 @@ describe('cosmos/util', () => {
         gas_used: '35000',
         tx: {
           body: {
-            messages: [encodedMsg, encodedMsg],
+            messages: [msgSend, msgSend],
           },
         } as RawTxResponse,
         timestamp: new Date().toString(),

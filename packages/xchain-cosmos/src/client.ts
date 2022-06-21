@@ -1,4 +1,4 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
+import { proto } from '@cosmos-client/core'
 import {
   Address,
   Balance,
@@ -15,8 +15,9 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { Asset, Chain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, Chain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
+import Long from 'long'
 
 import { AssetAtom, DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT } from './const'
 import { CosmosSDKClient } from './cosmos/sdk-client'
@@ -82,6 +83,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     if (network === this.network) return
 
     super.setNetwork(network)
+
     this.sdkClient = new CosmosSDKClient({
       server: this.clientUrls[network],
       chainId: this.chainIds[network],
@@ -249,12 +251,18 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     recipient,
     memo,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT),
-  }: TxParams & { gasLimit?: BigNumber }): Promise<TxHash> {
+    feeAmount = DEFAULT_FEE,
+  }: TxParams & { gasLimit?: BigNumber; feeAmount?: BaseAmount }): Promise<TxHash> {
     const fromAddressIndex = walletIndex || 0
 
     const fee = new proto.cosmos.tx.v1beta1.Fee({
-      amount: [],
-      gas_limit: cosmosclient.Long.fromString(gasLimit.toFixed(0)),
+      amount: [
+        {
+          denom: getDenom(AssetAtom),
+          amount: feeAmount.amount().toFixed(),
+        },
+      ],
+      gas_limit: Long.fromString(gasLimit.toFixed(0)),
     })
 
     return this.getSDKClient().transfer({
@@ -283,12 +291,18 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     from_account_number,
     from_sequence,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT),
+    feeAmount = DEFAULT_FEE,
   }: TxOfflineParams): Promise<string> {
     const fromAddressIndex = walletIndex || 0
 
     const fee = new proto.cosmos.tx.v1beta1.Fee({
-      amount: [],
-      gas_limit: cosmosclient.Long.fromString(gasLimit.toFixed(0)),
+      amount: [
+        {
+          denom: getDenom(AssetAtom),
+          amount: feeAmount.amount().toFixed(),
+        },
+      ],
+      gas_limit: Long.fromString(gasLimit.toFixed(0)),
     })
 
     return await this.getSDKClient().transferSignedOffline({
@@ -305,12 +319,20 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   }
 
   /**
-   * Returns (default) fees.
+   * Returns fees.
+   * It tries to get chain fees from THORChain `inbound_addresses` first
+   * If it fails, it returns DEFAULT fees.
    *
    * @returns {Fees} Current fees
    */
   async getFees(): Promise<Fees> {
-    return singleFee(FeeType.FlatFee, DEFAULT_FEE)
+    try {
+      const feeRate = await this.getFeeRateFromThorchain()
+      const fee = baseAmount(feeRate, DECIMAL)
+      return singleFee(FeeType.FlatFee, fee)
+    } catch (error) {
+      return singleFee(FeeType.FlatFee, DEFAULT_FEE)
+    }
   }
 }
 
