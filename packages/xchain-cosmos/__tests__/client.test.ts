@@ -4,7 +4,7 @@ import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { Client } from '../src/client'
-import { AssetAtom } from '../src/const'
+import { AssetAtom, COSMOS_DECIMAL } from '../src/const'
 import { GetTxByHashResponse, TxHistoryResponse } from '../src/cosmos/types'
 
 const getClientUrl = (client: Client): string => {
@@ -155,7 +155,7 @@ describe('Client Test', () => {
     })
     const balances = await cosmosClient.getBalance('cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv')
 
-    const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, 6).amount())
+    const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, COSMOS_DECIMAL).amount())
     expect(expected).toBeTruthy()
     expect(balances[0].asset).toEqual(AssetAtom)
   })
@@ -263,7 +263,7 @@ describe('Client Test', () => {
 
   it('transfer', async () => {
     const to_address = 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv'
-    const send_amount: BaseAmount = baseAmount(10000, 6)
+    const send_amount: BaseAmount = baseAmount(10000, COSMOS_DECIMAL)
     const memo = 'transfer'
 
     const expected_txsPost_result = {
@@ -332,9 +332,9 @@ describe('Client Test', () => {
     expect(tx.type).toEqual('transfer')
     expect(tx.hash).toEqual('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
     expect(tx.from[0].from).toEqual('cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z')
-    expect(tx.from[0].amount.amount().isEqualTo(baseAmount(4318994970, 6).amount())).toBeTruthy()
+    expect(tx.from[0].amount.amount().isEqualTo(baseAmount(4318994970, COSMOS_DECIMAL).amount())).toBeTruthy()
     expect(tx.to[0].to).toEqual('cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr')
-    expect(tx.to[0].amount.amount().isEqualTo(baseAmount(4318994970, 6).amount())).toBeTruthy()
+    expect(tx.to[0].amount.amount().isEqualTo(baseAmount(4318994970, COSMOS_DECIMAL).amount())).toBeTruthy()
   })
 
   it('should return valid explorer url', () => {

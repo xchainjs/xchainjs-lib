@@ -1,7 +1,7 @@
 import { proto } from '@cosmos-client/core'
 import { baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
-import { AssetAtom } from '../src/const'
+import { AssetAtom, COSMOS_DECIMAL } from '../src/const'
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
 import { getAsset, getDenom, getQueryString, getTxsFromHistory, isMsgMultiSend, isMsgSend } from '../src/util'
 
@@ -147,18 +147,18 @@ describe('cosmos/util', () => {
       expect(parsed_txs[0].asset).toEqual(AssetAtom)
       expect(parsed_txs[0].from.length).toEqual(1)
       expect(parsed_txs[0].from[0].from).toEqual(from_address)
-      expect(parsed_txs[0].from[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
+      expect(parsed_txs[0].from[0].amount.amount().isEqualTo(baseAmount(2000, COSMOS_DECIMAL).amount())).toBeTruthy()
       expect(parsed_txs[0].to.length).toEqual(1)
       expect(parsed_txs[0].to[0].to).toEqual(to_address)
-      expect(parsed_txs[0].to[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
+      expect(parsed_txs[0].to[0].amount.amount().isEqualTo(baseAmount(2000, COSMOS_DECIMAL).amount())).toBeTruthy()
 
       expect(parsed_txs[1].asset).toEqual(AssetAtom)
       expect(parsed_txs[1].from.length).toEqual(1)
       expect(parsed_txs[1].from[0].from).toEqual(from_address)
-      expect(parsed_txs[1].from[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
+      expect(parsed_txs[1].from[0].amount.amount().isEqualTo(baseAmount(2000, COSMOS_DECIMAL).amount())).toBeTruthy()
       expect(parsed_txs[1].to.length).toEqual(1)
       expect(parsed_txs[1].to[0].to).toEqual(to_address)
-      expect(parsed_txs[1].to[0].amount.amount().isEqualTo(baseAmount(2000, 6).amount())).toBeTruthy()
+      expect(parsed_txs[1].to[0].amount.amount().isEqualTo(baseAmount(2000, COSMOS_DECIMAL).amount())).toBeTruthy()
     })
   })
 

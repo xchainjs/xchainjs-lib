@@ -2,7 +2,7 @@ import { proto } from '@cosmos-client/core'
 import { FeeType, Fees, Network, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount, CosmosChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
-import { AssetAtom, DECIMAL } from './const'
+import { AssetAtom, COSMOS_DECIMAL } from './const'
 import { APIQueryParam, TxResponse } from './cosmos/types'
 import { ChainIds, ClientUrls as ClientUrls } from './types'
 
@@ -70,8 +70,8 @@ export const getAsset = (denom: string): Asset | null => {
  */
 const getCoinAmount = (coins: proto.cosmos.base.v1beta1.ICoin[]): BaseAmount =>
   coins
-    .map((coin) => baseAmount(coin.amount || 0, DECIMAL))
-    .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), DECIMAL), baseAmount(0, DECIMAL))
+    .map((coin) => baseAmount(coin.amount || 0, COSMOS_DECIMAL))
+    .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), COSMOS_DECIMAL), baseAmount(0, COSMOS_DECIMAL))
 
 /**
  * Filters `ICoin[]` by given `Asset`
@@ -126,7 +126,10 @@ export const getTxsFromHistory = (txs: TxResponse[], asset: Asset): Tx[] => {
                 amount,
               })
             } else {
-              from[from_index].amount = baseAmount(from[from_index].amount.amount().plus(amount.amount()), DECIMAL)
+              from[from_index].amount = baseAmount(
+                from[from_index].amount.amount().plus(amount.amount()),
+                COSMOS_DECIMAL,
+              )
             }
 
             let to_index = -1
@@ -141,7 +144,7 @@ export const getTxsFromHistory = (txs: TxResponse[], asset: Asset): Tx[] => {
                 amount,
               })
             } else {
-              to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), DECIMAL)
+              to[to_index].amount = baseAmount(to[to_index].amount.amount().plus(amount.amount()), COSMOS_DECIMAL)
             }
           }
         })
@@ -182,9 +185,9 @@ export const getQueryString = (params: APIQueryParam): string => {
 export const getDefaultFees = (): Fees => {
   return {
     type: FeeType.FlatFee,
-    fast: baseAmount(750, DECIMAL),
-    fastest: baseAmount(2500, DECIMAL),
-    average: baseAmount(0, DECIMAL),
+    fast: baseAmount(750, COSMOS_DECIMAL),
+    fastest: baseAmount(2500, COSMOS_DECIMAL),
+    average: baseAmount(0, COSMOS_DECIMAL),
   }
 }
 
