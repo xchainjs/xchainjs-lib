@@ -19,7 +19,7 @@ import { Asset, BaseAmount, Chain, baseAmount, eqAsset } from '@xchainjs/xchain-
 import BigNumber from 'bignumber.js'
 import Long from 'long'
 
-import { AssetAtom, DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT } from './const'
+import { AssetAtom, COSMOS_DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT } from './const'
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { TxOfflineParams } from './cosmos/types'
 import { ChainIds, ClientUrls, CosmosClientParams } from './types'
@@ -180,7 +180,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     const balances = coins
       .reduce((acc: Balance[], { denom, amount }) => {
         const asset = getAsset(denom)
-        return asset ? [...acc, { asset, amount: baseAmount(amount || '0', DECIMAL) }] : acc
+        return asset ? [...acc, { asset, amount: baseAmount(amount || '0', COSMOS_DECIMAL) }] : acc
       }, [])
       .filter(({ asset: balanceAsset }) => !assets || assets.filter((asset) => eqAsset(balanceAsset, asset)).length)
 
@@ -328,7 +328,12 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   async getFees(): Promise<Fees> {
     try {
       const feeRate = await this.getFeeRateFromThorchain()
-      const fee = baseAmount(feeRate, DECIMAL)
+      // convert decimal: 1e8 (THORChain) to 1e6 (COSMOS)
+      // Similar to `fromCosmosToThorchain` in THORNode
+      // @see https://gitlab.com/thorchain/thornode/-/blob/e787022028f662b3a7c594e4a65aca618caa359c/bifrost/pkg/chainclients/gaia/util.go#L86
+      const decimalDiff = COSMOS_DECIMAL - 8 /* THORCHAIN_DECIMAL */
+      const feeRate1e6 = feeRate * 10 ** decimalDiff
+      const fee = baseAmount(feeRate1e6, COSMOS_DECIMAL)
       return singleFee(FeeType.FlatFee, fee)
     } catch (error) {
       return singleFee(FeeType.FlatFee, DEFAULT_FEE)

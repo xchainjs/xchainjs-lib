@@ -1,9 +1,9 @@
-# v0.25.2 (2022-xx-xx)
+# v0.25.2 (2022-06-22)
 
 ## Update
 
 - Latest `@cosmos-client/core@0.45.10`
-- Latest "xchain-cosmos@0.18.0-alpha.2"
+- Latest "xchain-cosmos@0.18.0"
 
 ## Fix
 
