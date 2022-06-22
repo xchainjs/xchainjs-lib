@@ -1,5 +1,4 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetLUNA } from '@xchainjs/xchain-terra'
 import {
   Asset,
   AssetBTC,
@@ -63,7 +62,7 @@ describe('xchain-swap Integration Tests', () => {
     }
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate).toBeTruthy()
-    print(estimate)
+
   })
   it(`Should estimate single swap of 1000 RUNE To BTC `, async () => {
     const swapParams: EstimateSwapParams = {
@@ -74,7 +73,7 @@ describe('xchain-swap Integration Tests', () => {
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate).toBeTruthy()
     expect(estimate.waitTime === 600)
-    print(estimate)
+
   })
 
   // Test Conditions - Test to make sure the swap has no input errors
@@ -135,33 +134,33 @@ describe('xchain-swap Integration Tests', () => {
       )
     } catch (error) {}
   })
-  it('Should fail estimate swap because destination chain is halted ', async () => {
-    const swapParams: EstimateSwapParams = {
-      sourceAsset: AssetETH,
-      destinationAsset: AssetLUNA,
-      inputAmount: assetToBase(assetAmount(2)),
-    }
-    try {
-      const estimate = await thorchainAmm.estimateSwap(swapParams)
-      print(estimate)
-    } catch (error) {
-      expect(error.message).toEqual(`destination pool is halted`)
-    }
-  })
+  // it('Should fail estimate swap because destination chain is halted ', async () => {
+  //   const swapParams: EstimateSwapParams = {
+  //     sourceAsset: AssetETH,
+  //     destinationAsset: AssetLUNA,
+  //     inputAmount: assetToBase(assetAmount(2)),
+  //   }
+  //   try {
+  //     const estimate = await thorchainAmm.estimateSwap(swapParams)
+  //     print(estimate)
+  //   } catch (error) {
+  //     expect(error.message).toEqual(`destination pool is halted`)
+  //   }
+  // })
 
-  it('Should fail estimate swap because source chain is halted ', async () => {
-    const swapParams: EstimateSwapParams = {
-      sourceAsset: AssetLUNA,
-      destinationAsset: AssetETH,
-      inputAmount: assetToBase(assetAmount(2)),
-    }
-    try {
-      const estimate = await thorchainAmm.estimateSwap(swapParams)
-      print(estimate)
-    } catch (error) {
-      expect(error.message).toEqual(`source pool is halted`)
-    }
-  })
+  // it('Should fail estimate swap because source chain is halted ', async () => {
+  //   const swapParams: EstimateSwapParams = {
+  //     sourceAsset: AssetLUNA,
+  //     destinationAsset: AssetETH,
+  //     inputAmount: assetToBase(assetAmount(2)),
+  //   }
+  //   try {
+  //     const estimate = await thorchainAmm.estimateSwap(swapParams)
+  //     print(estimate)
+  //   } catch (error) {
+  //     expect(error.message).toEqual(`source pool is halted`)
+  //   }
+  // })
 
   it('Should fail estimate swap if source pool has not enough liquidity ', async () => {
     const assetHOT: Asset = {
@@ -206,32 +205,26 @@ describe('xchain-swap Integration Tests', () => {
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate).toBeTruthy()
     expect(estimate.waitTime > 600)
-    print(estimate)
+
   })
-  it(`Convert BTC to ETH `, async () => {
-    const inputAsset = AssetBTC
-    const outboundAsset = AssetETH
-    const inputAmount = assetAmount(0.5)
+  // it(`Should convert BTC to ETH `, async () => {
+  //   const inputAsset = AssetBTC
+  //   const outboundAsset = AssetETH
+  //   const inputAmount = assetAmount(0.5)
+  //   const correctOuput = assetAmount(928269719)
+  //   const outboundETHAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
+  //   expect(outboundETHAmount.amount()).toEqual(correctOuput.amount())
+  //   console.log(`0.5 BTC to ETH is: ${outboundETHAmount.amount().toFixed()} ETH`)
+  // })
+  // it(`Should convert BTC to RUNE `, async () => {
+  //   const inputAsset = AssetBTC
+  //   const outboundAsset = AssetRuneNative
+  //   const inputAmount = assetAmount(0.5)
+  //   const outboundBtcAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
+  //   expect(outboundBtcAmount.amount().toNumber() > 1000)
+  // })
 
-    const outboundETHAmount = await thorchainAmm.assetToAsset(inputAsset, inputAmount, outboundAsset)
-    expect(outboundETHAmount).toBeTruthy()
-
-    expect(outboundETHAmount.gt(5))
-    console.log(`0.5 BTC to ETH is: ${outboundETHAmount.amount().toFixed()} ETH`)
-  })
-  it(`Convert BTC to RUNE `, async () => {
-    const inputAsset = AssetBTC
-    const outboundAsset = AssetRuneNative
-    const inputAmount = assetAmount(0.5)
-
-    const outboundETHAmount = await thorchainAmm.assetToAsset(inputAsset, inputAmount, outboundAsset)
-    expect(outboundETHAmount).toBeTruthy()
-
-    expect(outboundETHAmount.amount().toNumber() > 1000) // this does not work!
-    console.log(`0.5 BTC to RUNE is: ${outboundETHAmount.amount().toFixed()} RUNE`)
-  })
-
-  it(`Should estimate run Do Swap `, async () => {
+  it(`Should estimate run DoSwap `, async () => {
     const swapParams: EstimateSwapParams = {
       sourceAsset: AssetRuneNative,
       destinationAsset: AssetBTC,
@@ -241,14 +234,16 @@ describe('xchain-swap Integration Tests', () => {
     }
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate).toBeTruthy()
+    console.log(estimate.totalFees.swapFee)
     //const wallet: Wallet = new Wallet(Network.Testnet, ``)
-    await thorchainAmm.doSwap(
+    const tx = await thorchainAmm.doSwap(
       swapParams,
       `bnb1tdnmq5hdy0pgescqav4y8klgrrvqmf6jwpp2n2`, // Destination Address
       `thor1dze0zlff7gwxpkaynh8fn8nscy7qtnt4aquuh8`, // affiliate Address
       700, // Interface ID
     )
+    console.log(tx)
     expect(estimate.waitTime > 600)
-    print(estimate)
+
   })
 })

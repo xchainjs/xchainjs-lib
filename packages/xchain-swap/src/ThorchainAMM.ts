@@ -23,7 +23,6 @@ import {
   THORChain,
   TerraChain,
   assetToBase,
-  assetToString,
   baseAmount,
   baseToAsset,
   eqAsset,
@@ -102,7 +101,7 @@ export class ThorchainAMM {
       errors.push(
         `expected slip: ${estimate.slipPercentage.toFixed()} is greater than your slip limit:${params.slipLimit?.toFixed()} `,
       )
-    // Sees if the inputAmount value is enough to cover all the fees.
+    // Check if the inputAmount value is enough to cover all the fees.
     if (sourcePool?.isAvailable() && destinationPool?.isAvailable()) {
       const inboundFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.inboundFee)
       const outboundFeeInRune = destinationPool.getValueInRUNE(params.destinationAsset, estimate.totalFees.outboundFee)
@@ -134,15 +133,15 @@ export class ThorchainAMM {
     // ---------- Remove Fees from inbound before doing the swap -----------
     let inputNetAmount = params.inputAmount.minus(inboundFee) // are of the same type so this works.
 
-    // remove any affiliateFee. netInput * affiliateFee (%age) of the desitnaiton asset type
+    // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
     const affiliateFee = inputNetAmount.times(params.affiliateFeePercent || 0)
     // remove the affiliate fee from the input.
     inputNetAmount = inputNetAmount.minus(affiliateFee)
-    //now we calculate swapfee based on inputNetAmount
+    // now we calculate swapfee based on inputNetAmount
     const swapOutput = this.calcSwapOutput(inputNetAmount, sourcePool, destinationPool)
 
     // ---------------- Remove Outbound Fee ---------------------- /
-    const netOutput = swapOutput.output.minus(outboundFee) // swap outbout and outbound fee should be in the same type also
+    const netOutput = swapOutput.output.minus(outboundFee) // swap outbound and outbound fee should be in the same type also
 
     const totalFees: TotalFees = {
       inboundFee: inboundFee,
@@ -155,7 +154,7 @@ export class ThorchainAMM {
       slipPercentage: swapOutput.slip,
       netOutput: netOutput,
       waitTime: 0, // will be set within EstimateSwap if canSwap = true
-      canSwap: false, //assume false for now, the getSwapEstimateErrors() step will flip this flag if required
+      canSwap: false, // assume false for now, the getSwapEstimateErrors() step will flip this flag if required
     }
     return swapEstimate
   }
@@ -173,7 +172,7 @@ export class ThorchainAMM {
       // RUNE->Asset
       return getSingleSwap(netInputAmount, destinationPool, false)
     }
-    throw Error('cannot calcSwapOutput')
+    throw Error('Cannot calcSwapOutput, source asset or destination asset undefined')
   }
   /**
    * Provides a swap estimate for the given swap detail. Will check the params for errors before trying to get the estimate.
@@ -184,7 +183,7 @@ export class ThorchainAMM {
    * @returns The SwapEstimate
    */
   public async estimateSwap(params: EstimateSwapParams): Promise<SwapEstimate> {
-    //first make sure the swap has no input errors
+
     this.isValidSwap(params)
 
     const [sourceInboundDetails, destinationInboundDetails] = await this.midgard.getInboundDetails([
@@ -193,12 +192,6 @@ export class ThorchainAMM {
     ])
     const sourcePool = await this.getPoolForAsset(params.sourceAsset)
     const destinationPool = await this.getPoolForAsset(params.destinationAsset)
-
-    // throw errors is either pools is not found, excpet if the chain is thor, which does not have a pool
-    if (params.sourceAsset.chain !== Chain.THORChain && !sourcePool)
-      throw Error(`No liquidity pool exists for: ${assetToString(params.sourceAsset)}`)
-    if (params.sourceAsset.chain !== Chain.THORChain && !destinationPool)
-      throw Error(`No liquidity pool exists for: ${assetToString(params.destinationAsset)}`)
 
     const swapEstimate = this.calcSwapEstimate(params, sourceInboundDetails, sourcePool, destinationPool)
     const errors = this.getSwapEstimateErrors(
@@ -218,24 +211,18 @@ export class ThorchainAMM {
       }
       // ---------------- Work out total Wait Time for Swap ---------------------- /
       if (swapEstimate.canSwap) {
-        const confCountTime = await this.confCounting(params.destinationAsset, swapEstimate.netOutput)
-        if (!confCountTime) {
-          throw Error(`Could not get conf count for ${params.destinationAsset.ticker}`)
-        }
+        const confCountTime = await this.confCounting(destinationPool, swapEstimate.netOutput)
+        // if (!confCountTime) {
+        //   throw Error(`Could not get conf count for ${params.destinationAsset.ticker}`)
+        // }
         const outboundDelay = await this.outboundDelay(destinationPool, params.destinationAsset, swapEstimate.netOutput)
-        if (!outboundDelay) {
-          throw Error(`Could not get conf count for ${params.destinationAsset.ticker}`)
-        }
-        let waitTime: number
-        // Find the biggest delay for the outbound Tx
-        console.log(`outboundDelay is ${outboundDelay}`)
-        console.log(`confCountTime is ${confCountTime}`)
+        // if (!outboundDelay) {
+        //   throw Error(`Could not get conf count for ${params.destinationAsset.ticker}`)
+        // }
 
-        if (confCountTime > outboundDelay) {
-          waitTime = confCountTime
-        } else {
-          waitTime = outboundDelay
-        }
+        // Find the biggest delay for the outbound Tx
+        let waitTime = (confCountTime > outboundDelay ? confCountTime : outboundDelay)
+
         // Add the Tx in Time
         // const inboundDelay = await this.confCounting(params.sourceAsset, params.inputAmount)
         // if (!inboundDelay) {
@@ -263,19 +250,19 @@ export class ThorchainAMM {
     affiliateAddress: string,
     interfaceID = 999,
   ): Promise<SwapSubmitted> {
-    //first make sure the swap has no input errors
-    //this.isValidSwap(params)
-    const swapEstimate = await this.estimateSwap(params) // only called to work out swapEstimate.totalFees.affiliateFee
+
+    this.isValidSwap(params)
+    const swapEstimate = await this.estimateSwap(params) // Used to return fees
 
     // Work out LIM from the slip percentage
-    let limPercentage: BigNumber = BN_1
+    let limPercentage = BN_1
     if (params.slipLimit) {
       limPercentage = BN_1.minus(params.slipLimit || 1)
       // need to get output value here.
     } // else allowed slip is 100%
 
     const limInputAmount: BaseAmount = params.inputAmount.times(limPercentage)
-    const limAssetAmount = await this.assetToAsset(
+    const limAssetAmount = await this.convertAssetToAsset(
       params.sourceAsset,
       baseToAsset(limInputAmount),
       params.destinationAsset,
@@ -285,47 +272,6 @@ export class ThorchainAMM {
     }
     let limstring = ``
 
-    // // Convert RUNE to Outbound Asset, limAmount is in RUNE. Need to get the assetPrice then * by RUNE amount.
-    // // Need to do lim RUNE ammount * (AssetPool: Asset Depth / RUNE Depth)
-    // if (eqAsset(params.sourceAsset, AssetRuneNative)) {
-    //   // Get the destination Pool.
-    //   const destinationAssetPool = await this.getPoolForAsset(params.destinationAsset)
-    //   if (!destinationAssetPool) {
-    //     throw new Error(`Could not find Pool for asset: ${params.destinationAsset}`)
-    //   }
-    //   // get Asset/RUNE
-    //   const RUNEPerAsset = destinationAssetPool.currentPriceInAsset
-    //   // covert from RUNE to Asset
-    //   limAssetAmount = baseToAsset(limInputAmount).times(RUNEPerAsset.amount())
-    // } // Convert Asset to RUNE Amount
-    // else if (eqAsset(params.destinationAsset, AssetRuneNative)) {
-    //   const sourceAssetPool = await this.getPoolForAsset(params.sourceAsset)
-    //   if (!sourceAssetPool) {
-    //     throw new Error(`Could not find Liquidity Pool`)
-    //   }
-    //   // Find the asset amount for the RUNE
-    //   limAssetAmount = baseToAsset(sourceAssetPool.getValueInRUNE(params.sourceAsset, limInputAmount))
-    //   if (!limAssetAmount) {
-    //     throw new Error(`Could get value in RUNE for asset: ${params.sourceAsset}`)
-    //   }
-    // } // Convert Asset to Asset
-    // else (!eqAsset(params.destinationAsset, AssetRuneNative) && !eqAsset(params.destinationAsset, AssetRuneNative)) {
-    //   const sourceAssetPool = await this.getPoolForAsset(params.sourceAsset)
-    //   if (!sourceAssetPool) {
-    //     throw new Error(`Could not find Liquidity Pool`)
-    //   }
-    //   const destinationAssetPool = await this.getPoolForAsset(params.destinationAsset)
-    //   if (!destinationAssetPool) {
-    //     throw new Error(`Could not find Pool for asset: ${params.destinationAsset}`)
-    //   }
-    //   // get source assetPrice
-    //   const sourceAssetPrice = sourceAssetPool?.currentPriceInRune
-    //   const desitnationPriceInAsset = destinationAssetPool?.currentPriceInAsset
-
-    //   //(BTC Pool Rune Depth / BTC Depth) * (BUSD Depth/ BUSD Pool Rune Depth)
-    //   const assetToAssetRatio = sourceAssetPrice?.times(desitnationPriceInAsset)
-    //   limAssetAmount = baseToAsset(limInputAmount).times(assetToAssetRatio)
-    // }
     limstring = limAssetAmount.amount().toFixed()
 
     // create LIM with interface ID
@@ -342,11 +288,11 @@ export class ThorchainAMM {
 
     const msgDepositSubmitted: SwapSubmitted = {
       hash: ``,
-      url: ``,
+      url: ``, // ? don't need this. just need txhash
     }
     return msgDepositSubmitted
 
-    // return wallet.execuiteSwap({
+    // return wallet.executeSwap({
     //   fromBaseAmount: params.inputAmount,
     //   from: params.sourceAsset,
     //   to: params.destinationAsset,
@@ -360,7 +306,7 @@ export class ThorchainAMM {
    * Needs to be tested
    *
    * @param asset asset being sent.
-   * @param outBoundAmount the amount of that asset
+   * @param outboundAmount the amount of that asset
    * @returns required delay in seconds
    * @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/manager_txout_current.go#L548
    */
@@ -379,7 +325,7 @@ export class ThorchainAMM {
     const thorChainblocktime = 6
 
     let runeValue: BaseAmount
-    console.log(`BTC Output is: ${baseToAsset(outboundAmount).amount().toFixed()}`)
+
     if (eqAsset(AssetRuneNative, asset)) {
       // Asset is RUNE, no need to convert to RUNE
       runeValue = outboundAmount
@@ -387,11 +333,6 @@ export class ThorchainAMM {
       runeValue = liquidtyPool.getValueInRUNE(asset, outboundAmount)
     }
 
-    console.log(
-      `outboundDelay: Is Rune Value: ${baseToAsset(runeValue)
-        .amount()
-        .toNumber()} is less than minTxOutVolumeThreshold: ${minTxOutVolumeThreshold} ?`,
-    )
     if (baseToAsset(runeValue).amount().toNumber() < minTxOutVolumeThreshold) {
       return thorChainblocktime
     }
@@ -405,26 +346,16 @@ export class ThorchainAMM {
     // Add outboundAmount in RUNE to the oubound queue
     const sumValue: AssetAmount = baseToAsset(runeValue.plus(getScheduledOutboundValue))
 
-    // reduce delay rate relative to the total scheduled value. In high volume
-    // scenarios, this causes the network to send outbound transactions slower,
-    // giving the community & NOs time to analyze and react. In an attack
-    // scenario, the attacker is likely going to move as much value as possible
-    // (as we've seen in the past). The act of doing this will slow down their
-    // own transaction(s), reducing the attack's effectiveness.
-    // txOutDelayRate -= sumValue / minTxOutVolumeThreshold
-    console.log(`outboundDelay: sumValue is ${sumValue.amount().toFixed()}`)
     const a = sumValue.amount().dividedBy(minTxOutVolumeThreshold)
-    console.log(`outboundDelay: a is ${a.toFixed()}`)
+
     txOutDelayRate = txOutDelayRate - a.toNumber()
-    console.log(`outboundDelay: txOutDelayRate is ${txOutDelayRate.toFixed()}`)
+
     if (txOutDelayRate < 1) {
       txOutDelayRate = 1
     }
     // calculate the minimum number of blocks in the future the txn has to be
     let minBlocks = baseToAsset(runeValue).div(txOutDelayRate).amount().toNumber()
 
-    console.log(`outboundDelay: minBlocks is ${minBlocks}`)
-    // if min block is bigger than max blocks it can be delayed
     if (minBlocks > maxTxOutOffset) {
       minBlocks = maxTxOutOffset
     }
@@ -434,61 +365,38 @@ export class ThorchainAMM {
   /**
    * Finds the required confCount required for an inbound or outbound Tx to THORChain
    *
-   * Finds the gas asset of the given asset (e.g. BUSD is on BNB), finds the value of asset in Gas Asset then finds the required conformation count.
+   * Finds the gas asset of the given asset (e.g. BUSD is on BNB), finds the value of asset in Gas Asset then finds the required confirmation count.
    * ConfCount is then times by 6 seconds.
    *
    * @param Assset - asset of the outbound amount.
    * @param amount - the amount of asset (any asset).
    * @returns time in seconds before a Tx is confirmed by THORChain
    */
-  private async confCounting(asset: Asset, amount: BaseAmount): Promise<number> {
+  private async confCounting(liquidityPool: LiquidityPool, netOutput: BaseAmount): Promise<number> {
+
     let amountInGasAsset: BaseAmount
-    // If it is Native RUNE
-    if (eqAsset(AssetRuneNative, asset)) {
-      amountInGasAsset = amount
-    } else {
-      // get the pool for the asset being sent
-      const amountPool = await this.getPoolForAsset(asset)
-      if (!amountPool) {
-        throw new Error(`Could not find Pool for asset: ${asset}`)
-      }
-      // Find the amount in RUNE
-      const amountInRUNE = amountPool.getValueInRUNE(asset, amount)
-      if (!amountInRUNE) {
-        throw new Error(`Could get value in RUNE for asset: ${asset}`)
-      }
-
-      // find the gasAsset for the asset and convert the amountInRUNE into amountInGasAsset
-      const chainGasAsset = this.getChainAsset(asset.chain)
-      //console.log(`confCounting: Chain asset ${asset.chain.toString()} for asset is ${chainGasAsset.ticker}`)
-      if (eqAsset(chainGasAsset, asset)) {
-        // asset is already the chain asset
-        amountInGasAsset = amount
-      } else {
-        const gasChainPool = await this.getPoolForAsset(chainGasAsset)
-        if (!gasChainPool) {
-          throw new Error(`Could not find Pool for asset: ${chainGasAsset}`)
-        }
-        const assetPrice = gasChainPool.currentPriceInAsset
-        amountInGasAsset = assetToBase(assetPrice.times(amountInRUNE.amount()))
-      }
-    }
-
-    // TO Do:
-    // ============== Const that need to be added for this to work.  Made up values to get it to work
-    // const blockReward = asset.chain.blockReward // need a constant here or in Chain Client
-    // const blockTime = asset.chain.blockTime // need a constant here or in Chain Client
 
     const btcBlockTime = 600 // 600 seconds =  10 mins
     const btcBlockReward = 6.25
-    //=========================================================================================
+    const amountInRUNE = liquidityPool.getValueInRUNE(liquidityPool.asset, netOutput)
 
-    // requiredConfs = ceil (inputAmount in Asset / BlockReward for the chain)
+    const chainGasAsset = this.getChainAsset(liquidityPool.asset.chain)
+
+    if (eqAsset(chainGasAsset, liquidityPool.asset)) {
+
+      amountInGasAsset = netOutput
+    } else {
+      const gasChainPool = await this.getPoolForAsset(chainGasAsset)
+      if (!gasChainPool) {
+        throw new Error(`Could not find Pool for asset: ${chainGasAsset}`)
+      }
+      const assetPrice = gasChainPool.inverseAssetPrice
+      amountInGasAsset = assetToBase(assetPrice.times(amountInRUNE.amount()))
+    }
 
     const amountInGasAssetInAsset: AssetAmount = baseToAsset(amountInGasAsset)
     const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(btcBlockReward).toNumber())
-    console.log(`confCounting: requiredConfs are: ${requiredConfs}`)
-    // returns (requiredConfs * chainBlockTime)
+
     return requiredConfs * btcBlockTime
   }
 
@@ -561,78 +469,40 @@ export class ThorchainAMM {
   }
 
   /**
-   * Takes and Asset and converts it to the value of the other asset.
-   * E.g. ETH, 5, BTC works out 5 ETH is worth in BTC.
-   *      BTC, 1, BUSD works how much 1 BTC is worth in BUSD
-   *
+   * Takes an Asset and converts it to the value of the other asset.
    * @param sourceAsset
    * @param inputAssetAmount
    * @param destinationAsset
    * @returns
    */
-  public async assetToAsset(
-    sourceAsset: Asset,
-    inputAssetAmount: AssetAmount,
-    destinationAsset: Asset,
-  ): Promise<AssetAmount> {
-    this.refereshPoolCache()
-    let amountInDestnationAsset: AssetAmount
-    // Convert RUNE to Outbound Asset, limAmount is in RUNE. Need to get the assetPrice then * by RUNE amount.
-    // Need to do lim RUNE ammount * (AssetPool: Asset Depth / RUNE Depth)
-    if (eqAsset(sourceAsset, AssetRuneNative)) {
-      // Get the destination Pool.
-      const destinationAssetPool = await this.getPoolForAsset(destinationAsset)
-      if (!destinationAssetPool) {
-        throw new Error(`Could not find Liquidity Pool for asset: ${destinationAsset}`)
-      }
-      // get Asset/RUNE
-      const RUNEPerAsset = destinationAssetPool.currentPriceInAsset
-      // covert from RUNE to Asset
-      amountInDestnationAsset = inputAssetAmount.times(RUNEPerAsset)
-    } // Convert Asset to RUNE Amount
-    else if (eqAsset(destinationAsset, AssetRuneNative)) {
-      const sourceAssetPool = await this.getPoolForAsset(sourceAsset)
-      if (!sourceAssetPool) {
-        throw new Error(`Could not find Liquidity Pool for asset: ${destinationAsset}`)
-      }
-      // Find the asset amount for the RUNE
-      amountInDestnationAsset = baseToAsset(sourceAssetPool.getValueInRUNE(sourceAsset, assetToBase(inputAssetAmount)))
-      if (!amountInDestnationAsset) {
-        throw new Error(`Could get value in RUNE for asset: ${sourceAsset}`)
-      }
-    } // Convert Asset to Asset // (!eqAsset(destinationAsset, AssetRuneNative) && !eqAsset(destinationAsset, AssetRuneNative))
-    else {
-      const sourceAssetPool = await this.getPoolForAsset(sourceAsset)
-      if (!sourceAssetPool) {
-        throw new Error(`Could not find Liquidity Pool for asset: ${destinationAsset}`)
-      }
-      const destinationAssetPool = await this.getPoolForAsset(destinationAsset)
-      if (!destinationAssetPool) {
-        throw new Error(`Could not find Liquidity Pool for asset: ${destinationAsset}`)
-      }
-      // get source assetPrice
-      const sourceAssetPrice = sourceAssetPool.assetPrice
-      //const desitnationInverseAssetPrice = 0.001562671614285836
+  public async convertAssetToAsset(sourceAsset: Asset, inputAssetAmount: AssetAmount, destinationAsset: Asset ): Promise<AssetAmount> {
 
-      // console.log(`BTC inputAmount is : ${inputAssetAmount.amount()}`)
+    let amountInAssetB: AssetAmount
 
-      console.log(`BTC Asset Price is : ${sourceAssetPrice.amount()}`)
-      console.log(`ETH Price inverseAssetPrice is : ${destinationAssetPool.inverseAssetPrice}`)
-      console.log(`ETH Price currentPriceInAsset is : ${destinationAssetPool.currentPriceInAsset.amount()}`)
-      console.log(`ETH Price currentPriceInRune is : ${destinationAssetPool.currentPriceInRune.amount()}`)
+    // Convert RUNE to Outbound Asset, limAmount is in RUNE. assetPrice then * by RUNE amount.
+    // lim RUNE ammount * (AssetPool: Asset Depth / RUNE Depth)
 
-      // Asset to Asset is
-      //(sourceAssetPool Rune Depth / sourceAssetPool Asset Depth) * (destinationAssetPool Asset Depth/ destinationAssetPool Rune Depth)
-      const assetToAssetRatio = sourceAssetPool.assetPrice.times(destinationAssetPool.inverseAssetPrice)
-      console.log(`assetToAssetRatio : ${assetToAssetRatio.amount().toFixed(8)}`)
-      // then times the assetAmount
-      amountInDestnationAsset = inputAssetAmount.times(assetToAssetRatio.amount().toNumber())
+    const sourceAssetPool = await this.getPoolForAsset(sourceAsset)
+    const destinationAssetPool = await this.getPoolForAsset(destinationAsset)
+
+    if (eqAsset(sourceAsset, AssetRuneNative) && destinationAssetPool) {
+      const inversedRuneOverAsset = destinationAssetPool.inverseAssetPrice
+      amountInAssetB = inputAssetAmount.times(inversedRuneOverAsset)
     }
-    return amountInDestnationAsset
-  }
+    else if (eqAsset(destinationAsset, AssetRuneNative) && sourceAssetPool) {
+      amountInAssetB = baseToAsset(sourceAssetPool.getValueInRUNE(sourceAsset, assetToBase(inputAssetAmount)))
+    }
+    else if (sourceAssetPool && destinationAssetPool) {
+      const assetToAssetRatio = sourceAssetPool.assetPrice.times(assetToBase(destinationAssetPool.inverseAssetPrice))
+      amountInAssetB = inputAssetAmount.times(assetToAssetRatio.amount())
+    } else {
+      throw Error ('Source or destination pool is undefined')
+    }
+    return amountInAssetB
+    }
 
   /**
-   * return the chain for a given Asset This method should live somewhere else.
+   * Return the chain for a given Asset This method should live somewhere else.
    * @param chain
    * @returns the gas asset type for the given chain
    */

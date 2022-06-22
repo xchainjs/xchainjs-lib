@@ -22,7 +22,7 @@ export class LiquidityPool {
   private _asset: Asset
   private _assetString: string
   private _currentPriceInRune: AssetAmount
-  private _currentPriceInAsset: AssetAmount
+  private _inverseAssetPrice: AssetAmount
 
   constructor(pool: PoolDetail) {
     this.pool = pool
@@ -37,23 +37,20 @@ export class LiquidityPool {
 
     const runeToAssetRatio = this.runeBalance.div(this.assetBalance) // RUNE/Asset gets `assetPrice` of a pool (how much rune to 1 asset)
     this._currentPriceInRune = baseToAsset(runeToAssetRatio)
-    this._currentPriceInAsset = assetAmount(BN_1.dividedBy(runeToAssetRatio.amount())) // Asset/RUNE gets inverset asset price
+    this._inverseAssetPrice = assetAmount(BN_1.dividedBy(runeToAssetRatio.amount())) // Asset/RUNE gets inverse asset price
   }
   isAvailable(): boolean {
     return this.pool.status.toLowerCase() === 'available'
   }
   getPriceIn(otherAssetPool: LiquidityPool): AssetAmount {
-    return otherAssetPool.currentPriceInAsset.times(this.currentPriceInRune)
+    return otherAssetPool._inverseAssetPrice.times(this.currentPriceInRune)
   }
-  public get currentPriceInAsset(): AssetAmount {
-    return this._currentPriceInAsset
-  }
-  /**
-   * Returns the 'assetPrice' for the pool
-   *
-   */
+
   public get currentPriceInRune(): AssetAmount {
     return this._currentPriceInRune
+  }
+  public get inverseAssetPrice(): AssetAmount {
+    return this._inverseAssetPrice
   }
   public get asset(): Asset {
     return this._asset
@@ -63,17 +60,6 @@ export class LiquidityPool {
   }
   public get assetPrice(): BaseAmount {
     return this.runeBalance.div(this.assetBalance)
-  }
-  public get inverseAssetPrice(): BigNumber {
-    // return this.assetBalance.div(this.runeBalance) // always results in 0.0000000 which is wrong so using something else.
-    const iAssetPrice = this.assetBalance.amount().toNumber() / this.runeBalance.amount().toNumber()
-    console.log(
-      `at inverseAssetPrice: for pool: ${
-        this._asset.ticker
-      }. AssetBalance is ${this.assetBalance.amount()} and Rune Balance is ${this.runeBalance.amount()} \n Result is ${iAssetPrice}`,
-    )
-
-    return new BigNumber(iAssetPrice)
   }
 
   /**

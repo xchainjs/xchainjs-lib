@@ -40,6 +40,19 @@ describe(`Liquidity calc tests`, () => {
     expect(baseToAsset(getLUnits).amount()).toEqual(correctLiquidityUnits)
   })
 
+  it(`Should return correct asset price in rune`, async () => {
+    const runeToAssetRatio = btcPool.runeBalance.div(btcPool.assetBalance)
+    expect(btcPool.currentPriceInRune.amount()).toEqual(baseToAsset(runeToAssetRatio).amount())
+  })
+
+  it(`Should return inversed asset price`, async () => {
+    const BN_1 = new BigNumber(1)
+    const runeToAssetRatio = btcPool.runeBalance.div(btcPool.assetBalance)
+    const output = assetAmount(BN_1.dividedBy(runeToAssetRatio.amount()))
+    expect(btcPool.inverseAssetPrice.amount()).toEqual(output.amount())
+
+  })
+
   it(`Should calculate correct pool share`, async () => {
     const getLPoolShare = getPoolShare(unitData, btcPool)
     expect(baseToAsset(getLPoolShare.asset).amount()).toEqual(baseToAsset(liquidityUnits.asset).amount())

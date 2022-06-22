@@ -44,7 +44,7 @@ export type ExecuiteSwap = {
 export type SwapSubmitted = {
   hash: string
   url: string
-  //waittime: number
+  //waitTime: number
 }
 
 export type DepositParams = {
