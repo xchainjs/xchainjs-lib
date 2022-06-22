@@ -1,4 +1,4 @@
-# v.0.18.0 (2022-xx-xx)
+# v.0.18.0 (2022-06-22)
 
 ## Add
 
@@ -31,6 +31,7 @@
 - Remove deprecated `AssetMuon`
 - Remove deprecated `Client.getMainAsset`
 - Remove deprecated `BaseAccountResponse`
+- Rename `DECIMAL` -> `COSMOS_DECIMAL`
 
 # v.0.17.0 (2022-03-23)
 
