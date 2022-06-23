@@ -21,7 +21,7 @@ export class LiquidityPool {
 
   private _asset: Asset
   private _assetString: string
-  private _currentPriceInRune: AssetAmount
+  private _currentRatioInRune: AssetAmount
   private _inverseAssetPrice: AssetAmount
 
   constructor(pool: PoolDetail) {
@@ -36,18 +36,18 @@ export class LiquidityPool {
     this.runeBalance = baseAmount(this.pool.runeDepth) //Rune is always 8 decimals
 
     const runeToAssetRatio = this.runeBalance.div(this.assetBalance) // RUNE/Asset gets `assetPrice` of a pool (how much rune to 1 asset)
-    this._currentPriceInRune = baseToAsset(runeToAssetRatio)
+    this._currentRatioInRune = baseToAsset(runeToAssetRatio)
     this._inverseAssetPrice = assetAmount(BN_1.dividedBy(runeToAssetRatio.amount())) // Asset/RUNE gets inverse asset price
   }
   isAvailable(): boolean {
     return this.pool.status.toLowerCase() === 'available'
   }
   getPriceIn(otherAssetPool: LiquidityPool): AssetAmount {
-    return otherAssetPool._inverseAssetPrice.times(this.currentPriceInRune)
+    return otherAssetPool._inverseAssetPrice.times(this.currentRatioInRune)
   }
 
-  public get currentPriceInRune(): AssetAmount {
-    return this._currentPriceInRune
+  public get currentRatioInRune(): AssetAmount {
+    return this._currentRatioInRune
   }
   public get inverseAssetPrice(): AssetAmount {
     return this._inverseAssetPrice

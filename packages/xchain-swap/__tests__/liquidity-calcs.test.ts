@@ -42,7 +42,7 @@ describe(`Liquidity calc tests`, () => {
 
   it(`Should return correct asset price in rune`, async () => {
     const runeToAssetRatio = btcPool.runeBalance.div(btcPool.assetBalance)
-    expect(btcPool.currentPriceInRune.amount()).toEqual(baseToAsset(runeToAssetRatio).amount())
+    expect(btcPool.currentRatioInRune.amount()).toEqual(baseToAsset(runeToAssetRatio).amount())
   })
 
   it(`Should return inversed asset price`, async () => {

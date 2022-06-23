@@ -74,7 +74,7 @@ export const getSlipOnLiquidity = (liquidity: LiquidityData, pool: LiquidityPool
  */
 // Blocks for full protection 144000 // 100 days
 export const getLiquidityProtectionData = (liquidity: LiquidityData, pool: LiquidityPool, block: Block): number => {
-  // formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
+  //formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
   const R0 = liquidity.rune.amount() // symetrical value of rune deposit
   const A0 = liquidity.asset.amount() // symetrical value of asset deposit
   const R1 = pool.runeBalance.amount() // rune to redeem
@@ -83,8 +83,8 @@ export const getLiquidityProtectionData = (liquidity: LiquidityData, pool: Liqui
   const coverage = A0.times(P1).plus(R0).minus(A1.times(P1).plus(R1))
   const currentHeight = block.current
   const heightLastAdded = block.lastAdded
-  // const blocksforfullprotection = //
-  const protectionProgress = currentHeight - heightLastAdded //blocksforfullprotection
+  const blocksforfullprotection = block.fullProtection
+  const protectionProgress = (currentHeight - heightLastAdded)/blocksforfullprotection
   const result = protectionProgress * coverage.toNumber() // impermanent loss protection result
   return result
 }

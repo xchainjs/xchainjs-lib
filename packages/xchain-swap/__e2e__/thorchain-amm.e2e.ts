@@ -244,6 +244,12 @@ describe('xchain-swap Integration Tests', () => {
     )
     console.log(tx)
     expect(estimate.waitTime > 600)
+  })
 
+  it(`Should return the correct network value`, async () => {
+    const constant = 'YGGFUNDRETRY'
+    const value = await midgard.getNetworkValueByName(constant)
+    console.log(value)
+    expect(value).toBeTruthy()
   })
 })

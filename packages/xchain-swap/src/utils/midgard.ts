@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Configuration, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
+import { Configuration, Constants, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
 import { BaseAmount, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
@@ -112,10 +112,12 @@ export class Midgard {
     return inboundDetails
   }
 
-  public async getConstantsDetails() {
-    for (const api of this.midgardApis) {
+  private async getConstantsDetails() {
+    const path = 'v2/thorchain/constants'
+    for (const baseUrl of this.config.midgardBaseUrls) {
       try {
-        return (await api.getProxiedConstants()).data
+        const { data } = await axios.get(`${baseUrl}${path}`)
+        return data
       } catch (e) {
         console.error(e)
       }
@@ -142,14 +144,24 @@ export class Midgard {
 
     throw new Error('Midgard not responding')
   }
-}
-/**
-  // want to do something like this in THORChainAMM Class
-  //let minTxOutVolumeThreshold = this.midgard.getMimirValueByName(minTxOutVolumeThreshold)
-  public async getMimirValueByName(mimirName: string): Promise<string> {
-    const mimirDetails = await Promise.all([this.getMimirDetails()])
-    const mimrValue = mimirDetails[`${mimirName}`]
-    return mimrValue
+  /**
+   * Function that wraps Mimir and Constants to return the value from a given constant name. Searchs Mimir first.
+   * Mimir has constants in all caps
+   * @param networkValueName the network value to be used to search the contsants
+   * @returns the constants value
+   */
+  public async getNetworkValueByName(networkValueName: string): Promise<Constants> {
+    const [mimirDetails] = await Promise.all([this.getMimirDetails()])
+    const [constantDetails] = await Promise.all([this.getConstantsDetails()])
+    const mimirValue = mimirDetails[networkValueName]
+    const constantsValue = constantDetails["int_64_values"][networkValueName]
+    if(mimirValue != undefined){
+      return mimirValue
+    }else if (constantDetails != undefined){
+      return constantsValue
+    }else {
+      throw Error (`Could not find network value name`)
+    }
   }
 }
-*/
+

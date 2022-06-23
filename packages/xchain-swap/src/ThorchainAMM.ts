@@ -368,8 +368,8 @@ export class ThorchainAMM {
    * Finds the gas asset of the given asset (e.g. BUSD is on BNB), finds the value of asset in Gas Asset then finds the required confirmation count.
    * ConfCount is then times by 6 seconds.
    *
-   * @param Assset - asset of the outbound amount.
-   * @param amount - the amount of asset (any asset).
+   * @param liquidityPool - asset of the outbound amount.
+   * @param netOutput - netOuput of asset being swapped (any asset).
    * @returns time in seconds before a Tx is confirmed by THORChain
    */
   private async confCounting(liquidityPool: LiquidityPool, netOutput: BaseAmount): Promise<number> {
@@ -469,36 +469,36 @@ export class ThorchainAMM {
   }
 
   /**
-   * Takes an Asset and converts it to the value of the other asset.
-   * @param sourceAsset
-   * @param inputAssetAmount
-   * @param destinationAsset
-   * @returns
+   * Takes an Asset and converts it to the value of the other asset using pool ratio's
+   *
+   * @param sourceAsset Input Asset type
+   * @param inputAssetAmount Input Asset amount
+   * @param destinationAsset Output Asset type
+   * @returns destinationAssetAmount - amount in destination asset after conversion
    */
   public async convertAssetToAsset(sourceAsset: Asset, inputAssetAmount: AssetAmount, destinationAsset: Asset ): Promise<AssetAmount> {
 
-    let amountInAssetB: AssetAmount
+    let destinationAssetAmount: AssetAmount
 
     // Convert RUNE to Outbound Asset, limAmount is in RUNE. assetPrice then * by RUNE amount.
     // lim RUNE ammount * (AssetPool: Asset Depth / RUNE Depth)
-
     const sourceAssetPool = await this.getPoolForAsset(sourceAsset)
     const destinationAssetPool = await this.getPoolForAsset(destinationAsset)
 
     if (eqAsset(sourceAsset, AssetRuneNative) && destinationAssetPool) {
       const inversedRuneOverAsset = destinationAssetPool.inverseAssetPrice
-      amountInAssetB = inputAssetAmount.times(inversedRuneOverAsset)
+      destinationAssetAmount = inputAssetAmount.times(inversedRuneOverAsset)
     }
     else if (eqAsset(destinationAsset, AssetRuneNative) && sourceAssetPool) {
-      amountInAssetB = baseToAsset(sourceAssetPool.getValueInRUNE(sourceAsset, assetToBase(inputAssetAmount)))
+      destinationAssetAmount = baseToAsset(sourceAssetPool.getValueInRUNE(sourceAsset, assetToBase(inputAssetAmount)))
     }
     else if (sourceAssetPool && destinationAssetPool) {
-      const assetToAssetRatio = sourceAssetPool.assetPrice.times(assetToBase(destinationAssetPool.inverseAssetPrice))
-      amountInAssetB = inputAssetAmount.times(assetToAssetRatio.amount())
+      const assetToAssetRatio = sourceAssetPool.getPriceIn(destinationAssetPool)
+      destinationAssetAmount = inputAssetAmount.times(assetToAssetRatio.amount())
     } else {
       throw Error ('Source or destination pool is undefined')
     }
-    return amountInAssetB
+    return destinationAssetAmount
     }
 
   /**
