@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Configuration, Constants, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
+import { Configuration, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
 import { BaseAmount, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
@@ -150,10 +150,10 @@ export class Midgard {
    * @param networkValueName the network value to be used to search the contsants
    * @returns the constants value
    */
-  public async getNetworkValueByName(networkValueName: string): Promise<Constants> {
+  public async getNetworkValueByName(networkValueName: string): Promise<number> {
     const [mimirDetails] = await Promise.all([this.getMimirDetails()])
     const [constantDetails] = await Promise.all([this.getConstantsDetails()])
-    const mimirValue = mimirDetails[networkValueName]
+    const mimirValue = mimirDetails[networkValueName.toUpperCase()]
     const constantsValue = constantDetails["int_64_values"][networkValueName]
     if(mimirValue != undefined){
       return mimirValue

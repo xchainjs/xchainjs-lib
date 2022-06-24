@@ -310,55 +310,35 @@ export class ThorchainAMM {
    * @returns required delay in seconds
    * @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/manager_txout_current.go#L548
    */
-  private async outboundDelay(liquidtyPool: LiquidityPool, asset: Asset, outboundAmount: BaseAmount): Promise<number> {
-    //Get the Mimir values
-    // want to do something like this in THORChainAMM Class
+  public async outboundDelay(liquidtyPool: LiquidityPool, asset: Asset, outboundAmount: BaseAmount): Promise<number> {
 
-    // TO Do:
-    // Require Midgard Class update to do
-    //this.midgard.getConstantValueByName(string)
-    //this.midgard.getMimirValueByName(string)
+    const minTxOutVolumeThreshold = await this.midgard.getNetworkValueByName("MinTxOutVolumeThreshold")
+    const maxTxOutOffset =  await this.midgard.getNetworkValueByName("MaxTxOutOffset")
+    const getScheduledOutboundValue = await this.midgard.getScheduledOutboundValue()
+    const thorChainblocktime = 6 // blocks required to confirm tx
 
-    const minTxOutVolumeThreshold = 1000 // RUNE per Block
-    const maxTxOutOffset = 720 //max blocks an outbound can be delayed
-    let txOutDelayRate = 100 // current delay rate
-    const thorChainblocktime = 6
-
+    let txOutDelayRate =  await this.midgard.getNetworkValueByName("TXOUTDELAYRATE")  // set to 100 rune
     let runeValue: BaseAmount
 
-    if (eqAsset(AssetRuneNative, asset)) {
-      // Asset is RUNE, no need to convert to RUNE
-      runeValue = outboundAmount
-    } else {
-      runeValue = liquidtyPool.getValueInRUNE(asset, outboundAmount)
-    }
-
-    if (baseToAsset(runeValue).amount().toNumber() < minTxOutVolumeThreshold) {
+    // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
+    runeValue = (eqAsset(AssetRuneNative, asset)) ? outboundAmount : liquidtyPool.getValueInRUNE(asset, outboundAmount)
+    // Check rune value amount
+    if (runeValue.amount().isLessThan(baseAmount(minTxOutVolumeThreshold).amount())) {
       return thorChainblocktime
     }
-    //https://midgard.thorswap.net/v2/thorchain/queue) "scheduled_outbound_value" // Rune value in the outbound queue
-    const getScheduledOutboundValue = await this.midgard.getScheduledOutboundValue()
-    if (getScheduledOutboundValue.amount().toNumber() < 0 || undefined) {
-      throw new Error(
-        `Could not get getScheduledOutboundValue. Value is:  ${getScheduledOutboundValue.amount.toString()}`,
-      )
+    // Rune value in the outbound queue
+    if (getScheduledOutboundValue == undefined) {
+      throw new Error(`Could not return Scheduled Outbound Value`)
     }
-    // Add outboundAmount in RUNE to the oubound queue
-    const sumValue: AssetAmount = baseToAsset(runeValue.plus(getScheduledOutboundValue))
-
-    const a = sumValue.amount().dividedBy(minTxOutVolumeThreshold)
-
-    txOutDelayRate = txOutDelayRate - a.toNumber()
-
-    if (txOutDelayRate < 1) {
-      txOutDelayRate = 1
-    }
+    // Add OutboundAmount in rune to the oubound queue
+    const outboundAmountTotal: BaseAmount = runeValue.plus(getScheduledOutboundValue)
+    // calculate the if outboundAmountTotal is over the volume threshold
+    const volumeThreshold = outboundAmountTotal.amount().dividedBy(minTxOutVolumeThreshold)
+    // check delay rate
+    txOutDelayRate = ((txOutDelayRate - volumeThreshold.toNumber()) < 1 ? 1 : txOutDelayRate)
     // calculate the minimum number of blocks in the future the txn has to be
-    let minBlocks = baseToAsset(runeValue).div(txOutDelayRate).amount().toNumber()
-
-    if (minBlocks > maxTxOutOffset) {
-      minBlocks = maxTxOutOffset
-    }
+    let minBlocks = runeValue.div(txOutDelayRate).amount().toNumber()
+    minBlocks = ( minBlocks > maxTxOutOffset ? maxTxOutOffset : minBlocks)
     return minBlocks * thorChainblocktime
   }
 

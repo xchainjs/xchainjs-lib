@@ -8,8 +8,10 @@ import {
   assetAmount,
   assetFromString,
   assetToBase,
+  AssetBNB
 } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
+//import { LiquidityPool } from '../src/LiquidityPool'
 
 import { ThorchainAMM } from '../src/ThorchainAMM'
 import { EstimateSwapParams, SwapEstimate } from '../src/types'
@@ -34,6 +36,23 @@ function print(estimate: SwapEstimate) {
   }
   console.log(expanded)
 }
+
+// const bnbPoolDetails = {
+//   asset: 'BNB.BNB',
+//   assetDepth: assetToBase(assetAmount(100)).amount().toFixed(),
+//   assetPrice: '11121.24920535084',
+//   assetPriceUSD: '30458.124870650492',
+//   liquidityUnits: '536087715332333',
+//   poolAPY: '0.1001447237777584',
+//   runeDepth: assetToBase(assetAmount(2500000)).amount().toFixed(),
+//   status: 'available',
+//   synthSupply: '3304301605',
+//   synthUnits: '10309541238596',
+//   units: '546397256570929',
+//   volume24h: '16202006480711',
+// }
+
+// const bnbPool = new LiquidityPool(bnbPoolDetails)
 // Test User Functions - single and double swap.
 describe('xchain-swap Integration Tests', () => {
   it('should estimate a swap of 1 BTC to ETH', async () => {
@@ -247,9 +266,16 @@ describe('xchain-swap Integration Tests', () => {
   })
 
   it(`Should return the correct network value`, async () => {
-    const constant = 'YGGFUNDRETRY'
+    const constant = 'TXOUTDELAYRATE'
     const value = await midgard.getNetworkValueByName(constant)
     console.log(value)
-    expect(value).toBeTruthy()
+    expect(value).toEqual(10000000000)
   })
+
+  // it(`Should get the correct outbound Delay`, async () => {
+  //   const outboundAmount = assetToBase(assetAmount(1))
+  //   const outBoundValue = await thorchainAmm.outboundDelay(bnbPool, AssetBNB, outboundAmount )
+  //   console.log(outBoundValue)
+  //   expect(outBoundValue).toEqual(1500)
+  // })
 })
