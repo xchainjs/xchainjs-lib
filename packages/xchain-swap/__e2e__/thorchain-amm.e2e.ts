@@ -8,7 +8,6 @@ import {
   assetAmount,
   assetFromString,
   assetToBase,
-  AssetBNB
 } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 //import { LiquidityPool } from '../src/LiquidityPool'
@@ -81,7 +80,6 @@ describe('xchain-swap Integration Tests', () => {
     }
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate).toBeTruthy()
-
   })
   it(`Should estimate single swap of 1000 RUNE To BTC `, async () => {
     const swapParams: EstimateSwapParams = {
@@ -92,7 +90,6 @@ describe('xchain-swap Integration Tests', () => {
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate).toBeTruthy()
     expect(estimate.waitTime === 600)
-
   })
 
   // Test Conditions - Test to make sure the swap has no input errors
@@ -224,7 +221,6 @@ describe('xchain-swap Integration Tests', () => {
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate).toBeTruthy()
     expect(estimate.waitTime > 600)
-
   })
   // it(`Should convert BTC to ETH `, async () => {
   //   const inputAsset = AssetBTC

@@ -148,20 +148,19 @@ export class Midgard {
    * Function that wraps Mimir and Constants to return the value from a given constant name. Searchs Mimir first.
    * Mimir has constants in all caps
    * @param networkValueName the network value to be used to search the contsants
-   * @returns the constants value
+   * @returns the mimir or constants value
    */
   public async getNetworkValueByName(networkValueName: string): Promise<number> {
     const [mimirDetails] = await Promise.all([this.getMimirDetails()])
     const [constantDetails] = await Promise.all([this.getConstantsDetails()])
     const mimirValue = mimirDetails[networkValueName.toUpperCase()]
-    const constantsValue = constantDetails["int_64_values"][networkValueName]
-    if(mimirValue != undefined){
+    const constantsValue = constantDetails['int_64_values'][networkValueName]
+    if (mimirValue != undefined) {
       return mimirValue
-    }else if (constantDetails != undefined){
+    } else if (constantDetails != undefined) {
       return constantsValue
-    }else {
-      throw Error (`Could not find network value name`)
+    } else {
+      throw Error(`Could not find network value name`)
     }
   }
 }
-
