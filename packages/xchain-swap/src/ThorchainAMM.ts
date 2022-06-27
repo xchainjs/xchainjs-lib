@@ -22,12 +22,14 @@ import {
   THORChain,
   TerraChain,
   baseAmount,
+  baseToAsset,
   eqAsset,
   eqChain,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
+import { Wallet } from './Wallet'
 import {
   EstimateSwapParams,
   InboundDetail,
@@ -39,7 +41,6 @@ import {
 } from './types'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'
-import { Wallet } from './Wallet'
 
 const BN_1 = new BigNumber(1)
 
@@ -266,11 +267,7 @@ export class ThorchainAMM {
     } // else allowed slip is 100%
 
     const limInputAmount: BaseAmount = params.inputAmount.times(limPercentage)
-    const limAssetAmount = await this.convertAssetToAsset(
-      params.sourceAsset,
-      limInputAmount,
-      params.destinationAsset,
-    )
+    const limAssetAmount = await this.convertAssetToAsset(params.sourceAsset, limInputAmount, params.destinationAsset)
     if (!limAssetAmount) {
       throw new Error(`Could not convert ${params.sourceAsset} to ${params.destinationAsset}`)
     }
@@ -284,9 +281,7 @@ export class ThorchainAMM {
     if (params.destinationAsset.synth && eqChain(params.destinationAsset.chain, Chain.THORChain)) {
       memo = `=:${params.destinationAsset.chain}/${params.destinationAsset.symbol}`
     }
-    memo = memo.concat(
-      `:${destinationAddress}:${lim}:${affiliateAddress}:${affiliateFee.amount().toFixed()}`,
-    )
+    memo = memo.concat(`:${destinationAddress}:${lim}:${affiliateAddress}:${affiliateFee.amount().toFixed()}`)
     // If memo length is too long for BTC, trim it
     if (eqAsset(params.sourceAsset, AssetBTC) && memo.length > 80) {
       memo = `:${params.destinationAsset.chain}.${params.destinationAsset.symbol}`
@@ -307,7 +302,6 @@ export class ThorchainAMM {
   /**
    * Works out how long an outbound Tx will be held by THORChain before sending.
    *
-   * Needs to be tested
    *
    * @param asset asset being sent.
    * @param outboundAmount the amount of that asset
@@ -351,11 +345,10 @@ export class ThorchainAMM {
    *
    * @param sourceAsset
    * @param gasRate
+   * @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
    * @returns
    */
   private calcInboundFee(sourceAsset: Asset, gasRate: BigNumber): BaseAmount {
-    // https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
-
     switch (sourceAsset.chain) {
       case Chain.Bitcoin:
       case Chain.BitcoinCash:
@@ -382,6 +375,11 @@ export class ThorchainAMM {
     throw new Error(`could not calculate inbound fee for ${sourceAsset.chain}`)
   }
 
+  /**
+   * Gets the Liquidity Pool for a given Asset
+   * @param asset - cannot be RUNE.
+   * @returns
+   */
   async getPoolForAsset(asset: Asset): Promise<LiquidityPool | undefined> {
     const pools = await this.getPools()
     return pools[asset.ticker]
@@ -425,31 +423,36 @@ export class ThorchainAMM {
   /**
    * Takes an Asset and converts it to the value of the other asset using pool ratio's
    *
-   * @param sourceAsset Input Asset type
+   * @param sourceAsset Input Asset Type
    * @param inputAssetAmount Input Asset amount
-   * @param destinationAsset Output Asset type
-   * @returns destinationAssetAmount - amount in destination asset after conversion
+   * @param destinationAsset Output Asset Type
+   * @returns {destinationAmount} - amount in destination asset after conversion
    */
-  public async convertAssetToAsset(sourceAsset: Asset, inputAssetAmount: BaseAmount, destinationAsset: Asset ): Promise<BaseAmount> {
+  public async convertAssetToAsset(
+    sourceAsset: Asset,
+    inputAmount: BaseAmount,
+    destinationAsset: Asset,
+  ): Promise<BaseAmount> {
+    let destinationAmount: BaseAmount
 
-    let destinationAssetAmount: BaseAmount
-    // Convert RUNE to Outbound Asset, limAmount is in RUNE. assetPrice then * by RUNE amount.
-    // lim RUNE ammount * (AssetPool: Asset Depth / RUNE Depth)
     const sourceAssetPool = await this.getPoolForAsset(sourceAsset)
     const destinationAssetPool = await this.getPoolForAsset(destinationAsset)
 
+    // Convert RUNE to Asset
     if (eqAsset(sourceAsset, AssetRuneNative) && destinationAssetPool) {
       const inversedRuneOverAsset = destinationAssetPool.inverseAssetPrice
-      destinationAssetAmount = inputAssetAmount.times(inversedRuneOverAsset.amount())
+      destinationAmount = inputAmount.times(inversedRuneOverAsset.amount())
+      // Convert Asset to RUNE
     } else if (eqAsset(destinationAsset, AssetRuneNative) && sourceAssetPool) {
-      destinationAssetAmount = sourceAssetPool.getValueInRUNE(sourceAsset, inputAssetAmount)
+      destinationAmount = sourceAssetPool.getValueInRUNE(sourceAsset, inputAmount)
+      // Convert Asset to Asset
     } else if (sourceAssetPool && destinationAssetPool) {
       const assetToAssetRatio = sourceAssetPool.getPriceIn(destinationAssetPool)
-      destinationAssetAmount = inputAssetAmount.times(assetToAssetRatio.amount())
+      destinationAmount = inputAmount.times(assetToAssetRatio.amount())
     } else {
       throw Error('Source or destination pool is undefined')
     }
-    return destinationAssetAmount
+    return destinationAmount
   }
 
   /**
@@ -506,45 +509,74 @@ export class ThorchainAMM {
   //   })
   // }
 
-    /**
+  /**
    * Parked for now
    * Finds the required confCount required for an inbound or outbound Tx to THORChain
    *
    * Finds the gas asset of the given asset (e.g. BUSD is on BNB), finds the value of asset in Gas Asset then finds the required confirmation count.
    * ConfCount is then times by 6 seconds.
    *
-   * @param liquidityPool - asset of the outbound amount.
-   * @param netOutput - netOuput of asset being swapped (any asset).
+   * @param inboundAsset - asset of the outbound amount.
+   * @param inboundAmount - netOuput of asset being swapped (any asset).
    * @returns time in seconds before a Tx is confirmed by THORChain
    * @see https://docs.thorchain.org/chain-clients/overview
    */
-  // private async confCounting(liquidityPool: LiquidityPool, netOutput: BaseAmount): Promise<number> {
-  //   let amountInGasAsset: BaseAmount
+  async confCounting(inboundAsset: Asset, inboundAmount: BaseAmount): Promise<number> {
+    let amountInGasAsset: BaseAmount
 
-  //   if(isThorChain((liquidityPool.asset.chain) || isBnbChain(liquidityPool.asset.chain))) {
-  //     return 0
-  //   }
+    // RUNE, BNB and Synths have near instant finality, so no conf counting required.
+    if (eqAsset(AssetRuneNative, inboundAsset) || eqAsset(AssetBNB, inboundAsset) || inboundAsset.synth) {
+      return 0
+    }
+    // Get the gas asset for the inboundAsset.chain
+    const chainGasAsset = this.getChainAsset(inboundAsset.chain)
 
-  //   const expectedBtcBlockTime = 600 // 600 seconds =  10 mins
-  //   const btcBlockReward = 6.25
-  //   const amountInRUNE = liquidityPool.getValueInRUNE(liquidityPool.asset, netOutput)
+    // if we already have the chain asset, good, else need to convert asset value to chain asset.
+    if (eqAsset(chainGasAsset, inboundAsset)) {
+      amountInGasAsset = inboundAmount
+    } else {
+      amountInGasAsset = await this.convertAssetToAsset(inboundAsset, inboundAmount, chainGasAsset)
+    }
+    // Convert to Asset Amount
+    const amountInGasAssetInAsset = baseToAsset(amountInGasAsset)
+    // get the relivate blockchian information
+    const btcBlockReward = 6.25
+    const btcBlockTime = 600 // 600 seconds =  10 mins
+    const ethBlockReward = 2
+    const ethBlockTime = 13
+    const ltcBlockReward = 12.5
+    const ltcBlockTime = 150 // 2.5 mins
+    const dogeBlockReward = 10000
+    const dogeBlockTime = 60
 
-  //   const chainGasAsset = this.getChainAsset(liquidityPool.asset.chain)
+    let blockReward = 1
+    let blockTime = 1
 
-  //   if (eqAsset(chainGasAsset, liquidityPool.asset)) {
-  //     amountInGasAsset = netOutput
-  //   } else {
-  //     const gasChainPool = await this.getPoolForAsset(chainGasAsset)
-  //     if (!gasChainPool) {
-  //       throw new Error(`Could not find Pool for asset: ${chainGasAsset}`)
-  //     }
-  //     const assetPrice = gasChainPool.inverseAssetPrice
-  //     amountInGasAsset = assetToBase(assetPrice.times(amountInRUNE.amount()))
-  //   }
+    switch (chainGasAsset) {
+      case AssetBTC:
+      case AssetBCH:
+        blockReward = btcBlockReward
+        blockTime = btcBlockTime
+        break
+      case AssetLTC:
+        blockReward = ltcBlockReward
+        blockTime = ltcBlockTime
+        break
+      case AssetETH:
+        blockReward = ethBlockReward
+        blockReward = ethBlockTime
+        break
+      case AssetDOGE:
+        blockReward = dogeBlockReward
+        blockTime = dogeBlockTime
+        break
+      default:
+        throw new Error(`Could not find Blockchain information for ${chainGasAsset}`)
+    }
 
-  //   const amountInGasAssetInAsset: AssetAmount = baseToAsset(amountInGasAsset)
-  //   const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(btcBlockReward).toNumber())
-
-  //   return requiredConfs * expectedBtcBlockTime
-  // }
+    // find the requried confs
+    const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(blockReward).toNumber())
+    // convert that into seconds
+    return requiredConfs * blockTime
+  }
 }
