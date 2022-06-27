@@ -1,3 +1,9 @@
+# v.0.18.1 (2022-xx-xx)
+
+## Add
+
+- helper `getDefaultRootDerivationPaths`
+
 # v.0.18.0 (2022-06-22)
 
 ## Add

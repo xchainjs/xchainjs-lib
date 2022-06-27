@@ -1,5 +1,5 @@
 import { proto } from '@cosmos-client/core'
-import { FeeType, Fees, Network, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
+import { FeeType, Fees, Network, RootDerivationPaths, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount, CosmosChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
 import { AssetAtom, COSMOS_DECIMAL } from './const'
@@ -230,3 +230,9 @@ export const getDefaultChainIds = (): ChainIds => {
     [Network.Mainnet]: mainChainId,
   }
 }
+
+export const getDefaultRootDerivationPaths = (): RootDerivationPaths => ({
+  [Network.Mainnet]: `44'/118'/0'/0/`,
+  [Network.Testnet]: `44'/118'/0'/0/`,
+  [Network.Stagenet]: `44'/118'/0'/0/`,
+})

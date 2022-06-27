@@ -23,7 +23,14 @@ import { AssetAtom, COSMOS_DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT } from './con
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { TxOfflineParams } from './cosmos/types'
 import { ChainIds, ClientUrls, CosmosClientParams } from './types'
-import { getAsset, getDefaultChainIds, getDefaultClientUrls, getDenom, getTxsFromHistory } from './util'
+import {
+  getAsset,
+  getDefaultChainIds,
+  getDefaultClientUrls,
+  getDefaultRootDerivationPaths,
+  getDenom,
+  getTxsFromHistory,
+} from './util'
 
 /**
  * Interface for custom Cosmos client
@@ -55,11 +62,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     phrase,
     clientUrls,
     chainIds,
-    rootDerivationPaths = {
-      [Network.Mainnet]: `44'/118'/0'/0/`,
-      [Network.Testnet]: `44'/118'/0'/0/`,
-      [Network.Stagenet]: `44'/118'/0'/0/`,
-    },
+    rootDerivationPaths = getDefaultRootDerivationPaths(),
   }: XChainClientParams & CosmosClientParams) {
     super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
 
