@@ -222,23 +222,7 @@ describe('xchain-swap Integration Tests', () => {
     expect(estimate).toBeTruthy()
     expect(estimate.waitTime > 600)
   })
-  // it(`Should convert BTC to ETH `, async () => {
-  //   const inputAsset = AssetBTC
-  //   const outboundAsset = AssetETH
-  //   const inputAmount = assetAmount(0.5)
-  //   const correctOuput = assetAmount(928269719)
-  //   const outboundETHAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
-  //   expect(outboundETHAmount.amount()).toEqual(correctOuput.amount())
-  //   console.log(`0.5 BTC to ETH is: ${outboundETHAmount.amount().toFixed()} ETH`)
-  // })
-  // it(`Should convert BTC to RUNE `, async () => {
-  //   const inputAsset = AssetBTC
-  //   const outboundAsset = AssetRuneNative
-  //   const inputAmount = assetAmount(0.5)
-  //   const outboundBtcAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
-  //   expect(outboundBtcAmount.amount().toNumber() > 1000)
-  // })
-
+  
   it(`Should estimate run DoSwap `, async () => {
     const swapParams: EstimateSwapParams = {
       sourceAsset: AssetRuneNative,

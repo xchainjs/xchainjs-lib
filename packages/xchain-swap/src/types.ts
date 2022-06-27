@@ -35,7 +35,7 @@ export type EstimateSwapParams = {
   slipLimit?: BigNumber
 }
 
-export type ExecuiteSwap = {
+export type ExecuteSwap = {
   fromBaseAmount: BaseAmount
   from: Asset
   to: Asset

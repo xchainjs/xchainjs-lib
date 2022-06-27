@@ -2,7 +2,6 @@ import { AssetLUNA } from '@xchainjs/xchain-terra/lib'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
 import {
   Asset,
-  AssetAmount,
   AssetBCH,
   AssetBNB,
   AssetBTC,
@@ -22,9 +21,7 @@ import {
   PolkadotChain,
   THORChain,
   TerraChain,
-  assetToBase,
   baseAmount,
-  baseToAsset,
   eqAsset,
   eqChain,
 } from '@xchainjs/xchain-util'
@@ -42,6 +39,8 @@ import {
 } from './types'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'
+import { Wallet } from './Wallet'
+
 const BN_1 = new BigNumber(1)
 
 export class ThorchainAMM {
@@ -131,7 +130,7 @@ export class ThorchainAMM {
     } else {
       inboundFee = this.calcInboundFee(params.sourceAsset, sourceInboundDetails.gas_rate)
     }
-    // works out inbound fee.
+    // works out outbound fee.
     if (eqChain(params.destinationAsset.chain, Chain.THORChain)) {
       outboundFee = baseAmount(2000000)
     } else {
@@ -145,7 +144,7 @@ export class ThorchainAMM {
     const affiliateFee = inputNetAmount.times(params.affiliateFeePercent || 0)
     // remove the affiliate fee from the input.
     inputNetAmount = inputNetAmount.minus(affiliateFee)
-    // now we calculate swapfee based on inputNetAmount
+    // now calculate swapfee based on inputNetAmount
     const swapOutput = this.calcSwapOutput(inputNetAmount, sourcePool, destinationPool)
 
     // ---------------- Remove Outbound Fee ---------------------- /
@@ -223,26 +222,19 @@ export class ThorchainAMM {
         swapEstimate.canSwap = true
       }
       // ---------------- Work out total Wait Time for Swap ---------------------- /
-      if (swapEstimate.canSwap) {
-        const confCountTime = await this.confCounting(destinationPool, swapEstimate.netOutput)
-        // if (!confCountTime) {
-        //   throw Error(`Could not get conf count for ${params.destinationAsset.ticker}`)
-        // }
-        const outboundDelay = await this.outboundDelay(destinationPool, params.destinationAsset, swapEstimate.netOutput)
-        // if (!outboundDelay) {
-        //   throw Error(`Could not get conf count for ${params.destinationAsset.ticker}`)
-        // }
+      // if (swapEstimate.canSwap) {
+      //   const inboundDelay = await this.confCounting(sourcePool, params.inputAmount)
+      //   // if (!confCountTime) {
+      //   //   throw Error(`Could not get conf count for ${params.destinationAsset.ticker}`)
+      //   // }
+      //   const outboundDelay = await this.outboundDelay(destinationPool, params.destinationAsset, swapEstimate.netOutput)
+      //   // if (!outboundDelay) {
+      //   //   throw Error(`Could not get conf count for ${params.destinationAsset.ticker}`)
+      //   // }
+      //   const waitTime = inboundDelay + outboundDelay
 
-        // Find the biggest delay for the outbound Tx
-        const waitTime = confCountTime > outboundDelay ? confCountTime : outboundDelay
-
-        // Add the Tx in Time
-        // const inboundDelay = await this.confCounting(params.sourceAsset, params.inputAmount)
-        // if (!inboundDelay) {
-        //   throw Error(`Could not get conf count for ${params.sourceAsset}`)
-        // }
-        swapEstimate.waitTime = waitTime
-      }
+      //   swapEstimate.waitTime = waitTime
+      // }
     }
     return swapEstimate
   }
@@ -257,14 +249,15 @@ export class ThorchainAMM {
    * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
   public async doSwap(
-    //  wallet: Wallet,
+    wallet: Wallet,
     params: EstimateSwapParams,
     destinationAddress: string,
     affiliateAddress: string,
     interfaceID = 999,
   ): Promise<SwapSubmitted> {
     this.isValidSwap(params)
-    const swapEstimate = await this.estimateSwap(params) // Used to return fees
+    // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
+    const affiliateFee = params.inputAmount.times(params.affiliateFeePercent || 0)
 
     // Work out LIM from the slip percentage
     let limPercentage = BN_1
@@ -275,7 +268,7 @@ export class ThorchainAMM {
     const limInputAmount: BaseAmount = params.inputAmount.times(limPercentage)
     const limAssetAmount = await this.convertAssetToAsset(
       params.sourceAsset,
-      baseToAsset(limInputAmount),
+      limInputAmount,
       params.destinationAsset,
     )
     if (!limAssetAmount) {
@@ -287,36 +280,28 @@ export class ThorchainAMM {
     const lim = limstring.substring(0, limstring.length - 3).concat(interfaceID.toString())
     // create the full memo
     let memo = `=:${params.destinationAsset.chain}.${params.destinationAsset.symbol}`
-    // synth needs a different memo
+    // If synth construct a synth memo
     if (params.destinationAsset.synth && eqChain(params.destinationAsset.chain, Chain.THORChain)) {
       memo = `=:${params.destinationAsset.chain}/${params.destinationAsset.symbol}`
     }
     memo = memo.concat(
-      `:${destinationAddress}:${lim}:${affiliateAddress}:${swapEstimate.totalFees.affiliateFee.amount().toFixed()}`,
+      `:${destinationAddress}:${lim}:${affiliateAddress}:${affiliateFee.amount().toFixed()}`,
     )
+    // If memo length is too long for BTC, trim it
     if (eqAsset(params.sourceAsset, AssetBTC) && memo.length > 80) {
-      // if memo length is too long for BTC, need to trim it
       memo = `:${params.destinationAsset.chain}.${params.destinationAsset.symbol}`
-      // if it is going to a synth
+      // If swapping to a synth
       if (params.destinationAsset.synth && eqChain(params.destinationAsset.chain, Chain.THORChain)) {
         memo = `=:${params.destinationAsset.chain}/${params.destinationAsset.symbol}`
       }
       memo = memo.concat(`:${destinationAddress}`)
     }
-    console.log(`DoSwap: memo is: ${memo.toString()}`)
-
-    const msgDepositSubmitted: SwapSubmitted = {
-      hash: ``,
-      url: ``, // ? don't need this. just need txhash
-    }
-    return msgDepositSubmitted
-
-    // return wallet.executeSwap({
-    //   fromBaseAmount: params.inputAmount,
-    //   from: params.sourceAsset,
-    //   to: params.destinationAsset,
-    //   memo: memo,
-    // })
+    return wallet.executeSwap({
+      fromBaseAmount: params.inputAmount,
+      from: params.sourceAsset,
+      to: params.destinationAsset,
+      memo: memo,
+    })
   }
 
   /**
@@ -362,42 +347,6 @@ export class ThorchainAMM {
   }
 
   /**
-   * Finds the required confCount required for an inbound or outbound Tx to THORChain
-   *
-   * Finds the gas asset of the given asset (e.g. BUSD is on BNB), finds the value of asset in Gas Asset then finds the required confirmation count.
-   * ConfCount is then times by 6 seconds.
-   *
-   * @param liquidityPool - asset of the outbound amount.
-   * @param netOutput - netOuput of asset being swapped (any asset).
-   * @returns time in seconds before a Tx is confirmed by THORChain
-   */
-  private async confCounting(liquidityPool: LiquidityPool, netOutput: BaseAmount): Promise<number> {
-    let amountInGasAsset: BaseAmount
-
-    const btcBlockTime = 600 // 600 seconds =  10 mins
-    const btcBlockReward = 6.25
-    const amountInRUNE = liquidityPool.getValueInRUNE(liquidityPool.asset, netOutput)
-
-    const chainGasAsset = this.getChainAsset(liquidityPool.asset.chain)
-
-    if (eqAsset(chainGasAsset, liquidityPool.asset)) {
-      amountInGasAsset = netOutput
-    } else {
-      const gasChainPool = await this.getPoolForAsset(chainGasAsset)
-      if (!gasChainPool) {
-        throw new Error(`Could not find Pool for asset: ${chainGasAsset}`)
-      }
-      const assetPrice = gasChainPool.inverseAssetPrice
-      amountInGasAsset = assetToBase(assetPrice.times(amountInRUNE.amount()))
-    }
-
-    const amountInGasAssetInAsset: AssetAmount = baseToAsset(amountInGasAsset)
-    const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(btcBlockReward).toNumber())
-
-    return requiredConfs * btcBlockTime
-  }
-
-  /**
    * Works out the required inbound or outbound fee based on the chain.
    *
    * @param sourceAsset
@@ -432,6 +381,7 @@ export class ThorchainAMM {
     }
     throw new Error(`could not calculate inbound fee for ${sourceAsset.chain}`)
   }
+
   async getPoolForAsset(asset: Asset): Promise<LiquidityPool | undefined> {
     const pools = await this.getPools()
     return pools[asset.ticker]
@@ -480,13 +430,9 @@ export class ThorchainAMM {
    * @param destinationAsset Output Asset type
    * @returns destinationAssetAmount - amount in destination asset after conversion
    */
-  public async convertAssetToAsset(
-    sourceAsset: Asset,
-    inputAssetAmount: AssetAmount,
-    destinationAsset: Asset,
-  ): Promise<AssetAmount> {
-    let destinationAssetAmount: AssetAmount
+  public async convertAssetToAsset(sourceAsset: Asset, inputAssetAmount: BaseAmount, destinationAsset: Asset ): Promise<BaseAmount> {
 
+    let destinationAssetAmount: BaseAmount
     // Convert RUNE to Outbound Asset, limAmount is in RUNE. assetPrice then * by RUNE amount.
     // lim RUNE ammount * (AssetPool: Asset Depth / RUNE Depth)
     const sourceAssetPool = await this.getPoolForAsset(sourceAsset)
@@ -494,9 +440,9 @@ export class ThorchainAMM {
 
     if (eqAsset(sourceAsset, AssetRuneNative) && destinationAssetPool) {
       const inversedRuneOverAsset = destinationAssetPool.inverseAssetPrice
-      destinationAssetAmount = inputAssetAmount.times(inversedRuneOverAsset)
+      destinationAssetAmount = inputAssetAmount.times(inversedRuneOverAsset.amount())
     } else if (eqAsset(destinationAsset, AssetRuneNative) && sourceAssetPool) {
-      destinationAssetAmount = baseToAsset(sourceAssetPool.getValueInRUNE(sourceAsset, assetToBase(inputAssetAmount)))
+      destinationAssetAmount = sourceAssetPool.getValueInRUNE(sourceAsset, inputAssetAmount)
     } else if (sourceAssetPool && destinationAssetPool) {
       const assetToAssetRatio = sourceAssetPool.getPriceIn(destinationAssetPool)
       destinationAssetAmount = inputAssetAmount.times(assetToAssetRatio.amount())
@@ -558,5 +504,47 @@ export class ThorchainAMM {
   //     hash: 0,
   //     url: '',
   //   })
+  // }
+
+    /**
+   * Parked for now
+   * Finds the required confCount required for an inbound or outbound Tx to THORChain
+   *
+   * Finds the gas asset of the given asset (e.g. BUSD is on BNB), finds the value of asset in Gas Asset then finds the required confirmation count.
+   * ConfCount is then times by 6 seconds.
+   *
+   * @param liquidityPool - asset of the outbound amount.
+   * @param netOutput - netOuput of asset being swapped (any asset).
+   * @returns time in seconds before a Tx is confirmed by THORChain
+   * @see https://docs.thorchain.org/chain-clients/overview
+   */
+  // private async confCounting(liquidityPool: LiquidityPool, netOutput: BaseAmount): Promise<number> {
+  //   let amountInGasAsset: BaseAmount
+
+  //   if(isThorChain((liquidityPool.asset.chain) || isBnbChain(liquidityPool.asset.chain))) {
+  //     return 0
+  //   }
+
+  //   const expectedBtcBlockTime = 600 // 600 seconds =  10 mins
+  //   const btcBlockReward = 6.25
+  //   const amountInRUNE = liquidityPool.getValueInRUNE(liquidityPool.asset, netOutput)
+
+  //   const chainGasAsset = this.getChainAsset(liquidityPool.asset.chain)
+
+  //   if (eqAsset(chainGasAsset, liquidityPool.asset)) {
+  //     amountInGasAsset = netOutput
+  //   } else {
+  //     const gasChainPool = await this.getPoolForAsset(chainGasAsset)
+  //     if (!gasChainPool) {
+  //       throw new Error(`Could not find Pool for asset: ${chainGasAsset}`)
+  //     }
+  //     const assetPrice = gasChainPool.inverseAssetPrice
+  //     amountInGasAsset = assetToBase(assetPrice.times(amountInRUNE.amount()))
+  //   }
+
+  //   const amountInGasAssetInAsset: AssetAmount = baseToAsset(amountInGasAsset)
+  //   const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(btcBlockReward).toNumber())
+
+  //   return requiredConfs * expectedBtcBlockTime
   // }
 }

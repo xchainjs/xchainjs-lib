@@ -1,14 +1,13 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
 import {
   Asset,
-  AssetAmount,
   AssetRuneNative,
   BaseAmount,
-  assetAmount,
   assetFromString,
   baseAmount,
-  baseToAsset,
   eqAsset,
+  AssetAmount,
+  assetAmount
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -21,7 +20,7 @@ export class LiquidityPool {
 
   private _asset: Asset
   private _assetString: string
-  private _currentRatioInRune: AssetAmount
+  private _currentRatioInRune: BaseAmount
   private _inverseAssetPrice: AssetAmount
 
   constructor(pool: PoolDetail) {
@@ -36,17 +35,17 @@ export class LiquidityPool {
     this.runeBalance = baseAmount(this.pool.runeDepth) //Rune is always 8 decimals
 
     const runeToAssetRatio = this.runeBalance.div(this.assetBalance) // RUNE/Asset gets `assetPrice` of a pool (how much rune to 1 asset)
-    this._currentRatioInRune = baseToAsset(runeToAssetRatio)
+    this._currentRatioInRune = runeToAssetRatio
     this._inverseAssetPrice = assetAmount(BN_1.dividedBy(runeToAssetRatio.amount())) // Asset/RUNE gets inverse asset price
   }
   isAvailable(): boolean {
     return this.pool.status.toLowerCase() === 'available'
   }
   getPriceIn(otherAssetPool: LiquidityPool): AssetAmount {
-    return otherAssetPool._inverseAssetPrice.times(this.currentRatioInRune)
+    return otherAssetPool._inverseAssetPrice.times(this._currentRatioInRune.amount())
   }
 
-  public get currentRatioInRune(): AssetAmount {
+  public get currentRatioInRune(): BaseAmount {
     return this._currentRatioInRune
   }
   public get inverseAssetPrice(): AssetAmount {

@@ -14,7 +14,7 @@ import { AssetETH, AssetRuneNative, Chain, assetToString, baseAmount } from '@xc
 import { ethers } from 'ethers'
 
 import routerABI from './abi/routerABI.json'
-import { DepositParams, ExecuiteSwap, SwapSubmitted } from './types'
+import { DepositParams, ExecuteSwap, SwapSubmitted } from './types'
 import { Midgard } from './utils/midgard'
 
 type AllBalances = {
@@ -70,13 +70,13 @@ export class Wallet {
     return allBalances
   }
   /**
-   * Execuites a Swap from THORChainAMM.doSwap()
+   * Executes a Swap from THORChainAMM.doSwap()
    *
    * @param swap object with all the required details for a swap.
    * @returns transaction details and explorer url
    * @see ThorchainAMM.doSwap()
    */
-  async execuiteSwap(swap: ExecuiteSwap): Promise<SwapSubmitted> {
+  async executeSwap(swap: ExecuteSwap): Promise<SwapSubmitted> {
     if (swap.from.chain === Chain.THORChain) {
       return await this.swapRuneTo(swap)
     } else {
@@ -84,20 +84,18 @@ export class Wallet {
     }
   }
 
-  private async swapRuneTo(swap: ExecuiteSwap): Promise<SwapSubmitted> {
+  private async swapRuneTo(swap: ExecuteSwap): Promise<SwapSubmitted> {
     const thorClient = (this.clients.THOR as unknown) as ThorchainClient
-
     const hash = await thorClient.deposit({
       amount: swap.fromBaseAmount,
       asset: AssetRuneNative,
       memo: swap.memo,
     })
-
     return { hash, url: this.clients.THOR.getExplorerTxUrl(hash) }
   }
-  private async swapNonRune(swap: ExecuiteSwap): Promise<SwapSubmitted> {
-    const client = this.clients[swap.from.chain]
 
+  private async swapNonRune(swap: ExecuteSwap): Promise<SwapSubmitted> {
+    const client = this.clients[swap.from.chain]
     const inboundAsgard = this.asgardAssets.find((item: InboundAddressesItem) => {
       return item.chain === swap.from.chain
     })
@@ -117,6 +115,7 @@ export class Wallet {
     const hash = await client.transfer(params)
     return { hash, url: client.getExplorerTxUrl(hash) }
   }
+
   private async updateAsgardAddresses(checkTimeMs: number) {
     try {
       this.asgardAssets = await this.midgard.getAllInboundAddresses()
