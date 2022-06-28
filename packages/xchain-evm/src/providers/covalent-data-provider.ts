@@ -243,6 +243,27 @@ export class CovalentProvider implements OnlineDataProvider {
       hash: item.tx_hash,
     }
   }
+  private buildNonNativeTx(item: GetTransactionsItem, myAddress: Address): Tx {
+    let from: TxFrom[]
+    let to: TxTo[]
+    const amount = baseAmount(item.value, this.nativeAssetDecimals)
+    if (myAddress === item.from_address) {
+      from = []
+      to = [{ to: item.to_address, amount }]
+    } else {
+      from = [{ from: item.from_address, amount }]
+      to = []
+    }
+
+    return {
+      asset: AssetAVAX,
+      from,
+      to,
+      date: new Date(item.block_signed_at),
+      type: TxType.Transfer,
+      hash: item.tx_hash,
+    }
+  }
   private async getTxsPage(params: getTxsParams): Promise<Tx[]> {
     // curl -X GET https://api.covalenthq.com/v1/:chain_id/address/:address/transactions_v2/?&key=ckey_4e17b519e504427586fc93c5b33
     const txs: Tx[] = []
