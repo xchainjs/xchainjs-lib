@@ -10,7 +10,16 @@ import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard/src/generated/midgardApi'
 import { Client as TerraClient } from '@xchainjs/xchain-terra'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
-import { AssetETH, AssetRuneNative, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import {
+  AssetBTC,
+  AssetETH,
+  AssetRuneNative,
+  Chain,
+  assetToString,
+  baseAmount,
+  eqAsset,
+  eqChain,
+} from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import routerABI from './abi/routerABI.json'
@@ -69,6 +78,21 @@ export class Wallet {
     )
     return allBalances
   }
+  // /**
+  //  * Executes a Swap from THORChainAMM.doSwap()
+  //  *
+  //  * @param swap object with all the required details for a swap.
+  //  * @returns transaction details and explorer url
+  //  * @see ThorchainAMM.doSwap()
+  //  */
+  // async executeSwap(swap: ExecuteSwap): Promise<SwapSubmitted> {
+  //   if (swap.sourceAsset.chain === Chain.THORChain) {
+  //     return await this.swapRuneTo(swap)
+  //   } else {
+  //     return await this.swapNonRune(swap)
+  //   }
+  // }
+
   /**
    * Executes a Swap from THORChainAMM.doSwap()
    *
@@ -77,11 +101,48 @@ export class Wallet {
    * @see ThorchainAMM.doSwap()
    */
   async executeSwap(swap: ExecuteSwap): Promise<SwapSubmitted> {
-    if (swap.from.chain === Chain.THORChain) {
+    this.validateSwap(swap)
+    if (swap.sourceAsset.chain === Chain.THORChain) {
       return await this.swapRuneTo(swap)
     } else {
       return await this.swapNonRune(swap)
     }
+  }
+  private constructSwapMemo(swap: ExecuteSwap): string {
+    const limstring = swap.limit.amount().toFixed()
+
+    // create LIM with interface ID
+    const lim = limstring.substring(0, limstring.length - 3).concat(swap.interfaceID.toString())
+    // create the full memo
+    let memo = `=:${swap.destinationAsset.chain}.${swap.destinationAsset.symbol}`
+    // If synth construct a synth memo
+    if (swap.destinationAsset.synth && eqChain(swap.destinationAsset.chain, Chain.THORChain)) {
+      memo = `=:${swap.destinationAsset.chain}/${swap.destinationAsset.symbol}`
+    }
+    memo = memo.concat(
+      `:${swap.destinationAddress}:${lim}:${swap.affiliateAddress}:${swap.affiliateFee.amount().toFixed()}`,
+    )
+    // If memo length is too long for BTC, trim it
+    if (eqAsset(swap.sourceAsset, AssetBTC) && memo.length > 80) {
+      memo = `:${swap.destinationAsset.chain}.${swap.destinationAsset.symbol}`
+      // If swapping to a synth
+      if (swap.destinationAsset.synth && eqChain(swap.destinationAsset.chain, Chain.THORChain)) {
+        memo = `=:${swap.destinationAsset.chain}/${swap.destinationAsset.symbol}`
+      }
+      memo = memo.concat(`:${swap.destinationAddress}`)
+    }
+    return memo
+  }
+  private validateSwap(swap: ExecuteSwap) {
+    const errors: string[] = []
+
+    if (!this.clients[swap.destinationAsset.chain].validateAddress(swap.destinationAddress))
+      errors.push(`${swap.destinationAddress} is not a valid address`)
+
+    if (swap.affiliateAddress?.length > 0 && !this.clients['THOR'].validateAddress(swap.affiliateAddress))
+      errors.push(`${swap.affiliateAddress} is not a valid address`)
+
+    if (errors.length > 0) throw Error(errors.join('\n'))
   }
 
   private async swapRuneTo(swap: ExecuteSwap): Promise<SwapSubmitted> {
@@ -89,15 +150,15 @@ export class Wallet {
     const hash = await thorClient.deposit({
       amount: swap.fromBaseAmount,
       asset: AssetRuneNative,
-      memo: swap.memo,
+      memo: this.constructSwapMemo(swap),
     })
     return { hash, url: this.clients.THOR.getExplorerTxUrl(hash) }
   }
 
   private async swapNonRune(swap: ExecuteSwap): Promise<SwapSubmitted> {
-    const client = this.clients[swap.from.chain]
+    const client = this.clients[swap.sourceAsset.chain]
     const inboundAsgard = this.asgardAssets.find((item: InboundAddressesItem) => {
-      return item.chain === swap.from.chain
+      return item.chain === swap.sourceAsset.chain
     })
     // ==============
     //TODO we need to check router approve before we can handle eth swaps
@@ -105,10 +166,10 @@ export class Wallet {
     // ==============
     const params = {
       walletIndex: 0,
-      asset: swap.from,
+      asset: swap.sourceAsset,
       amount: swap.fromBaseAmount,
       recipient: inboundAsgard?.address || '',
-      memo: swap.memo,
+      memo: this.constructSwapMemo(swap),
     }
 
     // console.log(JSON.stringify(params, null, 2))

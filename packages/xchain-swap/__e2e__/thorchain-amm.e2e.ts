@@ -222,28 +222,28 @@ describe('xchain-swap Integration Tests', () => {
     expect(estimate).toBeTruthy()
     expect(estimate.waitTime > 600)
   })
-  
-  it(`Should estimate run DoSwap `, async () => {
-    const swapParams: EstimateSwapParams = {
-      sourceAsset: AssetRuneNative,
-      destinationAsset: AssetBTC,
-      inputAmount: assetToBase(assetAmount(100000)),
-      affiliateFeePercent: 0.03, //optional
-      slipLimit: new BigNumber(0.1), //optional
-    }
-    const estimate = await thorchainAmm.estimateSwap(swapParams)
-    expect(estimate).toBeTruthy()
-    console.log(estimate.totalFees.swapFee)
-    //const wallet: Wallet = new Wallet(Network.Testnet, ``)
-    const tx = await thorchainAmm.doSwap(
-      swapParams,
-      `bnb1tdnmq5hdy0pgescqav4y8klgrrvqmf6jwpp2n2`, // Destination Address
-      `thor1dze0zlff7gwxpkaynh8fn8nscy7qtnt4aquuh8`, // affiliate Address
-      700, // Interface ID
-    )
-    console.log(tx)
-    expect(estimate.waitTime > 600)
-  })
+
+  // it(`Should estimate run DoSwap `, async () => {
+  //   const swapParams: EstimateSwapParams = {
+  //     sourceAsset: AssetRuneNative,
+  //     destinationAsset: AssetBTC,
+  //     inputAmount: assetToBase(assetAmount(100000)),
+  //     affiliateFeePercent: 0.03, //optional
+  //     slipLimit: new BigNumber(0.1), //optional
+  //   }
+  //   const estimate = await thorchainAmm.estimateSwap(swapParams)
+  //   expect(estimate).toBeTruthy()
+  //   console.log(estimate.totalFees.swapFee)
+  //   //const wallet: Wallet = new Wallet(Network.Testnet, ``)
+  //   const tx = await thorchainAmm.doSwap(
+  //     swapParams,
+  //     `bnb1tdnmq5hdy0pgescqav4y8klgrrvqmf6jwpp2n2`, // Destination Address
+  //     `thor1dze0zlff7gwxpkaynh8fn8nscy7qtnt4aquuh8`, // affiliate Address
+  //     700, // Interface ID
+  //   )
+  //   console.log(tx)
+  //   expect(estimate.waitTime > 600)
+  // })
 
   it(`Should return the correct network value`, async () => {
     const constant = 'TXOUTDELAYRATE'

@@ -253,10 +253,12 @@ export class ThorchainAMM {
     wallet: Wallet,
     params: EstimateSwapParams,
     destinationAddress: string,
-    affiliateAddress: string,
+    affiliateAddress = '',
     interfaceID = 999,
   ): Promise<SwapSubmitted> {
+    //initial validation
     this.isValidSwap(params)
+
     // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
     const affiliateFee = params.inputAmount.times(params.affiliateFeePercent || 0)
 
@@ -271,31 +273,16 @@ export class ThorchainAMM {
     if (!limAssetAmount) {
       throw new Error(`Could not convert ${params.sourceAsset} to ${params.destinationAsset}`)
     }
-    const limstring = limAssetAmount.amount().toFixed()
 
-    // create LIM with interface ID
-    const lim = limstring.substring(0, limstring.length - 3).concat(interfaceID.toString())
-    // create the full memo
-    let memo = `=:${params.destinationAsset.chain}.${params.destinationAsset.symbol}`
-    // If synth construct a synth memo
-    if (params.destinationAsset.synth && eqChain(params.destinationAsset.chain, Chain.THORChain)) {
-      memo = `=:${params.destinationAsset.chain}/${params.destinationAsset.symbol}`
-    }
-    memo = memo.concat(`:${destinationAddress}:${lim}:${affiliateAddress}:${affiliateFee.amount().toFixed()}`)
-    // If memo length is too long for BTC, trim it
-    if (eqAsset(params.sourceAsset, AssetBTC) && memo.length > 80) {
-      memo = `:${params.destinationAsset.chain}.${params.destinationAsset.symbol}`
-      // If swapping to a synth
-      if (params.destinationAsset.synth && eqChain(params.destinationAsset.chain, Chain.THORChain)) {
-        memo = `=:${params.destinationAsset.chain}/${params.destinationAsset.symbol}`
-      }
-      memo = memo.concat(`:${destinationAddress}`)
-    }
     return wallet.executeSwap({
       fromBaseAmount: params.inputAmount,
-      from: params.sourceAsset,
-      to: params.destinationAsset,
-      memo: memo,
+      sourceAsset: params.sourceAsset,
+      destinationAsset: params.destinationAsset,
+      limit: limAssetAmount,
+      destinationAddress,
+      affiliateAddress,
+      affiliateFee,
+      interfaceID,
     })
   }
 
@@ -539,7 +526,20 @@ export class ThorchainAMM {
     }
     // Convert to Asset Amount
     const amountInGasAssetInAsset = baseToAsset(amountInGasAsset)
-    // get the relivate blockchian information
+    // // get the relivate blockchian information
+    // type ConfCountingSetting = {
+    //   blockReward: number
+    //   avgBlockTimeInSecs: number
+    // }
+    // const confCountingConfig: Record<Chain,ConfCountingSetting>
+    // confCountingConfig = {
+    //   BCH: {
+    //     blockReward: number
+    //     avgBlockTimeInSecs: number
+    //   },
+    //   BTC: ...,
+    // todo add other chains
+    // }
     const btcBlockReward = 6.25
     const btcBlockTime = 600 // 600 seconds =  10 mins
     const ethBlockReward = 2

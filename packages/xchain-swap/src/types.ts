@@ -1,3 +1,4 @@
+import { Address } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -37,9 +38,13 @@ export type EstimateSwapParams = {
 
 export type ExecuteSwap = {
   fromBaseAmount: BaseAmount
-  from: Asset
-  to: Asset
-  memo: string
+  sourceAsset: Asset
+  destinationAsset: Asset
+  limit: BaseAmount
+  destinationAddress: Address
+  affiliateAddress: Address
+  affiliateFee: BaseAmount
+  interfaceID: number
 }
 export type SwapSubmitted = {
   hash: string
