@@ -147,22 +147,24 @@ export class Wallet {
 
   private async swapRuneTo(swap: ExecuteSwap): Promise<SwapSubmitted> {
     const thorClient = (this.clients.THOR as unknown) as ThorchainClient
+    const waitTime = swap.waitTime
     const hash = await thorClient.deposit({
       amount: swap.fromBaseAmount,
       asset: AssetRuneNative,
       memo: this.constructSwapMemo(swap),
     })
-    return { hash, url: this.clients.THOR.getExplorerTxUrl(hash) }
+    return { hash, url: this.clients.THOR.getExplorerTxUrl(hash), waitTime }
   }
 
   private async swapNonRune(swap: ExecuteSwap): Promise<SwapSubmitted> {
     const client = this.clients[swap.sourceAsset.chain]
+    const waitTime = swap.waitTime
     const inboundAsgard = this.asgardAssets.find((item: InboundAddressesItem) => {
       return item.chain === swap.sourceAsset.chain
     })
     // ==============
     //TODO we need to check router approve before we can handle eth swaps
-    if (inboundAsgard?.router) throw new Error('TBD implment eth')
+    //if (inboundAsgard?.router) throw new Error('TBD implment eth')
     // ==============
     const params = {
       walletIndex: 0,
@@ -174,7 +176,7 @@ export class Wallet {
 
     // console.log(JSON.stringify(params, null, 2))
     const hash = await client.transfer(params)
-    return { hash, url: client.getExplorerTxUrl(hash) }
+    return { hash, url: client.getExplorerTxUrl(hash), waitTime}
   }
 
   private async updateAsgardAddresses(checkTimeMs: number) {

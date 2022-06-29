@@ -10,7 +10,7 @@ import { InboundDetail, MidgardConfig } from '../types'
 const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://midgard.thorchain.info/', 'https://midgard.thorswap.net'],
+    midgardBaseUrls: ['https://midgard.thorchain.info/', 'https://midgard.thorswap.net', 'https://midgard.ninerealms.com/'],
   },
   stagenet: {
     apiRetries: 3,

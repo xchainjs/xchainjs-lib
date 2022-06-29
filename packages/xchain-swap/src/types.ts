@@ -19,10 +19,12 @@ export type SwapEstimate = {
   canSwap: boolean
   errors?: string[]
 }
+
 export type PoolCache = {
   lastRefreshed: number
   pools: Record<string, LiquidityPool>
 }
+
 export type MidgardConfig = {
   apiRetries: number
   midgardBaseUrls: string[]
@@ -45,11 +47,13 @@ export type ExecuteSwap = {
   affiliateAddress: Address
   affiliateFee: BaseAmount
   interfaceID: number
+  waitTime: number
 }
+
 export type SwapSubmitted = {
   hash: string
   url: string
-  //waitTime: number
+  waitTime: number
 }
 
 export type DepositParams = {

@@ -274,6 +274,13 @@ export class ThorchainAMM {
       throw new Error(`Could not convert ${params.sourceAsset} to ${params.destinationAsset}`)
     }
 
+    let waitTime = await this.confCounting(params.sourceAsset, params.inputAmount)
+    let destPool = await this.getPoolForAsset(params.destinationAsset)
+    if(destPool){
+      let outboundDelay = await this.outboundDelay(destPool, params.destinationAsset, limAssetAmount)
+      waitTime = outboundDelay + waitTime
+    }
+
     return wallet.executeSwap({
       fromBaseAmount: params.inputAmount,
       sourceAsset: params.sourceAsset,
@@ -283,6 +290,7 @@ export class ThorchainAMM {
       affiliateAddress,
       affiliateFee,
       interfaceID,
+      waitTime
     })
   }
 
@@ -508,7 +516,7 @@ export class ThorchainAMM {
    * @returns time in seconds before a Tx is confirmed by THORChain
    * @see https://docs.thorchain.org/chain-clients/overview
    */
-  async confCounting(inboundAsset: Asset, inboundAmount: BaseAmount): Promise<number> {
+  async confCounting(inboundAsset: Asset, inboundAmount: BaseAmount,): Promise<number> {
     let amountInGasAsset: BaseAmount
 
     // RUNE, BNB and Synths have near instant finality, so no conf counting required.
@@ -518,7 +526,7 @@ export class ThorchainAMM {
     // Get the gas asset for the inboundAsset.chain
     const chainGasAsset = this.getChainAsset(inboundAsset.chain)
 
-    // if we already have the chain asset, good, else need to convert asset value to chain asset.
+    // check for chain asset, else need to convert asset value to chain asset.
     if (eqAsset(chainGasAsset, inboundAsset)) {
       amountInGasAsset = inboundAmount
     } else {
@@ -526,20 +534,55 @@ export class ThorchainAMM {
     }
     // Convert to Asset Amount
     const amountInGasAssetInAsset = baseToAsset(amountInGasAsset)
-    // // get the relivate blockchian information
+    // // Get the relative blockchain information
     // type ConfCountingSetting = {
     //   blockReward: number
     //   avgBlockTimeInSecs: number
     // }
-    // const confCountingConfig: Record<Chain,ConfCountingSetting>
+    // let confCountingConfig: Record<Chain,ConfCountingSetting>
     // confCountingConfig = {
     //   BCH: {
-    //     blockReward: number
-    //     avgBlockTimeInSecs: number
+    //     blockReward: 6.25,
+    //     avgBlockTimeInSecs: 600
     //   },
-    //   BTC: ...,
-    // todo add other chains
+    //   BTC: {
+    //     blockReward: 6.25,
+    //     avgBlockTimeInSecs: 600
+    //   },
+    //   ETH: {
+    //     blockReward: 2,
+    //     avgBlockTimeInSecs: 13
+    //   },
+    //   LTC: {
+    //     blockReward: 12.5,
+    //     avgBlockTimeInSecs: 150
+    //   },
+    //   DOGE: {
+    //     blockReward: 10000,
+    //     avgBlockTimeInSecs: 60
+    //   },
+    //   GAIA: {
+    //     blockReward: 0,
+    //     avgBlockTimeInSecs: 0
+    //   },
+    //   TERRA: {
+    //     blockReward: 0,
+    //     avgBlockTimeInSecs: 0
+    //   },
+    //   BNB: {
+    //     blockReward: 0,
+    //     avgBlockTimeInSecs: 0
+    //   },
+    //   THOR: {
+    //     blockReward: 0,
+    //     avgBlockTimeInSecs: 0
+    //   },
+    //   POLKA: {
+    //     blockReward: 0,
+    //     avgBlockTimeInSecs: 0
+    //   },
     // }
+
     const btcBlockReward = 6.25
     const btcBlockTime = 600 // 600 seconds =  10 mins
     const ethBlockReward = 2
@@ -549,14 +592,15 @@ export class ThorchainAMM {
     const dogeBlockReward = 10000
     const dogeBlockTime = 60
 
-    let blockReward = 1
-    let blockTime = 1
+    let blockReward: number
+    let blockTime: number
 
     switch (chainGasAsset) {
       case AssetBTC:
       case AssetBCH:
         blockReward = btcBlockReward
         blockTime = btcBlockTime
+
         break
       case AssetLTC:
         blockReward = ltcBlockReward
@@ -564,7 +608,7 @@ export class ThorchainAMM {
         break
       case AssetETH:
         blockReward = ethBlockReward
-        blockReward = ethBlockTime
+        blockTime = ethBlockTime
         break
       case AssetDOGE:
         blockReward = dogeBlockReward
