@@ -44,7 +44,7 @@ describe('xchain-swap Integration Tests', () => {
         testnetWallet.clients['BNB'].getAddress(), // put the wrong chain address here to trigger error
       )
       fail()
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).toEqual(`tbnb1kmu0n6s44cz5jxdvkvsvrzgr57ndg6atw5zrys is not a valid address`)
     }
   })
@@ -81,4 +81,14 @@ describe('xchain-swap Integration Tests', () => {
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
+
+  // From synth to asset
+  it(`Should perform a swap from syntheticBTC to BTC`, async () => {
+    const 
+  })
+
+  // from asset to synth
+  // from synth to synth
+
+
 })

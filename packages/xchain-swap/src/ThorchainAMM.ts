@@ -38,9 +38,11 @@ import {
   SwapOutput,
   SwapSubmitted,
   TotalFees,
+  ConfCountingSetting
 } from './types'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'
+import { defaultConfCountingConfig } from './chainDefaults'
 
 const BN_1 = new BigNumber(1)
 
@@ -48,10 +50,12 @@ export class ThorchainAMM {
   private midgard: Midgard
   private poolCache: PoolCache | undefined
   private expirePoolCacheMillis
+  private confCountingConfig: Record<Chain,ConfCountingSetting>
 
-  constructor(midgard: Midgard, expirePoolCacheMillis = 6000) {
+  constructor(midgard: Midgard, expirePoolCacheMillis = 6000, confCountingConfig = defaultConfCountingConfig) {
     this.midgard = midgard
     this.expirePoolCacheMillis = expirePoolCacheMillis
+    this.confCountingConfig = confCountingConfig
     //initialize the cache
     this.refereshPoolCache()
   }
@@ -222,20 +226,12 @@ export class ThorchainAMM {
       } else {
         swapEstimate.canSwap = true
       }
-      // ---------------- Work out total Wait Time for Swap ---------------------- /
-      // if (swapEstimate.canSwap) {
-      //   const inboundDelay = await this.confCounting(sourcePool, params.inputAmount)
-      //   // if (!confCountTime) {
-      //   //   throw Error(`Could not get conf count for ${params.destinationAsset.ticker}`)
-      //   // }
-      //   const outboundDelay = await this.outboundDelay(destinationPool, params.destinationAsset, swapEstimate.netOutput)
-      //   // if (!outboundDelay) {
-      //   //   throw Error(`Could not get conf count for ${params.destinationAsset.ticker}`)
-      //   // }
-      //   const waitTime = inboundDelay + outboundDelay
-
-      //   swapEstimate.waitTime = waitTime
-      // }
+      //---------------- Work out total Wait Time for Swap ---------------------- /
+      if (swapEstimate.canSwap) {
+        const inboundDelay = await this.confCounting(params.sourceAsset, params.inputAmount)
+        const outboundDelay = await this.outboundDelay(destinationPool, params.destinationAsset, swapEstimate.netOutput)
+        swapEstimate.waitTime = inboundDelay + outboundDelay
+      }
     }
     return swapEstimate
   }
@@ -534,93 +530,11 @@ export class ThorchainAMM {
     }
     // Convert to Asset Amount
     const amountInGasAssetInAsset = baseToAsset(amountInGasAsset)
-    // // Get the relative blockchain information
-    // type ConfCountingSetting = {
-    //   blockReward: number
-    //   avgBlockTimeInSecs: number
-    // }
-    // let confCountingConfig: Record<Chain,ConfCountingSetting>
-    // confCountingConfig = {
-    //   BCH: {
-    //     blockReward: 6.25,
-    //     avgBlockTimeInSecs: 600
-    //   },
-    //   BTC: {
-    //     blockReward: 6.25,
-    //     avgBlockTimeInSecs: 600
-    //   },
-    //   ETH: {
-    //     blockReward: 2,
-    //     avgBlockTimeInSecs: 13
-    //   },
-    //   LTC: {
-    //     blockReward: 12.5,
-    //     avgBlockTimeInSecs: 150
-    //   },
-    //   DOGE: {
-    //     blockReward: 10000,
-    //     avgBlockTimeInSecs: 60
-    //   },
-    //   GAIA: {
-    //     blockReward: 0,
-    //     avgBlockTimeInSecs: 0
-    //   },
-    //   TERRA: {
-    //     blockReward: 0,
-    //     avgBlockTimeInSecs: 0
-    //   },
-    //   BNB: {
-    //     blockReward: 0,
-    //     avgBlockTimeInSecs: 0
-    //   },
-    //   THOR: {
-    //     blockReward: 0,
-    //     avgBlockTimeInSecs: 0
-    //   },
-    //   POLKA: {
-    //     blockReward: 0,
-    //     avgBlockTimeInSecs: 0
-    //   },
-    // }
 
-    const btcBlockReward = 6.25
-    const btcBlockTime = 600 // 600 seconds =  10 mins
-    const ethBlockReward = 2
-    const ethBlockTime = 13
-    const ltcBlockReward = 12.5
-    const ltcBlockTime = 150 // 2.5 mins
-    const dogeBlockReward = 10000
-    const dogeBlockTime = 60
-
-    let blockReward: number
-    let blockTime: number
-
-    switch (chainGasAsset) {
-      case AssetBTC:
-      case AssetBCH:
-        blockReward = btcBlockReward
-        blockTime = btcBlockTime
-
-        break
-      case AssetLTC:
-        blockReward = ltcBlockReward
-        blockTime = ltcBlockTime
-        break
-      case AssetETH:
-        blockReward = ethBlockReward
-        blockTime = ethBlockTime
-        break
-      case AssetDOGE:
-        blockReward = dogeBlockReward
-        blockTime = dogeBlockTime
-        break
-      default:
-        throw new Error(`Could not find Blockchain information for ${chainGasAsset}`)
-    }
-
+    const confConfig = this.confCountingConfig[inboundAsset.chain]
     // find the requried confs
-    const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(blockReward).toNumber())
+    const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(confConfig.blockReward).toNumber())
     // convert that into seconds
-    return requiredConfs * blockTime
+    return requiredConfs * confConfig.avgBlockTimeInSecs
   }
 }

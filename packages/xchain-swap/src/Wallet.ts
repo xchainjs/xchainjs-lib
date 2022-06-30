@@ -122,6 +122,7 @@ export class Wallet {
     memo = memo.concat(
       `:${swap.destinationAddress}:${lim}:${swap.affiliateAddress}:${swap.affiliateFee.amount().toFixed()}`,
     )
+    // Logic error? between synths to and from..
     // If memo length is too long for BTC, trim it
     if (eqAsset(swap.sourceAsset, AssetBTC) && memo.length > 80) {
       memo = `:${swap.destinationAsset.chain}.${swap.destinationAsset.symbol}`

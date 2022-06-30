@@ -98,3 +98,8 @@ export type InboundDetail = {
   haltedLP: boolean
   gas_rate: BigNumber
 }
+
+export type ConfCountingSetting = {
+  blockReward: number
+  avgBlockTimeInSecs: number
+}
