@@ -1,8 +1,10 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
   Asset,
+  AssetBNB,
   AssetBTC,
   AssetETH,
+  AssetLTC,
   AssetRuneNative,
   Chain,
   assetAmount,
@@ -10,11 +12,14 @@ import {
   assetToBase,
 } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
-//import { LiquidityPool } from '../src/LiquidityPool'
 
+import { LiquidityPool } from '../src/LiquidityPool'
 import { ThorchainAMM } from '../src/ThorchainAMM'
 import { EstimateSwapParams, SwapEstimate } from '../src/types'
 import { Midgard } from '../src/utils/midgard'
+
+// eslint-disable-next-line ordered-imports/ordered-imports
+import mockMidgardApi from '../__mocks__/midgard-api'
 
 const midgard = new Midgard(Network.Mainnet)
 const thorchainAmm = new ThorchainAMM(midgard)
@@ -36,24 +41,31 @@ function print(estimate: SwapEstimate) {
   console.log(expanded)
 }
 
-// const bnbPoolDetails = {
-//   asset: 'BNB.BNB',
-//   assetDepth: assetToBase(assetAmount(100)).amount().toFixed(),
-//   assetPrice: '11121.24920535084',
-//   assetPriceUSD: '30458.124870650492',
-//   liquidityUnits: '536087715332333',
-//   poolAPY: '0.1001447237777584',
-//   runeDepth: assetToBase(assetAmount(2500000)).amount().toFixed(),
-//   status: 'available',
-//   synthSupply: '3304301605',
-//   synthUnits: '10309541238596',
-//   units: '546397256570929',
-//   volume24h: '16202006480711',
-// }
+const bnbPoolDetails = {
+  asset: 'BNB.BNB',
+  assetDepth: assetToBase(assetAmount(100)).amount().toFixed(),
+  assetPrice: '11121.24920535084',
+  assetPriceUSD: '30458.124870650492',
+  liquidityUnits: '536087715332333',
+  poolAPY: '0.1001447237777584',
+  runeDepth: assetToBase(assetAmount(2500000)).amount().toFixed(),
+  status: 'available',
+  synthSupply: '3304301605',
+  synthUnits: '10309541238596',
+  units: '546397256570929',
+  volume24h: '16202006480711',
+}
 
-// const bnbPool = new LiquidityPool(bnbPoolDetails)
-// Test User Functions - single and double swap.
+const bnbPool = new LiquidityPool(bnbPoolDetails)
+// Test User Functions - single and double swap using mock pool data
 describe('xchain-swap Integration Tests', () => {
+  beforeEach(() => {
+    mockMidgardApi.init()
+  })
+  afterEach(() => {
+    mockMidgardApi.restore()
+  })
+  // Test estimate swaps with mock pool data
   it('should estimate a swap of 1 BTC to ETH', async () => {
     const swapParams: EstimateSwapParams = {
       sourceAsset: AssetBTC,
@@ -91,9 +103,7 @@ describe('xchain-swap Integration Tests', () => {
     expect(estimate).toBeTruthy()
     expect(estimate.waitTime === 600)
   })
-
   // Test Conditions - Test to make sure the swap has no input errors
-
   it('Should fail estimate swap from BTC to BTC if source asset is the same as destination asset', async () => {
     const swapParams: EstimateSwapParams = {
       sourceAsset: AssetBTC,
@@ -150,33 +160,6 @@ describe('xchain-swap Integration Tests', () => {
       )
     } catch (error) {}
   })
-  // it('Should fail estimate swap because destination chain is halted ', async () => {
-  //   const swapParams: EstimateSwapParams = {
-  //     sourceAsset: AssetETH,
-  //     destinationAsset: AssetLUNA,
-  //     inputAmount: assetToBase(assetAmount(2)),
-  //   }
-  //   try {
-  //     const estimate = await thorchainAmm.estimateSwap(swapParams)
-  //     print(estimate)
-  //   } catch (error) {
-  //     expect(error.message).toEqual(`destination pool is halted`)
-  //   }
-  // })
-
-  // it('Should fail estimate swap because source chain is halted ', async () => {
-  //   const swapParams: EstimateSwapParams = {
-  //     sourceAsset: AssetLUNA,
-  //     destinationAsset: AssetETH,
-  //     inputAmount: assetToBase(assetAmount(2)),
-  //   }
-  //   try {
-  //     const estimate = await thorchainAmm.estimateSwap(swapParams)
-  //     print(estimate)
-  //   } catch (error) {
-  //     expect(error.message).toEqual(`source pool is halted`)
-  //   }
-  // })
 
   it('Should fail estimate swap if source pool has not enough liquidity ', async () => {
     const assetHOT: Asset = {
@@ -223,28 +206,6 @@ describe('xchain-swap Integration Tests', () => {
     expect(estimate.waitTime > 600)
   })
 
-  // it(`Should estimate run DoSwap `, async () => {
-  //   const swapParams: EstimateSwapParams = {
-  //     sourceAsset: AssetRuneNative,
-  //     destinationAsset: AssetBTC,
-  //     inputAmount: assetToBase(assetAmount(100000)),
-  //     affiliateFeePercent: 0.03, //optional
-  //     slipLimit: new BigNumber(0.1), //optional
-  //   }
-  //   const estimate = await thorchainAmm.estimateSwap(swapParams)
-  //   expect(estimate).toBeTruthy()
-  //   console.log(estimate.totalFees.swapFee)
-  //   //const wallet: Wallet = new Wallet(Network.Testnet, ``)
-  //   const tx = await thorchainAmm.doSwap(
-  //     swapParams,
-  //     `bnb1tdnmq5hdy0pgescqav4y8klgrrvqmf6jwpp2n2`, // Destination Address
-  //     `thor1dze0zlff7gwxpkaynh8fn8nscy7qtnt4aquuh8`, // affiliate Address
-  //     700, // Interface ID
-  //   )
-  //   console.log(tx)
-  //   expect(estimate.waitTime > 600)
-  // })
-
   it(`Should return the correct network value`, async () => {
     const constant = 'TXOUTDELAYRATE'
     const value = await midgard.getNetworkValueByName(constant)
@@ -252,10 +213,59 @@ describe('xchain-swap Integration Tests', () => {
     expect(value).toEqual(10000000000)
   })
 
-  // it(`Should get the correct outbound Delay`, async () => {
-  //   const outboundAmount = assetToBase(assetAmount(1))
-  //   const outBoundValue = await thorchainAmm.outboundDelay(bnbPool, AssetBNB, outboundAmount )
-  //   console.log(outBoundValue)
-  //   expect(outBoundValue).toEqual(1500)
-  // })
+  // Test functions with mock data
+  it('Should fail estimate swap because destination chain is halted ', async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetETH,
+      destinationAsset: AssetLTC,
+      inputAmount: assetToBase(assetAmount(2)),
+    }
+    try {
+      const estimate = await thorchainAmm.estimateSwap(swapParams)
+      print(estimate)
+    } catch (error) {
+      expect(error.message).toEqual(`destination pool is halted`)
+    }
+  })
+
+  it('Should fail estimate swap because source chain is halted ', async () => {
+    const swapParams: EstimateSwapParams = {
+      sourceAsset: AssetLTC,
+      destinationAsset: AssetETH,
+      inputAmount: assetToBase(assetAmount(2)),
+    }
+    try {
+      const estimate = await thorchainAmm.estimateSwap(swapParams)
+      print(estimate)
+    } catch (error) {
+      expect(error.message).toEqual(`source pool is halted`)
+    }
+  })
+
+  it(`Should get the correct outbound Delay`, async () => {
+    const outboundAmount = assetToBase(assetAmount(1))
+    const outBoundValue = await thorchainAmm.outboundDelay(bnbPool, AssetBNB, outboundAmount)
+    console.log(outBoundValue)
+    expect(outBoundValue).toEqual(1500)
+  })
+  it(`Should convert BTC to ETH `, async () => {
+    const inputAsset: Asset = AssetBTC
+    const outboundAsset: Asset = AssetETH
+    const inputAmount = assetToBase(assetAmount(0.5))
+    const outboundETHAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
+    console.log(
+      `${inputAmount.amount()} ${inputAsset.chain} to ${
+        outboundAsset.chain
+      } is: ${outboundETHAmount.amount().toFixed()} ${outboundAsset.chain}`,
+    )
+    expect(outboundETHAmount.amount()).toBeTruthy()
+  })
+
+  it(`Should convert BTC to RUNE `, async () => {
+    const inputAsset = AssetBTC
+    const outboundAsset = AssetRuneNative
+    const inputAmount = assetToBase(assetAmount(0.5))
+    const outboundRuneAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
+    expect(outboundRuneAmount.amount().toNumber() > 1000)
+  })
 })

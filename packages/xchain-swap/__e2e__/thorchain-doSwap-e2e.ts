@@ -1,39 +1,18 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Asset, AssetBNB, AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetBNB, AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import BigNumber from 'bignumber.js'
 
 import { ThorchainAMM } from '../src/ThorchainAMM'
 import { Wallet } from '../src/Wallet'
 import { Midgard } from '../src/utils/midgard'
-import BigNumber from 'bignumber.js'
 
-const mainnetMidgard = new Midgard(Network.Mainnet)
+//const mainnetMidgard = new Midgard(Network.Mainnet)
 const testnetMidgard = new Midgard(Network.Testnet)
-const mainetThorchainAmm = new ThorchainAMM(mainnetMidgard)
+//const mainetThorchainAmm = new ThorchainAMM(mainnetMidgard)
 const testnetThorchainAmm = new ThorchainAMM(testnetMidgard)
 const testnetWallet = new Wallet(Network.Testnet, process.env.PHRASE || 'you forgot to set the phrase')
 
 describe('xchain-swap Integration Tests', () => {
-  it(`Should convert BTC to ETH `, async () => {
-    const inputAsset: Asset = AssetBTC
-    const outboundAsset: Asset = AssetETH
-    const inputAmount = assetToBase(assetAmount(0.5))
-    const outboundETHAmount = await mainetThorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
-    console.log(
-      `${inputAmount.amount()} ${inputAsset.chain} to ${
-        outboundAsset.chain
-      } is: ${outboundETHAmount.amount().toFixed()} ${outboundAsset.chain}`,
-    )
-    expect(outboundETHAmount.amount()).toBeTruthy()
-  })
-
-  it(`Should convert BTC to RUNE `, async () => {
-    const inputAsset = AssetBTC
-    const outboundAsset = AssetRuneNative
-    const inputAmount = assetToBase(assetAmount(0.5))
-    const outboundRuneAmount = await mainetThorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
-    expect(outboundRuneAmount.amount().toNumber() > 1000)
-  })
-
   it(`Should swap BTC to RUNE, with no affiliate address  `, async () => {
     const estimateSwapParams = {
       sourceAsset: AssetBTC,
@@ -87,7 +66,6 @@ describe('xchain-swap Integration Tests', () => {
   })
 
   it(`Should perform a double swap from BNB to ETH`, async () => {
-
     const estimateSwapParams = {
       sourceAsset: AssetBNB,
       destinationAsset: AssetETH,
