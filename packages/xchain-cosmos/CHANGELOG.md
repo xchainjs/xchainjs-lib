@@ -1,8 +1,16 @@
-# v.0.18.1 (2022-xx-xx)
+# v.0.19.0 (2022-xx-xx)
 
 ## Add
 
-- helper `getDefaultRootDerivationPaths`
+- Helpers `getDefaultRootDerivationPaths`. `getChainId`, `getChainIds`, `protoFee`, `protoMsgSend`, `protoTxBody`, `protoAuthInfo`
+
+## Breaking change
+
+- Helper `getDenom` supports `ATOM` only + returns `null` for all other assets
+- Remove `CosmosSDKClient.getUnsignedTxBody`
+- Rename `asset` -> `denom` in `TransferParams`
+- Change type of `amount` from `string` -> `BaseAmount` in `TransferParams`
+- Remove `account` param from `CosmosSDKClient.signAndBroadcast` in favour of `accountNumber`
 
 # v.0.18.0 (2022-06-22)
 

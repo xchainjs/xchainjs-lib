@@ -1,4 +1,5 @@
 import { proto } from '@cosmos-client/core'
+import { baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { CosmosSDKClient } from '../src/cosmos/sdk-client'
@@ -334,8 +335,8 @@ describe('SDK Client Test', () => {
         privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase, derivationPaths.cosmos.testnet + '0'),
         from: cosmos_testnet_address0,
         to: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-        amount: '10000',
-        asset: 'muon',
+        amount: baseAmount('10000'),
+        denom: 'muon',
         memo: 'transfer',
       })
 

@@ -6,7 +6,7 @@ import * as BIP32 from 'bip32'
 import Long from 'long'
 
 import { DEFAULT_GAS_LIMIT } from '../const'
-import { getQueryString } from '../util'
+import { getQueryString, protoAuthInfo, protoTxBody } from '../util'
 
 import {
   APIQueryParam,
@@ -19,7 +19,6 @@ import {
   TransferParams,
   TxHistoryResponse,
   TxResponse,
-  UnsignedTxParams,
 } from './types'
 
 const DEFAULT_FEE = new proto.cosmos.tx.v1beta1.Fee({
@@ -94,24 +93,6 @@ export class CosmosSDKClient {
     } catch (err) {
       return false
     }
-  }
-
-  getUnsignedTxBody({ from, to, amount, asset, memo = '' }: UnsignedTxParams): proto.cosmos.tx.v1beta1.TxBody {
-    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
-      from_address: from,
-      to_address: to,
-      amount: [
-        {
-          amount: amount,
-          denom: asset,
-        },
-      ],
-    })
-
-    return new proto.cosmos.tx.v1beta1.TxBody({
-      messages: [cosmosclient.codec.instanceToProtoAny(msgSend)],
-      memo,
-    })
   }
 
   async getBalance(address: string): Promise<proto.cosmos.base.v1beta1.Coin[]> {
@@ -234,48 +215,29 @@ export class CosmosSDKClient {
     return (await axios.get<GetTxByHashResponse>(`${this.server}/cosmos/tx/v1beta1/txs/${hash}`)).data.tx_response
   }
 
-  async transfer({ privkey, from, to, amount, asset, memo = '', fee = DEFAULT_FEE }: TransferParams): Promise<TxHash> {
+  async transfer({ privkey, from, to, amount, denom, memo, fee = DEFAULT_FEE }: TransferParams): Promise<TxHash> {
     this.setPrefix()
 
-    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
-      from_address: from,
-      to_address: to,
-      amount: [
-        {
-          amount: amount,
-          denom: asset,
-        },
-      ],
-    })
+    const txBody = protoTxBody({ from, to, amount, denom, memo })
 
     const pubKey = privkey.pubKey()
     const signer = cosmosclient.AccAddress.fromPublicKey(pubKey)
 
     const account = await this.getAccount(signer)
+    const { sequence, account_number: accountNumber } = account
+    if (!sequence) throw Error(`Transfer failed - missing sequence`)
+    if (!accountNumber) throw Error(`Transfer failed - missing account number`)
 
-    const txBody = new proto.cosmos.tx.v1beta1.TxBody({
-      messages: [cosmosclient.codec.instanceToProtoAny(msgSend)],
-      memo,
-    })
-
-    const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
-      signer_infos: [
-        {
-          public_key: cosmosclient.codec.instanceToProtoAny(pubKey),
-          mode_info: {
-            single: {
-              mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
-            },
-          },
-          sequence: account.sequence,
-        },
-      ],
+    const authInfo = protoAuthInfo({
+      pubKey,
+      sequence,
       fee,
+      mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
     })
 
     const txBuilder = new cosmosclient.TxBuilder(this.sdk, txBody, authInfo)
 
-    return this.signAndBroadcast(txBuilder, privkey, account)
+    return this.signAndBroadcast(txBuilder, privkey, accountNumber)
   }
 
   async transferSignedOffline({
@@ -285,11 +247,11 @@ export class CosmosSDKClient {
     from_sequence = '0',
     to,
     amount,
-    asset,
+    denom,
     memo = '',
     fee = DEFAULT_FEE,
   }: TransferOfflineParams): Promise<string> {
-    const txBody = this.getUnsignedTxBody({ from, to, amount, asset, memo })
+    const txBody = protoTxBody({ from, to, amount, denom, memo })
 
     const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
       signer_infos: [
@@ -316,13 +278,9 @@ export class CosmosSDKClient {
   async signAndBroadcast(
     txBuilder: cosmosclient.TxBuilder,
     privKey: proto.cosmos.crypto.secp256k1.PrivKey,
-    signerAccount: proto.cosmos.auth.v1beta1.IBaseAccount,
+    accountNumber: Long.Long,
   ): Promise<TxHash> {
     this.setPrefix()
-
-    const accountNumber = signerAccount.account_number
-
-    if (!accountNumber) throw new Error('Missing account number')
 
     // sign
     const signDocBytes = txBuilder.signDocBytes(accountNumber)
@@ -338,7 +296,7 @@ export class CosmosSDKClient {
       throw new Error('Error broadcasting: ' + res?.data?.tx_response?.raw_log)
     }
 
-    if (!res.data?.tx_response.txhash || res.data?.tx_response.txhash === '') {
+    if (!res.data?.tx_response?.txhash) {
       throw new Error('Error broadcasting, txhash not present on response')
     }
 

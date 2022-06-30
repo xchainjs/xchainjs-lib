@@ -1,6 +1,6 @@
 import { proto } from '@cosmos-client/core'
-import { TxParams } from '@xchainjs/xchain-client'
-import { BaseAmount } from '@xchainjs/xchain-util/lib'
+import { Address, TxParams } from '@xchainjs/xchain-client'
+import { BaseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 export type CosmosSDKClientParams = {
@@ -23,17 +23,17 @@ export type SearchTxParams = {
 export type UnsignedTxParams = {
   from: string
   to: string
-  amount: string
-  asset: string
+  amount: BaseAmount
+  denom: string
   memo?: string
 }
 
 export type TransferParams = {
   privkey: proto.cosmos.crypto.secp256k1.PrivKey
-  from: string
-  to: string
-  amount: string
-  asset: string
+  from: Address
+  to: Address
+  amount: BaseAmount
+  denom: string
   memo?: string
   fee?: proto.cosmos.tx.v1beta1.Fee
 }
