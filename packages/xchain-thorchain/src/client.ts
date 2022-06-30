@@ -484,6 +484,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     })
 
     const account = await this.getCosmosClient().getAccount(fromAddressAcc)
+    const accountSequence = account.sequence || Long.ZERO
 
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
@@ -493,7 +494,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       sequence: account.sequence || Long.ZERO,
     })
 
-    const txHash = await this.getCosmosClient().signAndBroadcast(txBuilder, privKey, account)
+    const txHash = await this.getCosmosClient().signAndBroadcast(txBuilder, privKey, accountSequence)
 
     if (!txHash) throw Error(`Invalid transaction hash: ${txHash}`)
 
@@ -564,7 +565,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       sequence: accountSequence,
     })
 
-    const txHash = await this.cosmosClient.signAndBroadcast(txBuilder, privKey, account)
+    const txHash = await this.cosmosClient.signAndBroadcast(txBuilder, privKey, accountSequence)
 
     if (!txHash) throw Error(`Invalid transaction hash: ${txHash}`)
 
