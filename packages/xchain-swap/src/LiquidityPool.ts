@@ -1,13 +1,13 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
 import {
   Asset,
+  AssetAmount,
   AssetRuneNative,
   BaseAmount,
+  assetAmount,
   assetFromString,
   baseAmount,
   eqAsset,
-  AssetAmount,
-  assetAmount
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 

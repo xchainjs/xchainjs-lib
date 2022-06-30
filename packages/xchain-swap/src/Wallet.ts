@@ -176,7 +176,7 @@ export class Wallet {
 
     // console.log(JSON.stringify(params, null, 2))
     const hash = await client.transfer(params)
-    return { hash, url: client.getExplorerTxUrl(hash), waitTime}
+    return { hash, url: client.getExplorerTxUrl(hash), waitTime }
   }
 
   private async updateAsgardAddresses(checkTimeMs: number) {

@@ -50,7 +50,6 @@ describe(`Liquidity calc tests`, () => {
     const runeToAssetRatio = btcPool.runeBalance.div(btcPool.assetBalance)
     const output = assetAmount(BN_1.dividedBy(runeToAssetRatio.amount()))
     expect(btcPool.inverseAssetPrice.amount()).toEqual(output.amount())
-
   })
 
   it(`Should calculate correct pool share`, async () => {

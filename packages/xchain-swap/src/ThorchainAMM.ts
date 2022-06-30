@@ -275,9 +275,9 @@ export class ThorchainAMM {
     }
 
     let waitTime = await this.confCounting(params.sourceAsset, params.inputAmount)
-    let destPool = await this.getPoolForAsset(params.destinationAsset)
-    if(destPool){
-      let outboundDelay = await this.outboundDelay(destPool, params.destinationAsset, limAssetAmount)
+    const destPool = await this.getPoolForAsset(params.destinationAsset)
+    if (destPool) {
+      const outboundDelay = await this.outboundDelay(destPool, params.destinationAsset, limAssetAmount)
       waitTime = outboundDelay + waitTime
     }
 
@@ -290,7 +290,7 @@ export class ThorchainAMM {
       affiliateAddress,
       affiliateFee,
       interfaceID,
-      waitTime
+      waitTime,
     })
   }
 
@@ -516,7 +516,7 @@ export class ThorchainAMM {
    * @returns time in seconds before a Tx is confirmed by THORChain
    * @see https://docs.thorchain.org/chain-clients/overview
    */
-  async confCounting(inboundAsset: Asset, inboundAmount: BaseAmount,): Promise<number> {
+  async confCounting(inboundAsset: Asset, inboundAmount: BaseAmount): Promise<number> {
     let amountInGasAsset: BaseAmount
 
     // RUNE, BNB and Synths have near instant finality, so no conf counting required.

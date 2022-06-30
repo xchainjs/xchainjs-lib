@@ -10,7 +10,11 @@ import { InboundDetail, MidgardConfig } from '../types'
 const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://midgard.thorchain.info/', 'https://midgard.thorswap.net', 'https://midgard.ninerealms.com/'],
+    midgardBaseUrls: [
+      'https://midgard.thorchain.info/',
+      'https://midgard.thorswap.net/',
+      'https://midgard.ninerealms.com/',
+    ],
   },
   stagenet: {
     apiRetries: 3,
@@ -163,4 +167,40 @@ export class Midgard {
       throw Error(`Could not find network value name`)
     }
   }
+  // /**
+  //  * For a given in Tx Hash (as returned by THORChainAMM.DoSwap()) or outbound address
+  //  * Find out out long it will take for the outbound Tx to be send to the user
+  //  *
+  //  * @param txHash
+  //  * @param outAddress
+  //  * @returns seconds until outbound transaction is sent
+  //  */
+  // public async getScheduledOutboundTime(txHash: string, outAddress: string): Promise<number> {
+  //   const baseUrl = `https://thornode.ninerealms.com/`
+  //   const path = 'thorchain/queue/scheduled/'
+  //   const height = 6217206 // example only
+
+  //   try {
+  //     const { data } = await axios.get(`${baseUrl}${path}`)
+  //   } catch (e) {
+  //     console.error(e)
+  //   }
+
+  //   // if inHash = '' search by outAddress or vice Versa
+  //   // witin data, find where in_hash = inHash || to_address = outAddress.
+  //   // when found, extract the height value
+
+  //   let currentBlockHeight = 6217000 // get that from network stats?
+  //   for (const api of this.midgardApis) {
+  //     try {
+  //       const data = (await api.getHealth()).data
+  //       currentBlockHeight = data[`scannerHeight`]
+  //     } catch (e) {
+  //       console.error(e)
+  //       throw Error(`Midgard not responding`)
+  //     }
+  //   }
+  //   const blocksRemaining = height - currentBlockHeight
+  //   return blocksRemaining * 5.5 // thorchain blocktime
+  // }
 }

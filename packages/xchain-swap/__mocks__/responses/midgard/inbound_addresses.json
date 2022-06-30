@@ -1,0 +1,45 @@
+[
+	{
+		"chain": "BCH",
+		"pub_key": "thorpub1addwnpepq2fsvewl3ph68mx4v70v46eu7d36dkyuenk9p5d59gaf7kn4l3gczenjkw0",
+		"address": "qzjzvcm4h0xkrv9s2txltjru4zh9gxuvpuvhedl75q",
+		"halted": false,
+		"gas_rate": "3"
+	},
+	{
+		"chain": "BNB",
+		"pub_key": "thorpub1addwnpepq2fsvewl3ph68mx4v70v46eu7d36dkyuenk9p5d59gaf7kn4l3gczenjkw0",
+		"address": "bnb15snxxadme4smpvzjeh6usl9g4e2phrq0c760m2",
+		"halted": false,
+		"gas_rate": "11250"
+	},
+	{
+		"chain": "BTC",
+		"pub_key": "thorpub1addwnpepq2fsvewl3ph68mx4v70v46eu7d36dkyuenk9p5d59gaf7kn4l3gczenjkw0",
+		"address": "bc1q5snxxadme4smpvzjeh6usl9g4e2phrq0vqmg7f",
+		"halted": false,
+		"gas_rate": "22"
+	},
+	{
+		"chain": "DOGE",
+		"pub_key": "thorpub1addwnpepq2fsvewl3ph68mx4v70v46eu7d36dkyuenk9p5d59gaf7kn4l3gczenjkw0",
+		"address": "DL73LzvKmCrBj7nmw9rEyT6ahy3Y7wBDfz",
+		"halted": false,
+		"gas_rate": "573934"
+	},
+	{
+		"chain": "ETH",
+		"pub_key": "thorpub1addwnpepq2fsvewl3ph68mx4v70v46eu7d36dkyuenk9p5d59gaf7kn4l3gczenjkw0",
+		"address": "0x4b2d8f17e51bc4b603d095c891d305b7f9e23a6a",
+		"router": "0xD37BbE5744D730a1d98d8DC97c42F0Ca46aD7146",
+		"halted": false,
+		"gas_rate": "100"
+	},
+	{
+		"chain": "LTC",
+		"pub_key": "thorpub1addwnpepq2fsvewl3ph68mx4v70v46eu7d36dkyuenk9p5d59gaf7kn4l3gczenjkw0",
+		"address": "ltc1q5snxxadme4smpvzjeh6usl9g4e2phrq0gupvxe",
+		"halted": true,
+		"gas_rate": "127"
+	}
+]

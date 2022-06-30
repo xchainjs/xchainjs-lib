@@ -84,7 +84,7 @@ export const getLiquidityProtectionData = (liquidity: LiquidityData, pool: Liqui
   const currentHeight = block.current
   const heightLastAdded = block.lastAdded
   const blocksforfullprotection = block.fullProtection
-  const protectionProgress = (currentHeight - heightLastAdded)/blocksforfullprotection
+  const protectionProgress = (currentHeight - heightLastAdded) / blocksforfullprotection
   const result = protectionProgress * coverage.toNumber() // impermanent loss protection result
   return result
 }
