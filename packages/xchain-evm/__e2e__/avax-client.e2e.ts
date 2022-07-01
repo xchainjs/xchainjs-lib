@@ -11,7 +11,6 @@ import { IsApprovedParams } from '../src/types'
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
 const AVALANCHE_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
   'https://api.avax-test.network/ext/bc/C/rpc',
-  EthNetwork.Test,
 )
 
 const ethersJSProviders = {
