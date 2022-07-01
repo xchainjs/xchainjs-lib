@@ -9,7 +9,7 @@ import {
   // assetToBase,
   assetToString,
   baseAmount,
-  eqAsset,
+  // eqAsset,
 } from '@xchainjs/xchain-util'
 import { Signer, ethers, providers } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
@@ -99,26 +99,6 @@ export const getTokenAddress = (asset: Asset): Address | null => {
   } catch (err) {
     return null
   }
-}
-
-/**
- * Checks whether an `Asset` is `AssetETH` or not
- *
- * @param {Asset} asset
- * @returns {boolean} Result of check if an asset is ETH or not
- */
-export const isEthAsset = (asset: Asset): boolean => eqAsset(AssetETH, asset)
-
-/**
- * Parses asset address from `Asset`
- *
- * @param {Asset} asset
- * @returns {Address|null} Asset address
- */
-export const getAssetAddress = (asset: Asset): Address | null => {
-  if (isEthAsset(asset)) return ETHAddress
-
-  return getTokenAddress(asset)
 }
 
 /**

@@ -15,7 +15,7 @@ import {
   mock_thornode_inbound_addresses_success,
 } from '../../__mocks__/thornode-api'
 import Client, { EVMClientParams } from '../../src/client'
-import { CovalentProvider } from '../../src/providers/covalent-data-provider'
+import { CovalentProvider } from '../../src/providers/covalent/covalent-data-provider'
 import { ExplorerProvider } from '../../src/providers/explorer-provider'
 // import erc20ABI from '../src/data/erc20.json'
 // import { ETH_DECIMAL } from '../src/utils'
@@ -266,9 +266,9 @@ describe('Client Test', () => {
 
     const { fast, fastest, average } = await avaxClient.estimateGasPrices()
 
-    expect(fast.amount().toString()).toEqual('30000000000')
-    expect(fastest.amount().toString()).toEqual('150000000000')
-    expect(average.amount().toString()).toEqual('15000000000')
+    expect(fast.amount().toString()).toEqual('25000000000')
+    expect(fastest.amount().toString()).toEqual('125000000000') // 5x more than fast
+    expect(average.amount().toString()).toEqual('12500000000') // 1/2 as much as fast
   })
 
   // it('get eth transaction history', async () => {
