@@ -117,7 +117,7 @@ export class Wallet {
     let memo = `=:${swap.destinationAsset.chain}.${swap.destinationAsset.symbol}`
     // If synth construct a synth memo
     if (swap.destinationAsset.synth && eqChain(swap.destinationAsset.chain, Chain.THORChain)) {
-      memo = `=:${swap.destinationAsset.chain}/${swap.destinationAsset.symbol}`
+      memo = `=:${swap.destinationAsset.symbol}/${swap.destinationAsset.symbol}`
     }
     memo = memo.concat(
       `:${swap.destinationAddress}:${lim}:${swap.affiliateAddress}:${swap.affiliateFee.amount().toFixed()}`,
@@ -128,7 +128,7 @@ export class Wallet {
       memo = `:${swap.destinationAsset.chain}.${swap.destinationAsset.symbol}`
       // If swapping to a synth
       if (swap.destinationAsset.synth && eqChain(swap.destinationAsset.chain, Chain.THORChain)) {
-        memo = `=:${swap.destinationAsset.chain}/${swap.destinationAsset.symbol}`
+        memo = `=:${swap.destinationAsset.symbol}/${swap.destinationAsset.symbol}`
       }
       memo = memo.concat(`:${swap.destinationAddress}`)
     }

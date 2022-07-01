@@ -73,19 +73,20 @@ export class THORNode {
   /**
    * For a given in Tx Hash (as returned by THORChainAMM.DoSwap()), finds the status of any THORChain transaction
    *
-   * @param sourcechain
-   * @param desintationChain
+   * @param sourceChain
+   * @param destinationChain
    * @param inboundTxHash
    * @returns
    */
-  public async checkTx(sourcechain: Chain, desintationChain: Chain, inboundTxHash: string): Promise<TxStatus> {
-    const sourcechainChainConfig = this.confCountingConfig[sourcechain]
-    const desintationChainConfig = this.confCountingConfig[desintationChain]
+  public async checkTx(sourceChain: Chain, destinationChain: Chain, inboundTxHash: string): Promise<TxStatus> {
+    const sourceChainConfig = this.confCountingConfig[sourceChain]
+    const destinationChainConfig = this.confCountingConfig[destinationChain]
 
     const txStatus: TxStatus = { stage: TxStage.INBOUND_CHAIN_UNCONFIRMED, seconds: 0 }
     /** Stage 1 See if the tx has been confirmed on the source Blockchain or not */
-    if (!sourcechain.Client.getTransactionDetails(inboundTxHash).isConfirmed) {
-      txStatus.seconds = sourcechainChainConfig.avgBlockTimeInSecs
+    const isConfirmed = await /*ChainClient*/ getTransactionDetails(inboundTxHash).isConfirmed
+    if (sourceChain != isConfirmed) {
+      txStatus.seconds = sourceChainConfig.avgBlockTimeInSecs
       return txStatus // wait the blockChain block time, re-check later
     } else {
       txStatus.stage++ // move to the next stage, e.g. txStatus.stage = TxStage.TC_PROCESSING
@@ -146,9 +147,9 @@ export class THORNode {
       }
 
       /** Stage 4, same as stage 1 but for the destination Chain */
-      if (!desintationChain.Client.getTransactionDetails(ouboundTxHash).isConfirmed) {
+      if (!destinationChain.Client.getTransactionDetails(ouboundTxHash).isConfirmed) {
         txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED // move to the next stage, e.g. txStatus.stage = TxStage.TC_PROCESSING
-        txStatus.seconds = desintationChainConfig.avgBlockTimeInSecs // block time of destinationChain
+        txStatus.seconds = destinationChainConfig.avgBlockTimeInSecs // block time of destinationChain
       } else {
         // Stage 5 - all done
         txStatus.stage = TxStage.OUTBOUND_CHAIN_CONFIRMED
