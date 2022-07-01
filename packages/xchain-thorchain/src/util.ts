@@ -14,6 +14,7 @@ import {
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import * as bech32Buffer from 'bech32-buffer'
+import Long from 'long'
 
 import { ChainId, ChainIds, ClientUrl, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx } from './types/messages'
@@ -22,7 +23,7 @@ import types from './types/proto/MsgCompiled'
 export const DECIMAL = 8
 export const DEFAULT_GAS_ADJUSTMENT = 2
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
-export const DEPOSIT_GAS_LIMIT_VALUE = '500000000'
+export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 export const MAX_TX_COUNT = 100
 
 /**
@@ -213,8 +214,8 @@ export const buildUnsignedTx = ({
   cosmosSdk: cosmosclient.CosmosSDK
   txBody: proto.cosmos.tx.v1beta1.TxBody
   signerPubkey: proto.google.protobuf.Any
-  sequence: cosmosclient.Long.Long
-  gasLimit?: cosmosclient.Long.Long
+  sequence: Long
+  gasLimit?: Long
 }): cosmosclient.TxBuilder => {
   const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
     signer_infos: [
@@ -237,6 +238,13 @@ export const buildUnsignedTx = ({
   return new cosmosclient.TxBuilder(cosmosSdk, txBody, authInfo)
 }
 
+/**
+ * Estimates usage of gas
+ *
+ * Note: Be careful by using this helper function,
+ * it's still experimental and result might be incorrect.
+ * Change `multiplier` to get a valid estimation of gas.
+ */
 export const getEstimatedGas = async ({
   cosmosSDKClient,
   txBody,
@@ -248,15 +256,15 @@ export const getEstimatedGas = async ({
   cosmosSDKClient: CosmosSDKClient
   txBody: proto.cosmos.tx.v1beta1.TxBody
   privKey: proto.cosmos.crypto.secp256k1.PrivKey
-  accountNumber: cosmosclient.Long.Long
-  accountSequence: cosmosclient.Long.Long
+  accountNumber: Long
+  accountSequence: Long
   multiplier?: number
-}): Promise<cosmosclient.Long.Long | undefined> => {
+}): Promise<Long | undefined> => {
   const pubKey = privKey.pubKey()
   const txBuilder = buildUnsignedTx({
     cosmosSdk: cosmosSDKClient.sdk,
     txBody: txBody,
-    signerPubkey: cosmosclient.codec.packAny(pubKey),
+    signerPubkey: cosmosclient.codec.instanceToProtoAny(pubKey),
     sequence: accountSequence,
   })
 
@@ -271,7 +279,7 @@ export const getEstimatedGas = async ({
     throw new Error('Could not get data of estimated gas')
   }
 
-  return cosmosclient.Long.fromString(estimatedGas).multiply(multiplier || DEFAULT_GAS_ADJUSTMENT)
+  return Long.fromString(estimatedGas).multiply(multiplier || DEFAULT_GAS_ADJUSTMENT)
 }
 /**
  * Structure a MsgDeposit
@@ -310,7 +318,7 @@ export const buildDepositTx = async ({
   const depositMsg = types.types.MsgDeposit.fromObject(msgDepositObj)
 
   return new proto.cosmos.tx.v1beta1.TxBody({
-    messages: [cosmosclient.codec.packAny(depositMsg)],
+    messages: [cosmosclient.codec.instanceToProtoAny(depositMsg)],
     memo: msgNativeTx.memo,
   })
 }
@@ -365,7 +373,7 @@ export const buildTransferTx = async ({
   const transferMsg = types.types.MsgSend.fromObject(transferObj)
 
   return new proto.cosmos.tx.v1beta1.TxBody({
-    messages: [cosmosclient.codec.packAny(transferMsg)],
+    messages: [cosmosclient.codec.instanceToProtoAny(transferMsg)],
     memo,
   })
 }

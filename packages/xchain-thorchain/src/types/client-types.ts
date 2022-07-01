@@ -1,6 +1,7 @@
-import { cosmosclient } from '@cosmos-client/core'
 import { Network, Tx, TxParams } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
+import BigNumber from 'bignumber.js'
+import Long from 'long'
 
 export type NodeUrl = {
   node: string
@@ -31,6 +32,7 @@ export type DepositParam = {
   asset?: Asset
   amount: BaseAmount
   memo: string
+  gasLimit?: BigNumber
 }
 
 export type TxData = Pick<Tx, 'from' | 'to' | 'type'>
@@ -45,8 +47,9 @@ export type TxOfflineParams = TxParams & {
    * Optional: It can be ignored if asset to send from is RUNE
    */
   fromAssetBalance?: BaseAmount
-  fromAccountNumber: cosmosclient.Long.Long
-  fromSequence: cosmosclient.Long.Long
+  fromAccountNumber: Long
+  fromSequence: Long
+  gasLimit?: BigNumber
 }
 
 /**

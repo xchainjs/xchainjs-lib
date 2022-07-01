@@ -1,3 +1,52 @@
+# v.0.19.0 (2022-07-01)
+
+## Add
+
+- Helpers `getDefaultRootDerivationPaths`. `getChainId`, `getChainIds`, `protoFee`, `protoMsgSend`, `protoTxBody`, `protoAuthInfo`
+
+## Breaking change
+
+- Helper `getDenom` supports `ATOM` only + returns `null` for all other assets
+- Remove `CosmosSDKClient.getUnsignedTxBody`
+- Rename `asset` -> `denom` in `TransferParams`
+- Change type of `amount` from `string` -> `BaseAmount` in `TransferParams`
+- Remove `account` param from `CosmosSDKClient.signAndBroadcast` in favour of `accountNumber`
+
+# v.0.18.0 (2022-06-22)
+
+## Add
+
+- const `DEFAULT_GAS_LIMIT`
+- const `DEFAULT_FEE`
+- Optional parameter `gasLimit` in `transfer` and `transferOffline`
+- Params `clientUrls`, `chainIds` for constructor
+- Helper `getDefaultClientUrls`
+- Helper `getDefaultChainIds`
+- Setter `setNetwork`
+
+## Fix
+
+- `getFees` checks chain fees provided by `inbound_addresses` first, before using `DEFAULT_FEE`
+- Initial one instance of `CosmosSDKClient` only depending on network
+- Support IBC assets in `getBalances` (#596)
+- Get IBC assets from denom in `getAsset`
+- Order txs in `getTxsFromHistory` to have latest txs on top
+- Fix `RawTxResponse` type
+
+## Update
+
+- Result of `getTxsFromHistory` is filtered by given asset
+- Move misc. constants into `const.ts`
+- `getTxsFromHistory` checks `MsgSend` txs only and ignores `MsgMultiSend` txs from now
+- Latest `@cosmos-client/core@0.45.10`
+
+## Breaking change
+
+- Remove deprecated `AssetMuon`
+- Remove deprecated `Client.getMainAsset`
+- Remove deprecated `BaseAccountResponse`
+- Rename `DECIMAL` -> `COSMOS_DECIMAL`
+
 # v.0.17.0 (2022-03-23)
 
 ## Update

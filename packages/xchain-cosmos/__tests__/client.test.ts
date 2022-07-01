@@ -1,11 +1,11 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
+import { proto } from '@cosmos-client/core'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { Client } from '../src/client'
+import { AssetAtom, COSMOS_DECIMAL } from '../src/const'
 import { GetTxByHashResponse, TxHistoryResponse } from '../src/cosmos/types'
-import { AssetMuon } from '../src/types'
 
 const getClientUrl = (client: Client): string => {
   return client.getNetwork() === Network.Testnet
@@ -78,7 +78,7 @@ describe('Client Test', () => {
   const address1_testnet = 'cosmos1924f27fujxqnkt74u4d3ke3sfygugv9qp29hmk'
 
   beforeEach(() => {
-    cosmosClient = new Client({ phrase, network: 'testnet' as Network })
+    cosmosClient = new Client({ phrase, network: Network.Testnet })
   })
 
   afterEach(() => {
@@ -86,22 +86,22 @@ describe('Client Test', () => {
   })
 
   it('should start with empty wallet', async () => {
-    const cosmosClientEmptyMain = new Client({ phrase, network: 'mainnet' as Network })
+    const cosmosClientEmptyMain = new Client({ phrase, network: Network.Mainnet })
     expect(cosmosClientEmptyMain.getAddress()).toEqual(address0_mainnet)
     expect(cosmosClientEmptyMain.getAddress(1)).toEqual(address1_mainnet)
 
-    const cosmosClientEmptyTest = new Client({ phrase, network: 'testnet' as Network })
+    const cosmosClientEmptyTest = new Client({ phrase, network: Network.Testnet })
     expect(cosmosClientEmptyTest.getAddress()).toEqual(address0_testnet)
     expect(cosmosClientEmptyTest.getAddress(1)).toEqual(address1_testnet)
   })
 
   it('throws an error passing an invalid phrase', async () => {
     expect(() => {
-      new Client({ phrase: 'invalid phrase', network: 'mainnet' as Network })
+      new Client({ phrase: 'invalid phrase', network: Network.Mainnet })
     }).toThrow()
 
     expect(() => {
-      new Client({ phrase: 'invalid phrase', network: 'testnet' as Network })
+      new Client({ phrase: 'invalid phrase', network: Network.Testnet })
     }).toThrow()
   })
 
@@ -118,8 +118,8 @@ describe('Client Test', () => {
   })
 
   it('should update net', async () => {
-    const client = new Client({ phrase, network: 'mainnet' as Network })
-    client.setNetwork('testnet' as Network)
+    const client = new Client({ phrase, network: Network.Mainnet })
+    client.setNetwork(Network.Testnet)
     expect(client.getNetwork()).toEqual('testnet')
 
     const address = client.getAddress()
@@ -129,12 +129,12 @@ describe('Client Test', () => {
   it('should init, should have right prefix', async () => {
     expect(cosmosClient.validateAddress(cosmosClient.getAddress())).toEqual(true)
 
-    cosmosClient.setNetwork('mainnet' as Network)
+    cosmosClient.setNetwork(Network.Mainnet)
     expect(cosmosClient.validateAddress(cosmosClient.getAddress())).toEqual(true)
   })
 
   it('has no balances', async () => {
-    cosmosClient.setNetwork('mainnet' as Network)
+    cosmosClient.setNetwork(Network.Mainnet)
 
     mockAccountsBalance(getClientUrl(cosmosClient), address0_mainnet, {
       balances: [],
@@ -148,19 +148,20 @@ describe('Client Test', () => {
     mockAccountsBalance(getClientUrl(cosmosClient), 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv', {
       balances: [
         new proto.cosmos.base.v1beta1.Coin({
-          denom: 'muon',
+          denom: 'uatom',
           amount: '75000000',
         }),
       ],
     })
     const balances = await cosmosClient.getBalance('cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv')
-    const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, 6).amount())
+
+    const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, COSMOS_DECIMAL).amount())
     expect(expected).toBeTruthy()
-    expect(balances[0].asset).toEqual(AssetMuon)
+    expect(balances[0].asset).toEqual(AssetAtom)
   })
 
   it('has an empty tx history', async () => {
-    cosmosClient.setNetwork('mainnet' as Network)
+    cosmosClient.setNetwork(Network.Mainnet)
 
     const expected: TxsPage = {
       total: 0,
@@ -186,12 +187,11 @@ describe('Client Test', () => {
       to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
       amount: [
         {
-          denom: 'umuon',
+          denom: 'uatom',
           amount: '4318994970',
         },
       ],
     })
-    const encodedMsg = cosmosclient.codec.packCosmosAny(msgSend)
 
     assertTxHstory(getClientUrl(cosmosClient), 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
       pagination: {
@@ -210,8 +210,7 @@ describe('Client Test', () => {
           gas_used: '148996',
           tx: {
             body: {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              messages: [encodedMsg as any],
+              messages: [msgSend],
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -222,7 +221,7 @@ describe('Client Test', () => {
     let transactions = await cosmosClient.getTransactions({ address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2' })
     expect(transactions.total).toBeGreaterThan(0)
 
-    cosmosClient.setNetwork('mainnet' as Network)
+    cosmosClient.setNetwork(Network.Mainnet)
     const msgSend2 = new proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z',
       to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
@@ -233,7 +232,6 @@ describe('Client Test', () => {
         },
       ],
     })
-    const encodedMsg2 = cosmosclient.codec.packCosmosAny(msgSend2)
     assertTxHstory(getClientUrl(cosmosClient), 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z', {
       pagination: {
         total: '1',
@@ -251,8 +249,7 @@ describe('Client Test', () => {
           gas_used: '148996',
           tx: {
             body: {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              messages: [encodedMsg2 as any],
+              messages: [msgSend2],
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -266,7 +263,7 @@ describe('Client Test', () => {
 
   it('transfer', async () => {
     const to_address = 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv'
-    const send_amount: BaseAmount = baseAmount(10000, 6)
+    const send_amount: BaseAmount = baseAmount(10000, COSMOS_DECIMAL)
     const memo = 'transfer'
 
     const expected_txsPost_result = {
@@ -291,7 +288,7 @@ describe('Client Test', () => {
     assertTxsPost(getClientUrl(cosmosClient), expected_txsPost_result)
 
     const result = await cosmosClient.transfer({
-      asset: AssetMuon,
+      asset: AssetAtom,
       recipient: to_address,
       amount: send_amount,
       memo,
@@ -301,7 +298,7 @@ describe('Client Test', () => {
   })
 
   it('get transaction data', async () => {
-    cosmosClient.setNetwork('mainnet' as Network)
+    cosmosClient.setNetwork(Network.Mainnet)
 
     const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z',
@@ -313,7 +310,6 @@ describe('Client Test', () => {
         },
       ],
     })
-    const encodedMsg = cosmosclient.codec.packCosmosAny(msgSend)
 
     assertTxHashGet(getClientUrl(cosmosClient), '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {
       tx_response: {
@@ -325,8 +321,7 @@ describe('Client Test', () => {
         gas_used: '148996',
         tx: {
           body: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            messages: [encodedMsg as any],
+            messages: [msgSend],
           },
         },
         timestamp: '2020-09-25T06:09:15Z',
@@ -337,16 +332,16 @@ describe('Client Test', () => {
     expect(tx.type).toEqual('transfer')
     expect(tx.hash).toEqual('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
     expect(tx.from[0].from).toEqual('cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z')
-    expect(tx.from[0].amount.amount().isEqualTo(baseAmount(4318994970, 6).amount())).toBeTruthy()
+    expect(tx.from[0].amount.amount().isEqualTo(baseAmount(4318994970, COSMOS_DECIMAL).amount())).toBeTruthy()
     expect(tx.to[0].to).toEqual('cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr')
-    expect(tx.to[0].amount.amount().isEqualTo(baseAmount(4318994970, 6).amount())).toBeTruthy()
+    expect(tx.to[0].amount.amount().isEqualTo(baseAmount(4318994970, COSMOS_DECIMAL).amount())).toBeTruthy()
   })
 
   it('should return valid explorer url', () => {
     // Client created with network === 'testnet'
     expect(cosmosClient.getExplorerUrl()).toEqual('https://explorer.theta-testnet.polypore.xyz')
 
-    cosmosClient.setNetwork('mainnet' as Network)
+    cosmosClient.setNetwork(Network.Mainnet)
     expect(cosmosClient.getExplorerUrl()).toEqual('https://cosmos.bigdipper.live')
   })
 
@@ -355,7 +350,7 @@ describe('Client Test', () => {
       'https://explorer.theta-testnet.polypore.xyz/account/anotherTestAddressHere',
     )
 
-    cosmosClient.setNetwork('mainnet' as Network)
+    cosmosClient.setNetwork(Network.Mainnet)
     expect(cosmosClient.getExplorerAddressUrl('testAddressHere')).toEqual(
       'https://cosmos.bigdipper.live/account/testAddressHere',
     )
@@ -366,7 +361,7 @@ describe('Client Test', () => {
       'https://explorer.theta-testnet.polypore.xyz/transactions/anotherTestTxHere',
     )
 
-    cosmosClient.setNetwork('mainnet' as Network)
+    cosmosClient.setNetwork(Network.Mainnet)
     expect(cosmosClient.getExplorerTxUrl('testTxHere')).toEqual('https://cosmos.bigdipper.live/transactions/testTxHere')
   })
 })

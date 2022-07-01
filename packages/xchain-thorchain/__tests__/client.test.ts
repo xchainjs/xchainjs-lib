@@ -479,7 +479,6 @@ describe('Client Test', () => {
       ],
     })
     mockThorchainConstants(nodeUrl)
-    console.log('mike-->' + JSON.stringify(thorClient.getClientUrl()))
     mockTendermintSimulate(nodeUrl, {
       gas_info: {
         gas_used: '1000000',
