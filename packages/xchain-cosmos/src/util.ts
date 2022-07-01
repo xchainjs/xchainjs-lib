@@ -1,10 +1,14 @@
-import { proto } from '@cosmos-client/core'
-import { FeeType, Fees, Network, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
+import { cosmosclient, proto } from '@cosmos-client/core'
+import { cosmos } from '@cosmos-client/core/cjs/proto'
+import { FeeType, Fees, Network, RootDerivationPaths, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount, CosmosChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import axios from 'axios'
+import BigNumber from 'bignumber.js'
+import Long from 'long'
 
-import { AssetAtom, COSMOS_DECIMAL } from './const'
-import { APIQueryParam, TxResponse } from './cosmos/types'
-import { ChainIds, ClientUrls as ClientUrls } from './types'
+import { AssetAtom, COSMOS_DECIMAL, DEFAULT_GAS_LIMIT } from './const'
+import { APIQueryParam, TxResponse, UnsignedTxParams } from './cosmos/types'
+import { ChainId, ChainIds, ClientUrls as ClientUrls } from './types'
 
 /**
  * Type guard for MsgSend
@@ -28,14 +32,14 @@ export const isMsgMultiSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.M
   (msg as proto.cosmos.bank.v1beta1.MsgMultiSend)?.outputs !== undefined
 
 /**
- * Get denomination from Asset
+ * Get denomination from Asset - currently `ATOM` supported only
  *
  * @param {Asset} asset
  * @returns {string} The denomination of the given asset.
  */
-export const getDenom = (asset: Asset): string => {
+export const getDenom = (asset: Asset): string | null => {
   if (eqAsset(asset, AssetAtom)) return 'uatom'
-  return asset.symbol
+  return null
 }
 
 /**
@@ -229,4 +233,111 @@ export const getDefaultChainIds = (): ChainIds => {
     [Network.Stagenet]: mainChainId,
     [Network.Mainnet]: mainChainId,
   }
+}
+
+export const getDefaultRootDerivationPaths = (): RootDerivationPaths => ({
+  [Network.Mainnet]: `44'/118'/0'/0/`,
+  [Network.Testnet]: `44'/118'/0'/0/`,
+  [Network.Stagenet]: `44'/118'/0'/0/`,
+})
+
+export const protoFee = ({
+  denom,
+  amount,
+  gasLimit = new BigNumber(DEFAULT_GAS_LIMIT),
+}: {
+  denom: string
+  amount: BaseAmount
+  gasLimit?: BigNumber
+}): proto.cosmos.tx.v1beta1.Fee =>
+  new proto.cosmos.tx.v1beta1.Fee({
+    amount: [
+      {
+        denom,
+        amount: amount.amount().toFixed(0),
+      },
+    ],
+    gas_limit: Long.fromString(gasLimit.toFixed(0)),
+  })
+
+export const protoMsgSend = ({
+  from,
+  to,
+  amount,
+  denom,
+}: {
+  from: string
+  to: string
+  amount: BaseAmount
+  denom: string
+}): proto.cosmos.bank.v1beta1.MsgSend =>
+  new proto.cosmos.bank.v1beta1.MsgSend({
+    from_address: from,
+    to_address: to,
+    amount: [
+      {
+        amount: amount.amount().toFixed(0),
+        denom,
+      },
+    ],
+  })
+
+export const protoTxBody = ({ from, to, amount, denom, memo }: UnsignedTxParams): proto.cosmos.tx.v1beta1.TxBody => {
+  const msg = protoMsgSend({ from, to, amount, denom })
+
+  return new proto.cosmos.tx.v1beta1.TxBody({
+    messages: [cosmosclient.codec.instanceToProtoAny(msg)],
+    memo,
+  })
+}
+
+export const protoAuthInfo = ({
+  pubKey,
+  sequence,
+  mode,
+  fee,
+}: {
+  pubKey: cosmosclient.PubKey
+  sequence: Long.Long
+  mode: proto.cosmos.tx.signing.v1beta1.SignMode
+  fee?: cosmos.tx.v1beta1.IFee
+}): proto.cosmos.tx.v1beta1.AuthInfo =>
+  new proto.cosmos.tx.v1beta1.AuthInfo({
+    signer_infos: [
+      {
+        public_key: cosmosclient.codec.instanceToProtoAny(pubKey),
+        mode_info: {
+          single: {
+            mode,
+          },
+        },
+        sequence,
+      },
+    ],
+    fee,
+  })
+
+/**
+ * Helper to get Cosmos' chain id
+ * @param {string} url API url
+ */
+export const getChainId = async (url: string): Promise<ChainId> => {
+  const { data } = await axios.get<{ node_info: { network: string } }>(`${url}/node_info`)
+  return data?.node_info?.network || Promise.reject('Could not parse chain id')
+}
+
+/**
+ * Helper to get Cosmos' chain id for all networks
+ * @param {ClientUrl} urls urls (use `getDefaultClientUrl()` if you don't need to use custom urls)
+ */
+export const getChainIds = async (urls: ClientUrls): Promise<ChainIds> => {
+  return Promise.all([
+    getChainId(urls[Network.Testnet]),
+    getChainId(urls[Network.Stagenet]),
+    getChainId(urls[Network.Mainnet]),
+  ]).then(([testnetId, stagenetId, mainnetId]) => ({
+    testnet: testnetId,
+    stagenet: stagenetId,
+    mainnet: mainnetId,
+  }))
 }

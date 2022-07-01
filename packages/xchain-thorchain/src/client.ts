@@ -484,6 +484,8 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     })
 
     const account = await this.getCosmosClient().getAccount(fromAddressAcc)
+    const { account_number: accountNumber } = account
+    if (!accountNumber) throw Error(`Deposit failed - could not get account number ${accountNumber}`)
 
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
@@ -493,7 +495,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       sequence: account.sequence || Long.ZERO,
     })
 
-    const txHash = await this.getCosmosClient().signAndBroadcast(txBuilder, privKey, account)
+    const txHash = await this.getCosmosClient().signAndBroadcast(txBuilder, privKey, accountNumber)
 
     if (!txHash) throw Error(`Invalid transaction hash: ${txHash}`)
 
@@ -554,17 +556,18 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       nodeUrl: this.getClientUrl().node,
     })
     const account = await this.getCosmosClient().getAccount(accAddress)
-    const accountSequence = account.sequence || Long.ZERO
+    const { account_number: accountNumber } = account
+    if (!accountNumber) throw Error(`Deposit failed - could not get account number ${accountNumber}`)
 
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,
       txBody: txBody,
       gasLimit: Long.fromString(gasLimit.toString()),
       signerPubkey: cosmosclient.codec.instanceToProtoAny(signerPubkey),
-      sequence: accountSequence,
+      sequence: account.sequence || Long.ZERO,
     })
 
-    const txHash = await this.cosmosClient.signAndBroadcast(txBuilder, privKey, account)
+    const txHash = await this.cosmosClient.signAndBroadcast(txBuilder, privKey, accountNumber)
 
     if (!txHash) throw Error(`Invalid transaction hash: ${txHash}`)
 

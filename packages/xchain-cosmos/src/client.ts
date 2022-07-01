@@ -15,15 +15,22 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, Chain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
-import Long from 'long'
 
 import { AssetAtom, COSMOS_DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT } from './const'
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { TxOfflineParams } from './cosmos/types'
 import { ChainIds, ClientUrls, CosmosClientParams } from './types'
-import { getAsset, getDefaultChainIds, getDefaultClientUrls, getDenom, getTxsFromHistory } from './util'
+import {
+  getAsset,
+  getDefaultChainIds,
+  getDefaultClientUrls,
+  getDefaultRootDerivationPaths,
+  getDenom,
+  getTxsFromHistory,
+  protoFee,
+} from './util'
 
 /**
  * Interface for custom Cosmos client
@@ -53,18 +60,14 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   constructor({
     network = Network.Testnet,
     phrase,
-    clientUrls,
-    chainIds,
-    rootDerivationPaths = {
-      [Network.Mainnet]: `44'/118'/0'/0/`,
-      [Network.Testnet]: `44'/118'/0'/0/`,
-      [Network.Stagenet]: `44'/118'/0'/0/`,
-    },
+    clientUrls = getDefaultClientUrls(),
+    chainIds = getDefaultChainIds(),
+    rootDerivationPaths = getDefaultRootDerivationPaths(),
   }: XChainClientParams & CosmosClientParams) {
     super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
 
-    this.clientUrls = clientUrls || getDefaultClientUrls()
-    this.chainIds = chainIds || getDefaultChainIds()
+    this.clientUrls = clientUrls
+    this.chainIds = chainIds
 
     this.sdkClient = new CosmosSDKClient({
       server: this.clientUrls[network],
@@ -255,22 +258,19 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   }: TxParams & { gasLimit?: BigNumber; feeAmount?: BaseAmount }): Promise<TxHash> {
     const fromAddressIndex = walletIndex || 0
 
-    const fee = new proto.cosmos.tx.v1beta1.Fee({
-      amount: [
-        {
-          denom: getDenom(AssetAtom),
-          amount: feeAmount.amount().toFixed(),
-        },
-      ],
-      gas_limit: Long.fromString(gasLimit.toFixed(0)),
-    })
+    const denom = getDenom(asset)
+
+    if (!denom)
+      throw Error(`Invalid asset ${assetToString(asset)} - Only ATOM asset is currently supported to transfer`)
+
+    const fee = protoFee({ denom, amount: feeAmount, gasLimit })
 
     return this.getSDKClient().transfer({
       privkey: this.getPrivateKey(fromAddressIndex),
       from: this.getAddress(fromAddressIndex),
       to: recipient,
-      amount: amount.amount().toString(),
-      asset: getDenom(asset),
+      amount,
+      denom,
       memo,
       fee,
     })
@@ -295,15 +295,12 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   }: TxOfflineParams): Promise<string> {
     const fromAddressIndex = walletIndex || 0
 
-    const fee = new proto.cosmos.tx.v1beta1.Fee({
-      amount: [
-        {
-          denom: getDenom(AssetAtom),
-          amount: feeAmount.amount().toFixed(),
-        },
-      ],
-      gas_limit: Long.fromString(gasLimit.toFixed(0)),
-    })
+    const denom = getDenom(asset)
+
+    if (!denom)
+      throw Error(`Invalid asset ${assetToString(asset)} - Only ATOM asset is currently supported to transfer`)
+
+    const fee = protoFee({ denom, amount: feeAmount, gasLimit })
 
     return await this.getSDKClient().transferSignedOffline({
       privkey: this.getPrivateKey(fromAddressIndex),
@@ -311,8 +308,8 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       from_account_number,
       from_sequence,
       to: recipient,
-      amount: amount.amount().toString(),
-      asset: getDenom(asset),
+      amount,
+      denom,
       memo,
       fee,
     })

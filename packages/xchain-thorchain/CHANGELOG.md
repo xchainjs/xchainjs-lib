@@ -1,3 +1,9 @@
+# v0.25.3 (2022-xx-xx)
+
+## Update
+
+- Latest "xchain-cosmos@0.19.0"
+
 # v0.25.2 (2022-06-22)
 
 ## Update
