@@ -10,8 +10,8 @@ const mainnetMidgard = new Midgard(Network.Mainnet)
 const testnetMidgard = new Midgard(Network.Testnet)
 const mainetThorchainAmm = new ThorchainAMM(mainnetMidgard)
 const testnetThorchainAmm = new ThorchainAMM(testnetMidgard)
-const testnetWallet = new Wallet(Network.Testnet, "narrow middle magnet shadow shove birth retreat guide promote fringe cradle oak" || 'you forgot to set the phrase')
-const mainnetWallet = new Wallet(Network.Mainnet, "obscure million amused relief spare ghost mushroom club bulb online maid sister" || 'you forgot to set the phrase')
+const testnetWallet = new Wallet(Network.Testnet, process.env.Phrase || 'you forgot to set the phrase')
+const mainnetWallet = new Wallet(Network.Mainnet, process.env.Phrase || 'you forgot to set the phrase')
 
 describe('xchain-swap Integration Tests', () => {
   it(`Should swap BTC to RUNE, with no affiliate address  `, async () => {
@@ -145,12 +145,16 @@ describe('xchain-swap Integration Tests', () => {
       ticker: "BTC",
       synth: true
     }
+    const sBNB: Asset = {
+      chain: Chain.THORChain,
+      symbol: "BNB",
+      ticker: "BNB",
+      synth: true
+    }
     const estimateSwapParams = {
-      sourceAsset: AssetBNB,
+      sourceAsset: sBNB,
       destinationAsset: sBTC,
       inputAmount: assetToBase(assetAmount(0.01)),
-      //slipLimit: new BigNumber(0.5),
-      //affiliateFeePercent: 0.1,
     }
     try {
       const output = await mainetThorchainAmm.doSwap(
