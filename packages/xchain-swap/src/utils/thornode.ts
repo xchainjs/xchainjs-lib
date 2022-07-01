@@ -84,7 +84,7 @@ export class THORNode {
 
     const txStatus: TxStatus = { stage: TxStage.INBOUND_CHAIN_UNCONFIRMED, seconds: 0 }
     /** Stage 1 See if the tx has been confirmed on the source Blockchain or not */
-    const isConfirmed = await /*ChainClient*/ getTransactionDetails(inboundTxHash).isConfirmed
+    const isConfirmed = await /*ChainClient*/getTransactionDetails(inboundTxHash).isConfirmed
     if (sourceChain != isConfirmed) {
       txStatus.seconds = sourceChainConfig.avgBlockTimeInSecs
       return txStatus // wait the blockChain block time, re-check later
