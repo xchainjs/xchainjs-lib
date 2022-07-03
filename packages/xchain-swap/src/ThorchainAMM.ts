@@ -30,7 +30,9 @@ import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
 import { Wallet } from './Wallet'
+import { defaultChainAttributes } from './chainDefaults'
 import {
+  ChainAttributes,
   EstimateSwapParams,
   InboundDetail,
   PoolCache,
@@ -38,11 +40,9 @@ import {
   SwapOutput,
   SwapSubmitted,
   TotalFees,
-  ConfCountingSetting
 } from './types'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'
-import { defaultConfCountingConfig } from './chainDefaults'
 
 const BN_1 = new BigNumber(1)
 
@@ -50,12 +50,12 @@ export class ThorchainAMM {
   private midgard: Midgard
   private poolCache: PoolCache | undefined
   private expirePoolCacheMillis
-  private confCountingConfig: Record<Chain,ConfCountingSetting>
+  private chainAttributes: Record<Chain, ChainAttributes>
 
-  constructor(midgard: Midgard, expirePoolCacheMillis = 6000, confCountingConfig = defaultConfCountingConfig) {
+  constructor(midgard: Midgard, expirePoolCacheMillis = 6000, chainAttributes = defaultChainAttributes) {
     this.midgard = midgard
     this.expirePoolCacheMillis = expirePoolCacheMillis
-    this.confCountingConfig = confCountingConfig
+    this.chainAttributes = chainAttributes
     //initialize the cache
     this.refereshPoolCache()
   }
@@ -531,7 +531,7 @@ export class ThorchainAMM {
     // Convert to Asset Amount
     const amountInGasAssetInAsset = baseToAsset(amountInGasAsset)
 
-    const confConfig = this.confCountingConfig[inboundAsset.chain]
+    const confConfig = this.chainAttributes[inboundAsset.chain]
     // find the requried confs
     const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(confConfig.blockReward).toNumber())
     // convert that into seconds

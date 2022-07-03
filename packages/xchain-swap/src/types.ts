@@ -99,7 +99,7 @@ export type InboundDetail = {
   gas_rate: BigNumber
 }
 
-export type ConfCountingSetting = {
+export type ChainAttributes = {
   blockReward: number
   avgBlockTimeInSecs: number
 }
