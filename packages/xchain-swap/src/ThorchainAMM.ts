@@ -478,30 +478,7 @@ export class ThorchainAMM {
     }
   }
 
-  // public async addLiquidity(sourceAssets: Asset[], inputAmount: BaseAmount[]): Promise<MsgDepositSubmitted> {
-  //   let memo
-
-  //   if (sourceAssets.length != inputAmount.length) {
-  //     new Error('Invalid Params, sourceAssets count does not match inputAmount count')
-  //   }
-  //   // Asym into Asset
-  //   if (sourceAssets.length == 1 && inputAmount.length == 1) {
-  //     const pool: LiquidityPool = this.getPoolForAsset(sourceAssets[0])
-  //     memo = `+:${sourceAssets[0].chain}}`
-  //   }
-
-  //   for (const asset of sourceAssets) {
-  //     const pool = this.getPoolForAsset(asset)
-  //   }
-
-  //   return MsgDepositSubmitted({
-  //     hash: 0,
-  //     url: '',
-  //   })
-  // }
-
   /**
-   * Parked for now
    * Finds the required confCount required for an inbound or outbound Tx to THORChain
    *
    * Finds the gas asset of the given asset (e.g. BUSD is on BNB), finds the value of asset in Gas Asset then finds the required confirmation count.
@@ -537,4 +514,25 @@ export class ThorchainAMM {
     // convert that into seconds
     return requiredConfs * confConfig.avgBlockTimeInSecs
   }
+  // public async addLiquidity(sourceAssets: Asset[], inputAmount: BaseAmount[]): Promise<MsgDepositSubmitted> {
+  //   let memo
+
+  //   if (sourceAssets.length != inputAmount.length) {
+  //     new Error('Invalid Params, sourceAssets count does not match inputAmount count')
+  //   }
+  //   // Asym into Asset
+  //   if (sourceAssets.length == 1 && inputAmount.length == 1) {
+  //     const pool: LiquidityPool = this.getPoolForAsset(sourceAssets[0])
+  //     memo = `+:${sourceAssets[0].chain}}`
+  //   }
+
+  //   for (const asset of sourceAssets) {
+  //     const pool = this.getPoolForAsset(asset)
+  //   }
+
+  //   return MsgDepositSubmitted({
+  //     hash: 0,
+  //     url: '',
+  //   })
+  // }
 }
