@@ -119,9 +119,16 @@ export class Wallet {
     if (swap.destinationAsset.synth && eqChain(swap.destinationAsset.chain, Chain.THORChain)) {
       memo = `=:${swap.destinationAsset.symbol}/${swap.destinationAsset.symbol}`
     }
-    memo = memo.concat(
-      `:${swap.destinationAddress}:${lim}:${swap.affiliateAddress}:${swap.affiliateFee.amount().toFixed()}`,
-    )
+    if(swap.affiliateAddress){
+      memo = memo.concat(
+        `:${swap.destinationAddress}:${lim}:${swap.affiliateAddress}:${swap.affiliateFee.amount().toFixed()}`,
+      )
+    }else {
+      memo = memo.concat(
+        `:${swap.destinationAddress}:${lim}`,
+      )
+    }
+
     // Logic error? between synths to and from..
     // If memo length is too long for BTC, trim it
     if (eqAsset(swap.sourceAsset, AssetBTC) && memo.length > 80) {
