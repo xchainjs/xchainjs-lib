@@ -21,9 +21,9 @@ yarn add @xchainjs/xchain-thornode
 Request data from MimirApi
 
 ```
-// Options to import three different baseUrl's
-// THORNODE_API_TC_URL, THORNODE_API_9R_URL, THORNODE_API_TS_URL
-//import { MimirApi, THORNODE_API_9R_URL, Configuration } from '../xchainjs/xchainjs-lib/packages/xchain-thornode/src'
+// baseUrl's
+// THORNODE_API_9R_URL - default exported URL
+// import { MimirApi, THORNODE_API_9R_URL, Configuration } from '../xchainjs/xchainjs-lib/packages/xchain-thornode/src'
 
   const baseUrl = THORNODE_API_9R_URL
   const apiconfig = new Configuration({ basePath: baseUrl })
@@ -34,6 +34,4 @@ Request data from MimirApi
 
 ## Documentation
 
-[`Thornode Thorchain endpoint`](https://thornode.thorchain.info/)
-[`Thornode Thorswap endpoint`](https://thornode.thorswap.net/)
 [`Thornode NineRelms endpoint`](https://thornode.ninerealms.com/)
