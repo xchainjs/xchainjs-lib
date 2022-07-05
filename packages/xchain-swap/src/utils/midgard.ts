@@ -150,7 +150,7 @@ export class Midgard {
   }
   /**
    * Function that wraps Mimir and Constants to return the value from a given constant name. Searchs Mimir first.
-   * Mimir has constants in all caps
+   *
    * @param networkValueName the network value to be used to search the contsants
    * @returns the mimir or constants value
    */
@@ -168,6 +168,11 @@ export class Midgard {
     }
   }
 
+  /**
+   * Gets the latest block using the Health endpoint within Midgard
+   *
+   * @returns
+   */
   public async getLatestBlocHeightk(): Promise<number> {
     for (const api of this.midgardApis) {
       try {
