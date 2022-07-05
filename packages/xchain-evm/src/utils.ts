@@ -1,4 +1,4 @@
-import { Address, FeeType, Fees } from '@xchainjs/xchain-client'
+import { Address } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetETH,
@@ -12,22 +12,21 @@ import {
   // eqAsset,
 } from '@xchainjs/xchain-util'
 import { Signer, ethers, providers } from 'ethers'
-import { parseUnits } from 'ethers/lib/utils'
+// import { parseUnits } from 'ethers/lib/utils'
 
 import erc20ABI from './data/erc20.json'
-import {
-  // ETHTransactionInfo,
-  // EthNetwork,
-  FeesWithGasPricesAndLimits,
-  GasPrices,
-  // TokenBalance,
-  // TokenTransactionInfo,
-  // TransactionInfo,
-  // TransactionOperation,
-} from './types'
+// import {
+//   // ETHTransactionInfo,
+//   // EthNetwork,
+//   FeesWithGasPricesAndLimits,
+//   GasPrices,
+//   // TokenBalance,
+//   // TokenTransactionInfo,
+//   // TransactionInfo,
+//   // TransactionOperation,
+// } from './types'
 
 export const ETH_DECIMAL = 18
-export const ETHPLORER_FREEKEY = 'freekey'
 
 // from https://github.com/MetaMask/metamask-extension/blob/ee205b893fe61dc4736efc576e0663189a9d23da/ui/app/pages/send/send.constants.js#L39
 // and based on recommendations of https://ethgasstation.info/blog/gas-limit/
@@ -35,41 +34,10 @@ export const SIMPLE_GAS_COST: ethers.BigNumber = ethers.BigNumber.from(21000)
 export const BASE_TOKEN_GAS_COST: ethers.BigNumber = ethers.BigNumber.from(100000)
 
 // default gas price in gwei
-export const DEFAULT_GAS_PRICE = 50
+// export const DEFAULT_GAS_PRICE = 50
 
-export const ETHAddress = '0x0000000000000000000000000000000000000000'
+// export const ETHAddress = '0x0000000000000000000000000000000000000000'
 export const MAX_APPROVAL: ethers.BigNumber = ethers.BigNumber.from(2).pow(256).sub(1)
-
-// /**
-//  * Network -> EthNetwork
-//  *
-//  * @param {Network} network
-//  * @returns {EthNetwork}
-//  */
-// export const xchainNetworkToEths = (network: Network): EthNetwork => {
-//   switch (network) {
-//     case Network.Mainnet:
-//     case Network.Stagenet:
-//       return EthNetwork.Main
-//     case Network.Testnet:
-//       return EthNetwork.Test
-//   }
-// }
-
-// /**
-//  * EthNetwork -> Network
-//  *
-//  * @param {EthNetwork} network
-//  * @returns {Network}
-//  */
-// export const ethNetworkToXchains = (network: EthNetwork): Network => {
-//   switch (network) {
-//     case EthNetwork.Main:
-//       return Network.Mainnet
-//     case EthNetwork.Test:
-//       return Network.Testnet
-//   }
-// }
 
 /**
  * Validate the given address.
@@ -244,57 +212,57 @@ export const validateSymbol = (symbol?: string | null): boolean => (symbol ? sym
 export const getFee = ({ gasPrice, gasLimit }: { gasPrice: BaseAmount; gasLimit: ethers.BigNumber }) =>
   baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), ETH_DECIMAL)
 
-export const estimateDefaultFeesWithGasPricesAndLimits = (asset?: Asset): FeesWithGasPricesAndLimits => {
-  const gasPrices = {
-    average: baseAmount(parseUnits(DEFAULT_GAS_PRICE.toString(), 'gwei').toString(), ETH_DECIMAL),
-    fast: baseAmount(parseUnits((DEFAULT_GAS_PRICE * 2).toString(), 'gwei').toString(), ETH_DECIMAL),
-    fastest: baseAmount(parseUnits((DEFAULT_GAS_PRICE * 3).toString(), 'gwei').toString(), ETH_DECIMAL),
-  }
-  const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
+// export const estimateDefaultFeesWithGasPricesAndLimits = (asset?: Asset): FeesWithGasPricesAndLimits => {
+//   const gasPrices = {
+//     average: baseAmount(parseUnits(DEFAULT_GAS_PRICE.toString(), 'gwei').toString(), ETH_DECIMAL),
+//     fast: baseAmount(parseUnits((DEFAULT_GAS_PRICE * 2).toString(), 'gwei').toString(), ETH_DECIMAL),
+//     fastest: baseAmount(parseUnits((DEFAULT_GAS_PRICE * 3).toString(), 'gwei').toString(), ETH_DECIMAL),
+//   }
+//   const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
 
-  let assetAddress
-  if (asset && assetToString(asset) !== assetToString(AssetETH)) {
-    assetAddress = getTokenAddress(asset)
-  }
+//   let assetAddress
+//   if (asset && assetToString(asset) !== assetToString(AssetETH)) {
+//     assetAddress = getTokenAddress(asset)
+//   }
 
-  let gasLimit
-  if (assetAddress && assetAddress !== ETHAddress) {
-    gasLimit = ethers.BigNumber.from(BASE_TOKEN_GAS_COST)
-  } else {
-    gasLimit = ethers.BigNumber.from(SIMPLE_GAS_COST)
-  }
+//   let gasLimit
+//   if (assetAddress && assetAddress !== ETHAddress) {
+//     gasLimit = ethers.BigNumber.from(BASE_TOKEN_GAS_COST)
+//   } else {
+//     gasLimit = ethers.BigNumber.from(SIMPLE_GAS_COST)
+//   }
 
-  return {
-    gasPrices,
-    gasLimit,
-    fees: {
-      type: FeeType.PerByte,
-      average: getFee({ gasPrice: averageGP, gasLimit }),
-      fast: getFee({ gasPrice: fastGP, gasLimit }),
-      fastest: getFee({ gasPrice: fastestGP, gasLimit }),
-    },
-  }
-}
+//   return {
+//     gasPrices,
+//     gasLimit,
+//     fees: {
+//       type: FeeType.PerByte,
+//       average: getFee({ gasPrice: averageGP, gasLimit }),
+//       fast: getFee({ gasPrice: fastGP, gasLimit }),
+//       fastest: getFee({ gasPrice: fastestGP, gasLimit }),
+//     },
+//   }
+// }
 
-/**
- * Get the default fees.
- *
- * @returns {Fees} The default gas price.
- */
-export const getDefaultFees = (asset?: Asset): Fees => {
-  const { fees } = estimateDefaultFeesWithGasPricesAndLimits(asset)
-  return fees
-}
+// /**
+//  * Get the default fees.
+//  *
+//  * @returns {Fees} The default gas price.
+//  */
+// export const getDefaultFees = (asset?: Asset): Fees => {
+//   const { fees } = estimateDefaultFeesWithGasPricesAndLimits(asset)
+//   return fees
+// }
 
-/**
- * Get the default gas price.
- *
- * @returns {Fees} The default gas prices.
- */
-export const getDefaultGasPrices = (asset?: Asset): GasPrices => {
-  const { gasPrices } = estimateDefaultFeesWithGasPricesAndLimits(asset)
-  return gasPrices
-}
+// /**
+//  * Get the default gas price.
+//  *
+//  * @returns {Fees} The default gas prices.
+//  */
+// export const getDefaultGasPrices = (asset?: Asset): GasPrices => {
+//   const { gasPrices } = estimateDefaultFeesWithGasPricesAndLimits(asset)
+//   return gasPrices
+// }
 
 /**
  * Get address prefix based on the network.

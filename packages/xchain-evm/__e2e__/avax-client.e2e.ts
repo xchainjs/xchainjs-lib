@@ -1,11 +1,11 @@
-import { Network } from '@xchainjs/xchain-client'
-import { AssetAVAX, Chain, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { Network, TxType } from '@xchainjs/xchain-client'
+import { Asset, AssetAVAX, Chain, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import { Client, EVMClientParams } from '../src/client'
 import { CovalentProvider } from '../src/providers/covalent/covalent-data-provider'
 import { ExplorerProvider } from '../src/providers/explorer-provider'
-import { IsApprovedParams } from '../src/types'
+import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '../src/types'
 
 // =====Ethers providers=====
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
@@ -69,12 +69,15 @@ const avaxParams: EVMClientParams = {
   phrase: process.env.PHRASE,
   feeBounds: {
     lower: 20000000000,
-    upper: 100000000000,
+    upper: 200000000000,
   },
   rootDerivationPaths: ethRootDerivationPaths,
 }
 const client = new Client(avaxParams)
 
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 describe('xchain-evm (Avax) Integration Tests', () => {
   it('should fetch avax balances', async () => {
     const address = client.getAddress(0)
@@ -92,27 +95,93 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
-  it('should estimate avax gasPrices', async () => {
-    const gasPrices = await client.estimateGasPrices()
-    console.log(JSON.stringify(gasPrices.average.amount(), null, 2))
-    console.log(JSON.stringify(gasPrices.fast.amount(), null, 2))
-    console.log(JSON.stringify(gasPrices.fastest.amount(), null, 2))
-    // expect(txPage.total).toBeGreaterThan(0)
-    // expect(txPage.txs.length).toBeGreaterThan(0)
+  it('should fetch single tx', async () => {
+    const txId = ''
+    const tx = await client.getTransactionData(txId)
+    console.log(JSON.stringify(tx, null, 2))
+    expect(tx.type).toBe(TxType.Transfer)
+    expect(tx.from).toBe('xxx')
+    expect(tx.hash).toBe(txId)
   })
-  it('should transfer 0.01 AVAX between wallet 0 and 1', async () => {
+
+  it('should transfer 0.01 AVAX between wallet 0 and 1, with a memo', async () => {
     const recipient = client.getAddress(1)
     const amount = assetToBase(assetAmount('0.01', 18))
-    const txHash = await client.transfer({ amount, recipient })
+    const memo = '=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000'
+    const txHash = await client.transfer({ amount, recipient, memo })
     console.log(txHash)
   })
-  it('should see if pagolin router isapproved for 1 RIP ', async () => {
+  it('should transfer 0.01 RIP(ERC-20) between wallet 0 and 1, with a memo', async () => {
+    const recipient = client.getAddress(1)
+    const amount = assetToBase(assetAmount('0.01', 18))
+    //ERC20 address The Crypt (RIP)
+    const contractAddress = '0x224695Ba2a98E4a096a519B503336E06D9116E48'
+    const RIPAsset: Asset = {
+      chain: Chain.Avalanche,
+      symbol: ``,
+      ticker: ``,
+      synth: false,
+    }
+    const memo = '=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000'
+    const txHash = await client.transfer({ amount, recipient, asset: RIPAsset, memo })
+    console.log(txHash)
+  })
+  it('should test erc-20 approvals ', async () => {
+    let isApproved = false
+    // check if approved for 1 RIP, should be false
     const params: IsApprovedParams = {
       contractAddress: '0x224695Ba2a98E4a096a519B503336E06D9116E48', //ERC20 address The Crypt (RIP)
       spenderAddress: '0x688d21b0b8dc35971af58cff1f7bf65639937860', //PangolinRouter contract on testnet
       amount: assetToBase(assetAmount('1', 18)),
     }
-    const isApproved = await client.isApproved(params)
-    console.log(isApproved)
+    isApproved = await client.isApproved(params)
+    expect(isApproved).toBe(false)
+
+    //  approve for 1 RIP
+    const approveParams: ApproveParams = {
+      contractAddress: '0x224695Ba2a98E4a096a519B503336E06D9116E48', //ERC20 address The Crypt (RIP)
+      spenderAddress: '0x688d21b0b8dc35971af58cff1f7bf65639937860', //PangolinRouter contract on testnet
+      amount: assetToBase(assetAmount('1', 18)),
+      walletIndex: 0,
+    }
+    await client.approve(approveParams)
+    await delay(10_000) //wait 10 secs for block to be mined
+
+    // check if approved for 1 RIP, should be true
+    isApproved = await client.isApproved(params)
+    expect(isApproved).toBe(true)
+
+    // set approve below 1 rip
+    approveParams.amount = assetToBase(assetAmount('0.1', 18))
+    await client.approve(approveParams)
+    await delay(10_000) //wait 10 secs for block to be mined
+
+    // check if approved for 1 RIP, should be false
+    isApproved = await client.isApproved(params)
+    expect(isApproved).toBe(false)
+  })
+  it('should test estimates ', async () => {
+    const estimateParams: EstimateApproveParams = {
+      fromAddress: client.getAddress(0),
+      contractAddress: '0x224695Ba2a98E4a096a519B503336E06D9116E48', //ERC20 address The Crypt (RIP)
+      spenderAddress: '0x688d21b0b8dc35971af58cff1f7bf65639937860', //PangolinRouter contract on testnet
+      amount: assetToBase(assetAmount('1', 18)),
+    }
+    const gasEstimate = await client.estimateApprove(estimateParams)
+    console.log(gasEstimate.toString())
+    expect(gasEstimate.gte(0)).toBe(true)
+
+    const recipient = client.getAddress(1)
+    const amount = assetToBase(assetAmount('0.01', 18))
+    const memo = '=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000'
+    const gasEstimateWithMemo = await client.estimateFeesWithGasPricesAndLimits({ amount, recipient, memo })
+    const gasEstimateWithoutMemo = await client.estimateFeesWithGasPricesAndLimits({ amount, recipient })
+    expect(gasEstimateWithMemo.gasLimit.gte(gasEstimateWithoutMemo.gasLimit)).toBe(true)
+    expect(gasEstimateWithMemo.fees.average.gte(gasEstimateWithoutMemo.fees.average)).toBe(true)
+
+    const gasPrices = await client.estimateGasPrices()
+    expect(gasPrices.fast.gte(gasPrices.average)).toBe(true)
+    expect(gasPrices.fastest.gte(gasPrices.average)).toBe(true)
+    expect(gasPrices.fastest.gte(gasPrices.fast)).toBe(true)
   })
 })

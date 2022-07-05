@@ -23,7 +23,6 @@ import { Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@x
 import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, toUtf8Bytes } from 'ethers/lib/utils'
 
-// import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import erc20ABI from './data/erc20.json'
 import { ExplorerProvider } from './providers/explorer-provider'
 import {
@@ -31,12 +30,8 @@ import {
   CallParams,
   EstimateApproveParams,
   EstimateCallParams,
-  // EthNetwork,
-  // ExplorerUrl,
   FeesWithGasPricesAndLimits,
-  // GasOracleResponse,
   GasPrices,
-  // InfuraCreds,
   IsApprovedParams,
   TxOverrides,
 } from './types'
@@ -48,7 +43,7 @@ import {
   estimateApprove,
   estimateCall,
   getApprovalAmount,
-  getDefaultGasPrices,
+  // getDefaultGasPrices,
   getFee,
   getTokenAddress,
   isApproved,
@@ -70,8 +65,7 @@ export interface EVMClient {
   // `getFees` of `BaseXChainClient` needs to be overridden
   getFees(params: TxParams): Promise<Fees>
   getWallet(walletIndex?: number): ethers.Wallet
-  // getProvider(): Provider
-  // getEtherscanProvider(): EtherscanProvider
+  getProvider(): Provider
 }
 
 export type EVMClientParams = {
@@ -377,11 +371,8 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
     gasLimitFallback,
   }: ApproveParams): Promise<TransactionResponse> {
     const gasPrice: BigNumber = BigNumber.from(
-      (
-        await this.estimateGasPrices()
-          .then((prices) => prices[feeOption])
-          .catch(() => getDefaultGasPrices()[feeOption])
-      )
+      (await this.estimateGasPrices().then((prices) => prices[feeOption]))
+        // .catch(() => getDefaultGasPrices()[feeOption])
         .amount()
         .toFixed(),
     )
@@ -490,7 +481,7 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
       ? BigNumber.from(gasPrice.amount().toFixed())
       : await this.estimateGasPrices()
           .then((prices) => prices[feeOption])
-          .catch(() => getDefaultGasPrices()[feeOption])
+          // .catch(() => getDefaultGasPrices()[feeOption])
           .then((gp) => BigNumber.from(gp.amount().toFixed()))
 
     const defaultGasLimit: ethers.BigNumber = isGasAsset ? SIMPLE_GAS_COST : BASE_TOKEN_GAS_COST

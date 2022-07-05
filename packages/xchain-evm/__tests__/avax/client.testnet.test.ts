@@ -220,7 +220,7 @@ describe('Client Test', () => {
     beforeEach(() => {
       avaxClient = new Client({
         ...avaxParams,
-        phrase: 'tag hammer journey adult opinion tennis nest obvious speed exchange life damp road rib auto',
+        phrase,
       })
     })
 
