@@ -11,14 +11,15 @@ import { InboundAddressesItem } from '@xchainjs/xchain-midgard/src/generated/mid
 import { Client as TerraClient } from '@xchainjs/xchain-terra'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import {
+  assetAmount,
   AssetBTC,
   AssetETH,
   AssetRuneNative,
+  assetToBase,
   Chain,
-  assetToString,
-  baseAmount,
   eqAsset,
   eqChain,
+  ETHChain,
 } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
@@ -78,20 +79,6 @@ export class Wallet {
     )
     return allBalances
   }
-  // /**
-  //  * Executes a Swap from THORChainAMM.doSwap()
-  //  *
-  //  * @param swap object with all the required details for a swap.
-  //  * @returns transaction details and explorer url
-  //  * @see ThorchainAMM.doSwap()
-  //  */
-  // async executeSwap(swap: ExecuteSwap): Promise<SwapSubmitted> {
-  //   if (swap.sourceAsset.chain === Chain.THORChain) {
-  //     return await this.swapRuneTo(swap)
-  //   } else {
-  //     return await this.swapNonRune(swap)
-  //   }
-  // }
 
   /**
    * Executes a Swap from THORChainAMM.doSwap()
@@ -119,7 +106,8 @@ export class Wallet {
     if (swap.destinationAsset.synth && eqChain(swap.destinationAsset.chain, Chain.THORChain)) {
       memo = `=:${swap.destinationAsset.symbol}/${swap.destinationAsset.symbol}`
     }
-    if(swap.affiliateAddress){
+    // needs to be tested
+    if(swap.affiliateAddress || swap.affiliateFee){
       memo = memo.concat(
         `:${swap.destinationAddress}:${lim}:${swap.affiliateAddress}:${swap.affiliateFee.amount().toFixed()}`,
       )
@@ -170,21 +158,28 @@ export class Wallet {
     const inboundAsgard = this.asgardAssets.find((item: InboundAddressesItem) => {
       return item.chain === swap.sourceAsset.chain
     })
-    // ==============
-    //TODO we need to check router approve before we can handle eth swaps
-    //if (inboundAsgard?.router) throw new Error('TBD implment eth')
-    // ==============
-    const params = {
-      walletIndex: 0,
-      asset: swap.sourceAsset,
-      amount: swap.fromBaseAmount,
-      recipient: inboundAsgard?.address || '',
-      memo: this.constructSwapMemo(swap),
-    }
+    if(eqChain(swap.sourceAsset.chain, ETHChain)) {
 
-    // console.log(JSON.stringify(params, null, 2))
-    const hash = await client.transfer(params)
-    return { hash, url: client.getExplorerTxUrl(hash), waitTime }
+      const params = {
+        walletIndex: 0,
+        asset: swap.sourceAsset,
+        amount: assetToBase(assetAmount(swap.fromBaseAmount.amount(), 10)),
+        memo: this.constructSwapMemo(swap),
+      }
+      const hash = await this.sendETHDeposit(params)
+      return { hash, url: client.getExplorerTxUrl(hash), waitTime}
+    }else {
+      const params = {
+        walletIndex: 0,
+        asset: swap.sourceAsset,
+        amount: swap.fromBaseAmount,
+        recipient: inboundAsgard?.address || '',
+        memo: this.constructSwapMemo(swap),
+      }
+      // console.log(JSON.stringify(params, null, 2))
+      const hash = await client.transfer(params)
+      return { hash, url: client.getExplorerTxUrl(hash), waitTime}
+    }
   }
 
   private async updateAsgardAddresses(checkTimeMs: number) {
@@ -206,49 +201,42 @@ export class Wallet {
    * @throws {"amount is not approved"} Thrown if the amount is not allowed to spend
    * @throws {"router address is not defined"} Thrown if router address is not defined
    */
-  async sendETHDeposit({ walletIndex = 0, asset = AssetETH, amount, memo }: DepositParams): Promise<TxHash> {
+  async sendETHDeposit(params: DepositParams): Promise<TxHash> {
     const ethClient = (this.clients.ETH as unknown) as EthereumClient
-    const { haltedChain, haltedTrading, router, vault } = (await this.midgard.getInboundDetails([asset.chain]))[0]
-
-    if (haltedChain) {
-      throw new Error(`Halted chain for ${assetToString(asset)}`)
-    }
-    if (haltedTrading) {
-      throw new Error(`Halted trading for ${assetToString(asset)}`)
-    }
-    if (!router) {
+    const inboundAsgard = this.asgardAssets.find((item: InboundAddressesItem) => {
+      return item.chain === params.asset.chain
+    })
+    console.log(inboundAsgard?.router)
+    if (!inboundAsgard?.router) {
       throw new Error('router address is not defined')
     }
-    if (asset.chain !== Chain.Ethereum) {
-      throw new Error('must be an ethereum asset')
-    }
-
-    const address = this.clients.ETH.getAddress(walletIndex)
+    const address = this.clients.ETH.getAddress(params.walletIndex)
     const gasPrice = await ethClient.estimateGasPrices()
 
-    if (asset.ticker.toUpperCase() === 'ETH') {
-      const contract = new ethers.Contract(router, routerABI)
+    if (eqAsset(params.asset, AssetETH)) {
+      const contract = new ethers.Contract(inboundAsgard.router, routerABI)
       const unsignedTx = await contract.populateTransaction.deposit(
-        vault,
+        inboundAsgard.address,
         ETHAddress,
-        amount.amount().toFixed(),
-        memo,
+        params.amount.amount().toFixed(),
+        params.memo,
         {
           from: address,
-          value: 0,
-          gasPrice: gasPrice.fast.amount().toFixed(),
+          value: params.amount.amount().toFixed(),
+          gasPrice: gasPrice.average.amount().toFixed(),
         },
       )
-      const response = await ethClient.getWallet(walletIndex).sendTransaction(unsignedTx)
+      const response = await ethClient.getWallet(params.walletIndex).sendTransaction(unsignedTx)
       return typeof response === 'string' ? response : response.hash
     } else {
-      const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
+      // This needs work
+      const assetAddress = params.asset.symbol.slice(params.asset.ticker.length + 1)
       const contractAddress = strip0x(assetAddress)
       const isApprovedResult = await ethClient.isApproved({
-        amount: baseAmount(amount.amount()),
-        spenderAddress: router,
+        amount: params.amount,
+        spenderAddress: inboundAsgard.router,
         contractAddress,
-        walletIndex,
+        walletIndex: params.walletIndex,
       })
 
       if (!isApprovedResult) {
@@ -256,15 +244,16 @@ export class Wallet {
       }
 
       const checkSummedContractAddress = ethers.utils.getAddress(contractAddress)
-      const params = [vault, checkSummedContractAddress, amount.amount().toFixed(), memo]
-      const vaultContract = new ethers.Contract(router, routerABI)
-      const unsignedTx = await vaultContract.populateTransaction.deposit(...params, {
+      const depositParams = [inboundAsgard.address, checkSummedContractAddress, params.amount.amount(), params.memo]
+      const vaultContract = new ethers.Contract(inboundAsgard.router, routerABI)
+      const unsignedTx = await vaultContract.populateTransaction.deposit(...depositParams, {
         from: address,
         value: 0,
         gasPrice: gasPrice.fast.amount().toFixed(),
       })
-      const { hash } = await ethClient.getWallet(walletIndex).sendTransaction(unsignedTx)
+      const { hash } = await ethClient.getWallet(params.walletIndex).sendTransaction(unsignedTx)
       return hash
     }
+
   }
 }
