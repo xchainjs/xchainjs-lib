@@ -1,11 +1,20 @@
 import { Network, TxType } from '@xchainjs/xchain-client'
 import { Asset, AssetAVAX, Chain, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
-import { ethers } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 
 import { Client, EVMClientParams } from '../src/client'
 import { CovalentProvider } from '../src/providers/covalent/covalent-data-provider'
 import { ExplorerProvider } from '../src/providers/explorer-provider'
 import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '../src/types'
+
+// =====Erc-20 asset=====
+
+const assetRIP: Asset = {
+  chain: Chain.Avalanche,
+  symbol: `RIP-0x224695Ba2a98E4a096a519B503336E06D9116E48`,
+  ticker: `RIP`,
+  synth: false,
+}
 
 // =====Ethers providers=====
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
@@ -62,6 +71,11 @@ const avaxParams: EVMClientParams = {
   chain: Chain.Avalanche,
   gasAsset: AssetAVAX,
   gasAssetDecimals: 18,
+  defaults: {
+    transferGasAssetGasLimit: BigNumber.from(21000),
+    transferTokenGasLimit: BigNumber.from(100000),
+    gasPrice: BigNumber.from(50),
+  },
   providers: ethersJSProviders,
   explorerProviders: avaxExplorerProviders,
   dataProviders: avaxProviders,
@@ -95,12 +109,33 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
-  it('should fetch single tx', async () => {
-    const txId = ''
+  it('should fetch single avax transfer tx', async () => {
+    const txId = '0x206d2300e57d0c23e48b8c4cc4af9c87abf33e2f406ac2265915b3d7b0e131e2'
     const tx = await client.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
+    const amount = assetToBase(assetAmount('0.01', 18))
+    expect(tx.asset.chain).toBe(AssetAVAX.chain)
+    expect(tx.asset.ticker).toBe(AssetAVAX.ticker)
     expect(tx.type).toBe(TxType.Transfer)
-    expect(tx.from).toBe('xxx')
+    expect(tx.from[0].from).toBe(client.getAddress(0))
+    expect(tx.from[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
+    expect(tx.to[0].to).toBe(client.getAddress(1))
+    expect(tx.to[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
+    expect(tx.hash).toBe(txId)
+  })
+  it('should fetch single RIP token transfer tx', async () => {
+    const txId = '0x15fa3948bf5c980de8be74afec94b69e6aba1134ed6714aa20fdb6bddb7738f8'
+    const tx = await client.getTransactionData(txId)
+    console.log(JSON.stringify(tx, null, 2))
+    const amount = assetToBase(assetAmount('0.01', 18))
+    expect(tx.asset.chain).toBe(AssetAVAX.chain)
+    expect(tx.asset.ticker).toBe(AssetAVAX.ticker)
+    expect(tx.asset.symbol).toBe(AssetAVAX.symbol)
+    expect(tx.type).toBe(TxType.Transfer)
+    expect(tx.from[0].from).toBe(client.getAddress(0))
+    expect(tx.from[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
+    expect(tx.to[0].to).toBe(client.getAddress(1))
+    expect(tx.to[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
     expect(tx.hash).toBe(txId)
   })
 
@@ -115,15 +150,9 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     const recipient = client.getAddress(1)
     const amount = assetToBase(assetAmount('0.01', 18))
     //ERC20 address The Crypt (RIP)
-    const contractAddress = '0x224695Ba2a98E4a096a519B503336E06D9116E48'
-    const RIPAsset: Asset = {
-      chain: Chain.Avalanche,
-      symbol: ``,
-      ticker: ``,
-      synth: false,
-    }
+
     const memo = '=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000'
-    const txHash = await client.transfer({ amount, recipient, asset: RIPAsset, memo })
+    const txHash = await client.transfer({ amount, recipient, asset: assetRIP, memo })
     console.log(txHash)
   })
   it('should test erc-20 approvals ', async () => {

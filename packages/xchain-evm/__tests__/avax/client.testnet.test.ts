@@ -1,7 +1,7 @@
 // import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetAVAX, Chain } from '@xchainjs/xchain-util'
-import { Wallet, ethers, providers } from 'ethers'
+import { Wallet, ethers, providers, BigNumber } from 'ethers'
 import nock from 'nock'
 
 // import { mock_all_api } from '../__mocks__'
@@ -57,6 +57,10 @@ const wallet = {
 //   timestamp: '0x6138dbd2',
 //   totalDifficulty: '0x7b5aae13f0a664',
 // }
+
+// =====Defaults=====
+export const transferGasAssetGasLimit: ethers.BigNumber = ethers.BigNumber.from(21000)
+export const transferTokenGasLimit: ethers.BigNumber = ethers.BigNumber.from(100000)
 // =====Ethers providers=====
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
 const AVALANCHE_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
@@ -113,6 +117,11 @@ const avaxParams: EVMClientParams = {
   chain: Chain.Avalanche,
   gasAsset: AssetAVAX,
   gasAssetDecimals: 18,
+  defaults: {
+    transferGasAssetGasLimit: BigNumber.from(21000),
+    transferTokenGasLimit: BigNumber.from(100000),
+    gasPrice: BigNumber.from(50),
+  },
   providers: ethersJSProviders,
   explorerProviders: avaxExplorerProviders,
   dataProviders: avaxProviders,

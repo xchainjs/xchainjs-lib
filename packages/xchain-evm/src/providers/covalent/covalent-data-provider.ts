@@ -164,6 +164,30 @@ export class CovalentProvider implements OnlineDataProvider {
     let to: TxTo[]
     const amount = baseAmount(item.value, this.nativeAssetDecimals)
     if (myAddress === item.from_address) {
+      from = [{ from: item.from_address, amount }]
+      to = [{ to: item.to_address, amount }]
+    } else {
+      from = [{ from: item.from_address, amount }]
+      to = [{ to: item.to_address, amount }]
+    }
+
+    return {
+      asset: AssetAVAX,
+      from,
+      to,
+      date: new Date(item.block_signed_at),
+      type: TxType.Transfer,
+      hash: item.tx_hash,
+    }
+  }
+  private buildNonNativeTx(item: GetTransactionsItem, myAddress: Address): Tx {
+    let from: TxFrom[]
+    let to: TxTo[]
+    const amount = baseAmount(item.value, this.nativeAssetDecimals)
+    console.log(item.log_events, null, 2)
+    const transferEvents = item.log_events.filter((i) => i.decoded?.name.toLowerCase() === 'transfer')
+    console.log(transferEvents, null, 2)
+    if (myAddress === item.from_address) {
       from = []
       to = [{ to: item.to_address, amount }]
     } else {
@@ -180,27 +204,6 @@ export class CovalentProvider implements OnlineDataProvider {
       hash: item.tx_hash,
     }
   }
-  // private buildNonNativeTx(item: GetTransactionsItem, myAddress: Address): Tx {
-  //   let from: TxFrom[]
-  //   let to: TxTo[]
-  //   const amount = baseAmount(item.value, this.nativeAssetDecimals)
-  //   if (myAddress === item.from_address) {
-  //     from = []
-  //     to = [{ to: item.to_address, amount }]
-  //   } else {
-  //     from = [{ from: item.from_address, amount }]
-  //     to = []
-  //   }
-
-  //   return {
-  //     asset: AssetAVAX,
-  //     from,
-  //     to,
-  //     date: new Date(item.block_signed_at),
-  //     type: TxType.Transfer,
-  //     hash: item.tx_hash,
-  //   }
-  // }
   private async getTxsPage(params: getTxsParams): Promise<Tx[]> {
     // curl -X GET https://api.covalenthq.com/v1/:chain_id/address/:address/transactions_v2/?&key=ckey_4e17b519e504427586fc93c5b33
     const txs: Tx[] = []
@@ -246,7 +249,7 @@ export class CovalentProvider implements OnlineDataProvider {
       txs: transactions.filter((_, index) => index >= offset && index < offset + limit),
     }
   }
-  async getTransactionData(txHash: string, assetAddress?: Address): Promise<Tx> {
+  async getTransactionData(txHash: string, userAddress: Address, assetAddress?: Address): Promise<Tx> {
     assetAddress
     const response = (
       await axios.get<GetTransactionResponse>(
@@ -256,9 +259,10 @@ export class CovalentProvider implements OnlineDataProvider {
     for (const item of response.data.items) {
       if (!item.log_events || item.log_events.length === 0) {
         //native tx
-        // return this.buildNativeTx(item, assetAddress || TODO fetch my address)
+        return this.buildNativeTx(item, userAddress)
       } else {
         //TODO non native txs
+        return this.buildNonNativeTx(item, userAddress)
       }
     }
     return {

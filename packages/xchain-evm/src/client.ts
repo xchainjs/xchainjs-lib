@@ -37,8 +37,6 @@ import {
 } from './types'
 import { ExplorerProviders, OnlineDataProvider, OnlineDataProviders } from './types/provider-types'
 import {
-  BASE_TOKEN_GAS_COST,
-  SIMPLE_GAS_COST,
   call,
   estimateApprove,
   estimateCall,
@@ -67,11 +65,17 @@ export interface EVMClient {
   getWallet(walletIndex?: number): ethers.Wallet
   getProvider(): Provider
 }
+type EvmDefaults = {
+  transferGasAssetGasLimit: BigNumber
+  transferTokenGasLimit: BigNumber
+  gasPrice: BigNumber
+}
 
 export type EVMClientParams = {
   chain: Chain
   gasAsset: Asset
   gasAssetDecimals: number
+  defaults: EvmDefaults
   providers: Record<Network, Provider>
   explorerProviders: ExplorerProviders
   dataProviders: OnlineDataProviders
@@ -87,6 +91,7 @@ export type EVMClientParams = {
 export default class Client extends BaseXChainClient implements XChainClient, EVMClient {
   private gasAsset: Asset
   private gasAssetDecimals: number
+  private defaults: EvmDefaults
   private hdNode?: HDNode
   private explorerProviders: Record<Network, ExplorerProvider>
   private dataProviders: Record<Network, OnlineDataProvider>
@@ -99,6 +104,7 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
     chain,
     gasAsset,
     gasAssetDecimals,
+    defaults,
     network = Network.Testnet,
     feeBounds,
     providers,
@@ -108,6 +114,7 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
     dataProviders,
   }: EVMClientParams) {
     super(chain, { network, rootDerivationPaths, feeBounds })
+    this.defaults = defaults
     this.gasAsset = gasAsset
     this.gasAssetDecimals = gasAssetDecimals
     this.explorerProviders = explorerProviders
@@ -278,7 +285,8 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
    * Thrown if the given txId is invalid.
    */
   async getTransactionData(txId: string, assetAddress?: Address): Promise<Tx> {
-    return await this.dataProviders[this.network].getTransactionData(txId, assetAddress)
+    // TODO how do we determine which address to use?
+    return await this.dataProviders[this.network].getTransactionData(txId, this.getAddress(), assetAddress)
   }
 
   /**
@@ -484,7 +492,9 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
           // .catch(() => getDefaultGasPrices()[feeOption])
           .then((gp) => BigNumber.from(gp.amount().toFixed()))
 
-    const defaultGasLimit: ethers.BigNumber = isGasAsset ? SIMPLE_GAS_COST : BASE_TOKEN_GAS_COST
+    const defaultGasLimit: ethers.BigNumber = isGasAsset
+      ? this.defaults.transferGasAssetGasLimit
+      : this.defaults.transferTokenGasLimit
     const txGasLimit =
       gasLimit || (await this.estimateGasLimit({ asset, recipient, amount, memo }).catch(() => defaultGasLimit))
 

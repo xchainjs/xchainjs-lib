@@ -8,7 +8,7 @@ import { GasPrices } from './client-types'
 export interface OnlineDataProvider {
   getBalance(address: Address, assets?: Asset[]): Promise<Balance[]>
   getTransactions(params: TxHistoryParams): Promise<TxsPage>
-  getTransactionData(txId: string, assetAddress?: Address): Promise<Tx>
+  getTransactionData(txId: string, userAddress: Address, assetAddress?: Address): Promise<Tx>
   getFees(): Promise<Fees>
   estimateGasPrices(): Promise<GasPrices>
 }
