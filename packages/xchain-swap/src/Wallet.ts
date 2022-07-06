@@ -11,11 +11,9 @@ import { InboundAddressesItem } from '@xchainjs/xchain-midgard/src/generated/mid
 import { Client as TerraClient } from '@xchainjs/xchain-terra'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import {
-  assetAmount,
   AssetBTC,
   AssetETH,
   AssetRuneNative,
-  assetToBase,
   Chain,
   eqAsset,
   eqChain,
@@ -163,7 +161,7 @@ export class Wallet {
       const params = {
         walletIndex: 0,
         asset: swap.sourceAsset,
-        amount: assetToBase(assetAmount(swap.fromBaseAmount.amount(), 10)),
+        amount: swap.fromBaseAmount,
         memo: this.constructSwapMemo(swap),
       }
       const hash = await this.sendETHDeposit(params)

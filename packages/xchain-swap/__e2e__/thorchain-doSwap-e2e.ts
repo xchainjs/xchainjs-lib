@@ -1,3 +1,4 @@
+import { ETH_DECIMAL } from './../../xchain-ethereum/src/utils';
 import { Network } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, AssetBTC, AssetRuneNative,  Asset, Chain } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
@@ -27,7 +28,7 @@ const testnetWallet = new Wallet(Network.Testnet, process.env.TESTNETPHRASE || '
 // }
 const USDT: Asset = {
   chain: Chain.Ethereum,
-  symbol: "USDT",
+  symbol: "USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306",
   ticker: "USDT",
   synth: false
 }
@@ -184,7 +185,7 @@ describe('xchain-swap Integration Tests', () => {
   //   const estimateSwapParams = {
   //     sourceAsset: AssetETH,
   //     destinationAsset: AssetBNB,
-  //     inputAmount: assetToBase(assetAmount(1)),
+  //     inputAmount: assetToBase(assetAmount(1, ETH_DECIMAL)),
   //     slipLimit: new BigNumber(0.5),
   //     // affiliateFeePercent: 0.1,
   //   }
@@ -220,10 +221,11 @@ describe('xchain-swap Integration Tests', () => {
     const estimateSwapParams = {
       sourceAsset: USDT,
       destinationAsset: AssetRuneNative,
-      inputAmount: assetToBase(assetAmount(0.05)),
+      inputAmount: assetToBase(assetAmount(0.005, ETH_DECIMAL)),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
     }
+
     const output = await testnetThorchainAmm.doSwap(
       testnetWallet,
       estimateSwapParams,
