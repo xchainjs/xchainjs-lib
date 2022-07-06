@@ -1,4 +1,5 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
+import { proto } from '@cosmos-client/core'
+import { baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { CosmosSDKClient } from '../src/cosmos/sdk-client'
@@ -227,7 +228,7 @@ describe('SDK Client Test', () => {
         },
       ],
     })
-    const encodedMsg = cosmosclient.codec.packAnyFromCosmosJSON(msgSend)
+
     assertTxHstory(cosmosTestnetClient.server, 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2', {
       pagination: {
         total: '1',
@@ -245,7 +246,7 @@ describe('SDK Client Test', () => {
           gas_used: '148996',
           tx: {
             body: {
-              messages: [encodedMsg],
+              messages: [msgSend],
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -277,7 +278,7 @@ describe('SDK Client Test', () => {
         },
       ],
     })
-    const encodedMsg2 = cosmosclient.codec.packAnyFromCosmosJSON(msgSend2)
+
     assertTxHstory(thorTestnetClient.server, thor_testnet_address0, {
       pagination: {
         total: '1',
@@ -295,7 +296,7 @@ describe('SDK Client Test', () => {
           gas_used: '148996',
           tx: {
             body: {
-              messages: [encodedMsg2],
+              messages: [msgSend2],
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -334,8 +335,8 @@ describe('SDK Client Test', () => {
         privkey: cosmosTestnetClient.getPrivKeyFromMnemonic(cosmos_phrase, derivationPaths.cosmos.testnet + '0'),
         from: cosmos_testnet_address0,
         to: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
-        amount: '10000',
-        asset: 'muon',
+        amount: baseAmount('10000'),
+        denom: 'muon',
         memo: 'transfer',
       })
 
@@ -370,7 +371,7 @@ describe('SDK Client Test', () => {
         },
       ],
     })
-    const encodedMsg = cosmosclient.codec.packAnyFromCosmosJSON(msgSend)
+
     assertTxHashGet(cosmosMainnetClient.server, '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066', {
       tx_response: {
         height: 45582,
@@ -381,7 +382,7 @@ describe('SDK Client Test', () => {
         gas_used: '148996',
         tx: {
           body: {
-            messages: [encodedMsg],
+            messages: [msgSend],
           },
         },
         timestamp: '2020-09-25T06:09:15Z',
@@ -401,7 +402,7 @@ describe('SDK Client Test', () => {
         },
       ],
     })
-    const encodedMsg2 = cosmosclient.codec.packAnyFromCosmosJSON(msgSend2)
+
     const txHashData: TxResponse = {
       height: 1047,
       txhash: '19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066',
@@ -411,7 +412,7 @@ describe('SDK Client Test', () => {
       gas_used: '148996',
       tx: {
         body: {
-          messages: [encodedMsg2],
+          messages: [msgSend2],
         },
       },
       timestamp: '2020-09-25T06:09:15Z',

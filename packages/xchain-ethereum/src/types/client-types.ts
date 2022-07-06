@@ -58,6 +58,7 @@ export type IsApprovedParams = {
 
 export type CallParams = {
   signer?: Signer
+  walletIndex?: number
   contractAddress: Address
   abi: ethers.ContractInterface
   funcName: string

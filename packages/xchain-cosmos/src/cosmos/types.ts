@@ -1,5 +1,7 @@
 import { proto } from '@cosmos-client/core'
-import { TxParams } from '@xchainjs/xchain-client'
+import { Address, TxParams } from '@xchainjs/xchain-client'
+import { BaseAmount } from '@xchainjs/xchain-util'
+import BigNumber from 'bignumber.js'
 
 export type CosmosSDKClientParams = {
   server: string
@@ -21,17 +23,17 @@ export type SearchTxParams = {
 export type UnsignedTxParams = {
   from: string
   to: string
-  amount: string
-  asset: string
+  amount: BaseAmount
+  denom: string
   memo?: string
 }
 
 export type TransferParams = {
   privkey: proto.cosmos.crypto.secp256k1.PrivKey
-  from: string
-  to: string
-  amount: string
-  asset: string
+  from: Address
+  to: Address
+  amount: BaseAmount
+  denom: string
   memo?: string
   fee?: proto.cosmos.tx.v1beta1.Fee
 }
@@ -44,16 +46,13 @@ export type TransferOfflineParams = TransferParams & {
 export type TxOfflineParams = TxParams & {
   from_account_number: string
   from_sequence: string
-}
-
-export type BaseAccountResponse = {
-  type?: string
-  value?: proto.cosmos.auth.v1beta1.BaseAccount
+  gasLimit?: BigNumber
+  feeAmount?: BaseAmount
 }
 
 export type RawTxResponse = {
   body: {
-    messages: proto.cosmos.bank.v1beta1.MsgSend[]
+    messages: proto.cosmos.bank.v1beta1.IMsgSend[]
   }
 }
 

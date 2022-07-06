@@ -1,4 +1,10 @@
-# v.0.25.0 (2022-xx-xx)
+# v.0.25.1 (2022-06-02)
+
+## Fix
+
+- If optional `signer` is not set to `client.call`, internal wallet is used as signer (similar to `transfer`)
+
+# v.0.25.0 (2022-05-27)
 
 ## Add
 
@@ -10,8 +16,9 @@
 - Helper `utils.call`
 - Helper `util.getAssetAddress`
 - Helper `util.isEthAsset`
-- Add optional `signer` params to `client.approve`
-- Add optional `signer` params to `client.transfer`
+- Add optional `signer` parameter to `client.approve`
+- Add optional `signer` parameter to `client.transfer`
+- Add optional `signer` parameter to `client.call`
 - Export ERC20 + router ABI's
 
 ## Breaking change

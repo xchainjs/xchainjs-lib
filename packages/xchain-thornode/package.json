@@ -1,0 +1,32 @@
+{
+  "name": "@xchainjs/xchain-thornode",
+  "version": "0.1.0-alpha",
+  "license": "MIT",
+  "description": "Thornode module that exposes all thornode functions using openapi-generator-cli",
+  "keywords": [
+    "XChain",
+    "Thornode"
+  ],
+  "author": "THORChain",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
+  "main": "lib/index",
+  "types": "lib/index",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "clean": "rimraf -rf ./lib",
+    "build": "yarn run clean && yarn run compile",
+    "compile": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "yarn run build",
+    "test": "jest --passWithNoTests",
+    "generate:types": "yarn clean:types:thornode && yarn generate:types:thornode",
+    "generate:types:thornode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://thornode.ninerealms.com/thorchain/doc/openapi.yaml -g typescript-axios -o ./src/generated/thornodeApi --reserved-words-mappings in=in",
+    "clean:types:thornode": "rimraf ./src/generated/thornodeApi"
+  },
+  "repository": "https://github.com/xchainjs/xchainjs-lib",
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.5.1",
+    "rimraf": "~3.0.2"
+  }
+}
