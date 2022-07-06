@@ -1,4 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
+import { Configuration, ObservedTx, TransactionsApi } from '@xchainjs/xchain-thornode'
 import { Chain, THORChain } from '@xchainjs/xchain-util/lib'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
@@ -21,18 +22,6 @@ export enum TxStage {
 export type TxStatus = {
   stage: TxStage
   seconds: number
-}
-
-export type ScheduledQueueItem = {
-  chain: Chain
-  to_address: string
-  vault_pub_key: string
-  coin: string
-  memo: string
-  max_gas: string
-  gas_rate: number
-  in_hash: string
-  height: number
 }
 
 const defaultTHORNodeConfig: Record<Network, THORNodeConfig> = {
@@ -58,12 +47,19 @@ export class THORNode {
   private config: THORNodeConfig
   private network: Network
   private chainAttributes: Record<Chain, ChainAttributes>
-  // private midgard: Midgard
+  //private transactionsApis: TransactionsApi[]
+  private transactionsApi: TransactionsApi[]
+  private observedTx: ObservedTx[]
+  //: TransactionsApi = new TransactionsApi(defaultTHORNodeConfig)
 
   constructor(network: Network = Network.Mainnet, config?: THORNodeConfig, chainAttributes = defaultChainAttributes) {
     this.network = network
     this.config = config ?? defaultTHORNodeConfig[this.network]
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })
+    this.transactionsApi = this.config.thornodeBaseUrls.map(
+      (url) => new TransactionsApi(new Configuration({ basePath: url })),
+    )
+    this.observedTx = this.config.thornodeBaseUrls.map((url) => new ObservedTx(new Configuration({ basePath: url })))
     this.chainAttributes = chainAttributes
     // this.midgard = new Midgard(network)
   }
@@ -89,13 +85,13 @@ export class THORNode {
     throw Error(`THORNode not responding`)
   }
 
-  async getTxData(txHash: string) {
+  async getTxData(txHash: string): Promise<ObservedTx> {
     // this should go in a seperate function
-    const txPath = `/thorchain/tx/`
-    for (const baseUrl of this.config.thornodeBaseUrls) {
+
+    for (const api of this.transactionsApi) {
       try {
-        const { data } = await axios.get(`${baseUrl}${txPath}/${txHash}`)
-        return data
+        const obseredTx: ObservedTx = await api.tx(txHash)
+        return await .
       } catch (e) {
         console.error(e)
       }
