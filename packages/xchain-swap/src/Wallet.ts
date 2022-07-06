@@ -1,29 +1,39 @@
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
-import { Balance, Network, TxHash, XChainClient } from '@xchainjs/xchain-client'
+import { Address, Balance, Network, TxHash, XChainClient } from '@xchainjs/xchain-client'
 import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
-import { Client as EthClient, EthereumClient } from '@xchainjs/xchain-ethereum'
-import { ETHAddress, strip0x } from '@xchainjs/xchain-ethereum/src'
+import {
+  ApproveParams,
+  Client as EthClient,
+  ETH_DECIMAL,
+  EthereumClient,
+  MAX_APPROVAL,
+} from '@xchainjs/xchain-ethereum'
+import { ETHAddress } from '@xchainjs/xchain-ethereum/src'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard/src/generated/midgardApi'
 import { Client as TerraClient } from '@xchainjs/xchain-terra'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import {
+  Asset,
   AssetBTC,
   AssetETH,
   AssetRuneNative,
+  BaseAmount,
   Chain,
+  ETHChain,
+  baseAmount,
   eqAsset,
   eqChain,
-  ETHChain,
 } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import routerABI from './abi/routerABI.json'
 import { DepositParams, ExecuteSwap, SwapSubmitted } from './types'
 import { Midgard } from './utils/midgard'
+import { getContractAddressFromAsset } from './utils/swap'
 
 type AllBalances = {
   chain: Chain
@@ -39,7 +49,7 @@ const chainIds = {
 export class Wallet {
   private network: Network
   clients: Record<string, XChainClient>
-  private asgardAssets: InboundAddressesItem[] = []
+  private asgardAssets: InboundAddressesItem[] | undefined = undefined
   private midgard: Midgard
 
   constructor(network: Network, phrase: string) {
@@ -57,8 +67,6 @@ export class Wallet {
       BNB: new BnbClient(settings),
       GAIA: new CosmosClient(settings),
     }
-
-    this.updateAsgardAddresses(60 * 1000)
   }
 
   async getAllBalances(): Promise<AllBalances[]> {
@@ -70,8 +78,8 @@ export class Wallet {
         try {
           const balances = await entry[1].getBalance(address)
           return { chain, address, balances }
-        } catch (error: any) {
-          return { chain, address, balances: error.message }
+        } catch (err) {
+          return { chain, address, balances: (err as unknown).message }
         }
       }),
     )
@@ -105,14 +113,12 @@ export class Wallet {
       memo = `=:${swap.destinationAsset.symbol}/${swap.destinationAsset.symbol}`
     }
     // needs to be tested
-    if(swap.affiliateAddress || swap.affiliateFee){
+    if (swap.affiliateAddress || swap.affiliateFee) {
       memo = memo.concat(
         `:${swap.destinationAddress}:${lim}:${swap.affiliateAddress}:${swap.affiliateFee.amount().toFixed()}`,
       )
-    }else {
-      memo = memo.concat(
-        `:${swap.destinationAddress}:${lim}`,
-      )
+    } else {
+      memo = memo.concat(`:${swap.destinationAddress}:${lim}`)
     }
 
     // Logic error? between synths to and from..
@@ -153,11 +159,10 @@ export class Wallet {
   private async swapNonRune(swap: ExecuteSwap): Promise<SwapSubmitted> {
     const client = this.clients[swap.sourceAsset.chain]
     const waitTime = swap.waitTime
-    const inboundAsgard = this.asgardAssets.find((item: InboundAddressesItem) => {
+    const inboundAsgard = (await this.getAsgardAssets()).find((item: InboundAddressesItem) => {
       return item.chain === swap.sourceAsset.chain
     })
-    if(eqChain(swap.sourceAsset.chain, ETHChain)) {
-
+    if (eqChain(swap.sourceAsset.chain, ETHChain)) {
       const params = {
         walletIndex: 0,
         asset: swap.sourceAsset,
@@ -165,8 +170,8 @@ export class Wallet {
         memo: this.constructSwapMemo(swap),
       }
       const hash = await this.sendETHDeposit(params)
-      return { hash, url: client.getExplorerTxUrl(hash), waitTime}
-    }else {
+      return { hash, url: client.getExplorerTxUrl(hash), waitTime }
+    } else {
       const params = {
         walletIndex: 0,
         asset: swap.sourceAsset,
@@ -176,7 +181,7 @@ export class Wallet {
       }
       // console.log(JSON.stringify(params, null, 2))
       const hash = await client.transfer(params)
-      return { hash, url: client.getExplorerTxUrl(hash), waitTime}
+      return { hash, url: client.getExplorerTxUrl(hash), waitTime }
     }
   }
 
@@ -201,10 +206,10 @@ export class Wallet {
    */
   async sendETHDeposit(params: DepositParams): Promise<TxHash> {
     const ethClient = (this.clients.ETH as unknown) as EthereumClient
-    const inboundAsgard = this.asgardAssets.find((item: InboundAddressesItem) => {
+    const inboundAsgard = (await this.getAsgardAssets()).find((item: InboundAddressesItem) => {
       return item.chain === params.asset.chain
     })
-    console.log(inboundAsgard?.router)
+
     if (!inboundAsgard?.router) {
       throw new Error('router address is not defined')
     }
@@ -227,22 +232,18 @@ export class Wallet {
       const response = await ethClient.getWallet(params.walletIndex).sendTransaction(unsignedTx)
       return typeof response === 'string' ? response : response.hash
     } else {
-      // This needs work
-      const assetAddress = params.asset.symbol.slice(params.asset.ticker.length + 1)
-      const contractAddress = strip0x(assetAddress)
-      const isApprovedResult = await ethClient.isApproved({
-        amount: params.amount,
-        spenderAddress: inboundAsgard.router,
-        contractAddress,
-        walletIndex: params.walletIndex,
-      })
-
+      const isApprovedResult = this.isTCRouterApprovedToSpend(params.asset, params.amount, params.walletIndex)
       if (!isApprovedResult) {
         throw new Error('The amount is not allowed to spend')
       }
-
+      const contractAddress = getContractAddressFromAsset(params.asset)
       const checkSummedContractAddress = ethers.utils.getAddress(contractAddress)
-      const depositParams = [inboundAsgard.address, checkSummedContractAddress, params.amount.amount(), params.memo]
+      const depositParams = [
+        inboundAsgard.address,
+        checkSummedContractAddress,
+        params.amount.amount().toFixed(),
+        params.memo,
+      ]
       const vaultContract = new ethers.Contract(inboundAsgard.router, routerABI)
       const unsignedTx = await vaultContract.populateTransaction.deposit(...depositParams, {
         from: address,
@@ -252,6 +253,53 @@ export class Wallet {
       const { hash } = await ethClient.getWallet(params.walletIndex).sendTransaction(unsignedTx)
       return hash
     }
+  }
+  async isTCRouterApprovedToSpend(asset: Asset, amount: BaseAmount, walletIndex = 0): Promise<boolean> {
+    const ethClient = (this.clients.ETH as unknown) as EthereumClient
 
+    const router = await this.getRouterAddressForChain(asset.chain)
+    const contractAddress = getContractAddressFromAsset(asset)
+    return await ethClient.isApproved({
+      amount: amount,
+      spenderAddress: router,
+      contractAddress,
+      walletIndex: walletIndex,
+    })
+  }
+  async approveTCRouterToSpend(
+    asset: Asset,
+    amount = MAX_APPROVAL,
+    walletIndex = 0,
+  ): Promise<ethers.providers.TransactionResponse> {
+    const ethClient = (this.clients.ETH as unknown) as EthereumClient
+
+    const contractAddress = getContractAddressFromAsset(asset)
+    const router = await this.getRouterAddressForChain(asset.chain)
+    const approveParams: ApproveParams = {
+      contractAddress,
+      spenderAddress: router,
+      amount: baseAmount(amount.toHexString(), ETH_DECIMAL),
+      walletIndex,
+    }
+    return await ethClient.approve(approveParams)
+  }
+
+  private async getRouterAddressForChain(chain: Chain): Promise<Address> {
+    const inboundAsgard = (await this.getAsgardAssets()).find((item: InboundAddressesItem) => {
+      return item.chain === chain
+    })
+
+    if (!inboundAsgard?.router) {
+      throw new Error('router address is not defined')
+    }
+    return inboundAsgard?.router
+  }
+  async getAsgardAssets(): Promise<InboundAddressesItem[]> {
+    if (!this.asgardAssets) {
+      this.asgardAssets = await this.midgard.getAllInboundAddresses()
+      //Refresh asgard address every 60 min
+      this.updateAsgardAddresses(60 * 60 * 1000)
+    }
+    return this.asgardAssets
   }
 }

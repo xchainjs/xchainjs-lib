@@ -1,12 +1,11 @@
-import { ETH_DECIMAL } from './../../xchain-ethereum/src/utils';
+require('dotenv').config()
 import { Network } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase, AssetBTC, AssetRuneNative,  Asset, Chain } from '@xchainjs/xchain-util'
+import { Asset, AssetBTC, AssetRuneNative, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
-require('dotenv').config();
+
 import { ThorchainAMM } from '../src/ThorchainAMM'
 import { Wallet } from '../src/Wallet'
 import { Midgard } from '../src/utils/midgard'
-
 
 //const mainnetMidgard = new Midgard(Network.Mainnet)
 const testnetMidgard = new Midgard(Network.Testnet)
@@ -26,11 +25,12 @@ const testnetWallet = new Wallet(Network.Testnet, process.env.TESTNETPHRASE || '
 //   ticker: "BNB",
 //   synth: true
 // }
+const ETH_DECIMAL = 18
 const USDT: Asset = {
   chain: Chain.Ethereum,
-  symbol: "USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306",
-  ticker: "USDT",
-  synth: false
+  symbol: 'USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306',
+  ticker: 'USDT',
+  synth: false,
 }
 // const USDC: Asset = {
 //   chain: Chain.Ethereum,
@@ -218,21 +218,34 @@ describe('xchain-swap Integration Tests', () => {
   // })
   // From ERC to Rune
   it(`Should perform a single swap from ERC to Rune`, async () => {
-    const estimateSwapParams = {
-      sourceAsset: USDT,
-      destinationAsset: AssetRuneNative,
-      inputAmount: assetToBase(assetAmount(0.005, ETH_DECIMAL)),
-      slipLimit: new BigNumber(0.5),
-      // affiliateFeePercent: 0.1,
-    }
+    try {
+      const estimateSwapParams = {
+        sourceAsset: USDT,
+        destinationAsset: AssetRuneNative,
+        inputAmount: assetToBase(assetAmount(0.005, ETH_DECIMAL)),
+        slipLimit: new BigNumber(0.5),
+        // affiliateFeePercent: 0.1,
+      }
 
-    const output = await testnetThorchainAmm.doSwap(
-      testnetWallet,
-      estimateSwapParams,
-      testnetWallet.clients['THOR'].getAddress(),
-    )
-    console.log(output)
-    expect(output.hash).toBeTruthy()
+      const approved = await testnetWallet.isTCRouterApprovedToSpend(
+        estimateSwapParams.sourceAsset,
+        estimateSwapParams.inputAmount,
+      )
+      if (!approved) {
+        const result = await testnetWallet.approveTCRouterToSpend(estimateSwapParams.sourceAsset)
+        //why is the has missing?
+        console.log(JSON.stringify(result, null, 2))
+      }
+      const output = await testnetThorchainAmm.doSwap(
+        testnetWallet,
+        estimateSwapParams,
+        testnetWallet.clients['THOR'].getAddress(),
+      )
+      console.log(output)
+      expect(output.hash).toBeTruthy()
+    } catch (error) {
+      console.error(error)
+    }
   })
   // From ERC to ERC
   // it(`Should perform a double swap from ERC to ERC`, async () => {

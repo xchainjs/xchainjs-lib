@@ -1,4 +1,6 @@
-import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address } from '@xchainjs/xchain-client'
+import { strip0x } from '@xchainjs/xchain-ethereum'
+import { Asset, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from '../LiquidityPool'
@@ -137,7 +139,10 @@ export const getDoubleSwap = (inputAmount: BaseAmount, pool1: LiquidityPool, poo
   }
   return SwapOutput
 }
-
+export const getContractAddressFromAsset = (asset: Asset): Address => {
+  const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
+  return strip0x(assetAddress)
+}
 /**
  * Not sure if the below functions will be used.
  */

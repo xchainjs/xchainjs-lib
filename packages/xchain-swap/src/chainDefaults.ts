@@ -1,4 +1,5 @@
 import { Chain } from '@xchainjs/xchain-util/lib'
+
 import { ChainAttributes } from './types'
 
 const defaultChainAttributes: Record<Chain, ChainAttributes> = {

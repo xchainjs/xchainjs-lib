@@ -1,5 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetETH, AssetBNB, assetAmount, assetToBase, Asset, AssetBTC, AssetRuneNative } from '@xchainjs/xchain-util'
+import { Asset, AssetBNB, AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+
 import { LiquidityPool } from '../src'
 import { ThorchainAMM } from '../src/ThorchainAMM'
 import { Midgard } from '../src/utils/midgard'
@@ -36,7 +37,7 @@ describe('Midgard Client Test', () => {
   })
 
   // ThorchainAMM unit tests with mock data
-    it(`Should get the correct outbound Delay`, async () => {
+  it(`Should get the correct outbound Delay`, async () => {
     const outboundAmount = assetToBase(assetAmount(1))
     const outBoundValue = await thorchainAmm.outboundDelay(bnbPool, AssetBNB, outboundAmount)
     console.log(outBoundValue)
@@ -63,7 +64,4 @@ describe('Midgard Client Test', () => {
     const outboundRuneAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
     expect(outboundRuneAmount.amount().toNumber() > 1000)
   })
-
 })
-
-
