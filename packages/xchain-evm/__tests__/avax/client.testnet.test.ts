@@ -1,7 +1,7 @@
 // import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetAVAX, Chain } from '@xchainjs/xchain-util'
-import { Wallet, ethers, providers, BigNumber } from 'ethers'
+import { BigNumber, Wallet, ethers, providers } from 'ethers'
 import nock from 'nock'
 
 // import { mock_all_api } from '../__mocks__'
