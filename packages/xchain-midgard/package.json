@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-midgard",
-  "version": "0.1.0-alpha",
+  "version": "0.1.0-alpha2",
   "license": "MIT",
   "description": "Midgard module that exposes all midgard functions using openapi-generator-cli",
   "keywords": [
@@ -12,21 +12,33 @@
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
   "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
   "files": [
     "lib"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
   "scripts": {
     "clean": "rimraf lib/**",
     "build": "yarn clean && rollup -c",
     "prepublishOnly": "yarn build",
     "test": "jest --passWithNoTests",
     "generate:types": "yarn clean:types:midgard && yarn generate:types:midgard",
-    "generate:types:midgard": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://midgard.thorchain.info/v2/swagger.json -g typescript-axios -o ./src/generated/midgardApi --reserved-words-mappings in=in",
     "clean:types:midgard": "rimraf ./src/generated/midgardApi"
   },
-  "repository": "https://github.com/xchainjs/xchainjs-lib",
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.5.1",
     "rimraf": "~3.0.2"
+  },
+  "peerDependencies": {
+    "axios": "^0.25.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
