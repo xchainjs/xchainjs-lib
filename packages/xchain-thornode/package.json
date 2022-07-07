@@ -30,7 +30,7 @@
     "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests",
     "generate:types": "yarn clean:types:thornode && yarn generate:types:thornode",
-    "generate:types:thornode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://thornode.ninerealms.com/thorchain/doc/openapi.yaml -g typescript-axios -o ./src/generated/thornodeApi --reserved-words-mappings in=in",
+    "generate:types:thornode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i ./src/thornode.yaml -g typescript-axios -o ./src/generated/thornodeApi --reserved-words-mappings in=in",
     "clean:types:thornode": "rimraf ./src/generated/thornodeApi"
   },
   "devDependencies": {
