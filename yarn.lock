@@ -2697,6 +2697,11 @@
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-cosmos/-/xchain-cosmos-0.17.0.tgz#947d53461870f746357ab46ad027b5c60edefc79"
   integrity sha512-MpD0rgTXzDw+oA1GuBc3yzf3TKouz6zDqji+VTgCXKrNV15ngMFpIFTzntY1+4ev7bxHp7lVLSgWyztZq8Ex5g==
 
+"@xchainjs/xchain-midgard@0.1.0-alpha":
+  version "0.1.0-alpha"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-midgard/-/xchain-midgard-0.1.0-alpha.tgz#d62d6076dbdbcb85ab0112947d873f210e5d327a"
+  integrity sha512-L+HN2DqAp6ZPmnR+8O3AmbMaaNF5w8adyQf22sK4VY5evpWuk5v/Ua2K+x856F1Uujoc5S7DSX83OcqC94OpEw==
+
 "@xchainjs/xchain-util@^0.3.0":
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.3.1.tgz#90fb81379d6c8eca83c7500684108b3dc4a1479f"

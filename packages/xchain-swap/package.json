@@ -24,9 +24,8 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
-    "build": "yarn clean && yarn compile",
     "clean": "rimraf lib/**",
-    "compile": "tsc -p tsconfig.build.json",
+    "build": "yarn clean && rollup -c",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
@@ -36,7 +35,7 @@
   "bugs": {
     "url": "https://github.com/xchainjs/xchainjs-lib/issues"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@binance-chain/javascript-sdk": "^4.2.0",
     "@cosmos-client/core": "^0.45.1",
     "@psf/bitcoincashjs-lib": "^4.0.2",

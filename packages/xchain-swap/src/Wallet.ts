@@ -79,7 +79,7 @@ export class Wallet {
           const balances = await entry[1].getBalance(address)
           return { chain, address, balances }
         } catch (err) {
-          return { chain, address, balances: (err as unknown).message }
+          return { chain, address, balances: (err as Error).message }
         }
       }),
     )
