@@ -159,20 +159,14 @@ export class CovalentProvider implements OnlineDataProvider {
   //   }
   // }
 
-  private buildNativeTx(item: GetTransactionsItem, myAddress: Address): Tx {
-    let from: TxFrom[]
-    let to: TxTo[]
+  private buildNativeTx(item: GetTransactionsItem): Tx {
     const amount = baseAmount(item.value, this.nativeAssetDecimals)
-    if (myAddress === item.from_address) {
-      from = [{ from: item.from_address, amount }]
-      to = [{ to: item.to_address, amount }]
-    } else {
-      from = [{ from: item.from_address, amount }]
-      to = [{ to: item.to_address, amount }]
-    }
+
+    const from: TxFrom[] = [{ from: item.from_address, amount }]
+    const to: TxTo[] = [{ to: item.to_address, amount }]
 
     return {
-      asset: AssetAVAX,
+      asset: this.nativeAsset,
       from,
       to,
       date: new Date(item.block_signed_at),
@@ -180,20 +174,13 @@ export class CovalentProvider implements OnlineDataProvider {
       hash: item.tx_hash,
     }
   }
-  private buildNonNativeTx(item: GetTransactionsItem, myAddress: Address): Tx {
-    let from: TxFrom[]
-    let to: TxTo[]
+  private buildNonNativeTx(item: GetTransactionsItem): Tx {
     const amount = baseAmount(item.value, this.nativeAssetDecimals)
     console.log(item.log_events, null, 2)
     const transferEvents = item.log_events.filter((i) => i.decoded?.name.toLowerCase() === 'transfer')
     console.log(transferEvents, null, 2)
-    if (myAddress === item.from_address) {
-      from = []
-      to = [{ to: item.to_address, amount }]
-    } else {
-      from = [{ from: item.from_address, amount }]
-      to = []
-    }
+    const from: TxFrom[] = [{ from: item.from_address, amount }]
+    const to: TxTo[] = [{ to: item.to_address, amount }]
 
     return {
       asset: AssetAVAX,
@@ -217,7 +204,7 @@ export class CovalentProvider implements OnlineDataProvider {
     for (const item of response.data.items) {
       if (!item.log_events || item.log_events.length === 0) {
         //native tx
-        txs.push(this.buildNativeTx(item, params.address))
+        txs.push(this.buildNativeTx(item))
       } else {
         //TODO non native txs
       }
@@ -249,7 +236,7 @@ export class CovalentProvider implements OnlineDataProvider {
       txs: transactions.filter((_, index) => index >= offset && index < offset + limit),
     }
   }
-  async getTransactionData(txHash: string, userAddress: Address, assetAddress?: Address): Promise<Tx> {
+  async getTransactionData(txHash: string, assetAddress?: Address): Promise<Tx> {
     assetAddress
     const response = (
       await axios.get<GetTransactionResponse>(
@@ -259,10 +246,10 @@ export class CovalentProvider implements OnlineDataProvider {
     for (const item of response.data.items) {
       if (!item.log_events || item.log_events.length === 0) {
         //native tx
-        return this.buildNativeTx(item, userAddress)
+        return this.buildNativeTx(item)
       } else {
         //TODO non native txs
-        return this.buildNonNativeTx(item, userAddress)
+        return this.buildNonNativeTx(item)
       }
     }
     return {

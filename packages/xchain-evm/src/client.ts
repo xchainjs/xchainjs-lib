@@ -285,8 +285,7 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
    * Thrown if the given txId is invalid.
    */
   async getTransactionData(txId: string, assetAddress?: Address): Promise<Tx> {
-    // TODO how do we determine which address to use?
-    return await this.dataProviders[this.network].getTransactionData(txId, this.getAddress(), assetAddress)
+    return await this.dataProviders[this.network].getTransactionData(txId, assetAddress)
   }
 
   /**
