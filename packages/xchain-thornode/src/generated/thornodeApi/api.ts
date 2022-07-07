@@ -843,6 +843,54 @@ export interface ProcessedOutbound {
      * @type {string}
      * @memberof ProcessedOutbound
      */
+    'chain'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessedOutbound
+     */
+    'to_address'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessedOutbound
+     */
+    'vault_pub_key'?: string;
+    /**
+     * 
+     * @type {Coin}
+     * @memberof ProcessedOutbound
+     */
+    'coin'?: Coin;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessedOutbound
+     */
+    'memo'?: string;
+    /**
+     * 
+     * @type {Array<Coin>}
+     * @memberof ProcessedOutbound
+     */
+    'max_gas'?: Array<Coin>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProcessedOutbound
+     */
+    'gas_rate'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessedOutbound
+     */
+    'in_hash'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessedOutbound
+     */
     'out_hash'?: string;
 }
 /**
@@ -882,6 +930,54 @@ export interface Queue {
  * @interface ScheduledOutbound
  */
 export interface ScheduledOutbound {
+    /**
+     * 
+     * @type {string}
+     * @memberof ScheduledOutbound
+     */
+    'chain'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ScheduledOutbound
+     */
+    'to_address'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ScheduledOutbound
+     */
+    'vault_pub_key'?: string;
+    /**
+     * 
+     * @type {Coin}
+     * @memberof ScheduledOutbound
+     */
+    'coin'?: Coin;
+    /**
+     * 
+     * @type {string}
+     * @memberof ScheduledOutbound
+     */
+    'memo'?: string;
+    /**
+     * 
+     * @type {Array<Coin>}
+     * @memberof ScheduledOutbound
+     */
+    'max_gas'?: Array<Coin>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ScheduledOutbound
+     */
+    'gas_rate'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ScheduledOutbound
+     */
+    'in_hash'?: string;
     /**
      * 
      * @type {number}
@@ -2996,7 +3092,7 @@ export const TSSApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async keysignPubkey(height: number, pubkey: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async keysignPubkey(height: number, pubkey: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Keysign>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.keysignPubkey(height, pubkey, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3017,7 +3113,7 @@ export const TSSApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async metricsKeygen(pubkey: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async metricsKeygen(pubkey: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<KeygenMetric>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.metricsKeygen(pubkey, height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3047,7 +3143,7 @@ export const TSSApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        keysignPubkey(height: number, pubkey: string, options?: any): AxiosPromise<void> {
+        keysignPubkey(height: number, pubkey: string, options?: any): AxiosPromise<Keysign> {
             return localVarFp.keysignPubkey(height, pubkey, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3066,7 +3162,7 @@ export const TSSApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        metricsKeygen(pubkey: string, height?: number, options?: any): AxiosPromise<void> {
+        metricsKeygen(pubkey: string, height?: number, options?: any): AxiosPromise<Array<KeygenMetric>> {
             return localVarFp.metricsKeygen(pubkey, height, options).then((request) => request(axios, basePath));
         },
     };
