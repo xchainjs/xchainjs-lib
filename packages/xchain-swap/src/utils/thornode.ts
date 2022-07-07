@@ -1,5 +1,14 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Configuration, ObservedTx, TransactionsApi, QueueApi, ScheduledOutbound, NetworkApi, Outbound, LastBlock } from '@xchainjs/xchain-thornode'
+import {
+  Configuration,
+  LastBlock,
+  NetworkApi,
+  ObservedTx,
+  Outbound,
+  QueueApi,
+  ScheduledOutbound,
+  TransactionsApi,
+} from '@xchainjs/xchain-thornode'
 import { Chain, THORChain } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
@@ -58,12 +67,11 @@ export class Thornode {
     this.network = network
     this.config = config ?? defaultThornodeConfig[this.network]
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })
-    this.transactionsApi = this.config.thornodeBaseUrls.map((url) => new TransactionsApi(new Configuration({ basePath: url })),
+    this.transactionsApi = this.config.thornodeBaseUrls.map(
+      (url) => new TransactionsApi(new Configuration({ basePath: url })),
     )
-    this.queueApi = this.config.thornodeBaseUrls.map((url) => new QueueApi(new Configuration({ basePath: url })),
-    )
-    this.networkApi = this.config.thornodeBaseUrls.map((url) => new NetworkApi(new Configuration({ basePath: url })),
-    )
+    this.queueApi = this.config.thornodeBaseUrls.map((url) => new QueueApi(new Configuration({ basePath: url })))
+    this.networkApi = this.config.thornodeBaseUrls.map((url) => new NetworkApi(new Configuration({ basePath: url })))
 
     this.chainAttributes = chainAttributes
     this.midgard = new Midgard(network)
@@ -116,7 +124,7 @@ export class Thornode {
   /**
    * For a given in Tx Hash (as returned by THORChainAMM.DoSwap()), finds the status of any THORChain transaction
    *
-   * @param sourceChain
+   * @param
    * @param destinationChain
    * @param inboundTxHash
    * @returns
@@ -129,52 +137,50 @@ export class Thornode {
 
     // If there is an error Thornode does not know about it. wait 60 seconds
     // If a long block time like BTC, can check or poll to see if the status changes.
-    if(!txData.block_height){
-    txStatus.stage = TxStage.INBOUND_CHAIN_UNCONFIRMED
-    if (sourceChain) {
-      txStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
-    } else {
-      txStatus.seconds = 60
+    if (!txData.block_height) {
+      txStatus.stage = TxStage.INBOUND_CHAIN_UNCONFIRMED
+      if (sourceChain) {
+        txStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
+      } else {
+        txStatus.seconds = 60
+      }
+      return txStatus
     }
-    return txStatus
-    }
-
-
-    /** Stage 2, THORNode has seen it. See if observed only or it has been processed by THORChain  */
+    /** Stage 2, THORNode has seen it. See if observed only (conf counting) or it has been processed by THORChain  */
     // e.g. https://thornode.ninerealms.com/thorchain/tx/365AC447BE6CE4A55D14143975EE3823A93A0D8DE2B70AECDD63B6A905C3D72B
-    const scheduledOutbound = await this.getscheduledQueue()
+    if (isChain(txData.tx?.chain)) {
+      sourceChain = txData.tx?.chain // to fix up
+    } else {
+      throw new Error(`Cannot get source chian ${txData.tx?.chain}`)
+    }
+    //If observed by not final, need to wait till the finalised block before moving to the next stage, blocks in source chain
+    if (txData.finalise_height && txData.block_height < txData.finalise_height) {
+      txStatus.stage = TxStage.CONF_COUNTING
+      const blocksToWait = txData.finaliseHeight - txData.observedTxBlockHeight
+      txStatus.seconds = blocksToWait * this.chainAttributes[sourceChain].avgBlockTimeInSecs
+      return txStatus
+    } else if (txData.status != 'done') {
+      // processed but not yet full final, e.g. not 2/3 nodes signed
+      txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs // wait one more TC block
+      txStatus.stage = TxStage.TC_PROCESSING
+      return txStatus
+    }
 
-    if(scheduledOutbound.length == 0) {
+    /** Stage 3 - It has been processed by TC
+     * check oubound queue for tx subject to oubound delay -> /thorchain/queue/scheduled/` */
+    txStatus.stage = TxStage.OUTBOUND_QUEUED
+    const scheduledOutbound = await this.getscheduledQueue()
+    if (scheduledOutbound.length == 0) {
+      // it is not queued, outbound Tx sent
       txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
-      txStatus.seconds = 60
+      txStatus.seconds = 60 // should be outbound chain time
       return txStatus
     }
     const observedTxBlockHeight = scheduledOutbound.find((obj) => {
       return obj.height
     })
-    const finaliseHeight = Number(txData[`finalise_height`])
-    const status = txData['status']
-    // const destinationChainString: string = txData[`memo`]
-    // const strTokens = destinationChainString.split(`:`, 2)
-    // const destinationChain: Chain = assetFromString(strTokens[1]).chain
-    const destinationChain: Chain = THORChain // to more fixed
-    txStatus.stage = TxStage.TC_PROCESSING
-    //If observed by not final, need to wait till the finalised block before moving to the next stage
-    if (observedTxBlockHeight < finaliseHeight) {
-      const blocksToWait = finaliseHeight - observedTxBlockHeight
-      txStatus.seconds = blocksToWait * this.chainAttributes[THORChain].avgBlockTimeInSecs
-      return txStatus
-    } else if (status != 'done') {
-      // processed but not yet full final, e.g. not 2/3 nodes signed
-      txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs
-      return txStatus
-    } else {
-      txStatus.stage++
-    }
 
-    /** Stage 3, check oubound queue for tx subject to oubound delay -> /thorchain/queue/scheduled/` */
-    const currentBlockHeight = this.midgard.getLatestBlocHeightk() // No way I know if to do it via THORNode
-    const currentBlockHeight = 50
+    const currentBlockHeight = this.getLastBlock()
     const allscheduledQueue = await this.getscheduledQueue()
     const scheduledQueueItem = allscheduledQueue?.find((item: ScheduledQueueItem) => item.in_hash === inboundTxHash)
     // If the scheudled block is greater than the current block, need to wait that amount of blocks till outbound is sent
@@ -189,18 +195,18 @@ export class Thornode {
       }
     }
 
-    // /** Stage 4, has the outbound Tx happened */
+    /** Stage 4, has the outbound Tx happened. just need to have the outbound chain and work out the conf time */
     if (scheduledQueueItem) {
       const blockDifference = scheduledQueueItem.height - currentBlockHeight
       const timeElapsed = blockDifference * this.chainAttributes[THORChain].avgBlockTimeInSecs
       if (blockDifference <= 0) {
         // If Tx has just been sent, Stage 3 should pick this up really
         txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
-        txStatus.seconds = this.chainAttributes[destinationChain].avgBlockTimeInSecs
-      } else if (timeElapsed < this.chainAttributes[destinationChain].avgBlockTimeInSecs) {
+        txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs
+      } else if (timeElapsed < this.chainAttributes[THORChain].avgBlockTimeInSecs) {
         // if the time passed since the outbound TX was sent is less than the outbound block time, outbound Tx unconfirmed, wait a bit longer.
         txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
-        txStatus.seconds = this.chainAttributes[destinationChain].avgBlockTimeInSecs - timeElapsed // workout how long to wait
+        txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs - timeElapsed // workout how long to wait
       } else {
         // time passed is greater than outbound Tx time, Tx is confirmed. Thus stage 5
         txStatus.stage = TxStage.OUTBOUND_CHAIN_CONFIRMED
