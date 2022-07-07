@@ -1,16 +1,18 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Configuration, ObservedTx, TransactionsApi } from '@xchainjs/xchain-thornode'
-import { Chain, THORChain } from '@xchainjs/xchain-util/lib'
+import { Configuration, ObservedTx, TransactionsApi, QueueApi, ScheduledOutbound, NetworkApi, Outbound, LastBlock } from '@xchainjs/xchain-thornode'
+import { Chain, THORChain } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 
 import { defaultChainAttributes } from '../chainDefaults'
 import { ChainAttributes } from '../types'
+import { Midgard } from './midgard'
 
-export type THORNodeConfig = {
+export type ThornodeConfig = {
   apiRetries: number
   thornodeBaseUrls: string[]
 }
+
 export enum TxStage {
   INBOUND_CHAIN_UNCONFIRMED,
   CONF_COUNTING,
@@ -24,13 +26,13 @@ export type TxStatus = {
   seconds: number
 }
 
-const defaultTHORNodeConfig: Record<Network, THORNodeConfig> = {
+const defaultThornodeConfig: Record<Network, ThornodeConfig> = {
   mainnet: {
     apiRetries: 3,
     thornodeBaseUrls: [
-      `https://thornode.thorchain.info/`,
-      `https://thornode.thorswap.net/`,
       `https://thornode.ninerealms.com/`,
+      `https://thornode.thorswap.net/`,
+      `https://thornode.thorchain.info/`,
     ],
   },
   stagenet: {
@@ -43,25 +45,28 @@ const defaultTHORNodeConfig: Record<Network, THORNodeConfig> = {
   },
 }
 
-export class THORNode {
-  private config: THORNodeConfig
+export class Thornode {
+  private config: ThornodeConfig
   private network: Network
   private chainAttributes: Record<Chain, ChainAttributes>
-  //private transactionsApis: TransactionsApi[]
   private transactionsApi: TransactionsApi[]
-  private observedTx: ObservedTx[]
-  //: TransactionsApi = new TransactionsApi(defaultTHORNodeConfig)
+  private queueApi: QueueApi[]
+  private midgard: Midgard
+  private networkApi: NetworkApi[]
 
-  constructor(network: Network = Network.Mainnet, config?: THORNodeConfig, chainAttributes = defaultChainAttributes) {
+  constructor(network: Network = Network.Mainnet, config?: ThornodeConfig, chainAttributes = defaultChainAttributes) {
     this.network = network
-    this.config = config ?? defaultTHORNodeConfig[this.network]
+    this.config = config ?? defaultThornodeConfig[this.network]
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })
-    this.transactionsApi = this.config.thornodeBaseUrls.map(
-      (url) => new TransactionsApi(new Configuration({ basePath: url })),
+    this.transactionsApi = this.config.thornodeBaseUrls.map((url) => new TransactionsApi(new Configuration({ basePath: url })),
     )
-    this.observedTx = this.config.thornodeBaseUrls.map((url) => new ObservedTx(new Configuration({ basePath: url })))
+    this.queueApi = this.config.thornodeBaseUrls.map((url) => new QueueApi(new Configuration({ basePath: url })),
+    )
+    this.networkApi = this.config.thornodeBaseUrls.map((url) => new NetworkApi(new Configuration({ basePath: url })),
+    )
+
     this.chainAttributes = chainAttributes
-    // this.midgard = new Midgard(network)
+    this.midgard = new Midgard(network)
   }
 
   /**
@@ -71,27 +76,36 @@ export class THORNode {
    * @returns {ScheduledQueueItem} Array
    *
    */
-  async getscheduledQueue(): Promise<ScheduledQueueItem[]> {
-    const queueScheduled = `/thorchain/queue/scheduled/`
-    for (const baseUrl of this.config.thornodeBaseUrls) {
+  async getscheduledQueue(): Promise<ScheduledOutbound[]> {
+    for (const api of this.queueApi) {
       try {
-        const { data } = await axios.get(`${baseUrl}${queueScheduled}`)
-        return data
+        const queueScheduled = await api.queueScheduled()
+        return queueScheduled.data
       } catch (e) {
         console.error(e)
-        throw new Error(`THORNode not responding ${baseUrl}`)
+        throw new Error(`THORNode not responding`)
       }
     }
     throw Error(`THORNode not responding`)
   }
 
   async getTxData(txHash: string): Promise<ObservedTx> {
-    // this should go in a seperate function
-
     for (const api of this.transactionsApi) {
       try {
-        const obseredTx: ObservedTx = await api.tx(txHash)
-        return await .
+        const obseredTx = await api.tx(txHash)
+        return obseredTx.data
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+
+  async getLastBlock(height?: number): Promise<LastBlock[]> {
+    for (const api of this.networkApi) {
+      try {
+        const lastBlock = await api.lastblock(height)
+        return lastBlock.data
       } catch (e) {
         console.error(e)
       }
@@ -111,33 +125,43 @@ export class THORNode {
     const txStatus: TxStatus = { stage: TxStage.INBOUND_CHAIN_UNCONFIRMED, seconds: 0 }
 
     /** Stage 1 See if the tx has been confirmed on the source Blockchain or not */
-    const [txData] = await Promise.all([this.getTxData(inboundTxHash)])
-    const error = txData['error']
-    if (error) {
-      // THORNode does not know about it yet, this it is not yet confirmed. Wait the chian blocktime.
-      // If a long block time like BTC, can check or pool to see if the status changes.
-      txStatus.stage = TxStage.INBOUND_CHAIN_UNCONFIRMED
-      if (sourceChain) {
-        txStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
-      } else {
-        // we don't know the source chain so guess
-        txStatus.seconds = 60
-      }
+    const txData = await this.getTxData(inboundTxHash)
+
+    // If there is an error Thornode does not know about it. wait 60 seconds
+    // If a long block time like BTC, can check or poll to see if the status changes.
+    if(!txData.block_height){
+    txStatus.stage = TxStage.INBOUND_CHAIN_UNCONFIRMED
+    if (sourceChain) {
+      txStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
+    } else {
+      txStatus.seconds = 60
+    }
+    return txStatus
+    }
+
+
+    /** Stage 2, THORNode has seen it. See if observed only or it has been processed by THORChain  */
+    // e.g. https://thornode.ninerealms.com/thorchain/tx/365AC447BE6CE4A55D14143975EE3823A93A0D8DE2B70AECDD63B6A905C3D72B
+    const scheduledOutbound = await this.getscheduledQueue()
+
+    if(scheduledOutbound.length == 0) {
+      txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
+      txStatus.seconds = 60
       return txStatus
     }
-    /** Stage 2, THORNode has seen it. See if observed only or it has been processed by THORChain  */
-    // this will be a json file so need to parase. e.g. https://thornode.ninerealms.com/thorchain/tx/365AC447BE6CE4A55D14143975EE3823A93A0D8DE2B70AECDD63B6A905C3D72B
-    const observed_tx_blockHeight = txData['block_height']
-    const finalise_height = Number(txData[`finalise_height`])
+    const observedTxBlockHeight = scheduledOutbound.find((obj) => {
+      return obj.height
+    })
+    const finaliseHeight = Number(txData[`finalise_height`])
     const status = txData['status']
     // const destinationChainString: string = txData[`memo`]
     // const strTokens = destinationChainString.split(`:`, 2)
     // const destinationChain: Chain = assetFromString(strTokens[1]).chain
     const destinationChain: Chain = THORChain // to more fixed
     txStatus.stage = TxStage.TC_PROCESSING
-    // If observed by not final, need to wait till the finalised block before moving to the next stage
-    if (observed_tx_blockHeight < finalise_height) {
-      const blocksToWait = finalise_height - observed_tx_blockHeight
+    //If observed by not final, need to wait till the finalised block before moving to the next stage
+    if (observedTxBlockHeight < finaliseHeight) {
+      const blocksToWait = finaliseHeight - observedTxBlockHeight
       txStatus.seconds = blocksToWait * this.chainAttributes[THORChain].avgBlockTimeInSecs
       return txStatus
     } else if (status != 'done') {
@@ -149,7 +173,7 @@ export class THORNode {
     }
 
     /** Stage 3, check oubound queue for tx subject to oubound delay -> /thorchain/queue/scheduled/` */
-    // const currentBlockHeight = this.midgard.getLatestBlocHeightk() // No way I know if to do it via THORNode
+    const currentBlockHeight = this.midgard.getLatestBlocHeightk() // No way I know if to do it via THORNode
     const currentBlockHeight = 50
     const allscheduledQueue = await this.getscheduledQueue()
     const scheduledQueueItem = allscheduledQueue?.find((item: ScheduledQueueItem) => item.in_hash === inboundTxHash)
@@ -165,7 +189,7 @@ export class THORNode {
       }
     }
 
-    /** Stage 4, has the outbound Tx happened */
+    // /** Stage 4, has the outbound Tx happened */
     if (scheduledQueueItem) {
       const blockDifference = scheduledQueueItem.height - currentBlockHeight
       const timeElapsed = blockDifference * this.chainAttributes[THORChain].avgBlockTimeInSecs
