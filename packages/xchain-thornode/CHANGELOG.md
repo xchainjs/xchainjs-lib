@@ -2,11 +2,8 @@
 
 ## Fix
 
-- Fix `OutboundProcess and ScheduledOutbound` exported interfaces
+- Fix `OutboundProcess and ScheduledOutbound` exported interfaces, by preprocessing yaml->json (https://github.com/OpenAPITools/openapi-generator/issues/1593)
 
-## Add
-
-- Thornode.yaml file 
 
 # v0.0.1.0-alpha (2022-07-4)
 
