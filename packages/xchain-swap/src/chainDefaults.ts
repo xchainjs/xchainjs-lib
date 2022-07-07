@@ -25,7 +25,7 @@ const defaultChainAttributes: Record<Chain, ChainAttributes> = {
   },
   GAIA: {
     blockReward: 0,
-    avgBlockTimeInSecs: 0,
+    avgBlockTimeInSecs: 6,
   },
   TERRA: {
     blockReward: 0,
@@ -33,7 +33,7 @@ const defaultChainAttributes: Record<Chain, ChainAttributes> = {
   },
   BNB: {
     blockReward: 0,
-    avgBlockTimeInSecs: 0,
+    avgBlockTimeInSecs: 6,
   },
   THOR: {
     blockReward: 0,
