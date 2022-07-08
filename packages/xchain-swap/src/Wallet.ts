@@ -112,17 +112,20 @@ export class Wallet {
       memo = `=:${swap.destinationAsset.symbol}/${swap.destinationAsset.symbol}`
     }
     // needs to be tested
-    if (swap.affiliateAddress || swap.affiliateFee) {
+    if (swap.affiliateAddress != '' || swap.affiliateFee == undefined ) {
+      console.log(`here`)
       memo = memo.concat(
         `:${swap.destinationAddress}:${lim}:${swap.affiliateAddress}:${swap.affiliateFee.amount().toFixed()}`,
       )
     } else {
+      console.log(`none`)
       memo = memo.concat(`:${swap.destinationAddress}:${lim}`)
     }
 
     // Logic error? between synths to and from..
     // If memo length is too long for BTC, trim it
     if (eqAsset(swap.sourceAsset, AssetBTC) && memo.length > 80) {
+
       memo = `:${swap.destinationAsset.chain}.${swap.destinationAsset.symbol}`
       // If swapping to a synth
       if (swap.destinationAsset.synth && eqChain(swap.destinationAsset.chain, Chain.THORChain)) {
@@ -145,6 +148,7 @@ export class Wallet {
   }
 
   private async swapRuneTo(swap: ExecuteSwap): Promise<SwapSubmitted> {
+    console.log(`rune`)
     const thorClient = (this.clients.THOR as unknown) as ThorchainClient
     const waitTime = swap.waitTime
     const hash = await thorClient.deposit({

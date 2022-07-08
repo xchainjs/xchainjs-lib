@@ -12,6 +12,7 @@ const midgard = new Midgard(Network.Mainnet)
 const thorchainAmm = new ThorchainAMM(midgard)
 
 const bnbPoolDetails = {
+  annualPercentageRate: "1.1865336252957166",
   asset: 'BNB.BNB',
   assetDepth: assetToBase(assetAmount(100)).amount().toFixed(),
   assetPrice: '11121.24920535084',
