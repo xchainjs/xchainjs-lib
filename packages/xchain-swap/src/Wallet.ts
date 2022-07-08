@@ -11,7 +11,6 @@ import {
   EthereumClient,
   MAX_APPROVAL,
 } from '@xchainjs/xchain-ethereum'
-import { ETHAddress } from '@xchainjs/xchain-ethereum/src'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard/src/generated/midgardApi'
 import { Client as TerraClient } from '@xchainjs/xchain-terra'
@@ -213,26 +212,23 @@ export class Wallet {
     if (!inboundAsgard?.router) {
       throw new Error('router address is not defined')
     }
+    console.log('ccc')
     const address = this.clients.ETH.getAddress(params.walletIndex)
     const gasPrice = await ethClient.estimateGasPrices()
-
+    console.log(inboundAsgard.router)
     if (eqAsset(params.asset, AssetETH)) {
-      const contract = new ethers.Contract(inboundAsgard.router, routerABI)
-      const unsignedTx = await contract.populateTransaction.deposit(
-        inboundAsgard.address,
-        ETHAddress,
-        params.amount.amount().toFixed(),
-        params.memo,
-        {
-          from: address,
-          value: params.amount.amount().toFixed(),
-          gasPrice: gasPrice.average.amount().toFixed(),
-        },
-      )
-      const response = await ethClient.getWallet(params.walletIndex).sendTransaction(unsignedTx)
-      return typeof response === 'string' ? response : response.hash
+      //ETH is a simple transfer
+      return await this.clients.ETH.transfer({
+        walletIndex: params.walletIndex || 0,
+        asset: params.asset,
+        amount: params.amount,
+        recipient: inboundAsgard.address,
+        memo: params.memo,
+      })
     } else {
-      const isApprovedResult = this.isTCRouterApprovedToSpend(params.asset, params.amount, params.walletIndex)
+      //erc-20 must be depsited to the router
+      console.log('eee')
+      const isApprovedResult = await this.isTCRouterApprovedToSpend(params.asset, params.amount, params.walletIndex)
       if (!isApprovedResult) {
         throw new Error('The amount is not allowed to spend')
       }
@@ -244,16 +240,35 @@ export class Wallet {
         params.amount.amount().toFixed(),
         params.memo,
       ]
-      const vaultContract = new ethers.Contract(inboundAsgard.router, routerABI)
-      const unsignedTx = await vaultContract.populateTransaction.deposit(...depositParams, {
+      console.log(JSON.stringify(depositParams, null, 2))
+
+      const routerContract = new ethers.Contract(inboundAsgard.router, routerABI)
+      const gasLimit = '500000'
+      console.log(gasLimit)
+      const unsignedTx = await routerContract.populateTransaction.deposit(...depositParams, {
         from: address,
         value: 0,
         gasPrice: gasPrice.fast.amount().toFixed(),
+        gasLimit,
       })
       const { hash } = await ethClient.getWallet(params.walletIndex).sendTransaction(unsignedTx)
       return hash
     }
   }
+  // private async estimateDepositGasUsage(
+  //   contractAddress: Address,
+  //   abi: ethers.ContractInterface,
+  //   funcName: string,
+  //   funcParams: any[],
+  // ): Promise<ethers.BigNumber> {
+  //   const ethClient = (this.clients.ETH as unknown) as EthereumClient
+  //   return await ethClient.estimateCall({
+  //     contractAddress,
+  //     abi,
+  //     funcName,
+  //     funcParams,
+  //   })
+  // }
   async isTCRouterApprovedToSpend(asset: Asset, amount: BaseAmount, walletIndex = 0): Promise<boolean> {
     const ethClient = (this.clients.ETH as unknown) as EthereumClient
 

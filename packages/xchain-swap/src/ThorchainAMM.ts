@@ -152,7 +152,8 @@ export class ThorchainAMM {
       const outboundDelay = await this.outboundDelay(destPool, params.destinationAsset, limAssetAmount)
       waitTime = outboundDelay + waitTime
     }
-    return wallet.executeSwap({
+
+    return await wallet.executeSwap({
       fromBaseAmount: params.inputAmount,
       sourceAsset: params.sourceAsset,
       destinationAsset: params.destinationAsset,

@@ -25,7 +25,9 @@ const testnetWallet = new Wallet(Network.Testnet, process.env.TESTNETPHRASE || '
 //   ticker: "BNB",
 //   synth: true
 // }
-const ETH_DECIMAL = 18
+// const ETH_DECIMAL = 18
+const USDT_DECIMAL = 6
+
 const USDT: Asset = {
   chain: Chain.Ethereum,
   symbol: 'USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306',
@@ -222,11 +224,13 @@ describe('xchain-swap Integration Tests', () => {
       const estimateSwapParams = {
         sourceAsset: USDT,
         destinationAsset: AssetRuneNative,
-        inputAmount: assetToBase(assetAmount(0.005, ETH_DECIMAL)),
+        inputAmount: assetToBase(assetAmount(0.005, USDT_DECIMAL)),
         slipLimit: new BigNumber(0.5),
         // affiliateFeePercent: 0.1,
       }
-
+      // console.log(estimateSwapParams.inputAmount.amount().toFixed())
+      // throw Error('')
+      console.log('aaaa')
       const approved = await testnetWallet.isTCRouterApprovedToSpend(
         estimateSwapParams.sourceAsset,
         estimateSwapParams.inputAmount,
@@ -236,6 +240,7 @@ describe('xchain-swap Integration Tests', () => {
         //why is the has missing?
         console.log(JSON.stringify(result, null, 2))
       }
+      console.log('bbbb')
       const output = await testnetThorchainAmm.doSwap(
         testnetWallet,
         estimateSwapParams,

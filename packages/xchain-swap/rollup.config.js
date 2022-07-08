@@ -40,7 +40,7 @@ export default {
     'crypto',
     'stream',
     'string_decoder',
-    '@xchainjs/xchain-client',
+    // '@xchainjs/xchain-client',
     'axios',
   ],
 }
