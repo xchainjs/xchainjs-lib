@@ -25,6 +25,7 @@ import {
   baseToAsset,
   eqAsset,
   eqChain,
+  formatAssetAmountCurrency,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -235,14 +236,14 @@ export class ThorchainAMM {
     let outboundFee: BaseAmount
 
     // works out inbound fee.
-    if (eqChain(params.sourceAsset.chain, Chain.THORChain)) {
+    if (eqChain(params.sourceAsset.chain, Chain.THORChain) || params.sourceAsset.synth) {
       // flat rune fee or Synths inbput
       inboundFee = baseAmount(2000000)
     } else {
       inboundFee = calcInboundFee(params.sourceAsset, sourceInboundDetails.gas_rate)
     }
     // works out outbound fee.
-    if (eqChain(params.destinationAsset.chain, Chain.THORChain)) {
+    if (eqChain(params.destinationAsset.chain, Chain.THORChain) || params.destinationAsset.synth) {
       outboundFee = baseAmount(2000000)
     } else {
       outboundFee = calcInboundFee(params.destinationAsset, destinationInboundDetails.gas_rate)
@@ -307,22 +308,69 @@ export class ThorchainAMM {
         errors.push(`destinationAsset ${params.destinationAsset.ticker} does not have a valid liquidity pool`)
       if (destinationInboundDetails.haltedChain || destinationInboundDetails.haltedTrading)
         errors.push(`destination pool is halted`)
+    } else {
     }
     if (estimate.slipPercentage.gte(params.slipLimit || 1))
       errors.push(
         `expected slip: ${estimate.slipPercentage.toFixed()} is greater than your slip limit:${params.slipLimit?.toFixed()} `,
       )
+    // only proceed to check fees if there are no errors so far
+    if (errors.length > 0) return errors
     // Check if the inputAmount value is enough to cover all the fees.
-    if (sourcePool?.isAvailable() && destinationPool?.isAvailable()) {
+    const canCoverFeesError = this.checkCoverFees(params, estimate, sourcePool, destinationPool)
+    if (canCoverFeesError) errors.push(canCoverFeesError)
+
+    return errors
+  }
+  private checkCoverFees(
+    params: EstimateSwapParams,
+    estimate: SwapEstimate,
+    sourcePool: LiquidityPool | undefined,
+    destinationPool: LiquidityPool | undefined,
+  ): string | undefined {
+    let result: string | undefined = undefined
+    if (sourcePool && destinationPool) {
+      //non-rune -> non-rune
+      const inputAmountInRune = sourcePool?.getValueInRUNE(params.sourceAsset, params.inputAmount)
       const inboundFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.inboundFee)
       const outboundFeeInRune = destinationPool.getValueInRUNE(params.destinationAsset, estimate.totalFees.outboundFee)
       const swapFeeInRune = sourcePool.getValueInRUNE(params.sourceAsset, estimate.totalFees.swapFee)
       const affiliateFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.affiliateFee)
       const totalSwapFeesInRune = inboundFeeInRune.plus(outboundFeeInRune).plus(swapFeeInRune).plus(affiliateFeeInRune)
-      if (totalSwapFeesInRune >= params.inputAmount)
-        errors.push(`Input amount ${params.inputAmount.amount().toFixed()} is less than or equal to total swap fees`)
+      if (totalSwapFeesInRune.gte(inputAmountInRune))
+        result = `Input amount ${formatAssetAmountCurrency({
+          amount: baseToAsset(params.inputAmount),
+          asset: params.sourceAsset,
+        })} is less than or equal to total swap fees`
+    } else if (!sourcePool && destinationPool) {
+      // rune -> non-rune
+      const inputAmountInRune = params.inputAmount
+      console.log(inputAmountInRune.amount().toFixed())
+      const inboundFeeInRune = estimate.totalFees.inboundFee
+      const outboundFeeInRune = destinationPool.getValueInRUNE(params.destinationAsset, estimate.totalFees.outboundFee)
+      const swapFeeInRune = estimate.totalFees.swapFee
+      const affiliateFeeInRune = estimate.totalFees.affiliateFee
+      const totalSwapFeesInRune = inboundFeeInRune.plus(outboundFeeInRune).plus(swapFeeInRune).plus(affiliateFeeInRune)
+      if (totalSwapFeesInRune.gte(inputAmountInRune))
+        result = `Input amount ${formatAssetAmountCurrency({
+          amount: baseToAsset(params.inputAmount),
+          asset: params.sourceAsset,
+        })} is less than or equal to total swap fees`
+    } else if (sourcePool && !destinationPool) {
+      // non-rune -> rune
+      const inputAmountInRune = sourcePool?.getValueInRUNE(params.sourceAsset, params.inputAmount)
+      const inboundFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.inboundFee)
+      const outboundFeeInRune = estimate.totalFees.outboundFee
+      const swapFeeInRune = sourcePool.getValueInRUNE(params.sourceAsset, estimate.totalFees.swapFee)
+      const affiliateFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.affiliateFee)
+      const totalSwapFeesInRune = inboundFeeInRune.plus(outboundFeeInRune).plus(swapFeeInRune).plus(affiliateFeeInRune)
+      if (totalSwapFeesInRune.gte(inputAmountInRune))
+        result = `Input amount ${formatAssetAmountCurrency({
+          amount: baseToAsset(params.inputAmount),
+          asset: params.sourceAsset,
+        })} is less than or equal to total swap fees`
     }
-    return errors
+    return result
   }
   /**
    * Works out the swap direction and amount and calls the swap functions.
