@@ -29,3 +29,25 @@ const swapParams = {
     slipLimit: new BigNumber(0.02)}//optional
 console.log(await thorchain.estimateSwap(swapParams))
 ```
+
+
+## Open Items
+
+- [x] Merge THORNode into Master
+- [x] Update THORNode.ts 
+- [ ] Complete and Test CheckTx  *(Stomzy)*
+- [ ] Move CheckTx to THORChainAMM  *(Stomzy)*
+- [ ] Test for Synth *(In-progess, Stormzy)*
+- [ ] Test ERC20 Support *(In-progess, Stormzy)*  
+- [ ] Review to remove from THORChainAMM.ts
+    - [ ] THORChainAMM.convertAssetToAsset()
+    - [ ] THORChainAMM.getChainAsset()
+    - [x] THORChainAMM.calcInboundFee()
+- [ ] code clean-up
+  - [ ] rename files to NOT CamelCase
+  - [ ] walk through all functions
+  - [ ] find/resolve TODOS
+  - [ ] document functions  
+  - [ ] update README  
+- [ ] Update Aggregator Documentation (Chris)
+- [ ] Complete Add Liquidity

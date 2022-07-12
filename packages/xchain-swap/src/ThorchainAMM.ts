@@ -42,7 +42,7 @@ import {
   TotalFees,
 } from './types'
 import { Midgard } from './utils/midgard'
-import { getDoubleSwap, getSingleSwap } from './utils/swap'
+import { calcInboundFee, getDoubleSwap, getSingleSwap } from './utils/swap'
 
 const BN_1 = new BigNumber(1)
 
@@ -239,13 +239,13 @@ export class ThorchainAMM {
       // flat rune fee or Synths inbput
       inboundFee = baseAmount(2000000)
     } else {
-      inboundFee = this.calcInboundFee(params.sourceAsset, sourceInboundDetails.gas_rate)
+      inboundFee = calcInboundFee(params.sourceAsset, sourceInboundDetails.gas_rate)
     }
     // works out outbound fee.
     if (eqChain(params.destinationAsset.chain, Chain.THORChain)) {
       outboundFee = baseAmount(2000000)
     } else {
-      outboundFee = this.calcInboundFee(params.destinationAsset, destinationInboundDetails.gas_rate)
+      outboundFee = calcInboundFee(params.destinationAsset, destinationInboundDetails.gas_rate)
     }
     outboundFee = outboundFee.times(3)
     // ---------- Remove Fees from inbound before doing the swap -----------
@@ -320,7 +320,7 @@ export class ThorchainAMM {
       const affiliateFeeInRune = sourcePool?.getValueInRUNE(params.sourceAsset, estimate.totalFees.affiliateFee)
       const totalSwapFeesInRune = inboundFeeInRune.plus(outboundFeeInRune).plus(swapFeeInRune).plus(affiliateFeeInRune)
       if (totalSwapFeesInRune >= params.inputAmount)
-        errors.push(`Input amount ${params.inputAmount} is less than or equal to total swap fees`)
+        errors.push(`Input amount ${params.inputAmount.amount().toFixed()} is less than or equal to total swap fees`)
     }
     return errors
   }
@@ -499,41 +499,6 @@ export class ThorchainAMM {
       default:
         throw Error('Unknown chain')
     }
-  }
-  /**
-   * Works out the required inbound or outbound fee based on the chain.
-   * Call getInboundDetails to get the current gasRate
-   *
-   * @param sourceAsset
-   * @param gasRate
-   * @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
-   * @returns
-   */
-  private calcInboundFee(sourceAsset: Asset, gasRate: BigNumber): BaseAmount {
-    switch (sourceAsset.chain) {
-      case Chain.Bitcoin:
-      case Chain.BitcoinCash:
-      case Chain.Litecoin:
-      case Chain.Doge:
-        // NOTE: UTXO chains estimate fees with a 250 byte size
-        return baseAmount(gasRate.multipliedBy(250))
-        break
-      case Chain.Binance:
-        //flat fee
-        return baseAmount(gasRate)
-        break
-      case Chain.Ethereum:
-        if (eqAsset(sourceAsset, AssetETH)) {
-          return baseAmount(gasRate.multipliedBy(35000).multipliedBy(10 ** 9))
-        } else {
-          return baseAmount(gasRate.multipliedBy(70000).multipliedBy(10 ** 9))
-        }
-        break
-      case Chain.Terra:
-        return baseAmount(gasRate)
-        break
-    }
-    throw new Error(`could not calculate inbound fee for ${sourceAsset.chain}`)
   }
 
   // public async addLiquidity(

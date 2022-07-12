@@ -40,7 +40,7 @@ export const isEnabledChain = (chain: Chain) => chain.includes(chain)
  * @returns boolean: True if equal else False
  */
 export const eqChain = (a: Chain, b: Chain) => {
-  return a.toString == b.toString
+  return a == b
 }
 
 /**

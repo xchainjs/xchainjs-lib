@@ -1,6 +1,15 @@
 require('dotenv').config()
 import { Network } from '@xchainjs/xchain-client'
-import { Asset, AssetBTC, AssetRuneNative, Chain, assetAmount, assetToBase, AssetBNB, AssetETH } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetBNB,
+  AssetBTC,
+  AssetETH,
+  AssetRuneNative,
+  Chain,
+  assetAmount,
+  assetToBase,
+} from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { ThorchainAMM } from '../src/ThorchainAMM'
@@ -16,15 +25,15 @@ const mainnetWallet = new Wallet(Network.Mainnet, process.env.MAINNETPHRASE || '
 
 const sBTC: Asset = {
   chain: Chain.THORChain,
-  symbol: "BTC",
-  ticker: "BTC",
-  synth: true
+  symbol: 'BTC',
+  ticker: 'BTC',
+  synth: true,
 }
 const sBNB: Asset = {
   chain: Chain.THORChain,
-  symbol: "BNB",
-  ticker: "BNB",
-  synth: true
+  symbol: 'BNB',
+  ticker: 'BNB',
+  synth: true,
 }
 const ETH_DECIMAL = 18
 const USDT_DECIMAL = 6
@@ -37,9 +46,9 @@ const USDT: Asset = {
 }
 const XRUNE: Asset = {
   chain: Chain.Ethereum,
-  symbol: "XRUNE-0X8626DB1A4F9F3E1002EEB9A4F3C6D391436FFC23",
-  ticker: "XRUNE",
-  synth: false
+  symbol: 'XRUNE-0X8626DB1A4F9F3E1002EEB9A4F3C6D391436FFC23',
+  ticker: 'XRUNE',
+  synth: false,
 }
 
 describe('xchain-swap Integration Tests', () => {
@@ -117,7 +126,6 @@ describe('xchain-swap Integration Tests', () => {
 
   // From asset to synth sBTC .. doesn't work at this stage
   it(`Should perform a swap from BNB to synthBTC`, async () => {
-
     const estimateSwapParams = {
       sourceAsset: AssetBNB,
       destinationAsset: sBTC,
@@ -133,8 +141,7 @@ describe('xchain-swap Integration Tests', () => {
       )
       console.log(`tx hash: ${output.hash}, \n Tx url: ${output.url} \n WaitTime:${output.waitTime}`)
       expect(output).toBeTruthy()
-
-    }catch(error: any){
+    } catch (error: any) {
       console.log(error.message)
     }
   })
@@ -154,8 +161,7 @@ describe('xchain-swap Integration Tests', () => {
       )
       console.log(`tx hash: ${output.hash}, \n Tx url: ${output.url} \n WaitTime:${output.waitTime}`)
       expect(output).toBeTruthy()
-
-    }catch(error: any){
+    } catch (error: any) {
       console.log(error.message)
     }
   })
@@ -173,12 +179,10 @@ describe('xchain-swap Integration Tests', () => {
         mainnetWallet,
         estimateSwapParams,
         mainnetWallet.clients['THOR'].getAddress(),
-
       )
       console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTime}`)
       expect(output).toBeTruthy()
-
-    }catch(error: any){
+    } catch (error: any) {
       console.log(error.message)
     }
   })
@@ -199,7 +203,6 @@ describe('xchain-swap Integration Tests', () => {
     )
     console.log(output)
     expect(output.hash).toBeTruthy()
-
   })
 
   // From Rune to ERC -- Passes
@@ -235,17 +238,17 @@ describe('xchain-swap Integration Tests', () => {
       )
       if (!approved) {
         const result = await testnetWallet.approveTCRouterToSpend(estimateSwapParams.sourceAsset)
-        //why is the hash missing?
+        expect(result.hash).toBeTruthy()
         console.log(JSON.stringify(result, null, 2))
+      } else {
+        const output = await testnetThorchainAmm.doSwap(
+          testnetWallet,
+          estimateSwapParams,
+          testnetWallet.clients['THOR'].getAddress(),
+        )
+        console.log(output)
+        expect(output.hash).toBeTruthy()
       }
-
-      const output = await testnetThorchainAmm.doSwap(
-        testnetWallet,
-        estimateSwapParams,
-        testnetWallet.clients['THOR'].getAddress(),
-      )
-      console.log(output)
-      expect(output.hash).toBeTruthy()
     } catch (error) {
       console.error(error)
     }

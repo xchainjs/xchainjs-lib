@@ -1,4 +1,4 @@
-import { Address } from '@xchainjs/xchain-client'
+import { Address, FeeOption } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -46,6 +46,7 @@ export type ExecuteSwap = {
   destinationAddress: Address
   affiliateAddress: Address
   affiliateFee: BaseAmount
+  feeOption?: FeeOption
   interfaceID: number
   waitTime: number
 }
@@ -60,6 +61,7 @@ export type DepositParams = {
   walletIndex?: number // send from this HD index
   asset: Asset
   amount: BaseAmount
+  feeOption: FeeOption
   memo: string
 }
 
