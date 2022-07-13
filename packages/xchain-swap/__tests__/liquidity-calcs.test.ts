@@ -6,6 +6,7 @@ import { LiquidityData, UnitData } from '../src/types'
 import { getLiquidityUnits, getPoolShare } from '../src/utils'
 
 const btcPoolDetails = {
+  annualPercentageRate: '0.294476309321674',
   asset: 'BTC.BTC',
   assetDepth: assetToBase(assetAmount(100)).amount().toFixed(),
   assetPrice: '11121.24920535084',
