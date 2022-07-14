@@ -1,15 +1,17 @@
-import { Network } from '@xchainjs/xchain-client'
-import { Asset, AssetBNB, AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetBNB, assetAmount, assetToBase, Asset, AssetBTC, AssetETH, AssetRuneNative } from '@xchainjs/xchain-util'
 
-import { LiquidityPool } from '../src'
 import { ThorchainAMM } from '../src/ThorchainAMM'
+
+import { Network } from '@xchainjs/xchain-client'
 import { Midgard } from '../src/utils/midgard'
+import { LiquidityPool } from '../src'
 
 // eslint-disable-next-line ordered-imports/ordered-imports
 import mockMidgardApi from '../__mocks__/midgard-api'
 
-const midgard = new Midgard(Network.Mainnet)
-const thorchainAmm = new ThorchainAMM(midgard)
+
+const midgardts = new Midgard(Network.Mainnet)
+const thorchainAmm = new ThorchainAMM(midgardts)
 
 const bnbPoolDetails = {
   annualPercentageRate: "1.1865336252957166",
@@ -29,20 +31,18 @@ const bnbPoolDetails = {
 
 const bnbPool = new LiquidityPool(bnbPoolDetails)
 
+
 describe('Midgard Client Test', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     mockMidgardApi.init()
-  })
-  afterEach(() => {
-    mockMidgardApi.restore()
   })
 
   // ThorchainAMM unit tests with mock data
   it(`Should get the correct outbound Delay`, async () => {
     const outboundAmount = assetToBase(assetAmount(1))
     const outBoundValue = await thorchainAmm.outboundDelay(bnbPool, AssetBNB, outboundAmount)
-    console.log(outBoundValue)
-    expect(outBoundValue).toEqual(1500)
+    const expectedOutput = 1500
+    expect(outBoundValue).toEqual(expectedOutput)
   })
 
   it(`Should convert BTC to ETH `, async () => {
@@ -50,19 +50,25 @@ describe('Midgard Client Test', () => {
     const outboundAsset: Asset = AssetETH
     const inputAmount = assetToBase(assetAmount(0.5))
     const outboundETHAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
-    console.log(
-      `${inputAmount.amount()} ${inputAsset.chain} to ${
-        outboundAsset.chain
-      } is: ${outboundETHAmount.amount().toFixed()} ${outboundAsset.chain}`,
-    )
-    expect(outboundETHAmount.amount()).toBeTruthy()
+    const EthAmount = assetToBase(assetAmount(9.13629640))
+    expect(outboundETHAmount.amount()).toEqual(EthAmount.amount())
   })
 
   it(`Should convert BTC to RUNE `, async () => {
-    const inputAsset = AssetBTC
-    const outboundAsset = AssetRuneNative
+    const inputAsset: Asset = AssetBTC
+    const outboundAsset: Asset = AssetRuneNative
     const inputAmount = assetToBase(assetAmount(0.5))
     const outboundRuneAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
-    expect(outboundRuneAmount.amount().toNumber() > 1000)
+    const expectedAmount = assetToBase(assetAmount(4760))
+    expect(outboundRuneAmount.amount()).toEqual(expectedAmount.amount())
+  })
+
+  it(`Should convert RUNE to BTC `, async () => {
+    const inputAsset: Asset = AssetRuneNative
+    const outboundAsset: Asset = AssetBTC
+    const inputAmount = assetToBase(assetAmount(100))
+    const outboundBTCAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
+    const expectedAmount = assetToBase(assetAmount(0.01050400))
+    expect(outboundBTCAmount.amount()).toEqual(expectedAmount.amount())
   })
 })

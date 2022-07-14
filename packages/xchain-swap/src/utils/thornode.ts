@@ -3,7 +3,6 @@ import {
   Configuration,
   LastBlock,
   NetworkApi,
-  ObservedTx,
   QueueApi,
   ScheduledOutbound,
   TransactionsApi,
@@ -31,6 +30,37 @@ export enum TxStage {
 export type TxStatus = {
   stage: TxStage
   seconds: number
+}
+
+interface TxResponse {
+  observed_tx: ObservedTx
+  keysign_metric: KeysignMetric
+}
+interface ObservedTx {
+  tx: Tx;
+  status: string
+  out_hashes: Array<string>
+  block_height: number
+  finalise_height: number
+  signers: Array<string>
+  observed_pub_key: string
+}
+interface Tx{
+  id: string;
+  chain: string;
+  from_address: string;
+  to_address: string;
+  coins: Array<Coin>
+  gas: Array<Coin>
+  memo: string
+}
+interface Coin {
+  asset: string;
+  amount: string;
+}
+interface KeysignMetric{
+  tx_id: string;
+  node_tss_times: number
 }
 
 const defaultThornodeConfig: Record<Network, ThornodeConfig> = {
@@ -93,10 +123,13 @@ export class Thornode {
     throw Error(`THORNode not responding`)
   }
 
-  async getTxData(txHash: string): Promise<ObservedTx> {
+  async getTxData(txHash: string): Promise<TxResponse> {
     for (const api of this.transactionsApi) {
       try {
-        return (await api.tx(txHash)).data
+        const txData = await api.tx(txHash)
+        const data = JSON.stringify(txData?.data)
+        const obj: TxResponse = JSON.parse(data);
+        return obj
       } catch (e) {
         console.error(e)
       }
@@ -159,7 +192,7 @@ export class Thornode {
 
     // If there is an error Thornode does not know about it. wait 60 seconds
     // If a long block time like BTC, can check or poll to see if the status changes.
-    if (!txData) {
+    if (!txData.observed_tx) {
       txStatus.stage = TxStage.INBOUND_CHAIN_UNCONFIRMED
       if (sourceChain) {
         txStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
@@ -170,26 +203,24 @@ export class Thornode {
     }
     /** Stage 2, THORNode has seen it. See if observed only (conf counting) or it has been processed by THORChain  */
     // e.g. https://thornode.ninerealms.com/thorchain/tx/365AC447BE6CE4A55D14143975EE3823A93A0D8DE2B70AECDD63B6A905C3D72B
-    console.log(txData.tx?.chain)
-    if (txData.tx?.chain != undefined) {
-      console.log(txData.tx.chain)
-      sourceChain = this.getChain(txData.tx?.chain)
-      console.log(sourceChain)
+    if (txData.observed_tx.tx.chain != '') {
+      sourceChain = this.getChain(txData.observed_tx.tx.chain)
     } else {
-      throw new Error(`Cannot get source chain ${txData.tx?.chain}`)
+      throw new Error(`Cannot get source chain ${txData.observed_tx.tx.chain}`)
     }
     const scheduledOutbound = await this.getscheduledQueue()
+
     const observedTxBlockHeight = scheduledOutbound.find((obj) => {
       return obj.height
     })
     //If observed by not final, need to wait till the finalised block before moving to the next stage, blocks in source chain
-    if(txData.block_height && sourceChain && txData.finalise_height && observedTxBlockHeight?.height){
-      if (txData.block_height < txData.finalise_height) {
+    if(txData.observed_tx.block_height && sourceChain && txData.observed_tx.finalise_height && observedTxBlockHeight?.height){
+      if (txData.observed_tx.block_height < txData.observed_tx.finalise_height ) {
         txStatus.stage = TxStage.CONF_COUNTING
-        const blocksToWait = txData.finalise_height - observedTxBlockHeight?.height
+        const blocksToWait = txData.observed_tx.finalise_height  - observedTxBlockHeight?.height
         txStatus.seconds = blocksToWait * this.chainAttributes[sourceChain].avgBlockTimeInSecs
         return txStatus
-      } else if (txData.status != 'done') {
+      } else if (txData.observed_tx.status != 'done') {
         // processed but not yet full final, e.g. not 2/3 nodes signed
         txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs // wait one more TC block
         txStatus.stage = TxStage.TC_PROCESSING

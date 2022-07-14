@@ -1,4 +1,4 @@
-import {Thornode} from '../src/utils/thornode'
+import { Thornode } from '../src/utils/thornode'
 import { Network } from '@xchainjs/xchain-client'
 
 
@@ -7,13 +7,12 @@ const thornode = new Thornode(Network.Mainnet)
 describe(`Thornode transaction status tests`, () => {
 
   it(`Should return txData`, async () => {
-
-    const txStatus = await thornode.getTxData("68E07D5A8985BFB0779C378D83CAF2F674971C6E89BBFE016C9E78E823DDFFB0")
+    const txStatus = await thornode.getTxData("276CE5005FF822294773C549E74513636808A6A9817FE7ADCE1709EE06BC7F52")
     expect(txStatus).toBeTruthy()
   })
   it(`Should return txStatus`, async () => {
-    const txStatus = await thornode.checkTx("68E07D5A8985BFB0779C378D83CAF2F674971C6E89BBFE016C9E78E823DDFFB0")
-    console.log(txStatus.stage)
+    const txStatus = await thornode.checkTx("276CE5005FF822294773C549E74513636808A6A9817FE7ADCE1709EE06BC7F52")
+    console.log(`Stage: ${txStatus.stage} \n Seconds: ${txStatus.seconds}`)
     expect(txStatus).toBeTruthy()
   })
 

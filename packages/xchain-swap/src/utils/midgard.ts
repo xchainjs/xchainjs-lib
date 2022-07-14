@@ -11,9 +11,9 @@ const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
     midgardBaseUrls: [
-      'https://midgard.thorchain.info/',
-      'https://midgard.thorswap.net/',
-      'https://midgard.ninerealms.com/',
+      'https://midgard.thorchain.info',
+      'https://midgard.thorswap.net',
+      'https://midgard.ninerealms.com',
     ],
   },
   stagenet: {
@@ -47,12 +47,11 @@ export class Midgard {
         console.error(e)
       }
     }
-
     throw new Error('Midgard not responding')
   }
   /**
    *
-   * @returns an array of PoolDetails
+   * @returns an array of Pools
    */
   async getPools(): Promise<PoolDetail[]> {
     for (const api of this.midgardApis) {
