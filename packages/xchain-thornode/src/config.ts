@@ -1,3 +1,1 @@
-export const THORNODE_API_9R_URL = 'https://thornode.ninerealms.com/';
-
-
+export const THORNODE_API_9R_URL = 'https://thornode.ninerealms.com/'

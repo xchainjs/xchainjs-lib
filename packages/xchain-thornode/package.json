@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thornode",
-  "version": "0.1.0-alpha",
+  "version": "0.1.0-alpha2",
   "license": "MIT",
   "description": "Thornode module that exposes all thornode functions using openapi-generator-cli",
   "keywords": [
@@ -9,24 +9,41 @@
   ],
   "author": "THORChain",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
-  "main": "lib/index",
-  "types": "lib/index",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
   "files": [
     "lib"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
   "scripts": {
-    "clean": "rimraf -rf ./lib",
-    "build": "yarn run clean && yarn run compile",
-    "compile": "tsc -p tsconfig.build.json",
+    "clean": "rimraf lib/**",
+    "build": "yarn clean && rollup -c",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests",
-    "generate:types": "yarn clean:types:thornode && yarn generate:types:thornode",
-    "generate:types:thornode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://thornode.ninerealms.com/thorchain/doc/openapi.yaml -g typescript-axios -o ./src/generated/thornodeApi --reserved-words-mappings in=in",
+    "generate:types": "yarn clean:types:thornode && yarn generate:types:convertToJson && yarn generate:types:thornode && yarn clean:types:tempFiles",
+    "generate:types:convertToJson": "curl 'https://thornode.ninerealms.com/thorchain/doc/openapi.yaml' > ./input.yaml && yaml2json ./input.yaml --pretty > ./input.json",
+    "generate:types:thornode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i ./input.json -g typescript-axios -o ./src/generated/thornodeApi --reserved-words-mappings  in=in",
+    "clean:types:tempFiles": "rimraf ./input.yaml ./input.json",
     "clean:types:thornode": "rimraf ./src/generated/thornodeApi"
   },
-  "repository": "https://github.com/xchainjs/xchainjs-lib",
   "devDependencies": {
+    "yamljs": "^0.3.0",
     "@openapitools/openapi-generator-cli": "^2.5.1",
     "rimraf": "~3.0.2"
+  },
+  "peerDependencies": {
+    "axios": "^0.25.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

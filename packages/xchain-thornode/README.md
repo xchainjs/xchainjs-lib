@@ -4,7 +4,8 @@ Thornode Module for XChainJS Clients
 
 ## Modules
 
-Thornode module has been created using openapi-generator-cli auto-generation reading from "https://thornode.ninerealms.com/thorchain/doc/openapi.yaml" This library exposes all the Api's outlined in the swagger doc "https://thornode.ninerealms.com/thorchain/doc"
+Thornode module has been created using openapi-generator-cli to auto-generate rest api reading from "https://thornode.ninerealms.com/thorchain/doc/openapi.yaml" 
+This library exposes all the Api's outlined in the swagger doc "https://thornode.ninerealms.com/thorchain/doc"
 
 
 ## Installation
@@ -23,8 +24,8 @@ Request data from MimirApi
   const baseUrl = THORNODE_API_9R_URL
   const apiconfig = new Configuration({ basePath: baseUrl })
   const mimirApi = new MimirApi(apiconfig)
-  const data = await mimirApi.mimir()
-  console.log(data)
+  const mimirResponse = await mimirApi.mimir()
+  console.log(mimirResponse.data)
 
 ```
 
