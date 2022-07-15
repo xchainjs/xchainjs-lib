@@ -4,8 +4,9 @@ import {
   LastBlock,
   NetworkApi,
   QueueApi,
-  ScheduledOutbound,
   TransactionsApi,
+  TxOutItem,
+  TxResponse,
 } from '@xchainjs/xchain-thornode'
 import { BCHChain, BNBChain, BTCChain, Chain, CosmosChain, DOGEChain, ETHChain, LTCChain, TerraChain, THORChain, } from '@xchainjs/xchain-util'
 import axios from 'axios'
@@ -30,37 +31,6 @@ export enum TxStage {
 export type TxStatus = {
   stage: TxStage
   seconds: number
-}
-
-interface TxResponse {
-  observed_tx: ObservedTx
-  keysign_metric: KeysignMetric
-}
-interface ObservedTx {
-  tx: Tx;
-  status: string
-  out_hashes: Array<string>
-  block_height: number
-  finalise_height: number
-  signers: Array<string>
-  observed_pub_key: string
-}
-interface Tx{
-  id: string;
-  chain: string;
-  from_address: string;
-  to_address: string;
-  coins: Array<Coin>
-  gas: Array<Coin>
-  memo: string
-}
-interface Coin {
-  asset: string;
-  amount: string;
-}
-interface KeysignMetric{
-  tx_id: string;
-  node_tss_times: number
 }
 
 const defaultThornodeConfig: Record<Network, ThornodeConfig> = {
@@ -110,7 +80,7 @@ export class Thornode {
    * @returns {ScheduledQueueItem} Array
    *
    */
-  async getscheduledQueue(): Promise<ScheduledOutbound[]> {
+  async getscheduledQueue(): Promise<TxOutItem[]> {
     for (const api of this.queueApi) {
       try {
         const queueScheduled = await api.queueScheduled()
@@ -126,10 +96,8 @@ export class Thornode {
   async getTxData(txHash: string): Promise<TxResponse> {
     for (const api of this.transactionsApi) {
       try {
-        const txData = await api.tx(txHash)
-        const data = JSON.stringify(txData?.data)
-        const obj: TxResponse = JSON.parse(data);
-        return obj
+        const txResponse = await api.tx(txHash)
+        return txResponse.data
       } catch (e) {
         console.error(e)
       }
@@ -203,7 +171,7 @@ export class Thornode {
     }
     /** Stage 2, THORNode has seen it. See if observed only (conf counting) or it has been processed by THORChain  */
     // e.g. https://thornode.ninerealms.com/thorchain/tx/365AC447BE6CE4A55D14143975EE3823A93A0D8DE2B70AECDD63B6A905C3D72B
-    if (txData.observed_tx.tx.chain != '') {
+    if (txData.observed_tx.tx.chain != undefined) {
       sourceChain = this.getChain(txData.observed_tx.tx.chain)
     } else {
       throw new Error(`Cannot get source chain ${txData.observed_tx.tx.chain}`)
@@ -243,10 +211,10 @@ export class Thornode {
       return obj
       })
     const scheduledQueue = await this.getscheduledQueue()
-    const scheduledQueueItem = scheduledQueue?.find((item: ScheduledOutbound) => item.in_hash === inboundTxHash)
+    const scheduledQueueItem = scheduledQueue?.find((item: TxOutItem) => item.in_hash === inboundTxHash)
     // If the scheudled block is greater than the current block, need to wait that amount of blocks till outbound is sent
     if (scheduledQueueItem?.height && lastBlockHeight?.thorchain) {
-      if (lastBlockHeight < scheduledQueueItem?.height) {
+      if (lastBlockHeight.thorchain < scheduledQueueItem?.height) {
         const blocksToWait = scheduledQueueItem.height - lastBlockHeight.thorchain
         txStatus.stage = TxStage.OUTBOUND_QUEUED
         txStatus.seconds = blocksToWait * this.chainAttributes[THORChain].avgBlockTimeInSecs

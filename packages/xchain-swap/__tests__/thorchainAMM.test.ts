@@ -59,7 +59,7 @@ describe('Midgard Client Test', () => {
     const outboundAsset: Asset = AssetRuneNative
     const inputAmount = assetToBase(assetAmount(0.5))
     const outboundRuneAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
-    const expectedAmount = assetToBase(assetAmount(4760))
+    const expectedAmount = assetToBase(assetAmount(4760.13797319))
     expect(outboundRuneAmount.amount()).toEqual(expectedAmount.amount())
   })
 

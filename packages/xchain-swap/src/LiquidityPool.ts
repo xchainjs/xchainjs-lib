@@ -30,7 +30,6 @@ export class LiquidityPool {
 
     this._asset = asset
     this._assetString = this.pool.asset
-
     this.assetBalance = baseAmount(this.pool.assetDepth)
     this.runeBalance = baseAmount(this.pool.runeDepth) //Rune is always 8 decimals
 
@@ -57,8 +56,8 @@ export class LiquidityPool {
   public get assetString(): string {
     return this._assetString
   }
-  public get assetPrice(): BaseAmount {
-    return this.runeBalance.div(this.assetBalance)
+  public get assetPrice(): BigNumber {
+    return (this.runeBalance.amount()).div(this.assetBalance.amount())
   }
 
   /**
@@ -77,6 +76,6 @@ export class LiquidityPool {
     if (asset.ticker != this._asset.ticker) {
       throw new Error(`wrong asset for the pool`)
     }
-    return assetAmount.times(this.runeBalance.div(this.assetBalance))
+    return assetAmount.times(this.runeBalance.amount().div(this.assetBalance.amount()))
   }
 }

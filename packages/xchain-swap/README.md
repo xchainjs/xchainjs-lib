@@ -51,3 +51,4 @@ console.log(await thorchain.estimateSwap(swapParams))
   - [ ] update README  
 - [ ] Update Aggregator Documentation (Chris)
 - [ ] Complete Add Liquidity
+- [ ] Thornode update dependency

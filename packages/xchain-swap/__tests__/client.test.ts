@@ -12,17 +12,14 @@ import mockMidgardApi from '../__mocks__/midgard-api'
 const mainnetMidgard = new Midgard(Network.Mainnet)
 
 describe('Midgard Client Test', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     mockMidgardApi.init()
-  })
-  afterEach(() => {
-    mockMidgardApi.restore()
   })
 
   // Tests for the midgard api
   it(`Should return pools array`, async () => {
     const data = await mainnetMidgard.getPools()
-    console.log(JSON.stringify(data))
+    //console.log(JSON.stringify(data))
     expect(data).toBeTruthy()
   })
 })

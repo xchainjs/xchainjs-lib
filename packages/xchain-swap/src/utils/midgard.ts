@@ -11,9 +11,9 @@ const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
     midgardBaseUrls: [
-      'https://midgard.thorchain.info',
-      'https://midgard.thorswap.net',
-      'https://midgard.ninerealms.com',
+      'https://midgard.thorchain.info/',
+      'https://midgard.thorswap.net/',
+      'https://midgard.ninerealms.com/',
     ],
   },
   stagenet: {

@@ -15,5 +15,4 @@ describe(`Thornode transaction status tests`, () => {
     console.log(`Stage: ${txStatus.stage} \n Seconds: ${txStatus.seconds}`)
     expect(txStatus).toBeTruthy()
   })
-
 })

@@ -24,27 +24,46 @@ import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } fr
 /**
  * 
  * @export
- * @interface Ban
+ * @interface BanResponse
  */
-export interface Ban {
+export interface BanResponse {
     /**
      * 
      * @type {string}
-     * @memberof Ban
+     * @memberof BanResponse
      */
     'node_address'?: string;
     /**
      * 
      * @type {number}
-     * @memberof Ban
+     * @memberof BanResponse
      */
     'block_height'?: number;
     /**
      * 
      * @type {Array<string>}
-     * @memberof Ban
+     * @memberof BanResponse
      */
     'signers'?: Array<string>;
+}
+/**
+ * 
+ * @export
+ * @interface ChainHeight
+ */
+export interface ChainHeight {
+    /**
+     * 
+     * @type {string}
+     * @memberof ChainHeight
+     */
+    'chain': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ChainHeight
+     */
+    'height': number;
 }
 /**
  * 
@@ -57,113 +76,44 @@ export interface Coin {
      * @type {string}
      * @memberof Coin
      */
-    'asset'?: string;
+    'asset': string;
     /**
      * 
      * @type {string}
      * @memberof Coin
      */
-    'amount'?: string;
+    'amount': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Coin
+     */
+    'decimals'?: number;
 }
 /**
  * 
  * @export
- * @interface Constants
+ * @interface ConstantsResponse
  */
-export interface Constants {
+export interface ConstantsResponse {
     /**
      * 
      * @type {{ [key: string]: string; }}
-     * @memberof Constants
+     * @memberof ConstantsResponse
      */
     'int64_values'?: { [key: string]: string; };
     /**
      * 
      * @type {{ [key: string]: string; }}
-     * @memberof Constants
+     * @memberof ConstantsResponse
      */
     'bool_values'?: { [key: string]: string; };
     /**
      * 
      * @type {{ [key: string]: string; }}
-     * @memberof Constants
+     * @memberof ConstantsResponse
      */
     'string_values'?: { [key: string]: string; };
-}
-/**
- * 
- * @export
- * @interface InboundAddress
- */
-export interface InboundAddress {
-    /**
-     * 
-     * @type {string}
-     * @memberof InboundAddress
-     */
-    'chain'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InboundAddress
-     */
-    'pub_key'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InboundAddress
-     */
-    'address'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InboundAddress
-     */
-    'gas_rate'?: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof InboundAddress
-     */
-    'halted'?: boolean;
-}
-/**
- * 
- * @export
- * @interface KeygenMetric
- */
-export interface KeygenMetric {
-    /**
-     * 
-     * @type {string}
-     * @memberof KeygenMetric
-     */
-    'pub_key'?: string;
-    /**
-     * 
-     * @type {Array<NodeKeygenMetric>}
-     * @memberof KeygenMetric
-     */
-    'node_tss_times'?: Array<NodeKeygenMetric>;
-}
-/**
- * 
- * @export
- * @interface Keysign
- */
-export interface Keysign {
-    /**
-     * 
-     * @type {KeysignInfo}
-     * @memberof Keysign
-     */
-    'keysign'?: KeysignInfo;
-    /**
-     * 
-     * @type {string}
-     * @memberof Keysign
-     */
-    'signature'?: string;
 }
 /**
  * 
@@ -179,29 +129,10 @@ export interface KeysignInfo {
     'height'?: number;
     /**
      * 
-     * @type {Array<ProcessedOutbound>}
+     * @type {Array<TxOutItem>}
      * @memberof KeysignInfo
      */
-    'tx_array'?: Array<ProcessedOutbound>;
-}
-/**
- * 
- * @export
- * @interface KeysignMetric
- */
-export interface KeysignMetric {
-    /**
-     * 
-     * @type {string}
-     * @memberof KeysignMetric
-     */
-    'address'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof KeysignMetric
-     */
-    'tss_time'?: string;
+    'tx_array': Array<TxOutItem>;
 }
 /**
  * 
@@ -217,10 +148,29 @@ export interface KeysignMetrics {
     'tx_id'?: string;
     /**
      * 
-     * @type {Array<KeysignMetric>}
+     * @type {Array<TssMetric>}
      * @memberof KeysignMetrics
      */
-    'node_tss_times'?: Array<KeysignMetric>;
+    'node_tss_times'?: Array<TssMetric>;
+}
+/**
+ * 
+ * @export
+ * @interface KeysignResponse
+ */
+export interface KeysignResponse {
+    /**
+     * 
+     * @type {KeysignInfo}
+     * @memberof KeysignResponse
+     */
+    'keysign'?: KeysignInfo;
+    /**
+     * 
+     * @type {string}
+     * @memberof KeysignResponse
+     */
+    'signature'?: string;
 }
 /**
  * 
@@ -233,25 +183,25 @@ export interface LastBlock {
      * @type {string}
      * @memberof LastBlock
      */
-    'chain'?: string;
+    'chain': string;
     /**
      * 
      * @type {number}
      * @memberof LastBlock
      */
-    'last_observed_in'?: number;
+    'last_observed_in': number;
     /**
      * 
      * @type {number}
      * @memberof LastBlock
      */
-    'last_sign_out'?: number;
+    'last_signed_out': number;
     /**
      * 
      * @type {number}
      * @memberof LastBlock
      */
-    'thorchain'?: number;
+    'thorchain': number;
 }
 /**
  * 
@@ -264,7 +214,7 @@ export interface LiquidityProvider {
      * @type {string}
      * @memberof LiquidityProvider
      */
-    'asset'?: string;
+    'asset': string;
     /**
      * 
      * @type {string}
@@ -285,59 +235,78 @@ export interface LiquidityProvider {
     'last_add_height'?: number;
     /**
      * 
-     * @type {string}
+     * @type {number}
      * @memberof LiquidityProvider
      */
-    'units'?: string;
+    'last_withdraw_height'?: number;
     /**
      * 
      * @type {string}
      * @memberof LiquidityProvider
      */
-    'pending_rune'?: string;
+    'units': string;
     /**
      * 
      * @type {string}
      * @memberof LiquidityProvider
      */
-    'pending_asset'?: string;
+    'pending_rune': string;
     /**
      * 
      * @type {string}
      * @memberof LiquidityProvider
      */
-    'pending_tx_id'?: string;
+    'pending_asset': string;
     /**
      * 
      * @type {string}
      * @memberof LiquidityProvider
      */
-    'rune_deposit_value'?: string;
+    'pending_tx_Id'?: string;
     /**
      * 
      * @type {string}
      * @memberof LiquidityProvider
      */
-    'asset_deposit_value'?: string;
+    'rune_deposit_value': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof LiquidityProvider
+     */
+    'asset_deposit_value': string;
 }
 /**
  * 
  * @export
- * @interface Metrics
+ * @interface MetricsResponse
  */
-export interface Metrics {
+export interface MetricsResponse {
     /**
      * 
-     * @type {Array<KeygenMetric>}
-     * @memberof Metrics
+     * @type {Array<object>}
+     * @memberof MetricsResponse
      */
-    'keygen'?: Array<KeygenMetric>;
+    'keygen'?: Array<object>;
     /**
      * 
      * @type {KeysignMetrics}
-     * @memberof Metrics
+     * @memberof MetricsResponse
      */
     'keysign'?: KeysignMetrics;
+}
+/**
+ * 
+ * @export
+ * @interface MimirNodesResponse
+ */
+export interface MimirNodesResponse {
+    /**
+     * 
+     * @type {Array<MimirVote>}
+     * @memberof MimirNodesResponse
+     */
+    'mimirs'?: Array<MimirVote>;
 }
 /**
  * 
@@ -367,52 +336,39 @@ export interface MimirVote {
 /**
  * 
  * @export
- * @interface MimirVotes
+ * @interface NetworkResponse
  */
-export interface MimirVotes {
-    /**
-     * 
-     * @type {Array<MimirVote>}
-     * @memberof MimirVotes
-     */
-    'mimirs'?: Array<MimirVote>;
-}
-/**
- * 
- * @export
- * @interface Network
- */
-export interface Network {
+export interface NetworkResponse {
     /**
      * total amount of RUNE awarded to node operators
      * @type {string}
-     * @memberof Network
+     * @memberof NetworkResponse
      */
-    'bond_reward_rune'?: string;
+    'bond_reward_rune': string;
     /**
      * total bonded RUNE
      * @type {string}
-     * @memberof Network
+     * @memberof NetworkResponse
      */
-    'total_bond_units'?: string;
+    'total_bond_units': string;
     /**
      * total reserve RUNE
      * @type {string}
-     * @memberof Network
+     * @memberof NetworkResponse
      */
-    'total_reserve'?: string;
+    'total_reserve': string;
     /**
      * total of burned BEP2 RUNE
      * @type {string}
-     * @memberof Network
+     * @memberof NetworkResponse
      */
-    'burned_bep_2_rune'?: string;
+    'burned_bep_2_rune': string;
     /**
      * total of burned ERC20 RUNE
      * @type {string}
-     * @memberof Network
+     * @memberof NetworkResponse
      */
-    'burned_erc_20_rune'?: string;
+    'burned_erc_20_rune': string;
 }
 /**
  * 
@@ -425,115 +381,121 @@ export interface Node {
      * @type {string}
      * @memberof Node
      */
-    'node_address'?: string;
+    'node_address': string;
     /**
      * 
      * @type {string}
      * @memberof Node
      */
-    'status'?: NodeStatusEnum;
+    'status': NodeStatusEnum;
     /**
      * 
      * @type {NodePubKeySet}
      * @memberof Node
      */
-    'pub_key_set'?: NodePubKeySet;
+    'pub_key_set': NodePubKeySet;
     /**
      * the consensus pub key for the node
      * @type {string}
      * @memberof Node
      */
-    'validator_cons_pub_key'?: string;
+    'validator_cons_pub_key': string;
     /**
      * current node bond
      * @type {string}
      * @memberof Node
      */
-    'bond'?: string;
+    'bond': string;
     /**
      * the block height at which the node became active
      * @type {number}
      * @memberof Node
      */
-    'active_block_height'?: number;
+    'active_block_height': number;
     /**
      * 
      * @type {string}
      * @memberof Node
      */
-    'bond_address'?: string;
+    'bond_address': string;
     /**
      * the block height of the current provided information for the node
      * @type {number}
      * @memberof Node
      */
-    'status_since'?: number;
+    'status_since': number;
     /**
      * the set of vault public keys of which the node is a member
      * @type {Array<string>}
      * @memberof Node
      */
-    'signer_membership'?: Array<string>;
+    'signer_membership': Array<string>;
     /**
      * 
      * @type {boolean}
      * @memberof Node
      */
-    'requested_to_leave'?: boolean;
+    'requested_to_leave': boolean;
     /**
      * indicates whether the node has been forced to leave by the network, typically via ban
      * @type {boolean}
      * @memberof Node
      */
-    'forced_to_leave'?: boolean;
+    'forced_to_leave': boolean;
     /**
      * 
      * @type {number}
      * @memberof Node
      */
-    'leave_height'?: number;
+    'leave_height': number;
     /**
      * 
      * @type {string}
      * @memberof Node
      */
-    'ip_address'?: string;
+    'ip_address': string;
     /**
      * the currently set version of the node
      * @type {string}
      * @memberof Node
      */
-    'version'?: string;
+    'version': string;
     /**
      * the accumlated slash points, reset at churn but excessive slash points may carry over
      * @type {number}
      * @memberof Node
      */
-    'slash_points'?: number;
+    'slash_points': number;
     /**
      * 
      * @type {NodeJail}
      * @memberof Node
      */
-    'jail'?: NodeJail;
+    'jail': NodeJail;
     /**
      * 
      * @type {string}
      * @memberof Node
      */
-    'current_award'?: string;
+    'current_award': string;
     /**
      * the last observed heights for all chain by the node
-     * @type {Array<NodeObserveChain>}
+     * @type {Array<ChainHeight>}
      * @memberof Node
      */
-    'observe_chains'?: Array<NodeObserveChain>;
+    'observe_chains': Array<ChainHeight>;
     /**
      * 
      * @type {NodePreflightStatus}
      * @memberof Node
      */
-    'preflight_status'?: NodePreflightStatus;
+    'preflight_status': NodePreflightStatus;
+    /**
+     * 
+     * @type {NodeBondProviders}
+     * @memberof Node
+     */
+    'bond_providers': NodeBondProviders;
 }
 
 export const NodeStatusEnum = {
@@ -548,6 +510,50 @@ export type NodeStatusEnum = typeof NodeStatusEnum[keyof typeof NodeStatusEnum];
 /**
  * 
  * @export
+ * @interface NodeBondProvider
+ */
+export interface NodeBondProvider {
+    /**
+     * 
+     * @type {string}
+     * @memberof NodeBondProvider
+     */
+    'bond_address'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof NodeBondProvider
+     */
+    'bond'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface NodeBondProviders
+ */
+export interface NodeBondProviders {
+    /**
+     * 
+     * @type {string}
+     * @memberof NodeBondProviders
+     */
+    'node_address'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof NodeBondProviders
+     */
+    'node_operator_fee'?: string;
+    /**
+     * 
+     * @type {NodeBondProvider}
+     * @memberof NodeBondProviders
+     */
+    'providers'?: NodeBondProvider;
+}
+/**
+ * 
+ * @export
  * @interface NodeJail
  */
 export interface NodeJail {
@@ -557,44 +563,18 @@ export interface NodeJail {
      * @memberof NodeJail
      */
     'node_address'?: string;
-}
-/**
- * 
- * @export
- * @interface NodeKeygenMetric
- */
-export interface NodeKeygenMetric {
-    /**
-     * 
-     * @type {string}
-     * @memberof NodeKeygenMetric
-     */
-    'address'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof NodeKeygenMetric
-     */
-    'tss_time'?: string;
-}
-/**
- * 
- * @export
- * @interface NodeObserveChain
- */
-export interface NodeObserveChain {
-    /**
-     * 
-     * @type {string}
-     * @memberof NodeObserveChain
-     */
-    'chain'?: string;
     /**
      * 
      * @type {number}
-     * @memberof NodeObserveChain
+     * @memberof NodeJail
      */
-    'height'?: number;
+    'release_height'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof NodeJail
+     */
+    'reason'?: string;
 }
 /**
  * 
@@ -607,19 +587,19 @@ export interface NodePreflightStatus {
      * @type {string}
      * @memberof NodePreflightStatus
      */
-    'status'?: string;
+    'status': string;
     /**
      * the reason for the transition to the next status
      * @type {string}
      * @memberof NodePreflightStatus
      */
-    'reason'?: string;
+    'reason': string;
     /**
      * 
      * @type {number}
      * @memberof NodePreflightStatus
      */
-    'code'?: number;
+    'code': number;
 }
 /**
  * 
@@ -651,7 +631,7 @@ export interface ObservedTx {
      * @type {Tx}
      * @memberof ObservedTx
      */
-    'tx'?: Tx;
+    'tx': Tx;
     /**
      * 
      * @type {string}
@@ -665,17 +645,11 @@ export interface ObservedTx {
      */
     'out_hashes'?: Array<string>;
     /**
-     * 
+     * the block height of the observed transaction on the source chain, not provided if chain is THOR
      * @type {number}
      * @memberof ObservedTx
      */
     'block_height'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ObservedTx
-     */
-    'finalise_height'?: number;
     /**
      * 
      * @type {Array<string>}
@@ -688,6 +662,36 @@ export interface ObservedTx {
      * @memberof ObservedTx
      */
     'observed_pub_key'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ObservedTx
+     */
+    'keysign_ms'?: number;
+    /**
+     * the finalised height of the observed transaction on the source chain, not provided if chain is THOR
+     * @type {number}
+     * @memberof ObservedTx
+     */
+    'finalise_height'?: number;
+    /**
+     * the outbound aggregator to use, will also match a suffix
+     * @type {string}
+     * @memberof ObservedTx
+     */
+    'aggregator'?: string;
+    /**
+     * the aggregator target asset provided to transferOutAndCall
+     * @type {string}
+     * @memberof ObservedTx
+     */
+    'aggregator_target'?: string;
+    /**
+     * the aggregator target asset limit provided to transferOutAndCall
+     * @type {string}
+     * @memberof ObservedTx
+     */
+    'aggregator_target_limit'?: string;
 }
 
 export const ObservedTxStatusEnum = {
@@ -697,61 +701,6 @@ export const ObservedTxStatusEnum = {
 
 export type ObservedTxStatusEnum = typeof ObservedTxStatusEnum[keyof typeof ObservedTxStatusEnum];
 
-/**
- * 
- * @export
- * @interface Outbound
- */
-export interface Outbound {
-    /**
-     * 
-     * @type {string}
-     * @memberof Outbound
-     */
-    'chain'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Outbound
-     */
-    'to_address'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Outbound
-     */
-    'vault_pub_key'?: string;
-    /**
-     * 
-     * @type {Coin}
-     * @memberof Outbound
-     */
-    'coin'?: Coin;
-    /**
-     * 
-     * @type {string}
-     * @memberof Outbound
-     */
-    'memo'?: string;
-    /**
-     * 
-     * @type {Array<Coin>}
-     * @memberof Outbound
-     */
-    'max_gas'?: Array<Coin>;
-    /**
-     * 
-     * @type {number}
-     * @memberof Outbound
-     */
-    'gas_rate'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Outbound
-     */
-    'in_hash'?: string;
-}
 /**
  * 
  * @export
@@ -776,245 +725,136 @@ export interface Pool {
      * @type {string}
      * @memberof Pool
      */
-    'balance_rune'?: string;
+    'balance_rune': string;
     /**
      * 
      * @type {string}
      * @memberof Pool
      */
-    'balance_asset'?: string;
+    'balance_asset': string;
     /**
      * 
      * @type {string}
      * @memberof Pool
      */
-    'asset'?: string;
+    'asset': string;
     /**
      * the total pool liquidity provider units
      * @type {string}
      * @memberof Pool
      */
-    'LP_units'?: string;
+    'LP_units': string;
     /**
      * the total pool units, this is the sum of LP and synth units
      * @type {string}
      * @memberof Pool
      */
-    'pool_units'?: string;
+    'pool_units': string;
     /**
      * 
      * @type {string}
      * @memberof Pool
      */
-    'status'?: string;
+    'status': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Pool
+     */
+    'decimals'?: number;
     /**
      * the total synth units in the pool
      * @type {string}
      * @memberof Pool
      */
-    'synth_units'?: string;
+    'synth_units': string;
     /**
      * the total supply of synths for the asset
      * @type {string}
      * @memberof Pool
      */
-    'synth_supply'?: string;
+    'synth_supply': string;
     /**
      * 
      * @type {string}
      * @memberof Pool
      */
-    'pending_inbound_rune'?: string;
+    'pending_inbound_rune': string;
     /**
      * 
      * @type {string}
      * @memberof Pool
      */
-    'pending_inbound_asset'?: string;
+    'pending_inbound_asset': string;
 }
 /**
  * 
  * @export
- * @interface ProcessedOutbound
+ * @interface QueueResponse
  */
-export interface ProcessedOutbound {
-    /**
-     * 
-     * @type {string}
-     * @memberof ProcessedOutbound
-     */
-    'chain'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProcessedOutbound
-     */
-    'to_address'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProcessedOutbound
-     */
-    'vault_pub_key'?: string;
-    /**
-     * 
-     * @type {Coin}
-     * @memberof ProcessedOutbound
-     */
-    'coin'?: Coin;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProcessedOutbound
-     */
-    'memo'?: string;
-    /**
-     * 
-     * @type {Array<Coin>}
-     * @memberof ProcessedOutbound
-     */
-    'max_gas'?: Array<Coin>;
+export interface QueueResponse {
     /**
      * 
      * @type {number}
-     * @memberof ProcessedOutbound
+     * @memberof QueueResponse
      */
-    'gas_rate'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProcessedOutbound
-     */
-    'in_hash'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProcessedOutbound
-     */
-    'out_hash'?: string;
-}
-/**
- * 
- * @export
- * @interface Queue
- */
-export interface Queue {
-    /**
-     * 
-     * @type {number}
-     * @memberof Queue
-     */
-    'swap'?: number;
+    'swap': number;
     /**
      * number of signed outbound tx in the queue
      * @type {number}
-     * @memberof Queue
+     * @memberof QueueResponse
      */
-    'outbound'?: number;
+    'outbound': number;
     /**
      * 
      * @type {number}
-     * @memberof Queue
+     * @memberof QueueResponse
      */
-    'internal'?: number;
+    'internal': number;
     /**
      * scheduled outbound value in RUNE
      * @type {string}
-     * @memberof Queue
+     * @memberof QueueResponse
      */
-    'scheduled_outbound_value'?: string;
+    'scheduled_outbound_value': string;
 }
 /**
  * 
  * @export
- * @interface ScheduledOutbound
+ * @interface TssKeysignMetric
  */
-export interface ScheduledOutbound {
+export interface TssKeysignMetric {
     /**
      * 
      * @type {string}
-     * @memberof ScheduledOutbound
+     * @memberof TssKeysignMetric
      */
-    'chain'?: string;
+    'tx_id'?: string;
     /**
      * 
-     * @type {string}
-     * @memberof ScheduledOutbound
+     * @type {Array<TssMetric>}
+     * @memberof TssKeysignMetric
      */
-    'to_address'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ScheduledOutbound
-     */
-    'vault_pub_key'?: string;
-    /**
-     * 
-     * @type {Coin}
-     * @memberof ScheduledOutbound
-     */
-    'coin'?: Coin;
-    /**
-     * 
-     * @type {string}
-     * @memberof ScheduledOutbound
-     */
-    'memo'?: string;
-    /**
-     * 
-     * @type {Array<Coin>}
-     * @memberof ScheduledOutbound
-     */
-    'max_gas'?: Array<Coin>;
-    /**
-     * 
-     * @type {number}
-     * @memberof ScheduledOutbound
-     */
-    'gas_rate'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ScheduledOutbound
-     */
-    'in_hash'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ScheduledOutbound
-     */
-    'height'?: number;
+    'node_tss_times': Array<TssMetric>;
 }
 /**
  * 
  * @export
- * @interface Thorname
+ * @interface TssMetric
  */
-export interface Thorname {
+export interface TssMetric {
     /**
      * 
      * @type {string}
-     * @memberof Thorname
-     */
-    'name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Thorname
-     */
-    'chain'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Thorname
+     * @memberof TssMetric
      */
     'address'?: string;
     /**
      * 
      * @type {number}
-     * @memberof Thorname
+     * @memberof TssMetric
      */
-    'expire_block_height'?: number;
+    'tss_time'?: number;
 }
 /**
  * 
@@ -1051,13 +891,13 @@ export interface Tx {
      * @type {Array<Coin>}
      * @memberof Tx
      */
-    'coins'?: Array<Coin>;
+    'coins': Array<Coin>;
     /**
      * 
      * @type {Array<Coin>}
      * @memberof Tx
      */
-    'gas'?: Array<Coin>;
+    'gas': Array<Coin>;
     /**
      * 
      * @type {string}
@@ -1068,45 +908,155 @@ export interface Tx {
 /**
  * 
  * @export
- * @interface TxSigners
+ * @interface TxOutItem
  */
-export interface TxSigners {
+export interface TxOutItem {
     /**
      * 
      * @type {string}
-     * @memberof TxSigners
+     * @memberof TxOutItem
+     */
+    'chain': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TxOutItem
+     */
+    'to_address': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TxOutItem
+     */
+    'vault_pub_key'?: string;
+    /**
+     * 
+     * @type {Coin}
+     * @memberof TxOutItem
+     */
+    'coin': Coin;
+    /**
+     * 
+     * @type {string}
+     * @memberof TxOutItem
+     */
+    'memo'?: string;
+    /**
+     * 
+     * @type {Array<Coin>}
+     * @memberof TxOutItem
+     */
+    'max_gas': Array<Coin>;
+    /**
+     * 
+     * @type {number}
+     * @memberof TxOutItem
+     */
+    'gas_rate'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof TxOutItem
+     */
+    'in_hash'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TxOutItem
+     */
+    'out_hash'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof TxOutItem
+     */
+    'height': number;
+}
+/**
+ * 
+ * @export
+ * @interface TxResponse
+ */
+export interface TxResponse {
+    /**
+     * 
+     * @type {ObservedTx}
+     * @memberof TxResponse
+     */
+    'observed_tx'?: ObservedTx;
+    /**
+     * 
+     * @type {TssKeysignMetric}
+     * @memberof TxResponse
+     */
+    'keysign_metric'?: TssKeysignMetric;
+}
+/**
+ * 
+ * @export
+ * @interface TxSignersResponse
+ */
+export interface TxSignersResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof TxSignersResponse
      */
     'tx_id'?: string;
     /**
      * 
      * @type {ObservedTx}
-     * @memberof TxSigners
+     * @memberof TxSignersResponse
      */
-    'tx'?: ObservedTx;
-    /**
-     * 
-     * @type {Array<ObservedTx>}
-     * @memberof TxSigners
-     */
-    'txs'?: Array<ObservedTx>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof TxSigners
-     */
-    'out_txs'?: Array<string>;
-    /**
-     * 
-     * @type {Array<ObservedTx>}
-     * @memberof TxSigners
-     */
-    'actions'?: Array<ObservedTx>;
+    'tx': ObservedTx;
     /**
      * 
      * @type {number}
-     * @memberof TxSigners
+     * @memberof TxSignersResponse
+     */
+    'height'?: number;
+    /**
+     * 
+     * @type {Array<ObservedTx>}
+     * @memberof TxSignersResponse
+     */
+    'txs': Array<ObservedTx>;
+    /**
+     * 
+     * @type {Array<ObservedTx>}
+     * @memberof TxSignersResponse
+     */
+    'actions': Array<ObservedTx>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof TxSignersResponse
+     */
+    'out_txs': Array<string>;
+    /**
+     * the thorchain height at which the outbound was finalised
+     * @type {number}
+     * @memberof TxSignersResponse
      */
     'finalised_height'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof TxSignersResponse
+     */
+    'updated_vault'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof TxSignersResponse
+     */
+    'reverted'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof TxSignersResponse
+     */
+    'outbound_height'?: number;
 }
 /**
  * 
@@ -1131,7 +1081,7 @@ export interface Vault {
      * @type {Array<Coin>}
      * @memberof Vault
      */
-    'coins'?: Array<Coin>;
+    'coins': Array<Coin>;
     /**
      * 
      * @type {string}
@@ -1176,16 +1126,22 @@ export interface Vault {
     'outbound_tx_count'?: number;
     /**
      * 
+     * @type {Array<number>}
+     * @memberof Vault
+     */
+    'pending_tx_block_heights'?: Array<number>;
+    /**
+     * 
      * @type {Array<VaultRouter>}
      * @memberof Vault
      */
-    'routers'?: Array<VaultRouter>;
+    'routers': Array<VaultRouter>;
     /**
      * 
      * @type {Array<VaultAddress>}
      * @memberof Vault
      */
-    'addresses'?: Array<VaultAddress>;
+    'addresses': Array<VaultAddress>;
 }
 
 export const VaultTypeEnum = {
@@ -1225,32 +1181,32 @@ export interface VaultInfo {
      * @type {string}
      * @memberof VaultInfo
      */
-    'pub_key'?: string;
+    'pub_key': string;
     /**
      * 
      * @type {Array<VaultRouter>}
      * @memberof VaultInfo
      */
-    'routers'?: Array<VaultRouter>;
+    'routers': Array<VaultRouter>;
 }
 /**
  * 
  * @export
- * @interface VaultPubkeys
+ * @interface VaultPubkeysResponse
  */
-export interface VaultPubkeys {
+export interface VaultPubkeysResponse {
     /**
      * 
      * @type {Array<VaultInfo>}
-     * @memberof VaultPubkeys
+     * @memberof VaultPubkeysResponse
      */
-    'asgard'?: Array<VaultInfo>;
+    'asgard': Array<VaultInfo>;
     /**
      * 
      * @type {Array<VaultInfo>}
-     * @memberof VaultPubkeys
+     * @memberof VaultPubkeysResponse
      */
-    'yggdrasil'?: Array<VaultInfo>;
+    'yggdrasil': Array<VaultInfo>;
 }
 /**
  * 
@@ -1274,27 +1230,27 @@ export interface VaultRouter {
 /**
  * 
  * @export
- * @interface Version
+ * @interface VersionResponse
  */
-export interface Version {
+export interface VersionResponse {
     /**
      * current version
      * @type {string}
-     * @memberof Version
+     * @memberof VersionResponse
      */
-    'current'?: string;
+    'current': string;
     /**
      * next version
      * @type {string}
-     * @memberof Version
+     * @memberof VersionResponse
      */
-    'next'?: string;
+    'next': string;
     /**
      * querier version
      * @type {string}
-     * @memberof Version
+     * @memberof VersionResponse
      */
-    'querier'?: string;
+    'querier': string;
 }
 
 /**
@@ -1820,7 +1776,7 @@ export const MimirApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async mimirNodes(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MimirVotes>> {
+        async mimirNodes(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MimirNodesResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.mimirNodes(height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1878,7 +1834,7 @@ export const MimirApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        mimirNodes(height?: number, options?: any): AxiosPromise<MimirVotes> {
+        mimirNodes(height?: number, options?: any): AxiosPromise<MimirNodesResponse> {
             return localVarFp.mimirNodes(height, options).then((request) => request(axios, basePath));
         },
     };
@@ -2253,7 +2209,7 @@ export const NetworkApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async ban(address: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Ban>> {
+        async ban(address: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BanResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.ban(address, height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2263,7 +2219,7 @@ export const NetworkApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async constants(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Constants>> {
+        async constants(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ConstantsResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.constants(height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2273,7 +2229,7 @@ export const NetworkApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async inboundAddresses(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<InboundAddress>>> {
+        async inboundAddresses(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<object>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.inboundAddresses(height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2304,7 +2260,7 @@ export const NetworkApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async network(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Network>> {
+        async network(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<NetworkResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.network(height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2324,7 +2280,7 @@ export const NetworkApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async version(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Version>> {
+        async version(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VersionResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.version(height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2345,7 +2301,7 @@ export const NetworkApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ban(address: string, height?: number, options?: any): AxiosPromise<Ban> {
+        ban(address: string, height?: number, options?: any): AxiosPromise<BanResponse> {
             return localVarFp.ban(address, height, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2354,7 +2310,7 @@ export const NetworkApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        constants(height?: number, options?: any): AxiosPromise<Constants> {
+        constants(height?: number, options?: any): AxiosPromise<ConstantsResponse> {
             return localVarFp.constants(height, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2363,7 +2319,7 @@ export const NetworkApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        inboundAddresses(height?: number, options?: any): AxiosPromise<Array<InboundAddress>> {
+        inboundAddresses(height?: number, options?: any): AxiosPromise<Array<object>> {
             return localVarFp.inboundAddresses(height, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2391,7 +2347,7 @@ export const NetworkApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        network(height?: number, options?: any): AxiosPromise<Network> {
+        network(height?: number, options?: any): AxiosPromise<NetworkResponse> {
             return localVarFp.network(height, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2409,7 +2365,7 @@ export const NetworkApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        version(height?: number, options?: any): AxiosPromise<Version> {
+        version(height?: number, options?: any): AxiosPromise<VersionResponse> {
             return localVarFp.version(height, options).then((request) => request(axios, basePath));
         },
     };
@@ -2510,6 +2466,179 @@ export class NetworkApi extends BaseAPI {
      */
     public version(height?: number, options?: AxiosRequestConfig) {
         return NetworkApiFp(this.configuration).version(height, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
+ * NodesApi - axios parameter creator
+ * @export
+ */
+export const NodesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Returns node information for the provided node address.
+         * @param {string} address 
+         * @param {number} [height] optional block height, defaults to current tip
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        node: async (address: string, height?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'address' is not null or undefined
+            assertParamExists('node', 'address', address)
+            const localVarPath = `/thorchain/node/{address}`
+                .replace(`{${"address"}}`, encodeURIComponent(String(address)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (height !== undefined) {
+                localVarQueryParameter['height'] = height;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Returns node information for all registered validators.
+         * @param {number} [height] optional block height, defaults to current tip
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        nodes: async (height?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/thorchain/nodes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (height !== undefined) {
+                localVarQueryParameter['height'] = height;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * NodesApi - functional programming interface
+ * @export
+ */
+export const NodesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = NodesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Returns node information for the provided node address.
+         * @param {string} address 
+         * @param {number} [height] optional block height, defaults to current tip
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async node(address: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Node>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.node(address, height, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Returns node information for all registered validators.
+         * @param {number} [height] optional block height, defaults to current tip
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async nodes(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Node>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.nodes(height, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * NodesApi - factory interface
+ * @export
+ */
+export const NodesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = NodesApiFp(configuration)
+    return {
+        /**
+         * Returns node information for the provided node address.
+         * @param {string} address 
+         * @param {number} [height] optional block height, defaults to current tip
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        node(address: string, height?: number, options?: any): AxiosPromise<Node> {
+            return localVarFp.node(address, height, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Returns node information for all registered validators.
+         * @param {number} [height] optional block height, defaults to current tip
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        nodes(height?: number, options?: any): AxiosPromise<Array<Node>> {
+            return localVarFp.nodes(height, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * NodesApi - object-oriented interface
+ * @export
+ * @class NodesApi
+ * @extends {BaseAPI}
+ */
+export class NodesApi extends BaseAPI {
+    /**
+     * Returns node information for the provided node address.
+     * @param {string} address 
+     * @param {number} [height] optional block height, defaults to current tip
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof NodesApi
+     */
+    public node(address: string, height?: number, options?: AxiosRequestConfig) {
+        return NodesApiFp(this.configuration).node(address, height, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Returns node information for all registered validators.
+     * @param {number} [height] optional block height, defaults to current tip
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof NodesApi
+     */
+    public nodes(height?: number, options?: AxiosRequestConfig) {
+        return NodesApiFp(this.configuration).nodes(height, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -2811,7 +2940,7 @@ export const QueueApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async queue(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Queue>> {
+        async queue(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<QueueResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.queue(height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2821,7 +2950,7 @@ export const QueueApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async queueOutbound(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Outbound>>> {
+        async queueOutbound(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TxOutItem>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.queueOutbound(height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2831,7 +2960,7 @@ export const QueueApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async queueScheduled(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ScheduledOutbound>>> {
+        async queueScheduled(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TxOutItem>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.queueScheduled(height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2851,7 +2980,7 @@ export const QueueApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        queue(height?: number, options?: any): AxiosPromise<Queue> {
+        queue(height?: number, options?: any): AxiosPromise<QueueResponse> {
             return localVarFp.queue(height, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2860,7 +2989,7 @@ export const QueueApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        queueOutbound(height?: number, options?: any): AxiosPromise<Array<Outbound>> {
+        queueOutbound(height?: number, options?: any): AxiosPromise<Array<TxOutItem>> {
             return localVarFp.queueOutbound(height, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2869,7 +2998,7 @@ export const QueueApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        queueScheduled(height?: number, options?: any): AxiosPromise<Array<ScheduledOutbound>> {
+        queueScheduled(height?: number, options?: any): AxiosPromise<Array<TxOutItem>> {
             return localVarFp.queueScheduled(height, options).then((request) => request(axios, basePath));
         },
     };
@@ -3081,7 +3210,7 @@ export const TSSApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async keysign(height: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Keysign>> {
+        async keysign(height: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<KeysignResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.keysign(height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3092,7 +3221,7 @@ export const TSSApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async keysignPubkey(height: number, pubkey: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Keysign>> {
+        async keysignPubkey(height: number, pubkey: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<KeysignResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.keysignPubkey(height, pubkey, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3102,7 +3231,7 @@ export const TSSApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async metrics(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Metrics>> {
+        async metrics(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MetricsResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.metrics(height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3113,7 +3242,7 @@ export const TSSApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async metricsKeygen(pubkey: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<KeygenMetric>>> {
+        async metricsKeygen(pubkey: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<object>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.metricsKeygen(pubkey, height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3133,7 +3262,7 @@ export const TSSApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        keysign(height: number, options?: any): AxiosPromise<Keysign> {
+        keysign(height: number, options?: any): AxiosPromise<KeysignResponse> {
             return localVarFp.keysign(height, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3143,7 +3272,7 @@ export const TSSApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        keysignPubkey(height: number, pubkey: string, options?: any): AxiosPromise<Keysign> {
+        keysignPubkey(height: number, pubkey: string, options?: any): AxiosPromise<KeysignResponse> {
             return localVarFp.keysignPubkey(height, pubkey, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3152,7 +3281,7 @@ export const TSSApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        metrics(height?: number, options?: any): AxiosPromise<Metrics> {
+        metrics(height?: number, options?: any): AxiosPromise<MetricsResponse> {
             return localVarFp.metrics(height, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3162,7 +3291,7 @@ export const TSSApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        metricsKeygen(pubkey: string, height?: number, options?: any): AxiosPromise<Array<KeygenMetric>> {
+        metricsKeygen(pubkey: string, height?: number, options?: any): AxiosPromise<Array<object>> {
             return localVarFp.metricsKeygen(pubkey, height, options).then((request) => request(axios, basePath));
         },
     };
@@ -3284,7 +3413,7 @@ export const ThornamesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async thorname(name: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Thorname>>> {
+        async thorname(name: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<object>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.thorname(name, height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3305,7 +3434,7 @@ export const ThornamesApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        thorname(name: string, height?: number, options?: any): AxiosPromise<Array<Thorname>> {
+        thorname(name: string, height?: number, options?: any): AxiosPromise<Array<object>> {
             return localVarFp.thorname(name, height, options).then((request) => request(axios, basePath));
         },
     };
@@ -3338,78 +3467,6 @@ export class ThornamesApi extends BaseAPI {
  */
 export const TransactionsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
-        /**
-         * Returns node information for the provided node address.
-         * @param {string} address 
-         * @param {number} [height] optional block height, defaults to current tip
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        node: async (address: string, height?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'address' is not null or undefined
-            assertParamExists('node', 'address', address)
-            const localVarPath = `/thorchain/node/{address}`
-                .replace(`{${"address"}}`, encodeURIComponent(String(address)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (height !== undefined) {
-                localVarQueryParameter['height'] = height;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Returns node information for all registered validators.
-         * @param {number} [height] optional block height, defaults to current tip
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        nodes: async (height?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/thorchain/nodes`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (height !== undefined) {
-                localVarQueryParameter['height'] = height;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
         /**
          * Returns the observed transaction for a provided inbound or outbound hash.
          * @param {string} hash 
@@ -3497,34 +3554,13 @@ export const TransactionsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = TransactionsApiAxiosParamCreator(configuration)
     return {
         /**
-         * Returns node information for the provided node address.
-         * @param {string} address 
-         * @param {number} [height] optional block height, defaults to current tip
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async node(address: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Node>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.node(address, height, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Returns node information for all registered validators.
-         * @param {number} [height] optional block height, defaults to current tip
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async nodes(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Node>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.nodes(height, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
          * Returns the observed transaction for a provided inbound or outbound hash.
          * @param {string} hash 
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tx(hash: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ObservedTx>> {
+        async tx(hash: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TxResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tx(hash, height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3535,7 +3571,7 @@ export const TransactionsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async txSigners(hash: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TxSigners>> {
+        async txSigners(hash: string, height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TxSignersResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.txSigners(hash, height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3550,32 +3586,13 @@ export const TransactionsApiFactory = function (configuration?: Configuration, b
     const localVarFp = TransactionsApiFp(configuration)
     return {
         /**
-         * Returns node information for the provided node address.
-         * @param {string} address 
-         * @param {number} [height] optional block height, defaults to current tip
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        node(address: string, height?: number, options?: any): AxiosPromise<Node> {
-            return localVarFp.node(address, height, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Returns node information for all registered validators.
-         * @param {number} [height] optional block height, defaults to current tip
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        nodes(height?: number, options?: any): AxiosPromise<Array<Node>> {
-            return localVarFp.nodes(height, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Returns the observed transaction for a provided inbound or outbound hash.
          * @param {string} hash 
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tx(hash: string, height?: number, options?: any): AxiosPromise<ObservedTx> {
+        tx(hash: string, height?: number, options?: any): AxiosPromise<TxResponse> {
             return localVarFp.tx(hash, height, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3585,7 +3602,7 @@ export const TransactionsApiFactory = function (configuration?: Configuration, b
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        txSigners(hash: string, height?: number, options?: any): AxiosPromise<TxSigners> {
+        txSigners(hash: string, height?: number, options?: any): AxiosPromise<TxSignersResponse> {
             return localVarFp.txSigners(hash, height, options).then((request) => request(axios, basePath));
         },
     };
@@ -3598,29 +3615,6 @@ export const TransactionsApiFactory = function (configuration?: Configuration, b
  * @extends {BaseAPI}
  */
 export class TransactionsApi extends BaseAPI {
-    /**
-     * Returns node information for the provided node address.
-     * @param {string} address 
-     * @param {number} [height] optional block height, defaults to current tip
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TransactionsApi
-     */
-    public node(address: string, height?: number, options?: AxiosRequestConfig) {
-        return TransactionsApiFp(this.configuration).node(address, height, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Returns node information for all registered validators.
-     * @param {number} [height] optional block height, defaults to current tip
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TransactionsApi
-     */
-    public nodes(height?: number, options?: AxiosRequestConfig) {
-        return TransactionsApiFp(this.configuration).nodes(height, options).then((request) => request(this.axios, this.basePath));
-    }
-
     /**
      * Returns the observed transaction for a provided inbound or outbound hash.
      * @param {string} hash 
@@ -3830,7 +3824,7 @@ export const VaultsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async vaultPubkeys(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VaultPubkeys>> {
+        async vaultPubkeys(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VaultPubkeysResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.vaultPubkeys(height, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3879,7 +3873,7 @@ export const VaultsApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        vaultPubkeys(height?: number, options?: any): AxiosPromise<VaultPubkeys> {
+        vaultPubkeys(height?: number, options?: any): AxiosPromise<VaultPubkeysResponse> {
             return localVarFp.vaultPubkeys(height, options).then((request) => request(axios, basePath));
         },
         /**
