@@ -1,3 +1,4 @@
+import { PoolDetail } from '@xchainjs/xchain-midgard'
 import { assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -16,6 +17,7 @@ import {
 } from '../src/utils/swap'
 
 const btcPoolDetails = {
+  annualPercentageRate: '0.2',
   asset: 'BTC.BTC',
   assetDepth: assetToBase(assetAmount(100)).amount().toFixed(),
   assetPrice: '25000',
@@ -30,6 +32,7 @@ const btcPoolDetails = {
   volume24h: '16202006480711',
 }
 const ethPoolDetails = {
+  annualPercentageRate: '0.2',
   asset: 'ETH.ETH',
   assetDepth: assetToBase(assetAmount(9100)).amount().toFixed(),
   assetPrice: '680.10989011',
@@ -43,7 +46,8 @@ const ethPoolDetails = {
   units: '263973251769640',
   volume24h: '8122016881297',
 }
-const busdPoolDetails = {
+const busdPoolDetails: PoolDetail = {
+  annualPercentageRate: '0.2',
   asset: 'BNB.BUSD',
   assetDepth: assetToBase(assetAmount(10000000)).amount().toFixed(),
   assetPrice: '10.0',

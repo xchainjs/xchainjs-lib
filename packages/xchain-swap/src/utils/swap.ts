@@ -1,9 +1,25 @@
 import { Address } from '@xchainjs/xchain-client'
+import { AssetAtom } from '@xchainjs/xchain-cosmos/lib'
 import { strip0x } from '@xchainjs/xchain-ethereum'
-import { Asset, AssetETH, BaseAmount, Chain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { AssetLUNA } from '@xchainjs/xchain-terra/lib'
+import {
+  Asset,
+  AssetBCH,
+  AssetBNB,
+  AssetBTC,
+  AssetDOGE,
+  AssetETH,
+  AssetLTC,
+  AssetRuneNative,
+  BaseAmount,
+  Chain,
+  baseAmount,
+  eqAsset,
+} from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from '../LiquidityPool'
+import { CryptoAmount } from '../crypto-amount'
 import { SwapOutput } from '../types'
 
 /**
@@ -79,12 +95,12 @@ export const getSingleSwap = (inputAmount: BaseAmount, pool: LiquidityPool, toRu
   const output = getSwapOutput(inputAmount, pool, toRune)
   const fee = getSwapFee(inputAmount, pool, toRune)
   const slip = getSwapSlip(inputAmount, pool, toRune)
-  const SwapOutput = {
+  const swapOutput = {
     output: output,
     swapFee: fee,
     slip: slip,
   }
-  return SwapOutput
+  return swapOutput
 }
 export const getDoubleSwapSlip = (inputAmount: BaseAmount, pool1: LiquidityPool, pool2: LiquidityPool): BigNumber => {
   // formula: getSwapSlip1(input1) + getSwapSlip2(getSwapOutput1 => input2)
@@ -153,28 +169,40 @@ export const getContractAddressFromAsset = (asset: Asset): Address => {
  * @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
  * @returns
  */
-export const calcInboundFee = (sourceAsset: Asset, gasRate: BigNumber): BaseAmount => {
+export const calcInboundFee = (sourceAsset: Asset, gasRate: BigNumber): CryptoAmount => {
   switch (sourceAsset.chain) {
     case Chain.Bitcoin:
+      return new CryptoAmount(baseAmount(gasRate.multipliedBy(250)), AssetBTC)
+      break
     case Chain.BitcoinCash:
+      return new CryptoAmount(baseAmount(gasRate.multipliedBy(250)), AssetBCH)
+      break
     case Chain.Litecoin:
+      return new CryptoAmount(baseAmount(gasRate.multipliedBy(250)), AssetLTC)
+      break
     case Chain.Doge:
       // NOTE: UTXO chains estimate fees with a 250 byte size
-      return baseAmount(gasRate.multipliedBy(250))
+      return new CryptoAmount(baseAmount(gasRate.multipliedBy(250)), AssetDOGE)
       break
     case Chain.Binance:
       //flat fee
-      return baseAmount(gasRate)
+      return new CryptoAmount(baseAmount(gasRate), AssetBNB)
       break
     case Chain.Ethereum:
       if (eqAsset(sourceAsset, AssetETH)) {
-        return baseAmount(gasRate.multipliedBy(35000).multipliedBy(10 ** 9))
+        return new CryptoAmount(baseAmount(gasRate.multipliedBy(35000)), AssetETH)
       } else {
-        return baseAmount(gasRate.multipliedBy(70000).multipliedBy(10 ** 9))
+        return new CryptoAmount(baseAmount(gasRate.multipliedBy(70000)), AssetETH)
       }
       break
     case Chain.Terra:
-      return baseAmount(gasRate)
+      return new CryptoAmount(baseAmount(gasRate), AssetLUNA)
+      break
+    case Chain.Cosmos:
+      return new CryptoAmount(baseAmount(gasRate), AssetAtom)
+      break
+    case Chain.THORChain:
+      return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
       break
   }
   throw new Error(`could not calculate inbound fee for ${sourceAsset.chain}`)

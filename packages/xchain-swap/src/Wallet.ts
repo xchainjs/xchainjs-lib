@@ -248,7 +248,7 @@ export class Wallet {
       const gasLimitInWei = calcInboundFee(params.asset, gasPriceInGwei)
       const gasLimitInGWei = gasLimitInWei
         .div(10 ** 9)
-        .amount()
+        .baseAmount.amount()
         .toFixed()
 
       const unsignedTx = await routerContract.populateTransaction.deposit(...depositParams, {

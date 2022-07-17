@@ -8,7 +8,18 @@ import {
   TxOutItem,
   TxResponse,
 } from '@xchainjs/xchain-thornode'
-import { BCHChain, BNBChain, BTCChain, Chain, CosmosChain, DOGEChain, ETHChain, LTCChain, TerraChain, THORChain, } from '@xchainjs/xchain-util'
+import {
+  BCHChain,
+  BNBChain,
+  BTCChain,
+  Chain,
+  CosmosChain,
+  DOGEChain,
+  ETHChain,
+  LTCChain,
+  THORChain,
+  TerraChain,
+} from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 
@@ -117,27 +128,27 @@ export class Thornode {
     throw new Error(`THORNode not responding`)
   }
 
-  protected getChain = (chain: string): Chain =>{
-    switch(chain) {
-      case "BNB":
+  protected getChain = (chain: string): Chain => {
+    switch (chain) {
+      case 'BNB':
         return BNBChain
-      case "BTC":
+      case 'BTC':
         return BTCChain
-      case "ETH":
+      case 'ETH':
         return ETHChain
-      case "THOR":
+      case 'THOR':
         return THORChain
-      case "GAIA":
+      case 'GAIA':
         return CosmosChain
-      case "BCH":
+      case 'BCH':
         return BCHChain
-      case "LTC":
+      case 'LTC':
         return LTCChain
-      case "DOGE":
+      case 'DOGE':
         return DOGEChain
-      case "TERRA":
+      case 'TERRA':
         return TerraChain
-      case "POLKA":
+      case 'POLKA':
         throw Error('Polkadot is not supported yet')
       default:
         throw Error('Unknown chain')
@@ -182,10 +193,15 @@ export class Thornode {
       return obj.height
     })
     //If observed by not final, need to wait till the finalised block before moving to the next stage, blocks in source chain
-    if(txData.observed_tx.block_height && sourceChain && txData.observed_tx.finalise_height && observedTxBlockHeight?.height){
-      if (txData.observed_tx.block_height < txData.observed_tx.finalise_height ) {
+    if (
+      txData.observed_tx.block_height &&
+      sourceChain &&
+      txData.observed_tx.finalise_height &&
+      observedTxBlockHeight?.height
+    ) {
+      if (txData.observed_tx.block_height < txData.observed_tx.finalise_height) {
         txStatus.stage = TxStage.CONF_COUNTING
-        const blocksToWait = txData.observed_tx.finalise_height  - observedTxBlockHeight?.height
+        const blocksToWait = txData.observed_tx.finalise_height - observedTxBlockHeight?.height
         txStatus.seconds = blocksToWait * this.chainAttributes[sourceChain].avgBlockTimeInSecs
         return txStatus
       } else if (txData.observed_tx.status != 'done') {
@@ -209,7 +225,7 @@ export class Thornode {
     const lastBlock = await this.getLastBlock()
     const lastBlockHeight = lastBlock.find((obj) => {
       return obj
-      })
+    })
     const scheduledQueue = await this.getscheduledQueue()
     const scheduledQueueItem = scheduledQueue?.find((item: TxOutItem) => item.in_hash === inboundTxHash)
     // If the scheudled block is greater than the current block, need to wait that amount of blocks till outbound is sent
