@@ -3,18 +3,19 @@ import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from './LiquidityPool'
+import { CryptoAmount } from './crypto-amount'
 
 export type TotalFees = {
-  inboundFee: BaseAmount
-  swapFee: BaseAmount
-  outboundFee: BaseAmount
-  affiliateFee: BaseAmount
+  inboundFee: CryptoAmount
+  swapFee: CryptoAmount
+  outboundFee: CryptoAmount
+  affiliateFee: CryptoAmount
 }
 
 export type SwapEstimate = {
   totalFees: TotalFees
   slipPercentage: BigNumber
-  netOutput: BaseAmount
+  netOutput: CryptoAmount
   waitTime: number
   canSwap: boolean
   errors?: string[]
@@ -31,8 +32,7 @@ export type MidgardConfig = {
 }
 
 export type EstimateSwapParams = {
-  sourceAsset: Asset
-  inputAmount: BaseAmount
+  input: CryptoAmount
   destinationAsset: Asset
   affiliateFeePercent?: number
   slipLimit?: BigNumber

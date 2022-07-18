@@ -1,10 +1,11 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Configuration, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
-import { BaseAmount, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { AssetRuneNative, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import BigNumber from 'bignumber.js'
 
+import { CryptoAmount } from '../crypto-amount'
 import { InboundDetail, MidgardConfig } from '../types'
 
 const defaultMidgardConfig: Record<Network, MidgardConfig> = {
@@ -132,13 +133,13 @@ export class Midgard {
    *
    * @returns the outbound Tx Value in RUNE (Basemount)
    */
-  async getScheduledOutboundValue(): Promise<BaseAmount> {
+  async getScheduledOutboundValue(): Promise<CryptoAmount> {
     const path = 'v2/thorchain/queue'
 
     for (const baseUrl of this.config.midgardBaseUrls) {
       try {
         const { data } = await axios.get(`${baseUrl}${path}`)
-        const value = baseAmount(data['scheduled_outbound_value'])
+        const value = new CryptoAmount(baseAmount(data['scheduled_outbound_value']), AssetRuneNative)
         return value
       } catch (e) {
         console.error(e)
@@ -153,18 +154,22 @@ export class Midgard {
    * @param networkValueName the network value to be used to search the contsants
    * @returns the mimir or constants value
    */
-  public async getNetworkValueByName(networkValueName: string): Promise<number> {
-    const [mimirDetails] = await Promise.all([this.getMimirDetails()])
-    const [constantDetails] = await Promise.all([this.getConstantsDetails()])
-    const mimirValue = mimirDetails[networkValueName.toUpperCase()]
-    const constantsValue = constantDetails['int_64_values'][networkValueName]
-    if (mimirValue != undefined) {
-      return mimirValue
-    } else if (constantDetails != undefined) {
-      return constantsValue
-    } else {
-      throw Error(`Could not find network value name`)
+  public async getNetworkValueByNames(networkValueNames: string[]): Promise<Record<string, string>> {
+    const [mimirDetails, constantDetails] = await Promise.all([this.getMimirDetails(), this.getConstantsDetails()])
+    const retVal: Record<string, string> = {}
+    for (const networkValueName of networkValueNames) {
+      const mimirValue = mimirDetails[networkValueName.toUpperCase()]
+      const constantsValue = constantDetails['int_64_values'][networkValueName]
+      if (mimirValue != undefined) {
+        retVal[networkValueName] = mimirValue
+      } else if (constantDetails != undefined) {
+        retVal[networkValueName] = constantsValue
+      } else {
+        throw Error(`Could not find network value name`)
+      }
     }
+    console.log(retVal)
+    return retVal
   }
 
   /**

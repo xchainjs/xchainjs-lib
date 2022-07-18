@@ -37,12 +37,8 @@ console.log(await thorchain.estimateSwap(swapParams))
 - [x] Update THORNode.ts 
 - [ ] Complete and Test CheckTx  *(Stomzy)*
 - [ ] Move CheckTx to THORChainAMM  *(Stomzy)*
-- [ ] Test for Synth *(In-progess, Stormzy)*
-- [ ] Test ERC20 Support *(In-progess, Stormzy)*  
-- [ ] Review to remove from THORChainAMM.ts
-    - [ ] THORChainAMM.convertAssetToAsset()
-    - [ ] THORChainAMM.getChainAsset()
-    - [x] THORChainAMM.calcInboundFee()
+- [x] Test for Synth *(In-progess, Stormzy)*
+- [x] Test ERC20 Support *(In-progess, Stormzy)*  
 - [ ] code clean-up
   - [ ] rename files to NOT CamelCase
   - [ ] walk through all functions
