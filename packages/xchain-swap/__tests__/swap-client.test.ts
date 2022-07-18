@@ -16,6 +16,7 @@ import {
 } from '../src/utils/swap'
 
 const btcPoolDetails = {
+  annualPercentageRate: '0.053737568449651274',
   asset: 'BTC.BTC',
   assetDepth: assetToBase(assetAmount(100)).amount().toFixed(),
   assetPrice: '25000',
@@ -30,6 +31,7 @@ const btcPoolDetails = {
   volume24h: '16202006480711',
 }
 const ethPoolDetails = {
+  annualPercentageRate: '0.09731470549045307',
   asset: 'ETH.ETH',
   assetDepth: assetToBase(assetAmount(9100)).amount().toFixed(),
   assetPrice: '680.10989011',
@@ -44,6 +46,7 @@ const ethPoolDetails = {
   volume24h: '8122016881297',
 }
 const busdPoolDetails = {
+  annualPercentageRate: '0.1290360396052299',
   asset: 'BNB.BUSD',
   assetDepth: assetToBase(assetAmount(10000000)).amount().toFixed(),
   assetPrice: '10.0',

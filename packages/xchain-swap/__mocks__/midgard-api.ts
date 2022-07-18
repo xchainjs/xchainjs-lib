@@ -28,5 +28,10 @@ export default {
       const resp = require(`./responses/thorchain/outboundQueue.json`)
       return [200, resp]
     })
+    //Mock midgard health
+    mock.onGet(/\/v2\/health/).reply(function () {
+      const resp = require(`./responses/midgard/health.json`)
+      return [200, resp]
+    })
   },
 }

@@ -1,20 +1,18 @@
-import { AssetBNB, assetAmount, assetToBase, Asset, AssetBTC, AssetETH, AssetRuneNative } from '@xchainjs/xchain-util'
-
-import { ThorchainAMM } from '../src/ThorchainAMM'
-
 import { Network } from '@xchainjs/xchain-client'
-import { Midgard } from '../src/utils/midgard'
+import { Asset, AssetBNB, AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+
 import { LiquidityPool } from '../src'
+import { ThorchainAMM } from '../src/ThorchainAMM'
+import { Midgard } from '../src/utils/midgard'
 
 // eslint-disable-next-line ordered-imports/ordered-imports
 import mockMidgardApi from '../__mocks__/midgard-api'
-
 
 const midgardts = new Midgard(Network.Mainnet)
 const thorchainAmm = new ThorchainAMM(midgardts)
 
 const bnbPoolDetails = {
-  annualPercentageRate: "1.1865336252957166",
+  annualPercentageRate: '1.1865336252957166',
   asset: 'BNB.BNB',
   assetDepth: assetToBase(assetAmount(100)).amount().toFixed(),
   assetPrice: '11121.24920535084',
@@ -30,7 +28,6 @@ const bnbPoolDetails = {
 }
 
 const bnbPool = new LiquidityPool(bnbPoolDetails)
-
 
 describe('Midgard Client Test', () => {
   beforeAll(() => {
@@ -50,7 +47,7 @@ describe('Midgard Client Test', () => {
     const outboundAsset: Asset = AssetETH
     const inputAmount = assetToBase(assetAmount(0.5))
     const outboundETHAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
-    const EthAmount = assetToBase(assetAmount(9.13629640))
+    const EthAmount = assetToBase(assetAmount(9.1362964))
     expect(outboundETHAmount.amount()).toEqual(EthAmount.amount())
   })
 
@@ -68,7 +65,7 @@ describe('Midgard Client Test', () => {
     const outboundAsset: Asset = AssetBTC
     const inputAmount = assetToBase(assetAmount(100))
     const outboundBTCAmount = await thorchainAmm.convertAssetToAsset(inputAsset, inputAmount, outboundAsset)
-    const expectedAmount = assetToBase(assetAmount(0.01050400))
+    const expectedAmount = assetToBase(assetAmount(0.010504))
     expect(outboundBTCAmount.amount()).toEqual(expectedAmount.amount())
   })
 })

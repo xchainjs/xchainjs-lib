@@ -57,7 +57,7 @@ export class LiquidityPool {
     return this._assetString
   }
   public get assetPrice(): BigNumber {
-    return (this.runeBalance.amount()).div(this.assetBalance.amount())
+    return this.runeBalance.amount().div(this.assetBalance.amount())
   }
 
   /**
