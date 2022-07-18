@@ -177,11 +177,11 @@ export class Midgard {
    *
    * @returns
    */
-  public async getLatestBlocHeightk(): Promise<number> {
+  public async getLatestBlockHeight(): Promise<number> {
     for (const api of this.midgardApis) {
       try {
         const data = (await api.getHealth()).data
-        return Number(data.scannerHeight)
+        return +data.scannerHeight
       } catch (e) {
         console.error(e)
       }
