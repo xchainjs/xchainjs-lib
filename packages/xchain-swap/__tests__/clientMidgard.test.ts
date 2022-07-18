@@ -67,9 +67,9 @@ describe('Midgard Client Test', () => {
     expect(latestBlockheight).toEqual(blockHeight)
   })
   it(`Should return networkValue by name`, async () => {
-    const networkValue = await mainnetMidgard.getNetworkValueByName(networkName)
+    const networkValue = await mainnetMidgard.getNetworkValueByNames([networkName])
     expect(networkValue).toBeTruthy()
-    expect(networkValue).toEqual(FullImpLossProtectionBlocks)
+    expect(Number.parseInt(networkValue[networkName])).toEqual(FullImpLossProtectionBlocks)
   })
   it(`Should return pools array`, async () => {
     const scheduledOutbound = await mainnetMidgard.getScheduledOutboundValue()

@@ -1,14 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import {
-  Asset,
-  AssetBNB,
-  AssetBTC,
-  AssetETH,
-  AssetRuneNative,
-  assetAmount,
-  assetToBase,
-  baseAmount,
-} from '@xchainjs/xchain-util'
+import { Asset, AssetBNB, AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import { ThorchainAMM } from '../src/ThorchainAMM'
 import { CryptoAmount } from '../src/crypto-amount'
@@ -35,18 +26,18 @@ describe('ThorchainAmm Client Test', () => {
   })
 
   it(`Should convert BTC to ETH `, async () => {
-    const input = new CryptoAmount(assetToBase(assetAmount(0.5)), AssetBTC)
+    const input = new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBTC)
     const outboundAsset: Asset = AssetETH
     const outboundETHAmount = await thorchainAmm.convert(input, outboundAsset)
-    const EthAmount = assetToBase(assetAmount(9.1362964))
-    expect(outboundETHAmount.baseAmount.amount()).toEqual(EthAmount.amount())
+    const EthAmount = assetToBase(assetAmount('15'))
+    expect(outboundETHAmount.baseAmount.amount().toFixed()).toEqual(EthAmount.amount().toFixed())
   })
 
   it(`Should convert BTC to RUNE `, async () => {
-    const input = new CryptoAmount(assetToBase(assetAmount(0.5)), AssetBTC)
+    const input = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
     const outboundAsset: Asset = AssetRuneNative
     const outboundRuneAmount = await thorchainAmm.convert(input, outboundAsset)
-    const expectedAmount = assetToBase(assetAmount(4760.13797319))
+    const expectedAmount = assetToBase(assetAmount(10))
     expect(outboundRuneAmount.baseAmount.amount()).toEqual(expectedAmount.amount())
   })
 
@@ -54,7 +45,7 @@ describe('ThorchainAmm Client Test', () => {
     const input = new CryptoAmount(assetToBase(assetAmount(100)), AssetRuneNative)
     const outboundAsset: Asset = AssetBTC
     const outboundBTCAmount = await thorchainAmm.convert(input, outboundAsset)
-    const expectedAmount = baseAmount('1050400')
+    const expectedAmount = assetToBase(assetAmount(10))
     expect(outboundBTCAmount.baseAmount.amount()).toEqual(expectedAmount.amount())
   })
 })

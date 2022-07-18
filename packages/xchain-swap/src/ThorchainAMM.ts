@@ -191,15 +191,12 @@ export class ThorchainAMM {
     console.log(`outboundFeeInRune = ${outboundFeeInRune.formatedAssetString()}`)
 
     // ---------- Remove Fees from inbound before doing the swap -----------
-    const inputNetAmount = inputInRune.minus(inboundFeeInRune) // are of the same type so this works.
+    const inputMinusInboundFeeInRune = inputInRune.minus(inboundFeeInRune) // are of the same type so this works.
 
     // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
-    const affiliateFeeInRune = new CryptoAmount(
-      inputNetAmount.baseAmount.times(params.affiliateFeePercent || 0),
-      inputNetAmount.asset,
-    )
+    const affiliateFeeInRune = inputMinusInboundFeeInRune.times(params.affiliateFeePercent || 0)
     // remove the affiliate fee from the input.
-    const inputNetAmountInRune = inputNetAmount.minus(affiliateFeeInRune)
+    const inputNetAmountInRune = inputMinusInboundFeeInRune.minus(affiliateFeeInRune)
     // convert back to input asset
     const inputNetInAsset = await this.allPools.convert(inputNetAmountInRune, input.asset)
     console.log(`inputNetInAsset = ${inputNetInAsset.formatedAssetString()}`)

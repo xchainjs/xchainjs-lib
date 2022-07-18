@@ -1,7 +1,6 @@
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
 import {
   Asset,
-  AssetRuneNative,
   assetToBase,
   // assetAmount,
   // assetToBase,
@@ -50,7 +49,7 @@ export class AllPools {
       // from/R * R/to = from/to
       exchangeRate = lpFrom.runeToAssetRatio.times(lpTo.assetToRuneRatio)
     }
-    console.log(`1 ${from.ticker} = ${exchangeRate.toFixed()} ${to.ticker} `)
+    // console.log(`1 ${from.ticker} = ${exchangeRate.toFixed()} ${to.ticker} `)
     return exchangeRate
   }
   /**
@@ -59,7 +58,7 @@ export class AllPools {
    * @returns
    */
   async getPoolForAsset(asset: Asset): Promise<LiquidityPool> {
-    if (eqAsset(asset, AssetRuneNative)) throw Error(`AssetRuneNative doesn't have a pool`)
+    if (isAssetRuneNative(asset)) throw Error(`AssetRuneNative doesn't have a pool`)
     const pools = await this.getPools()
     const pool = pools[asset.ticker]
     if (pool) {
@@ -132,7 +131,7 @@ export class AllPools {
 
     const amt = input.assetAmount.times(exchangeRate)
     const result = new CryptoAmount(assetToBase(amt), outAsset)
-    console.log(`${input.baseAmount.amount().toFixed()} = ${result.baseAmount.amount().toFixed()}`)
+    // console.log(`${input.baseAmount.amount().toFixed()} = ${result.baseAmount.amount().toFixed()}`)
     return result
   }
 }
