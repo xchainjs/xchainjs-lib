@@ -49,7 +49,7 @@ export class AllPools {
       // from/R * R/to = from/to
       exchangeRate = lpFrom.runeToAssetRatio.times(lpTo.assetToRuneRatio)
     }
-    // console.log(`1 ${from.ticker} = ${exchangeRate.toFixed()} ${to.ticker} `)
+    console.log(`1 ${from.ticker} = ${exchangeRate.toFixed()} ${to.ticker} `)
     return exchangeRate
   }
   /**
@@ -60,6 +60,7 @@ export class AllPools {
   async getPoolForAsset(asset: Asset): Promise<LiquidityPool> {
     if (isAssetRuneNative(asset)) throw Error(`AssetRuneNative doesn't have a pool`)
     const pools = await this.getPools()
+    // Not: we use ticker, not asset string to get the same pool for both assets and synths
     const pool = pools[asset.ticker]
     if (pool) {
       return pool

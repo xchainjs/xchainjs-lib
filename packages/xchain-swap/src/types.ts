@@ -16,7 +16,7 @@ export type SwapEstimate = {
   totalFees: TotalFees
   slipPercentage: BigNumber
   netOutput: CryptoAmount
-  waitTime: number
+  waitTimeSeconds: number
   canSwap: boolean
   errors?: string[]
 }
@@ -48,13 +48,13 @@ export type ExecuteSwap = {
   affiliateFee: BaseAmount
   feeOption?: FeeOption
   interfaceID: number
-  waitTime: number
+  waitTimeSeconds: number
 }
 
 export type SwapSubmitted = {
   hash: string
   url: string
-  waitTime: number
+  waitTimeSeconds: number
 }
 
 export type DepositParams = {

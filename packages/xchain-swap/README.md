@@ -33,8 +33,7 @@ console.log(await thorchain.estimateSwap(swapParams))
 
 ## Open Items
 
-- [x] Merge THORNode into Master
-- [x] Update THORNode.ts 
+
 - [ ] Complete and Test CheckTx  *(Stomzy)*
 - [ ] Move CheckTx to THORChainAMM  *(Stomzy)*
 - [x] Test for Synth *(In-progess, Stormzy)*

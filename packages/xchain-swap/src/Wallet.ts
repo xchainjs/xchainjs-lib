@@ -19,9 +19,10 @@ import {
   Asset,
   AssetBTC,
   AssetETH,
-  AssetRuneNative,
+  // AssetRuneNative,
   BaseAmount,
   Chain,
+  assetToString,
   baseAmount,
   eqAsset,
 } from '@xchainjs/xchain-util'
@@ -30,7 +31,7 @@ import { ethers } from 'ethers'
 import routerABI from './abi/routerABI.json'
 import { DepositParams, ExecuteSwap, SwapSubmitted } from './types'
 import { Midgard } from './utils/midgard'
-import { calcInboundFee, getContractAddressFromAsset } from './utils/swap'
+import { calcNetworkFee, getContractAddressFromAsset } from './utils/swap'
 
 type AllBalances = {
   chain: Chain
@@ -92,7 +93,7 @@ export class Wallet {
    */
   async executeSwap(swap: ExecuteSwap): Promise<SwapSubmitted> {
     this.validateSwap(swap)
-    if (swap.sourceAsset.chain === Chain.THORChain) {
+    if (swap.sourceAsset.chain === Chain.THORChain || swap.sourceAsset.synth) {
       return await this.swapRuneTo(swap)
     } else {
       return await this.swapNonRune(swap)
@@ -104,11 +105,8 @@ export class Wallet {
     // create LIM with interface ID
     const lim = limstring.substring(0, limstring.length - 3).concat(swap.interfaceID.toString())
     // create the full memo
-    let memo = `=:${swap.destinationAsset.chain}.${swap.destinationAsset.symbol}`
-    // If synth construct a synth memo
-    if (swap.destinationAsset.synth && swap.destinationAsset.chain === Chain.THORChain) {
-      memo = `=:${swap.destinationAsset.symbol}/${swap.destinationAsset.symbol}`
-    }
+    let memo = `=:${assetToString(swap.destinationAsset)}`
+
     // needs to be tested
     if (swap.affiliateAddress != '' || swap.affiliateFee == undefined) {
       memo = memo.concat(
@@ -118,44 +116,40 @@ export class Wallet {
       memo = memo.concat(`:${swap.destinationAddress}:${lim}`)
     }
 
-    // Logic error? between synths to and from..
     // If memo length is too long for BTC, trim it
     if (eqAsset(swap.sourceAsset, AssetBTC) && memo.length > 80) {
-      memo = `:${swap.destinationAsset.chain}.${swap.destinationAsset.symbol}`
-      // If swapping to a synth
-      if (swap.destinationAsset.synth && swap.destinationAsset.chain === Chain.THORChain) {
-        memo = `=:${swap.destinationAsset.symbol}/${swap.destinationAsset.symbol}`
-      }
-      memo = memo.concat(`:${swap.destinationAddress}`)
+      memo = `=:${assetToString(swap.destinationAsset)}:${swap.destinationAddress}`
     }
     return memo
   }
   private validateSwap(swap: ExecuteSwap) {
     const errors: string[] = []
+    const isThorchainDestinationAsset = swap.destinationAsset.synth || swap.destinationAsset.chain === Chain.THORChain
+    const chain = isThorchainDestinationAsset ? Chain.THORChain : swap.destinationAsset.chain
 
-    if (!this.clients[swap.destinationAsset.chain].validateAddress(swap.destinationAddress))
-      errors.push(`${swap.destinationAddress} is not a valid address`)
-
-    if (swap.affiliateAddress?.length > 0 && !this.clients['THOR'].validateAddress(swap.affiliateAddress))
-      errors.push(`${swap.affiliateAddress} is not a valid address`)
+    if (!this.clients[chain].validateAddress(swap.destinationAddress)) {
+      errors.push(`destinationAddress ${swap.destinationAddress} is not a valid address`)
+    }
+    if (swap.affiliateAddress && !this.clients[Chain.THORChain].validateAddress(swap.affiliateAddress))
+      errors.push(`affiliateAddress ${swap.affiliateAddress} is not a valid address`)
 
     if (errors.length > 0) throw Error(errors.join('\n'))
   }
 
   private async swapRuneTo(swap: ExecuteSwap): Promise<SwapSubmitted> {
     const thorClient = (this.clients.THOR as unknown) as ThorchainClient
-    const waitTime = swap.waitTime
+    const waitTimeSeconds = swap.waitTimeSeconds
     const hash = await thorClient.deposit({
       amount: swap.fromBaseAmount,
-      asset: AssetRuneNative,
+      asset: swap.sourceAsset,
       memo: this.constructSwapMemo(swap),
     })
-    return { hash, url: this.clients.THOR.getExplorerTxUrl(hash), waitTime }
+    return { hash, url: this.clients.THOR.getExplorerTxUrl(hash), waitTimeSeconds }
   }
 
   private async swapNonRune(swap: ExecuteSwap): Promise<SwapSubmitted> {
     const client = this.clients[swap.sourceAsset.chain]
-    const waitTime = swap.waitTime
+    const waitTimeSeconds = swap.waitTimeSeconds
     const inboundAsgard = (await this.getAsgardAssets()).find((item: InboundAddressesItem) => {
       return item.chain === swap.sourceAsset.chain
     })
@@ -168,7 +162,7 @@ export class Wallet {
         memo: this.constructSwapMemo(swap),
       }
       const hash = await this.sendETHDeposit(params)
-      return { hash, url: client.getExplorerTxUrl(hash), waitTime }
+      return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
       const params = {
         walletIndex: 0,
@@ -179,7 +173,7 @@ export class Wallet {
       }
       // console.log(JSON.stringify(params, null, 2))
       const hash = await client.transfer(params)
-      return { hash, url: client.getExplorerTxUrl(hash), waitTime }
+      return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     }
   }
 
@@ -245,7 +239,7 @@ export class Wallet {
 
       // TODO should we change the calcInboundFee() to use gasRate in BaseAmount instead of BIgNumber?
       // currently its hardto know the units to use, GWEI/WEI, etc
-      const gasLimitInWei = calcInboundFee(params.asset, gasPriceInGwei)
+      const gasLimitInWei = calcNetworkFee(params.asset, gasPriceInGwei)
       const gasLimitInGWei = gasLimitInWei
         .div(10 ** 9)
         .baseAmount.amount()

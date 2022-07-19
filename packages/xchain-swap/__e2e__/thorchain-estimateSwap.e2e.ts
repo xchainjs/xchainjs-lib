@@ -1,6 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
   Asset,
+  AssetBNB,
   AssetBTC,
   AssetETH,
   AssetLTC,
@@ -20,8 +21,9 @@ import { Midgard } from '../src/utils/midgard'
 const midgard = new Midgard(Network.Mainnet)
 const thorchainAmm = new ThorchainAMM(midgard)
 
-function print(estimate: SwapEstimate) {
+function print(estimate: SwapEstimate, input: CryptoAmount) {
   const expanded = {
+    input: input.formatedAssetString(),
     totalFees: {
       inboundFee: estimate.totalFees.inboundFee.formatedAssetString(),
       swapFee: estimate.totalFees.swapFee.formatedAssetString(),
@@ -30,25 +32,32 @@ function print(estimate: SwapEstimate) {
     },
     slipPercentage: estimate.slipPercentage.toFixed(),
     netOutput: estimate.netOutput.formatedAssetString(),
-    waitTime: estimate.waitTime.toFixed(),
+    waitTimeSeconds: estimate.waitTimeSeconds.toFixed(),
     canSwap: estimate.canSwap,
     errors: estimate.errors,
   }
   console.log(expanded)
 }
+const BUSD = assetFromString('BNB.BUSD-BD1')
+if (!BUSD) throw Error('bad asset')
 
 // Test User Functions - single and double swap using mock pool data
 describe('xchain-swap estimate Integration Tests', () => {
   // Test estimate swaps with mock pool data
-  it('should estimate a swap of 1 BTC to ETH', async () => {
+  it('should estimate a swap of 1 BTC to RUNE', async () => {
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
-      destinationAsset: AssetETH,
-      affiliateFeePercent: 0.003, //optional
-      slipLimit: new BigNumber(0.02), //optional
+      input: new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBNB),
+      destinationAsset: BUSD,
+      // affiliateFeePercent: 0.003, //optional
+      slipLimit: new BigNumber('0.03'), //optional
     }
+
     const estimate = await thorchainAmm.estimateSwap(swapParams)
-    print(estimate)
+    const estimateInBusd = await thorchainAmm.getFeesIn(estimate.totalFees, BUSD)
+    estimate.totalFees = estimateInBusd
+    print(estimate, swapParams.input)
+    const exchangeRate = await thorchainAmm.convert(new CryptoAmount(assetToBase(assetAmount('1')), AssetBNB), BUSD)
+    console.log(`1 ${swapParams.input.asset.ticker} = ${exchangeRate.formatedAssetString()}`)
     expect(estimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })
@@ -65,7 +74,7 @@ describe('xchain-swap estimate Integration Tests', () => {
       slipLimit: new BigNumber(0.03), //optional
     }
     const estimate = await thorchainAmm.estimateSwap(swapParams)
-    print(estimate)
+    print(estimate, swapParams.input)
     expect(estimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })
@@ -92,7 +101,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
-    expect(estimate.waitTime === 600)
+    expect(estimate.waitTimeSeconds === 600)
   })
   it(`Should fail estimate single swap of 0.01 RUNE To BTC `, async () => {
     const swapParams: EstimateSwapParams = {
@@ -102,7 +111,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate.canSwap).toBe(false)
     expect(estimate).toBeTruthy()
-    expect(estimate.waitTime === 600)
+    expect(estimate.waitTimeSeconds === 600)
   })
   it(`Should fail estimate single swap of 0.000001 BTC to RUNE `, async () => {
     const swapParams: EstimateSwapParams = {
@@ -112,7 +121,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate.canSwap).toBe(false)
     expect(estimate).toBeTruthy()
-    expect(estimate.waitTime === 600)
+    expect(estimate.waitTimeSeconds === 600)
   })
   // Test Conditions - Test to make sure the swap has no input errors
   it('Should fail estimate swap from BTC to BTC if source asset is the same as destination asset', async () => {
@@ -122,7 +131,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     }
     try {
       const estimate = await thorchainAmm.estimateSwap(swapParams)
-      print(estimate)
+      print(estimate, swapParams.input)
       fail()
     } catch (error: any) {
       expect(error.message).toEqual(`sourceAsset and destinationAsset cannot be the same`)
@@ -135,7 +144,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     }
     try {
       const estimate = await thorchainAmm.estimateSwap(swapParams)
-      print(estimate)
+      print(estimate, swapParams.input)
       fail()
     } catch (error: any) {
       expect(error.message).toEqual(`inputAmount must be greater than 0`)
@@ -149,7 +158,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     }
     try {
       const estimate = await thorchainAmm.estimateSwap(swapParams)
-      print(estimate)
+      print(estimate, swapParams.input)
       fail()
     } catch (error: any) {
       expect(error.message).toEqual(`affiliateFee must be between 0 and 1000`)
@@ -198,7 +207,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     }
     try {
       const feesToHigh = await thorchainAmm.estimateSwap(swapParams)
-      print(feesToHigh)
+      print(feesToHigh, swapParams.input)
       expect(feesToHigh.errors).toEqual([
         `Input amount ${swapParams.input.formatedAssetString()} is less that total swap fees`,
       ])
@@ -211,7 +220,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     }
     const estimate = await thorchainAmm.estimateSwap(swapParams)
     expect(estimate).toBeTruthy()
-    expect(estimate.waitTime > 600)
+    expect(estimate.waitTimeSeconds > 600)
   })
 
   it(`Should return the correct network value`, async () => {
@@ -228,7 +237,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     }
     try {
       const estimate = await thorchainAmm.estimateSwap(swapParams)
-      print(estimate)
+      print(estimate, swapParams.input)
       fail()
     } catch (error: any) {
       expect(error.message).toEqual(`destination pool is halted`)
@@ -242,7 +251,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     }
     try {
       const estimate = await thorchainAmm.estimateSwap(swapParams)
-      print(estimate)
+      print(estimate, swapParams.input)
       fail()
     } catch (error: any) {
       expect(error.message).toEqual(`source pool is halted`)

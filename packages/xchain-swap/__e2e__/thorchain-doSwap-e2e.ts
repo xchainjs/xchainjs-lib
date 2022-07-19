@@ -8,6 +8,7 @@ import {
   AssetRuneNative,
   Chain,
   assetAmount,
+  assetFromString,
   assetToBase,
 } from '@xchainjs/xchain-util'
 import { fail } from 'assert'
@@ -26,18 +27,23 @@ const testnetThorchainAmm = new ThorchainAMM(testnetMidgard)
 const testnetWallet = new Wallet(Network.Testnet, process.env.TESTNETPHRASE || 'you forgot to set the phrase')
 const mainnetWallet = new Wallet(Network.Mainnet, process.env.MAINNETPHRASE || 'you forgot to set the phrase')
 
-const sBTC: Asset = {
-  chain: Chain.THORChain,
-  symbol: 'BTC',
-  ticker: 'BTC',
+const sBTC = assetFromString('BTC/BTC')
+console.log('sBTC?.chain=' + sBTC?.chain)
+if (!sBTC) throw Error('xxxx')
+const sETH: Asset = {
+  chain: Chain.Ethereum,
+  symbol: 'ETH',
+  ticker: 'ETH',
   synth: true,
 }
+sETH
 const sBNB: Asset = {
-  chain: Chain.THORChain,
+  chain: Chain.Binance,
   symbol: 'BNB',
   ticker: 'BNB',
   synth: true,
 }
+sBNB
 // const ETH_DECIMAL = 18
 const USDT_DECIMAL = 6
 
@@ -59,7 +65,7 @@ const BUSD: Asset = {
   ticker: 'BUSD',
   synth: false,
 }
-
+BUSD
 function print(estimate: SwapEstimate) {
   const expanded = {
     totalFees: {
@@ -70,7 +76,7 @@ function print(estimate: SwapEstimate) {
     },
     slipPercentage: estimate.slipPercentage.toFixed(),
     netOutput: estimate.netOutput.formatedAssetString(),
-    waitTime: estimate.waitTime.toFixed(),
+    waitTime: estimate.waitTimeSeconds.toFixed(),
     canSwap: estimate.canSwap,
     errors: estimate.errors,
   }
@@ -146,23 +152,23 @@ describe('xchain-swap doSwap Integration Tests', () => {
   })
 
   // From asset to synth sBTC
-  it(`Should perform a swap from BUSD to synthBTC`, async () => {
+  it(`Should perform a swap from BTC to synthETH`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(100)), BUSD),
-      destinationAsset: sBTC,
-      slipLimit: new BigNumber(0.5),
+      input: new CryptoAmount(assetToBase(assetAmount(0.001)), AssetBTC),
+      destinationAsset: sETH,
+      slipLimit: new BigNumber(0.03),
     }
     try {
-      const outPutCanSwap = await mainetThorchainAmm.estimateSwap(estimateSwapParams)
+      const outPutCanSwap = await testnetThorchainAmm.estimateSwap(estimateSwapParams)
       print(outPutCanSwap)
       if (outPutCanSwap.canSwap) {
-        // const output = await mainetThorchainAmm.doSwap(
-        //   mainnetWallet,
-        //   estimateSwapParams,
-        //   mainnetWallet.clients['THOR'].getAddress(),
-        // )
-        // console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTime}`)
-        // expect(output).toBeTruthy()
+        const output = await testnetThorchainAmm.doSwap(
+          testnetWallet,
+          estimateSwapParams,
+          testnetWallet.clients[Chain.THORChain].getAddress(),
+        )
+        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+        expect(output).toBeTruthy()
       }
     } catch (error: any) {
       console.log(error.message)
@@ -170,18 +176,19 @@ describe('xchain-swap doSwap Integration Tests', () => {
   })
 
   // From synth sBTC to Asset
-  it(`Should perform a swap from synthBTC to BNB`, async () => {
+  it(`Should perform a swap from sETH to BNB`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(0.01)), sBTC),
+      input: new CryptoAmount(assetToBase(assetAmount(0.05)), sETH),
       destinationAsset: AssetBNB,
+      slipLimit: new BigNumber(0.09),
     }
     try {
-      const output = await mainetThorchainAmm.doSwap(
-        mainnetWallet,
+      const output = await testnetThorchainAmm.doSwap(
+        testnetWallet,
         estimateSwapParams,
-        mainnetWallet.clients['BNB'].getAddress(),
+        testnetWallet.clients['BNB'].getAddress(),
       )
-      console.log(`tx hash: ${output.hash}, \n Tx url: ${output.url} \n WaitTime:${output.waitTime}`)
+      console.log(`tx hash: ${output.hash}, \n Tx url: ${output.url} \n WaitTime:${output.waitTimeSeconds}`)
       expect(output).toBeTruthy()
     } catch (error: any) {
       console.log(error.message)
@@ -204,7 +211,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
           estimateSwapParams,
           mainnetWallet.clients['THOR'].getAddress(),
         )
-        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTime}`)
+        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
         expect(output).toBeTruthy()
       }
     } catch (error: any) {

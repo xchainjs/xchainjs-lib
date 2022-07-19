@@ -2,18 +2,18 @@ import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
 import {
   Asset,
   // AssetAmount,
-  AssetRuneNative,
+  // AssetRuneNative,
   BaseAmount,
   // assetAmount,
   assetFromString,
   // assetToBase,
-  assetToString,
+  // assetToString,
   baseAmount,
-  eqAsset,
+  // eqAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { CryptoAmount } from './crypto-amount'
+// import { CryptoAmount } from './crypto-amount'
 
 export class LiquidityPool {
   private pool: PoolDetail
@@ -24,7 +24,6 @@ export class LiquidityPool {
   readonly assetString: string
   readonly runeToAssetRatio: BigNumber
   readonly assetToRuneRatio: BigNumber
-  // readonly inverseAssetPrice: AssetAmount
 
   constructor(pool: PoolDetail) {
     this.pool = pool
@@ -36,30 +35,28 @@ export class LiquidityPool {
     this.assetBalance = baseAmount(this.pool.assetDepth)
     this.runeBalance = baseAmount(this.pool.runeDepth) //Rune is always 8 decimals
 
-    // const runeToAssetRatio = this.runeBalance.div(this.assetBalance) // RUNE/Asset gets `assetPrice` of a pool (how much rune to 1 asset)
     this.runeToAssetRatio = this.runeBalance.amount().div(this.assetBalance.amount())
     this.assetToRuneRatio = this.assetBalance.amount().div(this.runeBalance.amount())
-    // this.currentRatioInAsset = assetToBase(this.inverseAssetPrice)
   }
   isAvailable(): boolean {
     return this.pool.status.toLowerCase() === 'available'
   }
-  /**
-   * Returns the rune value.
-   * If the asset passed in is NativeRune, assetAmount is returned back
-   * If the asset passed in does not match the pool's asset, thow an error, else convert assetAmount into rune value.
-   *
-   * @param asset asset type. Should match the asset of the pool
-   * @param assetAmount - the amount of asset in the value of RUNE
-   * @returns
-   */
-  public getValueInRUNE(crytoAmount: CryptoAmount): CryptoAmount {
-    if (!eqAsset(this.asset, crytoAmount.asset)) {
-      throw Error(
-        `cannot getValueInRUNE 2 diff assets ${assetToString(this.asset)} ${assetToString(crytoAmount.asset)}`,
-      )
-    }
-    const baseAmount = crytoAmount.baseAmount.times(this.runeToAssetRatio)
-    return new CryptoAmount(baseAmount, AssetRuneNative)
-  }
+  // /**
+  //  * Returns the rune value.
+  //  * If the asset passed in is NativeRune, assetAmount is returned back
+  //  * If the asset passed in does not match the pool's asset, thow an error, else convert assetAmount into rune value.
+  //  *
+  //  * @param asset asset type. Should match the asset of the pool
+  //  * @param assetAmount - the amount of asset in the value of RUNE
+  //  * @returns
+  //  */
+  // public getValueInRUNE(crytoAmount: CryptoAmount): CryptoAmount {
+  //   if (!eqAsset(this.asset, crytoAmount.asset)) {
+  //     throw Error(
+  //       `cannot getValueInRUNE 2 diff assets ${assetToString(this.asset)} ${assetToString(crytoAmount.asset)}`,
+  //     )
+  //   }
+  //   const baseAmount = crytoAmount.baseAmount.times(this.runeToAssetRatio)
+  //   return new CryptoAmount(baseAmount, AssetRuneNative)
+  // }
 }

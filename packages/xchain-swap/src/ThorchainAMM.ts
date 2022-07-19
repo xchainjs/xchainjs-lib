@@ -1,3 +1,4 @@
+import { AssetAtom } from '@xchainjs/xchain-cosmos/lib'
 import { AssetLUNA } from '@xchainjs/xchain-terra'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
 import {
@@ -31,7 +32,7 @@ import { defaultChainAttributes } from './chainDefaults'
 import { CryptoAmount } from './crypto-amount'
 import { ChainAttributes, EstimateSwapParams, InboundDetail, SwapEstimate, SwapSubmitted, TotalFees } from './types'
 import { Midgard } from './utils/midgard'
-import { calcInboundFee } from './utils/swap'
+import { calcNetworkFee } from './utils/swap'
 
 const BN_1 = new BigNumber(1)
 
@@ -76,13 +77,11 @@ export class ThorchainAMM {
       swapEstimate.errors = errors
     } else {
       swapEstimate.canSwap = true
-      if (params.destinationAsset.chain !== Chain.THORChain) {
+      if (params.destinationAsset.chain !== Chain.THORChain && !params.destinationAsset.synth) {
         //---------------- Work out total Wait Time for Swap ---------------------- /
-        if (swapEstimate.canSwap) {
-          const inboundDelay = await this.confCounting(params.input)
-          const outboundDelay = await this.outboundDelay(swapEstimate.netOutput)
-          swapEstimate.waitTime = inboundDelay + outboundDelay
-        }
+        const inboundDelay = await this.confCounting(params.input)
+        const outboundDelay = await this.outboundDelay(swapEstimate.netOutput)
+        swapEstimate.waitTimeSeconds = inboundDelay + outboundDelay
       }
     }
 
@@ -116,6 +115,7 @@ export class ThorchainAMM {
     affiliateAddress = '',
     interfaceID = 999,
   ): Promise<SwapSubmitted> {
+    // TODO validate all input fields
     this.isValidSwap(params)
     // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
     const affiliateFee = params.input.baseAmount.times(params.affiliateFeePercent || 0)
@@ -128,9 +128,9 @@ export class ThorchainAMM {
     // out min outbound asset based on limPercentage
     const limAssetAmount = await this.allPools.convert(params.input.times(limPercentage), params.destinationAsset)
 
-    let waitTime = await this.confCounting(params.input)
+    let waitTimeSeconds = await this.confCounting(params.input)
     const outboundDelay = await this.outboundDelay(limAssetAmount)
-    waitTime = outboundDelay + waitTime
+    waitTimeSeconds = outboundDelay + waitTimeSeconds
 
     return await wallet.executeSwap({
       fromBaseAmount: params.input.baseAmount,
@@ -141,7 +141,7 @@ export class ThorchainAMM {
       affiliateAddress,
       affiliateFee,
       interfaceID,
-      waitTime,
+      waitTimeSeconds,
     })
   }
   /**
@@ -149,6 +149,8 @@ export class ThorchainAMM {
    * @param params
    */
   private isValidSwap(params: EstimateSwapParams) {
+    // TODO validate all input fields
+
     if (eqAsset(params.input.asset, params.destinationAsset))
       throw Error(`sourceAsset and destinationAsset cannot be the same`)
 
@@ -177,21 +179,17 @@ export class ThorchainAMM {
     const input = params.input
     const inputInRune = await this.allPools.convert(input, AssetRuneNative)
 
-    const inboundFeeInAsset = calcInboundFee(input.asset, sourceInboundDetails.gas_rate)
-    let outboundFeeInAsset = calcInboundFee(params.destinationAsset, destinationInboundDetails.gas_rate)
+    const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails.gas_rate)
+    let outboundFeeInAsset = calcNetworkFee(params.destinationAsset, destinationInboundDetails.gas_rate)
     outboundFeeInAsset = outboundFeeInAsset.times(3)
 
     const inboundFeeInRune = await this.allPools.convert(inboundFeeInAsset, AssetRuneNative)
     const outboundFeeInRune = await this.allPools.convert(outboundFeeInAsset, AssetRuneNative)
-    console.log(`input = ${input.formatedAssetString()}`)
-    console.log(`inputInRune = ${inputInRune.formatedAssetString()}`)
-    console.log(`inboundFeeInAsset = ${inboundFeeInAsset.formatedAssetString()}`)
-    console.log(`outboundFeeInAsset = ${outboundFeeInAsset.formatedAssetString()}`)
-    console.log(`inboundFeeInRune = ${inboundFeeInRune.formatedAssetString()}`)
-    console.log(`outboundFeeInRune = ${outboundFeeInRune.formatedAssetString()}`)
 
     // ---------- Remove Fees from inbound before doing the swap -----------
-    const inputMinusInboundFeeInRune = inputInRune.minus(inboundFeeInRune) // are of the same type so this works.
+    // TODO confirm with chris about this change
+    // const inputMinusInboundFeeInRune = inputInRune.minus(inboundFeeInRune) // are of the same type so this works.
+    const inputMinusInboundFeeInRune = inputInRune
 
     // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
     const affiliateFeeInRune = inputMinusInboundFeeInRune.times(params.affiliateFeePercent || 0)
@@ -199,28 +197,33 @@ export class ThorchainAMM {
     const inputNetAmountInRune = inputMinusInboundFeeInRune.minus(affiliateFeeInRune)
     // convert back to input asset
     const inputNetInAsset = await this.allPools.convert(inputNetAmountInRune, input.asset)
-    console.log(`inputNetInAsset = ${inputNetInAsset.formatedAssetString()}`)
 
     // now calculate swapfee based on inputNetAmount
     const swapOutput = await this.allPools.getExpectedSwapOutput(inputNetInAsset, params.destinationAsset)
 
-    const swapFeeInAsset = new CryptoAmount(swapOutput.swapFee, params.destinationAsset)
+    const swapFeeInAsset = new CryptoAmount(swapOutput.swapFee, AssetRuneNative)
     const swapFeeInRune = await this.allPools.convert(swapFeeInAsset, AssetRuneNative)
 
     const outputInAsset = new CryptoAmount(swapOutput.output, params.destinationAsset)
     const outputInRune = await this.allPools.convert(outputInAsset, AssetRuneNative)
 
     // ---------------- Remove Outbound Fee ---------------------- /
-    console.log(`swapFeeInAsset = ${swapFeeInAsset.formatedAssetString()}`)
-    console.log(`swapFeeInRune = ${swapFeeInRune.formatedAssetString()}`)
-    console.log(`outputInRune = ${outputInRune.formatedAssetString()}`)
-    console.log(`outputInAsset = ${outputInAsset.formatedAssetString()}`)
-    console.log(`outboundFeeInAsset = ${outboundFeeInAsset.formatedAssetString()}`)
-
     const netOutputInRune = outputInRune.minus(outboundFeeInRune)
     const netOutputInAsset = await this.allPools.convert(netOutputInRune, params.destinationAsset)
-    console.log(`netOutputInRune = ${netOutputInRune.formatedAssetString()}`)
-    console.log(`netOutputInAsset = ${netOutputInAsset.formatedAssetString()}`)
+    // console.log(`input = ${input.formatedAssetString()}`)
+    // console.log(`inputInRune = ${inputInRune.formatedAssetString()}`)
+    // console.log(`inputNetInAsset = ${inputNetInAsset.formatedAssetString()}`)
+    // console.log(`inboundFeeInAsset = ${inboundFeeInAsset.formatedAssetString()}`)
+    // console.log(`outboundFeeInAsset = ${outboundFeeInAsset.formatedAssetString()}`)
+    // console.log(`inboundFeeInRune = ${inboundFeeInRune.formatedAssetString()}`)
+    // console.log(`outboundFeeInRune = ${outboundFeeInRune.formatedAssetString()}`)
+    // console.log(`swapFeeInAsset = ${swapFeeInAsset.formatedAssetString()}`)
+    // console.log(`swapFeeInRune = ${swapFeeInRune.formatedAssetString()}`)
+    // console.log(`outputInRune = ${outputInRune.formatedAssetString()}`)
+    // console.log(`outputInAsset = ${outputInAsset.formatedAssetString()}`)
+    // console.log(`outboundFeeInAsset = ${outboundFeeInAsset.formatedAssetString()}`)
+    // console.log(`netOutputInRune = ${netOutputInRune.formatedAssetString()}`)
+    // console.log(`netOutputInAsset = ${netOutputInAsset.formatedAssetString()}`)
 
     const totalFees: TotalFees = {
       inboundFee: inboundFeeInRune,
@@ -232,7 +235,7 @@ export class ThorchainAMM {
       totalFees: totalFees,
       slipPercentage: swapOutput.slip,
       netOutput: netOutputInAsset,
-      waitTime: 0, // will be set within EstimateSwap if canSwap = true
+      waitTimeSeconds: 0, // will be set within EstimateSwap if canSwap = true
       canSwap: false, // assume false for now, the getSwapEstimateErrors() step will flip this flag if required
     }
     return swapEstimate
@@ -389,7 +392,7 @@ export class ThorchainAMM {
       case THORChain:
         return AssetRuneNative
       case CosmosChain:
-        throw Error('Cosmos is not supported yet')
+        return AssetAtom
       case BCHChain:
         return AssetBCH
       case LTCChain:

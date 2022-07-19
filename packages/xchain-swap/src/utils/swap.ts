@@ -169,8 +169,9 @@ export const getContractAddressFromAsset = (asset: Asset): Address => {
  * @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
  * @returns
  */
-export const calcInboundFee = (sourceAsset: Asset, gasRate: BigNumber): CryptoAmount => {
-  switch (sourceAsset.chain) {
+export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount => {
+  if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
+  switch (asset.chain) {
     case Chain.Bitcoin:
       return new CryptoAmount(baseAmount(gasRate.multipliedBy(250)), AssetBTC)
       break
@@ -189,7 +190,7 @@ export const calcInboundFee = (sourceAsset: Asset, gasRate: BigNumber): CryptoAm
       return new CryptoAmount(baseAmount(gasRate), AssetBNB)
       break
     case Chain.Ethereum:
-      if (eqAsset(sourceAsset, AssetETH)) {
+      if (eqAsset(asset, AssetETH)) {
         return new CryptoAmount(baseAmount(gasRate.multipliedBy(35000)), AssetETH)
       } else {
         return new CryptoAmount(baseAmount(gasRate.multipliedBy(70000)), AssetETH)
@@ -205,5 +206,5 @@ export const calcInboundFee = (sourceAsset: Asset, gasRate: BigNumber): CryptoAm
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
       break
   }
-  throw new Error(`could not calculate inbound fee for ${sourceAsset.chain}`)
+  throw new Error(`could not calculate inbound fee for ${asset.chain}`)
 }
