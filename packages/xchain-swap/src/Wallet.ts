@@ -168,7 +168,7 @@ export class Wallet {
         walletIndex: 0,
         asset: swap.sourceAsset,
         amount: swap.fromBaseAmount,
-        recipient: inboundAsgard?.address || '',
+        recipient: inboundAsgard?.address || '', //TODO fix this
         memo: this.constructSwapMemo(swap),
       }
       // console.log(JSON.stringify(params, null, 2))
