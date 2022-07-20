@@ -3,42 +3,42 @@
 		"chain": "BCH",
 		"last_observed_in": 749430,
 		"last_signed_out": 6496031,
-		"thorchain": 6496038
+		"thorchain": 6510125
 	},
 	{
 		"chain": "BNB",
 		"last_observed_in": 254622037,
 		"last_signed_out": 6496031,
-		"thorchain": 6496038
+		"thorchain": 6510125
 	},
 	{
 		"chain": "BTC",
 		"last_observed_in": 745578,
 		"last_signed_out": 6496031,
-		"thorchain": 6496038
+		"thorchain": 6510125
 	},
 	{
 		"chain": "DOGE",
 		"last_observed_in": 4312530,
 		"last_signed_out": 6496031,
-		"thorchain": 6496038
+		"thorchain": 6510125
 	},
 	{
 		"chain": "ETH",
 		"last_observed_in": 15171427,
 		"last_signed_out": 6496031,
-		"thorchain": 6496038
+		"thorchain": 6510125
 	},
 	{
 		"chain": "GAIA",
 		"last_observed_in": 11319344,
 		"last_signed_out": 6496031,
-		"thorchain": 6496038
+		"thorchain": 6510125
 	},
 	{
 		"chain": "LTC",
 		"last_observed_in": 2300288,
 		"last_signed_out": 6496031,
-		"thorchain": 6496038
+		"thorchain": 6510125
 	}
 ]

@@ -4,6 +4,7 @@ import {
   LastBlock,
   NetworkApi,
   ObservedTx,
+  ObservedTxStatusEnum,
   QueueApi,
   TransactionsApi,
   TxOutItem,
@@ -162,7 +163,7 @@ export class Thornode {
 
   /**
    * For a given in Tx Hash (as returned by THORChainAMM.DoSwap()), finds the status of any THORChain transaction
-   *
+   * This function should be polled.
    * @param
    * @param destinationChain
    * @param inboundTxHash
@@ -171,26 +172,39 @@ export class Thornode {
   public async checkTx(inboundTxHash: string, sourceChain?: Chain): Promise<TxStatus> {
     let txStatus: TxStatus = { stage: TxStage.INBOUND_CHAIN_UNCONFIRMED, seconds: 0 }
     const txData = await this.getTxData(inboundTxHash)
-    const scheduledOutbound = await this.getscheduledQueue()
     const scheduledQueue = await this.getscheduledQueue()
     const scheduledQueueItem = scheduledQueue?.find((item: TxOutItem) => item.in_hash === inboundTxHash)
     const lastBlock = await this.getLastBlock()
     const lastBlockHeight = lastBlock.find((obj) => {
       return obj
     })
-    txStatus = await this.checkObservedTx(txStatus, txData.observed_tx, sourceChain)
-    if (txStatus.stage == TxStage.INBOUND_CHAIN_UNCONFIRMED) {
+    console.log(txData.observed_tx?.tx)
+    if (txData.observed_tx?.tx == undefined) {
       console.log(`Stage 1`)
+      txStatus = await this.checkObservedTx(txStatus, txData.observed_tx, sourceChain)
       return txStatus
-    } else if (txStatus) {
-      txStatus = await this.checkObservedOnly(txStatus, txData.observed_tx, sourceChain)
+    } else if (txData.observed_tx.status == ObservedTxStatusEnum.Incomplete) {
       console.log(`Stage 2`)
+      txStatus = await this.checkObservedOnly(txStatus, txData.observed_tx, sourceChain)
       return txStatus
-    } else if (txStatus) {
-      txStatus = await this.checkOutboundQueue(txStatus, scheduledOutbound, scheduledQueueItem, lastBlockHeight)
+    } else if (txData.observed_tx.status == ObservedTxStatusEnum.Done) {
+      console.log(`Stage 3`)
+      txStatus = await this.checkOutboundQueue(
+        txStatus,
+        txData.observed_tx,
+        scheduledQueue,
+        scheduledQueueItem,
+        lastBlockHeight,
+      )
+      return txStatus
+    } else if (scheduledQueueItem?.height == lastBlockHeight?.thorchain) {
+      console.log(`Stage 4`)
+      txStatus = await this.checkOutboundTx(txStatus, scheduledQueueItem, lastBlockHeight)
       return txStatus
     } else {
-      txStatus = await this.checkOutboundTx(txStatus, scheduledQueueItem, lastBlockHeight)
+      console.log('here')
+      txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
+      txStatus.seconds = 0
       return txStatus
     }
   }
@@ -226,12 +240,12 @@ export class Thornode {
       return obj.height
     })
     //If observed by not final, need to wait till the finalised block before moving to the next stage, blocks in source chain
-    if (observed_tx.block_height && sourceChain && observed_tx.finalise_height && observedTxBlockHeight?.height) {
+    if (observed_tx?.block_height && sourceChain && observed_tx?.finalise_height && observedTxBlockHeight?.height) {
       if (observed_tx.block_height < observed_tx.finalise_height) {
         txStatus.stage = TxStage.CONF_COUNTING
         const blocksToWait = observed_tx.finalise_height - observedTxBlockHeight?.height
         txStatus.seconds = blocksToWait * this.chainAttributes[sourceChain].avgBlockTimeInSecs
-      } else if (observed_tx.status != 'done') {
+      } else if (observed_tx.status != ObservedTxStatusEnum.Done) {
         // processed but not yet full final, e.g. not 2/3 nodes signed
         txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs // wait one more TC block
         txStatus.stage = TxStage.TC_PROCESSING
@@ -239,20 +253,27 @@ export class Thornode {
     }
     return txStatus
   }
+  /** Stage 3 */
   private async checkOutboundQueue(
     txStatus: TxStatus,
-    scheduledOutbound: TxOutItem[],
+    txData: ObservedTx,
+    scheduledQueue: TxOutItem[],
     scheduledQueueItem?: TxOutItem,
     lastBlockHeight?: LastBlock,
   ): Promise<TxStatus> {
     txStatus.stage = TxStage.OUTBOUND_QUEUED
-    if (scheduledOutbound.length == 0) {
+    if (scheduledQueue.length == 0 && txData.tx.memo) {
       // it is not queued, outbound Tx sent
       txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
-      txStatus.seconds = 60 // should be outbound chain time
+      const pool = txData.tx.memo.split(`:`, 2)
+      const ticker = pool[1].split(`.`, 1).toString()
+      const chain = this.getChain(ticker)
+      txStatus.seconds = this.chainAttributes[chain].avgBlockTimeInSecs
       return txStatus
     }
-    // If the scheudled block is greater than the current block, need to wait that amount of blocks till outbound is sent
+    console.log(scheduledQueueItem?.height)
+    console.log(lastBlockHeight?.thorchain)
+    // If the scheduled block is greater than the current block, need to wait that amount of blocks till outbound is sent
     if (scheduledQueueItem?.height && lastBlockHeight?.thorchain) {
       if (lastBlockHeight.thorchain < scheduledQueueItem?.height) {
         const blocksToWait = scheduledQueueItem.height - lastBlockHeight.thorchain
@@ -265,16 +286,17 @@ export class Thornode {
     }
     return txStatus
   }
-
+  /** Stage 4 */
   private async checkOutboundTx(
     txStatus: TxStatus,
     scheduledQueueItem?: TxOutItem,
     lastBlockHeight?: LastBlock,
   ): Promise<TxStatus> {
     if (scheduledQueueItem?.height && lastBlockHeight?.thorchain) {
+      console.log(`here`)
       const blockDifference = scheduledQueueItem.height - lastBlockHeight?.thorchain
       const timeElapsed = blockDifference * this.chainAttributes[THORChain].avgBlockTimeInSecs
-      if (blockDifference <= 0) {
+      if (blockDifference == 0) {
         // If Tx has just been sent, Stage 3 should pick this up really
         txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
         txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs
