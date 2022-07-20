@@ -10,8 +10,8 @@ import {
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { LiquidityPool } from './LiquidityPool'
 import { CryptoAmount } from './crypto-amount'
+import { LiquidityPool } from './liquidityPool'
 import { PoolCache, SwapOutput } from './types'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'

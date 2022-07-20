@@ -1,3 +1,3 @@
-export * from './Wallet'
-export * from './ThorchainAMM'
-export * from './LiquidityPool'
+export * from './wallet'
+export * from './thorchainAMM'
+export * from './liquidityPool'

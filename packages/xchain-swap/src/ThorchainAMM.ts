@@ -26,13 +26,13 @@ import {
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { AllPools } from './AllPools'
-import { Wallet } from './Wallet'
+import { AllPools } from './allPools'
 import { defaultChainAttributes } from './chainDefaults'
 import { CryptoAmount } from './crypto-amount'
 import { ChainAttributes, EstimateSwapParams, InboundDetail, SwapEstimate, SwapSubmitted, TotalFees } from './types'
 import { Midgard } from './utils/midgard'
 import { calcNetworkFee } from './utils/swap'
+import { Wallet } from './wallet'
 
 const BN_1 = new BigNumber(1)
 
@@ -87,6 +87,7 @@ export class ThorchainAMM {
 
     return swapEstimate
   }
+  // Affiliate fee is always in rune.. need to refactor this
   async getFeesIn(fees: TotalFees, asset: Asset): Promise<TotalFees> {
     return {
       inboundFee: await this.convert(fees.inboundFee, asset),
@@ -359,7 +360,7 @@ export class ThorchainAMM {
   private async confCounting(inbound: CryptoAmount): Promise<number> {
     // RUNE, BNB and Synths have near instant finality, so no conf counting required.
     if (isAssetRuneNative(inbound.asset) || eqAsset(AssetBNB, inbound.asset) || inbound.asset.synth) {
-      return 0
+      return this.chainAttributes[Chain.THORChain].avgBlockTimeInSecs
     }
     // Get the gas asset for the inbound.asset.chain
     const chainGasAsset = this.getChainAsset(inbound.asset.chain)

@@ -28,6 +28,7 @@ const swapParams = {
     affiliateFeePercent:0.03,        //optional
     slipLimit: new BigNumber(0.02)}//optional
 console.log(await thorchain.estimateSwap(swapParams))
+
 ```
 
 
