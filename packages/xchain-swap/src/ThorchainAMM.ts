@@ -87,6 +87,7 @@ export class ThorchainAMM {
 
     return swapEstimate
   }
+  // Affiliate fee is always in rune.. need to refactor this
   async getFeesIn(fees: TotalFees, asset: Asset): Promise<TotalFees> {
     return {
       inboundFee: await this.convert(fees.inboundFee, asset),
@@ -359,7 +360,7 @@ export class ThorchainAMM {
   private async confCounting(inbound: CryptoAmount): Promise<number> {
     // RUNE, BNB and Synths have near instant finality, so no conf counting required.
     if (eqAsset(AssetRuneNative, inbound.asset) || eqAsset(AssetBNB, inbound.asset) || inbound.asset.synth) {
-      return 0
+      return this.chainAttributes[Chain.THORChain].avgBlockTimeInSecs
     }
     // Get the gas asset for the inbound.asset.chain
     const chainGasAsset = this.getChainAsset(inbound.asset.chain)
