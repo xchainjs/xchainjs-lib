@@ -18,7 +18,7 @@ import {
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { LiquidityPool } from '../LiquidityPool'
+import { LiquidityPool } from '../liquidityPool'
 import { CryptoAmount } from '../crypto-amount'
 import { SwapOutput } from '../types'
 

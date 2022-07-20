@@ -194,7 +194,7 @@ export class Thornode {
       return txStatus
     }
   }
-  
+
   /** Stage 1  */
   private async checkObservedTx(txStatus: TxStatus, txData?: ObservedTx, sourceChain?: Chain): Promise<TxStatus> {
     // If there is an error Thornode does not know about it. wait 60 seconds
@@ -291,4 +291,3 @@ export class Thornode {
     return txStatus
   }
 }
-

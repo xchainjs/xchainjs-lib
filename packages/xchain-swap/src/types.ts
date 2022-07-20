@@ -2,8 +2,8 @@ import { Address, FeeOption } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { LiquidityPool } from './LiquidityPool'
 import { CryptoAmount } from './crypto-amount'
+import { LiquidityPool } from './liquidityPool'
 
 export type TotalFees = {
   inboundFee: CryptoAmount

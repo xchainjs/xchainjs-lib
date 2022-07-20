@@ -26,13 +26,13 @@ import {
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { AllPools } from './AllPools'
-import { Wallet } from './Wallet'
+import { AllPools } from './allPools'
 import { defaultChainAttributes } from './chainDefaults'
 import { CryptoAmount } from './crypto-amount'
 import { ChainAttributes, EstimateSwapParams, InboundDetail, SwapEstimate, SwapSubmitted, TotalFees } from './types'
 import { Midgard } from './utils/midgard'
 import { calcNetworkFee } from './utils/swap'
+import { Wallet } from './wallet'
 
 const BN_1 = new BigNumber(1)
 
