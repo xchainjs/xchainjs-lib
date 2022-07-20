@@ -188,7 +188,7 @@ export class ThorchainAMM {
 
     // ---------- Remove Fees from inbound before doing the swap -----------
     // TODO confirm with chris about this change
-    // const inputMinusInboundFeeInRune = inputInRune.minus(inboundFeeInRune) // are of the same type so this works.
+    // const inputMinusInboundFeeInRune = inputInRune.minus(inboundFeeInRune)
     const inputMinusInboundFeeInRune = inputInRune
 
     // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
@@ -358,7 +358,7 @@ export class ThorchainAMM {
    */
   private async confCounting(inbound: CryptoAmount): Promise<number> {
     // RUNE, BNB and Synths have near instant finality, so no conf counting required.
-    if (eqAsset(AssetRuneNative, inbound.asset) || eqAsset(AssetBNB, inbound.asset) || inbound.asset.synth) {
+    if (isAssetRuneNative(inbound.asset) || eqAsset(AssetBNB, inbound.asset) || inbound.asset.synth) {
       return 0
     }
     // Get the gas asset for the inbound.asset.chain
