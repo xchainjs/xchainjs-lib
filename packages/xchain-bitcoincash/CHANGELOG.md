@@ -1,9 +1,8 @@
-# v.0.13.2 (2022-07-21)
+# v.0.14.0 (2022-07-21)
 
-## Update
+### Breaking change
 
-- Remove `deposit` function to BitcoinCash `Client`
-- Remove tests for `deposit`
+- client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
 
 # v.0.13.1 (2022-05-05)
 

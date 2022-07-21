@@ -1,8 +1,8 @@
-# v.5.4.4 (2022-07-21)
+# v.5.5.0 (2022-07-21)
 
-## Update
-- Remove `deposit` from Binance `Client`
-- Remove tests for `deposit`
+### Breaking change
+
+- client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
 
 # v.5.4.3 (2022-05-05)
 
@@ -10,8 +10,7 @@
 
 - Add `deposit` to Binance `Client`
 - Update latest dependencies
-- Add tests for `deposit` 
-
+- Add tests for `deposit`
 
 # v.5.4.2 (2022-02-04)
 
