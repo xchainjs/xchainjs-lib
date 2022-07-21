@@ -1,7 +1,7 @@
 import { assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { LiquidityPool } from '../src/liquidityPool'
+import { LiquidityPool } from '../src/liquidity-pool'
 import { SwapOutput } from '../src/types'
 import {
   getDoubleSwap,

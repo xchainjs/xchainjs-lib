@@ -1,8 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Asset, AssetBNB, AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-import { ThorchainAMM } from '../src/ThorchainAMM'
 import { CryptoAmount } from '../src/crypto-amount'
+import { ThorchainAMM } from '../src/thorchain-amm'
 import { Midgard } from '../src/utils/midgard'
 
 // eslint-disable-next-line ordered-imports/ordered-imports
