@@ -1,3 +1,8 @@
+# v.0.26.0 (2022-07-20)
+
+### Breaking change
+
+- client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
 # v.0.25.1 (2022-06-02)
 
 ## Fix
