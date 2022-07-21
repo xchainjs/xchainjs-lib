@@ -3,6 +3,11 @@
 ### Breaking change
 
 - client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
+# v.0.13.2 (2022-07-13)
+
+## Fix
+
+- Broadcast same tx several times to Haskoin in case of `500` error (similar to #492, but for BCH)
 
 # v.0.13.1 (2022-05-05)
 
