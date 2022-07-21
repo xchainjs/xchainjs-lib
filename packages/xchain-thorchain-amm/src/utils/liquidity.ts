@@ -1,7 +1,7 @@
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { LiquidityPool } from '../liquidityPool'
+import { LiquidityPool } from '../liquidity-pool'
 import { Block, LiquidityData, UnitData } from '../types'
 
 /**

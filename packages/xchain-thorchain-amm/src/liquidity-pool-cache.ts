@@ -1,28 +1,30 @@
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
-import {
-  Asset,
-  assetToBase,
-  // assetAmount,
-  // assetToBase,
-  assetToString,
-  // baseAmount,
-  eqAsset,
-} from '@xchainjs/xchain-util'
+import { Asset, assetToBase, assetToString, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
-import { LiquidityPool } from './liquidityPool'
+import { LiquidityPool } from './liquidity-pool'
 import { PoolCache, SwapOutput } from './types'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'
 
 const SAME_ASSET_EXCHANGE_RATE = new BigNumber(1)
 
-export class AllPools {
+/**
+ * This class manages retrieving information from up to date Thorchain Liquidity Pools
+ */
+export class LiquidityPoolCache {
   private midgard: Midgard
   private poolCache: PoolCache | undefined
   private expirePoolCacheMillis
 
+  /**
+   * Contrustor to create a LiquidityPoolCache
+   *
+   * @param midgard - an instance of the midgard API (could be pointing to stagenet,testnet,mainnet)
+   * @param expirePoolCacheMillis - how long should the pools be cached before expiry
+   * @returns LiquidityPoolCache
+   */
   constructor(midgard: Midgard, expirePoolCacheMillis = 6000) {
     this.midgard = midgard
     this.expirePoolCacheMillis = expirePoolCacheMillis
@@ -30,6 +32,13 @@ export class AllPools {
     //initialize the cache
     this.refereshPoolCache()
   }
+
+  /**
+   * Gets the exchange rate of the from asset in terms on the to asset
+   *
+   * @param asset - cannot be RUNE.
+   * @returns Promise<BigNumber>
+   */
   async getExchangeRate(from: Asset, to: Asset): Promise<BigNumber> {
     let exchangeRate: BigNumber
     if (eqAsset(from, to)) {
@@ -49,13 +58,15 @@ export class AllPools {
       // from/R * R/to = from/to
       exchangeRate = lpFrom.runeToAssetRatio.times(lpTo.assetToRuneRatio)
     }
-    console.log(`1 ${from.ticker} = ${exchangeRate.toFixed()} ${to.ticker} `)
+
     return exchangeRate
   }
+
   /**
    * Gets the Liquidity Pool for a given Asset
-   * @param asset - cannot be RUNE.
-   * @returns
+   *
+   * @param asset - cannot be RUNE, since Rune is the other side of each pool.
+   * @returns Promise<LiquidityPool>
    */
   async getPoolForAsset(asset: Asset): Promise<LiquidityPool> {
     if (isAssetRuneNative(asset)) throw Error(`AssetRuneNative doesn't have a pool`)
@@ -67,9 +78,12 @@ export class AllPools {
     }
     throw Error(`Pool for ${assetToString(asset)} not found`)
   }
+
   /**
-   * Refereshs the pool values
-   * @returns
+   * Get all the Liquidity Pools currently cached.
+   * if the cache is expired, the pools wioll be re-fetched from midgard
+   *
+   * @returns Promise<Record<string, LiquidityPool>>
    */
   async getPools(): Promise<Record<string, LiquidityPool>> {
     const millisSinceLastRefeshed = Date.now() - (this.poolCache?.lastRefreshed || 0)
@@ -88,10 +102,12 @@ export class AllPools {
     }
   }
   /**
+   * Refreshes the Pool Cache
+   *
    * NOTE: do not call refereshPoolCache() directly, call getPools() instead
    * which will refresh the cache if it's expired
    */
-  async refereshPoolCache(): Promise<void> {
+  private async refereshPoolCache(): Promise<void> {
     const pools = await this.midgard.getPools()
     const poolMap: Record<string, LiquidityPool> = {}
     if (pools) {
@@ -107,9 +123,15 @@ export class AllPools {
   }
   /**
    *
-   * @param inputAmount - amount to swap
-   * @param pool - Pool Data, RUNE and ASSET Depths
-   * @returns swap output object - output - fee - slip
+   *  Calcuate the expected slip, output & swapFee given the current pool depths
+   *
+   *  swapFee - the amount of asset lost  according to slip calculations
+   *  slip - the percent (0-1) of original amount lost to slipfees
+   *  output - the amount of asset expected from the swap   *
+   *
+   * @param inputAmount - CryptoAmount amount to swap from
+   * @param destinationAsset - destimation Asset to swap to
+   * @returns SwapOutput - swap output object - output - fee - slip
    */
   async getExpectedSwapOutput(inputAmount: CryptoAmount, destinationAsset: Asset): Promise<SwapOutput> {
     if (isAssetRuneNative(inputAmount.asset)) {
@@ -127,12 +149,21 @@ export class AllPools {
       return getDoubleSwap(inputAmount.baseAmount, inPpool, destPool)
     }
   }
+  /**
+   * Returns the exchange of a CryptoAmount to a different Asset
+   *
+   * Ex. convert(input:100 BUSD, outAsset: BTC) -> 0.0001234 BTC
+   *
+   * @param input - amount/asset to convert to outAsset
+   * @param ouAsset - the Asset you want to convert to
+   * @returns CryptoAmount of input
+   */
   async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
     const exchangeRate = await this.getExchangeRate(input.asset, outAsset)
 
     const amt = input.assetAmount.times(exchangeRate)
     const result = new CryptoAmount(assetToBase(amt), outAsset)
-    // console.log(`${input.baseAmount.amount().toFixed()} = ${result.baseAmount.amount().toFixed()}`)
+
     return result
   }
 }

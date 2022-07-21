@@ -14,9 +14,9 @@ import {
 import { fail } from 'assert'
 import BigNumber from 'bignumber.js'
 
-import { ThorchainAMM } from '../src/ThorchainAMM'
 import { Wallet } from '../src/Wallet'
 import { CryptoAmount } from '../src/crypto-amount'
+import { ThorchainAMM } from '../src/thorchain-amm'
 import { SwapEstimate } from '../src/types'
 import { Midgard } from '../src/utils/midgard'
 

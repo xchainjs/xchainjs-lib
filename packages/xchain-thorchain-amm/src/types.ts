@@ -3,7 +3,7 @@ import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
-import { LiquidityPool } from './liquidityPool'
+import { LiquidityPool } from './liquidity-pool'
 
 export type TotalFees = {
   inboundFee: CryptoAmount

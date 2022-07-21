@@ -11,6 +11,10 @@ import { BigNumber } from 'bignumber.js'
 
 type CryptoNumeric = CryptoAmount | number | BigNumber
 
+/**
+ * Utility Class to combine an amount (asset/base) with the Asset
+ *
+ */
 export class CryptoAmount {
   baseAmount: BaseAmount
   readonly asset: Asset
@@ -81,6 +85,17 @@ export class CryptoAmount {
   get assetAmount(): AssetAmount {
     return baseToAsset(this.baseAmount)
   }
+  /**
+   * This guard protects against trying to perform math with different assets
+   *
+   * Example.
+   * const x = new CryptoAmount(baseAmount(1),AssetBTC)
+   * const y = new CryptoAmount(baseAmount(1),AssetETH)
+   *
+   * x.plus(y) <- will throw error "cannot perform math on 2 diff assets BTC.BTC ETH.ETH
+   *
+   * @param v - CryptoNumeric
+   */
   private check(v: CryptoNumeric) {
     if (v instanceof CryptoAmount) {
       if (!eqAsset(this.asset, v.asset)) {

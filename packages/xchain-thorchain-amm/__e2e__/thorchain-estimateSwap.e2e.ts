@@ -12,8 +12,8 @@ import {
 } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
-import { ThorchainAMM } from '../src/ThorchainAMM'
 import { CryptoAmount } from '../src/crypto-amount'
+import { ThorchainAMM } from '../src/thorchain-amm'
 import { EstimateSwapParams, SwapEstimate } from '../src/types'
 import { Midgard } from '../src/utils/midgard'
 

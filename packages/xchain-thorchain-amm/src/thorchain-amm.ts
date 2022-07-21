@@ -1,37 +1,13 @@
-import { AssetAtom } from '@xchainjs/xchain-cosmos/lib'
-import { AssetLUNA } from '@xchainjs/xchain-terra'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
-import {
-  Asset,
-  AssetBCH,
-  AssetBNB,
-  AssetBTC,
-  AssetDOGE,
-  AssetETH,
-  AssetLTC,
-  AssetRuneNative,
-  BCHChain,
-  BNBChain,
-  BTCChain,
-  Chain,
-  CosmosChain,
-  DOGEChain,
-  ETHChain,
-  LTCChain,
-  PolkadotChain,
-  THORChain,
-  TerraChain,
-  baseAmount,
-  eqAsset,
-} from '@xchainjs/xchain-util'
+import { Asset, AssetBNB, AssetRuneNative, Chain, THORChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { AllPools } from './allPools'
-import { defaultChainAttributes } from './chainDefaults'
+import { DefaultChainAttributes } from './chain-defaults'
 import { CryptoAmount } from './crypto-amount'
+import { LiquidityPoolCache } from './liquidity-pool-cache'
 import { ChainAttributes, EstimateSwapParams, InboundDetail, SwapEstimate, SwapSubmitted, TotalFees } from './types'
 import { Midgard } from './utils/midgard'
-import { calcNetworkFee } from './utils/swap'
+import { calcNetworkFee, getChainAsset } from './utils/swap'
 import { Wallet } from './wallet'
 
 const BN_1 = new BigNumber(1)
@@ -43,14 +19,23 @@ const BN_1 = new BigNumber(1)
  */
 export class ThorchainAMM {
   private midgard: Midgard
-  private allPools: AllPools
+  private allPools: LiquidityPoolCache
   private chainAttributes: Record<Chain, ChainAttributes>
 
-  constructor(midgard: Midgard, expirePoolCacheMillis = 6000, chainAttributes = defaultChainAttributes) {
+  /**
+   * Contructor to create a ThorchainAMM
+   *
+   * @param midgard - an instance of the midgard API (could be pointing to stagenet,testnet,mainnet)
+   * @param expirePoolCacheMillis - how long should the pools be cached before expiry
+   * @param chainAttributes - atrributes used to calculate waitTime & conf counting
+   * @returns ThorchainAMM
+   */
+  constructor(midgard: Midgard, expirePoolCacheMillis = 6000, chainAttributes = DefaultChainAttributes) {
     this.midgard = midgard
-    this.allPools = new AllPools(midgard, expirePoolCacheMillis)
+    this.allPools = new LiquidityPoolCache(midgard, expirePoolCacheMillis)
     this.chainAttributes = chainAttributes
   }
+
   /**
    * Provides a swap estimate for the given swap detail. Will check the params for errors before trying to get the estimate.
    * Uses current pool data, works out inbound and outboud fee, affiliate fees and works out the expected wait time for the swap (in and out)
@@ -87,7 +72,17 @@ export class ThorchainAMM {
 
     return swapEstimate
   }
-  // Affiliate fee is always in rune.. need to refactor this
+
+  /**
+   * Convinience method to convert TotalFees to a different CryptoAmount
+   *
+   * TotalFees are always calculated and returned in RUNE, this method can
+   * be used to show the equivalent fees in another Asset Type
+   *
+   * @param fees: TotalFees - the fees you want to convert
+   * @param asset: Asset - the asset you want the fees converted to
+   * @returns TotalFees in asset
+   */
   async getFeesIn(fees: TotalFees, asset: Asset): Promise<TotalFees> {
     return {
       inboundFee: await this.convert(fees.inboundFee, asset),
@@ -96,9 +91,20 @@ export class ThorchainAMM {
       affiliateFee: await this.convert(fees.affiliateFee, asset),
     }
   }
+
+  /**
+   * Returns the exchange of a CryptoAmount to a different Asset
+   *
+   * Ex. convert(input:100 BUSD, outAsset: BTC) -> 0.0001234 BTC
+   *
+   * @param input - amount/asset to convert to outAsset
+   * @param ouAsset - the Asset you want to convert to
+   * @returns CryptoAmount of input
+   */
   async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
     return await this.allPools.convert(input, outAsset)
   }
+
   /**
    * Conducts a swap with the given inputs. Should be called after estimateSwap() to ensure the swap is valid
    *
@@ -109,7 +115,7 @@ export class ThorchainAMM {
    * @param interfaceID - id if the calling interface (optional)
    * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
-  public async doSwap(
+  protected async doSwap(
     wallet: Wallet,
     params: EstimateSwapParams,
     destinationAddress: string,
@@ -211,20 +217,6 @@ export class ThorchainAMM {
     // ---------------- Remove Outbound Fee ---------------------- /
     const netOutputInRune = outputInRune.minus(outboundFeeInRune)
     const netOutputInAsset = await this.allPools.convert(netOutputInRune, params.destinationAsset)
-    // console.log(`input = ${input.formatedAssetString()}`)
-    // console.log(`inputInRune = ${inputInRune.formatedAssetString()}`)
-    // console.log(`inputNetInAsset = ${inputNetInAsset.formatedAssetString()}`)
-    // console.log(`inboundFeeInAsset = ${inboundFeeInAsset.formatedAssetString()}`)
-    // console.log(`outboundFeeInAsset = ${outboundFeeInAsset.formatedAssetString()}`)
-    // console.log(`inboundFeeInRune = ${inboundFeeInRune.formatedAssetString()}`)
-    // console.log(`outboundFeeInRune = ${outboundFeeInRune.formatedAssetString()}`)
-    // console.log(`swapFeeInAsset = ${swapFeeInAsset.formatedAssetString()}`)
-    // console.log(`swapFeeInRune = ${swapFeeInRune.formatedAssetString()}`)
-    // console.log(`outputInRune = ${outputInRune.formatedAssetString()}`)
-    // console.log(`outputInAsset = ${outputInAsset.formatedAssetString()}`)
-    // console.log(`outboundFeeInAsset = ${outboundFeeInAsset.formatedAssetString()}`)
-    // console.log(`netOutputInRune = ${netOutputInRune.formatedAssetString()}`)
-    // console.log(`netOutputInAsset = ${netOutputInAsset.formatedAssetString()}`)
 
     const totalFees: TotalFees = {
       inboundFee: inboundFeeInRune,
@@ -303,8 +295,7 @@ export class ThorchainAMM {
   /**
    * Works out how long an outbound Tx will be held by THORChain before sending.
    *
-   * @param asset asset being sent.
-   * @param outboundAmount the amount of that asset
+   * @param outboundAmount: CryptoAmount  being sent.
    * @returns required delay in seconds
    * @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/manager_txout_current.go#L548
    */
@@ -346,14 +337,14 @@ export class ThorchainAMM {
     minBlocks = minBlocks > maxTxOutOffset ? maxTxOutOffset : minBlocks
     return minBlocks * thorChainblocktime
   }
+
   /**
    * Finds the required confCount required for an inbound or outbound Tx to THORChain. Estimate based on Midgard data only.
    *
    * Finds the gas asset of the given asset (e.g. BUSD is on BNB), finds the value of asset in Gas Asset then finds the required confirmation count.
    * ConfCount is then times by 6 seconds.
    *
-   * @param inboundAsset - asset of the outbound amount.
-   * @param inboundAmount - netOuput of asset being swapped (any asset).
+   * @param inbound: CryptoAmount - amount/asset of the outbound amount.
    * @returns time in seconds before a Tx is confirmed by THORChain
    * @see https://docs.thorchain.org/chain-clients/overview
    */
@@ -363,7 +354,7 @@ export class ThorchainAMM {
       return this.chainAttributes[Chain.THORChain].avgBlockTimeInSecs
     }
     // Get the gas asset for the inbound.asset.chain
-    const chainGasAsset = this.getChainAsset(inbound.asset.chain)
+    const chainGasAsset = getChainAsset(inbound.asset.chain)
 
     // check for chain asset, else need to convert asset value to chain asset.
     const amountInGasAsset = await this.allPools.convert(inbound, chainGasAsset)
@@ -375,38 +366,6 @@ export class ThorchainAMM {
     const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(confConfig.blockReward).toNumber())
     // convert that into seconds
     return requiredConfs * confConfig.avgBlockTimeInSecs
-  }
-
-  /**
-   * Return the chain for a given Asset This method should live somewhere else.
-   * @param chain
-   * @returns the gas asset type for the given chain
-   */
-  protected getChainAsset = (chain: Chain): Asset => {
-    switch (chain) {
-      case BNBChain:
-        return AssetBNB
-      case BTCChain:
-        return AssetBTC
-      case ETHChain:
-        return AssetETH
-      case THORChain:
-        return AssetRuneNative
-      case CosmosChain:
-        return AssetAtom
-      case BCHChain:
-        return AssetBCH
-      case LTCChain:
-        return AssetLTC
-      case DOGEChain:
-        return AssetDOGE
-      case TerraChain:
-        return AssetLUNA
-      case PolkadotChain:
-        throw Error('Polkadot is not supported yet')
-      default:
-        throw Error('Unknown chain')
-    }
   }
 
   // public async addLiquidity(

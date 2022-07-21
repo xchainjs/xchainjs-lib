@@ -15,17 +15,7 @@ import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard/src/generated/midgardApi'
 import { Client as TerraClient } from '@xchainjs/xchain-terra'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
-import {
-  Asset,
-  AssetBTC,
-  AssetETH,
-  // AssetRuneNative,
-  BaseAmount,
-  Chain,
-  assetToString,
-  baseAmount,
-  eqAsset,
-} from '@xchainjs/xchain-util'
+import { Asset, AssetBTC, AssetETH, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import routerABI from './abi/routerABI.json'
@@ -44,12 +34,23 @@ const chainIds = {
   [Network.Testnet]: 'thorchain-testnet-v2',
 }
 const APPROVE_GASLIMIT_FALLBACK = '200000'
+const ONE_HOUR = 60 * 60 * 1000
+/**
+ * Wallet Class for managing all xchain-* wallets with a mnemonic seed.
+ */
 export class Wallet {
   private network: Network
   clients: Record<string, XChainClient>
   private asgardAssets: InboundAddressesItem[] | undefined = undefined
   private midgard: Midgard
 
+  /**
+   * Contructor to create a Wallet
+   *
+   * @param network - stagenet,testnet,mainnet
+   * @param phrase - mnemonic phrase
+   * @returns Wallet
+   */
   constructor(network: Network, phrase: string) {
     this.network = network
     const settings = { network, phrase }
@@ -65,8 +66,14 @@ export class Wallet {
       BNB: new BnbClient(settings),
       GAIA: new CosmosClient(settings),
     }
+    this.updateAsgardAddresses(ONE_HOUR)
   }
 
+  /**
+   * Fetch balances for all wallets
+   *
+   * @returns AllBalances[]
+   */
   async getAllBalances(): Promise<AllBalances[]> {
     const clientArray = Object.entries(this.clients)
     const allBalances = await Promise.all(
@@ -171,7 +178,7 @@ export class Wallet {
         recipient: inboundAsgard?.address || '', //TODO fix this
         memo: this.constructSwapMemo(swap),
       }
-      // console.log(JSON.stringify(params, null, 2))
+
       const hash = await client.transfer(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     }
@@ -301,8 +308,6 @@ export class Wallet {
   async getAsgardAssets(): Promise<InboundAddressesItem[]> {
     if (!this.asgardAssets) {
       this.asgardAssets = await this.midgard.getAllInboundAddresses()
-      //Refresh asgard address every 60 min
-      this.updateAsgardAddresses(60 * 60 * 1000)
     }
     return this.asgardAssets
   }

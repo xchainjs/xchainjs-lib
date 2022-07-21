@@ -25,7 +25,7 @@ import {
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 
-import { defaultChainAttributes } from '../chainDefaults'
+import { DefaultChainAttributes } from '../chain-defaults'
 import { ChainAttributes } from '../types'
 
 export type ThornodeConfig = {
@@ -73,7 +73,7 @@ export class Thornode {
   private queueApi: QueueApi[]
   private networkApi: NetworkApi[]
 
-  constructor(network: Network = Network.Mainnet, config?: ThornodeConfig, chainAttributes = defaultChainAttributes) {
+  constructor(network: Network = Network.Mainnet, config: ThornodeConfig, chainAttributes = DefaultChainAttributes) {
     this.network = network
     this.config = config ?? defaultThornodeConfig[this.network]
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })

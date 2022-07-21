@@ -2,7 +2,7 @@ import { Chain } from '@xchainjs/xchain-util/lib'
 
 import { ChainAttributes } from './types'
 
-const defaultChainAttributes: Record<Chain, ChainAttributes> = {
+const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
   BCH: {
     blockReward: 6.25,
     avgBlockTimeInSecs: 600,
@@ -45,4 +45,4 @@ const defaultChainAttributes: Record<Chain, ChainAttributes> = {
   },
 }
 
-export { defaultChainAttributes }
+export { DefaultChainAttributes }

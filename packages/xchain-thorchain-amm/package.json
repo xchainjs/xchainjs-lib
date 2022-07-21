@@ -1,7 +1,7 @@
 {
-  "name": "@xchainjs/xchain-swap",
+  "name": "@xchainjs/xchain-xchain-thorchain-amm",
   "version": "0.1.0-alpha",
-  "description": "Custom swap module that utilizes Asgardex-util to perfrom smart swaps",
+  "description": "module that exposes estimating & swappping cryptocurrency assets on thorchain",
   "keywords": [
     "THORChain",
     "XChain"

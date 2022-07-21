@@ -11,15 +11,25 @@ import {
   AssetETH,
   AssetLTC,
   AssetRuneNative,
+  BCHChain,
+  BNBChain,
+  BTCChain,
   BaseAmount,
   Chain,
+  CosmosChain,
+  DOGEChain,
+  ETHChain,
+  LTCChain,
+  PolkadotChain,
+  THORChain,
+  TerraChain,
   baseAmount,
   eqAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from '../crypto-amount'
-import { LiquidityPool } from '../liquidityPool'
+import { LiquidityPool } from '../liquidity-pool'
 import { SwapOutput } from '../types'
 
 /**
@@ -207,4 +217,36 @@ export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount =
       break
   }
   throw new Error(`could not calculate inbound fee for ${asset.chain}`)
+}
+
+/**
+ * Return the chain for a given Asset This method should live somewhere else.
+ * @param chain
+ * @returns the gas asset type for the given chain
+ */
+export const getChainAsset = (chain: Chain): Asset => {
+  switch (chain) {
+    case BNBChain:
+      return AssetBNB
+    case BTCChain:
+      return AssetBTC
+    case ETHChain:
+      return AssetETH
+    case THORChain:
+      return AssetRuneNative
+    case CosmosChain:
+      return AssetAtom
+    case BCHChain:
+      return AssetBCH
+    case LTCChain:
+      return AssetLTC
+    case DOGEChain:
+      return AssetDOGE
+    case TerraChain:
+      return AssetLUNA
+    case PolkadotChain:
+      throw Error('Polkadot is not supported yet')
+    default:
+      throw Error('Unknown chain')
+  }
 }
