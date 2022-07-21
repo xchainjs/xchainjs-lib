@@ -1,11 +1,17 @@
+# v.0.13.2 (2022-07-21)
+
+## Update
+
+- Remove `deposit` function to BitcoinCash `Client`
+- Remove tests for `deposit`
+
 # v.0.13.1 (2022-05-05)
 
 ## Update
 
 - Add `deposit` function to BitcoinCash `Client`
 - Update latest dependencies
-- Add tests for `deposit` 
-
+- Add tests for `deposit`
 
 # v.0.13.0 (2022-03-23)
 

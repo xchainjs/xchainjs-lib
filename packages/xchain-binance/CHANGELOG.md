@@ -1,3 +1,9 @@
+# v.5.4.4 (2022-07-21)
+
+## Update
+- Remove `deposit` from Binance `Client`
+- Remove tests for `deposit`
+
 # v.5.4.3 (2022-05-05)
 
 ## Update

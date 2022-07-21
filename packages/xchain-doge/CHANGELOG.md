@@ -1,10 +1,17 @@
+# v.0.2.2 (2022-07-21)
+
+## Update
+
+- Remove `deposit` function to Doge `Client`
+- Remove tests for `deposit`
+
 # v.0.2.1 (2022-05-05)
 
 ## Update
 
 - Add `deposit` function to Doge `Client`
 - Update latest dependencies
-- Add tests for `deposit` 
+- Add tests for `deposit`
 
 ## Fix
 
