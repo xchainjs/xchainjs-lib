@@ -1,11 +1,16 @@
+# v.0.2.0 (2022-07-20)
+
+### Breaking change
+
+- client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
+
 # v.0.1.2 (2022-05-05)
 
 ## Update
 
-- Add `deposit` function to Terra `Client` 
+- Add `deposit` function to Terra `Client`
 - Update latest dependencies
-- Add tests for `deposit` 
-
+- Add tests for `deposit`
 
 # v.0.1.1 (2022-04-27)
 

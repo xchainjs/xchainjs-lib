@@ -5,7 +5,6 @@ import {
   Address,
   Balance,
   BaseXChainClient,
-  DepositParams,
   FeeType,
   Fees,
   Network,
@@ -29,7 +28,6 @@ import {
   assetToString,
   baseAmount,
   baseToAsset,
-  getInboundDetails,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
@@ -475,36 +473,6 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
         fastest: multiTxFee,
       } as Fees,
     }
-  }
-
-  /**
-   * Transaction to THORChain inbound address.
-   *
-   * @param {DepositParams} params The transaction options.
-   * @returns {TxHash} The transaction hash.
-   *
-   * @throws {"halted chain"} Thrown if chain is halted.
-   * @throws {"halted trading"} Thrown if trading is halted.
-   */
-  async deposit({ walletIndex = 0, asset = AssetBNB, amount, memo }: DepositParams): Promise<TxHash> {
-    const inboundDetails = await getInboundDetails(asset.chain, this.network)
-
-    if (inboundDetails.haltedChain) {
-      throw new Error(`Halted chain for ${assetToString(asset)}`)
-    }
-    if (inboundDetails.haltedTrading) {
-      throw new Error(`Halted trading for ${assetToString(asset)}`)
-    }
-
-    const txHash = await this.transfer({
-      walletIndex,
-      asset,
-      amount,
-      recipient: inboundDetails.vault,
-      memo,
-    })
-
-    return txHash
   }
 }
 

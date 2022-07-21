@@ -4,4 +4,3 @@ export { default as bn, isValidBN, bnOrZero, validBNOrZero, formatBN, formatBNCu
 export * from './chain'
 export * from './string'
 export * from './types'
-export * from './midgard'

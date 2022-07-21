@@ -1,10 +1,14 @@
+# v.0.3.0 (2022-07-21)
+
+- client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
+
 # v.0.2.1 (2022-05-05)
 
 ## Update
 
 - Add `deposit` function to Doge `Client`
 - Update latest dependencies
-- Add tests for `deposit` 
+- Add tests for `deposit`
 
 ## Fix
 

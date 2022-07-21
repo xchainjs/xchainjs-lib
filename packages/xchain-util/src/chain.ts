@@ -30,6 +30,19 @@ export const DOGEChain = Chain.Doge
  */
 export const isChain = (c: string): c is Chain => (Object.values(Chain) as string[]).includes(c)
 
+export const isEnabledChain = (chain: Chain) => chain.includes(chain)
+
+/**
+ * Sees if one chain is equal to another chain
+ *
+ * @param a chain a
+ * @param b chain b
+ * @returns boolean: True if equal else False
+ */
+export const eqChain = (a: Chain, b: Chain) => {
+  return a == b
+}
+
 /**
  * Convert chain to string.
  *
@@ -54,3 +67,43 @@ export const chainToString: ((chainId: Chain) => string) & Record<Chain, string>
     [Chain.Doge]: 'Dogecoin',
   },
 )
+
+/**
+ * Check whether chain is BTC chain
+ */
+export const isBtcChain = (chain: Chain): boolean => eqChain(chain, BTCChain)
+
+/**
+ * Check whether chain is LTC chain
+ */
+export const isLtcChain = (chain: Chain): boolean => eqChain(chain, LTCChain)
+
+/**
+ * Check whether chain is THOR chain
+ */
+export const isThorChain = (chain: Chain): boolean => eqChain(chain, THORChain)
+
+/**
+ * Check whether chain is BNB chain
+ */
+export const isBnbChain = (chain: Chain): boolean => eqChain(chain, BNBChain)
+
+/**
+ * Check whether chain is ETH chain
+ */
+export const isEthChain = (chain: Chain): boolean => eqChain(chain, ETHChain)
+
+/**
+ * Check whether chain is BCH chain
+ */
+export const isBchChain = (chain: Chain): boolean => eqChain(chain, BCHChain)
+
+/**
+ * Check whether chain is DOGE chain
+ */
+export const isDogeChain = (chain: Chain): boolean => eqChain(chain, DOGEChain)
+
+/**
+ * Check whether chain is TERRA chain
+ */
+export const isTerraChain = (chain: Chain): boolean => eqChain(chain, TerraChain)

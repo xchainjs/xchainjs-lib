@@ -1,3 +1,9 @@
+# v.0.19.0 (2022-07-21)
+
+### Breaking change
+
+- client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
+
 # v.0.18.4 (2022-05-17)
 
 ## Update
@@ -7,8 +13,8 @@
 # v.0.18.3 (2022-05-08)
 
 ## Fix
-- Add improvement to error message on utxo pending
 
+- Add improvement to error message on utxo pending
 
 # v.0.18.2 (2022-05-05)
 
@@ -16,8 +22,7 @@
 
 - Add `deposit` function to Bitcoin `Client`
 - Update latest dependencies
-- Add tests for `deposit` 
-
+- Add tests for `deposit`
 
 # v.0.18.1 (2022-03-15)
 

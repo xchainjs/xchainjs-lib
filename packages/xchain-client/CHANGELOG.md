@@ -1,3 +1,9 @@
+# v.0.12.0 (2022-07-20)
+
+### Breaking change
+
+- DepositParams type removed, all thorchain deposits were moved to xchain-thorchain-amm
+
 # v.0.11.3 (2022-05-24)
 
 ## Update
