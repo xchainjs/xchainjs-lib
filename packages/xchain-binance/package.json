@@ -35,17 +35,17 @@
   "devDependencies": {
     "@binance-chain/javascript-sdk": "^4.2.0",
     "@types/big.js": "^4.0.5",
-    "@xchainjs/xchain-client": "^0.11.2",
+    "@xchainjs/xchain-client": "^0.12.0",
     "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.7.1"
+    "@xchainjs/xchain-util": "^0.8.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "peerDependencies": {
     "@binance-chain/javascript-sdk": "^4.2.0",
-    "@xchainjs/xchain-client": "^0.11.2",
+    "@xchainjs/xchain-client": "^0.12.0",
     "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.7.1"
+    "@xchainjs/xchain-util": "^0.8.0"
   }
 }
