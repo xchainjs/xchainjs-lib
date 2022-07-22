@@ -79,8 +79,8 @@ describe(`Thornode transaction status tests`, () => {
     expect(stageTwo).toEqual(stageTwoResponsePart2)
   })
   it(`Should test stage 3 and return TxStatus with`, async () => {
-    const stageTwo = await thornode.checkTx(txStageThree)
-    expect(stageTwo).toEqual(stageThreeResponse)
+    const stageThree = await thornode.checkTx(txStageThree)
+    expect(stageThree).toEqual(stageThreeResponse)
   })
   // it(`Should test stage 3 and return TxStatus with`, async () => {
   //   const stageTwo = await thornode.checkTx(txStageFour)
