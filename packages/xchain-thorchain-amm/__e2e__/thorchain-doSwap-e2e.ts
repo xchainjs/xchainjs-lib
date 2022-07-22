@@ -233,8 +233,6 @@ describe('xchain-swap doSwap Integration Tests', () => {
     }
   })
 
-
-
   // From ETH to Asset -- passes
   it(`Should perform a double swap from ETH to BNB`, async () => {
     const estimateSwapParams = {

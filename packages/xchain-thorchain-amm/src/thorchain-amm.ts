@@ -349,8 +349,8 @@ export class ThorchainAMM {
    * @returns time in seconds before a Tx is confirmed by THORChain
    * @see https://docs.thorchain.org/chain-clients/overview
    */
-  public async confCounting(inbound: CryptoAmount): Promise<number> {
-    // RUNE, BNB and Synths have near instant finality, so no conf counting required. - need to make a bft only case.
+  private async confCounting(inbound: CryptoAmount): Promise<number> {
+    // RUNE, BNB and Synths have near instant finality, so no conf counting required. - need to make a BFT only case.
     if (
       isAssetRuneNative(inbound.asset) ||
       inbound.asset.chain == AssetBNB.chain ||
@@ -362,18 +362,15 @@ export class ThorchainAMM {
     // Get the gas asset for the inbound.asset.chain
     const chainGasAsset = getChainAsset(inbound.asset.chain)
 
-    // check for chain asset, else need to convert asset value to chain asset.
+    // Check for chain asset, else need to convert asset value to chain asset.
     const amountInGasAsset = await this.allPools.convert(inbound, chainGasAsset)
-    console.log(amountInGasAsset.baseAmount.amount())
+
     // Convert to Asset Amount
     const amountInGasAssetInAsset = amountInGasAsset.assetAmount
-    console.log(amountInGasAssetInAsset.amount())
 
     const confConfig = this.chainAttributes[inbound.asset.chain]
-    console.log(confConfig)
-    // find the required confs - need to check this
+    // find the required confs
     const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(confConfig.blockReward).toNumber())
-    console.log(requiredConfs)
     // convert that into seconds
     return requiredConfs * confConfig.avgBlockTimeInSecs
   }
