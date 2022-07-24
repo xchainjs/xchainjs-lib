@@ -1,3 +1,9 @@
+# v.0.20.0 (2022-07-20)
+
+## Change
+
+- updated packages xchain-client & xchain-util
+
 # v.0.19.0 (2022-07-01)
 
 ## Add

@@ -4,7 +4,6 @@ import {
   Address,
   Balance,
   BaseXChainClient,
-  DepositParams,
   FeeOption,
   FeeRates,
   FeeType,
@@ -20,22 +19,12 @@ import {
   checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import {
-  Asset,
-  AssetETH,
-  BaseAmount,
-  Chain,
-  assetToString,
-  baseAmount,
-  delay,
-  getInboundDetails,
-} from '@xchainjs/xchain-util'
+import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
 
 import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import erc20ABI from './data/erc20.json'
-import routerABI from './data/routerABI.json'
 import * as etherscanAPI from './etherscan-api'
 import * as ethplorerAPI from './ethplorer-api'
 import {
@@ -54,7 +43,6 @@ import {
 } from './types'
 import {
   BASE_TOKEN_GAS_COST,
-  ETHAddress,
   ETH_DECIMAL,
   SIMPLE_GAS_COST,
   call,
@@ -71,7 +59,6 @@ import {
   getTxFromEthplorerTokenOperation,
   isApproved,
   isEthAsset,
-  strip0x,
   validateAddress,
   xchainNetworkToEths,
 } from './utils'
@@ -456,75 +443,6 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     return {
       total: transactions.length,
       txs: transactions.filter((_, index) => index >= offset && index < offset + limit),
-    }
-  }
-
-  /**
-   * Transaction to THORChain inbound address.
-   *
-   * @param {DepositParams} params The transaction options.
-   * @returns {TxHash} The transaction hash.
-   *
-   * @throws {"halted chain"} Thrown if chain is halted.
-   * @throws {"halted trading"} Thrown if trading is halted.
-   * @throws {"amount is not approved"} Thrown if the amount is not allowed to spend
-   * @throws {"router address is not defined"} Thrown if router address is not defined
-   */
-  async deposit({ walletIndex = 0, asset = AssetETH, amount, memo }: DepositParams): Promise<TxHash> {
-    const { haltedChain, haltedTrading, router, vault } = await getInboundDetails(asset.chain, this.network)
-
-    if (haltedChain) {
-      throw new Error(`Halted chain for ${assetToString(asset)}`)
-    }
-    if (haltedTrading) {
-      throw new Error(`Halted trading for ${assetToString(asset)}`)
-    }
-    if (!router) {
-      throw new Error('router address is not defined')
-    }
-
-    const address = this.getAddress(walletIndex)
-    const gasPrice = await this.estimateGasPrices()
-
-    if (asset.ticker.toUpperCase() === 'ETH') {
-      const contract = new ethers.Contract(router, routerABI)
-      const unsignedTx = await contract.populateTransaction.deposit(
-        vault,
-        ETHAddress,
-        amount.amount().toFixed(),
-        memo,
-        {
-          from: address,
-          value: 0,
-          gasPrice: gasPrice.fast.amount().toFixed(),
-        },
-      )
-      const response = await this.getWallet(walletIndex).sendTransaction(unsignedTx)
-      return typeof response === 'string' ? response : response.hash
-    } else {
-      const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
-      const contractAddress = strip0x(assetAddress)
-      const isApprovedResult = await this.isApproved({
-        amount: baseAmount(amount.amount()),
-        spenderAddress: router,
-        contractAddress,
-        walletIndex,
-      })
-
-      if (!isApprovedResult) {
-        throw new Error('The amount is not allowed to spend')
-      }
-
-      const checkSummedContractAddress = ethers.utils.getAddress(contractAddress)
-      const params = [vault, checkSummedContractAddress, amount.amount().toFixed(), memo]
-      const vaultContract = new ethers.Contract(router, routerABI)
-      const unsignedTx = await vaultContract.populateTransaction.deposit(...params, {
-        from: address,
-        value: 0,
-        gasPrice: gasPrice.fast.amount().toFixed(),
-      })
-      const { hash } = await this.getWallet(walletIndex).sendTransaction(unsignedTx)
-      return hash
     }
   }
 

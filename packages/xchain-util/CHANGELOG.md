@@ -1,3 +1,11 @@
+# v.0.8.0 (2022-07-20)
+
+### Breaking change
+
+- Removed `midgard.ts`, moved to xchain-midgard 
+- Removed types `InboundDetail`, `ServerInboundDetail`, moved to xchain-midgard 
+- removed dependency on "@xchainjs/xchain-client"
+
 # v.0.7.1 (2022-05-05)
 
 ## Update

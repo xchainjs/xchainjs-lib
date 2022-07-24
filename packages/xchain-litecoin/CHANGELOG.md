@@ -1,11 +1,16 @@
+# v.0.9.0 (2022-07-20)
+
+### Breaking change
+
+- client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
+
 # v.0.8.1
 
 ## Update
 
-- Add `deposit` function to Litecoin `Client` 
+- Add `deposit` function to Litecoin `Client`
 - Update to latest dependencies
-- Add tests for `deposit` 
-
+- Add tests for `deposit`
 
 # v.0.8.0 (2022-03-08)
 

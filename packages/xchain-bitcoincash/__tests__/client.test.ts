@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetBCH, baseAmount } from '@xchainjs/xchain-util'
+import { baseAmount } from '@xchainjs/xchain-util'
 
 import mockBitgoApi from '../__mocks__/bitgo'
 import mockHaskoinApi from '../__mocks__/haskoin'
@@ -231,18 +231,5 @@ describe('BCHClient Test', () => {
     const { fast, fastest, average } = await bchClient.getFeeRates()
     expect(fast > average)
     expect(fastest > fast)
-  })
-
-  it('should broadcast a deposit to thorchain inbound address', async () => {
-    bchClient.setNetwork(Network.Testnet)
-    bchClient.setPhrase(phrase)
-
-    const txHash = await bchClient.deposit({
-      asset: AssetBCH,
-      amount: baseAmount(100, 8),
-      memo: '=:THOR.RUNE:tthor1puhn8fclwvmmzh7uj7546wnxz5h3zar8e66sc5', // TODO change address
-    })
-
-    expect(txHash).toEqual('mock-txid-haskoin')
   })
 })

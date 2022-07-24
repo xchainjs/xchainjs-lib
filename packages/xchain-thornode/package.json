@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thornode",
-  "version": "0.1.0-alpha2",
+  "version": "0.1.0-alpha3",
   "license": "MIT",
   "description": "Thornode module that exposes all thornode functions using openapi-generator-cli",
   "keywords": [
@@ -30,7 +30,7 @@
     "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests",
     "generate:types": "yarn clean:types:thornode && yarn generate:types:convertToJson && yarn generate:types:thornode && yarn clean:types:tempFiles",
-    "generate:types:convertToJson": "curl 'https://thornode.ninerealms.com/thorchain/doc/openapi.yaml' > ./input.yaml && yaml2json ./input.yaml --pretty > ./input.json",
+    "generate:types:convertToJson": "curl 'https://gitlab.com/thorchain/thornode/-/raw/357456ea9e71cb2e846157b169bb5581b4075d0f/openapi/openapi.yaml' > ./input.yaml && yaml2json ./input.yaml --pretty > ./input.json",
     "generate:types:thornode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i ./input.json -g typescript-axios -o ./src/generated/thornodeApi --reserved-words-mappings  in=in",
     "clean:types:tempFiles": "rimraf ./input.yaml ./input.json",
     "clean:types:thornode": "rimraf ./src/generated/thornodeApi"

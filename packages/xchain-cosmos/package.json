@@ -32,7 +32,7 @@
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.11.3",
+    "@xchainjs/xchain-client": "^0.12.0",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.7.1",
     "@cosmos-client/core": "^0.45.10",
@@ -43,9 +43,9 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.11.3",
+    "@xchainjs/xchain-client": "^0.12.0",
     "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.7.1",
+    "@xchainjs/xchain-util": "^0.8.0",
     "@cosmos-client/core": "^0.45.10",
     "axios": "^0.25.0"
   }
