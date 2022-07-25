@@ -172,22 +172,22 @@ export class Thornode {
   public async checkTx(inboundTxHash: string, sourceChain?: Chain): Promise<TxStatus> {
     let txStatus: TxStatus = { stage: TxStage.INBOUND_CHAIN_UNCONFIRMED, seconds: 0 }
     const txData = await this.getTxData(inboundTxHash)
+    console.log(txData.observed_tx?.tx.chain)
     const scheduledQueue = await this.getscheduledQueue()
     const scheduledQueueItem = scheduledQueue?.find((item: TxOutItem) => item.in_hash === inboundTxHash)
     const lastBlock = await this.getLastBlock()
     const lastBlockHeight = lastBlock.find((obj) => {
       return obj
     })
-    console.log(txData.observed_tx?.tx)
-    if (txData.observed_tx?.tx == undefined) {
+    if (txData.observed_tx == undefined) {
       console.log(`Stage 1`)
-      txStatus = await this.checkObservedTx(txStatus, txData.observed_tx, sourceChain)
-      return txStatus
-    } else if (txData.observed_tx.status == ObservedTxStatusEnum.Incomplete) {
+      txStatus = await this.checkObservedTx(txStatus, sourceChain)
+    }
+    if (txData.observed_tx?.tx && txData.observed_tx?.status != ObservedTxStatusEnum.Done) {
       console.log(`Stage 2`)
       txStatus = await this.checkObservedOnly(txStatus, txData.observed_tx, sourceChain)
-      return txStatus
-    } else if (txData.observed_tx.status == ObservedTxStatusEnum.Done) {
+    }
+    if (txData.observed_tx?.tx && txData.observed_tx?.status == ObservedTxStatusEnum.Done) {
       console.log(`Stage 3`)
       txStatus = await this.checkOutboundQueue(
         txStatus,
@@ -196,29 +196,22 @@ export class Thornode {
         scheduledQueueItem,
         lastBlockHeight,
       )
-      return txStatus
-    } else if (scheduledQueueItem?.height == lastBlockHeight?.thorchain) {
+    }
+    if (txStatus.stage >= TxStage.OUTBOUND_CHAIN_UNCONFIRMED) {
       console.log(`Stage 4`)
       txStatus = await this.checkOutboundTx(txStatus, scheduledQueueItem, lastBlockHeight)
-      return txStatus
-    } else {
-      console.log('here')
-      txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
-      txStatus.seconds = 0
-      return txStatus
     }
+    return txStatus
   }
 
   /** Stage 1  */
-  private async checkObservedTx(txStatus: TxStatus, txData?: ObservedTx, sourceChain?: Chain): Promise<TxStatus> {
+  private async checkObservedTx(txStatus: TxStatus, sourceChain?: Chain): Promise<TxStatus> {
     // If there is an error Thornode does not know about it. wait 60 seconds
     // If a long block time like BTC, can check or poll to see if the status changes.
-    if (!txData?.tx) {
-      if (sourceChain) {
-        txStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
-      } else {
-        txStatus.seconds = 60
-      }
+    if (sourceChain) {
+      txStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
+    } else {
+      txStatus.seconds = 60
     }
     return txStatus
   }
@@ -230,10 +223,10 @@ export class Thornode {
     observed_tx?: ObservedTx,
     sourceChain?: Chain,
   ): Promise<TxStatus> {
-    if (observed_tx?.tx.chain != undefined) {
+    if (observed_tx?.tx?.chain != undefined) {
       sourceChain = this.getChain(observed_tx.tx.chain)
     } else {
-      throw new Error(`Cannot get source chain ${observed_tx?.tx.chain}`)
+      throw new Error(`Cannot get source chain ${observed_tx?.tx?.chain}`)
     }
     const scheduledOutbound = await this.getscheduledQueue()
     const observedTxBlockHeight = scheduledOutbound.find((obj) => {
@@ -261,20 +254,30 @@ export class Thornode {
     scheduledQueueItem?: TxOutItem,
     lastBlockHeight?: LastBlock,
   ): Promise<TxStatus> {
-    txStatus.stage = TxStage.OUTBOUND_QUEUED
-    if (scheduledQueue.length == 0 && txData.tx.memo) {
-      // it is not queued, outbound Tx sent
+    txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
+    console.log(scheduledQueue.length) 
+    if (scheduledQueue.length == 0 && txData?.tx?.memo) {
+      console.log(scheduledQueue.length)
+      // if it is not queued, outbound Tx sent
       txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
       const pool = txData.tx.memo.split(`:`, 2)
-      const ticker = pool[1].split(`.`, 1).toString()
-      const chain = this.getChain(ticker)
-      txStatus.seconds = this.chainAttributes[chain].avgBlockTimeInSecs
+      const synthCheck = pool[1].split('/')
+      if (synthCheck.length == 2) {
+        console.log(synthCheck.length)
+        console.log(pool)
+        txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs
+      } else {
+        console.log(synthCheck.length)
+        console.log(pool)
+        const ticker = pool[1].split(`.`, 1).toString()
+        const chain = this.getChain(ticker)
+        txStatus.seconds = this.chainAttributes[chain].avgBlockTimeInSecs
+      }
       return txStatus
     }
-    console.log(scheduledQueueItem?.height)
-    console.log(lastBlockHeight?.thorchain)
     // If the scheduled block is greater than the current block, need to wait that amount of blocks till outbound is sent
     if (scheduledQueueItem?.height && lastBlockHeight?.thorchain) {
+      console.log(`here in second if`)
       if (lastBlockHeight.thorchain < scheduledQueueItem?.height) {
         const blocksToWait = scheduledQueueItem.height - lastBlockHeight.thorchain
         txStatus.stage = TxStage.OUTBOUND_QUEUED
@@ -282,8 +285,10 @@ export class Thornode {
         return txStatus
       } else {
         txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
+        return txStatus
       }
     }
+    console.log(txStatus.stage, txStatus.seconds)
     return txStatus
   }
   /** Stage 4 */
@@ -293,14 +298,14 @@ export class Thornode {
     lastBlockHeight?: LastBlock,
   ): Promise<TxStatus> {
     if (scheduledQueueItem?.height && lastBlockHeight?.thorchain) {
-      console.log(`here`)
       const blockDifference = scheduledQueueItem.height - lastBlockHeight?.thorchain
+      console.log(`Block difference ${blockDifference}`)
       const timeElapsed = blockDifference * this.chainAttributes[THORChain].avgBlockTimeInSecs
       if (blockDifference == 0) {
         // If Tx has just been sent, Stage 3 should pick this up really
         txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
         txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs
-      } else if (timeElapsed < this.chainAttributes[THORChain].avgBlockTimeInSecs) {
+      } else if (timeElapsed < txStatus.seconds) {
         // if the time passed since the outbound TX was sent is less than the outbound block time, outbound Tx unconfirmed, wait a bit longer.
         txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
         txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs - timeElapsed // workout how long to wait

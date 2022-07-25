@@ -168,7 +168,6 @@ export class Midgard {
         throw Error(`Could not find network value name`)
       }
     }
-    console.log(retVal)
     return retVal
   }
 
