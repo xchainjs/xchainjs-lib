@@ -189,7 +189,6 @@ export class Thornode {
     // If its scheduled and observed
     if (scheduledQueueItem && txData.observed_tx) {
       txStatus = await this.checkObservedOnly(txStatus, scheduledQueueItem, txData.observed_tx, sourceChain)
-      console.log(txStatus.stage)
     }
     // Retrieve asset and chain from memo
     const pool = txData.observed_tx.tx.memo?.split(`:`)
@@ -242,7 +241,6 @@ export class Thornode {
         }
         return txStatus
       } else {
-        console.log(txData.observed_tx?.status)
         txStatus.seconds = 0
         txStatus.stage = TxStage.OUTBOUND_CHAIN_CONFIRMED
       }
