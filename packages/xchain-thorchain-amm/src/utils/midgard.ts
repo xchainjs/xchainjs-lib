@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Configuration, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
+import { Action, Configuration, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
 import { AssetRuneNative, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
@@ -135,7 +135,6 @@ export class Midgard {
    */
   async getScheduledOutboundValue(): Promise<CryptoAmount> {
     const path = 'v2/thorchain/queue'
-
     for (const baseUrl of this.config.midgardBaseUrls) {
       try {
         const { data } = await axios.get(`${baseUrl}${path}`)
@@ -181,6 +180,22 @@ export class Midgard {
       try {
         const data = (await api.getHealth()).data
         return +data.scannerHeight
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    throw Error(`Midgard not responding`)
+  }
+  /**
+   * Gets actions related to a txID
+   * @param txHash transaction id
+   * @returns Type Action array of objects
+   */
+  public async getActions(txHash: string): Promise<Action[]> {
+    for (const api of this.midgardApis) {
+      try {
+        const actions = (await api.getActions('', txHash)).data.actions
+        return actions
       } catch (e) {
         console.error(e)
       }
