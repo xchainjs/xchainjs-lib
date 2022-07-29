@@ -183,17 +183,17 @@ export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount =
   if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
   switch (asset.chain) {
     case Chain.Bitcoin:
-      return new CryptoAmount(baseAmount(gasRate.multipliedBy(250)), AssetBTC)
+      return new CryptoAmount(baseAmount(gasRate.multipliedBy(1000)), AssetBTC)
       break
     case Chain.BitcoinCash:
-      return new CryptoAmount(baseAmount(gasRate.multipliedBy(250)), AssetBCH)
+      return new CryptoAmount(baseAmount(gasRate.multipliedBy(1500)), AssetBCH)
       break
     case Chain.Litecoin:
       return new CryptoAmount(baseAmount(gasRate.multipliedBy(250)), AssetLTC)
       break
     case Chain.Doge:
       // NOTE: UTXO chains estimate fees with a 250 byte size
-      return new CryptoAmount(baseAmount(gasRate.multipliedBy(250)), AssetDOGE)
+      return new CryptoAmount(baseAmount(gasRate.multipliedBy(1000)), AssetDOGE)
       break
     case Chain.Binance:
       //flat fee
@@ -201,9 +201,9 @@ export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount =
       break
     case Chain.Ethereum:
       if (eqAsset(asset, AssetETH)) {
-        return new CryptoAmount(baseAmount(gasRate.multipliedBy(35000)), AssetETH)
+        return new CryptoAmount(baseAmount(gasRate.multipliedBy(80000)), AssetETH)
       } else {
-        return new CryptoAmount(baseAmount(gasRate.multipliedBy(70000)), AssetETH)
+        return new CryptoAmount(baseAmount(gasRate.multipliedBy(80000)), AssetETH)
       }
       break
     case Chain.Terra:

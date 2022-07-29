@@ -229,32 +229,4 @@ describe('xchain-swap estimate Integration Tests', () => {
     console.log(values)
     expect(Number.parseInt(values[constant])).toEqual(10000000000)
   })
-
-  // it('Should fail estimate swap because destination chain is halted ', async () => {
-  //   const swapParams: EstimateSwapParams = {
-  //     input: new CryptoAmount(assetToBase(assetAmount(2)), AssetETH),
-  //     destinationAsset: AssetLTC,
-  //   }
-  //   try {
-  //     const estimate = await thorchainAmm.estimateSwap(swapParams)
-  //     print(estimate, swapParams.input)
-  //     fail()
-  //   } catch (error: any) {
-  //     expect(error.message).toEqual(`destination pool is halted`)
-  //   }
-  // })
-
-  // it('Should fail estimate swap because source chain is halted ', async () => {
-  //   const swapParams: EstimateSwapParams = {
-  //     input: new CryptoAmount(assetToBase(assetAmount(2)), AssetLTC),
-  //     destinationAsset: AssetETH,
-  //   }
-  //   try {
-  //     const estimate = await thorchainAmm.estimateSwap(swapParams)
-  //     print(estimate, swapParams.input)
-  //     fail()
-  //   } catch (error: any) {
-  //     expect(error.message).toEqual(`source pool is halted`)
-  //   }
-  // })
 })
