@@ -1,6 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Asset, AssetBNB, AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
+import { ThorchainCache } from '../src'
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainAMM } from '../src/thorchain-amm'
 import { Midgard } from '../src/utils/midgard'
@@ -9,7 +10,8 @@ import { Midgard } from '../src/utils/midgard'
 import mockMidgardApi from '../__mocks__/midgard-api'
 
 const midgardts = new Midgard(Network.Mainnet)
-const thorchainAmm = new ThorchainAMM(midgardts)
+const thorchainCache = new ThorchainCache(midgardts)
+const thorchainAmm = new ThorchainAMM(thorchainCache)
 
 describe('ThorchainAmm Client Test', () => {
   beforeAll(() => {

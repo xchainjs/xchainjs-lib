@@ -3,19 +3,18 @@ import {
   Address,
   Balance,
   BaseXChainClient,
-  FeeBounds,
   FeeOption,
   FeeRates,
   FeeType,
   Fees,
   Network,
-  RootDerivationPaths,
   Tx,
   TxHash,
   TxHistoryParams,
   TxParams,
   TxsPage,
   XChainClient,
+  XChainClientParams,
   checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
@@ -51,27 +50,27 @@ import {
 /**
  * Interface for custom EVM client
  */
-export interface EVMClient {
-  call<T>(params: CallParams): Promise<T>
-  estimateCall(asset: EstimateCallParams): Promise<BigNumber>
-  estimateGasPrices(): Promise<GasPrices>
-  estimateGasLimit(params: TxParams): Promise<BigNumber>
-  estimateFeesWithGasPricesAndLimits(params: TxParams): Promise<FeesWithGasPricesAndLimits>
-  estimateApprove(params: EstimateApproveParams): Promise<BigNumber>
-  isApproved(params: IsApprovedParams): Promise<boolean>
-  approve(params: ApproveParams): Promise<TransactionResponse>
-  // `getFees` of `BaseXChainClient` needs to be overridden
-  getFees(params: TxParams): Promise<Fees>
-  getWallet(walletIndex?: number): ethers.Wallet
-  getProvider(): Provider
-}
+// export interface EVMClient {
+//   call<T>(params: CallParams): Promise<T>
+//   estimateCall(asset: EstimateCallParams): Promise<BigNumber>
+//   estimateGasPrices(): Promise<GasPrices>
+//   estimateGasLimit(params: TxParams): Promise<BigNumber>
+//   estimateFeesWithGasPricesAndLimits(params: TxParams): Promise<FeesWithGasPricesAndLimits>
+//   estimateApprove(params: EstimateApproveParams): Promise<BigNumber>
+//   isApproved(params: IsApprovedParams): Promise<boolean>
+//   approve(params: ApproveParams): Promise<TransactionResponse>
+//   // `getFees` of `BaseXChainClient` needs to be overridden
+//   getFees(params: TxParams): Promise<Fees>
+//   getWallet(walletIndex?: number): ethers.Wallet
+//   getProvider(): Provider
+// }
 type EvmDefaults = {
   transferGasAssetGasLimit: BigNumber
   transferTokenGasLimit: BigNumber
   gasPrice: BigNumber
 }
 
-export type EVMClientParams = {
+export type EVMClientParams = XChainClientParams & {
   chain: Chain
   gasAsset: Asset
   gasAssetDecimals: number
@@ -79,16 +78,13 @@ export type EVMClientParams = {
   providers: Record<Network, Provider>
   explorerProviders: ExplorerProviders
   dataProviders: OnlineDataProviders
-  network?: Network | undefined
-  phrase?: string | undefined
-  feeBounds?: FeeBounds | undefined
-  rootDerivationPaths?: RootDerivationPaths | undefined
 }
 
 /**
  * Custom EVM client
  */
-export default class Client extends BaseXChainClient implements XChainClient, EVMClient {
+export default class Client extends BaseXChainClient implements XChainClient {
+  readonly config: EVMClientParams
   private gasAsset: Asset
   private gasAssetDecimals: number
   private defaults: EvmDefaults
@@ -114,6 +110,18 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
     dataProviders,
   }: EVMClientParams) {
     super(chain, { network, rootDerivationPaths, feeBounds })
+    this.config = {
+      chain,
+      gasAsset,
+      gasAssetDecimals,
+      defaults,
+      network,
+      feeBounds,
+      providers,
+      rootDerivationPaths,
+      explorerProviders,
+      dataProviders,
+    }
     this.defaults = defaults
     this.gasAsset = gasAsset
     this.gasAssetDecimals = gasAssetDecimals
@@ -620,6 +628,7 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
   async estimateFeesWithGasPricesAndLimits(params: TxParams): Promise<FeesWithGasPricesAndLimits> {
     // gas prices
     const gasPrices = await this.estimateGasPrices()
+    const decimals = this.gasAssetDecimals
     const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
 
     // gas limits
@@ -634,9 +643,9 @@ export default class Client extends BaseXChainClient implements XChainClient, EV
       gasPrices,
       fees: {
         type: FeeType.PerByte,
-        average: getFee({ gasPrice: averageGP, gasLimit }),
-        fast: getFee({ gasPrice: fastGP, gasLimit }),
-        fastest: getFee({ gasPrice: fastestGP, gasLimit }),
+        average: getFee({ gasPrice: averageGP, gasLimit, decimals }),
+        fast: getFee({ gasPrice: fastGP, gasLimit, decimals }),
+        fastest: getFee({ gasPrice: fastestGP, gasLimit, decimals }),
       },
       gasLimit,
     }

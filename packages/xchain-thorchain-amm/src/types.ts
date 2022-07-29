@@ -1,4 +1,5 @@
 import { Address, FeeOption } from '@xchainjs/xchain-client'
+import { InboundAddressesItem } from '@xchainjs/xchain-midgard'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -24,6 +25,19 @@ export type SwapEstimate = {
 export type PoolCache = {
   lastRefreshed: number
   pools: Record<string, LiquidityPool>
+}
+
+export type AsgardCache = {
+  lastRefreshed: number
+  inboundAddressesItems: Record<string, InboundAddressesItem>
+}
+export type InboundDetailCache = {
+  lastRefreshed: number
+  inboundDetails: Record<string, InboundDetail>
+}
+export type NetworkValuesCache = {
+  lastRefreshed: number
+  networkValues: Record<string, number>
 }
 
 export type MidgardConfig = {

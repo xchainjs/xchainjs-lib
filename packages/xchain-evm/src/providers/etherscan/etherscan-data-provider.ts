@@ -1,23 +1,10 @@
 import { Provider } from '@ethersproject/abstract-provider'
-import {
-  Address,
-  Balance,
-  FeeOption,
-  FeeType,
-  Fees,
-  Tx,
-  // TxFrom,
-  TxHistoryParams,
-  // TxTo,
-  // TxType,
-  TxsPage,
-} from '@xchainjs/xchain-client'
+import { Address, Balance, Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { BigNumber, ethers } from 'ethers'
 
 import erc20ABI from '../../data/erc20.json'
-import { GasPrices } from '../../types'
 import { OnlineDataProvider } from '../../types/provider-types'
 
 import * as etherscanAPI from './etherscan-api'
@@ -48,15 +35,7 @@ export class EtherscanProvider implements OnlineDataProvider {
     this.nativeAsset
     this.chain
   }
-  async estimateGasPrices(): Promise<GasPrices> {
-    // TODO get gas prices
-    // try {
-    //   return await this.estimateGasPricesFromEtherscan()
-    // } catch (error) {
-    //   return Promise.reject(new Error(`Failed to estimate gas price: ${error}`))
-    // }
-    throw Error('not implemented')
-  }
+
   async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
     //validate assets are for the correct chain
     assets?.forEach((i) => {
@@ -225,13 +204,5 @@ export class EtherscanProvider implements OnlineDataProvider {
     if (!tx) throw new Error('Could not get transaction history')
 
     return tx
-  }
-  async getFees(): Promise<Fees> {
-    return {
-      [FeeOption.Average]: baseAmount(1),
-      [FeeOption.Fast]: baseAmount(1),
-      [FeeOption.Fastest]: baseAmount(1),
-      type: FeeType.PerByte,
-    }
   }
 }

@@ -14,11 +14,13 @@ import BigNumber from 'bignumber.js'
 
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainAMM } from '../src/thorchain-amm'
+import { ThorchainCache } from '../src/thorchain-cache'
 import { EstimateSwapParams, SwapEstimate } from '../src/types'
 import { Midgard } from '../src/utils/midgard'
 
 const midgard = new Midgard(Network.Mainnet)
-const thorchainAmm = new ThorchainAMM(midgard)
+const thorchainCache = new ThorchainCache(midgard)
+const thorchainAmm = new ThorchainAMM(thorchainCache)
 
 function print(estimate: SwapEstimate, input: CryptoAmount) {
   const expanded = {
@@ -225,9 +227,9 @@ describe('xchain-swap estimate Integration Tests', () => {
 
   it(`Should return the correct network value`, async () => {
     const constant = 'TXOUTDELAYRATE'
-    const values = await midgard.getNetworkValueByNames([constant])
+    const values = (await thorchainCache.getNetworkValues())[constant]
     console.log(values)
-    expect(Number.parseInt(values[constant])).toEqual(10000000000)
+    expect(values[constant]).toEqual(10000000000)
   })
 
   // it('Should fail estimate swap because destination chain is halted ', async () => {

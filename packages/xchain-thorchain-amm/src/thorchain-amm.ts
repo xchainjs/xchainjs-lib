@@ -4,9 +4,8 @@ import { BigNumber } from 'bignumber.js'
 
 import { DefaultChainAttributes } from './chain-defaults'
 import { CryptoAmount } from './crypto-amount'
-import { LiquidityPoolCache } from './liquidity-pool-cache'
+import { ThorchainCache } from './thorchain-cache'
 import { ChainAttributes, EstimateSwapParams, InboundDetail, SwapEstimate, SwapSubmitted, TotalFees } from './types'
-import { Midgard } from './utils/midgard'
 import { calcNetworkFee, getChainAsset } from './utils/swap'
 import { Wallet } from './wallet'
 
@@ -18,8 +17,7 @@ const BN_1 = new BigNumber(1)
  * Has access to Midgard and THORNode data
  */
 export class ThorchainAMM {
-  private midgard: Midgard
-  private allPools: LiquidityPoolCache
+  private thorchainCache: ThorchainCache
   private chainAttributes: Record<Chain, ChainAttributes>
 
   /**
@@ -30,9 +28,8 @@ export class ThorchainAMM {
    * @param chainAttributes - atrributes used to calculate waitTime & conf counting
    * @returns ThorchainAMM
    */
-  constructor(midgard: Midgard, expirePoolCacheMillis = 6000, chainAttributes = DefaultChainAttributes) {
-    this.midgard = midgard
-    this.allPools = new LiquidityPoolCache(midgard, expirePoolCacheMillis)
+  constructor(thorchainCache: ThorchainCache, chainAttributes = DefaultChainAttributes) {
+    this.thorchainCache = thorchainCache
     this.chainAttributes = chainAttributes
   }
 
@@ -46,10 +43,10 @@ export class ThorchainAMM {
    */
   public async estimateSwap(params: EstimateSwapParams): Promise<SwapEstimate> {
     this.isValidSwap(params)
-    const [sourceInboundDetails, destinationInboundDetails] = await this.midgard.getInboundDetails([
-      params.input.asset.chain,
-      params.destinationAsset.chain,
-    ])
+    const inboundDetails = await this.thorchainCache.getInboundDetails()
+    const sourceInboundDetails = inboundDetails[params.input.asset.chain]
+    const destinationInboundDetails = inboundDetails[params.destinationAsset.chain]
+
     const swapEstimate = await this.calcSwapEstimate(params, sourceInboundDetails, destinationInboundDetails)
     const errors = await this.getSwapEstimateErrors(
       params,
@@ -102,7 +99,7 @@ export class ThorchainAMM {
    * @returns CryptoAmount of input
    */
   async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
-    return await this.allPools.convert(input, outAsset)
+    return await this.thorchainCache.convert(input, outAsset)
   }
 
   /**
@@ -133,7 +130,7 @@ export class ThorchainAMM {
     } // else allowed slip is 100%
 
     // out min outbound asset based on limPercentage
-    const limAssetAmount = await this.allPools.convert(params.input.times(limPercentage), params.destinationAsset)
+    const limAssetAmount = await this.thorchainCache.convert(params.input.times(limPercentage), params.destinationAsset)
 
     let waitTimeSeconds = await this.confCounting(params.input)
     const outboundDelay = await this.outboundDelay(limAssetAmount)
@@ -184,14 +181,14 @@ export class ThorchainAMM {
     destinationInboundDetails: InboundDetail,
   ): Promise<SwapEstimate> {
     const input = params.input
-    const inputInRune = await this.allPools.convert(input, AssetRuneNative)
+    const inputInRune = await this.thorchainCache.convert(input, AssetRuneNative)
 
     const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails.gas_rate)
     let outboundFeeInAsset = calcNetworkFee(params.destinationAsset, destinationInboundDetails.gas_rate)
     outboundFeeInAsset = outboundFeeInAsset.times(3)
 
-    const inboundFeeInRune = await this.allPools.convert(inboundFeeInAsset, AssetRuneNative)
-    const outboundFeeInRune = await this.allPools.convert(outboundFeeInAsset, AssetRuneNative)
+    const inboundFeeInRune = await this.thorchainCache.convert(inboundFeeInAsset, AssetRuneNative)
+    const outboundFeeInRune = await this.thorchainCache.convert(outboundFeeInAsset, AssetRuneNative)
 
     // ---------- Remove Fees from inbound before doing the swap -----------
     // TODO confirm with chris about this change
@@ -203,20 +200,20 @@ export class ThorchainAMM {
     // remove the affiliate fee from the input.
     const inputNetAmountInRune = inputMinusInboundFeeInRune.minus(affiliateFeeInRune)
     // convert back to input asset
-    const inputNetInAsset = await this.allPools.convert(inputNetAmountInRune, input.asset)
+    const inputNetInAsset = await this.thorchainCache.convert(inputNetAmountInRune, input.asset)
 
     // now calculate swapfee based on inputNetAmount
-    const swapOutput = await this.allPools.getExpectedSwapOutput(inputNetInAsset, params.destinationAsset)
+    const swapOutput = await this.thorchainCache.getExpectedSwapOutput(inputNetInAsset, params.destinationAsset)
 
     const swapFeeInAsset = new CryptoAmount(swapOutput.swapFee, AssetRuneNative)
-    const swapFeeInRune = await this.allPools.convert(swapFeeInAsset, AssetRuneNative)
+    const swapFeeInRune = await this.thorchainCache.convert(swapFeeInAsset, AssetRuneNative)
 
     const outputInAsset = new CryptoAmount(swapOutput.output, params.destinationAsset)
-    const outputInRune = await this.allPools.convert(outputInAsset, AssetRuneNative)
+    const outputInRune = await this.thorchainCache.convert(outputInAsset, AssetRuneNative)
 
     // ---------------- Remove Outbound Fee ---------------------- /
     const netOutputInRune = outputInRune.minus(outboundFeeInRune)
-    const netOutputInAsset = await this.allPools.convert(netOutputInRune, params.destinationAsset)
+    const netOutputInAsset = await this.thorchainCache.convert(netOutputInRune, params.destinationAsset)
 
     const totalFees: TotalFees = {
       inboundFee: inboundFeeInRune,
@@ -256,12 +253,12 @@ export class ThorchainAMM {
     const destAsset = params.destinationAsset
 
     if (!isAssetRuneNative(sourceAsset)) {
-      const sourcePool = await this.allPools.getPoolForAsset(sourceAsset)
+      const sourcePool = await this.thorchainCache.getPoolForAsset(sourceAsset)
       if (!sourcePool.isAvailable())
         errors.push(`sourceAsset ${sourceAsset.ticker} does not have a valid liquidity pool`)
     }
     if (!isAssetRuneNative(destAsset)) {
-      const destPool = await this.allPools.getPoolForAsset(destAsset)
+      const destPool = await this.thorchainCache.getPoolForAsset(destAsset)
       if (!destPool.isAvailable())
         errors.push(`destinationAsset ${destAsset.ticker} does not have a valid liquidity pool`)
     }
@@ -283,7 +280,7 @@ export class ThorchainAMM {
   }
   private async checkCoverFees(params: EstimateSwapParams, estimate: SwapEstimate): Promise<string | undefined> {
     let result: string | undefined = undefined
-    const input = await this.allPools.convert(params.input, AssetRuneNative)
+    const input = await this.thorchainCache.convert(params.input, AssetRuneNative)
     const fees = await this.getFeesIn(estimate.totalFees, AssetRuneNative)
 
     const totalSwapFeesInRune = fees.inboundFee.plus(fees.outboundFee).plus(fees.swapFee).plus(fees.affiliateFee)
@@ -300,22 +297,19 @@ export class ThorchainAMM {
    * @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/manager_txout_current.go#L548
    */
   async outboundDelay(outboundAmount: CryptoAmount): Promise<number> {
-    const networkValues = await this.midgard.getNetworkValueByNames([
-      'MinTxOutVolumeThreshold',
-      'MaxTxOutOffset',
-      'TXOUTDELAYRATE',
-    ])
+    const networkValues = await this.thorchainCache.getNetworkValues()
+
     const minTxOutVolumeThreshold = new CryptoAmount(
-      baseAmount(networkValues['MinTxOutVolumeThreshold']),
+      baseAmount(networkValues['MINTXOUTVOLUMETHRESHOLD']),
       AssetRuneNative,
     )
-    const maxTxOutOffset = Number.parseInt(networkValues['MaxTxOutOffset'])
+    const maxTxOutOffset = networkValues['MAXTXOUTOFFSET']
     let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative)
-    const getScheduledOutboundValue = await this.midgard.getScheduledOutboundValue()
+    const getScheduledOutboundValue = await this.thorchainCache.midgard.getScheduledOutboundValue()
     const thorChainblocktime = this.chainAttributes[THORChain].avgBlockTimeInSecs // blocks required to confirm tx
 
     // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
-    const runeValue = await this.allPools.convert(outboundAmount, AssetRuneNative)
+    const runeValue = await this.thorchainCache.convert(outboundAmount, AssetRuneNative)
     // Check rune value amount
     if (runeValue.lt(minTxOutVolumeThreshold)) {
       return thorChainblocktime
@@ -357,7 +351,7 @@ export class ThorchainAMM {
     const chainGasAsset = getChainAsset(inbound.asset.chain)
 
     // check for chain asset, else need to convert asset value to chain asset.
-    const amountInGasAsset = await this.allPools.convert(inbound, chainGasAsset)
+    const amountInGasAsset = await this.thorchainCache.convert(inbound, chainGasAsset)
     // Convert to Asset Amount
     const amountInGasAssetInAsset = amountInGasAsset.assetAmount
 

@@ -2,8 +2,12 @@ import { Network } from '@xchainjs/xchain-client'
 import { baseToAsset, formatAssetAmountCurrency } from '@xchainjs/xchain-util'
 
 import { Wallet } from '../src/Wallet'
+import { ThorchainCache } from '../src/thorchain-cache'
+import { Midgard } from '../src/utils/midgard'
 
-const testnetWallet = new Wallet(Network.Testnet, process.env.TESTNETPHRASE || 'you forgot to set the phrase')
+const midgard = new Midgard(Network.Testnet)
+const thorchainCache = new ThorchainCache(midgard)
+const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', thorchainCache)
 
 describe('xchain-swap temp Tests', () => {
   it(`Should show balances `, async () => {

@@ -1,37 +1,9 @@
 import { Address } from '@xchainjs/xchain-client'
-import {
-  Asset,
-  AssetETH,
-  BaseAmount,
-  // Chain,
-  // assetAmount,
-  // assetFromString,
-  // assetToBase,
-  assetToString,
-  baseAmount,
-  // eqAsset,
-} from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { Signer, ethers, providers } from 'ethers'
-// import { parseUnits } from 'ethers/lib/utils'
 
 import erc20ABI from './data/erc20.json'
-// import {
-//   // ETHTransactionInfo,
-//   // EthNetwork,
-//   FeesWithGasPricesAndLimits,
-//   GasPrices,
-//   // TokenBalance,
-//   // TokenTransactionInfo,
-//   // TransactionInfo,
-//   // TransactionOperation,
-// } from './types'
 
-export const ETH_DECIMAL = 18
-
-// default gas price in gwei
-// export const DEFAULT_GAS_PRICE = 50
-
-// export const ETHAddress = '0x0000000000000000000000000000000000000000'
 export const MAX_APPROVAL: ethers.BigNumber = ethers.BigNumber.from(2).pow(256).sub(1)
 
 /**
@@ -72,192 +44,20 @@ export const getTokenAddress = (asset: Asset): Address | null => {
  */
 export const validateSymbol = (symbol?: string | null): boolean => (symbol ? symbol.length >= 3 : false)
 
-// /**
-//  * Get transactions from token tx
-//  *
-//  * @param {TokenTransactionInfo} tx
-//  * @returns {Tx|null} The parsed transaction.
-//  */
-// export const getTxFromTokenTransaction = (tx: TokenTransactionInfo): Tx | null => {
-//   const decimals = parseInt(tx.tokenDecimal) || ETH_DECIMAL
-//   const symbol = tx.tokenSymbol
-//   const address = tx.contractAddress
-//   if (validateSymbol(symbol) && validateAddress(address)) {
-//     const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${address}`)
-//     if (tokenAsset) {
-//       return {
-//         asset: tokenAsset,
-//         from: [
-//           {
-//             from: tx.from,
-//             amount: baseAmount(tx.value, decimals),
-//           },
-//         ],
-//         to: [
-//           {
-//             to: tx.to,
-//             amount: baseAmount(tx.value, decimals),
-//           },
-//         ],
-//         date: new Date(parseInt(tx.timeStamp) * 1000),
-//         type: TxType.Transfer,
-//         hash: tx.hash,
-//       }
-//     }
-//   }
-
-//   return null
-// }
-
-// /**
-//  * Get transactions from ETH transaction
-//  *
-//  * @param {ETHTransactionInfo} tx
-//  * @returns {Tx} The parsed transaction.
-//  */
-// export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
-//   return {
-//     asset: AssetETH,
-//     from: [
-//       {
-//         from: tx.from,
-//         amount: baseAmount(tx.value, ETH_DECIMAL),
-//       },
-//     ],
-//     to: [
-//       {
-//         to: tx.to,
-//         amount: baseAmount(tx.value, ETH_DECIMAL),
-//       },
-//     ],
-//     date: new Date(parseInt(tx.timeStamp) * 1000),
-//     type: TxType.Transfer,
-//     hash: tx.hash,
-//   }
-// }
-
-// /**
-//  * Get transactions from operation
-//  *
-//  * @param {TransactionOperation} operation
-//  * @returns {Tx|null} The parsed transaction.
-//  */
-// export const getTxFromEthplorerTokenOperation = (operation: TransactionOperation): Tx | null => {
-//   const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
-//   const { symbol, address } = operation.tokenInfo
-//   if (validateSymbol(symbol) && validateAddress(address)) {
-//     const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${address}`)
-//     if (tokenAsset) {
-//       return {
-//         asset: tokenAsset,
-//         from: [
-//           {
-//             from: operation.from,
-//             amount: baseAmount(operation.value, decimals),
-//           },
-//         ],
-//         to: [
-//           {
-//             to: operation.to,
-//             amount: baseAmount(operation.value, decimals),
-//           },
-//         ],
-//         date: new Date(operation.timestamp * 1000),
-//         type: operation.type === 'transfer' ? TxType.Transfer : TxType.Unknown,
-//         hash: operation.transactionHash,
-//       }
-//     }
-//   }
-
-//   return null
-// }
-
-// /**
-//  * Get transactions from ETH transaction
-//  *
-//  * @param {TransactionInfo} txInfo
-//  * @returns {Tx} The parsed transaction.
-//  */
-// export const getTxFromEthplorerEthTransaction = (txInfo: TransactionInfo): Tx => {
-//   return {
-//     asset: AssetETH,
-//     from: [
-//       {
-//         from: txInfo.from,
-//         amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
-//       },
-//     ],
-//     to: [
-//       {
-//         to: txInfo.to,
-//         amount: assetToBase(assetAmount(txInfo.value, ETH_DECIMAL)),
-//       },
-//     ],
-//     date: new Date(txInfo.timestamp * 1000),
-//     type: TxType.Transfer,
-//     hash: txInfo.hash,
-//   }
-// }
-
 /**
  * Calculate fees by multiplying .
  *
  * @returns {Fees} The default gas price.
  */
-export const getFee = ({ gasPrice, gasLimit }: { gasPrice: BaseAmount; gasLimit: ethers.BigNumber }) =>
-  baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), ETH_DECIMAL)
-
-// export const estimateDefaultFeesWithGasPricesAndLimits = (asset?: Asset): FeesWithGasPricesAndLimits => {
-//   const gasPrices = {
-//     average: baseAmount(parseUnits(DEFAULT_GAS_PRICE.toString(), 'gwei').toString(), ETH_DECIMAL),
-//     fast: baseAmount(parseUnits((DEFAULT_GAS_PRICE * 2).toString(), 'gwei').toString(), ETH_DECIMAL),
-//     fastest: baseAmount(parseUnits((DEFAULT_GAS_PRICE * 3).toString(), 'gwei').toString(), ETH_DECIMAL),
-//   }
-//   const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
-
-//   let assetAddress
-//   if (asset && assetToString(asset) !== assetToString(AssetETH)) {
-//     assetAddress = getTokenAddress(asset)
-//   }
-
-//   let gasLimit
-//   if (assetAddress && assetAddress !== ETHAddress) {
-//     gasLimit = ethers.BigNumber.from(BASE_TOKEN_GAS_COST)
-//   } else {
-//     gasLimit = ethers.BigNumber.from(SIMPLE_GAS_COST)
-//   }
-
-//   return {
-//     gasPrices,
-//     gasLimit,
-//     fees: {
-//       type: FeeType.PerByte,
-//       average: getFee({ gasPrice: averageGP, gasLimit }),
-//       fast: getFee({ gasPrice: fastGP, gasLimit }),
-//       fastest: getFee({ gasPrice: fastestGP, gasLimit }),
-//     },
-//   }
-// }
-
-// /**
-//  * Get the default fees.
-//  *
-//  * @returns {Fees} The default gas price.
-//  */
-// export const getDefaultFees = (asset?: Asset): Fees => {
-//   const { fees } = estimateDefaultFeesWithGasPricesAndLimits(asset)
-//   return fees
-// }
-
-// /**
-//  * Get the default gas price.
-//  *
-//  * @returns {Fees} The default gas prices.
-//  */
-// export const getDefaultGasPrices = (asset?: Asset): GasPrices => {
-//   const { gasPrices } = estimateDefaultFeesWithGasPricesAndLimits(asset)
-//   return gasPrices
-// }
+export const getFee = ({
+  gasPrice,
+  gasLimit,
+  decimals,
+}: {
+  gasPrice: BaseAmount
+  gasLimit: ethers.BigNumber
+  decimals: number
+}) => baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), decimals)
 
 /**
  * Get address prefix based on the network.
@@ -393,26 +193,6 @@ export const estimateApprove = async ({
 }
 
 /**
- * Get Decimals
- *
- * @param {Asset} asset
- * @returns {Number} the decimal of a given asset
- *
- * @throws {"Invalid asset"} Thrown if the given asset is invalid
- */
-export const getDecimal = async (asset: Asset, provider: providers.Provider): Promise<number> => {
-  if (assetToString(asset) === assetToString(AssetETH)) return ETH_DECIMAL
-
-  const assetAddress = getTokenAddress(asset)
-  if (!assetAddress) throw new Error(`Invalid asset ${assetToString(asset)}`)
-
-  const contract: ethers.Contract = new ethers.Contract(assetAddress, erc20ABI, provider)
-  const decimal: ethers.BigNumberish = await contract.decimals()
-
-  return ethers.BigNumber.from(decimal).toNumber()
-}
-
-/**
  * Check allowance.
  *
  * @param {Provider} provider Provider to interact with the contract.
@@ -442,34 +222,6 @@ export const isApproved = async ({
 
   return txAmount.lte(allowance)
 }
-
-// /**
-//  * Get Token Balances
-//  *
-//  * @param {TokenBalance[]} tokenBalances
-//  * @returns {Balance[]} the parsed balances
-//  *
-//  */
-// export const getTokenBalances = (tokenBalances: TokenBalance[]): Balance[] => {
-//   return tokenBalances.reduce((acc, cur) => {
-//     const { symbol, address: tokenAddress } = cur.tokenInfo
-//     if (validateSymbol(symbol) && validateAddress(tokenAddress) && cur?.tokenInfo?.decimals !== undefined) {
-//       const decimals = parseInt(cur.tokenInfo.decimals, 10)
-//       const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${ethers.utils.getAddress(tokenAddress)}`)
-//       if (tokenAsset) {
-//         return [
-//           ...acc,
-//           {
-//             asset: tokenAsset,
-//             amount: baseAmount(cur.balance, decimals),
-//           },
-//         ]
-//       }
-//     }
-
-//     return acc
-//   }, [] as Balance[])
-// }
 
 /**
  * Removes `0x` or `0X` from address

@@ -1,33 +1,55 @@
-import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
-import { Asset, assetToBase, assetToString, eqAsset } from '@xchainjs/xchain-util'
+import { Address } from '@xchainjs/xchain-client'
+import { InboundAddressesItem } from '@xchainjs/xchain-midgard'
+import { isAssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { Asset, Chain, assetToBase, assetToString, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
 import { LiquidityPool } from './liquidity-pool'
-import { PoolCache, SwapOutput } from './types'
+import { AsgardCache, InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache, SwapOutput } from './types'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'
 
 const SAME_ASSET_EXCHANGE_RATE = new BigNumber(1)
+const TEN_MINUTES = 10 * 60 * 1000
 
 /**
- * This class manages retrieving information from up to date Thorchain Liquidity Pools
+ * This class manages retrieving information from up to date Thorchain
  */
-export class LiquidityPoolCache {
-  private midgard: Midgard
+export class ThorchainCache {
+  readonly midgard: Midgard
   private poolCache: PoolCache | undefined
+  private asgardAssetsCache: AsgardCache | undefined = undefined
+  private inboundDetailCache: InboundDetailCache | undefined = undefined
+  private networkValuesCache: NetworkValuesCache | undefined = undefined
+
   private expirePoolCacheMillis
+  private expireAsgardCacheMillis
+  private expireInboundDetailsCacheMillis
+  private expireNetworkValuesCacheMillis
 
   /**
-   * Contrustor to create a LiquidityPoolCache
+   * Contrustor to create a ThorchainCache
    *
    * @param midgard - an instance of the midgard API (could be pointing to stagenet,testnet,mainnet)
    * @param expirePoolCacheMillis - how long should the pools be cached before expiry
-   * @returns LiquidityPoolCache
+   * @param expireAsgardCacheMillis - how long should the inboundAsgard Addresses be cached before expiry
+   * @param expireInboundDetailsCacheMillis - how long should the InboundDetails be cached before expiry
+   * @param expireNetworkValuesCacheMillis - how long should the Mimir/Constants be cached before expiry
+   * @returns ThorchainCache
    */
-  constructor(midgard: Midgard, expirePoolCacheMillis = 6000) {
+  constructor(
+    midgard: Midgard,
+    expirePoolCacheMillis = 6000,
+    expireAsgardCacheMillis = TEN_MINUTES,
+    expireInboundDetailsCacheMillis = TEN_MINUTES,
+    expireNetworkValuesCacheMillis = TEN_MINUTES,
+  ) {
     this.midgard = midgard
     this.expirePoolCacheMillis = expirePoolCacheMillis
+    this.expireAsgardCacheMillis = expireAsgardCacheMillis
+    this.expireInboundDetailsCacheMillis = expireInboundDetailsCacheMillis
+    this.expireNetworkValuesCacheMillis = expireNetworkValuesCacheMillis
 
     //initialize the cache
     this.refereshPoolCache()
@@ -122,6 +144,54 @@ export class LiquidityPoolCache {
     }
   }
   /**
+   * Refreshes the asgardAssetsCache Cache
+   *
+   * NOTE: do not call refereshAsgardCache() directly, call getAsgardAssets() instead
+   * which will refresh the cache if it's expired
+   */
+  private async refereshAsgardCache(): Promise<void> {
+    const inboundAddressesItems = await this.midgard.getAllInboundAddresses()
+    const map: Record<string, InboundAddressesItem> = {}
+    if (inboundAddressesItems) {
+      for (const inboundAddress of inboundAddressesItems) {
+        map[inboundAddress.chain] = inboundAddress
+      }
+      this.asgardAssetsCache = {
+        lastRefreshed: Date.now(),
+        inboundAddressesItems: map,
+      }
+    }
+  }
+  /**
+   * Refreshes the InboundDetailCache Cache
+   *
+   * NOTE: do not call refereshInboundDetailCache() directly, call getInboundDetails() instead
+   * which will refresh the cache if it's expired
+   */
+  private async refereshInboundDetailCache(): Promise<void> {
+    const inboundDetails = await this.midgard.getInboundDetails()
+
+    this.inboundDetailCache = {
+      lastRefreshed: Date.now(),
+      inboundDetails,
+    }
+  }
+  /**
+   * Refreshes the NetworkValuesCache Cache
+   *
+   * NOTE: do not call refereshNetworkValuesCache() directly, call getNetworkValuess() instead
+   * which will refresh the cache if it's expired
+   */
+  private async refereshNetworkValuesCache(): Promise<void> {
+    const networkValues = await this.midgard.getNetworkValues()
+
+    this.networkValuesCache = {
+      lastRefreshed: Date.now(),
+      networkValues,
+    }
+  }
+
+  /**
    *
    *  Calcuate the expected slip, output & swapFee given the current pool depths
    *
@@ -165,5 +235,58 @@ export class LiquidityPoolCache {
     const result = new CryptoAmount(assetToBase(amt), outAsset)
 
     return result
+  }
+  async getRouterAddressForChain(chain: Chain): Promise<Address> {
+    const inboundAsgard = (await this.getInboundAddressesItems())[chain]
+
+    if (!inboundAsgard?.router) {
+      throw new Error('router address is not defined')
+    }
+    return inboundAsgard?.router
+  }
+  async getInboundAddressesItems(): Promise<Record<string, InboundAddressesItem>> {
+    const millisSinceLastRefeshed = Date.now() - (this.asgardAssetsCache?.lastRefreshed || 0)
+    if (millisSinceLastRefeshed > this.expireAsgardCacheMillis) {
+      try {
+        await this.refereshAsgardCache()
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    if (this.asgardAssetsCache) {
+      return this.asgardAssetsCache.inboundAddressesItems
+    } else {
+      throw Error(`Could not refresh refereshAsgardCache `)
+    }
+  }
+  async getInboundDetails(): Promise<Record<string, InboundDetail>> {
+    const millisSinceLastRefeshed = Date.now() - (this.asgardAssetsCache?.lastRefreshed || 0)
+    if (millisSinceLastRefeshed > this.expireInboundDetailsCacheMillis) {
+      try {
+        await this.refereshInboundDetailCache()
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    if (this.inboundDetailCache) {
+      return this.inboundDetailCache.inboundDetails
+    } else {
+      throw Error(`Could not refereshInboundDetailCache `)
+    }
+  }
+  async getNetworkValues(): Promise<Record<string, number>> {
+    const millisSinceLastRefeshed = Date.now() - (this.asgardAssetsCache?.lastRefreshed || 0)
+    if (millisSinceLastRefeshed > this.expireNetworkValuesCacheMillis) {
+      try {
+        await this.refereshNetworkValuesCache()
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    if (this.networkValuesCache) {
+      return this.networkValuesCache.networkValues
+    } else {
+      throw Error(`Could not refereshInboundDetailCache `)
+    }
   }
 }
