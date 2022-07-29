@@ -27,7 +27,7 @@ export type ApproveParams = {
   feeOption?: FeeOption
   amount?: BaseAmount
   // Optional fallback in case estimation for gas limit fails
-  gasLimitFallback?: ethers.BigNumberish
+  // gasLimitFallback?: ethers.BigNumberish
 }
 
 export type EstimateApproveParams = {

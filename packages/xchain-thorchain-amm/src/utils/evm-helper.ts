@@ -9,7 +9,7 @@ import { DepositParams } from '../types'
 
 import { calcNetworkFee, getContractAddressFromAsset } from './swap'
 
-const APPROVE_GASLIMIT_FALLBACK = '200000'
+// const APPROVE_GASLIMIT_FALLBACK = '200000'
 
 export class EvmHelper {
   private evmClient: EvmClient
@@ -43,8 +43,8 @@ export class EvmHelper {
     const address = this.client.getAddress(params.walletIndex)
     const gasPrice = await this.evmClient.estimateGasPrices()
 
-    if (eqAsset(params.asset, AssetETH)) {
-      //ETH is a simple transfer
+    if (eqAsset(params.asset, this.evmClient.config.gasAsset)) {
+      // simple transfer
       return await this.client.transfer({
         walletIndex: params.walletIndex || 0,
         asset: params.asset,
@@ -106,14 +106,12 @@ export class EvmHelper {
   ): Promise<ethers.providers.TransactionResponse> {
     const contractAddress = getContractAddressFromAsset(asset)
     const router = await this.thorchainCache.getRouterAddressForChain(asset.chain)
-    // const gasPrice = await evmClient.estimateGasPrices()
-    // const gasLimit = calcInboundFee(asset, gasPrice.fast.amount())
+
     const approveParams: ApproveParams = {
       contractAddress,
       spenderAddress: router,
       amount: baseAmount(amount.toString(), this.evmClient.config.gasAssetDecimals),
       walletIndex,
-      gasLimitFallback: APPROVE_GASLIMIT_FALLBACK,
     }
     return await this.evmClient.approve(approveParams)
   }

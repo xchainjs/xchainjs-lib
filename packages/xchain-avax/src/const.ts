@@ -68,6 +68,7 @@ export const defaultAvaxParams: EVMClientParams = {
   gasAsset: AssetAVAX,
   gasAssetDecimals: 18,
   defaults: {
+    approveGasLimit: BigNumber.from(200000),
     transferGasAssetGasLimit: BigNumber.from(21000),
     transferTokenGasLimit: BigNumber.from(100000),
     gasPrice: BigNumber.from(50),

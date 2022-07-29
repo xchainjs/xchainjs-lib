@@ -67,6 +67,7 @@ import {
 type EvmDefaults = {
   transferGasAssetGasLimit: BigNumber
   transferTokenGasLimit: BigNumber
+  approveGasLimit: BigNumber
   gasPrice: BigNumber
 }
 
@@ -383,7 +384,6 @@ export default class Client extends BaseXChainClient implements XChainClient {
     amount,
     walletIndex = 0,
     signer: txSigner,
-    gasLimitFallback,
   }: ApproveParams): Promise<TransactionResponse> {
     const gasPrice: BigNumber = BigNumber.from(
       (await this.estimateGasPrices().then((prices) => prices[feeOption]))
@@ -401,12 +401,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
       contractAddress,
       fromAddress,
       amount,
-    }).catch((error) => {
-      if (gasLimitFallback) {
-        return BigNumber.from(gasLimitFallback)
-      }
-
-      throw Error(`Could not estimate gas to send approve transaction ${error}`)
+    }).catch(() => {
+      return BigNumber.from(this.config.defaults.approveGasLimit)
     })
 
     checkFeeBounds(this.feeBounds, gasPrice.toNumber())
