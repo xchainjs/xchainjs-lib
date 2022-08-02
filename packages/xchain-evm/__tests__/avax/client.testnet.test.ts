@@ -121,6 +121,7 @@ const avaxParams: EVMClientParams = {
     transferGasAssetGasLimit: BigNumber.from(21000),
     transferTokenGasLimit: BigNumber.from(100000),
     gasPrice: BigNumber.from(50),
+    approveGasLimit: BigNumber.from(50),
   },
   providers: ethersJSProviders,
   explorerProviders: avaxExplorerProviders,

@@ -229,7 +229,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     const constant = 'TXOUTDELAYRATE'
     const values = (await thorchainCache.getNetworkValues())[constant]
     console.log(values)
-    expect(values[constant]).toEqual(10000000000)
+    expect(values).toEqual(10000000000)
   })
 
   // it('Should fail estimate swap because destination chain is halted ', async () => {
