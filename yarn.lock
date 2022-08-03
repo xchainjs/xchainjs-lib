@@ -2692,6 +2692,11 @@
     "@typescript-eslint/types" "4.18.0"
     eslint-visitor-keys "^2.0.0"
 
+"@xchainjs/xchain-client@^0.11.1":
+  version "0.11.3"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-client/-/xchain-client-0.11.3.tgz#9c76d27d287eae4d9e9bd623290c0fb95dfc56e9"
+  integrity sha512-wdL2kKUi/07RXQHGVp8yzsJvo75hBVlqr44xfp5PY7fAOhckQhbTSgfDfEFjyI+udpno8FDgZ2UwoZODO2kJMA==
+
 "@xchainjs/xchain-util@^0.3.0":
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.3.1.tgz#90fb81379d6c8eca83c7500684108b3dc4a1479f"
@@ -2701,6 +2706,11 @@
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.5.1.tgz#70903205589ff10c2794df6bd8937edca8d961e7"
   integrity sha512-DeHWi2xmW/QFc+gz7uxy2bfFvtzFBy3YNUmNv1+Zmiq2yRaXhDHrlfjASxQaqg8S/M2pZBaevJOOOimEUNq1gg==
+
+"@xchainjs/xchain-util@^0.7.1":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.7.1.tgz#6df007e4715778314c772aba2685447aa9b10fc7"
+  integrity sha512-CTYdrfJ7i9cHJY1AxDPq5c/4uHC2LWIt1F5WeuTriuGK5flRf9mPze7PmAZk05FI983kjKF/JiDKV/iewafTHQ==
 
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"

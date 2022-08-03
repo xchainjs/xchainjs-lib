@@ -19,6 +19,10 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 12.5,
     avgBlockTimeInSecs: 150,
   },
+  Avalanche: {
+    blockReward: 12.5,
+    avgBlockTimeInSecs: 150,
+  },
   DOGE: {
     blockReward: 10000,
     avgBlockTimeInSecs: 60,
