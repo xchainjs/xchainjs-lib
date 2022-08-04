@@ -1,23 +1,25 @@
 import { Network } from '@xchainjs/xchain-client'
-import {
-  CryptoAmount,
-  EstimateSwapParams,
-  Midgard,
-  SwapEstimate,
-  ThorchainAMM,
-  Wallet,
-} from '@xchainjs/xchain-thorchain-amm'
-import { AssetBNB, AssetLTC, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import { CryptoAmount, Midgard, SwapEstimate, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
+import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 // Instantiate the classes needed
 const mainnetMidgard = new Midgard(Network.Mainnet)
 const mainetThorchainAmm = new ThorchainAMM(mainnetMidgard)
-const mainnetWallet = new Wallet(Network.Mainnet, 'insert phrase here')
+const mainnetWallet = new Wallet(Network.Mainnet, process.argv[2])
 
 // Asset declaration
 const BUSD = assetFromString('BNB.BUSD-BD1')
 if (!BUSD) throw Error('Asset is incorrect')
+
+// Asset amount captured from cmd args
+const amount = process.argv[4]
+
+// Captured from args
+const fromAsset = assetFromString(`${process.argv[5]}.${process.argv[5]}`)
+const toAsset = assetFromString(`${process.argv[6]}.${process.argv[6]}`)
+console.log(fromAsset)
+console.log(toAsset)
 
 // Helper function for printing out the returned object
 function print(estimate: SwapEstimate, input: CryptoAmount) {
@@ -39,40 +41,47 @@ function print(estimate: SwapEstimate, input: CryptoAmount) {
 }
 
 /**
- * Estimate swap function
- * Returns estimate swap object
+ * From asset to asset - on testnet
  */
-const estimateSwap = async () => {
+const doDoubleSwap = async () => {
   try {
-    const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(0.01)), AssetLTC),
-      destinationAsset: AssetBNB,
-      // affiliateFeePercent: 0.003, //optional
-      slipLimit: new BigNumber('0.03'), //optional
+    console.log('Double Swap on testnet :)')
+    const swapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(amount)), fromAsset),
+      destinationAsset: toAsset,
+      slipLimit: new BigNumber(0.5),
     }
-    const estimate = await mainetThorchainAmm.estimateSwap(swapParams)
-    print(estimate, swapParams.input)
-
-    // convert fees (by default returned in RUNE) to a different asset (BUSD)
-    const estimateInBusd = await mainetThorchainAmm.getFeesIn(estimate.totalFees, AssetBNB)
-    estimate.totalFees = estimateInBusd
-    print(estimate, swapParams.input)
+    const outPutCanSwap = await mainetThorchainAmm.estimateSwap(swapParams)
+    print(outPutCanSwap, swapParams.input)
+    const output = await mainetThorchainAmm.doSwap(
+      mainnetWallet,
+      swapParams,
+      mainnetWallet.clients[toAsset?.ticker].getAddress(),
+    )
+    console.log(output)
   } catch (e) {
-    console.error(e)
+    console.log(e)
   }
 }
 
 /**
- * From LTC to BNB - on mainnet
+ * From asset to asset - on mainnet
  */
 const doDoubleSwapMainnet = async () => {
   try {
+    console.log('Double Swap on mainnet :)')
     const swapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(0.01)), AssetLTC),
-      destinationAsset: AssetBNB,
+      input: new CryptoAmount(assetToBase(assetAmount(amount)), fromAsset),
+      destinationAsset: toAsset,
       slipLimit: new BigNumber(0.5),
     }
-    const output = await mainetThorchainAmm.doSwap(mainnetWallet, swapParams, mainnetWallet.clients['BNB'].getAddress())
+    const outPutCanSwap = await mainetThorchainAmm.estimateSwap(swapParams)
+    print(outPutCanSwap, swapParams.input)
+    const output = await mainetThorchainAmm.doSwap(
+      mainnetWallet,
+      swapParams,
+      mainnetWallet.clients[toAsset?.ticker].getAddress(),
+    )
     console.log(output)
   } catch (e) {
     console.log(e)
@@ -81,8 +90,12 @@ const doDoubleSwapMainnet = async () => {
 
 // Call the function from main()
 const main = async () => {
-  await estimateSwap()
-  await doDoubleSwapMainnet()
+  if (process.argv[3] === 'testnet') {
+    await doDoubleSwap()
+  }
+  if (process.argv[3] === 'mainnet') {
+    await doDoubleSwapMainnet()
+  }
 }
 
 main()

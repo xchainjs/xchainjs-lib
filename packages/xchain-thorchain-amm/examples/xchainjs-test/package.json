@@ -1,6 +1,11 @@
 {
   "name": "xchainjs-test",
   "version": "1.0.0",
+  "scripts": {
+    "estimateSwap": "ts-node estimateSwap.ts",
+    "doSingleSwap": "ts-node doSwap-Single.ts",
+    "doDoubleSwap": "ts-node doSwap-Double.ts"
+  },
   "description": "Test folder for xchainjs thorchain-amm package",
   "main": "index.js",
   "author": "THORIANITE",
