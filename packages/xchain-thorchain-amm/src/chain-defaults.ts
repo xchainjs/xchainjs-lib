@@ -15,7 +15,7 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 2,
     avgBlockTimeInSecs: 13,
   },
-  Avalanche: {
+  AVAX: {
     blockReward: 2,
     avgBlockTimeInSecs: 3,
   },
