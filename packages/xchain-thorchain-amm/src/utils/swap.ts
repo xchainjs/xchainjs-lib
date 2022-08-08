@@ -20,7 +20,6 @@ import {
   DOGEChain,
   ETHChain,
   LTCChain,
-  PolkadotChain,
   THORChain,
   TerraChain,
   baseAmount,
@@ -244,8 +243,6 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetDOGE
     case TerraChain:
       return AssetLUNA
-    case PolkadotChain:
-      throw Error('Polkadot is not supported yet')
     default:
       throw Error('Unknown chain')
   }
