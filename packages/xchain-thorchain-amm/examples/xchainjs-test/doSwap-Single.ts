@@ -1,6 +1,19 @@
 import { Network } from '@xchainjs/xchain-client'
 import { CryptoAmount, Midgard, SwapEstimate, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
-import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetBCH,
+  AssetBNB,
+  AssetBTC,
+  AssetDOGE,
+  AssetETH,
+  AssetLTC,
+  AssetRuneNative,
+  Chain,
+  assetAmount,
+  assetFromString,
+  assetToBase,
+} from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 // Instantiate the classes needed
@@ -20,10 +33,35 @@ if (!BUSD) throw Error('Asset is incorrect')
 const amount = process.argv[4]
 
 // Captured from args
-const fromAsset = assetFromString(`${process.argv[5]}.${process.argv[5]}`)
-const toAsset = assetFromString(`${process.argv[6]}.${process.argv[6]}`)
-console.log(fromAsset)
-console.log(toAsset)
+
+const getAsset = (asset: string): Asset => {
+  switch (asset) {
+    case 'BNB':
+      return AssetBNB
+    case 'BTC':
+      return AssetBTC
+    case 'ETH':
+      return AssetETH
+    case 'RUNE':
+      return AssetRuneNative
+    case 'BCH':
+      return AssetBCH
+    case 'LTC':
+      return AssetLTC
+    case 'DOGE':
+      return AssetDOGE
+    case 'BUSD':
+      return BUSD
+    default:
+      throw Error('Unknown chain')
+  }
+}
+
+const fromAsset = getAsset(process.argv[5])
+const toAsset = getAsset(process.argv[6])
+
+console.log(`From Asset: ${JSON.stringify(fromAsset)}`)
+console.log(`To Asset: ${JSON.stringify(toAsset)}`)
 
 // Helper function for printing out the returned object
 function print(estimate: SwapEstimate, input: CryptoAmount) {
@@ -60,7 +98,7 @@ const doSingleSwap = async () => {
     const output = await testnetThorchainAmm.doSwap(
       testnetWallet,
       swapParams,
-      testnetWallet.clients[toAsset?.ticker].getAddress(),
+      testnetWallet.clients[toAsset.chain].getAddress(),
     )
     console.log(output)
   } catch (error) {
@@ -70,7 +108,6 @@ const doSingleSwap = async () => {
 
 // Swap from asset to asset on mainnet
 const doSwapMainnet = async () => {
-  // From asset BUSD to RUNE
   const swapParams = {
     input: new CryptoAmount(assetToBase(assetAmount(amount)), fromAsset),
     destinationAsset: toAsset,
@@ -84,7 +121,7 @@ const doSwapMainnet = async () => {
       const output = await mainetThorchainAmm.doSwap(
         mainnetWallet,
         swapParams,
-        mainnetWallet.clients[toAsset?.ticker].getAddress(),
+        mainnetWallet.clients[toAsset.chain].getAddress(),
       )
       console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
     }

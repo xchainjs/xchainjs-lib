@@ -30,7 +30,8 @@ yarn
 yarn estimate 2 BTC THOR
 
 // Doswap Dingle + 5 arguements => seedPhrase, Network, amount, fromAsset, toAsset
-yarn doSingleSwap PHRASE testnet || mainnet 2 BTC THOR
+// Note single swap is only between RUNE and Asset or vice versa. 
+yarn doSingleSwap PHRASE testnet || mainnet 2 BTC RUNE
 
 // Doswap Double + 5 arguements => seedPhrase, Network, amount, fromAsset, toAsset
 yarn doDoubleSwap PHRASE mainnet || testnet 2 BTC BNB
