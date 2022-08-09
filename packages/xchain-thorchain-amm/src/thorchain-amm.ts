@@ -1,3 +1,4 @@
+import { AssetAtom } from '@xchainjs/xchain-cosmos/lib'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
 import { Asset, AssetBNB, AssetRuneNative, Chain, THORChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
@@ -112,7 +113,7 @@ export class ThorchainAMM {
    * @param interfaceID - id if the calling interface (optional)
    * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
-  protected async doSwap(
+  public async doSwap(
     wallet: Wallet,
     params: EstimateSwapParams,
     destinationAddress: string,
@@ -343,8 +344,13 @@ export class ThorchainAMM {
    * @see https://docs.thorchain.org/chain-clients/overview
    */
   private async confCounting(inbound: CryptoAmount): Promise<number> {
-    // RUNE, BNB and Synths have near instant finality, so no conf counting required.
-    if (isAssetRuneNative(inbound.asset) || eqAsset(AssetBNB, inbound.asset) || inbound.asset.synth) {
+    // RUNE, BNB and Synths have near instant finality, so no conf counting required. - need to make a BFT only case.
+    if (
+      isAssetRuneNative(inbound.asset) ||
+      inbound.asset.chain == AssetBNB.chain ||
+      inbound.asset.chain == AssetAtom.chain ||
+      inbound.asset.synth
+    ) {
       return this.chainAttributes[Chain.THORChain].avgBlockTimeInSecs
     }
     // Get the gas asset for the inbound.asset.chain
@@ -356,7 +362,7 @@ export class ThorchainAMM {
     const amountInGasAssetInAsset = amountInGasAsset.assetAmount
 
     const confConfig = this.chainAttributes[inbound.asset.chain]
-    // find the requried confs
+    // find the required confs
     const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(confConfig.blockReward).toNumber())
     // convert that into seconds
     return requiredConfs * confConfig.avgBlockTimeInSecs

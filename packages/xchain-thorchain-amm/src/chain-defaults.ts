@@ -43,10 +43,6 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 0,
     avgBlockTimeInSecs: 6,
   },
-  POLKA: {
-    blockReward: 0,
-    avgBlockTimeInSecs: 0,
-  },
 }
 
 export { DefaultChainAttributes }

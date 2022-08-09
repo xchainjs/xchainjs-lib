@@ -2,7 +2,7 @@
 
 ## Modules
 
-module for to interact with Thorchain AMM
+Thorchain AMM module
 
 
 ## Installation

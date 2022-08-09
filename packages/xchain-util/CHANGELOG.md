@@ -1,9 +1,16 @@
+# v.0.8.1 (2022-08-08)
+
+## Remove
+
+- Remove `Polkadot` from chain.test.ts
+- Remove `Polkadot` from chain.ts
+
 # v.0.8.0 (2022-07-20)
 
 ### Breaking change
 
-- Removed `midgard.ts`, moved to xchain-midgard 
-- Removed types `InboundDetail`, `ServerInboundDetail`, moved to xchain-midgard 
+- Removed `midgard.ts`, moved to xchain-midgard
+- Removed types `InboundDetail`, `ServerInboundDetail`, moved to xchain-midgard
 - removed dependency on "@xchainjs/xchain-client"
 
 # v.0.7.1 (2022-05-05)
@@ -11,9 +18,8 @@
 ## Update
 
 - Add new types `InboundDetail`, `ServerInboundDetail`
-- Add `midgard.ts` to src 
-- Add `midgard` tests 
-
+- Add `midgard.ts` to src
+- Add `midgard` tests
 
 # v.0.7.0 (2022-04-13)
 
