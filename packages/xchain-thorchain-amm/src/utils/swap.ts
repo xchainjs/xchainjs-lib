@@ -4,6 +4,7 @@ import { strip0x } from '@xchainjs/xchain-ethereum'
 import { AssetLUNA } from '@xchainjs/xchain-terra/lib'
 import {
   Asset,
+  AssetAVAX,
   AssetBCH,
   AssetBNB,
   AssetBTC,
@@ -11,6 +12,7 @@ import {
   AssetETH,
   AssetLTC,
   AssetRuneNative,
+  AvalancheChain,
   BCHChain,
   BNBChain,
   BTCChain,
@@ -181,6 +183,13 @@ export const getContractAddressFromAsset = (asset: Asset): Address => {
 export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount => {
   if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
   switch (asset.chain) {
+    case Chain.Avalanche:
+      if (eqAsset(asset, AssetAVAX)) {
+        return new CryptoAmount(baseAmount(gasRate.multipliedBy(80000)), AssetAVAX)
+      } else {
+        return new CryptoAmount(baseAmount(gasRate.multipliedBy(80000)), AssetAVAX)
+      }
+      break
     case Chain.Bitcoin:
       return new CryptoAmount(baseAmount(gasRate.multipliedBy(1000)), AssetBTC)
       break
@@ -243,6 +252,8 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetDOGE
     case TerraChain:
       return AssetLUNA
+    case AvalancheChain:
+      return AssetAVAX
     default:
       throw Error('Unknown chain')
   }

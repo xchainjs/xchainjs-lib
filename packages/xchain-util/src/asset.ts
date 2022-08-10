@@ -16,7 +16,7 @@ export const isBigNumberValue = (v: unknown): v is BigNumber.Value =>
 
 /**
  * Default number of asset decimals
- * For history reason and by starting the project on Binance chain assets, it's 8 decimal.
+ * For history reason and by starting the project on Binance chain assets, it's 8 decimal.F
  *
  * For example:
  * ```

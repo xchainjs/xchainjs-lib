@@ -2,6 +2,7 @@ require('dotenv').config()
 import { Network } from '@xchainjs/xchain-client'
 import {
   Asset,
+  AssetAVAX,
   AssetBNB,
   AssetBTC,
   AssetETH,
@@ -17,15 +18,20 @@ import BigNumber from 'bignumber.js'
 import { Wallet } from '../src/Wallet'
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainAMM } from '../src/thorchain-amm'
+import { ThorchainCache } from '../src/thorchain-cache'
 import { SwapEstimate } from '../src/types'
+import { EthHelper } from '../src/utils/eth-helper'
 import { Midgard } from '../src/utils/midgard'
 
-const testnetMidgard = new Midgard(Network.Testnet)
-const mainnetMidgard = new Midgard(Network.Mainnet)
-const testnetThorchainAmm = new ThorchainAMM(testnetMidgard)
-const mainetThorchainAmm = new ThorchainAMM(mainnetMidgard)
-const testnetWallet = new Wallet(Network.Testnet, process.env.TESTNETPHRASE || 'you forgot to set the phrase')
-const mainnetWallet = new Wallet(Network.Mainnet, process.env.MAINNETPHRASE || 'you forgot to set the phrase')
+const testnetCache = new ThorchainCache(new Midgard(Network.Testnet))
+const mainnetCache = new ThorchainCache(new Midgard(Network.Mainnet))
+const stagenetCache = new ThorchainCache(new Midgard(Network.Stagenet))
+const testnetThorchainAmm = new ThorchainAMM(testnetCache)
+const mainetThorchainAmm = new ThorchainAMM(mainnetCache)
+const stagenetThorchainAmm = new ThorchainAMM(stagenetCache)
+const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', testnetCache)
+const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', mainnetCache)
+const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', stagenetCache)
 
 const sBTC = assetFromString('BTC/BTC')
 console.log('sBTC?.chain=' + sBTC?.chain)
@@ -275,12 +281,13 @@ describe('xchain-swap doSwap Integration Tests', () => {
         destinationAsset: AssetRuneNative,
         slipLimit: new BigNumber(0.5),
       }
-      const approved = await testnetWallet.isTCRouterApprovedToSpend(
+      const ethHelper = new EthHelper(testnetWallet.clients.ETH, testnetCache)
+      const approved = await ethHelper.isTCRouterApprovedToSpend(
         estimateSwapParams.input.asset,
         estimateSwapParams.input.baseAmount,
       )
       if (!approved) {
-        const result = await testnetWallet.approveTCRouterToSpend(estimateSwapParams.input.asset)
+        const result = await ethHelper.approveTCRouterToSpend(estimateSwapParams.input.asset)
         expect(result.hash).toBeTruthy()
         console.log(JSON.stringify(result, null, 2))
       } else {
@@ -303,18 +310,34 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAsset: XRUNE,
       slipLimit: new BigNumber(0.5),
     }
-    const approved = await testnetWallet.isTCRouterApprovedToSpend(
+    const ethHelper = new EthHelper(testnetWallet.clients.ETH, testnetCache)
+    const approved = await ethHelper.isTCRouterApprovedToSpend(
       estimateSwapParams.input.asset,
       estimateSwapParams.input.baseAmount,
     )
     if (!approved) {
-      const result = await testnetWallet.approveTCRouterToSpend(estimateSwapParams.input.asset)
+      const result = await ethHelper.approveTCRouterToSpend(estimateSwapParams.input.asset)
       console.log(JSON.stringify(result, null, 2))
     }
     const output = await testnetThorchainAmm.doSwap(
       testnetWallet,
       estimateSwapParams,
       testnetWallet.clients['ETH'].getAddress(),
+    )
+    console.log(output)
+    expect(output.hash).toBeTruthy()
+  })
+  // From ETH to Asset -- passes
+  it(`Should perform a swap from RUNE to AVAX`, async () => {
+    const estimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(2)), AssetRuneNative),
+      destinationAsset: AssetAVAX,
+      slipLimit: new BigNumber(0.5),
+    }
+    const output = await stagenetThorchainAmm.doSwap(
+      stagenetWallet,
+      estimateSwapParams,
+      stagenetWallet.clients[Chain.Avalanche].getAddress(),
     )
     console.log(output)
     expect(output.hash).toBeTruthy()

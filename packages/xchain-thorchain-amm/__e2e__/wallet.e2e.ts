@@ -7,7 +7,7 @@ import { Midgard } from '../src/utils/midgard'
 
 require('dotenv').config()
 
-const midgard = new Midgard(Network.Testnet)
+const midgard = new Midgard(Network.Stagenet)
 const thorchainCache = new ThorchainCache(midgard)
 const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', thorchainCache)
 

@@ -42,15 +42,15 @@ Following peer dependencies have to be installed into your project. These are no
   }
 
 ```
+## Examples
 
-## Usage
+
 
 ## Documentation
 
-### [`xchain thorchain-amm`](http://docs.xchainjs.org/xchain-thorchain-amm/)
-
-[`How thorchain-amm` works`](http://docs.xchainjs.org/xchain-thorchain-amm/how-it-works.html)\
-[`How to use thorchain-amm``](http://docs.xchainjs.org/xchain-thorchain-amm/how-to-use.html)
+[xchain thorchain-amm](http://docs.xchainjs.org/xchain-thorchain-amm/)
+[How thorchain-amm works](http://docs.xchainjs.org/xchain-thorchain-amm/how-it-works.html)\
+[How to use thorchain-amm](http://docs.xchainjs.org/xchain-thorchain-amm/how-to-use.html)
 
 ##
 

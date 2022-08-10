@@ -19,7 +19,7 @@ export type SwapEstimate = {
   netOutput: CryptoAmount
   waitTimeSeconds: number
   canSwap: boolean
-  errors?: string[]
+  errors: string[]
 }
 
 export type PoolCache = {
@@ -53,8 +53,7 @@ export type EstimateSwapParams = {
 }
 
 export type ExecuteSwap = {
-  fromBaseAmount: BaseAmount
-  sourceAsset: Asset
+  input: CryptoAmount
   destinationAsset: Asset
   limit: BaseAmount
   destinationAddress: Address

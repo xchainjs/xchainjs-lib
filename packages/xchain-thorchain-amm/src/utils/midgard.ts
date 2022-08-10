@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Configuration, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
-import { AssetRuneNative, baseAmount } from '@xchainjs/xchain-util'
+import { Action, Configuration, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
+import { AssetRuneNative, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import BigNumber from 'bignumber.js'
@@ -95,6 +95,15 @@ export class Midgard {
       }
       inboundDetails[chain] = details
     }
+    // add mock THORCHAIN inbound details
+    const details: InboundDetail = {
+      vault: '',
+      gas_rate: new BigNumber(0),
+      haltedChain: false,
+      haltedTrading: !!mimirDetails['HALTTRADING'],
+      haltedLP: false, //
+    }
+    inboundDetails[Chain.THORChain] = details
     return inboundDetails
   }
 

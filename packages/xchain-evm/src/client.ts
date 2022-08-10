@@ -506,6 +506,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
       gasLimit: txGasLimit,
       gasPrice: txGasPrice,
     }
+    console.log(JSON.stringify(overrides))
 
     checkFeeBounds(this.feeBounds, overrides.gasPrice.toNumber())
 

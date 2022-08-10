@@ -26,7 +26,7 @@ const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
   18,
 )
 const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
-  AVALANCHE_TESTNET_ETHERS_PROVIDER,
+  AVALANCHE_MAINNET_ETHERS_PROVIDER,
   'https://api.snowtrace.io',
   'fake',
   Chain.Avalanche,
@@ -80,7 +80,8 @@ export const defaultAvaxParams: EVMClientParams = {
   phrase: process.env.PHRASE,
   feeBounds: {
     lower: 20000000000,
-    upper: 200000000000,
+    upper: 260000000000,
+    //  234000000000
   },
   rootDerivationPaths: ethRootDerivationPaths,
 }

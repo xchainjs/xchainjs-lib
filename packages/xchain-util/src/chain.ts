@@ -66,7 +66,6 @@ export const chainToString: ((chainId: Chain) => string) & Record<Chain, string>
     [Chain.Cosmos]: 'Cosmos',
     [Chain.Terra]: 'Terra',
     [Chain.Doge]: 'Dogecoin',
-    [Chain.Avax]: 'Avalanche',
   },
 )
 

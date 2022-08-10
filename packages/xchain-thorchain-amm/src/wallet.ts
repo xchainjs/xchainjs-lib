@@ -92,7 +92,7 @@ export class Wallet {
    */
   async executeSwap(swap: ExecuteSwap): Promise<SwapSubmitted> {
     this.validateSwap(swap)
-    if (swap.sourceAsset.chain === Chain.THORChain || swap.sourceAsset.synth) {
+    if (swap.input.asset.chain === Chain.THORChain || swap.input.asset.synth) {
       return await this.swapRuneTo(swap)
     } else {
       return await this.swapNonRune(swap)
@@ -115,7 +115,7 @@ export class Wallet {
     }
 
     // If memo length is too long for BTC, trim it
-    if (eqAsset(swap.sourceAsset, AssetBTC) && memo.length > 80) {
+    if (eqAsset(swap.input.asset, AssetBTC) && memo.length > 80) {
       memo = `=:${assetToString(swap.destinationAsset)}:${swap.destinationAddress}`
     }
     return memo
@@ -138,33 +138,33 @@ export class Wallet {
     const thorClient = (this.clients.THOR as unknown) as ThorchainClient
     const waitTimeSeconds = swap.waitTimeSeconds
     const hash = await thorClient.deposit({
-      amount: swap.fromBaseAmount,
-      asset: swap.sourceAsset,
+      amount: swap.input.baseAmount,
+      asset: swap.input.asset,
       memo: this.constructSwapMemo(swap),
     })
     return { hash, url: this.clients.THOR.getExplorerTxUrl(hash), waitTimeSeconds }
   }
 
   private async swapNonRune(swap: ExecuteSwap): Promise<SwapSubmitted> {
-    const client = this.clients[swap.sourceAsset.chain]
+    const client = this.clients[swap.input.asset.chain]
     const waitTimeSeconds = swap.waitTimeSeconds
-    const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[swap.sourceAsset.chain]
+    const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[swap.input.asset.chain]
 
-    if (swap.sourceAsset.chain === Chain.Ethereum) {
+    if (swap.input.asset.chain === Chain.Ethereum) {
       const params = {
         walletIndex: 0,
-        asset: swap.sourceAsset,
-        amount: swap.fromBaseAmount,
+        asset: swap.input.asset,
+        amount: swap.input.baseAmount,
         feeOption: swap.feeOption || FeeOption.Fast,
         memo: this.constructSwapMemo(swap),
       }
       const hash = await this.ethHelper.sendDeposit(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
-    } else if (swap.sourceAsset.chain === Chain.Avalanche) {
+    } else if (swap.input.asset.chain === Chain.Avalanche) {
       const params = {
         walletIndex: 0,
-        asset: swap.sourceAsset,
-        amount: swap.fromBaseAmount,
+        asset: swap.input.asset,
+        amount: swap.input.baseAmount,
         feeOption: swap.feeOption || FeeOption.Fast,
         memo: this.constructSwapMemo(swap),
       }
@@ -174,8 +174,8 @@ export class Wallet {
     } else {
       const params = {
         walletIndex: 0,
-        asset: swap.sourceAsset,
-        amount: swap.fromBaseAmount,
+        asset: swap.input.asset,
+        amount: swap.input.baseAmount,
         recipient: inboundAsgard?.address || '', //TODO fix this
         memo: this.constructSwapMemo(swap),
       }

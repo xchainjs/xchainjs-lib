@@ -1,4 +1,4 @@
-import { Chain } from '@xchainjs/xchain-util/lib'
+import { Chain } from '@xchainjs/xchain-util'
 
 import { ChainAttributes } from './types'
 

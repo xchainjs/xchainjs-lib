@@ -45,6 +45,7 @@ export class ThorchainAMM {
   public async estimateSwap(params: EstimateSwapParams): Promise<SwapEstimate> {
     this.isValidSwap(params)
     const inboundDetails = await this.thorchainCache.getInboundDetails()
+    console.log(JSON.stringify(inboundDetails, null, 2))
     const sourceInboundDetails = inboundDetails[params.input.asset.chain]
     const destinationInboundDetails = inboundDetails[params.destinationAsset.chain]
 
@@ -138,8 +139,7 @@ export class ThorchainAMM {
     waitTimeSeconds = outboundDelay + waitTimeSeconds
 
     return await wallet.executeSwap({
-      fromBaseAmount: params.input.baseAmount,
-      sourceAsset: params.input.asset,
+      input: params.input,
       destinationAsset: params.destinationAsset,
       limit: limAssetAmount.baseAmount,
       destinationAddress,
@@ -183,7 +183,6 @@ export class ThorchainAMM {
   ): Promise<SwapEstimate> {
     const input = params.input
     const inputInRune = await this.thorchainCache.convert(input, AssetRuneNative)
-
     const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails.gas_rate)
     let outboundFeeInAsset = calcNetworkFee(params.destinationAsset, destinationInboundDetails.gas_rate)
     outboundFeeInAsset = outboundFeeInAsset.times(3)
@@ -228,6 +227,7 @@ export class ThorchainAMM {
       netOutput: netOutputInAsset,
       waitTimeSeconds: 0, // will be set within EstimateSwap if canSwap = true
       canSwap: false, // assume false for now, the getSwapEstimateErrors() step will flip this flag if required
+      errors: [],
     }
     return swapEstimate
   }
