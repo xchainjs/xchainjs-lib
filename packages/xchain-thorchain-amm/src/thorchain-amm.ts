@@ -6,7 +6,16 @@ import { BigNumber } from 'bignumber.js'
 import { DefaultChainAttributes } from './chain-defaults'
 import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
-import { ChainAttributes, EstimateSwapParams, InboundDetail, SwapEstimate, SwapSubmitted, TotalFees } from './types'
+import {
+  ChainAttributes,
+  EstimateSwapParams,
+  InboundDetail,
+  SwapEstimate,
+  SwapSubmitted,
+  TotalFees,
+  TxSubmitted,
+  liquidityPosition,
+} from './types'
 import { calcNetworkFee, getChainAsset } from './utils/swap'
 import { Wallet } from './wallet'
 
@@ -273,6 +282,7 @@ export class ThorchainAMM {
       )
     // only proceed to check fees if there are no errors so far
     if (errors.length > 0) return errors
+
     // Check if the inputAmount value is enough to cover all the fees.
     const canCoverFeesError = await this.checkCoverFees(params, estimate)
     if (canCoverFeesError) errors.push(canCoverFeesError)
@@ -368,40 +378,44 @@ export class ThorchainAMM {
     return requiredConfs * confConfig.avgBlockTimeInSecs
   }
 
-  // public async addLiquidity(
-  //   wallet: Wallet,
-  //   asset: Asset,
-  //   assetAmount: BaseAmount,
-  //   runeAmount: BaseAmount,
-  // ): Promise<SwapSubmitted> {
-  //   let symAdd = false
+  /**
+   *
+   * @param wallet // wallet that is being used
+   * @param asset // for rune asymetrical add
+   * @param rune
+   * @returns
+   */
+  public async liquidityPosition(wallet: Wallet, params: liquidityPosition): Promise<TxSubmitted> {
+    const assetInboundDetails = await this.thorchainCache.midgard.getInboundDetails()
+    const assetInboundFee = calcNetworkFee(params.asset.asset, assetInboundDetails[params.asset.asset.chain].gas_rate)
+    const waitTimeSeconds = await this.confCounting(params.asset)
 
-  //   const [assetInboundDetails] = await this.midgard.getInboundDetails([asset.chain])
-  //   const assetInboundFee = this.calcInboundFee(asset, assetInboundDetails.gas_rate)
-  //   // Might be better to do assetInboundFee * 4 to account for inbound and outbound fees
-  //   if (assetInboundFee.gt(assetAmount)) {
-  //     throw Error('Source or destination pool is undefined')
-  //   }
-  //   const memo = `+:${asset.chain}.${asset.ticker}`
+    // Might be better to do assetInboundFee * 4 to account for inbound and outbound fees
+    if (assetInboundFee.baseAmount.gt(params.asset.baseAmount)) {
+      throw Error('Fee is greater than asset amount')
+    }
+    return wallet.addLiquidity({
+      asset: params.asset,
+      rune: params.rune,
+      action: params.action,
+      waitTimeSeconds: waitTimeSeconds,
+    })
+  }
 
-  //   if (assetAmount.amount().gt(0) && runeAmount.amount().gt(0)) {
-  //     symAdd = true
-  //     wallet.addLiquiditySym(memo) // send Tx for Asset and RUNE
-  //   } else if (symAdd == false && assetAmount.amount().gt(0)) {
-  //     wallet.depositAsset(memo)
-  //   }
-  //   if (symAdd == false && runeAmount.amount().gt(0)) {
-  //     wallet.depositRUNE(memo)
-  //   }
+  // const memo = `+:${asset.asset.chain}.${assetAmount.asset.ticker}`
+  // Symmetrical Add or Asymmetrical Asset add or asymmetrical Rune add
+  // if (addAsset.gt(0) && addRune.gt(0)) return await wallet.addLiquiditySym(asset, memo) // send Tx for Asset and RUNE
 
-  //   return SwapSubmitted({
-  //     hash: 0,
-  //     url: '',
-  //     waitTime: 0,
-  //   })
-  // }
+  // if (addAsset.gt(0) && addRune.eq(0)) return await wallet.depositAsset(memo)
+
+  // if (addAsset.eq(0) && addRune.gt(0)) return await wallet.depositRUNE(memo)
 
   // public async removeLiquidity(wallet: Wallet, asset: Asset, percent: Percent) {
+
   //   const memo = `-:${asset.chain}.${asset.symbol}:${percent.mul(100).toFixed(0)}`
+  // }
+
+  // public async checkLiquidityPosition(): Promise<Yeild> {
+
   // }
 }

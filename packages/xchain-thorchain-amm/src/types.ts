@@ -69,6 +69,23 @@ export type SwapSubmitted = {
   url: string
   waitTimeSeconds: number
 }
+export type TxSubmitted = {
+  hash: string
+  url: string
+  waitTimeSeconds: number
+}
+export type liquidityPosition = {
+  asset: CryptoAmount
+  rune: CryptoAmount
+  action: string
+}
+
+export type ExecuteLP = {
+  asset: CryptoAmount
+  rune: CryptoAmount
+  action: string
+  waitTimeSeconds: number
+}
 
 export type DepositParams = {
   walletIndex?: number // send from this HD index

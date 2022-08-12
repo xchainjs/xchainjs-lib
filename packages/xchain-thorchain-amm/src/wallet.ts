@@ -12,7 +12,7 @@ import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchai
 import { AssetBTC, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
 
 import { ThorchainCache } from './thorchain-cache'
-import { ExecuteSwap, SwapSubmitted } from './types'
+import { ExecuteLP, ExecuteSwap, SwapSubmitted, TxSubmitted } from './types'
 import { EthHelper } from './utils/eth-helper'
 import { EvmHelper } from './utils/evm-helper'
 
@@ -183,5 +183,111 @@ export class Wallet {
       const hash = await client.transfer(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     }
+  }
+  /**
+   *
+   * @param params input parameters needed to add liquidity
+   * @returns transaction details submitted
+   */
+  async addLiquidity(params: ExecuteLP): Promise<TxSubmitted> {
+    const assetClient = this.clients[params.asset.asset.chain]
+    const assetRune = this.clients[params.asset.asset.chain]
+    //const thorClient = (this.clients.THOR as unknown) as ThorchainClient
+    const addressRune = assetRune.getAddress()
+    const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.asset.asset.chain]
+    const waitTimeSeconds = params.waitTimeSeconds
+
+    if (params.asset.asset.chain === Chain.Ethereum) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.asset.asset,
+        amount: params.asset.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: await this.constructLPMemo(params, addressRune),
+      }
+      console.log(addParams, waitTimeSeconds)
+      const hash = await this.ethHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else if (params.asset.asset.chain === Chain.Avalanche) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.asset.asset,
+        amount: params.asset.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: await this.constructLPMemo(params, addressRune),
+      }
+      console.log(addParams, waitTimeSeconds)
+      const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else if (params.asset.asset.chain === Chain.THORChain) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.rune.asset,
+        amount: params.rune.baseAmount,
+        recipient: inboundAsgard.address,
+        memo: await this.constructLPMemo(params, addressRune),
+      }
+      console.log(addParams, waitTimeSeconds)
+      const hash = `await thorClient.deposit(addParams)`
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.asset.asset,
+        amount: params.asset.baseAmount,
+        recipient: inboundAsgard.address,
+        memo: await this.constructLPMemo(params, addressRune),
+      }
+      console.log(addParams, waitTimeSeconds)
+      const hash = await assetClient.transfer(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    }
+  }
+
+  // /**
+  //  *
+  //  * @param params - parameters required for liquidity position
+  //  * @returns object with tx response, url and wait time in seconds
+  //  */
+  // async removeLiquidity(params: ExecuteLP): Promise<SwapSubmitted> {
+  //   const assetClient = this.clients[params.asset.asset.chain]
+  //   const runeClient = this.clients[params.asset.asset.chain]
+  //   const addressRune = runeClient.getAddress()
+  //   //const addressAsset = assetClient.getAddress()
+  //   const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.asset.asset.chain]
+  //   const waitTimeSeconds = params.waitTimeSeconds
+  //   const memo = await this.constructLPMemo(params, addressRune)
+  //   const addParams = {
+  //     wallIndex: 0,
+  //     asset: params.asset.asset,
+  //     amount: params.asset.assetAmount,
+  //     recipient: inboundAsgard.address,
+  //     memo: memo,
+  //   }
+  //   const hash = await assetClient.transfer(addParams)
+  //   return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+  // }
+
+  /**
+   *
+   * @param params - parameters required for liquidity position
+   * @param address - thor wallet rune address
+   * @returns object with tx response, url and wait time in seconds
+   */
+  private async constructLPMemo(params: ExecuteLP, addressRune: string): Promise<string> {
+    let memo = ''
+    const addAsset = params.asset
+    const addRune = params.rune
+    if (addAsset.assetAmount.gt(0) && addRune.assetAmount.gt(0)) {
+      memo = `${params.action}:${addAsset.asset.chain}.${addAsset.asset.symbol}:${addressRune}`
+    }
+    if (addAsset.assetAmount.gt(0) && addRune.assetAmount.eq(0)) {
+      memo = `${params.action}:${addAsset.asset.chain}.${addAsset.asset.symbol}:`
+    }
+    if (addAsset.assetAmount.eq(0) && addRune.assetAmount.gt(0)) {
+      memo = `${params.action}:${addAsset.asset.chain}.${addAsset.asset.symbol}:`
+    }
+    return memo
   }
 }
