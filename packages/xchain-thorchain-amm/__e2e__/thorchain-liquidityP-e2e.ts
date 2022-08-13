@@ -29,4 +29,14 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     console.log(hash)
     expect(hash).toBeTruthy()
   })
+  it(`Should add RUNE liquidity asymmetrically to BUSD pool `, async () => {
+    const LPAction = '+' // add to lP position
+    const hash = await thorchainAmm.liquidityPosition(mainnetWallet, {
+      asset: new CryptoAmount(assetToBase(assetAmount(0)), BUSD),
+      rune: new CryptoAmount(assetToBase(assetAmount(1)), AssetRuneNative),
+      action: LPAction,
+    })
+    console.log(hash)
+    expect(hash).toBeTruthy()
+  })
 })

@@ -385,15 +385,18 @@ export class ThorchainAMM {
    * @param rune
    * @returns
    */
-  public async liquidityPosition(wallet: Wallet, params: liquidityPosition): Promise<TxSubmitted> {
-    const assetInboundDetails = await this.thorchainCache.midgard.getInboundDetails()
-    const assetInboundFee = calcNetworkFee(params.asset.asset, assetInboundDetails[params.asset.asset.chain].gas_rate)
+  public async liquidityPosition(wallet: Wallet, params: liquidityPosition): Promise<TxSubmitted[]> {
+    const inboundDetails = await this.thorchainCache.midgard.getInboundDetails()
+    const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
+    const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
     const waitTimeSeconds = await this.confCounting(params.asset)
-
+    console.log(assetInboundFee)
+    console.log(runeInboundFee)
+    // Fees need to be less than LP amount.
     // Might be better to do assetInboundFee * 4 to account for inbound and outbound fees
-    if (assetInboundFee.baseAmount.gt(params.asset.baseAmount)) {
-      throw Error('Fee is greater than asset amount')
-    }
+    // if (as) {
+    //   throw Error('Fee is greater than asset amount')
+    // }
     return wallet.addLiquidity({
       asset: params.asset,
       rune: params.rune,
@@ -402,6 +405,7 @@ export class ThorchainAMM {
     })
   }
 
+  //public async
   // const memo = `+:${asset.asset.chain}.${assetAmount.asset.ticker}`
   // Symmetrical Add or Asymmetrical Asset add or asymmetrical Rune add
   // if (addAsset.gt(0) && addRune.gt(0)) return await wallet.addLiquiditySym(asset, memo) // send Tx for Asset and RUNE
