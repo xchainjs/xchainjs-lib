@@ -1,5 +1,13 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Action, Configuration, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
+import {
+  Action,
+  Configuration,
+  InboundAddressesItem,
+  MemberDetails,
+  MidgardApi,
+  PoolDetail,
+  PoolStatsDetail,
+} from '@xchainjs/xchain-midgard'
 import { AssetRuneNative, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
@@ -107,6 +115,10 @@ export class Midgard {
     return inboundDetails
   }
 
+  /**
+   *
+   * @returns - constants
+   */
   private async getConstantsDetails(): Promise<Record<string, number>> {
     const path = 'v2/thorchain/constants'
     for (const baseUrl of this.config.midgardBaseUrls) {
@@ -186,6 +198,40 @@ export class Midgard {
       try {
         const actions = (await api.getActions('', txHash)).data.actions
         return actions
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    throw Error(`Midgard not responding`)
+  }
+
+  /**
+   *
+   * @param address - needed to query for Lp details
+   * @returns - object type of Member Detail
+   */
+  public async getMember(address: string): Promise<MemberDetails> {
+    for (const api of this.midgardApis) {
+      try {
+        const memberDetail = (await api.getMemberDetail(address)).data
+        return memberDetail
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    throw Error(`Midgard not responding`)
+  }
+
+  /**
+   *
+   * @param asset - asset string to query its pool stats
+   * @returns - type object poolstatsDetail
+   */
+  public async getPoolStats(asset: string): Promise<PoolStatsDetail> {
+    for (const api of this.midgardApis) {
+      try {
+        const poolDetail = (await api.getPoolStats(asset)).data
+        return poolDetail
       } catch (e) {
         console.error(e)
       }

@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetRuneNative, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import { AssetRuneNative, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainAMM } from '../src/thorchain-amm'
@@ -38,5 +38,11 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     })
     console.log(hash)
     expect(hash).toBeTruthy()
+  })
+  it(`Should return correct lp details`, async () => {
+    const busd = new CryptoAmount(assetToBase(assetAmount(1)), BUSD)
+    const address = 'bnb150vpa06jrgucqz9ycgun73t0n0rrxq4m69fc22'
+    const poolShare = await thorchainAmm.checkLiquidityPosition(address)
+    expect(baseAmount(poolShare.assetAdded).amount()).toEqual(busd.baseAmount.amount())
   })
 })
