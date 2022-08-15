@@ -43,13 +43,13 @@ const avaxProviders = {
 // =====Explorers=====
 const AVAX_MAINNET_EXPLORER = new ExplorerProvider(
   'https://snowtrace.io/',
-  'https://snowtrace.io/tx/%%TX_ID%%',
   'https://snowtrace.io/address/%%ADDRESS%%',
+  'https://snowtrace.io/tx/%%TX_ID%%',
 )
 const AVAX_TESTNET_EXPLORER = new ExplorerProvider(
   'https://testnet.snowtrace.io/',
-  'https://testnet.snowtrace.io/tx/%%TX_ID%%',
   'https://testnet.snowtrace.io/address/%%ADDRESS%%',
+  'https://testnet.snowtrace.io/tx/%%TX_ID%%',
 )
 const avaxExplorerProviders = {
   [Network.Mainnet]: AVAX_MAINNET_EXPLORER,
@@ -63,25 +63,39 @@ const ethRootDerivationPaths = {
   [Network.Testnet]: `m/44'/60'/0'/0/`,
   [Network.Stagenet]: `m/44'/60'/0'/0/`,
 }
+
+const defaults = {
+  [Network.Mainnet]: {
+    approveGasLimit: BigNumber.from(200000),
+    transferGasAssetGasLimit: BigNumber.from(21000),
+    transferTokenGasLimit: BigNumber.from(100000),
+    gasPrice: BigNumber.from(30),
+  },
+  [Network.Testnet]: {
+    approveGasLimit: BigNumber.from(200000),
+    transferGasAssetGasLimit: BigNumber.from(21000),
+    transferTokenGasLimit: BigNumber.from(100000),
+    gasPrice: BigNumber.from(30),
+  },
+  [Network.Stagenet]: {
+    approveGasLimit: BigNumber.from(200000),
+    transferGasAssetGasLimit: BigNumber.from(21000),
+    transferTokenGasLimit: BigNumber.from(100000),
+    gasPrice: BigNumber.from(30),
+  },
+}
 export const defaultAvaxParams: EVMClientParams = {
   chain: Chain.Avalanche,
   gasAsset: AssetAVAX,
   gasAssetDecimals: 18,
-  defaults: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(21000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(50),
-  },
+  defaults,
   providers: ethersJSProviders,
   explorerProviders: avaxExplorerProviders,
   dataProviders: avaxProviders,
   network: Network.Testnet,
-  phrase: process.env.PHRASE,
   feeBounds: {
-    lower: 20000000000,
-    upper: 260000000000,
-    //  234000000000
+    lower: 2_000_000_000,
+    upper: 1_000_000_000_000,
   },
   rootDerivationPaths: ethRootDerivationPaths,
 }

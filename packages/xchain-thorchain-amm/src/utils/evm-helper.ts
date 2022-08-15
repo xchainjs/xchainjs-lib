@@ -40,7 +40,7 @@ export class EvmHelper {
 
     const address = this.client.getAddress(params.walletIndex)
     const gasPrice = await this.evmClient.estimateGasPrices()
-
+    console.log(JSON.stringify(params.amount.amount()))
     if (eqAsset(params.asset, this.evmClient.config.gasAsset)) {
       // simple transfer
       return await this.client.transfer({

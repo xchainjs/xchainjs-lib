@@ -38,8 +38,8 @@ export class Wallet {
   /**
    * Contructor to create a Wallet
    *
-   * @param network - stagenet,testnet,mainnet
    * @param phrase - mnemonic phrase
+   * @param thorchainCache - an instance of the ThorchainCache (could be pointing to stagenet,testnet,mainnet)
    * @returns Wallet
    */
   constructor(phrase: string, thorchainCache: ThorchainCache) {

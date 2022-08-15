@@ -1,8 +1,9 @@
 // import { Network, TxType } from '@xchainjs/xchain-client'
+import { Balance } from '@xchainjs/xchain-client'
+import { EtherscanProvider } from '@xchainjs/xchain-evm'
 import { AssetAVAX, Chain, assetToString } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
-import { EtherscanProvider } from '../src/providers/etherscan/etherscan-data-provider'
 // =====Erc-20 asset=====
 
 // const assetRIP: Asset = {
@@ -32,7 +33,7 @@ const provider = new EtherscanProvider(
 describe('etherscan Integration Tests', () => {
   it('should fetch all balances', async () => {
     const balances = await provider.getBalance('0xf32DA51880374201852057009c4c4d1e75949e09')
-    balances.forEach((bal) => {
+    balances.forEach((bal: Balance) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
     expect(balances.length).toBeGreaterThan(0)

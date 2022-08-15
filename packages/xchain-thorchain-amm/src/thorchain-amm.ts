@@ -24,8 +24,7 @@ export class ThorchainAMM {
   /**
    * Contructor to create a ThorchainAMM
    *
-   * @param midgard - an instance of the midgard API (could be pointing to stagenet,testnet,mainnet)
-   * @param expirePoolCacheMillis - how long should the pools be cached before expiry
+   * @param thorchainCache - an instance of the ThorchainCache (could be pointing to stagenet,testnet,mainnet)
    * @param chainAttributes - atrributes used to calculate waitTime & conf counting
    * @returns ThorchainAMM
    */

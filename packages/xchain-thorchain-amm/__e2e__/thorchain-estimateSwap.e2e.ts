@@ -252,7 +252,7 @@ describe('xchain-swap estimate Integration Tests', () => {
     // if (!USDT) throw Error('bad asset')
 
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.1')), AssetAVAX),
+      input: new CryptoAmount(assetToBase(assetAmount('0.1', 18)), AssetAVAX),
       destinationAsset: AssetRuneNative,
       // affiliateFeePercent: 0.003, //optional
       slipLimit: new BigNumber('0.03'), //optional
