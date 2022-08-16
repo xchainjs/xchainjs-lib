@@ -1,4 +1,5 @@
 import { AssetAtom } from '@xchainjs/xchain-cosmos/lib'
+import { MemberPool } from '@xchainjs/xchain-midgard/lib'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
 import { Asset, AssetBNB, AssetRuneNative, Chain, THORChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
@@ -8,14 +9,19 @@ import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
 import {
   ChainAttributes,
+  EstimateLP,
   EstimateSwapParams,
   InboundDetail,
+  PoolRatios,
+  RemoveLiquidity,
   SwapEstimate,
   SwapSubmitted,
   TotalFees,
   TxSubmitted,
+  UnitData,
   liquidityPosition,
 } from './types'
+import { getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils'
 import { calcNetworkFee, getChainAsset } from './utils/swap'
 import { Wallet } from './wallet'
 
@@ -380,9 +386,43 @@ export class ThorchainAMM {
 
   /**
    *
-   * @param wallet // wallet that is being used
-   * @param asset // for rune asymetrical add
-   * @param rune
+   * @param params - parameters needed for a estimated liquidity position
+   * @returns - type object EstimateLP
+   */
+  public async estimatAddLP(params: liquidityPosition): Promise<EstimateLP> {
+    const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
+    const lpUnits = getLiquidityUnits({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
+    const inboundDetails = await this.thorchainCache.midgard.getInboundDetails()
+    const runetoAssetRatio = assetPool.runeToAssetRatio
+    const unitData: UnitData = {
+      totalUnits: baseAmount(assetPool.pool.liquidityUnits),
+      liquidityUnits: lpUnits,
+    }
+    const poolShare = getPoolShare(unitData, assetPool)
+    const waitTimeSeconds = await this.confCounting(params.asset)
+    const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
+    const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
+    const totalFees = (await this.convert(assetInboundFee, AssetRuneNative)).plus(runeInboundFee)
+    const slip = getSlipOnLiquidity({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
+
+    const estimateLP: EstimateLP = {
+      slip: slip,
+      poolShare: poolShare,
+      runeToAssetRatio: runetoAssetRatio,
+      transactionFee: {
+        assetFee: assetInboundFee,
+        runeFee: runeInboundFee,
+        TotalFees: totalFees,
+      },
+      estimatedWait: waitTimeSeconds,
+    }
+    return estimateLP
+  }
+
+  /**
+   *
+   * @param wallet - instantiated wallet
+   * @param params - liquidity parameters
    * @returns
    */
   public async liquidityPosition(wallet: Wallet, params: liquidityPosition): Promise<TxSubmitted[]> {
@@ -390,8 +430,8 @@ export class ThorchainAMM {
     const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
     const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
     const waitTimeSeconds = await this.confCounting(params.asset)
-    console.log(assetInboundFee)
-    console.log(runeInboundFee)
+    console.log(await this.convert(assetInboundFee, params.asset.asset))
+    console.log(await this.convert(runeInboundFee, AssetRuneNative))
     // Fees need to be less than LP amount.
     // Might be better to do assetInboundFee * 4 to account for inbound and outbound fees
     // if (as) {
@@ -405,21 +445,51 @@ export class ThorchainAMM {
     })
   }
 
-  //public async
-  // const memo = `+:${asset.asset.chain}.${assetAmount.asset.ticker}`
-  // Symmetrical Add or Asymmetrical Asset add or asymmetrical Rune add
-  // if (addAsset.gt(0) && addRune.gt(0)) return await wallet.addLiquiditySym(asset, memo) // send Tx for Asset and RUNE
+  /**
+   * Do not send assetNativeRune, There is no pool for it.
+   * @param asset - asset needed to find the pool
+   * @returns - object type ratios
+   */
+  public async getPoolRatios(asset: Asset): Promise<PoolRatios> {
+    const assetPool = await this.thorchainCache.getPoolForAsset(asset)
+    const poolRatio: PoolRatios = {
+      assetToRune: assetPool.assetToRuneRatio,
+      runeToAsset: assetPool.runeToAssetRatio,
+    }
+    return poolRatio
+  }
 
-  // if (addAsset.gt(0) && addRune.eq(0)) return await wallet.depositAsset(memo)
+  /**
+   *
+   * @param params - liquidity parameters
+   * @param percent - percenta
+   * @returns
+   */
+  public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidity): Promise<TxSubmitted> {
+    const assetClient = wallet.clients[params.asset.asset.chain]
+    const address = assetClient.getAddress()
+    const memberDetail = (await this.thorchainCache.midgard.getMember(address)).pools.find((item) => item)
+    if (!memberDetail) throw Error(`could not find details for this address`)
+    const assetAmount = new CryptoAmount(baseAmount(memberDetail.assetAdded), params.asset.asset)
+    const waitTimeSeconds = await this.confCounting(assetAmount)
 
-  // if (addAsset.eq(0) && addRune.gt(0)) return await wallet.depositRUNE(memo)
+    return wallet.removeLiquidity({
+      asset: params.asset,
+      action: params.action,
+      percentage: params.percentage,
+      waitTimeSeconds: waitTimeSeconds,
+    })
+    //const memo = `-:${asset.chain}.${asset.symbol}:${percent.mul(100).toFixed(0)}`
+  }
 
-  // public async removeLiquidity(wallet: Wallet, asset: Asset, percent: Percent) {
-
-  //   const memo = `-:${asset.chain}.${asset.symbol}:${percent.mul(100).toFixed(0)}`
-  // }
-
-  // public async checkLiquidityPosition(): Promise<Yeild> {
-
-  // }
+  /**
+   *
+   * @param address - address used for Lp
+   * @returns - Type Object MemberPool
+   */
+  public async checkLiquidityPosition(address: string): Promise<MemberPool> {
+    const memberDetails = (await this.thorchainCache.midgard.getMember(address)).pools.find((item) => item)
+    if (!memberDetails) throw Error(`could not find details for this address`)
+    return memberDetails
+  }
 }

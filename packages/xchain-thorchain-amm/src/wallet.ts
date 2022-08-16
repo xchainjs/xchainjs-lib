@@ -9,10 +9,11 @@ import { Client as EthClient } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as TerraClient } from '@xchainjs/xchain-terra'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
-import { AssetBTC, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
+import { AssetBTC, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
+import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
-import { ExecuteLP, ExecuteSwap, SwapSubmitted, TxSubmitted } from './types'
+import { AddLiquidity, ExecuteSwap, RemoveLiquidity, SwapSubmitted, TxSubmitted } from './types'
 import { EthHelper } from './utils/eth-helper'
 import { EvmHelper } from './utils/evm-helper'
 
@@ -189,7 +190,7 @@ export class Wallet {
    * @param params input parameters needed to add liquidity
    * @returns transaction details submitted
    */
-  async addLiquidity(params: ExecuteLP): Promise<TxSubmitted[]> {
+  async addLiquidity(params: AddLiquidity): Promise<TxSubmitted[]> {
     const assetClient = this.clients[params.asset.asset.chain]
     const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.asset.asset.chain].address
     const thorchainClient = this.clients[params.asset.asset.chain]
@@ -206,6 +207,7 @@ export class Wallet {
       return txSubmitted
     } else if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.eq(0)) {
       // asymmetrical asset only
+      console.log(`Asymetrical add ${params.asset.asset.chain} to its pool  `)
       constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:`
       txSubmitted.push(await this.addAssetLP(params, constructedMemo, waitTimeSeconds, assetClient, inboundAsgard))
       return txSubmitted
@@ -227,7 +229,7 @@ export class Wallet {
    * @returns
    */
   private async addAssetLP(
-    params: ExecuteLP,
+    params: AddLiquidity,
     constructedMemo: string,
     waitTimeSeconds: number,
     assetClient: XChainClient,
@@ -278,7 +280,7 @@ export class Wallet {
    * @returns
    */
   private async addRuneLP(
-    params: ExecuteLP,
+    params: AddLiquidity,
     memo: string,
     inboundAsgard: string,
     thorchainClient: XChainClient,
@@ -297,27 +299,25 @@ export class Wallet {
     return { hash, url: thorchainClient.getExplorerTxUrl(hash), waitTimeSeconds }
   }
 
-  // /**
-  //  *
-  //  * @param params - parameters required for liquidity position
-  //  * @returns object with tx response, url and wait time in seconds
-  //  */
-  // async removeLiquidity(params: ExecuteLP): Promise<SwapSubmitted> {
-  //   const assetClient = this.clients[params.asset.asset.chain]
-  //   const runeClient = this.clients[params.asset.asset.chain]
-  //   const addressRune = runeClient.getAddress()
-  //   //const addressAsset = assetClient.getAddress()
-  //   const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.asset.asset.chain]
-  //   const waitTimeSeconds = params.waitTimeSeconds
-  //   const memo = await this.constructLPMemo(params, addressRune)
-  //   const addParams = {
-  //     wallIndex: 0,
-  //     asset: params.asset.asset,
-  //     amount: params.asset.assetAmount,
-  //     recipient: inboundAsgard.address,
-  //     memo: memo,
-  //   }
-  //   const hash = await assetClient.transfer(addParams)
-  //   return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
-  // }
+  /**
+   *
+   * @param params - parameters required for liquidity position
+   * @returns object with tx response, url and wait time in seconds
+   */
+  async removeLiquidity(params: RemoveLiquidity): Promise<TxSubmitted> {
+    const assetClient = this.clients[params.asset.asset.chain]
+    const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.asset.asset.chain]
+    const waitTimeSeconds = params.waitTimeSeconds
+    const percentageRemoval = (params.percentage * 100).toFixed()
+    const memo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${percentageRemoval}`
+    const removeParams = {
+      walletIndex: 0,
+      asset: params.asset.asset,
+      amount: new CryptoAmount(baseAmount(0), params.asset.asset).baseAmount,
+      recipient: inboundAsgard.address,
+      memo: memo,
+    }
+    const hash = await assetClient.transfer(removeParams)
+    return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+  }
 }

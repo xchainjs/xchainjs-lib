@@ -1,9 +1,10 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetRuneNative, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { AssetBTC, AssetRuneNative, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainAMM } from '../src/thorchain-amm'
 import { ThorchainCache } from '../src/thorchain-cache'
+import { EstimateLP, liquidityPosition } from '../src/types'
 import { Midgard } from '../src/utils/midgard'
 import { Wallet } from '../src/wallet'
 require('dotenv').config()
@@ -16,8 +17,49 @@ const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set
 const BUSD = assetFromString('BNB.BUSD-BD1')
 if (!BUSD) throw Error('bad asset')
 
+function print(estimate: EstimateLP) {
+  const expanded = {
+    slip: estimate.slip.multipliedBy(100),
+    poolShare: {
+      asset: estimate.poolShare.asset.amount().toFixed(),
+      rune: estimate.poolShare.asset.amount().toFixed(),
+    },
+    runeToAssetRatio: estimate.runeToAssetRatio.toFixed(),
+    transactionFees: {
+      runeFee: estimate.transactionFee.runeFee.assetAmount.amount().toFixed(),
+      assetFee: estimate.transactionFee.assetFee.assetAmount.amount().toFixed(),
+      totalFees: estimate.transactionFee.TotalFees.assetAmount.amount().toFixed(),
+    },
+    estimatedWait: estimate.estimatedWait.toFixed(),
+  }
+  console.log(expanded)
+}
+
 // Test User Functions - single and double swap using mock pool data
 describe('Thorchain-amm liquidity action end to end Tests', () => {
+  it(`Should estimate liquidity postion for given BUSD`, async () => {
+    const LPAction = '+' // add to lP position
+    const lp: liquidityPosition = {
+      asset: new CryptoAmount(assetToBase(assetAmount(100)), BUSD),
+      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+      action: LPAction,
+    }
+    const estimatedLP = await thorchainAmm.estimatAddLP(lp)
+    print(estimatedLP)
+    expect(estimatedLP).toBeTruthy()
+  })
+  it(`Should estimate liquidity postion for BTC & RUNE LP`, async () => {
+    const LPAction = '+' // add to lP position
+    const lp: liquidityPosition = {
+      asset: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
+      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+      action: LPAction,
+    }
+    const estimatedLP = await thorchainAmm.estimatAddLP(lp)
+    print(estimatedLP)
+    expect(estimatedLP).toBeTruthy()
+  })
+
   it(`Should add BUSD liquidity asymmetrically to BUSD pool `, async () => {
     const LPAction = '+' // add to lP position
     const hash = await thorchainAmm.liquidityPosition(mainnetWallet, {
@@ -44,5 +86,17 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const address = 'bnb150vpa06jrgucqz9ycgun73t0n0rrxq4m69fc22'
     const poolShare = await thorchainAmm.checkLiquidityPosition(address)
     expect(baseAmount(poolShare.assetAdded).amount()).toEqual(busd.baseAmount.amount())
+  })
+  it(`Should remove liquidty from the BUSD pool`, async () => {
+    const LPAction = '-' // add to lP position
+    const removePercentage = 50
+    const hash = await thorchainAmm.removeLiquidityPosition(mainnetWallet, {
+      asset: new CryptoAmount(baseAmount(1), BUSD),
+      action: LPAction,
+      percentage: removePercentage,
+      waitTimeSeconds: 0,
+    })
+    console.log(hash)
+    expect(hash).toBeTruthy()
   })
 })

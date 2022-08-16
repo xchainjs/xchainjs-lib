@@ -6,7 +6,7 @@ import { BigNumber } from 'bignumber.js'
  * Represent a Liquidity Pool in Thorchain
  */
 export class LiquidityPool {
-  private pool: PoolDetail
+  readonly pool: PoolDetail
   readonly assetBalance: BaseAmount
   readonly runeBalance: BaseAmount
 
