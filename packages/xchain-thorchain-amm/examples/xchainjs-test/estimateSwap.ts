@@ -1,5 +1,12 @@
 import { Network } from '@xchainjs/xchain-client'
-import { CryptoAmount, EstimateSwapParams, Midgard, SwapEstimate, ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
+import {
+  CryptoAmount,
+  EstimateSwapParams,
+  Midgard,
+  SwapEstimate,
+  ThorchainAMM,
+  ThorchainCache,
+} from '@xchainjs/xchain-thorchain-amm'
 import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
@@ -33,7 +40,8 @@ const estimateSwap = async () => {
     const fromAsset = assetFromString(`${process.argv[4]}`)
     const toAsset = assetFromString(`${process.argv[5]}`)
     const midgard = new Midgard(network)
-    const thorchainAmm = new ThorchainAMM(midgard)
+    const cache = new ThorchainCache(midgard)
+    const thorchainAmm = new ThorchainAMM(cache)
 
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(amount)), fromAsset),

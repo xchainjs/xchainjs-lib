@@ -56,10 +56,8 @@ describe('Midgard Client Test', () => {
     expect(inboundAddress[0]).toEqual(inboundBCHAdress)
   })
   it(`Should return all inbound details `, async () => {
-    const inboundDetails = await mainnetMidgard.getInboundDetails([BTCChain])
-    const inboundVault = inboundDetails.find((item) => {
-      return item
-    })
+    const inboundDetails = await mainnetMidgard.getInboundDetails()
+    const inboundVault = inboundDetails[BTCChain]
     expect(inboundVault?.vault).toEqual(vault)
   })
   it(`Should return latest block height`, async () => {
@@ -67,9 +65,10 @@ describe('Midgard Client Test', () => {
     expect(latestBlockheight).toEqual(blockHeight)
   })
   it(`Should return networkValue by name`, async () => {
-    const networkValue = await mainnetMidgard.getNetworkValueByNames([networkName])
-    expect(networkValue).toBeTruthy()
-    expect(Number.parseInt(networkValue[networkName])).toEqual(FullImpLossProtectionBlocks)
+    const networkValues = await mainnetMidgard.getNetworkValues()
+    const val = networkValues[networkName.toUpperCase()]
+    expect(val).toBeTruthy()
+    expect(val).toEqual(FullImpLossProtectionBlocks)
   })
   it(`Should return pools array`, async () => {
     const scheduledOutbound = await mainnetMidgard.getScheduledOutboundValue()

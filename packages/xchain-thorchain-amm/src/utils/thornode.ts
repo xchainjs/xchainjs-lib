@@ -159,8 +159,6 @@ export class Thornode {
         return DOGEChain
       case 'TERRA':
         return TerraChain
-      case 'POLKA':
-        throw Error('Polkadot is not supported yet')
       default:
         throw Error('Unknown chain')
     }

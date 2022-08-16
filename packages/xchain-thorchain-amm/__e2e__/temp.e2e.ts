@@ -3,6 +3,7 @@ import { AssetBTC, assetAmount, assetFromString, assetToBase } from '@xchainjs/x
 import BigNumber from 'bignumber.js'
 
 import { CryptoAmount, EstimateSwapParams, Midgard, SwapEstimate, ThorchainAMM } from '../src/index'
+import { ThorchainCache } from '../src/thorchain-cache'
 
 const BUSD = assetFromString('BNB.BUSD-BD1')
 if (!BUSD) throw Error('bad asset')
@@ -28,7 +29,8 @@ describe('xchain-swap temp Tests', () => {
   it(`Should perform a double swap `, async () => {
     try {
       const midgard = new Midgard(Network.Mainnet) //defaults to mainnet
-      const thorchainAmm = new ThorchainAMM(midgard)
+      const thorchainCache = new ThorchainCache(midgard)
+      const thorchainAmm = new ThorchainAMM(thorchainCache)
       const swapParams: EstimateSwapParams = {
         input: new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC),
         destinationAsset: BUSD,

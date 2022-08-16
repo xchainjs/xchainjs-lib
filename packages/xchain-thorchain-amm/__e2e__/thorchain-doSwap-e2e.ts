@@ -2,9 +2,11 @@ require('dotenv').config()
 import { Network } from '@xchainjs/xchain-client'
 import {
   Asset,
+  AssetAVAX,
   AssetBNB,
   AssetBTC,
   AssetETH,
+  AssetLTC,
   AssetRuneNative,
   Chain,
   assetAmount,
@@ -17,15 +19,20 @@ import BigNumber from 'bignumber.js'
 import { Wallet } from '../src/Wallet'
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainAMM } from '../src/thorchain-amm'
+import { ThorchainCache } from '../src/thorchain-cache'
 import { SwapEstimate } from '../src/types'
+import { EthHelper } from '../src/utils/eth-helper'
 import { Midgard } from '../src/utils/midgard'
 
-const testnetMidgard = new Midgard(Network.Testnet)
-const mainnetMidgard = new Midgard(Network.Mainnet)
-const testnetThorchainAmm = new ThorchainAMM(testnetMidgard)
-const mainetThorchainAmm = new ThorchainAMM(mainnetMidgard)
-const testnetWallet = new Wallet(Network.Testnet, process.env.TESTNETPHRASE || 'you forgot to set the phrase')
-const mainnetWallet = new Wallet(Network.Mainnet, process.env.MAINNETPHRASE || 'you forgot to set the phrase')
+const testnetCache = new ThorchainCache(new Midgard(Network.Testnet))
+const mainnetCache = new ThorchainCache(new Midgard(Network.Mainnet))
+const stagenetCache = new ThorchainCache(new Midgard(Network.Stagenet))
+const testnetThorchainAmm = new ThorchainAMM(testnetCache)
+const mainetThorchainAmm = new ThorchainAMM(mainnetCache)
+const stagenetThorchainAmm = new ThorchainAMM(stagenetCache)
+const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', testnetCache)
+const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', mainnetCache)
+const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', stagenetCache)
 
 const sBTC = assetFromString('BTC/BTC')
 console.log('sBTC?.chain=' + sBTC?.chain)
@@ -77,7 +84,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // From BTC to RUNE with no Affiliate address - passes
   it(`Should swap BTC to RUNE, with no affiliate address `, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(0.0001)), AssetBTC),
+      input: new CryptoAmount(assetToBase(assetAmount('0.0001')), AssetBTC),
       destinationAsset: AssetRuneNative,
       // affiliateFeePercent: 0.1,
     }
@@ -93,7 +100,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // From BTC to Rune but fail on destination address - passes
   it(`Should fail to swap BTC to RUNE, if dest address is not for the correct chain  `, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(0.0001)), AssetBTC),
+      input: new CryptoAmount(assetToBase(assetAmount('0.0001')), AssetBTC),
       destinationAsset: AssetRuneNative,
     }
     try {
@@ -105,7 +112,9 @@ describe('xchain-swap doSwap Integration Tests', () => {
       console.log(output.hash)
       fail()
     } catch (error: any) {
-      expect(error.message).toEqual(`tbnb1kmu0n6s44cz5jxdvkvsvrzgr57ndg6atw5zrys is not a valid address`)
+      expect(error.message).toEqual(
+        `destinationAddress tbnb1kmu0n6s44cz5jxdvkvsvrzgr57ndg6atw5zrys is not a valid address`,
+      )
     }
   })
   // Sawp From Rune to ETH - passes
@@ -127,7 +136,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // Swap From BNB to ETH - ?
   it(`Should perform a double swap from BNB to ETH`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(0.0001)), AssetBNB),
+      input: new CryptoAmount(assetToBase(assetAmount('0.0001')), AssetBNB),
       destinationAsset: AssetETH,
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
@@ -144,7 +153,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // From asset BUSD to synth sBTC -- passes
   it(`Should perform a swap from BUSD to synthBTC`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(4)), BUSD),
+      input: new CryptoAmount(assetToBase(assetAmount('4')), BUSD),
       destinationAsset: sBTC,
       slipLimit: new BigNumber(0.03),
     }
@@ -168,7 +177,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // From synth sBTC to Asset BUSD -- Passes
   it(`Should perform a swap from sBTC to BUSD`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(0.00009)), sBTC),
+      input: new CryptoAmount(assetToBase(assetAmount('0.00009')), sBTC),
       destinationAsset: BUSD,
       slipLimit: new BigNumber(0.09),
     }
@@ -188,7 +197,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // From synth sBTC to sETH - passes
   it(`Should perform a swap from synthBTC to synthETH`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(0.0009)), sBTC),
+      input: new CryptoAmount(assetToBase(assetAmount('0.0009')), sBTC),
       destinationAsset: sETH,
       slipLimit: new BigNumber(0.5),
     }
@@ -212,7 +221,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // From synth sETH to sBTC - passes
   it(`Should perform a swap from synthBTC to synthETH`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(0.0009)), sBTC),
+      input: new CryptoAmount(assetToBase(assetAmount('0.0009')), sBTC),
       destinationAsset: sETH,
       slipLimit: new BigNumber(0.5),
     }
@@ -236,7 +245,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // From ETH to Asset -- passes
   it(`Should perform a double swap from ETH to BNB`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(0.1)), AssetETH),
+      input: new CryptoAmount(assetToBase(assetAmount('0.1', 18)), AssetETH),
       destinationAsset: AssetBNB,
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
@@ -253,7 +262,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // From Rune to ERC -- Passes
   it(`Should perform a single swap from Rune to ERC`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(10)), AssetRuneNative),
+      input: new CryptoAmount(assetToBase(assetAmount('10')), AssetRuneNative),
       destinationAsset: USDT,
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
@@ -271,16 +280,17 @@ describe('xchain-swap doSwap Integration Tests', () => {
   it(`Should perform a single swap from ERC to Rune`, async () => {
     try {
       const estimateSwapParams = {
-        input: new CryptoAmount(assetToBase(assetAmount(0.005, USDT_DECIMAL)), USDT),
+        input: new CryptoAmount(assetToBase(assetAmount('0.005', USDT_DECIMAL)), USDT),
         destinationAsset: AssetRuneNative,
-        slipLimit: new BigNumber(0.5),
+        slipLimit: new BigNumber('0.5'),
       }
-      const approved = await testnetWallet.isTCRouterApprovedToSpend(
+      const ethHelper = new EthHelper(testnetWallet.clients.ETH, testnetCache)
+      const approved = await ethHelper.isTCRouterApprovedToSpend(
         estimateSwapParams.input.asset,
         estimateSwapParams.input.baseAmount,
       )
       if (!approved) {
-        const result = await testnetWallet.approveTCRouterToSpend(estimateSwapParams.input.asset)
+        const result = await ethHelper.approveTCRouterToSpend(estimateSwapParams.input.asset)
         expect(result.hash).toBeTruthy()
         console.log(JSON.stringify(result, null, 2))
       } else {
@@ -299,16 +309,17 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // From ERC to ERC -- passes
   it(`Should perform a double swap from ERC to ERC`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(0.005, USDT_DECIMAL)), USDT),
+      input: new CryptoAmount(assetToBase(assetAmount('0.005', USDT_DECIMAL)), USDT),
       destinationAsset: XRUNE,
-      slipLimit: new BigNumber(0.5),
+      slipLimit: new BigNumber('0.5'),
     }
-    const approved = await testnetWallet.isTCRouterApprovedToSpend(
+    const ethHelper = new EthHelper(testnetWallet.clients.ETH, testnetCache)
+    const approved = await ethHelper.isTCRouterApprovedToSpend(
       estimateSwapParams.input.asset,
       estimateSwapParams.input.baseAmount,
     )
     if (!approved) {
-      const result = await testnetWallet.approveTCRouterToSpend(estimateSwapParams.input.asset)
+      const result = await ethHelper.approveTCRouterToSpend(estimateSwapParams.input.asset)
       console.log(JSON.stringify(result, null, 2))
     }
     const output = await testnetThorchainAmm.doSwap(
@@ -318,5 +329,42 @@ describe('xchain-swap doSwap Integration Tests', () => {
     )
     console.log(output)
     expect(output.hash).toBeTruthy()
+  })
+  it(`Should perform a swap from LTC to AVAX`, async () => {
+    const estimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('0.2')), AssetLTC),
+      destinationAsset: AssetAVAX,
+      slipLimit: new BigNumber('0.5'),
+    }
+    const output = await stagenetThorchainAmm.doSwap(
+      stagenetWallet,
+      estimateSwapParams,
+      stagenetWallet.clients[Chain.Avalanche].getAddress(),
+    )
+    console.log(output)
+    expect(output.hash).toBeTruthy()
+  })
+  it(`Should perform a swap from AVAX to RUNE`, async () => {
+    const estimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('0.00000000005', 18)), AssetAVAX),
+      destinationAsset: AssetRuneNative,
+      slipLimit: new BigNumber('0.5'),
+    }
+    try {
+      const outPutCanSwap = await stagenetThorchainAmm.estimateSwap(estimateSwapParams)
+      print(outPutCanSwap)
+      if (outPutCanSwap.canSwap) {
+        const output = await stagenetThorchainAmm.doSwap(
+          stagenetWallet,
+          estimateSwapParams,
+          stagenetWallet.clients[Chain.THORChain].getAddress(),
+        )
+        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+        expect(output).toBeTruthy()
+      }
+    } catch (error: any) {
+      console.log(error.message)
+      fail()
+    }
   })
 })

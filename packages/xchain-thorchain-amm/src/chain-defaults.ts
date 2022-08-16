@@ -1,4 +1,4 @@
-import { Chain } from '@xchainjs/xchain-util/lib'
+import { Chain } from '@xchainjs/xchain-util'
 
 import { ChainAttributes } from './types'
 
@@ -14,6 +14,10 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
   ETH: {
     blockReward: 2,
     avgBlockTimeInSecs: 13,
+  },
+  AVAX: {
+    blockReward: 2,
+    avgBlockTimeInSecs: 3,
   },
   LTC: {
     blockReward: 12.5,
@@ -38,10 +42,6 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
   THOR: {
     blockReward: 0,
     avgBlockTimeInSecs: 6,
-  },
-  POLKA: {
-    blockReward: 0,
-    avgBlockTimeInSecs: 0,
   },
 }
 

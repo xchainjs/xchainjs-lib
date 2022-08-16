@@ -47,7 +47,6 @@ A single common interface:
 * [`xchain-doge`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-doge)
 * [`xchain-ethereum`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-ethereum)
 * [`xchain-litecoin`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-litecoin)
-* [`xchain-polkadot`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-polkadot)
 * [`xchain-terra`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-terra)
 * [`xchain-thorchain`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain)
 * [`xchain-util`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-util)
@@ -62,7 +61,6 @@ For wallets that need even more flexibility (smart contract blockchains) the cli
 - [@binance-chain/javascript-sdk](https://github.com/binance-chain/javascript-sdk)
 - [@ethersproject](https://github.com/ethers-io/ethers.js)
 - [cosmos-client](https://github.com/cosmos-client/cosmos-client-ts)
-- [PolkadotJS](https://github.com/polkadot-js)
 
 ![Test](https://github.com/thorchain/asgardex-electron/workflows/Test/badge.svg)
 

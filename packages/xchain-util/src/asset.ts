@@ -16,7 +16,7 @@ export const isBigNumberValue = (v: unknown): v is BigNumber.Value =>
 
 /**
  * Default number of asset decimals
- * For history reason and by starting the project on Binance chain assets, it's 8 decimal.
+ * For history reason and by starting the project on Binance chain assets, it's 8 decimal.F
  *
  * For example:
  * ```
@@ -161,6 +161,12 @@ export const formatAssetAmount = ({
  * @returns {string} The formatted base amount string from the given base amount.
  */
 export const formatBaseAmount = (amount: BaseAmount) => formatBN(amount.amount(), 0)
+
+/**
+ * Base "chain" asset of Avalanche chain.
+ *
+ */
+export const AssetAVAX: Asset = { chain: Chain.Avalanche, symbol: 'AVAX', ticker: 'AVAX', synth: false }
 
 /**
  * Base "chain" asset of Binance chain.

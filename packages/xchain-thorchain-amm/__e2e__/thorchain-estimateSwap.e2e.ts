@@ -1,6 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
   Asset,
+  AssetAVAX,
   AssetBNB,
   AssetBTC,
   AssetETH,
@@ -14,11 +15,15 @@ import BigNumber from 'bignumber.js'
 
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainAMM } from '../src/thorchain-amm'
+import { ThorchainCache } from '../src/thorchain-cache'
 import { EstimateSwapParams, SwapEstimate } from '../src/types'
 import { Midgard } from '../src/utils/midgard'
 
 const midgard = new Midgard(Network.Mainnet)
-const thorchainAmm = new ThorchainAMM(midgard)
+const thorchainCache = new ThorchainCache(midgard)
+const thorchainAmm = new ThorchainAMM(thorchainCache)
+const stagenetCache = new ThorchainCache(new Midgard(Network.Stagenet))
+const stagenetThorchainAmm = new ThorchainAMM(stagenetCache)
 
 function print(estimate: SwapEstimate, input: CryptoAmount) {
   const expanded = {
@@ -225,8 +230,40 @@ describe('xchain-swap estimate Integration Tests', () => {
 
   it(`Should return the correct network value`, async () => {
     const constant = 'TXOUTDELAYRATE'
-    const values = await midgard.getNetworkValueByNames([constant])
+    const values = (await thorchainCache.getNetworkValues())[constant]
     console.log(values)
-    expect(Number.parseInt(values[constant])).toEqual(10000000000)
+    expect(values).toEqual(10000000000)
+  })
+  it('should estimate a swap of 5 RUNE to AVAX', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('5')), AssetRuneNative),
+      destinationAsset: AssetAVAX,
+      // affiliateFeePercent: 0.003, //optional
+      slipLimit: new BigNumber('0.10'), //optional
+    }
+
+    const estimate = await stagenetThorchainAmm.estimateSwap(swapParams)
+    print(estimate, swapParams.input)
+    expect(estimate.canSwap).toBe(true)
+    expect(estimate).toBeTruthy()
+  })
+  it('should estimate a swap of 0.0000000005 AVAX to RUNE', async () => {
+    // const USDT = assetFromString('ETH.USDT-0XDAC1')
+    // if (!USDT) throw Error('bad asset')
+
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('0.00000000005', 18)), AssetAVAX),
+      destinationAsset: AssetRuneNative,
+      // affiliateFeePercent: 0.003, //optional
+      slipLimit: new BigNumber('0.07'), //optional
+    }
+
+    const estimate = await stagenetThorchainAmm.estimateSwap(swapParams)
+
+    // const estimateInBusd = await stagenetThorchainAmm.getFeesIn(estimate.totalFees, USDT)
+    // estimate.totalFees = estimateInBusd
+    print(estimate, swapParams.input)
+    expect(estimate.canSwap).toBe(true)
+    expect(estimate).toBeTruthy()
   })
 })

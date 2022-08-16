@@ -8,7 +8,6 @@ describe('chain', () => {
     expect(isChain('ETH')).toBeTruthy()
     expect(isChain('THOR')).toBeTruthy()
     expect(isChain('GAIA')).toBeTruthy()
-    expect(isChain('POLKA')).toBeTruthy()
     expect(isChain('LTC')).toBeTruthy()
     expect(isChain('')).toBeFalsy()
     expect(isChain('invalid')).toBeFalsy()
@@ -31,9 +30,6 @@ describe('chain', () => {
     })
     it('returns string for GAIA', () => {
       expect(chainToString(Chain.Cosmos)).toEqual('Cosmos')
-    })
-    it('returns string for POLKA', () => {
-      expect(chainToString(Chain.Polkadot)).toEqual('Polkadot')
     })
     it('returns string for LTC', () => {
       expect(chainToString(Chain.Litecoin)).toEqual('Litecoin')

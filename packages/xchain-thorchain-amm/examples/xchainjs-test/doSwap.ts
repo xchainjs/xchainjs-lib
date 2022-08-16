@@ -1,5 +1,12 @@
 import { Network } from '@xchainjs/xchain-client'
-import { CryptoAmount, Midgard, SwapEstimate, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
+import {
+  CryptoAmount,
+  Midgard,
+  SwapEstimate,
+  ThorchainAMM,
+  ThorchainCache,
+  Wallet,
+} from '@xchainjs/xchain-thorchain-amm'
 import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
@@ -52,8 +59,9 @@ const main = async () => {
   const seed = process.argv[2]
   const network = process.argv[3] as Network
   const midgard = new Midgard(network)
-  const thorchainAmm = new ThorchainAMM(midgard)
-  const wallet = new Wallet(network, seed)
+  const cache = new ThorchainCache(midgard)
+  const thorchainAmm = new ThorchainAMM(cache)
+  const wallet = new Wallet(seed, cache)
   console.log(`\ Swap on ${network} :)\n`)
   await doSingleSwap(thorchainAmm, wallet)
 }

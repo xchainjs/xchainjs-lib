@@ -33,14 +33,5 @@ export default {
     }),
     commonjs(),
   ],
-  external: [
-    'readable-stream',
-    'axios',
-    'buffer',
-    'crypto',
-    'stream',
-    'string_decoder',
-    // '@xchainjs/xchain-client',
-    'axios',
-  ],
+  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios'],
 }
