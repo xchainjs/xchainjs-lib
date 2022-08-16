@@ -185,9 +185,9 @@ export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount =
   switch (asset.chain) {
     case Chain.Avalanche:
       if (eqAsset(asset, AssetAVAX)) {
-        return new CryptoAmount(baseAmount(gasRate.multipliedBy(8000)), AssetAVAX)
+        return new CryptoAmount(baseAmount(gasRate.multipliedBy(80000)), AssetAVAX)
       } else {
-        return new CryptoAmount(baseAmount(gasRate.multipliedBy(8000)), AssetAVAX)
+        return new CryptoAmount(baseAmount(gasRate.multipliedBy(80000)), AssetAVAX)
       }
       break
     case Chain.Bitcoin:

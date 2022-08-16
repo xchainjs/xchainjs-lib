@@ -500,8 +500,10 @@ export default class Client extends BaseXChainClient implements XChainClient {
     if (!gasLimit) {
       try {
         txGasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo })
+        console.log(`estimateGasLimit=${txGasLimit.toString()}`)
       } catch (error) {
         txGasLimit = defaultGasLimit
+        console.log(`defaultGasLimit=${txGasLimit.toString()}`)
       }
     } else {
       txGasLimit = gasLimit

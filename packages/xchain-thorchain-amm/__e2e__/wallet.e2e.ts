@@ -11,7 +11,7 @@ const midgard = new Midgard(Network.Stagenet)
 const thorchainCache = new ThorchainCache(midgard)
 const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', thorchainCache)
 
-describe('xchain-swap temp Tests', () => {
+describe('xchain-swap wallet Tests', () => {
   it(`Should show balances `, async () => {
     try {
       const allBalances = await testnetWallet.getAllBalances()

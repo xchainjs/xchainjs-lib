@@ -73,17 +73,13 @@ export class EthHelper {
 
       // TODO should we change the calcInboundFee() to use gasRate in BaseAmount instead of BIgNumber?
       // currently its hardto know the units to use, GWEI/WEI, etc
-      const gasLimitInWei = calcNetworkFee(params.asset, gasPriceInGwei)
-      const gasLimitInGWei = gasLimitInWei
-        .div(10 ** 9)
-        .baseAmount.amount()
-        .toFixed()
-
+      const gasLimit = calcNetworkFee(params.asset, gasPriceInGwei)
+      const gasLimitInWei = gasLimit.baseAmount.amount().toFixed()
       const unsignedTx = await routerContract.populateTransaction.deposit(...depositParams, {
         from: address,
         value: 0,
         gasPrice: gasPrice.fast.amount().toFixed(),
-        gasLimit: gasLimitInGWei,
+        gasLimit: gasLimitInWei,
       })
       const { hash } = await this.ethClient.getWallet(params.walletIndex).sendTransaction(unsignedTx)
       return hash

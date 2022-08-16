@@ -112,7 +112,9 @@ describe('xchain-swap doSwap Integration Tests', () => {
       console.log(output.hash)
       fail()
     } catch (error: any) {
-      expect(error.message).toEqual(`tbnb1kmu0n6s44cz5jxdvkvsvrzgr57ndg6atw5zrys is not a valid address`)
+      expect(error.message).toEqual(
+        `destinationAddress tbnb1kmu0n6s44cz5jxdvkvsvrzgr57ndg6atw5zrys is not a valid address`,
+      )
     }
   })
   // Sawp From Rune to ETH - passes
@@ -328,7 +330,6 @@ describe('xchain-swap doSwap Integration Tests', () => {
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
-  // From ETH to Asset -- passes
   it(`Should perform a swap from LTC to AVAX`, async () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.2')), AssetLTC),
@@ -345,7 +346,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   })
   it(`Should perform a swap from AVAX to RUNE`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.0000000005', 18)), AssetAVAX),
+      input: new CryptoAmount(assetToBase(assetAmount('0.00000000005', 18)), AssetAVAX),
       destinationAsset: AssetRuneNative,
       slipLimit: new BigNumber('0.5'),
     }

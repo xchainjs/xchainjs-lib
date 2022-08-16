@@ -113,16 +113,31 @@ const ethRootDerivationPaths = {
   [Network.Testnet]: `m/44'/60'/0'/0/`,
   [Network.Stagenet]: `m/44'/60'/0'/0/`,
 }
+const defaults = {
+  [Network.Mainnet]: {
+    approveGasLimit: BigNumber.from(200000),
+    transferGasAssetGasLimit: BigNumber.from(23000),
+    transferTokenGasLimit: BigNumber.from(100000),
+    gasPrice: BigNumber.from(30),
+  },
+  [Network.Testnet]: {
+    approveGasLimit: BigNumber.from(200000),
+    transferGasAssetGasLimit: BigNumber.from(23000),
+    transferTokenGasLimit: BigNumber.from(100000),
+    gasPrice: BigNumber.from(30),
+  },
+  [Network.Stagenet]: {
+    approveGasLimit: BigNumber.from(200000),
+    transferGasAssetGasLimit: BigNumber.from(23000),
+    transferTokenGasLimit: BigNumber.from(100000),
+    gasPrice: BigNumber.from(30),
+  },
+}
 const avaxParams: EVMClientParams = {
   chain: Chain.Avalanche,
   gasAsset: AssetAVAX,
   gasAssetDecimals: 18,
-  defaults: {
-    transferGasAssetGasLimit: BigNumber.from(21000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(50),
-    approveGasLimit: BigNumber.from(50),
-  },
+  defaults,
   providers: ethersJSProviders,
   explorerProviders: avaxExplorerProviders,
   dataProviders: avaxProviders,

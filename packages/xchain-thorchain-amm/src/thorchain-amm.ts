@@ -130,8 +130,13 @@ export class ThorchainAMM {
       limPercentage = BN_1.minus(params.slipLimit || 1)
     } // else allowed slip is 100%
 
-    // out min outbound asset based on limPercentage
-    const limAssetAmount = await this.thorchainCache.convert(params.input.times(limPercentage), params.destinationAsset)
+    // calculate the slip limit after accounting for outbound fees
+    const inboundDetails = await this.thorchainCache.getInboundDetails()
+    const sourceInboundDetails = inboundDetails[params.input.asset.chain]
+    const destinationInboundDetails = inboundDetails[params.destinationAsset.chain]
+    const swapEstimate = await this.calcSwapEstimate(params, sourceInboundDetails, destinationInboundDetails)
+
+    const limAssetAmount = swapEstimate.netOutput.times(limPercentage)
 
     let waitTimeSeconds = await this.confCounting(params.input)
     const outboundDelay = await this.outboundDelay(limAssetAmount)

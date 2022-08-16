@@ -260,7 +260,7 @@ export class ThorchainCache {
     }
   }
   async getInboundDetails(): Promise<Record<string, InboundDetail>> {
-    const millisSinceLastRefeshed = Date.now() - (this.asgardAssetsCache?.lastRefreshed || 0)
+    const millisSinceLastRefeshed = Date.now() - (this.inboundDetailCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.expireInboundDetailsCacheMillis) {
       try {
         await this.refereshInboundDetailCache()
@@ -275,7 +275,7 @@ export class ThorchainCache {
     }
   }
   async getNetworkValues(): Promise<Record<string, number>> {
-    const millisSinceLastRefeshed = Date.now() - (this.asgardAssetsCache?.lastRefreshed || 0)
+    const millisSinceLastRefeshed = Date.now() - (this.networkValuesCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.expireNetworkValuesCacheMillis) {
       try {
         await this.refereshNetworkValuesCache()

@@ -67,19 +67,19 @@ const ethRootDerivationPaths = {
 const defaults = {
   [Network.Mainnet]: {
     approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(21000),
+    transferGasAssetGasLimit: BigNumber.from(23000),
     transferTokenGasLimit: BigNumber.from(100000),
     gasPrice: BigNumber.from(30),
   },
   [Network.Testnet]: {
     approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(21000),
+    transferGasAssetGasLimit: BigNumber.from(23000),
     transferTokenGasLimit: BigNumber.from(100000),
     gasPrice: BigNumber.from(30),
   },
   [Network.Stagenet]: {
     approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(21000),
+    transferGasAssetGasLimit: BigNumber.from(23000),
     transferTokenGasLimit: BigNumber.from(100000),
     gasPrice: BigNumber.from(30),
   },

@@ -234,9 +234,9 @@ describe('xchain-swap estimate Integration Tests', () => {
     console.log(values)
     expect(values).toEqual(10000000000)
   })
-  it('should estimate a swap of 0.5 RUNE to AVAX', async () => {
+  it('should estimate a swap of 5 RUNE to AVAX', async () => {
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.5')), AssetRuneNative),
+      input: new CryptoAmount(assetToBase(assetAmount('5')), AssetRuneNative),
       destinationAsset: AssetAVAX,
       // affiliateFeePercent: 0.003, //optional
       slipLimit: new BigNumber('0.10'), //optional
@@ -247,15 +247,15 @@ describe('xchain-swap estimate Integration Tests', () => {
     expect(estimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })
-  it('should estimate a swap of 0.1 AVAX to RUNE', async () => {
+  it('should estimate a swap of 0.0000000005 AVAX to RUNE', async () => {
     // const USDT = assetFromString('ETH.USDT-0XDAC1')
     // if (!USDT) throw Error('bad asset')
 
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.1', 18)), AssetAVAX),
+      input: new CryptoAmount(assetToBase(assetAmount('0.00000000005', 18)), AssetAVAX),
       destinationAsset: AssetRuneNative,
       // affiliateFeePercent: 0.003, //optional
-      slipLimit: new BigNumber('0.03'), //optional
+      slipLimit: new BigNumber('0.07'), //optional
     }
 
     const estimate = await stagenetThorchainAmm.estimateSwap(swapParams)

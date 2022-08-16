@@ -1,4 +1,8 @@
-# v.0.8.1 (2022-08-08)
+# v.0.8.1 (2022-08-15)
+
+## Add
+
+- added Avax chain and asset
 
 ## Remove
 

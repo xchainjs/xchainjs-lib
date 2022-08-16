@@ -40,7 +40,7 @@ export class EvmHelper {
 
     const address = this.client.getAddress(params.walletIndex)
     const gasPrice = await this.evmClient.estimateGasPrices()
-    console.log(JSON.stringify(params.amount.amount()))
+
     if (eqAsset(params.asset, this.evmClient.config.gasAsset)) {
       // simple transfer
       return await this.client.transfer({
@@ -71,17 +71,14 @@ export class EvmHelper {
 
       // TODO should we change the calcInboundFee() to use gasRate in BaseAmount instead of BIgNumber?
       // currently its hardto know the units to use, GWEI/WEI, etc
-      const gasLimitInWei = calcNetworkFee(params.asset, gasPriceInGwei)
-      const gasLimitInGWei = gasLimitInWei
-        .div(10 ** 9)
-        .baseAmount.amount()
-        .toFixed()
+      const gasLimit = calcNetworkFee(params.asset, gasPriceInGwei)
+      const gasLimitInWei = gasLimit.baseAmount.amount().toFixed()
 
       const unsignedTx = await routerContract.populateTransaction.deposit(...depositParams, {
         from: address,
         value: 0,
         gasPrice: gasPrice.fast.amount().toFixed(),
-        gasLimit: gasLimitInGWei,
+        gasLimit: gasLimitInWei,
       })
       const { hash } = await this.evmClient.getWallet(params.walletIndex).sendTransaction(unsignedTx)
       return hash
