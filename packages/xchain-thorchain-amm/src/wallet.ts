@@ -9,11 +9,10 @@ import { Client as EthClient } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as TerraClient } from '@xchainjs/xchain-terra'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
-import { AssetBTC, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { AssetBTC, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
 
-import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
-import { AddLiquidity, ExecuteSwap, RemoveLiquidity, SwapSubmitted, TxSubmitted } from './types'
+import { AddLiquidity, ExecuteSwap, RemoveLiquidity, TxSubmitted } from './types'
 import { EthHelper } from './utils/eth-helper'
 import { EvmHelper } from './utils/evm-helper'
 
@@ -91,7 +90,7 @@ export class Wallet {
    * @returns transaction details and explorer url
    * @see ThorchainAMM.doSwap()
    */
-  async executeSwap(swap: ExecuteSwap): Promise<SwapSubmitted> {
+  async executeSwap(swap: ExecuteSwap): Promise<TxSubmitted> {
     this.validateSwap(swap)
     if (swap.input.asset.chain === Chain.THORChain || swap.input.asset.synth) {
       return await this.swapRuneTo(swap)
@@ -135,7 +134,7 @@ export class Wallet {
     if (errors.length > 0) throw Error(errors.join('\n'))
   }
 
-  private async swapRuneTo(swap: ExecuteSwap): Promise<SwapSubmitted> {
+  private async swapRuneTo(swap: ExecuteSwap): Promise<TxSubmitted> {
     const thorClient = (this.clients.THOR as unknown) as ThorchainClient
     const waitTimeSeconds = swap.waitTimeSeconds
     const hash = await thorClient.deposit({
@@ -146,7 +145,7 @@ export class Wallet {
     return { hash, url: this.clients.THOR.getExplorerTxUrl(hash), waitTimeSeconds }
   }
 
-  private async swapNonRune(swap: ExecuteSwap): Promise<SwapSubmitted> {
+  private async swapNonRune(swap: ExecuteSwap): Promise<TxSubmitted> {
     const client = this.clients[swap.input.asset.chain]
     const waitTimeSeconds = swap.waitTimeSeconds
     const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[swap.input.asset.chain]
@@ -313,7 +312,7 @@ export class Wallet {
     const removeParams = {
       walletIndex: 0,
       asset: params.asset.asset,
-      amount: new CryptoAmount(baseAmount(0), params.asset.asset).baseAmount,
+      amount: params.asset.baseAmount,
       recipient: inboundAsgard.address,
       memo: memo,
     }

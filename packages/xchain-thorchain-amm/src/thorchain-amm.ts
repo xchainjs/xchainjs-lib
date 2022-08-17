@@ -13,9 +13,7 @@ import {
   EstimateSwapParams,
   InboundDetail,
   PoolRatios,
-  RemoveLiquidity,
   SwapEstimate,
-  SwapSubmitted,
   TotalFees,
   TxSubmitted,
   UnitData,
@@ -127,7 +125,7 @@ export class ThorchainAMM {
    * @param destinationAddress - were to send the output of the swap
    * @param affiliateAddress - were to send the affilate Address, should be a THOR address (optional)
    * @param interfaceID - id if the calling interface (optional)
-   * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
+   * @returns {TxSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
   public async doSwap(
     wallet: Wallet,
@@ -135,7 +133,7 @@ export class ThorchainAMM {
     destinationAddress: string,
     affiliateAddress = '',
     interfaceID = 999,
-  ): Promise<SwapSubmitted> {
+  ): Promise<TxSubmitted> {
     // TODO validate all input fields
     this.isValidSwap(params)
     // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
@@ -391,11 +389,14 @@ export class ThorchainAMM {
    */
   public async estimatAddLP(params: liquidityPosition): Promise<EstimateLP> {
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
-    const lpUnits = getLiquidityUnits({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
+    // returns lp units for asset/rune for the pool
+    const lpUnits = getLiquidityUnits(
+      { assetDeposited: params.asset.baseAmount, runeDeposited: params.rune.baseAmount },
+      assetPool,
+    )
     const inboundDetails = await this.thorchainCache.midgard.getInboundDetails()
-    const runetoAssetRatio = assetPool.runeToAssetRatio
     const unitData: UnitData = {
-      totalUnits: baseAmount(assetPool.pool.liquidityUnits),
+      totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
       liquidityUnits: lpUnits,
     }
     const poolShare = getPoolShare(unitData, assetPool)
@@ -403,12 +404,14 @@ export class ThorchainAMM {
     const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
     const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
     const totalFees = (await this.convert(assetInboundFee, AssetRuneNative)).plus(runeInboundFee)
-    const slip = getSlipOnLiquidity({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
-
+    const slip = getSlipOnLiquidity(
+      { assetShare: params.asset.baseAmount.amount(), runeShare: params.rune.baseAmount.amount() },
+      assetPool,
+    )
     const estimateLP: EstimateLP = {
       slip: slip,
       poolShare: poolShare,
-      runeToAssetRatio: runetoAssetRatio,
+      runeToAssetRatio: assetPool.runeToAssetRatio,
       transactionFee: {
         assetFee: assetInboundFee,
         runeFee: runeInboundFee,
@@ -430,6 +433,7 @@ export class ThorchainAMM {
     const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
     const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
     const waitTimeSeconds = await this.confCounting(params.asset)
+    // Need to do a fee check here
     console.log(await this.convert(assetInboundFee, params.asset.asset))
     console.log(await this.convert(runeInboundFee, AssetRuneNative))
     // Fees need to be less than LP amount.
@@ -462,19 +466,21 @@ export class ThorchainAMM {
   /**
    *
    * @param params - liquidity parameters
-   * @param percent - percenta
-   * @returns
+   * @param percent - percentage removed
+   * @return
    */
-  public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidity): Promise<TxSubmitted> {
+  public async removeLiquidityPosition(wallet: Wallet, params: liquidityPosition): Promise<TxSubmitted> {
     const assetClient = wallet.clients[params.asset.asset.chain]
     const address = assetClient.getAddress()
     const memberDetail = (await this.thorchainCache.midgard.getMember(address)).pools.find((item) => item)
     if (!memberDetail) throw Error(`could not find details for this address`)
     const assetAmount = new CryptoAmount(baseAmount(memberDetail.assetAdded), params.asset.asset)
     const waitTimeSeconds = await this.confCounting(assetAmount)
+    if (!params.percentage) throw Error(`Please pass in a percentage for withdrawal`)
 
     return wallet.removeLiquidity({
       asset: params.asset,
+      rune: params.rune,
       action: params.action,
       percentage: params.percentage,
       waitTimeSeconds: waitTimeSeconds,

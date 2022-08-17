@@ -1,5 +1,13 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetBTC, AssetRuneNative, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import {
+  AssetBTC,
+  AssetLTC,
+  AssetRuneNative,
+  assetAmount,
+  assetFromString,
+  assetToBase,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainAMM } from '../src/thorchain-amm'
@@ -19,12 +27,12 @@ if (!BUSD) throw Error('bad asset')
 
 function print(estimate: EstimateLP) {
   const expanded = {
-    slip: estimate.slip.multipliedBy(100),
+    slip: estimate.slip.toNumber(),
     poolShare: {
-      asset: estimate.poolShare.asset.amount().toFixed(),
-      rune: estimate.poolShare.asset.amount().toFixed(),
+      asset: estimate.poolShare.assetShare.toNumber(),
+      rune: estimate.poolShare.runeShare.toNumber(),
     },
-    runeToAssetRatio: estimate.runeToAssetRatio.toFixed(),
+    runeToAssetRatio: estimate.runeToAssetRatio.toNumber(),
     transactionFees: {
       runeFee: estimate.transactionFee.runeFee.assetAmount.amount().toFixed(),
       assetFee: estimate.transactionFee.assetFee.assetAmount.amount().toFixed(),
@@ -41,18 +49,30 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const LPAction = '+' // add to lP position
     const lp: liquidityPosition = {
       asset: new CryptoAmount(assetToBase(assetAmount(100)), BUSD),
-      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+      rune: new CryptoAmount(assetToBase(assetAmount(50)), AssetRuneNative),
       action: LPAction,
     }
     const estimatedLP = await thorchainAmm.estimatAddLP(lp)
     print(estimatedLP)
     expect(estimatedLP).toBeTruthy()
   })
+  it(`Should estimate liquidity postion for LTC & RUNE LP`, async () => {
+    const LPAction = '+' // add to lP position
+    const lp: liquidityPosition = {
+      asset: new CryptoAmount(assetToBase(assetAmount(65)), AssetLTC),
+      rune: new CryptoAmount(assetToBase(assetAmount(1552)), AssetRuneNative),
+      action: LPAction,
+    }
+    const estimatedLP = await thorchainAmm.estimatAddLP(lp)
+    print(estimatedLP)
+    expect(estimatedLP).toBeTruthy()
+  })
+
   it(`Should estimate liquidity postion for BTC & RUNE LP`, async () => {
     const LPAction = '+' // add to lP position
     const lp: liquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
-      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+      asset: new CryptoAmount(assetToBase(assetAmount(0.615314)), AssetBTC),
+      rune: new CryptoAmount(assetToBase(assetAmount(5480)), AssetRuneNative),
       action: LPAction,
     }
     const estimatedLP = await thorchainAmm.estimatAddLP(lp)
@@ -91,10 +111,10 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const LPAction = '-' // add to lP position
     const removePercentage = 50
     const hash = await thorchainAmm.removeLiquidityPosition(mainnetWallet, {
-      asset: new CryptoAmount(baseAmount(1), BUSD),
+      asset: new CryptoAmount(assetToBase(assetAmount(1)), BUSD),
+      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
       action: LPAction,
       percentage: removePercentage,
-      waitTimeSeconds: 0,
     })
     console.log(hash)
     expect(hash).toBeTruthy()
