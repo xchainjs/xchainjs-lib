@@ -192,28 +192,37 @@ export class Wallet {
   async addLiquidity(params: AddLiquidity): Promise<TxSubmitted[]> {
     const assetClient = this.clients[params.asset.asset.chain]
     const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.asset.asset.chain].address
-    const thorchainClient = this.clients[params.asset.asset.chain]
+    const thorchainClient = this.clients[params.rune.asset.chain]
     const addressRune = thorchainClient.getAddress()
+    const addressAsset = assetClient.getAddress()
     const waitTimeSeconds = params.waitTimeSeconds
     let constructedMemo = ''
     const txSubmitted: TxSubmitted[] = []
     // Do we need to check to see if its 50/50 for sym add?
     // symmetrical add
     if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.gt(0)) {
-      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.rune.asset.symbol}:${addressRune}`
-      txSubmitted.push(await this.addAssetLP(params, constructedMemo, waitTimeSeconds, assetClient, inboundAsgard))
-      txSubmitted.push(await this.addRuneLP(params, constructedMemo, inboundAsgard, thorchainClient, waitTimeSeconds))
+      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressRune}`
+      txSubmitted.push(
+        await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
+      )
+      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressAsset}`
+      txSubmitted.push(
+        await this.addOrRemoveRuneLP(params, constructedMemo, inboundAsgard, thorchainClient, waitTimeSeconds),
+      )
       return txSubmitted
     } else if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.eq(0)) {
       // asymmetrical asset only
-      console.log(`Asymetrical add ${params.asset.asset.chain} to its pool  `)
       constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:`
-      txSubmitted.push(await this.addAssetLP(params, constructedMemo, waitTimeSeconds, assetClient, inboundAsgard))
+      txSubmitted.push(
+        await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
+      )
       return txSubmitted
     } else {
       // asymmetrical rune only
       constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:`
-      txSubmitted.push(await this.addRuneLP(params, constructedMemo, inboundAsgard, thorchainClient, waitTimeSeconds))
+      txSubmitted.push(
+        await this.addOrRemoveRuneLP(params, constructedMemo, inboundAsgard, thorchainClient, waitTimeSeconds),
+      )
       return txSubmitted
     }
   }
@@ -227,12 +236,12 @@ export class Wallet {
    * @param inboundAsgard - inbound Asgard address for the LP
    * @returns
    */
-  private async addAssetLP(
+  private async addOrRemoveAssetLP(
     params: AddLiquidity,
     constructedMemo: string,
-    waitTimeSeconds: number,
-    assetClient: XChainClient,
     inboundAsgard: string,
+    assetClient: XChainClient,
+    waitTimeSeconds: number,
   ): Promise<TxSubmitted> {
     if (params.asset.asset.chain === Chain.Ethereum) {
       const addParams = {
@@ -266,7 +275,7 @@ export class Wallet {
         memo: constructedMemo,
       }
       console.log(addParams, waitTimeSeconds)
-      const hash = await assetClient.transfer(addParams)
+      const hash = 'await assetClient.transfer(addParams)'
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     }
   }
@@ -278,14 +287,14 @@ export class Wallet {
    * @param inboundAsgard
    * @returns
    */
-  private async addRuneLP(
+  private async addOrRemoveRuneLP(
     params: AddLiquidity,
     memo: string,
     inboundAsgard: string,
     thorchainClient: XChainClient,
     waitTimeSeconds: number,
   ): Promise<TxSubmitted> {
-    const thorClient = (this.clients.THOR as unknown) as ThorchainClient
+    //const thorClient = (this.clients.THOR as unknown) as ThorchainClient
     const addParams = {
       wallIndex: 0,
       asset: params.rune.asset,
@@ -294,7 +303,7 @@ export class Wallet {
       memo: memo,
     }
     console.log(addParams, params.waitTimeSeconds)
-    const hash = await thorClient.deposit(addParams)
+    const hash = 'await thorClient.deposit(addParams)'
     return { hash, url: thorchainClient.getExplorerTxUrl(hash), waitTimeSeconds }
   }
 
@@ -303,20 +312,39 @@ export class Wallet {
    * @param params - parameters required for liquidity position
    * @returns object with tx response, url and wait time in seconds
    */
-  async removeLiquidity(params: RemoveLiquidity): Promise<TxSubmitted> {
+  async removeLiquidity(params: RemoveLiquidity): Promise<TxSubmitted[]> {
     const assetClient = this.clients[params.asset.asset.chain]
-    const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.asset.asset.chain]
+    const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.asset.asset.chain].address
     const waitTimeSeconds = params.waitTimeSeconds
-    const percentageRemoval = (params.percentage * 100).toFixed()
-    const memo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${percentageRemoval}`
-    const removeParams = {
-      walletIndex: 0,
-      asset: params.asset.asset,
-      amount: params.asset.baseAmount,
-      recipient: inboundAsgard.address,
-      memo: memo,
+    const thorchainClient = this.clients[params.rune.asset.chain]
+    const basisPoints = (params.percentage * 100).toFixed() // convert to basis points
+    let constructedMemo = ''
+    const txSubmitted: TxSubmitted[] = []
+
+    if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.gt(0)) {
+      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      txSubmitted.push(
+        await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
+      )
+      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      txSubmitted.push(
+        await this.addOrRemoveRuneLP(params, constructedMemo, inboundAsgard, thorchainClient, waitTimeSeconds),
+      )
+      return txSubmitted
+    } else if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.eq(0)) {
+      // asymmetrical asset only
+      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      txSubmitted.push(
+        await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
+      )
+      return txSubmitted
+    } else {
+      // asymmetrical rune only
+      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      txSubmitted.push(
+        await this.addOrRemoveRuneLP(params, constructedMemo, inboundAsgard, thorchainClient, waitTimeSeconds),
+      )
+      return txSubmitted
     }
-    const hash = await assetClient.transfer(removeParams)
-    return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
   }
 }

@@ -73,6 +73,7 @@ export type TxSubmitted = {
 export type EstimateLP = {
   slip: BigNumber
   poolShare: PoolShareDetail
+  lpUnits: BigNumber
   transactionFee: LPFees
   runeToAssetRatio: BigNumber
   estimatedWait: number
@@ -94,11 +95,17 @@ export type LPFees = {
   TotalFees: CryptoAmount
 }
 
-export type liquidityPosition = {
+export type AddliquidityPosition = {
   asset: CryptoAmount
   rune: CryptoAmount
   action: string
-  percentage?: number
+}
+export type RemoveLiquidityPosition = {
+  action: string
+  percentage: number
+  asset: CryptoAmount
+  rune: CryptoAmount
+  asymmetricalWithdraw?: string
 }
 
 export type AddLiquidity = {
@@ -114,10 +121,11 @@ export type RemoveLiquidity = {
   action: string
   percentage: number
   waitTimeSeconds: number
+  asymmetricalWithdraw?: Asset
 }
 
 export type DepositParams = {
-  walletIndex?: number // send from this HD index
+  walletIndex?: number
   asset: Asset
   amount: BaseAmount
   feeOption: FeeOption

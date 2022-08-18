@@ -8,16 +8,17 @@ import { DefaultChainAttributes } from './chain-defaults'
 import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
 import {
+  AddliquidityPosition,
   ChainAttributes,
   EstimateLP,
   EstimateSwapParams,
   InboundDetail,
   PoolRatios,
+  RemoveLiquidityPosition,
   SwapEstimate,
   TotalFees,
   TxSubmitted,
   UnitData,
-  liquidityPosition,
 } from './types'
 import { getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils'
 import { calcNetworkFee, getChainAsset } from './utils/swap'
@@ -387,7 +388,7 @@ export class ThorchainAMM {
    * @param params - parameters needed for a estimated liquidity position
    * @returns - type object EstimateLP
    */
-  public async estimatAddLP(params: liquidityPosition): Promise<EstimateLP> {
+  public async estimatAddLP(params: AddliquidityPosition): Promise<EstimateLP> {
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
     // returns lp units for asset/rune for the pool
     const lpUnits = getLiquidityUnits(
@@ -399,6 +400,10 @@ export class ThorchainAMM {
       totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
       liquidityUnits: lpUnits,
     }
+    // const chek = unitData.liquidityUnits.div(unitData.totalUnits)
+    // const check = chek.times(unitData.totalUnits)
+    // console.log(chek.toNumber())
+    // console.log(check.toNumber())
     const poolShare = getPoolShare(unitData, assetPool)
     const waitTimeSeconds = await this.confCounting(params.asset)
     const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
@@ -411,6 +416,7 @@ export class ThorchainAMM {
     const estimateLP: EstimateLP = {
       slip: slip,
       poolShare: poolShare,
+      lpUnits: lpUnits,
       runeToAssetRatio: assetPool.runeToAssetRatio,
       transactionFee: {
         assetFee: assetInboundFee,
@@ -428,7 +434,7 @@ export class ThorchainAMM {
    * @param params - liquidity parameters
    * @returns
    */
-  public async liquidityPosition(wallet: Wallet, params: liquidityPosition): Promise<TxSubmitted[]> {
+  public async addLiquidityPosition(wallet: Wallet, params: AddliquidityPosition): Promise<TxSubmitted[]> {
     const inboundDetails = await this.thorchainCache.midgard.getInboundDetails()
     const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
     const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
@@ -469,7 +475,7 @@ export class ThorchainAMM {
    * @param percent - percentage removed
    * @return
    */
-  public async removeLiquidityPosition(wallet: Wallet, params: liquidityPosition): Promise<TxSubmitted> {
+  public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidityPosition): Promise<TxSubmitted[]> {
     const assetClient = wallet.clients[params.asset.asset.chain]
     const address = assetClient.getAddress()
     const memberDetail = (await this.thorchainCache.midgard.getMember(address)).pools.find((item) => item)
@@ -477,7 +483,7 @@ export class ThorchainAMM {
     const assetAmount = new CryptoAmount(baseAmount(memberDetail.assetAdded), params.asset.asset)
     const waitTimeSeconds = await this.confCounting(assetAmount)
     if (!params.percentage) throw Error(`Please pass in a percentage for withdrawal`)
-
+    // need to fetch dust values for so that tx can be picked up by thorchain.
     return wallet.removeLiquidity({
       asset: params.asset,
       rune: params.rune,

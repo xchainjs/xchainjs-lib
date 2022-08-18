@@ -48,9 +48,9 @@ export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShare
 
 /**
  *
- * @param poolShare
- * @param pool
- * @returns
+ * @param poolShare - the share of asset and rune added to the pool
+ * @param pool - Pool that the asset is attached to
+ * @returns - returns bignumber representing a a slip percentage
  */
 export const getSlipOnLiquidity = (poolShare: PoolShareDetail, pool: LiquidityPool): BigNumber => {
   // formula: (t * R - T * r)/ (T*r + R*T)
@@ -66,9 +66,9 @@ export const getSlipOnLiquidity = (poolShare: PoolShareDetail, pool: LiquidityPo
 
 /**
  *
- * @param liquidity
- * @param pool
- * @param block
+ * @param poolShare - the share of asset and rune added to the pool
+ * @param pool - Pool that the asset is attached to
+ * @param block - blockl object with current, last added and the constant blocksforlossProtection
  * @returns
  */
 // Blocks for full protection 144000 // 100 days
