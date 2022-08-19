@@ -184,7 +184,8 @@ export class Wallet {
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     }
   }
-  /**
+
+  /** BASED OFF https://dev.thorchain.org/thorchain-dev/network/memos
    *
    * @param params input parameters needed to add liquidity
    * @returns transaction details submitted
@@ -198,7 +199,7 @@ export class Wallet {
     const waitTimeSeconds = params.waitTimeSeconds
     let constructedMemo = ''
     const txSubmitted: TxSubmitted[] = []
-    // Do we need to check to see if its 50/50 for sym add?
+
     // symmetrical add
     if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.gt(0)) {
       constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressRune}`
@@ -206,105 +207,21 @@ export class Wallet {
         await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
       )
       constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressAsset}`
-      txSubmitted.push(
-        await this.addOrRemoveRuneLP(params, constructedMemo, inboundAsgard, thorchainClient, waitTimeSeconds),
-      )
+      txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     } else if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.eq(0)) {
       // asymmetrical asset only
-      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:`
+      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}`
       txSubmitted.push(
         await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
       )
       return txSubmitted
     } else {
       // asymmetrical rune only
-      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:`
-      txSubmitted.push(
-        await this.addOrRemoveRuneLP(params, constructedMemo, inboundAsgard, thorchainClient, waitTimeSeconds),
-      )
+      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}`
+      txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     }
-  }
-
-  /**
-   *
-   * @param params - parameters for the liquidity add
-   * @param constructedMemo - memo needed for thorchain
-   * @param waitTimeSeconds - wait time for the tx to be confirmed
-   * @param assetClient - passing XchainClient
-   * @param inboundAsgard - inbound Asgard address for the LP
-   * @returns
-   */
-  private async addOrRemoveAssetLP(
-    params: AddLiquidity,
-    constructedMemo: string,
-    inboundAsgard: string,
-    assetClient: XChainClient,
-    waitTimeSeconds: number,
-  ): Promise<TxSubmitted> {
-    if (params.asset.asset.chain === Chain.Ethereum) {
-      const addParams = {
-        wallIndex: 0,
-        asset: params.asset.asset,
-        amount: params.asset.baseAmount,
-        feeOption: FeeOption.Fast,
-        memo: constructedMemo,
-      }
-      console.log(addParams, waitTimeSeconds)
-      const hash = await this.ethHelper.sendDeposit(addParams)
-      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
-    } else if (params.asset.asset.chain === Chain.Avalanche) {
-      const addParams = {
-        wallIndex: 0,
-        asset: params.asset.asset,
-        amount: params.asset.baseAmount,
-        feeOption: FeeOption.Fast,
-        memo: constructedMemo,
-      }
-      console.log(addParams.amount.amount(), waitTimeSeconds)
-      const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainCache)
-      const hash = await evmHelper.sendDeposit(addParams)
-      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
-    } else {
-      const addParams = {
-        wallIndex: 0,
-        asset: params.asset.asset,
-        amount: params.asset.baseAmount,
-        recipient: inboundAsgard,
-        memo: constructedMemo,
-      }
-      console.log(addParams, waitTimeSeconds)
-      const hash = 'await assetClient.transfer(addParams)'
-      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
-    }
-  }
-
-  /**
-   *
-   * @param params
-   * @param memo
-   * @param inboundAsgard
-   * @returns
-   */
-  private async addOrRemoveRuneLP(
-    params: AddLiquidity,
-    memo: string,
-    inboundAsgard: string,
-    thorchainClient: XChainClient,
-    waitTimeSeconds: number,
-  ): Promise<TxSubmitted> {
-    //const thorClient = (this.clients.THOR as unknown) as ThorchainClient
-    const addParams = {
-      wallIndex: 0,
-      asset: params.rune.asset,
-      amount: params.rune.baseAmount,
-      recipient: inboundAsgard,
-      memo: memo,
-    }
-    console.log(addParams, params.waitTimeSeconds)
-    const hash = 'await thorClient.deposit(addParams)'
-    return { hash, url: thorchainClient.getExplorerTxUrl(hash), waitTimeSeconds }
   }
 
   /**
@@ -327,9 +244,7 @@ export class Wallet {
         await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
       )
       constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
-      txSubmitted.push(
-        await this.addOrRemoveRuneLP(params, constructedMemo, inboundAsgard, thorchainClient, waitTimeSeconds),
-      )
+      txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     } else if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.eq(0)) {
       // asymmetrical asset only
@@ -341,10 +256,82 @@ export class Wallet {
     } else {
       // asymmetrical rune only
       constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
-      txSubmitted.push(
-        await this.addOrRemoveRuneLP(params, constructedMemo, inboundAsgard, thorchainClient, waitTimeSeconds),
-      )
+      txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     }
+  }
+
+  /**
+   *
+   * @param params - parameters for add liquidity
+   * @param constructedMemo - memo needed for thorchain
+   * @param waitTimeSeconds - wait time for the tx to be confirmed
+   * @param assetClient - passing XchainClient
+   * @param inboundAsgard - inbound Asgard address for the LP
+   * @returns - tx object
+   */
+  private async addOrRemoveAssetLP(
+    params: AddLiquidity,
+    constructedMemo: string,
+    inboundAsgard: string,
+    assetClient: XChainClient,
+    waitTimeSeconds: number,
+  ): Promise<TxSubmitted> {
+    if (params.asset.asset.chain === Chain.Ethereum) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.asset.asset,
+        amount: params.asset.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: constructedMemo,
+      }
+      console.log(addParams.amount.amount().toNumber())
+      const hash = await this.ethHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else if (params.asset.asset.chain === Chain.Avalanche) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.asset.asset,
+        amount: params.asset.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: constructedMemo,
+      }
+      const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.asset.asset,
+        amount: params.asset.baseAmount,
+        recipient: inboundAsgard,
+        memo: constructedMemo,
+      }
+      const hash = await assetClient.transfer(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    }
+  }
+
+  /**
+   *
+   * @param params - deposit parameters
+   * @param memo - memo needed to withdraw lp
+   * @returns - tx object
+   */
+  private async addOrRemoveRuneLP(
+    params: AddLiquidity,
+    memo: string,
+    thorchainClient: XChainClient,
+    waitTimeSeconds: number,
+  ): Promise<TxSubmitted> {
+    const thorClient = (this.clients.THOR as unknown) as ThorchainClient
+    const addParams = {
+      asset: params.rune.asset,
+      amount: params.rune.baseAmount,
+      memo: memo,
+    }
+
+    const hash = await thorClient.deposit(addParams)
+    return { hash, url: thorchainClient.getExplorerTxUrl(hash), waitTimeSeconds }
   }
 }

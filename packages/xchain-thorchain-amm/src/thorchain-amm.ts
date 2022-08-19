@@ -400,10 +400,6 @@ export class ThorchainAMM {
       totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
       liquidityUnits: lpUnits,
     }
-    // const chek = unitData.liquidityUnits.div(unitData.totalUnits)
-    // const check = chek.times(unitData.totalUnits)
-    // console.log(chek.toNumber())
-    // console.log(check.toNumber())
     const poolShare = getPoolShare(unitData, assetPool)
     const waitTimeSeconds = await this.confCounting(params.asset)
     const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
@@ -421,7 +417,7 @@ export class ThorchainAMM {
       transactionFee: {
         assetFee: assetInboundFee,
         runeFee: runeInboundFee,
-        TotalFees: totalFees,
+        totalFees: totalFees,
       },
       estimatedWait: waitTimeSeconds,
     }
@@ -430,23 +426,24 @@ export class ThorchainAMM {
 
   /**
    *
-   * @param wallet - instantiated wallet
+   * @param wallet - wallet class
    * @param params - liquidity parameters
    * @returns
    */
   public async addLiquidityPosition(wallet: Wallet, params: AddliquidityPosition): Promise<TxSubmitted[]> {
+    let waitTimeSeconds = 0
     const inboundDetails = await this.thorchainCache.midgard.getInboundDetails()
     const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
     const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
-    const waitTimeSeconds = await this.confCounting(params.asset)
-    // Need to do a fee check here
-    console.log(await this.convert(assetInboundFee, params.asset.asset))
-    console.log(await this.convert(runeInboundFee, AssetRuneNative))
-    // Fees need to be less than LP amount.
-    // Might be better to do assetInboundFee * 4 to account for inbound and outbound fees
-    // if (as) {
-    //   throw Error('Fee is greater than asset amount')
-    // }
+
+    if (!params.asset.assetAmount.eq(0)) {
+      waitTimeSeconds = await this.confCounting(params.asset)
+      if (assetInboundFee.baseAmount.times(4).gt(params.asset.baseAmount)) throw Error(`Asset amount is less than fees`)
+    }
+    if (!params.rune.assetAmount.eq(0)) {
+      waitTimeSeconds = await this.confCounting(params.rune)
+      if (runeInboundFee.baseAmount.times(4).gt(params.rune.baseAmount)) throw Error(`Rune amount is less than fees`)
+    }
     return wallet.addLiquidity({
       asset: params.asset,
       rune: params.rune,
@@ -456,34 +453,26 @@ export class ThorchainAMM {
   }
 
   /**
-   * Do not send assetNativeRune, There is no pool for it.
-   * @param asset - asset needed to find the pool
-   * @returns - object type ratios
-   */
-  public async getPoolRatios(asset: Asset): Promise<PoolRatios> {
-    const assetPool = await this.thorchainCache.getPoolForAsset(asset)
-    const poolRatio: PoolRatios = {
-      assetToRune: assetPool.assetToRuneRatio,
-      runeToAsset: assetPool.runeToAssetRatio,
-    }
-    return poolRatio
-  }
-
-  /**
    *
    * @param params - liquidity parameters
    * @param percent - percentage removed
    * @return
    */
   public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidityPosition): Promise<TxSubmitted[]> {
+    let waitTimeSeconds = 0
     const assetClient = wallet.clients[params.asset.asset.chain]
     const address = assetClient.getAddress()
-    const memberDetail = (await this.thorchainCache.midgard.getMember(address)).pools.find((item) => item)
+    const memberDetail = await this.checkLiquidityPosition(address)
     if (!memberDetail) throw Error(`could not find details for this address`)
     const assetAmount = new CryptoAmount(baseAmount(memberDetail.assetAdded), params.asset.asset)
-    const waitTimeSeconds = await this.confCounting(assetAmount)
-    if (!params.percentage) throw Error(`Please pass in a percentage for withdrawal`)
-    // need to fetch dust values for so that tx can be picked up by thorchain.
+    if (!params.asset.assetAmount.eq(0)) {
+      waitTimeSeconds = await this.confCounting(assetAmount)
+    }
+    if (!params.rune.assetAmount.eq(0)) {
+      waitTimeSeconds = await this.confCounting(params.rune)
+    }
+    // need to fetch dust values for so that tx can be picked up by thorchain. can't rely on the UI
+    // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
     return wallet.removeLiquidity({
       asset: params.asset,
       rune: params.rune,
@@ -491,7 +480,6 @@ export class ThorchainAMM {
       percentage: params.percentage,
       waitTimeSeconds: waitTimeSeconds,
     })
-    //const memo = `-:${asset.chain}.${asset.symbol}:${percent.mul(100).toFixed(0)}`
   }
 
   /**
@@ -503,5 +491,19 @@ export class ThorchainAMM {
     const memberDetails = (await this.thorchainCache.midgard.getMember(address)).pools.find((item) => item)
     if (!memberDetails) throw Error(`could not find details for this address`)
     return memberDetails
+  }
+
+  /**
+   * Do not send assetNativeRune, There is no pool for it.
+   * @param asset - asset required to find the pool
+   * @returns - object type ratios
+   */
+  public async getPoolRatios(asset: Asset): Promise<PoolRatios> {
+    const assetPool = await this.thorchainCache.getPoolForAsset(asset)
+    const poolRatio: PoolRatios = {
+      assetToRune: assetPool.assetToRuneRatio,
+      runeToAsset: assetPool.runeToAssetRatio,
+    }
+    return poolRatio
   }
 }

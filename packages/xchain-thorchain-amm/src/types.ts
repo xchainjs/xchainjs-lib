@@ -92,7 +92,7 @@ export type PoolShareDetail = {
 export type LPFees = {
   runeFee: CryptoAmount
   assetFee: CryptoAmount
-  TotalFees: CryptoAmount
+  totalFees: CryptoAmount
 }
 
 export type AddliquidityPosition = {
