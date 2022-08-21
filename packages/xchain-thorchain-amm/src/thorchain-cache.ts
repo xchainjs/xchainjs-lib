@@ -80,7 +80,7 @@ export class ThorchainCache {
       // from/R * R/to = from/to
       exchangeRate = lpFrom.runeToAssetRatio.times(lpTo.assetToRuneRatio)
     }
-
+    console.log(`1 ${assetToString(from)} = ${exchangeRate.toFixed()} ${assetToString(to)}`)
     return exchangeRate
   }
 
@@ -112,7 +112,6 @@ export class ThorchainCache {
     if (millisSinceLastRefeshed > this.expirePoolCacheMillis) {
       try {
         await this.refereshPoolCache()
-        console.log('updated pool cache')
       } catch (e) {
         console.error(e)
       }

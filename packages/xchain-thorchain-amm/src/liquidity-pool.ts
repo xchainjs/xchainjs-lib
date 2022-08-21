@@ -1,5 +1,5 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
-import { Asset, BaseAmount, assetFromString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, Chain, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 /**
@@ -23,10 +23,11 @@ export class LiquidityPool {
     this.asset = asset
     this.assetString = this.pool.asset
     this.assetBalance = baseAmount(this.pool.assetDepth)
-    this.runeBalance = baseAmount(this.pool.runeDepth) //Rune is always 8 decimals
+    this.runeBalance = baseAmount(this.pool.runeDepth)
 
     this.runeToAssetRatio = this.runeBalance.amount().div(this.assetBalance.amount())
     this.assetToRuneRatio = this.assetBalance.amount().div(this.runeBalance.amount())
+    if (this.asset.chain === Chain.Avalanche) console.log(JSON.stringify(this, null, 2))
   }
   isAvailable(): boolean {
     return this.pool.status.toLowerCase() === 'available'

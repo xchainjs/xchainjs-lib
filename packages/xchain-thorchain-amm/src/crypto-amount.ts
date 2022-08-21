@@ -101,6 +101,11 @@ export class CryptoAmount {
       if (!eqAsset(this.asset, v.asset)) {
         throw Error(`cannot perform math on 2 diff assets ${assetToString(this.asset)} ${assetToString(v.asset)}`)
       }
+      if (this.baseAmount.decimal !== v.baseAmount.decimal) {
+        throw Error(
+          `cannot perform math on assets with different decimals this=${this.baseAmount.decimal} v=${v.baseAmount.decimal}`,
+        )
+      }
     }
   }
 }

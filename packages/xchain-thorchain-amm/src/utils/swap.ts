@@ -25,7 +25,6 @@ import {
   THORChain,
   TerraChain,
   baseAmount,
-  eqAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -183,13 +182,6 @@ export const getContractAddressFromAsset = (asset: Asset): Address => {
 export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount => {
   if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
   switch (asset.chain) {
-    case Chain.Avalanche:
-      if (eqAsset(asset, AssetAVAX)) {
-        return new CryptoAmount(baseAmount(gasRate.multipliedBy(80000)), AssetAVAX)
-      } else {
-        return new CryptoAmount(baseAmount(gasRate.multipliedBy(80000)), AssetAVAX)
-      }
-      break
     case Chain.Bitcoin:
       return new CryptoAmount(baseAmount(gasRate.multipliedBy(1000)), AssetBTC)
       break
@@ -207,12 +199,21 @@ export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount =
       //flat fee
       return new CryptoAmount(baseAmount(gasRate), AssetBNB)
       break
+    case Chain.Avalanche:
+      const gasRateinAVAXGwei = gasRate
+      const feeInAVAXGwei = gasRateinAVAXGwei.multipliedBy(80000)
+      const feeInAVAXWei = baseAmount(feeInAVAXGwei.multipliedBy(10 ** 9), 18)
+      return new CryptoAmount(feeInAVAXWei, AssetAVAX)
     case Chain.Ethereum:
-      if (eqAsset(asset, AssetETH)) {
-        return new CryptoAmount(baseAmount(gasRate.multipliedBy(80000)), AssetETH)
-      } else {
-        return new CryptoAmount(baseAmount(gasRate.multipliedBy(80000)), AssetETH)
-      }
+      const gasRateinETHGwei = gasRate
+      const feeInETHGwei = gasRateinETHGwei.multipliedBy(80000)
+      const feeInETHWei = baseAmount(feeInETHGwei.multipliedBy(10 ** 9), 18)
+      return new CryptoAmount(feeInETHWei, AssetETH)
+      // if (eqAsset(asset, AssetETH)) {
+      //   return new CryptoAmount(feeInWei, AssetETH)
+      // } else {
+      //   return new CryptoAmount(feeInWei, AssetETH)
+      // }
       break
     case Chain.Terra:
       return new CryptoAmount(baseAmount(gasRate), AssetLUNA)

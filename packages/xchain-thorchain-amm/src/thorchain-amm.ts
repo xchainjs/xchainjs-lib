@@ -43,8 +43,15 @@ export class ThorchainAMM {
    */
   public async estimateSwap(params: EstimateSwapParams): Promise<SwapEstimate> {
     this.isValidSwap(params)
+
+    if (params.input.assetAmount.decimal > 8) {
+      const decimals = params.input.assetAmount.decimal - 8
+      const baseAmt = baseAmount(params.input.baseAmount.amount().dividedBy(10 ** decimals), 8)
+      params.input = new CryptoAmount(baseAmt, params.input.asset)
+    }
+    console.log(`sending in ${params.input.formatedAssetString()}`)
     const inboundDetails = await this.thorchainCache.getInboundDetails()
-    console.log(JSON.stringify(inboundDetails, null, 2))
+    // console.log(JSON.stringify(inboundDetails, null, 2))
     const sourceInboundDetails = inboundDetails[params.input.asset.chain]
     const destinationInboundDetails = inboundDetails[params.destinationAsset.chain]
 
@@ -285,12 +292,13 @@ export class ThorchainAMM {
   }
   private async checkCoverFees(params: EstimateSwapParams, estimate: SwapEstimate): Promise<string | undefined> {
     let result: string | undefined = undefined
-    const input = await this.thorchainCache.convert(params.input, AssetRuneNative)
+    const inputInRune = await this.thorchainCache.convert(params.input, AssetRuneNative)
     const fees = await this.getFeesIn(estimate.totalFees, AssetRuneNative)
 
     const totalSwapFeesInRune = fees.inboundFee.plus(fees.outboundFee).plus(fees.swapFee).plus(fees.affiliateFee)
-    if (totalSwapFeesInRune.gte(input))
-      result = `Input amount ${input.formatedAssetString()} is less than or equal to total swap fees`
+    const totalSwapFeesInAsset = await this.thorchainCache.convert(totalSwapFeesInRune, params.input.asset)
+    if (totalSwapFeesInRune.gte(inputInRune))
+      result = `Input amount ${params.input.formatedAssetString()}(${inputInRune.formatedAssetString()}) is less than or equal to total swap fees ${totalSwapFeesInAsset.formatedAssetString()}(${totalSwapFeesInRune.formatedAssetString()}) `
     return result
   }
 
