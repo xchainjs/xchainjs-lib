@@ -70,13 +70,19 @@ export type TxSubmitted = {
   waitTimeSeconds: number
 }
 
-export type EstimateLP = {
+export type EstimateADDLP = {
   slip: BigNumber
   poolShare: PoolShareDetail
   lpUnits: BigNumber
   transactionFee: LPFees
   runeToAssetRatio: BigNumber
   estimatedWait: number
+}
+export type EstimateWidrawLP = {
+  slip: BigNumber
+  estimatedWait: number
+  transactionFee: LPFees
+  impermanentLossProtection: number
 }
 
 export type LiquidityDeposited = {
@@ -113,6 +119,10 @@ export type AddLiquidity = {
   rune: CryptoAmount
   action: string
   waitTimeSeconds: number
+}
+export type DustValues = {
+  asset: CryptoAmount
+  rune: CryptoAmount
 }
 
 export type RemoveLiquidity = {
