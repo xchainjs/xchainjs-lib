@@ -109,9 +109,9 @@ export type AddliquidityPosition = {
 export type RemoveLiquidityPosition = {
   action: string
   percentage: number
-  asset: CryptoAmount
-  rune: CryptoAmount
-  asymmetricalWithdraw?: string
+  assetAddress: string
+  runeAddress?: string
+  asymmetricalWithdraw?: boolean
 }
 
 export type AddLiquidity = {
@@ -119,6 +119,13 @@ export type AddLiquidity = {
   rune: CryptoAmount
   action: string
   waitTimeSeconds: number
+}
+
+export type liquidityPosition = {
+  assetPool: LiquidityPool
+  assetAmount: CryptoAmount
+  runeAmount: CryptoAmount
+  impermanentLossProtection: number
 }
 export type DustValues = {
   asset: CryptoAmount

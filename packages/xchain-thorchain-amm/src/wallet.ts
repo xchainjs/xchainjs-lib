@@ -185,7 +185,7 @@ export class Wallet {
     }
   }
 
-  /** BASED OFF https://dev.thorchain.org/thorchain-dev/network/memos
+  /** BASED OFF https://dev.thorchain.or›g/thorchain-dev/network/memos
    *
    * @param params input parameters needed to add liquidity
    * @returns transaction details submitted
@@ -307,8 +307,14 @@ export class Wallet {
         recipient: inboundAsgard,
         memo: constructedMemo,
       }
-      const hash = await assetClient.transfer(addParams)
-      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+      try {
+        console.log(addParams)
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()), waitTimeSeconds }
+      }
     }
   }
 
@@ -330,7 +336,7 @@ export class Wallet {
       amount: params.rune.baseAmount,
       memo: memo,
     }
-
+    console.log(addParams)
     const hash = await thorClient.deposit(addParams)
     return { hash, url: thorchainClient.getExplorerTxUrl(hash), waitTimeSeconds }
   }

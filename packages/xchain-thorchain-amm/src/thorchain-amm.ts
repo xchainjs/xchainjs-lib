@@ -1,5 +1,5 @@
+import { Network } from '@xchainjs/xchain-client/lib'
 import { AssetAtom } from '@xchainjs/xchain-cosmos/lib'
-import { MemberPool } from '@xchainjs/xchain-midgard/lib'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
 import {
   Asset,
@@ -8,6 +8,7 @@ import {
   Chain,
   THORChain,
   assetAmount,
+  assetFromString,
   assetToBase,
   baseAmount,
   eqAsset,
@@ -19,6 +20,7 @@ import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
 import {
   AddliquidityPosition,
+  Block,
   ChainAttributes,
   DustValues,
   EstimateADDLP,
@@ -31,9 +33,11 @@ import {
   TotalFees,
   TxSubmitted,
   UnitData,
+  liquidityPosition,
 } from './types'
-import { getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils'
+import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils'
 import { calcNetworkFee, getChainAsset } from './utils/swap'
+import { Thornode } from './utils/thornode'
 import { Wallet } from './wallet'
 
 const BN_1 = new BigNumber(1)
@@ -44,6 +48,7 @@ const BN_1 = new BigNumber(1)
  * Has access to Midgard and THORNode data
  */
 export class ThorchainAMM {
+  private thornode: Thornode
   private thorchainCache: ThorchainCache
   private chainAttributes: Record<Chain, ChainAttributes>
 
@@ -58,6 +63,7 @@ export class ThorchainAMM {
   constructor(thorchainCache: ThorchainCache, chainAttributes = DefaultChainAttributes) {
     this.thorchainCache = thorchainCache
     this.chainAttributes = chainAttributes
+    this.thornode = new Thornode(Network.Mainnet)
   }
 
   /**
@@ -472,22 +478,17 @@ export class ThorchainAMM {
    */
   public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidityPosition): Promise<TxSubmitted[]> {
     let waitTimeSeconds = 0
+    const membersLP = await this.checkLiquidityPosition(params.assetAddress)
     // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
-    const dustValues = await this.getDustValues(params.asset.asset)
+    const dustValues = await this.getDustValues(membersLP.assetAmount.asset)
     console.log(dustValues.asset.assetAmount.amount().toNumber(), dustValues.rune.assetAmount.amount().toNumber())
-    // Find Lp position using address
-    const assetClient = wallet.clients[params.asset.asset.chain]
-    const memberDetail = await this.checkLiquidityPosition(assetClient.getAddress())
-    if (!memberDetail) throw Error(`could not find details for this address`)
+
     // Calculating wait time for amount to be withdrawn based off the percentage
-    const assetAmount = new CryptoAmount(
-      baseAmount(memberDetail.assetAdded).times(params.percentage / 100),
-      params.asset.asset,
-    )
+    const assetAmount = membersLP.assetAmount.times(params.percentage / 100)
     // bug right here
 
     waitTimeSeconds = await this.confCounting(assetAmount)
-    waitTimeSeconds += await this.confCounting(params.rune)
+    waitTimeSeconds += await this.confCounting(membersLP.runeAmount)
 
     return wallet.removeLiquidity({
       asset: dustValues.asset,
@@ -501,12 +502,42 @@ export class ThorchainAMM {
   /**
    *
    * @param address - address used for Lp
-   * @returns - Type Object MemberPool
+   * @returns - Type Object liquidityPosition
    */
-  public async checkLiquidityPosition(address: string): Promise<MemberPool | undefined> {
+  public async checkLiquidityPosition(address: string): Promise<liquidityPosition> {
     try {
       const memberDetails = (await this.thorchainCache.midgard.getMember(address)).pools.find((item) => item)
-      return memberDetails
+      if (!memberDetails) throw Error(`could not find details for this address`)
+      const asset = assetFromString(memberDetails.pool)
+      if (!asset) throw Error(`could not get asset`)
+      const assetPool = await this.thorchainCache.getPoolForAsset(asset)
+      const assetAmount = new CryptoAmount(baseAmount(memberDetails.assetAdded), asset)
+      const runeAmount = new CryptoAmount(baseAmount(memberDetails.runeAdded), AssetRuneNative)
+      const lpUnits = getLiquidityUnits(
+        { assetDeposited: assetAmount.baseAmount, runeDeposited: runeAmount.baseAmount },
+        assetPool,
+      )
+      const unitData: UnitData = {
+        totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
+        liquidityUnits: lpUnits,
+      }
+      const networkValues = await this.thorchainCache.midgard.getNetworkValues()
+      const blockData = (await this.thornode.getLastBlock()).find((item) => item)
+      if (!blockData) throw Error(`Could not get block data`)
+      const block: Block = {
+        current: blockData?.thorchain,
+        lastAdded: blockData.last_signed_out,
+        fullProtection: networkValues['FULLIMPLOSSPROTECTIONBLOCKS'],
+      }
+      const poolShare = getPoolShare(unitData, assetPool)
+      const impermanentLossProtection = getLiquidityProtectionData(poolShare, assetPool, block)
+      const liquidityPosition: liquidityPosition = {
+        assetPool: assetPool,
+        assetAmount: assetAmount,
+        runeAmount: runeAmount,
+        impermanentLossProtection: impermanentLossProtection,
+      }
+      return liquidityPosition
     } catch (err) {
       throw Error(`No lp found for this address`)
     }
@@ -531,27 +562,20 @@ export class ThorchainAMM {
    */
   public async estimateWithdrawLP(params: RemoveLiquidityPosition): Promise<EstimateWidrawLP> {
     // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
-    const dustValues = await this.getDustValues(params.asset.asset)
-    const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
-    //console.log(dustValues.asset.assetAmount.amount().toNumber(), dustValues.rune.assetAmount.amount().toNumber())
+    if (!params.assetAddress) throw Error(`can't estimate lp without an asset address`)
+    const memberDetail = await this.checkLiquidityPosition(params.assetAddress)
+    const dustValues = await this.getDustValues(memberDetail.assetAmount.asset)
+    const assetPool = await this.thorchainCache.getPoolForAsset(memberDetail.assetAmount.asset)
 
-    const waitTimeSeconds = await this.confCounting(params.asset)
+    const waitTimeSeconds = await this.confCounting(memberDetail.assetAmount)
     const totalFees = (await this.convert(dustValues.asset, AssetRuneNative)).plus(dustValues.rune)
     const slip = getSlipOnLiquidity(
-      { assetShare: params.asset.baseAmount.amount(), runeShare: params.rune.baseAmount.amount() },
+      {
+        assetShare: memberDetail.assetAmount.baseAmount.amount(),
+        runeShare: memberDetail.runeAmount.baseAmount.amount(),
+      },
       assetPool,
     )
-    // const lpUnits = getLiquidityUnits(
-    //   { assetDeposited: params.asset.baseAmount, runeDeposited: params.rune.baseAmount },
-    //   assetPool,
-    // )
-    // const unitData: UnitData = {
-    //   totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
-    //   liquidityUnits: lpUnits,
-    // }
-    //const blockCurrent =
-    //const poolShare = getPoolShare(unitData, assetPool)
-    const impermanentLossProtection = 0 //`getLiquidityProtectionData(poolShare, assetPool)`
     const estimateLP: EstimateWidrawLP = {
       slip: slip,
       transactionFee: {
@@ -560,7 +584,7 @@ export class ThorchainAMM {
         totalFees: totalFees,
       },
       estimatedWait: waitTimeSeconds,
-      impermanentLossProtection: impermanentLossProtection,
+      impermanentLossProtection: memberDetail.impermanentLossProtection,
     }
     return estimateLP
   }
