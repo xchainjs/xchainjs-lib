@@ -1,7 +1,7 @@
 import { Address } from '@xchainjs/xchain-client'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { Asset, Chain, assetToBase, assetToString, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, Chain, assetAmount, assetToBase, assetToString, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
@@ -9,15 +9,17 @@ import { LiquidityPool } from './liquidity-pool'
 import { AsgardCache, InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache, SwapOutput } from './types'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'
+import { Thornode } from './utils/thornode'
 
 const SAME_ASSET_EXCHANGE_RATE = new BigNumber(1)
 const TEN_MINUTES = 10 * 60 * 1000
-
+const DEFAULT_THORCHAIN_DECIMALS = 8
 /**
  * This class manages retrieving information from up to date Thorchain
  */
 export class ThorchainCache {
   readonly midgard: Midgard
+  readonly thornode: Thornode
   private poolCache: PoolCache | undefined
   private asgardAssetsCache: AsgardCache | undefined = undefined
   private inboundDetailCache: InboundDetailCache | undefined = undefined
@@ -46,6 +48,7 @@ export class ThorchainCache {
     expireNetworkValuesCacheMillis = TEN_MINUTES,
   ) {
     this.midgard = midgard
+    this.thornode = new Thornode(midgard.network)
     this.expirePoolCacheMillis = expirePoolCacheMillis
     this.expireAsgardCacheMillis = expireAsgardCacheMillis
     this.expireInboundDetailsCacheMillis = expireInboundDetailsCacheMillis
@@ -80,7 +83,6 @@ export class ThorchainCache {
       // from/R * R/to = from/to
       exchangeRate = lpFrom.runeToAssetRatio.times(lpTo.assetToRuneRatio)
     }
-    console.log(`1 ${assetToString(from)} = ${exchangeRate.toFixed()} ${assetToString(to)}`)
     return exchangeRate
   }
 
@@ -129,7 +131,7 @@ export class ThorchainCache {
    * which will refresh the cache if it's expired
    */
   private async refereshPoolCache(): Promise<void> {
-    const pools = await this.midgard.getPools()
+    const pools = await this.thornode.getPools()
     const poolMap: Record<string, LiquidityPool> = {}
     if (pools) {
       for (const pool of pools) {
@@ -206,16 +208,16 @@ export class ThorchainCache {
     if (isAssetRuneNative(inputAmount.asset)) {
       //singleswap from rune -> asset
       const pool = await this.getPoolForAsset(destinationAsset)
-      return getSingleSwap(inputAmount.baseAmount, pool, false)
+      return getSingleSwap(inputAmount, pool, false)
     } else if (isAssetRuneNative(destinationAsset)) {
       //singleswap from  asset -> rune
       const pool = await this.getPoolForAsset(inputAmount.asset)
-      return getSingleSwap(inputAmount.baseAmount, pool, true)
+      return getSingleSwap(inputAmount, pool, true)
     } else {
       //doubleswap asset-> asset
-      const inPpool = await this.getPoolForAsset(inputAmount.asset)
+      const inPool = await this.getPoolForAsset(inputAmount.asset)
       const destPool = await this.getPoolForAsset(destinationAsset)
-      return getDoubleSwap(inputAmount.baseAmount, inPpool, destPool)
+      return await getDoubleSwap(inputAmount, inPool, destPool, this)
     }
   }
   /**
@@ -229,8 +231,13 @@ export class ThorchainCache {
    */
   async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
     const exchangeRate = await this.getExchangeRate(input.asset, outAsset)
+    let decimals = DEFAULT_THORCHAIN_DECIMALS
+    if (!isAssetRuneNative(outAsset)) {
+      const pool = await this.getPoolForAsset(outAsset)
+      decimals = pool.pool.decimals ?? DEFAULT_THORCHAIN_DECIMALS
+    }
 
-    const amt = input.assetAmount.times(exchangeRate)
+    const amt = assetAmount(input.assetAmount.times(exchangeRate).amount().toFixed(), decimals)
     const result = new CryptoAmount(assetToBase(amt), outAsset)
 
     return result

@@ -48,7 +48,7 @@ if (!BUSD) throw Error('bad asset')
 // Test User Functions - single and double swap using mock pool data
 describe('xchain-swap estimate Integration Tests', () => {
   // Test estimate swaps with mock pool data
-  it('should estimate a swap of 1 BTC to RUNE', async () => {
+  it('should estimate a swap of 0.5 BTC to BUSD', async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBTC),
       destinationAsset: BUSD,
@@ -247,21 +247,47 @@ describe('xchain-swap estimate Integration Tests', () => {
     expect(estimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })
-  it('should estimate a swap of 0.0000000005 AVAX to RUNE', async () => {
-    // const USDT = assetFromString('ETH.USDT-0XDAC1')
-    // if (!USDT) throw Error('bad asset')
 
-    const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.00000000005', 18)), AssetAVAX),
+  it(`Should estimate a swap from AVAX to RUNE`, async () => {
+    const swapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('0.5', 18)), AssetAVAX),
       destinationAsset: AssetRuneNative,
-      // affiliateFeePercent: 0.003, //optional
-      slipLimit: new BigNumber('0.07'), //optional
+      slipLimit: new BigNumber('0.2'),
     }
-
     const estimate = await stagenetThorchainAmm.estimateSwap(swapParams)
-
-    // const estimateInBusd = await stagenetThorchainAmm.getFeesIn(estimate.totalFees, USDT)
-    // estimate.totalFees = estimateInBusd
+    print(estimate, swapParams.input)
+    expect(estimate.canSwap).toBe(true)
+    expect(estimate).toBeTruthy()
+  })
+  it(`Should estimate a swap from ETH to RUNE`, async () => {
+    const swapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('0.5', 18)), AssetETH),
+      destinationAsset: AssetRuneNative,
+      slipLimit: new BigNumber('0.2'),
+    }
+    const estimate = await stagenetThorchainAmm.estimateSwap(swapParams)
+    print(estimate, swapParams.input)
+    expect(estimate.canSwap).toBe(true)
+    expect(estimate).toBeTruthy()
+  })
+  it(`Should estimate a swap from ETH to BTC`, async () => {
+    const swapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('50', 18)), AssetETH),
+      destinationAsset: AssetBTC,
+      slipLimit: new BigNumber('0.2'),
+    }
+    const estimate = await thorchainAmm.estimateSwap(swapParams)
+    print(estimate, swapParams.input)
+    expect(estimate.canSwap).toBe(true)
+    expect(estimate).toBeTruthy()
+  })
+  it(`Should estimate a swap from BTC to ETH`, async () => {
+    const swapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('5', 8)), AssetBTC),
+      destinationAsset: AssetETH,
+      slipLimit: new BigNumber('0.2'),
+    }
+    const estimate = await thorchainAmm.estimateSwap(swapParams)
     print(estimate, swapParams.input)
     expect(estimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()

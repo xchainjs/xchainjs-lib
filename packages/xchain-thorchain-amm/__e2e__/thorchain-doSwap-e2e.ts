@@ -346,10 +346,9 @@ describe('xchain-swap doSwap Integration Tests', () => {
   })
   it(`Should perform a swap from AVAX to RUNE`, async () => {
     const estimateSwapParams = {
-      // input: new CryptoAmount(assetToBase(assetAmount('0.5', 18)), AssetAVAX),
-      input: new CryptoAmount(assetToBase(assetAmount('0.5')), AssetAVAX),
+      input: new CryptoAmount(assetToBase(assetAmount('0.5', 18)), AssetAVAX),
       destinationAsset: AssetRuneNative,
-      slipLimit: new BigNumber('0.5'),
+      slipLimit: new BigNumber('0.2'),
     }
     try {
       const outPutCanSwap = await stagenetThorchainAmm.estimateSwap(estimateSwapParams)
