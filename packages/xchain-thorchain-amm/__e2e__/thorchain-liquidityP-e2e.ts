@@ -13,7 +13,13 @@ import {
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainAMM } from '../src/thorchain-amm'
 import { ThorchainCache } from '../src/thorchain-cache'
-import { AddliquidityPosition, EstimateADDLP, EstimateWidrawLP, RemoveLiquidityPosition } from '../src/types'
+import {
+  AddliquidityPosition,
+  EstimateADDLP,
+  EstimateWithdrawLP,
+  LiquidityPosition,
+  RemoveLiquidityPosition,
+} from '../src/types'
 import { Midgard } from '../src/utils/midgard'
 import { Wallet } from '../src/wallet'
 require('dotenv').config()
@@ -53,10 +59,22 @@ function printAdd(estimate: EstimateADDLP) {
   }
   console.log(expanded)
 }
-function printWithdraw(estimate: EstimateWidrawLP) {
+function printWithdraw(withdraw: EstimateWithdrawLP) {
   const expanded = {
-    slip: estimate.slip.toNumber(),
-    estimatedWait: estimate.estimatedWait.toFixed(),
+    slip: withdraw.slip.toNumber(),
+    txFee: withdraw.transactionFee,
+    impermanentLossProtection: withdraw.impermanentLossProtection,
+    estimatedWait: withdraw.estimatedWait.toFixed(),
+  }
+  console.log(expanded)
+}
+
+function printliquidityPosition(liquidityPosition: LiquidityPosition) {
+  const expanded = {
+    assetPool: liquidityPosition.assetPool.pool.asset,
+    assetAmount: liquidityPosition.assetAmount.assetAmount.amount().toNumber(),
+    runeAmount: liquidityPosition.runeAmount.assetAmount.amount().toNumber(),
+    impermanentLosProtection: liquidityPosition.impermanentLossProtection,
   }
   console.log(expanded)
 }
@@ -188,10 +206,12 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const LPAction = '-' // remove from lP position
     const percentage = 100 // gets converted to basis points later
     const assetAddress = 'redacted'
+    const withdrawType = `SYM`
     const removeLp: RemoveLiquidityPosition = {
       action: LPAction,
       percentage: percentage,
       assetAddress: assetAddress,
+      withdrawType: withdrawType,
     }
     const estimatRemoveLP = await testnetThorchainAmm.estimateWithdrawLP(removeLp)
     printWithdraw(estimatRemoveLP)
@@ -264,9 +284,9 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   //   expect(hash).toBeTruthy()
   // })
   it(`Should check liquidity position for an address`, async () => {
-    const address = 'Redacted'
+    const address = 'tbnb1kmu0n6s44cz5jxdvkvsvrzgr57ndg6atw5zrys'
     const checkLP = await testnetThorchainAmm.checkLiquidityPosition(address)
-    console.log(checkLP)
+    printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()
   })
 })

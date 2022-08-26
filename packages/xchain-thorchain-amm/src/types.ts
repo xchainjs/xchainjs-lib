@@ -78,10 +78,12 @@ export type EstimateADDLP = {
   runeToAssetRatio: BigNumber
   estimatedWait: number
 }
-export type EstimateWidrawLP = {
+export type EstimateWithdrawLP = {
   slip: BigNumber
   estimatedWait: number
   transactionFee: LPFees
+  assetAmount: CryptoAmount
+  runeAmount: CryptoAmount
   impermanentLossProtection: number
 }
 
@@ -111,7 +113,7 @@ export type RemoveLiquidityPosition = {
   percentage: number
   assetAddress: string
   runeAddress?: string
-  asymmetricalWithdraw?: boolean
+  withdrawType: string
 }
 
 export type AddLiquidity = {
@@ -121,7 +123,7 @@ export type AddLiquidity = {
   waitTimeSeconds: number
 }
 
-export type liquidityPosition = {
+export type LiquidityPosition = {
   assetPool: LiquidityPool
   assetAmount: CryptoAmount
   runeAmount: CryptoAmount
