@@ -346,24 +346,28 @@ describe('xchain-swap doSwap Integration Tests', () => {
   })
   it(`Should perform a swap from AVAX to RUNE`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.00000000005', 18)), AssetAVAX),
+      input: new CryptoAmount(assetToBase(assetAmount('0.5', 18)), AssetAVAX),
       destinationAsset: AssetRuneNative,
-      slipLimit: new BigNumber('0.5'),
+      slipLimit: new BigNumber('0.2'),
     }
     try {
       const outPutCanSwap = await stagenetThorchainAmm.estimateSwap(estimateSwapParams)
       print(outPutCanSwap)
-      if (outPutCanSwap.canSwap) {
-        const output = await stagenetThorchainAmm.doSwap(
-          stagenetWallet,
-          estimateSwapParams,
-          stagenetWallet.clients[Chain.THORChain].getAddress(),
-        )
-        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
-        expect(output).toBeTruthy()
-      }
+      const feesinAvax = await stagenetThorchainAmm.getFeesIn(outPutCanSwap.totalFees, AssetAVAX)
+      outPutCanSwap.totalFees = feesinAvax
+      print(outPutCanSwap)
+
+      // if (outPutCanSwap.canSwap) {
+      //   const output = await stagenetThorchainAmm.doSwap(
+      //     stagenetWallet,
+      //     estimateSwapParams,
+      //     stagenetWallet.clients[Chain.THORChain].getAddress(),
+      //   )
+      //   console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+      //   expect(output).toBeTruthy()
+      // }
     } catch (error: any) {
-      console.log(error.message)
+      console.error(error)
       fail()
     }
   })

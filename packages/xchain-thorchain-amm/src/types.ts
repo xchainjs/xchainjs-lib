@@ -79,8 +79,8 @@ export type DepositParams = {
 }
 
 export type SwapOutput = {
-  output: BaseAmount
-  swapFee: BaseAmount
+  output: CryptoAmount
+  swapFee: CryptoAmount
   slip: BigNumber
 }
 

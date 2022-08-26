@@ -5,6 +5,8 @@ import {
   NetworkApi,
   ObservedTx,
   ObservedTxStatusEnum,
+  Pool,
+  PoolsApi,
   QueueApi,
   TransactionsApi,
   TxOutItem,
@@ -75,6 +77,7 @@ export class Thornode {
   private transactionsApi: TransactionsApi[]
   private queueApi: QueueApi[]
   private networkApi: NetworkApi[]
+  private poolsApi: PoolsApi[]
   private midgard: Midgard
 
   constructor(network: Network = Network.Mainnet, config?: ThornodeConfig, chainAttributes = DefaultChainAttributes) {
@@ -87,6 +90,7 @@ export class Thornode {
     )
     this.queueApi = this.config.thornodeBaseUrls.map((url) => new QueueApi(new Configuration({ basePath: url })))
     this.networkApi = this.config.thornodeBaseUrls.map((url) => new NetworkApi(new Configuration({ basePath: url })))
+    this.poolsApi = this.config.thornodeBaseUrls.map((url) => new PoolsApi(new Configuration({ basePath: url })))
 
     this.chainAttributes = chainAttributes
   }
@@ -132,6 +136,17 @@ export class Thornode {
       try {
         const lastBlock = await api.lastblock(height)
         return lastBlock.data
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+  async getPools(): Promise<Pool[]> {
+    for (const api of this.poolsApi) {
+      try {
+        const pools = await api.pools()
+        return pools.data
       } catch (e) {
         console.error(e)
       }
