@@ -16,7 +16,6 @@ import {
   BCHChain,
   BNBChain,
   BTCChain,
-  // BaseAmount,
   Chain,
   CosmosChain,
   DOGEChain,
@@ -270,6 +269,35 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetLUNA
     case AvalancheChain:
       return AssetAVAX
+    default:
+      throw Error('Unknown chain')
+  }
+}
+/**
+ *
+ * @param chain - input chain string
+ * @returns - returns correct chain from string
+ */
+export const getChain = (chain: string): Chain => {
+  switch (chain) {
+    case 'BNB':
+      return BNBChain
+    case 'BTC':
+      return BTCChain
+    case 'ETH':
+      return ETHChain
+    case 'THOR':
+      return THORChain
+    case 'GAIA':
+      return CosmosChain
+    case 'BCH':
+      return BCHChain
+    case 'LTC':
+      return LTCChain
+    case 'DOGE':
+      return DOGEChain
+    case 'TERRA':
+      return TerraChain
     default:
       throw Error('Unknown chain')
   }

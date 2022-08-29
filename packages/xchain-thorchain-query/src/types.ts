@@ -1,3 +1,4 @@
+import { Address, FeeOption } from '@xchainjs/xchain-client'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
@@ -89,4 +90,22 @@ export type InboundDetail = {
 export type ChainAttributes = {
   blockReward: number
   avgBlockTimeInSecs: number
+}
+export type ExecuteSwap = {
+  input: CryptoAmount
+  destinationAsset: Asset
+  limit: BaseAmount
+  destinationAddress: Address
+  affiliateAddress: Address
+  affiliateFee: BaseAmount
+  feeOption?: FeeOption
+  interfaceID: number
+  waitTimeSeconds: number
+}
+
+export type TxDetails = {
+  memo: string
+  inboundVault: string
+  expiry: Date
+  txEstimate: SwapEstimate
 }

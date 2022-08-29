@@ -110,7 +110,7 @@ export class ThorchainAMM {
    *
    * @param wallet - wallet to use
    * @param params - swap paraps
-   * @param destinationAddress - were to send the output of the swap
+   * @param destinationAddress - where to send the output of the swap
    * @param affiliateAddress - were to send the affilate Address, should be a THOR address (optional)
    * @param interfaceID - id if the calling interface (optional)
    * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
