@@ -109,3 +109,16 @@ export type TxDetails = {
   expiry: Date
   txEstimate: SwapEstimate
 }
+
+export enum TxStage {
+  INBOUND_CHAIN_UNCONFIRMED,
+  CONF_COUNTING,
+  TC_PROCESSING,
+  OUTBOUND_QUEUED,
+  OUTBOUND_CHAIN_UNCONFIRMED,
+  OUTBOUND_CHAIN_CONFIRMED,
+}
+export type TxStatus = {
+  stage: TxStage
+  seconds: number
+}

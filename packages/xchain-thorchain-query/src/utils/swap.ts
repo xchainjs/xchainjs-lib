@@ -1,7 +1,7 @@
 import { Address } from '@xchainjs/xchain-client'
-import { AssetAtom } from '@xchainjs/xchain-cosmos/lib'
+import { AssetAtom } from '@xchainjs/xchain-cosmos'
 import { strip0x } from '@xchainjs/xchain-ethereum'
-import { AssetLUNA } from '@xchainjs/xchain-terra/lib'
+import { AssetLUNA } from '@xchainjs/xchain-terra'
 import {
   Asset,
   AssetAVAX,

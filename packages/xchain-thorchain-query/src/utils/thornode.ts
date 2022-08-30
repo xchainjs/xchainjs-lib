@@ -18,19 +18,6 @@ export type ThornodeConfig = {
   thornodeBaseUrls: string[]
 }
 
-export enum TxStage {
-  INBOUND_CHAIN_UNCONFIRMED,
-  CONF_COUNTING,
-  TC_PROCESSING,
-  OUTBOUND_QUEUED,
-  OUTBOUND_CHAIN_UNCONFIRMED,
-  OUTBOUND_CHAIN_CONFIRMED,
-}
-export type TxStatus = {
-  stage: TxStage
-  seconds: number
-}
-
 const defaultThornodeConfig: Record<Network, ThornodeConfig> = {
   mainnet: {
     apiRetries: 3,

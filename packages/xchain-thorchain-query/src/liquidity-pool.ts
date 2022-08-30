@@ -1,4 +1,4 @@
-import { Pool } from '@xchainjs/xchain-thornode/lib'
+import { Pool } from '@xchainjs/xchain-thornode'
 import { Asset, BaseAmount, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 

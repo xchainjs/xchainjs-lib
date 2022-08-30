@@ -1,6 +1,6 @@
-import { AssetAtom } from '@xchainjs/xchain-cosmos/lib'
-import { isAssetRuneNative } from '@xchainjs/xchain-thorchain/lib'
-import { LastBlock, ObservedTx, ObservedTxStatusEnum, TxOutItem } from '@xchainjs/xchain-thornode/lib'
+import { AssetAtom } from '@xchainjs/xchain-cosmos'
+import { isAssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { LastBlock, ObservedTx, ObservedTxStatusEnum, TxOutItem } from '@xchainjs/xchain-thornode'
 import {
   Asset,
   AssetBNB,
@@ -26,9 +26,10 @@ import {
   SwapEstimate,
   TotalFees,
   TxDetails,
+  TxStage,
+  TxStatus,
 } from './types'
 import { calcNetworkFee, getChain, getChainAsset } from './utils/swap'
-import { TxStage, TxStatus } from './utils/thornode'
 
 const BN_1 = new BigNumber(1)
 
@@ -76,7 +77,7 @@ export class ThorchainQuery {
 
     const swapEstimate = await this.calcSwapEstimate(params, sourceInboundDetails, destinationInboundDetails)
 
-    // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
+    // Remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
     const affiliateFee = params.input.baseAmount.times(params.affiliateFeePercent || 0)
 
     // Calculate expiry time
@@ -84,6 +85,7 @@ export class ThorchainQuery {
     const minutesToAdd = 15
     const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
 
+    // Check for errors
     const errors = await this.getSwapEstimateErrors(
       params,
       swapEstimate,
@@ -117,7 +119,7 @@ export class ThorchainQuery {
 
         // Retrieve inbound address
         const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.input.asset.chain]
-        txDetails.inboundVault = inboundAsgard?.address || '' //TODO fix this
+        txDetails.inboundVault = inboundAsgard?.address || ''
 
         // Construct memo
         txDetails.memo = this.constructSwapMemo({
