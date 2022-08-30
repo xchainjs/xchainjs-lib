@@ -213,12 +213,8 @@ export class ThorchainAMM {
     // now calculate swapfee based on inputNetAmount
     const swapOutput = await this.thorchainCache.getExpectedSwapOutput(inputNetInAsset, params.destinationAsset)
 
-    // const swapFeeInRune = new CryptoAmount(swapOutput.swapFee, AssetRuneNative)
-    // const swapFeeInAsset = await this.thorchainCache.convert(swapFeeInRune, params.input.asset)
-
-    const outputInRune = swapOutput.output
-    const swapFeeInRune = swapOutput.swapFee
-    // const outputInRune = await this.thorchainCache.convert(outputInAsset, AssetRuneNative)
+    const swapFeeInRune = await this.thorchainCache.convert(swapOutput.swapFee, AssetRuneNative)
+    const outputInRune = await this.thorchainCache.convert(swapOutput.output, AssetRuneNative)
 
     // ---------------- Remove Outbound Fee ---------------------- /
     const netOutputInRune = outputInRune.minus(outboundFeeInRune)

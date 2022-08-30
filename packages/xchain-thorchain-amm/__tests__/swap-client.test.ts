@@ -1,5 +1,6 @@
-import { assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
+import { AssetBTC, assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
+import { CryptoAmount } from '../src/crypto-amount'
 
 import { LiquidityPool } from '../src/liquidity-pool'
 import { SwapOutput } from '../src/types'
@@ -64,7 +65,8 @@ const btcPool = new LiquidityPool(btcPoolDetails)
 const ethPool = new LiquidityPool(ethPoolDetails)
 const busdPool = new LiquidityPool(busdPoolDetails)
 
-const inputAmount = assetToBase(assetAmount(1)) // 1 BTC
+const inputAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
+// const inputAmount = assetToBase(assetAmount(1)) // 1 BTC
 const feeAmount = assetToBase(assetAmount(0.0000375)) // sats
 
 describe('Swap Cal Tests', () => {
