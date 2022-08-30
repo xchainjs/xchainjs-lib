@@ -46,10 +46,11 @@ export const getSwapFee = (inputAmount: CryptoAmount, pool: LiquidityPool, toRun
   const X = toRune ? pool.assetBalance.amount() : pool.runeBalance.amount() // input is asset if toRune
   const Y = toRune ? pool.runeBalance.amount() : pool.assetBalance.amount() // output is rune if toRune
   const units = toRune ? AssetRuneNative : inputAmount.asset
+  const decimals = toRune || !pool.pool.decimals ? 8 : pool.pool.decimals
   const numerator = x.times(x).multipliedBy(Y)
   const denominator = x.plus(X).pow(2)
   const result = numerator.div(denominator)
-  return new CryptoAmount(baseAmount(result), units)
+  return new CryptoAmount(baseAmount(result, decimals), units)
 }
 
 /**
@@ -81,10 +82,11 @@ export const getSwapOutput = (inputAmount: CryptoAmount, pool: LiquidityPool, to
   const X = toRune ? pool.assetBalance.amount() : pool.runeBalance.amount() // input is asset if toRune
   const Y = toRune ? pool.runeBalance.amount() : pool.assetBalance.amount() // output is rune if toRune
   const units = toRune ? AssetRuneNative : inputAmount.asset
+  const decimals = toRune || !pool.pool.decimals ? 8 : pool.pool.decimals
   const numerator = x.times(X).times(Y)
   const denominator = x.plus(X).pow(2)
   const result = numerator.div(denominator)
-  return new CryptoAmount(baseAmount(result), units)
+  return new CryptoAmount(baseAmount(result, decimals), units)
 }
 
 export const getDoubleSwapOutput = (
@@ -122,24 +124,7 @@ export const getDoubleSwapSlip = (inputAmount: CryptoAmount, pool1: LiquidityPoo
   const result = swapOutput2.slip.plus(swapOutput1.slip)
   return result
 }
-// export const getValueOfRuneInAsset = (inputRune: CryptoAmount, pool: LiquidityPool): CryptoAmount => {
-//   // formula: ((r * A) / R) => A per R ($perRune)
-//   const r = inputRune.baseAmount.amount()
-//   const R = pool.runeBalance.amount()
-//   const A = pool.assetBalance.amount()
-//   const result = r.times(A).div(R)
-//   // return baseAmount(result)
-//   return new CryptoAmount(baseAmount(result), pool.asset)
-// }
 
-// export const getValueOfAssetInRune = (inputAsset: CryptoAmount, pool: LiquidityPool): CryptoAmount => {
-//   // formula: ((a * R) / A) => R per A (Runeper$)
-//   const t = inputAsset.baseAmount.amount()
-//   const R = pool.runeBalance.amount()
-//   const A = pool.assetBalance.amount()
-//   const result = t.times(R).div(A)
-//   return new CryptoAmount(baseAmount(result), AssetRuneNative)
-// }
 export const getDoubleSwapFee = async (
   inputAmount: CryptoAmount,
   pool1: LiquidityPool,
@@ -147,11 +132,10 @@ export const getDoubleSwapFee = async (
   thorchainCache: ThorchainCache,
 ): Promise<CryptoAmount> => {
   // formula: getSwapFee1 + getSwapFee2
-  const fee1 = getSwapFee(inputAmount, pool1, true)
-  const fee1InRune = await thorchainCache.convert(fee1, AssetRuneNative)
-  const r = getSwapOutput(inputAmount, pool1, true)
-  const fee2 = getSwapFee(r, pool2, false)
-  const fee2InRune = await thorchainCache.convert(fee2, AssetRuneNative)
+  const fee1InRune = getSwapFee(inputAmount, pool1, true)
+  const swapOutput = getSwapOutput(inputAmount, pool1, true)
+  const fee2InAsset = getSwapFee(swapOutput, pool2, false)
+  const fee2InRune = await thorchainCache.convert(fee2InAsset, AssetRuneNative)
   const result = fee1InRune.plus(fee2InRune)
   return result
 }
