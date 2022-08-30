@@ -1,5 +1,4 @@
-// import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
-import { Pool } from '@xchainjs/xchain-thornode'
+import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
 import { Asset, BaseAmount, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -7,7 +6,7 @@ import { BigNumber } from 'bignumber.js'
  * Represent a Liquidity Pool in Thorchain
  */
 export class LiquidityPool {
-  readonly pool: Pool
+  readonly pool: PoolDetail
   readonly assetBalance: BaseAmount
   readonly runeBalance: BaseAmount
 
@@ -16,16 +15,16 @@ export class LiquidityPool {
   readonly runeToAssetRatio: BigNumber
   readonly assetToRuneRatio: BigNumber
 
-  constructor(pool: Pool) {
+  constructor(pool: PoolDetail, decimals: number) {
     this.pool = pool
     const asset = assetFromString(this.pool.asset)
     if (!asset) throw new Error(`could not parse ${this.pool.asset}`)
-    const decimals = this.pool.decimals ?? 8
+    // const decimals = this.pool.decimals ?? 8
 
     this.asset = asset
     this.assetString = this.pool.asset
-    this.assetBalance = baseAmount(this.pool.balance_asset, decimals)
-    this.runeBalance = baseAmount(this.pool.balance_rune)
+    this.assetBalance = baseAmount(this.pool.assetDepth, decimals)
+    this.runeBalance = baseAmount(this.pool.runeDepth)
 
     this.runeToAssetRatio = this.runeBalance.amount().div(this.assetBalance.amount())
     this.assetToRuneRatio = this.assetBalance.amount().div(this.runeBalance.amount())

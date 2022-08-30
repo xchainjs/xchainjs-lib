@@ -83,6 +83,7 @@ export class ThorchainCache {
       // from/R * R/to = from/to
       exchangeRate = lpFrom.runeToAssetRatio.times(lpTo.assetToRuneRatio)
     }
+    // console.log(` 1 ${assetToString(from)} = ${exchangeRate} ${assetToString(to)}`)
     return exchangeRate
   }
 
@@ -131,11 +132,13 @@ export class ThorchainCache {
    * which will refresh the cache if it's expired
    */
   private async refereshPoolCache(): Promise<void> {
-    const pools = await this.thornode.getPools()
+    const [thornodePools, midgardPools] = await Promise.all([this.thornode.getPools(), this.midgard.getPools()])
     const poolMap: Record<string, LiquidityPool> = {}
-    if (pools) {
-      for (const pool of pools) {
-        const lp = new LiquidityPool(pool)
+    if (midgardPools) {
+      for (const pool of midgardPools) {
+        const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
+        const decimals = thornodePool?.decimals ?? 8
+        const lp = new LiquidityPool(pool, decimals)
         poolMap[lp.asset.ticker] = lp
       }
       this.poolCache = {
@@ -207,6 +210,7 @@ export class ThorchainCache {
   async getExpectedSwapOutput(inputAmount: CryptoAmount, destinationAsset: Asset): Promise<SwapOutput> {
     if (isAssetRuneNative(inputAmount.asset)) {
       //singleswap from rune -> asset
+
       const pool = await this.getPoolForAsset(destinationAsset)
       return getSingleSwap(inputAmount, pool, false)
     } else if (isAssetRuneNative(destinationAsset)) {
@@ -234,7 +238,7 @@ export class ThorchainCache {
     let decimals = DEFAULT_THORCHAIN_DECIMALS
     if (!isAssetRuneNative(outAsset)) {
       const pool = await this.getPoolForAsset(outAsset)
-      decimals = pool.pool.decimals ?? DEFAULT_THORCHAIN_DECIMALS
+      decimals = pool.decimals ?? DEFAULT_THORCHAIN_DECIMALS
     }
 
     const amt = assetAmount(input.assetAmount.times(exchangeRate).amount().toFixed(), decimals)
