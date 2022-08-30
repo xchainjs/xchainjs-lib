@@ -1,3 +1,4 @@
+import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from '../src/liquidity-pool'
@@ -5,19 +6,22 @@ import { LiquidityData, UnitData } from '../src/types'
 import { getLiquidityUnits, getPoolShare } from '../src/utils'
 
 const btcPoolDetails = {
-  LP_units: '476999260431737',
+  annualPercentageRate: '0.294476309321674',
   asset: 'BTC.BTC',
-  balance_asset: '84613721283',
-  balance_rune: '855784996349617',
-  pending_inbound_asset: '381258362',
-  pending_inbound_rune: '216150796102',
-  pool_units: '499780934986115',
-  status: 'Available',
-  synth_supply: '7713948757',
-  synth_units: '22781674554378',
+  assetDepth: assetToBase(assetAmount(100)).amount().toFixed(),
+  assetPrice: '11121.24920535084',
+  assetPriceUSD: '30458.124870650492',
+  liquidityUnits: '536087715332333',
+  poolAPY: '0.1001447237777584',
+  runeDepth: assetToBase(assetAmount(2500000)).amount().toFixed(),
+  status: 'available',
+  synthSupply: '3304301605',
+  synthUnits: '10309541238596',
+  units: '546397256570929',
+  volume24h: '16202006480711',
 }
 
-const btcPool = new LiquidityPool(btcPoolDetails)
+const btcPool = new LiquidityPool(btcPoolDetails, 8)
 
 // const btcInput = assetToBase(assetAmount(1))
 
