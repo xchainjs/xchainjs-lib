@@ -2,7 +2,6 @@ import { Network } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetAVAX,
-  AssetBCH,
   AssetBNB,
   AssetBTC,
   AssetETH,
@@ -302,31 +301,5 @@ describe('Thorchain-query estimate Integration Tests', () => {
     print(estimate.txEstimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
-  })
-  it(`Should estimate a swap from BTC to ETH and return correct memo`, async () => {
-    const swapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('5', 8)), AssetBTC),
-      destinationAsset: AssetETH,
-      slipLimit: new BigNumber('0.2'),
-    }
-    const memo = `=:ETH.ETH::5145999`
-    const estimate = await thorchainQuery.estimateSwap(swapParams)
-    print(estimate.txEstimate, swapParams.input)
-    printTx(estimate, swapParams.input)
-    expect(estimate.txEstimate.canSwap).toBe(true)
-    expect(estimate.memo).toEqual(memo)
-  })
-  it(`Should estimate a swap from BNB to ETH and return correct memo`, async () => {
-    const swapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('5')), AssetBNB),
-      destinationAsset: AssetBCH,
-      slipLimit: new BigNumber('0.2'),
-    }
-    const memo = `=:BCH.BCH::15910999`
-    const estimate = await thorchainQuery.estimateSwap(swapParams)
-    print(estimate.txEstimate, swapParams.input)
-    printTx(estimate, swapParams.input)
-    expect(estimate.txEstimate.canSwap).toBe(true)
-    expect(estimate.memo).toEqual(memo)
   })
 })
