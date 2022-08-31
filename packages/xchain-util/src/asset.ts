@@ -5,6 +5,8 @@ import { Chain, isChain } from './chain'
 import { trimZeros as trimZerosHelper } from './string'
 import { Amount, Asset, AssetAmount, BaseAmount, Denomination } from './types'
 
+export type Address = string
+
 /**
  * Guard to check whether value is a BigNumber.Value or not
  *
@@ -455,3 +457,21 @@ export const formatBaseAsAssetAmount = ({
  */
 export const eqAsset = (a: Asset, b: Asset) =>
   a.chain === b.chain && a.symbol === b.symbol && a.ticker === b.ticker && a.synth === b.synth
+
+/**
+ * Checks whether an asset is `AssetRuneNative`
+ *
+ * @param {Asset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
+
+/**
+ * Removes `0x` or `0X` from address
+ */
+export const strip0x = (addr: Address) => addr.replace(/^0(x|X)/, '')
+
+export const getContractAddressFromAsset = (asset: Asset): Address => {
+  const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
+  return strip0x(assetAddress)
+}

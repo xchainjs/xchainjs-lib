@@ -1,7 +1,14 @@
-import { Address } from '@xchainjs/xchain-client'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard'
-import { isAssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { Asset, Chain, assetAmount, assetToBase, assetToString, eqAsset } from '@xchainjs/xchain-util'
+import {
+  Address,
+  Asset,
+  Chain,
+  assetAmount,
+  assetToBase,
+  assetToString,
+  eqAsset,
+  isAssetRuneNative,
+} from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'

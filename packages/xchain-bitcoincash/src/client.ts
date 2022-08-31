@@ -1,6 +1,5 @@
 import * as bitcash from '@psf/bitcoincashjs-lib'
 import {
-  Address,
   Balance,
   Fee,
   FeeOption,
@@ -16,7 +15,7 @@ import {
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Chain } from '@xchainjs/xchain-util'
+import { Address, Chain } from '@xchainjs/xchain-util'
 
 import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'

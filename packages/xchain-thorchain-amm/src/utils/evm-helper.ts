@@ -1,13 +1,11 @@
-import { TxHash, XChainClient } from '@xchainjs/xchain-client/lib'
+import { TxHash, XChainClient } from '@xchainjs/xchain-client'
 import { ApproveParams, Client as EvmClient, MAX_APPROVAL } from '@xchainjs/xchain-evm'
-import { Asset, BaseAmount, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { ThorchainCache, calcNetworkFee } from '@xchainjs/xchain-thorchain-query'
+import { Asset, BaseAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import routerABI from '../abi/routerABI.json'
-import { ThorchainCache } from '../thorchain-cache'
 import { DepositParams } from '../types'
-
-import { calcNetworkFee, getContractAddressFromAsset } from './swap'
 
 export class EvmHelper {
   private evmClient: EvmClient

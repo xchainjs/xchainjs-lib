@@ -1,5 +1,4 @@
 import {
-  Address,
   Balance,
   Fee,
   FeeOption,
@@ -16,7 +15,7 @@ import {
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { AssetLTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Address, AssetLTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Litecoin from 'bitcoinjs-lib'
 
 import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'

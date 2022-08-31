@@ -1,6 +1,6 @@
 import { proto } from '@cosmos-client/core'
-import { Address, TxParams } from '@xchainjs/xchain-client'
-import { BaseAmount } from '@xchainjs/xchain-util'
+import { TxParams } from '@xchainjs/xchain-client'
+import { Address, BaseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 export type CosmosSDKClientParams = {

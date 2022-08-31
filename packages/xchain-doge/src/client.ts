@@ -1,5 +1,4 @@
 import {
-  Address,
   Balance,
   Fee,
   FeeRate,
@@ -15,7 +14,7 @@ import {
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { AssetDOGE, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Address, AssetDOGE, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Dogecoin from 'bitcoinjs-lib'
 
 import * as blockcypher from './blockcypher-api'

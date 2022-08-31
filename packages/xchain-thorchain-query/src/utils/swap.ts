@@ -1,8 +1,7 @@
-import { Address } from '@xchainjs/xchain-client'
 import { AssetAtom } from '@xchainjs/xchain-cosmos'
-import { strip0x } from '@xchainjs/xchain-ethereum'
 import { AssetLUNA } from '@xchainjs/xchain-terra'
 import {
+  // Address,
   Asset,
   AssetAVAX,
   AssetBCH,
@@ -16,16 +15,17 @@ import {
   BCHChain,
   BNBChain,
   BTCChain,
-  // BaseAmount,
   Chain,
+  // BaseAmount,
   CosmosChain,
   DOGEChain,
   ETHChain,
   LTCChain,
   THORChain,
   TerraChain,
-  // assetToString,
   baseAmount,
+  // assetToString,
+  // strip0x,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -169,10 +169,6 @@ export const getDoubleSwap = async (
     slip: doubleSlip,
   }
   return SwapOutput
-}
-export const getContractAddressFromAsset = (asset: Asset): Address => {
-  const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
-  return strip0x(assetAddress)
 }
 
 /**

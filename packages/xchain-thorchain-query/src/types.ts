@@ -1,6 +1,6 @@
-import { Address, FeeOption } from '@xchainjs/xchain-client'
+import { FeeOption } from '@xchainjs/xchain-client'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard'
-import { Asset, BaseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'

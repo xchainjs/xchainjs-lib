@@ -1,4 +1,5 @@
-import { Address } from '@xchainjs/xchain-client'
+import { Address } from "@xchainjs/xchain-util"
+
 
 export type GetBalanceResponse = {
   data: {

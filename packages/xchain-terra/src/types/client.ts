@@ -1,5 +1,5 @@
-import type { Address, Network } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount } from '@xchainjs/xchain-util/lib'
+import type { Network } from '@xchainjs/xchain-client'
+import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util/lib'
 
 export type SearchTxParams = {
   messageAction?: string

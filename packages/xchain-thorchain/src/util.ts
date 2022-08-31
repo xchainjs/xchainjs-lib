@@ -1,5 +1,5 @@
 import { cosmosclient, proto, rest } from '@cosmos-client/core'
-import { Address, Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
+import { Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
   Asset,
@@ -10,7 +10,9 @@ import {
   assetToBase,
   assetToString,
   baseAmount,
+  isAssetRuneNative,
   isSynthAsset,
+  Address,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import * as bech32Buffer from 'bech32-buffer'
@@ -25,14 +27,6 @@ export const DEFAULT_GAS_ADJUSTMENT = 2
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
 export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 export const MAX_TX_COUNT = 100
-
-/**
- * Checks whether an asset is `AssetRuneNative`
- *
- * @param {Asset} asset
- * @returns {boolean} `true` or `false`
- */
-export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
 
 const DENOM_RUNE_NATIVE = 'rune'
 /**

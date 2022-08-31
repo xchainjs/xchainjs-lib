@@ -1,13 +1,11 @@
-import { TxHash, XChainClient } from '@xchainjs/xchain-client/lib'
+import { TxHash, XChainClient } from '@xchainjs/xchain-client'
 import { ApproveParams, ETH_DECIMAL, EthereumClient, MAX_APPROVAL } from '@xchainjs/xchain-ethereum'
-import { Asset, AssetETH, BaseAmount, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { ThorchainCache, calcNetworkFee } from '@xchainjs/xchain-thorchain-query'
+import { Asset, AssetETH, BaseAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import routerABI from '../abi/routerABI.json'
-import { ThorchainCache } from '../thorchain-cache'
 import { DepositParams } from '../types'
-
-import { calcNetworkFee, getContractAddressFromAsset } from './swap'
 
 const APPROVE_GASLIMIT_FALLBACK = '200000'
 

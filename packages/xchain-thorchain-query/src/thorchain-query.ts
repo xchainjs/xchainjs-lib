@@ -1,5 +1,4 @@
 import { AssetAtom } from '@xchainjs/xchain-cosmos'
-import { isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { LastBlock, ObservedTx, ObservedTxStatusEnum, TxOutItem } from '@xchainjs/xchain-thornode'
 import {
   Asset,
@@ -12,6 +11,7 @@ import {
   assetToString,
   baseAmount,
   eqAsset,
+  isAssetRuneNative,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -39,7 +39,7 @@ const BN_1 = new BigNumber(1)
  * Has access to Midgard and THORNode data
  */
 export class ThorchainQuery {
-  private thorchainCache: ThorchainCache
+  readonly thorchainCache: ThorchainCache
   private chainAttributes: Record<Chain, ChainAttributes>
 
   /**

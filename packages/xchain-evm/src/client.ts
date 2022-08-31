@@ -1,6 +1,5 @@
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import {
-  Address,
   Balance,
   BaseXChainClient,
   FeeOption,
@@ -18,7 +17,7 @@ import {
   checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, toUtf8Bytes } from 'ethers/lib/utils'
 

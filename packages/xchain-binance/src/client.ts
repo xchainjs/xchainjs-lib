@@ -2,7 +2,6 @@ import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 import {
-  Address,
   Balance,
   BaseXChainClient,
   FeeType,
@@ -18,6 +17,7 @@ import {
   singleFee,
 } from '@xchainjs/xchain-client'
 import {
+  Address,
   Asset,
   AssetBNB,
   BaseAmount,

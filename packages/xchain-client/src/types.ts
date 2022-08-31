@@ -1,6 +1,4 @@
-import { Asset, BaseAmount } from '@xchainjs/xchain-util'
-
-export type Address = string
+import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util'
 
 export enum Network {
   Mainnet = 'mainnet',
