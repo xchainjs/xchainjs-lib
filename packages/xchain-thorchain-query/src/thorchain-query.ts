@@ -20,8 +20,8 @@ import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
 import {
   ChainAttributes,
+  ConstructMemo,
   EstimateSwapParams,
-  ExecuteSwap,
   InboundDetail,
   SwapEstimate,
   TotalFees,
@@ -94,7 +94,7 @@ export class ThorchainQuery {
     )
     const txDetails: TxDetails = {
       memo: '',
-      inboundVault: '',
+      toAddress: '',
       expiry: expiryDatetime,
       txEstimate: swapEstimate,
     }
@@ -103,38 +103,30 @@ export class ThorchainQuery {
       txDetails.txEstimate.errors = errors
     } else {
       txDetails.txEstimate.canSwap = true
-      if (params.destinationAsset.chain !== Chain.THORChain && !params.destinationAsset.synth) {
-        //---------------- Work out total Wait Time for Swap ---------------------- /
-        // Work out LIM from the slip percentage
-        let limPercentage = BN_1
-        if (params.slipLimit) {
-          limPercentage = BN_1.minus(params.slipLimit || 1)
-        } // else allowed slip is 100%
+      // Retrieve inbound Asgard address.
+      const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.input.asset.chain]
+      txDetails.toAddress = inboundAsgard?.address || ''
+      // Work out LIM from the slip percentage
+      let limPercentage = BN_1
+      if (params.slipLimit) {
+        limPercentage = BN_1.minus(params.slipLimit || 1)
+      } // else allowed slip is 100%
+      const limAssetAmount = swapEstimate.netOutput.times(limPercentage)
 
-        const limAssetAmount = swapEstimate.netOutput.times(limPercentage)
+      const inboundDelay = await this.confCounting(params.input)
+      const outboundDelay = await this.outboundDelay(limAssetAmount)
+      txDetails.txEstimate.waitTimeSeconds = outboundDelay + inboundDelay
 
-        const waitTimeSeconds = await this.confCounting(params.input)
-        const outboundDelay = await this.outboundDelay(limAssetAmount)
-        txDetails.txEstimate.waitTimeSeconds = outboundDelay + waitTimeSeconds
-
-        // Retrieve inbound address
-        const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.input.asset.chain]
-        txDetails.inboundVault = inboundAsgard?.address || ''
-
-        // Construct memo
-        txDetails.memo = this.constructSwapMemo({
-          input: params.input,
-          destinationAsset: params.destinationAsset,
-          limit: limAssetAmount.baseAmount,
-          destinationAddress,
-          affiliateAddress,
-          affiliateFee,
-          interfaceID,
-          waitTimeSeconds,
-        })
-
-        return txDetails
-      }
+      // Construct memo
+      txDetails.memo = this.constructSwapMemo({
+        input: params.input,
+        destinationAsset: params.destinationAsset,
+        limit: limAssetAmount.baseAmount,
+        destinationAddress,
+        affiliateAddress,
+        affiliateFee,
+        interfaceID,
+      })
     }
 
     return txDetails
@@ -225,7 +217,7 @@ export class ThorchainQuery {
    * @param swapMemo - swap object
    * @returns - constructed memo string
    */
-  private constructSwapMemo(params: ExecuteSwap): string {
+  private constructSwapMemo(params: ConstructMemo): string {
     const limstring = params.limit.amount().toFixed()
 
     // create LIM with interface ID

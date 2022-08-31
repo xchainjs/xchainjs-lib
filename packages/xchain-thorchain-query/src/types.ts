@@ -91,7 +91,7 @@ export type ChainAttributes = {
   blockReward: number
   avgBlockTimeInSecs: number
 }
-export type ExecuteSwap = {
+export type ConstructMemo = {
   input: CryptoAmount
   destinationAsset: Asset
   limit: BaseAmount
@@ -100,12 +100,11 @@ export type ExecuteSwap = {
   affiliateFee: BaseAmount
   feeOption?: FeeOption
   interfaceID: number
-  waitTimeSeconds: number
 }
 
 export type TxDetails = {
   memo: string
-  inboundVault: string
+  toAddress: string
   expiry: Date
   txEstimate: SwapEstimate
 }

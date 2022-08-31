@@ -2,7 +2,6 @@ import { Network } from '@xchainjs/xchain-client'
 import {
   Asset,
   AssetAVAX,
-  AssetBNB,
   AssetBTC,
   AssetETH,
   AssetRuneNative,
@@ -46,7 +45,7 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {
     memo: txDetails.memo,
     expiry: txDetails.expiry,
-    inboundAsgard: txDetails.inboundVault,
+    toAddress: txDetails.toAddress,
     txEstimate: print(txDetails.txEstimate, input),
   }
   console.log(expanded)
@@ -69,7 +68,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const estimateInBusd = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
     estimate.txEstimate.totalFees = estimateInBusd
     print(estimate.txEstimate, swapParams.input)
-    const exchangeRate = await thorchainQuery.convert(new CryptoAmount(assetToBase(assetAmount('1')), AssetBNB), BUSD)
+    const exchangeRate = await thorchainQuery.convert(new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC), BUSD)
     console.log(`1 ${swapParams.input.asset.ticker} = ${exchangeRate.formatedAssetString()}`)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
@@ -277,7 +276,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       slipLimit: new BigNumber('0.2'),
     }
     const estimate = await stagenethorchainQuery.estimateSwap(swapParams)
-    print(estimate.txEstimate, swapParams.input)
+    printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })
@@ -288,7 +287,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       slipLimit: new BigNumber('0.2'),
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
-    print(estimate.txEstimate, swapParams.input)
+    printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })
