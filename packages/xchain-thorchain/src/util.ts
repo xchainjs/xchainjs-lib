@@ -2,6 +2,7 @@ import { cosmosclient, proto, rest } from '@cosmos-client/core'
 import { Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
+  Address,
   Asset,
   AssetRuneNative,
   BaseAmount,
@@ -12,7 +13,6 @@ import {
   baseAmount,
   isAssetRuneNative,
   isSynthAsset,
-  Address,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import * as bech32Buffer from 'bech32-buffer'

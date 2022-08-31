@@ -46,7 +46,6 @@ export class ThorchainAMM {
     if (!txDetails.txEstimate.canSwap) {
       throw Error(txDetails.txEstimate.errors.join('\n'))
     }
-    const swapEstimate = txDetails.txEstimate
     // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
     const affiliateFee = params.input.baseAmount.times(params.affiliateFeePercent || 0)
     // Work out LIM from the slip percentage
@@ -55,7 +54,7 @@ export class ThorchainAMM {
       limPercentage = BN_1.minus(params.slipLimit || 1)
     } // else allowed slip is 100%
 
-    const limAssetAmount = swapEstimate.netOutput.times(limPercentage)
+    const limAssetAmount = txDetails.txEstimate.netOutput.times(limPercentage)
 
     const waitTimeSeconds = txDetails.txEstimate.waitTimeSeconds
 
