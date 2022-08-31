@@ -10,6 +10,7 @@ export enum Chain {
   Terra = 'TERRA',
   Doge = 'DOGE',
   Avax = 'AVAX',
+  Dash = 'DASH',
 }
 export const AvalancheChain = Chain.Avalanche
 export const BNBChain = Chain.Binance
@@ -22,6 +23,7 @@ export const LTCChain = Chain.Litecoin
 export const TerraChain = Chain.Terra
 export const DOGEChain = Chain.Doge
 export const AVAXChain = Chain.Avax
+export const DASHChain = Chain.Dash
 
 /**
  * Type guard to check whether string  is based on type `Chain`
@@ -66,6 +68,7 @@ export const chainToString: ((chainId: Chain) => string) & Record<Chain, string>
     [Chain.Cosmos]: 'Cosmos',
     [Chain.Terra]: 'Terra',
     [Chain.Doge]: 'Dogecoin',
+    [Chain.Dash]: 'Dash',
   },
 )
 
@@ -108,3 +111,8 @@ export const isDogeChain = (chain: Chain): boolean => eqChain(chain, DOGEChain)
  * Check whether chain is TERRA chain
  */
 export const isTerraChain = (chain: Chain): boolean => eqChain(chain, TerraChain)
+
+/**
+ * Check whether chain is DASH chain
+ */
+export const isDashChain = (chain: Chain): boolean => eqChain(chain, DASHChain)

@@ -43,6 +43,10 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 0,
     avgBlockTimeInSecs: 6,
   },
+  DASH: {
+    blockReward: 2.49,
+    avgBlockTimeInSecs: 156,
+  },
 }
 
 export { DefaultChainAttributes }

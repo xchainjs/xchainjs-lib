@@ -267,6 +267,11 @@ export const AssetRuneERC20Testnet: Asset = {
 }
 
 /**
+ * Dash asset
+ */
+export const AssetDASH: Asset = {chain: Chain.Dash, symbol: 'DASH', ticker: 'DASH', synth: false}
+
+/**
  * Helper to check whether asset is valid
  *
  * @param {Asset} asset

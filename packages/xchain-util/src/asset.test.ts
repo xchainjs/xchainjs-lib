@@ -5,6 +5,7 @@ import {
   AssetRune67C,
   AssetRuneB1A,
   AssetRuneNative,
+  AssetDASH,
   assetAmount,
   assetFromString,
   assetToBase,
@@ -535,6 +536,7 @@ describe('asset', () => {
       expect(eqAsset(AssetBNB, AssetBNB)).toBeTruthy()
       expect(eqAsset(AssetBTC, AssetBTC)).toBeTruthy()
       expect(eqAsset(AssetETH, AssetETH)).toBeTruthy()
+      expect(eqAsset(AssetDASH, AssetDASH)).toBeTruthy()
       expect(eqAsset(AssetRuneNative, AssetRuneNative)).toBeTruthy()
     })
     it('non equal', () => {
