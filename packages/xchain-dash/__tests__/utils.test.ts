@@ -1,17 +1,12 @@
-import MockAdapter from "axios-mock-adapter";
-import axios from "axios";
-import newMockInsightApi from "@xchainjs/xchain-dash/__mocks__/insight-mock";
 import * as utils from '../src/utils'
-
-const mock = new MockAdapter(axios)
-const mockInsightApi = newMockInsightApi(mock)
+import dashMocks from '../__mocks__/dash-mocks'
 
 describe('Dash Utils Test', () => {
   beforeEach(() => {
-    mockInsightApi.init()
+    dashMocks.init()
   })
   afterEach(() => {
-    mockInsightApi.restore()
+    dashMocks.restore()
   })
 
   it('should return a minimum fee of 1000', () => {
@@ -29,13 +24,5 @@ describe('Dash Utils Test', () => {
     expect(estimates.fast).toBeDefined()
     expect(estimates.fastest).toBeDefined()
     expect(estimates.average).toBeDefined()
-  })
-
-  describe('broadcastTx', () => {
-    it('returns txHash', async () => {
-      const txHex = '0xdead'
-      const txHash = await utils.broadcastTx({ txHex, nodeUrl: "https://testnet.dash.thorchain.info" })
-      expect(txHash).toEqual('mock-txid-thorchain-node')
-    })
   })
 })

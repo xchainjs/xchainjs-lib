@@ -1,37 +1,28 @@
 import {Network} from '@xchainjs/xchain-client'
 import {assetAmount, assetToBase, baseAmount} from '@xchainjs/xchain-util'
-
 import {Client} from '../src/client'
-
-import axios from 'axios'
-import MockAdapter from 'axios-mock-adapter'
-
-import newMockInsightApi from '../__mocks__/insight-mock'
-import newMockThornodeApi from '../__mocks__/thornode-api'
+import dashMocks from '../__mocks__/dash-mocks'
 
 const dashClient = new Client({ network: Network.Testnet })
 
-const mock = new MockAdapter(axios)
-const mockInsightApi = newMockInsightApi(mock)
-const mockThornodeApi = newMockThornodeApi(mock)
-
 describe('DashClient Test', () => {
-  beforeEach(() => {
-    mockInsightApi.init()
-    mockThornodeApi.init()
-    dashClient.purgeClient()
-  })
-  afterEach(() => {
-    mockInsightApi.restore()
-    mockThornodeApi.restore()
-    dashClient.purgeClient()
-  })
-
   const phrase = 'atom green various power must another rent imitate gadget creek fat then'
   const testnet_address_path0 = 'yUhRyiu6gTAQyRqwsd2cQ9SUo2m5cbyfHD'
   const testnet_address_path1 = 'yhuuiiCAEJWe4vMnf8HS9jQjNkeiev35H4'
   const mainnet_address_path0 = 'XpwaA7GdJRXdTc4xi72gAKMez8z1Ub1vxf'
   const mainnet_address_path1 = 'XxMov5baZykNHPy1fbvkwQuLFKz41soFNs'
+
+  beforeEach(() => {
+    dashMocks.init()
+    dashClient.purgeClient()
+    dashClient.setNetwork(Network.Testnet)
+    dashClient.setPhrase(phrase)
+  })
+
+  afterEach(() => {
+    dashMocks.restore()
+    dashClient.purgeClient()
+  })
 
   it('should not throw on a client without a phrase', () => {
     expect(() => {
@@ -68,8 +59,6 @@ describe('DashClient Test', () => {
   })
 
   it('should validate the right address', () => {
-    dashClient.setNetwork(Network.Testnet)
-    dashClient.setPhrase(phrase)
     expect(dashClient.getAddress()).toEqual(testnet_address_path0)
     expect(dashClient.validateAddress(testnet_address_path0)).toBeTruthy()
 
@@ -108,18 +97,12 @@ describe('DashClient Test', () => {
   })
 
   it('should get the right balance', async () => {
-    dashClient.setNetwork(Network.Testnet)
-    dashClient.setPhrase(phrase)
-
     const balance = await dashClient.getBalance(dashClient.getAddress())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toString()).toEqual('100831726070')
   })
 
   it('should get transaction data', async () => {
-    dashClient.setNetwork(Network.Testnet)
-    dashClient.setPhrase(phrase)
-
     const txid = '7176e32e34e83b28c8491fdadd06270bfd21635c8f75004e1792ab7cc68aa4d2'
     const txData = await dashClient.getTransactionData(txid)
 
@@ -135,8 +118,6 @@ describe('DashClient Test', () => {
   })
 
   it('should get transactions', async () => {
-    dashClient.setNetwork(Network.Testnet)
-    dashClient.setPhrase(phrase)
     const txs = await dashClient.getTransactions({
       address: 'yLhzaEXappHzG1C7fkEhEWQTzMQhjn18Rb',
       limit: 1,
@@ -152,9 +133,6 @@ describe('DashClient Test', () => {
   })
 
   it('should transfer dash', async () => {
-    dashClient.setNetwork(Network.Testnet)
-    dashClient.setPhrase(phrase)
-
     const txId = await dashClient.transfer({
       walletIndex: 0,
       recipient: 'yP8A3cbdxRtLRduy5mXDsBnJtMzHWs6ZXr',
@@ -165,9 +143,6 @@ describe('DashClient Test', () => {
   })
 
   it('returns fees and rates of a normal tx', async () => {
-    dashClient.setNetwork(Network.Testnet)
-    dashClient.setPhrase(phrase)
-
     const { fees, rates } = await dashClient.getFeesWithRates()
 
     expect(fees.fast).toBeDefined()
@@ -180,9 +155,6 @@ describe('DashClient Test', () => {
   })
 
   it('returns fees and rates(from thornodeAPI) of a normal tx', async () => {
-    dashClient.setNetwork(Network.Testnet)
-    dashClient.setPhrase(phrase)
-
     const { fees, rates } = await dashClient.getFeesWithRates()
 
     expect(fees.fast).toBeDefined()
@@ -195,9 +167,6 @@ describe('DashClient Test', () => {
   })
 
   it('returns fees and rates of a tx w/ memo', async () => {
-    dashClient.setNetwork(Network.Testnet)
-    dashClient.setPhrase(phrase)
-
     const { fees, rates } = await dashClient.getFeesWithRates('SWAP:THOR.RUNE')
 
     expect(fees.fast).toBeDefined()
@@ -210,9 +179,6 @@ describe('DashClient Test', () => {
   })
 
   it('should return estimated fees of a normal tx', async () => {
-    dashClient.setNetwork(Network.Testnet)
-    dashClient.setPhrase(phrase)
-
     const estimates = await dashClient.getFees()
     expect(estimates.fast).toBeDefined()
     expect(estimates.fastest).toBeDefined()
@@ -220,9 +186,6 @@ describe('DashClient Test', () => {
   })
 
   it('returns different fee rates for a normal tx', async () => {
-    dashClient.setNetwork(Network.Testnet)
-    dashClient.setPhrase(phrase)
-
     const { fast, fastest, average } = await dashClient.getFeeRates()
     expect(fast > average)
     expect(fastest > fast)

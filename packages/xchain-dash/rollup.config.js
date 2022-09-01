@@ -35,4 +35,11 @@ export default {
     }),
   ],
   external: ['readable-stream', 'buffer', 'stream', 'string_decoder', '@xchainjs/xchain-client', 'axios'],
+  onwarn: function ( warn, next ) {
+    // There's not much point worrying about errors in third-party dependencies
+    // as long as the tests pass, suppressing those warnings here.
+    if (/node_modules/.test(warn.message)) return
+    if (/node_modules/.test(warn.loc?.file)) return
+    next(warn)
+  }
 }

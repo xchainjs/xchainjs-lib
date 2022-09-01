@@ -41,5 +41,12 @@
     "address": "nc2rgdpVN1fBEnq9TTagLe8hHmrLGUSQJW",
     "halted": false,
     "gas_rate": "345"
+  },
+  {
+    "chain": "DASH",
+    "pub_key": "tthorpub1addwnpepq2kfzv0selg6s9d02efq3y7hlukjvqmghtxutyfha85xl8wxayll56jmv88",
+    "address": "yPUjPgomDZ6E9ja1opkjWMyhcNrdUeDs15",
+    "halted": false,
+    "gas_rate": "10"
   }
 ]

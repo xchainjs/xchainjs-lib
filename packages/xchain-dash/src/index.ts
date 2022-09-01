@@ -1,6 +1,5 @@
 export * from './client'
 export {
-  broadcastTx,
   buildTx,
   getDefaultFees,
   getDefaultFeesWithRates,
@@ -8,4 +7,3 @@ export {
   validateAddress,
   calcFee,
 } from './utils'
-export * from './const'

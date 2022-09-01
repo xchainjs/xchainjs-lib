@@ -15,23 +15,27 @@ type BroadcastTxResponse = {
 
 export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
   const uniqueId = new Date().getTime().toString()
-  const response: BroadcastTxResponse = (
-    await axios.post(
-      params.nodeUrl,
-      {
-        jsonrpc: '2.0',
-        method: 'sendrawtransaction',
-        params: [params.txHex],
-        id: uniqueId,
-      },
-      {
-        auth: params.auth,
-      },
-    )
-  ).data
-  if (response.error) {
-    throw new Error(`failed to broadcast a transaction: ${response.error}`)
+  try {
+    const response: BroadcastTxResponse = (
+      await axios.post(
+        params.nodeUrl,
+        {
+          jsonrpc: '2.0',
+          method: 'sendrawtransaction',
+          params: [params.txHex],
+          id: uniqueId,
+        },
+        {
+          auth: params.auth,
+          timeout: 30 * 1000,
+        },
+      )
+    ).data
+    if (response.error) {
+      return Promise.reject(Error(`failed to broadcast a transaction: ${response.error}`))
+    }
+    return response.result
+  } catch (ex) {
+    return Promise.reject(Error(`failed to broadcast a transaction: ${ex?.response?.data?.error?.message}`))
   }
-
-  return response.result
 }

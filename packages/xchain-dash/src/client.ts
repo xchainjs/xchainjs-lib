@@ -14,16 +14,16 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import {getSeed} from '@xchainjs/xchain-crypto'
-import {assetAmount, AssetDASH, assetToBase, Chain} from '@xchainjs/xchain-util'
+import {assetAmount, AssetDASH, assetToBase, baseAmount, Chain} from '@xchainjs/xchain-util'
 import * as Dash from 'bitcoinjs-lib'
 import * as insight from './insight-api'
 import {InsightTxResponse} from './insight-api'
 import * as Utils from './utils'
 import axios from "axios";
 import {checkFeeBounds} from "@xchainjs/xchain-client";
+import * as nodeApi from "@xchainjs/xchain-dash/src/node-api";
 
-// TODO: This doesn't seem right...
-export const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
+export const DEFAULT_FEE_RATE = 1
 
 export type NodeAuth = {
   username: string
@@ -130,31 +130,73 @@ class Client extends UTXOClient {
 
   async getBalance(address: string): Promise<Balance[]> {
     const addressResponse = await insight.getAddress({network: this.network, address})
-    // TODO: Do I need to include unconfirmed balance as with litecoin?
+    const confirmed = baseAmount(addressResponse.balanceSat)
+    const unconfirmed = baseAmount(addressResponse.unconfirmedBalanceSat)
     return [{
       asset: AssetDASH,
-      amount: assetToBase(assetAmount(addressResponse.balance)),
+      amount: confirmed.plus(unconfirmed),
     }]
   }
 
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    // TODO: Add offset/limit?
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
 
-    const response = await insight.getAddressTxs({
-      network: this.network,
-      address: `${params?.address}`,
-    })
+    // Insight uses pages rather than offset/limit indexes, so we have to
+    // iterate through each page within the offset/limit range.
 
-    const txs: Tx[] = response
-      .filter((_, index) => offset <= index && index < offset + limit)
-      .map(this.insightTxToXChainTx)
+    const perPage = 10
+    const startPage = Math.floor(offset / perPage)
+    const endPage = Math.floor((offset + limit - 1) / perPage)
+    const firstPageOffset = offset % perPage
+    const lastPageLimit = (firstPageOffset + (limit - 1)) % perPage
 
-    // TODO: I don't think total is valid here, I think it needs to be the entire
-    //       total.
+    let totalPages = -1
+    let lastPageTotal = -1
+
+    let insightTxs: InsightTxResponse[] = []
+
+    for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
+      const response = await insight.getAddressTxs({
+        network: this.network,
+        address: `${params?.address}`,
+        pageNum,
+      })
+      let startIndex = 0
+      let endIndex = perPage - 1
+      if (pageNum == startPage) {
+        startIndex = firstPageOffset
+      }
+      if (pageNum === endPage) {
+        endIndex = lastPageLimit
+      }
+      insightTxs = [...insightTxs, ...response.txs.slice(startIndex, endIndex + 1)]
+
+      // Insight only returns the number of pages not the total number of
+      // transactions. If the last page is within the offset/limit range then we
+      // can set the lastPageTotal here and avoid having to send another request,
+      // otherwise we can fetch the last page later to determine the total
+      // transaction count.
+
+      totalPages = response.pagesTotal
+      if (pageNum === totalPages - 1) {
+        lastPageTotal = response.txs.length
+      }
+    }
+
+    const txs: Tx[] = insightTxs.map(this.insightTxToXChainTx)
+
+    if (lastPageTotal < 0) {
+      const lastPageResponse = await insight.getAddressTxs({
+        network: this.network,
+        address: `${params?.address}`,
+        pageNum: totalPages - 1,
+      })
+      lastPageTotal = lastPageResponse.txs.length
+    }
+
     return {
-      total: response.length,
+      total: ((totalPages - 1) * perPage) + lastPageTotal,
       txs,
     }
   }
@@ -185,7 +227,7 @@ class Client extends UTXOClient {
       const response = await axios.get('https://app.bitgo.com/api/v2/dash/tx/fee')
       return response.data.feePerKb / 1000 // feePerKb to feePerByte
     } catch (error) {
-      return DEFAULT_SUGGESTED_TRANSACTION_FEE
+      return DEFAULT_FEE_RATE
     }
   }
 
@@ -194,24 +236,23 @@ class Client extends UTXOClient {
   }
 
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-      const fromAddressIndex = params?.walletIndex || 0
-      const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
-      checkFeeBounds(this.feeBounds, feeRate)
-      const {tx} = await Utils.buildTx({
-        ...params,
-        feeRate,
-        sender: this.getAddress(fromAddressIndex),
-        network: this.network,
-      })
-      const dashKeys = this.getDashKeys(this.phrase, fromAddressIndex)
-      tx.sign(`${dashKeys?.privateKey?.toString('hex')}`)
-      const txHex = tx.checkedSerialize({})
-      console.log(txHex)
-      return await Utils.broadcastTx({
-        txHex,
-        nodeUrl: this.nodeUrl,
-        auth: this.nodeAuth,
-      })
+    const fromAddressIndex = params?.walletIndex || 0
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Average]
+    checkFeeBounds(this.feeBounds, feeRate)
+    const {tx} = await Utils.buildTx({
+      ...params,
+      feeRate,
+      sender: this.getAddress(fromAddressIndex),
+      network: this.network,
+    })
+    const dashKeys = this.getDashKeys(this.phrase, fromAddressIndex)
+    tx.sign(`${dashKeys?.privateKey?.toString('hex')}`)
+    const txHex = tx.checkedSerialize({})
+    return await nodeApi.broadcastTx({
+      txHex,
+      nodeUrl: this.nodeUrl,
+      auth: this.nodeAuth,
+    })
   }
 }
 

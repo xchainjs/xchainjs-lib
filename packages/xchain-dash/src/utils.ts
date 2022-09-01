@@ -7,14 +7,10 @@ import {
   FeesWithRates,
   Network,
   standardFeeRates,
-  TxHash,
   TxParams,
 } from '@xchainjs/xchain-client'
 import {baseAmount, BaseAmount} from '@xchainjs/xchain-util'
 import * as Dash from 'bitcoinjs-lib'
-import {MIN_TX_FEE} from './const'
-import * as nodeApi from './node-api'
-import {BroadcastTxParams} from './node-api'
 import * as insight from './insight-api'
 import * as dashcore from "@dashevo/dashcore-lib"
 import {Transaction} from "@dashevo/dashcore-lib/typings/transaction/Transaction";
@@ -46,6 +42,9 @@ const TransactionBytes = {
   OutputOpReturn: 1,
   OutputScriptLength: 1,
 }
+
+export const TX_MIN_FEE = 1000
+export const TX_DUST_THRESHOLD = dashcore.Transaction.DUST_AMOUNT
 
 function accumulative(utxos: any[], outputs: any[], feeRate: number): { inputs: any[], outputs: any[], fee: number } {
   const TxEmptySize = TransactionBytes.Version + TransactionBytes.Type + TransactionBytes.InputCount + TransactionBytes.OutputCount + TransactionBytes.LockTime
@@ -80,11 +79,10 @@ function accumulative(utxos: any[], outputs: any[], feeRate: number): { inputs: 
   }
 
   const changeOutputByteLength = TxOutputBase + TransactionBytes.OutputPubkeyHash
-  const dustThreshold = feeRate * (TxInputBase + TransactionBytes.InputPubkeyHash)
   const feeAfterExtraOutput = feeRate * (bytesAccum + changeOutputByteLength)
   const remainderAfterExtraOutput = inputValueAccum - (outputValueTotal + feeAfterExtraOutput)
 
-  if (remainderAfterExtraOutput > dustThreshold) {
+  if (remainderAfterExtraOutput > TX_DUST_THRESHOLD) {
     outputs = outputs.concat({value: remainderAfterExtraOutput})
     feeAccum += changeOutputByteLength * feeRate
   }
@@ -118,7 +116,7 @@ export function getFee(inputCount: number, feeRate: FeeRate, data: Buffer | null
       data.length
   }
   const fee = sum * feeRate
-  return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
+  return fee > TX_MIN_FEE ? fee : TX_MIN_FEE
 }
 
 export const dashNetwork = (network: Network): Dash.Network => {
@@ -164,14 +162,12 @@ export const buildTx = async ({
     value: x.satoshis,
   }))
 
-  const feeRateWhole = Number(feeRate.toFixed(0))
-
   const targetOutputs = [{
     address: recipient,
     value: amount.amount().toNumber(),
   }]
 
-  const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+  const { inputs, outputs } = accumulative(utxos, targetOutputs, Number(feeRate.toFixed(0)))
   if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
 
   const tx : Transaction = new dashcore.Transaction().to(recipient, amount.amount().toNumber())
@@ -197,19 +193,21 @@ export const buildTx = async ({
     tx.uncheckedAddInput(input);
   })
 
-  const senderAddress: DashAddress = dashcore.Address.fromString(sender, network)
-  tx.change(senderAddress)
+  const changeOutput = outputs.find(o => o.address === undefined)
+  if (changeOutput) {
+    const changeAddress: DashAddress = dashcore.Address.fromString(sender, network)
+    const changeScript: Script = new dashcore.Script.buildPublicKeyHashOut(changeAddress)
+    tx.addOutput(new dashcore.Transaction.Output({
+      script: changeScript,
+      satoshis: changeOutput.value,
+    }))
+  }
 
   if (memo) {
     tx.addData(memo)
   }
 
   return {tx, utxos}
-}
-
-// TODO: Shouldn't the caller just instantiate a new dash client rather than go via util?
-export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
-  return nodeApi.broadcastTx(params)
 }
 
 export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXO[] = []): BaseAmount => {

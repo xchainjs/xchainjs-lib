@@ -4,6 +4,7 @@ import axios from 'axios'
 export type InsightAddressParams = {
   network: Network
   address: string
+  pageNum?: number
 }
 
 export type InsightAddressResponse = {
@@ -104,8 +105,9 @@ export const getAddress = async (p: InsightAddressParams): Promise<InsightAddres
   return (await axios.get(`${urlForNetwork(p.network)}/addr/${p.address}`)).data
 }
 
-export const getAddressTxs = async (p: InsightAddressParams): Promise<InsightTxResponse[]> => {
-  return (await axios.get(`${urlForNetwork(p.network)}/txs?address=${p.address}`)).data.txs
+export const getAddressTxs = async (p: InsightAddressParams): Promise<{txs: InsightTxResponse[], pagesTotal: number}> => {
+  const pageNum = p?.pageNum || 0
+  return (await axios.get(`${urlForNetwork(p.network)}/txs?address=${p.address}&pageNum=${pageNum}`)).data
 }
 
 export const getAddressUtxos = async (p: InsightAddressParams): Promise<InsightUtxoResponse[]> => {
