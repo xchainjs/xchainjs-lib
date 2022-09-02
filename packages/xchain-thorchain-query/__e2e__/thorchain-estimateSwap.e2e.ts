@@ -303,4 +303,16 @@ describe('Thorchain-query estimate Integration Tests', () => {
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })
+
+  it(`Should estimate a swap from BTC to ETH`, async () => {
+    const swapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('5', 8)), AssetBTC),
+      destinationAsset: AssetETH,
+      slipLimit: new BigNumber('0.2'),
+    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    print(estimate.txEstimate, swapParams.input)
+    expect(estimate.txEstimate.canSwap).toBe(true)
+    expect(estimate).toBeTruthy()
+  })
 })
