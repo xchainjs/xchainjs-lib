@@ -1,15 +1,13 @@
 import { Network } from '@xchainjs/xchain-client'
+import { Midgard, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
 import { baseToAsset, formatAssetAmountCurrency } from '@xchainjs/xchain-util'
 
 import { Wallet } from '../src/Wallet'
-import { ThorchainCache } from '../src/thorchain-cache'
-import { Midgard } from '../src/utils/midgard'
 
 require('dotenv').config()
-
-const midgard = new Midgard(Network.Stagenet)
-const thorchainCache = new ThorchainCache(midgard)
-const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', thorchainCache)
+const thorchainCacheTestnet = new ThorchainCache(new Midgard(Network.Testnet), new Thornode(Network.Testnet))
+const thorchainQueryTestnet = new ThorchainQuery(thorchainCacheTestnet)
+const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', thorchainQueryTestnet)
 
 describe('xchain-swap wallet Tests', () => {
   it(`Should show balances `, async () => {

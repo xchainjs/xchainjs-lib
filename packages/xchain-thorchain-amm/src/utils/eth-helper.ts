@@ -1,6 +1,6 @@
 import { TxHash, XChainClient } from '@xchainjs/xchain-client'
 import { ApproveParams, ETH_DECIMAL, EthereumClient, MAX_APPROVAL } from '@xchainjs/xchain-ethereum'
-import { ThorchainCache, calcNetworkFee } from '@xchainjs/xchain-thorchain-query'
+import { ThorchainCache } from '@xchainjs/xchain-thorchain-query'
 import { Asset, AssetETH, BaseAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
@@ -66,18 +66,13 @@ export class EthHelper {
       ]
 
       const routerContract = new ethers.Contract(inboundAsgard.router, routerABI)
-      const gasPriceInWei = gasPrice[params.feeOption]
-      const gasPriceInGwei = gasPriceInWei.div(10 ** 9).amount()
 
-      // TODO should we change the calcInboundFee() to use gasRate in BaseAmount instead of BIgNumber?
-      // currently its hardto know the units to use, GWEI/WEI, etc
-      const gasLimit = calcNetworkFee(params.asset, gasPriceInGwei)
-      const gasLimitInWei = gasLimit.baseAmount.amount().toFixed()
+      const gasLimit = '80000'
       const unsignedTx = await routerContract.populateTransaction.deposit(...depositParams, {
         from: address,
         value: 0,
         gasPrice: gasPrice.fast.amount().toFixed(),
-        gasLimit: gasLimitInWei,
+        gasLimit,
       })
       const { hash } = await this.ethClient.getWallet(params.walletIndex).sendTransaction(unsignedTx)
       return hash

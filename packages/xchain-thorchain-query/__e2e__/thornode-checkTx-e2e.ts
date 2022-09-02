@@ -3,9 +3,9 @@ import { Network } from '@xchainjs/xchain-client'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { Midgard } from '../src/utils/midgard'
+import { Thornode } from '../src/utils/thornode'
 
-const midgard = new Midgard(Network.Mainnet)
-const thorchainCache = new ThorchainCache(midgard)
+const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 const liveHash = '489614FDFFB7BAF93DB0FF6716157BBCE27CC050193AA330FD808C9EAB23DFD9'
