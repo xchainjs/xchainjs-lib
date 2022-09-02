@@ -250,7 +250,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount('5')), AssetRuneNative),
       destinationAsset: AssetAVAX,
       // affiliateFeePercent: 0.003, //optional
-      slipLimit: new BigNumber('0.10'), //optional
+      slipLimit: new BigNumber('0.20'), //optional
     }
 
     const estimate = await stagenethorchainQuery.estimateSwap(swapParams)
