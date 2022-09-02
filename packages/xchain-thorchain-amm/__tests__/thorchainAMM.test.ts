@@ -19,10 +19,8 @@ import {
   assetToBase,
 } from '@xchainjs/xchain-util'
 
-// import { ThorchainAMM } from '../src/thorchain-amm'
-
-// eslint-disable-next-line ordered-imports/ordered-imports
 import mockMidgardApi from '../__mocks__/midgard-api'
+import mockThornodeApi from '../__mocks__/thornode-api'
 
 const midgardts = new Midgard(Network.Mainnet)
 const thorchainCache = new ThorchainCache(midgardts)
@@ -57,8 +55,13 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
 }
 
 describe('ThorchainAmm Client Test', () => {
-  beforeAll(() => {
+
+  beforeEach(() => {
     mockMidgardApi.init()
+    mockThornodeApi.init()
+  })
+  afterEach(() => {
+    mockThornodeApi.restore()
   })
 
   // ThorchainAMM unit tests with mock data
