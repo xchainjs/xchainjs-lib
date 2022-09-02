@@ -2,8 +2,8 @@ import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from '../src/liquidity-pool'
-import { LiquidityData, UnitData } from '../src/types'
-import { getLiquidityUnits, getPoolShare } from '../src/utils'
+// import { UnitData } from '../src/types'
+// import { getPoolShare } from '../src/utils'
 
 const btcPoolDetails = {
   annualPercentageRate: '0.294476309321674',
@@ -25,21 +25,21 @@ const btcPool = new LiquidityPool(btcPoolDetails, 8)
 
 // const btcInput = assetToBase(assetAmount(1))
 
-const liquidity: LiquidityData = {
-  asset: new BigNumber(1),
-  rune: new BigNumber(10114.2150116231048),
-}
-const unitData: UnitData = {
-  liquidityUnits: new BigNumber(0.00005058),
-  totalUnits: new BigNumber(499780934986115), // liq units * 100
-}
+// const liquidity: LiquidityData = {
+//   asset: new BigNumber(1),
+//   rune: new BigNumber(10114.2150116231048),
+// }
+// const unitData: UnitData = {
+//   liquidityUnits: new BigNumber(0.00005058),
+//   totalUnits: new BigNumber(499780934986115), // liq units * 100
+// }
 
 describe(`Liquidity calc tests`, () => {
-  it(`Should calculate correct liquidity units`, async () => {
-    const getLUnits = getLiquidityUnits(liquidity, btcPool)
-    const correctLiquidityUnits = new BigNumber(5057.559132979577)
-    expect(getLUnits.toPrecision(2)).toEqual(correctLiquidityUnits.toPrecision(2))
-  })
+  // it(`Should calculate correct liquidity units`, async () => {
+  //   const getLUnits = getLiquidityUnits(liquidity, btcPool)
+  //   const correctLiquidityUnits = new BigNumber('5057.559132979577')
+  //   expect(getLUnits.toFixed()).toEqual(correctLiquidityUnits.toFixed())
+  // })
 
   it(`Should return inversed asset price`, async () => {
     const BN_1 = new BigNumber(1)
@@ -48,8 +48,8 @@ describe(`Liquidity calc tests`, () => {
     expect(btcPool.assetToRuneRatio.toPrecision(2)).toEqual(output.toPrecision(2))
   })
 
-  it(`Should calculate correct pool share`, async () => {
-    const getLPoolShare = getPoolShare(unitData, btcPool)
-    console.log(getLPoolShare.asset, getLPoolShare.rune)
-  })
+  // it(`Should calculate correct pool share`, async () => {
+  //   const getLPoolShare = getPoolShare(unitData, btcPool)
+  //   console.log(getLPoolShare.asset, getLPoolShare.rune)
+  // })
 })

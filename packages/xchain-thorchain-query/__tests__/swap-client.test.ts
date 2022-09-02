@@ -1,7 +1,9 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
+import mockMidgardApi from '../__mocks__/midgard-api'
+import mockThornodeApi from '../__mocks__/thornode-api'
 import { CryptoAmount } from '../src/crypto-amount'
 import { LiquidityPool } from '../src/liquidity-pool'
 import { ThorchainCache } from '../src/thorchain-cache'
@@ -17,9 +19,9 @@ import {
   getSwapOutput,
   getSwapSlip,
 } from '../src/utils/swap'
+import { Thornode } from '../src/utils/thornode'
 
-const midgard = new Midgard(Network.Mainnet)
-const thorchainCache = new ThorchainCache(midgard)
+const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 
 const btcPoolDetails = {
   annualPercentageRate: '0.053737568449651274',
@@ -75,6 +77,14 @@ const inputAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
 // const feeAmount = assetToBase(assetAmount(0.0000375)) // sats
 
 describe('Swap Cal Tests', () => {
+  beforeEach(() => {
+    mockMidgardApi.init()
+    mockThornodeApi.init()
+  })
+  afterEach(() => {
+    mockMidgardApi.restore()
+    mockThornodeApi.restore()
+  })
   it('should calculate correct swap output', async () => {
     const swapOutputValue = getSwapOutput(inputAmount, btcPool, true)
     const correctOutput = new CryptoAmount(assetToBase(assetAmount(24507.40123517)), AssetRuneNative)
@@ -120,9 +130,9 @@ describe('Swap Cal Tests', () => {
   // This needs to use mock cache data
   it('Should calculate correct double swap fee', async () => {
     const doubleSwapOutputFee = await getDoubleSwapFee(inputAmount, btcPool, ethPool, thorchainCache)
-    const correctdoubleSwapOutputFee = new CryptoAmount(assetToBase(assetAmount(359.3)), AssetRuneNative)
-    expect(doubleSwapOutputFee.assetAmount.amount().toFixed(0)).toEqual(
-      correctdoubleSwapOutputFee.assetAmount.amount().toFixed(0),
+    const correctdoubleSwapOutputFee = new CryptoAmount(baseAmount(24512120138), AssetRuneNative)
+    expect(doubleSwapOutputFee.baseAmount.amount().toFixed(0)).toEqual(
+      correctdoubleSwapOutputFee.baseAmount.amount().toFixed(0),
     )
   })
 

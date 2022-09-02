@@ -49,13 +49,14 @@ export class ThorchainCache {
    */
   constructor(
     midgard: Midgard,
+    thornode: Thornode,
     expirePoolCacheMillis = 6000,
     expireAsgardCacheMillis = TEN_MINUTES,
     expireInboundDetailsCacheMillis = TEN_MINUTES,
     expireNetworkValuesCacheMillis = TEN_MINUTES,
   ) {
     this.midgard = midgard
-    this.thornode = new Thornode(midgard.network)
+    this.thornode = thornode
     this.expirePoolCacheMillis = expirePoolCacheMillis
     this.expireAsgardCacheMillis = expireAsgardCacheMillis
     this.expireInboundDetailsCacheMillis = expireInboundDetailsCacheMillis

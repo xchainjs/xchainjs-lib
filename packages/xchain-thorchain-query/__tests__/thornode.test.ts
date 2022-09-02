@@ -1,9 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 
+import mockThornodeApi from '../__mocks__/thornode-api'
 import { Thornode } from '../src/utils/thornode'
-
-// eslint-disable-next-line ordered-imports/ordered-imports
-import mockThornodeApi from '../../xchain-thorchain-amm/__mocks__/thornode-api'
 
 const thornode = new Thornode(Network.Mainnet)
 

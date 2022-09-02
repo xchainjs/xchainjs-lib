@@ -22,18 +22,18 @@ const defaultThornodeConfig: Record<Network, ThornodeConfig> = {
   mainnet: {
     apiRetries: 3,
     thornodeBaseUrls: [
-      `https://thornode.ninerealms.com/`,
-      `https://thornode.thorswap.net/`,
-      `https://thornode.thorchain.info/`,
+      `https://thornode.ninerealms.com`,
+      `https://thornode.thorswap.net`,
+      `https://thornode.thorchain.info`,
     ],
   },
   stagenet: {
     apiRetries: 3,
-    thornodeBaseUrls: ['https://stagenet-thornode.ninerealms.com/'],
+    thornodeBaseUrls: ['https://stagenet-thornode.ninerealms.com'],
   },
   testnet: {
     apiRetries: 3,
-    thornodeBaseUrls: ['https://testnet.thornode.thorchain.info/'],
+    thornodeBaseUrls: ['https://testnet.thornode.thorchain.info'],
   },
 }
 
