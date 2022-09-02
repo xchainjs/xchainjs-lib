@@ -6,6 +6,7 @@ import {
   SwapEstimate,
   ThorchainCache,
   ThorchainQuery,
+  Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
 import {
@@ -22,8 +23,7 @@ import {
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
 
-const midgardts = new Midgard(Network.Mainnet)
-const thorchainCache = new ThorchainCache(midgardts)
+const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 //const thorchainAmm = new ThorchainAMM(thorchainQuery)
 
@@ -55,7 +55,6 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
 }
 
 describe('ThorchainAmm Client Test', () => {
-
   beforeEach(() => {
     mockMidgardApi.init()
     mockThornodeApi.init()

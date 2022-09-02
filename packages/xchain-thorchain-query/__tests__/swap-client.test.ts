@@ -65,24 +65,9 @@ const ethPoolDetails = {
   units: '263973251769640',
   volume24h: '8122016881297',
 }
-const busdPoolDetails = {
-  annualPercentageRate: '0.1290360396052299',
-  asset: 'BNB.BUSD',
-  assetDepth: new CryptoAmount(assetToBase(assetAmount(10000000)), BUSD).baseAmount.amount().toString(),
-  assetPrice: '0.4765068736842526',
-  assetPriceUSD: '0.9999999524962003',
-  liquidityUnits: '127767009274783',
-  poolAPY: '0.10844053560303157',
-  runeDepth: new CryptoAmount(assetToBase(assetAmount(1000000)), AssetRuneNative).baseAmount.amount().toString(),
-  status: 'available',
-  synthSupply: '205814036768351',
-  synthUnits: '13962475753507',
-  units: '141729485028290',
-  volume24h: '812201681297',
-}
+
 const btcPool = new LiquidityPool(btcPoolDetails, 8)
 const ethPool = new LiquidityPool(ethPoolDetails, 8)
-const busdPool = new LiquidityPool(busdPoolDetails, 8)
 
 const inputAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
 
@@ -137,7 +122,7 @@ describe('Swap Cal Tests', () => {
     const correctDoubleSwapOutputSlip = new BigNumber(0.0138452)
     expect(doubleSwapOutputSlip.toFixed(8)).toEqual(correctDoubleSwapOutputSlip.toFixed(8))
   })
-  // This needs to use mock cache data
+
   it('Should calculate correct double swap fee', async () => {
     const doubleSwapOutputFee = await getDoubleSwapFee(inputAmount, btcPool, ethPool, thorchainCache)
     const correctdoubleSwapOutputFee = new CryptoAmount(baseAmount(24512120138), AssetRuneNative)
@@ -160,12 +145,14 @@ describe('Swap Cal Tests', () => {
   })
 
   it(`Should calculate double swap with BUSD`, async () => {
-    const doubleswap = await getDoubleSwap(inputAmount, btcPool, busdPool, thorchainCache)
+    const BTCpool = await thorchainCache.getPoolForAsset(AssetBTC)
+    const BUSDPool = await thorchainCache.getPoolForAsset(BUSD)
+    const doubleswap = await getDoubleSwap(inputAmount, BTCpool, BUSDPool, thorchainCache)
 
     const correctOutput: SwapOutput = {
-      output: new CryptoAmount(assetToBase(assetAmount(233489.3417208)), BUSD),
-      swapFee: new CryptoAmount(assetToBase(assetAmount(2971.74973684)), AssetRuneNative),
-      slip: new BigNumber(0.03382215),
+      output: new CryptoAmount(assetToBase(assetAmount(21562.25250638)), BUSD),
+      swapFee: new CryptoAmount(assetToBase(assetAmount(33.85747072)), AssetRuneNative),
+      slip: new BigNumber(0.00328445),
     }
 
     expect(doubleswap.output.assetAmount.amount()).toEqual(correctOutput.output.assetAmount.amount())

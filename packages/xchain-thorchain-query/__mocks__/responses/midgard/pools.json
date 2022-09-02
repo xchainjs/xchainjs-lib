@@ -134,21 +134,21 @@
     "units": "9189786622485",
     "volume24h": "17494948700170"
   },
-  {
-    "annualPercentageRate": "0.053737568449651274",
-    "asset": "BTC.BTC",
-    "assetDepth": "100000000000",
-    "assetPrice": "9520.275946383232",
-    "assetPriceUSD": "19979.30359435353",
-    "liquidityUnits": "484973221764733",
-    "poolAPY": "0.053737568449651274",
-    "runeDepth": "1000000000000",
-    "status": "available",
-    "synthSupply": "3238590480",
-    "synthUnits": "9308623468012",
-    "units": "494281845232745",
-    "volume24h": "294566394657184"
-  },
+	{
+		"annualPercentageRate": "0.040965364152267515",
+		"asset": "BTC.BTC",
+		"assetDepth": "82138539695",
+		"assetPrice": "10342.335908088426",
+		"assetPriceUSD": "20337.34116261602",
+		"liquidityUnits": "475823029963663",
+		"poolAPY": "0.040965364152267515",
+		"runeDepth": "849504368525545",
+		"status": "available",
+		"synthSupply": "4746229303",
+		"synthUnits": "14156291442214",
+		"units": "489979321405877",
+		"volume24h": "144066181101007"
+	},
   {
     "annualPercentageRate": "0.1406902642959447",
     "asset": "DOGE.DOGE",
