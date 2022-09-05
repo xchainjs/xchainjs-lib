@@ -9,6 +9,7 @@ import {
   assetAmount,
   assetFromString,
   assetToBase,
+  baseAmount,
 } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
@@ -53,6 +54,8 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
 }
 const BUSD = assetFromString('BNB.BUSD-BD1')
 if (!BUSD) throw Error('bad asset')
+const BTCB = assetFromString('BNB.BTCB-1DE')
+if (!BTCB) throw Error('bad asset')
 
 // Test User Functions - single and double swap using mock pool data
 describe('Thorchain-query estimate Integration Tests', () => {
@@ -70,9 +73,34 @@ describe('Thorchain-query estimate Integration Tests', () => {
     estimate.txEstimate.totalFees = estimateInBusd
     print(estimate.txEstimate, swapParams.input)
     const exchangeRate = await thorchainQuery.convert(new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC), BUSD)
+    const minFee = new CryptoAmount(baseAmount(10000000), BUSD)
     console.log(`1 ${swapParams.input.asset.ticker} = ${exchangeRate.formatedAssetString()}`)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
+    expect(estimate.txEstimate.totalFees.outboundFee.baseAmount.amount().toNumber()).toBeGreaterThanOrEqual(
+      minFee.baseAmount.amount().toNumber(),
+    )
+  })
+  it('should estimate a swap of 0.5 BTCB to BUSD', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('0.5')), BTCB),
+      destinationAsset: BUSD,
+      // affiliateFeePercent: 0.003, //optional
+      slipLimit: new BigNumber('0.03'), //optional
+    }
+
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    const estimateInBusd = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
+    estimate.txEstimate.totalFees = estimateInBusd
+    print(estimate.txEstimate, swapParams.input)
+    const exchangeRate = await thorchainQuery.convert(new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC), BUSD)
+    const minFee = new CryptoAmount(baseAmount(10000000), BUSD)
+    console.log(`1 ${swapParams.input.asset.ticker} = ${exchangeRate.formatedAssetString()}`)
+    expect(estimate.txEstimate.canSwap).toBe(true)
+    expect(estimate).toBeTruthy()
+    expect(estimate.txEstimate.totalFees.outboundFee.baseAmount.amount().toNumber()).toBeGreaterThanOrEqual(
+      minFee.baseAmount.amount().toNumber(),
+    )
   })
   it('should estimate a swap of 1 BTC to sBTC', async () => {
     const BTC = assetFromString('BTC.BTC')
@@ -242,7 +270,6 @@ describe('Thorchain-query estimate Integration Tests', () => {
   it(`Should return the correct network value`, async () => {
     const constant = 'TXOUTDELAYRATE'
     const values = (await thorchainCache.getNetworkValues())[constant]
-    console.log(values)
     expect(values).toEqual(10000000000)
   })
   it('should estimate a swap of 5 RUNE to AVAX', async () => {

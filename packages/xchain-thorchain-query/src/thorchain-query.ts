@@ -171,7 +171,7 @@ export class ThorchainQuery {
     outboundFeeInAsset = outboundFeeInAsset.times(3)
 
     const inboundFeeInRune = await this.thorchainCache.convert(inboundFeeInAsset, AssetRuneNative)
-    const outboundFeeInRune = await this.thorchainCache.convert(outboundFeeInAsset, AssetRuneNative)
+    let outboundFeeInRune = await this.thorchainCache.convert(outboundFeeInAsset, AssetRuneNative)
 
     // ---------- Remove Fees from inbound before doing the swap -----------
     // TODO confirm with chris about this change
@@ -185,7 +185,21 @@ export class ThorchainQuery {
     // convert back to input asset
     const inputNetInAsset = await this.thorchainCache.convert(inputNetAmountInRune, input.asset)
 
-    // now calculate swapfee based on inputNetAmount
+    // Check outbound fee is equal too or greater than 1 USD * need to find a more permanent solution to this. referencing just 1 stable coin pool has problems
+    if (params.destinationAsset.chain !== Chain.THORChain && !params.destinationAsset.synth) {
+      const BUSD = assetFromString('BNB.BUSD-BD1')
+      if (!BUSD) throw Error('bad asset')
+      const networkValues = await this.thorchainCache.midgard.getNetworkValues()
+      const usdMinFee = new CryptoAmount(baseAmount(networkValues['MINIMUML1OUTBOUNDFEEUSD']), BUSD)
+      const FeeInBUSD = await this.convert(outboundFeeInRune, BUSD)
+      const checkOutboundFee = (await this.convert(outboundFeeInRune, BUSD)).gte(usdMinFee)
+      if (!checkOutboundFee) {
+        const newFee = FeeInBUSD.plus(usdMinFee.minus(FeeInBUSD))
+        outboundFeeInRune = await this.convert(newFee, AssetRuneNative)
+      }
+    }
+
+    // Now calculate swapfee based on inputNetAmount
     const swapOutput = await this.thorchainCache.getExpectedSwapOutput(inputNetInAsset, params.destinationAsset)
 
     const swapFeeInRune = await this.thorchainCache.convert(swapOutput.swapFee, AssetRuneNative)
@@ -214,7 +228,7 @@ export class ThorchainQuery {
 
   /**
    *
-   * @param swapMemo - swap object
+   * @param params - swap object
    * @returns - constructed memo string
    */
   private constructSwapMemo(params: ConstructMemo): string {
@@ -310,7 +324,7 @@ export class ThorchainQuery {
     return result
   }
   /**
-   * Convinience method to convert TotalFees to a different CryptoAmount
+   * Convenience method to convert TotalFees to a different CryptoAmount
    *
    * TotalFees are always calculated and returned in RUNE, this method can
    * be used to show the equivalent fees in another Asset Type
@@ -430,7 +444,7 @@ export class ThorchainQuery {
     const scheduledQueueItem = (await this.thorchainCache.thornode.getscheduledQueue()).find(
       (item: TxOutItem) => item.in_hash === inboundTxHash,
     )
-
+    //console.log(`Tx stage ${txStatus.stage}\nTx seconds left ${txStatus.seconds}`)
     // Check to see if the transaction has been observed
     if (txData.observed_tx == undefined) {
       txStatus = await this.checkTxDefined(txStatus, sourceChain)
@@ -440,10 +454,22 @@ export class ThorchainQuery {
     if (scheduledQueueItem && txData.observed_tx) {
       txStatus = await this.checkObservedOnly(txStatus, scheduledQueueItem, txData.observed_tx, sourceChain)
     }
+    //console.log(`Tx stage ${txStatus.stage}\nTx seconds left ${txStatus.seconds}`)
+
     // Retrieve asset and chain from memo
     const pool = txData.observed_tx.tx.memo?.split(`:`)
     if (!pool) throw Error(`No pool found from memo`)
     const getAsset = assetFromString(pool[1].toUpperCase())
+
+    // Retrieve thorchain blockHeight for the tx
+    if (!txData.observed_tx.tx?.id) throw Error('No action observed')
+    const recordedAction = await this.thorchainCache.midgard.getActions(txData.observed_tx.tx.id)
+    const recordedTCBlock = recordedAction.find((block) => {
+      return block
+    })
+    if (!recordedTCBlock?.height) throw Error('No recorded block height')
+
+    // Retrieve thorchains last observed block height
     const lastBlock = await this.thorchainCache.thornode.getLastBlock()
     const lastBlockHeight = lastBlock.find((obj) => obj.chain === getAsset?.chain)
 
@@ -454,6 +480,7 @@ export class ThorchainQuery {
       if (scheduledQueueItem?.height != undefined && txStatus.stage < TxStage.OUTBOUND_CHAIN_CONFIRMED) {
         txStatus = await this.checkOutboundTx(txStatus, scheduledQueueItem, lastBlockHeight)
       }
+      //console.log(`Tx stage ${txStatus.stage}\nTx seconds left ${txStatus.seconds}`)
       return txStatus
     }
 
@@ -467,15 +494,22 @@ export class ThorchainQuery {
         } else {
           txStatus.seconds = 6
         }
+        //console.log(`Tx stage ${txStatus.stage}\nTx seconds left ${txStatus.seconds}`)
         return txStatus
       }
       if (txData.observed_tx?.status == ObservedTxStatusEnum.Done && getAsset.chain != Chain.THORChain) {
-        if (lastBlockHeight?.last_observed_in && txData.observed_tx.block_height) {
+        // Retrieve recorded asset block height for the Outbound asset
+        const recordedBlockHeight = await this.thorchainCache.thornode.getLastBlock(+recordedTCBlock.height)
+        // Match outbound asset to block record
+        const assetBlockHeight = recordedBlockHeight.find((obj) => obj.chain === getAsset?.chain)
+        if (lastBlockHeight?.last_observed_in && assetBlockHeight?.last_observed_in) {
           const chainblockTime = this.chainAttributes[getAsset.chain].avgBlockTimeInSecs
-          // get the chain attributes from Outbound Chain and work out time elapsed
-          const blockDifference = lastBlockHeight.last_observed_in - txData.observed_tx.block_height
-          const timeElapsed = blockDifference / chainblockTime
+          // Difference between current block and the recorded tx block for the outbound asset
+          const blockDifference = lastBlockHeight.last_observed_in - assetBlockHeight.last_observed_in
+          const timeElapsed = blockDifference * chainblockTime
+          // If the time elapsed since the tx is greater than the chains block time, assume tx has 1 ocnfirmation else return time left to wait
           txStatus.seconds = timeElapsed > chainblockTime ? 0 : chainblockTime - timeElapsed
+          console.log(timeElapsed)
         } else if (txData.observed_tx.tx.id && lastBlockHeight?.thorchain) {
           const recordedAction = await this.thorchainCache.midgard.getActions(txData.observed_tx.tx.id)
           const recordedBlockheight = recordedAction.find((block) => {
@@ -483,17 +517,22 @@ export class ThorchainQuery {
           })
           if (!recordedBlockheight) throw Error(`No height recorded`)
           const chainblockTime = this.chainAttributes[getAsset.chain].avgBlockTimeInSecs
+          console.log(chainblockTime)
           const blockDifference = lastBlockHeight?.thorchain - +recordedBlockheight.height
+          console.log(blockDifference)
           const timeElapsed =
             (blockDifference * chainblockTime) / this.chainAttributes[getAsset.chain].avgBlockTimeInSecs
           txStatus.seconds = timeElapsed > chainblockTime ? 0 : chainblockTime - timeElapsed
+          console.log(txStatus.seconds)
           txStatus.stage = TxStage.OUTBOUND_CHAIN_CONFIRMED
         }
+        //console.log(`Tx stage ${txStatus.stage}\nTx seconds left ${txStatus.seconds}`)
         return txStatus
       } else {
         txStatus.seconds = 0
         txStatus.stage = TxStage.OUTBOUND_CHAIN_CONFIRMED
       }
+      //console.log(`Tx stage ${txStatus.stage}\nTx seconds left ${txStatus.seconds}`)
       return txStatus
     } else {
       // case example "memo": "OUT:08BC062B248F6F27D0FECEF1650843585A1496BFFEAF7CB17A1CBC30D8D58F9C" where no asset is found its a thorchain tx. Confirms in ~6 seconds
