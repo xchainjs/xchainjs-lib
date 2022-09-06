@@ -1,4 +1,4 @@
-import { EstimateSwapParams, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
+import { EstimateSwapParams, ThorchainQuery, TxDetails } from '@xchainjs/xchain-thorchain-query'
 import { BigNumber } from 'bignumber.js'
 
 import { SwapSubmitted } from './types'
@@ -22,6 +22,15 @@ export class ThorchainAMM {
    */
   constructor(thorchainQuery: ThorchainQuery) {
     this.thorchainQuery = thorchainQuery
+  }
+
+  /**
+   *
+   * @param params - estimate swap parameters
+   * @returns
+   */
+  public estimateSwap(params: EstimateSwapParams): Promise<TxDetails> {
+    return this.thorchainQuery.estimateSwap(params)
   }
 
   /**
