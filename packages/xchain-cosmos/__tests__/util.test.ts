@@ -1,7 +1,7 @@
 import { proto } from '@cosmos-client/core'
-import { baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { AssetAtom, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
-import { AssetAtom, COSMOS_DECIMAL } from '../src/const'
+import { COSMOS_DECIMAL } from '../src/const'
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
 import { getAsset, getDenom, getQueryString, getTxsFromHistory, isMsgMultiSend, isMsgSend } from '../src/util'
 
