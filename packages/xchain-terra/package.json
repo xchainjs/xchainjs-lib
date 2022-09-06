@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-terra",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Custom Terra client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@terra-money/terra.js": "^3.0.2",
     "@types/big.js": "^6.0.0",
-    "@xchainjs/xchain-client": "^0.14.0",
+    "@xchainjs/xchain-client": "^0.13.0",
     "@xchainjs/xchain-util": "^0.9.0",
     "axios": "^0.25.0",
     "nock": "^13.0.5"

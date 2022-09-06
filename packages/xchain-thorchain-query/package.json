@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@cosmos-client/core": "^0.45.1",
-    "@xchainjs/xchain-client": "^0.14.0",
+    "@xchainjs/xchain-client": "^0.13.0",
     "@xchainjs/xchain-midgard": "^0.1.0-alpha2",
     "@xchainjs/xchain-thornode": "^0.1.0-alpha4",
     "@xchainjs/xchain-util": "^0.9.0",
@@ -45,7 +45,7 @@
   },
   "peerDependencies": {
     "@cosmos-client/core": "^0.45.1",
-    "@xchainjs/xchain-client": "^0.14.0",
+    "@xchainjs/xchain-client": "^0.13.0",
     "@xchainjs/xchain-midgard": "^0.1.0-alpha2",
     "@xchainjs/xchain-thornode": "^0.1.0-alpha4",
     "@xchainjs/xchain-terra": "^0.2.0",
