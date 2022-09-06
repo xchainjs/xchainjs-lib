@@ -44,7 +44,7 @@
   },
   "peerDependencies": {
     "@terra-money/terra.js": "^3.0.2",
-    "@xchainjs/xchain-client": "^0.14.0",
+    "@xchainjs/xchain-client": "^0.13.0",
     "@xchainjs/xchain-util": "^0.9.0",
     "axios": "^0.25.0"
   },

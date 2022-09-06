@@ -1,8 +1,9 @@
 // import { Network } from '@xchainjs/xchain-client'
-import { AssetAtom } from '@xchainjs/xchain-cosmos'
+
 import { LastBlock, ObservedTx, ObservedTxStatusEnum, TxOutItem } from '@xchainjs/xchain-thornode'
 import {
   Asset,
+  AssetAtom,
   AssetBNB,
   AssetBTC,
   AssetRuneNative,

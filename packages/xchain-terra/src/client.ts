@@ -23,11 +23,11 @@ import type {
   XChainClient,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetLUNA, BaseAmount, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 
-import { AssetLUNA, TERRA_DECIMAL } from './const'
+import { TERRA_DECIMAL } from './const'
 import { EstimatedFee } from './types'
 import type { ClientConfig, ClientParams, FeeParams } from './types/client'
 import {

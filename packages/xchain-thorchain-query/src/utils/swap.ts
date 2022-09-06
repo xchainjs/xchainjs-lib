@@ -1,15 +1,15 @@
-import { AssetAtom } from '@xchainjs/xchain-cosmos'
-import { AssetLUNA } from '@xchainjs/xchain-terra'
 import {
   // Address,
   Asset,
   AssetAVAX,
+  AssetAtom,
   AssetBCH,
   AssetBNB,
   AssetBTC,
   AssetDOGE,
   AssetETH,
   AssetLTC,
+  AssetLUNA,
   AssetRuneNative,
   AvalancheChain,
   BCHChain,

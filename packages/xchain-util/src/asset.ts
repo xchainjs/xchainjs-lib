@@ -268,6 +268,9 @@ export const AssetRuneERC20Testnet: Asset = {
   synth: false,
 }
 
+export const AssetAtom: Asset = { chain: Chain.Cosmos, symbol: 'ATOM', ticker: 'ATOM', synth: false }
+
+export const AssetLUNA: Asset = { chain: Chain.Terra, symbol: 'LUNA', ticker: 'LUNA', synth: false }
 /**
  * Helper to check whether asset is valid
  *
