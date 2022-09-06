@@ -1,3 +1,4 @@
+// import { Network } from '@xchainjs/xchain-client'
 import { AssetAtom } from '@xchainjs/xchain-cosmos'
 import { LastBlock, ObservedTx, ObservedTxStatusEnum, TxOutItem } from '@xchainjs/xchain-thornode'
 import {
@@ -73,7 +74,9 @@ export class ThorchainQuery {
     const inboundDetails = await this.thorchainCache.getInboundDetails()
 
     const sourceInboundDetails = inboundDetails[params.input.asset.chain]
+    // console.log(JSON.stringify(sourceInboundDetails, null, 2))
     const destinationInboundDetails = inboundDetails[params.destinationAsset.chain]
+    // console.log(JSON.stringify(destinationInboundDetails, null, 2))
 
     const swapEstimate = await this.calcSwapEstimate(params, sourceInboundDetails, destinationInboundDetails)
 
@@ -187,14 +190,15 @@ export class ThorchainQuery {
 
     // Check outbound fee is equal too or greater than 1 USD * need to find a more permanent solution to this. referencing just 1 stable coin pool has problems
     if (params.destinationAsset.chain !== Chain.THORChain && !params.destinationAsset.synth) {
-      const BUSD = assetFromString('BNB.BUSD-BD1')
-      if (!BUSD) throw Error('bad asset')
+      const deepestUSDPOOL = await this.thorchainCache.getDeepestUSDPool()
+      const usdAsset = deepestUSDPOOL.asset
+
       const networkValues = await this.thorchainCache.midgard.getNetworkValues()
-      const usdMinFee = new CryptoAmount(baseAmount(networkValues['MINIMUML1OUTBOUNDFEEUSD']), BUSD)
-      const FeeInBUSD = await this.convert(outboundFeeInRune, BUSD)
-      const checkOutboundFee = (await this.convert(outboundFeeInRune, BUSD)).gte(usdMinFee)
+      const usdMinFee = new CryptoAmount(baseAmount(networkValues['MINIMUML1OUTBOUNDFEEUSD']), usdAsset)
+      // const FeeInUSD = await this.convert(outboundFeeInRune, usdAsset)
+      const checkOutboundFee = (await this.convert(outboundFeeInRune, usdAsset)).gte(usdMinFee)
       if (!checkOutboundFee) {
-        const newFee = FeeInBUSD.plus(usdMinFee.minus(FeeInBUSD))
+        const newFee = usdMinFee
         outboundFeeInRune = await this.convert(newFee, AssetRuneNative)
       }
     }

@@ -53,9 +53,7 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
   console.log(expanded)
 }
 const BUSD = assetFromString('BNB.BUSD-BD1')
-if (!BUSD) throw Error('bad asset')
 const BTCB = assetFromString('BNB.BTCB-1DE')
-if (!BTCB) throw Error('bad asset')
 
 // Test User Functions - single and double swap using mock pool data
 describe('Thorchain-query estimate Integration Tests', () => {
@@ -274,7 +272,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
   })
   it('should estimate a swap of 5 RUNE to AVAX', async () => {
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('5')), AssetRuneNative),
+      input: new CryptoAmount(assetToBase(assetAmount('20')), AssetRuneNative),
       destinationAsset: AssetAVAX,
       // affiliateFeePercent: 0.003, //optional
       slipLimit: new BigNumber('0.20'), //optional
@@ -288,12 +286,12 @@ describe('Thorchain-query estimate Integration Tests', () => {
 
   it(`Should estimate a swap from AVAX to RUNE`, async () => {
     const swapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.5', 18)), AssetAVAX),
+      input: new CryptoAmount(assetToBase(assetAmount('1', 18)), AssetAVAX),
       destinationAsset: AssetRuneNative,
       slipLimit: new BigNumber('0.2'),
     }
     const estimate = await stagenethorchainQuery.estimateSwap(swapParams)
-    print(estimate.txEstimate, swapParams.input)
+    printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })

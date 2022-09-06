@@ -25,9 +25,12 @@ export class ThorchainAMM {
   }
 
   /**
+   * Provides a swap estimate for the given swap detail. Will check the params for errors before trying to get the estimate.
+   * Uses current pool data, works out inbound and outboud fee, affiliate fees and works out the expected wait time for the swap (in and out)
    *
-   * @param params - estimate swap parameters
-   * @returns
+   * @param params - amount to swap
+
+   * @returns The SwapEstimate
    */
   public estimateSwap(params: EstimateSwapParams): Promise<TxDetails> {
     return this.thorchainQuery.estimateSwap(params)

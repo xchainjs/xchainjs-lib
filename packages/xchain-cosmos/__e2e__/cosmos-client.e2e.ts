@@ -62,7 +62,7 @@ describe('Cosmos Integration Tests', () => {
         recipient: addressTo,
         memo: 'Hi!',
       }
-      await delay(15 * 1000)
+      await delay(25 * 1000)
       const txHash = await xchainClient.transfer(transferTx)
       expect(txHash.length).toBeGreaterThan(0)
 

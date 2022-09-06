@@ -24,6 +24,7 @@ import {
   THORChain,
   TerraChain,
   baseAmount,
+  eqAsset,
   // assetToString,
   // strip0x,
 } from '@xchainjs/xchain-util'
@@ -200,21 +201,23 @@ export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount =
       //flat fee
       return new CryptoAmount(baseAmount(gasRate), AssetBNB)
       break
-    case Chain.Avalanche:
-      const gasRateinAVAXGwei = gasRate
-      const feeInAVAXGwei = gasRateinAVAXGwei.multipliedBy(80000)
-      const feeInAVAXWei = baseAmount(feeInAVAXGwei.multipliedBy(10 ** 9), 18)
-      return new CryptoAmount(feeInAVAXWei, AssetAVAX)
     case Chain.Ethereum:
       const gasRateinETHGwei = gasRate
-      const feeInETHGwei = gasRateinETHGwei.multipliedBy(80000)
-      const feeInETHWei = baseAmount(feeInETHGwei.multipliedBy(10 ** 9), 18)
-      return new CryptoAmount(feeInETHWei, AssetETH)
-      // if (eqAsset(asset, AssetETH)) {
-      //   return new CryptoAmount(feeInWei, AssetETH)
-      // } else {
-      //   return new CryptoAmount(feeInWei, AssetETH)
-      // }
+      const gasRateinETHWei = baseAmount(gasRateinETHGwei.multipliedBy(10 ** 9), 18)
+      if (eqAsset(asset, AssetETH)) {
+        return new CryptoAmount(gasRateinETHWei.times(21000), AssetETH)
+      } else {
+        return new CryptoAmount(gasRateinETHWei.times(70000), AssetETH)
+      }
+      break
+    case Chain.Avalanche:
+      const gasRateinAVAXGwei = gasRate
+      const gasRateinAVAXWei = baseAmount(gasRateinAVAXGwei.multipliedBy(10 ** 9), 18)
+      if (eqAsset(asset, AssetAVAX)) {
+        return new CryptoAmount(gasRateinAVAXWei.times(21000), AssetETH)
+      } else {
+        return new CryptoAmount(gasRateinAVAXWei.times(70000), AssetETH)
+      }
       break
     case Chain.Terra:
       return new CryptoAmount(baseAmount(gasRate), AssetLUNA)

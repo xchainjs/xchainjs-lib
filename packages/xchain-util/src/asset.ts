@@ -304,17 +304,17 @@ const NON_SYNTH_DELIMITER = '.'
  * @param {string} s The given string.
  * @returns {Asset|null} The asset from the given string.
  */
-export const assetFromString = (s: string): Asset | null => {
+export const assetFromString = (s: string): Asset => {
   const isSynth = s.includes(SYNTH_DELIMITER)
   const delimiter = isSynth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
   const data = s.split(delimiter)
   if (data.length <= 1 || data[1]?.length < 1) {
-    return null
+    throw Error('assest string not correct')
   }
 
   const chain = data[0]
   // filter out not supported string of chains
-  if (!chain || !isChain(chain)) return null
+  if (!chain || !isChain(chain)) throw Error('assest string not correct')
 
   const symbol = data[1]
   const ticker = symbol.split('-')[0]

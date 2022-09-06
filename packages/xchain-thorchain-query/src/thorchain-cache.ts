@@ -1,9 +1,11 @@
+import { Network } from '@xchainjs/xchain-client'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard'
 import {
   Address,
   Asset,
   Chain,
   assetAmount,
+  assetFromString,
   assetToBase,
   assetToString,
   eqAsset,
@@ -21,6 +23,16 @@ import { Thornode } from './utils/thornode'
 const SAME_ASSET_EXCHANGE_RATE = new BigNumber(1)
 const TEN_MINUTES = 10 * 60 * 1000
 const DEFAULT_THORCHAIN_DECIMALS = 8
+const USD_ASSETS: Record<Network, Asset[]> = {
+  mainnet: [
+    assetFromString('BNB.BUSD-BD1'),
+    assetFromString('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48'),
+    assetFromString('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7'),
+  ],
+  stagenet: [assetFromString('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')],
+  testnet: [assetFromString('BNB.BUSD-74E'), assetFromString('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306')],
+}
+
 /**
  * This class manages retrieving information from up to date Thorchain
  */
@@ -52,7 +64,7 @@ export class ThorchainCache {
     thornode: Thornode,
     expirePoolCacheMillis = 6000,
     expireAsgardCacheMillis = TEN_MINUTES,
-    expireInboundDetailsCacheMillis = TEN_MINUTES,
+    expireInboundDetailsCacheMillis = 6000,
     expireNetworkValuesCacheMillis = TEN_MINUTES,
   ) {
     this.midgard = midgard
@@ -306,5 +318,19 @@ export class ThorchainCache {
     } else {
       throw Error(`Could not refereshInboundDetailCache `)
     }
+  }
+  async getDeepestUSDPool(): Promise<LiquidityPool> {
+    const usdAssets = USD_ASSETS[this.midgard.network]
+    let deepestRuneDepth = new BigNumber(0)
+    let deepestPool: LiquidityPool | null = null
+    for (const usdAsset of usdAssets) {
+      const usdPool = await this.getPoolForAsset(usdAsset)
+      if (usdPool.runeBalance.amount() > deepestRuneDepth) {
+        deepestRuneDepth = usdPool.runeBalance.amount()
+        deepestPool = usdPool
+      }
+    }
+    if (!deepestPool) throw Error('now USD Pool found')
+    return deepestPool
   }
 }
