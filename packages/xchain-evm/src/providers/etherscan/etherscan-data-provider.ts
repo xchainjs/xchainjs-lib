@@ -1,6 +1,6 @@
 import { Provider } from '@ethersproject/abstract-provider'
-import { Address, Balance, Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
-import { Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Balance, Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
+import { Address, Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { BigNumber, ethers } from 'ethers'
 

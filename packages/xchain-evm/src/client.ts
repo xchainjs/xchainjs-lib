@@ -1,6 +1,5 @@
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import {
-  Address,
   Balance,
   BaseXChainClient,
   FeeOption,
@@ -18,7 +17,7 @@ import {
   checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, toUtf8Bytes } from 'ethers/lib/utils'
 
@@ -500,10 +499,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
     if (!gasLimit) {
       try {
         txGasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo })
-        console.log(`estimateGasLimit=${txGasLimit.toString()}`)
       } catch (error) {
         txGasLimit = defaultGasLimit
-        console.log(`defaultGasLimit=${txGasLimit.toString()}`)
       }
     } else {
       txGasLimit = gasLimit
@@ -514,7 +511,6 @@ export default class Client extends BaseXChainClient implements XChainClient {
       gasLimit: txGasLimit,
       gasPrice: txGasPrice,
     }
-    console.log(JSON.stringify(overrides))
 
     checkFeeBounds(this.feeBounds, overrides.gasPrice.toNumber())
 

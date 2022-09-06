@@ -1,5 +1,4 @@
-import { Address } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { Signer, ethers, providers } from 'ethers'
 
 import erc20ABI from './data/erc20.json'

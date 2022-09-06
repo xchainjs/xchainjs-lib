@@ -9,9 +9,9 @@ import { Client as EthClient } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as TerraClient } from '@xchainjs/xchain-terra'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
+import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { AssetBTC, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
 
-import { ThorchainCache } from './thorchain-cache'
 import { ExecuteSwap, SwapSubmitted } from './types'
 import { EthHelper } from './utils/eth-helper'
 import { EvmHelper } from './utils/evm-helper'
@@ -31,7 +31,7 @@ const chainIds = {
  * Wallet Class for managing all xchain-* wallets with a mnemonic seed.
  */
 export class Wallet {
-  private thorchainCache: ThorchainCache
+  private thorchainQuery: ThorchainQuery
   clients: Record<string, XChainClient>
   private ethHelper: EthHelper
 
@@ -42,10 +42,10 @@ export class Wallet {
    * @param thorchainCache - an instance of the ThorchainCache (could be pointing to stagenet,testnet,mainnet)
    * @returns Wallet
    */
-  constructor(phrase: string, thorchainCache: ThorchainCache) {
-    this.thorchainCache = thorchainCache
+  constructor(phrase: string, thorchainQuery: ThorchainQuery) {
+    this.thorchainQuery = thorchainQuery
 
-    const settings = { network: thorchainCache.midgard.network, phrase }
+    const settings = { network: thorchainQuery.thorchainCache.midgard.network, phrase }
     this.clients = {
       BCH: new BchClient(settings),
       BTC: new BtcClient(settings),
@@ -58,7 +58,7 @@ export class Wallet {
       GAIA: new CosmosClient(settings),
       AVAX: new AvaxClient({ ...defaultAvaxParams, network: settings.network, phrase }),
     }
-    this.ethHelper = new EthHelper(this.clients.ETH, this.thorchainCache)
+    this.ethHelper = new EthHelper(this.clients.ETH, this.thorchainQuery.thorchainCache)
   }
 
   /**
@@ -148,7 +148,7 @@ export class Wallet {
   private async swapNonRune(swap: ExecuteSwap): Promise<SwapSubmitted> {
     const client = this.clients[swap.input.asset.chain]
     const waitTimeSeconds = swap.waitTimeSeconds
-    const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[swap.input.asset.chain]
+    const inboundAsgard = (await this.thorchainQuery.thorchainCache.getInboundAddressesItems())[swap.input.asset.chain]
 
     if (swap.input.asset.chain === Chain.Ethereum) {
       const params = {
@@ -168,7 +168,7 @@ export class Wallet {
         feeOption: swap.feeOption || FeeOption.Fast,
         memo: this.constructSwapMemo(swap),
       }
-      const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainCache)
+      const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {

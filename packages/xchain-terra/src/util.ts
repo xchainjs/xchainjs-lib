@@ -1,7 +1,7 @@
 import { Coin, Coins, CreateTxOptions, LCDClient, MsgSend } from '@terra-money/terra.js'
-import { Address, Balance, Network } from '@xchainjs/xchain-client'
+import { Balance, Network } from '@xchainjs/xchain-client'
 import type { RootDerivationPaths } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, assetToString, baseAmount, bn, bnOrZero, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, assetToString, baseAmount, bn, bnOrZero, eqAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 

@@ -1,13 +1,11 @@
-import { TxHash, XChainClient } from '@xchainjs/xchain-client/lib'
+import { TxHash, XChainClient } from '@xchainjs/xchain-client'
 import { ApproveParams, Client as EvmClient, MAX_APPROVAL } from '@xchainjs/xchain-evm'
-import { Asset, BaseAmount, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { ThorchainCache } from '@xchainjs/xchain-thorchain-query'
+import { Asset, BaseAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import routerABI from '../abi/routerABI.json'
-import { ThorchainCache } from '../thorchain-cache'
 import { DepositParams } from '../types'
-
-import { calcNetworkFee, getContractAddressFromAsset } from './swap'
 
 export class EvmHelper {
   private evmClient: EvmClient
@@ -66,19 +64,13 @@ export class EvmHelper {
       ]
 
       const routerContract = new ethers.Contract(inboundAsgard.router, routerABI)
-      const gasPriceInWei = gasPrice[params.feeOption]
-      const gasPriceInGwei = gasPriceInWei.div(10 ** 9).amount()
-
-      // TODO should we change the calcInboundFee() to use gasRate in BaseAmount instead of BIgNumber?
-      // currently its hardto know the units to use, GWEI/WEI, etc
-      const gasLimit = calcNetworkFee(params.asset, gasPriceInGwei)
-      const gasLimitInWei = gasLimit.baseAmount.amount().toFixed()
+      const gasLimit = '80000'
 
       const unsignedTx = await routerContract.populateTransaction.deposit(...depositParams, {
         from: address,
         value: 0,
         gasPrice: gasPrice.fast.amount().toFixed(),
-        gasLimit: gasLimitInWei,
+        gasLimit: gasLimit,
       })
       const { hash } = await this.evmClient.getWallet(params.walletIndex).sendTransaction(unsignedTx)
       return hash

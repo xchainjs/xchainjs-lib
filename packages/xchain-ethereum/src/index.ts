@@ -15,7 +15,6 @@ export {
   getFee,
   isApproved,
   isEthAsset,
-  strip0x,
   validateAddress,
   ETHAddress,
   ETH_DECIMAL,

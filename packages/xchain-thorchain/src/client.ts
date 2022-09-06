@@ -1,6 +1,5 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
 import {
-  Address,
   Balance,
   BaseXChainClient,
   FeeType,
@@ -20,6 +19,7 @@ import {
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
 import {
+  Address,
   Asset,
   AssetRuneNative,
   BaseAmount,
@@ -27,6 +27,7 @@ import {
   assetFromString,
   assetToString,
   baseAmount,
+  isAssetRuneNative,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
@@ -60,7 +61,6 @@ import {
   getExplorerAddressUrl,
   getExplorerTxUrl,
   getPrefix,
-  isAssetRuneNative,
   registerDepositCodecs,
   registerSendCodecs,
 } from './util'

@@ -6,24 +6,26 @@ import { BigNumber } from 'bignumber.js'
  * Represent a Liquidity Pool in Thorchain
  */
 export class LiquidityPool {
-  private pool: PoolDetail
+  readonly pool: PoolDetail
   readonly assetBalance: BaseAmount
   readonly runeBalance: BaseAmount
+  readonly decimals: number
 
   readonly asset: Asset
   readonly assetString: string
   readonly runeToAssetRatio: BigNumber
   readonly assetToRuneRatio: BigNumber
 
-  constructor(pool: PoolDetail) {
+  constructor(pool: PoolDetail, decimals: number) {
     this.pool = pool
     const asset = assetFromString(this.pool.asset)
     if (!asset) throw new Error(`could not parse ${this.pool.asset}`)
 
     this.asset = asset
+    this.decimals = decimals
     this.assetString = this.pool.asset
     this.assetBalance = baseAmount(this.pool.assetDepth)
-    this.runeBalance = baseAmount(this.pool.runeDepth) //Rune is always 8 decimals
+    this.runeBalance = baseAmount(this.pool.runeDepth)
 
     this.runeToAssetRatio = this.runeBalance.amount().div(this.assetBalance.amount())
     this.assetToRuneRatio = this.assetBalance.amount().div(this.runeBalance.amount())

@@ -1,4 +1,5 @@
-import { Address, Balance, FeeOption, Fees, Network, TxHash } from '@xchainjs/xchain-client'
+import { Balance, FeeOption, Fees, Network, TxHash } from '@xchainjs/xchain-client'
+import { Address } from '@xchainjs/xchain-util'
 
 export type FeeRate = number
 export type FeeRates = Record<FeeOption, FeeRate>

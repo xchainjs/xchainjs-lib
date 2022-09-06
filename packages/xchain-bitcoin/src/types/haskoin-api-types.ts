@@ -2,7 +2,7 @@
  * Haskoin API types
  */
 
-import { Address } from '@xchainjs/xchain-client'
+import { Address } from '@xchainjs/xchain-util'
 
 export type UtxoData = {
   txid: string

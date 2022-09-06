@@ -1,10 +1,10 @@
 import { proto } from '@cosmos-client/core'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
-import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { AssetAtom, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { Client } from '../src/client'
-import { AssetAtom, COSMOS_DECIMAL } from '../src/const'
+import { COSMOS_DECIMAL } from '../src/const'
 import { GetTxByHashResponse, TxHistoryResponse } from '../src/cosmos/types'
 
 const getClientUrl = (client: Client): string => {

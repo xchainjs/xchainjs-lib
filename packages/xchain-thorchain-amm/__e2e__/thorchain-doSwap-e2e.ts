@@ -1,6 +1,15 @@
 require('dotenv').config()
 import { Network } from '@xchainjs/xchain-client'
 import {
+  CryptoAmount,
+  Midgard,
+  // SwapEstimate,
+  ThorchainCache,
+  ThorchainQuery,
+  Thornode,
+  TxDetails,
+} from '@xchainjs/xchain-thorchain-query'
+import {
   Asset,
   AssetAVAX,
   AssetBNB,
@@ -17,22 +26,25 @@ import { fail } from 'assert'
 import BigNumber from 'bignumber.js'
 
 import { Wallet } from '../src/Wallet'
-import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainAMM } from '../src/thorchain-amm'
-import { ThorchainCache } from '../src/thorchain-cache'
-import { SwapEstimate } from '../src/types'
 import { EthHelper } from '../src/utils/eth-helper'
-import { Midgard } from '../src/utils/midgard'
 
-const testnetCache = new ThorchainCache(new Midgard(Network.Testnet))
-const mainnetCache = new ThorchainCache(new Midgard(Network.Mainnet))
-const stagenetCache = new ThorchainCache(new Midgard(Network.Stagenet))
-const testnetThorchainAmm = new ThorchainAMM(testnetCache)
-const mainetThorchainAmm = new ThorchainAMM(mainnetCache)
-const stagenetThorchainAmm = new ThorchainAMM(stagenetCache)
-const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', testnetCache)
-const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', mainnetCache)
-const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', stagenetCache)
+const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
+
+const thorchainCacheTestnet = new ThorchainCache(new Midgard(Network.Testnet), new Thornode(Network.Testnet))
+const thorchainQueryTestnet = new ThorchainQuery(thorchainCacheTestnet)
+
+const thorchainCacheStagenet = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
+const thorchainQueryStagenet = new ThorchainQuery(thorchainCacheStagenet)
+
+const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', thorchainQueryTestnet)
+const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
+const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryStagenet)
+
+const testnetThorchainAmm = new ThorchainAMM(thorchainQueryTestnet)
+const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
+const stagenetThorchainAmm = new ThorchainAMM(thorchainQueryStagenet)
 
 const sBTC = assetFromString('BTC/BTC')
 console.log('sBTC?.chain=' + sBTC?.chain)
@@ -63,19 +75,19 @@ const XRUNE: Asset = {
   synth: false,
 }
 
-function print(estimate: SwapEstimate) {
+function print(estimate: TxDetails) {
   const expanded = {
     totalFees: {
-      inboundFee: estimate.totalFees.inboundFee.formatedAssetString(),
-      swapFee: estimate.totalFees.swapFee.formatedAssetString(),
-      outboundFee: estimate.totalFees.outboundFee.formatedAssetString(),
-      affiliateFee: estimate.totalFees.affiliateFee.formatedAssetString(),
+      inboundFee: estimate.txEstimate.totalFees.inboundFee.formatedAssetString(),
+      swapFee: estimate.txEstimate.totalFees.swapFee.formatedAssetString(),
+      outboundFee: estimate.txEstimate.totalFees.outboundFee.formatedAssetString(),
+      affiliateFee: estimate.txEstimate.totalFees.affiliateFee.formatedAssetString(),
     },
-    slipPercentage: estimate.slipPercentage.toFixed(),
-    netOutput: estimate.netOutput.formatedAssetString(),
-    waitTime: estimate.waitTimeSeconds.toFixed(),
-    canSwap: estimate.canSwap,
-    errors: estimate.errors,
+    slipPercentage: estimate.txEstimate.slipPercentage.toFixed(),
+    netOutput: estimate.txEstimate.netOutput.formatedAssetString(),
+    waitTime: estimate.txEstimate.waitTimeSeconds.toFixed(),
+    canSwap: estimate.txEstimate.canSwap,
+    errors: estimate.txEstimate.errors,
   }
   console.log(expanded)
 }
@@ -136,7 +148,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // Swap From BNB to ETH - ?
   it(`Should perform a double swap from BNB to ETH`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.0001')), AssetBNB),
+      input: new CryptoAmount(assetToBase(assetAmount('0.0009')), AssetBNB),
       destinationAsset: AssetETH,
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
@@ -158,9 +170,9 @@ describe('xchain-swap doSwap Integration Tests', () => {
       slipLimit: new BigNumber(0.03),
     }
     try {
-      const outPutCanSwap = await mainetThorchainAmm.estimateSwap(estimateSwapParams)
+      const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
       print(outPutCanSwap)
-      if (outPutCanSwap.canSwap) {
+      if (outPutCanSwap.txEstimate.canSwap) {
         const output = await mainetThorchainAmm.doSwap(
           mainnetWallet,
           estimateSwapParams,
@@ -202,9 +214,9 @@ describe('xchain-swap doSwap Integration Tests', () => {
       slipLimit: new BigNumber(0.5),
     }
     try {
-      const outPutCanSwap = await mainetThorchainAmm.estimateSwap(estimateSwapParams)
+      const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
       console.log(JSON.stringify(outPutCanSwap))
-      if (outPutCanSwap.canSwap) {
+      if (outPutCanSwap.txEstimate.canSwap) {
         const output = await mainetThorchainAmm.doSwap(
           mainnetWallet,
           estimateSwapParams,
@@ -226,9 +238,9 @@ describe('xchain-swap doSwap Integration Tests', () => {
       slipLimit: new BigNumber(0.5),
     }
     try {
-      const outPutCanSwap = await mainetThorchainAmm.estimateSwap(estimateSwapParams)
+      const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
       console.log(JSON.stringify(outPutCanSwap))
-      if (outPutCanSwap.canSwap) {
+      if (outPutCanSwap.txEstimate.canSwap) {
         const output = await mainetThorchainAmm.doSwap(
           mainnetWallet,
           estimateSwapParams,
@@ -284,7 +296,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
         destinationAsset: AssetRuneNative,
         slipLimit: new BigNumber('0.5'),
       }
-      const ethHelper = new EthHelper(testnetWallet.clients.ETH, testnetCache)
+      const ethHelper = new EthHelper(testnetWallet.clients.ETH, thorchainQueryTestnet.thorchainCache)
       const approved = await ethHelper.isTCRouterApprovedToSpend(
         estimateSwapParams.input.asset,
         estimateSwapParams.input.baseAmount,
@@ -313,7 +325,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAsset: XRUNE,
       slipLimit: new BigNumber('0.5'),
     }
-    const ethHelper = new EthHelper(testnetWallet.clients.ETH, testnetCache)
+    const ethHelper = new EthHelper(testnetWallet.clients.ETH, thorchainQueryTestnet.thorchainCache)
     const approved = await ethHelper.isTCRouterApprovedToSpend(
       estimateSwapParams.input.asset,
       estimateSwapParams.input.baseAmount,
@@ -332,7 +344,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   })
   it(`Should perform a swap from LTC to AVAX`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.2')), AssetLTC),
+      input: new CryptoAmount(assetToBase(assetAmount('0.01')), AssetLTC),
       destinationAsset: AssetAVAX,
       slipLimit: new BigNumber('0.5'),
     }
@@ -346,24 +358,28 @@ describe('xchain-swap doSwap Integration Tests', () => {
   })
   it(`Should perform a swap from AVAX to RUNE`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.00000000005', 18)), AssetAVAX),
+      input: new CryptoAmount(assetToBase(assetAmount('0.5', 18)), AssetAVAX),
       destinationAsset: AssetRuneNative,
-      slipLimit: new BigNumber('0.5'),
+      slipLimit: new BigNumber('0.2'),
     }
     try {
-      const outPutCanSwap = await stagenetThorchainAmm.estimateSwap(estimateSwapParams)
+      const outPutCanSwap = await thorchainQueryStagenet.estimateSwap(estimateSwapParams)
       print(outPutCanSwap)
-      if (outPutCanSwap.canSwap) {
-        const output = await stagenetThorchainAmm.doSwap(
-          stagenetWallet,
-          estimateSwapParams,
-          stagenetWallet.clients[Chain.THORChain].getAddress(),
-        )
-        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
-        expect(output).toBeTruthy()
-      }
+      const feesinAvax = await thorchainQueryStagenet.getFeesIn(outPutCanSwap.txEstimate.totalFees, AssetAVAX)
+      outPutCanSwap.txEstimate.totalFees = feesinAvax
+      print(outPutCanSwap)
+
+      // if (outPutCanSwap.canSwap) {
+      //   const output = await stagenetThorchainAmm.doSwap(
+      //     stagenetWallet,
+      //     estimateSwapParams,
+      //     stagenetWallet.clients[Chain.THORChain].getAddress(),
+      //   )
+      //   console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+      //   expect(output).toBeTruthy()
+      // }
     } catch (error: any) {
-      console.log(error.message)
+      console.error(error)
       fail()
     }
   })

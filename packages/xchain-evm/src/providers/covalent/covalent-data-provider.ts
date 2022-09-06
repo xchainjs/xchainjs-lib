@@ -1,5 +1,4 @@
 import {
-  Address,
   Balance,
   FeeOption,
   FeeType,
@@ -11,7 +10,7 @@ import {
   TxType,
   TxsPage,
 } from '@xchainjs/xchain-client'
-import { Asset, AssetAVAX, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, AssetAVAX, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import { GasPrices } from '../../types'

@@ -1,5 +1,4 @@
 import {
-  Address,
   Balance,
   FeeRate,
   Fees,
@@ -10,7 +9,7 @@ import {
   calcFees,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { AssetDOGE, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { Address, AssetDOGE, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import * as Dogecoin from 'bitcoinjs-lib'
 import coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'
