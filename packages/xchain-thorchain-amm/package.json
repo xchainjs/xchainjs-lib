@@ -54,6 +54,7 @@
     "@xchainjs/xchain-midgard": "0.1.0-alpha2",
     "@xchainjs/xchain-terra": "^0.3.0",
     "@xchainjs/xchain-thorchain": "^0.26.0",
+    "@xchainjs/xchain-thorchain-query": "^0.1.0-alpha",
     "@xchainjs/xchain-util": "^0.9.0",
     "axios": "^0.25.0",
     "axios-retry": "^3.2.5",
