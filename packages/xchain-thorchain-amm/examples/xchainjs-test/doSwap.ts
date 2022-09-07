@@ -1,12 +1,13 @@
 import { Network } from '@xchainjs/xchain-client'
+import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   CryptoAmount,
   Midgard,
   SwapEstimate,
-  ThorchainAMM,
   ThorchainCache,
-  Wallet,
-} from '@xchainjs/xchain-thorchain-amm'
+  ThorchainQuery,
+  Thornode,
+} from '@xchainjs/xchain-thorchain-query'
 import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
@@ -45,8 +46,8 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
     }
 
     const outPutCanSwap = await tcAmm.estimateSwap(swapParams)
-    print(outPutCanSwap, swapParams.input)
-    if (outPutCanSwap.canSwap) {
+    print(outPutCanSwap.txEstimate, swapParams.input)
+    if (outPutCanSwap.txEstimate.canSwap) {
       const output = await tcAmm.doSwap(wallet, swapParams, wallet.clients[toAsset.chain].getAddress())
       console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
     }
@@ -58,12 +59,12 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
 const main = async () => {
   const seed = process.argv[2]
   const network = process.argv[3] as Network
-  const midgard = new Midgard(network)
-  const cache = new ThorchainCache(midgard)
-  const thorchainAmm = new ThorchainAMM(cache)
-  const wallet = new Wallet(seed, cache)
+  const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+  const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
+  const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
+  const wallet = new Wallet(seed, thorchainQueryMainnet)
   console.log(`\ Swap on ${network} :)\n`)
-  await doSingleSwap(thorchainAmm, wallet)
+  await doSingleSwap(mainetThorchainAmm, wallet)
 }
 
 main()
