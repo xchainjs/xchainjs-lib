@@ -1,8 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
-import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
+import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   CryptoAmount,
-  EstimateSwapParams,
   Midgard,
   SwapEstimate,
   ThorchainCache,
@@ -42,37 +41,42 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
 }
 
 /**
- * Estimate swap function
- * Returns estimate swap object
+ * From asset to asset with no Affiliate address on testnet
  */
-const estimateSwap = async () => {
+const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
   try {
-    const network = process.argv[2] as Network
-    const amount = process.argv[3]
-    const fromAsset = assetFromString(`${process.argv[4]}`)
-    const toAsset = assetFromString(`${process.argv[5]}`)
-    //const toDestinationAddress = `${process.argv[6]}`
-    const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
-    const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
-    const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
+    const amount = process.argv[4]
+    const fromAsset = assetFromString(`${process.argv[5]}`)
+    const toAsset = assetFromString(`${process.argv[6]}`)
+    const swapDestinationAddress = wallet.clients[toAsset.chain].getAddress()
 
-    const swapParams: EstimateSwapParams = {
+    const swapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(amount)), fromAsset),
       destinationAsset: toAsset,
-      //destinationAddress: toDestinationAddress,
-      // affiliateFeePercent: 0.003, //optional
+
       slipLimit: new BigNumber('0.03'), //optional
     }
-    const estimate = await mainetThorchainAmm.estimateSwap(swapParams)
-    printTx(estimate, swapParams.input)
-  } catch (e) {
-    console.error(e)
+
+    const outPutCanSwap = await tcAmm.estimateSwap(swapParams)
+    printTx(outPutCanSwap, swapParams.input)
+    if (outPutCanSwap.txEstimate.canSwap) {
+      const output = await tcAmm.doSwap(wallet, swapParams)
+      console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+    }
+  } catch (error) {
+    console.error(error)
   }
 }
 
-// Call the function from main()
 const main = async () => {
-  await estimateSwap()
+  const seed = process.argv[2]
+  const network = process.argv[3] as Network
+  const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+  const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
+  const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
+  const wallet = new Wallet(seed, thorchainQueryMainnet)
+  console.log(`\ Swap on ${network} :)\n`)
+  await doSingleSwap(mainetThorchainAmm, wallet)
 }
 
 main()
