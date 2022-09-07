@@ -2,40 +2,35 @@ import { Network } from '@xchainjs/xchain-client'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   CryptoAmount,
+  EstimateSwapParams,
   Midgard,
-  SwapEstimate,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import { Chain, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
-// Helper function for printing out the returned object
-function print(estimate: SwapEstimate, input: CryptoAmount) {
-  const expanded = {
-    input: input.formatedAssetString(),
-    totalFees: {
-      inboundFee: estimate.totalFees.inboundFee.formatedAssetString(),
-      swapFee: estimate.totalFees.swapFee.formatedAssetString(),
-      outboundFee: estimate.totalFees.outboundFee.formatedAssetString(),
-      affiliateFee: estimate.totalFees.affiliateFee.formatedAssetString(),
-    },
-    slipPercentage: estimate.slipPercentage.toFixed(),
-    netOutput: estimate.netOutput.formatedAssetString(),
-    waitTimeSeconds: estimate.waitTimeSeconds.toFixed(),
-    canSwap: estimate.canSwap,
-    errors: estimate.errors,
-  }
-  return expanded
-}
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {
     memo: txDetails.memo,
     expiry: txDetails.expiry,
     toAddress: txDetails.toAddress,
-    txEstimate: print(txDetails.txEstimate, input),
+    txEstimate: {
+      input: input.formatedAssetString(),
+      totalFees: {
+        inboundFee: txDetails.txEstimate.totalFees.inboundFee.formatedAssetString(),
+        swapFee: txDetails.txEstimate.totalFees.swapFee.formatedAssetString(),
+        outboundFee: txDetails.txEstimate.totalFees.outboundFee.formatedAssetString(),
+        affiliateFee: txDetails.txEstimate.totalFees.affiliateFee.formatedAssetString(),
+      },
+      slipPercentage: txDetails.txEstimate.slipPercentage.toFixed(),
+      netOutput: txDetails.txEstimate.netOutput.formatedAssetString(),
+      waitTimeSeconds: txDetails.txEstimate.waitTimeSeconds.toFixed(),
+      canSwap: txDetails.txEstimate.canSwap,
+      errors: txDetails.txEstimate.errors,
+    },
   }
   console.log(expanded)
 }
@@ -48,12 +43,19 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
     const amount = process.argv[4]
     const fromAsset = assetFromString(`${process.argv[5]}`)
     const toAsset = assetFromString(`${process.argv[6]}`)
-    const swapDestinationAddress = wallet.clients[toAsset.chain].getAddress()
 
-    const swapParams = {
+    // const fromChain = fromAsset.synth ? Chain.THORChain : fromAsset.chain
+    const toChain = toAsset.synth ? Chain.THORChain : toAsset.chain
+    // const fromAddress = wallet.clients[fromChain].getAddress()
+    const destinationAddress = wallet.clients[toChain].getAddress()
+
+    console.log(destinationAddress)
+    // console.log(await wallet.clients[fromChain].getBalance(fromAddress))
+
+    const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(amount)), fromAsset),
       destinationAsset: toAsset,
-
+      destinationAddress,
       slipLimit: new BigNumber('0.03'), //optional
     }
 
@@ -71,12 +73,12 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
 const main = async () => {
   const seed = process.argv[2]
   const network = process.argv[3] as Network
-  const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
-  const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
-  const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
-  const wallet = new Wallet(seed, thorchainQueryMainnet)
+  const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
+  const thorchainQuery = new ThorchainQuery(thorchainCache)
+  const thorchainAmm = new ThorchainAMM(thorchainQuery)
+  const wallet = new Wallet(seed, thorchainQuery)
   console.log(`\ Swap on ${network} :)\n`)
-  await doSingleSwap(mainetThorchainAmm, wallet)
+  await doSingleSwap(thorchainAmm, wallet)
 }
 
 main()

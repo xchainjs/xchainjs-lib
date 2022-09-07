@@ -50,7 +50,7 @@ export type EstimateSwapParams = {
   destinationAsset: Asset
   destinationAddress: Address
   affiliateAddress?: Address
-  interfaceID: number
+  interfaceID?: number
   affiliateFeePercent?: number
   slipLimit?: BigNumber
 }
