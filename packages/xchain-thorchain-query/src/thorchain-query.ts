@@ -64,25 +64,48 @@ export class ThorchainQuery {
 
    * @returns The SwapEstimate
    */
-  public async estimateSwap(
-    params: EstimateSwapParams,
-    destinationAddress = '',
+  public async estimateSwap({
+    input,
+    destinationAsset,
+    destinationAddress,
     affiliateAddress = '',
     interfaceID = 999,
-  ): Promise<TxDetails> {
-    this.isValidSwap(params)
+    affiliateFeePercent = 0,
+    slipLimit,
+  }: EstimateSwapParams): Promise<TxDetails> {
+    this.isValidSwap({
+      input,
+      destinationAsset,
+      destinationAddress,
+      affiliateAddress,
+      interfaceID,
+      affiliateFeePercent,
+      slipLimit,
+    })
 
     const inboundDetails = await this.thorchainCache.getInboundDetails()
 
-    const sourceInboundDetails = inboundDetails[params.input.asset.chain]
+    const sourceInboundDetails = inboundDetails[input.asset.chain]
     // console.log(JSON.stringify(sourceInboundDetails, null, 2))
-    const destinationInboundDetails = inboundDetails[params.destinationAsset.chain]
+    const destinationInboundDetails = inboundDetails[destinationAsset.chain]
     // console.log(JSON.stringify(destinationInboundDetails, null, 2))
 
-    const swapEstimate = await this.calcSwapEstimate(params, sourceInboundDetails, destinationInboundDetails)
+    const swapEstimate = await this.calcSwapEstimate(
+      {
+        input,
+        destinationAsset,
+        destinationAddress,
+        affiliateAddress,
+        interfaceID,
+        affiliateFeePercent,
+        slipLimit,
+      },
+      sourceInboundDetails,
+      destinationInboundDetails,
+    )
 
     // Remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
-    const affiliateFee = params.input.baseAmount.times(params.affiliateFeePercent || 0)
+    const affiliateFee = input.baseAmount.times(affiliateFeePercent || 0)
 
     // Calculate expiry time
     const currentDatetime = new Date()
@@ -91,7 +114,15 @@ export class ThorchainQuery {
 
     // Check for errors
     const errors = await this.getSwapEstimateErrors(
-      params,
+      {
+        input,
+        destinationAsset,
+        destinationAddress,
+        affiliateAddress,
+        interfaceID,
+        affiliateFeePercent,
+        slipLimit,
+      },
       swapEstimate,
       sourceInboundDetails,
       destinationInboundDetails,
@@ -108,28 +139,28 @@ export class ThorchainQuery {
     } else {
       txDetails.txEstimate.canSwap = true
       // Retrieve inbound Asgard address.
-      const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.input.asset.chain]
+      const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[input.asset.chain]
       txDetails.toAddress = inboundAsgard?.address || ''
       // Work out LIM from the slip percentage
       let limPercentage = BN_1
-      if (params.slipLimit) {
-        limPercentage = BN_1.minus(params.slipLimit || 1)
+      if (slipLimit) {
+        limPercentage = BN_1.minus(slipLimit || 1)
       } // else allowed slip is 100%
       const limAssetAmount = swapEstimate.netOutput.times(limPercentage)
 
-      const inboundDelay = await this.confCounting(params.input)
+      const inboundDelay = await this.confCounting(input)
       const outboundDelay = await this.outboundDelay(limAssetAmount)
       txDetails.txEstimate.waitTimeSeconds = outboundDelay + inboundDelay
 
       // Construct memo
       txDetails.memo = this.constructSwapMemo({
-        input: params.input,
-        destinationAsset: params.destinationAsset,
+        input: input,
+        destinationAsset: destinationAsset,
         limit: limAssetAmount.baseAmount,
-        destinationAddress,
-        affiliateAddress,
+        destinationAddress: destinationAddress,
+        affiliateAddress: affiliateAddress,
         affiliateFee,
-        interfaceID,
+        interfaceID: interfaceID,
       })
     }
 

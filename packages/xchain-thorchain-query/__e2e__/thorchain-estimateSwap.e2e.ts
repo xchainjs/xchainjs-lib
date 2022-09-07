@@ -41,7 +41,7 @@ function print(estimate: SwapEstimate, input: CryptoAmount) {
     canSwap: estimate.canSwap,
     errors: estimate.errors,
   }
-  console.log(expanded)
+  return expanded
 }
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {

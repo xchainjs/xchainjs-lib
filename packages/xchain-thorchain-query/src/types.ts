@@ -48,6 +48,9 @@ export type MidgardConfig = {
 export type EstimateSwapParams = {
   input: CryptoAmount
   destinationAsset: Asset
+  destinationAddress: Address
+  affiliateAddress?: Address
+  interfaceID: number
   affiliateFeePercent?: number
   slipLimit?: BigNumber
 }
