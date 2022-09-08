@@ -1,4 +1,4 @@
-## Thorchain amm examples folder
+## Estimate Thorchain Swap
 
 ## Environment
 
@@ -13,10 +13,10 @@ tsconfig has already been set in the tsconfig.json
 
 ### Install
 
-1. cd into examples/xchainjs-test folder
+1. cd into examples/estimate-swap folder
 
 ```bash
-cd packages/xchain-thorchain-amm/examples/xchainjs-test
+cd examples/estimate-swap
 yarn install
 ```
 
@@ -206,38 +206,4 @@ updated pool cache
 }
 ✨  Done in 8.47s.
 
-```
-### Do Swap
-
-executes a swap from one asset to another  
-
-```bash
-yarn doSwap "MnemonicPhrase" testnet 10 THOR.RUNE BCH.BCH
-
-```
-
-#### Example output
-
-```bash
- Swap on testnet :)
-
-updated pool cache
-{
-  input: 'ᚱ 10',
-  totalFees: {
-    inboundFee: 'ᚱ 0.02',
-    swapFee: 'ᚱ 0.00000034',
-    outboundFee: 'ᚱ 1.19330225',
-    affiliateFee: 'ᚱ 0'
-  },
-  slipPercentage: '0.00029640089582720352',
-  netOutput: '0.00099564 BCH',
-  waitTimeSeconds: '12',
-  canSwap: true,
-  errors: undefined
-}
-Tx hash: REDACTED,
- Tx url: https://viewblock.io/thorchain/tx/REDACTED?network=testnet
- WaitTime: 12
-✨  Done in 14.94s.
 ```

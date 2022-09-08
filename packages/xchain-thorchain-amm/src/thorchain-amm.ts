@@ -32,27 +32,34 @@ export class ThorchainAMM {
 
    * @returns The SwapEstimate
    */
-  public estimateSwap(params: EstimateSwapParams): Promise<TxDetails> {
-    return this.thorchainQuery.estimateSwap(params)
+  public estimateSwap({
+    input,
+    destinationAsset,
+    destinationAddress,
+    affiliateAddress = '',
+    interfaceID = 999,
+    affiliateFeePercent = 0,
+    slipLimit,
+  }: EstimateSwapParams): Promise<TxDetails> {
+    return this.thorchainQuery.estimateSwap({
+      input,
+      destinationAsset,
+      destinationAddress,
+      affiliateAddress,
+      interfaceID,
+      affiliateFeePercent,
+      slipLimit,
+    })
   }
 
   /**
    * Conducts a swap with the given inputs. Should be called after estimateSwap() to ensure the swap is valid
    *
    * @param wallet - wallet to use
-   * @param params - swap paraps
-   * @param destinationAddress - where to send the output of the swap
-   * @param affiliateAddress - were to send the affilate Address, should be a THOR address (optional)
-   * @param interfaceID - id if the calling interface (optional)
+   * @param params - swap params
    * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
-  public async doSwap(
-    wallet: Wallet,
-    params: EstimateSwapParams,
-    destinationAddress: string,
-    affiliateAddress = '',
-    interfaceID = 999,
-  ): Promise<TxSubmitted> {
+  public async doSwap(wallet: Wallet, params: EstimateSwapParams): Promise<SwapSubmitted> {
     // TODO validate all input fields
     const txDetails = await this.thorchainQuery.estimateSwap(params)
     if (!txDetails.txEstimate.canSwap) {
@@ -74,10 +81,10 @@ export class ThorchainAMM {
       input: params.input,
       destinationAsset: params.destinationAsset,
       limit: limAssetAmount.baseAmount,
-      destinationAddress,
-      affiliateAddress,
+      destinationAddress: params.destinationAddress,
+      affiliateAddress: params.affiliateAddress || '',
       affiliateFee,
-      interfaceID,
+      interfaceID: params.interfaceID || 999,
       waitTimeSeconds,
     })
   }

@@ -1,12 +1,15 @@
 import { Network } from '@xchainjs/xchain-client'
+import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import {
   CryptoAmount,
   EstimateSwapParams,
   Midgard,
   SwapEstimate,
-  ThorchainAMM,
   ThorchainCache,
-} from '@xchainjs/xchain-thorchain-amm'
+  ThorchainQuery,
+  Thornode,
+  TxDetails,
+} from '@xchainjs/xchain-thorchain-query'
 import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
@@ -26,6 +29,15 @@ function print(estimate: SwapEstimate, input: CryptoAmount) {
     canSwap: estimate.canSwap,
     errors: estimate.errors,
   }
+  return expanded
+}
+function printTx(txDetails: TxDetails, input: CryptoAmount) {
+  const expanded = {
+    memo: txDetails.memo,
+    expiry: txDetails.expiry,
+    toAddress: txDetails.toAddress,
+    txEstimate: print(txDetails.txEstimate, input),
+  }
   console.log(expanded)
 }
 
@@ -39,21 +51,20 @@ const estimateSwap = async () => {
     const amount = process.argv[3]
     const fromAsset = assetFromString(`${process.argv[4]}`)
     const toAsset = assetFromString(`${process.argv[5]}`)
-    const midgard = new Midgard(network)
-    const cache = new ThorchainCache(midgard)
-    const thorchainAmm = new ThorchainAMM(cache)
+    const toDestinationAddress = `${process.argv[6]}`
+    const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
+    const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
+    const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(amount)), fromAsset),
       destinationAsset: toAsset,
+      destinationAddress: toDestinationAddress,
       // affiliateFeePercent: 0.003, //optional
       slipLimit: new BigNumber('0.03'), //optional
     }
-    const estimate = await thorchainAmm.estimateSwap(swapParams)
-    print(estimate, swapParams.input)
-    const estimateInFromAsset = await thorchainAmm.getFeesIn(estimate.totalFees, fromAsset)
-    estimate.totalFees = estimateInFromAsset
-    print(estimate, swapParams.input)
+    const estimate = await mainetThorchainAmm.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
   } catch (e) {
     console.error(e)
   }

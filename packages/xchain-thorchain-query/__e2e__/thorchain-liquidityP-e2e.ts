@@ -12,13 +12,7 @@ import {
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
-import {
-  AddliquidityPosition,
-  EstimateADDLP,
-  EstimateWithdrawLP,
-  LiquidityPosition,
-  RemoveLiquidityPosition,
-} from '../src/types'
+import { AddliquidityPosition, EstimateADDLP } from '../src/types'
 import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
 
@@ -59,25 +53,25 @@ function printAdd(estimate: EstimateADDLP) {
   }
   console.log(expanded)
 }
-function printWithdraw(withdraw: EstimateWithdrawLP) {
-  const expanded = {
-    slip: withdraw.slip.toNumber(),
-    txFee: withdraw.transactionFee,
-    impermanentLossProtection: withdraw.impermanentLossProtection,
-    estimatedWait: withdraw.estimatedWait.toFixed(),
-  }
-  console.log(expanded)
-}
+// function printWithdraw(withdraw: EstimateWithdrawLP) {
+//   const expanded = {
+//     slip: withdraw.slip.toNumber(),
+//     txFee: withdraw.transactionFee,
+//     impermanentLossProtection: withdraw.impermanentLossProtection,
+//     estimatedWait: withdraw.estimatedWait.toFixed(),
+//   }
+//   console.log(expanded)
+// }
 
-function printliquidityPosition(liquidityPosition: LiquidityPosition) {
-  const expanded = {
-    assetPool: liquidityPosition.assetPool.pool.asset,
-    assetAmount: liquidityPosition.assetAmount.assetAmount.amount().toNumber(),
-    runeAmount: liquidityPosition.runeAmount.assetAmount.amount().toNumber(),
-    impermanentLosProtection: liquidityPosition.impermanentLossProtection,
-  }
-  console.log(expanded)
-}
+// function printliquidityPosition(liquidityPosition: LiquidityPosition) {
+//   const expanded = {
+//     assetPool: liquidityPosition.assetPool.pool.asset,
+//     assetAmount: liquidityPosition.assetAmount.assetAmount.amount().toNumber(),
+//     runeAmount: liquidityPosition.runeAmount.assetAmount.amount().toNumber(),
+//     impermanentLosProtection: liquidityPosition.impermanentLossProtection,
+//   }
+//   console.log(expanded)
+// }
 
 // Test User Functions - LP positions estimations
 describe('Thorchain-amm liquidity action end to end Tests', () => {
@@ -139,27 +133,28 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     expect(estimateADDLP).toBeTruthy()
   })
 
-  // Estimate withrdaw lp positions
-  it(`Should estimate withdraw BNB from addresses position`, async () => {
-    const LPAction = '-' // remove from lP position
-    const percentage = 100 // gets converted to basis points later
-    const assetAddress = 'redacted'
-    const withdrawType = `SYM`
-    const removeLp: RemoveLiquidityPosition = {
-      action: LPAction,
-      percentage: percentage,
-      assetAddress: assetAddress,
-      withdrawType: withdrawType,
-    }
-    const estimatRemoveLP = await thorchainQuery.estimateWithdrawLP(removeLp)
-    printWithdraw(estimatRemoveLP)
-    expect(estimatRemoveLP).toBeTruthy()
-  })
+  // // Estimate withrdaw lp positions
+  // it(`Should estimate withdraw BNB from addresses position`, async () => {
+  //   const LPAction = '-' // remove from lP position
+  //   const percentage = 100 // gets converted to basis points later
+  //   const assetAddress = 'redacted'
+  //   const withdrawType = `SYM`
+  //   const removeLp: RemoveLiquidityPosition = {
+  //     asset: BUSDT.symbol,
+  //     action: LPAction,
+  //     percentage: percentage,
+  //     assetAddress: assetAddress,
+  //     withdrawType: withdrawType,
+  //   }
+  //   const estimatRemoveLP = await thorchainQuery.estimateWithdrawLP(removeLp)
+  //   printWithdraw(estimatRemoveLP)
+  //   expect(estimatRemoveLP).toBeTruthy()
+  // })
 
   it(`Should check liquidity position for an address`, async () => {
     const address = 'tbnb1kmu0n6s44cz5jxdvkvsvrzgr57ndg6atw5zrys'
-    const checkLP = await testnethorchainQuery.checkLiquidityPosition(address)
-    printliquidityPosition(checkLP)
+    const checkLP = await testnethorchainQuery.checkLiquidityPosition(BUSDT, address)
+    console.log(checkLP)
     expect(checkLP).toBeTruthy()
   })
 })

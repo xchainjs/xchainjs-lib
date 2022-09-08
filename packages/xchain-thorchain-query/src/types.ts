@@ -48,6 +48,9 @@ export type MidgardConfig = {
 export type EstimateSwapParams = {
   input: CryptoAmount
   destinationAsset: Asset
+  destinationAddress: Address
+  affiliateAddress?: Address
+  interfaceID?: number
   affiliateFeePercent?: number
   slipLimit?: BigNumber
 }
@@ -164,6 +167,7 @@ export type AddliquidityPosition = {
   action: string
 }
 export type RemoveLiquidityPosition = {
+  asset: string
   action: string
   percentage: number
   assetAddress: string
@@ -171,12 +175,22 @@ export type RemoveLiquidityPosition = {
   withdrawType: string
 }
 export type LiquidityPosition = {
-  assetPool: LiquidityPool
-  assetAmount: CryptoAmount
-  runeAmount: CryptoAmount
+  position: LiquidityProvider
   impermanentLossProtection: number
 }
+
 export type PoolRatios = {
   assetToRune: BigNumber
   runeToAsset: BigNumber
+}
+export type LiquidityProvider = {
+  asset: string
+  rune_address: string
+  asset_address: string
+  units: number
+  pending_rune: number
+  pending_asset: number
+  rune_deposit_value: number
+  asset_deposit_value: number
+  last_add_height: number
 }
