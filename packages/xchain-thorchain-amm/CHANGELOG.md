@@ -1,3 +1,13 @@
+# v0.0.1.0-beta (2022-09-05)
+
+- moved estimate logic into xchain-thorchain-query
+
+# v0.0.1.0-beta (2022-08-15)
+
+- resolved several issues
+- added avax client
+- added ThorchainCache to manage caching thorchain state
+
 # v0.0.1.0-alpha3 (2022-08-08)
 
 ## Remove

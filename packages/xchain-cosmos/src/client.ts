@@ -1,6 +1,5 @@
 import { proto } from '@cosmos-client/core'
 import {
-  Address,
   Balance,
   BaseXChainClient,
   FeeType,
@@ -15,10 +14,10 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, AssetAtom, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
-import { AssetAtom, COSMOS_DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT } from './const'
+import { COSMOS_DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT } from './const'
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { TxOfflineParams } from './cosmos/types'
 import { ChainIds, ClientUrls, CosmosClientParams } from './types'

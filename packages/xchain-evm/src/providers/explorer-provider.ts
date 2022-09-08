@@ -1,4 +1,4 @@
-import { Address } from '@xchainjs/xchain-client'
+import { Address } from '@xchainjs/xchain-util'
 
 export class ExplorerProvider {
   private explorerUrl: string

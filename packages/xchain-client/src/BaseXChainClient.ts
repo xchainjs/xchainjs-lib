@@ -1,9 +1,8 @@
 import { validatePhrase } from '@xchainjs/xchain-crypto'
-import { Asset, Chain } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import {
-  Address,
   Balance,
   FeeBounds,
   FeeRate,

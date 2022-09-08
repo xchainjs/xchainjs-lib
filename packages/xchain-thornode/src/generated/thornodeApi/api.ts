@@ -704,6 +704,43 @@ export type ObservedTxStatusEnum = typeof ObservedTxStatusEnum[keyof typeof Obse
 /**
  * 
  * @export
+ * @interface POLResponse
+ */
+export interface POLResponse {
+    /**
+     * total amount of RUNE deposited into the pools
+     * @type {string}
+     * @memberof POLResponse
+     */
+    'rune_deposited': string;
+    /**
+     * total amount of RUNE withdrawn from the pools
+     * @type {string}
+     * @memberof POLResponse
+     */
+    'rune_withdrawn': string;
+    /**
+     * total value of protocol\'s LP position in RUNE value
+     * @type {string}
+     * @memberof POLResponse
+     */
+    'value': string;
+    /**
+     * profit and loss of protocol owned liquidity
+     * @type {string}
+     * @memberof POLResponse
+     */
+    'pnl': string;
+    /**
+     * current amount of rune deposited
+     * @type {string}
+     * @memberof POLResponse
+     */
+    'current_deposit': string;
+}
+/**
+ * 
+ * @export
  * @interface Ping
  */
 export interface Ping {
@@ -2644,6 +2681,108 @@ export class NodesApi extends BaseAPI {
 
 
 /**
+ * POLApi - axios parameter creator
+ * @export
+ */
+export const POLApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Returns protocol owned liquidity overview statistics.
+         * @param {number} [height] optional block height, defaults to current tip
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pol: async (height?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/thorchain/pol`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (height !== undefined) {
+                localVarQueryParameter['height'] = height;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * POLApi - functional programming interface
+ * @export
+ */
+export const POLApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = POLApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Returns protocol owned liquidity overview statistics.
+         * @param {number} [height] optional block height, defaults to current tip
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async pol(height?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<POLResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.pol(height, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * POLApi - factory interface
+ * @export
+ */
+export const POLApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = POLApiFp(configuration)
+    return {
+        /**
+         * Returns protocol owned liquidity overview statistics.
+         * @param {number} [height] optional block height, defaults to current tip
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pol(height?: number, options?: any): AxiosPromise<POLResponse> {
+            return localVarFp.pol(height, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * POLApi - object-oriented interface
+ * @export
+ * @class POLApi
+ * @extends {BaseAPI}
+ */
+export class POLApi extends BaseAPI {
+    /**
+     * Returns protocol owned liquidity overview statistics.
+     * @param {number} [height] optional block height, defaults to current tip
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof POLApi
+     */
+    public pol(height?: number, options?: AxiosRequestConfig) {
+        return POLApiFp(this.configuration).pol(height, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
  * PoolsApi - axios parameter creator
  * @export
  */
@@ -3221,7 +3360,7 @@ export const TSSApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async keysignPubkey(height: number, pubkey: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<KeysignResponse>> {
+        async keysignPubkey(height: number, pubkey: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.keysignPubkey(height, pubkey, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3272,7 +3411,7 @@ export const TSSApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        keysignPubkey(height: number, pubkey: string, options?: any): AxiosPromise<KeysignResponse> {
+        keysignPubkey(height: number, pubkey: string, options?: any): AxiosPromise<void> {
             return localVarFp.keysignPubkey(height, pubkey, options).then((request) => request(axios, basePath));
         },
         /**

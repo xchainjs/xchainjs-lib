@@ -1,5 +1,5 @@
-import { Address, Balance, Network, Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
-import { Asset } from '@xchainjs/xchain-util'
+import { Balance, Network, Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
+import { Address, Asset } from '@xchainjs/xchain-util'
 
 import { ExplorerProvider } from '../providers/explorer-provider'
 

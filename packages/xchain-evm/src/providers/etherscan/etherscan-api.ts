@@ -74,12 +74,13 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfo, gasAsset: Asset,
  * @param {TokenTransactionInfo} tx
  * @returns {Tx|null} The parsed transaction.
  */
-export const getTxFromTokenTransaction = (tx: TokenTransactionInfo, decimals: number): Tx | null => {
+export const getTxFromTokenTransaction = (tx: TokenTransactionInfo, chain: Chain, decimals: number): Tx | null => {
   const decimal = parseInt(tx.tokenDecimal) || decimals
   const symbol = tx.tokenSymbol
   const address = tx.contractAddress
+
   if (validateSymbol(symbol) && validateAddress(address)) {
-    const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${address}`)
+    const tokenAsset = assetFromString(`${chain}.${symbol}-${address}`)
     if (tokenAsset) {
       return {
         asset: tokenAsset,
@@ -203,7 +204,10 @@ export const getTokenTransactionHistory = async ({
   startblock,
   endblock,
   apiKey,
-}: TransactionHistoryParam & { gasDecimals: number; baseUrl: string; apiKey?: string }): Promise<Tx[]> => {
+  chain,
+}: TransactionHistoryParam & { gasDecimals: number; chain: Chain; baseUrl: string; apiKey?: string }): Promise<
+  Tx[]
+> => {
   let url = baseUrl + `/api?module=account&action=tokentx&sort=desc` + getApiKeyQueryParameter(apiKey)
   if (address) url += `&address=${address}`
   if (assetAddress) url += `&contractaddress=${assetAddress}`
@@ -211,14 +215,13 @@ export const getTokenTransactionHistory = async ({
   if (page) url += `&page=${page}`
   if (startblock) url += `&startblock=${startblock}`
   if (endblock) url += `&endblock=${endblock}`
-
   const result = (await axios.get(url)).data.result
   if (JSON.stringify(result).includes('Invalid API Key')) throw new Error('Invalid API Key')
 
   return filterSelfTxs<TokenTransactionInfo>(result)
     .filter((tx) => !bnOrZero(tx.value).isZero())
     .reduce((acc, cur) => {
-      const tx = getTxFromTokenTransaction(cur, gasDecimals)
+      const tx = getTxFromTokenTransaction(cur, chain, gasDecimals)
       return tx ? [...acc, tx] : acc
     }, [] as Tx[])
 }

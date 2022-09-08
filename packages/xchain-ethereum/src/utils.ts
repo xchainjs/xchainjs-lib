@@ -1,5 +1,6 @@
 import { Balance, FeeType, Fees, Network, Tx, TxType } from '@xchainjs/xchain-client'
 import {
+  Address,
   Asset,
   AssetETH,
   BaseAmount,
@@ -16,7 +17,6 @@ import { parseUnits } from 'ethers/lib/utils'
 
 import erc20ABI from './data/erc20.json'
 import {
-  Address,
   ETHTransactionInfo,
   EthNetwork,
   FeesWithGasPricesAndLimits,
@@ -528,8 +528,3 @@ export const getTokenBalances = (tokenBalances: TokenBalance[]): Balance[] => {
     return acc
   }, [] as Balance[])
 }
-
-/**
- * Removes `0x` or `0X` from address
- */
-export const strip0x = (addr: Address) => addr.replace(/^0(x|X)/, '')

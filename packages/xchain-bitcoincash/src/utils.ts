@@ -1,6 +1,5 @@
 import * as bitcash from '@psf/bitcoincashjs-lib'
 import {
-  Address,
   Balance,
   FeeRate,
   Fees,
@@ -15,7 +14,7 @@ import {
   calcFees,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'

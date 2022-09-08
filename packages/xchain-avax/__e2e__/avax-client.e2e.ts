@@ -1,4 +1,4 @@
-import { Network, TxType } from '@xchainjs/xchain-client'
+import { Balance, Network, TxType } from '@xchainjs/xchain-client'
 import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
 import { Asset, AssetAVAX, Chain, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
@@ -11,11 +11,12 @@ import { defaultAvaxParams } from '../src/const'
 
 const assetRIP: Asset = {
   chain: Chain.Avalanche,
-  symbol: `RIP-0x224695Ba2a98E4a096a519B503336E06D9116E48`,
+  symbol: `RIP-0x224695ba2a98e4a096a519b503336e06d9116e48`,
   ticker: `RIP`,
   synth: false,
 }
 defaultAvaxParams.network = Network.Testnet
+defaultAvaxParams.phrase = process.env.PHRASE
 const client = new AvaxClient(defaultAvaxParams)
 
 function delay(ms: number) {
@@ -26,7 +27,7 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     const address = client.getAddress(0)
     console.log(address)
     const balances = await client.getBalance(address)
-    balances.forEach((bal) => {
+    balances.forEach((bal: Balance) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
     expect(balances.length).toBeGreaterThan(0)
@@ -54,12 +55,12 @@ describe('xchain-evm (Avax) Integration Tests', () => {
   })
   it('should fetch single RIP token transfer tx', async () => {
     const txId = '0x15fa3948bf5c980de8be74afec94b69e6aba1134ed6714aa20fdb6bddb7738f8'
-    const tx = await client.getTransactionData(txId)
-    console.log(JSON.stringify(tx, null, 2))
+    const tx = await client.getTransactionData(txId, '0x224695Ba2a98E4a096a519B503336E06D9116E48')
+    // console.log(JSON.stringify(tx, null, 2))
     const amount = assetToBase(assetAmount('0.01', 18))
-    expect(tx.asset.chain).toBe(AssetAVAX.chain)
-    expect(tx.asset.ticker).toBe(AssetAVAX.ticker)
-    expect(tx.asset.symbol).toBe(AssetAVAX.symbol)
+    expect(tx.asset.chain).toBe(assetRIP.chain)
+    expect(tx.asset.ticker).toBe(assetRIP.ticker)
+    expect(tx.asset.symbol).toBe(assetRIP.symbol)
     expect(tx.type).toBe(TxType.Transfer)
     expect(tx.from[0].from).toBe(client.getAddress(0))
     expect(tx.from[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
@@ -71,7 +72,7 @@ describe('xchain-evm (Avax) Integration Tests', () => {
   it('should transfer 0.01 AVAX between wallet 0 and 1, with a memo', async () => {
     const recipient = client.getAddress(1)
     const amount = assetToBase(assetAmount('0.01', 18))
-    const memo = '=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000'
+    const memo = `=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000`
     const txHash = await client.transfer({ amount, recipient, memo })
     console.log(txHash)
   })

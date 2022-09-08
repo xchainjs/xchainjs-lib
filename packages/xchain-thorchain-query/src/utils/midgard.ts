@@ -20,18 +20,18 @@ const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
     midgardBaseUrls: [
-      'https://midgard.thorchain.info/',
-      'https://midgard.thorswap.net/',
-      'https://midgard.ninerealms.com/',
+      'https://midgard.thorchain.info',
+      'https://midgard.thorswap.net',
+      'https://midgard.ninerealms.com',
     ],
   },
   stagenet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://stagenet-midgard.ninerealms.com/'],
+    midgardBaseUrls: ['https://stagenet-midgard.ninerealms.com'],
   },
   testnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://testnet.midgard.thorchain.info/'],
+    midgardBaseUrls: ['https://testnet.midgard.thorchain.info'],
   },
 }
 
@@ -120,7 +120,7 @@ export class Midgard {
    * @returns - constants
    */
   private async getConstantsDetails(): Promise<Record<string, number>> {
-    const path = 'v2/thorchain/constants'
+    const path = '/v2/thorchain/constants'
     for (const baseUrl of this.config.midgardBaseUrls) {
       try {
         const { data } = await axios.get(`${baseUrl}${path}`)
@@ -137,7 +137,7 @@ export class Midgard {
    * @returns the outbound Tx Value in RUNE (Basemount)
    */
   async getScheduledOutboundValue(): Promise<CryptoAmount> {
-    const path = 'v2/thorchain/queue'
+    const path = '/v2/thorchain/queue'
     for (const baseUrl of this.config.midgardBaseUrls) {
       try {
         const { data } = await axios.get(`${baseUrl}${path}`)

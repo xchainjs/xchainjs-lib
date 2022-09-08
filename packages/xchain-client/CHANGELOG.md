@@ -1,3 +1,9 @@
+# v.0.13.0 (2022-09-05)
+
+### Breaking change
+
+- moved isAssetRuneNative(), strip0x(), strip0x() from other libs into client
+
 # v.0.12.0 (2022-07-20)
 
 ### Breaking change

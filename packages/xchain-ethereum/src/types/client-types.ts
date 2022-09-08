@@ -1,8 +1,6 @@
 import { FeeOption, Fees, Network } from '@xchainjs/xchain-client'
-import { BaseAmount } from '@xchainjs/xchain-util'
+import { Address, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, ethers } from 'ethers'
-
-export type Address = string
 
 export enum EthNetwork {
   Test = 'ropsten',

@@ -1,6 +1,6 @@
 import { Provider } from '@ethersproject/abstract-provider'
-import { Address, Balance, Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Balance, Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
+import { Address, Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { BigNumber, ethers } from 'ethers'
 
@@ -48,15 +48,10 @@ export class EtherscanProvider implements OnlineDataProvider {
         if (asset.symbol === this.nativeAsset.symbol) {
           balances.push(await this.getNativeAssetBalance(address))
         } else {
-          // TODO
-          // balances.push(
-          //   await this.getTokenBalance(
-          //     address,
-          //     erc20Token.contractAddress,
-          //     erc20Token.tokenSymbol,
-          //     erc20Token.tokenDecimal,
-          //   ),
-          // )
+          const splitSymbol = asset.symbol.split('-')
+          const tokenSymbol = splitSymbol[0]
+          const contractAddress = splitSymbol[1]
+          balances.push(await this.getTokenBalance(address, contractAddress, tokenSymbol))
         }
       }
     } else {
@@ -71,14 +66,7 @@ export class EtherscanProvider implements OnlineDataProvider {
 
       const erc20TokenTxs = this.getUniqueContractAddresses(response.result)
       for (const erc20Token of erc20TokenTxs) {
-        balances.push(
-          await this.getTokenBalance(
-            address,
-            erc20Token.contractAddress,
-            erc20Token.tokenSymbol,
-            erc20Token.tokenDecimal,
-          ),
-        )
+        balances.push(await this.getTokenBalance(address, erc20Token.contractAddress, erc20Token.tokenSymbol))
       }
     }
 
@@ -92,13 +80,7 @@ export class EtherscanProvider implements OnlineDataProvider {
       amount,
     }
   }
-  private async getTokenBalance(
-    address: Address,
-    contractAddress: string,
-    tokenTicker: string,
-    tokenDecimal?: string,
-  ): Promise<Balance> {
-    let amount: BaseAmount
+  private async getTokenBalance(address: Address, contractAddress: string, tokenTicker: string): Promise<Balance> {
     const asset: Asset = {
       chain: this.chain,
       symbol: `${tokenTicker}-${contractAddress}`,
@@ -109,12 +91,8 @@ export class EtherscanProvider implements OnlineDataProvider {
     const contract: ethers.Contract = new ethers.Contract(contractAddress, erc20ABI, this.provider)
     const balance = (await contract.balanceOf(address)).toString()
 
-    if (!tokenDecimal) {
-      const decimals = (await contract.decimals()).toString()
-      amount = baseAmount(balance, Number.parseInt(decimals))
-    } else {
-      amount = baseAmount(balance, Number.parseInt(tokenDecimal))
-    }
+    const decimals = (await contract.decimals()).toString()
+    const amount = baseAmount(balance, Number.parseInt(decimals))
 
     return {
       asset,
@@ -149,6 +127,7 @@ export class EtherscanProvider implements OnlineDataProvider {
         page: 0,
         offset: maxCount,
         apiKey: this.apiKey,
+        chain: this.chain,
       })
     } else {
       transactions = await etherscanAPI.getGasAssetTransactionHistory({
@@ -172,6 +151,7 @@ export class EtherscanProvider implements OnlineDataProvider {
     let tx
 
     const txInfo = await this.provider.getTransaction(txHash)
+
     if (txInfo) {
       if (assetAddress) {
         tx =
@@ -183,6 +163,7 @@ export class EtherscanProvider implements OnlineDataProvider {
               startblock: txInfo.blockNumber,
               endblock: txInfo.blockNumber,
               apiKey: this.apiKey,
+              chain: this.chain,
             })
           ).filter((info) => info.hash === txHash)[0] ?? null
       } else {

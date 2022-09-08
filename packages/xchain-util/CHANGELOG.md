@@ -1,4 +1,15 @@
-# v.0.8.1 (2022-08-08)
+# v.0.9.0 (2022-09-05)
+
+## Update
+
+- moved isAssetRuneNative() into utils
+- changed assestFromString() to not return null, instead throw parsing error
+
+# v.0.8.1 (2022-08-15)
+
+## Add
+
+- added Avax chain and asset
 
 ## Remove
 

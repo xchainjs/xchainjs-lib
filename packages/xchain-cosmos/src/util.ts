@@ -1,12 +1,12 @@
 import { cosmosclient, proto } from '@cosmos-client/core'
 import { cosmos } from '@cosmos-client/core/cjs/proto'
 import { FeeType, Fees, Network, RootDerivationPaths, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, CosmosChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, AssetAtom, BaseAmount, CosmosChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 import Long from 'long'
 
-import { AssetAtom, COSMOS_DECIMAL, DEFAULT_GAS_LIMIT } from './const'
+import { COSMOS_DECIMAL, DEFAULT_GAS_LIMIT } from './const'
 import { APIQueryParam, TxResponse, UnsignedTxParams } from './cosmos/types'
 import { ChainId, ChainIds, ClientUrls as ClientUrls } from './types'
 

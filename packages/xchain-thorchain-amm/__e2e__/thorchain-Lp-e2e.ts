@@ -1,37 +1,34 @@
 import { Network } from '@xchainjs/xchain-client'
 import { ETH_DECIMAL } from '@xchainjs/xchain-ethereum'
 import {
-  AssetBTC,
-  AssetETH,
-  AssetLTC,
-  AssetRuneNative,
-  assetAmount,
-  assetFromString,
-  assetToBase,
-} from '@xchainjs/xchain-util'
-
-import { CryptoAmount } from '../src/crypto-amount'
-import { ThorchainAMM } from '../src/thorchain-amm'
-import { ThorchainCache } from '../src/thorchain-cache'
-import {
   AddliquidityPosition,
-  EstimateADDLP,
-  EstimateWithdrawLP,
-  LiquidityPosition,
-  RemoveLiquidityPosition,
-} from '../src/types'
-import { Midgard } from '../src/utils/midgard'
-import { Wallet } from '../src/wallet'
-require('dotenv').config()
+  CryptoAmount,
+  Midgard,
+  ThorchainCache,
+  ThorchainQuery,
+  Thornode,
+} from '@xchainjs/xchain-thorchain-query'
+import { AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 
-const testnetCache = new ThorchainCache(new Midgard(Network.Testnet))
+import { Wallet } from '../src/Wallet'
+import { ThorchainAMM } from '../src/thorchain-amm'
 
-const midgard = new Midgard(Network.Mainnet)
-const mainnetCache = new ThorchainCache(midgard)
-const thorchainAmm = new ThorchainAMM(mainnetCache)
-const testnetThorchainAmm = new ThorchainAMM(testnetCache)
-const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', testnetCache)
-//const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', mainnetCache)
+// const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+// const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
+
+const thorchainCacheTestnet = new ThorchainCache(new Midgard(Network.Testnet), new Thornode(Network.Testnet))
+const thorchainQueryTestnet = new ThorchainQuery(thorchainCacheTestnet)
+
+// const thorchainCacheStagenet = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
+// const thorchainQueryStagenet = new ThorchainQuery(thorchainCacheStagenet)
+
+const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', thorchainQueryTestnet)
+// const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
+// const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryStagenet)
+
+const testnetThorchainAmm = new ThorchainAMM(thorchainQueryTestnet)
+// const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
+// const stagenetThorchainAmm = new ThorchainAMM(thorchainQueryStagenet)
 
 // mainnet asset
 const BUSD = assetFromString('BNB.BUSD-BD1')
@@ -41,103 +38,8 @@ if (!BUSD) throw Error('bad asset')
 const BUSDT = assetFromString('BNB.BUSD-74E')
 if (!BUSDT) throw Error('bad asset')
 
-function printAdd(estimate: EstimateADDLP) {
-  const expanded = {
-    slip: estimate.slip.toNumber(),
-    poolShare: {
-      asset: estimate.poolShare.assetShare.toNumber(),
-      rune: estimate.poolShare.runeShare.toNumber(),
-    },
-    lpUnitsL: estimate.lpUnits.toNumber(),
-    runeToAssetRatio: estimate.runeToAssetRatio.toNumber(),
-    transactionFees: {
-      runeFee: estimate.transactionFee.runeFee.assetAmount.amount().toFixed(),
-      assetFee: estimate.transactionFee.assetFee.assetAmount.amount().toFixed(),
-      totalFees: estimate.transactionFee.totalFees.assetAmount.amount().toFixed(),
-    },
-    estimatedWait: estimate.estimatedWait.toFixed(),
-  }
-  console.log(expanded)
-}
-function printWithdraw(withdraw: EstimateWithdrawLP) {
-  const expanded = {
-    slip: withdraw.slip.toNumber(),
-    txFee: withdraw.transactionFee,
-    impermanentLossProtection: withdraw.impermanentLossProtection,
-    estimatedWait: withdraw.estimatedWait.toFixed(),
-  }
-  console.log(expanded)
-}
-
-function printliquidityPosition(liquidityPosition: LiquidityPosition) {
-  const expanded = {
-    assetPool: liquidityPosition.assetPool.pool.asset,
-    assetAmount: liquidityPosition.assetAmount.assetAmount.amount().toNumber(),
-    runeAmount: liquidityPosition.runeAmount.assetAmount.amount().toNumber(),
-    impermanentLosProtection: liquidityPosition.impermanentLossProtection,
-  }
-  console.log(expanded)
-}
-
 // Test User Functions - single and double swap using mock pool data
 describe('Thorchain-amm liquidity action end to end Tests', () => {
-  // Estimate Liquidity Positions
-  it(`Should estimate ADD BUSD liquidity postion for given amount`, async () => {
-    const LPAction = '+' // add to lP position
-    const addlp: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(8.9)), BUSDT),
-      rune: new CryptoAmount(assetToBase(assetAmount(2)), AssetRuneNative),
-      action: LPAction,
-    }
-    const estimateADDLP = await testnetThorchainAmm.estimatAddLP(addlp)
-    printAdd(estimateADDLP)
-    expect(estimateADDLP).toBeTruthy()
-  })
-  it(`Should estimate ADD ETH liquidity postion for given amount`, async () => {
-    const LPAction = '+' // add to lP position
-    const addlp: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(1)), AssetETH),
-      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-      action: LPAction,
-    }
-    const estimateADDLP = await testnetThorchainAmm.estimatAddLP(addlp)
-    printAdd(estimateADDLP)
-    expect(estimateADDLP).toBeTruthy()
-  })
-  it(`Should estimate ADD BTC liquidity postion for given amount`, async () => {
-    const LPAction = '+' // add to lP position
-    const addlp: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(0.001)), AssetBTC),
-      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-      action: LPAction,
-    }
-    const estimateADDLP = await testnetThorchainAmm.estimatAddLP(addlp)
-    printAdd(estimateADDLP)
-    expect(estimateADDLP).toBeTruthy()
-  })
-  it(`Should estimate ADD liquidity postion for LTC & RUNE LP`, async () => {
-    const LPAction = '+' // add to lP position
-    const addlp: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(65)), AssetLTC),
-      rune: new CryptoAmount(assetToBase(assetAmount(1552)), AssetRuneNative),
-      action: LPAction,
-    }
-    const estimateADDLP = await thorchainAmm.estimatAddLP(addlp)
-    printAdd(estimateADDLP)
-    expect(estimateADDLP).toBeTruthy()
-  })
-
-  it(`Should estimate ADD liquidity postion for BTC & RUNE LP`, async () => {
-    const LPAction = '+' // add to lP position
-    const addlp: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(0.615314)), AssetBTC),
-      rune: new CryptoAmount(assetToBase(assetAmount(5480)), AssetRuneNative),
-      action: LPAction,
-    }
-    const estimateADDLP = await thorchainAmm.estimatAddLP(addlp)
-    printAdd(estimateADDLP)
-    expect(estimateADDLP).toBeTruthy()
-  })
   // Add liquidity positions
   it(`Should add BUSD liquidity asymmetrically to BUSD pool `, async () => {
     const LPAction = '+' // add to lP position
@@ -185,10 +87,9 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     console.log(hash)
     expect(hash).toBeTruthy()
   })
-
   it(`Should add BUSD & RUNE liquidity symmetrically to BUSD pool`, async () => {
     const LPAction = '+' // add to lP position
-    const poolRatio = await testnetThorchainAmm.getPoolRatios(BUSDT)
+    const poolRatio = await thorchainQueryTestnet.getPoolRatios(BUSDT)
     // get ratios for pool and retrieve rune amount
     const busdtAmount = poolRatio.assetToRune.times(1.2)
     const runeAmount = poolRatio.runeToAsset.times(busdtAmount)
@@ -200,22 +101,6 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
 
     console.log(hash)
     expect(hash).toBeTruthy()
-  })
-  // Estimate withrdaw lp positions
-  it(`Should estimate withdraw BNB from addresses position`, async () => {
-    const LPAction = '-' // remove from lP position
-    const percentage = 100 // gets converted to basis points later
-    const assetAddress = 'redacted'
-    const withdrawType = `SYM`
-    const removeLp: RemoveLiquidityPosition = {
-      action: LPAction,
-      percentage: percentage,
-      assetAddress: assetAddress,
-      withdrawType: withdrawType,
-    }
-    const estimatRemoveLP = await testnetThorchainAmm.estimateWithdrawLP(removeLp)
-    printWithdraw(estimatRemoveLP)
-    expect(estimatRemoveLP).toBeTruthy()
   })
   //// Remove Liquidity Positions
   // it(`Should remove BUSD only liquidity asymmetrically from the BUSD pool `, async () => {
@@ -283,10 +168,4 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   //   console.log(hash)
   //   expect(hash).toBeTruthy()
   // })
-  it(`Should check liquidity position for an address`, async () => {
-    const address = 'tbnb1kmu0n6s44cz5jxdvkvsvrzgr57ndg6atw5zrys'
-    const checkLP = await testnetThorchainAmm.checkLiquidityPosition(address)
-    printliquidityPosition(checkLP)
-    expect(checkLP).toBeTruthy()
-  })
 })

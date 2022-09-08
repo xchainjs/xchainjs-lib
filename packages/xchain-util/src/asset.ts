@@ -5,6 +5,8 @@ import { Chain, isChain } from './chain'
 import { trimZeros as trimZerosHelper } from './string'
 import { Amount, Asset, AssetAmount, BaseAmount, Denomination } from './types'
 
+export type Address = string
+
 /**
  * Guard to check whether value is a BigNumber.Value or not
  *
@@ -266,6 +268,9 @@ export const AssetRuneERC20Testnet: Asset = {
   synth: false,
 }
 
+export const AssetAtom: Asset = { chain: Chain.Cosmos, symbol: 'ATOM', ticker: 'ATOM', synth: false }
+
+export const AssetLUNA: Asset = { chain: Chain.Terra, symbol: 'LUNA', ticker: 'LUNA', synth: false }
 /**
  * Helper to check whether asset is valid
  *
@@ -302,17 +307,17 @@ const NON_SYNTH_DELIMITER = '.'
  * @param {string} s The given string.
  * @returns {Asset|null} The asset from the given string.
  */
-export const assetFromString = (s: string): Asset | null => {
+export const assetFromString = (s: string): Asset => {
   const isSynth = s.includes(SYNTH_DELIMITER)
   const delimiter = isSynth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
   const data = s.split(delimiter)
   if (data.length <= 1 || data[1]?.length < 1) {
-    return null
+    throw Error('assest string not correct')
   }
 
   const chain = data[0]
   // filter out not supported string of chains
-  if (!chain || !isChain(chain)) return null
+  if (!chain || !isChain(chain)) throw Error('assest string not correct')
 
   const symbol = data[1]
   const ticker = symbol.split('-')[0]
@@ -455,3 +460,21 @@ export const formatBaseAsAssetAmount = ({
  */
 export const eqAsset = (a: Asset, b: Asset) =>
   a.chain === b.chain && a.symbol === b.symbol && a.ticker === b.ticker && a.synth === b.synth
+
+/**
+ * Checks whether an asset is `AssetRuneNative`
+ *
+ * @param {Asset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
+
+/**
+ * Removes `0x` or `0X` from address
+ */
+export const strip0x = (addr: Address) => addr.replace(/^0(x|X)/, '')
+
+export const getContractAddressFromAsset = (asset: Asset): Address => {
+  const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
+  return strip0x(assetAddress)
+}

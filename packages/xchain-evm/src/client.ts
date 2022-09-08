@@ -1,6 +1,5 @@
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import {
-  Address,
   Balance,
   BaseXChainClient,
   FeeOption,
@@ -18,7 +17,7 @@ import {
   checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, toUtf8Bytes } from 'ethers/lib/utils'
 
@@ -40,7 +39,6 @@ import {
   estimateApprove,
   estimateCall,
   getApprovalAmount,
-  // getDefaultGasPrices,
   getFee,
   getTokenAddress,
   isApproved,
@@ -75,7 +73,7 @@ export type EVMClientParams = XChainClientParams & {
   chain: Chain
   gasAsset: Asset
   gasAssetDecimals: number
-  defaults: EvmDefaults
+  defaults: Record<Network, EvmDefaults>
   providers: Record<Network, Provider>
   explorerProviders: ExplorerProviders
   dataProviders: OnlineDataProviders
@@ -88,8 +86,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
   readonly config: EVMClientParams
   private gasAsset: Asset
   private gasAssetDecimals: number
-  private defaults: EvmDefaults
   private hdNode?: HDNode
+  private defaults: Record<Network, EvmDefaults>
   private explorerProviders: Record<Network, ExplorerProvider>
   private dataProviders: Record<Network, OnlineDataProvider>
   private providers: Record<Network, Provider>
@@ -402,7 +400,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
       fromAddress,
       amount,
     }).catch(() => {
-      return BigNumber.from(this.config.defaults.approveGasLimit)
+      return BigNumber.from(this.config.defaults[this.network].approveGasLimit)
     })
 
     checkFeeBounds(this.feeBounds, gasPrice.toNumber())
@@ -492,21 +490,27 @@ export default class Client extends BaseXChainClient implements XChainClient {
       ? BigNumber.from(gasPrice.amount().toFixed())
       : await this.estimateGasPrices()
           .then((prices) => prices[feeOption])
-          // .catch(() => getDefaultGasPrices()[feeOption])
           .then((gp) => BigNumber.from(gp.amount().toFixed()))
 
     const defaultGasLimit: ethers.BigNumber = isGasAsset
-      ? this.defaults.transferGasAssetGasLimit
-      : this.defaults.transferTokenGasLimit
-    const txGasLimit =
-      gasLimit || (await this.estimateGasLimit({ asset, recipient, amount, memo }).catch(() => defaultGasLimit))
+      ? this.defaults[this.network].transferGasAssetGasLimit
+      : this.defaults[this.network].transferTokenGasLimit
+    let txGasLimit: BigNumber
+    if (!gasLimit) {
+      try {
+        txGasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo })
+      } catch (error) {
+        txGasLimit = defaultGasLimit
+      }
+    } else {
+      txGasLimit = gasLimit
+    }
 
     type SafeTxOverrides = Omit<TxOverrides, 'gasPrice'> & { gasPrice: ethers.BigNumber }
     const overrides: SafeTxOverrides = {
       gasLimit: txGasLimit,
       gasPrice: txGasPrice,
     }
-    console.log(JSON.stringify(overrides))
 
     checkFeeBounds(this.feeBounds, overrides.gasPrice.toNumber())
 
@@ -574,9 +578,13 @@ export default class Client extends BaseXChainClient implements XChainClient {
       }
     } catch (error) {
       console.warn(error)
+      const defaultRatesInGwei: FeeRates = standardFeeRates(this.defaults[this.network].gasPrice.toNumber())
+      return {
+        [FeeOption.Average]: baseAmount(defaultRatesInGwei[FeeOption.Average] * 10 ** 9, this.gasAssetDecimals),
+        [FeeOption.Fast]: baseAmount(defaultRatesInGwei[FeeOption.Fast] * 10 ** 9, this.gasAssetDecimals),
+        [FeeOption.Fastest]: baseAmount(defaultRatesInGwei[FeeOption.Fastest] * 10 ** 9, this.gasAssetDecimals),
+      }
     }
-    //should only get here if both gas estimates fails
-    throw Error(`Failed to estimate gas price`)
   }
 
   /**
@@ -591,26 +599,28 @@ export default class Client extends BaseXChainClient implements XChainClient {
   async estimateGasLimit({ asset, recipient, amount, memo }: TxParams): Promise<BigNumber> {
     const txAmount = BigNumber.from(amount.amount().toFixed())
     const theAsset = asset ?? this.gasAsset
+    let gasEstimate: BigNumber
     if (!this.isGasAsset(theAsset)) {
       // ERC20 gas estimate
       const assetAddress = getTokenAddress(theAsset)
       if (!assetAddress) throw Error(`Can't get address from asset ${assetToString(theAsset)}`)
       const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
 
-      return await contract.estimateGas.transfer(recipient, txAmount, {
+      gasEstimate = await contract.estimateGas.transfer(recipient, txAmount, {
         from: this.getAddress(),
       })
+    } else {
+      // ETH gas estimate
+      const transactionRequest = {
+        from: this.getAddress(),
+        to: recipient,
+        value: txAmount,
+        data: memo ? toUtf8Bytes(memo) : undefined,
+      }
+      gasEstimate = await this.getProvider().estimateGas(transactionRequest)
     }
 
-    // ETH gas estimate
-    const transactionRequest = {
-      from: this.getAddress(),
-      to: recipient,
-      value: txAmount,
-      data: memo ? toUtf8Bytes(memo) : undefined,
-    }
-
-    return await this.getProvider().estimateGas(transactionRequest)
+    return gasEstimate
   }
   private isGasAsset(asset: Asset): boolean {
     return eqAsset(this.gasAsset, asset)
