@@ -29,7 +29,7 @@ export const getLiquidityUnits = (liquidity: LiquidityDeposited, pool: Liquidity
  *
  * @param unitData - units for both asset and rune
  * @param pool - pool that the asset is bound to
- * @returns - pool share of both asset and rune
+ * @returns - pool share of both asset and rune in percentage
  */
 export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShareDetail => {
   // formula: (rune * part) / total; (asset * part) / total
@@ -38,7 +38,9 @@ export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShare
   const R = pool.runeBalance.amount()
   const T = pool.assetBalance.amount()
   const asset = T.times(units).div(total)
+  console.log(asset.toNumber())
   const rune = R.times(units).div(total)
+  console.log(rune.toNumber())
   const poolShareDetail = {
     assetShare: asset,
     runeShare: rune,
@@ -50,7 +52,7 @@ export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShare
  *
  * @param poolShare - the share of asset and rune added to the pool
  * @param pool - Pool that the asset is attached to
- * @returns - returns bignumber representing a a slip percentage
+ * @returns - returns bignumber representing a slip percentage
  */
 export const getSlipOnLiquidity = (poolShare: PoolShareDetail, pool: LiquidityPool): BigNumber => {
   // formula: (t * R - T * r)/ (T*r + R*T)

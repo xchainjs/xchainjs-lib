@@ -187,10 +187,12 @@ export type LiquidityProvider = {
   asset: string
   rune_address: string
   asset_address: string
+  last_add_height: number
+  last_withdraw_height: number
   units: number
   pending_rune: number
   pending_asset: number
+  pending_tx_Id: string
   rune_deposit_value: number
   asset_deposit_value: number
-  last_add_height: number
 }

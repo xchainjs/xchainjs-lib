@@ -39,8 +39,8 @@ function printAdd(estimate: EstimateADDLP) {
   const expanded = {
     slip: estimate.slip.toNumber(),
     poolShare: {
-      asset: estimate.poolShare.assetShare.toNumber(),
-      rune: estimate.poolShare.runeShare.toNumber(),
+      asset: estimate.poolShare.assetShare,
+      rune: estimate.poolShare.runeShare,
     },
     lpUnitsL: estimate.lpUnits.toNumber(),
     runeToAssetRatio: estimate.runeToAssetRatio.toNumber(),

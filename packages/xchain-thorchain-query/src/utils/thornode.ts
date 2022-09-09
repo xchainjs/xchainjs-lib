@@ -141,23 +141,11 @@ export class Thornode {
    * @param height - optional block height, defaults to current tip
    * @returns
    */
-  async getLiquidityProvider(asset: string, address: string, height?: number): Promise<LiquidityProvider> {
+  async getLiquidityProvider(asset: string, address: string, height?: number): Promise<LiquidityProvider[]> {
     for (const api of this.liquidityProvidersApi) {
       try {
         const lp = await api.liquidityProvider(asset, address, height)
-        if (!lp.data) throw Error('no position found')
-        const data: LiquidityProvider = {
-          asset: lp.data[0].asset,
-          rune_address: lp.data[0].rune_address,
-          asset_address: lp.data[0].asset_address,
-          units: lp.data[0].units,
-          pending_rune: lp.data[0].pending_rune,
-          pending_asset: lp.data[0].pending_asset,
-          rune_deposit_value: lp.data[0].rune_deposit_value,
-          asset_deposit_value: lp.data[0].asset_deposit_value,
-          last_add_height: lp.data[0].last_add_height,
-        }
-        return data
+        return lp.data
       } catch (e) {
         console.error(e)
       }

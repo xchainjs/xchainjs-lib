@@ -29,6 +29,7 @@ import {
   EstimateSwapParams,
   InboundDetail,
   LiquidityPosition,
+  LiquidityProvider,
   PoolRatios,
   SwapEstimate,
   TotalFees,
@@ -406,7 +407,7 @@ export class ThorchainQuery {
    * @returns time in seconds before a Tx is confirmed by THORChain
    * @see https://docs.thorchain.org/chain-clients/overview
    */
-  private async confCounting(inbound: CryptoAmount): Promise<number> {
+  async confCounting(inbound: CryptoAmount): Promise<number> {
     // RUNE, BNB and Synths have near instant finality, so no conf counting required. - need to make a BFT only case.
     if (
       isAssetRuneNative(inbound.asset) ||
@@ -721,7 +722,7 @@ export class ThorchainQuery {
   }
 
   /**
-   *
+   * @param - Asset for lp
    * @param address - address used for Lp
    * @returns - Type Object liquidityPosition
    */
@@ -729,23 +730,27 @@ export class ThorchainQuery {
     const poolAsset = await this.thorchainCache.getPoolForAsset(asset)
     if (!poolAsset) throw Error(`Could not find pool for ${asset}`)
     const liquidityProvider = await this.thorchainCache.thornode.getLiquidityProvider(poolAsset.assetString, address)
-    const blockData = (await this.thorchainCache.thornode.getLastBlock()).find((item) => item)
+    const lpObj: LiquidityProvider = JSON.parse(`${JSON.stringify(liquidityProvider)}`)
+    // Current block number for that chain
+    const blockData = (await this.thorchainCache.thornode.getLastBlock()).find((item) => item.chain === asset.chain)
     if (!blockData) throw Error(`Could not get block data`)
+    // Pools total units & Lp's total units
     const unitData: UnitData = {
       totalUnits: new BigNumber(poolAsset.pool.liquidityUnits),
-      liquidityUnits: new BigNumber(0),
+      liquidityUnits: new BigNumber(lpObj.units),
     }
     const networkValues = await this.thorchainCache.midgard.getNetworkValues()
     const block: Block = {
       current: blockData.thorchain,
-      lastAdded: 0,
+      lastAdded: lpObj.last_add_height,
       fullProtection: networkValues['FULLIMPLOSSPROTECTIONBLOCKS'],
     }
     const poolShare = getPoolShare(unitData, poolAsset)
+    console.log(poolShare.assetShare.toNumber(), poolShare.runeShare.toNumber())
+    console.log(block)
     const impermanentLossProtection = getLiquidityProtectionData(poolShare, poolAsset, block)
-    console.log(impermanentLossProtection)
     const lpPosition: LiquidityPosition = {
-      position: liquidityProvider,
+      position: lpObj,
       impermanentLossProtection: impermanentLossProtection,
     }
     return lpPosition

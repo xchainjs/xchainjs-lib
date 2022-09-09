@@ -1,7 +1,13 @@
-import { EstimateSwapParams, ThorchainQuery, TxDetails, calcNetworkFee } from '@xchainjs/xchain-thorchain-query'
+import {
+  AddliquidityPosition,
+  EstimateSwapParams,
+  ThorchainQuery,
+  TxDetails,
+  calcNetworkFee,
+} from '@xchainjs/xchain-thorchain-query'
 import { BigNumber } from 'bignumber.js'
 
-import { AddliquidityPosition, RemoveLiquidityPosition, TxSubmitted } from './types'
+import { TxSubmitted } from './types'
 import { Wallet } from './wallet'
 
 const BN_1 = new BigNumber(1)
@@ -59,7 +65,7 @@ export class ThorchainAMM {
    * @param params - swap params
    * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
-  public async doSwap(wallet: Wallet, params: EstimateSwapParams): Promise<SwapSubmitted> {
+  public async doSwap(wallet: Wallet, params: EstimateSwapParams): Promise<TxSubmitted> {
     // TODO validate all input fields
     const txDetails = await this.thorchainQuery.estimateSwap(params)
     if (!txDetails.txEstimate.canSwap) {
@@ -105,7 +111,7 @@ export class ThorchainAMM {
       if (assetInboundFee.baseAmount.times(4).gt(params.asset.baseAmount)) throw Error(`Asset amount is less than fees`)
     }
     if (!params.rune.assetAmount.eq(0)) {
-      waitTimeSeconds = await this.confCounting(params.rune)
+      waitTimeSeconds = await this.thorchainQuery.confCounting(params.rune)
       if (runeInboundFee.baseAmount.times(4).gt(params.rune.baseAmount)) throw Error(`Rune amount is less than fees`)
     }
     return wallet.addLiquidity({
@@ -115,32 +121,32 @@ export class ThorchainAMM {
       waitTimeSeconds: waitTimeSeconds,
     })
   }
-  /**
-   *
-   * @param params - liquidity parameters
-   * @param wallet - wallet needed to perform tx
-   * @return
-   */
-  public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidityPosition): Promise<TxSubmitted[]> {
-    let waitTimeSeconds = 0
-    const membersLP = await this.thorchainQuery.checkLiquidityPosition(params.assetAddress)
-    // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
-    const dustValues = await this.getDustValues(membersLP.assetAmount.asset)
-    console.log(dustValues.asset.assetAmount.amount().toNumber(), dustValues.rune.assetAmount.amount().toNumber())
+  // /**
+  //  *
+  //  * @param params - liquidity parameters
+  //  * @param wallet - wallet needed to perform tx
+  //  * @return
+  //  */
+  // public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidityPosition): Promise<TxSubmitted[]> {
+  //   let waitTimeSeconds = 0
+  //   const membersLP = await this.thorchainQuery.checkLiquidityPosition(params.assetAddress)
+  //   // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
+  //   const dustValues = await this.thorchainQuery.getDustValues(membersLP.assetAmount.asset)
+  //   console.log(dustValues.asset.assetAmount.amount().toNumber(), dustValues.rune.assetAmount.amount().toNumber())
 
-    // Calculating wait time for amount to be withdrawn based off the percentage
-    const assetAmount = membersLP.assetAmount.times(params.percentage / 100)
-    // bug right here
+  //   // Calculating wait time for amount to be withdrawn based off the percentage
+  //   const assetAmount = membersLP.assetAmount.times(params.percentage / 100)
+  //   // bug right here
 
-    waitTimeSeconds = await this.confCounting(assetAmount)
-    waitTimeSeconds += await this.confCounting(membersLP.runeAmount)
+  //   waitTimeSeconds = await this.thorchainQuery.confCounting(assetAmount)
+  //   waitTimeSeconds += await this.thorchainQuery.confCounting(membersLP.runeAmount)
 
-    return wallet.removeLiquidity({
-      asset: dustValues.asset,
-      rune: dustValues.rune,
-      action: params.action,
-      percentage: params.percentage,
-      waitTimeSeconds: waitTimeSeconds,
-    })
-  }
+  //   return wallet.removeLiquidity({
+  //     asset: dustValues.asset,
+  //     rune: dustValues.rune,
+  //     action: params.action,
+  //     percentage: params.percentage,
+  //     waitTimeSeconds: waitTimeSeconds,
+  //   })
+  // }
 }
