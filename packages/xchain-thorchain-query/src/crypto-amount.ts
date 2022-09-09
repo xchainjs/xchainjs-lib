@@ -66,6 +66,8 @@ export class CryptoAmount {
   }
   gte(v: CryptoAmount): boolean {
     this.check(v)
+    console.log('mike1', this.baseAmount.amount().toFixed())
+    console.log('mike2', v.baseAmount.amount().toFixed())
     return this.baseAmount.gte(v.baseAmount)
   }
   eq(v: CryptoAmount): boolean {

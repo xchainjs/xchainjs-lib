@@ -53,7 +53,7 @@ export const getSwapFee = (inputAmount: CryptoAmount, pool: LiquidityPool, toRun
   const decimals = toRune || !pool.decimals ? 8 : pool.decimals
   const numerator = x.times(x).multipliedBy(Y)
   const denominator = x.plus(X).pow(2)
-  const result = numerator.div(denominator)
+  const result = numerator.div(denominator).toFixed(0)
   const swapFee = new CryptoAmount(baseAmount(result, decimals), units)
   // console.log(` swapFee ${swapFee.assetAmountFixedString()} ${assetToString(units)}`)
   return swapFee
@@ -92,7 +92,7 @@ export const getSwapOutput = (inputAmount: CryptoAmount, pool: LiquidityPool, to
   const decimals = toRune || !pool.decimals ? 8 : pool.decimals
   const numerator = x.times(X).times(Y)
   const denominator = x.plus(X).pow(2)
-  const result = numerator.div(denominator)
+  const result = numerator.div(denominator).toFixed(0)
   return new CryptoAmount(baseAmount(result, decimals), units)
 }
 

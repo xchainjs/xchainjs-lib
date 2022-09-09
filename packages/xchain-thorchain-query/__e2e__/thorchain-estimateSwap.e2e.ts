@@ -62,7 +62,8 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBTC),
       destinationAsset: BUSD,
-      destinationAddress: ateFeePercent: 0.003, //optional
+      destinationAddress: 'xxx',
+      // affiliateFeePercent: 0.003, //optional
       slipLimit: new BigNumber('0.03'), //optional
     }
 

@@ -4,10 +4,12 @@ import {
   Address,
   Asset,
   Chain,
-  assetAmount,
+  // assetAmount,
   assetFromString,
-  assetToBase,
+  // assetToBase,
+  // assetToBase,
   assetToString,
+  baseAmount,
   eqAsset,
   isAssetRuneNative,
 } from '@xchainjs/xchain-util'
@@ -103,7 +105,7 @@ export class ThorchainCache {
       // from/R * R/to = from/to
       exchangeRate = lpFrom.runeToAssetRatio.times(lpTo.assetToRuneRatio)
     }
-    // console.log(` 1 ${assetToString(from)} = ${exchangeRate} ${assetToString(to)}`)
+    console.log(` 1 ${assetToString(from)} = ${exchangeRate} ${assetToString(to)}`)
     return exchangeRate
   }
 
@@ -255,16 +257,31 @@ export class ThorchainCache {
    */
   async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
     const exchangeRate = await this.getExchangeRate(input.asset, outAsset)
-    let decimals = DEFAULT_THORCHAIN_DECIMALS
-    if (!isAssetRuneNative(outAsset)) {
-      const pool = await this.getPoolForAsset(outAsset)
-      decimals = pool.decimals ?? DEFAULT_THORCHAIN_DECIMALS
-    }
+    const outDecimals = await this.getDecimalForAsset(outAsset)
+    const inDecimals = await this.getDecimalForAsset(input.asset)
 
-    const amt = assetAmount(input.assetAmount.times(exchangeRate).amount().toFixed(), decimals)
-    const result = new CryptoAmount(assetToBase(amt), outAsset)
+    const adjustDecimals = outDecimals - inDecimals
+    let baseAmountOut = input.baseAmount.times(exchangeRate).amount().toFixed(0)
+    console.log(`mike 3 input ${input.baseAmount.amount().toFixed()} ${input.asset.ticker}`)
+    if (adjustDecimals > 0) {
+      baseAmountOut = baseAmountOut + '0'.repeat(adjustDecimals)
+    } else if (adjustDecimals <= 0) {
+      baseAmountOut = baseAmountOut.substring(0, baseAmountOut.length + adjustDecimals)
+    }
+    const amt = baseAmount(baseAmountOut, outDecimals)
+    const result = new CryptoAmount(amt, outAsset)
+    console.log(
+      `${input.formatedAssetString()} ${input.asset.ticker} = ${result.formatedAssetString()} ${outAsset.ticker}`,
+    )
 
     return result
+  }
+  private async getDecimalForAsset(asset: Asset) {
+    if (!isAssetRuneNative(asset)) {
+      const pool = await this.getPoolForAsset(asset)
+      return pool.decimals ?? DEFAULT_THORCHAIN_DECIMALS
+    }
+    return DEFAULT_THORCHAIN_DECIMALS
   }
   async getRouterAddressForChain(chain: Chain): Promise<Address> {
     const inboundAsgard = (await this.getInboundAddressesItems())[chain]

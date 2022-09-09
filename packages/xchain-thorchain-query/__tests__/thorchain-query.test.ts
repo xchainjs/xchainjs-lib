@@ -1,14 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
-  CryptoAmount,
-  EstimateSwapParams,
-  Midgard,
-  ThorchainCache,
-  ThorchainQuery,
-  Thornode,
-  TxDetails,
-} from '@xchainjs/xchain-thorchain-query'
-import {
   Asset,
   AssetBNB,
   AssetBTC,
@@ -22,6 +13,12 @@ import {
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
+import { CryptoAmount } from '../src/crypto-amount'
+import { ThorchainCache } from '../src/thorchain-cache'
+import { ThorchainQuery } from '../src/thorchain-query'
+import { EstimateSwapParams, TxDetails } from '../src/types'
+import { Midgard } from '../src/utils/midgard'
+import { Thornode } from '../src/utils/thornode'
 
 const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
@@ -51,12 +48,13 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
   console.log(expanded)
 }
 
-describe('ThorchainAmm Client Test', () => {
+describe('thorchain-query tests', () => {
   beforeEach(() => {
     mockMidgardApi.init()
     mockThornodeApi.init()
   })
   afterEach(() => {
+    mockMidgardApi.restore()
     mockThornodeApi.restore()
   })
 
@@ -125,7 +123,7 @@ describe('ThorchainAmm Client Test', () => {
   })
   it('Should estimate swap from USDC to RUNE ', async () => {
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(1000)), assetUSDC),
+      input: new CryptoAmount(assetToBase(assetAmount(1000, 6)), assetUSDC),
       destinationAsset: AssetRuneNative,
       destinationAddress: 'xxx',
     }
@@ -138,7 +136,7 @@ describe('ThorchainAmm Client Test', () => {
       )
     } catch (error) {
       console.log(error.message)
-      expect(error.message).toEqual(`source chain is halted`)
+      fail()
     }
   })
 })
