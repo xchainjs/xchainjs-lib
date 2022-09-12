@@ -5,11 +5,14 @@ import {
   Asset,
   Chain,
   // assetAmount,
+  // assetToBase,
+  // assetToBase,
+  assetAmount,
   assetFromString,
-  // assetToBase,
-  // assetToBase,
+  assetToBase,
   assetToString,
   baseAmount,
+  baseToAsset,
   eqAsset,
   isAssetRuneNative,
 } from '@xchainjs/xchain-util'
@@ -252,30 +255,45 @@ export class ThorchainCache {
    * Ex. convert(input:100 BUSD, outAsset: BTC) -> 0.0001234 BTC
    *
    * @param input - amount/asset to convert to outAsset
-   * @param ouAsset - the Asset you want to convert to
+   * @param outAsset - the Asset you want to convert to
    * @returns CryptoAmount of input
    */
   async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
     const exchangeRate = await this.getExchangeRate(input.asset, outAsset)
-    const outDecimals = await this.getDecimalForAsset(outAsset)
-    const inDecimals = await this.getDecimalForAsset(input.asset)
-
-    const adjustDecimals = outDecimals - inDecimals
-    let baseAmountOut = input.baseAmount.times(exchangeRate).amount().toFixed(0)
-    console.log(`mike 3 input ${input.baseAmount.amount().toFixed()} ${input.asset.ticker}`)
-    if (adjustDecimals > 0) {
+    //const outDecimals = await this.getDecimalForAsset(outAsset)
+    const inDecimals = await this.getDecimalForAsset(input.asset) // resets the decimals for the asset every time this is called even though an asset has just been converted.
+    console.log(inDecimals)
+    const defaultDecimals = DEFAULT_THORCHAIN_DECIMALS
+    let baseAmountOut = input.baseAmount.times(exchangeRate).amount().toFixed()
+    console.log(`mike 3 input ${input.baseAmount.amount()} ${input.asset.ticker}`)
+    if (defaultDecimals > inDecimals) {
+      const adjustDecimals = defaultDecimals - inDecimals
+      console.log(`Default decimals ${baseAmountOut}`)
       baseAmountOut = baseAmountOut + '0'.repeat(adjustDecimals)
-    } else if (adjustDecimals <= 0) {
+      console.log(baseAmountOut)
+    } else if (inDecimals > defaultDecimals) {
+      const adjustDecimals = defaultDecimals - inDecimals
+      console.log(baseAmountOut)
       baseAmountOut = baseAmountOut.substring(0, baseAmountOut.length + adjustDecimals)
+      console.log(baseAmountOut)
     }
-    const amt = baseAmount(baseAmountOut, outDecimals)
-    const result = new CryptoAmount(amt, outAsset)
+    const amount = baseToAsset(baseAmount(+baseAmountOut))
+      .amount()
+      .toFixed()
+    const result = new CryptoAmount(assetToBase(assetAmount(amount, defaultDecimals)), outAsset)
+    const inD = await this.getDecimalForAsset(result.asset)
+    console.log(inD)
     console.log(
       `${input.formatedAssetString()} ${input.asset.ticker} = ${result.formatedAssetString()} ${outAsset.ticker}`,
     )
 
     return result
   }
+  /**
+   *
+   * @param asset - Asset
+   * @returns
+   */
   private async getDecimalForAsset(asset: Asset) {
     if (!isAssetRuneNative(asset)) {
       const pool = await this.getPoolForAsset(asset)
@@ -283,6 +301,7 @@ export class ThorchainCache {
     }
     return DEFAULT_THORCHAIN_DECIMALS
   }
+
   async getRouterAddressForChain(chain: Chain): Promise<Address> {
     const inboundAsgard = (await this.getInboundAddressesItems())[chain]
 

@@ -6,34 +6,36 @@ import { Midgard } from '../src/utils/midgard'
 
 // eslint-disable-next-line ordered-imports/ordered-imports
 import mockMidgardApi from '../__mocks__/midgard-api'
+import mockThornodeApi from '../__mocks__/thornode-api'
 
 const mainnetMidgard = new Midgard(Network.Mainnet)
 
 describe('Midgard Client Test', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     mockMidgardApi.init()
+    mockThornodeApi.init()
   })
   afterEach(() => {
     mockMidgardApi.restore()
+    mockThornodeApi.restore()
   })
-
   const networkName = 'FullImpLossProtectionBlocks'
   const FullImpLossProtectionBlocks = 1440000
 
   const poolDetail: PoolDetail = {
-    annualPercentageRate: '0.22630035115715733',
+    annualPercentageRate: '0.0925796460549001',
     asset: 'BCH.BCH',
-    assetDepth: '672725342458',
-    assetPrice: '47.8855454090496',
-    assetPriceUSD: '100.49286962864382',
-    liquidityUnits: '21313725982554',
-    poolAPY: '0.22630035115715733',
-    runeDepth: '32213819934091',
+    assetDepth: '580355957856',
+    assetPrice: '64.89141427538918',
+    assetPriceUSD: '129.74904173711747',
+    liquidityUnits: '21436675546946',
+    poolAPY: '0.0925796460549001',
+    runeDepth: '37660118888424',
     status: 'available',
-    synthSupply: '70021630527',
-    synthUnits: '1170133172651',
-    units: '22483859155205',
-    volume24h: '6189085819437',
+    synthSupply: '32889120336',
+    synthUnits: '625127816672',
+    units: '22061803363618',
+    volume24h: '8370845079708',
   }
   const inboundBCHAdress: InboundAddressesItem = {
     chain: 'BCH',

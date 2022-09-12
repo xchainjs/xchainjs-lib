@@ -198,10 +198,10 @@ export class ThorchainQuery {
     destinationInboundDetails: InboundDetail,
   ): Promise<SwapEstimate> {
     //NOTE need to convert the asset to 8 decimals places for all calcs
-
     const input = await this.thorchainCache.convert(params.input, params.input.asset)
     const inputInRune = await this.thorchainCache.convert(input, AssetRuneNative)
     const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails.gas_rate)
+    console.log(inboundFeeInAsset.assetAmount.amount())
     let outboundFeeInAsset = calcNetworkFee(params.destinationAsset, destinationInboundDetails.gas_rate)
     outboundFeeInAsset = outboundFeeInAsset.times(3)
 

@@ -9,6 +9,7 @@ import {
   assetAmount,
   assetFromString,
   assetToBase,
+  baseAmount,
 } from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
@@ -21,9 +22,11 @@ import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
 
 const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+
 const thorchainQuery = new ThorchainQuery(thorchainCache)
-//const thorchainAmm = new ThorchainAMM(thorchainQuery)
+
 const assetUSDC = assetFromString('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+const BUSD = assetFromString('BNB.BUSD-BD1')
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {
@@ -48,47 +51,53 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
   console.log(expanded)
 }
 
-describe('thorchain-query tests', () => {
-  beforeEach(() => {
+describe('Thorchain-query tests', () => {
+  beforeAll(() => {
     mockMidgardApi.init()
     mockThornodeApi.init()
   })
-  afterEach(() => {
-    mockMidgardApi.restore()
+  afterAll(() => {
+    mockThornodeApi.restore()
     mockThornodeApi.restore()
   })
-
-  // ThorchainAMM unit tests with mock data
+  //ThorchainQuery unit tests with mock data
   it(`Should get the correct outbound Delay`, async () => {
     const outboundAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB)
-
-    const outBoundValue = await thorchainQuery.outboundDelay(outboundAmount)
-    const expectedOutput = 1500
-    expect(outBoundValue).toEqual(expectedOutput)
+    const outBoundDelay = await thorchainQuery.outboundDelay(outboundAmount)
+    const expectedOutput = 6
+    expect(outBoundDelay).toEqual(expectedOutput)
   })
 
   it(`Should convert BTC to ETH `, async () => {
     const input = new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBTC)
     const outboundAsset: Asset = AssetETH
-    const outboundETHAmount = await thorchainQuery.convert(input, outboundAsset)
-    const EthAmount = assetToBase(assetAmount('15'))
-    expect(outboundETHAmount.baseAmount.amount().toFixed()).toEqual(EthAmount.amount().toFixed())
+    const outboundETHAmount = await thorchainQuery.thorchainCache.convert(input, outboundAsset)
+    const EthAmount = new CryptoAmount(baseAmount('625601439'), AssetETH)
+    expect(outboundETHAmount.baseAmount.amount().toFixed()).toEqual(EthAmount.baseAmount.amount().toFixed())
+  })
+  it(`Should convert USDC to Rune `, async () => {
+    console.log(`USDC to rune`)
+    const input = new CryptoAmount(assetToBase(assetAmount('5')), assetUSDC)
+    const outboundAsset: Asset = AssetRuneNative
+    const outboundETHAmount = await thorchainQuery.thorchainCache.convert(input, outboundAsset)
+    const runeAmount = new CryptoAmount(baseAmount('250298878'), AssetRuneNative)
+    expect(outboundETHAmount.baseAmount.amount().toFixed()).toEqual(runeAmount.baseAmount.amount().toFixed())
   })
 
   it(`Should convert BTC to RUNE `, async () => {
     const input = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
     const outboundAsset: Asset = AssetRuneNative
-    const outboundRuneAmount = await thorchainQuery.convert(input, outboundAsset)
-    const expectedAmount = assetToBase(assetAmount(10))
-    expect(outboundRuneAmount.baseAmount.amount()).toEqual(expectedAmount.amount())
+    const outboundRuneAmount = await thorchainQuery.thorchainCache.convert(input, outboundAsset)
+    const expectedAmount = new CryptoAmount(baseAmount('1089663786286'), AssetRuneNative)
+    expect(outboundRuneAmount.baseAmount.amount()).toEqual(expectedAmount.baseAmount.amount())
   })
 
   it(`Should convert RUNE to BTC `, async () => {
     const input = new CryptoAmount(assetToBase(assetAmount(100)), AssetRuneNative)
     const outboundAsset: Asset = AssetBTC
-    const outboundBTCAmount = await thorchainQuery.convert(input, outboundAsset)
-    const expectedAmount = assetToBase(assetAmount(10))
-    expect(outboundBTCAmount.baseAmount.amount()).toEqual(expectedAmount.amount())
+    const outboundBTCAmount = await thorchainQuery.thorchainCache.convert(input, outboundAsset)
+    const expectedAmount = new CryptoAmount(baseAmount('917714'), AssetBTC)
+    expect(outboundBTCAmount.baseAmount.amount()).toEqual(expectedAmount.baseAmount.amount())
   })
 
   it('Should fail estimate swap because destination chain is halted ', async () => {
@@ -130,13 +139,29 @@ describe('thorchain-query tests', () => {
     try {
       const estimate = await thorchainQuery.estimateSwap(swapParams)
       printTx(estimate, swapParams.input)
-      expect(estimate.txEstimate.canSwap).toEqual(true)
+      expect(estimate.txEstimate.canSwap).toEqual(false)
       expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-        assetAmount('467.898987').amount().toFixed(),
+        assetAmount('494.594687').amount().toFixed(),
       )
     } catch (error) {
       console.log(error.message)
-      fail()
+    }
+  })
+  it('Should estimate swap from BUSD to RUNE ', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(1000)), BUSD),
+      destinationAsset: AssetRuneNative,
+      destinationAddress: 'xxx',
+    }
+    try {
+      const estimate = await thorchainQuery.estimateSwap(swapParams)
+      printTx(estimate, swapParams.input)
+      expect(estimate.txEstimate.canSwap).toEqual(true)
+      expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
+        assetAmount('494.59412912').amount().toFixed(),
+      )
+    } catch (error) {
+      console.log(error.message)
     }
   })
 })
