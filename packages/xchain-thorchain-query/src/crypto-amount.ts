@@ -2,6 +2,7 @@ import {
   Asset,
   AssetAmount,
   BaseAmount,
+  assetToBase,
   assetToString,
   baseToAsset,
   eqAsset,
@@ -24,55 +25,54 @@ export class CryptoAmount {
   }
   plus(v: CryptoAmount): CryptoAmount {
     this.check(v)
-    const baseAmountResult = this.baseAmount.plus(v.baseAmount)
-    return new CryptoAmount(baseAmountResult, this.asset)
+    const assetAmountResult = assetToBase(this.assetAmount.plus(v.assetAmount))
+    return new CryptoAmount(assetAmountResult, this.asset)
   }
   minus(v: CryptoAmount): CryptoAmount {
     this.check(v)
-    const baseAmountResult = this.baseAmount.minus(v.baseAmount)
-    return new CryptoAmount(baseAmountResult, this.asset)
+    const assetAmountResult = assetToBase(this.assetAmount.minus(v.assetAmount))
+    return new CryptoAmount(assetAmountResult, this.asset)
   }
   times(v: CryptoNumeric): CryptoAmount {
     this.check(v)
     if (v instanceof CryptoAmount) {
-      const baseAmountResult = this.baseAmount.times(v.baseAmount)
-      return new CryptoAmount(baseAmountResult, this.asset)
+      const assetAmountResult = assetToBase(this.assetAmount.times(v.assetAmount))
+      return new CryptoAmount(assetAmountResult, this.asset)
     } else {
-      const baseAmountResult = this.baseAmount.times(v)
-      return new CryptoAmount(baseAmountResult, this.asset)
+      const assetAmountResult = assetToBase(this.assetAmount.times(v))
+      return new CryptoAmount(assetAmountResult, this.asset)
     }
   }
   div(v: CryptoNumeric): CryptoAmount {
     this.check(v)
     if (v instanceof CryptoAmount) {
-      const baseAmountResult = this.baseAmount.div(v.baseAmount)
-      return new CryptoAmount(baseAmountResult, this.asset)
+      const assetAmountResult = assetToBase(this.assetAmount.div(v.assetAmount))
+      return new CryptoAmount(assetAmountResult, this.asset)
     } else {
-      const baseAmountResult = this.baseAmount.div(v)
-      return new CryptoAmount(baseAmountResult, this.asset)
+      const assetAmountResult = assetToBase(this.assetAmount.div(v))
+      return new CryptoAmount(assetAmountResult, this.asset)
     }
   }
   lt(v: CryptoAmount): boolean {
     this.check(v)
-    return this.baseAmount.lt(v.baseAmount)
+    return this.assetAmount.lt(v.assetAmount)
   }
   lte(v: CryptoAmount): boolean {
     this.check(v)
-    return this.baseAmount.lte(v.baseAmount)
+    return this.assetAmount.lte(v.assetAmount)
   }
   gt(v: CryptoAmount): boolean {
     this.check(v)
-    return this.baseAmount.gt(v.baseAmount)
+    return this.assetAmount.gt(v.assetAmount)
   }
   gte(v: CryptoAmount): boolean {
     this.check(v)
-    console.log('mike1', this.baseAmount.amount().toFixed())
-    console.log('mike2', v.baseAmount.amount().toFixed())
-    return this.baseAmount.gte(v.baseAmount)
+
+    return this.assetAmount.gte(v.assetAmount)
   }
   eq(v: CryptoAmount): boolean {
     this.check(v)
-    return this.baseAmount.eq(v.baseAmount)
+    return this.assetAmount.eq(v.assetAmount)
   }
   formatedAssetString(): string {
     return formatAssetAmountCurrency({
@@ -91,8 +91,8 @@ export class CryptoAmount {
    * This guard protects against trying to perform math with different assets
    *
    * Example.
-   * const x = new CryptoAmount(baseAmount(1),AssetBTC)
-   * const y = new CryptoAmount(baseAmount(1),AssetETH)
+   * const x = new CryptoAmount(assetAmount(1),AssetBTC)
+   * const y = new CryptoAmount(assetAmount(1),AssetETH)
    *
    * x.plus(y) <- will throw error "cannot perform math on 2 diff assets BTC.BTC ETH.ETH
    *

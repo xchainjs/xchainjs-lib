@@ -76,7 +76,6 @@ describe('Thorchain-query tests', () => {
     expect(outboundETHAmount.baseAmount.amount().toFixed()).toEqual(EthAmount.baseAmount.amount().toFixed())
   })
   it(`Should convert USDC to Rune `, async () => {
-    console.log(`USDC to rune`)
     const input = new CryptoAmount(assetToBase(assetAmount('5')), assetUSDC)
     const outboundAsset: Asset = AssetRuneNative
     const outboundETHAmount = await thorchainQuery.thorchainCache.convert(input, outboundAsset)
@@ -139,7 +138,7 @@ describe('Thorchain-query tests', () => {
     try {
       const estimate = await thorchainQuery.estimateSwap(swapParams)
       printTx(estimate, swapParams.input)
-      expect(estimate.txEstimate.canSwap).toEqual(false)
+      expect(estimate.txEstimate.canSwap).toEqual(true)
       expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
         assetAmount('494.594687').amount().toFixed(),
       )
@@ -158,7 +157,7 @@ describe('Thorchain-query tests', () => {
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(true)
       expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-        assetAmount('494.59412912').amount().toFixed(),
+        assetAmount('499.96433727').amount().toFixed(),
       )
     } catch (error) {
       console.log(error.message)

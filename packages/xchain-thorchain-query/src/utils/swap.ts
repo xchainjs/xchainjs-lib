@@ -50,10 +50,11 @@ export const getSwapFee = (inputAmount: CryptoAmount, pool: LiquidityPool, toRun
   const X = toRune ? pool.assetBalance.amount() : pool.runeBalance.amount() // input is asset if toRune
   const Y = toRune ? pool.runeBalance.amount() : pool.assetBalance.amount() // output is rune if toRune
   const units = toRune ? AssetRuneNative : pool.asset
-  const decimals = toRune || !pool.decimals ? 8 : pool.decimals
   const numerator = x.times(x).multipliedBy(Y)
   const denominator = x.plus(X).pow(2)
-  const result = numerator.div(denominator).toFixed(0)
+  const result = numerator.div(denominator)
+
+  const decimals = toRune || !pool.decimals ? 8 : pool.decimals
   const swapFee = new CryptoAmount(baseAmount(result, decimals), units)
   // console.log(` swapFee ${swapFee.assetAmountFixedString()} ${assetToString(units)}`)
   return swapFee
@@ -92,7 +93,7 @@ export const getSwapOutput = (inputAmount: CryptoAmount, pool: LiquidityPool, to
   const decimals = toRune || !pool.decimals ? 8 : pool.decimals
   const numerator = x.times(X).times(Y)
   const denominator = x.plus(X).pow(2)
-  const result = numerator.div(denominator).toFixed(0)
+  const result = numerator.div(denominator)
   return new CryptoAmount(baseAmount(result, decimals), units)
 }
 
@@ -214,9 +215,9 @@ export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount =
       const gasRateinAVAXGwei = gasRate
       const gasRateinAVAXWei = baseAmount(gasRateinAVAXGwei.multipliedBy(10 ** 9), 18)
       if (eqAsset(asset, AssetAVAX)) {
-        return new CryptoAmount(gasRateinAVAXWei.times(21000), AssetETH)
+        return new CryptoAmount(gasRateinAVAXWei.times(21000), AssetAVAX)
       } else {
-        return new CryptoAmount(gasRateinAVAXWei.times(70000), AssetETH)
+        return new CryptoAmount(gasRateinAVAXWei.times(70000), AssetAVAX)
       }
       break
     case Chain.Terra:

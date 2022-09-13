@@ -5,14 +5,12 @@ import {
   Asset,
   Chain,
   // assetAmount,
-  // assetToBase,
-  // assetToBase,
-  assetAmount,
   assetFromString,
-  assetToBase,
+  // assetToBase,
+  // assetToBase,
   assetToString,
   baseAmount,
-  baseToAsset,
+  // baseAmount,
   eqAsset,
   isAssetRuneNative,
 } from '@xchainjs/xchain-util'
@@ -108,7 +106,7 @@ export class ThorchainCache {
       // from/R * R/to = from/to
       exchangeRate = lpFrom.runeToAssetRatio.times(lpTo.assetToRuneRatio)
     }
-    console.log(` 1 ${assetToString(from)} = ${exchangeRate} ${assetToString(to)}`)
+    // console.log(` 1 ${assetToString(from)} = ${exchangeRate} ${assetToString(to)}`)
     return exchangeRate
   }
 
@@ -260,32 +258,25 @@ export class ThorchainCache {
    */
   async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
     const exchangeRate = await this.getExchangeRate(input.asset, outAsset)
-    //const outDecimals = await this.getDecimalForAsset(outAsset)
-    const inDecimals = await this.getDecimalForAsset(input.asset) // resets the decimals for the asset every time this is called even though an asset has just been converted.
-    console.log(inDecimals)
-    const defaultDecimals = DEFAULT_THORCHAIN_DECIMALS
-    let baseAmountOut = input.baseAmount.times(exchangeRate).amount().toFixed()
-    console.log(`mike 3 input ${input.baseAmount.amount()} ${input.asset.ticker}`)
-    if (defaultDecimals > inDecimals) {
-      const adjustDecimals = defaultDecimals - inDecimals
-      console.log(`Default decimals ${baseAmountOut}`)
+    const outDecimals = await this.getDecimalForAsset(outAsset)
+    const inDecimals = input.baseAmount.decimal
+
+    const outDec = outDecimals //>= 8 ? 8 : outDecimals
+    const inDec = inDecimals // >= 8 ? 8 : inDecimals
+
+    const adjustDecimals = outDec - inDec
+    let baseAmountOut = input.baseAmount.times(exchangeRate).amount().toFixed(0)
+
+    if (adjustDecimals > 0) {
       baseAmountOut = baseAmountOut + '0'.repeat(adjustDecimals)
-      console.log(baseAmountOut)
-    } else if (inDecimals > defaultDecimals) {
-      const adjustDecimals = defaultDecimals - inDecimals
-      console.log(baseAmountOut)
+    } else if (adjustDecimals <= 0) {
       baseAmountOut = baseAmountOut.substring(0, baseAmountOut.length + adjustDecimals)
-      console.log(baseAmountOut)
     }
-    const amount = baseToAsset(baseAmount(+baseAmountOut))
-      .amount()
-      .toFixed()
-    const result = new CryptoAmount(assetToBase(assetAmount(amount, defaultDecimals)), outAsset)
-    const inD = await this.getDecimalForAsset(result.asset)
-    console.log(inD)
-    console.log(
-      `${input.formatedAssetString()} ${input.asset.ticker} = ${result.formatedAssetString()} ${outAsset.ticker}`,
-    )
+    const amt = baseAmount(baseAmountOut, outDec)
+    const result = new CryptoAmount(amt, outAsset)
+    // console.log(
+    //   `${input.formatedAssetString()} ${input.asset.ticker} = ${result.formatedAssetString()} ${outAsset.ticker}`,
+    // )
 
     return result
   }
