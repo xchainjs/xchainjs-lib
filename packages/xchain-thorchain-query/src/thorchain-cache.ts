@@ -4,13 +4,10 @@ import {
   Address,
   Asset,
   Chain,
-  // assetAmount,
+  assetAmount,
   assetFromString,
-  // assetToBase,
-  // assetToBase,
+  assetToBase,
   assetToString,
-  baseAmount,
-  // baseAmount,
   eqAsset,
   isAssetRuneNative,
 } from '@xchainjs/xchain-util'
@@ -260,25 +257,53 @@ export class ThorchainCache {
     const exchangeRate = await this.getExchangeRate(input.asset, outAsset)
     const outDecimals = await this.getDecimalForAsset(outAsset)
     const inDecimals = input.baseAmount.decimal
-
-    const outDec = outDecimals //>= 8 ? 8 : outDecimals
-    const inDec = inDecimals // >= 8 ? 8 : inDecimals
-
-    const adjustDecimals = outDec - inDec
-    let baseAmountOut = input.baseAmount.times(exchangeRate).amount().toFixed(0)
-
-    if (adjustDecimals > 0) {
-      baseAmountOut = baseAmountOut + '0'.repeat(adjustDecimals)
-    } else if (adjustDecimals <= 0) {
-      baseAmountOut = baseAmountOut.substring(0, baseAmountOut.length + adjustDecimals)
+    // if the input asset is the same as the output asset and is less that tc decimal standard, only the decimals needed to be convert to thorchain defaults
+    if (inDecimals < DEFAULT_THORCHAIN_DECIMALS && input.asset == outAsset) {
+      const assetAmt = input.assetAmount.amount().toNumber()
+      const changeDecimals = new CryptoAmount(assetToBase(assetAmount(assetAmt, DEFAULT_THORCHAIN_DECIMALS)), outAsset)
+      return changeDecimals
+    } else if (outDecimals == DEFAULT_THORCHAIN_DECIMALS && inDecimals == DEFAULT_THORCHAIN_DECIMALS) {
+      // If the OutAsset decimal and the indecimals is equal to the default TC decimal leave it alone
+      const exchangeRateInAsset = new CryptoAmount(assetToBase(assetAmount(exchangeRate.toString(), 16)), outAsset)
+      const assetAmt = input.assetAmount.times(exchangeRateInAsset.assetAmount).amount()
+      const exchangedOutAsset = new CryptoAmount(
+        assetToBase(assetAmount(assetAmt.toFixed(outDecimals), DEFAULT_THORCHAIN_DECIMALS)),
+        outAsset,
+      )
+      return exchangedOutAsset
+    } else if (outDecimals < DEFAULT_THORCHAIN_DECIMALS && inDecimals == DEFAULT_THORCHAIN_DECIMALS) {
+      // if out decimals are less than default leave it as the default
+      const exchangeRateInAsset = new CryptoAmount(assetToBase(assetAmount(exchangeRate.toString(), 16)), outAsset)
+      const assetAmt = input.assetAmount.times(exchangeRateInAsset.assetAmount).amount()
+      const exchangedOutAsset = new CryptoAmount(
+        assetToBase(assetAmount(assetAmt.toFixed(outDecimals), DEFAULT_THORCHAIN_DECIMALS)),
+        outAsset,
+      )
+      return exchangedOutAsset
+    } else {
+      // if In decimals is greater than out, convert to out.
+      const exchangeRateInAsset = new CryptoAmount(assetToBase(assetAmount(exchangeRate.toString(), 16)), outAsset)
+      const assetAmt = input.assetAmount.times(exchangeRateInAsset.assetAmount).amount()
+      const exchangedOutAsset = new CryptoAmount(
+        assetToBase(assetAmount(assetAmt.toFixed(outDecimals), DEFAULT_THORCHAIN_DECIMALS)),
+        outAsset,
+      )
+      return exchangedOutAsset
     }
-    const amt = baseAmount(baseAmountOut, outDec)
-    const result = new CryptoAmount(amt, outAsset)
-    // console.log(
-    //   `${input.formatedAssetString()} ${input.asset.ticker} = ${result.formatedAssetString()} ${outAsset.ticker}`,
-    // )
 
-    return result
+    // const outDec = outDecimals //>= 8 ? 8 : outDecimals
+    // const inDec = inDecimals // >= 8 ? 8 : inDecimals
+    // const adjustDecimals = outDec - inDec
+    // let baseAmountOut = input.baseAmount.times(exchangeRate).amount().toFixed(0)
+    // if (adjustDecimals > 0) {
+    //   baseAmountOut = baseAmountOut + '0'.repeat(adjustDecimals)
+    // } else if (adjustDecimals <= 0) {
+    //   baseAmountOut = baseAmountOut.substring(0, baseAmountOut.length + adjustDecimals)
+    // }
+    // const amt = baseAmount(baseAmountOut, outDec)
+    // const result = new CryptoAmount(amt, outAsset)
+    // console.log(input.asset.ticker, result.asset.ticker)
+    // return result
   }
   /**
    *

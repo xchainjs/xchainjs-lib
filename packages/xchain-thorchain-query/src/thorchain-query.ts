@@ -198,20 +198,29 @@ export class ThorchainQuery {
     destinationInboundDetails: InboundDetail,
   ): Promise<SwapEstimate> {
     //NOTE need to convert the asset to 8 decimals places for all calcs
-    const input = await this.thorchainCache.convert(params.input, params.input.asset)
-    const inputInRune = await this.thorchainCache.convert(input, AssetRuneNative)
+    const DEFAULT_THORCHAIN_DECIMALS = 8
+    // If input is already in 8 decimals skip the convert
+    const input =
+      params.input.baseAmount.decimal === DEFAULT_THORCHAIN_DECIMALS
+        ? params.input
+        : await this.thorchainCache.convert(params.input, params.input.asset)
+
+    // If asset is already rune native, skip the convert
+    const inputInRune =
+      input.asset === AssetRuneNative ? input : await this.thorchainCache.convert(input, AssetRuneNative)
+
     const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails.gas_rate)
-    // console.log(inboundFeeInAsset.assetAmount.amount())
+
     let outboundFeeInAsset = calcNetworkFee(params.destinationAsset, destinationInboundDetails.gas_rate)
     outboundFeeInAsset = outboundFeeInAsset.times(3)
-
+    // convert fees to rune
     const inboundFeeInRune = await this.thorchainCache.convert(inboundFeeInAsset, AssetRuneNative)
     let outboundFeeInRune = await this.thorchainCache.convert(outboundFeeInAsset, AssetRuneNative)
 
     // ---------- Remove Fees from inbound before doing the swap -----------
-    // TODO confirm with chris about this change
-    // const inputMinusInboundFeeInRune = inputInRune.minus(inboundFeeInRune)
-    const inputMinusInboundFeeInRune = inputInRune
+    // TODO confirm with chris about this change, was there a reason why this was commented out?
+    const inputMinusInboundFeeInRune = inputInRune.minus(inboundFeeInRune)
+    //>//const inputMinusInboundFeeInRune = inputInRune
 
     // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
     const affiliateFeeInRune = inputMinusInboundFeeInRune.times(params.affiliateFeePercent || 0)
@@ -235,16 +244,14 @@ export class ThorchainQuery {
       }
     }
 
-    // Now calculate swapfee based on inputNetAmount
+    // Now calculate swap output based on inputNetAmount
     const swapOutput = await this.thorchainCache.getExpectedSwapOutput(inputNetInAsset, params.destinationAsset)
-
     const swapFeeInRune = await this.thorchainCache.convert(swapOutput.swapFee, AssetRuneNative)
     const outputInRune = await this.thorchainCache.convert(swapOutput.output, AssetRuneNative)
 
     // ---------------- Remove Outbound Fee ---------------------- /
     const netOutputInRune = outputInRune.minus(outboundFeeInRune)
     const netOutputInAsset = await this.thorchainCache.convert(netOutputInRune, params.destinationAsset)
-
     const totalFees: TotalFees = {
       inboundFee: inboundFeeInRune,
       swapFee: swapFeeInRune,
