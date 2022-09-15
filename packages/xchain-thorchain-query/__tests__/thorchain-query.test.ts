@@ -149,7 +149,7 @@ describe('Thorchain-query tests', () => {
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('494.594687').amount().toFixed(),
+      assetAmount('1.2758079').amount().toFixed(),
     )
   })
 })
