@@ -10,7 +10,6 @@ import {
 } from '@xchainjs/xchain-thorchain-query'
 import {
   Asset,
-  AssetBNB,
   AssetBTC,
   AssetETH,
   AssetLTC,
@@ -52,20 +51,20 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
 }
 
 describe('ThorchainAmm Client Test', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     mockMidgardApi.init()
     mockThornodeApi.init()
   })
-  afterEach(() => {
+  afterAll(() => {
+    mockThornodeApi.restore()
     mockThornodeApi.restore()
   })
 
   // ThorchainAMM unit tests with mock data
   it(`Should get the correct outbound Delay`, async () => {
-    const outboundAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB)
-
+    const outboundAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
     const outBoundValue = await thorchainQuery.outboundDelay(outboundAmount)
-    const expectedOutput = 1500
+    const expectedOutput = 4320
     expect(outBoundValue).toEqual(expectedOutput)
   })
 
@@ -73,24 +72,24 @@ describe('ThorchainAmm Client Test', () => {
     const input = new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBTC)
     const outboundAsset: Asset = AssetETH
     const outboundETHAmount = await thorchainQuery.convert(input, outboundAsset)
-    const EthAmount = assetToBase(assetAmount('15'))
-    expect(outboundETHAmount.baseAmount.amount().toFixed()).toEqual(EthAmount.amount().toFixed())
+    const EthAmount = new CryptoAmount(assetToBase(assetAmount('6.25601439')), AssetETH)
+    expect(outboundETHAmount.assetAmount.amount().toFixed()).toEqual(EthAmount.assetAmount.amount().toFixed())
   })
 
   it(`Should convert BTC to RUNE `, async () => {
     const input = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
     const outboundAsset: Asset = AssetRuneNative
     const outboundRuneAmount = await thorchainQuery.convert(input, outboundAsset)
-    const expectedAmount = assetToBase(assetAmount(10))
-    expect(outboundRuneAmount.baseAmount.amount()).toEqual(expectedAmount.amount())
+    const expectedAmount = new CryptoAmount(assetToBase(assetAmount('10896.63786286')), AssetRuneNative)
+    expect(outboundRuneAmount.assetAmount.amount()).toEqual(expectedAmount.assetAmount.amount())
   })
 
   it(`Should convert RUNE to BTC `, async () => {
     const input = new CryptoAmount(assetToBase(assetAmount(100)), AssetRuneNative)
     const outboundAsset: Asset = AssetBTC
     const outboundBTCAmount = await thorchainQuery.convert(input, outboundAsset)
-    const expectedAmount = assetToBase(assetAmount(10))
-    expect(outboundBTCAmount.baseAmount.amount()).toEqual(expectedAmount.amount())
+    const expectedAmount = new CryptoAmount(assetToBase(assetAmount('917700')), AssetBTC)
+    expect(outboundBTCAmount.baseAmount.amount()).toEqual(expectedAmount.assetAmount.amount())
   })
 
   it('Should fail estimate swap because destination chain is halted ', async () => {
@@ -134,7 +133,7 @@ describe('ThorchainAmm Client Test', () => {
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(true)
       expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-        assetAmount('467.898987').amount().toFixed(),
+        assetAmount('467.48435919').amount().toFixed(),
       )
     } catch (error) {
       console.log(error.message)

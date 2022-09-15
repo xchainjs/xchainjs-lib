@@ -1,6 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
   AssetBNB,
+  AssetBTC,
   AssetETH,
   AssetLTC,
   AssetRuneNative,
@@ -65,6 +66,12 @@ describe('Thorchain-query tests', () => {
     const expectedOutput = 6
     expect(outBoundDelay).toEqual(expectedOutput)
   })
+  it(`Should get the correct outbound Delay`, async () => {
+    const outboundAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
+    const outBoundDelay = await thorchainQuery.outboundDelay(outboundAmount)
+    const expectedOutput = 4320
+    expect(outBoundDelay).toEqual(expectedOutput)
+  })
 
   it('Should fail estimate swap because destination chain is halted ', async () => {
     const swapParams: EstimateSwapParams = {
@@ -107,7 +114,7 @@ describe('Thorchain-query tests', () => {
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('494.14220228').amount().toFixed(),
+      assetAmount('494.14220628').amount().toFixed(),
     )
   })
   it('Should estimate swap from RUNE to USDC ', async () => {
@@ -121,7 +128,7 @@ describe('Thorchain-query tests', () => {
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('63.300701').amount().toFixed(),
+      assetAmount('63.300702').amount().toFixed(),
     )
   })
   it('Should estimate swap from BUSD to RUNE ', async () => {
@@ -135,7 +142,7 @@ describe('Thorchain-query tests', () => {
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('499.9478375').amount().toFixed(),
+      assetAmount('499.94783861').amount().toFixed(),
     )
   })
   it('Should estimate swap from UOS to ETH ', async () => {
@@ -149,7 +156,7 @@ describe('Thorchain-query tests', () => {
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('1.2758079').amount().toFixed(),
+      assetAmount('1.27581157').amount().toFixed(),
     )
   })
   it('Should estimate swap from ETH to UOS ', async () => {
@@ -163,7 +170,7 @@ describe('Thorchain-query tests', () => {
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('3714.4761').amount().toFixed(),
+      assetAmount('3714.4869').amount().toFixed(),
     )
   })
 })

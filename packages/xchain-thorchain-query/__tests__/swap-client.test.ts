@@ -151,7 +151,7 @@ describe('Swap Cal Tests', () => {
 
     const correctOutput: SwapOutput = {
       output: new CryptoAmount(assetToBase(assetAmount(21634.28119885)), BUSD),
-      swapFee: new CryptoAmount(assetToBase(assetAmount(38.30357049)), AssetRuneNative),
+      swapFee: new CryptoAmount(assetToBase(assetAmount(38.30357056)), AssetRuneNative),
       slip: new BigNumber(0.0035276),
     }
 

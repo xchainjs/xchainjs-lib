@@ -197,7 +197,7 @@ export class ThorchainQuery {
     sourceInboundDetails: InboundDetail,
     destinationInboundDetails: InboundDetail,
   ): Promise<SwapEstimate> {
-    //NOTE need to convert the asset to 8 decimals places for all calcs
+    // NOTE need to convert the asset to 8 decimals places for all calcs
     const DEFAULT_THORCHAIN_DECIMALS = 8
     // If input is already in 8 decimals skip the convert
     const input =
@@ -439,7 +439,6 @@ export class ThorchainQuery {
    */
   async outboundDelay(outboundAmount: CryptoAmount): Promise<number> {
     const networkValues = await this.thorchainCache.getNetworkValues()
-
     const minTxOutVolumeThreshold = new CryptoAmount(
       baseAmount(networkValues['MINTXOUTVOLUMETHRESHOLD']),
       AssetRuneNative,
@@ -448,7 +447,6 @@ export class ThorchainQuery {
     let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative)
     const getScheduledOutboundValue = await this.thorchainCache.midgard.getScheduledOutboundValue()
     const thorChainblocktime = this.chainAttributes[Chain.THORChain].avgBlockTimeInSecs // blocks required to confirm tx
-
     // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
     const runeValue = await this.thorchainCache.convert(outboundAmount, AssetRuneNative)
     // Check rune value amount
