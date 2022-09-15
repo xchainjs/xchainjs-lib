@@ -152,4 +152,18 @@ describe('Thorchain-query tests', () => {
       assetAmount('1.2758079').amount().toFixed(),
     )
   })
+  it('Should estimate swap from ETH to UOS ', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+      destinationAsset: assetUOS,
+      destinationAddress: 'xxx',
+    }
+
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    expect(estimate.txEstimate.canSwap).toEqual(true)
+    expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
+      assetAmount('3714.4761').amount().toFixed(),
+    )
+  })
 })
