@@ -88,7 +88,7 @@ describe('ThorchainAmm Client Test', () => {
     const input = new CryptoAmount(assetToBase(assetAmount(100)), AssetRuneNative)
     const outboundAsset: Asset = AssetBTC
     const outboundBTCAmount = await thorchainQuery.convert(input, outboundAsset)
-    const expectedAmount = new CryptoAmount(assetToBase(assetAmount('917700')), AssetBTC)
+    const expectedAmount = new CryptoAmount(assetToBase(assetAmount('917714')), AssetBTC)
     expect(outboundBTCAmount.baseAmount.amount()).toEqual(expectedAmount.assetAmount.amount())
   })
 
@@ -133,7 +133,7 @@ describe('ThorchainAmm Client Test', () => {
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(true)
       expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-        assetAmount('467.48435919').amount().toFixed(),
+        assetAmount('467.48435587').amount().toFixed(),
       )
     } catch (error) {
       console.log(error.message)

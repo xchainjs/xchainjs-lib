@@ -4,10 +4,13 @@ import {
   Address,
   Asset,
   Chain,
-  assetAmount,
+  // assetAmount,
   assetFromString,
-  assetToBase,
+  // assetToBase,
+  // assetToBase,
   assetToString,
+  baseAmount,
+  // baseAmount,
   eqAsset,
   isAssetRuneNative,
 } from '@xchainjs/xchain-util'
@@ -255,48 +258,21 @@ export class ThorchainCache {
    */
   async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
     const exchangeRate = await this.getExchangeRate(input.asset, outAsset)
-
     const outDecimals = await this.getDecimalForAsset(outAsset)
     const inDecimals = input.baseAmount.decimal
-    // if the input asset is the same as the output asset and is less that tc decimal standard, only the decimals needed to be convert to thorchain defaults
-    if (inDecimals < DEFAULT_THORCHAIN_DECIMALS && input.asset == outAsset) {
-      const assetAmt = input.assetAmount.amount().toNumber()
-      const changeDecimals = new CryptoAmount(assetToBase(assetAmount(assetAmt, DEFAULT_THORCHAIN_DECIMALS)), outAsset)
-      return changeDecimals
-    } else if (outDecimals == DEFAULT_THORCHAIN_DECIMALS && inDecimals == DEFAULT_THORCHAIN_DECIMALS) {
-      // If the OutAsset decimal and the indecimals is equal to the default TC decimal leave it alone
-      const exchangeRateInAsset = new CryptoAmount(assetToBase(assetAmount(exchangeRate.toString())), outAsset)
-      const assetAmt = input.assetAmount.times(exchangeRateInAsset.assetAmount).amount()
-      const exchangedOutAsset = new CryptoAmount(
-        assetToBase(assetAmount(assetAmt.toFixed(outDecimals), DEFAULT_THORCHAIN_DECIMALS)),
-        outAsset,
-      )
-      return exchangedOutAsset
-    } else if (outDecimals < DEFAULT_THORCHAIN_DECIMALS && inDecimals == DEFAULT_THORCHAIN_DECIMALS) {
-      // if out decimals are less than default leave it as the default
-      const exchangeRateInAsset = new CryptoAmount(assetToBase(assetAmount(exchangeRate.toString())), outAsset)
-      const assetAmt = input.assetAmount.times(exchangeRateInAsset.assetAmount).amount()
-      const exchangedOutAsset = new CryptoAmount(
-        assetToBase(assetAmount(assetAmt.toFixed(outDecimals), DEFAULT_THORCHAIN_DECIMALS)),
-        outAsset,
-      )
-      return exchangedOutAsset
-    } else {
-      // if In decimals is greater than out, convert to out.
-      const exchangeRateInAsset = new CryptoAmount(assetToBase(assetAmount(exchangeRate.toString())), outAsset)
-      const assetAmt = input.assetAmount.times(exchangeRateInAsset.assetAmount).amount()
-      const exchangedOutAsset = new CryptoAmount(
-        assetToBase(assetAmount(assetAmt.toFixed(outDecimals), DEFAULT_THORCHAIN_DECIMALS)),
-        outAsset,
-      )
-      return exchangedOutAsset
-    }
+
+    let baseAmountOut = input.baseAmount.times(exchangeRate).amount()
+    const adjustDecimals = outDecimals - inDecimals
+
+    baseAmountOut = baseAmountOut.times(10 ** adjustDecimals)
+    const amt = baseAmount(baseAmountOut, outDecimals)
+    const result = new CryptoAmount(amt, outAsset)
+    // console.log(
+    //   `${input.formatedAssetString()} ${input.asset.ticker} = ${result.formatedAssetString()} ${outAsset.ticker}`,
+    // )
+
+    return result
   }
-  /**
-   *
-   * @param asset - Asset
-   * @returns
-   */
   private async getDecimalForAsset(asset: Asset) {
     if (!isAssetRuneNative(asset)) {
       const pool = await this.getPoolForAsset(asset)

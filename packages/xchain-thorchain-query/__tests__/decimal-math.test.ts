@@ -83,7 +83,7 @@ describe('decimal math tests', () => {
   it(`Should convert RUNE to BTC `, async () => {
     const input = new CryptoAmount(assetToBase(assetAmount(100)), AssetRuneNative)
     const amount = await thorchainQuery.thorchainCache.convert(input, AssetBTC)
-    const expected = new CryptoAmount(assetToBase(assetAmount(`0.009177`)), AssetBTC)
+    const expected = new CryptoAmount(assetToBase(assetAmount(`0.00917714`)), AssetBTC)
     expect(amount.assetAmountFixedString()).toEqual(expected.assetAmountFixedString())
     expect(amount.eq(expected)).toBe(true)
   })
