@@ -97,8 +97,8 @@ validates the desired swap and estimates the fees
 Please refer to [asset-notation](https://dev.thorchain.org/thorchain-dev/network/memos#asset-notation) on the valid asset strings, also see the 'asset' column in the above tables
 
 ```bash
-yarn estimateSwap testnet 0.001 BTC.BTC ETH.ETH # good estimate
-yarn estimateSwap testnet 2 BTC.BTC ETH.ETH     # exceeds slip limit
+yarn estimateSwap mainnet 0.001 BTC.BTC ETH.ETH # good estimate
+yarn estimateSwap mainnet 2 BTC.BTC ETH.ETH     # Note due to testnet pools being inconsistent with real world prices use mainnet to retrieve accurate estimations
 yarn estimateSwap mainnet 2 BTC/BTC THOR.RUNE
 
 ```
@@ -106,7 +106,7 @@ yarn estimateSwap mainnet 2 BTC/BTC THOR.RUNE
 #### Example output
 
 ```bash
-$ npx ts-node estimateSwap.ts testnet 0.001 BTC.BTC ETH.ETH
+$ npx ts-node estimateSwap.ts mainnet 0.001 BTC.BTC ETH.ETH
 updated pool cache
 {
   input: '⚡ 100,000',
@@ -138,7 +138,7 @@ updated pool cache
 }
 ✨  Done in 9.84s.
 yarn run v1.22.17
-$ npx ts-node estimateSwap.ts testnet 2 BTC.BTC ETH.ETH
+$ npx ts-node estimateSwap.ts mainnet 2 BTC.BTC ETH.ETH
 updated pool cache
 {
   input: '₿ 2',
