@@ -1,9 +1,10 @@
 import mock from './axios-adapter'
 
 export default {
+  reset: mock.reset,
   restore: mock.restore,
   init: () => {
-    //Mock thornode unobserved tx
+    //Mock thornode pools
     mock.onGet(/\/thorchain\/pools/).reply(function () {
       const resp = require(`./responses/thornode/thornodePools.json`)
       return [200, resp]
@@ -14,7 +15,7 @@ export default {
       return [200, resp]
     })
     //Mock thornode unobserved tx
-    mock.onGet(/\/276CE5005FF822294773C549E74513636808A6A9817FE7ADCE1709EE06BC/).reply(function () {
+    mock.onGet(/\/thorchain\/tx\/276CE5005FF822294773C549E74513636808A6A9817FE7ADCE1709EE06BC/).reply(function () {
       const resp = require(`./responses/thornode/unobservedTx.json`)
       return [200, resp]
     })

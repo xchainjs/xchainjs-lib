@@ -96,15 +96,14 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // From BTC to RUNE with no Affiliate address - passes
   it(`Should swap BTC to RUNE, with no affiliate address `, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.0001')), AssetBTC),
+      input: new CryptoAmount(assetToBase(assetAmount('0.001')), AssetBTC),
       destinationAsset: AssetRuneNative,
+      destinationAddress: testnetWallet.clients['THOR'].getAddress(),
       // affiliateFeePercent: 0.1,
     }
-    const output = await testnetThorchainAmm.doSwap(
-      testnetWallet,
-      estimateSwapParams,
-      testnetWallet.clients['THOR'].getAddress(),
-    )
+    const outPutCanSwap = await testnetThorchainAmm.estimateSwap(estimateSwapParams)
+    print(outPutCanSwap)
+    const output = await testnetThorchainAmm.doSwap(testnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -114,13 +113,10 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.0001')), AssetBTC),
       destinationAsset: AssetRuneNative,
+      destinationAddress: testnetWallet.clients['BNB'].getAddress(), // Wrong chain to trigger error
     }
     try {
-      const output = await testnetThorchainAmm.doSwap(
-        testnetWallet,
-        estimateSwapParams,
-        await testnetWallet.clients['BNB'].getAddress(), // put the wrong chain address here to trigger error
-      )
+      const output = await testnetThorchainAmm.doSwap(testnetWallet, estimateSwapParams)
       console.log(output.hash)
       fail()
     } catch (error: any) {
@@ -134,30 +130,24 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(100)), AssetRuneNative),
       destinationAsset: AssetETH,
+      destinationAddress: testnetWallet.clients['ETH'].getAddress(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
     }
-    const output = await testnetThorchainAmm.doSwap(
-      testnetWallet,
-      estimateSwapParams,
-      testnetWallet.clients['ETH'].getAddress(),
-    )
+    const output = await testnetThorchainAmm.doSwap(testnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
   // Swap From BNB to ETH - ?
   it(`Should perform a double swap from BNB to ETH`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.0009')), AssetBNB),
+      input: new CryptoAmount(assetToBase(assetAmount('0.002')), AssetBNB),
       destinationAsset: AssetETH,
+      destinationAddress: testnetWallet.clients['ETH'].getAddress(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
     }
-    const output = await testnetThorchainAmm.doSwap(
-      testnetWallet,
-      estimateSwapParams,
-      testnetWallet.clients['ETH'].getAddress(),
-    )
+    const output = await testnetThorchainAmm.doSwap(testnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -167,17 +157,14 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('4')), BUSD),
       destinationAsset: sBTC,
+      destinationAddress: mainnetWallet.clients[Chain.THORChain].getAddress(),
       slipLimit: new BigNumber(0.03),
     }
     try {
       const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
       print(outPutCanSwap)
       if (outPutCanSwap.txEstimate.canSwap) {
-        const output = await mainetThorchainAmm.doSwap(
-          mainnetWallet,
-          estimateSwapParams,
-          mainnetWallet.clients[Chain.THORChain].getAddress(),
-        )
+        const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
         console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
         expect(output).toBeTruthy()
       }
@@ -191,14 +178,11 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.00009')), sBTC),
       destinationAsset: BUSD,
+      destinationAddress: mainnetWallet.clients['BNB'].getAddress(),
       slipLimit: new BigNumber(0.09),
     }
     try {
-      const output = await mainetThorchainAmm.doSwap(
-        mainnetWallet,
-        estimateSwapParams,
-        mainnetWallet.clients['BNB'].getAddress(),
-      )
+      const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
       console.log(`tx hash: ${output.hash}, \n Tx url: ${output.url} \n WaitTime:${output.waitTimeSeconds}`)
       expect(output).toBeTruthy()
     } catch (error: any) {
@@ -211,17 +195,14 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.0009')), sBTC),
       destinationAsset: sETH,
+      destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
       slipLimit: new BigNumber(0.5),
     }
     try {
       const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
       console.log(JSON.stringify(outPutCanSwap))
       if (outPutCanSwap.txEstimate.canSwap) {
-        const output = await mainetThorchainAmm.doSwap(
-          mainnetWallet,
-          estimateSwapParams,
-          mainnetWallet.clients['THOR'].getAddress(),
-        )
+        const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
         console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
         expect(output).toBeTruthy()
       }
@@ -235,17 +216,14 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.0009')), sBTC),
       destinationAsset: sETH,
+      destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
       slipLimit: new BigNumber(0.5),
     }
     try {
       const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
       console.log(JSON.stringify(outPutCanSwap))
       if (outPutCanSwap.txEstimate.canSwap) {
-        const output = await mainetThorchainAmm.doSwap(
-          mainnetWallet,
-          estimateSwapParams,
-          mainnetWallet.clients['THOR'].getAddress(),
-        )
+        const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
         console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
         expect(output).toBeTruthy()
       }
@@ -259,14 +237,11 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.1', 18)), AssetETH),
       destinationAsset: AssetBNB,
+      destinationAddress: testnetWallet.clients['BNB'].getAddress(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
     }
-    const output = await testnetThorchainAmm.doSwap(
-      testnetWallet,
-      estimateSwapParams,
-      testnetWallet.clients['BNB'].getAddress(),
-    )
+    const output = await testnetThorchainAmm.doSwap(testnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -276,14 +251,11 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('10')), AssetRuneNative),
       destinationAsset: USDT,
+      destinationAddress: testnetWallet.clients['ETH'].getAddress(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
     }
-    const output = await testnetThorchainAmm.doSwap(
-      testnetWallet,
-      estimateSwapParams,
-      testnetWallet.clients['ETH'].getAddress(),
-    )
+    const output = await testnetThorchainAmm.doSwap(testnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -294,6 +266,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       const estimateSwapParams = {
         input: new CryptoAmount(assetToBase(assetAmount('0.005', USDT_DECIMAL)), USDT),
         destinationAsset: AssetRuneNative,
+        destinationAddress: testnetWallet.clients['THOR'].getAddress(),
         slipLimit: new BigNumber('0.5'),
       }
       const ethHelper = new EthHelper(testnetWallet.clients.ETH, thorchainQueryTestnet.thorchainCache)
@@ -306,11 +279,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
         expect(result.hash).toBeTruthy()
         console.log(JSON.stringify(result, null, 2))
       } else {
-        const output = await testnetThorchainAmm.doSwap(
-          testnetWallet,
-          estimateSwapParams,
-          testnetWallet.clients['THOR'].getAddress(),
-        )
+        const output = await testnetThorchainAmm.doSwap(testnetWallet, estimateSwapParams)
         console.log(output)
         expect(output.hash).toBeTruthy()
       }
@@ -322,6 +291,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   it(`Should perform a double swap from ERC to ERC`, async () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.005', USDT_DECIMAL)), USDT),
+      destinationAddress: testnetWallet.clients['ETH'].getAddress(),
       destinationAsset: XRUNE,
       slipLimit: new BigNumber('0.5'),
     }
@@ -334,25 +304,18 @@ describe('xchain-swap doSwap Integration Tests', () => {
       const result = await ethHelper.approveTCRouterToSpend(estimateSwapParams.input.asset)
       console.log(JSON.stringify(result, null, 2))
     }
-    const output = await testnetThorchainAmm.doSwap(
-      testnetWallet,
-      estimateSwapParams,
-      testnetWallet.clients['ETH'].getAddress(),
-    )
+    const output = await testnetThorchainAmm.doSwap(testnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
   it(`Should perform a swap from LTC to AVAX`, async () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.01')), AssetLTC),
+      destinationAddress: stagenetWallet.clients[Chain.Avalanche].getAddress(),
       destinationAsset: AssetAVAX,
       slipLimit: new BigNumber('0.5'),
     }
-    const output = await stagenetThorchainAmm.doSwap(
-      stagenetWallet,
-      estimateSwapParams,
-      stagenetWallet.clients[Chain.Avalanche].getAddress(),
-    )
+    const output = await stagenetThorchainAmm.doSwap(stagenetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -360,6 +323,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.5', 18)), AssetAVAX),
       destinationAsset: AssetRuneNative,
+      destinationAddress: stagenetWallet.clients[Chain.THORChain].getAddress(),
       slipLimit: new BigNumber('0.2'),
     }
     try {

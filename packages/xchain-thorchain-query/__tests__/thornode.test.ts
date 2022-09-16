@@ -6,7 +6,7 @@ import { Thornode } from '../src/utils/thornode'
 const thornode = new Thornode(Network.Mainnet)
 
 describe(`Thornode transaction status tests`, () => {
-  beforeEach(() => {
+  beforeAll(() => {
     mockThornodeApi.init()
   })
   afterEach(() => {

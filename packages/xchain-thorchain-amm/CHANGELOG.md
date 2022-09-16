@@ -1,4 +1,13 @@
-# v0.0.1.0-beta (2022-09-05)
+# v0.0.1.0-beta4 (2022-09-15)
+
+- moved examples into different directory
+- import new version of xchain-thorchain-query
+
+# v0.0.1.0-beta3 (2022-09-06)
+
+- import new version of xchain-thorchain-query
+
+# v0.0.1.0-beta2 (2022-09-05)
 
 - moved estimate logic into xchain-thorchain-query
 

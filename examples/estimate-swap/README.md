@@ -1,4 +1,4 @@
-## Thorchain amm examples folder
+## Estimate Thorchain Swap
 
 ## Environment
 
@@ -13,10 +13,10 @@ tsconfig has already been set in the tsconfig.json
 
 ### Install
 
-1. cd into examples/xchainjs-test folder
+1. cd into examples/estimate-swap folder
 
 ```bash
-cd packages/xchain-thorchain-amm/examples/xchainjs-test
+cd examples/estimate-swap
 yarn install
 ```
 
@@ -97,8 +97,8 @@ validates the desired swap and estimates the fees
 Please refer to [asset-notation](https://dev.thorchain.org/thorchain-dev/network/memos#asset-notation) on the valid asset strings, also see the 'asset' column in the above tables
 
 ```bash
-yarn estimateSwap testnet 0.001 BTC.BTC ETH.ETH # good estimate
-yarn estimateSwap testnet 2 BTC.BTC ETH.ETH     # exceeds slip limit
+yarn estimateSwap mainnet 0.001 BTC.BTC ETH.ETH # good estimate
+yarn estimateSwap mainnet 2 BTC.BTC ETH.ETH     # Note due to testnet pools being inconsistent with real world prices use mainnet to retrieve accurate estimations
 yarn estimateSwap mainnet 2 BTC/BTC THOR.RUNE
 
 ```
@@ -106,7 +106,7 @@ yarn estimateSwap mainnet 2 BTC/BTC THOR.RUNE
 #### Example output
 
 ```bash
-$ npx ts-node estimateSwap.ts testnet 0.001 BTC.BTC ETH.ETH
+$ npx ts-node estimateSwap.ts mainnet 0.001 BTC.BTC ETH.ETH
 updated pool cache
 {
   input: '⚡ 100,000',
@@ -138,7 +138,7 @@ updated pool cache
 }
 ✨  Done in 9.84s.
 yarn run v1.22.17
-$ npx ts-node estimateSwap.ts testnet 2 BTC.BTC ETH.ETH
+$ npx ts-node estimateSwap.ts mainnet 2 BTC.BTC ETH.ETH
 updated pool cache
 {
   input: '₿ 2',
@@ -206,38 +206,4 @@ updated pool cache
 }
 ✨  Done in 8.47s.
 
-```
-### Do Swap
-
-executes a swap from one asset to another  
-
-```bash
-yarn doSwap "MnemonicPhrase" testnet 10 THOR.RUNE BCH.BCH
-
-```
-
-#### Example output
-
-```bash
- Swap on testnet :)
-
-updated pool cache
-{
-  input: 'ᚱ 10',
-  totalFees: {
-    inboundFee: 'ᚱ 0.02',
-    swapFee: 'ᚱ 0.00000034',
-    outboundFee: 'ᚱ 1.19330225',
-    affiliateFee: 'ᚱ 0'
-  },
-  slipPercentage: '0.00029640089582720352',
-  netOutput: '0.00099564 BCH',
-  waitTimeSeconds: '12',
-  canSwap: true,
-  errors: undefined
-}
-Tx hash: REDACTED,
- Tx url: https://viewblock.io/thorchain/tx/REDACTED?network=testnet
- WaitTime: 12
-✨  Done in 14.94s.
 ```

@@ -1,0 +1,42 @@
+{
+  "name": "example-do-swap",
+  "version": "1.0.0",
+  "scripts": {
+    "listPools": "npx ts-node listPools.ts",
+    "estimateSwap": "npx ts-node estimateSwap.ts",
+    "doSwap": "npx ts-node doSwap.ts"
+  },
+  "description": "example of doing a swap withthorchain-amm package",
+  "main": "index.js",
+  "author": "THORIANITE",
+  "license": "MIT",
+  "dependencies": {
+    "@binance-chain/javascript-sdk": "^4.2.0",
+    "@cosmos-client/core": "^0.45.13",
+    "@psf/bitcoincashjs-lib": "^4.0.2",
+    "@terra-money/terra.js": "^3.1.4",
+    "@xchainjs/xchain-binance": "file:../../packages/xchain-binance",
+    "@xchainjs/xchain-bitcoin": "file:../../packages/xchain-bitcoin",
+    "@xchainjs/xchain-bitcoincash": "file:../../packages/xchain-bitcoincash",
+    "@xchainjs/xchain-client": "file:../../packages/xchain-client",
+    "@xchainjs/xchain-cosmos": "file:../../packages/xchain-cosmos",
+    "@xchainjs/xchain-crypto": "file:../../packages/xchain-crypto",
+    "@xchainjs/xchain-doge": "file:../../packages/xchain-doge",
+    "@xchainjs/xchain-ethereum": "file:../../packages/xchain-ethereum",
+    "@xchainjs/xchain-litecoin": "file:../../packages/xchain-litecoin",
+    "@xchainjs/xchain-midgard": "file:../../packages/xchain-midgard",
+    "@xchainjs/xchain-terra": "file:../../packages/xchain-terra",
+    "@xchainjs/xchain-thorchain": "file:../../packages/xchain-thorchain",
+    "@xchainjs/xchain-thorchain-amm": "file:../../packages/xchain-thorchain-amm",
+    "@xchainjs/xchain-thornode": "file:../../packages/xchain-thornode",
+    "@xchainjs/xchain-util": "file:../../packages/xchain-util",
+    "@xchainjs/xchain-avax": "file:../../packages/xchain-avax",
+    "@xchainjs/xchain-thorchain-query": "file:../../packages/xchain-thorchain-query",
+    "axios-retry": "^3.3.1",
+    "bchaddrjs": "^0.5.2",
+    "bech32-buffer": "^0.2.0",
+    "bitcoinjs-lib": "^6.0.1",
+    "dotenv": "^16.0.0",
+    "ethers": "^5.6.2"
+  }
+}
