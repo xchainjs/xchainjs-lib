@@ -125,6 +125,7 @@ export class Thornode {
   async getPools(): Promise<Pool[]> {
     for (const api of this.poolsApi) {
       try {
+        // console.log(console.log(JSON.stringify(api, null, 2)))
         const pools = await api.pools()
         return pools.data
       } catch (e) {

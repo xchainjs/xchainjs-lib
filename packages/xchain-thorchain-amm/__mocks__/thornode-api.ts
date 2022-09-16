@@ -37,7 +37,6 @@ export default {
       const resp = require(`./responses/thornode/lastBlock.json`)
       return [200, resp]
     })
-
     // Mock Outbound Confirmed tx
     mock.onGet(/\/thorchain\/tx\/776CE5005FF822294773C549E74513636808A6A9817FE7ADCE1709EE06BC7F53/).reply(function () {
       const resp = require('./responses/thornode/thornodeTx.json')

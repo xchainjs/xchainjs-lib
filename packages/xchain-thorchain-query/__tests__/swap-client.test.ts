@@ -125,7 +125,7 @@ describe('Swap Cal Tests', () => {
 
   it('Should calculate correct double swap fee', async () => {
     const doubleSwapOutputFee = await getDoubleSwapFee(inputAmount, btcPool, ethPool, thorchainCache)
-    const correctdoubleSwapOutputFee = new CryptoAmount(baseAmount(24512120138), AssetRuneNative)
+    const correctdoubleSwapOutputFee = new CryptoAmount(baseAmount('36836378668'), AssetRuneNative)
     expect(doubleSwapOutputFee.baseAmount.amount().toFixed(0)).toEqual(
       correctdoubleSwapOutputFee.baseAmount.amount().toFixed(0),
     )
@@ -136,7 +136,7 @@ describe('Swap Cal Tests', () => {
 
     const correctOutput: SwapOutput = {
       output: new CryptoAmount(assetToBase(assetAmount(35.75077791)), AssetETH),
-      swapFee: new CryptoAmount(assetToBase(assetAmount(245.12120138)), AssetRuneNative),
+      swapFee: new CryptoAmount(assetToBase(assetAmount(368.36378668)), AssetRuneNative),
       slip: new BigNumber(0.0138452),
     }
     expect(doubleswap.output.assetAmount.amount()).toEqual(correctOutput.output.assetAmount.amount())
@@ -150,9 +150,9 @@ describe('Swap Cal Tests', () => {
     const doubleswap = await getDoubleSwap(inputAmount, BTCpool, BUSDPool, thorchainCache)
 
     const correctOutput: SwapOutput = {
-      output: new CryptoAmount(assetToBase(assetAmount(21562.25250638)), BUSD),
-      swapFee: new CryptoAmount(assetToBase(assetAmount(33.85747072)), AssetRuneNative),
-      slip: new BigNumber(0.00328445),
+      output: new CryptoAmount(assetToBase(assetAmount(21634.28119885)), BUSD),
+      swapFee: new CryptoAmount(assetToBase(assetAmount(38.30357049)), AssetRuneNative),
+      slip: new BigNumber(0.0035276),
     }
 
     expect(doubleswap.output.assetAmount.amount()).toEqual(correctOutput.output.assetAmount.amount())

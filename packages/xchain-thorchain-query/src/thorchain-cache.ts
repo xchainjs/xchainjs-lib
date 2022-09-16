@@ -4,10 +4,13 @@ import {
   Address,
   Asset,
   Chain,
-  assetAmount,
+  // assetAmount,
   assetFromString,
-  assetToBase,
+  // assetToBase,
+  // assetToBase,
   assetToString,
+  baseAmount,
+  // baseAmount,
   eqAsset,
   isAssetRuneNative,
 } from '@xchainjs/xchain-util'
@@ -250,27 +253,34 @@ export class ThorchainCache {
    * Ex. convert(input:100 BUSD, outAsset: BTC) -> 0.0001234 BTC
    *
    * @param input - amount/asset to convert to outAsset
-   * @param ouAsset - the Asset you want to convert to
+   * @param outAsset - the Asset you want to convert to
    * @returns CryptoAmount of input
    */
   async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
     const exchangeRate = await this.getExchangeRate(input.asset, outAsset)
-    let decimals = DEFAULT_THORCHAIN_DECIMALS
-    if (!isAssetRuneNative(outAsset)) {
-      const pool = await this.getPoolForAsset(outAsset)
-      decimals = pool.decimals ?? DEFAULT_THORCHAIN_DECIMALS
-    }
+    const outDecimals = await this.getDecimalForAsset(outAsset)
+    const inDecimals = input.baseAmount.decimal
 
-    const amt = assetAmount(input.assetAmount.times(exchangeRate).amount().toFixed(), decimals)
-    const result = new CryptoAmount(assetToBase(amt), outAsset)
+    let baseAmountOut = input.baseAmount.times(exchangeRate).amount()
+    const adjustDecimals = outDecimals - inDecimals
+
+    baseAmountOut = baseAmountOut.times(10 ** adjustDecimals)
+    const amt = baseAmount(baseAmountOut, outDecimals)
+    const result = new CryptoAmount(amt, outAsset)
+    // console.log(
+    //   `${input.formatedAssetString()} ${input.asset.ticker} = ${result.formatedAssetString()} ${outAsset.ticker}`,
+    // )
 
     return result
   }
-  /**
-   *
-   * @param chain - input type chain
-   * @returns - router address
-   */
+  private async getDecimalForAsset(asset: Asset) {
+    if (!isAssetRuneNative(asset)) {
+      const pool = await this.getPoolForAsset(asset)
+      return pool.decimals ?? DEFAULT_THORCHAIN_DECIMALS
+    }
+    return DEFAULT_THORCHAIN_DECIMALS
+  }
+
   async getRouterAddressForChain(chain: Chain): Promise<Address> {
     const inboundAsgard = (await this.getInboundAddressesItems())[chain]
 
