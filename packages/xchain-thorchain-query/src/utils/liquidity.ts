@@ -3,28 +3,48 @@ import { BigNumber } from 'bignumber.js'
 import { LiquidityPool } from '../liquidity-pool'
 import { Block, LiquidityToAdd, PoolShareDetail, UnitData } from '../types'
 
+// /**
+//  *
+//  * @param liquidity - asset amount added
+//  * @param pool  - pool depths
+//  * @returns liquidity units - ownership of pool
+//  */
+// export const getLiquidityUnitsOld = (liquidity: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
+//   // formula: ((R + T) (r T + R t))/(4 R T)
+//   // part1 * (part2 + part3) / denominator
+//   const r = liquidity.rune.amount()
+//   const t = liquidity.asset.amount()
+//   const R = pool.runeBalance.amount().plus(r) // Must add r first
+//   const T = pool.assetBalance.amount().plus(t) // Must add t first
+//   const part1 = R.plus(T)
+//   const part2 = r.times(T)
+//   const part3 = R.times(t)
+//   const numerator = part1.times(part2.plus(part3))
+//   const denominator = R.times(T).times(4)
+//   const result = numerator.div(denominator)
+//   return result
+// }
+
 /**
- *
+ * https://dev.thorchain.org/thorchain-dev/interface-guide/math#lp-units-add
  * @param liquidity - asset amount added
  * @param pool  - pool depths
  * @returns liquidity units - ownership of pool
  */
 export const getLiquidityUnits = (liquidity: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
-  // formula: ((R + T) (r T + R t))/(4 R T)
-  // part1 * (part2 + part3) / denominator
+  const P = new BigNumber(pool.pool.units)
   const r = liquidity.rune.amount()
-  const t = liquidity.asset.amount()
-  const R = pool.runeBalance.amount().plus(r) // Must add r first
-  const T = pool.assetBalance.amount().plus(t) // Must add t first
-  const part1 = R.plus(T)
-  const part2 = r.times(T)
-  const part3 = R.times(t)
-  const numerator = part1.times(part2.plus(part3))
-  const denominator = R.times(T).times(4)
+  const a = liquidity.asset.amount()
+  const R = pool.runeBalance.amount()
+  const A = pool.assetBalance.amount()
+  const part1 = R.times(a)
+  const part2 = r.times(A)
+
+  const numerator = P.times(part1.plus(part2))
+  const denominator = R.times(A).times(2)
   const result = numerator.div(denominator)
   return result
 }
-
 /**
  *
  * @param unitData - units for both asset and rune

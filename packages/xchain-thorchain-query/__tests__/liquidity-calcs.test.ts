@@ -30,23 +30,38 @@ const thorchainQuery = new ThorchainQuery(thorchainCache)
 // }
 
 const BUSD = assetFromString('BNB.BUSD-BD1')
-if (!BUSD) throw Error('Asset is incorrect')
 
 const BusdPoolDetails = {
-  annualPercentageRate: '0.09731470549045307',
+  annualPercentageRate: '-0.08690907236215786',
   asset: 'BNB.BUSD-BD1',
-  assetDepth: '944906899325454',
-  assetPrice: '0.50000000',
-  assetPriceUSD: '0.999999955869585',
-  liquidityUnits: '0',
+  assetDepth: '782699801097358',
+  assetPrice: '0.6213456696171857',
+  assetPriceUSD: '1',
+  liquidityUnits: '103754320722837',
   poolAPY: '0',
-  runeDepth: '472576456280254',
+  runeDepth: '486327132022076',
   status: 'available',
-  synthSupply: '11035203002',
-  synthUnits: '1634889648287',
-  units: '263973251769640',
-  volume24h: '8122016881297',
+  synthSupply: '204728293012779',
+  synthUnits: '15611003797131',
+  units: '119365324519968',
+  volume24h: '472358072383752',
 }
+
+// {
+//   annualPercentageRate: '0.09731470549045307',
+//   asset: 'BNB.BUSD-BD1',
+//   assetDepth: '944906899325454',
+//   assetPrice: '0.50000000',
+//   assetPriceUSD: '0.999999955869585',
+//   liquidityUnits: '0',
+//   poolAPY: '0',
+//   runeDepth: '472576456280254',
+//   status: 'available',
+//   synthSupply: '11035203002',
+//   synthUnits: '1634889648287',
+//   units: '263973251769640',
+//   volume24h: '8122016881297',
+// }
 const BusdPool = new LiquidityPool(BusdPoolDetails, 8)
 
 describe(`Liquidity calc tests`, () => {
