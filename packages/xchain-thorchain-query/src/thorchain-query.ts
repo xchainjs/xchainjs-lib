@@ -692,29 +692,22 @@ export class ThorchainQuery {
    */
   public async estimatAddLP(params: AddliquidityPosition): Promise<EstimateADDLP> {
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
-    console.log(assetPool)
-    const lpUnits = getLiquidityUnits(
-      { assetDeposited: params.asset.baseAmount, runeDeposited: params.rune.baseAmount },
-      assetPool,
-    )
+    const lpUnits = getLiquidityUnits({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
     const inboundDetails = await this.thorchainCache.midgard.getInboundDetails()
     const unitData: UnitData = {
-      totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
-      liquidityUnits: lpUnits,
+      liquidityUnits: baseAmount(lpUnits),
+      totalUnits: baseAmount(assetPool.pool.liquidityUnits),
     }
     const poolShare = getPoolShare(unitData, assetPool)
     const waitTimeSeconds = await this.confCounting(params.asset)
     const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
     const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
     const totalFees = (await this.convert(assetInboundFee, AssetRuneNative)).plus(runeInboundFee)
-    const slip = getSlipOnLiquidity(
-      { assetShare: params.asset.baseAmount.amount(), runeShare: params.rune.baseAmount.amount() },
-      assetPool,
-    )
+    const slip = getSlipOnLiquidity({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
     const estimateLP: EstimateADDLP = {
-      slip: slip,
+      slip: slip.times(100),
       poolShare: poolShare,
-      lpUnits: lpUnits,
+      lpUnits: baseAmount(lpUnits),
       runeToAssetRatio: assetPool.runeToAssetRatio,
       transactionFee: {
         assetFee: assetInboundFee,
@@ -741,8 +734,8 @@ export class ThorchainQuery {
     if (!blockData) throw Error(`Could not get block data`)
     // Pools total units & Lp's total units
     const unitData: UnitData = {
-      totalUnits: new BigNumber(poolAsset.pool.liquidityUnits),
-      liquidityUnits: new BigNumber(lpObj.units),
+      totalUnits: baseAmount(poolAsset.pool.liquidityUnits),
+      liquidityUnits: baseAmount(lpObj.units),
     }
     const networkValues = await this.thorchainCache.midgard.getNetworkValues()
     const block: Block = {

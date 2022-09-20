@@ -62,13 +62,13 @@ export type SwapOutput = {
 }
 
 export type UnitData = {
-  liquidityUnits: BigNumber
-  totalUnits: BigNumber
+  liquidityUnits: BaseAmount
+  totalUnits: BaseAmount
 }
 
 export type LiquidityData = {
-  rune: BigNumber
-  asset: BigNumber
+  rune: CryptoAmount
+  asset: CryptoAmount
 }
 
 export type Block = {
@@ -125,9 +125,9 @@ export type TxStatus = {
   seconds: number
 }
 
-export type LiquidityDeposited = {
-  assetDeposited: BaseAmount
-  runeDeposited: BaseAmount
+export type LiquidityToAdd = {
+  asset: BaseAmount
+  rune: BaseAmount
 }
 
 export type PoolShareDetail = {
@@ -138,7 +138,7 @@ export type PoolShareDetail = {
 export type EstimateADDLP = {
   slip: BigNumber
   poolShare: PoolShareDetail
-  lpUnits: BigNumber
+  lpUnits: BaseAmount
   transactionFee: LPFees
   runeToAssetRatio: BigNumber
   estimatedWait: number

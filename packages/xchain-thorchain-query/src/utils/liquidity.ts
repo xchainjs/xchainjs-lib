@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from '../liquidity-pool'
-import { Block, LiquidityDeposited, PoolShareDetail, UnitData } from '../types'
+import { Block, LiquidityToAdd, PoolShareDetail, UnitData } from '../types'
 
 /**
  *
@@ -9,11 +9,11 @@ import { Block, LiquidityDeposited, PoolShareDetail, UnitData } from '../types'
  * @param pool  - pool depths
  * @returns liquidity units - ownership of pool
  */
-export const getLiquidityUnits = (liquidity: LiquidityDeposited, pool: LiquidityPool): BigNumber => {
+export const getLiquidityUnits = (liquidity: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
   // formula: ((R + T) (r T + R t))/(4 R T)
   // part1 * (part2 + part3) / denominator
-  const r = liquidity.runeDeposited.amount()
-  const t = liquidity.assetDeposited.amount()
+  const r = liquidity.rune.amount()
+  const t = liquidity.asset.amount()
   const R = pool.runeBalance.amount().plus(r) // Must add r first
   const T = pool.assetBalance.amount().plus(t) // Must add t first
   const part1 = R.plus(T)
@@ -33,14 +33,12 @@ export const getLiquidityUnits = (liquidity: LiquidityDeposited, pool: Liquidity
  */
 export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShareDetail => {
   // formula: (rune * part) / total; (asset * part) / total
-  const units = unitData.liquidityUnits
-  const total = unitData.totalUnits
+  const units = unitData.liquidityUnits.amount()
+  const total = unitData.totalUnits.amount()
   const R = pool.runeBalance.amount()
   const T = pool.assetBalance.amount()
   const asset = T.times(units).div(total)
-  console.log(asset.toNumber())
   const rune = R.times(units).div(total)
-  console.log(rune.toNumber())
   const poolShareDetail = {
     assetShare: asset,
     runeShare: rune,
@@ -54,10 +52,10 @@ export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShare
  * @param pool - Pool that the asset is attached to
  * @returns - returns bignumber representing a slip percentage
  */
-export const getSlipOnLiquidity = (poolShare: PoolShareDetail, pool: LiquidityPool): BigNumber => {
+export const getSlipOnLiquidity = (stake: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
   // formula: (t * R - T * r)/ (T*r + R*T)
-  const r = poolShare.runeShare
-  const t = poolShare.assetShare
+  const r = stake.rune.amount()
+  const t = stake.asset.amount()
   const R = pool.runeBalance.amount()
   const T = pool.assetBalance.amount()
   const numerator = t.times(R).minus(T.times(r))

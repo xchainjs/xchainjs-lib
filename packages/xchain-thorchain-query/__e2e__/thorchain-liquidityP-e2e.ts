@@ -39,10 +39,10 @@ function printAdd(estimate: EstimateADDLP) {
   const expanded = {
     slip: estimate.slip.toNumber(),
     poolShare: {
-      asset: estimate.poolShare.assetShare,
-      rune: estimate.poolShare.runeShare,
+      asset: estimate.poolShare.assetShare.toNumber(),
+      rune: estimate.poolShare.runeShare.toNumber(),
     },
-    lpUnitsL: estimate.lpUnits.toNumber(),
+    lpUnitsL: estimate.lpUnits.amount().toNumber(),
     runeToAssetRatio: estimate.runeToAssetRatio.toNumber(),
     transactionFees: {
       runeFee: estimate.transactionFee.runeFee.assetAmount.amount().toFixed(),
@@ -79,8 +79,8 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   it(`Should estimate ADD BUSD liquidity postion for given amount`, async () => {
     const LPAction = '+' // add to lP position
     const addlp: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(8.9)), BUSDT),
-      rune: new CryptoAmount(assetToBase(assetAmount(2)), AssetRuneNative),
+      asset: new CryptoAmount(assetToBase(assetAmount(100)), BUSDT),
+      rune: new CryptoAmount(assetToBase(assetAmount(50)), AssetRuneNative),
       action: LPAction,
     }
     const estimateADDLP = await thorchainQuery.estimatAddLP(addlp)
