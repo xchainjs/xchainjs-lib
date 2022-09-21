@@ -9,7 +9,9 @@ import {
   AssetRuneNative,
   Chain,
   THORChain,
+  assetAmount,
   assetFromString,
+  assetToBase,
   assetToString,
   baseAmount,
   eqAsset,
@@ -25,12 +27,16 @@ import {
   Block,
   ChainAttributes,
   ConstructMemo,
+  DustValues,
   EstimateADDLP,
   EstimateSwapParams,
+  EstimateWithdrawLP,
   InboundDetail,
   LiquidityPosition,
   LiquidityProvider,
   PoolRatios,
+  PostionDepositValue,
+  RemoveLiquidityPosition,
   SwapEstimate,
   TotalFees,
   TxDetails,
@@ -737,16 +743,22 @@ export class ThorchainQuery {
       totalUnits: baseAmount(poolAsset.pool.liquidityUnits),
       liquidityUnits: baseAmount(lpObj.units),
     }
+    console.log(unitData.totalUnits.amount(), unitData.liquidityUnits.amount())
     const networkValues = await this.thorchainCache.midgard.getNetworkValues()
     const block: Block = {
       current: blockData.thorchain,
       lastAdded: lpObj.last_add_height,
       fullProtection: networkValues['FULLIMPLOSSPROTECTIONBLOCKS'],
     }
+    //
+    const currentLP: PostionDepositValue = {
+      asset: baseAmount(lpObj.asset_deposit_value),
+      rune: baseAmount(lpObj.rune_deposit_value),
+    }
     const poolShare = getPoolShare(unitData, poolAsset)
     console.log(poolShare.assetShare.toNumber(), poolShare.runeShare.toNumber())
-    console.log(block)
-    const impermanentLossProtection = getLiquidityProtectionData(poolShare, poolAsset, block)
+    console.log(poolAsset.pool.liquidityUnits)
+    const impermanentLossProtection = getLiquidityProtectionData(poolShare, currentLP, block)
     const lpPosition: LiquidityPosition = {
       position: lpObj,
       impermanentLossProtection: impermanentLossProtection,
@@ -768,93 +780,103 @@ export class ThorchainQuery {
     return poolRatio
   }
 
-  // /**
-  //  *
-  //  * @param params
-  //  */
-  // public async estimateWithdrawLP(params: RemoveLiquidityPosition): Promise<EstimateWithdrawLP> {
-  //   // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
-  //   if (!params.assetAddress) throw Error(`can't estimate lp without an asset address`)
-  //   const memberDetail = await this.checkLiquidityPosition(params.asset, params.assetAddress)
-  //   const dustValues = await this.getDustValues(memberDetail) // returns asset and rune dust values
-  //   const assetPool = await this.thorchainCache.getPoolForAsset(memberDetail.assetAmount.asset)
-  //   const waitTimeSeconds = await this.confCounting(memberDetail.assetAmount)
-  //   const assetAmount = memberDetail.assetAmount.times(params.percentage / 100)
-  //   const runeAmount = memberDetail.runeAmount.times(params.percentage / 100)
-  //   const totalFees = (await this.convert(dustValues.asset, AssetRuneNative)).plus(dustValues.rune)
-
-  //   const slip = getSlipOnLiquidity(
-  //     {
-  //       assetShare: memberDetail.assetAmount.baseAmount.amount(),
-  //       runeShare: memberDetail.runeAmount.baseAmount.amount(),
-  //     },
-  //     assetPool,
-  //   )
-  //   const estimateLP: EstimateWithdrawLP = {
-  //     slip: slip,
-  //     transactionFee: {
-  //       assetFee: dustValues.asset,
-  //       runeFee: dustValues.rune,
-  //       totalFees: totalFees,
-  //     },
-  //     assetAmount: assetAmount,
-  //     runeAmount: runeAmount,
-  //     estimatedWait: waitTimeSeconds,
-  //     impermanentLossProtection: 1,
-  //   }
-  //   return estimateLP
-  // }
+  /**
+   *
+   * @param params
+   */
+  public async estimateWithdrawLP(params: RemoveLiquidityPosition): Promise<EstimateWithdrawLP> {
+    // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
+    if (!params.assetAddress) throw Error(`can't estimate lp without an asset address`)
+    const memberDetail = await this.checkLiquidityPosition(params.asset, params.assetAddress)
+    const dustValues = await this.getDustValues(params.asset) // returns asset and rune dust values
+    const assetPool = await this.thorchainCache.getPoolForAsset(params.asset)
+    console.log(memberDetail.position.asset_deposit_value)
+    const waitTimeSeconds = await this.confCounting(
+      new CryptoAmount(baseAmount(memberDetail.position.asset_deposit_value), params.asset),
+    )
+    // get pool share from unit data
+    const poolShare = getPoolShare(
+      {
+        liquidityUnits: baseAmount(memberDetail.position.units),
+        totalUnits: baseAmount(assetPool.pool.liquidityUnits),
+      },
+      assetPool,
+    )
+    // calculate total fees
+    const totalFees = (await this.convert(dustValues.asset, AssetRuneNative)).plus(dustValues.rune)
+    // get slip on liquidity removal
+    const slip = getSlipOnLiquidity(
+      {
+        asset: baseAmount(memberDetail.position.asset_deposit_value),
+        rune: baseAmount(memberDetail.position.rune_deposit_value),
+      },
+      assetPool,
+    )
+    const estimateLP: EstimateWithdrawLP = {
+      slip: slip,
+      transactionFee: {
+        assetFee: dustValues.asset,
+        runeFee: dustValues.rune,
+        totalFees: totalFees,
+      },
+      assetAmount: new CryptoAmount(baseAmount(poolShare.assetShare), params.asset),
+      runeAmount: new CryptoAmount(baseAmount(poolShare.runeShare), AssetRuneNative),
+      estimatedWait: waitTimeSeconds,
+      impermanentLossProtection: 1,
+    }
+    return estimateLP
+  }
   /**
    * // can this become a quried constant? added to inbound_addresses or something
    * @param asset - asset needed to retrieve dust values
    * @returns - object type dust values
    */
-  // private async getDustValues(asset: Asset): Promise<DustValues> {
-  //   let dustValues: DustValues
-  //   switch (asset.chain) {
-  //     case 'BNB':
-  //       dustValues = {
-  //         asset: new CryptoAmount(assetToBase(assetAmount(0.000001)), AssetBNB),
-  //         rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-  //       }
-  //       return dustValues
-  //     case 'BTC' || `BCH` || `LTC`:
-  //       // 10k sats
-  //       dustValues = {
-  //         asset: new CryptoAmount(assetToBase(assetAmount(0.0001)), asset),
-  //         rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-  //       }
-  //       return dustValues
-  //     case 'ETH':
-  //       // 0 wei
-  //       dustValues = {
-  //         asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
-  //         rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-  //       }
-  //       return dustValues
-  //     case 'THOR':
-  //       // 0 Rune
-  //       dustValues = {
-  //         asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
-  //         rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-  //       }
-  //       return dustValues
-  //     case 'GAIA':
-  //       // 0 GAIA
-  //       dustValues = {
-  //         asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
-  //         rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-  //       }
-  //       return dustValues
-  //     case 'DOGE':
-  //       // 1 million sats
-  //       dustValues = {
-  //         asset: new CryptoAmount(assetToBase(assetAmount(0.01)), asset),
-  //         rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-  //       }
-  //       return dustValues
-  //     default:
-  //       throw Error('Unknown chain')
-  //   }
-  // }
+  private async getDustValues(asset: Asset): Promise<DustValues> {
+    let dustValues: DustValues
+    switch (asset.chain) {
+      case 'BNB':
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0.000001)), AssetBNB),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'BTC' || `BCH` || `LTC`:
+        // 10k sats
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0.0001)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'ETH':
+        // 0 wei
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'THOR':
+        // 0 Rune
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'GAIA':
+        // 0 GAIA
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'DOGE':
+        // 1 million sats
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0.01)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      default:
+        throw Error('Unknown chain')
+    }
+  }
 }

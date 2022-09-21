@@ -129,6 +129,10 @@ export type LiquidityToAdd = {
   asset: BaseAmount
   rune: BaseAmount
 }
+export type PostionDepositValue = {
+  asset: BaseAmount
+  rune: BaseAmount
+}
 
 export type PoolShareDetail = {
   assetShare: BigNumber
@@ -167,7 +171,7 @@ export type AddliquidityPosition = {
   action: string
 }
 export type RemoveLiquidityPosition = {
-  asset: string
+  asset: Asset
   action: string
   percentage: number
   assetAddress: string
