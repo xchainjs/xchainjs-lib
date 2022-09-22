@@ -1,4 +1,3 @@
-import { baseAmount } from '@xchainjs/xchain-util/lib'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from '../liquidity-pool'
@@ -72,25 +71,32 @@ export const getSlipOnLiquidity = (stake: LiquidityToAdd, pool: LiquidityPool): 
  */
 // Blocks for full protection 144000 // 100 days
 export const getLiquidityProtectionData = (
-  poolShare: PoolShareDetail,
   depositValue: PostionDepositValue,
+  poolShare: PoolShareDetail,
   block: Block,
 ): number => {
   //Coverage formula coverage=((A0∗P1)+R0)−((A1∗P1)+R1)=>((A0∗R1/A1)+R0)−(R1+R1)
   //formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
-  const R0 = depositValue.rune // rune deposit value
-  const A0 = depositValue.asset // asset deposit value
-  const R1 = baseAmount(poolShare.runeShare) // rune amount to redeem
-  const A1 = baseAmount(poolShare.assetShare) // asset amount to redeem
-  //const P1 = R1.div(A1) // Pool ratio at withdrawal
-  //const part1 = A0.times(P1).plus(R0).minus(A1.times(P1).plus(R1))
-  const part2 = A0.times(R1.div(A1).plus(R0)).minus(R1.plus(R1))
-  const coverage = part2
+  const R0 = depositValue.rune.amount() // rune deposit value
+  const A0 = depositValue.asset.amount() // asset deposit value
+  const R1 = poolShare.runeShare // rune amount to redeem
+  const A1 = poolShare.assetShare // asset amount to redeem
+  const P1 = R1.div(A1) // Pool ratio at withdrawal
+  console.log(R0, A0, A1, R1, P1)
+  const start = A0.times(P1)
+  console.log(R0.plus(start), start, R0)
+  const end = A1.times(P1).plus(R1)
+  console.log(end.toNumber())
+  const part1 = start.minus(end) // Coverage represents how much ILP a LP is entitled to
+  // const part2 = A0.times(R1.div(A1)).plus(R0).minus(R1.plus(R1))
+  console.log(part1.toNumber())
+  const coverage = part1
   const currentHeight = block.current
   const heightLastAdded = block.lastAdded
   const blocksforfullprotection = block.fullProtection
-  const protectionProgress = (currentHeight - heightLastAdded) / blocksforfullprotection
-  const result = protectionProgress * coverage.amount().toNumber() // impermanent loss protection result
+  const protectionProgress = (currentHeight - heightLastAdded) / blocksforfullprotection // percentage of entitlement
+  console.log(protectionProgress)
+  const result = protectionProgress * coverage.toNumber() // impermanent loss protection result
   return result
 }
 

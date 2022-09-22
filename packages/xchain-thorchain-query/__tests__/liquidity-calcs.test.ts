@@ -8,8 +8,8 @@ import { CryptoAmount } from '../src/crypto-amount'
 import { LiquidityPool } from '../src/liquidity-pool'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
-import { LiquidityToAdd, PoolShareDetail, UnitData } from '../src/types'
-import { getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from '../src/utils/liquidity'
+import { Block, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData } from '../src/types'
+import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from '../src/utils/liquidity'
 import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
 
@@ -89,5 +89,25 @@ describe(`Liquidity calc tests`, () => {
     const getSlip = getSlipOnLiquidity(liquidityOneSided, btcPool)
     const correctSlip = '0.104' // percent slippage
     expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
+  })
+  it(`Should calculate the correct ILP data `, async () => {
+    // Starting position
+    const depositValue: PostionDepositValue = {
+      asset: new CryptoAmount(assetToBase(assetAmount(`1`)), AssetBTC).baseAmount,
+      rune: new CryptoAmount(assetToBase(assetAmount('40000')), AssetRuneNative).baseAmount,
+    }
+    // Current pool position
+    const poolShare: PoolShareDetail = {
+      assetShare: new CryptoAmount(assetToBase(assetAmount(`0.8889`)), AssetBTC).baseAmount.amount(),
+      runeShare: new CryptoAmount(assetToBase(assetAmount('4444.44')), AssetRuneNative).baseAmount.amount(),
+    }
+    // Current block data
+    const block: Block = {
+      current: 25744,
+      lastAdded: 25600,
+      fullProtection: 144,
+    }
+    const checkILP = getLiquidityProtectionData(depositValue, poolShare, block)
+    console.log(checkILP)
   })
 })

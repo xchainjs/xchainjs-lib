@@ -743,7 +743,7 @@ export class ThorchainQuery {
       totalUnits: baseAmount(poolAsset.pool.liquidityUnits),
       liquidityUnits: baseAmount(lpObj.units),
     }
-    console.log(unitData.totalUnits.amount(), unitData.liquidityUnits.amount())
+    console.log(`unit data`, unitData.totalUnits.amount().toNumber(), unitData.liquidityUnits.amount().toNumber())
     const networkValues = await this.thorchainCache.midgard.getNetworkValues()
     const block: Block = {
       current: blockData.thorchain,
@@ -758,7 +758,7 @@ export class ThorchainQuery {
     const poolShare = getPoolShare(unitData, poolAsset)
     console.log(poolShare.assetShare.toNumber(), poolShare.runeShare.toNumber())
     console.log(poolAsset.pool.liquidityUnits)
-    const impermanentLossProtection = getLiquidityProtectionData(poolShare, currentLP, block)
+    const impermanentLossProtection = getLiquidityProtectionData(currentLP, poolShare, block)
     const lpPosition: LiquidityPosition = {
       position: lpObj,
       impermanentLossProtection: impermanentLossProtection,
@@ -790,7 +790,7 @@ export class ThorchainQuery {
     const memberDetail = await this.checkLiquidityPosition(params.asset, params.assetAddress)
     const dustValues = await this.getDustValues(params.asset) // returns asset and rune dust values
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset)
-    console.log(memberDetail.position.asset_deposit_value)
+    console.log(`members postion`, memberDetail.position)
     const waitTimeSeconds = await this.confCounting(
       new CryptoAmount(baseAmount(memberDetail.position.asset_deposit_value), params.asset),
     )

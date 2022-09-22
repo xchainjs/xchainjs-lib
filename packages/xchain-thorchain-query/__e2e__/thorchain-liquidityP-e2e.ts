@@ -62,6 +62,8 @@ function printAdd(estimate: EstimateADDLP) {
 function printWithdraw(withdraw: EstimateWithdrawLP) {
   const expanded = {
     slip: `${withdraw.slip.times(100).toPrecision(3)} %`,
+    asset: withdraw.assetAmount.assetAmount.amount().toNumber(),
+    rune: withdraw.runeAmount.assetAmount.amount().toNumber(),
     txFee: {
       runeFee: withdraw.transactionFee.runeFee.assetAmount.amount().toFixed(),
       assetFee: withdraw.transactionFee.assetFee.assetAmount.amount().toFixed(),
