@@ -94,12 +94,12 @@ describe(`Liquidity calc tests`, () => {
     // Starting position
     const depositValue: PostionDepositValue = {
       asset: new CryptoAmount(assetToBase(assetAmount(`1`)), AssetBTC).baseAmount,
-      rune: new CryptoAmount(assetToBase(assetAmount('40000')), AssetRuneNative).baseAmount,
+      rune: new CryptoAmount(assetToBase(assetAmount('4000')), AssetRuneNative).baseAmount,
     }
     // Current pool position
     const poolShare: PoolShareDetail = {
       assetShare: new CryptoAmount(assetToBase(assetAmount(`0.8889`)), AssetBTC).baseAmount.amount(),
-      runeShare: new CryptoAmount(assetToBase(assetAmount('4444.44')), AssetRuneNative).baseAmount.amount(),
+      runeShare: new CryptoAmount(assetToBase(assetAmount('4444')), AssetRuneNative).baseAmount.amount(),
     }
     // Current block data
     const block: Block = {
@@ -108,6 +108,6 @@ describe(`Liquidity calc tests`, () => {
       fullProtection: 144,
     }
     const checkILP = getLiquidityProtectionData(depositValue, poolShare, block)
-    console.log(checkILP)
+    expect(checkILP).toEqual(111.43750703)
   })
 })

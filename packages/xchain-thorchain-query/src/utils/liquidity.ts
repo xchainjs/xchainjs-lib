@@ -1,3 +1,4 @@
+import { baseAmount, baseToAsset } from '@xchainjs/xchain-util/lib'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from '../liquidity-pool'
@@ -82,21 +83,14 @@ export const getLiquidityProtectionData = (
   const R1 = poolShare.runeShare // rune amount to redeem
   const A1 = poolShare.assetShare // asset amount to redeem
   const P1 = R1.div(A1) // Pool ratio at withdrawal
-  console.log(R0, A0, A1, R1, P1)
-  const start = A0.times(P1)
-  console.log(R0.plus(start), start, R0)
-  const end = A1.times(P1).plus(R1)
-  console.log(end.toNumber())
-  const part1 = start.minus(end) // Coverage represents how much ILP a LP is entitled to
-  // const part2 = A0.times(R1.div(A1)).plus(R0).minus(R1.plus(R1))
-  console.log(part1.toNumber())
-  const coverage = part1
+  const part1 = A0.times(P1).plus(R0).minus(A1.times(P1).plus(R1)) // start position minus end position
+  const part2 = A0.times(R1.div(A1)).plus(R0).minus(R1.plus(R1)) // different way to check position
+  const coverage = part1 >= part2 ? part1 : part2 // Coverage represents how much ILP a LP is entitled to
   const currentHeight = block.current
   const heightLastAdded = block.lastAdded
   const blocksforfullprotection = block.fullProtection
   const protectionProgress = (currentHeight - heightLastAdded) / blocksforfullprotection // percentage of entitlement
-  console.log(protectionProgress)
-  const result = protectionProgress * coverage.toNumber() // impermanent loss protection result
+  const result = protectionProgress * baseToAsset(baseAmount(coverage)).amount().toNumber() // impermanent loss protection result
   return result
 }
 
