@@ -339,24 +339,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@cosmos-client/core@^0.45.1":
+"@cosmos-client/core@0.45.13":
   version "0.45.13"
   resolved "https://registry.yarnpkg.com/@cosmos-client/core/-/core-0.45.13.tgz#53a99f65c53b0cdefee245582a8bbea6f2a04e7d"
   integrity sha512-OTszam3HnH+PSRh9oW/NkEocrOuQnClCGxRmFSOk25Lck8CTtDeKLzkpNbeyFDJVyJvW5IGLL//n9f43UMwbXQ==
-  dependencies:
-    axios "^0.23.0"
-    bech32 "^1.1.4"
-    bip32 "^2.0.6"
-    bip39 "^3.0.4"
-    protobufjs "^6.11.2"
-    rxjs "^7.4.0"
-    secp256k1 "^4.0.2"
-    tweetnacl "^1.0.3"
-
-"@cosmos-client/core@^0.45.10":
-  version "0.45.10"
-  resolved "https://registry.yarnpkg.com/@cosmos-client/core/-/core-0.45.10.tgz#6cafc367b3392760fbe0580c76b43e5a72afb413"
-  integrity sha512-9VHGkCz3uomX5gZM0ToDHzzDAVY/vqccgLvjjrZnMZmKeog70pHw+cPtOyrcX1TZIoQKSsLqUbV6ccdB/p/fWA==
   dependencies:
     axios "^0.23.0"
     bech32 "^1.1.4"
@@ -2462,16 +2448,6 @@
   dependencies:
     "@typescript-eslint/types" "4.18.0"
     eslint-visitor-keys "^2.0.0"
-
-"@xchainjs/xchain-util@^0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.5.1.tgz#70903205589ff10c2794df6bd8937edca8d961e7"
-  integrity sha512-DeHWi2xmW/QFc+gz7uxy2bfFvtzFBy3YNUmNv1+Zmiq2yRaXhDHrlfjASxQaqg8S/M2pZBaevJOOOimEUNq1gg==
-
-"@xchainjs/xchain-util@^0.7.1":
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.7.1.tgz#6df007e4715778314c772aba2685447aa9b10fc7"
-  integrity sha512-CTYdrfJ7i9cHJY1AxDPq5c/4uHC2LWIt1F5WeuTriuGK5flRf9mPze7PmAZk05FI983kjKF/JiDKV/iewafTHQ==
 
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
@@ -5306,18 +5282,6 @@ glob@7.1.6, glob@^7.1.1, glob@^7.1.2, glob@^7.1.3, glob@^7.1.4:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-glob@^7.0.5:
-  version "7.2.3"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-7.2.3.tgz#b8df0fb802bbfa8e89bd1d938b4e16578ed44f2b"
-  integrity sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==
-  dependencies:
-    fs.realpath "^1.0.0"
-    inflight "^1.0.4"
-    inherits "2"
-    minimatch "^3.1.1"
-    once "^1.3.0"
-    path-is-absolute "^1.0.0"
-
 globals@^11.1.0:
   version "11.12.0"
   resolved "https://registry.yarnpkg.com/globals/-/globals-11.12.0.tgz#ab8795338868a0babd8525758018c2a7eb95c42e"
@@ -7186,13 +7150,6 @@ minimatch@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
   integrity sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==
-  dependencies:
-    brace-expansion "^1.1.7"
-
-minimatch@^3.1.1:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.1.2.tgz#19cd194bfd3e428f049a70817c038d89ab4be35b"
-  integrity sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==
   dependencies:
     brace-expansion "^1.1.7"
 
@@ -10401,14 +10358,6 @@ yaml@^1.10.0:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-1.10.0.tgz#3b593add944876077d4d683fee01081bd9fff31e"
   integrity sha512-yr2icI4glYaNG+KWONODapy2/jDdMSDnrONSjblABjD9B4Z5LgiircSt8m8sRZFNi08kG9Sm0uSHtEmP3zaEGg==
-
-yamljs@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/yamljs/-/yamljs-0.3.0.tgz#dc060bf267447b39f7304e9b2bfbe8b5a7ddb03b"
-  integrity sha512-C/FsVVhht4iPQYXOInoxUM/1ELSf9EsgKH34FofQOp6hwCPrW4vG4w5++TED3xRUo8gD7l0P1J1dLlDYzODsTQ==
-  dependencies:
-    argparse "^1.0.7"
-    glob "^7.0.5"
 
 yargs-parser@20.x, yargs-parser@^20.2.3:
   version "20.2.4"

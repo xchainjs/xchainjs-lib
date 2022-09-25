@@ -696,7 +696,7 @@ export class ThorchainQuery {
    * @param params - parameters needed for a estimated liquidity position
    * @returns - type object EstimateLP
    */
-  public async estimatAddLP(params: AddliquidityPosition): Promise<EstimateADDLP> {
+  public async estimateAddLP(params: AddliquidityPosition): Promise<EstimateADDLP> {
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
     const lpUnits = getLiquidityUnits({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
     const inboundDetails = await this.thorchainCache.midgard.getInboundDetails()

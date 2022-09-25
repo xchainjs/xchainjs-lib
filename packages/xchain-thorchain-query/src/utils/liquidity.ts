@@ -11,7 +11,7 @@ import { Block, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData }
  * @returns liquidity units - ownership of pool
  */
 export const getLiquidityUnits = (liquidity: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
-  const P = new BigNumber(pool.pool.units)
+  const P = new BigNumber(pool.pool.liquidityUnits)
   const r = liquidity.rune.amount()
   const a = liquidity.asset.amount()
   const R = pool.runeBalance.amount()
@@ -95,23 +95,23 @@ export const getLiquidityProtectionData = (
 }
 
 /**
- *
+ * https://docs.thorchain.org/thorchain-finance/continuous-liquidity-pools#calculating-pool-ownership
  * @param liquidity - asset amount added
  * @param pool  - pool depths
- * @returns liquidity units - ownership of pool
+ * @returns liquidity units - % ownership of pool
  */
-export const getPoolOwnership = (liquidity: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
-  // formula: ((R + T) (r T + R t))/(4 R T)
-  // part1 * (part2 + part3) / denominator
+export const getPoolOwnership = (liquidity: LiquidityToAdd, pool: LiquidityPool): number => {
+  const P = new BigNumber(pool.pool.liquidityUnits)
   const r = liquidity.rune.amount()
-  const t = liquidity.asset.amount()
+  const a = liquidity.asset.amount()
   const R = pool.runeBalance.amount().plus(r) // Must add r first
-  const T = pool.assetBalance.amount().plus(t) // Must add t first
-  const part1 = R.plus(T)
-  const part2 = r.times(T)
-  const part3 = R.times(t)
-  const numerator = part1.times(part2.plus(part3))
-  const denominator = R.times(T).times(4)
-  const result = numerator.div(denominator)
-  return result
+  const A = pool.assetBalance.amount().plus(a) // Must add t first
+  const part1 = R.plus(a)
+  const part2 = r.times(A)
+
+  const numerator = P.times(part1.plus(part2))
+  const denominator = R.times(A).times(2)
+  const lpUnits = numerator.div(denominator)
+  const percent = lpUnits.div(P)
+  return percent.toNumber()
 }

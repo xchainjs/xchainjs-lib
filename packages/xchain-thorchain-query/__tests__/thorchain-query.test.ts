@@ -9,6 +9,7 @@ import {
   assetFromString,
   assetToBase,
 } from '@xchainjs/xchain-util'
+import { BigNumber } from 'bignumber.js'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
@@ -139,6 +140,7 @@ describe('Thorchain-query tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount(1000)), BUSD),
       destinationAsset: AssetRuneNative,
       destinationAddress: 'xxx',
+      slipLimit: new BigNumber('0.03'),
     }
 
     const estimate = await thorchainQuery.estimateSwap(swapParams)
