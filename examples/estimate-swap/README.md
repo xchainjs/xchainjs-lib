@@ -97,10 +97,13 @@ validates the desired swap and estimates the fees
 Please refer to [asset-notation](https://dev.thorchain.org/thorchain-dev/network/memos#asset-notation) on the valid asset strings, also see the 'asset' column in the above tables
 
 ```bash
+yarn estimateSwap [network (Mainnet | TestNet)] [swap amount]] [source asset] [destination asset] ([destination address])
+
 yarn estimateSwap mainnet 0.001 BTC.BTC ETH.ETH # good estimate
 yarn estimateSwap mainnet 2 BTC.BTC ETH.ETH     # Note due to testnet pools being inconsistent with real world prices use mainnet to retrieve accurate estimations
 yarn estimateSwap mainnet 2 BTC/BTC THOR.RUNE
 
+See full Estimate Swap at http://docs.xchainjs.org/xchain-thorchain-query/how-to-use.html
 ```
 
 #### Example output
