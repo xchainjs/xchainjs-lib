@@ -46,10 +46,9 @@ A single common interface:
 - [`xchain-terra`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-terra)
 - [`xchain-thorchain`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain)
 - [`xchain-util`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-util)
-
-* [`xchain-thorchain-amm`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-amm)
-* [`xchain-thorchain-query`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-query)
-* [`xchain-avax`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-avax)
+- [`xchain-thorchain-amm`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-amm)
+- [`xchain-thorchain-query`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-query)
+- [`xchain-avax`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-avax)
 
 ## Advanced Features
 
