@@ -7,6 +7,7 @@ import {
   assetAmount,
   assetFromString,
   assetToBase,
+  baseAmount,
 } from '@xchainjs/xchain-util'
 
 import { CryptoAmount } from '../src/crypto-amount'
@@ -80,7 +81,15 @@ function printliquidityPosition(liquidityPosition: LiquidityPosition) {
     assetPool: liquidityPosition.position.asset,
     assetAmount: liquidityPosition.position.asset_deposit_value,
     runeAmount: liquidityPosition.position.rune_deposit_value,
-    impermanentLosProtection: liquidityPosition.impermanentLossProtection,
+    impermanentLossProtection: {
+      ILProtection: new CryptoAmount(
+        baseAmount(liquidityPosition.impermanentLossProtection.ILProtection.amount()),
+        AssetRuneNative,
+      ).assetAmount
+        .amount()
+        .toNumber(),
+      totalDays: liquidityPosition.impermanentLossProtection.totalDays,
+    },
   }
   console.log(expanded)
 }
@@ -95,7 +104,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
       rune: new CryptoAmount(assetToBase(assetAmount(50)), AssetRuneNative),
       action: LPAction,
     }
-    const estimateADDLP = await thorchainQuery.estimatAddLP(addlp)
+    const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
     printAdd(estimateADDLP)
     expect(estimateADDLP).toBeTruthy()
   })
@@ -106,7 +115,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
       rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
       action: LPAction,
     }
-    const estimateADDLP = await thorchainQuery.estimatAddLP(addlp)
+    const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
     printAdd(estimateADDLP)
     expect(estimateADDLP).toBeTruthy()
   })
@@ -117,7 +126,18 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
       rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
       action: LPAction,
     }
-    const estimateADDLP = await thorchainQuery.estimatAddLP(addlp)
+    const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
+    printAdd(estimateADDLP)
+    expect(estimateADDLP).toBeTruthy()
+  })
+  it(`Should estimate ADD BTC liquidity postion for given amount asymmetrical`, async () => {
+    const LPAction = '+' // add to lP position
+    const addlp: AddliquidityPosition = {
+      asset: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
+      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+      action: LPAction,
+    }
+    const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
     printAdd(estimateADDLP)
     expect(estimateADDLP).toBeTruthy()
   })
@@ -128,7 +148,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
       rune: new CryptoAmount(assetToBase(assetAmount(1552)), AssetRuneNative),
       action: LPAction,
     }
-    const estimateADDLP = await thorchainQuery.estimatAddLP(addlp)
+    const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
     printAdd(estimateADDLP)
     expect(estimateADDLP).toBeTruthy()
   })
@@ -140,7 +160,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
       rune: new CryptoAmount(assetToBase(assetAmount(5480)), AssetRuneNative),
       action: LPAction,
     }
-    const estimateADDLP = await thorchainQuery.estimatAddLP(addlp)
+    const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
     printAdd(estimateADDLP)
     expect(estimateADDLP).toBeTruthy()
   })
@@ -149,10 +169,10 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   it(`Should estimate withdraw BNB from address's position`, async () => {
     const LPAction = '-' // remove from lP position
     const percentage = 100 // gets converted to basis points later
-    const assetAddress = 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u'
+    const assetAddress = 'bc1qzw3xhtwctpezz8m4se7hsw4y68tg42p99gtrae'
     const withdrawType = `SYM`
     const removeLp: RemoveLiquidityPosition = {
-      asset: BUSD,
+      asset: AssetBTC,
       action: LPAction,
       percentage: percentage,
       assetAddress: assetAddress,
@@ -164,8 +184,8 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
 
   it(`Should check liquidity position for an address`, async () => {
-    const address = 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u'
-    const checkLP = await thorchainQuery.checkLiquidityPosition(BUSD, address)
+    const address = 'bc1qzw3xhtwctpezz8m4se7hsw4y68tg42p99gtrae'
+    const checkLP = await thorchainQuery.checkLiquidityPosition(AssetBTC, address)
     printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()
   })

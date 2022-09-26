@@ -1,5 +1,13 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetBTC, AssetRuneNative, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import {
+  AssetBTC,
+  AssetRuneNative,
+  assetAmount,
+  assetFromString,
+  assetToBase,
+  baseAmount,
+  baseToAsset,
+} from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
@@ -124,7 +132,7 @@ describe(`Liquidity calc tests`, () => {
     const correctSlip = '0.104' // percent slippage
     expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
   })
-  it(`Should calculate the correct ILP data `, async () => {
+  it(`Should calculate the correct ILP data symmetrical`, async () => {
     // Starting position
     const depositValue: PostionDepositValue = {
       asset: new CryptoAmount(assetToBase(assetAmount(`1`)), AssetBTC).baseAmount,
@@ -142,7 +150,29 @@ describe(`Liquidity calc tests`, () => {
       fullProtection: 144,
     }
     const checkILP = getLiquidityProtectionData(depositValue, poolShare, block)
-    expect(checkILP).toEqual(111.110875)
+    expect(baseToAsset(checkILP.ILProtection).amount().toNumber()).toEqual(111.110875)
+    expect(checkILP.totalDays).toEqual('100.00')
+  })
+  it(`Should calculate the correct ILP data Asymetrical `, async () => {
+    // Starting position
+    const depositValue: PostionDepositValue = {
+      asset: new CryptoAmount(assetToBase(assetAmount(`1`)), AssetBTC).baseAmount,
+      rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative).baseAmount,
+    }
+    // Current pool position
+    const poolShare: PoolShareDetail = {
+      assetShare: new CryptoAmount(assetToBase(assetAmount(`0.499999`)), AssetBTC).baseAmount.amount(),
+      runeShare: new CryptoAmount(assetToBase(assetAmount('6000.88')), AssetRuneNative).baseAmount.amount(),
+    }
+    // Current block data
+    const block: Block = {
+      current: 25744,
+      lastAdded: 25600,
+      fullProtection: 144,
+    }
+    const checkILP = getLiquidityProtectionData(depositValue, poolShare, block)
+    expect(baseToAsset(checkILP.ILProtection).amount().toNumber()).toEqual(0.02400357)
+    expect(checkILP.totalDays).toEqual('100.00')
   })
   it(`Should calculate correct pool ownership`, async () => {
     const BusdPool = new LiquidityPool(emptyBusdPoolDetails, 8)
@@ -168,12 +198,12 @@ describe(`Liquidity calc tests`, () => {
     const BusdPool1 = new LiquidityPool(emptyBusdPoolDetails, 8)
     const unitData: UnitData = {
       liquidityUnits: baseAmount('100000000'),
-      totalUnits:     baseAmount('1000000000'),
+      totalUnits: baseAmount('1000000000'),
     }
     const poolShare = getPoolShare(unitData, BusdPool1)
     const correctShare: PoolShareDetail = {
       assetShare: new BigNumber('100000000'),
-      runeShare:  new BigNumber('100000000'),
+      runeShare: new BigNumber('100000000'),
     }
     expect(baseAmount(poolShare.assetShare).amount()).toEqual(baseAmount(correctShare.assetShare).amount())
     expect(baseAmount(poolShare.runeShare).amount()).toEqual(baseAmount(correctShare.runeShare).amount())

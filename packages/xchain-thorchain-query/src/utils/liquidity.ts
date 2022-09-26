@@ -1,8 +1,8 @@
-import { baseAmount, baseToAsset } from '@xchainjs/xchain-util/lib'
+import { baseAmount } from '@xchainjs/xchain-util/lib'
 import { BigNumber } from 'bignumber.js'
 
 import { LiquidityPool } from '../liquidity-pool'
-import { Block, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData } from '../types'
+import { Block, ILProtectionData, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData } from '../types'
 
 /**
  * https://dev.thorchain.org/thorchain-dev/interface-guide/math#lp-units-add
@@ -70,12 +70,12 @@ export const getSlipOnLiquidity = (stake: LiquidityToAdd, pool: LiquidityPool): 
  * @param block - blockl object with current, last added and the constant blocksforlossProtection
  * @returns
  */
-// Blocks for full protection 144000 // 100 days
+// Blocks for full protection 1440000 // 100 days
 export const getLiquidityProtectionData = (
   depositValue: PostionDepositValue,
   poolShare: PoolShareDetail,
   block: Block,
-): number => {
+): ILProtectionData => {
   //Coverage formula coverage=((A0∗P1)+R0)−((A1∗P1)+R1)=>((A0∗R1/A1)+R0)−(R1+R1)
   //formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
   const R0 = depositValue.rune.amount() // rune deposit value
@@ -90,8 +90,12 @@ export const getLiquidityProtectionData = (
   const heightLastAdded = block.lastAdded
   const blocksforfullprotection = block.fullProtection
   const protectionProgress = (currentHeight - heightLastAdded) / blocksforfullprotection // percentage of entitlement
-  const result = protectionProgress * baseToAsset(baseAmount(coverage)).amount().toNumber() // impermanent loss protection result
-  return result
+  const result = coverage.times(protectionProgress) // impermanent loss protection result
+  const ILProtection: ILProtectionData = {
+    ILProtection: baseAmount(result),
+    totalDays: (protectionProgress * 100).toFixed(2),
+  }
+  return ILProtection
 }
 
 /**

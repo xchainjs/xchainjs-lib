@@ -458,7 +458,9 @@ export class ThorchainQuery {
       AssetRuneNative,
     )
     const maxTxOutOffset = networkValues['MAXTXOUTOFFSET']
-    let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative)
+    let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative).assetAmount
+      .amount()
+      .toNumber()
     const getScheduledOutboundValue = await this.thorchainCache.midgard.getScheduledOutboundValue()
     const thorChainblocktime = this.chainAttributes[Chain.THORChain].avgBlockTimeInSecs // blocks required to confirm tx
     // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
@@ -476,11 +478,9 @@ export class ThorchainQuery {
     // calculate the if outboundAmountTotal is over the volume threshold
     const volumeThreshold = outboundAmountTotal.div(minTxOutVolumeThreshold)
     // check delay rate
-    txOutDelayRate = txOutDelayRate.minus(volumeThreshold).baseAmount.amount().lt(1)
-      ? new CryptoAmount(baseAmount(1), AssetRuneNative)
-      : txOutDelayRate
+    txOutDelayRate = txOutDelayRate - volumeThreshold.assetAmount.amount().toNumber() <= 1 ? 1 : txOutDelayRate
     // calculate the minimum number of blocks in the future the txn has to be
-    let minBlocks = runeValue.div(txOutDelayRate).baseAmount.amount().toNumber()
+    let minBlocks = runeValue.assetAmount.amount().toNumber() / txOutDelayRate
     minBlocks = minBlocks > maxTxOutOffset ? maxTxOutOffset : minBlocks
     return minBlocks * thorChainblocktime
   }
@@ -743,7 +743,7 @@ export class ThorchainQuery {
       totalUnits: baseAmount(poolAsset.pool.liquidityUnits),
       liquidityUnits: baseAmount(lpObj.units),
     }
-    console.log(`unit data`, unitData.totalUnits.amount().toNumber(), unitData.liquidityUnits.amount().toNumber())
+    //console.log(`unit data`, unitData.totalUnits.amount().toNumber(), unitData.liquidityUnits.amount().toNumber())
     const networkValues = await this.thorchainCache.midgard.getNetworkValues()
     const block: Block = {
       current: blockData.thorchain,
@@ -756,9 +756,14 @@ export class ThorchainQuery {
       rune: baseAmount(lpObj.rune_deposit_value),
     }
     const poolShare = getPoolShare(unitData, poolAsset)
-    console.log(poolShare.assetShare.toNumber(), poolShare.runeShare.toNumber())
-    console.log(poolAsset.pool.liquidityUnits)
+    // console.log(poolShare.assetShare.toNumber(), poolShare.runeShare.toNumber())
+    // console.log(poolAsset.pool.liquidityUnits)
     const impermanentLossProtection = getLiquidityProtectionData(currentLP, poolShare, block)
+    const check = await this.convert(
+      new CryptoAmount(baseAmount(impermanentLossProtection.ILProtection.amount()), AssetRuneNative),
+      asset,
+    )
+    console.log(check.assetAmount.amount().toNumber())
     const lpPosition: LiquidityPosition = {
       position: lpObj,
       impermanentLossProtection: impermanentLossProtection,
@@ -812,6 +817,7 @@ export class ThorchainQuery {
       },
       assetPool,
     )
+    console.log(memberDetail.impermanentLossProtection)
     const estimateLP: EstimateWithdrawLP = {
       slip: slip,
       transactionFee: {
@@ -822,7 +828,7 @@ export class ThorchainQuery {
       assetAmount: new CryptoAmount(baseAmount(poolShare.assetShare), params.asset),
       runeAmount: new CryptoAmount(baseAmount(poolShare.runeShare), AssetRuneNative),
       estimatedWait: waitTimeSeconds,
-      impermanentLossProtection: 1,
+      impermanentLossProtection: memberDetail.impermanentLossProtection,
     }
     return estimateLP
   }

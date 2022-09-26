@@ -359,4 +359,9 @@ describe('Thorchain-query estimate Integration Tests', () => {
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })
+  it(`Should get correct outbound delay`, async () => {
+    const outboundAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetETH)
+    const outbound = await thorchainQuery.outboundDelay(outboundAmount)
+    console.log(outbound)
+  })
 })

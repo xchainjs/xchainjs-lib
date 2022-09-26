@@ -77,8 +77,9 @@ export type Block = {
   fullProtection: number
 }
 
-export type Coverage = {
-  poolRatio: BaseAmount
+export type ILProtectionData = {
+  ILProtection: BaseAmount
+  totalDays: string
 }
 
 export type InboundDetail = {
@@ -153,7 +154,7 @@ export type EstimateWithdrawLP = {
   transactionFee: LPFees
   assetAmount: CryptoAmount
   runeAmount: CryptoAmount
-  impermanentLossProtection: number
+  impermanentLossProtection: ILProtectionData
 }
 
 export type LPFees = {
@@ -180,7 +181,7 @@ export type RemoveLiquidityPosition = {
 }
 export type LiquidityPosition = {
   position: LiquidityProvider
-  impermanentLossProtection: number
+  impermanentLossProtection: ILProtectionData
 }
 
 export type PoolRatios = {
