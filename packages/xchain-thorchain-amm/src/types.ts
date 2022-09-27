@@ -29,7 +29,6 @@ export type TxSubmitted = {
 export type AddLiquidity = {
   asset: CryptoAmount
   rune: CryptoAmount
-  action: string
   waitTimeSeconds: number
 }
 
@@ -43,7 +42,6 @@ export type LiquidityPosition = {
 export type RemoveLiquidity = {
   asset: CryptoAmount
   rune: CryptoAmount
-  action: string
   percentage: number
   waitTimeSeconds: number
   asymmetricalWithdraw?: Asset

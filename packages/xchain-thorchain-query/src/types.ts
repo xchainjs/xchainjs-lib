@@ -1,5 +1,6 @@
 import { FeeOption } from '@xchainjs/xchain-client'
 import { InboundAddressesItem } from '@xchainjs/xchain-midgard'
+import { LiquidityProvider } from '@xchainjs/xchain-thornode'
 import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -73,7 +74,7 @@ export type LiquidityData = {
 
 export type Block = {
   current: number
-  lastAdded: number
+  lastAdded?: number
   fullProtection: number
 }
 
@@ -136,25 +137,25 @@ export type PostionDepositValue = {
 }
 
 export type PoolShareDetail = {
-  assetShare: BigNumber
-  runeShare: BigNumber
+  assetShare: CryptoAmount
+  runeShare: CryptoAmount
 }
 
-export type EstimateADDLP = {
-  slip: BigNumber
+export type EstimateAddLP = {
+  slipPercent: BigNumber
   poolShare: PoolShareDetail
   lpUnits: BaseAmount
   transactionFee: LPFees
   runeToAssetRatio: BigNumber
-  estimatedWait: number
+  estimatedWaitSeconds: number
 }
 export type EstimateWithdrawLP = {
-  slip: BigNumber
-  estimatedWait: number
+  slipPercent: BigNumber
   transactionFee: LPFees
   assetAmount: CryptoAmount
   runeAmount: CryptoAmount
   impermanentLossProtection: ILProtectionData
+  estimatedWaitSeconds: number
 }
 
 export type LPFees = {
@@ -169,17 +170,15 @@ export type DustValues = {
 export type AddliquidityPosition = {
   asset: CryptoAmount
   rune: CryptoAmount
-  action: string
 }
 export type RemoveLiquidityPosition = {
   asset: Asset
-  action: string
   percentage: number
-  assetAddress: string
+  assetAddress?: string
   runeAddress?: string
-  withdrawType: string
 }
 export type LiquidityPosition = {
+  poolShare: PoolShareDetail
   position: LiquidityProvider
   impermanentLossProtection: ILProtectionData
 }
@@ -188,16 +187,16 @@ export type PoolRatios = {
   assetToRune: BigNumber
   runeToAsset: BigNumber
 }
-export type LiquidityProvider = {
-  asset: string
-  rune_address: string
-  asset_address: string
-  last_add_height: number
-  last_withdraw_height: number
-  units: number
-  pending_rune: number
-  pending_asset: number
-  pending_tx_Id: string
-  rune_deposit_value: number
-  asset_deposit_value: number
-}
+// export type LiquidityProvider = {
+//   asset: string
+//   rune_address: string
+//   asset_address: string
+//   last_add_height: number
+//   last_withdraw_height: number
+//   units: number
+//   pending_rune: number
+//   pending_asset: number
+//   pending_tx_Id: string
+//   rune_deposit_value: number
+//   asset_deposit_value: number
+// }

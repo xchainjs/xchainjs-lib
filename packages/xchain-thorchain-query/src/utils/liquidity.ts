@@ -1,6 +1,7 @@
-import { baseAmount } from '@xchainjs/xchain-util/lib'
+import { AssetRuneNative, baseAmount } from '@xchainjs/xchain-util/lib'
 import { BigNumber } from 'bignumber.js'
 
+import { CryptoAmount } from '../crypto-amount'
 import { LiquidityPool } from '../liquidity-pool'
 import { Block, ILProtectionData, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData } from '../types'
 
@@ -39,8 +40,8 @@ export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShare
   const asset = T.times(units).div(total)
   const rune = R.times(units).div(total)
   const poolShareDetail = {
-    assetShare: asset,
-    runeShare: rune,
+    assetShare: new CryptoAmount(baseAmount(asset), pool.asset),
+    runeShare: new CryptoAmount(baseAmount(rune), AssetRuneNative),
   }
   return poolShareDetail
 }
@@ -80,14 +81,14 @@ export const getLiquidityProtectionData = (
   //formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
   const R0 = depositValue.rune.amount() // rune deposit value
   const A0 = depositValue.asset.amount() // asset deposit value
-  const R1 = poolShare.runeShare // rune amount to redeem
-  const A1 = poolShare.assetShare // asset amount to redeem
+  const R1 = poolShare.runeShare.baseAmount.amount() // rune amount to redeem
+  const A1 = poolShare.assetShare.baseAmount.amount() // asset amount to redeem
   const P1 = R1.div(A1) // Pool ratio at withdrawal
   const part1 = A0.times(P1).plus(R0).minus(A1.times(P1).plus(R1)) // start position minus end position
   const part2 = A0.times(R1.div(A1)).plus(R0).minus(R1.plus(R1)) // different way to check position
   const coverage = part1 >= part2 ? part1 : part2 // Coverage represents how much ILP a LP is entitled to
   const currentHeight = block.current
-  const heightLastAdded = block.lastAdded
+  const heightLastAdded = block.lastAdded || 0 //default to zero if undefined
   const blocksforfullprotection = block.fullProtection
   const protectionProgress = (currentHeight - heightLastAdded) / blocksforfullprotection // percentage of entitlement
   const result = coverage.times(protectionProgress) // impermanent loss protection result

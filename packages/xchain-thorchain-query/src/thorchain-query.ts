@@ -28,12 +28,11 @@ import {
   ChainAttributes,
   ConstructMemo,
   DustValues,
-  EstimateADDLP,
+  EstimateAddLP,
   EstimateSwapParams,
   EstimateWithdrawLP,
   InboundDetail,
   LiquidityPosition,
-  LiquidityProvider,
   PoolRatios,
   PostionDepositValue,
   RemoveLiquidityPosition,
@@ -518,7 +517,7 @@ export class ThorchainQuery {
 
     // Retrieve thorchain blockHeight for the tx
     if (!txData.observed_tx.tx?.id) throw Error('No action observed')
-    const recordedAction = await this.thorchainCache.midgard.getActions(txData.observed_tx.tx.id)
+    const recordedAction = await this.thorchainCache.midgard.getActions('', txData.observed_tx.tx.id)
     const recordedTCBlock = recordedAction.find((block) => {
       return block
     })
@@ -696,7 +695,10 @@ export class ThorchainQuery {
    * @param params - parameters needed for a estimated liquidity position
    * @returns - type object EstimateLP
    */
-  public async estimateAddLP(params: AddliquidityPosition): Promise<EstimateADDLP> {
+  public async estimateAddLP(params: AddliquidityPosition): Promise<EstimateAddLP> {
+    if (params.asset.asset.synth || params.rune.asset.synth) throw Error('you cannot add liquidity with a synth')
+    if (!isAssetRuneNative(params.rune.asset)) throw Error('params.rune must be THOR.RUNE')
+
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
     const lpUnits = getLiquidityUnits({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
     const inboundDetails = await this.thorchainCache.midgard.getInboundDetails()
@@ -705,13 +707,15 @@ export class ThorchainQuery {
       totalUnits: baseAmount(assetPool.pool.liquidityUnits),
     }
     const poolShare = getPoolShare(unitData, assetPool)
-    const waitTimeSeconds = await this.confCounting(params.asset)
+    const assetWaitTimeSeconds = await this.confCounting(params.asset)
+    const runeWaitTimeSeconds = await this.confCounting(params.rune)
+    const waitTimeSeconds = assetWaitTimeSeconds > runeWaitTimeSeconds ? assetWaitTimeSeconds : runeWaitTimeSeconds
     const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
     const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
     const totalFees = (await this.convert(assetInboundFee, AssetRuneNative)).plus(runeInboundFee)
     const slip = getSlipOnLiquidity({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
-    const estimateLP: EstimateADDLP = {
-      slip: slip.times(100),
+    const estimateLP: EstimateAddLP = {
+      slipPercent: slip.times(100),
       poolShare: poolShare,
       lpUnits: baseAmount(lpUnits),
       runeToAssetRatio: assetPool.runeToAssetRatio,
@@ -720,7 +724,7 @@ export class ThorchainQuery {
         runeFee: runeInboundFee,
         totalFees: totalFees,
       },
-      estimatedWait: waitTimeSeconds,
+      estimatedWaitSeconds: waitTimeSeconds,
     }
     return estimateLP
   }
@@ -730,42 +734,42 @@ export class ThorchainQuery {
    * @param address - address used for Lp
    * @returns - Type Object liquidityPosition
    */
-  public async checkLiquidityPosition(asset: Asset, address: string): Promise<LiquidityPosition> {
+  public async checkLiquidityPosition(asset: Asset, assetOrRuneAddress: string): Promise<LiquidityPosition> {
     const poolAsset = await this.thorchainCache.getPoolForAsset(asset)
     if (!poolAsset) throw Error(`Could not find pool for ${asset}`)
-    const liquidityProvider = await this.thorchainCache.thornode.getLiquidityProvider(poolAsset.assetString, address)
-    const lpObj: LiquidityProvider = JSON.parse(`${JSON.stringify(liquidityProvider)}`)
+
+    const liquidityProvider = await this.thorchainCache.thornode.getLiquidityProvider(
+      poolAsset.assetString,
+      assetOrRuneAddress,
+    )
+    if (!liquidityProvider) throw Error(`Could not find LP for ${assetOrRuneAddress}`)
     // Current block number for that chain
     const blockData = (await this.thorchainCache.thornode.getLastBlock()).find((item) => item.chain === asset.chain)
     if (!blockData) throw Error(`Could not get block data`)
     // Pools total units & Lp's total units
     const unitData: UnitData = {
       totalUnits: baseAmount(poolAsset.pool.liquidityUnits),
-      liquidityUnits: baseAmount(lpObj.units),
+      liquidityUnits: baseAmount(liquidityProvider.units),
     }
     //console.log(`unit data`, unitData.totalUnits.amount().toNumber(), unitData.liquidityUnits.amount().toNumber())
     const networkValues = await this.thorchainCache.midgard.getNetworkValues()
     const block: Block = {
       current: blockData.thorchain,
-      lastAdded: lpObj.last_add_height,
+      lastAdded: liquidityProvider.last_add_height,
       fullProtection: networkValues['FULLIMPLOSSPROTECTIONBLOCKS'],
     }
     //
     const currentLP: PostionDepositValue = {
-      asset: baseAmount(lpObj.asset_deposit_value),
-      rune: baseAmount(lpObj.rune_deposit_value),
+      asset: baseAmount(liquidityProvider.asset_deposit_value),
+      rune: baseAmount(liquidityProvider.rune_deposit_value),
     }
     const poolShare = getPoolShare(unitData, poolAsset)
     // console.log(poolShare.assetShare.toNumber(), poolShare.runeShare.toNumber())
     // console.log(poolAsset.pool.liquidityUnits)
     const impermanentLossProtection = getLiquidityProtectionData(currentLP, poolShare, block)
-    const check = await this.convert(
-      new CryptoAmount(baseAmount(impermanentLossProtection.ILProtection.amount()), AssetRuneNative),
-      asset,
-    )
-    console.log(check.assetAmount.amount().toNumber())
     const lpPosition: LiquidityPosition = {
-      position: lpObj,
+      poolShare,
+      position: liquidityProvider,
       impermanentLossProtection: impermanentLossProtection,
     }
     return lpPosition
@@ -796,6 +800,7 @@ export class ThorchainQuery {
     const dustValues = await this.getDustValues(params.asset) // returns asset and rune dust values
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset)
     console.log(`members postion`, memberDetail.position)
+    // TODO make sure we compare wait times for withdrawing both rune and asset OR just rune OR just asset
     const waitTimeSeconds = await this.confCounting(
       new CryptoAmount(baseAmount(memberDetail.position.asset_deposit_value), params.asset),
     )
@@ -819,15 +824,15 @@ export class ThorchainQuery {
     )
     console.log(memberDetail.impermanentLossProtection)
     const estimateLP: EstimateWithdrawLP = {
-      slip: slip,
+      slipPercent: slip.times(100),
       transactionFee: {
         assetFee: dustValues.asset,
         runeFee: dustValues.rune,
         totalFees: totalFees,
       },
-      assetAmount: new CryptoAmount(baseAmount(poolShare.assetShare), params.asset),
-      runeAmount: new CryptoAmount(baseAmount(poolShare.runeShare), AssetRuneNative),
-      estimatedWait: waitTimeSeconds,
+      assetAmount: poolShare.assetShare,
+      runeAmount: poolShare.runeShare,
+      estimatedWaitSeconds: waitTimeSeconds,
       impermanentLossProtection: memberDetail.impermanentLossProtection,
     }
     return estimateLP

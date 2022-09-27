@@ -204,23 +204,23 @@ export class Wallet {
 
     // symmetrical add
     if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.gt(0)) {
-      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressRune}`
+      constructedMemo = `+:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressRune}`
       txSubmitted.push(
         await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
       )
-      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressAsset}`
+      constructedMemo = `+:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressAsset}`
       txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     } else if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.eq(0)) {
       // asymmetrical asset only
-      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}`
+      constructedMemo = `+:${params.asset.asset.chain}.${params.asset.asset.symbol}`
       txSubmitted.push(
         await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
       )
       return txSubmitted
     } else {
       // asymmetrical rune only
-      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}`
+      constructedMemo = `+:${params.asset.asset.chain}.${params.asset.asset.symbol}`
       txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     }
@@ -243,23 +243,23 @@ export class Wallet {
     const txSubmitted: TxSubmitted[] = []
 
     if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.gt(0)) {
-      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      constructedMemo = `-:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
       txSubmitted.push(
         await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
       )
-      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      constructedMemo = `-:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
       txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     } else if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.eq(0)) {
       // asymmetrical asset only
-      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      constructedMemo = `-:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
       txSubmitted.push(
         await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
       )
       return txSubmitted
     } else {
       // asymmetrical rune only
-      constructedMemo = `${params.action}:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      constructedMemo = `-:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
       txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     }

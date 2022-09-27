@@ -2,11 +2,11 @@
   "name": "xchainjs-test",
   "version": "1.0.0",
   "scripts": {
-    "estimateAddLiquidity": "npx ts-node listPools.ts",
-    "estimateSwap": "npx ts-node estimateSwap.ts",
-    "doSwap": "npx ts-node doSwap.ts"
+    "checkLiquidity": "npx ts-node check-liquidity.ts",
+    "estimateAddLiquidity": "npx ts-node add-liquidity.ts",
+    "estimateWithdrawLiquidity": "npx ts-node withdraw-liquidity.ts"
   },
-  "description": "Test folder for xchainjs thorchain-amm package",
+  "description": "examples for adding liquidity",
   "main": "index.js",
   "author": "THORIANITE",
   "license": "MIT",

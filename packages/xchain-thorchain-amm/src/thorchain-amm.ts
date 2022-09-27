@@ -5,6 +5,7 @@ import {
   TxDetails,
   calcNetworkFee,
 } from '@xchainjs/xchain-thorchain-query'
+import { isAssetRuneNative } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { TxSubmitted } from './types'
@@ -101,6 +102,9 @@ export class ThorchainAMM {
    * @returns
    */
   public async addLiquidityPosition(wallet: Wallet, params: AddliquidityPosition): Promise<TxSubmitted[]> {
+    if (params.asset.asset.synth || params.rune.asset.synth) throw Error('you cannot add liquidity with a synth')
+    if (!isAssetRuneNative(params.rune.asset)) throw Error('params.rune must be THOR.RUNE')
+
     let waitTimeSeconds = 0
     const inboundDetails = await this.thorchainQuery.thorchainCache.midgard.getInboundDetails()
     const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
@@ -117,7 +121,6 @@ export class ThorchainAMM {
     return wallet.addLiquidity({
       asset: params.asset,
       rune: params.rune,
-      action: params.action,
       waitTimeSeconds: waitTimeSeconds,
     })
   }

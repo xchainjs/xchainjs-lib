@@ -142,11 +142,11 @@ export class Thornode {
    * @param height - optional block height, defaults to current tip
    * @returns
    */
-  async getLiquidityProvider(asset: string, address: string, height?: number): Promise<LiquidityProvider[]> {
+  async getLiquidityProvider(asset: string, address: string, height?: number): Promise<LiquidityProvider | undefined> {
     for (const api of this.liquidityProvidersApi) {
       try {
-        const lp = await api.liquidityProvider(asset, address, height)
-        return lp.data
+        const lps = (await api.liquidityProviders(asset, height)).data
+        return lps.find((lp) => lp.asset_address === address || lp.rune_address === address)
       } catch (e) {
         console.error(e)
       }
