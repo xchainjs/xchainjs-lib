@@ -1,3 +1,9 @@
+# v.0.5.1 (2022-09-27)
+
+## Fix
+
+- Increase value for `setMaximumFeeRate` to reflect current fees
+
 # v.0.5.0 (2022-09-05)
 
 ## Update
