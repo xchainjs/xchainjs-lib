@@ -1,3 +1,9 @@
+# v.0.1.0-alpha3 (2022-xx-xx)
+
+## Update
+
+- bumped deps on xchain-utils
+
 # v.0.1.0-alpha2 (2022-09-05)
 
 ## Update

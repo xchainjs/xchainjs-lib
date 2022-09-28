@@ -1,9 +1,19 @@
+# v.0.10.0 (2022-09-29)
+
+## Add
+
+- Add `assestFromStringEx()` to raise an exceptions in case of failures
+
+## Breaking change
+
+- Revert previous changes of `assestFromString()` to return null in case of failures
+
 # v.0.9.0 (2022-09-05)
 
-## Update
+## Breaking change
 
-- moved isAssetRuneNative() into utils
-- changed assestFromString() to not return null, instead throw parsing error
+- moved `isAssetRuneNative()` into utils
+- changed `assestFromString()` to not return null, instead throw parsing error
 
 # v.0.8.1 (2022-08-15)
 
