@@ -1,6 +1,7 @@
 import {
   AddliquidityPosition,
   EstimateSwapParams,
+  RemoveLiquidityPosition,
   ThorchainQuery,
   TxDetails,
   calcNetworkFee,
@@ -124,32 +125,27 @@ export class ThorchainAMM {
       waitTimeSeconds: waitTimeSeconds,
     })
   }
-  // /**
-  //  *
-  //  * @param params - liquidity parameters
-  //  * @param wallet - wallet needed to perform tx
-  //  * @return
-  //  */
-  // public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidityPosition): Promise<TxSubmitted[]> {
-  //   let waitTimeSeconds = 0
-  //   const membersLP = await this.thorchainQuery.checkLiquidityPosition(params.assetAddress)
-  //   // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
-  //   const dustValues = await this.thorchainQuery.getDustValues(membersLP.assetAmount.asset)
-  //   console.log(dustValues.asset.assetAmount.amount().toNumber(), dustValues.rune.assetAmount.amount().toNumber())
+  /**
+   *
+   * @param params - liquidity parameters
+   * @param wallet - wallet needed to perform tx
+   * @return
+   */
+  public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidityPosition): Promise<TxSubmitted[]> {
+    let waitTimeSeconds = 0
 
-  //   // Calculating wait time for amount to be withdrawn based off the percentage
-  //   const assetAmount = membersLP.assetAmount.times(params.percentage / 100)
-  //   // bug right here
+    // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
+    const estimateWithrawLp = await this.thorchainQuery.estimateWithdrawLP(params)
 
-  //   waitTimeSeconds = await this.thorchainQuery.confCounting(assetAmount)
-  //   waitTimeSeconds += await this.thorchainQuery.confCounting(membersLP.runeAmount)
+    // Calculating wait time for amount to be withdrawn based off the percentage
+    waitTimeSeconds = await this.thorchainQuery.confCounting(estimateWithrawLp.assetAmount)
+    waitTimeSeconds += await this.thorchainQuery.confCounting(estimateWithrawLp.runeAmount)
 
-  //   return wallet.removeLiquidity({
-  //     asset: dustValues.asset,
-  //     rune: dustValues.rune,
-  //     action: params.action,
-  //     percentage: params.percentage,
-  //     waitTimeSeconds: waitTimeSeconds,
-  //   })
-  // }
+    return wallet.removeLiquidity({
+      asset: estimateWithrawLp.transactionFee.assetFee,
+      rune: estimateWithrawLp.transactionFee.runeFee,
+      percentage: params.percentage,
+      waitTimeSeconds: waitTimeSeconds,
+    })
+  }
 }
