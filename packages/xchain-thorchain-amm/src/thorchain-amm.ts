@@ -132,20 +132,13 @@ export class ThorchainAMM {
    * @return
    */
   public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidityPosition): Promise<TxSubmitted[]> {
-    let waitTimeSeconds = 0
-
     // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
     const estimateWithrawLp = await this.thorchainQuery.estimateWithdrawLP(params)
-
-    // Calculating wait time for amount to be withdrawn based off the percentage
-    waitTimeSeconds = await this.thorchainQuery.confCounting(estimateWithrawLp.assetAmount)
-    waitTimeSeconds += await this.thorchainQuery.confCounting(estimateWithrawLp.runeAmount)
-
     return wallet.removeLiquidity({
       asset: estimateWithrawLp.transactionFee.assetFee,
       rune: estimateWithrawLp.transactionFee.runeFee,
       percentage: params.percentage,
-      waitTimeSeconds: waitTimeSeconds,
+      waitTimeSeconds: estimateWithrawLp.estimatedWait,
     })
   }
 }
