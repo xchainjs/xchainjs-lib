@@ -799,11 +799,7 @@ export class ThorchainQuery {
     const memberDetail = await this.checkLiquidityPosition(params.asset, params.assetAddress)
     const dustValues = await this.getDustValues(params.asset) // returns asset and rune dust values
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset)
-    console.log(`members postion`, memberDetail.position)
-    // TODO make sure we compare wait times for withdrawing both rune and asset OR just rune OR just asset
-    const waitTimeSeconds = await this.confCounting(
-      new CryptoAmount(baseAmount(memberDetail.position.asset_deposit_value), params.asset),
-    )
+
     // get pool share from unit data
     const poolShare = getPoolShare(
       {
@@ -822,7 +818,17 @@ export class ThorchainQuery {
       },
       assetPool,
     )
-    console.log(memberDetail.impermanentLossProtection)
+    // TODO make sure we compare wait times for withdrawing both rune and asset OR just rune OR just asset
+    const waitTimeSecondsForAsset = await this.confCounting(poolShare.assetShare.div(params.percentage / 100))
+    const waitTimeSecondsForRune = await this.confCounting(poolShare.runeShare.div(params.percentage / 100))
+    let waitTimeSeconds = 0
+    if (params.assetAddress && params.runeAddress) {
+      waitTimeSeconds = waitTimeSecondsForAsset + waitTimeSecondsForRune
+    } else if (params.assetAddress) {
+      waitTimeSeconds = waitTimeSecondsForAsset
+    } else {
+      waitTimeSeconds = waitTimeSecondsForRune
+    }
     const estimateLP: EstimateWithdrawLP = {
       slipPercent: slip.times(100),
       transactionFee: {
