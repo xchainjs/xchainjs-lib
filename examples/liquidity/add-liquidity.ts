@@ -23,6 +23,8 @@ function print(estimate: EstimateAddLP, input1: CryptoAmount, input2: CryptoAmou
       totalFees: estimate.transactionFee.totalFees.formatedAssetString(),
     },
     estimatedWaitSeconds: estimate.estimatedWaitSeconds,
+    errors: estimate.errors,
+    canAdd: estimate.canAdd,
   }
   console.log(expanded)
 }

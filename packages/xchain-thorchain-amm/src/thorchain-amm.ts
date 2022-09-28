@@ -4,9 +4,7 @@ import {
   RemoveLiquidityPosition,
   ThorchainQuery,
   TxDetails,
-  calcNetworkFee,
 } from '@xchainjs/xchain-thorchain-query'
-import { isAssetRuneNative } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { TxSubmitted } from './types'
@@ -103,26 +101,13 @@ export class ThorchainAMM {
    * @returns
    */
   public async addLiquidityPosition(wallet: Wallet, params: AddliquidityPosition): Promise<TxSubmitted[]> {
-    if (params.asset.asset.synth || params.rune.asset.synth) throw Error('you cannot add liquidity with a synth')
-    if (!isAssetRuneNative(params.rune.asset)) throw Error('params.rune must be THOR.RUNE')
+    // Check amounts are greater than fees and use return estimated wait
+    const checkLPAdd = await this.thorchainQuery.estimateAddLP(params)
 
-    let waitTimeSeconds = 0
-    const inboundDetails = await this.thorchainQuery.thorchainCache.midgard.getInboundDetails()
-    const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
-    const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
-
-    if (!params.asset.assetAmount.eq(0)) {
-      waitTimeSeconds = await this.thorchainQuery.confCounting(params.asset)
-      if (assetInboundFee.baseAmount.times(4).gt(params.asset.baseAmount)) throw Error(`Asset amount is less than fees`)
-    }
-    if (!params.rune.assetAmount.eq(0)) {
-      waitTimeSeconds = await this.thorchainQuery.confCounting(params.rune)
-      if (runeInboundFee.baseAmount.times(4).gt(params.rune.baseAmount)) throw Error(`Rune amount is less than fees`)
-    }
     return wallet.addLiquidity({
       asset: params.asset,
       rune: params.rune,
-      waitTimeSeconds: waitTimeSeconds,
+      waitTimeSeconds: checkLPAdd.estimatedWaitSeconds,
     })
   }
   /**
@@ -138,7 +123,7 @@ export class ThorchainAMM {
       asset: estimateWithrawLp.transactionFee.assetFee,
       rune: estimateWithrawLp.transactionFee.runeFee,
       percentage: params.percentage,
-      waitTimeSeconds: estimateWithrawLp.estimatedWait,
+      waitTimeSeconds: estimateWithrawLp.estimatedWaitSeconds,
     })
   }
 }

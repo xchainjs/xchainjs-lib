@@ -28,19 +28,9 @@ require('dotenv').config()
 const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
-// const stagenetCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
-// const stagenethorchainQuery = new ThorchainQuery(stagenetCache)
-
-// const testnetCache = new ThorchainCache(new Midgard(Network.Testnet), new Thornode(Network.Testnet))
-// const testnethorchainQuery = new ThorchainQuery(testnetCache)
-
 // mainnet asset
 const BUSD = assetFromString('BNB.BUSD-BD1')
 if (!BUSD) throw Error('bad asset')
-// Testnet asset
-
-// const BUSDT = assetFromString('BNB.BUSD-74E')
-// if (!BUSDT) throw Error('bad asset')
 
 function printAdd(estimate: EstimateAddLP) {
   const expanded = {
@@ -49,7 +39,7 @@ function printAdd(estimate: EstimateAddLP) {
       asset: estimate.poolShare.assetShare.formatedAssetString(),
       rune: estimate.poolShare.runeShare.formatedAssetString(),
     },
-    lpUnitsL: estimate.lpUnits.amount().toNumber(),
+    lpUnits: estimate.lpUnits.amount().toNumber(),
     runeToAssetRatio: estimate.runeToAssetRatio.toNumber(),
     transactionFees: {
       runeFee: estimate.transactionFee.runeFee.formatedAssetString(),
@@ -57,6 +47,8 @@ function printAdd(estimate: EstimateAddLP) {
       totalFees: estimate.transactionFee.totalFees.formatedAssetString(),
     },
     estimatedWait: estimate.estimatedWaitSeconds.toFixed(),
+    errors: estimate.errors,
+    canAdd: estimate.canAdd,
   }
   console.log(expanded)
 }
@@ -70,7 +62,10 @@ function printWithdraw(withdraw: EstimateWithdrawLP) {
       assetFee: withdraw.transactionFee.assetFee.assetAmount.amount().toFixed(),
       totalFees: withdraw.transactionFee.totalFees.assetAmount.amount().toFixed(),
     },
-    impermanentLossProtection: withdraw.impermanentLossProtection,
+    impermanentLossProtection: new CryptoAmount(
+      baseAmount(withdraw.impermanentLossProtection.ILProtection.amount()),
+      AssetRuneNative,
+    ).formatedAssetString(),
     estimatedWait: withdraw.estimatedWaitSeconds.toFixed(),
   }
   console.log(expanded)
@@ -85,9 +80,7 @@ function printliquidityPosition(liquidityPosition: LiquidityPosition) {
       ILProtection: new CryptoAmount(
         baseAmount(liquidityPosition.impermanentLossProtection.ILProtection.amount()),
         AssetRuneNative,
-      ).assetAmount
-        .amount()
-        .toNumber(),
+      ).formatedAssetString(),
       totalDays: liquidityPosition.impermanentLossProtection.totalDays,
     },
   }
@@ -108,7 +101,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
   it(`Should estimate ADD ETH liquidity postion for given amount`, async () => {
     const addlp: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(1)), AssetETH),
+      asset: new CryptoAmount(assetToBase(assetAmount(0.000001)), AssetETH),
       rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
     }
     const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)

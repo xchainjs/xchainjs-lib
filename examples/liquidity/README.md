@@ -32,15 +32,17 @@ $ npx ts-node add-liquidity.ts mainnet 1 BTC.BTC 12052.61115075 THOR.RUNE
 {
   input1: '₿ 1',
   input2: 'ᚱ 12,052.61115075',
-  slipPercent: '0.0000',
-  lpUnits: '609979466048',
-  runeToAssetRatio: '12052.61823221',
+  slipPercent: '0.0027',
+  lpUnits: '612042953364',
+  runeToAssetRatio: '12293.08677329',
   transactionFee: {
-    assetFee: '⚡ 22,000',
+    assetFee: '⚡ 15,000',
     runeFee: 'ᚱ 0.02',
-    totalFees: 'ᚱ 2.67157601'
+    totalFees: 'ᚱ 1.86396302'
   },
-  estimatedWaitSeconds: 600
+  estimatedWaitSeconds: 600,
+  errors: [],
+  canAdd: true
 }
 ✨  Done in 3.50s.
 
@@ -49,7 +51,7 @@ $ npx ts-node add-liquidity.ts mainnet 1 BTC.BTC 12052.61115075 THOR.RUNE
 #### example: estimate an asymmetrical add (1 BTC & 0 Rune)
 
 ```bash
-yarn estimateAddLiquidity mainnet 1 BTC.BTC 0 THOR.RUNE             
+yarn estimateAddLiquidity mainnet 1 BTC.BTC 0 THOR.RUNE
 
 yarn run v1.22.17
 $ npx ts-node add-liquidity.ts mainnet 1 BTC.BTC 0 THOR.RUNE
@@ -80,15 +82,17 @@ $ npx ts-node add-liquidity.ts mainnet 0 BTC.BTC 12052.61115075 THOR.RUNE
 {
   input1: '⚡ 0',
   input2: 'ᚱ 12,052.61115075',
-  slipPercent: '0.1346',
-  lpUnits: '304958794428',
-  runeToAssetRatio: '12053.83745005',
+  slipPercent: '0.1335',
+  lpUnits: '303091229273',
+  runeToAssetRatio: '12289.33537974',
   transactionFee: {
-    assetFee: '⚡ 22,000',
+    assetFee: '⚡ 16,000',
     runeFee: 'ᚱ 0.02',
-    totalFees: 'ᚱ 2.67184424'
+    totalFees: 'ᚱ 1.98629366'
   },
-  estimatedWaitSeconds: 6
+  estimatedWaitSeconds: 6,
+  errors: [],
+  canAdd: true
 }
 ✨  Done in 3.51s.
 ```
@@ -97,4 +101,3 @@ LP Withdraw
 LP Position
 
 ### Estimate Remove Liquidity
-

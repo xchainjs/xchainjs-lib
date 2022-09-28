@@ -148,6 +148,8 @@ export type EstimateAddLP = {
   transactionFee: LPFees
   runeToAssetRatio: BigNumber
   estimatedWaitSeconds: number
+  errors: string[]
+  canAdd: boolean
 }
 export type EstimateWithdrawLP = {
   slipPercent: BigNumber

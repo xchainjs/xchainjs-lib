@@ -696,8 +696,9 @@ export class ThorchainQuery {
    * @returns - type object EstimateLP
    */
   public async estimateAddLP(params: AddliquidityPosition): Promise<EstimateAddLP> {
-    if (params.asset.asset.synth || params.rune.asset.synth) throw Error('you cannot add liquidity with a synth')
-    if (!isAssetRuneNative(params.rune.asset)) throw Error('params.rune must be THOR.RUNE')
+    const errors: string[] = []
+    if (params.asset.asset.synth || params.rune.asset.synth) errors.push('you cannot add liquidity with a synth')
+    if (!isAssetRuneNative(params.rune.asset)) errors.push('params.rune must be THOR.RUNE')
 
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
     const lpUnits = getLiquidityUnits({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
@@ -710,8 +711,18 @@ export class ThorchainQuery {
     const assetWaitTimeSeconds = await this.confCounting(params.asset)
     const runeWaitTimeSeconds = await this.confCounting(params.rune)
     const waitTimeSeconds = assetWaitTimeSeconds > runeWaitTimeSeconds ? assetWaitTimeSeconds : runeWaitTimeSeconds
+
     const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
     const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
+
+    if (!params.asset.assetAmount.eq(0)) {
+      if (assetInboundFee.assetAmount.amount().times(3).gt(params.asset.assetAmount.amount()))
+        errors.push(`Asset amount is less than fees`)
+    }
+    if (!params.rune.assetAmount.eq(0)) {
+      if (runeInboundFee.assetAmount.amount().times(3).gt(params.rune.baseAmount.amount()))
+        errors.push(`Rune amount is less than fees`)
+    }
     const totalFees = (await this.convert(assetInboundFee, AssetRuneNative)).plus(runeInboundFee)
     const slip = getSlipOnLiquidity({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
     const estimateLP: EstimateAddLP = {
@@ -725,6 +736,8 @@ export class ThorchainQuery {
         totalFees: totalFees,
       },
       estimatedWaitSeconds: waitTimeSeconds,
+      errors,
+      canAdd: errors.length > 0 ? false : true,
     }
     return estimateLP
   }
