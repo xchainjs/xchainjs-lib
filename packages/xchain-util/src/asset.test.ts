@@ -308,40 +308,28 @@ describe('asset', () => {
       expect(result).toEqual({ chain: BNBChain, symbol: 'BNB', ticker: 'BNB', synth: true })
     })
     it('null for chain only', () => {
-      try {
-        assetFromString('BNB')
-        fail()
-      } catch (error) {}
+      const result = assetFromString('BNB')
+      expect(result).toBeNull()
     })
     it('null for chain and a `.`', () => {
-      try {
-        assetFromString('BNB.')
-        fail()
-      } catch (error) {}
+      const result = assetFromString('BNB.')
+      expect(result).toBeNull()
     })
     it('null for empty string', () => {
-      try {
-        assetFromString('')
-        fail()
-      } catch (error) {}
+      const result = assetFromString('')
+      expect(result).toBeNull()
     })
     it('null for `.` ', () => {
-      try {
-        assetFromString('.')
-        fail()
-      } catch (error) {}
+      const result = assetFromString('.')
+      expect(result).toBeNull()
     })
     it('null for undefined chain', () => {
-      try {
-        assetFromString('.BNB.BNB')
-        fail()
-      } catch (error) {}
+      const result = assetFromString('.BNB.BNB')
+      expect(result).toBeNull()
     })
     it('null for invalid chain', () => {
-      try {
-        assetFromString('invalid.BNB.BNB')
-        fail()
-      } catch (error) {}
+      const result = assetFromString('invalid.BNB.BNB')
+      expect(result).toBeNull()
     })
   })
 
