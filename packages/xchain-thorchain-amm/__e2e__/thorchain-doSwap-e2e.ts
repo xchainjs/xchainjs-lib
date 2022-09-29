@@ -19,7 +19,7 @@ import {
   AssetRuneNative,
   Chain,
   assetAmount,
-  assetFromString,
+  assetFromStringEx,
   assetToBase,
 } from '@xchainjs/xchain-util'
 import { fail } from 'assert'
@@ -46,17 +46,16 @@ const testnetThorchainAmm = new ThorchainAMM(thorchainQueryTestnet)
 const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 const stagenetThorchainAmm = new ThorchainAMM(thorchainQueryStagenet)
 
-const sBTC = assetFromString('BTC/BTC')
-console.log('sBTC?.chain=' + sBTC?.chain)
+const sBTC = assetFromStringEx('BTC/BTC')
 if (!sBTC) throw Error('Synthetic asset is incorrect')
 
-const sETH = assetFromString('ETH/ETH')
+const sETH = assetFromStringEx('ETH/ETH')
 if (!sETH) throw Error('Synthentic asset is incorrect')
 
-const sBNB = assetFromString('BNB/BNB')
+const sBNB = assetFromStringEx('BNB/BNB')
 if (!sBNB) throw Error('Synthetic asset is inccorect')
 
-const BUSD = assetFromString('BNB.BUSD-BD1')
+const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 if (!BUSD) throw Error('Asset is incorrect')
 
 // const ETH_DECIMAL = 18
@@ -316,6 +315,17 @@ describe('xchain-swap doSwap Integration Tests', () => {
       slipLimit: new BigNumber('0.5'),
     }
     const output = await stagenetThorchainAmm.doSwap(stagenetWallet, estimateSwapParams)
+    console.log(output)
+    expect(output.hash).toBeTruthy()
+  })
+  it(`Should perform a swap from LTC to RUNE`, async () => {
+    const estimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('0.01')), AssetLTC),
+      destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
+      destinationAsset: AssetRuneNative,
+      slipLimit: new BigNumber('0.5'),
+    }
+    const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
