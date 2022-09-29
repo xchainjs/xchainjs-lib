@@ -1,7 +1,13 @@
-import { EstimateSwapParams, ThorchainQuery, TxDetails } from '@xchainjs/xchain-thorchain-query'
+import {
+  AddliquidityPosition,
+  EstimateSwapParams,
+  RemoveLiquidityPosition,
+  ThorchainQuery,
+  TxDetails,
+} from '@xchainjs/xchain-thorchain-query'
 import { BigNumber } from 'bignumber.js'
 
-import { SwapSubmitted } from './types'
+import { TxSubmitted } from './types'
 import { Wallet } from './wallet'
 
 const BN_1 = new BigNumber(1)
@@ -59,7 +65,7 @@ export class ThorchainAMM {
    * @param params - swap params
    * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
-  public async doSwap(wallet: Wallet, params: EstimateSwapParams): Promise<SwapSubmitted> {
+  public async doSwap(wallet: Wallet, params: EstimateSwapParams): Promise<TxSubmitted> {
     // TODO validate all input fields
     const txDetails = await this.thorchainQuery.estimateSwap(params)
     if (!txDetails.txEstimate.canSwap) {
@@ -86,6 +92,38 @@ export class ThorchainAMM {
       affiliateFee,
       interfaceID: params.interfaceID || 999,
       waitTimeSeconds,
+    })
+  }
+  /**
+   *
+   * @param wallet - wallet class
+   * @param params - liquidity parameters
+   * @returns
+   */
+  public async addLiquidityPosition(wallet: Wallet, params: AddliquidityPosition): Promise<TxSubmitted[]> {
+    // Check amounts are greater than fees and use return estimated wait
+    const checkLPAdd = await this.thorchainQuery.estimateAddLP(params)
+
+    return wallet.addLiquidity({
+      asset: params.asset,
+      rune: params.rune,
+      waitTimeSeconds: checkLPAdd.estimatedWaitSeconds,
+    })
+  }
+  /**
+   *
+   * @param params - liquidity parameters
+   * @param wallet - wallet needed to perform tx
+   * @return
+   */
+  public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidityPosition): Promise<TxSubmitted[]> {
+    // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
+    const estimateWithrawLp = await this.thorchainQuery.estimateWithdrawLP(params)
+    return wallet.removeLiquidity({
+      asset: estimateWithrawLp.transactionFee.assetFee,
+      rune: estimateWithrawLp.transactionFee.runeFee,
+      percentage: params.percentage,
+      waitTimeSeconds: estimateWithrawLp.estimatedWaitSeconds,
     })
   }
 }

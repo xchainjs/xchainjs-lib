@@ -7,7 +7,7 @@ import {
   AssetRuneNative,
   Chain,
   assetAmount,
-  assetFromString,
+  assetFromStringEx,
   assetToBase,
   baseAmount,
 } from '@xchainjs/xchain-util'
@@ -52,8 +52,8 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
   }
   console.log(expanded)
 }
-const BUSD = assetFromString('BNB.BUSD-BD1')
-const BTCB = assetFromString('BNB.BTCB-1DE')
+const BUSD = assetFromStringEx('BNB.BUSD-BD1')
+const BTCB = assetFromStringEx('BNB.BTCB-1DE')
 
 // Test User Functions - single and double swap using mock pool data
 describe('Thorchain-query estimate Integration Tests', () => {
@@ -358,5 +358,10 @@ describe('Thorchain-query estimate Integration Tests', () => {
     print(estimate.txEstimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
+  })
+  it(`Should get correct outbound delay`, async () => {
+    const outboundAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetETH)
+    const outbound = await thorchainQuery.outboundDelay(outboundAmount)
+    console.log(outbound)
   })
 })

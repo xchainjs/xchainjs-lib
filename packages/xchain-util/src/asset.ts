@@ -307,22 +307,31 @@ const NON_SYNTH_DELIMITER = '.'
  * @param {string} s The given string.
  * @returns {Asset|null} The asset from the given string.
  */
-export const assetFromString = (s: string): Asset => {
+export const assetFromString = (s: string): Asset | null => {
   const isSynth = s.includes(SYNTH_DELIMITER)
   const delimiter = isSynth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
   const data = s.split(delimiter)
   if (data.length <= 1 || data[1]?.length < 1) {
-    throw Error('assest string not correct')
+    return null
   }
 
   const chain = data[0]
   // filter out not supported string of chains
-  if (!chain || !isChain(chain)) throw Error('assest string not correct')
+  if (!chain || !isChain(chain)) return null
 
   const symbol = data[1]
   const ticker = symbol.split('-')[0]
 
   return { chain, symbol, ticker, synth: isSynth }
+}
+
+/**
+ * Similar to an `assetFromString`, but throws an exception for invalid asset strings
+ */
+export const assetFromStringEx = (s: string): Asset => {
+  const asset = assetFromString(s)
+  if (!asset) throw Error('asset string not correct')
+  return asset
 }
 
 /**

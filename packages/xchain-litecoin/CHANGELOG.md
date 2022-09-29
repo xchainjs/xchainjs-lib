@@ -1,8 +1,15 @@
-# v.0.10.1 (2020-09-25)
+# v.0.10.2 (2020-09-25)
 
 ## Update
 
-- changed default node URL to 'https://litecoin.ninerealms.com' 
+- changed default node URL to 'https://litecoin.ninerealms.com'
+
+# v.0.10.1 (2022-09-29)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
 # v.0.10.0 (2020-09-05)
 
 ## Update

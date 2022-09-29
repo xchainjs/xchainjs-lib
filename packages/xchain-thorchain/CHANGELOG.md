@@ -1,3 +1,9 @@
+# v.0.26.1 (2022-09-29)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
 # v.0.26.0 (2022-07-20)
 
 ## Change

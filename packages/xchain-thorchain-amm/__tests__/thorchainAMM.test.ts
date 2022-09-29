@@ -15,7 +15,7 @@ import {
   AssetLTC,
   AssetRuneNative,
   assetAmount,
-  assetFromString,
+  assetFromStringEx,
   assetToBase,
 } from '@xchainjs/xchain-util'
 
@@ -25,7 +25,7 @@ import mockThornodeApi from '../__mocks__/thornode-api'
 const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 //const thorchainAmm = new ThorchainAMM(thorchainQuery)
-const assetUSDC = assetFromString('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {

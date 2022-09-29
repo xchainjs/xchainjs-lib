@@ -6,9 +6,10 @@ import {
   AssetLTC,
   AssetRuneNative,
   assetAmount,
-  assetFromString,
+  assetFromStringEx,
   assetToBase,
 } from '@xchainjs/xchain-util'
+import { BigNumber } from 'bignumber.js'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
@@ -23,9 +24,9 @@ const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thor
 
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
-const assetUOS = assetFromString('ETH.UOS-0XD13C7342E1EF687C5AD21B27C2B65D772CAB5C8C')
-const assetUSDC = assetFromString('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
-const BUSD = assetFromString('BNB.BUSD-BD1')
+const assetUOS = assetFromStringEx('ETH.UOS-0XD13C7342E1EF687C5AD21B27C2B65D772CAB5C8C')
+const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {
@@ -139,6 +140,7 @@ describe('Thorchain-query tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount(1000)), BUSD),
       destinationAsset: AssetRuneNative,
       destinationAddress: 'xxx',
+      slipLimit: new BigNumber('0.03'),
     }
 
     const estimate = await thorchainQuery.estimateSwap(swapParams)

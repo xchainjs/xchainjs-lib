@@ -2,6 +2,8 @@ import { Network } from '@xchainjs/xchain-client'
 import {
   Configuration,
   LastBlock,
+  LiquidityProvider,
+  LiquidityProvidersApi,
   NetworkApi,
   Pool,
   PoolsApi,
@@ -44,6 +46,7 @@ export class Thornode {
   private queueApi: QueueApi[]
   private networkApi: NetworkApi[]
   private poolsApi: PoolsApi[]
+  private liquidityProvidersApi: LiquidityProvidersApi[]
 
   constructor(network: Network = Network.Mainnet, config?: ThornodeConfig) {
     this.network = network
@@ -55,6 +58,9 @@ export class Thornode {
     this.queueApi = this.config.thornodeBaseUrls.map((url) => new QueueApi(new Configuration({ basePath: url })))
     this.networkApi = this.config.thornodeBaseUrls.map((url) => new NetworkApi(new Configuration({ basePath: url })))
     this.poolsApi = this.config.thornodeBaseUrls.map((url) => new PoolsApi(new Configuration({ basePath: url })))
+    this.liquidityProvidersApi = this.config.thornodeBaseUrls.map(
+      (url) => new LiquidityProvidersApi(new Configuration({ basePath: url })),
+    )
   }
 
   /**
@@ -76,7 +82,11 @@ export class Thornode {
     }
     throw Error(`THORNode not responding`)
   }
-
+  /**
+   *
+   * @param txHash - transaction hash
+   * @returns - transaction object
+   */
   async getTxData(txHash: string): Promise<TxResponse> {
     for (const api of this.transactionsApi) {
       try {
@@ -92,7 +102,11 @@ export class Thornode {
     }
     throw new Error(`THORNode not responding`)
   }
-
+  /**
+   *
+   * @param height - optional thorchain height only
+   * @returns - last block data || or block data pertaining to that height number
+   */
   async getLastBlock(height?: number): Promise<LastBlock[]> {
     for (const api of this.networkApi) {
       try {
@@ -104,12 +118,35 @@ export class Thornode {
     }
     throw new Error(`THORNode not responding`)
   }
+  /**
+   *
+   * @returns - thorchain pool
+   */
   async getPools(): Promise<Pool[]> {
     for (const api of this.poolsApi) {
       try {
         // console.log(console.log(JSON.stringify(api, null, 2)))
         const pools = await api.pools()
         return pools.data
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+
+  /**
+   *
+   * @param asset - asset string
+   * @param address - address
+   * @param height - optional block height, defaults to current tip
+   * @returns
+   */
+  async getLiquidityProvider(asset: string, address: string, height?: number): Promise<LiquidityProvider | undefined> {
+    for (const api of this.liquidityProvidersApi) {
+      try {
+        const lps = (await api.liquidityProviders(asset, height)).data
+        return lps.find((lp) => lp.asset_address === address || lp.rune_address === address)
       } catch (e) {
         console.error(e)
       }

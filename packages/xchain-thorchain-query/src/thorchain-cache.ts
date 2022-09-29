@@ -5,7 +5,7 @@ import {
   Asset,
   Chain,
   // assetAmount,
-  assetFromString,
+  assetFromStringEx,
   // assetToBase,
   // assetToBase,
   assetToString,
@@ -28,12 +28,15 @@ const TEN_MINUTES = 10 * 60 * 1000
 const DEFAULT_THORCHAIN_DECIMALS = 8
 const USD_ASSETS: Record<Network, Asset[]> = {
   mainnet: [
-    assetFromString('BNB.BUSD-BD1'),
-    assetFromString('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48'),
-    assetFromString('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7'),
+    assetFromStringEx('BNB.BUSD-BD1'),
+    assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48'),
+    assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7'),
   ],
-  stagenet: [assetFromString('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')],
-  testnet: [assetFromString('BNB.BUSD-74E'), assetFromString('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306')],
+  stagenet: [assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')],
+  testnet: [
+    assetFromStringEx('BNB.BUSD-74E'),
+    assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306'),
+  ],
 }
 
 /**
@@ -289,6 +292,10 @@ export class ThorchainCache {
     }
     return inboundAsgard?.router
   }
+  /**
+   *
+   * @returns - inbound adresses item
+   */
   async getInboundAddressesItems(): Promise<Record<string, InboundAddressesItem>> {
     const millisSinceLastRefeshed = Date.now() - (this.asgardAssetsCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.expireAsgardCacheMillis) {
@@ -304,6 +311,10 @@ export class ThorchainCache {
       throw Error(`Could not refresh refereshAsgardCache `)
     }
   }
+  /**
+   *
+   * @returns - inbound details
+   */
   async getInboundDetails(): Promise<Record<string, InboundDetail>> {
     const millisSinceLastRefeshed = Date.now() - (this.inboundDetailCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.expireInboundDetailsCacheMillis) {
@@ -319,6 +330,10 @@ export class ThorchainCache {
       throw Error(`Could not refereshInboundDetailCache `)
     }
   }
+  /**
+   *
+   * @returns - network values
+   */
   async getNetworkValues(): Promise<Record<string, number>> {
     const millisSinceLastRefeshed = Date.now() - (this.networkValuesCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.expireNetworkValuesCacheMillis) {

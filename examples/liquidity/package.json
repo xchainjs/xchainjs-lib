@@ -2,11 +2,11 @@
   "name": "xchainjs-test",
   "version": "1.0.0",
   "scripts": {
-    "listPools": "npx ts-node listPools.ts",
-    "estimateSwap": "npx ts-node estimateSwap.ts",
-    "doSwap": "npx ts-node doSwap.ts"
+    "checkLiquidity": "npx ts-node check-liquidity.ts",
+    "estimateAddLiquidity": "npx ts-node add-liquidity.ts",
+    "estimateWithdrawLiquidity": "npx ts-node withdraw-liquidity.ts"
   },
-  "description": "Test folder for xchainjs thorchain-amm package",
+  "description": "examples for adding liquidity",
   "main": "index.js",
   "author": "THORIANITE",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "@xchainjs/xchain-crypto": "file:../../packages/xchain-crypto",
     "axios": "^0.25.0",
     "axios-retry": "^3.2.5",
-    "bignumber.js": "9.0.1",
+    "bignumber.js": "^9.0.0",
     "rimraf": "~3.0.2"
   }
 }
