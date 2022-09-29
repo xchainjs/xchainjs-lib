@@ -3,10 +3,9 @@ import {
   AssetBTC,
   AssetRuneNative,
   assetAmount,
-  assetFromString,
+  assetFromStringEx,
   assetToBase,
   baseAmount,
-  baseToAsset,
 } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
@@ -30,7 +29,7 @@ import { Thornode } from '../src/utils/thornode'
 const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
-const BUSD = assetFromString('BNB.BUSD-BD1')
+const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 
 const BusdPoolDetails1 = {
   annualPercentageRate: '-0.08690907236215786',
@@ -150,7 +149,7 @@ describe(`Liquidity calc tests`, () => {
       fullProtection: 144,
     }
     const checkILP = getLiquidityProtectionData(depositValue, poolShare, block)
-    expect(baseToAsset(checkILP.ILProtection).amount().toNumber()).toEqual(111.110875)
+    expect(checkILP.ILProtection.assetAmount.amount().toNumber()).toEqual(111.110875)
     expect(checkILP.totalDays).toEqual('100.00')
   })
   it(`Should calculate the correct ILP data Asymetrical `, async () => {
@@ -171,7 +170,7 @@ describe(`Liquidity calc tests`, () => {
       fullProtection: 144,
     }
     const checkILP = getLiquidityProtectionData(depositValue, poolShare, block)
-    expect(baseToAsset(checkILP.ILProtection).amount().toNumber()).toEqual(0.02400357)
+    expect(checkILP.ILProtection.assetAmount.amount().toNumber()).toEqual(0.02400357)
     expect(checkILP.totalDays).toEqual('100.00')
   })
   it(`Should calculate correct pool ownership`, async () => {
