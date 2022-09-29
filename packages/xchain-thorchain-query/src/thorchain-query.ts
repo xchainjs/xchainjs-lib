@@ -514,6 +514,7 @@ export class ThorchainQuery {
     const pool = txData.observed_tx.tx.memo?.split(`:`)
     if (!pool) throw Error(`No pool found from memo`)
     const getAsset = assetFromString(pool[1].toUpperCase())
+    if (!getAsset) throw Error(`Invalid pool asset`)
 
     // Retrieve thorchain blockHeight for the tx
     if (!txData.observed_tx.tx?.id) throw Error('No action observed')

@@ -1,3 +1,15 @@
+# v.0.5.2 (2022-09-29)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
+# v.0.5.1 (2022-09-27)
+
+## Fix
+
+- Increase value for `setMaximumFeeRate` to reflect current fees
+
 # v.0.5.0 (2022-09-05)
 
 ## Update

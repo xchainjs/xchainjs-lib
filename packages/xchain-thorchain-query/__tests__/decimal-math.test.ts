@@ -7,7 +7,7 @@ import {
   AssetETH,
   AssetRuneNative,
   assetAmount,
-  assetFromString,
+  assetFromStringEx,
   assetToBase,
   baseAmount,
 } from '@xchainjs/xchain-util'
@@ -24,7 +24,7 @@ const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thor
 
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
-const assetUSDC = assetFromString('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 // const BUSD = assetFromString('BNB.BUSD-BD1')
 
 describe('decimal math tests', () => {

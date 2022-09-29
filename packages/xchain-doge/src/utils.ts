@@ -252,8 +252,10 @@ export const buildTx = async ({
 
   const psbt = new Dogecoin.Psbt({ network: dogeNetwork(network) }) // Network-specific
   // TODO: Doge recommended fees is greater than the recommended by Bitcoinjs-lib (for BTC),
-  //       so we need to increase the maximum fee rate. Currently, the fast rate fee is near ~650000sats/byte
-  psbt.setMaximumFeeRate(650000)
+  //       so we need to increase the maximum fee rate. Currently, the fast rate fee is near ~750000sats/byte
+  // https://thornode.ninerealms.com/thorchain/inbound_addresses?height=7526662 (09-27-2022)
+  // For now we increase it by 10x
+  psbt.setMaximumFeeRate(7500000)
   const params = { sochainUrl, network, address: sender }
 
   for (const utxo of inputs) {
