@@ -1,3 +1,10 @@
+# v0.0.1.0-beta2 (2022-09-29)
+
+## Add
+
+- Add estimate add & withdraw Liquidity
+- Add Check Liquidity position
+
 # v0.0.1.0-beta1 (2022-09-29)
 
 ## Update

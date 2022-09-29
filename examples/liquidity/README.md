@@ -99,7 +99,6 @@ $ npx ts-node add-liquidity.ts mainnet 0 BTC.BTC 12052.61115075 THOR.RUNE
 ✨  Done in 3.51s.
 ```
 
-
 ### Estimate Withdraw Liquidity
 
 ```bash
@@ -120,5 +119,31 @@ $ npx ts-node withdraw-liquidity.ts mainnet BTC.BTC 100 bc1qufc5hvfvszphksqawadp
   transactionFee: { assetFee: '⚡ 10,000', runeFee: 'ᚱ 0', totalFees: 'ᚱ 1.24571688' },
   impermanentLossProtection: { ILProtection: 'ᚱ 108,273.3706341', totalDays: '163.38' },
   estimatedWaitSeconds: 7200
+}
+```
+
+### Check Liquidity Position
+
+```bash
+yarn checkLiquidity mainnet bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn
+
+yarn run v1.22.18
+$ npx ts-node check-liquidity.ts mainnet BTC.BTC bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn
+
+{
+  address: 'bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn',
+  position: {
+    asset: 'BTC.BTC',
+    rune_address: 'thor1nkdpzamatx6u9xfga4nrhkgu4r6cd26xgsyhzw',
+    asset_address: 'bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn',
+    last_add_height: 5194791,
+    units: '42814765726730',
+    pending_rune: '0',
+    pending_asset: '0',
+    rune_deposit_value: '51550243067780',
+    asset_deposit_value: '10229454500'
+  },
+  poolShare: { assetShare: '₿ 69.17824308', runeShare: 'ᚱ 861,142.7681905' },
+  impermanentLossProtection: { ILProtection: '10880967869653', totalDays: '163.38' }
 }
 ```
