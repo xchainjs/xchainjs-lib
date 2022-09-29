@@ -713,15 +713,17 @@ export class ThorchainQuery {
     const runeWaitTimeSeconds = await this.confCounting(params.rune)
     const waitTimeSeconds = assetWaitTimeSeconds > runeWaitTimeSeconds ? assetWaitTimeSeconds : runeWaitTimeSeconds
 
-    const assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
-    const runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
+    let assetInboundFee = new CryptoAmount(baseAmount(0), params.asset.asset)
+    let runeInboundFee = new CryptoAmount(baseAmount(0), AssetRuneNative)
 
     if (!params.asset.assetAmount.eq(0)) {
+      assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
       if (assetInboundFee.assetAmount.amount().times(3).gt(params.asset.assetAmount.amount()))
         errors.push(`Asset amount is less than fees`)
     }
     if (!params.rune.assetAmount.eq(0)) {
-      if (runeInboundFee.assetAmount.amount().times(3).gt(params.rune.baseAmount.amount()))
+      runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
+      if (runeInboundFee.assetAmount.amount().times(3).gt(params.rune.assetAmount.amount()))
         errors.push(`Rune amount is less than fees`)
     }
     const totalFees = (await this.convert(assetInboundFee, AssetRuneNative)).plus(runeInboundFee)
@@ -827,8 +829,8 @@ export class ThorchainQuery {
     // get slip on liquidity removal
     const slip = getSlipOnLiquidity(
       {
-        asset: baseAmount(memberDetail.position.asset_deposit_value),
-        rune: baseAmount(memberDetail.position.rune_deposit_value),
+        asset: poolShare.assetShare.baseAmount,
+        rune: poolShare.runeShare.baseAmount,
       },
       assetPool,
     )

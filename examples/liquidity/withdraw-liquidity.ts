@@ -20,7 +20,7 @@ function print(estimate: EstimateWithdrawLP, withdrawLpParams: RemoveLiquidityPo
       totalFees: estimate.transactionFee.totalFees.formatedAssetString(),
     },
     impermanentLossProtection: {
-      ILProtection: estimate.impermanentLossProtection.ILProtection.amount().toFixed(0),
+      ILProtection: estimate.impermanentLossProtection.ILProtection.formatedAssetString(),
       totalDays: estimate.impermanentLossProtection.totalDays,
     },
     estimatedWaitSeconds: estimate.estimatedWaitSeconds,

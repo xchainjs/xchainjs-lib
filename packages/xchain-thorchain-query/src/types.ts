@@ -79,7 +79,7 @@ export type Block = {
 }
 
 export type ILProtectionData = {
-  ILProtection: BaseAmount
+  ILProtection: CryptoAmount
   totalDays: string
 }
 
