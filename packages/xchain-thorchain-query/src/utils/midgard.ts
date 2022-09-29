@@ -1,5 +1,13 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Action, Configuration, InboundAddressesItem, MidgardApi, PoolDetail } from '@xchainjs/xchain-midgard'
+import {
+  Action,
+  Configuration,
+  InboundAddressesItem,
+  MemberDetails,
+  MidgardApi,
+  PoolDetail,
+  PoolStatsDetail,
+} from '@xchainjs/xchain-midgard'
 import { AssetRuneNative, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
@@ -12,9 +20,9 @@ const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
     midgardBaseUrls: [
+      'https://midgard.ninerealms.com',
       'https://midgard.thorchain.info',
       'https://midgard.thorswap.net',
-      'https://midgard.ninerealms.com',
     ],
   },
   stagenet: {
@@ -107,6 +115,10 @@ export class Midgard {
     return inboundDetails
   }
 
+  /**
+   *
+   * @returns - constants
+   */
   private async getConstantsDetails(): Promise<Record<string, number>> {
     const path = '/v2/thorchain/constants'
     for (const baseUrl of this.config.midgardBaseUrls) {
@@ -177,15 +189,57 @@ export class Midgard {
     throw Error(`Midgard not responding`)
   }
   /**
-   * Gets actions related to a txID
+   * Gets actions object for any of the parameters
    * @param txHash transaction id
    * @returns Type Action array of objects
    */
-  public async getActions(txHash: string): Promise<Action[]> {
+  public async getActions(
+    address?: string,
+    txid?: string,
+    asset?: string,
+    type?: string,
+    affiliate?: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<Action[]> {
     for (const api of this.midgardApis) {
       try {
-        const actions = (await api.getActions('', txHash)).data.actions
+        const actions = (await api.getActions(address, txid, asset, type, affiliate, limit, offset)).data.actions
         return actions
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    throw Error(`Midgard not responding`)
+  }
+
+  /**
+   * Function to return member details based on valid liquidity position
+   * @param address - needed to query for Lp details
+   * @returns - object type of Member Detail
+   */
+  public async getMember(address: string): Promise<MemberDetails> {
+    for (const api of this.midgardApis) {
+      try {
+        const memberDetail = (await api.getMemberDetail(address)).data
+        return memberDetail
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    throw Error(`Midgard not responding`)
+  }
+
+  /**
+   * Function to return pool statistics for a particular asset
+   * @param asset - asset string to query its pool stats
+   * @returns - type object poolstatsDetail
+   */
+  public async getPoolStats(asset: string): Promise<PoolStatsDetail> {
+    for (const api of this.midgardApis) {
+      try {
+        const poolDetail = (await api.getPoolStats(asset)).data
+        return poolDetail
       } catch (e) {
         console.error(e)
       }

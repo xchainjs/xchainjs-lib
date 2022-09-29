@@ -9,7 +9,9 @@ import {
   AssetRuneNative,
   Chain,
   THORChain,
+  assetAmount,
   assetFromString,
+  assetToBase,
   assetToString,
   baseAmount,
   eqAsset,
@@ -21,16 +23,27 @@ import { DefaultChainAttributes } from './chain-defaults'
 import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
 import {
+  AddliquidityPosition,
+  Block,
   ChainAttributes,
   ConstructMemo,
+  DustValues,
+  EstimateAddLP,
   EstimateSwapParams,
+  EstimateWithdrawLP,
   InboundDetail,
+  LiquidityPosition,
+  PoolRatios,
+  PostionDepositValue,
+  RemoveLiquidityPosition,
   SwapEstimate,
   TotalFees,
   TxDetails,
   TxStage,
   TxStatus,
+  UnitData,
 } from './types'
+import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
 import { calcNetworkFee, getChain, getChainAsset } from './utils/swap'
 
 const BN_1 = new BigNumber(1)
@@ -406,7 +419,7 @@ export class ThorchainQuery {
    * @returns time in seconds before a Tx is confirmed by THORChain
    * @see https://docs.thorchain.org/chain-clients/overview
    */
-  private async confCounting(inbound: CryptoAmount): Promise<number> {
+  async confCounting(inbound: CryptoAmount): Promise<number> {
     // RUNE, BNB and Synths have near instant finality, so no conf counting required. - need to make a BFT only case.
     if (
       isAssetRuneNative(inbound.asset) ||
@@ -444,7 +457,9 @@ export class ThorchainQuery {
       AssetRuneNative,
     )
     const maxTxOutOffset = networkValues['MAXTXOUTOFFSET']
-    let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative)
+    let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative).assetAmount
+      .amount()
+      .toNumber()
     const getScheduledOutboundValue = await this.thorchainCache.midgard.getScheduledOutboundValue()
     const thorChainblocktime = this.chainAttributes[Chain.THORChain].avgBlockTimeInSecs // blocks required to confirm tx
     // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
@@ -462,11 +477,9 @@ export class ThorchainQuery {
     // calculate the if outboundAmountTotal is over the volume threshold
     const volumeThreshold = outboundAmountTotal.div(minTxOutVolumeThreshold)
     // check delay rate
-    txOutDelayRate = txOutDelayRate.minus(volumeThreshold).baseAmount.amount().lt(1)
-      ? new CryptoAmount(baseAmount(1), AssetRuneNative)
-      : txOutDelayRate
+    txOutDelayRate = txOutDelayRate - volumeThreshold.assetAmount.amount().toNumber() <= 1 ? 1 : txOutDelayRate
     // calculate the minimum number of blocks in the future the txn has to be
-    let minBlocks = runeValue.div(txOutDelayRate).baseAmount.amount().toNumber()
+    let minBlocks = runeValue.assetAmount.amount().toNumber() / txOutDelayRate
     minBlocks = minBlocks > maxTxOutOffset ? maxTxOutOffset : minBlocks
     return minBlocks * thorChainblocktime
   }
@@ -505,7 +518,7 @@ export class ThorchainQuery {
 
     // Retrieve thorchain blockHeight for the tx
     if (!txData.observed_tx.tx?.id) throw Error('No action observed')
-    const recordedAction = await this.thorchainCache.midgard.getActions(txData.observed_tx.tx.id)
+    const recordedAction = await this.thorchainCache.midgard.getActions('', txData.observed_tx.tx.id)
     const recordedTCBlock = recordedAction.find((block) => {
       return block
     })
@@ -676,5 +689,227 @@ export class ThorchainQuery {
       }
     }
     return txStatus
+  }
+
+  /**
+   * Estimates a liquidity position for given crypto amount value, both asymmetrical and symetrical
+   * @param params - parameters needed for a estimated liquidity position
+   * @returns - type object EstimateLP
+   */
+  public async estimateAddLP(params: AddliquidityPosition): Promise<EstimateAddLP> {
+    const errors: string[] = []
+    if (params.asset.asset.synth || params.rune.asset.synth) errors.push('you cannot add liquidity with a synth')
+    if (!isAssetRuneNative(params.rune.asset)) errors.push('params.rune must be THOR.RUNE')
+
+    const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
+    const lpUnits = getLiquidityUnits({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
+    const inboundDetails = await this.thorchainCache.midgard.getInboundDetails()
+    const unitData: UnitData = {
+      liquidityUnits: baseAmount(lpUnits),
+      totalUnits: baseAmount(assetPool.pool.liquidityUnits),
+    }
+    const poolShare = getPoolShare(unitData, assetPool)
+    const assetWaitTimeSeconds = await this.confCounting(params.asset)
+    const runeWaitTimeSeconds = await this.confCounting(params.rune)
+    const waitTimeSeconds = assetWaitTimeSeconds > runeWaitTimeSeconds ? assetWaitTimeSeconds : runeWaitTimeSeconds
+
+    let assetInboundFee = new CryptoAmount(baseAmount(0), params.asset.asset)
+    let runeInboundFee = new CryptoAmount(baseAmount(0), AssetRuneNative)
+
+    if (!params.asset.assetAmount.eq(0)) {
+      assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
+      if (assetInboundFee.assetAmount.amount().times(3).gt(params.asset.assetAmount.amount()))
+        errors.push(`Asset amount is less than fees`)
+    }
+    if (!params.rune.assetAmount.eq(0)) {
+      runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
+      if (runeInboundFee.assetAmount.amount().times(3).gt(params.rune.assetAmount.amount()))
+        errors.push(`Rune amount is less than fees`)
+    }
+    const totalFees = (await this.convert(assetInboundFee, AssetRuneNative)).plus(runeInboundFee)
+    const slip = getSlipOnLiquidity({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
+    const estimateLP: EstimateAddLP = {
+      slipPercent: slip.times(100),
+      poolShare: poolShare,
+      lpUnits: baseAmount(lpUnits),
+      runeToAssetRatio: assetPool.runeToAssetRatio,
+      transactionFee: {
+        assetFee: assetInboundFee,
+        runeFee: runeInboundFee,
+        totalFees: totalFees,
+      },
+      estimatedWaitSeconds: waitTimeSeconds,
+      errors,
+      canAdd: errors.length > 0 ? false : true,
+    }
+    return estimateLP
+  }
+
+  /**
+   * @param - Asset for lp
+   * @param address - address used for Lp
+   * @returns - Type Object liquidityPosition
+   */
+  public async checkLiquidityPosition(asset: Asset, assetOrRuneAddress: string): Promise<LiquidityPosition> {
+    const poolAsset = await this.thorchainCache.getPoolForAsset(asset)
+    if (!poolAsset) throw Error(`Could not find pool for ${asset}`)
+
+    const liquidityProvider = await this.thorchainCache.thornode.getLiquidityProvider(
+      poolAsset.assetString,
+      assetOrRuneAddress,
+    )
+    if (!liquidityProvider) throw Error(`Could not find LP for ${assetOrRuneAddress}`)
+    // Current block number for that chain
+    const blockData = (await this.thorchainCache.thornode.getLastBlock()).find((item) => item.chain === asset.chain)
+    if (!blockData) throw Error(`Could not get block data`)
+    // Pools total units & Lp's total units
+    const unitData: UnitData = {
+      totalUnits: baseAmount(poolAsset.pool.liquidityUnits),
+      liquidityUnits: baseAmount(liquidityProvider.units),
+    }
+    //console.log(`unit data`, unitData.totalUnits.amount().toNumber(), unitData.liquidityUnits.amount().toNumber())
+    const networkValues = await this.thorchainCache.midgard.getNetworkValues()
+    const block: Block = {
+      current: blockData.thorchain,
+      lastAdded: liquidityProvider.last_add_height,
+      fullProtection: networkValues['FULLIMPLOSSPROTECTIONBLOCKS'],
+    }
+    //
+    const currentLP: PostionDepositValue = {
+      asset: baseAmount(liquidityProvider.asset_deposit_value),
+      rune: baseAmount(liquidityProvider.rune_deposit_value),
+    }
+    const poolShare = getPoolShare(unitData, poolAsset)
+    // console.log(poolShare.assetShare.toNumber(), poolShare.runeShare.toNumber())
+    // console.log(poolAsset.pool.liquidityUnits)
+    const impermanentLossProtection = getLiquidityProtectionData(currentLP, poolShare, block)
+    const lpPosition: LiquidityPosition = {
+      poolShare,
+      position: liquidityProvider,
+      impermanentLossProtection: impermanentLossProtection,
+    }
+    return lpPosition
+  }
+
+  /**
+   * Do not send assetNativeRune, There is no pool for it.
+   * @param asset - asset required to find the pool
+   * @returns - object type ratios
+   */
+  public async getPoolRatios(asset: Asset): Promise<PoolRatios> {
+    const assetPool = await this.thorchainCache.getPoolForAsset(asset)
+    const poolRatio: PoolRatios = {
+      assetToRune: assetPool.assetToRuneRatio,
+      runeToAsset: assetPool.runeToAssetRatio,
+    }
+    return poolRatio
+  }
+
+  /**
+   *
+   * @param params
+   */
+  public async estimateWithdrawLP(params: RemoveLiquidityPosition): Promise<EstimateWithdrawLP> {
+    // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
+    if (!params.assetAddress) throw Error(`can't estimate lp without an asset address`)
+    const memberDetail = await this.checkLiquidityPosition(params.asset, params.assetAddress)
+    const dustValues = await this.getDustValues(params.asset) // returns asset and rune dust values
+    const assetPool = await this.thorchainCache.getPoolForAsset(params.asset)
+
+    // get pool share from unit data
+    const poolShare = getPoolShare(
+      {
+        liquidityUnits: baseAmount(memberDetail.position.units),
+        totalUnits: baseAmount(assetPool.pool.liquidityUnits),
+      },
+      assetPool,
+    )
+    // calculate total fees
+    const totalFees = (await this.convert(dustValues.asset, AssetRuneNative)).plus(dustValues.rune)
+    // get slip on liquidity removal
+    const slip = getSlipOnLiquidity(
+      {
+        asset: poolShare.assetShare.baseAmount,
+        rune: poolShare.runeShare.baseAmount,
+      },
+      assetPool,
+    )
+    // TODO make sure we compare wait times for withdrawing both rune and asset OR just rune OR just asset
+    const waitTimeSecondsForAsset = await this.confCounting(poolShare.assetShare.div(params.percentage / 100))
+    const waitTimeSecondsForRune = await this.confCounting(poolShare.runeShare.div(params.percentage / 100))
+    let waitTimeSeconds = 0
+    if (params.assetAddress && params.runeAddress) {
+      waitTimeSeconds = waitTimeSecondsForAsset + waitTimeSecondsForRune
+    } else if (params.assetAddress) {
+      waitTimeSeconds = waitTimeSecondsForAsset
+    } else {
+      waitTimeSeconds = waitTimeSecondsForRune
+    }
+    const estimateLP: EstimateWithdrawLP = {
+      slipPercent: slip.times(100),
+      transactionFee: {
+        assetFee: dustValues.asset,
+        runeFee: dustValues.rune,
+        totalFees: totalFees,
+      },
+      assetAmount: poolShare.assetShare,
+      runeAmount: poolShare.runeShare,
+      estimatedWaitSeconds: waitTimeSeconds,
+      impermanentLossProtection: memberDetail.impermanentLossProtection,
+    }
+    return estimateLP
+  }
+  /**
+   * // can this become a quried constant? added to inbound_addresses or something
+   * @param asset - asset needed to retrieve dust values
+   * @returns - object type dust values
+   */
+  private async getDustValues(asset: Asset): Promise<DustValues> {
+    let dustValues: DustValues
+    switch (asset.chain) {
+      case 'BNB':
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0.000001)), AssetBNB),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'BTC' || `BCH` || `LTC`:
+        // 10k sats
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0.0001)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'ETH':
+        // 0 wei
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'THOR':
+        // 0 Rune
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'GAIA':
+        // 0 GAIA
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'DOGE':
+        // 1 million sats
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0.01)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      default:
+        throw Error('Unknown chain')
+    }
   }
 }

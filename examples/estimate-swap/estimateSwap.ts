@@ -11,7 +11,7 @@ import {
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
 import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
-import BigNumber from 'bignumber.js'
+import { BigNumber } from 'bignumber.js'
 
 // Helper function for printing out the returned object
 function print(estimate: SwapEstimate, input: CryptoAmount) {

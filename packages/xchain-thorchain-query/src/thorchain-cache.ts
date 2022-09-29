@@ -292,6 +292,10 @@ export class ThorchainCache {
     }
     return inboundAsgard?.router
   }
+  /**
+   *
+   * @returns - inbound adresses item
+   */
   async getInboundAddressesItems(): Promise<Record<string, InboundAddressesItem>> {
     const millisSinceLastRefeshed = Date.now() - (this.asgardAssetsCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.expireAsgardCacheMillis) {
@@ -307,6 +311,10 @@ export class ThorchainCache {
       throw Error(`Could not refresh refereshAsgardCache `)
     }
   }
+  /**
+   *
+   * @returns - inbound details
+   */
   async getInboundDetails(): Promise<Record<string, InboundDetail>> {
     const millisSinceLastRefeshed = Date.now() - (this.inboundDetailCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.expireInboundDetailsCacheMillis) {
@@ -322,6 +330,10 @@ export class ThorchainCache {
       throw Error(`Could not refereshInboundDetailCache `)
     }
   }
+  /**
+   *
+   * @returns - network values
+   */
   async getNetworkValues(): Promise<Record<string, number>> {
     const millisSinceLastRefeshed = Date.now() - (this.networkValuesCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.expireNetworkValuesCacheMillis) {

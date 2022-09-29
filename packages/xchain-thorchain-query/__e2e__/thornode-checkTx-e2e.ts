@@ -8,10 +8,10 @@ import { Thornode } from '../src/utils/thornode'
 const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 
 const thorchainQuery = new ThorchainQuery(thorchainCache)
-const liveHash = '0A21838668F385FE0BCCF4CA5B2AD868E8B81725FE3B52251A4CC17A0D87B80E'
+const liveHash = '991DFE33AC4482CC7A1E3BF1142E121A315EED18ED8E8FDDDC678E8F176DFCBA'
 
 describe('Thorchain query checkTx Integration Tests', () => {
-  it(`Should check a live tx and return the stage`, async () => {
+  it(`Should c and return the stage`, async () => {
     const checkTx = await thorchainQuery.checkTx(liveHash)
     console.log(`Tx stage ${checkTx.stage}\nTx seconds left ${checkTx.seconds}`)
     expect(checkTx).toBeTruthy()
