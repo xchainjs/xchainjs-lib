@@ -125,7 +125,7 @@ $ npx ts-node withdraw-liquidity.ts mainnet BTC.BTC 100 bc1qufc5hvfvszphksqawadp
 ### Check Liquidity Position
 
 ```bash
-yarn checkLiquidity mainnet bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn
+yarn checkLiquidity mainnet BTC.BTC bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn
 
 yarn run v1.22.18
 $ npx ts-node check-liquidity.ts mainnet BTC.BTC bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn
