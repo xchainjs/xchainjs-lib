@@ -49,9 +49,9 @@ class Client extends UTXOClient {
     },
     sochainUrl = 'https://sochain.com/api/v2',
     haskoinUrl = {
-      [Network.Testnet]: 'https://api.haskoin.com/btctest',
-      [Network.Mainnet]: 'https://api.haskoin.com/btc',
-      [Network.Stagenet]: 'https://api.haskoin.com/btc',
+      [Network.Testnet]: 'https://haskoin.ninerealms.com/btctest',
+      [Network.Mainnet]: 'https://haskoin.ninerealms.com/btc',
+      [Network.Stagenet]: 'https://haskoin.ninerealms.com/btc',
     },
     rootDerivationPaths = {
       [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets

@@ -103,8 +103,8 @@ describe('Thorchain-query estimate Integration Tests', () => {
     )
   })
   it('should estimate a swap of 1 BTC to sBTC', async () => {
-    const BTC = assetFromString('BTC.BTC')
-    const sBTC = assetFromString('BTC/BTC')
+    const BTC = assetFromStringEx('BTC.BTC')
+    const sBTC = assetFromStringEx('BTC/BTC')
 
     if (!sBTC || !BTC) throw Error('err')
 
@@ -121,8 +121,8 @@ describe('Thorchain-query estimate Integration Tests', () => {
     expect(estimate).toBeTruthy()
   })
   it('should estimate a swap of 1 sBTC to sETH', async () => {
-    const sBTC = assetFromString('BTC/BTC')
-    const sETH = assetFromString('ETH/ETH')
+    const sBTC = assetFromStringEx('BTC/BTC')
+    const sETH = assetFromStringEx('ETH/ETH')
     if (!sBTC || !sETH) throw Error('err')
 
     const swapParams: EstimateSwapParams = {

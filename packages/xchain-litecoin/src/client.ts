@@ -71,7 +71,7 @@ class Client extends UTXOClient {
         switch (network) {
           case Network.Mainnet:
           case Network.Stagenet:
-            return 'https://ltc.thorchain.info'
+            return 'https://litecoin.ninerealms.com'
           case Network.Testnet:
             return 'https://testnet.ltc.thorchain.info'
         }

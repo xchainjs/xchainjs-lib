@@ -2,6 +2,12 @@
 
 ## Update
 
+- changed default haskoin url to point to ninerealms
+
+# v.0.20.1 (2022-09-29)
+
+## Update
+
 - bumped deps on xchain-utils & xchain-client
 
 # v.0.20.0 (2022-09-05)
@@ -9,6 +15,7 @@
 ## Update
 
 - bumped deps on xchain-utils & xchain-client
+
 # v.0.19.0 (2022-07-21)
 
 ### Breaking change

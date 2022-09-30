@@ -7,7 +7,6 @@ import {
   assetAmount,
   assetFromString,
   assetToBase,
-  baseAmount,
 } from '@xchainjs/xchain-util'
 
 import { CryptoAmount } from '../src/crypto-amount'
@@ -62,10 +61,7 @@ function printWithdraw(withdraw: EstimateWithdrawLP) {
       assetFee: withdraw.transactionFee.assetFee.assetAmount.amount().toFixed(),
       totalFees: withdraw.transactionFee.totalFees.assetAmount.amount().toFixed(),
     },
-    impermanentLossProtection: new CryptoAmount(
-      baseAmount(withdraw.impermanentLossProtection.ILProtection.amount()),
-      AssetRuneNative,
-    ).formatedAssetString(),
+    impermanentLossProtection: withdraw.impermanentLossProtection.ILProtection.formatedAssetString(),
     estimatedWait: withdraw.estimatedWaitSeconds.toFixed(),
   }
   console.log(expanded)
@@ -77,10 +73,7 @@ function printliquidityPosition(liquidityPosition: LiquidityPosition) {
     assetAmount: liquidityPosition.position.asset_deposit_value,
     runeAmount: liquidityPosition.position.rune_deposit_value,
     impermanentLossProtection: {
-      ILProtection: new CryptoAmount(
-        baseAmount(liquidityPosition.impermanentLossProtection.ILProtection.amount()),
-        AssetRuneNative,
-      ).formatedAssetString(),
+      ILProtection: liquidityPosition.impermanentLossProtection.ILProtection.formatedAssetString(),
       totalDays: liquidityPosition.impermanentLossProtection.totalDays,
     },
   }
