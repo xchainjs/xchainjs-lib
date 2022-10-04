@@ -216,7 +216,7 @@ export class ThorchainCache {
         !inbound.outbound_fee ||
         !inbound.gas_rate_units
       )
-        throw new Error(`Missing reqiored inbound info`)
+        throw new Error(`Missing required inbound info`)
 
       const details: InboundDetail = {
         chain: chain as Chain,

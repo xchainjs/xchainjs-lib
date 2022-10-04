@@ -1,3 +1,8 @@
+# v0.0.1.0-beta (2022-10-04)
+
+## Update
+
+- Update to latest THORNode 1.97.2
 
 # v0.0.1.0-alpha4 (2022-08-20)
 

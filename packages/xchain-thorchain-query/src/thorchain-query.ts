@@ -223,9 +223,11 @@ export class ThorchainQuery {
       input.asset === AssetRuneNative ? input : await this.thorchainCache.convert(input, AssetRuneNative)
 
     const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails.gasRate)
-
-    let outboundFeeInAsset = calcNetworkFee(params.destinationAsset, destinationInboundDetails.gasRate)
-    outboundFeeInAsset = outboundFeeInAsset.times(3)
+    // Retrieve outbound fee from inboundAddressDetails.
+    const outboundFeeInAsset = new CryptoAmount(
+      baseAmount(destinationInboundDetails.outboundFee),
+      params.destinationAsset,
+    )
     // convert fees to rune
     const inboundFeeInRune = await this.thorchainCache.convert(inboundFeeInAsset, AssetRuneNative)
     let outboundFeeInRune = await this.thorchainCache.convert(outboundFeeInAsset, AssetRuneNative)

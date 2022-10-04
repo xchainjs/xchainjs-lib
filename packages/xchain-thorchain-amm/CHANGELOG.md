@@ -1,3 +1,9 @@
+# v0.0.2.0 (2022-10-04)
+
+## Update
+
+- Updated wallet.ts and evm files to use updated `thorchain-query` `getInboundAddresses()`
+
 # v0.0.1.0-beta5 (2022-09-29)
 
 ## Update
