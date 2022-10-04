@@ -30,7 +30,7 @@
     "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests",
     "generate:types": "yarn clean:types:thornode && yarn generate:types:thornode",
-    "generate:types:thornode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://gitlab.com/thorchain/thornode/-/raw/release-1.95.0/openapi/openapi.yaml -g typescript-axios -o ./src/generated/thornodeApi --skip-validate-spec",
+    "generate:types:thornode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://gitlab.com/thorchain/thornode/-/raw/release-1.97.2/openapi/openapi.yaml -g typescript-axios -o ./src/generated/thornodeApi --skip-validate-spec --generate-alias-as-model",
     "clean:types:thornode": "rimraf ./src/generated/thornodeApi"
   },
   "devDependencies": {

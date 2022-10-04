@@ -2,19 +2,19 @@ import { Network } from '@xchainjs/xchain-client'
 import {
   Action,
   Configuration,
-  InboundAddressesItem,
+  // InboundAddressesItem,
   MemberDetails,
   MidgardApi,
   PoolDetail,
   PoolStatsDetail,
 } from '@xchainjs/xchain-midgard'
-import { AssetRuneNative, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { AssetRuneNative, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
-import BigNumber from 'bignumber.js'
+// import BigNumber from 'bignumber.js'
 
 import { CryptoAmount } from '../crypto-amount'
-import { InboundDetail, MidgardConfig } from '../types'
+import { MidgardConfig } from '../types'
 
 const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
@@ -46,7 +46,7 @@ export class Midgard {
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })
     this.midgardApis = this.config.midgardBaseUrls.map((url) => new MidgardApi(new Configuration({ basePath: url })))
   }
-  private async getMimirDetails(): Promise<Record<string, number>> {
+  async getMimirDetails(): Promise<Record<string, number>> {
     const path = '/v2/thorchain/mimir'
 
     for (const baseUrl of this.config.midgardBaseUrls) {
@@ -72,47 +72,6 @@ export class Midgard {
       }
     }
     throw Error(`Midgard not responding`)
-  }
-  async getAllInboundAddresses(): Promise<InboundAddressesItem[]> {
-    for (const api of this.midgardApis) {
-      try {
-        return (await api.getProxiedInboundAddresses()).data
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    throw Error(`Midgard not responding`)
-  }
-
-  /**
-   * Gets the Inbound Details
-   * @returns inbound details
-   */
-  async getInboundDetails(): Promise<Record<string, InboundDetail>> {
-    const [mimirDetails, allInboundDetails] = await Promise.all([this.getMimirDetails(), this.getAllInboundAddresses()])
-    const inboundDetails: Record<string, InboundDetail> = {}
-    for (const inboundDetail of allInboundDetails) {
-      const chain = inboundDetail.chain
-      if (!inboundDetail.gas_rate) throw new Error(`Could not get gas_rate for ${chain}`)
-      const details: InboundDetail = {
-        vault: inboundDetail.address,
-        gas_rate: new BigNumber(inboundDetail.gas_rate),
-        haltedChain: inboundDetail?.halted || !!mimirDetails[`HALT${chain}CHAIN`] || !!mimirDetails['HALTCHAINGLOBAL'],
-        haltedTrading: !!mimirDetails['HALTTRADING'] || !!mimirDetails[`HALT${chain}TRADING`],
-        haltedLP: !!mimirDetails['PAUSELP'] || !!mimirDetails[`PAUSELP${chain}`],
-      }
-      inboundDetails[chain] = details
-    }
-    // add mock THORCHAIN inbound details
-    const details: InboundDetail = {
-      vault: '',
-      gas_rate: new BigNumber(0),
-      haltedChain: false,
-      haltedTrading: !!mimirDetails['HALTTRADING'],
-      haltedLP: false, //
-    }
-    inboundDetails[Chain.THORChain] = details
-    return inboundDetails
   }
 
   /**

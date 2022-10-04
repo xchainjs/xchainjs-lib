@@ -1,12 +1,9 @@
 import { Network } from '@xchainjs/xchain-client'
-import { InboundAddressesItem, PoolDetail } from '@xchainjs/xchain-midgard'
-import { BTCChain } from '@xchainjs/xchain-util'
+import { PoolDetail } from '@xchainjs/xchain-midgard'
 
-import { Midgard } from '../src/utils/midgard'
-
-// eslint-disable-next-line ordered-imports/ordered-imports
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
+import { Midgard } from '../src/utils/midgard'
 
 const mainnetMidgard = new Midgard(Network.Mainnet)
 
@@ -37,14 +34,14 @@ describe('Midgard Client Test', () => {
     units: '22061803363618',
     volume24h: '8370845079708',
   }
-  const inboundBCHAdress: InboundAddressesItem = {
-    chain: 'BCH',
-    pub_key: 'thorpub1addwnpepq2fsvewl3ph68mx4v70v46eu7d36dkyuenk9p5d59gaf7kn4l3gczenjkw0',
-    address: 'qzjzvcm4h0xkrv9s2txltjru4zh9gxuvpuvhedl75q',
-    halted: false,
-    gas_rate: '3',
-  }
-  const vault = 'bc1q5snxxadme4smpvzjeh6usl9g4e2phrq0vqmg7f'
+  // const inboundBCHAdress: InboundAddressesItem = {
+  //   chain: 'BCH',
+  //   pub_key: 'thorpub1addwnpepq2fsvewl3ph68mx4v70v46eu7d36dkyuenk9p5d59gaf7kn4l3gczenjkw0',
+  //   address: 'qzjzvcm4h0xkrv9s2txltjru4zh9gxuvpuvhedl75q',
+  //   halted: false,
+  //   gas_rate: '3',
+  // }
+  // const vault = 'bc1q5snxxadme4smpvzjeh6usl9g4e2phrq0vqmg7f'
 
   const blockHeight = 6481698
 
@@ -53,15 +50,15 @@ describe('Midgard Client Test', () => {
     const poolData = await mainnetMidgard.getPools()
     expect(poolData[0]).toEqual(poolDetail)
   })
-  it(`Should return inbound addresses`, async () => {
-    const inboundAddress = await mainnetMidgard.getAllInboundAddresses()
-    expect(inboundAddress[0]).toEqual(inboundBCHAdress)
-  })
-  it(`Should return all inbound details `, async () => {
-    const inboundDetails = await mainnetMidgard.getInboundDetails()
-    const inboundVault = inboundDetails[BTCChain]
-    expect(inboundVault?.vault).toEqual(vault)
-  })
+  // it(`Should return inbound addresses`, async () => {
+  //   const inboundAddress = await mainnetMidgard.getAllInboundAddresses()
+  //   expect(inboundAddress[0]).toEqual(inboundBCHAdress)
+  // })
+  // it(`Should return all inbound details `, async () => {
+  //   const inboundDetails = await mainnetMidgard.getInboundDetails()
+  //   const inboundVault = inboundDetails[BTCChain]
+  //   expect(inboundVault?.vault).toEqual(vault)
+  // })
   it(`Should return latest block height`, async () => {
     const latestBlockheight = await mainnetMidgard.getLatestBlockHeight()
     expect(latestBlockheight).toEqual(blockHeight)
