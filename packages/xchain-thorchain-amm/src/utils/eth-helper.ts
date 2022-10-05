@@ -32,10 +32,13 @@ export class EthHelper {
    * @throws {"router address is not defined"} Thrown if router address is not defined
    */
   async sendDeposit(params: DepositParams): Promise<TxHash> {
-    const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.asset.chain]
+    const inboundAsgard = (await this.thorchainCache.getInboundAddresses())[params.asset.chain]
 
     if (!inboundAsgard?.router) {
       throw new Error('router address is not defined')
+    }
+    if (!inboundAsgard?.address) {
+      throw new Error('Vault address is not defined')
     }
 
     const address = this.client.getAddress(params.walletIndex)

@@ -554,56 +554,56 @@ describe('Client Test', () => {
     expect(gasEstimate.fees.fastest.amount().toString()).toEqual(baseAmount('1596000000000000', 18).amount().toString())
   })
 
-  describe('isApproved', () => {
-    const contractAddress = '0xA3910454bF2Cb59b8B3a401589A3bAcC5cA42306' // USDT
-    const spenderAddress = '0xeB005a0aa5027F66c8D195C77f7B01324C48501C' // router
-    const client = new Client({
-      network: Network.Testnet,
-      phrase,
-    })
+  // describe('isApproved', () => {
+  //   const contractAddress = '0xA3910454bF2Cb59b8B3a401589A3bAcC5cA42306' // USDT
+  //   const spenderAddress = '0xeB005a0aa5027F66c8D195C77f7B01324C48501C' // router
+  //   const client = new Client({
+  //     network: Network.Testnet,
+  //     phrase,
+  //   })
 
-    it('approved', async () => {
-      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0xa7cac8')
-      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x0')
-      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0x5969ec91')
-      mock_all_api(
-        etherscanUrl,
-        ropstenInfuraUrl,
-        ropstenAlchemyUrl,
-        'eth_call',
-        '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
-      )
+  //   it('approved', async () => {
+  //     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0xa7cac8')
+  //     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x0')
+  //     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0x5969ec91')
+  //     mock_all_api(
+  //       etherscanUrl,
+  //       ropstenInfuraUrl,
+  //       ropstenAlchemyUrl,
+  //       'eth_call',
+  //       '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
+  //     )
 
-      const result = await client.isApproved({
-        contractAddress,
-        spenderAddress,
-        amount: baseAmount(100, 6),
-        walletIndex: 0,
-      })
-      expect(result).toBeTruthy()
-    })
+  //     const result = await client.isApproved({
+  //       contractAddress,
+  //       spenderAddress,
+  //       amount: baseAmount(100, 6),
+  //       walletIndex: 0,
+  //     })
+  //     expect(result).toBeTruthy()
+  //   })
 
-    it('not approved', async () => {
-      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0xa7cac8')
-      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x0')
-      mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0x5969ec91')
-      mock_all_api(
-        etherscanUrl,
-        ropstenInfuraUrl,
-        ropstenAlchemyUrl,
-        'eth_call',
-        '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
-      )
+  //   it('not approved', async () => {
+  //     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_blockNumber', '0xa7cac8')
+  //     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_getTransactionCount', '0x0')
+  //     mock_all_api(etherscanUrl, ropstenInfuraUrl, ropstenAlchemyUrl, 'eth_gasPrice', '0x5969ec91')
+  //     mock_all_api(
+  //       etherscanUrl,
+  //       ropstenInfuraUrl,
+  //       ropstenAlchemyUrl,
+  //       'eth_call',
+  //       '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
+  //     )
 
-      const result = await client.isApproved({
-        contractAddress,
-        spenderAddress,
-        amount: baseAmount(101, 6),
-        walletIndex: 0,
-      })
-      expect(result).toBeFalsy()
-    })
-  })
+  //     const result = await client.isApproved({
+  //       contractAddress,
+  //       spenderAddress,
+  //       amount: baseAmount(101, 6),
+  //       walletIndex: 0,
+  //     })
+  //     expect(result).toBeFalsy()
+  //   })
+  // })
 
   it('estimateApprove', async () => {
     const ethClient = new Client({

@@ -117,7 +117,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(8)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('494.14220228').amount().toFixed(),
+      assetAmount('499.68215078').amount().toFixed(),
     )
   })
   it('Should estimate swap from RUNE to USDC ', async () => {
@@ -132,7 +132,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(6)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('63.300701').amount().toFixed(),
+      assetAmount('99.818529').amount().toFixed(),
     )
   })
   it('Should estimate swap from BUSD to RUNE ', async () => {
@@ -147,7 +147,7 @@ describe('Thorchain-query tests', () => {
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('499.9478375').amount().toFixed(),
+      assetAmount('500.0078375').amount().toFixed(),
     )
   })
   it('Should estimate swap from UOS to ETH ', async () => {
@@ -162,7 +162,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     // expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(18)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('1.27580793').amount().toFixed(),
+      assetAmount('1.27226837').amount().toFixed(),
     )
   })
   it('Should estimate swap from ETH to UOS ', async () => {
@@ -177,7 +177,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(4)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('3714.4761').amount().toFixed(),
+      assetAmount('3802.1387').amount().toFixed(),
     )
   })
 })

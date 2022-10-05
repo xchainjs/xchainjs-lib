@@ -1,16 +1,12 @@
 import { Network } from '@xchainjs/xchain-client'
-import { InboundAddressesItem } from '@xchainjs/xchain-midgard'
+import { InboundAddress } from '@xchainjs/xchain-thornode'
 import {
   Address,
   Asset,
   Chain,
-  // assetAmount,
   assetFromStringEx,
-  // assetToBase,
-  // assetToBase,
   assetToString,
   baseAmount,
-  // baseAmount,
   eqAsset,
   isAssetRuneNative,
 } from '@xchainjs/xchain-util'
@@ -180,15 +176,16 @@ export class ThorchainCache {
    * which will refresh the cache if it's expired
    */
   private async refereshAsgardCache(): Promise<void> {
-    const inboundAddressesItems = await this.midgard.getAllInboundAddresses()
-    const map: Record<string, InboundAddressesItem> = {}
-    if (inboundAddressesItems) {
-      for (const inboundAddress of inboundAddressesItems) {
+    const inboundAddresses = await this.thornode.getInboundAddresses()
+    const map: Record<string, InboundAddress> = {}
+    if (inboundAddresses) {
+      for (const inboundAddress of inboundAddresses) {
+        if (!inboundAddress.chain) throw Error('chain needed')
         map[inboundAddress.chain] = inboundAddress
       }
       this.asgardAssetsCache = {
         lastRefreshed: Date.now(),
-        inboundAddressesItems: map,
+        inboundAddresses: map,
       }
     }
   }
@@ -199,7 +196,52 @@ export class ThorchainCache {
    * which will refresh the cache if it's expired
    */
   private async refereshInboundDetailCache(): Promise<void> {
-    const inboundDetails = await this.midgard.getInboundDetails()
+    const [mimirDetails, allInboundAddresses] = await Promise.all([
+      this.midgard.getMimirDetails(),
+      this.thornode.getInboundAddresses(),
+    ])
+    const inboundDetails: Record<string, InboundDetail> = {}
+    for (const inbound of allInboundAddresses) {
+      const chain = inbound.chain
+      if (
+        !chain ||
+        !inbound.gas_rate ||
+        !inbound.address ||
+        !inbound.gas_rate_units ||
+        !inbound.outbound_tx_size ||
+        !inbound.outbound_fee ||
+        !inbound.gas_rate_units
+      )
+        throw new Error(`Missing required inbound info`)
+
+      const details: InboundDetail = {
+        chain: chain as Chain,
+        address: inbound.address,
+        router: inbound.router,
+        gasRate: new BigNumber(inbound.gas_rate),
+        gasRateUnits: inbound.gas_rate_units,
+        outboundTxSize: new BigNumber(inbound.outbound_tx_size),
+        outboundFee: new BigNumber(inbound.outbound_fee),
+        haltedChain: inbound?.halted || !!mimirDetails[`HALT${chain}CHAIN`] || !!mimirDetails['HALTCHAINGLOBAL'],
+        haltedTrading: !!mimirDetails['HALTTRADING'] || !!mimirDetails[`HALT${chain}TRADING`],
+        haltedLP: !!mimirDetails['PAUSELP'] || !!mimirDetails[`PAUSELP${chain}`],
+      }
+      inboundDetails[chain] = details
+    }
+    // add mock THORCHAIN inbound details
+    const details: InboundDetail = {
+      chain: Chain.THORChain,
+      address: '',
+      router: '',
+      gasRate: new BigNumber(0),
+      gasRateUnits: '',
+      outboundTxSize: new BigNumber(0),
+      outboundFee: new BigNumber(0),
+      haltedChain: false,
+      haltedTrading: !!mimirDetails['HALTTRADING'],
+      haltedLP: false, //
+    }
+    inboundDetails[Chain.THORChain] = details
 
     this.inboundDetailCache = {
       lastRefreshed: Date.now(),
@@ -285,7 +327,7 @@ export class ThorchainCache {
   }
 
   async getRouterAddressForChain(chain: Chain): Promise<Address> {
-    const inboundAsgard = (await this.getInboundAddressesItems())[chain]
+    const inboundAsgard = (await this.getInboundAddresses())[chain]
 
     if (!inboundAsgard?.router) {
       throw new Error('router address is not defined')
@@ -296,7 +338,7 @@ export class ThorchainCache {
    *
    * @returns - inbound adresses item
    */
-  async getInboundAddressesItems(): Promise<Record<string, InboundAddressesItem>> {
+  async getInboundAddresses(): Promise<Record<string, InboundAddress>> {
     const millisSinceLastRefeshed = Date.now() - (this.asgardAssetsCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.expireAsgardCacheMillis) {
       try {
@@ -306,7 +348,7 @@ export class ThorchainCache {
       }
     }
     if (this.asgardAssetsCache) {
-      return this.asgardAssetsCache.inboundAddressesItems
+      return this.asgardAssetsCache.inboundAddresses
     } else {
       throw Error(`Could not refresh refereshAsgardCache `)
     }

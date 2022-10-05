@@ -7,6 +7,11 @@ export default {
       const resp = require(`./responses/thornode/thornodePools.json`)
       return [200, resp]
     })
+    //Mock thorchain/inbound_addresses
+    mock.onGet(/\/thorchain\/inbound_addresses/).reply(function () {
+      const resp = require(`./responses/thornode/inbound_addresses.json`)
+      return [200, resp]
+    })
     //Mock thornode observed tx
     mock.onGet(/\/thorchain\/tx\/276CE5005FF822294773C549E74513636808A6A9817FE7ADCE1709EE06BC7F52/).reply(function () {
       const resp = require(`./responses/thornode/thornodeObservedTx.json`)
