@@ -10,6 +10,7 @@ import {
   THORChain,
   assetFromString,
   BNBChain,
+  CosmosChain,
 } from '@xchainjs/xchain-util'
 import { ThorchainCache } from './thorchain-cache'
 
@@ -59,66 +60,117 @@ export class CheckTx {
       txStatus = await this.checkTxDefined(txStatus, sourceChain) // Wait for it to be observed by TC
       return txStatus
     }
-
-      // Retrieve asset and chain from memo as we have the tx data
-      const pool = txData.observed_tx.tx.memo?.split(`:`)
-      if (!pool) throw Error(`No pool found from memo`)
-      const getAsset = assetFromString(pool[1].toUpperCase())
-      if (!getAsset) throw Error(`Invalid pool asset`)
-
-
+    // Get the source chain
       if (txData.observed_tx?.tx?.chain != undefined) {
         sourceChain = getChain(txData.observed_tx.tx.chain)
       } else {
         throw new Error(`Cannot get source chain ${txData.observed_tx?.tx?.chain}`)
       }
 
-
-      // Retrieve thorchain blockHeight for the tx
-      if (!txData.observed_tx.tx?.id) throw Error('No action observed')
-      const recordedAction = await this.thorchainCache.midgard.getActions('', txData.observed_tx.tx.id)
-      const recordedTCBlock = recordedAction.find((block) => {
-        return block
-      })
-      if (!recordedTCBlock?.height) throw Error('No recorded block height')
+    // Retrieve TC last observed block height
+    const lastBlock = await this.thorchainCache.thornode.getLastBlock()
+    const lastBlockHeight = lastBlock.find((obj) => obj.chain === sourceChain)
+    if (!lastBlockHeight?.last_observed_in) throw Error('No recorded block height')
 
 
-      // Stage 2 - Conf Counting
-      // Retrieve thorchains last observed block height
-      const lastBlock = await this.thorchainCache.thornode.getLastBlock()
-      const lastBlockHeight = lastBlock.find((obj) => obj.chain === getAsset?.chain)
-      if (!lastBlockHeight?.last_observed_in) throw Error('No recorded block height')
 
-      if (sourceChain == THORChain || sourceChain == BNBChain) {
-        txStatus.stage = TxStage.OUTBOUND_QUEUED
+    // Stage 2 - Conf Counting
+    if (sourceChain == THORChain || sourceChain == BNBChain || sourceChain == CosmosChain) {
+      txStatus.stage = TxStage.TC_PROCESSING
+    } else {
+      txStatus = await this.checkObservedOnly(txStatus, txData.observed_tx, sourceChain, lastBlockHeight)
+    }
+
+    // Retrieve thorchain processed blockHeight for the tx
+    if (!txData.observed_tx.tx?.id) throw Error('No action observed')
+    const recordedAction = await this.thorchainCache.midgard.getActions('', txData.observed_tx.tx.id)
+    const recordedTCBlock = recordedAction.find((block) => {
+      return block
+    })
+    if (!recordedTCBlock?.height) throw Error('No recorded block height')
+
+    // Stage 3 = has TC processing completed
+
+    // Stage 4 - Outbound Delay
+    const scheduledQueueItem = (await this.thorchainCache.thornode.getscheduledQueue()).find(
+      (item: TxOutItem) => item.in_hash === inboundTxHash,
+    )
+      // Check to see if its in the outbound queue and get the wait time
+    if (scheduledQueueItem) {
+      txStatus = await this.checkOutboundTx(txStatus, scheduledQueueItem, lastBlockHeight)
+    } else {
+        txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
+      }
+
+
+
+//----------------------------------------------
+
+ // Retrieve the desitnation asset and chain from memo
+ const pool = txData.observed_tx.tx.memo?.split(`:`)
+ if (!pool) throw Error(`No pool found from memo`)
+ const getAsset = assetFromString(pool[1].toUpperCase())
+ if (!getAsset) throw Error(`Invalid pool asset`)
+
+   // If not in queue, outbound Tx sent // check synth // check it status == done
+   if (!scheduledQueueItem ) {
+    txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
+    if (getAsset?.synth) {
+      if (txData.observed_tx?.status == ObservedTxStatusEnum.Done) {
+        txStatus.stage = TxStage.OUTBOUND_CHAIN_CONFIRMED
+        txStatus.seconds = 0
       } else {
-        if (txData.observed_tx) { // it has been observed by TC
-          txStatus = await this.checkObservedOnly(txStatus, txData.observed_tx, getAsset.chain, lastBlockHeight)
-        }
+        txStatus.seconds = 6
       }
-      // Stage 3
-      const scheduledQueueItem = (await this.thorchainCache.thornode.getscheduledQueue()).find(
-        (item: TxOutItem) => item.in_hash === inboundTxHash,
-      )
-        // Check to see if its in the outbound queue
-      if (scheduledQueueItem) {
-        txStatus = await this.checkOutboundQueue(txStatus, scheduledQueueItem, lastBlockHeight)
-        // Check to see if there is an outbound wait
-        if (scheduledQueueItem?.height != undefined && txStatus.stage < TxStage.OUTBOUND_CHAIN_CONFIRMED) {
-          txStatus = await this.checkOutboundTx(txStatus, scheduledQueueItem, lastBlockHeight)
-        }
-        //console.log(`Tx stage ${txStatus.stage}\nTx seconds left ${txStatus.seconds}`)
-        return txStatus
+      //console.log(`Tx stage ${txStatus.stage}\nTx seconds left ${txStatus.seconds}`)
+      return txStatus
+    }
+    if (txData.observed_tx?.status == ObservedTxStatusEnum.Done && getAsset.chain != Chain.THORChain) {
+      // Retrieve recorded asset block height for the Outbound asset
+      const recordedBlockHeight = await this.thorchainCache.thornode.getLastBlock(+recordedTCBlock.height)
+      // Match outbound asset to block record
+      const assetBlockHeight = recordedBlockHeight.find((obj) => obj.chain === getAsset?.chain)
+      if (lastBlockHeight?.last_observed_in && assetBlockHeight?.last_observed_in) {
+        const chainblockTime = this.chainAttributes[getAsset.chain].avgBlockTimeInSecs
+        // Difference between current block and the recorded tx block for the outbound asset
+        const blockDifference = lastBlockHeight.last_observed_in - assetBlockHeight.last_observed_in
+        const timeElapsed = blockDifference * chainblockTime
+        // If the time elapsed since the tx is greater than the chains block time, assume tx has 1 ocnfirmation else return time left to wait
+        txStatus.seconds = timeElapsed > chainblockTime ? 0 : chainblockTime - timeElapsed
+        console.log(timeElapsed)
+      } else if (txData.observed_tx.tx.id && lastBlockHeight?.thorchain) {
+        const recordedAction = await this.thorchainCache.midgard.getActions(txData.observed_tx.tx.id)
+        const recordedBlockheight = recordedAction.find((block) => {
+          return block
+        })
+        if (!recordedBlockheight) throw Error(`No height recorded`)
+        const chainblockTime = this.chainAttributes[getAsset.chain].avgBlockTimeInSecs
+        console.log(chainblockTime)
+        const blockDifference = lastBlockHeight?.thorchain - +recordedBlockheight.height
+        console.log(blockDifference)
+        const timeElapsed =
+          (blockDifference * chainblockTime) / this.chainAttributes[getAsset.chain].avgBlockTimeInSecs
+        txStatus.seconds = timeElapsed > chainblockTime ? 0 : chainblockTime - timeElapsed
+        console.log(txStatus.seconds)
+        txStatus.stage = TxStage.OUTBOUND_CHAIN_CONFIRMED
       }
+      //console.log(`Tx stage ${txStatus.stage}\nTx seconds left ${txStatus.seconds}`)
+      return txStatus
+    } else {
+      txStatus.seconds = 0
+      txStatus.stage = TxStage.OUTBOUND_CHAIN_CONFIRMED
+    }
+    //console.log(`Tx stage ${txStatus.stage}\nTx seconds left ${txStatus.seconds}`)
+    return txStatus
+  } else {
+    // case example "memo": "OUT:08BC062B248F6F27D0FECEF1650843585A1496BFFEAF7CB17A1CBC30D8D58F9C" where no asset is found its a thorchain tx. Confirms in ~6 seconds
+    txStatus.seconds = 0
+    txStatus.stage = TxStage.OUTBOUND_CHAIN_CONFIRMED
+  }
 
-
-
-    // If its scheduled and observed
+//----------------------------------------------
 
     //console.log(`Tx stage ${txStatus.stage}\nTx seconds left ${txStatus.seconds}`)
-
-
-
     return txStatus
   }
 
@@ -174,56 +226,32 @@ export class CheckTx {
     }
     return txStatus
   }
+
+  /** Stage 4 */
   /**
-   * Stage 3
+   * If the Tx is in the outbound queue, works out how long it has to go.
    * @param txStatus
-   * @param txData
-   * @param scheduledQueue
    * @param scheduledQueueItem
    * @param lastBlockHeight
    * @returns
    */
-  private async checkOutboundQueue(
-    txStatus: TxStatus,
-    scheduledQueueItem?: TxOutItem,
-    lastBlockHeight?: LastBlock,
-  ): Promise<TxStatus> {
-    // If the scheduled block is greater than the current block, need to wait that amount of blocks till outbound is sent
-    if (scheduledQueueItem?.height && lastBlockHeight?.thorchain) {
-      if (lastBlockHeight.thorchain < scheduledQueueItem?.height) {
-        const blocksToWait = scheduledQueueItem.height - lastBlockHeight.thorchain
-        txStatus.stage = TxStage.OUTBOUND_QUEUED
-        txStatus.seconds = blocksToWait * this.chainAttributes[THORChain].avgBlockTimeInSecs
-        return txStatus
-      } else {
-        txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
-        return txStatus
-      }
-    }
-    return txStatus
-  }
-  /** Stage 4 */
   private async checkOutboundTx(
     txStatus: TxStatus,
     scheduledQueueItem?: TxOutItem,
     lastBlockHeight?: LastBlock,
   ): Promise<TxStatus> {
     if (scheduledQueueItem?.height && lastBlockHeight?.thorchain) {
+
       const blockDifference = scheduledQueueItem.height - lastBlockHeight?.thorchain
-      const timeElapsed = blockDifference * this.chainAttributes[THORChain].avgBlockTimeInSecs
+      //const timeElapsed = blockDifference * this.chainAttributes[THORChain].avgBlockTimeInSecs
       if (blockDifference == 0) {
         // If Tx has just been sent, Stage 3 should pick this up really
         txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
         txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs
-      } else if (timeElapsed < txStatus.seconds) {
-        // if the time passed since the outbound TX was sent is less than the outbound block time, outbound Tx unconfirmed, wait a bit longer.
-        txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
-        txStatus.seconds = this.chainAttributes[THORChain].avgBlockTimeInSecs - timeElapsed // workout how long to wait
-      } else {
-        // time passed is greater than outbound Tx time, Tx is confirmed. Thus stage 5
-        txStatus.stage = TxStage.OUTBOUND_CHAIN_CONFIRMED
-        txStatus.seconds = 0
       }
+    }
+    else {
+      txStatus.stage = TxStage.OUTBOUND_CHAIN_UNCONFIRMED
     }
     return txStatus
   }
