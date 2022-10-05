@@ -152,7 +152,7 @@ export class ThorchainQuery {
     } else {
       txDetails.txEstimate.canSwap = true
       // Retrieve inbound Asgard address.
-      const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[input.asset.chain]
+      const inboundAsgard = (await this.thorchainCache.getInboundAddresses())[input.asset.chain]
       txDetails.toAddress = inboundAsgard?.address || ''
       // Work out LIM from the slip percentage
       let limPercentage = BN_1
@@ -222,10 +222,12 @@ export class ThorchainQuery {
     const inputInRune =
       input.asset === AssetRuneNative ? input : await this.thorchainCache.convert(input, AssetRuneNative)
 
-    const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails.gas_rate)
-
-    let outboundFeeInAsset = calcNetworkFee(params.destinationAsset, destinationInboundDetails.gas_rate)
-    outboundFeeInAsset = outboundFeeInAsset.times(3)
+    const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails)
+    // Retrieve outbound fee from inboundAddressDetails.
+    const outboundFeeInAsset = new CryptoAmount(
+      baseAmount(destinationInboundDetails.outboundFee),
+      params.destinationAsset,
+    )
     // convert fees to rune
     const inboundFeeInRune = await this.thorchainCache.convert(inboundFeeInAsset, AssetRuneNative)
     let outboundFeeInRune = await this.thorchainCache.convert(outboundFeeInAsset, AssetRuneNative)
@@ -703,7 +705,7 @@ export class ThorchainQuery {
 
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
     const lpUnits = getLiquidityUnits({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
-    const inboundDetails = await this.thorchainCache.midgard.getInboundDetails()
+    const inboundDetails = await this.thorchainCache.getInboundDetails()
     const unitData: UnitData = {
       liquidityUnits: baseAmount(lpUnits),
       totalUnits: baseAmount(assetPool.pool.liquidityUnits),
@@ -717,12 +719,12 @@ export class ThorchainQuery {
     let runeInboundFee = new CryptoAmount(baseAmount(0), AssetRuneNative)
 
     if (!params.asset.assetAmount.eq(0)) {
-      assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gas_rate)
+      assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain])
       if (assetInboundFee.assetAmount.amount().times(3).gt(params.asset.assetAmount.amount()))
         errors.push(`Asset amount is less than fees`)
     }
     if (!params.rune.assetAmount.eq(0)) {
-      runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gas_rate)
+      runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain])
       if (runeInboundFee.assetAmount.amount().times(3).gt(params.rune.assetAmount.amount()))
         errors.push(`Rune amount is less than fees`)
     }

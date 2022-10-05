@@ -148,8 +148,9 @@ export class Wallet {
   private async swapNonRune(swap: ExecuteSwap): Promise<TxSubmitted> {
     const client = this.clients[swap.input.asset.chain]
     const waitTimeSeconds = swap.waitTimeSeconds
-    const inboundAsgard = (await this.thorchainQuery.thorchainCache.getInboundAddressesItems())[swap.input.asset.chain]
+    const inbound = (await this.thorchainQuery.thorchainCache.getInboundDetails())[swap.input.asset.chain]
 
+    if (!inbound?.address) throw Error(`no asgard address found for ${swap.input.asset.chain}`)
     if (swap.input.asset.chain === Chain.Ethereum) {
       const params = {
         walletIndex: 0,
@@ -176,7 +177,7 @@ export class Wallet {
         walletIndex: 0,
         asset: swap.input.asset,
         amount: swap.input.baseAmount,
-        recipient: inboundAsgard?.address || '', //TODO fix this
+        recipient: inbound.address,
         memo: this.constructSwapMemo(swap),
       }
 
@@ -192,9 +193,8 @@ export class Wallet {
    */
   async addLiquidity(params: AddLiquidity): Promise<TxSubmitted[]> {
     const assetClient = this.clients[params.asset.asset.chain]
-    const inboundAsgard = (await this.thorchainQuery.thorchainCache.getInboundAddressesItems())[
-      params.asset.asset.chain
-    ].address
+    const inboundAsgard = (await this.thorchainQuery.thorchainCache.getInboundDetails())[params.asset.asset.chain]
+      .address
     const thorchainClient = this.clients[params.rune.asset.chain]
     const addressRune = thorchainClient.getAddress()
     const addressAsset = assetClient.getAddress()
@@ -206,7 +206,7 @@ export class Wallet {
     if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.gt(0)) {
       constructedMemo = `+:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressRune}`
       txSubmitted.push(
-        await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
+        await this.addOrRemoveAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard),
       )
       constructedMemo = `+:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressAsset}`
       txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
@@ -215,7 +215,7 @@ export class Wallet {
       // asymmetrical asset only
       constructedMemo = `+:${params.asset.asset.chain}.${params.asset.asset.symbol}`
       txSubmitted.push(
-        await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
+        await this.addOrRemoveAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard),
       )
       return txSubmitted
     } else {
@@ -233,9 +233,10 @@ export class Wallet {
    */
   async removeLiquidity(params: RemoveLiquidity): Promise<TxSubmitted[]> {
     const assetClient = this.clients[params.asset.asset.chain]
-    const inboundAsgard = (await this.thorchainQuery.thorchainCache.getInboundAddressesItems())[
-      params.asset.asset.chain
-    ].address
+    const inboundAsgard = (await this.thorchainQuery.thorchainCache.getInboundDetails())[params.asset.asset.chain]
+    if (!inboundAsgard?.address) {
+      throw new Error('Vault address is not defined')
+    }
     const waitTimeSeconds = params.waitTimeSeconds
     const thorchainClient = this.clients[params.rune.asset.chain]
     const basisPoints = (params.percentage * 100).toFixed() // convert to basis points
@@ -245,7 +246,7 @@ export class Wallet {
     if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.gt(0)) {
       constructedMemo = `-:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
       txSubmitted.push(
-        await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
+        await this.addOrRemoveAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard.address),
       )
       constructedMemo = `-:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
       txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
@@ -254,7 +255,7 @@ export class Wallet {
       // asymmetrical asset only
       constructedMemo = `-:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
       txSubmitted.push(
-        await this.addOrRemoveAssetLP(params, constructedMemo, inboundAsgard, assetClient, waitTimeSeconds),
+        await this.addOrRemoveAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard.address),
       )
       return txSubmitted
     } else {
@@ -277,9 +278,9 @@ export class Wallet {
   private async addOrRemoveAssetLP(
     params: AddLiquidity,
     constructedMemo: string,
-    inboundAsgard: string,
     assetClient: XChainClient,
     waitTimeSeconds: number,
+    inboundAsgard: string,
   ): Promise<TxSubmitted> {
     if (params.asset.asset.chain === Chain.Ethereum) {
       const addParams = {
