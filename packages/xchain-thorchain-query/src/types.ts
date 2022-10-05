@@ -1,7 +1,6 @@
 import { FeeOption } from '@xchainjs/xchain-client'
-import { InboundAddressesItem } from '@xchainjs/xchain-midgard'
-import { LiquidityProvider } from '@xchainjs/xchain-thornode'
-import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util'
+import { InboundAddress, LiquidityProvider } from '@xchainjs/xchain-thornode'
+import { Address, Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
@@ -30,7 +29,7 @@ export type PoolCache = {
 
 export type AsgardCache = {
   lastRefreshed: number
-  inboundAddressesItems: Record<string, InboundAddressesItem>
+  inboundAddresses: Record<string, InboundAddress>
 }
 export type InboundDetailCache = {
   lastRefreshed: number
@@ -84,12 +83,16 @@ export type ILProtectionData = {
 }
 
 export type InboundDetail = {
-  vault: string
-  router?: string
+  chain: Chain
+  address: Address
+  router?: Address
+  gasRate: BigNumber
+  gasRateUnits: string
+  outboundTxSize: BigNumber
+  outboundFee: BigNumber
   haltedChain: boolean
   haltedTrading: boolean
   haltedLP: boolean
-  gas_rate: BigNumber
 }
 
 export type ChainAttributes = {

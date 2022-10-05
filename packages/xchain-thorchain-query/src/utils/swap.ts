@@ -16,7 +16,6 @@ import {
   BNBChain,
   BTCChain,
   Chain,
-  // BaseAmount,
   CosmosChain,
   DOGEChain,
   ETHChain,
@@ -25,15 +24,13 @@ import {
   TerraChain,
   baseAmount,
   eqAsset,
-  // assetToString,
-  // strip0x,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from '../crypto-amount'
 import { LiquidityPool } from '../liquidity-pool'
 import { ThorchainCache } from '../thorchain-cache'
-import { SwapOutput } from '../types'
+import { InboundDetail, SwapOutput } from '../types'
 
 const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDecimals: number): BigNumber => {
   const inDecimals = inputAmount.baseAmount.decimal
@@ -198,28 +195,28 @@ export const getDoubleSwap = async (
  * @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
  * @returns
  */
-export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount => {
+export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmount => {
   if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
   switch (asset.chain) {
     case Chain.Bitcoin:
-      return new CryptoAmount(baseAmount(gasRate.multipliedBy(1000)), AssetBTC)
+      return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBTC)
       break
     case Chain.BitcoinCash:
-      return new CryptoAmount(baseAmount(gasRate.multipliedBy(1500)), AssetBCH)
+      return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBCH)
       break
     case Chain.Litecoin:
-      return new CryptoAmount(baseAmount(gasRate.multipliedBy(250)), AssetLTC)
+      return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetLTC)
       break
     case Chain.Doge:
       // NOTE: UTXO chains estimate fees with a 250 byte size
-      return new CryptoAmount(baseAmount(gasRate.multipliedBy(1000)), AssetDOGE)
+      return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetDOGE)
       break
     case Chain.Binance:
       //flat fee
-      return new CryptoAmount(baseAmount(gasRate), AssetBNB)
+      return new CryptoAmount(baseAmount(inbound.gasRate), AssetBNB)
       break
     case Chain.Ethereum:
-      const gasRateinETHGwei = gasRate
+      const gasRateinETHGwei = inbound.gasRate
       const gasRateinETHWei = baseAmount(gasRateinETHGwei.multipliedBy(10 ** 9), 18)
       if (eqAsset(asset, AssetETH)) {
         return new CryptoAmount(gasRateinETHWei.times(21000), AssetETH)
@@ -228,7 +225,7 @@ export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount =
       }
       break
     case Chain.Avalanche:
-      const gasRateinAVAXGwei = gasRate
+      const gasRateinAVAXGwei = inbound.gasRate
       const gasRateinAVAXWei = baseAmount(gasRateinAVAXGwei.multipliedBy(10 ** 9), 18)
       if (eqAsset(asset, AssetAVAX)) {
         return new CryptoAmount(gasRateinAVAXWei.times(21000), AssetAVAX)
@@ -237,10 +234,10 @@ export const calcNetworkFee = (asset: Asset, gasRate: BigNumber): CryptoAmount =
       }
       break
     case Chain.Terra:
-      return new CryptoAmount(baseAmount(gasRate), AssetLUNA)
+      return new CryptoAmount(baseAmount(inbound.gasRate), AssetLUNA)
       break
     case Chain.Cosmos:
-      return new CryptoAmount(baseAmount(gasRate), AssetAtom)
+      return new CryptoAmount(baseAmount(inbound.gasRate), AssetAtom)
       break
     case Chain.THORChain:
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)

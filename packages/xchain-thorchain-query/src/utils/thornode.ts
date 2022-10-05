@@ -1,6 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
   Configuration,
+  InboundAddress,
   LastBlock,
   LiquidityProvider,
   LiquidityProvidersApi,
@@ -147,6 +148,24 @@ export class Thornode {
       try {
         const lps = (await api.liquidityProviders(asset, height)).data
         return lps.find((lp) => lp.asset_address === address || lp.rune_address === address)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+  /**
+   *
+   * @param asset - asset string
+   * @param address - address
+   * @param height - optional block height, defaults to current tip
+   * @returns
+   */
+  async getInboundAddresses(): Promise<InboundAddress[]> {
+    for (const api of this.networkApi) {
+      try {
+        const resp = (await api.inboundAddresses()).data
+        return resp
       } catch (e) {
         console.error(e)
       }

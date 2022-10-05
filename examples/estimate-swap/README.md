@@ -99,7 +99,7 @@ Please refer to [asset-notation](https://dev.thorchain.org/thorchain-dev/network
 ```bash
 yarn estimateSwap [network (Mainnet | TestNet)] [swap amount]] [source asset] [destination asset] ([destination address])
 
-yarn estimateSwap mainnet 0.001 BTC.BTC ETH.ETH # good estimate
+yarn estimateSwap mainnet 0.002 BTC.BTC ETH.ETH # good estimate
 yarn estimateSwap mainnet 2 BTC.BTC ETH.ETH     # Note due to testnet pools being inconsistent with real world prices use mainnet to retrieve accurate estimations
 yarn estimateSwap mainnet 2 BTC/BTC THOR.RUNE
 
@@ -112,101 +112,66 @@ See full Estimate Swap at http://docs.xchainjs.org/xchain-thorchain-query/how-to
 $ npx ts-node estimateSwap.ts mainnet 0.001 BTC.BTC ETH.ETH
 updated pool cache
 {
-  input: '⚡ 100,000',
-  totalFees: {
-    inboundFee: 'ᚱ 129.56837034',
-    swapFee: 'ᚱ 0.01854982',
-    outboundFee: 'ᚱ 7.92602156',
-    affiliateFee: 'ᚱ 0'
-  },
-  slipPercentage: '0.0109953633769023203',
-  netOutput: 'Ξ 1.59650878',
-  waitTimeSeconds: '606',
-  canSwap: true,
-  errors: undefined
+  memo: '=:ETH.ETH:undefined:1215999',
+  expiry: 2022-10-04T06:05:35.691Z,
+  toAddress: 'bc1q45l09yhmjayd0swcnfku839uk0x0vsxau4a8j6',
+  txEstimate: {
+    input: '⚡ 200,000',
+    totalFees: {
+      inboundFee: 'ᚱ 0.85042717',
+      swapFee: 'ᚱ 0.00016927',
+      outboundFee: 'ᚱ 13.15033307',
+      affiliateFee: 'ᚱ 0'
+    },
+    slipPercentage: '0.00000715632168076026',
+    netOutput: 'Ξ 0.01252814',
+    waitTimeSeconds: '606',
+    canSwap: true,
+    errors: []
+  }
 }
-{
-  input: '⚡ 100,000',
-  totalFees: {
-    inboundFee: '⚡ 69,000',
-    swapFee: '⚡ 10',
-    outboundFee: '⚡ 4,221',
-    affiliateFee: '⚡ 0'
-  },
-  slipPercentage: '0.0109953633769023203',
-  netOutput: 'Ξ 1.59650878',
-  waitTimeSeconds: '606',
-  canSwap: true,
-  errors: undefined
-}
-✨  Done in 9.84s.
+
 yarn run v1.22.17
 $ npx ts-node estimateSwap.ts mainnet 2 BTC.BTC ETH.ETH
-updated pool cache
 {
-  input: '₿ 2',
-  totalFees: {
-    inboundFee: 'ᚱ 129.56837034',
-    swapFee: 'ᚱ 965.99305002',
-    outboundFee: 'ᚱ 7.92602156',
-    affiliateFee: 'ᚱ 0'
-  },
-  slipPercentage: '1.34347334294209985163',
-  netOutput: 'Ξ 21.65764335',
-  waitTimeSeconds: '0',
-  canSwap: false,
-  errors: [
-    'expected slip: 1.34347334294209985163 is greater than your slip limit:0.03 '
-  ]
+  memo: '=:ETH.ETH:undefined:2824318999',
+  expiry: 2022-10-04T06:08:07.854Z,
+  toAddress: 'bc1q45l09yhmjayd0swcnfku839uk0x0vsxau4a8j6',
+  txEstimate: {
+    input: '₿ 2',
+    totalFees: {
+      inboundFee: 'ᚱ 0.85028568',
+      swapFee: 'ᚱ 177.52446807',
+      outboundFee: 'ᚱ 13.14662292',
+      affiliateFee: 'ᚱ 0'
+    },
+    slipPercentage: '0.00736167351651217019',
+    netOutput: 'Ξ 29.11668923',
+    waitTimeSeconds: '1992',
+    canSwap: true,
+    errors: []
+  }
 }
-{
-  input: '₿ 2',
-  totalFees: {
-    inboundFee: '⚡ 69,000',
-    swapFee: '⚡ 514,427',
-    outboundFee: '⚡ 4,221',
-    affiliateFee: '⚡ 0'
-  },
-  slipPercentage: '1.34347334294209985163',
-  netOutput: 'Ξ 21.65764335',
-  waitTimeSeconds: '0',
-  canSwap: false,
-  errors: [
-    'expected slip: 1.34347334294209985163 is greater than your slip limit:0.03 '
-  ]
-}
-✨  Done in 8.22s.
 yarn run v1.22.17
 $ npx ts-node estimateSwap.ts mainnet 2 BTC/BTC THOR.RUNE
-updated pool cache
 {
-  input: '₿ 2',
-  totalFees: {
-    inboundFee: 'ᚱ 0.02',
-    swapFee: 'ᚱ 35.09081025',
-    outboundFee: 'ᚱ 0.06',
-    affiliateFee: 'ᚱ 0'
-  },
-  slipPercentage: '0.00211315998450617533',
-  netOutput: 'ᚱ 16,570.69564875',
-  waitTimeSeconds: '0',
-  canSwap: true,
-  errors: undefined
+  memo: '=:THOR.RUNE:undefined:2343615739999',
+  expiry: 2022-10-04T06:09:14.962Z,
+  toAddress: 'bc1q45l09yhmjayd0swcnfku839uk0x0vsxau4a8j6',
+  txEstimate: {
+    input: '₿ 2',
+    totalFees: {
+      inboundFee: 'ᚱ 0.02',
+      swapFee: 'ᚱ 66.65512242',
+      outboundFee: 'ᚱ 0',
+      affiliateFee: 'ᚱ 0'
+    },
+    slipPercentage: '0.00275120137876842664',
+    netOutput: 'ᚱ 24,160.98700222',
+    waitTimeSeconds: '1412',
+    canSwap: true,
+    errors: []
+  }
 }
-{
-  input: '₿ 2',
-  totalFees: {
-    inboundFee: '⚡ 240',
-    swapFee: '⚡ 421,739',
-    outboundFee: '⚡ 721',
-    affiliateFee: '⚡ 0'
-  },
-  slipPercentage: '0.00211315998450617533',
-  netOutput: 'ᚱ 16,570.69564875',
-  waitTimeSeconds: '0',
-  canSwap: true,
-  errors: undefined
-}
-✨  Done in 8.47s.
-
+✨  Done in 7.11s.
 ```

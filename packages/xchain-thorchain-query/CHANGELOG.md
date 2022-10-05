@@ -1,3 +1,9 @@
+# v0.0.1.0 (2022-10-30)
+
+## Update
+
+- Updated outboundfee calcs it now uses `/thorchain/inbound_addresses`, `outbound_fee`
+
 # v0.0.1.0-beta2 (2022-09-29)
 
 ## Add

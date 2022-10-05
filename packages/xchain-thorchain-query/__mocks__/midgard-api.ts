@@ -9,11 +9,6 @@ export default {
       const resp = require(`./responses/midgard/pools.json`)
       return [200, resp]
     })
-    //Mock thorchain/inbound_addresses
-    mock.onGet(/\/v2\/thorchain\/inbound_addresses/).reply(function () {
-      const resp = require(`./responses/midgard/inbound_addresses.json`)
-      return [200, resp]
-    })
     //Mock thorchain/mimir
     mock.onGet(/\/v2\/thorchain\/mimir/).reply(function () {
       const resp = require(`./responses/mimir/mimirConstants.json`)

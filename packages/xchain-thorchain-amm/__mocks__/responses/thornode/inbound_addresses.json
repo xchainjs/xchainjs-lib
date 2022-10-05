@@ -1,0 +1,84 @@
+[
+	{
+		"address": "0xb030b2297315185acec73fce4df95e7859021c8a",
+		"chain": "AVAX",
+		"gas_rate": "370",
+		"gas_rate_units": "gwei",
+		"halted": false,
+		"outbound_fee": "59200000",
+		"outbound_tx_size": "80000",
+		"pub_key": "thorpub1addwnpepqve7dt5a5yg9k9m2tpkgn5pte9dzqj3e2js5wa8mptd2wpvef4fk5js2qr7",
+		"router": "0x8F66c4AE756BEbC49Ec8B81966DD8bba9f127549"
+	},
+	{
+		"address": "qr49csqacn8ve55jgy28pu095att58u22g8rt8xzuj",
+		"chain": "BCH",
+		"gas_rate": "3",
+		"gas_rate_units": "satsperbyte",
+		"halted": false,
+		"outbound_fee": "9000",
+		"outbound_tx_size": "1500",
+		"pub_key": "thorpub1addwnpepqve7dt5a5yg9k9m2tpkgn5pte9dzqj3e2js5wa8mptd2wpvef4fk5js2qr7"
+	},
+	{
+		"address": "bnb1afwyq8wyemxd9yjpz3c0red826aplzjj5ajt8g",
+		"chain": "BNB",
+		"gas_rate": "11250",
+		"gas_rate_units": "ubnb",
+		"halted": false,
+		"outbound_fee": "22500",
+		"outbound_tx_size": "1",
+		"pub_key": "thorpub1addwnpepqve7dt5a5yg9k9m2tpkgn5pte9dzqj3e2js5wa8mptd2wpvef4fk5js2qr7"
+	},
+	{
+		"address": "bc1qafwyq8wyemxd9yjpz3c0red826aplzjjqrnvzt",
+		"chain": "BTC",
+		"gas_rate": "9",
+		"gas_rate_units": "satsperbyte",
+		"halted": false,
+		"outbound_fee": "18000",
+		"outbound_tx_size": "1000",
+		"pub_key": "thorpub1addwnpepqve7dt5a5yg9k9m2tpkgn5pte9dzqj3e2js5wa8mptd2wpvef4fk5js2qr7"
+	},
+	{
+		"address": "DSWHApZ3ZGfQatJmgf7ZZyu6YpAarSDtjR",
+		"chain": "DOGE",
+		"gas_rate": "750000",
+		"gas_rate_units": "satsperbyte",
+		"halted": false,
+		"outbound_fee": "1500000000",
+		"outbound_tx_size": "1000",
+		"pub_key": "thorpub1addwnpepqve7dt5a5yg9k9m2tpkgn5pte9dzqj3e2js5wa8mptd2wpvef4fk5js2qr7"
+	},
+	{
+		"address": "0xb030b2297315185acec73fce4df95e7859021c8a",
+		"chain": "ETH",
+		"gas_rate": "10",
+		"gas_rate_units": "gwei",
+		"halted": false,
+		"outbound_fee": "1600000",
+		"outbound_tx_size": "80000",
+		"pub_key": "thorpub1addwnpepqve7dt5a5yg9k9m2tpkgn5pte9dzqj3e2js5wa8mptd2wpvef4fk5js2qr7",
+		"router": "0xD37BbE5744D730a1d98d8DC97c42F0Ca46aD7146"
+	},
+	{
+		"address": "cosmos1afwyq8wyemxd9yjpz3c0red826aplzjjked8xx",
+		"chain": "GAIA",
+		"gas_rate": "450000",
+		"gas_rate_units": "uatom",
+		"halted": false,
+		"outbound_fee": "900000",
+		"outbound_tx_size": "1",
+		"pub_key": "thorpub1addwnpepqve7dt5a5yg9k9m2tpkgn5pte9dzqj3e2js5wa8mptd2wpvef4fk5js2qr7"
+	},
+	{
+		"address": "ltc1qafwyq8wyemxd9yjpz3c0red826aplzjjylfg6m",
+		"chain": "LTC",
+		"gas_rate": "88",
+		"gas_rate_units": "satsperbyte",
+		"halted": true,
+		"outbound_fee": "44000",
+		"outbound_tx_size": "250",
+		"pub_key": "thorpub1addwnpepqve7dt5a5yg9k9m2tpkgn5pte9dzqj3e2js5wa8mptd2wpvef4fk5js2qr7"
+	}
+]

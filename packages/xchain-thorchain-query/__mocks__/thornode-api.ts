@@ -4,6 +4,11 @@ export default {
   reset: mock.reset,
   restore: mock.restore,
   init: () => {
+    //Mock thorchain/inbound_addresses
+    mock.onGet(/\/thorchain\/inbound_addresses/).reply(function () {
+      const resp = require(`./responses/thornode/inbound_addresses.json`)
+      return [200, resp]
+    })
     //Mock thornode pools
     mock.onGet(/\/thorchain\/pools/).reply(function () {
       const resp = require(`./responses/thornode/thornodePools.json`)
