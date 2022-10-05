@@ -148,8 +148,9 @@ export class Wallet {
   private async swapNonRune(swap: ExecuteSwap): Promise<TxSubmitted> {
     const client = this.clients[swap.input.asset.chain]
     const waitTimeSeconds = swap.waitTimeSeconds
-    const inboundAsgard = (await this.thorchainQuery.thorchainCache.getInboundAddresses())[swap.input.asset.chain]
+    const inbound = (await this.thorchainQuery.thorchainCache.getInboundDetails())[swap.input.asset.chain]
 
+    if (!inbound?.address) throw Error(`no asgard address found for ${swap.input.asset.chain}`)
     if (swap.input.asset.chain === Chain.Ethereum) {
       const params = {
         walletIndex: 0,
@@ -176,7 +177,7 @@ export class Wallet {
         walletIndex: 0,
         asset: swap.input.asset,
         amount: swap.input.baseAmount,
-        recipient: inboundAsgard?.address || '', //TODO fix this
+        recipient: inbound.address,
         memo: this.constructSwapMemo(swap),
       }
 

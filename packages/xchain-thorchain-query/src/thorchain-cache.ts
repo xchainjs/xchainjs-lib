@@ -4,13 +4,9 @@ import {
   Address,
   Asset,
   Chain,
-  // assetAmount,
   assetFromStringEx,
-  // assetToBase,
-  // assetToBase,
   assetToString,
   baseAmount,
-  // baseAmount,
   eqAsset,
   isAssetRuneNative,
 } from '@xchainjs/xchain-util'

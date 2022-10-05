@@ -222,7 +222,7 @@ export class ThorchainQuery {
     const inputInRune =
       input.asset === AssetRuneNative ? input : await this.thorchainCache.convert(input, AssetRuneNative)
 
-    const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails.gasRate)
+    const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails)
     // Retrieve outbound fee from inboundAddressDetails.
     const outboundFeeInAsset = new CryptoAmount(
       baseAmount(destinationInboundDetails.outboundFee),
@@ -719,12 +719,12 @@ export class ThorchainQuery {
     let runeInboundFee = new CryptoAmount(baseAmount(0), AssetRuneNative)
 
     if (!params.asset.assetAmount.eq(0)) {
-      assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain].gasRate)
+      assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain])
       if (assetInboundFee.assetAmount.amount().times(3).gt(params.asset.assetAmount.amount()))
         errors.push(`Asset amount is less than fees`)
     }
     if (!params.rune.assetAmount.eq(0)) {
-      runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain].gasRate)
+      runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain])
       if (runeInboundFee.assetAmount.amount().times(3).gt(params.rune.assetAmount.amount()))
         errors.push(`Rune amount is less than fees`)
     }
