@@ -2454,11 +2454,6 @@
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-terra/-/xchain-terra-0.3.1.tgz#5d0a1f84854a2ad6bfb8c5931854f84794974227"
   integrity sha512-iSQmeqS5ObKIu0xJCuYj4Hv1nKsRgrghEFMyoJ5O3X6SLCIXJ5VCQHFr+noR94t/MWSzstJvzUaTcmN8J6m19g==
 
-"@xchainjs/xchain-util@^0.10.0":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-util/-/xchain-util-0.10.0.tgz#42e534313927094302a1ade140e3c42a3e2ad998"
-  integrity sha512-JZr2M8j+6VtjiqiYRUkNjK2JM8hSZbC7Cr2VmPvdvZa39Ks15D8xgrDw7IaCjPkENaLiejbzMzZZbtV9Qf9K4g==
-
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@zkochan/cmd-shim/-/cmd-shim-3.1.0.tgz#2ab8ed81f5bb5452a85f25758eb9b8681982fd2e"
