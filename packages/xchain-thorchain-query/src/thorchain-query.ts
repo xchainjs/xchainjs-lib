@@ -1,5 +1,3 @@
-// import { Network } from '@xchainjs/xchain-client'
-
 import { LastBlock, ObservedTx, ObservedTxStatusEnum, TxOutItem } from '@xchainjs/xchain-thornode'
 import {
   Asset,
@@ -731,6 +729,7 @@ export class ThorchainQuery {
     const totalFees = (await this.convert(assetInboundFee, AssetRuneNative)).plus(runeInboundFee)
     const slip = getSlipOnLiquidity({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
     const estimateLP: EstimateAddLP = {
+      assetPool: assetPool.pool.asset,
       slipPercent: slip.times(100),
       poolShare: poolShare,
       lpUnits: baseAmount(lpUnits),
@@ -752,9 +751,10 @@ export class ThorchainQuery {
    * @param address - address used for Lp
    * @returns - Type Object liquidityPosition
    */
-  public async checkLiquidityPosition(asset: Asset, assetOrRuneAddress: string): Promise<LiquidityPosition> {
+  public async checkLiquidityPosition(asset: Asset, assetOrRuneAddress?: string): Promise<LiquidityPosition> {
     const poolAsset = await this.thorchainCache.getPoolForAsset(asset)
     if (!poolAsset) throw Error(`Could not find pool for ${asset}`)
+    if (!assetOrRuneAddress) throw Error(`No address provided ${assetOrRuneAddress}`)
 
     const liquidityProvider = await this.thorchainCache.thornode.getLiquidityProvider(
       poolAsset.assetString,
@@ -813,11 +813,10 @@ export class ThorchainQuery {
    */
   public async estimateWithdrawLP(params: RemoveLiquidityPosition): Promise<EstimateWithdrawLP> {
     // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
-    if (!params.assetAddress) throw Error(`can't estimate lp without an asset address`)
-    const memberDetail = await this.checkLiquidityPosition(params.asset, params.assetAddress)
+    const assetOrRuneAddress = params.assetAddress ? params.assetAddress : params.runeAddress
+    const memberDetail = await this.checkLiquidityPosition(params.asset, assetOrRuneAddress)
     const dustValues = await this.getDustValues(params.asset) // returns asset and rune dust values
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset)
-
     // get pool share from unit data
     const poolShare = getPoolShare(
       {
@@ -858,6 +857,7 @@ export class ThorchainQuery {
       runeAmount: poolShare.runeShare,
       estimatedWaitSeconds: waitTimeSeconds,
       impermanentLossProtection: memberDetail.impermanentLossProtection,
+      assetPool: assetPool.pool.asset,
     }
     return estimateLP
   }

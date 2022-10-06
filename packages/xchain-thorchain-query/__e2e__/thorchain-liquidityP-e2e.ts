@@ -152,9 +152,21 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     printWithdraw(estimatRemoveLP)
     expect(estimatRemoveLP).toBeTruthy()
   })
+  // Estimate withrdaw lp positions
+  it(`Should estimate withdraw RUNE from address's position`, async () => {
+    const percentage = 100 // gets converted to basis points later
+    const removeLp: RemoveLiquidityPosition = {
+      asset: AssetBTC,
+      percentage: percentage,
+      runeAddress: `thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u`,
+    }
+    const estimatRemoveLP = await thorchainQuery.estimateWithdrawLP(removeLp)
+    printWithdraw(estimatRemoveLP)
+    expect(estimatRemoveLP).toBeTruthy()
+  })
 
   it(`Should check liquidity position for an address`, async () => {
-    const address = 'bc1qzw3xhtwctpezz8m4se7hsw4y68tg42p99gtrae'
+    const address = 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u'
     const checkLP = await thorchainQuery.checkLiquidityPosition(AssetBTC, address)
     printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()
