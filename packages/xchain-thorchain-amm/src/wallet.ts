@@ -204,23 +204,23 @@ export class Wallet {
 
     // symmetrical add
     if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.gt(0)) {
-      constructedMemo = `+:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressRune}`
+      constructedMemo = `+:${params.assetPool}:${addressRune}`
       txSubmitted.push(
         await this.addOrRemoveAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard),
       )
-      constructedMemo = `+:${params.asset.asset.chain}.${params.asset.asset.symbol}:${addressAsset}`
+      constructedMemo = `+:${params.assetPool}:${addressAsset}`
       txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     } else if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.eq(0)) {
       // asymmetrical asset only
-      constructedMemo = `+:${params.asset.asset.chain}.${params.asset.asset.symbol}`
+      constructedMemo = `+:${params.assetPool}`
       txSubmitted.push(
         await this.addOrRemoveAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard),
       )
       return txSubmitted
     } else {
       // asymmetrical rune only
-      constructedMemo = `+:${params.asset.asset.chain}.${params.asset.asset.symbol}`
+      constructedMemo = `+:${params.assetPool}`
       txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     }
@@ -234,9 +234,7 @@ export class Wallet {
   async removeLiquidity(params: RemoveLiquidity): Promise<TxSubmitted[]> {
     const assetClient = this.clients[params.asset.asset.chain]
     const inboundAsgard = (await this.thorchainQuery.thorchainCache.getInboundDetails())[params.asset.asset.chain]
-    if (!inboundAsgard?.address) {
-      throw new Error('Vault address is not defined')
-    }
+      .address
     const waitTimeSeconds = params.waitTimeSeconds
     const thorchainClient = this.clients[params.rune.asset.chain]
     const basisPoints = (params.percentage * 100).toFixed() // convert to basis points
@@ -244,23 +242,23 @@ export class Wallet {
     const txSubmitted: TxSubmitted[] = []
 
     if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.gt(0)) {
-      constructedMemo = `-:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      constructedMemo = `-:${params.assetPool}:${basisPoints}`
       txSubmitted.push(
-        await this.addOrRemoveAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard.address),
+        await this.addOrRemoveAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard),
       )
-      constructedMemo = `-:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      constructedMemo = `-:${params.assetPool}:${basisPoints}`
       txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     } else if (params.asset.assetAmount.gt(0) && params.rune.assetAmount.eq(0)) {
       // asymmetrical asset only
-      constructedMemo = `-:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      constructedMemo = `-:${params.assetPool}:${basisPoints}`
       txSubmitted.push(
-        await this.addOrRemoveAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard.address),
+        await this.addOrRemoveAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard),
       )
       return txSubmitted
     } else {
       // asymmetrical rune only
-      constructedMemo = `-:${params.asset.asset.chain}.${params.asset.asset.symbol}:${basisPoints}`
+      constructedMemo = `-:${params.assetPool}:${basisPoints}`
       txSubmitted.push(await this.addOrRemoveRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     }
@@ -276,25 +274,25 @@ export class Wallet {
    * @returns - tx object
    */
   private async addOrRemoveAssetLP(
-    params: AddLiquidity,
+    params: AddLiquidity | RemoveLiquidity,
     constructedMemo: string,
     assetClient: XChainClient,
     waitTimeSeconds: number,
     inboundAsgard: string,
   ): Promise<TxSubmitted> {
     if (params.asset.asset.chain === Chain.Ethereum) {
-      const addParams = {
+      const addOrRemoveParams = {
         wallIndex: 0,
         asset: params.asset.asset,
         amount: params.asset.baseAmount,
         feeOption: FeeOption.Fast,
         memo: constructedMemo,
       }
-      console.log(addParams.amount.amount().toNumber())
-      const hash = await this.ethHelper.sendDeposit(addParams)
+      console.log(addOrRemoveParams.amount.amount().toNumber())
+      const hash = await this.ethHelper.sendDeposit(addOrRemoveParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else if (params.asset.asset.chain === Chain.Avalanche) {
-      const addParams = {
+      const addOrRemoveParams = {
         wallIndex: 0,
         asset: params.asset.asset,
         amount: params.asset.baseAmount,
@@ -302,10 +300,10 @@ export class Wallet {
         memo: constructedMemo,
       }
       const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
-      const hash = await evmHelper.sendDeposit(addParams)
+      const hash = await evmHelper.sendDeposit(addOrRemoveParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
-      const addParams = {
+      const addOrRemoveParams = {
         wallIndex: 0,
         asset: params.asset.asset,
         amount: params.asset.baseAmount,
@@ -313,8 +311,8 @@ export class Wallet {
         memo: constructedMemo,
       }
       try {
-        console.log(addParams)
-        const hash = await assetClient.transfer(addParams)
+        console.log(addOrRemoveParams)
+        const hash = ` await assetClient.transfer(addOrRemoveParams)`
         return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
       } catch (err) {
         const hash = JSON.stringify(err)

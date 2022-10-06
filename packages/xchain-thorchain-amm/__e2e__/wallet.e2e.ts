@@ -5,14 +5,14 @@ import { baseToAsset, formatAssetAmountCurrency } from '@xchainjs/xchain-util'
 import { Wallet } from '../src/Wallet'
 
 require('dotenv').config()
-const thorchainCacheTestnet = new ThorchainCache(new Midgard(Network.Testnet), new Thornode(Network.Testnet))
-const thorchainQueryTestnet = new ThorchainQuery(thorchainCacheTestnet)
-const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', thorchainQueryTestnet)
+const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
+const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
 
 describe('xchain-swap wallet Tests', () => {
   it(`Should show balances `, async () => {
     try {
-      const allBalances = await testnetWallet.getAllBalances()
+      const allBalances = await mainnetWallet.getAllBalances()
 
       console.log(JSON.stringify(allBalances, null, 2))
       for (const allBalance of allBalances) {

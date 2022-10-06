@@ -26,12 +26,6 @@ export type TxSubmitted = {
   waitTimeSeconds: number
 }
 
-export type AddLiquidity = {
-  asset: CryptoAmount
-  rune: CryptoAmount
-  waitTimeSeconds: number
-}
-
 export type LiquidityPosition = {
   assetPool: LiquidityPool
   assetAmount: CryptoAmount
@@ -39,12 +33,18 @@ export type LiquidityPosition = {
   impermanentLossProtection: number
 }
 
-export type RemoveLiquidity = {
+export type AddLiquidity = {
   asset: CryptoAmount
   rune: CryptoAmount
-  percentage: number
   waitTimeSeconds: number
-  asymmetricalWithdraw?: Asset
+  assetPool: string
+}
+export type RemoveLiquidity = {
+  assetFee: CryptoAmount
+  runeFee: CryptoAmount
+  waitTimeSeconds: number
+  percentage: number
+  assetPool: string
 }
 
 export type DepositParams = {
