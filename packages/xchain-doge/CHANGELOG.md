@@ -1,3 +1,9 @@
+# v.0.5.3 (2022-xx-xx)
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
 # v.0.5.2 (2022-09-29)
 
 ## Update
