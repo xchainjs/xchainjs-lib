@@ -1,3 +1,9 @@
+# v.0.1.0-alpha4 (2022-xx-xx)
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
 # v.0.1.0-alpha3 (2022-xx-xx)
 
 ## Update
