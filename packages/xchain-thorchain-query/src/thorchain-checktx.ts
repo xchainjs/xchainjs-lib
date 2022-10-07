@@ -120,6 +120,8 @@ export class CheckTx {
     // If there is an error Thornode does not know about it. wait 60 seconds
     // If a long block time like BTC, can check or poll to see if the status changes.
     const stageStatus: TxStageStatus = { passed: false, seconds: 0, tgtBlock: 0 }
+    console.log(`${txData.observed_tx}`)
+    //{"error":"rpc error: code = Unknown desc = internal"}
     if (txData.observed_tx == undefined) {
       if (sourceChain) {
         stageStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
@@ -133,6 +135,7 @@ export class CheckTx {
   }
 
   /** Stage 2 */
+  // e.g. https://thornode.ninerealms.com/thorchain/tx/1FA0028157E4A4CFA38BC18D9DAF482A5E1C06987D08C90CBD1E0DCFAABE7642 for BNB (which is instant config)
   // https://thornode.ninerealms.com/thorchain/tx/619F2005282F3EB501636546A8A3C3375495B0E9F04130D8945A6AF2158966BC for BTC in
   // THOR in Txs do not ahve a block_height Tx field https://thornode.ninerealms.com/thorchain/tx/365AC447BE6CE4A55D14143975EE3823A93A0D8DE2B70AECDD63B6A905C3D72B
 
@@ -157,17 +160,19 @@ export class CheckTx {
     const stageStatus: TxStageStatus = { passed: false, seconds: 0, tgtBlock: 0 }
     if (observed_tx?.block_height && observed_tx?.finalise_height) {
       // has this already happened?
+      console.log(
+        `lastSourceBlock.last_observed_in is ${lastSourceBlock.last_observed_in} and observed_tx.finalise_height is ${observed_tx.finalise_height}`,
+      )
       if (lastSourceBlock.last_observed_in < observed_tx.finalise_height) {
         // If observed but not final, need to wait till the finalised block before moving to the next stage, blocks in source chain
         if (observed_tx.block_height < observed_tx.finalise_height) {
-          stageStatus.passed = false
           const blocksToWait = observed_tx.finalise_height - observed_tx?.block_height // how many source blocks to wait.
           stageStatus.seconds = blocksToWait * this.chainAttributes[sourceChain].avgBlockTimeInSecs
           stageStatus.tgtBlock = observed_tx.finalise_height // not this is the source blockchain height, not the THORChain block height
         }
+      } else {
+        stageStatus.passed = true
       }
-    } else {
-      stageStatus.passed = true
     }
     return stageStatus
   }

@@ -9,6 +9,7 @@ const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thor
 
 const checkTx = new CheckTx(thorchainCache)
 const liveHash = [
+  //'0000000000000000000000000000000000000000000000000000000000000000', // unkown transaction
   '991DFE33AC4482CC7A1E3BF1142E121A315EED18ED8E8FDDDC678E8F176DFCBA', // THOR in, ETH out
   '619F2005282F3EB501636546A8A3C3375495B0E9F04130D8945A6AF2158966BC', // BTC in, Synth BTC out
 ]
