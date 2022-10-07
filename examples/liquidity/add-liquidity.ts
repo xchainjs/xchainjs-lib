@@ -1,58 +1,33 @@
 import { Network } from '@xchainjs/xchain-client'
+import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   AddliquidityPosition,
   CryptoAmount,
-  EstimateAddLP,
   Midgard,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromString, assetToBase, isAssetRuneNative } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromStringEx, assetToBase, isAssetRuneNative } from '@xchainjs/xchain-util'
 
-function print(estimate: EstimateAddLP, input1: CryptoAmount, input2: CryptoAmount) {
-  const expanded = {
-    input1: input1.formatedAssetString(),
-    input2: input2.formatedAssetString(),
-    slipPercent: estimate.slipPercent.toFixed(4),
-    lpUnits: estimate.lpUnits.amount().toFixed(0),
-    runeToAssetRatio: estimate.runeToAssetRatio.toFixed(8),
-    transactionFee: {
-      assetFee: estimate.transactionFee.assetFee.formatedAssetString(),
-      runeFee: estimate.transactionFee.runeFee.formatedAssetString(),
-      totalFees: estimate.transactionFee.totalFees.formatedAssetString(),
-    },
-    estimatedWaitSeconds: estimate.estimatedWaitSeconds,
-    errors: estimate.errors,
-    canAdd: estimate.canAdd,
-  }
-  console.log(expanded)
-}
 /**
- * Estimate add lp function
- * Returns estimate swap object
+ * Add LP
+ * Returns tx
  */
-const estimateAddLp = async () => {
+const addLp = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
   try {
-    const network = process.argv[2] as Network
-    const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
-    const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
-    if (!process.argv[5] && !process.argv[6]) {
-      throw Error('You must supply 2 asset & amounts')
-    }
-    // TODO check if synth?
-    const input1 = new CryptoAmount(assetToBase(assetAmount(process.argv[3])), assetFromString(process.argv[4]))
-    const input2 = new CryptoAmount(assetToBase(assetAmount(process.argv[5])), assetFromString(process.argv[6]))
+    const input1 = new CryptoAmount(assetToBase(assetAmount(process.argv[4])), assetFromStringEx(process.argv[5]))
+    const input2 = new CryptoAmount(assetToBase(assetAmount(process.argv[6])), assetFromStringEx(process.argv[7]))
 
     const rune = isAssetRuneNative(input1.asset) ? input1 : input2
     const asset = isAssetRuneNative(input1.asset) ? input2 : input1
-    // const rune =
+
     const addLpParams: AddliquidityPosition = {
       asset,
       rune,
     }
-    const estimate = await thorchainQueryMainnet.estimateAddLP(addLpParams)
-    print(estimate, input1, input2)
+    const addlptx = await tcAmm.addLiquidityPosition(wallet, addLpParams)
+    console.log(addlptx)
   } catch (e) {
     console.error(e)
   }
@@ -60,7 +35,13 @@ const estimateAddLp = async () => {
 
 // Call the function from main()
 const main = async () => {
-  await estimateAddLp()
+  const seed = process.argv[2]
+  const network = process.argv[3] as Network
+  const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
+  const thorchainQuery = new ThorchainQuery(thorchainCache)
+  const thorchainAmm = new ThorchainAMM(thorchainQuery)
+  const wallet = new Wallet(seed, thorchainQuery)
+  await addLp(thorchainAmm, wallet)
 }
 
 main()

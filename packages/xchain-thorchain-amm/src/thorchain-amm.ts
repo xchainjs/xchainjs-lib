@@ -103,7 +103,6 @@ export class ThorchainAMM {
   public async addLiquidityPosition(wallet: Wallet, params: AddliquidityPosition): Promise<TxSubmitted[]> {
     // Check amounts are greater than fees and use return estimated wait
     const checkLPAdd = await this.thorchainQuery.estimateAddLP(params)
-    console.log(checkLPAdd.assetPool)
     return wallet.addLiquidity({
       asset: params.asset,
       rune: params.rune,
@@ -120,7 +119,6 @@ export class ThorchainAMM {
   public async removeLiquidityPosition(wallet: Wallet, params: RemoveLiquidityPosition): Promise<TxSubmitted[]> {
     // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
     const withdrawParams = await this.thorchainQuery.estimateWithdrawLP(params)
-    console.log(withdrawParams)
     return wallet.removeLiquidity({
       assetFee: withdrawParams.transactionFee.assetFee,
       runeFee: withdrawParams.transactionFee.runeFee,

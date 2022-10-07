@@ -15,7 +15,7 @@
   integrity sha512-Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==
 
 "@xchainjs/xchain-client@file:../../packages/xchain-client":
-  version "0.13.0"
+  version "0.13.1"
 
 "@xchainjs/xchain-crypto@file:../../packages/xchain-crypto":
   version "0.2.6"
@@ -28,16 +28,19 @@
     uuid "^8.3.2"
 
 "@xchainjs/xchain-midgard@file:../../packages/xchain-midgard":
-  version "0.1.0-alpha2"
+  version "0.1.0"
+
+"@xchainjs/xchain-thorchain-amm@file:../../packages/xchain-thorchain-amm":
+  version "0.2.0"
 
 "@xchainjs/xchain-thorchain-query@file:../../packages/xchain-thorchain-query":
-  version "0.1.0-beta"
+  version "0.1.0"
 
 "@xchainjs/xchain-thornode@file:../../packages/xchain-thornode":
-  version "0.1.0-alpha4"
+  version "0.1.0"
 
 "@xchainjs/xchain-util@file:../../packages/xchain-util":
-  version "0.9.0"
+  version "0.10.0"
 
 axios-retry@^3.2.5:
   version "3.3.1"

@@ -273,18 +273,17 @@ export class Wallet {
     inboundAsgard: string,
   ): Promise<TxSubmitted> {
     if (params.asset.asset.chain === Chain.Ethereum) {
-      const addOrRemoveParams = {
+      const addParams = {
         wallIndex: 0,
         asset: params.asset.asset,
         amount: params.asset.baseAmount,
         feeOption: FeeOption.Fast,
         memo: constructedMemo,
       }
-      console.log(addOrRemoveParams.amount.amount().toNumber())
-      const hash = await this.ethHelper.sendDeposit(addOrRemoveParams)
+      const hash = await this.ethHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else if (params.asset.asset.chain === Chain.Avalanche) {
-      const addOrRemoveParams = {
+      const addParams = {
         wallIndex: 0,
         asset: params.asset.asset,
         amount: params.asset.baseAmount,
@@ -292,10 +291,10 @@ export class Wallet {
         memo: constructedMemo,
       }
       const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
-      const hash = await evmHelper.sendDeposit(addOrRemoveParams)
+      const hash = await evmHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
-      const addOrRemoveParams = {
+      const addParams = {
         wallIndex: 0,
         asset: params.asset.asset,
         amount: params.asset.baseAmount,
@@ -303,8 +302,7 @@ export class Wallet {
         memo: constructedMemo,
       }
       try {
-        console.log(addOrRemoveParams)
-        const hash = await assetClient.transfer(addOrRemoveParams)
+        const hash = await assetClient.transfer(addParams)
         return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
       } catch (err) {
         const hash = JSON.stringify(err)
@@ -329,18 +327,18 @@ export class Wallet {
     inboundAsgard: string,
   ): Promise<TxSubmitted> {
     if (params.assetFee.asset.chain === Chain.Ethereum) {
-      const addOrRemoveParams = {
+      const removeParams = {
         wallIndex: 0,
         asset: params.assetFee.asset,
         amount: params.assetFee.baseAmount,
         feeOption: FeeOption.Fast,
         memo: constructedMemo,
       }
-      console.log(addOrRemoveParams.amount.amount().toNumber())
-      const hash = await this.ethHelper.sendDeposit(addOrRemoveParams)
+      console.log(removeParams.amount.amount().toNumber())
+      const hash = await this.ethHelper.sendDeposit(removeParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else if (params.assetFee.asset.chain === Chain.Avalanche) {
-      const addOrRemoveParams = {
+      const removeParams = {
         wallIndex: 0,
         asset: params.assetFee.asset,
         amount: params.assetFee.baseAmount,
@@ -348,10 +346,10 @@ export class Wallet {
         memo: constructedMemo,
       }
       const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
-      const hash = await evmHelper.sendDeposit(addOrRemoveParams)
+      const hash = await evmHelper.sendDeposit(removeParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
-      const addOrRemoveParams = {
+      const removeParams = {
         wallIndex: 0,
         asset: params.assetFee.asset,
         amount: params.assetFee.baseAmount,
@@ -359,8 +357,7 @@ export class Wallet {
         memo: constructedMemo,
       }
       try {
-        console.log(addOrRemoveParams)
-        const hash = await assetClient.transfer(addOrRemoveParams)
+        const hash = await assetClient.transfer(removeParams)
         return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
       } catch (err) {
         const hash = JSON.stringify(err)
