@@ -7,7 +7,6 @@ import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
 import { Client as EthClient } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
-import { Client as TerraClient } from '@xchainjs/xchain-terra'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { AssetBTC, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
@@ -50,7 +49,6 @@ export class Wallet {
       BCH: new BchClient(settings),
       BTC: new BtcClient(settings),
       DOGE: new DogeClient(settings),
-      TERRA: new TerraClient(settings),
       ETH: new EthClient(settings),
       THOR: new ThorClient({ ...settings, chainIds }),
       LTC: new LtcClient(settings),

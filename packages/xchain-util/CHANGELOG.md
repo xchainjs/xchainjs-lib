@@ -1,3 +1,10 @@
+# v.0.11.0 (2022-xx-xx)
+
+## Breaking change
+
+- Remove `Terra` from `Chain`
+- Remove `AssetLUNA`
+
 # v.0.10.0 (2022-09-29)
 
 ## Add
