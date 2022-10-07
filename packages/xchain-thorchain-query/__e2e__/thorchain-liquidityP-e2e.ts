@@ -69,6 +69,8 @@ function printWithdraw(withdraw: EstimateWithdrawLP) {
 
 function printliquidityPosition(liquidityPosition: LiquidityPosition) {
   const expanded = {
+    assetAddress: liquidityPosition.position.asset_address,
+    runeAddress: liquidityPosition.position.rune_address,
     assetPool: liquidityPosition.position.asset,
     assetAmount: liquidityPosition.position.asset_deposit_value,
     runeAmount: liquidityPosition.position.rune_deposit_value,
@@ -156,9 +158,9 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   it(`Should estimate withdraw RUNE from address's position`, async () => {
     const percentage = 100 // gets converted to basis points later
     const removeLp: RemoveLiquidityPosition = {
-      asset: AssetBTC,
+      asset: BUSD,
       percentage: percentage,
-      runeAddress: `thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u`,
+      runeAddress: 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u',
     }
     const estimatRemoveLP = await thorchainQuery.estimateWithdrawLP(removeLp)
     printWithdraw(estimatRemoveLP)
@@ -166,8 +168,8 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
 
   it(`Should check liquidity position for an address`, async () => {
-    const address = 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u'
-    const checkLP = await thorchainQuery.checkLiquidityPosition(AssetBTC, address)
+    const address = 'bnb150vpa06jrgucqz9ycgun73t0n0rrxq4m69fc22'
+    const checkLP = await thorchainQuery.checkLiquidityPosition(BUSD, address)
     printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()
   })

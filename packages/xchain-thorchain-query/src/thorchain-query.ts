@@ -847,6 +847,8 @@ export class ThorchainQuery {
       waitTimeSeconds = waitTimeSecondsForRune
     }
     const estimateLP: EstimateWithdrawLP = {
+      assetAddress: memberDetail.position.asset_address,
+      runeAddress: memberDetail.position.rune_address,
       slipPercent: slip.times(100),
       transactionFee: {
         assetFee: dustValues.asset,

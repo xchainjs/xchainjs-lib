@@ -101,7 +101,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   it(`Should add BUSD & RUNE liquidity symmetrically to BUSD pool`, async () => {
     const poolRatio = await thorchainQueryMainnet.getPoolRatios(BUSD)
     // get ratios for pool and retrieve rune amount
-    const busdtAmount = poolRatio.assetToRune.times(1.2)
+    const busdtAmount = poolRatio.assetToRune.times(3)
     const runeAmount = poolRatio.runeToAsset.times(busdtAmount)
     const hash = await mainetThorchainAmm.addLiquidityPosition(mainnetWallet, {
       asset: new CryptoAmount(assetToBase(assetAmount(busdtAmount)), BUSD),
@@ -124,7 +124,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     expect(hash).toBeTruthy()
   })
   it(`Should remove Rune liquidity asymetrically from the BUSD pool`, async () => {
-    const percentage = 50 // gets converted to basis points later
+    const percentage = 100 // gets converted to basis points later
     const removeLp: RemoveLiquidityPosition = {
       percentage: percentage,
       asset: BUSD,
@@ -135,7 +135,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     expect(hash).toBeTruthy()
   })
   it(`Should remove BUSDT & RUNE symmetrically from symmetrical lp`, async () => {
-    const percentage = 50 // gets converted to basis points later
+    const percentage = 100 // gets converted to basis points later
     const removeLp: RemoveLiquidityPosition = {
       percentage: percentage,
       asset: BUSD,

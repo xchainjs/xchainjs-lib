@@ -156,6 +156,8 @@ export type EstimateAddLP = {
   canAdd: boolean
 }
 export type EstimateWithdrawLP = {
+  assetAddress?: string
+  runeAddress?: string
   slipPercent: BigNumber
   transactionFee: LPFees
   assetAmount: CryptoAmount

@@ -127,6 +127,8 @@ export class ThorchainAMM {
       waitTimeSeconds: withdrawParams.estimatedWaitSeconds,
       percentage: params.percentage,
       assetPool: withdrawParams.assetPool,
+      assetAddress: withdrawParams.assetAddress,
+      runeAddress: withdrawParams.runeAddress,
     })
   }
 }

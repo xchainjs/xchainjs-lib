@@ -45,6 +45,8 @@ export type RemoveLiquidity = {
   waitTimeSeconds: number
   percentage: number
   assetPool: string
+  assetAddress?: string
+  runeAddress?: string
 }
 
 export type DepositParams = {
