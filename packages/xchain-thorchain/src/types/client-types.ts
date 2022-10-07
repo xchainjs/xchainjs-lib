@@ -22,7 +22,7 @@ export type ChainId = string
 export type ChainIds = Record<Network, ChainId>
 
 export type ThorchainClientParams = {
-  clientUrl?: ClientUrl
+  clientUrl: ClientUrl
   explorerUrls?: ExplorerUrls
   chainIds: ChainIds
 }
