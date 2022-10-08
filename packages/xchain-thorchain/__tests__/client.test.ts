@@ -104,10 +104,23 @@ describe('Client Test', () => {
   const mainnet_address_path1 = 'thor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecgaf4nc'
   const testnet_address_path0 = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
   const testnet_address_path1 = 'tthor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecv2c92a'
-
+  const clientUrl = {
+    [Network.Testnet]: {
+      node: '',
+      rpc: '',
+    },
+    [Network.Stagenet]: {
+      node: 'https://stagenet-thornode.ninerealms.com',
+      rpc: 'https://stagenet-rpc.ninerealms.com',
+    },
+    [Network.Mainnet]: {
+      node: 'https://thornode.ninerealms.com',
+      rpc: 'https://rpc.ninerealms.com',
+    },
+  }
   beforeEach(() => {
-    thorClient = new Client({ phrase, network: Network.Testnet, chainIds })
-    thorMainClient = new Client({ phrase, network: Network.Mainnet, chainIds })
+    thorClient = new Client({ clientUrl, phrase, network: Network.Testnet, chainIds })
+    thorMainClient = new Client({ clientUrl, phrase, network: Network.Mainnet, chainIds })
     mockGetChainId(thorClient.getClientUrl().node, chainIds[Network.Testnet])
   })
 
@@ -117,17 +130,18 @@ describe('Client Test', () => {
   })
 
   it('should start with empty wallet', async () => {
-    const thorClientEmptyMain = new Client({ phrase, network: Network.Mainnet, chainIds })
+    const thorClientEmptyMain = new Client({ clientUrl, phrase, network: Network.Mainnet, chainIds })
     const addressMain = thorClientEmptyMain.getAddress()
     expect(addressMain).toEqual(mainnet_address_path0)
 
-    const thorClientEmptyTest = new Client({ phrase, network: Network.Testnet, chainIds })
+    const thorClientEmptyTest = new Client({ clientUrl, phrase, network: Network.Testnet, chainIds })
     const addressTest = thorClientEmptyTest.getAddress()
     expect(addressTest).toEqual(testnet_address_path0)
   })
 
   it('should derive address accordingly to the user param', async () => {
     const thorClientEmptyMain = new Client({
+      clientUrl,
       phrase,
       network: Network.Mainnet /*, derivationPath: "44'/931'/0'/0/0" */,
       chainIds,
@@ -139,6 +153,7 @@ describe('Client Test', () => {
     expect(viaSetPhraseAddr1).toEqual(mainnet_address_path1)
 
     const thorClientEmptyTest = new Client({
+      clientUrl,
       phrase,
       network: Network.Testnet /*, derivationPath: "44'/931'/0'/0/0"*/,
       chainIds,
@@ -150,6 +165,7 @@ describe('Client Test', () => {
     expect(viaSetPhraseAddr1Test).toEqual(testnet_address_path1)
 
     const thorClientEmptyMain1 = new Client({
+      clientUrl,
       phrase,
       network: Network.Mainnet /*, derivationPath: "44'/931'/0'/0/1"*/,
       chainIds,
@@ -158,6 +174,7 @@ describe('Client Test', () => {
     expect(addressMain1).toEqual(mainnet_address_path1)
 
     const thorClientEmptyTest1 = new Client({
+      clientUrl,
       phrase,
       network: Network.Testnet /*, derivationPath: "44'/931'/0'/0/1"*/,
       chainIds,
@@ -168,11 +185,11 @@ describe('Client Test', () => {
 
   it('throws an error passing an invalid phrase', async () => {
     expect(() => {
-      new Client({ phrase: 'invalid phrase', network: Network.Mainnet, chainIds })
+      new Client({ clientUrl, phrase: 'invalid phrase', network: Network.Mainnet, chainIds })
     }).toThrow()
 
     expect(() => {
-      new Client({ phrase: 'invalid phrase', network: Network.Testnet, chainIds })
+      new Client({ clientUrl, phrase: 'invalid phrase', network: Network.Testnet, chainIds })
     }).toThrow()
   })
 
@@ -284,7 +301,7 @@ describe('Client Test', () => {
         [Network.Stagenet]: 'stagenet-id',
         [Network.Testnet]: 'testnet-id',
       }
-      const client = new Client({ phrase, network: Network.Testnet, chainIds })
+      const client = new Client({ clientUrl, phrase, network: Network.Testnet, chainIds })
       // chainId for testnet by default
       let chainId = client.getChainId()
       expect(chainId).toEqual('testnet-id')

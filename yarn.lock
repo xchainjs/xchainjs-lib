@@ -2449,6 +2449,11 @@
     "@typescript-eslint/types" "4.18.0"
     eslint-visitor-keys "^2.0.0"
 
+"@xchainjs/xchain-thorchain@^0.26.0":
+  version "0.26.1"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thorchain/-/xchain-thorchain-0.26.1.tgz#40d4e0b339d4859c861e72e6f487a3f42af6ed24"
+  integrity sha512-SmNsY2u8H07MifUoDgOEaYifmGo1qCAPyZQANPT/+xYeuuWTf1L5wcUeKILhH6FVUbuGeoxfXnNFJX5PiGDnhQ==
+
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@zkochan/cmd-shim/-/cmd-shim-3.1.0.tgz#2ab8ed81f5bb5452a85f25758eb9b8681982fd2e"
