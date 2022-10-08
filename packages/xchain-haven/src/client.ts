@@ -169,7 +169,6 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
     const asset: Asset | null = params?.asset ? assetFromString(params.asset) : null
     const ticker = asset?.ticker
     let transactions = await this.havenSDK.getTransactions()
-
     // filter if we either send or received coins for requested asset
     transactions = ticker
       ? transactions.filter((tx, _) => {
@@ -200,11 +199,11 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
       // if request is limited by an asset, we will only take the one which matches it
       const isOut: boolean =
         baseAmount(havenTx.total_sent[havenTx.from_asset_type], XHV_DECIMAL).gt('0') &&
-        (params?.asset === undefined || (params?.asset !== undefined && havenTx.from_asset_type == params.asset))
+        (ticker === undefined || havenTx.from_asset_type == ticker)
 
       const isIn: boolean =
         baseAmount(havenTx.total_received[havenTx.to_asset_type], XHV_DECIMAL).gt('0') &&
-        (params?.asset === undefined || (params?.asset !== undefined && havenTx.to_asset_type == params.asset))
+        (ticker === undefined || havenTx.to_asset_type === ticker)
 
       const from: Array<TxFrom> = isOut
         ? [
@@ -233,7 +232,6 @@ class Client extends BaseXChainClient implements XChainClient, HavenClient {
         to,
         asset: isOut ? createAssetByTicker(havenTx.from_asset_type) : createAssetByTicker(havenTx.to_asset_type),
       }
-
       return tx
     })
 
