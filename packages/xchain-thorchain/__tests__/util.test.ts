@@ -161,10 +161,10 @@ describe('thorchain/util', () => {
       ).toEqual('https://viewblock.io/thorchain/tx/txhash')
     })
   })
-  const defaultClientUrl: ClientUrl = {
+  const clientUrl: ClientUrl = {
     [Network.Testnet]: {
-      node: 'https://thornode.ninerealms.com',
-      rpc: 'https://rpc.ninerealms.com',
+      node: '',
+      rpc: '',
     },
     [Network.Stagenet]: {
       node: 'https://stagenet-thornode.ninerealms.com',
@@ -179,7 +179,7 @@ describe('thorchain/util', () => {
   describe('getChainId', () => {
     it('stagenet', async () => {
       const id = 'chain-id-stagenet'
-      const url = defaultClientUrl.stagenet.node
+      const url = clientUrl.stagenet.node
       // Mock chain id
       mockTendermintNodeInfo(url, {
         default_node_info: {
@@ -193,7 +193,7 @@ describe('thorchain/util', () => {
 
     it('mainnet', async () => {
       const id = 'chain-id-mainnet'
-      const url = defaultClientUrl.mainnet.node
+      const url = clientUrl.mainnet.node
       // Mock chain id
       mockTendermintNodeInfo(url, {
         default_node_info: {

@@ -106,8 +106,8 @@ describe('Client Test', () => {
   const testnet_address_path1 = 'tthor1hrf34g3lxwvpk7gjte0xvahf3txnq8ecv2c92a'
   const clientUrl = {
     [Network.Testnet]: {
-      node: 'https://thornode.ninerealms.com',
-      rpc: 'https://rpc.ninerealms.com',
+      node: '',
+      rpc: '',
     },
     [Network.Stagenet]: {
       node: 'https://stagenet-thornode.ninerealms.com',
