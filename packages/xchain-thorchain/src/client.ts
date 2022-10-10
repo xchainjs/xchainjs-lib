@@ -53,7 +53,6 @@ import {
   DEPOSIT_GAS_LIMIT_VALUE,
   MAX_TX_COUNT,
   getBalance,
-  getDefaultClientUrl,
   getDefaultExplorerUrls,
   getDefaultFees,
   getDenom,
@@ -110,7 +109,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     chainIds,
   }: XChainClientParams & ThorchainClientParams) {
     super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
-    this.clientUrl = clientUrl || getDefaultClientUrl()
+    this.clientUrl = clientUrl
     this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
     this.chainIds = chainIds
 

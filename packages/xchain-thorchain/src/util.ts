@@ -18,7 +18,7 @@ import axios from 'axios'
 import * as bech32Buffer from 'bech32-buffer'
 import Long from 'long'
 
-import { ChainId, ChainIds, ClientUrl, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
+import { ChainId, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx } from './types/messages'
 import types from './types/proto/MsgCompiled'
 
@@ -170,22 +170,6 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
 export const getChainId = async (nodeUrl: string): Promise<ChainId> => {
   const { data } = await axios.get<NodeInfoResponse>(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
   return data?.default_node_info?.network || Promise.reject('Could not parse chain id')
-}
-
-/**
- * Helper to get all THORChain's chain id
- * @param {ClientUrl} client urls (use `getDefaultClientUrl()` if you don't need to use custom urls)
- */
-export const getChainIds = async (client: ClientUrl): Promise<ChainIds> => {
-  return Promise.all([
-    getChainId(client[Network.Testnet].node),
-    getChainId(client[Network.Stagenet].node),
-    getChainId(client[Network.Mainnet].node),
-  ]).then(([testnetId, stagenetId, mainnetId]) => ({
-    testnet: testnetId,
-    stagenet: stagenetId,
-    mainnet: mainnetId,
-  }))
 }
 
 /**
@@ -399,28 +383,6 @@ export const getBalance = async ({
     .filter(
       (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
     )
-}
-
-/**
- * Get the client url.
- *
- * @returns {ClientUrl} The client url (both mainnet and testnet) for thorchain.
- */
-export const getDefaultClientUrl = (): ClientUrl => {
-  return {
-    [Network.Testnet]: {
-      node: 'https://testnet.thornode.thorchain.info',
-      rpc: 'https://testnet-rpc.ninerealms.com',
-    },
-    [Network.Stagenet]: {
-      node: 'https://stagenet-thornode.ninerealms.com',
-      rpc: 'https://stagenet-rpc.ninerealms.com',
-    },
-    [Network.Mainnet]: {
-      node: 'https://thornode.ninerealms.com',
-      rpc: 'https://rpc.ninerealms.com',
-    },
-  }
 }
 
 const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
