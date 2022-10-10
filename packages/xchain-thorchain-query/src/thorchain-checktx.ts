@@ -10,6 +10,7 @@ export class CheckTx {
   readonly thorchainCache: ThorchainCache
   private chainAttributes: Record<Chain, ChainAttributes>
 
+  readonly stageOneWait = 2
   /**
    * Contructor to create a ThorchainAMM
    *
@@ -41,13 +42,22 @@ export class CheckTx {
   public async checkTx(inboundTxHash: string, sourceChain?: Chain): Promise<boolean> {
     console.log(`Processing in Hash ${inboundTxHash}`)
     const txData = await this.thorchainCache.thornode.getTxData(inboundTxHash) // get txData from the TxInHash, e.g. https://thornode.ninerealms.com/thorchain/tx/DA4C2272F0EDAC84646489A271264D9FD405D34B9E39C890E9D98F1E8ACA1F42
-
+    let stage1 = this.checkTCObservedTx(txData, sourceChain)
     // Stage 1 - Check to see if the transaction has been observed (If TC knows about it)
-    const stage1 = this.checkTCObservedTx(txData, sourceChain)
-    if ((stage1.passed = false)) {
-      console.log(`Transaction not observed by Thorchain yet. Will retry in ${stage1.seconds} seconds`)
+    for (let i = 0; i < 3; i++) {
+      if (stage1.passed == false) {
+        console.log(`Transaction not observed by Thorchain yet. Will retry in ${stage1.seconds} seconds`)
+        //setTimeout('', 6000)
+      } else {
+        console.log(`Transaction has observed by Thorchain, going to stage 2 conf counting.`)
+        break
+      }
+      stage1 = this.checkTCObservedTx(txData, sourceChain)
     }
-    console.log(`Transaction has observed by Thorchain, going to stage 2 conf counting.`)
+    if (stage1.passed == false) {
+      console.log(`Transaction not found`)
+      return false
+    }
 
     // Stage 2 - Conf Counting
     // Prelim activities
@@ -67,7 +77,7 @@ export class CheckTx {
       const stage2 = await this.checkConfcounting(txData.observed_tx, sourceChain, lastBlockHeight)
       if (stage2.passed == false) {
         console.log(
-          `Transaction in conf counting. Need to wait ${stage2.seconds} Target Source Block height is ${stage2.tgtBlock}`,
+          `Transaction in conf counting. Need to wait ${stage2.seconds} seconds. Target source Block height is ${stage2.tgtBlock}`,
         )
       } else {
         console.log(`Transaction passed conf counting.`)
@@ -120,17 +130,19 @@ export class CheckTx {
     // If there is an error Thornode does not know about it. wait 60 seconds
     // If a long block time like BTC, can check or poll to see if the status changes.
     const stageStatus: TxStageStatus = { passed: false, seconds: 0, tgtBlock: 0 }
-    console.log(`${txData.observed_tx}`)
+    console.log(`${JSON.stringify(txData.observed_tx)}`)
     //{"error":"rpc error: code = Unknown desc = internal"}
-    if (txData.observed_tx == undefined) {
+    if (JSON.stringify(txData.observed_tx) == undefined) {
+      console.log(`Tx not observed`)
       if (sourceChain) {
         stageStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
       } else {
-        stageStatus.seconds = 60
+        stageStatus.seconds = this.stageOneWait
       }
     } else {
       stageStatus.passed = true
     }
+    console.log(stageStatus.passed)
     return stageStatus
   }
 
@@ -160,9 +172,9 @@ export class CheckTx {
     const stageStatus: TxStageStatus = { passed: false, seconds: 0, tgtBlock: 0 }
     if (observed_tx?.block_height && observed_tx?.finalise_height) {
       // has this already happened?
-      console.log(
-        `lastSourceBlock.last_observed_in is ${lastSourceBlock.last_observed_in} and observed_tx.finalise_height is ${observed_tx.finalise_height}`,
-      )
+      //   console.log(
+      //     `lastSourceBlock.last_observed_in is ${lastSourceBlock.last_observed_in} and observed_tx.finalise_height is ${observed_tx.finalise_height}`,
+      //   )
       if (lastSourceBlock.last_observed_in < observed_tx.finalise_height) {
         // If observed but not final, need to wait till the finalised block before moving to the next stage, blocks in source chain
         if (observed_tx.block_height < observed_tx.finalise_height) {
