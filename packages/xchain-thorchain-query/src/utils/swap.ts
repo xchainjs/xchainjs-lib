@@ -9,7 +9,6 @@ import {
   AssetDOGE,
   AssetETH,
   AssetLTC,
-  AssetLUNA,
   AssetRuneNative,
   AvalancheChain,
   BCHChain,
@@ -21,7 +20,6 @@ import {
   ETHChain,
   LTCChain,
   THORChain,
-  TerraChain,
   baseAmount,
   eqAsset,
 } from '@xchainjs/xchain-util'
@@ -233,9 +231,6 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
         return new CryptoAmount(gasRateinAVAXWei.times(70000), AssetAVAX)
       }
       break
-    case Chain.Terra:
-      return new CryptoAmount(baseAmount(inbound.gasRate), AssetLUNA)
-      break
     case Chain.Cosmos:
       return new CryptoAmount(baseAmount(inbound.gasRate), AssetAtom)
       break
@@ -269,8 +264,6 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetLTC
     case DOGEChain:
       return AssetDOGE
-    case TerraChain:
-      return AssetLUNA
     case AvalancheChain:
       return AssetAVAX
     default:
@@ -300,8 +293,6 @@ export const getChain = (chain: string): Chain => {
       return LTCChain
     case 'DOGE':
       return DOGEChain
-    case 'TERRA':
-      return TerraChain
     default:
       throw Error('Unknown chain')
   }

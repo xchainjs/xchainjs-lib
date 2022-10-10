@@ -1,3 +1,17 @@
+# v0.27.0 (2022-10-07)
+
+## Breaking Changes
+
+- Removed `getDefaultClientUrl`
+- Removed `getChainIds`
+- Update `ThorchainClientParams` to make clientUrl required (not optional)
+
+# v.0.26.2 (2022-10-06)
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
 # v.0.26.1 (2022-09-29)
 
 ## Update

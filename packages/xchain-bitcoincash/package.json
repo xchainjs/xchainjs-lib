@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-bitcoincash",
-  "version": "0.15.1",
+  "version": "0.15.2",
   "description": "Custom bitcoincash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -39,9 +39,9 @@
     "@psf/bitcoincashjs-lib": "^4.0.2",
     "@types/bchaddrjs": "0.4.0",
     "@types/uniqid": "^5.3.1",
-    "@xchainjs/xchain-client": "^0.13.1",
+    "@xchainjs/xchain-client": "^0.13.2",
     "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.10.0",
+    "@xchainjs/xchain-util": "^0.11.0",
     "axios": "^0.25.0",
     "axios-mock-adapter": "^1.20.0",
     "bchaddrjs": "^0.5.2",
@@ -49,9 +49,9 @@
   },
   "peerDependencies": {
     "@psf/bitcoincashjs-lib": "^4.0.2",
-    "@xchainjs/xchain-client": "^0.13.1",
+    "@xchainjs/xchain-client": "^0.13.2",
     "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.10.0",
+    "@xchainjs/xchain-util": "^0.11.0",
     "axios": "^0.25.0",
     "bchaddrjs": "^0.5.2",
     "coinselect": "3.1.12"

@@ -1,3 +1,15 @@
+# v0.3.0 (2022-10-11)
+
+## Update
+
+- Bumped `xchain-thorchain` 
+
+# v0.2.1 (2022-xx-xx)
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
 # v0.2.0 (2022-10-04)
 
 ## Update

@@ -1,9 +1,0 @@
-{
-  "_comment1": "// we are interested in `gas_used` only",
-  "gas_info": {
-    "gas_wanted": "0",
-    "gas_used": "100000"
-  },
-  "_comment2": "// Other values are ignored",
-  "result": {}
-}
