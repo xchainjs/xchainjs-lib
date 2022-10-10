@@ -23,7 +23,21 @@ type AllBalances = {
 const chainIds = {
   [Network.Mainnet]: 'thorchain-mainnet-v1',
   [Network.Stagenet]: 'chain-id-stagenet',
-  [Network.Testnet]: 'thorchain-testnet-v2',
+  [Network.Testnet]: 'deprecated',
+}
+const clientUrl = {
+  [Network.Stagenet]: {
+    node: 'https://stagenet-thornode.ninerealms.com',
+    rpc: 'https://stagenet-rpc.ninerealms.com',
+  },
+  [Network.Mainnet]: {
+    node: 'https://thornode.ninerealms.com',
+    rpc: 'https://rpc.ninerealms.com',
+  },
+  [Network.Testnet]: {
+    node: 'deprecated',
+    rpc: 'deprecated',
+  },
 }
 
 /**
@@ -50,7 +64,7 @@ export class Wallet {
       BTC: new BtcClient(settings),
       DOGE: new DogeClient(settings),
       ETH: new EthClient(settings),
-      THOR: new ThorClient({ ...settings, chainIds }),
+      THOR: new ThorClient({ ...settings, chainIds, clientUrl }),
       LTC: new LtcClient(settings),
       BNB: new BnbClient(settings),
       GAIA: new CosmosClient(settings),
