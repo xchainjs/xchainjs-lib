@@ -4,7 +4,7 @@ import { CheckTx, Midgard, ThorchainCache, Thornode } from '@xchainjs/xchain-tho
 //function printTx(inboundTxHash: string, source: string) {}
 
 /**
- * From asset to asset with no Affiliate address on testnet
+ *
  */
 const checkTransaction = async (checkTx: CheckTx, inboundTxHash: string) => {
   try {
@@ -13,7 +13,7 @@ const checkTransaction = async (checkTx: CheckTx, inboundTxHash: string) => {
       console.log(`no sourcechain provided: ${sourceChainArg}`)
     }
 
-    const status = checkTx.checkTx(inboundTxHash)
+    const status = await checkTx.checkTx(inboundTxHash)
     console.log(`Outcome of checkTx was : ${status}`)
   } catch (error) {
     console.error(error)

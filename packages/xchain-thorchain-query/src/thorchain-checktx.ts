@@ -10,7 +10,6 @@ export class CheckTx {
   readonly thorchainCache: ThorchainCache
   private chainAttributes: Record<Chain, ChainAttributes>
 
-  readonly stageOneWait = 2
   /**
    * Contructor to create a ThorchainAMM
    *
@@ -37,26 +36,22 @@ export class CheckTx {
    *
    * @param inboundTxHash - needed to determine transactions stage
    * @param sourceChain - extra parameter
-   * @returns - object tx status
+   * @returns
+   * - array of errors
+   * - wait time in seconds
+   * -
+   *
    */
   public async checkTx(inboundTxHash: string, sourceChain?: Chain): Promise<boolean> {
     console.log(`Processing in Hash ${inboundTxHash}`)
     const txData = await this.thorchainCache.thornode.getTxData(inboundTxHash) // get txData from the TxInHash, e.g. https://thornode.ninerealms.com/thorchain/tx/DA4C2272F0EDAC84646489A271264D9FD405D34B9E39C890E9D98F1E8ACA1F42
-    let stage1 = this.checkTCObservedTx(txData, sourceChain)
+    const stage1 = this.checkTCObservedTx(txData, sourceChain)
+
     // Stage 1 - Check to see if the transaction has been observed (If TC knows about it)
-    for (let i = 0; i < 3; i++) {
-      if (stage1.passed == false) {
-        console.log(`Transaction not observed by Thorchain yet. Will retry in ${stage1.seconds} seconds`)
-        //setTimeout('', 6000)
-      } else {
-        console.log(`Transaction has observed by Thorchain, going to stage 2 conf counting.`)
-        break
-      }
-      stage1 = this.checkTCObservedTx(txData, sourceChain)
-    }
     if (stage1.passed == false) {
-      console.log(`Transaction not found`)
-      return false
+      console.log(`Transaction not observed by Thorchain yet. Will retry in ${stage1.seconds} seconds`)
+    } else {
+      console.log(`Transaction has observed by Thorchain, going to stage 2 conf counting.`)
     }
 
     // Stage 2 - Conf Counting
@@ -67,11 +62,12 @@ export class CheckTx {
     } else {
       throw new Error(`Cannot get source chain ${txData.observed_tx?.tx?.chain}`)
     }
+    // need to get Block height (TC and Source Chain - TC for use later).
+    const lastBlock = await this.thorchainCache.thornode.getLastBlock()
 
     if (sourceChain == BTCChain || sourceChain == LTCChain || sourceChain == BCHChain) {
       // Retrieve TC last observed block height.
       //This does work if sourceChain is THORChain as the field block_height (lastBlockHeight.last_observed_in) is not present in the payload.
-      const lastBlock = await this.thorchainCache.thornode.getLastBlock()
       const lastBlockHeight = lastBlock.find((obj) => obj.chain === sourceChain)
       if (!lastBlockHeight?.last_observed_in) throw Error('No recorded block height')
       const stage2 = await this.checkConfcounting(txData.observed_tx, sourceChain, lastBlockHeight)
@@ -94,15 +90,12 @@ export class CheckTx {
       console.log('THORChain processing completed.')
     } else {
       console.log('Wait for TC processing ....')
-      setTimeout('', 6000)
-      console.log('THORChain Processing should be complete ....')
     }
 
-    // need to get TC Block height.
-    const lastBlock = await this.thorchainCache.thornode.getLastBlock()
+    // Stage 4 - Outbound Delay
+    // Need to get the THORChain block height.
     const tcBlockHeight = lastBlock.find((obj) => obj.chain === BTCChain) // forcing using BTC as TC block height is not dosplayed
 
-    // Stage 4 - Outbound Delay
     const stage4 = await this.checkOutboundQueue(inboundTxHash, tcBlockHeight)
     if (stage4.passed == false) {
       console.log(
@@ -111,8 +104,6 @@ export class CheckTx {
     } else {
       this.outTxInfo(txData.observed_tx)
     }
-
-    // Stage 5
 
     return true
   }
@@ -137,7 +128,7 @@ export class CheckTx {
       if (sourceChain) {
         stageStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
       } else {
-        stageStatus.seconds = this.stageOneWait
+        stageStatus.seconds = 60
       }
     } else {
       stageStatus.passed = true
@@ -221,7 +212,7 @@ export class CheckTx {
   }
 
   /**
-   *
+   * Print information about the completed transaciton.
    */
   private outTxInfo(observed_tx: ObservedTx) {
     // Retrieve the desitnation asset and chain from memo

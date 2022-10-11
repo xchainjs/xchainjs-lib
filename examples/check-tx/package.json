@@ -2,8 +2,7 @@
   "name": "check-tx-",
   "version": "1.0.0",
   "scripts": {
-    "checktx": "npx ts-node check-tx.ts",
-    "doSwap": "npx ts-node doSwap.ts"
+    "checktx": "npx ts-node check-tx.ts"
   },
   "description": "example of doing checking a Tx with thorchain-query package",
   "main": "index.js",
