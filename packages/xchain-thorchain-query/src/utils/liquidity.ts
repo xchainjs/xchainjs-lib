@@ -14,8 +14,7 @@ import { getBaseAmountWithDiffDecimals } from './swap'
  * @returns liquidity units - ownership of pool
  */
 export const getLiquidityUnits = (liquidity: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
-  const baseAmount8decimals = getBaseAmountWithDiffDecimals(liquidity.asset, pool.decimals)
-
+  const baseAmount8decimals = getBaseAmountWithDiffDecimals(liquidity.asset, 8)
   const P = new BigNumber(pool.pool.liquidityUnits)
   const r = liquidity.rune.baseAmount.amount()
   const a = baseAmount8decimals
@@ -44,7 +43,7 @@ export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShare
   const asset = T.times(units).div(total)
   const rune = R.times(units).div(total)
   const poolShareDetail = {
-    assetShare: new CryptoAmount(baseAmount(asset, pool.decimals), pool.asset),
+    assetShare: new CryptoAmount(baseAmount(asset), pool.asset),
     runeShare: new CryptoAmount(baseAmount(rune), AssetRuneNative),
   }
   return poolShareDetail

@@ -700,6 +700,7 @@ export class ThorchainQuery {
     if (!isAssetRuneNative(params.rune.asset)) errors.push('params.rune must be THOR.RUNE')
 
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
+
     const lpUnits = getLiquidityUnits({ asset: params.asset, rune: params.rune }, assetPool)
     const inboundDetails = await this.thorchainCache.getInboundDetails()
     const unitData: UnitData = {

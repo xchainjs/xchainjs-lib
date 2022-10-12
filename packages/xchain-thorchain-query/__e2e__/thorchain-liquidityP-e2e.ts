@@ -187,7 +187,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
 
   it(`Should check liquidity position for an address`, async () => {
-    const address = 'bnb150vpa06jrgucqz9ycgun73t0n0rrxq4m69fc22'
+    const address = 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u'
     const checkLP = await thorchainQuery.checkLiquidityPosition(BUSD, address)
     printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()

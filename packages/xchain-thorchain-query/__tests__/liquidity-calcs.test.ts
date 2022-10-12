@@ -183,28 +183,4 @@ describe(`Liquidity calc tests`, () => {
     const correctOwership = 0.5000000002 // percent ownership
     expect(onwershipPercent).toEqual(correctOwership)
   })
-  // it(`Should calculate correct liquidity units for adding to empty pool`, async () => {
-  //   const BusdPool1 = new LiquidityPool(emptyBusdPoolDetails, 8)
-  //   const liquidityBUSd: LiquidityToAdd = {
-  //     asset: assetToBase(assetAmount('10')),
-  //     rune: assetToBase(assetAmount('10')),
-  //   }
-  //   const getLUnits = getLiquidityUnits(liquidityBUSd, BusdPool1)
-  //   const correctLiquidityUnits = new BigNumber('27826793')
-  //   expect(baseAmount(getLUnits).amount()).toEqual(baseAmount(correctLiquidityUnits).amount())
-  // })
-  // it(`Should calculate pool share2`, async () => {
-  //   const BusdPool1 = new LiquidityPool(emptyBusdPoolDetails, 8)
-  //   const unitData: UnitData = {
-  //     liquidityUnits: baseAmount('100000000'),
-  //     totalUnits: baseAmount('1000000000'),
-  //   }
-  //   const poolShare = getPoolShare(unitData, BusdPool1)
-  //   const correctShare: PoolShareDetail = {
-  //     assetShare: new CryptoAmount(assetToBase(assetAmount(`100000000`)), BUSD),
-  //     runeShare: new CryptoAmount(assetToBase(assetAmount('100000000')), AssetRuneNative),
-  //   }
-  //   expect(poolShare.assetShare.assetAmount.amount()).toEqual(correctShare.assetShare.assetAmount.amount())
-  //   expect(poolShare.runeShare.assetAmount.amount()).toEqual(correctShare.runeShare.assetAmount.amount())
-  // })
 })
