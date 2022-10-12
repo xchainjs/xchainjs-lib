@@ -8,12 +8,12 @@ import {
   ThorchainQuery,
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromString, assetToBase, isAssetRuneNative } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromStringEx, assetToBase, isAssetRuneNative } from '@xchainjs/xchain-util'
 
-function print(estimate: EstimateAddLP, input1: CryptoAmount, input2: CryptoAmount) {
+function print(estimate: EstimateAddLP, rune: CryptoAmount, asset: CryptoAmount) {
   const expanded = {
-    input1: input1.formatedAssetString(),
-    input2: input2.formatedAssetString(),
+    rune: rune.formatedAssetString(),
+    asset: asset.formatedAssetString(),
     slipPercent: estimate.slipPercent.toFixed(4),
     lpUnits: estimate.lpUnits.amount().toFixed(0),
     runeToAssetRatio: estimate.runeToAssetRatio.toFixed(8),
@@ -37,22 +37,23 @@ const estimateAddLp = async () => {
     const network = process.argv[2] as Network
     const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
-    if (!process.argv[5] && !process.argv[6]) {
-      throw Error('You must supply 2 asset & amounts')
-    }
-    // TODO check if synth?
-    const input1 = new CryptoAmount(assetToBase(assetAmount(process.argv[3])), assetFromString(process.argv[4]))
-    const input2 = new CryptoAmount(assetToBase(assetAmount(process.argv[5])), assetFromString(process.argv[6]))
 
-    const rune = isAssetRuneNative(input1.asset) ? input1 : input2
-    const asset = isAssetRuneNative(input1.asset) ? input2 : input1
+    // TODO check if synth?
+    const rune = new CryptoAmount(assetToBase(assetAmount(process.argv[3])), assetFromStringEx(process.argv[4]))
+    if (!isAssetRuneNative(rune.asset)) {
+      throw Error('THOR.RUNE  must be the first argument')
+    }
+    const asset = new CryptoAmount(
+      assetToBase(assetAmount(process.argv[5], Number(process.argv[6]))),
+      assetFromStringEx(process.argv[7]),
+    )
     // const rune =
     const addLpParams: AddliquidityPosition = {
       asset,
       rune,
     }
     const estimate = await thorchainQueryMainnet.estimateAddLP(addLpParams)
-    print(estimate, input1, input2)
+    print(estimate, rune, asset)
   } catch (e) {
     console.error(e)
   }

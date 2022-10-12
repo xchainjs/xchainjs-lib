@@ -143,8 +143,8 @@ $ npx ts-node check-liquidity.ts mainnet BTC.BTC bc1qufc5hvfvszphksqawadpc63ujar
     rune_deposit_value: '51550243067780',
     asset_deposit_value: '10229454500'
   },
-  poolShare: { assetShare: '₿ 69.17824308', runeShare: 'ᚱ 861,142.7681905' },
-  impermanentLossProtection: { ILProtection: '10880967869653', totalDays: '163.38' }
+  poolShare: { assetShare: '₿ 68.37127412', runeShare: 'ᚱ 860,339.42808863' },
+  impermanentLossProtection: { ILProtection: 'ᚱ 145,057.94923468', totalDays: '176.83' }
 }
 ```
 
@@ -162,34 +162,6 @@ yarn addLiquidity "MnemonicPhrase" mainnet 1 THOR.RUNE 0 BNB.BUSD-BD1
   }
 ]
 ✨  Done in 9.88s.
-```
-
-### Check LP
-
-yarn checkLiquidity mainnet BNB.BUSD-BD1 thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u
-
-```bash
-yarn run v1.22.18
-$ npx ts-node check-liquidity.ts mainnet BNB.BUSD-BD1 thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u
-{
-  address: 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u',
-  position: {
-    asset: 'BNB.BUSD-BD1',
-    rune_address: 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u',
-    last_add_height: 7669042,
-    units: '12228552',
-    pending_rune: '0',
-    pending_asset: '0',
-    rune_deposit_value: '49999991',
-    asset_deposit_value: '81151084'
-  },
-  poolShare: { assetShare: '$ 0.89821571', runeShare: 'ᚱ 0.55333876' },
-  impermanentLossProtection: {
-    ILProtection: CryptoAmount { asset: [Object], baseAmount: [Object] },
-    totalDays: '0.00'
-  }
-}
-✨  Done in 12.40s.
 ```
 
 ### Remove Liquidity

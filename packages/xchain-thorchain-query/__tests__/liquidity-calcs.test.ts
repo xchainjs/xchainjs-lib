@@ -89,19 +89,19 @@ describe(`Liquidity calc tests`, () => {
   it(`Should calculate correct liquidity units for above entry`, async () => {
     const BusdPool1 = new LiquidityPool(BusdPoolDetails1, 8)
     const liquidityBUSd: LiquidityToAdd = {
-      asset: assetToBase(assetAmount('2.05262786')),
-      rune: assetToBase(assetAmount('1.02658114')),
+      asset: new CryptoAmount(assetToBase(assetAmount(`2.05262786`, 6)), BUSD),
+      rune: new CryptoAmount(assetToBase(assetAmount('1.02658114')), AssetRuneNative),
     }
     const getLUnits = getLiquidityUnits(liquidityBUSd, BusdPool1)
-    const correctLiquidityUnits = new BigNumber('27826793')
+    const correctLiquidityUnits = new BigNumber('27826794')
     expect(baseAmount(getLUnits).amount()).toEqual(baseAmount(correctLiquidityUnits).amount())
   })
   // Not sure what Lp units actually represents
   it(`Should calculate pool share`, async () => {
     const busdPool = await thorchainQuery.thorchainCache.getPoolForAsset(BUSD)
     const unitData: UnitData = {
-      liquidityUnits: baseAmount('27826793'),
-      totalUnits: baseAmount('128097884443169'),
+      liquidityUnits: new BigNumber('27826793'),
+      totalUnits: new BigNumber('128097884443169'),
     }
     const getLPoolShare = getPoolShare(unitData, busdPool)
     const correctShare: PoolShareDetail = {
@@ -114,8 +114,8 @@ describe(`Liquidity calc tests`, () => {
   it(`Should calculate slip on liquidity for single sided BTC add`, async () => {
     const btcPool = await thorchainQuery.thorchainCache.getPoolForAsset(AssetBTC)
     const liquidityOneSided: LiquidityToAdd = {
-      asset: new CryptoAmount(assetToBase(assetAmount('100')), AssetBTC).baseAmount,
-      rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative).baseAmount,
+      asset: new CryptoAmount(assetToBase(assetAmount('100')), AssetBTC),
+      rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative),
     }
     const getSlip = getSlipOnLiquidity(liquidityOneSided, btcPool)
     const correctSlip = '12.3' // percent slippage
@@ -124,8 +124,8 @@ describe(`Liquidity calc tests`, () => {
   it(`Should calculate slip on liquidity for single sided RUNE add`, async () => {
     const btcPool = await thorchainQuery.thorchainCache.getPoolForAsset(AssetBTC)
     const liquidityOneSided: LiquidityToAdd = {
-      asset: new CryptoAmount(assetToBase(assetAmount('0')), AssetBTC).baseAmount,
-      rune: new CryptoAmount(assetToBase(assetAmount('9177')), AssetRuneNative).baseAmount,
+      asset: new CryptoAmount(assetToBase(assetAmount('0')), AssetBTC),
+      rune: new CryptoAmount(assetToBase(assetAmount('9177')), AssetRuneNative),
     }
     const getSlip = getSlipOnLiquidity(liquidityOneSided, btcPool)
     const correctSlip = '0.104' // percent slippage
@@ -176,8 +176,8 @@ describe(`Liquidity calc tests`, () => {
   it(`Should calculate correct pool ownership`, async () => {
     const BusdPool = new LiquidityPool(emptyBusdPoolDetails, 8)
     const liquidityToAdd: LiquidityToAdd = {
-      asset: new CryptoAmount(assetToBase(assetAmount('50')), BUSD).baseAmount,
-      rune: new CryptoAmount(assetToBase(assetAmount('50')), AssetRuneNative).baseAmount,
+      asset: new CryptoAmount(assetToBase(assetAmount('50')), BUSD),
+      rune: new CryptoAmount(assetToBase(assetAmount('50')), AssetRuneNative),
     }
     const onwershipPercent = getPoolOwnership(liquidityToAdd, BusdPool)
     const correctOwership = 0.5000000002 // percent ownership

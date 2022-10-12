@@ -97,9 +97,7 @@ export class ThorchainQuery {
     const inboundDetails = await this.thorchainCache.getInboundDetails()
 
     const sourceInboundDetails = inboundDetails[input.asset.chain]
-    // console.log(JSON.stringify(sourceInboundDetails, null, 2))
     const destinationInboundDetails = inboundDetails[destinationAsset.chain]
-    // console.log(JSON.stringify(destinationInboundDetails, null, 2))
 
     const swapEstimate = await this.calcSwapEstimate(
       {
@@ -702,11 +700,11 @@ export class ThorchainQuery {
     if (!isAssetRuneNative(params.rune.asset)) errors.push('params.rune must be THOR.RUNE')
 
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
-    const lpUnits = getLiquidityUnits({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
+    const lpUnits = getLiquidityUnits({ asset: params.asset, rune: params.rune }, assetPool)
     const inboundDetails = await this.thorchainCache.getInboundDetails()
     const unitData: UnitData = {
-      liquidityUnits: baseAmount(lpUnits),
-      totalUnits: baseAmount(assetPool.pool.liquidityUnits),
+      liquidityUnits: lpUnits,
+      totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
     }
     const poolShare = getPoolShare(unitData, assetPool)
     const assetWaitTimeSeconds = await this.confCounting(params.asset)
@@ -727,7 +725,7 @@ export class ThorchainQuery {
         errors.push(`Rune amount is less than fees`)
     }
     const totalFees = (await this.convert(assetInboundFee, AssetRuneNative)).plus(runeInboundFee)
-    const slip = getSlipOnLiquidity({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
+    const slip = getSlipOnLiquidity({ asset: params.asset, rune: params.rune }, assetPool)
     const estimateLP: EstimateAddLP = {
       assetPool: assetPool.pool.asset,
       slipPercent: slip.times(100),
@@ -766,8 +764,8 @@ export class ThorchainQuery {
     if (!blockData) throw Error(`Could not get block data`)
     // Pools total units & Lp's total units
     const unitData: UnitData = {
-      totalUnits: baseAmount(poolAsset.pool.liquidityUnits),
-      liquidityUnits: baseAmount(liquidityProvider.units),
+      totalUnits: new BigNumber(poolAsset.pool.liquidityUnits),
+      liquidityUnits: new BigNumber(liquidityProvider.units),
     }
     //console.log(`unit data`, unitData.totalUnits.amount().toNumber(), unitData.liquidityUnits.amount().toNumber())
     const networkValues = await this.thorchainCache.midgard.getNetworkValues()
@@ -820,8 +818,8 @@ export class ThorchainQuery {
     // get pool share from unit data
     const poolShare = getPoolShare(
       {
-        liquidityUnits: baseAmount(memberDetail.position.units),
-        totalUnits: baseAmount(assetPool.pool.liquidityUnits),
+        liquidityUnits: new BigNumber(memberDetail.position.units),
+        totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
       },
       assetPool,
     )
@@ -830,8 +828,8 @@ export class ThorchainQuery {
     // get slip on liquidity removal
     const slip = getSlipOnLiquidity(
       {
-        asset: poolShare.assetShare.baseAmount,
-        rune: poolShare.runeShare.baseAmount,
+        asset: poolShare.assetShare,
+        rune: poolShare.runeShare,
       },
       assetPool,
     )

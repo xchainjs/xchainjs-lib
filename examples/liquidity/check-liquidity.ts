@@ -11,7 +11,7 @@ function print(estimate: LiquidityPosition, address: string) {
       runeShare: estimate.poolShare.runeShare.formatedAssetString(),
     },
     impermanentLossProtection: {
-      ILProtection: estimate.impermanentLossProtection.ILProtection,
+      ILProtection: estimate.impermanentLossProtection.ILProtection.formatedAssetString(),
       totalDays: estimate.impermanentLossProtection.totalDays,
     },
   }

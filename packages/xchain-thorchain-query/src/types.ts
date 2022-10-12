@@ -62,8 +62,8 @@ export type SwapOutput = {
 }
 
 export type UnitData = {
-  liquidityUnits: BaseAmount
-  totalUnits: BaseAmount
+  liquidityUnits: BigNumber
+  totalUnits: BigNumber
 }
 
 export type LiquidityData = {
@@ -131,8 +131,8 @@ export type TxStatus = {
 }
 
 export type LiquidityToAdd = {
-  asset: BaseAmount
-  rune: BaseAmount
+  asset: CryptoAmount
+  rune: CryptoAmount
 }
 export type PostionDepositValue = {
   asset: BaseAmount

@@ -16,11 +16,14 @@ import { assetAmount, assetFromStringEx, assetToBase, isAssetRuneNative } from '
  */
 const addLp = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
   try {
-    const input1 = new CryptoAmount(assetToBase(assetAmount(process.argv[4])), assetFromStringEx(process.argv[5]))
-    const input2 = new CryptoAmount(assetToBase(assetAmount(process.argv[6])), assetFromStringEx(process.argv[7]))
-
-    const rune = isAssetRuneNative(input1.asset) ? input1 : input2
-    const asset = isAssetRuneNative(input1.asset) ? input2 : input1
+    const rune = new CryptoAmount(assetToBase(assetAmount(process.argv[4])), assetFromStringEx(process.argv[5]))
+    if (!isAssetRuneNative(rune.asset)) {
+      throw Error('THOR.RUNE  must be the first argument')
+    }
+    const asset = new CryptoAmount(
+      assetToBase(assetAmount(process.argv[6], Number(process.argv[7]))),
+      assetFromStringEx(process.argv[8]),
+    )
 
     const addLpParams: AddliquidityPosition = {
       asset,

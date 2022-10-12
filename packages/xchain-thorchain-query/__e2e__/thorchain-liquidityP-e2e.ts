@@ -1,11 +1,12 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
+  AssetAVAX,
   AssetBTC,
   AssetETH,
   AssetLTC,
   AssetRuneNative,
   assetAmount,
-  assetFromString,
+  assetFromStringEx,
   assetToBase,
 } from '@xchainjs/xchain-util'
 
@@ -28,8 +29,8 @@ const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thor
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 // mainnet asset
-const BUSD = assetFromString('BNB.BUSD-BD1')
-if (!BUSD) throw Error('bad asset')
+const BUSD = assetFromStringEx('BNB.BUSD-BD1')
+const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 function printAdd(estimate: EstimateAddLP) {
   const expanded = {
@@ -96,7 +97,25 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
   it(`Should estimate ADD ETH liquidity postion for given amount`, async () => {
     const addlp: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(0.000001)), AssetETH),
+      asset: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+    }
+    const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
+    printAdd(estimateADDLP)
+    expect(estimateADDLP).toBeTruthy()
+  })
+  it(`Should estimate ADD AVAX liquidity postion for given amount`, async () => {
+    const addlp: AddliquidityPosition = {
+      asset: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetAVAX),
+      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+    }
+    const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
+    printAdd(estimateADDLP)
+    expect(estimateADDLP).toBeTruthy()
+  })
+  it(`Should estimate ADD USDC liquidity postion for given amount`, async () => {
+    const addlp: AddliquidityPosition = {
+      asset: new CryptoAmount(assetToBase(assetAmount(10, 6)), USDC),
       rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
     }
     const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)

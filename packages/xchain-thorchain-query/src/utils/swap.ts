@@ -30,7 +30,7 @@ import { LiquidityPool } from '../liquidity-pool'
 import { ThorchainCache } from '../thorchain-cache'
 import { InboundDetail, SwapOutput } from '../types'
 
-const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDecimals: number): BigNumber => {
+export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDecimals: number): BigNumber => {
   const inDecimals = inputAmount.baseAmount.decimal
   let baseAmountOut = inputAmount.baseAmount.amount()
   const adjustDecimals = outDecimals - inDecimals

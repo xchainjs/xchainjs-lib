@@ -346,7 +346,7 @@ export class Wallet {
         feeOption: FeeOption.Fast,
         memo: constructedMemo,
       }
-      console.log(removeParams.amount.amount().toNumber())
+      // console.log(removeParams.amount.amount().toNumber())
       const hash = await this.ethHelper.sendDeposit(removeParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else if (params.assetFee.asset.chain === Chain.Avalanche) {
@@ -396,7 +396,7 @@ export class Wallet {
       amount: params.rune.baseAmount,
       memo: memo,
     }
-    console.log(addParams)
+    // console.log(addParams)
     const hash = await thorClient.deposit(addParams)
     return { hash, url: thorchainClient.getExplorerTxUrl(hash), waitTimeSeconds }
   }
@@ -418,7 +418,7 @@ export class Wallet {
       amount: params.runeFee.baseAmount,
       memo: memo,
     }
-    console.log(addParams)
+    // console.log(addParams)
     const hash = await thorClient.deposit(addParams)
     return { hash, url: thorchainClient.getExplorerTxUrl(hash), waitTimeSeconds }
   }
