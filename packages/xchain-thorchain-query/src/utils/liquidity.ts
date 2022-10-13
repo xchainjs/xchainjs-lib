@@ -5,6 +5,8 @@ import { CryptoAmount } from '../crypto-amount'
 import { LiquidityPool } from '../liquidity-pool'
 import { Block, ILProtectionData, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData } from '../types'
 
+import { getBaseAmountWithDiffDecimals } from './swap'
+
 /**
  * https://dev.thorchain.org/thorchain-dev/interface-guide/math#lp-units-add
  * @param liquidity - asset amount added
@@ -12,9 +14,10 @@ import { Block, ILProtectionData, LiquidityToAdd, PoolShareDetail, PostionDeposi
  * @returns liquidity units - ownership of pool
  */
 export const getLiquidityUnits = (liquidity: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
+  const baseAmount8decimals = getBaseAmountWithDiffDecimals(liquidity.asset, 8)
   const P = new BigNumber(pool.pool.liquidityUnits)
-  const r = liquidity.rune.amount()
-  const a = liquidity.asset.amount()
+  const r = liquidity.rune.baseAmount.amount()
+  const a = baseAmount8decimals
   const R = pool.runeBalance.amount()
   const A = pool.assetBalance.amount()
   const part1 = R.times(a)
@@ -33,8 +36,8 @@ export const getLiquidityUnits = (liquidity: LiquidityToAdd, pool: LiquidityPool
  */
 export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShareDetail => {
   // formula: (rune * part) / total; (asset * part) / total
-  const units = unitData.liquidityUnits.amount()
-  const total = unitData.totalUnits.amount()
+  const units = unitData.liquidityUnits
+  const total = unitData.totalUnits
   const R = pool.runeBalance.amount()
   const T = pool.assetBalance.amount()
   const asset = T.times(units).div(total)
@@ -53,9 +56,10 @@ export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShare
  * @returns - returns bignumber representing a slip percentage
  */
 export const getSlipOnLiquidity = (stake: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
+  const baseAmount8decimals = getBaseAmountWithDiffDecimals(stake.asset, pool.decimals)
   // formula: (t * R - T * r)/ (T*r + R*T)
-  const r = stake.rune.amount()
-  const t = stake.asset.amount()
+  const r = stake.rune.baseAmount.amount()
+  const t = baseAmount8decimals
   const R = pool.runeBalance.amount()
   const T = pool.assetBalance.amount()
   const numerator = t.times(R).minus(T.times(r))
@@ -107,8 +111,8 @@ export const getLiquidityProtectionData = (
  */
 export const getPoolOwnership = (liquidity: LiquidityToAdd, pool: LiquidityPool): number => {
   const P = new BigNumber(pool.pool.liquidityUnits)
-  const r = liquidity.rune.amount()
-  const a = liquidity.asset.amount()
+  const r = liquidity.rune.baseAmount.amount()
+  const a = liquidity.asset.baseAmount.amount()
   const R = pool.runeBalance.amount().plus(r) // Must add r first
   const A = pool.assetBalance.amount().plus(a) // Must add t first
   const part1 = R.plus(a)

@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
+import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
-  EstimateWithdrawLP,
   Midgard,
   RemoveLiquidityPosition,
   ThorchainCache,
@@ -9,39 +9,16 @@ import {
 } from '@xchainjs/xchain-thorchain-query'
 import { assetFromString } from '@xchainjs/xchain-util'
 
-function print(estimate: EstimateWithdrawLP, withdrawLpParams: RemoveLiquidityPosition) {
-  const expanded = {
-    slipPercent: estimate.slipPercent.toFixed(4),
-    runeAmount: estimate.runeAmount.formatedAssetString(),
-    assetAmount: estimate.assetAmount.formatedAssetString(),
-    transactionFee: {
-      assetFee: estimate.transactionFee.assetFee.formatedAssetString(),
-      runeFee: estimate.transactionFee.runeFee.formatedAssetString(),
-      totalFees: estimate.transactionFee.totalFees.formatedAssetString(),
-    },
-    impermanentLossProtection: {
-      ILProtection: estimate.impermanentLossProtection.ILProtection.formatedAssetString(),
-      totalDays: estimate.impermanentLossProtection.totalDays,
-    },
-    estimatedWaitSeconds: estimate.estimatedWaitSeconds,
-  }
-  console.log(withdrawLpParams)
-  console.log(expanded)
-}
 /**
- * Estimate Withdraw lp function
- * Returns estimate swap object
+ * Withdraw lp function
+ * Returns tx
  */
-const estimateWithdrawLp = async () => {
+const withdrawLp = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
   try {
-    const network = process.argv[2] as Network
-    const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
-    const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
-
-    const asset = assetFromString(process.argv[3])
-    const percentage = Number(process.argv[4])
-    const assetAddress = process.argv[5] || ''
-    const runeAddress = process.argv[6] || ''
+    const asset = assetFromString(process.argv[4])
+    const percentage = Number(process.argv[5])
+    const assetAddress = process.argv[6] || ''
+    const runeAddress = process.argv[7] || ''
 
     const withdrawLpParams: RemoveLiquidityPosition = {
       asset,
@@ -49,8 +26,8 @@ const estimateWithdrawLp = async () => {
       assetAddress,
       runeAddress,
     }
-    const estimate = await thorchainQueryMainnet.estimateWithdrawLP(withdrawLpParams)
-    print(estimate, withdrawLpParams)
+    const withdraw = await tcAmm.removeLiquidityPosition(wallet, withdrawLpParams)
+    console.log(withdraw)
   } catch (e) {
     console.error(e)
   }
@@ -58,7 +35,13 @@ const estimateWithdrawLp = async () => {
 
 // Call the function from main()
 const main = async () => {
-  await estimateWithdrawLp()
+  const seed = process.argv[2]
+  const network = process.argv[3] as Network
+  const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
+  const thorchainQuery = new ThorchainQuery(thorchainCache)
+  const thorchainAmm = new ThorchainAMM(thorchainQuery)
+  const wallet = new Wallet(seed, thorchainQuery)
+  await withdrawLp(thorchainAmm, wallet)
 }
 
 main()

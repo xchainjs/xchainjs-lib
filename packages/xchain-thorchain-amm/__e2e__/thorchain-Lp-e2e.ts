@@ -3,46 +3,66 @@ import { ETH_DECIMAL } from '@xchainjs/xchain-ethereum'
 import {
   AddliquidityPosition,
   CryptoAmount,
+  LiquidityPosition,
   Midgard,
+  RemoveLiquidityPosition,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
-import { AssetBTC, AssetETH, AssetRuneNative, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
+import {
+  AssetBNB,
+  AssetBTC,
+  AssetETH,
+  AssetRuneNative,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+} from '@xchainjs/xchain-util'
 
 import { Wallet } from '../src/Wallet'
 import { ThorchainAMM } from '../src/thorchain-amm'
 
-// const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
-// const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
-
-const thorchainCacheTestnet = new ThorchainCache(new Midgard(Network.Testnet), new Thornode(Network.Testnet))
-const thorchainQueryTestnet = new ThorchainQuery(thorchainCacheTestnet)
+const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 
 // const thorchainCacheStagenet = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
 // const thorchainQueryStagenet = new ThorchainQuery(thorchainCacheStagenet)
 
-const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', thorchainQueryTestnet)
-// const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
+const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
 // const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryStagenet)
 
-const testnetThorchainAmm = new ThorchainAMM(thorchainQueryTestnet)
-// const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
+const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 // const stagenetThorchainAmm = new ThorchainAMM(thorchainQueryStagenet)
 
 // mainnet asset
-// const BUSD = assetFromStringEx('BNB.BUSD-BD1')
+const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 
-// Testnet asset
-
-const BUSDT = assetFromStringEx('BNB.BUSD-74E')
+function printliquidityPosition(liquidityPosition: LiquidityPosition) {
+  const expanded = {
+    assetPool: liquidityPosition.position.asset,
+    assetAmount: liquidityPosition.position.asset_deposit_value,
+    runeAmount: liquidityPosition.position.rune_deposit_value,
+    impermanentLossProtection: {
+      ILProtection: liquidityPosition.impermanentLossProtection.ILProtection.formatedAssetString(),
+      totalDays: liquidityPosition.impermanentLossProtection.totalDays,
+    },
+  }
+  console.log(expanded)
+}
 
 // Test User Functions - single and double swap using mock pool data
 describe('Thorchain-amm liquidity action end to end Tests', () => {
+  // Check liquidity position
+  it(`Should check liquidity position`, async () => {
+    const busdAddress = mainnetWallet.clients[AssetRuneNative.chain].getAddress()
+    const lpPositon = await thorchainQueryMainnet.checkLiquidityPosition(BUSD, busdAddress)
+    printliquidityPosition(lpPositon)
+  })
   // Add liquidity positions
   it(`Should add BUSD liquidity asymmetrically to BUSD pool `, async () => {
-    const hash = await testnetThorchainAmm.addLiquidityPosition(testnetWallet, {
-      asset: new CryptoAmount(assetToBase(assetAmount(1)), BUSDT),
+    const hash = await mainetThorchainAmm.addLiquidityPosition(mainnetWallet, {
+      asset: new CryptoAmount(assetToBase(assetAmount(2)), BUSD),
       rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
     })
 
@@ -54,7 +74,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
       asset: new CryptoAmount(assetToBase(assetAmount(1.5, ETH_DECIMAL)), AssetETH),
       rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
     }
-    const hash = await testnetThorchainAmm.addLiquidityPosition(testnetWallet, addLPparams)
+    const hash = await mainetThorchainAmm.addLiquidityPosition(mainnetWallet, addLPparams)
 
     console.log(hash)
     expect(hash).toBeTruthy()
@@ -64,97 +84,88 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
       asset: new CryptoAmount(assetToBase(assetAmount(0.009)), AssetBTC),
       rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
     }
-    const hash = await testnetThorchainAmm.addLiquidityPosition(testnetWallet, addLPparams)
+    const hash = await mainetThorchainAmm.addLiquidityPosition(mainnetWallet, addLPparams)
 
     console.log(hash)
     expect(hash).toBeTruthy()
   })
   it(`Should add RUNE liquidity asymmetrically to BUSD pool `, async () => {
     const addLPparams: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(0)), BUSDT),
+      asset: new CryptoAmount(assetToBase(assetAmount(0)), BUSD),
       rune: new CryptoAmount(assetToBase(assetAmount(1.19997)), AssetRuneNative),
     }
-    const hash = await testnetThorchainAmm.addLiquidityPosition(testnetWallet, addLPparams)
+    const hash = await mainetThorchainAmm.addLiquidityPosition(mainnetWallet, addLPparams)
     console.log(hash)
     expect(hash).toBeTruthy()
   })
   it(`Should add BUSD & RUNE liquidity symmetrically to BUSD pool`, async () => {
-    const poolRatio = await thorchainQueryTestnet.getPoolRatios(BUSDT)
+    const poolRatio = await thorchainQueryMainnet.getPoolRatios(BUSD)
     // get ratios for pool and retrieve rune amount
-    const busdtAmount = poolRatio.assetToRune.times(1.2)
+    const busdtAmount = poolRatio.assetToRune.times(3)
     const runeAmount = poolRatio.runeToAsset.times(busdtAmount)
-    const hash = await testnetThorchainAmm.addLiquidityPosition(testnetWallet, {
-      asset: new CryptoAmount(assetToBase(assetAmount(busdtAmount)), BUSDT),
+    const hash = await mainetThorchainAmm.addLiquidityPosition(mainnetWallet, {
+      asset: new CryptoAmount(assetToBase(assetAmount(busdtAmount)), BUSD),
       rune: new CryptoAmount(assetToBase(assetAmount(runeAmount)), AssetRuneNative),
     })
 
     console.log(hash)
     expect(hash).toBeTruthy()
   })
-  //// Remove Liquidity Positions
-  // it(`Should remove BUSD only liquidity asymmetrically from the BUSD pool `, async () => {
-  //   const LPAction = '-' // remove from lP position
-  //   const percentage = 100 // gets converted to basis points later
-  //   const removeLp: RemoveLiquidityPosition = {
-  //     action: LPAction,
-  //     percentage: percentage,
-  //     asset: new CryptoAmount(assetToBase(assetAmount(0)), BUSDT),
-  //     rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-  //   }
-  //   const hash = await testnetThorchainAmm.removeLiquidityPosition(testnetWallet, removeLp)
-  //   console.log(hash)
-  //   expect(hash).toBeTruthy()
-  // })
-  // it(`Should remove Rune liquidity asymetrically from the BUSD pool`, async () => {
-  //   const LPAction = '-' // remove from lP position
-  //   const percentage = 100 // gets converted to basis points later
-  //   const removeLp: RemoveLiquidityPosition = {
-  //     action: LPAction,
-  //     percentage: percentage,
-  //     asset: new CryptoAmount(assetToBase(assetAmount(0)), BUSDT),
-  //     rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-  //   }
-  //   const hash = await testnetThorchainAmm.removeLiquidityPosition(testnetWallet, removeLp)
-  //   console.log(hash)
-  //   expect(hash).toBeTruthy()
-  // })
-  // it(`Should remove BUSDT & RUNE symmetrically from symmetrical lp`, async () => {
-  //   const LPAction = '-' // add to lP position
-  //   const percentage = 100 // gets converted to basis points later
-  //   const removeLp: RemoveLiquidityPosition = {
-  //     action: LPAction,
-  //     percentage: percentage,
-  //     asset: new CryptoAmount(assetToBase(assetAmount(0)), BUSDT),
-  //     rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-  //   }
-  //   const hash = await testnetThorchainAmm.removeLiquidityPosition(testnetWallet, removeLp)
-  //   console.log(hash)
-  //   expect(hash).toBeTruthy()
-  // })
-  // it(`Should remove ETH liquidity asymetrically from the ETH pool`, async () => {
-  //   const LPAction = '-' // remove from lP position
-  //   const percentage = 100 // gets converted to basis points later
-  //   const removeLp: RemoveLiquidityPosition = {
-  //     action: LPAction,
-  //     percentage: percentage,
-  //     asset: new CryptoAmount(assetToBase(assetAmount(0)), BUSDT),
-  //     rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-  //   }
-  //   const hash = await testnetThorchainAmm.removeLiquidityPosition(testnetWallet, removeLp)
-  //   console.log(hash)
-  //   expect(hash).toBeTruthy()
-  // })
-  // it(`Should remove BTC liquidity asymetrically from the BTC pool`, async () => {
-  //   const LPAction = '-' // remove from lP position
-  //   const percentage = 100 // gets converted to basis points later
-  //   const removeLp: RemoveLiquidityPosition = {
-  //     action: LPAction,
-  //     percentage: percentage,
-  //     asset: new CryptoAmount(assetToBase(assetAmount(0)), BUSDT),
-  //     rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-  //   }
-  //   const hash = await testnetThorchainAmm.removeLiquidityPosition(testnetWallet, removeLp)
-  //   console.log(hash)
-  //   expect(hash).toBeTruthy()
-  // })
+  // Remove Liquidity Positions
+  it(`Should remove BUSD only liquidity asymmetrically from the BUSD pool `, async () => {
+    const percentage = 100 // gets converted to basis points later
+    const removeLp: RemoveLiquidityPosition = {
+      percentage: percentage,
+      asset: BUSD,
+      assetAddress: mainnetWallet.clients[AssetBNB.chain].getAddress(),
+    }
+    const hash = await mainetThorchainAmm.removeLiquidityPosition(mainnetWallet, removeLp)
+    console.log(hash)
+    expect(hash).toBeTruthy()
+  })
+  it(`Should remove Rune liquidity asymetrically from the BUSD pool`, async () => {
+    const percentage = 100 // gets converted to basis points later
+    const removeLp: RemoveLiquidityPosition = {
+      percentage: percentage,
+      asset: BUSD,
+      runeAddress: mainnetWallet.clients[AssetRuneNative.chain].getAddress(),
+    }
+    const hash = await mainetThorchainAmm.removeLiquidityPosition(mainnetWallet, removeLp)
+    console.log(hash)
+    expect(hash).toBeTruthy()
+  })
+  it(`Should remove BUSDT & RUNE symmetrically from symmetrical lp`, async () => {
+    const percentage = 100 // gets converted to basis points later
+    const removeLp: RemoveLiquidityPosition = {
+      percentage: percentage,
+      asset: BUSD,
+      assetAddress: mainnetWallet.clients[BUSD.chain].getAddress(),
+      runeAddress: mainnetWallet.clients[AssetRuneNative.chain].getAddress(),
+    }
+    const hash = await mainetThorchainAmm.removeLiquidityPosition(mainnetWallet, removeLp)
+    console.log(hash)
+    expect(hash).toBeTruthy()
+  })
+  it(`Should remove ETH liquidity asymetrically from the ETH pool`, async () => {
+    const percentage = 100 // gets converted to basis points later
+    const removeLp: RemoveLiquidityPosition = {
+      percentage: percentage,
+      asset: AssetETH,
+      assetAddress: mainnetWallet.clients[AssetETH.chain].getAddress(),
+    }
+    const hash = await mainetThorchainAmm.removeLiquidityPosition(mainnetWallet, removeLp)
+    console.log(hash)
+    expect(hash).toBeTruthy()
+  })
+  it(`Should remove BTC liquidity asymetrically from the BTC pool`, async () => {
+    const percentage = 100 // gets converted to basis points later
+    const removeLp: RemoveLiquidityPosition = {
+      percentage: percentage,
+      asset: AssetBTC,
+      assetAddress: mainnetWallet.clients[AssetBTC.chain].getAddress(),
+    }
+    const hash = await mainetThorchainAmm.removeLiquidityPosition(mainnetWallet, removeLp)
+    console.log(hash)
+    expect(hash).toBeTruthy()
+  })
 })

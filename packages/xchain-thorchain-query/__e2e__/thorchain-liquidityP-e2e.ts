@@ -1,11 +1,12 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
+  AssetAVAX,
   AssetBTC,
   AssetETH,
   AssetLTC,
   AssetRuneNative,
   assetAmount,
-  assetFromString,
+  assetFromStringEx,
   assetToBase,
 } from '@xchainjs/xchain-util'
 
@@ -28,8 +29,8 @@ const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thor
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 // mainnet asset
-const BUSD = assetFromString('BNB.BUSD-BD1')
-if (!BUSD) throw Error('bad asset')
+const BUSD = assetFromStringEx('BNB.BUSD-BD1')
+const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 function printAdd(estimate: EstimateAddLP) {
   const expanded = {
@@ -69,6 +70,8 @@ function printWithdraw(withdraw: EstimateWithdrawLP) {
 
 function printliquidityPosition(liquidityPosition: LiquidityPosition) {
   const expanded = {
+    assetAddress: liquidityPosition.position.asset_address,
+    runeAddress: liquidityPosition.position.rune_address,
     assetPool: liquidityPosition.position.asset,
     assetAmount: liquidityPosition.position.asset_deposit_value,
     runeAmount: liquidityPosition.position.rune_deposit_value,
@@ -94,7 +97,25 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
   it(`Should estimate ADD ETH liquidity postion for given amount`, async () => {
     const addlp: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(0.000001)), AssetETH),
+      asset: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+    }
+    const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
+    printAdd(estimateADDLP)
+    expect(estimateADDLP).toBeTruthy()
+  })
+  it(`Should estimate ADD AVAX liquidity postion for given amount`, async () => {
+    const addlp: AddliquidityPosition = {
+      asset: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetAVAX),
+      rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+    }
+    const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
+    printAdd(estimateADDLP)
+    expect(estimateADDLP).toBeTruthy()
+  })
+  it(`Should estimate ADD USDC liquidity postion for given amount`, async () => {
+    const addlp: AddliquidityPosition = {
+      asset: new CryptoAmount(assetToBase(assetAmount(10, 6)), USDC),
       rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
     }
     const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
@@ -152,10 +173,22 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     printWithdraw(estimatRemoveLP)
     expect(estimatRemoveLP).toBeTruthy()
   })
+  // Estimate withrdaw lp positions
+  it(`Should estimate withdraw RUNE from address's position`, async () => {
+    const percentage = 100 // gets converted to basis points later
+    const removeLp: RemoveLiquidityPosition = {
+      asset: BUSD,
+      percentage: percentage,
+      runeAddress: 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u',
+    }
+    const estimatRemoveLP = await thorchainQuery.estimateWithdrawLP(removeLp)
+    printWithdraw(estimatRemoveLP)
+    expect(estimatRemoveLP).toBeTruthy()
+  })
 
   it(`Should check liquidity position for an address`, async () => {
-    const address = 'bc1qzw3xhtwctpezz8m4se7hsw4y68tg42p99gtrae'
-    const checkLP = await thorchainQuery.checkLiquidityPosition(AssetBTC, address)
+    const address = 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u'
+    const checkLP = await thorchainQuery.checkLiquidityPosition(BUSD, address)
     printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()
   })

@@ -62,8 +62,8 @@ export type SwapOutput = {
 }
 
 export type UnitData = {
-  liquidityUnits: BaseAmount
-  totalUnits: BaseAmount
+  liquidityUnits: BigNumber
+  totalUnits: BigNumber
 }
 
 export type LiquidityData = {
@@ -131,8 +131,8 @@ export type TxStatus = {
 }
 
 export type LiquidityToAdd = {
-  asset: BaseAmount
-  rune: BaseAmount
+  asset: CryptoAmount
+  rune: CryptoAmount
 }
 export type PostionDepositValue = {
   asset: BaseAmount
@@ -145,6 +145,7 @@ export type PoolShareDetail = {
 }
 
 export type EstimateAddLP = {
+  assetPool: string
   slipPercent: BigNumber
   poolShare: PoolShareDetail
   lpUnits: BaseAmount
@@ -155,12 +156,15 @@ export type EstimateAddLP = {
   canAdd: boolean
 }
 export type EstimateWithdrawLP = {
+  assetAddress?: string
+  runeAddress?: string
   slipPercent: BigNumber
   transactionFee: LPFees
   assetAmount: CryptoAmount
   runeAmount: CryptoAmount
   impermanentLossProtection: ILProtectionData
   estimatedWaitSeconds: number
+  assetPool: string
 }
 
 export type LPFees = {
@@ -192,16 +196,3 @@ export type PoolRatios = {
   assetToRune: BigNumber
   runeToAsset: BigNumber
 }
-// export type LiquidityProvider = {
-//   asset: string
-//   rune_address: string
-//   asset_address: string
-//   last_add_height: number
-//   last_withdraw_height: number
-//   units: number
-//   pending_rune: number
-//   pending_asset: number
-//   pending_tx_Id: string
-//   rune_deposit_value: number
-//   asset_deposit_value: number
-// }
