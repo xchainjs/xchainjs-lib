@@ -18,7 +18,7 @@ import {
   EstimateAddLP,
   EstimateWithdrawLP,
   LiquidityPosition,
-  RemoveLiquidityPosition,
+  WithdrawLiquidityPosition,
 } from '../src/types'
 import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
@@ -164,7 +164,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   it(`Should estimate withdraw BNB from address's position`, async () => {
     const percentage = 100 // gets converted to basis points later
     const assetAddress = 'bc1qzw3xhtwctpezz8m4se7hsw4y68tg42p99gtrae'
-    const removeLp: RemoveLiquidityPosition = {
+    const removeLp: WithdrawLiquidityPosition = {
       asset: AssetBTC,
       percentage: percentage,
       assetAddress: assetAddress,
@@ -176,7 +176,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   // Estimate withrdaw lp positions
   it(`Should estimate withdraw RUNE from address's position`, async () => {
     const percentage = 100 // gets converted to basis points later
-    const removeLp: RemoveLiquidityPosition = {
+    const removeLp: WithdrawLiquidityPosition = {
       asset: BUSD,
       percentage: percentage,
       runeAddress: 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u',
