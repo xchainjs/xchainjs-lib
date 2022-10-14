@@ -17,9 +17,9 @@ import { mockTendermintNodeInfo, mockTendermintSimulate } from '../__mocks__/tho
 import { Client } from '../src/client'
 
 const chainIds = {
-  [Network.Mainnet]: 'mainnet-id',
-  [Network.Stagenet]: 'stagenet-id',
-  [Network.Testnet]: 'testnet-id',
+  [Network.Mainnet]: 'chain-id-mainnet',
+  [Network.Stagenet]: 'chain-id-stagenet',
+  [Network.Testnet]: 'deprecated',
 }
 
 const mockAccountsAddress = (
@@ -259,7 +259,7 @@ describe('Client Test', () => {
     })
     it('get default chainId for mainnet', () => {
       const chainId = thorClient.getChainId(Network.Mainnet)
-      expect(chainId).toEqual('chain-id-mainnet')
+      expect(chainId).toEqual('thorchain-mainnet-v1')
     })
     it('update chainId for mainnet', () => {
       thorClient.setChainId('another-mainnet-id', Network.Mainnet)
