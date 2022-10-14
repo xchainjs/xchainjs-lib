@@ -11,7 +11,7 @@ import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchai
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { AssetBTC, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
 
-import { AddLiquidity, ExecuteSwap, RemoveLiquidity, TxSubmitted } from './types'
+import { AddLiquidity, ExecuteSwap, TxSubmitted, WithdrawLiquidity } from './types'
 import { EthHelper } from './utils/eth-helper'
 import { EvmHelper } from './utils/evm-helper'
 
@@ -239,7 +239,7 @@ export class Wallet {
    * @param params - parameters required for liquidity position
    * @returns object with tx response, url and wait time in seconds
    */
-  async removeLiquidity(params: RemoveLiquidity): Promise<TxSubmitted[]> {
+  async withdrawLiquidity(params: WithdrawLiquidity): Promise<TxSubmitted[]> {
     const assetClient = this.clients[params.assetFee.asset.chain]
     const inboundAsgard = (await this.thorchainQuery.thorchainCache.getInboundDetails())[params.assetFee.asset.chain]
       .address
@@ -251,19 +251,19 @@ export class Wallet {
 
     if (params.assetAddress && params.runeAddress) {
       constructedMemo = `-:${params.assetPool}:${basisPoints}`
-      txSubmitted.push(await this.removeAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard))
+      txSubmitted.push(await this.withdrawAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard))
       constructedMemo = `-:${params.assetPool}:${basisPoints}`
-      txSubmitted.push(await this.removeRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
+      txSubmitted.push(await this.withdrawRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     } else if (params.assetAddress && !params.runeAddress) {
       // asymmetrical asset only
       constructedMemo = `-:${params.assetPool}:${basisPoints}`
-      txSubmitted.push(await this.removeAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard))
+      txSubmitted.push(await this.withdrawAssetLP(params, constructedMemo, assetClient, waitTimeSeconds, inboundAsgard))
       return txSubmitted
     } else {
       // asymmetrical rune only
       constructedMemo = `-:${params.assetPool}:${basisPoints}`
-      txSubmitted.push(await this.removeRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
+      txSubmitted.push(await this.withdrawRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
     }
   }
@@ -324,33 +324,33 @@ export class Wallet {
   }
   /**
    *
-   * @param params - parameters for remove liquidity
+   * @param params - parameters for withdraw liquidity
    * @param constructedMemo - memo needed for thorchain execution
    * @param assetClient - asset client to call transfer
    * @param waitTimeSeconds - return back estimated wait
    * @param inboundAsgard - destination address
    * @returns - tx object
    */
-  private async removeAssetLP(
-    params: RemoveLiquidity,
+  private async withdrawAssetLP(
+    params: WithdrawLiquidity,
     constructedMemo: string,
     assetClient: XChainClient,
     waitTimeSeconds: number,
     inboundAsgard: string,
   ): Promise<TxSubmitted> {
     if (params.assetFee.asset.chain === Chain.Ethereum) {
-      const removeParams = {
+      const withdrawParams = {
         wallIndex: 0,
         asset: params.assetFee.asset,
         amount: params.assetFee.baseAmount,
         feeOption: FeeOption.Fast,
         memo: constructedMemo,
       }
-      // console.log(removeParams.amount.amount().toNumber())
-      const hash = await this.ethHelper.sendDeposit(removeParams)
+      // console.log(withdrawParams.amount.amount().toNumber())
+      const hash = await this.ethHelper.sendDeposit(withdrawParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else if (params.assetFee.asset.chain === Chain.Avalanche) {
-      const removeParams = {
+      const withdrawParams = {
         wallIndex: 0,
         asset: params.assetFee.asset,
         amount: params.assetFee.baseAmount,
@@ -358,10 +358,10 @@ export class Wallet {
         memo: constructedMemo,
       }
       const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
-      const hash = await evmHelper.sendDeposit(removeParams)
+      const hash = await evmHelper.sendDeposit(withdrawParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
-      const removeParams = {
+      const withdrawParams = {
         wallIndex: 0,
         asset: params.assetFee.asset,
         amount: params.assetFee.baseAmount,
@@ -369,7 +369,7 @@ export class Wallet {
         memo: constructedMemo,
       }
       try {
-        const hash = await assetClient.transfer(removeParams)
+        const hash = await assetClient.transfer(withdrawParams)
         return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
       } catch (err) {
         const hash = JSON.stringify(err)
@@ -402,12 +402,12 @@ export class Wallet {
   }
   /**
    *
-   * @param params - remove parameters
+   * @param params - withdraw parameters
    * @param memo - memo needed to withdraw lp
    * @returns - tx object
    */
-  private async removeRuneLP(
-    params: RemoveLiquidity,
+  private async withdrawRuneLP(
+    params: WithdrawLiquidity,
     memo: string,
     thorchainClient: XChainClient,
     waitTimeSeconds: number,

@@ -39,7 +39,7 @@ export type AddLiquidity = {
   waitTimeSeconds: number
   assetPool: string
 }
-export type RemoveLiquidity = {
+export type WithdrawLiquidity = {
   assetFee: CryptoAmount
   runeFee: CryptoAmount
   waitTimeSeconds: number
