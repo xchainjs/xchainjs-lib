@@ -54,6 +54,11 @@ Following peer dependencies have to be installed into your project. These are no
 [How thorchain-amm works](http://docs.xchainjs.org/xchain-thorchain-amm/how-it-works.html)\
 [How to use thorchain-amm](http://docs.xchainjs.org/xchain-thorchain-amm/how-to-use.html)
 
+For live examples
+[Do Swap](https://replit.com/@thorchain/doSwap-Single)
+[Add Liquidity](https://replit.com/@thorchain/addLiquidity)
+[Withdraw liquidity](https://replit.com/@thorchain/removeLiquidity)
+
 ##
 
 tsconfig compiler options
