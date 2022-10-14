@@ -7,7 +7,7 @@ import mockThornodeApi from '../__mocks__/thornode'
 import { Client } from '../src/client'
 import { BCH_DECIMAL } from '../src/utils'
 
-const bchClient = new Client({ network: Network.Mainnet })
+const bchClient = new Client({})
 
 describe('BCHClient Test', () => {
   beforeEach(() => {
@@ -34,6 +34,11 @@ describe('BCHClient Test', () => {
         network: Network.Testnet,
       })
     }).not.toThrow()
+  })
+  it('Default network should be mainnet', () => {
+    const getNetwork = bchClient.getNetwork()
+    const result = Network.Mainnet
+    expect(result).toEqual(getNetwork)
   })
 
   it('set phrase should return correct address', () => {

@@ -1,4 +1,10 @@
-# v.0.5.3 (2022-xx-xx)
+# v.05.4 (2022-10-14)
+
+## Update
+
+- Set Default network to `Network.Mainnet`
+
+# v.0.5.3 (2022-10-04)
 
 ## Update
 
