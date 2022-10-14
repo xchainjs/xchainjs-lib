@@ -100,7 +100,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
     gasAsset,
     gasAssetDecimals,
     defaults,
-    network = Network.Testnet,
+    network = Network.Mainnet,
     feeBounds,
     providers,
     phrase = '',

@@ -107,9 +107,7 @@ describe('Client Test', () => {
 
   it('should not throw on a client without a phrase', () => {
     expect(() => {
-      new Client({
-        network: Network.Testnet,
-      })
+      new Client({})
     }).not.toThrow()
   })
 

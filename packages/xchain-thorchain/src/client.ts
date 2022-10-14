@@ -52,8 +52,8 @@ import {
   DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
   MAX_TX_COUNT,
+  defaultExplorerUrls,
   getBalance,
-  getDefaultExplorerUrls,
   getDefaultFees,
   getDenom,
   getDepositTxDataFromLogs,
@@ -97,20 +97,37 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
   constructor({
-    network = Network.Testnet,
+    network = Network.Mainnet,
     phrase,
-    clientUrl,
-    explorerUrls,
+    clientUrl = {
+      [Network.Testnet]: {
+        node: 'deprecated',
+        rpc: 'deprecated',
+      },
+      [Network.Stagenet]: {
+        node: 'https://stagenet-thornode.ninerealms.com',
+        rpc: 'https://stagenet-rpc.ninerealms.com',
+      },
+      [Network.Mainnet]: {
+        node: 'https://thornode.ninerealms.com',
+        rpc: 'https://rpc.ninerealms.com',
+      },
+    },
+    explorerUrls = defaultExplorerUrls,
     rootDerivationPaths = {
       [Network.Mainnet]: "44'/931'/0'/0/",
       [Network.Stagenet]: "44'/931'/0'/0/",
       [Network.Testnet]: "44'/931'/0'/0/",
     },
-    chainIds,
+    chainIds = {
+      [Network.Mainnet]: 'thorchain-mainnet-v1',
+      [Network.Stagenet]: 'chain-id-stagenet',
+      [Network.Testnet]: 'deprecated',
+    },
   }: XChainClientParams & ThorchainClientParams) {
     super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
     this.clientUrl = clientUrl
-    this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
+    this.explorerUrls = explorerUrls
     this.chainIds = chainIds
 
     registerSendCodecs()
