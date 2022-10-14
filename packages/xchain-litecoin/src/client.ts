@@ -24,9 +24,11 @@ import { NodeAuth } from './types'
 import { TxIO } from './types/sochain-api-types'
 import * as Utils from './utils'
 
+export type NodeUrls = Record<Network, string>
+
 export type LitecoinClientParams = XChainClientParams & {
   sochainUrl?: string
-  nodeUrl?: string
+  nodeUrls?: NodeUrls
   nodeAuth?: NodeAuth | null
 }
 
@@ -34,8 +36,8 @@ export type LitecoinClientParams = XChainClientParams & {
  * Custom Litecoin client
  */
 class Client extends UTXOClient {
-  private sochainUrl = ''
-  private nodeUrl = ''
+  private sochainUrl: string
+  private nodeUrls: NodeUrls
   private nodeAuth?: NodeAuth
 
   /**
@@ -53,7 +55,11 @@ class Client extends UTXOClient {
     },
     sochainUrl = 'https://sochain.com/api/v2',
     phrase,
-    nodeUrl,
+    nodeUrls = {
+      [Network.Mainnet]: 'https://litecoin.ninerealms.com',
+      [Network.Stagenet]: 'https://litecoin.ninerealms.com',
+      [Network.Testnet]: 'https://testnet.ltc.thorchain.info',
+    },
     nodeAuth = {
       username: 'thorchain',
       password: 'password',
@@ -65,24 +71,14 @@ class Client extends UTXOClient {
     },
   }: LitecoinClientParams) {
     super(Chain.Litecoin, { network, rootDerivationPaths, phrase, feeBounds })
-    this.nodeUrl =
-      nodeUrl ??
-      (() => {
-        switch (network) {
-          case Network.Mainnet:
-          case Network.Stagenet:
-            return 'https://litecoin.ninerealms.com'
-          case Network.Testnet:
-            return 'https://testnet.ltc.thorchain.info'
-        }
-      })()
+    this.nodeUrls = nodeUrls
 
     this.nodeAuth =
       // Leave possibility to send requests without auth info for user
       // by strictly passing nodeAuth as null value
       nodeAuth === null ? undefined : nodeAuth
 
-    this.setSochainUrl(sochainUrl)
+    this.sochainUrl = sochainUrl
   }
 
   /**
@@ -326,7 +322,7 @@ class Client extends UTXOClient {
 
     return await Utils.broadcastTx({
       txHex,
-      nodeUrl: this.nodeUrl,
+      nodeUrl: this.nodeUrls[this.network],
       auth: this.nodeAuth,
     })
   }
