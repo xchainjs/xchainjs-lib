@@ -33,13 +33,13 @@ import {
   LiquidityPosition,
   PoolRatios,
   PostionDepositValue,
-  RemoveLiquidityPosition,
   SwapEstimate,
   TotalFees,
   TxDetails,
   TxStage,
   TxStatus,
   UnitData,
+  WithdrawLiquidityPosition,
 } from './types'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
 import { calcNetworkFee, getChain, getChainAsset } from './utils/swap'
@@ -810,7 +810,7 @@ export class ThorchainQuery {
    *
    * @param params
    */
-  public async estimateWithdrawLP(params: RemoveLiquidityPosition): Promise<EstimateWithdrawLP> {
+  public async estimateWithdrawLP(params: WithdrawLiquidityPosition): Promise<EstimateWithdrawLP> {
     // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
     const assetOrRuneAddress = params.assetAddress ? params.assetAddress : params.runeAddress
     const memberDetail = await this.checkLiquidityPosition(params.asset, assetOrRuneAddress)

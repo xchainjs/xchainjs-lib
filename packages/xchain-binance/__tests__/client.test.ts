@@ -121,7 +121,11 @@ describe('BinanceClient Test', () => {
       })
     }).not.toThrow()
   })
-
+  it('should not throw on a client without a phrase', () => {
+    expect(() => {
+      new BinanceClient({})
+    }).not.toThrow()
+  })
   it('throws an error passing an invalid phrase', async () => {
     expect(() => {
       new BinanceClient({ phrase: 'invalid phrase', network: 'mainnet' as Network })

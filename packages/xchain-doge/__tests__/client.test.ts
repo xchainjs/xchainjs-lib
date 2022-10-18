@@ -8,7 +8,7 @@ import { LOWER_FEE_BOUND, MIN_TX_FEE } from '../src/const'
 
 mockSochainApi.init()
 
-const dogeClient = new Client({ network: Network.Testnet })
+const dogeClient = new Client({})
 
 describe('DogecoinClient Test', () => {
   beforeEach(() => {
@@ -29,6 +29,12 @@ describe('DogecoinClient Test', () => {
   const testnet_address_path1 = 'nsUcSfSVREZ9jaMKrcKeZc8kKUJxj1Y7ms'
   const mainnet_address_path0 = 'D6Wmy5cmPMDmZjvQpvxk2XTzKhgPJ43ho9'
   const mainnet_address_path1 = 'DToAEBCvzfxqsZX2u4xkLfMXVbkyAwebkn'
+
+  it('Default network should be mainnet', () => {
+    const getNetwork = dogeClient.getNetwork()
+    const result = Network.Mainnet
+    expect(result).toEqual(getNetwork)
+  })
 
   it('set phrase should return correct address', () => {
     dogeClient.setNetwork(Network.Testnet)

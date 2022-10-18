@@ -90,8 +90,16 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor(params: XChainClientParams) {
-    super(Chain.Binance, params)
+  constructor({
+    network = Network.Mainnet,
+    phrase,
+    rootDerivationPaths = {
+      [Network.Mainnet]: "44'/931'/0'/0/",
+      [Network.Stagenet]: "44'/931'/0'/0/",
+      [Network.Testnet]: "44'/931'/0'/0/",
+    },
+  }: XChainClientParams) {
+    super(Chain.Binance, { network, rootDerivationPaths, phrase })
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(this.getNetwork())
   }

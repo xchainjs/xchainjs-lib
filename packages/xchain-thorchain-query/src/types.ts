@@ -180,7 +180,7 @@ export type AddliquidityPosition = {
   asset: CryptoAmount
   rune: CryptoAmount
 }
-export type RemoveLiquidityPosition = {
+export type WithdrawLiquidityPosition = {
   asset: Asset
   percentage: number
   assetAddress?: string

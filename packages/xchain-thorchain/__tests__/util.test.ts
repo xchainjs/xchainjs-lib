@@ -6,8 +6,8 @@ import { mockTendermintNodeInfo } from '../__mocks__/thornode-api'
 import { ClientUrl } from '../src/types'
 import {
   assetFromDenom,
+  defaultExplorerUrls,
   getChainId,
-  getDefaultExplorerUrls,
   getDenom,
   getDepositTxDataFromLogs,
   getExplorerAddressUrl,
@@ -134,31 +134,31 @@ describe('thorchain/util', () => {
 
   describe('explorer url', () => {
     it('should return valid explorer url', () => {
-      expect(getExplorerUrl(getDefaultExplorerUrls(), 'testnet' as Network)).toEqual(
+      expect(getExplorerUrl(defaultExplorerUrls, 'testnet' as Network)).toEqual(
         'https://viewblock.io/thorchain?network=testnet',
       )
 
-      expect(getExplorerUrl(getDefaultExplorerUrls(), 'mainnet' as Network)).toEqual('https://viewblock.io/thorchain')
+      expect(getExplorerUrl(defaultExplorerUrls, 'mainnet' as Network)).toEqual('https://viewblock.io/thorchain')
     })
 
     it('should return valid explorer address url', () => {
       expect(
-        getExplorerAddressUrl({ urls: getDefaultExplorerUrls(), network: 'testnet' as Network, address: 'tthorabc' }),
+        getExplorerAddressUrl({ urls: defaultExplorerUrls, network: 'testnet' as Network, address: 'tthorabc' }),
       ).toEqual('https://viewblock.io/thorchain/address/tthorabc?network=testnet')
 
       expect(
-        getExplorerAddressUrl({ urls: getDefaultExplorerUrls(), network: 'mainnet' as Network, address: 'thorabc' }),
+        getExplorerAddressUrl({ urls: defaultExplorerUrls, network: 'mainnet' as Network, address: 'thorabc' }),
       ).toEqual('https://viewblock.io/thorchain/address/thorabc')
     })
 
     it('should return valid explorer tx url', () => {
-      expect(
-        getExplorerTxUrl({ urls: getDefaultExplorerUrls(), network: 'testnet' as Network, txID: 'txhash' }),
-      ).toEqual('https://viewblock.io/thorchain/tx/txhash?network=testnet')
+      expect(getExplorerTxUrl({ urls: defaultExplorerUrls, network: 'testnet' as Network, txID: 'txhash' })).toEqual(
+        'https://viewblock.io/thorchain/tx/txhash?network=testnet',
+      )
 
-      expect(
-        getExplorerTxUrl({ urls: getDefaultExplorerUrls(), network: 'mainnet' as Network, txID: 'txhash' }),
-      ).toEqual('https://viewblock.io/thorchain/tx/txhash')
+      expect(getExplorerTxUrl({ urls: defaultExplorerUrls, network: 'mainnet' as Network, txID: 'txhash' })).toEqual(
+        'https://viewblock.io/thorchain/tx/txhash',
+      )
     })
   })
   const clientUrl: ClientUrl = {

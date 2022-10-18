@@ -1,3 +1,10 @@
+# v.10.4 (2022-10-14)
+
+## Update
+
+- Set Default network to `Network.Mainnet`
+- change contructor to accept NodeUrls = Record<Network, string>
+
 # v.0.10.3 (2022-10-04)
 
 ## Update

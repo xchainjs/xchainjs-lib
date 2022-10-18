@@ -1,3 +1,10 @@
+# v.0.1.0 (2022-10-13)
+
+## Update
+
+- Set Default avax config in constructor
+
+
 # v.0.1.0-alpha4 (2022-xx-xx)
 
 ## Update

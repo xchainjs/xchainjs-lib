@@ -18,7 +18,7 @@ import axios from 'axios'
 import * as bech32Buffer from 'bech32-buffer'
 import Long from 'long'
 
-import { ChainId, ExplorerUrl, ExplorerUrls, NodeInfoResponse, TxData } from './types'
+import { ChainId, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx } from './types/messages'
 import types from './types/proto/MsgCompiled'
 
@@ -29,6 +29,28 @@ export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 export const MAX_TX_COUNT = 100
 
 const DENOM_RUNE_NATIVE = 'rune'
+
+const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
+const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
+const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
+export const defaultExplorerUrls: ExplorerUrls = {
+  root: {
+    [Network.Testnet]: `${DEFAULT_EXPLORER_URL}?network=testnet`,
+    [Network.Stagenet]: `${DEFAULT_EXPLORER_URL}?network=stagenet`,
+    [Network.Mainnet]: DEFAULT_EXPLORER_URL,
+  },
+  tx: {
+    [Network.Testnet]: txUrl,
+    [Network.Stagenet]: txUrl,
+    [Network.Mainnet]: txUrl,
+  },
+  address: {
+    [Network.Testnet]: addressUrl,
+    [Network.Stagenet]: addressUrl,
+    [Network.Mainnet]: addressUrl,
+  },
+}
+
 /**
  * Get denomination from Asset
  *
@@ -383,39 +405,6 @@ export const getBalance = async ({
     .filter(
       (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
     )
-}
-
-const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
-
-/**
- * Get default explorer urls.
- *
- * @returns {ExplorerUrls} Default explorer urls (both mainnet and testnet) for thorchain.
- */
-export const getDefaultExplorerUrls = (): ExplorerUrls => {
-  const root: ExplorerUrl = {
-    [Network.Testnet]: `${DEFAULT_EXPLORER_URL}?network=testnet`,
-    [Network.Stagenet]: `${DEFAULT_EXPLORER_URL}?network=stagenet`,
-    [Network.Mainnet]: DEFAULT_EXPLORER_URL,
-  }
-  const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
-  const tx: ExplorerUrl = {
-    [Network.Testnet]: txUrl,
-    [Network.Stagenet]: txUrl,
-    [Network.Mainnet]: txUrl,
-  }
-  const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
-  const address: ExplorerUrl = {
-    [Network.Testnet]: addressUrl,
-    [Network.Stagenet]: addressUrl,
-    [Network.Mainnet]: addressUrl,
-  }
-
-  return {
-    root,
-    tx,
-    address,
-  }
 }
 
 /**

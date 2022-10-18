@@ -43,7 +43,7 @@ class Client extends UTXOClient {
    * @param {DogecoinClientParams} params
    */
   constructor({
-    network = Network.Testnet,
+    network = Network.Mainnet,
     feeBounds = {
       lower: LOWER_FEE_BOUND,
       upper: UPPER_FEE_BOUND,
