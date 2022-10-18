@@ -127,7 +127,7 @@ export enum TxStage {
 }
 export type TxStageStatus = {
   seconds: number
-  tgtBlock: number
+  targetBlock: number
   passed: boolean
 }
 

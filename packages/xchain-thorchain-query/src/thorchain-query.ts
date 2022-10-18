@@ -1,4 +1,3 @@
-import { LastBlock, ObservedTx, ObservedTxStatusEnum, TxOutItem } from '@xchainjs/xchain-thornode'
 import {
   Asset,
   AssetAtom,

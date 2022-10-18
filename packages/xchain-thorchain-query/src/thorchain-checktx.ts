@@ -30,7 +30,7 @@ export class CheckTx {
    *
    * 1. Has TC see it?
    * 2. If observed, has is there inbound conf counting (for non BFT Chains)? If so, for how long
-   * 3. has TC processed it?
+   * 3. Has TC processed it?
    * 4. Is it in the outbound queue? If so, what is the target block and how long will it take for that to happen?
    * 5. If TC has sent it, how long will outbound conf take?
    *
@@ -73,7 +73,7 @@ export class CheckTx {
       const stage2 = await this.checkConfcounting(txData.observed_tx, sourceChain, lastBlockHeight)
       if (stage2.passed == false) {
         console.log(
-          `Transaction in conf counting. Need to wait ${stage2.seconds} seconds. Target source Block height is ${stage2.tgtBlock}`,
+          `Transaction in conf counting. Need to wait ${stage2.seconds} seconds. Target source Block height is ${stage2.targetBlock}`,
         )
       } else {
         console.log(`Transaction passed conf counting.`)
@@ -99,7 +99,7 @@ export class CheckTx {
     const stage4 = await this.checkOutboundQueue(inboundTxHash, tcBlockHeight)
     if (stage4.passed == false) {
       console.log(
-        `In Outbound Queue. Need to wait ${stage4.seconds} for Tx to be sent. Target TC Block height is ${stage4.tgtBlock}`,
+        `In Outbound Queue. Need to wait ${stage4.seconds} for Tx to be sent. Target TC Block height is ${stage4.targetBlock}`,
       )
     } else {
       this.outTxInfo(txData.observed_tx)
@@ -120,7 +120,7 @@ export class CheckTx {
   private checkTCObservedTx(txData: TxResponse, sourceChain?: Chain): TxStageStatus {
     // If there is an error Thornode does not know about it. wait 60 seconds
     // If a long block time like BTC, can check or poll to see if the status changes.
-    const stageStatus: TxStageStatus = { passed: false, seconds: 0, tgtBlock: 0 }
+    const stageStatus: TxStageStatus = { passed: false, seconds: 0, targetBlock: 0 }
     console.log(`${JSON.stringify(txData.observed_tx)}`)
     //{"error":"rpc error: code = Unknown desc = internal"}
     if (JSON.stringify(txData.observed_tx) == undefined) {
@@ -160,7 +160,7 @@ export class CheckTx {
     sourceChain: Chain,
     lastSourceBlock: LastBlock,
   ): Promise<TxStageStatus> {
-    const stageStatus: TxStageStatus = { passed: false, seconds: 0, tgtBlock: 0 }
+    const stageStatus: TxStageStatus = { passed: false, seconds: 0, targetBlock: 0 }
     if (observed_tx?.block_height && observed_tx?.finalise_height) {
       // has this already happened?
       //   console.log(
@@ -171,7 +171,7 @@ export class CheckTx {
         if (observed_tx.block_height < observed_tx.finalise_height) {
           const blocksToWait = observed_tx.finalise_height - observed_tx?.block_height // how many source blocks to wait.
           stageStatus.seconds = blocksToWait * this.chainAttributes[sourceChain].avgBlockTimeInSecs
-          stageStatus.tgtBlock = observed_tx.finalise_height // not this is the source blockchain height, not the THORChain block height
+          stageStatus.targetBlock = observed_tx.finalise_height // not this is the source blockchain height, not the THORChain block height
         }
       } else {
         stageStatus.passed = true
@@ -195,7 +195,7 @@ export class CheckTx {
    * @returns
    */
   private async checkOutboundQueue(inboundTxHash: string, lastBlockHeight?: LastBlock): Promise<TxStageStatus> {
-    const stageStatus: TxStageStatus = { passed: false, seconds: 0, tgtBlock: 0 }
+    const stageStatus: TxStageStatus = { passed: false, seconds: 0, targetBlock: 0 }
     const scheduledQueueItem = (await this.thorchainCache.thornode.getscheduledQueue()).find(
       (item: TxOutItem) => item.in_hash === inboundTxHash,
     )
@@ -203,7 +203,7 @@ export class CheckTx {
       stageStatus.passed = true
     } else {
       if (scheduledQueueItem?.height && lastBlockHeight?.thorchain) {
-        stageStatus.tgtBlock = scheduledQueueItem.height
+        stageStatus.targetBlock = scheduledQueueItem.height
         stageStatus.seconds =
           (scheduledQueueItem.height - lastBlockHeight?.thorchain) * this.chainAttributes[THORChain].avgBlockTimeInSecs
       }
