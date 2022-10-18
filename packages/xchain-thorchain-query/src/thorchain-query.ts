@@ -1,5 +1,4 @@
-// import { Network } from '@xchainjs/xchain-client'
-
+import { LastBlock, ObservedTx, ObservedTxStatusEnum, TxOutItem } from '@xchainjs/xchain-thornode'
 import {
   Asset,
   AssetAtom,
@@ -32,11 +31,11 @@ import {
   LiquidityPosition,
   PoolRatios,
   PostionDepositValue,
-  RemoveLiquidityPosition,
   SwapEstimate,
   TotalFees,
   TxDetails,
   UnitData,
+  WithdrawLiquidityPosition,
 } from './types'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
 import { calcNetworkFee, getChainAsset } from './utils/swap'
@@ -94,9 +93,7 @@ export class ThorchainQuery {
     const inboundDetails = await this.thorchainCache.getInboundDetails()
 
     const sourceInboundDetails = inboundDetails[input.asset.chain]
-    // console.log(JSON.stringify(sourceInboundDetails, null, 2))
     const destinationInboundDetails = inboundDetails[destinationAsset.chain]
-    // console.log(JSON.stringify(destinationInboundDetails, null, 2))
 
     const swapEstimate = await this.calcSwapEstimate(
       {
@@ -492,11 +489,12 @@ export class ThorchainQuery {
     if (!isAssetRuneNative(params.rune.asset)) errors.push('params.rune must be THOR.RUNE')
 
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
-    const lpUnits = getLiquidityUnits({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
+
+    const lpUnits = getLiquidityUnits({ asset: params.asset, rune: params.rune }, assetPool)
     const inboundDetails = await this.thorchainCache.getInboundDetails()
     const unitData: UnitData = {
-      liquidityUnits: baseAmount(lpUnits),
-      totalUnits: baseAmount(assetPool.pool.liquidityUnits),
+      liquidityUnits: lpUnits,
+      totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
     }
     const poolShare = getPoolShare(unitData, assetPool)
     const assetWaitTimeSeconds = await this.confCounting(params.asset)
@@ -517,8 +515,9 @@ export class ThorchainQuery {
         errors.push(`Rune amount is less than fees`)
     }
     const totalFees = (await this.convert(assetInboundFee, AssetRuneNative)).plus(runeInboundFee)
-    const slip = getSlipOnLiquidity({ asset: params.asset.baseAmount, rune: params.rune.baseAmount }, assetPool)
+    const slip = getSlipOnLiquidity({ asset: params.asset, rune: params.rune }, assetPool)
     const estimateLP: EstimateAddLP = {
+      assetPool: assetPool.pool.asset,
       slipPercent: slip.times(100),
       poolShare: poolShare,
       lpUnits: baseAmount(lpUnits),
@@ -540,9 +539,10 @@ export class ThorchainQuery {
    * @param address - address used for Lp
    * @returns - Type Object liquidityPosition
    */
-  public async checkLiquidityPosition(asset: Asset, assetOrRuneAddress: string): Promise<LiquidityPosition> {
+  public async checkLiquidityPosition(asset: Asset, assetOrRuneAddress?: string): Promise<LiquidityPosition> {
     const poolAsset = await this.thorchainCache.getPoolForAsset(asset)
     if (!poolAsset) throw Error(`Could not find pool for ${asset}`)
+    if (!assetOrRuneAddress) throw Error(`No address provided ${assetOrRuneAddress}`)
 
     const liquidityProvider = await this.thorchainCache.thornode.getLiquidityProvider(
       poolAsset.assetString,
@@ -554,8 +554,8 @@ export class ThorchainQuery {
     if (!blockData) throw Error(`Could not get block data`)
     // Pools total units & Lp's total units
     const unitData: UnitData = {
-      totalUnits: baseAmount(poolAsset.pool.liquidityUnits),
-      liquidityUnits: baseAmount(liquidityProvider.units),
+      totalUnits: new BigNumber(poolAsset.pool.liquidityUnits),
+      liquidityUnits: new BigNumber(liquidityProvider.units),
     }
     //console.log(`unit data`, unitData.totalUnits.amount().toNumber(), unitData.liquidityUnits.amount().toNumber())
     const networkValues = await this.thorchainCache.midgard.getNetworkValues()
@@ -599,18 +599,17 @@ export class ThorchainQuery {
    *
    * @param params
    */
-  public async estimateWithdrawLP(params: RemoveLiquidityPosition): Promise<EstimateWithdrawLP> {
+  public async estimateWithdrawLP(params: WithdrawLiquidityPosition): Promise<EstimateWithdrawLP> {
     // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
-    if (!params.assetAddress) throw Error(`can't estimate lp without an asset address`)
-    const memberDetail = await this.checkLiquidityPosition(params.asset, params.assetAddress)
+    const assetOrRuneAddress = params.assetAddress ? params.assetAddress : params.runeAddress
+    const memberDetail = await this.checkLiquidityPosition(params.asset, assetOrRuneAddress)
     const dustValues = await this.getDustValues(params.asset) // returns asset and rune dust values
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset)
-
     // get pool share from unit data
     const poolShare = getPoolShare(
       {
-        liquidityUnits: baseAmount(memberDetail.position.units),
-        totalUnits: baseAmount(assetPool.pool.liquidityUnits),
+        liquidityUnits: new BigNumber(memberDetail.position.units),
+        totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
       },
       assetPool,
     )
@@ -619,8 +618,8 @@ export class ThorchainQuery {
     // get slip on liquidity removal
     const slip = getSlipOnLiquidity(
       {
-        asset: poolShare.assetShare.baseAmount,
-        rune: poolShare.runeShare.baseAmount,
+        asset: poolShare.assetShare,
+        rune: poolShare.runeShare,
       },
       assetPool,
     )
@@ -636,6 +635,8 @@ export class ThorchainQuery {
       waitTimeSeconds = waitTimeSecondsForRune
     }
     const estimateLP: EstimateWithdrawLP = {
+      assetAddress: memberDetail.position.asset_address,
+      runeAddress: memberDetail.position.rune_address,
       slipPercent: slip.times(100),
       transactionFee: {
         assetFee: dustValues.asset,
@@ -646,6 +647,7 @@ export class ThorchainQuery {
       runeAmount: poolShare.runeShare,
       estimatedWaitSeconds: waitTimeSeconds,
       impermanentLossProtection: memberDetail.impermanentLossProtection,
+      assetPool: assetPool.pool.asset,
     }
     return estimateLP
   }

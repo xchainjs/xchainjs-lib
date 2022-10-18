@@ -57,7 +57,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
   constructor({
-    network = Network.Testnet,
+    network = Network.Mainnet,
     phrase,
     clientUrls = getDefaultClientUrls(),
     chainIds = getDefaultChainIds(),

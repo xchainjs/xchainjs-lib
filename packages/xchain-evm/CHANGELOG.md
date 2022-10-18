@@ -1,3 +1,9 @@
+# v.0.1.0 (2022-10-13)
+
+## Update
+
+- Set Default network to `Network.Mainnet`
+
 # v.0.1.0-alph4 (2022-xx-xx)
 
 ## Update

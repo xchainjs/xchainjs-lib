@@ -1,3 +1,9 @@
+# v.0.27.3 (2022-10-13)
+
+## Update
+
+- Set Default network to `Network.Mainnet`
+
 # v.0.27.2 (2022-xx-xx)
 
 ## Update
@@ -16,12 +22,12 @@
 
 - bumped deps on xchain-utils & xchain-client
 
-
 # v.0.26.0 (2022-07-20)
 
 ### Breaking change
 
 - client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
+
 # v.0.25.1 (2022-06-02)
 
 ## Fix

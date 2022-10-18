@@ -6,7 +6,7 @@ import mockSochainApi from '../__mocks__/sochain'
 import { Client } from '../src/client'
 import { MIN_TX_FEE } from '../src/const'
 
-const btcClient = new Client({ network: Network.Mainnet, sochainUrl: 'https://sochain.com/api/v2' })
+const btcClient = new Client({})
 
 describe('BitcoinClient Test', () => {
   beforeEach(() => {
@@ -43,6 +43,12 @@ describe('BitcoinClient Test', () => {
 
   const phraseTwoMainnet_path0 = 'bc1qsn4ujsja3ukdlzjmc9tcgpeaxeauq0ga83xmds'
   const phraseTwoMainnet_path1 = 'bc1q7c58pf87g73pk07ryq996jfa5nqkx2ppzjz8kq'
+
+  it('Default network should be mainnet', () => {
+    const getNetwork = btcClient.getNetwork()
+    const result = Network.Mainnet
+    expect(result).toEqual(getNetwork)
+  })
 
   it('set phrase should return correct address', () => {
     btcClient.setNetwork(Network.Testnet)

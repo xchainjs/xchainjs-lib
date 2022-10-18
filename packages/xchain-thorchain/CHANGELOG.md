@@ -1,3 +1,13 @@
+# v.0.27.1 (2022-10-13)
+
+- added default `chainIds` in constructor
+- added default `explorerUrls` in constructor
+- Set Default network to `Network.Mainnet`
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
 # v0.27.0 (2022-10-07)
 
 ## Breaking Changes

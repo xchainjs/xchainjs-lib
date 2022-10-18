@@ -3,14 +3,17 @@
   "version": "1.0.0",
   "scripts": {
     "checkLiquidity": "npx ts-node check-liquidity.ts",
-    "estimateAddLiquidity": "npx ts-node add-liquidity.ts",
-    "estimateWithdrawLiquidity": "npx ts-node withdraw-liquidity.ts"
+    "estimateAddLiquidity": "npx ts-node estimate-add-liquidity.ts",
+    "estimateWithdrawLiquidity": "npx ts-node estimate-remove-liquidity.ts",
+    "addLiquidity": "npx ts-node add-liquidity.ts",
+    "withdrawLiquidity": "npx ts-node withdraw-liquidity.ts"
   },
   "description": "examples for adding liquidity",
   "main": "index.js",
   "author": "THORIANITE",
   "license": "MIT",
   "dependencies": {
+    "@xchainjs/xchain-thorchain-amm": "file:../../packages/xchain-thorchain-amm",
     "@xchainjs/xchain-thorchain-query": "file:../../packages/xchain-thorchain-query",
     "@xchainjs/xchain-client": "file:../../packages/xchain-client",
     "@xchainjs/xchain-midgard": "file:../../packages/xchain-midgard",

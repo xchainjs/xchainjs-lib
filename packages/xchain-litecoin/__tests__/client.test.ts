@@ -6,7 +6,7 @@ import mockThornodeApi from '../__mocks__/thornode-api'
 import { Client } from '../src/client'
 import { MIN_TX_FEE } from '../src/const'
 
-const ltcClient = new Client({ network: Network.Testnet })
+const ltcClient = new Client({})
 
 describe('LitecoinClient Test', () => {
   beforeEach(() => {
@@ -35,6 +35,12 @@ describe('LitecoinClient Test', () => {
   // Third ones is used only for balance verification
   const phraseThree = 'quantum vehicle print stairs canvas kid erode grass baby orbit lake remove'
   const addyThree = 'tltc1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rz364adu'
+
+  it('Default network should be mainnet', () => {
+    const getNetwork = ltcClient.getNetwork()
+    const result = Network.Mainnet
+    expect(result).toEqual(getNetwork)
+  })
 
   it('set phrase should return correct address', () => {
     ltcClient.setNetwork(Network.Testnet)

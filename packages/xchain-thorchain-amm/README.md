@@ -28,11 +28,11 @@ Following peer dependencies have to be installed into your project. These are no
     "@xchainjs/xchain-ethereum": "^0.27.0",
     "@xchainjs/xchain-evm": "^0.1.0-alpha2",
     "@xchainjs/xchain-avax": "^0.1.0-alpha3",
-    "@xchainjs/xchain-litecoin": "^0.10.0",
+    "@xchainjs/xchain-litecoin": "^0.10.3",
     "@xchainjs/xchain-midgard": "^0.1.0",
     "@xchainjs/xchain-terra": "^0.3.0",
     "@xchainjs/xchain-thorchain": "^0.26.0",
-    "@xchainjs/xchain-thorchain-query": "^0.1.0",
+    "@xchainjs/xchain-thorchain-query": "^0.1.2",
     "@xchainjs/xchain-thornode": "^0.1.0",
     "@xchainjs/xchain-util": "^0.9.0",
     "axios": "^0.27.2",
@@ -53,6 +53,11 @@ Following peer dependencies have to be installed into your project. These are no
 [xchain thorchain-amm](http://docs.xchainjs.org/xchain-thorchain-amm/)
 [How thorchain-amm works](http://docs.xchainjs.org/xchain-thorchain-amm/how-it-works.html)\
 [How to use thorchain-amm](http://docs.xchainjs.org/xchain-thorchain-amm/how-to-use.html)
+
+For live examples
+[Do Swap](https://replit.com/@thorchain/doSwap-Single)
+[Add Liquidity](https://replit.com/@thorchain/addLiquidity)
+[Withdraw liquidity](https://replit.com/@thorchain/removeLiquidity)
 
 ##
 

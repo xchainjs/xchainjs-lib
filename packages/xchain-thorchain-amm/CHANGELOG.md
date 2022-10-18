@@ -1,10 +1,17 @@
-# v0.3.0 (2022-10-11)
+# v0.3.1 (2022-10-11)
+
+## Add
+
+- Add lp add & withdraw
+- Bumped `xchain-litecoin`
+
+# v0.3.0 (2022-10-10)
 
 ## Update
 
-- Bumped `xchain-thorchain` 
+- Bumped `xchain-thorchain`
 
-# v0.2.1 (2022-xx-xx)
+# v0.2.1 (2022-10-04)
 
 ## Update
 
