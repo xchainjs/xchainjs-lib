@@ -34,6 +34,8 @@ const USD_ASSETS: Record<Network, Asset[]> = {
     assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306'),
   ],
 }
+const defaultMidgard = new Midgard()
+const defaultThornode = new Thornode()
 
 /**
  * This class manages retrieving information from up to date Thorchain
@@ -62,8 +64,8 @@ export class ThorchainCache {
    * @returns ThorchainCache
    */
   constructor(
-    midgard: Midgard,
-    thornode: Thornode,
+    midgard = defaultMidgard,
+    thornode = defaultThornode,
     expirePoolCacheMillis = 6000,
     expireAsgardCacheMillis = TEN_MINUTES,
     expireInboundDetailsCacheMillis = 6000,
