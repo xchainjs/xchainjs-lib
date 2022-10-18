@@ -13,7 +13,7 @@ import { TxSubmitted } from './types'
 import { Wallet } from './wallet'
 
 const BN_1 = new BigNumber(1)
-
+const defaultQuery = new ThorchainQuery()
 /**
  * THORChain Class for interacting with THORChain.
  * Recommended main class to use for swapping with THORChain
@@ -28,7 +28,7 @@ export class ThorchainAMM {
    * @param thorchainQuery - an instance of the ThorchainQuery
    * @returns ThorchainAMM
    */
-  constructor(thorchainQuery: ThorchainQuery) {
+  constructor(thorchainQuery = defaultQuery) {
     this.thorchainQuery = thorchainQuery
   }
 

@@ -1,3 +1,9 @@
+# v0.3.2 (2022-10-17)
+
+## Update
+
+- default to mainnet and stadard APIs with no arg constructor
+
 # v0.3.1 (2022-10-11)
 
 ## Add
