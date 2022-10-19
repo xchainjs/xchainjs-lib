@@ -1,11 +1,5 @@
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
-import {
-  CryptoAmount,
-  EstimateSwapParams,
-  ThorchainCache,
-  ThorchainQuery,
-  TxDetails,
-} from '@xchainjs/xchain-thorchain-query'
+import { CryptoAmount, EstimateSwapParams, ThorchainQuery, TxDetails } from '@xchainjs/xchain-thorchain-query'
 import { Chain, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
@@ -70,8 +64,7 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
 
 const main = async () => {
   const seed = process.argv[2]
-  const thorchainCache = new ThorchainCache()
-  const thorchainQuery = new ThorchainQuery(thorchainCache)
+  const thorchainQuery = new ThorchainQuery()
   const thorchainAmm = new ThorchainAMM(thorchainQuery)
   const wallet = new Wallet(seed, thorchainQuery)
   await doSingleSwap(thorchainAmm, wallet)

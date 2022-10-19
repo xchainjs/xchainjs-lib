@@ -12,21 +12,21 @@ export type Swap = {
 const chainIds = {
   [Network.Mainnet]: 'thorchain-mainnet-v1',
   [Network.Stagenet]: 'chain-id-stagenet',
-  [Network.Testnet]: 'thorchain-testnet-v2',
+  [Network.Testnet]: 'deprecated',
 }
 
 const thorClient: XChainClient = new ThorClient({
-  network: Network.Testnet,
+  network: Network.Mainnet,
   phrase: process.env.PHRASE,
   chainIds: chainIds,
 })
 const thorchainClient = (thorClient as unknown) as ThorchainClient
-const bnbClient: XChainClient = new BnbClient({ network: Network.Testnet, phrase: process.env.PHRASE })
+const bnbClient: XChainClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
 
 describe('thorchain Integration Tests', () => {
   it('should fetch thorchain balances', async () => {
-    const address = thorClient.getAddress(0)
-    const balances = await thorClient.getBalance(address)
+    // const address = thorClient.getAddress(0)
+    const balances = await thorClient.getBalance('thor18958nd6r803zespz8lff3jxlamgnv82pe87jaw')
     balances.forEach((bal) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
@@ -75,5 +75,12 @@ describe('thorchain Integration Tests', () => {
     const txPage = await thorClient.getTransactions({ address })
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
+  })
+  it('should fetch thorchain tx data', async () => {
+    const txId = '61559D65EE6D538032C2A42CB9F02B78B88631C80F958F0AAAF871279EBEE7E5'
+    const tx = await thorClient.getTransactionData(txId)
+    console.log(JSON.stringify(tx, null, 2))
+    expect(tx.hash).toBe('61559D65EE6D538032C2A42CB9F02B78B88631C80F958F0AAAF871279EBEE7E5')
+    // expect(tx.asset.ticker).toBe('xx')
   })
 })

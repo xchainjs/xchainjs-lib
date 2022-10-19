@@ -18,13 +18,9 @@ yarn add @xchainjs/xchain-midgard
 Request data from midgardApi
 
 ```
-// Options to import three different baseUrl's
-// MIDGARD_API_TC_URL, MIDGARD_API_9R_URL, MIDGARD_API_TS_URL
-import { MidgardApi, Configuration, MIDGARD_API_TS_URL } from '@xchainjs/xchain-midgard'
+import { MidgardApi } from '@xchainjs/xchain-midgard'
 
-const baseUrl = MIDGARD_API_TS_URL
-const apiconfig = new Configuration({ basePath: baseUrl })
-const midgardApi = new MidgardApi(apiconfig)
+const midgardApi = new MidgardApi()
 const data = midgardApi.getPool('BTC.BTC') 
 
 ```
