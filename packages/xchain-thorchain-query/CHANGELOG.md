@@ -3,13 +3,13 @@
 ## Fix
 
 - Bug - outbound fee is now calculated correctly
-- 
+- Bump dep on package `xchain-midgard`
 
 # v0.1.3 (2022-10-17)
 
 ## Update
 
-- default to mainnet and stadard APIs with no arg constructor 
+- default to mainnet and stadard APIs with no arg constructor
 
 # v0.1.2 (2022-10-11)
 

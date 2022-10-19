@@ -125,10 +125,9 @@ export enum TxStage {
   OUTBOUND_CHAIN_UNCONFIRMED,
   OUTBOUND_CHAIN_CONFIRMED,
 }
-export type TxStageStatus = {
+export type TransactionStatus = {
   seconds: number
   targetBlock: number
-  passed: boolean
 }
 
 export type LiquidityToAdd = {
