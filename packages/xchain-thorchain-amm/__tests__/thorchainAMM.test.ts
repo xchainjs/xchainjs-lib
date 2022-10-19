@@ -1,13 +1,4 @@
-import { Network } from '@xchainjs/xchain-client'
-import {
-  CryptoAmount,
-  EstimateSwapParams,
-  Midgard,
-  ThorchainCache,
-  ThorchainQuery,
-  Thornode,
-  TxDetails,
-} from '@xchainjs/xchain-thorchain-query'
+import { CryptoAmount, EstimateSwapParams, ThorchainQuery, TxDetails } from '@xchainjs/xchain-thorchain-query'
 import {
   Asset,
   AssetBTC,
@@ -21,10 +12,11 @@ import {
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
+import { ThorchainAMM } from '../src/thorchain-amm'
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
-const thorchainQuery = new ThorchainQuery(thorchainCache)
-//const thorchainAmm = new ThorchainAMM(thorchainQuery)
+const thorchainQuery = new ThorchainQuery()
+const thorchainAmm = new ThorchainAMM()
+thorchainAmm
 const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {

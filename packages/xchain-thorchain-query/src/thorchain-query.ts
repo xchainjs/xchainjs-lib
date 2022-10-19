@@ -40,7 +40,7 @@ import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnL
 import { calcNetworkFee, getChainAsset } from './utils/swap'
 
 const BN_1 = new BigNumber(1)
-
+const defaultCache = new ThorchainCache()
 /**
  * THORChain Class for interacting with THORChain.
  * Recommended main class to use for swapping with THORChain
@@ -57,7 +57,7 @@ export class ThorchainQuery {
    * @param chainAttributes - atrributes used to calculate waitTime & conf counting
    * @returns ThorchainAMM
    */
-  constructor(thorchainCache: ThorchainCache, chainAttributes = DefaultChainAttributes) {
+  constructor(thorchainCache = defaultCache, chainAttributes = DefaultChainAttributes) {
     this.thorchainCache = thorchainCache
     this.chainAttributes = chainAttributes
   }
