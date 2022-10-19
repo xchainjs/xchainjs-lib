@@ -1,4 +1,10 @@
-# v0.3.2 (2022-10-17)
+# v0.3.3 (2022-10-17)
+
+## Update
+
+- Bump Dep version number for `xchain-midgard`, `thorchain-query`
+
+# v0.3.3 (2022-10-17)
 
 ## Update
 

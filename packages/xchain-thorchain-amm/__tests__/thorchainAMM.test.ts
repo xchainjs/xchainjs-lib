@@ -125,7 +125,7 @@ describe('ThorchainAmm Client Test', () => {
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(true)
       expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-        assetAmount('473.02482308').amount().toFixed(),
+        assetAmount('472.96482308').amount().toFixed(),
       )
     } catch (error) {
       console.log(error.message)
