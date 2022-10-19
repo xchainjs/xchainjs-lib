@@ -1,12 +1,9 @@
-import { Network } from '@xchainjs/xchain-client'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   CryptoAmount,
   EstimateSwapParams,
-  Midgard,
   ThorchainCache,
   ThorchainQuery,
-  Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
 import { Chain, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
@@ -40,9 +37,9 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
  */
 const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
   try {
-    const amount = process.argv[4]
-    const fromAsset = assetFromString(`${process.argv[5]}`)
-    const toAsset = assetFromString(`${process.argv[6]}`)
+    const amount = process.argv[3]
+    const fromAsset = assetFromString(`${process.argv[4]}`)
+    const toAsset = assetFromString(`${process.argv[5]}`)
 
     // const fromChain = fromAsset.synth ? Chain.THORChain : fromAsset.chain
     const toChain = toAsset.synth ? Chain.THORChain : toAsset.chain
@@ -63,7 +60,8 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
     printTx(outPutCanSwap, swapParams.input)
     if (outPutCanSwap.txEstimate.canSwap) {
       const output = await tcAmm.doSwap(wallet, swapParams)
-      console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+      console.log(`swap ${output}`)
+      //console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
     }
   } catch (error) {
     console.error(error)
@@ -72,12 +70,10 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
 
 const main = async () => {
   const seed = process.argv[2]
-  const network = process.argv[3] as Network
-  const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
+  const thorchainCache = new ThorchainCache()
   const thorchainQuery = new ThorchainQuery(thorchainCache)
   const thorchainAmm = new ThorchainAMM(thorchainQuery)
   const wallet = new Wallet(seed, thorchainQuery)
-  console.log(`\ Swap on ${network} :)\n`)
   await doSingleSwap(thorchainAmm, wallet)
 }
 

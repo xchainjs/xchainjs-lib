@@ -156,7 +156,6 @@ export class ThorchainQuery {
         limPercentage = BN_1.minus(slipLimit || 1)
       } // else allowed slip is 100%
       const limAssetAmount = swapEstimate.netOutput.times(limPercentage)
-
       const inboundDelay = await this.confCounting(input)
       const outboundDelay = await this.outboundDelay(limAssetAmount)
       txDetails.txEstimate.waitTimeSeconds = outboundDelay + inboundDelay
@@ -220,10 +219,8 @@ export class ThorchainQuery {
 
     const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails)
     // Retrieve outbound fee from inboundAddressDetails.
-    const outboundFeeInAsset = new CryptoAmount(
-      baseAmount(destinationInboundDetails.outboundFee),
-      params.destinationAsset,
-    )
+    const outboundFeeInAsset = calcNetworkFee(params.destinationAsset, destinationInboundDetails).times(3)
+
     // convert fees to rune
     const inboundFeeInRune = await this.thorchainCache.convert(inboundFeeInAsset, AssetRuneNative)
     let outboundFeeInRune = await this.thorchainCache.convert(outboundFeeInAsset, AssetRuneNative)
@@ -287,7 +284,6 @@ export class ThorchainQuery {
    */
   private constructSwapMemo(params: ConstructMemo): string {
     const limstring = params.limit.amount().toFixed()
-
     // create LIM with interface ID
     const lim = limstring.substring(0, limstring.length - 3).concat(params.interfaceID.toString())
     // create the full memo

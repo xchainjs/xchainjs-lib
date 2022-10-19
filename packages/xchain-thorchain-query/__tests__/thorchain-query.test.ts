@@ -111,7 +111,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(8)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('499.68215078').amount().toFixed(),
+      assetAmount('499.62215078').amount().toFixed(),
     )
   })
   it('Should estimate swap from RUNE to USDC ', async () => {
@@ -126,7 +126,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(6)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('99.818529').amount().toFixed(),
+      assetAmount('96.181146').amount().toFixed(),
     )
   })
   it('Should estimate swap from BUSD to RUNE ', async () => {
@@ -141,7 +141,7 @@ describe('Thorchain-query tests', () => {
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('500.0078375').amount().toFixed(),
+      assetAmount('499.9478375').amount().toFixed(),
     )
   })
   it('Should estimate swap from UOS to ETH ', async () => {
@@ -156,7 +156,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     // expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(18)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('1.27226837').amount().toFixed(),
+      assetAmount('1.28763837').amount().toFixed(),
     )
   })
   it('Should estimate swap from ETH to UOS ', async () => {
@@ -171,7 +171,18 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(4)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('3802.1387').amount().toFixed(),
+      assetAmount('3794.0994').amount().toFixed(),
     )
+  })
+  it('Should construct the correct memo ', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(100)), BUSD),
+      destinationAsset: assetUSDC,
+      destinationAddress: 'xxx',
+    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:96212999`
+    expect(estimate.memo).toEqual(correctMemo)
   })
 })

@@ -1,3 +1,10 @@
+# v0.1.4 (2022-10-17)
+
+## Fix
+
+- Bug - outbound fee is now calculated correctly
+- 
+
 # v0.1.3 (2022-10-17)
 
 ## Update
