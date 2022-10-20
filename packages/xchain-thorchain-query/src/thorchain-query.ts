@@ -37,7 +37,7 @@ import {
   WithdrawLiquidityPosition,
 } from './types'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
-import { calcNetworkFee, getChainAsset } from './utils/swap'
+import { calcNetworkFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/swap'
 
 const BN_1 = new BigNumber(1)
 const defaultCache = new ThorchainCache()
@@ -90,10 +90,10 @@ export class ThorchainQuery {
     })
 
     const inboundDetails = await this.thorchainCache.getInboundDetails()
-
     const sourceInboundDetails = inboundDetails[input.asset.chain]
     const destinationInboundDetails = inboundDetails[destinationAsset.chain]
 
+    // Calculate swap estimate
     const swapEstimate = await this.calcSwapEstimate(
       {
         input,
@@ -107,11 +107,7 @@ export class ThorchainQuery {
       sourceInboundDetails,
       destinationInboundDetails,
     )
-
-    // Remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
-    const affiliateFee = input.baseAmount.times(affiliateFeePercent || 0)
-
-    // Calculate expiry time
+    // Calculate transaction expiry time
     const currentDatetime = new Date()
     const minutesToAdd = 15
     const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
@@ -142,7 +138,6 @@ export class ThorchainQuery {
       txDetails.txEstimate.errors = errors
     } else {
       txDetails.txEstimate.canSwap = true
-      // Retrieve inbound Asgard address.
       const inboundAsgard = (await this.thorchainCache.getInboundAddresses())[input.asset.chain]
       txDetails.toAddress = inboundAsgard?.address || ''
       // Work out LIM from the slip percentage
@@ -150,7 +145,14 @@ export class ThorchainQuery {
       if (slipLimit) {
         limPercentage = BN_1.minus(slipLimit || 1)
       } // else allowed slip is 100%
-      const limAssetAmount = swapEstimate.netOutput.times(limPercentage)
+      // Lim should allways be 1e8
+      const limAssetAmount =
+        swapEstimate.netOutput.baseAmount.decimal === 8
+          ? swapEstimate.netOutput.times(limPercentage)
+          : new CryptoAmount(
+              baseAmount(getBaseAmountWithDiffDecimals(swapEstimate.netOutput.times(limPercentage), 8)),
+              destinationAsset,
+            )
       const inboundDelay = await this.confCounting(input)
       const outboundDelay = await this.outboundDelay(limAssetAmount)
       txDetails.txEstimate.waitTimeSeconds = outboundDelay + inboundDelay
@@ -162,11 +164,10 @@ export class ThorchainQuery {
         limit: limAssetAmount.baseAmount,
         destinationAddress: destinationAddress,
         affiliateAddress: affiliateAddress,
-        affiliateFee,
+        affiliateFee: swapEstimate.totalFees.affiliateFee.baseAmount,
         interfaceID: interfaceID,
       })
     }
-
     return txDetails
   }
   /**
@@ -174,15 +175,13 @@ export class ThorchainQuery {
    * @param params
    */
   private isValidSwap(params: EstimateSwapParams) {
-    // TODO validate all input fields
-
     if (eqAsset(params.input.asset, params.destinationAsset))
       throw Error(`sourceAsset and destinationAsset cannot be the same`)
 
     if (params.input.baseAmount.lte(0)) throw Error('inputAmount must be greater than 0')
-
+    // Affiliate fee % can't exceed 10% because this is set by TC.
     if (params.affiliateFeePercent && (params.affiliateFeePercent < 0 || params.affiliateFeePercent > 0.1))
-      throw Error(`affiliateFee must be between 0 and 1000`)
+      throw Error(`affiliateFee must be between 0 and 1000 basis points`)
   }
   /**
    * Does the calculations for the swap.
@@ -220,12 +219,9 @@ export class ThorchainQuery {
     const inboundFeeInRune = await this.thorchainCache.convert(inboundFeeInAsset, AssetRuneNative)
     let outboundFeeInRune = await this.thorchainCache.convert(outboundFeeInAsset, AssetRuneNative)
 
-    // ---------- Remove Fees from inbound before doing the swap -----------
-    // TODO confirm with chris about this change, was there a reason why this was commented out?
+    // ----------- Remove Fees from inbound before doing the swap -----------
     const inputMinusInboundFeeInRune = inputInRune.minus(inboundFeeInRune)
-    //>//const inputMinusInboundFeeInRune = inputInRune
-
-    // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
+    // remove any affiliateFee. netInput * affiliateFee (percentage) of the destination asset type
     const affiliateFeeInRune = inputMinusInboundFeeInRune.times(params.affiliateFeePercent || 0)
     // remove the affiliate fee from the input.
     const inputNetAmountInRune = inputMinusInboundFeeInRune.minus(affiliateFeeInRune)
@@ -283,7 +279,7 @@ export class ThorchainQuery {
     const lim = limstring.substring(0, limstring.length - 3).concat(params.interfaceID.toString())
     // create the full memo
     let memo = `=:${assetToString(params.destinationAsset)}`
-
+    console.log(params.affiliateFee.amount().toFixed())
     if (params.affiliateAddress != '' || params.affiliateFee == undefined) {
       memo = memo.concat(
         `:${params.destinationAddress}:${lim}:${params.affiliateAddress}:${params.affiliateFee.amount().toFixed()}`,

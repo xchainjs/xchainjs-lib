@@ -182,7 +182,18 @@ describe('Thorchain-query tests', () => {
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
     printTx(estimate, swapParams.input)
-    const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:96212999`
+    const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:9621201999`
+    expect(estimate.memo).toEqual(correctMemo)
+  })
+  it('Should construct the correct memo ', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(1)), AssetETH),
+      destinationAsset: assetUSDC,
+      destinationAddress: 'xxx',
+    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:173329271999`
     expect(estimate.memo).toEqual(correctMemo)
   })
 })
