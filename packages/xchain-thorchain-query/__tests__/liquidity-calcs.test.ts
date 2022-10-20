@@ -1,6 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
   AssetBTC,
+  AssetETH,
   AssetRuneNative,
   assetAmount,
   assetFromStringEx,
@@ -30,6 +31,7 @@ const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thor
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
+const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 const BusdPoolDetails1 = {
   annualPercentageRate: '-0.08690907236215786',
@@ -47,6 +49,7 @@ const BusdPoolDetails1 = {
   units: '119365324519968',
   volume24h: '472358072383752',
 }
+
 // const BusdPoolDetails = {
 //   annualPercentageRate: '-0.08690907236215786',
 //   asset: 'BNB.BUSD-BD1',
@@ -89,7 +92,7 @@ describe(`Liquidity calc tests`, () => {
   })
 
   it(`Should calculate correct liquidity units for above entry`, async () => {
-    const BusdPool1 = new LiquidityPool(BusdPoolDetails1, 8)
+    const BusdPool1 = new LiquidityPool(BusdPoolDetails1)
     const liquidityBUSd: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount(`2.05262786`, 6)), BUSD),
       rune: new CryptoAmount(assetToBase(assetAmount('1.02658114')), AssetRuneNative),
@@ -121,6 +124,26 @@ describe(`Liquidity calc tests`, () => {
     }
     const getSlip = getSlipOnLiquidity(liquidityOneSided, btcPool)
     const correctSlip = '12.3' // percent slippage
+    expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
+  })
+  it(`Should calculate slip on liquidity for single sided USDC add`, async () => {
+    const usdcPool = await thorchainQuery.thorchainCache.getPoolForAsset(USDC)
+    const liquidityOneSided: LiquidityToAdd = {
+      asset: new CryptoAmount(assetToBase(assetAmount('10000', 6)), USDC),
+      rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative),
+    }
+    const getSlip = getSlipOnLiquidity(liquidityOneSided, usdcPool)
+    const correctSlip = '0.307' // percent slippage
+    expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
+  })
+  it(`Should calculate slip on liquidity for single sided ETH add`, async () => {
+    const ethPool = await thorchainQuery.thorchainCache.getPoolForAsset(AssetETH)
+    const liquidityOneSided: LiquidityToAdd = {
+      asset: new CryptoAmount(assetToBase(assetAmount('100', 18)), AssetETH),
+      rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative),
+    }
+    const getSlip = getSlipOnLiquidity(liquidityOneSided, ethPool)
+    const correctSlip = '1.56' // percent slippage
     expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
   })
   it(`Should calculate slip on liquidity for single sided RUNE add`, async () => {
@@ -176,7 +199,7 @@ describe(`Liquidity calc tests`, () => {
     expect(checkILP.totalDays).toEqual('100.00')
   })
   it(`Should calculate correct pool ownership`, async () => {
-    const BusdPool = new LiquidityPool(emptyBusdPoolDetails, 8)
+    const BusdPool = new LiquidityPool(emptyBusdPoolDetails)
     const liquidityToAdd: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount('50')), BUSD),
       rune: new CryptoAmount(assetToBase(assetAmount('50')), AssetRuneNative),

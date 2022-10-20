@@ -71,7 +71,7 @@ describe('Thorchain-query tests', () => {
 
   it('Should fail estimate swap because destination chain is halted ', async () => {
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(2)), AssetETH),
+      input: new CryptoAmount(assetToBase(assetAmount(2, 18)), AssetETH),
       destinationAsset: AssetLTC,
       destinationAddress: 'xxx',
     }
@@ -174,7 +174,7 @@ describe('Thorchain-query tests', () => {
       assetAmount('3794.0994').amount().toFixed(),
     )
   })
-  it('Should construct the correct memo ', async () => {
+  it('Should construct the correct memo BUSD->USDC', async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(100)), BUSD),
       destinationAsset: assetUSDC,
@@ -184,9 +184,9 @@ describe('Thorchain-query tests', () => {
     const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:9621201999`
     expect(estimate.memo).toEqual(correctMemo)
   })
-  it('Should construct the correct memo ', async () => {
+  it('Should construct the correct memo ETH->USDC', async () => {
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(1)), AssetETH),
+      input: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
       destinationAsset: assetUSDC,
       destinationAddress: 'xxx',
     }

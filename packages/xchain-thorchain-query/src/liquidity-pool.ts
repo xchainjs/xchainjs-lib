@@ -9,20 +9,20 @@ export class LiquidityPool {
   readonly pool: PoolDetail
   readonly assetBalance: BaseAmount
   readonly runeBalance: BaseAmount
-  readonly decimals: number
+  // readonly decimals: number
 
   readonly asset: Asset
   readonly assetString: string
   readonly runeToAssetRatio: BigNumber
   readonly assetToRuneRatio: BigNumber
 
-  constructor(pool: PoolDetail, decimals: number) {
+  constructor(pool: PoolDetail) {
     this.pool = pool
     const asset = assetFromString(this.pool.asset)
     if (!asset) throw new Error(`could not parse ${this.pool.asset}`)
 
     this.asset = asset
-    this.decimals = decimals
+    // this.decimals = decimals
     this.assetString = this.pool.asset
     this.assetBalance = baseAmount(this.pool.assetDepth)
     this.runeBalance = baseAmount(this.pool.runeDepth)

@@ -56,7 +56,7 @@ export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShare
  * @returns - returns bignumber representing a slip percentage
  */
 export const getSlipOnLiquidity = (stake: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
-  const baseAmount8decimals = getBaseAmountWithDiffDecimals(stake.asset, pool.decimals)
+  const baseAmount8decimals = getBaseAmountWithDiffDecimals(stake.asset, 8)
   // formula: (t * R - T * r)/ (T*r + R*T)
   const r = stake.rune.baseAmount.amount()
   const t = baseAmount8decimals

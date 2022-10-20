@@ -37,7 +37,7 @@ import {
   WithdrawLiquidityPosition,
 } from './types'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
-import { calcNetworkFee, getChainAsset } from './utils/swap'
+import { calcNetworkFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/swap'
 
 const BN_1 = new BigNumber(1)
 const defaultCache = new ThorchainCache()
@@ -79,7 +79,7 @@ export class ThorchainQuery {
     affiliateFeePercent = 0,
     slipLimit,
   }: EstimateSwapParams): Promise<TxDetails> {
-    this.isValidSwap({
+    await this.isValidSwap({
       input,
       destinationAsset,
       destinationAddress,
@@ -146,10 +146,8 @@ export class ThorchainQuery {
         limPercentage = BN_1.minus(slipLimit || 1)
       } // else allowed slip is 100%
       // Lim should allways be 1e8
-      const limAssetAmount = new CryptoAmount(
-        baseAmount(swapEstimate.netOutput.times(limPercentage).baseAmount.amount(), 8),
-        destinationAsset,
-      )
+      const limAssetAmount = swapEstimate.netOutput.times(limPercentage)
+      const limAssetAmount8Decimals = getBaseAmountWithDiffDecimals(limAssetAmount, 8)
       const inboundDelay = await this.confCounting(input)
       const outboundDelay = await this.outboundDelay(limAssetAmount)
       txDetails.txEstimate.waitTimeSeconds = outboundDelay + inboundDelay
@@ -158,7 +156,7 @@ export class ThorchainQuery {
       txDetails.memo = this.constructSwapMemo({
         input: input,
         destinationAsset: destinationAsset,
-        limit: limAssetAmount.baseAmount,
+        limit: baseAmount(limAssetAmount8Decimals),
         destinationAddress: destinationAddress,
         affiliateAddress: affiliateAddress,
         affiliateFee: swapEstimate.totalFees.affiliateFee.baseAmount,
@@ -172,8 +170,21 @@ export class ThorchainQuery {
    * @param params
    */
   private async isValidSwap(params: EstimateSwapParams) {
-    const nativeDecimals = await this.thorchainCache.getPoolForAsset(params.input.asset)
-    if (params.input.baseAmount.decimal == nativeDecimals.decimals) {
+    if (isAssetRuneNative(params.input.asset)) {
+      if (params.input.baseAmount.decimal !== 8)
+        throw Error(`input asset ${assetToString(params.input.asset)}  must have decimals of 8`)
+    } else {
+      const assetPool = await this.thorchainCache.getPoolForAsset(params.input.asset)
+      const nativeDecimals = assetPool?.pool.nativeDecimal
+      if (
+        nativeDecimals &&
+        nativeDecimals !== '-1' &&
+        params.input.baseAmount.decimal !== Number(assetPool?.pool.nativeDecimal)
+      ) {
+        throw Error(
+          `input asset ${assetToString(params.input.asset)}  must have decimals of ${assetPool?.pool.nativeDecimal}`,
+        )
+      }
     }
     if (eqAsset(params.input.asset, params.destinationAsset))
       throw Error(`sourceAsset and destinationAsset cannot be the same`)

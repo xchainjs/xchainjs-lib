@@ -156,13 +156,14 @@ export class ThorchainCache {
    * which will refresh the cache if it's expired
    */
   private async refereshPoolCache(): Promise<void> {
-    const [thornodePools, midgardPools] = await Promise.all([this.thornode.getPools(), this.midgard.getPools()])
+    // const [thornodePools, midgardPools] = await Promise.all([this.thornode.getPools(), this.midgard.getPools()])
+    const midgardPools = await this.midgard.getPools()
     const poolMap: Record<string, LiquidityPool> = {}
     if (midgardPools) {
       for (const pool of midgardPools) {
-        const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
-        const decimals = thornodePool?.decimals ?? 8
-        const lp = new LiquidityPool(pool, decimals)
+        // const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
+        // const decimals = thornodePool?.decimals ?? 8
+        const lp = new LiquidityPool(pool)
         poolMap[lp.asset.ticker] = lp
       }
       this.poolCache = {
@@ -320,10 +321,12 @@ export class ThorchainCache {
 
     return result
   }
-  private async getDecimalForAsset(asset: Asset) {
+  private async getDecimalForAsset(asset: Asset): Promise<number> {
     if (!isAssetRuneNative(asset)) {
       const pool = await this.getPoolForAsset(asset)
-      return pool.decimals ?? DEFAULT_THORCHAIN_DECIMALS
+      const decimals = Number(pool.pool.nativeDecimal)
+      if (decimals > 0) return decimals
+      else return DEFAULT_THORCHAIN_DECIMALS
     }
     return DEFAULT_THORCHAIN_DECIMALS
   }

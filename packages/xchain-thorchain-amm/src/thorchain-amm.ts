@@ -82,7 +82,6 @@ export class ThorchainAMM {
     } // else allowed slip is 100%
 
     const limAssetAmount = txDetails.txEstimate.netOutput.times(limPercentage)
-
     const waitTimeSeconds = txDetails.txEstimate.waitTimeSeconds
 
     return await wallet.executeSwap({

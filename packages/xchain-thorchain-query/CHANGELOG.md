@@ -2,8 +2,14 @@
 
 ## Fix
 
+- Bug - Limit asset amount was not using 8 decimal places 
 - Bug - outbound fee is now calculated correctly
+- affiliate fee calculation fixed 
 - Bump dep on package `xchain-midgard`
+
+## Add
+
+- check input asset decimals match nativeDecimals in LiquidityPool.pool, or throw Error
 
 # v0.1.3 (2022-10-17)
 

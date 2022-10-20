@@ -68,8 +68,8 @@ const ethPoolDetails = {
   volume24h: '8122016881297',
 }
 
-const btcPool = new LiquidityPool(btcPoolDetails, 8)
-const ethPool = new LiquidityPool(ethPoolDetails, 8)
+const btcPool = new LiquidityPool(btcPoolDetails)
+const ethPool = new LiquidityPool(ethPoolDetails)
 
 const inputAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
 

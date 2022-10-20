@@ -87,4 +87,12 @@ describe('decimal math tests', () => {
     expect(amount.assetAmountFixedString()).toEqual(expected.assetAmountFixedString())
     expect(amount.eq(expected)).toBe(true)
   })
+  // it(`Should do decimal conversion `, async () => {
+  //   const input = new CryptoAmount(assetToBase(assetAmount(100)), AssetRuneNative)
+  //   const out = getBaseAmountWithDiffDecimals(input.baseAmount, 18)
+  //   const amount = await thorchainQuery.thorchainCache.convert(input, AssetBTC)
+  //   const expected = new CryptoAmount(assetToBase(assetAmount(`0.00917714`)), AssetBTC)
+  //   expect(amount.assetAmountFixedString()).toEqual(expected.assetAmountFixedString())
+  //   expect(amount.eq(expected)).toBe(true)
+  // })
 })
