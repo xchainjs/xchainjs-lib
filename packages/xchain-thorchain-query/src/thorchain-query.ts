@@ -37,7 +37,7 @@ import {
   WithdrawLiquidityPosition,
 } from './types'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
-import { calcNetworkFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/swap'
+import { calcNetworkFee, getChainAsset } from './utils/swap'
 
 const BN_1 = new BigNumber(1)
 const defaultCache = new ThorchainCache()
@@ -146,13 +146,10 @@ export class ThorchainQuery {
         limPercentage = BN_1.minus(slipLimit || 1)
       } // else allowed slip is 100%
       // Lim should allways be 1e8
-      const limAssetAmount =
-        swapEstimate.netOutput.baseAmount.decimal === 8
-          ? swapEstimate.netOutput.times(limPercentage)
-          : new CryptoAmount(
-              baseAmount(getBaseAmountWithDiffDecimals(swapEstimate.netOutput.times(limPercentage), 8)),
-              destinationAsset,
-            )
+      const limAssetAmount = new CryptoAmount(
+        baseAmount(swapEstimate.netOutput.times(limPercentage).baseAmount.amount(), 8),
+        destinationAsset,
+      )
       const inboundDelay = await this.confCounting(input)
       const outboundDelay = await this.outboundDelay(limAssetAmount)
       txDetails.txEstimate.waitTimeSeconds = outboundDelay + inboundDelay
@@ -174,7 +171,10 @@ export class ThorchainQuery {
    * Basic Checks for swap information
    * @param params
    */
-  private isValidSwap(params: EstimateSwapParams) {
+  private async isValidSwap(params: EstimateSwapParams) {
+    const nativeDecimals = await this.thorchainCache.getPoolForAsset(params.input.asset)
+    if (params.input.baseAmount.decimal == nativeDecimals.decimals) {
+    }
     if (eqAsset(params.input.asset, params.destinationAsset))
       throw Error(`sourceAsset and destinationAsset cannot be the same`)
 
@@ -199,7 +199,6 @@ export class ThorchainQuery {
     sourceInboundDetails: InboundDetail,
     destinationInboundDetails: InboundDetail,
   ): Promise<SwapEstimate> {
-    // NOTE need to convert the asset to 8 decimals places for all calcs
     const DEFAULT_THORCHAIN_DECIMALS = 8
     // If input is already in 8 decimals skip the convert
     const input =
