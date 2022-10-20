@@ -279,7 +279,6 @@ export class ThorchainQuery {
     const lim = limstring.substring(0, limstring.length - 3).concat(params.interfaceID.toString())
     // create the full memo
     let memo = `=:${assetToString(params.destinationAsset)}`
-    console.log(params.affiliateFee.amount().toFixed())
     if (params.affiliateAddress != '' || params.affiliateFee == undefined) {
       memo = memo.concat(
         `:${params.destinationAddress}:${lim}:${params.affiliateAddress}:${params.affiliateFee.amount().toFixed()}`,
