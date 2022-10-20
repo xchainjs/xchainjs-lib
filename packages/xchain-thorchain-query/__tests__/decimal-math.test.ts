@@ -1,4 +1,3 @@
-import { Network } from '@xchainjs/xchain-client'
 import {
   // Asset,
   // AssetBNB,
@@ -15,14 +14,9 @@ import {
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
 import { CryptoAmount } from '../src/crypto-amount'
-import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
-import { Midgard } from '../src/utils/midgard'
-import { Thornode } from '../src/utils/thornode'
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
-
-const thorchainQuery = new ThorchainQuery(thorchainCache)
+const thorchainQuery = new ThorchainQuery()
 
 const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 // const BUSD = assetFromString('BNB.BUSD-BD1')

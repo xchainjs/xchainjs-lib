@@ -1,11 +1,10 @@
-import { Network } from '@xchainjs/xchain-client'
 import { PoolDetail } from '@xchainjs/xchain-midgard'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
 import { Midgard } from '../src/utils/midgard'
 
-const mainnetMidgard = new Midgard(Network.Mainnet)
+const mainnetMidgard = new Midgard()
 
 describe('Midgard Client Test', () => {
   beforeAll(() => {

@@ -1,12 +1,6 @@
 import { FeeOption } from '@xchainjs/xchain-client'
 import { CryptoAmount, LiquidityPool } from '@xchainjs/xchain-thorchain-query'
 import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util'
-import { BigNumber } from 'bignumber.js'
-
-export type MidgardConfig = {
-  apiRetries: number
-  midgardBaseUrls: string[]
-}
 
 export type ExecuteSwap = {
   input: CryptoAmount
@@ -55,15 +49,4 @@ export type DepositParams = {
   amount: BaseAmount
   feeOption: FeeOption
   memo: string
-}
-
-export type SwapOutput = {
-  output: CryptoAmount
-  swapFee: CryptoAmount
-  slip: BigNumber
-}
-
-export type UnitData = {
-  liquidityUnits: BigNumber
-  totalUnits: BigNumber
 }

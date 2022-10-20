@@ -3,7 +3,7 @@ import { Chain, THORChain } from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
 import { ThorchainCache } from './thorchain-cache'
-import { ChainAttributes, TransactionStatus } from './types'
+import { ChainAttributes, TransactionProgress, TransactionStatus } from './types'
 import { getChain } from './utils/swap'
 
 export class TransactionStage {
@@ -28,34 +28,46 @@ export class TransactionStage {
    * @param sourceChain - Needed for faster logic
    * @returns - tx stage or maybe a boolean not sure at this stage
    */
-  public async transactionProgress(inboundTxHash: string, sourceChain?: Chain): Promise<boolean> {
+  public async checkTxProgress(
+    inboundTxHash: string,
+    progress?: number,
+    sourceChain?: Chain,
+  ): Promise<TransactionProgress> {
+    const transactionProgress: TransactionProgress = {
+      progress: 0,
+      seconds: 0,
+      errors: [],
+    }
     const txData = await this.thorchainCache.thornode.getTxData(inboundTxHash)
-    const txObserved = this.checkTCObservedTx(txData, sourceChain)
-    console.log(txObserved)
-
-    // Get the source chain
-    if (txData.observed_tx?.tx?.chain != undefined) {
-      sourceChain = getChain(txData.observed_tx.tx.chain)
-    } else {
-      throw new Error(`Cannot get source chain ${txData.observed_tx?.tx?.chain}`)
-    }
-
-    // Retrieve block height
     const lastBlock = await this.thorchainCache.thornode.getLastBlock()
-
-    if (sourceChain == Chain.Bitcoin || Chain.BitcoinCash || Chain.Litecoin) {
-      const lastBlockHeight = lastBlock.find((obj) => obj.chain === sourceChain)
-      if (!lastBlockHeight?.last_observed_in) throw Error('No recorded block height')
-      const checkConf = await this.checkConfcounting(txData.observed_tx, sourceChain, lastBlockHeight)
-      console.log(checkConf)
-
-      // Get block height
-      const tcBlockHeight = lastBlock.find((obj) => obj.thorchain)
-
-      const s = await this.checkOutboundQueue(inboundTxHash, tcBlockHeight)
-      console.log(s)
+    switch (progress) {
+      case 0:
+        const txObserved = await this.checkTCRecords(txData, sourceChain)
+        transactionProgress.seconds = txObserved.seconds
+        transactionProgress.progress = 1
+        transactionProgress.errors = txObserved.error
+        return transactionProgress
+      case 1:
+        if (txData.observed_tx?.tx?.chain != undefined) {
+          sourceChain = getChain(txData.observed_tx.tx.chain)
+          if (sourceChain == Chain.Bitcoin || Chain.BitcoinCash || Chain.Litecoin) {
+            const lastBlockHeight = lastBlock.find((obj) => obj.chain === sourceChain)
+            const checkConf = await this.checkConfcounting(sourceChain, lastBlockHeight, txData.observed_tx)
+            transactionProgress.seconds = checkConf.seconds
+            transactionProgress.errors = checkConf.error
+          }
+        }
+        transactionProgress.progress = 2
+        return transactionProgress
+      case 2:
+        const tcBlockHeight = lastBlock.find((obj) => obj.thorchain)
+        const checkOutboundQueue = await this.checkOutboundQueue(inboundTxHash, tcBlockHeight)
+        transactionProgress.seconds = checkOutboundQueue.seconds
+        transactionProgress.errors = checkOutboundQueue.error
+        return transactionProgress
+      default:
+        return transactionProgress
     }
-    return true
   }
 
   /** Stage 1  */
@@ -67,19 +79,19 @@ export class TransactionStage {
    * @param sourceChain
    * @returns
    */
-  public async checkTCObservedTx(txData: TxResponse, sourceChain?: Chain): Promise<TransactionStatus> {
+  private async checkTCRecords(txData: TxResponse, sourceChain?: Chain): Promise<TransactionStatus> {
     const stageStatus: TransactionStatus = {
       seconds: 0,
-      targetBlock: 0,
+      error: [],
     }
     if (JSON.stringify(txData.observed_tx) == undefined) {
       if (sourceChain) {
         stageStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
-      } else {
-        stageStatus.seconds = 60
       }
-    } else {
+      stageStatus.seconds = 60
+      stageStatus.error.push(`No observed tx, wait sixty seconds`)
     }
+
     return stageStatus
   }
 
@@ -95,30 +107,30 @@ export class TransactionStage {
    * @returns - transaction stage
    */
   private async checkConfcounting(
-    observed_tx: ObservedTx,
     sourceChain: Chain,
-    lastSourceBlock: LastBlock,
+    lastSourceBlock?: LastBlock,
+    observed_tx?: ObservedTx,
   ): Promise<TransactionStatus> {
-    const stageStatus: TransactionStatus = { seconds: 0, targetBlock: 0 }
-    if (observed_tx?.block_height && observed_tx?.finalise_height) {
-      // has this already happened?
-      //   console.log(
-      //     `lastSourceBlock.last_observed_in is ${lastSourceBlock.last_observed_in} and observed_tx.finalise_height is ${observed_tx.finalise_height}`,
-      //   )
-      if (lastSourceBlock.last_observed_in < observed_tx.finalise_height) {
-        // If observed but not final, need to wait till the finalised block before moving to the next stage, blocks in source chain
-        if (observed_tx.block_height < observed_tx.finalise_height) {
-          const blocksToWait = observed_tx.finalise_height - observed_tx?.block_height // how many source blocks to wait.
-          stageStatus.seconds = blocksToWait * this.chainAttributes[sourceChain].avgBlockTimeInSecs
-          stageStatus.targetBlock = observed_tx.finalise_height // not this is the source blockchain height, not the THORChain block height
-        }
-      } else {
+    const transactionStatus: TransactionStatus = { seconds: 0, error: [] }
+    if (lastSourceBlock == undefined) {
+      transactionStatus.error.push(`could not find last source block`)
+      return transactionStatus
+    }
+    if (
+      observed_tx?.block_height &&
+      observed_tx?.finalise_height &&
+      lastSourceBlock.last_observed_in < observed_tx.finalise_height
+    ) {
+      // If observed but not final, need to wait till the finalised block before moving to the next stage, blocks in source chain
+      if (observed_tx.block_height < observed_tx.finalise_height) {
+        const blocksToWait = observed_tx.finalise_height - observed_tx?.block_height // how many source blocks to wait.
+        transactionStatus.seconds = blocksToWait * this.chainAttributes[sourceChain].avgBlockTimeInSecs
       }
     }
-    return stageStatus
+    return transactionStatus
   }
 
-  /** Stage 4 */
+  /** Stage 3 */
   /**
    * Regardless of the transaction size, if the network is under load, Txs will need to wait. Given a size of a transaction AND the current network load, THORNode can assign a future block for the outgoing transaction.
    * A user needs to wait for that block to be reached before a TX is sent.
@@ -126,21 +138,21 @@ export class TransactionStage {
    * Steps.
    * 1. See if there is an outbound queue. If none, outTx has been sent.
    * 2. Find the targetblock the oubound Tx will be sent in for the given inbound Tx hash.
-   * 3. Compare that agains the current TC height to see the block different then times the TC block time to get seconds.
+   * 3. Compare that against the current TC height to see the block different then times the TC block time to get seconds.
    *
    * @param inboundTxHash
    * @param lastBlockHeight
    * @returns
    */
   private async checkOutboundQueue(inboundTxHash: string, lastBlockHeight?: LastBlock): Promise<TransactionStatus> {
-    const stageStatus: TransactionStatus = { seconds: 0, targetBlock: 0 }
+    const stageStatus: TransactionStatus = { seconds: 0, error: [] }
     const scheduledQueueItem = (await this.thorchainCache.thornode.getscheduledQueue()).find(
       (item: TxOutItem) => item.in_hash === inboundTxHash,
     )
     if (scheduledQueueItem == undefined) {
+      stageStatus.error.push(`scheduled queue item is undefined`)
     } else {
       if (scheduledQueueItem?.height && lastBlockHeight?.thorchain) {
-        stageStatus.targetBlock = scheduledQueueItem.height
         stageStatus.seconds =
           (scheduledQueueItem.height - lastBlockHeight?.thorchain) * this.chainAttributes[THORChain].avgBlockTimeInSecs
       }

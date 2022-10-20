@@ -1,4 +1,3 @@
-import { Network } from '@xchainjs/xchain-client'
 import {
   AssetBTC,
   AssetETH,
@@ -16,7 +15,6 @@ import { CryptoAmount } from '../src/crypto-amount'
 import { LiquidityPool } from '../src/liquidity-pool'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { SwapOutput } from '../src/types'
-import { Midgard } from '../src/utils/midgard'
 import {
   getDoubleSwap,
   //getDoubleSwap,
@@ -28,9 +26,8 @@ import {
   getSwapOutput,
   getSwapSlip,
 } from '../src/utils/swap'
-import { Thornode } from '../src/utils/thornode'
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+const thorchainCache = new ThorchainCache()
 
 const BUSD = assetFromString('BNB.BUSD-BD1')
 if (!BUSD) throw Error('Asset is incorrect')
