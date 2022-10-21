@@ -186,6 +186,7 @@ export class ThorchainQuery {
         )
       }
     }
+
     if (eqAsset(params.input.asset, params.destinationAsset))
       throw Error(`sourceAsset and destinationAsset cannot be the same`)
 

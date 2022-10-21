@@ -9,7 +9,7 @@ import { Client as EthClient } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { AssetBTC, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
+import { Chain } from '@xchainjs/xchain-util'
 
 import { AddLiquidity, ExecuteSwap, TxSubmitted, WithdrawLiquidity } from './types'
 import { EthHelper } from './utils/eth-helper'
@@ -110,28 +110,11 @@ export class Wallet {
       return await this.swapNonRune(swap)
     }
   }
-  private constructSwapMemo(swap: ExecuteSwap): string {
-    const limstring = swap.limit.amount().toFixed()
 
-    // create LIM with interface ID
-    const lim = limstring.substring(0, limstring.length - 3).concat(swap.interfaceID.toString())
-    // create the full memo
-    let memo = `=:${assetToString(swap.destinationAsset)}`
-
-    if (swap.affiliateAddress != '' || swap.affiliateFee == undefined) {
-      memo = memo.concat(
-        `:${swap.destinationAddress}:${lim}:${swap.affiliateAddress}:${swap.affiliateFee.amount().toFixed()}`,
-      )
-    } else {
-      memo = memo.concat(`:${swap.destinationAddress}:${lim}`)
-    }
-
-    // If memo length is too long for BTC, trim it
-    if (eqAsset(swap.input.asset, AssetBTC) && memo.length > 80) {
-      memo = `=:${assetToString(swap.destinationAsset)}:${swap.destinationAddress}`
-    }
-    return memo
-  }
+  /** Validate swap object
+   *
+   * @param swap  - swap parameters
+   */
   private validateSwap(swap: ExecuteSwap) {
     const errors: string[] = []
     const isThorchainDestinationAsset = swap.destinationAsset.synth || swap.destinationAsset.chain === Chain.THORChain
@@ -140,23 +123,37 @@ export class Wallet {
     if (!this.clients[chain].validateAddress(swap.destinationAddress)) {
       errors.push(`destinationAddress ${swap.destinationAddress} is not a valid address`)
     }
-    if (swap.affiliateAddress && !this.clients[Chain.THORChain].validateAddress(swap.affiliateAddress))
-      errors.push(`affiliateAddress ${swap.affiliateAddress} is not a valid address`)
-
+    // Affiliate address should be THORName or THORAddress
+    // To do add check for THORName using endpoint  https://thornode.ninerealms.com/thorchain/thorname/orion
+    const checkAffiliateAddress = swap.memo.split(':')
+    if (checkAffiliateAddress.length > 4) {
+      if (checkAffiliateAddress[4] && !this.clients[Chain.THORChain].validateAddress(checkAffiliateAddress[4]))
+        errors.push(`affiliateAddress ${checkAffiliateAddress[4]} is not a valid THOR address`)
+    }
     if (errors.length > 0) throw Error(errors.join('\n'))
   }
 
+  /** Function handles all swaps from Rune to asset
+   *
+   * @param swap - swap parameters
+   * @returns - tx submitted object
+   */
   private async swapRuneTo(swap: ExecuteSwap): Promise<TxSubmitted> {
     const thorClient = (this.clients.THOR as unknown) as ThorchainClient
     const waitTimeSeconds = swap.waitTimeSeconds
     const hash = await thorClient.deposit({
       amount: swap.input.baseAmount,
       asset: swap.input.asset,
-      memo: this.constructSwapMemo(swap),
+      memo: swap.memo,
     })
     return { hash, url: this.clients.THOR.getExplorerTxUrl(hash), waitTimeSeconds }
   }
 
+  /** Function handles all swaps from Non Rune
+   *
+   * @param swap - swap object
+   * @returns - TxSubmitted object
+   */
   private async swapNonRune(swap: ExecuteSwap): Promise<TxSubmitted> {
     const client = this.clients[swap.input.asset.chain]
     const waitTimeSeconds = swap.waitTimeSeconds
@@ -169,7 +166,7 @@ export class Wallet {
         asset: swap.input.asset,
         amount: swap.input.baseAmount,
         feeOption: swap.feeOption || FeeOption.Fast,
-        memo: this.constructSwapMemo(swap),
+        memo: swap.memo,
       }
       const hash = await this.ethHelper.sendDeposit(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
@@ -179,7 +176,7 @@ export class Wallet {
         asset: swap.input.asset,
         amount: swap.input.baseAmount,
         feeOption: swap.feeOption || FeeOption.Fast,
-        memo: this.constructSwapMemo(swap),
+        memo: swap.memo,
       }
       const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(params)
@@ -190,16 +187,16 @@ export class Wallet {
         asset: swap.input.asset,
         amount: swap.input.baseAmount,
         recipient: inbound.address,
-        memo: this.constructSwapMemo(swap),
+        memo: swap.memo,
       }
-
-      const hash = await client.transfer(params)
+      console.log(params)
+      const hash = 'await client.transfer(params)'
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     }
   }
 
-  /** BASED OFF https://dev.thorchain.or›g/thorchain-dev/network/memos
-   *
+  /** Function handles liquidity Add
+   * BASED OFF https://dev.thorchain.or›g/thorchain-dev/network/memos
    * @param params input parameters needed to add liquidity
    * @returns transaction details submitted
    */
@@ -234,7 +231,7 @@ export class Wallet {
     }
   }
 
-  /**
+  /** Function handles liquidity Withdraw
    *
    * @param params - parameters required for liquidity position
    * @returns object with tx response, url and wait time in seconds
@@ -268,7 +265,7 @@ export class Wallet {
     }
   }
 
-  /**
+  /** Function handles liquidity add for all non rune assets
    *
    * @param params - parameters for add liquidity
    * @param constructedMemo - memo needed for thorchain
@@ -322,7 +319,7 @@ export class Wallet {
       }
     }
   }
-  /**
+  /** Function handles liquidity Withdraw for Non rune assets
    *
    * @param params - parameters for withdraw liquidity
    * @param constructedMemo - memo needed for thorchain execution
@@ -378,7 +375,7 @@ export class Wallet {
     }
   }
 
-  /**
+  /** Function handles liquidity Add for Rune only
    *
    * @param params - deposit parameters
    * @param memo - memo needed to withdraw lp
@@ -400,7 +397,7 @@ export class Wallet {
     const hash = await thorClient.deposit(addParams)
     return { hash, url: thorchainClient.getExplorerTxUrl(hash), waitTimeSeconds }
   }
-  /**
+  /** Function handles liquidity Withdraw for Rune only
    *
    * @param params - withdraw parameters
    * @param memo - memo needed to withdraw lp

@@ -48,14 +48,15 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
       destinationAsset: toAsset,
       destinationAddress,
       slipLimit: new BigNumber('0.03'), //optional
+      //affiliateAddress: 'affiliate address goes here',
+      //affiliateFeePercent: 0.01,
     }
 
     const outPutCanSwap = await tcAmm.estimateSwap(swapParams)
     printTx(outPutCanSwap, swapParams.input)
     if (outPutCanSwap.txEstimate.canSwap) {
       const output = await tcAmm.doSwap(wallet, swapParams)
-      console.log(`swap ${output}`)
-      //console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+      console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
     }
   } catch (error) {
     console.error(error)

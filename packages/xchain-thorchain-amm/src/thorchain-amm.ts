@@ -7,12 +7,10 @@ import {
   TxDetails,
   WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
-import { BigNumber } from 'bignumber.js'
 
 import { TxSubmitted } from './types'
 import { Wallet } from './wallet'
 
-const BN_1 = new BigNumber(1)
 const defaultQuery = new ThorchainQuery()
 /**
  * THORChain Class for interacting with THORChain.
@@ -68,31 +66,17 @@ export class ThorchainAMM {
    * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
   public async doSwap(wallet: Wallet, params: EstimateSwapParams): Promise<TxSubmitted> {
-    // TODO validate all input fields
+    // Thorchain-query call satisfies the data needed for executeSwap to be called.
     const txDetails = await this.thorchainQuery.estimateSwap(params)
     if (!txDetails.txEstimate.canSwap) {
       throw Error(txDetails.txEstimate.errors.join('\n'))
     }
-    // remove any affiliateFee. netInput * affiliateFee (%age) of the destination asset type
-    const affiliateFee = params.input.baseAmount.times(params.affiliateFeePercent || 0)
-    // Work out LIM from the slip percentage
-    let limPercentage = BN_1
-    if (params.slipLimit) {
-      limPercentage = BN_1.minus(params.slipLimit || 1)
-    } // else allowed slip is 100%
-
-    const limAssetAmount = txDetails.txEstimate.netOutput.times(limPercentage)
-    const waitTimeSeconds = txDetails.txEstimate.waitTimeSeconds
-
     return await wallet.executeSwap({
       input: params.input,
       destinationAsset: params.destinationAsset,
-      limit: limAssetAmount.baseAmount,
       destinationAddress: params.destinationAddress,
-      affiliateAddress: params.affiliateAddress || '',
-      affiliateFee,
-      interfaceID: params.interfaceID || 999,
-      waitTimeSeconds,
+      memo: txDetails.memo,
+      waitTimeSeconds: txDetails.txEstimate.waitTimeSeconds,
     })
   }
 

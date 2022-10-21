@@ -3,6 +3,9 @@
 ## Update
 
 - Bump Dep version number for `xchain-midgard`, `thorchain-query`
+- Change ExecuteSwap() parameters to use constructed memo from `estimateSwap()`
+- Remove `constructMemo()` from wallet.ts
+- Clean types file
 
 # v0.3.3 (2022-10-17)
 
