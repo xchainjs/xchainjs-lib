@@ -189,8 +189,7 @@ export class Wallet {
         recipient: inbound.address,
         memo: swap.memo,
       }
-      console.log(params)
-      const hash = 'await client.transfer(params)'
+      const hash = await client.transfer(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     }
   }
@@ -393,7 +392,6 @@ export class Wallet {
       amount: params.rune.baseAmount,
       memo: memo,
     }
-    // console.log(addParams)
     const hash = await thorClient.deposit(addParams)
     return { hash, url: thorchainClient.getExplorerTxUrl(hash), waitTimeSeconds }
   }
@@ -415,7 +413,6 @@ export class Wallet {
       amount: params.runeFee.baseAmount,
       memo: memo,
     }
-    // console.log(addParams)
     const hash = await thorClient.deposit(addParams)
     return { hash, url: thorchainClient.getExplorerTxUrl(hash), waitTimeSeconds }
   }
