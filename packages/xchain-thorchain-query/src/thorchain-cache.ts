@@ -120,8 +120,9 @@ export class ThorchainCache {
   async getPoolForAsset(asset: Asset): Promise<LiquidityPool> {
     if (isAssetRuneNative(asset)) throw Error(`AssetRuneNative doesn't have a pool`)
     const pools = await this.getPools()
-    // Not: we use ticker, not asset string to get the same pool for both assets and synths
-    const pool = pools[asset.ticker]
+    // Note: we use ticker, not asset string to get the same pool for both assets and synths
+    // using ticker causes problems between same named tickers but different chains
+    const pool = pools[asset.symbol]
     if (pool) {
       return pool
     }
@@ -164,7 +165,7 @@ export class ThorchainCache {
         // const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
         // const decimals = thornodePool?.decimals ?? 8
         const lp = new LiquidityPool(pool)
-        poolMap[lp.asset.ticker] = lp
+        poolMap[lp.asset.symbol] = lp
       }
       this.poolCache = {
         lastRefreshed: Date.now(),

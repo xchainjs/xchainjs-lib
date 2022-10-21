@@ -1,4 +1,5 @@
 import {
+  AssetAtom,
   AssetBNB,
   AssetBTC,
   AssetETH,
@@ -19,7 +20,8 @@ import { EstimateSwapParams, TxDetails } from '../src/types'
 const thorchainQuery = new ThorchainQuery()
 
 const assetUOS = assetFromStringEx('ETH.UOS-0XD13C7342E1EF687C5AD21B27C2B65D772CAB5C8C')
-const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+const assetEthUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+const assetAVAXUSDC = assetFromStringEx(`AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E`)
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
@@ -101,7 +103,7 @@ describe('Thorchain-query tests', () => {
   })
   it('Should estimate swap from USDC to RUNE ', async () => {
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(1000, 6)), assetUSDC),
+      input: new CryptoAmount(assetToBase(assetAmount(1000, 6)), assetEthUSDC),
       destinationAsset: AssetRuneNative,
       destinationAddress: 'xxx',
     }
@@ -117,7 +119,7 @@ describe('Thorchain-query tests', () => {
   it('Should estimate swap from RUNE to USDC ', async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(50)), AssetRuneNative),
-      destinationAsset: assetUSDC,
+      destinationAsset: assetEthUSDC,
       destinationAddress: 'runeaddress',
     }
 
@@ -177,7 +179,7 @@ describe('Thorchain-query tests', () => {
   it('Should construct the correct memo BUSD->USDC', async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(100)), BUSD),
-      destinationAsset: assetUSDC,
+      destinationAsset: assetEthUSDC,
       destinationAddress: 'xxx',
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
@@ -187,11 +189,19 @@ describe('Thorchain-query tests', () => {
   it('Should construct the correct memo ETH->USDC', async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
-      destinationAsset: assetUSDC,
+      destinationAsset: assetEthUSDC,
       destinationAddress: 'xxx',
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
     const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:173329271999`
     expect(estimate.memo).toEqual(correctMemo)
+  })
+  it(`Should check assets match asset pools`, async () => {
+    const assetPoolEthUsdc = await thorchainQuery.thorchainCache.getPoolForAsset(assetEthUSDC)
+    const assetPoolAvaxUsdc = await thorchainQuery.thorchainCache.getPoolForAsset(assetAVAXUSDC)
+    const assetPoolGai = await thorchainQuery.thorchainCache.getPoolForAsset(AssetAtom)
+    expect(assetPoolEthUsdc.asset).toEqual(assetEthUSDC)
+    expect(assetPoolAvaxUsdc.asset).toEqual(assetAVAXUSDC)
+    expect(assetPoolGai.asset).toEqual(AssetAtom)
   })
 })

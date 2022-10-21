@@ -48,8 +48,7 @@ describe('Midgard Client Test', () => {
   // Tests for the midgard api
   it(`Should return pools array and match interface type PoolDetail`, async () => {
     const poolData = await mainnetMidgard.getPools()
-    console.log(poolData)
-    expect(poolData[0]).toEqual(poolDetail)
+    expect(poolData[2]).toEqual(poolDetail)
   })
   // it(`Should return inbound addresses`, async () => {
   //   const inboundAddress = await mainnetMidgard.getAllInboundAddresses()

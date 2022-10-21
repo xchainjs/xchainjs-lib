@@ -1,4 +1,36 @@
 [
+  {
+		"annualPercentageRate": "NaN",
+		"asset": "AVAX.AVAX",
+		"assetDepth": "1688374757745",
+		"assetPrice": "10.388442609031266",
+		"assetPriceUSD": "14.818744642937002",
+		"liquidityUnits": "12561766023435",
+		"nativeDecimal": "18",
+		"poolAPY": "0",
+		"runeDepth": "17539584273371",
+		"status": "available",
+		"synthSupply": "29627874696",
+		"synthUnits": "111193577540",
+		"units": "12672959600975",
+		"volume24h": "342880306596"
+	},
+  {
+		"annualPercentageRate": "NaN",
+		"asset": "AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E",
+		"assetDepth": "11004414013300",
+		"assetPrice": "0.6949151935685651",
+		"assetPriceUSD": "0.9912718575388061",
+		"liquidityUnits": "102959774173249",
+		"nativeDecimal": "6",
+		"poolAPY": "0",
+		"runeDepth": "7647134494161",
+		"status": "available",
+		"synthSupply": "2902888896033",
+		"synthUnits": "15643344362351",
+		"units": "118603118535600",
+		"volume24h": "266992165990"
+	},
 	{
 		"annualPercentageRate": "0.0925796460549001",
 		"asset": "BCH.BCH",
