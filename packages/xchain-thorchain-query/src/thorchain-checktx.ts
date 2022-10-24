@@ -43,8 +43,17 @@ export class TransactionStage {
     } else {
       progress = 0
     }
+
     const txData = await this.thorchainCache.thornode.getTxData(inboundTxHash)
+    const isSynth = await this.isSynthTransaction(txData)
+    if (isSynth) {
+      progress = 3
+    }
     const lastBlock = await this.thorchainCache.thornode.getLastBlock()
+    if (txData.observed_tx == undefined) {
+      // Check inbound, if nothing check outbound queue
+      progress = 2
+    }
     switch (progress) {
       case 0:
         const txObserved = await this.checkTCRecords(txData, sourceChain)
@@ -70,6 +79,12 @@ export class TransactionStage {
         transactionProgress.seconds = checkOutboundQueue.seconds
         transactionProgress.errors = checkOutboundQueue.error
         transactionProgress.progress = 3
+        return transactionProgress
+      case 3:
+        const tcBlock = lastBlock.find((obj) => obj.thorchain)
+        const checkOutboundQue = await this.checkOutboundQueue(inboundTxHash, tcBlock)
+        transactionProgress.seconds = checkOutboundQue.seconds
+        transactionProgress.progress = 4
         return transactionProgress
       default:
         return transactionProgress
@@ -156,8 +171,10 @@ export class TransactionStage {
     const scheduledQueueItem = (await this.thorchainCache.thornode.getscheduledQueue()).find(
       (item: TxOutItem) => item.in_hash === inboundTxHash,
     )
-    if (scheduledQueueItem == undefined) {
-      stageStatus.error.push(`scheduled queue item is undefined`)
+    const scheduledQueueLength = (await this.thorchainCache.thornode.getscheduledQueue()).length
+    if (scheduledQueueLength > 0 && scheduledQueueItem == undefined) {
+      stageStatus.error.push(`Scheduled queue count ${scheduledQueueLength}`)
+      stageStatus.error.push(`Could not find tx in outbound queue`)
     } else {
       if (scheduledQueueItem?.height && lastBlockHeight?.thorchain) {
         stageStatus.seconds =
@@ -165,5 +182,16 @@ export class TransactionStage {
       }
     }
     return stageStatus
+  }
+
+  /**
+   * Checks too see if the transaction is synth from the memo
+   * @param txData  - input txData
+   * @returns - boolean
+   */
+  private async isSynthTransaction(txData: TxResponse): Promise<boolean> {
+    const memo = txData.observed_tx?.tx.memo
+    const synth = memo?.split(`:`)[1].match(`/`) ? true : false
+    return synth
   }
 }
