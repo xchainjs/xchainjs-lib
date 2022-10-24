@@ -38,6 +38,11 @@ export class TransactionStage {
       seconds: 0,
       errors: [],
     }
+    if (progress) {
+      transactionProgress.progress = progress
+    } else {
+      progress = 0
+    }
     const txData = await this.thorchainCache.thornode.getTxData(inboundTxHash)
     const lastBlock = await this.thorchainCache.thornode.getLastBlock()
     switch (progress) {
@@ -50,7 +55,7 @@ export class TransactionStage {
       case 1:
         if (txData.observed_tx?.tx?.chain != undefined) {
           sourceChain = getChain(txData.observed_tx.tx.chain)
-          if (sourceChain == Chain.Bitcoin || Chain.BitcoinCash || Chain.Litecoin) {
+          if (sourceChain == (Chain.Bitcoin || Chain.BitcoinCash || Chain.Litecoin)) {
             const lastBlockHeight = lastBlock.find((obj) => obj.chain === sourceChain)
             const checkConf = await this.checkConfcounting(sourceChain, lastBlockHeight, txData.observed_tx)
             transactionProgress.seconds = checkConf.seconds
@@ -64,6 +69,7 @@ export class TransactionStage {
         const checkOutboundQueue = await this.checkOutboundQueue(inboundTxHash, tcBlockHeight)
         transactionProgress.seconds = checkOutboundQueue.seconds
         transactionProgress.errors = checkOutboundQueue.error
+        transactionProgress.progress = 3
         return transactionProgress
       default:
         return transactionProgress
@@ -87,9 +93,10 @@ export class TransactionStage {
     if (JSON.stringify(txData.observed_tx) == undefined) {
       if (sourceChain) {
         stageStatus.seconds = this.chainAttributes[sourceChain].avgBlockTimeInSecs
+      } else {
+        stageStatus.seconds = 60
+        stageStatus.error.push(`No observed tx, wait sixty seconds`)
       }
-      stageStatus.seconds = 60
-      stageStatus.error.push(`No observed tx, wait sixty seconds`)
     }
 
     return stageStatus

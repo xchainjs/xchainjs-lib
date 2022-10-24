@@ -122,7 +122,7 @@ export class ThorchainCache {
     const pools = await this.getPools()
     // Note: we use ticker, not asset string to get the same pool for both assets and synths
     // using ticker causes problems between same named tickers but different chains
-    const pool = pools[asset.symbol]
+    const pool = pools[`${asset.chain}.${asset.ticker}`]
     if (pool) {
       return pool
     }
@@ -165,7 +165,7 @@ export class ThorchainCache {
         // const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
         // const decimals = thornodePool?.decimals ?? 8
         const lp = new LiquidityPool(pool)
-        poolMap[lp.asset.symbol] = lp
+        poolMap[`${lp.asset.chain}.${lp.asset.ticker}`] = lp
       }
       this.poolCache = {
         lastRefreshed: Date.now(),
