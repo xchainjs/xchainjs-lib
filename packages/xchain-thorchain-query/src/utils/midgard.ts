@@ -7,6 +7,7 @@ import {
   MidgardApi,
   PoolDetail,
   PoolStatsDetail,
+  THORNameDetails,
 } from '@xchainjs/xchain-midgard'
 import { AssetRuneNative, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
@@ -200,6 +201,30 @@ export class Midgard {
         const poolDetail = (await api.getPoolStats(asset)).data
         return poolDetail
       } catch (e) {
+        console.error(e)
+      }
+    }
+    throw Error(`Midgard not responding`)
+  }
+
+  /**
+   * Function to return THORNameDetails for a particular name
+   * @param name - thorname string to query
+   * @returns - type object THORNameDetails
+   */
+  public async getTHORNameDetails(name: string): Promise<THORNameDetails | undefined> {
+    for (const api of this.midgardApis) {
+      try {
+        const resp = await api.getTHORNameDetail(name)
+        if (resp.status == 404) {
+          return undefined
+        } else if (resp.status == 200) {
+          return resp.data
+        }
+      } catch (e) {
+        // if (resp.status == 404) {
+        //   return undefined
+        // }
         console.error(e)
       }
     }

@@ -124,13 +124,22 @@ export class Wallet {
       errors.push(`destinationAddress ${swap.destinationAddress} is not a valid address`)
     }
     // Affiliate address should be THORName or THORAddress
-    // To do add check for THORName using endpoint  https://thornode.ninerealms.com/thorchain/thorname/orion
     const checkAffiliateAddress = swap.memo.split(':')
     if (checkAffiliateAddress.length > 4) {
-      if (checkAffiliateAddress[4] && !this.clients[Chain.THORChain].validateAddress(checkAffiliateAddress[4]))
-        errors.push(`affiliateAddress ${checkAffiliateAddress[4]} is not a valid THOR address`)
+      const affiliateAddress = checkAffiliateAddress[4]
+      if (affiliateAddress.length > 0) {
+        const isValidThorchainAddress = this.clients[Chain.THORChain].validateAddress(affiliateAddress)
+        const isValidThorname = this.isThorname(affiliateAddress)
+        if (!(isValidThorchainAddress || isValidThorname))
+          errors.push(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
+      }
     }
     if (errors.length > 0) throw Error(errors.join('\n'))
+  }
+
+  private async isThorname(name: string): Promise<boolean> {
+    const thornameDetails = await this.thorchainQuery.thorchainCache.midgard.getTHORNameDetails(name)
+    return thornameDetails !== undefined
   }
 
   /** Function handles all swaps from Rune to asset
