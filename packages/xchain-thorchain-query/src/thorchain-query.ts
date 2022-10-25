@@ -317,11 +317,10 @@ export class ThorchainQuery {
   //       throw Error(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
   //   }
   // }
-
-  private async isThorname(name: string): Promise<boolean> {
-    const thornameDetails = await this.thorchainCache.midgard.getTHORNameDetails(name)
-    return thornameDetails !== undefined
-  }
+  // private async isThorname(name: string): Promise<boolean> {
+  //   const thornameDetails = await this.thorchainCache.midgard.getTHORNameDetails(name)
+  //   return thornameDetails !== undefined
+  // }
 
   /**
    * Looks for errors or issues within swap prams before doing the swap.
