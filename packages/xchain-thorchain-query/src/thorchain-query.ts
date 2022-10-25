@@ -289,7 +289,10 @@ export class ThorchainQuery {
     const lim = limstring.substring(0, limstring.length - 3).concat(params.interfaceID.toString())
     // create the full memo
     let memo = `=:${assetToString(params.destinationAsset)}`
+    // NOTE: we should validate affiliate address is EITHER: a thorname or valid thorchain address, currently we cannot do this without importing xchain-thorchain
+
     if (params.affiliateAddress != '' || params.affiliateFee == undefined) {
+      // NOTE: we should validate destinationAddress address is valid destination address for the asset type requested
       memo = memo.concat(
         `:${params.destinationAddress}:${lim}:${params.affiliateAddress}:${params.affiliateFee.amount().toFixed()}`,
       )
@@ -303,6 +306,21 @@ export class ThorchainQuery {
     }
     return memo
   }
+  // this is commented out for now, see note about affiliate address ~10 lines above
+  //
+  // private async validateAffiliateAddress(affiliateAddress: string) {
+  //   // Affiliate address should be THORName or THORAddress
+  //   if (affiliateAddress.length > 0) {
+  //     const isValidThorchainAddress = this.clients[Chain.THORChain].validateAddress(affiliateAddress)
+  //     const isValidThorname = await this.isThorname(affiliateAddress)
+  //     if (!(isValidThorchainAddress || isValidThorname))
+  //       throw Error(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
+  //   }
+  // }
+  // private async isThorname(name: string): Promise<boolean> {
+  //   const thornameDetails = await this.thorchainCache.midgard.getTHORNameDetails(name)
+  //   return thornameDetails !== undefined
+  // }
 
   /**
    * Looks for errors or issues within swap prams before doing the swap.

@@ -23,10 +23,15 @@ yarn install
 ### Do Swap
 
 executes a swap from one asset to another  
-`yarn doSwap "MnemonicPhrase" stagenet|mainnet assestAmount decimals FromAssetString ToAssetString`
+`yarn doSwap "MnemonicPhrase" stagenet|mainnet assestAmount decimals FromAssetString ToAssetString [affiliateAddress] [affiliate percent]`
 
 ```bash
 # example of swapping 10 RUNE to BCH
-yarn doSwap "MnemonicPhrase" testnet 10 8 THOR.RUNE BCH.BCH
+yarn doSwap "MnemonicPhrase" mainnet 10 8 THOR.RUNE BCH.BCH
 
+# example of swapping 10 RUNE to BCH with affiliate fee of 0.1% sent to address thor19pws7ukjew3vujdhfcr0eaqhffj2km7r6hf3cx
+yarn doSwap "MnemonicPhrase" mainnet 10 8 THOR.RUNE BCH.BCH thor19pws7ukjew3vujdhfcr0eaqhffj2km7r6hf3cx 0.1
+
+# example of swapping 10 RUNE to BCH with affiliate fee of 0.1% sent to thorname hello
+yarn doSwap "MnemonicPhrase" mainnet 10 8 THOR.RUNE BCH.BCH hello 0.1
 ```

@@ -5,12 +5,9 @@ import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util'
 export type ExecuteSwap = {
   input: CryptoAmount
   destinationAsset: Asset
-  limit: BaseAmount
   destinationAddress: Address
-  affiliateAddress: Address
-  affiliateFee: BaseAmount
+  memo: string
   feeOption?: FeeOption
-  interfaceID: number
   waitTimeSeconds: number
 }
 

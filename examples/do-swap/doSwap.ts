@@ -1,14 +1,5 @@
-import { Network } from '@xchainjs/xchain-client'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
-import {
-  CryptoAmount,
-  EstimateSwapParams,
-  Midgard,
-  ThorchainCache,
-  ThorchainQuery,
-  Thornode,
-  TxDetails,
-} from '@xchainjs/xchain-thorchain-query'
+import { CryptoAmount, EstimateSwapParams, ThorchainQuery, TxDetails } from '@xchainjs/xchain-thorchain-query'
 import { Chain, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
@@ -45,9 +36,7 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
     const fromAsset = assetFromString(`${process.argv[6]}`)
     const toAsset = assetFromString(`${process.argv[7]}`)
 
-    // const fromChain = fromAsset.synth ? Chain.THORChain : fromAsset.chain
     const toChain = toAsset.synth ? Chain.THORChain : toAsset.chain
-    // const fromAddress = wallet.clients[fromChain].getAddress()
     const destinationAddress = wallet.clients[toChain].getAddress()
 
     console.log(destinationAddress)
@@ -59,7 +48,12 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
       destinationAddress,
       slipLimit: new BigNumber('0.03'), //optional
     }
-
+    const affiliateAddress = process.argv[8]
+    if (affiliateAddress) {
+      const affiliateFeePercent = Number(process.argv[9])
+      swapParams.affiliateAddress = affiliateAddress
+      swapParams.affiliateFeePercent = affiliateFeePercent
+    }
     const outPutCanSwap = await tcAmm.estimateSwap(swapParams)
     printTx(outPutCanSwap, swapParams.input)
     if (outPutCanSwap.txEstimate.canSwap) {
@@ -74,12 +68,9 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
 
 const main = async () => {
   const seed = process.argv[2]
-  const network = process.argv[3] as Network
-  const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
-  const thorchainQuery = new ThorchainQuery(thorchainCache)
+  const thorchainQuery = new ThorchainQuery()
   const thorchainAmm = new ThorchainAMM(thorchainQuery)
   const wallet = new Wallet(seed, thorchainQuery)
-
   await doSingleSwap(thorchainAmm, wallet)
 }
 
