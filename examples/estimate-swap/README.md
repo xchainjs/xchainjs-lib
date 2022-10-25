@@ -97,11 +97,11 @@ validates the desired swap and estimates the fees
 Please refer to [asset-notation](https://dev.thorchain.org/thorchain-dev/network/memos#asset-notation) on the valid asset strings, also see the 'asset' column in the above tables
 
 ```bash
-yarn estimateSwap [network (Mainnet | TestNet)] [swap amount]] [source asset] [destination asset] ([destination address])
+yarn estimateSwap [network (Mainnet | Stagenet)] [swap amount]] [source asset][source decimals] [destination asset] ([destination address])
 
-yarn estimateSwap mainnet 0.002 BTC.BTC ETH.ETH # good estimate
-yarn estimateSwap mainnet 2 BTC.BTC ETH.ETH     # Note due to testnet pools being inconsistent with real world prices use mainnet to retrieve accurate estimations
-yarn estimateSwap mainnet 2 BTC/BTC THOR.RUNE
+yarn estimateSwap mainnet 0.002 8 BTC.BTC ETH.ETH # good estimate
+yarn estimateSwap mainnet 2 8 BTC.BTC ETH.ETH     # Note due to testnet pools being inconsistent with real world prices use mainnet to retrieve accurate estimations
+yarn estimateSwap mainnet 2 8 BTC/BTC THOR.RUNE
 
 See full Estimate Swap at http://docs.xchainjs.org/xchain-thorchain-query/how-to-use.html
 ```
@@ -109,7 +109,7 @@ See full Estimate Swap at http://docs.xchainjs.org/xchain-thorchain-query/how-to
 #### Example output
 
 ```bash
-$ npx ts-node estimateSwap.ts mainnet 0.001 BTC.BTC ETH.ETH
+$ npx ts-node estimateSwap.ts mainnet 0.001 8 BTC.BTC ETH.ETH
 updated pool cache
 {
   memo: '=:ETH.ETH:undefined:1215999',
@@ -132,7 +132,7 @@ updated pool cache
 }
 
 yarn run v1.22.17
-$ npx ts-node estimateSwap.ts mainnet 2 BTC.BTC ETH.ETH
+$ npx ts-node estimateSwap.ts mainnet 2 8 BTC.BTC ETH.ETH
 {
   memo: '=:ETH.ETH:undefined:2824318999',
   expiry: 2022-10-04T06:08:07.854Z,
@@ -153,7 +153,7 @@ $ npx ts-node estimateSwap.ts mainnet 2 BTC.BTC ETH.ETH
   }
 }
 yarn run v1.22.17
-$ npx ts-node estimateSwap.ts mainnet 2 BTC/BTC THOR.RUNE
+$ npx ts-node estimateSwap.ts mainnet 2 8 BTC/BTC THOR.RUNE
 {
   memo: '=:THOR.RUNE:undefined:2343615739999',
   expiry: 2022-10-04T06:09:14.962Z,

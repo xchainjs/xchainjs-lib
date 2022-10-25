@@ -4,7 +4,8 @@
 
 - Bug - Limit asset amount was not using 8 decimal places 
 - Bug - outbound fee is now calculated correctly
-- affiliate fee calculation fixed 
+- Bug - affiliate fee calculation fixed 
+- Bug - getPoolForAsset() changed to take both chain & ticker for lookup
 - Bump dep on package `xchain-midgard`
 
 ## Add
@@ -15,7 +16,7 @@
 
 ## Update
 
-- default to mainnet and stadard APIs with no arg constructor
+- default to mainnet and standard APIs with no arg constructor
 
 # v0.1.2 (2022-10-11)
 

@@ -49,15 +49,17 @@ const estimateSwap = async () => {
   try {
     const network = process.argv[2] as Network
     const amount = process.argv[3]
-    const fromAsset = assetFromString(`${process.argv[4]}`)
-    const toAsset = assetFromString(`${process.argv[5]}`)
-    const toDestinationAddress = `${process.argv[6]}`
+    const decimals = Number(process.argv[4])
+
+    const fromAsset = assetFromString(`${process.argv[5]}`)
+    const toAsset = assetFromString(`${process.argv[6]}`)
+    const toDestinationAddress = `${process.argv[7]}`
     const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
     const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(amount)), fromAsset),
+      input: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
       destinationAsset: toAsset,
       destinationAddress: toDestinationAddress,
       // affiliateFeePercent: 0.003, //optional
