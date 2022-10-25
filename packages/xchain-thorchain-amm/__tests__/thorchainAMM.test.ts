@@ -1,14 +1,5 @@
 import { CryptoAmount, EstimateSwapParams, ThorchainQuery, TxDetails } from '@xchainjs/xchain-thorchain-query'
-import {
-  Asset,
-  AssetBTC,
-  AssetETH,
-  AssetLTC,
-  AssetRuneNative,
-  assetAmount,
-  assetFromStringEx,
-  assetToBase,
-} from '@xchainjs/xchain-util'
+import { Asset, AssetBTC, AssetETH, AssetLTC, AssetRuneNative, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
@@ -17,7 +8,6 @@ import { ThorchainAMM } from '../src/thorchain-amm'
 const thorchainQuery = new ThorchainQuery()
 const thorchainAmm = new ThorchainAMM()
 thorchainAmm
-const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {
@@ -109,24 +99,6 @@ describe('ThorchainAmm Client Test', () => {
       const estimate = await thorchainQuery.estimateSwap(swapParams)
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(false)
-    } catch (error) {
-      console.log(error.message)
-      expect(error.message).toEqual(`source chain is halted`)
-    }
-  })
-  it('Should estimate swap from USDC to RUNE ', async () => {
-    const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(1000)), assetUSDC),
-      destinationAsset: AssetRuneNative,
-      destinationAddress: 'xxx',
-    }
-    try {
-      const estimate = await thorchainQuery.estimateSwap(swapParams)
-      printTx(estimate, swapParams.input)
-      expect(estimate.txEstimate.canSwap).toEqual(true)
-      expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-        assetAmount('473.02482308').amount().toFixed(),
-      )
     } catch (error) {
       console.log(error.message)
       expect(error.message).toEqual(`source chain is halted`)

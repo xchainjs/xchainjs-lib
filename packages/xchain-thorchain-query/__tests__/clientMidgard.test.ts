@@ -1,11 +1,10 @@
-import { Network } from '@xchainjs/xchain-client'
 import { PoolDetail } from '@xchainjs/xchain-midgard'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
 import { Midgard } from '../src/utils/midgard'
 
-const mainnetMidgard = new Midgard(Network.Mainnet)
+const mainnetMidgard = new Midgard()
 
 describe('Midgard Client Test', () => {
   beforeAll(() => {
@@ -26,6 +25,7 @@ describe('Midgard Client Test', () => {
     assetPrice: '64.89141427538918',
     assetPriceUSD: '129.74904173711747',
     liquidityUnits: '21436675546946',
+    nativeDecimal: '8',
     poolAPY: '0.0925796460549001',
     runeDepth: '37660118888424',
     status: 'available',
@@ -48,7 +48,7 @@ describe('Midgard Client Test', () => {
   // Tests for the midgard api
   it(`Should return pools array and match interface type PoolDetail`, async () => {
     const poolData = await mainnetMidgard.getPools()
-    expect(poolData[0]).toEqual(poolDetail)
+    expect(poolData[2]).toEqual(poolDetail)
   })
   // it(`Should return inbound addresses`, async () => {
   //   const inboundAddress = await mainnetMidgard.getAllInboundAddresses()

@@ -41,8 +41,9 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
 const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
   try {
     const amount = process.argv[4]
-    const fromAsset = assetFromString(`${process.argv[5]}`)
-    const toAsset = assetFromString(`${process.argv[6]}`)
+    const decimals = Number(process.argv[5])
+    const fromAsset = assetFromString(`${process.argv[6]}`)
+    const toAsset = assetFromString(`${process.argv[7]}`)
 
     // const fromChain = fromAsset.synth ? Chain.THORChain : fromAsset.chain
     const toChain = toAsset.synth ? Chain.THORChain : toAsset.chain
@@ -53,7 +54,7 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
     // console.log(await wallet.clients[fromChain].getBalance(fromAddress))
 
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(amount)), fromAsset),
+      input: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
       destinationAsset: toAsset,
       destinationAddress,
       slipLimit: new BigNumber('0.03'), //optional
@@ -63,7 +64,8 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
     printTx(outPutCanSwap, swapParams.input)
     if (outPutCanSwap.txEstimate.canSwap) {
       const output = await tcAmm.doSwap(wallet, swapParams)
-      console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+      console.log(`swap ${output}`)
+      //console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
     }
   } catch (error) {
     console.error(error)
@@ -77,7 +79,7 @@ const main = async () => {
   const thorchainQuery = new ThorchainQuery(thorchainCache)
   const thorchainAmm = new ThorchainAMM(thorchainQuery)
   const wallet = new Wallet(seed, thorchainQuery)
-  console.log(`\ Swap on ${network} :)\n`)
+
   await doSingleSwap(thorchainAmm, wallet)
 }
 

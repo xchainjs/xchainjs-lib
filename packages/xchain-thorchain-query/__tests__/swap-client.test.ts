@@ -1,4 +1,3 @@
-import { Network } from '@xchainjs/xchain-client'
 import {
   AssetBTC,
   AssetETH,
@@ -16,7 +15,6 @@ import { CryptoAmount } from '../src/crypto-amount'
 import { LiquidityPool } from '../src/liquidity-pool'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { SwapOutput } from '../src/types'
-import { Midgard } from '../src/utils/midgard'
 import {
   getDoubleSwap,
   //getDoubleSwap,
@@ -28,9 +26,8 @@ import {
   getSwapOutput,
   getSwapSlip,
 } from '../src/utils/swap'
-import { Thornode } from '../src/utils/thornode'
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+const thorchainCache = new ThorchainCache()
 
 const BUSD = assetFromString('BNB.BUSD-BD1')
 if (!BUSD) throw Error('Asset is incorrect')
@@ -42,6 +39,7 @@ const btcPoolDetails = {
   assetPrice: '25000',
   assetPriceUSD: '30458.124870650492',
   liquidityUnits: '536087715332333',
+  nativeDecimal: '8',
   poolAPY: '0.1001447237777584',
   runeDepth: new CryptoAmount(assetToBase(assetAmount(2500000)), AssetRuneNative).baseAmount.amount().toString(),
   status: 'available',
@@ -57,6 +55,7 @@ const ethPoolDetails = {
   assetPrice: '680.10989011',
   assetPriceUSD: '1817.6139097932505',
   liquidityUnits: '262338362121353',
+  nativeDecimal: '18',
   poolAPY: '0.10844053560303157',
   runeDepth: new CryptoAmount(assetToBase(assetAmount(6189000)), AssetRuneNative).baseAmount.amount().toString(),
   status: 'available',
@@ -66,8 +65,8 @@ const ethPoolDetails = {
   volume24h: '8122016881297',
 }
 
-const btcPool = new LiquidityPool(btcPoolDetails, 8)
-const ethPool = new LiquidityPool(ethPoolDetails, 8)
+const btcPool = new LiquidityPool(btcPoolDetails)
+const ethPool = new LiquidityPool(ethPoolDetails)
 
 const inputAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
 

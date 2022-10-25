@@ -120,8 +120,9 @@ export class ThorchainCache {
   async getPoolForAsset(asset: Asset): Promise<LiquidityPool> {
     if (isAssetRuneNative(asset)) throw Error(`AssetRuneNative doesn't have a pool`)
     const pools = await this.getPools()
-    // Not: we use ticker, not asset string to get the same pool for both assets and synths
-    const pool = pools[asset.ticker]
+    // Note: we use ticker, not asset string to get the same pool for both assets and synths
+    // using ticker causes problems between same named tickers but different chains
+    const pool = pools[`${asset.chain}.${asset.ticker}`]
     if (pool) {
       return pool
     }
@@ -156,14 +157,15 @@ export class ThorchainCache {
    * which will refresh the cache if it's expired
    */
   private async refereshPoolCache(): Promise<void> {
-    const [thornodePools, midgardPools] = await Promise.all([this.thornode.getPools(), this.midgard.getPools()])
+    // const [thornodePools, midgardPools] = await Promise.all([this.thornode.getPools(), this.midgard.getPools()])
+    const midgardPools = await this.midgard.getPools()
     const poolMap: Record<string, LiquidityPool> = {}
     if (midgardPools) {
       for (const pool of midgardPools) {
-        const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
-        const decimals = thornodePool?.decimals ?? 8
-        const lp = new LiquidityPool(pool, decimals)
-        poolMap[lp.asset.ticker] = lp
+        // const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
+        // const decimals = thornodePool?.decimals ?? 8
+        const lp = new LiquidityPool(pool)
+        poolMap[`${lp.asset.chain}.${lp.asset.ticker}`] = lp
       }
       this.poolCache = {
         lastRefreshed: Date.now(),
@@ -320,10 +322,12 @@ export class ThorchainCache {
 
     return result
   }
-  private async getDecimalForAsset(asset: Asset) {
+  private async getDecimalForAsset(asset: Asset): Promise<number> {
     if (!isAssetRuneNative(asset)) {
       const pool = await this.getPoolForAsset(asset)
-      return pool.decimals ?? DEFAULT_THORCHAIN_DECIMALS
+      const decimals = Number(pool.pool.nativeDecimal)
+      if (decimals > 0) return decimals
+      else return DEFAULT_THORCHAIN_DECIMALS
     }
     return DEFAULT_THORCHAIN_DECIMALS
   }

@@ -10,6 +10,7 @@ import {
 import {
   Asset,
   AssetAVAX,
+  AssetAtom,
   AssetBNB,
   AssetBTC,
   AssetETH,
@@ -42,16 +43,10 @@ const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 const stagenetThorchainAmm = new ThorchainAMM(thorchainQueryStagenet)
 
 const sBTC = assetFromStringEx('BTC/BTC')
-if (!sBTC) throw Error('Synthetic asset is incorrect')
-
 const sETH = assetFromStringEx('ETH/ETH')
-if (!sETH) throw Error('Synthentic asset is incorrect')
-
-const sBNB = assetFromStringEx('BNB/BNB')
-if (!sBNB) throw Error('Synthetic asset is inccorect')
-
+// const sBNB = assetFromStringEx('BNB/BNB')
+const sATOM = assetFromStringEx('GAIA/ATOM')
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
-if (!BUSD) throw Error('Asset is incorrect')
 
 // const ETH_DECIMAL = 18
 const USDT_DECIMAL = 6
@@ -319,6 +314,17 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
       destinationAsset: AssetRuneNative,
       slipLimit: new BigNumber('0.5'),
+    }
+    const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+    console.log(output)
+    expect(output.hash).toBeTruthy()
+  })
+  it(`Should perform a swap from ATOM to synth ATOM`, async () => {
+    const estimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('10')), AssetAtom),
+      destinationAddress: mainnetWallet.clients[Chain.THORChain].getAddress(),
+      destinationAsset: sATOM,
+      slipLimit: new BigNumber('0.05'),
     }
     const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)

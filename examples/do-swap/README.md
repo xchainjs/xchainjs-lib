@@ -23,14 +23,10 @@ yarn install
 ### Do Swap
 
 executes a swap from one asset to another  
+`yarn doSwap "MnemonicPhrase" stagenet|mainnet assestAmount decimals FromAssetString ToAssetString`
 
 ```bash
-yarn doSwap "MnemonicPhrase" testnet 10 THOR.RUNE BCH.BCH
-
-```
-
-#### Example output
-
-```bash
+# example of swapping 10 RUNE to BCH
+yarn doSwap "MnemonicPhrase" testnet 10 8 THOR.RUNE BCH.BCH
 
 ```

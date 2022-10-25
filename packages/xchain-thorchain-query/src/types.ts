@@ -49,10 +49,10 @@ export type EstimateSwapParams = {
   input: CryptoAmount
   destinationAsset: Asset
   destinationAddress: Address
-  affiliateAddress?: Address
-  interfaceID?: number
-  affiliateFeePercent?: number
   slipLimit?: BigNumber
+  affiliateAddress?: Address
+  affiliateFeePercent?: number
+  interfaceID?: number
 }
 
 export type SwapOutput = {
@@ -112,22 +112,19 @@ export type ConstructMemo = {
 
 export type TxDetails = {
   memo: string
-  toAddress: string
+  toAddress: Address
   expiry: Date
   txEstimate: SwapEstimate
 }
 
-export enum TxStage {
-  INBOUND_CHAIN_UNCONFIRMED,
-  CONF_COUNTING,
-  TC_PROCESSING,
-  OUTBOUND_QUEUED,
-  OUTBOUND_CHAIN_UNCONFIRMED,
-  OUTBOUND_CHAIN_CONFIRMED,
-}
-export type TxStatus = {
-  stage: TxStage
+export type TransactionProgress = {
+  progress: number
   seconds: number
+  errors: string[]
+}
+export type TransactionStatus = {
+  seconds: number
+  error: string[]
 }
 
 export type LiquidityToAdd = {
