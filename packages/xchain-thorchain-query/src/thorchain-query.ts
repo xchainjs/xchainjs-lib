@@ -232,7 +232,8 @@ export class ThorchainQuery {
     // ----------- Remove Fees from inbound before doing the swap -----------
     const inputMinusInboundFeeInRune = inputInRune.minus(inboundFeeInRune)
     // remove any affiliateFee. netInput * affiliateFee (percentage) of the destination asset type
-    const affiliateFeeInRune = inputMinusInboundFeeInRune.times(params.affiliateFeeBasisPoints || 0)
+    const affiliateFeePercent = params.affiliateFeeBasisPoints ? params.affiliateFeeBasisPoints / 10000 : 0
+    const affiliateFeeInRune = inputMinusInboundFeeInRune.times(affiliateFeePercent)
     // remove the affiliate fee from the input.
     const inputNetAmountInRune = inputMinusInboundFeeInRune.minus(affiliateFeeInRune)
     // convert back to input asset
@@ -276,7 +277,7 @@ export class ThorchainQuery {
       affiliateFee: affiliateFeeInRune,
       // totalFees: ,
     }
-    const totalFeesInUsd = await this.getFeesIn(totalFees, usdAsset)
+    //const totalFeesInUsd = await this.getFeesIn(totalFees, usdAsset)
     const swapEstimate = {
       totalFees: totalFees,
       slipPercentage: swapOutput.slip,

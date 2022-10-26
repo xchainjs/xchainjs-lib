@@ -34,6 +34,7 @@ function print(estimate: SwapEstimate, input: CryptoAmount) {
       swapFee: estimate.totalFees.swapFee.formatedAssetString(),
       outboundFee: estimate.totalFees.outboundFee.formatedAssetString(),
       affiliateFee: estimate.totalFees.affiliateFee.formatedAssetString(),
+      totalFees: estimate.totalFees.totalFees?.formatedAssetString(),
     },
     slipPercentage: estimate.slipPercentage.toFixed(),
     netOutput: estimate.netOutput.formatedAssetString(),
@@ -54,6 +55,7 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
 }
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 const BTCB = assetFromStringEx('BNB.BTCB-1DE')
+const USDCETH = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 // Test User Functions - single and double swap using mock pool data
 describe('Thorchain-query estimate Integration Tests', () => {
@@ -212,7 +214,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       print(estimate.txEstimate, swapParams.input)
       fail()
     } catch (error: any) {
-      expect(error.message).toEqual(`affiliateFee must be between 0 and 1000`)
+      expect(error.message).toEqual(`affiliateFee must be between 0 and 1000 basis points`)
     }
   })
 
@@ -240,7 +242,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       synth: false,
     }
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(20)), AssetETH),
+      input: new CryptoAmount(assetToBase(assetAmount(20, 18)), AssetETH),
       destinationAsset: assetHOT,
       destinationAddress: 'xxx',
     }
@@ -339,6 +341,8 @@ describe('Thorchain-query estimate Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount('5', 8)), AssetBTC),
       destinationAsset: AssetETH,
       destinationAddress: 'xxx',
+      affiliateAddress: `tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx`,
+      affiliateFeeBasisPoints: 30,
       slipLimit: new BigNumber('0.2'),
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
@@ -347,15 +351,18 @@ describe('Thorchain-query estimate Integration Tests', () => {
     expect(estimate).toBeTruthy()
   })
 
-  it(`Should estimate a swap from BTC to ETH`, async () => {
-    const swapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('5', 8)), AssetBTC),
-      destinationAsset: AssetETH,
+  it(`Should estimate a swap from BTC to ETHUSDC and check memo`, async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('1', 8)), AssetBTC),
+      destinationAsset: USDCETH,
       destinationAddress: 'xxx',
+      interfaceID: 999,
+      affiliateAddress: `tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx`,
+      affiliateFeeBasisPoints: 30,
       slipLimit: new BigNumber('0.2'),
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
-    print(estimate.txEstimate, swapParams.input)
+    printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })
