@@ -1,3 +1,10 @@
+# v0.3.4 (2022-10-27)
+
+## Update
+
+- Bump Dep for `thorchain-query`
+- update to `getInboundDetails()`
+
 # v0.3.3 (2022-10-17)
 
 ## Update

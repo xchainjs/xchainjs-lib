@@ -43,8 +43,8 @@ export class ThorchainAMM {
     destinationAsset,
     destinationAddress,
     affiliateAddress = '',
-    interfaceID = 999,
-    affiliateFeePercent = 0,
+    interfaceID = `999`,
+    affiliateFeeBasisPoints = 0,
     slipLimit,
   }: EstimateSwapParams): Promise<TxDetails> {
     return this.thorchainQuery.estimateSwap({
@@ -53,7 +53,7 @@ export class ThorchainAMM {
       destinationAddress,
       affiliateAddress,
       interfaceID,
-      affiliateFeePercent,
+      affiliateFeeBasisPoints,
       slipLimit,
     })
   }

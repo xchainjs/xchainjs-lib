@@ -30,7 +30,7 @@ export class EvmHelper {
    * @throws {"router address is not defined"} Thrown if router address is not defined
    */
   async sendDeposit(params: DepositParams): Promise<TxHash> {
-    const inboundAsgard = (await this.thorchainCache.getInboundAddresses())[params.asset.chain]
+    const inboundAsgard = (await this.thorchainCache.getInboundDetails())[params.asset.chain]
 
     if (!inboundAsgard?.router) {
       throw new Error('router address is not defined')

@@ -75,7 +75,7 @@ export class ThorchainQuery {
     destinationAsset,
     destinationAddress,
     slipLimit = new BigNumber('0.03'), //default to 3%
-    interfaceID = '000',
+    interfaceID = '555',
     affiliateAddress = '',
     affiliateFeeBasisPoints = 0,
   }: EstimateSwapParams): Promise<TxDetails> {
@@ -151,7 +151,6 @@ export class ThorchainQuery {
       const inboundDelay = await this.confCounting(input)
       const outboundDelay = await this.outboundDelay(limAssetAmount)
       txDetails.txEstimate.waitTimeSeconds = outboundDelay + inboundDelay
-
       // Construct memo
       txDetails.memo = this.constructSwapMemo({
         input: input,
@@ -238,7 +237,7 @@ export class ThorchainQuery {
     // remove any affiliateFee. netInput * affiliateFee (percentage) of the destination asset type
     const affiliateFeePercent = params.affiliateFeeBasisPoints ? params.affiliateFeeBasisPoints / 10000 : 0
     const affiliateFeeInRune = inputMinusInboundFeeInRune.times(affiliateFeePercent)
-    const affiliateFeeInAsset = await this.thorchainCache.convert(affiliateFeeInRune, input.asset)
+    const affiliateFeeInAsset = await this.thorchainCache.convert(affiliateFeeInRune, input.asset) // what if input asset is already in rune?
     const affiliateFeeSwapOutputInRune = await this.thorchainCache.getExpectedSwapOutput(
       affiliateFeeInAsset,
       AssetRuneNative,
@@ -283,7 +282,6 @@ export class ThorchainQuery {
     // ---------------- Remove Outbound Fee ---------------------- /
     const netOutputInRune = outputInRune.minus(outboundFeeInRune)
     const netOutputInAsset = await this.thorchainCache.convert(netOutputInRune, params.destinationAsset)
-
     // const totalFeesInUsd = await this.convert(
     //   inboundFeeInAsset.plus(swapOutput.swapFee).plus(outboundFeeInAsset).plus(affiliateFeeInRune),
     //   usdAsset,
