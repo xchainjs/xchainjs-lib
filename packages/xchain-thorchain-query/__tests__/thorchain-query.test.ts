@@ -204,4 +204,14 @@ describe('Thorchain-query tests', () => {
     expect(assetPoolAvaxUsdc.asset).toEqual(assetAVAXUSDC)
     expect(assetPoolGai.asset).toEqual(AssetAtom)
   })
+  it('Should construct the correct memo for non-rune swap', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
+      destinationAsset: AssetBNB,
+      destinationAddress: 'xxx',
+    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:173329271999`
+    expect(estimate.memo).toEqual(correctMemo)
+  })
 })

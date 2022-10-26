@@ -63,7 +63,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBTC),
       destinationAsset: BUSD,
       destinationAddress: 'xxx',
-      // affiliateFeePercent: 0.003, //optional
+      // affiliateFeeBasisPoints: 0.003, //optional
       slipLimit: new BigNumber('0.03'), //optional
     }
 
@@ -85,7 +85,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount('0.5')), BTCB),
       destinationAsset: BUSD,
       destinationAddress: 'xxx',
-      // affiliateFeePercent: 0.003, //optional
+      // affiliateFeeBasisPoints: 0.003, //optional
       slipLimit: new BigNumber('0.03'), //optional
     }
 
@@ -112,7 +112,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
       destinationAsset: sBTC,
       destinationAddress: 'xxx',
-      // affiliateFeePercent: 0.03, //optional
+      // affiliateFeeBasisPoints: 0.03, //optional
       slipLimit: new BigNumber(0.03), //optional
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
@@ -129,7 +129,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount(1)), sBTC),
       destinationAsset: sETH,
       destinationAddress: 'xxx',
-      affiliateFeePercent: 0.03, //optional
+      affiliateFeeBasisPoints: 0.03, //optional
       slipLimit: new BigNumber(0.02), //optional
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
@@ -204,7 +204,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
       destinationAsset: AssetETH,
-      affiliateFeePercent: 0 || 1001,
+      affiliateFeeBasisPoints: 0 || 1001,
       destinationAddress: 'xxx',
     }
     try {
@@ -221,7 +221,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount(50)), AssetBTC),
       destinationAsset: AssetETH,
       destinationAddress: 'xxx',
-      affiliateFeePercent: 0.03, //optional
+      affiliateFeeBasisPoints: 0.03, //optional
       slipLimit: new BigNumber(0.02), //optional
     }
     try {
@@ -256,7 +256,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(0.001)), AssetBTC),
       destinationAsset: AssetETH,
-      affiliateFeePercent: 0.1,
+      affiliateFeeBasisPoints: 0.1,
       destinationAddress: 'xxx',
     }
     try {
@@ -288,7 +288,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount('20')), AssetRuneNative),
       destinationAsset: AssetAVAX,
       destinationAddress: 'xxx',
-      // affiliateFeePercent: 0.003, //optional
+      // affiliateFeeBasisPoints: 0.003, //optional
       slipLimit: new BigNumber('0.20'), //optional
     }
 

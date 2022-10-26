@@ -242,6 +242,50 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
 }
 
 /**
+ * Works out the required outbound fee based on the chain.
+ * Call getInboundDetails to get the current outbound fee
+ *
+ * @param sourceAsset
+ * @param inbound detail
+ * @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
+ * @returns
+ */
+export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmount => {
+  if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
+  switch (asset.chain) {
+    case Chain.Bitcoin:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBTC)
+      break
+    case Chain.BitcoinCash:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBCH)
+      break
+    case Chain.Litecoin:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetLTC)
+      break
+    case Chain.Doge:
+      // NOTE: UTXO chains estimate fees with a 250 byte size
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetDOGE)
+      break
+    case Chain.Binance:
+      //flat fee
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBNB)
+      break
+    case Chain.Ethereum:
+      return new CryptoAmount(baseAmount(inbound.outboundFee, 18), AssetETH)
+      break
+    case Chain.Avalanche:
+      return new CryptoAmount(baseAmount(inbound.outboundFee, 18), AssetAVAX)
+      break
+    case Chain.Cosmos:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetAtom)
+      break
+    case Chain.THORChain:
+      return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
+      break
+  }
+  throw new Error(`could not calculate outbound fee for ${asset.chain}`)
+}
+/**
  * Return the chain for a given Asset This method should live somewhere else.
  * @param chain
  * @returns the gas asset type for the given chain
