@@ -34,7 +34,7 @@ function print(estimate: SwapEstimate, input: CryptoAmount) {
       swapFee: estimate.totalFees.swapFee.formatedAssetString(),
       outboundFee: estimate.totalFees.outboundFee.formatedAssetString(),
       affiliateFee: estimate.totalFees.affiliateFee.formatedAssetString(),
-      totalFees: estimate.totalFees.totalFees?.formatedAssetString(),
+      // totalFees: estimate.totalFees.totalFees?.formatedAssetString(),
     },
     slipPercentage: estimate.slipPercentage.toFixed(),
     netOutput: estimate.netOutput.formatedAssetString(),
@@ -60,6 +60,20 @@ const USDCETH = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE36
 // Test User Functions - single and double swap using mock pool data
 describe('Thorchain-query estimate Integration Tests', () => {
   // Test estimate swaps with mock pool data
+  it('should estimate a swap of 10 BTC to RUNE with 0.3 affiliate fee', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('10')), AssetBTC),
+      destinationAsset: AssetRuneNative,
+      destinationAddress: 'xxx',
+      affiliateAddress: 'affiliateAddress',
+      affiliateFeeBasisPoints: 30, //optional
+    }
+
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    // const estimateInBusd = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
+    // estimate.txEstimate.totalFees = estimateInBusd
+    printTx(estimate, swapParams.input)
+  })
   it('should estimate a swap of 0.5 BTC to BUSD', async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBTC),
@@ -131,7 +145,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount(1)), sBTC),
       destinationAsset: sETH,
       destinationAddress: 'xxx',
-      affiliateFeeBasisPoints: 0.03, //optional
+      affiliateFeeBasisPoints: 30, //optional
       slipLimit: new BigNumber(0.02), //optional
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
@@ -214,7 +228,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       print(estimate.txEstimate, swapParams.input)
       fail()
     } catch (error: any) {
-      expect(error.message).toEqual(`affiliateFee must be between 0 and 1000 basis points`)
+      expect(error.message).toEqual(`affiliateFeeBasisPoints must be between 0 and 1000 basis points`)
     }
   })
 
@@ -223,7 +237,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount(50)), AssetBTC),
       destinationAsset: AssetETH,
       destinationAddress: 'xxx',
-      affiliateFeeBasisPoints: 0.03, //optional
+      affiliateFeeBasisPoints: 30, //optional
       slipLimit: new BigNumber(0.02), //optional
     }
     try {
@@ -248,7 +262,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     }
     try {
       const estimate = await thorchainQuery.estimateSwap(swapParams)
-      expect(estimate.txEstimate.errors).toEqual([`destinationAsset HOT does not have a valid liquidity pool`])
+      expect(estimate.txEstimate.errors[0]).toEqual(`destinationAsset HOT does not have a valid liquidity pool`)
     } catch (error) {
       throw error
     }
@@ -258,7 +272,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(0.001)), AssetBTC),
       destinationAsset: AssetETH,
-      affiliateFeeBasisPoints: 0.1,
+      affiliateFeeBasisPoints: 10,
       destinationAddress: 'xxx',
     }
     try {
@@ -356,7 +370,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount('1', 8)), AssetBTC),
       destinationAsset: USDCETH,
       destinationAddress: 'xxx',
-      interfaceID: 999,
+      interfaceID: '999',
       affiliateAddress: `tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx`,
       affiliateFeeBasisPoints: 30,
       slipLimit: new BigNumber('0.2'),

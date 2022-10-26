@@ -11,7 +11,7 @@ export type TotalFees = {
   swapFee: CryptoAmount
   outboundFee: CryptoAmount
   affiliateFee: CryptoAmount
-  totalFees?: CryptoAmount
+  // totalFees?: CryptoAmount
 }
 
 export type SwapEstimate = {
@@ -49,7 +49,7 @@ export type EstimateSwapParams = {
   slipLimit?: BigNumber
   affiliateAddress?: Address
   affiliateFeeBasisPoints?: number
-  interfaceID?: number
+  interfaceID?: string
 }
 
 export type SwapOutput = {
@@ -102,9 +102,9 @@ export type ConstructMemo = {
   limit: BaseAmount
   destinationAddress: Address
   affiliateAddress: Address
-  affiliateFee: BaseAmount
+  affiliateFeeBasisPoints: number
   feeOption?: FeeOption
-  interfaceID: number
+  interfaceID: string
 }
 
 export type TxDetails = {

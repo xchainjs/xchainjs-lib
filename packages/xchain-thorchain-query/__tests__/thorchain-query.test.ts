@@ -146,6 +146,36 @@ describe('Thorchain-query tests', () => {
       assetAmount('499.9878375').amount().toFixed(),
     )
   })
+  it('Should estimate swap from BUSD to RUNE with no sliplimit ', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(1000)), BUSD),
+      destinationAsset: AssetRuneNative,
+      destinationAddress: 'xxx',
+    }
+
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    expect(estimate.txEstimate.canSwap).toEqual(true)
+    expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
+      assetAmount('499.9878375').amount().toFixed(),
+    )
+  })
+  it('Should estimate swap from BUSD to RUNE with no sliplimit and 30 basis point affiliate fees ', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(10)), AssetBTC),
+      destinationAsset: AssetRuneNative,
+      destinationAddress: 'xxx',
+      affiliateAddress: 'affiliateAddress',
+      affiliateFeeBasisPoints: 30,
+    }
+
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    expect(estimate.txEstimate.canSwap).toEqual(true)
+    expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
+      assetAmount('106013.28224179').amount().toFixed(),
+    )
+  })
   it('Should estimate swap from UOS to ETH ', async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(5000, 4)), assetUOS),
@@ -185,7 +215,7 @@ describe('Thorchain-query tests', () => {
       affiliateFeeBasisPoints: 50,
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
-    const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:9936610999:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:24998256`
+    const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:9638512555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
     expect(estimate.memo).toEqual(correctMemo)
   })
   it('Should construct the correct memo ETH->USDC', async () => {
@@ -197,7 +227,7 @@ describe('Thorchain-query tests', () => {
       affiliateFeeBasisPoints: 50,
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
-    const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:172827326999:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:435355040`
+    const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:167642506555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
     expect(estimate.memo).toEqual(correctMemo)
   })
   it(`Should check assets match asset pools`, async () => {

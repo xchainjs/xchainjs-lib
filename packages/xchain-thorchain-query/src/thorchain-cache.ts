@@ -13,7 +13,7 @@ import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
 import { LiquidityPool } from './liquidity-pool'
-import {  InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache, SwapOutput } from './types'
+import { InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache, SwapOutput } from './types'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'
 import { Thornode } from './utils/thornode'

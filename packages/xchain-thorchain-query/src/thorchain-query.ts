@@ -74,8 +74,8 @@ export class ThorchainQuery {
     input,
     destinationAsset,
     destinationAddress,
-    slipLimit,
-    interfaceID = 999,
+    slipLimit = new BigNumber('0.03'), //default to 3%
+    interfaceID = '000',
     affiliateAddress = '',
     affiliateFeeBasisPoints = 0,
   }: EstimateSwapParams): Promise<TxDetails> {
@@ -159,7 +159,7 @@ export class ThorchainQuery {
         limit: baseAmount(limAssetAmount8Decimals),
         destinationAddress: destinationAddress,
         affiliateAddress: affiliateAddress,
-        affiliateFee: swapEstimate.totalFees.affiliateFee.baseAmount,
+        affiliateFeeBasisPoints: affiliateFeeBasisPoints,
         interfaceID: interfaceID,
       })
     }
@@ -192,7 +192,10 @@ export class ThorchainQuery {
     if (params.input.baseAmount.lte(0)) throw Error('inputAmount must be greater than 0')
     // Affiliate fee % can't exceed 10% because this is set by TC.
     if (params.affiliateFeeBasisPoints && (params.affiliateFeeBasisPoints < 0 || params.affiliateFeeBasisPoints > 1000))
-      throw Error(`affiliateFee must be between 0 and 1000 basis points`)
+      throw Error(`affiliateFeeBasisPoints must be between 0 and 1000 basis points`)
+    if (params.affiliateFeeBasisPoints && !Number.isInteger(params.affiliateFeeBasisPoints))
+      throw Error(`affiliateFeeBasisPoints must be an integer`)
+    if (params.slipLimit?.lte(0) || params.slipLimit?.gt(1)) throw Error(`slipLimit must be between 0 and 1`)
   }
   /**
    * Does the calculations for the swap.
@@ -227,6 +230,7 @@ export class ThorchainQuery {
 
     // convert fees to rune
     const inboundFeeInRune = await this.thorchainCache.convert(inboundFeeInAsset, AssetRuneNative)
+
     let outboundFeeInRune = await this.thorchainCache.convert(outboundFeeInAsset, AssetRuneNative)
 
     // ----------- Remove Fees from inbound before doing the swap -----------
@@ -234,8 +238,22 @@ export class ThorchainQuery {
     // remove any affiliateFee. netInput * affiliateFee (percentage) of the destination asset type
     const affiliateFeePercent = params.affiliateFeeBasisPoints ? params.affiliateFeeBasisPoints / 10000 : 0
     const affiliateFeeInRune = inputMinusInboundFeeInRune.times(affiliateFeePercent)
+    const affiliateFeeInAsset = await this.thorchainCache.convert(affiliateFeeInRune, input.asset)
+    const affiliateFeeSwapOutputInRune = await this.thorchainCache.getExpectedSwapOutput(
+      affiliateFeeInAsset,
+      AssetRuneNative,
+    )
+    // const affiliateFeeSwapOutputInRune = await this.thorchainCache.convert(
+    //   affiliateFeeSwapOutput.output,
+    //   AssetRuneNative,
+    // )
     // remove the affiliate fee from the input.
     const inputNetAmountInRune = inputMinusInboundFeeInRune.minus(affiliateFeeInRune)
+    console.log(inputInRune.assetAmountFixedString())
+    console.log(affiliateFeeInRune.assetAmountFixedString())
+    console.log(inputNetAmountInRune.assetAmountFixedString())
+
+    // affiliateFeeSwapOutputInRune
     // convert back to input asset
     const inputNetInAsset = await this.thorchainCache.convert(inputNetAmountInRune, input.asset)
 
@@ -274,7 +292,7 @@ export class ThorchainQuery {
       inboundFee: inboundFeeInAsset,
       swapFee: swapOutput.swapFee,
       outboundFee: outboundFeeInAsset,
-      affiliateFee: affiliateFeeInRune,
+      affiliateFee: affiliateFeeSwapOutputInRune.output,
       // totalFees: ,
     }
     //const totalFeesInUsd = await this.getFeesIn(totalFees, usdAsset)
@@ -297,7 +315,7 @@ export class ThorchainQuery {
   private constructSwapMemo(params: ConstructMemo): string {
     const limstring = params.limit.amount().toFixed()
     // create LIM with interface ID
-    const lim = limstring.substring(0, limstring.length - 3).concat(params.interfaceID.toString())
+    const lim = limstring.substring(0, limstring.length - 3).concat(params.interfaceID)
     // create the full memo
     let memo = `=:${assetToString(params.destinationAsset)}`
     // NOTE: we should validate affiliate address is EITHER: a thorname or valid thorchain address, currently we cannot do this without importing xchain-thorchain
@@ -305,7 +323,7 @@ export class ThorchainQuery {
     if (params.affiliateAddress?.length > 0) {
       // NOTE: we should validate destinationAddress address is valid destination address for the asset type requested
       memo = memo.concat(
-        `:${params.destinationAddress}:${lim}:${params.affiliateAddress}:${params.affiliateFee.amount().toFixed()}`,
+        `:${params.destinationAddress}:${lim}:${params.affiliateAddress}:${params.affiliateFeeBasisPoints}`,
       )
     } else {
       memo = memo.concat(`:${params.destinationAddress}:${lim}`)
