@@ -1,10 +1,20 @@
+# v0.1.x (2022-10-25)
+
+## Fix
+
+- Bug - Limit asset amount was not using 8 decimal places
+
+## Update
+
+- Removed getInboundAddresses() from thorchainCache since it was redundant
+
 # v0.1.4 (2022-10-17)
 
 ## Fix
 
-- Bug - Limit asset amount was not using 8 decimal places 
+- Bug - Limit asset amount was not using 8 decimal places
 - Bug - outbound fee is now calculated correctly
-- Bug - affiliate fee calculation fixed 
+- Bug - affiliate fee calculation fixed
 - Bug - getPoolForAsset() changed to take both chain & ticker for lookup
 - Bump dep on package `xchain-midgard`
 

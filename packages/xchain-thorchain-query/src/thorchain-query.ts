@@ -138,7 +138,7 @@ export class ThorchainQuery {
       txDetails.txEstimate.errors = errors
     } else {
       txDetails.txEstimate.canSwap = true
-      const inboundAsgard = (await this.thorchainCache.getInboundAddresses())[input.asset.chain]
+      const inboundAsgard = (await this.thorchainCache.getInboundDetails())[input.asset.chain]
       txDetails.toAddress = inboundAsgard?.address || ''
       // Work out LIM from the slip percentage
       let limPercentage = BN_1

@@ -1,5 +1,5 @@
 import { FeeOption } from '@xchainjs/xchain-client'
-import { InboundAddress, LiquidityProvider } from '@xchainjs/xchain-thornode'
+import { LiquidityProvider } from '@xchainjs/xchain-thornode'
 import { Address, Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -28,10 +28,6 @@ export type PoolCache = {
   pools: Record<string, LiquidityPool>
 }
 
-export type AsgardCache = {
-  lastRefreshed: number
-  inboundAddresses: Record<string, InboundAddress>
-}
 export type InboundDetailCache = {
   lastRefreshed: number
   inboundDetails: Record<string, InboundDetail>
