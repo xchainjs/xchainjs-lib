@@ -256,21 +256,24 @@ export class ThorchainCache {
    * @returns SwapOutput - swap output object - output - fee - slip
    */
   async getExpectedSwapOutput(inputAmount: CryptoAmount, destinationAsset: Asset): Promise<SwapOutput> {
+    let swapOutput: SwapOutput
     if (isAssetRuneNative(inputAmount.asset)) {
       //singleswap from rune -> asset
-
       const pool = await this.getPoolForAsset(destinationAsset)
-      return getSingleSwap(inputAmount, pool, false)
+      swapOutput = getSingleSwap(inputAmount, pool, false)
     } else if (isAssetRuneNative(destinationAsset)) {
       //singleswap from  asset -> rune
       const pool = await this.getPoolForAsset(inputAmount.asset)
-      return getSingleSwap(inputAmount, pool, true)
+      swapOutput = getSingleSwap(inputAmount, pool, true)
     } else {
       //doubleswap asset-> asset
       const inPool = await this.getPoolForAsset(inputAmount.asset)
       const destPool = await this.getPoolForAsset(destinationAsset)
-      return await getDoubleSwap(inputAmount, inPool, destPool, this)
+      swapOutput = await getDoubleSwap(inputAmount, inPool, destPool, this)
     }
+    //Note this is needed to return a synth vs. a  native asset on swap out
+    swapOutput.output = new CryptoAmount(swapOutput.output.baseAmount, destinationAsset)
+    return swapOutput
   }
   /**
    * Returns the exchange of a CryptoAmount to a different Asset

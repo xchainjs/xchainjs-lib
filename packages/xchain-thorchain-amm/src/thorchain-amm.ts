@@ -43,7 +43,7 @@ export class ThorchainAMM {
     destinationAsset,
     destinationAddress,
     affiliateAddress = '',
-    interfaceID = `999`,
+    interfaceID = `555`,
     affiliateFeeBasisPoints = 0,
     slipLimit,
   }: EstimateSwapParams): Promise<TxDetails> {

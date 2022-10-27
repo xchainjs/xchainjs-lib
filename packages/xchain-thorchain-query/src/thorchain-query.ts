@@ -31,6 +31,7 @@ import {
   PoolRatios,
   PostionDepositValue,
   SwapEstimate,
+  SwapOutput,
   TotalFees,
   TxDetails,
   UnitData,
@@ -219,84 +220,59 @@ export class ThorchainQuery {
         ? params.input
         : await this.thorchainCache.convert(params.input, params.input.asset)
 
-    // If asset is already rune native, skip the convert
-    const inputInRune =
-      input.asset === AssetRuneNative ? input : await this.thorchainCache.convert(input, AssetRuneNative)
-
-    const inboundFeeInAsset = calcNetworkFee(input.asset, sourceInboundDetails)
-    // Retrieve outbound fee from inboundAddressDetails.
-    const outboundFeeInAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails)
-
-    // convert fees to rune
-    const inboundFeeInRune = await this.thorchainCache.convert(inboundFeeInAsset, AssetRuneNative)
-
-    let outboundFeeInRune = await this.thorchainCache.convert(outboundFeeInAsset, AssetRuneNative)
+    const inboundFeeInInboundGasAsset = calcNetworkFee(input.asset, sourceInboundDetails)
+    const outboundFeeInOutboundGasAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails)
 
     // ----------- Remove Fees from inbound before doing the swap -----------
-    const inputMinusInboundFeeInRune = inputInRune.minus(inboundFeeInRune)
+    const inboundFeeInInboundAsset = await this.thorchainCache.convert(inboundFeeInInboundGasAsset, params.input.asset)
+    const inputMinusInboundFeeInAsset = input.minus(inboundFeeInInboundAsset)
+    // console.log('y', inputMinusInboundFeeInAsset.formatedAssetString())
+
     // remove any affiliateFee. netInput * affiliateFee (percentage) of the destination asset type
     const affiliateFeePercent = params.affiliateFeeBasisPoints ? params.affiliateFeeBasisPoints / 10000 : 0
-    const affiliateFeeInRune = inputMinusInboundFeeInRune.times(affiliateFeePercent)
-    const affiliateFeeInAsset = await this.thorchainCache.convert(affiliateFeeInRune, input.asset) // what if input asset is already in rune?
-    const affiliateFeeSwapOutputInRune = await this.thorchainCache.getExpectedSwapOutput(
-      affiliateFeeInAsset,
-      AssetRuneNative,
-    )
-    // const affiliateFeeSwapOutputInRune = await this.thorchainCache.convert(
-    //   affiliateFeeSwapOutput.output,
-    //   AssetRuneNative,
-    // )
-    // remove the affiliate fee from the input.
-    const inputNetAmountInRune = inputMinusInboundFeeInRune.minus(affiliateFeeInRune)
-    console.log(inputInRune.assetAmountFixedString())
-    console.log(affiliateFeeInRune.assetAmountFixedString())
-    console.log(inputNetAmountInRune.assetAmountFixedString())
-
-    // affiliateFeeSwapOutputInRune
-    // convert back to input asset
-    const inputNetInAsset = await this.thorchainCache.convert(inputNetAmountInRune, input.asset)
-
-    // Check outbound fee is equal too or greater than 1 USD * need to find a more permanent solution to this. referencing just 1 stable coin pool has problems
-    const deepestUSDPOOL = await this.thorchainCache.getDeepestUSDPool()
-    const usdAsset = deepestUSDPOOL.asset
-
-    if (params.destinationAsset.chain !== Chain.THORChain && !params.destinationAsset.synth) {
-      // const deepestUSDPOOL = await this.thorchainCache.getDeepestUSDPool()
-      // const usdAsset = deepestUSDPOOL.asset
-
-      const networkValues = await this.thorchainCache.midgard.getNetworkValues()
-      const usdMinFee = new CryptoAmount(baseAmount(networkValues['MINIMUML1OUTBOUNDFEEUSD']), usdAsset)
-      // const FeeInUSD = await this.convert(outboundFeeInRune, usdAsset)
-      const checkOutboundFee = (await this.convert(outboundFeeInRune, usdAsset)).gte(usdMinFee)
-      if (!checkOutboundFee) {
-        const newFee = usdMinFee
-        outboundFeeInRune = await this.convert(newFee, AssetRuneNative)
+    const affiliateFeeInAsset = inputMinusInboundFeeInAsset.times(affiliateFeePercent)
+    let affiliateFeeSwapOutputInRune: SwapOutput
+    if (isAssetRuneNative(affiliateFeeInAsset.asset)) {
+      affiliateFeeSwapOutputInRune = {
+        output: affiliateFeeInAsset,
+        swapFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
+        slip: new BigNumber(0),
       }
+    } else {
+      affiliateFeeSwapOutputInRune = await this.thorchainCache.getExpectedSwapOutput(
+        affiliateFeeInAsset,
+        AssetRuneNative,
+      )
     }
+    // remove the affiliate fee from the input.
+    const inputNetInAsset = inputMinusInboundFeeInAsset.minus(affiliateFeeInAsset)
 
     // Now calculate swap output based on inputNetAmount
-    const swapOutput = await this.thorchainCache.getExpectedSwapOutput(inputNetInAsset, params.destinationAsset)
-    //const swapFeeInRune = await this.thorchainCache.convert(swapOutput.swapFee, AssetRuneNative)
-    const outputInRune = await this.thorchainCache.convert(swapOutput.output, AssetRuneNative)
-
+    const swapOutputInDestinationAsset = await this.thorchainCache.getExpectedSwapOutput(
+      inputNetInAsset,
+      params.destinationAsset,
+    )
     // ---------------- Remove Outbound Fee ---------------------- /
-    const netOutputInRune = outputInRune.minus(outboundFeeInRune)
-    const netOutputInAsset = await this.thorchainCache.convert(netOutputInRune, params.destinationAsset)
-    // const totalFeesInUsd = await this.convert(
-    //   inboundFeeInAsset.plus(swapOutput.swapFee).plus(outboundFeeInAsset).plus(affiliateFeeInRune),
-    //   usdAsset,
-    // )
+    const outboundFeeInDestinationAsset = await this.thorchainCache.convert(
+      outboundFeeInOutboundGasAsset,
+      params.destinationAsset,
+    )
+    // console.log('a', assetToString(swapOutputInDestinationAsset.output.asset))
+    // console.log('b', assetToString(outboundFeeInDestinationAsset.asset))
+    // // console.log('x', swapOutputInDestinationAsset.output.formatedAssetString())
+    // // console.log('y', outboundFeeInDestinationAsset.formatedAssetString())
+    const netOutputInAsset = swapOutputInDestinationAsset.output.minus(outboundFeeInDestinationAsset)
     const totalFees: TotalFees = {
-      inboundFee: inboundFeeInAsset,
-      swapFee: swapOutput.swapFee,
-      outboundFee: outboundFeeInAsset,
+      inboundFee: inboundFeeInInboundGasAsset,
+      swapFee: swapOutputInDestinationAsset.swapFee,
+      outboundFee: outboundFeeInOutboundGasAsset,
       affiliateFee: affiliateFeeSwapOutputInRune.output,
       // totalFees: ,
     }
     //const totalFeesInUsd = await this.getFeesIn(totalFees, usdAsset)
     const swapEstimate = {
       totalFees: totalFees,
-      slipPercentage: swapOutput.slip,
+      slipPercentage: swapOutputInDestinationAsset.slip,
       netOutput: netOutputInAsset,
       waitTimeSeconds: 0, // will be set within EstimateSwap if canSwap = true
       canSwap: false, // assume false for now, the getSwapEstimateErrors() step will flip this flag if required

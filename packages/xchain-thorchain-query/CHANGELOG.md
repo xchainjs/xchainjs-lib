@@ -1,12 +1,16 @@
-# v0.1.x (2022-10-25)
+# v0.1.5 (2022-10-27)
 
 ## Fix
 
 - Bug - Limit asset amount was not using 8 decimal places
+- Bug - Swap to Syntns was failing 
+-
 
 ## Update
 
 - Removed getInboundAddresses() from thorchainCache since it was redundant
+- Renamed AffiliateFeePercent to AffiliateFeeBasisPoints in EstimateSwapParams
+- Updated output 
 
 # v0.1.4 (2022-10-17)
 
