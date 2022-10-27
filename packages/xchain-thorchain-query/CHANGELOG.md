@@ -3,14 +3,15 @@
 ## Fix
 
 - Bug - Limit asset amount was not using 8 decimal places
-- Bug - Swap to Syntns was failing 
--
+- Bug - Swap to Synths was failing Pool Conversion 
+- 
 
 ## Update
 
 - Removed getInboundAddresses() from thorchainCache since it was redundant
 - Renamed AffiliateFeePercent to AffiliateFeeBasisPoints in EstimateSwapParams
-- Updated output 
+- Updated output decimals to us NativeDecimals from Pool data
+- Created calcOutboundFee() to use thornode outbound_fee 
 
 # v0.1.4 (2022-10-17)
 
