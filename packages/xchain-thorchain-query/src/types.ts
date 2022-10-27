@@ -1,5 +1,5 @@
 import { FeeOption } from '@xchainjs/xchain-client'
-import { InboundAddress, LiquidityProvider } from '@xchainjs/xchain-thornode'
+import { LiquidityProvider } from '@xchainjs/xchain-thornode'
 import { Address, Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -11,6 +11,7 @@ export type TotalFees = {
   swapFee: CryptoAmount
   outboundFee: CryptoAmount
   affiliateFee: CryptoAmount
+  // totalFees?: CryptoAmount
 }
 
 export type SwapEstimate = {
@@ -27,10 +28,6 @@ export type PoolCache = {
   pools: Record<string, LiquidityPool>
 }
 
-export type AsgardCache = {
-  lastRefreshed: number
-  inboundAddresses: Record<string, InboundAddress>
-}
 export type InboundDetailCache = {
   lastRefreshed: number
   inboundDetails: Record<string, InboundDetail>
@@ -51,8 +48,8 @@ export type EstimateSwapParams = {
   destinationAddress: Address
   slipLimit?: BigNumber
   affiliateAddress?: Address
-  affiliateFeePercent?: number
-  interfaceID?: number
+  affiliateFeeBasisPoints?: number
+  interfaceID?: string
 }
 
 export type SwapOutput = {
@@ -105,9 +102,9 @@ export type ConstructMemo = {
   limit: BaseAmount
   destinationAddress: Address
   affiliateAddress: Address
-  affiliateFee: BaseAmount
+  affiliateFeeBasisPoints: number
   feeOption?: FeeOption
-  interfaceID: number
+  interfaceID: string
 }
 
 export type TxDetails = {

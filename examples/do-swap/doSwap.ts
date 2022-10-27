@@ -46,13 +46,13 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
       input: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
       destinationAsset: toAsset,
       destinationAddress,
-      slipLimit: new BigNumber('0.03'), //optional
+      // slipLimit: new BigNumber('0.03'), //optional
     }
     const affiliateAddress = process.argv[8]
     if (affiliateAddress) {
-      const affiliateFeePercent = Number(process.argv[9])
+      const affiliateFeeBasisPoints = Number(process.argv[9])
       swapParams.affiliateAddress = affiliateAddress
-      swapParams.affiliateFeePercent = affiliateFeePercent
+      swapParams.affiliateFeeBasisPoints = affiliateFeeBasisPoints
     }
     const outPutCanSwap = await tcAmm.estimateSwap(swapParams)
     printTx(outPutCanSwap, swapParams.input)

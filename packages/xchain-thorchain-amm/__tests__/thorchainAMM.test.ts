@@ -76,7 +76,7 @@ describe('ThorchainAmm Client Test', () => {
 
   it('Should fail estimate swap because destination chain is halted ', async () => {
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(2)), AssetETH),
+      input: new CryptoAmount(assetToBase(assetAmount(2, 18)), AssetETH),
       destinationAsset: AssetLTC,
       destinationAddress: 'xxx',
     }

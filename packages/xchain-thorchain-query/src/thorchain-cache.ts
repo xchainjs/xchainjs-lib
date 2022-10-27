@@ -1,5 +1,4 @@
 import { Network } from '@xchainjs/xchain-client'
-import { InboundAddress } from '@xchainjs/xchain-thornode'
 import {
   Address,
   Asset,
@@ -14,7 +13,7 @@ import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
 import { LiquidityPool } from './liquidity-pool'
-import { AsgardCache, InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache, SwapOutput } from './types'
+import { InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache, SwapOutput } from './types'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'
 import { Thornode } from './utils/thornode'
@@ -44,12 +43,10 @@ export class ThorchainCache {
   readonly midgard: Midgard
   readonly thornode: Thornode
   private poolCache: PoolCache | undefined
-  private asgardAssetsCache: AsgardCache | undefined = undefined
   private inboundDetailCache: InboundDetailCache | undefined = undefined
   private networkValuesCache: NetworkValuesCache | undefined = undefined
 
   private expirePoolCacheMillis
-  private expireAsgardCacheMillis
   private expireInboundDetailsCacheMillis
   private expireNetworkValuesCacheMillis
 
@@ -67,14 +64,12 @@ export class ThorchainCache {
     midgard = defaultMidgard,
     thornode = defaultThornode,
     expirePoolCacheMillis = 6000,
-    expireAsgardCacheMillis = TEN_MINUTES,
     expireInboundDetailsCacheMillis = 6000,
     expireNetworkValuesCacheMillis = TEN_MINUTES,
   ) {
     this.midgard = midgard
     this.thornode = thornode
     this.expirePoolCacheMillis = expirePoolCacheMillis
-    this.expireAsgardCacheMillis = expireAsgardCacheMillis
     this.expireInboundDetailsCacheMillis = expireInboundDetailsCacheMillis
     this.expireNetworkValuesCacheMillis = expireNetworkValuesCacheMillis
 
@@ -173,26 +168,7 @@ export class ThorchainCache {
       }
     }
   }
-  /**
-   * Refreshes the asgardAssetsCache Cache
-   *
-   * NOTE: do not call refereshAsgardCache() directly, call getAsgardAssets() instead
-   * which will refresh the cache if it's expired
-   */
-  private async refereshAsgardCache(): Promise<void> {
-    const inboundAddresses = await this.thornode.getInboundAddresses()
-    const map: Record<string, InboundAddress> = {}
-    if (inboundAddresses) {
-      for (const inboundAddress of inboundAddresses) {
-        if (!inboundAddress.chain) throw Error('chain needed')
-        map[inboundAddress.chain] = inboundAddress
-      }
-      this.asgardAssetsCache = {
-        lastRefreshed: Date.now(),
-        inboundAddresses: map,
-      }
-    }
-  }
+
   /**
    * Refreshes the InboundDetailCache Cache
    *
@@ -280,21 +256,24 @@ export class ThorchainCache {
    * @returns SwapOutput - swap output object - output - fee - slip
    */
   async getExpectedSwapOutput(inputAmount: CryptoAmount, destinationAsset: Asset): Promise<SwapOutput> {
+    let swapOutput: SwapOutput
     if (isAssetRuneNative(inputAmount.asset)) {
       //singleswap from rune -> asset
-
       const pool = await this.getPoolForAsset(destinationAsset)
-      return getSingleSwap(inputAmount, pool, false)
+      swapOutput = getSingleSwap(inputAmount, pool, false)
     } else if (isAssetRuneNative(destinationAsset)) {
       //singleswap from  asset -> rune
       const pool = await this.getPoolForAsset(inputAmount.asset)
-      return getSingleSwap(inputAmount, pool, true)
+      swapOutput = getSingleSwap(inputAmount, pool, true)
     } else {
       //doubleswap asset-> asset
       const inPool = await this.getPoolForAsset(inputAmount.asset)
       const destPool = await this.getPoolForAsset(destinationAsset)
-      return await getDoubleSwap(inputAmount, inPool, destPool, this)
+      swapOutput = await getDoubleSwap(inputAmount, inPool, destPool, this)
     }
+    //Note this is needed to return a synth vs. a  native asset on swap out
+    swapOutput.output = new CryptoAmount(swapOutput.output.baseAmount, destinationAsset)
+    return swapOutput
   }
   /**
    * Returns the exchange of a CryptoAmount to a different Asset
@@ -333,32 +312,14 @@ export class ThorchainCache {
   }
 
   async getRouterAddressForChain(chain: Chain): Promise<Address> {
-    const inboundAsgard = (await this.getInboundAddresses())[chain]
+    const inboundAsgard = (await this.getInboundDetails())[chain]
 
     if (!inboundAsgard?.router) {
       throw new Error('router address is not defined')
     }
     return inboundAsgard?.router
   }
-  /**
-   *
-   * @returns - inbound adresses item
-   */
-  async getInboundAddresses(): Promise<Record<string, InboundAddress>> {
-    const millisSinceLastRefeshed = Date.now() - (this.asgardAssetsCache?.lastRefreshed || 0)
-    if (millisSinceLastRefeshed > this.expireAsgardCacheMillis) {
-      try {
-        await this.refereshAsgardCache()
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    if (this.asgardAssetsCache) {
-      return this.asgardAssetsCache.inboundAddresses
-    } else {
-      throw Error(`Could not refresh refereshAsgardCache `)
-    }
-  }
+
   /**
    *
    * @returns - inbound details

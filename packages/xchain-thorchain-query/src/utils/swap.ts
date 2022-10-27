@@ -48,6 +48,8 @@ export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDeci
 export const getSwapFee = (inputAmount: CryptoAmount, pool: LiquidityPool, toRune: boolean): CryptoAmount => {
   // formula: (x * x * Y) / (x + X) ^ 2
   // const isInputRune = isAssetRuneNative(inputAmount.asset)
+  const decimalsOut =
+    pool.pool.nativeDecimal !== '-1' ? Number(pool.pool.nativeDecimal) : inputAmount.baseAmount.decimal
 
   const x = getBaseAmountWithDiffDecimals(inputAmount, 8)
   const X = toRune ? pool.assetBalance.amount() : pool.runeBalance.amount() // input is asset if toRune
@@ -59,7 +61,7 @@ export const getSwapFee = (inputAmount: CryptoAmount, pool: LiquidityPool, toRun
 
   const eightDecimalResult = new CryptoAmount(baseAmount(result), units)
 
-  const decimals = toRune ? 8 : inputAmount.baseAmount.decimal
+  const decimals = toRune ? 8 : decimalsOut
   const baseOut = getBaseAmountWithDiffDecimals(eightDecimalResult, decimals)
   const swapFee = new CryptoAmount(baseAmount(baseOut, decimals), units)
   //console.log(` swapFee ${swapFee.assetAmountFixedString()} `)
@@ -91,6 +93,8 @@ export const getSwapSlip = (inputAmount: CryptoAmount, pool: LiquidityPool, toRu
  */
 export const getSwapOutput = (inputAmount: CryptoAmount, pool: LiquidityPool, toRune: boolean): CryptoAmount => {
   // formula: (x * X * Y) / (x + X) ^ 2
+  const decimalsOut =
+    pool.pool.nativeDecimal !== '-1' ? Number(pool.pool.nativeDecimal) : inputAmount.baseAmount.decimal
   const x = getBaseAmountWithDiffDecimals(inputAmount, 8)
   const X = toRune ? pool.assetBalance.amount() : pool.runeBalance.amount() // input is asset if toRune
   const Y = toRune ? pool.runeBalance.amount() : pool.assetBalance.amount() // output is rune if toRune
@@ -103,7 +107,7 @@ export const getSwapOutput = (inputAmount: CryptoAmount, pool: LiquidityPool, to
 
   const eightDecimalResult = new CryptoAmount(baseAmount(result), units)
 
-  const decimals = toRune ? 8 : inputAmount.baseAmount.decimal
+  const decimals = toRune ? 8 : decimalsOut
   const baseOut = getBaseAmountWithDiffDecimals(eightDecimalResult, decimals)
   return new CryptoAmount(baseAmount(baseOut, decimals), units)
 }
@@ -241,6 +245,50 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
   throw new Error(`could not calculate inbound fee for ${asset.chain}`)
 }
 
+/**
+ * Works out the required outbound fee based on the chain.
+ * Call getInboundDetails to get the current outbound fee
+ *
+ * @param sourceAsset
+ * @param inbound detail
+ * @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
+ * @returns
+ */
+export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmount => {
+  if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
+  switch (asset.chain) {
+    case Chain.Bitcoin:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBTC)
+      break
+    case Chain.BitcoinCash:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBCH)
+      break
+    case Chain.Litecoin:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetLTC)
+      break
+    case Chain.Doge:
+      // NOTE: UTXO chains estimate fees with a 250 byte size
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetDOGE)
+      break
+    case Chain.Binance:
+      //flat fee
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBNB)
+      break
+    case Chain.Ethereum:
+      return new CryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetETH)
+      break
+    case Chain.Avalanche:
+      return new CryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetAVAX)
+      break
+    case Chain.Cosmos:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetAtom)
+      break
+    case Chain.THORChain:
+      return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
+      break
+  }
+  throw new Error(`could not calculate outbound fee for ${asset.chain}`)
+}
 /**
  * Return the chain for a given Asset This method should live somewhere else.
  * @param chain
