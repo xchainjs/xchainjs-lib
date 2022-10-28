@@ -60,10 +60,7 @@ class Client extends UTXOClient {
       [Network.Stagenet]: 'https://litecoin.ninerealms.com',
       [Network.Testnet]: 'https://testnet.ltc.thorchain.info',
     },
-    nodeAuth = {
-      username: 'thorchain',
-      password: 'password',
-    },
+    nodeAuth,
     rootDerivationPaths = {
       [Network.Mainnet]: `m/84'/2'/0'/0/`,
       [Network.Testnet]: `m/84'/1'/0'/0/`,
