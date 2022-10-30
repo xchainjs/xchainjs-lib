@@ -1,3 +1,10 @@
+# v.10.5 (2022-10-27)
+
+## Update
+
+- removed Default username/password in Client constructor
+- do not send auth header if undefined
+
 # v.10.4 (2022-10-14)
 
 ## Update
