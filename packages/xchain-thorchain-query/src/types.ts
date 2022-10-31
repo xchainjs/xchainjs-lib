@@ -156,6 +156,7 @@ export type EstimateWithdrawLP = {
   transactionFee: LPFees
   assetAmount: CryptoAmount
   runeAmount: CryptoAmount
+  lpGrowth: string
   impermanentLossProtection: ILProtectionData
   estimatedWaitSeconds: number
   assetPool: string

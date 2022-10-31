@@ -10,6 +10,7 @@ function print(estimate: LiquidityPosition, address: string) {
       assetShare: estimate.poolShare.assetShare.formatedAssetString(),
       runeShare: estimate.poolShare.runeShare.formatedAssetString(),
     },
+    lpGrowth: estimate.lpGrowth,
     impermanentLossProtection: {
       ILProtection: estimate.impermanentLossProtection.ILProtection.formatedAssetString(),
       totalDays: estimate.impermanentLossProtection.totalDays,

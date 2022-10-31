@@ -62,6 +62,7 @@ function printWithdraw(withdraw: EstimateWithdrawLP) {
       assetFee: withdraw.transactionFee.assetFee.assetAmount.amount().toFixed(),
       totalFees: withdraw.transactionFee.totalFees.assetAmount.amount().toFixed(),
     },
+    lpGrowth: withdraw.lpGrowth,
     impermanentLossProtection: withdraw.impermanentLossProtection.ILProtection.formatedAssetString(),
     estimatedWait: withdraw.estimatedWaitSeconds.toFixed(),
   }
@@ -178,9 +179,9 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   it(`Should estimate withdraw RUNE from address's position`, async () => {
     const percentage = 100 // gets converted to basis points later
     const removeLp: WithdrawLiquidityPosition = {
-      asset: BUSD,
+      asset: AssetBTC,
       percentage: percentage,
-      runeAddress: 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u',
+      runeAddress: 'thor1cf4dsll8rema8y3xvvsn2t786xrkhp3d679qxh',
     }
     const estimatRemoveLP = await thorchainQuery.estimateWithdrawLP(removeLp)
     printWithdraw(estimatRemoveLP)

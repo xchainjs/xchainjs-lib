@@ -685,6 +685,7 @@ export class ThorchainQuery {
       },
       assetAmount: poolShare.assetShare,
       runeAmount: poolShare.runeShare,
+      lpGrowth: memberDetail.lpGrowth,
       estimatedWaitSeconds: waitTimeSeconds,
       impermanentLossProtection: memberDetail.impermanentLossProtection,
       assetPool: assetPool.pool.asset,
