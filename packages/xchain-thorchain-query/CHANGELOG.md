@@ -1,3 +1,9 @@
+# v0.1.6 (2022-10-27)
+
+## ADD 
+- Add Liquidity position growth calculations using the LUVI formula in `checkLiquidityPosition()`
+
+## Fix
 # v0.1.5 (2022-10-27)
 
 ## Fix
