@@ -55,7 +55,7 @@ export class Midgard {
         const { data } = await axios.get<Record<string, number>>(`${baseUrl}${path}`)
         return data
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
     throw new Error('Midgard not responding')
@@ -69,10 +69,10 @@ export class Midgard {
       try {
         return (await api.getPools()).data
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
-    throw Error(`Midgard not responding`)
+    throw new Error(`Midgard not responding`)
   }
 
   /**
@@ -86,7 +86,7 @@ export class Midgard {
         const { data } = await axios.get(`${baseUrl}${path}`)
         return data.int_64_values
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
     throw new Error('Midgard not responding')
@@ -104,7 +104,7 @@ export class Midgard {
         const value = new CryptoAmount(baseAmount(data['scheduled_outbound_value']), AssetRuneNative)
         return value
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
 
@@ -143,7 +143,7 @@ export class Midgard {
         const data = (await api.getHealth()).data
         return +data.scannerHeight
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
     throw Error(`Midgard not responding`)
@@ -167,7 +167,7 @@ export class Midgard {
         const actions = (await api.getActions(address, txid, asset, type, affiliate, limit, offset)).data.actions
         return actions
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
     throw Error(`Midgard not responding`)
@@ -184,7 +184,7 @@ export class Midgard {
         const memberDetail = (await api.getMemberDetail(address)).data
         return memberDetail
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
     throw Error(`Midgard not responding`)
@@ -201,7 +201,7 @@ export class Midgard {
         const poolDetail = (await api.getPoolStats(asset)).data
         return poolDetail
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
     throw Error(`Midgard not responding`)
@@ -225,7 +225,7 @@ export class Midgard {
         // if (resp.status == 404) {
         //   return undefined
         // }
-        console.error(e)
+        //console.error(e)
       }
     }
     throw Error(`Midgard not responding`)

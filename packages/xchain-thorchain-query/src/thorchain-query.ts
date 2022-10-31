@@ -594,12 +594,27 @@ export class ThorchainQuery {
       asset: baseAmount(liquidityProvider.asset_deposit_value),
       rune: baseAmount(liquidityProvider.rune_deposit_value),
     }
+
     const poolShare = getPoolShare(unitData, poolAsset)
-    // console.log(poolShare.assetShare.toNumber(), poolShare.runeShare.toNumber())
-    // console.log(poolAsset.pool.liquidityUnits)
+    // Liquidity Unit Value Index = sprt(assetdepth * runeDepth) / Poolunits
+    // Using this formula we can work out an individual position to find LUVI and then the growth rate
+    const depositLuvi = Math.sqrt(
+      currentLP.asset.times(currentLP.rune).div(unitData.liquidityUnits).amount().toNumber(),
+    )
+    const redeemLuvi = Math.sqrt(
+      poolShare.assetShare.baseAmount
+        .times(poolShare.runeShare.baseAmount)
+        .div(unitData.liquidityUnits)
+        .amount()
+        .toNumber(),
+    )
+    const lpGrowth = redeemLuvi - depositLuvi
+    const currentLpGrowth = lpGrowth > 0 ? lpGrowth / depositLuvi : 0
+
     const impermanentLossProtection = getLiquidityProtectionData(currentLP, poolShare, block)
     const lpPosition: LiquidityPosition = {
       poolShare,
+      lpGrowth: `${(currentLpGrowth * 100).toFixed(2)} %`,
       position: liquidityProvider,
       impermanentLossProtection: impermanentLossProtection,
     }

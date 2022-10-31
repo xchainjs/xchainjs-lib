@@ -183,6 +183,7 @@ export type WithdrawLiquidityPosition = {
 export type LiquidityPosition = {
   poolShare: PoolShareDetail
   position: LiquidityProvider
+  lpGrowth: string
   impermanentLossProtection: ILProtectionData
 }
 
