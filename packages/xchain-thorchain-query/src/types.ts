@@ -143,7 +143,9 @@ export type EstimateAddLP = {
   slipPercent: BigNumber
   poolShare: PoolShareDetail
   lpUnits: BaseAmount
-  transactionFee: LPFees
+  inbound: {
+    fees: LPAmounts
+  }
   runeToAssetRatio: BigNumber
   estimatedWaitSeconds: number
   errors: string[]
@@ -153,7 +155,11 @@ export type EstimateWithdrawLP = {
   assetAddress?: string
   runeAddress?: string
   slipPercent: BigNumber
-  transactionFee: LPFees
+  inbound: {
+    minToSend: LPAmounts
+    fees: LPAmounts
+  }
+  outboundFee: LPAmounts
   assetAmount: CryptoAmount
   runeAmount: CryptoAmount
   lpGrowth: string
@@ -161,12 +167,12 @@ export type EstimateWithdrawLP = {
   estimatedWaitSeconds: number
   assetPool: string
 }
-
-export type LPFees = {
-  runeFee: CryptoAmount
-  assetFee: CryptoAmount
-  totalFees: CryptoAmount
+export type LPAmounts = {
+  rune: CryptoAmount
+  asset: CryptoAmount
+  total: CryptoAmount
 }
+
 export type DustValues = {
   asset: CryptoAmount
   rune: CryptoAmount
