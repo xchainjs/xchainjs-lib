@@ -125,8 +125,8 @@ export class ThorchainAMM {
     // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
     const withdrawParams = await this.thorchainQuery.estimateWithdrawLP(params)
     return wallet.withdrawLiquidity({
-      assetFee: withdrawParams.transactionFee.assetFee,
-      runeFee: withdrawParams.transactionFee.runeFee,
+      assetFee: withdrawParams.inbound.fees.asset,
+      runeFee: withdrawParams.inbound.fees.rune,
       waitTimeSeconds: withdrawParams.estimatedWaitSeconds,
       percentage: params.percentage,
       assetPool: withdrawParams.assetPool,
