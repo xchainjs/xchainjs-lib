@@ -94,7 +94,7 @@ export const getLiquidityProtectionData = (
   const currentHeight = block.current
   const heightLastAdded = block.lastAdded || 0 //default to zero if undefined
   const blocksforfullprotection = block.fullProtection
-  const protectionProgress = (currentHeight - heightLastAdded) / blocksforfullprotection // percentage of entitlement
+  const protectionProgress = Math.min((currentHeight - heightLastAdded) / blocksforfullprotection, 1) // percentage of entitlement
   const result = coverage.times(protectionProgress) // impermanent loss protection result
   const ILProtection: ILProtectionData = {
     ILProtection: new CryptoAmount(baseAmount(result), AssetRuneNative),
