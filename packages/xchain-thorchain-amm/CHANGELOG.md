@@ -1,3 +1,10 @@
+# v0.3.5 (2022-10-27)
+
+## Update
+
+- Bump Dep for `thorchain-query`
+- Bump Dep for `xchain-litecoin`
+
 # v0.3.4 (2022-10-27)
 
 ## Update

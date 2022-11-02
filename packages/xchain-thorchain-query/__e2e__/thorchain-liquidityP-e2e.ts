@@ -41,10 +41,12 @@ function printAdd(estimate: EstimateAddLP) {
     },
     lpUnits: estimate.lpUnits.amount().toNumber(),
     runeToAssetRatio: estimate.runeToAssetRatio.toNumber(),
-    transactionFees: {
-      runeFee: estimate.transactionFee.runeFee.formatedAssetString(),
-      assetFee: estimate.transactionFee.assetFee.formatedAssetString(),
-      totalFees: estimate.transactionFee.totalFees.formatedAssetString(),
+    inbound: {
+      fees: {
+        rune: estimate.inbound.fees.rune.formatedAssetString(),
+        asset: estimate.inbound.fees.asset.formatedAssetString(),
+        total: estimate.inbound.fees.total.formatedAssetString(),
+      },
     },
     estimatedWait: estimate.estimatedWaitSeconds.toFixed(),
     errors: estimate.errors,
@@ -54,15 +56,31 @@ function printAdd(estimate: EstimateAddLP) {
 }
 function printWithdraw(withdraw: EstimateWithdrawLP) {
   const expanded = {
-    slip: `${withdraw.slipPercent} %`,
-    asset: withdraw.assetAmount.assetAmount.amount().toNumber(),
-    rune: withdraw.runeAmount.assetAmount.amount().toNumber(),
-    txFee: {
-      runeFee: withdraw.transactionFee.runeFee.assetAmount.amount().toFixed(),
-      assetFee: withdraw.transactionFee.assetFee.assetAmount.amount().toFixed(),
-      totalFees: withdraw.transactionFee.totalFees.assetAmount.amount().toFixed(),
+    slip: `${withdraw.slipPercent.toFixed()} %`,
+    asset: withdraw.assetAmount.formatedAssetString(),
+    rune: withdraw.runeAmount.formatedAssetString(),
+    inbound: {
+      minToSend: {
+        rune: withdraw.inbound.minToSend.rune.formatedAssetString(),
+        asset: withdraw.inbound.minToSend.asset.formatedAssetString(),
+        total: withdraw.inbound.minToSend.total.formatedAssetString(),
+      },
+      fees: {
+        rune: withdraw.inbound.fees.rune.formatedAssetString(),
+        asset: withdraw.inbound.fees.asset.formatedAssetString(),
+        total: withdraw.inbound.fees.total.formatedAssetString(),
+      },
     },
-    impermanentLossProtection: withdraw.impermanentLossProtection.ILProtection.formatedAssetString(),
+    outboundFee: {
+      rune: withdraw.outboundFee.rune.formatedAssetString(),
+      asset: withdraw.outboundFee.asset.formatedAssetString(),
+      total: withdraw.outboundFee.total.formatedAssetString(),
+    },
+    lpGrowth: withdraw.lpGrowth,
+    impermanentLossProtection: {
+      ILP: withdraw.impermanentLossProtection.ILProtection.formatedAssetString(),
+      totalDays: withdraw.impermanentLossProtection.totalDays,
+    },
     estimatedWait: withdraw.estimatedWaitSeconds.toFixed(),
   }
   console.log(expanded)
@@ -75,6 +93,7 @@ function printliquidityPosition(liquidityPosition: LiquidityPosition) {
     assetPool: liquidityPosition.position.asset,
     assetAmount: liquidityPosition.position.asset_deposit_value,
     runeAmount: liquidityPosition.position.rune_deposit_value,
+    growth: liquidityPosition.lpGrowth,
     impermanentLossProtection: {
       ILProtection: liquidityPosition.impermanentLossProtection.ILProtection.formatedAssetString(),
       totalDays: liquidityPosition.impermanentLossProtection.totalDays,
@@ -179,7 +198,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const removeLp: WithdrawLiquidityPosition = {
       asset: BUSD,
       percentage: percentage,
-      runeAddress: 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u',
+      runeAddress: 'thor14mjdjs49sa76lw3gkvj7gr6uwapxq7256rwp30',
     }
     const estimatRemoveLP = await thorchainQuery.estimateWithdrawLP(removeLp)
     printWithdraw(estimatRemoveLP)
@@ -187,8 +206,8 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
 
   it(`Should check liquidity position for an address`, async () => {
-    const address = 'thor1kf4fgvwjfx74htkwh4qla2huw506dkf8tyg23u'
-    const checkLP = await thorchainQuery.checkLiquidityPosition(BUSD, address)
+    const address = 'thor1cf4dsll8rema8y3xvvsn2t786xrkhp3d679qxh'
+    const checkLP = await thorchainQuery.checkLiquidityPosition(AssetBTC, address)
     printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()
   })

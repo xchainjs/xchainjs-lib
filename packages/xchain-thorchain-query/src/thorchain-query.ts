@@ -547,10 +547,12 @@ export class ThorchainQuery {
       poolShare: poolShare,
       lpUnits: baseAmount(lpUnits),
       runeToAssetRatio: assetPool.runeToAssetRatio,
-      transactionFee: {
-        assetFee: assetInboundFee,
-        runeFee: runeInboundFee,
-        totalFees: totalFees,
+      inbound: {
+        fees: {
+          asset: assetInboundFee,
+          rune: runeInboundFee,
+          total: totalFees,
+        },
       },
       estimatedWaitSeconds: waitTimeSeconds,
       errors,
@@ -594,12 +596,27 @@ export class ThorchainQuery {
       asset: baseAmount(liquidityProvider.asset_deposit_value),
       rune: baseAmount(liquidityProvider.rune_deposit_value),
     }
+
     const poolShare = getPoolShare(unitData, poolAsset)
-    // console.log(poolShare.assetShare.toNumber(), poolShare.runeShare.toNumber())
-    // console.log(poolAsset.pool.liquidityUnits)
+    // Liquidity Unit Value Index = sprt(assetdepth * runeDepth) / Poolunits
+    // Using this formula we can work out an individual position to find LUVI and then the growth rate
+    const depositLuvi = Math.sqrt(
+      currentLP.asset.times(currentLP.rune).div(unitData.liquidityUnits).amount().toNumber(),
+    )
+    const redeemLuvi = Math.sqrt(
+      poolShare.assetShare.baseAmount
+        .times(poolShare.runeShare.baseAmount)
+        .div(unitData.liquidityUnits)
+        .amount()
+        .toNumber(),
+    )
+    const lpGrowth = redeemLuvi - depositLuvi
+    const currentLpGrowth = lpGrowth > 0 ? lpGrowth / depositLuvi : 0
+
     const impermanentLossProtection = getLiquidityProtectionData(currentLP, poolShare, block)
     const lpPosition: LiquidityPosition = {
       poolShare,
+      lpGrowth: `${(currentLpGrowth * 100).toFixed(2)} %`,
       position: liquidityProvider,
       impermanentLossProtection: impermanentLossProtection,
     }
@@ -638,8 +655,6 @@ export class ThorchainQuery {
       },
       assetPool,
     )
-    // calculate total fees
-    const totalFees = (await this.convert(dustValues.asset, AssetRuneNative)).plus(dustValues.rune)
     // get slip on liquidity removal
     const slip = getSlipOnLiquidity(
       {
@@ -652,24 +667,45 @@ export class ThorchainQuery {
     const waitTimeSecondsForAsset = await this.confCounting(poolShare.assetShare.div(params.percentage / 100))
     const waitTimeSecondsForRune = await this.confCounting(poolShare.runeShare.div(params.percentage / 100))
     let waitTimeSeconds = 0
-    if (params.assetAddress && params.runeAddress) {
-      waitTimeSeconds = waitTimeSecondsForAsset + waitTimeSecondsForRune
-    } else if (params.assetAddress) {
+    if (memberDetail.position.asset_address && memberDetail.position.rune_address) {
+      waitTimeSeconds =
+        waitTimeSecondsForAsset > waitTimeSecondsForRune ? waitTimeSecondsForAsset : waitTimeSecondsForRune
+    } else if (memberDetail.position.asset_address) {
       waitTimeSeconds = waitTimeSecondsForAsset
     } else {
       waitTimeSeconds = waitTimeSecondsForRune
     }
+    const allInboundDetails = await this.thorchainCache.getInboundDetails()
+    const inboundDetails = allInboundDetails[params.asset.chain]
+    const runeInbound = calcNetworkFee(AssetRuneNative, inboundDetails)
+    const assetInbound = calcNetworkFee(params.asset, inboundDetails)
+    const runeOutbound = calcOutboundFee(AssetRuneNative, inboundDetails)
+    const assetOutbound = calcOutboundFee(params.asset, inboundDetails)
+
     const estimateLP: EstimateWithdrawLP = {
       assetAddress: memberDetail.position.asset_address,
       runeAddress: memberDetail.position.rune_address,
       slipPercent: slip.times(100),
-      transactionFee: {
-        assetFee: dustValues.asset,
-        runeFee: dustValues.rune,
-        totalFees: totalFees,
+      inbound: {
+        minToSend: {
+          rune: dustValues.rune,
+          asset: dustValues.asset,
+          total: (await this.convert(dustValues.asset, AssetRuneNative)).plus(dustValues.rune),
+        },
+        fees: {
+          rune: runeInbound,
+          asset: assetInbound,
+          total: (await this.convert(assetInbound, AssetRuneNative)).plus(runeInbound),
+        },
+      },
+      outboundFee: {
+        asset: assetOutbound,
+        rune: runeOutbound,
+        total: (await this.convert(assetOutbound, AssetRuneNative)).plus(runeOutbound),
       },
       assetAmount: poolShare.assetShare,
       runeAmount: poolShare.runeShare,
+      lpGrowth: memberDetail.lpGrowth,
       estimatedWaitSeconds: waitTimeSeconds,
       impermanentLossProtection: memberDetail.impermanentLossProtection,
       assetPool: assetPool.pool.asset,

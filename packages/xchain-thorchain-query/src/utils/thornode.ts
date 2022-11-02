@@ -77,7 +77,7 @@ export class Thornode {
         const queueScheduled = await api.queueScheduled()
         return queueScheduled.data
       } catch (e) {
-        console.error(e)
+        //console.error(e)
         throw new Error(`THORNode not responding`)
       }
     }
@@ -114,7 +114,7 @@ export class Thornode {
         const lastBlock = await api.lastblock(height)
         return lastBlock.data
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -126,11 +126,10 @@ export class Thornode {
   async getPools(): Promise<Pool[]> {
     for (const api of this.poolsApi) {
       try {
-        // console.log(console.log(JSON.stringify(api, null, 2)))
         const pools = await api.pools()
         return pools.data
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -149,7 +148,7 @@ export class Thornode {
         const lps = (await api.liquidityProviders(asset, height)).data
         return lps.find((lp) => lp.asset_address === address || lp.rune_address === address)
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -167,7 +166,7 @@ export class Thornode {
         const resp = (await api.inboundAddresses()).data
         return resp
       } catch (e) {
-        console.error(e)
+        //console.error(e)
       }
     }
     throw new Error(`THORNode not responding`)

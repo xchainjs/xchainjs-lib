@@ -2,14 +2,14 @@ import { Network } from '@xchainjs/xchain-client'
 import {
   EstimateWithdrawLP,
   Midgard,
-  RemoveLiquidityPosition,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
+  WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
 import { assetFromString } from '@xchainjs/xchain-util'
 
-function print(estimate: EstimateWithdrawLP, withdrawLpParams: RemoveLiquidityPosition) {
+function print(estimate: EstimateWithdrawLP, withdrawLpParams: WithdrawLiquidityPosition) {
   const expanded = {
     slipPercent: estimate.slipPercent.toFixed(4),
     runeAmount: estimate.runeAmount.formatedAssetString(),
@@ -43,7 +43,7 @@ const estimateWithdrawLp = async () => {
     const assetAddress = process.argv[5] || ''
     const runeAddress = process.argv[6] || ''
 
-    const withdrawLpParams: RemoveLiquidityPosition = {
+    const withdrawLpParams: WithdrawLiquidityPosition = {
       asset,
       percentage,
       assetAddress,
