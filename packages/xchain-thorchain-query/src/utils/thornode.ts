@@ -4,11 +4,13 @@ import {
   InboundAddress,
   LastBlock,
   LiquidityProvider,
+  LiquidityProviderResponse,
   LiquidityProvidersApi,
   NetworkApi,
   Pool,
   PoolsApi,
   QueueApi,
+  SaversApi,
   TransactionsApi,
   TxOutItem,
   TxResponse,
@@ -48,6 +50,7 @@ export class Thornode {
   private networkApi: NetworkApi[]
   private poolsApi: PoolsApi[]
   private liquidityProvidersApi: LiquidityProvidersApi[]
+  private saversApi: SaversApi[]
 
   constructor(network: Network = Network.Mainnet, config?: ThornodeConfig) {
     this.network = network
@@ -62,6 +65,7 @@ export class Thornode {
     this.liquidityProvidersApi = this.config.thornodeBaseUrls.map(
       (url) => new LiquidityProvidersApi(new Configuration({ basePath: url })),
     )
+    this.saversApi = this.config.thornodeBaseUrls.map((url) => new SaversApi(new Configuration({ basePath: url })))
   }
 
   /**
@@ -164,6 +168,40 @@ export class Thornode {
     for (const api of this.networkApi) {
       try {
         const resp = (await api.inboundAddresses()).data
+        return resp
+      } catch (e) {
+        //console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+  /**
+   *
+   * @param asset - asset string
+   * @param height - optional thorchain block height parameter
+   * @returns - Liquidity Provider Object
+   */
+  async getSavers(asset: string, height?: number): Promise<LiquidityProviderResponse> {
+    for (const api of this.saversApi) {
+      try {
+        const resp = (await api.savers(asset, height)).data
+        return resp
+      } catch (e) {
+        //console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+  /**
+   *
+   * @param asset - asset string
+   * @param height - optional thorchain block height parameter
+   * @returns - Liquidity Provider Object
+   */
+  async getSaver(asset: string, address: string, height?: number): Promise<LiquidityProviderResponse> {
+    for (const api of this.saversApi) {
+      try {
+        const resp = (await api.saver(asset, address, height)).data
         return resp
       } catch (e) {
         //console.error(e)

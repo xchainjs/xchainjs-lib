@@ -16,6 +16,7 @@ import { ThorchainQuery } from '../src/thorchain-query'
 import {
   AddliquidityPosition,
   EstimateAddLP,
+  EstimateAddSaver,
   EstimateWithdrawLP,
   LiquidityPosition,
   WithdrawLiquidityPosition,
@@ -82,6 +83,22 @@ function printWithdraw(withdraw: EstimateWithdrawLP) {
       totalDays: withdraw.impermanentLossProtection.totalDays,
     },
     estimatedWait: withdraw.estimatedWaitSeconds.toFixed(),
+  }
+  console.log(expanded)
+}
+
+function printSaver(saver: EstimateAddSaver) {
+  const expanded = {
+    assetAmount: saver.assetAmount.formatedAssetString(),
+    fee: {
+      networkFee: saver.fee.networkFee.formatedAssetString(),
+      liquidityFee: saver.fee.liquidityFee.formatedAssetString(),
+      totalFees: saver.fee.totalFees.formatedAssetString(),
+    },
+    expiry: saver.expiry,
+    toAddress: saver.toAddress,
+    memo: saver.memo,
+    estimateWaitTime: saver.estimatedWaitTime,
   }
   console.log(expanded)
 }
@@ -210,5 +227,11 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const checkLP = await thorchainQuery.checkLiquidityPosition(AssetBTC, address)
     printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()
+  })
+
+  it(`Should estimate saver addition`, async () => {
+    const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(1, 8)), AssetBTC)
+    const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
+    printSaver(estimateAddsSaver)
   })
 })

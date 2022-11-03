@@ -24,12 +24,15 @@ import {
   ConstructMemo,
   DustValues,
   EstimateAddLP,
+  EstimateAddSaver,
   EstimateSwapParams,
   EstimateWithdrawLP,
+  EstimateWithdrawSaver,
   InboundDetail,
   LiquidityPosition,
   PoolRatios,
   PostionDepositValue,
+  SaverFees,
   SwapEstimate,
   SwapOutput,
   TotalFees,
@@ -257,19 +260,14 @@ export class ThorchainQuery {
       outboundFeeInOutboundGasAsset,
       params.destinationAsset,
     )
-    // console.log('a', assetToString(swapOutputInDestinationAsset.output.asset))
-    // console.log('b', assetToString(outboundFeeInDestinationAsset.asset))
-    // // console.log('x', swapOutputInDestinationAsset.output.formatedAssetString())
-    // // console.log('y', outboundFeeInDestinationAsset.formatedAssetString())
     const netOutputInAsset = swapOutputInDestinationAsset.output.minus(outboundFeeInDestinationAsset)
     const totalFees: TotalFees = {
       inboundFee: inboundFeeInInboundGasAsset,
       swapFee: swapOutputInDestinationAsset.swapFee,
       outboundFee: outboundFeeInOutboundGasAsset,
       affiliateFee: affiliateFeeSwapOutputInRune.output,
-      // totalFees: ,
     }
-    //const totalFeesInUsd = await this.getFeesIn(totalFees, usdAsset)
+
     const swapEstimate = {
       totalFees: totalFees,
       slipPercentage: swapOutputInDestinationAsset.slip,
@@ -413,9 +411,6 @@ export class ThorchainQuery {
     }
   }
 
-  // async getTotalFees(inbound: CryptoAmount, swapFee: CryptoAmount, outbound: CryptoAmount, affiliate: CryptoAmount): Promise<TotalFees> {
-  //   return {}
-  // }
   /**
    * Returns the exchange of a CryptoAmount to a different Asset
    *
@@ -584,7 +579,6 @@ export class ThorchainQuery {
       totalUnits: new BigNumber(poolAsset.pool.liquidityUnits),
       liquidityUnits: new BigNumber(liquidityProvider.units),
     }
-    //console.log(`unit data`, unitData.totalUnits.amount().toNumber(), unitData.liquidityUnits.amount().toNumber())
     const networkValues = await this.thorchainCache.midgard.getNetworkValues()
     const block: Block = {
       current: blockData.thorchain,
@@ -765,4 +759,100 @@ export class ThorchainQuery {
         throw Error('Unknown chain')
     }
   }
+
+  // Savers Queries
+  // Derrived from https://dev.thorchain.org/thorchain-dev/connection-guide/savers-guide
+  public async estimateAddSaver(addAmount: CryptoAmount): Promise<EstimateAddSaver> {
+    const allInboundDetails = await this.thorchainCache.getInboundDetails()
+    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
+    const inboundDetails = allInboundDetails[addAmount.asset.chain]
+    const vault = inboundDetails.address
+    const isSaversPool = (await this.thorchainCache.thornode.getPools()).find(
+      (item) => item.asset === addAmount.asset.chain,
+    )?.is_savers_pool
+    if (!isSaversPool) throw Error(`Pool has no record of being a saver`)
+    // network fee is a 1/3 of the outbound fee
+    const networkFees = new CryptoAmount(
+      baseAmount(inboundDetails.outboundFee.times(0.33), +pool.nativeDecimal),
+      addAmount.asset,
+    )
+    // Pool asset depth
+    const assetDepth = new CryptoAmount(baseAmount(+pool.assetDepth, +pool.nativeDecimal), addAmount.asset)
+
+    // liquidity fees calculated from amount added and pool depths
+    const liquidityFees = addAmount.div(addAmount.plus(assetDepth)).times(addAmount)
+    const saversFees: SaverFees = {
+      networkFee: networkFees,
+      liquidityFee: liquidityFees,
+      totalFees: networkFees.plus(liquidityFees),
+    }
+    const memo = `+:${addAmount.asset.chain}/${addAmount.asset.ticker}`
+
+    // Calculate transaction expiry time of the vault address
+    const currentDatetime = new Date()
+    const minutesToAdd = 15
+    const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
+
+    const estimatedWait = await this.confCounting(addAmount)
+    const estimateAddSaver: EstimateAddSaver = {
+      assetAmount: addAmount,
+      fee: saversFees,
+      expiry: expiryDatetime,
+      toAddress: vault,
+      memo: memo,
+      estimatedWaitTime: estimatedWait,
+      canAddSaver: isSaversPool,
+    }
+    return estimateAddSaver
+  }
+  public async estimatewithdrawSaver(removeAmount: CryptoAmount): Promise<EstimateWithdrawSaver> {
+    const allInboundDetails = await this.thorchainCache.getInboundDetails()
+    const pool = (await this.thorchainCache.getPoolForAsset(removeAmount.asset)).pool
+    const inboundDetails = allInboundDetails[removeAmount.asset.chain]
+    const vault = inboundDetails.address
+
+    // network fee is a 1/3 of the outbound fee
+    const networkFees = new CryptoAmount(
+      baseAmount(inboundDetails.outboundFee, +pool.nativeDecimal),
+      removeAmount.asset,
+    )
+    // Pool asset depth
+    const assetDepth = new CryptoAmount(baseAmount(+pool.assetDepth, +pool.nativeDecimal), removeAmount.asset)
+
+    // liquidity fees calculated from amount added and pool depths
+    const liquidityFees = removeAmount.div(removeAmount.plus(assetDepth)).times(removeAmount)
+    const saversFees: SaverFees = {
+      networkFee: networkFees,
+      liquidityFee: liquidityFees,
+      totalFees: networkFees.plus(liquidityFees),
+    }
+
+    // Calculate transaction expiry time of the vault address
+    const currentDatetime = new Date()
+    const minutesToAdd = 15
+    const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
+
+    const memo = `+:${removeAmount.asset.chain}/${removeAmount.asset.ticker}`
+
+    const estimatedWait = await this.confCounting(removeAmount)
+
+    const estimateWithdrawSaver: EstimateWithdrawSaver = {
+      assetAmount: removeAmount,
+      fee: saversFees,
+      expiry: expiryDatetime,
+      toAddress: vault,
+      memo: memo,
+      estimatedWaitTime: estimatedWait,
+    }
+    return estimateWithdrawSaver
+  }
+
+  // public async getSaverPosition(params: getSaver): Promise<SaverPosition> {
+  //   const checkSaverPosition = await this.thorchainCache.thornode.getSaver(
+  //     params.asset.symbol,
+  //     params.address,
+  //     params.height,
+  //   )
+  //   return checkSaverPosition
+  // }
 }

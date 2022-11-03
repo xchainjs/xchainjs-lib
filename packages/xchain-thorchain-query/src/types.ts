@@ -198,3 +198,34 @@ export type PoolRatios = {
   assetToRune: BigNumber
   runeToAsset: BigNumber
 }
+
+export type getSaver = {
+  asset: Asset
+  address: Address
+  height?: number
+}
+
+export type EstimateAddSaver = {
+  assetAmount: CryptoAmount
+  fee: SaverFees
+  expiry: Date
+  toAddress: Address
+  memo: string
+  estimatedWaitTime: number
+  canAddSaver: boolean
+}
+
+export type EstimateWithdrawSaver = {
+  assetAmount: CryptoAmount
+  fee: SaverFees
+  expiry: Date
+  toAddress: Address
+  memo: string
+  estimatedWaitTime: number
+}
+
+export type SaverFees = {
+  networkFee: CryptoAmount
+  liquidityFee: CryptoAmount
+  totalFees: CryptoAmount
+}
