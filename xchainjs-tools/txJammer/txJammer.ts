@@ -14,11 +14,13 @@ import {
   ThorchainCache,
   ThorchainQuery,
   Thornode,
+  WithdrawLiquidityPosition,
   //WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
 import {
   Asset,
   AssetRuneNative,
+  Chain,
   assetAmount,
   assetFromStringEx,
   assetToBase,
@@ -147,7 +149,7 @@ export class TxJammer {
         await this.executeAddLp()
         break
       case 'withdrawLp':
-        // await this.executeSwap()
+        await this.executeWithdraw()
         break
       case 'transfer':
         await this.executeTransfer()
@@ -178,6 +180,7 @@ export class TxJammer {
     }
     this.txRecords.push(result)
   }
+
   private async executeTransfer() {
     const [senderWallet, receiverWallet] = this.getRandomWallets()
     const [sourceAsset] = this.getRandomSourceAndDestAssets()
@@ -249,9 +252,9 @@ export class TxJammer {
     const [senderWallet] = this.getRandomWallets()
     const [sourceAsset, destinationAsset] = this.getRandomSourceAndDestAssets()
 
-    const amount = await this.createCryptoAmount(sourceAsset)
-    const rune = await this.thorchainQuery.convert(amount, AssetRuneNative)
-    const destinationAmount = await this.thorchainQuery.convert(amount, destinationAsset)
+    const sourceAssetAmount = await this.createCryptoAmount(sourceAsset)
+    const rune = await this.thorchainQuery.convert(sourceAssetAmount, AssetRuneNative)
+    //const destinationAmount = await this.thorchainQuery.convert(amount, destinationAsset)
 
     const inboundDetails = await this.thorchainQuery.thorchainCache.getPoolForAsset(destinationAsset)
     const decimals = inboundDetails.pool.nativeDecimal
@@ -259,11 +262,11 @@ export class TxJammer {
     // if it is even its a symmetrical add if its odd the its an asymetrical add
     const isEven = randomNumber % 2 === 0
     const addlpSym: AddliquidityPosition = {
-      asset: destinationAmount,
+      asset: sourceAssetAmount,
       rune: rune,
     }
     const addlpAsym: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(0, +decimals)), destinationAsset), // leave as empty. for asym,
+      asset: new CryptoAmount(assetToBase(assetAmount(0, +decimals)), sourceAssetAmount.asset), // leave as empty. for asym,
       rune: rune,
     }
 
@@ -272,13 +275,25 @@ export class TxJammer {
     }
     try {
       const estimateSym = await this.thorchainQuery.estimateAddLP(addlpSym)
+      result.date = new Date()
+      result.details = `Adding liquidity position ${sourceAssetAmount.formatedAssetString()} to ${
+        estimateSym.assetPool
+      } `
       if (isEven) {
+        result.details = `Adding liquidity position ${sourceAssetAmount.formatedAssetString()} and ${rune.formatedAssetString()}  to ${
+          estimateSym.assetPool
+        } `
         if (estimateSym.canAdd && !this.estimateOnly) {
           result.details = addlpSym
           const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpSym)
-          result.result = txhash[1]
+          result.result = txhash[1] // todo
+        } else {
+          result.result = 'not submitted, estimate only mode'
         }
       } else {
+        result.details = `Adding liquidity position ${sourceAssetAmount.formatedAssetString()} to ${
+          estimateSym.assetPool
+        } `
         const estimate = await this.thorchainQuery.estimateAddLP(addlpAsym)
         if (estimate.canAdd && !this.estimateOnly) {
           result.details = addlpAsym
@@ -291,36 +306,47 @@ export class TxJammer {
     }
     this.txRecords.push(result)
   }
-}
+  /**
+   * Executes add lp for a random wallet, random amount, and random asset
+   */
+  private async executeWithdraw() {
+    const [senderWallet] = this.getRandomWallets()
+    const [sourceAsset] = this.getRandomSourceAndDestAssets()
 
-// // const withdrawLp = async (
-// //   amount: CryptoAmount,
-// //   wallet1: Wallet,
-// //   wallet2: Wallet,
-// //   tcAmm: ThorchainAMM,
-// //   tcQuery: ThorchainQuery,
-// // ) => {
-// //   //const runeAddress = await wallet1.clients[Chain.THORChain].getAddress()
-// //   // const checkLp = await tcQuery.checkLiquidityPosition( assetList[], runeAddress) return lp
-// //   // const withdrawLParams: WithdrawLiquidityPosition = {
-// //   //   asset:
-// //   // }
-// //   // try {
-// //   //   const estimate = await tcQuery.estimateWithdrawLP(withdrawLParams)
-// //   //   if (estimate) {
-// //   //     const txhash = await tcAmm.withdrawLiquidityPosition(wallet1, withdrawLParams)
-// //   //     txCount += 1
-// //   //     const txDetails: TxDetail = {
-// //   //       txCount: txCount,
-// //   //       hash: txhash[1],
-// //   //       amount: `${estimate.assetAmount.formatedAssetString()}, ${estimate.runeAmount.formatedAssetString()}`,
-// //   //     }
-// //   //     txRecord.push(txDetails)
-// //   //   }
-// //   // } catch (e) {
-// //   //   throw Error(`Error in swapping from synth ${e}`)
-// //   // }
-// // }
+    const runeAddress = senderWallet.clients[Chain.THORChain].getAddress()
+
+    const result: TxDetail = {
+      action: 'withdrawLp',
+    }
+    try {
+      const checkLp = await this.thorchainQuery.checkLiquidityPosition(sourceAsset, runeAddress)
+      const withdrawLParams: WithdrawLiquidityPosition = {
+        asset: sourceAsset,
+        percentage: 100,
+        assetAddress: checkLp.position.asset_address,
+        runeAddress: checkLp.position.rune_address,
+      }
+
+      try {
+        const estimate = await this.thorchainQuery.estimateWithdrawLP(withdrawLParams)
+        result.date = new Date()
+        result.details = `withdrawing ${checkLp.poolShare.assetShare.formatedAssetString()} and ${checkLp.poolShare.runeShare.formatedAssetString()}`
+        if (estimate && !this.estimateOnly) {
+          const txhash = await this.thorchainAmm.withdrawLiquidityPosition(senderWallet, withdrawLParams)
+          result.details = withdrawLParams
+          result.result = txhash[0]
+        } else {
+          result.result = 'not submitted, estimate only mode'
+        }
+      } catch (e) {
+        result.result = e.message
+      }
+    } catch (e) {
+      result.result = e.message
+    }
+    this.txRecords.push(result)
+  }
+}
 
 // // const dexAggSwapIn = async () => {}
 // // const dexAggSwapOut = async () => {}
