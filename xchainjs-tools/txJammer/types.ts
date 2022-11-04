@@ -8,7 +8,8 @@ export enum JammerAction {
 }
 
 export type TxDetail = {
-  date: Date
-  result: TxSubmitted | string
-  details: any
+  date?: Date
+  action?: string
+  result?: TxSubmitted | string
+  details?: any
 }

@@ -54,7 +54,7 @@ const txJammer = new TxJammer(
 )
 
 async function main() {
-  console.log(JSON.stringify(options, null, 2))
+  // console.log(JSON.stringify(options, null, 2))
   await txJammer.start()
 }
 

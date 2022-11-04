@@ -1,6 +1,6 @@
 import fs = require('fs')
 
-import { Network } from '@xchainjs/xchain-client'
+import { Network, TxParams } from '@xchainjs/xchain-client'
 import { decryptFromKeystore } from '@xchainjs/xchain-crypto'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
@@ -16,7 +16,14 @@ import {
   Thornode,
   //WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
-import { Asset, AssetRuneNative, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetRuneNative,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+} from '@xchainjs/xchain-util'
 import * as weighted from 'weighted'
 
 import { TxDetail } from './types'
@@ -143,7 +150,7 @@ export class TxJammer {
         // await this.executeSwap()
         break
       case 'transfer':
-        // await this.executeSwap()
+        await this.executeTransfer()
         break
       default:
         break
@@ -157,19 +164,47 @@ export class TxJammer {
       destinationAsset,
       destinationAddress: receiverWallet.clients[destinationAsset.chain].getAddress(),
     }
-    let result: TxDetail
+    const result: TxDetail = { action: 'swap' }
     try {
       const estimate = await this.thorchainQuery.estimateSwap(swapParams)
+      result.date = new Date()
+      result.details = `swapping ${swapParams.input.formatedAssetString()} to ${assetToString(destinationAsset)} `
       if (estimate.txEstimate.canSwap && !this.estimateOnly) {
-        result.details = swapParams
         const txhash = await this.thorchainAmm.doSwap(senderWallet, swapParams)
-        result.date = new Date()
         result.result = txhash
       }
     } catch (e) {
       result.result = e.message
-      throw Error(`Error in swapping to rune ${e}`)
     }
+    this.txRecords.push(result)
+  }
+  private async executeTransfer() {
+    const [senderWallet, receiverWallet] = this.getRandomWallets()
+    const [sourceAsset] = this.getRandomSourceAndDestAssets()
+
+    const result: TxDetail = { action: 'transfer' }
+    try {
+      const amount = await this.createCryptoAmount(sourceAsset)
+      const transferParams: TxParams = {
+        asset: amount.asset,
+        amount: amount.baseAmount,
+        recipient: receiverWallet.clients[sourceAsset.chain].getAddress(),
+      }
+      result.date = new Date()
+      result.details = `transfering ${amount.formatedAssetString()} to ${transferParams.recipient} `
+      if (!this.estimateOnly) {
+        result.date = new Date()
+        result.details = transferParams
+        const txhash = await senderWallet.clients[sourceAsset.chain].transfer(transferParams)
+        result.result = txhash
+      } else {
+        result.result = 'not submitted, estimate only mode'
+      }
+    } catch (e) {
+      result.result = e.message
+    }
+    console.log(JSON.stringify(result))
+    this.txRecords.push(result)
   }
   private async createCryptoAmount(asset: Asset): Promise<CryptoAmount> {
     const amount = this.getRandom(this.maxAmount, this.minAmount)
@@ -194,8 +229,10 @@ export class TxJammer {
     destinationAsset.synth = this.doSynthSwap()
     return [sourceAsset, destinationAsset]
   }
+
   private doSynthSwap(): boolean {
-    // 1/4 of the time do a synth swap
+    // 1/4 of the time do a synth swap,
+    // this should lead to 1/2 swaps being native L1s on one side or another
     const rand = this.getRandom(3, 0)
     return rand == 0
   }
@@ -230,7 +267,9 @@ export class TxJammer {
       rune: rune,
     }
 
-    let result: TxDetail
+    const result: TxDetail = {
+      action: 'addLp',
+    }
     try {
       const estimateSym = await this.thorchainQuery.estimateAddLP(addlpSym)
       if (isEven) {
@@ -248,8 +287,9 @@ export class TxJammer {
         }
       }
     } catch (e) {
-      throw Error(`Error in swapping from synth ${e}`)
+      result.result = e.message
     }
+    this.txRecords.push(result)
   }
 }
 
