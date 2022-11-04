@@ -229,3 +229,7 @@ export type SaverFees = {
   liquidityFee: CryptoAmount
   totalFees: CryptoAmount
 }
+
+export type SaversPosition = {
+  assetAmount: CryptoAmount
+}

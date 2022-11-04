@@ -33,12 +33,14 @@ import {
   PoolRatios,
   PostionDepositValue,
   SaverFees,
+  // SaversPosition,
   SwapEstimate,
   SwapOutput,
   TotalFees,
   TxDetails,
   UnitData,
   WithdrawLiquidityPosition,
+  // getSaver,
 } from './types'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
 import { calcNetworkFee, calcOutboundFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/swap'
@@ -763,6 +765,7 @@ export class ThorchainQuery {
   // Savers Queries
   // Derrived from https://dev.thorchain.org/thorchain-dev/connection-guide/savers-guide
   public async estimateAddSaver(addAmount: CryptoAmount): Promise<EstimateAddSaver> {
+    if (isAssetRuneNative(addAmount.asset)) throw Error(`Native Rune is not supported only L1's`)
     const allInboundDetails = await this.thorchainCache.getInboundDetails()
     const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
     const inboundDetails = allInboundDetails[addAmount.asset.chain]
@@ -786,6 +789,7 @@ export class ThorchainQuery {
       liquidityFee: liquidityFees,
       totalFees: networkFees.plus(liquidityFees),
     }
+    //construct memo
     const memo = `+:${addAmount.asset.chain}/${addAmount.asset.ticker}`
 
     // Calculate transaction expiry time of the vault address
@@ -806,12 +810,13 @@ export class ThorchainQuery {
     return estimateAddSaver
   }
   public async estimatewithdrawSaver(removeAmount: CryptoAmount): Promise<EstimateWithdrawSaver> {
+    if (isAssetRuneNative(removeAmount.asset)) throw Error(`Native Rune is not supported`)
     const allInboundDetails = await this.thorchainCache.getInboundDetails()
     const pool = (await this.thorchainCache.getPoolForAsset(removeAmount.asset)).pool
     const inboundDetails = allInboundDetails[removeAmount.asset.chain]
     const vault = inboundDetails.address
 
-    // network fee is a 1/3 of the outbound fee
+    // network fee is the outbound fee
     const networkFees = new CryptoAmount(
       baseAmount(inboundDetails.outboundFee, +pool.nativeDecimal),
       removeAmount.asset,
@@ -831,8 +836,8 @@ export class ThorchainQuery {
     const currentDatetime = new Date()
     const minutesToAdd = 15
     const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
-
-    const memo = `+:${removeAmount.asset.chain}/${removeAmount.asset.ticker}`
+    //construct memo
+    const memo = `-:${removeAmount.asset.chain}/${removeAmount.asset.ticker}`
 
     const estimatedWait = await this.confCounting(removeAmount)
 
@@ -847,12 +852,21 @@ export class ThorchainQuery {
     return estimateWithdrawSaver
   }
 
-  // public async getSaverPosition(params: getSaver): Promise<SaverPosition> {
+  // /**
+  //  *
+  //  * @param params - getSaver object > asset, addresss, height?
+  //  * @returns - Savers position object
+  //  */
+  // public async getSaverPosition(params: getSaver): Promise<SaversPosition> {
   //   const checkSaverPosition = await this.thorchainCache.thornode.getSaver(
   //     params.asset.symbol,
   //     params.address,
   //     params.height,
   //   )
-  //   return checkSaverPosition
+
+  //   const saversPos: SaversPosition = {
+  //     assetAmount: checkSaverPosition,
+  //   }
+  //   return saversPos
   // }
 }
