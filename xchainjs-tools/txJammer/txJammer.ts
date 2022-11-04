@@ -19,6 +19,8 @@ import {
 import { Asset, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 import * as weighted from 'weighted'
 
+import { TxDetail } from './types'
+
 // import { JammerAction } from './types'
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 function delay(ms: number) {
@@ -32,7 +34,7 @@ export class TxJammer {
   private weightedAddLP: Record<string, number> = {}
   private weightedWithdrawLP: Record<string, number> = {}
   private weightedTransfer: Record<string, number> = {}
-  private txRecords = []
+  private txRecords: TxDetail[] = []
   private thorchainCache: ThorchainCache
   private thorchainQuery: ThorchainQuery
   private thorchainAmm: ThorchainAMM
@@ -88,13 +90,12 @@ export class TxJammer {
 
     this.pools = await this.thorchainCache.getPools()
     this.setupWeightedActions()
-    await this.setupWeightedAddLPAssets()
-    await this.setupWeightedWithdrawLPAssets()
-    await this.setupWeightedTransferAssets()
-    await this.setupWeightedSwapAssets()
+    await this.setupWeightedChoices()
   }
   private getAvailablePoolAssets(): string[] {
-    return Object.keys(this.pools)
+    const availablePools = Object.values(this.pools).filter((i) => i.isAvailable())
+    const assets = availablePools.map((i) => i.assetString)
+    return assets
   }
   private setupWeightedActions() {
     this.weightedActions = {
@@ -104,28 +105,14 @@ export class TxJammer {
       transfer: 100,
     }
   }
-  private async setupWeightedAddLPAssets() {
-    const assets = await this.getAvailablePoolAssets()
-    for (const asset of assets) {
-      this.weightedAddLP[asset] = 100
-    }
-  }
-  private async setupWeightedWithdrawLPAssets() {
-    const assets = await this.getAvailablePoolAssets()
-    for (const asset of assets) {
-      this.weightedWithdrawLP[asset] = 100
-    }
-  }
-  private async setupWeightedTransferAssets() {
-    const assets = await this.getAvailablePoolAssets()
-    for (const asset of assets) {
-      this.weightedTransfer[asset] = 100
-    }
-  }
-  private async setupWeightedSwapAssets() {
+
+  private async setupWeightedChoices() {
     const assets = await this.getAvailablePoolAssets()
     for (const asset of assets) {
       this.weightedSwap[asset] = 100
+      this.weightedTransfer[asset] = 100
+      this.weightedWithdrawLP[asset] = 100
+      this.weightedAddLP[asset] = 100
     }
   }
 
@@ -136,8 +123,9 @@ export class TxJammer {
     while (currentTime.getTime() < startTime.getTime() + this.durationSeconds * 1000) {
       currentTime = new Date()
       // select a random action
-      const action = weighted.select(this.weightedActions)
-      console.log(action)
+      const action = weighted.select(this.weightedActions) as string
+      console.log(`executing ${action}..`)
+      this.executeAction(action)
       await delay(this.pauseTimeSeconds * 1000)
     }
     console.log('Complete')
@@ -145,6 +133,7 @@ export class TxJammer {
   private async executeAction(action: string) {
     switch (action) {
       case 'swap':
+        await this.executeSwap()
         break
 
       default:
@@ -152,210 +141,60 @@ export class TxJammer {
     }
   }
   private async executeSwap() {
-    // TODO support synth
-    const sourceAssetString = weighted.select(this.weightedSwap)
-    let destinationAssetString = weighted.select(this.weightedSwap)
+    const [senderWallet, receiverWallet] = this.getRandomWallets()
+    const [sourceAsset, destinationAsset] = this.getRandomSourceAndDestAssets()
+    const swapParams: EstimateSwapParams = {
+      input: await this.createCryptoAmount(sourceAsset),
+      destinationAsset,
+      destinationAddress: receiverWallet.clients[destinationAsset.chain].getAddress(),
+    }
+    let result: TxDetail
+    try {
+      const estimate = await this.thorchainQuery.estimateSwap(swapParams)
+      if (estimate.txEstimate.canSwap && !this.estimateOnly) {
+        result.details = swapParams
+        const txhash = await this.thorchainAmm.doSwap(senderWallet, swapParams)
+        result.date = new Date()
+        result.result = txhash
+      }
+    } catch (e) {
+      result.result = e.message
+      throw Error(`Error in swapping to rune ${e}`)
+    }
+  }
+  private async createCryptoAmount(asset: Asset): Promise<CryptoAmount> {
+    const amount = this.getRandom(this.maxAmount, this.minAmount)
+    const usdAmount = new CryptoAmount(assetToBase(assetAmount(amount)), BUSD)
+    return await this.thorchainQuery.convert(usdAmount, asset)
+  }
+  private getRandomWallets(): [Wallet, Wallet] {
+    const rand = this.getRandom(1, 0)
+    return rand == 0 ? [this.wallet1, this.wallet2] : [this.wallet2, this.wallet1]
+  }
+  private getRandomSourceAndDestAssets(): [Asset, Asset] {
+    const sourceAssetString = weighted.select(this.weightedSwap) as string
+    let destinationAssetString = weighted.select(this.weightedSwap) as string
     while (sourceAssetString === destinationAssetString) {
       //can't have same source and dest
       destinationAssetString = weighted.select(this.weightedSwap)
     }
     const sourceAsset = assetFromStringEx(sourceAssetString)
     const destinationAsset = assetFromStringEx(destinationAssetString)
-    const swapParams: EstimateSwapParams = {
-      input: this.createCryptoAmount(sourceAsset),
-      destinationAsset,
-      destinationAddress: wallet2.clients[Chain.THORChain].getAddress(),
-    }
-    try {
-      const estimate = await tcQuery.estimateSwap(swapParams)
-      if (estimate.txEstimate.canSwap && !this.estimateOnly) {
-        const txhash = await tcAmm.doSwap(wallet1, swapParams)
-        txCount += 1
-        const txDetails: TxDetail = {
-          txCount: txCount,
-          hash: txhash,
-          memo: estimate.memo,
-          vault: estimate.toAddress,
-          amount: estimate.txEstimate.netOutput.formatedAssetString(),
-        }
-        txRecord.push(txDetails)
-      }
-    } catch (e) {
-      throw Error(`Error in swapping to rune ${e}`)
-    }
+    sourceAsset.synth = this.doSynthSwap()
+    destinationAsset.synth = this.doSynthSwap()
+    return [sourceAsset, destinationAsset]
   }
-  private async createCryptoAmount(asset: Asset): CryptoAmount {
-    const amount = this.getRandom(this.maxAmount, this.minAmount)
-    const usdAmount = new CryptoAmount(assetToBase(assetAmount(amount)), BUSD)
-    return await this.thorchainQuery.convert(usdAmount, asset)
+  private doSynthSwap(): boolean {
+    // 1/4 of the time do a synth swap
+    const rand = this.getRandom(3, 0)
+    return rand == 0
   }
   private getRandom(max: number, min: number) {
     const randomNumber = Math.random() * (max - min) + min
     return randomNumber
   }
-  private recordAcionAndResult() {}
+  private recordActionAndResult() {}
 }
-
-// /**
-//  *
-//  * @param amount - input amount
-//  * @param wallet1 - wallet from
-//  * @param wallet2 - wallet to
-//  * @param tcAmm - amm instance
-//  * @param tcQuery - query instance
-//  */
-// const swapToRune = async (
-//   amount: CryptoAmount,
-//   wallet1: Wallet,
-//   wallet2: Wallet,
-//   tcAmm: ThorchainAMM,
-//   tcQuery: ThorchainQuery,
-// ) => {
-//   const swapParams: EstimateSwapParams = {
-//     input: amount,
-//     destinationAsset: AssetRuneNative,
-//     destinationAddress: wallet2.clients[Chain.THORChain].getAddress(),
-//   }
-//   try {
-//     const estimate = await tcQuery.estimateSwap(swapParams)
-//     if (estimate.txEstimate.canSwap) {
-//       const txhash = await tcAmm.doSwap(wallet1, swapParams)
-//       txCount += 1
-//       const txDetails: TxDetail = {
-//         txCount: txCount,
-//         hash: txhash,
-//         memo: estimate.memo,
-//         vault: estimate.toAddress,
-//         amount: estimate.txEstimate.netOutput.formatedAssetString(),
-//       }
-//       txRecord.push(txDetails)
-//     }
-//   } catch (e) {
-//     throw Error(`Error in swapping to rune ${e}`)
-//   }
-// }
-
-// /**
-//  *
-//  * @param amount - input amount
-//  * @param wallet1 - wallet from
-//  * @param wallet2 - wallet to
-//  * @param tcAmm - amm instance
-//  * @param tcQuery - query instance
-//  */
-// const swapToOtherRandomL1 = async (
-//   amount: CryptoAmount,
-//   wallet1: Wallet,
-//   wallet2: Wallet,
-//   tcAmm: ThorchainAMM,
-//   tcQuery: ThorchainQuery,
-// ) => {
-//   const randomAssetAmount = await getRandomAssetCryptoAmount(tcQuery, minTxAmount)
-//   const destination = await getRandomAssetCryptoAmount(tcQuery, minTxAmount)
-//   const swapParams: EstimateSwapParams = {
-//     input: randomAssetAmount,
-//     destinationAsset: destination.asset,
-//     destinationAddress: wallet2.clients[destination.asset.chain].getAddress(),
-//   }
-//   try {
-//     const estimate = await tcQuery.estimateSwap(swapParams)
-//     if (estimate.txEstimate.canSwap) {
-//       const txhash = await tcAmm.doSwap(wallet1, swapParams)
-//       txCount += 1
-//       const txDetails: TxDetail = {
-//         txCount: txCount,
-//         hash: txhash,
-//         memo: estimate.memo,
-//         vault: estimate.toAddress,
-//         amount: estimate.txEstimate.netOutput.formatedAssetString(),
-//       }
-//       txRecord.push(txDetails)
-//     }
-//   } catch (e) {
-//     throw Error(`Error in swapping to other l1 ${e}`)
-//   }
-// }
-// /**
-//  *
-//  * @param amount - input amount
-//  * @param wallet1 - wallet from
-//  * @param wallet2 - wallet to
-//  * @param tcAmm - amm instance
-//  * @param tcQuery - query instance
-//  */
-// const swapToSynth = async (
-//   amount: CryptoAmount,
-//   wallet1: Wallet,
-//   wallet2: Wallet,
-//   tcAmm: ThorchainAMM,
-//   tcQuery: ThorchainQuery,
-// ) => {
-//   const randomAssetAmount = await getRandomAssetCryptoAmount(tcQuery, minTxAmount)
-//   const destination = await getRandomSynthAsset()
-//   const swapParams: EstimateSwapParams = {
-//     input: randomAssetAmount,
-//     destinationAsset: destination,
-//     destinationAddress: wallet2.clients[destination.chain].getAddress(),
-//   }
-//   try {
-//     const estimate = await tcQuery.estimateSwap(swapParams)
-//     if (estimate.txEstimate.canSwap) {
-//       const txhash = await tcAmm.doSwap(wallet1, swapParams)
-//       txCount += 1
-//       const txDetails: TxDetail = {
-//         txCount: txCount,
-//         hash: txhash,
-//         memo: estimate.memo,
-//         vault: estimate.toAddress,
-//         amount: estimate.txEstimate.netOutput.formatedAssetString(),
-//       }
-//       txRecord.push(txDetails)
-//     }
-//   } catch (e) {
-//     throw Error(`Error in swapping to synth ${e}`)
-//   }
-// }
-
-// /**
-//  *
-//  * @param amount - input amount
-//  * @param wallet1 - wallet from
-//  * @param wallet2 - wallet to
-//  * @param tcAmm - amm instance
-//  * @param tcQuery - query instance
-//  */
-// const swapFromSynth = async (
-//   amount: CryptoAmount,
-//   wallet1: Wallet,
-//   wallet2: Wallet,
-//   tcAmm: ThorchainAMM,
-//   tcQuery: ThorchainQuery,
-// ) => {
-//   const randomAssetAmount = await getRandomAssetCryptoAmount(tcQuery, minTxAmount)
-//   const destination = await getRandomSynthAsset()
-//   const swapParams: EstimateSwapParams = {
-//     input: randomAssetAmount,
-//     destinationAsset: destination,
-//     destinationAddress: wallet2.clients[destination.chain].getAddress(),
-//   }
-//   try {
-//     const estimate = await tcQuery.estimateSwap(swapParams)
-//     if (estimate.txEstimate.canSwap) {
-//       const txhash = await tcAmm.doSwap(wallet1, swapParams)
-//       txCount += 1
-//       const txDetails: TxDetail = {
-//         txCount: txCount,
-//         hash: txhash,
-//         memo: estimate.memo,
-//         vault: estimate.toAddress,
-//         amount: estimate.txEstimate.netOutput.formatedAssetString(),
-//       }
-//       txRecord.push(txDetails)
-//     }
-//   } catch (e) {
-//     throw Error(`Error in swapping from synth ${e}`)
-//   }
-// }
 
 // const addLiquidity = async (
 //   amount: CryptoAmount,
