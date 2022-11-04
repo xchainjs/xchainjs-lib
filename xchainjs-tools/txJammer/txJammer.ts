@@ -4,6 +4,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { decryptFromKeystore } from '@xchainjs/xchain-crypto'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
+  AddliquidityPosition,
   CryptoAmount,
   EstimateSwapParams,
   // AddliquidityPosition,
@@ -15,7 +16,7 @@ import {
   Thornode,
   //WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
-import { Asset, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
+import { Asset, AssetRuneNative, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 import * as weighted from 'weighted'
 
 import { TxDetail } from './types'
@@ -136,7 +137,7 @@ export class TxJammer {
         await this.executeSwap()
         break
       case 'addLp':
-        // await this.executeSwap()
+        await this.executeAddLp()
         break
       case 'withdrawLp':
         // await this.executeSwap()
@@ -203,47 +204,55 @@ export class TxJammer {
     return randomNumber
   }
   private recordActionAndResult() {}
+
+  /**
+   * Executes add lp for a random wallet, random amount, and random asset
+   */
+  private async executeAddLp() {
+    const [senderWallet] = this.getRandomWallets()
+    const [sourceAsset, destinationAsset] = this.getRandomSourceAndDestAssets()
+
+    const amount = await this.createCryptoAmount(sourceAsset)
+    const rune = await this.thorchainQuery.convert(amount, AssetRuneNative)
+    const destinationAmount = await this.thorchainQuery.convert(amount, destinationAsset)
+
+    const inboundDetails = await this.thorchainQuery.thorchainCache.getPoolForAsset(destinationAsset)
+    const decimals = inboundDetails.pool.nativeDecimal
+    const randomNumber = this.getRandom(1, 10)
+    // if it is even its a symmetrical add if its odd the its an asymetrical add
+    const isEven = randomNumber % 2 === 0
+    const addlpSym: AddliquidityPosition = {
+      asset: destinationAmount,
+      rune: rune,
+    }
+    const addlpAsym: AddliquidityPosition = {
+      asset: new CryptoAmount(assetToBase(assetAmount(0, +decimals)), destinationAsset), // leave as empty. for asym,
+      rune: rune,
+    }
+
+    let result: TxDetail
+    try {
+      const estimateSym = await this.thorchainQuery.estimateAddLP(addlpSym)
+      if (isEven) {
+        if (estimateSym.canAdd && !this.estimateOnly) {
+          result.details = addlpSym
+          const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpSym)
+          result.result = txhash[1]
+        }
+      } else {
+        const estimate = await this.thorchainQuery.estimateAddLP(addlpAsym)
+        if (estimate.canAdd && !this.estimateOnly) {
+          result.details = addlpAsym
+          const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpAsym)
+          result.result = txhash[1]
+        }
+      }
+    } catch (e) {
+      throw Error(`Error in swapping from synth ${e}`)
+    }
+  }
 }
 
-// const addLiquidity = async (
-//   amount: CryptoAmount,
-//   wallet1: Wallet,
-//   wallet2: Wallet,
-//   tcAmm: ThorchainAMM,
-//   tcQuery: ThorchainQuery,
-// ) => {
-//   const rune = await tcQuery.convert(amount, AssetRuneNative)
-//   const destination = await getRandomAssetCryptoAmount(tcQuery, minTxAmount)
-//   const inboundDetails = await tcQuery.thorchainCache.getPoolForAsset(destination.asset)
-//   const decimals = inboundDetails.pool.nativeDecimal
-//   const randomNumber = await getRandomArbitrary(1, 10)
-//   // if it is even its a symmetrical add if its odd the its an asymetrical add
-//   const isEven = randomNumber % 2 === 0
-//   let addlp: AddliquidityPosition
-//   if (isEven) {
-//     addlp.rune = rune
-//     addlp.asset = destination
-//   } else {
-//     addlp.rune = rune
-//     addlp.asset = new CryptoAmount(assetToBase(assetAmount(0, +decimals)), destination.asset)
-//   }
-
-//   try {
-//     const estimate = await tcQuery.estimateAddLP(addlp)
-//     if (estimate.canAdd) {
-//       const txhash = await tcAmm.addLiquidityPosition(wallet1, addlp)
-//       txCount += 1
-//       const txDetails: TxDetail = {
-//         txCount: txCount,
-//         hash: txhash[1],
-//         amount: `${addlp.asset.formatedAssetString()}, ${addlp.asset.formatedAssetString()}`,
-//       }
-//       txRecord.push(txDetails)
-//     }
-//   } catch (e) {
-//     throw Error(`Error in swapping from synth ${e}`)
-//   }
-// }
 // // const withdrawLp = async (
 // //   amount: CryptoAmount,
 // //   wallet1: Wallet,

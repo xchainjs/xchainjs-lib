@@ -1,5 +1,14 @@
+import { Network } from '@xchainjs/xchain-client'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
-import { CryptoAmount, EstimateSwapParams, ThorchainQuery, TxDetails } from '@xchainjs/xchain-thorchain-query'
+import {
+  CryptoAmount,
+  EstimateSwapParams,
+  Midgard,
+  ThorchainCache,
+  ThorchainQuery,
+  Thornode,
+  TxDetails,
+} from '@xchainjs/xchain-thorchain-query'
 import { Chain, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
@@ -46,7 +55,7 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
       input: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
       destinationAsset: toAsset,
       destinationAddress,
-      // slipLimit: new BigNumber('0.03'), //optional
+      slipLimit: new BigNumber('0.05'), //optional
     }
     const affiliateAddress = process.argv[8]
     if (affiliateAddress) {
@@ -68,7 +77,9 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
 
 const main = async () => {
   const seed = process.argv[2]
-  const thorchainQuery = new ThorchainQuery()
+  const network = process.argv[3] as Network
+  const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
+  const thorchainQuery = new ThorchainQuery(thorchainCache)
   const thorchainAmm = new ThorchainAMM(thorchainQuery)
   const wallet = new Wallet(seed, thorchainQuery)
   await doSingleSwap(thorchainAmm, wallet)
