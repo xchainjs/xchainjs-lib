@@ -8,7 +8,6 @@ import {
   EstimateSwapParams,
   // AddliquidityPosition,
   // CryptoAmount,
-  // EstimateSwapParams,
   LiquidityPool,
   Midgard,
   ThorchainCache,
@@ -22,7 +21,7 @@ import * as weighted from 'weighted'
 import { TxDetail } from './types'
 
 // import { JammerAction } from './types'
-const BUSD = assetFromStringEx('BNB.BUSD-BD1')
+// const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -100,7 +99,7 @@ export class TxJammer {
   private setupWeightedActions() {
     this.weightedActions = {
       swap: 100,
-      addLP: 100,
+      addLp: 100,
       withdrawLp: 100,
       transfer: 100,
     }
@@ -129,13 +128,22 @@ export class TxJammer {
       await delay(this.pauseTimeSeconds * 1000)
     }
     console.log('Complete')
+    console.log(JSON.stringify(this.txRecords, null, 2))
   }
   private async executeAction(action: string) {
     switch (action) {
       case 'swap':
         await this.executeSwap()
         break
-
+      case 'addLp':
+        // await this.executeSwap()
+        break
+      case 'withdrawLp':
+        // await this.executeSwap()
+        break
+      case 'transfer':
+        // await this.executeSwap()
+        break
       default:
         break
     }
@@ -164,7 +172,8 @@ export class TxJammer {
   }
   private async createCryptoAmount(asset: Asset): Promise<CryptoAmount> {
     const amount = this.getRandom(this.maxAmount, this.minAmount)
-    const usdAmount = new CryptoAmount(assetToBase(assetAmount(amount)), BUSD)
+    const usdPool = await this.thorchainCache.getDeepestUSDPool()
+    const usdAmount = new CryptoAmount(assetToBase(assetAmount(amount)), usdPool.asset)
     return await this.thorchainQuery.convert(usdAmount, asset)
   }
   private getRandomWallets(): [Wallet, Wallet] {
