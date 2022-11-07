@@ -1,6 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
   AssetAVAX,
+  AssetBNB,
   AssetBTC,
   AssetETH,
   AssetLTC,
@@ -18,8 +19,11 @@ import {
   EstimateAddLP,
   EstimateAddSaver,
   EstimateWithdrawLP,
+  EstimateWithdrawSaver,
   LiquidityPosition,
+  SaversPosition,
   WithdrawLiquidityPosition,
+  getSaver,
 } from '../src/types'
 import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
@@ -31,6 +35,7 @@ const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 // mainnet asset
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
+const synthBTC = assetFromStringEx('BTC/BTC')
 const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 function printAdd(estimate: EstimateAddLP) {
@@ -99,6 +104,31 @@ function printSaver(saver: EstimateAddSaver) {
     toAddress: saver.toAddress,
     memo: saver.memo,
     estimateWaitTime: saver.estimatedWaitTime,
+  }
+  console.log(expanded)
+}
+function printWithdrawSaver(saver: EstimateWithdrawSaver) {
+  const expanded = {
+    assetAmount: saver.assetAmount.formatedAssetString(),
+    fee: {
+      networkFee: saver.fee.networkFee.formatedAssetString(),
+      liquidityFee: saver.fee.liquidityFee.formatedAssetString(),
+      totalFees: saver.fee.totalFees.formatedAssetString(),
+    },
+    expiry: saver.expiry,
+    toAddress: saver.toAddress,
+    memo: saver.memo,
+    estimateWaitTime: saver.estimatedWaitTime,
+  }
+  console.log(expanded)
+}
+function printSaversPosition(saver: SaversPosition) {
+  const expanded = {
+    depositValue: saver.depositValue.formatedAssetString(),
+    redeemableValue: saver.redeemableValue.formatedAssetString(),
+    lastAddHeight: saver.lastAddHeight,
+    growth: saver.growth,
+    age: saver.age,
   }
   console.log(expanded)
 }
@@ -233,5 +263,24 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(1, 8)), AssetBTC)
     const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
     printSaver(estimateAddsSaver)
+  })
+  it(`Should estimate saver addition synth`, async () => {
+    const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(1, 8)), synthBTC)
+    const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
+    printSaver(estimateAddsSaver)
+  })
+  it(`Should estimate saver withdrawal`, async () => {
+    const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(0, 8)), AssetBTC)
+    const estimateWithdrawSaver = await thorchainQuery.estimateWithdrawSaver(addAssetAmount)
+    printWithdrawSaver(estimateWithdrawSaver)
+  })
+  it(`Should get saver position`, async () => {
+    const address = 'bnb1jy7h4muz0ruflmrlxnt89ayhn3mf82sgza4vfm'
+    const saver: getSaver = {
+      asset: AssetBNB,
+      address: address,
+    }
+    const getSavers = await thorchainQuery.getSaverPosition(saver)
+    printSaversPosition(getSavers)
   })
 })

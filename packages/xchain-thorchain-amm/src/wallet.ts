@@ -22,7 +22,7 @@ type AllBalances = {
 }
 const chainIds = {
   [Network.Mainnet]: 'thorchain-mainnet-v1',
-  [Network.Stagenet]: 'chain-id-stagenet',
+  [Network.Stagenet]: 'thorchain-stagenet-v2',
   [Network.Testnet]: 'deprecated',
 }
 const clientUrl = {

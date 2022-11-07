@@ -231,5 +231,9 @@ export type SaverFees = {
 }
 
 export type SaversPosition = {
-  assetAmount: CryptoAmount
+  depositValue: CryptoAmount
+  redeemableValue: CryptoAmount
+  lastAddHeight: number
+  growth: number
+  age: number
 }

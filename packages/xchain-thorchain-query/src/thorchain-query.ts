@@ -33,14 +33,14 @@ import {
   PoolRatios,
   PostionDepositValue,
   SaverFees,
-  // SaversPosition,
+  SaversPosition,
   SwapEstimate,
   SwapOutput,
   TotalFees,
   TxDetails,
   UnitData,
   WithdrawLiquidityPosition,
-  // getSaver,
+  getSaver,
 } from './types'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
 import { calcNetworkFee, calcOutboundFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/swap'
@@ -771,7 +771,7 @@ export class ThorchainQuery {
     const inboundDetails = allInboundDetails[addAmount.asset.chain]
     const vault = inboundDetails.address
     const isSaversPool = (await this.thorchainCache.thornode.getPools()).find(
-      (item) => item.asset === addAmount.asset.chain,
+      (item) => item.asset === `${addAmount.asset.chain}/${addAmount.asset.ticker}`,
     )?.is_savers_pool
     if (!isSaversPool) throw Error(`Pool has no record of being a saver`)
     // network fee is a 1/3 of the outbound fee
@@ -809,7 +809,7 @@ export class ThorchainQuery {
     }
     return estimateAddSaver
   }
-  public async estimatewithdrawSaver(removeAmount: CryptoAmount): Promise<EstimateWithdrawSaver> {
+  public async estimateWithdrawSaver(removeAmount: CryptoAmount): Promise<EstimateWithdrawSaver> {
     if (isAssetRuneNative(removeAmount.asset)) throw Error(`Native Rune is not supported`)
     const allInboundDetails = await this.thorchainCache.getInboundDetails()
     const pool = (await this.thorchainCache.getPoolForAsset(removeAmount.asset)).pool
@@ -852,21 +852,41 @@ export class ThorchainQuery {
     return estimateWithdrawSaver
   }
 
-  // /**
-  //  *
-  //  * @param params - getSaver object > asset, addresss, height?
-  //  * @returns - Savers position object
-  //  */
-  // public async getSaverPosition(params: getSaver): Promise<SaversPosition> {
-  //   const checkSaverPosition = await this.thorchainCache.thornode.getSaver(
-  //     params.asset.symbol,
-  //     params.address,
-  //     params.height,
-  //   )
+  /**
+   *
+   * @param params - getSaver object > asset, addresss, height?
+   * @returns - Savers position object
+   */
+  public async getSaverPosition(params: getSaver): Promise<SaversPosition> {
+    const blockData = (await this.thorchainCache.thornode.getLastBlock()).find(
+      (item) => item.chain === params.asset.chain,
+    )
+    const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.ticker}`)).find(
+      (item) => item.asset_address === params.address,
+    )
+    const pool = (await this.thorchainCache.getPoolForAsset(params.asset)).pool
+    const saversPool = (await this.thorchainCache.thornode.getPools()).find(
+      (item) => item.asset === `${params.asset.chain}/${params.asset.ticker}`,
+    )
+    if (!saversPool) throw Error(`Pool has no record of being a saver`)
+    if (!savers?.last_add_height) throw Error(`Could not find position for ${params.address}`)
+    if (!blockData?.thorchain) throw Error(`Could not get thorchain block height`)
+    const ownerUnits = savers.units
+    const saverUnits = saversPool.synth_units
+    const assetDepth = saversPool.balance_asset
+    const redeemableValue = (+ownerUnits * +saverUnits) / +assetDepth
+    const depositAmount = new CryptoAmount(baseAmount(savers.asset_deposit_value, +pool.nativeDecimal), params.asset)
+    const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue, +pool.nativeDecimal), params.asset)
+    const saversAge = (blockData?.thorchain - savers.last_add_height) / ((365 * 86400) / 6)
 
-  //   const saversPos: SaversPosition = {
-  //     assetAmount: checkSaverPosition,
-  //   }
-  //   return saversPos
-  // }
+    const saverGrowth = redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
+    const saversPos: SaversPosition = {
+      depositValue: depositAmount,
+      redeemableValue: redeemableAssetAmount,
+      lastAddHeight: savers.last_add_height,
+      growth: saverGrowth.assetAmount.amount().toNumber(),
+      age: saversAge,
+    }
+    return saversPos
+  }
 }
