@@ -299,6 +299,8 @@ export class TxJammer {
           result.details = addlpAsym
           const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpAsym)
           result.result = txhash[1]
+        } else {
+          result.result = 'not submitted, estimate only mode'
         }
       }
     } catch (e) {

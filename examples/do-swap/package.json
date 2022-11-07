@@ -4,7 +4,8 @@
   "scripts": {
     "listPools": "npx ts-node listPools.ts",
     "estimateSwap": "npx ts-node estimateSwap.ts",
-    "doSwap": "npx ts-node doSwap.ts"
+    "doSwap": "npx ts-node doSwap.ts",
+    "doSend": "npx ts-node doSend.ts"
   },
   "description": "example of doing a swap withthorchain-amm package",
   "main": "index.js",
