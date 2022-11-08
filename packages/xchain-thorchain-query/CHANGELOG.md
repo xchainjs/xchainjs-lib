@@ -1,23 +1,31 @@
+# v0.1.7 (2022-10-27)
+
+## ADD
+
+- Add `estimateAddSaver()` & `estimateWithdrawSaver()` & `getsaverPosition()`
+
 # v0.1.6 (2022-10-27)
 
-## ADD 
+## ADD
+
 - Add Liquidity position growth calculations using the LUVI formula in `checkLiquidityPosition()`
 
 ## Fix
+
 # v0.1.5 (2022-10-27)
 
 ## Fix
 
 - Bug - Limit asset amount was not using 8 decimal places
-- Bug - Swap to Synths was failing Pool Conversion 
-- 
+- Bug - Swap to Synths was failing Pool Conversion
+-
 
 ## Update
 
 - Removed getInboundAddresses() from thorchainCache since it was redundant
 - Renamed AffiliateFeePercent to AffiliateFeeBasisPoints in EstimateSwapParams
 - Updated output decimals to us NativeDecimals from Pool data
-- Created calcOutboundFee() to use thornode outbound_fee 
+- Created calcOutboundFee() to use thornode outbound_fee
 
 # v0.1.4 (2022-10-17)
 
