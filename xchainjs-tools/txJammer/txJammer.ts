@@ -25,7 +25,7 @@ import {
 } from '@xchainjs/xchain-util'
 import * as weighted from 'weighted'
 
-import { TxDetail } from './types'
+import { ActionConfig, JammerAction, SwapConfig, TxDetail } from './types'
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -55,6 +55,8 @@ export class TxJammer {
   private keystore2Password: string
   private wallet1: Wallet | undefined
   private wallet2: Wallet | undefined
+  private swapConfig: SwapConfig[]
+  private actionConfig: ActionConfig[]
 
   constructor(
     estimateOnly: boolean,
@@ -66,6 +68,8 @@ export class TxJammer {
     keystore1Password: string,
     keystore2FilePath: string,
     keystore2Password: string,
+    swapConfig: SwapConfig[],
+    actionConfig: ActionConfig[],
   ) {
     this.estimateOnly = estimateOnly
     this.minAmount = minAmount
@@ -77,6 +81,8 @@ export class TxJammer {
     this.keystore1Password = keystore1Password
     this.keystore2FilePath = keystore2FilePath
     this.keystore2Password = keystore2Password
+    this.swapConfig = swapConfig
+    this.actionConfig = actionConfig
 
     this.thorchainCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
     this.thorchainQuery = new ThorchainQuery(this.thorchainCache)
@@ -103,10 +109,18 @@ export class TxJammer {
   }
   private setupWeightedActions() {
     this.weightedActions = {
-      swap: 200,
-      addLp: 100,
-      withdrawLp: 100,
-      transfer: 200,
+      swap: this.actionConfig.find((i) => i.action === JammerAction.swap)
+        ? this.actionConfig.find((i) => i.action === JammerAction.swap).weight
+        : 100,
+      addLp: this.actionConfig.find((i) => i.action === JammerAction.addLp)
+        ? this.actionConfig.find((i) => i.action === JammerAction.addLp).weight
+        : 100,
+      withdrawLp: this.actionConfig.find((i) => i.action === JammerAction.withdrawLp)
+        ? this.actionConfig.find((i) => i.action === JammerAction.withdrawLp).weight
+        : 100,
+      transfer: this.actionConfig.find((i) => i.action === JammerAction.transfer)
+        ? this.actionConfig.find((i) => i.action === JammerAction.transfer).weight
+        : 100,
     }
   }
 
