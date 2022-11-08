@@ -26,10 +26,30 @@ txJammer --wallet1 ./sdasdasd/asdasd.json --wallet2 ./sdasdasd/asdasd.json
 --durationSeconds 600
 --pauseTimeSeconds 5
 --txAmountInUsd 0.2-5 
---config swap ETH 10%, BTC 10%, ETH.ETH 5%, ETH.USDT 5%, *  
---config addLp ETH 10%, BTC 50%, ETH.USDT 5%, *
---config transfer THOR.RUNE 50%, ETH/USDT 5%, *  
+--configSwap ETH.ETH BTC.BTC 100, * * 100  
+--configAddLp THOR.RUNE BTC.BTC 500, BTC.BTC 300, * * 100
+--configWithdrawLp BTC.BTC S 500-500 A 100-500, * * 100
+--configTransfer ETH.ETH 100, BCH.BCH 200, * 100
 --estimateOnly
+
+
+
+
+
+
+txJammer --wallet1 ./sdasdasd/asdasd.json --wallet2 ./sdasdasd/asdasd.json 
+--durationSeconds 60
+--pauseTimeSeconds 0
+--txAmountInUsd 2-3 
+--config swap BCH.BCH BTC.BTC 100  
+--config addLp ETH.ETH BTC.BTC 500, * * 100
+--config withdrawLp ETH.ETH BTC.BTC 500, * * 100
+--config transfer ETH.ETH 100, BCH 200
+--estimateOnly
+
+
+
+
 
 
 txJammer --wallet1 ./sdasdasd/asdasd.json --wallet2 ./sdasdasd/asdasd.json 
@@ -49,3 +69,10 @@ addLP
 withdrawLp
 swap (including minet/redeem synth)
 transfer  thorchain asset 
+
+
+  private getRandomInt(max: number, min: number) {
+    const cmin = Math.ceil(min)
+    const cmax = Math.floor(max)
+    return Math.floor(Math.random() * (cmax - cmin + 1)) + cmin
+  }
