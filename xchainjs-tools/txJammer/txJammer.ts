@@ -125,17 +125,49 @@ export class TxJammer {
   }
 
   private async setupWeightedChoices() {
+    const assetsIncludingSynths: string[] = []
     const assets = await this.getAvailablePoolAssets()
     for (const asset of assets) {
+      const synth = assetFromStringEx(asset)
+      synth.synth = true
+      assetsIncludingSynths.push(asset)
+      assetsIncludingSynths.push(assetToString(synth))
+    }
+    this.setupWeightedSwaps(assetsIncludingSynths)
+    // this.setupWeightedTransfers(assetsIncludingSynths)
+    // this.setupWeightedAddLps(assets)
+    // this.setupWeightedWithdrawLps(assets)
+
+    for (const a of assetsIncludingSynths) {
       let weight = 100
-      if (asset.includes('ETH.')) {
+      if (a.includes('ETH.')) {
         // we want to limit the number to "expensive" (in terms of gas) eth txs
         weight = 10
       }
-      this.weightedSwap[asset] = weight
-      this.weightedTransfer[asset] = weight
-      this.weightedWithdrawLP[asset] = weight
-      this.weightedAddLP[asset] = weight
+      this.weightedTransfer[a] = weight
+      this.weightedWithdrawLP[a] = weight
+      this.weightedAddLP[a] = weight
+    }
+  }
+  private async setupWeightedSwaps(assetStrings: string[]) {
+    for (const source of assetStrings) {
+      for (const dest of assetStrings) {
+        if (source === dest) {
+          //do nothing, can't swap to same asset
+        } else {
+          let weight = 100 // default 100
+          if (source.includes('ETH.')) {
+            // default: we want to limit the number to "expensive" (in terms of gas) eth txs
+            weight = 10
+          }
+          for (const config of this.swapConfig) {
+            const srcApplies = source === config.sourceAssetString || config.sourceAssetString === '*'
+            const destApplies = dest === config.destAssetString || config.destAssetString === '*'
+            if (srcApplies && destApplies) weight = config.weight
+          }
+          this.weightedSwap[`${source} ${dest}`] = weight
+        }
+      }
     }
   }
 
@@ -235,26 +267,20 @@ export class TxJammer {
     return rand == 0 ? [this.wallet1, this.wallet2] : [this.wallet2, this.wallet1]
   }
   private getRandomSourceAndDestAssets(): [Asset, Asset] {
-    const sourceAssetString = weighted.select(this.weightedSwap) as string
-    let destinationAssetString = weighted.select(this.weightedSwap) as string
-    while (sourceAssetString === destinationAssetString) {
-      //can't have same source and dest
-      destinationAssetString = weighted.select(this.weightedSwap)
-    }
-    const sourceAsset = assetFromStringEx(sourceAssetString)
-    const destinationAsset = assetFromStringEx(destinationAssetString)
-    sourceAsset.synth = this.doSynthSwap()
-    destinationAsset.synth = this.doSynthSwap()
-    return [assetFromStringEx(assetToString(sourceAsset)), assetFromStringEx(assetToString(destinationAsset))]
+    const sourceAndDestAssetString = weighted.select(this.weightedSwap) as string
+    const assets = sourceAndDestAssetString.split(' ')
+    const sourceAsset = assetFromStringEx(assets[0])
+    const destinationAsset = assetFromStringEx(assets[1])
+    return [sourceAsset, destinationAsset]
   }
 
-  private doSynthSwap(): boolean {
-    // 1/4 of the time do a synth swap,
-    // this should lead to 1/2 swaps being native L1s on one side or another
-    const rand = this.getRandomInt(0, 3)
-    // console.log(`synth ${rand} ${rand === 0}`)
-    return rand === 0
-  }
+  // private doSynthSwap(): boolean {
+  //   // 1/4 of the time do a synth swap,
+  //   // this should lead to 1/2 swaps being native L1s on one side or another
+  //   const rand = this.getRandomInt(0, 3)
+  //   // console.log(`synth ${rand} ${rand === 0}`)
+  //   return rand === 0
+  // }
   private getRandomInt(min: number, max: number) {
     const cmin = Math.ceil(min)
     const cmax = Math.floor(max)
