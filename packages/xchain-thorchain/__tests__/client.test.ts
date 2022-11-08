@@ -17,8 +17,8 @@ import { mockTendermintNodeInfo, mockTendermintSimulate } from '../__mocks__/tho
 import { Client } from '../src/client'
 
 const chainIds = {
-  [Network.Mainnet]: 'chain-id-mainnet',
-  [Network.Stagenet]: 'chain-id-stagenet',
+  [Network.Mainnet]: 'thorchain-mainnet-v1',
+  [Network.Stagenet]: 'thorchain-stagenet-v2',
   [Network.Testnet]: 'deprecated',
 }
 
@@ -236,7 +236,7 @@ describe('Client Test', () => {
   describe('chainId', () => {
     it('get chainId', () => {
       const chainId = thorClient.getChainId()
-      expect(chainId).toEqual('chain-id-stagenet')
+      expect(chainId).toEqual('thorchain-stagenet-v2')
     })
     it('update chainId', () => {
       thorClient.setChainId('another-testnet-id')
@@ -250,7 +250,7 @@ describe('Client Test', () => {
     })
     it('get default chainId for stagenet', () => {
       const chainId = thorClient.getChainId(Network.Stagenet)
-      expect(chainId).toEqual('chain-id-stagenet')
+      expect(chainId).toEqual('thorchain-stagenet-v2')
     })
     it('update chainId for stagenet', () => {
       thorClient.setChainId('another-stagenet-id', Network.Stagenet)
