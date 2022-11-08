@@ -1,3 +1,10 @@
+# v0.3.6 (2022-11-08)
+
+## Update
+
+- changed chain-id in wallet to `thorchain-stagenet-v2`
+- removed clienturl params in wallet
+
 # v0.3.5 (2022-10-27)
 
 ## Update

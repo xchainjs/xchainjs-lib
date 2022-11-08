@@ -2,7 +2,7 @@ import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
-import { Balance, FeeOption, Network, XChainClient } from '@xchainjs/xchain-client'
+import { Balance, FeeOption, XChainClient } from '@xchainjs/xchain-client'
 import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
 import { Client as EthClient } from '@xchainjs/xchain-ethereum'
@@ -19,25 +19,6 @@ type AllBalances = {
   chain: Chain
   address: string
   balances: Balance[] | string
-}
-const chainIds = {
-  [Network.Mainnet]: 'thorchain-mainnet-v1',
-  [Network.Stagenet]: 'chain-id-stagenet',
-  [Network.Testnet]: 'deprecated',
-}
-const clientUrl = {
-  [Network.Stagenet]: {
-    node: 'https://stagenet-thornode.ninerealms.com',
-    rpc: 'https://stagenet-rpc.ninerealms.com',
-  },
-  [Network.Mainnet]: {
-    node: 'https://thornode.ninerealms.com',
-    rpc: 'https://rpc.ninerealms.com',
-  },
-  [Network.Testnet]: {
-    node: 'deprecated',
-    rpc: 'deprecated',
-  },
 }
 
 /**
@@ -64,7 +45,7 @@ export class Wallet {
       BTC: new BtcClient(settings),
       DOGE: new DogeClient(settings),
       ETH: new EthClient(settings),
-      THOR: new ThorClient({ ...settings, chainIds, clientUrl }),
+      THOR: new ThorClient(settings),
       LTC: new LtcClient(settings),
       BNB: new BnbClient(settings),
       GAIA: new CosmosClient(settings),
