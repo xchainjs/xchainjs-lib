@@ -67,7 +67,7 @@ program.requiredOption('-p2, --password2 <password>', 'you must send in a passwo
 program.requiredOption('-d, --durationSeconds <number>', 'the seconds you want to run the txJammer for', parseInteger)
 program.requiredOption('-p, --pauseTimeSeconds <number>', 'the seconds you want to pause between actions', parseInteger)
 program.requiredOption('-u, --txAmountInUsd <min-max>', 'the value of each tx in USD terms', parseMinMaxAmounts)
-program.option('-s, --configActions <config>', 'custom swap configuration ', parseCustomActions)
+program.option('-s, --configActions <config>', 'custom action configuration ', parseCustomActions)
 program.option('-s, --configSwap <config>', 'custom swap configuration ', parseCustomSwap)
 program.option('-a, --configAddLp <config>', 'custom addLp configuration ', parseCustomSwap)
 program.option('-w, --configWithdrawLp <config>', 'custom withdrawLp configuration ', parseCustomSwap)
