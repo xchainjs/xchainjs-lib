@@ -27,6 +27,11 @@ export type AddLpConfig = {
   assetString: string
   weight: number
 }
+export type WithdrawLpConfig = {
+  assetString: string
+  weight: number
+  basisPoints: number
+}
 export type ActionConfig = {
   action: JammerAction
   weight: number

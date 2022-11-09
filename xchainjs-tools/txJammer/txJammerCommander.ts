@@ -2,7 +2,7 @@ import { assetFromStringEx } from '@xchainjs/xchain-util'
 import * as commander from 'commander'
 
 import { TxJammer } from './TxJammer'
-import { ActionConfig, AddLpConfig, JammerAction, SwapConfig, TransferConfig } from './types'
+import { ActionConfig, AddLpConfig, JammerAction, SwapConfig, TransferConfig, WithdrawLpConfig } from './types'
 
 function parseCustomSwap(value: string): SwapConfig[] {
   // example --configSwap ETH.ETH BTC.BTC 100, * * 100
@@ -49,7 +49,6 @@ function parseCustomAddLP(value: string): AddLpConfig[] {
   const addlpConfigs: AddLpConfig[] = []
   for (const config of configs) {
     const parts = config.trim().split(/\s+/)
-    console.log(parts)
     if (parts.length !== 2) throw Error(`${config} must have 2 parameters: [assetString | *] [weight]`)
     //check asset strings parse ok
     parts[0] === '*' || assetFromStringEx(parts[0])
@@ -61,6 +60,25 @@ function parseCustomAddLP(value: string): AddLpConfig[] {
     addlpConfigs.push(addlpConfig)
   }
   return addlpConfigs
+}
+function parseCustomWithdrawLP(value: string): WithdrawLpConfig[] {
+  // example --configWithdrawlp BTC.BTC 100 100, * 100 100
+  const configs = value.split(',')
+  const withdrawlpConfigs: WithdrawLpConfig[] = []
+  for (const config of configs) {
+    const parts = config.trim().split(/\s+/)
+    if (parts.length !== 3) throw Error(`${config} must have 3 parameters: [assetString | *] [weight] [basisPoints]`)
+    //check asset strings parse ok
+    parts[0] === '*' || assetFromStringEx(parts[0])
+
+    const withdrawlpConfig = {
+      assetString: parts[0],
+      weight: Number(parts[1]),
+      basisPoints: Number(parts[2]),
+    }
+    withdrawlpConfigs.push(withdrawlpConfig)
+  }
+  return withdrawlpConfigs
 }
 function parseCustomActions(value: string): ActionConfig[] {
   // example --configActions transfer 200, addLp 200
@@ -108,7 +126,7 @@ program.requiredOption('-u, --txAmountInUsd <min-max>', 'the value of each tx in
 program.option('-s, --configActions <config>', 'custom action configuration ', parseCustomActions)
 program.option('-s, --configSwap <config>', 'custom swap configuration ', parseCustomSwap)
 program.option('-a, --configAddLp <config>', 'custom addLp configuration ', parseCustomAddLP)
-program.option('-w, --configWithdrawLp <config>', 'custom withdrawLp configuration ', parseCustomSwap)
+program.option('-w, --configWithdrawLp <config>', 'custom withdrawLp configuration ', parseCustomWithdrawLP)
 program.option('-t, --configTransfer <config>', 'custom transfer configuration ', parseCustomTransfer)
 
 program.parse()
@@ -129,6 +147,7 @@ const txJammer = new TxJammer(
   options.configSwap || [],
   options.configTransfer || [],
   options.configAddLp || [],
+  options.configWithdrawLp || [],
 )
 
 async function main() {

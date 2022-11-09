@@ -25,7 +25,15 @@ import {
 } from '@xchainjs/xchain-util'
 import * as weighted from 'weighted'
 
-import { ActionConfig, AddLpConfig, JammerAction, SwapConfig, TransferConfig, TxDetail } from './types'
+import {
+  ActionConfig,
+  AddLpConfig,
+  JammerAction,
+  SwapConfig,
+  TransferConfig,
+  TxDetail,
+  WithdrawLpConfig,
+} from './types'
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -59,6 +67,7 @@ export class TxJammer {
   private actionConfig: ActionConfig[]
   private addLpConfig: AddLpConfig[]
   private transferConfig: TransferConfig[]
+  private withdrawLpConfig: WithdrawLpConfig[]
 
   constructor(
     estimateOnly: boolean,
@@ -74,6 +83,7 @@ export class TxJammer {
     swapConfig: SwapConfig[],
     transferConfig: TransferConfig[],
     addLpConfig: AddLpConfig[],
+    withdrawLpConfig: WithdrawLpConfig[],
   ) {
     this.estimateOnly = estimateOnly
     this.minAmount = minAmount
@@ -89,6 +99,7 @@ export class TxJammer {
     this.actionConfig = actionConfig
     this.addLpConfig = addLpConfig
     this.transferConfig = transferConfig
+    this.withdrawLpConfig = withdrawLpConfig
 
     this.thorchainCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
     this.thorchainQuery = new ThorchainQuery(this.thorchainCache)
@@ -142,7 +153,7 @@ export class TxJammer {
     this.setupWeightedSwaps(assetsIncludingSynths)
     this.setupWeightedTransfers(assetsIncludingSynths)
     this.setupWeightedAddLps(assets)
-    // this.setupWeightedWithdrawLps(assets)
+    this.setupWeightedWithdrawLps(assets)
 
     for (const a of assetsIncludingSynths) {
       let weight = 100
@@ -224,6 +235,27 @@ export class TxJammer {
     }
     // console.log(JSON.stringify(this.weightedSwap, null, 2))
   }
+  private async setupWeightedWithdrawLps(assetStrings: string[]) {
+    for (const asset of assetStrings) {
+      if (this.addLpConfig.length > 0) {
+        for (const config of this.addLpConfig) {
+          const srcApplies = asset === config.assetString || config.assetString === '*'
+          if (srcApplies) {
+            this.weightedAddLP[asset] = config.weight
+            break // stop looping if a match is found
+          }
+        }
+      } else {
+        let weight = 100 // default 100
+        if (asset.includes('ETH.')) {
+          // default: we want to limit the number to "expensive" (in terms of gas) eth txs
+          weight = 10
+        }
+        this.weightedAddLP[asset] = weight
+      }
+    }
+    // console.log(JSON.stringify(this.weightedSwap, null, 2))
+  }
 
   async start() {
     await this.setup()
@@ -261,11 +293,15 @@ export class TxJammer {
   private async executeSwap() {
     const [senderWallet, receiverWallet] = this.getRandomWallets()
     const [sourceAsset, destinationAsset] = this.getRandomSwapAssets()
+    const destinationAddress = destinationAsset.synth
+      ? receiverWallet.clients[Chain.THORChain].getAddress()
+      : receiverWallet.clients[destinationAsset.chain].getAddress()
     const swapParams: EstimateSwapParams = {
       input: await this.createCryptoAmount(sourceAsset),
       destinationAsset,
-      destinationAddress: receiverWallet.clients[destinationAsset.chain].getAddress(),
+      destinationAddress: destinationAddress,
     }
+
     const result: TxDetail = { action: 'swap' }
     try {
       const estimate = await this.thorchainQuery.estimateSwap(swapParams)
@@ -275,7 +311,7 @@ export class TxJammer {
         const txhash = await this.thorchainAmm.doSwap(senderWallet, swapParams)
         result.result = txhash
       } else {
-        result.result = 'not submitted, estimate only mode'
+        result.result = `not submitted, Can swap: ${estimate.txEstimate.canSwap} or estimate: ${this.estimateOnly}`
       }
     } catch (e) {
       result.result = e.message
@@ -335,6 +371,10 @@ export class TxJammer {
     const randomAssetString = weighted.select(this.weightedAddLP) as string
     return assetFromStringEx(randomAssetString)
   }
+  private getRandomWithdrawLpAsset(): Asset {
+    const randomAssetString = weighted.select(this.weightedWithdrawLP) as string
+    return assetFromStringEx(randomAssetString)
+  }
 
   private getRandomInt(min: number, max: number) {
     const cmin = Math.ceil(min)
@@ -354,7 +394,6 @@ export class TxJammer {
   private async executeAddLp() {
     const [senderWallet] = this.getRandomWallets()
     const sourceAsset = this.getRandomAddLpAsset()
-    console.log(sourceAsset)
     const sourceAssetAmount = await this.createCryptoAmount(sourceAsset)
     const rune = await this.thorchainQuery.convert(sourceAssetAmount, AssetRuneNative)
 
@@ -379,7 +418,7 @@ export class TxJammer {
       const estimateSym = await this.thorchainQuery.estimateAddLP(addlpSym)
       result.date = new Date()
       if (isEven) {
-        result.details = `Adding liquidity position ${rune.formatedAssetString()} and ${sourceAssetAmount.formatedAssetString()} to pool: ${
+        result.details = `Adding symetrical liquidity position ${rune.formatedAssetString()} and ${sourceAssetAmount.formatedAssetString()} to pool: ${
           estimateSym.assetPool
         } `
         if (estimateSym.canAdd && !this.estimateOnly) {
@@ -387,19 +426,19 @@ export class TxJammer {
           const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpSym)
           result.result = `hash: ${txhash[0].hash}    hash: ${txhash[1].hash}`
         } else {
-          result.result = 'not submitted, estimate only mode'
+          result.result = `not submitted, Can add lp position: ${estimateSym.canAdd} or ${this.estimateOnly}`
         }
       } else {
-        result.details = `Adding liquidity position ${sourceAssetAmount.formatedAssetString()} to ${
+        result.details = `Adding asymetrical liquidity position ${sourceAssetAmount.formatedAssetString()} to ${
           estimateSym.assetPool
         } `
         const estimate = await this.thorchainQuery.estimateAddLP(addlpAsym)
         if (estimate.canAdd && !this.estimateOnly) {
           result.details = addlpAsym
           const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpAsym)
-          result.result = `hash: ${txhash[0].hash}    hash: ${txhash[1].hash}`
+          result.result = `hash: ${txhash[0].hash}`
         } else {
-          result.result = 'not submitted, estimate only mode'
+          result.result = `not submitted, Can add: ${estimate.canAdd} or ${this.estimateOnly}`
         }
       }
     } catch (e) {
@@ -412,10 +451,10 @@ export class TxJammer {
    */
   private async executeWithdraw() {
     const [senderWallet] = this.getRandomWallets()
-    const [sourceAsset] = this.getRandomSwapAssets()
+    const sourceAsset = this.getRandomWithdrawLpAsset()
 
     const runeAddress = senderWallet.clients[Chain.THORChain].getAddress()
-
+    const percentageWithdraw = Number(this.withdrawLpConfig[2])
     const result: TxDetail = {
       action: 'withdrawLp',
     }
@@ -424,7 +463,7 @@ export class TxJammer {
       const checkLp = await this.thorchainQuery.checkLiquidityPosition(sourceAsset, runeAddress)
       const withdrawLParams: WithdrawLiquidityPosition = {
         asset: sourceAsset,
-        percentage: 100,
+        percentage: percentageWithdraw,
         assetAddress: checkLp.position.asset_address,
         runeAddress: checkLp.position.rune_address,
       }
