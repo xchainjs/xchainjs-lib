@@ -25,7 +25,7 @@ import {
 } from '@xchainjs/xchain-util'
 import * as weighted from 'weighted'
 
-import { ActionConfig, JammerAction, SwapConfig, TxDetail } from './types'
+import { ActionConfig, AddLpConfig, JammerAction, SwapConfig, TxDetail } from './types'
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -57,6 +57,7 @@ export class TxJammer {
   private wallet2: Wallet | undefined
   private swapConfig: SwapConfig[]
   private actionConfig: ActionConfig[]
+  private addLpConfig: AddLpConfig[]
 
   constructor(
     estimateOnly: boolean,
@@ -70,6 +71,7 @@ export class TxJammer {
     keystore2Password: string,
     swapConfig: SwapConfig[],
     actionConfig: ActionConfig[],
+    addLpConfig: AddLpConfig[],
   ) {
     this.estimateOnly = estimateOnly
     this.minAmount = minAmount
@@ -83,6 +85,7 @@ export class TxJammer {
     this.keystore2Password = keystore2Password
     this.swapConfig = swapConfig
     this.actionConfig = actionConfig
+    this.addLpConfig = addLpConfig
 
     this.thorchainCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
     this.thorchainQuery = new ThorchainQuery(this.thorchainCache)
@@ -134,8 +137,8 @@ export class TxJammer {
       assetsIncludingSynths.push(assetToString(synth))
     }
     this.setupWeightedSwaps(assetsIncludingSynths)
-    this.setupWeightedTransfers(assetsIncludingSynths)
-    // this.setupWeightedAddLps(assets)
+    // this.setupWeightedTransfers(assetsIncludingSynths)
+    this.setupWeightedAddLps(assets)
     // this.setupWeightedWithdrawLps(assets)
 
     for (const a of assetsIncludingSynths) {
@@ -186,7 +189,24 @@ export class TxJammer {
         }
       }
     }
-    console.log(JSON.string this.weightedSwap)
+    console.log(JSON.stringify(this.weightedSwap))
+  }
+
+  private async setupWeightedAddLps(assetStrings: string[]) {
+    for (const asset of assetStrings) {
+      let weight = 100 // default 100
+      if (asset.includes('ETH.')) {
+        // default: we want to limit the number to "expensive" (in terms of gas) eth txs
+        weight = 10
+      }
+      for (const config of this.swapConfig) {
+        const srcApplies = asset === config.sourceAssetString || config.sourceAssetString === '*'
+        if (srcApplies) {
+          weight = config.weight
+          this.weightedAddLP[asset] = weight
+        }
+      }
+    }
   }
 
   async start() {
@@ -295,6 +315,10 @@ export class TxJammer {
     const randomAssetString = weighted.select(this.weightedTransfer) as string
     return assetFromStringEx(randomAssetString)
   }
+  private getRandomAddLpAsset(): Asset {
+    const randomAssetString = weighted.select(this.weightedAddLP) as string
+    return assetFromStringEx(randomAssetString)
+  }
 
   private getRandomInt(min: number, max: number) {
     const cmin = Math.ceil(min)
@@ -305,6 +329,7 @@ export class TxJammer {
     const randomNumber = Math.random() * (max - min) + min
     return randomNumber
   }
+
   private recordActionAndResult() {}
 
   /**
@@ -312,13 +337,12 @@ export class TxJammer {
    */
   private async executeAddLp() {
     const [senderWallet] = this.getRandomWallets()
-    const [sourceAsset, destinationAsset] = this.getRandomSwapAssets()
-
+    const sourceAsset = this.getRandomAddLpAsset()
+    console.log(sourceAsset)
     const sourceAssetAmount = await this.createCryptoAmount(sourceAsset)
     const rune = await this.thorchainQuery.convert(sourceAssetAmount, AssetRuneNative)
-    //const destinationAmount = await this.thorchainQuery.convert(amount, destinationAsset)
 
-    const inboundDetails = await this.thorchainQuery.thorchainCache.getPoolForAsset(destinationAsset)
+    const inboundDetails = await this.thorchainQuery.thorchainCache.getPoolForAsset(sourceAsset)
     const decimals = inboundDetails.pool.nativeDecimal
     const randomNumber = this.getRandomInt(1, 10)
     // if it is even its a symmetrical add if its odd the its an asymetrical add
@@ -338,17 +362,14 @@ export class TxJammer {
     try {
       const estimateSym = await this.thorchainQuery.estimateAddLP(addlpSym)
       result.date = new Date()
-      result.details = `Adding liquidity position ${sourceAssetAmount.formatedAssetString()} to ${
-        estimateSym.assetPool
-      } `
       if (isEven) {
-        result.details = `Adding liquidity position ${sourceAssetAmount.formatedAssetString()} and ${rune.formatedAssetString()}  to ${
+        result.details = `Adding liquidity position ${rune.formatedAssetString()} and ${sourceAssetAmount.formatedAssetString()} to pool: ${
           estimateSym.assetPool
         } `
         if (estimateSym.canAdd && !this.estimateOnly) {
           result.details = addlpSym
           const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpSym)
-          result.result = `${txhash[0]}    ${txhash[1]}`
+          result.result = `hash: ${txhash[0].hash}    hash: ${txhash[1].hash}`
         } else {
           result.result = 'not submitted, estimate only mode'
         }
@@ -360,7 +381,7 @@ export class TxJammer {
         if (estimate.canAdd && !this.estimateOnly) {
           result.details = addlpAsym
           const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpAsym)
-          result.result = txhash[1]
+          result.result = `hash: ${txhash[0].hash}    hash: ${txhash[1].hash}`
         } else {
           result.result = 'not submitted, estimate only mode'
         }
@@ -407,85 +428,3 @@ export class TxJammer {
     this.txRecords.push(result)
   }
 }
-
-// // const dexAggSwapIn = async () => {}
-// // const dexAggSwapOut = async () => {}
-// // const addSavers = async () => {}
-// // const withdrawSavers = async () => {}
-
-// // Rebalance wallets to be of equal value..
-// // const reBalanceWallets = async (tcAmm: ThorchainAMM, tcQuery: ThorchainQuery, wallet1: Wallet, wallet2: Wallet) => {
-// //   const
-// // }
-
-// /**
-//  * tx : {hash: hash,
-//  * memo: memo,
-//  * vault: vault,
-//  * amount: amount,}
-//  * @param txDetails - details to write to the file
-//  */
-// const writeTxsToFile = async () => {
-//   fs.writeFileSync(`./txJammer${Date}.json`, JSON.stringify(txRecord, null, 4), 'utf8')
-// }
-
-// /**
-//  *
-//  * @param tcAmm - AMM instance
-//  * @param tcQuery - Query instance
-//  * @param wallet1 - wallet 1
-//  * @param wallet2 - wallet 2
-//  */
-// const startTxJammer = async (tcAmm: ThorchainAMM, tcQuery: ThorchainQuery, wallet1: Wallet, wallet2: Wallet) => {
-//   const txRandomCeiling = await getRandomArbitrary(txMax, txMin)
-//   console.log(`TX Jammer Time`)
-//   // run while transactions are less than max transactions
-//   while (txCount < txRandomCeiling) {
-//     // select random Action
-//     // execute action
-//     // wait random secs between 1 sec - 10 sec
-//     // update
-
-//     // convert 2 usdt to random asset.
-//     const amount = await getRandomAssetCryptoAmount(tcQuery, minTxAmount)
-//     await swapToRune(amount, wallet1, wallet2, tcAmm, tcQuery)
-//     // delay program by 2 seconds
-//     await delay(2000)
-//     await swapToOtherRandomL1(amount, wallet1, wallet2, tcAmm, tcQuery)
-//     // delay program by 2 seconds
-//     await delay(2000)
-//     await swapToSynth(amount, wallet1, wallet2, tcAmm, tcQuery)
-//     // delay program by 2 seconds
-//     await delay(2000)
-//     await swapFromSynth(amount, wallet1, wallet2, tcAmm, tcQuery)
-//     // delay program by 2 seconds
-//     await delay(2000)
-//     await addLiquidity(amount, wallet1, wallet2, tcAmm, tcQuery)
-//     // delay program by 2 seconds
-//     await delay(2000)
-//     //await withdrawLp(amount, wallet1, wallet2, tcAmm, tcQuery)
-//     console.log(txRecord)
-//   }
-//   await writeTxsToFile()
-//   // shutdown
-//   // withdraw all LP positions?
-//   //
-// }
-
-// /**
-//  * ToDo Make wallet random. or self balancing, so it doesn't matter which wallet makes the transaction
-//  */
-// const main = async () => {
-//   const phrase1 = await decryptFromKeystore(keystore1, password)
-//   const phrase2 = await decryptFromKeystore(keystore2, password)
-//   const thorchainCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
-//   const thorchainQuery = new ThorchainQuery(thorchainCache)
-//   const thorchainAmm = new ThorchainAMM(thorchainQuery)
-//   const wallet1 = new Wallet(phrase1, thorchainQuery)
-//   const wallet2 = new Wallet(phrase2, thorchainQuery)
-//   await startTxJammer(thorchainAmm, thorchainQuery, wallet1, wallet2)
-// }
-
-// main()
-//   .then(() => process.exit(0))
-//   .catch((err) => console.error(err))
