@@ -2,7 +2,7 @@ import { assetFromStringEx } from '@xchainjs/xchain-util'
 import * as commander from 'commander'
 
 import { TxJammer } from './TxJammer'
-import { ActionConfig, JammerAction, SwapConfig } from './types'
+import { ActionConfig, JammerAction, SwapConfig, TransferConfig } from './types'
 
 function parseCustomSwap(value: string): SwapConfig[] {
   // example --configSwap ETH.ETH BTC.BTC 100, * * 100
@@ -24,6 +24,24 @@ function parseCustomSwap(value: string): SwapConfig[] {
     swapConfigs.push(swapConfig)
   }
   return swapConfigs
+}
+function parseCustomTransfer(value: string): TransferConfig[] {
+  // example --configTransfer ETH.ETH 100, * 100
+  const configs = value.split(',')
+  const transferConfigs: TransferConfig[] = []
+  for (const config of configs) {
+    const parts = config.trim().split(/\s+/)
+    if (parts.length !== 2) throw Error(`${config} must have 2 parameters: [assetString | *] [weight]`)
+    //check asset strings parse ok
+    parts[0] === '*' || assetFromStringEx(parts[0])
+
+    const transferConfig = {
+      assetString: parts[0],
+      weight: Number(parts[1]),
+    }
+    transferConfigs.push(transferConfig)
+  }
+  return transferConfigs
 }
 function parseCustomActions(value: string): ActionConfig[] {
   // example --configActions transfer 200,addLp 200
@@ -58,6 +76,7 @@ function parseMinMaxAmounts(value: string) {
   parseInt(parts[1])
   return parts
 }
+
 const program = new commander.Command()
 program.option('-e, --estimateOnly', 'do not perform a swap, only perform an estimate swap ')
 program.requiredOption('-w1, --wallet1 <file> ', 'you must send in a json wallet ')
@@ -71,7 +90,7 @@ program.option('-s, --configActions <config>', 'custom action configuration ', p
 program.option('-s, --configSwap <config>', 'custom swap configuration ', parseCustomSwap)
 program.option('-a, --configAddLp <config>', 'custom addLp configuration ', parseCustomSwap)
 program.option('-w, --configWithdrawLp <config>', 'custom withdrawLp configuration ', parseCustomSwap)
-program.option('-t, --configTransfer <config>', 'custom transfer configuration ', parseCustomSwap)
+program.option('-t, --configTransfer <config>', 'custom transfer configuration ', parseCustomTransfer)
 
 program.parse()
 

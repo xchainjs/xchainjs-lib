@@ -19,6 +19,10 @@ export type SwapConfig = {
   destAssetString: string
   weight: number
 }
+export type TransferConfig = {
+  assetString: string
+  weight: number
+}
 export type ActionConfig = {
   action: JammerAction
   weight: number

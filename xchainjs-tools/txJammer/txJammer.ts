@@ -134,7 +134,7 @@ export class TxJammer {
       assetsIncludingSynths.push(assetToString(synth))
     }
     this.setupWeightedSwaps(assetsIncludingSynths)
-    // this.setupWeightedTransfers(assetsIncludingSynths)
+    this.setupWeightedTransfers(assetsIncludingSynths)
     // this.setupWeightedAddLps(assets)
     // this.setupWeightedWithdrawLps(assets)
 
@@ -144,9 +144,24 @@ export class TxJammer {
         // we want to limit the number to "expensive" (in terms of gas) eth txs
         weight = 10
       }
-      this.weightedTransfer[a] = weight
       this.weightedWithdrawLP[a] = weight
       this.weightedAddLP[a] = weight
+    }
+  }
+  private async setupWeightedTransfers(assetStrings: string[]) {
+    for (const asset of assetStrings) {
+      let weight = 100 // default 100
+      if (asset.includes('ETH.')) {
+        // default: we want to limit the number to "expensive" (in terms of gas) eth txs
+        weight = 10
+      }
+      for (const config of this.swapConfig) {
+        const srcApplies = asset === config.sourceAssetString || config.sourceAssetString === '*'
+        if (srcApplies) {
+          weight = config.weight
+          this.weightedTransfer[asset] = weight
+        }
+      }
     }
   }
   private async setupWeightedSwaps(assetStrings: string[]) {
@@ -163,12 +178,15 @@ export class TxJammer {
           for (const config of this.swapConfig) {
             const srcApplies = source === config.sourceAssetString || config.sourceAssetString === '*'
             const destApplies = dest === config.destAssetString || config.destAssetString === '*'
-            if (srcApplies && destApplies) weight = config.weight
+            if (srcApplies && destApplies) {
+              weight = config.weight
+              this.weightedSwap[`${source} ${dest}`] = weight
+            }
           }
-          this.weightedSwap[`${source} ${dest}`] = weight
         }
       }
     }
+    console.log(JSON.string this.weightedSwap)
   }
 
   async start() {
@@ -206,7 +224,7 @@ export class TxJammer {
   }
   private async executeSwap() {
     const [senderWallet, receiverWallet] = this.getRandomWallets()
-    const [sourceAsset, destinationAsset] = this.getRandomSourceAndDestAssets()
+    const [sourceAsset, destinationAsset] = this.getRandomSwapAssets()
     const swapParams: EstimateSwapParams = {
       input: await this.createCryptoAmount(sourceAsset),
       destinationAsset,
@@ -231,7 +249,7 @@ export class TxJammer {
 
   private async executeTransfer() {
     const [senderWallet, receiverWallet] = this.getRandomWallets()
-    const [sourceAsset] = this.getRandomSourceAndDestAssets()
+    const sourceAsset = this.getRandomTransferAsset()
 
     const result: TxDetail = { action: 'transfer' }
     try {
@@ -266,21 +284,18 @@ export class TxJammer {
     const rand = this.getRandomInt(0, 1)
     return rand == 0 ? [this.wallet1, this.wallet2] : [this.wallet2, this.wallet1]
   }
-  private getRandomSourceAndDestAssets(): [Asset, Asset] {
+  private getRandomSwapAssets(): [Asset, Asset] {
     const sourceAndDestAssetString = weighted.select(this.weightedSwap) as string
     const assets = sourceAndDestAssetString.split(' ')
     const sourceAsset = assetFromStringEx(assets[0])
     const destinationAsset = assetFromStringEx(assets[1])
     return [sourceAsset, destinationAsset]
   }
+  private getRandomTransferAsset(): Asset {
+    const randomAssetString = weighted.select(this.weightedTransfer) as string
+    return assetFromStringEx(randomAssetString)
+  }
 
-  // private doSynthSwap(): boolean {
-  //   // 1/4 of the time do a synth swap,
-  //   // this should lead to 1/2 swaps being native L1s on one side or another
-  //   const rand = this.getRandomInt(0, 3)
-  //   // console.log(`synth ${rand} ${rand === 0}`)
-  //   return rand === 0
-  // }
   private getRandomInt(min: number, max: number) {
     const cmin = Math.ceil(min)
     const cmax = Math.floor(max)
@@ -297,7 +312,7 @@ export class TxJammer {
    */
   private async executeAddLp() {
     const [senderWallet] = this.getRandomWallets()
-    const [sourceAsset, destinationAsset] = this.getRandomSourceAndDestAssets()
+    const [sourceAsset, destinationAsset] = this.getRandomSwapAssets()
 
     const sourceAssetAmount = await this.createCryptoAmount(sourceAsset)
     const rune = await this.thorchainQuery.convert(sourceAssetAmount, AssetRuneNative)
@@ -360,7 +375,7 @@ export class TxJammer {
    */
   private async executeWithdraw() {
     const [senderWallet] = this.getRandomWallets()
-    const [sourceAsset] = this.getRandomSourceAndDestAssets()
+    const [sourceAsset] = this.getRandomSwapAssets()
 
     const runeAddress = senderWallet.clients[Chain.THORChain].getAddress()
 
