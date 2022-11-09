@@ -453,14 +453,15 @@ export class TxJammer {
     const [senderWallet] = this.getRandomWallets()
     const sourceAsset = this.getRandomWithdrawLpAsset()
 
-    const runeAddress = senderWallet.clients[Chain.THORChain].getAddress()
+    //const runeAddress = senderWallet.clients[Chain.THORChain].getAddress()
+    const sourceAddress = senderWallet.clients[sourceAsset.chain].getAddress()
     const percentageWithdraw = Number(this.withdrawLpConfig[2])
     const result: TxDetail = {
       action: 'withdrawLp',
     }
     try {
       result.date = new Date()
-      const checkLp = await this.thorchainQuery.checkLiquidityPosition(sourceAsset, runeAddress)
+      const checkLp = await this.thorchainQuery.checkLiquidityPosition(sourceAsset, sourceAddress)
       const withdrawLParams: WithdrawLiquidityPosition = {
         asset: sourceAsset,
         percentage: percentageWithdraw,

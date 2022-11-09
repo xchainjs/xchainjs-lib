@@ -70,3 +70,27 @@ yarn ts-node txJammerCommander.ts \
  --configActions "transfer 500, addLp 0, withdrawLp 0, swap 300" \
  --configSwap "ETH.ETH BTC.BTC 500, BNB.BNB * 200, * * 100"
 ```
+
+#### Example 3
+
+Runs random txs with a monetary value between 1-3 USD for 60 secs with a pause between actions of 2 secs, but run in "estimate only" mode ( does not submit the txs)
+Additionally, a specfic action config specifies the following
+
+- transfer should have a probablistic weight of 100
+- addLp should have a probablistic weight of 0
+- withdrawLp should have a probablistic weight of 100
+- swap should have a probablistic weight of 100
+
+```bash
+yarn ts-node txJammerCommander.ts \
+ --wallet1 ./keystore1.txt --password1 123 \
+ --wallet2 ./keystore2.txt --password2 123 \
+ --durationSeconds 60 --pauseTimeSeconds 2 \
+ --txAmountInUsd 1-3 \
+ --estimateOnly \
+ --configActions "swap 100, addLp 0, transfer 100, withdrawLP 100" \
+ --configSwap "BNB.BNB * 200, THOR.RUNE * 500, * * 50" \
+ --configTransfer "BNB.BNB 300, BCH.BCH 200, * 50" \
+ --configWithdrawLp "* 100 100" \
+ --estimateOnly
+```
