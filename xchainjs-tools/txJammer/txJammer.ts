@@ -151,26 +151,24 @@ export class TxJammer {
         weight = 10
       }
       this.weightedWithdrawLP[a] = weight
-      this.weightedAddLP[a] = weight
     }
   }
   private async setupWeightedTransfers(assetStrings: string[]) {
     for (const asset of assetStrings) {
-      let weight = 100 // default 100
-      if (asset.includes('ETH.')) {
-        // default: we want to limit the number to "expensive" (in terms of gas) eth txs
-        weight = 10
-      }
       if (this.transferConfig.length > 0) {
         for (const config of this.transferConfig) {
           const srcApplies = asset === config.assetString || config.assetString === '*'
           if (srcApplies) {
-            weight = config.weight
-            this.weightedTransfer[asset] = weight
+            this.weightedTransfer[asset] = config.weight
             break // stop looping if a match is found
           }
         }
       } else {
+        let weight = 100 // default 100
+        if (asset.includes('ETH.')) {
+          // default: we want to limit the number to "expensive" (in terms of gas) eth txs
+          weight = 10
+        }
         this.weightedTransfer[asset] = weight
       }
     }
@@ -182,22 +180,21 @@ export class TxJammer {
         if (source === dest) {
           //do nothing, can't swap to same asset
         } else {
-          let weight = 100 // default 100
-          if (source.includes('ETH.')) {
-            // default: we want to limit the number to "expensive" (in terms of gas) eth txs
-            weight = 10
-          }
           if (this.swapConfig.length > 0) {
             for (const config of this.swapConfig) {
               const srcApplies = source === config.sourceAssetString || config.sourceAssetString === '*'
               const destApplies = dest === config.destAssetString || config.destAssetString === '*'
               if (srcApplies && destApplies) {
-                weight = config.weight
-                this.weightedSwap[`${source} ${dest}`] = weight
+                this.weightedSwap[`${source} ${dest}`] = config.weight
                 break // stop looping if a match is found
               }
             }
           } else {
+            let weight = 100 // default 100
+            if (source.includes('ETH.')) {
+              // default: we want to limit the number to "expensive" (in terms of gas) eth txs
+              weight = 10
+            }
             this.weightedSwap[`${source} ${dest}`] = weight
           }
         }
@@ -208,17 +205,21 @@ export class TxJammer {
 
   private async setupWeightedAddLps(assetStrings: string[]) {
     for (const asset of assetStrings) {
-      let weight = 100 // default 100
-      if (asset.includes('ETH.')) {
-        // default: we want to limit the number to "expensive" (in terms of gas) eth txs
-        weight = 10
-      }
-      for (const config of this.swapConfig) {
-        const srcApplies = asset === config.sourceAssetString || config.sourceAssetString === '*'
-        if (srcApplies) {
-          weight = config.weight
-          this.weightedAddLP[asset] = weight
+      if (this.addLpConfig.length > 0) {
+        for (const config of this.addLpConfig) {
+          const srcApplies = asset === config.assetString || config.assetString === '*'
+          if (srcApplies) {
+            this.weightedAddLP[asset] = config.weight
+            break // stop looping if a match is found
+          }
         }
+      } else {
+        let weight = 100 // default 100
+        if (asset.includes('ETH.')) {
+          // default: we want to limit the number to "expensive" (in terms of gas) eth txs
+          weight = 10
+        }
+        this.weightedAddLP[asset] = weight
       }
     }
     // console.log(JSON.stringify(this.weightedSwap, null, 2))

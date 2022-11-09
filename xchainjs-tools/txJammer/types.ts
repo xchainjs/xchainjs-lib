@@ -24,8 +24,7 @@ export type TransferConfig = {
   weight: number
 }
 export type AddLpConfig = {
-  runeAssetString: string
-  pairedAssetString: string
+  assetString: string
   weight: number
 }
 export type ActionConfig = {

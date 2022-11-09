@@ -44,22 +44,19 @@ function parseCustomTransfer(value: string): TransferConfig[] {
   return transferConfigs
 }
 function parseCustomAddLP(value: string): AddLpConfig[] {
-  // example --configAddlp THOR.RUNE BTC.BTC 100, * * 100
+  // example --configAddlp BTC.BTC 100, * 100
   const configs = value.split(',')
   const addlpConfigs: AddLpConfig[] = []
   for (const config of configs) {
     const parts = config.trim().split(/\s+/)
     console.log(parts)
-    if (parts.length !== 3)
-      throw Error(`${config} must have 3 parameters: [assetString | *] [assetString | *] [weight]`)
+    if (parts.length !== 2) throw Error(`${config} must have 2 parameters: [assetString | *] [weight]`)
     //check asset strings parse ok
     parts[0] === '*' || assetFromStringEx(parts[0])
-    parts[1] === '*' || assetFromStringEx(parts[1])
 
     const addlpConfig = {
-      runeAssetString: parts[0],
-      pairedAssetString: parts[1],
-      weight: Number(parts[2]),
+      assetString: parts[0],
+      weight: Number(parts[1]),
     }
     addlpConfigs.push(addlpConfig)
   }
