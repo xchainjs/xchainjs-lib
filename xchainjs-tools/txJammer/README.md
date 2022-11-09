@@ -1,6 +1,6 @@
 # `txJammer`
 
-Purpose of this script is to push a random amount of difference types of transactions to stagenet to verify new stagenet releases
+Purpose of this script is to push a random amount of different types of transactions to stagenet to verify new stagenet releases
 
 Use wisely as it deals with real funds.
 
@@ -55,10 +55,10 @@ yarn ts-node txJammerCommander.ts \
 Runs random txs with a monetary value between 1-3 USD for 60 secs with a pause between actions of 2 secs, but run in "estimate only" mode ( does not submit the txs)
 Additionally, a specfic action config specifies the following
 
-- transfer should have a probablistic weight of 500
-- addLp should have a probablistic weight of 0
-- withdrawLp should have a probablistic weight of 0
-- swap should have a probablistic weight of 300
+- transfer should have a probabilistic weight of 500
+- addLp should have a probabilistic weight of 0
+- withdrawLp should have a probabilistic weight of 0
+- swap should have a probabilistic weight of 300
 
 ```bash
 yarn ts-node txJammerCommander.ts \
@@ -76,10 +76,10 @@ yarn ts-node txJammerCommander.ts \
 Runs random txs with a monetary value between 1-3 USD for 60 secs with a pause between actions of 2 secs, but run in "estimate only" mode ( does not submit the txs)
 Additionally, a specfic action config specifies the following
 
-- transfer should have a probablistic weight of 100
-- addLp should have a probablistic weight of 0
-- withdrawLp should have a probablistic weight of 100
-- swap should have a probablistic weight of 100
+- transfer should have a probabilistic weight of 100
+- addLp should have a probabilistic weight of 0
+- withdrawLp should have a probabilistic weight of 100
+- swap should have a probabilistic weight of 100
 
 ```bash
 yarn ts-node txJammerCommander.ts \
