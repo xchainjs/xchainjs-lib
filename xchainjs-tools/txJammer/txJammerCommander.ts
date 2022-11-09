@@ -130,6 +130,7 @@ const txJammer = new TxJammer(
   options.password2,
   options.configActions || [],
   options.configSwap || [],
+  options.configTransfer || [],
   options.configAddLp || [],
 )
 

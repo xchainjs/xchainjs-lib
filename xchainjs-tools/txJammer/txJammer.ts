@@ -25,7 +25,7 @@ import {
 } from '@xchainjs/xchain-util'
 import * as weighted from 'weighted'
 
-import { ActionConfig, AddLpConfig, JammerAction, SwapConfig, TxDetail } from './types'
+import { ActionConfig, AddLpConfig, JammerAction, SwapConfig, TransferConfig, TxDetail } from './types'
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -58,6 +58,7 @@ export class TxJammer {
   private swapConfig: SwapConfig[]
   private actionConfig: ActionConfig[]
   private addLpConfig: AddLpConfig[]
+  private transferConfig: TransferConfig[]
 
   constructor(
     estimateOnly: boolean,
@@ -69,8 +70,9 @@ export class TxJammer {
     keystore1Password: string,
     keystore2FilePath: string,
     keystore2Password: string,
-    swapConfig: SwapConfig[],
     actionConfig: ActionConfig[],
+    swapConfig: SwapConfig[],
+    transferConfig: TransferConfig[],
     addLpConfig: AddLpConfig[],
   ) {
     this.estimateOnly = estimateOnly
@@ -86,6 +88,7 @@ export class TxJammer {
     this.swapConfig = swapConfig
     this.actionConfig = actionConfig
     this.addLpConfig = addLpConfig
+    this.transferConfig = transferConfig
 
     this.thorchainCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
     this.thorchainQuery = new ThorchainQuery(this.thorchainCache)
@@ -137,7 +140,7 @@ export class TxJammer {
       assetsIncludingSynths.push(assetToString(synth))
     }
     this.setupWeightedSwaps(assetsIncludingSynths)
-    // this.setupWeightedTransfers(assetsIncludingSynths)
+    this.setupWeightedTransfers(assetsIncludingSynths)
     this.setupWeightedAddLps(assets)
     // this.setupWeightedWithdrawLps(assets)
 
@@ -158,14 +161,20 @@ export class TxJammer {
         // default: we want to limit the number to "expensive" (in terms of gas) eth txs
         weight = 10
       }
-      for (const config of this.swapConfig) {
-        const srcApplies = asset === config.sourceAssetString || config.sourceAssetString === '*'
-        if (srcApplies) {
-          weight = config.weight
-          this.weightedTransfer[asset] = weight
+      if (this.transferConfig.length > 0) {
+        for (const config of this.transferConfig) {
+          const srcApplies = asset === config.assetString || config.assetString === '*'
+          if (srcApplies) {
+            weight = config.weight
+            this.weightedTransfer[asset] = weight
+            break // stop looping if a match is found
+          }
         }
+      } else {
+        this.weightedTransfer[asset] = weight
       }
     }
+    console.log(JSON.stringify(this.weightedTransfer, null, 2))
   }
   private async setupWeightedSwaps(assetStrings: string[]) {
     for (const source of assetStrings) {
@@ -178,13 +187,18 @@ export class TxJammer {
             // default: we want to limit the number to "expensive" (in terms of gas) eth txs
             weight = 10
           }
-          for (const config of this.swapConfig) {
-            const srcApplies = source === config.sourceAssetString || config.sourceAssetString === '*'
-            const destApplies = dest === config.destAssetString || config.destAssetString === '*'
-            if (srcApplies && destApplies) {
-              weight = config.weight
-              this.weightedSwap[`${source} ${dest}`] = weight
+          if (this.swapConfig.length > 0) {
+            for (const config of this.swapConfig) {
+              const srcApplies = source === config.sourceAssetString || config.sourceAssetString === '*'
+              const destApplies = dest === config.destAssetString || config.destAssetString === '*'
+              if (srcApplies && destApplies) {
+                weight = config.weight
+                this.weightedSwap[`${source} ${dest}`] = weight
+                break // stop looping if a match is found
+              }
             }
+          } else {
+            this.weightedSwap[`${source} ${dest}`] = weight
           }
         }
       }
@@ -207,6 +221,7 @@ export class TxJammer {
         }
       }
     }
+    // console.log(JSON.stringify(this.weightedSwap, null, 2))
   }
 
   async start() {
