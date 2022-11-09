@@ -121,7 +121,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     },
     chainIds = {
       [Network.Mainnet]: 'thorchain-mainnet-v1',
-      [Network.Stagenet]: 'chain-id-stagenet',
+      [Network.Stagenet]: 'thorchain-stagenet-v2',
       [Network.Testnet]: 'deprecated',
     },
   }: XChainClientParams & ThorchainClientParams) {

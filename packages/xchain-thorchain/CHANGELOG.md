@@ -1,3 +1,9 @@
+# v.0.27.2 (2022-11-08)
+
+## Update
+
+- changed chain-id-stagenet to `thorchain-stagenet-v2`
+
 # v.0.27.1 (2022-10-13)
 
 - added default `chainIds` in constructor
