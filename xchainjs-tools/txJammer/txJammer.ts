@@ -70,6 +70,7 @@ export class TxJammer {
   private withdrawLpConfig: WithdrawLpConfig[]
 
   constructor(
+    network: Network,
     estimateOnly: boolean,
     minAmount: number,
     maxAmount: number,
@@ -101,11 +102,13 @@ export class TxJammer {
     this.transferConfig = transferConfig
     this.withdrawLpConfig = withdrawLpConfig
 
-    this.thorchainCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
+    this.thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
     this.thorchainQuery = new ThorchainQuery(this.thorchainCache)
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery)
   }
-
+  private async writeToFile() {
+    fs.writeFileSync(`./txJammer${new Date().toISOString()}.json`, JSON.stringify(this.txRecords, null, 4), 'utf8')
+  }
   private async setup() {
     const keystore1 = JSON.parse(fs.readFileSync(this.keystore1FilePath, 'utf8'))
     const keystore2 = JSON.parse(fs.readFileSync(this.keystore2FilePath, 'utf8'))
@@ -154,15 +157,6 @@ export class TxJammer {
     this.setupWeightedTransfers(assetsIncludingSynths)
     this.setupWeightedAddLps(assets)
     this.setupWeightedWithdrawLps(assets)
-
-    for (const a of assetsIncludingSynths) {
-      let weight = 100
-      if (a.includes('ETH.')) {
-        // we want to limit the number to "expensive" (in terms of gas) eth txs
-        weight = 10
-      }
-      this.weightedWithdrawLP[a] = weight
-    }
   }
   private async setupWeightedTransfers(assetStrings: string[]) {
     for (const asset of assetStrings) {
@@ -183,7 +177,7 @@ export class TxJammer {
         this.weightedTransfer[asset] = weight
       }
     }
-    console.log(JSON.stringify(this.weightedTransfer, null, 2))
+    // console.log(JSON.stringify(this.weightedTransfer, null, 2))
   }
   private async setupWeightedSwaps(assetStrings: string[]) {
     for (const source of assetStrings) {
@@ -211,9 +205,8 @@ export class TxJammer {
         }
       }
     }
-    console.log(JSON.stringify(this.weightedSwap))
+    // console.log(JSON.stringify(this.weightedSwap))
   }
-
   private async setupWeightedAddLps(assetStrings: string[]) {
     for (const asset of assetStrings) {
       if (this.addLpConfig.length > 0) {
@@ -237,11 +230,11 @@ export class TxJammer {
   }
   private async setupWeightedWithdrawLps(assetStrings: string[]) {
     for (const asset of assetStrings) {
-      if (this.addLpConfig.length > 0) {
-        for (const config of this.addLpConfig) {
+      if (this.withdrawLpConfig.length > 0) {
+        for (const config of this.withdrawLpConfig) {
           const srcApplies = asset === config.assetString || config.assetString === '*'
           if (srcApplies) {
-            this.weightedAddLP[asset] = config.weight
+            this.weightedWithdrawLP[asset] = config.weight
             break // stop looping if a match is found
           }
         }
@@ -251,7 +244,7 @@ export class TxJammer {
           // default: we want to limit the number to "expensive" (in terms of gas) eth txs
           weight = 10
         }
-        this.weightedAddLP[asset] = weight
+        this.weightedWithdrawLP[asset] = weight
       }
     }
     // console.log(JSON.stringify(this.weightedSwap, null, 2))
@@ -269,8 +262,8 @@ export class TxJammer {
       this.executeAction(action)
       await delay(this.pauseTimeSeconds * 1000)
     }
+    await this.writeToFile()
     console.log('Complete')
-    console.log(JSON.stringify(this.txRecords, null, 2))
   }
   private async executeAction(action: string) {
     switch (action) {
@@ -426,7 +419,7 @@ export class TxJammer {
           const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpSym)
           result.result = `hash: ${txhash[0].hash}    hash: ${txhash[1].hash}`
         } else {
-          result.result = `not submitted, Can add lp position: ${estimateSym.canAdd} or ${this.estimateOnly}`
+          result.result = `not submitted, Can add lp position: ${estimateSym.canAdd},  estimateOnly: ${this.estimateOnly}`
         }
       } else {
         result.details = `Adding asymetrical liquidity position ${sourceAssetAmount.formatedAssetString()} to ${
@@ -438,7 +431,7 @@ export class TxJammer {
           const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpAsym)
           result.result = `hash: ${txhash[0].hash}`
         } else {
-          result.result = `not submitted, Can add: ${estimate.canAdd} or ${this.estimateOnly}`
+          result.result = `not submitted, Can add: ${estimate.canAdd} ,  estimateOnly: ${this.estimateOnly}`
         }
       }
     } catch (e) {
@@ -451,26 +444,32 @@ export class TxJammer {
    */
   private async executeWithdraw() {
     const [senderWallet] = this.getRandomWallets()
-    const sourceAsset = this.getRandomWithdrawLpAsset()
+    const asset = this.getRandomWithdrawLpAsset()
 
-    //const runeAddress = senderWallet.clients[Chain.THORChain].getAddress()
-    const sourceAddress = senderWallet.clients[sourceAsset.chain].getAddress()
-    const percentageWithdraw = Number(this.withdrawLpConfig[2])
+    const runeAddress = senderWallet.clients[Chain.THORChain].getAddress()
+    const sourceAddress = senderWallet.clients[asset.chain].getAddress()
+    const percentageWithdraw = this.getRandomInt(1, 100)
     const result: TxDetail = {
       action: 'withdrawLp',
     }
     try {
       result.date = new Date()
-      const checkLp = await this.thorchainQuery.checkLiquidityPosition(sourceAsset, sourceAddress)
+      const [hasRunePosition, hasAssetPosition] = await this.getLpPositions(asset, runeAddress, sourceAddress)
       const withdrawLParams: WithdrawLiquidityPosition = {
-        asset: sourceAsset,
+        asset: asset,
         percentage: percentageWithdraw,
-        assetAddress: checkLp.position.asset_address,
-        runeAddress: checkLp.position.rune_address,
+      }
+      if (hasRunePosition) {
+        withdrawLParams.runeAddress = runeAddress
+      }
+      if (hasAssetPosition) {
+        withdrawLParams.assetAddress = sourceAddress
       }
 
+      result.details = `LP ${assetToString(
+        asset,
+      )} hasRunePosition: ${hasRunePosition}, hasAssetPosition: ${hasAssetPosition},  withdrawing ${percentageWithdraw}%`
       const estimate = await this.thorchainQuery.estimateWithdrawLP(withdrawLParams)
-      result.details = `withdrawing ${checkLp.poolShare.assetShare.formatedAssetString()} and ${checkLp.poolShare.runeShare.formatedAssetString()}`
       if (estimate && !this.estimateOnly) {
         const txhash = await this.thorchainAmm.withdrawLiquidityPosition(senderWallet, withdrawLParams)
         result.details = withdrawLParams
@@ -483,4 +482,20 @@ export class TxJammer {
     }
     this.txRecords.push(result)
   }
+  private async getLpPositions(asset: Asset, runeAddress: string, sourceAddress: string): Promise<[boolean, boolean]> {
+    let runePosition = true
+    try {
+      await this.thorchainQuery.checkLiquidityPosition(asset, runeAddress)
+    } catch (error) {
+      runePosition = false
+    }
+    let assetPosition = true
+    try {
+      await this.thorchainQuery.checkLiquidityPosition(asset, sourceAddress)
+    } catch (error) {
+      assetPosition = false
+    }
+    return [runePosition, assetPosition]
+  }
+  private executeSymWithdraw() {}
 }

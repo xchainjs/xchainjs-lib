@@ -20,6 +20,7 @@ node_modules/.bin/ts-node txJammerCommander.ts --help
 Usage: txJammerCommander [options]
 
 Options:
+  -n, --network <network>          which thorchain network to use... stagenet|mainnet defaults to stagenet
   -e, --estimateOnly               do not perform a swap, only perform an estimate swap
   -w1, --wallet1 <file>            you must send in a json wallet
   -p1, --password1 <password>      you must send in a password for wallet 1
@@ -53,12 +54,19 @@ yarn ts-node txJammerCommander.ts \
 #### Example 2
 
 Runs random txs with a monetary value between 1-3 USD for 60 secs with a pause between actions of 2 secs, but run in "estimate only" mode ( does not submit the txs)
-Additionally, a specfic action config specifies the following
+
+Additionally, a specfic **Action Config** specified with --configActions, specifies the following:
 
 - transfer should have a probabilistic weight of 500
 - addLp should have a probabilistic weight of 0
 - withdrawLp should have a probabilistic weight of 0
 - swap should have a probabilistic weight of 300
+
+Additionally, a specfic **Swap Config** specified with --configSwap, specifies the following:
+
+- ETH.ETH BTC.BTC swaps should have a probabilistic weight of 500
+- BNB.BNB to any other asset should have a probabilistic weight of 200
+- swap for every other asset to another asset should have a probabilistic weight of 100
 
 ```bash
 yarn ts-node txJammerCommander.ts \
@@ -74,12 +82,24 @@ yarn ts-node txJammerCommander.ts \
 #### Example 3
 
 Runs random txs with a monetary value between 1-3 USD for 60 secs with a pause between actions of 2 secs, but run in "estimate only" mode ( does not submit the txs)
-Additionally, a specfic action config specifies the following
 
-- transfer should have a probabilistic weight of 100
-- addLp should have a probabilistic weight of 0
-- withdrawLp should have a probabilistic weight of 100
-- swap should have a probabilistic weight of 100
+Additionally, a specfic **Transfer Config** specified with --configTransfer, specifies the following:
+
+- BNB.BNB transfers should have a probabilistic weight of 300
+- BCH.BCH transfers should have a probabilistic weight of 200
+- all other asset transfers should have a probabilistic weight of 50
+
+Additionally, a specfic **AddLP Config** specified with --configAddLp, specifies the following:
+
+- BTC.BTC addLp should have a probabilistic weight of 300
+- BCH.BCH addLp should have a probabilistic weight of 200
+- no other other assetwill be selected to addLp
+
+Additionally, a specfic **WithdrawLP Config** specified with --configWithdrawLp, specifies the following:
+
+- BTC.BTC WithdrawLP should have a probabilistic weight of 300
+- BCH.BCH addLp should have a probabilistic weight of 200
+- no other other assetwill be selected to withdrawLp
 
 ```bash
 yarn ts-node txJammerCommander.ts \
@@ -88,9 +108,8 @@ yarn ts-node txJammerCommander.ts \
  --durationSeconds 60 --pauseTimeSeconds 2 \
  --txAmountInUsd 1-3 \
  --estimateOnly \
- --configActions "swap 100, addLp 0, transfer 100, withdrawLP 100" \
- --configSwap "BNB.BNB * 200, THOR.RUNE * 500, * * 50" \
  --configTransfer "BNB.BNB 300, BCH.BCH 200, * 50" \
- --configWithdrawLp "* 100 100" \
+ --configAddLp "BTC.BTC 300, BCH.BCH 200" \
+ --configWithdrawLp "BTC.BTC 100, BCH.BCH 200" \
  --estimateOnly
 ```

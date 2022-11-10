@@ -1,3 +1,4 @@
+import { Network } from '@xchainjs/xchain-client'
 import { assetFromStringEx } from '@xchainjs/xchain-util'
 import * as commander from 'commander'
 
@@ -67,14 +68,13 @@ function parseCustomWithdrawLP(value: string): WithdrawLpConfig[] {
   const withdrawlpConfigs: WithdrawLpConfig[] = []
   for (const config of configs) {
     const parts = config.trim().split(/\s+/)
-    if (parts.length !== 3) throw Error(`${config} must have 3 parameters: [assetString | *] [weight] [basisPoints]`)
+    if (parts.length !== 2) throw Error(`${config} must have 2 parameters: [assetString | *] [weight] `)
     //check asset strings parse ok
     parts[0] === '*' || assetFromStringEx(parts[0])
 
     const withdrawlpConfig = {
       assetString: parts[0],
       weight: Number(parts[1]),
-      basisPoints: Number(parts[2]),
     }
     withdrawlpConfigs.push(withdrawlpConfig)
   }
@@ -115,6 +115,7 @@ function parseMinMaxAmounts(value: string) {
 }
 
 const program = new commander.Command()
+program.option('-n, --network <network>', 'which thorchain network to use... stagenet|mainnet defaults to stagenet ')
 program.option('-e, --estimateOnly', 'do not perform a swap, only perform an estimate swap ')
 program.requiredOption('-w1, --wallet1 <file> ', 'you must send in a json wallet ')
 program.requiredOption('-p1, --password1 <password>', 'you must send in a password for wallet 1')
@@ -132,8 +133,9 @@ program.option('-t, --configTransfer <config>', 'custom transfer configuration '
 program.parse()
 
 const options = program.opts()
-console.log(options)
+// console.log(options)
 const txJammer = new TxJammer(
+  options.network || Network.Stagenet,
   options.estimateOnly,
   Number(options.txAmountInUsd[0]),
   Number(options.txAmountInUsd[1]),
