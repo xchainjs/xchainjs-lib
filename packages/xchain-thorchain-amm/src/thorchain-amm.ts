@@ -1,8 +1,10 @@
 import {
   AddliquidityPosition,
+  CryptoAmount,
   EstimateAddLP,
   EstimateSwapParams,
   EstimateWithdrawLP,
+  SaversWithdraw,
   ThorchainQuery,
   TxDetails,
   WithdrawLiquidityPosition,
@@ -133,5 +135,38 @@ export class ThorchainAMM {
       assetAddress: withdrawParams.assetAddress,
       runeAddress: withdrawParams.runeAddress,
     })
+  }
+
+  /**
+   *
+   * @param wallet - wallet needed to execute tx
+   * @param addAssetAmount - asset amount being added to savers
+   * @returns - submitted tx
+   */
+  public async addSaver(wallet: Wallet, addAssetAmount: CryptoAmount): Promise<TxSubmitted> {
+    const addEstimate = await this.thorchainQuery.estimateAddSaver(addAssetAmount)
+    if (!addEstimate.canAddSaver) throw Error(`Cannot add to savers`)
+    return wallet.addSavers(
+      addEstimate.assetAmount,
+      addEstimate.memo,
+      addEstimate.toAddress,
+      addEstimate.estimatedWaitTime,
+    )
+  }
+
+  /**
+   *
+   * @param wallet - wallet needed to execute tx
+   * @param addAssetAmount - asset amount being withrawn from savers
+   * @returns - submitted tx
+   */
+  public async withdrawSaver(wallet: Wallet, withdrawParams: SaversWithdraw): Promise<TxSubmitted> {
+    const withddrawEstimate = await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
+    return wallet.withdrawSavers(
+      withddrawEstimate.assetAmount,
+      withddrawEstimate.memo,
+      withddrawEstimate.toAddress,
+      withddrawEstimate.estimatedWaitTime,
+    )
   }
 }
