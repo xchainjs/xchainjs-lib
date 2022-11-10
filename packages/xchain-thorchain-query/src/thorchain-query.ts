@@ -34,6 +34,7 @@ import {
   PostionDepositValue,
   SaverFees,
   SaversPosition,
+  SaversWithdraw,
   SwapEstimate,
   SwapOutput,
   TotalFees,
@@ -765,89 +766,86 @@ export class ThorchainQuery {
   // Savers Queries
   // Derrived from https://dev.thorchain.org/thorchain-dev/connection-guide/savers-guide
   public async estimateAddSaver(addAmount: CryptoAmount): Promise<EstimateAddSaver> {
-    if (isAssetRuneNative(addAmount.asset)) throw Error(`Native Rune is not supported only L1's`)
-    const allInboundDetails = await this.thorchainCache.getInboundDetails()
-    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
-    const inboundDetails = allInboundDetails[addAmount.asset.chain]
-    const vault = inboundDetails.address
-    const isSaversPool = (await this.thorchainCache.thornode.getPools()).find(
-      (item) => item.asset === `${addAmount.asset.chain}/${addAmount.asset.ticker}`,
-    )?.is_savers_pool
-    if (!isSaversPool) throw Error(`Pool has no record of being a saver`)
-    // network fee is a 1/3 of the outbound fee
-    const networkFees = new CryptoAmount(
-      baseAmount(inboundDetails.outboundFee.times(0.33), +pool.nativeDecimal),
-      addAmount.asset,
+    if (isAssetRuneNative(addAmount.asset) || addAmount.asset.synth)
+      throw Error(`Native Rune and synth assets are not supported only L1's`)
+    const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
+      addAmount.asset.symbol,
+      addAmount.assetAmount.amount().toNumber(),
     )
-    // Pool asset depth
-    const assetDepth = new CryptoAmount(baseAmount(+pool.assetDepth, +pool.nativeDecimal), addAmount.asset)
-
-    // liquidity fees calculated from amount added and pool depths
-    const liquidityFees = addAmount.div(addAmount.plus(assetDepth)).times(addAmount)
-    const saversFees: SaverFees = {
-      networkFee: networkFees,
-      liquidityFee: liquidityFees,
-      totalFees: networkFees.plus(liquidityFees),
-    }
-    //construct memo
-    const memo = `+:${addAmount.asset.chain}/${addAmount.asset.ticker}`
-
     // Calculate transaction expiry time of the vault address
     const currentDatetime = new Date()
     const minutesToAdd = 15
     const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
+    const estimatedWait = depositQuote.inbound_confirmation_seconds
+      ? depositQuote.inbound_confirmation_seconds
+      : await this.confCounting(addAmount)
+    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
 
-    const estimatedWait = await this.confCounting(addAmount)
+    const saverFees: SaverFees = {
+      affiliate: new CryptoAmount(
+        assetToBase(assetAmount(+depositQuote.fees.affiliate, +pool.nativeDecimal)),
+        addAmount.asset,
+      ),
+      asset: new CryptoAmount(assetToBase(assetAmount(+depositQuote.fees.asset, +pool.nativeDecimal)), addAmount.asset),
+      outbound: new CryptoAmount(
+        assetToBase(assetAmount(+depositQuote.fees.outbound, +pool.nativeDecimal)),
+        addAmount.asset,
+      ),
+    }
+    const totalFees = saverFees.affiliate.plus(saverFees.asset).plus(saverFees.outbound)
+    const canAdd = totalFees.gte(addAmount)
     const estimateAddSaver: EstimateAddSaver = {
       assetAmount: addAmount,
-      fee: saversFees,
+      fee: saverFees,
       expiry: expiryDatetime,
-      toAddress: vault,
-      memo: memo,
+      toAddress: depositQuote.inbound_address,
+      memo: depositQuote.memo,
       estimatedWaitTime: estimatedWait,
-      canAddSaver: isSaversPool,
+      canAddSaver: canAdd,
     }
     return estimateAddSaver
   }
-  public async estimateWithdrawSaver(removeAmount: CryptoAmount): Promise<EstimateWithdrawSaver> {
-    if (isAssetRuneNative(removeAmount.asset)) throw Error(`Native Rune is not supported`)
-    const allInboundDetails = await this.thorchainCache.getInboundDetails()
-    const pool = (await this.thorchainCache.getPoolForAsset(removeAmount.asset)).pool
-    const inboundDetails = allInboundDetails[removeAmount.asset.chain]
-    const vault = inboundDetails.address
-
-    // network fee is the outbound fee
-    const networkFees = new CryptoAmount(
-      baseAmount(inboundDetails.outboundFee, +pool.nativeDecimal),
-      removeAmount.asset,
+  public async estimateWithdrawSaver(withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
+    if (isAssetRuneNative(withdrawParams.asset) || withdrawParams.asset.synth)
+      throw Error(`Native Rune and synth assets are not supported only L1's`)
+    const withdrawQuote = await this.thorchainCache.thornode.getSaversWithdrawQuote(
+      withdrawParams.asset.ticker,
+      withdrawParams.address,
+      withdrawParams.withdrawBps,
     )
-    // Pool asset depth
-    const assetDepth = new CryptoAmount(baseAmount(+pool.assetDepth, +pool.nativeDecimal), removeAmount.asset)
-
-    // liquidity fees calculated from amount added and pool depths
-    const liquidityFees = removeAmount.div(removeAmount.plus(assetDepth)).times(removeAmount)
-    const saversFees: SaverFees = {
-      networkFee: networkFees,
-      liquidityFee: liquidityFees,
-      totalFees: networkFees.plus(liquidityFees),
-    }
+    const pool = (await this.thorchainCache.getPoolForAsset(withdrawParams.asset)).pool
 
     // Calculate transaction expiry time of the vault address
     const currentDatetime = new Date()
     const minutesToAdd = 15
     const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
-    //construct memo
-    const memo = `-:${removeAmount.asset.chain}/${removeAmount.asset.ticker}`
 
-    const estimatedWait = await this.confCounting(removeAmount)
+    const estimatedWait = withdrawQuote.outbound_delay_seconds
 
     const estimateWithdrawSaver: EstimateWithdrawSaver = {
-      assetAmount: removeAmount,
-      fee: saversFees,
+      assetAmount: new CryptoAmount(
+        baseAmount(withdrawQuote.expected_amount_out, +pool.nativeDecimal),
+        withdrawParams.asset,
+      ),
+      fee: {
+        affiliate: new CryptoAmount(
+          assetToBase(assetAmount(+withdrawQuote.fees.affiliate, +pool.nativeDecimal)),
+          withdrawParams.asset,
+        ),
+        asset: new CryptoAmount(
+          assetToBase(assetAmount(+withdrawQuote.fees.asset, +pool.nativeDecimal)),
+          withdrawParams.asset,
+        ),
+        outbound: new CryptoAmount(
+          assetToBase(assetAmount(+withdrawQuote.fees.outbound, +pool.nativeDecimal)),
+          withdrawParams.asset,
+        ),
+      },
       expiry: expiryDatetime,
-      toAddress: vault,
-      memo: memo,
+      toAddress: withdrawQuote.inbound_address,
+      memo: withdrawQuote.memo,
       estimatedWaitTime: estimatedWait,
+      sipplage: withdrawQuote.slippage_bps,
     }
     return estimateWithdrawSaver
   }

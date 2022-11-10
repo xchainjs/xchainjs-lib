@@ -3,6 +3,7 @@
 ## ADD
 
 - Add `estimateAddSaver()` & `estimateWithdrawSaver()` & `getsaverPosition()`
+- QuoteApi to thornode.ts
 
 # v0.1.6 (2022-10-27)
 

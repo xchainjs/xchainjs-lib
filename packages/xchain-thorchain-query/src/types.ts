@@ -222,12 +222,13 @@ export type EstimateWithdrawSaver = {
   toAddress: Address
   memo: string
   estimatedWaitTime: number
+  sipplage: number
 }
 
 export type SaverFees = {
-  networkFee: CryptoAmount
-  liquidityFee: CryptoAmount
-  totalFees: CryptoAmount
+  affiliate: CryptoAmount
+  asset: CryptoAmount
+  outbound: CryptoAmount
 }
 
 export type SaversPosition = {
@@ -236,4 +237,10 @@ export type SaversPosition = {
   lastAddHeight: number
   growth: number
   age: number
+}
+
+export type SaversWithdraw = {
+  asset: Asset
+  address: Address
+  withdrawBps: number
 }
