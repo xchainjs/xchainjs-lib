@@ -251,9 +251,11 @@ export class TxJammer {
   }
 
   async start() {
+    console.log('Setting up')
     await this.setup()
     const startTime = new Date()
     let currentTime = new Date()
+    console.log('Running txJammer....')
     while (currentTime.getTime() < startTime.getTime() + this.durationSeconds * 1000) {
       currentTime = new Date()
       // select a random action
