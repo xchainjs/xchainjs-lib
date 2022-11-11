@@ -19,9 +19,10 @@ import {
   EstimateAddLP,
   EstimateAddSaver,
   EstimateWithdrawLP,
-  // EstimateWithdrawSaver,
+  EstimateWithdrawSaver,
   LiquidityPosition,
   SaversPosition,
+  SaversWithdraw,
   WithdrawLiquidityPosition,
   getSaver,
 } from '../src/types'
@@ -107,21 +108,21 @@ function printSaver(saver: EstimateAddSaver) {
   }
   console.log(expanded)
 }
-// function printWithdrawSaver(saver: EstimateWithdrawSaver) {
-//   const expanded = {
-//     assetAmount: saver.assetAmount.formatedAssetString(),
-//     fee: {
-//       affili: saver.fee.affiliate.formatedAssetString(),
-//       liquidityFee: saver.fee.asset.formatedAssetString(),
-//       totalFees: saver.fee.outbound.formatedAssetString(),
-//     },
-//     expiry: saver.expiry,
-//     toAddress: saver.toAddress,
-//     memo: saver.memo,
-//     estimateWaitTime: saver.estimatedWaitTime,
-//   }
-//   console.log(expanded)
-// }
+function printWithdrawSaver(saver: EstimateWithdrawSaver) {
+  const expanded = {
+    assetAmount: saver.expectedAssetAmount.formatedAssetString(),
+    fee: {
+      affiliate: saver.fee.affiliate.formatedAssetString(),
+      liquidityFee: saver.fee.asset.formatedAssetString(),
+      totalFees: saver.fee.outbound.formatedAssetString(),
+    },
+    expiry: saver.expiry,
+    toAddress: saver.toAddress,
+    memo: saver.memo,
+    estimateWaitTime: saver.estimatedWaitTime,
+  }
+  console.log(expanded)
+}
 function printSaversPosition(saver: SaversPosition) {
   const expanded = {
     depositValue: saver.depositValue.formatedAssetString(),
@@ -264,11 +265,15 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
     printSaver(estimateAddsSaver)
   })
-  // it(`Should estimate saver withdrawal`, async () => {
-  //   const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(0, 8)), AssetBTC)
-  //   const estimateWithdrawSaver = await thorchainQuery.estimateWithdrawSaver(addAssetAmount)
-  //   printWithdrawSaver(estimateWithdrawSaver)
-  // })
+  it(`Should estimate saver withdrawal`, async () => {
+    const withdrawPos: SaversWithdraw = {
+      address: `bnb1jy7h4muz0ruflmrlxnt89ayhn3mf82sgza4vfm`,
+      asset: AssetBTC,
+      withdrawBps: 100,
+    }
+    const estimateWithdrawSaver = await thorchainQuery.estimateWithdrawSaver(withdrawPos)
+    printWithdrawSaver(estimateWithdrawSaver)
+  })
   it(`Should get saver position`, async () => {
     const address = 'bnb1jy7h4muz0ruflmrlxnt89ayhn3mf82sgza4vfm'
     const saver: getSaver = {

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain-amm",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "module that exposes estimating & swappping cryptocurrency assets on thorchain",
   "keywords": [
     "THORChain",
@@ -53,8 +53,8 @@
     "@xchainjs/xchain-litecoin": "^0.10.5",
     "@xchainjs/xchain-midgard": "0.2.0",
     "@xchainjs/xchain-thorchain": "^0.27.2",
-    "@xchainjs/xchain-thorchain-query": "^0.1.6",
-    "@xchainjs/xchain-thornode": "^0.1.1",
+    "@xchainjs/xchain-thorchain-query": "^0.1.7",
+    "@xchainjs/xchain-thornode": "^0.1.2",
     "@xchainjs/xchain-util": "^0.11.0",
     "axios": "^0.25.0",
     "axios-retry": "^3.2.5",

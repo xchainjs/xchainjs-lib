@@ -783,12 +783,12 @@ export class ThorchainQuery {
 
     const saverFees: SaverFees = {
       affiliate: new CryptoAmount(
-        assetToBase(assetAmount(+depositQuote.fees.affiliate, +pool.nativeDecimal)),
+        assetToBase(assetAmount(depositQuote.fees.affiliate, +pool.nativeDecimal)),
         addAmount.asset,
       ),
-      asset: new CryptoAmount(assetToBase(assetAmount(+depositQuote.fees.asset, +pool.nativeDecimal)), addAmount.asset),
+      asset: new CryptoAmount(assetToBase(assetAmount(depositQuote.fees.asset, +pool.nativeDecimal)), addAmount.asset),
       outbound: new CryptoAmount(
-        assetToBase(assetAmount(+depositQuote.fees.outbound, +pool.nativeDecimal)),
+        assetToBase(assetAmount(depositQuote.fees.outbound, +pool.nativeDecimal)),
         addAmount.asset,
       ),
     }
@@ -823,21 +823,21 @@ export class ThorchainQuery {
     const estimatedWait = withdrawQuote.outbound_delay_seconds
 
     const estimateWithdrawSaver: EstimateWithdrawSaver = {
-      assetAmount: new CryptoAmount(
+      expectedAssetAmount: new CryptoAmount(
         baseAmount(withdrawQuote.expected_amount_out, +pool.nativeDecimal),
         withdrawParams.asset,
       ),
       fee: {
         affiliate: new CryptoAmount(
-          assetToBase(assetAmount(+withdrawQuote.fees.affiliate, +pool.nativeDecimal)),
+          assetToBase(assetAmount(withdrawQuote.fees.affiliate, +pool.nativeDecimal)),
           withdrawParams.asset,
         ),
         asset: new CryptoAmount(
-          assetToBase(assetAmount(+withdrawQuote.fees.asset, +pool.nativeDecimal)),
+          assetToBase(assetAmount(withdrawQuote.fees.asset, +pool.nativeDecimal)),
           withdrawParams.asset,
         ),
         outbound: new CryptoAmount(
-          assetToBase(assetAmount(+withdrawQuote.fees.outbound, +pool.nativeDecimal)),
+          assetToBase(assetAmount(withdrawQuote.fees.outbound, +pool.nativeDecimal)),
           withdrawParams.asset,
         ),
       },
@@ -846,6 +846,10 @@ export class ThorchainQuery {
       memo: withdrawQuote.memo,
       estimatedWaitTime: estimatedWait,
       sipplage: withdrawQuote.slippage_bps,
+      dustAmount: new CryptoAmount(
+        assetToBase(assetAmount(withdrawQuote.dust_amount, +pool.nativeDecimal)),
+        withdrawParams.asset,
+      ),
     }
     return estimateWithdrawSaver
   }

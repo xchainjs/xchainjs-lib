@@ -314,27 +314,27 @@ export class Wallet {
    * @returns
    */
   async withdrawSavers(
-    assetAmount: CryptoAmount,
+    dustAssetAmount: CryptoAmount,
     memo: string,
     toAddress: Address,
     waitTimeSeconds: number,
   ): Promise<TxSubmitted> {
-    const assetClient = this.clients[assetAmount.asset.chain]
-    if (assetAmount.asset.chain === Chain.Ethereum) {
+    const assetClient = this.clients[dustAssetAmount.asset.chain]
+    if (dustAssetAmount.asset.chain === Chain.Ethereum) {
       const addParams = {
         wallIndex: 0,
-        asset: assetAmount.asset,
-        amount: assetAmount.baseAmount,
+        asset: dustAssetAmount.asset,
+        amount: dustAssetAmount.baseAmount,
         feeOption: FeeOption.Fast,
         memo: memo,
       }
       const hash = await this.ethHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
-    } else if (assetAmount.asset.chain === Chain.Avalanche) {
+    } else if (dustAssetAmount.asset.chain === Chain.Avalanche) {
       const addParams = {
         wallIndex: 0,
-        asset: assetAmount.asset,
-        amount: assetAmount.baseAmount,
+        asset: dustAssetAmount.asset,
+        amount: dustAssetAmount.baseAmount,
         feeOption: FeeOption.Fast,
         memo: memo,
       }
@@ -344,8 +344,8 @@ export class Wallet {
     } else {
       const addParams = {
         wallIndex: 0,
-        asset: assetAmount.asset,
-        amount: assetAmount.baseAmount,
+        asset: dustAssetAmount.asset,
+        amount: dustAssetAmount.baseAmount,
         recipient: toAddress,
         memo: memo,
       }
