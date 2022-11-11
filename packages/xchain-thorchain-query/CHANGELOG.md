@@ -2,7 +2,7 @@
 
 ## Update
 
-- Use latest xchain-midgard@0.2.1
+- Use latest xchain-midgard@0.3.0
 
 # v0.1.7 (2022-11-10)
 
