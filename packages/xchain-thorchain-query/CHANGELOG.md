@@ -1,3 +1,9 @@
+# v0.1.7 (2022-11-10)
+
+## Fix 
+- added missing AVAX case in getDustValues()
+- fixed BTC/BCH/LTC case statement 
+
 # v0.1.6 (2022-10-27)
 
 ## ADD 

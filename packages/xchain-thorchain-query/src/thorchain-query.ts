@@ -726,7 +726,9 @@ export class ThorchainQuery {
           rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
         return dustValues
-      case 'BTC' || `BCH` || `LTC`:
+      case 'BTC':
+      case `BCH`:
+      case `LTC`:
         // 10k sats
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0.0001)), asset),
@@ -758,6 +760,13 @@ export class ThorchainQuery {
         // 1 million sats
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0.01)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'AVAX':
+        // 0 AVAX
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
           rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
         return dustValues

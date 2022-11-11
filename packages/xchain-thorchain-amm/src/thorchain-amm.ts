@@ -38,7 +38,7 @@ export class ThorchainAMM {
 
    * @returns The SwapEstimate
    */
-  public estimateSwap({
+  public async estimateSwap({
     input,
     destinationAsset,
     destinationAddress,
@@ -47,7 +47,7 @@ export class ThorchainAMM {
     affiliateFeeBasisPoints = 0,
     slipLimit,
   }: EstimateSwapParams): Promise<TxDetails> {
-    return this.thorchainQuery.estimateSwap({
+    return await this.thorchainQuery.estimateSwap({
       input,
       destinationAsset,
       destinationAddress,
@@ -86,7 +86,7 @@ export class ThorchainAMM {
    * @returns - Estimate add lp object
    */
   public async estimateAddLiquidity(params: AddliquidityPosition): Promise<EstimateAddLP> {
-    return this.thorchainQuery.estimateAddLP(params)
+    return await this.thorchainQuery.estimateAddLP(params)
   }
 
   /**
@@ -95,7 +95,7 @@ export class ThorchainAMM {
    * @returns - Estimate withdraw lp object
    */
   public async estimateWithdrawLiquidity(params: WithdrawLiquidityPosition): Promise<EstimateWithdrawLP> {
-    return this.thorchainQuery.estimateWithdrawLP(params)
+    return await this.thorchainQuery.estimateWithdrawLP(params)
   }
 
   /**
@@ -108,7 +108,7 @@ export class ThorchainAMM {
     // Check amounts are greater than fees and use return estimated wait
     const checkLPAdd = await this.thorchainQuery.estimateAddLP(params)
     if (!checkLPAdd.canAdd) throw Error(`${checkLPAdd.errors}`)
-    return wallet.addLiquidity({
+    return await wallet.addLiquidity({
       asset: params.asset,
       rune: params.rune,
       waitTimeSeconds: checkLPAdd.estimatedWaitSeconds,
@@ -124,7 +124,7 @@ export class ThorchainAMM {
   public async withdrawLiquidityPosition(wallet: Wallet, params: WithdrawLiquidityPosition): Promise<TxSubmitted[]> {
     // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
     const withdrawParams = await this.thorchainQuery.estimateWithdrawLP(params)
-    return wallet.withdrawLiquidity({
+    return await wallet.withdrawLiquidity({
       assetFee: withdrawParams.inbound.fees.asset,
       runeFee: withdrawParams.inbound.fees.rune,
       waitTimeSeconds: withdrawParams.estimatedWaitSeconds,

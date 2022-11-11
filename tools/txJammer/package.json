@@ -1,6 +1,6 @@
 {
   "name": "txJammer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple script to test all types of transactions broadcasted to a thornode but on stagenet",
   "main": "index.js",
   "author": "thorianite",
@@ -30,8 +30,8 @@
     "@xchainjs/xchain-litecoin": "^0.10.3",
     "@xchainjs/xchain-midgard": "0.2.0",
     "@xchainjs/xchain-thorchain": "^0.27.2",
-    "@xchainjs/xchain-thorchain-amm": "^0.3.6",
-    "@xchainjs/xchain-thorchain-query": "^0.1.6",
+    "@xchainjs/xchain-thorchain-amm": "^0.3.7",
+    "@xchainjs/xchain-thorchain-query": "^0.1.7",
     "@xchainjs/xchain-thornode": "^0.1.1",
     "@xchainjs/xchain-util": "^0.11.0",
     "axios": "^0.25.0",
