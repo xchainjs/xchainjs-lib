@@ -1,3 +1,4 @@
+import { PoolDetail } from '@xchainjs/xchain-midgard'
 import {
   AssetBTC,
   AssetETH,
@@ -32,7 +33,7 @@ const thorchainCache = new ThorchainCache()
 const BUSD = assetFromString('BNB.BUSD-BD1')
 if (!BUSD) throw Error('Asset is incorrect')
 
-const btcPoolDetails = {
+const btcPoolDetails: PoolDetail = {
   annualPercentageRate: '0.053737568449651274',
   asset: 'BTC.BTC',
   assetDepth: new CryptoAmount(assetToBase(assetAmount(100)), AssetBTC).baseAmount.amount().toString(),
@@ -40,6 +41,8 @@ const btcPoolDetails = {
   assetPriceUSD: '30458.124870650492',
   liquidityUnits: '536087715332333',
   nativeDecimal: '8',
+  saversDepth: '0',
+  saversUnits: '0',
   poolAPY: '0.1001447237777584',
   runeDepth: new CryptoAmount(assetToBase(assetAmount(2500000)), AssetRuneNative).baseAmount.amount().toString(),
   status: 'available',
@@ -48,7 +51,7 @@ const btcPoolDetails = {
   units: '546397256570929',
   volume24h: '16202006480711',
 }
-const ethPoolDetails = {
+const ethPoolDetails: PoolDetail = {
   annualPercentageRate: '0.09731470549045307',
   asset: 'ETH.ETH',
   assetDepth: new CryptoAmount(assetToBase(assetAmount(9100)), AssetETH).baseAmount.amount().toString(),
@@ -56,6 +59,8 @@ const ethPoolDetails = {
   assetPriceUSD: '1817.6139097932505',
   liquidityUnits: '262338362121353',
   nativeDecimal: '18',
+  saversDepth: '0',
+  saversUnits: '0',
   poolAPY: '0.10844053560303157',
   runeDepth: new CryptoAmount(assetToBase(assetAmount(6189000)), AssetRuneNative).baseAmount.amount().toString(),
   status: 'available',

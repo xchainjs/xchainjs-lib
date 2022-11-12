@@ -26,6 +26,8 @@ describe('Midgard Client Test', () => {
     assetPriceUSD: '129.74904173711747',
     liquidityUnits: '21436675546946',
     nativeDecimal: '8',
+    saversDepth: '0',
+    saversUnits: '0',
     poolAPY: '0.0925796460549001',
     runeDepth: '37660118888424',
     status: 'available',

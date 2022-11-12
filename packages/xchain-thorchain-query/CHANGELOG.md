@@ -1,9 +1,19 @@
-# v0.1.8 (2022-10-27)
+# v0.1.8 (2022-11-12)
 
 ## ADD
 
 - Add `estimateAddSaver()` & `estimateWithdrawSaver()` & `getsaverPosition()`
-- Add QuoteApi to thornode.ts
+
+## Update
+
+- Use latest xchain-midgard@0.3.0
+
+# v0.1.7 (2022-11-10)
+
+## Fix
+
+- added missing AVAX case in getDustValues()
+- fixed BTC/BCH/LTC case statement
 
 # v0.1.6 (2022-10-27)
 

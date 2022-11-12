@@ -257,12 +257,12 @@ export class TxJammer {
     let currentTime = new Date()
     console.log('Running txJammer....')
     while (currentTime.getTime() < startTime.getTime() + this.durationSeconds * 1000) {
-      currentTime = new Date()
       // select a random action
       const action = weighted.select(this.weightedActions) as string
       console.log(`executing ${action}..`)
-      this.executeAction(action)
+      await this.executeAction(action)
       await delay(this.pauseTimeSeconds * 1000)
+      currentTime = new Date()
     }
     await this.writeToFile()
     console.log('Complete')
@@ -417,7 +417,6 @@ export class TxJammer {
           estimateSym.assetPool
         } `
         if (estimateSym.canAdd && !this.estimateOnly) {
-          result.details = addlpSym
           const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpSym)
           result.result = `hash: ${txhash[0].hash}    hash: ${txhash[1].hash}`
         } else {
@@ -429,7 +428,6 @@ export class TxJammer {
         } `
         const estimate = await this.thorchainQuery.estimateAddLP(addlpAsym)
         if (estimate.canAdd && !this.estimateOnly) {
-          result.details = addlpAsym
           const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpAsym)
           result.result = `hash: ${txhash[0].hash}`
         } else {
@@ -447,7 +445,6 @@ export class TxJammer {
   private async executeWithdraw() {
     const [senderWallet] = this.getRandomWallets()
     const asset = this.getRandomWithdrawLpAsset()
-
     const runeAddress = senderWallet.clients[Chain.THORChain].getAddress()
     const sourceAddress = senderWallet.clients[asset.chain].getAddress()
     const percentageWithdraw = this.getRandomInt(1, 100)
@@ -467,15 +464,15 @@ export class TxJammer {
       if (hasAssetPosition) {
         withdrawLParams.assetAddress = sourceAddress
       }
-
       result.details = `LP ${assetToString(
         asset,
       )} hasRunePosition: ${hasRunePosition}, hasAssetPosition: ${hasAssetPosition},  withdrawing ${percentageWithdraw}%`
       const estimate = await this.thorchainQuery.estimateWithdrawLP(withdrawLParams)
+
       if (estimate && !this.estimateOnly) {
         const txhash = await this.thorchainAmm.withdrawLiquidityPosition(senderWallet, withdrawLParams)
         result.details = withdrawLParams
-        result.result = txhash[0]
+        result.result = `hash: ${txhash[0].hash}    hash: ${txhash[1].hash}`
       } else {
         result.result = 'not submitted, estimate only mode'
       }

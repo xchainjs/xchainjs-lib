@@ -1616,12 +1616,12 @@
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-midgard/-/xchain-midgard-0.2.0.tgz#5b2faec8c36b869dce8a809781014bec550a1cee"
   integrity sha512-A+0uSzdwlxvEB7JOI9+rvPvnWxY8XqI5IS2ndTjYEPtJu87e8WuyuwN336EWST7AWXIEf9uAbxCCy9wKbQv2+Q==
 
-"@xchainjs/xchain-thorchain-amm@^0.3.6":
+"@xchainjs/xchain-thorchain-amm@^0.3.7":
   version "0.3.6"
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thorchain-amm/-/xchain-thorchain-amm-0.3.6.tgz#cc3271c9750796d80eb2be4a58a380fcddc30e50"
   integrity sha512-0isfCXtzu9biNtVq4Em9eNH5nAZFhTljaRgjMnK9pYni0uDjkXrjaHPn3pZMv/oBrP4rb2ZtwnsTkM3gyX+AJw==
 
-"@xchainjs/xchain-thorchain-query@^0.1.6":
+"@xchainjs/xchain-thorchain-query@^0.1.7":
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thorchain-query/-/xchain-thorchain-query-0.1.6.tgz#4df6cb01a6cf75a0d2946b3000fbcfa2cb749ed7"
   integrity sha512-W6RL7sQXId582wJwtjONO3+fKw5wW21zHGXaVH1PlHoHCT5RBzG495bBCEQhZEWSKSjrcl15YnxSuWM89JP+bA==

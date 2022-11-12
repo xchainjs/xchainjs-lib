@@ -1,6 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
   AssetAVAX,
+  AssetBCH,
   AssetBNB,
   AssetBTC,
   AssetETH,
@@ -31,7 +32,7 @@ import { Thornode } from '../src/utils/thornode'
 
 require('dotenv').config()
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+const thorchainCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 // mainnet asset
@@ -282,5 +283,16 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     }
     const getSavers = await thorchainQuery.getSaverPosition(saver)
     printSaversPosition(getSavers)
+  })
+  it(`Should withdraw liquidity position for an address`, async () => {
+    const removeLp: WithdrawLiquidityPosition = {
+      asset: AssetBCH,
+      percentage: 76,
+      runeAddress: 'sthor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjvxdhkz',
+      assetAddress: 'qq3p8qwxpnkwy06fls96qd4rwrufr0e7qghp0xjdjv',
+    }
+    const checkLP = await thorchainQuery.estimateWithdrawLP(removeLp)
+    printWithdraw(checkLP)
+    expect(checkLP).toBeTruthy()
   })
 })

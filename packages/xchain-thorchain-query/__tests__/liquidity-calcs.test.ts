@@ -1,3 +1,4 @@
+import { PoolDetail } from '@xchainjs/xchain-midgard'
 import {
   AssetBTC,
   AssetETH,
@@ -28,7 +29,7 @@ const thorchainQuery = new ThorchainQuery()
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
-const BusdPoolDetails1 = {
+const BusdPoolDetails1: PoolDetail = {
   annualPercentageRate: '-0.08690907236215786',
   asset: 'BNB.BUSD-BD1',
   assetDepth: '782699801097358',
@@ -36,6 +37,8 @@ const BusdPoolDetails1 = {
   assetPriceUSD: '1',
   liquidityUnits: '117576764000000',
   nativeDecimal: '8',
+  saversDepth: '0',
+  saversUnits: '0',
   poolAPY: '0',
   runeDepth: '486327132022076',
   status: 'available',
@@ -60,7 +63,7 @@ const BusdPoolDetails1 = {
 //   units: '119365324519968',
 //   volume24h: '472358072383752',
 // }
-const emptyBusdPoolDetails = {
+const emptyBusdPoolDetails: PoolDetail = {
   annualPercentageRate: '0',
   asset: 'BNB.BUSD-BD1',
   assetDepth: '0',
@@ -68,6 +71,8 @@ const emptyBusdPoolDetails = {
   assetPriceUSD: '0',
   liquidityUnits: '10',
   nativeDecimal: '8',
+  saversDepth: '0',
+  saversUnits: '0',
   poolAPY: '0',
   runeDepth: '0',
   status: 'available',
