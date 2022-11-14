@@ -1,14 +1,14 @@
-# v0.3.7 (2022-11-10)
-
-## Update
-
-- added missing 'await' statements in thorchain-amm
-
 # v0.3.8 (2022-11-08)
 
 ## Update
 
 - added `addSaver()` & `withdrawSaver()` to thorchain-amm
+
+# v0.3.7 (2022-11-10)
+
+## Update
+
+- added missing 'await' statements in thorchain-amm
 
 # v0.3.6 (2022-11-08)
 
