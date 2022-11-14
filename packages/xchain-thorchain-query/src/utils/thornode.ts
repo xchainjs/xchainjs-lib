@@ -22,6 +22,8 @@ import {
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 
+import { SaversWithdraw } from '../types'
+
 export type ThornodeConfig = {
   apiRetries: number
   thornodeBaseUrls: string[]
@@ -243,16 +245,16 @@ export class Thornode {
    * @param withdrawBps - withddraw percent
    * @returns quotes withdraw object response
    */
-  async getSaversWithdrawQuote(
-    asset: string,
-    address: string,
-    height?: number,
-    withdrawBps?: number,
-  ): Promise<QuoteSaverWithdrawResponse> {
+  async getSaversWithdrawQuote(withdrawParams: SaversWithdraw): Promise<QuoteSaverWithdrawResponse> {
     for (const api of this.quoteApi) {
       try {
-        const resp = (await api.quotesaverwithdraw(height, asset, address, withdrawBps)).data
-        return resp
+        const resp = await api.quotesaverwithdraw(
+          withdrawParams.height,
+          `${withdrawParams.asset.chain}.${withdrawParams.asset.ticker}`,
+          withdrawParams.address,
+          withdrawParams.withdrawBps,
+        )
+        return resp.data
       } catch (e) {
         //console.error(e)
       }

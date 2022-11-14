@@ -241,6 +241,7 @@ export type SaversPosition = {
 }
 
 export type SaversWithdraw = {
+  height?: number
   asset: Asset
   address: Address
   withdrawBps: number

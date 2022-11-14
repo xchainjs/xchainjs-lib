@@ -181,4 +181,49 @@ yarn withdrawLiquidity "MnemonicPhrase" mainnet BNB.BUSD-BD1 100 thor1kf4fgvwjfx
 ]
 ✨  Done in 25.28s.
 
+
+```
+
+### Add Saver
+
+Asset and asset amount to add to saver, asset decimals,
+
+```bash
+yarn addSaver "MnemonicPhrase" mainnet  0.01 8 BNB.BNB
+  expiry: 2022-11-14T04:12:49.724Z,
+  toAddress: 'bnb1jzwjvflzc2jca0345lxrr3dkzr7fq32jve3e77',
+  memo: '+:BNB/BNB',
+  estimatedWaitTime: 6,
+  canAddSaver: true
+}
+{
+  hash: '60A352A78E87851958D0B02AF31987ED4CDF3E8F3B87FAD036E1F8FFAF3ED8A8',
+  url: 'https://explorer.binance.org/tx/60A352A78E87851958D0B02AF31987ED4CDF3E8F3B87FAD036E1F8FFAF3ED8A8',
+  waitTimeSeconds: 6
+}
+```
+
+### Withdraw Savers
+
+Asset, address and withdrawal basis points 10000 = 100%
+
+```bash
+yarn withdrawSaver "MnemonicPhrase" mainnet BNB.BNB "address" 10000
+
+{
+  dust_amount: '10000',
+  expected_amount_out: '629569',
+  fees: { affiliate: '0', asset: 'BNB.BNB', outbound: '370426' },
+  inbound_address: 'bnb1gkue4z8t5sm0p7xfzvdpdzdp5z4x4u7yhqywnz',
+  memo: '-:BNB/BNB:10000',
+  outbound_delay_blocks: 0,
+  outbound_delay_seconds: 0,
+  slippage_bps: 0
+}
+{
+  hash: 'C0F9E71D42B9DAEF2412268775CE062F4291ED49EA7C9399BD7204147EB72B09',
+  url: 'https://explorer.binance.org/tx/C0F9E71D42B9DAEF2412268775CE062F4291ED49EA7C9399BD7204147EB72B09',
+  waitTimeSeconds: 0
+}
+
 ```

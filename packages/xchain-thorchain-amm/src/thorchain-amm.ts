@@ -161,12 +161,12 @@ export class ThorchainAMM {
    * @returns
    */
   public async withdrawSaver(wallet: Wallet, withdrawParams: SaversWithdraw): Promise<TxSubmitted> {
-    const withddrawEstimate = await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
+    const withdrawEstimate = await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
     return await wallet.withdrawSavers(
-      withddrawEstimate.dustAmount,
-      withddrawEstimate.memo,
-      withddrawEstimate.toAddress,
-      withddrawEstimate.estimatedWaitTime,
+      withdrawEstimate.dustAmount,
+      withdrawEstimate.memo,
+      withdrawEstimate.toAddress,
+      withdrawEstimate.estimatedWaitTime,
     )
   }
 }

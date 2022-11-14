@@ -6,7 +6,9 @@
     "estimateAddLiquidity": "npx ts-node estimate-add-liquidity.ts",
     "estimateWithdrawLiquidity": "npx ts-node estimate-remove-liquidity.ts",
     "addLiquidity": "npx ts-node add-liquidity.ts",
-    "withdrawLiquidity": "npx ts-node withdraw-liquidity.ts"
+    "withdrawLiquidity": "npx ts-node withdraw-liquidity.ts",
+    "addSaver": "npx ts-node add-savers.ts",
+    "withdrawSaver": "npx ts-node withdrawSavers.ts"
   },
   "description": "examples for adding liquidity",
   "main": "index.js",

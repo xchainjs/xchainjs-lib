@@ -32,7 +32,7 @@ import { Thornode } from '../src/utils/thornode'
 
 require('dotenv').config()
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
+const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 // mainnet asset
@@ -106,6 +106,7 @@ function printSaver(saver: EstimateAddSaver) {
     toAddress: saver.toAddress,
     memo: saver.memo,
     estimateWaitTime: saver.estimatedWaitTime,
+    canAdd: saver.canAddSaver,
   }
   console.log(expanded)
 }
@@ -260,30 +261,6 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()
   })
-
-  it(`Should estimate saver addition`, async () => {
-    const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(1, 8)), AssetBTC)
-    const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
-    printSaver(estimateAddsSaver)
-  })
-  it(`Should estimate saver withdrawal`, async () => {
-    const withdrawPos: SaversWithdraw = {
-      address: `bnb1jy7h4muz0ruflmrlxnt89ayhn3mf82sgza4vfm`,
-      asset: AssetBTC,
-      withdrawBps: 100,
-    }
-    const estimateWithdrawSaver = await thorchainQuery.estimateWithdrawSaver(withdrawPos)
-    printWithdrawSaver(estimateWithdrawSaver)
-  })
-  it(`Should get saver position`, async () => {
-    const address = 'bnb1jy7h4muz0ruflmrlxnt89ayhn3mf82sgza4vfm'
-    const saver: getSaver = {
-      asset: AssetBNB,
-      address: address,
-    }
-    const getSavers = await thorchainQuery.getSaverPosition(saver)
-    printSaversPosition(getSavers)
-  })
   it(`Should withdraw liquidity position for an address`, async () => {
     const removeLp: WithdrawLiquidityPosition = {
       asset: AssetBCH,
@@ -294,5 +271,29 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const checkLP = await thorchainQuery.estimateWithdrawLP(removeLp)
     printWithdraw(checkLP)
     expect(checkLP).toBeTruthy()
+  })
+
+  it(`Should estimate saver addition`, async () => {
+    const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(0.001, 8)), AssetBTC)
+    const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
+    printSaver(estimateAddsSaver)
+  })
+  it(`Should estimate saver withdrawal`, async () => {
+    const withdrawPos: SaversWithdraw = {
+      address: `bnb150vpa06jrgucqz9ycgun73t0n0rrxq4m69fc22`,
+      asset: AssetBNB,
+      withdrawBps: 10000,
+    }
+    const estimateWithdrawSaver = await thorchainQuery.estimateWithdrawSaver(withdrawPos)
+    printWithdrawSaver(estimateWithdrawSaver)
+  })
+  it(`Should get saver position`, async () => {
+    const address = 'bnb150vpa06jrgucqz9ycgun73t0n0rrxq4m69fc22'
+    const saver: getSaver = {
+      asset: AssetBNB,
+      address: address,
+    }
+    const getSavers = await thorchainQuery.getSaverPosition(saver)
+    printSaversPosition(getSavers)
   })
 })

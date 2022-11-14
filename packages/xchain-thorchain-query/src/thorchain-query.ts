@@ -778,8 +778,8 @@ export class ThorchainQuery {
     if (isAssetRuneNative(addAmount.asset) || addAmount.asset.synth)
       throw Error(`Native Rune and synth assets are not supported only L1's`)
     const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
-      addAmount.asset.symbol,
-      addAmount.assetAmount.amount().toNumber(),
+      `${addAmount.asset.chain}.${addAmount.asset.ticker}`,
+      addAmount.baseAmount.amount().toNumber(),
     )
     // Calculate transaction expiry time of the vault address
     const currentDatetime = new Date()
@@ -802,7 +802,7 @@ export class ThorchainQuery {
       ),
     }
     const totalFees = saverFees.affiliate.plus(saverFees.asset).plus(saverFees.outbound)
-    const canAdd = totalFees.gte(addAmount)
+    const canAdd = totalFees.lte(addAmount)
     const estimateAddSaver: EstimateAddSaver = {
       assetAmount: addAmount,
       fee: saverFees,
@@ -814,14 +814,16 @@ export class ThorchainQuery {
     }
     return estimateAddSaver
   }
+  /**
+   *
+   * @param withdrawParams - height?, asset, address, withdrawalBasisPoints
+   * @returns - savers withdrawal quote with extras
+   */
   public async estimateWithdrawSaver(withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
     if (isAssetRuneNative(withdrawParams.asset) || withdrawParams.asset.synth)
       throw Error(`Native Rune and synth assets are not supported only L1's`)
-    const withdrawQuote = await this.thorchainCache.thornode.getSaversWithdrawQuote(
-      withdrawParams.asset.ticker,
-      withdrawParams.address,
-      withdrawParams.withdrawBps,
-    )
+    const withdrawQuote = await this.thorchainCache.thornode.getSaversWithdrawQuote(withdrawParams)
+    if (!withdrawQuote.expected_amount_out) throw Error(`Could not quote withdrawal ${JSON.stringify(withdrawQuote)}`)
     const pool = (await this.thorchainCache.getPoolForAsset(withdrawParams.asset)).pool
 
     // Calculate transaction expiry time of the vault address
@@ -829,8 +831,7 @@ export class ThorchainQuery {
     const minutesToAdd = 15
     const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
 
-    const estimatedWait = withdrawQuote.outbound_delay_seconds
-
+    const estimatedWait = +withdrawQuote.outbound_delay_seconds
     const estimateWithdrawSaver: EstimateWithdrawSaver = {
       expectedAssetAmount: new CryptoAmount(
         baseAmount(withdrawQuote.expected_amount_out, +pool.nativeDecimal),
@@ -855,10 +856,7 @@ export class ThorchainQuery {
       memo: withdrawQuote.memo,
       estimatedWaitTime: estimatedWait,
       sipplage: withdrawQuote.slippage_bps,
-      dustAmount: new CryptoAmount(
-        assetToBase(assetAmount(withdrawQuote.dust_amount, +pool.nativeDecimal)),
-        withdrawParams.asset,
-      ),
+      dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount, +pool.nativeDecimal), withdrawParams.asset),
     }
     return estimateWithdrawSaver
   }
@@ -876,19 +874,17 @@ export class ThorchainQuery {
       (item) => item.asset_address === params.address,
     )
     const pool = (await this.thorchainCache.getPoolForAsset(params.asset)).pool
-    const saversPool = (await this.thorchainCache.thornode.getPools()).find(
-      (item) => item.asset === `${params.asset.chain}/${params.asset.ticker}`,
-    )
-    if (!saversPool) throw Error(`Pool has no record of being a saver`)
-    if (!savers?.last_add_height) throw Error(`Could not find position for ${params.address}`)
+
+    if (!savers) throw Error(`Could not find position for ${params.address}`)
+    if (!savers.last_add_height) throw Error(`Could not find position for ${params.address}`)
     if (!blockData?.thorchain) throw Error(`Could not get thorchain block height`)
     const ownerUnits = savers.units
-    const saverUnits = saversPool.synth_units
-    const assetDepth = saversPool.balance_asset
+    const saverUnits = pool.saversUnits
+    const assetDepth = pool.saversDepth
     const redeemableValue = (+ownerUnits * +saverUnits) / +assetDepth
     const depositAmount = new CryptoAmount(baseAmount(savers.asset_deposit_value, +pool.nativeDecimal), params.asset)
     const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue, +pool.nativeDecimal), params.asset)
-    const saversAge = (blockData?.thorchain - savers.last_add_height) / ((365 * 86400) / 6)
+    const saversAge = (blockData?.thorchain - +savers.last_add_height) / ((365 * 86400) / 6)
 
     const saverGrowth = redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
     const saversPos: SaversPosition = {
