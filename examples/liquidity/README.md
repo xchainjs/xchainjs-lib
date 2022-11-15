@@ -184,6 +184,30 @@ yarn withdrawLiquidity "MnemonicPhrase" mainnet BNB.BUSD-BD1 100 thor1kf4fgvwjfx
 
 ```
 
+### Estimate Add Saver
+
+Asset and asset amount to add to saver, asset decimals,
+
+```bash
+yarn estimateAddSaver mainnet 0.001 8 BTC.BTC
+yarn run v1.22.17
+$ npx ts-node estimate-add-saver.ts mainnet 0.001 8 BTC.BTC
+{
+  assetAmount: '⚡ 100,000',
+  fee: {
+    affiliateFee: '⚡ 0',
+    asset: { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: true },
+    outbound: '⚡ 0'
+  },
+  expiry: 2022-11-15T05:04:09.735Z,
+  toAddress: 'bc1qjzwjvflzc2jca0345lxrr3dkzr7fq32jc8s7ma',
+  memo: '+:BTC/BTC',
+  estimateWaitTime: 600,
+  canAdd: true,
+  errors: []
+}
+```
+
 ### Add Saver
 
 Asset and asset amount to add to saver, asset decimals,

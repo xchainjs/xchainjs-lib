@@ -7,6 +7,7 @@
     "estimateWithdrawLiquidity": "npx ts-node estimate-remove-liquidity.ts",
     "addLiquidity": "npx ts-node add-liquidity.ts",
     "withdrawLiquidity": "npx ts-node withdraw-liquidity.ts",
+    "estimateAddSaver": "npx ts-node estimate-add-saver.ts",
     "addSaver": "npx ts-node add-savers.ts",
     "withdrawSaver": "npx ts-node withdrawSavers.ts"
   },

@@ -213,6 +213,7 @@ export type EstimateAddSaver = {
   memo: string
   estimatedWaitTime: number
   canAddSaver: boolean
+  errors: string[]
 }
 
 export type EstimateWithdrawSaver = {
@@ -228,7 +229,7 @@ export type EstimateWithdrawSaver = {
 
 export type SaverFees = {
   affiliate: CryptoAmount
-  asset: CryptoAmount
+  asset: Asset
   outbound: CryptoAmount
 }
 

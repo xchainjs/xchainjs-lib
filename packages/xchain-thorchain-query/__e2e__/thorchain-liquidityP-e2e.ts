@@ -52,7 +52,7 @@ function printAdd(estimate: EstimateAddLP) {
     inbound: {
       fees: {
         rune: estimate.inbound.fees.rune.formatedAssetString(),
-        asset: estimate.inbound.fees.asset.formatedAssetString(),
+        asset: estimate.inbound.fees.asset,
         total: estimate.inbound.fees.total.formatedAssetString(),
       },
     },
@@ -70,18 +70,18 @@ function printWithdraw(withdraw: EstimateWithdrawLP) {
     inbound: {
       minToSend: {
         rune: withdraw.inbound.minToSend.rune.formatedAssetString(),
-        asset: withdraw.inbound.minToSend.asset.formatedAssetString(),
+        asset: withdraw.inbound.minToSend.asset,
         total: withdraw.inbound.minToSend.total.formatedAssetString(),
       },
       fees: {
         rune: withdraw.inbound.fees.rune.formatedAssetString(),
-        asset: withdraw.inbound.fees.asset.formatedAssetString(),
+        asset: withdraw.inbound.fees.asset,
         total: withdraw.inbound.fees.total.formatedAssetString(),
       },
     },
     outboundFee: {
       rune: withdraw.outboundFee.rune.formatedAssetString(),
-      asset: withdraw.outboundFee.asset.formatedAssetString(),
+      asset: withdraw.outboundFee.asset,
       total: withdraw.outboundFee.total.formatedAssetString(),
     },
     lpGrowth: withdraw.lpGrowth,
@@ -99,7 +99,7 @@ function printSaver(saver: EstimateAddSaver) {
     assetAmount: saver.assetAmount.formatedAssetString(),
     fee: {
       affiliateFee: saver.fee.affiliate.formatedAssetString(),
-      asset: saver.fee.asset.formatedAssetString(),
+      asset: saver.fee.asset,
       outbound: saver.fee.outbound.formatedAssetString(),
     },
     expiry: saver.expiry,
@@ -115,7 +115,7 @@ function printWithdrawSaver(saver: EstimateWithdrawSaver) {
     assetAmount: saver.expectedAssetAmount.formatedAssetString(),
     fee: {
       affiliate: saver.fee.affiliate.formatedAssetString(),
-      liquidityFee: saver.fee.asset.formatedAssetString(),
+      liquidityFee: saver.fee.asset,
       totalFees: saver.fee.outbound.formatedAssetString(),
     },
     expiry: saver.expiry,

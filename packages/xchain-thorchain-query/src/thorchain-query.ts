@@ -1,4 +1,3 @@
-import { QuoteSaverDepositResponse } from '@xchainjs/xchain-thornode/lib'
 import {
   Asset,
   AssetAtom,
@@ -7,6 +6,7 @@ import {
   AssetRuneNative,
   Chain,
   assetAmount,
+  assetFromStringEx,
   assetToBase,
   assetToString,
   baseAmount,
@@ -776,47 +776,62 @@ export class ThorchainQuery {
   // Savers Queries
   // Derrived from https://dev.thorchain.org/thorchain-dev/connection-guide/savers-guide
   public async estimateAddSaver(addAmount: CryptoAmount): Promise<EstimateAddSaver> {
-    let errors = []
-    errors = await this.getAddSaversEstimateErrors(addAmount)
-    const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
-      `${addAmount.asset.chain}.${addAmount.asset.ticker}`,
-      addAmount.baseAmount.amount().toNumber(),
-    )
-    // Calculate transaction expiry time of the vault address
-    const currentDatetime = new Date()
-    const minutesToAdd = 15
-    const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
-    const estimatedWait = depositQuote.inbound_confirmation_seconds
-      ? depositQuote.inbound_confirmation_seconds
-      : await this.confCounting(addAmount)
-    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
+    let errors: string[] = []
+    try {
+      errors = await this.getAddSaversEstimateErrors(addAmount)
+      if (errors.length > 0) throw Error('errors')
 
-    if (addAmount.baseAmount.lte(depositQuote.expected_amount_out))
-      // should this be double ? seeing as the user needs to pay for inbound and outbound fees?
-      errors.push(`Amount being added to savers can't pay for fees`)
-    const saverFees: SaverFees = {
-      affiliate: new CryptoAmount(
-        assetToBase(assetAmount(depositQuote.fees.affiliate, +pool.nativeDecimal)),
-        addAmount.asset,
-      ),
-      asset: new CryptoAmount(assetToBase(assetAmount(depositQuote.fees.asset, +pool.nativeDecimal)), addAmount.asset),
-      outbound: new CryptoAmount(
-        assetToBase(assetAmount(depositQuote.fees.outbound, +pool.nativeDecimal)),
-        addAmount.asset,
-      ),
+      const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
+        `${addAmount.asset.chain}.${addAmount.asset.ticker}`,
+        addAmount.baseAmount.amount().toNumber(),
+      )
+      // Calculate transaction expiry time of the vault address
+      const currentDatetime = new Date()
+      const minutesToAdd = 15
+      const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
+      const estimatedWait = depositQuote.inbound_confirmation_seconds
+        ? depositQuote.inbound_confirmation_seconds
+        : await this.confCounting(addAmount)
+      const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
+
+      if (addAmount.baseAmount.lte(depositQuote.expected_amount_out))
+        // should this be double ? seeing as the user needs to pay for inbound and outbound fees?
+        errors.push(`Amount being added to savers can't pay for fees`)
+      const saverFees: SaverFees = {
+        affiliate: new CryptoAmount(baseAmount(depositQuote.fees.affiliate, +pool.nativeDecimal), addAmount.asset),
+        asset: assetFromStringEx(depositQuote.fees.asset),
+        outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound, +pool.nativeDecimal), addAmount.asset),
+      }
+      // const totalFees = saverFees.affiliate.plus(saverFees.outbound)
+      // if( totalFees.lte(addAmount))
+      const estimateAddSaver: EstimateAddSaver = {
+        assetAmount: addAmount,
+        fee: saverFees,
+        expiry: expiryDatetime,
+        toAddress: depositQuote.inbound_address,
+        memo: depositQuote.memo,
+        estimatedWaitTime: estimatedWait,
+        canAddSaver: errors.length === 0,
+        errors,
+      }
+      return estimateAddSaver
+    } catch (error) {
+      // console.log(error)
+      return {
+        assetAmount: addAmount,
+        fee: {
+          affiliate: new CryptoAmount(assetToBase(assetAmount(0)), addAmount.asset),
+          asset: addAmount.asset,
+          outbound: new CryptoAmount(assetToBase(assetAmount(0)), addAmount.asset),
+        },
+        expiry: new Date(0),
+        toAddress: '',
+        memo: '',
+        estimatedWaitTime: -1,
+        canAddSaver: false,
+        errors,
+      }
     }
-    const totalFees = saverFees.affiliate.plus(saverFees.asset).plus(saverFees.outbound)
-    const canAdd = totalFees.lte(addAmount)
-    const estimateAddSaver: EstimateAddSaver = {
-      assetAmount: addAmount,
-      fee: saverFees,
-      expiry: expiryDatetime,
-      toAddress: depositQuote.inbound_address,
-      memo: depositQuote.memo,
-      estimatedWaitTime: estimatedWait,
-      canAddSaver: canAdd,
-    }
-    return estimateAddSaver
   }
   /**
    *
@@ -836,24 +851,16 @@ export class ThorchainQuery {
     const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
 
     const estimatedWait = +withdrawQuote.outbound_delay_seconds
+    const withdrawAsset = assetFromStringEx(withdrawQuote.fees.asset)
     const estimateWithdrawSaver: EstimateWithdrawSaver = {
       expectedAssetAmount: new CryptoAmount(
         baseAmount(withdrawQuote.expected_amount_out, +pool.nativeDecimal),
         withdrawParams.asset,
       ),
       fee: {
-        affiliate: new CryptoAmount(
-          assetToBase(assetAmount(withdrawQuote.fees.affiliate, +pool.nativeDecimal)),
-          withdrawParams.asset,
-        ),
-        asset: new CryptoAmount(
-          assetToBase(assetAmount(withdrawQuote.fees.asset, +pool.nativeDecimal)),
-          withdrawParams.asset,
-        ),
-        outbound: new CryptoAmount(
-          assetToBase(assetAmount(withdrawQuote.fees.outbound, +pool.nativeDecimal)),
-          withdrawParams.asset,
-        ),
+        affiliate: new CryptoAmount(baseAmount(withdrawQuote.fees.affiliate, +pool.nativeDecimal), withdrawAsset),
+        asset: withdrawAsset,
+        outbound: new CryptoAmount(baseAmount(withdrawQuote.fees.outbound, +pool.nativeDecimal), withdrawAsset),
       },
       expiry: expiryDatetime,
       toAddress: withdrawQuote.inbound_address,
@@ -903,14 +910,15 @@ export class ThorchainQuery {
 
   private async getAddSaversEstimateErrors(addAmount: CryptoAmount): Promise<string[]> {
     const errors = []
+    const pools = await this.thorchainCache.getPools()
+    const saversPools = Object.values(pools).filter((i) => i.pool.saversDepth !== '0')
     const inboundDetails = await this.thorchainCache.getInboundDetails()
-    if (isAssetRuneNative(addAmount.asset) || addAmount.asset.synth)
-      errors.push(`Native Rune and synth assets are not supported only L1's`)
-    if (inboundDetails[addAmount.asset.chain].haltedChain === false)
-      errors.push(`${addAmount.asset.chain} is halted, cannot add`)
+    const saverPool = saversPools.find((i) => assetToString(i.asset) === assetToString(addAmount.asset))
+    if (!saverPool) errors.push(` ${assetToString(addAmount.asset)} does not have a saver's pool`)
+    if (inboundDetails[addAmount.asset.chain].haltedChain) errors.push(`${addAmount.asset.chain} is halted, cannot add`)
     const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
-    if (pool.status != 'Available') errors.push(`Pool is not available for this asset ${addAmount.asset}`)
-    if (+pool.saversDepth == 0) errors.push(`Savers depth is ${pool.saversDepth} for this pool ${pool.asset}`)
+    if (pool.status.toLowerCase() !== 'available')
+      errors.push(`Pool is not available for this asset ${assetToString(addAmount.asset)}`)
     return errors
   }
 }
