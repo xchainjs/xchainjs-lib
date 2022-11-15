@@ -14,10 +14,10 @@ function print(estimate: EstimateWithdrawLP, withdrawLpParams: WithdrawLiquidity
     slipPercent: estimate.slipPercent.toFixed(4),
     runeAmount: estimate.runeAmount.formatedAssetString(),
     assetAmount: estimate.assetAmount.formatedAssetString(),
-    transactionFee: {
-      assetFee: estimate.transactionFee.assetFee.formatedAssetString(),
-      runeFee: estimate.transactionFee.runeFee.formatedAssetString(),
-      totalFees: estimate.transactionFee.totalFees.formatedAssetString(),
+    inbound: {
+      assetFee: estimate.inbound.fees.asset.formatedAssetString(),
+      runeFee: estimate.inbound.fees.rune.formatedAssetString(),
+      totalFees: estimate.inbound.fees.total.formatedAssetString(),
     },
     impermanentLossProtection: {
       ILProtection: estimate.impermanentLossProtection.ILProtection,

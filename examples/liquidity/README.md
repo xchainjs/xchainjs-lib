@@ -251,3 +251,40 @@ yarn withdrawSaver "MnemonicPhrase" mainnet BNB.BNB "address" 10000
 }
 
 ```
+
+### Estimate Withdraw Savers
+
+Asset, address and withdrawal basis points 10000 = 100%
+
+```bash
+yarn estimateWithdrawSaver mainnet "bnb10dvhe2sks0cfyusw87e5jus260xrrqac67a9zs" BNB.BNB 10000
+{
+  assetAmount: '0.04638325 BNB',
+  fee: {
+    affiliate: '0 BNB',
+    liquidityFee: { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: false },
+    totalFees: '0.00361993 BNB'
+  },
+  expiry: 2022-11-15T13:35:50.890Z,
+  toAddress: 'bnb1lccxv985m20qvd8g5yp6g9lc0wlc70v6kpuc8y',
+  memo: '-:BNB/BNB:10000',
+  estimateWaitTime: 0
+}
+```
+
+### Check saver position
+
+network, address, asset string.
+
+yarn checkSaverPosition mainnet "bnb10dvhe2sks0cfyusw87e5jus260xrrqac67a9zs" BNB.BNB
+
+```bash
+{
+  depositValue: '0.04999961 BNB',
+  redeemableValue: '0.04998268 BNB',
+  lastAddHeight: 8225368,
+  growth: -0.03386,
+  age: 0.0020190258751902586
+}
+✨  Done in 3.64s.
+```

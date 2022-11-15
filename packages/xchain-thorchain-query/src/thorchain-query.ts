@@ -795,15 +795,12 @@ export class ThorchainQuery {
       const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
 
       if (addAmount.baseAmount.lte(depositQuote.expected_amount_out))
-        // should this be double ? seeing as the user needs to pay for inbound and outbound fees?
         errors.push(`Amount being added to savers can't pay for fees`)
       const saverFees: SaverFees = {
         affiliate: new CryptoAmount(baseAmount(depositQuote.fees.affiliate, +pool.nativeDecimal), addAmount.asset),
         asset: assetFromStringEx(depositQuote.fees.asset),
         outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound, +pool.nativeDecimal), addAmount.asset),
       }
-      // const totalFees = saverFees.affiliate.plus(saverFees.outbound)
-      // if( totalFees.lte(addAmount))
       const estimateAddSaver: EstimateAddSaver = {
         assetAmount: addAmount,
         fee: saverFees,

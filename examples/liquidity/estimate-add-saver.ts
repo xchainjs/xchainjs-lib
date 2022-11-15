@@ -3,7 +3,6 @@ import {
   CryptoAmount,
   EstimateAddSaver,
   Midgard,
-  SaversPosition,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
@@ -27,19 +26,10 @@ function printSaver(saver: EstimateAddSaver) {
   }
   console.log(expanded)
 }
-// function printSaversPosition(saver: SaversPosition) {
-//   const expanded = {
-//     depositValue: saver.depositValue.formatedAssetString(),
-//     redeemableValue: saver.redeemableValue.formatedAssetString(),
-//     lastAddHeight: saver.lastAddHeight,
-//     growth: saver.growth,
-//     age: saver.age,
-//   }
-//   console.log(expanded)
-// }
+
 /**
- * Estimate add lp function
- * Returns estimate swap object
+ * Estimate add saver function
+ * Returns estimate saver object
  */
 const estimateAddSaver = async () => {
   try {
