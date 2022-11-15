@@ -1,3 +1,4 @@
+import { QuoteSaverDepositResponse } from '@xchainjs/xchain-thornode/lib'
 import {
   Asset,
   AssetAtom,
@@ -775,8 +776,8 @@ export class ThorchainQuery {
   // Savers Queries
   // Derrived from https://dev.thorchain.org/thorchain-dev/connection-guide/savers-guide
   public async estimateAddSaver(addAmount: CryptoAmount): Promise<EstimateAddSaver> {
-    if (isAssetRuneNative(addAmount.asset) || addAmount.asset.synth)
-      throw Error(`Native Rune and synth assets are not supported only L1's`)
+    let errors = []
+    errors = await this.getAddSaversEstimateErrors(addAmount)
     const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
       `${addAmount.asset.chain}.${addAmount.asset.ticker}`,
       addAmount.baseAmount.amount().toNumber(),
@@ -790,6 +791,9 @@ export class ThorchainQuery {
       : await this.confCounting(addAmount)
     const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
 
+    if (addAmount.baseAmount.lte(depositQuote.expected_amount_out))
+      // should this be double ? seeing as the user needs to pay for inbound and outbound fees?
+      errors.push(`Amount being added to savers can't pay for fees`)
     const saverFees: SaverFees = {
       affiliate: new CryptoAmount(
         assetToBase(assetAmount(depositQuote.fees.affiliate, +pool.nativeDecimal)),
@@ -895,5 +899,18 @@ export class ThorchainQuery {
       age: saversAge,
     }
     return saversPos
+  }
+
+  private async getAddSaversEstimateErrors(addAmount: CryptoAmount): Promise<string[]> {
+    const errors = []
+    const inboundDetails = await this.thorchainCache.getInboundDetails()
+    if (isAssetRuneNative(addAmount.asset) || addAmount.asset.synth)
+      errors.push(`Native Rune and synth assets are not supported only L1's`)
+    if (inboundDetails[addAmount.asset.chain].haltedChain === false)
+      errors.push(`${addAmount.asset.chain} is halted, cannot add`)
+    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
+    if (pool.status != 'Available') errors.push(`Pool is not available for this asset ${addAmount.asset}`)
+    if (+pool.saversDepth == 0) errors.push(`Savers depth is ${pool.saversDepth} for this pool ${pool.asset}`)
+    return errors
   }
 }
