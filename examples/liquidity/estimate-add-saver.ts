@@ -12,6 +12,7 @@ import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-ut
 function printSaver(saver: EstimateAddSaver) {
   const expanded = {
     assetAmount: saver.assetAmount.formatedAssetString(),
+    estimatedDepositValue: saver.estimatedDepositValue.formatedAssetString(),
     fee: {
       affiliateFee: saver.fee.affiliate.formatedAssetString(),
       asset: saver.fee.asset,
@@ -21,6 +22,8 @@ function printSaver(saver: EstimateAddSaver) {
     toAddress: saver.toAddress,
     memo: saver.memo,
     estimateWaitTime: saver.estimatedWaitTime,
+    saverCapFilledPercent: saver.saverCapFilledPercent,
+    slipBasisPoints: saver.slipBasisPoints,
     canAdd: saver.canAddSaver,
     errors: saver.errors,
   }

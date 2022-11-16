@@ -801,21 +801,27 @@ export class ThorchainQuery {
         asset: assetFromStringEx(depositQuote.fees.asset),
         outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound, +pool.nativeDecimal), addAmount.asset),
       }
+      const saverCap = 0.3 * +pool.assetDepth
+      const saverCapFilledPercent = (+pool.saversDepth / saverCap) * 100
       const estimateAddSaver: EstimateAddSaver = {
         assetAmount: addAmount,
+        estimatedDepositValue: new CryptoAmount(baseAmount(depositQuote.expected_amount_out), saverFees.asset),
         fee: saverFees,
         expiry: expiryDatetime,
         toAddress: depositQuote.inbound_address,
         memo: depositQuote.memo,
         estimatedWaitTime: estimatedWait,
         canAddSaver: errors.length === 0,
+        slipBasisPoints: depositQuote.slippage_bps,
+        saverCapFilledPercent,
         errors,
       }
       return estimateAddSaver
     } catch (error) {
-      // console.log(error)
+      errors.push((error as any).message)
       return {
         assetAmount: addAmount,
+        estimatedDepositValue: new CryptoAmount(assetToBase(assetAmount(0)), addAmount.asset),
         fee: {
           affiliate: new CryptoAmount(assetToBase(assetAmount(0)), addAmount.asset),
           asset: addAmount.asset,
@@ -824,7 +830,9 @@ export class ThorchainQuery {
         expiry: new Date(0),
         toAddress: '',
         memo: '',
+        saverCapFilledPercent: -1,
         estimatedWaitTime: -1,
+        slipBasisPoints: -1,
         canAddSaver: false,
         errors,
       }
@@ -863,7 +871,7 @@ export class ThorchainQuery {
       toAddress: withdrawQuote.inbound_address,
       memo: withdrawQuote.memo,
       estimatedWaitTime: estimatedWait,
-      sipplage: withdrawQuote.slippage_bps,
+      slipBasisPoints: withdrawQuote.slippage_bps,
       dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount, +pool.nativeDecimal), withdrawParams.asset),
     }
     return estimateWithdrawSaver

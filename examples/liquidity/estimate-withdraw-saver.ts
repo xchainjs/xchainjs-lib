@@ -14,13 +14,14 @@ function printWithdrawSaver(saver: EstimateWithdrawSaver) {
     assetAmount: saver.expectedAssetAmount.formatedAssetString(),
     fee: {
       affiliate: saver.fee.affiliate.formatedAssetString(),
-      liquidityFee: saver.fee.asset,
-      totalFees: saver.fee.outbound.formatedAssetString(),
+      asset: saver.fee.asset,
+      outbound: saver.fee.outbound.formatedAssetString(),
     },
     expiry: saver.expiry,
     toAddress: saver.toAddress,
     memo: saver.memo,
     estimateWaitTime: saver.estimatedWaitTime,
+    slipBasisPoints: saver.slipBasisPoints,
   }
   console.log(expanded)
 }

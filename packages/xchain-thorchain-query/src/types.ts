@@ -207,10 +207,13 @@ export type getSaver = {
 
 export type EstimateAddSaver = {
   assetAmount: CryptoAmount
+  estimatedDepositValue: CryptoAmount
+  slipBasisPoints: number
   fee: SaverFees
   expiry: Date
   toAddress: Address
   memo: string
+  saverCapFilledPercent: number
   estimatedWaitTime: number
   canAddSaver: boolean
   errors: string[]
@@ -223,7 +226,7 @@ export type EstimateWithdrawSaver = {
   toAddress: Address
   memo: string
   estimatedWaitTime: number
-  sipplage: number
+  slipBasisPoints: number
   dustAmount: CryptoAmount
 }
 

@@ -14,8 +14,9 @@ function printSaversPosition(saver: SaversPosition) {
     depositValue: saver.depositValue.formatedAssetString(),
     redeemableValue: saver.redeemableValue.formatedAssetString(),
     lastAddHeight: saver.lastAddHeight,
-    growth: saver.growth,
-    age: saver.age,
+    percentageGrowth: saver.percentageGrowth,
+    ageInYears: saver.ageInYears,
+    ageInDays: saver.ageInDays,
   }
   console.log(expanded)
 }
