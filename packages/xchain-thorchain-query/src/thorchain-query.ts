@@ -881,26 +881,27 @@ export class ThorchainQuery {
     const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.ticker}`)).find(
       (item) => item.asset_address === params.address,
     )
-    const pool = (await this.thorchainCache.getPoolForAsset(params.asset)).pool
 
+    const pool = (await this.thorchainCache.getPoolForAsset(params.asset)).pool
     if (!savers) throw Error(`Could not find position for ${params.address}`)
     if (!savers.last_add_height) throw Error(`Could not find position for ${params.address}`)
     if (!blockData?.thorchain) throw Error(`Could not get thorchain block height`)
-    const ownerUnits = savers.units
-    const saverUnits = pool.saversUnits
-    const assetDepth = pool.saversDepth
-    const redeemableValue = (+ownerUnits * +saverUnits) / +assetDepth
+    const ownerUnits = Number(savers.units)
+    const lastAdded = Number(savers.last_add_height)
+    const saverUnits = Number(pool.saversUnits)
+    const assetDepth = Number(pool.saversDepth)
+    const redeemableValue = (ownerUnits / saverUnits) * assetDepth
     const depositAmount = new CryptoAmount(baseAmount(savers.asset_deposit_value, +pool.nativeDecimal), params.asset)
     const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue, +pool.nativeDecimal), params.asset)
-    const saversAge = (blockData?.thorchain - +savers.last_add_height) / ((365 * 86400) / 6)
-
+    const saversAge = (blockData?.thorchain - lastAdded) / ((365 * 86400) / 6)
     const saverGrowth = redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
     const saversPos: SaversPosition = {
       depositValue: depositAmount,
       redeemableValue: redeemableAssetAmount,
       lastAddHeight: savers.last_add_height,
-      growth: saverGrowth.assetAmount.amount().toNumber(),
-      age: saversAge,
+      percentageGrowth: saverGrowth.assetAmount.amount().toNumber(),
+      ageInYears: saversAge,
+      ageInDays: saversAge * 365,
     }
     return saversPos
   }

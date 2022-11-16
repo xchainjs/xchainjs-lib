@@ -237,8 +237,9 @@ export type SaversPosition = {
   depositValue: CryptoAmount
   redeemableValue: CryptoAmount
   lastAddHeight: number
-  growth: number
-  age: number
+  percentageGrowth: number
+  ageInYears: number
+  ageInDays: number
 }
 
 export type SaversWithdraw = {

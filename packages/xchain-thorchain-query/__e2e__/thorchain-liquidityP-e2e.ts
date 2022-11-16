@@ -130,8 +130,9 @@ function printSaversPosition(saver: SaversPosition) {
     depositValue: saver.depositValue.formatedAssetString(),
     redeemableValue: saver.redeemableValue.formatedAssetString(),
     lastAddHeight: saver.lastAddHeight,
-    growth: saver.growth,
-    age: saver.age,
+    percentageGrowth: saver.percentageGrowth,
+    ageInYears: saver.ageInYears,
+    ageInDays: saver.ageInDays,
   }
   console.log(expanded)
 }
@@ -288,9 +289,9 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     printWithdrawSaver(estimateWithdrawSaver)
   })
   it(`Should get saver position`, async () => {
-    const address = 'bnb150vpa06jrgucqz9ycgun73t0n0rrxq4m69fc22'
+    const address = 'bc1qpcaardpf2wzcu6uwd4hhsmt0fz8su80cjfk5lh'
     const saver: getSaver = {
-      asset: AssetBNB,
+      asset: AssetBTC,
       address: address,
     }
     const getSavers = await thorchainQuery.getSaverPosition(saver)
