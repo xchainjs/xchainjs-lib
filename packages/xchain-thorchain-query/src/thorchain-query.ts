@@ -777,48 +777,8 @@ export class ThorchainQuery {
   // Derrived from https://dev.thorchain.org/thorchain-dev/connection-guide/savers-guide
   public async estimateAddSaver(addAmount: CryptoAmount): Promise<EstimateAddSaver> {
     let errors: string[] = []
-    try {
-      errors = await this.getAddSaversEstimateErrors(addAmount)
-      if (errors.length > 0) throw Error('errors')
-
-      const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
-        `${addAmount.asset.chain}.${addAmount.asset.ticker}`,
-        addAmount.baseAmount.amount().toNumber(),
-      )
-      // Calculate transaction expiry time of the vault address
-      const currentDatetime = new Date()
-      const minutesToAdd = 15
-      const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
-      const estimatedWait = depositQuote.inbound_confirmation_seconds
-        ? depositQuote.inbound_confirmation_seconds
-        : await this.confCounting(addAmount)
-      const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
-
-      if (addAmount.baseAmount.lte(depositQuote.expected_amount_out))
-        errors.push(`Amount being added to savers can't pay for fees`)
-      const saverFees: SaverFees = {
-        affiliate: new CryptoAmount(baseAmount(depositQuote.fees.affiliate, +pool.nativeDecimal), addAmount.asset),
-        asset: assetFromStringEx(depositQuote.fees.asset),
-        outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound, +pool.nativeDecimal), addAmount.asset),
-      }
-      const saverCap = 0.3 * +pool.assetDepth
-      const saverCapFilledPercent = (+pool.saversDepth / saverCap) * 100
-      const estimateAddSaver: EstimateAddSaver = {
-        assetAmount: addAmount,
-        estimatedDepositValue: new CryptoAmount(baseAmount(depositQuote.expected_amount_out), saverFees.asset),
-        fee: saverFees,
-        expiry: expiryDatetime,
-        toAddress: depositQuote.inbound_address,
-        memo: depositQuote.memo,
-        estimatedWaitTime: estimatedWait,
-        canAddSaver: errors.length === 0,
-        slipBasisPoints: depositQuote.slippage_bps,
-        saverCapFilledPercent,
-        errors,
-      }
-      return estimateAddSaver
-    } catch (error) {
-      errors.push((error as any).message)
+    errors = await this.getAddSaversEstimateErrors(addAmount)
+    if (errors.length > 0) {
       return {
         assetAmount: addAmount,
         estimatedDepositValue: new CryptoAmount(assetToBase(assetAmount(0)), addAmount.asset),
@@ -837,6 +797,43 @@ export class ThorchainQuery {
         errors,
       }
     }
+
+    const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
+      `${addAmount.asset.chain}.${addAmount.asset.ticker}`,
+      addAmount.baseAmount.amount().toNumber(),
+    )
+    // Calculate transaction expiry time of the vault address
+    const currentDatetime = new Date()
+    const minutesToAdd = 15
+    const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
+    const estimatedWait = depositQuote.inbound_confirmation_seconds
+      ? depositQuote.inbound_confirmation_seconds
+      : await this.confCounting(addAmount)
+    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
+
+    if (addAmount.baseAmount.lte(depositQuote.expected_amount_out))
+      errors.push(`Amount being added to savers can't pay for fees`)
+    const saverFees: SaverFees = {
+      affiliate: new CryptoAmount(baseAmount(depositQuote.fees.affiliate, +pool.nativeDecimal), addAmount.asset),
+      asset: assetFromStringEx(depositQuote.fees.asset),
+      outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound, +pool.nativeDecimal), addAmount.asset),
+    }
+    const saverCap = 0.3 * +pool.assetDepth
+    const saverCapFilledPercent = (+pool.saversDepth / saverCap) * 100
+    const estimateAddSaver: EstimateAddSaver = {
+      assetAmount: addAmount,
+      estimatedDepositValue: new CryptoAmount(baseAmount(depositQuote.expected_amount_out), saverFees.asset),
+      fee: saverFees,
+      expiry: expiryDatetime,
+      toAddress: depositQuote.inbound_address,
+      memo: depositQuote.memo,
+      estimatedWaitTime: estimatedWait,
+      canAddSaver: errors.length === 0,
+      slipBasisPoints: depositQuote.slippage_bps,
+      saverCapFilledPercent,
+      errors,
+    }
+    return estimateAddSaver
   }
   /**
    *
