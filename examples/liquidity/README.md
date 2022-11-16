@@ -181,4 +181,103 @@ yarn withdrawLiquidity "MnemonicPhrase" mainnet BNB.BUSD-BD1 100 thor1kf4fgvwjfx
 ]
 ✨  Done in 25.28s.
 
+
+```
+
+### Estimate Add Saver
+
+Asset and asset amount to add to saver, asset decimals,
+
+```bash
+yarn estimateAddSaver mainnet 1 8 BTC.BTC
+{
+  assetAmount: '₿ 1',
+  estimatedDepositValue: '₿ 0.99692917',
+  fee: {
+    affiliateFee: '⚡ 0',
+    asset: { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: true },
+    outbound: '⚡ 0'
+  },
+  expiry: 2022-11-16T04:40:47.080Z,
+  toAddress: 'bc1qlccxv985m20qvd8g5yp6g9lc0wlc70v6zlalz8',
+  memo: '+:BTC/BTC',
+  estimateWaitTime: 600,
+  saverCapFilledPercent: 18.789011861252053,
+  slipBasisPoints: 30,
+  canAdd: true,
+  errors: []
+}
+```
+
+### Add Saver
+
+Asset and asset amount to add to saver, asset decimals,
+
+```bash
+yarn addSaver "MnemonicPhrase" mainnet  0.01 8 BNB.BNB
+{
+  expiry: 2022-11-14T04:12:49.724Z,
+  toAddress: 'bnb1jzwjvflzc2jca0345lxrr3dkzr7fq32jve3e77',
+  memo: '+:BNB/BNB',
+  estimatedWaitTime: 6,
+  canAddSaver: true
+}
+{
+  hash: '60A352A78E87851958D0B02AF31987ED4CDF3E8F3B87FAD036E1F8FFAF3ED8A8',
+  url: 'https://explorer.binance.org/tx/60A352A78E87851958D0B02AF31987ED4CDF3E8F3B87FAD036E1F8FFAF3ED8A8',
+  waitTimeSeconds: 6
+}
+```
+
+### Withdraw Savers
+
+Asset, address and withdrawal basis points 10000 = 100%
+
+```bash
+yarn withdrawSaver "MnemonicPhrase" mainnet BNB.BNB "address" 10000
+
+{
+  hash: 'C0F9E71D42B9DAEF2412268775CE062F4291ED49EA7C9399BD7204147EB72B09',
+  url: 'https://explorer.binance.org/tx/C0F9E71D42B9DAEF2412268775CE062F4291ED49EA7C9399BD7204147EB72B09',
+  waitTimeSeconds: 0
+}
+
+```
+
+### Estimate Withdraw Savers
+
+Asset, address and withdrawal basis points 10000 = 100%
+
+```bash
+yarn estimateWithdrawSaver mainnet "bnb10dvhe2sks0cfyusw87e5jus260xrrqac67a9zs" BNB.BNB 10000
+{
+  assetAmount: '0.04641913 BNB',
+  fee: {
+    affiliate: '0 BNB',
+    asset: { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: false },
+    outbound: '0.0035874 BNB'
+  },
+  expiry: 2022-11-16T04:43:10.229Z,
+  toAddress: 'bnb16vfpjv795hv3zpxd4qs7qshh6fcrarn7cp7mnz',
+  memo: '-:BNB/BNB:10000',
+  estimateWaitTime: 0,
+  slipBasisPoints: 0
+}
+```
+
+### Check saver position
+
+network, address, asset string.
+
+```bash
+yarn checkSaverPosition mainnet "bnb10dvhe2sks0cfyusw87e5jus260xrrqac67a9zs" BNB.BNB
+{
+  depositValue: '0.04999961 BNB',
+  redeemableValue: '0.05000693 BNB',
+  lastAddHeight: 8225368,
+  percentageGrowth: 0.01464,
+  ageInYears: 0.003664383561643836,
+  ageInDays: 1.3375000000000001
+}
+✨  Done in 3.64s.
 ```

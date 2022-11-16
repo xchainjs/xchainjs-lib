@@ -8,8 +8,8 @@ import { Client as DogeClient } from '@xchainjs/xchain-doge'
 import { Client as EthClient } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
-import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { Chain } from '@xchainjs/xchain-util'
+import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
+import { Address, Chain } from '@xchainjs/xchain-util'
 
 import { AddLiquidity, ExecuteSwap, TxSubmitted, WithdrawLiquidity } from './types'
 import { EthHelper } from './utils/eth-helper'
@@ -251,6 +251,111 @@ export class Wallet {
       constructedMemo = `-:${params.assetPool}:${basisPoints}`
       txSubmitted.push(await this.withdrawRuneLP(params, constructedMemo, thorchainClient, waitTimeSeconds))
       return txSubmitted
+    }
+  }
+
+  /**
+   *
+   * @param assetAmount - amount to add
+   * @param memo - memo required
+   * @param waitTimeSeconds - expected wait for the transaction to be processed
+   * @returns
+   */
+  async addSavers(
+    assetAmount: CryptoAmount,
+    memo: string,
+    toAddress: Address,
+    waitTimeSeconds: number,
+  ): Promise<TxSubmitted> {
+    const assetClient = this.clients[assetAmount.asset.chain]
+    if (assetAmount.asset.chain === Chain.Ethereum) {
+      const addParams = {
+        wallIndex: 0,
+        asset: assetAmount.asset,
+        amount: assetAmount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: memo,
+      }
+      const hash = await this.ethHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else if (assetAmount.asset.chain === Chain.Avalanche) {
+      const addParams = {
+        wallIndex: 0,
+        asset: assetAmount.asset,
+        amount: assetAmount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: memo,
+      }
+      const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else {
+      const addParams = {
+        wallIndex: 0,
+        asset: assetAmount.asset,
+        amount: assetAmount.baseAmount,
+        recipient: toAddress,
+        memo: memo,
+      }
+      try {
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()), waitTimeSeconds }
+      }
+    }
+  }
+  /**
+   *
+   * @param assetAmount - amount to withdraw
+   * @param memo - memo required
+   * @param waitTimeSeconds - expected wait for the transaction to be processed
+   * @returns
+   */
+  async withdrawSavers(
+    dustAssetAmount: CryptoAmount,
+    memo: string,
+    toAddress: Address,
+    waitTimeSeconds: number,
+  ): Promise<TxSubmitted> {
+    const assetClient = this.clients[dustAssetAmount.asset.chain]
+    if (dustAssetAmount.asset.chain === Chain.Ethereum) {
+      const addParams = {
+        wallIndex: 0,
+        asset: dustAssetAmount.asset,
+        amount: dustAssetAmount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: memo,
+      }
+      const hash = await this.ethHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else if (dustAssetAmount.asset.chain === Chain.Avalanche) {
+      const addParams = {
+        wallIndex: 0,
+        asset: dustAssetAmount.asset,
+        amount: dustAssetAmount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: memo,
+      }
+      const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else {
+      const addParams = {
+        wallIndex: 0,
+        asset: dustAssetAmount.asset,
+        amount: dustAssetAmount.baseAmount,
+        recipient: toAddress,
+        memo: memo,
+      }
+      try {
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()), waitTimeSeconds }
+      }
     }
   }
 

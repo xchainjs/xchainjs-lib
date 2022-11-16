@@ -35,7 +35,7 @@
   "devDependencies": {
     "@xchainjs/xchain-client": "^0.13.2",
     "@xchainjs/xchain-midgard": "^0.3.0",
-    "@xchainjs/xchain-thornode": "^0.1.0",
+    "@xchainjs/xchain-thornode": "^0.1.2",
     "@xchainjs/xchain-util": "^0.11.0",
     "axios": "^0.25.0",
     "axios-retry": "^3.2.5",
@@ -44,8 +44,8 @@
   },
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.13.2",
-    "@xchainjs/xchain-midgard": "^0.2.0",
-    "@xchainjs/xchain-thornode": "^0.1.1",
+    "@xchainjs/xchain-midgard": "^0.3.0",
+    "@xchainjs/xchain-thornode": "^0.1.2",
     "@xchainjs/xchain-util": "^0.11.0",
     "axios": "^0.25.0",
     "axios-retry": "^3.2.5",

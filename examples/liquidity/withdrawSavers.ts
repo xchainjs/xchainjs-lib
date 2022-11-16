@@ -1,32 +1,24 @@
 import { Network } from '@xchainjs/xchain-client'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
-import {
-  Midgard,
-  ThorchainCache,
-  ThorchainQuery,
-  Thornode,
-  WithdrawLiquidityPosition,
-} from '@xchainjs/xchain-thorchain-query'
+import { Midgard, SaversWithdraw, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
 import { assetFromString } from '@xchainjs/xchain-util'
 
 /**
  * Withdraw lp function
  * Returns tx
  */
-const withdrawLp = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
+const withdrawSavers = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
   try {
     const asset = assetFromString(process.argv[4])
-    const percentage = Number(process.argv[5])
-    const assetAddress = process.argv[6] || ''
-    const runeAddress = process.argv[7] || ''
+    const address = process.argv[5] || ''
+    const withdrawBps = Number(process.argv[6])
 
-    const withdrawLpParams: WithdrawLiquidityPosition = {
+    const saversWithdraw: SaversWithdraw = {
       asset,
-      percentage,
-      assetAddress,
-      runeAddress,
+      address,
+      withdrawBps,
     }
-    const withdraw = await tcAmm.withdrawLiquidityPosition(wallet, withdrawLpParams)
+    const withdraw = await tcAmm.withdrawSaver(wallet, saversWithdraw)
     console.log(withdraw)
   } catch (e) {
     console.error(e)
@@ -41,7 +33,7 @@ const main = async () => {
   const thorchainQuery = new ThorchainQuery(thorchainCache)
   const thorchainAmm = new ThorchainAMM(thorchainQuery)
   const wallet = new Wallet(seed, thorchainQuery)
-  await withdrawLp(thorchainAmm, wallet)
+  await withdrawSavers(thorchainAmm, wallet)
 }
 
 main()

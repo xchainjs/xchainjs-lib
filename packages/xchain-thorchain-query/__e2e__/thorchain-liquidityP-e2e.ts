@@ -2,6 +2,7 @@ import { Network } from '@xchainjs/xchain-client'
 import {
   AssetAVAX,
   AssetBCH,
+  AssetBNB,
   AssetBTC,
   AssetETH,
   AssetLTC,
@@ -17,20 +18,26 @@ import { ThorchainQuery } from '../src/thorchain-query'
 import {
   AddliquidityPosition,
   EstimateAddLP,
+  EstimateAddSaver,
   EstimateWithdrawLP,
+  EstimateWithdrawSaver,
   LiquidityPosition,
+  SaversPosition,
+  SaversWithdraw,
   WithdrawLiquidityPosition,
+  getSaver,
 } from '../src/types'
 import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
 
 require('dotenv').config()
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
+const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 // mainnet asset
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
+//const synthBTC = assetFromStringEx('BTC/BTC')
 const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 function printAdd(estimate: EstimateAddLP) {
@@ -45,7 +52,7 @@ function printAdd(estimate: EstimateAddLP) {
     inbound: {
       fees: {
         rune: estimate.inbound.fees.rune.formatedAssetString(),
-        asset: estimate.inbound.fees.asset.formatedAssetString(),
+        asset: estimate.inbound.fees.asset,
         total: estimate.inbound.fees.total.formatedAssetString(),
       },
     },
@@ -63,18 +70,18 @@ function printWithdraw(withdraw: EstimateWithdrawLP) {
     inbound: {
       minToSend: {
         rune: withdraw.inbound.minToSend.rune.formatedAssetString(),
-        asset: withdraw.inbound.minToSend.asset.formatedAssetString(),
+        asset: withdraw.inbound.minToSend.asset,
         total: withdraw.inbound.minToSend.total.formatedAssetString(),
       },
       fees: {
         rune: withdraw.inbound.fees.rune.formatedAssetString(),
-        asset: withdraw.inbound.fees.asset.formatedAssetString(),
+        asset: withdraw.inbound.fees.asset,
         total: withdraw.inbound.fees.total.formatedAssetString(),
       },
     },
     outboundFee: {
       rune: withdraw.outboundFee.rune.formatedAssetString(),
-      asset: withdraw.outboundFee.asset.formatedAssetString(),
+      asset: withdraw.outboundFee.asset,
       total: withdraw.outboundFee.total.formatedAssetString(),
     },
     lpGrowth: withdraw.lpGrowth,
@@ -83,6 +90,49 @@ function printWithdraw(withdraw: EstimateWithdrawLP) {
       totalDays: withdraw.impermanentLossProtection.totalDays,
     },
     estimatedWait: withdraw.estimatedWaitSeconds.toFixed(),
+  }
+  console.log(expanded)
+}
+
+function printSaver(saver: EstimateAddSaver) {
+  const expanded = {
+    assetAmount: saver.assetAmount.formatedAssetString(),
+    fee: {
+      affiliateFee: saver.fee.affiliate.formatedAssetString(),
+      asset: saver.fee.asset,
+      outbound: saver.fee.outbound.formatedAssetString(),
+    },
+    expiry: saver.expiry,
+    toAddress: saver.toAddress,
+    memo: saver.memo,
+    estimateWaitTime: saver.estimatedWaitTime,
+    canAdd: saver.canAddSaver,
+  }
+  console.log(expanded)
+}
+function printWithdrawSaver(saver: EstimateWithdrawSaver) {
+  const expanded = {
+    assetAmount: saver.expectedAssetAmount.formatedAssetString(),
+    fee: {
+      affiliate: saver.fee.affiliate.formatedAssetString(),
+      liquidityFee: saver.fee.asset,
+      totalFees: saver.fee.outbound.formatedAssetString(),
+    },
+    expiry: saver.expiry,
+    toAddress: saver.toAddress,
+    memo: saver.memo,
+    estimateWaitTime: saver.estimatedWaitTime,
+  }
+  console.log(expanded)
+}
+function printSaversPosition(saver: SaversPosition) {
+  const expanded = {
+    depositValue: saver.depositValue.formatedAssetString(),
+    redeemableValue: saver.redeemableValue.formatedAssetString(),
+    lastAddHeight: saver.lastAddHeight,
+    percentageGrowth: saver.percentageGrowth,
+    ageInYears: saver.ageInYears,
+    ageInDays: saver.ageInDays,
   }
   console.log(expanded)
 }
@@ -212,7 +262,6 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()
   })
-
   it(`Should withdraw liquidity position for an address`, async () => {
     const removeLp: WithdrawLiquidityPosition = {
       asset: AssetBCH,
@@ -223,5 +272,29 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const checkLP = await thorchainQuery.estimateWithdrawLP(removeLp)
     printWithdraw(checkLP)
     expect(checkLP).toBeTruthy()
+  })
+
+  it(`Should estimate saver addition`, async () => {
+    const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(0.001, 8)), AssetBTC)
+    const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
+    printSaver(estimateAddsSaver)
+  })
+  it(`Should estimate saver withdrawal`, async () => {
+    const withdrawPos: SaversWithdraw = {
+      address: `bnb150vpa06jrgucqz9ycgun73t0n0rrxq4m69fc22`,
+      asset: AssetBNB,
+      withdrawBps: 10000,
+    }
+    const estimateWithdrawSaver = await thorchainQuery.estimateWithdrawSaver(withdrawPos)
+    printWithdrawSaver(estimateWithdrawSaver)
+  })
+  it(`Should get saver position`, async () => {
+    const address = 'bc1qpcaardpf2wzcu6uwd4hhsmt0fz8su80cjfk5lh'
+    const saver: getSaver = {
+      asset: AssetBTC,
+      address: address,
+    }
+    const getSavers = await thorchainQuery.getSaverPosition(saver)
+    printSaversPosition(getSavers)
   })
 })

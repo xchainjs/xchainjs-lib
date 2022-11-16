@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "scripts": {
     "checkLiquidity": "npx ts-node check-liquidity.ts",
+    "checkSaverPosition": "npx ts-node check-saver-position.ts",
     "estimateAddLiquidity": "npx ts-node estimate-add-liquidity.ts",
     "estimateWithdrawLiquidity": "npx ts-node estimate-remove-liquidity.ts",
     "addLiquidity": "npx ts-node add-liquidity.ts",
-    "withdrawLiquidity": "npx ts-node withdraw-liquidity.ts"
+    "withdrawLiquidity": "npx ts-node withdraw-liquidity.ts",
+    "estimateAddSaver": "npx ts-node estimate-add-saver.ts",
+    "estimateWithdrawSaver": "npx ts-node estimate-withdraw-saver.ts",
+    "addSaver": "npx ts-node add-savers.ts",
+    "withdrawSaver": "npx ts-node withdrawSavers.ts"
   },
   "description": "examples for adding liquidity",
   "main": "index.js",

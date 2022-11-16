@@ -4,17 +4,25 @@ import {
   InboundAddress,
   LastBlock,
   LiquidityProvider,
+  LiquidityProviderResponse,
   LiquidityProvidersApi,
   NetworkApi,
   Pool,
   PoolsApi,
   QueueApi,
+  QuoteApi,
+  QuoteSaverDepositResponse,
+  QuoteSaverWithdrawResponse,
+  QuoteSwapResponse,
+  SaversApi,
   TransactionsApi,
   TxOutItem,
   TxResponse,
 } from '@xchainjs/xchain-thornode'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
+
+import { SaversWithdraw } from '../types'
 
 export type ThornodeConfig = {
   apiRetries: number
@@ -48,6 +56,8 @@ export class Thornode {
   private networkApi: NetworkApi[]
   private poolsApi: PoolsApi[]
   private liquidityProvidersApi: LiquidityProvidersApi[]
+  private saversApi: SaversApi[]
+  private quoteApi: QuoteApi[]
 
   constructor(network: Network = Network.Mainnet, config?: ThornodeConfig) {
     this.network = network
@@ -62,6 +72,8 @@ export class Thornode {
     this.liquidityProvidersApi = this.config.thornodeBaseUrls.map(
       (url) => new LiquidityProvidersApi(new Configuration({ basePath: url })),
     )
+    this.saversApi = this.config.thornodeBaseUrls.map((url) => new SaversApi(new Configuration({ basePath: url })))
+    this.quoteApi = this.config.thornodeBaseUrls.map((url) => new QuoteApi(new Configuration({ basePath: url })))
   }
 
   /**
@@ -164,6 +176,119 @@ export class Thornode {
     for (const api of this.networkApi) {
       try {
         const resp = (await api.inboundAddresses()).data
+        return resp
+      } catch (e) {
+        //console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+  /**
+   *
+   * @param asset - asset string
+   * @param height - optional thorchain block height parameter
+   * @returns - Liquidity Provider Object
+   */
+  async getSavers(asset: string, height?: number): Promise<LiquidityProviderResponse> {
+    for (const api of this.saversApi) {
+      try {
+        const resp = (await api.savers(asset, height)).data
+        return resp
+      } catch (e) {
+        //console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+  /**
+   *
+   * @param asset - asset string
+   * @param height - optional thorchain block height parameter
+   * @returns - Liquidity Provider Object
+   */
+  async getSaver(asset: string, address: string, height?: number): Promise<LiquidityProviderResponse> {
+    for (const api of this.saversApi) {
+      try {
+        const resp = (await api.saver(asset, address, height)).data
+        return resp
+      } catch (e) {
+        //console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+
+  /**
+   *
+   * @param asset - asset to add to savers
+   * @param amount - amount to deposit
+   * @param height - block height
+   * @returns quotes deposit object response
+   */
+  async getSaversDepositQuote(asset: string, amount: number, height?: number): Promise<QuoteSaverDepositResponse> {
+    for (const api of this.quoteApi) {
+      try {
+        const resp = (await api.quotesaverdeposit(height, asset, amount)).data
+        return resp
+      } catch (e) {
+        //console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+
+  /**
+   *
+   * @param asset - asset to withdraw
+   * @param address - savers address
+   * @param height - block height
+   * @param withdrawBps - withddraw percent
+   * @returns quotes withdraw object response
+   */
+  async getSaversWithdrawQuote(withdrawParams: SaversWithdraw): Promise<QuoteSaverWithdrawResponse> {
+    for (const api of this.quoteApi) {
+      try {
+        const resp = await api.quotesaverwithdraw(
+          withdrawParams.height,
+          `${withdrawParams.asset.chain}.${withdrawParams.asset.ticker}`,
+          withdrawParams.address,
+          withdrawParams.withdrawBps,
+        )
+        return resp.data
+      } catch (e) {
+        //console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+
+  /**
+   *
+   * @param fromAsset - input asset
+   * @param toAsset - output asset
+   * @param amount - amount to swap
+   * @param destination - vault address
+   * @param toleranceBps - slip percent
+   * @param affiliateBps - affiliate percent
+   * @param affiliate - affiliate address
+   * @param height - block height
+   * @returns quotes swap object response
+   */
+  async getSwapQuote(
+    fromAsset: string,
+    toAsset: string,
+    amount: number,
+    destination: string,
+    toleranceBps: number,
+    affiliateBps: number,
+    affiliate: string,
+    height?: number,
+  ): Promise<QuoteSwapResponse> {
+    for (const api of this.quoteApi) {
+      try {
+        const resp = (
+          await api.quoteswap(height, fromAsset, toAsset, amount, destination, toleranceBps, affiliateBps, affiliate)
+        ).data
         return resp
       } catch (e) {
         //console.error(e)

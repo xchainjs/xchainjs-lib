@@ -1,4 +1,8 @@
-# v0.1.8 (2022-11-11)
+# v0.1.8 (2022-11-12)
+
+## ADD
+
+- Add `estimateAddSaver()` & `estimateWithdrawSaver()` & `getsaverPosition()`
 
 ## Update
 
