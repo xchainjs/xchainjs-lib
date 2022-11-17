@@ -59,4 +59,6 @@ Estimate add: https://replit.com/@thorchain/estimateAddliquidity\
 Estimate withdraw: https://replit.com/@thorchain/estimateWithdrawLiquidity\
 Check liquidity: https://replit.com/@thorchain/checkLiquidity\
 List pools: https://replit.com/@thorchain/listPools#package.json\
-Get Network Values: https://replit.com/@thorchain/networkValues#index.ts
+Get Network Values: https://replit.com/@thorchain/networkValues#index.ts\
+
+Estimate AddSaver() & WithdrawSaver() & getSaverPosition() https://replit.com/@thorchain/quoteDepositTS#index.ts
