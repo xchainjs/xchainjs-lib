@@ -15,7 +15,9 @@ XChainJS is a library with a common interface for multiple blockchains, built fo
 
 Telegram group: https://t.me/xchainjs \
 Homepage: https://xchainjs.org \
-Docs: http://docs.xchainjs.org/overview/
+Live Examples: https://dev.thorchain.org/thorchain-dev/xchainjs-integration-guide/query-package \
+Docs: http://docs.xchainjs.org/overview \
+Integration guide: https://dev.thorchain.org/thorchain-dev/xchainjs-integration-guide/overview
 
 ## Interface
 
@@ -43,7 +45,6 @@ A single common interface:
 - [`xchain-doge`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-doge)
 - [`xchain-ethereum`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-ethereum)
 - [`xchain-litecoin`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-litecoin)
-- [`xchain-terra`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-terra)
 - [`xchain-thorchain`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain)
 - [`xchain-util`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-util)
 - [`xchain-thorchain-amm`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-amm)
