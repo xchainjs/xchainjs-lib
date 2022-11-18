@@ -49,13 +49,16 @@ For bash exmples, see example folder at the base of this repository xchainjs/xch
 
 ### [`xchain-thorchain-query`](http://docs.xchainjs.org/xchain-thorchain-query/)
 
-[`How xchain-thorchain-query works`](http://docs.xchainjs.org/xchain-thorchain-query/how-it-works.html)
-[`How to use xchain-thorchain-query`](http://docs.xchainjs.org/xchain-thorchain-query/how-to-use.html)
+How xchain-thorchain-query works: http://docs.xchainjs.org/xchain-thorchain-query/how-it-works.html\
+How to use xchain-thorchain-query: http://docs.xchainjs.org/xchain-thorchain-query/how-to-use.html
 
-For Live examples
+## For Live examples
 
-[`Estimate swap`](https://replit.com/@thorchain/estimateSwap#index.ts)\
-[`Estimate add`](https://replit.com/@thorchain/estimateAddliquidity)\
-[`Estimate withdraw`](https://replit.com/@thorchain/estimateWithdrawLiquidity)\
-[`Check liquidity`](https://replit.com/@thorchain/checkLiquidity)\
-[`List pools`](https://replit.com/@thorchain/listPools#package.json)
+Estimate swap: https://replit.com/@thorchain/estimateSwap#index.ts\
+Estimate add: https://replit.com/@thorchain/estimateAddliquidity\
+Estimate withdraw: https://replit.com/@thorchain/estimateWithdrawLiquidity\
+Check liquidity: https://replit.com/@thorchain/checkLiquidity\
+List pools: https://replit.com/@thorchain/listPools#package.json\
+Get Network Values: https://replit.com/@thorchain/networkValues#index.ts\
+
+Estimate AddSaver() & WithdrawSaver() & getSaverPosition() https://replit.com/@thorchain/quoteDepositTS#index.ts
