@@ -2,9 +2,44 @@ import { LastBlock, ObservedTx, TxOutItem, TxResponse } from '@xchainjs/xchain-t
 import { Chain, THORChain } from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
+import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
 import { ChainAttributes, TransactionProgress, TransactionStatus } from './types'
 import { getChain } from './utils/swap'
+
+export enum TransactionStates {
+  NOT_OBSERVED = 0,
+  OBSERVED = 1,
+  IN_OUTBOUND = 1,
+  SENT = 1,
+  OUTBOUND_SENT = 1,
+  REFUNDED = 2,
+  COMPLETE,
+}
+export enum TxType {
+  Swap = 'Swap',
+  AddLP = 'AddLP',
+  WithdrawLP = 'WithdrawLP',
+  AddSaver = 'AddSaver',
+  WithdrawSaver = 'WithdrawSaver',
+  Other = 'Other',
+  Unknown = 'Unknown',
+}
+
+type TXProgress2 = {
+  txType: TxType
+  status: 'pending' | 'complete' | 'refunded'
+  observed?: {
+    date: Date
+    block: number
+    expectedConfirmationBlock: number
+    expectedConfirmationDate: Date
+    amount: CryptoAmount
+    fromAddress: string
+    expectedAmountOut?: CryptoAmount
+    memo: string
+  }
+}
 
 export class TransactionStage {
   readonly thorchainCache: ThorchainCache
@@ -14,10 +49,35 @@ export class TransactionStage {
     this.thorchainCache = thorchainCache
     this.chainAttributes = chainAttributes
   }
+  public async checkTxProgress2(inboundTxHash: string): Promise<TXProgress2 | undefined> {
+    const txData = await this.thorchainCache.thornode.getTxData(inboundTxHash)
+    console.log(JSON.stringify(txData, null, 2))
+    const txType = this.determineTxType(txData)
+
+    return {
+      txType,
+      status: 'pending',
+    }
+  }
+  private determineTxType(txData: TxResponse): TxType {
+    const txType: TxType = TxType.Unknown
+    if (txData.observed_tx) {
+      const parts = txData.observed_tx?.tx.memo?.split(`:`)
+      const operation = parts && parts[0] ? parts[0] : ''
+      const asset = parts && parts[1] ? parts[1] : ''
+
+      if (operation.match(/[=|s|swap]/i)) return TxType.Swap
+      if (operation.match(/[+|a|add]/i) && asset.includes('/')) return TxType.AddSaver
+      if (operation.match(/[+|a|add]/i) && asset.includes('.')) return TxType.AddLP
+      if (operation.match(/[-|wd|withdraw]/i) && asset.includes('/')) return TxType.WithdrawSaver
+      if (operation.match(/[-|wd|withdraw]/i) && asset.includes('.')) return TxType.WithdrawLP
+    }
+    return txType
+  }
 
   // Functions follow this logic below
   // 1. Has TC see it?
-  // 2. If observed, has is there inbound conf counting (for non BFT Chains)? If so, for how long
+  // 2. If observed, is there inbound conf counting (for non BFT Chains)? If so, for how long
   // 3. Has TC processed it?
   // 4. Is it in the outbound queue? If so, what is the target block and how long will it take for that to happen?
   // 5. If TC has sent it, how long will outbound conf take?
@@ -54,6 +114,7 @@ export class TransactionStage {
       // Check inbound, if nothing check outbound queue
       progress = 2
     }
+    console.log('mike')
     switch (progress) {
       case 0:
         const txObserved = await this.checkTCRecords(txData, sourceChain)
@@ -78,7 +139,7 @@ export class TransactionStage {
         const checkOutboundQueue = await this.checkOutboundQueue(inboundTxHash, tcBlockHeight)
         transactionProgress.seconds = checkOutboundQueue.seconds
         transactionProgress.errors = checkOutboundQueue.error
-        transactionProgress.progress = 3
+        transactionProgress.progress = 444
         return transactionProgress
       case 3:
         const tcBlock = lastBlock.find((obj) => obj.thorchain)
