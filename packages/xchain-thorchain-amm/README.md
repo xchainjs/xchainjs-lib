@@ -54,7 +54,8 @@ Following peer dependencies have to be installed into your project. These are no
 
 Do Swap: https://replit.com/@thorchain/doSwap-Single \
 Add Liquidity: https://replit.com/@thorchain/addLiquidity \
-Withdraw liquidity: https://replit.com/@thorchain/removeLiquidity
+Withdraw liquidity: https://replit.com/@thorchain/removeLiquidity \
+Add Savers & withdraw Savers: https://replit.com/@thorchain/saversTs#index.ts
 
 ## Documentation
 
