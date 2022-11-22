@@ -53,7 +53,7 @@ export class TransactionStage {
     this.thorchainCache = thorchainCache
     this.chainAttributes = chainAttributes
   }
-  public async checkTxProgress2(inboundTxHash: string): Promise<TXProgress2 | undefined> {
+  public async checkTxProgress2(inboundTxHash: string): Promise<TXProgress2> {
     let txData
     try {
       txData = await this.thorchainCache.thornode.getTxData(inboundTxHash)
@@ -134,8 +134,6 @@ export class TransactionStage {
   // private blockToDate(chain: Chain, block: number): Date {
   //   switch (chain) {
   //     case Chain.THORChain:
-  //       break
-  //     case Chain.Avalanche:
   //       break
 
   //     default:
