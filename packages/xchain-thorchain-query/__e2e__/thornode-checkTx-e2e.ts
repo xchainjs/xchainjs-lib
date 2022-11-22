@@ -1,5 +1,5 @@
 import { ThorchainCache } from '../src/thorchain-cache'
-import { TransactionStage } from '../src/thorchain-checktx'
+import { TransactionStage, TxStatus } from '../src/thorchain-checktx'
 
 const thorchainCache = new ThorchainCache()
 
@@ -25,8 +25,22 @@ describe('Thorchain query checkTx Integration Tests', () => {
   //     console.log(afterdelay2)
   //   }
   // })
-  it(`Should check transaction and return the stage`, async () => {
-    const x = await checkTxStage.checkTxProgress2('E5C8AA800DD54F9D069E6822E99EC66DF8FA81DAE748CE534B9325AF2A4B1666')
-    console.log(x)
+  it(`Should check asymBTCAddLp `, async () => {
+    const hash = 'E5C8AA800DD54F9D069E6822E99EC66DF8FA81DAE748CE534B9325AF2A4B1666'
+    const progress = await checkTxStage.checkTxProgress2(hash)
+    expect(progress?.status).toBe(TxStatus.Done)
+    console.log(progress)
+  })
+  it(`Should check swap BTC.BTC for ETH.FOX `, async () => {
+    const hash = '508478AC13EA0F675A57BD980B964B2F89B9CCD3CEC6E16FA7A598163E17D422'
+    const progress = await checkTxStage.checkTxProgress2(hash)
+    expect(progress?.status).toBe(TxStatus.Done)
+    console.log(progress)
+  })
+  it(`Should check swap unknown TX `, async () => {
+    const hash = '508478AC13EA0F675A57BD980B964B2F89B9CCD3CEC6E16FA7A5981XXXXXXXXX'
+    const progress = await checkTxStage.checkTxProgress2(hash)
+    expect(progress?.status).toBe(TxStatus.Unknown)
+    console.log(progress)
   })
 })

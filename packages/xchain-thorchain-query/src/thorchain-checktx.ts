@@ -1,5 +1,5 @@
 import { LastBlock, ObservedTx, TxOutItem, TxResponse } from '@xchainjs/xchain-thornode'
-import { Chain, THORChain } from '@xchainjs/xchain-util'
+import { Chain, THORChain, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
 import { CryptoAmount } from './crypto-amount'
@@ -7,15 +7,6 @@ import { ThorchainCache } from './thorchain-cache'
 import { ChainAttributes, TransactionProgress, TransactionStatus } from './types'
 import { getChain } from './utils/swap'
 
-export enum TransactionStates {
-  NOT_OBSERVED = 0,
-  OBSERVED = 1,
-  IN_OUTBOUND = 1,
-  SENT = 1,
-  OUTBOUND_SENT = 1,
-  REFUNDED = 2,
-  COMPLETE,
-}
 export enum TxType {
   Swap = 'Swap',
   AddLP = 'AddLP',
@@ -25,20 +16,33 @@ export enum TxType {
   Other = 'Other',
   Unknown = 'Unknown',
 }
+export enum TxStatus {
+  Done = 'done',
+  Incomplete = 'incomplete',
+  Unknown = 'Unknown',
+}
 
+type SwapInfo = {
+  expectedOutBlock: number
+  expectedOutDate: Date
+  expectedAmountOut: CryptoAmount
+  minimumAmountOut: CryptoAmount
+  affliateFee: CryptoAmount
+  toAddress: string
+}
 type TXProgress2 = {
   txType: TxType
-  status: 'pending' | 'complete' | 'refunded'
-  observed?: {
+  status: TxStatus
+  inboundObserved?: {
     date: Date
     block: number
     expectedConfirmationBlock: number
     expectedConfirmationDate: Date
     amount: CryptoAmount
     fromAddress: string
-    expectedAmountOut?: CryptoAmount
     memo: string
   }
+  swapInfo?: SwapInfo
 }
 
 export class TransactionStage {
@@ -50,31 +54,95 @@ export class TransactionStage {
     this.chainAttributes = chainAttributes
   }
   public async checkTxProgress2(inboundTxHash: string): Promise<TXProgress2 | undefined> {
-    const txData = await this.thorchainCache.thornode.getTxData(inboundTxHash)
-    console.log(JSON.stringify(txData, null, 2))
-    const txType = this.determineTxType(txData)
-
-    return {
-      txType,
-      status: 'pending',
+    let txData
+    try {
+      txData = await this.thorchainCache.thornode.getTxData(inboundTxHash)
+      //console.log(JSON.stringify(txData, null, 2))
+    } catch (error) {
+      return {
+        txType: TxType.Unknown,
+        status: TxStatus.Unknown,
+      }
     }
+    //valid tx
+    const progress = this.determineObserved(txData)
+
+    switch (progress.txType) {
+      case TxType.Swap:
+        this.checkSwapProgress(txData, progress)
+        break
+      // TODO implement other tx tyes
+      default:
+        break
+    }
+
+    return progress
   }
-  private determineTxType(txData: TxResponse): TxType {
-    const txType: TxType = TxType.Unknown
+  private checkSwapProgress(txData: TxResponse, progress: TXProgress2): void {
+    //TODO implement
+    txData
+    const asset = assetFromStringEx('BTC.BTC')
+    const swapInfo: SwapInfo = {
+      expectedOutBlock: 0,
+      expectedOutDate: new Date(),
+      expectedAmountOut: new CryptoAmount(baseAmount(0), asset),
+      minimumAmountOut: new CryptoAmount(baseAmount(0), asset),
+      affliateFee: new CryptoAmount(baseAmount(0), asset),
+      toAddress: 'string',
+    }
+    progress.swapInfo = swapInfo
+  }
+  private determineObserved(txData: TxResponse): TXProgress2 {
+    const progress: TXProgress2 = {
+      txType: TxType.Unknown,
+      status: TxStatus.Unknown,
+    }
     if (txData.observed_tx) {
-      const parts = txData.observed_tx?.tx.memo?.split(`:`)
+      const memo = txData.observed_tx?.tx.memo ?? ''
+      const parts = memo?.split(`:`)
       const operation = parts && parts[0] ? parts[0] : ''
-      const asset = parts && parts[1] ? parts[1] : ''
+      const inboundAsset = txData.observed_tx?.tx.coins?.[0].asset
+      const inboundAmount = txData.observed_tx?.tx.coins?.[0].amount
+      const fromAddress = txData.observed_tx?.tx.from_address ?? 'unknkown'
+      const block = Number(txData.observed_tx?.block_height)
+      const finalizeBlock = Number(txData.observed_tx?.finalise_height)
+      progress.status = txData.observed_tx?.status === 'done' ? TxStatus.Done : TxStatus.Incomplete
 
-      if (operation.match(/[=|s|swap]/i)) return TxType.Swap
-      if (operation.match(/[+|a|add]/i) && asset.includes('/')) return TxType.AddSaver
-      if (operation.match(/[+|a|add]/i) && asset.includes('.')) return TxType.AddLP
-      if (operation.match(/[-|wd|withdraw]/i) && asset.includes('/')) return TxType.WithdrawSaver
-      if (operation.match(/[-|wd|withdraw]/i) && asset.includes('.')) return TxType.WithdrawLP
+      //TODO look for affiliate fees
+
+      if (operation.match(/[=|s|swap]/i)) progress.txType = TxType.Swap
+      if (operation.match(/[+|a|add]/i) && inboundAsset.includes('/')) progress.txType = TxType.AddSaver
+      if (operation.match(/[+|a|add]/i) && inboundAsset.includes('.')) progress.txType = TxType.AddLP
+      if (operation.match(/[-|wd|withdraw]/i) && inboundAsset.includes('/')) progress.txType = TxType.WithdrawSaver
+      if (operation.match(/[-|wd|withdraw]/i) && inboundAsset.includes('.')) progress.txType = TxType.WithdrawLP
+
+      //TODO get the pool asset and use native decimals
+      const amount = new CryptoAmount(baseAmount(inboundAmount), assetFromStringEx(inboundAsset))
+
+      progress.inboundObserved = {
+        date: new Date(),
+        block,
+        expectedConfirmationBlock: finalizeBlock,
+        expectedConfirmationDate: new Date(),
+        amount,
+        fromAddress,
+        memo,
+      }
     }
-    return txType
+    return progress
   }
+  // private blockToDate(chain: Chain, block: number): Date {
+  //   switch (chain) {
+  //     case Chain.THORChain:
+  //       break
+  //     case Chain.Avalanche:
+  //       break
 
+  //     default:
+  //       return new Date()
+  //       break
+  //   }
+  // }
   // Functions follow this logic below
   // 1. Has TC see it?
   // 2. If observed, is there inbound conf counting (for non BFT Chains)? If so, for how long
