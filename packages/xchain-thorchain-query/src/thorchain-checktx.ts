@@ -22,7 +22,7 @@ export enum TxStatus {
   Unknown = 'Unknown',
 }
 
-type SwapInfo = {
+export type SwapInfo = {
   expectedOutBlock: number
   expectedOutDate: Date
   expectedAmountOut: CryptoAmount
@@ -30,7 +30,7 @@ type SwapInfo = {
   affliateFee: CryptoAmount
   toAddress: string
 }
-type TXProgress2 = {
+export type TXProgress2 = {
   txType: TxType
   status: TxStatus
   inboundObserved?: {
@@ -56,6 +56,7 @@ export class TransactionStage {
   public async checkTxProgress2(inboundTxHash: string): Promise<TXProgress2> {
     let txData
     try {
+      if (inboundTxHash.length < 1) throw Error('inboundTxHash too short')
       txData = await this.thorchainCache.thornode.getTxData(inboundTxHash)
       //console.log(JSON.stringify(txData, null, 2))
     } catch (error) {
