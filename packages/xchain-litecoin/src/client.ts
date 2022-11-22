@@ -321,6 +321,7 @@ class Client extends UTXOClient {
       txHex,
       nodeUrl: this.nodeUrls[this.network],
       auth: this.nodeAuth,
+      customRequestHeaders: this.customRequestHeaders,
     })
   }
 }

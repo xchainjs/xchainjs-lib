@@ -27,6 +27,7 @@ export abstract class BaseXChainClient implements XChainClient {
   protected feeBounds: FeeBounds
   protected phrase = ''
   protected rootDerivationPaths: RootDerivationPaths | undefined
+  protected customRequestHeaders: Record<string, string>
 
   /**
    * Constructor
@@ -42,6 +43,7 @@ export abstract class BaseXChainClient implements XChainClient {
     this.chain = chain
     this.network = params.network || Network.Testnet
     this.feeBounds = params.feeBounds || { lower: 1, upper: Infinity }
+    this.customRequestHeaders = params.customRequestHeaders ?? { 'x-client-id': 'xchainjs-client' }
     // Fire off a warning in the console to indicate that stagenet and real assets are being used.
     if (this.network === Network.Stagenet) console.warn('WARNING: This is using stagenet! Real assets are being used!')
     if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths

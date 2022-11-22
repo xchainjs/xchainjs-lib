@@ -10,7 +10,12 @@ import { TxBroadcastResponse } from './types/node-api-types'
  *
  * @returns {string} Transaction ID.
  */
-export const broadcastTx = async ({ txHex, auth, nodeUrl }: BroadcastTxParams): Promise<string> => {
+export const broadcastTx = async ({
+  txHex,
+  auth,
+  nodeUrl,
+  customRequestHeaders,
+}: BroadcastTxParams): Promise<string> => {
   const uniqueId = new Date().getTime().toString() // for unique id
   const postData = {
     jsonrpc: '2.0',
@@ -20,9 +25,9 @@ export const broadcastTx = async ({ txHex, auth, nodeUrl }: BroadcastTxParams): 
   }
   let response: TxBroadcastResponse
   if (auth) {
-    response = (await axios.post(nodeUrl, postData, { auth })).data
+    response = (await axios.post(nodeUrl, postData, { auth, headers: customRequestHeaders })).data
   } else {
-    response = (await axios.post(nodeUrl, postData)).data
+    response = (await axios.post(nodeUrl, postData, { headers: customRequestHeaders })).data
   }
   if (response.error) {
     throw new Error(`failed to broadcast a transaction: ${response.error}`)
