@@ -1,5 +1,5 @@
 import { LastBlock, ObservedTx, TxOutItem, TxResponse } from '@xchainjs/xchain-thornode'
-import { Chain, THORChain, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
+import { AssetRuneNative, Chain, THORChain, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
 import { CryptoAmount } from './crypto-amount'
@@ -14,6 +14,8 @@ export enum TxType {
   AddSaver = 'AddSaver',
   WithdrawSaver = 'WithdrawSaver',
   Other = 'Other',
+  Out = 'out',
+  Refund = 'refund',
   Unknown = 'Unknown',
 }
 export enum TxStatus {
@@ -30,7 +32,7 @@ export type SwapInfo = {
   affliateFee: CryptoAmount
   toAddress: string
 }
-export type TXProgress2 = {
+export type TXProgress = {
   txType: TxType
   status: TxStatus
   inboundObserved?: {
@@ -39,6 +41,8 @@ export type TXProgress2 = {
     expectedConfirmationBlock: number
     expectedConfirmationDate: Date
     amount: CryptoAmount
+    expectedAmountOut: CryptoAmount
+    affiliateAmount: CryptoAmount
     fromAddress: string
     memo: string
   }
@@ -53,7 +57,7 @@ export class TransactionStage {
     this.thorchainCache = thorchainCache
     this.chainAttributes = chainAttributes
   }
-  public async checkTxProgress2(inboundTxHash: string): Promise<TXProgress2> {
+  public async checkTxProgress(inboundTxHash: string): Promise<TXProgress> {
     let txData
     try {
       if (inboundTxHash.length < 1) throw Error('inboundTxHash too short')
@@ -66,35 +70,35 @@ export class TransactionStage {
       }
     }
     //valid tx
-    const progress = this.determineObserved(txData)
+    const progress = await this.determineObserved(txData)
 
     switch (progress.txType) {
       case TxType.Swap:
         this.checkSwapProgress(txData, progress)
         break
-      // TODO implement other tx tyes
+      //this.checkAddLpProgress(txData, progress)
       default:
         break
     }
 
     return progress
   }
-  private checkSwapProgress(txData: TxResponse, progress: TXProgress2): void {
+  private checkSwapProgress(txData: TxResponse, progress: TXProgress): void {
     //TODO implement
     txData
-    const asset = assetFromStringEx('BTC.BTC')
+    const asset = assetFromStringEx(`${txData.observed_tx?.tx.coins?.[0].asset}`)
     const swapInfo: SwapInfo = {
-      expectedOutBlock: 0,
-      expectedOutDate: new Date(),
-      expectedAmountOut: new CryptoAmount(baseAmount(0), asset),
-      minimumAmountOut: new CryptoAmount(baseAmount(0), asset),
-      affliateFee: new CryptoAmount(baseAmount(0), asset),
-      toAddress: 'string',
+      expectedOutBlock: Number(`${progress.inboundObserved?.expectedConfirmationBlock}`),
+      expectedOutDate: new Date(`${progress.inboundObserved?.expectedConfirmationDate}`),
+      expectedAmountOut: new CryptoAmount(baseAmount(`${progress.inboundObserved?.amount}`), asset),
+      minimumAmountOut: new CryptoAmount(baseAmount(0), asset), // how?
+      affliateFee: progress.inboundObserved?.affiliateAmount ?? new CryptoAmount(baseAmount(0), AssetRuneNative),
+      toAddress: `${txData.observed_tx?.tx.to_address}`,
     }
     progress.swapInfo = swapInfo
   }
-  private determineObserved(txData: TxResponse): TXProgress2 {
-    const progress: TXProgress2 = {
+  private async determineObserved(txData: TxResponse): Promise<TXProgress> {
+    const progress: TXProgress = {
       txType: TxType.Unknown,
       status: TxStatus.Unknown,
     }
@@ -109,8 +113,6 @@ export class TransactionStage {
       const finalizeBlock = Number(txData.observed_tx?.finalise_height)
       progress.status = txData.observed_tx?.status === 'done' ? TxStatus.Done : TxStatus.Incomplete
 
-      //TODO look for affiliate fees
-
       if (operation.match(/[=|s|swap]/i)) progress.txType = TxType.Swap
       if (operation.match(/[+|a|add]/i) && inboundAsset.includes('/')) progress.txType = TxType.AddSaver
       if (operation.match(/[+|a|add]/i) && inboundAsset.includes('.')) progress.txType = TxType.AddLP
@@ -118,7 +120,18 @@ export class TransactionStage {
       if (operation.match(/[-|wd|withdraw]/i) && inboundAsset.includes('.')) progress.txType = TxType.WithdrawLP
 
       //TODO get the pool asset and use native decimals
-      const amount = new CryptoAmount(baseAmount(inboundAmount), assetFromStringEx(inboundAsset))
+      const assetIn = assetFromStringEx(inboundAsset)
+      const InAssetPool = (await this.thorchainCache.getPoolForAsset(assetIn)).pool
+      const amount = new CryptoAmount(baseAmount(inboundAmount, +InAssetPool.nativeDecimal), assetIn)
+
+      // Expected amount out from asset & asset amount in memo
+      const outAsset = assetFromStringEx(parts[1])
+      const outAssetPool = (await this.thorchainCache.getPoolForAsset(outAsset)).pool
+      const expectedAmountOut = new CryptoAmount(baseAmount(`${parts[3]}`, +outAssetPool.nativeDecimal), outAsset)
+
+      //TODO look for affiliate fees
+      const affiliateFee = parts[5] ?? 0
+      const affiliateAmount = new CryptoAmount(baseAmount(affiliateFee), AssetRuneNative)
 
       progress.inboundObserved = {
         date: new Date(),
@@ -126,6 +139,8 @@ export class TransactionStage {
         expectedConfirmationBlock: finalizeBlock,
         expectedConfirmationDate: new Date(),
         amount,
+        expectedAmountOut,
+        affiliateAmount,
         fromAddress,
         memo,
       }
@@ -135,6 +150,8 @@ export class TransactionStage {
   // private blockToDate(chain: Chain, block: number): Date {
   //   switch (chain) {
   //     case Chain.THORChain:
+  //       break
+  //     case Chain.Avalanche:
   //       break
 
   //     default:
@@ -155,7 +172,7 @@ export class TransactionStage {
    * @param sourceChain - Needed for faster logic
    * @returns - tx stage or maybe a boolean not sure at this stage
    */
-  public async checkTxProgress(
+  public async checkTxProgressDraft(
     inboundTxHash: string,
     progress?: number,
     sourceChain?: Chain,
