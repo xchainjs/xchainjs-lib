@@ -18,6 +18,7 @@ import {
   TransactionsApi,
   TxOutItem,
   TxResponse,
+  TxSignersResponse,
 } from '@xchainjs/xchain-thornode'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
@@ -111,6 +112,22 @@ export class Thornode {
           keysign_metric: undefined,
         }
         return txR
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+  /**
+   *
+   * @param txHash - transaction hash
+   * @returns - transaction object
+   */
+  async getTxDataSigners(txHash: string): Promise<TxSignersResponse> {
+    for (const api of this.transactionsApi) {
+      try {
+        const txResponse = await api.txSigners(txHash)
+        return txResponse.data
+      } catch (e) {
+        throw new Error(`THORNode not responding`)
       }
     }
     throw new Error(`THORNode not responding`)
