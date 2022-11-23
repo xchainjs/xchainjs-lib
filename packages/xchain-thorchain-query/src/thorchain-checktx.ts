@@ -24,7 +24,7 @@ export enum TxStatus {
   Unknown = 'Unknown',
 }
 
-type SwapInfo = {
+export type SwapInfo = {
   expectedOutBlock: number
   expectedOutDate: Date
   expectedAmountOut: CryptoAmount
@@ -32,7 +32,7 @@ type SwapInfo = {
   affliateFee: CryptoAmount
   toAddress: string
 }
-type TXProgress = {
+export type TXProgress = {
   txType: TxType
   status: TxStatus
   inboundObserved?: {
@@ -57,9 +57,10 @@ export class TransactionStage {
     this.thorchainCache = thorchainCache
     this.chainAttributes = chainAttributes
   }
-  public async checkTxProgress(inboundTxHash: string): Promise<TXProgress | undefined> {
+  public async checkTxProgress(inboundTxHash: string): Promise<TXProgress> {
     let txData
     try {
+      if (inboundTxHash.length < 1) throw Error('inboundTxHash too short')
       txData = await this.thorchainCache.thornode.getTxData(inboundTxHash)
       //console.log(JSON.stringify(txData, null, 2))
     } catch (error) {
@@ -85,16 +86,19 @@ export class TransactionStage {
   private checkSwapProgress(txData: TxResponse, progress: TXProgress): void {
     //TODO implement
     txData
-    const asset = assetFromStringEx(`${txData.observed_tx?.tx.coins?.[0].asset}`)
-    const swapInfo: SwapInfo = {
-      expectedOutBlock: Number(`${progress.inboundObserved?.expectedConfirmationBlock}`),
-      expectedOutDate: new Date(`${progress.inboundObserved?.expectedConfirmationDate}`),
-      expectedAmountOut: new CryptoAmount(baseAmount(`${progress.inboundObserved?.amount}`), asset),
-      minimumAmountOut: new CryptoAmount(baseAmount(0), asset), // how?
-      affliateFee: progress.inboundObserved?.affiliateAmount ?? new CryptoAmount(baseAmount(0), AssetRuneNative),
-      toAddress: `${txData.observed_tx?.tx.to_address}`,
-    }
-    progress.swapInfo = swapInfo
+    //const assetIn = assetFromStringEx(`${txData.observed_tx?.tx.coins?.[0].asset}`)
+    if (progress.inboundObserved) {
+      const assetOut = progress.inboundObserved?.expectedAmountOut.asset
+      const swapInfo: SwapInfo = {
+        expectedOutBlock: Number(`${progress.inboundObserved?.expectedConfirmationBlock}`),
+        expectedOutDate: new Date(`${progress.inboundObserved?.expectedConfirmationDate}`),
+        expectedAmountOut: progress.inboundObserved?.expectedAmountOut, // hmm expected amount out is the same as minimum amout out?
+        minimumAmountOut: new CryptoAmount(baseAmount(0), assetOut), // how?
+        affliateFee: progress.inboundObserved?.affiliateAmount,
+        toAddress: `${txData.observed_tx?.tx.to_address}`,
+      }
+      progress.swapInfo = swapInfo
+    } // else case?
   }
   private async determineObserved(txData: TxResponse): Promise<TXProgress> {
     const progress: TXProgress = {
@@ -117,12 +121,12 @@ export class TransactionStage {
       if (operation.match(/[+|a|add]/i) && inboundAsset.includes('.')) progress.txType = TxType.AddLP
       if (operation.match(/[-|wd|withdraw]/i) && inboundAsset.includes('/')) progress.txType = TxType.WithdrawSaver
       if (operation.match(/[-|wd|withdraw]/i) && inboundAsset.includes('.')) progress.txType = TxType.WithdrawLP
-
+      console.log(parts)
       //TODO get the pool asset and use native decimals
       const assetIn = assetFromStringEx(inboundAsset)
       const InAssetPool = (await this.thorchainCache.getPoolForAsset(assetIn)).pool
       const amount = new CryptoAmount(baseAmount(inboundAmount, +InAssetPool.nativeDecimal), assetIn)
-
+      console.log(assetIn)
       // Expected amount out from asset & asset amount in memo
       const outAsset = assetFromStringEx(parts[1])
       const outAssetPool = (await this.thorchainCache.getPoolForAsset(outAsset)).pool
@@ -131,9 +135,10 @@ export class TransactionStage {
       //TODO look for affiliate fees
       const affiliateFee = parts[5] ?? 0
       const affiliateAmount = new CryptoAmount(baseAmount(affiliateFee), AssetRuneNative)
+      //const chain = getChain(`${txData.observed_tx.tx.chain}`)
 
       progress.inboundObserved = {
-        date: new Date(),
+        date: new Date(), // do we consider fetching date stamp from midgard?
         block,
         expectedConfirmationBlock: finalizeBlock,
         expectedConfirmationDate: new Date(),
@@ -146,13 +151,24 @@ export class TransactionStage {
     }
     return progress
   }
-  // private blockToDate(chain: Chain, block: number): Date {
+
+  //private async checkAddLpProgress(txData: TxResponse): Promise<TXProgress> {}
+
+  // /**
+  //  * Private function to return the date stamp from block height and chain
+  //  * @param chain
+  //  * @param block
+  //  * @returns
+  //  */
+  // private async blockToDate(chain: Chain, txid: string): Promise<Date> {
   //   switch (chain) {
   //     case Chain.THORChain:
-  //       break
-  //     case Chain.Avalanche:
-  //       break
+  //       //const date = await this.thorchainCache.midgard.getActions('', txid) only to be used for outbound data
 
+  //       return new Date()
+  //       break
+  //     // case Chain.Avalanche:
+  //     //   break
   //     default:
   //       return new Date()
   //       break
