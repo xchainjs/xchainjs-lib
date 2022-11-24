@@ -1,3 +1,9 @@
+# v.10.6 (2022-11-24)
+
+## Update
+
+- Added `customRequestHeaders` to `BroadcastTxParams` & bump dependencies
+
 # v.10.5 (2022-10-27)
 
 ## Update

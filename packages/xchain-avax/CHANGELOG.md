@@ -1,9 +1,14 @@
+# v.0.1.1 (2022-11-24)
+
+## Update
+
+- Bump `xchain-client`
+
 # v.0.1.0 (2022-10-13)
 
 ## Update
 
 - Set Default avax config in constructor
-
 
 # v.0.1.0-alpha4 (2022-xx-xx)
 

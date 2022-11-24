@@ -12,7 +12,7 @@ export type UTXO = {
   txHex?: string
 }
 
-export type BroadcastTxParams = { txHex: string; haskoinUrl: string }
+export type BroadcastTxParams = { txHex: string; haskoinUrl: string; customRequestHeaders: Record<string, string> }
 
 // We might extract it into xchain-client later
 export type DerivePath = Record<Network, string>

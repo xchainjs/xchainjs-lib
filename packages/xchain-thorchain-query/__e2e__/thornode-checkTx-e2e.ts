@@ -14,7 +14,7 @@ const liveHash = [
 describe('Thorchain query checkTx Integration Tests', () => {
   //can't use delays inside a async callback :(
   it(`Should check transaction and return the stage`, async () => {
-    const txStatus = await checkTxStage.checkTxProgress(liveHash[0], 0)
+    const txStatus = await checkTxStage.checkTxProgress(liveHash[1], 0)
     console.log(txStatus)
     if (txStatus.progress >= 3) {
       console.log(`Done`, txStatus)

@@ -56,8 +56,9 @@ class Client extends UTXOClient {
       [Network.Testnet]: `m/44'/1'/0'/0/`,
       [Network.Stagenet]: `m/44'/145'/0'/0/`,
     },
+    customRequestHeaders,
   }: BitcoinCashClientParams) {
-    super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase, feeBounds })
+    super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase, feeBounds, customRequestHeaders })
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.rootDerivationPaths = rootDerivationPaths
@@ -266,6 +267,7 @@ class Client extends UTXOClient {
     return await utils.broadcastTx({
       txHex,
       haskoinUrl: this.getHaskoinURL(),
+      customRequestHeaders: this.customRequestHeaders,
     })
   }
 }

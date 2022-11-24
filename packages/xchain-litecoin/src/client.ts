@@ -66,8 +66,9 @@ class Client extends UTXOClient {
       [Network.Testnet]: `m/84'/1'/0'/0/`,
       [Network.Stagenet]: `m/84'/2'/0'/0/`,
     },
+    customRequestHeaders,
   }: LitecoinClientParams) {
-    super(Chain.Litecoin, { network, rootDerivationPaths, phrase, feeBounds })
+    super(Chain.Litecoin, { network, rootDerivationPaths, phrase, feeBounds, customRequestHeaders })
     this.nodeUrls = nodeUrls
 
     this.nodeAuth =

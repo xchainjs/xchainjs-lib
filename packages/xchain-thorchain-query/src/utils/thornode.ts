@@ -27,7 +27,7 @@ import { SaversWithdraw } from '../types'
 export type ThornodeConfig = {
   apiRetries: number
   thornodeBaseUrls: string[]
-  customHeader: string
+  customRequestHeaders: string
 }
 
 const defaultThornodeConfig: Record<Network, ThornodeConfig> = {
@@ -38,17 +38,17 @@ const defaultThornodeConfig: Record<Network, ThornodeConfig> = {
       `https://thornode.thorswap.net`,
       `https://thornode.thorchain.info`,
     ],
-    customHeader: 'xchainheader',
+    customRequestHeaders: 'xchainjs-client',
   },
   stagenet: {
     apiRetries: 3,
     thornodeBaseUrls: ['https://stagenet-thornode.ninerealms.com'],
-    customHeader: 'xchainheader',
+    customRequestHeaders: 'xchainjs-client',
   },
   testnet: {
     apiRetries: 3,
     thornodeBaseUrls: ['https://testnet.thornode.thorchain.info'],
-    customHeader: 'xchainheader',
+    customRequestHeaders: 'xchainjs-client',
   },
 }
 
@@ -67,7 +67,7 @@ export class Thornode {
     this.network = network
     this.config = config ?? defaultThornodeConfig[this.network]
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })
-    axios.defaults.headers.common[`x-client-id`] = defaultThornodeConfig[this.network].customHeader
+    axios.defaults.headers.common['x-client-id'] = defaultThornodeConfig[this.network].customRequestHeaders
     this.transactionsApi = this.config.thornodeBaseUrls.map(
       (url) => new TransactionsApi(new Configuration({ basePath: url })),
     )
@@ -109,7 +109,6 @@ export class Thornode {
     for (const api of this.transactionsApi) {
       try {
         const txResponse = await api.tx(txHash)
-        console.log(txResponse.headers)
         return txResponse.data
       } catch (e) {
         const txR: TxResponse = {

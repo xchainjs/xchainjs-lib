@@ -1,3 +1,9 @@
+# v.05.4 (2022-11-24)
+
+## Update
+
+- Bumped dependencies
+
 # v.05.4 (2022-10-14)
 
 ## Update

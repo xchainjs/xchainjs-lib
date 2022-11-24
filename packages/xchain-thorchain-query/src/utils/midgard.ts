@@ -25,14 +25,17 @@ const defaultMidgardConfig: Record<Network, MidgardConfig> = {
       'https://midgard.thorchain.info',
       'https://midgard.thorswap.net',
     ],
+    customRequestHeaders: 'xchainjs-client',
   },
   stagenet: {
     apiRetries: 3,
     midgardBaseUrls: ['https://stagenet-midgard.ninerealms.com'],
+    customRequestHeaders: 'xchainjs-client',
   },
   testnet: {
     apiRetries: 3,
     midgardBaseUrls: ['https://testnet.midgard.thorchain.info'],
+    customRequestHeaders: 'xchainjs-client',
   },
 }
 
@@ -45,6 +48,7 @@ export class Midgard {
     this.network = network
     this.config = config ?? defaultMidgardConfig[this.network]
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })
+    axios.defaults.headers.common['x-client-id'] = defaultMidgardConfig[this.network].customRequestHeaders
     this.midgardApis = this.config.midgardBaseUrls.map((url) => new MidgardApi(new Configuration({ basePath: url })))
   }
   async getMimirDetails(): Promise<Record<string, number>> {

@@ -40,6 +40,7 @@ export type NetworkValuesCache = {
 export type MidgardConfig = {
   apiRetries: number
   midgardBaseUrls: string[]
+  customRequestHeaders: string
 }
 
 export type EstimateSwapParams = {

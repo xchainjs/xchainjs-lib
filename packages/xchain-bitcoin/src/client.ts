@@ -59,8 +59,9 @@ class Client extends UTXOClient {
       [Network.Stagenet]: `84'/0'/0'/0/`,
     },
     phrase = '',
+    customRequestHeaders,
   }: BitcoinClientParams) {
-    super(Chain.Bitcoin, { network, rootDerivationPaths, phrase, feeBounds })
+    super(Chain.Bitcoin, { network, rootDerivationPaths, phrase, feeBounds, customRequestHeaders })
     this.setSochainUrl(sochainUrl)
     this.haskoinUrl = haskoinUrl
   }
@@ -318,7 +319,7 @@ class Client extends UTXOClient {
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-    return await Utils.broadcastTx({ txHex, haskoinUrl })
+    return await Utils.broadcastTx({ txHex, haskoinUrl, customRequestHeaders: this.customRequestHeaders })
   }
 }
 
