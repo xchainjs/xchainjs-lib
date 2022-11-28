@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { TransactionStage } from '../src/thorchain-checktx'
 
@@ -10,6 +11,16 @@ const liveHash = [
   //  '991DFE33AC4482CC7A1E3BF1142E121A315EED18ED8E8FDDDC678E8F176DFCBA', // THOR in, ETH out
   '619F2005282F3EB501636546A8A3C3375495B0E9F04130D8945A6AF2158966BC', // BTC in, Synth BTC out
 ]
+
+axios.interceptors.request.use((request) => {
+  console.log('Starting Request', JSON.stringify(request, null, 2))
+  return request
+})
+
+axios.interceptors.response.use((response) => {
+  console.log('Response:', JSON.stringify(response, null, 2))
+  return response
+})
 
 describe('Thorchain query checkTx Integration Tests', () => {
   //can't use delays inside a async callback :(

@@ -28,6 +28,23 @@ Request data from MimirApi
   console.log(mimirResponse.data)
 
 ```
+## Example - set custom header
+
+Request data from MimirApi
+
+```
+// THORNODE_API_9R_URL - default exported URL
+// import { MimirApi, THORNODE_API_9R_URL, Configuration } from '@xchainjs/xchain-thornode'
+
+  const baseUrl = THORNODE_API_9R_URL
+  const headers = {"x-client-id": "my-custom-val"}
+  const baseOptions = { headers }
+  const apiconfig = new Configuration({ basePath: baseUrl , baseOptions })
+  const mimirApi = new MimirApi(apiconfig)
+  const mimirResponse = await mimirApi.mimir()
+  console.log(mimirResponse.data)
+
+```
 
 ## Documentation
 
