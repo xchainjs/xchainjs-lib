@@ -12,19 +12,6 @@ const checkTxStage = new TransactionStage(thorchainCache)
 // ]
 
 describe('Thorchain query checkTx Integration Tests', () => {
-  //can't use delays inside a async callback :(
-  // it(`Should check transaction and return the stage`, async () => {
-  //   const txStatus = await checkTxStage.checkTxProgress(liveHash[0], 0)
-  //   console.log(txStatus)
-  //   if (txStatus.progress >= 3) {
-  //     console.log(`Done`, txStatus)
-  //   } else {
-  //     const afterdelay1 = await checkTxStage.checkTxProgress(liveHash[0], txStatus.progress)
-  //     console.log(afterdelay1)
-  //     const afterdelay2 = await checkTxStage.checkTxProgress(liveHash[0], afterdelay1.progress)
-  //     console.log(afterdelay2)
-  //   }
-  // })
   it(`Should check asymBTCAddLp `, async () => {
     const hash = 'E5C8AA800DD54F9D069E6822E99EC66DF8FA81DAE748CE534B9325AF2A4B1666'
     const progress = await checkTxStage.checkTxProgress(hash)
@@ -34,7 +21,7 @@ describe('Thorchain query checkTx Integration Tests', () => {
   it(`Should check swap BTC.BTC for ETH.FOX `, async () => {
     const hash = '508478AC13EA0F675A57BD980B964B2F89B9CCD3CEC6E16FA7A598163E17D422'
     const progress = await checkTxStage.checkTxProgress(hash)
-    expect(progress?.status).toBe(TxStatus.Done)
+    expect(progress?.status).toBe(TxStatus.Refund)
     console.log(progress)
   })
   it(`Should check swap unknown TX `, async () => {
