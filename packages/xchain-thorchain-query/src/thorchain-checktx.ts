@@ -65,7 +65,7 @@ export class TransactionStage {
     try {
       if (inboundTxHash.length < 1) throw Error('inboundTxHash too short')
       txData = await this.thorchainCache.thornode.getTxDataSigners(inboundTxHash)
-      //console.log(JSON.stringify(txData, null, 2))
+      console.log(JSON.stringify(txData, null, 2))
     } catch (error) {
       // always wait 1 block for confirmation based on chain?
       return {
@@ -121,9 +121,17 @@ export class TransactionStage {
       const sourceChain = getChain(`${txData.tx.tx.chain}`)
       const block = sourceChain == Chain.THORChain ? Number(txData.finalised_height) : Number(txData.tx.block_height)
       const finalizeBlock = Number(txData.tx.finalise_height)
-      progress.status = txData.tx.status === 'done' ? TxStatus.Done : TxStatus.Incomplete // more logic is needed
-      const outTx = JSON.stringify(txData.actions[0])
-      if (outTx.match(/REFUND/)) progress.status = TxStatus.Refund
+
+      if (txData.tx.status === 'done') {
+        // This means the all nodes have observed
+        //TODO change this hack once thornode fixes bad openapi signatures
+        const outTx = JSON.stringify(txData.actions[0])
+        // console.log(JSON.stringify(txData.actions, null, 2))
+        progress.status = outTx && outTx?.match(/REFUND/) ? TxStatus.Refund : TxStatus.Done
+      } else {
+        progress.status = TxStatus.Incomplete
+      }
+
       if (operation.match(/[=|s|swap]/i)) progress.txType = TxType.Swap
       if (operation.match(/[+|a|add]/i) && inboundAsset.includes('/')) progress.txType = TxType.AddSaver
       if (operation.match(/[+|a|add]/i) && inboundAsset.includes('.')) progress.txType = TxType.AddLP
@@ -187,119 +195,16 @@ export class TransactionStage {
     const time = new Date()
     const recordedBlock = Number(`${txData.tx.block_height}`)
     let blockDifference: number
-    switch (chain) {
-      case Chain.THORChain:
-        const currentTHORHeight = lastBlockObj.find((obj) => obj.chain == chain)
-        const THORChainHeight = Number(`${currentTHORHeight?.last_observed_in}`)
-        // find out how long ago it was processed
-        if (THORChainHeight > recordedBlock) {
-          blockDifference = THORChainHeight - recordedBlock
-          time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        } else {
-          time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
-        }
-        return time
-        break
-      case Chain.Bitcoin:
-        const currentBTCHeight = lastBlockObj.find((obj) => obj.chain == chain)
-        const BTCChainHeight = Number(`${currentBTCHeight?.last_observed_in}`)
-        // find out how long ago it was processed
-        if (BTCChainHeight > recordedBlock) {
-          blockDifference = BTCChainHeight - recordedBlock
-          time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        } else {
-          time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
-        }
-        return time
-        break
-      case Chain.Litecoin:
-        const currentLTCChainHeight = lastBlockObj.find((obj) => obj.chain == chain)
-        const LTCChainHeight = Number(`${currentLTCChainHeight?.last_observed_in}`)
-        // find out how long ago it was processed
-        if (LTCChainHeight > recordedBlock) {
-          blockDifference = LTCChainHeight - recordedBlock
-          time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        } else {
-          time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
-        }
-        return time
-        break
-      case Chain.BitcoinCash:
-        const currentBCHChainHeight = lastBlockObj.find((obj) => obj.chain == chain)
-        const BCHChainHeight = Number(`${currentBCHChainHeight?.last_observed_in}`)
-        // find out how long ago it was processed
-        if (BCHChainHeight > recordedBlock) {
-          blockDifference = BCHChainHeight - recordedBlock
-          time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        } else {
-          time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
-        }
-        return time
-        break
-      case Chain.Avalanche:
-        const currentAVAXChainHeight = lastBlockObj.find((obj) => obj.chain == chain)
-        const AVAXChainHeight = Number(`${currentAVAXChainHeight?.last_observed_in}`)
-        // find out how long ago it was processed
-        if (AVAXChainHeight > recordedBlock) {
-          blockDifference = AVAXChainHeight - recordedBlock
-          time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        } else {
-          time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
-        }
-        return time
-        break
-      case Chain.Doge:
-        const currentDOGEChainHeight = lastBlockObj.find((obj) => obj.chain == chain)
-        const DOGEChainHeight = Number(`${currentDOGEChainHeight?.last_observed_in}`)
-        // find out how long ago it was processed
-        if (DOGEChainHeight > recordedBlock) {
-          blockDifference = DOGEChainHeight - recordedBlock
-          time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        } else {
-          time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
-        }
-        return time
-        break
-      case Chain.Ethereum:
-        const currentETHChainHeight = lastBlockObj.find((obj) => obj.chain == chain)
-        const ETHChainHeight = Number(`${currentETHChainHeight?.last_observed_in}`)
-        // find out how long ago it was processed
-        if (ETHChainHeight > recordedBlock) {
-          blockDifference = ETHChainHeight - recordedBlock
-          time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        } else {
-          time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
-        }
-        return time
-        break
-      case Chain.Binance:
-        const currentBNBChainHeight = lastBlockObj.find((obj) => obj.chain == chain)
-        const BNBChainHeight = Number(`${currentBNBChainHeight?.last_observed_in}`)
-        // find out how long ago it was processed
-        if (BNBChainHeight > recordedBlock) {
-          blockDifference = BNBChainHeight - recordedBlock
-          time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        } else {
-          time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
-        }
-        return time
-        break
-      case Chain.Cosmos:
-        const currentGAIAChainHeight = lastBlockObj.find((obj) => obj.chain == chain)
-        const GAIAChainHeight = Number(`${currentGAIAChainHeight?.last_observed_in}`)
-        // find out how long ago it was processed
-        if (GAIAChainHeight > recordedBlock) {
-          blockDifference = GAIAChainHeight - recordedBlock
-          time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        } else {
-          time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
-        }
-        return time
-        break
-      default:
-        return new Date()
-        break
+    const currentHeight = lastBlockObj.find((obj) => obj.chain == chain)
+    const chainHeight = Number(`${currentHeight?.last_observed_in}`)
+    // find out how long ago it was processed
+    if (chainHeight > recordedBlock) {
+      blockDifference = chainHeight - recordedBlock
+      time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
+    } else {
+      time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
     }
+    return time
   }
   // Functions follow this logic below
   // 1. Has TC see it?
