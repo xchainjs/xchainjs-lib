@@ -19,6 +19,7 @@ import { Address, Asset, AssetBTC, Chain, assetAmount, assetToBase } from '@xcha
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import { BTC_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
+import { setupHaskoinInstance } from './haskoin-api'
 import * as sochain from './sochain-api'
 import { ClientUrl } from './types/client-types'
 import * as Utils from './utils'
@@ -64,6 +65,12 @@ class Client extends UTXOClient {
     super(Chain.Bitcoin, { network, rootDerivationPaths, phrase, feeBounds, customRequestHeaders })
     this.setSochainUrl(sochainUrl)
     this.haskoinUrl = haskoinUrl
+    // need to ensure x-client-id is set if we are using 9R endpoints
+    if (!customRequestHeaders) customRequestHeaders = {}
+    if (this.haskoinUrl.mainnet.includes('haskoin.ninerealms.com') && !customRequestHeaders['x-client-id']) {
+      customRequestHeaders['x-client-id'] = 'xchainjs-client'
+    }
+    setupHaskoinInstance(customRequestHeaders)
   }
 
   /**
@@ -319,7 +326,7 @@ class Client extends UTXOClient {
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-    return await Utils.broadcastTx({ txHex, haskoinUrl, customRequestHeaders: this.customRequestHeaders })
+    return await Utils.broadcastTx({ txHex, haskoinUrl })
   }
 }
 

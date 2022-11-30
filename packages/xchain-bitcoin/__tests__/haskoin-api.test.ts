@@ -8,6 +8,7 @@ const MOCK_URL = 'https://api.haskoin.com/haskoin-store/btc'
 describe('Haskoin API Test', () => {
   beforeEach(() => {
     mockHaskoinApi.init()
+    haskoin.setupHaskoinInstance({})
   })
   afterEach(() => {
     mockHaskoinApi.restore()
@@ -29,7 +30,6 @@ describe('Haskoin API Test', () => {
       const txHash = await haskoin.broadcastTx({
         txHex: '0xdead',
         haskoinUrl: MOCK_URL,
-        customRequestHeaders: { xxx: 'yyy' },
       })
       expect(txHash).toEqual('mock-txid')
     })

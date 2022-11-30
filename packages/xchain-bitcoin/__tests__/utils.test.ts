@@ -77,7 +77,6 @@ describe('Bitcoin Utils Test', () => {
       const txHash = await Utils.broadcastTx({
         txHex: '0xdead',
         haskoinUrl: 'haskoin-url',
-        customRequestHeaders: { xxx: 'yyy' },
       })
       expect(txHash).toEqual('mock-txid')
     })

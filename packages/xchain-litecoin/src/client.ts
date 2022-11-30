@@ -19,6 +19,7 @@ import { Address, AssetLTC, Chain, assetAmount, assetToBase } from '@xchainjs/xc
 import * as Litecoin from 'bitcoinjs-lib'
 
 import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
+import { setupInstance } from './node-api'
 import * as sochain from './sochain-api'
 import { NodeAuth } from './types'
 import { TxIO } from './types/sochain-api-types'
@@ -77,6 +78,12 @@ class Client extends UTXOClient {
       nodeAuth === null ? undefined : nodeAuth
 
     this.sochainUrl = sochainUrl
+    // need to ensure x-client-id is set if we are using 9R endpoints
+    if (!customRequestHeaders) customRequestHeaders = {}
+    if (this.nodeUrls.mainnet.includes('litecoin.ninerealms.com') && !customRequestHeaders['x-client-id']) {
+      customRequestHeaders['x-client-id'] = 'xchainjs-client'
+    }
+    setupInstance(customRequestHeaders)
   }
 
   /**
