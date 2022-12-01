@@ -36,4 +36,16 @@ describe('Thorchain query checkTx Integration Tests', () => {
     expect(progress?.status).toBe(TxStatus.Done)
     console.log(progress)
   })
+  it(`Should check add lp asym `, async () => {
+    const hash = '1D0CDFFA846D92B71FED3AE18056D1D3C3BD6FA221CC762B463F2CF28DC4D041'
+    const progress = await checkTxStage.checkTxProgress(hash)
+    expect(progress?.status).toBe(TxStatus.Done)
+    console.log(progress)
+  })
+  it(`Should check add Savers `, async () => {
+    const hash = '5DB63D41606C776360D86A8F3809738836F2917A2CE8ACA11F539EFEE9D72572'
+    const progress = await checkTxStage.checkTxProgress(hash)
+    expect(progress?.status).toBe(TxStatus.Done)
+    console.log(progress)
+  })
 })
