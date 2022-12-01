@@ -1,5 +1,5 @@
-import { LastBlock, LiquidityProvider, ObservedTx, TxOutItem, TxSignersResponse } from '@xchainjs/xchain-thornode'
-import { AssetRuneNative, Chain, THORChain, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
+import { LastBlock, ObservedTx, TxOutItem, TxSignersResponse } from '@xchainjs/xchain-thornode'
+import { Asset, Chain, THORChain, assetFromStringEx, baseAmount, isAssetRuneNative } from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
 import { CryptoAmount } from './crypto-amount'
@@ -16,39 +16,54 @@ export enum TxType {
   Other = 'Other',
   Unknown = 'Unknown',
 }
-export enum TxStatus {
-  Done = 'done',
-  Incomplete = 'incomplete',
-  Unknown = 'Unknown',
-  Refund = 'Refunded',
+export enum InboundStatus {
+  Observed_Consensus,
+  Observed_Incomplete,
+  Unknown,
 }
-
+export enum SwapStatus {
+  Complete,
+  Complete_Refunded,
+  Complete_Below_Dust,
+  Incomplete,
+}
+export enum AddLpStatus {
+  Complete,
+  Complete_Refunded,
+  Complete_Below_Dust,
+  Incomplete,
+}
 export type SwapInfo = {
+  status: SwapStatus
+  toAddress: string
+  minimumAmountOut: CryptoAmount
+  affliateFee: CryptoAmount
   expectedOutBlock: number
   expectedOutDate: Date
   expectedAmountOut: CryptoAmount
-  minimumAmountOut: CryptoAmount
-  affliateFee: CryptoAmount
-  toAddress: string
+  actualAmountOut?: CryptoAmount
 }
-
+export type AddLpInfo = {
+  status: AddLpStatus
+  isSymmetric: boolean
+  assetTx?: InboundTx
+  runeTx?: InboundTx
+}
+type InboundTx = {
+  status: InboundStatus
+  date: Date
+  block: number
+  expectedConfirmationBlock: number
+  expectedConfirmationDate: Date
+  amount: CryptoAmount
+  fromAddress: string
+  memo: string
+}
 export type TXProgress = {
   txType: TxType
-  status: TxStatus
-  inboundObserved?: {
-    date: Date
-    block: number
-    expectedConfirmationBlock: number
-    expectedConfirmationDate: Date
-    amount: CryptoAmount
-    expectedAmountOut: CryptoAmount
-    affiliateAmount: CryptoAmount
-    fromAddress: string
-    memo: string
-    assetLpPool?: string
-    lpPosition?: LiquidityProvider
-  }
+  inboundObserved?: InboundTx
   swapInfo?: SwapInfo
+  addLpInfo?: AddLpInfo
 }
 
 export class TransactionStage {
@@ -64,12 +79,11 @@ export class TransactionStage {
     try {
       if (inboundTxHash.length < 1) throw Error('inboundTxHash too short')
       txData = await this.thorchainCache.thornode.getTxDataSigners(inboundTxHash)
-      console.log(JSON.stringify(txData, null, 2))
+      // console.log(JSON.stringify(txData, null, 2))
     } catch (error) {
       // always wait 1 block for confirmation based on chain?
       return {
         txType: TxType.Unknown,
-        status: TxStatus.Unknown,
       }
     }
     //valid tx
@@ -87,124 +101,128 @@ export class TransactionStage {
 
     return progress
   }
+  private async checkSwapProgress(txData: TxSignersResponse, progress: TXProgress) {
+    if (progress.inboundObserved) {
+      const memo = txData.tx.tx.memo ?? ''
+      const memoFields = this.parseSwapMemo(memo)
+      const assetOut = assetFromStringEx(memoFields.asset)
+      const minimumAmountOut = memoFields.limit
+        ? await this.getCryptoAmount(memoFields.limit, assetOut)
+        : await this.getCryptoAmount('0', assetOut)
 
+      const affliateFee = memoFields.affiliateFee
+        ? await this.getCryptoAmount(memoFields.affiliateFee, assetOut)
+        : await this.getCryptoAmount('0', assetOut)
+      // TODO get out tx
+      // const status = outTx && outTx?.match(/REFUND/) ? TxStatus.Refund : TxStatus.Done
+      const swapInfo: SwapInfo = {
+        status: SwapStatus.Incomplete,
+        expectedOutBlock: Number(`${progress.inboundObserved?.expectedConfirmationBlock}`),
+        expectedOutDate: new Date(`${progress.inboundObserved?.expectedConfirmationDate}`),
+        expectedAmountOut: minimumAmountOut, // TODO call estimateSwap()
+        minimumAmountOut,
+        affliateFee,
+        toAddress: memoFields.destAddress,
+      }
+      progress.swapInfo = swapInfo
+    } // else case?
+  }
+  private parseSwapMemo(memo: string) {
+    //SWAP:ASSET:DESTADDR:LIM:AFFILIATE:FEE
+    const parts = memo.split(`:`)
+    const action = parts[0]
+    const asset = parts[1]
+    const destAddress = parts[2]
+    const limit = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
+    const affiliateAddress = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
+    const affiliateFee = parts.length > 5 && parts[5].length > 0 ? parts[5] : undefined
+    return { action, asset, destAddress, limit, affiliateAddress, affiliateFee }
+  }
+  private async getCryptoAmount(baseAmt: string, asset: Asset): Promise<CryptoAmount> {
+    const decimals =
+      Chain.THORChain === asset.chain
+        ? 8
+        : Number((await this.thorchainCache.getPoolForAsset(asset)).pool.nativeDecimal)
+    return new CryptoAmount(baseAmount(baseAmt, decimals), asset)
+  }
   private async determineObserved(txData: TxSignersResponse): Promise<TXProgress> {
     const progress: TXProgress = {
       txType: TxType.Unknown,
-      status: TxStatus.Unknown,
     }
 
     if (txData.tx) {
       const memo = txData.tx.tx.memo ?? ''
       const parts = memo?.split(`:`)
       const operation = parts && parts[0] ? parts[0] : ''
-      const inboundAsset = txData.tx.tx.coins?.[0].asset
+      const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
       const inboundAmount = txData.tx.tx.coins?.[0].amount
       const fromAddress = txData.tx.tx.from_address ?? 'unknkown'
-      const sourceChain = getChain(`${txData.tx.tx.chain}`)
-      const block = sourceChain == Chain.THORChain ? Number(txData.finalised_height) : Number(txData.tx.block_height)
-      let finalizeBlock = Number(txData.tx.finalise_height)
+      const block = assetIn.chain == Chain.THORChain ? Number(txData.finalised_height) : Number(txData.tx.block_height)
+
+      const finalizeBlock = txData.finalised_height ?? Number(txData.tx.finalise_height)
+      const status = txData.tx.status === 'done' ? InboundStatus.Observed_Consensus : InboundStatus.Observed_Incomplete
 
       if (operation.match(/[=|s|swap]/i)) progress.txType = TxType.Swap
-      if (operation.match(/[+|a|add]/i) && inboundAsset.includes('/')) progress.txType = TxType.AddSaver
-      if (operation.match(/[+|a|add]/i) && inboundAsset.includes('.')) progress.txType = TxType.AddLP
-      if (operation.match(/[-|wd|withdraw]/i) && inboundAsset.includes('/')) progress.txType = TxType.WithdrawSaver
-      if (operation.match(/[-|wd|withdraw]/i) && inboundAsset.includes('.')) progress.txType = TxType.WithdrawLP
+      if (operation.match(/[+|a|add]/i) && assetIn.synth) progress.txType = TxType.AddSaver
+      if (operation.match(/[+|a|add]/i) && !assetIn.synth) progress.txType = TxType.AddLP
+      if (operation.match(/[-|wd|withdraw]/i) && assetIn.synth) progress.txType = TxType.WithdrawSaver
+      if (operation.match(/[-|wd|withdraw]/i) && !assetIn.synth) progress.txType = TxType.WithdrawLP
 
-      //TODO get the pool asset and use native decimals
-      const assetIn = assetFromStringEx(inboundAsset)
-      const outAsset = assetFromStringEx(parts[1])
+      const amount = await this.getCryptoAmount(inboundAmount, assetIn)
+
       // find a date for when it was completed
-      let expectedConfirmationDate = await this.blockToDate(sourceChain, txData)
-
-      let amount: CryptoAmount
-      let expectedAmountOut: CryptoAmount
-      if (assetIn.chain || outAsset.chain == Chain.THORChain) {
-        amount = new CryptoAmount(baseAmount(inboundAmount), assetIn)
-        expectedAmountOut = new CryptoAmount(baseAmount(`${parts[3]}`), outAsset)
-      } else {
-        const InAssetPool = (await this.thorchainCache.getPoolForAsset(assetIn)).pool
-        amount = new CryptoAmount(baseAmount(inboundAmount, +InAssetPool.nativeDecimal), assetIn)
-        console.log(assetIn)
-        // Expected amount out from asset & asset amount in memo
-        const outAssetPool = (await this.thorchainCache.getPoolForAsset(outAsset)).pool
-        expectedAmountOut = new CryptoAmount(baseAmount(`${parts[3]}`, +outAssetPool.nativeDecimal), outAsset)
-        console.log(outAsset)
-      }
-      let assetLpPool
-      let lpPosition
-      if (TxType.AddLP) {
-        assetLpPool = parts[1]
-        finalizeBlock = Number(txData.finalised_height)
-        const address = `${txData.tx.tx.from_address}`
-        const asset = assetFromStringEx(assetLpPool)
-        const assetChain = getChain(asset.chain)
-        lpPosition = await this.thorchainCache.thornode.getLiquidityProvider(assetLpPool, address)
-        // find the date in which the asset should be added to the pool
-        if (lpPosition?.pending_asset) {
-          expectedConfirmationDate = await this.blockToDate(assetChain, txData)
-        }
-      }
-      //TODO look for affiliate fees
-      const affiliateFee = parts[5] ?? 0
-      const affiliateAmount = new CryptoAmount(baseAmount(affiliateFee), AssetRuneNative)
+      const expectedConfirmationDate = await this.blockToDate(assetIn.chain, txData)
 
       progress.inboundObserved = {
+        status,
         date: new Date(), // date observed?
         block,
         expectedConfirmationBlock: finalizeBlock,
         expectedConfirmationDate,
         amount,
-        expectedAmountOut,
-        affiliateAmount,
         fromAddress,
         memo,
-        assetLpPool,
-        lpPosition,
       }
     }
     return progress
   }
-  private checkSwapProgress(txData: TxSignersResponse, progress: TXProgress): void {
-    //TODO implement
-    txData
-    //const assetIn = assetFromStringEx(`${txData.observed_tx?.tx.coins?.[0].asset}`)
+
+  private async checkAddLpProgress(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
-      const assetOut = progress.inboundObserved?.expectedAmountOut.asset
-      const swapInfo: SwapInfo = {
-        expectedOutBlock: Number(`${progress.inboundObserved?.expectedConfirmationBlock}`),
-        expectedOutDate: new Date(`${progress.inboundObserved?.expectedConfirmationDate}`),
-        expectedAmountOut: progress.inboundObserved?.expectedAmountOut, // hmm expected amount out is the same as minimum amout out?
-        minimumAmountOut: new CryptoAmount(baseAmount(0), assetOut), // how?
-        affliateFee: progress.inboundObserved?.affiliateAmount,
-        toAddress: `${txData.tx.tx.to_address}`,
+      const memo = txData.tx.tx.memo ?? ''
+      const memoFields = this.parseAddLpMemo(memo)
+      // const finalizedBlock = Number(txData.finalised_height)
+      // const address = `${txData.tx.tx.from_address}`
+      // const asset = assetFromStringEx(memoFields.asset)
+      // const lpPosition = await this.thorchainCache.thornode.getLiquidityProvider(memoFields.asset, address)
+      // find the date in which the asset should be added to the pool
+      // if (lpPosition?.pending_asset) {
+      //   expectedConfirmationDate = await this.blockToDate(asset.chain, txData)
+      // }
+
+      const assetTx = !isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
+      const runeTx = isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
+      const addLpInfo: AddLpInfo = {
+        status: AddLpStatus.Incomplete,
+        isSymmetric: memoFields.pairedAddress ? true : false,
+        assetTx,
+        runeTx,
       }
-      progress.swapInfo = swapInfo
+      progress.addLpInfo = addLpInfo
     }
-    if (txData.tx.status === 'done') {
-      // This means the all nodes have observed
-      //TODO change this hack once thornode fixes bad openapi signatures
-      const outTx = JSON.stringify(txData.actions[0])
-      // console.log(JSON.stringify(txData.actions, null, 2))
-      progress.status = outTx && outTx?.match(/REFUND/) ? TxStatus.Refund : TxStatus.Done
-    } else {
-      progress.status = TxStatus.Incomplete
-    }
-  }
-
-  private checkAddLpProgress(txData: TxSignersResponse, progress: TXProgress): void {
-    //TODO implement
-    txData
     // need to check if TC has a recording of it
-    if (
-      txData.tx.status === 'done' &&
-      progress.inboundObserved?.lpPosition &&
-      progress.inboundObserved?.lpPosition?.pending_asset
-    ) {
-      progress.status = progress.inboundObserved.lpPosition ? TxStatus.Done : TxStatus.Incomplete
-    }
   }
-
+  private parseAddLpMemo(memo: string) {
+    //ADD:POOL:PAIREDADDR:AFFILIATE:FEE
+    const parts = memo.split(`:`)
+    const action = parts[0]
+    const asset = parts[1]
+    //optional fields
+    const pairedAddress = parts.length > 2 && parts[2].length > 0 ? parts[2] : undefined
+    const affiliateAddress = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
+    const affiliateFee = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
+    return { action, asset, pairedAddress, affiliateAddress, affiliateFee }
+  }
   /**
    * Private function to return the date stamp from block height and chain
    * @param chain
