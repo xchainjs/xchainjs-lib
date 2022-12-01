@@ -33,6 +33,12 @@ export enum AddLpStatus {
   Complete_Below_Dust,
   Incomplete,
 }
+export enum AddSaverStatus {
+  Complete,
+  Complete_Refunded,
+  Complete_Below_Dust,
+  Incomplete,
+}
 export type SwapInfo = {
   status: SwapStatus
   toAddress: string
@@ -49,6 +55,10 @@ export type AddLpInfo = {
   assetTx?: InboundTx
   runeTx?: InboundTx
 }
+export type AddSaverInfo = {
+  status: AddSaverStatus
+  assetTx?: InboundTx
+}
 type InboundTx = {
   status: InboundStatus
   date: Date
@@ -64,6 +74,7 @@ export type TXProgress = {
   inboundObserved?: InboundTx
   swapInfo?: SwapInfo
   addLpInfo?: AddLpInfo
+  addSaverInfo?: AddSaverInfo
 }
 
 export class TransactionStage {
@@ -81,7 +92,6 @@ export class TransactionStage {
       txData = await this.thorchainCache.thornode.getTxDataSigners(inboundTxHash)
       // console.log(JSON.stringify(txData, null, 2))
     } catch (error) {
-      // always wait 1 block for confirmation based on chain?
       return {
         txType: TxType.Unknown,
       }
@@ -94,6 +104,9 @@ export class TransactionStage {
         break
       case TxType.AddLP:
         this.checkAddLpProgress(txData, progress)
+        break
+      case TxType.AddSaver:
+        this.checkAddSaverProgress(progress)
         break
       default:
         break
@@ -114,7 +127,6 @@ export class TransactionStage {
         ? await this.getCryptoAmount(memoFields.affiliateFee, assetOut)
         : await this.getCryptoAmount('0', assetOut)
       // TODO get out tx
-      // const status = outTx && outTx?.match(/REFUND/) ? TxStatus.Refund : TxStatus.Done
       const swapInfo: SwapInfo = {
         status: SwapStatus.Incomplete,
         expectedOutBlock: Number(`${progress.inboundObserved?.expectedConfirmationBlock}`),
@@ -125,7 +137,7 @@ export class TransactionStage {
         toAddress: memoFields.destAddress,
       }
       progress.swapInfo = swapInfo
-    } // else case?
+    }
   }
   private parseSwapMemo(memo: string) {
     //SWAP:ASSET:DESTADDR:LIM:AFFILIATE:FEE
@@ -159,18 +171,18 @@ export class TransactionStage {
       const fromAddress = txData.tx.tx.from_address ?? 'unknkown'
       const block = assetIn.chain == Chain.THORChain ? Number(txData.finalised_height) : Number(txData.tx.block_height)
 
-      const finalizeBlock = txData.finalised_height ?? Number(txData.tx.finalise_height)
+      const finalizeBlock =
+        assetIn.chain == Chain.THORChain ? Number(txData.finalised_height) : Number(txData.tx.finalise_height)
       const status = txData.tx.status === 'done' ? InboundStatus.Observed_Consensus : InboundStatus.Observed_Incomplete
 
       if (operation.match(/[=|s|swap]/i)) progress.txType = TxType.Swap
-      if (operation.match(/[+|a|add]/i) && assetIn.synth) progress.txType = TxType.AddSaver
-      if (operation.match(/[+|a|add]/i) && !assetIn.synth) progress.txType = TxType.AddLP
+      if (operation.match(/[+|a|add]/i) && parts[1].match(/[/]/)) progress.txType = TxType.AddSaver
+      if (operation.match(/[+|a|add]/i) && parts[1].match(/[.]/)) progress.txType = TxType.AddLP
       if (operation.match(/[-|wd|withdraw]/i) && assetIn.synth) progress.txType = TxType.WithdrawSaver
       if (operation.match(/[-|wd|withdraw]/i) && !assetIn.synth) progress.txType = TxType.WithdrawLP
 
       const amount = await this.getCryptoAmount(inboundAmount, assetIn)
-
-      // find a date for when it was completed
+      // find a date for when it should be competed
       const expectedConfirmationDate = await this.blockToDate(assetIn.chain, txData)
 
       progress.inboundObserved = {
@@ -191,14 +203,9 @@ export class TransactionStage {
     if (progress.inboundObserved) {
       const memo = txData.tx.tx.memo ?? ''
       const memoFields = this.parseAddLpMemo(memo)
-      // const finalizedBlock = Number(txData.finalised_height)
-      // const address = `${txData.tx.tx.from_address}`
-      // const asset = assetFromStringEx(memoFields.asset)
-      // const lpPosition = await this.thorchainCache.thornode.getLiquidityProvider(memoFields.asset, address)
+      const asset = assetFromStringEx(memoFields.asset)
       // find the date in which the asset should be added to the pool
-      // if (lpPosition?.pending_asset) {
-      //   expectedConfirmationDate = await this.blockToDate(asset.chain, txData)
-      // }
+      progress.inboundObserved.expectedConfirmationDate = await this.blockToDate(asset.chain, txData)
 
       const assetTx = !isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
       const runeTx = isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
@@ -210,7 +217,17 @@ export class TransactionStage {
       }
       progress.addLpInfo = addLpInfo
     }
-    // need to check if TC has a recording of it
+  }
+
+  private async checkAddSaverProgress(progress: TXProgress) {
+    if (progress.inboundObserved) {
+      const assetTx = !isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
+      const addSaverInfo: AddSaverInfo = {
+        status: AddSaverStatus.Incomplete,
+        assetTx,
+      }
+      progress.addSaverInfo = addSaverInfo
+    }
   }
   private parseAddLpMemo(memo: string) {
     //ADD:POOL:PAIREDADDR:AFFILIATE:FEE
@@ -225,9 +242,9 @@ export class TransactionStage {
   }
   /**
    * Private function to return the date stamp from block height and chain
-   * @param chain
-   * @param block
-   * @returns
+   * @param chain - input chain
+   * @param txData - txResponse
+   * @returns date()
    */
   private async blockToDate(chain: Chain, txData: TxSignersResponse): Promise<Date> {
     const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
@@ -240,11 +257,18 @@ export class TransactionStage {
     if (chainHeight > recordedBlock) {
       blockDifference = chainHeight - recordedBlock
       time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
+    } else if (chain == Chain.THORChain) {
+      const currentHeight = lastBlockObj.find((obj) => obj)
+      const thorchainHeight = Number(`${currentHeight?.thorchain}`) // current height of the TC
+      const finalisedHeight = Number(`${txData.finalised_height}`) // height tx was completed in
+      blockDifference = thorchainHeight - finalisedHeight
+      time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
     } else {
       time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
     }
     return time
   }
+
   // Functions follow this logic below
   // 1. Has TC see it?
   // 2. If observed, is there inbound conf counting (for non BFT Chains)? If so, for how long
