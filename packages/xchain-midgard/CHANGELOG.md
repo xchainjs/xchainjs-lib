@@ -1,3 +1,11 @@
+# v0.4.0 (2022-11-27)
+
+## Update
+
+- Update to latest Midgard 2.11.0
+- support custom headers
+- set default 'x-client-id' in all calls
+
 # v0.3.0 (2022-11-11)
 
 ## Update

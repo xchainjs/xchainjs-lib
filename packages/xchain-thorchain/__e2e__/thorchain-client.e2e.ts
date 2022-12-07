@@ -2,6 +2,7 @@ import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { Asset, AssetRuneNative, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+// import axios from 'axios'
 
 export type Swap = {
   fromBaseAmount: BaseAmount
@@ -22,6 +23,16 @@ const thorClient: XChainClient = new ThorClient({
 })
 const thorchainClient = (thorClient as unknown) as ThorchainClient
 const bnbClient: XChainClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
+
+// axios.interceptors.request.use((request) => {
+//   console.log('Starting Request', JSON.stringify(request, null, 2))
+//   return request
+// })
+
+// axios.interceptors.response.use((response) => {
+//   console.log('Response:', JSON.stringify(response, null, 2))
+//   return response
+// })
 
 describe('thorchain Integration Tests', () => {
   it('should fetch thorchain balances', async () => {

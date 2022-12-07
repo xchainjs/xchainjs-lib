@@ -1,3 +1,11 @@
+# v0.1.3 (2022-11-27)
+
+## Update
+
+- Update to latest THORNode 1.100.0
+- support custom headers
+- set default 'x-client-id' in all calls
+
 # v0.1.2 (2022-11-11)
 
 ## Update

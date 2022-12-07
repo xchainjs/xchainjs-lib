@@ -8,6 +8,7 @@ const MOCK_URL = 'https://api.haskoin.com/haskoin-store/btc'
 describe('Haskoin API Test', () => {
   beforeEach(() => {
     mockHaskoinApi.init()
+    haskoin.setupHaskoinInstance({})
   })
   afterEach(() => {
     mockHaskoinApi.restore()
@@ -26,7 +27,10 @@ describe('Haskoin API Test', () => {
 
   describe('broadcastTx', () => {
     it('returns txHash', async () => {
-      const txHash = await haskoin.broadcastTx({ txHex: '0xdead', haskoinUrl: MOCK_URL })
+      const txHash = await haskoin.broadcastTx({
+        txHex: '0xdead',
+        haskoinUrl: MOCK_URL,
+      })
       expect(txHash).toEqual('mock-txid')
     })
   })

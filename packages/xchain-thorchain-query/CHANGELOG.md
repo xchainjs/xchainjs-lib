@@ -1,3 +1,9 @@
+# v0.1.9 (2022-11-27)
+
+## Udpate
+
+- Bump dependencies
+
 # v0.1.8 (2022-11-12)
 
 ## ADD

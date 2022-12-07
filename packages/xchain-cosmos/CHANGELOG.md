@@ -1,3 +1,9 @@
+# v.0.20.4 (2022-11-22)
+
+## Update
+- Added `customRequestHeaders`
+- Bumped `xchain-client`
+
 # v.0.20.3 (2022-10-13)
 
 ## Update

@@ -1,8 +1,13 @@
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
 
 import { BroadcastTxParams } from './types/common'
 import { TxBroadcastResponse } from './types/node-api-types'
 
+let instance: AxiosInstance = axios.create()
+
+export const setupInstance = (customRequestHeaders: Record<string, string>) => {
+  instance = axios.create({ headers: customRequestHeaders })
+}
 /**
  * Broadcast transaction.
  *
@@ -20,9 +25,9 @@ export const broadcastTx = async ({ txHex, auth, nodeUrl }: BroadcastTxParams): 
   }
   let response: TxBroadcastResponse
   if (auth) {
-    response = (await axios.post(nodeUrl, postData, { auth })).data
+    response = (await instance.post(nodeUrl, postData, { auth })).data
   } else {
-    response = (await axios.post(nodeUrl, postData)).data
+    response = (await instance.post(nodeUrl, postData)).data
   }
   if (response.error) {
     throw new Error(`failed to broadcast a transaction: ${response.error}`)
