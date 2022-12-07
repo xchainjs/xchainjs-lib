@@ -2,14 +2,7 @@
 // import axios from 'axios'
 
 import { ThorchainCache } from '../src/thorchain-cache'
-<<<<<<< HEAD
 import { TransactionStage, TxType } from '../src/thorchain-checktx'
-=======
-import { TransactionStage } from '../src/thorchain-checktx'
-// import { MidgardConfig } from '../src/types'
-// import { Midgard } from '../src/utils/midgard'
-// import { Thornode, ThornodeConfig } from '../src/utils/thornode'
->>>>>>> master
 
 // const mc: MidgardConfig = {
 //   apiRetries: 2,

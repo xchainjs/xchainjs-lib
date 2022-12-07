@@ -17,31 +17,31 @@ export enum TxType {
   Unknown = 'Unknown',
 }
 export enum InboundStatus {
-  Observed_Consensus,
-  Observed_Incomplete,
-  Unknown,
+  Observed_Consensus = 'Observed_Consensus',
+  Observed_Incomplete = 'Observed_Incomplete',
+  Unknown = 'Unknown',
 }
 export enum SwapStatus {
-  Complete,
-  Complete_Refunded,
-  Complete_Below_Dust,
-  Incomplete,
+  Complete = 'Complete',
+  Complete_Refunded = 'Complete_Refunded',
+  Complete_Below_Dust = 'Complete_Below_Dust',
+  Incomplete = 'Incomplete',
 }
 export enum AddLpStatus {
-  Complete,
-  Complete_Refunded,
-  Complete_Below_Dust,
-  Incomplete,
+  Complete = 'Complete',
+  Complete_Refunded = 'Complete_Refunded',
+  Complete_Below_Dust = 'Complete_Below_Dust',
+  Incomplete = 'Incomplete',
 }
 export enum WithdrawLpStatus {
-  Complete,
-  Incomplete,
+  Complete = 'Complete',
+  Incomplete = 'Incomplete',
 }
 export enum AddSaverStatus {
-  Complete,
-  Complete_Refunded,
-  Complete_Below_Dust,
-  Incomplete,
+  Complete = 'Complete',
+  Complete_Refunded = 'Complete_Refunded',
+  Complete_Below_Dust = 'Complete_Below_Dust',
+  Incomplete = 'Incomplete',
 }
 export type SwapInfo = {
   status: SwapStatus
