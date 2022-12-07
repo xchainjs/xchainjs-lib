@@ -2,7 +2,8 @@
 
 ## Update
 
-- Added `customRequestHeaders` to `BroadcastTxParams` & bumped `xchain-client`
+- Added `customRequestHeaders` to `BroadcastTxParams` 
+- Bumped `xchain-client`
 
 # v.0.15.3 (2022-10-14)
 

@@ -124,8 +124,9 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       [Network.Stagenet]: 'thorchain-stagenet-v2',
       [Network.Testnet]: 'deprecated',
     },
+    customRequestHeaders = {},
   }: XChainClientParams & ThorchainClientParams) {
-    super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
+    super(Chain.Cosmos, { network, rootDerivationPaths, phrase, customRequestHeaders })
     this.clientUrl = clientUrl
     this.explorerUrls = explorerUrls
     this.chainIds = chainIds
@@ -133,10 +134,15 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     registerSendCodecs()
     registerDepositCodecs()
 
+    if (this.clientUrl[Network.Mainnet].node.includes('ninerealms.com') && !this.customRequestHeaders['x-client-id']) {
+      this.customRequestHeaders['x-client-id'] = 'xchainjs-client'
+    }
+
     this.cosmosClient = new CosmosSDKClient({
       server: this.getClientUrl().node,
       chainId: this.getChainId(network),
       prefix: getPrefix(network),
+      headers: this.customRequestHeaders,
     })
   }
 

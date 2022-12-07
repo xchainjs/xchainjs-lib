@@ -67,7 +67,7 @@ class Client extends UTXOClient {
       [Network.Testnet]: `m/84'/1'/0'/0/`,
       [Network.Stagenet]: `m/84'/2'/0'/0/`,
     },
-    customRequestHeaders,
+    customRequestHeaders = {},
   }: LitecoinClientParams) {
     super(Chain.Litecoin, { network, rootDerivationPaths, phrase, feeBounds, customRequestHeaders })
     this.nodeUrls = nodeUrls
@@ -79,11 +79,10 @@ class Client extends UTXOClient {
 
     this.sochainUrl = sochainUrl
     // need to ensure x-client-id is set if we are using 9R endpoints
-    if (!customRequestHeaders) customRequestHeaders = {}
-    if (this.nodeUrls.mainnet.includes('litecoin.ninerealms.com') && !customRequestHeaders['x-client-id']) {
-      customRequestHeaders['x-client-id'] = 'xchainjs-client'
+    if (this.nodeUrls.mainnet.includes('litecoin.ninerealms.com') && !this.customRequestHeaders['x-client-id']) {
+      this.customRequestHeaders['x-client-id'] = 'xchainjs-client'
     }
-    setupInstance(customRequestHeaders)
+    setupInstance(this.customRequestHeaders)
   }
 
   /**

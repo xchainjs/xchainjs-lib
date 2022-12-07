@@ -7,6 +7,7 @@ export type CosmosSDKClientParams = {
   server: string
   chainId: string
   prefix?: string
+  headers?: Record<string, string>
 }
 
 export type SearchTxParams = {

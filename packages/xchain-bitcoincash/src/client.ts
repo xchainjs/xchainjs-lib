@@ -56,7 +56,7 @@ class Client extends UTXOClient {
       [Network.Testnet]: `m/44'/1'/0'/0/`,
       [Network.Stagenet]: `m/44'/145'/0'/0/`,
     },
-    customRequestHeaders,
+    customRequestHeaders = {},
   }: BitcoinCashClientParams) {
     super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase, feeBounds, customRequestHeaders })
     this.network = network
@@ -65,11 +65,10 @@ class Client extends UTXOClient {
     phrase && this.setPhrase(phrase)
 
     // need to ensure x-client-id is set if we are using 9R endpoints
-    if (!customRequestHeaders) customRequestHeaders = {}
-    if (this.haskoinUrl.mainnet.includes('haskoin.ninerealms.com') && !customRequestHeaders['x-client-id']) {
-      customRequestHeaders['x-client-id'] = 'xchainjs-client'
+    if (this.haskoinUrl.mainnet.includes('haskoin.ninerealms.com') && !this.customRequestHeaders['x-client-id']) {
+      this.customRequestHeaders['x-client-id'] = 'xchainjs-client'
     }
-    setupHaskoinInstance(customRequestHeaders)
+    setupHaskoinInstance(this.customRequestHeaders)
   }
 
   /**

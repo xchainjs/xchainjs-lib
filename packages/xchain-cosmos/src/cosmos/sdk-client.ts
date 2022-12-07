@@ -35,12 +35,13 @@ export class CosmosSDKClient {
   prefix = ''
 
   // by default, cosmos chain
-  constructor({ server, chainId, prefix = 'cosmos' }: CosmosSDKClientParams) {
+  constructor({ server, chainId, prefix = 'cosmos', headers }: CosmosSDKClientParams) {
     this.server = server
     this.chainId = chainId
     this.sdk = new cosmosclient.CosmosSDK(server, this.chainId)
 
     this.updatePrefix(prefix)
+    if (headers) axios.defaults.headers.common = headers
   }
 
   updatePrefix(prefix: string) {
