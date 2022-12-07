@@ -7,13 +7,18 @@
 
 import { Network, TxHash } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount, delay } from '@xchainjs/xchain-util'
-import axios, { AxiosError, AxiosResponse } from 'axios'
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
 
 import { BTC_DECIMAL } from './const'
 import { getConfirmedTxStatus } from './sochain-api'
 import type { BroadcastTxParams } from './types/common'
 import type { BalanceData, UtxoData } from './types/haskoin-api-types'
 
+let instance: AxiosInstance = axios.create()
+
+export const setupHaskoinInstance = (customRequestHeaders: Record<string, string>) => {
+  instance = axios.create({ headers: customRequestHeaders })
+}
 export const getBalance = async ({
   haskoinUrl,
   address,
@@ -25,7 +30,7 @@ export const getBalance = async ({
 }): Promise<BaseAmount> => {
   const {
     data: { confirmed, unconfirmed },
-  } = await axios.get<BalanceData>(`${haskoinUrl}/address/${address}/balance`)
+  } = await instance.get<BalanceData>(`${haskoinUrl}/address/${address}/balance`)
 
   const confirmedAmount = baseAmount(confirmed, BTC_DECIMAL)
   const unconfirmedAmount = baseAmount(unconfirmed, BTC_DECIMAL)
@@ -40,7 +45,7 @@ export const getUnspentTxs = async ({
   haskoinUrl: string
   address: string
 }): Promise<UtxoData[]> => {
-  const { data: response } = await axios.get<UtxoData[]>(`${haskoinUrl}/address/${address}/unspent`)
+  const { data: response } = await instance.get<UtxoData[]>(`${haskoinUrl}/address/${address}/unspent`)
 
   return response
 }
@@ -90,8 +95,6 @@ export const getConfirmedUnspentTxs = async ({
  * @returns {TxHash} Transaction hash.
  */
 export const broadcastTx = async ({ txHex, haskoinUrl }: BroadcastTxParams): Promise<TxHash> => {
-  const instance = axios.create()
-
   const MAX = 5
   let counter = 0
 

@@ -99,7 +99,11 @@ describe('Litecoin Utils Test', () => {
 
   describe('broadcastTx', () => {
     it('returns txHash', async () => {
-      const txHash = await Utils.broadcastTx({ txHex: '0xdead', nodeUrl: 'https://ltc.thorchain.info' })
+      const txHash = await Utils.broadcastTx({
+        txHex: '0xdead',
+        nodeUrl: 'https://ltc.thorchain.info',
+        customRequestHeaders: { xxx: 'yyy' },
+      })
       expect(txHash).toEqual('mock-txid')
     })
   })

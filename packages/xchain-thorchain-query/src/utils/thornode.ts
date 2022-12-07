@@ -32,11 +32,7 @@ export type ThornodeConfig = {
 const defaultThornodeConfig: Record<Network, ThornodeConfig> = {
   mainnet: {
     apiRetries: 3,
-    thornodeBaseUrls: [
-      `https://thornode.ninerealms.com`,
-      `https://thornode.thorswap.net`,
-      `https://thornode.thorchain.info`,
-    ],
+    thornodeBaseUrls: [`https://thornode.ninerealms.com`, `https://thornode.thorswap.net`],
   },
   stagenet: {
     apiRetries: 3,

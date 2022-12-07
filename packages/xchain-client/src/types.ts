@@ -88,6 +88,7 @@ export type XChainClientParams = {
   phrase?: string
   feeBounds?: FeeBounds
   rootDerivationPaths?: RootDerivationPaths
+  customRequestHeaders?: Record<string, string>
 }
 
 export interface XChainClient {

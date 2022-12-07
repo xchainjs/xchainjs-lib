@@ -1,3 +1,9 @@
+# v.0.27.4 (2022-11-24)
+
+## Update
+
+- Bumped Dependencies
+
 # v.0.27.3 (2022-10-13)
 
 ## Update

@@ -1,3 +1,9 @@
+# v0.3.9 (2022-11-24)
+
+## udpate
+
+- Bump `xchain-client`
+
 # v0.3.8 (2022-11-08)
 
 ## Update
