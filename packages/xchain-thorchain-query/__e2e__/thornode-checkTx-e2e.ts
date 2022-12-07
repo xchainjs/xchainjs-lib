@@ -42,10 +42,22 @@ describe('Thorchain query checkTx Integration Tests', () => {
     expect(progress?.txType).toBe(TxType.AddLP)
     console.log(progress)
   })
+  it(`Should check add lp sym `, async () => {
+    const hash = '95808713ED7B30CAAA2E19B458F581F63F3DB50669972E5B0DCD0402AC3F48F1'
+    const progress = await checkTxStage.checkTxProgress(hash)
+    expect(progress?.txType).toBe(TxType.AddLP)
+    console.log(progress)
+  })
   it(`Should check add Savers `, async () => {
     const hash = '5DB63D41606C776360D86A8F3809738836F2917A2CE8ACA11F539EFEE9D72572'
     const progress = await checkTxStage.checkTxProgress(hash)
     expect(progress?.txType).toBe(TxType.AddSaver)
+    console.log(progress)
+  })
+  it(`Should check withdraw lp `, async () => {
+    const hash = '51328FFAE99C0DF15CC5A43E299CDF6556F27B0D4E8F89EE380D5035541863FD'
+    const progress = await checkTxStage.checkTxProgress(hash)
+    expect(progress?.txType).toBe(TxType.WithdrawLP)
     console.log(progress)
   })
 })

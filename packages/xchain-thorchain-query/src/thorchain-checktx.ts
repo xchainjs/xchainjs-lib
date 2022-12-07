@@ -33,6 +33,10 @@ export enum AddLpStatus {
   Complete_Below_Dust,
   Incomplete,
 }
+export enum WithdrawLpStatus {
+  Complete,
+  Incomplete,
+}
 export enum AddSaverStatus {
   Complete,
   Complete_Refunded,
@@ -54,6 +58,12 @@ export type AddLpInfo = {
   isSymmetric: boolean
   assetTx?: InboundTx
   runeTx?: InboundTx
+  assetConfirmationDate?: Date
+}
+export type WithdrawLpInfo = {
+  status: WithdrawLpStatus
+  withdrawalAmount: CryptoAmount
+  expectedConfirmationDate: Date
 }
 export type AddSaverInfo = {
   status: AddSaverStatus
@@ -75,6 +85,7 @@ export type TXProgress = {
   swapInfo?: SwapInfo
   addLpInfo?: AddLpInfo
   addSaverInfo?: AddSaverInfo
+  withdrawLpInfo?: WithdrawLpInfo
 }
 
 export class TransactionStage {
@@ -100,13 +111,16 @@ export class TransactionStage {
     const progress = await this.determineObserved(txData)
     switch (progress.txType) {
       case TxType.Swap:
-        this.checkSwapProgress(txData, progress)
+        await this.checkSwapProgress(txData, progress)
         break
       case TxType.AddLP:
-        this.checkAddLpProgress(txData, progress)
+        await this.checkAddLpProgress(txData, progress)
+        break
+      case TxType.WithdrawLP:
+        await this.checkWithdrawLpProgress(txData, progress)
         break
       case TxType.AddSaver:
-        this.checkAddSaverProgress(progress)
+        await this.checkAddSaverProgress(progress)
         break
       default:
         break
@@ -127,6 +141,7 @@ export class TransactionStage {
         ? await this.getCryptoAmount(memoFields.affiliateFee, assetOut)
         : await this.getCryptoAmount('0', assetOut)
       // TODO get out tx
+      // const outMemo = txData.tx.out_hashes ?? txData.out_txs
       const swapInfo: SwapInfo = {
         status: SwapStatus.Incomplete,
         expectedOutBlock: Number(`${progress.inboundObserved?.expectedConfirmationBlock}`),
@@ -178,8 +193,8 @@ export class TransactionStage {
       if (operation.match(/[=|s|swap]/i)) progress.txType = TxType.Swap
       if (operation.match(/[+|a|add]/i) && parts[1].match(/[/]/)) progress.txType = TxType.AddSaver
       if (operation.match(/[+|a|add]/i) && parts[1].match(/[.]/)) progress.txType = TxType.AddLP
-      if (operation.match(/[-|wd|withdraw]/i) && assetIn.synth) progress.txType = TxType.WithdrawSaver
-      if (operation.match(/[-|wd|withdraw]/i) && !assetIn.synth) progress.txType = TxType.WithdrawLP
+      if (operation.match(/[-|wd|withdraw]/i) && parts[1].match(/[/]/)) progress.txType = TxType.WithdrawSaver
+      if (operation.match(/[-|wd|withdraw]/i) && parts[1].match(/[.]/)) progress.txType = TxType.WithdrawLP
 
       const amount = await this.getCryptoAmount(inboundAmount, assetIn)
       // find a date for when it should be competed
@@ -204,18 +219,45 @@ export class TransactionStage {
       const memo = txData.tx.tx.memo ?? ''
       const memoFields = this.parseAddLpMemo(memo)
       const asset = assetFromStringEx(memoFields.asset)
-      // find the date in which the asset should be added to the pool
-      progress.inboundObserved.expectedConfirmationDate = await this.blockToDate(asset.chain, txData)
-
+      const isSymmetric = memoFields.pairedAddress ? true : false
       const assetTx = !isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
       const runeTx = isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
+      const pairedAssetExpectedConfirmationDate = assetTx ? await this.blockToDate(asset.chain, txData) : undefined
+      const checkLpPosition = await this.thorchainCache.thornode.getLiquidityProvider(
+        memoFields.asset,
+        progress.inboundObserved.fromAddress,
+      )
+      const status = checkLpPosition ? AddLpStatus.Complete : AddLpStatus.Incomplete
       const addLpInfo: AddLpInfo = {
-        status: AddLpStatus.Incomplete,
-        isSymmetric: memoFields.pairedAddress ? true : false,
+        status,
+        isSymmetric,
         assetTx,
         runeTx,
+        assetConfirmationDate: pairedAssetExpectedConfirmationDate,
       }
       progress.addLpInfo = addLpInfo
+    }
+  }
+
+  private async checkWithdrawLpProgress(txData: TxSignersResponse, progress: TXProgress) {
+    if (progress.inboundObserved) {
+      const memo = txData.tx.tx.memo ?? ''
+      const memoFields = this.parseAddLpMemo(memo)
+      const asset = assetFromStringEx(memoFields.asset)
+
+      // find the date in which the asset should be seen in the wallet
+      const expectedConfirmationDate = await this.blockToDate(asset.chain, txData)
+      const outAmount = JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`)
+      const status =
+        progress.inboundObserved.date > expectedConfirmationDate
+          ? WithdrawLpStatus.Complete
+          : WithdrawLpStatus.Incomplete
+      const withdrawLpInfo: WithdrawLpInfo = {
+        status,
+        withdrawalAmount: new CryptoAmount(baseAmount(outAmount[0]), asset),
+        expectedConfirmationDate,
+      }
+      progress.withdrawLpInfo = withdrawLpInfo
     }
   }
 
@@ -246,7 +288,7 @@ export class TransactionStage {
    * @param txData - txResponse
    * @returns date()
    */
-  private async blockToDate(chain: Chain, txData: TxSignersResponse): Promise<Date> {
+  private async blockToDate(chain: Chain, txData: TxSignersResponse) {
     const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
     const time = new Date()
     const recordedBlock = Number(`${txData.tx.block_height}`)
