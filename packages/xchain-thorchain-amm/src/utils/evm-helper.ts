@@ -1,12 +1,12 @@
 import { TxHash, XChainClient } from '@xchainjs/xchain-client'
-import { ApproveParams, Client as EvmClient, MAX_APPROVAL } from '@xchainjs/xchain-evm'
+import { ApproveParams, Client as EvmClient, MAX_APPROVAL, abi } from '@xchainjs/xchain-evm'
 import { ThorchainCache } from '@xchainjs/xchain-thorchain-query'
 import { Asset, BaseAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
-import routerABI from '../abi/routerABI.json'
 import { DepositParams } from '../types'
 
+const FIFTEEN_MIN_IN_SECS = 15 * 60
 export class EvmHelper {
   private evmClient: EvmClient
   private client: XChainClient
@@ -59,17 +59,19 @@ export class EvmHelper {
       }
       const contractAddress = getContractAddressFromAsset(params.asset)
       const checkSummedContractAddress = ethers.utils.getAddress(contractAddress)
+      const expiry = Date.now() / 1000 + FIFTEEN_MIN_IN_SECS
       const depositParams = [
         inboundAsgard.address,
         checkSummedContractAddress,
         params.amount.amount().toFixed(),
         params.memo,
+        expiry,
       ]
 
-      const routerContract = new ethers.Contract(inboundAsgard.router, routerABI)
+      const routerContract = new ethers.Contract(inboundAsgard.router, abi.router)
       const gasLimit = '80000'
 
-      const unsignedTx = await routerContract.populateTransaction.deposit(...depositParams, {
+      const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams, {
         from: address,
         value: 0,
         gasPrice: gasPrice.fast.amount().toFixed(),
