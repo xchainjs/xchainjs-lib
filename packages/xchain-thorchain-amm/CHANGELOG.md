@@ -1,3 +1,9 @@
+# v0.3.10 (2022-12-08)
+
+## udpate
+
+- changed eth & evm deposit() to use depositWithExpiry() with a 15 min expiry time
+
 # v0.3.9 (2022-11-24)
 
 ## udpate
