@@ -60,7 +60,8 @@ export class EthHelper {
       }
       const contractAddress = getContractAddressFromAsset(params.asset)
       const checkSummedContractAddress = ethers.utils.getAddress(contractAddress)
-      const expiry = Date.now() / 1000 + FIFTEEN_MIN_IN_SECS
+      const latestBlockTimeUnixSecs = (await this.ethClient.getProvider().getBlock('latest')).timestamp
+      const expiry = latestBlockTimeUnixSecs + FIFTEEN_MIN_IN_SECS
       const depositParams = [
         inboundAsgard.address,
         checkSummedContractAddress,
