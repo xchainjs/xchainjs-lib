@@ -1,3 +1,4 @@
+import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Asset,
   AssetAtom,
@@ -881,7 +882,7 @@ export class ThorchainQuery {
    */
   public async getSaverPosition(params: getSaver): Promise<SaversPosition> {
     const blockData = (await this.thorchainCache.thornode.getLastBlock()).find(
-      (item) => item.chain === params.asset.chain,
+      (item: LastBlock) => item.chain === params.asset.chain,
     )
     const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.ticker}`)).find(
       (item) => item.asset_address === params.address,

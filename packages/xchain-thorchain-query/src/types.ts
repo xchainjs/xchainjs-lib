@@ -1,5 +1,5 @@
 import { FeeOption } from '@xchainjs/xchain-client'
-import { LiquidityProvider } from '@xchainjs/xchain-thornode'
+import { LiquidityProviderSummary } from '@xchainjs/xchain-thornode'
 import { Address, Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -189,7 +189,7 @@ export type WithdrawLiquidityPosition = {
 }
 export type LiquidityPosition = {
   poolShare: PoolShareDetail
-  position: LiquidityProvider
+  position: LiquidityProviderSummary
   lpGrowth: string
   impermanentLossProtection: ILProtectionData
 }

@@ -3,8 +3,7 @@ import {
   Configuration,
   InboundAddress,
   LastBlock,
-  LiquidityProvider,
-  LiquidityProviderResponse,
+  LiquidityProviderSummary,
   LiquidityProvidersApi,
   NetworkApi,
   Pool,
@@ -14,6 +13,7 @@ import {
   QuoteSaverDepositResponse,
   QuoteSaverWithdrawResponse,
   QuoteSwapResponse,
+  SaverResponse,
   SaversApi,
   TransactionsApi,
   TxOutItem,
@@ -150,7 +150,11 @@ export class Thornode {
    * @param height - optional block height, defaults to current tip
    * @returns
    */
-  async getLiquidityProvider(asset: string, address: string, height?: number): Promise<LiquidityProvider | undefined> {
+  async getLiquidityProvider(
+    asset: string,
+    address: string,
+    height?: number,
+  ): Promise<LiquidityProviderSummary | undefined> {
     for (const api of this.liquidityProvidersApi) {
       try {
         const lps = (await api.liquidityProviders(asset, height)).data
@@ -185,7 +189,7 @@ export class Thornode {
    * @param height - optional thorchain block height parameter
    * @returns - Liquidity Provider Object
    */
-  async getSavers(asset: string, height?: number): Promise<LiquidityProviderResponse> {
+  async getSavers(asset: string, height?: number): Promise<SaverResponse> {
     for (const api of this.saversApi) {
       try {
         const resp = (await api.savers(asset, height)).data
@@ -202,7 +206,7 @@ export class Thornode {
    * @param height - optional thorchain block height parameter
    * @returns - Liquidity Provider Object
    */
-  async getSaver(asset: string, address: string, height?: number): Promise<LiquidityProviderResponse> {
+  async getSaver(asset: string, address: string, height?: number): Promise<SaverResponse> {
     for (const api of this.saversApi) {
       try {
         const resp = (await api.saver(asset, address, height)).data
