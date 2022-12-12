@@ -471,3 +471,16 @@ export const getExplorerTxUrl = ({
       return `${url}?network=testnet`
   }
 }
+
+export const getAccount = (
+  address: string,
+  client: CosmosSDKClient,
+): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> => {
+  const accAddress = cosmosclient.AccAddress.fromString(address)
+  return client.getAccount(accAddress)
+}
+
+export const getSequence = async (address: string, client: CosmosSDKClient): Promise<number | null> => {
+  const { sequence } = await getAccount(address, client)
+  return sequence?.toNumber() ?? null
+}
