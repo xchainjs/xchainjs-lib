@@ -1,3 +1,12 @@
+# v.0.27.5 (2022-12-12)
+
+## Update
+
+- Add optional `sequence` to `transfer` and `deposit` to override `sequence`
+- Add helpers `getAccount` and `getSequence` to `utils`
+
+# v.0.27.4 (2022-11-??)
+
 # v.0.27.3 (2022-11-24)
 
 ## Update

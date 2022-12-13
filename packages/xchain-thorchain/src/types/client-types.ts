@@ -33,6 +33,7 @@ export type DepositParam = {
   amount: BaseAmount
   memo: string
   gasLimit?: BigNumber
+  sequence?: number
 }
 
 export type TxData = Pick<Tx, 'from' | 'to' | 'type'>

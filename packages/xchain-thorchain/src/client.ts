@@ -462,6 +462,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     amount,
     memo,
     gasLimit = new BigNumber(DEPOSIT_GAS_LIMIT_VALUE),
+    sequence,
   }: DepositParam): Promise<TxHash> {
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
@@ -514,7 +515,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       txBody: depositTxBody,
       signerPubkey: cosmosclient.codec.instanceToProtoAny(signerPubkey),
       gasLimit: Long.fromString(gasLimit.toFixed(0)),
-      sequence: account.sequence || Long.ZERO,
+      sequence: sequence ? Long.fromNumber(sequence) : account.sequence || Long.ZERO,
     })
 
     const txHash = await this.getCosmosClient().signAndBroadcast(txBuilder, privKey, accountNumber)
@@ -540,7 +541,8 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     recipient,
     memo,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
-  }: TxParams & { gasLimit?: BigNumber }): Promise<TxHash> {
+    sequence,
+  }: TxParams & { gasLimit?: BigNumber; sequence?: number }): Promise<TxHash> {
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
       balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
@@ -586,7 +588,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       txBody: txBody,
       gasLimit: Long.fromString(gasLimit.toString()),
       signerPubkey: cosmosclient.codec.instanceToProtoAny(signerPubkey),
-      sequence: account.sequence || Long.ZERO,
+      sequence: sequence ? Long.fromNumber(sequence) : account.sequence || Long.ZERO,
     })
 
     const txHash = await this.cosmosClient.signAndBroadcast(txBuilder, privKey, accountNumber)
