@@ -43,6 +43,23 @@ describe('thorchain Integration Tests', () => {
     })
     expect(balances.length).toBeGreaterThan(0)
   })
+  it('should xfer rune from wallet 0 -> 1, with a memo and custom sequence', async () => {
+    try {
+      const addressTo = thorClient.getAddress(1)
+      const transferTx = {
+        walletIndex: 0,
+        asset: AssetRuneNative,
+        amount: baseAmount('100'),
+        recipient: addressTo,
+        memo: 'Hi!',
+        sequence: 1,
+      }
+      await thorClient.transfer(transferTx)
+      fail()
+    } catch (error) {
+      expect(error.toString().includes('account sequence mismatch')).toBe(true)
+    }
+  })
   it('should xfer rune from wallet 0 -> 1, with a memo', async () => {
     try {
       const addressTo = thorClient.getAddress(1)
