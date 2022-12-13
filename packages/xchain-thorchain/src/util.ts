@@ -1,6 +1,4 @@
-
 import cosmosclient from '@cosmos-client/core'
-import { proto, rest } from '@cosmos-client/core/cjs/module'
 import { Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
@@ -214,18 +212,18 @@ export const buildUnsignedTx = ({
   gasLimit,
 }: {
   cosmosSdk: cosmosclient.CosmosSDK
-  txBody: proto.cosmos.tx.v1beta1.TxBody
-  signerPubkey: proto.google.protobuf.Any
+  txBody: cosmosclient.proto.cosmos.tx.v1beta1.TxBody
+  signerPubkey: cosmosclient.proto.google.protobuf.Any
   sequence: Long
   gasLimit?: Long
 }): cosmosclient.TxBuilder => {
-  const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
+  const authInfo = new cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo({
     signer_infos: [
       {
         public_key: signerPubkey,
         mode_info: {
           single: {
-            mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+            mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
           },
         },
         sequence: sequence,
@@ -256,8 +254,8 @@ export const getEstimatedGas = async ({
   multiplier,
 }: {
   cosmosSDKClient: CosmosSDKClient
-  txBody: proto.cosmos.tx.v1beta1.TxBody
-  privKey: proto.cosmos.crypto.secp256k1.PrivKey
+  txBody: cosmosclient.proto.cosmos.tx.v1beta1.TxBody
+  privKey: cosmosclient.proto.cosmos.crypto.secp256k1.PrivKey
   accountNumber: Long
   accountSequence: Long
   multiplier?: number
@@ -273,7 +271,7 @@ export const getEstimatedGas = async ({
   const signDocBytes = txBuilder.signDocBytes(accountNumber)
   txBuilder.addSignature(privKey.sign(signDocBytes))
 
-  const resp = await rest.tx.simulate(cosmosSDKClient.sdk, { tx_bytes: txBuilder.txBytes() })
+  const resp = await cosmosclient.rest.tx.simulate(cosmosSDKClient.sdk, { tx_bytes: txBuilder.txBytes() })
 
   const estimatedGas = resp.data?.gas_info?.gas_used ?? null
 
@@ -302,7 +300,7 @@ export const buildDepositTx = async ({
   msgNativeTx: MsgNativeTx
   nodeUrl: string
   chainId: ChainId
-}): Promise<proto.cosmos.tx.v1beta1.TxBody> => {
+}): Promise<cosmosclient.proto.cosmos.tx.v1beta1.TxBody> => {
   const networkChainId = await getChainId(nodeUrl)
   if (!networkChainId || chainId !== networkChainId) {
     throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
@@ -319,7 +317,7 @@ export const buildDepositTx = async ({
 
   const depositMsg = types.types.MsgDeposit.fromObject(msgDepositObj)
 
-  return new proto.cosmos.tx.v1beta1.TxBody({
+  return new cosmosclient.proto.cosmos.tx.v1beta1.TxBody({
     messages: [cosmosclient.codec.instanceToProtoAny(depositMsg)],
     memo: msgNativeTx.memo,
   })
@@ -352,7 +350,7 @@ export const buildTransferTx = async ({
   memo?: string
   nodeUrl: string
   chainId: ChainId
-}): Promise<proto.cosmos.tx.v1beta1.TxBody> => {
+}): Promise<cosmosclient.proto.cosmos.tx.v1beta1.TxBody> => {
   const networkChainId = await getChainId(nodeUrl)
   if (!networkChainId || chainId !== networkChainId) {
     throw new Error(`Invalid network (asked: ${chainId} / returned: ${networkChainId}`)
@@ -374,7 +372,7 @@ export const buildTransferTx = async ({
 
   const transferMsg = types.types.MsgSend.fromObject(transferObj)
 
-  return new proto.cosmos.tx.v1beta1.TxBody({
+  return new cosmosclient.proto.cosmos.tx.v1beta1.TxBody({
     messages: [cosmosclient.codec.instanceToProtoAny(transferMsg)],
     memo,
   })
@@ -477,7 +475,7 @@ export const getExplorerTxUrl = ({
 export const getAccount = (
   address: string,
   client: CosmosSDKClient,
-): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> => {
+): Promise<cosmosclient.proto.cosmos.auth.v1beta1.IBaseAccount> => {
   const accAddress = cosmosclient.AccAddress.fromString(address)
   return client.getAccount(accAddress)
 }

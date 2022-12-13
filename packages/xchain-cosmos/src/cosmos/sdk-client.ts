@@ -1,5 +1,4 @@
 import cosmosclient from '@cosmos-client/core'
-import { proto, rest } from '@cosmos-client/core/cjs/module'
 import { TxHash, TxHistoryParams } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import axios from 'axios'
@@ -22,7 +21,7 @@ import {
   TxResponse,
 } from './types'
 
-const DEFAULT_FEE = new proto.cosmos.tx.v1beta1.Fee({
+const DEFAULT_FEE = new cosmosclient.proto.cosmos.tx.v1beta1.Fee({
   amount: [],
   gas_limit: Long.fromString(DEFAULT_GAS_LIMIT),
 })
@@ -60,7 +59,7 @@ export class CosmosSDKClient {
     })
   }
 
-  getAddressFromPrivKey(privkey: proto.cosmos.crypto.secp256k1.PrivKey): string {
+  getAddressFromPrivKey(privkey: cosmosclient.proto.cosmos.crypto.secp256k1.PrivKey): string {
     this.setPrefix()
 
     return cosmosclient.AccAddress.fromPublicKey(privkey.pubKey()).toString()
@@ -73,7 +72,7 @@ export class CosmosSDKClient {
     return cosmosclient.AccAddress.fromPublicKey(privKey.pubKey()).toString()
   }
 
-  getPrivKeyFromMnemonic(mnemonic: string, derivationPath: string): proto.cosmos.crypto.secp256k1.PrivKey {
+  getPrivKeyFromMnemonic(mnemonic: string, derivationPath: string): cosmosclient.proto.cosmos.crypto.secp256k1.PrivKey {
     this.setPrefix()
     const seed = xchainCrypto.getSeed(mnemonic)
     const node = BIP32.fromSeed(seed)
@@ -81,7 +80,7 @@ export class CosmosSDKClient {
 
     if (!child.privateKey) throw new Error('child does not have a privateKey')
 
-    return new proto.cosmos.crypto.secp256k1.PrivKey({ key: child.privateKey })
+    return new cosmosclient.proto.cosmos.crypto.secp256k1.PrivKey({ key: child.privateKey })
   }
 
   checkAddress(address: string): boolean {
@@ -96,29 +95,29 @@ export class CosmosSDKClient {
     }
   }
 
-  async getBalance(address: string): Promise<proto.cosmos.base.v1beta1.Coin[]> {
+  async getBalance(address: string): Promise<cosmosclient.proto.cosmos.base.v1beta1.Coin[]> {
     this.setPrefix()
 
     const accAddress = cosmosclient.AccAddress.fromString(address)
-    const response = await rest.bank.allBalances(this.sdk, accAddress)
-    const balances: proto.cosmos.base.v1beta1.Coin[] =
+    const response = await cosmosclient.rest.bank.allBalances(this.sdk, accAddress)
+    const balances: cosmosclient.proto.cosmos.base.v1beta1.Coin[] =
       response.data.balances?.reduce(
-        (acc: proto.cosmos.base.v1beta1.Coin[], { amount, denom }) =>
-          !!amount && !!denom ? [...acc, new proto.cosmos.base.v1beta1.Coin({ amount, denom })] : acc,
+        (acc: cosmosclient.proto.cosmos.base.v1beta1.Coin[], { amount, denom }) =>
+          !!amount && !!denom ? [...acc, new cosmosclient.proto.cosmos.base.v1beta1.Coin({ amount, denom })] : acc,
         [],
       ) || []
     return balances
   }
 
-  async getAccount(address: cosmosclient.AccAddress): Promise<proto.cosmos.auth.v1beta1.IBaseAccount> {
-    const account = await rest.auth
+  async getAccount(address: cosmosclient.AccAddress): Promise<cosmosclient.proto.cosmos.auth.v1beta1.IBaseAccount> {
+    const account = await cosmosclient.rest.auth
       .account(this.sdk, address)
       .then((res) => {
         return cosmosclient.codec.protoJSONToInstance(cosmosclient.codec.castProtoJSONOfProtoAny(res.data.account))
       })
       .catch((_) => undefined)
 
-    if (!(account instanceof proto.cosmos.auth.v1beta1.BaseAccount)) {
+    if (!(account instanceof cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount)) {
       throw Error('could not get account')
     }
 
@@ -233,7 +232,7 @@ export class CosmosSDKClient {
       pubKey,
       sequence,
       fee,
-      mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+      mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
     })
 
     const txBuilder = new cosmosclient.TxBuilder(this.sdk, txBody, authInfo)
@@ -254,13 +253,13 @@ export class CosmosSDKClient {
   }: TransferOfflineParams): Promise<string> {
     const txBody = protoTxBody({ from, to, amount, denom, memo })
 
-    const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
+    const authInfo = new cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo({
       signer_infos: [
         {
           public_key: cosmosclient.codec.instanceToProtoAny(privkey.pubKey()),
           mode_info: {
             single: {
-              mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+              mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
             },
           },
           sequence: Long.fromString(from_sequence),
@@ -278,7 +277,7 @@ export class CosmosSDKClient {
 
   async signAndBroadcast(
     txBuilder: cosmosclient.TxBuilder,
-    privKey: proto.cosmos.crypto.secp256k1.PrivKey,
+    privKey: cosmosclient.proto.cosmos.crypto.secp256k1.PrivKey,
     accountNumber: Long.Long,
   ): Promise<TxHash> {
     this.setPrefix()
@@ -288,9 +287,9 @@ export class CosmosSDKClient {
     txBuilder.addSignature(privKey.sign(signDocBytes))
 
     // broadcast
-    const res = await rest.tx.broadcastTx(this.sdk, {
+    const res = await cosmosclient.rest.tx.broadcastTx(this.sdk, {
       tx_bytes: txBuilder.txBytes(),
-      mode: rest.tx.BroadcastTxMode.Sync,
+      mode: cosmosclient.rest.tx.BroadcastTxMode.Sync,
     })
 
     if (res?.data?.tx_response?.code !== 0) {
