@@ -1,6 +1,6 @@
 import { TxHash } from '@xchainjs/xchain-client'
 import { delay } from '@xchainjs/xchain-util'
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
+import axios, { AxiosError, AxiosResponse } from 'axios'
 
 import {
   AddressBalance,
@@ -15,8 +15,6 @@ import {
 import { DEFAULT_SUGGESTED_TRANSACTION_FEE } from './utils'
 
 type ErrorResponse = { error: unknown }
-
-const instance: AxiosInstance = axios.create()
 
 /**
  * Check error response.
@@ -39,7 +37,7 @@ const isErrorResponse = (response: any): response is ErrorResponse => {
  * @throws {"failed to query account by a given address"} thrown if failed to query account by a given address
  */
 export const getAccount = async ({ haskoinUrl, address }: AddressParams): Promise<AddressBalance> => {
-  const result: AddressBalance | ErrorResponse = (await instance.get(`${haskoinUrl}/address/${address}/balance`)).data
+  const result: AddressBalance | ErrorResponse = (await axios.get(`${haskoinUrl}/address/${address}/balance`)).data
   if (!result || isErrorResponse(result)) throw new Error(`failed to query account by given address ${address}`)
   return result
 }
@@ -69,7 +67,7 @@ export const getTransaction = async ({ haskoinUrl, txId }: TxHashParams): Promis
  * @throws {"failed to query transaction by a given hash"} thrown if failed to query raw transaction by a given hash
  */
 export const getRawTransaction = async ({ haskoinUrl, txId }: TxHashParams): Promise<string> => {
-  const result: RawTransaction | ErrorResponse = (await instance.get(`${haskoinUrl}/transaction/${txId}/raw`)).data
+  const result: RawTransaction | ErrorResponse = (await axios.get(`${haskoinUrl}/transaction/${txId}/raw`)).data
   if (!result || isErrorResponse(result)) throw new Error(`failed to query transaction by a given hash ${txId}`)
   return result.result
 }
@@ -90,7 +88,7 @@ export const getTransactions = async ({
   params,
 }: AddressParams & { params: TransactionsQueryParam }): Promise<Transaction[]> => {
   const result: Transaction[] | ErrorResponse = (
-    await instance.get(`${haskoinUrl}/address/${address}/transactions/full`, { params })
+    await axios.get(`${haskoinUrl}/address/${address}/transactions/full`, { params })
   ).data
   if (!result || isErrorResponse(result)) throw new Error('failed to query transactions')
   return result
@@ -127,9 +125,7 @@ export const getSuggestedFee = async (): Promise<number> => {
   //So use Bitgo API for fee estimation
   //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
   try {
-    const instance = axios.create()
-
-    const response = await instance.get('https://app.bitgo.com/api/v2/bch/tx/fee')
+    const response = await axios.get('https://app.bitgo.com/api/v2/bch/tx/fee')
     return response.data.feePerKb / 1000 // feePerKb to feePerByte
   } catch (error) {
     return DEFAULT_SUGGESTED_TRANSACTION_FEE
@@ -158,25 +154,25 @@ export const broadcastTx = async ({ txHex, haskoinUrl }: BroadcastTxParams): Pro
     if (counter < MAX && error.response?.status === 500) {
       counter++
       await delay(200 * counter)
-      return instance.request(config)
+      return axios.request(config)
     }
     return Promise.reject(error)
   }
   // All logic for re-sending same tx is handled by Axios' response interceptor
   // https://github.com/axios/axios#interceptors
-  const id = instance.interceptors.response.use(onFullfilled, onRejected)
+  const id = axios.interceptors.response.use(onFullfilled, onRejected)
 
   const url = `${haskoinUrl}/transactions`
   try {
     const {
       data: { txid },
-    } = await instance.post<string, AxiosResponse<{ txid: string }>>(url, txHex)
-    // clean up interceptor from axios instance
-    instance.interceptors.response.eject(id)
+    } = await axios.post<string, AxiosResponse<{ txid: string }>>(url, txHex)
+    // clean up interceptor from axios axios
+    axios.interceptors.response.eject(id)
     return txid
   } catch (error: unknown) {
-    // clean up interceptor from axios instance
-    instance.interceptors.response.eject(id)
+    // clean up interceptor from axios axios
+    axios.interceptors.response.eject(id)
     return Promise.reject(error)
   }
 }

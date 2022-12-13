@@ -27,6 +27,7 @@ export const add9Rheader = <T extends { url?: string; headers?: Record<string, s
   }
 
   // If it errors, just return same request and keep it untouched (no change)
+  console.log(` Request ${request.url} ${JSON.stringify(request.headers)}`)
   return request
 }
 
