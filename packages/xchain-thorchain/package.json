@@ -34,7 +34,7 @@
     "generate:ThorchainMsgs": "./genMsgs.sh"
   },
   "devDependencies": {
-    "@cosmos-client/core": "0.45.13",
+    "@cosmos-client/core": "0.46.1",
     "@types/big.js": "^6.0.0",
     "@xchainjs/xchain-client": "^0.13.3",
     "@xchainjs/xchain-cosmos": "^0.20.4",
@@ -48,7 +48,7 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@cosmos-client/core": "0.45.13",
+    "@cosmos-client/core": "0.46.1",
     "@xchainjs/xchain-client": "^0.13.3",
     "@xchainjs/xchain-cosmos": "^0.20.4",
     "@xchainjs/xchain-crypto": "^0.2.6",
