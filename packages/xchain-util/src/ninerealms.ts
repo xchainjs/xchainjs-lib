@@ -16,12 +16,13 @@ export const add9Rheader = <T extends { url?: string; headers?: Record<string, s
     if (url.host.includes('ninerealms') && !headerAlreadyExists) {
       const headers = request?.headers ?? {}
       // Add custom header to request before returning it
-      const newRequest =  { ...request, headers: { ...headers, [`${NINE_REALMS_CLIENT_HEADER}`]: `${XCHAINJS_IDENTIFIER}` } }
+      const newRequest = {
+        ...request,
+        headers: { ...headers, [`${NINE_REALMS_CLIENT_HEADER}`]: `${XCHAINJS_IDENTIFIER}` },
+      }
       console.log(` Request ${newRequest.url} ${JSON.stringify(newRequest.headers)}`)
       return newRequest
     }
-
-
   } catch (error) {
     console.error(`Failed to add custom ${NINE_REALMS_CLIENT_HEADER} header`, error)
   }
@@ -34,6 +35,6 @@ export const add9Rheader = <T extends { url?: string; headers?: Record<string, s
 /**
  * Adds custom header to axios requests (9R endpoints only)
  */
-export const register9Rheader = (axios: unknown) => {
-  ;(axios as any).interceptors.request.use(add9Rheader, (error: any) => Promise.reject(error))
+export const register9Rheader = (axios) => {
+  axios.interceptors.request.use(add9Rheader, (error) => Promise.reject(error))
 }
