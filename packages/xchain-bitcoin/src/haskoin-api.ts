@@ -14,11 +14,8 @@ import { getConfirmedTxStatus } from './sochain-api'
 import type { BroadcastTxParams } from './types/common'
 import type { BalanceData, UtxoData } from './types/haskoin-api-types'
 
-let instance: AxiosInstance = axios.create()
+const instance: AxiosInstance = axios.create()
 
-export const setupHaskoinInstance = (customRequestHeaders: Record<string, string>) => {
-  instance = axios.create({ headers: customRequestHeaders })
-}
 export const getBalance = async ({
   haskoinUrl,
   address,

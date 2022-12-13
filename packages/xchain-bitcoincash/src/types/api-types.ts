@@ -18,7 +18,6 @@ export type NodeAuth = {
 export type BroadcastTxParams = {
   txHex: string
   haskoinUrl: string
-  customRequestHeaders: Record<string, string>
 }
 
 export type ErrorResponse = {

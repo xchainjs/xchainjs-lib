@@ -1,4 +1,4 @@
-import { proto } from '@cosmos-client/core'
+import { proto } from '@cosmos-client/core/cjs/module'
 import { AssetAtom, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
 import { COSMOS_DECIMAL } from '../src/const'

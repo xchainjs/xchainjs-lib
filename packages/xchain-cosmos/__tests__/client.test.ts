@@ -1,4 +1,4 @@
-import { proto } from '@cosmos-client/core'
+import { proto } from '@cosmos-client/core/cjs/module'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { AssetAtom, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'

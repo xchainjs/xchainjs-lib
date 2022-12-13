@@ -339,8 +339,8 @@ export const buildTx = async ({
  * @param {BroadcastTxParams} params The transaction broadcast options.
  * @returns {TxHash} The transaction hash.
  */
-export const broadcastTx = async ({ haskoinUrl, txHex, customRequestHeaders }: BroadcastTxParams): Promise<TxHash> => {
-  return await haskoinApi.broadcastTx({ haskoinUrl, txHex, customRequestHeaders })
+export const broadcastTx = async ({ haskoinUrl, txHex }: BroadcastTxParams): Promise<TxHash> => {
+  return await haskoinApi.broadcastTx({ haskoinUrl, txHex })
 }
 
 /**

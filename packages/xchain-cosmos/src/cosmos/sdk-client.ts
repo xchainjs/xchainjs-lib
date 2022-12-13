@@ -1,4 +1,5 @@
-import { cosmosclient, proto, rest } from '@cosmos-client/core'
+import cosmosclient from '@cosmos-client/core'
+import { proto, rest } from '@cosmos-client/core/cjs/module'
 import { TxHash, TxHistoryParams } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import axios from 'axios'
@@ -35,13 +36,12 @@ export class CosmosSDKClient {
   prefix = ''
 
   // by default, cosmos chain
-  constructor({ server, chainId, prefix = 'cosmos', headers }: CosmosSDKClientParams) {
+  constructor({ server, chainId, prefix = 'cosmos' }: CosmosSDKClientParams) {
     this.server = server
     this.chainId = chainId
     this.sdk = new cosmosclient.CosmosSDK(server, this.chainId)
 
     this.updatePrefix(prefix)
-    if (headers) axios.defaults.headers.common = headers
   }
 
   updatePrefix(prefix: string) {

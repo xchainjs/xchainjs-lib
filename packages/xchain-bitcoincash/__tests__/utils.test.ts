@@ -70,7 +70,7 @@ describe('Bitcoin Cash Utils Test', () => {
     it('returns txHash', async () => {
       const txHex = '0xdead'
 
-      const txHash = await utils.broadcastTx({ txHex, haskoinUrl, customRequestHeaders: { xxx: 'yyy' } })
+      const txHash = await utils.broadcastTx({ txHex, haskoinUrl })
       expect(txHash).toEqual('mock-txid-haskoin')
     })
   })

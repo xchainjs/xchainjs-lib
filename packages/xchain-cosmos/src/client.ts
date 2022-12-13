@@ -1,4 +1,4 @@
-import { proto } from '@cosmos-client/core'
+import { proto } from '@cosmos-client/core/cjs/module'
 import {
   Balance,
   BaseXChainClient,
@@ -62,21 +62,15 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     clientUrls = getDefaultClientUrls(),
     chainIds = getDefaultChainIds(),
     rootDerivationPaths = getDefaultRootDerivationPaths(),
-    customRequestHeaders = {},
   }: XChainClientParams & CosmosClientParams) {
-    super(Chain.Cosmos, { network, rootDerivationPaths, phrase, customRequestHeaders })
+    super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
 
     this.clientUrls = clientUrls
     this.chainIds = chainIds
 
-    if (this.clientUrls[Network.Mainnet].includes('ninerealms.com') && !this.customRequestHeaders['x-client-id']) {
-      this.customRequestHeaders['x-client-id'] = 'xchainjs-client'
-    }
-
     this.sdkClient = new CosmosSDKClient({
       server: this.clientUrls[network],
       chainId: this.chainIds[network],
-      headers: this.customRequestHeaders,
     })
   }
 

@@ -1,4 +1,6 @@
-import { cosmosclient, proto, rest } from '@cosmos-client/core'
+
+import cosmosclient from '@cosmos-client/core'
+import { proto, rest } from '@cosmos-client/core/cjs/module'
 import { Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {

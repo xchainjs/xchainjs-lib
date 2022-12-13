@@ -3,11 +3,8 @@ import axios, { AxiosInstance } from 'axios'
 import { BroadcastTxParams } from './types/common'
 import { TxBroadcastResponse } from './types/node-api-types'
 
-let instance: AxiosInstance = axios.create()
+const instance: AxiosInstance = axios.create()
 
-export const setupInstance = (customRequestHeaders: Record<string, string>) => {
-  instance = axios.create({ headers: customRequestHeaders })
-}
 /**
  * Broadcast transaction.
  *

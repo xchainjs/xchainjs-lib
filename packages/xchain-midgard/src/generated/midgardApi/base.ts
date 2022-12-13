@@ -56,12 +56,6 @@ export class BaseAPI {
     if (configuration) {
       this.configuration = configuration
       this.basePath = configuration.basePath || this.basePath
-      if (this.basePath.includes('midgard.ninerealms.com')) {
-        if (!this.configuration.baseOptions) this.configuration.baseOptions = {}
-        if (!this.configuration.baseOptions.headers) this.configuration.baseOptions.headers = {}
-        if (!this.configuration.baseOptions.headers['x-client-id'])
-          this.configuration.baseOptions.headers['x-client-id'] = 'xchainjs-client'
-      }
     }
   }
 }

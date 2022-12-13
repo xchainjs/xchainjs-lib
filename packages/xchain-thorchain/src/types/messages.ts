@@ -1,4 +1,5 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
+import cosmosclient from '@cosmos-client/core'
+import { proto } from '@cosmos-client/core/cjs/module'
 import { Asset } from '@xchainjs/xchain-util'
 
 export type MsgCoin = {

@@ -8,7 +8,6 @@ const MOCK_URL = 'https://api.haskoin.com/haskoin-store/btc'
 describe('Haskoin API Test', () => {
   beforeEach(() => {
     mockHaskoinApi.init()
-    haskoin.setupHaskoinInstance({})
   })
   afterEach(() => {
     mockHaskoinApi.restore()

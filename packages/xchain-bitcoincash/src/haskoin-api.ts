@@ -16,11 +16,8 @@ import { DEFAULT_SUGGESTED_TRANSACTION_FEE } from './utils'
 
 type ErrorResponse = { error: unknown }
 
-let instance: AxiosInstance = axios.create()
+const instance: AxiosInstance = axios.create()
 
-export const setupHaskoinInstance = (customRequestHeaders: Record<string, string>) => {
-  instance = axios.create({ headers: customRequestHeaders })
-}
 /**
  * Check error response.
  *
