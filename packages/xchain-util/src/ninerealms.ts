@@ -20,7 +20,7 @@ export const add9Rheader = <T extends { url?: string; headers?: Record<string, s
         ...request,
         headers: { ...headers, [`${NINE_REALMS_CLIENT_HEADER}`]: `${XCHAINJS_IDENTIFIER}` },
       }
-      console.log(` Request ${newRequest.url} ${JSON.stringify(newRequest.headers)}`)
+      // console.log(` Request ${newRequest.url} ${JSON.stringify(newRequest.headers)}`)
       return newRequest
     }
   } catch (error) {
@@ -28,7 +28,7 @@ export const add9Rheader = <T extends { url?: string; headers?: Record<string, s
   }
 
   // If it errors, just return same request and keep it untouched (no change)
-  console.log(` Request ${request.url} ${JSON.stringify(request.headers)}`)
+  // console.log(` Request ${request.url} ${JSON.stringify(request.headers)}`)
   return request
 }
 

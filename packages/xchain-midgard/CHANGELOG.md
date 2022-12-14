@@ -1,3 +1,9 @@
+# v0.4.1 (2022-12-13)
+
+## Update
+
+- removed for support custom headers
+
 # v0.4.0 (2022-11-27)
 
 ## Update

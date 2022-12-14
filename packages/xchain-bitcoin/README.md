@@ -40,7 +40,26 @@ Sochain API rate limits: https://sochain.com/api#rate-limits (300 requests/minut
 
 Bitgo API rate limits: https://app.bitgo.com/docs/#section/Rate-Limiting (10 requests/second)
 
+### Setting Headers for Nine Realms endpoints
 
+If you plan on using the publically accessible endpoints provided by Nine Realms(listed below), ensure that you add a valid 'x-client-id' to all requests
+
+- https://midgard.ninerealms.com
+- https://haskoin.ninerealms.com (BTC/BCH/LTC)
+- https://thornode.ninerealms.com 
+
+Example
+
+```typescript
+import cosmosclient from '@cosmos-client/core'
+import axios from 'axios'
+import { register9Rheader } from '@xchainjs/xchain-util'
+
+register9Rheader(axios)
+register9Rheader(cosmosclient.config.globalAxios)
+```
+
+For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts) for a complete example
 
 
 

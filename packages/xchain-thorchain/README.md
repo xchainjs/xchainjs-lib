@@ -58,3 +58,24 @@ In order for this library to de/serialize proto3 structures, you can use the fol
 
 Alternatively, you can run the convenience script: `genMsgs.sh`, which will overwrite the proto/js files in types/proto. This should only be done and checked in if changes were made to the upstream Msg in the THORNode repo. 
 
+
+### Setting Headers for Nine Realms endpoints
+
+If you plan on using the publically accessible endpoints provided by Nine Realms(listed below), ensure that you add a valid 'x-client-id' to all requests
+
+- https://midgard.ninerealms.com
+- https://haskoin.ninerealms.com (BTC/BCH/LTC)
+- https://thornode.ninerealms.com 
+
+Example
+
+```typescript
+import cosmosclient from '@cosmos-client/core'
+import axios from 'axios'
+import { register9Rheader } from '@xchainjs/xchain-util'
+
+register9Rheader(axios)
+register9Rheader(cosmosclient.config.globalAxios)
+```
+
+For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts) for a complete example

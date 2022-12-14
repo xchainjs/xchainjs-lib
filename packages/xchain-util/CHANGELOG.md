@@ -1,3 +1,8 @@
+# v.0.11.1 (2022-12-13)
+
+## Add
+
+- Add `register9Rheader()` to populate x-client-id header
 # v.0.11.0 (2022-xx-xx)
 
 ## Breaking change

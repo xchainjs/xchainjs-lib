@@ -1,3 +1,9 @@
+# v.0.27.6 (2022-12-13)
+
+## Update
+
+- removed `customRequestHeaders`
+
 # v.0.27.5 (2022-12-12)
 
 ## Update
