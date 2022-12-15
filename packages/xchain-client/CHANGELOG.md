@@ -1,3 +1,9 @@
+# v.0.13.4 (2022-12-13)
+
+## Update
+
+- removed `customRequestHeaders` from BaseXChainClient
+
 # v.0.13.3 (2022-11-24)
 
 ## Update

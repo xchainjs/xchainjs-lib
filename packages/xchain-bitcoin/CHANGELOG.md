@@ -1,3 +1,9 @@
+# v.0.20.6 (2022-11-24)
+
+## Update
+
+- reverted `customRequestHeaders` to `BroadcastTxParams`
+
 # v.0.20.5 (2022-11-24)
 
 ## Update

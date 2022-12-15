@@ -13,7 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "@binance-chain/javascript-sdk": "^4.2.0",
-    "@cosmos-client/core": "^0.45.13",
+    "@cosmos-client/core": "^0.46.1",
     "@psf/bitcoincashjs-lib": "^4.0.2",
     "@xchainjs/xchain-binance": "file:../../packages/xchain-binance",
     "@xchainjs/xchain-bitcoin": "file:../../packages/xchain-bitcoin",

@@ -18,7 +18,7 @@ import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address, Chain } from '@xchainjs/xchain-util'
 
 import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
-import { getAccount, getSuggestedFee, getTransaction, getTransactions, setupHaskoinInstance } from './haskoin-api'
+import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { ClientUrl } from './types/client-types'
 import * as utils from './utils'
@@ -56,19 +56,12 @@ class Client extends UTXOClient {
       [Network.Testnet]: `m/44'/1'/0'/0/`,
       [Network.Stagenet]: `m/44'/145'/0'/0/`,
     },
-    customRequestHeaders = {},
   }: BitcoinCashClientParams) {
-    super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase, feeBounds, customRequestHeaders })
+    super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase, feeBounds })
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.rootDerivationPaths = rootDerivationPaths
     phrase && this.setPhrase(phrase)
-
-    // need to ensure x-client-id is set if we are using 9R endpoints
-    if (this.haskoinUrl.mainnet.includes('haskoin.ninerealms.com') && !this.customRequestHeaders['x-client-id']) {
-      this.customRequestHeaders['x-client-id'] = 'xchainjs-client'
-    }
-    setupHaskoinInstance(this.customRequestHeaders)
   }
 
   /**
@@ -273,7 +266,6 @@ class Client extends UTXOClient {
     return await utils.broadcastTx({
       txHex,
       haskoinUrl: this.getHaskoinURL(),
-      customRequestHeaders: this.customRequestHeaders,
     })
   }
 }

@@ -16,13 +16,12 @@ yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util @
 
 Important note: Make sure to install same version of `@cosmos-client/core` as `xchain-thorchain` is using (currently `@cosmos-client/core@0.45.1` ). In other case things might break.
 
-
 ## Documentation
 
 ### [`xchain thorchain`](http://docs.xchainjs.org/xchain-client/xchain-thorchain/)
+
 [`How xchain-thorchain works`](http://docs.xchainjs.org/xchain-client/xchain-thorchain/how-it-works.html)\
 [`How to use xchain-thorchain`](http://docs.xchainjs.org/xchain-client/xchain-thorchain/how-to-use.html)
-
 
 For more examples check out tests in `./__tests__/client.test.ts`
 
@@ -56,5 +55,25 @@ In order for this library to de/serialize proto3 structures, you can use the fol
    yarn run pbts src/types/proto/MsgCompiled.js -o src/types/proto/MsgCompiled.d.ts
    ```
 
-Alternatively, you can run the convenience script: `genMsgs.sh`, which will overwrite the proto/js files in types/proto. This should only be done and checked in if changes were made to the upstream Msg in the THORNode repo. 
+Alternatively, you can run the convenience script: `genMsgs.sh`, which will overwrite the proto/js files in types/proto. This should only be done and checked in if changes were made to the upstream Msg in the THORNode repo.
 
+### Setting Headers for Nine Realms endpoints
+
+If you plan on using the publically accessible endpoints provided by Nine Realms(listed below), ensure that you add a valid 'x-client-id' to all requests
+
+- https://midgard.ninerealms.com
+- https://haskoin.ninerealms.com (BTC/BCH/LTC)
+- https://thornode.ninerealms.com
+
+Example
+
+```typescript
+import cosmosclient from '@cosmos-client/core'
+import axios from 'axios'
+import { register9Rheader } from '@xchainjs/xchain-util'
+
+register9Rheader(axios)
+register9Rheader(cosmosclient.config.globalAxios)
+```
+
+For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts)
