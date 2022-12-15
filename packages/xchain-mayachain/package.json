@@ -1,0 +1,61 @@
+{
+  "name": "@xchainjs/xchain-mayachain",
+  "version": "0.0.0",
+  "description": "Custom Mayachain client and utilities used by XChainJS clients",
+  "keywords": [
+    "MAYAChain",
+    "XChain"
+  ],
+  "author": "MAYAChain",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
+  "scripts": {
+    "clean": "rimraf lib/**",
+    "build": "yarn clean && rollup -c",
+    "test": "jest",
+    "e2e": "jest --config jest.config.e2e.js",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "prepublishOnly": "yarn build",
+    "start:example": "ts-node example/index.ts",
+    "generate:MayachainMsgs": "./genMsgs.sh"
+  },
+  "devDependencies": {
+    "@xchainjs/xchain-binance": "^5.6.6",
+    "@cosmos-client/core": "0.46.1",
+    "@types/big.js": "^6.0.0",
+    "@xchainjs/xchain-client": "^0.13.5",
+    "@xchainjs/xchain-cosmos": "^0.20.6",
+    "@xchainjs/xchain-crypto": "^0.2.6",
+    "@xchainjs/xchain-ethereum": "^0.27.6",
+    "@xchainjs/xchain-util": "^0.12.0",
+    "axios": "^0.25.0",
+    "bech32-buffer": "^0.2.0",
+    "nock": "^13.0.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@cosmos-client/core": "0.46.1",
+    "@xchainjs/xchain-client": "^0.13.5",
+    "@xchainjs/xchain-cosmos": "^0.20.6",
+    "@xchainjs/xchain-crypto": "^0.2.6",
+    "@xchainjs/xchain-util": "^0.12.0",
+    "axios": "^0.25.0",
+    "bech32-buffer": "^0.2.0"
+  }
+}
