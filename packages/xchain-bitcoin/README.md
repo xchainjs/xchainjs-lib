@@ -19,9 +19,9 @@ yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util a
 ## Documentation
 
 ### [`xchain bitcoin`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/)
+
 [`How xchain-bitcoin works`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/how-it-works.html)\
 [`How to use xchain-bitcoin`](http://docs.xchainjs.org/xchain-client/xchain-bitcoin/how-to-use.html)
-
 
 ## Service Providers
 
@@ -46,7 +46,7 @@ If you plan on using the publically accessible endpoints provided by Nine Realms
 
 - https://midgard.ninerealms.com
 - https://haskoin.ninerealms.com (BTC/BCH/LTC)
-- https://thornode.ninerealms.com 
+- https://thornode.ninerealms.com
 
 Example
 
@@ -59,7 +59,4 @@ register9Rheader(axios)
 register9Rheader(cosmosclient.config.globalAxios)
 ```
 
-For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts) for a complete example
-
-
-
+For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts)

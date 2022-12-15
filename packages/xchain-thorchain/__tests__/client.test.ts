@@ -1,4 +1,4 @@
-import { proto } from '@cosmos-client/core/cjs/module'
+import cosmosclient from '@cosmos-client/core'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCResponse, RPCTxSearchResult, TxResponse } from '@xchainjs/xchain-cosmos'
 import {
@@ -54,7 +54,7 @@ const mockAccountsBalance = (
   url: string,
   address: string,
   result: {
-    balances: proto.cosmos.base.v1beta1.Coin[]
+    balances: cosmosclient.proto.cosmos.base.v1beta1.Coin[]
   },
 ) => {
   nock(url).get(`/cosmos/bank/v1beta1/balances/${address}`).reply(200, result)
@@ -288,7 +288,7 @@ describe('Client Test', () => {
     // mainnet - 0: thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws
     mockAccountsBalance(thorMainClient.getClientUrl().node, 'thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5', {
       balances: [
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
           amount: '100',
         }),
@@ -305,15 +305,15 @@ describe('Client Test', () => {
     thorClient.setNetwork(Network.Stagenet)
     mockAccountsBalance(thorClient.getClientUrl().node, 'sthor13gym97tmw3axj3hpewdggy2cr288d3qfed2ken', {
       balances: [
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'bnb/bnb',
           amount: '100',
         }),
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'bnb/busd-74e',
           amount: '200',
         }),
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
           amount: '200',
         }),
@@ -338,15 +338,15 @@ describe('Client Test', () => {
     thorClient.setNetwork(Network.Stagenet)
     mockAccountsBalance(thorClient.getClientUrl().node, 'sthor13gym97tmw3axj3hpewdggy2cr288d3qfed2ken', {
       balances: [
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'bnb/bnb',
           amount: '100',
         }),
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'bnb/busd-74e',
           amount: '200',
         }),
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
           amount: '200',
         }),
@@ -440,7 +440,7 @@ describe('Client Test', () => {
     })
     mockAccountsBalance(nodeUrl, stagenet_address_path0, {
       balances: [
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
           amount: '210000000',
         }),
@@ -491,7 +491,7 @@ describe('Client Test', () => {
     })
     mockAccountsBalance(nodeUrl, stagenet_address_path0, {
       balances: [
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
           amount: '210000000',
         }),

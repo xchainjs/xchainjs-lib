@@ -19,9 +19,9 @@ yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util a
 ## Documentation
 
 ### [`xchain bitcoincash`](http://docs.xchainjs.org/xchain-client/xchain-bitcoincash/)
+
 [`How xchain-bitcoincash works`](http://docs.xchainjs.org/xchain-client/xchain-bitcoincash/how-it-works.html)\
 [`How to use xchain-bitcoincash`](http://docs.xchainjs.org/xchain-client/xchain-bitcoincash/how-to-use.html)
-
 
 ## Service Providers
 
@@ -34,12 +34,11 @@ This package uses the following service providers:
 | Transaction details by hash | Haskoin           | https://api.haskoin.com/#/Transaction/getTransaction                |
 | Transaction fees            | Bitgo             | https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate          |
 | Transaction broadcast       | Bitcoin Cash Node | https://developer.bitcoin.org/reference/rpc/sendrawtransaction.html |
-| Explorer                    | Blockchain.com    | https://www.blockchain.com/explorer?view=bch                                          |
+| Explorer                    | Blockchain.com    | https://www.blockchain.com/explorer?view=bch                        |
 
 Haskoin API rate limits: No
 
 Bitgo API rate limits: https://app.bitgo.com/docs/#section/Rate-Limiting (10 requests/second)
-
 
 ### Setting Headers for Nine Realms endpoints
 
@@ -47,7 +46,7 @@ If you plan on using the publically accessible endpoints provided by Nine Realms
 
 - https://midgard.ninerealms.com
 - https://haskoin.ninerealms.com (BTC/BCH/LTC)
-- https://thornode.ninerealms.com 
+- https://thornode.ninerealms.com
 
 Example
 
@@ -60,4 +59,4 @@ register9Rheader(axios)
 register9Rheader(cosmosclient.config.globalAxios)
 ```
 
-For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts) for a complete example
+For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts)
