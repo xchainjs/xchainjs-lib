@@ -369,7 +369,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('1', 8)), AssetBTC),
       destinationAsset: USDCETH,
-      destinationAddress: 'xxx',
+      destinationAddress: 'tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxxxxx',
       interfaceID: '999',
       affiliateAddress: `tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx`,
       affiliateFeeBasisPoints: 30,
