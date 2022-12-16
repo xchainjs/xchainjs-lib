@@ -1,3 +1,9 @@
+# v.0.1.2 (2022-12-16)
+
+## Update
+
+- default to mainnet
+
 # v.0.1.1 (2022-11-24)
 
 ## Update

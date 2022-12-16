@@ -1,3 +1,9 @@
+# v0.1.11 (2022-12-16)
+
+## fix
+
+- use abbreviated asset names in swap memo
+
 # v0.1.10 (2022-12-13)
 
 ## Udpate
