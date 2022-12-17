@@ -1,3 +1,10 @@
+# v.0.1.2 (2022-12-17)
+
+## Update
+
+- Added `depositWithExpiry` to `routerABI.json`
+- Bumped `xchain-client@0.13.4`
+
 # v.0.1.1 (2022-12-24)
 
 ## Update
