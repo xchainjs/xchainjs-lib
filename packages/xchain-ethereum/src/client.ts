@@ -18,7 +18,7 @@ import {
   checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import { Address, Asset, AssetETH, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
 
@@ -124,7 +124,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     etherscanApiKey,
     infuraCreds,
   }: EthereumClientParams) {
-    super(Chain.Ethereum, { network, rootDerivationPaths, feeBounds })
+    super(AssetETH.chain, { network, rootDerivationPaths, feeBounds })
     this.ethNetwork = xchainNetworkToEths(network)
     this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey

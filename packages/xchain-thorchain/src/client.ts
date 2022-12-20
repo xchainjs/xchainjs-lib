@@ -21,9 +21,9 @@ import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
 import {
   Address,
   Asset,
+  AssetAtom,
   AssetRuneNative,
   BaseAmount,
-  Chain,
   assetFromString,
   assetToString,
   baseAmount,
@@ -125,7 +125,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       [Network.Testnet]: 'deprecated',
     },
   }: XChainClientParams & ThorchainClientParams) {
-    super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
+    super(AssetAtom.chain, { network, rootDerivationPaths, phrase })
     this.clientUrl = clientUrl
     this.explorerUrls = explorerUrls
     this.chainIds = chainIds

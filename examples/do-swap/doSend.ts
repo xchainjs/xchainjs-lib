@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Wallet } from '@xchainjs/xchain-thorchain-amm'
 import { Midgard, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
-import { Chain, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import { THORChain, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 
 /**
  * send an asset from your wallet to another address
@@ -13,7 +13,7 @@ const doSend = async (wallet: Wallet) => {
     const asset = assetFromString(`${process.argv[6]}`)
     const destinationAddress = process.argv[7]
 
-    const toChain = asset.synth ? Chain.THORChain : asset.chain
+    const toChain = asset.synth ? THORChain : asset.chain
     const client = wallet.clients[toChain]
 
     console.log(`sending ${amount.amount().toFixed()} ${asset} to ${destinationAddress}`)

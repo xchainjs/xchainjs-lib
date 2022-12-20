@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
 import { EVMClientParams, EtherscanProvider, ExplorerProvider } from '@xchainjs/xchain-evm'
-import { AssetAVAX, Chain } from '@xchainjs/xchain-util'
+import { AssetAVAX } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
 // =====Ethers providers=====
@@ -21,7 +21,7 @@ const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
   AVALANCHE_TESTNET_ETHERS_PROVIDER,
   'https://api-testnet.snowtrace.io',
   'fake',
-  Chain.Avalanche,
+  AssetAVAX.chain,
   AssetAVAX,
   18,
 )
@@ -29,7 +29,7 @@ const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
   AVALANCHE_MAINNET_ETHERS_PROVIDER,
   'https://api.snowtrace.io',
   'fake',
-  Chain.Avalanche,
+  AssetAVAX.chain,
   AssetAVAX,
   18,
 )
@@ -85,7 +85,7 @@ const defaults = {
   },
 }
 export const defaultAvaxParams: EVMClientParams = {
-  chain: Chain.Avalanche,
+  chain: AssetAVAX.chain,
   gasAsset: AssetAVAX,
   gasAssetDecimals: 18,
   defaults,

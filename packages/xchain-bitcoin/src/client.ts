@@ -15,7 +15,7 @@ import {
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, Asset, AssetBTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Address, Asset, AssetBTC, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import { BTC_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
@@ -60,7 +60,7 @@ class Client extends UTXOClient {
     },
     phrase = '',
   }: BitcoinClientParams) {
-    super(Chain.Bitcoin, { network, rootDerivationPaths, phrase, feeBounds })
+    super(AssetBTC.chain, { network, rootDerivationPaths, phrase, feeBounds })
     this.setSochainUrl(sochainUrl)
     this.haskoinUrl = haskoinUrl
   }

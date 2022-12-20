@@ -1,13 +1,13 @@
 // import { Network, TxType } from '@xchainjs/xchain-client'
 import { Balance } from '@xchainjs/xchain-client'
 import { EtherscanProvider } from '@xchainjs/xchain-evm'
-import { AssetAVAX, Chain, assetToString } from '@xchainjs/xchain-util'
+import { AssetAVAX, assetToString } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 // =====Erc-20 asset=====
 
 // const assetRIP: Asset = {
-//   chain: Chain.Avalanche,
+//   chain: AssetAVAX.chain,
 //   symbol: `RIP-0x224695Ba2a98E4a096a519B503336E06D9116E48`,
 //   ticker: `RIP`,
 //   synth: false,
@@ -22,7 +22,7 @@ const provider = new EtherscanProvider(
   AVALANCHE_TESTNET_ETHERS_PROVIDER,
   'https://api-testnet.snowtrace.io',
   'fake',
-  Chain.Avalanche,
+  AssetAVAX.chain,
   AssetAVAX,
   18,
 )

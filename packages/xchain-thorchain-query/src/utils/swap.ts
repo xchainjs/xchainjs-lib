@@ -1,5 +1,6 @@
 import {
   // Address,
+  AVAXChain,
   Asset,
   AssetAVAX,
   AssetAtom,
@@ -10,7 +11,6 @@ import {
   AssetETH,
   AssetLTC,
   AssetRuneNative,
-  AvalancheChain,
   BCHChain,
   BNBChain,
   BTCChain,
@@ -200,24 +200,24 @@ export const getDoubleSwap = async (
 export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmount => {
   if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
   switch (asset.chain) {
-    case Chain.Bitcoin:
+    case AssetBTC.chain:
       return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBTC)
       break
-    case Chain.BitcoinCash:
+    case AssetBTC.chain:
       return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBCH)
       break
-    case Chain.Litecoin:
+    case AssetLTC.chain:
       return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetLTC)
       break
-    case Chain.Doge:
+    case AssetDOGE.chain:
       // NOTE: UTXO chains estimate fees with a 250 byte size
       return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetDOGE)
       break
-    case Chain.Binance:
+    case AssetBNB.chain:
       //flat fee
       return new CryptoAmount(baseAmount(inbound.gasRate), AssetBNB)
       break
-    case Chain.Ethereum:
+    case AssetETH.chain:
       const gasRateinETHGwei = inbound.gasRate
       const gasRateinETHWei = baseAmount(gasRateinETHGwei.multipliedBy(10 ** 9), 18)
       if (eqAsset(asset, AssetETH)) {
@@ -226,7 +226,7 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
         return new CryptoAmount(gasRateinETHWei.times(70000), AssetETH)
       }
       break
-    case Chain.Avalanche:
+    case AssetAVAX.chain:
       const gasRateinAVAXGwei = inbound.gasRate
       const gasRateinAVAXWei = baseAmount(gasRateinAVAXGwei.multipliedBy(10 ** 9), 18)
       if (eqAsset(asset, AssetAVAX)) {
@@ -235,10 +235,10 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
         return new CryptoAmount(gasRateinAVAXWei.times(70000), AssetAVAX)
       }
       break
-    case Chain.Cosmos:
+    case AssetAtom.chain:
       return new CryptoAmount(baseAmount(inbound.gasRate), AssetAtom)
       break
-    case Chain.THORChain:
+    case AssetRuneNative.chain:
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
       break
   }
@@ -257,33 +257,33 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
 export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmount => {
   if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
   switch (asset.chain) {
-    case Chain.Bitcoin:
+    case AssetBTC.chain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBTC)
       break
-    case Chain.BitcoinCash:
+    case AssetBTC.chain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBCH)
       break
-    case Chain.Litecoin:
+    case AssetLTC.chain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetLTC)
       break
-    case Chain.Doge:
+    case AssetDOGE.chain:
       // NOTE: UTXO chains estimate fees with a 250 byte size
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetDOGE)
       break
-    case Chain.Binance:
+    case AssetBNB.chain:
       //flat fee
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBNB)
       break
-    case Chain.Ethereum:
+    case AssetETH.chain:
       return new CryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetETH)
       break
-    case Chain.Avalanche:
+    case AssetAVAX.chain:
       return new CryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetAVAX)
       break
-    case Chain.Cosmos:
+    case AssetAtom.chain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetAtom)
       break
-    case Chain.THORChain:
+    case AssetRuneNative.chain:
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
       break
   }
@@ -312,7 +312,7 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetLTC
     case DOGEChain:
       return AssetDOGE
-    case AvalancheChain:
+    case AVAXChain:
       return AssetAVAX
     default:
       throw Error('Unknown chain')

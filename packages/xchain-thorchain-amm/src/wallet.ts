@@ -9,7 +9,7 @@ import { Client as EthClient } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { Address, Chain } from '@xchainjs/xchain-util'
+import { Address, AssetAVAX, AssetETH, AssetRuneNative, Chain } from '@xchainjs/xchain-util'
 
 import { AddLiquidity, ExecuteSwap, TxSubmitted, WithdrawLiquidity } from './types'
 import { EthHelper } from './utils/eth-helper'
@@ -85,7 +85,7 @@ export class Wallet {
    */
   async executeSwap(swap: ExecuteSwap): Promise<TxSubmitted> {
     this.validateSwap(swap)
-    if (swap.input.asset.chain === Chain.THORChain || swap.input.asset.synth) {
+    if (swap.input.asset.chain === AssetRuneNative.chain || swap.input.asset.synth) {
       return await this.swapRuneTo(swap)
     } else {
       return await this.swapNonRune(swap)
@@ -98,8 +98,9 @@ export class Wallet {
    */
   private validateSwap(swap: ExecuteSwap) {
     const errors: string[] = []
-    const isThorchainDestinationAsset = swap.destinationAsset.synth || swap.destinationAsset.chain === Chain.THORChain
-    const chain = isThorchainDestinationAsset ? Chain.THORChain : swap.destinationAsset.chain
+    const isThorchainDestinationAsset =
+      swap.destinationAsset.synth || swap.destinationAsset.chain === AssetRuneNative.chain
+    const chain = isThorchainDestinationAsset ? AssetRuneNative.chain : swap.destinationAsset.chain
 
     if (!this.clients[chain].validateAddress(swap.destinationAddress)) {
       errors.push(`destinationAddress ${swap.destinationAddress} is not a valid address`)
@@ -109,7 +110,7 @@ export class Wallet {
     if (checkAffiliateAddress.length > 4) {
       const affiliateAddress = checkAffiliateAddress[4]
       if (affiliateAddress.length > 0) {
-        const isValidThorchainAddress = this.clients[Chain.THORChain].validateAddress(affiliateAddress)
+        const isValidThorchainAddress = this.clients[AssetRuneNative.chain].validateAddress(affiliateAddress)
         const isValidThorname = this.isThorname(affiliateAddress)
         if (!(isValidThorchainAddress || isValidThorname))
           errors.push(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
@@ -150,7 +151,7 @@ export class Wallet {
     const inbound = (await this.thorchainQuery.thorchainCache.getInboundDetails())[swap.input.asset.chain]
 
     if (!inbound?.address) throw Error(`no asgard address found for ${swap.input.asset.chain}`)
-    if (swap.input.asset.chain === Chain.Ethereum) {
+    if (swap.input.asset.chain === AssetETH.chain) {
       const params = {
         walletIndex: 0,
         asset: swap.input.asset,
@@ -160,7 +161,7 @@ export class Wallet {
       }
       const hash = await this.ethHelper.sendDeposit(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
-    } else if (swap.input.asset.chain === Chain.Avalanche) {
+    } else if (swap.input.asset.chain === AssetAVAX.chain) {
       const params = {
         walletIndex: 0,
         asset: swap.input.asset,
@@ -268,7 +269,7 @@ export class Wallet {
     waitTimeSeconds: number,
   ): Promise<TxSubmitted> {
     const assetClient = this.clients[assetAmount.asset.chain]
-    if (assetAmount.asset.chain === Chain.Ethereum) {
+    if (assetAmount.asset.chain === AssetETH.chain) {
       const addParams = {
         wallIndex: 0,
         asset: assetAmount.asset,
@@ -278,7 +279,7 @@ export class Wallet {
       }
       const hash = await this.ethHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
-    } else if (assetAmount.asset.chain === Chain.Avalanche) {
+    } else if (assetAmount.asset.chain === AssetAVAX.chain) {
       const addParams = {
         wallIndex: 0,
         asset: assetAmount.asset,
@@ -320,7 +321,7 @@ export class Wallet {
     waitTimeSeconds: number,
   ): Promise<TxSubmitted> {
     const assetClient = this.clients[dustAssetAmount.asset.chain]
-    if (dustAssetAmount.asset.chain === Chain.Ethereum) {
+    if (dustAssetAmount.asset.chain === AssetETH.chain) {
       const addParams = {
         wallIndex: 0,
         asset: dustAssetAmount.asset,
@@ -330,7 +331,7 @@ export class Wallet {
       }
       const hash = await this.ethHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
-    } else if (dustAssetAmount.asset.chain === Chain.Avalanche) {
+    } else if (dustAssetAmount.asset.chain === AssetAVAX.chain) {
       const addParams = {
         wallIndex: 0,
         asset: dustAssetAmount.asset,
@@ -375,7 +376,7 @@ export class Wallet {
     waitTimeSeconds: number,
     inboundAsgard: string,
   ): Promise<TxSubmitted> {
-    if (params.asset.asset.chain === Chain.Ethereum) {
+    if (params.asset.asset.chain === AssetETH.chain) {
       const addParams = {
         wallIndex: 0,
         asset: params.asset.asset,
@@ -385,7 +386,7 @@ export class Wallet {
       }
       const hash = await this.ethHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
-    } else if (params.asset.asset.chain === Chain.Avalanche) {
+    } else if (params.asset.asset.chain === AssetAVAX.chain) {
       const addParams = {
         wallIndex: 0,
         asset: params.asset.asset,
@@ -429,7 +430,7 @@ export class Wallet {
     waitTimeSeconds: number,
     inboundAsgard: string,
   ): Promise<TxSubmitted> {
-    if (params.assetFee.asset.chain === Chain.Ethereum) {
+    if (params.assetFee.asset.chain === AssetETH.chain) {
       const withdrawParams = {
         wallIndex: 0,
         asset: params.assetFee.asset,
@@ -440,7 +441,7 @@ export class Wallet {
       // console.log(withdrawParams.amount.amount().toNumber())
       const hash = await this.ethHelper.sendDeposit(withdrawParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
-    } else if (params.assetFee.asset.chain === Chain.Avalanche) {
+    } else if (params.assetFee.asset.chain === AssetAVAX.chain) {
       const withdrawParams = {
         wallIndex: 0,
         asset: params.assetFee.asset,

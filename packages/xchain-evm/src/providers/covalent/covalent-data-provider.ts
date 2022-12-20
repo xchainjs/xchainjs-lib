@@ -118,7 +118,7 @@ export class CovalentProvider implements OnlineDataProvider {
 
   //   // }
   //   return {
-  //     chain: Chain.Avalanche,
+  //     chain: AssetAVAX.chain,
   //     symbol: 'string',
   //     ticker: 'string',
   //     synth: false,
@@ -145,7 +145,7 @@ export class CovalentProvider implements OnlineDataProvider {
 
   //   return {
   //     asset: {
-  //       chain: Chain.Avalanche,
+  //       chain: AssetAVAX.chain,
   //       symbol: 'string',
   //       ticker: 'string',
   //       synth: false,

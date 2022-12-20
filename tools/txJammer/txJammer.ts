@@ -289,7 +289,7 @@ export class TxJammer {
     const [senderWallet, receiverWallet] = this.getRandomWallets()
     const [sourceAsset, destinationAsset] = this.getRandomSwapAssets()
     const destinationAddress = destinationAsset.synth
-      ? receiverWallet.clients[Chain.THORChain].getAddress()
+      ? receiverWallet.clients[AssetRuneNative.chain].getAddress()
       : receiverWallet.clients[destinationAsset.chain].getAddress()
     const swapParams: EstimateSwapParams = {
       input: await this.createCryptoAmount(sourceAsset),
@@ -445,7 +445,7 @@ export class TxJammer {
   private async executeWithdraw() {
     const [senderWallet] = this.getRandomWallets()
     const asset = this.getRandomWithdrawLpAsset()
-    const runeAddress = senderWallet.clients[Chain.THORChain].getAddress()
+    const runeAddress = senderWallet.clients[AssetRuneNative.chain].getAddress()
     const sourceAddress = senderWallet.clients[asset.chain].getAddress()
     const percentageWithdraw = this.getRandomInt(1, 100)
     const result: TxDetail = {

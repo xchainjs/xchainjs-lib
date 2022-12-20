@@ -52,13 +52,13 @@ const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 const USDT_DECIMAL = 6
 
 const USDT: Asset = {
-  chain: Chain.Ethereum,
+  chain: AssetETH.chain,
   symbol: 'USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306',
   ticker: 'USDT',
   synth: false,
 }
 const XRUNE: Asset = {
-  chain: Chain.Ethereum,
+  chain: AssetETH.chain,
   symbol: 'XRUNE-0X8626DB1A4F9F3E1002EEB9A4F3C6D391436FFC23',
   ticker: 'XRUNE',
   synth: false,
@@ -146,7 +146,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('4')), BUSD),
       destinationAsset: sBTC,
-      destinationAddress: mainnetWallet.clients[Chain.THORChain].getAddress(),
+      destinationAddress: mainnetWallet.clients[AssetRuneNative.chain].getAddress(),
       slipLimit: new BigNumber(0.03),
     }
     try {
@@ -300,7 +300,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   it(`Should perform a swap from LTC to AVAX`, async () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.01')), AssetLTC),
-      destinationAddress: stagenetWallet.clients[Chain.Avalanche].getAddress(),
+      destinationAddress: stagenetWallet.clients[AssetAVAX.chain].getAddress(),
       destinationAsset: AssetAVAX,
       slipLimit: new BigNumber('0.5'),
     }
@@ -322,7 +322,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   it(`Should perform a swap from ATOM to synth ATOM`, async () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('10')), AssetAtom),
-      destinationAddress: mainnetWallet.clients[Chain.THORChain].getAddress(),
+      destinationAddress: mainnetWallet.clients[AssetRuneNative.chain].getAddress(),
       destinationAsset: sATOM,
       slipLimit: new BigNumber('0.05'),
     }
@@ -334,7 +334,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('0.5', 18)), AssetAVAX),
       destinationAsset: AssetRuneNative,
-      destinationAddress: stagenetWallet.clients[Chain.THORChain].getAddress(),
+      destinationAddress: stagenetWallet.clients[AssetRuneNative.chain].getAddress(),
       slipLimit: new BigNumber('0.2'),
     }
     try {
@@ -348,7 +348,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       //   const output = await stagenetThorchainAmm.doSwap(
       //     stagenetWallet,
       //     estimateSwapParams,
-      //     stagenetWallet.clients[Chain.THORChain].getAddress(),
+      //     stagenetWallet.clients[AssetRuneNative.chain].getAddress(),
       //   )
       //   console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
       //   expect(output).toBeTruthy()

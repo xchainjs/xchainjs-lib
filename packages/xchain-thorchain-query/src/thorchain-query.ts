@@ -320,7 +320,7 @@ export class ThorchainQuery {
   // private async validateAffiliateAddress(affiliateAddress: string) {
   //   // Affiliate address should be THORName or THORAddress
   //   if (affiliateAddress.length > 0) {
-  //     const isValidThorchainAddress = this.clients[Chain.THORChain].validateAddress(affiliateAddress)
+  //     const isValidThorchainAddress = this.clients[AssetRuneNative.chain].validateAddress(affiliateAddress)
   //     const isValidThorname = await this.isThorname(affiliateAddress)
   //     if (!(isValidThorchainAddress || isValidThorname))
   //       throw Error(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
@@ -449,7 +449,7 @@ export class ThorchainQuery {
       inbound.asset.chain == AssetAtom.chain ||
       inbound.asset.synth
     ) {
-      return this.chainAttributes[Chain.THORChain].avgBlockTimeInSecs
+      return this.chainAttributes[AssetRuneNative.chain].avgBlockTimeInSecs
     }
     // Get the gas asset for the inbound.asset.chain
     const chainGasAsset = getChainAsset(inbound.asset.chain)
@@ -483,7 +483,7 @@ export class ThorchainQuery {
       .amount()
       .toNumber()
     const getScheduledOutboundValue = await this.thorchainCache.midgard.getScheduledOutboundValue()
-    const thorChainblocktime = this.chainAttributes[Chain.THORChain].avgBlockTimeInSecs // blocks required to confirm tx
+    const thorChainblocktime = this.chainAttributes[AssetRuneNative.chain].avgBlockTimeInSecs // blocks required to confirm tx
     // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
     const runeValue = await this.thorchainCache.convert(outboundAmount, AssetRuneNative)
     // Check rune value amount

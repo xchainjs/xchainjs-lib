@@ -15,7 +15,7 @@ import {
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, Chain } from '@xchainjs/xchain-util'
+import { Address, AssetBCH } from '@xchainjs/xchain-util'
 
 import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
@@ -57,7 +57,7 @@ class Client extends UTXOClient {
       [Network.Stagenet]: `m/44'/145'/0'/0/`,
     },
   }: BitcoinCashClientParams) {
-    super(Chain.BitcoinCash, { network, rootDerivationPaths, phrase, feeBounds })
+    super(AssetBCH.chain, { network, rootDerivationPaths, phrase, feeBounds })
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.rootDerivationPaths = rootDerivationPaths

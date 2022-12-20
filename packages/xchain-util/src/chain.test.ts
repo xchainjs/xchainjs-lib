@@ -1,4 +1,15 @@
-import { Chain, chainToString, isChain } from './chain'
+import {
+  BCHChain,
+  BNBChain,
+  BTCChain,
+  CosmosChain,
+  DOGEChain,
+  ETHChain,
+  LTCChain,
+  THORChain,
+  chainToString,
+  isChain,
+} from './chain'
 
 describe('chain', () => {
   it('checks type Chain', () => {
@@ -13,29 +24,29 @@ describe('chain', () => {
     expect(isChain('invalid')).toBeFalsy()
   })
   describe('chainToString', () => {
-    it('returns string for Thorchain', () => {
-      expect(chainToString(Chain.THORChain)).toEqual('Thorchain')
-    })
-    it('returns string for BTC', () => {
-      expect(chainToString(Chain.Bitcoin)).toEqual('Bitcoin')
-    })
     it('returns string for BCH', () => {
-      expect(chainToString(Chain.BitcoinCash)).toEqual('Bitcoin Cash')
-    })
-    it('returns string for ETH', () => {
-      expect(chainToString(Chain.Ethereum)).toEqual('Ethereum')
+      expect(chainToString(BCHChain)).toEqual('Bitcoin Cash')
     })
     it('returns string for BNB', () => {
-      expect(chainToString(Chain.Binance)).toEqual('Binance Chain')
+      expect(chainToString(BNBChain)).toEqual('Binance Chain')
     })
-    it('returns string for GAIA', () => {
-      expect(chainToString(Chain.Cosmos)).toEqual('Cosmos')
-    })
-    it('returns string for LTC', () => {
-      expect(chainToString(Chain.Litecoin)).toEqual('Litecoin')
+    it('returns string for BTC', () => {
+      expect(chainToString(BTCChain)).toEqual('Bitcoin')
     })
     it('returns string for DOGE', () => {
-      expect(chainToString(Chain.Doge)).toEqual('Dogecoin')
+      expect(chainToString(DOGEChain)).toEqual('Dogecoin')
+    })
+    it('returns string for ETH', () => {
+      expect(chainToString(ETHChain)).toEqual('Ethereum')
+    })
+    it('returns string for GAIA', () => {
+      expect(chainToString(CosmosChain)).toEqual('Cosmos')
+    })
+    it('returns string for LTC', () => {
+      expect(chainToString(LTCChain)).toEqual('Litecoin')
+    })
+    it('returns string for THOR', () => {
+      expect(chainToString(THORChain)).toEqual('Thorchain')
     })
   })
 })

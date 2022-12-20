@@ -9,7 +9,7 @@ import {
   Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
-import { Chain, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import { THORChain, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
@@ -45,7 +45,7 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
     const fromAsset = assetFromString(`${process.argv[6]}`)
     const toAsset = assetFromString(`${process.argv[7]}`)
 
-    const toChain = toAsset.synth ? Chain.THORChain : toAsset.chain
+    const toChain = toAsset.synth ? THORChain : toAsset.chain
     const destinationAddress = wallet.clients[toChain].getAddress()
 
     console.log(destinationAddress)

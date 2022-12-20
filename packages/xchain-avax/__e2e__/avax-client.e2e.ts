@@ -1,6 +1,6 @@
 import { Balance, Network, TxType } from '@xchainjs/xchain-client'
 import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
-import { Asset, AssetAVAX, Chain, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { Asset, AssetAVAX, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import AvaxClient from '../src/client'
 import { defaultAvaxParams } from '../src/const'
@@ -10,7 +10,7 @@ import { defaultAvaxParams } from '../src/const'
 // =====Erc-20 asset=====
 
 const assetRIP: Asset = {
-  chain: Chain.Avalanche,
+  chain: AssetAVAX.chain,
   symbol: `RIP-0x224695ba2a98e4a096a519b503336e06d9116e48`,
   ticker: `RIP`,
   synth: false,

@@ -250,7 +250,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
 
   it('Should fail estimate swap if source pool has not enough liquidity ', async () => {
     const assetHOT: Asset = {
-      chain: Chain.Ethereum,
+      chain: AssetETH.chain,
       symbol: 'HOT-0X6C6EE5E31D828DE241282B9606C8E98EA48526E2',
       ticker: 'HOT',
       synth: false,

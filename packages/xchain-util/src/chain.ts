@@ -1,35 +1,36 @@
-export enum Chain {
-  Avalanche = 'AVAX',
-  Binance = 'BNB',
-  Bitcoin = 'BTC',
-  Ethereum = 'ETH',
-  THORChain = 'THOR',
-  Cosmos = 'GAIA',
-  BitcoinCash = 'BCH',
-  Litecoin = 'LTC',
-  Doge = 'DOGE',
-  Avax = 'AVAX',
+import { Chain } from './types'
+
+export const AVAXChain = 'AVAX'
+export const BCHChain = 'BCH'
+export const BNBChain = 'BNB'
+export const BTCChain = 'BTC'
+export const CosmosChain = 'GAIA'
+export const DOGEChain = 'DOGE'
+export const ETHChain = 'ETH'
+export const LTCChain = 'LTC'
+export const THORChain = 'THOR'
+
+const chains: Chain[] = [BNBChain, BTCChain, ETHChain, THORChain, CosmosChain, BCHChain, LTCChain, DOGEChain, AVAXChain]
+
+const chainNames: Record<Chain, string> = {
+  [AVAXChain]: 'Avalanche',
+  [BCHChain]: 'Bitcoin Cash',
+  [BNBChain]: 'Binance Chain',
+  [BTCChain]: 'Bitcoin',
+  [CosmosChain]: 'Cosmos',
+  [DOGEChain]: 'Dogecoin',
+  [ETHChain]: 'Ethereum',
+  [LTCChain]: 'Litecoin',
+  [THORChain]: 'Thorchain',
 }
-export const AvalancheChain = Chain.Avalanche
-export const BNBChain = Chain.Binance
-export const BTCChain = Chain.Bitcoin
-export const ETHChain = Chain.Ethereum
-export const THORChain = Chain.THORChain
-export const CosmosChain = Chain.Cosmos
-export const BCHChain = Chain.BitcoinCash
-export const LTCChain = Chain.Litecoin
-export const DOGEChain = Chain.Doge
-export const AVAXChain = Chain.Avax
 
 /**
- * Type guard to check whether string  is based on type `Chain`
+ * Check if a given chain is supported by xchain-util
  *
  * @param {string} c The chain string.
  * @returns {boolean} `true` or `false`
  */
-export const isChain = (c: string): c is Chain => (Object.values(Chain) as string[]).includes(c)
-
-export const isEnabledChain = (chain: Chain) => chain.includes(chain)
+export const isChain = (c: Chain): boolean => chains.includes(c)
 
 /**
  * Sees if one chain is equal to another chain
@@ -38,9 +39,7 @@ export const isEnabledChain = (chain: Chain) => chain.includes(chain)
  * @param b chain b
  * @returns boolean: True if equal else False
  */
-export const eqChain = (a: Chain, b: Chain) => {
-  return a == b
-}
+export const eqChain = (a: Chain, b: Chain) => a == b
 
 /**
  * Convert chain to string.
@@ -48,28 +47,42 @@ export const eqChain = (a: Chain, b: Chain) => {
  * @param {Chain} chainId.
  * @returns {string} The string based on the given chain type.
  */
-export const chainToString: ((chainId: Chain) => string) & Record<Chain, string> = Object.assign(
-  (chainId: Chain) => {
-    if (!(chainId in chainToString)) return 'unknown chain'
-    return chainToString[chainId]
-  },
-  {
-    [Chain.Avalanche]: 'Avalanche',
-    [Chain.THORChain]: 'Thorchain',
-    [Chain.Bitcoin]: 'Bitcoin',
-    [Chain.BitcoinCash]: 'Bitcoin Cash',
-    [Chain.Litecoin]: 'Litecoin',
-    [Chain.Ethereum]: 'Ethereum',
-    [Chain.Binance]: 'Binance Chain',
-    [Chain.Cosmos]: 'Cosmos',
-    [Chain.Doge]: 'Dogecoin',
-  },
-)
+export const chainToString = (chainId: Chain): string | undefined => chainNames[chainId]
+
+/**
+ * Check whether chain is AVAX chain
+ */
+export const isAVAXChain = (chain: Chain): boolean => eqChain(chain, AVAXChain)
+
+/**
+ * Check whether chain is BCH chain
+ */
+export const isBchChain = (chain: Chain): boolean => eqChain(chain, BCHChain)
+
+/**
+ * Check whether chain is BNB chain
+ */
+export const isBnbChain = (chain: Chain): boolean => eqChain(chain, BNBChain)
 
 /**
  * Check whether chain is BTC chain
  */
 export const isBtcChain = (chain: Chain): boolean => eqChain(chain, BTCChain)
+
+/**
+ * Check whether chain is Cosmos chain
+ */
+export const isCosmosChain = (chain: Chain): boolean => eqChain(chain, CosmosChain)
+
+/**
+ * Check whether chain is DOGE chain
+ */
+export const isDogeChain = (chain: Chain): boolean => eqChain(chain, DOGEChain)
+
+/**
+ * Check whether chain is ETH chain
+ */
+export const isEthChain = (chain: Chain): boolean => eqChain(chain, ETHChain)
 
 /**
  * Check whether chain is LTC chain
@@ -79,24 +92,4 @@ export const isLtcChain = (chain: Chain): boolean => eqChain(chain, LTCChain)
 /**
  * Check whether chain is THOR chain
  */
-export const isThorChain = (chain: Chain): boolean => eqChain(chain, THORChain)
-
-/**
- * Check whether chain is BNB chain
- */
-export const isBnbChain = (chain: Chain): boolean => eqChain(chain, BNBChain)
-
-/**
- * Check whether chain is ETH chain
- */
-export const isEthChain = (chain: Chain): boolean => eqChain(chain, ETHChain)
-
-/**
- * Check whether chain is BCH chain
- */
-export const isBchChain = (chain: Chain): boolean => eqChain(chain, BCHChain)
-
-/**
- * Check whether chain is DOGE chain
- */
-export const isDogeChain = (chain: Chain): boolean => eqChain(chain, DOGEChain)
+export const isTHORChain = (chain: Chain): boolean => eqChain(chain, THORChain)

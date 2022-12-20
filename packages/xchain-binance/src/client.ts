@@ -21,7 +21,6 @@ import {
   Asset,
   AssetBNB,
   BaseAmount,
-  Chain,
   assetAmount,
   assetFromString,
   assetToBase,
@@ -99,7 +98,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
       [Network.Testnet]: "44'/931'/0'/0/",
     },
   }: XChainClientParams) {
-    super(Chain.Binance, { network, rootDerivationPaths, phrase })
+    super(AssetBNB.chain, { network, rootDerivationPaths, phrase })
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(this.getNetwork())
   }
@@ -260,7 +259,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     return balances
       .map((balance) => {
         return {
-          asset: assetFromString(`${Chain.Binance}.${balance.symbol}`) || AssetBNB,
+          asset: assetFromString(`${AssetBNB.chain}.${balance.symbol}`) || AssetBNB,
           amount: assetToBase(assetAmount(balance.free, 8)),
         }
       })
