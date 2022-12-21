@@ -1,6 +1,6 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { FeeOption, Network } from '@xchainjs/xchain-client'
-import { AssetETH, AssetLTC, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { AssetLTC, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, providers } from 'ethers'
 import nock from 'nock'
 
@@ -16,7 +16,7 @@ import {
 } from '../__mocks__/thornode-api'
 import Client from '../src/client'
 import erc20ABI from '../src/data/erc20.json'
-import { ETH_DECIMAL } from '../src/utils'
+import { AssetETH, ETH_DECIMAL } from '../src/utils'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'

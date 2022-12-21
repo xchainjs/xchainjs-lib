@@ -1,6 +1,8 @@
 export * from './types'
 export * from './client'
 export {
+  AssetETH,
+  ETHChain,
   call,
   estimateApprove,
   estimateCall,

@@ -2,8 +2,8 @@ import { Balance, FeeType, Fees, Network, Tx, TxType } from '@xchainjs/xchain-cl
 import {
   Address,
   Asset,
-  AssetETH,
   BaseAmount,
+  Chain,
   assetAmount,
   assetFromString,
   assetToBase,
@@ -39,6 +39,19 @@ export const DEFAULT_GAS_PRICE = 50
 
 export const ETHAddress = '0x0000000000000000000000000000000000000000'
 export const MAX_APPROVAL: ethers.BigNumber = ethers.BigNumber.from(2).pow(256).sub(1)
+
+/**
+ * Chain identifier for Ethereum mainnet
+ *
+ */
+export const ETHChain: Chain = 'ETH'
+/**
+ * Base "chain" asset on ethereum main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetETH: Asset = { chain: ETHChain, symbol: 'ETH', ticker: 'ETH', synth: false }
 
 /**
  * Network -> EthNetwork

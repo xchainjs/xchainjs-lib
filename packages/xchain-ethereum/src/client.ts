@@ -18,7 +18,7 @@ import {
   checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, Asset, AssetETH, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
 
@@ -41,6 +41,7 @@ import {
   TxOverrides,
 } from './types'
 import {
+  AssetETH,
   BASE_TOKEN_GAS_COST,
   ETH_DECIMAL,
   SIMPLE_GAS_COST,
