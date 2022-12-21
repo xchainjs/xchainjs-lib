@@ -1,9 +1,9 @@
 import { AssetAVAX } from '@xchainjs/xchain-avax'
 import { AssetBNB } from '@xchainjs/xchain-binance'
+import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
 import {
   AssetBCH,
-  AssetBTC,
   AssetETH,
   AssetLTC,
   AssetRuneNative,

@@ -1,13 +1,6 @@
+import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { PoolDetail } from '@xchainjs/xchain-midgard'
-import {
-  AssetBTC,
-  AssetETH,
-  AssetRuneNative,
-  assetAmount,
-  assetFromString,
-  assetToBase,
-  baseAmount,
-} from '@xchainjs/xchain-util'
+import { AssetETH, AssetRuneNative, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import mockMidgardApi from '../__mocks__/midgard-api'

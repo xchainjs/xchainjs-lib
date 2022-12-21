@@ -10,7 +10,7 @@ import {
   calcFees,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, AssetBTC, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, Chain, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
@@ -20,6 +20,20 @@ import * as sochain from './sochain-api'
 import { BroadcastTxParams, UTXO } from './types/common'
 import * as HaskoinApiTypes from './types/haskoin-api-types'
 import { AddressParams, BtcAddressUTXO, ScanUTXOParam } from './types/sochain-api-types'
+
+/**
+ * Chain identifier for Bitcoin mainnet
+ *
+ */
+export const BTCChain: Chain = 'BTC'
+
+/**
+ * Base "chain" asset on bitcoin main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetBTC: Asset = { chain: BTCChain, symbol: 'BTC', ticker: 'BTC', synth: false }
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41

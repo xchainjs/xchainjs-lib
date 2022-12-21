@@ -1,7 +1,7 @@
 import { AssetBNB } from '@xchainjs/xchain-binance'
+import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import {
   AssetAtom,
-  AssetBTC,
   AssetETH,
   AssetLTC,
   AssetRuneNative,

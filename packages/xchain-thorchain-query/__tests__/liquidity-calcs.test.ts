@@ -1,6 +1,6 @@
+import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { PoolDetail } from '@xchainjs/xchain-midgard'
 import {
-  AssetBTC,
   AssetETH,
   AssetRuneNative,
   assetAmount,

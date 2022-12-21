@@ -1,17 +1,16 @@
 import { AVAXChain, AssetAVAX } from '@xchainjs/xchain-avax'
 import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
+import { AssetBTC, BTCChain } from '@xchainjs/xchain-bitcoin'
 import {
   // Address,
   Asset,
   AssetAtom,
   AssetBCH,
-  AssetBTC,
   AssetDOGE,
   AssetETH,
   AssetLTC,
   AssetRuneNative,
   BCHChain,
-  BTCChain,
   Chain,
   CosmosChain,
   DOGEChain,
