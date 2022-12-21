@@ -1,9 +1,10 @@
 import { FeeType, Network } from '@xchainjs/xchain-client'
-import { Asset, AssetBNB, BNBChain, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { Client as BinanceClient } from '../src/client'
 import { Account, Fees, TransactionResult, TxPage } from '../src/types/binance'
+import { AssetBNB, BNBChain } from '../src/util'
 
 const mockGetAccount = (url: string, address: string, result: Account, ntimes = 1, status = 200) => {
   nock(url).get(`/api/v1/account/${address}`).times(ntimes).reply(status, result)

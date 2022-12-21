@@ -19,7 +19,6 @@ import {
 import {
   Address,
   Asset,
-  AssetBNB,
   BaseAmount,
   assetAmount,
   assetFromString,
@@ -39,6 +38,7 @@ import {
   TxPage as BinanceTxPage,
 } from './types/binance'
 import { getPrefix, isAccount, isTransferFee, parseTx } from './util'
+import { AssetBNB } from './util'
 
 type PrivKey = string
 

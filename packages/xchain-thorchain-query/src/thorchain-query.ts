@@ -1,8 +1,8 @@
+import { AssetBNB } from '@xchainjs/xchain-binance'
 import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Asset,
   AssetAtom,
-  AssetBNB,
   AssetBTC,
   AssetRuneNative,
   Chain,

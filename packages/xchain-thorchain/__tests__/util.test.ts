@@ -1,5 +1,6 @@
+import { AssetBNB } from '@xchainjs/xchain-binance'
 import { Network } from '@xchainjs/xchain-client'
-import { AssetBNB, AssetETH, AssetRuneNative, assetAmount, assetToBase, isAssetRuneNative } from '@xchainjs/xchain-util'
+import { AssetETH, AssetRuneNative, assetAmount, assetToBase, isAssetRuneNative } from '@xchainjs/xchain-util'
 // import nock from 'nock'
 
 import { mockTendermintNodeInfo } from '../__mocks__/thornode-api'

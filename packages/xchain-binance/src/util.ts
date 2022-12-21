@@ -1,9 +1,21 @@
 import { FeeType, Fees, Network, Tx, TxType, singleFee } from '@xchainjs/xchain-client'
-import { AssetBNB, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, Chain, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
 import { Account, DexFees, Fee, TransferFee, Tx as BinanceTx, TxType as BinanceTxType } from './types/binance'
 import { Transfer, TransferEvent } from './types/binance-ws'
 import { DerivePath } from './types/common'
+
+/**
+ * Chain identifier for BNB.
+ *
+ */
+export const BNBChain: Chain = 'BNB'
+
+/**
+ * Base "chain" asset of Binance chain.
+ *
+ */
+export const AssetBNB: Asset = { chain: BNBChain, symbol: 'BNB', ticker: 'BNB', synth: false }
 
 /**
  * Get `hash` from transfer event sent by Binance chain.
