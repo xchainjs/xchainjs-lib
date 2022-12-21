@@ -12,6 +12,7 @@ import {
   assetToString,
   baseAmount,
   eqAsset,
+  getContractAddressFromAsset,
   isAssetRuneNative,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
@@ -283,7 +284,15 @@ export class ThorchainQuery {
     }
     return swapEstimate
   }
-
+  private abbreviateAssetString(asset: Asset): string {
+    const contractAddress = getContractAddressFromAsset(asset)
+    if (contractAddress && contractAddress.length > 5) {
+      const abrev = contractAddress.substring(contractAddress.length - 5)
+      const sep = asset.chain !== Chain.THORChain && asset.synth ? '/' : '.'
+      return `${asset.chain}${sep}${asset.ticker}-${abrev}`
+    }
+    return assetToString(asset)
+  }
   /**
    *
    * @param params - swap object
@@ -291,24 +300,18 @@ export class ThorchainQuery {
    */
   private constructSwapMemo(params: ConstructMemo): string {
     const limstring = params.limit.amount().toFixed()
-    // create LIM with interface ID
     const lim = limstring.substring(0, limstring.length - 3).concat(params.interfaceID)
-    // create the full memo
-    let memo = `=:${assetToString(params.destinationAsset)}`
-    // NOTE: we should validate affiliate address is EITHER: a thorname or valid thorchain address, currently we cannot do this without importing xchain-thorchain
+    let memo = `=:${this.abbreviateAssetString(params.destinationAsset)}:${params.destinationAddress}:${lim}`
 
+    // NOTE: we should validate affiliate address is EITHER: a thorname or valid thorchain address, currently we cannot do this without importing xchain-thorchain
     if (params.affiliateAddress?.length > 0) {
       // NOTE: we should validate destinationAddress address is valid destination address for the asset type requested
-      memo = memo.concat(
-        `:${params.destinationAddress}:${lim}:${params.affiliateAddress}:${params.affiliateFeeBasisPoints}`,
-      )
-    } else {
-      memo = memo.concat(`:${params.destinationAddress}:${lim}`)
+      memo = memo.concat(`:${params.affiliateAddress}:${params.affiliateFeeBasisPoints}`)
     }
 
     // If memo length is too long for BTC, trim it
     if (eqAsset(params.input.asset, AssetBTC) && memo.length > 80) {
-      memo = `=:${assetToString(params.destinationAsset)}:${params.destinationAddress}`
+      memo = `=:${this.abbreviateAssetString(params.destinationAsset)}:${params.destinationAddress}:${lim}`
     }
     return memo
   }
