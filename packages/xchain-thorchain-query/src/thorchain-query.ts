@@ -1,10 +1,10 @@
 import { AssetBNB } from '@xchainjs/xchain-binance'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
+import { AssetRuneNative, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Asset,
   AssetAtom,
-  AssetRuneNative,
   Chain,
   assetAmount,
   assetFromStringEx,
@@ -12,8 +12,6 @@ import {
   assetToString,
   baseAmount,
   eqAsset,
-  getContractAddressFromAsset,
-  isAssetRuneNative,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 

@@ -1,13 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
-import {
-  AssetETH,
-  AssetRuneERC20,
-  AssetRuneNative,
-  ETHChain,
-  assetToString,
-  baseAmount,
-  strip0x,
-} from '@xchainjs/xchain-util'
+import { AssetRuneERC20, AssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { AssetETH, ETHChain, assetToString, baseAmount, strip0x } from '@xchainjs/xchain-util'
 import { ethers, providers } from 'ethers'
 import nock from 'nock'
 

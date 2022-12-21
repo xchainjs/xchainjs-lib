@@ -1,7 +1,8 @@
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetLTC } from '@xchainjs/xchain-litecoin'
+import { THORChain } from '@xchainjs/xchain-thorchain'
 import { LastBlock, ObservedTx, TxOutItem, TxResponse } from '@xchainjs/xchain-thornode'
-import { Chain, THORChain } from '@xchainjs/xchain-util'
+import { Chain } from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
 import { ThorchainCache } from './thorchain-cache'

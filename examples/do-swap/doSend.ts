@@ -1,7 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
+import { THORChain } from '@xchainjs/xchain-thorchain'
 import { Wallet } from '@xchainjs/xchain-thorchain-amm'
 import { Midgard, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
-import { THORChain, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 
 /**
  * send an asset from your wallet to another address

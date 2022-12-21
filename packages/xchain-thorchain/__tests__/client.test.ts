@@ -2,10 +2,11 @@ import cosmosclient from '@cosmos-client/core'
 import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCResponse, RPCTxSearchResult, TxResponse } from '@xchainjs/xchain-cosmos'
-import { Asset, AssetRuneNative, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { mockTendermintNodeInfo, mockTendermintSimulate } from '../__mocks__/thornode-api'
+import { AssetRuneNative } from '../src'
 import { Client } from '../src/client'
 
 const chainIds = {

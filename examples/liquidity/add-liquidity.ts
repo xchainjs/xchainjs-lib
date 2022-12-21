@@ -8,7 +8,8 @@ import {
   ThorchainQuery,
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromStringEx, assetToBase, isAssetRuneNative } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
+import { isAssetRuneNative } from '@xchainjs/xchain-thorchain' }
 
 /**
  * Add LP

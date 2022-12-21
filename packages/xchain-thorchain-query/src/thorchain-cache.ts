@@ -1,15 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
-import {
-  Address,
-  Asset,
-  AssetRuneNative,
-  Chain,
-  assetFromStringEx,
-  assetToString,
-  baseAmount,
-  eqAsset,
-  isAssetRuneNative,
-} from '@xchainjs/xchain-util'
+import { AssetRuneNative, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { Address, Asset, Chain, assetFromStringEx, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'

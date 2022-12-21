@@ -22,12 +22,10 @@ import {
   Address,
   Asset,
   AssetAtom,
-  AssetRuneNative,
   BaseAmount,
   assetFromString,
   assetToString,
   baseAmount,
-  isAssetRuneNative,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
@@ -48,6 +46,7 @@ import {
 } from './types'
 import { TxResult } from './types/messages'
 import {
+  AssetRuneNative,
   DECIMAL,
   DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
@@ -60,6 +59,7 @@ import {
   getExplorerAddressUrl,
   getExplorerTxUrl,
   getPrefix,
+  isAssetRuneNative,
   registerDepositCodecs,
   registerSendCodecs,
 } from './util'

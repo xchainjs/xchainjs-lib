@@ -464,14 +464,6 @@ export const eqAsset = (a: Asset, b: Asset) =>
   a.chain === b.chain && a.symbol === b.symbol && a.ticker === b.ticker && a.synth === b.synth
 
 /**
- * Checks whether an asset is `AssetRuneNative`
- *
- * @param {Asset} asset
- * @returns {boolean} `true` or `false`
- */
-export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
-
-/**
  * Removes `0x` or `0X` from address
  */
 export const strip0x = (addr: Address) => addr.replace(/^0(x|X)/, '')

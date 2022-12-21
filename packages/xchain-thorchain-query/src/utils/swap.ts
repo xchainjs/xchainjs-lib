@@ -1,6 +1,7 @@
 import { AVAXChain, AssetAVAX } from '@xchainjs/xchain-avax'
 import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
 import { AssetBTC, BTCChain } from '@xchainjs/xchain-bitcoin'
+import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   // Address,
   Asset,
@@ -9,14 +10,12 @@ import {
   AssetDOGE,
   AssetETH,
   AssetLTC,
-  AssetRuneNative,
   BCHChain,
   Chain,
   CosmosChain,
   DOGEChain,
   ETHChain,
   LTCChain,
-  THORChain,
   baseAmount,
   eqAsset,
 } from '@xchainjs/xchain-util'

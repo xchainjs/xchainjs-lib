@@ -4,14 +4,13 @@ import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
   Address,
   Asset,
-  AssetRuneNative,
   BaseAmount,
+  Chain,
   assetAmount,
   assetFromString,
   assetToBase,
   assetToString,
   baseAmount,
-  isAssetRuneNative,
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
@@ -29,8 +28,64 @@ export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 export const MAX_TX_COUNT = 100
 
 const DENOM_RUNE_NATIVE = 'rune'
+const RUNE_TICKER = 'RUNE'
 
 const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
+/**
+ * Chain identifier for Thorchain
+ *
+ */
+export const THORChain: Chain = 'THOR'
+
+/**
+ * Base "chain" asset for RUNE-67C on Binance test net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetRune67C: Asset = { chain: 'BNB', symbol: 'RUNE-67C', ticker: RUNE_TICKER, synth: false }
+
+/**
+ * Base "chain" asset for RUNE-B1A on Binance main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetRuneB1A: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: RUNE_TICKER, synth: false }
+
+/**
+ * Base "chain" asset on thorchain main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetRuneNative: Asset = { chain: THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
+
+/**
+ * Base "chain" asset for RUNE on ethereum main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetRuneERC20: Asset = {
+  chain: 'ETH',
+  symbol: `${RUNE_TICKER}-0x3155ba85d5f96b2d030a4966af206230e46849cb`,
+  ticker: RUNE_TICKER,
+  synth: false,
+}
+
+/**
+ * Base "chain" asset for RUNE on ethereum main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetRuneERC20Testnet: Asset = {
+  chain: 'ETH',
+  symbol: `${RUNE_TICKER}-0xd601c6A3a36721320573885A8d8420746dA3d7A0`,
+  ticker: RUNE_TICKER,
+  synth: false,
+}
 const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
 const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
 export const defaultExplorerUrls: ExplorerUrls = {
@@ -73,6 +128,14 @@ export const assetFromDenom = (denom: string): Asset | null => {
   if (denom === DENOM_RUNE_NATIVE) return AssetRuneNative
   return assetFromString(denom.toUpperCase())
 }
+
+/**
+ * Checks whether an asset is `AssetRuneNative`
+ *
+ * @param {Asset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
 
 /**
  * Response guard for transaction broadcast
