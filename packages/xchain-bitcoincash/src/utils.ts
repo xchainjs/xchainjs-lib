@@ -14,7 +14,7 @@ import {
   calcFees,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, Chain, baseAmount } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'
@@ -31,6 +31,20 @@ const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
 const TX_INPUT_PUBKEYHASH = 107
 const TX_OUTPUT_BASE = 8 + 1 //9
 const TX_OUTPUT_PUBKEYHASH = 25
+
+/**
+ * Chain identifier for Bitcoin Cash
+ *
+ */
+export const BCHChain: Chain = 'BCH'
+
+/**
+ * Base "chain" asset on bitcoin main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetBCH: Asset = { chain: BCHChain, symbol: 'BCH', ticker: 'BCH', synth: false }
 
 /**
  * Compile memo.

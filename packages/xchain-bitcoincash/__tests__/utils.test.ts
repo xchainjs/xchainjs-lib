@@ -1,8 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetBCH } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
 
 import mockHaskoinApi from '../__mocks__/haskoin'
+import { AssetBCH } from '../src/utils'
 import * as utils from '../src/utils'
 
 describe('Bitcoin Cash Utils Test', () => {
