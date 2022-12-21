@@ -1,6 +1,7 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { FeeOption, Network } from '@xchainjs/xchain-client'
-import { AssetLTC, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { AssetLTC } from '@xchainjs/xchain-litecoin'
+import { assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, providers } from 'ethers'
 import nock from 'nock'
 

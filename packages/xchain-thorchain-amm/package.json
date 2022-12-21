@@ -49,7 +49,7 @@
     "@xchainjs/xchain-ethereum": "^0.27.4",
     "@xchainjs/xchain-evm": "^0.1.1",
     "@xchainjs/xchain-avax": "^0.1.1",
-    "@xchainjs/xchain-litecoin": "^0.10.6",
+    "@xchainjs/xchain-litecoin": "^0.10.7",
     "@xchainjs/xchain-midgard": "0.3.0",
     "@xchainjs/xchain-thorchain": "^0.27.4",
     "@xchainjs/xchain-thorchain-query": "^0.1.9",

@@ -15,7 +15,7 @@ import {
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, AssetLTC, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Address, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Litecoin from 'bitcoinjs-lib'
 
 import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
@@ -67,7 +67,7 @@ class Client extends UTXOClient {
       [Network.Stagenet]: `m/84'/2'/0'/0/`,
     },
   }: LitecoinClientParams) {
-    super(AssetLTC.chain, { network, rootDerivationPaths, phrase, feeBounds })
+    super(Utils.AssetLTC.chain, { network, rootDerivationPaths, phrase, feeBounds })
     this.nodeUrls = nodeUrls
 
     this.nodeAuth =
@@ -238,7 +238,7 @@ class Client extends UTXOClient {
         hash: txItem.txid,
       })
       const tx: Tx = {
-        asset: AssetLTC,
+        asset: Utils.AssetLTC,
         from: rawTx.inputs.map((i: TxIO) => ({
           from: i.address,
           amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
@@ -274,7 +274,7 @@ class Client extends UTXOClient {
       hash: txId,
     })
     return {
-      asset: AssetLTC,
+      asset: Utils.AssetLTC,
       from: rawTx.inputs.map((i) => ({
         from: i.address,
         amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),

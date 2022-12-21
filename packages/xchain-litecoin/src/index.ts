@@ -1,6 +1,8 @@
 export * from './types'
 export * from './client'
 export {
+  AssetLTC,
+  LTCChain,
   broadcastTx,
   buildTx,
   getDefaultFees,
