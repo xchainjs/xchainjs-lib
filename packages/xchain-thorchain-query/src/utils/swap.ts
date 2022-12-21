@@ -1,8 +1,7 @@
+import { AVAXChain, AssetAVAX } from '@xchainjs/xchain-avax'
 import {
   // Address,
-  AVAXChain,
   Asset,
-  AssetAVAX,
   AssetAtom,
   AssetBCH,
   AssetBNB,

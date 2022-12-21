@@ -1,3 +1,4 @@
+import { AssetAVAX } from '@xchainjs/xchain-avax'
 import {
   Balance,
   FeeOption,
@@ -10,7 +11,7 @@ import {
   TxType,
   TxsPage,
 } from '@xchainjs/xchain-client'
-import { Address, Asset, AssetAVAX, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import { GasPrices } from '../../types'

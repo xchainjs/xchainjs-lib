@@ -10,6 +10,7 @@ export const ETHChain = 'ETH'
 export const LTCChain = 'LTC'
 export const THORChain = 'THOR'
 
+// TODO: Avoid dependency cycles between xchain-util and xchain-* or remove util functions (not used by other package)
 const chains: Chain[] = [BNBChain, BTCChain, ETHChain, THORChain, CosmosChain, BCHChain, LTCChain, DOGEChain, AVAXChain]
 
 const chainNames: Record<Chain, string> = {

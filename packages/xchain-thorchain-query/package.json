@@ -33,6 +33,7 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
+    "@xchainjs/xchain-avax": "^0.1.1",
     "@xchainjs/xchain-client": "^0.13.4",
     "@xchainjs/xchain-midgard": "^0.4.0",
     "@xchainjs/xchain-thornode": "^0.1.3",

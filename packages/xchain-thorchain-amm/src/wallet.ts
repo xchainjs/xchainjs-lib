@@ -1,3 +1,4 @@
+import { AssetAVAX } from '@xchainjs/xchain-avax'
 import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
@@ -9,7 +10,7 @@ import { Client as EthClient } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { Address, AssetAVAX, AssetETH, AssetRuneNative, Chain } from '@xchainjs/xchain-util'
+import { Address, AssetETH, AssetRuneNative, Chain } from '@xchainjs/xchain-util'
 
 import { AddLiquidity, ExecuteSwap, TxSubmitted, WithdrawLiquidity } from './types'
 import { EthHelper } from './utils/eth-helper'

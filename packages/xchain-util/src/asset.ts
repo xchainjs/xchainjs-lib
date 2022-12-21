@@ -1,18 +1,7 @@
 import BigNumber from 'bignumber.js'
 
 import { fixedBN, formatBN } from './bn'
-import {
-  AVAXChain,
-  BCHChain,
-  BNBChain,
-  BTCChain,
-  CosmosChain,
-  DOGEChain,
-  ETHChain,
-  LTCChain,
-  THORChain,
-  isChain,
-} from './chain'
+import { BCHChain, BNBChain, BTCChain, CosmosChain, DOGEChain, ETHChain, LTCChain, THORChain, isChain } from './chain'
 import { trimZeros as trimZerosHelper } from './string'
 import { Amount, Asset, AssetAmount, BaseAmount, Denomination } from './types'
 
@@ -174,14 +163,6 @@ export const formatAssetAmount = ({
  * @returns {string} The formatted base amount string from the given base amount.
  */
 export const formatBaseAmount = (amount: BaseAmount) => formatBN(amount.amount(), 0)
-
-/**
- * Base "chain" asset on Avalanche
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
 
 /**
  * Base "chain" asset on bitcoin cash main net.

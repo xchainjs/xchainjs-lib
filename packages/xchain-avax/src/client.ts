@@ -1,6 +1,6 @@
 import { Client as XchainEvmClient } from '@xchainjs/xchain-evm'
 
-import { defaultAvaxParams } from './const'
+import { defaultAvaxParams } from './util'
 
 export default class Client extends XchainEvmClient {
   constructor(config = defaultAvaxParams) {

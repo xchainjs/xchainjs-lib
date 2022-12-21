@@ -1,6 +1,6 @@
 // import { TransactionResponse } from '@ethersproject/abstract-provider'
+import { AssetAVAX } from '@xchainjs/xchain-avax'
 import { Network } from '@xchainjs/xchain-client'
-import { AssetAVAX } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, ethers, providers } from 'ethers'
 import nock from 'nock'
 

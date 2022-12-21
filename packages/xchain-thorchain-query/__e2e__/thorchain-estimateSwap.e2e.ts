@@ -1,11 +1,10 @@
+import { AssetAVAX } from '@xchainjs/xchain-avax'
 import { Network } from '@xchainjs/xchain-client'
 import {
   Asset,
-  AssetAVAX,
   AssetBTC,
   AssetETH,
   AssetRuneNative,
-  Chain,
   assetAmount,
   assetFromStringEx,
   assetToBase,

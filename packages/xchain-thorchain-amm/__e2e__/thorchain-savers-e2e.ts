@@ -1,3 +1,4 @@
+import { AssetAVAX } from '@xchainjs/xchain-avax'
 import {
   CryptoAmount,
   SaversPosition,
@@ -5,7 +6,7 @@ import {
   ThorchainQuery,
   getSaver,
 } from '@xchainjs/xchain-thorchain-query'
-import { AssetAVAX, AssetBNB, assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
+import { AssetBNB, assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
 
 import { Wallet } from '../src/Wallet'
 import { ThorchainAMM } from '../src/thorchain-amm'

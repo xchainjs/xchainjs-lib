@@ -1,3 +1,4 @@
+import { AssetAVAX } from '@xchainjs/xchain-avax'
 import { Network } from '@xchainjs/xchain-client'
 import {
   CryptoAmount,
@@ -9,14 +10,12 @@ import {
 } from '@xchainjs/xchain-thorchain-query'
 import {
   Asset,
-  AssetAVAX,
   AssetAtom,
   AssetBNB,
   AssetBTC,
   AssetETH,
   AssetLTC,
   AssetRuneNative,
-  Chain,
   assetAmount,
   assetFromStringEx,
   assetToBase,
