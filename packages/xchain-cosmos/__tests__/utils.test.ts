@@ -11,7 +11,7 @@ import {
   getTxsFromHistory,
   isMsgMultiSend,
   isMsgSend,
-} from '../src/util'
+} from '../src/utils'
 
 describe('cosmos/util', () => {
   describe('Msg type guards', () => {

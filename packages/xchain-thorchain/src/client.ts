@@ -54,7 +54,7 @@ import {
   isAssetRuneNative,
   registerDepositCodecs,
   registerSendCodecs,
-} from './util'
+} from './utils'
 
 /**
  * Interface for custom Thorchain client

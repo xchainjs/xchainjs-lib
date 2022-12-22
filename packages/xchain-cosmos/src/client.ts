@@ -30,7 +30,7 @@ import {
   getDenom,
   getTxsFromHistory,
   protoFee,
-} from './util'
+} from './utils'
 
 /**
  * Interface for custom Cosmos client

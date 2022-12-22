@@ -6,7 +6,7 @@ import nock from 'nock'
 import { Client } from '../src/client'
 import { COSMOS_DECIMAL } from '../src/const'
 import { GetTxByHashResponse, TxHistoryResponse } from '../src/cosmos/types'
-import { AssetATOM } from '../src/util'
+import { AssetATOM } from '../src/utils'
 
 const getClientUrl = (client: Client): string => {
   return client.getNetwork() === Network.Testnet

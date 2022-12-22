@@ -1,5 +1,5 @@
 export * from './types'
 export * from './const'
-export * from './util'
+export * from './utils'
 export * from './cosmos'
 export * from './client'

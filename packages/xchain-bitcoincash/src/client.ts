@@ -21,7 +21,7 @@ import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { ClientUrl } from './types/client-types'
-import * as utils from './utils'
+import * as Utils from './utils'
 
 export type BitcoinCashClientParams = XChainClientParams & {
   haskoinUrl?: ClientUrl
@@ -57,7 +57,7 @@ class Client extends UTXOClient {
       [Network.Stagenet]: `m/44'/145'/0'/0/`,
     },
   }: BitcoinCashClientParams) {
-    super(utils.AssetBCH.chain, { network, rootDerivationPaths, phrase, feeBounds })
+    super(Utils.AssetBCH.chain, { network, rootDerivationPaths, phrase, feeBounds })
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.rootDerivationPaths = rootDerivationPaths
@@ -132,7 +132,7 @@ class Client extends UTXOClient {
    * */
   private getBCHKeys(phrase: string, derivationPath: string): KeyPair {
     const rootSeed = getSeed(phrase)
-    const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, utils.bchNetwork(this.network))
+    const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, Utils.bchNetwork(this.network))
 
     return masterHDNode.derivePath(derivationPath).keyPair
   }
@@ -154,7 +154,7 @@ class Client extends UTXOClient {
       const keys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
       const address = keys.getAddress(index)
 
-      return utils.stripPrefix(utils.toCashAddress(address))
+      return Utils.stripPrefix(Utils.toCashAddress(address))
     } catch (error) {
       throw new Error('Address not defined')
     }
@@ -167,7 +167,7 @@ class Client extends UTXOClient {
    * @returns {boolean} `true` or `false`
    */
   validateAddress(address: string): boolean {
-    return utils.validateAddress(address, this.network)
+    return Utils.validateAddress(address, this.network)
   }
 
   /**
@@ -179,7 +179,7 @@ class Client extends UTXOClient {
    * @throws {"Invalid address"} Thrown if the given address is an invalid address.
    */
   async getBalance(address: Address): Promise<Balance[]> {
-    return utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address })
+    return Utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address })
   }
 
   /**
@@ -207,7 +207,7 @@ class Client extends UTXOClient {
 
     return {
       total: account.txs,
-      txs: txs.map(utils.parseTransaction),
+      txs: txs.map(Utils.parseTransaction),
     }
   }
 
@@ -223,7 +223,7 @@ class Client extends UTXOClient {
     const tx = await getTransaction({ haskoinUrl: this.getHaskoinURL(), txId })
     if (!tx) throw new Error('Invalid TxID')
 
-    return utils.parseTransaction(tx)
+    return Utils.parseTransaction(tx)
   }
 
   protected async getSuggestedFeeRate(): Promise<FeeRate> {
@@ -231,7 +231,7 @@ class Client extends UTXOClient {
   }
 
   protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
-    return utils.calcFee(feeRate, memo)
+    return Utils.calcFee(feeRate, memo)
   }
 
   /**
@@ -247,7 +247,7 @@ class Client extends UTXOClient {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
 
-    const { builder, inputs } = await utils.buildTx({
+    const { builder, inputs } = await Utils.buildTx({
       ...params,
       feeRate,
       sender: this.getAddress(index),
@@ -263,7 +263,7 @@ class Client extends UTXOClient {
 
     const txHex = builder.build().toHex()
 
-    return await utils.broadcastTx({
+    return await Utils.broadcastTx({
       txHex,
       haskoinUrl: this.getHaskoinURL(),
     })

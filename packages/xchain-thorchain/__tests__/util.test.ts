@@ -19,7 +19,7 @@ import {
   getPrefix,
   getTxType,
   isBroadcastSuccess,
-} from '../src/util'
+} from '../src/utils'
 
 describe('thorchain/util', () => {
   describe('isAssetRuneNative', () => {
