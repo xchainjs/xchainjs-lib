@@ -211,7 +211,7 @@ export const RUNE_TICKER = 'RUNE'
  */
 export const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false }
 
-export const AssetAtom: Asset = { chain: 'GAIA', symbol: 'ATOM', ticker: 'ATOM', synth: false }
+export const AssetATOM: Asset = { chain: 'GAIA', symbol: 'ATOM', ticker: 'ATOM', synth: false }
 
 /**
  * Base "chain" asset for RUNE-67C on Binance test net.

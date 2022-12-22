@@ -12,6 +12,7 @@ import {
   assetToString,
   baseAmount,
   eqAsset,
+  getContractAddressFromAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -286,7 +287,7 @@ export class ThorchainQuery {
     const contractAddress = getContractAddressFromAsset(asset)
     if (contractAddress && contractAddress.length > 5) {
       const abrev = contractAddress.substring(contractAddress.length - 5)
-      const sep = asset.chain !== Chain.THORChain && asset.synth ? '/' : '.'
+      const sep = asset.chain !== AssetRuneNative.chain && asset.synth ? '/' : '.'
       return `${asset.chain}${sep}${asset.ticker}-${abrev}`
     }
     return assetToString(asset)
