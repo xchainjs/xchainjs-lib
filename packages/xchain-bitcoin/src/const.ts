@@ -9,3 +9,5 @@ export const BTC_DECIMAL = 8
 
 export const LOWER_FEE_BOUND = 1
 export const UPPER_FEE_BOUND = 500
+export const BTC_SYMBOL = '₿'
+export const BTC_SATOSHI_SYMBOL = '⚡'

@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
 import { AssetRuneERC20, AssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { AssetETH, ETHChain, assetToString, baseAmount, strip0x } from '@xchainjs/xchain-util'
+import { assetToString, baseAmount, strip0x } from '@xchainjs/xchain-util'
 import { ethers, providers } from 'ethers'
 import nock from 'nock'
 
@@ -8,7 +8,9 @@ import { mock_etherscan_api } from '../__mocks__/etherscan-api'
 import erc20ABI from '../src/data/erc20.json'
 import { EthNetwork } from '../src/types'
 import {
+  AssetETH,
   ETHAddress,
+  ETHChain,
   ETH_DECIMAL,
   MAX_APPROVAL,
   call,

@@ -1,4 +1,5 @@
-import { AssetRuneNative, baseAmount } from '@xchainjs/xchain-util/lib'
+import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from '../crypto-amount'

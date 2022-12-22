@@ -3,6 +3,9 @@ import { AssetBNB } from '@xchainjs/xchain-binance'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetATOM } from '@xchainjs/xchain-cosmos'
+import { AssetETH } from '@xchainjs/xchain-ethereum'
+import { AssetLTC } from '@xchainjs/xchain-litecoin'
+import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import {
   CryptoAmount,
   Midgard,
@@ -11,15 +14,7 @@ import {
   Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
-import {
-  Asset,
-  AssetETH,
-  AssetLTC,
-  AssetRuneNative,
-  assetAmount,
-  assetFromStringEx,
-  assetToBase,
-} from '@xchainjs/xchain-util'
+import { Asset, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 import { fail } from 'assert'
 import BigNumber from 'bignumber.js'
 

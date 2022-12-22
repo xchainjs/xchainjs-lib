@@ -37,8 +37,7 @@ import {
   TransferFee,
   TxPage as BinanceTxPage,
 } from './types/binance'
-import { getPrefix, isAccount, isTransferFee, parseTx } from './util'
-import { AssetBNB } from './util'
+import { AssetBNB, getPrefix, isAccount, isTransferFee, parseTx } from './util'
 
 type PrivKey = string
 

@@ -1,7 +1,10 @@
 import { AssetBNB } from '@xchainjs/xchain-binance'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetATOM } from '@xchainjs/xchain-cosmos'
-import { AssetETH, AssetLTC, AssetRuneNative, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
+import { AssetETH } from '@xchainjs/xchain-ethereum'
+import { AssetLTC } from '@xchainjs/xchain-litecoin'
+import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import mockMidgardApi from '../__mocks__/midgard-api'

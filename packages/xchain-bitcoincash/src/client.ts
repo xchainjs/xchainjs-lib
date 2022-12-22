@@ -21,7 +21,6 @@ import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
 import { KeyPair } from './types/bitcoincashjs-types'
 import { ClientUrl } from './types/client-types'
-import { AssetBCH } from './utils'
 import * as utils from './utils'
 
 export type BitcoinCashClientParams = XChainClientParams & {
@@ -58,7 +57,7 @@ class Client extends UTXOClient {
       [Network.Stagenet]: `m/44'/145'/0'/0/`,
     },
   }: BitcoinCashClientParams) {
-    super(AssetBCH.chain, { network, rootDerivationPaths, phrase, feeBounds })
+    super(utils.AssetBCH.chain, { network, rootDerivationPaths, phrase, feeBounds })
     this.network = network
     this.haskoinUrl = haskoinUrl
     this.rootDerivationPaths = rootDerivationPaths

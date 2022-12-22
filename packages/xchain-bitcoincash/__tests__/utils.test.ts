@@ -2,7 +2,6 @@ import { Network } from '@xchainjs/xchain-client'
 import * as bchaddr from 'bchaddrjs'
 
 import mockHaskoinApi from '../__mocks__/haskoin'
-import { AssetBCH } from '../src/utils'
 import * as utils from '../src/utils'
 
 describe('Bitcoin Cash Utils Test', () => {
@@ -61,7 +60,7 @@ describe('Bitcoin Cash Utils Test', () => {
       const address = 'qr20g55jd7x3dalp4qxjfgfvda0nwr8cfccrgxd0dw'
       const balance = await utils.getBalance({ address, haskoinUrl })
       expect(balance.length).toEqual(1)
-      expect(balance[0]?.asset).toEqual(AssetBCH)
+      expect(balance[0]?.asset).toEqual(utils.AssetBCH)
       expect(balance[0]?.amount.amount().toString()).toEqual('300000000')
     })
   })

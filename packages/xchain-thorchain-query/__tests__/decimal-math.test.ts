@@ -1,15 +1,9 @@
+// import { AssetBNB } from '@xchainjs/xchain-binance'
+// import { AssetLTC } from '@xchainjs/xchain-litecoin'
+import { AssetBTC } from '@xchainjs/xchain-bitcoin'
+import { AssetETH } from '@xchainjs/xchain-ethereum'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
-import {
-  // Asset,
-  // AssetBNB,
-  AssetBTC,
-  // AssetLTC,
-  AssetETH,
-  assetAmount,
-  assetFromStringEx,
-  assetToBase,
-  baseAmount,
-} from '@xchainjs/xchain-util'
+import { assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'

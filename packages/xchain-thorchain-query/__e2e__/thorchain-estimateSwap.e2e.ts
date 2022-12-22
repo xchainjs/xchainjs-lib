@@ -1,15 +1,9 @@
 import { AssetAVAX } from '@xchainjs/xchain-avax'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
-import {
-  Asset,
-  AssetETH,
-  AssetRuneNative,
-  assetAmount,
-  assetFromStringEx,
-  assetToBase,
-  baseAmount,
-} from '@xchainjs/xchain-util'
+import { AssetETH } from '@xchainjs/xchain-ethereum'
+import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { Asset, assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { CryptoAmount } from '../src/crypto-amount'

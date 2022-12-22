@@ -26,6 +26,7 @@ export const DEFAULT_GAS_ADJUSTMENT = 2
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
 export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 export const MAX_TX_COUNT = 100
+export const RUNE_SYMBOL = 'ᚱ'
 
 const DENOM_RUNE_NATIVE = 'rune'
 const RUNE_TICKER = 'RUNE'
@@ -107,6 +108,14 @@ export const defaultExplorerUrls: ExplorerUrls = {
 }
 
 /**
+ * Checks whether an asset is `AssetRuneNative`
+ *
+ * @param {Asset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
+/**
+
  * Get denomination from Asset
  *
  * @param {Asset} asset
@@ -128,14 +137,6 @@ export const assetFromDenom = (denom: string): Asset | null => {
   if (denom === DENOM_RUNE_NATIVE) return AssetRuneNative
   return assetFromString(denom.toUpperCase())
 }
-
-/**
- * Checks whether an asset is `AssetRuneNative`
- *
- * @param {Asset} asset
- * @returns {boolean} `true` or `false`
- */
-export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
 
 /**
  * Response guard for transaction broadcast
