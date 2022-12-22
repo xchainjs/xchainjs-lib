@@ -1,0 +1,38 @@
+{
+  "name": "check-tx-",
+  "version": "1.0.0",
+  "scripts": {
+    "multi-chain-wallet": "npx ts-node multi-chain-wallet.ts"
+  },
+  "description": "Full xchainjs example",
+  "main": "index.js",
+  "author": "GRC",
+  "license": "MIT",
+  "dependencies": {
+    "@xchainjs/xchain-avax": "latest",
+    "@xchainjs/xchain-binance": "latest",
+    "@xchainjs/xchain-bitcoin": "latest",
+    "@xchainjs/xchain-bitcoincash": "latest",
+    "@xchainjs/xchain-client": "latest",
+    "@xchainjs/xchain-cosmos": "latest",
+    "@xchainjs/xchain-crypto": "latest",
+    "@xchainjs/xchain-doge": "latest",
+    "@xchainjs/xchain-ethereum": "latest",
+    "@xchainjs/xchain-evm": "latest",
+    "@xchainjs/xchain-litecoin": "latest",
+    "@xchainjs/xchain-midgard": "latest",
+    "@xchainjs/xchain-thorchain": "latest",
+    "@xchainjs/xchain-thornode": "latest",
+    "@xchainjs/xchain-util": "latest",
+    "@xchainjs/xchain-thorchain-query": "latest",
+    "@xchainjs/xchain-thorchain-amm": "latest",
+    "@binance-chain/javascript-sdk": "^4.2.0",
+    "@cosmos-client/core": "^0.46.1",
+    "@psf/bitcoincashjs-lib": "^4.0.2",
+    "axios-retry": "^3.3.1",
+    "bchaddrjs": "^0.5.2",
+    "bech32-buffer": "^0.2.0",
+    "bignumber.js": "^9.1.0",
+    "bitcoinjs-lib": "^6.0.1"
+  }
+}
