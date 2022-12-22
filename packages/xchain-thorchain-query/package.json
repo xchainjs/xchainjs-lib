@@ -49,6 +49,7 @@
   "peerDependencies": {
     "@xchainjs/xchain-avax": "^0.1.2",
     "@xchainjs/xchain-binance": "^5.6.5",
+    "@xchainjs/xchain-cosmos": "^0.20.5",
     "@xchainjs/xchain-bitcoin": "^0.20.6",
     "@xchainjs/xchain-thorchain": "^0.27.6",
     "@xchainjs/xchain-client": "^0.13.4",

@@ -14,7 +14,7 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { Address, Asset, AssetAtom, BaseAmount, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { COSMOS_DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT } from './const'
@@ -22,6 +22,7 @@ import { CosmosSDKClient } from './cosmos/sdk-client'
 import { TxOfflineParams } from './cosmos/types'
 import { ChainIds, ClientUrls, CosmosClientParams } from './types'
 import {
+  AssetATOM,
   getAsset,
   getDefaultChainIds,
   getDefaultClientUrls,
@@ -63,7 +64,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     chainIds = getDefaultChainIds(),
     rootDerivationPaths = getDefaultRootDerivationPaths(),
   }: XChainClientParams & CosmosClientParams) {
-    super(AssetAtom.chain, { network, rootDerivationPaths, phrase })
+    super(AssetATOM.chain, { network, rootDerivationPaths, phrase })
 
     this.clientUrls = clientUrls
     this.chainIds = chainIds
@@ -203,7 +204,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     const limit = (params && params.limit) || undefined
     const txMinHeight = undefined
     const txMaxHeight = undefined
-    const asset = getAsset(params?.asset ?? '') || AssetAtom
+    const asset = getAsset(params?.asset ?? '') || AssetATOM
     const messageSender = params?.address ?? this.getAddress()
 
     const txHistory = await this.getSDKClient().searchTx({
@@ -234,7 +235,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       throw new Error('transaction not found')
     }
 
-    const txs = getTxsFromHistory([txResult], AssetAtom)
+    const txs = getTxsFromHistory([txResult], AssetATOM)
     if (txs.length === 0) throw new Error('transaction not found')
 
     return txs[0]
@@ -248,7 +249,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    */
   async transfer({
     walletIndex,
-    asset = AssetAtom,
+    asset = AssetATOM,
     amount,
     recipient,
     memo,
@@ -283,7 +284,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    */
   async transferOffline({
     walletIndex,
-    asset = AssetAtom,
+    asset = AssetATOM,
     amount,
     recipient,
     memo,

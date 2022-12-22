@@ -1,10 +1,10 @@
 import { AssetBNB } from '@xchainjs/xchain-binance'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
+import { AssetATOM } from '@xchainjs/xchain-cosmos'
 import { AssetRuneNative, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Asset,
-  AssetAtom,
   Chain,
   assetAmount,
   assetFromStringEx,
@@ -444,7 +444,7 @@ export class ThorchainQuery {
     if (
       isAssetRuneNative(inbound.asset) ||
       inbound.asset.chain == AssetBNB.chain ||
-      inbound.asset.chain == AssetAtom.chain ||
+      inbound.asset.chain == AssetATOM.chain ||
       inbound.asset.synth
     ) {
       return this.chainAttributes[AssetRuneNative.chain].avgBlockTimeInSecs

@@ -2,6 +2,7 @@ import { AssetAVAX } from '@xchainjs/xchain-avax'
 import { AssetBNB } from '@xchainjs/xchain-binance'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
+import { AssetATOM } from '@xchainjs/xchain-cosmos'
 import {
   CryptoAmount,
   Midgard,
@@ -12,7 +13,6 @@ import {
 } from '@xchainjs/xchain-thorchain-query'
 import {
   Asset,
-  AssetAtom,
   AssetETH,
   AssetLTC,
   AssetRuneNative,
@@ -320,7 +320,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
   })
   it(`Should perform a swap from ATOM to synth ATOM`, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('10')), AssetAtom),
+      input: new CryptoAmount(assetToBase(assetAmount('10')), AssetATOM),
       destinationAddress: mainnetWallet.clients[AssetRuneNative.chain].getAddress(),
       destinationAsset: sATOM,
       slipLimit: new BigNumber('0.05'),

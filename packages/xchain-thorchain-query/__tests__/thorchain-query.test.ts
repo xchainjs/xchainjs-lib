@@ -1,14 +1,7 @@
 import { AssetBNB } from '@xchainjs/xchain-binance'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
-import {
-  AssetAtom,
-  AssetETH,
-  AssetLTC,
-  AssetRuneNative,
-  assetAmount,
-  assetFromStringEx,
-  assetToBase,
-} from '@xchainjs/xchain-util'
+import { AssetATOM } from '@xchainjs/xchain-cosmos'
+import { AssetETH, AssetLTC, AssetRuneNative, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
@@ -254,10 +247,10 @@ describe('Thorchain-query tests', () => {
   it(`Should check assets match asset pools`, async () => {
     const assetPoolEthUsdc = await thorchainQuery.thorchainCache.getPoolForAsset(assetEthUSDC)
     const assetPoolAvaxUsdc = await thorchainQuery.thorchainCache.getPoolForAsset(assetAVAXUSDC)
-    const assetPoolGaia = await thorchainQuery.thorchainCache.getPoolForAsset(AssetAtom)
+    const assetPoolGaia = await thorchainQuery.thorchainCache.getPoolForAsset(AssetATOM)
     expect(assetPoolEthUsdc.asset).toEqual(assetEthUSDC)
     expect(assetPoolAvaxUsdc.asset).toEqual(assetAVAXUSDC)
-    expect(assetPoolGaia.asset).toEqual(AssetAtom)
+    expect(assetPoolGaia.asset).toEqual(AssetATOM)
   })
   it('Should construct the correct memo for BTC->BUSD swap', async () => {
     const swapParams: EstimateSwapParams = {

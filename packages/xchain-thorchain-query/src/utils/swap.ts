@@ -1,18 +1,17 @@
 import { AVAXChain, AssetAVAX } from '@xchainjs/xchain-avax'
 import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
 import { AssetBTC, BTCChain } from '@xchainjs/xchain-bitcoin'
+import { AssetATOM, GAIAChain } from '@xchainjs/xchain-cosmos'
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   // Address,
   Asset,
-  AssetAtom,
   AssetBCH,
   AssetDOGE,
   AssetETH,
   AssetLTC,
   BCHChain,
   Chain,
-  CosmosChain,
   DOGEChain,
   ETHChain,
   LTCChain,
@@ -231,8 +230,8 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
         return new CryptoAmount(gasRateinAVAXWei.times(70000), AssetAVAX)
       }
       break
-    case AssetAtom.chain:
-      return new CryptoAmount(baseAmount(inbound.gasRate), AssetAtom)
+    case AssetATOM.chain:
+      return new CryptoAmount(baseAmount(inbound.gasRate), AssetATOM)
       break
     case AssetRuneNative.chain:
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
@@ -276,8 +275,8 @@ export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmo
     case AssetAVAX.chain:
       return new CryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetAVAX)
       break
-    case AssetAtom.chain:
-      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetAtom)
+    case AssetATOM.chain:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetATOM)
       break
     case AssetRuneNative.chain:
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
@@ -300,8 +299,8 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetETH
     case THORChain:
       return AssetRuneNative
-    case CosmosChain:
-      return AssetAtom
+    case GAIAChain:
+      return AssetATOM
     case BCHChain:
       return AssetBCH
     case LTCChain:
@@ -330,7 +329,7 @@ export const getChain = (chain: string): Chain => {
     case 'THOR':
       return THORChain
     case 'GAIA':
-      return CosmosChain
+      return GAIAChain
     case 'BCH':
       return BCHChain
     case 'LTC':

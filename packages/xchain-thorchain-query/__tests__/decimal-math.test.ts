@@ -1,10 +1,10 @@
+import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import {
   // Asset,
   // AssetBNB,
   AssetBTC,
   // AssetLTC,
   AssetETH,
-  AssetRuneNative,
   assetAmount,
   assetFromStringEx,
   assetToBase,

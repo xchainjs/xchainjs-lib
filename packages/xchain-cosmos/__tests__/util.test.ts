@@ -1,9 +1,17 @@
 import { proto } from '@cosmos-client/core/cjs/module'
-import { AssetAtom, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
 import { COSMOS_DECIMAL } from '../src/const'
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
-import { getAsset, getDenom, getQueryString, getTxsFromHistory, isMsgMultiSend, isMsgSend } from '../src/util'
+import {
+  AssetATOM,
+  getAsset,
+  getDenom,
+  getQueryString,
+  getTxsFromHistory,
+  isMsgMultiSend,
+  isMsgSend,
+} from '../src/util'
 
 describe('cosmos/util', () => {
   describe('Msg type guards', () => {
@@ -73,15 +81,15 @@ describe('cosmos/util', () => {
 
   describe('Denom <-> Asset', () => {
     describe('getDenom', () => {
-      it('get denom for AssetAtom', () => {
-        expect(getDenom(AssetAtom)).toEqual('uatom')
+      it('get denom for AssetATOM', () => {
+        expect(getDenom(AssetATOM)).toEqual('uatom')
       })
     })
 
     describe('getAsset', () => {
       it('get asset for uatom', () => {
         const asset = getAsset('uatom')
-        const result = asset !== null && eqAsset(asset, AssetAtom)
+        const result = asset !== null && eqAsset(asset, AssetATOM)
         expect(result).toBeTruthy()
       })
 
@@ -89,7 +97,7 @@ describe('cosmos/util', () => {
         // see https://github.com/bitsongofficial/docs.bitsong.io/blob/main/relayer.md#official-bitsong-ibc-channels
         const denom = 'ibc/E7D5E9D0E9BF8B7354929A817DD28D4D017E745F638954764AA88522A7A409EC'
         const asset = getAsset(denom)
-        const expected = { ...AssetAtom, symbol: denom, ticker: '' }
+        const expected = { ...AssetATOM, symbol: denom, ticker: '' }
         expect(asset !== null && eqAsset(asset, expected)).toBeTruthy()
       })
     })
@@ -140,11 +148,11 @@ describe('cosmos/util', () => {
     ]
 
     it('parse Tx', () => {
-      const parsed_txs = getTxsFromHistory(txs, AssetAtom)
+      const parsed_txs = getTxsFromHistory(txs, AssetATOM)
 
       expect(parsed_txs.length).toEqual(2)
 
-      expect(parsed_txs[0].asset).toEqual(AssetAtom)
+      expect(parsed_txs[0].asset).toEqual(AssetATOM)
       expect(parsed_txs[0].from.length).toEqual(1)
       expect(parsed_txs[0].from[0].from).toEqual(from_address)
       expect(parsed_txs[0].from[0].amount.amount().isEqualTo(baseAmount(2000, COSMOS_DECIMAL).amount())).toBeTruthy()
@@ -152,7 +160,7 @@ describe('cosmos/util', () => {
       expect(parsed_txs[0].to[0].to).toEqual(to_address)
       expect(parsed_txs[0].to[0].amount.amount().isEqualTo(baseAmount(2000, COSMOS_DECIMAL).amount())).toBeTruthy()
 
-      expect(parsed_txs[1].asset).toEqual(AssetAtom)
+      expect(parsed_txs[1].asset).toEqual(AssetATOM)
       expect(parsed_txs[1].from.length).toEqual(1)
       expect(parsed_txs[1].from[0].from).toEqual(from_address)
       expect(parsed_txs[1].from[0].amount.amount().isEqualTo(baseAmount(2000, COSMOS_DECIMAL).amount())).toBeTruthy()
