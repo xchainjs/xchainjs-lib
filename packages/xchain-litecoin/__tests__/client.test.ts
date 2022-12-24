@@ -4,8 +4,7 @@ import { baseAmount } from '@xchainjs/xchain-util'
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode-api'
 import { Client } from '../src/client'
-import { MIN_TX_FEE } from '../src/const'
-import { AssetLTC } from '../src/utils'
+import { AssetLTC, MIN_TX_FEE } from '../src/const'
 
 const ltcClient = new Client({})
 

@@ -1,6 +1,6 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { FeeOption, Network } from '@xchainjs/xchain-client'
-import { AssetLTC } from '@xchainjs/xchain-litecoin'
+import { LTCChain } from '@xchainjs/xchain-litecoin'
 import { assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, providers } from 'ethers'
 import nock from 'nock'
@@ -16,8 +16,8 @@ import {
   mock_thornode_inbound_addresses_success,
 } from '../__mocks__/thornode-api'
 import Client from '../src/client'
+import { AssetETH, ETHChain, ETH_DECIMAL } from '../src/const'
 import erc20ABI from '../src/data/erc20.json'
-import { AssetETH, ETH_DECIMAL } from '../src/utils'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
@@ -459,7 +459,7 @@ describe('Client Test', () => {
     )
     mock_thornode_inbound_addresses_success(thornodeApiUrl, [
       {
-        chain: AssetETH.chain,
+        chain: ETHChain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: '0x8d1133a8cf23112fdb21f1efca340d727a98196e',
         router: '0xe0a63488e677151844e70623533c22007dc57c9e',
@@ -467,7 +467,7 @@ describe('Client Test', () => {
         gas_rate: '30',
       },
       {
-        chain: AssetLTC.chain,
+        chain: LTCChain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: 'tltc1q3x76wl4gmwu4yzx682r30ej0a8e2tttaw6pv7u',
         halted: false,
@@ -478,12 +478,12 @@ describe('Client Test', () => {
     const gasFee = await ethClient.estimateFeesWithGasPricesAndLimits({
       recipient: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       amount: baseAmount('10000000000000', ETH_DECIMAL),
-      asset: assetFromString(`${AssetETH.chain}.DAI-0xc7ad46e0b8a400bb3c915120d284aafba8fc4735`) || undefined,
+      asset: assetFromString(`${ETHChain}.DAI-0xc7ad46e0b8a400bb3c915120d284aafba8fc4735`) || undefined,
     })
     const txHash = await ethClient.transfer({
       recipient: '0x8c2a90d36ec9f745c9b28b588cba5e2a978a1656',
       amount: baseAmount('10000000000000', ETH_DECIMAL),
-      asset: assetFromString(`${AssetETH.chain}.DAI-0xc7ad46e0b8a400bb3c915120d284aafba8fc4735`) || undefined,
+      asset: assetFromString(`${ETHChain}.DAI-0xc7ad46e0b8a400bb3c915120d284aafba8fc4735`) || undefined,
       gasLimit: gasFee.gasLimit,
       gasPrice: gasFee.gasPrices.fastest,
     })
@@ -545,7 +545,7 @@ describe('Client Test', () => {
     )
 
     const gasEstimate = await ethClient.estimateFeesWithGasPricesAndLimits({
-      asset: assetFromString(`${AssetETH.chain}.DAI-0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa`) || undefined,
+      asset: assetFromString(`${ETHChain}.DAI-0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa`) || undefined,
       recipient: '0x2fe25ca708fc485cf356b2f27399247d91c6edbd',
       amount: baseAmount(1, ETH_DECIMAL),
     })
@@ -714,7 +714,7 @@ describe('Client Test', () => {
     )
     mock_thornode_inbound_addresses_success(thornodeApiUrl, [
       {
-        chain: AssetETH.chain,
+        chain: ETHChain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: '0x8d1133a8cf23112fdb21f1efca340d727a98196e',
         router: '0xe0a63488e677151844e70623533c22007dc57c9e',
@@ -722,7 +722,7 @@ describe('Client Test', () => {
         gas_rate: '51',
       },
       {
-        chain: AssetLTC.chain,
+        chain: LTCChain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: 'tltc1q3x76wl4gmwu4yzx682r30ej0a8e2tttaw6pv7u',
         halted: false,

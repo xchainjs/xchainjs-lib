@@ -6,8 +6,8 @@ import { Asset, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchain
 import nock from 'nock'
 
 import { mockTendermintNodeInfo, mockTendermintSimulate } from '../__mocks__/thornode-api'
-import { AssetRuneNative } from '../src'
 import { Client } from '../src/client'
+import { AssetRuneNative } from '../src/const'
 
 const chainIds = {
   [Network.Mainnet]: 'thorchain-mainnet-v1',

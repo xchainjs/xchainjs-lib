@@ -1,7 +1,7 @@
-import { AssetBNB } from '@xchainjs/xchain-binance'
+import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetATOM } from '@xchainjs/xchain-cosmos'
-import { AssetRuneNative, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { AssetRuneNative, THORChain, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Asset,
@@ -287,7 +287,7 @@ export class ThorchainQuery {
     const contractAddress = getContractAddressFromAsset(asset)
     if (contractAddress && contractAddress.length > 5) {
       const abrev = contractAddress.substring(contractAddress.length - 5)
-      const sep = asset.chain !== AssetRuneNative.chain && asset.synth ? '/' : '.'
+      const sep = asset.chain !== THORChain && asset.synth ? '/' : '.'
       return `${asset.chain}${sep}${asset.ticker}-${abrev}`
     }
     return assetToString(asset)
@@ -319,7 +319,7 @@ export class ThorchainQuery {
   // private async validateAffiliateAddress(affiliateAddress: string) {
   //   // Affiliate address should be THORName or THORAddress
   //   if (affiliateAddress.length > 0) {
-  //     const isValidThorchainAddress = this.clients[AssetRuneNative.chain].validateAddress(affiliateAddress)
+  //     const isValidThorchainAddress = this.clients[THORChain].validateAddress(affiliateAddress)
   //     const isValidThorname = await this.isThorname(affiliateAddress)
   //     if (!(isValidThorchainAddress || isValidThorname))
   //       throw Error(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
@@ -444,11 +444,11 @@ export class ThorchainQuery {
     // RUNE, BNB and Synths have near instant finality, so no conf counting required. - need to make a BFT only case.
     if (
       isAssetRuneNative(inbound.asset) ||
-      inbound.asset.chain == AssetBNB.chain ||
+      inbound.asset.chain == BNBChain ||
       inbound.asset.chain == AssetATOM.chain ||
       inbound.asset.synth
     ) {
-      return this.chainAttributes[AssetRuneNative.chain].avgBlockTimeInSecs
+      return this.chainAttributes[THORChain].avgBlockTimeInSecs
     }
     // Get the gas asset for the inbound.asset.chain
     const chainGasAsset = getChainAsset(inbound.asset.chain)
@@ -482,7 +482,7 @@ export class ThorchainQuery {
       .amount()
       .toNumber()
     const getScheduledOutboundValue = await this.thorchainCache.midgard.getScheduledOutboundValue()
-    const thorChainblocktime = this.chainAttributes[AssetRuneNative.chain].avgBlockTimeInSecs // blocks required to confirm tx
+    const thorChainblocktime = this.chainAttributes[THORChain].avgBlockTimeInSecs // blocks required to confirm tx
     // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
     const runeValue = await this.thorchainCache.convert(outboundAmount, AssetRuneNative)
     // Check rune value amount

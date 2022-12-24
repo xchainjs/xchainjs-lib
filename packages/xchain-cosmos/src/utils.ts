@@ -1,26 +1,13 @@
 import cosmosclient from '@cosmos-client/core'
 import { FeeType, Fees, Network, RootDerivationPaths, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, Chain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 import Long from 'long'
 
-import { COSMOS_DECIMAL, DEFAULT_GAS_LIMIT } from './const'
+import { AssetATOM, COSMOS_DECIMAL, DEFAULT_GAS_LIMIT, GAIAChain } from './const'
 import { APIQueryParam, TxResponse, UnsignedTxParams } from './cosmos/types'
 import { ChainId, ChainIds, ClientUrls as ClientUrls } from './types'
-
-/**
- * Chain identifier for Cosmos chain
- *
- */
-export const GAIAChain: Chain = 'GAIA'
-/**
- * Base "chain" asset on cosmos main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetATOM: Asset = { chain: GAIAChain, symbol: 'ATOM', ticker: 'ATOM', synth: false }
 
 /**
  * Type guard for MsgSend

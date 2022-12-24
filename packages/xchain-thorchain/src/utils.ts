@@ -5,7 +5,6 @@ import {
   Address,
   Asset,
   BaseAmount,
-  Chain,
   assetAmount,
   assetFromString,
   assetToBase,
@@ -17,96 +16,12 @@ import axios from 'axios'
 import * as bech32Buffer from 'bech32-buffer'
 import Long from 'long'
 
+import { AssetRuneNative, DECIMAL, DEFAULT_GAS_ADJUSTMENT } from './const'
 import { ChainId, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx } from './types/messages'
 import types from './types/proto/MsgCompiled'
 
-export const DECIMAL = 8
-export const DEFAULT_GAS_ADJUSTMENT = 2
-export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
-export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
-export const MAX_TX_COUNT = 100
-export const RUNE_SYMBOL = 'ᚱ'
-
 const DENOM_RUNE_NATIVE = 'rune'
-const RUNE_TICKER = 'RUNE'
-
-const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
-/**
- * Chain identifier for Thorchain
- *
- */
-export const THORChain: Chain = 'THOR'
-
-/**
- * Base "chain" asset for RUNE-67C on Binance test net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRune67C: Asset = { chain: 'BNB', symbol: 'RUNE-67C', ticker: RUNE_TICKER, synth: false }
-
-/**
- * Base "chain" asset for RUNE-B1A on Binance main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneB1A: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: RUNE_TICKER, synth: false }
-
-/**
- * Base "chain" asset on thorchain main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneNative: Asset = { chain: THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
-
-/**
- * Base "chain" asset for RUNE on ethereum main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneERC20: Asset = {
-  chain: 'ETH',
-  symbol: `${RUNE_TICKER}-0x3155ba85d5f96b2d030a4966af206230e46849cb`,
-  ticker: RUNE_TICKER,
-  synth: false,
-}
-
-/**
- * Base "chain" asset for RUNE on ethereum main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneERC20Testnet: Asset = {
-  chain: 'ETH',
-  symbol: `${RUNE_TICKER}-0xd601c6A3a36721320573885A8d8420746dA3d7A0`,
-  ticker: RUNE_TICKER,
-  synth: false,
-}
-const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
-const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
-export const defaultExplorerUrls: ExplorerUrls = {
-  root: {
-    [Network.Testnet]: `${DEFAULT_EXPLORER_URL}?network=testnet`,
-    [Network.Stagenet]: `${DEFAULT_EXPLORER_URL}?network=stagenet`,
-    [Network.Mainnet]: DEFAULT_EXPLORER_URL,
-  },
-  tx: {
-    [Network.Testnet]: txUrl,
-    [Network.Stagenet]: txUrl,
-    [Network.Mainnet]: txUrl,
-  },
-  address: {
-    [Network.Testnet]: addressUrl,
-    [Network.Stagenet]: addressUrl,
-    [Network.Mainnet]: addressUrl,
-  },
-}
-
 /**
  * Checks whether an asset is `AssetRuneNative`
  *

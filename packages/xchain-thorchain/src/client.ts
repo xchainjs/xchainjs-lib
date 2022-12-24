@@ -25,6 +25,14 @@ import Long from 'long'
 
 import { buildDepositTx, buildTransferTx, buildUnsignedTx } from '.'
 import {
+  AssetRuneNative,
+  DECIMAL,
+  DEFAULT_GAS_LIMIT_VALUE,
+  DEPOSIT_GAS_LIMIT_VALUE,
+  MAX_TX_COUNT,
+  defaultExplorerUrls,
+} from './const'
+import {
   ChainId,
   ChainIds,
   ClientUrl,
@@ -38,12 +46,6 @@ import {
 } from './types'
 import { TxResult } from './types/messages'
 import {
-  AssetRuneNative,
-  DECIMAL,
-  DEFAULT_GAS_LIMIT_VALUE,
-  DEPOSIT_GAS_LIMIT_VALUE,
-  MAX_TX_COUNT,
-  defaultExplorerUrls,
   getBalance,
   getDefaultFees,
   getDenom,

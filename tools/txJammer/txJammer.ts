@@ -2,6 +2,7 @@ import fs = require('fs')
 
 import { Network, TxParams } from '@xchainjs/xchain-client'
 import { decryptFromKeystore } from '@xchainjs/xchain-crypto'
+import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   AddliquidityPosition,
@@ -14,15 +15,7 @@ import {
   Thornode,
   WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
-import {
-  Asset,
-  AssetRuneNative,
-  Chain,
-  assetAmount,
-  assetFromStringEx,
-  assetToBase,
-  assetToString,
-} from '@xchainjs/xchain-util'
+import { Asset, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
 import * as weighted from 'weighted'
 
 import {
@@ -289,7 +282,7 @@ export class TxJammer {
     const [senderWallet, receiverWallet] = this.getRandomWallets()
     const [sourceAsset, destinationAsset] = this.getRandomSwapAssets()
     const destinationAddress = destinationAsset.synth
-      ? receiverWallet.clients[AssetRuneNative.chain].getAddress()
+      ? receiverWallet.clients[THORChain].getAddress()
       : receiverWallet.clients[destinationAsset.chain].getAddress()
     const swapParams: EstimateSwapParams = {
       input: await this.createCryptoAmount(sourceAsset),
@@ -445,7 +438,7 @@ export class TxJammer {
   private async executeWithdraw() {
     const [senderWallet] = this.getRandomWallets()
     const asset = this.getRandomWithdrawLpAsset()
-    const runeAddress = senderWallet.clients[AssetRuneNative.chain].getAddress()
+    const runeAddress = senderWallet.clients[THORChain].getAddress()
     const sourceAddress = senderWallet.clients[asset.chain].getAddress()
     const percentageWithdraw = this.getRandomInt(1, 100)
     const result: TxDetail = {

@@ -29,6 +29,7 @@ import {
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
+import { AssetBNB, BNBChain } from './const'
 import {
   Account,
   Balance as BinanceBalance,
@@ -37,7 +38,7 @@ import {
   TransferFee,
   TxPage as BinanceTxPage,
 } from './types/binance'
-import { AssetBNB, getPrefix, isAccount, isTransferFee, parseTx } from './utils'
+import { getPrefix, isAccount, isTransferFee, parseTx } from './utils'
 
 type PrivKey = string
 
@@ -97,7 +98,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
       [Network.Testnet]: "44'/931'/0'/0/",
     },
   }: XChainClientParams) {
-    super(AssetBNB.chain, { network, rootDerivationPaths, phrase })
+    super(BNBChain, { network, rootDerivationPaths, phrase })
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(this.getNetwork())
   }
@@ -258,7 +259,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     return balances
       .map((balance) => {
         return {
-          asset: assetFromString(`${AssetBNB.chain}.${balance.symbol}`) || AssetBNB,
+          asset: assetFromString(`${BNBChain}.${balance.symbol}`) || AssetBNB,
           amount: assetToBase(assetAmount(balance.free, 8)),
         }
       })

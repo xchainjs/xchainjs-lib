@@ -1,10 +1,4 @@
 import {
-  AssetBNB,
-  AssetBTC,
-  AssetETH,
-  AssetRune67C,
-  AssetRuneB1A,
-  AssetRuneNative,
   assetAmount,
   assetFromString,
   assetToBase,
@@ -25,6 +19,18 @@ import {
 } from './asset'
 import { bn } from './index'
 import { Asset, Denomination } from './types'
+
+const BNBChain = 'BNB'
+const ETHChain = 'ETH'
+
+const AssetBNB: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: false }
+const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false }
+
+const RUNE_TICKER = 'RUNE'
+const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false }
+const AssetRune67C: Asset = { chain: 'BNB', symbol: 'RUNE-67C', ticker: RUNE_TICKER, synth: false }
+const AssetRuneB1A: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: RUNE_TICKER, synth: false }
+const AssetRuneNative: Asset = { chain: 'THOR', symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
 
 describe('asset', () => {
   describe('isBigNumberValue', () => {
@@ -398,9 +404,7 @@ describe('asset', () => {
       expect(currencySymbolByAsset(AssetETH)).toEqual('Ξ')
     })
     it('returns $ for USD', () => {
-      expect(
-        currencySymbolByAsset({ chain: AssetBNB.chain, symbol: 'BUSD-BAF', ticker: 'BUSD', synth: false }),
-      ).toEqual('$')
+      expect(currencySymbolByAsset({ chain: BNBChain, symbol: 'BUSD-BAF', ticker: 'BUSD', synth: false })).toEqual('$')
     })
     it('returns ticker as currency symbol for other assets', () => {
       expect(currencySymbolByAsset(AssetBNB)).toEqual('BNB')
@@ -436,7 +440,7 @@ describe('asset', () => {
         formatAssetAmountCurrency({
           amount,
           asset: {
-            chain: AssetETH.chain,
+            chain: ETHChain,
             symbol: 'XRUNE-0X69FA0FEE221AD11012BAB0FDB45D444D3D2CE71C',
             ticker: 'XRUNE',
             synth: false,

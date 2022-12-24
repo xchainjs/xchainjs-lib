@@ -2,6 +2,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
+import { LTC_DECIMAL } from './const'
 import {
   AddressParams,
   LtcAddressDTO,
@@ -12,7 +13,6 @@ import {
   Transaction,
   TxHashParams,
 } from './types/sochain-api-types'
-import { LTC_DECIMAL } from './utils'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
 

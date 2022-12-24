@@ -18,7 +18,7 @@ import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address, Asset, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Bitcoin from 'bitcoinjs-lib'
 
-import { BTC_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
+import { AssetBTC, BTCChain, BTC_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import * as sochain from './sochain-api'
 import { ClientUrl } from './types/client-types'
 import * as Utils from './utils'
@@ -60,7 +60,7 @@ class Client extends UTXOClient {
     },
     phrase = '',
   }: BitcoinClientParams) {
-    super(Utils.AssetBTC.chain, { network, rootDerivationPaths, phrase, feeBounds })
+    super(BTCChain, { network, rootDerivationPaths, phrase, feeBounds })
     this.setSochainUrl(sochainUrl)
     this.haskoinUrl = haskoinUrl
   }
@@ -225,7 +225,7 @@ class Client extends UTXOClient {
         hash: txItem.txid,
       })
       const tx: Tx = {
-        asset: Utils.AssetBTC,
+        asset: AssetBTC,
         from: rawTx.inputs.map((i) => ({
           from: i.address,
           amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)),
@@ -260,7 +260,7 @@ class Client extends UTXOClient {
       hash: txId,
     })
     return {
-      asset: Utils.AssetBTC,
+      asset: AssetBTC,
       from: rawTx.inputs.map((i) => ({
         from: i.address,
         amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)),

@@ -1,8 +1,7 @@
 export * from './types'
 export * from './client'
+export * from './const'
 export {
-  AssetETH,
-  ETHChain,
   call,
   estimateApprove,
   estimateCall,
@@ -18,10 +17,6 @@ export {
   isApproved,
   isEthAsset,
   validateAddress,
-  ETHAddress,
-  ETH_DECIMAL,
-  ETHPLORER_FREEKEY,
-  MAX_APPROVAL,
 } from './utils'
 
 import erc20ABI from './data/erc20.json'

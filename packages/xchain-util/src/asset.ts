@@ -164,44 +164,12 @@ export const formatAssetAmount = ({
 export const formatBaseAmount = (amount: BaseAmount) => formatBN(amount.amount(), 0)
 
 /**
- * Base "chain" asset on bitcoin cash main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetBCH: Asset = { chain: 'BCH', symbol: 'BCH', ticker: 'BCH', synth: false }
-
-/**
- * Base "chain" asset on bitcoin cash main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetBNB: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: false }
-
-/**
  * Base "chain" asset on bitcoin main net.
  *
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false }
-
-/**
- * Base "chain" asset on litecoin main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetLTC: Asset = { chain: 'LTC', symbol: 'LTC', ticker: 'LTC', synth: false }
-/**
- * Dogecoin asset
- * Based on definition in Thorchain
- * @see https://gitlab.com/thorchain/thornode/-/blob/781-add-doge-chain/common/asset.go#L24
- */
-export const AssetDOGE: Asset = { chain: 'DOGE', symbol: 'DOGE', ticker: 'DOGE', synth: false }
-
-export const RUNE_TICKER = 'RUNE'
+const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false }
 
 /**
  * Base "chain" asset on ethereum main net.
@@ -209,59 +177,7 @@ export const RUNE_TICKER = 'RUNE'
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false }
-
-export const AssetATOM: Asset = { chain: 'GAIA', symbol: 'ATOM', ticker: 'ATOM', synth: false }
-
-/**
- * Base "chain" asset for RUNE-67C on Binance test net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRune67C: Asset = { chain: 'BNB', symbol: 'RUNE-67C', ticker: RUNE_TICKER, synth: false }
-
-/**
- * Base "chain" asset for RUNE-B1A on Binance main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneB1A: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: RUNE_TICKER, synth: false }
-
-/**
- * Base "chain" asset on thorchain main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneNative: Asset = { chain: 'THOR', symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
-
-/**
- * Base "chain" asset for RUNE on ethereum main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneERC20: Asset = {
-  chain: 'ETH',
-  symbol: `${RUNE_TICKER}-0x3155ba85d5f96b2d030a4966af206230e46849cb`,
-  ticker: RUNE_TICKER,
-  synth: false,
-}
-
-/**
- * Base "chain" asset for RUNE on ethereum main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneERC20Testnet: Asset = {
-  chain: 'ETH',
-  symbol: `${RUNE_TICKER}-0xd601c6A3a36721320573885A8d8420746dA3d7A0`,
-  ticker: RUNE_TICKER,
-  synth: false,
-}
+const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false }
 
 /**
  * Helper to check whether asset is valid
@@ -367,7 +283,7 @@ export enum AssetCurrencySymbol {
  */
 export const currencySymbolByAsset = ({ ticker }: Asset) => {
   switch (true) {
-    case ticker === RUNE_TICKER:
+    case ticker === 'RUNE':
       return AssetCurrencySymbol.RUNE
     case ticker === AssetBTC.ticker:
       return AssetCurrencySymbol.BTC
@@ -412,7 +328,7 @@ export const formatAssetAmountCurrency = ({
 
   if (ticker) {
     // RUNE
-    if (ticker === RUNE_TICKER) return `${AssetCurrencySymbol.RUNE} ${amountFormatted}`
+    if (ticker === 'RUNE') return `${AssetCurrencySymbol.RUNE} ${amountFormatted}`
     // BTC
     let regex = new RegExp(AssetBTC.ticker, 'i')
     if (ticker.match(new RegExp(AssetBTC.ticker, 'i'))) {

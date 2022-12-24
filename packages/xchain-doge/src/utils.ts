@@ -9,12 +9,12 @@ import {
   calcFees,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, Asset, BaseAmount, Chain, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { Address, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import * as Dogecoin from 'bitcoinjs-lib'
 import coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'
 
-import { DOGE_DECIMAL, MIN_TX_FEE } from './const'
+import { AssetDOGE, DOGE_DECIMAL, MIN_TX_FEE } from './const'
 import * as nodeApi from './node-api'
 import * as sochain from './sochain-api'
 import { BroadcastTxParams, UTXO } from './types/common'
@@ -25,20 +25,6 @@ const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
 const TX_INPUT_PUBKEYHASH = 107
 const TX_OUTPUT_BASE = 8 + 1 //9
 const TX_OUTPUT_PUBKEYHASH = 25
-
-/**
- * Chain identifier for Dogecoin
- *
- */
-export const DOGEChain: Chain = 'DOGE'
-
-/**
- * Base "chain" asset on bitcoin main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetDOGE: Asset = { chain: DOGEChain, symbol: 'BTC', ticker: 'BTC', synth: false }
 
 function inputBytes(): number {
   return TX_INPUT_BASE + TX_INPUT_PUBKEYHASH

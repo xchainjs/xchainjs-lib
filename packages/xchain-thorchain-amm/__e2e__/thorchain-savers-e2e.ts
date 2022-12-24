@@ -1,5 +1,6 @@
-import { AssetAVAX } from '@xchainjs/xchain-avax'
+import { AVAXChain } from '@xchainjs/xchain-avax'
 import { AssetBNB } from '@xchainjs/xchain-binance'
+import { BNBChain } from '@xchainjs/xchain-binance'
 import {
   CryptoAmount,
   SaversPosition,
@@ -38,7 +39,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
 
   it(`Should check savers position `, async () => {
-    const walletAddress = await mainnetWallet.clients[AssetBNB.chain].getAddress()
+    const walletAddress = await mainnetWallet.clients[BNBChain].getAddress()
     const getSaver: getSaver = {
       asset: AssetBNB,
       address: walletAddress,
@@ -48,11 +49,11 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
 
   it(`Should check balance of an address`, async () => {
-    const check = await mainnetWallet.clients[AssetAVAX.chain].getBalance('0x5acaed152386de95772468072e1b3fad2f4423f0')
+    const check = await mainnetWallet.clients[AVAXChain].getBalance('0x5acaed152386de95772468072e1b3fad2f4423f0')
     console.log(baseToAsset(check[0].amount).amount().toNumber())
   })
   it(`Should withdraw savers position`, async () => {
-    const walletAddress = await mainnetWallet.clients[AssetBNB.chain].getAddress()
+    const walletAddress = await mainnetWallet.clients[BNBChain].getAddress()
     const saversWithdraw: SaversWithdraw = {
       height: 8214446,
       asset: AssetBNB,

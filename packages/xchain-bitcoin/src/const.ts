@@ -1,3 +1,5 @@
+import { Asset, Chain } from '@xchainjs/xchain-util'
+
 /**
  * Minimum transaction fee
  * 1000 satoshi/kB (similar to current `minrelaytxfee`)
@@ -11,3 +13,17 @@ export const LOWER_FEE_BOUND = 1
 export const UPPER_FEE_BOUND = 500
 export const BTC_SYMBOL = '₿'
 export const BTC_SATOSHI_SYMBOL = '⚡'
+
+/**
+ * Chain identifier for Bitcoin mainnet
+ *
+ */
+export const BTCChain: Chain = 'BTC'
+
+/**
+ * Base "chain" asset on bitcoin main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetBTC: Asset = { chain: BTCChain, symbol: 'BTC', ticker: 'BTC', synth: false }

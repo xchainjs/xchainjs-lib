@@ -3,14 +3,14 @@ import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainj
 import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import AvaxClient from '../src/client'
-import { AssetAVAX, defaultAvaxParams } from '../src/util'
+import { AVAXChain, AssetAVAX, defaultAvaxParams } from '../src/const'
 
 // import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '../src/types'
 
 // =====Erc-20 asset=====
 
 const assetRIP: Asset = {
-  chain: AssetAVAX.chain,
+  chain: AVAXChain,
   symbol: `RIP-0x224695ba2a98e4a096a519b503336e06d9116e48`,
   ticker: `RIP`,
   synth: false,
@@ -44,7 +44,7 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     const tx = await client.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
     const amount = assetToBase(assetAmount('0.01', 18))
-    expect(tx.asset.chain).toBe(AssetAVAX.chain)
+    expect(tx.asset.chain).toBe(AVAXChain)
     expect(tx.asset.ticker).toBe(AssetAVAX.ticker)
     expect(tx.type).toBe(TxType.Transfer)
     expect(tx.from[0].from).toBe(client.getAddress(0))

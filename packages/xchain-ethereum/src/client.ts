@@ -22,7 +22,15 @@ import { Address, Asset, BaseAmount, assetToString, baseAmount, delay } from '@x
 import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
 
-import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
+import {
+  AssetETH,
+  BASE_TOKEN_GAS_COST,
+  ETHChain,
+  ETH_DECIMAL,
+  LOWER_FEE_BOUND,
+  SIMPLE_GAS_COST,
+  UPPER_FEE_BOUND,
+} from './const'
 import erc20ABI from './data/erc20.json'
 import * as etherscanAPI from './etherscan-api'
 import * as ethplorerAPI from './ethplorer-api'
@@ -41,10 +49,6 @@ import {
   TxOverrides,
 } from './types'
 import {
-  AssetETH,
-  BASE_TOKEN_GAS_COST,
-  ETH_DECIMAL,
-  SIMPLE_GAS_COST,
   call,
   estimateApprove,
   estimateCall,
@@ -125,7 +129,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     etherscanApiKey,
     infuraCreds,
   }: EthereumClientParams) {
-    super(AssetETH.chain, { network, rootDerivationPaths, feeBounds })
+    super(ETHChain, { network, rootDerivationPaths, feeBounds })
     this.ethNetwork = xchainNetworkToEths(network)
     this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey

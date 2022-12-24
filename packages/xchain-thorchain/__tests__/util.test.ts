@@ -5,11 +5,10 @@ import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 // import nock from 'nock'
 
 import { mockTendermintNodeInfo } from '../__mocks__/thornode-api'
-import { AssetRuneNative, isAssetRuneNative } from '../src'
+import { AssetRuneNative, defaultExplorerUrls } from '../src/const'
 import { ClientUrl } from '../src/types'
 import {
   assetFromDenom,
-  defaultExplorerUrls,
   getChainId,
   getDenom,
   getDepositTxDataFromLogs,
@@ -18,6 +17,7 @@ import {
   getExplorerUrl,
   getPrefix,
   getTxType,
+  isAssetRuneNative,
   isBroadcastSuccess,
 } from '../src/utils'
 

@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetRuneNative, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { THORChain, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { Address, Asset, Chain, assetFromStringEx, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -202,7 +202,7 @@ export class ThorchainCache {
     }
     // add mock THORCHAIN inbound details
     const details: InboundDetail = {
-      chain: AssetRuneNative.chain,
+      chain: THORChain,
       address: '',
       router: '',
       gasRate: new BigNumber(0),
@@ -213,7 +213,7 @@ export class ThorchainCache {
       haltedTrading: !!mimirDetails['HALTTRADING'],
       haltedLP: false, //
     }
-    inboundDetails[AssetRuneNative.chain] = details
+    inboundDetails[THORChain] = details
 
     this.inboundDetailCache = {
       lastRefreshed: Date.now(),

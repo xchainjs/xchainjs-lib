@@ -2,10 +2,8 @@ export * from './types'
 export * from './client'
 export * from './const'
 export {
-  AssetDOGE,
   broadcastTx,
   buildTx,
-  DOGEChain,
   getDefaultFees,
   getDefaultFeesWithRates,
   validateAddress,

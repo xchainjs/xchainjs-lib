@@ -4,8 +4,7 @@ import { baseAmount } from '@xchainjs/xchain-util'
 import mockHaskoinApi from '../__mocks__/haskoin'
 import mockSochainApi from '../__mocks__/sochain'
 import { Client } from '../src/client'
-import { MIN_TX_FEE } from '../src/const'
-import { AssetBTC } from '../src/utils'
+import { AssetBTC, MIN_TX_FEE } from '../src/const'
 
 const btcClient = new Client({})
 

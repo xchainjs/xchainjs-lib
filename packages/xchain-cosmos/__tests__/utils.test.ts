@@ -1,17 +1,9 @@
 import { proto } from '@cosmos-client/core/cjs/module'
 import { baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
-import { COSMOS_DECIMAL } from '../src/const'
+import { AssetATOM, COSMOS_DECIMAL } from '../src/const'
 import { APIQueryParam, RawTxResponse, TxResponse } from '../src/cosmos/types'
-import {
-  AssetATOM,
-  getAsset,
-  getDenom,
-  getQueryString,
-  getTxsFromHistory,
-  isMsgMultiSend,
-  isMsgSend,
-} from '../src/utils'
+import { getAsset, getDenom, getQueryString, getTxsFromHistory, isMsgMultiSend, isMsgSend } from '../src/utils'
 
 describe('cosmos/util', () => {
   describe('Msg type guards', () => {

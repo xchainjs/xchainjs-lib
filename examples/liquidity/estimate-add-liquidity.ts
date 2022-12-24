@@ -1,4 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
+import { isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import {
   AddliquidityPosition,
   CryptoAmount,
@@ -9,7 +10,6 @@ import {
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
 import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
-import { isAssetRuneNative } from '@xchainjs/xchain-thorchain' }
 
 function print(estimate: EstimateAddLP, rune: CryptoAmount, asset: CryptoAmount) {
   const expanded = {

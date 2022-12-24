@@ -5,14 +5,10 @@ import { ethers, providers } from 'ethers'
 import nock from 'nock'
 
 import { mock_etherscan_api } from '../__mocks__/etherscan-api'
+import { AssetETH, ETHAddress, ETHChain, ETH_DECIMAL, MAX_APPROVAL } from '../src/const'
 import erc20ABI from '../src/data/erc20.json'
 import { EthNetwork } from '../src/types'
 import {
-  AssetETH,
-  ETHAddress,
-  ETHChain,
-  ETH_DECIMAL,
-  MAX_APPROVAL,
   call,
   estimateApprove,
   estimateCall,
