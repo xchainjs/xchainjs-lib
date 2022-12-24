@@ -226,7 +226,7 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
         return new CryptoAmount(gasRateinAVAXWei.times(70000), AssetAVAX)
       }
       break
-    case AssetATOM.chain:
+    case GAIAChain:
       return new CryptoAmount(baseAmount(inbound.gasRate), AssetATOM)
       break
     case THORChain:
@@ -271,7 +271,7 @@ export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmo
     case AVAXChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetAVAX)
       break
-    case AssetATOM.chain:
+    case GAIAChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetATOM)
       break
     case THORChain:

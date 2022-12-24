@@ -63,7 +63,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     chainIds = getDefaultChainIds(),
     rootDerivationPaths = getDefaultRootDerivationPaths(),
   }: XChainClientParams & CosmosClientParams) {
-    super(AssetATOM.chain, { network, rootDerivationPaths, phrase })
+    super(GAIAChain, { network, rootDerivationPaths, phrase })
 
     this.clientUrls = clientUrls
     this.chainIds = chainIds

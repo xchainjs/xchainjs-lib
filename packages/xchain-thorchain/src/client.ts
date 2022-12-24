@@ -17,7 +17,7 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { AssetATOM, CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
+import { CosmosSDKClient, GAIAChain, RPCTxResult } from '@xchainjs/xchain-cosmos'
 import { Address, Asset, BaseAmount, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
@@ -119,7 +119,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       [Network.Testnet]: 'deprecated',
     },
   }: XChainClientParams & ThorchainClientParams) {
-    super(AssetATOM.chain, { network, rootDerivationPaths, phrase })
+    super(GAIAChain, { network, rootDerivationPaths, phrase })
     this.clientUrl = clientUrl
     this.explorerUrls = explorerUrls
     this.chainIds = chainIds
