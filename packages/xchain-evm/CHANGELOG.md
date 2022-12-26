@@ -1,3 +1,9 @@
+# v.0.1.3 (2022-12-25)
+
+## Add
+
+- Add `AssetAVAX` and `AVAXChain` definitions
+
 # v.0.1.2 (2022-12-17)
 
 ## Update

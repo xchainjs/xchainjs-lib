@@ -1,15 +1,20 @@
+# v.0.15.6 (2022-12-25)
+
+## Add
+
+- Add `AssetBCH` and `BCHChain` definition
+
 # v.0.15.5 (2022-12-13)
 
 ## Update
 
-- reverted `customRequestHeaders` to `BroadcastTxParams` 
-
+- reverted `customRequestHeaders` to `BroadcastTxParams`
 
 # v.0.15.4 (2022-11-24)
 
 ## Update
 
-- Added `customRequestHeaders` to `BroadcastTxParams` 
+- Added `customRequestHeaders` to `BroadcastTxParams`
 - Bumped `xchain-client`
 
 # v.0.15.3 (2022-10-14)

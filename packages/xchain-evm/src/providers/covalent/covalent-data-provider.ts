@@ -1,4 +1,3 @@
-import { AssetAVAX } from '@xchainjs/xchain-avax'
 import {
   Balance,
   FeeOption,
@@ -24,6 +23,10 @@ import {
   GetTransactionsResponse,
   getTxsParams,
 } from './types'
+
+// Don't import from @xchainjs/xchain-avax to avoid circular dependency
+const AVAXChain: Chain = 'AVAX'
+const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
 
 export class CovalentProvider implements OnlineDataProvider {
   private baseUrl = 'https://api.covalenthq.com'

@@ -1,3 +1,9 @@
+# v.5.6.6 (2022-24-12)
+
+## Add
+
+- Add `AssetBNB` and `BNBChain` definition
+
 # v.5.6.5 (2022-10-13)
 
 ## Update

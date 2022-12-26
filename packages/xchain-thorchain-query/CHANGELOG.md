@@ -1,3 +1,20 @@
+# v0.1.12 (2022-12-25)
+
+## Update
+
+- Bump:
+ - `xchain-avax@0.1.3`
+ - `xchain-binance@5.6.6`
+ - `xchain-bitcoin@0.20.7`
+ - `xchain-bitcoincash@0.15.6`
+ - `xchain-cosmos@0.20.6`
+ - `xchain-ethereum@0.27.6`
+ - `xchain-evm@0.1.3`
+ - `xchain-litecoin@0.10.8`
+ - `xchain-thorchain@0.27.7`
+ - `xchain-util@0.12.0`
+- Change `Asset*` and `*Chain` imports from `xchain-util` to its respective `xchain-*`
+
 # v0.1.11 (2022-12-16)
 
 ## fix

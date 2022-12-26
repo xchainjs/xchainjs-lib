@@ -1,3 +1,9 @@
+# v.0.20.6 (2022-12-25)
+
+## Add
+
+- Add `AssetATOM` and `GAIAChain` definition
+
 # v.0.20.5 (2022-12-13)
 
 ## Update

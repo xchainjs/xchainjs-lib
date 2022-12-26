@@ -1,8 +1,14 @@
+# v.10.8 (2022-12-25)
+
+## Add
+
+- Add `AssetLTC` and `LTCChain` definition
+
 # v.10.7 (2022-12-13)
 
 ## Update
 
-- removed `customRequestHeaders` 
+- removed `customRequestHeaders`
 
 # v.10.6 (2022-11-24)
 

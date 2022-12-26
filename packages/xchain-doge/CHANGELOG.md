@@ -1,3 +1,9 @@
+# v.0.5.6 (2022-12-25)
+
+## Add
+
+- Add `AssetDOGE` and `DOGEChain` definition
+
 # v.0.5.5 (2022-11-24)
 
 ## Update

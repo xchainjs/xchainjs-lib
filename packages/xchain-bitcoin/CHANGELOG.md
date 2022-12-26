@@ -1,3 +1,9 @@
+# v.0.20.7 (2022-12-25)
+
+## Add
+
+- Add `AssetBTC` and `BTCChain` definition
+
 # v.0.20.6 (2022-11-24)
 
 ## Update

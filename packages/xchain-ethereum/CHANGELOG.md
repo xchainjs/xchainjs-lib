@@ -1,3 +1,9 @@
+# v.0.27.6 (2022-12-25)
+
+## Add
+
+- Add `AssetETH` and `ETHChain` definition
+
 # v.0.27.5 (2022-12-17)
 
 ## Update
