@@ -34,7 +34,7 @@
   "devDependencies": {
     "@types/bitcoinjs-lib": "^5.0.0",
     "@types/wif": "^2.0.2",
-    "@xchainjs/xchain-client": "^0.13.3",
+    "@xchainjs/xchain-client": "^0.13.5",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.12.0",
     "axios": "^0.25.0",
@@ -44,7 +44,7 @@
     "wif": "^2.0.6"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.13.3",
+    "@xchainjs/xchain-client": "^0.13.5",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.12.0",
     "axios": "^0.25.0",

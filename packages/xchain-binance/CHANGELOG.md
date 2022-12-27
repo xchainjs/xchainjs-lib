@@ -1,8 +1,12 @@
-# v.5.6.6 (2022-24-12)
+# v.5.6.6 (2022-12-27)
 
 ## Add
 
 - Add `AssetBNB` and `BNBChain` definition
+
+## Update
+
+- Bump `xchain-client@13.5.0`
 
 # v.5.6.5 (2022-10-13)
 

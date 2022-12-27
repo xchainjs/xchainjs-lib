@@ -35,7 +35,7 @@
   "devDependencies": {
     "@binance-chain/javascript-sdk": "^4.2.0",
     "@types/big.js": "^4.0.5",
-    "@xchainjs/xchain-client": "^0.13.3",
+    "@xchainjs/xchain-client": "^0.13.5",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.12.0"
   },
@@ -44,7 +44,7 @@
   },
   "peerDependencies": {
     "@binance-chain/javascript-sdk": "^4.2.0",
-    "@xchainjs/xchain-client": "^0.13.3",
+    "@xchainjs/xchain-client": "^0.13.5",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.12.0"
   }

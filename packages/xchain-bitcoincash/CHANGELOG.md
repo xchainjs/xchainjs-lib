@@ -1,8 +1,12 @@
-# v.0.15.6 (2022-12-25)
+# v.0.15.6 (2022-12-27)
 
 ## Add
 
 - Add `AssetBCH` and `BCHChain` definition
+
+## Update
+
+- Bump `xchain-client@13.5.0`
 
 # v.0.15.5 (2022-12-13)
 

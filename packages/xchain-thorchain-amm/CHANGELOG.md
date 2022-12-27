@@ -1,4 +1,4 @@
-# v0.3.11 (2022-12-25)
+# v0.3.11 (2022-12-27)
 
 ## Update
 
@@ -7,6 +7,7 @@
  - `xchain-binance@5.6.6`
  - `xchain-bitcoin@0.20.7`
  - `xchain-bitcoincash@0.15.6`
+ - `xchain-client@0.13.5`
  - `xchain-cosmos@0.20.6`
  - `xchain-ethereum@0.27.6`
  - `xchain-evm@0.1.3`
@@ -14,6 +15,7 @@
  - `xchain-thorchain@0.27.7`
  - `xchain-util@0.12.0`
 - Change `Asset*` and `*Chain` imports from `xchain-util` to its respective `xchain-*`
+ - Update README.md dependency specification
 
 # v0.3.10 (2022-12-08)
 

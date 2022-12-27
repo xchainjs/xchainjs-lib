@@ -1,8 +1,12 @@
-# v.0.27.6 (2022-12-25)
+# v.0.27.6 (2022-12-27)
 
 ## Add
 
 - Add `AssetETH` and `ETHChain` definition
+
+## Update
+
+- Bump `xchain-client@13.5.0`
 
 # v.0.27.5 (2022-12-17)
 
