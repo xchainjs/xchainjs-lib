@@ -32,7 +32,7 @@
     "@xchainjs/xchain-thorchain": "^0.27.2",
     "@xchainjs/xchain-thorchain-amm": "^0.3.7",
     "@xchainjs/xchain-thorchain-query": "^0.1.7",
-    "@xchainjs/xchain-thornode": "^0.1.1",
+    "@xchainjs/xchain-thornode": "^0.2.0",
     "@xchainjs/xchain-util": "^0.11.0",
     "axios": "^0.25.0",
     "axios-retry": "^3.2.5",

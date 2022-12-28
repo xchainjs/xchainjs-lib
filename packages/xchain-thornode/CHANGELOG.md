@@ -1,3 +1,9 @@
+# v0.2.0 (2022-12-28)
+
+## Breaking Change
+
+- Update to latest THORNode 1.102.0, which has several backwards incompatible changes
+
 # v0.1.5 (2022-12-13)
 
 ## Update
