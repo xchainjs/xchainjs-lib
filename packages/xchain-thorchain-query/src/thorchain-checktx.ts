@@ -1,5 +1,9 @@
+import { BTCChain } from '@xchainjs/xchain-bitcoin'
+import { BCHChain } from '@xchainjs/xchain-bitcoincash'
+import { LTCChain } from '@xchainjs/xchain-litecoin'
+import { THORChain } from '@xchainjs/xchain-thorchain'
 import { LastBlock, ObservedTx, TxOutItem, TxResponse } from '@xchainjs/xchain-thornode'
-import { Chain, THORChain } from '@xchainjs/xchain-util'
+import { Chain } from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
 import { ThorchainCache } from './thorchain-cache'
@@ -64,7 +68,7 @@ export class TransactionStage {
       case 1:
         if (txData.observed_tx?.tx?.chain != undefined) {
           sourceChain = getChain(txData.observed_tx.tx.chain)
-          if (sourceChain == (Chain.Bitcoin || Chain.BitcoinCash || Chain.Litecoin)) {
+          if (sourceChain == (BTCChain || BCHChain || LTCChain)) {
             const lastBlockHeight = lastBlock.find((obj) => obj.chain === sourceChain)
             const checkConf = await this.checkConfcounting(sourceChain, lastBlockHeight, txData.observed_tx)
             transactionProgress.seconds = checkConf.seconds

@@ -1,3 +1,5 @@
+import { Asset, Chain } from '@xchainjs/xchain-util/lib'
+
 /**
  * Minimum transaction fee
  * 1000 satoshi/kB (similar to current `minrelaytxfee`)
@@ -6,3 +8,18 @@
 export const MIN_TX_FEE = 1000
 export const LOWER_FEE_BOUND = 1
 export const UPPER_FEE_BOUND = 500
+export const LTC_DECIMAL = 8
+
+/**
+ * Chain identifier for litecoin
+ *
+ */
+export const LTCChain: Chain = 'LTC'
+
+/**
+ * Base "chain" asset on litecoin main net.
+ *
+ * Based on definition in Thorchain `common`
+ * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ */
+export const AssetLTC: Asset = { chain: LTCChain, symbol: 'LTC', ticker: 'LTC', synth: false }

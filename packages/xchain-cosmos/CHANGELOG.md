@@ -1,3 +1,13 @@
+# v.0.20.6 (2022-12-27)
+
+## Add
+
+- Add `AssetATOM` and `GAIAChain` definition
+
+## Update
+
+- Bump `xchain-client@13.5.0`
+
 # v.0.20.5 (2022-12-13)
 
 ## Update

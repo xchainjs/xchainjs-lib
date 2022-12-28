@@ -17,23 +17,21 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
-import {
-  Address,
-  Asset,
-  AssetRuneNative,
-  BaseAmount,
-  Chain,
-  assetFromString,
-  assetToString,
-  baseAmount,
-  isAssetRuneNative,
-} from '@xchainjs/xchain-util'
+import { CosmosSDKClient, GAIAChain, RPCTxResult } from '@xchainjs/xchain-cosmos'
+import { Address, Asset, BaseAmount, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 import Long from 'long'
 
 import { buildDepositTx, buildTransferTx, buildUnsignedTx } from '.'
+import {
+  AssetRuneNative,
+  DECIMAL,
+  DEFAULT_GAS_LIMIT_VALUE,
+  DEPOSIT_GAS_LIMIT_VALUE,
+  MAX_TX_COUNT,
+  defaultExplorerUrls,
+} from './const'
 import {
   ChainId,
   ChainIds,
@@ -48,11 +46,6 @@ import {
 } from './types'
 import { TxResult } from './types/messages'
 import {
-  DECIMAL,
-  DEFAULT_GAS_LIMIT_VALUE,
-  DEPOSIT_GAS_LIMIT_VALUE,
-  MAX_TX_COUNT,
-  defaultExplorerUrls,
   getBalance,
   getDefaultFees,
   getDenom,
@@ -60,9 +53,10 @@ import {
   getExplorerAddressUrl,
   getExplorerTxUrl,
   getPrefix,
+  isAssetRuneNative,
   registerDepositCodecs,
   registerSendCodecs,
-} from './util'
+} from './utils'
 
 /**
  * Interface for custom Thorchain client
@@ -125,7 +119,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       [Network.Testnet]: 'deprecated',
     },
   }: XChainClientParams & ThorchainClientParams) {
-    super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
+    super(GAIAChain, { network, rootDerivationPaths, phrase })
     this.clientUrl = clientUrl
     this.explorerUrls = explorerUrls
     this.chainIds = chainIds

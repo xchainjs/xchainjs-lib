@@ -2,9 +2,7 @@ import { Balance, FeeType, Fees, Network, Tx, TxType } from '@xchainjs/xchain-cl
 import {
   Address,
   Asset,
-  AssetETH,
   BaseAmount,
-  Chain,
   assetAmount,
   assetFromString,
   assetToBase,
@@ -15,6 +13,16 @@ import {
 import { Signer, ethers, providers } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
 
+import {
+  AssetETH,
+  BASE_TOKEN_GAS_COST,
+  DEFAULT_GAS_PRICE,
+  ETHAddress,
+  ETHChain,
+  ETH_DECIMAL,
+  MAX_APPROVAL,
+  SIMPLE_GAS_COST,
+} from './const'
 import erc20ABI from './data/erc20.json'
 import {
   ETHTransactionInfo,
@@ -26,20 +34,6 @@ import {
   TransactionInfo,
   TransactionOperation,
 } from './types'
-
-export const ETH_DECIMAL = 18
-export const ETHPLORER_FREEKEY = 'freekey'
-
-// from https://github.com/MetaMask/metamask-extension/blob/ee205b893fe61dc4736efc576e0663189a9d23da/ui/app/pages/send/send.constants.js#L39
-// and based on recommendations of https://ethgasstation.info/blog/gas-limit/
-export const SIMPLE_GAS_COST: ethers.BigNumber = ethers.BigNumber.from(21000)
-export const BASE_TOKEN_GAS_COST: ethers.BigNumber = ethers.BigNumber.from(100000)
-
-// default gas price in gwei
-export const DEFAULT_GAS_PRICE = 50
-
-export const ETHAddress = '0x0000000000000000000000000000000000000000'
-export const MAX_APPROVAL: ethers.BigNumber = ethers.BigNumber.from(2).pow(256).sub(1)
 
 /**
  * Network -> EthNetwork
@@ -141,7 +135,7 @@ export const getTxFromTokenTransaction = (tx: TokenTransactionInfo): Tx | null =
   const symbol = tx.tokenSymbol
   const address = tx.contractAddress
   if (validateSymbol(symbol) && validateAddress(address)) {
-    const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${address}`)
+    const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${address}`)
     if (tokenAsset) {
       return {
         asset: tokenAsset,
@@ -204,7 +198,7 @@ export const getTxFromEthplorerTokenOperation = (operation: TransactionOperation
   const decimals = parseInt(operation.tokenInfo.decimals) || ETH_DECIMAL
   const { symbol, address } = operation.tokenInfo
   if (validateSymbol(symbol) && validateAddress(address)) {
-    const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${address}`)
+    const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${address}`)
     if (tokenAsset) {
       return {
         asset: tokenAsset,
@@ -513,7 +507,7 @@ export const getTokenBalances = (tokenBalances: TokenBalance[]): Balance[] => {
     const { symbol, address: tokenAddress } = cur.tokenInfo
     if (validateSymbol(symbol) && validateAddress(tokenAddress) && cur?.tokenInfo?.decimals !== undefined) {
       const decimals = parseInt(cur.tokenInfo.decimals, 10)
-      const tokenAsset = assetFromString(`${Chain.Ethereum}.${symbol}-${ethers.utils.getAddress(tokenAddress)}`)
+      const tokenAsset = assetFromString(`${ETHChain}.${symbol}-${ethers.utils.getAddress(tokenAddress)}`)
       if (tokenAsset) {
         return [
           ...acc,

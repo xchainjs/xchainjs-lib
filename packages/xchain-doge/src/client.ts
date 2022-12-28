@@ -14,11 +14,11 @@ import {
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, AssetDOGE, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Address, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Dogecoin from 'bitcoinjs-lib'
 
 import * as blockcypher from './blockcypher-api'
-import { DOGE_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
+import { AssetDOGE, DOGEChain, DOGE_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import * as sochain from './sochain-api'
 import { TxIO } from './types/sochain-api-types'
 import * as Utils from './utils'
@@ -57,7 +57,7 @@ class Client extends UTXOClient {
       [Network.Testnet]: `m/44'/1'/0'/0/`,
     },
   }: DogecoinClientParams) {
-    super(Chain.Doge, { network, rootDerivationPaths, phrase, feeBounds })
+    super(DOGEChain, { network, rootDerivationPaths, phrase, feeBounds })
     this.setSochainUrl(sochainUrl)
     this.setBlockcypherUrl(blockcypherUrl)
   }

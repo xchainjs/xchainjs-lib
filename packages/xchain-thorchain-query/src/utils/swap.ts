@@ -1,25 +1,16 @@
+import { AVAXChain, AssetAVAX } from '@xchainjs/xchain-avax'
+import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
+import { AssetBTC, BTCChain } from '@xchainjs/xchain-bitcoin'
+import { AssetBCH, BCHChain } from '@xchainjs/xchain-bitcoincash'
+import { AssetATOM, GAIAChain } from '@xchainjs/xchain-cosmos'
+import { AssetDOGE, DOGEChain } from '@xchainjs/xchain-doge'
+import { AssetETH, ETHChain } from '@xchainjs/xchain-ethereum'
+import { AssetLTC, LTCChain } from '@xchainjs/xchain-litecoin'
+import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   // Address,
   Asset,
-  AssetAVAX,
-  AssetAtom,
-  AssetBCH,
-  AssetBNB,
-  AssetBTC,
-  AssetDOGE,
-  AssetETH,
-  AssetLTC,
-  AssetRuneNative,
-  AvalancheChain,
-  BCHChain,
-  BNBChain,
-  BTCChain,
   Chain,
-  CosmosChain,
-  DOGEChain,
-  ETHChain,
-  LTCChain,
-  THORChain,
   baseAmount,
   eqAsset,
 } from '@xchainjs/xchain-util'
@@ -200,24 +191,24 @@ export const getDoubleSwap = async (
 export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmount => {
   if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
   switch (asset.chain) {
-    case Chain.Bitcoin:
+    case BTCChain:
       return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBTC)
       break
-    case Chain.BitcoinCash:
+    case BTCChain:
       return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBCH)
       break
-    case Chain.Litecoin:
+    case LTCChain:
       return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetLTC)
       break
-    case Chain.Doge:
+    case DOGEChain:
       // NOTE: UTXO chains estimate fees with a 250 byte size
       return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetDOGE)
       break
-    case Chain.Binance:
+    case BNBChain:
       //flat fee
       return new CryptoAmount(baseAmount(inbound.gasRate), AssetBNB)
       break
-    case Chain.Ethereum:
+    case ETHChain:
       const gasRateinETHGwei = inbound.gasRate
       const gasRateinETHWei = baseAmount(gasRateinETHGwei.multipliedBy(10 ** 9), 18)
       if (eqAsset(asset, AssetETH)) {
@@ -226,7 +217,7 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
         return new CryptoAmount(gasRateinETHWei.times(70000), AssetETH)
       }
       break
-    case Chain.Avalanche:
+    case AVAXChain:
       const gasRateinAVAXGwei = inbound.gasRate
       const gasRateinAVAXWei = baseAmount(gasRateinAVAXGwei.multipliedBy(10 ** 9), 18)
       if (eqAsset(asset, AssetAVAX)) {
@@ -235,10 +226,10 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
         return new CryptoAmount(gasRateinAVAXWei.times(70000), AssetAVAX)
       }
       break
-    case Chain.Cosmos:
-      return new CryptoAmount(baseAmount(inbound.gasRate), AssetAtom)
+    case GAIAChain:
+      return new CryptoAmount(baseAmount(inbound.gasRate), AssetATOM)
       break
-    case Chain.THORChain:
+    case THORChain:
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
       break
   }
@@ -257,33 +248,33 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
 export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmount => {
   if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
   switch (asset.chain) {
-    case Chain.Bitcoin:
+    case BTCChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBTC)
       break
-    case Chain.BitcoinCash:
+    case BTCChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBCH)
       break
-    case Chain.Litecoin:
+    case LTCChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetLTC)
       break
-    case Chain.Doge:
+    case DOGEChain:
       // NOTE: UTXO chains estimate fees with a 250 byte size
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetDOGE)
       break
-    case Chain.Binance:
+    case BNBChain:
       //flat fee
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBNB)
       break
-    case Chain.Ethereum:
+    case ETHChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetETH)
       break
-    case Chain.Avalanche:
+    case AVAXChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetAVAX)
       break
-    case Chain.Cosmos:
-      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetAtom)
+    case GAIAChain:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetATOM)
       break
-    case Chain.THORChain:
+    case THORChain:
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
       break
   }
@@ -304,15 +295,15 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetETH
     case THORChain:
       return AssetRuneNative
-    case CosmosChain:
-      return AssetAtom
+    case GAIAChain:
+      return AssetATOM
     case BCHChain:
       return AssetBCH
     case LTCChain:
       return AssetLTC
     case DOGEChain:
       return AssetDOGE
-    case AvalancheChain:
+    case AVAXChain:
       return AssetAVAX
     default:
       throw Error('Unknown chain')
@@ -334,7 +325,7 @@ export const getChain = (chain: string): Chain => {
     case 'THOR':
       return THORChain
     case 'GAIA':
-      return CosmosChain
+      return GAIAChain
     case 'BCH':
       return BCHChain
     case 'LTC':

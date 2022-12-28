@@ -1,7 +1,7 @@
 import { TxHash, XChainClient } from '@xchainjs/xchain-client'
-import { ApproveParams, ETH_DECIMAL, EthereumClient, MAX_APPROVAL, abi } from '@xchainjs/xchain-ethereum'
+import { ApproveParams, AssetETH, ETH_DECIMAL, EthereumClient, MAX_APPROVAL, abi } from '@xchainjs/xchain-ethereum'
 import { ThorchainCache } from '@xchainjs/xchain-thorchain-query'
-import { Asset, AssetETH, BaseAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import { DepositParams } from '../types'

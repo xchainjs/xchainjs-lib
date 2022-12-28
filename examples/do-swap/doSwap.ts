@@ -1,4 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
+import { THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   CryptoAmount,
@@ -9,7 +10,7 @@ import {
   Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
-import { Chain, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
@@ -45,7 +46,7 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
     const fromAsset = assetFromString(`${process.argv[6]}`)
     const toAsset = assetFromString(`${process.argv[7]}`)
 
-    const toChain = toAsset.synth ? Chain.THORChain : toAsset.chain
+    const toChain = toAsset.synth ? THORChain : toAsset.chain
     const destinationAddress = wallet.clients[toChain].getAddress()
 
     console.log(destinationAddress)
