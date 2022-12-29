@@ -1,3 +1,10 @@
+# v0.1.13 (2022-12-29)
+
+## Update
+
+- Bump:`xchain-thornode@0.2.0`
+- Fix: incorrect Chain in utils/swap.ts
+
 # v0.1.12 (2022-12-27)
 
 ## Update

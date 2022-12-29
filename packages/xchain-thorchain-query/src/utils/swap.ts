@@ -251,7 +251,7 @@ export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmo
     case BTCChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBTC)
       break
-    case BTCChain:
+    case BCHChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBCH)
       break
     case LTCChain:
@@ -316,6 +316,8 @@ export const getChainAsset = (chain: Chain): Asset => {
  */
 export const getChain = (chain: string): Chain => {
   switch (chain) {
+    case 'AVAX':
+      return AVAXChain
     case 'BNB':
       return BNBChain
     case 'BTC':
