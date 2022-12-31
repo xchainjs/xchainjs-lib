@@ -110,9 +110,9 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
     },
     explorerUrls = defaultExplorerUrls,
     rootDerivationPaths = {
-      [Network.Mainnet]: "44'/932'/0'/0/",
-      [Network.Stagenet]: "44'/932'/0'/0/",
-      [Network.Testnet]: "44'/932'/0'/0/",
+      [Network.Mainnet]: "44'/931'/0'/0/",
+      [Network.Stagenet]: "44'/931'/0'/0/",
+      [Network.Testnet]: "44'/931'/0'/0/",
     },
     chainIds = {
       [Network.Mainnet]: 'mayachain-mainnet-v1',

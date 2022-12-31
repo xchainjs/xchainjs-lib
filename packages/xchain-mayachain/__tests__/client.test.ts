@@ -92,10 +92,10 @@ describe('Client Test', () => {
   let mayaClient: Client
   let mayaMainClient: Client
   const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
-  const mainnet_address_path0 = 'maya14e0zalymjxjxlwsmtwyvvtagm2hhw6jkgmwpuz'
-  const mainnet_address_path1 = 'maya19pt99mamjrrp8hqu2l3cm3gvmzazec9xkavtmj'
-  const stagenet_address_path0 = 'smaya14e0zalymjxjxlwsmtwyvvtagm2hhw6jkuzjh2u'
-  const stagenet_address_path1 = 'smaya19pt99mamjrrp8hqu2l3cm3gvmzazec9xzysadv'
+  const mainnet_address_path0 = 'maya19kacmmyuf2ysyvq3t9nrl9495l5cvktjsc69cq'
+  const mainnet_address_path1 = 'maya1hrf34g3lxwvpk7gjte0xvahf3txnq8ecg2he9g'
+  const stagenet_address_path0 = 'smaya19kacmmyuf2ysyvq3t9nrl9495l5cvktjypxnw7'
+  const stagenet_address_path1 = 'smaya1hrf34g3lxwvpk7gjte0xvahf3txnq8ecunt0nk'
 
   beforeEach(() => {
     mayaClient = new Client({ phrase, network: Network.Stagenet })
@@ -223,7 +223,7 @@ describe('Client Test', () => {
 
   it('returns private key', async () => {
     const privKey = mayaClient.getPrivateKey()
-    expect(Buffer.from(privKey.bytes()).toString('base64')).toEqual('Pp2Gzo3TeCMsMgNpVnHvsf/T1SZpNbE8T2Y+9CjTi3k=')
+    expect(Buffer.from(privKey.bytes()).toString('base64')).toEqual('CHCbyYWorMZVRFtfJzt72DigvZeRNi3jo2c3hGEQ46I=')
   })
 
   describe('chainId', () => {
@@ -264,7 +264,7 @@ describe('Client Test', () => {
   it('returns public key', async () => {
     const pubKey = mayaClient.getPubKey()
     const pkString = Buffer.from(pubKey.bytes()).toString('base64')
-    expect(pkString).toEqual('A2BXo1lxFM9ac9iXrvYEb4wd6FUjn67kJ77zmtQZIqDK')
+    expect(pkString).toEqual('AsL4F+rvFMqDkZYpVVnZa0OBa0EXwscjNrODbBME42vC')
   })
 
   it('has no balances', async () => {
