@@ -39,10 +39,6 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 0,
     avgBlockTimeInSecs: 6,
   },
-  MAYA: {
-    blockReward: 0,
-    avgBlockTimeInSecs: 6,
-  },
 }
 
 export { DefaultChainAttributes }
