@@ -8,15 +8,7 @@ import { AssetBSC, BSCChain } from '../src/const'
 
 // =====Erc-20 asset=====
 
-// const assetRIP: Asset = {
-//   chain: BSCChain,
-//   symbol: `RIP-0x224695Ba2a98E4a096a519B503336E06D9116E48`,
-//   ticker: `RIP`,
-//   synth: false,
-// }
-
 // =====Ethers providers=====
-// const BSC_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
 const BSC_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://bsc-testnet.public.blastapi.io')
 const provider = new EtherscanProvider(
   BSC_TESTNET_ETHERS_PROVIDER,
