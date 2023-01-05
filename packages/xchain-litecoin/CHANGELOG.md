@@ -1,3 +1,19 @@
+# v.10.8 (2022-12-27)
+
+## Add
+
+- Add `AssetLTC` and `LTCChain` definition
+
+## Update
+
+- Bump `xchain-client@13.5.0`
+
+# v.10.7 (2022-12-13)
+
+## Update
+
+- removed `customRequestHeaders`
+
 # v.10.6 (2022-11-24)
 
 ## Update

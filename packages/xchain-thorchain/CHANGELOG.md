@@ -1,3 +1,32 @@
+# v.0.27.7 (2022-12-27)
+
+## Add
+
+- Add `AssetRune67C`, `AssetRuneB1A`, `AssetRuneERC20`, `AssetRuneERC20Testnet`, `THORChain` and `AssetRuneNative` definitions
+
+## Update
+
+- Bump `xchain-client@13.5.0`
+
+## Update
+
+- Change `AssetETH`, `AssetBNB` and `GAIAChain` imports to its own `xchain-*` package
+
+# v.0.27.6 (2022-12-13)
+
+## Update
+
+- removed `customRequestHeaders`
+
+# v.0.27.5 (2022-12-12)
+
+## Update
+
+- Add optional `sequence` to `transfer` and `deposit` to override `sequence`
+- Add helpers `getAccount` and `getSequence` to `utils`
+
+# v.0.27.4 (2022-11-??)
+
 # v.0.27.3 (2022-11-24)
 
 ## Update

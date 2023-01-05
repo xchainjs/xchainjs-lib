@@ -1,3 +1,19 @@
+# v.0.1.3 (2022-12-27)
+
+## Add
+
+- Add `AssetAVAX` and `AVAXChain` definition
+
+## Update
+
+- Bump `xchain-client@13.5.0`
+
+# v.0.1.2 (2022-12-16)
+
+## Update
+
+- default to mainnet
+
 # v.0.1.1 (2022-11-24)
 
 ## Update

@@ -9,12 +9,12 @@ import {
   calcFees,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, AssetDOGE, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { Address, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import * as Dogecoin from 'bitcoinjs-lib'
 import coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'
 
-import { DOGE_DECIMAL, MIN_TX_FEE } from './const'
+import { AssetDOGE, DOGE_DECIMAL, MIN_TX_FEE } from './const'
 import * as nodeApi from './node-api'
 import * as sochain from './sochain-api'
 import { BroadcastTxParams, UTXO } from './types/common'

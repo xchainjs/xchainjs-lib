@@ -1,14 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
-import {
-  Address,
-  Asset,
-  Chain,
-  assetFromStringEx,
-  assetToString,
-  baseAmount,
-  eqAsset,
-  isAssetRuneNative,
-} from '@xchainjs/xchain-util'
+import { THORChain, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { Address, Asset, Chain, assetFromStringEx, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
@@ -195,7 +187,7 @@ export class ThorchainCache {
         throw new Error(`Missing required inbound info`)
 
       const details: InboundDetail = {
-        chain: chain as Chain,
+        chain: chain,
         address: inbound.address,
         router: inbound.router,
         gasRate: new BigNumber(inbound.gas_rate),
@@ -210,7 +202,7 @@ export class ThorchainCache {
     }
     // add mock THORCHAIN inbound details
     const details: InboundDetail = {
-      chain: Chain.THORChain,
+      chain: THORChain,
       address: '',
       router: '',
       gasRate: new BigNumber(0),
@@ -221,7 +213,7 @@ export class ThorchainCache {
       haltedTrading: !!mimirDetails['HALTTRADING'],
       haltedLP: false, //
     }
-    inboundDetails[Chain.THORChain] = details
+    inboundDetails[THORChain] = details
 
     this.inboundDetailCache = {
       lastRefreshed: Date.now(),

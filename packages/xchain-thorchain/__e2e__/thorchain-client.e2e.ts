@@ -1,8 +1,10 @@
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
 import { Client as ThorClient, ThorchainClient } from '@xchainjs/xchain-thorchain'
-import { Asset, AssetRuneNative, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 // import axios from 'axios'
+
+import { AssetRuneNative } from '../src'
 
 export type Swap = {
   fromBaseAmount: BaseAmount
@@ -42,6 +44,23 @@ describe('thorchain Integration Tests', () => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
     expect(balances.length).toBeGreaterThan(0)
+  })
+  it('should xfer rune from wallet 0 -> 1, with a memo and custom sequence', async () => {
+    try {
+      const addressTo = thorClient.getAddress(1)
+      const transferTx = {
+        walletIndex: 0,
+        asset: AssetRuneNative,
+        amount: baseAmount('100'),
+        recipient: addressTo,
+        memo: 'Hi!',
+        sequence: 1,
+      }
+      await thorClient.transfer(transferTx)
+      fail()
+    } catch (error) {
+      expect(error.toString().includes('account sequence mismatch')).toBe(true)
+    }
   })
   it('should xfer rune from wallet 0 -> 1, with a memo', async () => {
     try {

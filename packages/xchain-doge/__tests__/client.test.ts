@@ -1,10 +1,10 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetDOGE, baseAmount } from '@xchainjs/xchain-util'
+import { baseAmount } from '@xchainjs/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode'
 import { Client } from '../src/client'
-import { LOWER_FEE_BOUND, MIN_TX_FEE } from '../src/const'
+import { AssetDOGE, LOWER_FEE_BOUND, MIN_TX_FEE } from '../src/const'
 
 mockSochainApi.init()
 

@@ -1,3 +1,4 @@
 export * from './client'
 export * from './types'
-export { getDerivePath, getDefaultFees, getPrefix } from './util'
+export { getDerivePath, getDefaultFees, getPrefix } from './utils'
+export { AssetBNB, BNBChain } from './const'

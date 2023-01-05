@@ -1,7 +1,26 @@
 import { Network } from '@xchainjs/xchain-client'
 import { EVMClientParams, EtherscanProvider, ExplorerProvider } from '@xchainjs/xchain-evm'
-import { AssetAVAX, Chain } from '@xchainjs/xchain-util'
+import { Asset, Chain } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
+
+export const AVAX_DECIMAL = 8
+
+export const LOWER_FEE_BOUND = 2_000_000_000
+export const UPPER_FEE_BOUND = 1_000_000_000_000
+
+export const AVAX_GAS_ASSET_DECIMAL = 18
+
+/**
+ * Chain identifier for AVAX.
+ *
+ */
+export const AVAXChain: Chain = 'AVAX'
+
+/**
+ * Base "chain" asset of Avalanche chain.
+ *
+ */
+export const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
 
 // =====Ethers providers=====
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
@@ -21,7 +40,7 @@ const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
   AVALANCHE_TESTNET_ETHERS_PROVIDER,
   'https://api-testnet.snowtrace.io',
   'fake',
-  Chain.Avalanche,
+  AVAXChain,
   AssetAVAX,
   18,
 )
@@ -29,7 +48,7 @@ const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
   AVALANCHE_MAINNET_ETHERS_PROVIDER,
   'https://api.snowtrace.io',
   'fake',
-  Chain.Avalanche,
+  AVAXChain,
   AssetAVAX,
   18,
 )
@@ -85,17 +104,17 @@ const defaults = {
   },
 }
 export const defaultAvaxParams: EVMClientParams = {
-  chain: Chain.Avalanche,
+  chain: AVAXChain,
   gasAsset: AssetAVAX,
-  gasAssetDecimals: 18,
+  gasAssetDecimals: AVAX_GAS_ASSET_DECIMAL,
   defaults,
   providers: ethersJSProviders,
   explorerProviders: avaxExplorerProviders,
   dataProviders: avaxProviders,
   network: Network.Testnet,
   feeBounds: {
-    lower: 2_000_000_000,
-    upper: 1_000_000_000_000,
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
   },
   rootDerivationPaths: ethRootDerivationPaths,
 }

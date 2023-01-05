@@ -14,11 +14,12 @@ import {
   calcFees,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'
 
+import { AssetBCH } from './const'
 import * as haskoinApi from './haskoin-api'
 import { AddressParams, BroadcastTxParams, Transaction, TransactionInput, TransactionOutput, UTXO } from './types'
 import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'
@@ -339,8 +340,8 @@ export const buildTx = async ({
  * @param {BroadcastTxParams} params The transaction broadcast options.
  * @returns {TxHash} The transaction hash.
  */
-export const broadcastTx = async ({ haskoinUrl, txHex, customRequestHeaders }: BroadcastTxParams): Promise<TxHash> => {
-  return await haskoinApi.broadcastTx({ haskoinUrl, txHex, customRequestHeaders })
+export const broadcastTx = async ({ haskoinUrl, txHex }: BroadcastTxParams): Promise<TxHash> => {
+  return await haskoinApi.broadcastTx({ haskoinUrl, txHex })
 }
 
 /**

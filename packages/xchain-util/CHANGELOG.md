@@ -1,3 +1,16 @@
+# v.0.12.0 (2022-12-25)
+
+## Breaking change
+
+- Remove `Asset*` definitions
+- Change `Chain` enum to less strict `string` type
+- Remove `isChain`, `eqChain`, `chainToString`, `is*Chain`,
+
+# v.0.11.1 (2022-12-13)
+
+## Add
+
+- Add `register9Rheader()` to populate x-client-id header
 # v.0.11.0 (2022-xx-xx)
 
 ## Breaking change

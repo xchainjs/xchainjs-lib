@@ -1,8 +1,11 @@
 // import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { Network } from '@xchainjs/xchain-client'
-import { AssetAVAX, Chain } from '@xchainjs/xchain-util'
+import { Asset, Chain } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, ethers, providers } from 'ethers'
 import nock from 'nock'
+
+const AVAXChain: Chain = 'AVAX'
+const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
 
 // import { mock_all_api } from '../__mocks__'
 // import {
@@ -75,8 +78,8 @@ const ethersJSProviders = {
 // =====Ethers providers=====
 // =====ONLINE providers=====
 const API_KEY = 'FAKE_KEY'
-const AVAX_ONLINE_PROVIDER_MAINNET = new CovalentProvider(API_KEY, Chain.Avalanche, 43114, AssetAVAX, 18)
-const AVAX_ONLINE_PROVIDER_TESTNET = new CovalentProvider(API_KEY, Chain.Avalanche, 43113, AssetAVAX, 18)
+const AVAX_ONLINE_PROVIDER_MAINNET = new CovalentProvider(API_KEY, AVAXChain, 43114, AssetAVAX, 18)
+const AVAX_ONLINE_PROVIDER_TESTNET = new CovalentProvider(API_KEY, AVAXChain, 43113, AssetAVAX, 18)
 
 const avaxProviders = {
   [Network.Mainnet]: AVAX_ONLINE_PROVIDER_MAINNET,
@@ -134,7 +137,7 @@ const defaults = {
   },
 }
 const avaxParams: EVMClientParams = {
-  chain: Chain.Avalanche,
+  chain: AVAXChain,
   gasAsset: AssetAVAX,
   gasAssetDecimals: 18,
   defaults,

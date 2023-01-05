@@ -1,5 +1,9 @@
-import { LastBlock, ObservedTx, TxOutItem, TxSignersResponse } from '@xchainjs/xchain-thornode'
-import { Asset, Chain, THORChain, assetFromStringEx, baseAmount, isAssetRuneNative } from '@xchainjs/xchain-util'
+import { BTCChain } from '@xchainjs/xchain-bitcoin'
+import { BCHChain } from '@xchainjs/xchain-bitcoincash'
+import { LTCChain } from '@xchainjs/xchain-litecoin'
+import { THORChain, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { LastBlock, ObservedTx, TxDetailsResponse, TxOutItem, TxSignersResponse } from '@xchainjs/xchain-thornode'
+import { Asset, Chain, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
 import { CryptoAmount } from './crypto-amount'
@@ -100,7 +104,7 @@ export class TransactionStage {
     let txData
     try {
       if (inboundTxHash.length < 1) throw Error('inboundTxHash too short')
-      txData = await this.thorchainCache.thornode.getTxDataSigners(inboundTxHash)
+      txData = await this.thorchainCache.thornode.getTxDetail(inboundTxHash)
       // console.log(JSON.stringify(txData, null, 2))
     } catch (error) {
       return {
@@ -128,7 +132,7 @@ export class TransactionStage {
 
     return progress
   }
-  private async checkSwapProgress(txData: TxSignersResponse, progress: TXProgress) {
+  private async checkSwapProgress(txData: TxDetailsResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
       const memo = txData.tx.tx.memo ?? ''
       const memoFields = this.parseSwapMemo(memo)
@@ -167,9 +171,7 @@ export class TransactionStage {
   }
   private async getCryptoAmount(baseAmt: string, asset: Asset): Promise<CryptoAmount> {
     const decimals =
-      Chain.THORChain === asset.chain
-        ? 8
-        : Number((await this.thorchainCache.getPoolForAsset(asset)).pool.nativeDecimal)
+      THORChain === asset.chain ? 8 : Number((await this.thorchainCache.getPoolForAsset(asset)).pool.nativeDecimal)
     return new CryptoAmount(baseAmount(baseAmt, decimals), asset)
   }
   private async determineObserved(txData: TxSignersResponse): Promise<TXProgress> {
@@ -184,10 +186,10 @@ export class TransactionStage {
       const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
       const inboundAmount = txData.tx.tx.coins?.[0].amount
       const fromAddress = txData.tx.tx.from_address ?? 'unknkown'
-      const block = assetIn.chain == Chain.THORChain ? Number(txData.finalised_height) : Number(txData.tx.block_height)
+      const block = assetIn.chain == THORChain ? Number(txData.finalised_height) : Number(txData.tx.block_height)
 
       const finalizeBlock =
-        assetIn.chain == Chain.THORChain ? Number(txData.finalised_height) : Number(txData.tx.finalise_height)
+        assetIn.chain == THORChain ? Number(txData.finalised_height) : Number(txData.tx.finalise_height)
       const status = txData.tx.status === 'done' ? InboundStatus.Observed_Consensus : InboundStatus.Observed_Incomplete
 
       if (operation.match(/[=|s|swap]/i)) progress.txType = TxType.Swap
@@ -299,7 +301,7 @@ export class TransactionStage {
     if (chainHeight > recordedBlock) {
       blockDifference = chainHeight - recordedBlock
       time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-    } else if (chain == Chain.THORChain) {
+    } else if (chain == THORChain) {
       const currentHeight = lastBlockObj.find((obj) => obj)
       const thorchainHeight = Number(`${currentHeight?.thorchain}`) // current height of the TC
       const finalisedHeight = Number(`${txData.finalised_height}`) // height tx was completed in
@@ -340,7 +342,7 @@ export class TransactionStage {
       progress = 0
     }
 
-    const txData = await this.thorchainCache.thornode.getTxDataSigners(inboundTxHash)
+    const txData = await this.thorchainCache.thornode.getTxDetail(inboundTxHash)
     const isSynth = await this.isSynthTransaction(txData)
     if (isSynth) {
       progress = 3
@@ -359,9 +361,9 @@ export class TransactionStage {
         transactionProgress.errors = txObserved.error
         return transactionProgress
       case 1:
-        if (txData.tx?.tx?.chain != undefined) {
+        if (txData.tx.tx?.chain != undefined) {
           sourceChain = getChain(txData.tx.tx.chain)
-          if (sourceChain == (Chain.Bitcoin || Chain.BitcoinCash || Chain.Litecoin)) {
+          if (sourceChain == (BTCChain || BCHChain || LTCChain)) {
             const lastBlockHeight = lastBlock.find((obj) => obj.chain === sourceChain)
             const checkConf = await this.checkConfcounting(
               sourceChain,

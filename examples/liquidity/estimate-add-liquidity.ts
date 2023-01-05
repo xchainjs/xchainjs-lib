@@ -1,4 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
+import { isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import {
   AddliquidityPosition,
   CryptoAmount,
@@ -8,7 +9,7 @@ import {
   ThorchainQuery,
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromStringEx, assetToBase, isAssetRuneNative } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
 function print(estimate: EstimateAddLP, rune: CryptoAmount, asset: CryptoAmount) {
   const expanded = {
@@ -18,9 +19,9 @@ function print(estimate: EstimateAddLP, rune: CryptoAmount, asset: CryptoAmount)
     lpUnits: estimate.lpUnits.amount().toFixed(0),
     runeToAssetRatio: estimate.runeToAssetRatio.toFixed(8),
     transactionFee: {
-      assetFee: estimate.transactionFee.assetFee.formatedAssetString(),
-      runeFee: estimate.transactionFee.runeFee.formatedAssetString(),
-      totalFees: estimate.transactionFee.totalFees.formatedAssetString(),
+      assetFee: estimate.inbound.fees.asset.formatedAssetString(),
+      runeFee: estimate.inbound.fees.rune.formatedAssetString(),
+      totalFees: estimate.inbound.fees.total.formatedAssetString(),
     },
     estimatedWaitSeconds: estimate.estimatedWaitSeconds,
     errors: estimate.errors,

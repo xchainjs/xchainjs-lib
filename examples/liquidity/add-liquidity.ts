@@ -1,4 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
+import { isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   AddliquidityPosition,
@@ -8,7 +9,7 @@ import {
   ThorchainQuery,
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromStringEx, assetToBase, isAssetRuneNative } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
 /**
  * Add LP

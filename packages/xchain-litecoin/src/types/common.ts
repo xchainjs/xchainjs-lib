@@ -19,5 +19,4 @@ export type BroadcastTxParams = {
   txHex: string
   nodeUrl: string
   auth?: NodeAuth
-  customRequestHeaders: Record<string, string>
 }

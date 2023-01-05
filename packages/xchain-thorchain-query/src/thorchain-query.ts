@@ -1,9 +1,10 @@
+import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
+import { AssetBTC } from '@xchainjs/xchain-bitcoin'
+import { GAIAChain } from '@xchainjs/xchain-cosmos'
+import { AssetRuneNative, THORChain, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Asset,
-  AssetAtom,
-  AssetBNB,
-  AssetBTC,
-  AssetRuneNative,
   Chain,
   assetAmount,
   assetFromStringEx,
@@ -11,7 +12,7 @@ import {
   assetToString,
   baseAmount,
   eqAsset,
-  isAssetRuneNative,
+  getContractAddressFromAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -282,7 +283,15 @@ export class ThorchainQuery {
     }
     return swapEstimate
   }
-
+  private abbreviateAssetString(asset: Asset): string {
+    const contractAddress = getContractAddressFromAsset(asset)
+    if (contractAddress && contractAddress.length > 5) {
+      const abrev = contractAddress.substring(contractAddress.length - 5)
+      const sep = asset.chain !== THORChain && asset.synth ? '/' : '.'
+      return `${asset.chain}${sep}${asset.ticker}-${abrev}`
+    }
+    return assetToString(asset)
+  }
   /**
    *
    * @param params - swap object
@@ -290,24 +299,18 @@ export class ThorchainQuery {
    */
   private constructSwapMemo(params: ConstructMemo): string {
     const limstring = params.limit.amount().toFixed()
-    // create LIM with interface ID
     const lim = limstring.substring(0, limstring.length - 3).concat(params.interfaceID)
-    // create the full memo
-    let memo = `=:${assetToString(params.destinationAsset)}`
-    // NOTE: we should validate affiliate address is EITHER: a thorname or valid thorchain address, currently we cannot do this without importing xchain-thorchain
+    let memo = `=:${this.abbreviateAssetString(params.destinationAsset)}:${params.destinationAddress}:${lim}`
 
+    // NOTE: we should validate affiliate address is EITHER: a thorname or valid thorchain address, currently we cannot do this without importing xchain-thorchain
     if (params.affiliateAddress?.length > 0) {
       // NOTE: we should validate destinationAddress address is valid destination address for the asset type requested
-      memo = memo.concat(
-        `:${params.destinationAddress}:${lim}:${params.affiliateAddress}:${params.affiliateFeeBasisPoints}`,
-      )
-    } else {
-      memo = memo.concat(`:${params.destinationAddress}:${lim}`)
+      memo = memo.concat(`:${params.affiliateAddress}:${params.affiliateFeeBasisPoints}`)
     }
 
     // If memo length is too long for BTC, trim it
     if (eqAsset(params.input.asset, AssetBTC) && memo.length > 80) {
-      memo = `=:${assetToString(params.destinationAsset)}:${params.destinationAddress}`
+      memo = `=:${this.abbreviateAssetString(params.destinationAsset)}:${params.destinationAddress}:${lim}`
     }
     return memo
   }
@@ -316,7 +319,7 @@ export class ThorchainQuery {
   // private async validateAffiliateAddress(affiliateAddress: string) {
   //   // Affiliate address should be THORName or THORAddress
   //   if (affiliateAddress.length > 0) {
-  //     const isValidThorchainAddress = this.clients[Chain.THORChain].validateAddress(affiliateAddress)
+  //     const isValidThorchainAddress = this.clients[THORChain].validateAddress(affiliateAddress)
   //     const isValidThorname = await this.isThorname(affiliateAddress)
   //     if (!(isValidThorchainAddress || isValidThorname))
   //       throw Error(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
@@ -441,11 +444,11 @@ export class ThorchainQuery {
     // RUNE, BNB and Synths have near instant finality, so no conf counting required. - need to make a BFT only case.
     if (
       isAssetRuneNative(inbound.asset) ||
-      inbound.asset.chain == AssetBNB.chain ||
-      inbound.asset.chain == AssetAtom.chain ||
+      inbound.asset.chain == BNBChain ||
+      inbound.asset.chain == GAIAChain ||
       inbound.asset.synth
     ) {
-      return this.chainAttributes[Chain.THORChain].avgBlockTimeInSecs
+      return this.chainAttributes[THORChain].avgBlockTimeInSecs
     }
     // Get the gas asset for the inbound.asset.chain
     const chainGasAsset = getChainAsset(inbound.asset.chain)
@@ -479,7 +482,7 @@ export class ThorchainQuery {
       .amount()
       .toNumber()
     const getScheduledOutboundValue = await this.thorchainCache.midgard.getScheduledOutboundValue()
-    const thorChainblocktime = this.chainAttributes[Chain.THORChain].avgBlockTimeInSecs // blocks required to confirm tx
+    const thorChainblocktime = this.chainAttributes[THORChain].avgBlockTimeInSecs // blocks required to confirm tx
     // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
     const runeValue = await this.thorchainCache.convert(outboundAmount, AssetRuneNative)
     // Check rune value amount
@@ -881,7 +884,7 @@ export class ThorchainQuery {
    */
   public async getSaverPosition(params: getSaver): Promise<SaversPosition> {
     const blockData = (await this.thorchainCache.thornode.getLastBlock()).find(
-      (item) => item.chain === params.asset.chain,
+      (item: LastBlock) => item.chain === params.asset.chain,
     )
     const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.ticker}`)).find(
       (item) => item.asset_address === params.address,

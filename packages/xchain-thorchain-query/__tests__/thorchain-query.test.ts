@@ -1,14 +1,10 @@
-import {
-  AssetAtom,
-  AssetBNB,
-  AssetBTC,
-  AssetETH,
-  AssetLTC,
-  AssetRuneNative,
-  assetAmount,
-  assetFromStringEx,
-  assetToBase,
-} from '@xchainjs/xchain-util'
+import { AssetBNB } from '@xchainjs/xchain-binance'
+import { AssetBTC } from '@xchainjs/xchain-bitcoin'
+import { AssetATOM } from '@xchainjs/xchain-cosmos'
+import { AssetETH } from '@xchainjs/xchain-ethereum'
+import { AssetLTC } from '@xchainjs/xchain-litecoin'
+import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
@@ -235,7 +231,7 @@ describe('Thorchain-query tests', () => {
       affiliateFeeBasisPoints: 50,
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
-    const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:9368510555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
+    const correctMemo = `=:ETH.USDC-6EB48:xxx:9368510555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
     expect(estimate.memo).toEqual(correctMemo)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(6)
   })
@@ -248,18 +244,18 @@ describe('Thorchain-query tests', () => {
       affiliateFeeBasisPoints: 50,
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
-    const correctMemo = `=:ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:xxx:167372504555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
+    const correctMemo = `=:ETH.USDC-6EB48:xxx:167372504555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
     expect(estimate.memo).toEqual(correctMemo)
   })
   it(`Should check assets match asset pools`, async () => {
     const assetPoolEthUsdc = await thorchainQuery.thorchainCache.getPoolForAsset(assetEthUSDC)
     const assetPoolAvaxUsdc = await thorchainQuery.thorchainCache.getPoolForAsset(assetAVAXUSDC)
-    const assetPoolGaia = await thorchainQuery.thorchainCache.getPoolForAsset(AssetAtom)
+    const assetPoolGaia = await thorchainQuery.thorchainCache.getPoolForAsset(AssetATOM)
     expect(assetPoolEthUsdc.asset).toEqual(assetEthUSDC)
     expect(assetPoolAvaxUsdc.asset).toEqual(assetAVAXUSDC)
-    expect(assetPoolGaia.asset).toEqual(AssetAtom)
+    expect(assetPoolGaia.asset).toEqual(AssetATOM)
   })
-  it('Should construct the correct memo for non-rune swap', async () => {
+  it('Should construct the correct memo for BTC->BUSD swap', async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
       destinationAsset: BUSD,
@@ -268,7 +264,7 @@ describe('Thorchain-query tests', () => {
       affiliateFeeBasisPoints: 50,
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
-    const correctMemo = `=:BNB.BUSD-BD1:0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990`
+    const correctMemo = `=:BNB.BUSD-BD1:0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990:2087913175555`
     expect(estimate.memo).toEqual(correctMemo)
   })
 })

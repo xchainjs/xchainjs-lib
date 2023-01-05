@@ -1,12 +1,11 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
-import { cosmos } from '@cosmos-client/core/cjs/proto'
+import cosmosclient from '@cosmos-client/core'
 import { FeeType, Fees, Network, RootDerivationPaths, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
-import { Asset, AssetAtom, BaseAmount, CosmosChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 import Long from 'long'
 
-import { COSMOS_DECIMAL, DEFAULT_GAS_LIMIT } from './const'
+import { AssetATOM, COSMOS_DECIMAL, DEFAULT_GAS_LIMIT, GAIAChain } from './const'
 import { APIQueryParam, TxResponse, UnsignedTxParams } from './cosmos/types'
 import { ChainId, ChainIds, ClientUrls as ClientUrls } from './types'
 
@@ -16,10 +15,10 @@ import { ChainId, ChainIds, ClientUrls as ClientUrls } from './types'
  * @param {Msg} msg
  * @returns {boolean} `true` or `false`.
  */
-export const isMsgSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.MsgSend =>
-  (msg as proto.cosmos.bank.v1beta1.MsgSend)?.amount !== undefined &&
-  (msg as proto.cosmos.bank.v1beta1.MsgSend)?.from_address !== undefined &&
-  (msg as proto.cosmos.bank.v1beta1.MsgSend)?.to_address !== undefined
+export const isMsgSend = (msg: unknown): msg is cosmosclient.proto.cosmos.bank.v1beta1.MsgSend =>
+  (msg as cosmosclient.proto.cosmos.bank.v1beta1.MsgSend)?.amount !== undefined &&
+  (msg as cosmosclient.proto.cosmos.bank.v1beta1.MsgSend)?.from_address !== undefined &&
+  (msg as cosmosclient.proto.cosmos.bank.v1beta1.MsgSend)?.to_address !== undefined
 
 /**
  * Type guard for MsgMultiSend
@@ -27,9 +26,9 @@ export const isMsgSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.MsgSen
  * @param {Msg} msg
  * @returns {boolean} `true` or `false`.
  */
-export const isMsgMultiSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.MsgMultiSend =>
-  (msg as proto.cosmos.bank.v1beta1.MsgMultiSend)?.inputs !== undefined &&
-  (msg as proto.cosmos.bank.v1beta1.MsgMultiSend)?.outputs !== undefined
+export const isMsgMultiSend = (msg: unknown): msg is cosmosclient.proto.cosmos.bank.v1beta1.MsgMultiSend =>
+  (msg as cosmosclient.proto.cosmos.bank.v1beta1.MsgMultiSend)?.inputs !== undefined &&
+  (msg as cosmosclient.proto.cosmos.bank.v1beta1.MsgMultiSend)?.outputs !== undefined
 
 /**
  * Get denomination from Asset - currently `ATOM` supported only
@@ -38,7 +37,7 @@ export const isMsgMultiSend = (msg: unknown): msg is proto.cosmos.bank.v1beta1.M
  * @returns {string} The denomination of the given asset.
  */
 export const getDenom = (asset: Asset): string | null => {
-  if (eqAsset(asset, AssetAtom)) return 'uatom'
+  if (eqAsset(asset, AssetATOM)) return 'uatom'
   return null
 }
 
@@ -49,12 +48,12 @@ export const getDenom = (asset: Asset): string | null => {
  * @returns {Asset|null} The asset of the given denomination.
  */
 export const getAsset = (denom: string): Asset | null => {
-  if (denom === getDenom(AssetAtom)) return AssetAtom
+  if (denom === getDenom(AssetATOM)) return AssetATOM
   // IBC assets
   if (denom.startsWith('ibc/'))
     // Note: Don't use `assetFromString` here, it will interpret `/` as synth
     return {
-      chain: CosmosChain,
+      chain: GAIAChain,
       symbol: denom,
       // TODO (xchain-contributors)
       // Get readable ticker for IBC assets from denom #600 https://github.com/xchainjs/xchainjs-lib/issues/600
@@ -72,7 +71,7 @@ export const getAsset = (denom: string): Asset | null => {
  *
  * @returns {BaseAmount} Coin amount
  */
-const getCoinAmount = (coins: proto.cosmos.base.v1beta1.ICoin[]): BaseAmount =>
+const getCoinAmount = (coins: cosmosclient.proto.cosmos.base.v1beta1.ICoin[]): BaseAmount =>
   coins
     .map((coin) => baseAmount(coin.amount || 0, COSMOS_DECIMAL))
     .reduce((acc, cur) => baseAmount(acc.amount().plus(cur.amount()), COSMOS_DECIMAL), baseAmount(0, COSMOS_DECIMAL))
@@ -85,7 +84,10 @@ const getCoinAmount = (coins: proto.cosmos.base.v1beta1.ICoin[]): BaseAmount =>
  *
  * @returns {ICoin[]} Filtered list
  */
-const getCoinsByAsset = (coins: proto.cosmos.base.v1beta1.ICoin[], asset: Asset): proto.cosmos.base.v1beta1.ICoin[] =>
+const getCoinsByAsset = (
+  coins: cosmosclient.proto.cosmos.base.v1beta1.ICoin[],
+  asset: Asset,
+): cosmosclient.proto.cosmos.base.v1beta1.ICoin[] =>
   coins.filter(({ denom }) => {
     const coinAsset = !!denom ? getAsset(denom) : null
     return !!coinAsset ? eqAsset(coinAsset, asset) : false
@@ -249,8 +251,8 @@ export const protoFee = ({
   denom: string
   amount: BaseAmount
   gasLimit?: BigNumber
-}): proto.cosmos.tx.v1beta1.Fee =>
-  new proto.cosmos.tx.v1beta1.Fee({
+}): cosmosclient.proto.cosmos.tx.v1beta1.Fee =>
+  new cosmosclient.proto.cosmos.tx.v1beta1.Fee({
     amount: [
       {
         denom,
@@ -270,8 +272,8 @@ export const protoMsgSend = ({
   to: string
   amount: BaseAmount
   denom: string
-}): proto.cosmos.bank.v1beta1.MsgSend =>
-  new proto.cosmos.bank.v1beta1.MsgSend({
+}): cosmosclient.proto.cosmos.bank.v1beta1.MsgSend =>
+  new cosmosclient.proto.cosmos.bank.v1beta1.MsgSend({
     from_address: from,
     to_address: to,
     amount: [
@@ -282,10 +284,16 @@ export const protoMsgSend = ({
     ],
   })
 
-export const protoTxBody = ({ from, to, amount, denom, memo }: UnsignedTxParams): proto.cosmos.tx.v1beta1.TxBody => {
+export const protoTxBody = ({
+  from,
+  to,
+  amount,
+  denom,
+  memo,
+}: UnsignedTxParams): cosmosclient.proto.cosmos.tx.v1beta1.TxBody => {
   const msg = protoMsgSend({ from, to, amount, denom })
 
-  return new proto.cosmos.tx.v1beta1.TxBody({
+  return new cosmosclient.proto.cosmos.tx.v1beta1.TxBody({
     messages: [cosmosclient.codec.instanceToProtoAny(msg)],
     memo,
   })
@@ -299,10 +307,10 @@ export const protoAuthInfo = ({
 }: {
   pubKey: cosmosclient.PubKey
   sequence: Long.Long
-  mode: proto.cosmos.tx.signing.v1beta1.SignMode
-  fee?: cosmos.tx.v1beta1.IFee
-}): proto.cosmos.tx.v1beta1.AuthInfo =>
-  new proto.cosmos.tx.v1beta1.AuthInfo({
+  mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode
+  fee?: cosmosclient.proto.cosmos.tx.v1beta1.IFee
+}): cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo =>
+  new cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo({
     signer_infos: [
       {
         public_key: cosmosclient.codec.instanceToProtoAny(pubKey),

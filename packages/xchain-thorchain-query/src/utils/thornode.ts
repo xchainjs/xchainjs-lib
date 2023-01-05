@@ -3,8 +3,7 @@ import {
   Configuration,
   InboundAddress,
   LastBlock,
-  LiquidityProvider,
-  LiquidityProviderResponse,
+  LiquidityProviderSummary,
   LiquidityProvidersApi,
   NetworkApi,
   Pool,
@@ -14,11 +13,13 @@ import {
   QuoteSaverDepositResponse,
   QuoteSaverWithdrawResponse,
   QuoteSwapResponse,
+  Saver,
   SaversApi,
+  SaversResponse,
   TransactionsApi,
+  TxDetailsResponse,
   TxOutItem,
   TxResponse,
-  TxSignersResponse,
 } from '@xchainjs/xchain-thornode'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
@@ -117,7 +118,7 @@ export class Thornode {
    * @param txHash - transaction hash
    * @returns - transaction object
    */
-  async getTxDataSigners(txHash: string): Promise<TxSignersResponse> {
+  async getTxDetail(txHash: string): Promise<TxDetailsResponse> {
     for (const api of this.transactionsApi) {
       try {
         const txResponse = await api.txSigners(txHash)
@@ -167,7 +168,11 @@ export class Thornode {
    * @param height - optional block height, defaults to current tip
    * @returns
    */
-  async getLiquidityProvider(asset: string, address: string, height?: number): Promise<LiquidityProvider | undefined> {
+  async getLiquidityProvider(
+    asset: string,
+    address: string,
+    height?: number,
+  ): Promise<LiquidityProviderSummary | undefined> {
     for (const api of this.liquidityProvidersApi) {
       try {
         const lps = (await api.liquidityProviders(asset, height)).data
@@ -202,7 +207,7 @@ export class Thornode {
    * @param height - optional thorchain block height parameter
    * @returns - Liquidity Provider Object
    */
-  async getSavers(asset: string, height?: number): Promise<LiquidityProviderResponse> {
+  async getSavers(asset: string, height?: number): Promise<SaversResponse> {
     for (const api of this.saversApi) {
       try {
         const resp = (await api.savers(asset, height)).data
@@ -219,7 +224,7 @@ export class Thornode {
    * @param height - optional thorchain block height parameter
    * @returns - Liquidity Provider Object
    */
-  async getSaver(asset: string, address: string, height?: number): Promise<LiquidityProviderResponse> {
+  async getSaver(asset: string, address: string, height?: number): Promise<Saver> {
     for (const api of this.saversApi) {
       try {
         const resp = (await api.saver(asset, address, height)).data

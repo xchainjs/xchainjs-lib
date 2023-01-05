@@ -339,15 +339,16 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@cosmos-client/core@0.45.13":
-  version "0.45.13"
-  resolved "https://registry.yarnpkg.com/@cosmos-client/core/-/core-0.45.13.tgz#53a99f65c53b0cdefee245582a8bbea6f2a04e7d"
-  integrity sha512-OTszam3HnH+PSRh9oW/NkEocrOuQnClCGxRmFSOk25Lck8CTtDeKLzkpNbeyFDJVyJvW5IGLL//n9f43UMwbXQ==
+"@cosmos-client/core@0.46.1":
+  version "0.46.1"
+  resolved "https://registry.yarnpkg.com/@cosmos-client/core/-/core-0.46.1.tgz#63738da4c6506c6606f9ae23be7b6e2545d51418"
+  integrity sha512-IWoFCioVKV9ukAk1GE+LXdn67jSHDjn7+S9KE6ysQqvUIOo332RgoOOK8IlJG4nhQuyfdSS7YZjPAVGZn+WhQw==
   dependencies:
     axios "^0.23.0"
     bech32 "^1.1.4"
     bip32 "^2.0.6"
     bip39 "^3.0.4"
+    process "^0.11.10"
     protobufjs "^6.11.2"
     rxjs "^7.4.0"
     secp256k1 "^4.0.2"
@@ -8150,6 +8151,11 @@ process-nextick-args@~2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
+
+process@^0.11.10:
+  version "0.11.10"
+  resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
+  integrity sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==
 
 progress@^2.0.0:
   version "2.0.3"
