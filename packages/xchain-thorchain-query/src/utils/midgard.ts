@@ -9,7 +9,8 @@ import {
   PoolStatsDetail,
   THORNameDetails,
 } from '@xchainjs/xchain-midgard'
-import { AssetRuneNative, baseAmount } from '@xchainjs/xchain-util'
+import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 // import BigNumber from 'bignumber.js'

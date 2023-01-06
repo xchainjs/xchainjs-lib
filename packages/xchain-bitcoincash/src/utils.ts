@@ -14,11 +14,12 @@ import {
   calcFees,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'
 
+import { AssetBCH } from './const'
 import * as haskoinApi from './haskoin-api'
 import { AddressParams, BroadcastTxParams, Transaction, TransactionInput, TransactionOutput, UTXO } from './types'
 import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'

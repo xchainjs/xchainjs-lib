@@ -15,10 +15,10 @@ import {
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, AssetLTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Address, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import * as Litecoin from 'bitcoinjs-lib'
 
-import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
+import { AssetLTC, LOWER_FEE_BOUND, LTCChain, LTC_DECIMAL, UPPER_FEE_BOUND } from './const'
 import * as sochain from './sochain-api'
 import { NodeAuth } from './types'
 import { TxIO } from './types/sochain-api-types'
@@ -67,7 +67,7 @@ class Client extends UTXOClient {
       [Network.Stagenet]: `m/84'/2'/0'/0/`,
     },
   }: LitecoinClientParams) {
-    super(Chain.Litecoin, { network, rootDerivationPaths, phrase, feeBounds })
+    super(LTCChain, { network, rootDerivationPaths, phrase, feeBounds })
     this.nodeUrls = nodeUrls
 
     this.nodeAuth =
@@ -241,12 +241,12 @@ class Client extends UTXOClient {
         asset: AssetLTC,
         from: rawTx.inputs.map((i: TxIO) => ({
           from: i.address,
-          amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
+          amount: assetToBase(assetAmount(i.value, LTC_DECIMAL)),
         })),
         to: rawTx.outputs
           // ignore tx with type 'nulldata'
           .filter((i: TxIO) => i.type !== 'nulldata')
-          .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
+          .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, LTC_DECIMAL)) })),
         date: new Date(rawTx.time * 1000),
         type: TxType.Transfer,
         hash: rawTx.txid,
@@ -277,9 +277,9 @@ class Client extends UTXOClient {
       asset: AssetLTC,
       from: rawTx.inputs.map((i) => ({
         from: i.address,
-        amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
+        amount: assetToBase(assetAmount(i.value, LTC_DECIMAL)),
       })),
-      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
+      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, LTC_DECIMAL)) })),
       date: new Date(rawTx.time * 1000),
       type: TxType.Transfer,
       hash: rawTx.txid,

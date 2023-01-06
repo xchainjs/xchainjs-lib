@@ -6,7 +6,7 @@ import * as BIP32 from 'bip32'
 import Long from 'long'
 
 import { DEFAULT_GAS_LIMIT } from '../const'
-import { getQueryString, protoAuthInfo, protoTxBody } from '../util'
+import { getQueryString, protoAuthInfo, protoTxBody } from '../utils'
 
 import {
   APIQueryParam,

@@ -11,7 +11,7 @@ import {
   isFee,
   isTransferFee,
   parseTx,
-} from '../src/util'
+} from '../src/utils'
 
 describe('binance/util', () => {
   describe('getHashFromTransfer', () => {

@@ -1,16 +1,12 @@
+import { AssetAVAX } from '@xchainjs/xchain-avax'
+import { AssetBNB } from '@xchainjs/xchain-binance'
+import { AssetBTC } from '@xchainjs/xchain-bitcoin'
+import { AssetBCH } from '@xchainjs/xchain-bitcoincash'
 import { Network } from '@xchainjs/xchain-client'
-import {
-  AssetAVAX,
-  AssetBCH,
-  AssetBNB,
-  AssetBTC,
-  AssetETH,
-  AssetLTC,
-  AssetRuneNative,
-  assetAmount,
-  assetFromStringEx,
-  assetToBase,
-} from '@xchainjs/xchain-util'
+import { AssetETH } from '@xchainjs/xchain-ethereum'
+import { AssetLTC } from '@xchainjs/xchain-litecoin'
+import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainCache } from '../src/thorchain-cache'

@@ -1,11 +1,11 @@
 import cosmosclient from '@cosmos-client/core'
 import { FeeType, Fees, Network, RootDerivationPaths, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
-import { Asset, AssetAtom, BaseAmount, CosmosChain, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 import Long from 'long'
 
-import { COSMOS_DECIMAL, DEFAULT_GAS_LIMIT } from './const'
+import { AssetATOM, COSMOS_DECIMAL, DEFAULT_GAS_LIMIT, GAIAChain } from './const'
 import { APIQueryParam, TxResponse, UnsignedTxParams } from './cosmos/types'
 import { ChainId, ChainIds, ClientUrls as ClientUrls } from './types'
 
@@ -37,7 +37,7 @@ export const isMsgMultiSend = (msg: unknown): msg is cosmosclient.proto.cosmos.b
  * @returns {string} The denomination of the given asset.
  */
 export const getDenom = (asset: Asset): string | null => {
-  if (eqAsset(asset, AssetAtom)) return 'uatom'
+  if (eqAsset(asset, AssetATOM)) return 'uatom'
   return null
 }
 
@@ -48,12 +48,12 @@ export const getDenom = (asset: Asset): string | null => {
  * @returns {Asset|null} The asset of the given denomination.
  */
 export const getAsset = (denom: string): Asset | null => {
-  if (denom === getDenom(AssetAtom)) return AssetAtom
+  if (denom === getDenom(AssetATOM)) return AssetATOM
   // IBC assets
   if (denom.startsWith('ibc/'))
     // Note: Don't use `assetFromString` here, it will interpret `/` as synth
     return {
-      chain: CosmosChain,
+      chain: GAIAChain,
       symbol: denom,
       // TODO (xchain-contributors)
       // Get readable ticker for IBC assets from denom #600 https://github.com/xchainjs/xchainjs-lib/issues/600

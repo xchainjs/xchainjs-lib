@@ -4,54 +4,33 @@ import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
   Address,
   Asset,
-  AssetRuneNative,
   BaseAmount,
   assetAmount,
   assetFromString,
   assetToBase,
   assetToString,
   baseAmount,
-  isAssetRuneNative,
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import * as bech32Buffer from 'bech32-buffer'
 import Long from 'long'
 
+import { AssetRuneNative, DECIMAL, DEFAULT_GAS_ADJUSTMENT } from './const'
 import { ChainId, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx } from './types/messages'
 import types from './types/proto/MsgCompiled'
 
-export const DECIMAL = 8
-export const DEFAULT_GAS_ADJUSTMENT = 2
-export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
-export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
-export const MAX_TX_COUNT = 100
-
 const DENOM_RUNE_NATIVE = 'rune'
-
-const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
-const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
-const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
-export const defaultExplorerUrls: ExplorerUrls = {
-  root: {
-    [Network.Testnet]: `${DEFAULT_EXPLORER_URL}?network=testnet`,
-    [Network.Stagenet]: `${DEFAULT_EXPLORER_URL}?network=stagenet`,
-    [Network.Mainnet]: DEFAULT_EXPLORER_URL,
-  },
-  tx: {
-    [Network.Testnet]: txUrl,
-    [Network.Stagenet]: txUrl,
-    [Network.Mainnet]: txUrl,
-  },
-  address: {
-    [Network.Testnet]: addressUrl,
-    [Network.Stagenet]: addressUrl,
-    [Network.Mainnet]: addressUrl,
-  },
-}
-
 /**
+ * Checks whether an asset is `AssetRuneNative`
+ *
+ * @param {Asset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
+/**
+
  * Get denomination from Asset
  *
  * @param {Asset} asset

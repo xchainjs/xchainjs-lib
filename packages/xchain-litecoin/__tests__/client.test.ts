@@ -1,10 +1,10 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetLTC, baseAmount } from '@xchainjs/xchain-util'
+import { baseAmount } from '@xchainjs/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode-api'
 import { Client } from '../src/client'
-import { MIN_TX_FEE } from '../src/const'
+import { AssetLTC, MIN_TX_FEE } from '../src/const'
 
 const ltcClient = new Client({})
 
@@ -207,7 +207,7 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork(Network.Testnet)
     ltcClient.setPhrase(phraseOne)
     const normalTx = await ltcClient.getFees()
-    const vaultTx = await ltcClient.getFeesWithMemo(MEMO)
+    const vaultTx = await ltcClient.getFees(MEMO)
 
     if (vaultTx.average.amount().isGreaterThan(MIN_TX_FEE)) {
       expect(vaultTx.average.amount().isGreaterThan(normalTx.average.amount())).toBeTruthy()

@@ -1,5 +1,4 @@
-import { Chain } from '../chain'
-
+import { Chain } from './chain'
 export type Asset = {
   chain: Chain
   symbol: string

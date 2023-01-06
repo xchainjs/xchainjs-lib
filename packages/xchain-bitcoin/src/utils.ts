@@ -10,11 +10,11 @@ import {
   calcFees,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, AssetBTC, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { Address, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
-import { BTC_DECIMAL, MIN_TX_FEE } from './const'
+import { AssetBTC, BTC_DECIMAL, MIN_TX_FEE } from './const'
 import * as haskoinApi from './haskoin-api'
 import * as sochain from './sochain-api'
 import { BroadcastTxParams, UTXO } from './types/common'

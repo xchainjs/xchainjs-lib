@@ -1,6 +1,7 @@
 import { FeeType, Fees, Network, Tx, TxType, singleFee } from '@xchainjs/xchain-client'
-import { AssetBNB, assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
+import { BNBChain } from './const'
 import { Account, DexFees, Fee, TransferFee, Tx as BinanceTx, TxType as BinanceTxType } from './types/binance'
 import { Transfer, TransferEvent } from './types/binance-ws'
 import { DerivePath } from './types/common'
@@ -80,7 +81,7 @@ export const getTxType = (t: BinanceTxType): TxType => {
  * @returns {Tx|null} The transaction parsed from the binance tx.
  */
 export const parseTx = (tx: BinanceTx): Tx | null => {
-  const asset = assetFromString(`${AssetBNB.chain}.${tx.txAsset}`)
+  const asset = assetFromString(`${BNBChain}.${tx.txAsset}`)
 
   if (!asset) return null
 

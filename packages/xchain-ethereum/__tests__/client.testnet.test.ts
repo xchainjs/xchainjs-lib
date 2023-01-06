@@ -1,6 +1,7 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { FeeOption, Network } from '@xchainjs/xchain-client'
-import { AssetETH, Chain, ETHChain, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { LTCChain } from '@xchainjs/xchain-litecoin'
+import { assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, providers } from 'ethers'
 import nock from 'nock'
 
@@ -15,8 +16,8 @@ import {
   mock_thornode_inbound_addresses_success,
 } from '../__mocks__/thornode-api'
 import Client from '../src/client'
+import { AssetETH, ETHChain, ETH_DECIMAL } from '../src/const'
 import erc20ABI from '../src/data/erc20.json'
-import { ETH_DECIMAL } from '../src/utils'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
@@ -458,7 +459,7 @@ describe('Client Test', () => {
     )
     mock_thornode_inbound_addresses_success(thornodeApiUrl, [
       {
-        chain: 'ETH' as Chain,
+        chain: ETHChain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: '0x8d1133a8cf23112fdb21f1efca340d727a98196e',
         router: '0xe0a63488e677151844e70623533c22007dc57c9e',
@@ -466,7 +467,7 @@ describe('Client Test', () => {
         gas_rate: '30',
       },
       {
-        chain: 'LTC' as Chain,
+        chain: LTCChain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: 'tltc1q3x76wl4gmwu4yzx682r30ej0a8e2tttaw6pv7u',
         halted: false,
@@ -713,7 +714,7 @@ describe('Client Test', () => {
     )
     mock_thornode_inbound_addresses_success(thornodeApiUrl, [
       {
-        chain: 'ETH' as Chain,
+        chain: ETHChain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: '0x8d1133a8cf23112fdb21f1efca340d727a98196e',
         router: '0xe0a63488e677151844e70623533c22007dc57c9e',
@@ -721,7 +722,7 @@ describe('Client Test', () => {
         gas_rate: '51',
       },
       {
-        chain: 'LTC' as Chain,
+        chain: LTCChain,
         pub_key: 'tthorpub1addwnpepqfz98sx54jpv3f95qfg39zkx500avc6tr0d8ww0lv283yu3ucgq3g9y9njj',
         address: 'tltc1q3x76wl4gmwu4yzx682r30ej0a8e2tttaw6pv7u',
         halted: false,

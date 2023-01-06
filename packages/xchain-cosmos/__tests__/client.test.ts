@@ -1,10 +1,10 @@
 import { proto } from '@cosmos-client/core/cjs/module'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
-import { AssetAtom, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { Client } from '../src/client'
-import { COSMOS_DECIMAL } from '../src/const'
+import { AssetATOM, COSMOS_DECIMAL } from '../src/const'
 import { GetTxByHashResponse, TxHistoryResponse } from '../src/cosmos/types'
 
 const getClientUrl = (client: Client): string => {
@@ -155,7 +155,7 @@ describe('Client Test', () => {
 
     const expected = balances[0].amount.amount().isEqualTo(baseAmount(75000000, COSMOS_DECIMAL).amount())
     expect(expected).toBeTruthy()
-    expect(balances[0].asset).toEqual(AssetAtom)
+    expect(balances[0].asset).toEqual(AssetATOM)
   })
 
   it('has an empty tx history', async () => {
@@ -286,7 +286,7 @@ describe('Client Test', () => {
     assertTxsPost(getClientUrl(cosmosClient), expected_txsPost_result)
 
     const result = await cosmosClient.transfer({
-      asset: AssetAtom,
+      asset: AssetATOM,
       recipient: to_address,
       amount: send_amount,
       memo,

@@ -13,8 +13,9 @@ import {
   QuoteSaverDepositResponse,
   QuoteSaverWithdrawResponse,
   QuoteSwapResponse,
-  SaverResponse,
+  Saver,
   SaversApi,
+  SaversResponse,
   TransactionsApi,
   TxOutItem,
   TxResponse,
@@ -189,7 +190,7 @@ export class Thornode {
    * @param height - optional thorchain block height parameter
    * @returns - Liquidity Provider Object
    */
-  async getSavers(asset: string, height?: number): Promise<SaverResponse> {
+  async getSavers(asset: string, height?: number): Promise<SaversResponse> {
     for (const api of this.saversApi) {
       try {
         const resp = (await api.savers(asset, height)).data
@@ -206,7 +207,7 @@ export class Thornode {
    * @param height - optional thorchain block height parameter
    * @returns - Liquidity Provider Object
    */
-  async getSaver(asset: string, address: string, height?: number): Promise<SaverResponse> {
+  async getSaver(asset: string, address: string, height?: number): Promise<Saver> {
     for (const api of this.saversApi) {
       try {
         const resp = (await api.saver(asset, address, height)).data

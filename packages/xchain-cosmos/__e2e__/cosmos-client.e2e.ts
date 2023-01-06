@@ -1,5 +1,5 @@
 import { Network, TxParams } from '@xchainjs/xchain-client'
-import { AssetAtom, Client as CosmosClient } from '@xchainjs/xchain-cosmos'
+import { AssetATOM, Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 
 let xchainClient: CosmosClient = new CosmosClient({})
@@ -34,7 +34,7 @@ describe('Cosmos Integration Tests', () => {
       const addressTo = xchainClient.getAddress(1)
       const transferTx: TxParams = {
         walletIndex: 0,
-        asset: AssetAtom,
+        asset: AssetATOM,
         amount: baseAmount('100', 6),
         recipient: addressTo,
         memo: 'Hi!',
@@ -57,7 +57,7 @@ describe('Cosmos Integration Tests', () => {
       const addressTo = xchainClient.getAddress(1)
       const transferTx: TxParams = {
         walletIndex: 0,
-        asset: AssetAtom,
+        asset: AssetATOM,
         amount: baseAmount('100000000000', 6),
         recipient: addressTo,
         memo: 'Hi!',
