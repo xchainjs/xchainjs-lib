@@ -26,12 +26,8 @@ export const AssetBSC: Asset = {
 }
 
 // =====Ethers providers=====
-const BSC_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
-  'https://rpc.ankr.com/bsc',
-)
-const BSC_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
-  'https://bsc-testnet.public.blastapi.io',
-)
+const BSC_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/bsc')
+const BSC_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://bsc-testnet.public.blastapi.io')
 
 const ethersJSProviders = {
   [Network.Mainnet]: BSC_MAINNET_ETHERS_PROVIDER,
