@@ -14,7 +14,7 @@ Following peer dependencies have to be installed into your project. These are no
 yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util @xchainjs/xchain-cosmos axios @cosmos-client/core bech32-buffer
 ```
 
-Important note: Make sure to install same version of `@cosmos-client/core` as `xchain-mayachain` is using (currently `@cosmos-client/core@0.45.1` ). In other case things might break.
+Important note: Make sure to install same version of `@cosmos-client/core` as `xchain-mayachain` is using (currently `@cosmos-client/core@0.46.1` ). In other case things might break.
 
 ## Documentation
 
@@ -29,13 +29,13 @@ For more examples check out tests in `./__tests__/client.test.ts`
 
 This package uses the following service providers:
 
-| Function                    | Service                 | Notes                                                               |
-| --------------------------- | ----------------------- | ------------------------------------------------------------------- |
-| Balances                    | Cosmos RPC              | https://cosmos.network/rpc/v0.37.9 (`GET /bank/balances/{address}`) |
-| Transaction history         | Tendermint RPC          | https://docs.tendermint.com/master/rpc/#/Info/tx_search             |
-| Transaction details by hash | Cosmos RPC              | https://cosmos.network/rpc/v0.37.9 (`GET /txs/{hash}`)              |
-| Transaction broadcast       | Cosmos RPC              | https://cosmos.network/rpc/v0.37.9 (`POST /txs`)                    |
-| Explorer                    | Explorer Mayachain.info | https://explorer.mayachain.net                                      |
+| Function                    | Service                 | Notes                                                                                 |
+| --------------------------- | ----------------------- | ------------------------------------------------------------------------------------- |
+| Balances                    | Cosmos RPC              | https://v1.cosmos.network/rpc/v0.45.1 (`GET /cosmos/bank/v1beta1/balances/{address}`) |
+| Transaction history         | Tendermint RPC          | https://docs.tendermint.com/v0.34/rpc/#/Info/tx_search                                |
+| Transaction details by hash | Cosmos RPC              | https://v1.cosmos.network/rpc/v0.45.1 (`GET /cosmos/tx/v1beta1/txs/{hash}`)           |
+| Transaction broadcast       | Cosmos RPC              | https://v1.cosmos.network/rpc/v0.45.1 (`POST /cosmos/tx/v1beta1/txs`)                 |
+| Explorer                    | Explorer Mayachain.info | https://explorer.mayachain.info                                                       |
 
 Rate limits: No
 

@@ -12,7 +12,6 @@ export const DEFAULT_GAS_ADJUSTMENT = 2
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
 export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 export const MAX_TX_COUNT = 100
-export const RUNE_SYMBOL = 'ᚱ'
 export const defaultExplorerUrls: ExplorerUrls = {
   root: {
     [Network.Testnet]: `${DEFAULT_EXPLORER_URL}?network=testnet`,
