@@ -2,7 +2,14 @@ import { BTCChain } from '@xchainjs/xchain-bitcoin'
 import { BCHChain } from '@xchainjs/xchain-bitcoincash'
 import { LTCChain } from '@xchainjs/xchain-litecoin'
 import { THORChain, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { LastBlock, ObservedTx, TxDetailsResponse, TxOutItem, TxSignersResponse } from '@xchainjs/xchain-thornode'
+import {
+  LastBlock,
+  ObservedTx,
+  Saver,
+  TxDetailsResponse,
+  TxOutItem,
+  TxSignersResponse,
+} from '@xchainjs/xchain-thornode'
 import { Asset, Chain, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
@@ -72,6 +79,7 @@ export type WithdrawLpInfo = {
 export type AddSaverInfo = {
   status: AddSaverStatus
   assetTx?: InboundTx
+  saverPos?: Saver
 }
 type InboundTx = {
   status: InboundStatus
@@ -113,6 +121,7 @@ export class TransactionStage {
     }
     //valid tx
     const progress = await this.determineObserved(txData)
+
     switch (progress.txType) {
       case TxType.Swap:
         await this.checkSwapProgress(txData, progress)
@@ -124,7 +133,7 @@ export class TransactionStage {
         await this.checkWithdrawLpProgress(txData, progress)
         break
       case TxType.AddSaver:
-        await this.checkAddSaverProgress(progress)
+        await this.checkAddSaverProgress(txData, progress)
         break
       default:
         break
@@ -192,12 +201,14 @@ export class TransactionStage {
         assetIn.chain == THORChain ? Number(txData.finalised_height) : Number(txData.tx.finalise_height)
       const status = txData.tx.status === 'done' ? InboundStatus.Observed_Consensus : InboundStatus.Observed_Incomplete
 
-      if (operation.match(/[=|s|swap]/i)) progress.txType = TxType.Swap
-      if (operation.match(/[+|a|add]/i) && parts[1].match(/[/]/)) progress.txType = TxType.AddSaver
-      if (operation.match(/[+|a|add]/i) && parts[1].match(/[.]/)) progress.txType = TxType.AddLP
-      if (operation.match(/[-|wd|withdraw]/i) && parts[1].match(/[/]/)) progress.txType = TxType.WithdrawSaver
-      if (operation.match(/[-|wd|withdraw]/i) && parts[1].match(/[.]/)) progress.txType = TxType.WithdrawLP
-
+      if (operation.match(/swap|s|=/gi)) progress.txType = TxType.Swap
+      if ((operation.match(/add/gi) && parts[1].match(`/`)) || (operation.match(/a|[+]/) && parts[1].match(/[/]/)))
+        progress.txType = TxType.AddSaver
+      if ((operation.match(/add/gi) && parts[1].match(`.`)) || (operation.match(/a|[+]/) && parts[1].match(/[.]/)))
+        progress.txType = TxType.AddLP
+      if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[/]/)) progress.txType = TxType.WithdrawSaver
+      if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[.]/)) progress.txType = TxType.WithdrawLP
+      console.log(operation, progress.txType, parts[1])
       const amount = await this.getCryptoAmount(inboundAmount, assetIn)
       // find a date for when it should be competed
       const expectedConfirmationDate = await this.blockToDate(assetIn.chain, txData)
@@ -263,12 +274,19 @@ export class TransactionStage {
     }
   }
 
-  private async checkAddSaverProgress(progress: TXProgress) {
+  private async checkAddSaverProgress(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
       const assetTx = !isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
+
+      const checkSaverVaults = await this.thorchainCache.thornode.getSaver(
+        txData.tx.tx.coins[0].asset,
+        `${assetTx?.fromAddress}`,
+      )
+      const status = checkSaverVaults ? AddSaverStatus.Complete : AddSaverStatus.Incomplete
       const addSaverInfo: AddSaverInfo = {
-        status: AddSaverStatus.Incomplete,
+        status: status,
         assetTx,
+        saverPos: checkSaverVaults,
       }
       progress.addSaverInfo = addSaverInfo
     }

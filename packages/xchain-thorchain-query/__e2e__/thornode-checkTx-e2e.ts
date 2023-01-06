@@ -49,7 +49,7 @@ describe('Thorchain query checkTx Integration Tests', () => {
   it(`Should check swap unknown TX `, async () => {
     const hash = '508478AC13EA0F675A57BD980B964B2F89B9CCD3CEC6E16FA7A5981XXXXXXXXX'
     const progress = await checkTxStage.checkTxProgress(hash)
-    expect(progress?.txType).toBe(TxType.Swap)
+    expect(progress?.txType).toBe(TxType.Unknown)
     console.log(progress)
   })
   it(`Should check swap from rune to asset `, async () => {
