@@ -1,6 +1,8 @@
+import { AssetAVAX } from '@xchainjs/xchain-avax'
+import { AssetBNB } from '@xchainjs/xchain-binance'
 import { Network, TxHistoryParams, TxParams } from '@xchainjs/xchain-client'
 import { decryptFromKeystore, encryptToKeyStore, generatePhrase, validatePhrase } from '@xchainjs/xchain-crypto'
-import { ETH_DECIMAL } from '@xchainjs/xchain-ethereum'
+import { AssetETH, ETH_DECIMAL } from '@xchainjs/xchain-ethereum'
 import { Client as EVMClient } from '@xchainjs/xchain-evm'
 import { Client as THORClient } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
@@ -14,18 +16,7 @@ import {
   Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
-import {
-  Address,
-  Asset,
-  AssetAVAX,
-  AssetBNB,
-  AssetETH,
-  Chain,
-  assetAmount,
-  assetFromStringEx,
-  assetToBase,
-  baseToAsset,
-} from '@xchainjs/xchain-util'
+import { Address, Asset, assetAmount, assetFromStringEx, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 import fs from 'fs'
 
@@ -38,7 +29,6 @@ const password = 'Password123!'
 
 // Save the encrypted Keystore using phrase generated
 const generateKeystore = async (seedPhrase: string) => {
-  //   const phrase = "narrow middle magnet shadow shove birth retreat guide promote fringe cradle oak"
   const isCorrect = validatePhrase(seedPhrase) //validate phrase, returns Boolean
   console.log(`Phrase valid?: ${isCorrect}`)
   const keystore = await encryptToKeyStore(seedPhrase, password)
@@ -144,7 +134,7 @@ const queryAllFeeData = async (wallet: Wallet) => {
           walletIndex: 0,
           asset: AssetETH,
           amount: assetToBase(assetAmount(0.05, ETH_DECIMAL)),
-          recipient: wallet.clients[Chain.Ethereum].getAddress(1),
+          recipient: wallet.clients['ETH'].getAddress(1),
           memo: '',
         }
         const fees = await client.estimateFeesWithGasPricesAndLimits(txparams)
@@ -159,7 +149,7 @@ const queryAllFeeData = async (wallet: Wallet) => {
           walletIndex: 0,
           asset: client.config.gasAsset,
           amount: assetToBase(assetAmount(0.05)),
-          recipient: wallet.clients[Chain.Avax].getAddress(1),
+          recipient: wallet.clients['AVAX'].getAddress(1),
           memo: '',
         }
         const fees = await client.estimateFeesWithGasPricesAndLimits(txparams)
@@ -220,7 +210,7 @@ const sendCrypto = async (
   try {
     console.log(`Recipient address: ${destinationAddress}`)
 
-    const toChain = amountToTransfer.asset.synth ? Chain.THORChain : amountToTransfer.asset.chain
+    const toChain = amountToTransfer.asset.synth ? 'THOR' : amountToTransfer.asset.chain
     const client = sendingWallet.clients[toChain]
 
     console.log(

@@ -13,20 +13,20 @@ tsconfig has already been set in the tsconfig.json
 
 ### Install
 
-1. cd into examples/do-swap folder
+1. cd into examples/multi-chain-wallet folder
 
 ```bash
-cd examples/do-swap
+cd examples/multi-chain-wallet
 yarn install
 ```
 
 ### Multi-chain-wallet
 
 executes a swap from one asset to another  
-`yarn Multi-chain-wallet "MnemonicPhraseSendingWallet" "MnemonicPhraseRecievingWallet"
+`yarn multi-chain-wallet "MnemonicPhraseSendingWallet" "MnemonicPhraseRecievingWallet"
 
 ```bash
 # example of running the wallet with a sending and a receiving walelt
-yarn Multi-chain-wallet  "MnemonicPhraseSendingWallet" "MnemonicPhraseReceivingWallet"
+yarn multi-chain-wallet  "MnemonicPhraseSendingWallet" "MnemonicPhraseReceivingWallet"
 
 ```
