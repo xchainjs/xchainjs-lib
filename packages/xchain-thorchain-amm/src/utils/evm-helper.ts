@@ -13,7 +13,7 @@ export class EvmHelper {
   private thorchainCache: ThorchainCache
 
   constructor(client: XChainClient, thorchainCache: ThorchainCache) {
-    this.evmClient = (client as unknown) as EvmClient
+    this.evmClient = client as unknown as EvmClient
     this.client = client
     this.thorchainCache = thorchainCache
   }

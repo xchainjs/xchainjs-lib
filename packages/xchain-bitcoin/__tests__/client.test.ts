@@ -160,19 +160,16 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
 
     const amount = baseAmount(2223)
-    try {
-      await btcClient.transfer({
+
+    return expect(
+      btcClient.transfer({
         asset: AssetBTC,
         recipient: addyThreePath0,
         amount,
         memo: 'too long too long too long too long too long too long too long too long too long too long',
         feeRate: 1,
-      })
-      fail()
-    } catch (err) {
-      const message = (err as any).message as string
-      expect(message.includes('memo too long')).toBeTruthy()
-    }
+      }),
+    ).rejects.toThrow('memo too long, must not be longer than 80 chars.')
   })
 
   it('should purge phrase and utxos', async () => {
