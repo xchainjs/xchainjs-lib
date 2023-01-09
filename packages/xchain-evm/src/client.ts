@@ -409,10 +409,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
     const contract = new ethers.Contract(contractAddress, erc20ABI, this.getProvider())
 
-    const unsignedTx: ethers.PopulatedTransaction /* as same as ethers.TransactionResponse expected by `sendTransaction` */ = await contract.populateTransaction.approve(
-      spenderAddress,
-      valueToApprove,
-    )
+    const unsignedTx: ethers.PopulatedTransaction /* as same as ethers.TransactionResponse expected by `sendTransaction` */ =
+      await contract.populateTransaction.approve(spenderAddress, valueToApprove)
 
     const result = await signer.sendTransaction({
       ...unsignedTx,

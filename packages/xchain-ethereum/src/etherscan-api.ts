@@ -12,7 +12,7 @@ import {
 } from './types'
 import { filterSelfTxs, getTxFromEthTransaction, getTxFromTokenTransaction } from './utils'
 
-const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
+const getApiKeyQueryParameter = (apiKey: string | null): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 
 /**
  * SafeGasPrice, ProposeGasPrice And FastGasPrice returned in string-Gwei
@@ -23,7 +23,7 @@ const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKe
  * @param {string} apiKey The etherscan API key. (optional)
  * @returns {GasOracleResponse} LastBlock, SafeGasPrice, ProposeGasPrice, FastGasPrice
  */
-export const getGasOracle = async (baseUrl: string, apiKey?: string): Promise<GasOracleResponse> => {
+export const getGasOracle = async (baseUrl: string, apiKey: string | null): Promise<GasOracleResponse> => {
   const url = baseUrl + '/api?module=gastracker&action=gasoracle'
 
   return (await axios.get(url + getApiKeyQueryParameter(apiKey))).data.result
@@ -45,7 +45,7 @@ export const getTokenBalance = async ({
   address,
   assetAddress,
   apiKey,
-}: TokenBalanceParam & { baseUrl: string; apiKey?: string }): Promise<BigNumberish> => {
+}: TokenBalanceParam & { baseUrl: string; apiKey: string | null }): Promise<BigNumberish> => {
   const url = baseUrl + `/api?module=account&action=tokenbalance&contractaddress=${assetAddress}&address=${address}`
 
   return (await axios.get(url + getApiKeyQueryParameter(apiKey))).data.result
@@ -70,7 +70,7 @@ export const getETHTransactionHistory = async ({
   startblock,
   endblock,
   apiKey,
-}: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Tx[]> => {
+}: TransactionHistoryParam & { baseUrl: string; apiKey: string | null }): Promise<Tx[]> => {
   let url = baseUrl + `/api?module=account&action=txlist&sort=desc` + getApiKeyQueryParameter(apiKey)
   if (address) url += `&address=${address}`
   if (offset) url += `&offset=${offset}`
@@ -107,7 +107,7 @@ export const getTokenTransactionHistory = async ({
   startblock,
   endblock,
   apiKey,
-}: TransactionHistoryParam & { baseUrl: string; apiKey?: string }): Promise<Tx[]> => {
+}: TransactionHistoryParam & { baseUrl: string; apiKey: string | null }): Promise<Tx[]> => {
   let url = baseUrl + `/api?module=account&action=tokentx&sort=desc` + getApiKeyQueryParameter(apiKey)
   if (address) url += `&address=${address}`
   if (assetAddress) url += `&contractaddress=${assetAddress}`

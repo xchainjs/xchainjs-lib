@@ -170,7 +170,7 @@ describe('BitcoinClient Test', () => {
       })
       fail()
     } catch (err) {
-      const message = err.message as string
+      const message = (err as any).message as string
       expect(message.includes('memo too long')).toBeTruthy()
     }
   })
