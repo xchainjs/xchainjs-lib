@@ -41,6 +41,7 @@
     "rollup-plugin-typescript2": "^0.30.0",
     "ts-jest": "^26.4.4",
     "tslib": "^2.1.0",
-    "typescript": "^4.2.3"
+    "typescript": "^4.2.3",
+    "yarn-audit-ci": "^1.2.0"
   }
 }
