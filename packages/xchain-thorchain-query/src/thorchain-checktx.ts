@@ -145,7 +145,7 @@ export class TransactionStage {
     if (progress.inboundObserved) {
       const memo = txData.tx.tx.memo ?? ''
       const memoFields = this.parseSwapMemo(memo)
-      const assetOut = assetFromStringEx(memoFields.asset)
+      const assetOut = assetFromStringEx(memoFields.asset.toUpperCase())
       const minimumAmountOut = memoFields.limit
         ? await this.getCryptoAmount(memoFields.limit, assetOut)
         : await this.getCryptoAmount('0', assetOut)
@@ -154,9 +154,8 @@ export class TransactionStage {
         ? await this.getCryptoAmount(memoFields.affiliateFee, assetOut)
         : await this.getCryptoAmount('0', assetOut)
       // TODO get out tx
-      // const outMemo = txData.tx.out_hashes ?? txData.out_txs
       const swapInfo: SwapInfo = {
-        status: SwapStatus.Incomplete,
+        status: txData.out_txs[0].memo?.match('OUT') ? SwapStatus.Complete : SwapStatus.Complete_Refunded,
         expectedOutBlock: Number(`${progress.inboundObserved?.expectedConfirmationBlock}`),
         expectedOutDate: new Date(`${progress.inboundObserved?.expectedConfirmationDate}`),
         expectedAmountOut: minimumAmountOut, // TODO call estimateSwap()
@@ -195,10 +194,11 @@ export class TransactionStage {
       const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
       const inboundAmount = txData.tx.tx.coins?.[0].amount
       const fromAddress = txData.tx.tx.from_address ?? 'unknkown'
-      const block = assetIn.chain == THORChain ? Number(txData.finalised_height) : Number(txData.tx.block_height)
+      const block = txData.tx.tx.chain == THORChain ? Number(txData.finalised_height) : Number(txData.tx.block_height)
 
       const finalizeBlock =
-        assetIn.chain == THORChain ? Number(txData.finalised_height) : Number(txData.tx.finalise_height)
+        txData.tx.tx.chain == THORChain ? Number(txData.finalised_height) : Number(txData.tx.finalise_height)
+
       const status = txData.tx.status === 'done' ? InboundStatus.Observed_Consensus : InboundStatus.Observed_Incomplete
 
       if (operation.match(/swap|s|=/gi)) progress.txType = TxType.Swap
@@ -208,7 +208,7 @@ export class TransactionStage {
         progress.txType = TxType.AddLP
       if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[/]/)) progress.txType = TxType.WithdrawSaver
       if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[.]/)) progress.txType = TxType.WithdrawLP
-      console.log(operation, progress.txType, parts[1])
+      // console.log(operation, progress.txType, parts[1])
       const amount = await this.getCryptoAmount(inboundAmount, assetIn)
       // find a date for when it should be competed
       const expectedConfirmationDate = await this.blockToDate(assetIn.chain, txData)
