@@ -80,7 +80,7 @@ describe('Thorchain-query tests', () => {
       expect(estimate.txEstimate.canSwap).toEqual(false)
     } catch (error) {
       console.error(error)
-      expect(error.message).toEqual(`destination chain is halted`)
+      expect(error).toEqual(`destination chain is halted`)
     }
   })
 
@@ -95,8 +95,8 @@ describe('Thorchain-query tests', () => {
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(false)
     } catch (error) {
-      console.log(error.message)
-      expect(error.message).toEqual(`source chain is halted`)
+      console.log(error)
+      expect(error).toEqual(`source chain is halted`)
     }
   })
   it('Should estimate swap from USDC to RUNE ', async () => {

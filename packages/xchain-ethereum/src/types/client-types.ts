@@ -3,7 +3,7 @@ import { Address, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, ethers } from 'ethers'
 
 export enum EthNetwork {
-  Test = 'ropsten',
+  Test = 'sepolia',
   Main = 'homestead',
 }
 

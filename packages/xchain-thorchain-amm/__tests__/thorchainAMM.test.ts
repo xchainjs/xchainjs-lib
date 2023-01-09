@@ -84,13 +84,10 @@ describe('ThorchainAmm Client Test', () => {
       destinationAsset: AssetLTC,
       destinationAddress: 'xxx',
     }
-    try {
-      const estimate = await thorchainQuery.estimateSwap(swapParams)
-      printTx(estimate, swapParams.input)
-      expect(estimate.txEstimate.canSwap).toEqual(false)
-    } catch (error) {
-      expect(error.message).toEqual(`destination chain is halted`)
-    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    expect(estimate.txEstimate.canSwap).toEqual(false)
+    expect(estimate.txEstimate.errors[0]).toEqual(`destination chain is halted`)
   })
 
   it('Should fail estimate swap because source chain is halted ', async () => {
@@ -99,13 +96,9 @@ describe('ThorchainAmm Client Test', () => {
       destinationAsset: AssetETH,
       destinationAddress: 'xxx',
     }
-    try {
-      const estimate = await thorchainQuery.estimateSwap(swapParams)
-      printTx(estimate, swapParams.input)
-      expect(estimate.txEstimate.canSwap).toEqual(false)
-    } catch (error) {
-      console.log(error.message)
-      expect(error.message).toEqual(`source chain is halted`)
-    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    expect(estimate.txEstimate.canSwap).toEqual(false)
+    expect(estimate.txEstimate.errors[0]).toEqual(`source chain is halted`)
   })
 })
