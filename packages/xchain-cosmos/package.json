@@ -12,6 +12,7 @@
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
   "typings": "lib/index.d.ts",
+  "type": "module",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -32,21 +33,21 @@
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
+    "@cosmos-client/core": "0.46.1",
     "@xchainjs/xchain-client": "^0.13.5",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.12.0",
-    "@cosmos-client/core": "0.46.1",
-    "axios": "^0.25.0",
+    "axios": "^1.2.2",
     "nock": "^13.0.5"
   },
   "publishConfig": {
     "access": "public"
   },
   "peerDependencies": {
+    "@cosmos-client/core": "0.46.1",
     "@xchainjs/xchain-client": "^0.13.5",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.12.0",
-    "@cosmos-client/core": "0.46.1",
-    "axios": "^0.25.0"
+    "axios": "^1.2.2"
   }
 }

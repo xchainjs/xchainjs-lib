@@ -150,7 +150,7 @@ export const broadcastTx = async ({ txHex, haskoinUrl }: BroadcastTxParams): Pro
 
   const onFullfilled = (res: AxiosResponse): AxiosResponse => res
   const onRejected = async (error: AxiosError): Promise<AxiosResponse> => {
-    const config = error.config
+    const config = error.config || axios.defaults
     if (counter < MAX && error.response?.status === 500) {
       counter++
       await delay(200 * counter)

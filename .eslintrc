@@ -7,9 +7,9 @@
   "plugins": ["prettier", "ordered-imports"],
   "extends": [
     "plugin:@typescript-eslint/recommended",
-    "prettier/@typescript-eslint",
     "plugin:prettier/recommended",
-    "plugin:ordered-imports/recommended"
+    "plugin:ordered-imports/recommended",
+    "prettier"
   ],
   "ignorePatterns": "**/*.d.ts",
   "rules": {

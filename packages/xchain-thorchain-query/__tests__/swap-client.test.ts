@@ -86,8 +86,8 @@ describe('Swap Cal Tests', () => {
   })
   it('should calculate correct slip percentage', async () => {
     const slip = getSwapSlip(inputAmount, btcPool, true)
-    const correctSlip = 0.00990099009900990099009900990099 // 1/101 0.99 % slip.
-    expect(slip.toNumber()).toEqual(correctSlip)
+    const correctSlip = '0.00990099009900990099009900990099' // 1/101 0.99 % slip.
+    expect(slip.toFixed()).toEqual(correctSlip)
   })
 
   it('should calculate correct swap fee', async () => {
@@ -101,7 +101,7 @@ describe('Swap Cal Tests', () => {
     const correctOutput: SwapOutput = {
       output: new CryptoAmount(assetToBase(assetAmount(24507.40123517)), AssetRuneNative),
       swapFee: new CryptoAmount(assetToBase(assetAmount(245.07401235)), AssetRuneNative),
-      slip: new BigNumber(0.00990099009900990099),
+      slip: new BigNumber('0.00990099009900990099'),
     }
     expect(singleSwap.output.assetAmount.amount()).toEqual(correctOutput.output.assetAmount.amount())
     expect(singleSwap.swapFee.assetAmount.amount()).toEqual(correctOutput.swapFee.assetAmount.amount())

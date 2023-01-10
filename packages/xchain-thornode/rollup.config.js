@@ -3,8 +3,13 @@ import json from 'rollup-plugin-json'
 import resolve from 'rollup-plugin-node-resolve'
 import external from 'rollup-plugin-peer-deps-external'
 import typescript from 'rollup-plugin-typescript2'
+import { readFile } from 'fs/promises'
 
-import pkg from './package.json'
+const pkg = JSON.parse(
+  await readFile(
+    new URL('./package.json', import.meta.url)
+  )
+)
 
 export default {
   input: 'src/index.ts',
@@ -27,7 +32,6 @@ export default {
     external(),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
-      rollupCommonJSResolveHack: true,
       exclude: '__tests__/**',
       clean: true,
     }),

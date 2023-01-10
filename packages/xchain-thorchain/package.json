@@ -12,6 +12,7 @@
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
   "typings": "lib/index.d.ts",
+  "type": "module",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -42,7 +43,7 @@
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-ethereum": "^0.27.6",
     "@xchainjs/xchain-util": "^0.12.0",
-    "axios": "^0.25.0",
+    "axios": "^1.2.2",
     "bech32-buffer": "^0.2.0",
     "nock": "^13.0.5"
   },
@@ -55,7 +56,7 @@
     "@xchainjs/xchain-cosmos": "^0.20.6",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.12.0",
-    "axios": "^0.25.0",
+    "axios": "^1.2.2",
     "bech32-buffer": "^0.2.0"
   }
 }

@@ -12,6 +12,7 @@
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
   "typings": "lib/index.d.ts",
+  "type": "module",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
