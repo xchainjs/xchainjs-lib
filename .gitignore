@@ -16,3 +16,4 @@ packages/*/yarn.lock
 
 .env
 *.txt
+.husky
