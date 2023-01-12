@@ -12,7 +12,6 @@
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
   "typings": "lib/index.d.ts",
-  "type": "module",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -26,7 +25,7 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "yarn clean && rollup -c",
+    "build": "yarn clean && rollup --bundleConfigAsCjs -c",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
@@ -38,7 +37,7 @@
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.12.0",
     "axios": "^1.2.2",
-    "nock": "^13.0.5"
+    "nock": "^13.3.0"
   },
   "publishConfig": {
     "access": "public"
@@ -46,8 +45,8 @@
   "peerDependencies": {
     "@cosmos-client/core": "0.46.1",
     "@xchainjs/xchain-client": "^0.13.5",
-    "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.12.0",
+    "@xchainjs/xchain-crypto": "^0.3.0",
+    "@xchainjs/xchain-util": "^0.13.0",
     "axios": "^1.2.2"
   }
 }

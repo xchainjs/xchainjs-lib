@@ -1,4 +1,4 @@
-import { proto } from '@cosmos-client/core/cjs/module'
+import cosmosclient from '@cosmos-client/core'
 import { baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
 import { AssetATOM, COSMOS_DECIMAL } from '../src/const'
@@ -7,7 +7,7 @@ import { getAsset, getDenom, getQueryString, getTxsFromHistory, isMsgMultiSend, 
 
 describe('cosmos/util', () => {
   describe('Msg type guards', () => {
-    const msgMultiSend = new proto.cosmos.bank.v1beta1.MsgMultiSend({
+    const msgMultiSend = new cosmosclient.proto.cosmos.bank.v1beta1.MsgMultiSend({
       inputs: [
         {
           address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
@@ -41,7 +41,7 @@ describe('cosmos/util', () => {
       ],
     })
 
-    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+    const msgSend = new cosmosclient.proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
       to_address: 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv',
       amount: [
@@ -98,7 +98,7 @@ describe('cosmos/util', () => {
   describe('parse Tx', () => {
     const from_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
     const to_address = 'cosmos16mzuy68a9xzqpsp88dt4f2tl0d49drhepn68fg'
-    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+    const msgSend = new cosmosclient.proto.cosmos.bank.v1beta1.MsgSend({
       from_address,
       to_address,
       amount: [

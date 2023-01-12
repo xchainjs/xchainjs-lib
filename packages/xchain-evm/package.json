@@ -12,7 +12,6 @@
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
   "typings": "lib/index.d.ts",
-  "type": "module",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -26,7 +25,7 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "yarn clean && rollup -c rollup.config.js",
+    "build": "yarn clean && rollup --bundleConfigAsCjs -c",
     "test": "jest",
     "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build"

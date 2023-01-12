@@ -1,4 +1,4 @@
-import { proto } from '@cosmos-client/core/cjs/module'
+import cosmosclient from '@cosmos-client/core'
 import {
   Balance,
   BaseXChainClient,
@@ -136,7 +136,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  private getPrivateKey(index = 0): proto.cosmos.crypto.secp256k1.PrivKey {
+  private getPrivateKey(index = 0): cosmosclient.proto.cosmos.crypto.secp256k1.PrivKey {
     if (!this.phrase) throw new Error('Phrase not set')
 
     return this.getSDKClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))

@@ -21,7 +21,7 @@ jobs:
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install Deps
-        run: yarn && yarn yarn-audit-ci --critical
+        run: yarn && yarn audit --level critical
 
       - name: Build Packages
         run: yarn build

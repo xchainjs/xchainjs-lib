@@ -1,16 +1,11 @@
-import commonjs from 'rollup-plugin-commonjs'
-import json from 'rollup-plugin-json'
-import resolve from 'rollup-plugin-node-resolve'
-import external from 'rollup-plugin-peer-deps-external'
-import typescript from 'rollup-plugin-typescript2'
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
+import resolve from '@rollup/plugin-node-resolve'
+import typescript from '@rollup/plugin-typescript'
+import { readFileSync } from 'fs'
+import peerDepsExternal from 'rollup-plugin-peer-deps-external'
 
-import { readFile } from 'fs/promises'
-
-const pkg = JSON.parse(
-  await readFile(
-    new URL('./package.json', import.meta.url)
-  )
-)
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)))
 
 export default {
   input: 'src/index.ts',
@@ -30,13 +25,12 @@ export default {
   ],
   plugins: [
     json({}),
-    external(),
+    peerDepsExternal(),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
       exclude: '__tests__/**',
-      clean: true,
     }),
     commonjs(),
   ],
-  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios'],
+  external: ['readable-stream', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios'],
 }
