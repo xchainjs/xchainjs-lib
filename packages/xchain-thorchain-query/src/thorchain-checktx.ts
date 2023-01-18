@@ -61,6 +61,7 @@ export type SwapInfo = {
   affliateFee: CryptoAmount
   expectedOutBlock: number
   expectedOutDate: Date
+  currentChainHeight: number
   expectedAmountOut: CryptoAmount
   actualAmountOut?: CryptoAmount
 }
@@ -146,6 +147,10 @@ export class TransactionStage {
       const memo = txData.tx.tx.memo ?? ''
       const memoFields = this.parseSwapMemo(memo)
       const assetOut = assetFromStringEx(memoFields.asset.toUpperCase())
+      const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
+      const swapStatus = txData.out_txs[0].memo?.match('OUT') ? SwapStatus.Complete : SwapStatus.Complete_Refunded
+      const chainHeght =
+        swapStatus === SwapStatus.Complete ? await this.blockHeight(assetOut) : await this.blockHeight(assetIn)
       const minimumAmountOut = memoFields.limit
         ? await this.getCryptoAmount(memoFields.limit, assetOut)
         : await this.getCryptoAmount('0', assetOut)
@@ -155,10 +160,11 @@ export class TransactionStage {
         : await this.getCryptoAmount('0', assetOut)
       // TODO get out tx
       const swapInfo: SwapInfo = {
-        status: txData.out_txs[0].memo?.match('OUT') ? SwapStatus.Complete : SwapStatus.Complete_Refunded,
+        status: swapStatus,
         expectedOutBlock: Number(`${progress.inboundObserved?.expectedConfirmationBlock}`),
         expectedOutDate: new Date(`${progress.inboundObserved?.expectedConfirmationDate}`),
         expectedAmountOut: minimumAmountOut, // TODO call estimateSwap()
+        currentChainHeight: chainHeght,
         minimumAmountOut,
         affliateFee,
         toAddress: memoFields.destAddress,
@@ -212,10 +218,11 @@ export class TransactionStage {
       const amount = await this.getCryptoAmount(inboundAmount, assetIn)
       // find a date for when it should be competed
       const expectedConfirmationDate = await this.blockToDate(assetIn.chain, txData)
+      const dateObserved = await this.blockToDate(THORChain, txData)
 
       progress.inboundObserved = {
         status,
-        date: new Date(), // date observed?
+        date: dateObserved, // date observed?
         block,
         expectedConfirmationBlock: finalizeBlock,
         expectedConfirmationDate,
@@ -319,16 +326,37 @@ export class TransactionStage {
     if (chainHeight > recordedBlock) {
       blockDifference = chainHeight - recordedBlock
       time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
+      console.log(time)
     } else if (chain == THORChain) {
       const currentHeight = lastBlockObj.find((obj) => obj)
       const thorchainHeight = Number(`${currentHeight?.thorchain}`) // current height of the TC
       const finalisedHeight = Number(`${txData.finalised_height}`) // height tx was completed in
       blockDifference = thorchainHeight - finalisedHeight
+      console.log(blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
       time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
+      console.log(time)
     } else {
       time.setSeconds(time.getSeconds() + this.chainAttributes[chain].avgBlockTimeInSecs / 2) // Assume block is half completed, therefore divide average block times by 2
     }
     return time
+  }
+
+  /**
+   * Returns current block height of an asset's native chain
+   * @param chain
+   * @returns
+   */
+  private async blockHeight(asset: Asset) {
+    const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
+    const currentHeight = lastBlockObj.find((obj) => obj.chain == asset.chain)
+    let blockHeight
+    if (asset.chain === THORChain || asset.synth) {
+      const currentHeight = lastBlockObj.find((obj) => obj)
+      blockHeight = Number(`${currentHeight?.thorchain}`)
+    } else {
+      blockHeight = Number(`${currentHeight?.last_observed_in}`)
+    }
+    return blockHeight
   }
 
   // Functions follow this logic below
