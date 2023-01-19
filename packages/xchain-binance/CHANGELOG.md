@@ -1,8 +1,8 @@
-# v.5.6.6 (2022-12-27)
+# v.5.6.7 (2023-01-19)
 
-## Add
+## Update
 
-- Add `AssetBNB` and `BNBChain` definition
+- Type safety `BNBChain`
 
 ## Update
 

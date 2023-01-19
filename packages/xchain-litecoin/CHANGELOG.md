@@ -1,4 +1,10 @@
-# v.10.8 (2022-12-27)
+# v.0.10.9 (2022-01-19)
+
+## Update
+
+- Type safety `LTCChain`
+
+# v.0.10.8 (2022-12-27)
 
 ## Add
 
@@ -8,26 +14,26 @@
 
 - Bump `xchain-client@13.5.0`
 
-# v.10.7 (2022-12-13)
+# v.0.10.7 (2022-12-13)
 
 ## Update
 
 - removed `customRequestHeaders`
 
-# v.10.6 (2022-11-24)
+# v.0.10.6 (2022-11-24)
 
 ## Update
 
 - Added `customRequestHeaders` to `BroadcastTxParams` & bump dependencies
 
-# v.10.5 (2022-10-27)
+# v.0.10.5 (2022-10-27)
 
 ## Update
 
 - removed Default username/password in Client constructor
 - do not send auth header if undefined
 
-# v.10.4 (2022-10-14)
+# v.0.10.4 (2022-10-14)
 
 ## Update
 

@@ -1,3 +1,9 @@
+# v.0.1.4 (2023-01-19)
+
+## Update
+
+- Type safety `AVAXChain`
+
 # v.0.1.3 (2022-12-27)
 
 ## Add

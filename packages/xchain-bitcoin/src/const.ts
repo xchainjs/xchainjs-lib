@@ -1,4 +1,4 @@
-import { Asset, Chain } from '@xchainjs/xchain-util'
+import { Asset } from '@xchainjs/xchain-util'
 
 /**
  * Minimum transaction fee
@@ -18,7 +18,7 @@ export const BTC_SATOSHI_SYMBOL = '⚡'
  * Chain identifier for Bitcoin mainnet
  *
  */
-export const BTCChain: Chain = 'BTC'
+export const BTCChain = 'BTC' as const
 
 /**
  * Base "chain" asset on bitcoin main net.

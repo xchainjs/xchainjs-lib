@@ -1,4 +1,4 @@
-import { Asset, Chain } from '@xchainjs/xchain-util'
+import { Asset } from '@xchainjs/xchain-util'
 
 /**
  * Minimum transaction fee
@@ -14,7 +14,7 @@ export const UPPER_FEE_BOUND = 20_000_000
  * Chain identifier for Dogecoin
  *
  */
-export const DOGEChain: Chain = 'DOGE'
+export const DOGEChain = 'DOGE' as const
 
 /**
  * Base "chain" asset on dogecoin

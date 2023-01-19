@@ -1,4 +1,4 @@
-import { Asset, Chain } from '@xchainjs/xchain-util'
+import { Asset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 export const LOWER_FEE_BOUND = 2_000_000_000
@@ -23,7 +23,7 @@ export const MAX_APPROVAL: ethers.BigNumber = ethers.BigNumber.from(2).pow(256).
  * Chain identifier for Ethereum mainnet
  *
  */
-export const ETHChain: Chain = 'ETH'
+export const ETHChain = 'ETH' as const
 
 /**
  * Base "chain" asset on ethereum main net.

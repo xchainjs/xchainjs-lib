@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client/lib'
-import { Asset, Chain } from '@xchainjs/xchain-util/lib'
+import { Asset } from '@xchainjs/xchain-util/lib'
 
 import { ExplorerUrls } from './types'
 
@@ -36,7 +36,7 @@ export const defaultExplorerUrls: ExplorerUrls = {
  * Chain identifier for Thorchain
  *
  */
-export const THORChain: Chain = 'THOR'
+export const THORChain = 'THOR' as const
 
 /**
  * Base "chain" asset for RUNE-67C on Binance test net.
