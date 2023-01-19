@@ -1,4 +1,4 @@
-import { Asset, Chain } from '@xchainjs/xchain-util/lib'
+import { Asset } from '@xchainjs/xchain-util/lib'
 
 /**
  * Minimum transaction fee
@@ -14,7 +14,7 @@ export const LTC_DECIMAL = 8
  * Chain identifier for litecoin
  *
  */
-export const LTCChain: Chain = 'LTC'
+export const LTCChain = 'LTC' as const
 
 /**
  * Base "chain" asset on litecoin main net.

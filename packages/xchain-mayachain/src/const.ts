@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client/lib'
-import { Asset, Chain } from '@xchainjs/xchain-util/lib'
+import { Asset } from '@xchainjs/xchain-util/lib'
 
 import { ExplorerUrls } from './types'
 
@@ -31,10 +31,10 @@ export const defaultExplorerUrls: ExplorerUrls = {
 }
 
 /**
- * Chain identifier for Thorchain
+ * Chain identifier for MayaChain
  *
  */
-export const MAYAChain: Chain = 'MAYA'
+export const MAYAChain = 'MAYA' as const
 
 /**
  * Base "chain" asset on thorchain main net.

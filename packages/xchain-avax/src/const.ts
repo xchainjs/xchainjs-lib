@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
 import { EVMClientParams, EtherscanProvider, ExplorerProvider } from '@xchainjs/xchain-evm'
-import { Asset, Chain } from '@xchainjs/xchain-util'
+import { Asset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
 export const AVAX_DECIMAL = 8
@@ -14,7 +14,7 @@ export const AVAX_GAS_ASSET_DECIMAL = 18
  * Chain identifier for AVAX.
  *
  */
-export const AVAXChain: Chain = 'AVAX'
+export const AVAXChain = 'AVAX' as const
 
 /**
  * Base "chain" asset of Avalanche chain.
