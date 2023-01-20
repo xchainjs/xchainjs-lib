@@ -1,10 +1,10 @@
-import { Asset, Chain } from '@xchainjs/xchain-util'
+import { Asset } from '@xchainjs/xchain-util'
 
 /**
  * Chain identifier for BNB.
  *
  */
-export const BNBChain: Chain = 'BNB'
+export const BNBChain = 'BNB' as const
 
 /**
  * Base "chain" asset of Binance chain.

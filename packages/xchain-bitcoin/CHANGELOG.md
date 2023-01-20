@@ -1,3 +1,9 @@
+# v.0.20.8 (2023-01-19)
+
+## Update
+
+- Type safety `BTCChain`
+
 # v.0.20.7 (2022-12-27)
 
 ## Add

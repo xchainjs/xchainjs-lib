@@ -1,4 +1,4 @@
-import { Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, baseAmount } from '@xchainjs/xchain-util'
 
 /**
  * The decimal for cosmos chain.
@@ -23,7 +23,7 @@ export const DEFAULT_FEE = baseAmount(5000, COSMOS_DECIMAL)
  * Chain identifier for Cosmos chain
  *
  */
-export const GAIAChain: Chain = 'GAIA'
+export const GAIAChain = 'GAIA' as const
 /**
  * Base "chain" asset on cosmos main net.
  *

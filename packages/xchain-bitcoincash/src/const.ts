@@ -1,4 +1,4 @@
-import { Asset, Chain } from '@xchainjs/xchain-util'
+import { Asset } from '@xchainjs/xchain-util'
 
 export const LOWER_FEE_BOUND = 1
 export const UPPER_FEE_BOUND = 500
@@ -7,7 +7,7 @@ export const UPPER_FEE_BOUND = 500
  * Chain identifier for Bitcoin Cash
  *
  */
-export const BCHChain: Chain = 'BCH'
+export const BCHChain = 'BCH' as const
 
 /**
  * Base "chain" asset on bitcoincash main net.
