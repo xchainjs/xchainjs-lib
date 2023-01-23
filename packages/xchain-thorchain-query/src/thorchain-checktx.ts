@@ -144,6 +144,8 @@ export class TransactionStage {
       case TxType.WithdrawSaver:
         await this.checkWithdrawSaverProgress(txData, progress)
         break
+      case TxType.Other:
+        break
       default:
         break
     }
@@ -228,6 +230,7 @@ export class TransactionStage {
         progress.txType = TxType.AddLP
       if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[/]/)) progress.txType = TxType.WithdrawSaver
       if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[.]/)) progress.txType = TxType.WithdrawLP
+      if (operation.match(/out|refund/gi)) progress.txType = TxType.Other
 
       const amount = await this.getCryptoAmount(inboundAmount, assetIn)
       // find a date for when it should be competed
@@ -282,9 +285,7 @@ export class TransactionStage {
   private async checkWithdrawLpProgress(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
       const memo = txData.tx.tx.memo ?? ''
-      const outMemo = txData.out_txs[0].memo ?? ''
       const memoFields = this.parseWithdrawLpMemo(memo)
-      const outMemoFields = this.parseWithdrawLpMemo(outMemo)
       const asset = assetFromStringEx(memoFields.asset)
 
       const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
@@ -295,19 +296,17 @@ export class TransactionStage {
 
       const expectedConfirmationDate = await this.blockToDate(THORChain, txData, outboundHeight) // always pass in thorchain
 
-      const outAmount = JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`)
+      // if the TC has process the block that the outbound tx was assigned to then its completed.
+      const status = txData.tx.status === 'done' ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
+
+      const outAmount =
+        status === WithdrawStatus.Complete ? JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`) : ''
       const outboundBlock = Number(txData.outbound_height ?? txData.finalised_height)
       const currentTCHeight = Number(`${currentHeight?.thorchain}`)
       const estimatedWaitTime =
         outboundBlock > currentTCHeight
           ? (outboundBlock - currentTCHeight) * this.chainAttributes[THORChain].avgBlockTimeInSecs
           : 0
-
-      // if the TC has process the block that the outbound tx was assigned to then its completed.
-      const status =
-        outMemoFields.action === 'OUT' && txData.tx.status === 'done'
-          ? WithdrawStatus.Complete
-          : WithdrawStatus.Incomplete
 
       const withdrawLpInfo: WithdrawInfo = {
         status,
