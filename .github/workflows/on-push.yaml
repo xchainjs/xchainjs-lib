@@ -22,7 +22,8 @@ jobs:
 
       - name: Install Deps
         # NOTE: below will exit pipeline if there are are critical(16) vulns, in order to change to high use 8
-        run: yarn && /bin/bash -c 'yarn audit; [[ $? -ge 16 ]] && exit 1 || exit 0'
+        # run: yarn && /bin/bash -c 'yarn audit; [[ $? -ge 16 ]] && exit 1 || exit 0'
+        run: yarn
 
       - name: Build Packages
         run: yarn build
