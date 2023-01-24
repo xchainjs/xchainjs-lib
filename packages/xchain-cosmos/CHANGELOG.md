@@ -1,3 +1,9 @@
+# v.0.20.7 (2023-01-19)
+
+## Update
+
+- Type safety `GAIAChain`
+
 # v.0.20.6 (2022-12-27)
 
 ## Add

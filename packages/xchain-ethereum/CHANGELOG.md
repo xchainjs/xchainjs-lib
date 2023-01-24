@@ -1,3 +1,9 @@
+# v.0.27.7 (2023-01-19)
+
+## Update
+
+- Type safety `ETHChain`
+
 # v.0.27.6 (2022-12-27)
 
 ## Add

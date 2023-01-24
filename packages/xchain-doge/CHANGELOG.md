@@ -1,3 +1,9 @@
+# v.0.5.7 (2023-01-19)
+
+## Update
+
+- Type safety `DOGEChain`
+
 # v.0.5.6 (2022-12-27)
 
 ## Add

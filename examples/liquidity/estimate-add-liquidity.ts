@@ -19,9 +19,9 @@ function print(estimate: EstimateAddLP, rune: CryptoAmount, asset: CryptoAmount)
     lpUnits: estimate.lpUnits.amount().toFixed(0),
     runeToAssetRatio: estimate.runeToAssetRatio.toFixed(8),
     transactionFee: {
-      assetFee: estimate.transactionFee.assetFee.formatedAssetString(),
-      runeFee: estimate.transactionFee.runeFee.formatedAssetString(),
-      totalFees: estimate.transactionFee.totalFees.formatedAssetString(),
+      assetFee: estimate.inbound.fees.asset.formatedAssetString(),
+      runeFee: estimate.inbound.fees.rune.formatedAssetString(),
+      totalFees: estimate.inbound.fees.total.formatedAssetString(),
     },
     estimatedWaitSeconds: estimate.estimatedWaitSeconds,
     errors: estimate.errors,
