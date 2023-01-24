@@ -17,6 +17,7 @@ import {
   SaversApi,
   SaversResponse,
   TransactionsApi,
+  TxDetailsResponse,
   TxOutItem,
   TxResponse,
 } from '@xchainjs/xchain-thornode'
@@ -108,6 +109,22 @@ export class Thornode {
           keysign_metric: undefined,
         }
         return txR
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+  /**
+   *
+   * @param txHash - transaction hash
+   * @returns - transaction object
+   */
+  async getTxDetail(txHash: string): Promise<TxDetailsResponse> {
+    for (const api of this.transactionsApi) {
+      try {
+        const txResponse = await api.txSigners(txHash)
+        return txResponse.data
+      } catch (e) {
+        throw new Error(`THORNode not responding`)
       }
     }
     throw new Error(`THORNode not responding`)

@@ -107,10 +107,10 @@ describe('thorchain Integration Tests', () => {
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
   it('should fetch thorchain tx data', async () => {
-    const txId = '1256ED91F3E16F8499888B06BF9282DF5CE2785278C94CD803C6201872C76ADD'
+    const txId = 'ED631AF5CB1DD2294220FC62F01F6ECE2343A9ED8DD0B44CE9473A085B41F737'
     const tx = await thorClient.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
-    expect(tx.hash).toBe('1256ED91F3E16F8499888B06BF9282DF5CE2785278C94CD803C6201872C76ADD')
+    expect(tx.hash).toBe('ED631AF5CB1DD2294220FC62F01F6ECE2343A9ED8DD0B44CE9473A085B41F737')
     // expect(tx.asset.ticker).toBe('xx')
   })
 })
