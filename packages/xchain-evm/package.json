@@ -25,7 +25,7 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "yarn clean && rollup --bundleConfigAsCjs -c",
+    "build": "yarn clean && rollup -c ",
     "test": "jest",
     "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build"
@@ -35,15 +35,15 @@
   },
   "devDependencies": {
     "@xchainjs/xchain-client": "^0.13.5",
-    "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.12.0",
+    "@xchainjs/xchain-crypto": "^0.3.0",
+    "@xchainjs/xchain-util": "^0.13.0",
     "axios": "^1.2.2",
     "ethers": "^5.6.6"
   },
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.13.5",
-    "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.12.0",
+    "@xchainjs/xchain-crypto": "^0.3.0",
+    "@xchainjs/xchain-util": "^0.13.0",
     "axios": "^1.2.2",
     "ethers": "^5.6.6"
   }

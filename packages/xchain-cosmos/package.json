@@ -25,7 +25,7 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "yarn clean && rollup --bundleConfigAsCjs -c",
+    "build": "yarn clean && rollup --bundleConfigAsCjs -c rollup.config.js",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
@@ -34,8 +34,8 @@
   "devDependencies": {
     "@cosmos-client/core": "0.46.1",
     "@xchainjs/xchain-client": "^0.13.5",
-    "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.12.0",
+    "@xchainjs/xchain-crypto": "^0.3.0",
+    "@xchainjs/xchain-util": "^0.13.0",
     "axios": "^1.2.2",
     "nock": "^13.3.0"
   },

@@ -1,11 +1,9 @@
-import commonjs from '@rollup/plugin-commonjs'
-import json from '@rollup/plugin-json'
-import resolve from '@rollup/plugin-node-resolve'
-import typescript from '@rollup/plugin-typescript'
-import { readFileSync } from 'fs'
-import peerDepsExternal from 'rollup-plugin-peer-deps-external'
+import commonjs from 'rollup-plugin-commonjs'
+import json from 'rollup-plugin-json'
+import resolve from 'rollup-plugin-node-resolve'
+import typescript from 'rollup-plugin-typescript2'
 
-const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)))
+import pkg from './package.json'
 
 export default {
   input: 'src/index.ts',
@@ -14,23 +12,36 @@ export default {
       file: pkg.main,
       format: 'cjs',
       exports: 'named',
-      sourcemap: false,
+      sourcemap: true,
     },
     {
       file: pkg.module,
       format: 'es',
       exports: 'named',
-      sourcemap: false,
+      sourcemap: true,
     },
   ],
   plugins: [
-    json({}),
-    peerDepsExternal(),
-    resolve({ preferBuiltins: true, browser: true }),
+    json(),
     typescript({
+      rollupCommonJSResolveHack: true,
       exclude: '__tests__/**',
+      clean: true,
+      browser: true,
     }),
-    commonjs(),
+    resolve({ extensions: ['.js', '.ts'], preferBuiltins: true, browser: true }),
+    commonjs({
+      browser: true,
+    }),
   ],
-  // external(['readable-stream', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios']),
+  external: [
+    'readable-stream',
+    '@psf/bitcoincashjs-lib',
+    'bchaddrjs',
+    'buffer',
+    'stream',
+    'string_decoder',
+    '@xchainjs/xchain-client',
+    'axios',
+  ],
 }

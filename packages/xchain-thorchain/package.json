@@ -25,8 +25,8 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "yarn clean && rollup --bundleConfigAsCjs -c",
-    "test": "jest --config jest.config.json",
+    "build": "yarn clean &&  rollup --bundleConfigAsCjs -c rollup.config.js",
+    "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",
@@ -39,9 +39,9 @@
     "@xchainjs/xchain-binance": "^5.6.6",
     "@xchainjs/xchain-client": "^0.13.5",
     "@xchainjs/xchain-cosmos": "^0.20.6",
-    "@xchainjs/xchain-crypto": "^0.2.6",
+    "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-ethereum": "^0.27.6",
-    "@xchainjs/xchain-util": "^0.12.0",
+    "@xchainjs/xchain-util": "^0.13.0",
     "axios": "^1.2.2",
     "bech32-buffer": "^0.2.0",
     "nock": "^13.3.0"
@@ -53,8 +53,8 @@
     "@cosmos-client/core": "0.46.1",
     "@xchainjs/xchain-client": "^0.13.5",
     "@xchainjs/xchain-cosmos": "^0.20.6",
-    "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-util": "^0.12.0",
+    "@xchainjs/xchain-crypto": "^0.3.0",
+    "@xchainjs/xchain-util": "^0.13.0",
     "axios": "^1.2.2",
     "bech32-buffer": "^0.2.0"
   }

@@ -86,7 +86,7 @@ describe('Swap Cal Tests', () => {
   })
   it('should calculate correct slip percentage', async () => {
     const slip = getSwapSlip(inputAmount, btcPool, true)
-    const correctSlip = '0.00990099009900990099009900990099' // 1/101 0.99 % slip.
+    const correctSlip = '0.00990099009900990099' // 1/101 0.99 % slip.
     expect(slip.toFixed()).toEqual(correctSlip)
   })
 
