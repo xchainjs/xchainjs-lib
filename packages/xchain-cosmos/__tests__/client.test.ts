@@ -10,7 +10,7 @@ import { GetTxByHashResponse, TxHistoryResponse } from '../src/cosmos/types'
 const getClientUrl = (client: Client): string => {
   return client.getNetwork() === Network.Testnet
     ? 'https://rest.sentry-02.theta-testnet.polypore.xyz'
-    : 'https://api.cosmos.network'
+    : 'https://rest.cosmos.directory/cosmoshub'
 }
 
 const mockAccountsAddress = (

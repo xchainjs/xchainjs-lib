@@ -356,7 +356,7 @@ export class ThorchainCache {
     let deepestPool: LiquidityPool | null = null
     for (const usdAsset of usdAssets) {
       const usdPool = await this.getPoolForAsset(usdAsset)
-      if (usdPool.runeBalance.amount() > deepestRuneDepth) {
+      if (usdPool.runeBalance.amount().gt(deepestRuneDepth)) {
         deepestRuneDepth = usdPool.runeBalance.amount()
         deepestPool = usdPool
       }

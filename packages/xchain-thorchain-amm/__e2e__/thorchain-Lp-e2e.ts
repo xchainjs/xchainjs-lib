@@ -1,6 +1,6 @@
+import { BNBChain } from '@xchainjs/xchain-binance'
 import { AssetBTC, BTCChain } from '@xchainjs/xchain-bitcoin'
-import { AssetETH } from '@xchainjs/xchain-ethereum'
-import { ETHChain, ETH_DECIMAL } from '@xchainjs/xchain-ethereum'
+import { AssetETH, ETHChain, ETH_DECIMAL } from '@xchainjs/xchain-ethereum'
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   AddliquidityPosition,
@@ -11,7 +11,6 @@ import {
 } from '@xchainjs/xchain-thorchain-query'
 import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
-import { BNBChain } from '@xchainjs/xchain-binance'
 import { Wallet } from '../src/Wallet'
 import { ThorchainAMM } from '../src/thorchain-amm'
 

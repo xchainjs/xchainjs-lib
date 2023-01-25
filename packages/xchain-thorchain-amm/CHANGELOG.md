@@ -1,3 +1,19 @@
+# v0.3.13 (2023-1-24)
+
+## Update
+
+- Bump:
+- `xchain-avax`: "^0.1.4",
+- `xchain-binance`: "^5.6.7",
+- `xchain-bitcoin`: "^0.20.8",
+- `xchain-bitcoincash`: "^0.15.7",
+- `xchain-cosmos`: "^0.20.7",
+- `xchain-doge`: "^0.5.7",
+- `xchain-ethereum`: "^0.27.7",
+- `xchain-litecoin`: "^0.10.9",
+- `xchain-midgard`: "0.4.1",
+- `xchain-thorchain-query`: "^0.1.14",
+
 # v0.3.12 (2022-12-29)
 
 ## Update

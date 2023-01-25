@@ -2,8 +2,6 @@
   "name": "example-do-swap",
   "version": "1.0.0",
   "scripts": {
-    "listPools": "npx ts-node listPools.ts",
-    "estimateSwap": "npx ts-node estimateSwap.ts",
     "doSwap": "npx ts-node doSwap.ts",
     "doSend": "npx ts-node doSend.ts"
   },

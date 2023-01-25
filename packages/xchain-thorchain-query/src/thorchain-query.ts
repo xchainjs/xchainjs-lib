@@ -229,8 +229,25 @@ export class ThorchainQuery {
         : await this.thorchainCache.convert(params.input, params.input.asset)
 
     const inboundFeeInInboundGasAsset = calcNetworkFee(input.asset, sourceInboundDetails)
-    const outboundFeeInOutboundGasAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails)
+    let outboundFeeInOutboundGasAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails)
 
+    // Check outbound fee is equal too or greater than 1 USD * need to find a more permanent solution to this. referencing just 1 stable coin pool has problems
+    if (params.destinationAsset.chain !== THORChain && !params.destinationAsset.synth) {
+      const deepestUSDPOOL = await this.thorchainCache.getDeepestUSDPool()
+      const usdAsset = deepestUSDPOOL.asset
+      const usdMinFee = new CryptoAmount(
+        assetToBase(assetAmount('1', Number(deepestUSDPOOL.pool.nativeDecimal))),
+        usdAsset,
+      )
+
+      const checkOutboundFee = (await this.convert(outboundFeeInOutboundGasAsset, usdAsset)).gte(usdMinFee)
+
+      if (!checkOutboundFee) {
+        const newFee = usdMinFee
+        outboundFeeInOutboundGasAsset = await this.convert(newFee, AssetRuneNative)
+        console.log(outboundFeeInOutboundGasAsset.assetAmount.amount)
+      }
+    }
     // ----------- Remove Fees from inbound before doing the swap -----------
     const inboundFeeInInboundAsset = await this.thorchainCache.convert(inboundFeeInInboundGasAsset, params.input.asset)
     const inputMinusInboundFeeInAsset = input.minus(inboundFeeInInboundAsset)

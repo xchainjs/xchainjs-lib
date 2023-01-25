@@ -21,7 +21,7 @@ import { MidgardConfig } from '../types'
 const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://midgard.ninerealms.com', 'https://midgard.thorswap.net'],
+    midgardBaseUrls: ['https://midgard.ninerealms.com'],
   },
   stagenet: {
     apiRetries: 3,
@@ -52,7 +52,7 @@ export class Midgard {
         const { data } = await axios.get<Record<string, number>>(`${baseUrl}${path}`)
         return data
       } catch (e) {
-        //console.error(e)
+        console.error(e)
       }
     }
     throw new Error('Midgard not responding')
