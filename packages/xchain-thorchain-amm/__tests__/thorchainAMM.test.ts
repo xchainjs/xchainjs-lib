@@ -104,7 +104,7 @@ describe('ThorchainAmm Client Test', () => {
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(false)
     } catch (error) {
-      console.log(error.message)
+      console.error(error)
       expect(error.message).toEqual(`source chain is halted`)
     }
   })

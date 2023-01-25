@@ -50,7 +50,6 @@ export class Midgard {
     for (const baseUrl of this.config.midgardBaseUrls) {
       try {
         const { data } = await axios.get<Record<string, number>>(`${baseUrl}${path}`)
-        console.log(data)
         return data
       } catch (e) {
         console.error(e)
