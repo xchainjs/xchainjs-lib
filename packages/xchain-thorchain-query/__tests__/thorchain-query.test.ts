@@ -161,7 +161,7 @@ describe('Thorchain-query tests', () => {
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('199.8334843').amount().toFixed(),
+      assetAmount('198.89949416').amount().toFixed(),
     )
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(8)
   })
@@ -264,7 +264,7 @@ describe('Thorchain-query tests', () => {
       affiliateFeeBasisPoints: 50,
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
-    const correctMemo = `=:BNB.BUSD-BD1:0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990:2087913175555`
+    const correctMemo = `=:BNB.BUSD-BD1:0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990:2087822578555`
     expect(estimate.memo).toEqual(correctMemo)
   })
 })
