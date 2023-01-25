@@ -1,5 +1,4 @@
 import { Network } from '@xchainjs/xchain-client'
-import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import {
   CryptoAmount,
   EstimateSwapParams,
@@ -11,7 +10,6 @@ import {
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
 import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
-import { BigNumber } from 'bignumber.js'
 
 // Helper function for printing out the returned object
 function print(estimate: SwapEstimate, input: CryptoAmount) {
@@ -54,18 +52,17 @@ const estimateSwap = async () => {
     const fromAsset = assetFromString(`${process.argv[5]}`)
     const toAsset = assetFromString(`${process.argv[6]}`)
     const toDestinationAddress = `${process.argv[7]}`
-    const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
-    const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
-    const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
+    const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
+    const thorchainQuery = new ThorchainQuery(thorchainCache)
 
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
       destinationAsset: toAsset,
       destinationAddress: toDestinationAddress,
       // affiliateFeePercent: 0.003, //optional
-      slipLimit: new BigNumber('0.03'), //optional
+      //slipLimit: new BigNumber('0.03'), //optional
     }
-    const estimate = await mainetThorchainAmm.estimateSwap(swapParams)
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
     printTx(estimate, swapParams.input)
   } catch (e) {
     console.error(e)
