@@ -50,5 +50,10 @@ export default {
       const resp = require('./responses/thornode/thornodeTx.json')
       return [200, resp]
     })
+    // Mock constants tx
+    mock.onGet(/\/thorchain\/constants/).reply(function () {
+      const resp = require('./responses/thornode/constants.json')
+      return [200, resp]
+    })
   },
 }

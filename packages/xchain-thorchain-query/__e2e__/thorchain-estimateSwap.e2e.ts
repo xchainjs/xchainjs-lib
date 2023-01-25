@@ -16,8 +16,8 @@ import { Thornode } from '../src/utils/thornode'
 const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
-const stagenetCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
-const stagenethorchainQuery = new ThorchainQuery(stagenetCache)
+// const stagenetCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
+// const thorchainQuery = new ThorchainQuery(stagenetCache)
 
 function print(estimate: SwapEstimate, input: CryptoAmount) {
   const expanded = {
@@ -301,7 +301,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       slipLimit: new BigNumber('0.20'), //optional
     }
 
-    const estimate = await stagenethorchainQuery.estimateSwap(swapParams)
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
     print(estimate.txEstimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
@@ -314,7 +314,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       destinationAddress: 'xxx',
       slipLimit: new BigNumber('0.2'),
     }
-    const estimate = await stagenethorchainQuery.estimateSwap(swapParams)
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
@@ -326,7 +326,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       destinationAddress: 'xxx',
       slipLimit: new BigNumber('0.2'),
     }
-    const estimate = await stagenethorchainQuery.estimateSwap(swapParams)
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()

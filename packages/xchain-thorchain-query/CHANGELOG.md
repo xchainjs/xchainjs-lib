@@ -1,3 +1,9 @@
+# v0.1.15 (2023-01-25)
+
+## Bug fix
+
+- Fix bug with minL1 fee
+
 # v0.1.14 (2023-01-25)
 
 ## Update
