@@ -292,7 +292,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const values = (await thorchainCache.getNetworkValues())[constant]
     expect(values).toEqual(10000000000)
   })
-  it('should estimate a swap of 5 RUNE to AVAX', async () => {
+  it('should estimate a swap of 20 RUNE to AVAX', async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount('20')), AssetRuneNative),
       destinationAsset: AssetAVAX,

@@ -230,6 +230,7 @@ export class ThorchainQuery {
 
     const inboundFeeInInboundGasAsset = calcNetworkFee(input.asset, sourceInboundDetails)
     const outboundFeeInOutboundGasAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails)
+    //const minL1 = await this.thorchainCache.midgard.
 
     // ----------- Remove Fees from inbound before doing the swap -----------
     const inboundFeeInInboundAsset = await this.thorchainCache.convert(inboundFeeInInboundGasAsset, params.input.asset)

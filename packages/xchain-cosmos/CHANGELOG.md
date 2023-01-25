@@ -1,3 +1,9 @@
+# v.0.20.8 (2023-01-25)
+
+## Update
+
+- Change API to `https://rest.cosmos.directory/cosmoshub`
+
 # v.0.20.7 (2023-01-19)
 
 ## Update

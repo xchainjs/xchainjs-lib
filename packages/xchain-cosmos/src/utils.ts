@@ -211,7 +211,7 @@ export const getPrefix = () => 'cosmos'
  * @returns {ClientUrls} The client urls for Cosmos.
  */
 export const getDefaultClientUrls = (): ClientUrls => {
-  const mainClientUrl = 'https://api.cosmos.network'
+  const mainClientUrl = 'https://rest.cosmos.directory/cosmoshub'
   // Note: In case anyone facing into CORS issue, try the following URLs
   // https://lcd-cosmos.cosmostation.io/
   // https://lcd-cosmoshub.keplr.app/

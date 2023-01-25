@@ -1,6 +1,5 @@
 import { AVAXChain } from '@xchainjs/xchain-avax'
-import { AssetBNB } from '@xchainjs/xchain-binance'
-import { BNBChain } from '@xchainjs/xchain-binance'
+import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
 import {
   CryptoAmount,
   SaversPosition,
