@@ -282,7 +282,7 @@ export class ThorchainQuery {
       outboundFeeInOutboundGasAsset,
       params.destinationAsset,
     )
-    console.log(outboundFeeInDestinationAsset.formatedAssetString())
+    //console.log(outboundFeeInDestinationAsset.formatedAssetString())
     const netOutputInAsset = swapOutputInDestinationAsset.output.minus(outboundFeeInDestinationAsset)
     const totalFees: TotalFees = {
       inboundFee: inboundFeeInInboundGasAsset,
@@ -605,11 +605,12 @@ export class ThorchainQuery {
       totalUnits: new BigNumber(poolAsset.pool.liquidityUnits),
       liquidityUnits: new BigNumber(liquidityProvider.units),
     }
-    const networkValues = await this.thorchainCache.thornode.getNetworkValues()
+    const mimir = await this.thorchainCache.thornode.getNetworkValues()
+    console.log(mimir['FULLIMPLOSSPROTECTIONBLOCKS'])
     const block: Block = {
       current: blockData.thorchain,
       lastAdded: liquidityProvider.last_add_height,
-      fullProtection: networkValues['FULLIMPLOSSPROTECTIONBLOCKS'],
+      fullProtection: mimir['FULLIMPLOSSPROTECTIONBLOCKS'],
     }
     //
     const currentLP: PostionDepositValue = {

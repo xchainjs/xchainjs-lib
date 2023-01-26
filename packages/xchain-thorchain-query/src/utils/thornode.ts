@@ -232,17 +232,14 @@ export class Thornode {
     const [mimirDetails, constantDetails] = await Promise.all([this.getMimir(), this.getTcConstants()])
     const retVal: Record<string, number> = {}
     // insert constants first
-    for (const constantKey of Object.keys(constantDetails)) {
-      retVal[(Object.values(constantDetails), constantDetails[constantKey])]
-    }
-    console.log(retVal)
-    console.log(mimirDetails)
-    // // mimir will overwrite any dupe constants
-    // for (const mimirKey of Object.keys(mimirDetails)) {
-    //   const mimirValue = mimirDetails[mimirKey]
-    //   retVal[mimirKey.toUpperCase()] = mimirValue
-    // }
 
+    for (const [key, value] of Object.entries(constantDetails)) {
+      retVal[key.toUpperCase()] = parseInt(value)
+    }
+    // // mimir will overwrite any dupe constants
+    for (const [key, value] of Object.entries(mimirDetails)) {
+      retVal[key] = parseInt(value)
+    }
     return retVal
   }
   /**

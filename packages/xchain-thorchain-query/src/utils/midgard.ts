@@ -43,19 +43,7 @@ export class Midgard {
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })
     this.midgardApis = this.config.midgardBaseUrls.map((url) => new MidgardApi(new Configuration({ basePath: url })))
   }
-  // async getMimirDetails(): Promise<Record<string, number>> {
-  //   const path = '/v2/thorchain/mimir'
 
-  //   for (const baseUrl of this.config.midgardBaseUrls) {
-  //     try {
-  //       const { data } = await axios.get<Record<string, number>>(`${baseUrl}${path}`)
-  //       return data
-  //     } catch (e) {
-  //       console.error(e)
-  //     }
-  //   }
-  //   throw new Error('Midgard not responding')
-  // }
   /**
    *
    * @returns an array of Pools
@@ -71,63 +59,6 @@ export class Midgard {
     throw new Error(`Midgard not responding`)
   }
 
-  // /**
-  //  *
-  //  * @returns - constants
-  //  */
-  // private async getConstantsDetails(): Promise<Record<string, number>> {
-  //   const path = '/v2/thorchain/constants'
-  //   for (const baseUrl of this.config.midgardBaseUrls) {
-  //     try {
-  //       const { data } = await axios.get(`${baseUrl}${path}`)
-  //       return data.int_64_values
-  //     } catch (e) {
-  //       //console.error(e)
-  //     }
-  //   }
-  //   throw new Error('Midgard not responding')
-  // }
-
-  // /**
-  //  *
-  //  * @returns the outbound Tx Value in RUNE (Basemount)
-  //  */
-  // async getScheduledOutboundValue(): Promise<CryptoAmount> {
-  //   const path = '/v2/thorchain/queue'
-  //   for (const baseUrl of this.config.midgardBaseUrls) {
-  //     try {
-  //       const { data } = await axios.get(`${baseUrl}${path}`)
-  //       const value = new CryptoAmount(baseAmount(data['scheduled_outbound_value']), AssetRuneNative)
-  //       return value
-  //     } catch (e) {
-  //       //console.error(e)
-  //     }
-  //   }
-
-  //   throw new Error('Midgard not responding')
-  // }
-
-  // /**
-  //  * Function that wraps Mimir and Constants to return the value from a given constant name. Searchs Mimir first.
-  //  *
-  //  * @param networkValueName the network value to be used to search the contsants
-  //  * @returns the mimir or constants value
-  //  */
-  // public async getNetworkValues(): Promise<Record<string, number>> {
-  //   const [mimirDetails, constantDetails] = await Promise.all([this.getMimirDetails(), this.getConstantsDetails()])
-  //   const retVal: Record<string, number> = {}
-  //   // insert constants first
-  //   for (const constantKey of Object.keys(constantDetails)) {
-  //     retVal[constantKey.toUpperCase()] = constantDetails[constantKey]
-  //   }
-  //   // mimir will overwrite any dupe constants
-  //   for (const mimirKey of Object.keys(mimirDetails)) {
-  //     const mimirValue = mimirDetails[mimirKey]
-  //     retVal[mimirKey.toUpperCase()] = mimirValue
-  //   }
-
-  //   return retVal
-  // }
   /**
    * Gets the latest block using the Health endpoint within Midgard
    *

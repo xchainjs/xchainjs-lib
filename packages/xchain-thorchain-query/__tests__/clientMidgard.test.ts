@@ -15,8 +15,6 @@ describe('Midgard Client Test', () => {
     mockMidgardApi.restore()
     mockThornodeApi.restore()
   })
-  const networkName = 'FullImpLossProtectionBlocks'
-  const FullImpLossProtectionBlocks = 1440000
 
   const poolDetail: PoolDetail = {
     annualPercentageRate: '0.0925796460549001',
@@ -64,15 +62,5 @@ describe('Midgard Client Test', () => {
   it(`Should return latest block height`, async () => {
     const latestBlockheight = await mainnetMidgard.getLatestBlockHeight()
     expect(latestBlockheight).toEqual(blockHeight)
-  })
-  it(`Should return networkValue by name`, async () => {
-    const networkValues = await mainnetMidgard.getNetworkValues()
-    const val = networkValues[networkName.toUpperCase()]
-    expect(val).toBeTruthy()
-    expect(val).toEqual(FullImpLossProtectionBlocks)
-  })
-  it(`Should return pools array`, async () => {
-    const scheduledOutbound = await mainnetMidgard.getScheduledOutboundValue()
-    expect(scheduledOutbound).toBeTruthy()
   })
 })
