@@ -5,10 +5,13 @@ import {
   LastBlock,
   LiquidityProviderSummary,
   LiquidityProvidersApi,
+  MimirApi,
+  MimirResponse,
   NetworkApi,
   Pool,
   PoolsApi,
   QueueApi,
+  QueueResponse,
   QuoteApi,
   QuoteSaverDepositResponse,
   QuoteSaverWithdrawResponse,
@@ -56,6 +59,7 @@ export class Thornode {
   private liquidityProvidersApi: LiquidityProvidersApi[]
   private saversApi: SaversApi[]
   private quoteApi: QuoteApi[]
+  private mimirApi: MimirApi[]
 
   constructor(network: Network = Network.Mainnet, config?: ThornodeConfig) {
     this.network = network
@@ -72,6 +76,7 @@ export class Thornode {
     )
     this.saversApi = this.config.thornodeBaseUrls.map((url) => new SaversApi(new Configuration({ basePath: url })))
     this.quoteApi = this.config.thornodeBaseUrls.map((url) => new QuoteApi(new Configuration({ basePath: url })))
+    this.mimirApi = this.config.thornodeBaseUrls.map((url) => new MimirApi(new Configuration({ basePath: url })))
   }
 
   /**
@@ -86,6 +91,44 @@ export class Thornode {
       try {
         const queueScheduled = await api.queueScheduled()
         return queueScheduled.data
+      } catch (e) {
+        //console.error(e)
+        throw new Error(`THORNode not responding`)
+      }
+    }
+    throw Error(`THORNode not responding`)
+  }
+  /**
+   * Returns queue
+   * May be empty if there are no transactions
+   *
+   * @returns {ScheduledQueueItem} Array
+   *
+   */
+  async getQueue(): Promise<QueueResponse> {
+    for (const api of this.queueApi) {
+      try {
+        const queue = await api.queue()
+        return queue.data
+      } catch (e) {
+        //console.error(e)
+        throw new Error(`THORNode not responding`)
+      }
+    }
+    throw Error(`THORNode not responding`)
+  }
+  /**
+   * Returns Mimir
+   * May be empty if there are no transactions
+   *
+   * @returns {ScheduledQueueItem} Array
+   *
+   */
+  async getMimir(): Promise<MimirResponse> {
+    for (const api of this.mimirApi) {
+      try {
+        const queue = await api.mimir()
+        return queue.data
       } catch (e) {
         //console.error(e)
         throw new Error(`THORNode not responding`)
@@ -161,6 +204,47 @@ export class Thornode {
     throw new Error(`THORNode not responding`)
   }
 
+  /**
+   *
+   * @returns  Thorchain constants
+   */
+  async getTcConstants(): Promise<Record<string, string>> {
+    for (const api of this.networkApi) {
+      try {
+        const constants = await api.constants()
+        if (constants.data.int_64_values) {
+          return constants.data.int_64_values
+        }
+      } catch (e) {
+        //console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+
+  /**
+   * Function that wraps Mimir and Constants to return the value from a given constant name. Searchs Mimir first.
+   *
+   * @param networkValueName the network value to be used to search the contsants
+   * @returns the mimir or constants value
+   */
+  async getNetworkValues(): Promise<Record<string, number>> {
+    const [mimirDetails, constantDetails] = await Promise.all([this.getMimir(), this.getTcConstants()])
+    const retVal: Record<string, number> = {}
+    // insert constants first
+    for (const constantKey of Object.keys(constantDetails)) {
+      retVal[(Object.values(constantDetails), constantDetails[constantKey])]
+    }
+    console.log(retVal)
+    console.log(mimirDetails)
+    // // mimir will overwrite any dupe constants
+    // for (const mimirKey of Object.keys(mimirDetails)) {
+    //   const mimirValue = mimirDetails[mimirKey]
+    //   retVal[mimirKey.toUpperCase()] = mimirValue
+    // }
+
+    return retVal
+  }
   /**
    *
    * @param asset - asset string
