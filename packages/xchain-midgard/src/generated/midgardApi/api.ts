@@ -19,12 +19,7 @@ import globalAxios, { AxiosPromise, AxiosInstance, AxiosRequestConfig } from 'ax
 import {
   DUMMY_BASE_URL,
   assertParamExists,
-  setApiKeyToObject,
-  setBasicAuthToObject,
-  setBearerAuthToObject,
-  setOAuthToObject,
   setSearchParams,
-  serializeDataIfNeeded,
   toPathString,
   createRequestFunction,
 } from './common'
