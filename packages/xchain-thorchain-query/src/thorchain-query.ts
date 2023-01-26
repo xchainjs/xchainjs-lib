@@ -605,12 +605,11 @@ export class ThorchainQuery {
       totalUnits: new BigNumber(poolAsset.pool.liquidityUnits),
       liquidityUnits: new BigNumber(liquidityProvider.units),
     }
-    const mimir = await this.thorchainCache.thornode.getNetworkValues()
-    console.log(mimir['FULLIMPLOSSPROTECTIONBLOCKS'])
+    const networkValues = await this.thorchainCache.thornode.getNetworkValues()
     const block: Block = {
       current: blockData.thorchain,
       lastAdded: liquidityProvider.last_add_height,
-      fullProtection: mimir['FULLIMPLOSSPROTECTIONBLOCKS'],
+      fullProtection: networkValues['FULLIMPLOSSPROTECTIONBLOCKS'],
     }
     //
     const currentLP: PostionDepositValue = {
