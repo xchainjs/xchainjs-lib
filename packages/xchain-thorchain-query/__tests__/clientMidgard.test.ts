@@ -26,6 +26,7 @@ describe('Midgard Client Test', () => {
     nativeDecimal: '8',
     saversDepth: '0',
     saversUnits: '0',
+    saversAPR: '0',
     poolAPY: '0.0925796460549001',
     runeDepth: '37660118888424',
     status: 'available',
