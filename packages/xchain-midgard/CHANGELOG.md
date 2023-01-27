@@ -1,3 +1,9 @@
+# v0.4.2 (2023-01-26)
+
+## Update
+
+- Update to latest Midgard 2.13.0
+
 # v0.4.1 (2022-12-13)
 
 ## Update

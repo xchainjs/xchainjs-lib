@@ -245,9 +245,9 @@ export class ThorchainQuery {
       if (!checkOutboundFee) {
         const newFee = usdMinFee
         outboundFeeInOutboundGasAsset = await this.convert(newFee, AssetRuneNative)
-        console.log(outboundFeeInOutboundGasAsset.assetAmount.amount)
       }
     }
+    //console.log(outboundFeeInOutboundGasAsset.formatedAssetString())
     // ----------- Remove Fees from inbound before doing the swap -----------
     const inboundFeeInInboundAsset = await this.thorchainCache.convert(inboundFeeInInboundGasAsset, params.input.asset)
     const inputMinusInboundFeeInAsset = input.minus(inboundFeeInInboundAsset)
@@ -282,6 +282,7 @@ export class ThorchainQuery {
       outboundFeeInOutboundGasAsset,
       params.destinationAsset,
     )
+    //console.log(outboundFeeInDestinationAsset.formatedAssetString())
     const netOutputInAsset = swapOutputInDestinationAsset.output.minus(outboundFeeInDestinationAsset)
     const totalFees: TotalFees = {
       inboundFee: inboundFeeInInboundGasAsset,
@@ -498,7 +499,8 @@ export class ThorchainQuery {
     let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative).assetAmount
       .amount()
       .toNumber()
-    const getScheduledOutboundValue = await this.thorchainCache.midgard.getScheduledOutboundValue()
+    const getQueue = await this.thorchainCache.thornode.getQueue()
+    const outboundValue = new CryptoAmount(baseAmount(getQueue.scheduled_outbound_value), AssetRuneNative)
     const thorChainblocktime = this.chainAttributes[THORChain].avgBlockTimeInSecs // blocks required to confirm tx
     // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
     const runeValue = await this.thorchainCache.convert(outboundAmount, AssetRuneNative)
@@ -507,11 +509,11 @@ export class ThorchainQuery {
       return thorChainblocktime
     }
     // Rune value in the outbound queue
-    if (getScheduledOutboundValue == undefined) {
+    if (outboundValue == undefined) {
       throw new Error(`Could not return Scheduled Outbound Value`)
     }
     // Add OutboundAmount in rune to the oubound queue
-    const outboundAmountTotal = runeValue.plus(getScheduledOutboundValue)
+    const outboundAmountTotal = runeValue.plus(outboundValue)
     // calculate the if outboundAmountTotal is over the volume threshold
     const volumeThreshold = outboundAmountTotal.div(minTxOutVolumeThreshold)
     // check delay rate
@@ -603,7 +605,7 @@ export class ThorchainQuery {
       totalUnits: new BigNumber(poolAsset.pool.liquidityUnits),
       liquidityUnits: new BigNumber(liquidityProvider.units),
     }
-    const networkValues = await this.thorchainCache.midgard.getNetworkValues()
+    const networkValues = await this.thorchainCache.thornode.getNetworkValues()
     const block: Block = {
       current: blockData.thorchain,
       lastAdded: liquidityProvider.last_add_height,

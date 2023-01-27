@@ -3,6 +3,7 @@ import { AssetBNB } from '@xchainjs/xchain-binance'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetBCH } from '@xchainjs/xchain-bitcoincash'
 import { Network } from '@xchainjs/xchain-client'
+import { AssetDOGE } from '@xchainjs/xchain-doge'
 import { AssetETH } from '@xchainjs/xchain-ethereum'
 import { AssetLTC } from '@xchainjs/xchain-litecoin'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
@@ -254,7 +255,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
 
   it(`Should check liquidity position for an address`, async () => {
     const address = 'thor1cf4dsll8rema8y3xvvsn2t786xrkhp3d679qxh'
-    const checkLP = await thorchainQuery.checkLiquidityPosition(AssetBTC, address)
+    const checkLP = await thorchainQuery.checkLiquidityPosition(AssetDOGE, address)
     printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()
   })

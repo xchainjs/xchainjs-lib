@@ -39,6 +39,11 @@ export default {
       const resp = require(`./responses/thornode/scheduledQueue.json`)
       return [200, resp]
     })
+    // Mock scheduled queue
+    mock.onGet(/\/thorchain\/queue/).reply(function () {
+      const resp = require(`./responses/thornode/queue.json`)
+      return [200, resp]
+    })
     // Mock last block
     mock.onGet(/\/thorchain\/lastblock/).reply(function () {
       const resp = require(`./responses/thornode/lastBlock.json`)
@@ -53,6 +58,11 @@ export default {
     // Mock constants tx
     mock.onGet(/\/thorchain\/constants/).reply(function () {
       const resp = require('./responses/thornode/constants.json')
+      return [200, resp]
+    })
+    // Mock mimir tx
+    mock.onGet(/\/thorchain\/mimir/).reply(function () {
+      const resp = require('./responses/thornode/mimir.json')
       return [200, resp]
     })
   },

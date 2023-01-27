@@ -1,3 +1,10 @@
+# v0.1.16 (2023-1-26)
+
+## Fix
+
+- Switch from deprecated Migard endpoints `v2/thorchain` to thornode `/thorchain`
+- Update tests
+
 # v0.1.15 (2023-01-25)
 
 ## Bug fix

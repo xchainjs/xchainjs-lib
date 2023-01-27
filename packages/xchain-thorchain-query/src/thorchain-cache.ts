@@ -169,7 +169,7 @@ export class ThorchainCache {
    */
   private async refereshInboundDetailCache(): Promise<void> {
     const [mimirDetails, allInboundAddresses] = await Promise.all([
-      this.midgard.getMimirDetails(),
+      this.thornode.getMimir(),
       this.thornode.getInboundAddresses(),
     ])
     const inboundDetails: Record<string, InboundDetail> = {}
@@ -227,7 +227,7 @@ export class ThorchainCache {
    * which will refresh the cache if it's expired
    */
   private async refereshNetworkValuesCache(): Promise<void> {
-    const networkValues = await this.midgard.getNetworkValues()
+    const networkValues = await this.thornode.getNetworkValues()
 
     this.networkValuesCache = {
       lastRefreshed: Date.now(),

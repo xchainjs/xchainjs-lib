@@ -307,10 +307,11 @@ export class TransactionStage {
         outboundBlock > currentTCHeight
           ? (outboundBlock - currentTCHeight) * this.chainAttributes[THORChain].avgBlockTimeInSecs
           : 0
+      const withdrawalAmount = await this.getCryptoAmount(outAmount[0], asset)
 
       const withdrawLpInfo: WithdrawInfo = {
         status,
-        withdrawalAmount: new CryptoAmount(baseAmount(outAmount[0]), asset),
+        withdrawalAmount,
         expectedConfirmationDate,
         thorchainHeight: currentTCHeight,
         outboundHeight: outboundBlock,
@@ -365,9 +366,10 @@ export class TransactionStage {
       // if the TC has process the block that the outbound tx was assigned to then its completed.
       const status = txData.out_txs ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
 
+      const withdrawalAmount = await this.getCryptoAmount(outAmount[0], asset)
       const withdrawSaverInfo: WithdrawSaverInfo = {
         status,
-        withdrawalAmount: new CryptoAmount(baseAmount(outAmount[0]), asset),
+        withdrawalAmount,
         expectedConfirmationDate,
         thorchainHeight: currentTCHeight,
         finalisedHeight,

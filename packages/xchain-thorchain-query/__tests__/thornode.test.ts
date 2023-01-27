@@ -2,6 +2,8 @@ import mockThornodeApi from '../__mocks__/thornode-api'
 import { Thornode } from '../src/utils/thornode'
 
 const thornode = new Thornode()
+const networkName = 'FullImpLossProtectionBlocks'
+const FullImpLossProtectionBlocks = 1440000
 
 describe(`Thornode transaction status tests`, () => {
   beforeAll(() => {
@@ -27,5 +29,15 @@ describe(`Thornode transaction status tests`, () => {
     const lastBlock = await thornode.getLastBlock()
     expect(lastBlock).toBeTruthy()
     expect(lastBlock[0].chain).toEqual('BCH')
+  })
+  it(`Should return networkValue by name`, async () => {
+    const networkValues = await thornode.getNetworkValues()
+    const val = networkValues[networkName.toUpperCase()]
+    expect(val).toBeTruthy()
+    expect(val).toEqual(FullImpLossProtectionBlocks)
+  })
+  it(`Should return pools array`, async () => {
+    const scheduledOutbound = await thornode.getscheduledQueue()
+    expect(scheduledOutbound).toBeTruthy()
   })
 })
