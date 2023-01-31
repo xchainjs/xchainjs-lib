@@ -5,6 +5,7 @@ import axios from 'axios'
 import { BTC_DECIMAL } from './const'
 import {
   AddressParams,
+  BalanceParams,
   BtcAddressDTO,
   BtcAddressUTXO,
   BtcGetBalanceDTO,
@@ -106,7 +107,7 @@ export const getBalance = async ({
   network,
   address,
   confirmedOnly,
-}: AddressParams & { confirmedOnly: boolean }): Promise<BaseAmount> => {
+}: BalanceParams): Promise<BaseAmount> => {
   const url = `${sochainUrl}/balance/${toSochainNetwork(network)}/${address}`
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const balanceResponse: SochainResponse<BtcGetBalanceDTO> = response.data
@@ -132,30 +133,21 @@ export const getUnspentTxs = async ({
   sochainUrl,
   network,
   address,
-  startingFromTxId,
+  page,
 }: AddressParams): Promise<BtcAddressUTXO[]> => {
-  const url = [
-    sochainUrl,
-    'unspent_outputs',
-    toSochainNetwork(network),
-    address,
-    startingFromTxId ? startingFromTxId : null,
-  ]
-    .filter((v) => !!v)
-    .join('/')
+  const url = [sochainUrl, 'unspent_outputs', toSochainNetwork(network), address, page].filter((v) => !!v).join('/')
   const resp = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const response: SochainResponse<BtcUnspentTxsDTO> = resp.data
-  const txs = response.data.txs
-  if (txs.length === 100) {
+  const txs = response.data.outputs
+  if (txs.length === 10) {
     //fetch the next batch
-    const lastTxId = txs[99].txid
 
     const nextBatch = await getUnspentTxs({
       apiKey,
       sochainUrl,
       network,
       address,
-      startingFromTxId: lastTxId,
+      page: page + 1,
     })
     return txs.concat(nextBatch)
   } else {
@@ -246,6 +238,7 @@ export const getConfirmedUnspentTxs = async ({
     sochainUrl,
     network,
     address,
+    page: 1,
   })
 
   const confirmedUTXOs: BtcAddressUTXO[] = []
@@ -256,7 +249,7 @@ export const getConfirmedUnspentTxs = async ({
         apiKey,
         sochainUrl,
         network,
-        txHash: tx.txid,
+        txHash: tx.hash,
       })
 
       if (confirmed) {

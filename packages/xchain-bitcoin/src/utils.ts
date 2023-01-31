@@ -19,7 +19,7 @@ import * as haskoinApi from './haskoin-api'
 import * as sochain from './sochain-api'
 import { BroadcastTxParams, UTXO } from './types/common'
 import * as HaskoinApiTypes from './types/haskoin-api-types'
-import { AddressParams, BtcAddressUTXO, ScanUTXOParam } from './types/sochain-api-types'
+import { AddressParams, BalanceParams, BtcAddressUTXO, ScanUTXOParam } from './types/sochain-api-types'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
@@ -106,11 +106,9 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
 export const getBalance = async ({
   params,
   haskoinUrl,
-  confirmedOnly,
 }: {
-  params: AddressParams
+  params: BalanceParams
   haskoinUrl: string
-  confirmedOnly: boolean
 }): Promise<Balance[]> => {
   switch (params.network) {
     case Network.Mainnet:
@@ -118,14 +116,18 @@ export const getBalance = async ({
       return [
         {
           asset: AssetBTC,
-          amount: await haskoinApi.getBalance({ haskoinUrl, address: params.address, confirmedOnly }),
+          amount: await haskoinApi.getBalance({
+            haskoinUrl,
+            address: params.address,
+            confirmedOnly: params.confirmedOnly,
+          }),
         },
       ]
     case Network.Testnet:
       return [
         {
           asset: AssetBTC,
-          amount: await sochain.getBalance({ ...params, confirmedOnly }),
+          amount: await sochain.getBalance({ ...params }),
         },
       ]
   }
@@ -200,6 +202,7 @@ export const scanUTXOs = async ({
         sochainUrl,
         network,
         address,
+        page: 1,
       }
 
       // Get UTXOs from Sochain
@@ -209,14 +212,14 @@ export const scanUTXOs = async ({
 
       return await Promise.all(
         utxos.map(async (utxo) => ({
-          hash: utxo.txid,
-          index: utxo.output_no,
+          hash: utxo.hash,
+          index: utxo.index,
           value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
           witnessUtxo: {
             value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
-            script: Buffer.from(utxo.script_hex, 'hex'),
+            script: Buffer.from(utxo.script, 'hex'),
           },
-          txHex: withTxHex ? await getTxHex({ apiKey, txHash: utxo.txid, sochainUrl, network }) : undefined,
+          txHex: withTxHex ? await getTxHex({ apiKey, txHash: utxo.hash, sochainUrl, network }) : undefined,
         })),
       )
     }
@@ -224,7 +227,7 @@ export const scanUTXOs = async ({
     case Network.Stagenet: {
       // Get UTXOs from Haskoin
       const utxos: HaskoinApiTypes.UtxoData[] = confirmedOnly
-        ? await haskoinApi.getConfirmedUnspentTxs({ address, haskoinUrl, sochainUrl, network })
+        ? await haskoinApi.getConfirmedUnspentTxs({ apiKey, address, haskoinUrl, sochainUrl, network })
         : await haskoinApi.getUnspentTxs({ address, haskoinUrl })
 
       return await Promise.all(

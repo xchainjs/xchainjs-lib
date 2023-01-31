@@ -61,7 +61,8 @@ describe('Bitcoin Utils Test', () => {
   it('should fetch as many uxtos as are associated with an address', async () => {
     const address = '34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo'
     const utxos: UTXO[] = await Utils.scanUTXOs({
-      sochainUrl: 'https://sochain.com/api/v2',
+      apiKey: 'mock',
+      sochainUrl: 'https://sochain.com/api/v3',
       haskoinUrl: 'https://api.haskoin.com/haskoin-store/btc',
       network: Network.Testnet,
       address,

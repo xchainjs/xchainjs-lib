@@ -8,14 +8,14 @@ export default {
   restore: mock.restore,
   init: () => {
     //Mock address
-    mock.onGet(/\/address\//).reply(function (config: MockConfig) {
+    mock.onGet(/\/address_summary\//).reply(function (config: MockConfig) {
       const id: string = config.url?.split('/').pop() ?? ''
       const resp = require(`./response/addresses/${id}.json`)
       return [200, resp]
     })
 
     //Mock get_tx
-    mock.onGet(/\/get_tx\//).reply(function (config: MockConfig) {
+    mock.onGet(/\/transaction\//).reply(function (config: MockConfig) {
       const id = config.url?.split('/').pop() ?? ''
       const resp = require(`./response/tx/${id}.json`)
       return [200, resp]
@@ -29,7 +29,7 @@ export default {
     })
 
     //Mock get_unspent_txs
-    mock.onGet(/\/get_tx_unspent\//).reply(function (config: MockConfig) {
+    mock.onGet(/\/unspent_outputs\//).reply(function (config: MockConfig) {
       const split = config.url?.split('/')
 
       //the address is always the 7th, the optional 8th param would be starting from txid to allow paging
@@ -45,12 +45,12 @@ export default {
       return [200, resp]
     })
 
-    //Mock is_tx_confirmed
-    mock.onGet(/\/is_tx_confirmed\//).reply(function (config: MockConfig) {
-      const id = config.url?.split('/').pop() ?? ''
-      const resp = require(`./response/is-tx-confirmed/${id}.json`)
-      return [200, resp]
-    })
+    // //Mock is_tx_confirmed
+    // mock.onGet(/\/is_tx_confirmed\//).reply(function (config: MockConfig) {
+    //   const id = config.url?.split('/').pop() ?? ''
+    //   const resp = require(`./response/is-tx-confirmed/${id}.json`)
+    //   return [200, resp]
+    // })
 
     //Mock blockstream send tx
     mock.onPost(/\/tx/).reply(function () {

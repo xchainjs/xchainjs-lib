@@ -6,7 +6,7 @@ import mockSochainApi from '../__mocks__/sochain'
 import { Client } from '../src/client'
 import { AssetBTC, MIN_TX_FEE } from '../src/const'
 
-const btcClient = new Client({})
+const btcClient = new Client({ sochainApiKey: 'mock' })
 
 describe('BitcoinClient Test', () => {
   beforeEach(() => {
@@ -59,6 +59,7 @@ describe('BitcoinClient Test', () => {
   it('should not throw on a client without a phrase', () => {
     expect(() => {
       new Client({
+        sochainApiKey: 'mock',
         network: Network.Testnet,
       })
     }).not.toThrow()

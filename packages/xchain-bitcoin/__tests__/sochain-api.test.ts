@@ -9,6 +9,7 @@ import { BtcAddressUTXO } from '../src/types/sochain-api-types'
 
 const sochainUrl = 'https://sochain.com/api/v2'
 const network = Network.Mainnet
+const apiKey = 'xxx'
 
 describe('Sochain API Test', () => {
   beforeEach(() => {
@@ -21,6 +22,7 @@ describe('Sochain API Test', () => {
     const address = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
 
     const utxos: BtcAddressUTXO[] = await sochain.getUnspentTxs({
+      apiKey,
       sochainUrl,
       network,
       address,
@@ -34,12 +36,14 @@ describe('Sochain API Test', () => {
     const unconfirmedTxId = '8ef74ec4a6473caf7b3ddfcf38cf6db43995ff98c7cbc6d8cf317f3c22e35df2'
 
     const isTx1Confirmed = await sochain.getIsTxConfirmed({
+      apiKey,
       sochainUrl,
       network,
       hash: confirmedTxId,
     })
 
     const isTx2Confirmed = await sochain.getIsTxConfirmed({
+      apiKey,
       sochainUrl,
       network,
       hash: unconfirmedTxId,
@@ -56,6 +60,7 @@ describe('Sochain API Test', () => {
     const confirmedUTXOs = unspentTxsResponse.data.txs.filter((data) => data.txid !== unconfirmedTxid)
 
     const utxos = await sochain.getConfirmedUnspentTxs({
+      apiKey,
       sochainUrl,
       network,
       address,

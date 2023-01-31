@@ -5,7 +5,14 @@ export type AddressParams = {
   sochainUrl: string
   network: Network
   address: string
-  startingFromTxId?: string
+  page: number
+}
+export type BalanceParams = {
+  apiKey: string
+  sochainUrl: string
+  network: Network
+  address: string
+  confirmedOnly: boolean
 }
 
 export type TxHashParams = {
@@ -48,13 +55,14 @@ export interface Transaction {
 }
 
 export type BtcAddressUTXO = {
-  txid: string
-  output_no: number
-  script_asm: string
-  script_hex: string
+  hash: string
+  index: number
+  script: string
+  address: string
+  tx_hex: string
   value: string
-  confirmations: number
-  time: number
+  // confirmations: number
+  // time: number
 }
 
 export type BtcAddressTxDTO = {
@@ -81,9 +89,7 @@ export type BtcGetBalanceDTO = {
 }
 
 export type BtcUnspentTxsDTO = {
-  network: string
-  address: string
-  txs: BtcAddressUTXO[]
+  outputs: BtcAddressUTXO[]
 }
 
 export type BtcBroadcastTransfer = {

@@ -195,9 +195,9 @@ class Client extends UTXOClient {
         sochainUrl: this.sochainUrl,
         network: this.network,
         address: address,
+        confirmedOnly: !!confirmedOnly,
       },
       haskoinUrl: this.haskoinUrl[this.network],
-      confirmedOnly: !!confirmedOnly,
     })
   }
 
