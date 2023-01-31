@@ -156,10 +156,12 @@ const txHexMap: Record<TxHash, string> = {}
  * It will try to get it from cache before requesting it from Sochain
  */
 const getTxHex = async ({
+  apiKey,
   txHash,
   sochainUrl,
   network,
 }: {
+  apiKey: string
   sochainUrl: string
   txHash: TxHash
   network: Network
@@ -168,7 +170,7 @@ const getTxHex = async ({
   const txHex = txHexMap[txHash]
   if (!!txHex) return txHex
   // or get it from Sochain
-  const { tx_hex } = await sochain.getTx({ hash: txHash, sochainUrl, network })
+  const { tx_hex } = await sochain.getTx({ apiKey, hash: txHash, sochainUrl, network })
   // cache it
   txHexMap[txHash] = tx_hex
   return tx_hex
@@ -183,6 +185,7 @@ const getTxHex = async ({
  * @returns {UTXO[]} The UTXOs of the given address.
  */
 export const scanUTXOs = async ({
+  apiKey,
   sochainUrl,
   haskoinUrl,
   network,
@@ -193,6 +196,7 @@ export const scanUTXOs = async ({
   switch (network) {
     case Network.Testnet: {
       const addressParam: AddressParams = {
+        apiKey,
         sochainUrl,
         network,
         address,
@@ -212,7 +216,7 @@ export const scanUTXOs = async ({
             value: assetToBase(assetAmount(utxo.value, BTC_DECIMAL)).amount().toNumber(),
             script: Buffer.from(utxo.script_hex, 'hex'),
           },
-          txHex: withTxHex ? await getTxHex({ txHash: utxo.txid, sochainUrl, network }) : undefined,
+          txHex: withTxHex ? await getTxHex({ apiKey, txHash: utxo.txid, sochainUrl, network }) : undefined,
         })),
       )
     }
@@ -232,7 +236,7 @@ export const scanUTXOs = async ({
             value: baseAmount(utxo.value, BTC_DECIMAL).amount().toNumber(),
             script: Buffer.from(utxo.pkscript, 'hex'),
           },
-          txHex: withTxHex ? await getTxHex({ txHash: utxo.txid, sochainUrl, network }) : undefined,
+          txHex: withTxHex ? await getTxHex({ apiKey, txHash: utxo.txid, sochainUrl, network }) : undefined,
         })),
       )
     }
@@ -245,6 +249,7 @@ export const scanUTXOs = async ({
  * @returns {Transaction}
  */
 export const buildTx = async ({
+  apiKey,
   amount,
   recipient,
   memo,
@@ -256,6 +261,7 @@ export const buildTx = async ({
   spendPendingUTXO = false, // default: prevent spending uncomfirmed UTXOs
   withTxHex = false,
 }: TxParams & {
+  apiKey: string
   feeRate: FeeRate
   sender: Address
   network: Network
@@ -266,7 +272,7 @@ export const buildTx = async ({
 }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> => {
   // search only confirmed UTXOs if pending UTXO is not allowed
   const confirmedOnly = !spendPendingUTXO
-  const utxos = await scanUTXOs({ sochainUrl, haskoinUrl, network, address: sender, confirmedOnly, withTxHex })
+  const utxos = await scanUTXOs({ apiKey, sochainUrl, haskoinUrl, network, address: sender, confirmedOnly, withTxHex })
 
   if (memo && memo.length > 80) {
     throw new Error('memo too long, must not be longer than 80 chars.')
