@@ -27,7 +27,7 @@ describe('Bitcoin Integration Tests', () => {
   it('should fetch btc tx data', async () => {
     const txId = '3b250bfd61e7f231a22c6e02f9927927ac33e40c8b343716e08fec29c509ab54'
     const tx = await btcClient.getTransactionData(txId)
-    console.log(JSON.stringify(tx, null, 2))
+    //console.log(JSON.stringify(tx, null, 2))
     expect(tx.hash).toBe(txId)
   })
 })

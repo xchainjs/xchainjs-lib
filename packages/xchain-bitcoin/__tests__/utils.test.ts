@@ -60,17 +60,18 @@ describe('Bitcoin Utils Test', () => {
 
   it('should fetch as many uxtos as are associated with an address', async () => {
     const address = '34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo'
+
     const utxos: UTXO[] = await Utils.scanUTXOs({
       apiKey: 'mock',
       sochainUrl: 'https://sochain.com/api/v3',
       haskoinUrl: 'https://api.haskoin.com/haskoin-store/btc',
-      network: Network.Testnet,
+      network: Network.Mainnet,
       address,
       confirmedOnly: false, // get all confirmed & unconfirmed UTXOs
     })
-    expect(utxos.length).toEqual(177)
-    expect(utxos?.[0].hash).toEqual('a79b970c17d97557357ec0661a2b9de44724440e1c635e1b603381c53ece725d')
-    expect(utxos?.[176].hash).toEqual('fca7fe2df9318fb17ab8e527429c900bcea16613e57ab65f323d0593f0c3919c')
+    expect(utxos.length).toEqual(100)
+    expect(utxos?.[0].hash).toEqual('27e9ea50a4ef642aae8ba2fc4d9604df9b227090c0da7c8e13b591f76a2d4f2c')
+    expect(utxos?.[99].hash).toEqual('a89a533b3034c5b5df6b9a20a951cf33c0df0125f233584807d6a0958dddd070')
   })
 
   describe('broadcastTx', () => {

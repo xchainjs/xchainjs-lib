@@ -1,35 +1,24 @@
 {
-  "status" : "success",
-  "data" : {
-    "network" : "BTCTEST",
-    "address" : "tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp",
-    "txs" : [
+  "status": "success",
+  "data": {
+    "outputs": [
       {
-        "txid" : "d5d4a0f07c5cc639e379caceb1e4e75f817b94daf698c9242f9c09a212df2fee",
-        "output_no" : 1,
-        "script_asm" : "0 506ddfff434e99a93f0c0f5a47d0d7247d91cdac",
-        "script_hex" : "0014506ddfff434e99a93f0c0f5a47d0d7247d91cdac",
-        "value" : "0.00008800",
-        "confirmations" : 42822,
-        "time" : 1605495806
+        "hash": "fc319add73bb6d9b37b2ebbd362ea93d5a3689d543cab3b06dac111591043304",
+        "index": 0,
+        "script": "0014506ddfff434e99a93f0c0f5a47d0d7247d91cdac",
+        "address": "tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp",
+        "value": "0.00000010",
+        "block": 2065199,
+        "tx_hex": "010000000001015814ce5571ca571e17e38758ff8543802d9cf4d18aac56f50f3d277c56b691d30100000000ffffffff030a00000000000000160014506ddfff434e99a93f0c0f5a47d0d7247d91cdacfede050000000000160014506ddfff434e99a93f0c0f5a47d0d7247d91cdac0000000000000000066a046d656d6f024730440220660e32ba30bc0b137e0362f9b25927752948c5e0adc8eaa5e327cbc629ffde8c0220378901c5cef067a1f574cc1381f187eda42e7b6eeb02306aacc230b6d1ed3eb30121034817f9a4e3cca3bcfa454a80fb1270543f0a170d0ab089bc9040d0431f858cde00000000"
       },
       {
-        "txid" : "8ef74ec4a6473caf7b3ddfcf38cf6db43995ff98c7cbc6d8cf317f3c22e35df2",
-        "output_no" : 1,
-        "script_asm" : "0 506ddfff434e99a93f0c0f5a47d0d7247d91cdac",
-        "script_hex" : "0014506ddfff434e99a93f0c0f5a47d0d7247d91cdac",
-        "value" : "0.00495777",
-        "confirmations" : 37488,
-        "time" : 1607858375
-      },
-      {
-        "txid" : "70f27da37df6183d357fa49267eee1934a2621b005edaa04899c5d80ef95de30",
-        "output_no" : 1,
-        "script_asm" : "0 506ddfff434e99a93f0c0f5a47d0d7247d91cdac",
-        "script_hex" : "0014506ddfff434e99a93f0c0f5a47d0d7247d91cdac",
-        "value" : "0.00015073",
-        "confirmations" : 37215,
-        "time" : 1608016068
+        "hash": "fc319add73bb6d9b37b2ebbd362ea93d5a3689d543cab3b06dac111591043304",
+        "index": 1,
+        "script": "0014506ddfff434e99a93f0c0f5a47d0d7247d91cdac",
+        "address": "tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp",
+        "value": "0.00384766",
+        "block": 2065199,
+        "tx_hex": "010000000001015814ce5571ca571e17e38758ff8543802d9cf4d18aac56f50f3d277c56b691d30100000000ffffffff030a00000000000000160014506ddfff434e99a93f0c0f5a47d0d7247d91cdacfede050000000000160014506ddfff434e99a93f0c0f5a47d0d7247d91cdac0000000000000000066a046d656d6f024730440220660e32ba30bc0b137e0362f9b25927752948c5e0adc8eaa5e327cbc629ffde8c0220378901c5cef067a1f574cc1381f187eda42e7b6eeb02306aacc230b6d1ed3eb30121034817f9a4e3cca3bcfa454a80fb1270543f0a170d0ab089bc9040d0431f858cde00000000"
       }
     ]
   }

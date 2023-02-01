@@ -320,7 +320,6 @@ class Client extends UTXOClient {
       network: this.network,
       spendPendingUTXO,
     })
-
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
     psbt.signAllInputs(btcKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs

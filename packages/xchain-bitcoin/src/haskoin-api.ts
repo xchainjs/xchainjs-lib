@@ -41,7 +41,6 @@ export const getUnspentTxs = async ({
   address: string
 }): Promise<UtxoData[]> => {
   const { data: response } = await axios.get<UtxoData[]>(`${haskoinUrl}/address/${address}/unspent`)
-
   return response
 }
 

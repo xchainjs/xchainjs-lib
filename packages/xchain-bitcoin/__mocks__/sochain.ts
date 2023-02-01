@@ -15,14 +15,22 @@ export default {
     })
 
     //Mock get_tx
-    mock.onGet(/\/transaction\//).reply(function (config: MockConfig) {
+    mock.onGet(/\/v3\/transaction\//).reply(function (config: MockConfig) {
       const id = config.url?.split('/').pop() ?? ''
       const resp = require(`./response/tx/${id}.json`)
       return [200, resp]
     })
 
+    //Mock get_txs
+    mock.onGet(/\/v3\/transactions\//).reply(function (config: MockConfig) {
+      const split = config.url?.split('/')
+      const address = split?.[7] || ''
+      const resp = require(`./response/txs/${address}.json`)
+      return [200, resp]
+    })
+
     //Mock get_address_balance
-    mock.onGet(/\/get_address_balance\//).reply(function (config: MockConfig) {
+    mock.onGet(/\/balance\//).reply(function (config: MockConfig) {
       const id = config.url?.split('/').pop() ?? ''
       const resp = require(`./response/balances/${id}.json`)
       return [200, resp]
@@ -39,25 +47,25 @@ export default {
       let filePath = `./response/unspent-txs/${address}.json`
       if (startingfromTxId) {
         // this allows you to page utxos starting from a given txid
-        filePath = `./response/unspent-txs/${address}/${startingfromTxId}.json`
+        filePath = `./response/unspent-txs/${address}.json`
       }
       const resp = require(filePath)
       return [200, resp]
     })
 
-    // //Mock is_tx_confirmed
-    // mock.onGet(/\/is_tx_confirmed\//).reply(function (config: MockConfig) {
-    //   const id = config.url?.split('/').pop() ?? ''
-    //   const resp = require(`./response/is-tx-confirmed/${id}.json`)
-    //   return [200, resp]
-    // })
+    //Mock is_tx_confirmed
+    mock.onGet(/\/is_tx_confirmed\//).reply(function (config: MockConfig) {
+      const id = config.url?.split('/').pop() ?? ''
+      const resp = require(`./response/is-tx-confirmed/${id}.json`)
+      return [200, resp]
+    })
 
     //Mock blockstream send tx
-    mock.onPost(/\/tx/).reply(function () {
+    mock.onPost(/\/transaction/).reply(function () {
       return [200, 'TEST_OK']
     })
     //
-    //Mock horchain/inbound_addresses
+    //Mock thorchain/inbound_addresses
     mock.onGet(/\/thorchain\/inbound_addresses/).reply(function () {
       const resp = require(`./response/thornode/inbound_addresses.json`)
       return [200, resp]

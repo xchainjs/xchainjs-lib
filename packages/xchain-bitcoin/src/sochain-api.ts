@@ -85,7 +85,6 @@ export const getTxs = async ({
   network: Network
 }): Promise<BtcGetTxsDTO> => {
   const url = `${sochainUrl}/transactions/${toSochainNetwork(network)}/${address}/1` //TODO support paging
-  console.log(url)
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const txs: SochainResponse<BtcGetTxsDTO> = response.data
   return txs.data
@@ -206,7 +205,7 @@ export const getConfirmedTxStatus = async ({
   // try to get it from cache
   if (confirmedTxs.includes(txHash)) return true
   // or get status from Sochain
-  const { is_confirmed } = await await getIsTxConfirmed({
+  const { is_confirmed } = await getIsTxConfirmed({
     apiKey,
     sochainUrl,
     network,
