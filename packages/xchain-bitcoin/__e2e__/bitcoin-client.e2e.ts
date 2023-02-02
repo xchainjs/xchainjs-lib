@@ -1,6 +1,8 @@
-import { assetToString } from '@xchainjs/xchain-util'
+import { Network } from '@xchainjs/xchain-client'
+import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import { Client } from '../src/client'
+import { AssetBTC } from '../src/const'
 
 const btcClient = new Client({ sochainApiKey: process.env.SOCHAIN_API_KEY || '' })
 
@@ -30,4 +32,32 @@ describe('Bitcoin Integration Tests', () => {
     //console.log(JSON.stringify(tx, null, 2))
     expect(tx.hash).toBe(txId)
   })
+  // it('should send a testnet btc tx', async () => {
+  //   try {
+  //     const btcClientTestnet = new Client({
+  //       haskoinUrl: {
+  //         [Network.Testnet]: 'https://api.haskoin.com/btctest',
+  //         [Network.Mainnet]: 'https://api.haskoin.com/btc',
+  //         [Network.Stagenet]: 'https://api.haskoin.com/btc',
+  //       },
+  //       network: Network.Testnet,
+  //       phrase: process.env.TESTNETPHRASE,
+  //       sochainApiKey: process.env.SOCHAIN_API_KEY || '',
+  //     })
+  //     // const from = btcClientTestnet.getAddress(0)
+  //     const to = btcClientTestnet.getAddress(1)
+  //     const amount = assetToBase(assetAmount('0.0001'))
+  //     const txid = await btcClientTestnet.transfer({
+  //       asset: AssetBTC,
+  //       recipient: to,
+  //       amount,
+  //       memo: 'test',
+  //       feeRate: 1,
+  //     })
+  //     console.log(JSON.stringify(txid, null, 2))
+  //   } catch (err) {
+  //     console.error('ERR running test', err)
+  //     fail()
+  //   }
+  // })
 })

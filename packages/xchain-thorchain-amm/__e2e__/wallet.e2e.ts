@@ -13,7 +13,12 @@ register9Rheader(cosmosclient.config.globalAxios)
 
 const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
-const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
+const mainnetWallet = new Wallet(
+  process.env.MAINNETPHRASE || 'you forgot to set the phrase',
+  thorchainQueryMainnet,
+  process.env.SOCHAIN_API_KEY || '',
+)
+
 
 describe('xchain-swap wallet Tests', () => {
   it(`Should show balances `, async () => {
