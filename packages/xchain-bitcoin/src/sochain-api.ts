@@ -42,7 +42,6 @@ export const getAddress = async ({ apiKey, sochainUrl, network, address }: Addre
   const url = `${sochainUrl}/address_summary/${toSochainNetwork(network)}/${address}`
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const addressResponse: SochainResponse<BtcAddressDTO> = response.data
-  console.log(JSON.stringify(response.data))
   return addressResponse.data
 }
 

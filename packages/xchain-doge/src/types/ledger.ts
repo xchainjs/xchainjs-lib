@@ -12,6 +12,7 @@ export type LedgerTxInfoParams = Pick<TxParams, 'amount' | 'recipient'> & {
   feeRate: FeeRate
   sender: Address
   network: Network
+  apiKey: string
   sochainUrl: string
   nodeApiKey: string
 }
