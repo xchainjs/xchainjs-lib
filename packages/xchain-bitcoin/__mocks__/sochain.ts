@@ -7,21 +7,21 @@ type MockConfig = {
 export default {
   restore: mock.restore,
   init: () => {
-    //Mock address
+    //Mock addresses summary
     mock.onGet(/\/address_summary\//).reply(function (config: MockConfig) {
       const id: string = config.url?.split('/').pop() ?? ''
       const resp = require(`./response/addresses/${id}.json`)
       return [200, resp]
     })
 
-    //Mock get_tx
+    //Mock get transaction data
     mock.onGet(/\/v3\/transaction\//).reply(function (config: MockConfig) {
       const id = config.url?.split('/').pop() ?? ''
       const resp = require(`./response/tx/${id}.json`)
       return [200, resp]
     })
 
-    //Mock get_txs
+    //Mock get addresses transactions
     mock.onGet(/\/v3\/transactions\//).reply(function (config: MockConfig) {
       const split = config.url?.split('/')
       const address = split?.[7] || ''

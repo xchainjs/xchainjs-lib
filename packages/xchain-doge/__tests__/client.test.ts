@@ -7,8 +7,9 @@ import { Client } from '../src/client'
 import { AssetDOGE, LOWER_FEE_BOUND, MIN_TX_FEE } from '../src/const'
 
 mockSochainApi.init()
+const sochainApiKey = 'xxx'
 
-const dogeClient = new Client({})
+const dogeClient = new Client({ sochainApiKey })
 
 describe('DogecoinClient Test', () => {
   beforeEach(() => {
@@ -53,6 +54,7 @@ describe('DogecoinClient Test', () => {
   it('should not throw on a client without a phrase', () => {
     expect(() => {
       new Client({
+        sochainApiKey,
         network: Network.Testnet,
       })
     }).not.toThrow()
@@ -127,6 +129,7 @@ describe('DogecoinClient Test', () => {
     dogeClient.setPhrase(phraseOne)
     const amount = baseAmount(5000000000)
     const txid = await dogeClient.transfer({ recipient: testnet_address_path1, amount, feeRate: LOWER_FEE_BOUND })
+    console.log(txid)
     expect(txid).toEqual('mock-txid-sochain')
   })
 
@@ -269,7 +272,6 @@ describe('DogecoinClient Test', () => {
     dogeClient.setNetwork(Network.Testnet)
 
     const txPages = await dogeClient.getTransactions({ address: 'nVhTSAcDWg5PihJA7FCx6G6jLexRz7qhsB', limit: 4 })
-
     expect(txPages.total).toEqual(2)
     expect(txPages.txs[0].asset).toEqual(AssetDOGE)
     expect(txPages.txs[0].date).toEqual(new Date('2021-12-22T00:39:13.000Z'))

@@ -201,7 +201,6 @@ export const scanUTXOs = async ({
     address,
     page: 1,
   })
-
   return await Promise.all(
     utxos.map(async (utxo) => ({
       hash: utxo.hash,
@@ -240,7 +239,6 @@ export const buildTx = async ({
 
   const utxos = await scanUTXOs({ apiKey, sochainUrl, network, address: sender, withTxHex })
   if (utxos.length === 0) throw new Error('No utxos to send')
-
   const feeRateWhole = Number(feeRate.toFixed(0))
   const compiledMemo = memo ? compileMemo(memo) : null
 
@@ -266,12 +264,11 @@ export const buildTx = async ({
   // For now we increase it by 10x
   psbt.setMaximumFeeRate(7500000)
   const params = { sochainUrl, network, address: sender }
-
   for (const utxo of inputs) {
     psbt.addInput({
       hash: utxo.hash,
       index: utxo.index,
-      nonWitnessUtxo: Buffer.from((await sochain.getTx({ apiKey, hash: utxo.hash, ...params })).tx_hex, 'hex'),
+      nonWitnessUtxo: Buffer.from((await sochain.getUnspentTxs ({ apiKey, hash: utxo.hash, ...params })).tx_hex, 'hex'),
     })
   }
 

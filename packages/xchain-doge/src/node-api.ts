@@ -15,6 +15,7 @@ export const broadcastTxToSochain = async ({ txHex, nodeUrl }: BroadcastTxParams
       tx_hex: txHex,
     })
   ).data
+
   if (response.error) {
     throw new Error(`failed to broadcast a transaction: ${response.error}`)
   }
