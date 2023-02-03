@@ -4,7 +4,7 @@ export type UTXO = {
   hash: string
   index: number
   value: number
-  txHex?: string
+  txHex: string
 }
 
 export type BroadcastTxParams = {

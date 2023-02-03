@@ -48,7 +48,6 @@ export interface Transaction {
   confirmations: number
   time: number
 
-  tx_hex: string
   inputs: TxIO[]
   outputs: TxIO[]
 }

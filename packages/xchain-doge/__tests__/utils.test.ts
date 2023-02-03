@@ -59,7 +59,6 @@ describe('Dogecoin Utils Test', () => {
       sochainUrl: 'https://sochain.com/api/v3',
       network: Network.Mainnet,
       address,
-      withTxHex: false,
     })
     expect(utxos.length).toEqual(1)
     expect(utxos?.[0].hash).toEqual('f65aa58332a0d491d7f96ccb96cc513ad622f18ad88cbe123096b23963569da0')

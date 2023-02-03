@@ -77,13 +77,15 @@ export const getTxs = async ({
   address,
   sochainUrl,
   network,
+  page,
 }: {
   apiKey: string
   address: string
   sochainUrl: string
   network: Network
+  page: number
 }): Promise<BtcGetTxsDTO> => {
-  const url = `${sochainUrl}/transactions/${toSochainNetwork(network)}/${address}/1` //TODO support paging
+  const url = `${sochainUrl}/transactions/${toSochainNetwork(network)}/${address}/${page}` //TODO support paging
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const txs: SochainResponse<BtcGetTxsDTO> = response.data
   return txs.data

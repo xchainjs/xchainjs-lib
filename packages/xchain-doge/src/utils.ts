@@ -147,33 +147,33 @@ export const validateAddress = (address: Address, network: Network): boolean => 
 }
 
 // Stores list of txHex in memory to avoid requesting same data
-const txHexMap: Record<TxHash, string> = {}
+// const txHexMap: Record<TxHash, string> = {}
 
-/**
- * Helper to get `hex` of `Tx`
- *
- * It will try to get it from cache before requesting it from Sochain
- */
-const getTxHex = async ({
-  apiKey,
-  txHash,
-  sochainUrl,
-  network,
-}: {
-  apiKey: string
-  sochainUrl: string
-  txHash: TxHash
-  network: Network
-}): Promise<string> => {
-  // try to get hex from cache
-  const txHex = txHexMap[txHash]
-  if (!!txHex) return txHex
-  // or get it from Sochain
-  const { tx_hex } = await sochain.getTx({ apiKey, hash: txHash, sochainUrl, network })
-  // cache it
-  txHexMap[txHash] = tx_hex
-  return tx_hex
-}
+// /**
+//  * Helper to get `hex` of `Tx`
+//  *
+//  * It will try to get it from cache before requesting it from Sochain
+//  */
+// const getTxHex = async ({
+//   apiKey,
+//   txHash,
+//   sochainUrl,
+//   network,
+// }: {
+//   apiKey: string
+//   sochainUrl: string
+//   txHash: TxHash
+//   network: Network
+// }): Promise<string> => {
+//   // try to get hex from cache
+//   const txHex = txHexMap[txHash]
+//   if (!!txHex) return txHex
+//   // or get it from Sochain
+//   const { tx_hex } = await sochain.getTx({ apiKey, hash: txHash, sochainUrl, network })
+//   // cache it
+//   txHexMap[txHash] = tx_hex
+//   return tx_hex
+// }
 
 /**
  * Scan UTXOs from sochain.
@@ -186,13 +186,11 @@ export const scanUTXOs = async ({
   sochainUrl,
   network,
   address,
-  withTxHex,
 }: {
   apiKey: string
   sochainUrl: string
   network: Network
   address: string
-  withTxHex: boolean
 }): Promise<UTXO[]> => {
   const utxos: DogeAddressUTXO[] = await sochain.getUnspentTxs({
     apiKey,
@@ -201,14 +199,12 @@ export const scanUTXOs = async ({
     address,
     page: 1,
   })
-  return await Promise.all(
-    utxos.map(async (utxo) => ({
-      hash: utxo.hash,
-      index: utxo.index,
-      value: assetToBase(assetAmount(utxo.value, DOGE_DECIMAL)).amount().toNumber(),
-      txHex: withTxHex ? await getTxHex({ apiKey, txHash: utxo.hash, sochainUrl, network }) : undefined,
-    })),
-  )
+  return utxos.map((utxo) => ({
+    hash: utxo.hash,
+    index: utxo.index,
+    value: assetToBase(assetAmount(utxo.value, DOGE_DECIMAL)).amount().toNumber(),
+    txHex: utxo.tx_hex,
+  }))
 }
 
 /**
@@ -226,18 +222,16 @@ export const buildTx = async ({
   sender,
   network,
   sochainUrl,
-  withTxHex = false,
 }: TxParams & {
   apiKey: string
   feeRate: FeeRate
   sender: Address
   network: Network
   sochainUrl: string
-  withTxHex?: boolean
 }): Promise<{ psbt: Dogecoin.Psbt; utxos: UTXO[] }> => {
   if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
-  const utxos = await scanUTXOs({ apiKey, sochainUrl, network, address: sender, withTxHex })
+  const utxos = await scanUTXOs({ apiKey, sochainUrl, network, address: sender })
   if (utxos.length === 0) throw new Error('No utxos to send')
   const feeRateWhole = Number(feeRate.toFixed(0))
   const compiledMemo = memo ? compileMemo(memo) : null
@@ -263,12 +257,12 @@ export const buildTx = async ({
   // https://thornode.ninerealms.com/thorchain/inbound_addresses?height=7526662 (09-27-2022)
   // For now we increase it by 10x
   psbt.setMaximumFeeRate(7500000)
-  const params = { sochainUrl, network, address: sender }
+  // const params = { sochainUrl, network, address: sender }
   for (const utxo of inputs) {
     psbt.addInput({
       hash: utxo.hash,
       index: utxo.index,
-      nonWitnessUtxo: Buffer.from((await sochain.getUnspentTxs ({ apiKey, hash: utxo.hash, ...params })).tx_hex, 'hex'),
+      nonWitnessUtxo: Buffer.from(utxo.txHex, 'hex'),
     })
   }
 

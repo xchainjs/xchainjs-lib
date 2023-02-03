@@ -200,7 +200,14 @@ class Client extends UTXOClient {
       haskoinUrl: this.haskoinUrl[this.network],
     })
   }
-
+  addArrayUpToLimit(arr: string[], toAdd: string[], limit: number) {
+    for (let index = 0; index < toAdd.length; index++) {
+      const element = toAdd[index]
+      while (arr.length < limit) {
+        arr.push(element)
+      }
+    }
+  }
   /**
    * Get transaction history of a given address with pagination options.
    * By default it will return the transaction history of the current wallet.
@@ -209,26 +216,52 @@ class Client extends UTXOClient {
    * @returns {TxsPage} The transaction history.
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    // Sochain API doesn't have pagination parameter
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
+    const firstPage = Math.floor(offset / 10) + 1
+    const offsetOnFirstPage = offset - firstPage * 10
+    const txHashesToFetch: string[] = []
+    let page = firstPage
+    try {
+      while (txHashesToFetch.length < limit) {
+        const response = await sochain.getTxs({
+          apiKey: this.sochainApiKey,
+          sochainUrl: this.sochainUrl,
+          network: this.network,
+          address: `${params?.address}`,
+          page,
+        })
+        if (page === firstPage && response.transactions.length > offsetOnFirstPage) {
+          //start from offset
+          const txsToGet = response.transactions.slice(offsetOnFirstPage)
+          this.addArrayUpToLimit(
+            txHashesToFetch,
+            txsToGet.map((i) => i.hash),
+            limit,
+          )
+        } else {
+          this.addArrayUpToLimit(
+            txHashesToFetch,
+            response.transactions.map((i) => i.hash),
+            limit,
+          )
+        }
+        // console.log(JSON.stringify(txHashesToFetch, null, 2))
+        page++
+      }
+    } catch (error) {
+      //an errors means no more results
+    }
 
-    const response = await sochain.getTxs({
-      apiKey: this.sochainApiKey,
-      address: params?.address || this.getAddress(),
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-    })
-    const total = response.transactions.length
+    const total = txHashesToFetch.length
     const transactions: Tx[] = []
 
-    const txs = response.transactions.filter((_, index) => offset <= index && index < offset + limit)
-    for (const txItem of txs) {
+    for (const hash of txHashesToFetch) {
       const rawTx = await sochain.getTx({
         apiKey: this.sochainApiKey,
         sochainUrl: this.sochainUrl,
         network: this.network,
-        hash: txItem.hash,
+        hash,
       })
       const tx: Tx = {
         asset: AssetBTC,

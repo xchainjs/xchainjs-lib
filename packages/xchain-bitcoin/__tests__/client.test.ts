@@ -326,7 +326,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork(Network.Testnet)
 
     const txPages = await btcClient.getTransactions({ address: addyThreePath0, limit: 4 })
-
+    console.log(JSON.stringify(txPages, null, 2))
     expect(txPages.total).toEqual(1) //there is 1 tx in addyThreePath0
     expect(txPages.txs[0].asset).toEqual(AssetBTC)
     expect(txPages.txs[0].date).toEqual(new Date('2021-05-01T18:50:26.000Z'))

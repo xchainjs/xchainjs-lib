@@ -214,25 +214,31 @@ class Client extends UTXOClient {
    * @returns {TxsPage} The transaction history.
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    // Sochain API doesn't have pagination parameter
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
-    const response = await sochain.getTxs({
-      apiKey: this.sochainApiKey,
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-      address: `${params?.address}`,
-    })
-    const total = response.transactions.length
+    const page = Math.floor(offset / 10) + 1
+    let txHashesToFetch: string[] = []
+
+    while (txHashesToFetch.length < limit) {
+      const response = await sochain.getTxs({
+        apiKey: this.sochainApiKey,
+        sochainUrl: this.sochainUrl,
+        network: this.network,
+        address: `${params?.address}`,
+        page,
+      })
+      txHashesToFetch.push(...response.transactions.map((i) => i.hash))
+    }
+    txHashesToFetch = txHashesToFetch.slice(0, limit)
+    const total = txHashesToFetch.length
     const transactions: Tx[] = []
 
-    const txs = response.transactions.filter((_, index) => offset <= index && index < offset + limit)
-    for (const txItem of txs) {
+    for (const hash of txHashesToFetch) {
       const rawTx = await sochain.getTx({
         apiKey: this.sochainApiKey,
         sochainUrl: this.sochainUrl,
         network: this.network,
-        hash: txItem.hash,
+        hash,
       })
       const tx: Tx = {
         asset: AssetDOGE,
@@ -312,7 +318,6 @@ class Client extends UTXOClient {
       sender: this.getAddress(fromAddressIndex),
       sochainUrl: this.sochainUrl,
       network: this.network,
-      withTxHex: false,
     })
     const dogeKeys = this.getDogeKeys(this.phrase, fromAddressIndex)
     psbt.signAllInputs(dogeKeys) // Sign all inputs
