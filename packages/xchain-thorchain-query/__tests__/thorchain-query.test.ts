@@ -111,7 +111,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(8)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('499.66215128').amount().toFixed(),
+      assetAmount('499.62215128').amount().toFixed(),
     )
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(8)
   })
@@ -145,7 +145,7 @@ describe('Thorchain-query tests', () => {
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('499.9878375').amount().toFixed(),
+      assetAmount('499.9478375').amount().toFixed(),
     )
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(8)
   })
@@ -177,7 +177,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(18)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('1.28666834').amount().toFixed(),
+      assetAmount('1.28346834').amount().toFixed(),
     )
   })
   it('Should estimate swap from ETH to UOS ', async () => {
@@ -191,7 +191,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(4)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('3796.0174').amount().toFixed(),
+      assetAmount('3783.7427').amount().toFixed(),
     )
   })
   it('Should estimate swap from ETH to GAIA/ATOM ', async () => {
@@ -205,7 +205,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(6)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('112.242592').amount().toFixed(),
+      assetAmount('112.237426').amount().toFixed(),
     )
   })
   it('Should estimate swap from GAIA/ATOM to ETH', async () => {
@@ -219,7 +219,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(18)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('0.99436768', 18).amount().toFixed(),
+      assetAmount('0.99116768', 18).amount().toFixed(),
     )
   })
   it('Should construct the correct memo BUSD->USDC', async () => {
@@ -231,7 +231,7 @@ describe('Thorchain-query tests', () => {
       affiliateFeeBasisPoints: 50,
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
-    const correctMemo = `=:ETH.USDC-6EB48:xxx:9368510555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
+    const correctMemo = `=:ETH.USDC-6EB48:xxx:8828505555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
     expect(estimate.memo).toEqual(correctMemo)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(6)
   })
@@ -244,7 +244,7 @@ describe('Thorchain-query tests', () => {
       affiliateFeeBasisPoints: 50,
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
-    const correctMemo = `=:ETH.USDC-6EB48:xxx:167372504555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
+    const correctMemo = `=:ETH.USDC-6EB48:xxx:166832499555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
     expect(estimate.memo).toEqual(correctMemo)
   })
   it(`Should check assets match asset pools`, async () => {
