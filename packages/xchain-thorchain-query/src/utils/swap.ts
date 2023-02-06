@@ -310,6 +310,15 @@ export const getChainAsset = (chain: Chain): Asset => {
   }
 }
 /**
+ * Sees if an asset is a gas / native chain asset.
+ * @param asset
+ * @returns
+ */
+export const isChainAsset = (asset: Asset): boolean => {
+  return eqAsset(asset, getChainAsset(asset.chain))
+}
+
+/**
  *
  * @param chain - input chain string
  * @returns - returns correct chain from string
