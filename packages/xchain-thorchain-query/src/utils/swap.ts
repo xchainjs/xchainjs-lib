@@ -281,7 +281,7 @@ export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmo
   throw new Error(`could not calculate outbound fee for ${asset.chain}`)
 }
 /**
- * Return the chain for a given Asset This method should live somewhere else.
+ * Returns the native asset for a given chain
  * @param chain
  * @returns the gas asset type for the given chain
  */
@@ -310,11 +310,11 @@ export const getChainAsset = (chain: Chain): Asset => {
   }
 }
 /**
- * Sees if an asset is a gas / native chain asset.
+ *
  * @param asset
- * @returns
+ * @returns a boolean based on Assets being compared are equal
  */
-export const isChainAsset = (asset: Asset): boolean => {
+export const isNativeChainAsset = (asset: Asset): boolean => {
   return eqAsset(asset, getChainAsset(asset.chain))
 }
 

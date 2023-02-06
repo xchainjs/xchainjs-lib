@@ -51,7 +51,7 @@ import {
   calcOutboundFee,
   getBaseAmountWithDiffDecimals,
   getChainAsset,
-  isChainAsset,
+  isNativeChainAsset,
 } from './utils/swap'
 
 const BN_1 = new BigNumber(1)
@@ -258,12 +258,7 @@ export class ThorchainQuery {
 
     const inboundFeeInInboundAsset = await this.thorchainCache.convert(inboundFeeInInboundGasAsset, params.input.asset)
     // if it a gas asset, take away inbound fee, else leave it as is. Still allow inboundFeeInInboundGasAsset to pass to swapEstimate.totalFees.inboundFee so user is aware if the gas requirements.
-    let inputMinusInboundFeeInAsset
-    if (isChainAsset(input.asset) === true) {
-      inputMinusInboundFeeInAsset = input.minus(inboundFeeInInboundAsset)
-    } else {
-      inputMinusInboundFeeInAsset = input
-    }
+    const inputMinusInboundFeeInAsset = isNativeChainAsset(input.asset) ? input.minus(inboundFeeInInboundAsset) : input
 
     // remove any affiliateFee. netInput * affiliateFee (percentage) of the destination asset type
     const affiliateFeePercent = params.affiliateFeeBasisPoints ? params.affiliateFeeBasisPoints / 10000 : 0
@@ -422,7 +417,7 @@ export class ThorchainQuery {
 
     //const totalSwapFeesInRune = feesInRune.inboundFee
     // make inbound fee 0 if non gas asset.
-    const totalSwapFeesInRune = (!isChainAsset(params.input.asset)
+    const totalSwapFeesInRune = (!isNativeChainAsset(params.input.asset)
       ? new CryptoAmount(baseAmount(0), AssetRuneNative)
       : feesInRune.inboundFee
     )

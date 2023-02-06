@@ -111,7 +111,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(8)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('499.62215128').amount().toFixed(),
+      assetAmount('500.23102979').amount().toFixed(),
     )
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(8)
   })
@@ -145,7 +145,7 @@ describe('Thorchain-query tests', () => {
     printTx(estimate, swapParams.input)
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('499.9478375').amount().toFixed(),
+      assetAmount('499.96433727').amount().toFixed(),
     )
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(8)
   })
@@ -177,7 +177,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(18)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('1.28346834').amount().toFixed(),
+      assetAmount('1.2841528').amount().toFixed(),
     )
   })
   it('Should estimate swap from ETH to UOS ', async () => {
@@ -219,7 +219,7 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.canSwap).toEqual(true)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(18)
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-      assetAmount('0.99116768', 18).amount().toFixed(),
+      assetAmount('0.99119055', 18).amount().toFixed(),
     )
   })
   it('Should construct the correct memo BUSD->USDC', async () => {
@@ -231,7 +231,7 @@ describe('Thorchain-query tests', () => {
       affiliateFeeBasisPoints: 50,
     }
     const estimate = await thorchainQuery.estimateSwap(swapParams)
-    const correctMemo = `=:ETH.USDC-6EB48:xxx:8828505555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
+    const correctMemo = `=:ETH.USDC-6EB48:xxx:8831687555:tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx:50`
     expect(estimate.memo).toEqual(correctMemo)
     expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(6)
   })
