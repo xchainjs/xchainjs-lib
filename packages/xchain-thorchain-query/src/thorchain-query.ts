@@ -46,7 +46,13 @@ import {
   getSaver,
 } from './types'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
-import { calcNetworkFee, calcOutboundFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/swap'
+import {
+  calcNetworkFee,
+  calcOutboundFee,
+  getBaseAmountWithDiffDecimals,
+  getChainAsset,
+  isNativeChainAsset,
+} from './utils/swap'
 
 const BN_1 = new BigNumber(1)
 const defaultCache = new ThorchainCache()
@@ -229,7 +235,7 @@ export class ThorchainQuery {
         : await this.thorchainCache.convert(params.input, params.input.asset)
 
     const inboundFeeInInboundGasAsset = calcNetworkFee(input.asset, sourceInboundDetails)
-    let outboundFeeInOutboundGasAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails)
+    let outboundFeeInOutboundGasAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails).times(3)
 
     // Check outbound fee is equal too or greater than 1 USD * need to find a more permanent solution to this. referencing just 1 stable coin pool has problems
     if (params.destinationAsset.chain !== THORChain && !params.destinationAsset.synth) {
@@ -247,11 +253,12 @@ export class ThorchainQuery {
         outboundFeeInOutboundGasAsset = await this.convert(newFee, AssetRuneNative)
       }
     }
-    //console.log(outboundFeeInOutboundGasAsset.formatedAssetString())
+
     // ----------- Remove Fees from inbound before doing the swap -----------
+
     const inboundFeeInInboundAsset = await this.thorchainCache.convert(inboundFeeInInboundGasAsset, params.input.asset)
-    const inputMinusInboundFeeInAsset = input.minus(inboundFeeInInboundAsset)
-    // console.log('y', inputMinusInboundFeeInAsset.formatedAssetString())
+    // if it a gas asset, take away inbound fee, else leave it as is. Still allow inboundFeeInInboundGasAsset to pass to swapEstimate.totalFees.inboundFee so user is aware if the gas requirements.
+    const inputMinusInboundFeeInAsset = isNativeChainAsset(input.asset) ? input.minus(inboundFeeInInboundAsset) : input
 
     // remove any affiliateFee. netInput * affiliateFee (percentage) of the destination asset type
     const affiliateFeePercent = params.affiliateFeeBasisPoints ? params.affiliateFeeBasisPoints / 10000 : 0
@@ -408,10 +415,10 @@ export class ThorchainQuery {
     const inputInRune = await this.thorchainCache.convert(params.input, AssetRuneNative)
     const feesInRune = await this.getFeesIn(estimate.totalFees, AssetRuneNative)
 
-    const totalSwapFeesInRune = feesInRune.inboundFee
-      .plus(feesInRune.outboundFee)
-      .plus(feesInRune.swapFee)
-      .plus(feesInRune.affiliateFee)
+    const totalSwapFeesInRune =
+      !params.input.asset.synth && isNativeChainAsset(params.input.asset)
+        ? feesInRune.inboundFee.plus(feesInRune.outboundFee).plus(feesInRune.swapFee).plus(feesInRune.affiliateFee)
+        : feesInRune.outboundFee.plus(feesInRune.swapFee).plus(feesInRune.affiliateFee)
     const totalSwapFeesInAsset = await this.thorchainCache.convert(totalSwapFeesInRune, params.input.asset)
     if (totalSwapFeesInRune.gte(inputInRune))
       result = `Input amount ${params.input.formatedAssetString()}(${inputInRune.formatedAssetString()}) is less than or equal to total swap fees ${totalSwapFeesInAsset.formatedAssetString()}(${totalSwapFeesInRune.formatedAssetString()}) `
