@@ -1,3 +1,10 @@
+# v0.3.15 (2023-2-6)
+
+## Update
+
+- Bump:
+- `xchain-thorchain-query`
+
 # v0.3.14 (2023-1-26)
 
 ## Update
