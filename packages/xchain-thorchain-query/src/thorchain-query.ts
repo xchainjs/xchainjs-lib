@@ -415,15 +415,10 @@ export class ThorchainQuery {
     const inputInRune = await this.thorchainCache.convert(params.input, AssetRuneNative)
     const feesInRune = await this.getFeesIn(estimate.totalFees, AssetRuneNative)
 
-    //const totalSwapFeesInRune = feesInRune.inboundFee
-    // make inbound fee 0 if non gas asset.
-    const totalSwapFeesInRune = (!isNativeChainAsset(params.input.asset)
-      ? new CryptoAmount(baseAmount(0), AssetRuneNative)
-      : feesInRune.inboundFee
-    )
-      .plus(feesInRune.outboundFee)
-      .plus(feesInRune.swapFee)
-      .plus(feesInRune.affiliateFee)
+    const totalSwapFeesInRune =
+      !params.input.asset.synth && isNativeChainAsset(params.input.asset)
+        ? feesInRune.inboundFee.plus(feesInRune.outboundFee).plus(feesInRune.swapFee).plus(feesInRune.affiliateFee)
+        : feesInRune.outboundFee.plus(feesInRune.swapFee).plus(feesInRune.affiliateFee)
     const totalSwapFeesInAsset = await this.thorchainCache.convert(totalSwapFeesInRune, params.input.asset)
     if (totalSwapFeesInRune.gte(inputInRune))
       result = `Input amount ${params.input.formatedAssetString()}(${inputInRune.formatedAssetString()}) is less than or equal to total swap fees ${totalSwapFeesInAsset.formatedAssetString()}(${totalSwapFeesInRune.formatedAssetString()}) `

@@ -180,7 +180,46 @@ export const getDoubleSwap = async (
 }
 
 /**
- * Works out the required inbound or outbound fee based on the chain.
+ * Returns the native asset for a given chain
+ * @param chain
+ * @returns the gas asset type for the given chain
+ */
+export const getChainAsset = (chain: Chain): Asset => {
+  switch (chain) {
+    case BNBChain:
+      return AssetBNB
+    case BTCChain:
+      return AssetBTC
+    case ETHChain:
+      return AssetETH
+    case THORChain:
+      return AssetRuneNative
+    case GAIAChain:
+      return AssetATOM
+    case BCHChain:
+      return AssetBCH
+    case LTCChain:
+      return AssetLTC
+    case DOGEChain:
+      return AssetDOGE
+    case AVAXChain:
+      return AssetAVAX
+    default:
+      throw Error('Unknown chain')
+  }
+}
+
+/**
+ *
+ * @param asset
+ * @returns a boolean based on Assets being compared are equal
+ */
+export const isNativeChainAsset = (asset: Asset): boolean => {
+  return eqAsset(asset, getChainAsset(asset.chain))
+}
+
+/**
+ * Works out the required inbound fee based on the chain.
  * Call getInboundDetails to get the current gasRate
  *
  * @param sourceAsset
@@ -189,7 +228,12 @@ export const getDoubleSwap = async (
  * @returns
  */
 export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmount => {
+  // synths are always 0.02R fee
   if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
+  // if you are swapping a non-gas asset  on a multiAsset chain (ex. ERC-20 on ETH), the
+  // gas fees will be paid in a diff asset than the one you are swapping
+  else if (!isNativeChainAsset(asset)) return new CryptoAmount(baseAmount(0), AssetRuneNative)
+
   switch (asset.chain) {
     case BTCChain:
       return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBTC)
@@ -279,43 +323,6 @@ export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmo
       break
   }
   throw new Error(`could not calculate outbound fee for ${asset.chain}`)
-}
-/**
- * Returns the native asset for a given chain
- * @param chain
- * @returns the gas asset type for the given chain
- */
-export const getChainAsset = (chain: Chain): Asset => {
-  switch (chain) {
-    case BNBChain:
-      return AssetBNB
-    case BTCChain:
-      return AssetBTC
-    case ETHChain:
-      return AssetETH
-    case THORChain:
-      return AssetRuneNative
-    case GAIAChain:
-      return AssetATOM
-    case BCHChain:
-      return AssetBCH
-    case LTCChain:
-      return AssetLTC
-    case DOGEChain:
-      return AssetDOGE
-    case AVAXChain:
-      return AssetAVAX
-    default:
-      throw Error('Unknown chain')
-  }
-}
-/**
- *
- * @param asset
- * @returns a boolean based on Assets being compared are equal
- */
-export const isNativeChainAsset = (asset: Asset): boolean => {
-  return eqAsset(asset, getChainAsset(asset.chain))
 }
 
 /**

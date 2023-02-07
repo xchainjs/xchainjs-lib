@@ -121,17 +121,13 @@ describe('Thorchain-query tests', () => {
       destinationAsset: assetEthUSDC,
       destinationAddress: 'runeaddress',
     }
-    try {
-      const estimate = await thorchainQuery.estimateSwap(swapParams)
-      printTx(estimate, swapParams.input)
-      expect(estimate.txEstimate.canSwap).toEqual(true)
-      expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(6)
-      expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
-        assetAmount('99.834529').amount().toFixed(),
-      )
-    } catch (e) {
-      console.log(e)
-    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    expect(estimate.txEstimate.canSwap).toEqual(true)
+    expect(estimate.txEstimate.netOutput.assetAmount.decimal).toEqual(6)
+    expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
+      assetAmount('91.48394').amount().toFixed(),
+    )
   })
   it('Should estimate swap from BUSD to RUNE ', async () => {
     const swapParams: EstimateSwapParams = {
@@ -256,6 +252,18 @@ describe('Thorchain-query tests', () => {
     expect(assetPoolGaia.asset).toEqual(AssetATOM)
   })
   it('Should construct the correct memo for BTC->BUSD swap', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
+      destinationAsset: BUSD,
+      destinationAddress: '0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990',
+      affiliateAddress: `tthor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx`,
+      affiliateFeeBasisPoints: 50,
+    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    const correctMemo = `=:BNB.BUSD-BD1:0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990:2087822578555`
+    expect(estimate.memo).toEqual(correctMemo)
+  })
+  it('Should construct the correct memo for sATOM->BTC swap', async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
       destinationAsset: BUSD,
