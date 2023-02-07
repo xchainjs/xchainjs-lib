@@ -103,7 +103,12 @@ export const ltcNetwork = (network: Network): Litecoin.Network => {
  * @param {AddressParams} params
  * @returns {Balance[]} The balances of the given address.
  */
-export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
+export const getBalance = async (params: {
+  apiKey: string
+  sochainUrl: string
+  network: Network
+  address: string
+}): Promise<Balance[]> => {
   try {
     const balance = await sochain.getBalance(params)
     return [
@@ -133,32 +138,32 @@ export const validateAddress = (address: Address, network: Network): boolean => 
   }
 }
 
-// Stores list of txHex in memory to avoid requesting same data
-const txHexMap: Record<TxHash, string> = {}
+// // Stores list of txHex in memory to avoid requesting same data
+// const txHexMap: Record<TxHash, string> = {}
 
-/**
- * Helper to get `hex` of `Tx`
- *
- * It will try to get it from cache before requesting it from Sochain
- */
-const getTxHex = async ({
-  txHash,
-  sochainUrl,
-  network,
-}: {
-  sochainUrl: string
-  txHash: TxHash
-  network: Network
-}): Promise<string> => {
-  // try to get hex from cache
-  const txHex = txHexMap[txHash]
-  if (!!txHex) return txHex
-  // or get it from Sochain
-  const { tx_hex } = await sochain.getTx({ hash: txHash, sochainUrl, network })
-  // cache it
-  txHexMap[txHash] = tx_hex
-  return tx_hex
-}
+// /**
+//  * Helper to get `hex` of `Tx`
+//  *
+//  * It will try to get it from cache before requesting it from Sochain
+//  */
+// const getTxHex = async ({
+//   txHash,
+//   sochainUrl,
+//   network,
+// }: {
+//   sochainUrl: string
+//   txHash: TxHash
+//   network: Network
+// }): Promise<string> => {
+//   // try to get hex from cache
+//   const txHex = txHexMap[txHash]
+//   if (!!txHex) return txHex
+//   // or get it from Sochain
+//   const { tx_hex } = await sochain.getTx({ hash: txHash, sochainUrl, network })
+//   // cache it
+//   txHexMap[txHash] = tx_hex
+//   return tx_hex
+// }
 
 /**
  * Scan UTXOs from sochain.
@@ -166,29 +171,26 @@ const getTxHex = async ({
  * @param {ScanUTXOParam} params
  * @returns {UTXO[]} The UTXOs of the given address.
  */
-export const scanUTXOs = async ({
-  sochainUrl,
-  network,
-  address,
-  withTxHex = false,
-}: ScanUTXOParam): Promise<UTXO[]> => {
+export const scanUTXOs = async ({ apiKey, sochainUrl, network, address }: ScanUTXOParam): Promise<UTXO[]> => {
   const addressParam: AddressParams = {
+    apiKey,
     sochainUrl,
     network,
     address,
+    page: 1,
   }
   const utxos: LtcAddressUTXO[] = await sochain.getUnspentTxs(addressParam)
 
   return await Promise.all(
     utxos.map(async (utxo) => ({
-      hash: utxo.txid,
-      index: utxo.output_no,
+      hash: utxo.hash,
+      index: utxo.index,
       value: assetToBase(assetAmount(utxo.value, LTC_DECIMAL)).amount().toNumber(),
       witnessUtxo: {
         value: assetToBase(assetAmount(utxo.value, LTC_DECIMAL)).amount().toNumber(),
-        script: Buffer.from(utxo.script_hex, 'hex'),
+        script: Buffer.from(utxo.script, 'hex'),
       },
-      txHex: withTxHex ? await getTxHex({ txHash: utxo.txid, network, sochainUrl }) : undefined,
+      txHex: utxo.tx_hex,
     })),
   )
 }
@@ -200,6 +202,7 @@ export const scanUTXOs = async ({
  * @returns {Transaction}
  */
 export const buildTx = async ({
+  apiKey,
   amount,
   recipient,
   memo,
@@ -207,8 +210,8 @@ export const buildTx = async ({
   sender,
   network,
   sochainUrl,
-  withTxHex = false,
 }: TxParams & {
+  apiKey: string
   feeRate: FeeRate
   sender: Address
   network: Network
@@ -217,7 +220,7 @@ export const buildTx = async ({
 }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXO[] }> => {
   if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
-  const utxos = await scanUTXOs({ sochainUrl, network, address: sender, withTxHex })
+  const utxos = await scanUTXOs({ apiKey, sochainUrl, network, address: sender })
   if (utxos.length === 0) throw new Error('No utxos to send')
 
   const feeRateWhole = Number(feeRate.toFixed(0))

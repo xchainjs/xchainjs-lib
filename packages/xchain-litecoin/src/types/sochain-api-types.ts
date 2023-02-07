@@ -1,20 +1,28 @@
 import { Network, TxHash } from '@xchainjs/xchain-client'
 
 export type AddressParams = {
+  apiKey: string
   sochainUrl: string
   network: Network
   address: string
-  startingFromTxId?: string
+  page: number
+}
+export type BalanceParams = {
+  apiKey: string
+  sochainUrl: string
+  network: Network
+  address: string
 }
 
 export type ScanUTXOParam = {
+  apiKey: string
   sochainUrl: string
   network: Network
   address: string
-  withTxHex?: boolean
 }
 
 export type TxHashParams = {
+  apiKey: string
   sochainUrl: string
   network: Network
   hash: TxHash
@@ -46,13 +54,14 @@ export interface Transaction {
 }
 
 export type LtcAddressUTXO = {
-  txid: string
-  output_no: number
-  script_asm: string
-  script_hex: string
+  hash: string
+  index: number
+  script: string
+  address: string
+  tx_hex: string
   value: string
-  confirmations: number
-  time: number
+  //confirmations: number
+  // time: number
 }
 
 export type LtcAddressTxDTO = {

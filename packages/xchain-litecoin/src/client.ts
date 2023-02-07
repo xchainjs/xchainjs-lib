@@ -30,6 +30,7 @@ export type LitecoinClientParams = XChainClientParams & {
   sochainUrl?: string
   nodeUrls?: NodeUrls
   nodeAuth?: NodeAuth | null
+  sochainApiKey: string
 }
 
 /**
@@ -39,6 +40,7 @@ class Client extends UTXOClient {
   private sochainUrl: string
   private nodeUrls: NodeUrls
   private nodeAuth?: NodeAuth
+  private sochainApiKey
 
   /**
    * Constructor
@@ -53,6 +55,7 @@ class Client extends UTXOClient {
       lower: LOWER_FEE_BOUND,
       upper: UPPER_FEE_BOUND,
     },
+    sochainApiKey,
     sochainUrl = 'https://sochain.com/api/v2',
     phrase,
     nodeUrls = {
@@ -76,6 +79,7 @@ class Client extends UTXOClient {
       nodeAuth === null ? undefined : nodeAuth
 
     this.sochainUrl = sochainUrl
+    this.sochainApiKey = sochainApiKey
   }
 
   /**
@@ -205,6 +209,7 @@ class Client extends UTXOClient {
    */
   async getBalance(address: Address): Promise<Balance[]> {
     return Utils.getBalance({
+      apiKey: this.sochainApiKey,
       sochainUrl: this.sochainUrl,
       network: this.network,
       address,
@@ -222,10 +227,13 @@ class Client extends UTXOClient {
     // Sochain API doesn't have pagination parameter
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
+    const page = Math.floor(offset / 10) + 1
     const response = await sochain.getAddress({
+      apiKey: this.sochainApiKey,
       sochainUrl: this.sochainUrl,
       network: this.network,
       address: `${params?.address}`,
+      page,
     })
     const total = response.txs.length
     const transactions: Tx[] = []
@@ -233,6 +241,7 @@ class Client extends UTXOClient {
     const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
     for (const txItem of txs) {
       const rawTx = await sochain.getTx({
+        apiKey: this.sochainApiKey,
         sochainUrl: this.sochainUrl,
         network: this.network,
         hash: txItem.txid,
@@ -269,6 +278,7 @@ class Client extends UTXOClient {
    */
   async getTransactionData(txId: string): Promise<Tx> {
     const rawTx = await sochain.getTx({
+      apiKey: this.sochainApiKey,
       sochainUrl: this.sochainUrl,
       network: this.network,
       hash: txId,
@@ -306,6 +316,7 @@ class Client extends UTXOClient {
     checkFeeBounds(this.feeBounds, feeRate)
 
     const { psbt } = await Utils.buildTx({
+      apiKey: this.sochainApiKey,
       ...params,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
