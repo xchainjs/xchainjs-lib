@@ -204,10 +204,100 @@ class Client extends UTXOClient {
     for (let index = 0; index < toAdd.length; index++) {
       const element = toAdd[index]
       while (arr.length < limit) {
+        console.log(
+          JSON.stringify(
+            {
+              'arr.length': arr.length,
+              limit,
+            },
+            null,
+            2,
+          ),
+        )
         arr.push(element)
       }
     }
+    console.log(JSON.stringify({ arr }, null, 2))
   }
+
+  /**
+   * Get transaction history of a given address with pagination options.
+   * By default it will return the transaction history of the current wallet.
+   *
+   * @param {TxHistoryParams} params The options to get transaction history. (optional)
+   * @returns {TxsPage} The transaction history.
+   */
+  // async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
+  //   const offset = params?.offset ?? 0
+  //   const limit = params?.limit || 10
+  //   const firstPage = Math.floor(offset / 10) + 1
+  //   const offsetOnFirstPage = offset - firstPage * 10
+  //   const txHashesToFetch: string[] = []
+  //   let page = firstPage
+  //   try {
+  //     while (txHashesToFetch.length < limit) {
+  //       const response = await sochain.getTxs({
+  //         apiKey: this.sochainApiKey,
+  //         sochainUrl: this.sochainUrl,
+  //         network: this.network,
+  //         address: `${params?.address}`,
+  //         page,
+  //       })
+  //       if (page === firstPage && response.transactions.length > offsetOnFirstPage) {
+  //         //start from offset
+  //         const txsToGet = response.transactions.slice(offsetOnFirstPage)
+  //         this.addArrayUpToLimit(
+  //           txHashesToFetch,
+  //           txsToGet.map((i) => i.hash),
+  //           limit,
+  //         )
+  //       } else {
+  //         this.addArrayUpToLimit(
+  //           txHashesToFetch,
+  //           response.transactions.map((i) => i.hash),
+  //           limit,
+  //         )
+  //       }
+  //       // console.log(JSON.stringify(txHashesToFetch, null, 2))
+  //       page++
+  //     }
+  //   } catch (error) {
+  //     //an errors means no more results
+  //   }
+
+  //   const total = txHashesToFetch.length
+  //   const transactions: Tx[] = []
+
+  //   for (const hash of txHashesToFetch) {
+  //     const rawTx = await sochain.getTx({
+  //       apiKey: this.sochainApiKey,
+  //       sochainUrl: this.sochainUrl,
+  //       network: this.network,
+  //       hash,
+  //     })
+  //     const tx: Tx = {
+  //       asset: AssetBTC,
+  //       from: rawTx.inputs.map((i) => ({
+  //         from: i.address,
+  //         amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)),
+  //       })),
+  //       to: rawTx.outputs
+  //         .filter((i) => i.type !== 'nulldata')
+  //         .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)) })),
+  //       date: new Date(rawTx.time * 1000),
+  //       type: TxType.Transfer,
+  //       hash: rawTx.hash,
+  //     }
+  //     transactions.push(tx)
+  //   }
+
+  //   const result: TxsPage = {
+  //     total,
+  //     txs: transactions,
+  //   }
+  //   return result
+  // }
+
   /**
    * Get transaction history of a given address with pagination options.
    * By default it will return the transaction history of the current wallet.
@@ -219,11 +309,26 @@ class Client extends UTXOClient {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
     const firstPage = Math.floor(offset / 10) + 1
-    const offsetOnFirstPage = offset - firstPage * 10
+    const lastPage = firstPage + Math.floor(limit / 10)
+    const offsetOnFirstPage = offset - firstPage * 10 > 0 ? offset - firstPage * 10 : 0
     const txHashesToFetch: string[] = []
     let page = firstPage
+    console.log(
+      JSON.stringify(
+        {
+          offset,
+          limit,
+          firstPage,
+          lastPage,
+          offsetOnFirstPage,
+        },
+        null,
+        2,
+      ),
+    )
     try {
-      while (txHashesToFetch.length < limit) {
+      while (page <= lastPage) {
+        console.log(`get page ${page}`)
         const response = await sochain.getTxs({
           apiKey: this.sochainApiKey,
           sochainUrl: this.sochainUrl,
@@ -234,6 +339,7 @@ class Client extends UTXOClient {
         if (page === firstPage && response.transactions.length > offsetOnFirstPage) {
           //start from offset
           const txsToGet = response.transactions.slice(offsetOnFirstPage)
+          console.log(JSON.stringify({ txsToGet }, null, 2))
           this.addArrayUpToLimit(
             txHashesToFetch,
             txsToGet.map((i) => i.hash),
@@ -250,9 +356,10 @@ class Client extends UTXOClient {
         page++
       }
     } catch (error) {
+      console.error(error)
       //an errors means no more results
     }
-
+    console.log(JSON.stringify({ txHashesToFetch }, null, 2))
     const total = txHashesToFetch.length
     const transactions: Tx[] = []
 
@@ -283,9 +390,9 @@ class Client extends UTXOClient {
       total,
       txs: transactions,
     }
+    console.log('xxx', JSON.stringify({ result }, null, 2))
     return result
   }
-
   /**
    * Get the transaction details of a given transaction id.
    *

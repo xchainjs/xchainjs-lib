@@ -44,9 +44,9 @@ export class Wallet {
       BCH: new BchClient(settings),
       BTC: new BtcClient({ ...settings, sochainApiKey }),
       DOGE: new DogeClient({ ...settings, sochainApiKey }),
+      LTC: new LtcClient({ ...settings, sochainApiKey }),
       ETH: new EthClient(settings),
       THOR: new ThorClient(settings),
-      LTC: new LtcClient({ ...settings, sochainApiKey }),
       BNB: new BnbClient(settings),
       GAIA: new CosmosClient(settings),
       AVAX: new AvaxClient({ ...defaultAvaxParams, network: settings.network, phrase }),
@@ -129,7 +129,7 @@ export class Wallet {
    * @returns - tx submitted object
    */
   private async swapRuneTo(swap: ExecuteSwap): Promise<TxSubmitted> {
-    const thorClient = (this.clients.THOR as unknown) as ThorchainClient
+    const thorClient = this.clients.THOR as unknown as ThorchainClient
     const waitTimeSeconds = swap.waitTimeSeconds
     const hash = await thorClient.deposit({
       amount: swap.input.baseAmount,
