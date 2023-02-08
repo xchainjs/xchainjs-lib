@@ -6,7 +6,8 @@ import mockThornodeApi from '../__mocks__/thornode-api'
 import { Client } from '../src/client'
 import { AssetLTC, MIN_TX_FEE } from '../src/const'
 
-const ltcClient = new Client({})
+const sochainApiKey = 'xxx'
+const ltcClient = new Client({ sochainApiKey })
 
 describe('LitecoinClient Test', () => {
   beforeEach(() => {
@@ -59,6 +60,7 @@ describe('LitecoinClient Test', () => {
   it('should not throw on a client without a phrase', () => {
     expect(() => {
       new Client({
+        sochainApiKey,
         network: Network.Testnet,
       })
     }).not.toThrow()
@@ -261,7 +263,6 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork(Network.Testnet)
 
     const txPages = await ltcClient.getTransactions({ address: addyThree, limit: 4 })
-
     expect(txPages.total).toEqual(1) //there is 1 tx in addyThree
     expect(txPages.txs[0].asset).toEqual(AssetLTC)
     expect(txPages.txs[0].date).toEqual(new Date('2021-01-29T03:36:36.000Z'))

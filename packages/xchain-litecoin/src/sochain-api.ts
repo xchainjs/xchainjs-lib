@@ -9,6 +9,7 @@ import {
   LtcAddressDTO,
   LtcAddressUTXO,
   LtcGetBalanceDTO,
+  LtcGetTxsDTO,
   LtcUnspentTxsDTO,
   SochainResponse,
   Transaction,
@@ -62,6 +63,34 @@ export const getTx = async ({ apiKey, sochainUrl, network, hash }: TxHashParams)
 }
 
 /**
+ * Get transactions
+ *
+ * @see https://sochain.com/api#get-tx
+ *
+ * @param {string} sochainUrl The sochain node url.
+ * @param {string} network network id
+ * @param {string} hash The transaction hash.
+ * @returns {Transactions}
+ */
+export const getTxs = async ({
+  apiKey,
+  address,
+  sochainUrl,
+  network,
+  page,
+}: {
+  apiKey: string
+  address: string
+  sochainUrl: string
+  network: Network
+  page: number
+}): Promise<LtcGetTxsDTO> => {
+  const url = `${sochainUrl}/transactions/${toSochainNetwork(network)}/${address}/${page}` //TODO support paging
+  const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
+  const txs: SochainResponse<LtcGetTxsDTO> = response.data
+  return txs.data
+}
+/**
  * Get address balance.
  *
  * @see https://sochain.com/api#get-balance
@@ -75,8 +104,8 @@ export const getBalance = async ({ apiKey, sochainUrl, network, address }: Balan
   const url = `${sochainUrl}/balance/${toSochainNetwork(network)}/${address}`
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const balanceResponse: SochainResponse<LtcGetBalanceDTO> = response.data
-  const confirmed = assetAmount(balanceResponse.data.confirmed_balance, LTC_DECIMAL)
-  const unconfirmed = assetAmount(balanceResponse.data.unconfirmed_balance, LTC_DECIMAL)
+  const confirmed = assetAmount(balanceResponse.data.confirmed, LTC_DECIMAL)
+  const unconfirmed = assetAmount(balanceResponse.data.unconfirmed, LTC_DECIMAL)
   const netAmt = confirmed.amount().plus(unconfirmed.amount())
   const result = assetToBase(assetAmount(netAmt, LTC_DECIMAL))
   return result
@@ -99,16 +128,12 @@ export const getUnspentTxs = async ({
   address,
   page,
 }: AddressParams): Promise<LtcAddressUTXO[]> => {
-  let resp = null
-  resp = await axios.get(`${sochainUrl}/unspent_outputs/${toSochainNetwork(network)}/${address}/${page}`, {
-    headers: { 'API-KEY': apiKey },
-  })
+  const url = [sochainUrl, 'unspent_outputs', toSochainNetwork(network), address, page].filter((v) => !!v).join('/')
+  const resp = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const response: SochainResponse<LtcUnspentTxsDTO> = resp.data
-  const txs = response.data.txs
+  const txs = response.data.outputs
   if (txs.length === 10) {
     //fetch the next batch
-    //const lastTxId = txs[99].txid
-
     const nextBatch = await getUnspentTxs({
       apiKey,
       sochainUrl,

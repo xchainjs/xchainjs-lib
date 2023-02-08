@@ -179,6 +179,7 @@ export const scanUTXOs = async ({ apiKey, sochainUrl, network, address }: ScanUT
     address,
     page: 1,
   }
+
   const utxos: LtcAddressUTXO[] = await sochain.getUnspentTxs(addressParam)
 
   return await Promise.all(

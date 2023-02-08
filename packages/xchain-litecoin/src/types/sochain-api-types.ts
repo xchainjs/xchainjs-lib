@@ -43,12 +43,11 @@ export interface TxIO {
 
 export interface Transaction {
   network: string
-  txid: string
-  blockhash: string
+  hash: string
+  block_hash: string
   confirmations: number
   time: number
 
-  tx_hex: string
   inputs: TxIO[]
   outputs: TxIO[]
 }
@@ -65,13 +64,9 @@ export type LtcAddressUTXO = {
 }
 
 export type LtcAddressTxDTO = {
-  txid: string
-  block_no: number
-  confirmations: number
+  hash: string
+  block: number
   time: number
-  req_sigs: number
-  script_asm: string
-  script_hex: string
 }
 
 export type LtcAddressDTO = {
@@ -81,20 +76,18 @@ export type LtcAddressDTO = {
   received_value: string
   pending_value: string
   total_txs: number
-  txs: LtcAddressTxDTO[]
+}
+export type LtcGetTxsDTO = {
+  transactions: LtcAddressTxDTO[]
 }
 
 export type LtcGetBalanceDTO = {
-  network: string
-  address: string
-  confirmed_balance: string
-  unconfirmed_balance: string
+  confirmed: string
+  unconfirmed: string
 }
 
 export type LtcUnspentTxsDTO = {
-  network: string
-  address: string
-  txs: LtcAddressUTXO[]
+  outputs: LtcAddressUTXO[]
 }
 
 export type LtcBroadcastTransfer = {

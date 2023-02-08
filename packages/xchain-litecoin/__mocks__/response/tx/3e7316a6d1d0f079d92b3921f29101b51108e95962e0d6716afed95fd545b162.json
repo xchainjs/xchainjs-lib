@@ -1,59 +1,76 @@
 {
   "status": "success",
   "data": {
-    "network": "LTC",
-    "txid": "3e7316a6d1d0f079d92b3921f29101b51108e95962e0d6716afed95fd545b162",
-    "blockhash": "b43a1c949d9d41fd6807c14bf15dc7bd4d5888066533e3c233958f8cccdf0535",
-    "confirmations": 11,
+    "hash": "3e7316a6d1d0f079d92b3921f29101b51108e95962e0d6716afed95fd545b162",
+    "confirmations": 197006,
+    "size": 342,
+    "vsize": 179,
+    "weight": 714,
+    "version": 1,
+    "locktime": 0,
+    "block_hash": "b43a1c949d9d41fd6807c14bf15dc7bd4d5888066533e3c233958f8cccdf0535",
+    "block_height": 2221685,
     "time": 1646416011,
+    "inputs_n": 2,
+    "inputs_value": "0.05123272",
     "inputs": [
       {
-        "input_no": 0,
+        "index": 0,
         "value": "0.03920363",
         "address": "ltc1qlyah9gjr670clx5snc6l43v5znz7tggycvdwm2",
-        "type": "witness_v0_keyhash",
-        "script": "",
-        "sequence": 4294967293,
+        "scriptSig": {
+          "hex": "",
+          "asm": ""
+        },
         "witness": [
           "3045022100ec4250332f0f2b9f05078ea1d58c1b577ec9614eff3e70249fd932774949d2d102207391e6b99391d899755be23b8592c4ac7798250c36691350d9c56b76fa395d3b01",
           "03d0635c580ef041ba12686d621d6cd193dc08dd1a627458222a84eae78a396658"
         ],
-        "from_output": {
-          "txid": "b6c885303e68e343deb5e83891c893f459be5ad5181f57c77dd121f358227a0d",
-          "output_no": 0
+        "previous_output": {
+          "hash": "b6c885303e68e343deb5e83891c893f459be5ad5181f57c77dd121f358227a0d",
+          "index": 0
         }
       },
       {
-        "input_no": 1,
+        "index": 1,
         "value": "0.01202909",
         "address": "ltc1qlyah9gjr670clx5snc6l43v5znz7tggycvdwm2",
-        "type": "witness_v0_keyhash",
-        "script": "",
-        "sequence": 4294967294,
+        "scriptSig": {
+          "hex": "",
+          "asm": ""
+        },
         "witness": [
           "30450221008638423e93857fc18cab6679184d21cf0d76b59f58e5ebffb2a3d02b7452419c022063d0b4e256c3d70d05ad4698c3ff463558a379349fee8188f477e40bc7dd069501",
           "03d0635c580ef041ba12686d621d6cd193dc08dd1a627458222a84eae78a396658"
         ],
-        "from_output": {
-          "txid": "606b8edba1e87cff250c421585a204403b6d13917592a7bbe62f73a9616f8e8d",
-          "output_no": 0
+        "previous_output": {
+          "hash": "606b8edba1e87cff250c421585a204403b6d13917592a7bbe62f73a9616f8e8d",
+          "index": 0
         }
       }
     ],
+    "outputs_n": 1,
+    "outputs_value": "0.05123093",
     "outputs": [
       {
-        "output_no": 0,
+        "index": 0,
         "value": "0.05123093",
-        "address": "3Gi2h7qawGV74cW14VstRXR5KXuszA1E4d",
         "type": "scripthash",
-        "script": "OP_HASH160 a4baf1bae58d11536548d437713b99d47f9213f4 OP_EQUAL"
+        "address": "MNvB11FYtPLXs7muANsEFAfUeEWKw2caPp",
+        "script": {
+          "hex": "a914a4baf1bae58d11536548d437713b99d47f9213f487",
+          "asm": "OP_HASH160 a4baf1bae58d11536548d437713b99d47f9213f4 OP_EQUAL"
+        },
+        "spent": {
+          "hash": "2989b791014704655692278f917cba80047bc5062b5c4c72068d6cfd202985ef",
+          "index": 4
+        }
       }
     ],
-    "tx_hex": "010000000001020d7a2258f321d17dc7571f18d55abe59f493c89138e8b5de43e3683e3085c8b60000000000fdffffff8d8e6f61a9732fe6bba7927591136d3b4004a28515420c25ff7ce8a1db8e6b600000000000feffffff01152c4e000000000017a914a4baf1bae58d11536548d437713b99d47f9213f48702483045022100ec4250332f0f2b9f05078ea1d58c1b577ec9614eff3e70249fd932774949d2d102207391e6b99391d899755be23b8592c4ac7798250c36691350d9c56b76fa395d3b012103d0635c580ef041ba12686d621d6cd193dc08dd1a627458222a84eae78a396658024830450221008638423e93857fc18cab6679184d21cf0d76b59f58e5ebffb2a3d02b7452419c022063d0b4e256c3d70d05ad4698c3ff463558a379349fee8188f477e40bc7dd0695012103d0635c580ef041ba12686d621d6cd193dc08dd1a627458222a84eae78a39665800000000",
-    "network_fee": "0.00000179",
-    "size": 342,
-    "vsize": 179,
-    "version": 1,
-    "locktime": 0
+    "fee": "0.00000179",
+    "price": {
+      "value": "112.54029523",
+      "currency": "USD"
+    }
   }
 }

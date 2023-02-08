@@ -22,8 +22,7 @@ export default {
     })
 
     // Mock ltc node send tx
-    mock.onPost(/ltc.thorchain.info/).reply((req) => {
-      console.log(req.headers)
+    mock.onPost(/ltc.thorchain.info/).reply(() => {
       return [
         200,
         {
