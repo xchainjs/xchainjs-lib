@@ -13,6 +13,42 @@
           "value": "0.00000000",
           "currency": "USD"
         }
+      },
+      {
+        "hash": "e4cbba2af4c680e33182fa6f459e34a1696f134e85499511c732b96ddd777d55",
+        "value_sent": "0.00000000",
+        "value_received": "0.00440904",
+        "balance_change": "0.00440904",
+        "time": 1619895026,
+        "block": 1973541,
+        "price": {
+          "value": "0.00000000",
+          "currency": "USD"
+        }
+      },
+      {
+        "hash": "9a01405ed79335a5898a8041dc24579c49dd3f62ec20ee509ce892a4259995b2",
+        "value_sent": "0.00000000",
+        "value_received": "0.00575760",
+        "balance_change": "0.00575760",
+        "time": 1619894462,
+        "block": 1973539,
+        "price": {
+          "value": "0.00000000",
+          "currency": "USD"
+        }
+      },
+      {
+        "hash": "029b22bef5728a4be32505836255cec67ec1ae6df86298334b45dbef5582353e",
+        "value_sent": "0.00000000",
+        "value_received": "0.00589402",
+        "balance_change": "0.00589402",
+        "time": 1619894462,
+        "block": 1973539,
+        "price": {
+          "value": "0.00000000",
+          "currency": "USD"
+        }
       }
     ]
   }

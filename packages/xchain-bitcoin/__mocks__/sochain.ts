@@ -42,12 +42,12 @@ export default {
 
       //the address is always the 7th, the optional 8th param would be starting from txid to allow paging
       const address = split?.[7] || ''
-      const startingfromTxId = split?.length == 9 ? split?.[8] : ''
+      const page = split?.length == 9 ? split?.[8] : ''
 
       let filePath = `./response/unspent-txs/${address}.json`
-      if (startingfromTxId) {
-        // this allows you to page utxos starting from a given txid
-        filePath = `./response/unspent-txs/${address}.json`
+      if (page) {
+        // this allows you to return utxos starting from a given page
+        filePath = `./response/unspent-txs/${address}/${page}.json`
       }
       const resp = require(filePath)
       return [200, resp]
