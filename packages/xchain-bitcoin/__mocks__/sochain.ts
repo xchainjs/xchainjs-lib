@@ -7,39 +7,47 @@ type MockConfig = {
 export default {
   restore: mock.restore,
   init: () => {
-    //Mock address
-    mock.onGet(/\/address\//).reply(function (config: MockConfig) {
+    //Mock addresses summary
+    mock.onGet(/\/address_summary\//).reply(function (config: MockConfig) {
       const id: string = config.url?.split('/').pop() ?? ''
       const resp = require(`./response/addresses/${id}.json`)
       return [200, resp]
     })
 
-    //Mock get_tx
-    mock.onGet(/\/get_tx\//).reply(function (config: MockConfig) {
+    //Mock get transaction data
+    mock.onGet(/\/v3\/transaction\//).reply(function (config: MockConfig) {
       const id = config.url?.split('/').pop() ?? ''
       const resp = require(`./response/tx/${id}.json`)
       return [200, resp]
     })
 
+    //Mock get addresses transactions
+    mock.onGet(/\/v3\/transactions\//).reply(function (config: MockConfig) {
+      const split = config.url?.split('/')
+      const address = split?.[7] || ''
+      const resp = require(`./response/txs/${address}.json`)
+      return [200, resp]
+    })
+
     //Mock get_address_balance
-    mock.onGet(/\/get_address_balance\//).reply(function (config: MockConfig) {
+    mock.onGet(/\/balance\//).reply(function (config: MockConfig) {
       const id = config.url?.split('/').pop() ?? ''
       const resp = require(`./response/balances/${id}.json`)
       return [200, resp]
     })
 
     //Mock get_unspent_txs
-    mock.onGet(/\/get_tx_unspent\//).reply(function (config: MockConfig) {
+    mock.onGet(/\/unspent_outputs\//).reply(function (config: MockConfig) {
       const split = config.url?.split('/')
 
       //the address is always the 7th, the optional 8th param would be starting from txid to allow paging
       const address = split?.[7] || ''
-      const startingfromTxId = split?.length == 9 ? split?.[8] : ''
+      const page = split?.length == 9 ? split?.[8] : ''
 
       let filePath = `./response/unspent-txs/${address}.json`
-      if (startingfromTxId) {
-        // this allows you to page utxos starting from a given txid
-        filePath = `./response/unspent-txs/${address}/${startingfromTxId}.json`
+      if (page) {
+        // this allows you to return utxos starting from a given page
+        filePath = `./response/unspent-txs/${address}/${page}.json`
       }
       const resp = require(filePath)
       return [200, resp]
@@ -53,11 +61,11 @@ export default {
     })
 
     //Mock blockstream send tx
-    mock.onPost(/\/tx/).reply(function () {
+    mock.onPost(/\/transaction/).reply(function () {
       return [200, 'TEST_OK']
     })
     //
-    //Mock horchain/inbound_addresses
+    //Mock thorchain/inbound_addresses
     mock.onGet(/\/thorchain\/inbound_addresses/).reply(function () {
       const resp = require(`./response/thornode/inbound_addresses.json`)
       return [200, resp]

@@ -1,19 +1,29 @@
 import { Network, TxHash } from '@xchainjs/xchain-client'
 
 export type AddressParams = {
+  apiKey: string
   sochainUrl: string
   network: Network
   address: string
-  startingFromTxId?: string
+  page: number
+}
+export type BalanceParams = {
+  apiKey: string
+  sochainUrl: string
+  network: Network
+  address: string
+  confirmedOnly: boolean
 }
 
 export type TxHashParams = {
+  apiKey: string
   sochainUrl: string
   network: Network
   hash: TxHash
 }
 
 export type TxBroadcastParams = {
+  apiKey: string
   sochainUrl: string
   network: Network
   txHex: string
@@ -25,17 +35,16 @@ export interface SochainResponse<T> {
 }
 
 export interface TxIO {
-  input_no: number
+  index: number
   value: string
   address: string
-  type: string
+  type?: string
   script: string
 }
 
 export interface Transaction {
-  network: string
-  txid: string
-  blockhash: string
+  hash: string
+  block_hash: string
   confirmations: number
   time: number
 
@@ -45,23 +54,20 @@ export interface Transaction {
 }
 
 export type BtcAddressUTXO = {
-  txid: string
-  output_no: number
-  script_asm: string
-  script_hex: string
+  hash: string
+  index: number
+  script: string
+  address: string
+  tx_hex: string
   value: string
-  confirmations: number
-  time: number
+  // confirmations: number
+  // time: number
 }
 
 export type BtcAddressTxDTO = {
-  txid: string
-  block_no: number
-  confirmations: number
+  hash: string
+  block: number
   time: number
-  req_sigs: number
-  script_asm: string
-  script_hex: string
 }
 
 export type BtcAddressDTO = {
@@ -71,20 +77,18 @@ export type BtcAddressDTO = {
   received_value: string
   pending_value: string
   total_txs: number
-  txs: BtcAddressTxDTO[]
+}
+export type BtcGetTxsDTO = {
+  transactions: BtcAddressTxDTO[]
 }
 
 export type BtcGetBalanceDTO = {
-  network: string
-  address: string
-  confirmed_balance: string
-  unconfirmed_balance: string
+  confirmed: string
+  unconfirmed: string
 }
 
 export type BtcUnspentTxsDTO = {
-  network: string
-  address: string
-  txs: BtcAddressUTXO[]
+  outputs: BtcAddressUTXO[]
 }
 
 export type BtcBroadcastTransfer = {
@@ -100,6 +104,7 @@ export type TxConfirmedStatus = {
 }
 
 export type ScanUTXOParam = {
+  apiKey: string
   sochainUrl: string
   haskoinUrl: string
   network: Network

@@ -25,6 +25,7 @@ import * as Utils from './utils'
 
 export type BitcoinClientParams = XChainClientParams & {
   sochainUrl?: string
+  sochainApiKey: string
   haskoinUrl?: ClientUrl
 }
 
@@ -34,7 +35,7 @@ export type BitcoinClientParams = XChainClientParams & {
 class Client extends UTXOClient {
   private sochainUrl = ''
   private haskoinUrl: ClientUrl
-
+  private sochainApiKey
   /**
    * Constructor
    * Client is initialised with network type
@@ -47,7 +48,8 @@ class Client extends UTXOClient {
       lower: LOWER_FEE_BOUND,
       upper: UPPER_FEE_BOUND,
     },
-    sochainUrl = 'https://sochain.com/api/v2',
+    sochainApiKey,
+    sochainUrl = 'https://sochain.com/api/v3',
     haskoinUrl = {
       [Network.Testnet]: 'https://haskoin.ninerealms.com/btctest',
       [Network.Mainnet]: 'https://haskoin.ninerealms.com/btc',
@@ -63,6 +65,7 @@ class Client extends UTXOClient {
     super(BTCChain, { network, rootDerivationPaths, phrase, feeBounds })
     this.setSochainUrl(sochainUrl)
     this.haskoinUrl = haskoinUrl
+    this.sochainApiKey = sochainApiKey
   }
 
   /**
@@ -188,13 +191,29 @@ class Client extends UTXOClient {
   async getBalance(address: Address, _assets?: Asset[] /* not used */, confirmedOnly?: boolean): Promise<Balance[]> {
     return Utils.getBalance({
       params: {
+        apiKey: this.sochainApiKey,
         sochainUrl: this.sochainUrl,
         network: this.network,
         address: address,
+        confirmedOnly: !!confirmedOnly,
       },
       haskoinUrl: this.haskoinUrl[this.network],
-      confirmedOnly: !!confirmedOnly,
     })
+  }
+  /**
+   * helper function tto limit adding to an array
+   *
+   * @param arr array to be added to
+   * @param toAdd elements to add
+   * @param limit do not add more than this limit
+   */
+  private addArrayUpToLimit(arr: string[], toAdd: string[], limit: number) {
+    for (let index = 0; index < toAdd.length; index++) {
+      const element = toAdd[index]
+      if (arr.length < limit) {
+        arr.push(element)
+      }
+    }
   }
 
   /**
@@ -205,40 +224,50 @@ class Client extends UTXOClient {
    * @returns {TxsPage} The transaction history.
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    // Sochain API doesn't have pagination parameter
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
+    if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
 
-    const response = await sochain.getAddress({
-      address: params?.address + '',
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-    })
-    const total = response.txs.length
-    const transactions: Tx[] = []
+    const firstPage = Math.floor(offset / 10) + 1
+    const lastPage = limit > 10 ? firstPage + Math.floor(limit / 10) : firstPage
+    const offsetOnFirstPage = offset % 10
 
-    const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
-    for (const txItem of txs) {
-      const rawTx = await sochain.getTx({
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-        hash: txItem.txid,
-      })
-      const tx: Tx = {
-        asset: AssetBTC,
-        from: rawTx.inputs.map((i) => ({
-          from: i.address,
-          amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)),
-        })),
-        to: rawTx.outputs
-          .filter((i) => i.type !== 'nulldata')
-          .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)) })),
-        date: new Date(rawTx.time * 1000),
-        type: TxType.Transfer,
-        hash: rawTx.txid,
+    const txHashesToFetch: string[] = []
+    let page = firstPage
+    try {
+      while (page <= lastPage) {
+        const response = await sochain.getTxs({
+          apiKey: this.sochainApiKey,
+          sochainUrl: this.sochainUrl,
+          network: this.network,
+          address: `${params?.address}`,
+          page,
+        })
+        if (response.transactions.length === 0) break
+        if (page === firstPage && response.transactions.length > offsetOnFirstPage) {
+          //start from offset
+          const txsToGet = response.transactions.slice(offsetOnFirstPage)
+          this.addArrayUpToLimit(
+            txHashesToFetch,
+            txsToGet.map((i) => i.hash),
+            limit,
+          )
+        } else {
+          this.addArrayUpToLimit(
+            txHashesToFetch,
+            response.transactions.map((i) => i.hash),
+            limit,
+          )
+        }
+        page++
       }
-      transactions.push(tx)
+    } catch (error) {
+      console.error(error)
+      //an errors means no more results
     }
+
+    const total = txHashesToFetch.length
+    const transactions: Tx[] = await Promise.all(txHashesToFetch.map((hash) => this.getTransactionData(hash)))
 
     const result: TxsPage = {
       total,
@@ -254,21 +283,29 @@ class Client extends UTXOClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string): Promise<Tx> {
-    const rawTx = await sochain.getTx({
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-      hash: txId,
-    })
-    return {
-      asset: AssetBTC,
-      from: rawTx.inputs.map((i) => ({
-        from: i.address,
-        amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)),
-      })),
-      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)) })),
-      date: new Date(rawTx.time * 1000),
-      type: TxType.Transfer,
-      hash: rawTx.txid,
+    try {
+      const rawTx = await sochain.getTx({
+        apiKey: this.sochainApiKey,
+        sochainUrl: this.sochainUrl,
+        network: this.network,
+        hash: txId,
+      })
+      return {
+        asset: AssetBTC,
+        from: rawTx.inputs.map((i) => ({
+          from: i.address,
+          amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)),
+        })),
+        to: rawTx.outputs
+          .filter((i) => i.type !== 'nulldata') //filter out op_return outputs
+          .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)) })),
+        date: new Date(rawTx.time * 1000),
+        type: TxType.Transfer,
+        hash: rawTx.hash,
+      }
+    } catch (error) {
+      console.error(error)
+      throw error
     }
   }
 
@@ -305,6 +342,7 @@ class Client extends UTXOClient {
 
     const { psbt } = await Utils.buildTx({
       ...params,
+      apiKey: this.sochainApiKey,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
       sochainUrl: this.sochainUrl,
@@ -312,7 +350,6 @@ class Client extends UTXOClient {
       network: this.network,
       spendPendingUTXO,
     })
-
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
     psbt.signAllInputs(btcKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs

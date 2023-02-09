@@ -1,9 +1,7 @@
 {
   "status": "success",
   "data": {
-    "network": "DOGETEST",
-    "address": "nfVtm2hbz4rv1fhBVTqi5hGWrRzy5rqmLv",
-    "confirmed_balance": "100.00000000",
-    "unconfirmed_balance": "0.00000000"
+    "confirmed": "100.00000000",
+    "unconfirmed": "0.00000000"
   }
 }

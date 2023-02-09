@@ -1,59 +1,76 @@
 {
   "status": "success",
   "data": {
-    "network": "LTC",
-    "txid": "f526f60ef4495a86b4e3d103efed4474119096e4f42acf54ef24dd535380d781",
-    "blockhash": "b43a1c949d9d41fd6807c14bf15dc7bd4d5888066533e3c233958f8cccdf0535",
-    "confirmations": 6,
+    "hash": "f526f60ef4495a86b4e3d103efed4474119096e4f42acf54ef24dd535380d781",
+    "confirmations": 197007,
+    "size": 340,
+    "vsize": 178,
+    "weight": 712,
+    "version": 1,
+    "locktime": 0,
+    "block_hash": "b43a1c949d9d41fd6807c14bf15dc7bd4d5888066533e3c233958f8cccdf0535",
+    "block_height": 2221685,
     "time": 1646416011,
+    "inputs_n": 2,
+    "inputs_value": "0.05914971",
     "inputs": [
       {
-        "input_no": 0,
+        "index": 0,
         "value": "0.04751423",
         "address": "ltc1qu6akfvdnanew6ldexqvjs3j58r9dnjud2qhukx",
-        "type": "witness_v0_keyhash",
-        "script": "",
-        "sequence": 4294967293,
+        "scriptSig": {
+          "hex": "",
+          "asm": ""
+        },
         "witness": [
           "304402201e13756ffd74f2c89542f6a4d022f298181d6dc5b7f84c8d76aa1afbac786fa30220561bff0da6037e3e9d2792a1b0a05dc00775858a437c8b644e9f401df919273901",
           "03df2365318e86e7d4971a825b3265cc80b28235c0c77612d155968390b7ec57e5"
         ],
-        "from_output": {
-          "txid": "aa501b5cb50df225ad7b5270fa51c6b7e3edb1576291b4b7447d920c3fe953b5",
-          "output_no": 0
+        "previous_output": {
+          "hash": "aa501b5cb50df225ad7b5270fa51c6b7e3edb1576291b4b7447d920c3fe953b5",
+          "index": 0
         }
       },
       {
-        "input_no": 1,
+        "index": 1,
         "value": "0.01163548",
         "address": "ltc1qu6akfvdnanew6ldexqvjs3j58r9dnjud2qhukx",
-        "type": "witness_v0_keyhash",
-        "script": "",
-        "sequence": 4294967294,
+        "scriptSig": {
+          "hex": "",
+          "asm": ""
+        },
         "witness": [
           "3044022042df93024ef970f2ef70fcb2f352266215fb1072069bf81bdfcb7e741c280b0e0220405f98570e0a462f11d89b4595e4811f5def3010a9858e7d5659052bb084a8c001",
           "03df2365318e86e7d4971a825b3265cc80b28235c0c77612d155968390b7ec57e5"
         ],
-        "from_output": {
-          "txid": "5c11733e006c3c1d62ae33571c0bb603b6e5780244bc3abfbe2f21ac1663b277",
-          "output_no": 0
+        "previous_output": {
+          "hash": "5c11733e006c3c1d62ae33571c0bb603b6e5780244bc3abfbe2f21ac1663b277",
+          "index": 0
         }
       }
     ],
+    "outputs_n": 1,
+    "outputs_value": "0.05914792",
     "outputs": [
       {
-        "output_no": 0,
+        "index": 0,
         "value": "0.05914792",
-        "address": "3Gi2h7qawGV74cW14VstRXR5KXuszA1E4d",
         "type": "scripthash",
-        "script": "OP_HASH160 a4baf1bae58d11536548d437713b99d47f9213f4 OP_EQUAL"
+        "address": "MNvB11FYtPLXs7muANsEFAfUeEWKw2caPp",
+        "script": {
+          "hex": "a914a4baf1bae58d11536548d437713b99d47f9213f487",
+          "asm": "OP_HASH160 a4baf1bae58d11536548d437713b99d47f9213f4 OP_EQUAL"
+        },
+        "spent": {
+          "hash": "2989b791014704655692278f917cba80047bc5062b5c4c72068d6cfd202985ef",
+          "index": 3
+        }
       }
     ],
-    "tx_hex": "01000000000102b553e93f0c927d44b7b4916257b1ede3b7c651fa70527bad25f20db55c1b50aa0000000000fdffffff77b26316ac212fbebf3abc440278e5b603b60b1c5733ae621d3c6c003e73115c0000000000feffffff01a8405a000000000017a914a4baf1bae58d11536548d437713b99d47f9213f4870247304402201e13756ffd74f2c89542f6a4d022f298181d6dc5b7f84c8d76aa1afbac786fa30220561bff0da6037e3e9d2792a1b0a05dc00775858a437c8b644e9f401df9192739012103df2365318e86e7d4971a825b3265cc80b28235c0c77612d155968390b7ec57e502473044022042df93024ef970f2ef70fcb2f352266215fb1072069bf81bdfcb7e741c280b0e0220405f98570e0a462f11d89b4595e4811f5def3010a9858e7d5659052bb084a8c0012103df2365318e86e7d4971a825b3265cc80b28235c0c77612d155968390b7ec57e500000000",
-    "network_fee": "0.00000179",
-    "size": 340,
-    "vsize": 178,
-    "version": 1,
-    "locktime": 0
+    "fee": "0.00000179",
+    "price": {
+      "value": "112.54029523",
+      "currency": "USD"
+    }
   }
 }

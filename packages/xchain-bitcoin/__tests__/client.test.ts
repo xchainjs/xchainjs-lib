@@ -6,7 +6,7 @@ import mockSochainApi from '../__mocks__/sochain'
 import { Client } from '../src/client'
 import { AssetBTC, MIN_TX_FEE } from '../src/const'
 
-const btcClient = new Client({})
+const btcClient = new Client({ sochainApiKey: 'mock' })
 
 describe('BitcoinClient Test', () => {
   beforeEach(() => {
@@ -59,6 +59,7 @@ describe('BitcoinClient Test', () => {
   it('should not throw on a client without a phrase', () => {
     expect(() => {
       new Client({
+        sochainApiKey: 'mock',
         network: Network.Testnet,
       })
     }).not.toThrow()
@@ -86,7 +87,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     const balance = await btcClient.getBalance(btcClient.getAddress())
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(530000)
+    expect(balance[0].amount.amount().toNumber()).toEqual(384776)
   })
 
   it('confirmed balances only', async () => {
@@ -94,7 +95,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     const balance = await btcClient.getBalance(btcClient.getAddress(), undefined, true)
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(519650)
+    expect(balance[0].amount.amount().toNumber()).toEqual(384776)
   })
 
   it('all balances of an address, but without phrase', async () => {
@@ -102,7 +103,7 @@ describe('BitcoinClient Test', () => {
     btcClient.purgeClient()
     const balance = await btcClient.getBalance(addyThreePath0)
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(20000)
+    expect(balance[0].amount.amount().toNumber()).toEqual(21462)
   })
 
   it('confirmed balances of an address, but without phrase', async () => {
@@ -110,7 +111,7 @@ describe('BitcoinClient Test', () => {
     btcClient.purgeClient()
     const balance = await btcClient.getBalance(addyThreePath0, undefined, true)
     expect(balance.length).toEqual(1)
-    expect(balance[0].amount.amount().toNumber()).toEqual(15446)
+    expect(balance[0].amount.amount().toNumber()).toEqual(21462)
   })
 
   it('should broadcast a normal transfer', async () => {
@@ -134,7 +135,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
 
     /**
-     * All UTXO values: 8800 + 495777 + 15073
+     * All UTXO values: 384776
      * Confirmed UTXO values: 8800 + 15073 = 23873
      * Spend amount: 2223
      * Expected: Successful
@@ -151,7 +152,7 @@ describe('BitcoinClient Test', () => {
       })
       expect(txid).toEqual('mock-txid')
     } catch (err) {
-      console.log('ERR running test', err)
+      console.error('ERR running test', err)
       throw err
     }
   })
@@ -321,15 +322,15 @@ describe('BitcoinClient Test', () => {
     ).rejects.toThrow(expectedError)
   })
 
-  it('should get address transactions', async () => {
+  it('should get address transactions with default limit =10', async () => {
     btcClient.setNetwork(Network.Testnet)
 
-    const txPages = await btcClient.getTransactions({ address: addyThreePath0, limit: 4 })
-
-    expect(txPages.total).toEqual(1) //there is 1 tx in addyThreePath0
+    const txPages = await btcClient.getTransactions({ address: addyThreePath0 })
+    // console.log(JSON.stringify(txPages, null, 2))
+    expect(txPages.total).toEqual(4) //there is 4 tx in addyThreePath0
     expect(txPages.txs[0].asset).toEqual(AssetBTC)
-    expect(txPages.txs[0].date).toEqual(new Date('2020-12-13T11:39:55.000Z'))
-    expect(txPages.txs[0].hash).toEqual('6e7071a09e82d72c6c84d253047c38dbd7fea531b93155adfe10acfba41bca63')
+    expect(txPages.txs[0].date).toEqual(new Date('2021-05-01T18:50:26.000Z'))
+    expect(txPages.txs[0].hash).toEqual('ffd3cfa80cc766257b96b445c5bf8c3ffb58a33a725cb97727293a7c1fc9ba12')
     expect(txPages.txs[0].type).toEqual('transfer')
     expect(txPages.txs[0].to.length).toEqual(2)
     expect(txPages.txs[0].from.length).toEqual(1)
@@ -338,8 +339,8 @@ describe('BitcoinClient Test', () => {
   it('should get address transactions with limit', async () => {
     btcClient.setNetwork(Network.Testnet)
     // Limit should work
-    const txPages = await btcClient.getTransactions({ address: addyThreePath0, limit: 1 })
-    return expect(txPages.total).toEqual(1) //there 1 tx in addyThreePath0
+    const txPages = await btcClient.getTransactions({ address: addyThreePath0, limit: 3 })
+    return expect(txPages.total).toEqual(3) //there 4 tx in addyThreePath0
   })
 
   it('should get transaction with hash', async () => {

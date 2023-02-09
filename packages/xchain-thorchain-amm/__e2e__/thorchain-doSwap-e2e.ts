@@ -30,8 +30,16 @@ const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 const thorchainCacheStagenet = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
 const thorchainQueryStagenet = new ThorchainQuery(thorchainCacheStagenet)
 
-const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
-const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryStagenet)
+const mainnetWallet = new Wallet(
+  process.env.MAINNETPHRASE || 'you forgot to set the phrase',
+  thorchainQueryMainnet,
+  process.env.SOCHAIN_API_KEY || '',
+)
+const stagenetWallet = new Wallet(
+  process.env.MAINNETPHRASE || 'you forgot to set the phrase',
+  thorchainQueryStagenet,
+  process.env.SOCHAIN_API_KEY || '',
+)
 
 const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 const stagenetThorchainAmm = new ThorchainAMM(thorchainQueryStagenet)
@@ -79,11 +87,12 @@ describe('xchain-swap doSwap Integration Tests', () => {
   // From BTC to RUNE with no Affiliate address - passes
   it(`Should swap BTC to RUNE, with no affiliate address `, async () => {
     const estimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('0.001')), AssetBTC),
+      input: new CryptoAmount(assetToBase(assetAmount('0.0005')), AssetBTC),
       destinationAsset: AssetRuneNative,
       destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
       // affiliateFeePercent: 0.1,
     }
+
     const outPutCanSwap = await mainetThorchainAmm.estimateSwap(estimateSwapParams)
     print(outPutCanSwap)
     const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)

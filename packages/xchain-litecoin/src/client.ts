@@ -21,7 +21,6 @@ import * as Litecoin from 'bitcoinjs-lib'
 import { AssetLTC, LOWER_FEE_BOUND, LTCChain, LTC_DECIMAL, UPPER_FEE_BOUND } from './const'
 import * as sochain from './sochain-api'
 import { NodeAuth } from './types'
-import { TxIO } from './types/sochain-api-types'
 import * as Utils from './utils'
 
 export type NodeUrls = Record<Network, string>
@@ -30,6 +29,7 @@ export type LitecoinClientParams = XChainClientParams & {
   sochainUrl?: string
   nodeUrls?: NodeUrls
   nodeAuth?: NodeAuth | null
+  sochainApiKey: string
 }
 
 /**
@@ -39,6 +39,7 @@ class Client extends UTXOClient {
   private sochainUrl: string
   private nodeUrls: NodeUrls
   private nodeAuth?: NodeAuth
+  private sochainApiKey
 
   /**
    * Constructor
@@ -53,7 +54,8 @@ class Client extends UTXOClient {
       lower: LOWER_FEE_BOUND,
       upper: UPPER_FEE_BOUND,
     },
-    sochainUrl = 'https://sochain.com/api/v2',
+    sochainApiKey,
+    sochainUrl = 'https://sochain.com/api/v3',
     phrase,
     nodeUrls = {
       [Network.Mainnet]: 'https://litecoin.ninerealms.com',
@@ -76,6 +78,7 @@ class Client extends UTXOClient {
       nodeAuth === null ? undefined : nodeAuth
 
     this.sochainUrl = sochainUrl
+    this.sochainApiKey = sochainApiKey
   }
 
   /**
@@ -205,10 +208,26 @@ class Client extends UTXOClient {
    */
   async getBalance(address: Address): Promise<Balance[]> {
     return Utils.getBalance({
+      apiKey: this.sochainApiKey,
       sochainUrl: this.sochainUrl,
       network: this.network,
       address,
     })
+  }
+  /**
+   * helper function tto limit adding to an array
+   *
+   * @param arr array to be added to
+   * @param toAdd elements to add
+   * @param limit do not add more than this limit
+   */
+  private addArrayUpToLimit(arr: string[], toAdd: string[], limit: number) {
+    for (let index = 0; index < toAdd.length; index++) {
+      const element = toAdd[index]
+      if (arr.length < limit) {
+        arr.push(element)
+      }
+    }
   }
 
   /**
@@ -219,40 +238,50 @@ class Client extends UTXOClient {
    * @returns {TxsPage} The transaction history.
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    // Sochain API doesn't have pagination parameter
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
-    const response = await sochain.getAddress({
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-      address: `${params?.address}`,
-    })
-    const total = response.txs.length
-    const transactions: Tx[] = []
+    if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
 
-    const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
-    for (const txItem of txs) {
-      const rawTx = await sochain.getTx({
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-        hash: txItem.txid,
-      })
-      const tx: Tx = {
-        asset: AssetLTC,
-        from: rawTx.inputs.map((i: TxIO) => ({
-          from: i.address,
-          amount: assetToBase(assetAmount(i.value, LTC_DECIMAL)),
-        })),
-        to: rawTx.outputs
-          // ignore tx with type 'nulldata'
-          .filter((i: TxIO) => i.type !== 'nulldata')
-          .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, LTC_DECIMAL)) })),
-        date: new Date(rawTx.time * 1000),
-        type: TxType.Transfer,
-        hash: rawTx.txid,
+    const firstPage = Math.floor(offset / 10) + 1
+    const lastPage = limit > 10 ? firstPage + Math.floor(limit / 10) : firstPage
+    const offsetOnFirstPage = offset % 10
+
+    const txHashesToFetch: string[] = []
+    let page = firstPage
+    try {
+      while (page <= lastPage) {
+        const response = await sochain.getTxs({
+          apiKey: this.sochainApiKey,
+          sochainUrl: this.sochainUrl,
+          network: this.network,
+          address: `${params?.address}`,
+          page,
+        })
+        if (response.transactions.length === 0) break
+        if (page === firstPage && response.transactions.length > offsetOnFirstPage) {
+          //start from offset
+          const txsToGet = response.transactions.slice(offsetOnFirstPage)
+          this.addArrayUpToLimit(
+            txHashesToFetch,
+            txsToGet.map((i) => i.hash),
+            limit,
+          )
+        } else {
+          this.addArrayUpToLimit(
+            txHashesToFetch,
+            response.transactions.map((i) => i.hash),
+            limit,
+          )
+        }
+        page++
       }
-      transactions.push(tx)
+    } catch (error) {
+      console.error(error)
+      //an errors means no more results
     }
+
+    const total = txHashesToFetch.length
+    const transactions: Tx[] = await Promise.all(txHashesToFetch.map((hash) => this.getTransactionData(hash)))
 
     const result: TxsPage = {
       total,
@@ -268,21 +297,29 @@ class Client extends UTXOClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string): Promise<Tx> {
-    const rawTx = await sochain.getTx({
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-      hash: txId,
-    })
-    return {
-      asset: AssetLTC,
-      from: rawTx.inputs.map((i) => ({
-        from: i.address,
-        amount: assetToBase(assetAmount(i.value, LTC_DECIMAL)),
-      })),
-      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, LTC_DECIMAL)) })),
-      date: new Date(rawTx.time * 1000),
-      type: TxType.Transfer,
-      hash: rawTx.txid,
+    try {
+      const rawTx = await sochain.getTx({
+        apiKey: this.sochainApiKey,
+        sochainUrl: this.sochainUrl,
+        network: this.network,
+        hash: txId,
+      })
+      return {
+        asset: AssetLTC,
+        from: rawTx.inputs.map((i) => ({
+          from: i.address,
+          amount: assetToBase(assetAmount(i.value, LTC_DECIMAL)),
+        })),
+        to: rawTx.outputs
+          .filter((i) => i.type !== 'nulldata') //filter out op_return outputs
+          .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, LTC_DECIMAL)) })),
+        date: new Date(rawTx.time * 1000),
+        type: TxType.Transfer,
+        hash: rawTx.hash,
+      }
+    } catch (error) {
+      console.error(error)
+      throw error
     }
   }
 
@@ -306,6 +343,7 @@ class Client extends UTXOClient {
     checkFeeBounds(this.feeBounds, feeRate)
 
     const { psbt } = await Utils.buildTx({
+      apiKey: this.sochainApiKey,
       ...params,
       feeRate,
       sender: this.getAddress(fromAddressIndex),

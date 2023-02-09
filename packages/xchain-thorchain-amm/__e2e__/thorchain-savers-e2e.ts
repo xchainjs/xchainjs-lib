@@ -13,7 +13,11 @@ import { Wallet } from '../src/Wallet'
 import { ThorchainAMM } from '../src/thorchain-amm'
 
 const thorchainQueryMainnet = new ThorchainQuery()
-const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
+const mainnetWallet = new Wallet(
+  process.env.MAINNETPHRASE || 'you forgot to set the phrase',
+  thorchainQueryMainnet,
+  process.env.SOCHAIN_API_KEY || '',
+)
 const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 
 // mainnet asset

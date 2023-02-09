@@ -41,16 +41,17 @@ export const getUnspentTxs = async ({
   address: string
 }): Promise<UtxoData[]> => {
   const { data: response } = await axios.get<UtxoData[]>(`${haskoinUrl}/address/${address}/unspent`)
-
   return response
 }
 
 export const getConfirmedUnspentTxs = async ({
+  apiKey,
   haskoinUrl,
   sochainUrl,
   address,
   network,
 }: {
+  apiKey: string
   haskoinUrl: string
   sochainUrl: string
   address: string
@@ -63,6 +64,7 @@ export const getConfirmedUnspentTxs = async ({
   await Promise.all(
     allUtxos.map(async (tx: UtxoData) => {
       const confirmed = await getConfirmedTxStatus({
+        apiKey,
         sochainUrl,
         network,
         txHash: tx.txid,
