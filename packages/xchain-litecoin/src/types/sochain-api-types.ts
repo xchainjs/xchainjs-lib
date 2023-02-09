@@ -59,8 +59,6 @@ export type LtcAddressUTXO = {
   address: string
   tx_hex: string
   value: string
-  //confirmations: number
-  // time: number
 }
 
 export type LtcAddressTxDTO = {

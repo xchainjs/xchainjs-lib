@@ -38,7 +38,7 @@ describe('Bitcoin Integration Tests', () => {
     txHistory = await btcClient.getTransactions({ address, offset: 500, limit: 10 })
     expect(txHistory.total).toBe(0)
 
-    txHistory = await btcClient.getTransactions({ address, offset: 0, limit: 1000 })
+    txHistory = await btcClient.getTransactions({ address, offset: 0, limit: 40 })
     expect(txHistory.total).toBe(39)
 
     txHistory = await btcClient.getTransactions({ address, offset: 11, limit: 20 })
