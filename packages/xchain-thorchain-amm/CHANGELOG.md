@@ -1,3 +1,12 @@
+# v0.3.16 (2023-2-8)
+
+## Update
+
+- Bump:
+- `xchain-bitcoin`
+- `xchain-litecoin`
+- `xchain-doge`
+
 # v0.3.15 (2023-2-6)
 
 ## Update
