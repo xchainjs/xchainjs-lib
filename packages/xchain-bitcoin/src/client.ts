@@ -200,7 +200,14 @@ class Client extends UTXOClient {
       haskoinUrl: this.haskoinUrl[this.network],
     })
   }
-  addArrayUpToLimit(arr: string[], toAdd: string[], limit: number) {
+  /**
+   * helper function tto limit adding to an array
+   *
+   * @param arr array to be added to
+   * @param toAdd elements to add
+   * @param limit do not add more than this limit
+   */
+  private addArrayUpToLimit(arr: string[], toAdd: string[], limit: number) {
     for (let index = 0; index < toAdd.length; index++) {
       const element = toAdd[index]
       if (arr.length < limit) {
@@ -258,7 +265,7 @@ class Client extends UTXOClient {
       console.error(error)
       //an errors means no more results
     }
-    // console.log(JSON.stringify({ txHashesToFetch }, null, 2))
+
     const total = txHashesToFetch.length
     const transactions: Tx[] = await Promise.all(txHashesToFetch.map((hash) => this.getTransactionData(hash)))
 
