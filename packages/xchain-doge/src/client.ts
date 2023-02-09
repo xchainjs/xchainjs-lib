@@ -20,7 +20,6 @@ import * as Dogecoin from 'bitcoinjs-lib'
 import * as blockcypher from './blockcypher-api'
 import { AssetDOGE, DOGEChain, DOGE_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import * as sochain from './sochain-api'
-import { TxIO } from './types/sochain-api-types'
 import * as Utils from './utils'
 
 export type DogecoinClientParams = XChainClientParams & {
@@ -207,6 +206,22 @@ class Client extends UTXOClient {
   }
 
   /**
+   * helper function tto limit adding to an array
+   *
+   * @param arr array to be added to
+   * @param toAdd elements to add
+   * @param limit do not add more than this limit
+   */
+  private addArrayUpToLimit(arr: string[], toAdd: string[], limit: number) {
+    for (let index = 0; index < toAdd.length; index++) {
+      const element = toAdd[index]
+      if (arr.length < limit) {
+        arr.push(element)
+      }
+    }
+  }
+
+  /**
    * Get transaction history of a given address with pagination options.
    * By default it will return the transaction history of the current wallet.
    *
@@ -216,46 +231,48 @@ class Client extends UTXOClient {
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
-    const page = Math.floor(offset / 10) + 1
-    let txHashesToFetch: string[] = []
+    if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
 
-    while (txHashesToFetch.length < limit) {
-      const response = await sochain.getTxs({
-        apiKey: this.sochainApiKey,
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-        address: `${params?.address}`,
-        page,
-      })
-      txHashesToFetch.push(...response.transactions.map((i) => i.hash))
-    }
-    txHashesToFetch = txHashesToFetch.slice(0, limit)
-    const total = txHashesToFetch.length
-    const transactions: Tx[] = []
+    const firstPage = Math.floor(offset / 10) + 1
+    const lastPage = limit > 10 ? firstPage + Math.floor(limit / 10) : firstPage
+    const offsetOnFirstPage = offset % 10
 
-    for (const hash of txHashesToFetch) {
-      const rawTx = await sochain.getTx({
-        apiKey: this.sochainApiKey,
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-        hash,
-      })
-      const tx: Tx = {
-        asset: AssetDOGE,
-        from: rawTx.inputs.map((i: TxIO) => ({
-          from: i.address,
-          amount: assetToBase(assetAmount(i.value, DOGE_DECIMAL)),
-        })),
-        to: rawTx.outputs
-          // ignore tx with type 'nulldata'
-          .filter((i: TxIO) => i.type !== 'nulldata')
-          .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, DOGE_DECIMAL)) })),
-        date: new Date(rawTx.time * 1000),
-        type: TxType.Transfer,
-        hash: rawTx.hash,
+    const txHashesToFetch: string[] = []
+    let page = firstPage
+    try {
+      while (page <= lastPage) {
+        const response = await sochain.getTxs({
+          apiKey: this.sochainApiKey,
+          sochainUrl: this.sochainUrl,
+          network: this.network,
+          address: `${params?.address}`,
+          page,
+        })
+        if (response.transactions.length === 0) break
+        if (page === firstPage && response.transactions.length > offsetOnFirstPage) {
+          //start from offset
+          const txsToGet = response.transactions.slice(offsetOnFirstPage)
+          this.addArrayUpToLimit(
+            txHashesToFetch,
+            txsToGet.map((i) => i.hash),
+            limit,
+          )
+        } else {
+          this.addArrayUpToLimit(
+            txHashesToFetch,
+            response.transactions.map((i) => i.hash),
+            limit,
+          )
+        }
+        page++
       }
-      transactions.push(tx)
+    } catch (error) {
+      console.error(error)
+      //an errors means no more results
     }
+    // console.log(JSON.stringify({ txHashesToFetch }, null, 2))
+    const total = txHashesToFetch.length
+    const transactions: Tx[] = await Promise.all(txHashesToFetch.map((hash) => this.getTransactionData(hash)))
 
     const result: TxsPage = {
       total,

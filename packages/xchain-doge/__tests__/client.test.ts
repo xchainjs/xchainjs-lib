@@ -129,7 +129,6 @@ describe('DogecoinClient Test', () => {
     dogeClient.setPhrase(phraseOne)
     const amount = baseAmount(5000000000)
     const txid = await dogeClient.transfer({ recipient: testnet_address_path1, amount, feeRate: LOWER_FEE_BOUND })
-    console.log(txid)
     expect(txid).toEqual('mock-txid-sochain')
   })
 
