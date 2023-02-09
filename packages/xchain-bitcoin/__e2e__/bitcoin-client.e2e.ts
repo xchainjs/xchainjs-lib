@@ -1,5 +1,4 @@
-import { Network } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { assetToString } from '@xchainjs/xchain-util'
 
 import { Client } from '../src/client'
 import { AssetBTC } from '../src/const'
@@ -15,8 +14,47 @@ describe('Bitcoin Integration Tests', () => {
     expect(balances.length).toBeGreaterThan(0)
   })
   it('should fetch previous transactions', async () => {
+    let txHistory = await btcClient.getTransactions({
+      address: '15UWKjrakkZjvAGjJttvAm1o6NsB5VeMb9',
+      offset: 0,
+      limit: 10,
+    })
+    expect(txHistory.total).toBe(0)
+
+    txHistory = await btcClient.getTransactions({
+      address: '15UWKjrakkZjvAGjJttvAm1o6NsB5VeMb9',
+      offset: 5,
+      limit: 1,
+    })
+    expect(txHistory.total).toBe(0)
+
     const address = 'bc1qd8jhw2m64r8lslzkx59h8jf3uhgw56grx5dqcf'
-    const txHistory = await btcClient.getTransactions({ address })
+    txHistory = await btcClient.getTransactions({ address, offset: 5, limit: 1 })
+    expect(txHistory.total).toBe(1)
+    expect(txHistory.txs[0].asset).toEqual(AssetBTC)
+    expect(txHistory.txs[0].hash).toEqual('a9cadbf0a59bbee3253c30978c00eb587a16c7e41421732968fd9626a7fea8af')
+    expect(txHistory.txs[0].type).toEqual('transfer')
+
+    txHistory = await btcClient.getTransactions({ address, offset: 500, limit: 10 })
+    expect(txHistory.total).toBe(0)
+
+    txHistory = await btcClient.getTransactions({ address, offset: 0, limit: 1000 })
+    expect(txHistory.total).toBe(39)
+
+    txHistory = await btcClient.getTransactions({ address, offset: 11, limit: 20 })
+    expect(txHistory.total).toBe(20)
+    expect(txHistory.txs[0].hash).toEqual('35a52115b4adedbd0b6166a0cea701809460dbb8befa8a86348eb6174ecf0d1a')
+    expect(txHistory.txs[19].hash).toEqual('af0362a05557ff80ffaef09c968eeef72307be72134f051f9b5daadfc2892c98')
+
+    try {
+      txHistory = await btcClient.getTransactions({ address, offset: -1, limit: 10 })
+      fail()
+    } catch (error) {}
+    try {
+      txHistory = await btcClient.getTransactions({ address, offset: 0, limit: -10 })
+      fail()
+    } catch (error) {}
+
     // for (const tx of txHistory.txs) {
     //   console.log(tx.hash, tx.date)
     //   console.log(tx.from[0].from, tx.from[0].amount.amount().toFixed())

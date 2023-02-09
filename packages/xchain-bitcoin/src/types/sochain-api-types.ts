@@ -43,7 +43,6 @@ export interface TxIO {
 }
 
 export interface Transaction {
-  network: string
   hash: string
   block_hash: string
   confirmations: number

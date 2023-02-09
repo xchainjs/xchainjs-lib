@@ -322,7 +322,7 @@ describe('BitcoinClient Test', () => {
     ).rejects.toThrow(expectedError)
   })
 
-  it('should get address transactions', async () => {
+  it('should get address transactions with default limit =10', async () => {
     btcClient.setNetwork(Network.Testnet)
 
     const txPages = await btcClient.getTransactions({ address: addyThreePath0 })
@@ -332,7 +332,7 @@ describe('BitcoinClient Test', () => {
     expect(txPages.txs[0].date).toEqual(new Date('2021-05-01T18:50:26.000Z'))
     expect(txPages.txs[0].hash).toEqual('ffd3cfa80cc766257b96b445c5bf8c3ffb58a33a725cb97727293a7c1fc9ba12')
     expect(txPages.txs[0].type).toEqual('transfer')
-    expect(txPages.txs[0].to.length).toEqual(3)
+    expect(txPages.txs[0].to.length).toEqual(2)
     expect(txPages.txs[0].from.length).toEqual(1)
   })
 
