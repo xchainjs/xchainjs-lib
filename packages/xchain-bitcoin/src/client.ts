@@ -270,37 +270,6 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   */
-  // async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-  //   const offset = (params && params.offset) || 0
-  //   const limit = (params && params.limit) || 10
-  //   const address = `${params?.address}`
-  //   const page = Math.floor(offset / 10) + 1
-  //   const { transactions: allTransactions } = await sochain.getTxs({
-  //     apiKey: this.sochainApiKey,
-  //     sochainUrl: this.sochainUrl,
-  //     network: this.network,
-  //     address,
-  //     page,
-  //   })
-
-  //   const filteredTxs = allTransactions.slice(offset, offset + limit)
-  //   const total = filteredTxs.length // new total of tx's returned
-
-  //   const transactions = await Promise.all(filteredTxs.map((txItem) => this.getTransactionData(txItem.hash)))
-  //   const result = {
-  //     total,
-  //     txs: transactions,
-  //   }
-  //   console.log(JSON.stringify({ result }, null, 2))
-  //   return result
-  // }
-  /**
    * Get the transaction details of a given transaction id.
    *
    * @param {string} txId The transaction id.
