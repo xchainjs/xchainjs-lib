@@ -1,3 +1,9 @@
+# v.0.10.10 (2023-02-08)
+
+## Update
+
+- add support for sochain v3 API
+
 # v.0.10.9 (2022-01-19)
 
 ## Update
