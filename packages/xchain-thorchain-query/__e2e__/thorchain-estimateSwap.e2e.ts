@@ -158,6 +158,18 @@ describe('Thorchain-query estimate Integration Tests', () => {
     expect(estimate).toBeTruthy()
     expect(estimate.txEstimate.waitTimeSeconds === 600)
   })
+  it(`Should estimate single swap of 1000 busd To BTC `, async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(1000, 8)), BUSD),
+      destinationAsset: AssetBTC,
+      destinationAddress: 'xxx',
+    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    expect(estimate.txEstimate.canSwap).toBe(true)
+    expect(estimate).toBeTruthy()
+    expect(estimate.txEstimate.waitTimeSeconds === 600)
+  })
   it(`Should fail estimate single swap of 0.01 RUNE To BTC `, async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(0.01)), AssetRuneNative),

@@ -4,6 +4,12 @@
 
 - several fee calculation fixes
 
+# v0.1.17 (2023-2-6)
+
+## Fix
+
+- several fee calculation fixes
+
 # v0.1.16 (2023-1-26)
 
 ## Fix

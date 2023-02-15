@@ -2,6 +2,7 @@ import { AVAXChain, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xc
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
+import { BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { Balance, FeeOption, XChainClient } from '@xchainjs/xchain-client'
 import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
@@ -50,6 +51,7 @@ export class Wallet {
       BNB: new BnbClient(settings),
       GAIA: new CosmosClient(settings),
       AVAX: new AvaxClient({ ...defaultAvaxParams, network: settings.network, phrase }),
+      BSC: new BscClient({ ...defaultBscParams, network: settings.network, phrase }),
     }
     this.ethHelper = new EthHelper(this.clients.ETH, this.thorchainQuery.thorchainCache)
   }
@@ -129,7 +131,7 @@ export class Wallet {
    * @returns - tx submitted object
    */
   private async swapRuneTo(swap: ExecuteSwap): Promise<TxSubmitted> {
-    const thorClient = this.clients.THOR as unknown as ThorchainClient
+    const thorClient = (this.clients.THOR as unknown) as ThorchainClient
     const waitTimeSeconds = swap.waitTimeSeconds
     const hash = await thorClient.deposit({
       amount: swap.input.baseAmount,
@@ -169,6 +171,17 @@ export class Wallet {
         memo: swap.memo,
       }
       const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(params)
+      return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else if (swap.input.asset.chain === BSCChain) {
+      const params = {
+        walletIndex: 0,
+        asset: swap.input.asset,
+        amount: swap.input.baseAmount,
+        feeOption: swap.feeOption || FeeOption.Fast,
+        memo: swap.memo,
+      }
+      const evmHelper = new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
@@ -289,6 +302,17 @@ export class Wallet {
       const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else if (assetAmount.asset.chain === BSCChain) {
+      const addParams = {
+        wallIndex: 0,
+        asset: assetAmount.asset,
+        amount: assetAmount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: memo,
+      }
+      const evmHelper = new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
       const addParams = {
         wallIndex: 0,
@@ -339,6 +363,17 @@ export class Wallet {
         memo: memo,
       }
       const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else if (dustAssetAmount.asset.chain === BSCChain) {
+      const addParams = {
+        wallIndex: 0,
+        asset: dustAssetAmount.asset,
+        amount: dustAssetAmount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: memo,
+      }
+      const evmHelper = new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
@@ -396,6 +431,17 @@ export class Wallet {
       const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else if (params.asset.asset.chain === BSCChain) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.asset.asset,
+        amount: params.asset.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: constructedMemo,
+      }
+      const evmHelper = new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
       const addParams = {
         wallIndex: 0,
@@ -449,6 +495,17 @@ export class Wallet {
         memo: constructedMemo,
       }
       const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(withdrawParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else if (params.assetFee.asset.chain === BSCChain) {
+      const withdrawParams = {
+        wallIndex: 0,
+        asset: params.assetFee.asset,
+        amount: params.assetFee.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: constructedMemo,
+      }
+      const evmHelper = new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(withdrawParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {

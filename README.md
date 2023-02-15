@@ -39,6 +39,7 @@ A single common interface:
 - [`xchain-binance`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-binance)
 - [`xchain-bitcoin`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoin)
 - [`xchain-bitcoincash`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoincash)
+- [`xchain-bsc`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bsc)
 - [`xchain-client`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-client)
 - [`xchain-cosmos`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cosmos)
 - [`xchain-crypto`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-crypto)
