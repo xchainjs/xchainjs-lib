@@ -232,6 +232,17 @@ export class Wallet {
       }
       const hash = await this.evmHelpers['BSC'].sendDeposit(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
+    } else if (swap.input.asset.chain === BSCChain) {
+      const params = {
+        walletIndex: 0,
+        asset: swap.input.asset,
+        amount: swap.input.baseAmount,
+        feeOption: swap.feeOption || FeeOption.Fast,
+        memo: swap.memo,
+      }
+      const evmHelper = new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(params)
+      return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
       const params = {
         walletIndex: 0,

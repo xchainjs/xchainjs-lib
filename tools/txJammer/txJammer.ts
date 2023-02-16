@@ -14,7 +14,15 @@ import {
   Thornode,
   WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
-import { Asset, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetRuneNative,
+  THORChain,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+} from '@xchainjs/xchain-util'
 import * as weighted from 'weighted'
 
 import {
