@@ -1,47 +1,35 @@
-import { Network, TxHash } from '@xchainjs/xchain-client'
+import { TxHash } from '@xchainjs/xchain-client'
 import { BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
-import { BTC_DECIMAL } from './const'
 import {
+  AddressDTO,
   AddressParams,
+  AddressUTXO,
   BalanceParams,
-  BtcAddressDTO,
-  BtcAddressUTXO,
-  BtcGetBalanceDTO,
-  BtcGetTxsDTO,
-  BtcUnspentTxsDTO,
+  BroadcastDTO,
+  GetBalanceDTO,
+  GetTxsDTO,
+  SochainNetwork,
   SochainResponse,
   Transaction,
   TxConfirmedStatus,
   TxHashParams,
-} from './types/sochain-api-types'
-
-const DEFAULT_SUGGESTED_TRANSACTION_FEE = 127
-
-const toSochainNetwork = (network: Network): string => {
-  switch (network) {
-    case Network.Mainnet:
-    case Network.Stagenet:
-      return 'BTC'
-    case Network.Testnet:
-      return 'BTCTEST'
-  }
-}
+  UnspentTxsDTO,
+} from './sochain-api-types'
 
 /**
  * Get address information.
  *
- *
  * @param {string} sochainUrl The sochain node url.
  * @param {string} network
  * @param {string} address
- * @returns {BtcAddressDTO}
+ * @returns {AddressDTO}
  */
-export const getAddress = async ({ apiKey, sochainUrl, network, address }: AddressParams): Promise<BtcAddressDTO> => {
-  const url = `${sochainUrl}/address_summary/${toSochainNetwork(network)}/${address}`
+export const getAddress = async ({ apiKey, sochainUrl, network, address }: AddressParams): Promise<AddressDTO> => {
+  const url = `${sochainUrl}/address_summary/${network}/${address}`
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
-  const addressResponse: SochainResponse<BtcAddressDTO> = response.data
+  const addressResponse: SochainResponse<AddressDTO> = response.data
   return addressResponse.data
 }
 
@@ -56,7 +44,7 @@ export const getAddress = async ({ apiKey, sochainUrl, network, address }: Addre
  * @returns {Transactions}
  */
 export const getTx = async ({ apiKey, sochainUrl, network, hash }: TxHashParams): Promise<Transaction> => {
-  const url = `${sochainUrl}/transaction/${toSochainNetwork(network)}/${hash}`
+  const url = `${sochainUrl}/transaction/${network}/${hash}`
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const tx: SochainResponse<Transaction> = response.data
   return tx.data
@@ -82,12 +70,12 @@ export const getTxs = async ({
   apiKey: string
   address: string
   sochainUrl: string
-  network: Network
+  network: SochainNetwork
   page: number
-}): Promise<BtcGetTxsDTO> => {
-  const url = `${sochainUrl}/transactions/${toSochainNetwork(network)}/${address}/${page}` //TODO support paging
+}): Promise<GetTxsDTO> => {
+  const url = `${sochainUrl}/transactions/${network}/${address}/${page}` //TODO support paging
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
-  const txs: SochainResponse<BtcGetTxsDTO> = response.data
+  const txs: SochainResponse<GetTxsDTO> = response.data
   return txs.data
 }
 /**
@@ -107,12 +95,13 @@ export const getBalance = async ({
   network,
   address,
   confirmedOnly,
+  assetDecimals,
 }: BalanceParams): Promise<BaseAmount> => {
-  const url = `${sochainUrl}/balance/${toSochainNetwork(network)}/${address}`
+  const url = `${sochainUrl}/balance/${network}/${address}`
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
-  const balanceResponse: SochainResponse<BtcGetBalanceDTO> = response.data
-  const confirmed = assetAmount(balanceResponse.data.confirmed, BTC_DECIMAL)
-  const unconfirmed = assetAmount(balanceResponse.data.unconfirmed, BTC_DECIMAL)
+  const balanceResponse: SochainResponse<GetBalanceDTO> = response.data
+  const confirmed = assetAmount(balanceResponse.data.confirmed, assetDecimals)
+  const unconfirmed = assetAmount(balanceResponse.data.unconfirmed, assetDecimals)
   const netAmt = confirmedOnly ? confirmed : confirmed.plus(unconfirmed)
   const result = assetToBase(netAmt)
   return result
@@ -126,7 +115,7 @@ export const getBalance = async ({
  * @param {string} sochainUrl The sochain node url.
  * @param {string} network
  * @param {string} address
- * @returns {BtcAddressUTXO[]}
+ * @returns {AddressUTXO[]}
  */
 export const getUnspentTxs = async ({
   apiKey,
@@ -134,10 +123,10 @@ export const getUnspentTxs = async ({
   network,
   address,
   page,
-}: AddressParams): Promise<BtcAddressUTXO[]> => {
-  const url = [sochainUrl, 'unspent_outputs', toSochainNetwork(network), address, page].filter((v) => !!v).join('/')
+}: AddressParams): Promise<AddressUTXO[]> => {
+  const url = [sochainUrl, 'unspent_outputs', network, address, page].filter((v) => !!v).join('/')
   const resp = await axios.get(url, { headers: { 'API-KEY': apiKey } })
-  const response: SochainResponse<BtcUnspentTxsDTO> = resp.data
+  const response: SochainResponse<UnspentTxsDTO> = resp.data
   const txs = response.data.outputs
   if (txs.length === 10) {
     //fetch the next batch
@@ -201,7 +190,7 @@ export const getConfirmedTxStatus = async ({
   apiKey: string
   sochainUrl: string
   txHash: TxHash
-  network: Network
+  network: SochainNetwork
 }): Promise<boolean> => {
   // try to get it from cache
   if (confirmedTxs.includes(txHash)) return true
@@ -225,14 +214,14 @@ export const getConfirmedTxStatus = async ({
  * @param {string} sochainUrl The sochain node url.
  * @param {Network} network
  * @param {string} address
- * @returns {BtcAddressUTXO[]}
+ * @returns {AddressUTXO[]}
  */
 export const getConfirmedUnspentTxs = async ({
   apiKey,
   sochainUrl,
   network,
   address,
-}: AddressParams): Promise<BtcAddressUTXO[]> => {
+}: AddressParams): Promise<AddressUTXO[]> => {
   const txs = await getUnspentTxs({
     apiKey,
     sochainUrl,
@@ -241,10 +230,10 @@ export const getConfirmedUnspentTxs = async ({
     page: 1,
   })
 
-  const confirmedUTXOs: BtcAddressUTXO[] = []
+  const confirmedUTXOs: AddressUTXO[] = []
 
   await Promise.all(
-    txs.map(async (tx: BtcAddressUTXO) => {
+    txs.map(async (tx: AddressUTXO) => {
       const confirmed = await getConfirmedTxStatus({
         apiKey,
         sochainUrl,
@@ -262,18 +251,29 @@ export const getConfirmedUnspentTxs = async ({
 }
 
 /**
- * Get Bitcoin suggested transaction fee.
+ * Get address balance.
  *
- * @returns {number} The Bitcoin suggested transaction fee per bytes in sat.
+ * @see https://sochain.com/api#get-balance
+ *
+ * @param {string} sochainUrl The sochain node url.
+ * @param {string} network Network
+ * @param {string} address Address
+ * @param {boolean} confirmedOnly Flag whether to get balances of confirmed txs only or for all
+ * @returns {number}
  */
-export const getSuggestedTxFee = async (): Promise<number> => {
-  //Note: sochain does not provide fee rate related data
-  //So use Bitgo API for fee estimation
-  //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
-  try {
-    const response = await axios.get('https://app.bitgo.com/api/v2/btc/tx/fee')
-    return response.data.feePerKb / 1000 // feePerKb to feePerByte
-  } catch (error) {
-    return DEFAULT_SUGGESTED_TRANSACTION_FEE
-  }
+export const broadcastTx = async ({
+  apiKey,
+  sochainUrl,
+  network,
+  txHex,
+}: {
+  apiKey: string
+  sochainUrl: string
+  txHex: string
+  network: SochainNetwork
+}): Promise<TxHash> => {
+  const url = `${sochainUrl}/broadcast_transaction/${network}`
+  const response = await axios.post(url, { tx_hex: txHex }, { headers: { 'API-KEY': apiKey } })
+  const broadcastResponse: SochainResponse<BroadcastDTO> = response.data
+  return broadcastResponse.data.hash
 }

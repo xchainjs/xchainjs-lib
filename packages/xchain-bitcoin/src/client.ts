@@ -8,34 +8,40 @@ import {
   TxHash,
   TxHistoryParams,
   TxParams,
-  TxType,
   TxsPage,
   UTXOClient,
   XChainClientParams,
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, Asset, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import {
+  ExplorerProvider,
+  ExplorerProviders,
+  UTXO,
+  UtxoOnlineDataProvider,
+  UtxoOnlineDataProviders,
+} from '@xchainjs/xchain-providers'
+import { Address, Asset } from '@xchainjs/xchain-util'
+import axios from 'axios'
 import * as Bitcoin from 'bitcoinjs-lib'
+import accumulative from 'coinselect/accumulative'
 
-import { AssetBTC, BTCChain, BTC_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
-import * as sochain from './sochain-api'
-import { ClientUrl } from './types/client-types'
+import { BTCChain, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
 import * as Utils from './utils'
 
+const DEFAULT_SUGGESTED_TRANSACTION_FEE = 127
+
 export type BitcoinClientParams = XChainClientParams & {
-  sochainUrl?: string
-  sochainApiKey: string
-  haskoinUrl?: ClientUrl
+  explorerProviders: ExplorerProviders
+  dataProviders: UtxoOnlineDataProviders
 }
 
 /**
  * Custom Bitcoin client
  */
 class Client extends UTXOClient {
-  private sochainUrl = ''
-  private haskoinUrl: ClientUrl
-  private sochainApiKey
+  private explorerProviders: Record<Network, ExplorerProvider>
+  private dataProviders: Record<Network, UtxoOnlineDataProvider>
   /**
    * Constructor
    * Client is initialised with network type
@@ -48,34 +54,28 @@ class Client extends UTXOClient {
       lower: LOWER_FEE_BOUND,
       upper: UPPER_FEE_BOUND,
     },
-    sochainApiKey,
-    sochainUrl = 'https://sochain.com/api/v3',
-    haskoinUrl = {
-      [Network.Testnet]: 'https://haskoin.ninerealms.com/btctest',
-      [Network.Mainnet]: 'https://haskoin.ninerealms.com/btc',
-      [Network.Stagenet]: 'https://haskoin.ninerealms.com/btc',
-    },
+    // sochainApiKey,
+    // sochainUrl = 'https://sochain.com/api/v3',
+    // haskoinUrl = {
+    //   [Network.Testnet]: 'https://haskoin.ninerealms.com/btctest',
+    //   [Network.Mainnet]: 'https://haskoin.ninerealms.com/btc',
+    //   [Network.Stagenet]: 'https://haskoin.ninerealms.com/btc',
+    // },
     rootDerivationPaths = {
       [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
       [Network.Testnet]: `84'/1'/0'/0/`,
       [Network.Stagenet]: `84'/0'/0'/0/`,
     },
     phrase = '',
+    explorerProviders,
+    dataProviders,
   }: BitcoinClientParams) {
     super(BTCChain, { network, rootDerivationPaths, phrase, feeBounds })
-    this.setSochainUrl(sochainUrl)
-    this.haskoinUrl = haskoinUrl
-    this.sochainApiKey = sochainApiKey
-  }
-
-  /**
-   * Set/Update the sochain url.
-   *
-   * @param {string} url The new sochain url.
-   * @returns {void}
-   */
-  setSochainUrl(url: string): void {
-    this.sochainUrl = url
+    this.explorerProviders = explorerProviders
+    this.dataProviders = dataProviders
+    // this.setSochainUrl(sochainUrl)
+    // this.haskoinUrl = haskoinUrl
+    // this.sochainApiKey = sochainApiKey
   }
 
   /**
@@ -84,13 +84,7 @@ class Client extends UTXOClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    switch (this.network) {
-      case Network.Mainnet:
-      case Network.Stagenet:
-        return 'https://blockstream.info'
-      case Network.Testnet:
-        return 'https://blockstream.info/testnet'
-    }
+    return this.explorerProviders[this.network].getExplorerUrl()
   }
 
   /**
@@ -100,7 +94,7 @@ class Client extends UTXOClient {
    * @returns {string} The explorer url for the given address based on the network.
    */
   getExplorerAddressUrl(address: string): string {
-    return `${this.getExplorerUrl()}/address/${address}`
+    return this.explorerProviders[this.network].getExplorerAddressUrl(address)
   }
   /**
    * Get the explorer url for the given transaction id.
@@ -109,7 +103,7 @@ class Client extends UTXOClient {
    * @returns {string} The explorer url for the given transaction id based on the network.
    */
   getExplorerTxUrl(txID: string): string {
-    return `${this.getExplorerUrl()}/tx/${txID}`
+    return this.explorerProviders[this.network].getExplorerTxUrl(txID)
   }
 
   /**
@@ -189,31 +183,9 @@ class Client extends UTXOClient {
   // TODO (@xchain-team|@veado) Change params to be an object to be extendable more easily
   // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
   async getBalance(address: Address, _assets?: Asset[] /* not used */, confirmedOnly?: boolean): Promise<Balance[]> {
-    return Utils.getBalance({
-      params: {
-        apiKey: this.sochainApiKey,
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-        address: address,
-        confirmedOnly: !!confirmedOnly,
-      },
-      haskoinUrl: this.haskoinUrl[this.network],
-    })
-  }
-  /**
-   * helper function tto limit adding to an array
-   *
-   * @param arr array to be added to
-   * @param toAdd elements to add
-   * @param limit do not add more than this limit
-   */
-  private addArrayUpToLimit(arr: string[], toAdd: string[], limit: number) {
-    for (let index = 0; index < toAdd.length; index++) {
-      const element = toAdd[index]
-      if (arr.length < limit) {
-        arr.push(element)
-      }
-    }
+    // TODO figure this out ---> !!confirmedOnly)
+    confirmedOnly
+    return await this.dataProviders[this.network].getBalance(address, _assets)
   }
 
   /**
@@ -224,56 +196,15 @@ class Client extends UTXOClient {
    * @returns {TxsPage} The transaction history.
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const offset = params?.offset ?? 0
-    const limit = params?.limit || 10
-    if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
-
-    const firstPage = Math.floor(offset / 10) + 1
-    const lastPage = limit > 10 ? firstPage + Math.floor(limit / 10) : firstPage
-    const offsetOnFirstPage = offset % 10
-
-    const txHashesToFetch: string[] = []
-    let page = firstPage
-    try {
-      while (page <= lastPage) {
-        const response = await sochain.getTxs({
-          apiKey: this.sochainApiKey,
-          sochainUrl: this.sochainUrl,
-          network: this.network,
-          address: `${params?.address}`,
-          page,
-        })
-        if (response.transactions.length === 0) break
-        if (page === firstPage && response.transactions.length > offsetOnFirstPage) {
-          //start from offset
-          const txsToGet = response.transactions.slice(offsetOnFirstPage)
-          this.addArrayUpToLimit(
-            txHashesToFetch,
-            txsToGet.map((i) => i.hash),
-            limit,
-          )
-        } else {
-          this.addArrayUpToLimit(
-            txHashesToFetch,
-            response.transactions.map((i) => i.hash),
-            limit,
-          )
-        }
-        page++
-      }
-    } catch (error) {
-      console.error(error)
-      //an errors means no more results
+    const filteredParams: TxHistoryParams = {
+      address: params?.address || this.getAddress(),
+      offset: params?.offset,
+      limit: params?.limit,
+      startTime: params?.startTime,
+      asset: params?.asset,
     }
 
-    const total = txHashesToFetch.length
-    const transactions: Tx[] = await Promise.all(txHashesToFetch.map((hash) => this.getTransactionData(hash)))
-
-    const result: TxsPage = {
-      total,
-      txs: transactions,
-    }
-    return result
+    return await this.dataProviders[this.network].getTransactions(filteredParams)
   }
 
   /**
@@ -283,34 +214,18 @@ class Client extends UTXOClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string): Promise<Tx> {
-    try {
-      const rawTx = await sochain.getTx({
-        apiKey: this.sochainApiKey,
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-        hash: txId,
-      })
-      return {
-        asset: AssetBTC,
-        from: rawTx.inputs.map((i) => ({
-          from: i.address,
-          amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)),
-        })),
-        to: rawTx.outputs
-          .filter((i) => i.type !== 'nulldata') //filter out op_return outputs
-          .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, BTC_DECIMAL)) })),
-        date: new Date(rawTx.time * 1000),
-        type: TxType.Transfer,
-        hash: rawTx.hash,
-      }
-    } catch (error) {
-      console.error(error)
-      throw error
-    }
+    return await this.dataProviders[this.network].getTransactionData(txId)
   }
 
   protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    return await sochain.getSuggestedTxFee()
+    //use Bitgo API for fee estimation
+    //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
+    try {
+      const response = await axios.get('https://app.bitgo.com/api/v2/btc/tx/fee')
+      return response.data.feePerKb / 1000 // feePerKb to feePerByte
+    } catch (error) {
+      return DEFAULT_SUGGESTED_TRANSACTION_FEE
+    }
   }
 
   protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
@@ -338,16 +253,10 @@ class Client extends UTXOClient {
      */
     const spendPendingUTXO = !params.memo
 
-    const haskoinUrl = this.haskoinUrl[this.network]
-
-    const { psbt } = await Utils.buildTx({
+    const { psbt } = await this.buildTx({
       ...params,
-      apiKey: this.sochainApiKey,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
-      sochainUrl: this.sochainUrl,
-      haskoinUrl,
-      network: this.network,
       spendPendingUTXO,
     })
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
@@ -355,7 +264,87 @@ class Client extends UTXOClient {
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-    return await Utils.broadcastTx({ txHex, haskoinUrl })
+    return await this.dataProviders[this.network].broadcastTx(txHex)
+  }
+  private async buildTx({
+    amount,
+    recipient,
+    memo,
+    feeRate,
+    sender,
+    spendPendingUTXO = false, // default: prevent spending uncomfirmed UTXOs
+  }: TxParams & {
+    feeRate: FeeRate
+    sender: Address
+    spendPendingUTXO?: boolean
+    withTxHex?: boolean
+  }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
+    if (memo && memo.length > 80) {
+      throw new Error('memo too long, must not be longer than 80 chars.')
+    }
+    // search only confirmed UTXOs if pending UTXO is not allowed
+    const confirmedOnly = !spendPendingUTXO
+    const utxos = await this.scanUTXOs(sender, confirmedOnly)
+
+    if (utxos.length === 0)
+      throw new Error('No confirmed UTXOs. Please wait until your balance has been confirmed on-chain.')
+    if (!this.validateAddress(recipient)) throw new Error('Invalid address')
+    const feeRateWhole = Math.ceil(feeRate)
+    const compiledMemo = memo ? Utils.compileMemo(memo) : null
+
+    const targetOutputs = []
+
+    //1. add output amount and recipient to targets
+    targetOutputs.push({
+      address: recipient,
+      value: amount.amount().toNumber(),
+    })
+    //2. add output memo to targets (optional)
+    if (compiledMemo) {
+      targetOutputs.push({ script: compiledMemo, value: 0 })
+    }
+    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+
+    // .inputs and .outputs will be undefined if no solution was found
+    if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
+
+    const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) }) // Network-specific
+
+    // psbt add input from accumulative inputs
+    inputs.forEach((utxo: UTXO) =>
+      psbt.addInput({
+        hash: utxo.hash,
+        index: utxo.index,
+        witnessUtxo: utxo.witnessUtxo,
+      }),
+    )
+
+    // psbt add outputs from accumulative outputs
+    outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
+      if (!output.address) {
+        //an empty address means this is the  change ddress
+        output.address = sender
+      }
+      if (!output.script) {
+        psbt.addOutput(output)
+      } else {
+        //we need to add the compiled memo this way to
+        //avoid dust error tx when accumulating memo output with 0 value
+        if (compiledMemo) {
+          psbt.addOutput({ script: compiledMemo, value: 0 })
+        }
+      }
+    })
+
+    return { psbt, utxos, inputs }
+  }
+  private async scanUTXOs(
+    address: string,
+    confirmedOnly = true, // default: scan only confirmed UTXOs
+  ): Promise<UTXO[]> {
+    return confirmedOnly
+      ? await this.dataProviders[this.network].getConfirmedUnspentTxs(address)
+      : await this.dataProviders[this.network].getUnspentTxs(address)
   }
 }
 

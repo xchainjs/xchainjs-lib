@@ -1,31 +1,41 @@
-import { Network, TxHash } from '@xchainjs/xchain-client'
+import { TxHash } from '@xchainjs/xchain-client'
+
+export enum SochainNetwork {
+  BTC = 'BTC',
+  BTCTEST = 'BTCTEST',
+  LTC = 'LTC',
+  LTCTEST = 'LTCTEST',
+  DOGE = 'DOGE',
+  DOGETEST = 'DOGETEST',
+}
 
 export type AddressParams = {
   apiKey: string
   sochainUrl: string
-  network: Network
+  network: SochainNetwork
   address: string
   page: number
 }
 export type BalanceParams = {
   apiKey: string
   sochainUrl: string
-  network: Network
+  network: SochainNetwork
   address: string
   confirmedOnly: boolean
+  assetDecimals: number
 }
 
 export type TxHashParams = {
   apiKey: string
   sochainUrl: string
-  network: Network
+  network: SochainNetwork
   hash: TxHash
 }
 
 export type TxBroadcastParams = {
   apiKey: string
   sochainUrl: string
-  network: Network
+  network: SochainNetwork
   txHex: string
 }
 
@@ -53,24 +63,23 @@ export interface Transaction {
   outputs: TxIO[]
 }
 
-export type BtcAddressUTXO = {
+export type AddressUTXO = {
   hash: string
   index: number
   script: string
   address: string
   tx_hex: string
   value: string
-  // confirmations: number
-  // time: number
+  block: number
 }
 
-export type BtcAddressTxDTO = {
+export type AddressTxDTO = {
   hash: string
   block: number
   time: number
 }
 
-export type BtcAddressDTO = {
+export type AddressDTO = {
   network: string
   address: string
   balance: string
@@ -78,20 +87,22 @@ export type BtcAddressDTO = {
   pending_value: string
   total_txs: number
 }
-export type BtcGetTxsDTO = {
-  transactions: BtcAddressTxDTO[]
+export type GetTxsDTO = {
+  transactions: AddressTxDTO[]
 }
 
-export type BtcGetBalanceDTO = {
+export type GetBalanceDTO = {
   confirmed: string
   unconfirmed: string
 }
-
-export type BtcUnspentTxsDTO = {
-  outputs: BtcAddressUTXO[]
+export type BroadcastDTO = {
+  hash: string
+}
+export type UnspentTxsDTO = {
+  outputs: AddressUTXO[]
 }
 
-export type BtcBroadcastTransfer = {
+export type BroadcastTransfer = {
   network: string
   txid: string
 }
@@ -101,14 +112,4 @@ export type TxConfirmedStatus = {
   txid: string
   confirmations: number
   is_confirmed: boolean
-}
-
-export type ScanUTXOParam = {
-  apiKey: string
-  sochainUrl: string
-  haskoinUrl: string
-  network: Network
-  address: string
-  confirmedOnly?: boolean
-  withTxHex?: boolean
 }
