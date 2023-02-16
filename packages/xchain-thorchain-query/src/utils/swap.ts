@@ -232,7 +232,6 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
   if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
   // if you are swapping a non-gas asset  on a multiAsset chain (ex. ERC-20 on ETH), the
   // gas fees will be paid in a diff asset than the one you are swapping
-  else if (!isNativeChainAsset(asset)) return new CryptoAmount(baseAmount(0), AssetRuneNative)
 
   switch (asset.chain) {
     case BTCChain:

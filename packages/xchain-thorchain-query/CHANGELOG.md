@@ -1,3 +1,9 @@
+# v0.1.18 (2023-2-16)
+
+## Fix
+
+- Remove gas asset check in `calcNetwork`
+
 # v0.1.17 (2023-2-6)
 
 ## Fix
