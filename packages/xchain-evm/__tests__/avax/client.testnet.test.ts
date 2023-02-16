@@ -1,27 +1,18 @@
 // import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { Network } from '@xchainjs/xchain-client'
+import { EtherscanProvider, ExplorerProvider } from '@xchainjs/xchain-providers'
 import { Asset, Chain } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, ethers, providers } from 'ethers'
 import nock from 'nock'
 
-const AVAXChain: Chain = 'AVAX'
-const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
-
-// import { mock_all_api } from '../__mocks__'
-// import {
-//   mock_etherscan_eth_txs_api,
-//   mock_etherscan_token_txs_api,
-//   mock_gastracker_api,
-// } from '../__mocks__/etherscan-api'
 import {
   // mock_thornode_inbound_addresses_fail,
   mock_thornode_inbound_addresses_success,
 } from '../../__mocks__/thornode-api'
 import Client, { EVMClientParams } from '../../src/client'
-import { CovalentProvider } from '../../src/providers/covalent/covalent-data-provider'
-import { ExplorerProvider } from '../../src/providers/explorer-provider'
-// import erc20ABI from '../src/data/erc20.json'
-// import { ETH_DECIMAL } from '../src/utils'
+
+const AVAXChain: Chain = 'AVAX'
+const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
@@ -77,9 +68,24 @@ const ethersJSProviders = {
 }
 // =====Ethers providers=====
 // =====ONLINE providers=====
-const API_KEY = 'FAKE_KEY'
-const AVAX_ONLINE_PROVIDER_MAINNET = new CovalentProvider(API_KEY, AVAXChain, 43114, AssetAVAX, 18)
-const AVAX_ONLINE_PROVIDER_TESTNET = new CovalentProvider(API_KEY, AVAXChain, 43113, AssetAVAX, 18)
+// const API_KEY = 'FAKE_KEY'
+
+const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
+  AVALANCHE_TESTNET_ETHERS_PROVIDER,
+  'https://api-testnet.snowtrace.io',
+  'fake',
+  AVAXChain,
+  AssetAVAX,
+  18,
+)
+const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
+  AVALANCHE_MAINNET_ETHERS_PROVIDER,
+  'https://api.snowtrace.io',
+  'fake',
+  AVAXChain,
+  AssetAVAX,
+  18,
+)
 
 const avaxProviders = {
   [Network.Mainnet]: AVAX_ONLINE_PROVIDER_MAINNET,

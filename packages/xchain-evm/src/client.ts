@@ -17,12 +17,17 @@ import {
   checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
+import {
+  ExplorerProvider,
+  ExplorerProviders,
+  OnlineDataProvider,
+  OnlineDataProviders,
+} from '@xchainjs/xchain-providers'
 import { Address, Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, toUtf8Bytes } from 'ethers/lib/utils'
 
 import erc20ABI from './data/erc20.json'
-import { ExplorerProvider } from './providers/explorer-provider'
 import {
   ApproveParams,
   CallParams,
@@ -33,7 +38,6 @@ import {
   IsApprovedParams,
   TxOverrides,
 } from './types'
-import { ExplorerProviders, OnlineDataProvider, OnlineDataProviders } from './types/provider-types'
 import {
   call,
   estimateApprove,
@@ -409,10 +413,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
     const contract = new ethers.Contract(contractAddress, erc20ABI, this.getProvider())
 
-    const unsignedTx: ethers.PopulatedTransaction /* as same as ethers.TransactionResponse expected by `sendTransaction` */ = await contract.populateTransaction.approve(
-      spenderAddress,
-      valueToApprove,
-    )
+    const unsignedTx: ethers.PopulatedTransaction /* as same as ethers.TransactionResponse expected by `sendTransaction` */ =
+      await contract.populateTransaction.approve(spenderAddress, valueToApprove)
 
     const result = await signer.sendTransaction({
       ...unsignedTx,

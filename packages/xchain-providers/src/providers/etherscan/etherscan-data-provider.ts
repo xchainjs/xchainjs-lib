@@ -4,9 +4,9 @@ import { Address, Asset, Chain, assetToString, baseAmount } from '@xchainjs/xcha
 import axios from 'axios'
 import { BigNumber, ethers } from 'ethers'
 
-import erc20ABI from '../../data/erc20.json'
-import { OnlineDataProvider } from '../../types/provider-types'
+import { OnlineDataProvider } from '../../provider-types'
 
+import erc20ABI from './erc20.json'
 import * as etherscanAPI from './etherscan-api'
 import { ERC20Tx, GetERC20TxsResponse } from './types'
 
