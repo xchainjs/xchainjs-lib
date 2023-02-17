@@ -19,6 +19,7 @@
     "@xchainjs/xchain-avax": "^0.1.4",
     "@xchainjs/xchain-binance": "^5.6.7",
     "@xchainjs/xchain-bitcoin": "^0.20.8",
+    "@xchainjs/xchain-bsc": "^0.1.0",
     "@xchainjs/xchain-bitcoincash": "^0.15.7",
     "@xchainjs/xchain-client": "^0.13.5",
     "@xchainjs/xchain-cosmos": "^0.20.8",
