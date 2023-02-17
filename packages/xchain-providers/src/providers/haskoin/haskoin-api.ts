@@ -5,30 +5,30 @@
  *
  */
 
-import { Network, TxHash } from '@xchainjs/xchain-client'
+import { TxHash } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount, delay } from '@xchainjs/xchain-util'
 import axios, { AxiosError, AxiosResponse } from 'axios'
 
-import { BTC_DECIMAL } from './const'
-import { getConfirmedTxStatus } from './sochain-api'
-import type { BroadcastTxParams } from './types/common'
-import type { BalanceData, UtxoData } from './types/haskoin-api-types'
+import type { BalanceData, UtxoData } from './haskoin-api-types'
+// import { getConfirmedTxStatus } from './sochain-api'
 
 export const getBalance = async ({
   haskoinUrl,
   address,
   confirmedOnly,
+  decimals,
 }: {
   haskoinUrl: string
   address: string
   confirmedOnly: boolean
+  decimals: number
 }): Promise<BaseAmount> => {
   const {
     data: { confirmed, unconfirmed },
   } = await axios.get<BalanceData>(`${haskoinUrl}/address/${address}/balance`)
 
-  const confirmedAmount = baseAmount(confirmed, BTC_DECIMAL)
-  const unconfirmedAmount = baseAmount(unconfirmed, BTC_DECIMAL)
+  const confirmedAmount = baseAmount(confirmed, decimals)
+  const unconfirmedAmount = baseAmount(unconfirmed, decimals)
 
   return confirmedOnly ? confirmedAmount : confirmedAmount.plus(unconfirmedAmount)
 }
@@ -44,40 +44,40 @@ export const getUnspentTxs = async ({
   return response
 }
 
-export const getConfirmedUnspentTxs = async ({
-  apiKey,
-  haskoinUrl,
-  sochainUrl,
-  address,
-  network,
-}: {
-  apiKey: string
-  haskoinUrl: string
-  sochainUrl: string
-  address: string
-  network: Network
-}): Promise<UtxoData[]> => {
-  const allUtxos = await getUnspentTxs({ haskoinUrl, address })
+// export const getConfirmedUnspentTxs = async ({
+//   apiKey,
+//   haskoinUrl,
+//   sochainUrl,
+//   address,
+//   network,
+// }: {
+//   apiKey: string
+//   haskoinUrl: string
+//   sochainUrl: string
+//   address: string
+//   network: Network
+// }): Promise<UtxoData[]> => {
+//   const allUtxos = await getUnspentTxs({ haskoinUrl, address })
 
-  const confirmedUTXOs: UtxoData[] = []
+//   const confirmedUTXOs: UtxoData[] = []
 
-  await Promise.all(
-    allUtxos.map(async (tx: UtxoData) => {
-      const confirmed = await getConfirmedTxStatus({
-        apiKey,
-        sochainUrl,
-        network,
-        txHash: tx.txid,
-      })
+//   await Promise.all(
+//     allUtxos.map(async (tx: UtxoData) => {
+//       const confirmed = await getConfirmedTxStatus({
+//         apiKey,
+//         sochainUrl,
+//         network,
+//         txHash: tx.txid,
+//       })
 
-      if (confirmed) {
-        confirmedUTXOs.push(tx)
-      }
-    }),
-  )
+//       if (confirmed) {
+//         confirmedUTXOs.push(tx)
+//       }
+//     }),
+//   )
 
-  return confirmedUTXOs
-}
+//   return confirmedUTXOs
+// }
 
 /**
  * Broadcast transaction.
@@ -91,7 +91,7 @@ export const getConfirmedUnspentTxs = async ({
  * @param {BroadcastTxParams} params
  * @returns {TxHash} Transaction hash.
  */
-export const broadcastTx = async ({ txHex, haskoinUrl }: BroadcastTxParams): Promise<TxHash> => {
+export const broadcastTx = async ({ txHex, haskoinUrl }: { txHex: string; haskoinUrl: string }): Promise<TxHash> => {
   const MAX = 5
   let counter = 0
 

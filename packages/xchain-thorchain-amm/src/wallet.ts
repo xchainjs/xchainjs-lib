@@ -43,7 +43,7 @@ export class Wallet {
     const settings = { network: thorchainQuery.thorchainCache.midgard.network, phrase }
     this.clients = {
       BCH: new BchClient(settings),
-      BTC: new BtcClient({ ...settings, sochainApiKey }),
+      BTC: new BtcClient({ ...settings }),
       DOGE: new DogeClient({ ...settings, sochainApiKey }),
       LTC: new LtcClient({ ...settings, sochainApiKey }),
       ETH: new EthClient(settings),

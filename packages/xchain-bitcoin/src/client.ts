@@ -26,7 +26,7 @@ import axios from 'axios'
 import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
-import { BTCChain, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
+import { BTCChain, LOWER_FEE_BOUND, UPPER_FEE_BOUND, blockstreamExplorerProviders, sochainDataProviders } from './const'
 import * as Utils from './utils'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 127
@@ -35,7 +35,21 @@ export type BitcoinClientParams = XChainClientParams & {
   explorerProviders: ExplorerProviders
   dataProviders: UtxoOnlineDataProviders
 }
-
+export const defaultBTCParams: BitcoinClientParams = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: blockstreamExplorerProviders,
+  dataProviders: sochainDataProviders,
+  rootDerivationPaths: {
+    [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
+    [Network.Testnet]: `84'/1'/0'/0/`,
+    [Network.Stagenet]: `84'/0'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
+}
 /**
  * Custom Bitcoin client
  */
@@ -48,34 +62,15 @@ class Client extends UTXOClient {
    *
    * @param {BitcoinClientParams} params
    */
-  constructor({
-    network = Network.Mainnet,
-    feeBounds = {
-      lower: LOWER_FEE_BOUND,
-      upper: UPPER_FEE_BOUND,
-    },
-    // sochainApiKey,
-    // sochainUrl = 'https://sochain.com/api/v3',
-    // haskoinUrl = {
-    //   [Network.Testnet]: 'https://haskoin.ninerealms.com/btctest',
-    //   [Network.Mainnet]: 'https://haskoin.ninerealms.com/btc',
-    //   [Network.Stagenet]: 'https://haskoin.ninerealms.com/btc',
-    // },
-    rootDerivationPaths = {
-      [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
-      [Network.Testnet]: `84'/1'/0'/0/`,
-      [Network.Stagenet]: `84'/0'/0'/0/`,
-    },
-    phrase = '',
-    explorerProviders,
-    dataProviders,
-  }: BitcoinClientParams) {
-    super(BTCChain, { network, rootDerivationPaths, phrase, feeBounds })
-    this.explorerProviders = explorerProviders
-    this.dataProviders = dataProviders
-    // this.setSochainUrl(sochainUrl)
-    // this.haskoinUrl = haskoinUrl
-    // this.sochainApiKey = sochainApiKey
+  constructor(params = defaultBTCParams) {
+    super(BTCChain, {
+      network: params.network,
+      rootDerivationPaths: params.rootDerivationPaths,
+      phrase: params.phrase,
+      feeBounds: params.feeBounds,
+    })
+    this.explorerProviders = params.explorerProviders
+    this.dataProviders = params.dataProviders
   }
 
   /**

@@ -1,4 +1,4 @@
-import { Network } from '@xchainjs/xchain-client'
+// import { Network } from '@xchainjs/xchain-client'
 
 // export type Witness = {
 //   value: number
@@ -12,7 +12,7 @@ import { Network } from '@xchainjs/xchain-client'
 //   txHex?: string
 // }
 
-export type BroadcastTxParams = { txHex: string; haskoinUrl: string }
+// export type BroadcastTxParams = { txHex: string; haskoinUrl: string }
 
 // We might extract it into xchain-client later
-export type DerivePath = Record<Network, string>
+// export type DerivePath = Record<Network, string>
