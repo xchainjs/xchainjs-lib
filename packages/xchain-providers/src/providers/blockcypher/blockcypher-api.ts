@@ -3,12 +3,10 @@ import { BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import {
-  AddressDTO,
   AddressParams,
   AddressUTXO,
   BalanceParams,
   BlockcypherNetwork,
-  BlockcypherResponse,
   BroadcastDTO,
   GetBalanceDTO,
   GetTxsDTO,
@@ -18,44 +16,45 @@ import {
   UnspentTxsDTO,
 } from './blockcypher-api-types'
 
-/**
- * Get address information.
- *
- * @param {string} blockcypherUrl The blockcypher node url.
- * @param {string} network
- * @param {string} address
- * @returns {AddressDTO}
- */
-export const getAddress = async ({ apiKey, blockcypherUrl, network, address }: AddressParams): Promise<AddressDTO> => {
-  const url = `${blockcypherUrl}/${network}/addrs/${address}`
-  const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
-  const addressResponse: BlockcypherResponse<AddressDTO> = response.data
-  return addressResponse.data
-}
+// /**
+//  * Get address information.
+//  *
+//  * @param {string} baseUrl The sochain node url.
+//  * @param {string} network
+//  * @param {string} address
+//  * @returns {AddressDTO}
+//  */
+// export const getAddress = async ({ apiKey, baseUrl, network, address }: AddressParams): Promise<AddressDTO> => {
+//   const url = `${baseUrl}/${network}/addrs/${address}/balance`
+//   const urlWithKey = apiKey ? `${url}?${apiKey}` : url
+//   const response = await axios.get(urlWithKey)
+//   const addressResponse: AddressDTO = response.data
+//   return addressResponse
+// }
 
 /**
  * Get transaction by hash.
  *
- * @see https://blockcypher.com/api#get-tx
  *
- * @param {string} blockcypherUrl The blockcypher node url.
+ * @param {string} baseUrl The sochain node url.
  * @param {string} network network id
  * @param {string} hash The transaction hash.
  * @returns {Transactions}
  */
-export const getTx = async ({ apiKey, blockcypherUrl, network, hash }: TxHashParams): Promise<Transaction> => {
-  const url = `${blockcypherUrl}/transaction/${network}/${hash}`
-  const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
-  const tx: BlockcypherResponse<Transaction> = response.data
-  return tx.data
+export const getTx = async ({ apiKey, baseUrl, network, hash }: TxHashParams): Promise<Transaction> => {
+  const params: Record<string, string> = { includeHex: 'true' }
+  if (apiKey) params['token'] = apiKey
+  const url = `${baseUrl}/${network}/txs/${hash}`
+  const response = await axios.get(url, { params })
+  const tx: Transaction = response.data
+  return tx
 }
 
 /**
  * Get transactions
  *
- * @see https://blockcypher.com/api#get-tx
  *
- * @param {string} blockcypherUrl The blockcypher node url.
+ * @param {string} baseUrl The sochain node url.
  * @param {string} network network id
  * @param {string} hash The transaction hash.
  * @returns {Transactions}
@@ -63,27 +62,31 @@ export const getTx = async ({ apiKey, blockcypherUrl, network, hash }: TxHashPar
 export const getTxs = async ({
   apiKey,
   address,
-  blockcypherUrl,
+  baseUrl,
   network,
-  page,
+  beforeBlock,
+  limit,
 }: {
   apiKey: string
   address: string
-  blockcypherUrl: string
+  baseUrl: string
   network: BlockcypherNetwork
-  page: number
+  limit: number
+  beforeBlock?: number
 }): Promise<GetTxsDTO> => {
-  const url = `${blockcypherUrl}/transactions/${network}/${address}/${page}` //TODO support paging
-  const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
-  const txs: BlockcypherResponse<GetTxsDTO> = response.data
-  return txs.data
+  const params: Record<string, string> = { limit: `${limit}` }
+  const url = `${baseUrl}/${network}/addrs/${address}?limit=2000;`
+  if (apiKey) params['token'] = apiKey
+  if (beforeBlock) params['beforeBlock'] = `${beforeBlock}`
+  const response = await axios.get(url, { params })
+  const txs: GetTxsDTO = response.data
+  return txs
 }
 /**
  * Get address balance.
  *
- * @see https://blockcypher.com/api#get-balance
  *
- * @param {string} blockcypherUrl The blockcypher node url.
+ * @param {string} baseUrl The sochain node url.
  * @param {string} network Network
  * @param {string} address Address
  * @param {boolean} confirmedOnly Flag whether to get balances of confirmed txs only or for all
@@ -91,20 +94,20 @@ export const getTxs = async ({
  */
 export const getBalance = async ({
   apiKey,
-  blockcypherUrl,
-  chain,
+  baseUrl,
   network,
   address,
   confirmedOnly,
   assetDecimals,
 }: BalanceParams): Promise<BaseAmount> => {
-  const url = `${blockcypherUrl}/${chain}/${network}/addrs/${address}/balance`
-  const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
-  const balanceResponse: BlockcypherResponse<GetBalanceDTO> = response.data
-  console.log(`${JSON.stringify(balanceResponse.data)}`)
-  const confirmed = assetAmount(balanceResponse.data.balance, assetDecimals)
-  const unconfirmed = assetAmount(balanceResponse.data.unconfirmed, assetDecimals)
-  const netAmt = confirmedOnly ? confirmed : confirmed.plus(unconfirmed)
+  const params: Record<string, string> = {}
+  const url = `${baseUrl}/${network}/addrs/${address}/balance`
+  if (apiKey) params['token'] = apiKey
+  const response = await axios.get(url, { params })
+  const balanceResponse: GetBalanceDTO = response.data
+  const total = assetAmount(balanceResponse.final_balance, assetDecimals)
+  const unconfirmed = assetAmount(balanceResponse.unconfirmed_balance, assetDecimals)
+  const netAmt = !confirmedOnly ? unconfirmed : total
   const result = assetToBase(netAmt)
   return result
 }
@@ -112,30 +115,30 @@ export const getBalance = async ({
 /**
  * Get unspent txs
  *
- * @see https://blockcypher.com/api#get-unspent-tx
  *
- * @param {string} blockcypherUrl The blockcypher node url.
+ * @param {string} baseUrl The sochain node url.
  * @param {string} network
  * @param {string} address
  * @returns {AddressUTXO[]}
  */
 export const getUnspentTxs = async ({
   apiKey,
-  blockcypherUrl,
+  baseUrl,
   network,
   address,
   page,
 }: AddressParams): Promise<AddressUTXO[]> => {
-  const url = [blockcypherUrl, 'unspent_outputs', network, address, page].filter((v) => !!v).join('/')
-  const resp = await axios.get(url, { headers: { 'API-KEY': apiKey } })
-  const response: BlockcypherResponse<UnspentTxsDTO> = resp.data
-  const txs = response.data.outputs
+  const params: Record<string, string> = {}
+  const url = [baseUrl, 'unspent_outputs', network, address, page].filter((v) => !!v).join('/')
+  const resp = await axios.get(url, { params })
+  const response: UnspentTxsDTO = resp.data
+  const txs = response.outputs
   if (txs.length === 10) {
     //fetch the next batch
 
     const nextBatch = await getUnspentTxs({
       apiKey,
-      blockcypherUrl,
+      baseUrl,
       network,
       address,
       page: page + 1,
@@ -149,20 +152,20 @@ export const getUnspentTxs = async ({
 /**
  * Get Tx Confirmation status
  *
- * @see https://blockcypher.com/api#get-is-tx-confirmed
+ * @see https://sochain.com/api#get-is-tx-confirmed
  *
- * @param {string} blockcypherUrl The blockcypher node url.
+ * @param {string} baseUrl The sochain node url.
  * @param {Network} network
  * @param {string} hash tx id
  * @returns {TxConfirmedStatus}
  */
 export const getIsTxConfirmed = async ({
   apiKey,
-  blockcypherUrl,
+  baseUrl,
   network,
   hash,
 }: TxHashParams): Promise<TxConfirmedStatus> => {
-  const tx = await getTx({ apiKey, blockcypherUrl, network, hash })
+  const tx = await getTx({ apiKey, baseUrl, network, hash })
   return {
     network: network,
     txid: hash,
@@ -181,25 +184,25 @@ const confirmedTxs: Array<TxHash> = []
 /**
  * Helper to get `confirmed` status of a tx.
  *
- * It will get it from cache or try to get it from blockcypher (if not cached before)
+ * It will get it from cache or try to get it from Sochain (if not cached before)
  */
 export const getConfirmedTxStatus = async ({
   apiKey,
   txHash,
-  blockcypherUrl,
+  baseUrl,
   network,
 }: {
-  apiKey: string
-  blockcypherUrl: string
+  apiKey?: string
+  baseUrl: string
   txHash: TxHash
   network: BlockcypherNetwork
 }): Promise<boolean> => {
   // try to get it from cache
   if (confirmedTxs.includes(txHash)) return true
-  // or get status from blockcypher
+  // or get status from Sochain
   const { is_confirmed } = await getIsTxConfirmed({
     apiKey,
-    blockcypherUrl,
+    baseUrl,
     network,
     hash: txHash,
   })
@@ -211,22 +214,22 @@ export const getConfirmedTxStatus = async ({
 /**
  * Get unspent txs and filter out pending UTXOs
  *
- * @see https://blockcypher.com/api#get-unspent-tx
+ * @see https://sochain.com/api#get-unspent-tx
  *
- * @param {string} blockcypherUrl The blockcypher node url.
+ * @param {string} baseUrl The sochain node url.
  * @param {Network} network
  * @param {string} address
  * @returns {AddressUTXO[]}
  */
 export const getConfirmedUnspentTxs = async ({
   apiKey,
-  blockcypherUrl,
+  baseUrl,
   network,
   address,
 }: AddressParams): Promise<AddressUTXO[]> => {
   const txs = await getUnspentTxs({
     apiKey,
-    blockcypherUrl,
+    baseUrl,
     network,
     address,
     page: 1,
@@ -238,7 +241,7 @@ export const getConfirmedUnspentTxs = async ({
     txs.map(async (tx: AddressUTXO) => {
       const confirmed = await getConfirmedTxStatus({
         apiKey,
-        blockcypherUrl,
+        baseUrl,
         network,
         txHash: tx.hash,
       })
@@ -255,9 +258,9 @@ export const getConfirmedUnspentTxs = async ({
 /**
  * Get address balance.
  *
- * @see https://blockcypher.com/api#get-balance
+ * @see https://sochain.com/api#get-balance
  *
- * @param {string} blockcypherUrl The blockcypher node url.
+ * @param {string} baseUrl The sochain node url.
  * @param {string} network Network
  * @param {string} address Address
  * @param {boolean} confirmedOnly Flag whether to get balances of confirmed txs only or for all
@@ -265,17 +268,17 @@ export const getConfirmedUnspentTxs = async ({
  */
 export const broadcastTx = async ({
   apiKey,
-  blockcypherUrl,
+  baseUrl,
   network,
   txHex,
 }: {
   apiKey: string
-  blockcypherUrl: string
+  baseUrl: string
   txHex: string
   network: BlockcypherNetwork
 }): Promise<TxHash> => {
-  const url = `${blockcypherUrl}/broadcast_transaction/${network}`
+  const url = `${baseUrl}/broadcast_transaction/${network}`
   const response = await axios.post(url, { tx_hex: txHex }, { headers: { 'API-KEY': apiKey } })
-  const broadcastResponse: BlockcypherResponse<BroadcastDTO> = response.data
-  return broadcastResponse.data.hash
+  const broadcastResponse: BroadcastDTO = response.data
+  return broadcastResponse.hash
 }

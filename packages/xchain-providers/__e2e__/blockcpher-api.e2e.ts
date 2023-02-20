@@ -18,4 +18,29 @@ describe('blockcypher api tests', () => {
     const bal = await blockcypherProvider.getBalance(address)
     console.log(bal)
   })
+  it(`Should getConfirmedUnspentTxs for an address`, async () => {
+    const address = '1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD'
+    const response = await blockcypherProvider.getConfirmedUnspentTxs(address)
+    console.log(response)
+  })
+  it(`Should getUnspentTxs for an address`, async () => {
+    const address = '1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD'
+    const response = await blockcypherProvider.getUnspentTxs(address)
+    console.log(response)
+  })
+  it(`Should getTransactions for an address`, async () => {
+    const address = '1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD'
+    const response = await blockcypherProvider.getTransactions({ address })
+    console.log(response)
+  })
+  it(`Should getTransactionData for an address`, async () => {
+    const hash = 'xxx'
+    const response = await blockcypherProvider.getTransactionData(hash)
+    console.log(response)
+  })
+  it(`Should broadcastTx`, async () => {
+    const txHex = 'xxx'
+    const response = await blockcypherProvider.broadcastTx(txHex)
+    console.log(response)
+  })
 })

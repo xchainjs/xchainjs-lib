@@ -1,26 +1,22 @@
 import { TxHash } from '@xchainjs/xchain-client'
-import { Chain } from '@xchainjs/xchain-util/lib'
 
 export enum BlockcypherNetwork {
-  BTC = 'main',
-  BTCTEST = 'Testnet3',
-  LTC = 'main',
-  //LTCTEST = 'LTCTEST',
-  DOGE = 'main',
-  //DOGETEST = 'DOGETEST',
+  BTC = 'btc/main',
+  BTCTEST = 'btc/test3',
+  LTC = 'ltc/main',
+  DOGE = 'doge/main',
 }
 
 export type AddressParams = {
-  apiKey: string
-  blockcypherUrl: string
+  apiKey?: string
+  baseUrl: string
   network: BlockcypherNetwork
   address: string
   page: number
 }
 export type BalanceParams = {
-  apiKey: string
-  blockcypherUrl: string
-  chain: Chain
+  apiKey?: string
+  baseUrl: string
   network: BlockcypherNetwork
   address: string
   confirmedOnly: boolean
@@ -28,22 +24,17 @@ export type BalanceParams = {
 }
 
 export type TxHashParams = {
-  apiKey: string
-  blockcypherUrl: string
+  apiKey?: string
+  baseUrl: string
   network: BlockcypherNetwork
   hash: TxHash
 }
 
 export type TxBroadcastParams = {
-  apiKey: string
-  blockcypherUrl: string
+  apiKey?: string
+  baseUrl: string
   network: BlockcypherNetwork
   txHex: string
-}
-
-export interface BlockcypherResponse<T> {
-  data: T
-  status: string
 }
 
 export interface TxIO {
@@ -58,9 +49,9 @@ export interface Transaction {
   hash: string
   block_hash: string
   confirmations: number
-  time: number
+  confirmed: string
 
-  tx_hex: string
+  hex: string
   inputs: TxIO[]
   outputs: TxIO[]
 }
@@ -76,27 +67,24 @@ export type AddressUTXO = {
 }
 
 export type AddressTxDTO = {
-  hash: string
-  block: number
-  time: number
-}
-
-export type AddressDTO = {
-  network: string
-  address: string
-  balance: string
-  received_value: string
-  pending_value: string
-  total_txs: number
-}
-export type GetTxsDTO = {
-  transactions: AddressTxDTO[]
+  tx_hash: string
+  block_height: number
+  confirmed: string
 }
 
 export type GetBalanceDTO = {
   balance: string
-  unconfirmed: string
+  unconfirmed_balance: string
+  final_balance: string
+  n_tx: number
+  unconfirmed_n_tx: number
+  final_n_tx: number
 }
+
+export type GetTxsDTO = {
+  txrefs: AddressTxDTO[]
+}
+
 export type BroadcastDTO = {
   hash: string
 }

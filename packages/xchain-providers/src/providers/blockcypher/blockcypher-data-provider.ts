@@ -31,10 +31,11 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     this.asset
     this.chain
   }
+
   async broadcastTx(txHex: string): Promise<TxHash> {
     return await blockcypher.broadcastTx({
       apiKey: this.apiKey,
-      blockcypherUrl: this.baseUrl,
+      baseUrl: this.baseUrl,
       network: this.blockcypherNetwork,
       txHex,
     })
@@ -43,7 +44,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
   async getConfirmedUnspentTxs(address: string): Promise<UTXO[]> {
     const allUnspent = await blockcypher.getUnspentTxs({
       apiKey: this.apiKey,
-      blockcypherUrl: this.baseUrl,
+      baseUrl: this.baseUrl,
       network: this.blockcypherNetwork,
       address,
       page: 1,
@@ -54,7 +55,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
   async getUnspentTxs(address: string): Promise<UTXO[]> {
     const allUnspent = await blockcypher.getUnspentTxs({
       apiKey: this.apiKey,
-      blockcypherUrl: this.baseUrl,
+      baseUrl: this.baseUrl,
       network: this.blockcypherNetwork,
       address,
       page: 1,
@@ -66,8 +67,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     assets // TODO can we fix this?
     const amount = await blockcypher.getBalance({
       apiKey: this.apiKey,
-      blockcypherUrl: this.baseUrl,
-      chain: this.chain.toLowerCase(),
+      baseUrl: this.baseUrl,
       network: this.blockcypherNetwork,
       address,
       confirmedOnly: !!confirmedOnly,
@@ -84,43 +84,25 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
    * @returns {TxsPage} The transaction history.
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const offset = params?.offset ?? 0
-    const limit = params?.limit || 10
-    if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
-
-    const firstPage = Math.floor(offset / 10) + 1
-    const lastPage = limit > 10 ? firstPage + Math.floor(limit / 10) : firstPage
-    const offsetOnFirstPage = offset % 10
-
     const txHashesToFetch: string[] = []
-    let page = firstPage
+
+    //TODO rewrite
     try {
-      while (page <= lastPage) {
-        const response = await blockcypher.getTxs({
-          apiKey: this.apiKey,
-          blockcypherUrl: this.baseUrl,
-          network: this.blockcypherNetwork,
-          address: `${params?.address}`,
-          page,
-        })
-        if (response.transactions.length === 0) break
-        if (page === firstPage && response.transactions.length > offsetOnFirstPage) {
-          //start from offset
-          const txsToGet = response.transactions.slice(offsetOnFirstPage)
-          this.addArrayUpToLimit(
-            txHashesToFetch,
-            txsToGet.map((i) => i.hash),
-            limit,
-          )
-        } else {
-          this.addArrayUpToLimit(
-            txHashesToFetch,
-            response.transactions.map((i) => i.hash),
-            limit,
-          )
-        }
-        page++
-      }
+      const response = await blockcypher.getTxs({
+        apiKey: this.apiKey,
+        baseUrl: this.baseUrl,
+        network: this.blockcypherNetwork,
+        address: `${params?.address}`,
+        limit: 2000,
+      })
+
+      //start from offset
+      const txsToGet = response.txrefs
+      this.addArrayUpToLimit(
+        txHashesToFetch,
+        txsToGet.map((i) => i.tx_hash),
+        params?.limit || 20,
+      )
     } catch (error) {
       console.error(error)
       //an errors means no more results
@@ -146,7 +128,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     try {
       const rawTx = await blockcypher.getTx({
         apiKey: this.apiKey,
-        blockcypherUrl: this.baseUrl,
+        baseUrl: this.baseUrl,
         network: this.blockcypherNetwork,
         hash: txId,
       })
@@ -159,7 +141,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
         to: rawTx.outputs
           .filter((i) => i.type !== 'nulldata') //filter out op_return outputs
           .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, this.assetDecimals)) })),
-        date: new Date(rawTx.time * 1000),
+        date: new Date(rawTx.confirmed),
         type: TxType.Transfer,
         hash: rawTx.hash,
       }
