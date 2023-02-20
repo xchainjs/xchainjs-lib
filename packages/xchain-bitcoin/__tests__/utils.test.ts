@@ -3,8 +3,9 @@ import * as Bitcoin from 'bitcoinjs-lib'
 
 import mockHaskoinApi from '../__mocks__/haskoin'
 import mockSochainApi from '../__mocks__/sochain'
-import { UTXO } from '../src/types/common'
 import * as Utils from '../src/utils'
+
+import { UTXO } from '@xchainjs/xchain-providers'
 
 let utxos: UTXO[]
 
