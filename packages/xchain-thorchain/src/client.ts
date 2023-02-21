@@ -18,7 +18,15 @@ import {
   singleFee,
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, GAIAChain, RPCTxResult } from '@xchainjs/xchain-cosmos'
-import { Address, Asset, BaseAmount, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Address,
+  Asset,
+  BaseAmount,
+  assetFromString,
+  assetFromStringEx,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 import Long from 'long'
@@ -383,14 +391,24 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    */
   async getTransactionData(txId: string, address: Address): Promise<Tx> {
     const txResult = await this.cosmosClient.txsHashGet(txId)
+    const regx = new RegExp(/\d/)
+    const txfindAsset = txResult.raw_log?.split(`:`)
+    const lastEntry = txfindAsset ? txfindAsset[txfindAsset.length - 1].split(`"`)[1].split(regx) : 'undefined'
+    const assetFrom = lastEntry[lastEntry.length - 1]
+    let asset: Asset
+    if (assetFrom === `rune`) {
+      asset = AssetRuneNative
+    } else {
+      asset = assetFromStringEx(lastEntry[lastEntry.length - 1])
+    }
     const txData: TxData | null = txResult && txResult.logs ? getDepositTxDataFromLogs(txResult.logs, address) : null
     if (!txResult || !txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
 
     const { from, to, type } = txData
-
+    // to and from don't return data. bug is in cosmos i think
     return {
       hash: txId,
-      asset: AssetRuneNative,
+      asset,
       from,
       to,
       date: new Date(txResult.timestamp),

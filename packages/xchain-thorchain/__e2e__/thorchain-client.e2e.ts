@@ -103,6 +103,7 @@ describe('thorchain Integration Tests', () => {
   it('should fetch thorchain txs', async () => {
     const address = thorClient.getAddress(0)
     const txPage = await thorClient.getTransactions({ address })
+    console.log(txPage)
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
@@ -112,5 +113,14 @@ describe('thorchain Integration Tests', () => {
     console.log(JSON.stringify(tx, null, 2))
     expect(tx.hash).toBe('ED631AF5CB1DD2294220FC62F01F6ECE2343A9ED8DD0B44CE9473A085B41F737')
     // expect(tx.asset.ticker).toBe('xx')
+  })
+
+  it('should get synth asset from synth tx', async () => {
+    const txId = 'FF900F04B145799668AB9975E40C51E42024D8761330D2210DCC8447F44218AF'
+    const tx = await thorClient.getTransactionData(txId)
+    console.log(JSON.stringify(tx, null, 2))
+    expect(tx.hash).toBe('FF900F04B145799668AB9975E40C51E42024D8761330D2210DCC8447F44218AF')
+    expect(tx.asset.ticker).toBe('btc')
+    expect(tx.asset.synth).toBeTruthy()
   })
 })
