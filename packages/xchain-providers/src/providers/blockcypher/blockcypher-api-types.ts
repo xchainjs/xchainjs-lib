@@ -37,14 +37,18 @@ export type TxBroadcastParams = {
   txHex: string
 }
 
-export interface TxIO {
-  index: number
-  value: string
-  address: string
-  type?: string
-  script: string
+export interface TxInput {
+  output_value: string
+  addresses: string[]
+  script_type?: string
+  // script: string
 }
-
+export interface TxOutput {
+  value: string
+  addresses: string[]
+  script_type?: string
+  // script: string
+}
 export interface Transaction {
   hash: string
   block_hash: string
@@ -52,8 +56,8 @@ export interface Transaction {
   confirmed: string
 
   hex: string
-  inputs: TxIO[]
-  outputs: TxIO[]
+  inputs: TxInput[]
+  outputs: TxOutput[]
 }
 
 export type AddressUTXO = {

@@ -67,7 +67,7 @@ export const getTxs = async ({
   beforeBlock,
   limit,
 }: {
-  apiKey: string
+  apiKey?: string
   address: string
   baseUrl: string
   network: BlockcypherNetwork
@@ -272,13 +272,15 @@ export const broadcastTx = async ({
   network,
   txHex,
 }: {
-  apiKey: string
+  apiKey?: string
   baseUrl: string
   txHex: string
   network: BlockcypherNetwork
 }): Promise<TxHash> => {
-  const url = `${baseUrl}/broadcast_transaction/${network}`
-  const response = await axios.post(url, { tx_hex: txHex }, { headers: { 'API-KEY': apiKey } })
+  const params: Record<string, string> = {}
+  const url = `${baseUrl}/${network}/txs/push`
+  if (apiKey) params['token'] = apiKey
+  const response = await axios.post(url, { tx: txHex }, { params })
   const broadcastResponse: BroadcastDTO = response.data
   return broadcastResponse.hash
 }

@@ -1,5 +1,5 @@
 import { Balance, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
-import { Address, Asset, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
 import { UTXO, UtxoOnlineDataProvider } from '../../provider-types'
 
@@ -8,7 +8,7 @@ import { AddressUTXO, BlockcypherNetwork } from './blockcypher-api-types'
 
 export class BlockcypherProvider implements UtxoOnlineDataProvider {
   private baseUrl: string
-  private apiKey: string
+  private apiKey?: string
   private chain: Chain
   private asset: Asset
   private assetDecimals: number
@@ -16,11 +16,11 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
 
   constructor(
     baseUrl = 'https://api.blockcypher.com/v1/',
-    apiKey: string,
     chain: Chain,
     asset: Asset,
     assetDecimals: number,
     blockcypherNetwork: BlockcypherNetwork,
+    apiKey?: string,
   ) {
     this.baseUrl = baseUrl
     this.apiKey = apiKey
@@ -95,6 +95,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
         address: `${params?.address}`,
         limit: 2000,
       })
+      console.log(JSON.stringify(response, null, 2))
 
       //start from offset
       const txsToGet = response.txrefs
@@ -132,15 +133,16 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
         network: this.blockcypherNetwork,
         hash: txId,
       })
+
       return {
         asset: this.asset,
         from: rawTx.inputs.map((i) => ({
-          from: i.address,
-          amount: assetToBase(assetAmount(i.value, this.assetDecimals)),
+          from: i.addresses[0],
+          amount: baseAmount(i.output_value, this.assetDecimals),
         })),
         to: rawTx.outputs
-          .filter((i) => i.type !== 'nulldata') //filter out op_return outputs
-          .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, this.assetDecimals)) })),
+          .filter((i) => i.script_type !== 'null-data') //filter out op_return outputs
+          .map((i) => ({ to: i.addresses[0], amount: baseAmount(i.value, this.assetDecimals) })),
         date: new Date(rawTx.confirmed),
         type: TxType.Transfer,
         hash: rawTx.hash,
