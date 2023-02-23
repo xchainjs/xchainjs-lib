@@ -78,7 +78,7 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
 const main = async () => {
   const seed = process.argv[2]
   const network = process.argv[3] as Network
-  const apiKey = process.env.APIKEY
+  const apiKey = process.env.SOCHAIN_API_KEY
   const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
   const thorchainQuery = new ThorchainQuery(thorchainCache)
   const thorchainAmm = new ThorchainAMM(thorchainQuery)
