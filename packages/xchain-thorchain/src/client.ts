@@ -391,6 +391,14 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    */
   async getTransactionData(txId: string, address: Address): Promise<Tx> {
     const txResult = await this.cosmosClient.txsHashGet(txId)
+    if(!txResult){
+      // call thornode https://thornode.ninerealms.com/thorchain/tx/7FDFBD0B884376B2ED4F615476787C08FF569C181566052A3907535529347FBA'
+    }
+    const messages = txResult.tx?.body.messages[0]
+    const xfer = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'transfer')
+    console.log(JSON.stringify(messages, null, 2))
+    console.log(JSON.stringify(xfer, null, 2))
+
     const regx = new RegExp(/\d/)
     const txfindAsset = txResult.raw_log?.split(`:`)
     const lastEntry = txfindAsset ? txfindAsset[txfindAsset.length - 1].split(`"`)[1].split(regx) : 'undefined'
