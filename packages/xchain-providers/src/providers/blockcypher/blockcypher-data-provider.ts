@@ -84,6 +84,10 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
    * @returns {TxsPage} The transaction history.
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
+    const offset = params?.offset ?? 0
+    const limit = params?.limit || 10
+    if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
+
     const txHashesToFetch: string[] = []
 
     //TODO rewrite
@@ -97,13 +101,11 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
       })
       console.log(JSON.stringify(response, null, 2))
 
-      //start from offset
-      const txsToGet = response.txrefs
-      this.addArrayUpToLimit(
-        txHashesToFetch,
-        txsToGet.map((i) => i.tx_hash),
-        params?.limit || 20,
-      )
+      //remove duplicates
+      const txs = response.txrefs.map((i) => i.tx_hash)
+      const uniqTxs = [...new Set(txs)].filter((i) => i.endsWith('-'))
+      console.log(JSON.stringify(uniqTxs, null, 2))
+      this.addArrayUpToLimit(txHashesToFetch, uniqTxs, params?.limit || 20)
     } catch (error) {
       console.error(error)
       //an errors means no more results

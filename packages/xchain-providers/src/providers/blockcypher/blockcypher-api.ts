@@ -75,9 +75,9 @@ export const getTxs = async ({
   beforeBlock?: number
 }): Promise<GetTxsDTO> => {
   const params: Record<string, string> = { limit: `${limit}` }
-  const url = `${baseUrl}/${network}/addrs/${address}?limit=2000;`
+  const url = `${baseUrl}/${network}/addrs/${address}`
   if (apiKey) params['token'] = apiKey
-  if (beforeBlock) params['beforeBlock'] = `${beforeBlock}`
+  if (beforeBlock) params['before'] = `${beforeBlock}`
   const response = await axios.get(url, { params })
   const txs: GetTxsDTO = response.data
   return txs
@@ -152,7 +152,6 @@ export const getUnspentTxs = async ({
 /**
  * Get Tx Confirmation status
  *
- * @see https://sochain.com/api#get-is-tx-confirmed
  *
  * @param {string} baseUrl The sochain node url.
  * @param {Network} network
