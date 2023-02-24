@@ -1,3 +1,9 @@
+# v.0.27.9 (2023-02-23)
+
+## FIX
+
+- `getTransactionData` mapping bug.
+
 # v.0.27.8 (2023-01-19)
 
 ## Update

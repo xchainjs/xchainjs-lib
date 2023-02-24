@@ -18,6 +18,7 @@ import {
   singleFee,
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, GAIAChain, RPCTxResult } from '@xchainjs/xchain-cosmos'
+import { Thornode } from '@xchainjs/xchain-thorchain-query'
 import {
   Address,
   Asset,
@@ -66,6 +67,8 @@ import {
   registerSendCodecs,
 } from './utils'
 
+const thornode = new Thornode()
+
 /**
  * Interface for custom Thorchain client
  */
@@ -87,6 +90,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
   private explorerUrls: ExplorerUrls
   private chainIds: ChainIds
   private cosmosClient: CosmosSDKClient
+  private thornode: Thornode
 
   /**
    * Constructor
@@ -131,6 +135,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     this.clientUrl = clientUrl
     this.explorerUrls = explorerUrls
     this.chainIds = chainIds
+    this.thornode = thornode
 
     registerSendCodecs()
     registerDepositCodecs()
@@ -390,38 +395,112 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string, address: Address): Promise<Tx> {
-    const txResult = await this.cosmosClient.txsHashGet(txId)
-    if(!txResult){
-      // call thornode https://thornode.ninerealms.com/thorchain/tx/7FDFBD0B884376B2ED4F615476787C08FF569C181566052A3907535529347FBA'
-    }
-    const messages = txResult.tx?.body.messages[0]
-    const xfer = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'transfer')
-    console.log(JSON.stringify(messages, null, 2))
-    console.log(JSON.stringify(xfer, null, 2))
+    try {
+      const txResult = await this.cosmosClient.txsHashGet(txId)
+      const transfer = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'transfer')
+      if (!transfer) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
+      const sender = transfer[0].attributes.find((attr) => attr.key === 'sender')?.value
+      const senderAmount = transfer[0].attributes.filter((attr) => attr.key === 'amount')[1].value
 
-    const regx = new RegExp(/\d/)
-    const txfindAsset = txResult.raw_log?.split(`:`)
-    const lastEntry = txfindAsset ? txfindAsset[txfindAsset.length - 1].split(`"`)[1].split(regx) : 'undefined'
-    const assetFrom = lastEntry[lastEntry.length - 1]
+      const assetString = senderAmount.split(/(?<=\d)(?=[a-zA-Z])/)
+      const senderAsset = assetString[1] === 'rune' ? AssetRuneNative : assetFromStringEx(assetString[1])
+
+      const senderAddress = sender ? sender : address
+      const message = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'message')
+      const coinSpent = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'coin_spent')
+      if (!message || !coinSpent) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
+      const action = message[0].attributes.find((attr) => attr.key === 'action')?.value
+      if (action === 'send') {
+        const assetTo = AssetRuneNative
+        const assetToAddress = transfer[0].attributes.filter((attr) => attr.key === 'recipient')[1].value
+        const txData: TxData | null =
+          txResult && txResult.logs
+            ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo, assetToAddress)
+            : null
+        console.log(txData)
+        if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
+
+        const { from, to, type } = txData
+        return {
+          hash: txId,
+          asset: senderAsset,
+          from,
+          to,
+          date: new Date(txResult.timestamp),
+          type,
+        }
+      }
+      const messageBody = JSON.stringify(txResult.tx?.body.messages).split(':')
+
+      const assetTo = assetFromStringEx(messageBody[7])
+      const assetToAddres = messageBody[8]
+      const txData: TxData | null =
+        txResult && txResult.logs
+          ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo, assetToAddres)
+          : null
+      if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
+
+      const { from, to, type } = txData
+      return {
+        hash: txId,
+        asset: senderAsset,
+        from,
+        to,
+        date: new Date(txResult.timestamp),
+        type,
+      }
+    } catch {
+      return await this.getTransactionDataThornode(txId)
+    }
+  }
+  /** This function is used when in bound or outbound is not of thorchain
+   *
+   * @param txId - transaction hash
+   * @returns - Tx object
+   */
+  private async getTransactionDataThornode(txId: string): Promise<Tx> {
+    const getTx = await this.thornode.getTxData(txId)
+    if (!getTx.observed_tx) throw Error(`Could not return tx data`)
+    const senderAsset = assetFromStringEx(`${getTx.observed_tx?.tx.coins[0].asset}`)
+    const fromAddress = `${getTx.observed_tx?.tx.from_address}`
+    const from: TxFrom[] = [
+      { from: fromAddress, amount: baseAmount(getTx.observed_tx?.tx.coins[0].amount), asset: senderAsset },
+    ]
+    const splitMemo = getTx.observed_tx.tx.memo?.split(':')
+
+    if (!splitMemo) throw Error(`Could not parse memo`)
     let asset: Asset
-    if (assetFrom === `rune`) {
-      asset = AssetRuneNative
-    } else {
-      asset = assetFromStringEx(lastEntry[lastEntry.length - 1])
+    let amount: string
+    if (splitMemo[0] === 'OUT') {
+      asset = assetFromStringEx(getTx.observed_tx.tx.coins[0].asset)
+      amount = getTx.observed_tx.tx.coins[0].amount
+      const addressTo = getTx.observed_tx.tx.to_address ? getTx.observed_tx.tx.to_address : 'undefined'
+      const to: TxTo[] = [{ to: addressTo, amount: baseAmount(amount, DECIMAL), asset: asset }]
+      const txData: Tx = {
+        hash: txId,
+        asset: senderAsset,
+        from,
+        to,
+        date: new Date(),
+        type: TxType.Transfer,
+      }
+      return txData
     }
-    const txData: TxData | null = txResult && txResult.logs ? getDepositTxDataFromLogs(txResult.logs, address) : null
-    if (!txResult || !txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
-
-    const { from, to, type } = txData
-    // to and from don't return data. bug is in cosmos i think
-    return {
+    asset = assetFromStringEx(splitMemo[1])
+    const address = splitMemo[2]
+    amount = splitMemo[3]
+    const receiverAsset = asset
+    const recieverAmount = amount
+    const to: TxTo[] = [{ to: address, amount: baseAmount(recieverAmount, DECIMAL), asset: receiverAsset }]
+    const txData: Tx = {
       hash: txId,
-      asset,
+      asset: senderAsset,
       from,
       to,
-      date: new Date(txResult.timestamp),
-      type,
+      date: new Date(),
+      type: TxType.Transfer,
     }
+    return txData
   }
 
   /**
