@@ -397,8 +397,11 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
   async getTransactionData(txId: string, address: Address): Promise<Tx> {
     try {
       const txResult = await this.cosmosClient.txsHashGet(txId)
+      //console.log(JSON.stringify(txResult, null, 2))
+      const bond = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'bond')
       const transfer = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'transfer')
       if (!transfer) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
+
       const sender = transfer[0].attributes.find((attr) => attr.key === 'sender')?.value
       const senderAmount = transfer[0].attributes.filter((attr) => attr.key === 'amount')[1].value
 
@@ -410,6 +413,27 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       const coinSpent = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'coin_spent')
       if (!message || !coinSpent) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
       const action = message[0].attributes.find((attr) => attr.key === 'action')?.value
+      if (!bond) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
+      if (bond[0].type === 'bond') {
+        const assetTo = AssetRuneNative
+        const assetToAddress = transfer[0].attributes.filter((attr) => attr.key === 'recipient')[1].value
+        const txData: TxData | null =
+          txResult && txResult.logs
+            ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo, assetToAddress)
+            : null
+        //console.log(JSON.stringify(txData, null, 2))
+        if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
+
+        const { from, to, type } = txData
+        return {
+          hash: txId,
+          asset: senderAsset,
+          from,
+          to,
+          date: new Date(txResult.timestamp),
+          type,
+        }
+      }
       if (action === 'send') {
         const assetTo = AssetRuneNative
         const assetToAddress = transfer[0].attributes.filter((attr) => attr.key === 'recipient')[1].value
@@ -430,17 +454,19 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
           type,
         }
       }
+
       const messageBody = JSON.stringify(txResult.tx?.body.messages).split(':')
 
       const assetTo = assetFromStringEx(messageBody[7])
-      const assetToAddres = messageBody[8]
+      const assetToAddress = messageBody[8]
       const txData: TxData | null =
         txResult && txResult.logs
-          ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo, assetToAddres)
+          ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo, assetToAddress)
           : null
       if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
 
       const { from, to, type } = txData
+
       return {
         hash: txId,
         asset: senderAsset,

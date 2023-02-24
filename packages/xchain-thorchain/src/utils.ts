@@ -1,5 +1,5 @@
 import cosmosclient from '@cosmos-client/core'
-import { Balance, FeeType, Fees, Network, TxFrom, TxHash, TxTo, TxType, singleFee } from '@xchainjs/xchain-client'
+import { Balance, FeeType, Fees, Network, TxHash, TxType, singleFee } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, TxLog } from '@xchainjs/xchain-cosmos'
 import {
   Address,
@@ -104,42 +104,47 @@ export const registerSendCodecs = () => {
  * @param {Address} address - Address to get transaction data for
  * @returns {TxData} Parsed transaction data
  */
-type TransferData = { sender: string; recipient: string; amount: BaseAmount }
-type TransferDataList = TransferData[]
-
 export const getDepositTxDataFromLogs = (
   logs: TxLog[],
   address: Address,
-  senderAsset: Asset,
+  senderAsset?: Asset,
   receiverAsset?: Asset,
   assetToAddress?: Address,
 ): TxData => {
   const events = logs[0]?.events
+
   if (!events) {
     throw Error('No events in logs available')
   }
 
+  type TransferData = { sender: string; recipient: string; amount: BaseAmount }
+  type TransferDataList = TransferData[]
   const transferDataList: TransferDataList = events.reduce((acc: TransferDataList, { type, attributes }) => {
     if (type === 'transfer') {
-      const newData: TransferData = { sender: '', recipient: '', amount: baseAmount(0, DECIMAL) }
-      attributes.forEach(({ key, value }, index) => {
+      return attributes.reduce((acc2, { key, value }, index) => {
+        if (index % 3 === 0) acc2.push({ sender: '', recipient: '', amount: baseAmount(0, DECIMAL) })
+        const newData = acc2[acc2.length - 1]
         if (key === 'sender') newData.sender = value
         if (key === 'recipient') newData.recipient = value
         if (key === 'amount') newData.amount = baseAmount(value.replace(/rune/, ''), DECIMAL)
-        if ((index + 1) % 3 === 0) acc.push(newData)
-      })
+        return acc2
+      }, acc)
     }
     return acc
   }, [])
-  const toAddress = assetToAddress ? assetToAddress : transferDataList[0].recipient
-  const from: TxFrom[] = [{ from: address, amount: transferDataList[0].amount, asset: senderAsset }]
-  const to: TxTo[] = [{ to: toAddress, amount: baseAmount(0, DECIMAL), asset: receiverAsset }]
-
-  const txData: TxData = {
-    from,
-    to,
-    type: TxType.Transfer,
-  }
+  console.log(assetToAddress)
+  const txData: TxData = transferDataList
+    // filter out txs which are not based on given address
+    .filter(({ sender, recipient }) => sender === address || recipient === address)
+    // transform `TransferData` -> `TxData`
+    .reduce(
+      (acc: TxData, { sender, recipient, amount }) => ({
+        ...acc,
+        from: [...acc.from, { amount, from: sender, asset: senderAsset }],
+        to: [...acc.to, { amount, to: recipient, asset: receiverAsset }],
+      }),
+      { from: [], to: [], type: TxType.Transfer },
+    )
 
   return txData
 }

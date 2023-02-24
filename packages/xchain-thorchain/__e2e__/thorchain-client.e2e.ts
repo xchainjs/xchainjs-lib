@@ -119,10 +119,10 @@ describe('thorchain Integration Tests', () => {
     console.log(JSON.stringify(tx, null, 2))
 
     expect(tx.hash).toBe('FF900F04B145799668AB9975E40C51E42024D8761330D2210DCC8447F44218AF')
-    expect(tx.asset.ticker).toBe('btc')
+    expect(tx.asset.ticker).toBe('BTC')
     expect(tx.asset.synth).toBeTruthy()
-    expect(tx.from[0].asset?.chain).toBe('btc')
-    expect(tx.from[0].asset?.symbol).toBe('btc')
+    expect(tx.from[0].asset?.chain).toBe('BTC')
+    expect(tx.from[0].asset?.symbol).toBe('BTC')
   })
   it('should get RUNE asset from RUNE tx', async () => {
     const txId = 'EAC3D95D9160D4CF5A0BD861BDD9A7C5ACBA102B3A825FECD01581393BF76AEF'
