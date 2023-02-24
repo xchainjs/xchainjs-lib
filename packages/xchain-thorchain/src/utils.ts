@@ -109,7 +109,6 @@ export const getDepositTxDataFromLogs = (
   address: Address,
   senderAsset?: Asset,
   receiverAsset?: Asset,
-  assetToAddress?: Address,
 ): TxData => {
   const events = logs[0]?.events
 
@@ -132,7 +131,6 @@ export const getDepositTxDataFromLogs = (
     }
     return acc
   }, [])
-  console.log(assetToAddress)
   const txData: TxData = transferDataList
     // filter out txs which are not based on given address
     .filter(({ sender, recipient }) => sender === address || recipient === address)
