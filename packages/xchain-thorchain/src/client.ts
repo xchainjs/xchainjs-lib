@@ -18,7 +18,6 @@ import {
   singleFee,
 } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, GAIAChain, RPCTxResult } from '@xchainjs/xchain-cosmos'
-import { Thornode } from '@xchainjs/xchain-thorchain-query'
 import {
   Address,
   Asset,
@@ -67,8 +66,6 @@ import {
   registerSendCodecs,
 } from './utils'
 
-const thornode = new Thornode()
-
 /**
  * Interface for custom Thorchain client
  */
@@ -90,7 +87,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
   private explorerUrls: ExplorerUrls
   private chainIds: ChainIds
   private cosmosClient: CosmosSDKClient
-  private thornode: Thornode
 
   /**
    * Constructor
@@ -135,8 +131,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     this.clientUrl = clientUrl
     this.explorerUrls = explorerUrls
     this.chainIds = chainIds
-    this.thornode = thornode
-
     registerSendCodecs()
     registerDepositCodecs()
 
@@ -480,10 +474,11 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @returns - Tx object
    */
   private async getTransactionDataThornode(txId: string): Promise<Tx> {
-    const getTx = await this.thornode.getTxData(txId)
-    if (!getTx.observed_tx) throw Error(`Could not return tx data`)
+    const txResult = JSON.stringify(await this.thornodeAPIGet(`/tx/${txId}`))
+    const getTx: TxResult = JSON.parse(txResult)
+    if (!getTx) throw Error(`Could not return tx data`)
     const senderAsset = assetFromStringEx(`${getTx.observed_tx?.tx.coins[0].asset}`)
-    const fromAddress = `${getTx.observed_tx?.tx.from_address}`
+    const fromAddress = `${getTx.observed_tx.tx.from_address}`
     const from: TxFrom[] = [
       { from: fromAddress, amount: baseAmount(getTx.observed_tx?.tx.coins[0].amount), asset: senderAsset },
     ]
