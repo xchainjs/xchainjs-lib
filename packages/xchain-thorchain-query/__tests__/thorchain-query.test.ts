@@ -20,6 +20,7 @@ const assetEthUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB
 const assetAVAXUSDC = assetFromStringEx(`AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E`)
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 const sATOM = assetFromStringEx('GAIA/ATOM')
+const sETH = assetFromStringEx('ETH/ETH')
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {
@@ -217,6 +218,16 @@ describe('Thorchain-query tests', () => {
     expect(estimate.txEstimate.netOutput.assetAmount.amount().toFixed()).toEqual(
       assetAmount('0.99119055', 18).amount().toFixed(),
     )
+  })
+  it('Should check catch synth paused on sETH', async () => {
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount('.8', 8)), AssetBTC),
+      destinationAsset: sETH,
+      destinationAddress: 'xxx',
+    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    expect(estimate.txEstimate.canSwap).toEqual(false)
   })
   it('Should construct the correct memo BUSD->USDC', async () => {
     const swapParams: EstimateSwapParams = {

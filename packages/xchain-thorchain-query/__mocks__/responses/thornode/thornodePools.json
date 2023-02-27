@@ -189,7 +189,8 @@
 		"pool_units": "214627431217434",
 		"status": "Available",
 		"synth_supply": "8286830514",
-		"synth_units": "1387476708395"
+		"synth_units": "1387476708395",
+    "synth_mint_paused": true
 	},
 	{
 		"LP_units": "9931508703803",
