@@ -446,9 +446,8 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         date: new Date(txResult.timestamp),
         type,
       }
-    } catch {
-      return await this.getTransactionDataThornode(txId)
-    }
+    } catch (error) {}
+    return await this.getTransactionDataThornode(txId)
   }
   /** This function is used when in bound or outbound tx is not of thorchain
    *
