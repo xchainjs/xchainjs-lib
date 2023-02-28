@@ -16,6 +16,7 @@
     "@xchainjs/xchain-binance": "file:../../packages/xchain-binance",
     "@xchainjs/xchain-bitcoin": "file:../../packages/xchain-bitcoin",
     "@xchainjs/xchain-bitcoincash": "file:../../packages/xchain-bitcoincash",
+    "@xchainjs/xchain-bsc": "file:../../packages/xchain-bsc",
     "@xchainjs/xchain-client": "file:../../packages/xchain-client",
     "@xchainjs/xchain-cosmos": "file:../../packages/xchain-cosmos",
     "@xchainjs/xchain-crypto": "file:../../packages/xchain-crypto",
