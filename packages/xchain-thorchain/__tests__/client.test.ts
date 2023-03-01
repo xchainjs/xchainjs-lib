@@ -7,7 +7,7 @@ import nock from 'nock'
 
 import { mockTendermintNodeInfo, mockTendermintSimulate } from '../__mocks__/thornode-api'
 import { Client } from '../src/client'
-import { AssetRuneNative } from '../src/const'
+import { AssetRuneNative, MAX_TX_COUNT_PER_FUNCTION_CALL, MAX_TX_COUNT_PER_PAGE } from '../src/const'
 
 const chainIds = {
   [Network.Mainnet]: 'thorchain-mainnet-v1',
@@ -375,7 +375,7 @@ describe('Client Test', () => {
     expect(transactions).toEqual(expected)
   })
 
-  it('has tx history', async () => {
+  it('has tx history with limit', async () => {
     const historyData = require('../__mocks__/responses/tx_search/sender-tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f.json')
     const bondTxData = require('../__mocks__/responses/txs/bond-tn-9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C.json')
     const address = 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f'
@@ -386,6 +386,7 @@ describe('Client Test', () => {
 
     const txs = await thorClient.getTransactions({
       address: 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f',
+      limit: 1,
     })
 
     expect(txs.total).toEqual(1)
@@ -403,6 +404,73 @@ describe('Client Test', () => {
     expect(to[0].amount.amount().toString()).toEqual(assetToBase(assetAmount(0.02)).amount().toString())
     expect(to[1].to).toEqual('tthor17gw75axcnr8747pkanye45pnrwk7p9c3uhzgff')
     expect(to[1].amount.amount().toString()).toEqual(assetToBase(assetAmount(1700)).amount().toString())
+  })
+
+  it('get tx history with limit too high', async () => {
+    const historyData = require('../__mocks__/responses/tx_search/sender-tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f.json')
+    const address = 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f'
+    mockTxHistory(thorClient.getClientUrl().rpc, historyData)
+
+    try {
+      const txs = await thorClient.getTransactions({
+        address,
+        limit: MAX_TX_COUNT_PER_FUNCTION_CALL + 1,
+      })
+      expect(txs).toEqual({})
+    } catch (e) {
+      expect(e).toMatchInlineSnapshot(`[Error: Maximum number of transaction per call is 500]`)
+    }
+  })
+
+  it('get tx history with limit + offset too high', async () => {
+    const historyData = require('../__mocks__/responses/tx_search/sender-tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f.json')
+    const address = 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f'
+    mockTxHistory(thorClient.getClientUrl().rpc, historyData)
+
+    try {
+      const txs = await thorClient.getTransactions({
+        address,
+        limit: 1,
+        offset: MAX_TX_COUNT_PER_PAGE * MAX_TX_COUNT_PER_PAGE,
+      })
+      expect(txs).toEqual({})
+    } catch (e) {
+      expect(e).toMatchInlineSnapshot(`[Error: limit plus offset can not be grater than 1500]`)
+    }
+  })
+
+  it('get tx history', async () => {
+    const historyData = require('../__mocks__/responses/tx_search/sender-tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f.json')
+    const bondTxData = require('../__mocks__/responses/txs/bond-tn-9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C.json')
+    const address = 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f'
+    const txHashA = '9C175AF7ACE9FCDC930B78909FFF598C18CBEAF9F39D7AA2C4D9A27BB7E55A5C'
+    const txHashB = '99C97CB3DAC2BABBF5EF2938C15E8D3AEA55A815BBD04FCB53D97FA044E941CC'
+    mockTxHistory(thorClient.getClientUrl().rpc, historyData)
+
+    assertTxHashGet(thorClient.getClientUrl().node, txHashA, { tx_response: bondTxData })
+    assertTxHashGet(thorClient.getClientUrl().node, txHashB, { tx_response: bondTxData })
+
+    const txs = await thorClient.getTransactions({
+      address: 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f',
+    })
+
+    expect(txs.total).toEqual(2)
+
+    const { type, hash, asset, from, to } = txs.txs[0]
+
+    expect(type).toEqual('transfer')
+    expect(hash).toEqual(txHashA)
+    expect(asset).toEqual(AssetRuneNative)
+    expect(from[0].from).toEqual(address)
+    expect(from[0].amount.amount().toString()).toEqual(assetToBase(assetAmount(0.02)).amount().toString())
+    expect(from[1].from).toEqual(address)
+    expect(from[1].amount.amount().toString()).toEqual(assetToBase(assetAmount(1700)).amount().toString())
+    expect(to[0].to).toEqual('tthor1dheycdevq39qlkxs2a6wuuzyn4aqxhve3hhmlw')
+    expect(to[0].amount.amount().toString()).toEqual(assetToBase(assetAmount(0.02)).amount().toString())
+    expect(to[1].to).toEqual('tthor17gw75axcnr8747pkanye45pnrwk7p9c3uhzgff')
+    expect(to[1].amount.amount().toString()).toEqual(assetToBase(assetAmount(1700)).amount().toString())
+
+    expect(txs.txs[1].hash).toEqual(txHashB)
   })
 
   it('transfer', async () => {

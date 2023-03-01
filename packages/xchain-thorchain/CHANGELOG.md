@@ -1,3 +1,9 @@
+# v.0.27.10 (2023-03-01)
+
+## Fix
+
+- Fix method `getTransactions`
+
 # v.0.27.9 (2023-02-23)
 
 ## FIX

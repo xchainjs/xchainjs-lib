@@ -12,7 +12,9 @@ export const DECIMAL = 8
 export const DEFAULT_GAS_ADJUSTMENT = 2
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
 export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
-export const MAX_TX_COUNT = 100
+export const MAX_TX_COUNT_PER_PAGE = 100
+export const MAX_TX_COUNT_PER_FUNCTION_CALL = 500
+export const MAX_PAGES_PER_FUNCTION_CALL = 15
 export const RUNE_SYMBOL = 'ᚱ'
 export const defaultExplorerUrls: ExplorerUrls = {
   root: {

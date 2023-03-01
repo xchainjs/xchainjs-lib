@@ -17,7 +17,7 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { CosmosSDKClient, GAIAChain, RPCTxResult } from '@xchainjs/xchain-cosmos'
+import { CosmosSDKClient, GAIAChain, RPCTxResult, RPCTxSearchResult } from '@xchainjs/xchain-cosmos'
 import {
   Address,
   Asset,
@@ -26,6 +26,7 @@ import {
   assetFromStringEx,
   assetToString,
   baseAmount,
+  delay,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
@@ -37,7 +38,9 @@ import {
   DECIMAL,
   DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
-  MAX_TX_COUNT,
+  MAX_PAGES_PER_FUNCTION_CALL,
+  MAX_TX_COUNT_PER_FUNCTION_CALL,
+  MAX_TX_COUNT_PER_PAGE,
   defaultExplorerUrls,
 } from './const'
 import {
@@ -334,29 +337,56 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
-    const txIncomingHistory = (
-      await this.cosmosClient.searchTxFromRPC({
-        rpcEndpoint: this.getClientUrl().rpc,
-        messageAction,
-        transferRecipient: address,
-        limit: MAX_TX_COUNT,
-        txMinHeight,
-        txMaxHeight,
-      })
-    ).txs
-    const txOutgoingHistory = (
-      await this.cosmosClient.searchTxFromRPC({
-        rpcEndpoint: this.getClientUrl().rpc,
-        messageAction,
-        transferSender: address,
-        limit: MAX_TX_COUNT,
-        txMinHeight,
-        txMaxHeight,
-      })
-    ).txs
+    if (limit + offset > MAX_PAGES_PER_FUNCTION_CALL * MAX_TX_COUNT_PER_PAGE) {
+      throw Error(`limit plus offset can not be grater than ${MAX_PAGES_PER_FUNCTION_CALL * MAX_TX_COUNT_PER_PAGE}`)
+    }
 
-    let history: RPCTxResult[] = txIncomingHistory
-      .concat(txOutgoingHistory)
+    if (limit > MAX_TX_COUNT_PER_FUNCTION_CALL) {
+      throw Error(`Maximum number of transaction per call is ${MAX_TX_COUNT_PER_FUNCTION_CALL}`)
+    }
+
+    const pagesNumber = Math.ceil((limit + offset) / MAX_TX_COUNT_PER_PAGE)
+
+    const promiseTotalTxIncomingHistory: Promise<RPCTxSearchResult>[] = []
+    const promiseTotalTxOutgoingHistory: Promise<RPCTxSearchResult>[] = []
+
+    for (let index = 1; index <= pagesNumber; index++) {
+      promiseTotalTxIncomingHistory.push(
+        this.cosmosClient.searchTxFromRPC({
+          rpcEndpoint: this.getClientUrl().rpc,
+          messageAction,
+          transferRecipient: address,
+          page: index,
+          limit: MAX_TX_COUNT_PER_PAGE,
+          txMinHeight,
+          txMaxHeight,
+        }),
+      )
+      promiseTotalTxOutgoingHistory.push(
+        this.cosmosClient.searchTxFromRPC({
+          rpcEndpoint: this.getClientUrl().rpc,
+          messageAction,
+          transferSender: address,
+          page: index,
+          limit: MAX_TX_COUNT_PER_PAGE,
+          txMinHeight,
+          txMaxHeight,
+        }),
+      )
+    }
+
+    const incomingSearchResult = await Promise.all(promiseTotalTxIncomingHistory)
+    const outgoingSearchResult = await Promise.all(promiseTotalTxOutgoingHistory)
+
+    const totalTxIncomingHistory: RPCTxResult[] = incomingSearchResult.reduce((allTxs, searchResult) => {
+      return [...allTxs, ...searchResult.txs]
+    }, [] as RPCTxResult[])
+    const totalTxOutgoingHistory: RPCTxResult[] = outgoingSearchResult.reduce((allTxs, searchResult) => {
+      return [...allTxs, ...searchResult.txs]
+    }, [] as RPCTxResult[])
+
+    let history: RPCTxResult[] = totalTxIncomingHistory
+      .concat(totalTxOutgoingHistory)
       .sort((a, b) => {
         if (a.height !== b.height) return parseInt(b.height) > parseInt(a.height) ? 1 : -1
         if (a.hash !== b.hash) return a.hash > b.hash ? 1 : -1
@@ -367,14 +397,19 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         [] as RPCTxResult[],
       )
       .filter(params?.filterFn ? params.filterFn : (tx) => tx)
-      .filter((_, index) => index < MAX_TX_COUNT)
-
-    // get `total` before filtering txs out for pagination
-    const total = history.length
 
     history = history.filter((_, index) => index >= offset && index < offset + limit)
 
-    const txs = await Promise.all(history.map(({ hash }) => this.getTransactionData(hash, address)))
+    const total = history.length
+
+    const txs: Tx[] = []
+
+    for (let i = 0; i < history.length; i += 10) {
+      const batch = history.slice(i, i + 10)
+      const result = await Promise.all(batch.map(({ hash }) => this.getTransactionData(hash, address)))
+      txs.push(...result)
+      delay(2000) // Delay to avoid 503 from ninerealms server
+    }
 
     return {
       total,
