@@ -81,3 +81,27 @@ export type SimulateResponse = {
     gas_used: string
   }
 }
+
+export type MessageSend = {
+  '@type': string
+  from_address: string
+  to_address: string
+  amount: Amount
+}
+export type Amount = {
+  denom: string
+  amount: string
+}
+
+export type MessageDeposit = {
+  '@type': string
+  coins: Coins[]
+  memo: string
+  signer: string
+}
+
+export type Coins = {
+  asset: string
+  amount: number
+  decimals: number
+}

@@ -104,7 +104,12 @@ export const registerSendCodecs = () => {
  * @param {Address} address - Address to get transaction data for
  * @returns {TxData} Parsed transaction data
  */
-export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxData => {
+export const getDepositTxDataFromLogs = (
+  logs: TxLog[],
+  address: Address,
+  senderAsset?: Asset,
+  receiverAsset?: Asset,
+): TxData => {
   const events = logs[0]?.events
 
   if (!events) {
@@ -126,7 +131,6 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
     }
     return acc
   }, [])
-
   const txData: TxData = transferDataList
     // filter out txs which are not based on given address
     .filter(({ sender, recipient }) => sender === address || recipient === address)
@@ -134,8 +138,8 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
     .reduce(
       (acc: TxData, { sender, recipient, amount }) => ({
         ...acc,
-        from: [...acc.from, { amount, from: sender }],
-        to: [...acc.to, { amount, to: recipient }],
+        from: [...acc.from, { amount, from: sender, asset: senderAsset }],
+        to: [...acc.to, { amount, to: recipient, asset: receiverAsset }],
       }),
       { from: [], to: [], type: TxType.Transfer },
     )
