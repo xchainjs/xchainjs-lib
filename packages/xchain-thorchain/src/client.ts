@@ -17,8 +17,17 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { CosmosSDKClient, GAIAChain, RPCTxResult } from '@xchainjs/xchain-cosmos'
-import { Address, Asset, BaseAmount, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { CosmosSDKClient, GAIAChain, RPCTxResult, RPCTxSearchResult } from '@xchainjs/xchain-cosmos'
+import {
+  Address,
+  Asset,
+  BaseAmount,
+  assetFromString,
+  assetFromStringEx,
+  assetToString,
+  baseAmount,
+  delay,
+} from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 import Long from 'long'
@@ -29,7 +38,9 @@ import {
   DECIMAL,
   DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
-  MAX_TX_COUNT,
+  MAX_PAGES_PER_FUNCTION_CALL,
+  MAX_TX_COUNT_PER_FUNCTION_CALL,
+  MAX_TX_COUNT_PER_PAGE,
   defaultExplorerUrls,
 } from './const'
 import {
@@ -123,7 +134,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     this.clientUrl = clientUrl
     this.explorerUrls = explorerUrls
     this.chainIds = chainIds
-
     registerSendCodecs()
     registerDepositCodecs()
 
@@ -327,29 +337,56 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
-    const txIncomingHistory = (
-      await this.cosmosClient.searchTxFromRPC({
-        rpcEndpoint: this.getClientUrl().rpc,
-        messageAction,
-        transferRecipient: address,
-        limit: MAX_TX_COUNT,
-        txMinHeight,
-        txMaxHeight,
-      })
-    ).txs
-    const txOutgoingHistory = (
-      await this.cosmosClient.searchTxFromRPC({
-        rpcEndpoint: this.getClientUrl().rpc,
-        messageAction,
-        transferSender: address,
-        limit: MAX_TX_COUNT,
-        txMinHeight,
-        txMaxHeight,
-      })
-    ).txs
+    if (limit + offset > MAX_PAGES_PER_FUNCTION_CALL * MAX_TX_COUNT_PER_PAGE) {
+      throw Error(`limit plus offset can not be grater than ${MAX_PAGES_PER_FUNCTION_CALL * MAX_TX_COUNT_PER_PAGE}`)
+    }
 
-    let history: RPCTxResult[] = txIncomingHistory
-      .concat(txOutgoingHistory)
+    if (limit > MAX_TX_COUNT_PER_FUNCTION_CALL) {
+      throw Error(`Maximum number of transaction per call is ${MAX_TX_COUNT_PER_FUNCTION_CALL}`)
+    }
+
+    const pagesNumber = Math.ceil((limit + offset) / MAX_TX_COUNT_PER_PAGE)
+
+    const promiseTotalTxIncomingHistory: Promise<RPCTxSearchResult>[] = []
+    const promiseTotalTxOutgoingHistory: Promise<RPCTxSearchResult>[] = []
+
+    for (let index = 1; index <= pagesNumber; index++) {
+      promiseTotalTxIncomingHistory.push(
+        this.cosmosClient.searchTxFromRPC({
+          rpcEndpoint: this.getClientUrl().rpc,
+          messageAction,
+          transferRecipient: address,
+          page: index,
+          limit: MAX_TX_COUNT_PER_PAGE,
+          txMinHeight,
+          txMaxHeight,
+        }),
+      )
+      promiseTotalTxOutgoingHistory.push(
+        this.cosmosClient.searchTxFromRPC({
+          rpcEndpoint: this.getClientUrl().rpc,
+          messageAction,
+          transferSender: address,
+          page: index,
+          limit: MAX_TX_COUNT_PER_PAGE,
+          txMinHeight,
+          txMaxHeight,
+        }),
+      )
+    }
+
+    const incomingSearchResult = await Promise.all(promiseTotalTxIncomingHistory)
+    const outgoingSearchResult = await Promise.all(promiseTotalTxOutgoingHistory)
+
+    const totalTxIncomingHistory: RPCTxResult[] = incomingSearchResult.reduce((allTxs, searchResult) => {
+      return [...allTxs, ...searchResult.txs]
+    }, [] as RPCTxResult[])
+    const totalTxOutgoingHistory: RPCTxResult[] = outgoingSearchResult.reduce((allTxs, searchResult) => {
+      return [...allTxs, ...searchResult.txs]
+    }, [] as RPCTxResult[])
+
+    let history: RPCTxResult[] = totalTxIncomingHistory
+      .concat(totalTxOutgoingHistory)
       .sort((a, b) => {
         if (a.height !== b.height) return parseInt(b.height) > parseInt(a.height) ? 1 : -1
         if (a.hash !== b.hash) return a.hash > b.hash ? 1 : -1
@@ -360,14 +397,19 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         [] as RPCTxResult[],
       )
       .filter(params?.filterFn ? params.filterFn : (tx) => tx)
-      .filter((_, index) => index < MAX_TX_COUNT)
-
-    // get `total` before filtering txs out for pagination
-    const total = history.length
 
     history = history.filter((_, index) => index >= offset && index < offset + limit)
 
-    const txs = await Promise.all(history.map(({ hash }) => this.getTransactionData(hash, address)))
+    const total = history.length
+
+    const txs: Tx[] = []
+
+    for (let i = 0; i < history.length; i += 10) {
+      const batch = history.slice(i, i + 10)
+      const result = await Promise.all(batch.map(({ hash }) => this.getTransactionData(hash, address)))
+      txs.push(...result)
+      delay(2000) // Delay to avoid 503 from ninerealms server
+    }
 
     return {
       total,
@@ -382,20 +424,115 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string, address: Address): Promise<Tx> {
-    const txResult = await this.cosmosClient.txsHashGet(txId)
-    const txData: TxData | null = txResult && txResult.logs ? getDepositTxDataFromLogs(txResult.logs, address) : null
-    if (!txResult || !txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
+    try {
+      const txResult = await this.cosmosClient.txsHashGet(txId)
+      const bond = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'bond')
+      const transfer = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'transfer')
+      if (!transfer) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
 
-    const { from, to, type } = txData
+      const sender = transfer[0].attributes.find((attr) => attr.key === 'sender')?.value
+      const senderAmount = transfer[0].attributes.filter((attr) => attr.key === 'amount')[1].value
 
-    return {
+      const assetString = senderAmount.split(/(?<=\d)(?=[a-zA-Z])/)
+      const senderAsset = assetString[1] === 'rune' ? AssetRuneNative : assetFromStringEx(assetString[1])
+
+      const senderAddress = sender ? sender : address
+      const message = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'message')
+      const coinSpent = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'coin_spent')
+      if (!message || !coinSpent) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
+
+      const action = message[0].attributes.find((attr) => attr.key === 'action')?.value
+      if (!bond) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
+      // Rune only transactions
+      if (bond[0].type === 'bond' || action === 'send') {
+        const assetTo = AssetRuneNative
+        const txData: TxData | null =
+          txResult && txResult.logs
+            ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo)
+            : null
+        //console.log(JSON.stringify(txData, null, 2))
+        if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
+
+        const { from, to, type } = txData
+        return {
+          hash: txId,
+          asset: senderAsset,
+          from,
+          to,
+          date: new Date(txResult.timestamp),
+          type,
+        }
+      }
+      // synths and other tx types
+      const messageBody = JSON.stringify(txResult.tx?.body.messages).split(':')
+      const assetTo = assetFromStringEx(messageBody[7])
+
+      const txData: TxData | null =
+        txResult && txResult.logs ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo) : null
+      if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
+
+      const { from, to, type } = txData
+
+      return {
+        hash: txId,
+        asset: senderAsset,
+        from,
+        to,
+        date: new Date(txResult.timestamp),
+        type,
+      }
+    } catch (error) {}
+    return await this.getTransactionDataThornode(txId)
+  }
+  /** This function is used when in bound or outbound tx is not of thorchain
+   *
+   * @param txId - transaction hash
+   * @returns - Tx object
+   */
+  private async getTransactionDataThornode(txId: string): Promise<Tx> {
+    const txResult = JSON.stringify(await this.thornodeAPIGet(`/tx/${txId}`))
+    const getTx: TxResult = JSON.parse(txResult)
+    if (!getTx) throw Error(`Could not return tx data`)
+    const senderAsset = assetFromStringEx(`${getTx.observed_tx?.tx.coins[0].asset}`)
+    const fromAddress = `${getTx.observed_tx.tx.from_address}`
+    const from: TxFrom[] = [
+      { from: fromAddress, amount: baseAmount(getTx.observed_tx?.tx.coins[0].amount), asset: senderAsset },
+    ]
+    const splitMemo = getTx.observed_tx.tx.memo?.split(':')
+
+    if (!splitMemo) throw Error(`Could not parse memo`)
+    let asset: Asset
+    let amount: string
+    if (splitMemo[0] === 'OUT') {
+      asset = assetFromStringEx(getTx.observed_tx.tx.coins[0].asset)
+      amount = getTx.observed_tx.tx.coins[0].amount
+      const addressTo = getTx.observed_tx.tx.to_address ? getTx.observed_tx.tx.to_address : 'undefined'
+      const to: TxTo[] = [{ to: addressTo, amount: baseAmount(amount, DECIMAL), asset: asset }]
+      const txData: Tx = {
+        hash: txId,
+        asset: senderAsset,
+        from,
+        to,
+        date: new Date(),
+        type: TxType.Transfer,
+      }
+      return txData
+    }
+    asset = assetFromStringEx(splitMemo[1])
+    const address = splitMemo[2]
+    amount = splitMemo[3]
+    const receiverAsset = asset
+    const recieverAmount = amount
+    const to: TxTo[] = [{ to: address, amount: baseAmount(recieverAmount, DECIMAL), asset: receiverAsset }]
+    const txData: Tx = {
       hash: txId,
-      asset: AssetRuneNative,
+      asset: senderAsset,
       from,
       to,
-      date: new Date(txResult.timestamp),
-      type,
+      date: new Date(),
+      type: TxType.Transfer,
     }
+    return txData
   }
 
   /**
