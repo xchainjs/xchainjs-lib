@@ -56,7 +56,7 @@ export class EthHelper {
       //erc-20 must be depsited to the router
       const isApprovedResult = await this.isTCRouterApprovedToSpend(params.asset, params.amount, params.walletIndex)
       if (!isApprovedResult) {
-        throw new Error('The amount is not allowed to spend')
+        throw new Error('TC router has not been approved to spend this amount')
       }
       const contractAddress = getContractAddressFromAsset(params.asset)
       const checkSummedContractAddress = ethers.utils.getAddress(contractAddress)

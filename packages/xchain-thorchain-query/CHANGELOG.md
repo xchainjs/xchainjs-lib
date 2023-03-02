@@ -1,3 +1,10 @@
+# v0.1.19 (2023-3-03)
+
+## Fix
+
+- Add check to see if synth mint is paused
+- Update dependencies
+
 # v0.1.18 (2023-2-16)
 
 ## Fix
