@@ -13,6 +13,7 @@ export enum TxType {
   WithdrawLP = 'WithdrawLP',
   AddSaver = 'AddSaver',
   WithdrawSaver = 'WithdrawSaver',
+  Refund = 'Refund',
   Other = 'Other',
   Unknown = 'Unknown',
 }
@@ -34,6 +35,11 @@ export enum AddLpStatus {
   Incomplete = 'Incomplete',
 }
 export enum WithdrawStatus {
+  Complete = 'Complete',
+  Incomplete = 'Incomplete',
+  Complete_Refunded = 'Complete_Refunded',
+}
+export enum RefundStatus {
   Complete = 'Complete',
   Incomplete = 'Incomplete',
   Complete_Refunded = 'Complete_Refunded',
@@ -80,6 +86,16 @@ export type WithdrawInfo = {
   outboundHeight: number
   estimatedWaitTime: number
 }
+export type RefundInfo = {
+  status: RefundStatus
+  refundAmount: CryptoAmount
+  toAddress: string
+  expectedConfirmationDate: Date
+  finalisedHeight: number
+  thorchainHeight: number
+  outboundBlock: number
+  estimatedWaitTime: number
+}
 
 export type AddSaverInfo = {
   status: AddSaverStatus
@@ -104,6 +120,7 @@ export type TXProgress = {
   addSaverInfo?: AddSaverInfo
   withdrawLpInfo?: WithdrawInfo
   withdrawSaverInfo?: WithdrawSaverInfo
+  refundInfo?: RefundInfo
 }
 
 export class TransactionStage {
@@ -143,6 +160,9 @@ export class TransactionStage {
         break
       case TxType.WithdrawSaver:
         await this.checkWithdrawSaverProgress(txData, progress)
+        break
+      case TxType.Refund:
+        await this.checkRefund(txData, progress)
         break
       case TxType.Other:
         break
@@ -230,7 +250,8 @@ export class TransactionStage {
         progress.txType = TxType.AddLP
       if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[/]/)) progress.txType = TxType.WithdrawSaver
       if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[.]/)) progress.txType = TxType.WithdrawLP
-      if (operation.match(/out|refund/gi)) progress.txType = TxType.Other
+      if (operation.match(/refund/gi)) progress.txType = TxType.Refund
+      if (operation.match(/out/gi)) progress.txType = TxType.Other
 
       const amount = await this.getCryptoAmount(inboundAmount, assetIn)
       // find a date for when it should be competed
@@ -377,6 +398,46 @@ export class TransactionStage {
         estimatedWaitTime,
       }
       progress.withdrawSaverInfo = withdrawSaverInfo
+    }
+  }
+
+  private async checkRefund(txData: TxSignersResponse, progress: TXProgress) {
+    if (progress.inboundObserved) {
+      const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
+      // find the date in which the asset should be seen in the wallet
+      const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
+
+      const expectedConfirmationDate = await this.blockToDate(THORChain, txData, outboundHeight) // always pass in thorchain
+
+      const amount = txData.tx.tx.coins[0].amount
+      const asset = assetFromStringEx(txData.tx.tx.coins[0].asset)
+      const toAddress = `${txData.tx.tx.to_address}`
+      const currentHeight = lastBlockObj.find((obj) => obj.chain === asset.chain)
+      console.log(currentHeight)
+      const outboundBlock = Number(`${currentHeight?.last_observed_in}`)
+      const finalisedHeight = Number(txData.finalised_height)
+      const currentTCHeight = Number(`${currentHeight?.thorchain}`)
+      const estimatedWaitTime =
+        outboundBlock > currentTCHeight
+          ? (outboundBlock - currentTCHeight) * this.chainAttributes[THORChain].avgBlockTimeInSecs +
+            this.chainAttributes[asset.chain].avgBlockTimeInSecs
+          : 0
+
+      // if the TC has process the block that the outbound tx was assigned to then its completed.
+      const status = txData.tx.status === 'done' ? RefundStatus.Complete : RefundStatus.Incomplete
+
+      const refundAmount = await this.getCryptoAmount(amount, asset)
+      const refundInfo: RefundInfo = {
+        status,
+        refundAmount,
+        toAddress,
+        expectedConfirmationDate,
+        thorchainHeight: currentTCHeight,
+        finalisedHeight,
+        outboundBlock,
+        estimatedWaitTime,
+      }
+      progress.refundInfo = refundInfo
     }
   }
 

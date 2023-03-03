@@ -82,10 +82,16 @@ describe('Thorchain query checkTx Integration Tests', () => {
     expect(progress?.txType).toBe(TxType.WithdrawLP)
     console.log(progress)
   })
-  it(`Should check random tx `, async () => {
-    const hash = '91B15EA094D95D9AE89C2B0246E27EC3750101DFCBC1B5E3CA4933DD10AD25B4'
+  it(`Should check refund tx `, async () => {
+    const hash = 'D7096ED62970D7523382ABBAF7D122CF7DD1EB8C4DF442D9E5B77948EB1F6CEC'
     const progress = await checkTxStage.checkTxProgress(hash)
-    expect(progress?.txType).toBe(TxType.WithdrawLP)
+    expect(progress?.txType).toBe(TxType.Refund)
+    console.log(progress)
+  })
+  it(`Should check random tx `, async () => {
+    const hash = '3D19C242B4136CF6A936AA7FDB4896804BDF21816E9B268DF2696E950DA0A36D'
+    const progress = await checkTxStage.checkTxProgress(hash)
+    expect(progress?.txType).toBe(TxType.Refund)
     console.log(progress)
   })
 })
