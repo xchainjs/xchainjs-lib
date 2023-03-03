@@ -393,15 +393,26 @@ export class Thornode {
     toAsset: string,
     amount: number,
     destination: string,
-    toleranceBps: string,
+    fromAddress: string,
+    toleranceBps: number,
     affiliateBps: number,
-    affiliate: number,
+    affiliate: string,
     height?: number,
   ): Promise<QuoteSwapResponse> {
     for (const api of this.quoteApi) {
       try {
         const resp = (
-          await api.quoteswap(height, fromAsset, toAsset, amount, destination, toleranceBps, affiliateBps, affiliate)
+          await api.quoteswap(
+            height,
+            fromAsset,
+            toAsset,
+            amount,
+            destination,
+            fromAddress,
+            toleranceBps,
+            affiliateBps,
+            affiliate,
+          )
         ).data
         return resp
       } catch (e) {
