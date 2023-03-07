@@ -1,5 +1,29 @@
 [
-	{
+  {
+		"LP_units": "21436675546946",
+		"asset": "AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E",
+		"balance_asset": "580355957856",
+		"balance_rune": "37556402318671",
+		"pending_inbound_asset": "3446563192",
+		"pending_inbound_rune": "1207037453",
+		"pool_units": "22030053143314",
+		"status": "Available",
+		"synth_supply": "31263676131",
+		"synth_units": "593377596368"
+	},
+  	{
+		"LP_units": "21436675546946",
+		"asset": "AVAX.AVAX",
+		"balance_asset": "580355957856",
+		"balance_rune": "37556402318671",
+		"pending_inbound_asset": "3446563192",
+		"pending_inbound_rune": "1207037453",
+		"pool_units": "22030053143314",
+		"status": "Available",
+		"synth_supply": "31263676131",
+		"synth_units": "593377596368"
+	},
+  	{
 		"LP_units": "21436675546946",
 		"asset": "BCH.BCH",
 		"balance_asset": "580355957856",
