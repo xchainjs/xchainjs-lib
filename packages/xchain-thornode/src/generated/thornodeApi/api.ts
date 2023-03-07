@@ -22,187 +22,187 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } from './base';
 
 /**
- * 
+ *
  * @export
  * @interface BanResponse
  */
 export interface BanResponse {
     /**
-     * 
+     *
      * @type {string}
      * @memberof BanResponse
      */
     'node_address'?: string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof BanResponse
      */
     'block_height'?: number;
     /**
-     * 
+     *
      * @type {Array<string>}
      * @memberof BanResponse
      */
     'signers'?: Array<string>;
 }
 /**
- * 
+ *
  * @export
  * @interface Borrower
  */
 export interface Borrower {
     /**
-     * 
+     *
      * @type {string}
      * @memberof Borrower
      */
     'owner': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Borrower
      */
     'asset': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Borrower
      */
     'debt_up': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Borrower
      */
     'debt_down': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Borrower
      */
     'collateral_up': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Borrower
      */
     'collateral_down': string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Borrower
      */
     'last_open_height': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Borrower
      */
     'last_repay_height': number;
 }
 /**
- * 
+ *
  * @export
  * @interface BorrowersResponse
  */
 export interface BorrowersResponse extends Array<Borrower> {
 }
 /**
- * 
+ *
  * @export
  * @interface ChainHeight
  */
 export interface ChainHeight {
     /**
-     * 
+     *
      * @type {string}
      * @memberof ChainHeight
      */
     'chain': string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof ChainHeight
      */
     'height': number;
 }
 /**
- * 
+ *
  * @export
  * @interface Coin
  */
 export interface Coin {
     /**
-     * 
+     *
      * @type {string}
      * @memberof Coin
      */
     'asset': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Coin
      */
     'amount': string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Coin
      */
     'decimals'?: number;
 }
 /**
- * 
+ *
  * @export
  * @interface ConstantsResponse
  */
 export interface ConstantsResponse {
     /**
-     * 
+     *
      * @type {{ [key: string]: string; }}
      * @memberof ConstantsResponse
      */
     'int_64_values'?: { [key: string]: string; };
     /**
-     * 
+     *
      * @type {{ [key: string]: string; }}
      * @memberof ConstantsResponse
      */
     'bool_values'?: { [key: string]: string; };
     /**
-     * 
+     *
      * @type {{ [key: string]: string; }}
      * @memberof ConstantsResponse
      */
     'string_values'?: { [key: string]: string; };
 }
 /**
- * 
+ *
  * @export
  * @interface InboundAddress
  */
 export interface InboundAddress {
     /**
-     * 
+     *
      * @type {string}
      * @memberof InboundAddress
      */
     'chain'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof InboundAddress
      */
     'pub_key'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof InboundAddress
      */
     'address'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof InboundAddress
      */
@@ -263,14 +263,14 @@ export interface InboundAddress {
     'dust_threshold'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface InboundAddressesResponse
  */
 export interface InboundAddressesResponse extends Array<InboundAddress> {
 }
 /**
- * 
+ *
  * @export
  * @interface InvariantResponse
  */
@@ -295,46 +295,46 @@ export interface InvariantResponse {
     'msg': string;
 }
 /**
- * 
+ *
  * @export
  * @interface InvariantsResponse
  */
 export interface InvariantsResponse {
     /**
-     * 
+     *
      * @type {Array<string>}
      * @memberof InvariantsResponse
      */
     'invariants'?: Array<string>;
 }
 /**
- * 
+ *
  * @export
  * @interface KeygenMetric
  */
 export interface KeygenMetric {
     /**
-     * 
+     *
      * @type {string}
      * @memberof KeygenMetric
      */
     'pub_key'?: string;
     /**
-     * 
+     *
      * @type {Array<NodeKeygenMetric>}
      * @memberof KeygenMetric
      */
     'node_tss_times': Array<NodeKeygenMetric>;
 }
 /**
- * 
+ *
  * @export
  * @interface KeygenMetricsResponse
  */
 export interface KeygenMetricsResponse extends Array<KeygenMetric> {
 }
 /**
- * 
+ *
  * @export
  * @interface KeysignInfo
  */
@@ -346,305 +346,305 @@ export interface KeysignInfo {
      */
     'height'?: number;
     /**
-     * 
+     *
      * @type {Array<TxOutItem>}
      * @memberof KeysignInfo
      */
     'tx_array': Array<TxOutItem>;
 }
 /**
- * 
+ *
  * @export
  * @interface KeysignMetrics
  */
 export interface KeysignMetrics {
     /**
-     * 
+     *
      * @type {string}
      * @memberof KeysignMetrics
      */
     'tx_id'?: string;
     /**
-     * 
+     *
      * @type {Array<TssMetric>}
      * @memberof KeysignMetrics
      */
     'node_tss_times'?: Array<TssMetric>;
 }
 /**
- * 
+ *
  * @export
  * @interface KeysignResponse
  */
 export interface KeysignResponse {
     /**
-     * 
+     *
      * @type {KeysignInfo}
      * @memberof KeysignResponse
      */
     'keysign'?: KeysignInfo;
     /**
-     * 
+     *
      * @type {string}
      * @memberof KeysignResponse
      */
     'signature'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface LastBlock
  */
 export interface LastBlock {
     /**
-     * 
+     *
      * @type {string}
      * @memberof LastBlock
      */
     'chain': string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof LastBlock
      */
     'last_observed_in': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof LastBlock
      */
     'last_signed_out': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof LastBlock
      */
     'thorchain': number;
 }
 /**
- * 
+ *
  * @export
  * @interface LastBlockResponse
  */
 export interface LastBlockResponse extends Array<LastBlock> {
 }
 /**
- * 
+ *
  * @export
  * @interface LiquidityProvider
  */
 export interface LiquidityProvider {
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'asset': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'rune_address'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'asset_address'?: string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof LiquidityProvider
      */
     'last_add_height'?: number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof LiquidityProvider
      */
     'last_withdraw_height'?: number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'units': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'pending_rune': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'pending_asset': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'pending_tx_id'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'rune_deposit_value': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'asset_deposit_value': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'rune_redeem_value': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'asset_redeem_value': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'luvi_deposit_value': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'luvi_redeem_value': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProvider
      */
     'luvi_growth_pct': string;
 }
 /**
- * 
+ *
  * @export
  * @interface LiquidityProviderSummary
  */
 export interface LiquidityProviderSummary {
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProviderSummary
      */
     'asset': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProviderSummary
      */
     'rune_address'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProviderSummary
      */
     'asset_address'?: string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof LiquidityProviderSummary
      */
     'last_add_height'?: number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof LiquidityProviderSummary
      */
     'last_withdraw_height'?: number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProviderSummary
      */
     'units': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProviderSummary
      */
     'pending_rune': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProviderSummary
      */
     'pending_asset': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProviderSummary
      */
     'pending_tx_id'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProviderSummary
      */
     'rune_deposit_value': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof LiquidityProviderSummary
      */
     'asset_deposit_value': string;
 }
 /**
- * 
+ *
  * @export
  * @interface LiquidityProvidersResponse
  */
 export interface LiquidityProvidersResponse extends Array<LiquidityProviderSummary> {
 }
 /**
- * 
+ *
  * @export
  * @interface MetricsResponse
  */
 export interface MetricsResponse {
     /**
-     * 
+     *
      * @type {KeygenMetricsResponse}
      * @memberof MetricsResponse
      */
     'keygen'?: KeygenMetricsResponse;
     /**
-     * 
+     *
      * @type {KeysignMetrics}
      * @memberof MetricsResponse
      */
     'keysign'?: KeysignMetrics;
 }
 /**
- * 
+ *
  * @export
  * @interface MimirNodesResponse
  */
 export interface MimirNodesResponse {
     /**
-     * 
+     *
      * @type {Array<MimirVote>}
      * @memberof MimirNodesResponse
      */
     'mimirs'?: Array<MimirVote>;
 }
 /**
- * 
+ *
  * @export
  * @interface MimirResponse
  */
@@ -653,38 +653,38 @@ export interface MimirResponse {
 
 }
 /**
- * 
+ *
  * @export
  * @interface MimirVote
  */
 export interface MimirVote {
     /**
-     * 
+     *
      * @type {string}
      * @memberof MimirVote
      */
     'key'?: string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof MimirVote
      */
     'value'?: number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof MimirVote
      */
     'signer'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface MsgSwap
  */
 export interface MsgSwap {
     /**
-     * 
+     *
      * @type {Tx}
      * @memberof MsgSwap
      */
@@ -751,7 +751,7 @@ export interface MsgSwap {
     'order_type'?: number;
 }
 /**
- * 
+ *
  * @export
  * @interface NetworkResponse
  */
@@ -794,25 +794,25 @@ export interface NetworkResponse {
     'vaults_migrating': boolean;
 }
 /**
- * 
+ *
  * @export
  * @interface Node
  */
 export interface Node {
     /**
-     * 
+     *
      * @type {string}
      * @memberof Node
      */
     'node_address': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Node
      */
     'status': NodeStatusEnum;
     /**
-     * 
+     *
      * @type {NodePubKeySet}
      * @memberof Node
      */
@@ -842,7 +842,7 @@ export interface Node {
      */
     'status_since': number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Node
      */
@@ -854,7 +854,7 @@ export interface Node {
      */
     'total_bond': string;
     /**
-     * 
+     *
      * @type {NodeBondProviders}
      * @memberof Node
      */
@@ -866,7 +866,7 @@ export interface Node {
      */
     'signer_membership': Array<string>;
     /**
-     * 
+     *
      * @type {boolean}
      * @memberof Node
      */
@@ -878,13 +878,13 @@ export interface Node {
      */
     'forced_to_leave': boolean;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Node
      */
     'leave_height': number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Node
      */
@@ -902,13 +902,13 @@ export interface Node {
      */
     'slash_points': number;
     /**
-     * 
+     *
      * @type {NodeJail}
      * @memberof Node
      */
     'jail': NodeJail;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Node
      */
@@ -920,7 +920,7 @@ export interface Node {
      */
     'observe_chains': Array<ChainHeight>;
     /**
-     * 
+     *
      * @type {NodePreflightStatus}
      * @memberof Node
      */
@@ -937,26 +937,26 @@ export const NodeStatusEnum = {
 export type NodeStatusEnum = typeof NodeStatusEnum[keyof typeof NodeStatusEnum];
 
 /**
- * 
+ *
  * @export
  * @interface NodeBondProvider
  */
 export interface NodeBondProvider {
     /**
-     * 
+     *
      * @type {string}
      * @memberof NodeBondProvider
      */
     'bond_address'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof NodeBondProvider
      */
     'bond'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface NodeBondProviders
  */
@@ -968,52 +968,52 @@ export interface NodeBondProviders {
      */
     'node_operator_fee'?: string;
     /**
-     * 
+     *
      * @type {NodeBondProvider}
      * @memberof NodeBondProviders
      */
     'providers'?: NodeBondProvider;
 }
 /**
- * 
+ *
  * @export
  * @interface NodeJail
  */
 export interface NodeJail {
     /**
-     * 
+     *
      * @type {number}
      * @memberof NodeJail
      */
     'release_height'?: number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof NodeJail
      */
     'reason'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface NodeKeygenMetric
  */
 export interface NodeKeygenMetric {
     /**
-     * 
+     *
      * @type {string}
      * @memberof NodeKeygenMetric
      */
     'address'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof NodeKeygenMetric
      */
     'tss_time'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface NodePreflightStatus
  */
@@ -1031,58 +1031,58 @@ export interface NodePreflightStatus {
      */
     'reason': string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof NodePreflightStatus
      */
     'code': number;
 }
 /**
- * 
+ *
  * @export
  * @interface NodePubKeySet
  */
 export interface NodePubKeySet {
     /**
-     * 
+     *
      * @type {string}
      * @memberof NodePubKeySet
      */
     'secp256k1'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof NodePubKeySet
      */
     'ed25519'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface NodesResponse
  */
 export interface NodesResponse extends Array<Node> {
 }
 /**
- * 
+ *
  * @export
  * @interface ObservedTx
  */
 export interface ObservedTx {
     /**
-     * 
+     *
      * @type {Tx}
      * @memberof ObservedTx
      */
     'tx': Tx;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ObservedTx
      */
     'status'?: ObservedTxStatusEnum;
     /**
-     * 
+     *
      * @type {Array<string>}
      * @memberof ObservedTx
      */
@@ -1100,19 +1100,19 @@ export interface ObservedTx {
      */
     'external_observed_height'?: number;
     /**
-     * 
+     *
      * @type {Array<string>}
      * @memberof ObservedTx
      */
     'signers'?: Array<string>;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ObservedTx
      */
     'observed_pub_key'?: string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof ObservedTx
      */
@@ -1157,14 +1157,14 @@ export const ObservedTxStatusEnum = {
 export type ObservedTxStatusEnum = typeof ObservedTxStatusEnum[keyof typeof ObservedTxStatusEnum];
 
 /**
- * 
+ *
  * @export
  * @interface OutboundResponse
  */
 export interface OutboundResponse extends Array<TxOutItem> {
 }
 /**
- * 
+ *
  * @export
  * @interface POLResponse
  */
@@ -1201,38 +1201,38 @@ export interface POLResponse {
     'current_deposit': string;
 }
 /**
- * 
+ *
  * @export
  * @interface Ping
  */
 export interface Ping {
     /**
-     * 
+     *
      * @type {string}
      * @memberof Ping
      */
     'ping'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface Pool
  */
 export interface Pool {
     /**
-     * 
+     *
      * @type {string}
      * @memberof Pool
      */
     'balance_rune': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Pool
      */
     'balance_asset': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Pool
      */
@@ -1250,13 +1250,13 @@ export interface Pool {
      */
     'pool_units': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Pool
      */
     'status': string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Pool
      */
@@ -1274,13 +1274,13 @@ export interface Pool {
      */
     'synth_supply': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Pool
      */
     'pending_inbound_rune': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Pool
      */
@@ -1317,20 +1317,20 @@ export interface Pool {
     'loan_collateral': string;
 }
 /**
- * 
+ *
  * @export
  * @interface PoolsResponse
  */
 export interface PoolsResponse extends Array<Pool> {
 }
 /**
- * 
+ *
  * @export
  * @interface QueueResponse
  */
 export interface QueueResponse {
     /**
-     * 
+     *
      * @type {number}
      * @memberof QueueResponse
      */
@@ -1342,7 +1342,7 @@ export interface QueueResponse {
      */
     'outbound': number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof QueueResponse
      */
@@ -1355,32 +1355,32 @@ export interface QueueResponse {
     'scheduled_outbound_value': string;
 }
 /**
- * 
+ *
  * @export
  * @interface QuoteFees
  */
 export interface QuoteFees {
     /**
-     * 
+     *
      * @type {string}
      * @memberof QuoteFees
      */
     'asset': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof QuoteFees
      */
     'affiliate': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof QuoteFees
      */
     'outbound': string;
 }
 /**
- * 
+ *
  * @export
  * @interface QuoteSaverDepositResponse
  */
@@ -1422,7 +1422,7 @@ export interface QuoteSaverDepositResponse {
      */
     'inbound_confirmation_seconds'?: number;
     /**
-     * 
+     *
      * @type {QuoteFees}
      * @memberof QuoteSaverDepositResponse
      */
@@ -1459,7 +1459,7 @@ export interface QuoteSaverDepositResponse {
     'dust_threshold'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface QuoteSaverWithdrawResponse
  */
@@ -1501,7 +1501,7 @@ export interface QuoteSaverWithdrawResponse {
      */
     'outbound_delay_seconds': number;
     /**
-     * 
+     *
      * @type {QuoteFees}
      * @memberof QuoteSaverWithdrawResponse
      */
@@ -1538,7 +1538,7 @@ export interface QuoteSaverWithdrawResponse {
     'dust_threshold'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface QuoteSwapResponse
  */
@@ -1586,7 +1586,7 @@ export interface QuoteSwapResponse {
      */
     'outbound_delay_seconds': number;
     /**
-     * 
+     *
      * @type {QuoteFees}
      * @memberof QuoteSwapResponse
      */
@@ -1629,269 +1629,269 @@ export interface QuoteSwapResponse {
     'dust_threshold'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface Saver
  */
 export interface Saver {
     /**
-     * 
+     *
      * @type {string}
      * @memberof Saver
      */
     'asset': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Saver
      */
     'asset_address': string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Saver
      */
     'last_add_height'?: number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Saver
      */
     'last_withdraw_height'?: number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Saver
      */
     'units': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Saver
      */
     'asset_deposit_value': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Saver
      */
     'asset_redeem_value': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Saver
      */
     'growth_pct': string;
 }
 /**
- * 
+ *
  * @export
  * @interface SaversResponse
  */
 export interface SaversResponse extends Array<Saver> {
 }
 /**
- * 
+ *
  * @export
  * @interface ScheduledResponse
  */
 export interface ScheduledResponse extends Array<TxOutItem> {
 }
 /**
- * 
+ *
  * @export
  * @interface SwapQueueResponse
  */
 export interface SwapQueueResponse extends Array<MsgSwap> {
 }
 /**
- * 
+ *
  * @export
  * @interface Thorname
  */
 export interface Thorname {
     /**
-     * 
+     *
      * @type {string}
      * @memberof Thorname
      */
     'name'?: string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Thorname
      */
     'expire_block_height'?: number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Thorname
      */
     'owner'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Thorname
      */
     'preferred_asset': string;
     /**
-     * 
+     *
      * @type {Array<ThornameAlias>}
      * @memberof Thorname
      */
     'aliases': Array<ThornameAlias>;
 }
 /**
- * 
+ *
  * @export
  * @interface ThornameAlias
  */
 export interface ThornameAlias {
     /**
-     * 
+     *
      * @type {string}
      * @memberof ThornameAlias
      */
     'chain'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof ThornameAlias
      */
     'address'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface ThornameResponse
  */
 export interface ThornameResponse extends Array<Thorname> {
 }
 /**
- * 
+ *
  * @export
  * @interface TssKeysignMetric
  */
 export interface TssKeysignMetric {
     /**
-     * 
+     *
      * @type {string}
      * @memberof TssKeysignMetric
      */
     'tx_id'?: string;
     /**
-     * 
+     *
      * @type {Array<TssMetric>}
      * @memberof TssKeysignMetric
      */
     'node_tss_times': Array<TssMetric>;
 }
 /**
- * 
+ *
  * @export
  * @interface TssMetric
  */
 export interface TssMetric {
     /**
-     * 
+     *
      * @type {string}
      * @memberof TssMetric
      */
     'address'?: string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof TssMetric
      */
     'tss_time'?: number;
 }
 /**
- * 
+ *
  * @export
  * @interface Tx
  */
 export interface Tx {
     /**
-     * 
+     *
      * @type {string}
      * @memberof Tx
      */
     'id'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Tx
      */
     'chain'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Tx
      */
     'from_address'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Tx
      */
     'to_address'?: string;
     /**
-     * 
+     *
      * @type {Array<Coin>}
      * @memberof Tx
      */
     'coins': Array<Coin>;
     /**
-     * 
+     *
      * @type {Array<Coin>}
      * @memberof Tx
      */
     'gas': Array<Coin>;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Tx
      */
     'memo'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface TxDetailsResponse
  */
 export interface TxDetailsResponse {
     /**
-     * 
+     *
      * @type {string}
      * @memberof TxDetailsResponse
      */
     'tx_id'?: string;
     /**
-     * 
+     *
      * @type {ObservedTx}
      * @memberof TxDetailsResponse
      */
     'tx': ObservedTx;
     /**
-     * 
+     *
      * @type {number}
      * @memberof TxDetailsResponse
      */
     'height'?: number;
     /**
-     * 
+     *
      * @type {Array<ObservedTx>}
      * @memberof TxDetailsResponse
      */
     'txs': Array<ObservedTx>;
     /**
-     * 
+     *
      * @type {Array<TxOutItem>}
      * @memberof TxDetailsResponse
      */
     'actions': Array<TxOutItem>;
     /**
-     * 
+     *
      * @type {Array<Tx>}
      * @memberof TxDetailsResponse
      */
@@ -1903,13 +1903,13 @@ export interface TxDetailsResponse {
      */
     'finalised_height'?: number;
     /**
-     * 
+     *
      * @type {boolean}
      * @memberof TxDetailsResponse
      */
     'updated_vault'?: boolean;
     /**
-     * 
+     *
      * @type {boolean}
      * @memberof TxDetailsResponse
      */
@@ -1922,80 +1922,80 @@ export interface TxDetailsResponse {
     'outbound_height'?: number;
 }
 /**
- * 
+ *
  * @export
  * @interface TxOutItem
  */
 export interface TxOutItem {
     /**
-     * 
+     *
      * @type {string}
      * @memberof TxOutItem
      */
     'chain': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof TxOutItem
      */
     'to_address': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof TxOutItem
      */
     'vault_pub_key'?: string;
     /**
-     * 
+     *
      * @type {Coin}
      * @memberof TxOutItem
      */
     'coin': Coin;
     /**
-     * 
+     *
      * @type {string}
      * @memberof TxOutItem
      */
     'memo'?: string;
     /**
-     * 
+     *
      * @type {Array<Coin>}
      * @memberof TxOutItem
      */
     'max_gas': Array<Coin>;
     /**
-     * 
+     *
      * @type {number}
      * @memberof TxOutItem
      */
     'gas_rate'?: number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof TxOutItem
      */
     'in_hash'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof TxOutItem
      */
     'out_hash'?: string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof TxOutItem
      */
     'height': number;
 }
 /**
- * 
+ *
  * @export
  * @interface TxResponse
  */
 export interface TxResponse {
     /**
-     * 
+     *
      * @type {ObservedTx}
      * @memberof TxResponse
      */
@@ -2013,50 +2013,50 @@ export interface TxResponse {
      */
     'outbound_height'?: number;
     /**
-     * 
+     *
      * @type {TssKeysignMetric}
      * @memberof TxResponse
      */
     'keysign_metric'?: TssKeysignMetric;
 }
 /**
- * 
+ *
  * @export
  * @interface TxSignersResponse
  */
 export interface TxSignersResponse {
     /**
-     * 
+     *
      * @type {string}
      * @memberof TxSignersResponse
      */
     'tx_id'?: string;
     /**
-     * 
+     *
      * @type {ObservedTx}
      * @memberof TxSignersResponse
      */
     'tx': ObservedTx;
     /**
-     * 
+     *
      * @type {number}
      * @memberof TxSignersResponse
      */
     'height'?: number;
     /**
-     * 
+     *
      * @type {Array<ObservedTx>}
      * @memberof TxSignersResponse
      */
     'txs': Array<ObservedTx>;
     /**
-     * 
+     *
      * @type {Array<TxOutItem>}
      * @memberof TxSignersResponse
      */
     'actions': Array<TxOutItem>;
     /**
-     * 
+     *
      * @type {Array<Tx>}
      * @memberof TxSignersResponse
      */
@@ -2068,13 +2068,13 @@ export interface TxSignersResponse {
      */
     'finalised_height'?: number;
     /**
-     * 
+     *
      * @type {boolean}
      * @memberof TxSignersResponse
      */
     'updated_vault'?: boolean;
     /**
-     * 
+     *
      * @type {boolean}
      * @memberof TxSignersResponse
      */
@@ -2087,50 +2087,50 @@ export interface TxSignersResponse {
     'outbound_height'?: number;
 }
 /**
- * 
+ *
  * @export
  * @interface TxStagesResponse
  */
 export interface TxStagesResponse {
     /**
-     * 
+     *
      * @type {TxStagesResponseInboundObserved}
      * @memberof TxStagesResponse
      */
     'inbound_observed': TxStagesResponseInboundObserved;
     /**
-     * 
+     *
      * @type {TxStagesResponseInboundConfirmationCounted}
      * @memberof TxStagesResponse
      */
     'inbound_confirmation_counted'?: TxStagesResponseInboundConfirmationCounted;
     /**
-     * 
+     *
      * @type {TxStagesResponseInboundFinalised}
      * @memberof TxStagesResponse
      */
     'inbound_finalised': TxStagesResponseInboundFinalised;
     /**
-     * 
+     *
      * @type {TxStagesResponseSwapFinalised}
      * @memberof TxStagesResponse
      */
     'swap_finalised'?: TxStagesResponseSwapFinalised;
     /**
-     * 
+     *
      * @type {TxStagesResponseOutboundDelay}
      * @memberof TxStagesResponse
      */
     'outbound_delay'?: TxStagesResponseOutboundDelay;
     /**
-     * 
+     *
      * @type {TxStagesResponseOutboundSigned}
      * @memberof TxStagesResponse
      */
     'outbound_signed'?: TxStagesResponseOutboundSigned;
 }
 /**
- * 
+ *
  * @export
  * @interface TxStagesResponseInboundConfirmationCounted
  */
@@ -2173,7 +2173,7 @@ export interface TxStagesResponseInboundConfirmationCounted {
     'completed': boolean;
 }
 /**
- * 
+ *
  * @export
  * @interface TxStagesResponseInboundFinalised
  */
@@ -2186,7 +2186,7 @@ export interface TxStagesResponseInboundFinalised {
     'completed': boolean;
 }
 /**
- * 
+ *
  * @export
  * @interface TxStagesResponseInboundObserved
  */
@@ -2205,7 +2205,7 @@ export interface TxStagesResponseInboundObserved {
     'completed': boolean;
 }
 /**
- * 
+ *
  * @export
  * @interface TxStagesResponseOutboundDelay
  */
@@ -2230,7 +2230,7 @@ export interface TxStagesResponseOutboundDelay {
     'completed': boolean;
 }
 /**
- * 
+ *
  * @export
  * @interface TxStagesResponseOutboundSigned
  */
@@ -2255,7 +2255,7 @@ export interface TxStagesResponseOutboundSigned {
     'completed': boolean;
 }
 /**
- * 
+ *
  * @export
  * @interface TxStagesResponseSwapFinalised
  */
@@ -2268,56 +2268,56 @@ export interface TxStagesResponseSwapFinalised {
     'completed': boolean;
 }
 /**
- * 
+ *
  * @export
  * @interface TxStatusResponse
  */
 export interface TxStatusResponse {
     /**
-     * 
+     *
      * @type {Tx}
      * @memberof TxStatusResponse
      */
     'tx'?: Tx;
     /**
-     * 
+     *
      * @type {Array<TxStatusResponsePlannedOutTxsInner>}
      * @memberof TxStatusResponse
      */
     'planned_out_txs'?: Array<TxStatusResponsePlannedOutTxsInner>;
     /**
-     * 
+     *
      * @type {Array<Tx>}
      * @memberof TxStatusResponse
      */
     'out_txs'?: Array<Tx>;
     /**
-     * 
+     *
      * @type {TxStagesResponse}
      * @memberof TxStatusResponse
      */
     'stages': TxStagesResponse;
 }
 /**
- * 
+ *
  * @export
  * @interface TxStatusResponsePlannedOutTxsInner
  */
 export interface TxStatusResponsePlannedOutTxsInner {
     /**
-     * 
+     *
      * @type {string}
      * @memberof TxStatusResponsePlannedOutTxsInner
      */
     'chain': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof TxStatusResponsePlannedOutTxsInner
      */
     'to_address': string;
     /**
-     * 
+     *
      * @type {Coin}
      * @memberof TxStatusResponsePlannedOutTxsInner
      */
@@ -2330,43 +2330,43 @@ export interface TxStatusResponsePlannedOutTxsInner {
     'refund': boolean;
 }
 /**
- * 
+ *
  * @export
  * @interface Vault
  */
 export interface Vault {
     /**
-     * 
+     *
      * @type {number}
      * @memberof Vault
      */
     'block_height'?: number;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Vault
      */
     'pub_key'?: string;
     /**
-     * 
+     *
      * @type {Array<Coin>}
      * @memberof Vault
      */
     'coins': Array<Coin>;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Vault
      */
     'type'?: VaultTypeEnum;
     /**
-     * 
+     *
      * @type {string}
      * @memberof Vault
      */
     'status'?: string;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Vault
      */
@@ -2378,37 +2378,37 @@ export interface Vault {
      */
     'membership'?: Array<string>;
     /**
-     * 
+     *
      * @type {Array<string>}
      * @memberof Vault
      */
     'chains'?: Array<string>;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Vault
      */
     'inbound_tx_count'?: number;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Vault
      */
     'outbound_tx_count'?: number;
     /**
-     * 
+     *
      * @type {Array<number>}
      * @memberof Vault
      */
     'pending_tx_block_heights'?: Array<number>;
     /**
-     * 
+     *
      * @type {Array<VaultRouter>}
      * @memberof Vault
      */
     'routers': Array<VaultRouter>;
     /**
-     * 
+     *
      * @type {Array<VaultAddress>}
      * @memberof Vault
      */
@@ -2423,90 +2423,90 @@ export const VaultTypeEnum = {
 export type VaultTypeEnum = typeof VaultTypeEnum[keyof typeof VaultTypeEnum];
 
 /**
- * 
+ *
  * @export
  * @interface VaultAddress
  */
 export interface VaultAddress {
     /**
-     * 
+     *
      * @type {string}
      * @memberof VaultAddress
      */
     'chain'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof VaultAddress
      */
     'address'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface VaultInfo
  */
 export interface VaultInfo {
     /**
-     * 
+     *
      * @type {string}
      * @memberof VaultInfo
      */
     'pub_key': string;
     /**
-     * 
+     *
      * @type {Array<VaultRouter>}
      * @memberof VaultInfo
      */
     'routers': Array<VaultRouter>;
 }
 /**
- * 
+ *
  * @export
  * @interface VaultPubkeysResponse
  */
 export interface VaultPubkeysResponse {
     /**
-     * 
+     *
      * @type {Array<VaultInfo>}
      * @memberof VaultPubkeysResponse
      */
     'asgard': Array<VaultInfo>;
     /**
-     * 
+     *
      * @type {Array<VaultInfo>}
      * @memberof VaultPubkeysResponse
      */
     'yggdrasil': Array<VaultInfo>;
 }
 /**
- * 
+ *
  * @export
  * @interface VaultRouter
  */
 export interface VaultRouter {
     /**
-     * 
+     *
      * @type {string}
      * @memberof VaultRouter
      */
     'chain'?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof VaultRouter
      */
     'router'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface VaultsResponse
  */
 export interface VaultsResponse extends Array<Vault> {
 }
 /**
- * 
+ *
  * @export
  * @interface VersionResponse
  */
@@ -2539,8 +2539,8 @@ export const BorrowersApiAxiosParamCreator = function (configuration?: Configura
     return {
         /**
          * Returns the borrower position given the pool and address.
-         * @param {string} asset 
-         * @param {string} address 
+         * @param {string} asset
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2569,7 +2569,7 @@ export const BorrowersApiAxiosParamCreator = function (configuration?: Configura
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2581,7 +2581,7 @@ export const BorrowersApiAxiosParamCreator = function (configuration?: Configura
         },
         /**
          * Returns all borrowers for the given pool.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2607,7 +2607,7 @@ export const BorrowersApiAxiosParamCreator = function (configuration?: Configura
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2629,8 +2629,8 @@ export const BorrowersApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Returns the borrower position given the pool and address.
-         * @param {string} asset 
-         * @param {string} address 
+         * @param {string} asset
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2641,7 +2641,7 @@ export const BorrowersApiFp = function(configuration?: Configuration) {
         },
         /**
          * Returns all borrowers for the given pool.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2662,8 +2662,8 @@ export const BorrowersApiFactory = function (configuration?: Configuration, base
     return {
         /**
          * Returns the borrower position given the pool and address.
-         * @param {string} asset 
-         * @param {string} address 
+         * @param {string} asset
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2673,7 +2673,7 @@ export const BorrowersApiFactory = function (configuration?: Configuration, base
         },
         /**
          * Returns all borrowers for the given pool.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2693,8 +2693,8 @@ export const BorrowersApiFactory = function (configuration?: Configuration, base
 export class BorrowersApi extends BaseAPI {
     /**
      * Returns the borrower position given the pool and address.
-     * @param {string} asset 
-     * @param {string} address 
+     * @param {string} asset
+     * @param {string} address
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2706,7 +2706,7 @@ export class BorrowersApi extends BaseAPI {
 
     /**
      * Returns all borrowers for the given pool.
-     * @param {string} asset 
+     * @param {string} asset
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2725,7 +2725,7 @@ export class BorrowersApi extends BaseAPI {
 export const HealthApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
+         *
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2743,7 +2743,7 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2764,7 +2764,7 @@ export const HealthApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = HealthApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
+         *
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2783,7 +2783,7 @@ export const HealthApiFactory = function (configuration?: Configuration, basePat
     const localVarFp = HealthApiFp(configuration)
     return {
         /**
-         * 
+         *
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2801,7 +2801,7 @@ export const HealthApiFactory = function (configuration?: Configuration, basePat
  */
 export class HealthApi extends BaseAPI {
     /**
-     * 
+     *
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HealthApi
@@ -2820,7 +2820,7 @@ export const InvariantsApiAxiosParamCreator = function (configuration?: Configur
     return {
         /**
          * Returns result of running the given invariant.
-         * @param {string} invariant 
+         * @param {string} invariant
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2846,7 +2846,7 @@ export const InvariantsApiAxiosParamCreator = function (configuration?: Configur
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2880,7 +2880,7 @@ export const InvariantsApiAxiosParamCreator = function (configuration?: Configur
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2902,7 +2902,7 @@ export const InvariantsApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Returns result of running the given invariant.
-         * @param {string} invariant 
+         * @param {string} invariant
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2933,7 +2933,7 @@ export const InvariantsApiFactory = function (configuration?: Configuration, bas
     return {
         /**
          * Returns result of running the given invariant.
-         * @param {string} invariant 
+         * @param {string} invariant
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2962,7 +2962,7 @@ export const InvariantsApiFactory = function (configuration?: Configuration, bas
 export class InvariantsApi extends BaseAPI {
     /**
      * Returns result of running the given invariant.
-     * @param {string} invariant 
+     * @param {string} invariant
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2993,8 +2993,8 @@ export const LiquidityProvidersApiAxiosParamCreator = function (configuration?: 
     return {
         /**
          * Returns the liquidity provider information for an address and asset.
-         * @param {string} asset 
-         * @param {string} address 
+         * @param {string} asset
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3023,7 +3023,7 @@ export const LiquidityProvidersApiAxiosParamCreator = function (configuration?: 
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3035,7 +3035,7 @@ export const LiquidityProvidersApiAxiosParamCreator = function (configuration?: 
         },
         /**
          * Returns all liquidity provider information for an asset.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3061,7 +3061,7 @@ export const LiquidityProvidersApiAxiosParamCreator = function (configuration?: 
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3083,8 +3083,8 @@ export const LiquidityProvidersApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Returns the liquidity provider information for an address and asset.
-         * @param {string} asset 
-         * @param {string} address 
+         * @param {string} asset
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3095,7 +3095,7 @@ export const LiquidityProvidersApiFp = function(configuration?: Configuration) {
         },
         /**
          * Returns all liquidity provider information for an asset.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3116,8 +3116,8 @@ export const LiquidityProvidersApiFactory = function (configuration?: Configurat
     return {
         /**
          * Returns the liquidity provider information for an address and asset.
-         * @param {string} asset 
-         * @param {string} address 
+         * @param {string} asset
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3127,7 +3127,7 @@ export const LiquidityProvidersApiFactory = function (configuration?: Configurat
         },
         /**
          * Returns all liquidity provider information for an asset.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3147,8 +3147,8 @@ export const LiquidityProvidersApiFactory = function (configuration?: Configurat
 export class LiquidityProvidersApi extends BaseAPI {
     /**
      * Returns the liquidity provider information for an address and asset.
-     * @param {string} asset 
-     * @param {string} address 
+     * @param {string} asset
+     * @param {string} address
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3160,7 +3160,7 @@ export class LiquidityProvidersApi extends BaseAPI {
 
     /**
      * Returns all liquidity provider information for an asset.
-     * @param {string} asset 
+     * @param {string} asset
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3202,7 +3202,7 @@ export const MimirApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3236,7 +3236,7 @@ export const MimirApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3274,7 +3274,7 @@ export const MimirApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3286,7 +3286,7 @@ export const MimirApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * Returns current node mimir configuration for the provided node address.
-         * @param {string} address 
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3312,7 +3312,7 @@ export const MimirApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3346,7 +3346,7 @@ export const MimirApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3399,7 +3399,7 @@ export const MimirApiFp = function(configuration?: Configuration) {
         },
         /**
          * Returns current node mimir configuration for the provided node address.
-         * @param {string} address 
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3458,7 +3458,7 @@ export const MimirApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * Returns current node mimir configuration for the provided node address.
-         * @param {string} address 
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3521,7 +3521,7 @@ export class MimirApi extends BaseAPI {
 
     /**
      * Returns current node mimir configuration for the provided node address.
-     * @param {string} address 
+     * @param {string} address
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3552,7 +3552,7 @@ export const NetworkApiAxiosParamCreator = function (configuration?: Configurati
     return {
         /**
          * Returns the ban status for the provided node address.
-         * @param {string} address 
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3578,7 +3578,7 @@ export const NetworkApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3612,7 +3612,7 @@ export const NetworkApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3646,7 +3646,7 @@ export const NetworkApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3680,7 +3680,7 @@ export const NetworkApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3692,7 +3692,7 @@ export const NetworkApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * Returns the last block information for the provided chain.
-         * @param {string} chain 
+         * @param {string} chain
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3718,7 +3718,7 @@ export const NetworkApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3752,7 +3752,7 @@ export const NetworkApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3786,7 +3786,7 @@ export const NetworkApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3820,7 +3820,7 @@ export const NetworkApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3842,7 +3842,7 @@ export const NetworkApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Returns the ban status for the provided node address.
-         * @param {string} address 
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3883,7 +3883,7 @@ export const NetworkApiFp = function(configuration?: Configuration) {
         },
         /**
          * Returns the last block information for the provided chain.
-         * @param {string} chain 
+         * @param {string} chain
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3934,7 +3934,7 @@ export const NetworkApiFactory = function (configuration?: Configuration, basePa
     return {
         /**
          * Returns the ban status for the provided node address.
-         * @param {string} address 
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3971,7 +3971,7 @@ export const NetworkApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * Returns the last block information for the provided chain.
-         * @param {string} chain 
+         * @param {string} chain
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -4018,7 +4018,7 @@ export const NetworkApiFactory = function (configuration?: Configuration, basePa
 export class NetworkApi extends BaseAPI {
     /**
      * Returns the ban status for the provided node address.
-     * @param {string} address 
+     * @param {string} address
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -4063,7 +4063,7 @@ export class NetworkApi extends BaseAPI {
 
     /**
      * Returns the last block information for the provided chain.
-     * @param {string} chain 
+     * @param {string} chain
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -4116,7 +4116,7 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
     return {
         /**
          * Returns node information for the provided node address.
-         * @param {string} address 
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -4142,7 +4142,7 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4176,7 +4176,7 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4198,7 +4198,7 @@ export const NodesApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Returns node information for the provided node address.
-         * @param {string} address 
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -4229,7 +4229,7 @@ export const NodesApiFactory = function (configuration?: Configuration, basePath
     return {
         /**
          * Returns node information for the provided node address.
-         * @param {string} address 
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -4258,7 +4258,7 @@ export const NodesApiFactory = function (configuration?: Configuration, basePath
 export class NodesApi extends BaseAPI {
     /**
      * Returns node information for the provided node address.
-     * @param {string} address 
+     * @param {string} address
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -4311,7 +4311,7 @@ export const POLApiAxiosParamCreator = function (configuration?: Configuration) 
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4391,7 +4391,7 @@ export const PoolsApiAxiosParamCreator = function (configuration?: Configuration
     return {
         /**
          * Returns the pool information for the provided asset.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -4417,7 +4417,7 @@ export const PoolsApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4451,7 +4451,7 @@ export const PoolsApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4473,7 +4473,7 @@ export const PoolsApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Returns the pool information for the provided asset.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -4504,7 +4504,7 @@ export const PoolsApiFactory = function (configuration?: Configuration, basePath
     return {
         /**
          * Returns the pool information for the provided asset.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -4533,7 +4533,7 @@ export const PoolsApiFactory = function (configuration?: Configuration, basePath
 export class PoolsApi extends BaseAPI {
     /**
      * Returns the pool information for the provided asset.
-     * @param {string} asset 
+     * @param {string} asset
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -4586,7 +4586,7 @@ export const QueueApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4620,7 +4620,7 @@ export const QueueApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4654,7 +4654,7 @@ export const QueueApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4688,7 +4688,7 @@ export const QueueApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4890,7 +4890,7 @@ export const QuoteApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4939,7 +4939,7 @@ export const QuoteApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5013,7 +5013,7 @@ export const QuoteApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5192,8 +5192,8 @@ export const SaversApiAxiosParamCreator = function (configuration?: Configuratio
     return {
         /**
          * Returns the saver position given then savers pool and address.
-         * @param {string} asset 
-         * @param {string} address 
+         * @param {string} asset
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5222,7 +5222,7 @@ export const SaversApiAxiosParamCreator = function (configuration?: Configuratio
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5234,7 +5234,7 @@ export const SaversApiAxiosParamCreator = function (configuration?: Configuratio
         },
         /**
          * Returns all savers for the savers pool.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5260,7 +5260,7 @@ export const SaversApiAxiosParamCreator = function (configuration?: Configuratio
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5282,8 +5282,8 @@ export const SaversApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Returns the saver position given then savers pool and address.
-         * @param {string} asset 
-         * @param {string} address 
+         * @param {string} asset
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5294,7 +5294,7 @@ export const SaversApiFp = function(configuration?: Configuration) {
         },
         /**
          * Returns all savers for the savers pool.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5315,8 +5315,8 @@ export const SaversApiFactory = function (configuration?: Configuration, basePat
     return {
         /**
          * Returns the saver position given then savers pool and address.
-         * @param {string} asset 
-         * @param {string} address 
+         * @param {string} asset
+         * @param {string} address
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5326,7 +5326,7 @@ export const SaversApiFactory = function (configuration?: Configuration, basePat
         },
         /**
          * Returns all savers for the savers pool.
-         * @param {string} asset 
+         * @param {string} asset
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5346,8 +5346,8 @@ export const SaversApiFactory = function (configuration?: Configuration, basePat
 export class SaversApi extends BaseAPI {
     /**
      * Returns the saver position given then savers pool and address.
-     * @param {string} asset 
-     * @param {string} address 
+     * @param {string} asset
+     * @param {string} address
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -5359,7 +5359,7 @@ export class SaversApi extends BaseAPI {
 
     /**
      * Returns all savers for the savers pool.
-     * @param {string} asset 
+     * @param {string} asset
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -5379,7 +5379,7 @@ export const TSSApiAxiosParamCreator = function (configuration?: Configuration) 
     return {
         /**
          * Returns keysign information for the provided height - the height being the first block a tx out item appears in the signed-but-unobserved outbound queue.
-         * @param {number} height 
+         * @param {number} height
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5400,7 +5400,7 @@ export const TSSApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5412,8 +5412,8 @@ export const TSSApiAxiosParamCreator = function (configuration?: Configuration) 
         },
         /**
          * Returns keysign information for the provided height and pubkey - the height being the block at which a tx out item is scheduled to be signed and moved from the scheduled outbound queue to the outbound queue.
-         * @param {number} height 
-         * @param {string} pubkey 
+         * @param {number} height
+         * @param {string} pubkey
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5437,7 +5437,7 @@ export const TSSApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5471,7 +5471,7 @@ export const TSSApiAxiosParamCreator = function (configuration?: Configuration) 
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5483,7 +5483,7 @@ export const TSSApiAxiosParamCreator = function (configuration?: Configuration) 
         },
         /**
          * Returns keygen metrics for the provided vault pubkey.
-         * @param {string} pubkey 
+         * @param {string} pubkey
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5509,7 +5509,7 @@ export const TSSApiAxiosParamCreator = function (configuration?: Configuration) 
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5531,7 +5531,7 @@ export const TSSApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Returns keysign information for the provided height - the height being the first block a tx out item appears in the signed-but-unobserved outbound queue.
-         * @param {number} height 
+         * @param {number} height
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5541,8 +5541,8 @@ export const TSSApiFp = function(configuration?: Configuration) {
         },
         /**
          * Returns keysign information for the provided height and pubkey - the height being the block at which a tx out item is scheduled to be signed and moved from the scheduled outbound queue to the outbound queue.
-         * @param {number} height 
-         * @param {string} pubkey 
+         * @param {number} height
+         * @param {string} pubkey
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5562,7 +5562,7 @@ export const TSSApiFp = function(configuration?: Configuration) {
         },
         /**
          * Returns keygen metrics for the provided vault pubkey.
-         * @param {string} pubkey 
+         * @param {string} pubkey
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5583,7 +5583,7 @@ export const TSSApiFactory = function (configuration?: Configuration, basePath?:
     return {
         /**
          * Returns keysign information for the provided height - the height being the first block a tx out item appears in the signed-but-unobserved outbound queue.
-         * @param {number} height 
+         * @param {number} height
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5592,8 +5592,8 @@ export const TSSApiFactory = function (configuration?: Configuration, basePath?:
         },
         /**
          * Returns keysign information for the provided height and pubkey - the height being the block at which a tx out item is scheduled to be signed and moved from the scheduled outbound queue to the outbound queue.
-         * @param {number} height 
-         * @param {string} pubkey 
+         * @param {number} height
+         * @param {string} pubkey
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5611,7 +5611,7 @@ export const TSSApiFactory = function (configuration?: Configuration, basePath?:
         },
         /**
          * Returns keygen metrics for the provided vault pubkey.
-         * @param {string} pubkey 
+         * @param {string} pubkey
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5631,7 +5631,7 @@ export const TSSApiFactory = function (configuration?: Configuration, basePath?:
 export class TSSApi extends BaseAPI {
     /**
      * Returns keysign information for the provided height - the height being the first block a tx out item appears in the signed-but-unobserved outbound queue.
-     * @param {number} height 
+     * @param {number} height
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TSSApi
@@ -5642,8 +5642,8 @@ export class TSSApi extends BaseAPI {
 
     /**
      * Returns keysign information for the provided height and pubkey - the height being the block at which a tx out item is scheduled to be signed and moved from the scheduled outbound queue to the outbound queue.
-     * @param {number} height 
-     * @param {string} pubkey 
+     * @param {number} height
+     * @param {string} pubkey
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TSSApi
@@ -5665,7 +5665,7 @@ export class TSSApi extends BaseAPI {
 
     /**
      * Returns keygen metrics for the provided vault pubkey.
-     * @param {string} pubkey 
+     * @param {string} pubkey
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -5711,7 +5711,7 @@ export const ThornamesApiAxiosParamCreator = function (configuration?: Configura
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5794,7 +5794,7 @@ export const TransactionsApiAxiosParamCreator = function (configuration?: Config
     return {
         /**
          * Returns the observed transaction for a provided inbound or outbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5820,7 +5820,7 @@ export const TransactionsApiAxiosParamCreator = function (configuration?: Config
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5832,7 +5832,7 @@ export const TransactionsApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * Returns the signers for a provided inbound or outbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5858,7 +5858,7 @@ export const TransactionsApiAxiosParamCreator = function (configuration?: Config
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5870,7 +5870,7 @@ export const TransactionsApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * Deprecated - migrate to /thorchain/tx/details.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5896,7 +5896,7 @@ export const TransactionsApiAxiosParamCreator = function (configuration?: Config
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5908,7 +5908,7 @@ export const TransactionsApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * Returns the processing stages of a provided inbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5934,7 +5934,7 @@ export const TransactionsApiAxiosParamCreator = function (configuration?: Config
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5946,7 +5946,7 @@ export const TransactionsApiAxiosParamCreator = function (configuration?: Config
         },
         /**
          * Returns the status of a provided inbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5972,7 +5972,7 @@ export const TransactionsApiAxiosParamCreator = function (configuration?: Config
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5994,7 +5994,7 @@ export const TransactionsApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Returns the observed transaction for a provided inbound or outbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6005,7 +6005,7 @@ export const TransactionsApiFp = function(configuration?: Configuration) {
         },
         /**
          * Returns the signers for a provided inbound or outbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6016,7 +6016,7 @@ export const TransactionsApiFp = function(configuration?: Configuration) {
         },
         /**
          * Deprecated - migrate to /thorchain/tx/details.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6027,7 +6027,7 @@ export const TransactionsApiFp = function(configuration?: Configuration) {
         },
         /**
          * Returns the processing stages of a provided inbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6038,7 +6038,7 @@ export const TransactionsApiFp = function(configuration?: Configuration) {
         },
         /**
          * Returns the status of a provided inbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6059,7 +6059,7 @@ export const TransactionsApiFactory = function (configuration?: Configuration, b
     return {
         /**
          * Returns the observed transaction for a provided inbound or outbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6069,7 +6069,7 @@ export const TransactionsApiFactory = function (configuration?: Configuration, b
         },
         /**
          * Returns the signers for a provided inbound or outbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6079,7 +6079,7 @@ export const TransactionsApiFactory = function (configuration?: Configuration, b
         },
         /**
          * Deprecated - migrate to /thorchain/tx/details.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6089,7 +6089,7 @@ export const TransactionsApiFactory = function (configuration?: Configuration, b
         },
         /**
          * Returns the processing stages of a provided inbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6099,7 +6099,7 @@ export const TransactionsApiFactory = function (configuration?: Configuration, b
         },
         /**
          * Returns the status of a provided inbound hash.
-         * @param {string} hash 
+         * @param {string} hash
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6119,7 +6119,7 @@ export const TransactionsApiFactory = function (configuration?: Configuration, b
 export class TransactionsApi extends BaseAPI {
     /**
      * Returns the observed transaction for a provided inbound or outbound hash.
-     * @param {string} hash 
+     * @param {string} hash
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6131,7 +6131,7 @@ export class TransactionsApi extends BaseAPI {
 
     /**
      * Returns the signers for a provided inbound or outbound hash.
-     * @param {string} hash 
+     * @param {string} hash
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6143,7 +6143,7 @@ export class TransactionsApi extends BaseAPI {
 
     /**
      * Deprecated - migrate to /thorchain/tx/details.
-     * @param {string} hash 
+     * @param {string} hash
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6155,7 +6155,7 @@ export class TransactionsApi extends BaseAPI {
 
     /**
      * Returns the processing stages of a provided inbound hash.
-     * @param {string} hash 
+     * @param {string} hash
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6167,7 +6167,7 @@ export class TransactionsApi extends BaseAPI {
 
     /**
      * Returns the status of a provided inbound hash.
-     * @param {string} hash 
+     * @param {string} hash
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6209,7 +6209,7 @@ export const VaultsApiAxiosParamCreator = function (configuration?: Configuratio
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -6221,7 +6221,7 @@ export const VaultsApiAxiosParamCreator = function (configuration?: Configuratio
         },
         /**
          * Returns the vault for the provided pubkey.
-         * @param {string} pubkey 
+         * @param {string} pubkey
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6247,7 +6247,7 @@ export const VaultsApiAxiosParamCreator = function (configuration?: Configuratio
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -6281,7 +6281,7 @@ export const VaultsApiAxiosParamCreator = function (configuration?: Configuratio
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -6315,7 +6315,7 @@ export const VaultsApiAxiosParamCreator = function (configuration?: Configuratio
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -6347,7 +6347,7 @@ export const VaultsApiFp = function(configuration?: Configuration) {
         },
         /**
          * Returns the vault for the provided pubkey.
-         * @param {string} pubkey 
+         * @param {string} pubkey
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6397,7 +6397,7 @@ export const VaultsApiFactory = function (configuration?: Configuration, basePat
         },
         /**
          * Returns the vault for the provided pubkey.
-         * @param {string} pubkey 
+         * @param {string} pubkey
          * @param {number} [height] optional block height, defaults to current tip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6446,7 +6446,7 @@ export class VaultsApi extends BaseAPI {
 
     /**
      * Returns the vault for the provided pubkey.
-     * @param {string} pubkey 
+     * @param {string} pubkey
      * @param {number} [height] optional block height, defaults to current tip
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
