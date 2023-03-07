@@ -36,7 +36,7 @@ describe(`Thornode transaction status tests`, () => {
     expect(val).toBeTruthy()
     expect(val).toEqual(FullImpLossProtectionBlocks)
   })
-  it(`Should return pools array`, async () => {
+  it(`Should fetch schedule outbound array`, async () => {
     const scheduledOutbound = await thornode.getscheduledQueue()
     expect(scheduledOutbound).toBeTruthy()
   })

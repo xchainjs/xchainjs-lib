@@ -1,8 +1,15 @@
+# v0.3.18 (2023-3-2)
+
+## FIX
+
+- ERC-20 approve bug
+- update dependencies
+
 # v0.3.17 (2023-2-15)
 
 ## Add
-- `xchain-bsc`: "0.1.0"
 
+- `xchain-bsc`: "0.1.0"
 
 # v0.3.16 (2023-2-8)
 
