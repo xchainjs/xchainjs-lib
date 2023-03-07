@@ -144,14 +144,13 @@ export class ThorchainCache {
    * which will refresh the cache if it's expired
    */
   private async refereshPoolCache(): Promise<void> {
-    // const [thornodePools, midgardPools] = await Promise.all([this.thornode.getPools(), this.midgard.getPools()])
-    const midgardPools = await this.midgard.getPools()
+    const [thornodePools, midgardPools] = await Promise.all([this.thornode.getPools(), this.midgard.getPools()])
     const poolMap: Record<string, LiquidityPool> = {}
     if (midgardPools) {
       for (const pool of midgardPools) {
-        // const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
-        // const decimals = thornodePool?.decimals ?? 8
-        const lp = new LiquidityPool(pool)
+        const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
+        if (!thornodePool) throw Error(`Could not find thornode pool ${pool.asset}`)
+        const lp = new LiquidityPool(pool, thornodePool)
         poolMap[`${lp.asset.chain}.${lp.asset.ticker}`] = lp
       }
       this.poolCache = {

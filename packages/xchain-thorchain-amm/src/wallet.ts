@@ -29,7 +29,7 @@ export class Wallet {
   private thorchainQuery: ThorchainQuery
   clients: Record<string, XChainClient>
   private ethHelper: EthHelper
-
+  evmHelpers: Record<string, EvmHelper>
   /**
    * Contructor to create a Wallet
    *
@@ -54,6 +54,11 @@ export class Wallet {
       BSC: new BscClient({ ...defaultBscParams, network: settings.network, phrase }),
     }
     this.ethHelper = new EthHelper(this.clients.ETH, this.thorchainQuery.thorchainCache)
+    this.evmHelpers = {
+      // ETH: new EvmHelper(this.clients.ETH, this.thorchainQuery.thorchainCache),
+      BSC: new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache),
+      AVAX: new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache),
+    }
   }
 
   /**
@@ -98,14 +103,16 @@ export class Wallet {
    *
    * @param swap  - swap parameters
    */
-  private validateSwap(swap: ExecuteSwap) {
+  validateSwap(swap: ExecuteSwap) {
     const errors: string[] = []
     const isThorchainDestinationAsset = swap.destinationAsset.synth || swap.destinationAsset.chain === THORChain
     const chain = isThorchainDestinationAsset ? THORChain : swap.destinationAsset.chain
 
+    // check address
     if (!this.clients[chain].validateAddress(swap.destinationAddress)) {
       errors.push(`destinationAddress ${swap.destinationAddress} is not a valid address`)
     }
+
     // Affiliate address should be THORName or THORAddress
     const checkAffiliateAddress = swap.memo.split(':')
     if (checkAffiliateAddress.length > 4) {
@@ -117,6 +124,8 @@ export class Wallet {
           errors.push(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
       }
     }
+    // if erc-20, check thorchain router contract isApproved
+
     if (errors.length > 0) throw Error(errors.join('\n'))
   }
 
@@ -170,8 +179,7 @@ export class Wallet {
         feeOption: swap.feeOption || FeeOption.Fast,
         memo: swap.memo,
       }
-      const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
-      const hash = await evmHelper.sendDeposit(params)
+      const hash = await this.evmHelpers['AVAX'].sendDeposit(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     } else if (swap.input.asset.chain === BSCChain) {
       const params = {
@@ -181,8 +189,7 @@ export class Wallet {
         feeOption: swap.feeOption || FeeOption.Fast,
         memo: swap.memo,
       }
-      const evmHelper = new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache)
-      const hash = await evmHelper.sendDeposit(params)
+      const hash = await this.evmHelpers['BSC'].sendDeposit(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
       const params = {

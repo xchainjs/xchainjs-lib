@@ -387,15 +387,8 @@ export class ThorchainQuery {
       if (!destPool.isAvailable())
         errors.push(`destinationAsset ${destAsset.ticker} does not have a valid liquidity pool`)
       // check synth info on thornode pools
-      try {
-        const pools = await this.thorchainCache.thornode.getPools()
-        const destinationAssetPool = pools.find((pool) => pool.asset === `${destAsset.chain}.${destAsset.symbol}`)
-        if (destinationAssetPool)
-          if (destinationAssetPool.synth_mint_paused && destAsset.synth) {
-            errors.push(`Synth supply is over cap on destinationAsset ${destAsset.ticker}, synth minting is paused`)
-          }
-      } catch (error) {
-        errors.push(`Error: ${error} destination pool was not found for asset ${destAsset}`)
+      if (destPool.thornodeDetails.synth_mint_paused && destAsset.synth) {
+        errors.push(`Synth supply is over cap on destinationAsset ${destAsset.ticker}, synth minting is paused`)
       }
     }
     if (sourceInboundDetails.haltedChain) errors.push(`source chain is halted`)

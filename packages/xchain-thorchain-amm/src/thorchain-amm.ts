@@ -14,6 +14,11 @@ import { TxSubmitted } from './types'
 import { Wallet } from './wallet'
 
 const defaultQuery = new ThorchainQuery()
+
+export type AmmEstimateSwapParams = EstimateSwapParams & {
+  wallet: Wallet
+  walletIndex: number
+}
 /**
  * THORChain Class for interacting with THORChain.
  * Recommended main class to use for swapping with THORChain
@@ -48,7 +53,20 @@ export class ThorchainAMM {
     interfaceID = `555`,
     affiliateFeeBasisPoints = 0,
     slipLimit,
-  }: EstimateSwapParams): Promise<TxDetails> {
+    wallet,
+    walletIndex,
+  }: AmmEstimateSwapParams): Promise<TxDetails> {
+    if (wallet) {
+      const x = {
+        input,
+        destinationAsset,
+        destinationAddress,
+        memo: '',
+        waitTimeSeconds: 100,
+        walletIndex,
+      }
+      wallet.validateSwap(x)
+    }
     return await this.thorchainQuery.estimateSwap({
       input,
       destinationAsset,
