@@ -9,8 +9,48 @@ import { TxHash } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount, delay } from '@xchainjs/xchain-util'
 import axios, { AxiosError, AxiosResponse } from 'axios'
 
-import type { BalanceData, UtxoData } from './haskoin-api-types'
-// import { getConfirmedTxStatus } from './sochain-api'
+import type {
+  AddressDTO,
+  AddressParams,
+  BalanceData,
+  HaskoinNetwork,
+  HaskoinResponse,
+  Transaction,
+  TxHashParams,
+  UtxoData,
+} from './haskoin-api-types'
+
+/**
+ * Get address information.
+ *
+ * @param {string} haskoinUrl The haskoin node url.
+ * @param {string} network
+ * @param {string} address
+ * @returns {AddressDTO}
+ */
+export const getAddress = async ({ apiKey, haskoinUrl, network, address }: AddressParams): Promise<AddressDTO> => {
+  const url = `${haskoinUrl}/address_summary/${network}/${address}`
+  const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
+  const addressResponse: HaskoinResponse<AddressDTO> = response.data
+  return addressResponse.data
+}
+
+/**
+ * Get transaction by hash.
+ *
+ * @see https://haskoin.com/api#get-tx
+ *
+ * @param {string} haskoinUrl The haskoin node url.
+ * @param {string} network network id
+ * @param {string} hash The transaction hash.
+ * @returns {Transactions}
+ */
+export const getTx = async ({ apiKey, haskoinUrl, network, hash }: TxHashParams): Promise<Transaction> => {
+  const url = `${haskoinUrl}/${network}/transaction/${hash}`
+  const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
+  const tx: HaskoinResponse<Transaction> = response.data
+  return tx.data
+}
 
 export const getBalance = async ({
   haskoinUrl,
@@ -32,6 +72,34 @@ export const getBalance = async ({
 
   return confirmedOnly ? confirmedAmount : confirmedAmount.plus(unconfirmedAmount)
 }
+/**
+ * Get transactions
+ *
+ * @see https://sochain.com/api#get-tx
+ *
+ * @param {string} sochainUrl The sochain node url.
+ * @param {string} network network id
+ * @param {string} hash The transaction hash.
+ * @returns {Transactions}
+ */
+export const getTxs = async ({
+  apiKey,
+  address,
+  sochainUrl,
+  network,
+  page,
+}: {
+  apiKey: string
+  address: string
+  sochainUrl: string
+  network: SochainNetwork
+  page: number
+}): Promise<GetTxsDTO> => {
+  const url = `${sochainUrl}/transactions/${network}/${address}/${page}` //TODO support paging
+  const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
+  const txs: SochainResponse<GetTxsDTO> = response.data
+  return txs.data
+}
 
 export const getUnspentTxs = async ({
   haskoinUrl,
@@ -43,41 +111,6 @@ export const getUnspentTxs = async ({
   const { data: response } = await axios.get<UtxoData[]>(`${haskoinUrl}/address/${address}/unspent`)
   return response
 }
-
-// export const getConfirmedUnspentTxs = async ({
-//   apiKey,
-//   haskoinUrl,
-//   sochainUrl,
-//   address,
-//   network,
-// }: {
-//   apiKey: string
-//   haskoinUrl: string
-//   sochainUrl: string
-//   address: string
-//   network: Network
-// }): Promise<UtxoData[]> => {
-//   const allUtxos = await getUnspentTxs({ haskoinUrl, address })
-
-//   const confirmedUTXOs: UtxoData[] = []
-
-//   await Promise.all(
-//     allUtxos.map(async (tx: UtxoData) => {
-//       const confirmed = await getConfirmedTxStatus({
-//         apiKey,
-//         sochainUrl,
-//         network,
-//         txHash: tx.txid,
-//       })
-
-//       if (confirmed) {
-//         confirmedUTXOs.push(tx)
-//       }
-//     }),
-//   )
-
-//   return confirmedUTXOs
-// }
 
 /**
  * Broadcast transaction.
