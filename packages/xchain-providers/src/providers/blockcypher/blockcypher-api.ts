@@ -66,6 +66,7 @@ export const getTxs = async ({
   network,
   beforeBlock,
   limit,
+  unspentOnly,
 }: {
   apiKey?: string
   address: string
@@ -73,8 +74,9 @@ export const getTxs = async ({
   network: BlockcypherNetwork
   limit: number
   beforeBlock?: number
+  unspentOnly: boolean
 }): Promise<GetTxsDTO> => {
-  const params: Record<string, string> = { limit: `${limit}` }
+  const params: Record<string, string> = { limit: `${limit}`, unspentOnly: `${unspentOnly}` }
   const url = `${baseUrl}/${network}/addrs/${address}`
   if (apiKey) params['token'] = apiKey
   if (beforeBlock) params['before'] = `${beforeBlock}`
@@ -112,42 +114,23 @@ export const getBalance = async ({
   return result
 }
 
-/**
- * Get unspent txs
- *
- *
- * @param {string} baseUrl The sochain node url.
- * @param {string} network
- * @param {string} address
- * @returns {AddressUTXO[]}
- */
-export const getUnspentTxs = async ({
-  apiKey,
-  baseUrl,
-  network,
-  address,
-  page,
-}: AddressParams): Promise<AddressUTXO[]> => {
-  const params: Record<string, string> = {}
-  const url = [baseUrl, 'unspent_outputs', network, address, page].filter((v) => !!v).join('/')
-  const resp = await axios.get(url, { params })
-  const response: UnspentTxsDTO = resp.data
-  const txs = response.outputs
-  if (txs.length === 10) {
-    //fetch the next batch
-
-    const nextBatch = await getUnspentTxs({
-      apiKey,
-      baseUrl,
-      network,
-      address,
-      page: page + 1,
-    })
-    return txs.concat(nextBatch)
-  } else {
-    return txs
-  }
-}
+// /**
+//  * Get unspent txs
+//  *
+//  *
+//  * @param {string} baseUrl The sochain node url.
+//  * @param {string} network
+//  * @param {string} address
+//  * @returns {GetTxsDTO[]}
+//  */
+// export const getUnspentTxs = async ({ apiKey, baseUrl, network, address }: AddressParams): Promise<GetTxsDTO> => {
+//   const params: Record<string, string> = { limit: '2000', unspentOnly: 'true' }
+//   const url = `${baseUrl}/${network}/addrs/${address}`
+//   if (apiKey) params['token'] = apiKey
+//   const response = await axios.get(url, { params })
+//   const txs: GetTxsDTO = response.data
+//   return txs
+// }
 
 /**
  * Get Tx Confirmation status
@@ -168,8 +151,8 @@ export const getIsTxConfirmed = async ({
   return {
     network: network,
     txid: hash,
-    confirmations: tx.confirmations,
-    is_confirmed: tx.confirmations >= 1,
+    confirmations: !!tx.confirmed ? 1 : 0,
+    is_confirmed: !!tx.confirmed,
   }
 }
 
@@ -210,49 +193,49 @@ export const getConfirmedTxStatus = async ({
   return is_confirmed
 }
 
-/**
- * Get unspent txs and filter out pending UTXOs
- *
- * @see https://sochain.com/api#get-unspent-tx
- *
- * @param {string} baseUrl The sochain node url.
- * @param {Network} network
- * @param {string} address
- * @returns {AddressUTXO[]}
- */
-export const getConfirmedUnspentTxs = async ({
-  apiKey,
-  baseUrl,
-  network,
-  address,
-}: AddressParams): Promise<AddressUTXO[]> => {
-  const txs = await getUnspentTxs({
-    apiKey,
-    baseUrl,
-    network,
-    address,
-    page: 1,
-  })
+// /**
+//  * Get unspent txs and filter out pending UTXOs
+//  *
+//  * @see https://sochain.com/api#get-unspent-tx
+//  *
+//  * @param {string} baseUrl The sochain node url.
+//  * @param {Network} network
+//  * @param {string} address
+//  * @returns {AddressUTXO[]}
+//  */
+// export const getConfirmedUnspentTxs = async ({
+//   apiKey,
+//   baseUrl,
+//   network,
+//   address,
+// }: AddressParams): Promise<AddressUTXO[]> => {
+//   const txs = await getUnspentTxs({
+//     apiKey,
+//     baseUrl,
+//     network,
+//     address,
+//     page: 1,
+//   })
 
-  const confirmedUTXOs: AddressUTXO[] = []
+//   const confirmedUTXOs: AddressUTXO[] = []
 
-  await Promise.all(
-    txs.map(async (tx: AddressUTXO) => {
-      const confirmed = await getConfirmedTxStatus({
-        apiKey,
-        baseUrl,
-        network,
-        txHash: tx.hash,
-      })
+//   await Promise.all(
+//     txs.map(async (tx: AddressUTXO) => {
+//       const confirmed = await getConfirmedTxStatus({
+//         apiKey,
+//         baseUrl,
+//         network,
+//         txHash: tx.hash,
+//       })
 
-      if (confirmed) {
-        confirmedUTXOs.push(tx)
-      }
-    }),
-  )
+//       if (confirmed) {
+//         confirmedUTXOs.push(tx)
+//       }
+//     }),
+//   )
 
-  return confirmedUTXOs
-}
+//   return confirmedUTXOs
+// }
 
 /**
  * Get address balance.

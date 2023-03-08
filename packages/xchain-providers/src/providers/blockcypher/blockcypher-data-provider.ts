@@ -1,10 +1,11 @@
+import { PromisePool } from '@supercharge/promise-pool'
 import { Balance, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
 import { UTXO, UtxoOnlineDataProvider } from '../../provider-types'
 
 import * as blockcypher from './blockcypher-api'
-import { AddressUTXO, BlockcypherNetwork } from './blockcypher-api-types'
+import { BlockcypherNetwork, Transaction } from './blockcypher-api-types'
 
 export class BlockcypherProvider implements UtxoOnlineDataProvider {
   private baseUrl: string
@@ -42,24 +43,11 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
   }
 
   async getConfirmedUnspentTxs(address: string): Promise<UTXO[]> {
-    const allUnspent = await blockcypher.getUnspentTxs({
-      apiKey: this.apiKey,
-      baseUrl: this.baseUrl,
-      network: this.blockcypherNetwork,
-      address,
-      page: 1,
-    })
-    const confirmedUnspent = allUnspent.filter((i) => i.block) //if it has a block noumber it's been confirmed
-    return this.mapUTXOs(confirmedUnspent)
+    const allUnspent = await this.getRawTransactions({ address, offset: 0, limit: 2000 }, true)
+    return this.mapUTXOs(allUnspent.filter((i) => i.confirmed))
   }
   async getUnspentTxs(address: string): Promise<UTXO[]> {
-    const allUnspent = await blockcypher.getUnspentTxs({
-      apiKey: this.apiKey,
-      baseUrl: this.baseUrl,
-      network: this.blockcypherNetwork,
-      address,
-      page: 1,
-    })
+    const allUnspent = await this.getRawTransactions({ address, offset: 0, limit: 2000 }, true)
     return this.mapUTXOs(allUnspent)
   }
 
@@ -83,40 +71,12 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
    * @param {TxHistoryParams} params The options to get transaction history. (optional)
    * @returns {TxsPage} The transaction history.
    */
-  async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const offset = params?.offset ?? 0
-    const limit = params?.limit || 10
-    if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
-
-    const txHashesToFetch: string[] = []
-
-    //TODO rewrite
-    try {
-      const response = await blockcypher.getTxs({
-        apiKey: this.apiKey,
-        baseUrl: this.baseUrl,
-        network: this.blockcypherNetwork,
-        address: `${params?.address}`,
-        limit: 2000,
-      })
-      console.log(JSON.stringify(response, null, 2))
-
-      //remove duplicates
-      const txs = response.txrefs.map((i) => i.tx_hash)
-      const uniqTxs = [...new Set(txs)].filter((i) => i.endsWith('-'))
-      console.log(JSON.stringify(uniqTxs, null, 2))
-      this.addArrayUpToLimit(txHashesToFetch, uniqTxs, params?.limit || 20)
-    } catch (error) {
-      console.error(error)
-      //an errors means no more results
-    }
-
-    const total = txHashesToFetch.length
-    const transactions: Tx[] = await Promise.all(txHashesToFetch.map((hash) => this.getTransactionData(hash)))
-
+  async getTransactions(params?: TxHistoryParams, unspentOnly = false): Promise<TxsPage> {
+    const rawTxs = await this.getRawTransactions(params, unspentOnly)
+    const txs = rawTxs.map((i) => this.mapTransactionToTx(i))
     const result: TxsPage = {
-      total,
-      txs: transactions,
+      total: txs.length,
+      txs,
     }
     return result
   }
@@ -135,37 +95,43 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
         network: this.blockcypherNetwork,
         hash: txId,
       })
-
-      return {
-        asset: this.asset,
-        from: rawTx.inputs.map((i) => ({
-          from: i.addresses[0],
-          amount: baseAmount(i.output_value, this.assetDecimals),
-        })),
-        to: rawTx.outputs
-          .filter((i) => i.script_type !== 'null-data') //filter out op_return outputs
-          .map((i) => ({ to: i.addresses[0], amount: baseAmount(i.value, this.assetDecimals) })),
-        date: new Date(rawTx.confirmed),
-        type: TxType.Transfer,
-        hash: rawTx.hash,
-      }
+      return this.mapTransactionToTx(rawTx)
     } catch (error) {
       console.error(error)
       throw error
     }
   }
+  private mapTransactionToTx(rawTx: Transaction): Tx {
+    return {
+      asset: this.asset,
+      from: rawTx.inputs.map((i) => ({
+        from: i.addresses[0],
+        amount: baseAmount(i.output_value, this.assetDecimals),
+      })),
+      to: rawTx.outputs
+        .filter((i) => i.script_type !== 'null-data') //filter out op_return outputs
+        .map((i) => ({ to: i.addresses[0], amount: baseAmount(i.value, this.assetDecimals) })),
+      date: new Date(rawTx.confirmed),
+      type: TxType.Transfer,
+      hash: rawTx.hash,
+    }
+  }
 
-  private mapUTXOs(utxos: AddressUTXO[]): UTXO[] {
-    return utxos.map((utxo) => ({
-      hash: utxo.hash,
-      index: utxo.index,
-      value: assetToBase(assetAmount(utxo.value, this.assetDecimals)).amount().toNumber(),
-      witnessUtxo: {
-        value: assetToBase(assetAmount(utxo.value, this.assetDecimals)).amount().toNumber(),
-        script: Buffer.from(utxo.script, 'hex'),
-      },
-      txHex: utxo.tx_hex,
-    }))
+  private mapUTXOs(utxos: Transaction[]): UTXO[] {
+    utxos[0].outputs
+    // const hex =
+    // // utxos.map((utxo) => (return utxo))
+    // return utxos.map((utxo) => ({
+    //   hash: utxo.hash,
+    //   index: utxo.index,
+    //   value: assetToBase(assetAmount(utxo.value, this.assetDecimals)).amount().toNumber(),
+    //   witnessUtxo: {
+    //     value: assetToBase(assetAmount(utxo.value, this.assetDecimals)).amount().toNumber(),
+    //     script: Buffer.from(utxo.script, 'hex'),
+    //   },
+    //   txHex: utxo.hex,
+    // }))
+    return []
   }
 
   /**
@@ -182,5 +148,64 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
         arr.push(element)
       }
     }
+  }
+  private delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+  }
+
+  /**
+   * Get transaction history of a given address with pagination options.
+   * By default it will return the transaction history of the current wallet.
+   *
+   * @param {TxHistoryParams} params The options to get transaction history. (optional)
+   * @returns {TxsPage} The transaction history.
+   */
+  private async getRawTransactions(params?: TxHistoryParams, unspentOnly = false): Promise<Transaction[]> {
+    const offset = params?.offset ?? 0
+    const limit = params?.limit || 10
+    if (offset + limit > 2000) throw Error('cannot fetch more than last 2000 txs')
+
+    const txHashesToFetch: string[] = []
+    try {
+      const response = await blockcypher.getTxs({
+        apiKey: this.apiKey,
+        baseUrl: this.baseUrl,
+        network: this.blockcypherNetwork,
+        address: `${params?.address}`,
+        limit: 2000, // fetch the maximum
+        unspentOnly,
+      })
+      // console.log(JSON.stringify(response, null, 2))
+
+      //remove duplicates
+      const txs = response.txrefs.map((i) => i.tx_hash)
+      const uniqTxs = [...new Set(txs)]
+      const start = offset >= uniqTxs.length ? uniqTxs.length : offset
+      const end = offset + limit >= uniqTxs.length ? uniqTxs.length : offset + limit
+      const txsToFetch = uniqTxs.slice(start, end)
+      // console.log(JSON.stringify(txsToFetch, null, 2))
+
+      this.addArrayUpToLimit(txHashesToFetch, txsToFetch, limit)
+    } catch (error) {
+      console.error(error)
+      //an errors means no more results
+    }
+
+    //note: blockcypher has rate of 3 req/sec --> https://www.blockcypher.com/dev/bitcoin/#rate-limits-and-tokens
+    const batchResult = await PromisePool.for(txHashesToFetch)
+      .withConcurrency(3)
+      .useCorrespondingResults()
+      .process(async (hash) => {
+        await this.delay(1000)
+        const rawTx = await blockcypher.getTx({
+          apiKey: this.apiKey,
+          baseUrl: this.baseUrl,
+          network: this.blockcypherNetwork,
+          hash,
+        })
+        return rawTx
+      })
+
+    return batchResult.results as Transaction[]
   }
 }

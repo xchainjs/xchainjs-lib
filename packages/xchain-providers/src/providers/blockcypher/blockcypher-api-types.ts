@@ -52,7 +52,6 @@ export interface TxOutput {
 export interface Transaction {
   hash: string
   block_hash: string
-  confirmations: number
   confirmed: string
 
   hex: string

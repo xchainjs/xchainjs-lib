@@ -42,9 +42,8 @@ describe('blockcypher api tests', () => {
   })
   it(`Should getTransactions2 for an address`, async () => {
     const address = 'bc1q946qtg2fgk8hxgqgfe6tnpqg66yj5ex4jnkp2m'
-    const response = await blockcypherProvider.getTransactions({ address })
-    // console.log(JSON.stringify(response, null, 2))
-    expect(response.total).toBe(5)
+    const response = await blockcypherProvider.getTransactions({ address, offset: 0, limit: 12 })
+    expect(response.total).toBe(12)
   })
 
   it(`Should getTransactionData for an address`, async () => {
