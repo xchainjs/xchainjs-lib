@@ -6,7 +6,7 @@ import mockSochainApi from '../__mocks__/sochain'
 import { Client } from '../src/client'
 import { AssetBTC, MIN_TX_FEE } from '../src/const'
 
-const btcClient = new Client({ sochainApiKey: 'mock' })
+const btcClient = new Client()
 
 describe('BitcoinClient Test', () => {
   beforeEach(() => {
@@ -58,10 +58,7 @@ describe('BitcoinClient Test', () => {
 
   it('should not throw on a client without a phrase', () => {
     expect(() => {
-      new Client({
-        sochainApiKey: 'mock',
-        network: Network.Testnet,
-      })
+      new Client()
     }).not.toThrow()
   })
 
@@ -363,10 +360,10 @@ describe('BitcoinClient Test', () => {
 
   it('should return valid explorer url', () => {
     btcClient.setNetwork(Network.Mainnet)
-    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info')
+    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info/')
 
     btcClient.setNetwork(Network.Testnet)
-    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info/testnet')
+    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info/testnet/')
   })
 
   it('should return valid explorer address url', () => {

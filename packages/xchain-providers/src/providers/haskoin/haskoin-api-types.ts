@@ -7,7 +7,9 @@ import { Address } from '@xchainjs/xchain-util'
 
 export enum HaskoinNetwork {
   BTC = 'btc',
+  BTCTEST = 'btctest',
   BCH = 'bch',
+  BCHTEST = 'bchtest',
 }
 
 export type AddressParams = {
@@ -18,12 +20,12 @@ export type AddressParams = {
   page: number
 }
 
-export type UtxoData = {
-  txid: string
-  index: number
-  value: number
-  pkscript: string
-}
+// export type UtxoData = {
+//   txid: string
+//   index: number
+//   value: number
+//   pkscript: string
+// }
 
 export type BalanceData = {
   address: Address
@@ -44,7 +46,6 @@ export type AddressDTO = {
 }
 
 export type TxHashParams = {
-  apiKey: string
   haskoinUrl: string
   network: HaskoinNetwork
   hash: TxHash
@@ -76,4 +77,32 @@ export interface HaskoinResponse<T> {
 export type Block = {
   height: number
   position: number
+}
+
+export type GetTxsDTO = {
+  transactions: AddressTxDTO[]
+}
+
+export type AddressTxDTO = {
+  hash: string
+  block: number
+  time: number
+}
+export type TxConfirmedStatus = {
+  network: string
+  txid: string
+  confirmations: number
+  is_confirmed: boolean
+}
+export type AddressUTXO = {
+  hash: string
+  index: number
+  script: string
+  address: string
+  tx_hex: string
+  value: string
+  block: number
+}
+export type UnspentTxsDTO = {
+  outputs: AddressUTXO[]
 }

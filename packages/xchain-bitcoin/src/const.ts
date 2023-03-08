@@ -1,5 +1,11 @@
 import { Network } from '@xchainjs/xchain-client'
-import { ExplorerProvider, SochainNetwork, SochainProvider } from '@xchainjs/xchain-providers'
+import {
+  ExplorerProvider,
+  HaskoinNetwork,
+  HaskoinProvider,
+  SochainNetwork,
+  SochainProvider,
+} from '@xchainjs/xchain-providers'
 import { Asset } from '@xchainjs/xchain-util'
 
 /**
@@ -66,4 +72,25 @@ export const sochainDataProviders = {
   [Network.Testnet]: testnetSochainProvider,
   [Network.Stagenet]: mainnetSochainProvider,
   [Network.Mainnet]: mainnetSochainProvider,
+}
+
+const testnetHaskoinProvider = new HaskoinProvider(
+  'https://api.haskoin.com/',
+  BTCChain,
+  AssetBTC,
+  8,
+  HaskoinNetwork.BTCTEST,
+)
+
+const mainnetHaskoinProvider = new HaskoinProvider(
+  'https://api.haskoin.com/',
+  BTCChain,
+  AssetBTC,
+  8,
+  HaskoinNetwork.BTC,
+)
+export const HaskoinDataProviders = {
+  [Network.Testnet]: testnetHaskoinProvider,
+  [Network.Stagenet]: mainnetHaskoinProvider,
+  [Network.Mainnet]: mainnetHaskoinProvider,
 }

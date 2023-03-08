@@ -76,5 +76,10 @@ export default {
       const resp = require(`./response/thornode/mimir.json`)
       return [200, resp]
     })
+
+    mock.onPost(/\/broadcast_transaction/).reply(function () {
+      const resp = require(`./response/broadcast_tx/broadcast_transaction.json`)
+      return [200, resp]
+    })
   },
 }
