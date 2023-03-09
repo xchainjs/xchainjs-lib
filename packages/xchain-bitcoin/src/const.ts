@@ -82,20 +82,14 @@ export const sochainDataProviders = {
 // haskoin
 //======================
 const testnetHaskoinProvider = new HaskoinProvider(
-  'https://api.haskoin.com/',
+  'https://api.haskoin.com',
   BTCChain,
   AssetBTC,
   8,
   HaskoinNetwork.BTCTEST,
 )
 
-const mainnetHaskoinProvider = new HaskoinProvider(
-  'https://api.haskoin.com/',
-  BTCChain,
-  AssetBTC,
-  8,
-  HaskoinNetwork.BTC,
-)
+const mainnetHaskoinProvider = new HaskoinProvider('https://api.haskoin.com', BTCChain, AssetBTC, 8, HaskoinNetwork.BTC)
 export const HaskoinDataProviders = {
   [Network.Testnet]: testnetHaskoinProvider,
   [Network.Stagenet]: mainnetHaskoinProvider,

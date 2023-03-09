@@ -14,7 +14,6 @@ import type {
   AddressParams,
   AddressUTXO,
   BalanceData,
-  GetTxsDTO,
   HaskoinNetwork,
   HaskoinResponse,
   Transaction,
@@ -50,8 +49,8 @@ export const getAddress = async ({ apiKey, haskoinUrl, network, address }: Addre
 export const getTx = async ({ haskoinUrl, network, hash }: TxHashParams): Promise<Transaction> => {
   const url = `${haskoinUrl}/${network}/transaction/${hash}`
   const response = await axios.get(url)
-  const tx: HaskoinResponse<Transaction> = response.data
-  return tx.data
+  const tx: Transaction = response.data
+  return tx
 }
 
 /**
@@ -68,17 +67,21 @@ export const getTxs = async ({
   address,
   haskoinUrl,
   network,
-  page,
+  limit,
+  offset,
 }: {
   address: string
   haskoinUrl: string
   network: HaskoinNetwork
-  page: number
-}): Promise<GetTxsDTO> => {
-  const url = `${haskoinUrl}/${network}/${address}/transactions/${page}` //TODO support paging
-  const response = await axios.get(url)
-  const txs: HaskoinResponse<GetTxsDTO> = response.data
-  return txs.data
+  limit: number
+  offset?: number
+}): Promise<Transaction[]> => {
+  const params: Record<string, string> = { limit: `${limit}`, offset: `${offset}` }
+  const url = `${haskoinUrl}/${network}/address/${address}/transactions/full`
+  if (offset) params['before'] = `${offset}`
+  if (limit) params['limit'] = `${limit}`
+  const response = await axios.get<Transaction[]>(url, { params })
+  return response.data
 }
 
 /**
@@ -210,7 +213,7 @@ export const getConfirmedUnspentTxs = async ({
         apiKey,
         haskoinUrl,
         network,
-        txHash: tx.hash,
+        txHash: tx.txid,
       })
 
       if (confirmed) {
@@ -237,7 +240,6 @@ export const getConfirmedUnspentTxs = async ({
 export const broadcastTx = async ({ txHex, haskoinUrl }: { txHex: string; haskoinUrl: string }): Promise<TxHash> => {
   const MAX = 5
   let counter = 0
-
   const onFullfilled = (res: AxiosResponse): AxiosResponse => res
   const onRejected = async (error: AxiosError): Promise<AxiosResponse> => {
     const config = error.config

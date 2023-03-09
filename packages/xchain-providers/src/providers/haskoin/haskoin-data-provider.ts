@@ -1,10 +1,10 @@
 import { Balance, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
-import { Address, Asset, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
 import { UTXO, UtxoOnlineDataProvider } from '../../provider-types'
 
 import * as haskoin from './haskoin-api'
-import { AddressUTXO, HaskoinNetwork } from './haskoin-api-types'
+import { AddressUTXO, HaskoinNetwork, Transaction } from './haskoin-api-types'
 
 export class HaskoinProvider implements UtxoOnlineDataProvider {
   private baseUrl: string
@@ -50,6 +50,7 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
       network: this.haskoinNetwork,
       address,
     })
+
     return this.mapUTXOs(allUnspent)
   }
 
@@ -75,53 +76,38 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
+    if (offset + limit > 2000) throw Error('cannot fetch more than last 2000 txs')
     if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
-
-    const firstPage = Math.floor(offset / 10) + 1
-    const lastPage = limit > 10 ? firstPage + Math.floor(limit / 10) : firstPage
-    const offsetOnFirstPage = offset % 10
-
-    const txHashesToFetch: string[] = []
-    let page = firstPage
-    try {
-      while (page <= lastPage) {
-        const response = await haskoin.getTxs({
-          haskoinUrl: this.baseUrl,
-          network: this.haskoinNetwork,
-          address: `${params?.address}`,
-          page,
-        })
-        if (response.transactions.length === 0) break
-        if (page === firstPage && response.transactions.length > offsetOnFirstPage) {
-          //start from offset
-          const txsToGet = response.transactions.slice(offsetOnFirstPage)
-          this.addArrayUpToLimit(
-            txHashesToFetch,
-            txsToGet.map((i) => i.hash),
-            limit,
-          )
-        } else {
-          this.addArrayUpToLimit(
-            txHashesToFetch,
-            response.transactions.map((i) => i.hash),
-            limit,
-          )
-        }
-        page++
-      }
-    } catch (error) {
-      console.error(error)
-      //an errors means no more results
-    }
-
-    const total = txHashesToFetch.length
-    const transactions: Tx[] = await Promise.all(txHashesToFetch.map((hash) => this.getTransactionData(hash)))
-
+    const response = await haskoin.getTxs({
+      address: `${params?.address}`,
+      haskoinUrl: this.baseUrl,
+      network: this.haskoinNetwork,
+      limit: limit,
+      offset,
+    })
+    const txs = response.map((i) => this.mapTransactionToTx(i))
     const result: TxsPage = {
-      total,
-      txs: transactions,
+      total: txs.length,
+      txs: txs,
     }
+
     return result
+  }
+
+  private mapTransactionToTx(rawTx: Transaction): Tx {
+    return {
+      asset: this.asset,
+      from: rawTx.inputs.map((i) => ({
+        from: i.address,
+        amount: baseAmount(i.value, this.assetDecimals),
+      })),
+      to: rawTx.outputs
+        .filter((i) => i.script !== 'null-data') //filter out op_return outputs
+        .map((i) => ({ to: i.address, amount: baseAmount(i.value, this.assetDecimals) })),
+      date: new Date(rawTx.time),
+      type: TxType.Transfer,
+      hash: rawTx.txid,
+    }
   }
 
   /**
@@ -137,19 +123,7 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
         network: this.haskoinNetwork,
         hash: txId,
       })
-      return {
-        asset: this.asset,
-        from: rawTx.inputs.map((i) => ({
-          from: i.address,
-          amount: assetToBase(assetAmount(i.value, this.assetDecimals)),
-        })),
-        to: rawTx.outputs
-          .filter((i) => i.type !== 'nulldata') //filter out op_return outputs
-          .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, this.assetDecimals)) })),
-        date: new Date(rawTx.time * 1000),
-        type: TxType.Transfer,
-        hash: rawTx.txid,
-      }
+      return this.mapTransactionToTx(rawTx)
     } catch (error) {
       console.error(error)
       throw error
@@ -158,30 +132,14 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
 
   private mapUTXOs(utxos: AddressUTXO[]): UTXO[] {
     return utxos.map((utxo) => ({
-      hash: utxo.hash,
+      hash: utxo.txid,
       index: utxo.index,
       value: assetToBase(assetAmount(utxo.value, this.assetDecimals)).amount().toNumber(),
       witnessUtxo: {
         value: assetToBase(assetAmount(utxo.value, this.assetDecimals)).amount().toNumber(),
-        script: Buffer.from(utxo.script, 'hex'),
+        script: Buffer.from(utxo.pkscript, 'hex'),
       },
       txHex: utxo.tx_hex,
     }))
-  }
-
-  /**
-   * helper function tto limit adding to an array
-   *
-   * @param arr array to be added to
-   * @param toAdd elements to add
-   * @param limit do not add more than this limit
-   */
-  private addArrayUpToLimit(arr: string[], toAdd: string[], limit: number) {
-    for (let index = 0; index < toAdd.length; index++) {
-      const element = toAdd[index]
-      if (arr.length < limit) {
-        arr.push(element)
-      }
-    }
   }
 }

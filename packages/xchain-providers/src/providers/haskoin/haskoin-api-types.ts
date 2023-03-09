@@ -84,8 +84,8 @@ export type GetTxsDTO = {
 }
 
 export type AddressTxDTO = {
-  hash: string
-  block: number
+  txid: string
+  block: Block
   time: number
 }
 export type TxConfirmedStatus = {
@@ -95,13 +95,13 @@ export type TxConfirmedStatus = {
   is_confirmed: boolean
 }
 export type AddressUTXO = {
-  hash: string
-  index: number
-  script: string
   address: string
-  tx_hex: string
+  block: Block
+  txid: string
+  index: number
+  pkscript: string
   value: string
-  block: number
+  tx_hex: string
 }
 export type UnspentTxsDTO = {
   outputs: AddressUTXO[]

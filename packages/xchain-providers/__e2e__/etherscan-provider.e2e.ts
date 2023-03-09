@@ -1,10 +1,9 @@
 // import { Network, TxType } from '@xchainjs/xchain-client'
+import { AVAXChain, AssetAVAX } from '@xchainjs/xchain-avax'
 import { Balance } from '@xchainjs/xchain-client'
 import { EtherscanProvider } from '@xchainjs/xchain-evm'
 import { assetToString } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
-
-import { AVAXChain, AssetAVAX } from '../src/const'
 
 // =====Erc-20 asset=====
 

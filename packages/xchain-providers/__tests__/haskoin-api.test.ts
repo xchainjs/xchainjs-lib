@@ -1,9 +1,11 @@
 import mockHaskoinApi from '../__mocks__/haskoin'
+import { HaskoinNetwork } from '../src/providers'
 import * as haskoin from '../src/providers/haskoin/haskoin-api'
 
 // Mock address has to match with mock file in `__mocks__/response/balances/haskoin-{address}.json
 const MOCK_ADDRESS = 'bc1address'
-const MOCK_URL = 'https://api.haskoin.com/haskoin-store/btc'
+const MOCK_URL = 'https://api.haskoin.com/'
+const network = HaskoinNetwork.BTCTEST
 
 describe('Haskoin API Test', () => {
   beforeEach(() => {
@@ -18,8 +20,9 @@ describe('Haskoin API Test', () => {
       const balance = await haskoin.getBalance({
         address: MOCK_ADDRESS,
         haskoinUrl: MOCK_URL,
+        haskoinNetwork: network,
         confirmedOnly: false,
-        decimals: 8,
+        assetDecimals: 8,
       })
       expect(balance.amount().toString()).toEqual('3300000')
     })
@@ -27,8 +30,9 @@ describe('Haskoin API Test', () => {
       const balance = await haskoin.getBalance({
         address: MOCK_ADDRESS,
         haskoinUrl: MOCK_URL,
+        haskoinNetwork: network,
         confirmedOnly: true,
-        decimals: 8,
+        assetDecimals: 8,
       })
       expect(balance.amount().toString()).toEqual('1100000')
     })
