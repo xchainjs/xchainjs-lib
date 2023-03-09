@@ -47,7 +47,7 @@ export interface TxOutput {
   value: string
   addresses: string[]
   script_type?: string
-  // script: string
+  script: string
 }
 export interface Transaction {
   hash: string

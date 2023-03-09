@@ -3,8 +3,6 @@ import { BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import {
-  AddressParams,
-  AddressUTXO,
   BalanceParams,
   BlockcypherNetwork,
   BroadcastDTO,
@@ -13,24 +11,7 @@ import {
   Transaction,
   TxConfirmedStatus,
   TxHashParams,
-  UnspentTxsDTO,
 } from './blockcypher-api-types'
-
-// /**
-//  * Get address information.
-//  *
-//  * @param {string} baseUrl The sochain node url.
-//  * @param {string} network
-//  * @param {string} address
-//  * @returns {AddressDTO}
-//  */
-// export const getAddress = async ({ apiKey, baseUrl, network, address }: AddressParams): Promise<AddressDTO> => {
-//   const url = `${baseUrl}/${network}/addrs/${address}/balance`
-//   const urlWithKey = apiKey ? `${url}?${apiKey}` : url
-//   const response = await axios.get(urlWithKey)
-//   const addressResponse: AddressDTO = response.data
-//   return addressResponse
-// }
 
 /**
  * Get transaction by hash.
@@ -104,6 +85,7 @@ export const getBalance = async ({
 }: BalanceParams): Promise<BaseAmount> => {
   const params: Record<string, string> = {}
   const url = `${baseUrl}/${network}/addrs/${address}/balance`
+  console.log(url)
   if (apiKey) params['token'] = apiKey
   const response = await axios.get(url, { params })
   const balanceResponse: GetBalanceDTO = response.data
@@ -113,24 +95,6 @@ export const getBalance = async ({
   const result = assetToBase(netAmt)
   return result
 }
-
-// /**
-//  * Get unspent txs
-//  *
-//  *
-//  * @param {string} baseUrl The sochain node url.
-//  * @param {string} network
-//  * @param {string} address
-//  * @returns {GetTxsDTO[]}
-//  */
-// export const getUnspentTxs = async ({ apiKey, baseUrl, network, address }: AddressParams): Promise<GetTxsDTO> => {
-//   const params: Record<string, string> = { limit: '2000', unspentOnly: 'true' }
-//   const url = `${baseUrl}/${network}/addrs/${address}`
-//   if (apiKey) params['token'] = apiKey
-//   const response = await axios.get(url, { params })
-//   const txs: GetTxsDTO = response.data
-//   return txs
-// }
 
 /**
  * Get Tx Confirmation status
@@ -193,61 +157,6 @@ export const getConfirmedTxStatus = async ({
   return is_confirmed
 }
 
-// /**
-//  * Get unspent txs and filter out pending UTXOs
-//  *
-//  * @see https://sochain.com/api#get-unspent-tx
-//  *
-//  * @param {string} baseUrl The sochain node url.
-//  * @param {Network} network
-//  * @param {string} address
-//  * @returns {AddressUTXO[]}
-//  */
-// export const getConfirmedUnspentTxs = async ({
-//   apiKey,
-//   baseUrl,
-//   network,
-//   address,
-// }: AddressParams): Promise<AddressUTXO[]> => {
-//   const txs = await getUnspentTxs({
-//     apiKey,
-//     baseUrl,
-//     network,
-//     address,
-//     page: 1,
-//   })
-
-//   const confirmedUTXOs: AddressUTXO[] = []
-
-//   await Promise.all(
-//     txs.map(async (tx: AddressUTXO) => {
-//       const confirmed = await getConfirmedTxStatus({
-//         apiKey,
-//         baseUrl,
-//         network,
-//         txHash: tx.hash,
-//       })
-
-//       if (confirmed) {
-//         confirmedUTXOs.push(tx)
-//       }
-//     }),
-//   )
-
-//   return confirmedUTXOs
-// }
-
-/**
- * Get address balance.
- *
- * @see https://sochain.com/api#get-balance
- *
- * @param {string} baseUrl The sochain node url.
- * @param {string} network Network
- * @param {string} address Address
- * @param {boolean} confirmedOnly Flag whether to get balances of confirmed txs only or for all
- * @returns {number}
- */
 export const broadcastTx = async ({
   apiKey,
   baseUrl,

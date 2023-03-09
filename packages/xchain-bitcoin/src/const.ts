@@ -1,5 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
+  BlockcypherNetwork,
+  BlockcypherProvider,
   ExplorerProvider,
   HaskoinNetwork,
   HaskoinProvider,
@@ -51,6 +53,9 @@ export const blockstreamExplorerProviders = {
   [Network.Stagenet]: BTC_MAINNET_EXPLORER,
   [Network.Mainnet]: BTC_MAINNET_EXPLORER,
 }
+//======================
+// sochain
+//======================
 
 const testnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
@@ -73,7 +78,9 @@ export const sochainDataProviders = {
   [Network.Stagenet]: mainnetSochainProvider,
   [Network.Mainnet]: mainnetSochainProvider,
 }
-
+//======================
+// haskoin
+//======================
 const testnetHaskoinProvider = new HaskoinProvider(
   'https://api.haskoin.com/',
   BTCChain,
@@ -93,4 +100,27 @@ export const HaskoinDataProviders = {
   [Network.Testnet]: testnetHaskoinProvider,
   [Network.Stagenet]: mainnetHaskoinProvider,
   [Network.Mainnet]: mainnetHaskoinProvider,
+}
+//======================
+// Blockcypher
+//======================
+const testnetBlockcypherProvider = new BlockcypherProvider(
+  'https://api.blockcypher.com/v1',
+  BTCChain,
+  AssetBTC,
+  8,
+  BlockcypherNetwork.BTCTEST,
+)
+
+const mainnetBlockcypherProvider = new BlockcypherProvider(
+  'https://api.blockcypher.com/v1',
+  BTCChain,
+  AssetBTC,
+  8,
+  BlockcypherNetwork.BTC,
+)
+export const BlockcypherDataProviders = {
+  [Network.Testnet]: testnetBlockcypherProvider,
+  [Network.Stagenet]: mainnetBlockcypherProvider,
+  [Network.Mainnet]: mainnetBlockcypherProvider,
 }

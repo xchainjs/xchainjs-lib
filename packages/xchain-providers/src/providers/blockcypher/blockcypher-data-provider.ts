@@ -118,20 +118,26 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
   }
 
   private mapUTXOs(utxos: Transaction[]): UTXO[] {
-    utxos[0].outputs
-    // const hex =
-    // // utxos.map((utxo) => (return utxo))
-    // return utxos.map((utxo) => ({
-    //   hash: utxo.hash,
-    //   index: utxo.index,
-    //   value: assetToBase(assetAmount(utxo.value, this.assetDecimals)).amount().toNumber(),
-    //   witnessUtxo: {
-    //     value: assetToBase(assetAmount(utxo.value, this.assetDecimals)).amount().toNumber(),
-    //     script: Buffer.from(utxo.script, 'hex'),
-    //   },
-    //   txHex: utxo.hex,
-    // }))
-    return []
+    const utxosOut: UTXO[] = []
+    for (let index = 0; index < utxos.length; index++) {
+      const utxo = utxos[index]
+      for (let index2 = 0; index2 < utxo.outputs.length; index2++) {
+        const output = utxo.outputs[index2]
+        const utxoOut = {
+          hash: utxo.hash,
+          index: index2,
+          value: assetToBase(assetAmount(output.value, this.assetDecimals)).amount().toNumber(),
+          witnessUtxo: {
+            value: assetToBase(assetAmount(output.value, this.assetDecimals)).amount().toNumber(),
+            script: Buffer.from(output.script, 'hex'),
+          },
+          txHex: utxo.hex,
+        }
+        utxosOut.push(utxoOut)
+      }
+    }
+
+    return utxosOut
   }
 
   /**
@@ -164,6 +170,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
     if (offset + limit > 2000) throw Error('cannot fetch more than last 2000 txs')
+    if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
 
     const txHashesToFetch: string[] = []
     try {

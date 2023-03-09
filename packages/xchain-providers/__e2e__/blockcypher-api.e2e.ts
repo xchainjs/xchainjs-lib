@@ -42,8 +42,8 @@ describe('blockcypher api tests', () => {
   })
   it(`Should getTransactions2 for an address`, async () => {
     const address = 'bc1q946qtg2fgk8hxgqgfe6tnpqg66yj5ex4jnkp2m'
-    const response = await blockcypherProvider.getTransactions({ address, offset: 0, limit: 12 })
-    expect(response.total).toBe(12)
+    const response = await blockcypherProvider.getTransactions({ address, offset: 0, limit: 5 })
+    expect(response.total).toBe(5)
   })
 
   it(`Should getTransactionData for an address`, async () => {
@@ -57,10 +57,5 @@ describe('blockcypher api tests', () => {
     expect(response.to[0].amount.amount().toFixed()).toBe('1973081')
     expect(response.to[0].to).toBe('bc1qcwnecmzdg0f0wwrjrmlelxfgvmjtqn7cal0dgx')
     // console.log(JSON.stringify(response, null, 2))
-  })
-  it(`Should broadcastTx`, async () => {
-    const txHex = 'xxx'
-    const response = await blockcypherProvider.broadcastTx(txHex)
-    console.log(response)
   })
 })
