@@ -8,6 +8,7 @@ import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
 import { Client as EthClient, ETHChain } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
+import { ExplorerProviders, UtxoOnlineDataProviders } from '@xchainjs/xchain-providers/lib'
 import { Client as ThorClient, THORChain, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Address, Chain } from '@xchainjs/xchain-util'
@@ -37,13 +38,19 @@ export class Wallet {
    * @param thorchainCache - an instance of the ThorchainCache (could be pointing to stagenet,testnet,mainnet)
    * @returns Wallet
    */
-  constructor(phrase: string, thorchainQuery: ThorchainQuery, sochainApiKey: string) {
+  constructor(
+    phrase: string,
+    thorchainQuery: ThorchainQuery,
+    sochainApiKey: string,
+    explorerProviders: ExplorerProviders,
+    dataProviders: UtxoOnlineDataProviders,
+  ) {
     this.thorchainQuery = thorchainQuery
 
     const settings = { network: thorchainQuery.thorchainCache.midgard.network, phrase }
     this.clients = {
       BCH: new BchClient(settings),
-      BTC: new BtcClient({ ...settings }),
+      BTC: new BtcClient({ ...settings, explorerProviders, dataProviders }),
       DOGE: new DogeClient({ ...settings, sochainApiKey }),
       LTC: new LtcClient({ ...settings, sochainApiKey }),
       ETH: new EthClient(settings),
