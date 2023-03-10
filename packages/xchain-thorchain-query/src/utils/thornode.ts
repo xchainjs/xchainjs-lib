@@ -190,12 +190,27 @@ export class Thornode {
   }
   /**
    *
-   * @returns - thorchain pool
+   * @returns - thorchain pools
    */
   async getPools(): Promise<Pool[]> {
     for (const api of this.poolsApi) {
       try {
         const pools = await api.pools()
+        return pools.data
+      } catch (e) {
+        //console.error(e)
+      }
+    }
+    throw new Error(`THORNode not responding`)
+  }
+  /**
+   *
+   * @returns - thorchain pool
+   */
+  async getPool(asset: string): Promise<Pool> {
+    for (const api of this.poolsApi) {
+      try {
+        const pools = await api.pool(asset)
         return pools.data
       } catch (e) {
         //console.error(e)
@@ -378,6 +393,7 @@ export class Thornode {
     toAsset: string,
     amount: number,
     destination: string,
+    fromAddress: string,
     toleranceBps: number,
     affiliateBps: number,
     affiliate: string,
@@ -386,7 +402,17 @@ export class Thornode {
     for (const api of this.quoteApi) {
       try {
         const resp = (
-          await api.quoteswap(height, fromAsset, toAsset, amount, destination, toleranceBps, affiliateBps, affiliate)
+          await api.quoteswap(
+            height,
+            fromAsset,
+            toAsset,
+            amount,
+            destination,
+            fromAddress,
+            toleranceBps,
+            affiliateBps,
+            affiliate,
+          )
         ).data
         return resp
       } catch (e) {

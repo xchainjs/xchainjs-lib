@@ -1,3 +1,9 @@
+# v0.2.1 (2023-02-28)
+
+## Breaking Change
+
+- Update to latest THORNode 1.105.0
+
 # v0.2.0 (2022-12-28)
 
 ## Breaking Change

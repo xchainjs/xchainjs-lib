@@ -1,6 +1,18 @@
 [
 	{
 		"LP_units": "21431706650497",
+		"asset": "BNB.FRM-DE7",
+		"balance_asset": "601828572655",
+		"balance_rune": "36435639468875",
+		"pending_inbound_asset": "3446563192",
+		"pending_inbound_rune": "1207037453",
+		"pool_units": "22176742969634",
+		"status": "Available",
+		"synth_supply": "40437330688",
+		"synth_units": "745036319137"
+	},
+  {
+		"LP_units": "21431706650497",
 		"asset": "BCH.BCH",
 		"balance_asset": "601828572655",
 		"balance_rune": "36435639468875",

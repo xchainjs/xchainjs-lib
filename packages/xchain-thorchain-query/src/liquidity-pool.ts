@@ -1,4 +1,5 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
+import { Pool } from '@xchainjs/xchain-thornode/lib'
 import { Asset, BaseAmount, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -7,6 +8,7 @@ import { BigNumber } from 'bignumber.js'
  */
 export class LiquidityPool {
   readonly pool: PoolDetail
+  readonly thornodeDetails: Pool
   readonly assetBalance: BaseAmount
   readonly runeBalance: BaseAmount
   // readonly decimals: number
@@ -16,8 +18,9 @@ export class LiquidityPool {
   readonly runeToAssetRatio: BigNumber
   readonly assetToRuneRatio: BigNumber
 
-  constructor(pool: PoolDetail) {
+  constructor(pool: PoolDetail, thornodeDetails: Pool) {
     this.pool = pool
+    this.thornodeDetails = thornodeDetails
     const asset = assetFromString(this.pool.asset)
     if (!asset) throw new Error(`could not parse ${this.pool.asset}`)
 
