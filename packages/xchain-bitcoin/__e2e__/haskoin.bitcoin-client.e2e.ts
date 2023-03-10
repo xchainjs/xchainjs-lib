@@ -25,6 +25,7 @@ const defaultBTCParams: BitcoinClientParams = {
     upper: UPPER_FEE_BOUND,
   },
 }
+
 const btcClient = new Client({
   ...defaultBTCParams,
 })
@@ -97,8 +98,9 @@ describe('Bitcoin Integration Tests for Haskoin', () => {
   })
   it('should send a testnet btc tx using haskoin', async () => {
     try {
-      // const from = btcClientTestnet.getAddress(0)
-      const to = btcClientTestnet.getAddress(0)
+      const from = btcClientTestnet.getAddress(0)
+      console.log(from)
+      const to = btcClientTestnet.getAddress(1)
       const amount = assetToBase(assetAmount('0.00001'))
       const txid = await btcClientTestnet.transfer({
         asset: AssetBTC,

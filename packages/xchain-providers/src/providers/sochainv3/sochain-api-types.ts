@@ -96,7 +96,7 @@ export type GetBalanceDTO = {
   unconfirmed: string
 }
 export type BroadcastDTO = {
-  hash: string
+  tx_hex: string
 }
 export type UnspentTxsDTO = {
   outputs: AddressUTXO[]

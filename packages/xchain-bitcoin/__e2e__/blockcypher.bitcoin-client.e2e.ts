@@ -10,8 +10,6 @@ import {
   blockstreamExplorerProviders,
 } from '../src/const'
 
-const btcClient = new Client()
-
 const defaultBTCParams: BitcoinClientParams = {
   network: Network.Mainnet,
   phrase: '',
@@ -27,20 +25,24 @@ const defaultBTCParams: BitcoinClientParams = {
     upper: UPPER_FEE_BOUND,
   },
 }
+const btcClient = new Client({
+  ...defaultBTCParams,
+})
+
 const btcClientTestnet = new Client({
   ...defaultBTCParams,
   network: Network.Testnet,
   phrase: process.env.TESTNETPHRASE,
 })
 describe('Bitcoin Integration Tests for BlockCypher', () => {
-  it('should fetch address balance', async () => {
+  it('should fetch address balance for blockcypher', async () => {
     const balances = await btcClient.getBalance('bc1qd8jhw2m64r8lslzkx59h8jf3uhgw56grx5dqcf')
     balances.forEach((bal) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
     expect(balances.length).toBeGreaterThan(0)
   })
-  it('should fetch previous transactions', async () => {
+  it('should fetch previous transactions for blockcypher', async () => {
     let txHistory = await btcClient.getTransactions({
       address: '15UWKjrakkZjvAGjJttvAm1o6NsB5VeMb9',
       offset: 0,
@@ -87,13 +89,13 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
     //   // console.log(JSON.stringify(txHistory, null, 2))
     // }
   })
-  it('should fetch btc tx data', async () => {
+  it('should fetch btc tx data for blockcypher', async () => {
     const txId = '3b250bfd61e7f231a22c6e02f9927927ac33e40c8b343716e08fec29c509ab54'
     const tx = await btcClient.getTransactionData(txId)
     //console.log(JSON.stringify(tx, null, 2))
     expect(tx.hash).toBe(txId)
   })
-  it('should send a testnet btc tx', async () => {
+  it('should send a testnet btc tx for blockcypher', async () => {
     try {
       // const from = btcClientTestnet.getAddress(0)
       const to = btcClientTestnet.getAddress(1)

@@ -43,6 +43,7 @@ describe('Haskoin API Test', () => {
       const txHash = await haskoin.broadcastTx({
         txHex: '0xdead',
         haskoinUrl: MOCK_URL,
+        haskoinNetwork: network,
       })
       expect(txHash).toEqual('mock-txid')
     })

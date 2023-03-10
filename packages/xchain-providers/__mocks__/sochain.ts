@@ -61,7 +61,7 @@ export default {
     })
 
     //Mock blockstream send tx
-    mock.onPost(/\/transaction/).reply(function () {
+    mock.onPost(/\/broadcast_transaction/).reply(function () {
       return [200, 'TEST_OK']
     })
     //

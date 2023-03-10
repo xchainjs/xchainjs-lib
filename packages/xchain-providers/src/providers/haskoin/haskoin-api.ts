@@ -9,7 +9,7 @@ import { TxHash } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount, delay } from '@xchainjs/xchain-util'
 import axios, { AxiosError, AxiosResponse } from 'axios'
 
-import type {
+import {
   AddressDTO,
   AddressParams,
   AddressUTXO,
@@ -237,7 +237,15 @@ export const getConfirmedUnspentTxs = async ({
  * @param {BroadcastTxParams} params
  * @returns {TxHash} Transaction hash.
  */
-export const broadcastTx = async ({ txHex, haskoinUrl }: { txHex: string; haskoinUrl: string }): Promise<TxHash> => {
+export const broadcastTx = async ({
+  txHex,
+  haskoinUrl,
+  haskoinNetwork,
+}: {
+  txHex: string
+  haskoinUrl: string
+  haskoinNetwork: string
+}): Promise<TxHash> => {
   const MAX = 5
   let counter = 0
   const onFullfilled = (res: AxiosResponse): AxiosResponse => res
@@ -254,7 +262,7 @@ export const broadcastTx = async ({ txHex, haskoinUrl }: { txHex: string; haskoi
   // https://github.com/axios/axios#interceptors
   const id = axios.interceptors.response.use(onFullfilled, onRejected)
 
-  const url = `${haskoinUrl}/transactions`
+  const url = `${haskoinUrl}/${haskoinNetwork}/transactions`
   try {
     const {
       data: { txid },

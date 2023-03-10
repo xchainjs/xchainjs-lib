@@ -274,6 +274,6 @@ export const broadcastTx = async ({
 }): Promise<TxHash> => {
   const url = `${sochainUrl}/broadcast_transaction/${network}`
   const response = await axios.post(url, { tx_hex: txHex }, { headers: { 'API-KEY': apiKey } })
-  const broadcastResponse: SochainResponse<BroadcastDTO> = response.data
-  return broadcastResponse.data.hash
+  const broadcastResponse: BroadcastDTO = response.data
+  return broadcastResponse.tx_hex
 }

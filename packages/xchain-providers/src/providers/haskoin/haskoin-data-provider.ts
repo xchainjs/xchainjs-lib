@@ -31,6 +31,7 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
   async broadcastTx(txHex: string): Promise<TxHash> {
     return await haskoin.broadcastTx({
       haskoinUrl: this.baseUrl,
+      haskoinNetwork: this.haskoinNetwork,
       txHex,
     })
   }
