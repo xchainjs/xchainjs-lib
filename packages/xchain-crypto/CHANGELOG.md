@@ -1,6 +1,10 @@
-# v.0.2.6 (2021-09-02)
+# v.0.2.7 (2023-03-10)
 
-- updated to the latest dependencies
+- Update dependencies
+
+# v.0.2.6 (???)
+
+- ???
 
 # v.0.2.5 (2021-06-19)
 
