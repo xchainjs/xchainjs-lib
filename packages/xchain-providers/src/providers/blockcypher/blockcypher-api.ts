@@ -85,7 +85,6 @@ export const getBalance = async ({
 }: BalanceParams): Promise<BaseAmount> => {
   const params: Record<string, string> = {}
   const url = `${baseUrl}/${network}/addrs/${address}/balance`
-  console.log(url)
   if (apiKey) params['token'] = apiKey
   const response = await axios.get(url, { params })
   const balanceResponse: GetBalanceDTO = response.data

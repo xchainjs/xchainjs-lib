@@ -53,16 +53,9 @@ export default {
     })
 
     // Mock broad cast tx
-    mock.onPost(/\/v3\/broadcast_transaction\//).reply(function () {
-      return [
-        200,
-        {
-          data: {
-            network: 'DOGE',
-            txid: 'mock-txid-sochain',
-          },
-        },
-      ]
+    mock.onPost(/\/broadcast_transaction/).reply(function () {
+      const resp = require(`./response/broadcast_tx/broadcast_transaction.json`)
+      return [200, resp]
     })
   },
 }

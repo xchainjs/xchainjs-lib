@@ -2,7 +2,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
 
 import mockHaskoinApi from '../__mocks__/haskoin'
-import txId from '../__mocks__/response/broadcast_tx/broadcast_transaction.json'
+import mocktxId from '../__mocks__/response/broadcast_tx/broadcast_transaction.json'
 import mockSochainApi from '../__mocks__/sochain'
 import { Client } from '../src/client'
 import { AssetBTC, MIN_TX_FEE } from '../src/const'
@@ -117,7 +117,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
     const txid = await btcClient.transfer({ walletIndex: 0, asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
-    expect(txid).toEqual(txId.tx_hex)
+    expect(txid).toEqual(mocktxId.tx_hex)
   })
 
   it('should broadcast a normal transfer without feeRate option', async () => {
@@ -125,7 +125,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
     const txid = await btcClient.transfer({ asset: AssetBTC, recipient: addyTwo, amount })
-    expect(txid).toEqual(txId.tx_hex)
+    expect(txid).toEqual(mocktxId.tx_hex)
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
@@ -148,7 +148,7 @@ describe('BitcoinClient Test', () => {
         memo: MEMO,
         feeRate: 1,
       })
-      expect(txid).toEqual(txId.tx_hex)
+      expect(txid).toEqual(mocktxId.tx_hex)
     } catch (err) {
       console.error('ERR running test', err)
       throw err

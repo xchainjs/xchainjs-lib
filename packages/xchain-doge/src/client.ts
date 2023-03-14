@@ -7,34 +7,61 @@ import {
   TxHash,
   TxHistoryParams,
   TxParams,
-  TxType,
   TxsPage,
   UTXOClient,
   XChainClientParams,
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import {
+  ExplorerProvider,
+  ExplorerProviders,
+  UTXO,
+  UtxoOnlineDataProvider,
+  UtxoOnlineDataProviders,
+} from '@xchainjs/xchain-providers'
+import { Address } from '@xchainjs/xchain-util'
+import axios from 'axios'
 import * as Dogecoin from 'bitcoinjs-lib'
+import accumulative from 'coinselect/accumulative'
 
-import * as blockcypher from './blockcypher-api'
-import { AssetDOGE, DOGEChain, DOGE_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
-import * as sochain from './sochain-api'
+import {
+  DOGEChain,
+  LOWER_FEE_BOUND,
+  UPPER_FEE_BOUND,
+  blockcypherDataProviders,
+  blockstreamExplorerProviders,
+} from './const'
 import * as Utils from './utils'
 
+const DEFAULT_SUGGESTED_TRANSACTION_FEE = 150000
+
 export type DogecoinClientParams = XChainClientParams & {
-  sochainUrl?: string
-  blockcypherUrl?: string
-  sochainApiKey: string
+  explorerProviders: ExplorerProviders
+  dataProviders: UtxoOnlineDataProviders
+}
+export const defaultBTCParams: DogecoinClientParams = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: blockstreamExplorerProviders,
+  dataProviders: blockcypherDataProviders,
+  rootDerivationPaths: {
+    [Network.Mainnet]: `m/44'/3'/0'/0/`,
+    [Network.Stagenet]: `m/44'/3'/0'/0/`,
+    [Network.Testnet]: `m/44'/1'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
 }
 
 /**
  * Custom Dogecoin client
  */
 class Client extends UTXOClient {
-  private sochainUrl = ''
-  private blockcypherUrl = ''
-  private sochainApiKey
+  private explorerProviders: Record<Network, ExplorerProvider>
+  private dataProviders: Record<Network, UtxoOnlineDataProvider>
   /**
    * Constructor
    * Client is initialised with network type
@@ -42,46 +69,15 @@ class Client extends UTXOClient {
    *
    * @param {DogecoinClientParams} params
    */
-  constructor({
-    network = Network.Mainnet,
-    feeBounds = {
-      lower: LOWER_FEE_BOUND,
-      upper: UPPER_FEE_BOUND,
-    },
-    sochainApiKey,
-    sochainUrl = 'https://sochain.com/api/v3',
-    blockcypherUrl = 'https://api.blockcypher.com/v1',
-    phrase,
-    rootDerivationPaths = {
-      [Network.Mainnet]: `m/44'/3'/0'/0/`,
-      [Network.Stagenet]: `m/44'/3'/0'/0/`,
-      [Network.Testnet]: `m/44'/1'/0'/0/`,
-    },
-  }: DogecoinClientParams) {
-    super(DOGEChain, { network, rootDerivationPaths, phrase, feeBounds })
-    this.setSochainUrl(sochainUrl)
-    this.setBlockcypherUrl(blockcypherUrl)
-    this.sochainApiKey = sochainApiKey
-  }
-
-  /**
-   * Set/Update the sochain url.
-   *
-   * @param {string} url The new sochain url.
-   * @returns {void}
-   */
-  setSochainUrl(url: string): void {
-    this.sochainUrl = url
-  }
-
-  /**
-   * Set/Update the blockcypher url.
-   *
-   * @param {string} url The new blockcypher url.
-   * @returns {void}
-   */
-  setBlockcypherUrl(url: string): void {
-    this.blockcypherUrl = url
+  constructor(params = defaultBTCParams) {
+    super(DOGEChain, {
+      network: params.network,
+      rootDerivationPaths: params.rootDerivationPaths,
+      phrase: params.phrase,
+      feeBounds: params.feeBounds,
+    })
+    this.explorerProviders = params.explorerProviders
+    this.dataProviders = params.dataProviders
   }
 
   /**
@@ -90,13 +86,7 @@ class Client extends UTXOClient {
    * @returns {string} The explorer url based on the network.
    */
   getExplorerUrl(): string {
-    switch (this.network) {
-      case Network.Mainnet:
-      case Network.Stagenet:
-        return 'https://blockchair.com/dogecoin'
-      case Network.Testnet:
-        return 'https://blockexplorer.one/dogecoin/testnet'
-    }
+    return this.explorerProviders[this.network].getExplorerUrl()
   }
 
   /**
@@ -106,7 +96,7 @@ class Client extends UTXOClient {
    * @returns {string} The explorer url for the given address based on the network.
    */
   getExplorerAddressUrl(address: Address): string {
-    return `${this.getExplorerUrl()}/address/${address}`
+    return this.explorerProviders[this.network].getExplorerAddressUrl(address)
   }
   /**
    * Get the explorer url for the given transaction id.
@@ -115,14 +105,7 @@ class Client extends UTXOClient {
    * @returns {string} The explorer url for the given transaction id based on the network.
    */
   getExplorerTxUrl(txID: string): string {
-    switch (this.network) {
-      case Network.Mainnet:
-        return `${this.getExplorerUrl()}/transaction/${txID}`
-      case Network.Stagenet:
-        return `${this.getExplorerUrl()}/transaction/${txID}`
-      case Network.Testnet:
-        return `${this.getExplorerUrl()}/tx/${txID}`
-    }
+    return this.explorerProviders[this.network].getExplorerTxUrl(txID)
   }
 
   /**
@@ -197,28 +180,7 @@ class Client extends UTXOClient {
    * @returns {Balance[]} The Doge balance of the address.
    */
   async getBalance(address: Address): Promise<Balance[]> {
-    return Utils.getBalance({
-      apiKey: this.sochainApiKey,
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-      address,
-    })
-  }
-
-  /**
-   * helper function tto limit adding to an array
-   *
-   * @param arr array to be added to
-   * @param toAdd elements to add
-   * @param limit do not add more than this limit
-   */
-  private addArrayUpToLimit(arr: string[], toAdd: string[], limit: number) {
-    for (let index = 0; index < toAdd.length; index++) {
-      const element = toAdd[index]
-      if (arr.length < limit) {
-        arr.push(element)
-      }
-    }
+    return await this.dataProviders[this.network].getBalance(address)
   }
 
   /**
@@ -229,56 +191,15 @@ class Client extends UTXOClient {
    * @returns {TxsPage} The transaction history.
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const offset = params?.offset ?? 0
-    const limit = params?.limit || 10
-    if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
-
-    const firstPage = Math.floor(offset / 10) + 1
-    const lastPage = limit > 10 ? firstPage + Math.floor(limit / 10) : firstPage
-    const offsetOnFirstPage = offset % 10
-
-    const txHashesToFetch: string[] = []
-    let page = firstPage
-    try {
-      while (page <= lastPage) {
-        const response = await sochain.getTxs({
-          apiKey: this.sochainApiKey,
-          sochainUrl: this.sochainUrl,
-          network: this.network,
-          address: `${params?.address}`,
-          page,
-        })
-        if (response.transactions.length === 0) break
-        if (page === firstPage && response.transactions.length > offsetOnFirstPage) {
-          //start from offset
-          const txsToGet = response.transactions.slice(offsetOnFirstPage)
-          this.addArrayUpToLimit(
-            txHashesToFetch,
-            txsToGet.map((i) => i.hash),
-            limit,
-          )
-        } else {
-          this.addArrayUpToLimit(
-            txHashesToFetch,
-            response.transactions.map((i) => i.hash),
-            limit,
-          )
-        }
-        page++
-      }
-    } catch (error) {
-      console.error(error)
-      //an errors means no more results
+    const filteredParams: TxHistoryParams = {
+      address: params?.address || this.getAddress(),
+      offset: params?.offset,
+      limit: params?.limit,
+      startTime: params?.startTime,
+      asset: params?.asset,
     }
-    // console.log(JSON.stringify({ txHashesToFetch }, null, 2))
-    const total = txHashesToFetch.length
-    const transactions: Tx[] = await Promise.all(txHashesToFetch.map((hash) => this.getTransactionData(hash)))
 
-    const result: TxsPage = {
-      total,
-      txs: transactions,
-    }
-    return result
+    return await this.dataProviders[this.network].getTransactions(filteredParams)
   }
 
   /**
@@ -288,27 +209,16 @@ class Client extends UTXOClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string): Promise<Tx> {
-    const rawTx = await sochain.getTx({
-      apiKey: this.sochainApiKey,
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-      hash: txId,
-    })
-    return {
-      asset: AssetDOGE,
-      from: rawTx.inputs.map((i) => ({
-        from: i.address,
-        amount: assetToBase(assetAmount(i.value, DOGE_DECIMAL)),
-      })),
-      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, DOGE_DECIMAL)) })),
-      date: new Date(rawTx.time * 1000),
-      type: TxType.Transfer,
-      hash: rawTx.hash,
-    }
+    return await this.dataProviders[this.network].getTransactionData(txId)
   }
 
   protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    return await blockcypher.getSuggestedTxFee({ blockcypherUrl: this.blockcypherUrl })
+    try {
+      const response = await axios.get(`https://api.blockcypher.com/v1/doge/main`)
+      return response.data.low_fee_per_kb / 1000 // feePerKb to feePerByte
+    } catch (error) {
+      return DEFAULT_SUGGESTED_TRANSACTION_FEE
+    }
   }
 
   protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
@@ -325,37 +235,105 @@ class Client extends UTXOClient {
     const fromAddressIndex = params?.walletIndex || 0
     const feeRate = params.feeRate || (await this.getSuggestedFeeRate())
     checkFeeBounds(this.feeBounds, feeRate)
-
-    const { psbt } = await Utils.buildTx({
-      apiKey: this.sochainApiKey,
-      amount: params.amount,
-      recipient: params.recipient,
-      memo: params.memo,
+    const { psbt } = await this.buildTx({
+      ...params,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
-      sochainUrl: this.sochainUrl,
-      network: this.network,
     })
     const dogeKeys = this.getDogeKeys(this.phrase, fromAddressIndex)
     psbt.signAllInputs(dogeKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-    let nodeUrl: string
-    if (this.network === Network.Testnet) {
-      nodeUrl = sochain.getSendTxUrl({
-        network: this.network,
-        sochainUrl: this.sochainUrl,
+    return await this.dataProviders[this.network].broadcastTx(txHex)
+  }
+
+  /**
+   * Build transcation.
+   *
+   * @param {BuildParams} params The transaction build options.
+   * @returns {Transaction}
+   */
+  buildTx = async ({
+    amount,
+    recipient,
+    memo,
+    feeRate,
+    sender,
+  }: TxParams & {
+    feeRate: FeeRate
+    sender: Address
+  }): Promise<{ psbt: Dogecoin.Psbt; utxos: UTXO[] }> => {
+    if (!this.validateAddress(recipient)) throw new Error('Invalid address')
+
+    const utxos = await this.scanUTXOs(sender)
+    if (utxos.length === 0) throw new Error('No utxos to send')
+    const feeRateWhole = Number(feeRate.toFixed(0))
+    const compiledMemo = memo ? Utils.compileMemo(memo) : null
+
+    const targetOutputs = []
+    //1. output to recipient
+    targetOutputs.push({
+      address: recipient,
+      value: amount.amount().toNumber(),
+    })
+    //2. add output memo to targets (optional)
+    if (compiledMemo) {
+      targetOutputs.push({ script: compiledMemo, value: 0 })
+    }
+    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+
+    // .inputs and .outputs will be undefined if no solution was found
+    if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
+
+    const psbt = new Dogecoin.Psbt({ network: Utils.dogeNetwork(this.network) }) // Network-specific
+    // TODO: Doge recommended fees is greater than the recommended by Bitcoinjs-lib (for BTC),
+    //       so we need to increase the maximum fee rate. Currently, the fast rate fee is near ~750000sats/byte
+    // https://thornode.ninerealms.com/thorchain/inbound_addresses?height=7526662 (09-27-2022)
+    // For now we increase it by 10x
+    psbt.setMaximumFeeRate(7500000)
+    // const params = { sochainUrl, network, address: sender }
+    for (const utxo of inputs) {
+      psbt.addInput({
+        hash: utxo.hash,
+        index: utxo.index,
+        nonWitnessUtxo: Buffer.from(utxo.txHex, 'hex'),
       })
-    } else {
-      nodeUrl = blockcypher.getSendTxUrl({ network: this.network, blockcypherUrl: this.blockcypherUrl })
     }
 
-    return await Utils.broadcastTx({
-      network: this.network,
-      txHex,
-      nodeUrl,
+    // Outputs
+    outputs.forEach((output: Dogecoin.PsbtTxOutput) => {
+      if (!output.address) {
+        //an empty address means this is the  change address
+        output.address = sender
+      }
+      if (!output.script) {
+        psbt.addOutput(output)
+      } else {
+        //we need to add the compiled memo this way to
+        //avoid dust error tx when accumulating memo output with 0 value
+        if (compiledMemo) {
+          psbt.addOutput({ script: compiledMemo, value: 0 })
+        }
+      }
     })
+
+    return { psbt, utxos }
+  }
+
+  /**
+   * Scan UTXOs from provider
+   *
+   * @param params
+   * @returns {UTXO[]} The UTXOs of the given address.
+   */
+  private async scanUTXOs(
+    address: string,
+    confirmedOnly = true, // default: scan only confirmed UTXOs
+  ): Promise<UTXO[]> {
+    return confirmedOnly
+      ? await this.dataProviders[this.network].getConfirmedUnspentTxs(address)
+      : await this.dataProviders[this.network].getUnspentTxs(address)
   }
 }
 
