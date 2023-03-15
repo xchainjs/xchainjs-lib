@@ -44,11 +44,14 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
 
   async getConfirmedUnspentTxs(address: string): Promise<UTXO[]> {
     const allUnspent = await this.getRawTransactions({ address, offset: 0, limit: 2000 }, true)
-    return this.mapUTXOs(allUnspent.filter((i) => i.confirmed))
+    return this.mapUTXOs(
+      address,
+      allUnspent.filter((i) => i.confirmed),
+    )
   }
   async getUnspentTxs(address: string): Promise<UTXO[]> {
     const allUnspent = await this.getRawTransactions({ address, offset: 0, limit: 2000 }, true)
-    return this.mapUTXOs(allUnspent)
+    return this.mapUTXOs(address, allUnspent)
   }
 
   async getBalance(address: Address, assets?: Asset[] /*ignored*/, confirmedOnly?: boolean): Promise<Balance[]> {
@@ -117,23 +120,25 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     }
   }
 
-  private mapUTXOs(utxos: Transaction[]): UTXO[] {
+  private mapUTXOs(address: string, utxos: Transaction[]): UTXO[] {
     const utxosOut: UTXO[] = []
     for (let index = 0; index < utxos.length; index++) {
       const utxo = utxos[index]
       for (let index2 = 0; index2 < utxo.outputs.length; index2++) {
         const output = utxo.outputs[index2]
-        const utxoOut = {
-          hash: utxo.hash,
-          index: index2,
-          value: assetToBase(assetAmount(output.value, this.assetDecimals)).amount().toNumber(),
-          witnessUtxo: {
-            value: assetToBase(assetAmount(output.value, this.assetDecimals)).amount().toNumber(),
-            script: Buffer.from(output.script, 'hex'),
-          },
-          txHex: utxo.hex,
+        if (output.addresses && output.addresses[0] === address) {
+          const utxoOut = {
+            hash: utxo.hash,
+            index: index2,
+            value: baseAmount(output.value, this.assetDecimals).amount().toNumber(),
+            witnessUtxo: {
+              value: baseAmount(output.value, this.assetDecimals).amount().toNumber(),
+              script: Buffer.from(output.script, 'hex'),
+            },
+            txHex: utxo.hex,
+          }
+          utxosOut.push(utxoOut)
         }
-        utxosOut.push(utxoOut)
       }
     }
 

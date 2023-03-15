@@ -95,11 +95,12 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
     //console.log(JSON.stringify(tx, null, 2))
     expect(tx.hash).toBe(txId)
   })
-  it('should send a testnet btc tx for blockcypher', async () => {
+  it('should send a testnet btc tx via blockcypher', async () => {
     try {
       // const from = btcClientTestnet.getAddress(0)
       const to = btcClientTestnet.getAddress(1)
-      const amount = assetToBase(assetAmount('0.00001'))
+      // console.log(JSON.stringify(to, null, 2))
+      const amount = assetToBase(assetAmount('0.000011'))
       const txid = await btcClientTestnet.transfer({
         asset: AssetBTC,
         recipient: to,

@@ -1,34 +1,34 @@
 import { AssetBTC, BTCChain } from '../../xchain-bitcoin/src/const'
-import { BlockcypherNetwork, BlockcypherProvider } from '../src/providers'
+import { SochainNetwork, SochainProvider } from '../src/providers'
 
-const blockcypherProvider = new BlockcypherProvider(
-  'https://api.blockcypher.com/v1',
+const sochainProvider = new SochainProvider(
+  'https://sochain.com/api/v3',
+  process.env.SOCHAIN_API_KEY || 'undefined',
   BTCChain,
   AssetBTC,
   8,
-  BlockcypherNetwork.BTC,
-  process.env.BLOCKCYHER_API_TOKEN || undefined,
+  SochainNetwork.BTC,
 )
 
-describe('blockcypher api tests', () => {
+describe('sochain api tests', () => {
   it(`Should fetch the balance for an address`, async () => {
     const address = '1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD'
-    const bal = await blockcypherProvider.getBalance(address)
+    const bal = await sochainProvider.getBalance(address)
     console.log(bal)
   })
   it(`Should getConfirmedUnspentTxs for an address`, async () => {
     const address = 'bc1qcwnecmzdg0f0wwrjrmlelxfgvmjtqn7cal0dgx'
-    const response = await blockcypherProvider.getConfirmedUnspentTxs(address)
+    const response = await sochainProvider.getConfirmedUnspentTxs(address)
     console.log(response)
   })
-  it(`Should blockcypher getUnspentTxs for an address`, async () => {
+  it(`Should sochain getUnspentTxs for an address`, async () => {
     const address = 'bc1qcwnecmzdg0f0wwrjrmlelxfgvmjtqn7cal0dgx'
-    const response = await blockcypherProvider.getUnspentTxs(address)
+    const response = await sochainProvider.getUnspentTxs(address)
     console.log(JSON.stringify(response, null, 2))
   })
   it(`Should getTransactions for an address`, async () => {
     const address = 'bc1qcwnecmzdg0f0wwrjrmlelxfgvmjtqn7cal0dgx'
-    const response = await blockcypherProvider.getTransactions({ address })
+    const response = await sochainProvider.getTransactions({ address })
     // console.log(JSON.stringify(response, null, 2))
     expect(response.total).toBe(5)
     expect(response.txs[0].hash).toBe('a3db2a87dc086151630e4365c0ce6a9c17fc784ad7f7bf79cb6ecf5ced6d632f')
@@ -42,13 +42,13 @@ describe('blockcypher api tests', () => {
   })
   it(`Should getTransactions2 for an address`, async () => {
     const address = 'bc1q946qtg2fgk8hxgqgfe6tnpqg66yj5ex4jnkp2m'
-    const response = await blockcypherProvider.getTransactions({ address, offset: 0, limit: 5 })
+    const response = await sochainProvider.getTransactions({ address, offset: 0, limit: 5 })
     expect(response.total).toBe(5)
   })
 
   it(`Should getTransactionData for an address`, async () => {
     const hash = 'D519ABAEF1F0B27BF4B186AD241A81B5AF1BCB9303F9936B4161EA8945C98416'
-    const response = await blockcypherProvider.getTransactionData(hash)
+    const response = await sochainProvider.getTransactionData(hash)
     expect(response.asset.chain).toBe(BTCChain)
     expect(response.asset.ticker).toBe('BTC')
     expect(response.date.getTime()).toBeLessThan(Date.now())

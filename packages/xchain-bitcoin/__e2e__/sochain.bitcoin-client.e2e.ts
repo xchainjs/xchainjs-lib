@@ -11,7 +11,7 @@ const btcClientTestnet = new Client({
   network: Network.Testnet,
   phrase: process.env.TESTNETPHRASE,
 })
-describe('Bitcoin Integration Tests', () => {
+describe('Bitcoin Integration Sochain Tests', () => {
   it('should fetch address balance', async () => {
     const balances = await btcClient.getBalance('bc1qd8jhw2m64r8lslzkx59h8jf3uhgw56grx5dqcf')
     balances.forEach((bal) => {
@@ -72,10 +72,11 @@ describe('Bitcoin Integration Tests', () => {
     //console.log(JSON.stringify(tx, null, 2))
     expect(tx.hash).toBe(txId)
   })
-  it('should send a testnet btc tx', async () => {
+  it('should send a testnet btc tx via sochain', async () => {
     try {
-      // const from = btcClientTestnet.getAddress(0)
+      //const from = btcClientTestnet.getAddress(0)
       const to = btcClientTestnet.getAddress(1)
+      console.log(JSON.stringify(to, null, 2))
       const amount = assetToBase(assetAmount('0.00001'))
       const txid = await btcClientTestnet.transfer({
         asset: AssetBTC,

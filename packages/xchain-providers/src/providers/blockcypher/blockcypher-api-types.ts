@@ -89,7 +89,9 @@ export type GetTxsDTO = {
 }
 
 export type BroadcastDTO = {
-  hash: string
+  tx: {
+    hash: string
+  }
 }
 export type UnspentTxsDTO = {
   outputs: AddressUTXO[]

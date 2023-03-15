@@ -172,5 +172,5 @@ export const broadcastTx = async ({
   if (apiKey) params['token'] = apiKey
   const response = await axios.post(url, { tx: txHex }, { params })
   const broadcastResponse: BroadcastDTO = response.data
-  return broadcastResponse.hash
+  return broadcastResponse.tx.hash
 }
