@@ -51,7 +51,7 @@ export class Wallet {
     this.clients = {
       BCH: new BchClient(settings),
       BTC: new BtcClient({ ...settings, explorerProviders, dataProviders }),
-      DOGE: new DogeClient({ ...settings, sochainApiKey }),
+      DOGE: new DogeClient({ ...settings, explorerProviders, dataProviders }),
       LTC: new LtcClient({ ...settings, sochainApiKey }),
       ETH: new EthClient(settings),
       THOR: new ThorClient(settings),

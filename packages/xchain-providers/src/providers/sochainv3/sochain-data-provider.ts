@@ -64,15 +64,19 @@ export class SochainProvider implements UtxoOnlineDataProvider {
 
   async getBalance(address: Address, assets?: Asset[] /*ignored*/, confirmedOnly?: boolean): Promise<Balance[]> {
     assets // TODO can we fix this?
-    const amount = await sochain.getBalance({
-      apiKey: this.apiKey,
-      sochainUrl: this.baseUrl,
-      network: this.sochainNetwork,
-      address,
-      confirmedOnly: !!confirmedOnly,
-      assetDecimals: this.assetDecimals,
-    })
-    return [{ amount, asset: this.asset }]
+    try {
+      const amount = await sochain.getBalance({
+        apiKey: this.apiKey,
+        sochainUrl: this.baseUrl,
+        network: this.sochainNetwork,
+        address,
+        confirmedOnly: !!confirmedOnly,
+        assetDecimals: this.assetDecimals,
+      })
+      return [{ amount, asset: this.asset }]
+    } catch (error) {
+      throw new Error(`Could not get balances for address ${address}`)
+    }
   }
 
   /**

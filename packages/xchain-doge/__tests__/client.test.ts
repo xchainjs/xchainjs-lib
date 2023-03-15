@@ -67,7 +67,7 @@ describe('DogecoinClient Test', () => {
     dogeClient.setPhrase(phraseOne)
     const address = dogeClient.getAddress()
     const valid = dogeClient.validateAddress(address)
-    // expect(address).toEqual('nfVtm2hbz4rv1fhBVTqi5hGWrRzy5rqmLv')
+    expect(address).toEqual('nfVtm2hbz4rv1fhBVTqi5hGWrRzy5rqmLv')
     expect(valid).toBeTruthy()
   })
 
