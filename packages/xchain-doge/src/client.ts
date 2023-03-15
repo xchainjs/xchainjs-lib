@@ -32,6 +32,7 @@ import {
   blockcypherDataProviders,
   blockstreamExplorerProviders,
 } from './const'
+import { LedgerTxInfo, LedgerTxInfoParams } from './types/ledger'
 import * as Utils from './utils'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 150000
@@ -254,7 +255,7 @@ class Client extends UTXOClient {
    * @param {BuildParams} params The transaction build options.
    * @returns {Transaction}
    */
-  buildTx = async ({
+  public buildTx = async ({
     amount,
     recipient,
     memo,
@@ -319,6 +320,21 @@ class Client extends UTXOClient {
     })
 
     return { psbt, utxos }
+  }
+
+  /**
+   * Create transaction info.
+   *
+   * @param {LedgerTxInfoParams} params The transaction build options.
+   * @returns {LedgerTxInfo} The transaction info used for ledger sign.
+   */
+  public async createTxInfo(params: LedgerTxInfoParams): Promise<LedgerTxInfo> {
+    const { psbt, utxos } = await this.buildTx(params)
+    const ledgerTxInfo: LedgerTxInfo = {
+      utxos,
+      newTxHex: psbt.data.globalMap.unsignedTx.toBuffer().toString('hex'),
+    }
+    return ledgerTxInfo
   }
 
   /**

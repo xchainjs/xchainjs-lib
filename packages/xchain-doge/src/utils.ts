@@ -1,24 +1,10 @@
-import {
-  Balance,
-  FeeRate,
-  Fees,
-  FeesWithRates,
-  Network,
-  TxHash,
-  TxParams,
-  calcFees,
-  standardFeeRates,
-} from '@xchainjs/xchain-client'
-import { Address, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { FeeRate, Fees, FeesWithRates, Network, calcFees, standardFeeRates } from '@xchainjs/xchain-client'
+import { UTXO } from '@xchainjs/xchain-providers'
+import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as Dogecoin from 'bitcoinjs-lib'
 import coininfo from 'coininfo'
-import accumulative from 'coinselect/accumulative'
 
-import { AssetDOGE, DOGE_DECIMAL, MIN_TX_FEE } from './const'
-import * as nodeApi from './node-api'
-import * as sochain from './sochain-api'
-import { BroadcastTxParams, UTXO } from './types/common'
-import { DogeAddressUTXO } from './types/sochain-api-types'
+import { MIN_TX_FEE } from './const'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
@@ -106,31 +92,6 @@ export const dogeNetwork = (network: Network): Dogecoin.networks.Network => {
 }
 
 /**
- * Get the balances of an address.
- *
- * @param params
- * @returns {Balance[]} The balances of the given address.
- */
-export const getBalance = async (params: {
-  apiKey: string
-  sochainUrl: string
-  network: Network
-  address: string
-}): Promise<Balance[]> => {
-  try {
-    const balance = await sochain.getBalance(params)
-    return [
-      {
-        asset: AssetDOGE,
-        amount: balance,
-      },
-    ]
-  } catch (error) {
-    throw new Error(`Could not get balances for address ${params.address}`)
-  }
-}
-
-/**
  * Validate the Doge address.
  *
  * @param {string} address
@@ -143,160 +104,6 @@ export const validateAddress = (address: Address, network: Network): boolean => 
     return true
   } catch (error) {
     return false
-  }
-}
-
-// Stores list of txHex in memory to avoid requesting same data
-// const txHexMap: Record<TxHash, string> = {}
-
-// /**
-//  * Helper to get `hex` of `Tx`
-//  *
-//  * It will try to get it from cache before requesting it from Sochain
-//  */
-// const getTxHex = async ({
-//   apiKey,
-//   txHash,
-//   sochainUrl,
-//   network,
-// }: {
-//   apiKey: string
-//   sochainUrl: string
-//   txHash: TxHash
-//   network: Network
-// }): Promise<string> => {
-//   // try to get hex from cache
-//   const txHex = txHexMap[txHash]
-//   if (!!txHex) return txHex
-//   // or get it from Sochain
-//   const { tx_hex } = await sochain.getTx({ apiKey, hash: txHash, sochainUrl, network })
-//   // cache it
-//   txHexMap[txHash] = tx_hex
-//   return tx_hex
-// }
-
-/**
- * Scan UTXOs from sochain.
- *
- * @param params
- * @returns {UTXO[]} The UTXOs of the given address.
- */
-export const scanUTXOs = async ({
-  apiKey,
-  sochainUrl,
-  network,
-  address,
-}: {
-  apiKey: string
-  sochainUrl: string
-  network: Network
-  address: string
-}): Promise<UTXO[]> => {
-  const utxos: DogeAddressUTXO[] = await sochain.getUnspentTxs({
-    apiKey,
-    sochainUrl,
-    network,
-    address,
-    page: 1,
-  })
-  return utxos.map((utxo) => ({
-    hash: utxo.hash,
-    index: utxo.index,
-    value: assetToBase(assetAmount(utxo.value, DOGE_DECIMAL)).amount().toNumber(),
-    txHex: utxo.tx_hex,
-  }))
-}
-
-/**
- * Build transcation.
- *
- * @param {BuildParams} params The transaction build options.
- * @returns {Transaction}
- */
-export const buildTx = async ({
-  apiKey,
-  amount,
-  recipient,
-  memo,
-  feeRate,
-  sender,
-  network,
-  sochainUrl,
-}: TxParams & {
-  apiKey: string
-  feeRate: FeeRate
-  sender: Address
-  network: Network
-  sochainUrl: string
-}): Promise<{ psbt: Dogecoin.Psbt; utxos: UTXO[] }> => {
-  if (!validateAddress(recipient, network)) throw new Error('Invalid address')
-
-  const utxos = await scanUTXOs({ apiKey, sochainUrl, network, address: sender })
-  if (utxos.length === 0) throw new Error('No utxos to send')
-  const feeRateWhole = Number(feeRate.toFixed(0))
-  const compiledMemo = memo ? compileMemo(memo) : null
-
-  const targetOutputs = []
-  //1. output to recipient
-  targetOutputs.push({
-    address: recipient,
-    value: amount.amount().toNumber(),
-  })
-  //2. add output memo to targets (optional)
-  if (compiledMemo) {
-    targetOutputs.push({ script: compiledMemo, value: 0 })
-  }
-  const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-
-  // .inputs and .outputs will be undefined if no solution was found
-  if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
-
-  const psbt = new Dogecoin.Psbt({ network: dogeNetwork(network) }) // Network-specific
-  // TODO: Doge recommended fees is greater than the recommended by Bitcoinjs-lib (for BTC),
-  //       so we need to increase the maximum fee rate. Currently, the fast rate fee is near ~750000sats/byte
-  // https://thornode.ninerealms.com/thorchain/inbound_addresses?height=7526662 (09-27-2022)
-  // For now we increase it by 10x
-  psbt.setMaximumFeeRate(7500000)
-  // const params = { sochainUrl, network, address: sender }
-  for (const utxo of inputs) {
-    psbt.addInput({
-      hash: utxo.hash,
-      index: utxo.index,
-      nonWitnessUtxo: Buffer.from(utxo.txHex, 'hex'),
-    })
-  }
-
-  // Outputs
-  outputs.forEach((output: Dogecoin.PsbtTxOutput) => {
-    if (!output.address) {
-      //an empty address means this is the  change address
-      output.address = sender
-    }
-    if (!output.script) {
-      psbt.addOutput(output)
-    } else {
-      //we need to add the compiled memo this way to
-      //avoid dust error tx when accumulating memo output with 0 value
-      if (compiledMemo) {
-        psbt.addOutput({ script: compiledMemo, value: 0 })
-      }
-    }
-  })
-
-  return { psbt, utxos }
-}
-
-/**
- * Broadcast the transaction.
- *
- * @param {BroadcastTxParams} params The transaction broadcast options.
- * @returns {TxHash} The transaction hash.
- */
-export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
-  if (params.network === Network.Testnet) {
-    return await nodeApi.broadcastTxToSochain(params)
-  } else {
-    return await nodeApi.broadcastTxToBlockCypher(params)
   }
 }
 

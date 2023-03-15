@@ -1,12 +1,10 @@
-import { Network } from '@xchainjs/xchain-client'
+import { UTXO } from '@xchainjs/xchain-providers'
 
 import mockBlockcypherApi from '../__mocks__/blockcypher'
 import mockSochainApi from '../__mocks__/sochain'
-import { UTXO } from '../src/types/common'
 import * as Utils from '../src/utils'
 
 let utxos: UTXO[]
-const apiKey = 'xxx'
 
 describe('Dogecoin Utils Test', () => {
   beforeEach(() => {
@@ -52,18 +50,18 @@ describe('Dogecoin Utils Test', () => {
     expect(estimates.average).toBeDefined()
   })
 
-  it('should fetch as many uxtos as are associated with an address', async () => {
-    const address = 'DRapidDiBYggT1zdrELnVhNDqyAHn89cRi'
-    const utxos: UTXO[] = await Utils.scanUTXOs({
-      apiKey,
-      sochainUrl: 'https://sochain.com/api/v3',
-      network: Network.Mainnet,
-      address,
-    })
-    expect(utxos.length).toEqual(1)
-    expect(utxos?.[0].hash).toEqual('f65aa58332a0d491d7f96ccb96cc513ad622f18ad88cbe123096b23963569da0')
-    expect(utxos?.[0].value).toEqual(100000000)
-  })
+  // it('should fetch as many uxtos as are associated with an address', async () => {
+  //   const address = 'DRapidDiBYggT1zdrELnVhNDqyAHn89cRi'
+  //   const utxos: UTXO[] = await Utils.scanUTXOs({
+  //     apiKey,
+  //     sochainUrl: 'https://sochain.com/api/v3',
+  //     network: Network.Mainnet,
+  //     address,
+  //   })
+  //   expect(utxos.length).toEqual(1)
+  //   expect(utxos?.[0].hash).toEqual('f65aa58332a0d491d7f96ccb96cc513ad622f18ad88cbe123096b23963569da0')
+  //   expect(utxos?.[0].value).toEqual(100000000)
+  // })
 
   // theses tests are no longer a part of utils
 
