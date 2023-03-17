@@ -1,4 +1,4 @@
-import { UTXO } from '@xchainjs/xchain-providers'
+import { UTXO } from '@xchainjs/xchain-client'
 
 import mockBlockcypherApi from '../__mocks__/blockcypher'
 import mockSochainApi from '../__mocks__/sochain'
