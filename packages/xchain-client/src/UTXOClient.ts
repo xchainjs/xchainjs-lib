@@ -167,7 +167,7 @@ export abstract class UTXOClient extends Client {
         console.warn(error)
       }
     }
-    throw Error('no provider abble to get balance')
+    throw Error('no provider able to get balance')
   }
   protected async roundRobinGetUnspentTxs(address: Address, confirmed: boolean) {
     for (const provider of this.dataProviders) {

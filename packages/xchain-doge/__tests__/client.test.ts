@@ -1,15 +1,38 @@
-import { Network } from '@xchainjs/xchain-client'
+import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
 
 import mocktxId from '../__mocks__/response/broadcast_tx/broadcast_transaction.json'
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode'
 import { Client } from '../src/client'
-import { AssetDOGE, LOWER_FEE_BOUND, MIN_TX_FEE } from '../src/const'
+import {
+  AssetDOGE,
+  LOWER_FEE_BOUND,
+  MIN_TX_FEE,
+  UPPER_FEE_BOUND,
+  blockstreamExplorerProviders,
+  sochainDataProviders,
+} from '../src/const'
 
 mockSochainApi.init()
 
-const dogeClient = new Client()
+export const defaultDogeParams: UtxoClientParams = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: blockstreamExplorerProviders,
+  dataProviders: [sochainDataProviders],
+  rootDerivationPaths: {
+    [Network.Mainnet]: `m/44'/3'/0'/0/`,
+    [Network.Stagenet]: `m/44'/3'/0'/0/`,
+    [Network.Testnet]: `m/44'/1'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
+}
+
+const dogeClient = new Client({ ...defaultDogeParams })
 
 describe('DogecoinClient Test', () => {
   beforeEach(() => {
@@ -248,7 +271,7 @@ describe('DogecoinClient Test', () => {
     dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const invalidAddress = 'error_address'
-    const expectedError = 'Could not get balances for address error_address'
+    const expectedError = 'no provider able to get balance'
     return expect(dogeClient.getBalance(invalidAddress)).rejects.toThrow(expectedError)
   })
 
