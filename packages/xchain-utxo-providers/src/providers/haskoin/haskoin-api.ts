@@ -150,7 +150,6 @@ export const getBalance = async ({
 
   const confirmedAmount = baseAmount(confirmed, assetDecimals)
   const unconfirmedAmount = baseAmount(unconfirmed, assetDecimals)
-
   return confirmedOnly ? confirmedAmount : confirmedAmount.plus(unconfirmedAmount)
 }
 
@@ -337,7 +336,7 @@ export const broadcastTx = async ({
     } catch (error: any) {
       if (error.response?.status === 500) {
         retries++
-        await delay(1000 * retries)
+        await delay(200 * retries)
       } else {
         return Promise.reject(error)
       }

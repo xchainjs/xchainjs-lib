@@ -45,7 +45,7 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
   it('should fetch previous transactions for blockcypher', async () => {
     let txHistory = await btcClient.getTransactions({
       address: '15UWKjrakkZjvAGjJttvAm1o6NsB5VeMb9',
-      offset: 0,
+      offset: 1,
       limit: 10,
     })
     expect(txHistory.total).toBe(0)

@@ -4,10 +4,10 @@ import { HaskoinNetwork, HaskoinProvider } from '../src/providers'
 const haskoinProvider = new HaskoinProvider('https://api.haskoin.com', BTCChain, AssetBTC, 8, HaskoinNetwork.BTC)
 
 describe('haskoin api tests', () => {
-  it(`Should fetch the balance for an address`, async () => {
+  it(`Should fetch the balance for an address for haskoin`, async () => {
     const address = '1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD'
     const bal = await haskoinProvider.getBalance(address)
-    console.log(bal)
+    console.log(bal[0].amount.amount().toNumber())
   })
   it(`Should getConfirmedUnspentTxs for an address using haskoin`, async () => {
     const address = 'bc1qcwnecmzdg0f0wwrjrmlelxfgvmjtqn7cal0dgx'

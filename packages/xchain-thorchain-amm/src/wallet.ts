@@ -3,7 +3,14 @@ import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
 import { BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
-import { Balance, ExplorerProviders, FeeOption, UtxoOnlineDataProviders, XChainClient } from '@xchainjs/xchain-client'
+import {
+  Balance,
+  ExplorerProviders,
+  FeeOption,
+  Network,
+  UtxoOnlineDataProviders,
+  XChainClient,
+} from '@xchainjs/xchain-client'
 import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
 import { Client as EthClient, ETHChain } from '@xchainjs/xchain-ethereum'
@@ -21,6 +28,7 @@ type AllBalances = {
   address: string
   balances: Balance[] | string
 }
+export type NodeUrls = Record<Network, string>
 
 /**
  * Wallet Class for managing all xchain-* wallets with a mnemonic seed.
@@ -40,18 +48,18 @@ export class Wallet {
   constructor(
     phrase: string,
     thorchainQuery: ThorchainQuery,
-    sochainApiKey: string,
     explorerProviders: ExplorerProviders,
-    dataProviders: UtxoOnlineDataProviders,
+    dataProviders: UtxoOnlineDataProviders[],
+    nodeUrls: NodeUrls,
   ) {
     this.thorchainQuery = thorchainQuery
 
     const settings = { network: thorchainQuery.thorchainCache.midgard.network, phrase }
     this.clients = {
-      BCH: new BchClient(settings),
+      BCH: new BchClient({ ...settings, explorerProviders, dataProviders }),
       BTC: new BtcClient({ ...settings, explorerProviders, dataProviders }),
       DOGE: new DogeClient({ ...settings, explorerProviders, dataProviders }),
-      LTC: new LtcClient({ ...settings, sochainApiKey }),
+      LTC: new LtcClient({ ...settings, explorerProviders, dataProviders, nodeUrls }),
       ETH: new EthClient(settings),
       THOR: new ThorClient(settings),
       BNB: new BnbClient(settings),

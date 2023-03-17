@@ -72,7 +72,7 @@ const mainnetSochainProvider = new SochainProvider(
   8,
   SochainNetwork.BTC,
 )
-export const sochainDataProviders: UtxoOnlineDataProviders = {
+export const SochainDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: testnetSochainProvider,
   [Network.Stagenet]: mainnetSochainProvider,
   [Network.Mainnet]: mainnetSochainProvider,

@@ -206,8 +206,7 @@ class Client extends UTXOClient {
     // search only confirmed UTXOs if pending UTXO is not allowed
     const confirmedOnly = !spendPendingUTXO
     const utxos = await this.scanUTXOs(sender, confirmedOnly)
-    if (utxos.length === 0)
-      throw new Error('No confirmed UTXOs. Please wait until your balance has been confirmed on-chain.')
+    if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
     const feeRateWhole = Math.ceil(feeRate)
     const compiledMemo = memo ? Utils.compileMemo(memo) : null
 

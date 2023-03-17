@@ -7,7 +7,7 @@ import mockThornodeApi from '../__mocks__/thornode'
 import { Client } from '../src/client'
 import { BCH_DECIMAL } from '../src/utils'
 
-const bchClient = new Client({})
+const bchClient = new Client()
 
 describe('BCHClient Test', () => {
   beforeEach(() => {
@@ -30,9 +30,7 @@ describe('BCHClient Test', () => {
 
   it('should not throw on a client without a phrase', () => {
     expect(() => {
-      new Client({
-        network: Network.Testnet,
-      })
+      new Client()
     }).not.toThrow()
   })
   it('Default network should be mainnet', () => {
@@ -79,10 +77,10 @@ describe('BCHClient Test', () => {
 
   it('should return valid explorer url', () => {
     bchClient.setNetwork(Network.Mainnet)
-    expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch')
+    expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch/')
 
     bchClient.setNetwork(Network.Testnet)
-    expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch-testnet')
+    expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch-testnet/')
   })
 
   it('should return valid explorer address url', () => {
@@ -136,9 +134,8 @@ describe('BCHClient Test', () => {
     bchClient.setPhrase(phrase)
     const txs = await bchClient.getTransactions({
       address: 'qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
-      limit: 1,
     })
-    expect(txs.total).toEqual(1345)
+    expect(txs.total).toEqual(1342)
     expect(txs.txs[0].hash).toEqual('0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b')
     expect(txs.txs[0].from.length).toEqual(1)
     expect(txs.txs[0].from[0].from).toEqual('qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')

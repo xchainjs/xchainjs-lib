@@ -1,13 +1,36 @@
-import { Network } from '@xchainjs/xchain-client'
+import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
 
 import mockHaskoinApi from '../__mocks__/haskoin'
 import mocktxId from '../__mocks__/response/broadcast_tx/broadcast_transaction.json'
 import mockSochainApi from '../__mocks__/sochain'
 import { Client } from '../src/client'
-import { AssetBTC, MIN_TX_FEE } from '../src/const'
+import {
+  AssetBTC,
+  LOWER_FEE_BOUND,
+  MIN_TX_FEE,
+  SochainDataProviders,
+  UPPER_FEE_BOUND,
+  blockstreamExplorerProviders,
+} from '../src/const'
 
-const btcClient = new Client()
+export const defaultBTCParams: UtxoClientParams = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: blockstreamExplorerProviders,
+  dataProviders: [SochainDataProviders],
+  rootDerivationPaths: {
+    [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
+    [Network.Testnet]: `84'/1'/0'/0/`,
+    [Network.Stagenet]: `84'/0'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
+}
+
+const btcClient = new Client({ ...defaultBTCParams })
 
 describe('BitcoinClient Test', () => {
   beforeEach(() => {
@@ -80,7 +103,7 @@ describe('BitcoinClient Test', () => {
     expect(valid).toBeTruthy()
   })
 
-  it('all balances', async () => {
+  it('all balances test', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const balance = await btcClient.getBalance(btcClient.getAddress())

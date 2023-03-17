@@ -63,7 +63,7 @@ export interface TxIO {
   value: number
   type?: string
 }
-export interface Transaction {
+export type Transaction = {
   txid: string
   block: Block
   confirmations: number
