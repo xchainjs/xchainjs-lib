@@ -1,14 +1,13 @@
-import { Network } from '@xchainjs/xchain-client'
+import { ExplorerProvider, Network, UtxoOnlineDataProviders } from '@xchainjs/xchain-client'
+import { Asset } from '@xchainjs/xchain-util'
 import {
   BlockcypherNetwork,
   BlockcypherProvider,
-  ExplorerProvider,
   HaskoinNetwork,
   HaskoinProvider,
   SochainNetwork,
   SochainProvider,
-} from '@xchainjs/xchain-providers'
-import { Asset } from '@xchainjs/xchain-util'
+} from '@xchainjs/xchain-utxo-providers'
 
 /**
  * Minimum transaction fee
@@ -73,7 +72,7 @@ const mainnetSochainProvider = new SochainProvider(
   8,
   SochainNetwork.BTC,
 )
-export const sochainDataProviders = {
+export const sochainDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: testnetSochainProvider,
   [Network.Stagenet]: mainnetSochainProvider,
   [Network.Mainnet]: mainnetSochainProvider,
@@ -90,7 +89,7 @@ const testnetHaskoinProvider = new HaskoinProvider(
 )
 
 const mainnetHaskoinProvider = new HaskoinProvider('https://api.haskoin.com', BTCChain, AssetBTC, 8, HaskoinNetwork.BTC)
-export const HaskoinDataProviders = {
+export const HaskoinDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: testnetHaskoinProvider,
   [Network.Stagenet]: mainnetHaskoinProvider,
   [Network.Mainnet]: mainnetHaskoinProvider,
@@ -113,7 +112,7 @@ const mainnetBlockcypherProvider = new BlockcypherProvider(
   8,
   BlockcypherNetwork.BTC,
 )
-export const BlockcypherDataProviders = {
+export const BlockcypherDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: testnetBlockcypherProvider,
   [Network.Stagenet]: mainnetBlockcypherProvider,
   [Network.Mainnet]: mainnetBlockcypherProvider,

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-client",
-  "version": "0.13.5",
+  "version": "0.13.6",
   "license": "MIT",
   "main": "lib/index",
   "types": "lib/index",

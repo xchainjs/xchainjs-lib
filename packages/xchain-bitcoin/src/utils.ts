@@ -1,5 +1,13 @@
-import { FeeOption, FeeRate, Fees, FeesWithRates, Network, calcFees, standardFeeRates } from '@xchainjs/xchain-client'
-import { UTXO } from '@xchainjs/xchain-providers'
+import {
+  FeeOption,
+  FeeRate,
+  Fees,
+  FeesWithRates,
+  Network,
+  UTXO,
+  calcFees,
+  standardFeeRates,
+} from '@xchainjs/xchain-client'
 import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as Bitcoin from 'bitcoinjs-lib'
 

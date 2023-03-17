@@ -1,45 +1,37 @@
 import {
-  Balance,
   Fee,
   FeeOption,
   FeeRate,
   Network,
-  Tx,
   TxHash,
-  TxHistoryParams,
   TxParams,
-  TxsPage,
+  UTXO,
   UTXOClient,
-  XChainClientParams,
+  UtxoClientParams,
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import {
-  ExplorerProvider,
-  ExplorerProviders,
-  UTXO,
-  UtxoOnlineDataProvider,
-  UtxoOnlineDataProviders,
-} from '@xchainjs/xchain-providers'
-import { Address, Asset } from '@xchainjs/xchain-util'
+import { Address } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
-import { BTCChain, LOWER_FEE_BOUND, UPPER_FEE_BOUND, blockstreamExplorerProviders, sochainDataProviders } from './const'
+import {
+  BTCChain,
+  BlockcypherDataProviders,
+  LOWER_FEE_BOUND,
+  UPPER_FEE_BOUND,
+  blockstreamExplorerProviders,
+} from './const'
 import * as Utils from './utils'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 127
 
-export type BitcoinClientParams = XChainClientParams & {
-  explorerProviders: ExplorerProviders
-  dataProviders: UtxoOnlineDataProviders
-}
-export const defaultBTCParams: BitcoinClientParams = {
+export const defaultBTCParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
-  dataProviders: sochainDataProviders,
+  dataProviders: [BlockcypherDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
     [Network.Testnet]: `84'/1'/0'/0/`,
@@ -54,13 +46,11 @@ export const defaultBTCParams: BitcoinClientParams = {
  * Custom Bitcoin client
  */
 class Client extends UTXOClient {
-  private explorerProviders: Record<Network, ExplorerProvider>
-  private dataProviders: Record<Network, UtxoOnlineDataProvider>
   /**
    * Constructor
    * Client is initialised with network type
    *
-   * @param {BitcoinClientParams} params
+   * @param {UtxoClientParams} params
    */
   constructor(params = defaultBTCParams) {
     super(BTCChain, {
@@ -68,37 +58,9 @@ class Client extends UTXOClient {
       rootDerivationPaths: params.rootDerivationPaths,
       phrase: params.phrase,
       feeBounds: params.feeBounds,
+      explorerProviders: params.explorerProviders,
+      dataProviders: params.dataProviders,
     })
-    this.explorerProviders = params.explorerProviders
-    this.dataProviders = params.dataProviders
-  }
-
-  /**
-   * Get the explorer url.
-   *
-   * @returns {string} The explorer url based on the network.
-   */
-  getExplorerUrl(): string {
-    return this.explorerProviders[this.network].getExplorerUrl()
-  }
-
-  /**
-   * Get the explorer url for the given address.
-   *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address based on the network.
-   */
-  getExplorerAddressUrl(address: string): string {
-    return this.explorerProviders[this.network].getExplorerAddressUrl(address)
-  }
-  /**
-   * Get the explorer url for the given transaction id.
-   *
-   * @param {string} txID The transaction id
-   * @returns {string} The explorer url for the given transaction id based on the network.
-   */
-  getExplorerTxUrl(txID: string): string {
-    return this.explorerProviders[this.network].getExplorerTxUrl(txID)
   }
 
   /**
@@ -166,52 +128,6 @@ class Client extends UTXOClient {
     return Utils.validateAddress(address, this.network)
   }
 
-  /**
-   * Gets BTC balances of a given address.
-   *
-   * @param {Address} BTC address to get balances from
-   * @param {undefined} Needed for legacy only to be in common with `XChainClient` interface - will be removed by a next version
-   * @param {confirmedOnly} Flag to get balances of confirmed txs only
-   *
-   * @returns {Balance[]} BTC balances
-   */
-  // TODO (@xchain-team|@veado) Change params to be an object to be extendable more easily
-  // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
-  async getBalance(address: Address, _assets?: Asset[] /* not used */, confirmedOnly?: boolean): Promise<Balance[]> {
-    // TODO figure this out ---> !!confirmedOnly)
-    confirmedOnly
-    return await this.dataProviders[this.network].getBalance(address, _assets)
-  }
-
-  /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   */
-  async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const filteredParams: TxHistoryParams = {
-      address: params?.address || this.getAddress(),
-      offset: params?.offset,
-      limit: params?.limit,
-      startTime: params?.startTime,
-      asset: params?.asset,
-    }
-
-    return await this.dataProviders[this.network].getTransactions(filteredParams)
-  }
-
-  /**
-   * Get the transaction details of a given transaction id.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   */
-  async getTransactionData(txId: string): Promise<Tx> {
-    return await this.dataProviders[this.network].getTransactionData(txId)
-  }
-
   protected async getSuggestedFeeRate(): Promise<FeeRate> {
     //use Bitgo API for fee estimation
     //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
@@ -258,9 +174,10 @@ class Client extends UTXOClient {
     psbt.signAllInputs(btcKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+
     const txHash = psbt.extractTransaction().getId()
     try {
-      const txId = await this.dataProviders[this.network].broadcastTx(txHex)
+      const txId = await this.roundRobinBroadcastTx(txHex)
       return txId
     } catch (err) {
       const error = `Server error, please check explorer for tx confirmation ${this.explorerProviders[
@@ -285,12 +202,12 @@ class Client extends UTXOClient {
     if (memo && memo.length > 80) {
       throw new Error('memo too long, must not be longer than 80 chars.')
     }
+    if (!this.validateAddress(recipient)) throw new Error('Invalid address')
     // search only confirmed UTXOs if pending UTXO is not allowed
     const confirmedOnly = !spendPendingUTXO
     const utxos = await this.scanUTXOs(sender, confirmedOnly)
     if (utxos.length === 0)
       throw new Error('No confirmed UTXOs. Please wait until your balance has been confirmed on-chain.')
-    if (!this.validateAddress(recipient)) throw new Error('Invalid address')
     const feeRateWhole = Math.ceil(feeRate)
     const compiledMemo = memo ? Utils.compileMemo(memo) : null
 
@@ -339,14 +256,6 @@ class Client extends UTXOClient {
     })
 
     return { psbt, utxos, inputs }
-  }
-  private async scanUTXOs(
-    address: string,
-    confirmedOnly = true, // default: scan only confirmed UTXOs
-  ): Promise<UTXO[]> {
-    return confirmedOnly
-      ? await this.dataProviders[this.network].getConfirmedUnspentTxs(address)
-      : await this.dataProviders[this.network].getUnspentTxs(address)
   }
 }
 

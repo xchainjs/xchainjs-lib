@@ -1,15 +1,16 @@
-import { Network } from '@xchainjs/xchain-client'
+import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import { Client, defaultBTCParams } from '../src/client'
-import { AssetBTC } from '../src/const'
+import { AssetBTC, sochainDataProviders } from '../src/const'
 
-const btcClient = new Client()
+export const sochainParams: UtxoClientParams = { ...defaultBTCParams, dataProviders: [sochainDataProviders] }
+const btcClient = new Client(sochainParams)
 
 const btcClientTestnet = new Client({
-  ...defaultBTCParams,
+  ...sochainParams,
   network: Network.Testnet,
-  phrase: process.env.TESTNETPHRASE,
+  phrase: process.env.TESTNETPHRASE || '',
 })
 describe('Bitcoin Integration Sochain Tests', () => {
   it('should fetch address balance', async () => {

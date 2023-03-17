@@ -1,7 +1,7 @@
-import { Balance, Network, Tx, TxHash, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
 import { Address, Asset } from '@xchainjs/xchain-util'
 
 import { ExplorerProvider } from './explorer-provider'
+import { Balance, Network, Tx, TxHash, TxHistoryParams, TxsPage } from './types'
 
 export type Witness = {
   value: number
@@ -27,5 +27,5 @@ export interface UtxoOnlineDataProvider extends OnlineDataProvider {
 }
 
 export type ExplorerProviders = Record<Network, ExplorerProvider>
-export type OnlineDataProviders = Record<Network, OnlineDataProvider>
-export type UtxoOnlineDataProviders = Record<Network, UtxoOnlineDataProvider>
+export type OnlineDataProviders = Record<Network, OnlineDataProvider | undefined>
+export type UtxoOnlineDataProviders = Record<Network, UtxoOnlineDataProvider | undefined>

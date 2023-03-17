@@ -1,7 +1,7 @@
-import { Network } from '@xchainjs/xchain-client'
+import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
-import { BitcoinClientParams, Client } from '../src/client'
+import { Client } from '../src/client'
 import {
   AssetBTC,
   HaskoinDataProviders,
@@ -10,11 +10,11 @@ import {
   blockstreamExplorerProviders,
 } from '../src/const'
 
-const defaultBTCParams: BitcoinClientParams = {
+const defaultBTCParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
-  dataProviders: HaskoinDataProviders,
+  dataProviders: [HaskoinDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
     [Network.Testnet]: `84'/1'/0'/0/`,

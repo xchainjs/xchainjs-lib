@@ -1,5 +1,5 @@
 {
-  "name": "@xchainjs/xchain-providers",
+  "name": "@xchainjs/xchain-utxo-providers",
   "version": "0.1.0",
   "license": "MIT",
   "main": "lib/index.js",
@@ -28,13 +28,13 @@
     "access": "public"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.13.5",
+    "@xchainjs/xchain-client": "^0.13.6",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.12.0",
     "axios": "^0.25.0"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.13.5",
+    "@xchainjs/xchain-client": "^0.13.6",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.12.0",
     "axios": "^0.25.0"

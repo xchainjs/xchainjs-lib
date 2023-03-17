@@ -1,5 +1,3 @@
-export * from './etherscan/types'
-export * from './etherscan/etherscan-data-provider'
 export * from './sochainv3/sochain-api-types'
 export * from './sochainv3/sochain-api'
 export * from './sochainv3/sochain-data-provider'

@@ -1,25 +1,15 @@
 import {
-  Balance,
   Fee,
   FeeRate,
   Network,
-  Tx,
   TxHash,
-  TxHistoryParams,
   TxParams,
-  TxsPage,
+  UTXO,
   UTXOClient,
-  XChainClientParams,
+  UtxoClientParams,
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import {
-  ExplorerProvider,
-  ExplorerProviders,
-  UTXO,
-  UtxoOnlineDataProvider,
-  UtxoOnlineDataProviders,
-} from '@xchainjs/xchain-providers'
 import { Address } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import * as Dogecoin from 'bitcoinjs-lib'
@@ -37,15 +27,11 @@ import * as Utils from './utils'
 
 const DEFAULT_SUGGESTED_TRANSACTION_FEE = 150000
 
-export type DogecoinClientParams = XChainClientParams & {
-  explorerProviders: ExplorerProviders
-  dataProviders: UtxoOnlineDataProviders
-}
-export const defaultBTCParams: DogecoinClientParams = {
+export const defaultDogeParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
-  dataProviders: blockcypherDataProviders,
+  dataProviders: [blockcypherDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/44'/3'/0'/0/`,
     [Network.Stagenet]: `m/44'/3'/0'/0/`,
@@ -56,13 +42,10 @@ export const defaultBTCParams: DogecoinClientParams = {
     upper: UPPER_FEE_BOUND,
   },
 }
-
 /**
  * Custom Dogecoin client
  */
 class Client extends UTXOClient {
-  private explorerProviders: Record<Network, ExplorerProvider>
-  private dataProviders: Record<Network, UtxoOnlineDataProvider>
   /**
    * Constructor
    * Client is initialised with network type
@@ -70,43 +53,15 @@ class Client extends UTXOClient {
    *
    * @param {DogecoinClientParams} params
    */
-  constructor(params = defaultBTCParams) {
+  constructor(params = defaultDogeParams) {
     super(DOGEChain, {
       network: params.network,
       rootDerivationPaths: params.rootDerivationPaths,
       phrase: params.phrase,
       feeBounds: params.feeBounds,
+      explorerProviders: params.explorerProviders,
+      dataProviders: params.dataProviders,
     })
-    this.explorerProviders = params.explorerProviders
-    this.dataProviders = params.dataProviders
-  }
-
-  /**
-   * Get the explorer url.
-   *
-   * @returns {string} The explorer url based on the network.
-   */
-  getExplorerUrl(): string {
-    return this.explorerProviders[this.network].getExplorerUrl()
-  }
-
-  /**
-   * Get the explorer url for the given address.
-   *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address based on the network.
-   */
-  getExplorerAddressUrl(address: Address): string {
-    return this.explorerProviders[this.network].getExplorerAddressUrl(address)
-  }
-  /**
-   * Get the explorer url for the given transaction id.
-   *
-   * @param {string} txID The transaction id
-   * @returns {string} The explorer url for the given transaction id based on the network.
-   */
-  getExplorerTxUrl(txID: string): string {
-    return this.explorerProviders[this.network].getExplorerTxUrl(txID)
   }
 
   /**
@@ -174,45 +129,6 @@ class Client extends UTXOClient {
     return Utils.validateAddress(address, this.network)
   }
 
-  /**
-   * Get the Doge balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Balance[]} The Doge balance of the address.
-   */
-  async getBalance(address: Address): Promise<Balance[]> {
-    return await this.dataProviders[this.network].getBalance(address)
-  }
-
-  /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   */
-  async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const filteredParams: TxHistoryParams = {
-      address: params?.address || this.getAddress(),
-      offset: params?.offset,
-      limit: params?.limit,
-      startTime: params?.startTime,
-      asset: params?.asset,
-    }
-
-    return await this.dataProviders[this.network].getTransactions(filteredParams)
-  }
-
-  /**
-   * Get the transaction details of a given transaction id.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   */
-  async getTransactionData(txId: string): Promise<Tx> {
-    return await this.dataProviders[this.network].getTransactionData(txId)
-  }
-
   protected async getSuggestedFeeRate(): Promise<FeeRate> {
     try {
       const response = await axios.get(`https://api.blockcypher.com/v1/doge/main`)
@@ -246,7 +162,7 @@ class Client extends UTXOClient {
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
-    return await this.dataProviders[this.network].broadcastTx(txHex)
+    return await this.roundRobinBroadcastTx(txHex)
   }
 
   /**
@@ -335,21 +251,6 @@ class Client extends UTXOClient {
       newTxHex: psbt.data.globalMap.unsignedTx.toBuffer().toString('hex'),
     }
     return ledgerTxInfo
-  }
-
-  /**
-   * Scan UTXOs from provider
-   *
-   * @param params
-   * @returns {UTXO[]} The UTXOs of the given address.
-   */
-  private async scanUTXOs(
-    address: string,
-    confirmedOnly = true, // default: scan only confirmed UTXOs
-  ): Promise<UTXO[]> {
-    return confirmedOnly
-      ? await this.dataProviders[this.network].getConfirmedUnspentTxs(address)
-      : await this.dataProviders[this.network].getUnspentTxs(address)
   }
 }
 

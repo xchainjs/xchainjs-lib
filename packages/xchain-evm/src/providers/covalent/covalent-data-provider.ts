@@ -3,6 +3,7 @@ import {
   FeeOption,
   FeeType,
   Fees,
+  OnlineDataProvider,
   Tx,
   TxFrom,
   TxHistoryParams,
@@ -12,8 +13,6 @@ import {
 } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
-
-import { OnlineDataProvider } from '../../provider-types'
 
 import {
   GetBalanceResponse,

@@ -1,13 +1,11 @@
-import { Network } from '@xchainjs/xchain-client'
+import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
+import { Asset } from '@xchainjs/xchain-util'
 import {
   BlockcypherNetwork,
   BlockcypherProvider,
-  ExplorerProvider,
   SochainNetwork,
   SochainProvider,
-} from '@xchainjs/xchain-providers'
-import { Asset } from '@xchainjs/xchain-util'
-
+} from '@xchainjs/xchain-utxo-providers'
 /**
  * Minimum transaction fee
  * 100000 satoshi/kB (similar to current `minrelaytxfee`)
@@ -88,7 +86,7 @@ const mainnetBlockcypherProvider = new BlockcypherProvider(
   BlockcypherNetwork.DOGE,
 )
 export const blockcypherDataProviders = {
-  [Network.Testnet]: testnetSochainProvider,
+  [Network.Testnet]: undefined, //no provider here
   [Network.Stagenet]: mainnetBlockcypherProvider,
   [Network.Mainnet]: mainnetBlockcypherProvider,
 }

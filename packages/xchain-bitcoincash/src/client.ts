@@ -1,140 +1,59 @@
 import * as bitcash from '@psf/bitcoincashjs-lib'
 import {
-  Balance,
   Fee,
   FeeOption,
   FeeRate,
   Network,
-  Tx,
   TxHash,
-  TxHistoryParams,
   TxParams,
-  TxsPage,
+  UTXO,
   UTXOClient,
-  XChainClientParams,
+  UtxoClientParams,
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
+import axios from 'axios'
+import accumulative from 'coinselect/accumulative'
 
-import { BCHChain, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
-import { getAccount, getSuggestedFee, getTransaction, getTransactions } from './haskoin-api'
-import { KeyPair } from './types/bitcoincashjs-types'
-import { ClientUrl } from './types/client-types'
+import { BCHChain, HaskoinDataProviders, LOWER_FEE_BOUND, UPPER_FEE_BOUND, explorerProviders } from './const'
+import { KeyPair, TransactionBuilder } from './types/bitcoincashjs-types'
 import * as Utils from './utils'
 
-export type BitcoinCashClientParams = XChainClientParams & {
-  haskoinUrl?: ClientUrl
+export const defaultBCHParams: UtxoClientParams = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: explorerProviders,
+  dataProviders: [HaskoinDataProviders],
+  rootDerivationPaths: {
+    [Network.Mainnet]: `m/44'/145'/0'/0/`,
+    [Network.Testnet]: `m/44'/1'/0'/0/`,
+    [Network.Stagenet]: `m/44'/145'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
 }
-
 /**
  * Custom Bitcoin Cash client
  */
 class Client extends UTXOClient {
-  private haskoinUrl: ClientUrl
-
   /**
    * Constructor
    * Client is initialised with network type
    *
-   * @param {BitcoinCashClientParams} params
+   * @param {UtxoClientParams} params
    */
-  constructor({
-    network = Network.Mainnet,
-    feeBounds = {
-      lower: LOWER_FEE_BOUND,
-      upper: UPPER_FEE_BOUND,
-    },
-    haskoinUrl = {
-      [Network.Testnet]: 'https://haskoin.ninerealms.com/bchtest',
-      [Network.Mainnet]: 'https://haskoin.ninerealms.com/bch',
-      [Network.Stagenet]: 'https://haskoin.ninerealms.com/bch',
-    },
-    phrase,
-    rootDerivationPaths = {
-      [Network.Mainnet]: `m/44'/145'/0'/0/`,
-      [Network.Testnet]: `m/44'/1'/0'/0/`,
-      [Network.Stagenet]: `m/44'/145'/0'/0/`,
-    },
-  }: BitcoinCashClientParams) {
-    super(BCHChain, { network, rootDerivationPaths, phrase, feeBounds })
-    this.network = network
-    this.haskoinUrl = haskoinUrl
-    this.rootDerivationPaths = rootDerivationPaths
-    phrase && this.setPhrase(phrase)
-  }
-
-  /**
-   * Set/Update the haskoin url.
-   *
-   * @param {string} url The new haskoin url.
-   * @returns {void}
-   */
-  setHaskoinURL(url: ClientUrl): void {
-    this.haskoinUrl = url
-  }
-
-  /**
-   * Get the haskoin url.
-   *
-   * @returns {string} The haskoin url based on the current network.
-   */
-  getHaskoinURL(): string {
-    return this.haskoinUrl[this.getNetwork()]
-  }
-
-  /**
-   * Get the explorer url.
-   *
-   * @returns {string} The explorer url based on the network.
-   */
-  getExplorerUrl(): string {
-    switch (this.network) {
-      case Network.Mainnet:
-      case Network.Stagenet:
-        return 'https://www.blockchain.com/bch'
-      case Network.Testnet:
-        return 'https://www.blockchain.com/bch-testnet'
-    }
-  }
-
-  /**
-   * Get the explorer url for the given address.
-   *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address based on the network.
-   */
-  getExplorerAddressUrl(address: Address): string {
-    return `${this.getExplorerUrl()}/address/${address}`
-  }
-
-  /**
-   * Get the explorer url for the given transaction id.
-   *
-   * @param {string} txID The transaction id
-   * @returns {string} The explorer url for the given transaction id based on the network.
-   */
-  getExplorerTxUrl(txID: string): string {
-    return `${this.getExplorerUrl()}/tx/${txID}`
-  }
-
-  /**
-   * @private
-   * Get private key.
-   *
-   * Private function to get keyPair from the this.phrase
-   *
-   * @param {string} phrase The phrase to be used for generating privkey
-   * @param {string} derivationPath BIP44 derivation path
-   * @returns {PrivateKey} The privkey generated from the given phrase
-   *
-   * @throws {"Invalid phrase"} Thrown if invalid phrase is provided.
-   * */
-  private getBCHKeys(phrase: string, derivationPath: string): KeyPair {
-    const rootSeed = getSeed(phrase)
-    const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, Utils.bchNetwork(this.network))
-
-    return masterHDNode.derivePath(derivationPath).keyPair
+  constructor(params = defaultBCHParams) {
+    super(BCHChain, {
+      network: params.network,
+      rootDerivationPaths: params.rootDerivationPaths,
+      phrase: params.phrase,
+      feeBounds: params.feeBounds,
+      explorerProviders: params.explorerProviders,
+      dataProviders: params.dataProviders,
+    })
   }
 
   /**
@@ -171,63 +90,26 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Get the BCH balance of a given address.
+   * @private
+   * Get private key.
    *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Balance[]} The BCH balance of the address.
+   * Private function to get keyPair from the this.phrase
    *
-   * @throws {"Invalid address"} Thrown if the given address is an invalid address.
-   */
-  async getBalance(address: Address): Promise<Balance[]> {
-    return Utils.getBalance({ haskoinUrl: this.getHaskoinURL(), address })
-  }
-
-  /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
+   * @param {string} phrase The phrase to be used for generating privkey
+   * @param {string} derivationPath BIP44 derivation path
+   * @returns {PrivateKey} The privkey generated from the given phrase
    *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   *
-   * @throws {"Invalid address"} Thrown if the given address is an invalid address.
-   */
-  async getTransactions({ address, offset, limit }: TxHistoryParams): Promise<TxsPage> {
-    offset = offset || 0
-    limit = limit || 10
+   * @throws {"Invalid phrase"} Thrown if invalid phrase is provided.
+   * */
+  private getBCHKeys(phrase: string, derivationPath: string): KeyPair {
+    const rootSeed = getSeed(phrase)
+    const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, Utils.bchNetwork(this.network))
 
-    const account = await getAccount({ haskoinUrl: this.getHaskoinURL(), address })
-    const txs = await getTransactions({
-      haskoinUrl: this.getHaskoinURL(),
-      address,
-      params: { offset, limit },
-    })
-
-    if (!account) throw new Error(`Invalid address: ${address}`)
-    if (!txs) throw new Error(`Transactions could not found for address ${address}`)
-
-    return {
-      total: account.txs,
-      txs: txs.map(Utils.parseTransaction),
-    }
-  }
-
-  /**
-   * Get the transaction details of a given transaction id.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   *
-   * @throws {"Invalid TxID"} Thrown if the given transaction id is an invalid one.
-   */
-  async getTransactionData(txId: string): Promise<Tx> {
-    const tx = await getTransaction({ haskoinUrl: this.getHaskoinURL(), txId })
-    if (!tx) throw new Error('Invalid TxID')
-
-    return Utils.parseTransaction(tx)
+    return masterHDNode.derivePath(derivationPath).keyPair
   }
 
   protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    return await getSuggestedFee()
+    return await this.getSuggestedFee()
   }
 
   protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
@@ -244,15 +126,14 @@ class Client extends UTXOClient {
     const index = params.walletIndex || 0
     const derivationPath = this.getFullDerivationPath(index)
 
+    // set the default fee rate to `fast`
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
 
-    const { builder, inputs } = await Utils.buildTx({
+    const { builder, inputs } = await this.buildTx({
       ...params,
       feeRate,
       sender: this.getAddress(index),
-      haskoinUrl: this.getHaskoinURL(),
-      network: this.network,
     })
 
     const keyPair = this.getBCHKeys(this.phrase, derivationPath)
@@ -263,10 +144,85 @@ class Client extends UTXOClient {
 
     const txHex = builder.build().toHex()
 
-    return await Utils.broadcastTx({
-      txHex,
-      haskoinUrl: this.getHaskoinURL(),
+    return await this.roundRobinBroadcastTx(txHex)
+  }
+  private async buildTx({
+    amount,
+    recipient,
+    memo,
+    feeRate,
+    sender,
+  }: TxParams & {
+    feeRate: FeeRate
+    sender: Address
+  }): Promise<{
+    builder: TransactionBuilder
+    utxos: UTXO[]
+    inputs: UTXO[]
+  }> {
+    const recipientCashAddress = Utils.toCashAddress(recipient)
+    if (!this.validateAddress(recipientCashAddress)) throw new Error('Invalid address')
+
+    const utxos = await this.scanUTXOs(sender, false)
+    if (utxos.length === 0) throw new Error('No utxos to send')
+
+    const feeRateWhole = Number(feeRate.toFixed(0))
+    const compiledMemo = memo ? Utils.compileMemo(memo) : null
+
+    const targetOutputs = []
+
+    //1. add output amount and recipient to targets
+    targetOutputs.push({
+      address: recipient,
+      value: amount.amount().toNumber(),
     })
+    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+
+    // .inputs and .outputs will be undefined if no solution was found
+    if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
+
+    const transactionBuilder = new bitcash.TransactionBuilder(Utils.bchNetwork(this.network))
+
+    //Inputs
+    inputs.forEach((utxo: UTXO) =>
+      transactionBuilder.addInput(bitcash.Transaction.fromBuffer(Buffer.from(utxo.txHex || '', 'hex')), utxo.index),
+    )
+
+    // Outputs
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    outputs.forEach((output: any) => {
+      let out = undefined
+      if (!output.address) {
+        //an empty address means this is the  change address
+        out = bitcash.address.toOutputScript(Utils.toLegacyAddress(sender), Utils.bchNetwork(this.network))
+      } else if (output.address) {
+        out = bitcash.address.toOutputScript(Utils.toLegacyAddress(output.address), Utils.bchNetwork(this.network))
+      }
+      transactionBuilder.addOutput(out, output.value)
+    })
+
+    // add output for memo
+    if (compiledMemo) {
+      transactionBuilder.addOutput(compiledMemo, 0) // Add OP_RETURN {script, value}
+    }
+
+    return {
+      builder: transactionBuilder,
+      utxos,
+      inputs,
+    }
+  }
+
+  private async getSuggestedFee(): Promise<number> {
+    //Note: Haskcoin does not provide fee rate related data
+    //So use Bitgo API for fee estimation
+    //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
+    try {
+      const response = await axios.get('https://app.bitgo.com/api/v2/bch/tx/fee')
+      return response.data.feePerKb / 1000 // feePerKb to feePerByte
+    } catch (error) {
+      return Utils.DEFAULT_SUGGESTED_TRANSACTION_FEE
+    }
   }
 }
 
