@@ -91,15 +91,15 @@ describe('Bitcoin Integration Tests for Haskoin', () => {
     // }
   })
   it('should fetch btc tx data using haskoin', async () => {
-    const txId = '3b250bfd61e7f231a22c6e02f9927927ac33e40c8b343716e08fec29c509ab54'
-    const tx = await btcClient.getTransactionData(txId)
-    //console.log(JSON.stringify(tx, null, 2))
+    const txId = 'af6003c802751d7a9a8583abe730c3335859dd8d3fef13161b3201a24f44cf91'
+    const tx = await btcClientTestnet.getTransactionData(txId)
+    console.log(JSON.stringify(tx, null, 2))
     expect(tx.hash).toBe(txId)
   })
   it('should send a testnet btc tx using haskoin', async () => {
     try {
-      const from = btcClientTestnet.getAddress(0)
-      console.log(from)
+      // const from = btcClientTestnet.getAddress(0)
+      // console.log(from)
       const to = btcClientTestnet.getAddress(1)
       const amount = assetToBase(assetAmount('0.00001'))
       const txid = await btcClientTestnet.transfer({

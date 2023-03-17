@@ -1,10 +1,10 @@
 import { Balance, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
-import { Address, Asset, Chain, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 
 import { UTXO, UtxoOnlineDataProvider } from '../../provider-types'
 
 import * as haskoin from './haskoin-api'
-import { AddressUTXO, HaskoinNetwork, Transaction } from './haskoin-api-types'
+import { HaskoinNetwork, Transaction, TxUnspent } from './haskoin-api-types'
 
 export class HaskoinProvider implements UtxoOnlineDataProvider {
   private baseUrl: string
@@ -37,7 +37,7 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
   }
 
   async getConfirmedUnspentTxs(address: string): Promise<UTXO[]> {
-    const allUnspent = await haskoin.getUnspentTxs({
+    const allUnspent = await haskoin.getUnspentTransactions({
       haskoinUrl: this.baseUrl,
       network: this.haskoinNetwork,
       address,
@@ -52,7 +52,7 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
       address,
     })
 
-    return this.mapUTXOs(allUnspent)
+    return await this.mapUTXOs(allUnspent)
   }
 
   async getBalance(address: Address, assets?: Asset[] /*ignored*/, confirmedOnly?: boolean): Promise<Balance[]> {
@@ -122,7 +122,7 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
       const rawTx = await haskoin.getTx({
         haskoinUrl: this.baseUrl,
         network: this.haskoinNetwork,
-        hash: txId,
+        txId: txId,
       })
       return this.mapTransactionToTx(rawTx)
     } catch (error) {
@@ -130,17 +130,23 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
       throw error
     }
   }
-
-  private mapUTXOs(utxos: AddressUTXO[]): UTXO[] {
-    return utxos.map((utxo) => ({
-      hash: utxo.txid,
-      index: utxo.index,
-      value: assetToBase(assetAmount(utxo.value, this.assetDecimals)).amount().toNumber(),
-      witnessUtxo: {
-        value: assetToBase(assetAmount(utxo.value, this.assetDecimals)).amount().toNumber(),
-        script: Buffer.from(utxo.pkscript, 'hex'),
-      },
-      txHex: utxo.tx_hex,
-    }))
+  /**
+   *
+   * @param utxos
+   * @returns utxo array
+   */
+  private async mapUTXOs(utxos: TxUnspent[]): Promise<UTXO[]> {
+    return await Promise.all(
+      utxos.map(async (utxo) => ({
+        hash: utxo.txid,
+        index: utxo.index,
+        value: baseAmount(utxo.value, this.assetDecimals).amount().toNumber(),
+        witnessUtxo: {
+          value: baseAmount(utxo.value, this.assetDecimals).amount().toNumber(),
+          script: Buffer.from(utxo.pkscript, 'hex'),
+        },
+        txHex: await haskoin.getTxHex({ haskoinUrl: this.baseUrl, txId: utxo.txid, network: this.haskoinNetwork }),
+      })),
+    )
   }
 }

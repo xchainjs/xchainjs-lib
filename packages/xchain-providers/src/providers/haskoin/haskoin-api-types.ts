@@ -13,19 +13,20 @@ export enum HaskoinNetwork {
 }
 
 export type AddressParams = {
-  apiKey: string
   haskoinUrl: string
   network: HaskoinNetwork
   address: string
-  page: number
 }
+export type ErrorResponse = { error: unknown }
 
-// export type UtxoData = {
-//   txid: string
-//   index: number
-//   value: number
-//   pkscript: string
-// }
+export type AddressBalance = {
+  received: number
+  utxo: number
+  address: string
+  txs: number
+  unconfirmed: number
+  confirmed: number
+}
 
 export type BalanceData = {
   address: Address
@@ -34,6 +35,10 @@ export type BalanceData = {
   utxo: number
   txs: number
   received: number
+}
+
+export type RawTransaction = {
+  result: string
 }
 
 export type AddressDTO = {
@@ -48,7 +53,7 @@ export type AddressDTO = {
 export type TxHashParams = {
   haskoinUrl: string
   network: HaskoinNetwork
-  hash: TxHash
+  txId: TxHash
 }
 export interface TxIO {
   txid: number
@@ -105,4 +110,16 @@ export type AddressUTXO = {
 }
 export type UnspentTxsDTO = {
   outputs: AddressUTXO[]
+}
+
+export type TxUnspent = {
+  pkscript: string
+  value: number
+  address: string
+  block: {
+    height: number
+    position: number
+  }
+  index: number
+  txid: string
 }

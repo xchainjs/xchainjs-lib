@@ -258,8 +258,16 @@ class Client extends UTXOClient {
     psbt.signAllInputs(btcKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
-
-    return await this.dataProviders[this.network].broadcastTx(txHex)
+    const txHash = psbt.extractTransaction().getId()
+    try {
+      const txId = await this.dataProviders[this.network].broadcastTx(txHex)
+      return txId
+    } catch (err) {
+      const error = `Server error, please check explorer for tx confirmation ${this.explorerProviders[
+        this.network
+      ].getExplorerTxUrl(txHash)}`
+      return error
+    }
   }
   private async buildTx({
     amount,
@@ -280,7 +288,6 @@ class Client extends UTXOClient {
     // search only confirmed UTXOs if pending UTXO is not allowed
     const confirmedOnly = !spendPendingUTXO
     const utxos = await this.scanUTXOs(sender, confirmedOnly)
-
     if (utxos.length === 0)
       throw new Error('No confirmed UTXOs. Please wait until your balance has been confirmed on-chain.')
     if (!this.validateAddress(recipient)) throw new Error('Invalid address')

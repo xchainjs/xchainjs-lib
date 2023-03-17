@@ -20,6 +20,7 @@ export {
   getBalance,
   getConfirmedTxStatus,
   getConfirmedUnspentTxs,
+  getAccount,
   getIsTxConfirmed,
   getTx,
   getTxs,
