@@ -1,4 +1,4 @@
-import { UTXO } from '@xchainjs/xchain-providers'
+import { UTXO } from '@xchainjs/xchain-client'
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import mockHaskoinApi from '../__mocks__/haskoin'
