@@ -95,6 +95,7 @@ describe('Bitcoincash Integration Tests for Haskoin', () => {
   })
   it('should send a testnet bch tx using haskoin', async () => {
     try {
+      console.log(bchClientTestnet.getAddress(0))
       const to = bchClientTestnet.getAddress(1)
       const amount = assetToBase(assetAmount('0.00001'))
       const txid = await bchClientTestnet.transfer({
