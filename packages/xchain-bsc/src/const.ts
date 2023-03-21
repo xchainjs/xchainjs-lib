@@ -1,6 +1,6 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
-import { EtherscanProvider, EVMClientParams } from '@xchainjs/xchain-evm'
-import { Asset, Chain } from '@xchainjs/xchain-util'
+import { EVMClientParams, EtherscanProvider } from '@xchainjs/xchain-evm'
+import { Asset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
 export const LOWER_FEE_BOUND = 2_000_000_000
@@ -12,7 +12,7 @@ export const BSC_GAS_ASSET_DECIMAL = 18
  * Chain identifier for BSC.
  *
  */
-export const BSCChain: Chain = 'BSC'
+export const BSCChain = 'BSC' as const
 
 /**
  * Base "chain" asset of Binance smart chain.
