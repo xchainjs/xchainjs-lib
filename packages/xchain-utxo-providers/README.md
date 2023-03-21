@@ -42,26 +42,31 @@ export interface UtxoOnlineDataProvider extends OnlineDataProvider {
 }
 ```
 
-
 ## Implementations
 
 ### sochain v3
 
+```
 Website:          https://sochain.com/api/
 Status:           Complete
 FreeTier:         No
 Chains supported: BTC,BTC-Testnet,LTC,LTC-Testnet,DOGE,DOGE-Testnet
+```
 
 ### blockcypher
 
+```
 Website:         https://www.blockcypher.com/
 Status:           Complete
 FreeTier:         Yes, rate limited 3 reqs/sec
 Chains supported: BTC,BTC-Testnet,LTC,DOGE
+```
 
 ### haskoin
 
+```
 Website:         https://www.haskoin.com/
 Status:           Complete
 FreeTier:         Yes, rate limit unknown
 Chains supported:  BTC,BTC-Testnet,BCH,BCH-Testnet
+```
