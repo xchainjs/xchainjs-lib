@@ -194,7 +194,6 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
         limit: 2000, // fetch the maximum
         unspentOnly,
       })
-      console.log(JSON.stringify(response, null, 2))
 
       //remove duplicates
       const txs = response.txrefs.map((i) => i.tx_hash)
