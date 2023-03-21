@@ -3,7 +3,7 @@ import { assetToString } from '@xchainjs/xchain-util'
 import { Client } from '../src/client'
 import { AssetDOGE } from '../src/const'
 
-const dogeClient = new Client({ sochainApiKey: process.env.SOCHAIN_API_KEY || '' })
+const dogeClient = new Client()
 
 describe('Dogecoin Integration Tests', () => {
   it('should fetch address balance', async () => {

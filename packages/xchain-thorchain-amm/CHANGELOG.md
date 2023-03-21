@@ -1,3 +1,10 @@
+# v0.3.19 (2023-03-21)
+
+## FIX
+
+- Update package deps
+- Update wallet client() settings
+
 # v0.3.18 (2023-3-2)
 
 ## FIX

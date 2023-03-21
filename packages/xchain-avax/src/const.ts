@@ -1,5 +1,5 @@
-import { Network } from '@xchainjs/xchain-client'
-import { EVMClientParams, EtherscanProvider, ExplorerProvider } from '@xchainjs/xchain-evm'
+import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
+import { EVMClientParams, EtherscanProvider } from '@xchainjs/xchain-evm'
 import { Asset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 

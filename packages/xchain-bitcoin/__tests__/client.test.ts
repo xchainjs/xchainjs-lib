@@ -1,12 +1,36 @@
-import { Network } from '@xchainjs/xchain-client'
+import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
 
 import mockHaskoinApi from '../__mocks__/haskoin'
+import mocktxId from '../__mocks__/response/broadcast_tx/broadcast_transaction.json'
 import mockSochainApi from '../__mocks__/sochain'
 import { Client } from '../src/client'
-import { AssetBTC, MIN_TX_FEE } from '../src/const'
+import {
+  AssetBTC,
+  LOWER_FEE_BOUND,
+  MIN_TX_FEE,
+  SochainDataProviders,
+  UPPER_FEE_BOUND,
+  blockstreamExplorerProviders,
+} from '../src/const'
 
-const btcClient = new Client({ sochainApiKey: 'mock' })
+export const defaultBTCParams: UtxoClientParams = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: blockstreamExplorerProviders,
+  dataProviders: [SochainDataProviders],
+  rootDerivationPaths: {
+    [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
+    [Network.Testnet]: `84'/1'/0'/0/`,
+    [Network.Stagenet]: `84'/0'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
+}
+
+const btcClient = new Client({ ...defaultBTCParams })
 
 describe('BitcoinClient Test', () => {
   beforeEach(() => {
@@ -58,10 +82,7 @@ describe('BitcoinClient Test', () => {
 
   it('should not throw on a client without a phrase', () => {
     expect(() => {
-      new Client({
-        sochainApiKey: 'mock',
-        network: Network.Testnet,
-      })
+      new Client()
     }).not.toThrow()
   })
 
@@ -82,7 +103,7 @@ describe('BitcoinClient Test', () => {
     expect(valid).toBeTruthy()
   })
 
-  it('all balances', async () => {
+  it('all balances test', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const balance = await btcClient.getBalance(btcClient.getAddress())
@@ -119,7 +140,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
     const txid = await btcClient.transfer({ walletIndex: 0, asset: AssetBTC, recipient: addyTwo, amount, feeRate: 1 })
-    expect(txid).toEqual('mock-txid')
+    expect(txid).toEqual(mocktxId.tx_hex)
   })
 
   it('should broadcast a normal transfer without feeRate option', async () => {
@@ -127,7 +148,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     const amount = baseAmount(2223)
     const txid = await btcClient.transfer({ asset: AssetBTC, recipient: addyTwo, amount })
-    expect(txid).toEqual('mock-txid')
+    expect(txid).toEqual(mocktxId.tx_hex)
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
@@ -150,7 +171,7 @@ describe('BitcoinClient Test', () => {
         memo: MEMO,
         feeRate: 1,
       })
-      expect(txid).toEqual('mock-txid')
+      expect(txid).toEqual(mocktxId.tx_hex)
     } catch (err) {
       console.error('ERR running test', err)
       throw err
@@ -363,10 +384,10 @@ describe('BitcoinClient Test', () => {
 
   it('should return valid explorer url', () => {
     btcClient.setNetwork(Network.Mainnet)
-    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info')
+    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info/')
 
     btcClient.setNetwork(Network.Testnet)
-    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info/testnet')
+    expect(btcClient.getExplorerUrl()).toEqual('https://blockstream.info/testnet/')
   })
 
   it('should return valid explorer address url', () => {

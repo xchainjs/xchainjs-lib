@@ -3,7 +3,7 @@ import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
 import { BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
-import { Balance, FeeOption, XChainClient } from '@xchainjs/xchain-client'
+import { Balance, FeeOption, Network, XChainClient } from '@xchainjs/xchain-client'
 import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
 import { Client as EthClient, ETHChain } from '@xchainjs/xchain-ethereum'
@@ -21,6 +21,7 @@ type AllBalances = {
   address: string
   balances: Balance[] | string
 }
+export type NodeUrls = Record<Network, string>
 
 /**
  * Wallet Class for managing all xchain-* wallets with a mnemonic seed.
@@ -37,15 +38,15 @@ export class Wallet {
    * @param thorchainCache - an instance of the ThorchainCache (could be pointing to stagenet,testnet,mainnet)
    * @returns Wallet
    */
-  constructor(phrase: string, thorchainQuery: ThorchainQuery, sochainApiKey: string) {
+  constructor(phrase: string, thorchainQuery: ThorchainQuery) {
     this.thorchainQuery = thorchainQuery
 
     const settings = { network: thorchainQuery.thorchainCache.midgard.network, phrase }
     this.clients = {
-      BCH: new BchClient(settings),
-      BTC: new BtcClient({ ...settings, sochainApiKey }),
-      DOGE: new DogeClient({ ...settings, sochainApiKey }),
-      LTC: new LtcClient({ ...settings, sochainApiKey }),
+      BCH: new BchClient(),
+      BTC: new BtcClient(),
+      DOGE: new DogeClient(),
+      LTC: new LtcClient(),
       ETH: new EthClient(settings),
       THOR: new ThorClient(settings),
       BNB: new BnbClient(settings),
@@ -53,6 +54,15 @@ export class Wallet {
       AVAX: new AvaxClient({ ...defaultAvaxParams, network: settings.network, phrase }),
       BSC: new BscClient({ ...defaultBscParams, network: settings.network, phrase }),
     }
+    this.clients.BCH.setNetwork(settings.network)
+    this.clients.BCH.setPhrase(settings.phrase, 0)
+    this.clients.BTC.setNetwork(settings.network)
+    this.clients.BTC.setPhrase(settings.phrase, 0)
+    this.clients.DOGE.setNetwork(settings.network)
+    this.clients.DOGE.setPhrase(settings.phrase, 0)
+    this.clients.LTC.setNetwork(settings.network)
+    this.clients.LTC.setPhrase(settings.phrase, 0)
+
     this.ethHelper = new EthHelper(this.clients.ETH, this.thorchainQuery.thorchainCache)
   }
 

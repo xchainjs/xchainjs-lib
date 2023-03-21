@@ -1,3 +1,9 @@
+# v.0.13.6 (2023-03-23)
+
+## Add
+
+- add OnlineDataProvider, UtxoOnlineDataProvider, ExplorerProvider
+
 # v.0.13.5 (2022-12-27)
 
 ## Update

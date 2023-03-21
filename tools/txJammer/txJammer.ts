@@ -2,6 +2,7 @@ import fs = require('fs')
 
 import { Network, TxParams } from '@xchainjs/xchain-client'
 import { decryptFromKeystore } from '@xchainjs/xchain-crypto'
+import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   AddliquidityPosition,
@@ -14,15 +15,7 @@ import {
   Thornode,
   WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
-import {
-  Asset,
-  AssetRuneNative,
-  THORChain,
-  assetAmount,
-  assetFromStringEx,
-  assetToBase,
-  assetToString,
-} from '@xchainjs/xchain-util'
+import { Asset, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
 import * as weighted from 'weighted'
 
 import {

@@ -2,7 +2,6 @@ import { Network } from '@xchainjs/xchain-client'
 import * as bchaddr from 'bchaddrjs'
 
 import mockHaskoinApi from '../__mocks__/haskoin'
-import { AssetBCH } from '../src/const'
 import * as Utils from '../src/utils'
 
 describe('Bitcoin Cash Utils Test', () => {
@@ -15,7 +14,7 @@ describe('Bitcoin Cash Utils Test', () => {
 
   const testnet_address = 'bchtest:qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g'
   const mainnet_address = 'bitcoincash:qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
-  const haskoinUrl = 'https://haskoin.ninerealms.com/btctest'
+  //const haskoinUrl = 'https://haskoin.ninerealms.com/btctest'
 
   describe('stripPrefix', () => {
     it('get the right vault fee', () => {
@@ -56,22 +55,4 @@ describe('Bitcoin Cash Utils Test', () => {
     })
   })
 
-  describe('getBalance', () => {
-    it('confirmed + unconfirmed', async () => {
-      const address = 'qr20g55jd7x3dalp4qxjfgfvda0nwr8cfccrgxd0dw'
-      const balance = await Utils.getBalance({ address, haskoinUrl })
-      expect(balance.length).toEqual(1)
-      expect(balance[0]?.asset).toEqual(AssetBCH)
-      expect(balance[0]?.amount.amount().toString()).toEqual('300000000')
-    })
-  })
-
-  describe('broadcastTx', () => {
-    it('returns txHash', async () => {
-      const txHex = '0xdead'
-
-      const txHash = await Utils.broadcastTx({ txHex, haskoinUrl })
-      expect(txHash).toEqual('mock-txid-haskoin')
-    })
-  })
 })

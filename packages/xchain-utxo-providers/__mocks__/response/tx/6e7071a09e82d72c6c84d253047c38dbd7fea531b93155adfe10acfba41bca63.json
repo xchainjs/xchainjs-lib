@@ -1,0 +1,73 @@
+{
+  "status": "success",
+  "data": {
+    "hash": "6e7071a09e82d72c6c84d253047c38dbd7fea531b93155adfe10acfba41bca63",
+    "confirmations": 521083,
+    "size": 223,
+    "vsize": 141,
+    "weight": 562,
+    "version": 1,
+    "locktime": 0,
+    "block_hash": "00000000aa4f0d731870acd255548212e89a85203b0b4d139dd6c34dae1ef70e",
+    "block_height": 1897436,
+    "time": 1607859595,
+    "inputs_n": 1,
+    "inputs_value": "0.00019800",
+    "inputs": [
+      {
+        "index": 0,
+        "value": "0.00019800",
+        "address": "tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp",
+        "scriptSig": {
+          "hex": "",
+          "asm": ""
+        },
+        "witness": [
+          "3045022100ed27c61eb1aa41d708dbb3f3c2520a56cef818ccd6c22064cbbb56d623064ace02206c438c5222e6be9846d28ea3ae4dadd2d036c335faf2b8d520027bd3418b31e601",
+          "034817f9a4e3cca3bcfa454a80fb1270543f0a170d0ab089bc9040d0431f858cde"
+        ],
+        "previous_output": {
+          "hash": "74eb646e971e5e44e3808e10fe85ec5ab8efec600e9c322b3a472e56ca8a8014",
+          "index": 1
+        }
+      }
+    ],
+    "outputs_n": 2,
+    "outputs_value": "0.00019658",
+    "outputs": [
+      {
+        "index": 0,
+        "value": "0.00002223",
+        "type": "witness_v0_keyhash",
+        "address": "tb1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rzgjhra4",
+        "script": {
+          "hex": "00147d48afcd6fef2047f9802b5147287399492fc462",
+          "asm": "0 7d48afcd6fef2047f9802b5147287399492fc462"
+        },
+        "spent": {
+          "hash": "9a01405ed79335a5898a8041dc24579c49dd3f62ec20ee509ce892a4259995b2",
+          "index": 2
+        }
+      },
+      {
+        "index": 1,
+        "value": "0.00017435",
+        "type": "witness_v0_keyhash",
+        "address": "tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp",
+        "script": {
+          "hex": "0014506ddfff434e99a93f0c0f5a47d0d7247d91cdac",
+          "asm": "0 506ddfff434e99a93f0c0f5a47d0d7247d91cdac"
+        },
+        "spent": {
+          "hash": "70f27da37df6183d357fa49267eee1934a2621b005edaa04899c5d80ef95de30",
+          "index": 0
+        }
+      }
+    ],
+    "fee": "0.00000142",
+    "price": {
+      "value": "0.00000000",
+      "currency": "USD"
+    }
+  }
+}

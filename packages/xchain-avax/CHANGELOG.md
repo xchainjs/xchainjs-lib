@@ -1,3 +1,9 @@
+# v.0.1.5 (2023-03-21)
+
+## Update
+
+- Update Explorer provider imports
+
 # v.0.1.4 (2023-01-19)
 
 ## Update

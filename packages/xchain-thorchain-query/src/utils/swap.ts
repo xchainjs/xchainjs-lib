@@ -237,7 +237,7 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
     case BTCChain:
       return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBTC)
       break
-    case BTCChain:
+    case BCHChain:
       return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBCH)
       break
     case LTCChain:

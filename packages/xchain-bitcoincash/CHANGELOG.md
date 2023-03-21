@@ -1,3 +1,9 @@
+# v.0.15.8 (2023-03-21)
+
+## Update
+
+- Update to use `xchain-uxto-providers`
+
 # v.0.15.7 (2023-01-19)
 
 ## Update

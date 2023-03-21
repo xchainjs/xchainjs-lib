@@ -3,7 +3,7 @@ import { assetToString } from '@xchainjs/xchain-util'
 import { Client } from '../src/client'
 import { AssetLTC } from '../src/const'
 
-const ltcClient = new Client({ sochainApiKey: process.env.SOCHAIN_API_KEY || '' })
+const ltcClient = new Client()
 
 describe('Litecoin Integration Tests', () => {
   it('should fetch address balance', async () => {

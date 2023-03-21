@@ -60,3 +60,53 @@ register9Rheader(cosmosclient.config.globalAxios)
 ```
 
 For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts)
+
+### UtxoOnlineDataProviders
+
+## default providers
+
+Creating a no-arg BTC Client will default to the following settings:
+
+```typescript
+const defaultBTCParams: UtxoClientParams = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: blockstreamExplorerProviders,
+  dataProviders: [BlockcypherDataProviders],
+  rootDerivationPaths: {
+    [Network.Mainnet]: `84'/0'/0'/0/`,
+    [Network.Testnet]: `84'/1'/0'/0/`,
+    [Network.Stagenet]: `84'/0'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
+}
+```
+
+Note: BlockCypher is the default online data provider (to fetch realtime utxos, balances, etc)
+
+## Overriding providers
+
+You can specify own array of providers, whoch will be executed in array-order, to provide automated failover to the subsequent providers if calls to the first providers fail
+
+### example sochain v3, blockcypher backup
+
+```typescript
+import { Client, defaultBTCParams, AssetBTC, SochainDataProviders, BlockcypherDataProviders } from '@xchainjs/xchain-bitcoin'
+import { SochainNetwork,  SochainProvider } from '@xchainjs/xchain-utxo-providers'
+import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
+
+// override with your API key
+SochainDataProviders[Network.Mainnet].apiKey = 'YOU_SOCHAIN_API_KEY'
+
+//overridde the default init params with your onfig
+const initParams: UtxoClientParams = {
+  ...defaultBTCParams,
+  dataProviders: [SochainDataProviders, BlockcypherDataProviders]// use sochain first and blockcypher as fallback
+  phrase: process.env.YOURPHRASE,
+}
+const btcClient = new Client(sochainParams)
+
+```

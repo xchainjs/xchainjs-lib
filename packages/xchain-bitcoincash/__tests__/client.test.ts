@@ -7,7 +7,7 @@ import mockThornodeApi from '../__mocks__/thornode'
 import { Client } from '../src/client'
 import { BCH_DECIMAL } from '../src/utils'
 
-const bchClient = new Client({})
+const bchClient = new Client()
 
 describe('BCHClient Test', () => {
   beforeEach(() => {
@@ -30,9 +30,7 @@ describe('BCHClient Test', () => {
 
   it('should not throw on a client without a phrase', () => {
     expect(() => {
-      new Client({
-        network: Network.Testnet,
-      })
+      new Client()
     }).not.toThrow()
   })
   it('Default network should be mainnet', () => {
@@ -79,10 +77,10 @@ describe('BCHClient Test', () => {
 
   it('should return valid explorer url', () => {
     bchClient.setNetwork(Network.Mainnet)
-    expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch')
+    expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch/')
 
     bchClient.setNetwork(Network.Testnet)
-    expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch-testnet')
+    expect(bchClient.getExplorerUrl()).toEqual('https://www.blockchain.com/bch-testnet/')
   })
 
   it('should return valid explorer address url', () => {
@@ -123,11 +121,11 @@ describe('BCHClient Test', () => {
     )
     expect(txData.hash).toEqual('0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b')
     expect(txData.from.length).toEqual(1)
-    expect(txData.from[0].from).toEqual('qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
+    expect(txData.from[0].from).toEqual('bchtest:qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
     expect(txData.from[0].amount.amount().isEqualTo(baseAmount(4008203, 8).amount())).toBeTruthy()
 
-    expect(txData.to.length).toEqual(1)
-    expect(txData.to[0].to).toEqual('qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
+    expect(txData.to.length).toEqual(2)
+    expect(txData.to[0].to).toEqual('bchtest:qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
     expect(txData.to[0].amount.amount().isEqualTo(baseAmount(4005704, 8).amount())).toBeTruthy()
   })
 
@@ -136,16 +134,15 @@ describe('BCHClient Test', () => {
     bchClient.setPhrase(phrase)
     const txs = await bchClient.getTransactions({
       address: 'qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf',
-      limit: 1,
     })
-    expect(txs.total).toEqual(1345)
-    expect(txs.txs[0].hash).toEqual('0d5764c89d3fbf8bea9b329ad5e0ddb6047e72313c0f7b54dcb14f4d242da64b')
+    expect(txs.total).toEqual(100)
+    expect(txs.txs[0].hash).toEqual('0957b51a39d6e67a7a3ced07b49a1102006cb51cea7c82b5a949a8678f3ac35c')
     expect(txs.txs[0].from.length).toEqual(1)
-    expect(txs.txs[0].from[0].from).toEqual('qzyrvsm6z4ucrhaq4zza3wylre7mavvldgr67jrxt4')
-    expect(txs.txs[0].from[0].amount.amount().isEqualTo(baseAmount(4008203, 8).amount())).toBeTruthy()
-    expect(txs.txs[0].to.length).toEqual(1)
-    expect(txs.txs[0].to[0].to).toEqual('qq235k7k9y5cwf3s2vfpxwgu8c5497sxnsdnxv6upc')
-    expect(txs.txs[0].to[0].amount.amount().isEqualTo(baseAmount(4005704, 8).amount())).toBeTruthy()
+    expect(txs.txs[0].from[0].from).toEqual('bchtest:qzmpc0fz8tdz9kkfhxzmu0rt6d23dvyusugshegndx')
+    expect(txs.txs[0].from[0].amount.amount().isEqualTo(baseAmount(3834, 8).amount())).toBeTruthy()
+    expect(txs.txs[0].to.length).toEqual(2)
+    expect(txs.txs[0].to[0].to).toEqual('bchtest:qz35h5mfa8w2pqma2jq06lp7dnv5fxkp2svtllzmlf')
+    expect(txs.txs[0].to[0].amount.amount().isEqualTo(baseAmount(600, 8).amount())).toBeTruthy()
   })
 
   it('should transfer bch', async () => {
