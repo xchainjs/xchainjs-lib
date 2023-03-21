@@ -1,3 +1,10 @@
+# v.0.21.0 (2023-03-21)
+
+## Update
+
+- add support for BlockCypher
+- Update to use `xchain-uxto-providers`
+
 # v.0.20.9 (2023-02-08)
 
 ## Update

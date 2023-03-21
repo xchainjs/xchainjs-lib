@@ -146,6 +146,41 @@ describe('Thorchain-query estimate Integration Tests', () => {
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })
+  it('should estimate a swap of 1 sETH to sBTC', async () => {
+    const sBTC = assetFromStringEx('BTC/BTC')
+    const sETH = assetFromStringEx('ETH/ETH')
+    if (!sBTC || !sETH) throw Error('err')
+
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(1)), sETH),
+      destinationAsset: sBTC,
+      destinationAddress: 'xxx',
+      affiliateFeeBasisPoints: 30, //optional
+      slipLimit: new BigNumber(0.02), //optional
+    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    expect(estimate.txEstimate.canSwap).toBe(true)
+    expect(estimate).toBeTruthy()
+  })
+  it('should estimate a swap of 1 sBNBETH to sETH', async () => {
+    const sBNBETH = assetFromStringEx('BNB/ETH-1C9')
+    console.log(USDCETH.ticker)
+    const sETH = assetFromStringEx('ETH/ETH')
+    if (!sBNBETH || !sETH) throw Error('err')
+
+    const swapParams: EstimateSwapParams = {
+      input: new CryptoAmount(assetToBase(assetAmount(1)), sETH),
+      destinationAsset: sBNBETH,
+      destinationAddress: 'xxx',
+      affiliateFeeBasisPoints: 30, //optional
+      slipLimit: new BigNumber(0.02), //optional
+    }
+    const estimate = await thorchainQuery.estimateSwap(swapParams)
+    printTx(estimate, swapParams.input)
+    expect(estimate.txEstimate.canSwap).toBe(true)
+    expect(estimate).toBeTruthy()
+  })
   it(`Should estimate single swap of 1000 RUNE To BTC `, async () => {
     const swapParams: EstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(1000, 8)), AssetRuneNative),

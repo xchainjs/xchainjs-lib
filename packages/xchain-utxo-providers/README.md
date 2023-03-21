@@ -4,7 +4,7 @@ A specification for a generalised interface for api providers, to be used by XCh
 
 ## Documentation
 
-### [`xchain providers`](http://docs.xchainjs.org/xchain-providers/)
+### [`xchain providers`](http://docs.xchainjs.org/xchain-xchain-utxo-providers/)
 
-[`Overview of xchain-providers`](http://docs.xchainjs.org/xchain-providers/overview.html)\
-[`Interface of xchain-providers`](http://docs.xchainjs.org/xchain-providers/interface.html)
+[`Overview of xchain-providers`](http://docs.xchainjs.org/xchain-utxo-providers/overview.html)\
+[`Interface of xchain-providers`](http://docs.xchainjs.org/xchain-utxo-providers/interface.html)

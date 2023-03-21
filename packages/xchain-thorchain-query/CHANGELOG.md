@@ -1,3 +1,11 @@
+# v0.2.0 (2023-3-21)
+
+## Fix
+
+- update package deps
+- Calculate network fee error
+- Fix validate estimate swap error
+
 # v0.1.19 (2023-3-03)
 
 ## Fix
