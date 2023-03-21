@@ -15,7 +15,7 @@ import { AddressUTXO, SochainNetwork } from './sochain-api-types'
 
 export class SochainProvider implements UtxoOnlineDataProvider {
   private baseUrl: string
-  private apiKey: string
+  private _apiKey: string
   private chain: Chain
   private asset: Asset
   private assetDecimals: number
@@ -30,7 +30,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
     sochainNetwork: SochainNetwork,
   ) {
     this.baseUrl = baseUrl
-    this.apiKey = apiKey
+    this._apiKey = apiKey
     this.chain = chain
     this.asset = asset
     this.assetDecimals = assetDecimals
@@ -38,9 +38,15 @@ export class SochainProvider implements UtxoOnlineDataProvider {
     this.asset
     this.chain
   }
+  public get apiKey(): string {
+    return this._apiKey
+  }
+  public set apiKey(value: string) {
+    this._apiKey = value
+  }
   async broadcastTx(txHex: string): Promise<TxHash> {
     return await sochain.broadcastTx({
-      apiKey: this.apiKey,
+      apiKey: this._apiKey,
       sochainUrl: this.baseUrl,
       network: this.sochainNetwork,
       txHex,
@@ -49,7 +55,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
 
   async getConfirmedUnspentTxs(address: string): Promise<UTXO[]> {
     const allUnspent = await sochain.getUnspentTxs({
-      apiKey: this.apiKey,
+      apiKey: this._apiKey,
       sochainUrl: this.baseUrl,
       network: this.sochainNetwork,
       address,
@@ -60,7 +66,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
   }
   async getUnspentTxs(address: string): Promise<UTXO[]> {
     const allUnspent = await sochain.getUnspentTxs({
-      apiKey: this.apiKey,
+      apiKey: this._apiKey,
       sochainUrl: this.baseUrl,
       network: this.sochainNetwork,
       address,
@@ -73,7 +79,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
     assets // TODO can we fix this?
     try {
       const amount = await sochain.getBalance({
-        apiKey: this.apiKey,
+        apiKey: this._apiKey,
         sochainUrl: this.baseUrl,
         network: this.sochainNetwork,
         address,
@@ -107,7 +113,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
     try {
       while (page <= lastPage) {
         const response = await sochain.getTxs({
-          apiKey: this.apiKey,
+          apiKey: this._apiKey,
           sochainUrl: this.baseUrl,
           network: this.sochainNetwork,
           address: `${params?.address}`,
@@ -155,7 +161,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
   async getTransactionData(txId: string): Promise<Tx> {
     try {
       const rawTx = await sochain.getTx({
-        apiKey: this.apiKey,
+        apiKey: this._apiKey,
         sochainUrl: this.baseUrl,
         network: this.sochainNetwork,
         hash: txId,

@@ -60,3 +60,29 @@ register9Rheader(cosmosclient.config.globalAxios)
 ```
 
 For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts)
+
+### UtxoOnlineDataProviders
+
+## default providers
+
+Creating a no-arg BCH Client will default to the following settings:
+
+```typescript
+defaultBCHParams: UtxoClientParams = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: explorerProviders,
+  dataProviders: [HaskoinDataProviders],
+  rootDerivationPaths: {
+    [Network.Mainnet]: `m/44'/145'/0'/0/`,
+    [Network.Testnet]: `m/44'/1'/0'/0/`,
+    [Network.Stagenet]: `m/44'/145'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
+}
+```
+
+Note: Haskoin is the default online data provider (to fetch realtime utxos, balances, etc)

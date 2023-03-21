@@ -39,3 +39,53 @@ This package uses the following service providers:
 Sochain API rate limits: https://sochain.com/api#rate-limits (300 requests/minute)
 
 BlockCypher API rate limits: https://api.blockcypher.com/v1/doge/main (5 requests/second)
+
+### UtxoOnlineDataProviders
+
+## default providers
+
+Creating a no-arg DOGE Client will default to the following settings:
+
+```typescript
+const defaultDogeParams: UtxoClientParams = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: blockstreamExplorerProviders,
+  dataProviders: [blockcypherDataProviders],
+  rootDerivationPaths: {
+    [Network.Mainnet]: `m/44'/3'/0'/0/`,
+    [Network.Stagenet]: `m/44'/3'/0'/0/`,
+    [Network.Testnet]: `m/44'/1'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
+}
+```
+
+Note: BlockCypher is the default online data provider (to fetch realtime utxos, balances, etc)
+
+## Overriding providers
+
+You can specify own array of providers, whoch will be executed in array-order, to provide automated failover to the subsequent providers if calls to the first providers fail
+
+### example sochain v3, blockcypher backup
+
+```typescript
+import { Client, defaultDogeParams, AssetDOGE, SochainDataProviders, BlockcypherDataProviders } from '@xchainjs/xchain-doge'
+import { SochainNetwork,  SochainProvider } from '@xchainjs/xchain-utxo-providers'
+import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
+
+// override with your API key
+SochainDataProviders[Network.Mainnet].apiKey = 'YOU_SOCHAIN_API_KEY'
+
+//overridde the default init params with your onfig
+const initParams: UtxoClientParams = {
+  ...defaultDogeParams,
+  dataProviders: [SochainDataProviders, BlockcypherDataProviders]// use sochain first and blockcypher as fallback
+  phrase: process.env.YOURPHRASE,
+}
+const DOGEClient = new Client(sochainParams)
+
+```

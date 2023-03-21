@@ -16,7 +16,7 @@ import { BlockcypherNetwork, Transaction } from './blockcypher-api-types'
 
 export class BlockcypherProvider implements UtxoOnlineDataProvider {
   private baseUrl: string
-  private apiKey?: string
+  private _apiKey?: string
   private chain: Chain
   private asset: Asset
   private assetDecimals: number
@@ -31,7 +31,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     apiKey?: string,
   ) {
     this.baseUrl = baseUrl
-    this.apiKey = apiKey
+    this._apiKey = apiKey
     this.chain = chain
     this.asset = asset
     this.assetDecimals = assetDecimals
@@ -39,10 +39,15 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     this.asset
     this.chain
   }
-
+  public get apiKey(): string | undefined {
+    return this._apiKey
+  }
+  public set apiKey(value: string | undefined) {
+    this._apiKey = value
+  }
   async broadcastTx(txHex: string): Promise<TxHash> {
     return await blockcypher.broadcastTx({
-      apiKey: this.apiKey,
+      apiKey: this._apiKey,
       baseUrl: this.baseUrl,
       network: this.blockcypherNetwork,
       txHex,
@@ -64,7 +69,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
   async getBalance(address: Address, assets?: Asset[] /*ignored*/, confirmedOnly?: boolean): Promise<Balance[]> {
     assets // TODO can we fix this?
     const amount = await blockcypher.getBalance({
-      apiKey: this.apiKey,
+      apiKey: this._apiKey,
       baseUrl: this.baseUrl,
       network: this.blockcypherNetwork,
       address,
@@ -100,7 +105,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
   async getTransactionData(txId: string): Promise<Tx> {
     try {
       const rawTx = await blockcypher.getTx({
-        apiKey: this.apiKey,
+        apiKey: this._apiKey,
         baseUrl: this.baseUrl,
         network: this.blockcypherNetwork,
         hash: txId,
@@ -187,7 +192,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     const txHashesToFetch: string[] = []
     try {
       const response = await blockcypher.getTxs({
-        apiKey: this.apiKey,
+        apiKey: this._apiKey,
         baseUrl: this.baseUrl,
         network: this.blockcypherNetwork,
         address: `${params?.address}`,
@@ -216,7 +221,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
       .process(async (hash) => {
         await this.delay(1000)
         const rawTx = await blockcypher.getTx({
-          apiKey: this.apiKey,
+          apiKey: this._apiKey,
           baseUrl: this.baseUrl,
           network: this.blockcypherNetwork,
           hash,

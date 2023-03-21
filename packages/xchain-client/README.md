@@ -7,3 +7,4 @@ A specification for a generalised interface for crypto wallets clients, to be us
 ### [`xchain client`](http://docs.xchainjs.org/xchain-client/)
 [`Overview of xchain-client`](http://docs.xchainjs.org/xchain-client/overview.html)\
 [`Interface of xchain-client`](http://docs.xchainjs.org/xchain-client/interface.html)
+
