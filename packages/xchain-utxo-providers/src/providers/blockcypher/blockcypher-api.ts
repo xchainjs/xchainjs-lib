@@ -1,5 +1,5 @@
 import { TxHash } from '@xchainjs/xchain-client'
-import { BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import {
@@ -88,11 +88,9 @@ export const getBalance = async ({
   if (apiKey) params['token'] = apiKey
   const response = await axios.get(url, { params })
   const balanceResponse: GetBalanceDTO = response.data
-  const total = assetAmount(balanceResponse.final_balance, assetDecimals)
-  const unconfirmed = assetAmount(balanceResponse.unconfirmed_balance, assetDecimals)
-  const netAmt = !confirmedOnly ? unconfirmed : total
-  const result = assetToBase(netAmt)
-  return result
+  const confirmedAmount = baseAmount(balanceResponse.balance, assetDecimals)
+  const finalBalance = baseAmount(balanceResponse.final_balance, assetDecimals)
+  return confirmedOnly ? confirmedAmount : finalBalance
 }
 
 /**

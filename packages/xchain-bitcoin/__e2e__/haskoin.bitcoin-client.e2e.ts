@@ -1,5 +1,5 @@
 import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
 import { Client } from '../src/client'
 import {
@@ -37,9 +37,9 @@ const btcClientTestnet = new Client({
 })
 describe('Bitcoin Integration Tests for Haskoin', () => {
   it('should fetch address balance using haskoin', async () => {
-    const balances = await btcClient.getBalance('bc1qd8jhw2m64r8lslzkx59h8jf3uhgw56grx5dqcf')
+    const balances = await btcClient.getBalance('bc1q3q6gfcg2n4c7hdzjsvpq5rp9rfv5t59t5myz5v')
     balances.forEach((bal) => {
-      console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
+      console.log(`${assetToString(bal.asset)} = ${baseToAsset(bal.amount).amount()}`)
     })
     expect(balances.length).toBeGreaterThan(0)
   })
