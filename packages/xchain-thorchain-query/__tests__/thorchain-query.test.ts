@@ -207,7 +207,7 @@ describe('Thorchain-query tests', () => {
   })
   it('Should estimate swap from GAIA/ATOM to ETH', async () => {
     const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount('112.242592', 6)), sATOM),
+      input: new CryptoAmount(assetToBase(assetAmount('112.242592', 8)), sATOM),
       destinationAsset: AssetETH,
       destinationAddress: 'xxx',
     }
