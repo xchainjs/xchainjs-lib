@@ -4,6 +4,7 @@
 
 - Synth bug `default` all synths to 8 decimals
 - Savers baseAmount bug, removed `+pool.nativeDecimals`
+- fix outboundfee calc 
 
 # v0.2.0 (2023-3-21)
 
