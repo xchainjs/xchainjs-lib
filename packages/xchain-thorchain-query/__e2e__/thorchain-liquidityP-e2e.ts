@@ -1,5 +1,4 @@
 import { AssetAVAX } from '@xchainjs/xchain-avax'
-import { AssetBNB } from '@xchainjs/xchain-binance'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetBCH } from '@xchainjs/xchain-bitcoincash'
 import { Network } from '@xchainjs/xchain-client'
@@ -278,8 +277,8 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
   it(`Should estimate saver withdrawal`, async () => {
     const withdrawPos: SaversWithdraw = {
-      address: `bnb150vpa06jrgucqz9ycgun73t0n0rrxq4m69fc22`,
-      asset: AssetBNB,
+      address: `bc1qpcaardpf2wzcu6uwd4hhsmt0fz8su80cjfk5lh`,
+      asset: AssetBTC,
       withdrawBps: 10000,
     }
     const estimateWithdrawSaver = await thorchainQuery.estimateWithdrawSaver(withdrawPos)

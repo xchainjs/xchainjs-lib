@@ -1,3 +1,9 @@
+# v.0.21.1 (2023-03-29)
+
+## Fix
+
+- make `buildtx` public again
+
 # v.0.21.0 (2023-03-21)
 
 ## Update

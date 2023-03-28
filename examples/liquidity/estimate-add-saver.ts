@@ -44,7 +44,6 @@ const estimateAddSaver = async () => {
       assetToBase(assetAmount(process.argv[3], Number(process.argv[4]))),
       assetFromStringEx(process.argv[5]),
     )
-
     const estimate = await thorchainQueryMainnet.estimateAddSaver(asset)
     printSaver(estimate)
   } catch (e) {

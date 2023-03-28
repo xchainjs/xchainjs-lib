@@ -146,7 +146,7 @@ class Client extends UTXOClient {
 
     return await this.roundRobinBroadcastTx(txHex)
   }
-  private async buildTx({
+  async buildTx({
     amount,
     recipient,
     memo,

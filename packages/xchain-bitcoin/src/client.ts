@@ -186,7 +186,7 @@ class Client extends UTXOClient {
       return error
     }
   }
-  private async buildTx({
+  async buildTx({
     amount,
     recipient,
     memo,

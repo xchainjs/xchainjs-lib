@@ -2,9 +2,9 @@ import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import { Client, defaultBTCParams } from '../src/client'
-import { AssetBTC, sochainDataProviders } from '../src/const'
+import { AssetBTC, SochainDataProviders } from '../src/const'
 
-export const sochainParams: UtxoClientParams = { ...defaultBTCParams, dataProviders: [sochainDataProviders] }
+export const sochainParams: UtxoClientParams = { ...defaultBTCParams, dataProviders: [SochainDataProviders] }
 const btcClient = new Client(sochainParams)
 
 const btcClientTestnet = new Client({
