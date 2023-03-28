@@ -235,7 +235,7 @@ export class ThorchainQuery {
         : await this.thorchainCache.convert(params.input, params.input.asset)
 
     const inboundFeeInInboundGasAsset = calcNetworkFee(input.asset, sourceInboundDetails)
-    let outboundFeeInOutboundGasAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails).times(3)
+    let outboundFeeInOutboundGasAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails)
 
     // Check outbound fee is equal too or greater than 1 USD * need to find a more permanent solution to this. referencing just 1 stable coin pool has problems
     if (params.destinationAsset.chain !== THORChain && !params.destinationAsset.synth) {
