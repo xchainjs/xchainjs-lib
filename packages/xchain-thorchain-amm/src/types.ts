@@ -9,6 +9,7 @@ export type ExecuteSwap = {
   memo: string
   feeOption?: FeeOption
   waitTimeSeconds: number
+  walletIndex: number
 }
 
 export type TxSubmitted = {
