@@ -83,6 +83,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAsset: AssetRuneNative,
       destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
       // affiliateFeePercent: 0.1,
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
 
     const outPutCanSwap = await mainetThorchainAmm.estimateSwap(estimateSwapParams)
@@ -98,6 +100,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       input: new CryptoAmount(assetToBase(assetAmount('0.0001')), AssetBTC),
       destinationAsset: AssetRuneNative,
       destinationAddress: mainnetWallet.clients['BNB'].getAddress(), // Wrong chain to trigger error
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     try {
       const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
@@ -117,6 +121,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAddress: mainnetWallet.clients['ETH'].getAddress(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
@@ -130,6 +136,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAddress: mainnetWallet.clients['ETH'].getAddress(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
@@ -143,6 +151,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAsset: sBTC,
       destinationAddress: mainnetWallet.clients[THORChain].getAddress(),
       slipLimit: new BigNumber(0.03),
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     try {
       const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
@@ -164,6 +174,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAsset: BUSD,
       destinationAddress: mainnetWallet.clients['BNB'].getAddress(),
       slipLimit: new BigNumber(0.09),
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     try {
       const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
@@ -181,6 +193,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAsset: sETH,
       destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
       slipLimit: new BigNumber(0.5),
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     try {
       const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
@@ -202,6 +216,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAsset: sETH,
       destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
       slipLimit: new BigNumber(0.5),
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     try {
       const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
@@ -224,6 +240,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAddress: mainnetWallet.clients['BNB'].getAddress(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
@@ -238,6 +256,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAddress: mainnetWallet.clients['ETH'].getAddress(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
@@ -252,6 +272,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
         destinationAsset: AssetRuneNative,
         destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
         slipLimit: new BigNumber('0.5'),
+        wallet: mainnetWallet,
+        walletIndex: 0,
       }
       const ethHelper = new EthHelper(mainnetWallet.clients.ETH, thorchainQueryMainnet.thorchainCache)
       const approved = await ethHelper.isTCRouterApprovedToSpend(
@@ -278,6 +300,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAddress: mainnetWallet.clients['ETH'].getAddress(),
       destinationAsset: XRUNE,
       slipLimit: new BigNumber('0.5'),
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     const ethHelper = new EthHelper(mainnetWallet.clients.ETH, thorchainQueryMainnet.thorchainCache)
     const approved = await ethHelper.isTCRouterApprovedToSpend(
@@ -298,6 +322,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAddress: stagenetWallet.clients[AVAXChain].getAddress(),
       destinationAsset: AssetAVAX,
       slipLimit: new BigNumber('0.5'),
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     const output = await stagenetThorchainAmm.doSwap(stagenetWallet, estimateSwapParams)
     console.log(output)
@@ -309,6 +335,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
       destinationAsset: AssetRuneNative,
       slipLimit: new BigNumber('0.5'),
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
@@ -320,6 +348,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       destinationAddress: mainnetWallet.clients[THORChain].getAddress(),
       destinationAsset: sATOM,
       slipLimit: new BigNumber('0.05'),
+      wallet: mainnetWallet,
+      walletIndex: 0,
     }
     const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)

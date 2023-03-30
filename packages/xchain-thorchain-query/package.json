@@ -33,7 +33,7 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
-    "@xchainjs/xchain-avax": "^0.1.4",
+    "@xchainjs/xchain-avax": "^0.1.5",
     "@xchainjs/xchain-binance": "^5.6.7",
     "@xchainjs/xchain-bitcoin": "^0.21.0",
     "@xchainjs/xchain-bitcoincash": "^0.15.8",
@@ -52,7 +52,7 @@
     "rimraf": "~3.0.2"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-avax": "^0.1.4",
+    "@xchainjs/xchain-avax": "^0.1.5",
     "@xchainjs/xchain-binance": "^5.6.7",
     "@xchainjs/xchain-bitcoin": "^0.21.0",
     "@xchainjs/xchain-bitcoincash": "^0.15.8",

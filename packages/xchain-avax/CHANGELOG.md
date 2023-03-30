@@ -1,3 +1,9 @@
+# v.0.1.6 (2023-03-30)
+
+## Fix
+
+- Corrected AVAX decimal in const.ts from 8 to 18
+
 # v.0.1.5 (2023-03-21)
 
 ## Update

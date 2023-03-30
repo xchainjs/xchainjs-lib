@@ -85,7 +85,7 @@ export class ThorchainAMM {
    * @param params - swap params
    * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
-  public async doSwap(wallet: Wallet, params: EstimateSwapParams): Promise<TxSubmitted> {
+  public async doSwap(wallet: Wallet, params: AmmEstimateSwapParams): Promise<TxSubmitted> {
     // Thorchain-query call satisfies the data needed for executeSwap to be called.
     const txDetails = await this.thorchainQuery.estimateSwap(params)
     if (!txDetails.txEstimate.canSwap) {
@@ -97,7 +97,7 @@ export class ThorchainAMM {
       destinationAddress: params.destinationAddress,
       memo: txDetails.memo,
       waitTimeSeconds: txDetails.txEstimate.waitTimeSeconds,
-      walletIndex: 0,
+      walletIndex: params.walletIndex,
     })
   }
 
