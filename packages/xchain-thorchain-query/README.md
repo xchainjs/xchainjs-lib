@@ -1,6 +1,7 @@
 # `@xchainjs/xchain-thorchain-query`
 
-Thorchain-query module to query thorchain for estimation of swaps. Returns a TxDetail object with all the information needed to conduct a swap.
+Thorchain-query module to query thorchain for estimation of swaps/ add and remove Liquidity and checking a transaction stage. 
+Returns a TxDetail object with all the information needed to conduct a swap, or add liquidity. This includes estimateAddSavers()
 
 ## Installation
 
@@ -41,11 +42,72 @@ Estimation example from a swap of 2 BTC to RUNE
 }
 ```
 
+Estimation of add symetric liquidity
+```ts
+{
+  rune: 'ᚱ 12,000',
+  asset: '⚡ 0',
+  slipPercent: '0.0747',
+  lpUnits: '154224962883',
+  runeToAssetRatio: '20064.69985077',
+  transactionFee: { assetFee: '⚡ 0', runeFee: 'ᚱ 0.02', totalFees: 'ᚱ 0.02' },
+  estimatedWaitSeconds: 6,
+  errors: [],
+  canAdd: true
+}
+```
+
+Estimation of remove Liquidity
+```ts
+{
+  asset: { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false },
+  percentage: 100,
+  assetAddress: 'bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn',
+  runeAddress: ''
+}
+{
+  slipPercent: '0.0000',
+  runeAmount: 'ᚱ 1,664,891.55918601',
+  assetAmount: '₿ 83.01517361',
+  inbound: {
+    assetFee: '⚡ 10,000',
+    runeFee: 'ᚱ 0.02',
+    totalFees: 'ᚱ 2.02552681'
+  },
+  impermanentLossProtection: {
+    ILProtection: CryptoAmount { asset: [Object], baseAmount: [Object] },
+    totalDays: '346.62'
+  },
+  estimatedWaitSeconds: 8400
+}
+```
+
+Estimation of Add Saver
+```ts
+{
+  assetAmount: '₿ 0.5',
+  estimatedDepositValue: '₿ 0.49937395',
+  fee: {
+    affiliateFee: '⚡ 0',
+    asset: { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: true },
+    outbound: '⚡ 0'
+  },
+  expiry: 2023-03-29T05:58:34.415Z,
+  toAddress: 'bc1qucjrczghvwl5d66klz6npv7tshkpwpzlw0zzj8',
+  memo: '+:BTC/BTC',
+  estimateWaitTime: 600,
+  saverCapFilledPercent: 266.3662135203711,
+  slipBasisPoints: 12,
+  canAdd: true,
+  errors: []
+}
+```
+
 ## Documentation
 
 [`Overview `](https://dev.thorchain.org/thorchain-dev/xchainjs-integration-guide/query-package)
 
-For bash exmples, see example folder at the base of this repository xchainjs/xchainjs-lib.
+For bash exmples, see example folder at the base of this repository xchainjs/xchainjs-lib/examples/liquidity.
 
 ### [`xchain-thorchain-query`](http://docs.xchainjs.org/xchain-thorchain-query/)
 
@@ -63,6 +125,8 @@ Get Network Values: https://replit.com/@thorchain/networkValues#index.ts\
 
 Estimate AddSaver() & WithdrawSaver() & getSaverPosition() https://replit.com/@thorchain/quoteDepositTS#index.ts
 
+Check transaction Stage 
+
 ### Setting Headers for Nine Realms endpoints
 
 If you plan on using the publically accessible endpoints provided by Nine Realms(listed below), ensure that you add a valid 'x-client-id' to all requests
@@ -71,7 +135,7 @@ If you plan on using the publically accessible endpoints provided by Nine Realms
 - https://haskoin.ninerealms.com (BTC/BCH/LTC)
 - https://thornode.ninerealms.com
 
-Example
+## Example
 
 ```typescript
 import cosmosclient from '@cosmos-client/core'

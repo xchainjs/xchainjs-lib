@@ -97,6 +97,7 @@ export class ThorchainAMM {
       destinationAddress: params.destinationAddress,
       memo: txDetails.memo,
       waitTimeSeconds: txDetails.txEstimate.waitTimeSeconds,
+      walletIndex: 0,
     })
   }
 
