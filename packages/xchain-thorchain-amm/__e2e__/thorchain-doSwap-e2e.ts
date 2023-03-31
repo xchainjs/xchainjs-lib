@@ -293,6 +293,24 @@ describe('xchain-swap doSwap Integration Tests', () => {
       console.error(error)
     }
   })
+
+  // From ERC to Rune - passes
+  it(`Should check validity of swap from ERC to Rune`, async () => {
+    try {
+      const estimateSwapParams = {
+        input: new CryptoAmount(assetToBase(assetAmount('0.005', USDT_DECIMAL)), USDT),
+        destinationAsset: AssetRuneNative,
+        destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
+        slipLimit: new BigNumber('0.5'),
+        wallet: mainnetWallet,
+        walletIndex: 0,
+      }
+      const isValidSwap = await mainetThorchainAmm.estimateSwap(estimateSwapParams)
+      console.log(isValidSwap)
+    } catch (error) {
+      console.error(error)
+    }
+  })
   // From ERC to ERC -- passes
   it(`Should perform a double swap from ERC to ERC`, async () => {
     const estimateSwapParams = {
