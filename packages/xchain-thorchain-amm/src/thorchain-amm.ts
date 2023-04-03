@@ -98,6 +98,7 @@ export class ThorchainAMM {
       memo: txDetails.memo,
       waitTimeSeconds: txDetails.txEstimate.waitTimeSeconds,
       walletIndex: params.walletIndex,
+      feeOption: params.feeOption,
     })
   }
 

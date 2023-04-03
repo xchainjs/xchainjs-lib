@@ -3,24 +3,19 @@ import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
 import { BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
-import { Balance, FeeOption, Network, XChainClient } from '@xchainjs/xchain-client'
+import { FeeOption, Network, XChainClient } from '@xchainjs/xchain-client'
 import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
-import { Client as EthClient, ETHChain } from '@xchainjs/xchain-ethereum'
+import { AssetETH, Client as EthClient, ETHChain } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, THORChain, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { Address, Chain } from '@xchainjs/xchain-util'
+import { Address, eqAsset } from '@xchainjs/xchain-util'
 
-import { AddLiquidity, ExecuteSwap, TxSubmitted, WithdrawLiquidity } from './types'
+import { AddLiquidity, AllBalances, ExecuteSwap, TxSubmitted, WithdrawLiquidity } from './types'
 import { EthHelper } from './utils/eth-helper'
 import { EvmHelper } from './utils/evm-helper'
 
-type AllBalances = {
-  chain: Chain
-  address: string
-  balances: Balance[] | string
-}
 export type NodeUrls = Record<Network, string>
 
 /**
@@ -77,19 +72,17 @@ export class Wallet {
    * @returns AllBalances[]
    */
   async getAllBalances(): Promise<AllBalances[]> {
-    const clientArray = Object.entries(this.clients)
-    const allBalances = await Promise.all(
-      clientArray.map(async (entry) => {
-        const chain = entry[0] as Chain
-        const address = entry[1].getAddress(0)
-        try {
-          const balances = await entry[1].getBalance(address)
-          return { chain, address, balances }
-        } catch (err) {
-          return { chain, address, balances: (err as Error).message }
-        }
-      }),
-    )
+    const allBalances: AllBalances[] = []
+
+    for (const [chain, client] of Object.entries(this.clients)) {
+      const address = client.getAddress(0)
+      try {
+        const balances = await client.getBalance(address)
+        allBalances.push({ chain, address, balances })
+      } catch (err) {
+        allBalances.push({ chain, address, balances: (err as Error).message })
+      }
+    }
     return allBalances
   }
 
@@ -101,7 +94,7 @@ export class Wallet {
    * @see ThorchainAMM.doSwap()
    */
   async executeSwap(swap: ExecuteSwap): Promise<TxSubmitted> {
-    this.validateSwap(swap)
+    await this.validateSwap(swap)
     if (swap.input.asset.chain === THORChain || swap.input.asset.synth) {
       return await this.swapRuneTo(swap)
     } else {
@@ -113,7 +106,7 @@ export class Wallet {
    *
    * @param swap  - swap parameters
    */
-  validateSwap(swap: ExecuteSwap) {
+  async validateSwap(swap: ExecuteSwap) {
     const errors: string[] = []
     const isThorchainDestinationAsset = swap.destinationAsset.synth || swap.destinationAsset.chain === THORChain
     const chain = isThorchainDestinationAsset ? THORChain : swap.destinationAsset.chain
@@ -134,9 +127,23 @@ export class Wallet {
           errors.push(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
       }
     }
-    // if erc-20, check thorchain router contract isApproved
+    if (swap.input.asset.chain === ETHChain) {
+      if (eqAsset(swap.input.asset, AssetETH) !== true) {
+        const isApprovedResult = await this.ethHelper.isTCRouterApprovedToSpend(
+          swap.input.asset,
+          swap.input.baseAmount,
+          swap.walletIndex,
+        )
+        console.log(isApprovedResult)
+        if (!isApprovedResult) {
+          errors.push('TC router has not been approved to spend this amount')
+        }
+      }
+    }
+    if (errors.length > 0)
+      // if erc-20, check thorchain router contract isApproved
 
-    if (errors.length > 0) throw Error(errors.join('\n'))
+      throw Error(errors.join('\n'))
   }
 
   private async isThorname(name: string): Promise<boolean> {

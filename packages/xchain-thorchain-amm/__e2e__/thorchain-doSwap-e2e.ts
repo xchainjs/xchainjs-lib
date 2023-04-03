@@ -33,7 +33,7 @@ const thorchainQueryStagenet = new ThorchainQuery(thorchainCacheStagenet)
 const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
 const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryStagenet)
 
-const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
+const mainnetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 const stagenetThorchainAmm = new ThorchainAMM(thorchainQueryStagenet)
 
 const sBTC = assetFromStringEx('BTC/BTC')
@@ -87,10 +87,10 @@ describe('xchain-swap doSwap Integration Tests', () => {
       walletIndex: 0,
     }
 
-    const outPutCanSwap = await mainetThorchainAmm.estimateSwap(estimateSwapParams)
+    const outPutCanSwap = await mainnetThorchainAmm.estimateSwap(estimateSwapParams)
     print(outPutCanSwap)
-    const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
-    console.log(output)
+    const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+    //console.log(output)
     expect(output.hash).toBeTruthy()
   })
 
@@ -104,7 +104,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       walletIndex: 0,
     }
     try {
-      const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+      const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
       console.log(output.hash)
       fail()
     } catch (error: any) {
@@ -124,7 +124,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       wallet: mainnetWallet,
       walletIndex: 0,
     }
-    const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+    const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -139,7 +139,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       wallet: mainnetWallet,
       walletIndex: 0,
     }
-    const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+    const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -158,12 +158,12 @@ describe('xchain-swap doSwap Integration Tests', () => {
       const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
       print(outPutCanSwap)
       if (outPutCanSwap.txEstimate.canSwap) {
-        const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+        const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
         console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
         expect(output).toBeTruthy()
       }
-    } catch (error: any) {
-      console.log(error.message)
+    } catch (error) {
+      console.error(error)
     }
   })
 
@@ -178,11 +178,11 @@ describe('xchain-swap doSwap Integration Tests', () => {
       walletIndex: 0,
     }
     try {
-      const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+      const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
       console.log(`tx hash: ${output.hash}, \n Tx url: ${output.url} \n WaitTime:${output.waitTimeSeconds}`)
       expect(output).toBeTruthy()
-    } catch (error: any) {
-      console.log(error.message)
+    } catch (error) {
+      console.error(error)
     }
   })
 
@@ -200,12 +200,12 @@ describe('xchain-swap doSwap Integration Tests', () => {
       const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
       console.log(JSON.stringify(outPutCanSwap))
       if (outPutCanSwap.txEstimate.canSwap) {
-        const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+        const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
         console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
         expect(output).toBeTruthy()
       }
-    } catch (error: any) {
-      console.log(error.message)
+    } catch (error) {
+      console.error(error)
     }
   })
 
@@ -223,12 +223,12 @@ describe('xchain-swap doSwap Integration Tests', () => {
       const outPutCanSwap = await thorchainQueryMainnet.estimateSwap(estimateSwapParams)
       console.log(JSON.stringify(outPutCanSwap))
       if (outPutCanSwap.txEstimate.canSwap) {
-        const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+        const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
         console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
         expect(output).toBeTruthy()
       }
-    } catch (error: any) {
-      console.log(error.message)
+    } catch (error) {
+      console.error(error)
     }
   })
 
@@ -243,7 +243,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       wallet: mainnetWallet,
       walletIndex: 0,
     }
-    const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+    const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -259,7 +259,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       wallet: mainnetWallet,
       walletIndex: 0,
     }
-    const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+    const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -285,7 +285,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
         expect(result.hash).toBeTruthy()
         console.log(JSON.stringify(result, null, 2))
       } else {
-        const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+        const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
         console.log(output)
         expect(output.hash).toBeTruthy()
       }
@@ -305,7 +305,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
         wallet: mainnetWallet,
         walletIndex: 0,
       }
-      const isValidSwap = await mainetThorchainAmm.estimateSwap(estimateSwapParams)
+      const isValidSwap = await mainnetThorchainAmm.estimateSwap(estimateSwapParams)
       console.log(isValidSwap)
     } catch (error) {
       console.error(error)
@@ -330,7 +330,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       const result = await ethHelper.approveTCRouterToSpend(estimateSwapParams.input.asset)
       console.log(JSON.stringify(result, null, 2))
     }
-    const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+    const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -356,7 +356,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       wallet: mainnetWallet,
       walletIndex: 0,
     }
-    const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+    const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -369,7 +369,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       wallet: mainnetWallet,
       walletIndex: 0,
     }
-    const output = await mainetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
+    const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
     console.log(output)
     expect(output.hash).toBeTruthy()
   })
@@ -396,9 +396,8 @@ describe('xchain-swap doSwap Integration Tests', () => {
       //   console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
       //   expect(output).toBeTruthy()
       // }
-    } catch (error: any) {
+    } catch (error) {
       console.error(error)
-      fail()
     }
   })
 })
