@@ -240,8 +240,7 @@ export class Wallet {
         feeOption: swap.feeOption || FeeOption.Fast,
         memo: swap.memo,
       }
-      const evmHelper = new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache)
-      const hash = await evmHelper.sendDeposit(params)
+      const hash = await this.evmHelpers['BSC'].sendDeposit(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
       const params = {
