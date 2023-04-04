@@ -1,26 +1,21 @@
-import { AVAXChain, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import { AVAXChain, AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
-import { BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
-import { Balance, FeeOption, Network, XChainClient } from '@xchainjs/xchain-client'
+import { AssetBSC, BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
+import { FeeOption, Network, XChainClient } from '@xchainjs/xchain-client'
 import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
-import { Client as EthClient, ETHChain } from '@xchainjs/xchain-ethereum'
+import { AssetETH, Client as EthClient, ETHChain } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, THORChain, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { Address, Chain } from '@xchainjs/xchain-util'
+import { Address, eqAsset } from '@xchainjs/xchain-util'
 
-import { AddLiquidity, ExecuteSwap, TxSubmitted, WithdrawLiquidity } from './types'
+import { AddLiquidity, AllBalances, ExecuteSwap, TxSubmitted, WithdrawLiquidity } from './types'
 import { EthHelper } from './utils/eth-helper'
 import { EvmHelper } from './utils/evm-helper'
 
-type AllBalances = {
-  chain: Chain
-  address: string
-  balances: Balance[] | string
-}
 export type NodeUrls = Record<Network, string>
 
 /**
@@ -30,7 +25,7 @@ export class Wallet {
   private thorchainQuery: ThorchainQuery
   clients: Record<string, XChainClient>
   private ethHelper: EthHelper
-
+  evmHelpers: Record<string, EvmHelper>
   /**
    * Contructor to create a Wallet
    *
@@ -64,6 +59,11 @@ export class Wallet {
     this.clients.LTC.setPhrase(settings.phrase, 0)
 
     this.ethHelper = new EthHelper(this.clients.ETH, this.thorchainQuery.thorchainCache)
+    this.evmHelpers = {
+      // ETH: new EvmHelper(this.clients.ETH, this.thorchainQuery.thorchainCache),
+      BSC: new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache),
+      AVAX: new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache),
+    }
   }
 
   /**
@@ -72,19 +72,17 @@ export class Wallet {
    * @returns AllBalances[]
    */
   async getAllBalances(): Promise<AllBalances[]> {
-    const clientArray = Object.entries(this.clients)
-    const allBalances = await Promise.all(
-      clientArray.map(async (entry) => {
-        const chain = entry[0] as Chain
-        const address = entry[1].getAddress(0)
-        try {
-          const balances = await entry[1].getBalance(address)
-          return { chain, address, balances }
-        } catch (err) {
-          return { chain, address, balances: (err as Error).message }
-        }
-      }),
-    )
+    const allBalances: AllBalances[] = []
+
+    for (const [chain, client] of Object.entries(this.clients)) {
+      const address = client.getAddress(0)
+      try {
+        const balances = await client.getBalance(address)
+        allBalances.push({ chain, address, balances })
+      } catch (err) {
+        allBalances.push({ chain, address, balances: (err as Error).message })
+      }
+    }
     return allBalances
   }
 
@@ -96,7 +94,7 @@ export class Wallet {
    * @see ThorchainAMM.doSwap()
    */
   async executeSwap(swap: ExecuteSwap): Promise<TxSubmitted> {
-    this.validateSwap(swap)
+    await this.validateSwap(swap)
     if (swap.input.asset.chain === THORChain || swap.input.asset.synth) {
       return await this.swapRuneTo(swap)
     } else {
@@ -108,14 +106,16 @@ export class Wallet {
    *
    * @param swap  - swap parameters
    */
-  private validateSwap(swap: ExecuteSwap) {
+  async validateSwap(swap: ExecuteSwap): Promise<string[]> {
     const errors: string[] = []
     const isThorchainDestinationAsset = swap.destinationAsset.synth || swap.destinationAsset.chain === THORChain
     const chain = isThorchainDestinationAsset ? THORChain : swap.destinationAsset.chain
 
+    // check address
     if (!this.clients[chain].validateAddress(swap.destinationAddress)) {
       errors.push(`destinationAddress ${swap.destinationAddress} is not a valid address`)
     }
+
     // Affiliate address should be THORName or THORAddress
     const checkAffiliateAddress = swap.memo.split(':')
     if (checkAffiliateAddress.length > 4) {
@@ -127,7 +127,44 @@ export class Wallet {
           errors.push(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
       }
     }
-    if (errors.length > 0) throw Error(errors.join('\n'))
+    if (swap.input.asset.chain === ETHChain) {
+      if (eqAsset(swap.input.asset, AssetETH) !== true) {
+        const isApprovedResult = await this.ethHelper.isTCRouterApprovedToSpend(
+          swap.input.asset,
+          swap.input.baseAmount,
+          swap.walletIndex,
+        )
+        console.log(isApprovedResult)
+        if (!isApprovedResult) {
+          errors.push('TC router has not been approved to spend this amount')
+        }
+      }
+    } else if (swap.input.asset.chain === AVAXChain) {
+      if (eqAsset(swap.input.asset, AssetAVAX) !== true) {
+        const isApprovedResult = await this.evmHelpers[`AVAX`].isTCRouterApprovedToSpend(
+          swap.input.asset,
+          swap.input.baseAmount,
+          swap.walletIndex,
+        )
+        console.log(isApprovedResult)
+        if (!isApprovedResult) {
+          errors.push('TC router has not been approved to spend this amount')
+        }
+      }
+    } else if (swap.input.asset.chain === BSCChain) {
+      if (eqAsset(swap.input.asset, AssetBSC) !== true) {
+        const isApprovedResult = await this.evmHelpers[`BSC`].isTCRouterApprovedToSpend(
+          swap.input.asset,
+          swap.input.baseAmount,
+          swap.walletIndex,
+        )
+        console.log(isApprovedResult)
+        if (!isApprovedResult) {
+          errors.push('TC router has not been approved to spend this amount')
+        }
+      }
+    }
+    return errors
   }
 
   private async isThorname(name: string): Promise<boolean> {
@@ -180,8 +217,7 @@ export class Wallet {
         feeOption: swap.feeOption || FeeOption.Fast,
         memo: swap.memo,
       }
-      const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
-      const hash = await evmHelper.sendDeposit(params)
+      const hash = await this.evmHelpers['AVAX'].sendDeposit(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     } else if (swap.input.asset.chain === BSCChain) {
       const params = {
@@ -191,8 +227,7 @@ export class Wallet {
         feeOption: swap.feeOption || FeeOption.Fast,
         memo: swap.memo,
       }
-      const evmHelper = new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache)
-      const hash = await evmHelper.sendDeposit(params)
+      const hash = await this.evmHelpers['BSC'].sendDeposit(params)
       return { hash, url: client.getExplorerTxUrl(hash), waitTimeSeconds }
     } else {
       const params = {

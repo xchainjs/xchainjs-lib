@@ -3,7 +3,7 @@ import { EVMClientParams, EtherscanProvider } from '@xchainjs/xchain-evm'
 import { Asset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
-export const AVAX_DECIMAL = 8
+export const AVAX_DECIMAL = 18
 
 export const LOWER_FEE_BOUND = 2_000_000_000
 export const UPPER_FEE_BOUND = 1_000_000_000_000

@@ -14,6 +14,11 @@ import { TxSubmitted } from './types'
 import { Wallet } from './wallet'
 
 const defaultQuery = new ThorchainQuery()
+
+export type AmmEstimateSwapParams = EstimateSwapParams & {
+  wallet: Wallet
+  walletIndex: number
+}
 /**
  * THORChain Class for interacting with THORChain.
  * Recommended main class to use for swapping with THORChain
@@ -48,8 +53,22 @@ export class ThorchainAMM {
     interfaceID = `555`,
     affiliateFeeBasisPoints = 0,
     slipLimit,
-  }: EstimateSwapParams): Promise<TxDetails> {
-    return await this.thorchainQuery.estimateSwap({
+    wallet,
+    walletIndex,
+  }: AmmEstimateSwapParams): Promise<TxDetails> {
+    let errors: string[] = []
+    if (wallet) {
+      const params = {
+        input,
+        destinationAsset,
+        destinationAddress,
+        memo: '',
+        waitTimeSeconds: 100,
+        walletIndex,
+      }
+      errors = await wallet.validateSwap(params)
+    }
+    const estimate = await this.thorchainQuery.estimateSwap({
       input,
       destinationAsset,
       destinationAddress,
@@ -58,6 +77,9 @@ export class ThorchainAMM {
       affiliateFeeBasisPoints,
       slipLimit,
     })
+    estimate.txEstimate.errors.push(...errors)
+    estimate.txEstimate.canSwap = errors.length == 0
+    return estimate
   }
 
   /**
@@ -67,7 +89,7 @@ export class ThorchainAMM {
    * @param params - swap params
    * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
    */
-  public async doSwap(wallet: Wallet, params: EstimateSwapParams): Promise<TxSubmitted> {
+  public async doSwap(wallet: Wallet, params: AmmEstimateSwapParams): Promise<TxSubmitted> {
     // Thorchain-query call satisfies the data needed for executeSwap to be called.
     const txDetails = await this.thorchainQuery.estimateSwap(params)
     if (!txDetails.txEstimate.canSwap) {
@@ -79,6 +101,8 @@ export class ThorchainAMM {
       destinationAddress: params.destinationAddress,
       memo: txDetails.memo,
       waitTimeSeconds: txDetails.txEstimate.waitTimeSeconds,
+      walletIndex: params.walletIndex,
+      feeOption: params.feeOption,
     })
   }
 

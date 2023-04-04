@@ -837,10 +837,13 @@ export class ThorchainQuery {
         errors,
       }
     }
+    // request param amount should always be in 1e8 which is why we pass in adjusted decimals if chain decimals != 8
+    const newAddAmount =
+      addAmount.baseAmount.decimal != 8 ? getBaseAmountWithDiffDecimals(addAmount, 8) : addAmount.baseAmount.amount()
 
     const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
-      `${addAmount.asset.chain}.${addAmount.asset.ticker}`,
-      addAmount.baseAmount.amount().toNumber(),
+      assetToString(addAmount.asset),
+      newAddAmount.toNumber(),
     )
     // Calculate transaction expiry time of the vault address
     const currentDatetime = new Date()
@@ -850,18 +853,18 @@ export class ThorchainQuery {
       ? depositQuote.inbound_confirmation_seconds
       : await this.confCounting(addAmount)
     const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
-
     if (addAmount.baseAmount.lte(depositQuote.expected_amount_out))
       errors.push(`Amount being added to savers can't pay for fees`)
     const saverFees: SaverFees = {
-      affiliate: new CryptoAmount(baseAmount(depositQuote.fees.affiliate, +pool.nativeDecimal), addAmount.asset),
+      affiliate: new CryptoAmount(baseAmount(depositQuote.fees.affiliate), addAmount.asset),
       asset: assetFromStringEx(depositQuote.fees.asset),
-      outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound, +pool.nativeDecimal), addAmount.asset),
+      outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound), addAmount.asset),
     }
+
     const saverCap = 0.3 * +pool.assetDepth
     const saverCapFilledPercent = (+pool.saversDepth / saverCap) * 100
     const estimateAddSaver: EstimateAddSaver = {
-      assetAmount: addAmount,
+      assetAmount: new CryptoAmount(baseAmount(depositQuote.expected_amount_out), addAmount.asset),
       estimatedDepositValue: new CryptoAmount(baseAmount(depositQuote.expected_amount_out), saverFees.asset),
       fee: saverFees,
       expiry: expiryDatetime,

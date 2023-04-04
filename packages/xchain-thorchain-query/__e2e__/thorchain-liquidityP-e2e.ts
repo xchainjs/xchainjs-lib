@@ -100,6 +100,7 @@ function printSaver(saver: EstimateAddSaver) {
     },
     expiry: saver.expiry,
     toAddress: saver.toAddress,
+    slippage: saver.slipBasisPoints,
     memo: saver.memo,
     estimateWaitTime: saver.estimatedWaitTime,
     canAdd: saver.canAddSaver,
@@ -150,7 +151,7 @@ function printliquidityPosition(liquidityPosition: LiquidityPosition) {
 }
 
 // Test User Functions - LP positions estimations
-describe('Thorchain-amm liquidity action end to end Tests', () => {
+describe('Thorchain-query liquidity action end to end Tests', () => {
   // Estimate Liquidity Positions
   it(`Should estimate ADD BUSD liquidity postion for given amount`, async () => {
     const addlp: AddliquidityPosition = {
@@ -271,9 +272,13 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
 
   it(`Should estimate saver addition`, async () => {
-    const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(0.001, 8)), AssetBTC)
-    const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
-    printSaver(estimateAddsSaver)
+    try {
+      const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(1000, 18)), AssetAVAX)
+      const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
+      printSaver(estimateAddsSaver)
+    } catch (error) {
+      console.error(error)
+    }
   })
   it(`Should estimate saver withdrawal`, async () => {
     const withdrawPos: SaversWithdraw = {

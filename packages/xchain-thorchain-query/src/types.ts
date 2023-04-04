@@ -50,6 +50,7 @@ export type EstimateSwapParams = {
   affiliateAddress?: Address
   affiliateFeeBasisPoints?: number
   interfaceID?: string
+  feeOption?: FeeOption
 }
 
 export type SwapOutput = {

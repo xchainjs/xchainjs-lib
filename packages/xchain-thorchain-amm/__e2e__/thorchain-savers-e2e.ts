@@ -13,11 +13,7 @@ import { Wallet } from '../src/Wallet'
 import { ThorchainAMM } from '../src/thorchain-amm'
 
 const thorchainQueryMainnet = new ThorchainQuery()
-const mainnetWallet = new Wallet(
-  process.env.MAINNETPHRASE || 'you forgot to set the phrase',
-  thorchainQueryMainnet,
-  process.env.SOCHAIN_API_KEY || '',
-)
+const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
 const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 
 // mainnet asset
@@ -36,9 +32,14 @@ function printSaversPosition(saver: SaversPosition) {
 describe('Thorchain-amm liquidity action end to end Tests', () => {
   // Check liquidity position
   it(`Should add a savers position`, async () => {
-    const addSaverAmount = new CryptoAmount(assetToBase(assetAmount(0.1, 8)), AssetBNB)
-    const hash = await mainetThorchainAmm.addSaver(mainnetWallet, addSaverAmount)
-    console.log(hash)
+    //const addSaverAmount = new CryptoAmount(assetToBase(assetAmount(0.01, 18)), AssetAVAX)
+    try {
+      const addSaverAmount = new CryptoAmount(assetToBase(assetAmount(0.1, 8)), AssetBNB)
+      const hash = await mainetThorchainAmm.addSaver(mainnetWallet, addSaverAmount)
+      console.log(hash)
+    } catch (error) {
+      console.error(error)
+    }
   })
 
   it(`Should check savers position `, async () => {

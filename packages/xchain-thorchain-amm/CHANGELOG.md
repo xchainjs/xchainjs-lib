@@ -1,3 +1,14 @@
+# v0.3.21 (2023-04-04)
+
+## Add
+
+- Bump packages
+- Add `erc-20` approval check in `thorchain-amm.estimateSwap()`
+
+## Fix 
+
+- Pass `FeeOption` enum through `executeSwap()` 
+
 # v0.3.20 (2023-03-27)
 
 ## Update

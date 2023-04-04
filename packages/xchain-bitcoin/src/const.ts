@@ -58,7 +58,7 @@ export const blockstreamExplorerProviders = {
 
 const testnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env.SOCHAIN_API_KEY || '',
+  'PLACEHOLDER_APIKEY',
   BTCChain,
   AssetBTC,
   8,
@@ -66,7 +66,7 @@ const testnetSochainProvider = new SochainProvider(
 )
 const mainnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env.SOCHAIN_API_KEY || '',
+  'PLACEHOLDER_APIKEY',
   BTCChain,
   AssetBTC,
   8,

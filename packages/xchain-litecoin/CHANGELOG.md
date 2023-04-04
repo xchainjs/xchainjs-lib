@@ -1,3 +1,9 @@
+# v.0.11.2 (2023-04-03)
+
+## Fix
+
+- remove references to process.env in runtime code
+
 # v.0.11.1 (2023-03-29)
 
 ## Update
