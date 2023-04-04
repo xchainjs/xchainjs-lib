@@ -56,6 +56,7 @@ export class ThorchainAMM {
     wallet,
     walletIndex,
   }: AmmEstimateSwapParams): Promise<TxDetails> {
+    let errors: string[] = []
     if (wallet) {
       const params = {
         input,
@@ -65,9 +66,9 @@ export class ThorchainAMM {
         waitTimeSeconds: 100,
         walletIndex,
       }
-      wallet.validateSwap(params)
+      errors = await wallet.validateSwap(params)
     }
-    return await this.thorchainQuery.estimateSwap({
+    const estimate = await this.thorchainQuery.estimateSwap({
       input,
       destinationAsset,
       destinationAddress,
@@ -76,6 +77,9 @@ export class ThorchainAMM {
       affiliateFeeBasisPoints,
       slipLimit,
     })
+    estimate.txEstimate.errors.push(...errors)
+    estimate.txEstimate.canSwap = errors.length == 0
+    return estimate
   }
 
   /**

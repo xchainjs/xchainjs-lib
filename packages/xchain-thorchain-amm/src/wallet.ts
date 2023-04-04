@@ -1,8 +1,8 @@
-import { AVAXChain, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import { AVAXChain, AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
-import { BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
+import { AssetBSC, BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { FeeOption, Network, XChainClient } from '@xchainjs/xchain-client'
 import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
@@ -106,7 +106,7 @@ export class Wallet {
    *
    * @param swap  - swap parameters
    */
-  async validateSwap(swap: ExecuteSwap) {
+  async validateSwap(swap: ExecuteSwap): Promise<string[]> {
     const errors: string[] = []
     const isThorchainDestinationAsset = swap.destinationAsset.synth || swap.destinationAsset.chain === THORChain
     const chain = isThorchainDestinationAsset ? THORChain : swap.destinationAsset.chain
@@ -139,11 +139,32 @@ export class Wallet {
           errors.push('TC router has not been approved to spend this amount')
         }
       }
+    } else if (swap.input.asset.chain === AVAXChain) {
+      if (eqAsset(swap.input.asset, AssetAVAX) !== true) {
+        const isApprovedResult = await this.evmHelpers[`AVAX`].isTCRouterApprovedToSpend(
+          swap.input.asset,
+          swap.input.baseAmount,
+          swap.walletIndex,
+        )
+        console.log(isApprovedResult)
+        if (!isApprovedResult) {
+          errors.push('TC router has not been approved to spend this amount')
+        }
+      }
+    } else if (swap.input.asset.chain === BSCChain) {
+      if (eqAsset(swap.input.asset, AssetBSC) !== true) {
+        const isApprovedResult = await this.evmHelpers[`BSC`].isTCRouterApprovedToSpend(
+          swap.input.asset,
+          swap.input.baseAmount,
+          swap.walletIndex,
+        )
+        console.log(isApprovedResult)
+        if (!isApprovedResult) {
+          errors.push('TC router has not been approved to spend this amount')
+        }
+      }
     }
-    if (errors.length > 0)
-      // if erc-20, check thorchain router contract isApproved
-
-      throw Error(errors.join('\n'))
+    return errors
   }
 
   private async isThorname(name: string): Promise<boolean> {
