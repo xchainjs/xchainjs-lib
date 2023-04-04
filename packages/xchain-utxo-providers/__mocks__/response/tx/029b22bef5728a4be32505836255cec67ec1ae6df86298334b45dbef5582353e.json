@@ -1,0 +1,70 @@
+{
+  "status": "success",
+  "data": {
+    "hash": "029b22bef5728a4be32505836255cec67ec1ae6df86298334b45dbef5582353e",
+    "confirmations": 445826,
+    "size": 223,
+    "vsize": 141,
+    "weight": 562,
+    "version": 2,
+    "locktime": 0,
+    "block_hash": "00000000000000169c811e4fd5536ca82a1953b2944cfacedb0f80a553134192",
+    "block_height": 1973539,
+    "time": 1619894462,
+    "inputs_n": 1,
+    "inputs_value": "0.00592402",
+    "inputs": [
+      {
+        "index": 0,
+        "value": "0.00592402",
+        "address": "tb1q6tkjqxrha5czgx388fk0wpphudmqd8cqnegd5d",
+        "scriptSig": {
+          "hex": "",
+          "asm": ""
+        },
+        "witness": [
+          "3045022100a48c3ac07a1d34d6344c83dce148eca13e20010719bd17ed298c3f18cb7ea0d402204612408a34c1566b68b8527dcdce3c8f3296869b084d509fc3667087bf4a179101",
+          "02bbad40f644f411a17a2976165787d1aaae0e46da86ffd9cb42d848e93680cfbe"
+        ],
+        "previous_output": {
+          "hash": "4173ae9c25f6707a73d6d5ae362df4bf22206b9112a9eb715f9d769e41b08fe3",
+          "index": 0
+        }
+      }
+    ],
+    "outputs_n": 2,
+    "outputs_value": "0.00590698",
+    "outputs": [
+      {
+        "index": 0,
+        "value": "0.00589402",
+        "type": "witness_v0_keyhash",
+        "address": "tb1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rzgjhra4",
+        "script": {
+          "hex": "00147d48afcd6fef2047f9802b5147287399492fc462",
+          "asm": "0 7d48afcd6fef2047f9802b5147287399492fc462"
+        },
+        "spent": {
+          "hash": "9a01405ed79335a5898a8041dc24579c49dd3f62ec20ee509ce892a4259995b2",
+          "index": 3
+        }
+      },
+      {
+        "index": 1,
+        "value": "0.00001296",
+        "type": "witness_v0_keyhash",
+        "address": "tb1q6tkjqxrha5czgx388fk0wpphudmqd8cqnegd5d",
+        "script": {
+          "hex": "0014d2ed201877ed30241a273a6cf70437e376069f00",
+          "asm": "0 d2ed201877ed30241a273a6cf70437e376069f00"
+        },
+        "spent": null
+      }
+    ],
+    "fee": "0.00001704",
+    "price": {
+      "value": "0.00000000",
+      "currency": "USD"
+    }
+  }
+}

@@ -1,3 +1,16 @@
+# v.0.11.1 (2023-03-29)
+
+## Update
+
+- Udpate deps
+
+# v.0.11.0 (2023-03-21)
+
+## Update
+
+- Update to use `xchain-utxo-providers`
+- Udpate deps
+
 # v.0.10.10 (2023-02-08)
 
 ## Update

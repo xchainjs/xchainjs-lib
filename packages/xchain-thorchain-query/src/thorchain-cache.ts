@@ -66,7 +66,7 @@ export class ThorchainCache {
     this.expireNetworkValuesCacheMillis = expireNetworkValuesCacheMillis
 
     //initialize the cache
-    this.refereshPoolCache()
+    this.refreshPoolCache()
   }
 
   /**
@@ -126,7 +126,7 @@ export class ThorchainCache {
     const millisSinceLastRefeshed = Date.now() - (this.poolCache?.lastRefreshed || 0)
     if (millisSinceLastRefeshed > this.expirePoolCacheMillis) {
       try {
-        await this.refereshPoolCache()
+        await this.refreshPoolCache()
       } catch (e) {
         console.error(e)
       }
@@ -140,23 +140,33 @@ export class ThorchainCache {
   /**
    * Refreshes the Pool Cache
    *
-   * NOTE: do not call refereshPoolCache() directly, call getPools() instead
+   * NOTE: do not call refreshPoolCache() directly, call getPools() instead
    * which will refresh the cache if it's expired
    */
-  private async refereshPoolCache(): Promise<void> {
-    const [thornodePools, midgardPools] = await Promise.all([this.thornode.getPools(), this.midgard.getPools()])
-    const poolMap: Record<string, LiquidityPool> = {}
-    if (midgardPools) {
-      for (const pool of midgardPools) {
-        const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
-        if (!thornodePool) throw Error(`Could not find thornode pool ${pool.asset}`)
-        const lp = new LiquidityPool(pool, thornodePool)
-        poolMap[`${lp.asset.chain}.${lp.asset.ticker}`] = lp
+  private async refreshPoolCache(): Promise<void> {
+    try {
+      const [thornodePools, midgardPools] = await Promise.all([this.thornode.getPools(), this.midgard.getPools()])
+      const poolMap: Record<string, LiquidityPool> = {}
+
+      if (midgardPools) {
+        for (const pool of midgardPools) {
+          try {
+            const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
+            if (!thornodePool) throw Error(`Could not find thornode pool ${pool.asset}`)
+            const lp = new LiquidityPool(pool, thornodePool)
+            poolMap[`${lp.asset.chain}.${lp.asset.ticker}`] = lp
+          } catch (error) {
+            console.log(error)
+          }
+        }
+
+        this.poolCache = {
+          lastRefreshed: Date.now(),
+          pools: poolMap,
+        }
       }
-      this.poolCache = {
-        lastRefreshed: Date.now(),
-        pools: poolMap,
-      }
+    } catch (error) {
+      console.error('Error refreshing pool cache:', error)
     }
   }
 

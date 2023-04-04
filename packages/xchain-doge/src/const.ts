@@ -6,7 +6,6 @@ import {
   SochainNetwork,
   SochainProvider,
 } from '@xchainjs/xchain-utxo-providers'
-
 /**
  * Minimum transaction fee
  * 100000 satoshi/kB (similar to current `minrelaytxfee`)

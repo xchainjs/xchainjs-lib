@@ -3,6 +3,7 @@ import {
   FeeOption,
   FeeType,
   Fees,
+  OnlineDataProvider,
   Tx,
   TxFrom,
   TxHistoryParams,
@@ -12,9 +13,6 @@ import {
 } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
-
-import { GasPrices } from '../../types'
-import { OnlineDataProvider } from '../../types/provider-types'
 
 import {
   GetBalanceResponse,
@@ -44,15 +42,7 @@ export class CovalentProvider implements OnlineDataProvider {
     this.nativeAssetDecimals = nativeAssetDecimals
     this.nativeAsset
   }
-  async estimateGasPrices(): Promise<GasPrices> {
-    // TODO get gas prices
-    // try {
-    //   return await this.estimateGasPricesFromEtherscan()
-    // } catch (error) {
-    //   return Promise.reject(new Error(`Failed to estimate gas price: ${error}`))
-    // }
-    throw Error('not implemented')
-  }
+
   async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
     const balances: Balance[] = []
     const response = (

@@ -1,12 +1,10 @@
 import { Provider } from '@ethersproject/abstract-provider'
-import { Balance, Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
+import { Balance, OnlineDataProvider, Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { BigNumber, ethers } from 'ethers'
 
-import erc20ABI from '../../data/erc20.json'
-import { OnlineDataProvider } from '../../types/provider-types'
-
+import erc20ABI from './erc20.json'
 import * as etherscanAPI from './etherscan-api'
 import { ERC20Tx, GetERC20TxsResponse } from './types'
 

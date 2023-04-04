@@ -1065,6 +1065,11 @@
   resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-5.50.0.tgz#29c6419e8379d496ab6d0426eadf3c4d100cd186"
   integrity sha512-swKHYCOZUGyVt4ge0u8a7AwNcA//h4nx5wIi0sruGye1IJ5Cva0GyK9L2/WdX+kWVTKp92ZiEo1df31lrWGPgA==
 
+"@noble/hashes@^1.2.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.3.0.tgz#085fd70f6d7d9d109671090ccae1d3bec62554a1"
+  integrity sha512-ilHEACi9DwqJB0pw7kv+Apvh50jiiSyR/cQ3y4W7lOR5mhvn/50FLUfsnfJz0BDZtl/RR16kXvptiv6q1msYZg==
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
@@ -1514,9 +1519,9 @@
   integrity sha512-b12XeYoh5PWoOaksBY46ZsimdfNwft/FVM7Fhsg6UoLhJsFNC3GE4hGLi6a9awI52FHhdhvFs483LMTLbwG7rQ==
 
 "@xchainjs/xchain-bitcoin@^0.20.8":
-  version "0.20.8"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-bitcoin/-/xchain-bitcoin-0.20.8.tgz#570e40935993c44bfe7a090d46901c878a8884f4"
-  integrity sha512-8dIOItFI8xoFQTvGUVWridC7RHRWFMF0OFZ8VIOsFLh52GBlfqRpwI2TT3iTNxdqxKHjEpCu+s7Syxnl3wmJ5w==
+  version "0.20.9"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-bitcoin/-/xchain-bitcoin-0.20.9.tgz#a5938ad8e73bfdd9d715eca58eec67727d8d4dd4"
+  integrity sha512-c/8BbhGAM89tBr+bZlK5BOmzzgrr0DTcvjNK9agfCywmvtaTsslzvxmgZKE3VY1PpzgAUNCMoIx98RnyzgxU7g==
 
 "@xchainjs/xchain-bitcoincash@^0.15.7":
   version "0.15.7"
@@ -1524,6 +1529,11 @@
   integrity sha512-oAHTnwMRyr+ZwT4MkJDkSas17KAXvpWKsd1CxWc+KnzwkueAU6xp46J+0mBUe+jJ83P1lPv+pbH31GwRpwWFAA==
   dependencies:
     uniqid "^5.4.0"
+
+"@xchainjs/xchain-bsc@^0.1.0":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-bsc/-/xchain-bsc-0.1.1.tgz#d48f3bcd58f4c953c0d335ddca46b2b0bbc61a51"
+  integrity sha512-nEqMHoBpWu9eGWbUSWNA4jCSwnfN2A/g0tzyaixgk58cbdhPeJhMXi5406Ov1dE9q4IRq01znRl3l2q7xKMPZQ==
 
 "@xchainjs/xchain-client@^0.13.5":
   version "0.13.5"
@@ -1536,21 +1546,21 @@
   integrity sha512-GQRFmNfGY74BdTfQHr8EUSTiQ+M8p9p+2mtoSeAmM4a5/ty6ECD5ktvxv7HRzk3XLQ+OfSVhrhD95DAR1afGVA==
 
 "@xchainjs/xchain-crypto@^0.2.6":
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-crypto/-/xchain-crypto-0.2.6.tgz#2d0a6f81aefd8741b4e428431651d9c312f4b410"
-  integrity sha512-DVw+JDNQ0uNgc8JbWYh8BEJuABxzvfwXvp0mX8ywEeN0xwZ87JavyKQs+I2aWNhcE0shww1bQd9u8w6BdtUM4g==
+  version "0.2.7"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-crypto/-/xchain-crypto-0.2.7.tgz#55fea2fcd48d8804fdb2a443ee2022455b880119"
+  integrity sha512-SRXbAq/U9L3EW7cVwpEujbbW9mbsGt0JFXbHUCOP/nYNsG2s4Rim1grm1Caqa1p4jqC71UzTxREjvjscWMOTyw==
   dependencies:
     bech32 "^2.0.0"
-    bip39 "^3.0.4"
+    bip39 "^3.1.0"
     crypto-js "^4.1.1"
     foundry-primitives "^0.2.1"
-    hdkey "^2.0.1"
-    uuid "^8.3.2"
+    hdkey "^2.1.0"
+    uuid "^9.0.0"
 
 "@xchainjs/xchain-doge@^0.5.7":
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-doge/-/xchain-doge-0.5.7.tgz#2a7a8f08ad112c7ad7948cb426e15fb24ebdda68"
-  integrity sha512-JE9qJSigfa/i+u1NeSJyr61pKZui2Is0laZASjWJn2w6mdLqfKJSyG6DTyerr84IGoIakg0TYxeF2Fxqsm8taQ==
+  version "0.5.8"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-doge/-/xchain-doge-0.5.8.tgz#1c0d32868835565e82ab6646dde4eb8bb8655674"
+  integrity sha512-UwK9El5eraTuqTeg2HussRZ3X/xmtOB0wBb2mIk/yQ4t1V3OwvYHV99YFXTFw/9GKcetNQ/mEWiQkTj9z/gVuw==
 
 "@xchainjs/xchain-ethereum@^0.27.7":
   version "0.27.7"
@@ -1563,34 +1573,34 @@
   integrity sha512-oD34DVJ378yiYVy1se5Th3hMlSJgu2X8G3cCIiCEWKK2KpZtArrnVP9bFEhv7UZ62Jr/kHisF2ITEnZtNiG4LA==
 
 "@xchainjs/xchain-litecoin@^0.10.9":
-  version "0.10.9"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-litecoin/-/xchain-litecoin-0.10.9.tgz#959aed0ce29b38948d3d6217e6d99089392828dc"
-  integrity sha512-n8J6axpoF9KZ1zV9slZRYgsuj+OVwDUeeCzD4zMKptMwNatVRYts3bM4D11QcNWIKGaSmo0rb8orYzp4g4fT9Q==
+  version "0.10.10"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-litecoin/-/xchain-litecoin-0.10.10.tgz#27be4195995f455fd1ecf229427662decdc89b1a"
+  integrity sha512-aEWFHE9yRiMrTFJB7iZMI+BUKe7UmRXTINyjLkXD5FktUtktv8xcL8XtszDP1cW8DGOdrtcZIOJ0YYdd4LzaOQ==
 
-"@xchainjs/xchain-midgard@0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-midgard/-/xchain-midgard-0.4.1.tgz#6e18990659c4f0ca89496dd43ce1f8a89bf47269"
-  integrity sha512-+z0oZX+RJEP0Z+Ew1CtzhrXF+0zXZaxY6xke0+6U6U+wd3CJcDTIv4fLQNmL6pmGy9/I4y/ku1EGV+kqKZ9oEA==
+"@xchainjs/xchain-midgard@0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-midgard/-/xchain-midgard-0.4.2.tgz#6d2d8d00badefea2cb57126d44f18f76c7f6fee2"
+  integrity sha512-Mhj0mTOuBP9h8tDrBITkjItJudiVr/kIFrBsaxb2unwfPMZ91DQ37KGlSeQd97idUVy2WTq0iPwdSdOYOp23VA==
 
-"@xchainjs/xchain-thorchain-amm@^0.3.12":
-  version "0.3.13"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thorchain-amm/-/xchain-thorchain-amm-0.3.13.tgz#acde2630aeb2c59c5349aac11d6bbe094e5221a5"
-  integrity sha512-iOUJZHmPm9eV6hlujXBK0aYaKR/hM3F3qw/h0UjvQJlW0q/6cokmXbMXUIygYLRurfnmoVD0YLLE70hV7eEpJA==
+"@xchainjs/xchain-thorchain-amm@^0.3.18":
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thorchain-amm/-/xchain-thorchain-amm-0.3.18.tgz#d1a6035eb539dd249c7e41f1c114c51ad6e97753"
+  integrity sha512-kLn7CCJobG4OEKh3uIa63IBxb1k8RTQ/5N+Tkr5rNBBSigtMfOIfGUdXNTz+uULbWwitfmaUbxO79Xt3rd2NJw==
 
 "@xchainjs/xchain-thorchain-query@^0.1.15":
-  version "0.1.15"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thorchain-query/-/xchain-thorchain-query-0.1.15.tgz#2ad993e5ff23e5b41e04293ffc183d9dfea07f22"
-  integrity sha512-vRgDG1BvTUwscZQfwTHqEUnxTcxynfsnubs/k7cijmcOZYZLc4lDwGmhguu7zykCHy3jVTkFzY8msuYMQ24yGA==
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thorchain-query/-/xchain-thorchain-query-0.1.19.tgz#8647379f058597207371e5922264891635556c01"
+  integrity sha512-nRCUdIyogF9NuuKbnsaSYCJWeQbXl2rtjl2OwJKARI3NZRYCBkfiksETHmLNquUVmJsmCT6MoUSg/Oipc7o5VA==
 
 "@xchainjs/xchain-thorchain@^0.27.8":
-  version "0.27.8"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thorchain/-/xchain-thorchain-0.27.8.tgz#4da636cd5e6864e7bc1f3107bb7e3560a6ac63e7"
-  integrity sha512-97q+ekgxh9Av1/UOzQE4bhu1n1AKW2WUOAE7wZ+mKG/ciBIedyLMMY/3DruTD9z2kUJQunu4l+Kr6LmGKPRTrw==
+  version "0.27.9"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thorchain/-/xchain-thorchain-0.27.9.tgz#1fa1a530d996d4bf0638054c0a82e27f3f89ff09"
+  integrity sha512-NhkAgrPQ0r3FczSaK5rOjgQVfeN3s9VJQSQVyaSkP1rnTujVET03+LLaOw31Ngt+4wjyri04KVzpTLScZtgxsw==
 
 "@xchainjs/xchain-thornode@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thornode/-/xchain-thornode-0.2.0.tgz#227435535d62a943ac17f64b442797410542dc08"
-  integrity sha512-me2GKUshLe/zywt99qnU0LR5riPgWWrNCq8jOkmJHXLms0CXzYj7QMygR7ik5pfBknZPZpdAnyhqZaXgXsu8+g==
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thornode/-/xchain-thornode-0.2.1.tgz#abb8115a690bc4bab67a977fbb76d0159752a838"
+  integrity sha512-pzM3Zj1v67bRUe6kul/ZYmz6wiSRYBkUrnsqjMpuQsb8kmRFbJlCaGZIqL/mBotbhLjKkhEGQ1gEpY/Qxn3j7g==
 
 "@xchainjs/xchain-util@^0.12.0":
   version "0.12.0"
@@ -2012,7 +2022,7 @@ bip32@^2.0.4, bip32@^2.0.5, bip32@^2.0.6:
     typeforce "^1.11.5"
     wif "^2.0.6"
 
-bip39@^3.0.2, bip39@^3.0.4:
+bip39@^3.0.2:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/bip39/-/bip39-3.0.4.tgz#5b11fed966840b5e1b8539f0f54ab6392969b2a0"
   integrity sha512-YZKQlb752TrUWqHWj7XAwCSjYEgGAk+/Aas3V7NyjQeZYsztO8JnQUaCWhcnL4T+jL8nvB8typ2jRPzTlgugNw==
@@ -2021,6 +2031,13 @@ bip39@^3.0.2, bip39@^3.0.4:
     create-hash "^1.1.0"
     pbkdf2 "^3.0.9"
     randombytes "^2.0.1"
+
+bip39@^3.0.4, bip39@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/bip39/-/bip39-3.1.0.tgz#c55a418deaf48826a6ceb34ac55b3ee1577e18a3"
+  integrity sha512-c9kiwdk45Do5GL0vJMe7tS95VjCii65mYAH7DfWl3uW8AVzXKQVUm64i3hzVybBDMp9r7j9iNxR85+ul8MdN/A==
+  dependencies:
+    "@noble/hashes" "^1.2.0"
 
 bip66@^1.1.0:
   version "1.1.5"
@@ -3553,12 +3570,13 @@ hash.js@1.1.7, hash.js@^1.0.0, hash.js@^1.0.3:
     inherits "^2.0.3"
     minimalistic-assert "^1.0.1"
 
-hdkey@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/hdkey/-/hdkey-2.0.1.tgz#0a211d0c510bfc44fa3ec9d44b13b634641cad74"
-  integrity sha512-c+tl9PHG9/XkGgG0tD7CJpRVaE0jfZizDNmnErUAKQ4EjQSOcOUcV3EN9ZEZS8pZ4usaeiiK0H7stzuzna8feA==
+hdkey@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/hdkey/-/hdkey-2.1.0.tgz#755b30b73f54e93c31919c1b2f19205a8e57cb92"
+  integrity sha512-i9Wzi0Dy49bNS4tXXeGeu0vIcn86xXdPQUpEYg+SO1YiO8HtomjmmRMaRyqL0r59QfcD4PfVbSF3qmsWFwAemA==
   dependencies:
     bs58check "^2.1.2"
+    ripemd160 "^2.0.2"
     safe-buffer "^5.1.1"
     secp256k1 "^4.0.0"
 
@@ -4824,7 +4842,12 @@ node-forge@^0.7.6:
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.7.6.tgz#fdf3b418aee1f94f0ef642cd63486c77ca9724ac"
   integrity sha512-sol30LUpz1jQFBjOKwbjxijiE3b6pjd74YwfD0fJOKPjF+fONKb2Yg8rYgS6+bK6VDl+/wfr4IYpC7jDzLUIfw==
 
-node-gyp-build@^4.2.0, node-gyp-build@^4.3.0:
+node-gyp-build@^4.2.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.6.0.tgz#0c52e4cbf54bbd28b709820ef7b6a3c2d6209055"
+  integrity sha512-NTZVKn9IylLwUzaKjkas1e4u2DLNcV4rdYagA4PWdPwW87Bi7z+BznyKSRwS/761tV/lzCGXplWsiaMjLqP2zQ==
+
+node-gyp-build@^4.3.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.5.0.tgz#7a64eefa0b21112f89f58379da128ac177f20e40"
   integrity sha512-2iGbaQBV+ITgCz76ZEjmhUKAKVf7xfY1sRl4UiKQspfZMH2h06SyhNsnSVy50cwkFQDGLyif6m/6uFXHkOZ6rg==
@@ -5402,10 +5425,19 @@ readable-stream@^2.0.0, readable-stream@^2.0.6, readable-stream@^2.3.3, readable
     string_decoder "~1.1.1"
     util-deprecate "~1.0.1"
 
-readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.5.0, readable-stream@^3.6.0:
+readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.5.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-3.6.0.tgz#337bbda3adc0706bd3e024426a286d4b4b2c9198"
   integrity sha512-BViHy7LKeTz4oNnkcLJ+lVSL6vpiFeX6/d3oSH8zCW7UxP2onchk+vTGB143xuFjHS3deTgkKoXXymXqymiIdA==
+  dependencies:
+    inherits "^2.0.3"
+    string_decoder "^1.1.1"
+    util-deprecate "^1.0.1"
+
+readable-stream@^3.6.0:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-3.6.2.tgz#56a9b36ea965c00c5a93ef31eb111a0f11056967"
+  integrity sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==
   dependencies:
     inherits "^2.0.3"
     string_decoder "^1.1.1"
@@ -5525,7 +5557,7 @@ rimraf@^3.0.0, rimraf@^3.0.2, rimraf@~3.0.2:
   dependencies:
     glob "^7.1.3"
 
-ripemd160@^2.0.0, ripemd160@^2.0.1:
+ripemd160@^2.0.0, ripemd160@^2.0.1, ripemd160@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/ripemd160/-/ripemd160-2.0.2.tgz#a1c1a6f624751577ba5d07914cbc92850585890c"
   integrity sha512-ii4iagi25WusVoiC4B4lq7pbXfAp3D9v5CwfkY33vffw2+pkDjY1D8GaN7spsxvCSx8dkPqOZCEZyfxcmJG2IA==
@@ -6388,10 +6420,15 @@ uuid@^3.3.2:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
 
-uuid@^8.3.0, uuid@^8.3.2:
+uuid@^8.3.0:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
+
+uuid@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
+  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
 
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"

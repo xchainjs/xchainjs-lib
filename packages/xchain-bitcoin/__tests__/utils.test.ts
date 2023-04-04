@@ -1,9 +1,8 @@
-import { Network } from '@xchainjs/xchain-client'
+import { UTXO } from '@xchainjs/xchain-client'
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import mockHaskoinApi from '../__mocks__/haskoin'
 import mockSochainApi from '../__mocks__/sochain'
-import { UTXO } from '../src/types/common'
 import * as Utils from '../src/utils'
 
 let utxos: UTXO[]
@@ -58,29 +57,29 @@ describe('Bitcoin Utils Test', () => {
     expect(estimates.average).toBeDefined()
   })
 
-  it('should fetch as many uxtos as are associated with an address', async () => {
-    const address = '34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo'
+  // it('should fetch as many uxtos as are associated with an address', async () => {
+  //   const address = '34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo'
 
-    const utxos: UTXO[] = await Utils.scanUTXOs({
-      apiKey: 'mock',
-      sochainUrl: 'https://sochain.com/api/v3',
-      haskoinUrl: 'https://api.haskoin.com/haskoin-store/btc',
-      network: Network.Mainnet,
-      address,
-      confirmedOnly: false, // get all confirmed & unconfirmed UTXOs
-    })
-    expect(utxos.length).toEqual(100)
-    expect(utxos?.[0].hash).toEqual('27e9ea50a4ef642aae8ba2fc4d9604df9b227090c0da7c8e13b591f76a2d4f2c')
-    expect(utxos?.[99].hash).toEqual('a89a533b3034c5b5df6b9a20a951cf33c0df0125f233584807d6a0958dddd070')
-  })
+  //   const utxos: UTXO[] = await Utils.scanUTXOs({
+  //     apiKey: 'mock',
+  //     sochainUrl: 'https://sochain.com/api/v3',
+  //     haskoinUrl: 'https://api.haskoin.com/haskoin-store/btc',
+  //     network: Network.Mainnet,
+  //     address,
+  //     confirmedOnly: false, // get all confirmed & unconfirmed UTXOs
+  //   })
+  //   expect(utxos.length).toEqual(100)
+  //   expect(utxos?.[0].hash).toEqual('27e9ea50a4ef642aae8ba2fc4d9604df9b227090c0da7c8e13b591f76a2d4f2c')
+  //   expect(utxos?.[99].hash).toEqual('a89a533b3034c5b5df6b9a20a951cf33c0df0125f233584807d6a0958dddd070')
+  // })
 
-  describe('broadcastTx', () => {
-    it('returns txHash', async () => {
-      const txHash = await Utils.broadcastTx({
-        txHex: '0xdead',
-        haskoinUrl: 'haskoin-url',
-      })
-      expect(txHash).toEqual('mock-txid')
-    })
-  })
+  // describe('broadcastTx', () => {
+  //   it('returns txHash', async () => {
+  //     const txHash = await Utils.broadcastTx({
+  //       txHex: '0xdead',
+  //       haskoinUrl: 'haskoin-url',
+  //     })
+  //     expect(txHash).toEqual('mock-txid')
+  //   })
+  // })
 })

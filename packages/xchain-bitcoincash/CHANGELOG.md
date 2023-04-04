@@ -1,3 +1,15 @@
+# v.0.15.9 (2023-03-29)
+
+## Fix
+
+- make `buildTx` public
+
+# v.0.15.8 (2023-03-21)
+
+## Update
+
+- Update to use `xchain-uxto-providers`
+
 # v.0.15.7 (2023-01-19)
 
 ## Update

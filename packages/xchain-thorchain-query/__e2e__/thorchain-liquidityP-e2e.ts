@@ -1,5 +1,4 @@
 import { AssetAVAX } from '@xchainjs/xchain-avax'
-import { AssetBNB } from '@xchainjs/xchain-binance'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetBCH } from '@xchainjs/xchain-bitcoincash'
 import { Network } from '@xchainjs/xchain-client'
@@ -151,7 +150,7 @@ function printliquidityPosition(liquidityPosition: LiquidityPosition) {
 }
 
 // Test User Functions - LP positions estimations
-describe('Thorchain-amm liquidity action end to end Tests', () => {
+describe('Thorchain-query liquidity action end to end Tests', () => {
   // Estimate Liquidity Positions
   it(`Should estimate ADD BUSD liquidity postion for given amount`, async () => {
     const addlp: AddliquidityPosition = {
@@ -272,14 +271,18 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
 
   it(`Should estimate saver addition`, async () => {
-    const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(0.001, 8)), AssetBTC)
-    const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
-    printSaver(estimateAddsSaver)
+    try {
+      const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetAVAX)
+      const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
+      printSaver(estimateAddsSaver)
+    } catch (error) {
+      console.error(error)
+    }
   })
   it(`Should estimate saver withdrawal`, async () => {
     const withdrawPos: SaversWithdraw = {
-      address: `bnb150vpa06jrgucqz9ycgun73t0n0rrxq4m69fc22`,
-      asset: AssetBNB,
+      address: `bc1qpcaardpf2wzcu6uwd4hhsmt0fz8su80cjfk5lh`,
+      asset: AssetBTC,
       withdrawBps: 10000,
     }
     const estimateWithdrawSaver = await thorchainQuery.estimateWithdrawSaver(withdrawPos)

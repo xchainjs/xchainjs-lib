@@ -1,3 +1,19 @@
+# v0.2.1 (2023-3-29)
+
+## Fix
+
+- Synth bug `default` all synths to 8 decimals
+- Savers baseAmount bug, removed `+pool.nativeDecimals`
+- fix outboundfee calc 
+
+# v0.2.0 (2023-3-21)
+
+## Fix
+
+- update package deps
+- Calculate network fee error
+- Fix validate estimate swap error
+
 # v0.1.19 (2023-3-03)
 
 ## Fix

@@ -28,7 +28,7 @@ const thorchainCache = new ThorchainCache()
 const BUSD = assetFromString('BNB.BUSD-BD1')
 if (!BUSD) throw Error('Asset is incorrect')
 
-const btcPoolDetails: PoolDetail = {
+const btcMidgardPoolDetails: PoolDetail = {
   annualPercentageRate: '0.053737568449651274',
   asset: 'BTC.BTC',
   assetDepth: new CryptoAmount(assetToBase(assetAmount(100)), AssetBTC).baseAmount.amount().toString(),
@@ -47,7 +47,7 @@ const btcPoolDetails: PoolDetail = {
   units: '546397256570929',
   volume24h: '16202006480711',
 }
-const ethPoolDetails: PoolDetail = {
+const ethMidgardPoolDetails: PoolDetail = {
   annualPercentageRate: '0.09731470549045307',
   asset: 'ETH.ETH',
   assetDepth: new CryptoAmount(assetToBase(assetAmount(9100)), AssetETH).baseAmount.amount().toString(),
@@ -66,9 +66,24 @@ const ethPoolDetails: PoolDetail = {
   units: '263973251769640',
   volume24h: '8122016881297',
 }
-
-const btcPool = new LiquidityPool(btcPoolDetails)
-const ethPool = new LiquidityPool(ethPoolDetails)
+const fakeThornodePoolDetails = {
+  LP_units: '413276971622326',
+  asset: 'BTC.BTC',
+  balance_asset: '89543337768',
+  balance_rune: '1337993917142398',
+  pending_inbound_asset: '266444758',
+  pending_inbound_rune: '11008584177407',
+  pool_units: '649253242123717',
+  savers_depth: '61274178654',
+  savers_units: '60486113446',
+  status: 'Available',
+  synth_mint_paused: false,
+  synth_supply: '65090480952',
+  synth_supply_remaining: '24452856816',
+  synth_units: '235976270501391',
+}
+const btcPool = new LiquidityPool(btcMidgardPoolDetails, fakeThornodePoolDetails)
+const ethPool = new LiquidityPool(ethMidgardPoolDetails, fakeThornodePoolDetails)
 
 const inputAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
 

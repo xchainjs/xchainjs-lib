@@ -184,7 +184,7 @@ export class ThorchainQuery {
    * @param params
    */
   private async isValidSwap(params: EstimateSwapParams) {
-    if (isAssetRuneNative(params.input.asset)) {
+    if (isAssetRuneNative(params.input.asset) || params.input.asset.synth) {
       if (params.input.baseAmount.decimal !== 8)
         throw Error(`input asset ${assetToString(params.input.asset)}  must have decimals of 8`)
     } else {
@@ -235,7 +235,7 @@ export class ThorchainQuery {
         : await this.thorchainCache.convert(params.input, params.input.asset)
 
     const inboundFeeInInboundGasAsset = calcNetworkFee(input.asset, sourceInboundDetails)
-    let outboundFeeInOutboundGasAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails).times(3)
+    let outboundFeeInOutboundGasAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails)
 
     // Check outbound fee is equal too or greater than 1 USD * need to find a more permanent solution to this. referencing just 1 stable coin pool has problems
     if (params.destinationAsset.chain !== THORChain && !params.destinationAsset.synth) {
@@ -387,8 +387,15 @@ export class ThorchainQuery {
       if (!destPool.isAvailable())
         errors.push(`destinationAsset ${destAsset.ticker} does not have a valid liquidity pool`)
       // check synth info on thornode pools
-      if (destPool.thornodeDetails.synth_mint_paused && destAsset.synth) {
-        errors.push(`Synth supply is over cap on destinationAsset ${destAsset.ticker}, synth minting is paused`)
+      try {
+        const pools = await this.thorchainCache.thornode.getPools()
+        const destinationAssetPool = pools.find((pool) => pool.asset === `${destAsset.chain}.${destAsset.symbol}`)
+        if (destinationAssetPool)
+          if (destinationAssetPool.synth_mint_paused && destAsset.synth) {
+            errors.push(`Synth supply is over cap on destinationAsset ${destAsset.ticker}, synth minting is paused`)
+          }
+      } catch (error) {
+        errors.push(`Error: ${error} destination pool was not found for asset ${destAsset}`)
       }
     }
     if (sourceInboundDetails.haltedChain) errors.push(`source chain is halted`)
@@ -830,10 +837,13 @@ export class ThorchainQuery {
         errors,
       }
     }
+    // request param amount should always be in 1e8 which is why we pass in adjusted decimals if chain decimals != 8
+    const newAddAmount =
+      addAmount.baseAmount.decimal != 8 ? getBaseAmountWithDiffDecimals(addAmount, 8) : addAmount.baseAmount.amount()
 
     const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
       `${addAmount.asset.chain}.${addAmount.asset.ticker}`,
-      addAmount.baseAmount.amount().toNumber(),
+      newAddAmount.toNumber(),
     )
     // Calculate transaction expiry time of the vault address
     const currentDatetime = new Date()
@@ -843,14 +853,14 @@ export class ThorchainQuery {
       ? depositQuote.inbound_confirmation_seconds
       : await this.confCounting(addAmount)
     const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
-
     if (addAmount.baseAmount.lte(depositQuote.expected_amount_out))
       errors.push(`Amount being added to savers can't pay for fees`)
     const saverFees: SaverFees = {
-      affiliate: new CryptoAmount(baseAmount(depositQuote.fees.affiliate, +pool.nativeDecimal), addAmount.asset),
+      affiliate: new CryptoAmount(baseAmount(depositQuote.fees.affiliate), addAmount.asset),
       asset: assetFromStringEx(depositQuote.fees.asset),
-      outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound, +pool.nativeDecimal), addAmount.asset),
+      outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound), addAmount.asset),
     }
+
     const saverCap = 0.3 * +pool.assetDepth
     const saverCapFilledPercent = (+pool.saversDepth / saverCap) * 100
     const estimateAddSaver: EstimateAddSaver = {
@@ -878,7 +888,7 @@ export class ThorchainQuery {
       throw Error(`Native Rune and synth assets are not supported only L1's`)
     const withdrawQuote = await this.thorchainCache.thornode.getSaversWithdrawQuote(withdrawParams)
     if (!withdrawQuote.expected_amount_out) throw Error(`Could not quote withdrawal ${JSON.stringify(withdrawQuote)}`)
-    const pool = (await this.thorchainCache.getPoolForAsset(withdrawParams.asset)).pool
+    // const pool = (await this.thorchainCache.getPoolForAsset(withdrawParams.asset)).pool
 
     // Calculate transaction expiry time of the vault address
     const currentDatetime = new Date()
@@ -888,21 +898,18 @@ export class ThorchainQuery {
     const estimatedWait = +withdrawQuote.outbound_delay_seconds
     const withdrawAsset = assetFromStringEx(withdrawQuote.fees.asset)
     const estimateWithdrawSaver: EstimateWithdrawSaver = {
-      expectedAssetAmount: new CryptoAmount(
-        baseAmount(withdrawQuote.expected_amount_out, +pool.nativeDecimal),
-        withdrawParams.asset,
-      ),
+      expectedAssetAmount: new CryptoAmount(baseAmount(withdrawQuote.expected_amount_out), withdrawParams.asset),
       fee: {
-        affiliate: new CryptoAmount(baseAmount(withdrawQuote.fees.affiliate, +pool.nativeDecimal), withdrawAsset),
+        affiliate: new CryptoAmount(baseAmount(withdrawQuote.fees.affiliate), withdrawAsset),
         asset: withdrawAsset,
-        outbound: new CryptoAmount(baseAmount(withdrawQuote.fees.outbound, +pool.nativeDecimal), withdrawAsset),
+        outbound: new CryptoAmount(baseAmount(withdrawQuote.fees.outbound), withdrawAsset),
       },
       expiry: expiryDatetime,
       toAddress: withdrawQuote.inbound_address,
       memo: withdrawQuote.memo,
       estimatedWaitTime: estimatedWait,
       slipBasisPoints: withdrawQuote.slippage_bps,
-      dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount, +pool.nativeDecimal), withdrawParams.asset),
+      dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount), withdrawParams.asset),
     }
     return estimateWithdrawSaver
   }
@@ -929,8 +936,8 @@ export class ThorchainQuery {
     const saverUnits = Number(pool.saversUnits)
     const assetDepth = Number(pool.saversDepth)
     const redeemableValue = (ownerUnits / saverUnits) * assetDepth
-    const depositAmount = new CryptoAmount(baseAmount(savers.asset_deposit_value, +pool.nativeDecimal), params.asset)
-    const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue, +pool.nativeDecimal), params.asset)
+    const depositAmount = new CryptoAmount(baseAmount(savers.asset_deposit_value), params.asset)
+    const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue), params.asset)
     const saversAge = (blockData?.thorchain - lastAdded) / ((365 * 86400) / 6)
     const saverGrowth = redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
     const saversPos: SaversPosition = {
