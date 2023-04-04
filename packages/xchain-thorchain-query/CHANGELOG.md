@@ -1,3 +1,10 @@
+# v0.2.2 (2023-4-04)
+
+## Fix
+
+- Savers quote error
+- Bump packages 
+
 # v0.2.1 (2023-3-29)
 
 ## Fix

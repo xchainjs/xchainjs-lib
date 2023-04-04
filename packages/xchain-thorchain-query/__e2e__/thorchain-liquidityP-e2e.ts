@@ -100,6 +100,7 @@ function printSaver(saver: EstimateAddSaver) {
     },
     expiry: saver.expiry,
     toAddress: saver.toAddress,
+    slippage: saver.slipBasisPoints,
     memo: saver.memo,
     estimateWaitTime: saver.estimatedWaitTime,
     canAdd: saver.canAddSaver,
@@ -272,7 +273,7 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
 
   it(`Should estimate saver addition`, async () => {
     try {
-      const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetAVAX)
+      const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(1000, 18)), AssetAVAX)
       const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
       printSaver(estimateAddsSaver)
     } catch (error) {

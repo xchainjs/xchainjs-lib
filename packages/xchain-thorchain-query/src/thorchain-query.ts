@@ -842,7 +842,7 @@ export class ThorchainQuery {
       addAmount.baseAmount.decimal != 8 ? getBaseAmountWithDiffDecimals(addAmount, 8) : addAmount.baseAmount.amount()
 
     const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
-      `${addAmount.asset.chain}.${addAmount.asset.ticker}`,
+      assetToString(addAmount.asset),
       newAddAmount.toNumber(),
     )
     // Calculate transaction expiry time of the vault address
@@ -864,7 +864,7 @@ export class ThorchainQuery {
     const saverCap = 0.3 * +pool.assetDepth
     const saverCapFilledPercent = (+pool.saversDepth / saverCap) * 100
     const estimateAddSaver: EstimateAddSaver = {
-      assetAmount: addAmount,
+      assetAmount: new CryptoAmount(baseAmount(depositQuote.expected_amount_out), addAmount.asset),
       estimatedDepositValue: new CryptoAmount(baseAmount(depositQuote.expected_amount_out), saverFees.asset),
       fee: saverFees,
       expiry: expiryDatetime,
