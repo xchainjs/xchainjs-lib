@@ -114,6 +114,8 @@ export interface XChainClient {
   getFees(): Promise<Fees>
 
   transfer(params: TxParams): Promise<TxHash>
+  // prepareTx(params: TxParams): Promise<UnsignedTx>
+  // signTx(params: UnsignedTx, signer: Signer): Promise<SignedTx>
   broadcastTx(txHex: string): Promise<TxHash>
 
   purgeClient(): void

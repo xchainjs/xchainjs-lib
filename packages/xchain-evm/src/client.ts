@@ -553,7 +553,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
     }
   }
 
-  broadcastTx(txHex: string): Promise<TxHash>{
+  async broadcastTx(txHex: string): Promise<TxHash>{
     const feeRateInWei = await this.providers[this.network].sendTransaction()
   }
 

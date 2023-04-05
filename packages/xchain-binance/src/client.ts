@@ -403,6 +403,10 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
 
     return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
   }
+  async broadcastTx(txHex: string): Promise<string> {
+    const tx = await this.bncClient.sendRawTransaction(txHex)
+    return tx.result
+  }
 
   /**
    * Get the current transfer fee.
