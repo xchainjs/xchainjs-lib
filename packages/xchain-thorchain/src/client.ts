@@ -723,6 +723,10 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     return txHash
   }
 
+  async broadcastTx(txHex: string): Promise<TxHash> {
+    return await this.getCosmosClient().broadcast(txHex)
+  }
+
   /**
    * Transfer without broadcast balances with MsgSend
    *
