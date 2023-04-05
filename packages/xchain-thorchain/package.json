@@ -36,7 +36,6 @@
   "devDependencies": {
     "@cosmos-client/core": "0.46.1",
     "@types/big.js": "^6.0.0",
-    "@xchainjs/xchain-binance": "^5.6.8",
     "@xchainjs/xchain-client": "^0.13.7",
     "@xchainjs/xchain-cosmos": "^0.20.9",
     "@xchainjs/xchain-crypto": "^0.2.6",
