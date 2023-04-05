@@ -10,6 +10,7 @@ import {
   Network,
   RootDerivationPaths,
   Tx,
+  TxHash,
   TxHistoryParams,
   TxParams,
   TxsPage,
@@ -156,4 +157,5 @@ export abstract class BaseXChainClient implements XChainClient {
   abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
   abstract transfer(params: TxParams): Promise<string>
+  abstract broadcastTx(txHex: string): Promise<TxHash>
 }
