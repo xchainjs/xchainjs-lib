@@ -1,3 +1,11 @@
+# v.0.27.8 (2023-04-04)
+
+## Add
+
+- add `broadcastTx()` to client
+- Bump `xchain-client` in dependencies
+- Remove `@xchainjs/xchain-litecoin": "^0.10.7` package from devDependencies
+
 # v.0.27.7 (2023-01-19)
 
 ## Update

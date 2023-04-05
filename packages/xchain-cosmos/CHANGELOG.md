@@ -1,3 +1,9 @@
+# v.0.20.9 (2023-04-05)
+
+## Add
+
+- add `broadcastTx()` to client
+
 # v.0.20.8 (2023-01-25)
 
 ## Update

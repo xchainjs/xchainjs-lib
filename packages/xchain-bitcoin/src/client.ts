@@ -187,7 +187,6 @@ class Client extends UTXOClient {
     }
   }
 
-
   async buildTx({
     amount,
     recipient,
