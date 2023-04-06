@@ -429,12 +429,12 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       const bond = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'bond')
       const transfer = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'transfer')
       if (!transfer) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
-
       const sender = transfer[0].attributes.find((attr) => attr.key === 'sender')?.value
       const senderAmount = transfer[0].attributes.filter((attr) => attr.key === 'amount')[1].value
-
-      const assetString = senderAmount.split(/(?<=\d)(?=[a-zA-Z])/)
-      const senderAsset = assetString[1] === 'rune' ? AssetRuneNative : assetFromStringEx(assetString[1])
+      const regex = /[a-zA-Z]+$/
+      const match = senderAmount.match(regex)
+      const asset = match ? match[0] : null
+      const senderAsset = asset === 'rune' ? AssetRuneNative : assetFromStringEx(`${asset}`)
 
       const senderAddress = sender ? sender : address
       const message = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'message')
