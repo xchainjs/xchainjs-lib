@@ -807,6 +807,20 @@ export class ThorchainQuery {
           rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
         return dustValues
+      case 'BSC':
+        // 0 BSC
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'MAYA':
+        // 0 MAYA
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
       default:
         throw Error('Unknown chain')
     }
