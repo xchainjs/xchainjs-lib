@@ -111,6 +111,68 @@ export interface BorrowersResponse extends Array<Borrower> {
 /**
  *
  * @export
+ * @interface Borrower
+ */
+export interface Borrower {
+    /**
+     *
+     * @type {string}
+     * @memberof Borrower
+     */
+    'owner': string;
+    /**
+     *
+     * @type {string}
+     * @memberof Borrower
+     */
+    'asset': string;
+    /**
+     *
+     * @type {string}
+     * @memberof Borrower
+     */
+    'debt_up': string;
+    /**
+     *
+     * @type {string}
+     * @memberof Borrower
+     */
+    'debt_down': string;
+    /**
+     *
+     * @type {string}
+     * @memberof Borrower
+     */
+    'collateral_up': string;
+    /**
+     *
+     * @type {string}
+     * @memberof Borrower
+     */
+    'collateral_down': string;
+    /**
+     *
+     * @type {number}
+     * @memberof Borrower
+     */
+    'last_open_height': number;
+    /**
+     *
+     * @type {number}
+     * @memberof Borrower
+     */
+    'last_repay_height': number;
+}
+/**
+ *
+ * @export
+ * @interface BorrowersResponse
+ */
+export interface BorrowersResponse extends Array<Borrower> {
+}
+/**
+ *
+ * @export
  * @interface ChainHeight
  */
 export interface ChainHeight {
@@ -268,6 +330,44 @@ export interface InboundAddress {
  * @interface InboundAddressesResponse
  */
 export interface InboundAddressesResponse extends Array<InboundAddress> {
+}
+/**
+ *
+ * @export
+ * @interface InvariantResponse
+ */
+export interface InvariantResponse {
+    /**
+     * The name of the invariant.
+     * @type {string}
+     * @memberof InvariantResponse
+     */
+    'invariant': string;
+    /**
+     * Returns true if the invariant is broken.
+     * @type {boolean}
+     * @memberof InvariantResponse
+     */
+    'broken': boolean;
+    /**
+     * Informative message about the invariant result.
+     * @type {string}
+     * @memberof InvariantResponse
+     */
+    'msg': string;
+}
+/**
+ *
+ * @export
+ * @interface InvariantsResponse
+ */
+export interface InvariantsResponse {
+    /**
+     *
+     * @type {Array<string>}
+     * @memberof InvariantsResponse
+     */
+    'invariants'?: Array<string>;
 }
 /**
  *
@@ -676,6 +776,79 @@ export interface MimirVote {
      * @memberof MimirVote
      */
     'signer'?: string;
+}
+/**
+ *
+ * @export
+ * @interface MsgSwap
+ */
+export interface MsgSwap {
+    /**
+     *
+     * @type {Tx}
+     * @memberof MsgSwap
+     */
+    'tx': Tx;
+    /**
+     * the asset to be swapped to
+     * @type {string}
+     * @memberof MsgSwap
+     */
+    'target_asset': string;
+    /**
+     * the destination address to receive the swap output
+     * @type {string}
+     * @memberof MsgSwap
+     */
+    'destination'?: string;
+    /**
+     * the minimum amount of output asset to receive (else cancelling and refunding the swap)
+     * @type {string}
+     * @memberof MsgSwap
+     */
+    'trade_target': string;
+    /**
+     * the affiliate address which will receive any affiliate fee
+     * @type {string}
+     * @memberof MsgSwap
+     */
+    'affiliate_address'?: string;
+    /**
+     * the affiliate fee in basis points
+     * @type {string}
+     * @memberof MsgSwap
+     */
+    'affiliate_basis_points': string;
+    /**
+     * the signer (sender) of the transaction
+     * @type {string}
+     * @memberof MsgSwap
+     */
+    'signer'?: string;
+    /**
+     * the contract address if an aggregator is specified for a non-THORChain SwapOut
+     * @type {string}
+     * @memberof MsgSwap
+     */
+    'aggregator'?: string;
+    /**
+     * the desired output asset of the aggregator SwapOut
+     * @type {string}
+     * @memberof MsgSwap
+     */
+    'aggregator_target_address'?: string;
+    /**
+     * the minimum amount of SwapOut asset to receive (else cancelling the SwapOut and receiving THORChain\'s output)
+     * @type {string}
+     * @memberof MsgSwap
+     */
+    'aggregator_target_limit'?: string;
+    /**
+     * 0 if a market order (immediately completed or refunded), 1 if a limit order (held until fulfillable)
+     * @type {number}
+     * @memberof MsgSwap
+     */
+    'order_type'?: number;
 }
 /**
  *
@@ -1707,6 +1880,13 @@ export interface SwapQueueResponse extends Array<MsgSwap> {
 /**
  *
  * @export
+ * @interface SwapQueueResponse
+ */
+export interface SwapQueueResponse extends Array<MsgSwap> {
+}
+/**
+ *
+ * @export
  * @interface Thorname
  */
 export interface Thorname {
@@ -2569,7 +2749,6 @@ export const BorrowersApiAxiosParamCreator = function (configuration?: Configura
             }
 
 
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2605,7 +2784,6 @@ export const BorrowersApiAxiosParamCreator = function (configuration?: Configura
             if (height !== undefined) {
                 localVarQueryParameter['height'] = height;
             }
-
 
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -2846,7 +3024,6 @@ export const InvariantsApiAxiosParamCreator = function (configuration?: Configur
             }
 
 
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2878,7 +3055,6 @@ export const InvariantsApiAxiosParamCreator = function (configuration?: Configur
             if (height !== undefined) {
                 localVarQueryParameter['height'] = height;
             }
-
 
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -4638,6 +4814,40 @@ export const QueueApiAxiosParamCreator = function (configuration?: Configuration
          */
         queueScheduled: async (height?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/thorchain/queue/scheduled`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (height !== undefined) {
+                localVarQueryParameter['height'] = height;
+            }
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Returns the swap queue.
+         * @param {number} [height] optional block height, defaults to current tip
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        queueSwap: async (height?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/thorchain/queue/swap`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;

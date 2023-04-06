@@ -186,6 +186,7 @@ class Client extends UTXOClient {
       return error
     }
   }
+
   async buildTx({
     amount,
     recipient,
