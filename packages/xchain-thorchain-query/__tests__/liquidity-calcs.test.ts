@@ -59,6 +59,7 @@ const BusdThornodePoolDetails1: Pool = {
   synth_supply: '47690245926711',
   synth_supply_remaining: '329709222556881',
   synth_units: '3543715470795',
+  loan_collateral: '',
 }
 
 const emptyBusdPoolDetails: PoolDetail = {
