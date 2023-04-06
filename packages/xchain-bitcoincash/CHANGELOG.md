@@ -1,3 +1,10 @@
+# v.0.15.10 (2023-04-05)
+
+## Add
+
+- Add async `broadcastTx()` to client
+- bump xchain-client deps
+
 # v.0.15.9 (2023-03-29)
 
 ## Fix

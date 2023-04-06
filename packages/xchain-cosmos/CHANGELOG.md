@@ -3,6 +3,7 @@
 ## Add
 
 - add `broadcastTx()` to client
+- bump xchain-client deps
 
 # v.0.20.8 (2023-01-25)
 
