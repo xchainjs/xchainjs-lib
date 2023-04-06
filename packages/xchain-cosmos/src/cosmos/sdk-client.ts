@@ -302,4 +302,21 @@ export class CosmosSDKClient {
 
     return res.data.tx_response.txhash
   }
+  async broadcast(txHex: string): Promise<TxHash> {
+    // broadcast
+    const res = await cosmosclient.rest.tx.broadcastTx(this.sdk, {
+      tx_bytes: txHex,
+      mode: cosmosclient.rest.tx.BroadcastTxMode.Sync,
+    })
+
+    if (res?.data?.tx_response?.code !== 0) {
+      throw new Error('Error broadcasting: ' + res?.data?.tx_response?.raw_log)
+    }
+
+    if (!res.data?.tx_response?.txhash) {
+      throw new Error('Error broadcasting, txhash not present on response')
+    }
+
+    return res.data.tx_response.txhash
+  }
 }

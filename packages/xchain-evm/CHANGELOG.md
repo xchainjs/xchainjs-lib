@@ -1,3 +1,10 @@
+# v.0.1.5 (2022-04-04)
+
+## Update
+
+- add `broadcastTx() ` to client
+- add `getContract` const to utils
+
 # v.0.1.4 (2022-03-21)
 
 ## Update

@@ -313,6 +313,9 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       fee,
     })
   }
+  async broadcastTx(txHex: string): Promise<TxHash> {
+    return await this.getSDKClient().broadcast(txHex)
+  }
 
   /**
    * Returns fees.

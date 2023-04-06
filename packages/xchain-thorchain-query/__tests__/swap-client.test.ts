@@ -81,6 +81,7 @@ const fakeThornodePoolDetails = {
   synth_supply: '65090480952',
   synth_supply_remaining: '24452856816',
   synth_units: '235976270501391',
+  loan_collateral: '',
 }
 const btcPool = new LiquidityPool(btcMidgardPoolDetails, fakeThornodePoolDetails)
 const ethPool = new LiquidityPool(ethMidgardPoolDetails, fakeThornodePoolDetails)

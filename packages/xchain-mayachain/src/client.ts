@@ -645,6 +645,10 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
     return txBuilder.txBytes()
   }
 
+  async broadcastTx(txHex: string): Promise<TxHash> {
+    return await this.getCosmosClient().broadcast(txHex)
+  }
+
   /**
    * Gets fees from Node
    *

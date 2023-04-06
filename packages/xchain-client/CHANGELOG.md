@@ -1,3 +1,9 @@
+# v.0.13.7 (2023-04-05)
+
+## Add
+
+- add `broadcastTx()` to `BaseXChainClient` & `UTXOClient`
+
 # v.0.13.6 (2023-03-23)
 
 ## Add

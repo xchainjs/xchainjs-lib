@@ -12,6 +12,7 @@ import {
   Fees,
   FeesWithRates,
   Tx,
+  TxHash,
   TxHistoryParams,
   TxsPage,
   XChainClientParams,
@@ -158,6 +159,10 @@ export abstract class UTXOClient extends Client {
 
     return standardFeeRates(feeRate)
   }
+  async broadcastTx(txHex: string): Promise<TxHash> {
+    return await this.roundRobinBroadcastTx(txHex)
+  }
+
   protected async roundRobinGetBalance(address: Address) {
     for (const provider of this.dataProviders) {
       try {

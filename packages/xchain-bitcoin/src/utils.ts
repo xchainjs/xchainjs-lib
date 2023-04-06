@@ -87,44 +87,6 @@ export const btcNetwork = (network: Network): Bitcoin.Network => {
   }
 }
 
-// /**
-//  * Get the balances of an address.
-//  *
-//  * @param {string} sochainUrl sochain Node URL.
-//  * @param {Network} network
-//  * @param {Address} address
-//  * @returns {Balance[]} The balances of the given address.
-//  */
-// export const getBalance = async ({
-//   params,
-//   haskoinUrl,
-// }: {
-//   params: BalanceParams
-//   haskoinUrl: string
-// }): Promise<Balance[]> => {
-//   switch (params.network) {
-//     case Network.Mainnet:
-//     case Network.Stagenet:
-//       return [
-//         {
-//           asset: AssetBTC,
-//           amount: await haskoinApi.getBalance({
-//             haskoinUrl,
-//             address: params.address,
-//             confirmedOnly: params.confirmedOnly,
-//           }),
-//         },
-//       ]
-//     case Network.Testnet:
-//       return [
-//         {
-//           asset: AssetBTC,
-//           amount: await sochain.getBalance({ ...params }),
-//         },
-//       ]
-//   }
-// }
-
 /**
  * Validate the BTC address.
  *
@@ -140,16 +102,6 @@ export const validateAddress = (address: Address, network: Network): boolean => 
     return false
   }
 }
-
-// /**
-//  * Broadcast the transaction.
-//  *
-//  * @param {BroadcastTxParams} params The transaction broadcast options.
-//  * @returns {TxHash} The transaction hash.
-//  */
-// export const broadcastTx = async ({ haskoinUrl, txHex }: BroadcastTxParams): Promise<TxHash> => {
-//   return await haskoinApi.broadcastTx({ haskoinUrl, txHex })
-// }
 
 /**
  * Calculate fees based on fee rate and memo.

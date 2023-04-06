@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Custom Mayachain client and utilities used by XChainJS clients",
   "keywords": [
     "MAYAChain",
@@ -34,13 +34,11 @@
     "generate:MayachainMsgs": "./genMsgs.sh"
   },
   "devDependencies": {
-    "@xchainjs/xchain-binance": "^5.6.6",
     "@cosmos-client/core": "0.46.1",
     "@types/big.js": "^6.0.0",
-    "@xchainjs/xchain-client": "^0.13.5",
-    "@xchainjs/xchain-cosmos": "^0.20.6",
+    "@xchainjs/xchain-client": "^0.13.7",
+    "@xchainjs/xchain-cosmos": "^0.20.9",
     "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-ethereum": "^0.27.6",
     "@xchainjs/xchain-util": "^0.12.0",
     "axios": "^0.25.0",
     "bech32-buffer": "^0.2.0",
@@ -51,8 +49,8 @@
   },
   "peerDependencies": {
     "@cosmos-client/core": "0.46.1",
-    "@xchainjs/xchain-client": "^0.13.5",
-    "@xchainjs/xchain-cosmos": "^0.20.6",
+    "@xchainjs/xchain-client": "^0.13.7",
+    "@xchainjs/xchain-cosmos": "^0.20.9",
     "@xchainjs/xchain-crypto": "^0.2.6",
     "@xchainjs/xchain-util": "^0.12.0",
     "axios": "^0.25.0",

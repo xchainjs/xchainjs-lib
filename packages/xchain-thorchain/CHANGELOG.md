@@ -1,3 +1,10 @@
+# v.0.27.11 (2023-04-04)
+
+## Add
+
+- add `broadcastTx()` to client
+- bump dependencies
+
 # v.0.27.10 (2023-03-01)
 
 ## Fix

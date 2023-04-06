@@ -755,6 +755,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     return hash
   }
 
+  async broadcastTx(txHex: string): Promise<TxHash> {
+    const resp = await this.getProvider().sendTransaction(txHex)
+    return resp.hash
+  }
+
   /**
    * Estimate gas price.
    * @see https://etherscan.io/apis#gastracker
