@@ -57,7 +57,7 @@ describe('thorchain Integration Tests', () => {
       }
       await thorClient.transfer(transferTx)
       fail()
-    } catch (error) {
+    } catch (error: any) {
       expect(error.toString().includes('account sequence mismatch')).toBe(true)
     }
   })

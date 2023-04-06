@@ -1,8 +1,6 @@
-import { AssetBTC } from '@xchainjs/xchain-bitcoin'
-import { AssetETH } from '@xchainjs/xchain-ethereum'
 import { PoolDetail } from '@xchainjs/xchain-midgard'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromString, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
@@ -24,6 +22,9 @@ import {
 } from '../src/utils/swap'
 
 const thorchainCache = new ThorchainCache()
+
+const AssetBTC = assetFromStringEx('BTC.BTC')
+const AssetETH = assetFromStringEx('ETH.ETH')
 
 const BUSD = assetFromString('BNB.BUSD-BD1')
 if (!BUSD) throw Error('Asset is incorrect')

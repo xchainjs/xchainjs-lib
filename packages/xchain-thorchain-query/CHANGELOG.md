@@ -1,3 +1,10 @@
+# v0.2.4 (2023-4-05)
+
+## Fix
+
+- Remove unused deps
+- Declared asset conts 
+
 # v0.2.3 (2023-4-05)
 
 ## Fix

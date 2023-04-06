@@ -1,11 +1,3 @@
-import { AVAXChain, AssetAVAX } from '@xchainjs/xchain-avax'
-import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
-import { AssetBTC, BTCChain } from '@xchainjs/xchain-bitcoin'
-import { AssetBCH, BCHChain } from '@xchainjs/xchain-bitcoincash'
-import { AssetATOM, GAIAChain } from '@xchainjs/xchain-cosmos'
-import { AssetDOGE, DOGEChain } from '@xchainjs/xchain-doge'
-import { AssetETH, ETHChain } from '@xchainjs/xchain-ethereum'
-import { AssetLTC, LTCChain } from '@xchainjs/xchain-litecoin'
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   // Address,
@@ -20,6 +12,25 @@ import { CryptoAmount } from '../crypto-amount'
 import { LiquidityPool } from '../liquidity-pool'
 import { ThorchainCache } from '../thorchain-cache'
 import { InboundDetail, SwapOutput } from '../types'
+// eslint-disable-next-line ordered-imports/ordered-imports
+import {
+  AVAXChain,
+  AssetATOM,
+  AssetAVAX,
+  AssetBCH,
+  AssetBNB,
+  AssetBTC,
+  AssetDOGE,
+  AssetETH,
+  AssetLTC,
+  BCHChain,
+  BNBChain,
+  BTCChain,
+  DOGEChain,
+  ETHChain,
+  GAIAChain,
+  LTCChain,
+} from './const'
 
 export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDecimals: number): BigNumber => {
   const inDecimals = inputAmount.baseAmount.decimal

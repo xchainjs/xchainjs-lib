@@ -1,8 +1,3 @@
-import { AssetBNB } from '@xchainjs/xchain-binance'
-import { AssetBTC } from '@xchainjs/xchain-bitcoin'
-import { AssetATOM } from '@xchainjs/xchain-cosmos'
-import { AssetETH } from '@xchainjs/xchain-ethereum'
-import { AssetLTC } from '@xchainjs/xchain-litecoin'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
@@ -21,6 +16,12 @@ const assetAVAXUSDC = assetFromStringEx(`AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 const sATOM = assetFromStringEx('GAIA/ATOM')
 const sETH = assetFromStringEx('ETH/ETH')
+
+const AssetBTC = assetFromStringEx('BTC.BTC')
+const AssetETH = assetFromStringEx('ETH.ETH')
+const AssetLTC = assetFromStringEx('LTC.LTC')
+const AssetBNB = assetFromStringEx('BNB.BNB')
+const AssetATOM = assetFromStringEx('GAIA.ATOM')
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {
@@ -79,7 +80,7 @@ describe('Thorchain-query tests', () => {
       const estimate = await thorchainQuery.estimateSwap(swapParams)
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(false)
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
       expect(error.message).toEqual(`destination chain is halted`)
     }
@@ -95,7 +96,7 @@ describe('Thorchain-query tests', () => {
       const estimate = await thorchainQuery.estimateSwap(swapParams)
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(false)
-    } catch (error) {
+    } catch (error: any) {
       console.log(error.message)
       expect(error.message).toEqual(`source chain is halted`)
     }

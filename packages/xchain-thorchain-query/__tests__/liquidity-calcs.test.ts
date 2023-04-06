@@ -1,5 +1,3 @@
-import { AssetBTC } from '@xchainjs/xchain-bitcoin'
-import { AssetETH } from '@xchainjs/xchain-ethereum'
 import { PoolDetail } from '@xchainjs/xchain-midgard'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { Pool } from '@xchainjs/xchain-thornode'
@@ -24,6 +22,8 @@ const thorchainQuery = new ThorchainQuery()
 
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+const AssetBTC = assetFromStringEx('BTC.BTC')
+const AssetETH = assetFromStringEx('ETH.ETH')
 
 const BusdMidgardPoolDetails1: PoolDetail = {
   annualPercentageRate: '-0.08690907236215786',

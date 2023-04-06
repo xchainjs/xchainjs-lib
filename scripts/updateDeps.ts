@@ -2,7 +2,6 @@ const fs = require('fs')
 const path = require('path')
 
 interface PackageJson {
-  dependencies?: Record<string, string>
   devDependencies?: Record<string, string>
   peerDependencies?: Record<string, string>
 }
@@ -11,21 +10,7 @@ function updatePackageJson(packagePath: string, packageName: string, version: st
   const packageJsonPath = path.join(packagePath, 'package.json')
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as PackageJson
 
-  if (packageJson.dependencies && packageJson.dependencies[packageName]) {
-    const depVersion = packageJson.dependencies[packageName]
-    if (/^(\^|\~|\d)/.test(depVersion)) {
-      const newVersion = `^${version}`
-      if (depVersion === newVersion) {
-        console.log(`${packageName} is already up to date.`)
-      } else {
-        console.log(`Updating ${packageName} from ${depVersion} to ${newVersion}`)
-        packageJson.dependencies[packageName] = newVersion
-        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
-      }
-    } else {
-      console.log(`${packageName} is not using a compatible version specifier.`)
-    }
-  } else if (packageJson.devDependencies && packageJson.devDependencies[packageName]) {
+  if (packageJson.devDependencies && packageJson.devDependencies[packageName]) {
     const depVersion = packageJson.devDependencies[packageName]
     if (/^(\^|\~|\d)/.test(depVersion)) {
       const newVersion = `^${version}`
@@ -39,7 +24,10 @@ function updatePackageJson(packagePath: string, packageName: string, version: st
     } else {
       console.log(`${packageName} is not using a compatible version specifier.`)
     }
-  } else if (packageJson.peerDependencies && packageJson.peerDependencies[packageName]) {
+  } else {
+    console.log(`${packageName} is not devDependency ${packageJsonPath}.`)
+  }
+  if (packageJson.peerDependencies && packageJson.peerDependencies[packageName]) {
     const depVersion = packageJson.peerDependencies[packageName]
     if (/^(\^|\~|\d)/.test(depVersion)) {
       const newVersion = `^${version}`
@@ -54,7 +42,7 @@ function updatePackageJson(packagePath: string, packageName: string, version: st
       console.log(`${packageName} is not using a compatible version specifier.`)
     }
   } else {
-    console.log(`${packageName} is not a dependency or devDependency or peer in ${packageJsonPath}.`)
+    console.log(`${packageName} is not peerDependency ${packageJsonPath}.`)
   }
 }
 
@@ -79,7 +67,7 @@ function updatePackage(packageName: string, version: string): void {
   const packagePaths = getPackagePaths(packagesPath)
 
   for (const packagePath of packagePaths) {
-    updatePackageJson(packagePath, packageName, version)
+    updatePackageJson(packagePath, `@xchainjs/xchain-${packageName}`, version)
   }
 }
 
