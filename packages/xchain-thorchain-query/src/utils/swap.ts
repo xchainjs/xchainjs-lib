@@ -19,17 +19,21 @@ import {
   AssetAVAX,
   AssetBCH,
   AssetBNB,
+  AssetBSC,
   AssetBTC,
   AssetDOGE,
   AssetETH,
   AssetLTC,
+  AssetMAYA,
   BCHChain,
   BNBChain,
+  BSCCHain,
   BTCChain,
   DOGEChain,
   ETHChain,
   GAIAChain,
   LTCChain,
+  MAYAChain,
 } from './const'
 
 export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDecimals: number): BigNumber => {
@@ -215,6 +219,10 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetDOGE
     case AVAXChain:
       return AssetAVAX
+    case BSCCHain:
+      return AssetBSC
+    case MAYAChain:
+      return AssetMAYA
     default:
       throw Error('Unknown chain')
   }
@@ -286,6 +294,12 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
     case THORChain:
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
       break
+    case BSCCHain:
+      return new CryptoAmount(baseAmount(inbound.gasRate), AssetBSC)
+      break
+    case MAYAChain:
+      return new CryptoAmount(baseAmount(inbound.gasRate), AssetMAYA)
+      break
   }
   throw new Error(`could not calculate inbound fee for ${asset.chain}`)
 }
@@ -328,8 +342,14 @@ export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmo
     case GAIAChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetATOM)
       break
+    case BSCCHain:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBSC)
+      break
     case THORChain:
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
+      break
+    case MAYAChain:
+      return new CryptoAmount(baseAmount(2000000), AssetMAYA)
       break
   }
   throw new Error(`could not calculate outbound fee for ${asset.chain}`)
@@ -360,6 +380,10 @@ export const getChain = (chain: string): Chain => {
       return LTCChain
     case 'DOGE':
       return DOGEChain
+    case 'BSC':
+      return BSCCHain
+    case 'MAYA':
+      return MAYAChain
     default:
       throw Error('Unknown chain')
   }

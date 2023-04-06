@@ -8,6 +8,8 @@ export const AssetETH = assetFromStringEx('ETH.ETH')
 export const AssetDOGE = assetFromStringEx('DOGE.DOGE')
 export const AssetLTC = assetFromStringEx('LTC.LTC')
 export const AssetATOM = assetFromStringEx('GAIA.ATOM')
+export const AssetMAYA = assetFromStringEx('MAYA.CACAO')
+export const AssetBSC = assetFromStringEx('BSC.BNB')
 
 export const BNBChain = 'BNB'
 export const BTCChain = 'BTC'
@@ -17,3 +19,5 @@ export const GAIAChain = 'GAIA'
 export const DOGEChain = 'DOGE'
 export const LTCChain = 'LTC'
 export const AVAXChain = 'AVAX'
+export const MAYAChain = 'MAYA'
+export const BSCCHain = 'BSC'
