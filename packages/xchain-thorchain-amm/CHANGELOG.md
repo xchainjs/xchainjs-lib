@@ -1,3 +1,10 @@
+# v0.3.22 (2023-04-05)
+
+## Add
+
+- Bump packages
+- change erc-20 depositWithExpiry gaslimit to 160000
+
 # v0.3.21 (2023-04-04)
 
 ## Add
@@ -5,9 +12,9 @@
 - Bump packages
 - Add `erc-20` approval check in `thorchain-amm.estimateSwap()`
 
-## Fix 
+## Fix
 
-- Pass `FeeOption` enum through `executeSwap()` 
+- Pass `FeeOption` enum through `executeSwap()`
 
 # v0.3.20 (2023-03-27)
 

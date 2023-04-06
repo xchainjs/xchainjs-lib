@@ -72,7 +72,7 @@ export class EthHelper {
 
       const routerContract = new ethers.Contract(inboundAsgard.router, abi.router)
 
-      const gasLimit = '80000'
+      const gasLimit = '160000'
       const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams, {
         from: address,
         value: 0,
