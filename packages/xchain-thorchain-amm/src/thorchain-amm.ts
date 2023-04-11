@@ -2,12 +2,16 @@ import {
   AddliquidityPosition,
   CryptoAmount,
   EstimateAddLP,
+  EstimateAddSaver,
   EstimateSwapParams,
   EstimateWithdrawLP,
+  EstimateWithdrawSaver,
+  SaversPosition,
   SaversWithdraw,
   ThorchainQuery,
   TxDetails,
   WithdrawLiquidityPosition,
+  getSaver,
 } from '@xchainjs/xchain-thorchain-query'
 
 import { TxSubmitted } from './types'
@@ -159,6 +163,30 @@ export class ThorchainAMM {
       assetAddress: withdrawParams.assetAddress,
       runeAddress: withdrawParams.runeAddress,
     })
+  }
+  /**
+   *
+   * @param addAssetAmount
+   * @returns
+   */
+  public async estimateAddSaver(addAssetAmount: CryptoAmount): Promise<EstimateAddSaver> {
+    return await this.thorchainQuery.estimateAddSaver(addAssetAmount)
+  }
+  /**
+   *
+   * @param withdrawParams
+   * @returns
+   */
+  public async estimateWithdrawSaver(withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
+    return await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
+  }
+  /**
+   *
+   * @param getsaver
+   * @returns
+   */
+  public async getSaverPosition(getsaver: getSaver): Promise<SaversPosition> {
+    return await this.thorchainQuery.getSaverPosition(getsaver)
   }
 
   /**

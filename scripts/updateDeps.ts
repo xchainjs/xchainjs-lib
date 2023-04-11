@@ -19,7 +19,7 @@ function updatePackageJson(packagePath: string, packageName: string, version: st
       } else {
         console.log(`Updating ${packageName} from ${depVersion} to ${newVersion}`)
         packageJson.devDependencies[packageName] = newVersion
-        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n')
       }
     } else {
       console.log(`${packageName} is not using a compatible version specifier.`)
@@ -36,7 +36,7 @@ function updatePackageJson(packagePath: string, packageName: string, version: st
       } else {
         console.log(`Updating ${packageName} from ${depVersion} to ${newVersion}`)
         packageJson.peerDependencies[packageName] = newVersion
-        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n')
       }
     } else {
       console.log(`${packageName} is not using a compatible version specifier.`)
