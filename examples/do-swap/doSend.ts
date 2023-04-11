@@ -13,12 +13,12 @@ const doSend = async (wallet: Wallet) => {
     const amount = assetAmount(process.argv[4], decimals)
     const asset = assetFromString(`${process.argv[6]}`)
     const destinationAddress = process.argv[7]
+    const memo = process.argv[8]
 
     const toChain = asset.synth ? THORChain : asset.chain
     const client = wallet.clients[toChain]
-
     console.log(`sending ${amount.amount().toFixed()} ${asset} to ${destinationAddress}`)
-    const tx = await client.transfer({ recipient: destinationAddress, amount: assetToBase(amount) })
+    const tx = await client.transfer({ recipient: destinationAddress, amount: assetToBase(amount), memo: memo })
     console.log(tx)
   } catch (error) {
     console.error(error)

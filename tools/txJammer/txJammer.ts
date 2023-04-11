@@ -3,11 +3,10 @@ import fs = require('fs')
 import { Network, TxParams } from '@xchainjs/xchain-client'
 import { decryptFromKeystore } from '@xchainjs/xchain-crypto'
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
-import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
+import { AmmEstimateSwapParams, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   AddliquidityPosition,
   CryptoAmount,
-  EstimateSwapParams,
   LiquidityPool,
   Midgard,
   ThorchainCache,
@@ -284,10 +283,12 @@ export class TxJammer {
     const destinationAddress = destinationAsset.synth
       ? receiverWallet.clients[THORChain].getAddress()
       : receiverWallet.clients[destinationAsset.chain].getAddress()
-    const swapParams: EstimateSwapParams = {
+    const swapParams: AmmEstimateSwapParams = {
       input: await this.createCryptoAmount(sourceAsset),
       destinationAsset,
       destinationAddress: destinationAddress,
+      wallet: senderWallet,
+      walletIndex: 0,
     }
 
     const result: TxDetail = { action: 'swap' }
