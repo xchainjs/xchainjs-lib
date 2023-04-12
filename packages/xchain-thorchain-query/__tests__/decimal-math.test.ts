@@ -1,16 +1,14 @@
-// import { AssetBNB } from '@xchainjs/xchain-binance'
-// import { AssetLTC } from '@xchainjs/xchain-litecoin'
-import { AssetBTC } from '@xchainjs/xchain-bitcoin'
-import { AssetETH } from '@xchainjs/xchain-ethereum'
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainQuery } from '../src/thorchain-query'
+import { AssetRuneNative } from '../src/utils'
 
 const thorchainQuery = new ThorchainQuery()
+const AssetBTC = assetFromStringEx('BTC.BTC')
+const AssetETH = assetFromStringEx('ETH.ETH')
 
 const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 // const BUSD = assetFromString('BNB.BUSD-BD1')

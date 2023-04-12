@@ -11,7 +11,8 @@
     "pub": "lerna publish",
     "test": "lerna run test",
     "e2e": "lerna run e2e",
-    "lint": "lerna run lint"
+    "lint": "lerna run lint",
+    "updateDeps": " ts-node scripts/updateDeps.ts"
   },
   "husky": {
     "hooks": {

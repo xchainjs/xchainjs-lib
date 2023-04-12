@@ -1,8 +1,4 @@
-import { AssetAVAX } from '@xchainjs/xchain-avax'
-import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
-import { AssetETH, ETHChain } from '@xchainjs/xchain-ethereum'
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { Asset, assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
@@ -10,11 +6,18 @@ import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { EstimateSwapParams, SwapEstimate, TxDetails } from '../src/types'
+import { AssetRuneNative } from '../src/utils'
 import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
 
 const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
+
+const AssetAVAX = assetFromStringEx('AVAX.AVAX')
+const AssetBTC = assetFromStringEx('BTC.BTC')
+const AssetETH = assetFromStringEx('ETH.ETH')
+
+const ETHChain = 'ETH'
 
 // const stagenetCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
 // const thorchainQuery = new ThorchainQuery(stagenetCache)

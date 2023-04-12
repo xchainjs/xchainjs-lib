@@ -1,15 +1,23 @@
+# v0.2.4 (2023-4-05)
+
+## Fix
+
+- Remove unused deps
+- Declared asset conts
+- Add logic for BSC & MAYA
+
 # v0.2.3 (2023-4-05)
 
 ## Fix
 
-- Bump deps 
+- Bump deps
 
 # v0.2.2 (2023-4-04)
 
 ## Fix
 
 - Savers quote error
-- Bump packages 
+- Bump packages
 
 # v0.2.1 (2023-3-29)
 
@@ -17,7 +25,7 @@
 
 - Synth bug `default` all synths to 8 decimals
 - Savers baseAmount bug, removed `+pool.nativeDecimals`
-- fix outboundfee calc 
+- fix outboundfee calc
 
 # v0.2.0 (2023-3-21)
 

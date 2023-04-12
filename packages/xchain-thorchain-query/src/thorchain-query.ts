@@ -1,7 +1,3 @@
-import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
-import { AssetBTC } from '@xchainjs/xchain-bitcoin'
-import { GAIAChain } from '@xchainjs/xchain-cosmos'
-import { AssetRuneNative, THORChain, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Asset,
@@ -45,6 +41,7 @@ import {
   WithdrawLiquidityPosition,
   getSaver,
 } from './types'
+import { AssetBNB, AssetBTC, AssetRuneNative, BNBChain, GAIAChain, THORChain, isAssetRuneNative } from './utils'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
 import {
   calcNetworkFee,
@@ -56,6 +53,7 @@ import {
 
 const BN_1 = new BigNumber(1)
 const defaultCache = new ThorchainCache()
+
 /**
  * THORChain Class for interacting with THORChain.
  * Recommended main class to use for swapping with THORChain
@@ -803,6 +801,20 @@ export class ThorchainQuery {
         return dustValues
       case 'AVAX':
         // 0 AVAX
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'BSC':
+        // 0 BSC
+        dustValues = {
+          asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
+          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+        }
+        return dustValues
+      case 'MAYA':
+        // 0 MAYA
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
           rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),

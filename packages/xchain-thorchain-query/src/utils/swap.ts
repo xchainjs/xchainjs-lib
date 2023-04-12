@@ -1,12 +1,3 @@
-import { AVAXChain, AssetAVAX } from '@xchainjs/xchain-avax'
-import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
-import { AssetBTC, BTCChain } from '@xchainjs/xchain-bitcoin'
-import { AssetBCH, BCHChain } from '@xchainjs/xchain-bitcoincash'
-import { AssetATOM, GAIAChain } from '@xchainjs/xchain-cosmos'
-import { AssetDOGE, DOGEChain } from '@xchainjs/xchain-doge'
-import { AssetETH, ETHChain } from '@xchainjs/xchain-ethereum'
-import { AssetLTC, LTCChain } from '@xchainjs/xchain-litecoin'
-import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   // Address,
   Asset,
@@ -20,6 +11,31 @@ import { CryptoAmount } from '../crypto-amount'
 import { LiquidityPool } from '../liquidity-pool'
 import { ThorchainCache } from '../thorchain-cache'
 import { InboundDetail, SwapOutput } from '../types'
+// eslint-disable-next-line ordered-imports/ordered-imports
+import {
+  AVAXChain,
+  AssetATOM,
+  AssetAVAX,
+  AssetBCH,
+  AssetBNB,
+  AssetBSC,
+  AssetBTC,
+  AssetDOGE,
+  AssetETH,
+  AssetLTC,
+  AssetMAYA,
+  AssetRuneNative,
+  BCHChain,
+  BNBChain,
+  BSCChain,
+  BTCChain,
+  DOGEChain,
+  ETHChain,
+  GAIAChain,
+  LTCChain,
+  MAYAChain,
+  THORChain,
+} from './const'
 
 export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDecimals: number): BigNumber => {
   const inDecimals = inputAmount.baseAmount.decimal
@@ -204,6 +220,10 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetDOGE
     case AVAXChain:
       return AssetAVAX
+    case BSCChain:
+      return AssetBSC
+    case MAYAChain:
+      return AssetMAYA
     default:
       throw Error('Unknown chain')
   }
@@ -275,6 +295,12 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
     case THORChain:
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
       break
+    case BSCChain:
+      return new CryptoAmount(baseAmount(inbound.gasRate), AssetBSC)
+      break
+    case MAYAChain:
+      return new CryptoAmount(baseAmount(inbound.gasRate), AssetMAYA)
+      break
   }
   throw new Error(`could not calculate inbound fee for ${asset.chain}`)
 }
@@ -317,8 +343,14 @@ export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmo
     case GAIAChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetATOM)
       break
+    case BSCChain:
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBSC)
+      break
     case THORChain:
       return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
+      break
+    case MAYAChain:
+      return new CryptoAmount(baseAmount(2000000), AssetMAYA)
       break
   }
   throw new Error(`could not calculate outbound fee for ${asset.chain}`)
@@ -349,6 +381,10 @@ export const getChain = (chain: string): Chain => {
       return LTCChain
     case 'DOGE':
       return DOGEChain
+    case 'BSC':
+      return BSCChain
+    case 'MAYA':
+      return MAYAChain
     default:
       throw Error('Unknown chain')
   }

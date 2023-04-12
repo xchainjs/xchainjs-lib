@@ -1,11 +1,11 @@
 import { Network } from '@xchainjs/xchain-client'
-import { THORChain, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { Address, Asset, Chain, assetFromStringEx, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
 import { LiquidityPool } from './liquidity-pool'
 import { InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache, SwapOutput } from './types'
+import { THORChain, isAssetRuneNative } from './utils'
 import { Midgard } from './utils/midgard'
 import { getDoubleSwap, getSingleSwap } from './utils/swap'
 import { Thornode } from './utils/thornode'

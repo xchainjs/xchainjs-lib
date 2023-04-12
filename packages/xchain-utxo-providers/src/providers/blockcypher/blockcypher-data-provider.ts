@@ -1,4 +1,4 @@
-import { PromisePool } from '@supercharge/promise-pool'
+import PromisePool from '@supercharge/promise-pool'
 import {
   Balance,
   Tx,

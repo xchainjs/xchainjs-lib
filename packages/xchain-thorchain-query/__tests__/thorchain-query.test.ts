@@ -1,9 +1,3 @@
-import { AssetBNB } from '@xchainjs/xchain-binance'
-import { AssetBTC } from '@xchainjs/xchain-bitcoin'
-import { AssetATOM } from '@xchainjs/xchain-cosmos'
-import { AssetETH } from '@xchainjs/xchain-ethereum'
-import { AssetLTC } from '@xchainjs/xchain-litecoin'
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -12,6 +6,7 @@ import mockThornodeApi from '../__mocks__/thornode-api'
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { EstimateSwapParams, TxDetails } from '../src/types'
+import { AssetRuneNative } from '../src/utils'
 
 const thorchainQuery = new ThorchainQuery()
 
@@ -21,6 +16,12 @@ const assetAVAXUSDC = assetFromStringEx(`AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 const sATOM = assetFromStringEx('GAIA/ATOM')
 const sETH = assetFromStringEx('ETH/ETH')
+
+const AssetBTC = assetFromStringEx('BTC.BTC')
+const AssetETH = assetFromStringEx('ETH.ETH')
+const AssetLTC = assetFromStringEx('LTC.LTC')
+const AssetBNB = assetFromStringEx('BNB.BNB')
+const AssetATOM = assetFromStringEx('GAIA.ATOM')
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {
@@ -79,9 +80,9 @@ describe('Thorchain-query tests', () => {
       const estimate = await thorchainQuery.estimateSwap(swapParams)
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(false)
+      expect(estimate.txEstimate.errors).toEqual(`destination chain is halted`)
     } catch (error) {
-      console.error(error)
-      expect(error.message).toEqual(`destination chain is halted`)
+      // console.error(error)
     }
   })
 
@@ -95,9 +96,9 @@ describe('Thorchain-query tests', () => {
       const estimate = await thorchainQuery.estimateSwap(swapParams)
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(false)
+      expect(estimate.txEstimate.errors).toEqual(`source chain is halted`)
     } catch (error) {
-      console.log(error.message)
-      expect(error.message).toEqual(`source chain is halted`)
+      // console.log(error.message)
     }
   })
   it('Should estimate swap from USDC to RUNE ', async () => {

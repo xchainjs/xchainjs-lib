@@ -1,3 +1,9 @@
+# v0.3.23 (2023-04-12)
+
+## Add
+
+- case for `synths` in `validateSwap()`
+
 # v0.3.22 (2023-04-05)
 
 ## Add

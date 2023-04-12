@@ -127,6 +127,9 @@ export class Wallet {
           errors.push(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
       }
     }
+    // if input == synth return errors.
+    if (swap.input.asset.synth) return errors
+
     if (swap.input.asset.chain === ETHChain) {
       if (eqAsset(swap.input.asset, AssetETH) !== true) {
         const isApprovedResult = await this.ethHelper.isTCRouterApprovedToSpend(

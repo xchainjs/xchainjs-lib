@@ -37,7 +37,8 @@ const bnbClient: XChainClient = new BnbClient({ network: Network.Mainnet, phrase
 
 describe('thorchain Integration Tests', () => {
   it('should fetch thorchain balances', async () => {
-    // const address = thorClient.getAddress(0)
+    const address = thorClient.getAddress(0)
+    console.log(address)
     const balances = await thorClient.getBalance('thor18958nd6r803zespz8lff3jxlamgnv82pe87jaw')
     balances.forEach((bal) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
@@ -57,7 +58,7 @@ describe('thorchain Integration Tests', () => {
       }
       await thorClient.transfer(transferTx)
       fail()
-    } catch (error) {
+    } catch (error: any) {
       expect(error.toString().includes('account sequence mismatch')).toBe(true)
     }
   })

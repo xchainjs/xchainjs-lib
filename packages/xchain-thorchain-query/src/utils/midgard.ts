@@ -2,7 +2,6 @@ import { Network } from '@xchainjs/xchain-client'
 import {
   Action,
   Configuration,
-  // InboundAddressesItem,
   MemberDetails,
   MidgardApi,
   PoolDetail,
@@ -11,10 +10,7 @@ import {
 } from '@xchainjs/xchain-midgard'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
-// import BigNumber from 'bignumber.js'
-// import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
-// import { baseAmount } from '@xchainjs/xchain-util'
-// import { CryptoAmount } from '../crypto-amount'
+
 import { MidgardConfig } from '../types'
 
 const defaultMidgardConfig: Record<Network, MidgardConfig> = {

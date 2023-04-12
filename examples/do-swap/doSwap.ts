@@ -49,7 +49,6 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
     const toChain = toAsset.synth ? THORChain : toAsset.chain
     const destinationAddress = wallet.clients[toChain].getAddress()
 
-    console.log(destinationAddress)
     // console.log(await wallet.clients[fromChain].getBalance(fromAddress))
 
     const swapParams: EstimateSwapParams = {
