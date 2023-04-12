@@ -1,3 +1,9 @@
+# v.0.1.8 (2023-04-11)
+
+## Fix
+
+- point default RPC providers to ankr.com
+
 # v.0.1.7 (2023-04-05)
 
 ## Fix

@@ -1,4 +1,4 @@
 {
   "extends": "../../tsconfig.json",
-  "include": [ "src/**/*", "../xchain-evm/src/providers/covalent" ]
+  "include": [ "src/**/*" ]
 }

@@ -1,3 +1,9 @@
+# v.0.1.2 (2023-4-11)
+
+## Fix
+
+- changed build to output esm libs
+
 # v.0.1.1 (2023-2-25)
 
 ## Fix

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-utxo-providers",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -17,12 +17,11 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
-    "build": "yarn run clean && yarn run compile",
+    "build": "yarn clean && rollup -c",
     "clean": "rimraf -rf ./lib",
-    "compile": "tsc -p tsconfig.build.json",
     "prepublishOnly": "yarn run build",
     "e2e": "jest --config jest.config.e2e.js",
-    "test": "jest --passWithNoTests"
+    "test": "jest "
   },
   "publishConfig": {
     "access": "public"
