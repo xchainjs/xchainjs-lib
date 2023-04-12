@@ -1,5 +1,4 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
 import { CryptoAmount } from '../src/crypto-amount'
@@ -17,7 +16,7 @@ import {
   WithdrawLiquidityPosition,
   getSaver,
 } from '../src/types'
-import { AssetAVAX, AssetBCH, AssetBTC, AssetDOGE, AssetETH, AssetLTC } from '../src/utils/const'
+import { AssetAVAX, AssetBCH, AssetBTC, AssetDOGE, AssetETH, AssetLTC, AssetRuneNative } from '../src/utils/const'
 import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
 

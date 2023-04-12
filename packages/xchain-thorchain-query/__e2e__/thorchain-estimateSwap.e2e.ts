@@ -1,5 +1,4 @@
 import { Network } from '@xchainjs/xchain-client'
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { Asset, assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
@@ -7,6 +6,7 @@ import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { EstimateSwapParams, SwapEstimate, TxDetails } from '../src/types'
+import { AssetRuneNative } from '../src/utils'
 import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
 

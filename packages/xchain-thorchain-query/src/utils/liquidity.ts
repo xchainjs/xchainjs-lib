@@ -1,4 +1,3 @@
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -6,6 +5,7 @@ import { CryptoAmount } from '../crypto-amount'
 import { LiquidityPool } from '../liquidity-pool'
 import { Block, ILProtectionData, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData } from '../types'
 
+import { AssetRuneNative } from './const'
 import { getBaseAmountWithDiffDecimals } from './swap'
 
 /**

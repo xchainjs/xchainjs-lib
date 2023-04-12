@@ -1,4 +1,3 @@
-import { AssetRuneNative, THORChain, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Asset,
@@ -42,7 +41,7 @@ import {
   WithdrawLiquidityPosition,
   getSaver,
 } from './types'
-import { AssetBNB, AssetBTC, BNBChain, GAIAChain } from './utils'
+import { AssetBNB, AssetBTC, AssetRuneNative, BNBChain, GAIAChain, THORChain, isAssetRuneNative } from './utils'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
 import {
   calcNetworkFee,

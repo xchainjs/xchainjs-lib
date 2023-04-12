@@ -1,5 +1,4 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard'
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { assetAmount, assetFromString, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 

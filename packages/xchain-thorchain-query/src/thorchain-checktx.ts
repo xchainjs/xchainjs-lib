@@ -1,4 +1,3 @@
-import { AssetRuneNative, THORChain, isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { Saver, TxDetailsResponse, TxSignersResponse } from '@xchainjs/xchain-thornode'
 import { Asset, Chain, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
 
@@ -6,6 +5,7 @@ import { DefaultChainAttributes } from './chain-defaults'
 import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
 import { ChainAttributes } from './types'
+import { AssetRuneNative, THORChain, isAssetRuneNative } from './utils'
 
 export enum TxType {
   Swap = 'Swap',

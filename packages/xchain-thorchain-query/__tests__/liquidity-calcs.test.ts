@@ -1,5 +1,4 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard'
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { Pool } from '@xchainjs/xchain-thornode'
 import { assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
@@ -17,6 +16,7 @@ import {
   getPoolShare,
   getSlipOnLiquidity,
 } from '../src/utils/liquidity'
+import { AssetRuneNative } from '../src/utils'
 
 const thorchainQuery = new ThorchainQuery()
 

@@ -1,4 +1,3 @@
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
