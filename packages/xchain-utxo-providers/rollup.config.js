@@ -41,6 +41,6 @@ export default {
     'stream',
     'string_decoder',
     'axios',
-    '@supercharge/promise-pool',
+    // '@supercharge/promise-pool',
   ],
 }
