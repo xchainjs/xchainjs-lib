@@ -6,6 +6,7 @@ import mockThornodeApi from '../__mocks__/thornode-api'
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { EstimateSwapParams, TxDetails } from '../src/types'
+import { AssetRuneNative } from '../src/utils'
 
 const thorchainQuery = new ThorchainQuery()
 

@@ -8,6 +8,7 @@ import { CryptoAmount } from '../src/crypto-amount'
 import { LiquidityPool } from '../src/liquidity-pool'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { SwapOutput } from '../src/types'
+import { AssetRuneNative } from '../src/utils'
 import {
   getDoubleSwap,
   //getDoubleSwap,
