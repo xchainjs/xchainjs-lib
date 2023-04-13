@@ -229,6 +229,7 @@ export type EstimateWithdrawSaver = {
   estimatedWaitTime: number
   slipBasisPoints: number
   dustAmount: CryptoAmount
+  errors: string[]
 }
 
 export type SaverFees = {
@@ -244,6 +245,7 @@ export type SaversPosition = {
   percentageGrowth: number
   ageInYears: number
   ageInDays: number
+  errors: string[]
 }
 
 export type SaversWithdraw = {
