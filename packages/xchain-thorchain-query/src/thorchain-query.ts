@@ -902,7 +902,11 @@ export class ThorchainQuery {
    */
   public async estimateWithdrawSaver(withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
     const errors: string[] = []
+    // return error if Asset in is incorrect
+    if (isAssetRuneNative(withdrawParams.asset) || withdrawParams.asset.synth)
+      errors.push(`Native Rune and synth assets are not supported only L1's`)
     const inboundDetails = await this.thorchainCache.getInboundDetails()
+    // Check to see if there is a position before calling withdraw quote
     const checkPositon = await this.getSaverPosition(withdrawParams)
     if (checkPositon.errors.length > 0) {
       for (let i = 0; i < checkPositon.errors.length; i++) {
@@ -934,8 +938,7 @@ export class ThorchainQuery {
         errors,
       }
     }
-    if (isAssetRuneNative(withdrawParams.asset) || withdrawParams.asset.synth)
-      throw Error(`Native Rune and synth assets are not supported only L1's`)
+    // Request withdraw quote
     const withdrawQuote = await this.thorchainCache.thornode.getSaversWithdrawQuote(withdrawParams)
     // error handling
     const response: { error?: string } = JSON.parse(JSON.stringify(withdrawQuote))
