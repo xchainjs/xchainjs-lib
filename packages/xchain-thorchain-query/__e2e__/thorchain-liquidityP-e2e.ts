@@ -1,4 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
+import { COSMOS_DECIMAL } from '@xchainjs/xchain-cosmos'
 import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
 import { CryptoAmount } from '../src/crypto-amount'
@@ -16,7 +17,16 @@ import {
   WithdrawLiquidityPosition,
   getSaver,
 } from '../src/types'
-import { AssetAVAX, AssetBCH, AssetBTC, AssetDOGE, AssetETH, AssetLTC, AssetRuneNative } from '../src/utils/const'
+import {
+  AssetATOM,
+  AssetAVAX,
+  AssetBCH,
+  AssetBTC,
+  AssetDOGE,
+  AssetETH,
+  AssetLTC,
+  AssetRuneNative,
+} from '../src/utils/const'
 import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
 
@@ -98,6 +108,7 @@ function printSaver(saver: EstimateAddSaver) {
     memo: saver.memo,
     estimateWaitTime: saver.estimatedWaitTime,
     canAdd: saver.canAddSaver,
+    errors: saver.errors,
   }
   console.log(expanded)
 }
@@ -113,6 +124,7 @@ function printWithdrawSaver(saver: EstimateWithdrawSaver) {
     toAddress: saver.toAddress,
     memo: saver.memo,
     estimateWaitTime: saver.estimatedWaitTime,
+    error: saver.errors,
   }
   console.log(expanded)
 }
@@ -267,7 +279,7 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
 
   it(`Should estimate saver addition`, async () => {
     try {
-      const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(1000, 18)), AssetAVAX)
+      const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(0.1, COSMOS_DECIMAL)), AssetATOM)
       const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
       printSaver(estimateAddsSaver)
     } catch (error) {
@@ -276,8 +288,8 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
   })
   it(`Should estimate saver withdrawal`, async () => {
     const withdrawPos: SaversWithdraw = {
-      address: `bc1qpcaardpf2wzcu6uwd4hhsmt0fz8su80cjfk5lh`,
-      asset: AssetBTC,
+      address: `cosmos1f2hzu2cup9tk427w5tpfysvx9cf4c9wkud0qn9`,
+      asset: AssetATOM,
       withdrawBps: 10000,
     }
     const estimateWithdrawSaver = await thorchainQuery.estimateWithdrawSaver(withdrawPos)

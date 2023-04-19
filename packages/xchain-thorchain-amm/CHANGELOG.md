@@ -1,3 +1,10 @@
+# v0.3.24 (2023-04-14)
+
+## Fix
+
+- `addSaver` bug with AddAmount
+- Error handling for `withdrawSaver()`
+
 # v0.3.23 (2023-04-12)
 
 ## Add
