@@ -25,7 +25,7 @@ export default {
   plugins: [
     json({}),
     external(),
-    resolve({ preferBuiltins: true, browser: true }),
+    resolve(),
     typescript({
       rollupCommonJSResolveHack: true,
       exclude: '__tests__/**',
@@ -34,4 +34,5 @@ export default {
     commonjs(),
   ],
   external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios'],
+
 }

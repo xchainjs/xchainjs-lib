@@ -1,10 +1,9 @@
-import commonjs from 'rollup-plugin-commonjs'
-import json from 'rollup-plugin-json'
-import resolve from 'rollup-plugin-node-resolve'
-import external from 'rollup-plugin-peer-deps-external'
-import typescript from 'rollup-plugin-typescript2'
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
+import resolve from '@rollup/plugin-node-resolve'
+import typescript from '@rollup/plugin-typescript'
 
-import pkg from './package.json'
+import pkg from './package.json' assert { type: "json" }
 
 export default {
   input: 'src/index.ts',
@@ -23,12 +22,9 @@ export default {
     },
   ],
   plugins: [
-    external(),
     json(),
     typescript({
-      rollupCommonJSResolveHack: true,
       exclude: '__tests__/**',
-      clean: true,
     }),
     resolve({ preferBuiltins: true, browser: true }),
     commonjs({

@@ -8,20 +8,20 @@
     "lib"
   ],
   "scripts": {
-    "build": "yarn run clean && yarn run compile",
-    "clean": "rimraf -rf ./lib",
+    "clean": "rimraf lib/**",
+    "build": "yarn clean && rollup  --config rollup.config.ts --configPlugin typescript --bundleConfigAsCjs",
     "compile": "tsc -p tsconfig.build.json",
     "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests"
   },
   "devDependencies": {
     "@xchainjs/xchain-util": "^0.12.0",
-    "@xchainjs/xchain-crypto": "^0.2.6",
-    "axios": "^0.25.0"
+    "@xchainjs/xchain-crypto": "^0.2.7",
+    "axios": "^1.3.6"
   },
   "peerDependencies": {
     "@xchainjs/xchain-util": "^0.12.0",
-    "@xchainjs/xchain-crypto": "^0.2.6",
-    "axios": "^0.25.0"
+    "@xchainjs/xchain-crypto": "^0.2.7",
+    "axios": "^1.3.6"
   }
 }
