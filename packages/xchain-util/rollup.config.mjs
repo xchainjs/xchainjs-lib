@@ -1,9 +1,9 @@
-import commonjs from '@rollup/plugin-commonjs'
-import json from '@rollup/plugin-json'
 import resolve from '@rollup/plugin-node-resolve'
-import typescript from '@rollup/plugin-typescript'
+import commonjs from '@rollup/plugin-commonjs'
+import typescript from 'rollup-plugin-typescript2'
+import external from 'rollup-plugin-peer-deps-external'
 
-import pkg from './package.json' assert { type: "json" }
+import pkg from './package.json'
 
 export default {
   input: 'src/index.ts',
@@ -22,15 +22,12 @@ export default {
     },
   ],
   plugins: [
-    json(),
+    external(),
+    resolve({ preferBuiltins: true, browser: true }),
     typescript({
+      tsconfig: './tsconfig.json', // path to your tsconfig.json file
       exclude: '__tests__/**',
     }),
-    resolve({ preferBuiltins: true, browser: true }),
-    commonjs({
-      include: /node_modules/,
-      exclude: '**/*.json',
-    }),
+    commonjs(),
   ],
-  external: ['buffer', 'crypto'],
-}
+};

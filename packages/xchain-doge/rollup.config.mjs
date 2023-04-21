@@ -6,6 +6,7 @@ import external from 'rollup-plugin-peer-deps-external'
 
 import pkg from './package.json'
 
+
 export default {
   input: 'src/index.ts',
   output: [
@@ -23,11 +24,15 @@ export default {
     },
   ],
   plugins: [
-    json({}),
+    json(),
     external(),
-    resolve({ preferBuiltins: true, browser: true }),
-    typescript(),
-    commonjs(),
+    typescript({
+      exclude: '__tests__/**',
+    }),
+    resolve({ extensions: ['.js', '.ts'], preferBuiltins: true, browser: true }),
+    commonjs({
+      browser: true,
+    }),
   ],
-  external: ['readable-stream', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios'],
+  external: ['readable-stream', 'buffer', 'stream', 'string_decoder' ],
 }

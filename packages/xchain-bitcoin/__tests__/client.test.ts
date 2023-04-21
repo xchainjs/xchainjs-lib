@@ -191,7 +191,7 @@ describe('BitcoinClient Test', () => {
         feeRate: 1,
       })
       fail()
-    } catch (err) {
+    } catch (err: any) {
       const message = err.message as string
       expect(message.includes('memo too long')).toBeTruthy()
     }

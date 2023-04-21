@@ -1,7 +1,8 @@
-import commonjs from 'rollup-plugin-commonjs'
-import json from 'rollup-plugin-json'
-import resolve from 'rollup-plugin-node-resolve'
+import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
 import typescript from 'rollup-plugin-typescript2'
+import external from 'rollup-plugin-peer-deps-external'
 
 import pkg from './package.json'
 
@@ -22,26 +23,22 @@ export default {
     },
   ],
   plugins: [
-    json(),
+    // ignore(["@ethersproject/providers", "@ethersproject/abstract-provider", "@ethersproject/strings"]),
+    external(),
+    resolve({ preferBuiltins: true, browser: true }),
     typescript({
-      rollupCommonJSResolveHack: true,
+      tsconfig: "./tsconfig.json",
       exclude: '__tests__/**',
-      clean: true,
-      browser: true,
     }),
-    resolve({ extensions: ['.js', '.ts'], preferBuiltins: true, browser: true }),
-    commonjs({
-      browser: true,
-    }),
+    commonjs(),
+    json(),
   ],
   external: [
-    'readable-stream',
-    '@psf/bitcoincashjs-lib',
-    'bchaddrjs',
     'buffer',
+    'http',
+    'https',
+    'url',
     'stream',
     'string_decoder',
-    '@xchainjs/xchain-client',
-    'axios',
   ],
 }

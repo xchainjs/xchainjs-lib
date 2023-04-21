@@ -88,7 +88,7 @@ describe('ThorchainAmm Client Test', () => {
       const estimate = await thorchainQuery.estimateSwap(swapParams)
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(false)
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).toEqual(`destination chain is halted`)
     }
   })
@@ -103,7 +103,7 @@ describe('ThorchainAmm Client Test', () => {
       const estimate = await thorchainQuery.estimateSwap(swapParams)
       printTx(estimate, swapParams.input)
       expect(estimate.txEstimate.canSwap).toEqual(false)
-    } catch (error) {
+    } catch (error: any ) {
       console.error(error)
       expect(error.message).toEqual(`source chain is halted`)
     }

@@ -25,7 +25,7 @@
   },
   "scripts": {
     "clean": "rimraf lib/**",
-    "build": "yarn clean && rollup --config rollup.config.ts --configPlugin typescript",
+    "build": "yarn clean && rollup --bundleConfigAsCjs -c",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build"

@@ -17,7 +17,7 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
-    "build": "yarn clean && rollup -c",
+    "build": "yarn clean && rollup --bundleConfigAsCjs -c",
     "clean": "rimraf -rf ./lib",
     "prepublishOnly": "yarn run build",
     "e2e": "jest --config jest.config.e2e.js",

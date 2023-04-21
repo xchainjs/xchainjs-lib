@@ -368,9 +368,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         // https://github.com/xchainjs/xchainjs-lib/issues/252
         // And to avoid etherscan api call limit, it gets balances in a sequence way, not in parallel
         const balances = []
+
         for (let i = 0; i < newAssets.length; i++) {
           const asset: Asset = newAssets[i]
           const etherscan = this.getEtherscanProvider()
+          let apiKey: string | undefined = etherscan.apiKey || undefined;
           if (!isEthAsset(asset)) {
             // Handle token balances
             const assetAddress = getTokenAddress(asset)
@@ -381,7 +383,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
               baseUrl: etherscan.baseUrl,
               address,
               assetAddress,
-              apiKey: etherscan.apiKey,
+              apiKey: apiKey,
             })
             const decimals = (await getDecimal(asset, provider)) || ETH_DECIMAL
 
@@ -424,7 +426,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     let transactions
     const etherscan = this.getEtherscanProvider()
-
+    let apiKey: string | undefined = etherscan.apiKey || undefined;
     if (assetAddress) {
       transactions = await etherscanAPI.getTokenTransactionHistory({
         baseUrl: etherscan.baseUrl,
@@ -432,7 +434,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         assetAddress,
         page: 0,
         offset: maxCount,
-        apiKey: etherscan.apiKey,
+        apiKey: apiKey,
       })
     } else {
       transactions = await etherscanAPI.getETHTransactionHistory({
@@ -440,7 +442,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         address: params?.address,
         page: 0,
         offset: maxCount,
-        apiKey: etherscan.apiKey,
+        apiKey: apiKey,
       })
     }
 
@@ -474,6 +476,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       case Network.Testnet: {
         let tx
         const etherscan = this.getEtherscanProvider()
+        let apiKey: string | undefined = etherscan.apiKey || undefined;
         const txInfo = await etherscan.getTransaction(txId)
         if (txInfo) {
           if (assetAddress) {
@@ -484,7 +487,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
                   assetAddress,
                   startblock: txInfo.blockNumber,
                   endblock: txInfo.blockNumber,
-                  apiKey: etherscan.apiKey,
+                  apiKey: apiKey,
                 })
               ).filter((info) => info.hash === txId)[0] ?? null
           } else {
@@ -494,7 +497,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
                   baseUrl: etherscan.baseUrl,
                   startblock: txInfo.blockNumber,
                   endblock: txInfo.blockNumber,
-                  apiKey: etherscan.apiKey,
+                  apiKey: apiKey,
                   address: txInfo.from,
                 })
               ).filter((info) => info.hash === txId)[0] ?? null
@@ -796,7 +799,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   async estimateGasPricesFromEtherscan(): Promise<GasPrices> {
     const etherscan = this.getEtherscanProvider()
-    const response: GasOracleResponse = await etherscanAPI.getGasOracle(etherscan.baseUrl, etherscan.apiKey)
+    let apiKey: string | undefined = etherscan.apiKey || undefined;
+    const response: GasOracleResponse = await etherscanAPI.getGasOracle(etherscan.baseUrl, apiKey)
 
     // Convert result of gas prices: `Gwei` -> `Wei`
     const averageWei = parseUnits(response.SafeGasPrice, 'gwei')
