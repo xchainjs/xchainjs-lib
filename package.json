@@ -20,7 +20,7 @@
     }
   },
   "devDependencies": {
-    "@rollup/plugin-typescript": "^11.1.0",
+    "rollup-plugin-typescript2": "^0.34.1",
     "@types/jest": "^29.2.5",
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
@@ -35,10 +35,11 @@
     "lint-staged": "^13.1.0",
     "prettier": "^2.2.0",
     "rimraf": "5.0.0",
-    "rollup": "3.9.1",
+    "rollup": "3.20.6",
     "@rollup/plugin-commonjs": "^24.1.0",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
+    "rollup-plugin-peer-deps-external": "2.2.4",
     "@types/rollup-plugin-peer-deps-external": "2.2.1",
     "ts-jest": "^29.0.3",
     "tslib": "^2.5.0",

@@ -13,23 +13,23 @@ export default {
       file: pkg.main,
       format: 'cjs',
       exports: 'named',
-      sourcemap: false,
+      sourcemap: true,
     },
     {
       file: pkg.module,
       format: 'es',
       exports: 'named',
-      sourcemap: false,
+      sourcemap: true,
     },
   ],
   plugins: [
-    external(),
     json({}),
+    external(),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
       exclude: '__tests__/**',
     }),
     commonjs(),
   ],
-  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios'],
+  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder',],
 }
