@@ -54,5 +54,4 @@ describe('Bitcoin Cash Utils Test', () => {
       expect(Utils.toBCHAddressNetwork(Network.Testnet)).toEqual(bchaddr.Network.Testnet)
     })
   })
-
 })

@@ -7,7 +7,7 @@
   "plugins": ["prettier", "ordered-imports"],
   "extends": [
     "plugin:@typescript-eslint/recommended",
-    "prettier/@typescript-eslint",
+    "prettier",
     "plugin:prettier/recommended",
     "plugin:ordered-imports/recommended"
   ],

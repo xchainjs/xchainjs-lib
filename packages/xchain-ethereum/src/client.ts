@@ -372,7 +372,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         for (let i = 0; i < newAssets.length; i++) {
           const asset: Asset = newAssets[i]
           const etherscan = this.getEtherscanProvider()
-          let apiKey: string | undefined = etherscan.apiKey || undefined;
+          const apiKey: string | undefined = etherscan.apiKey || undefined
           if (!isEthAsset(asset)) {
             // Handle token balances
             const assetAddress = getTokenAddress(asset)
@@ -426,7 +426,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     let transactions
     const etherscan = this.getEtherscanProvider()
-    let apiKey: string | undefined = etherscan.apiKey || undefined;
+    const apiKey: string | undefined = etherscan.apiKey || undefined
     if (assetAddress) {
       transactions = await etherscanAPI.getTokenTransactionHistory({
         baseUrl: etherscan.baseUrl,
@@ -476,7 +476,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       case Network.Testnet: {
         let tx
         const etherscan = this.getEtherscanProvider()
-        let apiKey: string | undefined = etherscan.apiKey || undefined;
+        const apiKey: string | undefined = etherscan.apiKey || undefined
         const txInfo = await etherscan.getTransaction(txId)
         if (txInfo) {
           if (assetAddress) {
@@ -633,10 +633,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     const contract = new ethers.Contract(contractAddress, erc20ABI, this.getProvider())
 
-    const unsignedTx: ethers.PopulatedTransaction /* as same as ethers.TransactionResponse expected by `sendTransaction` */ = await contract.populateTransaction.approve(
-      spenderAddress,
-      valueToApprove,
-    )
+    const unsignedTx: ethers.PopulatedTransaction /* as same as ethers.TransactionResponse expected by `sendTransaction` */ =
+      await contract.populateTransaction.approve(spenderAddress, valueToApprove)
 
     const result = await signer.sendTransaction({
       ...unsignedTx,
@@ -799,7 +797,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   async estimateGasPricesFromEtherscan(): Promise<GasPrices> {
     const etherscan = this.getEtherscanProvider()
-    let apiKey: string | undefined = etherscan.apiKey || undefined;
+    const apiKey: string | undefined = etherscan.apiKey || undefined
     const response: GasOracleResponse = await etherscanAPI.getGasOracle(etherscan.baseUrl, apiKey)
 
     // Convert result of gas prices: `Gwei` -> `Wei`

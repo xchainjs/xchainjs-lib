@@ -1,4 +1,4 @@
-import cosmosClientCore from '@cosmos-client/core';
+import cosmosClientCore from '@cosmos-client/core'
 import { baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 

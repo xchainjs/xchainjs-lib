@@ -1,4 +1,4 @@
-import cosmosClientCore from '@cosmos-client/core';
+import cosmosClientCore from '@cosmos-client/core'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
@@ -362,5 +362,4 @@ describe('Client Test', () => {
     cosmosClient.setNetwork(Network.Mainnet)
     expect(cosmosClient.getExplorerTxUrl('testTxHere')).toEqual('https://cosmos.bigdipper.live/transactions/testTxHere')
   })
-
 })
