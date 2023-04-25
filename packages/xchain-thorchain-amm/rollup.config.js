@@ -2,10 +2,9 @@ import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import typescript from 'rollup-plugin-typescript2'
+import external from 'rollup-plugin-peer-deps-external'
 
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const pkg = require('./package.json');
+import pkg from './package.json'
 
 export default {
   input: 'src/index.ts',
@@ -25,6 +24,7 @@ export default {
   ],
   plugins: [
     json({}),
+    external(),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
       tsconfig:'./tsconfig.json',
