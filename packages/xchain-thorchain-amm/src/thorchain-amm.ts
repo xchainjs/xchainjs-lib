@@ -199,7 +199,7 @@ export class ThorchainAMM {
     const addEstimate = await this.thorchainQuery.estimateAddSaver(addAssetAmount)
     if (!addEstimate.canAddSaver) throw Error(`Cannot add to savers`)
     return await wallet.addSavers(
-      addEstimate.assetAmount,
+      addAssetAmount,
       addEstimate.memo,
       addEstimate.toAddress,
       addEstimate.estimatedWaitTime,
@@ -214,6 +214,7 @@ export class ThorchainAMM {
    */
   public async withdrawSaver(wallet: Wallet, withdrawParams: SaversWithdraw): Promise<TxSubmitted> {
     const withdrawEstimate = await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
+    if (withdrawEstimate.errors.length > 0) throw Error(`${withdrawEstimate.errors}`)
     return await wallet.withdrawSavers(
       withdrawEstimate.dustAmount,
       withdrawEstimate.memo,
