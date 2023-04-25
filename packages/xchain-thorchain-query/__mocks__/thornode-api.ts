@@ -9,6 +9,11 @@ export default {
       const resp = require(`./responses/thornode/inbound_addresses.json`)
       return [200, resp]
     })
+    //Mock thorchain/inbound_addresses
+    mock.onGet(/\/thorchain\/quote\/swap/).reply(function () {
+      const resp = require(`./responses/thornode/quoteBTC>ETH.json`)
+      return [200, resp]
+    })
     //Mock thornode pools
     mock.onGet(/\/thorchain\/pools/).reply(function () {
       const resp = require(`./responses/thornode/thornodePools.json`)
