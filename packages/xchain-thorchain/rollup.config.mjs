@@ -22,6 +22,10 @@ export default {
       sourcemap: true,
     },
   ],
+  onwarn: (warning, warn) => {
+    // Ignore circular dependency warnings
+    if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+  },
   plugins: [
     json({}),
     external(),
@@ -29,7 +33,10 @@ export default {
     typescript({
       exclude: '__tests__/**',
     }),
-    commonjs(),
+    commonjs({
+      exclude: '**/*.json',
+    }),
+
   ],
-  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder',],
+  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder',]
 }
