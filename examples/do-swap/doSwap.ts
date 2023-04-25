@@ -1,9 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
 import { THORChain } from '@xchainjs/xchain-thorchain'
-import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
+import { AmmEstimateSwapParams, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   CryptoAmount,
-  EstimateSwapParams,
   Midgard,
   ThorchainCache,
   ThorchainQuery,
@@ -51,11 +50,13 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
 
     // console.log(await wallet.clients[fromChain].getBalance(fromAddress))
 
-    const swapParams: EstimateSwapParams = {
+    const swapParams: AmmEstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
       destinationAsset: toAsset,
       destinationAddress,
       slipLimit: new BigNumber('0.05'), //optional
+      wallet,
+      walletIndex: 0,
     }
     const affiliateAddress = process.argv[8]
     if (affiliateAddress) {
