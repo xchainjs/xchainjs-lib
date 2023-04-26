@@ -20,7 +20,10 @@ for package_name in os.listdir(package_dir):
     if not os.path.isdir(package_dir_path):
         continue
 
-    if specific_packages and package_name not in specific_packages:
+    # Extract the package name from the directory name
+    package_base_name = package_name.split("-")[1]
+
+    if specific_packages and package_base_name not in specific_packages:
         continue
 
     # Read the package's version from the package.json file
