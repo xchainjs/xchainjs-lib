@@ -1,3 +1,9 @@
+# v0.1.6 (2023-04-26)
+
+## Update
+
+- update rollup config & axios to the latest
+
 # v.0.1.5 (2022-04-04)
 
 ## Update

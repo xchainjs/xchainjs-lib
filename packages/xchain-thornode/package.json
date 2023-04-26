@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thornode",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "license": "MIT",
   "description": "Thornode module that exposes all thornode functions using openapi-generator-cli",
   "keywords": [
