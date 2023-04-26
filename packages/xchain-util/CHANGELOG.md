@@ -2,7 +2,7 @@
 
 ## Update
 
-- update rollup config & axios to the latest
+- update rollup config
 
 # v.0.12.0 (2022-12-25)
 
@@ -17,6 +17,7 @@
 ## Add
 
 - Add `register9Rheader()` to populate x-client-id header
+
 # v.0.11.0 (2022-xx-xx)
 
 ## Breaking change

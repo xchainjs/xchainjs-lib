@@ -3,6 +3,7 @@
 ## Update
 
 - update rollup config & axios to the latest
+- udpate `@types/big.js`
 
 # v.0.27.11 (2023-04-04)
 

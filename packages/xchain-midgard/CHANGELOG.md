@@ -3,6 +3,7 @@
 ## Update
 
 - update rollup config & axios to the latest
+- update openapitools and rimraf
 
 # v0.4.3 (2023-02-27)
 

@@ -3,6 +3,7 @@
 ## Update
 
 - update rollup config & axios to the latest
+- update `@psf/bitcoincashjs-lib`
 
 # v.0.15.11 (2023-04-11)
 
