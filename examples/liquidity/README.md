@@ -25,10 +25,10 @@ yarn install
 #### example: estimate a symmetrical add (equal amount of BTC & Rune)
 
 ```bash
-yarn estimateAddLiquidity mainnet 1 BTC.BTC 12052.61115075 THOR.RUNE
+yarn estimateAddLiquidity mainnet 12052.61115075 THOR.RUNE 1 8 BTC.BTC
 
 yarn run v1.22.17
-$ npx ts-node add-liquidity.ts mainnet 1 BTC.BTC 12052.61115075 THOR.RUNE
+$ npx ts-node add-liquidity.ts mainnet 12052.61115075 THOR.RUNE 1 8 BTC.BTC
 {
   input1: '₿ 1',
   input2: 'ᚱ 12,052.61115075',
@@ -51,10 +51,10 @@ $ npx ts-node add-liquidity.ts mainnet 1 BTC.BTC 12052.61115075 THOR.RUNE
 #### example: estimate an asymmetrical add (1 BTC & 0 Rune)
 
 ```bash
-yarn estimateAddLiquidity mainnet 1 BTC.BTC 0 THOR.RUNE
+yarn estimateAddLiquidity mainnet 0 THOR.RUNE 1 8 BTC.BTC 
 
 yarn run v1.22.17
-$ npx ts-node add-liquidity.ts mainnet 1 BTC.BTC 0 THOR.RUNE
+$ npx ts-node add-liquidity.ts mainnet 0 THOR.RUNE 1 8 BTC.BTC 
 {
   input1: '₿ 1',
   input2: 'ᚱ 0',
@@ -77,10 +77,10 @@ $ npx ts-node add-liquidity.ts mainnet 1 BTC.BTC 0 THOR.RUNE
 #### example: estimate an asymmetrical add (0 BTC & 12052.61115075 Rune)
 
 ```bash
-yarn estimateAddLiquidity mainnet 0 BTC.BTC 12052.61115075 THOR.RUNE
+yarn estimateAddLiquidity mainnet 12052.61115075 THOR.RUNE 0 8 BTC.BTC 
 
 yarn run v1.22.17
-$ npx ts-node add-liquidity.ts mainnet 0 BTC.BTC 12052.61115075 THOR.RUNE
+$ npx ts-node add-liquidity.ts mainnet 12052.61115075 THOR.RUNE 0 8 BTC.BTC 
 {
   input1: '⚡ 0',
   input2: 'ᚱ 12,052.61115075',
@@ -102,14 +102,14 @@ $ npx ts-node add-liquidity.ts mainnet 0 BTC.BTC 12052.61115075 THOR.RUNE
 ### Estimate Withdraw Liquidity
 
 ```bash
-yarn estimateWithdrawLiquidity mainnet BTC.BTC 100 bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn
+yarn estimateWithdrawLiquidity mainnet BTC.BTC 100 bc1qzugwrq3wmzky9eceucyxfytvnmqydddhh7sjy5
 
 yarn run v1.22.17
-$ npx ts-node withdraw-liquidity.ts mainnet BTC.BTC 100 bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn
+$ npx ts-node withdraw-liquidity.ts mainnet BTC.BTC 100 bc1qzugwrq3wmzky9eceucyxfytvnmqydddhh7sjy5
 {
   asset: { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false },
   percentage: 100,
-  assetAddress: 'bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn',
+  assetAddress: 'bc1qzugwrq3wmzky9eceucyxfytvnmqydddhh7sjy5',
   runeAddress: ''
 }
 {
@@ -125,17 +125,17 @@ $ npx ts-node withdraw-liquidity.ts mainnet BTC.BTC 100 bc1qufc5hvfvszphksqawadp
 ### Check Liquidity Position
 
 ```bash
-yarn checkLiquidity mainnet BTC.BTC bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn
+yarn checkLiquidity mainnet BTC.BTC bc1qzugwrq3wmzky9eceucyxfytvnmqydddhh7sjy5
 
 yarn run v1.22.18
-$ npx ts-node check-liquidity.ts mainnet BTC.BTC bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn
+$ npx ts-node check-liquidity.ts mainnet BTC.BTC bc1qzugwrq3wmzky9eceucyxfytvnmqydddhh7sjy5
 
 {
-  address: 'bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn',
+  address: 'bc1qzugwrq3wmzky9eceucyxfytvnmqydddhh7sjy5',
   position: {
     asset: 'BTC.BTC',
     rune_address: 'thor1nkdpzamatx6u9xfga4nrhkgu4r6cd26xgsyhzw',
-    asset_address: 'bc1qufc5hvfvszphksqawadpc63ujarhjpn26je2jn',
+    asset_address: 'bc1qzugwrq3wmzky9eceucyxfytvnmqydddhh7sjy5',
     last_add_height: 5194791,
     units: '42814765726730',
     pending_rune: '0',
@@ -249,7 +249,7 @@ yarn withdrawSaver "MnemonicPhrase" mainnet BNB.BNB "address" 10000
 Asset, address and withdrawal basis points 10000 = 100%
 
 ```bash
-yarn estimateWithdrawSaver mainnet "bnb10dvhe2sks0cfyusw87e5jus260xrrqac67a9zs" BNB.BNB 10000
+yarn estimateWithdrawSaver mainnet 15qwKqmicfvTNb5aqX3Nq4dfMEYdDo5Wsm BTC.BTC 10000
 {
   assetAmount: '0.04641913 BNB',
   fee: {
@@ -270,7 +270,7 @@ yarn estimateWithdrawSaver mainnet "bnb10dvhe2sks0cfyusw87e5jus260xrrqac67a9zs" 
 network, address, asset string.
 
 ```bash
-yarn checkSaverPosition mainnet "bnb10dvhe2sks0cfyusw87e5jus260xrrqac67a9zs" BNB.BNB
+yarn checkSaverPosition mainnet 15qwKqmicfvTNb5aqX3Nq4dfMEYdDo5Wsm BTC.BTC
 {
   depositValue: '0.04999961 BNB',
   redeemableValue: '0.05000693 BNB',

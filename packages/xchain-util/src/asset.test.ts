@@ -308,6 +308,10 @@ describe('asset', () => {
       const result = assetFromString('BCH.BCH')
       expect(result).toEqual({ chain: 'BCH', symbol: 'BCH', ticker: 'BCH', synth: false })
     })
+    it('synth BCH/BCH', () => {
+      const result = assetFromString('BCH/BCH')
+      expect(result).toEqual({ chain: 'BCH', symbol: 'BCH', ticker: 'BCH', synth: true })
+    })
     it('synth ETH/ETH', () => {
       const result = assetFromString('ETH/ETH')
       expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: true })
