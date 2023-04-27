@@ -3,16 +3,19 @@ import { Midgard, ThorchainCache, Thornode, TransactionStage } from '@xchainjs/x
 
 //function printTx(inboundTxHash: string, source: string) {}
 
-const main = async () => {
-  const network = process.argv[2] as Network
-  const inboundTxHash = process.argv[3]
+export const checkTx = async (network: Network, inboundHash: string) => {
   const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
   const transactionStage = new TransactionStage(thorchainCache)
-  const checkTransaction = await transactionStage.checkTxProgress(inboundTxHash)
-
+  const checkTransaction = await transactionStage.checkTxProgress(inboundHash)
   console.log(`\ Checking on ${network} :)\n`)
   console.log(checkTransaction.txType)
   console.log(checkTransaction)
+}
+
+const main = async () => {
+  const network = process.argv[2] as Network
+  const inboundTxHash = process.argv[3]
+  await checkTx(network, inboundTxHash)
 }
 
 main()
