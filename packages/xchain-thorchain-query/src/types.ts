@@ -16,7 +16,7 @@ export type TotalFees = {
 
 export type SwapEstimate = {
   totalFees: TotalFees
-  slipPercentage: number
+  slipBasisPoints: number
   netOutput: CryptoAmount
   waitTimeSeconds: number
   canSwap: boolean
@@ -61,9 +61,10 @@ export type QuoteSwapParams = {
   destinationAddress: string
   fromAddress: string
   toleranceBps?: number
-  affiliateBps?: number
   affiliate?: string
+  affiliateBps?: number
   height?: number
+  interfaceID?: string
 }
 
 export type SwapOutput = {

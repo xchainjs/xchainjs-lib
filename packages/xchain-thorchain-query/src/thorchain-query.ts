@@ -33,17 +33,11 @@ import {
   UnitData,
   WithdrawLiquidityPosition,
   getSaver,
+  TotalFees,
 } from './types'
 import { AssetBNB, AssetRuneNative, BNBChain, GAIAChain, THORChain, isAssetRuneNative } from './utils'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
-import {
-  calcNetworkFee,
-  calcOutboundFee,
-  getBaseAmountWithDiffDecimals,
-  getChainAsset,
-
-} from './utils/swap'
-
+import { calcNetworkFee, calcOutboundFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/swap'
 
 const defaultCache = new ThorchainCache()
 
@@ -73,54 +67,36 @@ export class ThorchainQuery {
    * @param quoteSwapParams -  input params
    * @returns
    */
-  public async quoteSwap(quoteSwapParams: QuoteSwapParams): Promise<TxDetails> {
+  public async quoteSwap({
+    fromAsset,
+    toAsset,
+    amount,
+    destinationAddress,
+    fromAddress,
+    toleranceBps = 300, // default to 0.3%,
+    interfaceID = '555',
+    affiliateBps,
+    affiliate,
+    height,
+  }: QuoteSwapParams): Promise<TxDetails> {
     let errors: string[] = []
 
-    // Missing interfaceID
-    const {
-      fromAsset,
-      toAsset,
-      amount,
-      destinationAddress,
-      fromAddress,
-      toleranceBps,
-      affiliateBps,
-      affiliate,
-      height,
-    } = quoteSwapParams
-
+    const fromAssetString = assetToString(fromAsset)
+    const toAssetString = assetToString(toAsset)
+    // how to use
+    interfaceID
     // fetch quote
     const swapQuote = await this.thorchainCache.thornode.getSwapQuote(
-      `${fromAsset.chain}.${fromAsset.ticker}`,
-      `${toAsset.chain}.${toAsset.ticker}`,
+      fromAssetString,
+      toAssetString,
       amount.baseAmount.amount().toNumber(),
       destinationAddress,
       fromAddress,
-      toleranceBps ? toleranceBps : 0 ,
-      affiliateBps ? affiliateBps : 0 ,
-      affiliate ? affiliate : '' ,
+      toleranceBps ? toleranceBps : 0,
+      affiliateBps ? affiliateBps : 0,
+      affiliate ? affiliate : '',
       height,
     )
-    // set object up
-    const txDetails: TxDetails = {
-      memo: `${swapQuote.memo}`,
-      toAddress: `${swapQuote.inbound_address}`,
-      expiry: new Date(swapQuote.expiry * 1000),
-      txEstimate: {
-        totalFees: {
-          asset: fromAsset,
-          affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate,), fromAsset),
-          swapFee: new CryptoAmount(baseAmount(swapQuote.fees.liquidity), fromAsset),
-          outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound), fromAsset),
-          totatBps: Number(swapQuote.fees.total_bps)
-        },
-        slipPercentage: quoteSwapParams.toleranceBps ? quoteSwapParams.toleranceBps : 0,
-        netOutput: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), toAsset),
-        waitTimeSeconds: Number(swapQuote.inbound_confirmation_seconds) + Number(swapQuote.outbound_delay_seconds),
-        canSwap: true,
-        errors
-      },
-    }
     // error handling - if errors
     const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
@@ -132,19 +108,40 @@ export class ThorchainQuery {
         txEstimate: {
           totalFees: {
             asset: toAsset,
-            affiliateFee: new CryptoAmount(baseAmount(0), fromAsset),
-            swapFee: new CryptoAmount(baseAmount(0), fromAsset),
-            outboundFee: new CryptoAmount(baseAmount(0), fromAsset),
-            totatBps: 0
+            affiliateFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
+            swapFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
+            outboundFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
+            totatBps: 0,
           },
-          slipPercentage: 0,
+          slipBasisPoints: 0,
           netOutput: new CryptoAmount(baseAmount(0), toAsset),
           waitTimeSeconds: 0,
           canSwap: false,
-          errors
-        }
+          errors,
+        },
+      }
     }
-  }
+    //console.log(swapQuote)
+    // Return quote
+    const txDetails: TxDetails = {
+      memo: `${swapQuote.memo}`,
+      toAddress: `${swapQuote.inbound_address}`,
+      expiry: new Date(swapQuote.expiry * 1000),
+      txEstimate: {
+        totalFees: {
+          asset: fromAsset,
+          affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate), AssetRuneNative),
+          swapFee: new CryptoAmount(baseAmount(swapQuote.fees.liquidity), AssetRuneNative),
+          outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound), AssetRuneNative),
+          totatBps: Number(swapQuote.fees.total_bps),
+        },
+        slipBasisPoints: toleranceBps ? toleranceBps : 0,
+        netOutput: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), toAsset),
+        waitTimeSeconds: swapQuote.inbound_confirmation_seconds ? Number(swapQuote.inbound_confirmation_seconds) + Number(swapQuote.outbound_delay_seconds) : Number(swapQuote.outbound_delay_seconds), // sometimes quote response doesn't return and inbound confirmation seconds
+        canSwap: true,
+        errors,
+      },
+    }
     return txDetails
   }
 
@@ -388,7 +385,7 @@ export class ThorchainQuery {
   //   }
   //   return assetToString(asset)
   // }
-  ///**
+  // /**
   //  *
   //  * @param params - swap object
   //  * @returns - constructed memo string
@@ -410,8 +407,8 @@ export class ThorchainQuery {
   //   }
   //   return memo
   // }
-  // this is commented out for now, see note about affiliate address ~10 lines above
-  //
+  //this is commented out for now, see note about affiliate address ~10 lines above
+
   // private async validateAffiliateAddress(affiliateAddress: string) {
   //   // Affiliate address should be THORName or THORAddress
   //   if (affiliateAddress.length > 0) {
@@ -422,8 +419,13 @@ export class ThorchainQuery {
   //   }
   // }
   // private async isThorname(name: string): Promise<boolean> {
-  //   const thornameDetails = await this.thorchainCache.midgard.getTHORNameDetails(name)
-  //   return thornameDetails !== undefined
+  //   try {
+  //     const thornameDetails = await this.thorchainCache.midgard.getTHORNameDetails(name)
+  //     return thornameDetails !== undefined
+  //   } catch {
+  //     return false
+  //   }
+
   // }
 
   // /**
@@ -469,7 +471,6 @@ export class ThorchainQuery {
   //   // only proceed to check fees if there are no errors so far
   //   if (errors.length > 0) return errors
 
-
   //   return errors
   // }
 
@@ -493,24 +494,25 @@ export class ThorchainQuery {
   //     result = `Input amount ${params.input.formatedAssetString()}(${inputInRune.formatedAssetString()}) is less than or equal to total swap fees ${totalSwapFeesInAsset.formatedAssetString()}(${totalSwapFeesInRune.formatedAssetString()}) `
   //   return result
   // }
-  // /**
-  //  * Convenience method to convert TotalFees to a different CryptoAmount
-  //  *
-  //  * TotalFees are always calculated and returned in RUNE, this method can
-  //  * be used to show the equivalent fees in another Asset Type
-  //  *
-  //  * @param fees: TotalFees - the fees you want to convert
-  //  * @param asset: Asset - the asset you want the fees converted to
-  //  * @returns TotalFees in asset
-  //  */
-  // async getFeesIn(fees: TotalFees, asset: Asset): Promise<TotalFees> {
-  //   return {
-  //     inboundFee: await this.convert(fees.inboundFee, asset),
-  //     swapFee: await this.convert(fees.swapFee, asset),
-  //     outboundFee: await this.convert(fees.outboundFee, asset),
-  //     affiliateFee: await this.convert(fees.affiliateFee, asset),
-  //   }
-  // }
+  /**
+   * Convenience method to convert TotalFees to a different CryptoAmount
+   *
+   * TotalFees are always calculated and returned in RUNE, this method can
+   * be used to show the equivalent fees in another Asset Type
+   *
+   * @param fees: TotalFees - the fees you want to convert
+   * @param asset: Asset - the asset you want the fees converted to
+   * @returns TotalFees in asset
+   */
+  async getFeesIn(fees: TotalFees, asset: Asset): Promise<TotalFees> {
+    return {
+      asset: fees.asset,
+      swapFee: await this.convert(fees.swapFee, asset),
+      outboundFee: await this.convert(fees.outboundFee, asset),
+      affiliateFee: await this.convert(fees.affiliateFee, asset),
+      totatBps: fees.totatBps,
+    }
+  }
 
   /**
    * Returns the exchange of a CryptoAmount to a different Asset
