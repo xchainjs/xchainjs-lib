@@ -64,10 +64,10 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('10')), AssetBTC),
-      toAsset: AssetRuneNative,
+      destinationAsset: AssetRuneNative,
       destinationAddress: 'xxx',
       toleranceBps: 300,
-      affiliate: affiliateAddress,
+      affiliateAddress: affiliateAddress,
       affiliateBps: 30, //optional
       fromAddress: btcAddress,
     }
@@ -82,7 +82,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBTC),
       toleranceBps: 200,
-      toAsset: BUSD,
+      destinationAsset: BUSD,
       destinationAddress: bnbAddress,
       fromAddress: btcAddress,
     }
@@ -104,9 +104,9 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: BTCB,
       amount: new CryptoAmount(assetToBase(assetAmount('0.5')), BTCB),
-      toAsset: BUSD,
+      destinationAsset: BUSD,
       destinationAddress: 'bnb1mtvk4jm2a9m7lfdnvfc2vz9r9qgavs4xfc6dtx',
-      affiliate: affiliateAddress, // optional
+      affiliateAddress: affiliateAddress, // optional
       //affiliateBps: 10, //optional
       toleranceBps: 300, //optional
       fromAddress: 'bnb1mtvk4jm2a9m7lfdnvfc2vz9r9qgavs4xfc6dtx',
@@ -134,7 +134,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
-      toAsset: sBTC,
+      destinationAsset: sBTC,
       destinationAddress: runeAddress,
       //affiliate: affiliateAddress, //
       //affiliateBps: 30, //optional
@@ -153,9 +153,9 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: sBTC,
       amount: new CryptoAmount(assetToBase(assetAmount(1)), sBTC),
-      toAsset: sETH,
+      destinationAsset: sETH,
       destinationAddress: runeAddress,
-      affiliate: affiliateAddress,
+      affiliateAddress: affiliateAddress,
       affiliateBps: 30, //optional
       //toleranceBps: 20, //optional\
       fromAddress: runeAddress,
@@ -172,7 +172,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: sETH,
       amount: new CryptoAmount(assetToBase(assetAmount(1)), sETH),
-      toAsset: sBTC,
+      destinationAsset: sBTC,
       destinationAddress: 'xxx',
       // affiliate: affiliateAddress,
       // affiliateBps: 30, //optional
@@ -191,7 +191,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: sETH,
       amount: new CryptoAmount(assetToBase(assetAmount(1)), sETH),
-      toAsset: sBNBETH,
+      destinationAsset: sBNBETH,
       destinationAddress: 'xxx',
       // affiliate: affiliateAddress,
       // affiliateBps: 30, //optional
@@ -206,7 +206,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetRuneNative,
       amount: new CryptoAmount(assetToBase(assetAmount(1000, 8)), AssetRuneNative),
-      toAsset: AssetBTC,
+      destinationAsset: AssetBTC,
       destinationAddress: btcAddress,
       //toleranceBps: 200, //optional
       fromAddress: runeAddress,
@@ -220,7 +220,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: BUSD,
       amount: new CryptoAmount(assetToBase(assetAmount(1000, 8)), BUSD),
-      toAsset: AssetBTC,
+      destinationAsset: AssetBTC,
       destinationAddress: btcAddress,
       fromAddress: bnbAddress,
     }
@@ -233,7 +233,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetRuneNative,
       amount: new CryptoAmount(assetToBase(assetAmount(0.01)), AssetRuneNative),
-      toAsset: AssetBTC,
+      destinationAsset: AssetBTC,
       destinationAddress: btcAddress,
       fromAddress: runeAddress,
     }
@@ -246,7 +246,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount(0.000001)), AssetBTC),
-      toAsset: AssetRuneNative,
+      destinationAsset: AssetRuneNative,
       destinationAddress: runeAddress,
       fromAddress: btcAddress,
     }
@@ -260,7 +260,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
-      toAsset: AssetBTC,
+      destinationAsset: AssetBTC,
       destinationAddress: btcAddress,
       fromAddress: btcAddress,
     }
@@ -269,13 +269,12 @@ describe('Thorchain-query estimate Integration Tests', () => {
     printTx(estimate, swapParams.amount)
     print(estimate.txEstimate, swapParams.amount)
     expect(estimate.txEstimate.errors.length).toEqual(1)
-
   })
   it('Should fail estimate swap from BTC to ETH if amount amount is 0', async () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount(0)), AssetBTC),
-      toAsset: AssetETH,
+      destinationAsset: AssetETH,
       destinationAddress: ethAddress,
       fromAddress: btcAddress,
     }
@@ -284,14 +283,13 @@ describe('Thorchain-query estimate Integration Tests', () => {
     print(estimate.txEstimate, swapParams.amount)
 
     expect(estimate.txEstimate.errors.length).toEqual(1)
-
   })
 
   it(`Should estimate a swap from AVAX to RUNE`, async () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetAVAX,
       amount: new CryptoAmount(assetToBase(assetAmount('1', 8)), AssetAVAX),
-      toAsset: AssetRuneNative,
+      destinationAsset: AssetRuneNative,
       destinationAddress: runeAddress,
       fromAddress: avaxAddress,
     }
@@ -299,5 +297,4 @@ describe('Thorchain-query estimate Integration Tests', () => {
     printTx(estimate, swapParams.amount)
     expect(estimate).toBeTruthy()
   })
-
 })

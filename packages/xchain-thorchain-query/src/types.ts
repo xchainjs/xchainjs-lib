@@ -56,15 +56,16 @@ export type EstimateSwapParams = {
 
 export type QuoteSwapParams = {
   fromAsset: Asset
-  toAsset: Asset
+  destinationAsset: Asset
   amount: CryptoAmount
   destinationAddress: string
   fromAddress: string
   toleranceBps?: number
-  affiliate?: string
+  affiliateAddress?: string
   affiliateBps?: number
   height?: number
   interfaceID?: string
+  feeOption?: FeeOption
 }
 
 export type SwapOutput = {

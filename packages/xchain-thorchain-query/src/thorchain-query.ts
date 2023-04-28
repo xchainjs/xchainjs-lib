@@ -20,20 +20,20 @@ import {
   DustValues,
   EstimateAddLP,
   EstimateAddSaver,
-  QuoteSwapParams,
   EstimateWithdrawLP,
   EstimateWithdrawSaver,
   LiquidityPosition,
   PoolRatios,
   PostionDepositValue,
+  QuoteSwapParams,
   SaverFees,
   SaversPosition,
   SaversWithdraw,
+  TotalFees,
   TxDetails,
   UnitData,
   WithdrawLiquidityPosition,
   getSaver,
-  TotalFees,
 } from './types'
 import { AssetBNB, AssetRuneNative, BNBChain, GAIAChain, THORChain, isAssetRuneNative } from './utils'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
@@ -69,20 +69,20 @@ export class ThorchainQuery {
    */
   public async quoteSwap({
     fromAsset,
-    toAsset,
+    destinationAsset,
     amount,
     destinationAddress,
     fromAddress,
     toleranceBps = 300, // default to 0.3%,
     interfaceID = '555',
     affiliateBps,
-    affiliate,
+    affiliateAddress,
     height,
   }: QuoteSwapParams): Promise<TxDetails> {
-    let errors: string[] = []
+    const errors: string[] = []
 
     const fromAssetString = assetToString(fromAsset)
-    const toAssetString = assetToString(toAsset)
+    const toAssetString = assetToString(destinationAsset)
     // how to use
     interfaceID
     // fetch quote
@@ -94,7 +94,7 @@ export class ThorchainQuery {
       fromAddress,
       toleranceBps ? toleranceBps : 0,
       affiliateBps ? affiliateBps : 0,
-      affiliate ? affiliate : '',
+      affiliateAddress ? affiliateAddress : '',
       height,
     )
     // error handling - if errors
@@ -107,14 +107,14 @@ export class ThorchainQuery {
         expiry: new Date(),
         txEstimate: {
           totalFees: {
-            asset: toAsset,
+            asset: destinationAsset,
             affiliateFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
             swapFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
             outboundFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
             totatBps: 0,
           },
           slipBasisPoints: 0,
-          netOutput: new CryptoAmount(baseAmount(0), toAsset),
+          netOutput: new CryptoAmount(baseAmount(0), destinationAsset),
           waitTimeSeconds: 0,
           canSwap: false,
           errors,
@@ -136,8 +136,10 @@ export class ThorchainQuery {
           totatBps: Number(swapQuote.fees.total_bps),
         },
         slipBasisPoints: toleranceBps ? toleranceBps : 0,
-        netOutput: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), toAsset),
-        waitTimeSeconds: swapQuote.inbound_confirmation_seconds ? Number(swapQuote.inbound_confirmation_seconds) + Number(swapQuote.outbound_delay_seconds) : Number(swapQuote.outbound_delay_seconds), // sometimes quote response doesn't return and inbound confirmation seconds
+        netOutput: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
+        waitTimeSeconds: swapQuote.inbound_confirmation_seconds
+          ? Number(swapQuote.inbound_confirmation_seconds) + Number(swapQuote.outbound_delay_seconds)
+          : Number(swapQuote.outbound_delay_seconds), // sometimes quote response doesn't return and inbound confirmation seconds
         canSwap: true,
         errors,
       },

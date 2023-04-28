@@ -3,9 +3,9 @@ import {
   CryptoAmount,
   EstimateAddLP,
   EstimateAddSaver,
-  EstimateSwapParams,
   EstimateWithdrawLP,
   EstimateWithdrawSaver,
+  QuoteSwapParams,
   SaversPosition,
   SaversWithdraw,
   ThorchainQuery,
@@ -19,7 +19,7 @@ import { Wallet } from './wallet'
 
 const defaultQuery = new ThorchainQuery()
 
-export type AmmEstimateSwapParams = EstimateSwapParams & {
+export type AmmEstimateSwapParams = QuoteSwapParams & {
   wallet: Wallet
   walletIndex: number
 }
@@ -50,20 +50,22 @@ export class ThorchainAMM {
    * @returns The SwapEstimate
    */
   public async estimateSwap({
-    input,
+    fromAsset,
+    amount,
+    fromAddress,
     destinationAsset,
     destinationAddress,
     affiliateAddress = '',
     interfaceID = `555`,
-    affiliateFeeBasisPoints = 0,
-    slipLimit,
+    affiliateBps = 0,
+    toleranceBps,
     wallet,
     walletIndex,
   }: AmmEstimateSwapParams): Promise<TxDetails> {
     let errors: string[] = []
     if (wallet) {
       const params = {
-        input,
+        input: amount,
         destinationAsset,
         destinationAddress,
         memo: '',
@@ -72,14 +74,16 @@ export class ThorchainAMM {
       }
       errors = await wallet.validateSwap(params)
     }
-    const estimate = await this.thorchainQuery.estimateSwap({
-      input,
+    const estimate = await this.thorchainQuery.quoteSwap({
+      fromAsset,
+      amount,
+      fromAddress,
       destinationAsset,
       destinationAddress,
       affiliateAddress,
       interfaceID,
-      affiliateFeeBasisPoints,
-      slipLimit,
+      affiliateBps,
+      toleranceBps,
     })
     estimate.txEstimate.errors.push(...errors)
     estimate.txEstimate.canSwap = errors.length == 0
@@ -95,12 +99,12 @@ export class ThorchainAMM {
    */
   public async doSwap(wallet: Wallet, params: AmmEstimateSwapParams): Promise<TxSubmitted> {
     // Thorchain-query call satisfies the data needed for executeSwap to be called.
-    const txDetails = await this.thorchainQuery.estimateSwap(params)
+    const txDetails = await this.thorchainQuery.quoteSwap(params)
     if (!txDetails.txEstimate.canSwap) {
       throw Error(txDetails.txEstimate.errors.join('\n'))
     }
     return await wallet.executeSwap({
-      input: params.input,
+      input: params.amount,
       destinationAsset: params.destinationAsset,
       destinationAddress: params.destinationAddress,
       memo: txDetails.memo,

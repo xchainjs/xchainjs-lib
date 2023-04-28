@@ -3,10 +3,9 @@ import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-ut
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
 import { CryptoAmount } from '../src/crypto-amount'
+import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { QuoteSwapParams, TxDetails } from '../src/types'
-
-import { ThorchainCache } from '../src/thorchain-cache'
 
 //import { AssetRuneNative } from '../src/utils'
 const thorchainCache = new ThorchainCache()
@@ -26,7 +25,6 @@ const AssetsETH = assetFromStringEx('ETH/ETH')
 
 const ethAddress = '0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990'
 const btcAddress = 'bc1quk3t999thy4qcck2p208k84s2gtrxel82k5mr3'
-
 
 function printTx(txDetails: TxDetails, amount: CryptoAmount) {
   const expanded = {
@@ -62,20 +60,20 @@ describe('Thorchain-query tests', () => {
     mockThornodeApi.restore()
   })
 
-    it('Should fetch BTC to ETH swap', async () => {
+  it('Should fetch BTC to ETH swap', async () => {
     const swapParams: QuoteSwapParams = {
       amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC),
       fromAsset: AssetBTC,
-      toAsset: AssetETH,
+      destinationAsset: AssetETH,
       destinationAddress: ethAddress,
-      affiliate: `thor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx`,
+      affiliateAddress: `thor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx`,
       affiliateBps: 50,
-      fromAddress:btcAddress,
+      fromAddress: btcAddress,
     }
     try {
       const estimate = await thorchainQuery.quoteSwap(swapParams)
       printTx(estimate, swapParams.amount)
-    }catch (error) {
+    } catch (error) {
       console.error(error)
     }
   })
@@ -84,19 +82,18 @@ describe('Thorchain-query tests', () => {
     const swapParams: QuoteSwapParams = {
       amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetsBTC),
       fromAsset: AssetsBTC,
-      toAsset: AssetsETH,
+      destinationAsset: AssetsETH,
       destinationAddress: 'thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu',
-      fromAddress:'thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu',
+      fromAddress: 'thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu',
     }
     const estimate = await thorchainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
   })
 
-
   // it('Should fail estimate swap because destination chain is halted ', async () => {
   //   const swapParams: QuoteSwapParams = {
   //     fromAsset: AssetETH,
-  //     toAsset: AssetLTC,
+  //     destinationAsset: AssetLTC,
   //     amount: new CryptoAmount(assetToBase(assetAmount(2, 18)), AssetETH),
   //     destinationAddress: 'xxx',
   //     fromAddress:'0x4675C7e5BaAFBFFbca748158bEcBA61ef3b0a263'

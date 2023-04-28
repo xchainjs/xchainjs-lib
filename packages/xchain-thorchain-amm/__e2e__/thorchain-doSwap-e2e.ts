@@ -18,9 +18,9 @@ import { Asset, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xc
 import { fail } from 'assert'
 import BigNumber from 'bignumber.js'
 
-import { Wallet } from '../src/Wallet'
 import { ThorchainAMM } from '../src/thorchain-amm'
 import { EthHelper } from '../src/utils/eth-helper'
+import { Wallet } from '../src/wallet'
 
 require('dotenv').config()
 
@@ -61,12 +61,11 @@ const XRUNE: Asset = {
 function print(estimate: TxDetails) {
   const expanded = {
     totalFees: {
-      inboundFee: estimate.txEstimate.totalFees.inboundFee.formatedAssetString(),
       swapFee: estimate.txEstimate.totalFees.swapFee.formatedAssetString(),
       outboundFee: estimate.txEstimate.totalFees.outboundFee.formatedAssetString(),
       affiliateFee: estimate.txEstimate.totalFees.affiliateFee.formatedAssetString(),
     },
-    slipPercentage: estimate.txEstimate.slipPercentage.toFixed(),
+    slipBasisPoints: estimate.txEstimate.slipBasisPoints.toFixed(),
     netOutput: estimate.txEstimate.netOutput.formatedAssetString(),
     waitTime: estimate.txEstimate.waitTimeSeconds.toFixed(),
     canSwap: estimate.txEstimate.canSwap,

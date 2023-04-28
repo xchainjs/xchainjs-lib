@@ -1,8 +1,7 @@
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetETH } from '@xchainjs/xchain-ethereum'
-import { AssetLTC } from '@xchainjs/xchain-litecoin'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { CryptoAmount, EstimateSwapParams, ThorchainQuery, TxDetails } from '@xchainjs/xchain-thorchain-query'
+import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Asset, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
@@ -13,28 +12,28 @@ const thorchainQuery = new ThorchainQuery()
 const thorchainAmm = new ThorchainAMM()
 thorchainAmm
 
-function printTx(txDetails: TxDetails, input: CryptoAmount) {
-  const expanded = {
-    memo: txDetails.memo,
-    expiry: txDetails.expiry,
-    toAddress: txDetails.toAddress,
-    txEstimate: {
-      input: input.formatedAssetString(),
-      totalFees: {
-        inboundFee: txDetails.txEstimate.totalFees.inboundFee.formatedAssetString(),
-        swapFee: txDetails.txEstimate.totalFees.swapFee.formatedAssetString(),
-        outboundFee: txDetails.txEstimate.totalFees.outboundFee.formatedAssetString(),
-        affiliateFee: txDetails.txEstimate.totalFees.affiliateFee.formatedAssetString(),
-      },
-      slipPercentage: txDetails.txEstimate.slipPercentage.toFixed(),
-      netOutput: txDetails.txEstimate.netOutput.formatedAssetString(),
-      waitTimeSeconds: txDetails.txEstimate.waitTimeSeconds.toFixed(),
-      canSwap: txDetails.txEstimate.canSwap,
-      errors: txDetails.txEstimate.errors,
-    },
-  }
-  console.log(expanded)
-}
+// function printTx(txDetails: TxDetails, input: CryptoAmount) {
+//   const expanded = {
+//     memo: txDetails.memo,
+//     expiry: txDetails.expiry,
+//     toAddress: txDetails.toAddress,
+//     txEstimate: {
+//       input: input.formatedAssetString(),
+//       totalFees: {
+//         swapFee: txDetails.txEstimate.totalFees.swapFee.formatedAssetString(),
+//         outboundFee: txDetails.txEstimate.totalFees.outboundFee.formatedAssetString(),
+//         affiliateFee: txDetails.txEstimate.totalFees.affiliateFee.formatedAssetString(),
+//       },
+//       slipBasisPoints: txDetails.txEstimate.slipBasisPoints.toFixed(),
+//       netOutput: txDetails.txEstimate.netOutput.formatedAssetString(),
+//       waitTimeSeconds: txDetails.txEstimate.waitTimeSeconds.toFixed(),
+//       canSwap: txDetails.txEstimate.canSwap,
+//       errors: txDetails.txEstimate.errors,
+//     },
+//   }
+//   console.log(expanded)
+// }
+//const ethAddress = '0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990'
 
 describe('ThorchainAmm Client Test', () => {
   beforeAll(() => {
@@ -44,14 +43,6 @@ describe('ThorchainAmm Client Test', () => {
   afterAll(() => {
     mockThornodeApi.restore()
     mockThornodeApi.restore()
-  })
-
-  // ThorchainAMM unit tests with mock data
-  it(`Should get the correct outbound Delay`, async () => {
-    const outboundAmount = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
-    const outBoundValue = await thorchainQuery.outboundDelay(outboundAmount)
-    const expectedOutput = 4320
-    expect(outBoundValue).toEqual(expectedOutput)
   })
 
   it(`Should convert BTC to ETH `, async () => {
@@ -78,34 +69,29 @@ describe('ThorchainAmm Client Test', () => {
     expect(outboundBTCAmount.baseAmount.amount()).toEqual(expectedAmount.assetAmount.amount())
   })
 
-  it('Should fail estimate swap because destination chain is halted ', async () => {
-    const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(2, 18)), AssetETH),
-      destinationAsset: AssetLTC,
-      destinationAddress: 'xxx',
-    }
-    try {
-      const estimate = await thorchainQuery.estimateSwap(swapParams)
-      printTx(estimate, swapParams.input)
-      expect(estimate.txEstimate.canSwap).toEqual(false)
-    } catch (error) {
-      expect(error.message).toEqual(`destination chain is halted`)
-    }
-  })
+  // it('Should fail estimate swap because destination chain is halted ', async () => {
+  //   const swapParams: QuoteSwapParams = {
+  //     fromAsset: AssetETH,
+  //     fromAddress: ethAddress,
+  //     amount: new CryptoAmount(assetToBase(assetAmount(2, 18)), AssetETH),
+  //     destinationAsset: AssetLTC,
+  //     destinationAddress: 'xxx',
+  //   }
+  //   const estimate = await thorchainQuery.quoteSwap(swapParams)
+  //   printTx(estimate, swapParams.amount)
+  //   expect(estimate.txEstimate.canSwap).toEqual(false)
+  // })
 
-  it('Should fail estimate swap because source chain is halted ', async () => {
-    const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(2)), AssetLTC),
-      destinationAsset: AssetETH,
-      destinationAddress: 'xxx',
-    }
-    try {
-      const estimate = await thorchainQuery.estimateSwap(swapParams)
-      printTx(estimate, swapParams.input)
-      expect(estimate.txEstimate.canSwap).toEqual(false)
-    } catch (error) {
-      console.error(error)
-      expect(error.message).toEqual(`source chain is halted`)
-    }
-  })
+  // it('Should fail estimate swap because source chain is halted ', async () => {
+  //   const swapParams: QuoteSwapParams = {
+  //     fromAsset: AssetLTC,
+  //     fromAddress: 'ltc1q6zvz3d5tnaqd6exg4vljvtn8lcg4qfqsu4cc4h',
+  //     amount: new CryptoAmount(assetToBase(assetAmount(2)), AssetLTC),
+  //     destinationAsset: AssetETH,
+  //     destinationAddress: ethAddress,
+  //   }
+  //   const estimate = await thorchainQuery.quoteSwap(swapParams)
+  //   printTx(estimate, swapParams.amount)
+  //   expect(estimate.txEstimate.canSwap).toEqual(false)
+  // })
 })

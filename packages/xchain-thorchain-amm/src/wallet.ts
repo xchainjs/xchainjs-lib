@@ -181,7 +181,7 @@ export class Wallet {
    * @returns - tx submitted object
    */
   private async swapRuneTo(swap: ExecuteSwap): Promise<TxSubmitted> {
-    const thorClient = (this.clients.THOR as unknown) as ThorchainClient
+    const thorClient = this.clients.THOR as unknown as ThorchainClient
     const waitTimeSeconds = swap.waitTimeSeconds
     const hash = await thorClient.deposit({
       amount: swap.input.baseAmount,
@@ -586,7 +586,7 @@ export class Wallet {
     thorchainClient: XChainClient,
     waitTimeSeconds: number,
   ): Promise<TxSubmitted> {
-    const thorClient = (this.clients.THOR as unknown) as ThorchainClient
+    const thorClient = this.clients.THOR as unknown as ThorchainClient
     const addParams = {
       asset: params.rune.asset,
       amount: params.rune.baseAmount,
@@ -607,7 +607,7 @@ export class Wallet {
     thorchainClient: XChainClient,
     waitTimeSeconds: number,
   ): Promise<TxSubmitted> {
-    const thorClient = (this.clients.THOR as unknown) as ThorchainClient
+    const thorClient = this.clients.THOR as unknown as ThorchainClient
     const addParams = {
       asset: params.runeFee.asset,
       amount: params.runeFee.baseAmount,
