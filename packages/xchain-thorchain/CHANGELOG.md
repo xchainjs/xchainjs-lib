@@ -1,8 +1,8 @@
-# v0.27.12 (2023-04-26)
+# v0.28.0 (2023-05-02)
 
 ## Update
 
-- update rollup config & axios to the latest
+- update rollup config and axios to the latest
 - udpate `@types/big.js`
 
 # v.0.27.11 (2023-04-04)
