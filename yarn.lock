@@ -2280,11 +2280,6 @@
     "@typescript-eslint/types" "5.59.1"
     eslint-visitor-keys "^3.3.0"
 
-"@xchainjs/xchain-midgard@0.4.3":
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-midgard/-/xchain-midgard-0.4.3.tgz#d666820e477e48e988249b6213a1ca776748be21"
-  integrity sha512-em3XZ4HtzruSLRf/IXcMp69/44gwZXGVLW1dVaH7lkObpqWA3udwDGqxxDHaOgu52Pie6N86ZjG5f9B2GRVHIA==
-
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz#e77a97fbd345b76d83245edcd17d393b1b41fb31"
