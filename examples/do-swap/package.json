@@ -12,7 +12,7 @@
   "dependencies": {
     "@binance-chain/javascript-sdk": "^4.2.0",
     "@cosmos-client/core": "^0.46.1",
-    "@psf/bitcoincashjs-lib": "^4.0.2",
+    "@psf/bitcoincashjs-lib": "^4.0.3",
     "@xchainjs/xchain-binance": "file:../../packages/xchain-binance",
     "@xchainjs/xchain-bitcoin": "file:../../packages/xchain-bitcoin",
     "@xchainjs/xchain-bitcoincash": "file:../../packages/xchain-bitcoincash",
@@ -33,8 +33,9 @@
     "axios-retry": "^3.3.1",
     "bchaddrjs": "^0.5.2",
     "bech32-buffer": "^0.2.0",
-    "bitcoinjs-lib": "^6.0.1",
+    "bitcoinjs-lib": "5.2.0",
     "dotenv": "^16.0.0",
-    "ethers": "^5.6.2"
+    "axios": "^1.3.6",
+    "ethers": "^5.6.6"
   }
 }

@@ -293,7 +293,7 @@ export class TxJammer {
 
     const result: TxDetail = { action: 'swap' }
     try {
-      const estimate = await this.thorchainQuery.estimateSwap(swapParams)
+      const estimate = await this.thorchainAmm.estimateSwap(swapParams)
       result.date = new Date()
       result.details = `swapping ${swapParams.input.formatedAssetString()} to ${assetToString(destinationAsset)} `
       if (estimate.txEstimate.canSwap && !this.estimateOnly) {

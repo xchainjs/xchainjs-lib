@@ -437,7 +437,7 @@ describe('ethereum/util', () => {
 
     it('USDT - testnet', async () => {
       mock_etherscan_api(
-        'https://api-ropsten.etherscan.io',
+        'https://api-sepolia.etherscan.io',
         'eth_call',
         '0x0000000000000000000000000000000000000000000000000000000000000006', // 6
       )
@@ -477,7 +477,7 @@ describe('ethereum/util', () => {
 
     it('is approved', async () => {
       mock_etherscan_api(
-        'https://api-ropsten.etherscan.io',
+        'https://api-sepolia.etherscan.io',
         'eth_call',
         '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
       )
@@ -493,7 +493,7 @@ describe('ethereum/util', () => {
 
     it('is not approved', async () => {
       mock_etherscan_api(
-        'https://api-ropsten.etherscan.io',
+        'https://api-sepolia.etherscan.io',
         'eth_call',
         '0x0000000000000000000000000000000000000000000000000000000000000064', // 100
       )
@@ -510,7 +510,7 @@ describe('ethereum/util', () => {
 
   describe('estimateCall', () => {
     it('estimate transfer', async () => {
-      mock_etherscan_api('https://api-ropsten.etherscan.io', 'eth_estimateGas', '0x5208') // 2100
+      mock_etherscan_api('https://api-sepolia.etherscan.io', 'eth_estimateGas', '0x5208') // 2100
 
       const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
       const fromAddress = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E'
@@ -536,7 +536,7 @@ describe('ethereum/util', () => {
 
   describe('estimateApprove', () => {
     it('estimate transfer', async () => {
-      mock_etherscan_api('https://api-ropsten.etherscan.io', 'eth_estimateGas', '0x5208') // 2100
+      mock_etherscan_api('https://api-sepolia.etherscan.io', 'eth_estimateGas', '0x5208') // 2100
 
       const provider = new providers.EtherscanProvider(xchainNetworkToEths(Network.Testnet))
       const fromAddress = '0xb8c0c226d6FE17E5d9132741836C3ae82A5B6C4E'
@@ -576,7 +576,7 @@ describe('ethereum/util', () => {
   describe('call', () => {
     it('`decimals`', async () => {
       mock_etherscan_api(
-        'https://api-ropsten.etherscan.io',
+        'https://api-sepolia.etherscan.io',
         'eth_call',
         '0x0000000000000000000000000000000000000000000000000000000000000006', // 6
       )

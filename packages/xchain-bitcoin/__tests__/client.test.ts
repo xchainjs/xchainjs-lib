@@ -191,7 +191,9 @@ describe('BitcoinClient Test', () => {
         feeRate: 1,
       })
       fail()
-    } catch (err) {
+      // Disable @typescript-eslint/no-explicit-any for this block of code
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+    } catch (err: any) {
       const message = err.message as string
       expect(message.includes('memo too long')).toBeTruthy()
     }

@@ -7,8 +7,33 @@
 
 ### Examples
 
+// for xchainjs packages
 yarn updateDeps <packageName> <packageVersion>
 
 ```
 yarn updateDeps client 0.13.7
+```
+
+### For other packages
+
+- So it can find the full package name
+
+yarn updateDeps <fullpackageName> <packageVersion> true
+
+```
+yarn updateDeps @psf/bitcoincashjs-lib 4.0.3 true
+```
+
+### Using python scripting update package version Minor or Patch
+
+For the whole library
+
+```
+yarn updatePackages minor Update "update rollup config and axios to the latest"
+```
+
+For just one package
+
+```
+yarn updatePackages minor Update "update rollup config and axios to the latest" avax
 ```

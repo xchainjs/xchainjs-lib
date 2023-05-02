@@ -9,6 +9,7 @@ import { CryptoAmount } from '../src/crypto-amount'
 import { LiquidityPool } from '../src/liquidity-pool'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { Block, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData } from '../src/types'
+import { AssetRuneNative } from '../src/utils'
 import {
   getLiquidityProtectionData,
   getLiquidityUnits,
@@ -16,7 +17,6 @@ import {
   getPoolShare,
   getSlipOnLiquidity,
 } from '../src/utils/liquidity'
-import { AssetRuneNative } from '../src/utils'
 
 const thorchainQuery = new ThorchainQuery()
 

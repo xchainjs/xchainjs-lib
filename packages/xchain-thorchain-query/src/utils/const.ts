@@ -3,7 +3,7 @@ import { Asset, assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
 export const AssetBNB = assetFromStringEx('BNB.BNB')
 export const AssetAVAX = assetFromStringEx('AVAX.AVAX')
 export const AssetBTC = assetFromStringEx('BTC.BTC')
-export const AssetBCH = assetFromStringEx('BCH.BHC')
+export const AssetBCH = assetFromStringEx('BCH.BCH')
 export const AssetETH = assetFromStringEx('ETH.ETH')
 export const AssetDOGE = assetFromStringEx('DOGE.DOGE')
 export const AssetLTC = assetFromStringEx('LTC.LTC')

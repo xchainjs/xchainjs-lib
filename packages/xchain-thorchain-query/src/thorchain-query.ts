@@ -396,9 +396,9 @@ export class ThorchainQuery {
         errors.push(`Error: ${error} destination pool was not found for asset ${destAsset}`)
       }
     }
-    if (sourceInboundDetails.haltedChain) errors.push(`source chain is halted`)
+    if (!sourceAsset.synth && sourceInboundDetails.haltedChain) errors.push(`source chain is halted`)
     if (sourceInboundDetails.haltedTrading) errors.push(`source pool is halted trading`)
-    if (destinationInboundDetails.haltedChain) errors.push(`destination chain is halted`)
+    if (!destAsset.synth && destinationInboundDetails.haltedChain) errors.push(`destination chain is halted`)
     if (destinationInboundDetails.haltedTrading) errors.push(`destination pool is halted trading`)
     if (estimate.slipPercentage.gte(params.slipLimit || 1))
       errors.push(

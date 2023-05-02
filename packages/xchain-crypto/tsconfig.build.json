@@ -1,12 +1,11 @@
 // {
 //   "extends": "../../tsconfig.build.json",
+
 //   "compilerOptions": {
 //     "outDir": "./lib",
-//     "composite": true, // Add this option
+//     "declaration": true,
 //     "declarationMap": true,
-//     "types": ["node"],
-//     "baseUrl": "./",
-//     // "paths": { ... } // Add this if needed
+//     "types": ["node"]
 //   },
 //   "include": [
 //     "src/**/*"

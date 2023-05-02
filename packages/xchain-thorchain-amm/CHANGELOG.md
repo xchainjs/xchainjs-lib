@@ -1,3 +1,10 @@
+# v0.4.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+- update `bitoinCashjs-lib`
+
 # v0.3.25 (2023-04-24)
 
 ## Add

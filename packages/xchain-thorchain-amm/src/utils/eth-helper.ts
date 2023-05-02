@@ -14,7 +14,7 @@ export class EthHelper {
   private thorchainCache: ThorchainCache
 
   constructor(client: XChainClient, thorchainCache: ThorchainCache) {
-    this.ethClient = (client as unknown) as EthereumClient
+    this.ethClient = client as unknown as EthereumClient
     this.client = client
     this.thorchainCache = thorchainCache
   }

@@ -1,4 +1,4 @@
-import { proto } from '@cosmos-client/core/cjs/module'
+import cosmosClientCore from '@cosmos-client/core'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
@@ -36,7 +36,7 @@ const mockAccountsBalance = (
   url: string,
   address: string,
   result: {
-    balances: proto.cosmos.base.v1beta1.Coin[]
+    balances: cosmosClientCore.proto.cosmos.base.v1beta1.Coin[]
   },
 ) => {
   nock(url).get(`/cosmos/bank/v1beta1/balances/${address}`).reply(200, result)
@@ -145,7 +145,7 @@ describe('Client Test', () => {
   it('has balances', async () => {
     mockAccountsBalance(getClientUrl(cosmosClient), 'cosmos1gehrq0pr5d79q8nxnaenvqh09g56jafm82thjv', {
       balances: [
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosClientCore.proto.cosmos.base.v1beta1.Coin({
           denom: 'uatom',
           amount: '75000000',
         }),
@@ -180,7 +180,7 @@ describe('Client Test', () => {
   })
 
   it('has tx history', async () => {
-    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+    const msgSend = new cosmosClientCore.proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2',
       to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
       amount: [
@@ -220,7 +220,7 @@ describe('Client Test', () => {
     expect(transactions.total).toBeGreaterThan(0)
 
     cosmosClient.setNetwork(Network.Mainnet)
-    const msgSend2 = new proto.cosmos.bank.v1beta1.MsgSend({
+    const msgSend2 = new cosmosClientCore.proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z',
       to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
       amount: [
@@ -298,7 +298,7 @@ describe('Client Test', () => {
   it('get transaction data', async () => {
     cosmosClient.setNetwork(Network.Mainnet)
 
-    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+    const msgSend = new cosmosClientCore.proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'cosmos1pjkpqxmvz47a5aw40l98fyktlg7k6hd9heq95z',
       to_address: 'cosmos155svs6sgxe55rnvs6ghprtqu0mh69kehrn0dqr',
       amount: [

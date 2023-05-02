@@ -1,3 +1,10 @@
+# v0.12.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+- update `bitcoinjs-lib` to the latest
+
 # v.0.11.4 (2023-04-11)
 
 ## Add

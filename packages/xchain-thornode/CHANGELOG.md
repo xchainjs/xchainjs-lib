@@ -1,3 +1,10 @@
+# v0.3.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+- update rimraf and openapitools
+
 # v0.2.3 (2023-04-23)
 
 ## Breaking Change

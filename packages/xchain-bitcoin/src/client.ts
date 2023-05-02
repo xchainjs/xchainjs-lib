@@ -105,7 +105,7 @@ class Client extends UTXOClient {
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating BTC keys from the given phrase
    * */
-  private getBtcKeys(phrase: string, index = 0): Bitcoin.ECPairInterface {
+  private getBtcKeys(phrase: string, index = 0): Bitcoin.ECPair.ECPairInterface {
     const btcNetwork = Utils.btcNetwork(this.network)
 
     const seed = getSeed(phrase)
