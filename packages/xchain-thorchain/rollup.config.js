@@ -1,6 +1,6 @@
-import commonjs from 'rollup-plugin-commonjs'
-import json from 'rollup-plugin-json'
-import resolve from 'rollup-plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
+import resolve from '@rollup/plugin-node-resolve'
 import external from 'rollup-plugin-peer-deps-external'
 import typescript from 'rollup-plugin-typescript2'
 
@@ -13,25 +13,29 @@ export default {
       file: pkg.main,
       format: 'cjs',
       exports: 'named',
-      sourcemap: false,
+      sourcemap: true,
     },
     {
       file: pkg.module,
       format: 'es',
       exports: 'named',
-      sourcemap: false,
+      sourcemap: true,
     },
   ],
+  onwarn: (warning) => {
+    // Ignore circular dependency warnings
+    if (warning.code === 'CIRCULAR_DEPENDENCY') return
+  },
   plugins: [
     json({}),
     external(),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
-      rollupCommonJSResolveHack: true,
       exclude: '__tests__/**',
-      clean: true,
     }),
-    commonjs(),
+    commonjs({
+      exclude: '**/*.json',
+    }),
   ],
-  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios'],
+  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder'],
 }

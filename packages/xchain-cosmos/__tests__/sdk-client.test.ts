@@ -1,4 +1,4 @@
-import { proto } from '@cosmos-client/core/cjs/module'
+import cosmosClientCore from '@cosmos-client/core'
 import { baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
@@ -28,7 +28,7 @@ const mockAccountsBalance = (
   url: string,
   address: string,
   result: {
-    balances: proto.cosmos.base.v1beta1.Coin[]
+    balances: cosmosClientCore.proto.cosmos.base.v1beta1.Coin[]
   },
 ) => {
   nock(url).get(`/cosmos/bank/v1beta1/balances/${address}`).reply(200, result)
@@ -174,7 +174,7 @@ describe('SDK Client Test', () => {
 
     mockAccountsBalance(cosmosTestnetClient.server, cosmos_testnet_address0, {
       balances: [
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosClientCore.proto.cosmos.base.v1beta1.Coin({
           denom: 'umuon',
           amount: '75000000',
         }),
@@ -187,7 +187,7 @@ describe('SDK Client Test', () => {
 
     mockAccountsBalance(thorMainnetClient.server, thor_mainnet_address0, {
       balances: [
-        new proto.cosmos.base.v1beta1.Coin({
+        new cosmosClientCore.proto.cosmos.base.v1beta1.Coin({
           denom: 'thor',
           amount: '100',
         }),
@@ -218,7 +218,7 @@ describe('SDK Client Test', () => {
     let txHistory = await cosmosMainnetClient.searchTx({ messageSender: cosmos_mainnet_address0 })
     expect(parseInt(txHistory.pagination?.total?.toString() || '0')).toEqual(0)
 
-    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+    const msgSend = new cosmosClientCore.proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2',
       to_address: cosmos_testnet_address0,
       amount: [
@@ -268,7 +268,7 @@ describe('SDK Client Test', () => {
     txHistory = await thorMainnetClient.searchTx({ messageSender: thor_mainnet_address0 })
     expect(parseInt(txHistory.pagination?.total?.toString() || '0')).toEqual(0)
 
-    const msgSend2 = new proto.cosmos.bank.v1beta1.MsgSend({
+    const msgSend2 = new cosmosClientCore.proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
       to_address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
       amount: [
@@ -361,7 +361,7 @@ describe('SDK Client Test', () => {
   })
 
   it('get transaction data', async () => {
-    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+    const msgSend = new cosmosClientCore.proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'cosmos1xvt4e7xd0j9dwv2w83g50tpcltsl90h52003e2',
       to_address: cosmos_mainnet_address0,
       amount: [
@@ -392,7 +392,7 @@ describe('SDK Client Test', () => {
     expect(tx.txhash).toEqual('19BFC1E8EBB10AA1EC6B82E380C6F5FD349D367737EA8D55ADB4A24F0F7D1066')
     expect(tx.height).toEqual(45582)
 
-    const msgSend2 = new proto.cosmos.bank.v1beta1.MsgSend({
+    const msgSend2 = new cosmosClientCore.proto.cosmos.bank.v1beta1.MsgSend({
       from_address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
       to_address: 'thor19kacmmyuf2ysyvq3t9nrl9495l5cvktjs0yfws',
       amount: [

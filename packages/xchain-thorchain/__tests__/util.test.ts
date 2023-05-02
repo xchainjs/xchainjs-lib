@@ -1,7 +1,6 @@
 import { AssetBNB } from '@xchainjs/xchain-binance'
 import { Network } from '@xchainjs/xchain-client'
-import { AssetETH } from '@xchainjs/xchain-ethereum'
-import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 // import nock from 'nock'
 
 import { mockTendermintNodeInfo } from '../__mocks__/thornode-api'
@@ -20,6 +19,8 @@ import {
   isAssetRuneNative,
   isBroadcastSuccess,
 } from '../src/utils'
+
+const AssetETH = assetFromStringEx('ETH.ETH')
 
 describe('thorchain/util', () => {
   describe('isAssetRuneNative', () => {

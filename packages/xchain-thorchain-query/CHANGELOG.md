@@ -1,8 +1,16 @@
+# v0.3.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+- update rimraf
+
 # v0.2.6 (2023-4-24)
 
 ## Add
 
 - Bump packages
+
 # v0.2.5 (2023-4-14)
 
 ## Fix

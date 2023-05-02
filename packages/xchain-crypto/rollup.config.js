@@ -1,6 +1,6 @@
-import commonjs from 'rollup-plugin-commonjs'
-import json from 'rollup-plugin-json'
-import resolve from 'rollup-plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
+import resolve from '@rollup/plugin-node-resolve'
 import external from 'rollup-plugin-peer-deps-external'
 import typescript from 'rollup-plugin-typescript2'
 
@@ -23,14 +23,13 @@ export default {
     },
   ],
   plugins: [
-    external(),
-    json(),
-    typescript({
-      rollupCommonJSResolveHack: true,
-      exclude: '__tests__/**',
-      clean: true,
-    }),
     resolve({ preferBuiltins: true, browser: true }),
+    json(),
+    external(),
+    typescript({
+      tsconfig: './tsconfig.json',
+      exclude: '__tests__/**',
+    }),
     commonjs({
       include: /node_modules/,
       exclude: '**/*.json',

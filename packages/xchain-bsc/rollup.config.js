@@ -1,6 +1,6 @@
-import commonjs from 'rollup-plugin-commonjs'
-import json from 'rollup-plugin-json'
-import resolve from 'rollup-plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
+import resolve from '@rollup/plugin-node-resolve'
 import external from 'rollup-plugin-peer-deps-external'
 import typescript from 'rollup-plugin-typescript2'
 
@@ -27,17 +27,11 @@ export default {
     external(),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
-      rollupCommonJSResolveHack: true,
       exclude: '__tests__/**',
-      clean: true,
     }),
     commonjs({
-      // see: https://github.com/ethers-io/ethers.js/issues/839#issuecomment-630320675
-      namedExports: {
-        'node_modules/bn.js/lib/bn.js': ['BN'],
-        'node_modules/elliptic/lib/elliptic.js': ['ec'],
-        'node_modules/ethers/dist/ethers.esm.js': ['ethers'],
-      },
+      include: /node_modules/,
+      exclude: '**/*.json',
     }),
     json(),
   ],

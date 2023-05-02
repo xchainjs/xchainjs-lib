@@ -1,17 +1,18 @@
 import { Network } from '@xchainjs/xchain-client'
 import { THORChain } from '@xchainjs/xchain-thorchain'
-import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
+import { AmmEstimateSwapParams, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   CryptoAmount,
-  EstimateSwapParams,
   Midgard,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromString, assetToBase, delay } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
+
+import { checkTx } from '../check-tx/check-tx'
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {
@@ -36,10 +37,30 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
   console.log(expanded)
 }
 
+const delayedLog = async (message: string, delayMs: number) => {
+  const startTime = new Date().getTime()
+  const endTime = startTime + delayMs
+  let remainingTime = delayMs
+
+  while (remainingTime > 0) {
+    const elapsedMs = delayMs - remainingTime
+    const remainingSeconds = Math.ceil(remainingTime / 1000)
+    const elapsedSeconds = Math.floor(elapsedMs / 1000)
+    const progress = Math.floor((elapsedMs / delayMs) * 100)
+
+    console.log(`${message} (${elapsedSeconds}s/${remainingSeconds}s ${progress}%)`)
+
+    await delay(500)
+    remainingTime = endTime - new Date().getTime()
+  }
+
+  console.log(`${message} (Done!)`)
+}
+
 /**
  * From asset to asset with no Affiliate address on testnet
  */
-const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
+const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Network) => {
   try {
     const amount = process.argv[4]
     const decimals = Number(process.argv[5])
@@ -51,11 +72,13 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
 
     // console.log(await wallet.clients[fromChain].getBalance(fromAddress))
 
-    const swapParams: EstimateSwapParams = {
+    const swapParams: AmmEstimateSwapParams = {
       input: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
       destinationAsset: toAsset,
       destinationAddress,
       slipLimit: new BigNumber('0.05'), //optional
+      wallet,
+      walletIndex: 0,
     }
     const affiliateAddress = process.argv[8]
     if (affiliateAddress) {
@@ -68,6 +91,9 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
     if (outPutCanSwap.txEstimate.canSwap) {
       const output = await tcAmm.doSwap(wallet, swapParams)
       console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+      console.log('Waiting for transaction to be confirmed...')
+      await delayedLog('hash', output.waitTimeSeconds * 1000)
+      await checkTx(network, output.hash)
     }
   } catch (error) {
     console.error(error)
@@ -81,7 +107,7 @@ const main = async () => {
   const thorchainQuery = new ThorchainQuery(thorchainCache)
   const thorchainAmm = new ThorchainAMM(thorchainQuery)
   const wallet = new Wallet(seed, thorchainQuery)
-  await doSingleSwap(thorchainAmm, wallet)
+  await doSingleSwap(thorchainAmm, wallet, network)
 }
 
 main()
