@@ -1,30 +1,28 @@
-import { Network } from '@xchainjs/xchain-client'
-import { Address, Asset, Chain, assetFromStringEx, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
 import { LiquidityPool } from './liquidity-pool'
-import { InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache, SwapOutput } from './types'
+import { InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache } from './types'
 import { THORChain, isAssetRuneNative } from './utils'
 import { Midgard } from './utils/midgard'
-import { getDoubleSwap, getSingleSwap } from './utils/swap'
 import { Thornode } from './utils/thornode'
 
 const SAME_ASSET_EXCHANGE_RATE = new BigNumber(1)
 const TEN_MINUTES = 10 * 60 * 1000
 const DEFAULT_THORCHAIN_DECIMALS = 8
-const USD_ASSETS: Record<Network, Asset[]> = {
-  mainnet: [
-    assetFromStringEx('BNB.BUSD-BD1'),
-    assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48'),
-    assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7'),
-  ],
-  stagenet: [assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')],
-  testnet: [
-    assetFromStringEx('BNB.BUSD-74E'),
-    assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306'),
-  ],
-}
+// const USD_ASSETS: Record<Network, Asset[]> = {
+//   mainnet: [
+//     assetFromStringEx('BNB.BUSD-BD1'),
+//     assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48'),
+//     assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7'),
+//   ],
+//   stagenet: [assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')],
+//   testnet: [
+//     assetFromStringEx('BNB.BUSD-74E'),
+//     assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306'),
+//   ],
+// }
 const defaultMidgard = new Midgard()
 const defaultThornode = new Thornode()
 
@@ -245,38 +243,6 @@ export class ThorchainCache {
   }
 
   /**
-   *
-   *  Calcuate the expected slip, output & swapFee given the current pool depths
-   *
-   *  swapFee - the amount of asset lost  according to slip calculations
-   *  slip - the percent (0-1) of original amount lost to slipfees
-   *  output - the amount of asset expected from the swap   *
-   *
-   * @param inputAmount - CryptoAmount amount to swap from
-   * @param destinationAsset - destimation Asset to swap to
-   * @returns SwapOutput - swap output object - output - fee - slip
-   */
-  async getExpectedSwapOutput(inputAmount: CryptoAmount, destinationAsset: Asset): Promise<SwapOutput> {
-    let swapOutput: SwapOutput
-    if (isAssetRuneNative(inputAmount.asset)) {
-      //singleswap from rune -> asset
-      const pool = await this.getPoolForAsset(destinationAsset)
-      swapOutput = getSingleSwap(inputAmount, pool, false)
-    } else if (isAssetRuneNative(destinationAsset)) {
-      //singleswap from  asset -> rune
-      const pool = await this.getPoolForAsset(inputAmount.asset)
-      swapOutput = getSingleSwap(inputAmount, pool, true)
-    } else {
-      //doubleswap asset-> asset
-      const inPool = await this.getPoolForAsset(inputAmount.asset)
-      const destPool = await this.getPoolForAsset(destinationAsset)
-      swapOutput = await getDoubleSwap(inputAmount, inPool, destPool, this)
-    }
-    //Note this is needed to return a synth vs. a  native asset on swap out
-    swapOutput.output = new CryptoAmount(swapOutput.output.baseAmount, destinationAsset)
-    return swapOutput
-  }
-  /**
    * Returns the exchange of a CryptoAmount to a different Asset
    *
    * Ex. convert(input:100 BUSD, outAsset: BTC) -> 0.0001234 BTC
@@ -359,18 +325,18 @@ export class ThorchainCache {
       throw Error(`Could not refereshInboundDetailCache `)
     }
   }
-  async getDeepestUSDPool(): Promise<LiquidityPool> {
-    const usdAssets = USD_ASSETS[this.midgard.network]
-    let deepestRuneDepth = new BigNumber(0)
-    let deepestPool: LiquidityPool | null = null
-    for (const usdAsset of usdAssets) {
-      const usdPool = await this.getPoolForAsset(usdAsset)
-      if (usdPool.runeBalance.amount().gt(deepestRuneDepth)) {
-        deepestRuneDepth = usdPool.runeBalance.amount()
-        deepestPool = usdPool
-      }
-    }
-    if (!deepestPool) throw Error('now USD Pool found')
-    return deepestPool
-  }
+  // async getDeepestUSDPool(): Promise<LiquidityPool> {
+  //   const usdAssets = USD_ASSETS[this.midgard.network]
+  //   let deepestRuneDepth = new BigNumber(0)
+  //   let deepestPool: LiquidityPool | null = null
+  //   for (const usdAsset of usdAssets) {
+  //     const usdPool = await this.getPoolForAsset(usdAsset)
+  //     if (usdPool.runeBalance.amount().gt(deepestRuneDepth)) {
+  //       deepestRuneDepth = usdPool.runeBalance.amount()
+  //       deepestPool = usdPool
+  //     }
+  //   }
+  //   if (!deepestPool) throw Error('now USD Pool found')
+  //   return deepestPool
+  // }
 }

@@ -42,24 +42,12 @@ export type MidgardConfig = {
   midgardBaseUrls: string[]
 }
 
-export type EstimateSwapParams = {
-  input: CryptoAmount
-  fromAddress: Address
-  destinationAsset: Asset
-  destinationAddress: Address
-  slipLimit?: BigNumber
-  affiliateAddress?: Address
-  affiliateFeeBasisPoints?: number
-  interfaceID?: string
-  feeOption?: FeeOption
-}
-
 export type QuoteSwapParams = {
   fromAsset: Asset
   destinationAsset: Asset
   amount: CryptoAmount
-  destinationAddress: string
-  fromAddress: string
+  destinationAddress?: string
+  fromAddress?: string
   toleranceBps?: number
   affiliateAddress?: string
   affiliateBps?: number
