@@ -1,3 +1,9 @@
+# v0.4.1 (2023-05-03)
+
+## Update
+
+- Updated thorchain-amm to wrap the latest swap quote from thorchain-query
+
 # v0.4.0 (2023-05-02)
 
 ## Update

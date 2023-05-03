@@ -11,7 +11,7 @@ export type AllBalances = {
 export type ExecuteSwap = {
   input: CryptoAmount
   destinationAsset: Asset
-  destinationAddress: Address
+  destinationAddress?: Address
   memo: string
   feeOption?: FeeOption
   waitTimeSeconds: number

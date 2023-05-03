@@ -1,8 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
 import {
   CryptoAmount,
-  EstimateSwapParams,
   Midgard,
+  QuoteSwapParams,
   SwapEstimate,
   ThorchainCache,
   ThorchainQuery,
@@ -16,12 +16,11 @@ function print(estimate: SwapEstimate, input: CryptoAmount) {
   const expanded = {
     input: input.formatedAssetString(),
     totalFees: {
-      inboundFee: estimate.totalFees.inboundFee.formatedAssetString(),
       swapFee: estimate.totalFees.swapFee.formatedAssetString(),
       outboundFee: estimate.totalFees.outboundFee.formatedAssetString(),
       affiliateFee: estimate.totalFees.affiliateFee.formatedAssetString(),
     },
-    slipPercentage: estimate.slipPercentage.toFixed(),
+    slipBasisPoints: estimate.slipBasisPoints.toFixed(),
     netOutput: estimate.netOutput.formatedAssetString(),
     waitTimeSeconds: estimate.waitTimeSeconds.toFixed(),
     canSwap: estimate.canSwap,
@@ -54,16 +53,25 @@ const estimateSwap = async () => {
     const toDestinationAddress = `${process.argv[7]}`
     const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
     const thorchainQuery = new ThorchainQuery(thorchainCache)
-
-    const swapParams: EstimateSwapParams = {
-      input: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
-      destinationAsset: toAsset,
-      destinationAddress: toDestinationAddress,
-      // affiliateFeePercent: 0.003, //optional
-      //slipLimit: new BigNumber('0.03'), //optional
+    let swapParams: QuoteSwapParams
+    console.log(process.argv[7])
+    if (process.argv[7] === undefined) {
+      swapParams = {
+        fromAsset,
+        amount: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
+        destinationAsset: toAsset,
+      }
+    } else {
+      swapParams = {
+        fromAsset,
+        amount: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
+        destinationAsset: toAsset,
+        destinationAddress: toDestinationAddress,
+      }
     }
-    const estimate = await thorchainQuery.estimateSwap(swapParams)
-    printTx(estimate, swapParams.input)
+
+    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    printTx(estimate, swapParams.amount)
   } catch (e) {
     console.error(e)
   }

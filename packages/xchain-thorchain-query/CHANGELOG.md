@@ -1,3 +1,10 @@
+# v0.3.1 (2023-05-03)
+
+## Update
+
+- integrated thornode endpoint quoteSwap(), removed unnecesary logic
+- renamed estimateSwap() with quoteSwap()
+
 # v0.3.0 (2023-05-02)
 
 ## Update

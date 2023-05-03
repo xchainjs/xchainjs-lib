@@ -100,16 +100,13 @@ describe('Thorchain-query estimate Integration Tests', () => {
       minFee.baseAmount.amount().toNumber(),
     )
   })
-  it('should estimate a swap of 0.5 BTCB to BUSD', async () => {
+  it('should quote only swap of 0.5 BTCB to BUSD', async () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: BTCB,
       amount: new CryptoAmount(assetToBase(assetAmount('0.5')), BTCB),
       destinationAsset: BUSD,
-      destinationAddress: 'bnb1mtvk4jm2a9m7lfdnvfc2vz9r9qgavs4xfc6dtx',
-      affiliateAddress: affiliateAddress, // optional
-      //affiliateBps: 10, //optional
-      toleranceBps: 300, //optional
-      fromAddress: 'bnb1mtvk4jm2a9m7lfdnvfc2vz9r9qgavs4xfc6dtx',
+      // destinationAddress: bnbAddress,
+      // toleranceBps: 400,
     }
 
     const estimate = await thorchainQuery.quoteSwap(swapParams)

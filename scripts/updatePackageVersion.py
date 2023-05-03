@@ -26,7 +26,12 @@ with open("output.txt", "w") as output_file:
             continue
 
         # Extract the package name from the directory name
-        package_base_name = package_name.split("-")[1]
+        split_package_name = package_name.split("-")
+
+        if len(split_package_name) < 3:
+            package_base_name = split_package_name[1]
+        else:
+            package_base_name = "-".join(split_package_name[-2:]) 
 
         if specific_packages and package_base_name not in specific_packages:
             continue

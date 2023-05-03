@@ -73,7 +73,7 @@ export class ThorchainQuery {
     amount,
     destinationAddress,
     fromAddress,
-    toleranceBps = 300, // default to 0.3%,
+    toleranceBps = 300, // default to 0.3%
     interfaceID = '555',
     affiliateBps,
     affiliateAddress,
@@ -84,18 +84,17 @@ export class ThorchainQuery {
     const fromAssetString = assetToString(fromAsset)
     const toAssetString = assetToString(destinationAsset)
     const inputAmount = getBaseAmountWithDiffDecimals(amount, 8)
-    // how to use
-    interfaceID
+
     // fetch quote
     const swapQuote = await this.thorchainCache.thornode.getSwapQuote(
       fromAssetString,
       toAssetString,
       inputAmount.toNumber(),
-      destinationAddress ? destinationAddress : '',
-      fromAddress ? fromAddress : '',
+      destinationAddress,
+      fromAddress,
       toleranceBps,
-      affiliateBps ? affiliateBps : 0,
-      affiliateAddress ? affiliateAddress : '',
+      affiliateBps,
+      affiliateAddress,
       height,
     )
     // error handling - if errors
