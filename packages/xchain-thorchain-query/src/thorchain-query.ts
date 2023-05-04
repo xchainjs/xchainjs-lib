@@ -73,7 +73,7 @@ export class ThorchainQuery {
     amount,
     destinationAddress,
     fromAddress,
-    toleranceBps = 300, // default to 0.3%
+    toleranceBps,
     interfaceID = '555',
     affiliateBps,
     affiliateAddress,
@@ -97,10 +97,20 @@ export class ThorchainQuery {
       affiliateAddress,
       height,
     )
-    // error handling - if errors
+    // error handling
     const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
-    if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
+    if (response.error) errors.push(`Thornode request quote: ${response.error}`)
+
     if (errors.length > 0) {
+      // Define a regular expression to match any sequence of digits (\d+)
+      const regex = /\d+/g
+      // Extract the numbers from the error log and convert them to numbers
+      const matches = errors[0].match(regex)?.map(Number)
+      if (matches?.length === 2) {
+        const [oldValue, newValue] = matches
+        const percentageDifference = ((newValue - oldValue) / oldValue) * 100
+        errors.push(`Price slip: ${percentageDifference}`)
+      }
       return {
         memo: ``,
         toAddress: ``,

@@ -1,6 +1,5 @@
 import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
-import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainCache } from '../src/thorchain-cache'
@@ -52,11 +51,9 @@ function printTx(txDetails: TxDetails, amount: CryptoAmount) {
 
 describe('Thorchain-query tests', () => {
   beforeAll(() => {
-    mockMidgardApi.init()
     mockThornodeApi.init()
   })
   afterAll(() => {
-    mockMidgardApi.restore()
     mockThornodeApi.restore()
   })
 
@@ -70,12 +67,8 @@ describe('Thorchain-query tests', () => {
       affiliateBps: 50,
       fromAddress: btcAddress,
     }
-    try {
-      const estimate = await thorchainQuery.quoteSwap(swapParams)
-      printTx(estimate, swapParams.amount)
-    } catch (error) {
-      console.error(error)
-    }
+    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    printTx(estimate, swapParams.amount)
   })
 
   it('Should fetch sBTC to sETH swap', async () => {
