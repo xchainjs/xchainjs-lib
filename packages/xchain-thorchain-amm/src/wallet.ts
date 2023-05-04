@@ -112,7 +112,7 @@ export class Wallet {
     const chain = isThorchainDestinationAsset ? THORChain : swap.destinationAsset.chain
 
     // check address
-    if (!this.clients[chain].validateAddress(swap.destinationAddress)) {
+    if (swap.destinationAddress && !this.clients[chain].validateAddress(swap.destinationAddress)) {
       errors.push(`destinationAddress ${swap.destinationAddress} is not a valid address`)
     }
 
