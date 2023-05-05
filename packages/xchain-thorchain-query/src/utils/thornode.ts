@@ -13,6 +13,8 @@ import {
   QueueApi,
   QueueResponse,
   QuoteApi,
+  QuoteLoanCloseResponse,
+  QuoteLoanOpenResponse,
   QuoteSaverDepositResponse,
   QuoteSaverWithdrawResponse,
   QuoteSwapResponse,
@@ -420,5 +422,71 @@ export class Thornode {
       }
     }
     throw new Error(`THORNode not responding`)
+  }
+
+  /**
+   *
+   * @param height
+   * @param asset
+   * @param amount
+   * @param targetAsset
+   * @param destination
+   * @param minOut
+   * @param affiliateBps
+   * @param affiliate
+   * @returns
+   */
+  async getLoanQuoteOpen(
+    asset: string,
+    amount: number,
+    targetAsset: string,
+    destination: string,
+    minOut: string,
+    affiliateBps?: number,
+    affiliate?: string,
+    height?: number,
+  ): Promise<QuoteLoanOpenResponse> {
+    for (const api of this.quoteApi) {
+      try {
+        const resp = (
+          await api.quoteloanopen(height, asset, amount, targetAsset, destination, minOut, affiliateBps, affiliate)
+        ).data
+        return resp
+      } catch (e) {
+        //console.log(e)
+      }
+    }
+    throw new Error(`THORNode is not responding`)
+  }
+
+  /**
+   *
+   * @param height
+   * @param asset
+   * @param amount
+   * @param targetAsset
+   * @param destination
+   * @param minOut
+   * @param affiliateBps
+   * @param affiliate
+   * @returns
+   */
+  async getLoanQuoteClose(
+    asset: string,
+    amount: number,
+    loanAsset: string,
+    loanOwner: string,
+    minOut: string,
+    height?: number,
+  ): Promise<QuoteLoanCloseResponse> {
+    for (const api of this.quoteApi) {
+      try {
+        const resp = (await api.quoteloanclose(height, asset, amount, loanAsset, loanOwner, minOut)).data
+        return resp
+      } catch (e) {
+        //console.log(e)
+      }
+    }
+    throw new Error(`THORNode is not responding`)
   }
 }

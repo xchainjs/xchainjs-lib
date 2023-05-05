@@ -254,3 +254,62 @@ export type SaversWithdraw = {
   address: Address
   withdrawBps: number
 }
+
+export type LoanOpenParams = {
+  height?: number
+  asset: string
+  amount: number
+  targetAsset: string
+  destination: string
+  minOut: string
+  affiliateBps?: number
+  affiliate?: string
+}
+
+export type LoanCloseParams = {
+  height?: number
+  asset: string
+  amount: number
+  loanAsset: string
+  loanOwner: string
+  minOut: string
+}
+
+export type LoanOpenQuote = {
+  inboundAddress: string
+  expectedWaitTime: BlockInformation
+  //fees: QuoteFess
+  slippageBps?: number
+  router?: string
+  expiry: number
+  warning: string
+  notes: string
+  dustThreshold?: string
+  memo?: string
+  expectedAmountOut: string
+  expectedCollateralizationRation: string
+  expectedCollateralUp: string
+  expectedDebtUp: string
+}
+export type LoanCloseQuote = {
+  inboundAddress: string
+  expectedWaitTime: BlockInformation
+  // fees: QuoteFees
+  slippageBps?: number
+  router?: string
+  expiry: number
+  warning: string
+  notes: string
+  dustThreshold?: string
+  memo?: string
+  expectedAmountOut: string
+  expectedCollateralDown: string
+  expectedDebtDown: string
+}
+
+export type BlockInformation = {
+  inboundConfirmationBlocks?: number
+  inboundConfirmationSeconds?: number
+  outboundDelayBlocks?: number
+  outbondDelaySeconds?: number
+}

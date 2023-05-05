@@ -28,6 +28,10 @@ import {
   EstimateWithdrawSaver,
   InboundDetail,
   LiquidityPosition,
+  LoanCloseParams,
+  LoanCloseQuote,
+  LoanOpenParams,
+  LoanOpenQuote,
   PoolRatios,
   PostionDepositValue,
   SaverFees,
@@ -1043,5 +1047,93 @@ export class ThorchainQuery {
     const inboundFee = calcNetworkFee(addAmount.asset, inboundDetails[addAmount.asset.chain])
     if (addAmount.lte(inboundFee)) errors.push(`Add amount does not cover fees`)
     return errors
+  }
+
+  /**
+   *
+   * @param loanOpenParams - params needed for the end Point
+   * @returns
+   */
+  public async getLoanQuoteOpen({
+    asset,
+    amount,
+    destination,
+    targetAsset,
+    minOut,
+    affiliateBps,
+    affiliate,
+    height,
+  }: LoanOpenParams): Promise<LoanOpenQuote> {
+    const loanOpenResp = await this.thorchainCache.thornode.getLoanQuoteOpen(
+      asset,
+      amount,
+      destination,
+      targetAsset,
+      minOut,
+      affiliateBps,
+      affiliate,
+      height,
+    )
+    const loanOpenQuote: LoanOpenQuote = {
+      inboundAddress: loanOpenResp.inbound_address,
+      expectedWaitTime: {
+        outboundDelayBlocks: loanOpenResp.outbound_delay_blocks,
+        outbondDelaySeconds: loanOpenResp.outbound_delay_seconds,
+      },
+      slippageBps: loanOpenResp.slippage_bps,
+      router: loanOpenResp.router,
+      expiry: loanOpenResp.expiry,
+      warning: loanOpenResp.warning,
+      notes: loanOpenResp.notes,
+      dustThreshold: loanOpenResp.dust_threshold,
+      memo: loanOpenResp.memo,
+      expectedAmountOut: loanOpenResp.expected_amount_out,
+      expectedCollateralizationRation: loanOpenResp.expected_collateralization_ratio,
+      expectedCollateralUp: loanOpenResp.expected_collateral_up,
+      expectedDebtUp: loanOpenResp.expected_collateral_up,
+    }
+    return loanOpenQuote
+  }
+
+  /**
+   *
+   * @param loanOpenParams - params needed for the end Point
+   * @returns
+   */
+  public async getLoanQuoteClose({
+    asset,
+    amount,
+    loanAsset,
+    loanOwner,
+    minOut,
+    height,
+  }: LoanCloseParams): Promise<LoanCloseQuote> {
+    const loanCloseResp = await this.thorchainCache.thornode.getLoanQuoteClose(
+      asset,
+      amount,
+      loanAsset,
+      loanOwner,
+      minOut,
+      height,
+    )
+    const loanCloseQuote: LoanCloseQuote = {
+      inboundAddress: loanCloseResp.inbound_address,
+      expectedWaitTime: {
+        outboundDelayBlocks: loanCloseResp.outbound_delay_blocks,
+        outbondDelaySeconds: loanCloseResp.outbound_delay_seconds,
+      },
+      slippageBps: loanCloseResp.slippage_bps,
+      router: loanCloseResp.router,
+      expiry: loanCloseResp.expiry,
+      warning: loanCloseResp.warning,
+      notes: loanCloseResp.notes,
+      dustThreshold: loanCloseResp.dust_threshold,
+      memo: loanCloseResp.memo,
+      expectedAmountOut: loanCloseResp.expected_amount_out,
+      expectedCollateralDown: loanCloseResp.expected_collateral_down,
+      expectedDebtDown: loanCloseResp.expected_debt_down,
+    }
+
+    return loanCloseQuote
   }
 }
