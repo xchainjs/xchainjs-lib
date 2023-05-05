@@ -239,19 +239,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
     expect(estimate.txEstimate.canSwap).toBe(false)
     expect(estimate).toBeTruthy()
   })
-  // it(`Should fail estimate single swap of 0.000001 BTC to RUNE `, async () => {
-  //   const swapParams: QuoteSwapParams = {
-  //     fromAsset: AssetBTC,
-  //     amount: new CryptoAmount(assetToBase(assetAmount(0.000001)), AssetBTC),
-  //     destinationAsset: AssetRuneNative,
-  //     destinationAddress: runeAddress,
-  //     fromAddress: btcAddress,
-  //   }
-  //   const estimate = await thorchainQuery.quoteSwap(swapParams)
-  //   printTx(estimate, swapParams.amount)
-  //   expect(estimate.txEstimate.canSwap).toBe(false)
-  //   expect(estimate).toBeTruthy()
-  // })
+
   // Test Conditions - Test to make sure the swap has no amount errors
   it('Should fail estimate swap from BTC to BTC if source asset is the same as destination asset', async () => {
     const swapParams: QuoteSwapParams = {

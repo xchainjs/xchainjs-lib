@@ -131,6 +131,11 @@ export class ThorchainQuery {
         },
       }
     }
+
+    const inboundDelay = await this.confCounting(amount)
+    const outboundDelay = await this.outboundDelay(
+      new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
+    )
     // Return quote
     const txDetails: TxDetails = {
       memo: this.constructSwapMemo(`${swapQuote.memo}`, interfaceID),
@@ -146,9 +151,7 @@ export class ThorchainQuery {
         },
         slipBasisPoints: toleranceBps ? toleranceBps : 0,
         netOutput: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
-        waitTimeSeconds: swapQuote.inbound_confirmation_seconds
-          ? Number(swapQuote.inbound_confirmation_seconds) + Number(swapQuote.outbound_delay_seconds)
-          : Number(swapQuote.outbound_delay_seconds), // sometimes quote response doesn't return and inbound confirmation seconds
+        waitTimeSeconds: inboundDelay + outboundDelay,
         canSwap: true,
         errors,
       },
@@ -173,6 +176,48 @@ export class ThorchainQuery {
       return outmemo.substring(0, outmemo.length - 1)
     }
     return memo
+  }
+
+  /**
+   * Works out how long an outbound Tx will be held by THORChain before sending.
+   *
+   * @param outboundAmount: CryptoAmount  being sent.
+   * @returns required delay in seconds
+   * @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/manager_txout_current.go#L548
+   */
+  async outboundDelay(outboundAmount: CryptoAmount): Promise<number> {
+    const networkValues = await this.thorchainCache.getNetworkValues()
+    const minTxOutVolumeThreshold = new CryptoAmount(
+      baseAmount(networkValues['MINTXOUTVOLUMETHRESHOLD']),
+      AssetRuneNative,
+    )
+    const maxTxOutOffset = networkValues['MAXTXOUTOFFSET']
+    let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative).assetAmount
+      .amount()
+      .toNumber()
+    const getQueue = await this.thorchainCache.thornode.getQueue()
+    const outboundValue = new CryptoAmount(baseAmount(getQueue.scheduled_outbound_value), AssetRuneNative)
+    const thorChainblocktime = this.chainAttributes[THORChain].avgBlockTimeInSecs // blocks required to confirm tx
+    // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
+    const runeValue = await this.thorchainCache.convert(outboundAmount, AssetRuneNative)
+    // Check rune value amount
+    if (runeValue.lt(minTxOutVolumeThreshold)) {
+      return thorChainblocktime
+    }
+    // Rune value in the outbound queue
+    if (outboundValue == undefined) {
+      throw new Error(`Could not return Scheduled Outbound Value`)
+    }
+    // Add OutboundAmount in rune to the oubound queue
+    const outboundAmountTotal = runeValue.plus(outboundValue)
+    // calculate the if outboundAmountTotal is over the volume threshold
+    const volumeThreshold = outboundAmountTotal.div(minTxOutVolumeThreshold)
+    // check delay rate
+    txOutDelayRate = txOutDelayRate - volumeThreshold.assetAmount.amount().toNumber() <= 1 ? 1 : txOutDelayRate
+    // calculate the minimum number of blocks in the future the txn has to be
+    let minBlocks = runeValue.assetAmount.amount().toNumber() / txOutDelayRate
+    minBlocks = minBlocks > maxTxOutOffset ? maxTxOutOffset : minBlocks
+    return minBlocks * thorChainblocktime
   }
 
   /**

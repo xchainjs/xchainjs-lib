@@ -325,18 +325,4 @@ export class ThorchainCache {
       throw Error(`Could not refereshInboundDetailCache `)
     }
   }
-  // async getDeepestUSDPool(): Promise<LiquidityPool> {
-  //   const usdAssets = USD_ASSETS[this.midgard.network]
-  //   let deepestRuneDepth = new BigNumber(0)
-  //   let deepestPool: LiquidityPool | null = null
-  //   for (const usdAsset of usdAssets) {
-  //     const usdPool = await this.getPoolForAsset(usdAsset)
-  //     if (usdPool.runeBalance.amount().gt(deepestRuneDepth)) {
-  //       deepestRuneDepth = usdPool.runeBalance.amount()
-  //       deepestPool = usdPool
-  //     }
-  //   }
-  //   if (!deepestPool) throw Error('now USD Pool found')
-  //   return deepestPool
-  // }
 }
