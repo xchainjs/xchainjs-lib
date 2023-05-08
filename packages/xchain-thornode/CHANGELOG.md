@@ -1,3 +1,9 @@
+# v0.3.0 (2023-05-08)
+
+## Update
+
+- Update to latest THORNode 1.109.0
+
 # v0.3.0 (2023-05-02)
 
 ## Update
