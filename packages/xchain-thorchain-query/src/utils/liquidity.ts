@@ -6,7 +6,7 @@ import { LiquidityPool } from '../liquidity-pool'
 import { Block, ILProtectionData, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData } from '../types'
 
 import { AssetRuneNative } from './const'
-import { getBaseAmountWithDiffDecimals } from './swap'
+import { getBaseAmountWithDiffDecimals } from './utils'
 
 /**
  * https://dev.thorchain.org/thorchain-dev/interface-guide/math#lp-units-add

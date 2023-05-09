@@ -1,4 +1,4 @@
-export { getSingleSwap, getDoubleSwap, calcNetworkFee } from './swap'
+export { calcNetworkFee } from './utils'
 export { getLiquidityProtectionData, getSlipOnLiquidity, getPoolShare, getLiquidityUnits } from './liquidity'
 export * from './midgard'
 export * from './thornode'

@@ -7,8 +7,6 @@ import {
   assetToBase,
   assetToString,
   baseAmount,
-  eqAsset,
-  getContractAddressFromAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -19,39 +17,28 @@ import {
   AddliquidityPosition,
   Block,
   ChainAttributes,
-  ConstructMemo,
   DustValues,
   EstimateAddLP,
   EstimateAddSaver,
-  EstimateSwapParams,
   EstimateWithdrawLP,
   EstimateWithdrawSaver,
-  InboundDetail,
   LiquidityPosition,
   PoolRatios,
   PostionDepositValue,
+  QuoteSwapParams,
   SaverFees,
   SaversPosition,
   SaversWithdraw,
-  SwapEstimate,
-  SwapOutput,
   TotalFees,
   TxDetails,
   UnitData,
   WithdrawLiquidityPosition,
   getSaver,
 } from './types'
-import { AssetBNB, AssetBTC, AssetRuneNative, BNBChain, GAIAChain, THORChain, isAssetRuneNative } from './utils'
+import { AssetBNB, AssetRuneNative, BNBChain, GAIAChain, THORChain, isAssetRuneNative } from './utils'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
-import {
-  calcNetworkFee,
-  calcOutboundFee,
-  getBaseAmountWithDiffDecimals,
-  getChainAsset,
-  isNativeChainAsset,
-} from './utils/swap'
+import { calcNetworkFee, calcOutboundFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/utils'
 
-const BN_1 = new BigNumber(1)
 const defaultCache = new ThorchainCache()
 
 /**
@@ -76,363 +63,149 @@ export class ThorchainQuery {
   }
 
   /**
-   * Provides a swap estimate for the given swap detail. Will check the params for errors before trying to get the estimate.
-   * Uses current pool data, works out inbound and outboud fee, affiliate fees and works out the expected wait time for the swap (in and out)
    *
-   * @param params - amount to swap
-
-   * @returns The SwapEstimate
+   * @param quoteSwapParams -  input params
+   * @returns
    */
-  public async estimateSwap({
-    input,
+  public async quoteSwap({
+    fromAsset,
     destinationAsset,
+    amount,
     destinationAddress,
-    slipLimit = new BigNumber('0.03'), //default to 3%
+    fromAddress,
+    toleranceBps,
     interfaceID = '555',
-    affiliateAddress = '',
-    affiliateFeeBasisPoints = 0,
-  }: EstimateSwapParams): Promise<TxDetails> {
-    await this.isValidSwap({
-      input,
-      destinationAsset,
+    affiliateBps,
+    affiliateAddress,
+    height,
+  }: QuoteSwapParams): Promise<TxDetails> {
+    const errors: string[] = []
+
+    const fromAssetString = assetToString(fromAsset)
+    const toAssetString = assetToString(destinationAsset)
+    const inputAmount = getBaseAmountWithDiffDecimals(amount, 8)
+
+    // fetch quote
+    const swapQuote = await this.thorchainCache.thornode.getSwapQuote(
+      fromAssetString,
+      toAssetString,
+      inputAmount.toNumber(),
       destinationAddress,
-      slipLimit,
+      fromAddress,
+      toleranceBps,
+      affiliateBps,
       affiliateAddress,
-      affiliateFeeBasisPoints,
-      interfaceID,
-    })
-
-    const inboundDetails = await this.thorchainCache.getInboundDetails()
-    const sourceInboundDetails = inboundDetails[input.asset.chain]
-    const destinationInboundDetails = inboundDetails[destinationAsset.chain]
-
-    // Calculate swap estimate
-    const swapEstimate = await this.calcSwapEstimate(
-      {
-        input,
-        destinationAsset,
-        destinationAddress,
-        slipLimit,
-        affiliateAddress,
-        affiliateFeeBasisPoints,
-        interfaceID,
-      },
-      sourceInboundDetails,
-      destinationInboundDetails,
+      height,
     )
-    // Calculate transaction expiry time
-    const currentDatetime = new Date()
-    const minutesToAdd = 15
-    const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
+    // error handling
+    const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
+    if (response.error) errors.push(`Thornode request quote: ${response.error}`)
 
-    // Check for errors
-    const errors = await this.getSwapEstimateErrors(
-      {
-        input,
-        destinationAsset,
-        destinationAddress,
-        slipLimit,
-        affiliateAddress,
-        affiliateFeeBasisPoints,
-        interfaceID,
-      },
-      swapEstimate,
-      sourceInboundDetails,
-      destinationInboundDetails,
-    )
-    const txDetails: TxDetails = {
-      memo: '',
-      toAddress: '',
-      expiry: expiryDatetime,
-      txEstimate: swapEstimate,
-    }
     if (errors.length > 0) {
-      txDetails.txEstimate.canSwap = false
-      txDetails.txEstimate.errors = errors
-    } else {
-      txDetails.txEstimate.canSwap = true
-      const inboundAsgard = (await this.thorchainCache.getInboundDetails())[input.asset.chain]
-      txDetails.toAddress = inboundAsgard?.address || ''
-      // Work out LIM from the slip percentage
-      let limPercentage = BN_1
-      if (slipLimit) {
-        limPercentage = BN_1.minus(slipLimit || 1)
-      } // else allowed slip is 100%
-      // Lim should allways be 1e8
-      const limAssetAmount = swapEstimate.netOutput.times(limPercentage)
-      const limAssetAmount8Decimals = getBaseAmountWithDiffDecimals(limAssetAmount, 8)
-      const inboundDelay = await this.confCounting(input)
-      const outboundDelay = await this.outboundDelay(limAssetAmount)
-      txDetails.txEstimate.waitTimeSeconds = outboundDelay + inboundDelay
-      // Construct memo
-      txDetails.memo = this.constructSwapMemo({
-        input: input,
-        destinationAsset: destinationAsset,
-        limit: baseAmount(limAssetAmount8Decimals),
-        destinationAddress: destinationAddress,
-        affiliateAddress: affiliateAddress,
-        affiliateFeeBasisPoints: affiliateFeeBasisPoints,
-        interfaceID: interfaceID,
-      })
+      return {
+        memo: ``,
+        toAddress: ``,
+        expiry: new Date(),
+        txEstimate: {
+          totalFees: {
+            asset: destinationAsset,
+            affiliateFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
+            outboundFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
+          },
+          slipBasisPoints: 0,
+          netOutput: new CryptoAmount(baseAmount(0), destinationAsset),
+          outboundDelaySeconds: 0,
+          inboundConfirmationSeconds: 0,
+          canSwap: false,
+          errors,
+        },
+      }
+    }
+
+    // Return quote
+    const feeAsset = assetFromStringEx(swapQuote.fees.asset)
+    const txDetails: TxDetails = {
+      memo: this.constructSwapMemo(`${swapQuote.memo}`, interfaceID),
+      toAddress: `${swapQuote.inbound_address}`,
+      expiry: new Date(swapQuote.expiry * 1000),
+      txEstimate: {
+        totalFees: {
+          asset: fromAsset,
+          affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate), feeAsset),
+          outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound), feeAsset),
+        },
+        slipBasisPoints: swapQuote.slippage_bps,
+        netOutput: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
+        outboundDelaySeconds: swapQuote.outbound_delay_seconds,
+        inboundConfirmationSeconds: swapQuote.inbound_confirmation_seconds,
+        canSwap: true,
+        errors,
+      },
     }
     return txDetails
   }
-  /**
-   * Basic Checks for swap information
-   * @param params
-   */
-  private async isValidSwap(params: EstimateSwapParams) {
-    if (isAssetRuneNative(params.input.asset) || params.input.asset.synth) {
-      if (params.input.baseAmount.decimal !== 8)
-        throw Error(`input asset ${assetToString(params.input.asset)}  must have decimals of 8`)
-    } else {
-      const assetPool = await this.thorchainCache.getPoolForAsset(params.input.asset)
-      const nativeDecimals = assetPool?.pool.nativeDecimal
-      if (
-        nativeDecimals &&
-        nativeDecimals !== '-1' &&
-        params.input.baseAmount.decimal !== Number(assetPool?.pool.nativeDecimal)
-      ) {
-        throw Error(
-          `input asset ${assetToString(params.input.asset)}  must have decimals of ${assetPool?.pool.nativeDecimal}`,
-        )
-      }
-    }
-    if (eqAsset(params.input.asset, params.destinationAsset))
-      throw Error(`sourceAsset and destinationAsset cannot be the same`)
 
-    if (params.input.baseAmount.lte(0)) throw Error('inputAmount must be greater than 0')
-    // Affiliate fee % can't exceed 10% because this is set by TC.
-    if (params.affiliateFeeBasisPoints && (params.affiliateFeeBasisPoints < 0 || params.affiliateFeeBasisPoints > 1000))
-      throw Error(`affiliateFeeBasisPoints must be between 0 and 1000 basis points`)
-    if (params.affiliateFeeBasisPoints && !Number.isInteger(params.affiliateFeeBasisPoints))
-      throw Error(`affiliateFeeBasisPoints must be an integer`)
-    if (params.slipLimit?.lte(0) || params.slipLimit?.gt(1)) throw Error(`slipLimit must be between 0 and 1`)
-  }
-  /**
-   * Does the calculations for the swap.
-   * Used by estimateSwap
-   *
-   * @param params
-   * @param sourceInboundDetails
-   * @param destinationInboundDetails
-   * @param sourcePool
-   * @param destinationPool
-   * @returns
-   */
-  private async calcSwapEstimate(
-    params: EstimateSwapParams,
-    sourceInboundDetails: InboundDetail,
-    destinationInboundDetails: InboundDetail,
-  ): Promise<SwapEstimate> {
-    const DEFAULT_THORCHAIN_DECIMALS = 8
-    // If input is already in 8 decimals skip the convert
-    const input =
-      params.input.baseAmount.decimal === DEFAULT_THORCHAIN_DECIMALS
-        ? params.input
-        : await this.thorchainCache.convert(params.input, params.input.asset)
-
-    const inboundFeeInInboundGasAsset = calcNetworkFee(input.asset, sourceInboundDetails)
-    let outboundFeeInOutboundGasAsset = calcOutboundFee(params.destinationAsset, destinationInboundDetails)
-
-    // Check outbound fee is equal too or greater than 1 USD * need to find a more permanent solution to this. referencing just 1 stable coin pool has problems
-    if (params.destinationAsset.chain !== THORChain && !params.destinationAsset.synth) {
-      const deepestUSDPOOL = await this.thorchainCache.getDeepestUSDPool()
-      const usdAsset = deepestUSDPOOL.asset
-      const usdMinFee = new CryptoAmount(
-        assetToBase(assetAmount('1', Number(deepestUSDPOOL.pool.nativeDecimal))),
-        usdAsset,
-      )
-
-      const checkOutboundFee = (await this.convert(outboundFeeInOutboundGasAsset, usdAsset)).gte(usdMinFee)
-
-      if (!checkOutboundFee) {
-        const newFee = usdMinFee
-        outboundFeeInOutboundGasAsset = await this.convert(newFee, AssetRuneNative)
-      }
-    }
-
-    // ----------- Remove Fees from inbound before doing the swap -----------
-
-    const inboundFeeInInboundAsset = await this.thorchainCache.convert(inboundFeeInInboundGasAsset, params.input.asset)
-    // if it a gas asset, take away inbound fee, else leave it as is. Still allow inboundFeeInInboundGasAsset to pass to swapEstimate.totalFees.inboundFee so user is aware if the gas requirements.
-    const inputMinusInboundFeeInAsset = isNativeChainAsset(input.asset) ? input.minus(inboundFeeInInboundAsset) : input
-
-    // remove any affiliateFee. netInput * affiliateFee (percentage) of the destination asset type
-    const affiliateFeePercent = params.affiliateFeeBasisPoints ? params.affiliateFeeBasisPoints / 10000 : 0
-    const affiliateFeeInAsset = inputMinusInboundFeeInAsset.times(affiliateFeePercent)
-    let affiliateFeeSwapOutputInRune: SwapOutput
-    if (isAssetRuneNative(affiliateFeeInAsset.asset)) {
-      affiliateFeeSwapOutputInRune = {
-        output: affiliateFeeInAsset,
-        swapFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
-        slip: new BigNumber(0),
-      }
-    } else {
-      affiliateFeeSwapOutputInRune = await this.thorchainCache.getExpectedSwapOutput(
-        affiliateFeeInAsset,
-        AssetRuneNative,
-      )
-    }
-    // remove the affiliate fee from the input.
-    const inputNetInAsset = inputMinusInboundFeeInAsset.minus(affiliateFeeInAsset)
-
-    // Now calculate swap output based on inputNetAmount
-    const swapOutputInDestinationAsset = await this.thorchainCache.getExpectedSwapOutput(
-      inputNetInAsset,
-      params.destinationAsset,
-    )
-    // ---------------- Remove Outbound Fee ---------------------- /
-    const outboundFeeInDestinationAsset = await this.thorchainCache.convert(
-      outboundFeeInOutboundGasAsset,
-      params.destinationAsset,
-    )
-    //console.log(outboundFeeInDestinationAsset.formatedAssetString())
-    const netOutputInAsset = swapOutputInDestinationAsset.output.minus(outboundFeeInDestinationAsset)
-    const totalFees: TotalFees = {
-      inboundFee: inboundFeeInInboundGasAsset,
-      swapFee: swapOutputInDestinationAsset.swapFee,
-      outboundFee: outboundFeeInOutboundGasAsset,
-      affiliateFee: affiliateFeeSwapOutputInRune.output,
-    }
-
-    const swapEstimate = {
-      totalFees: totalFees,
-      slipPercentage: swapOutputInDestinationAsset.slip,
-      netOutput: netOutputInAsset,
-      waitTimeSeconds: 0, // will be set within EstimateSwap if canSwap = true
-      canSwap: false, // assume false for now, the getSwapEstimateErrors() step will flip this flag if required
-      errors: [],
-    }
-    return swapEstimate
-  }
-  private abbreviateAssetString(asset: Asset): string {
-    const contractAddress = getContractAddressFromAsset(asset)
-    if (contractAddress && contractAddress.length > 5) {
-      const abrev = contractAddress.substring(contractAddress.length - 5)
-      const sep = asset.chain !== THORChain && asset.synth ? '/' : '.'
-      return `${asset.chain}${sep}${asset.ticker}-${abrev}`
-    }
-    return assetToString(asset)
-  }
   /**
    *
    * @param params - swap object
    * @returns - constructed memo string
    */
-  private constructSwapMemo(params: ConstructMemo): string {
-    const limstring = params.limit.amount().toFixed()
-    const lim = limstring.substring(0, limstring.length - 3).concat(params.interfaceID)
-    let memo = `=:${this.abbreviateAssetString(params.destinationAsset)}:${params.destinationAddress}:${lim}`
-
-    // NOTE: we should validate affiliate address is EITHER: a thorname or valid thorchain address, currently we cannot do this without importing xchain-thorchain
-    if (params.affiliateAddress?.length > 0) {
-      // NOTE: we should validate destinationAddress address is valid destination address for the asset type requested
-      memo = memo.concat(`:${params.affiliateAddress}:${params.affiliateFeeBasisPoints}`)
-    }
-
-    // If memo length is too long for BTC, trim it
-    if (eqAsset(params.input.asset, AssetBTC) && memo.length > 80) {
-      memo = `=:${this.abbreviateAssetString(params.destinationAsset)}:${params.destinationAddress}:${lim}`
+  private constructSwapMemo(memo: string, interfaceID: string): string {
+    const memoPart = memo.split(':')
+    if (memoPart.length > 3) {
+      memoPart[3] =
+        memoPart[3].length >= 3 ? memoPart[3].substring(0, memoPart[3].length - 3).concat(interfaceID) : interfaceID
+      let outmemo = ''
+      for (let i = 0; i < memoPart.length; i++) {
+        outmemo = outmemo.concat(`${memoPart[i]}:`)
+      }
+      return outmemo.substring(0, outmemo.length - 1)
     }
     return memo
   }
-  // this is commented out for now, see note about affiliate address ~10 lines above
-  //
-  // private async validateAffiliateAddress(affiliateAddress: string) {
-  //   // Affiliate address should be THORName or THORAddress
-  //   if (affiliateAddress.length > 0) {
-  //     const isValidThorchainAddress = this.clients[THORChain].validateAddress(affiliateAddress)
-  //     const isValidThorname = await this.isThorname(affiliateAddress)
-  //     if (!(isValidThorchainAddress || isValidThorname))
-  //       throw Error(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
-  //   }
-  // }
-  // private async isThorname(name: string): Promise<boolean> {
-  //   const thornameDetails = await this.thorchainCache.midgard.getTHORNameDetails(name)
-  //   return thornameDetails !== undefined
-  // }
 
   /**
-   * Looks for errors or issues within swap prams before doing the swap.
+   * Works out how long an outbound Tx will be held by THORChain before sending.
    *
-   *
-   * @param params
-   * @param estimate
-   * @param sourcePool
-   * @param sourceInboundDetails
-   * @param destinationPool
-   * @param destinationInboundDetails
-   * @returns
+   * @param outboundAmount: CryptoAmount  being sent.
+   * @returns required delay in seconds
+   * @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/manager_txout_current.go#L548
    */
-  private async getSwapEstimateErrors(
-    params: EstimateSwapParams,
-    estimate: SwapEstimate,
-    sourceInboundDetails: InboundDetail,
-    destinationInboundDetails: InboundDetail,
-  ): Promise<string[]> {
-    const errors: string[] = []
-    const sourceAsset = params.input.asset
-    const destAsset = params.destinationAsset
-
-    if (!isAssetRuneNative(sourceAsset)) {
-      const sourcePool = await this.thorchainCache.getPoolForAsset(sourceAsset)
-      if (!sourcePool.isAvailable())
-        errors.push(`sourceAsset ${sourceAsset.ticker} does not have a valid liquidity pool`)
+  async outboundDelay(outboundAmount: CryptoAmount): Promise<number> {
+    const networkValues = await this.thorchainCache.getNetworkValues()
+    const minTxOutVolumeThreshold = new CryptoAmount(
+      baseAmount(networkValues['MINTXOUTVOLUMETHRESHOLD']),
+      AssetRuneNative,
+    )
+    const maxTxOutOffset = networkValues['MAXTXOUTOFFSET']
+    let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative).assetAmount
+      .amount()
+      .toNumber()
+    const getQueue = await this.thorchainCache.thornode.getQueue()
+    const outboundValue = new CryptoAmount(baseAmount(getQueue.scheduled_outbound_value), AssetRuneNative)
+    const thorChainblocktime = this.chainAttributes[THORChain].avgBlockTimeInSecs // blocks required to confirm tx
+    // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
+    const runeValue = await this.thorchainCache.convert(outboundAmount, AssetRuneNative)
+    // Check rune value amount
+    if (runeValue.lt(minTxOutVolumeThreshold)) {
+      return thorChainblocktime
     }
-    if (!isAssetRuneNative(destAsset)) {
-      const destPool = await this.thorchainCache.getPoolForAsset(destAsset)
-      if (!destPool.isAvailable())
-        errors.push(`destinationAsset ${destAsset.ticker} does not have a valid liquidity pool`)
-      // check synth info on thornode pools
-      try {
-        const pools = await this.thorchainCache.thornode.getPools()
-        const destinationAssetPool = pools.find((pool) => pool.asset === `${destAsset.chain}.${destAsset.symbol}`)
-        if (destinationAssetPool)
-          if (destinationAssetPool.synth_mint_paused && destAsset.synth) {
-            errors.push(`Synth supply is over cap on destinationAsset ${destAsset.ticker}, synth minting is paused`)
-          }
-      } catch (error) {
-        errors.push(`Error: ${error} destination pool was not found for asset ${destAsset}`)
-      }
+    // Rune value in the outbound queue
+    if (outboundValue == undefined) {
+      throw new Error(`Could not return Scheduled Outbound Value`)
     }
-    if (!sourceAsset.synth && sourceInboundDetails.haltedChain) errors.push(`source chain is halted`)
-    if (sourceInboundDetails.haltedTrading) errors.push(`source pool is halted trading`)
-    if (!destAsset.synth && destinationInboundDetails.haltedChain) errors.push(`destination chain is halted`)
-    if (destinationInboundDetails.haltedTrading) errors.push(`destination pool is halted trading`)
-    if (estimate.slipPercentage.gte(params.slipLimit || 1))
-      errors.push(
-        `expected slip: ${estimate.slipPercentage.toFixed()} is greater than your slip limit:${params.slipLimit?.toFixed()} `,
-      )
-    // only proceed to check fees if there are no errors so far
-    if (errors.length > 0) return errors
-    // Check if the inputAmount value is enough to cover all the fees.
-    const canCoverFeesError = await this.checkCoverFees(params, estimate)
-    if (canCoverFeesError) errors.push(canCoverFeesError)
-
-    return errors
+    // Add OutboundAmount in rune to the oubound queue
+    const outboundAmountTotal = runeValue.plus(outboundValue)
+    // calculate the if outboundAmountTotal is over the volume threshold
+    const volumeThreshold = outboundAmountTotal.div(minTxOutVolumeThreshold)
+    // check delay rate
+    txOutDelayRate = txOutDelayRate - volumeThreshold.assetAmount.amount().toNumber() <= 1 ? 1 : txOutDelayRate
+    // calculate the minimum number of blocks in the future the txn has to be
+    let minBlocks = runeValue.assetAmount.amount().toNumber() / txOutDelayRate
+    minBlocks = minBlocks > maxTxOutOffset ? maxTxOutOffset : minBlocks
+    return minBlocks * thorChainblocktime
   }
 
-  /**
-   *
-   * @param params
-   * @param estimate
-   * @returns
-   */
-  private async checkCoverFees(params: EstimateSwapParams, estimate: SwapEstimate): Promise<string | undefined> {
-    let result: string | undefined = undefined
-    const inputInRune = await this.thorchainCache.convert(params.input, AssetRuneNative)
-    const feesInRune = await this.getFeesIn(estimate.totalFees, AssetRuneNative)
-
-    const totalSwapFeesInRune =
-      !params.input.asset.synth && isNativeChainAsset(params.input.asset)
-        ? feesInRune.inboundFee.plus(feesInRune.outboundFee).plus(feesInRune.swapFee).plus(feesInRune.affiliateFee)
-        : feesInRune.outboundFee.plus(feesInRune.swapFee).plus(feesInRune.affiliateFee)
-    const totalSwapFeesInAsset = await this.thorchainCache.convert(totalSwapFeesInRune, params.input.asset)
-    if (totalSwapFeesInRune.gte(inputInRune))
-      result = `Input amount ${params.input.formatedAssetString()}(${inputInRune.formatedAssetString()}) is less than or equal to total swap fees ${totalSwapFeesInAsset.formatedAssetString()}(${totalSwapFeesInRune.formatedAssetString()}) `
-    return result
-  }
   /**
    * Convenience method to convert TotalFees to a different CryptoAmount
    *
@@ -445,10 +218,11 @@ export class ThorchainQuery {
    */
   async getFeesIn(fees: TotalFees, asset: Asset): Promise<TotalFees> {
     return {
-      inboundFee: await this.convert(fees.inboundFee, asset),
-      swapFee: await this.convert(fees.swapFee, asset),
+      asset: fees.asset,
+      // swapFee: await this.convert(fees.swapFee, asset),
       outboundFee: await this.convert(fees.outboundFee, asset),
       affiliateFee: await this.convert(fees.affiliateFee, asset),
+      // totatBps: fees.totatBps,
     }
   }
 
@@ -497,47 +271,6 @@ export class ThorchainQuery {
     const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(confConfig.blockReward).toNumber())
     // convert that into seconds
     return requiredConfs * confConfig.avgBlockTimeInSecs
-  }
-  /**
-   * Works out how long an outbound Tx will be held by THORChain before sending.
-   *
-   * @param outboundAmount: CryptoAmount  being sent.
-   * @returns required delay in seconds
-   * @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/manager_txout_current.go#L548
-   */
-  async outboundDelay(outboundAmount: CryptoAmount): Promise<number> {
-    const networkValues = await this.thorchainCache.getNetworkValues()
-    const minTxOutVolumeThreshold = new CryptoAmount(
-      baseAmount(networkValues['MINTXOUTVOLUMETHRESHOLD']),
-      AssetRuneNative,
-    )
-    const maxTxOutOffset = networkValues['MAXTXOUTOFFSET']
-    let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative).assetAmount
-      .amount()
-      .toNumber()
-    const getQueue = await this.thorchainCache.thornode.getQueue()
-    const outboundValue = new CryptoAmount(baseAmount(getQueue.scheduled_outbound_value), AssetRuneNative)
-    const thorChainblocktime = this.chainAttributes[THORChain].avgBlockTimeInSecs // blocks required to confirm tx
-    // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
-    const runeValue = await this.thorchainCache.convert(outboundAmount, AssetRuneNative)
-    // Check rune value amount
-    if (runeValue.lt(minTxOutVolumeThreshold)) {
-      return thorChainblocktime
-    }
-    // Rune value in the outbound queue
-    if (outboundValue == undefined) {
-      throw new Error(`Could not return Scheduled Outbound Value`)
-    }
-    // Add OutboundAmount in rune to the oubound queue
-    const outboundAmountTotal = runeValue.plus(outboundValue)
-    // calculate the if outboundAmountTotal is over the volume threshold
-    const volumeThreshold = outboundAmountTotal.div(minTxOutVolumeThreshold)
-    // check delay rate
-    txOutDelayRate = txOutDelayRate - volumeThreshold.assetAmount.amount().toNumber() <= 1 ? 1 : txOutDelayRate
-    // calculate the minimum number of blocks in the future the txn has to be
-    let minBlocks = runeValue.assetAmount.amount().toNumber() / txOutDelayRate
-    minBlocks = minBlocks > maxTxOutOffset ? maxTxOutOffset : minBlocks
-    return minBlocks * thorChainblocktime
   }
 
   /**

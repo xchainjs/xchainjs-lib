@@ -7,18 +7,17 @@ import { CryptoAmount } from './crypto-amount'
 import { LiquidityPool } from './liquidity-pool'
 
 export type TotalFees = {
-  inboundFee: CryptoAmount
-  swapFee: CryptoAmount
-  outboundFee: CryptoAmount
+  asset: Asset
   affiliateFee: CryptoAmount
-  // totalFees?: CryptoAmount
+  outboundFee: CryptoAmount
 }
 
 export type SwapEstimate = {
   totalFees: TotalFees
-  slipPercentage: BigNumber
+  slipBasisPoints: number
   netOutput: CryptoAmount
-  waitTimeSeconds: number
+  inboundConfirmationSeconds?: number
+  outboundDelaySeconds: number
   canSwap: boolean
   errors: string[]
 }
@@ -42,13 +41,16 @@ export type MidgardConfig = {
   midgardBaseUrls: string[]
 }
 
-export type EstimateSwapParams = {
-  input: CryptoAmount
+export type QuoteSwapParams = {
+  fromAsset: Asset
   destinationAsset: Asset
-  destinationAddress: Address
-  slipLimit?: BigNumber
-  affiliateAddress?: Address
-  affiliateFeeBasisPoints?: number
+  amount: CryptoAmount
+  destinationAddress?: string
+  fromAddress?: string
+  toleranceBps?: number
+  affiliateAddress?: string
+  affiliateBps?: number
+  height?: number
   interfaceID?: string
   feeOption?: FeeOption
 }
