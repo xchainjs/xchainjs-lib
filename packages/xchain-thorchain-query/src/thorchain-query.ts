@@ -102,15 +102,6 @@ export class ThorchainQuery {
     if (response.error) errors.push(`Thornode request quote: ${response.error}`)
 
     if (errors.length > 0) {
-      // Define a regular expression to match any sequence of digits (\d+)
-      const regex = /\d+/g
-      // Extract the numbers from the error log and convert them to numbers
-      const matches = errors[0].match(regex)?.map(Number)
-      if (matches?.length === 2) {
-        const [oldValue, newValue] = matches
-        const percentageDifference = ((newValue - oldValue) / oldValue) * 100
-        errors.push(`Price slip: ${percentageDifference}`)
-      }
       return {
         memo: ``,
         toAddress: ``,
@@ -119,24 +110,20 @@ export class ThorchainQuery {
           totalFees: {
             asset: destinationAsset,
             affiliateFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
-            swapFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
             outboundFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
-            totatBps: 0,
           },
           slipBasisPoints: 0,
           netOutput: new CryptoAmount(baseAmount(0), destinationAsset),
-          waitTimeSeconds: 0,
+          outboundDelaySeconds: 0,
+          inboundConfirmationSeconds: 0,
           canSwap: false,
           errors,
         },
       }
     }
 
-    const inboundDelay = await this.confCounting(amount)
-    const outboundDelay = await this.outboundDelay(
-      new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
-    )
     // Return quote
+    const feeAsset = assetFromStringEx(swapQuote.fees.asset)
     const txDetails: TxDetails = {
       memo: this.constructSwapMemo(`${swapQuote.memo}`, interfaceID),
       toAddress: `${swapQuote.inbound_address}`,
@@ -144,14 +131,13 @@ export class ThorchainQuery {
       txEstimate: {
         totalFees: {
           asset: fromAsset,
-          affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate), AssetRuneNative),
-          swapFee: new CryptoAmount(baseAmount(swapQuote.fees.liquidity), AssetRuneNative),
-          outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound), AssetRuneNative),
-          totatBps: Number(swapQuote.fees.total_bps),
+          affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate), feeAsset),
+          outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound), feeAsset),
         },
-        slipBasisPoints: toleranceBps ? toleranceBps : 0,
+        slipBasisPoints: swapQuote.slippage_bps,
         netOutput: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
-        waitTimeSeconds: inboundDelay + outboundDelay,
+        outboundDelaySeconds: swapQuote.outbound_delay_seconds,
+        inboundConfirmationSeconds: swapQuote.inbound_confirmation_seconds,
         canSwap: true,
         errors,
       },
@@ -233,10 +219,10 @@ export class ThorchainQuery {
   async getFeesIn(fees: TotalFees, asset: Asset): Promise<TotalFees> {
     return {
       asset: fees.asset,
-      swapFee: await this.convert(fees.swapFee, asset),
+      // swapFee: await this.convert(fees.swapFee, asset),
       outboundFee: await this.convert(fees.outboundFee, asset),
       affiliateFee: await this.convert(fees.affiliateFee, asset),
-      totatBps: fees.totatBps,
+      // totatBps: fees.totatBps,
     }
   }
 

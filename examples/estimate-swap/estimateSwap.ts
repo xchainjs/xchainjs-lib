@@ -16,13 +16,13 @@ function print(estimate: SwapEstimate, input: CryptoAmount) {
   const expanded = {
     input: input.formatedAssetString(),
     totalFees: {
-      swapFee: estimate.totalFees.swapFee.formatedAssetString(),
       outboundFee: estimate.totalFees.outboundFee.formatedAssetString(),
       affiliateFee: estimate.totalFees.affiliateFee.formatedAssetString(),
     },
     slipBasisPoints: estimate.slipBasisPoints.toFixed(),
     netOutput: estimate.netOutput.formatedAssetString(),
-    waitTimeSeconds: estimate.waitTimeSeconds.toFixed(),
+    inboundConfirmationSeconds: estimate.inboundConfirmationSeconds.toFixed(),
+    outboundDelaySeconds: estimate.outboundDelaySeconds.toFixed(),
     canSwap: estimate.canSwap,
     errors: estimate.errors,
   }
@@ -44,6 +44,7 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
  */
 const estimateSwap = async () => {
   try {
+    const toleranceBps = 300 //hardcode slip for now
     const network = process.argv[2] as Network
     const amount = process.argv[3]
     const decimals = Number(process.argv[4])
@@ -60,6 +61,7 @@ const estimateSwap = async () => {
         fromAsset,
         amount: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
         destinationAsset: toAsset,
+        toleranceBps,
       }
     } else {
       swapParams = {
@@ -67,7 +69,7 @@ const estimateSwap = async () => {
         amount: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
         destinationAsset: toAsset,
         destinationAddress: toDestinationAddress,
-        toleranceBps: 1000,
+        toleranceBps,
       }
     }
 

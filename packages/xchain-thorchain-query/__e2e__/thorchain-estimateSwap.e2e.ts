@@ -32,13 +32,13 @@ function print(estimate: SwapEstimate, amount: CryptoAmount) {
   const expanded = {
     amount: amount.formatedAssetString(),
     totalFees: {
-      swapFee: estimate.totalFees.swapFee.formatedAssetString(),
       outboundFee: estimate.totalFees.outboundFee.formatedAssetString(),
       affiliateFee: estimate.totalFees.affiliateFee.formatedAssetString(),
     },
     slipBasisPoints: estimate.slipBasisPoints.toFixed(),
     netOutput: estimate.netOutput.formatedAssetString(),
-    waitTimeSeconds: estimate.waitTimeSeconds.toFixed(),
+    outboundDelaySeconds: estimate.outboundDelaySeconds,
+    inboundConfirmationSeconds: estimate.inboundConfirmationSeconds,
     canSwap: estimate.canSwap,
     errors: estimate.errors,
   }

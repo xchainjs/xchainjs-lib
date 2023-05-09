@@ -10,15 +10,14 @@ export type TotalFees = {
   asset: Asset
   affiliateFee: CryptoAmount
   outboundFee: CryptoAmount
-  swapFee: CryptoAmount
-  totatBps: number
 }
 
 export type SwapEstimate = {
   totalFees: TotalFees
   slipBasisPoints: number
   netOutput: CryptoAmount
-  waitTimeSeconds: number
+  inboundConfirmationSeconds?: number
+  outboundDelaySeconds: number
   canSwap: boolean
   errors: string[]
 }
