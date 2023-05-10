@@ -1,3 +1,9 @@
+# v0.5.1 (2023-05-10)
+
+## Update
+
+- Bump thornode & thorchain-query deps
+
 # v0.5.0 (2023-05-03)
 
 ## Update
