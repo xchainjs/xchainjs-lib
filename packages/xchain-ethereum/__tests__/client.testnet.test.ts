@@ -5,19 +5,19 @@ import { assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-uti
 import { BigNumber, Wallet, providers } from 'ethers'
 import nock from 'nock'
 
-import { mock_all_api } from '../__mocks__'
+import { mock_all_api } from '../../xchain-ethereum-old/__mocks__'
 import {
   mock_etherscan_eth_txs_api,
   mock_etherscan_token_txs_api,
   mock_gastracker_api,
-} from '../__mocks__/etherscan-api'
+} from '../../xchain-ethereum-old/__mocks__/etherscan-api'
 import {
   mock_thornode_inbound_addresses_fail,
   mock_thornode_inbound_addresses_success,
-} from '../__mocks__/thornode-api'
-import Client from '../src/client'
-import { AssetETH, ETHChain, ETH_DECIMAL } from '../src/const'
-import erc20ABI from '../src/data/erc20.json'
+} from '../../xchain-ethereum-old/__mocks__/thornode-api'
+import Client from '../../xchain-ethereum-old/src/client'
+import { AssetETH, ETHChain, ETH_DECIMAL } from '../../xchain-ethereum-old/src/const'
+import erc20ABI from '../../xchain-ethereum-old/src/data/erc20.json'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'
