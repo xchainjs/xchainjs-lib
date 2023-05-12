@@ -16,7 +16,7 @@ import axios from 'axios'
 import * as bech32Buffer from 'bech32-buffer'
 import Long from 'long'
 
-import { AssetCacao, DECIMAL, DEFAULT_GAS_ADJUSTMENT } from './const'
+import { AssetCacao, CACAO_DECIMAL, DEFAULT_GAS_ADJUSTMENT } from './const'
 import { ChainId, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx } from './types/messages'
 import types from './types/proto/MsgCompiled'
@@ -105,11 +105,11 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
   const transferDataList: TransferDataList = events.reduce((acc: TransferDataList, { type, attributes }) => {
     if (type === 'transfer') {
       return attributes.reduce((acc2, { key, value }, index) => {
-        if (index % 3 === 0) acc2.push({ sender: '', recipient: '', amount: baseAmount(0, DECIMAL) })
+        if (index % 3 === 0) acc2.push({ sender: '', recipient: '', amount: baseAmount(0, CACAO_DECIMAL) })
         const newData = acc2[acc2.length - 1]
         if (key === 'sender') newData.sender = value
         if (key === 'recipient') newData.recipient = value
-        if (key === 'amount') newData.amount = baseAmount(value.replace(/cacao/, ''), DECIMAL)
+        if (key === 'amount') newData.amount = baseAmount(value.replace(/cacao/, ''), CACAO_DECIMAL)
         return acc2
       }, acc)
     }
@@ -138,7 +138,7 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxDat
  * @returns {Fees} The default fee.
  */
 export const getDefaultFees = (): Fees => {
-  const fee = assetToBase(assetAmount(0.02 /* 0.02 CACAO */, DECIMAL))
+  const fee = assetToBase(assetAmount(0.02 /* 0.02 CACAO */, CACAO_DECIMAL))
   return singleFee(FeeType.FlatFee, fee)
 }
 
@@ -368,7 +368,7 @@ export const getBalance = async ({
   return balances
     .map((balance) => ({
       asset: (balance.denom && assetFromDenom(balance.denom)) || AssetCacao,
-      amount: baseAmount(balance.amount, DECIMAL),
+      amount: baseAmount(balance.amount, CACAO_DECIMAL),
     }))
     .filter(
       (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,

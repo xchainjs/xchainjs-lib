@@ -35,12 +35,12 @@ import Long from 'long'
 import { buildDepositTx, buildTransferTx, buildUnsignedTx } from '.'
 import {
   AssetRuneNative,
-  DECIMAL,
   DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
   MAX_PAGES_PER_FUNCTION_CALL,
   MAX_TX_COUNT_PER_FUNCTION_CALL,
   MAX_TX_COUNT_PER_PAGE,
+  RUNE_DECIMAL,
   defaultExplorerUrls,
 } from './const'
 import {
@@ -507,7 +507,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       asset = assetFromStringEx(getTx.observed_tx.tx.coins[0].asset)
       amount = getTx.observed_tx.tx.coins[0].amount
       const addressTo = getTx.observed_tx.tx.to_address ? getTx.observed_tx.tx.to_address : 'undefined'
-      const to: TxTo[] = [{ to: addressTo, amount: baseAmount(amount, DECIMAL), asset: asset }]
+      const to: TxTo[] = [{ to: addressTo, amount: baseAmount(amount, RUNE_DECIMAL), asset: asset }]
       const txData: Tx = {
         hash: txId,
         asset: senderAsset,
@@ -523,7 +523,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     amount = splitMemo[3]
     const receiverAsset = asset
     const recieverAmount = amount
-    const to: TxTo[] = [{ to: address, amount: baseAmount(recieverAmount, DECIMAL), asset: receiverAsset }]
+    const to: TxTo[] = [{ to: address, amount: baseAmount(recieverAmount, RUNE_DECIMAL), asset: receiverAsset }]
     const txData: Tx = {
       hash: txId,
       asset: senderAsset,
@@ -554,11 +554,11 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     result.observed_tx.tx.coins.forEach((coin) => {
       from.push({
         from: result.observed_tx.tx.from_address,
-        amount: baseAmount(coin.amount, DECIMAL),
+        amount: baseAmount(coin.amount, RUNE_DECIMAL),
       })
       to.push({
         to: result.observed_tx.tx.to_address,
-        amount: baseAmount(coin.amount, DECIMAL),
+        amount: baseAmount(coin.amount, RUNE_DECIMAL),
       })
       asset = assetFromString(coin.asset)
     })
@@ -591,10 +591,10 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
   }: DepositParam): Promise<TxHash> {
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
-      balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
+      balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, RUNE_DECIMAL)
     const assetBalance: BaseAmount =
       balances.filter(({ asset: assetInList }) => assetToString(assetInList) === assetToString(asset))[0]?.amount ??
-      baseAmount(0, DECIMAL)
+      baseAmount(0, RUNE_DECIMAL)
 
     const { average: fee } = await this.getFees()
 
@@ -670,10 +670,10 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
   }: TxParams & { gasLimit?: BigNumber; sequence?: number }): Promise<TxHash> {
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
-      balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
+      balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, RUNE_DECIMAL)
     const assetBalance: BaseAmount =
       balances.filter(({ asset: assetInList }) => assetToString(assetInList) === assetToString(asset))[0]?.amount ??
-      baseAmount(0, DECIMAL)
+      baseAmount(0, RUNE_DECIMAL)
 
     const fee = (await this.getFees()).average
 
@@ -740,7 +740,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     recipient,
     memo,
     fromRuneBalance: from_rune_balance,
-    fromAssetBalance: from_asset_balance = baseAmount(0, DECIMAL),
+    fromAssetBalance: from_asset_balance = baseAmount(0, RUNE_DECIMAL),
     fromAccountNumber = Long.ZERO,
     fromSequence = Long.ZERO,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
