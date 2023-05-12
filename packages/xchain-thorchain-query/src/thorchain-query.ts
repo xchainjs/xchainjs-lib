@@ -610,9 +610,9 @@ export class ThorchainQuery {
       asset: assetFromStringEx(depositQuote.fees.asset),
       outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound), addAmount.asset),
     }
-    // define savers cap
-    const saverCap = 0.3 * +pool.assetDepth
-    const saverCapFilledPercent = (+pool.saversDepth / saverCap) * 100
+    // define savers filled capacity
+    const saverCapFilledPercent = (+pool.synthSupply / +pool.assetDepth) * 100
+    // return object
     const estimateAddSaver: EstimateAddSaver = {
       assetAmount: new CryptoAmount(baseAmount(depositQuote.expected_amount_out), addAmount.asset),
       estimatedDepositValue: new CryptoAmount(baseAmount(depositQuote.expected_amount_deposit), addAmount.asset),
@@ -738,8 +738,10 @@ export class ThorchainQuery {
     if (!savers) errors.push(`Could not find position for ${params.address}`)
     if (!savers?.last_add_height) errors.push(`Could not find position for ${params.address}`)
     if (!blockData?.thorchain) errors.push(`Could not get thorchain block height`)
-    const outboundFee = await calcOutboundFee(params.asset, inboundDetails[params.asset.chain])
-    if (Number(savers?.asset_redeem_value) < outboundFee.baseAmount.amount().toNumber())
+    const outboundFee = calcOutboundFee(params.asset, inboundDetails[params.asset.chain])
+    const convertToBaseEight = getBaseAmountWithDiffDecimals(outboundFee, 8)
+    // For comparison use 1e8 since asset_redeem_value is returned in 1e8
+    if (Number(savers?.asset_redeem_value) < convertToBaseEight.toNumber())
       errors.push(`Unlikely to withdraw balance as outbound fee is greater than redeemable amount`)
     const ownerUnits = Number(savers?.units)
     const lastAdded = Number(savers?.last_add_height)

@@ -15,32 +15,32 @@
   integrity sha512-ilHEACi9DwqJB0pw7kv+Apvh50jiiSyR/cQ3y4W7lOR5mhvn/50FLUfsnfJz0BDZtl/RR16kXvptiv6q1msYZg==
 
 "@xchainjs/xchain-client@file:../../packages/xchain-client":
-  version "0.13.8"
+  version "0.14.0"
 
 "@xchainjs/xchain-crypto@file:../../packages/xchain-crypto":
-  version "0.2.8"
+  version "0.3.0"
   dependencies:
     bech32 "^2.0.0"
     bip39 "^3.1.0"
     crypto-js "^4.1.1"
-    foundry-primitives "^0.2.1"
+    foundry-primitives-xchainjs "github:xchainjs/foundry-primitives-js#master"
     hdkey "^2.1.0"
     uuid "^9.0.0"
 
 "@xchainjs/xchain-midgard@file:../../packages/xchain-midgard":
-  version "0.4.4"
+  version "0.5.0"
 
 "@xchainjs/xchain-thorchain-amm@file:../../packages/xchain-thorchain-amm":
-  version "0.3.26"
+  version "0.5.0"
 
 "@xchainjs/xchain-thorchain-query@file:../../packages/xchain-thorchain-query":
-  version "0.2.7"
+  version "0.4.0"
 
 "@xchainjs/xchain-thornode@file:../../packages/xchain-thornode":
-  version "0.2.4"
+  version "0.3.1"
 
 "@xchainjs/xchain-util@file:../../packages/xchain-util":
-  version "0.12.1"
+  version "0.13.0"
 
 asynckit@^0.4.0:
   version "0.4.0"
@@ -228,10 +228,9 @@ form-data@^4.0.0:
     combined-stream "^1.0.8"
     mime-types "^2.1.12"
 
-foundry-primitives@^0.2.1:
+"foundry-primitives-xchainjs@github:xchainjs/foundry-primitives-js#master":
   version "0.2.1"
-  resolved "https://registry.yarnpkg.com/foundry-primitives/-/foundry-primitives-0.2.1.tgz#287f35d7179905f10e87ac71dc4acc5636f41437"
-  integrity sha512-q/m/08djWYMfaZWddCz6QVL6tEcCzyJyigQOmUZDS8WIuT6mVF60fpewpxhy892F/E+hEl8mgE5iutgXf74lbg==
+  resolved "https://codeload.github.com/xchainjs/foundry-primitives-js/tar.gz/cc69da563d0a4b29adf70f1e75cccab1ca3752c0"
   dependencies:
     bignumber.js "^7.2.1"
     blakejs "^1.1.0"
@@ -240,8 +239,8 @@ foundry-primitives@^0.2.1:
     crypto-js "^3.1.9-1"
     elliptic "^6.4.1"
     hmac-drbg "^1.0.1"
-    lodash "^4.17.14"
-    node-forge "^0.7.6"
+    lodash "^4.17.21"
+    node-forge "^1.3.1"
     rlp "^2.1.0"
     tweetnacl "^1.0.3"
 
@@ -321,7 +320,7 @@ is-retry-allowed@^2.2.0:
   resolved "https://registry.yarnpkg.com/is-retry-allowed/-/is-retry-allowed-2.2.0.tgz#88f34cbd236e043e71b6932d09b0c65fb7b4d71d"
   integrity sha512-XVm7LOeLpTW4jV19QSH38vkswxoLud8sQ57YwJVTPWdiaI9I8keEhGFpBlslyVsgdQy4Opg8QOLb8YRgsyZiQg==
 
-lodash@^4.17.14:
+lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -369,10 +368,10 @@ node-addon-api@^2.0.0:
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-2.0.2.tgz#432cfa82962ce494b132e9d72a15b29f71ff5d32"
   integrity sha512-Ntyt4AIXyaLIuMHF6IOoTakB3K+RWxwtsHNRxllEoA6vPwP9o4866g6YWDLUdnucilZhmkxiHwHr11gAENw+QA==
 
-node-forge@^0.7.6:
-  version "0.7.6"
-  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.7.6.tgz#fdf3b418aee1f94f0ef642cd63486c77ca9724ac"
-  integrity sha512-sol30LUpz1jQFBjOKwbjxijiE3b6pjd74YwfD0fJOKPjF+fONKb2Yg8rYgS6+bK6VDl+/wfr4IYpC7jDzLUIfw==
+node-forge@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
+  integrity sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==
 
 node-gyp-build@^4.2.0:
   version "4.6.0"
