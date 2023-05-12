@@ -2,9 +2,9 @@ import { Network } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
-import { mock_ethplorer_api_getTxInfo } from '../../xchain-ethereum-old/__mocks__/ethplorer-api'
-import { mock_thornode_inbound_addresses_success } from '../../xchain-ethereum-old/__mocks__/thornode-api'
-import Client from '../../xchain-ethereum-old/src/client'
+import { mock_ethplorer_api_getTxInfo } from '../__mocks__/ethplorer-api'
+import { mock_thornode_inbound_addresses_success } from '../__mocks__/thornode-api'
+import Client from '../src/client'
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 // https://iancoleman.io/bip39/
