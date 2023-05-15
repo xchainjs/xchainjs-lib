@@ -1,3 +1,9 @@
+# v0.12.1 (2023-05-15)
+
+## Fix
+
+- renamed defaultLTCParams to defaultLtcParams to be more consistent with CamelCase
+
 # v0.12.0 (2023-05-02)
 
 ## Update

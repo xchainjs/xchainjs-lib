@@ -24,7 +24,7 @@ const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
 
 export type NodeUrls = Record<Network, string>
 
-export const defaultLTCParams: UtxoClientParams & {
+export const defaultLtcParams: UtxoClientParams & {
   nodeUrls: NodeUrls
   nodeAuth?: NodeAuth
 } = {
@@ -61,7 +61,7 @@ class Client extends UTXOClient {
    *
    * @param {UtxoClientParams} params
    */
-  constructor(params = defaultLTCParams) {
+  constructor(params = defaultLtcParams) {
     super(LTCChain, {
       network: params.network,
       rootDerivationPaths: params.rootDerivationPaths,

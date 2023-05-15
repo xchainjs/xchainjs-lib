@@ -20,7 +20,7 @@ import { BCHChain, HaskoinDataProviders, LOWER_FEE_BOUND, UPPER_FEE_BOUND, explo
 import { KeyPair, TransactionBuilder } from './types/bitcoincashjs-types'
 import * as Utils from './utils'
 
-export const defaultBCHParams: UtxoClientParams = {
+export const defaultBchParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
@@ -45,7 +45,7 @@ class Client extends UTXOClient {
    *
    * @param {UtxoClientParams} params
    */
-  constructor(params = defaultBCHParams) {
+  constructor(params = defaultBchParams) {
     super(BCHChain, {
       network: params.network,
       rootDerivationPaths: params.rootDerivationPaths,

@@ -8,7 +8,7 @@ import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
 import { AssetETH, Client as EthClient, ETHChain } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
-import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
+import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { Client as ThorClient, THORChain, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Address, eqAsset } from '@xchainjs/xchain-util'
@@ -231,6 +231,17 @@ export class Wallet {
         memo: swap.memo,
       }
       const hash = await this.evmHelpers['BSC'].sendDeposit(params)
+      return { hash, url: client.getExplorerTxUrl(hash) }
+    } else if (swap.input.asset.chain === MAYAChain) {
+      // add mayachain
+      const params = {
+        walletIndex: 0,
+        asset: swap.input.asset,
+        amount: swap.input.baseAmount,
+        recipient: inbound.address,
+        memo: swap.memo,
+      }
+      const hash = await client.transfer(params)
       return { hash, url: client.getExplorerTxUrl(hash) }
     } else {
       const params = {

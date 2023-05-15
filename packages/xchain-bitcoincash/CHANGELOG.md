@@ -1,3 +1,9 @@
+# v0.16.1 (2023-05-15)
+
+## Fix
+
+- renamed defaultBCHParams to defaultBchParams to be more consistent with CamelCase
+
 # v0.16.0 (2023-05-02)
 
 ## Update
