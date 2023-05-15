@@ -234,9 +234,9 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
   })
 
   // Estimate withrdaw lp positions
-  it(`Should estimate withdraw BNB from address's position`, async () => {
+  it(`Should estimate withdraw BTC from address's position`, async () => {
     const percentage = 100 // gets converted to basis points later
-    const assetAddress = 'bc1qzw3xhtwctpezz8m4se7hsw4y68tg42p99gtrae'
+    const assetAddress = 'bc1qzd7uyt2ed794m270cp8vwtkp6c0ppxwqd5djc0'
     const removeLp: WithdrawLiquidityPosition = {
       asset: AssetBTC,
       percentage: percentage,
@@ -252,7 +252,7 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
     const removeLp: WithdrawLiquidityPosition = {
       asset: BUSD,
       percentage: percentage,
-      runeAddress: 'thor14mjdjs49sa76lw3gkvj7gr6uwapxq7256rwp30',
+      runeAddress: 'thor1cf4dsll8rema8y3xvvsn2t786xrkhp3d679qxh',
     }
     const estimatRemoveLP = await thorchainQuery.estimateWithdrawLP(removeLp)
     printWithdraw(estimatRemoveLP)
@@ -265,12 +265,12 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
     printliquidityPosition(checkLP)
     expect(checkLP).toBeTruthy()
   })
-  it(`Should withdraw liquidity position for an address`, async () => {
+  it(`Should estimate withdraw liquidity position for an address`, async () => {
     const removeLp: WithdrawLiquidityPosition = {
       asset: AssetBCH,
       percentage: 76,
       runeAddress: 'sthor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjvxdhkz',
-      assetAddress: 'qq3p8qwxpnkwy06fls96qd4rwrufr0e7qghp0xjdjv',
+      assetAddress: 'qp0aq7glt8lgmyw72ej65fu5szycrp90yvrdwkgn7c',
     }
     const checkLP = await thorchainQuery.estimateWithdrawLP(removeLp)
     printWithdraw(checkLP)

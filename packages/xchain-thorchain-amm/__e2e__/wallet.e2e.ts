@@ -4,7 +4,7 @@ import { Midgard, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xch
 import { baseToAsset, formatAssetAmountCurrency, register9Rheader } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
-import { Wallet } from '../src/Wallet'
+import { Wallet } from '../src/wallet'
 
 require('dotenv').config()
 

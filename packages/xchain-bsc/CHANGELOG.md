@@ -1,3 +1,9 @@
+# v0.2.1 (2023-05-09)
+
+## Update
+
+- update ethers dependency
+
 # v0.2.0 (2023-05-02)
 
 ## Update

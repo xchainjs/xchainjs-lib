@@ -12,8 +12,8 @@ import {
 } from '@xchainjs/xchain-thorchain-query'
 import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
-import { Wallet } from '../src/Wallet'
 import { ThorchainAMM } from '../src/thorchain-amm'
+import { Wallet } from '../src/wallet'
 
 const thorchainQueryMainnet = new ThorchainQuery()
 const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
