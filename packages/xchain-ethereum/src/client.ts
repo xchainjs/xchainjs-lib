@@ -1,6 +1,7 @@
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 import {
+  AssetInfo,
   Balance,
   BaseXChainClient,
   FeeOption,
@@ -179,6 +180,19 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       throw new Error('HDNode is not defined. Make sure phrase has been provided.')
     }
     return this.hdNode.derivePath(this.getFullDerivationPath(walletIndex)).address.toLowerCase()
+  }
+
+  /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetETH,
+      decimal: ETH_DECIMAL,
+      chain: this.chain,
+    }
+    return assetInfo
   }
 
   /**
