@@ -1,9 +1,11 @@
-import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
+import { AssetInfo, Network, UtxoClientParams } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
 import { Client } from '../src/client'
 import {
   AssetBTC,
+  BTCChain,
+  BTC_DECIMAL,
   BlockcypherDataProviders,
   LOWER_FEE_BOUND,
   UPPER_FEE_BOUND,
@@ -35,6 +37,15 @@ const btcClientTestnet = new Client({
   phrase: process.env.TESTNETPHRASE,
 })
 describe('Bitcoin Integration Tests for BlockCypher', () => {
+  it('should fetch correct asset ', async () => {
+    const info = btcClient.getAssetInfo()
+    const correctAssetInf: AssetInfo = {
+      asset: AssetBTC,
+      decimal: BTC_DECIMAL,
+      chain: BTCChain,
+    }
+    expect(info).toEqual(correctAssetInf)
+  })
   it('should fetch address balance for blockcypher', async () => {
     const balances = await btcClient.getBalance('bc1q3q6gfcg2n4c7hdzjsvpq5rp9rfv5t59t5myz5v')
     balances.forEach((bal) => {

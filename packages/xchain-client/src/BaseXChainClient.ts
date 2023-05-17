@@ -3,6 +3,7 @@ import { Address, Asset, Chain } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import {
+  AssetInfo,
   Balance,
   FeeBounds,
   FeeRate,
@@ -146,6 +147,7 @@ export abstract class BaseXChainClient implements XChainClient {
   public purgeClient(): void {
     this.phrase = ''
   }
+
   //individual clients will need to implement these
   abstract getFees(): Promise<Fees>
   abstract getAddress(walletIndex?: number): string
@@ -158,4 +160,5 @@ export abstract class BaseXChainClient implements XChainClient {
   abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
   abstract transfer(params: TxParams): Promise<string>
   abstract broadcastTx(txHex: string): Promise<TxHash>
+  abstract getAssetInfo(): AssetInfo
 }

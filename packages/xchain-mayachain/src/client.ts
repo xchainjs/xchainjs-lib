@@ -1,5 +1,6 @@
 import cosmosclient from '@cosmos-client/core'
 import {
+  AssetInfo,
   Balance,
   BaseXChainClient,
   FeeType,
@@ -309,6 +310,19 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
    */
   async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
     return getBalance({ address, assets, cosmosClient: this.getCosmosClient() })
+  }
+
+  /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetCacao,
+      decimal: CACAO_DECIMAL,
+      chain: this.chain,
+    }
+    return assetInfo
   }
 
   /**
