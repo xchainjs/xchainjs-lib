@@ -263,7 +263,7 @@ export type LoanOpenParams = {
   amount: number
   targetAsset: string
   destination: string
-  minOut: string
+  minOut?: string
   affiliateBps?: number
   affiliate?: string
 }
