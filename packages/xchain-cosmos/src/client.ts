@@ -196,8 +196,8 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
-      asset: this.getAssetInfo().asset,
-      decimal: this.getAssetInfo().decimal,
+      asset: AssetATOM,
+      decimal: COSMOS_DECIMAL,
       chain: this.chain,
     }
     return assetInfo
