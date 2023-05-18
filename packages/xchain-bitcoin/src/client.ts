@@ -1,4 +1,5 @@
 import {
+  AssetInfo,
   Fee,
   FeeOption,
   FeeRate,
@@ -17,7 +18,9 @@ import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
 import {
+  AssetBTC,
   BTCChain,
+  BTC_DECIMAL,
   BlockcypherDataProviders,
   LOWER_FEE_BOUND,
   UPPER_FEE_BOUND,
@@ -92,6 +95,18 @@ class Client extends UTXOClient {
       return address
     }
     throw new Error('Phrase must be provided')
+  }
+
+  /**
+   *
+   * @returns BTC asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetBTC,
+      decimal: BTC_DECIMAL,
+    }
+    return assetInfo
   }
 
   /**

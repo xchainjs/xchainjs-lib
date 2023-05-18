@@ -1,3 +1,9 @@
+# v5.7.1 (2023-05-18)
+
+## Add
+
+- New client function getAssetInfo() returns chain, decimals and asset
+
 # v5.7.0 (2023-05-02)
 
 ## Update

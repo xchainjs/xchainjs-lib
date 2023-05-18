@@ -1,3 +1,9 @@
+# v0.2.1 (2023-05-18)
+
+## Add
+
+- New client function getAssetInfo() returns chain, decimals and asset & rename DECIMAL - CACAO_DECIMAL
+
 # v0.2.0 (2023-05-02)
 
 ## Update

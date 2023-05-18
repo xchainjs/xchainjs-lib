@@ -1,3 +1,9 @@
+# v0.14.1 (2023-05-18)
+
+## Add
+
+- Abstract function getAssetInfo()
+
 # v0.14.0 (2023-05-02)
 
 ## Update

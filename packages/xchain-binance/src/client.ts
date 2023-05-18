@@ -2,6 +2,7 @@ import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 import {
+  AssetInfo,
   Balance,
   BaseXChainClient,
   FeeType,
@@ -29,7 +30,7 @@ import {
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
-import { AssetBNB, BNBChain } from './const'
+import { AssetBNB, BNBChain, BNB_DECIMAL } from './const'
 import {
   Account,
   Balance as BinanceBalance,
@@ -227,6 +228,17 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    */
   validateAddress(address: Address): boolean {
     return this.bncClient.checkAddress(address, getPrefix(this.network))
+  }
+  /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetBNB,
+      decimal: BNB_DECIMAL,
+    }
+    return assetInfo
   }
 
   /**

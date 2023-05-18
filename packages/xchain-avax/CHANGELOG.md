@@ -1,3 +1,9 @@
+# v0.2.2 (2023-05-18)
+
+## Update
+
+- Update client & evm  dependencies
+
 # v0.2.1 (2023-05-09)
 
 ## Update
