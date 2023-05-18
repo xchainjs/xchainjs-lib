@@ -37,7 +37,6 @@ describe('xchain-evm (Bsc) Integration Tests', () => {
     const correctAssetInfo: AssetInfo = {
       asset: AssetBSC,
       decimal: BSC_GAS_ASSET_DECIMAL,
-      chain: BSCChain,
     }
     expect(assetInfo).toEqual(correctAssetInfo)
   })

@@ -2,7 +2,7 @@
 
 ## Add
 
-- New client function getAssetInfo() returns chain, decimals and asset & rename DECIMAL - CACAO_DECIMAL
+- New client function getAssetInfo() returns chain, decimals and asset & rename DECIMAL - RUNE_DECIMAL
 
 # v0.28.0 (2023-05-02)
 

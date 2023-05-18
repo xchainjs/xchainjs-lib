@@ -1,3 +1,9 @@
+# v0.4.2 (2023-05-18)
+
+## Update
+
+- Update client dependency
+
 # v0.4.1 (2023-05-10)
 
 ## Fix

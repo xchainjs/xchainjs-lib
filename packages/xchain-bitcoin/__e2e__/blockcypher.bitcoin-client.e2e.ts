@@ -4,7 +4,6 @@ import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/
 import { Client } from '../src/client'
 import {
   AssetBTC,
-  BTCChain,
   BTC_DECIMAL,
   BlockcypherDataProviders,
   LOWER_FEE_BOUND,
@@ -42,7 +41,6 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
     const correctAssetInf: AssetInfo = {
       asset: AssetBTC,
       decimal: BTC_DECIMAL,
-      chain: BTCChain,
     }
     expect(info).toEqual(correctAssetInf)
   })
