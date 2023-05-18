@@ -1,12 +1,8 @@
-# v0.22.2 (2023-05-18)
+# v0.22.1 (2023-05-18)
 
 ## Add
 
 - New client function getAssetInfo() returns chain, decimals and asset
-
-# v0.22.1 (2023-05-15)
-
-## Fix
 
 - renamed defaultBTCParams to defaultBtcParams to be more consistent with CamelCase
 

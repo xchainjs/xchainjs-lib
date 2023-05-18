@@ -1,13 +1,8 @@
-# v0.16.2 (2023-05-18)
+# v0.16.1 (2023-05-18)
 
 ## Add
 
 - New client function getAssetInfo() returns chain, decimals and asset
-
-# v0.16.1 (2023-05-15)
-
-## Fix
-
 - renamed defaultBCHParams to defaultBchParams to be more consistent with CamelCase
 
 # v0.16.0 (2023-05-02)
