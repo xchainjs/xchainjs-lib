@@ -1,4 +1,4 @@
-import { Address, Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util'
 
 export enum Network {
   Mainnet = 'mainnet',
@@ -9,7 +9,6 @@ export enum Network {
 export type AssetInfo = {
   asset: Asset
   decimal: number
-  chain: Chain
 }
 
 export type Balance = {

@@ -237,7 +237,6 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     const assetInfo: AssetInfo = {
       asset: AssetBNB,
       decimal: BNB_DECIMAL,
-      chain: this.chain,
     }
     return assetInfo
   }

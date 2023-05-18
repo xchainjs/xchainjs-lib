@@ -190,7 +190,6 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     const assetInfo: AssetInfo = {
       asset: AssetETH,
       decimal: ETH_DECIMAL,
-      chain: this.chain,
     }
     return assetInfo
   }

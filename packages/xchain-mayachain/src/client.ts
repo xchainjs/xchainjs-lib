@@ -320,7 +320,6 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
     const assetInfo: AssetInfo = {
       asset: AssetCacao,
       decimal: CACAO_DECIMAL,
-      chain: this.chain,
     }
     return assetInfo
   }

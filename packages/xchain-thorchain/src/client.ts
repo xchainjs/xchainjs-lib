@@ -329,7 +329,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     const assetInfo: AssetInfo = {
       asset: AssetRuneNative,
       decimal: RUNE_DECIMAL,
-      chain: this.chain,
     }
     return assetInfo
   }

@@ -33,7 +33,7 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.14.0",
+    "@xchainjs/xchain-client": "^0.14.1",
     "@xchainjs/xchain-midgard": "^0.5.0",
     "@xchainjs/xchain-thornode": "^0.3.1",
     "@xchainjs/xchain-util": "^0.13.0",
@@ -42,7 +42,7 @@
     "bignumber.js": "^9.0.0"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.14.0",
+    "@xchainjs/xchain-client": "^0.14.1",
     "@xchainjs/xchain-midgard": "^0.5.0",
     "@xchainjs/xchain-thornode": "^0.3.1",
     "@xchainjs/xchain-util": "^0.13.0",

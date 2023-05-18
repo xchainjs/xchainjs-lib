@@ -96,7 +96,6 @@ class Client extends UTXOClient {
     const assetInfo: AssetInfo = {
       asset: AssetBCH,
       decimal: BCH_DECIMAL,
-      chain: this.chain,
     }
     return assetInfo
   }
