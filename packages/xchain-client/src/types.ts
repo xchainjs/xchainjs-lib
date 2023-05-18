@@ -6,6 +6,11 @@ export enum Network {
   Testnet = 'testnet',
 }
 
+export type AssetInfo = {
+  asset: Asset
+  decimal: number
+}
+
 export type Balance = {
   asset: Asset
   amount: BaseAmount

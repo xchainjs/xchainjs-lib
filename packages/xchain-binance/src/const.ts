@@ -11,3 +11,8 @@ export const BNBChain = 'BNB' as const
  *
  */
 export const AssetBNB: Asset = { chain: BNBChain, symbol: 'BNB', ticker: 'BNB', synth: false }
+
+/**
+ * Asset Decimal
+ */
+export const BNB_DECIMAL = 8

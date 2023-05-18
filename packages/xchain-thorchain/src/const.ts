@@ -8,7 +8,7 @@ const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
 const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
 const RUNE_TICKER = 'RUNE'
 
-export const DECIMAL = 8
+export const RUNE_DECIMAL = 8
 export const DEFAULT_GAS_ADJUSTMENT = 2
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
 export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'

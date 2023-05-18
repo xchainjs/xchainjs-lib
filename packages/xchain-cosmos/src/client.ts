@@ -1,5 +1,6 @@
 import { proto } from '@cosmos-client/core/cjs/module'
 import {
+  AssetInfo,
   Balance,
   BaseXChainClient,
   FeeType,
@@ -187,6 +188,18 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       .filter(({ asset: balanceAsset }) => !assets || assets.filter((asset) => eqAsset(balanceAsset, asset)).length)
 
     return balances
+  }
+
+  /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetATOM,
+      decimal: COSMOS_DECIMAL,
+    }
+    return assetInfo
   }
 
   /**

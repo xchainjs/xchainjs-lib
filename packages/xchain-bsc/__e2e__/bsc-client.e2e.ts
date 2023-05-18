@@ -1,9 +1,9 @@
-import { Balance, Network, TxType } from '@xchainjs/xchain-client'
+import { AssetInfo, Balance, Network, TxType } from '@xchainjs/xchain-client'
 import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
 import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import BscClient from '../src/client'
-import { AssetBSC, BSCChain, defaultBscParams } from '../src/const'
+import { AssetBSC, BSCChain, BSC_GAS_ASSET_DECIMAL, defaultBscParams } from '../src/const'
 
 // =====Erc-20 asset=====
 
@@ -32,6 +32,14 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 describe('xchain-evm (Bsc) Integration Tests', () => {
+  it('should fetch asset info', async () => {
+    const assetInfo = clientTestnet.getAssetInfo()
+    const correctAssetInfo: AssetInfo = {
+      asset: AssetBSC,
+      decimal: BSC_GAS_ASSET_DECIMAL,
+    }
+    expect(assetInfo).toEqual(correctAssetInfo)
+  })
   it('should fetch bsc balances', async () => {
     const address = clientTestnet.getAddress(0)
     console.log(address)
