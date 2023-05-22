@@ -5,6 +5,10 @@ import {
   EstimateAddSaver,
   EstimateWithdrawLP,
   EstimateWithdrawSaver,
+  LoanCloseParams,
+  LoanCloseQuote,
+  LoanOpenParams,
+  LoanOpenQuote,
   QuoteSwapParams,
   SaversPosition,
   SaversWithdraw,
@@ -214,5 +218,54 @@ export class ThorchainAMM {
     const withdrawEstimate = await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
     if (withdrawEstimate.errors.length > 0) throw Error(`${withdrawEstimate.errors}`)
     return await wallet.withdrawSavers(withdrawEstimate.dustAmount, withdrawEstimate.memo, withdrawEstimate.toAddress)
+  }
+
+  /**
+   *
+   * @param loanOpenParams
+   * @returns
+   */
+  public async getLoanQuoteOpen(loanOpenParams: LoanOpenParams): Promise<LoanOpenQuote> {
+    return await this.thorchainQuery.getLoanQuoteOpen(loanOpenParams)
+  }
+
+  /**
+   *
+   * @param loanCloseParams
+   * @returns
+   */
+  public async getLoanQuoteClose(loanCloseParams: LoanCloseParams): Promise<LoanCloseQuote> {
+    return await this.thorchainQuery.getLoanQuoteClose(loanCloseParams)
+  }
+
+  /**
+   *
+   * @param wallet - wallet needed to execute transaction
+   * @param loanOpenParams - params needed to open the loan
+   * @returns - submitted tx
+   */
+  public async addLoan(wallet: Wallet, loanOpenParams: LoanOpenParams): Promise<TxSubmitted> {
+    const loanOpen = await this.thorchainQuery.getLoanQuoteOpen(loanOpenParams)
+    if (loanOpen.errors.length > 0) throw Error(`${loanOpen.errors}`)
+    return await wallet.loanOpen({
+      memo: `${loanOpen.memo}`,
+      amount: loanOpenParams.amount,
+      toAddress: loanOpen.inboundAddress,
+    })
+  }
+  /**
+   *
+   * @param wallet - wallet to execute the transaction
+   * @param loanCloseParams - params needed for withdrawing the loan
+   * @returns
+   */
+  public async withdrawLoan(wallet: Wallet, loanCloseParams: LoanCloseParams): Promise<TxSubmitted> {
+    const withdrawLoan = await this.thorchainQuery.getLoanQuoteClose(loanCloseParams)
+    if (withdrawLoan.errors.length > 0) throw Error(`${withdrawLoan.errors}`)
+    return await wallet.loanClose({
+      memo: `${withdrawLoan.memo}`,
+      amount: loanCloseParams.amount,
+      toAddress: withdrawLoan.inboundAddress,
+    })
   }
 }

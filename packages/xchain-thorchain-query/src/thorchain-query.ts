@@ -800,7 +800,6 @@ export class ThorchainQuery {
     height,
   }: LoanOpenParams): Promise<LoanOpenQuote> {
     const errors: string[] = []
-    console.log()
     const loanOpenResp = await this.thorchainCache.thornode.getLoanQuoteOpen(
       `${asset.chain}.${asset.ticker}`,
       amount.baseAmount.amount().toNumber(),
@@ -811,6 +810,7 @@ export class ThorchainQuery {
       affiliate,
       height,
     )
+    console.log(loanOpenResp)
     const response: { error?: string } = JSON.parse(JSON.stringify(loanOpenResp))
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
     if (errors.length > 0) {
@@ -890,7 +890,7 @@ export class ThorchainQuery {
       minOut,
       height,
     )
-
+    console.log(loanCloseResp)
     const response: { error?: string } = JSON.parse(JSON.stringify(loanCloseResp))
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
     if (errors.length > 0) {

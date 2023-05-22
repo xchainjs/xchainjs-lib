@@ -476,7 +476,7 @@ export class Thornode {
     amount: number,
     loanAsset: string,
     loanOwner: string,
-    minOut: string,
+    minOut?: string,
     height?: number,
   ): Promise<QuoteLoanCloseResponse> {
     for (const api of this.quoteApi) {
@@ -484,7 +484,7 @@ export class Thornode {
         const resp = (await api.quoteloanclose(height, asset, amount, loanAsset, loanOwner, minOut)).data
         return resp
       } catch (e) {
-        //console.log(e)
+        // console.log(e)
       }
     }
     throw new Error(`THORNode is not responding`)

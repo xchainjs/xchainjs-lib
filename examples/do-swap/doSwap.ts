@@ -21,13 +21,12 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
     txEstimate: {
       input: input.formatedAssetString(),
       totalFees: {
-        swapFee: txDetails.txEstimate.totalFees.swapFee.formatedAssetString(),
         outboundFee: txDetails.txEstimate.totalFees.outboundFee.formatedAssetString(),
         affiliateFee: txDetails.txEstimate.totalFees.affiliateFee.formatedAssetString(),
       },
       slipBasisPoints: txDetails.txEstimate.slipBasisPoints.toFixed(),
       netOutput: txDetails.txEstimate.netOutput.formatedAssetString(),
-      waitTimeSeconds: txDetails.txEstimate.waitTimeSeconds.toFixed(),
+      waitTimeSeconds: txDetails.txEstimate.outboundDelaySeconds.toFixed(),
       canSwap: txDetails.txEstimate.canSwap,
       errors: txDetails.txEstimate.errors,
     },
@@ -70,8 +69,9 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Networ
 
     const fromChain = fromAsset.synth ? THORChain : fromAsset.chain
     const fromAddress = wallet.clients[fromChain].getAddress()
-    // console.log(await wallet.clients[fromChain].getBalance(fromAddress))
-
+    const bal = await wallet.clients[fromChain].getBalance(fromAddress)
+    console.log(bal[amount])
+    console.log(fromAddress)
     const swapParams: AmmEstimateSwapParams = {
       fromAsset,
       amount: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
@@ -92,9 +92,16 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Networ
     printTx(outPutCanSwap, swapParams.amount)
     if (outPutCanSwap.txEstimate.canSwap) {
       const output = await tcAmm.doSwap(wallet, swapParams)
-      console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+      console.log(
+        `Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${outPutCanSwap.txEstimate.outboundDelaySeconds}`,
+      )
       console.log('Waiting for transaction to be confirmed...')
-      await delayedLog('hash', output.waitTimeSeconds <= 6 ? 12000 : output.waitTimeSeconds * 1000)
+      await delayedLog(
+        'hash',
+        outPutCanSwap.txEstimate.outboundDelaySeconds <= 6
+          ? 12000
+          : outPutCanSwap.txEstimate.outboundDelaySeconds * 1000,
+      )
       await checkTx(network, output.hash)
     }
   } catch (error) {
