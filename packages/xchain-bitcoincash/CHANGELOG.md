@@ -1,8 +1,101 @@
+# v0.16.1 (2023-05-18)
+
+## Add
+
+- New client function getAssetInfo() returns chain, decimals and asset
+- renamed defaultBCHParams to defaultBchParams to be more consistent with CamelCase
+
+# v0.16.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+- update `@psf/bitcoincashjs-lib`
+
+# v.0.15.11 (2023-04-11)
+
+## Add
+
+- bump deps
+
+# v.0.15.10 (2023-04-05)
+
+## Add
+
+- Add async `broadcastTx()` to client
+- bump xchain-client deps
+
+# v.0.15.9 (2023-03-29)
+
+## Fix
+
+- make `buildTx` public
+
+# v.0.15.8 (2023-03-21)
+
+## Update
+
+- Update to use `xchain-uxto-providers`
+
+# v.0.15.7 (2023-01-19)
+
+## Update
+
+- Type safety `BCHChain`
+
+# v.0.15.6 (2022-12-27)
+
+## Add
+
+- Add `AssetBCH` and `BCHChain` definition
+
+## Update
+
+- Bump `xchain-client@13.5.0`
+
+# v.0.15.5 (2022-12-13)
+
+## Update
+
+- reverted `customRequestHeaders` to `BroadcastTxParams`
+
+# v.0.15.4 (2022-11-24)
+
+## Update
+
+- Added `customRequestHeaders` to `BroadcastTxParams`
+- Bumped `xchain-client`
+
+# v.0.15.3 (2022-10-14)
+
+## Update
+
+- Set Default network to `Network.Mainnet`
+
+# v.0.15.2 (2022-10-04)
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
+# v.0.15.1 (2022-09-29)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
+# v.0.15.0 (2022-09-05)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
 # v.0.14.0 (2022-07-21)
 
 ### Breaking change
 
 - client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
+
 # v.0.13.2 (2022-07-13)
 
 ## Fix

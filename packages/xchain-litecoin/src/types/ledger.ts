@@ -1,4 +1,5 @@
-import { Address, FeeRate, Network, TxParams } from '@xchainjs/xchain-client'
+import { FeeRate, Network, TxParams } from '@xchainjs/xchain-client'
+import { Address } from '@xchainjs/xchain-util'
 
 import { UTXO } from './common'
 

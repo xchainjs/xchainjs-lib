@@ -1,13 +1,15 @@
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import {
-  Address,
+  AssetInfo,
   Balance,
   BaseXChainClient,
+  ExplorerProviders,
   FeeOption,
   FeeRates,
   FeeType,
   Fees,
   Network,
+  OnlineDataProviders,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -18,12 +20,11 @@ import {
   checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, toUtf8Bytes } from 'ethers/lib/utils'
 
 import erc20ABI from './data/erc20.json'
-import { ExplorerProvider } from './providers/explorer-provider'
 import {
   ApproveParams,
   CallParams,
@@ -34,7 +35,6 @@ import {
   IsApprovedParams,
   TxOverrides,
 } from './types'
-import { ExplorerProviders, OnlineDataProvider, OnlineDataProviders } from './types/provider-types'
 import {
   call,
   estimateApprove,
@@ -89,8 +89,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
   private gasAssetDecimals: number
   private hdNode?: HDNode
   private defaults: Record<Network, EvmDefaults>
-  private explorerProviders: Record<Network, ExplorerProvider>
-  private dataProviders: Record<Network, OnlineDataProvider>
+  private explorerProviders: ExplorerProviders
+  private dataProviders: OnlineDataProviders
   private providers: Record<Network, Provider>
   /**
    * Constructor
@@ -101,7 +101,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
     gasAsset,
     gasAssetDecimals,
     defaults,
-    network = Network.Testnet,
+    network = Network.Mainnet,
     feeBounds,
     providers,
     phrase = '',
@@ -195,6 +195,18 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: this.gasAsset,
+      decimal: this.gasAssetDecimals,
+    }
+    return assetInfo
+  }
+
+  /**
    * Get the explorer url for the given address.
    *
    * @param {Address} address
@@ -260,7 +272,9 @@ export default class Client extends BaseXChainClient implements XChainClient {
    * @throws {"Invalid asset"} throws when the give asset is an invalid one
    */
   async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
-    return await this.dataProviders[this.network].getBalance(address, assets)
+    const prov = this.dataProviders[this.network]
+    if (!prov) throw Error('Provider unidefined')
+    return await prov.getBalance(address, assets)
   }
 
   /**
@@ -279,7 +293,9 @@ export default class Client extends BaseXChainClient implements XChainClient {
       asset: params?.asset,
     }
 
-    return await this.dataProviders[this.network].getTransactions(filteredParams)
+    const prov = this.dataProviders[this.network]
+    if (!prov) throw Error('Provider unidefined')
+    return await prov.getTransactions(filteredParams)
   }
 
   /**
@@ -293,7 +309,9 @@ export default class Client extends BaseXChainClient implements XChainClient {
    * Thrown if the given txId is invalid.
    */
   async getTransactionData(txId: string, assetAddress?: Address): Promise<Tx> {
-    return await this.dataProviders[this.network].getTransactionData(txId, assetAddress)
+    const prov = this.dataProviders[this.network]
+    if (!prov) throw Error('Provider unidefined')
+    return await prov.getTransactionData(txId, assetAddress)
   }
 
   /**
@@ -410,7 +428,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
     const contract = new ethers.Contract(contractAddress, erc20ABI, this.getProvider())
 
-    const unsignedTx: ethers.PopulatedTransaction /* as same as ethers.TransactionResponse expected by `sendTransaction` */ = await contract.populateTransaction.approve(
+    /* as same as ethers.TransactionResponse expected by `sendTransaction` */
+    const unsignedTx: ethers.PopulatedTransaction = await contract.populateTransaction.approve(
       spenderAddress,
       valueToApprove,
     )
@@ -500,10 +519,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
     if (!gasLimit) {
       try {
         txGasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo })
-        console.log(`estimateGasLimit=${txGasLimit.toString()}`)
       } catch (error) {
         txGasLimit = defaultGasLimit
-        console.log(`defaultGasLimit=${txGasLimit.toString()}`)
       }
     } else {
       txGasLimit = gasLimit
@@ -514,7 +531,6 @@ export default class Client extends BaseXChainClient implements XChainClient {
       gasLimit: txGasLimit,
       gasPrice: txGasPrice,
     }
-    console.log(JSON.stringify(overrides))
 
     checkFeeBounds(this.feeBounds, overrides.gasPrice.toNumber())
 
@@ -548,6 +564,11 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
       return hash
     }
+  }
+
+  async broadcastTx(txHex: string): Promise<TxHash> {
+    const resp = await this.providers[this.network].sendTransaction(txHex)
+    return resp.hash
   }
 
   /**

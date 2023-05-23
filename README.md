@@ -5,22 +5,19 @@
     XChainJS - xchainjs Library 
 </h1>
 
-*:star: Developed / Developing by [xchainjs](https://xchainjs.org/)*
+_:star: Developed / Developing by [xchainjs](https://xchainjs.org/)_
 
 XChainJS is a library with a common interface for multiple blockchains, built for simple and fast integration for wallets and more.
-
 
 ## License
 
 [![License](https://img.shields.io/badge/MIT-xchainjs-green)]()
 
-
 Telegram group: https://t.me/xchainjs \
 Homepage: https://xchainjs.org \
-Docs: http://docs.xchainjs.org/overview/
-
-
-
+Live Examples: https://dev.thorchain.org/thorchain-dev/xchainjs-integration-guide/query-package \
+Docs: http://docs.xchainjs.org/overview \
+Integration guide: https://dev.thorchain.org/thorchain-dev/xchainjs-integration-guide/overview
 
 ## Interface
 
@@ -38,18 +35,24 @@ A single common interface:
 6. Get blockchain fee information (standard, fast, fastest)
 
 ### Packages
-* [`xchain-binance`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-binance)
-* [`xchain-bitcoin`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoin)
-* [`xchain-bitcoincash`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoincash)
-* [`xchain-client`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-client)
-* [`xchain-cosmos`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cosmos)
-* [`xchain-crypto`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-crypto)
-* [`xchain-doge`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-doge)
-* [`xchain-ethereum`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-ethereum)
-* [`xchain-litecoin`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-litecoin)
-* [`xchain-terra`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-terra)
-* [`xchain-thorchain`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain)
-* [`xchain-util`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-util)
+
+- [`xchain-binance`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-binance)
+- [`xchain-bitcoin`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoin)
+- [`xchain-bitcoincash`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoincash)
+- [`xchain-bsc`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bsc)
+- [`xchain-client`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-client)
+- [`xchain-cosmos`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cosmos)
+- [`xchain-crypto`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-crypto)
+- [`xchain-doge`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-doge)
+- [`xchain-ethereum`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-ethereum)
+- [`xchain-litecoin`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-litecoin)
+- [`xchain-thorchain`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain)
+- [`xchain-util`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-util)
+- [`xchain-thorchain-amm`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-amm)
+- [`xchain-thorchain-query`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-query)
+- [`xchain-avax`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-avax)
+- [`xchain-midgard`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-midgard)
+- [`xchain-thornode`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thornode)
 
 ## Advanced Features
 
@@ -67,11 +70,13 @@ For wallets that need even more flexibility (smart contract blockchains) the cli
 ## Tests
 
 Make sure Jest and Lerna is installed
+
 ```
 yarn add --dev jest lerna
 ```
 
 Start with
+
 ```
 yarn
 yarn build
@@ -119,5 +124,3 @@ Please ask in the telegram group to be added as a contributor.
 ## Bug Reports
 
 Please submit an issue and flag in the telegram group.
-
-

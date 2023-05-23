@@ -1,3 +1,47 @@
+# v0.13.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+
+# v.0.12.0 (2022-12-25)
+
+## Breaking change
+
+- Remove `Asset*` definitions
+- Change `Chain` enum to less strict `string` type
+- Remove `isChain`, `eqChain`, `chainToString`, `is*Chain`,
+
+# v.0.11.1 (2022-12-13)
+
+## Add
+
+- Add `register9Rheader()` to populate x-client-id header
+
+# v.0.11.0 (2022-xx-xx)
+
+## Breaking change
+
+- Remove `Terra` from `Chain`
+- Remove `AssetLUNA`
+
+# v.0.10.0 (2022-09-29)
+
+## Add
+
+- Add `assestFromStringEx()` to raise an exceptions in case of failures
+
+## Breaking change
+
+- Revert previous changes of `assestFromString()` to return null in case of failures
+
+# v.0.9.0 (2022-09-05)
+
+## Breaking change
+
+- moved `isAssetRuneNative()` into utils
+- changed `assestFromString()` to not return null, instead throw parsing error
+
 # v.0.8.1 (2022-08-15)
 
 ## Add

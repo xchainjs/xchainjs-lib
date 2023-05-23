@@ -1,6 +1,16 @@
-# v.0.2.6 (2021-09-02)
+# v0.3.0 (2023-05-02)
 
-- updated to the latest dependencies
+## Update
+
+- update rollup config and axios to the latest
+
+# v.0.2.7 (2023-03-10)
+
+- Update dependencies
+
+# v.0.2.6 (???)
+
+- ???
 
 # v.0.2.5 (2021-06-19)
 

@@ -1,3 +1,114 @@
+# v0.22.1 (2023-05-18)
+
+## Add
+
+- New client function getAssetInfo() returns chain, decimals and asset
+
+- renamed defaultBTCParams to defaultBtcParams to be more consistent with CamelCase
+
+# v0.22.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+
+# v.0.21.4 (2023-04-11)
+
+## Add
+
+- bump deps
+
+# v.0.21.3 (2023-04-05)
+
+## Add
+
+- Add async `broadcastTx()` to client
+- bump xchain-client deps
+
+# v.0.21.2 (2023-04-03)
+
+## Fix
+
+- remove references to process.env in runtime code
+
+# v.0.21.1 (2023-03-29)
+
+## Fix
+
+- make `buildtx` public again
+
+# v.0.21.0 (2023-03-21)
+
+## Update
+
+- add support for BlockCypher
+- Update to use `xchain-uxto-providers`
+
+# v.0.20.9 (2023-02-08)
+
+## Update
+
+- add support for sochain v3 API
+
+# v.0.20.8 (2023-01-19)
+
+## Update
+
+- Type safety `BTCChain`
+
+# v.0.20.7 (2022-12-27)
+
+## Add
+
+- Add `AssetBTC` and `BTCChain` definition
+
+## Update
+
+- Bump `xchain-client@13.5.0`
+
+# v.0.20.6 (2022-11-24)
+
+## Update
+
+- reverted `customRequestHeaders` to `BroadcastTxParams`
+
+# v.0.20.5 (2022-11-24)
+
+## Update
+
+- Added `customRequestHeaders` to `BroadcastTxParams`
+- Bumped `xchain-client`
+
+# v.0.20.4 (2022-10-14)
+
+## Update
+
+- Set Default network to `Network.Mainnet`
+
+# v.0.20.3 (2022-10-04)
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
+# v.0.20.2 (2022-09-30)
+
+## Update
+
+- changed default haskoin url to point to ninerealms
+
+# v.0.20.1 (2022-09-29)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
+# v.0.20.0 (2022-09-05)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
 # v.0.19.0 (2022-07-21)
 
 ### Breaking change

@@ -1,3 +1,75 @@
+# v0.21.1 (2023-05-18)
+
+## Add
+
+- New client function getAssetInfo() returns chain, decimals and asset
+
+# v0.21.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+
+# v.0.20.9 (2023-04-05)
+
+## Add
+
+- add `broadcastTx()` to client
+- bump xchain-client deps
+
+# v.0.20.8 (2023-01-25)
+
+## Update
+
+- Change API to `https://rest.cosmos.directory/cosmoshub`
+
+# v.0.20.7 (2023-01-19)
+
+## Update
+
+- Type safety `GAIAChain`
+
+# v.0.20.6 (2022-12-27)
+
+## Add
+
+- Add `AssetATOM` and `GAIAChain` definition
+
+## Update
+
+- Bump `xchain-client@13.5.0`
+
+# v.0.20.5 (2022-12-13)
+
+## Update
+
+- removed `customRequestHeaders`
+
+# v.0.20.4 (2022-11-22)
+
+## Update
+
+- Added `customRequestHeaders`
+- Bumped `xchain-client`
+
+# v.0.20.3 (2022-10-13)
+
+## Update
+
+- Set Default network to `Network.Mainnet`
+
+# v.0.20.2 (2022-xx-xx)
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
+# v.0.20.1 (2022-09-29)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
 # v.0.20.0 (2022-07-20)
 
 ## Change

@@ -29,7 +29,6 @@ describe('Client Test', () => {
 
   it('derive path correctly with bip44', () => {
     const ethClient = new Client({
-      network: Network.Mainnet,
       phrase,
       ethplorerUrl,
     })

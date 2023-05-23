@@ -3,6 +3,15 @@ import mock from './axios-adapter'
 export default {
   restore: mock.restore,
   init: () => {
+    mock.onGet(/\/thorchain\/pools/).reply(function () {
+      const resp = require(`./responses/thornode/thornodePools.json`)
+      return [200, resp]
+    })
+    //Mock thorchain/inbound_addresses
+    mock.onGet(/\/thorchain\/inbound_addresses/).reply(function () {
+      const resp = require(`./responses/thornode/inbound_addresses.json`)
+      return [200, resp]
+    })
     //Mock thornode observed tx
     mock.onGet(/\/thorchain\/tx\/276CE5005FF822294773C549E74513636808A6A9817FE7ADCE1709EE06BC7F52/).reply(function () {
       const resp = require(`./responses/thornode/thornodeObservedTx.json`)
@@ -33,7 +42,6 @@ export default {
       const resp = require(`./responses/thornode/lastBlock.json`)
       return [200, resp]
     })
-
     // Mock Outbound Confirmed tx
     mock.onGet(/\/thorchain\/tx\/776CE5005FF822294773C549E74513636808A6A9817FE7ADCE1709EE06BC7F53/).reply(function () {
       const resp = require('./responses/thornode/thornodeTx.json')

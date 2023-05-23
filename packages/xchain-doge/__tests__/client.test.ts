@@ -1,14 +1,38 @@
-import { Network } from '@xchainjs/xchain-client'
-import { AssetDOGE, baseAmount } from '@xchainjs/xchain-util'
+import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
+import { baseAmount } from '@xchainjs/xchain-util'
 
+import mocktxId from '../__mocks__/response/broadcast_tx/broadcast_transaction.json'
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode'
 import { Client } from '../src/client'
-import { LOWER_FEE_BOUND, MIN_TX_FEE } from '../src/const'
+import {
+  AssetDOGE,
+  LOWER_FEE_BOUND,
+  MIN_TX_FEE,
+  UPPER_FEE_BOUND,
+  blockstreamExplorerProviders,
+  sochainDataProviders,
+} from '../src/const'
 
 mockSochainApi.init()
 
-const dogeClient = new Client({ network: Network.Testnet })
+export const defaultDogeParams: UtxoClientParams = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: blockstreamExplorerProviders,
+  dataProviders: [sochainDataProviders],
+  rootDerivationPaths: {
+    [Network.Mainnet]: `m/44'/3'/0'/0/`,
+    [Network.Stagenet]: `m/44'/3'/0'/0/`,
+    [Network.Testnet]: `m/44'/1'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
+}
+
+const dogeClient = new Client({ ...defaultDogeParams })
 
 describe('DogecoinClient Test', () => {
   beforeEach(() => {
@@ -30,6 +54,12 @@ describe('DogecoinClient Test', () => {
   const mainnet_address_path0 = 'D6Wmy5cmPMDmZjvQpvxk2XTzKhgPJ43ho9'
   const mainnet_address_path1 = 'DToAEBCvzfxqsZX2u4xkLfMXVbkyAwebkn'
 
+  it('Default network should be mainnet', () => {
+    const getNetwork = dogeClient.getNetwork()
+    const result = Network.Mainnet
+    expect(result).toEqual(getNetwork)
+  })
+
   it('set phrase should return correct address', () => {
     dogeClient.setNetwork(Network.Testnet)
     const result = dogeClient.setPhrase(phraseOne)
@@ -46,9 +76,7 @@ describe('DogecoinClient Test', () => {
 
   it('should not throw on a client without a phrase', () => {
     expect(() => {
-      new Client({
-        network: Network.Testnet,
-      })
+      new Client()
     }).not.toThrow()
   })
 
@@ -121,7 +149,8 @@ describe('DogecoinClient Test', () => {
     dogeClient.setPhrase(phraseOne)
     const amount = baseAmount(5000000000)
     const txid = await dogeClient.transfer({ recipient: testnet_address_path1, amount, feeRate: LOWER_FEE_BOUND })
-    expect(txid).toEqual('mock-txid-sochain')
+
+    expect(txid).toEqual(mocktxId.tx_hex)
   })
 
   it('should broadcast a normal transfer without feeRate', async () => {
@@ -129,7 +158,7 @@ describe('DogecoinClient Test', () => {
     dogeClient.setPhrase(phraseOne)
     const amount = baseAmount(100)
     const txid = await dogeClient.transfer({ recipient: testnet_address_path0, amount })
-    expect(txid).toEqual('mock-txid-sochain')
+    expect(txid).toEqual(mocktxId.tx_hex)
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
@@ -144,7 +173,7 @@ describe('DogecoinClient Test', () => {
         memo: MEMO,
         feeRate: LOWER_FEE_BOUND,
       })
-      expect(txid).toEqual('mock-txid-sochain')
+      expect(txid).toEqual(mocktxId.tx_hex)
     } catch (err) {
       console.log('ERR running test', err)
       throw err
@@ -242,7 +271,7 @@ describe('DogecoinClient Test', () => {
     dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const invalidAddress = 'error_address'
-    const expectedError = 'Could not get balances for address error_address'
+    const expectedError = 'no provider able to get balance'
     return expect(dogeClient.getBalance(invalidAddress)).rejects.toThrow(expectedError)
   })
 
@@ -263,7 +292,6 @@ describe('DogecoinClient Test', () => {
     dogeClient.setNetwork(Network.Testnet)
 
     const txPages = await dogeClient.getTransactions({ address: 'nVhTSAcDWg5PihJA7FCx6G6jLexRz7qhsB', limit: 4 })
-
     expect(txPages.total).toEqual(2)
     expect(txPages.txs[0].asset).toEqual(AssetDOGE)
     expect(txPages.txs[0].date).toEqual(new Date('2021-12-22T00:39:13.000Z'))

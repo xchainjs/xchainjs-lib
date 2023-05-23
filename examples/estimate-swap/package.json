@@ -1,0 +1,25 @@
+{
+  "name": "xchainjs-test",
+  "version": "1.0.0",
+  "scripts": {
+    "listPools": "npx ts-node listPools.ts",
+    "estimateSwap": "npx ts-node estimateSwap.ts",
+    "doSwap": "npx ts-node doSwap.ts"
+  },
+  "description": "Test folder for xchainjs thorchain-amm package",
+  "main": "index.js",
+  "author": "THORIANITE",
+  "license": "MIT",
+  "dependencies": {
+    "@xchainjs/xchain-thorchain-query": "file:../../packages/xchain-thorchain-query",
+    "@xchainjs/xchain-client": "file:../../packages/xchain-client",
+    "@xchainjs/xchain-midgard": "file:../../packages/xchain-midgard",
+    "@xchainjs/xchain-thornode": "file:../../packages/xchain-thornode",
+    "@xchainjs/xchain-util": "file:../../packages/xchain-util",
+    "@xchainjs/xchain-crypto": "file:../../packages/xchain-crypto",
+    "axios": "^1.3.6",
+    "axios-retry": "^3.2.5",
+    "bignumber.js": "9.0.1",
+    "rimraf": "~3.0.2"
+  }
+}

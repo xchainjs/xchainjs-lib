@@ -1,6 +1,6 @@
-import { proto } from '@cosmos-client/core'
+import { proto } from '@cosmos-client/core/cjs/module'
 import {
-  Address,
+  AssetInfo,
   Balance,
   BaseXChainClient,
   FeeType,
@@ -15,10 +15,10 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
-import { AssetAtom, COSMOS_DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT } from './const'
+import { AssetATOM, COSMOS_DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT, GAIAChain } from './const'
 import { CosmosSDKClient } from './cosmos/sdk-client'
 import { TxOfflineParams } from './cosmos/types'
 import { ChainIds, ClientUrls, CosmosClientParams } from './types'
@@ -30,7 +30,7 @@ import {
   getDenom,
   getTxsFromHistory,
   protoFee,
-} from './util'
+} from './utils'
 
 /**
  * Interface for custom Cosmos client
@@ -58,13 +58,13 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
   constructor({
-    network = Network.Testnet,
+    network = Network.Mainnet,
     phrase,
     clientUrls = getDefaultClientUrls(),
     chainIds = getDefaultChainIds(),
     rootDerivationPaths = getDefaultRootDerivationPaths(),
   }: XChainClientParams & CosmosClientParams) {
-    super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
+    super(GAIAChain, { network, rootDerivationPaths, phrase })
 
     this.clientUrls = clientUrls
     this.chainIds = chainIds
@@ -191,6 +191,18 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   }
 
   /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetATOM,
+      decimal: COSMOS_DECIMAL,
+    }
+    return assetInfo
+  }
+
+  /**
    * Get transaction history of a given address and asset with pagination options.
    * If `asset` is not set, history will include `ATOM` txs only
    * By default it will return the transaction history of the current wallet.
@@ -204,7 +216,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     const limit = (params && params.limit) || undefined
     const txMinHeight = undefined
     const txMaxHeight = undefined
-    const asset = getAsset(params?.asset ?? '') || AssetAtom
+    const asset = getAsset(params?.asset ?? '') || AssetATOM
     const messageSender = params?.address ?? this.getAddress()
 
     const txHistory = await this.getSDKClient().searchTx({
@@ -235,7 +247,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       throw new Error('transaction not found')
     }
 
-    const txs = getTxsFromHistory([txResult], AssetAtom)
+    const txs = getTxsFromHistory([txResult], AssetATOM)
     if (txs.length === 0) throw new Error('transaction not found')
 
     return txs[0]
@@ -249,7 +261,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    */
   async transfer({
     walletIndex,
-    asset = AssetAtom,
+    asset = AssetATOM,
     amount,
     recipient,
     memo,
@@ -284,7 +296,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    */
   async transferOffline({
     walletIndex,
-    asset = AssetAtom,
+    asset = AssetATOM,
     amount,
     recipient,
     memo,
@@ -313,6 +325,9 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       memo,
       fee,
     })
+  }
+  async broadcastTx(txHex: string): Promise<TxHash> {
+    return await this.getSDKClient().broadcast(txHex)
   }
 
   /**

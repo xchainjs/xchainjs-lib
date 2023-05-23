@@ -1,3 +1,63 @@
+# v0.14.1 (2023-05-18)
+
+## Add
+
+- Abstract function getAssetInfo()
+
+# v0.14.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+
+# v.0.13.7 (2023-04-05)
+
+## Add
+
+- add `broadcastTx()` to `BaseXChainClient` & `UTXOClient`
+
+# v.0.13.6 (2023-03-23)
+
+## Add
+
+- add OnlineDataProvider, UtxoOnlineDataProvider, ExplorerProvider
+
+# v.0.13.5 (2022-12-27)
+
+## Update
+
+- Bump `xchain-util@0.12.0`
+
+# v.0.13.4 (2022-12-13)
+
+## Update
+
+- removed `customRequestHeaders` from BaseXChainClient
+
+# v.0.13.3 (2022-11-24)
+
+## Update
+
+- added `customRequestHeaders` to BaseXChainClient
+
+# v.0.13.2 (2022-xx-xx)
+
+## Update
+
+- Bumped `xchain-utils`
+
+# v.0.13.1 (2022-09-29)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
+# v.0.13.0 (2022-09-05)
+
+### Breaking change
+
+- moved isAssetRuneNative(), strip0x(), strip0x() from other libs into client
+
 # v.0.12.0 (2022-07-20)
 
 ### Breaking change

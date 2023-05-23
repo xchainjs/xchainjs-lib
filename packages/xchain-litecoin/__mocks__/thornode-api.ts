@@ -22,13 +22,15 @@ export default {
     })
 
     // Mock ltc node send tx
-    mock.onPost(/ltc.thorchain.info/).reply(() => [
-      200,
-      {
-        id: '1',
-        result: 'mock-txid',
-        error: null,
-      },
-    ])
+    mock.onPost(/ltc.thorchain.info/).reply(() => {
+      return [
+        200,
+        {
+          id: '1',
+          result: 'mock-txid',
+          error: null,
+        },
+      ]
+    })
   },
 }

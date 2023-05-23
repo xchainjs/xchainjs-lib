@@ -1,5 +1,4 @@
-import { Address } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { Signer, ethers, providers } from 'ethers'
 
 import erc20ABI from './data/erc20.json'
@@ -154,6 +153,26 @@ export const call = async <T>({
     contract = contract.connect(signer)
   }
   return contract[funcName](...funcParams)
+}
+
+/**
+ * Load a contract.
+ *
+ * @param {Provider} provider Provider to interact with the contract.
+ * @param {Address} contractAddress The contract address.
+ * @param {ContractInterface} abi The contract ABI json.
+ *
+ */
+export const getContract = async ({
+  provider,
+  contractAddress,
+  abi,
+}: {
+  provider: providers.Provider
+  contractAddress: Address
+  abi: ethers.ContractInterface
+}): Promise<ethers.Contract> => {
+  return new ethers.Contract(contractAddress, abi, provider)
 }
 
 /**

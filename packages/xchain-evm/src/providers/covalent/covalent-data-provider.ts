@@ -1,9 +1,9 @@
 import {
-  Address,
   Balance,
   FeeOption,
   FeeType,
   Fees,
+  OnlineDataProvider,
   Tx,
   TxFrom,
   TxHistoryParams,
@@ -11,11 +11,8 @@ import {
   TxType,
   TxsPage,
 } from '@xchainjs/xchain-client'
-import { Asset, AssetAVAX, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
-
-import { GasPrices } from '../../types'
-import { OnlineDataProvider } from '../../types/provider-types'
 
 import {
   GetBalanceResponse,
@@ -24,6 +21,10 @@ import {
   GetTransactionsResponse,
   getTxsParams,
 } from './types'
+
+// Don't import from @xchainjs/xchain-avax to avoid circular dependency
+const AVAXChain: Chain = 'AVAX'
+const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
 
 export class CovalentProvider implements OnlineDataProvider {
   private baseUrl = 'https://api.covalenthq.com'
@@ -41,15 +42,7 @@ export class CovalentProvider implements OnlineDataProvider {
     this.nativeAssetDecimals = nativeAssetDecimals
     this.nativeAsset
   }
-  async estimateGasPrices(): Promise<GasPrices> {
-    // TODO get gas prices
-    // try {
-    //   return await this.estimateGasPricesFromEtherscan()
-    // } catch (error) {
-    //   return Promise.reject(new Error(`Failed to estimate gas price: ${error}`))
-    // }
-    throw Error('not implemented')
-  }
+
   async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
     const balances: Balance[] = []
     const response = (
@@ -119,7 +112,7 @@ export class CovalentProvider implements OnlineDataProvider {
 
   //   // }
   //   return {
-  //     chain: Chain.Avalanche,
+  //     chain: AVAXChain,
   //     symbol: 'string',
   //     ticker: 'string',
   //     synth: false,
@@ -146,7 +139,7 @@ export class CovalentProvider implements OnlineDataProvider {
 
   //   return {
   //     asset: {
-  //       chain: Chain.Avalanche,
+  //       chain: AVAXChain,
   //       symbol: 'string',
   //       ticker: 'string',
   //       synth: false,

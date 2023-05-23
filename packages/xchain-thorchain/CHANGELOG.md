@@ -1,3 +1,114 @@
+# v0.28.1 (2023-05-18)
+
+## Add
+
+- New client function getAssetInfo() returns chain, decimals and asset & rename DECIMAL - RUNE_DECIMAL
+
+# v0.28.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+- udpate `@types/big.js`
+
+# v.0.27.11 (2023-04-04)
+
+## Add
+
+- add `broadcastTx()` to client
+- bump dependencies
+
+# v.0.27.10 (2023-03-01)
+
+## Fix
+
+- Fix method `getTransactions`
+
+# v.0.27.9 (2023-02-23)
+
+## FIX
+
+- `getTransactionData` mapping bug.
+- Update dependencies
+
+# v.0.27.8 (2023-01-19)
+
+## Update
+
+- Type safety `THORChain`
+
+# v.0.27.7 (2022-12-27)
+
+## Add
+
+- Add `AssetRune67C`, `AssetRuneB1A`, `AssetRuneERC20`, `AssetRuneERC20Testnet`, `THORChain` and `AssetRuneNative` definitions
+
+## Update
+
+- Bump `xchain-client@13.5.0`
+
+## Update
+
+- Change `AssetETH`, `AssetBNB` and `GAIAChain` imports to its own `xchain-*` package
+
+# v.0.27.6 (2022-12-13)
+
+## Update
+
+- removed `customRequestHeaders`
+
+# v.0.27.5 (2022-12-12)
+
+## Update
+
+- Add optional `sequence` to `transfer` and `deposit` to override `sequence`
+- Add helpers `getAccount` and `getSequence` to `utils`
+
+# v.0.27.4 (2022-11-??)
+
+# v.0.27.3 (2022-11-24)
+
+## Update
+
+- Added `customRequestHeaders` to `BroadcastTxParams`
+- Bump `xchain-client`
+
+# v.0.27.2 (2022-11-08)
+
+## Update
+
+- changed chain-id-stagenet to `thorchain-stagenet-v2`
+
+# v.0.27.1 (2022-10-13)
+
+- added default `chainIds` in constructor
+- added default `explorerUrls` in constructor
+- Set Default network to `Network.Mainnet`
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
+# v0.27.0 (2022-10-07)
+
+## Breaking Changes
+
+- Removed `getDefaultClientUrl`
+- Removed `getChainIds`
+- Update `ThorchainClientParams` to make clientUrl required (not optional)
+
+# v.0.26.2 (2022-10-06)
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
+# v.0.26.1 (2022-09-29)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
 # v.0.26.0 (2022-07-20)
 
 ## Change

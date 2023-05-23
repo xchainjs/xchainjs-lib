@@ -1,9 +1,9 @@
 import { validatePhrase } from '@xchainjs/xchain-crypto'
-import { Asset, Chain } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import {
-  Address,
+  AssetInfo,
   Balance,
   FeeBounds,
   FeeRate,
@@ -11,6 +11,7 @@ import {
   Network,
   RootDerivationPaths,
   Tx,
+  TxHash,
   TxHistoryParams,
   TxParams,
   TxsPage,
@@ -43,6 +44,7 @@ export abstract class BaseXChainClient implements XChainClient {
     this.chain = chain
     this.network = params.network || Network.Testnet
     this.feeBounds = params.feeBounds || { lower: 1, upper: Infinity }
+
     // Fire off a warning in the console to indicate that stagenet and real assets are being used.
     if (this.network === Network.Stagenet) console.warn('WARNING: This is using stagenet! Real assets are being used!')
     if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths
@@ -145,6 +147,7 @@ export abstract class BaseXChainClient implements XChainClient {
   public purgeClient(): void {
     this.phrase = ''
   }
+
   //individual clients will need to implement these
   abstract getFees(): Promise<Fees>
   abstract getAddress(walletIndex?: number): string
@@ -156,4 +159,6 @@ export abstract class BaseXChainClient implements XChainClient {
   abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
   abstract transfer(params: TxParams): Promise<string>
+  abstract broadcastTx(txHex: string): Promise<TxHash>
+  abstract getAssetInfo(): AssetInfo
 }

@@ -2,7 +2,7 @@ import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 import {
-  Address,
+  AssetInfo,
   Balance,
   BaseXChainClient,
   FeeType,
@@ -18,10 +18,9 @@ import {
   singleFee,
 } from '@xchainjs/xchain-client'
 import {
+  Address,
   Asset,
-  AssetBNB,
   BaseAmount,
-  Chain,
   assetAmount,
   assetFromString,
   assetToBase,
@@ -31,6 +30,7 @@ import {
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
+import { AssetBNB, BNBChain, BNB_DECIMAL } from './const'
 import {
   Account,
   Balance as BinanceBalance,
@@ -39,7 +39,7 @@ import {
   TransferFee,
   TxPage as BinanceTxPage,
 } from './types/binance'
-import { getPrefix, isAccount, isTransferFee, parseTx } from './util'
+import { getPrefix, isAccount, isTransferFee, parseTx } from './utils'
 
 type PrivKey = string
 
@@ -90,8 +90,16 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
-  constructor(params: XChainClientParams) {
-    super(Chain.Binance, params)
+  constructor({
+    network = Network.Mainnet,
+    phrase,
+    rootDerivationPaths = {
+      [Network.Mainnet]: "44'/931'/0'/0/",
+      [Network.Stagenet]: "44'/931'/0'/0/",
+      [Network.Testnet]: "44'/931'/0'/0/",
+    },
+  }: XChainClientParams) {
+    super(BNBChain, { network, rootDerivationPaths, phrase })
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(this.getNetwork())
   }
@@ -221,6 +229,17 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   validateAddress(address: Address): boolean {
     return this.bncClient.checkAddress(address, getPrefix(this.network))
   }
+  /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetBNB,
+      decimal: BNB_DECIMAL,
+    }
+    return assetInfo
+  }
 
   /**
    * Get account data of wallets or by given address.
@@ -252,7 +271,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     return balances
       .map((balance) => {
         return {
-          asset: assetFromString(`${Chain.Binance}.${balance.symbol}`) || AssetBNB,
+          asset: assetFromString(`${BNBChain}.${balance.symbol}`) || AssetBNB,
           amount: assetToBase(assetAmount(balance.free, 8)),
         }
       })
@@ -395,6 +414,10 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     )
 
     return transferResult.result.map((txResult: { hash?: TxHash }) => txResult?.hash ?? '')[0]
+  }
+  async broadcastTx(txHex: string): Promise<string> {
+    const tx = await this.bncClient.sendRawTransaction(txHex)
+    return tx.result
   }
 
   /**

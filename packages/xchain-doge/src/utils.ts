@@ -1,25 +1,9 @@
-import {
-  Address,
-  Balance,
-  FeeRate,
-  Fees,
-  FeesWithRates,
-  Network,
-  TxHash,
-  TxParams,
-  calcFees,
-  standardFeeRates,
-} from '@xchainjs/xchain-client'
-import { AssetDOGE, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { FeeRate, Fees, FeesWithRates, Network, UTXO, calcFees, standardFeeRates } from '@xchainjs/xchain-client'
+import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as Dogecoin from 'bitcoinjs-lib'
 import coininfo from 'coininfo'
-import accumulative from 'coinselect/accumulative'
 
-import { DOGE_DECIMAL, MIN_TX_FEE } from './const'
-import * as nodeApi from './node-api'
-import * as sochain from './sochain-api'
-import { BroadcastTxParams, UTXO } from './types/common'
-import { DogeAddressUTXO } from './types/sochain-api-types'
+import { MIN_TX_FEE } from './const'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
@@ -107,30 +91,6 @@ export const dogeNetwork = (network: Network): Dogecoin.networks.Network => {
 }
 
 /**
- * Get the balances of an address.
- *
- * @param params
- * @returns {Balance[]} The balances of the given address.
- */
-export const getBalance = async (params: {
-  sochainUrl: string
-  network: Network
-  address: string
-}): Promise<Balance[]> => {
-  try {
-    const balance = await sochain.getBalance(params)
-    return [
-      {
-        asset: AssetDOGE,
-        amount: balance,
-      },
-    ]
-  } catch (error) {
-    throw new Error(`Could not get balances for address ${params.address}`)
-  }
-}
-
-/**
  * Validate the Doge address.
  *
  * @param {string} address
@@ -143,159 +103,6 @@ export const validateAddress = (address: Address, network: Network): boolean => 
     return true
   } catch (error) {
     return false
-  }
-}
-
-// Stores list of txHex in memory to avoid requesting same data
-const txHexMap: Record<TxHash, string> = {}
-
-/**
- * Helper to get `hex` of `Tx`
- *
- * It will try to get it from cache before requesting it from Sochain
- */
-const getTxHex = async ({
-  txHash,
-  sochainUrl,
-  network,
-}: {
-  sochainUrl: string
-  txHash: TxHash
-  network: Network
-}): Promise<string> => {
-  // try to get hex from cache
-  const txHex = txHexMap[txHash]
-  if (!!txHex) return txHex
-  // or get it from Sochain
-  const { tx_hex } = await sochain.getTx({ hash: txHash, sochainUrl, network })
-  // cache it
-  txHexMap[txHash] = tx_hex
-  return tx_hex
-}
-
-/**
- * Scan UTXOs from sochain.
- *
- * @param params
- * @returns {UTXO[]} The UTXOs of the given address.
- */
-export const scanUTXOs = async ({
-  sochainUrl,
-  network,
-  address,
-  withTxHex,
-}: {
-  sochainUrl: string
-  network: Network
-  address: string
-  withTxHex: boolean
-}): Promise<UTXO[]> => {
-  const utxos: DogeAddressUTXO[] = await sochain.getUnspentTxs({
-    sochainUrl,
-    network,
-    address,
-  })
-
-  return await Promise.all(
-    utxos.map(async (utxo) => ({
-      hash: utxo.txid,
-      index: utxo.output_no,
-      value: assetToBase(assetAmount(utxo.value, DOGE_DECIMAL)).amount().toNumber(),
-      txHex: withTxHex ? await getTxHex({ txHash: utxo.txid, sochainUrl, network }) : undefined,
-    })),
-  )
-}
-
-/**
- * Build transcation.
- *
- * @param {BuildParams} params The transaction build options.
- * @returns {Transaction}
- */
-export const buildTx = async ({
-  amount,
-  recipient,
-  memo,
-  feeRate,
-  sender,
-  network,
-  sochainUrl,
-  withTxHex = false,
-}: TxParams & {
-  feeRate: FeeRate
-  sender: Address
-  network: Network
-  sochainUrl: string
-  withTxHex?: boolean
-}): Promise<{ psbt: Dogecoin.Psbt; utxos: UTXO[] }> => {
-  if (!validateAddress(recipient, network)) throw new Error('Invalid address')
-
-  const utxos = await scanUTXOs({ sochainUrl, network, address: sender, withTxHex })
-  if (utxos.length === 0) throw new Error('No utxos to send')
-
-  const feeRateWhole = Number(feeRate.toFixed(0))
-  const compiledMemo = memo ? compileMemo(memo) : null
-
-  const targetOutputs = []
-  //1. output to recipient
-  targetOutputs.push({
-    address: recipient,
-    value: amount.amount().toNumber(),
-  })
-  //2. add output memo to targets (optional)
-  if (compiledMemo) {
-    targetOutputs.push({ script: compiledMemo, value: 0 })
-  }
-  const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-
-  // .inputs and .outputs will be undefined if no solution was found
-  if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
-
-  const psbt = new Dogecoin.Psbt({ network: dogeNetwork(network) }) // Network-specific
-  // TODO: Doge recommended fees is greater than the recommended by Bitcoinjs-lib (for BTC),
-  //       so we need to increase the maximum fee rate. Currently, the fast rate fee is near ~650000sats/byte
-  psbt.setMaximumFeeRate(650000)
-  const params = { sochainUrl, network, address: sender }
-
-  for (const utxo of inputs) {
-    psbt.addInput({
-      hash: utxo.hash,
-      index: utxo.index,
-      nonWitnessUtxo: Buffer.from((await sochain.getTx({ hash: utxo.hash, ...params })).tx_hex, 'hex'),
-    })
-  }
-
-  // Outputs
-  outputs.forEach((output: Dogecoin.PsbtTxOutput) => {
-    if (!output.address) {
-      //an empty address means this is the  change address
-      output.address = sender
-    }
-    if (!output.script) {
-      psbt.addOutput(output)
-    } else {
-      //we need to add the compiled memo this way to
-      //avoid dust error tx when accumulating memo output with 0 value
-      if (compiledMemo) {
-        psbt.addOutput({ script: compiledMemo, value: 0 })
-      }
-    }
-  })
-
-  return { psbt, utxos }
-}
-
-/**
- * Broadcast the transaction.
- *
- * @param {BroadcastTxParams} params The transaction broadcast options.
- * @returns {TxHash} The transaction hash.
- */
-export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
-  if (params.network === Network.Testnet) {
-    return await nodeApi.broadcastTxToSochain(params)
-  } else {
-    return await nodeApi.broadcastTxToBlockCypher(params)
   }
 }
 

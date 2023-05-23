@@ -6,7 +6,6 @@ export {
   getDefaultFees,
   getDefaultFeesWithRates,
   getPrefix,
-  LTC_DECIMAL,
   validateAddress,
   calcFee,
 } from './utils'

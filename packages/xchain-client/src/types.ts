@@ -1,11 +1,14 @@
-import { Asset, BaseAmount } from '@xchainjs/xchain-util'
-
-export type Address = string
+import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util'
 
 export enum Network {
   Mainnet = 'mainnet',
   Stagenet = 'stagenet',
   Testnet = 'testnet',
+}
+
+export type AssetInfo = {
+  asset: Asset
+  decimal: number
 }
 
 export type Balance = {
@@ -116,6 +119,9 @@ export interface XChainClient {
   getFees(): Promise<Fees>
 
   transfer(params: TxParams): Promise<TxHash>
+  // prepareTx(params: TxParams): Promise<UnsignedTx>
+  // signTx(params: UnsignedTx, signer: Signer): Promise<SignedTx>
+  broadcastTx(txHex: string): Promise<TxHash>
 
   purgeClient(): void
 }

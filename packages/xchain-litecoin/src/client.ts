@@ -1,142 +1,86 @@
 import {
-  Address,
-  Balance,
+  AssetInfo,
   Fee,
   FeeOption,
   FeeRate,
   Network,
-  Tx,
   TxHash,
-  TxHistoryParams,
   TxParams,
-  TxType,
-  TxsPage,
+  UTXO,
   UTXOClient,
-  XChainClientParams,
+  UtxoClientParams,
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { AssetLTC, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Address } from '@xchainjs/xchain-util'
+import axios from 'axios'
 import * as Litecoin from 'bitcoinjs-lib'
+import accumulative from 'coinselect/accumulative'
 
-import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
-import * as sochain from './sochain-api'
+import {
+  AssetLTC,
+  BlockcypherDataProviders,
+  LOWER_FEE_BOUND,
+  LTCChain,
+  LTC_DECIMAL,
+  UPPER_FEE_BOUND,
+  explorerProviders,
+} from './const'
 import { NodeAuth } from './types'
-import { TxIO } from './types/sochain-api-types'
 import * as Utils from './utils'
 
-export type LitecoinClientParams = XChainClientParams & {
-  sochainUrl?: string
-  nodeUrl?: string
-  nodeAuth?: NodeAuth | null
+const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
+
+export type NodeUrls = Record<Network, string>
+
+export const defaultLtcParams: UtxoClientParams & {
+  nodeUrls: NodeUrls
+  nodeAuth?: NodeAuth
+} = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: explorerProviders,
+  dataProviders: [BlockcypherDataProviders],
+  rootDerivationPaths: {
+    [Network.Mainnet]: `m/84'/2'/0'/0/`,
+    [Network.Testnet]: `m/84'/1'/0'/0/`,
+    [Network.Stagenet]: `m/84'/2'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
+  nodeUrls: {
+    [Network.Mainnet]: 'https://litecoin.ninerealms.com',
+    [Network.Stagenet]: 'https://litecoin.ninerealms.com',
+    [Network.Testnet]: 'https://testnet.ltc.thorchain.info',
+  },
 }
 
 /**
  * Custom Litecoin client
  */
 class Client extends UTXOClient {
-  private sochainUrl = ''
-  private nodeUrl = ''
+  private nodeUrls: NodeUrls
   private nodeAuth?: NodeAuth
 
   /**
    * Constructor
    * Client is initialised with network type
-   * Pass strict null as nodeAuth to disable auth for node json rpc
    *
-   * @param {LitecoinClientParams} params
+   * @param {UtxoClientParams} params
    */
-  constructor({
-    network = Network.Testnet,
-    feeBounds = {
-      lower: LOWER_FEE_BOUND,
-      upper: UPPER_FEE_BOUND,
-    },
-    sochainUrl = 'https://sochain.com/api/v2',
-    phrase,
-    nodeUrl,
-    nodeAuth = {
-      username: 'thorchain',
-      password: 'password',
-    },
-    rootDerivationPaths = {
-      [Network.Mainnet]: `m/84'/2'/0'/0/`,
-      [Network.Testnet]: `m/84'/1'/0'/0/`,
-      [Network.Stagenet]: `m/84'/2'/0'/0/`,
-    },
-  }: LitecoinClientParams) {
-    super(Chain.Litecoin, { network, rootDerivationPaths, phrase, feeBounds })
-    this.nodeUrl =
-      nodeUrl ??
-      (() => {
-        switch (network) {
-          case Network.Mainnet:
-          case Network.Stagenet:
-            return 'https://ltc.thorchain.info'
-          case Network.Testnet:
-            return 'https://testnet.ltc.thorchain.info'
-        }
-      })()
-
-    this.nodeAuth =
-      // Leave possibility to send requests without auth info for user
-      // by strictly passing nodeAuth as null value
-      nodeAuth === null ? undefined : nodeAuth
-
-    this.setSochainUrl(sochainUrl)
-  }
-
-  /**
-   * Set/Update the sochain url.
-   *
-   * @param {string} url The new sochain url.
-   * @returns {void}
-   */
-  setSochainUrl(url: string): void {
-    this.sochainUrl = url
-  }
-
-  /**
-   * Get the explorer url.
-   *
-   * @returns {string} The explorer url based on the network.
-   */
-  getExplorerUrl(): string {
-    switch (this.network) {
-      case Network.Mainnet:
-      case Network.Stagenet:
-        return 'https://blockchair.com/litecoin'
-      case Network.Testnet:
-        return 'https://blockexplorer.one/litecoin/testnet'
-    }
-  }
-
-  /**
-   * Get the explorer url for the given address.
-   *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address based on the network.
-   */
-  getExplorerAddressUrl(address: Address): string {
-    return `${this.getExplorerUrl()}/address/${address}`
-  }
-
-  /**
-   * Get the explorer url for the given transaction id.
-   *
-   * @param {string} txID The transaction id
-   * @returns {string} The explorer url for the given transaction id based on the network.
-   */
-  getExplorerTxUrl(txID: string): string {
-    switch (this.network) {
-      case Network.Mainnet:
-      case Network.Stagenet:
-        // blockchair
-        return `${this.getExplorerUrl()}/transaction/${txID}`
-      case Network.Testnet:
-        // blockexplorer.one
-        return `${this.getExplorerUrl()}/blockHash/${txID}`
-    }
+  constructor(params = defaultLtcParams) {
+    super(LTCChain, {
+      network: params.network,
+      rootDerivationPaths: params.rootDerivationPaths,
+      phrase: params.phrase,
+      feeBounds: params.feeBounds,
+      explorerProviders: params.explorerProviders,
+      dataProviders: params.dataProviders,
+    })
+    this.nodeUrls = params.nodeUrls
+    this.nodeAuth = params.nodeAuth
   }
 
   /**
@@ -162,13 +106,24 @@ class Client extends UTXOClient {
         pubkey: ltcKeys.publicKey,
         network: ltcNetwork,
       })
-
       if (!address) {
         throw new Error('Address not defined')
       }
       return address
     }
     throw new Error('Phrase must be provided')
+  }
+
+  /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetLTC,
+      decimal: LTC_DECIMAL,
+    }
+    return assetInfo
   }
 
   /**
@@ -205,97 +160,15 @@ class Client extends UTXOClient {
     return Utils.validateAddress(address, this.network)
   }
 
-  /**
-   * Get the LTC balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Balance[]} The LTC balance of the address.
-   */
-  async getBalance(address: Address): Promise<Balance[]> {
-    return Utils.getBalance({
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-      address,
-    })
-  }
-
-  /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   */
-  async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    // Sochain API doesn't have pagination parameter
-    const offset = params?.offset ?? 0
-    const limit = params?.limit || 10
-    const response = await sochain.getAddress({
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-      address: `${params?.address}`,
-    })
-    const total = response.txs.length
-    const transactions: Tx[] = []
-
-    const txs = response.txs.filter((_, index) => offset <= index && index < offset + limit)
-    for (const txItem of txs) {
-      const rawTx = await sochain.getTx({
-        sochainUrl: this.sochainUrl,
-        network: this.network,
-        hash: txItem.txid,
-      })
-      const tx: Tx = {
-        asset: AssetLTC,
-        from: rawTx.inputs.map((i: TxIO) => ({
-          from: i.address,
-          amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
-        })),
-        to: rawTx.outputs
-          // ignore tx with type 'nulldata'
-          .filter((i: TxIO) => i.type !== 'nulldata')
-          .map((i: TxIO) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
-        date: new Date(rawTx.time * 1000),
-        type: TxType.Transfer,
-        hash: rawTx.txid,
-      }
-      transactions.push(tx)
-    }
-
-    const result: TxsPage = {
-      total,
-      txs: transactions,
-    }
-    return result
-  }
-
-  /**
-   * Get the transaction details of a given transaction id.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   */
-  async getTransactionData(txId: string): Promise<Tx> {
-    const rawTx = await sochain.getTx({
-      sochainUrl: this.sochainUrl,
-      network: this.network,
-      hash: txId,
-    })
-    return {
-      asset: AssetLTC,
-      from: rawTx.inputs.map((i) => ({
-        from: i.address,
-        amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)),
-      })),
-      to: rawTx.outputs.map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, Utils.LTC_DECIMAL)) })),
-      date: new Date(rawTx.time * 1000),
-      type: TxType.Transfer,
-      hash: rawTx.txid,
-    }
-  }
-
   protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    return await sochain.getSuggestedTxFee()
+    //use Bitgo API for fee estimation
+    //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
+    try {
+      const response = await axios.get('https://app.bitgo.com/api/v2/ltc/tx/fee')
+      return response.data.feePerKb / 1000 // feePerKb to feePerByte
+    } catch (error) {
+      return DEFAULT_SUGGESTED_TRANSACTION_FEE
+    }
   }
 
   protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
@@ -310,15 +183,15 @@ class Client extends UTXOClient {
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const fromAddressIndex = params?.walletIndex || 0
+
+    // set the default fee rate to `fast`
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
 
-    const { psbt } = await Utils.buildTx({
+    const { psbt } = await this.buildTx({
       ...params,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
-      sochainUrl: this.sochainUrl,
-      network: this.network,
     })
     const ltcKeys = this.getLtcKeys(this.phrase, fromAddressIndex)
     psbt.signAllInputs(ltcKeys) // Sign all inputs
@@ -327,9 +200,72 @@ class Client extends UTXOClient {
 
     return await Utils.broadcastTx({
       txHex,
-      nodeUrl: this.nodeUrl,
+      nodeUrl: this.nodeUrls[this.network],
       auth: this.nodeAuth,
     })
+  }
+  buildTx = async ({
+    amount,
+    recipient,
+    memo,
+    feeRate,
+    sender,
+  }: TxParams & {
+    feeRate: FeeRate
+    sender: Address
+  }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXO[] }> => {
+    if (!this.validateAddress(recipient)) throw new Error('Invalid address')
+
+    const utxos = await this.scanUTXOs(sender, false)
+    if (utxos.length === 0) throw new Error('No utxos to send')
+
+    const feeRateWhole = Number(feeRate.toFixed(0))
+    const compiledMemo = memo ? Utils.compileMemo(memo) : null
+
+    const targetOutputs = []
+
+    //1. add output amount and recipient to targets
+    targetOutputs.push({
+      address: recipient,
+      value: amount.amount().toNumber(),
+    })
+    //2. add output memo to targets (optional)
+    if (compiledMemo) {
+      targetOutputs.push({ script: compiledMemo, value: 0 })
+    }
+    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
+
+    // .inputs and .outputs will be undefined if no solution was found
+    if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
+
+    const psbt = new Litecoin.Psbt({ network: Utils.ltcNetwork(this.network) }) // Network-specific
+    // psbt add input from accumulative inputs
+    inputs.forEach((utxo: UTXO) =>
+      psbt.addInput({
+        hash: utxo.hash,
+        index: utxo.index,
+        witnessUtxo: utxo.witnessUtxo,
+      }),
+    )
+
+    // Outputs
+    outputs.forEach((output: Litecoin.PsbtTxOutput) => {
+      if (!output.address) {
+        //an empty address means this is the  change address
+        output.address = sender
+      }
+      if (!output.script) {
+        psbt.addOutput(output)
+      } else {
+        //we need to add the compiled memo this way to
+        //avoid dust error tx when accumulating memo output with 0 value
+        if (compiledMemo) {
+          psbt.addOutput({ script: compiledMemo, value: 0 })
+        }
+      }
+    })
+
+    return { psbt, utxos }
   }
 }
 

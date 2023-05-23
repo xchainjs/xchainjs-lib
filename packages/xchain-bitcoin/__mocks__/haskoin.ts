@@ -9,8 +9,14 @@ export default {
   init: () => {
     //Mock GET https://{haskoinurl}/{btc|btctest}/address/{address}/balance
     mock.onGet(/\/address\/\w+\/balance/).reply((config: MockConfig) => {
-      const address = config.url?.split('/')?.[6] ?? ''
-      const resp = require(`./response/balances/haskoin-${address}.json`)
+      const address = config.url?.split('/')?.[5] ?? ''
+      const resp = require(`./response/balances/${address}.json`)
+      return [200, resp]
+    })
+    //Mock Get utxo's
+    mock.onGet(/\/address\/\w+\/unspent/).reply((config: MockConfig) => {
+      const address = config.url?.split('/')?.[5] ?? ''
+      const resp = require(`./response/unspent-txs/${address}.json`)
       return [200, resp]
     })
     //Mock POST https://{haskoinurl}/{btc|btctest}/transactions

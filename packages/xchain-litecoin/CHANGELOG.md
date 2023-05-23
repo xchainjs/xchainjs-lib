@@ -1,3 +1,121 @@
+# v0.12.1 (2023-05-18)
+
+## Add
+
+- New client function getAssetInfo() returns chain, decimals and asset
+- renamed defaultLTCParams to defaultLtcParams to be more consistent with CamelCase
+
+# v0.12.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+- update `bitcoinjs-lib` to the latest
+
+# v.0.11.4 (2023-04-11)
+
+## Add
+
+- bump deps
+
+# v.0.11.3 (2023-04-05)
+
+## Add
+
+- Add async `broadcastTx()` to client
+- bump xchain-client deps
+
+# v.0.11.2 (2023-04-03)
+
+## Fix
+
+- remove references to process.env in runtime code
+
+# v.0.11.1 (2023-03-29)
+
+## Update
+
+- Udpate deps
+
+# v.0.11.0 (2023-03-21)
+
+## Update
+
+- Update to use `xchain-utxo-providers`
+- Udpate deps
+
+# v.0.10.10 (2023-02-08)
+
+## Update
+
+- add support for sochain v3 API
+
+# v.0.10.9 (2022-01-19)
+
+## Update
+
+- Type safety `LTCChain`
+
+# v.0.10.8 (2022-12-27)
+
+## Add
+
+- Add `AssetLTC` and `LTCChain` definition
+
+## Update
+
+- Bump `xchain-client@13.5.0`
+
+# v.0.10.7 (2022-12-13)
+
+## Update
+
+- removed `customRequestHeaders`
+
+# v.0.10.6 (2022-11-24)
+
+## Update
+
+- Added `customRequestHeaders` to `BroadcastTxParams` & bump dependencies
+
+# v.0.10.5 (2022-10-27)
+
+## Update
+
+- removed Default username/password in Client constructor
+- do not send auth header if undefined
+
+# v.0.10.4 (2022-10-14)
+
+## Update
+
+- Set Default network to `Network.Mainnet`
+- change contructor to accept NodeUrls = Record<Network, string>
+
+# v.0.10.3 (2022-10-04)
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
+# v.0.10.2 (2020-09-30)
+
+## Update
+
+- changed default node URL to 'https://litecoin.ninerealms.com'
+
+# v.0.10.1 (2022-09-29)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
+# v.0.10.0 (2020-09-05)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
 # v.0.9.0 (2022-07-20)
 
 ### Breaking change

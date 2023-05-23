@@ -1,7 +1,7 @@
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 import {
-  Address,
+  AssetInfo,
   Balance,
   BaseXChainClient,
   FeeOption,
@@ -19,11 +19,19 @@ import {
   checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Asset, AssetETH, BaseAmount, Chain, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, Wallet, ethers } from 'ethers'
 import { HDNode, parseUnits, toUtf8Bytes } from 'ethers/lib/utils'
 
-import { LOWER_FEE_BOUND, UPPER_FEE_BOUND } from './const'
+import {
+  AssetETH,
+  BASE_TOKEN_GAS_COST,
+  ETHChain,
+  ETH_DECIMAL,
+  LOWER_FEE_BOUND,
+  SIMPLE_GAS_COST,
+  UPPER_FEE_BOUND,
+} from './const'
 import erc20ABI from './data/erc20.json'
 import * as etherscanAPI from './etherscan-api'
 import * as ethplorerAPI from './ethplorer-api'
@@ -42,9 +50,6 @@ import {
   TxOverrides,
 } from './types'
 import {
-  BASE_TOKEN_GAS_COST,
-  ETH_DECIMAL,
-  SIMPLE_GAS_COST,
   call,
   estimateApprove,
   estimateCall,
@@ -108,7 +113,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    * @param {EthereumClientParams} params
    */
   constructor({
-    network = Network.Testnet,
+    network = Network.Mainnet,
     feeBounds = {
       lower: LOWER_FEE_BOUND,
       upper: UPPER_FEE_BOUND,
@@ -125,7 +130,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     etherscanApiKey,
     infuraCreds,
   }: EthereumClientParams) {
-    super(Chain.Ethereum, { network, rootDerivationPaths, feeBounds })
+    super(ETHChain, { network, rootDerivationPaths, feeBounds })
     this.ethNetwork = xchainNetworkToEths(network)
     this.infuraCreds = infuraCreds
     this.etherscanApiKey = etherscanApiKey
@@ -175,6 +180,18 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       throw new Error('HDNode is not defined. Make sure phrase has been provided.')
     }
     return this.hdNode.derivePath(this.getFullDerivationPath(walletIndex)).address.toLowerCase()
+  }
+
+  /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetETH,
+      decimal: ETH_DECIMAL,
+    }
+    return assetInfo
   }
 
   /**
@@ -364,9 +381,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         // https://github.com/xchainjs/xchainjs-lib/issues/252
         // And to avoid etherscan api call limit, it gets balances in a sequence way, not in parallel
         const balances = []
+
         for (let i = 0; i < newAssets.length; i++) {
           const asset: Asset = newAssets[i]
           const etherscan = this.getEtherscanProvider()
+          const apiKey: string | undefined = etherscan.apiKey || undefined
           if (!isEthAsset(asset)) {
             // Handle token balances
             const assetAddress = getTokenAddress(asset)
@@ -377,7 +396,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
               baseUrl: etherscan.baseUrl,
               address,
               assetAddress,
-              apiKey: etherscan.apiKey,
+              apiKey: apiKey,
             })
             const decimals = (await getDecimal(asset, provider)) || ETH_DECIMAL
 
@@ -420,7 +439,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     let transactions
     const etherscan = this.getEtherscanProvider()
-
+    const apiKey: string | undefined = etherscan.apiKey || undefined
     if (assetAddress) {
       transactions = await etherscanAPI.getTokenTransactionHistory({
         baseUrl: etherscan.baseUrl,
@@ -428,7 +447,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         assetAddress,
         page: 0,
         offset: maxCount,
-        apiKey: etherscan.apiKey,
+        apiKey: apiKey,
       })
     } else {
       transactions = await etherscanAPI.getETHTransactionHistory({
@@ -436,7 +455,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
         address: params?.address,
         page: 0,
         offset: maxCount,
-        apiKey: etherscan.apiKey,
+        apiKey: apiKey,
       })
     }
 
@@ -470,6 +489,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
       case Network.Testnet: {
         let tx
         const etherscan = this.getEtherscanProvider()
+        const apiKey: string | undefined = etherscan.apiKey || undefined
         const txInfo = await etherscan.getTransaction(txId)
         if (txInfo) {
           if (assetAddress) {
@@ -480,7 +500,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
                   assetAddress,
                   startblock: txInfo.blockNumber,
                   endblock: txInfo.blockNumber,
-                  apiKey: etherscan.apiKey,
+                  apiKey: apiKey,
                 })
               ).filter((info) => info.hash === txId)[0] ?? null
           } else {
@@ -490,7 +510,7 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
                   baseUrl: etherscan.baseUrl,
                   startblock: txInfo.blockNumber,
                   endblock: txInfo.blockNumber,
-                  apiKey: etherscan.apiKey,
+                  apiKey: apiKey,
                   address: txInfo.from,
                 })
               ).filter((info) => info.hash === txId)[0] ?? null
@@ -626,10 +646,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
 
     const contract = new ethers.Contract(contractAddress, erc20ABI, this.getProvider())
 
-    const unsignedTx: ethers.PopulatedTransaction /* as same as ethers.TransactionResponse expected by `sendTransaction` */ = await contract.populateTransaction.approve(
-      spenderAddress,
-      valueToApprove,
-    )
+    const unsignedTx: ethers.PopulatedTransaction /* as same as ethers.TransactionResponse expected by `sendTransaction` */ =
+      await contract.populateTransaction.approve(spenderAddress, valueToApprove)
 
     const result = await signer.sendTransaction({
       ...unsignedTx,
@@ -751,6 +769,11 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
     return hash
   }
 
+  async broadcastTx(txHex: string): Promise<TxHash> {
+    const resp = await this.getProvider().sendTransaction(txHex)
+    return resp.hash
+  }
+
   /**
    * Estimate gas price.
    * @see https://etherscan.io/apis#gastracker
@@ -787,7 +810,8 @@ export default class Client extends BaseXChainClient implements XChainClient, Et
    */
   async estimateGasPricesFromEtherscan(): Promise<GasPrices> {
     const etherscan = this.getEtherscanProvider()
-    const response: GasOracleResponse = await etherscanAPI.getGasOracle(etherscan.baseUrl, etherscan.apiKey)
+    const apiKey: string | undefined = etherscan.apiKey || undefined
+    const response: GasOracleResponse = await etherscanAPI.getGasOracle(etherscan.baseUrl, apiKey)
 
     // Convert result of gas prices: `Gwei` -> `Wei`
     const averageWei = parseUnits(response.SafeGasPrice, 'gwei')

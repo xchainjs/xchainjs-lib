@@ -1,23 +1,20 @@
-import { TxHash, XChainClient } from '@xchainjs/xchain-client/lib'
-import { ApproveParams, ETH_DECIMAL, EthereumClient, MAX_APPROVAL } from '@xchainjs/xchain-ethereum'
-import { Asset, AssetETH, BaseAmount, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { TxHash, XChainClient } from '@xchainjs/xchain-client'
+import { ApproveParams, AssetETH, ETH_DECIMAL, EthereumClient, MAX_APPROVAL, abi } from '@xchainjs/xchain-ethereum'
+import { ThorchainCache } from '@xchainjs/xchain-thorchain-query'
+import { Asset, BaseAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
-import routerABI from '../abi/routerABI.json'
-import { ThorchainCache } from '../thorchain-cache'
 import { DepositParams } from '../types'
 
-import { calcNetworkFee, getContractAddressFromAsset } from './swap'
-
 const APPROVE_GASLIMIT_FALLBACK = '200000'
-
+const FIFTEEN_MIN_IN_SECS = 15 * 60
 export class EthHelper {
   private ethClient: EthereumClient
   private client: XChainClient
   private thorchainCache: ThorchainCache
 
   constructor(client: XChainClient, thorchainCache: ThorchainCache) {
-    this.ethClient = (client as unknown) as EthereumClient
+    this.ethClient = client as unknown as EthereumClient
     this.client = client
     this.thorchainCache = thorchainCache
   }
@@ -34,10 +31,13 @@ export class EthHelper {
    * @throws {"router address is not defined"} Thrown if router address is not defined
    */
   async sendDeposit(params: DepositParams): Promise<TxHash> {
-    const inboundAsgard = (await this.thorchainCache.getInboundAddressesItems())[params.asset.chain]
+    const inboundAsgard = (await this.thorchainCache.getInboundDetails())[params.asset.chain]
 
     if (!inboundAsgard?.router) {
       throw new Error('router address is not defined')
+    }
+    if (!inboundAsgard?.address) {
+      throw new Error('Vault address is not defined')
     }
 
     const address = this.client.getAddress(params.walletIndex)
@@ -56,30 +56,28 @@ export class EthHelper {
       //erc-20 must be depsited to the router
       const isApprovedResult = await this.isTCRouterApprovedToSpend(params.asset, params.amount, params.walletIndex)
       if (!isApprovedResult) {
-        throw new Error('The amount is not allowed to spend')
+        throw new Error('TC router has not been approved to spend this amount')
       }
       const contractAddress = getContractAddressFromAsset(params.asset)
       const checkSummedContractAddress = ethers.utils.getAddress(contractAddress)
+      const latestBlockTimeUnixSecs = (await this.ethClient.getProvider().getBlock('latest')).timestamp
+      const expiry = latestBlockTimeUnixSecs + FIFTEEN_MIN_IN_SECS
       const depositParams = [
         inboundAsgard.address,
         checkSummedContractAddress,
         params.amount.amount().toFixed(),
         params.memo,
+        expiry,
       ]
 
-      const routerContract = new ethers.Contract(inboundAsgard.router, routerABI)
-      const gasPriceInWei = gasPrice[params.feeOption]
-      const gasPriceInGwei = gasPriceInWei.div(10 ** 9).amount()
+      const routerContract = new ethers.Contract(inboundAsgard.router, abi.router)
 
-      // TODO should we change the calcInboundFee() to use gasRate in BaseAmount instead of BIgNumber?
-      // currently its hardto know the units to use, GWEI/WEI, etc
-      const gasLimit = calcNetworkFee(params.asset, gasPriceInGwei)
-      const gasLimitInWei = gasLimit.baseAmount.amount().toFixed()
-      const unsignedTx = await routerContract.populateTransaction.deposit(...depositParams, {
+      const gasLimit = '160000'
+      const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams, {
         from: address,
         value: 0,
         gasPrice: gasPrice.fast.amount().toFixed(),
-        gasLimit: gasLimitInWei,
+        gasLimit,
       })
       const { hash } = await this.ethClient.getWallet(params.walletIndex).sendTransaction(unsignedTx)
       return hash

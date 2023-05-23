@@ -1,20 +1,24 @@
+import cosmosclient from '@cosmos-client/core'
 import { Network } from '@xchainjs/xchain-client'
-import { baseToAsset, formatAssetAmountCurrency } from '@xchainjs/xchain-util'
+import { Midgard, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
+import { baseToAsset, formatAssetAmountCurrency, register9Rheader } from '@xchainjs/xchain-util'
+import axios from 'axios'
 
-import { Wallet } from '../src/Wallet'
-import { ThorchainCache } from '../src/thorchain-cache'
-import { Midgard } from '../src/utils/midgard'
+import { Wallet } from '../src/wallet'
 
 require('dotenv').config()
 
-const midgard = new Midgard(Network.Stagenet)
-const thorchainCache = new ThorchainCache(midgard)
-const testnetWallet = new Wallet(process.env.TESTNETPHRASE || 'you forgot to set the phrase', thorchainCache)
+register9Rheader(axios)
+register9Rheader(cosmosclient.config.globalAxios)
+
+const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
+const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
 
 describe('xchain-swap wallet Tests', () => {
   it(`Should show balances `, async () => {
     try {
-      const allBalances = await testnetWallet.getAllBalances()
+      const allBalances = await mainnetWallet.getAllBalances()
 
       console.log(JSON.stringify(allBalances, null, 2))
       for (const allBalance of allBalances) {

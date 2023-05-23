@@ -1,5 +1,6 @@
 export * from './types'
 export * from './client'
+export * from './const'
 export {
   call,
   estimateApprove,
@@ -15,12 +16,7 @@ export {
   getFee,
   isApproved,
   isEthAsset,
-  strip0x,
   validateAddress,
-  ETHAddress,
-  ETH_DECIMAL,
-  ETHPLORER_FREEKEY,
-  MAX_APPROVAL,
 } from './utils'
 
 import erc20ABI from './data/erc20.json'

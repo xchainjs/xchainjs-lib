@@ -1,6 +1,6 @@
-import { cosmosclient, proto } from '@cosmos-client/core'
+import cosmosclient from '@cosmos-client/core'
 import {
-  Address,
+  AssetInfo,
   Balance,
   BaseXChainClient,
   FeeType,
@@ -18,21 +18,32 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { CosmosSDKClient, RPCTxResult } from '@xchainjs/xchain-cosmos'
+import { CosmosSDKClient, GAIAChain, RPCTxResult, RPCTxSearchResult } from '@xchainjs/xchain-cosmos'
 import {
+  Address,
   Asset,
-  AssetRuneNative,
   BaseAmount,
-  Chain,
   assetFromString,
+  assetFromStringEx,
   assetToString,
   baseAmount,
+  delay,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 import Long from 'long'
 
 import { buildDepositTx, buildTransferTx, buildUnsignedTx } from '.'
+import {
+  AssetRuneNative,
+  DEFAULT_GAS_LIMIT_VALUE,
+  DEPOSIT_GAS_LIMIT_VALUE,
+  MAX_PAGES_PER_FUNCTION_CALL,
+  MAX_TX_COUNT_PER_FUNCTION_CALL,
+  MAX_TX_COUNT_PER_PAGE,
+  RUNE_DECIMAL,
+  defaultExplorerUrls,
+} from './const'
 import {
   ChainId,
   ChainIds,
@@ -47,13 +58,7 @@ import {
 } from './types'
 import { TxResult } from './types/messages'
 import {
-  DECIMAL,
-  DEFAULT_GAS_LIMIT_VALUE,
-  DEPOSIT_GAS_LIMIT_VALUE,
-  MAX_TX_COUNT,
   getBalance,
-  getDefaultClientUrl,
-  getDefaultExplorerUrls,
   getDefaultFees,
   getDenom,
   getDepositTxDataFromLogs,
@@ -63,7 +68,7 @@ import {
   isAssetRuneNative,
   registerDepositCodecs,
   registerSendCodecs,
-} from './util'
+} from './utils'
 
 /**
  * Interface for custom Thorchain client
@@ -98,22 +103,38 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
    */
   constructor({
-    network = Network.Testnet,
+    network = Network.Mainnet,
     phrase,
-    clientUrl,
-    explorerUrls,
+    clientUrl = {
+      [Network.Testnet]: {
+        node: 'deprecated',
+        rpc: 'deprecated',
+      },
+      [Network.Stagenet]: {
+        node: 'https://stagenet-thornode.ninerealms.com',
+        rpc: 'https://stagenet-rpc.ninerealms.com',
+      },
+      [Network.Mainnet]: {
+        node: 'https://thornode.ninerealms.com',
+        rpc: 'https://rpc.ninerealms.com',
+      },
+    },
+    explorerUrls = defaultExplorerUrls,
     rootDerivationPaths = {
       [Network.Mainnet]: "44'/931'/0'/0/",
       [Network.Stagenet]: "44'/931'/0'/0/",
       [Network.Testnet]: "44'/931'/0'/0/",
     },
-    chainIds,
+    chainIds = {
+      [Network.Mainnet]: 'thorchain-mainnet-v1',
+      [Network.Stagenet]: 'thorchain-stagenet-v2',
+      [Network.Testnet]: 'deprecated',
+    },
   }: XChainClientParams & ThorchainClientParams) {
-    super(Chain.Cosmos, { network, rootDerivationPaths, phrase })
-    this.clientUrl = clientUrl || getDefaultClientUrl()
-    this.explorerUrls = explorerUrls || getDefaultExplorerUrls()
+    super(GAIAChain, { network, rootDerivationPaths, phrase })
+    this.clientUrl = clientUrl
+    this.explorerUrls = explorerUrls
     this.chainIds = chainIds
-
     registerSendCodecs()
     registerDepositCodecs()
 
@@ -244,7 +265,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @throws {"Phrase not set"}
    * Throws an error if phrase has not been set before
    * */
-  getPrivateKey(index = 0): proto.cosmos.crypto.secp256k1.PrivKey {
+  getPrivateKey(index = 0): cosmosclient.proto.cosmos.crypto.secp256k1.PrivKey {
     return this.cosmosClient.getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
   }
 
@@ -301,6 +322,18 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
   }
 
   /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetRuneNative,
+      decimal: RUNE_DECIMAL,
+    }
+    return assetInfo
+  }
+
+  /**
    * Get transaction history of a given address with pagination options.
    * By default it will return the transaction history of the current wallet.
    *
@@ -317,29 +350,56 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
-    const txIncomingHistory = (
-      await this.cosmosClient.searchTxFromRPC({
-        rpcEndpoint: this.getClientUrl().rpc,
-        messageAction,
-        transferRecipient: address,
-        limit: MAX_TX_COUNT,
-        txMinHeight,
-        txMaxHeight,
-      })
-    ).txs
-    const txOutgoingHistory = (
-      await this.cosmosClient.searchTxFromRPC({
-        rpcEndpoint: this.getClientUrl().rpc,
-        messageAction,
-        transferSender: address,
-        limit: MAX_TX_COUNT,
-        txMinHeight,
-        txMaxHeight,
-      })
-    ).txs
+    if (limit + offset > MAX_PAGES_PER_FUNCTION_CALL * MAX_TX_COUNT_PER_PAGE) {
+      throw Error(`limit plus offset can not be grater than ${MAX_PAGES_PER_FUNCTION_CALL * MAX_TX_COUNT_PER_PAGE}`)
+    }
 
-    let history: RPCTxResult[] = txIncomingHistory
-      .concat(txOutgoingHistory)
+    if (limit > MAX_TX_COUNT_PER_FUNCTION_CALL) {
+      throw Error(`Maximum number of transaction per call is ${MAX_TX_COUNT_PER_FUNCTION_CALL}`)
+    }
+
+    const pagesNumber = Math.ceil((limit + offset) / MAX_TX_COUNT_PER_PAGE)
+
+    const promiseTotalTxIncomingHistory: Promise<RPCTxSearchResult>[] = []
+    const promiseTotalTxOutgoingHistory: Promise<RPCTxSearchResult>[] = []
+
+    for (let index = 1; index <= pagesNumber; index++) {
+      promiseTotalTxIncomingHistory.push(
+        this.cosmosClient.searchTxFromRPC({
+          rpcEndpoint: this.getClientUrl().rpc,
+          messageAction,
+          transferRecipient: address,
+          page: index,
+          limit: MAX_TX_COUNT_PER_PAGE,
+          txMinHeight,
+          txMaxHeight,
+        }),
+      )
+      promiseTotalTxOutgoingHistory.push(
+        this.cosmosClient.searchTxFromRPC({
+          rpcEndpoint: this.getClientUrl().rpc,
+          messageAction,
+          transferSender: address,
+          page: index,
+          limit: MAX_TX_COUNT_PER_PAGE,
+          txMinHeight,
+          txMaxHeight,
+        }),
+      )
+    }
+
+    const incomingSearchResult = await Promise.all(promiseTotalTxIncomingHistory)
+    const outgoingSearchResult = await Promise.all(promiseTotalTxOutgoingHistory)
+
+    const totalTxIncomingHistory: RPCTxResult[] = incomingSearchResult.reduce((allTxs, searchResult) => {
+      return [...allTxs, ...searchResult.txs]
+    }, [] as RPCTxResult[])
+    const totalTxOutgoingHistory: RPCTxResult[] = outgoingSearchResult.reduce((allTxs, searchResult) => {
+      return [...allTxs, ...searchResult.txs]
+    }, [] as RPCTxResult[])
+
+    let history: RPCTxResult[] = totalTxIncomingHistory
+      .concat(totalTxOutgoingHistory)
       .sort((a, b) => {
         if (a.height !== b.height) return parseInt(b.height) > parseInt(a.height) ? 1 : -1
         if (a.hash !== b.hash) return a.hash > b.hash ? 1 : -1
@@ -350,14 +410,19 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         [] as RPCTxResult[],
       )
       .filter(params?.filterFn ? params.filterFn : (tx) => tx)
-      .filter((_, index) => index < MAX_TX_COUNT)
-
-    // get `total` before filtering txs out for pagination
-    const total = history.length
 
     history = history.filter((_, index) => index >= offset && index < offset + limit)
 
-    const txs = await Promise.all(history.map(({ hash }) => this.getTransactionData(hash, address)))
+    const total = history.length
+
+    const txs: Tx[] = []
+
+    for (let i = 0; i < history.length; i += 10) {
+      const batch = history.slice(i, i + 10)
+      const result = await Promise.all(batch.map(({ hash }) => this.getTransactionData(hash, address)))
+      txs.push(...result)
+      delay(2000) // Delay to avoid 503 from ninerealms server
+    }
 
     return {
       total,
@@ -372,20 +437,115 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string, address: Address): Promise<Tx> {
-    const txResult = await this.cosmosClient.txsHashGet(txId)
-    const txData: TxData | null = txResult && txResult.logs ? getDepositTxDataFromLogs(txResult.logs, address) : null
-    if (!txResult || !txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
+    try {
+      const txResult = await this.cosmosClient.txsHashGet(txId)
+      const bond = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'bond')
+      const transfer = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'transfer')
+      if (!transfer) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
+      const sender = transfer[0].attributes.find((attr) => attr.key === 'sender')?.value
+      const senderAmount = transfer[0].attributes.filter((attr) => attr.key === 'amount')[1].value
+      const regex = /[a-zA-Z]+$/
+      const match = senderAmount.match(regex)
+      const asset = match ? match[0] : null
+      const senderAsset = asset === 'rune' ? AssetRuneNative : assetFromStringEx(`${asset}`)
 
-    const { from, to, type } = txData
+      const senderAddress = sender ? sender : address
+      const message = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'message')
+      const coinSpent = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'coin_spent')
+      if (!message || !coinSpent) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
 
-    return {
+      const action = message[0].attributes.find((attr) => attr.key === 'action')?.value
+      if (!bond) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
+      // Rune only transactions
+      if (bond[0].type === 'bond' || action === 'send') {
+        const assetTo = AssetRuneNative
+        const txData: TxData | null =
+          txResult && txResult.logs
+            ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo)
+            : null
+        //console.log(JSON.stringify(txData, null, 2))
+        if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
+
+        const { from, to, type } = txData
+        return {
+          hash: txId,
+          asset: senderAsset,
+          from,
+          to,
+          date: new Date(txResult.timestamp),
+          type,
+        }
+      }
+      // synths and other tx types
+      const messageBody = JSON.stringify(txResult.tx?.body.messages).split(':')
+      const assetTo = assetFromStringEx(messageBody[7])
+
+      const txData: TxData | null =
+        txResult && txResult.logs ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo) : null
+      if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
+
+      const { from, to, type } = txData
+
+      return {
+        hash: txId,
+        asset: senderAsset,
+        from,
+        to,
+        date: new Date(txResult.timestamp),
+        type,
+      }
+    } catch (error) {}
+    return await this.getTransactionDataThornode(txId)
+  }
+  /** This function is used when in bound or outbound tx is not of thorchain
+   *
+   * @param txId - transaction hash
+   * @returns - Tx object
+   */
+  private async getTransactionDataThornode(txId: string): Promise<Tx> {
+    const txResult = JSON.stringify(await this.thornodeAPIGet(`/tx/${txId}`))
+    const getTx: TxResult = JSON.parse(txResult)
+    if (!getTx) throw Error(`Could not return tx data`)
+    const senderAsset = assetFromStringEx(`${getTx.observed_tx?.tx.coins[0].asset}`)
+    const fromAddress = `${getTx.observed_tx.tx.from_address}`
+    const from: TxFrom[] = [
+      { from: fromAddress, amount: baseAmount(getTx.observed_tx?.tx.coins[0].amount), asset: senderAsset },
+    ]
+    const splitMemo = getTx.observed_tx.tx.memo?.split(':')
+
+    if (!splitMemo) throw Error(`Could not parse memo`)
+    let asset: Asset
+    let amount: string
+    if (splitMemo[0] === 'OUT') {
+      asset = assetFromStringEx(getTx.observed_tx.tx.coins[0].asset)
+      amount = getTx.observed_tx.tx.coins[0].amount
+      const addressTo = getTx.observed_tx.tx.to_address ? getTx.observed_tx.tx.to_address : 'undefined'
+      const to: TxTo[] = [{ to: addressTo, amount: baseAmount(amount, RUNE_DECIMAL), asset: asset }]
+      const txData: Tx = {
+        hash: txId,
+        asset: senderAsset,
+        from,
+        to,
+        date: new Date(),
+        type: TxType.Transfer,
+      }
+      return txData
+    }
+    asset = assetFromStringEx(splitMemo[1])
+    const address = splitMemo[2]
+    amount = splitMemo[3]
+    const receiverAsset = asset
+    const recieverAmount = amount
+    const to: TxTo[] = [{ to: address, amount: baseAmount(recieverAmount, RUNE_DECIMAL), asset: receiverAsset }]
+    const txData: Tx = {
       hash: txId,
-      asset: AssetRuneNative,
+      asset: senderAsset,
       from,
       to,
-      date: new Date(txResult.timestamp),
-      type,
+      date: new Date(),
+      type: TxType.Transfer,
     }
+    return txData
   }
 
   /**
@@ -407,11 +567,11 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     result.observed_tx.tx.coins.forEach((coin) => {
       from.push({
         from: result.observed_tx.tx.from_address,
-        amount: baseAmount(coin.amount, DECIMAL),
+        amount: baseAmount(coin.amount, RUNE_DECIMAL),
       })
       to.push({
         to: result.observed_tx.tx.to_address,
-        amount: baseAmount(coin.amount, DECIMAL),
+        amount: baseAmount(coin.amount, RUNE_DECIMAL),
       })
       asset = assetFromString(coin.asset)
     })
@@ -440,13 +600,14 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     amount,
     memo,
     gasLimit = new BigNumber(DEPOSIT_GAS_LIMIT_VALUE),
+    sequence,
   }: DepositParam): Promise<TxHash> {
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
-      balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
+      balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, RUNE_DECIMAL)
     const assetBalance: BaseAmount =
       balances.filter(({ asset: assetInList }) => assetToString(assetInList) === assetToString(asset))[0]?.amount ??
-      baseAmount(0, DECIMAL)
+      baseAmount(0, RUNE_DECIMAL)
 
     const { average: fee } = await this.getFees()
 
@@ -492,7 +653,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       txBody: depositTxBody,
       signerPubkey: cosmosclient.codec.instanceToProtoAny(signerPubkey),
       gasLimit: Long.fromString(gasLimit.toFixed(0)),
-      sequence: account.sequence || Long.ZERO,
+      sequence: sequence ? Long.fromNumber(sequence) : account.sequence || Long.ZERO,
     })
 
     const txHash = await this.getCosmosClient().signAndBroadcast(txBuilder, privKey, accountNumber)
@@ -518,13 +679,14 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     recipient,
     memo,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
-  }: TxParams & { gasLimit?: BigNumber }): Promise<TxHash> {
+    sequence,
+  }: TxParams & { gasLimit?: BigNumber; sequence?: number }): Promise<TxHash> {
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const runeBalance: BaseAmount =
-      balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, DECIMAL)
+      balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, RUNE_DECIMAL)
     const assetBalance: BaseAmount =
       balances.filter(({ asset: assetInList }) => assetToString(assetInList) === assetToString(asset))[0]?.amount ??
-      baseAmount(0, DECIMAL)
+      baseAmount(0, RUNE_DECIMAL)
 
     const fee = (await this.getFees()).average
 
@@ -564,7 +726,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       txBody: txBody,
       gasLimit: Long.fromString(gasLimit.toString()),
       signerPubkey: cosmosclient.codec.instanceToProtoAny(signerPubkey),
-      sequence: account.sequence || Long.ZERO,
+      sequence: sequence ? Long.fromNumber(sequence) : account.sequence || Long.ZERO,
     })
 
     const txHash = await this.cosmosClient.signAndBroadcast(txBuilder, privKey, accountNumber)
@@ -572,6 +734,10 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     if (!txHash) throw Error(`Invalid transaction hash: ${txHash}`)
 
     return txHash
+  }
+
+  async broadcastTx(txHex: string): Promise<TxHash> {
+    return await this.getCosmosClient().broadcast(txHex)
   }
 
   /**
@@ -587,7 +753,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     recipient,
     memo,
     fromRuneBalance: from_rune_balance,
-    fromAssetBalance: from_asset_balance = baseAmount(0, DECIMAL),
+    fromAssetBalance: from_asset_balance = baseAmount(0, RUNE_DECIMAL),
     fromAccountNumber = Long.ZERO,
     fromSequence = Long.ZERO,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),

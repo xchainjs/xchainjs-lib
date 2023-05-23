@@ -1,20 +1,28 @@
 import { Network, TxHash } from '@xchainjs/xchain-client'
 
 export type AddressParams = {
+  apiKey: string
   sochainUrl: string
   network: Network
   address: string
-  startingFromTxId?: string
+  page: number
+}
+export type BalanceParams = {
+  apiKey: string
+  sochainUrl: string
+  network: Network
+  address: string
 }
 
 export type ScanUTXOParam = {
+  apiKey: string
   sochainUrl: string
   network: Network
   address: string
-  withTxHex?: boolean
 }
 
 export type TxHashParams = {
+  apiKey: string
   sochainUrl: string
   network: Network
   hash: TxHash
@@ -35,34 +43,28 @@ export interface TxIO {
 
 export interface Transaction {
   network: string
-  txid: string
-  blockhash: string
+  hash: string
+  block_hash: string
   confirmations: number
   time: number
 
-  tx_hex: string
   inputs: TxIO[]
   outputs: TxIO[]
 }
 
 export type LtcAddressUTXO = {
-  txid: string
-  output_no: number
-  script_asm: string
-  script_hex: string
+  hash: string
+  index: number
+  script: string
+  address: string
+  tx_hex: string
   value: string
-  confirmations: number
-  time: number
 }
 
 export type LtcAddressTxDTO = {
-  txid: string
-  block_no: number
-  confirmations: number
+  hash: string
+  block: number
   time: number
-  req_sigs: number
-  script_asm: string
-  script_hex: string
 }
 
 export type LtcAddressDTO = {
@@ -72,20 +74,18 @@ export type LtcAddressDTO = {
   received_value: string
   pending_value: string
   total_txs: number
-  txs: LtcAddressTxDTO[]
+}
+export type LtcGetTxsDTO = {
+  transactions: LtcAddressTxDTO[]
 }
 
 export type LtcGetBalanceDTO = {
-  network: string
-  address: string
-  confirmed_balance: string
-  unconfirmed_balance: string
+  confirmed: string
+  unconfirmed: string
 }
 
 export type LtcUnspentTxsDTO = {
-  network: string
-  address: string
-  txs: LtcAddressUTXO[]
+  outputs: LtcAddressUTXO[]
 }
 
 export type LtcBroadcastTransfer = {

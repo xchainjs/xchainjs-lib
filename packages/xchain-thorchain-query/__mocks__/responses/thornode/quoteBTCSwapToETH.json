@@ -1,0 +1,19 @@
+{
+  "dust_threshold": "10000",
+  "expected_amount_out": "13494192",
+  "expiry": 1682325622,
+  "fees": {
+    "affiliate": "148426",
+    "asset": "ETH.ETH",
+    "outbound": "1200000"
+  },
+  "inbound_address": "bc1qjgxkus8e5slq06j3v8t9kzz7cflr9fa8nhu5g7",
+  "inbound_confirmation_blocks": 1,
+  "inbound_confirmation_seconds": 600,
+  "memo": "=:ETH.ETH:0x1c7b17362c84287bd1184447e6dfeaf920c31bbe::t:100",
+  "notes": "First output should be to inbound_address, second output should be change back to self, third output should be OP_RETURN, limited to 80 bytes. Do not send below the dust threshold. Do not use exotic spend scripts, locks or address formats (P2WSH with Bech32 address format preferred).",
+  "outbound_delay_blocks": 1,
+  "outbound_delay_seconds": 12,
+  "slippage_bps": 0,
+  "warning": "Do not cache this response. Do not send funds after the expiry."
+}

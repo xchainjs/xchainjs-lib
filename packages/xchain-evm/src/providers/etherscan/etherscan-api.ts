@@ -3,8 +3,6 @@ import { Asset, Chain, assetFromString, baseAmount, bnOrZero } from '@xchainjs/x
 import axios from 'axios'
 import { BigNumberish } from 'ethers'
 
-import { validateAddress } from '../../utils'
-
 import {
   ETHTransactionInfo,
   GasOracleResponse,
@@ -12,6 +10,7 @@ import {
   TokenTransactionInfo,
   TransactionHistoryParam,
 } from './etherscan-api-types'
+import { validateAddress } from './utils'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 

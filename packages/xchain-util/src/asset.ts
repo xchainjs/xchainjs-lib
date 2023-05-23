@@ -1,9 +1,10 @@
 import BigNumber from 'bignumber.js'
 
 import { fixedBN, formatBN } from './bn'
-import { Chain, isChain } from './chain'
 import { trimZeros as trimZerosHelper } from './string'
 import { Amount, Asset, AssetAmount, BaseAmount, Denomination } from './types'
+
+export type Address = string
 
 /**
  * Guard to check whether value is a BigNumber.Value or not
@@ -163,50 +164,12 @@ export const formatAssetAmount = ({
 export const formatBaseAmount = (amount: BaseAmount) => formatBN(amount.amount(), 0)
 
 /**
- * Base "chain" asset of Avalanche chain.
- *
- */
-export const AssetAVAX: Asset = { chain: Chain.Avalanche, symbol: 'AVAX', ticker: 'AVAX', synth: false }
-
-/**
- * Base "chain" asset of Binance chain.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetBNB: Asset = { chain: Chain.Binance, symbol: 'BNB', ticker: 'BNB', synth: false }
-
-/**
  * Base "chain" asset on bitcoin main net.
  *
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetBTC: Asset = { chain: Chain.Bitcoin, symbol: 'BTC', ticker: 'BTC', synth: false }
-
-/**
- * Base "chain" asset on bitcoin cash main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetBCH: Asset = { chain: Chain.BitcoinCash, symbol: 'BCH', ticker: 'BCH', synth: false }
-
-/**
- * Base "chain" asset on litecoin main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetLTC: Asset = { chain: Chain.Litecoin, symbol: 'LTC', ticker: 'LTC', synth: false }
-/**
- * Dogecoin asset
- * Based on definition in Thorchain
- * @see https://gitlab.com/thorchain/thornode/-/blob/781-add-doge-chain/common/asset.go#L24
- */
-export const AssetDOGE: Asset = { chain: Chain.Doge, symbol: 'DOGE', ticker: 'DOGE', synth: false }
-
-export const RUNE_TICKER = 'RUNE'
+const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false }
 
 /**
  * Base "chain" asset on ethereum main net.
@@ -214,57 +177,7 @@ export const RUNE_TICKER = 'RUNE'
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetETH: Asset = { chain: Chain.Ethereum, symbol: 'ETH', ticker: 'ETH', synth: false }
-
-/**
- * Base "chain" asset for RUNE-67C on Binance test net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRune67C: Asset = { chain: Chain.Binance, symbol: 'RUNE-67C', ticker: RUNE_TICKER, synth: false }
-
-/**
- * Base "chain" asset for RUNE-B1A on Binance main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneB1A: Asset = { chain: Chain.Binance, symbol: 'RUNE-B1A', ticker: RUNE_TICKER, synth: false }
-
-/**
- * Base "chain" asset on thorchain main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneNative: Asset = { chain: Chain.THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
-
-/**
- * Base "chain" asset for RUNE on ethereum main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneERC20: Asset = {
-  chain: Chain.Ethereum,
-  symbol: `${RUNE_TICKER}-0x3155ba85d5f96b2d030a4966af206230e46849cb`,
-  ticker: RUNE_TICKER,
-  synth: false,
-}
-
-/**
- * Base "chain" asset for RUNE on ethereum main net.
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
-export const AssetRuneERC20Testnet: Asset = {
-  chain: Chain.Ethereum,
-  symbol: `${RUNE_TICKER}-0xd601c6A3a36721320573885A8d8420746dA3d7A0`,
-  ticker: RUNE_TICKER,
-  synth: false,
-}
+const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false }
 
 /**
  * Dash asset
@@ -317,12 +230,23 @@ export const assetFromString = (s: string): Asset | null => {
 
   const chain = data[0]
   // filter out not supported string of chains
-  if (!chain || !isChain(chain)) return null
+  if (!chain) return null
 
   const symbol = data[1]
   const ticker = symbol.split('-')[0]
 
+  if (!symbol) return null
+
   return { chain, symbol, ticker, synth: isSynth }
+}
+
+/**
+ * Similar to an `assetFromString`, but throws an exception for invalid asset strings
+ */
+export const assetFromStringEx = (s: string): Asset => {
+  const asset = assetFromString(s)
+  if (!asset) throw Error('asset string not correct')
+  return asset
 }
 
 /**
@@ -364,7 +288,7 @@ export enum AssetCurrencySymbol {
  */
 export const currencySymbolByAsset = ({ ticker }: Asset) => {
   switch (true) {
-    case ticker === RUNE_TICKER:
+    case ticker === 'RUNE':
       return AssetCurrencySymbol.RUNE
     case ticker === AssetBTC.ticker:
       return AssetCurrencySymbol.BTC
@@ -409,7 +333,7 @@ export const formatAssetAmountCurrency = ({
 
   if (ticker) {
     // RUNE
-    if (ticker === RUNE_TICKER) return `${AssetCurrencySymbol.RUNE} ${amountFormatted}`
+    if (ticker === 'RUNE') return `${AssetCurrencySymbol.RUNE} ${amountFormatted}`
     // BTC
     let regex = new RegExp(AssetBTC.ticker, 'i')
     if (ticker.match(new RegExp(AssetBTC.ticker, 'i'))) {
@@ -460,3 +384,13 @@ export const formatBaseAsAssetAmount = ({
  */
 export const eqAsset = (a: Asset, b: Asset) =>
   a.chain === b.chain && a.symbol === b.symbol && a.ticker === b.ticker && a.synth === b.synth
+
+/**
+ * Removes `0x` or `0X` from address
+ */
+export const strip0x = (addr: Address) => addr.replace(/^0(x|X)/, '')
+
+export const getContractAddressFromAsset = (asset: Asset): Address => {
+  const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
+  return strip0x(assetAddress)
+}

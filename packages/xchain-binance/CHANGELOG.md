@@ -1,3 +1,65 @@
+# v5.7.1 (2023-05-18)
+
+## Add
+
+- New client function getAssetInfo() returns chain, decimals and asset
+
+# v5.7.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+
+# v.5.6.8 (2023-04-05)
+
+## Add
+
+- Add async `broadcastTx()` to client
+
+## Update
+
+- Bump `xchain-client
+
+# v.5.6.7 (2023-01-19)
+
+## Update
+
+- Type safety `BNBChain`
+
+## Update
+
+- Bump `xchain-client@13.5.0`
+
+# v.5.6.5 (2022-10-13)
+
+## Update
+
+- Bump `xchain-client`
+
+# v.5.6.4 (2022-10-13)
+
+## Update
+
+- Set Default network to `Network.Mainnet`
+
+# v.5.6.3 (2022-xx-xx)
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
+# v.5.6.2 (2022-09-29)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
+# v.5.6.0 (2022-09-05)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
 # v.5.5.0 (2022-07-21)
 
 ### Breaking change

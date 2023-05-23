@@ -1,28 +1,23 @@
 import * as bitcash from '@psf/bitcoincashjs-lib'
 import {
-  Address,
-  Balance,
   FeeRate,
   Fees,
   FeesWithRates,
   Network,
   Tx,
   TxFrom,
-  TxHash,
-  TxParams,
   TxTo,
   TxType,
   calcFees,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { AssetBCH, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
-import accumulative from 'coinselect/accumulative'
 
-import * as haskoinApi from './haskoin-api'
-import { AddressParams, BroadcastTxParams, Transaction, TransactionInput, TransactionOutput, UTXO } from './types'
-import { Network as BCHNetwork, TransactionBuilder } from './types/bitcoincashjs-types'
+import { AssetBCH } from './const'
+import { Transaction, TransactionInput, TransactionOutput, UTXO } from './types'
+import { Network as BCHNetwork } from './types/bitcoincashjs-types'
 
 export const BCH_DECIMAL = 8
 export const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
@@ -65,28 +60,6 @@ export function getFee(inputs: number, feeRate: FeeRate, data: Buffer | null = n
   }
 
   return Math.ceil(totalWeight * feeRate)
-}
-
-/**
- * Get the balances of an address.
- *
- * @param {AddressParams} params
- * @returns {Balance[]} The balances of the given address.
- */
-export const getBalance = async (params: AddressParams): Promise<Balance[]> => {
-  const account = await haskoinApi.getAccount(params)
-  if (!account) throw new Error('BCH balance not found')
-
-  const confirmed = baseAmount(account.confirmed, BCH_DECIMAL)
-  const unconfirmed = baseAmount(account.unconfirmed, BCH_DECIMAL)
-
-  account.confirmed
-  return [
-    {
-      asset: AssetBCH,
-      amount: baseAmount(confirmed.amount().plus(unconfirmed.amount()), BCH_DECIMAL),
-    },
-  ]
 }
 
 /**
@@ -212,136 +185,6 @@ export const toBCHAddressNetwork = (network: Network): string => {
 export const validateAddress = (address: string, network: Network): boolean => {
   const toAddress = toCashAddress(address)
   return bchaddr.isValidAddress(toAddress) && bchaddr.detectAddressNetwork(toAddress) === toBCHAddressNetwork(network)
-}
-
-// Stores list of txHex in memory to avoid requesting same data
-const txHexMap: Record<TxHash, string> = {}
-
-/**
- * Helper to get `hex` of `Tx`
- *
- * It will try to get it from cache before requesting it from Sochain
- */
-const getTxHex = async ({ txHash, haskoinUrl }: { haskoinUrl: string; txHash: TxHash }): Promise<string> => {
-  // try to get hex from cache
-  let txHex = txHexMap[txHash]
-  if (!!txHex) return txHex
-  // or get it from Haskoin
-  txHex = await haskoinApi.getRawTransaction({ haskoinUrl, txId: txHash })
-  // cache it
-  txHexMap[txHash] = txHex
-  return txHex
-}
-
-/**
- * Scan UTXOs from sochain.
- *
- * @param {string} haskoinUrl sochain Node URL.
- * @param {Address} address
- * @returns {UTXO[]} The UTXOs of the given address.
- */
-export const scanUTXOs = async ({ haskoinUrl, address }: { haskoinUrl: string; address: Address }): Promise<UTXO[]> => {
-  const unspentUtxos = await haskoinApi.getUnspentTransactions({ haskoinUrl, address })
-
-  return await Promise.all(
-    unspentUtxos.map(async (utxo) => ({
-      hash: utxo.txid,
-      value: utxo.value,
-      index: utxo.index,
-      witnessUtxo: {
-        value: utxo.value,
-        script: bitcash.script.compile(Buffer.from(utxo.pkscript, 'hex')),
-      },
-      address: utxo.address,
-      txHex: await getTxHex({ haskoinUrl, txHash: utxo.txid }),
-    })),
-  )
-}
-
-/**
- * Build transcation.
- *
- * @param {BuildParams} params The transaction build options.
- * @returns {Transaction}
- */
-export const buildTx = async ({
-  amount,
-  recipient,
-  memo,
-  feeRate,
-  sender,
-  network,
-  haskoinUrl,
-}: TxParams & {
-  feeRate: FeeRate
-  sender: Address
-  network: Network
-  haskoinUrl: string
-}): Promise<{
-  builder: TransactionBuilder
-  utxos: UTXO[]
-  inputs: UTXO[]
-}> => {
-  const recipientCashAddress = toCashAddress(recipient)
-  if (!validateAddress(recipientCashAddress, network)) throw new Error('Invalid address')
-
-  const utxos = await scanUTXOs({ haskoinUrl, address: sender })
-  if (utxos.length === 0) throw new Error('No utxos to send')
-
-  const feeRateWhole = Number(feeRate.toFixed(0))
-  const compiledMemo = memo ? compileMemo(memo) : null
-
-  const targetOutputs = []
-  // output to recipient
-  targetOutputs.push({
-    address: recipient,
-    value: amount.amount().toNumber(),
-  })
-  const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-
-  // .inputs and .outputs will be undefined if no solution was found
-  if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
-
-  const transactionBuilder = new bitcash.TransactionBuilder(bchNetwork(network))
-
-  //Inputs
-  inputs.forEach((utxo: UTXO) =>
-    transactionBuilder.addInput(bitcash.Transaction.fromBuffer(Buffer.from(utxo.txHex, 'hex')), utxo.index),
-  )
-
-  // Outputs
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  outputs.forEach((output: any) => {
-    let out = undefined
-    if (!output.address) {
-      //an empty address means this is the  change address
-      out = bitcash.address.toOutputScript(toLegacyAddress(sender), bchNetwork(network))
-    } else if (output.address) {
-      out = bitcash.address.toOutputScript(toLegacyAddress(output.address), bchNetwork(network))
-    }
-    transactionBuilder.addOutput(out, output.value)
-  })
-
-  // add output for memo
-  if (compiledMemo) {
-    transactionBuilder.addOutput(compiledMemo, 0) // Add OP_RETURN {script, value}
-  }
-
-  return {
-    builder: transactionBuilder,
-    utxos,
-    inputs,
-  }
-}
-
-/**
- * Broadcast the transaction.
- *
- * @param {BroadcastTxParams} params The transaction broadcast options.
- * @returns {TxHash} The transaction hash.
- */
-export const broadcastTx = async ({ haskoinUrl, txHex }: BroadcastTxParams): Promise<TxHash> => {
-  return await haskoinApi.broadcastTx({ haskoinUrl, txHex })
 }
 
 /**

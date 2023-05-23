@@ -1,8 +1,88 @@
+# v0.28.2 (2023-05-18)
+
+## Add
+
+- New client function getAssetInfo() returns chain, decimals and asset
+
+# v0.28.1 (2023-05-09)
+
+## Update
+
+- update ethers dependency
+
+# v0.28.0 (2023-05-02)
+
+## Update
+
+- update rollup config and axios to the latest
+
+# v.0.27.8 (2023-04-04)
+
+## Add
+
+- add `broadcastTx()` to client
+- Bump `xchain-client` in dependencies
+- Remove `@xchainjs/xchain-litecoin": "^0.10.7` package from devDependencies
+
+# v.0.27.7 (2023-01-19)
+
+## Update
+
+- Type safety `ETHChain`
+
+# v.0.27.6 (2022-12-27)
+
+## Add
+
+- Add `AssetETH` and `ETHChain` definition
+
+## Update
+
+- Bump `xchain-client@13.5.0`
+
+# v.0.27.5 (2022-12-17)
+
+## Update
+
+- Added `depositWithExpiry` to `routerABI.json`
+- Bumped `xchain-client@0.13.4`
+
+# v.0.27.4 (2022-11-24)
+
+## Update
+
+- Bumped Dependencies
+
+# v.0.27.3 (2022-10-13)
+
+## Update
+
+- Set Default network to `Network.Mainnet`
+
+# v.0.27.2 (2022-xx-xx)
+
+## Update
+
+- Bumped `xchain-utils` & `xchain-client`
+
+# v.0.27.1 (2022-09-29)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
+# v.0.27.0 (2022-09-05)
+
+## Update
+
+- bumped deps on xchain-utils & xchain-client
+
 # v.0.26.0 (2022-07-20)
 
 ### Breaking change
 
 - client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
+
 # v.0.25.1 (2022-06-02)
 
 ## Fix

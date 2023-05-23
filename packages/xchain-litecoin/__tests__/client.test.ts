@@ -1,12 +1,44 @@
-import { Network } from '@xchainjs/xchain-client'
-import { AssetLTC, baseAmount } from '@xchainjs/xchain-util'
+import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
+import { baseAmount } from '@xchainjs/xchain-util'
 
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode-api'
-import { Client } from '../src/client'
-import { MIN_TX_FEE } from '../src/const'
+import { Client, NodeUrls } from '../src/client'
+import {
+  AssetLTC,
+  LOWER_FEE_BOUND,
+  MIN_TX_FEE,
+  UPPER_FEE_BOUND,
+  explorerProviders,
+  sochainDataProviders,
+} from '../src/const'
+import { NodeAuth } from '../src/types'
 
-const ltcClient = new Client({ network: Network.Testnet })
+export const defaultLTCParams: UtxoClientParams & {
+  nodeUrls: NodeUrls
+  nodeAuth?: NodeAuth
+} = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: explorerProviders,
+  dataProviders: [sochainDataProviders],
+  rootDerivationPaths: {
+    [Network.Mainnet]: `m/84'/2'/0'/0/`,
+    [Network.Testnet]: `m/84'/1'/0'/0/`,
+    [Network.Stagenet]: `m/84'/2'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
+  nodeUrls: {
+    [Network.Mainnet]: 'https://litecoin.ninerealms.com',
+    [Network.Stagenet]: 'https://litecoin.ninerealms.com',
+    [Network.Testnet]: 'https://testnet.ltc.thorchain.info',
+  },
+}
+
+const ltcClient = new Client({ ...defaultLTCParams })
 
 describe('LitecoinClient Test', () => {
   beforeEach(() => {
@@ -36,6 +68,12 @@ describe('LitecoinClient Test', () => {
   const phraseThree = 'quantum vehicle print stairs canvas kid erode grass baby orbit lake remove'
   const addyThree = 'tltc1q04y2lnt0ausy07vq9dg5w2rnn9yjl3rz364adu'
 
+  it('Default network should be mainnet', () => {
+    const getNetwork = ltcClient.getNetwork()
+    const result = Network.Mainnet
+    expect(result).toEqual(getNetwork)
+  })
+
   it('set phrase should return correct address', () => {
     ltcClient.setNetwork(Network.Testnet)
     const result = ltcClient.setPhrase(phraseOne)
@@ -52,9 +90,7 @@ describe('LitecoinClient Test', () => {
 
   it('should not throw on a client without a phrase', () => {
     expect(() => {
-      new Client({
-        network: Network.Testnet,
-      })
+      new Client()
     }).not.toThrow()
   })
 
@@ -157,7 +193,7 @@ describe('LitecoinClient Test', () => {
     const amount = baseAmount(9999999999)
     return expect(
       ltcClient.transfer({ walletIndex: 0, asset, recipient: addyTwo, amount, feeRate: 1 }),
-    ).rejects.toThrow('Balance insufficient for transaction')
+    ).rejects.toThrow('Insufficient Balance for transaction')
   })
 
   it('returns fees and rates of a normal tx', async () => {
@@ -201,7 +237,7 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork(Network.Testnet)
     ltcClient.setPhrase(phraseOne)
     const normalTx = await ltcClient.getFees()
-    const vaultTx = await ltcClient.getFeesWithMemo(MEMO)
+    const vaultTx = await ltcClient.getFees(MEMO)
 
     if (vaultTx.average.amount().isGreaterThan(MIN_TX_FEE)) {
       expect(vaultTx.average.amount().isGreaterThan(normalTx.average.amount())).toBeTruthy()
@@ -234,7 +270,7 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork(Network.Testnet)
     ltcClient.setPhrase(phraseOne)
     const invalidAddress = 'error_address'
-    const expectedError = 'Could not get balances for address error_address'
+    const expectedError = 'no provider able to get balance'
     return expect(ltcClient.getBalance(invalidAddress)).rejects.toThrow(expectedError)
   })
 
@@ -255,7 +291,6 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork(Network.Testnet)
 
     const txPages = await ltcClient.getTransactions({ address: addyThree, limit: 4 })
-
     expect(txPages.total).toEqual(1) //there is 1 tx in addyThree
     expect(txPages.txs[0].asset).toEqual(AssetLTC)
     expect(txPages.txs[0].date).toEqual(new Date('2021-01-29T03:36:36.000Z'))
@@ -291,10 +326,10 @@ describe('LitecoinClient Test', () => {
 
   it('should return valid explorer url', () => {
     ltcClient.setNetwork(Network.Mainnet)
-    expect(ltcClient.getExplorerUrl()).toEqual('https://blockchair.com/litecoin')
+    expect(ltcClient.getExplorerUrl()).toEqual('https://blockchair.com/litecoin/')
 
     ltcClient.setNetwork(Network.Testnet)
-    expect(ltcClient.getExplorerUrl()).toEqual('https://blockexplorer.one/litecoin/testnet')
+    expect(ltcClient.getExplorerUrl()).toEqual('https://blockexplorer.one/litecoin/testnet/')
   })
 
   it('should retrun valid explorer address url', () => {

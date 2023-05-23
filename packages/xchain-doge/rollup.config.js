@@ -1,6 +1,7 @@
-import commonjs from 'rollup-plugin-commonjs'
-import json from 'rollup-plugin-json'
-import resolve from 'rollup-plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
+import resolve from '@rollup/plugin-node-resolve'
+import external from 'rollup-plugin-peer-deps-external'
 import typescript from 'rollup-plugin-typescript2'
 
 import pkg from './package.json'
@@ -23,16 +24,14 @@ export default {
   ],
   plugins: [
     json(),
+    external(),
     typescript({
-      rollupCommonJSResolveHack: true,
       exclude: '__tests__/**',
-      clean: true,
-      browser: true,
     }),
     resolve({ extensions: ['.js', '.ts'], preferBuiltins: true, browser: true }),
     commonjs({
       browser: true,
     }),
   ],
-  external: ['readable-stream', 'buffer', 'stream', 'string_decoder', '@xchainjs/xchain-client', 'axios'],
+  external: ['readable-stream', 'buffer', 'stream', 'string_decoder'],
 }

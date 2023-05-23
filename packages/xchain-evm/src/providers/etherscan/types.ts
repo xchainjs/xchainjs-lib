@@ -1,4 +1,4 @@
-import { Address } from '@xchainjs/xchain-client'
+import { Address } from '@xchainjs/xchain-util'
 
 export type ERC20Tx = {
   timeStamp: string
