@@ -1,73 +1,86 @@
 import {
-  Address,
+  AssetInfo,
   Balance,
-  Fee, FeeOption,
+  Fee,
+  FeeOption,
   FeeRate,
   Network,
   Tx,
   TxHash,
   TxHistoryParams,
   TxParams,
-  TxsPage,
   TxType,
+  TxsPage,
   UTXOClient,
-  XChainClientParams,
+  UtxoClientParams,
+  checkFeeBounds,
 } from '@xchainjs/xchain-client'
-import {getSeed} from '@xchainjs/xchain-crypto'
-import {assetAmount, AssetDASH, assetToBase, baseAmount, Chain} from '@xchainjs/xchain-util'
+import { getSeed } from '@xchainjs/xchain-crypto'
+import * as nodeApi from '@xchainjs/xchain-dash/src/node-api'
+import { Address, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import axios from 'axios'
 import * as Dash from 'bitcoinjs-lib'
-import * as insight from './insight-api'
-import {InsightTxResponse} from './insight-api'
-import * as Utils from './utils'
-import axios from "axios";
-import {checkFeeBounds} from "@xchainjs/xchain-client";
-import * as nodeApi from "@xchainjs/xchain-dash/src/node-api";
 
-export const DEFAULT_FEE_RATE = 1
+import {
+  AssetDASH,
+  BlockcypherDataProviders,
+  DASHChain,
+  DASH_DECIMAL,
+  DEFAULT_FEE_RATE,
+  LOWER_FEE_BOUND,
+  UPPER_FEE_BOUND,
+  explorerProviders,
+} from './const'
+import * as insight from './insight-api'
+import { InsightTxResponse } from './insight-api'
+import * as Utils from './utils'
 
 export type NodeAuth = {
   username: string
   password: string
 }
 
-export type DashClientParams = XChainClientParams & {
-  nodeUrl?: string
-  nodeAuth?: NodeAuth | null
+export type NodeUrls = Record<Network, string>
+
+export const defaultDashParams: UtxoClientParams & {
+  nodeUrls: NodeUrls
+  nodeAuth?: NodeAuth
+} = {
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: explorerProviders,
+  dataProviders: [BlockcypherDataProviders],
+  rootDerivationPaths: {
+    [Network.Mainnet]: `m/44'/5'/0'/0/`,
+    [Network.Stagenet]: `m/44'/5'/0'/0/`,
+    [Network.Testnet]: `m/44'/1'/0'/0/`,
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
+  },
+  nodeUrls: {
+    [Network.Mainnet]: 'https://dash.ninerealms.com',
+    [Network.Stagenet]: 'https://dash.ninerealms.com',
+    [Network.Testnet]: 'https://testnet.dash.thorchain.info',
+  },
 }
 
 class Client extends UTXOClient {
-  private readonly nodeUrl: string
+  private readonly nodeUrls: NodeUrls
   private readonly nodeAuth?: NodeAuth
 
-  constructor({
-    network = Network.Testnet,
-    feeBounds = {
-      lower: 1,
-      upper: 500,
-    },
-    phrase,
-    nodeUrl,
-    nodeAuth = {
-      username: 'thorchain',
-      password: 'password',
-    },
-    rootDerivationPaths = {
-      [Network.Mainnet]: `m/44'/5'/0'/0/`,
-      [Network.Stagenet]: `m/44'/5'/0'/0/`,
-      [Network.Testnet]: `m/44'/1'/0'/0/`,
-    },
-  }: DashClientParams) {
-    super(Chain.Dash, {network, rootDerivationPaths, phrase, feeBounds})
-    this.nodeUrl = nodeUrl ?? (() => {
-      switch (network) {
-        case Network.Mainnet:
-        case Network.Stagenet:
-          return 'https://dash.thorchain.info'
-        case Network.Testnet:
-          return 'https://testnet.dash.thorchain.info'
-      }
-    })()
-    this.nodeAuth = nodeAuth === null ? undefined : nodeAuth
+  constructor(params = defaultDashParams) {
+    super(DASHChain, {
+      network: params.network,
+      rootDerivationPaths: params.rootDerivationPaths,
+      phrase: params.phrase,
+      feeBounds: params.feeBounds,
+      explorerProviders: params.explorerProviders,
+      dataProviders: params.dataProviders,
+    })
+    this.nodeUrls = params.nodeUrls
+    this.nodeAuth = params.nodeAuth
   }
 
   getExplorerUrl(): string {
@@ -99,7 +112,7 @@ class Client extends UTXOClient {
     const dashNetwork = Utils.dashNetwork(this.network)
     const dashKeys = this.getDashKeys(this.phrase, index)
 
-    const {address} = Dash.payments.p2pkh({
+    const { address } = Dash.payments.p2pkh({
       pubkey: dashKeys.publicKey,
       network: dashNetwork,
     })
@@ -109,6 +122,17 @@ class Client extends UTXOClient {
     }
 
     return address
+  }
+  /**
+   *
+   * @returns BTC asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetDASH,
+      decimal: DASH_DECIMAL,
+    }
+    return assetInfo
   }
 
   public getDashKeys(phrase: string, index = 0): Dash.ECPairInterface {
@@ -121,7 +145,7 @@ class Client extends UTXOClient {
       throw new Error('Could not get private key from phrase')
     }
 
-    return Dash.ECPair.fromPrivateKey(master.privateKey, {network: dashNetwork})
+    return Dash.ECPair.fromPrivateKey(master.privateKey, { network: dashNetwork })
   }
 
   validateAddress(address: string): boolean {
@@ -129,13 +153,15 @@ class Client extends UTXOClient {
   }
 
   async getBalance(address: string): Promise<Balance[]> {
-    const addressResponse = await insight.getAddress({network: this.network, address})
+    const addressResponse = await insight.getAddress({ network: this.network, address })
     const confirmed = baseAmount(addressResponse.balanceSat)
     const unconfirmed = baseAmount(addressResponse.unconfirmedBalanceSat)
-    return [{
-      asset: AssetDASH,
-      amount: confirmed.plus(unconfirmed),
-    }]
+    return [
+      {
+        asset: AssetDASH,
+        amount: confirmed.plus(unconfirmed),
+      },
+    ]
   }
 
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
@@ -196,13 +222,13 @@ class Client extends UTXOClient {
     }
 
     return {
-      total: ((totalPages - 1) * perPage) + lastPageTotal,
+      total: (totalPages - 1) * perPage + lastPageTotal,
       txs,
     }
   }
 
   async getTransactionData(txid: string): Promise<Tx> {
-    const tx = await insight.getTx({network: this.network, txid})
+    const tx = await insight.getTx({ network: this.network, txid })
     return this.insightTxToXChainTx(tx)
   }
 
@@ -215,7 +241,7 @@ class Client extends UTXOClient {
       })),
       to: tx.vout
         .filter((i) => i.scriptPubKey.type !== 'nulldata')
-        .map((i) => ({to: i.scriptPubKey.addresses?.[0], amount: assetToBase(assetAmount(i.value))})),
+        .map((i) => ({ to: i.scriptPubKey.addresses?.[0], amount: assetToBase(assetAmount(i.value)) })),
       date: new Date(tx.time * 1000),
       type: TxType.Transfer,
       hash: tx.txid,
@@ -239,7 +265,7 @@ class Client extends UTXOClient {
     const fromAddressIndex = params?.walletIndex || 0
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Average]
     checkFeeBounds(this.feeBounds, feeRate)
-    const {tx} = await Utils.buildTx({
+    const { tx } = await Utils.buildTx({
       ...params,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
@@ -250,10 +276,10 @@ class Client extends UTXOClient {
     const txHex = tx.checkedSerialize({})
     return await nodeApi.broadcastTx({
       txHex,
-      nodeUrl: this.nodeUrl,
+      nodeUrl: this.nodeUrls[this.network],
       auth: this.nodeAuth,
     })
   }
 }
 
-export {Client}
+export { Client }

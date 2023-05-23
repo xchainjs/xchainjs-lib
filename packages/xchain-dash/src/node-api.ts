@@ -1,6 +1,6 @@
+import { TxHash } from '@xchainjs/xchain-client'
+import { NodeAuth } from '@xchainjs/xchain-dash/src/client'
 import axios from 'axios'
-import {TxHash} from "@xchainjs/xchain-client";
-import {NodeAuth} from "@xchainjs/xchain-dash/src/client";
 
 export type BroadcastTxParams = {
   txHex: string
@@ -9,8 +9,8 @@ export type BroadcastTxParams = {
 }
 
 type BroadcastTxResponse = {
-  error: string,
-  result: string,
+  error: string
+  result: string
 }
 
 export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
@@ -36,6 +36,6 @@ export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> =>
     }
     return response.result
   } catch (ex) {
-    return Promise.reject(Error(`failed to broadcast a transaction: ${ex?.response?.data?.error?.message}`))
+    return Promise.reject(Error(`failed to broadcast a transaction: ${ex}`))
   }
 }

@@ -43,6 +43,14 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 0,
     avgBlockTimeInSecs: 6,
   },
+  BSC: {
+    blockReward: 0,
+    avgBlockTimeInSecs: 3,
+  },
+  MAYA: {
+    blockReward: 0,
+    avgBlockTimeInSecs: 6,
+  },
   DASH: {
     blockReward: 2.49,
     avgBlockTimeInSecs: 156,

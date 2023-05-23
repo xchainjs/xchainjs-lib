@@ -1,8 +1,4 @@
 {
   "extends": "../../tsconfig.json",
   "include": [ "src/**/*" ],
-  "typeRoots": [
-    "./node_modules/@types",
-    "../../node_modules/@dashevo/dashcore-lib/typings",
-  ]
 }

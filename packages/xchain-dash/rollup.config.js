@@ -1,6 +1,6 @@
-import commonjs from 'rollup-plugin-commonjs'
-import json from 'rollup-plugin-json'
-import resolve from 'rollup-plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
+import resolve from '@rollup/plugin-node-resolve'
 import typescript from 'rollup-plugin-typescript2'
 
 import pkg from './package.json'
@@ -35,11 +35,4 @@ export default {
     }),
   ],
   external: ['readable-stream', 'buffer', 'stream', 'string_decoder', '@xchainjs/xchain-client', 'axios'],
-  onwarn: function ( warn, next ) {
-    // There's not much point worrying about errors in third-party dependencies
-    // as long as the tests pass, suppressing those warnings here.
-    if (/node_modules/.test(warn.message)) return
-    if (/node_modules/.test(warn.loc?.file)) return
-    next(warn)
-  }
 }

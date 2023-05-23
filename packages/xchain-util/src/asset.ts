@@ -182,7 +182,7 @@ const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: fal
 /**
  * Dash asset
  */
-export const AssetDASH: Asset = {chain: Chain.Dash, symbol: 'DASH', ticker: 'DASH', synth: false}
+export const AssetDASH: Asset = { chain: 'DASH', symbol: 'DASH', ticker: 'DASH', synth: false }
 
 /**
  * Helper to check whether asset is valid

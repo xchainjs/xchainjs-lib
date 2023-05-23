@@ -1,23 +1,23 @@
+import * as dashcore from '@dashevo/dashcore-lib'
+import { Address as DashAddress } from '@dashevo/dashcore-lib/typings/Address'
+import { Script } from '@dashevo/dashcore-lib/typings/script/Script'
+import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transaction'
+import { Input } from '@dashevo/dashcore-lib/typings/transaction/input/Input'
 import {
-  Address,
-  calcFees,
   FeeOption,
   FeeRate,
   Fees,
   FeesWithRates,
   Network,
-  standardFeeRates,
   TxParams,
+  calcFees,
+  standardFeeRates,
 } from '@xchainjs/xchain-client'
-import {baseAmount, BaseAmount} from '@xchainjs/xchain-util'
+import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as Dash from 'bitcoinjs-lib'
+import * as coininfo from 'coininfo'
+
 import * as insight from './insight-api'
-import * as dashcore from "@dashevo/dashcore-lib"
-import {Transaction} from "@dashevo/dashcore-lib/typings/transaction/Transaction";
-import {Script} from "@dashevo/dashcore-lib/typings/script/Script";
-import {Address as DashAddress} from '@dashevo/dashcore-lib/typings/Address'
-import {Input} from "@dashevo/dashcore-lib/typings/transaction/input/Input";
-import * as coininfo from "coininfo";
 
 export type UTXO = {
   hash: string
@@ -46,24 +46,36 @@ const TransactionBytes = {
 export const TX_MIN_FEE = 1000
 export const TX_DUST_THRESHOLD = dashcore.Transaction.DUST_AMOUNT
 
-function accumulative(utxos: any[], outputs: any[], feeRate: number): { inputs: any[], outputs: any[], fee: number } {
-  const TxEmptySize = TransactionBytes.Version + TransactionBytes.Type + TransactionBytes.InputCount + TransactionBytes.OutputCount + TransactionBytes.LockTime
-  const TxInputBase = TransactionBytes.InputPrevOutputHash + TransactionBytes.InputPrevOutputIndex + TransactionBytes.InputScriptLength + TransactionBytes.InputSequence
+function accumulative(utxos: any[], outputs: any[], feeRate: number): { inputs: any[]; outputs: any[]; fee: number } {
+  const TxEmptySize =
+    TransactionBytes.Version +
+    TransactionBytes.Type +
+    TransactionBytes.InputCount +
+    TransactionBytes.OutputCount +
+    TransactionBytes.LockTime
+  const TxInputBase =
+    TransactionBytes.InputPrevOutputHash +
+    TransactionBytes.InputPrevOutputIndex +
+    TransactionBytes.InputScriptLength +
+    TransactionBytes.InputSequence
   const TxOutputBase = TransactionBytes.OutputValue + TransactionBytes.OutputScriptLength
 
   if (!Number.isInteger(feeRate) || feeRate < 0) {
-    throw new Error("feeRate must be a positive integral number")
+    throw new Error('feeRate must be a positive integral number')
   }
 
   const inputs: any[] = []
   const outputValueTotal = outputs.reduce((p: any, c: any) => p + c.value, 0)
-  const outputByteLengthTotal = outputs.reduce((p: any, c: any) => p + TxOutputBase + (c?.script?.length || TransactionBytes.OutputPubkeyHash), 0)
+  const outputByteLengthTotal = outputs.reduce(
+    (p: any, c: any) => p + TxOutputBase + (c?.script?.length || TransactionBytes.OutputPubkeyHash),
+    0,
+  )
 
   let inputValueAccum = 0
   let bytesAccum = TxEmptySize + outputByteLengthTotal
   let feeAccum = bytesAccum * feeRate
 
-  for (let utxo of utxos) {
+  for (const utxo of utxos) {
     if (inputValueAccum >= outputValueTotal + feeAccum) {
       break
     }
@@ -83,11 +95,11 @@ function accumulative(utxos: any[], outputs: any[], feeRate: number): { inputs: 
   const remainderAfterExtraOutput = inputValueAccum - (outputValueTotal + feeAfterExtraOutput)
 
   if (remainderAfterExtraOutput > TX_DUST_THRESHOLD) {
-    outputs = outputs.concat({value: remainderAfterExtraOutput})
+    outputs = outputs.concat({ value: remainderAfterExtraOutput })
     feeAccum += changeOutputByteLength * feeRate
   }
 
-  return {inputs, outputs, fee: feeAccum}
+  return { inputs, outputs, fee: feeAccum }
 }
 
 export function getFee(inputCount: number, feeRate: FeeRate, data: Buffer | null = null): number {
@@ -95,25 +107,18 @@ export function getFee(inputCount: number, feeRate: FeeRate, data: Buffer | null
     TransactionBytes.Version +
     TransactionBytes.Type +
     TransactionBytes.InputCount +
-    inputCount * (
-        TransactionBytes.InputPrevOutputHash +
+    inputCount *
+      (TransactionBytes.InputPrevOutputHash +
         TransactionBytes.InputPrevOutputIndex +
         TransactionBytes.InputScriptLength +
         TransactionBytes.InputPubkeyHash +
-        TransactionBytes.InputSequence
-    ) +
+        TransactionBytes.InputSequence) +
     TransactionBytes.OutputCount +
-    2 * (
-      TransactionBytes.OutputValue +
-      TransactionBytes.OutputScriptLength +
-      TransactionBytes.OutputPubkeyHash
-    ) +
+    2 * (TransactionBytes.OutputValue + TransactionBytes.OutputScriptLength + TransactionBytes.OutputPubkeyHash) +
     TransactionBytes.LockTime
   if (data) {
-    sum += TransactionBytes.OutputValue +
-      TransactionBytes.OutputScriptLength +
-      TransactionBytes.OutputOpReturn +
-      data.length
+    sum +=
+      TransactionBytes.OutputValue + TransactionBytes.OutputScriptLength + TransactionBytes.OutputOpReturn + data.length
   }
   const fee = sum * feeRate
   return fee > TX_MIN_FEE ? fee : TX_MIN_FEE
@@ -153,27 +158,29 @@ export const buildTx = async ({
 }): Promise<{ tx: Transaction; utxos: UTXO[] }> => {
   if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
-  const insightUtxos = await insight.getAddressUtxos({network, address: sender})
+  const insightUtxos = await insight.getAddressUtxos({ network, address: sender })
   if (insightUtxos.length === 0) throw new Error('No utxos to send')
 
-  const utxos: UTXO[] = insightUtxos.map(x => ({
+  const utxos: UTXO[] = insightUtxos.map((x) => ({
     hash: x.txid,
     index: x.vout,
     value: x.satoshis,
   }))
 
-  const targetOutputs = [{
-    address: recipient,
-    value: amount.amount().toNumber(),
-  }]
+  const targetOutputs = [
+    {
+      address: recipient,
+      value: amount.amount().toNumber(),
+    },
+  ]
 
   const { inputs, outputs } = accumulative(utxos, targetOutputs, Number(feeRate.toFixed(0)))
   if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
 
-  const tx : Transaction = new dashcore.Transaction().to(recipient, amount.amount().toNumber())
+  const tx: Transaction = new dashcore.Transaction().to(recipient, amount.amount().toNumber())
 
   inputs.forEach((utxo: UTXO) => {
-    const insightUtxo = insightUtxos.find(x => {
+    const insightUtxo = insightUtxos.find((x) => {
       return x.txid === utxo.hash && x.vout == utxo.index
     })
     if (insightUtxo === undefined) {
@@ -184,34 +191,36 @@ export const buildTx = async ({
     const input: Input = new dashcore.Transaction.Input.PublicKeyHash({
       prevTxId: Buffer.from(insightUtxo.txid, 'hex'),
       outputIndex: insightUtxo.vout,
-      script: "",
+      script: '',
       output: new dashcore.Transaction.Output({
         satoshis: utxo.value,
         script,
-      })
+      }),
     })
-    tx.uncheckedAddInput(input);
+    tx.uncheckedAddInput(input)
   })
 
-  const changeOutput = outputs.find(o => o.address === undefined)
+  const changeOutput = outputs.find((o) => o.address === undefined)
   if (changeOutput) {
     const changeAddress: DashAddress = dashcore.Address.fromString(sender, network)
     const changeScript: Script = new dashcore.Script.buildPublicKeyHashOut(changeAddress)
-    tx.addOutput(new dashcore.Transaction.Output({
-      script: changeScript,
-      satoshis: changeOutput.value,
-    }))
+    tx.addOutput(
+      new dashcore.Transaction.Output({
+        script: changeScript,
+        satoshis: changeOutput.value,
+      }),
+    )
   }
 
   if (memo) {
     tx.addData(memo)
   }
 
-  return {tx, utxos}
+  return { tx, utxos }
 }
 
 export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXO[] = []): BaseAmount => {
-  const script: Script = dashcore.Script.buildDataOut(`${memo}`, 'utf8');
+  const script: Script = dashcore.Script.buildDataOut(`${memo}`, 'utf8')
   // @ts-ignore
   const scriptBuffer: Buffer = script.toBuffer()
   const fee = getFee(utxos.length, feeRate, scriptBuffer)
@@ -231,7 +240,7 @@ export const getDefaultFeesWithRates = (): FeesWithRates => {
 }
 
 export const getDefaultFees = (): Fees => {
-  const {fees} = getDefaultFeesWithRates()
+  const { fees } = getDefaultFeesWithRates()
   return fees
 }
 

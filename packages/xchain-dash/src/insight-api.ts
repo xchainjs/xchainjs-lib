@@ -1,4 +1,4 @@
-import {Network} from '@xchainjs/xchain-client'
+import { Network } from '@xchainjs/xchain-client'
 import axios from 'axios'
 
 export type InsightAddressParams = {
@@ -50,32 +50,36 @@ export type InsightTxResponse = {
   type: number
   valueOut: number
   version: number
-  vin: [{
-    addr: string
-    doubleSpentTxID: string
-    n: number
-    scriptSig: {
-      asm: string
-      hex: string
-    }
-    sequence: number
-    txid: number
-    value: number
-    valueSat: number
-  }],
-  vout: [{
-    n: number
-    scriptPubKey: {
-      addresses: string[]
-      asm: string
-      hex: string
-      type: string
-    }
-    spentHeight: number
-    spentIndex: number
-    spentTxId: string
-    value: string
-  }]
+  vin: [
+    {
+      addr: string
+      doubleSpentTxID: string
+      n: number
+      scriptSig: {
+        asm: string
+        hex: string
+      }
+      sequence: number
+      txid: number
+      value: number
+      valueSat: number
+    },
+  ]
+  vout: [
+    {
+      n: number
+      scriptPubKey: {
+        addresses: string[]
+        asm: string
+        hex: string
+        type: string
+      }
+      spentHeight: number
+      spentIndex: number
+      spentTxId: string
+      value: string
+    },
+  ]
 }
 
 export type InsightRawTx = string
@@ -105,7 +109,9 @@ export const getAddress = async (p: InsightAddressParams): Promise<InsightAddres
   return (await axios.get(`${urlForNetwork(p.network)}/addr/${p.address}`)).data
 }
 
-export const getAddressTxs = async (p: InsightAddressParams): Promise<{txs: InsightTxResponse[], pagesTotal: number}> => {
+export const getAddressTxs = async (
+  p: InsightAddressParams,
+): Promise<{ txs: InsightTxResponse[]; pagesTotal: number }> => {
   const pageNum = p?.pageNum || 0
   return (await axios.get(`${urlForNetwork(p.network)}/txs?address=${p.address}&pageNum=${pageNum}`)).data
 }

@@ -1,9 +1,10 @@
-import {Network} from '@xchainjs/xchain-client'
-import {assetAmount, assetToBase, baseAmount} from '@xchainjs/xchain-util'
-import {Client} from '../src/client'
-import dashMocks from '../__mocks__/dash-mocks'
+import { Network } from '@xchainjs/xchain-client'
+import { assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
-const dashClient = new Client({ network: Network.Testnet })
+import dashMocks from '../__mocks__/dash-mocks'
+import { Client } from '../src/client'
+
+const dashClient = new Client()
 
 describe('DashClient Test', () => {
   const phrase = 'atom green various power must another rent imitate gadget creek fat then'
@@ -26,9 +27,7 @@ describe('DashClient Test', () => {
 
   it('should not throw on a client without a phrase', () => {
     expect(() => {
-      new Client({
-        network: Network.Testnet,
-      })
+      new Client()
     }).not.toThrow()
   })
 
@@ -87,9 +86,7 @@ describe('DashClient Test', () => {
 
   it('should return valid explorer tx url', () => {
     dashClient.setNetwork(Network.Mainnet)
-    expect(dashClient.getExplorerTxUrl('testTxHere')).toEqual(
-      'https://insight.dash.org/insight/tx/testTxHere',
-    )
+    expect(dashClient.getExplorerTxUrl('testTxHere')).toEqual('https://insight.dash.org/insight/tx/testTxHere')
     dashClient.setNetwork(Network.Testnet)
     expect(dashClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
       'https://testnet-insight.dash.org/insight/tx/anotherTestTxHere',
