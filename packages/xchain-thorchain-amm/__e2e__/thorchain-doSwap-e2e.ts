@@ -61,13 +61,12 @@ const XRUNE: Asset = {
 function print(estimate: TxDetails) {
   const expanded = {
     totalFees: {
-      swapFee: estimate.txEstimate.totalFees.swapFee.formatedAssetString(),
       outboundFee: estimate.txEstimate.totalFees.outboundFee.formatedAssetString(),
       affiliateFee: estimate.txEstimate.totalFees.affiliateFee.formatedAssetString(),
     },
     slipBasisPoints: estimate.txEstimate.slipBasisPoints.toFixed(),
     netOutput: estimate.txEstimate.netOutput.formatedAssetString(),
-    waitTime: estimate.txEstimate.waitTimeSeconds.toFixed(),
+    waitTime: estimate.txEstimate.outboundDelaySeconds.toFixed(),
     canSwap: estimate.txEstimate.canSwap,
     errors: estimate.txEstimate.errors,
   }
@@ -163,7 +162,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       print(outPutCanSwap)
       if (outPutCanSwap.txEstimate.canSwap) {
         const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
-        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}`)
         expect(output).toBeTruthy()
       }
     } catch (error) {
@@ -184,7 +183,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
     }
     try {
       const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
-      console.log(`tx hash: ${output.hash}, \n Tx url: ${output.url} \n WaitTime:${output.waitTimeSeconds}`)
+      console.log(`tx hash: ${output.hash}, \n Tx url: ${output.url}`)
       expect(output).toBeTruthy()
     } catch (error) {
       console.error(error)
@@ -207,7 +206,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       console.log(JSON.stringify(outPutCanSwap))
       if (outPutCanSwap.txEstimate.canSwap) {
         const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
-        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}`)
         expect(output).toBeTruthy()
       }
     } catch (error) {
@@ -231,7 +230,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       console.log(JSON.stringify(outPutCanSwap))
       if (outPutCanSwap.txEstimate.canSwap) {
         const output = await mainnetThorchainAmm.doSwap(mainnetWallet, estimateSwapParams)
-        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+        console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}`)
         expect(output).toBeTruthy()
       }
     } catch (error) {

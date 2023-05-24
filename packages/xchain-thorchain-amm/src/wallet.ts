@@ -8,6 +8,7 @@ import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient } from '@xchainjs/xchain-doge'
 import { AssetETH, Client as EthClient, ETHChain } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
+import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { Client as ThorClient, THORChain, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Address, eqAsset } from '@xchainjs/xchain-util'
@@ -48,6 +49,7 @@ export class Wallet {
       GAIA: new CosmosClient(settings),
       AVAX: new AvaxClient({ ...defaultAvaxParams, network: settings.network, phrase }),
       BSC: new BscClient({ ...defaultBscParams, network: settings.network, phrase }),
+      MAYA: new MayaClient(settings),
     }
     this.clients.BCH.setNetwork(settings.network)
     this.clients.BCH.setPhrase(settings.phrase, 0)
@@ -181,7 +183,7 @@ export class Wallet {
    * @returns - tx submitted object
    */
   private async swapRuneTo(swap: ExecuteSwap): Promise<TxSubmitted> {
-    const thorClient = (this.clients.THOR as unknown) as ThorchainClient
+    const thorClient = this.clients.THOR as unknown as ThorchainClient
     const hash = await thorClient.deposit({
       amount: swap.input.baseAmount,
       asset: swap.input.asset,
@@ -229,6 +231,17 @@ export class Wallet {
         memo: swap.memo,
       }
       const hash = await this.evmHelpers['BSC'].sendDeposit(params)
+      return { hash, url: client.getExplorerTxUrl(hash) }
+    } else if (swap.input.asset.chain === MAYAChain) {
+      // add mayachain
+      const params = {
+        walletIndex: 0,
+        asset: swap.input.asset,
+        amount: swap.input.baseAmount,
+        recipient: inbound.address,
+        memo: swap.memo,
+      }
+      const hash = await client.transfer(params)
       return { hash, url: client.getExplorerTxUrl(hash) }
     } else {
       const params = {
@@ -567,7 +580,7 @@ export class Wallet {
    * @returns - tx object
    */
   private async addRuneLP(params: AddLiquidity, memo: string, thorchainClient: XChainClient): Promise<TxSubmitted> {
-    const thorClient = (this.clients.THOR as unknown) as ThorchainClient
+    const thorClient = this.clients.THOR as unknown as ThorchainClient
     const addParams = {
       asset: params.rune.asset,
       amount: params.rune.baseAmount,
@@ -587,7 +600,7 @@ export class Wallet {
     memo: string,
     thorchainClient: XChainClient,
   ): Promise<TxSubmitted> {
-    const thorClient = (this.clients.THOR as unknown) as ThorchainClient
+    const thorClient = this.clients.THOR as unknown as ThorchainClient
     const addParams = {
       asset: params.runeFee.asset,
       amount: params.runeFee.baseAmount,

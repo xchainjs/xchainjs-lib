@@ -1,4 +1,5 @@
 import {
+  AssetInfo,
   Fee,
   FeeRate,
   Network,
@@ -16,7 +17,9 @@ import * as Dogecoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
 import {
+  AssetDOGE,
   DOGEChain,
+  DOGE_DECIMAL,
   LOWER_FEE_BOUND,
   UPPER_FEE_BOUND,
   blockcypherDataProviders,
@@ -93,6 +96,18 @@ class Client extends UTXOClient {
       return address
     }
     throw new Error('Phrase must be provided')
+  }
+
+  /**
+   *
+   * @returns Doge asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetDOGE,
+      decimal: DOGE_DECIMAL,
+    }
+    return assetInfo
   }
 
   /**

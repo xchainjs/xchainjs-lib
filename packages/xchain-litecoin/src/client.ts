@@ -1,4 +1,5 @@
 import {
+  AssetInfo,
   Fee,
   FeeOption,
   FeeRate,
@@ -16,7 +17,15 @@ import axios from 'axios'
 import * as Litecoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
-import { BlockcypherDataProviders, LOWER_FEE_BOUND, LTCChain, UPPER_FEE_BOUND, explorerProviders } from './const'
+import {
+  AssetLTC,
+  BlockcypherDataProviders,
+  LOWER_FEE_BOUND,
+  LTCChain,
+  LTC_DECIMAL,
+  UPPER_FEE_BOUND,
+  explorerProviders,
+} from './const'
 import { NodeAuth } from './types'
 import * as Utils from './utils'
 
@@ -24,7 +33,7 @@ const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
 
 export type NodeUrls = Record<Network, string>
 
-export const defaultLTCParams: UtxoClientParams & {
+export const defaultLtcParams: UtxoClientParams & {
   nodeUrls: NodeUrls
   nodeAuth?: NodeAuth
 } = {
@@ -61,7 +70,7 @@ class Client extends UTXOClient {
    *
    * @param {UtxoClientParams} params
    */
-  constructor(params = defaultLTCParams) {
+  constructor(params = defaultLtcParams) {
     super(LTCChain, {
       network: params.network,
       rootDerivationPaths: params.rootDerivationPaths,
@@ -103,6 +112,18 @@ class Client extends UTXOClient {
       return address
     }
     throw new Error('Phrase must be provided')
+  }
+
+  /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetLTC,
+      decimal: LTC_DECIMAL,
+    }
+    return assetInfo
   }
 
   /**

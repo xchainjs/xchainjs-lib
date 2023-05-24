@@ -1,5 +1,6 @@
 import cosmosclient from '@cosmos-client/core'
 import {
+  AssetInfo,
   Balance,
   BaseXChainClient,
   FeeType,
@@ -25,7 +26,7 @@ import Long from 'long'
 
 import {
   AssetCacao,
-  DECIMAL,
+  CACAO_DECIMAL,
   DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
   MAX_TX_COUNT,
@@ -312,6 +313,18 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
   }
 
   /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetCacao,
+      decimal: CACAO_DECIMAL,
+    }
+    return assetInfo
+  }
+
+  /**
    * Get transaction history of a given address with pagination options.
    * By default it will return the transaction history of the current wallet.
    *
@@ -418,11 +431,11 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
     result.observed_tx.tx.coins.forEach((coin) => {
       from.push({
         from: result.observed_tx.tx.from_address,
-        amount: baseAmount(coin.amount, DECIMAL),
+        amount: baseAmount(coin.amount, CACAO_DECIMAL),
       })
       to.push({
         to: result.observed_tx.tx.to_address,
-        amount: baseAmount(coin.amount, DECIMAL),
+        amount: baseAmount(coin.amount, CACAO_DECIMAL),
       })
       asset = assetFromString(coin.asset)
     })
@@ -456,10 +469,10 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const cacaoBalance: BaseAmount =
       balances.filter(({ asset: assetInList }) => assetInList.ticker === AssetCacao.ticker)[0]?.amount ??
-      baseAmount(0, DECIMAL)
+      baseAmount(0, CACAO_DECIMAL)
     const assetBalance: BaseAmount =
       balances.filter(({ asset: assetInList }) => assetToString(assetInList) === assetToString(asset))[0]?.amount ??
-      baseAmount(0, DECIMAL)
+      baseAmount(0, CACAO_DECIMAL)
 
     const { average: fee } = await this.getFees()
 
@@ -536,10 +549,10 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
     const balances = await this.getBalance(this.getAddress(walletIndex))
     const cacaoBalance: BaseAmount =
       balances.filter(({ asset: assetInList }) => assetInList.ticker === AssetCacao.ticker)[0]?.amount ??
-      baseAmount(0, DECIMAL)
+      baseAmount(0, CACAO_DECIMAL)
     const assetBalance: BaseAmount =
       balances.filter(({ asset: assetInList }) => assetToString(assetInList) === assetToString(asset))[0]?.amount ??
-      baseAmount(0, DECIMAL)
+      baseAmount(0, CACAO_DECIMAL)
 
     const fee = (await this.getFees()).average
 
@@ -602,7 +615,7 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
     recipient,
     memo,
     fromCacaoBalance: from_cacao_balance,
-    fromAssetBalance: from_asset_balance = baseAmount(0, DECIMAL),
+    fromAssetBalance: from_asset_balance = baseAmount(0, CACAO_DECIMAL),
     fromAccountNumber = Long.ZERO,
     fromSequence = Long.ZERO,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),

@@ -1,3 +1,16 @@
+# v0.5.2 (2023-05-18)
+
+## Update
+
+- Add Mayachain to wallet class
+- Bumps deps
+
+# v0.5.1 (2023-05-10)
+
+## Update
+
+- Bump thornode & thorchain-query deps
+
 # v0.5.0 (2023-05-03)
 
 ## Update

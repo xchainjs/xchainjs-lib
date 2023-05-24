@@ -1,5 +1,6 @@
 import * as bitcash from '@psf/bitcoincashjs-lib'
 import {
+  AssetInfo,
   Fee,
   FeeOption,
   FeeRate,
@@ -16,11 +17,19 @@ import { Address } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import accumulative from 'coinselect/accumulative'
 
-import { BCHChain, HaskoinDataProviders, LOWER_FEE_BOUND, UPPER_FEE_BOUND, explorerProviders } from './const'
+import {
+  AssetBCH,
+  BCHChain,
+  BCH_DECIMAL,
+  HaskoinDataProviders,
+  LOWER_FEE_BOUND,
+  UPPER_FEE_BOUND,
+  explorerProviders,
+} from './const'
 import { KeyPair, TransactionBuilder } from './types/bitcoincashjs-types'
 import * as Utils from './utils'
 
-export const defaultBCHParams: UtxoClientParams = {
+export const defaultBchParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
@@ -45,7 +54,7 @@ class Client extends UTXOClient {
    *
    * @param {UtxoClientParams} params
    */
-  constructor(params = defaultBCHParams) {
+  constructor(params = defaultBchParams) {
     super(BCHChain, {
       network: params.network,
       rootDerivationPaths: params.rootDerivationPaths,
@@ -77,6 +86,18 @@ class Client extends UTXOClient {
     } catch (error) {
       throw new Error('Address not defined')
     }
+  }
+
+  /**
+   *
+   * @returns BCH asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: AssetBCH,
+      decimal: BCH_DECIMAL,
+    }
+    return assetInfo
   }
 
   /**

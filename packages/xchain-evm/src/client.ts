@@ -1,5 +1,6 @@
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import {
+  AssetInfo,
   Balance,
   BaseXChainClient,
   ExplorerProviders,
@@ -191,6 +192,18 @@ export default class Client extends BaseXChainClient implements XChainClient {
    */
   getExplorerUrl(): string {
     return this.explorerProviders[this.network].getExplorerUrl()
+  }
+
+  /**
+   *
+   * @returns asset info
+   */
+  getAssetInfo(): AssetInfo {
+    const assetInfo: AssetInfo = {
+      asset: this.gasAsset,
+      decimal: this.gasAssetDecimals,
+    }
+    return assetInfo
   }
 
   /**
