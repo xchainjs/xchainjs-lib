@@ -1,5 +1,5 @@
-import MockAdapter from "axios-mock-adapter";
-import axios from "axios";
+import axios from 'axios'
+import MockAdapter from 'axios-mock-adapter'
 
 type MockConfig = {
   url?: string
@@ -25,8 +25,8 @@ const mocks = {
       200,
       {
         feePerKb: 10000,
-        numBlocks: 2
-      }
+        numBlocks: 2,
+      },
     ])
   },
   mockInsight: () => {
@@ -73,7 +73,7 @@ const mocks = {
     mocks.mockThorchain()
     mocks.mockBitgo()
     mocks.mockInsight()
-  }
+  },
 }
 
 export default mocks

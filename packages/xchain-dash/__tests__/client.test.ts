@@ -70,7 +70,7 @@ describe('DashClient Test', () => {
     expect(dashClient.getExplorerUrl()).toEqual('https://insight.dash.org/insight')
 
     dashClient.setNetwork(Network.Testnet)
-    expect(dashClient.getExplorerUrl()).toEqual('https://testnet-insight.dash.org/insight')
+    expect(dashClient.getExplorerUrl()).toEqual('https://blockexplorer.one/dash/testnet/')
   })
 
   it('should return valid explorer address url', () => {
@@ -80,7 +80,7 @@ describe('DashClient Test', () => {
     )
     dashClient.setNetwork(Network.Testnet)
     expect(dashClient.getExplorerAddressUrl('anotherTestAddressHere')).toEqual(
-      'https://testnet-insight.dash.org/insight/address/anotherTestAddressHere',
+      'https://blockexplorer.one/dash/testnet/address/anotherTestAddressHere',
     )
   })
 
@@ -89,7 +89,7 @@ describe('DashClient Test', () => {
     expect(dashClient.getExplorerTxUrl('testTxHere')).toEqual('https://insight.dash.org/insight/tx/testTxHere')
     dashClient.setNetwork(Network.Testnet)
     expect(dashClient.getExplorerTxUrl('anotherTestTxHere')).toEqual(
-      'https://testnet-insight.dash.org/insight/tx/anotherTestTxHere',
+      'https://blockexplorer.one/dash/testnet/tx/anotherTestTxHere',
     )
   })
 

@@ -220,10 +220,8 @@ export const buildTx = async ({
 }
 
 export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXO[] = []): BaseAmount => {
-  const script: Script = dashcore.Script.buildDataOut(`${memo}`, 'utf8')
-  // @ts-ignore
-  const scriptBuffer: Buffer = script.toBuffer()
-  const fee = getFee(utxos.length, feeRate, scriptBuffer)
+  const scriptData: Buffer = Buffer.from(`${memo}`, 'utf8')
+  const fee = getFee(utxos.length, feeRate, scriptData)
   return baseAmount(fee)
 }
 

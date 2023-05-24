@@ -83,24 +83,6 @@ class Client extends UTXOClient {
     this.nodeAuth = params.nodeAuth
   }
 
-  getExplorerUrl(): string {
-    switch (this.network) {
-      case Network.Mainnet:
-      case Network.Stagenet:
-        return 'https://insight.dash.org/insight'
-      case Network.Testnet:
-        return 'https://testnet-insight.dash.org/insight'
-    }
-  }
-
-  getExplorerAddressUrl(address: Address): string {
-    return `${this.getExplorerUrl()}/address/${address}`
-  }
-
-  getExplorerTxUrl(txID: string): string {
-    return `${this.getExplorerUrl()}/tx/${txID}`
-  }
-
   getAddress(index = 0): Address {
     if (index < 0) {
       throw new Error('index must be greater than zero')

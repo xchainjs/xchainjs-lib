@@ -38,9 +38,9 @@ const DASH_MAINNET_EXPLORER = new ExplorerProvider(
 )
 
 const DASH_TESTNET_EXPLORER = new ExplorerProvider(
-  'https://testnet-insight.dash.org/insight',
-  'https://testnet-insight.dash.org/insight/address/%%ADDRESS%%',
-  'https://testnet-insight.dash.org/insight/tx/%%TX_ID%%',
+  'https://blockexplorer.one/dash/testnet/',
+  'https://blockexplorer.one/dash/testnet/address/%%ADDRESS%%',
+  'https://blockexplorer.one/dash/testnet/tx/%%TX_ID%%',
 )
 
 export const explorerProviders = {

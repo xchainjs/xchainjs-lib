@@ -1,5 +1,5 @@
-import * as utils from '../src/utils'
 import dashMocks from '../__mocks__/dash-mocks'
+import * as utils from '../src/utils'
 
 describe('Dash Utils Test', () => {
   beforeEach(() => {
