@@ -2280,6 +2280,11 @@
     "@typescript-eslint/types" "5.59.1"
     eslint-visitor-keys "^3.3.0"
 
+"@xchainjs/xchain-ethereum@^0.28.2":
+  version "0.28.2"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-ethereum/-/xchain-ethereum-0.28.2.tgz#9bf30796d9bb2f3fbf055c739a395638574ce452"
+  integrity sha512-y10WWWROl2Sj9QCxToMxmnIKJZLtXQ0AdVk6VA+FTssWDxezKCajzHDIds38MCZsLSWLcPnHHuIt2K69EPc+dw==
+
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz#e77a97fbd345b76d83245edcd17d393b1b41fb31"
