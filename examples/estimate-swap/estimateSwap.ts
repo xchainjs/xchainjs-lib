@@ -21,8 +21,8 @@ function print(estimate: SwapEstimate, input: CryptoAmount) {
     },
     slipBasisPoints: estimate.slipBasisPoints.toFixed(),
     netOutput: estimate.netOutput.formatedAssetString(),
-    inboundConfirmationSeconds: estimate.inboundConfirmationSeconds.toFixed(),
-    outboundDelaySeconds: estimate.outboundDelaySeconds.toFixed(),
+    inboundConfirmationSeconds: estimate.inboundConfirmationSeconds,
+    outboundDelaySeconds: estimate.outboundDelaySeconds,
     canSwap: estimate.canSwap,
     errors: estimate.errors,
   }

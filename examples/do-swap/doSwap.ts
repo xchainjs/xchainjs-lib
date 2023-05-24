@@ -9,7 +9,7 @@ import {
   Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromString, assetToBase, delay } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromString, assetToBase, assetToString, delay } from '@xchainjs/xchain-util'
 
 import { checkTx } from '../check-tx/check-tx'
 
@@ -21,13 +21,13 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
     txEstimate: {
       input: input.formatedAssetString(),
       totalFees: {
-        swapFee: txDetails.txEstimate.totalFees.swapFee.formatedAssetString(),
+        asset: assetToString(txDetails.txEstimate.totalFees.asset),
         outboundFee: txDetails.txEstimate.totalFees.outboundFee.formatedAssetString(),
         affiliateFee: txDetails.txEstimate.totalFees.affiliateFee.formatedAssetString(),
       },
       slipBasisPoints: txDetails.txEstimate.slipBasisPoints.toFixed(),
       netOutput: txDetails.txEstimate.netOutput.formatedAssetString(),
-      waitTimeSeconds: txDetails.txEstimate.waitTimeSeconds.toFixed(),
+      outboundDelaySeconds: txDetails.txEstimate.outboundDelaySeconds,
       canSwap: txDetails.txEstimate.canSwap,
       errors: txDetails.txEstimate.errors,
     },
@@ -92,9 +92,16 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Networ
     printTx(outPutCanSwap, swapParams.amount)
     if (outPutCanSwap.txEstimate.canSwap) {
       const output = await tcAmm.doSwap(wallet, swapParams)
-      console.log(`Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${output.waitTimeSeconds}`)
+      console.log(
+        `Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${outPutCanSwap.txEstimate.outboundDelaySeconds}`,
+      )
       console.log('Waiting for transaction to be confirmed...')
-      await delayedLog('hash', output.waitTimeSeconds <= 6 ? 12000 : output.waitTimeSeconds * 1000)
+      await delayedLog(
+        'hash',
+        outPutCanSwap.txEstimate.outboundDelaySeconds <= 6
+          ? 12000
+          : outPutCanSwap.txEstimate.outboundDelaySeconds * 1000,
+      )
       await checkTx(network, output.hash)
     }
   } catch (error) {
