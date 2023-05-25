@@ -52,3 +52,15 @@ export type DepositParams = {
   feeOption: FeeOption
   memo: string
 }
+
+export type LoanOpenParams = {
+  memo: string
+  amount: CryptoAmount
+  toAddress: Address
+}
+
+export type LoanCloseParams = {
+  memo: string
+  amount: CryptoAmount
+  toAddress: Address
+}

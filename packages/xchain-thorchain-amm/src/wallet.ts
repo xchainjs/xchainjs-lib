@@ -13,7 +13,15 @@ import { Client as ThorClient, THORChain, ThorchainClient } from '@xchainjs/xcha
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Address, eqAsset } from '@xchainjs/xchain-util'
 
-import { AddLiquidity, AllBalances, ExecuteSwap, TxSubmitted, WithdrawLiquidity } from './types'
+import {
+  AddLiquidity,
+  AllBalances,
+  ExecuteSwap,
+  LoanCloseParams,
+  LoanOpenParams,
+  TxSubmitted,
+  WithdrawLiquidity,
+} from './types'
 import { EthHelper } from './utils/eth-helper'
 import { EvmHelper } from './utils/evm-helper'
 
@@ -432,6 +440,110 @@ export class Wallet {
         amount: dustAssetAmount.baseAmount,
         recipient: toAddress,
         memo: memo,
+      }
+      try {
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash) }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
+      }
+    }
+  }
+
+  async loanOpen(params: LoanOpenParams): Promise<TxSubmitted> {
+    const assetClient = this.clients[params.amount.asset.chain]
+    if (params.amount.asset.chain === ETHChain) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: params.memo,
+      }
+      const hash = await this.ethHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else if (params.amount.asset.chain === AVAXChain) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: params.memo,
+      }
+      const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else if (params.amount.asset.chain === BSCChain) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: params.memo,
+      }
+      const evmHelper = new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        recipient: params.toAddress,
+        memo: params.memo,
+      }
+      try {
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash) }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
+      }
+    }
+  }
+
+  async loanClose(params: LoanCloseParams): Promise<TxSubmitted> {
+    const assetClient = this.clients[params.amount.asset.chain]
+    if (params.amount.asset.chain === ETHChain) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: params.memo,
+      }
+      const hash = await this.ethHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else if (params.amount.asset.chain === AVAXChain) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: params.memo,
+      }
+      const evmHelper = new EvmHelper(this.clients.AVAX, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else if (params.amount.asset.chain === BSCChain) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: params.memo,
+      }
+      const evmHelper = new EvmHelper(this.clients.BSC, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        recipient: params.toAddress,
+        memo: params.memo,
       }
       try {
         const hash = await assetClient.transfer(addParams)

@@ -1,3 +1,10 @@
+# v0.5.3 (2023-05-22)
+
+## Update
+
+- Add getLoanQuoteClose & getLoanQuoteOpen to thorchainamm
+- Bumps Query dep
+
 # v0.5.2 (2023-05-18)
 
 ## Update
