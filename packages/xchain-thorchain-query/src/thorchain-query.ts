@@ -810,33 +810,32 @@ export class ThorchainQuery {
       affiliate,
       height,
     )
-    console.log(loanOpenResp)
     const response: { error?: string } = JSON.parse(JSON.stringify(loanOpenResp))
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
     if (errors.length > 0) {
       return {
-        inboundAddress: loanOpenResp.inbound_address,
+        inboundAddress: '',
         expectedWaitTime: {
-          outboundDelayBlocks: loanOpenResp.outbound_delay_blocks,
-          outbondDelaySeconds: loanOpenResp.outbound_delay_seconds,
+          outboundDelayBlocks: undefined,
+          outbondDelaySeconds: undefined,
         },
         fees: {
-          asset: loanOpenResp.fees.asset,
-          liquidity: loanOpenResp.fees.liquidity,
-          outbound: loanOpenResp.fees.outbound,
-          total_bps: loanOpenResp.fees.total_bps,
+          asset: '',
+          liquidity: undefined,
+          outbound: undefined,
+          total_bps: undefined,
         },
-        slippageBps: loanOpenResp.slippage_bps,
-        router: loanOpenResp.router,
-        expiry: loanOpenResp.expiry,
-        warning: loanOpenResp.warning,
-        notes: loanOpenResp.notes,
-        dustThreshold: loanOpenResp.dust_threshold,
-        memo: loanOpenResp.memo,
-        expectedAmountOut: loanOpenResp.expected_amount_out,
-        expectedCollateralizationRation: loanOpenResp.expected_collateralization_ratio,
-        expectedCollateralUp: loanOpenResp.expected_collateral_up,
-        expectedDebtUp: loanOpenResp.expected_collateral_up,
+        slippageBps: undefined,
+        router: undefined,
+        expiry: 0,
+        warning: '',
+        notes: '',
+        dustThreshold: undefined,
+        memo: undefined,
+        expectedAmountOut: '',
+        expectedCollateralizationRation: '',
+        expectedCollateralUp: '',
+        expectedDebtUp: '',
         errors: errors,
       }
     }
@@ -876,6 +875,7 @@ export class ThorchainQuery {
   public async getLoanQuoteClose({
     asset,
     amount,
+    fromAddress,
     loanAsset,
     loanOwner,
     minOut,
@@ -885,37 +885,37 @@ export class ThorchainQuery {
     const loanCloseResp = await this.thorchainCache.thornode.getLoanQuoteClose(
       `${asset.chain}.${asset.ticker}`,
       amount.baseAmount.amount().toNumber(),
+      fromAddress,
       `${loanAsset.chain}.${loanAsset.ticker}`,
       loanOwner,
       minOut,
       height,
     )
-    console.log(loanCloseResp)
     const response: { error?: string } = JSON.parse(JSON.stringify(loanCloseResp))
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
     if (errors.length > 0) {
       return {
-        inboundAddress: loanCloseResp.inbound_address,
+        inboundAddress: '',
         expectedWaitTime: {
-          outboundDelayBlocks: loanCloseResp.outbound_delay_blocks,
-          outbondDelaySeconds: loanCloseResp.outbound_delay_seconds,
+          outboundDelayBlocks: undefined,
+          outbondDelaySeconds: undefined,
         },
         fees: {
-          asset: loanCloseResp.fees.asset,
-          liquidity: loanCloseResp.fees.liquidity,
-          outbound: loanCloseResp.fees.outbound,
-          total_bps: loanCloseResp.fees.total_bps,
+          asset: '',
+          liquidity: undefined,
+          outbound: undefined,
+          total_bps: undefined,
         },
-        slippageBps: loanCloseResp.slippage_bps,
-        router: loanCloseResp.router,
-        expiry: loanCloseResp.expiry,
-        warning: loanCloseResp.warning,
-        notes: loanCloseResp.notes,
-        dustThreshold: loanCloseResp.dust_threshold,
-        memo: loanCloseResp.memo,
-        expectedAmountOut: loanCloseResp.expected_amount_out,
-        expectedCollateralDown: loanCloseResp.expected_collateral_down,
-        expectedDebtDown: loanCloseResp.expected_debt_down,
+        slippageBps: undefined,
+        router: undefined,
+        expiry: 0,
+        warning: '',
+        notes: '',
+        dustThreshold: undefined,
+        memo: undefined,
+        expectedAmountOut: '',
+        expectedCollateralDown: '',
+        expectedDebtDown: '',
         errors: errors,
       }
     }

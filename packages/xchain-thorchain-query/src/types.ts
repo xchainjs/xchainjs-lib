@@ -279,7 +279,8 @@ export type LoanCloseParams = {
   asset: Asset
   amount: CryptoAmount
   loanAsset: Asset
-  loanOwner: string
+  loanOwner: Address
+  fromAddress: Address
   minOut?: string
   height?: number
 }

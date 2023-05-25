@@ -4,7 +4,7 @@ import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
-import { LoanCloseParams, LoanOpenParams, LoanOpenQuote } from '../src/types'
+import { LoanCloseParams, LoanCloseQuote, LoanOpenParams, LoanOpenQuote } from '../src/types'
 import { AssetBTC, AssetETH } from '../src/utils'
 import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
@@ -16,7 +16,7 @@ const thorchainQuery = new ThorchainQuery(thorchainCache)
 const btcAddress = 'bc1q3q6gfcg2n4c7hdzjsvpq5rp9rfv5t59t5myz5v'
 const ethAddress = '0xf155e9cdD77A5d77073aB43d17F661507C08E23d'
 
-function print(quote: LoanOpenQuote) {
+function printOpen(quote: LoanOpenQuote) {
   const expanded = {
     inboundAddress: quote.inboundAddress,
     expectedWaitTime: {
@@ -45,6 +45,34 @@ function print(quote: LoanOpenQuote) {
   console.log(expanded)
 }
 
+function printClose(quote: LoanCloseQuote) {
+  const expanded = {
+    inboundAddress: quote.inboundAddress,
+    expectedWaitTime: {
+      outboundDelayBlocks: quote.expectedWaitTime.outboundDelayBlocks,
+      outbondDelaySeconds: quote.expectedWaitTime.outbondDelaySeconds,
+    },
+    fees: {
+      asset: quote.fees.asset,
+      liquidity: quote.fees.liquidity,
+      outbound: quote.fees.outbound,
+      total_bps: quote.fees.total_bps,
+    },
+    slippageBps: quote.slippageBps,
+    router: quote.router,
+    expiry: quote.expiry,
+    warning: quote.warning,
+    notes: quote.notes,
+    dustThreshold: quote.dustThreshold,
+    memo: quote.memo,
+    expectedAmountOut: quote.expectedAmountOut,
+    expectedCollateralDown: quote.expectedCollateralDown,
+    expectedDebtDown: quote.expectedDebtDown,
+    errors: quote.errors,
+  }
+  console.log(expanded)
+}
+
 // Testing lending queries
 describe('Thorchain-query Loan Integration Tests', () => {
   it(`Should fetch a loan quote for BTC`, async () => {
@@ -55,7 +83,7 @@ describe('Thorchain-query Loan Integration Tests', () => {
       destination: ethAddress,
     }
     const loanQuote = await thorchainQuery.getLoanQuoteOpen(loanQuoteParams)
-    print(loanQuote)
+    printOpen(loanQuote)
   })
 
   it(`Should fetch a loan quote for ETH`, async () => {
@@ -67,18 +95,19 @@ describe('Thorchain-query Loan Integration Tests', () => {
     }
     const loanQuote = await thorchainQuery.getLoanQuoteOpen(loanQuoteParams)
 
-    print(loanQuote)
+    printOpen(loanQuote)
   })
 
   it(`Should fetch a loan withdrawal quote for BTC`, async () => {
     const loanCloseParams: LoanCloseParams = {
       asset: AssetETH,
+      fromAddress: ethAddress,
       loanOwner: btcAddress,
       loanAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC),
     }
     const loanQuoteWithdraw = await thorchainQuery.getLoanQuoteClose(loanCloseParams)
 
-    console.log(loanQuoteWithdraw)
+    printClose(loanQuoteWithdraw)
   })
 })
