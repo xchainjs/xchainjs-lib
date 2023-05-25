@@ -1,6 +1,6 @@
 // import { Network, TxType } from '@xchainjs/xchain-client'
 import { Balance } from '@xchainjs/xchain-client'
-import { EtherscanProvider } from '@xchainjs/xchain-evm'
+import { EtherscanProvider as XchainEtherscanProvider } from '@xchainjs/xchain-evm'
 import { assetToString } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
@@ -9,11 +9,11 @@ import { AssetETH, ETHChain } from '../src/const'
 // =====Erc-20 asset=====
 
 // =====Ethers providers=====
-const BSC_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://bsc-testnet.public.blastapi.io')
-const provider = new EtherscanProvider(
-  BSC_TESTNET_ETHERS_PROVIDER,
-  'https://api-testnet.bscscan.com',
-  'XXX-BSCSCAN-API-KEY',
+const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider('sepolia', process.env['ETHERSCAN_API_KEY'])
+const provider = new XchainEtherscanProvider(
+  ETH_TESTNET_ETHERS_PROVIDER,
+  'https://api-sepolia.etherscan.io/',
+  process.env['ETHERSCAN_API'] || '',
   ETHChain,
   AssetETH,
   18,
@@ -24,21 +24,15 @@ const provider = new EtherscanProvider(
 // }
 describe('etherscan Integration Tests', () => {
   it('should fetch all balances 1', async () => {
-    const balances = await provider.getBalance('0x0af7e0671c82920c28e951e40c4bd20b5fc3937d')
+    const balances = await provider.getBalance('0x26000cc95ab0886FE8439E53c73b1219Eba9DBCF')
     balances.forEach((bal: Balance) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
     expect(balances.length).toBeGreaterThan(0)
   })
-  it('should fetch all balances 2', async () => {
-    const balances = await provider.getBalance('0xE80aCFfd88fe03129812da0Ef1ce60872D373768')
-    balances.forEach((bal) => {
-      console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
-    })
-    expect(balances.length).toBeGreaterThan(3)
-  })
+
   it('should fetch alltxs', async () => {
-    const txs = await provider.getTransactions({ address: '0x35552c16704d214347f29Fa77f77DA6d75d7C752' })
+    const txs = await provider.getTransactions({ address: '0x26000cc95ab0886FE8439E53c73b1219Eba9DBCF' })
     txs.txs.forEach((tx) => {
       console.log(JSON.stringify(tx))
     })

@@ -18,8 +18,8 @@ export const AssetETH: Asset = {
 }
 
 // =====Ethers providers=====
-const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://TBD')
-const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://TBD')
+const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api.etherscan.io/')
+const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api-sepolia.etherscan.io/')
 
 const ethersJSProviders = {
   [Network.Mainnet]: ETH_MAINNET_ETHERS_PROVIDER,
@@ -31,16 +31,16 @@ const ethersJSProviders = {
 // =====ONLINE providers=====
 const ETH_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
   ETH_TESTNET_ETHERS_PROVIDER,
-  'https://TBD',
-  'X-ETHERSCAN-API-KEY',
+  'https://api-sepolia.etherscan.io/',
+  '',
   ETHChain,
   AssetETH,
   ETH_GAS_ASSET_DECIMAL,
 )
 const ETH_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
   ETH_MAINNET_ETHERS_PROVIDER,
-  'https://TBD',
-  'X-ETHERSCAN-API-KEY',
+  'https://api.etherscan.io/',
+  '',
   ETHChain,
   AssetETH,
   ETH_GAS_ASSET_DECIMAL,
@@ -54,14 +54,14 @@ const ethProviders = {
 
 // =====Explorers=====
 const ETH_MAINNET_EXPLORER = new ExplorerProvider(
-  'https://TBD/',
-  'https://TBD/address/%%ADDRESS%%',
-  'https://TBD/tx/%%TX_ID%%',
+  'https://etherscan.io',
+  'https://etherscan.io/address/%%ADDRESS%%',
+  'https://etherscan.io/tx/%%TX_ID%%',
 )
 const ETH_TESTNET_EXPLORER = new ExplorerProvider(
-  'https://testnet.TBD/',
-  'https://testnet.TBD/address/%%ADDRESS%%',
-  'https://testnet.TBD/tx/%%TX_ID%%',
+  'https://sepolia.etherscan.io/',
+  'https://sepolia.etherscan.io/address/%%ADDRESS%%',
+  'https://sepolia.etherscan.io/tx/%%TX_ID%%',
 )
 const ethExplorerProviders = {
   [Network.Mainnet]: ETH_MAINNET_EXPLORER,
