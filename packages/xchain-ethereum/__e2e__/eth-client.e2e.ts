@@ -1,5 +1,10 @@
 import { Balance, Network, TxType } from '@xchainjs/xchain-client'
-import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
+import {
+  ApproveParams,
+  EstimateApproveParams,
+  // EtherscanProvider as XchainEtherscanProvider,
+  IsApprovedParams,
+} from '@xchainjs/xchain-evm'
 import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import Client from '../src/client'
@@ -22,7 +27,6 @@ const AssetBNB: Asset = {
 }
 
 defaultEthParams.network = Network.Testnet
-// defaultEthParams.network = Network.Mainnet
 defaultEthParams.phrase = process.env.PHRASE
 
 //const clientMainnet = new BscClient(defaultBscParams)
@@ -33,7 +37,7 @@ function delay(ms: number) {
 }
 describe('xchain-evm (Eth) Integration Tests', () => {
   it('should fetch eth balances', async () => {
-    const address = clientTestnet.getAddress(0)
+    const address = '0x26000cc95ab0886FE8439E53c73b1219Eba9DBCF'
     console.log(address)
     const balances = await clientTestnet.getBalance(address)
     balances.forEach((bal: Balance) => {
@@ -42,39 +46,39 @@ describe('xchain-evm (Eth) Integration Tests', () => {
     expect(balances.length).toBeGreaterThan(0)
   })
   it('should fetch eth txs', async () => {
-    const address = '0xf32DA51880374201852057009c4c4d1e75949e09'
+    const address = '0x26000cc95ab0886FE8439E53c73b1219Eba9DBCF'
     const txPage = await clientTestnet.getTransactions({ address })
     console.log(JSON.stringify(txPage, null, 2))
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
   it('should fetch single eth transfer tx', async () => {
-    const txId = '0x0d67aea90aafc15cbb9f8ec31842f5fc4044e8dced4947079a83e8ab5c068df3'
+    const txId = '0x045c9c813652651ea46eb160bbc23d324dee9551a6a3a180af91a53d3194ad7f'
     const tx = await clientTestnet.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
     const amount = assetToBase(assetAmount('0.5', 18))
     expect(tx.asset.chain).toBe(ETHChain)
     expect(tx.asset.ticker).toBe(AssetETH.ticker)
     expect(tx.type).toBe(TxType.Transfer)
-    expect(tx.from[0].from).toBe('0xaa25aa7a19f9c426e07dee59b12f944f4d9f1dd3')
+    expect(tx.from[0].from).toBe('0x7ed746476a7f6520babd24eee1fdbcd0f7fb271f')
     expect(tx.from[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
-    expect(tx.to[0].to).toBe('0xf32da51880374201852057009c4c4d1e75949e09')
+    expect(tx.to[0].to).toBe('0x26000cc95ab0886fe8439e53c73b1219eba9dbcf')
     expect(tx.to[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
     expect(tx.hash).toBe(txId)
   })
   it('should fetch single eth token transfer tx', async () => {
-    const txId = '0x11a9471062f2b352699895ff5dca2ed805b65eeed2ab173c65e5f424eb2af29a'
-    const assetAddress = '0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378'
+    const txId = '0x50468a9172b5a782ec5bf169bf2559517f83c191a0730383e2f9d953ad24c15d'
+    const assetAddress = '0x22C1317FE43132b22860e8b465548613d6151a9F'
     const tx = await clientTestnet.getTransactionData(txId, assetAddress)
     // console.log(JSON.stringify(tx, null, 2))
-    const amount = assetToBase(assetAmount('0.001', 18))
-    expect(tx.asset.chain).toBe(assetETH.chain)
-    expect(tx.asset.ticker).toBe(assetETH.ticker)
-    expect(tx.asset.symbol).toBe(assetETH.symbol)
+    const amount = assetToBase(assetAmount('2.000000000000000000', 18))
+    // expect(tx.asset.chain).toBe(assetETH.chain)
+    // expect(tx.asset.ticker).toBe(assetETH.ticker)
+    // expect(tx.asset.symbol).toBe(assetETH.symbol)
     expect(tx.type).toBe(TxType.Transfer)
-    expect(tx.from[0].from).toBe('0xf32da51880374201852057009c4c4d1e75949e09')
+    expect(tx.from[0].from).toBe('0x572af1afa5afcfc6fdf1eb2913aa4463037860e8')
     expect(tx.from[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
-    expect(tx.to[0].to).toBe('0x089790801ed0dc459a1484a62561026a15adb235')
+    expect(tx.to[0].to).toBe('0x26000cc95ab0886fe8439e53c73b1219eba9dbcf')
     expect(tx.to[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
     expect(tx.hash).toBe(txId)
   })

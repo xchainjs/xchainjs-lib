@@ -18,8 +18,11 @@ export const AssetETH: Asset = {
 }
 
 // =====Ethers providers=====
-const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api.etherscan.io/')
-const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api-sepolia.etherscan.io/')
+const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(
+  'homestead',
+  process.env['ETHERSCAN_API_KEY'],
+)
+const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider('sepolia', process.env['ETHERSCAN_API_KEY'])
 
 const ethersJSProviders = {
   [Network.Mainnet]: ETH_MAINNET_ETHERS_PROVIDER,
@@ -32,15 +35,16 @@ const ethersJSProviders = {
 const ETH_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
   ETH_TESTNET_ETHERS_PROVIDER,
   'https://api-sepolia.etherscan.io/',
-  '',
+  process.env['ETHERSCAN_API'] || '',
   ETHChain,
   AssetETH,
   ETH_GAS_ASSET_DECIMAL,
 )
+
 const ETH_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
   ETH_MAINNET_ETHERS_PROVIDER,
   'https://api.etherscan.io/',
-  '',
+  process.env['ETHERSCAN_API'] || '',
   ETHChain,
   AssetETH,
   ETH_GAS_ASSET_DECIMAL,
