@@ -115,7 +115,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         rpc: 'https://stagenet-rpc.ninerealms.com',
       },
       [Network.Mainnet]: {
-        node: 'https://thornode.ninerealms.com',
+        node: 'https://thornode-v1.ninerealms.com', // un-pruned node.
         rpc: 'https://rpc.ninerealms.com',
       },
     },
@@ -436,7 +436,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
-  async getTransactionData(txId: string, address: Address): Promise<Tx> {
+  async getTransactionData(txId: string, address?: Address): Promise<Tx> {
     try {
       const txResult = await this.cosmosClient.txsHashGet(txId)
       const bond = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'bond')
@@ -457,11 +457,11 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       const action = message[0].attributes.find((attr) => attr.key === 'action')?.value
       if (!bond) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
       // Rune only transactions
-      if (bond[0].type === 'bond' || action === 'send') {
+      if (action === 'send' || bond[0].type === 'bond') {
         const assetTo = AssetRuneNative
         const txData: TxData | null =
           txResult && txResult.logs
-            ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo)
+            ? getDepositTxDataFromLogs(txResult.logs, `${senderAddress}`, senderAsset, assetTo)
             : null
         //console.log(JSON.stringify(txData, null, 2))
         if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
@@ -481,7 +481,9 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       const assetTo = assetFromStringEx(messageBody[7])
 
       const txData: TxData | null =
-        txResult && txResult.logs ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo) : null
+        txResult && txResult.logs
+          ? getDepositTxDataFromLogs(txResult.logs, `${senderAddress}`, senderAsset, assetTo)
+          : null
       if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
 
       const { from, to, type } = txData
