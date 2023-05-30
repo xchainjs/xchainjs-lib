@@ -60,9 +60,9 @@ export const defaultDashParams: UtxoClientParams & {
     upper: UPPER_FEE_BOUND,
   },
   nodeUrls: {
-    [Network.Mainnet]: 'https://dash.ninerealms.com',
-    [Network.Stagenet]: 'https://dash.ninerealms.com',
-    [Network.Testnet]: 'https://testnet.dash.thorchain.info',
+    [Network.Mainnet]: 'https://insight.dash.org/insight-api',
+    [Network.Stagenet]: 'https://insight.dash.org/insight-api',
+    [Network.Testnet]: 'http://insight.testnet.networks.dash.org:3001/insight-api',
   },
 }
 

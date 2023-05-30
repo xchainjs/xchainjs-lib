@@ -36,6 +36,6 @@ export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> =>
     }
     return response.result
   } catch (ex) {
-    return Promise.reject(Error(`failed to broadcast a transaction: ${ex}`))
+    return Promise.reject(Error(`failed to broadcast a transaction caught: ${ex}`))
   }
 }

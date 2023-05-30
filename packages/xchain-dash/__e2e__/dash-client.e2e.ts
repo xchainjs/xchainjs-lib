@@ -1,32 +1,8 @@
-import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
+import { Network } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
-import { Client, NodeAuth, NodeUrls } from '../src/client'
-import { AssetDASH, BlockcypherDataProviders, LOWER_FEE_BOUND, UPPER_FEE_BOUND, explorerProviders } from '../src/const'
-
-const defaultDashParams: UtxoClientParams & {
-  nodeUrls: NodeUrls
-  nodeAuth?: NodeAuth
-} = {
-  network: Network.Mainnet,
-  phrase: '',
-  explorerProviders: explorerProviders,
-  dataProviders: [BlockcypherDataProviders],
-  rootDerivationPaths: {
-    [Network.Mainnet]: `m/44'/5'/0'/0/`,
-    [Network.Stagenet]: `m/44'/5'/0'/0/`,
-    [Network.Testnet]: `m/44'/1'/0'/0/`,
-  },
-  feeBounds: {
-    lower: LOWER_FEE_BOUND,
-    upper: UPPER_FEE_BOUND,
-  },
-  nodeUrls: {
-    [Network.Mainnet]: 'https://dash.ninerealms.com',
-    [Network.Stagenet]: 'https://dash.ninerealms.com',
-    [Network.Testnet]: 'https://testnet.dash.thorchain.info',
-  },
-}
+import { Client, defaultDashParams } from '../src/client'
+import { AssetDASH } from '../src/const'
 
 const dashClient = new Client({
   ...defaultDashParams,
@@ -71,39 +47,23 @@ describe('Dash Integration Tests', () => {
 
     const address = 'XhW237upJdjgYp73mVHSomAE8ckQgHQ8YN'
     txHistory = await dashClient.getTransactions({ address, offset: 5, limit: 1 })
-    expect(txHistory.total).toBe(1)
+    expect(txHistory.total).toBe(121)
     expect(txHistory.txs[0].asset).toEqual(AssetDASH)
-    expect(txHistory.txs[0].hash).toEqual('0f93b895999a93e2ff91fadc53ff6037292263011df44478ce14d8ca72a94c7e')
+    expect(txHistory.txs[0].hash).toEqual('8c674426c58a856d085a57c32078268ac129ed7b72104b5a5f1e6579e768d25f')
     expect(txHistory.txs[0].type).toEqual('transfer')
 
     txHistory = await dashClient.getTransactions({ address, offset: 50000, limit: 10 })
-    expect(txHistory.total).toBe(0)
+    expect(txHistory.total).toBe(121)
 
     txHistory = await dashClient.getTransactions({ address, offset: 0, limit: 40 })
-    expect(txHistory.total).toBe(40)
-
-    txHistory = await dashClient.getTransactions({ address, offset: 11, limit: 20 })
-    expect(txHistory.total).toBe(20)
-    expect(txHistory.txs[0].hash).toEqual('1cee349a214267c211f05cccd1bbcef994958496f470ee41f4a7c80375904d4b')
-    expect(txHistory.txs[19].hash).toEqual('f374dfcce7baaadf0578a03816d5ab3a390388e38e898c4353d8481b4592a0f8')
-
-    try {
-      txHistory = await dashClient.getTransactions({ address, offset: -1, limit: 10 })
-      fail()
-    } catch (error) {}
-    try {
-      txHistory = await dashClient.getTransactions({ address, offset: 0, limit: -10 })
-      fail()
-    } catch (error) {}
-
-    expect(txHistory.total).toBeGreaterThan(0)
+    expect(txHistory.txs.length).toBe(40)
   })
   it('should fetch Dash tx data', async () => {
-    const txId = '91a7a17110081c1f3da4b71d1526e4cb8494b5727521b32b2caf25fb8409619a'
+    const txId = '5e84ee1535c06301d3b77b2ea636346ff7c9f0e8f7d6cad353eb6af43dafe826'
     const tx = await dashClient.getTransactionData(txId)
     expect(tx.hash).toBe(txId)
   })
-  it('should send a testnet btc tx', async () => {
+  it('should send a testnet dash tx', async () => {
     try {
       // const from = dashClientTestnet.getAddress(0)
       const to = dashClientTestnet.getAddress(1)

@@ -101,12 +101,13 @@ const urlForNetwork = (network: Network) => {
     case Network.Stagenet:
       return 'https://insight.dash.org/insight-api'
     case Network.Testnet:
-      return 'https://testnet-insight.dash.org/insight-api'
+      return 'http://insight.testnet.networks.dash.org:3001/insight-api'
   }
 }
 
 export const getAddress = async (p: InsightAddressParams): Promise<InsightAddressResponse> => {
-  return (await axios.get(`${urlForNetwork(p.network)}/addr/${p.address}`)).data
+  const data = (await axios.get(`${urlForNetwork(p.network)}/addr/${p.address}`)).data
+  return data
 }
 
 export const getAddressTxs = async (

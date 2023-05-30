@@ -16,6 +16,7 @@ import {
 import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as Dash from 'bitcoinjs-lib'
 import * as coininfo from 'coininfo'
+import accumulative from 'coinselect/accumulative'
 
 import * as insight from './insight-api'
 
@@ -45,62 +46,6 @@ const TransactionBytes = {
 
 export const TX_MIN_FEE = 1000
 export const TX_DUST_THRESHOLD = dashcore.Transaction.DUST_AMOUNT
-
-function accumulative(utxos: any[], outputs: any[], feeRate: number): { inputs: any[]; outputs: any[]; fee: number } {
-  const TxEmptySize =
-    TransactionBytes.Version +
-    TransactionBytes.Type +
-    TransactionBytes.InputCount +
-    TransactionBytes.OutputCount +
-    TransactionBytes.LockTime
-  const TxInputBase =
-    TransactionBytes.InputPrevOutputHash +
-    TransactionBytes.InputPrevOutputIndex +
-    TransactionBytes.InputScriptLength +
-    TransactionBytes.InputSequence
-  const TxOutputBase = TransactionBytes.OutputValue + TransactionBytes.OutputScriptLength
-
-  if (!Number.isInteger(feeRate) || feeRate < 0) {
-    throw new Error('feeRate must be a positive integral number')
-  }
-
-  const inputs: any[] = []
-  const outputValueTotal = outputs.reduce((p: any, c: any) => p + c.value, 0)
-  const outputByteLengthTotal = outputs.reduce(
-    (p: any, c: any) => p + TxOutputBase + (c?.script?.length || TransactionBytes.OutputPubkeyHash),
-    0,
-  )
-
-  let inputValueAccum = 0
-  let bytesAccum = TxEmptySize + outputByteLengthTotal
-  let feeAccum = bytesAccum * feeRate
-
-  for (const utxo of utxos) {
-    if (inputValueAccum >= outputValueTotal + feeAccum) {
-      break
-    }
-    const byteLength = TxInputBase + (utxo?.script?.length || TransactionBytes.InputPubkeyHash)
-    const fee = feeRate * byteLength
-    if (fee > utxo.value) {
-      continue
-    }
-    bytesAccum += byteLength
-    inputValueAccum += utxo.value
-    feeAccum += fee
-    inputs.push(utxo)
-  }
-
-  const changeOutputByteLength = TxOutputBase + TransactionBytes.OutputPubkeyHash
-  const feeAfterExtraOutput = feeRate * (bytesAccum + changeOutputByteLength)
-  const remainderAfterExtraOutput = inputValueAccum - (outputValueTotal + feeAfterExtraOutput)
-
-  if (remainderAfterExtraOutput > TX_DUST_THRESHOLD) {
-    outputs = outputs.concat({ value: remainderAfterExtraOutput })
-    feeAccum += changeOutputByteLength * feeRate
-  }
-
-  return { inputs, outputs, fee: feeAccum }
-}
 
 export function getFee(inputCount: number, feeRate: FeeRate, data: Buffer | null = null): number {
   let sum =
@@ -167,6 +112,8 @@ export const buildTx = async ({
     value: x.satoshis,
   }))
 
+  const feeRateWhole = Number(feeRate.toFixed(0))
+
   const targetOutputs = [
     {
       address: recipient,
@@ -174,7 +121,7 @@ export const buildTx = async ({
     },
   ]
 
-  const { inputs, outputs } = accumulative(utxos, targetOutputs, Number(feeRate.toFixed(0)))
+  const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
   if (!inputs || !outputs) throw new Error('Balance insufficient for transaction')
 
   const tx: Transaction = new dashcore.Transaction().to(recipient, amount.amount().toNumber())
@@ -200,17 +147,8 @@ export const buildTx = async ({
     tx.uncheckedAddInput(input)
   })
 
-  const changeOutput = outputs.find((o) => o.address === undefined)
-  if (changeOutput) {
-    const changeAddress: DashAddress = dashcore.Address.fromString(sender, network)
-    const changeScript: Script = new dashcore.Script.buildPublicKeyHashOut(changeAddress)
-    tx.addOutput(
-      new dashcore.Transaction.Output({
-        script: changeScript,
-        satoshis: changeOutput.value,
-      }),
-    )
-  }
+  const senderAddress: DashAddress = dashcore.Address.fromString(sender, network)
+  tx.change(senderAddress)
 
   if (memo) {
     tx.addData(memo)
