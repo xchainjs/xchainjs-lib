@@ -1,3 +1,14 @@
+# v0.2.2 (2023-05-31)
+
+## Update
+
+- Update CACAO_DECIMAL from 8 to 10
+
+## Add
+
+- New asset for $MAYA
+- MAYA_DECIMAL constant
+
 # v0.2.1 (2023-05-18)
 
 ## Add

@@ -7,7 +7,8 @@ const DEFAULT_EXPLORER_URL = 'https://explorer.mayachain.info'
 const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
 const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
 
-export const CACAO_DECIMAL = 8
+export const CACAO_DECIMAL = 10
+export const MAYA_DECIMAL = 4
 export const DEFAULT_GAS_ADJUSTMENT = 2
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
 export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
@@ -43,3 +44,4 @@ export const MAYAChain = 'MAYA' as const
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
 export const AssetCacao: Asset = { chain: MAYAChain, symbol: 'CACAO', ticker: 'CACAO', synth: false }
+export const AssetMaya: Asset = { chain: MAYAChain, symbol: 'MAYA', ticker: 'MAYA', synth: false }
