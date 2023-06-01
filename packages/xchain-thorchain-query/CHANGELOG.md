@@ -1,3 +1,9 @@
+# v0.4.3 (2023-05-22)
+
+## Update
+
+- Add new queries to support lending getLoanQuoteClose & getLoanQuoteOpen 
+
 # v0.4.2 (2023-05-18)
 
 ## Update

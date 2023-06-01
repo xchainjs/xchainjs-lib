@@ -13,7 +13,15 @@ import { Client as ThorClient, THORChain, ThorchainClient } from '@xchainjs/xcha
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Address, Asset } from '@xchainjs/xchain-util'
 
-import { AddLiquidity, AllBalances, ExecuteSwap, TxSubmitted, WithdrawLiquidity } from './types'
+import {
+  AddLiquidity,
+  AllBalances,
+  ExecuteSwap,
+  LoanCloseParams,
+  LoanOpenParams,
+  TxSubmitted,
+  WithdrawLiquidity,
+} from './types'
 import { EvmHelper } from './utils/evm-helper'
 
 export type NodeUrls = Record<Network, string>
@@ -174,8 +182,7 @@ export class Wallet {
     const inbound = (await this.thorchainQuery.thorchainCache.getInboundDetails())[swap.input.asset.chain]
 
     if (!inbound?.address) throw Error(`no asgard address found for ${swap.input.asset.chain}`)
-
-    if (this.isERC20Asset(swap.input.asset)) {
+    if (this.isEVMChain(swap.input.asset)) {
       const params = {
         walletIndex: 0,
         asset: swap.input.asset,
@@ -278,7 +285,7 @@ export class Wallet {
   async addSavers(assetAmount: CryptoAmount, memo: string, toAddress: Address): Promise<TxSubmitted> {
     const assetClient = this.clients[assetAmount.asset.chain]
 
-    if (this.isERC20Asset(assetAmount.asset)) {
+    if (this.isEVMChain(assetAmount.asset)) {
       const addParams = {
         wallIndex: 0,
         asset: assetAmount.asset,
@@ -315,7 +322,7 @@ export class Wallet {
    */
   async withdrawSavers(assetAmount: CryptoAmount, memo: string, toAddress: Address): Promise<TxSubmitted> {
     const assetClient = this.clients[assetAmount.asset.chain]
-    if (this.isERC20Asset(assetAmount.asset)) {
+    if (this.isEVMChain(assetAmount.asset)) {
       const addParams = {
         wallIndex: 0,
         asset: assetAmount.asset,
@@ -344,6 +351,68 @@ export class Wallet {
     }
   }
 
+  async loanOpen(params: LoanOpenParams): Promise<TxSubmitted> {
+    const assetClient = this.clients[params.amount.asset.chain]
+    if (this.isEVMChain(params.amount.asset)) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: params.memo,
+      }
+      const evmHelper = new EvmHelper(assetClient, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        recipient: params.toAddress,
+        memo: params.memo,
+      }
+      try {
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash) }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
+      }
+    }
+  }
+
+  async loanClose(params: LoanCloseParams): Promise<TxSubmitted> {
+    const assetClient = this.clients[params.amount.asset.chain]
+    if (this.isEVMChain(params.amount.asset)) {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        feeOption: FeeOption.Fast,
+        memo: params.memo,
+      }
+      const evmHelper = new EvmHelper(assetClient, this.thorchainQuery.thorchainCache)
+      const hash = await evmHelper.sendDeposit(addParams)
+      return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else {
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        recipient: params.toAddress,
+        memo: params.memo,
+      }
+      try {
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash) }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
+      }
+    }
+  }
+
   /** Function handles liquidity add for all non rune assets
    *
    * @param params - parameters for add liquidity
@@ -359,7 +428,7 @@ export class Wallet {
     assetClient: XChainClient,
     inboundAsgard: string,
   ): Promise<TxSubmitted> {
-    if (this.isERC20Asset(params.asset.asset)) {
+    if (this.isEVMChain(params.asset.asset)) {
       const addParams = {
         wallIndex: 0,
         asset: params.asset.asset,
@@ -402,7 +471,7 @@ export class Wallet {
     assetClient: XChainClient,
     inboundAsgard: string,
   ): Promise<TxSubmitted> {
-    if (this.isERC20Asset(params.assetFee.asset)) {
+    if (this.isEVMChain(params.assetFee.asset)) {
       const withdrawParams = {
         wallIndex: 0,
         asset: params.assetFee.asset,
@@ -468,8 +537,11 @@ export class Wallet {
     return { hash, url: thorchainClient.getExplorerTxUrl(hash) }
   }
   private isERC20Asset(asset: Asset): boolean {
-    const isEvmChain = ['ETH', 'BSC', 'AVAX'].includes(asset.chain)
     const isGasAsset = ['ETH', 'BSC', 'AVAX'].includes(asset.symbol)
-    return isEvmChain && !isGasAsset
+    return this.isEVMChain(asset) && !isGasAsset
+  }
+  private isEVMChain(asset: Asset): boolean {
+    const isEvmChain = ['ETH', 'BSC', 'AVAX'].includes(asset.chain)
+    return isEvmChain
   }
 }

@@ -240,6 +240,13 @@ export type SaverFees = {
   outbound: CryptoAmount
 }
 
+export type QuoteFees = {
+  asset: string
+  liquidity?: string
+  outbound?: string
+  total_bps?: string
+}
+
 export type SaversPosition = {
   depositValue: CryptoAmount
   redeemableValue: CryptoAmount
@@ -255,4 +262,66 @@ export type SaversWithdraw = {
   asset: Asset
   address: Address
   withdrawBps: number
+}
+
+export type LoanOpenParams = {
+  asset: Asset
+  amount: CryptoAmount
+  targetAsset: Asset
+  destination: string
+  height?: number
+  minOut?: string
+  affiliateBps?: number
+  affiliate?: string
+}
+
+export type LoanCloseParams = {
+  asset: Asset
+  amount: CryptoAmount
+  loanAsset: Asset
+  loanOwner: Address
+  fromAddress: Address
+  minOut?: string
+  height?: number
+}
+
+export type LoanOpenQuote = {
+  inboundAddress: string
+  expectedWaitTime: BlockInformation
+  fees: QuoteFees
+  slippageBps?: number
+  router?: string
+  expiry: number
+  warning: string
+  notes: string
+  dustThreshold?: string
+  memo?: string
+  expectedAmountOut: string
+  expectedCollateralizationRation: string
+  expectedCollateralUp: string
+  expectedDebtUp: string
+  errors: string[]
+}
+export type LoanCloseQuote = {
+  inboundAddress: string
+  expectedWaitTime: BlockInformation
+  fees: QuoteFees
+  slippageBps?: number
+  router?: string
+  expiry: number
+  warning: string
+  notes: string
+  dustThreshold?: string
+  memo?: string
+  expectedAmountOut: string
+  expectedCollateralDown: string
+  expectedDebtDown: string
+  errors: string[]
+}
+
+export type BlockInformation = {
+  inboundConfirmationBlocks?: number
+  inboundConfirmationSeconds?: number
+  outboundDelayBlocks?: number
+  outbondDelaySeconds?: number
 }

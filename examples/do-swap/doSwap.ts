@@ -70,8 +70,7 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Networ
 
     const fromChain = fromAsset.synth ? THORChain : fromAsset.chain
     const fromAddress = wallet.clients[fromChain].getAddress()
-    // console.log(await wallet.clients[fromChain].getBalance(fromAddress))
-
+    // const bal = await wallet.clients[fromChain].getBalance(fromAddress)
     const swapParams: AmmEstimateSwapParams = {
       fromAsset,
       amount: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
