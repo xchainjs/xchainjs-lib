@@ -1,3 +1,9 @@
+# v0.5.4 (2023-06-01)
+
+## Update
+
+- Updated mayachain dependency
+
 # v0.5.3 (2023-05-22)
 
 ## Update
