@@ -1,7 +1,9 @@
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
 import { Client as MayaClient, MayachainClient } from '@xchainjs/xchain-mayachain'
-import { Asset, AssetCacao, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+
+import { AssetCacao } from '../src/const'
 // import axios from 'axios'
 
 export type Swap = {
@@ -21,7 +23,7 @@ const mayaClient: XChainClient = new MayaClient({
   phrase: process.env.PHRASE,
   chainIds: chainIds,
 })
-const mayachainClient = (mayaClient as unknown) as MayachainClient
+const mayachainClient = mayaClient as unknown as MayachainClient
 const bnbClient: XChainClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
 
 // axios.interceptors.request.use((request) => {
