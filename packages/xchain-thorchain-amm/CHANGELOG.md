@@ -2,7 +2,7 @@
 
 ## Update
 
-- Updated mayachain dependency
+- Updated mayachain, ethereum, bitcoincash dependencies
 
 # v0.5.3 (2023-05-22)
 

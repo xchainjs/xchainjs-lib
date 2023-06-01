@@ -1,3 +1,9 @@
+# v0.16.2 (2023-05-31)
+
+## Update
+
+- removed duplicate declaration of BCH_DECIMAL
+
 # v0.16.1 (2023-05-18)
 
 ## Add
