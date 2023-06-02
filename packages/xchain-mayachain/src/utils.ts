@@ -16,7 +16,7 @@ import axios from 'axios'
 import * as bech32Buffer from 'bech32-buffer'
 import Long from 'long'
 
-import { AssetCacao, CACAO_DECIMAL, DEFAULT_GAS_ADJUSTMENT } from './const'
+import { AssetCacao, AssetMaya, CACAO_DECIMAL, DEFAULT_GAS_ADJUSTMENT, MAYA_DECIMAL } from './const'
 import { ChainId, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx } from './types/messages'
 import types from './types/proto/MsgCompiled'
@@ -366,10 +366,27 @@ export const getBalance = async ({
 }): Promise<Balance[]> => {
   const balances = await cosmosClient.getBalance(address)
   return balances
-    .map((balance) => ({
-      asset: (balance.denom && assetFromDenom(balance.denom)) || AssetCacao,
-      amount: baseAmount(balance.amount, CACAO_DECIMAL),
-    }))
+    .map((balance) => {
+      const hasAssetFromString = balance.denom && assetFromString(balance.denom)
+      if (hasAssetFromString) {
+        return {
+          asset: hasAssetFromString,
+          amount: baseAmount(balance.amount, CACAO_DECIMAL),
+        }
+      }
+
+      if (balance.denom.toUpperCase() === AssetMaya.symbol) {
+        return {
+          asset: AssetMaya,
+          amount: baseAmount(balance.amount, MAYA_DECIMAL),
+        }
+      } else {
+        return {
+          asset: AssetCacao,
+          amount: baseAmount(balance.amount, CACAO_DECIMAL),
+        }
+      }
+    })
     .filter(
       (balance) => !assets || assets.filter((asset) => assetToString(balance.asset) === assetToString(asset)).length,
     )
