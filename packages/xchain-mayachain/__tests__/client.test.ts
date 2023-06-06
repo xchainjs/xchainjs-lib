@@ -572,8 +572,8 @@ describe('Client Test', () => {
 
     const fees = await mayaClient.getFees()
 
-    expect(fees.average.amount().toString()).toEqual('2000000')
-    expect(fees.fast.amount().toString()).toEqual('2000000')
-    expect(fees.fastest.amount().toString()).toEqual('2000000')
+    expect(fees.average.amount().toString()).toEqual('200000000')
+    expect(fees.fast.amount().toString()).toEqual('200000000')
+    expect(fees.fastest.amount().toString()).toEqual('200000000')
   })
 })

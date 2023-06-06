@@ -5,7 +5,7 @@ import mockBitgoApi from '../__mocks__/bitgo'
 import mockHaskoinApi from '../__mocks__/haskoin'
 import mockThornodeApi from '../__mocks__/thornode'
 import { Client } from '../src/client'
-import { BCH_DECIMAL } from '../src/utils'
+import { BCH_DECIMAL } from '../src/const'
 
 const bchClient = new Client()
 
