@@ -10,7 +10,7 @@ export type BroadcastTxParams = {
 
 type BroadcastTxResponse = {
   error: string
-  result: string
+  txid: string
 }
 
 export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> => {
@@ -18,11 +18,10 @@ export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> =>
   try {
     const response: BroadcastTxResponse = (
       await axios.post(
-        params.nodeUrl,
+        `${params.nodeUrl}/tx/send`,
         {
           jsonrpc: '2.0',
-          method: 'sendrawtransaction',
-          params: [params.txHex],
+          rawtx: [params.txHex],
           id: uniqueId,
         },
         {
@@ -34,7 +33,7 @@ export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> =>
     if (response.error) {
       return Promise.reject(Error(`failed to broadcast a transaction: ${response.error}`))
     }
-    return response.result
+    return response.txid
   } catch (ex) {
     return Promise.reject(Error(`failed to broadcast a transaction caught: ${ex}`))
   }
