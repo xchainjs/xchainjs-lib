@@ -31,10 +31,6 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 0,
     avgBlockTimeInSecs: 6,
   },
-  TERRA: {
-    blockReward: 0,
-    avgBlockTimeInSecs: 0,
-  },
   BNB: {
     blockReward: 0,
     avgBlockTimeInSecs: 6,
@@ -50,10 +46,6 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
   MAYA: {
     blockReward: 0,
     avgBlockTimeInSecs: 6,
-  },
-  DASH: {
-    blockReward: 2.49,
-    avgBlockTimeInSecs: 156,
   },
 }
 
