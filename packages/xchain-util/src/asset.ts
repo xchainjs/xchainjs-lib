@@ -180,11 +180,6 @@ const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: fal
 const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false }
 
 /**
- * Dash asset
- */
-export const AssetDASH: Asset = { chain: 'DASH', symbol: 'DASH', ticker: 'DASH', synth: false }
-
-/**
  * Helper to check whether asset is valid
  *
  * @param {Asset} asset
