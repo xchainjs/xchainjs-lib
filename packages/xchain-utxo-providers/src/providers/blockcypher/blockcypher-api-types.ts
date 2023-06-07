@@ -5,7 +5,7 @@ export enum BlockcypherNetwork {
   BTCTEST = 'btc/test3',
   LTC = 'ltc/main',
   DOGE = 'doge/main',
-  //DASH = 'dash/main',
+  DASH = 'dash/main',
 }
 
 export type AddressParams = {
