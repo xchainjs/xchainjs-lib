@@ -1,3 +1,9 @@
+# v0.2.2 (2023-06-07)
+
+## Update
+
+- Added Dash routing to Blockcyphernetwork
+
 # v0.2.1 (2023-05-18)
 
 ## Update
