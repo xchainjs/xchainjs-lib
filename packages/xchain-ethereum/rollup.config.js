@@ -13,13 +13,13 @@ export default {
       file: pkg.main,
       format: 'cjs',
       exports: 'named',
-      sourcemap: false,
+      sourcemap: true,
     },
     {
       file: pkg.module,
       format: 'es',
       exports: 'named',
-      sourcemap: false,
+      sourcemap: true,
     },
   ],
   plugins: [
@@ -29,7 +29,10 @@ export default {
     typescript({
       exclude: '__tests__/**',
     }),
-    commonjs(),
+    commonjs({
+      include: /node_modules/,
+      exclude: '**/*.json',
+    }),
     json(),
   ],
   external: [

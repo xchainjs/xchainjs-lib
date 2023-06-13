@@ -15,11 +15,10 @@ import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
 
-import { AssetBCH } from './const'
+import { AssetBCH, BCH_DECIMAL } from './const'
 import { Transaction, TransactionInput, TransactionOutput, UTXO } from './types'
 import { Network as BCHNetwork } from './types/bitcoincashjs-types'
 
-export const BCH_DECIMAL = 8
 export const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10

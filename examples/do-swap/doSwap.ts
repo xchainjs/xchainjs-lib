@@ -9,7 +9,7 @@ import {
   Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromString, assetToBase, delay } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromString, assetToBase, assetToString, delay } from '@xchainjs/xchain-util'
 
 import { checkTx } from '../check-tx/check-tx'
 
@@ -21,12 +21,13 @@ function printTx(txDetails: TxDetails, input: CryptoAmount) {
     txEstimate: {
       input: input.formatedAssetString(),
       totalFees: {
+        asset: assetToString(txDetails.txEstimate.totalFees.asset),
         outboundFee: txDetails.txEstimate.totalFees.outboundFee.formatedAssetString(),
         affiliateFee: txDetails.txEstimate.totalFees.affiliateFee.formatedAssetString(),
       },
       slipBasisPoints: txDetails.txEstimate.slipBasisPoints.toFixed(),
       netOutput: txDetails.txEstimate.netOutput.formatedAssetString(),
-      waitTimeSeconds: txDetails.txEstimate.outboundDelaySeconds.toFixed(),
+      outboundDelaySeconds: txDetails.txEstimate.outboundDelaySeconds,
       canSwap: txDetails.txEstimate.canSwap,
       errors: txDetails.txEstimate.errors,
     },

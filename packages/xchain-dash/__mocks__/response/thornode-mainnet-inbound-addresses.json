@@ -1,0 +1,59 @@
+[
+  {
+    "address": "qzx2jjyty8h69aqda9stsqmum6sqpwn8lcltvelc0k",
+    "chain": "BCH",
+    "gas_rate": "3",
+    "halted": false,
+    "pub_key": "thorpub1addwnpepqdwshqeuk9uzhw8smw8naa9cd5ywuwlwvh9wv6r3yd5py3mya33x72dvzyy"
+  },
+  {
+    "address": "bnb13j553zepa730gr0fvzuqxlx75qqt5el7v7rvvz",
+    "chain": "BNB",
+    "gas_rate": "11250",
+    "halted": false,
+    "pub_key": "thorpub1addwnpepqdwshqeuk9uzhw8smw8naa9cd5ywuwlwvh9wv6r3yd5py3mya33x72dvzyy"
+  },
+  {
+    "address": "bc1q3j553zepa730gr0fvzuqxlx75qqt5el7cqztfp",
+    "chain": "BTC",
+    "gas_rate": "28",
+    "halted": false,
+    "pub_key": "thorpub1addwnpepqdwshqeuk9uzhw8smw8naa9cd5ywuwlwvh9wv6r3yd5py3mya33x72dvzyy"
+  },
+  {
+    "address": "DHxqw8UR53JbDhnrkj9TrWHzZ4PYGmDeNh",
+    "chain": "DOGE",
+    "gas_rate": "885000",
+    "halted": false,
+    "pub_key": "thorpub1addwnpepqdwshqeuk9uzhw8smw8naa9cd5ywuwlwvh9wv6r3yd5py3mya33x72dvzyy"
+  },
+  {
+    "address": "0x49785bc4db52419af0f6ce878b51b0f04438ff06",
+    "chain": "ETH",
+    "gas_rate": "100",
+    "halted": false,
+    "pub_key": "thorpub1addwnpepqdwshqeuk9uzhw8smw8naa9cd5ywuwlwvh9wv6r3yd5py3mya33x72dvzyy",
+    "router": "0xD37BbE5744D730a1d98d8DC97c42F0Ca46aD7146"
+  },
+  {
+    "address": "cosmos13j553zepa730gr0fvzuqxlx75qqt5el7w6uqdv",
+    "chain": "GAIA",
+    "gas_rate": "389900",
+    "halted": false,
+    "pub_key": "thorpub1addwnpepqdwshqeuk9uzhw8smw8naa9cd5ywuwlwvh9wv6r3yd5py3mya33x72dvzyy"
+  },
+  {
+    "address": "ltc1q3j553zepa730gr0fvzuqxlx75qqt5el7uuc033",
+    "chain": "LTC",
+    "gas_rate": "94",
+    "halted": false,
+    "pub_key": "thorpub1addwnpepqdwshqeuk9uzhw8smw8naa9cd5ywuwlwvh9wv6r3yd5py3mya33x72dvzyy"
+  },
+  {
+    "chain": "DASH",
+    "pub_key": "thorpub1addwnpepq2ymj7l6uu5ahq8v8hsq8fw0vxz9ad0rzyvdryc6en6v2ret0tsvzh3440d",
+    "address": "Xhaj8yBk2w4TuhY2cVhJ7BZmKwr8VY3Stu",
+    "halted": false,
+    "gas_rate": "10"
+  }
+]
