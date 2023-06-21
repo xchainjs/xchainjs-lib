@@ -1,3 +1,9 @@
+# v0.5.5 (2023-06-21)
+
+## Update
+
+- Updated dependencies for thornode, thorchain && thorhcain-query
+
 # v0.5.4 (2023-06-01)
 
 ## Update

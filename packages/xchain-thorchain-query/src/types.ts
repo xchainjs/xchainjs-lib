@@ -280,13 +280,12 @@ export type LoanCloseParams = {
   amount: CryptoAmount
   loanAsset: Asset
   loanOwner: Address
-  fromAddress: Address
   minOut?: string
   height?: number
 }
 
 export type LoanOpenQuote = {
-  inboundAddress: string
+  inboundAddress?: string
   expectedWaitTime: BlockInformation
   fees: QuoteFees
   slippageBps?: number
@@ -303,7 +302,7 @@ export type LoanOpenQuote = {
   errors: string[]
 }
 export type LoanCloseQuote = {
-  inboundAddress: string
+  inboundAddress?: string
   expectedWaitTime: BlockInformation
   fees: QuoteFees
   slippageBps?: number

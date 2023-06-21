@@ -474,7 +474,6 @@ export class Thornode {
   async getLoanQuoteClose(
     asset: string,
     amount: number,
-    fromAddress: string,
     loanAsset: string,
     loanOwner: string,
     minOut?: string,
@@ -482,7 +481,7 @@ export class Thornode {
   ): Promise<QuoteLoanCloseResponse> {
     for (const api of this.quoteApi) {
       try {
-        const resp = (await api.quoteloanclose(height, asset, amount, fromAddress, loanAsset, loanOwner, minOut)).data
+        const resp = (await api.quoteloanclose(height, asset, amount, loanAsset, loanOwner, minOut)).data
         return resp
       } catch (e) {
         // console.log(e)

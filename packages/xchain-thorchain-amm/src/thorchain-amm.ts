@@ -250,7 +250,7 @@ export class ThorchainAMM {
     return await wallet.loanOpen({
       memo: `${loanOpen.memo}`,
       amount: loanOpenParams.amount,
-      toAddress: loanOpen.inboundAddress,
+      toAddress: `${loanOpen.inboundAddress}`,
     })
   }
   /**
@@ -265,7 +265,7 @@ export class ThorchainAMM {
     return await wallet.loanClose({
       memo: `${withdrawLoan.memo}`,
       amount: loanCloseParams.amount,
-      toAddress: withdrawLoan.inboundAddress,
+      toAddress: `${withdrawLoan.inboundAddress}`,
     })
   }
 }

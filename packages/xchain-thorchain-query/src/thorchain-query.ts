@@ -875,7 +875,6 @@ export class ThorchainQuery {
   public async getLoanQuoteClose({
     asset,
     amount,
-    fromAddress,
     loanAsset,
     loanOwner,
     minOut,
@@ -885,7 +884,6 @@ export class ThorchainQuery {
     const loanCloseResp = await this.thorchainCache.thornode.getLoanQuoteClose(
       `${asset.chain}.${asset.ticker}`,
       amount.baseAmount.amount().toNumber(),
-      fromAddress,
       `${loanAsset.chain}.${loanAsset.ticker}`,
       loanOwner,
       minOut,

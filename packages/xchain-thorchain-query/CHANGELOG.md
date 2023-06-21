@@ -1,3 +1,9 @@
+# v0.4.4 (2023-06-21)
+
+## Update
+
+- Updated loan queries to match the latest Thornode requirements
+
 # v0.4.3 (2023-05-22)
 
 ## Update
