@@ -1,3 +1,9 @@
+# v0.28.2 (2023-06-21)
+
+## Update
+
+- Add fallback url in const for getTransaction
+
 # v0.28.1 (2023-05-18)
 
 ## Add

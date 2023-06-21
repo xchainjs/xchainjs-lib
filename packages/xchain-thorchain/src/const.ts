@@ -89,3 +89,37 @@ export const AssetRuneERC20Testnet: Asset = {
   ticker: RUNE_TICKER,
   synth: false,
 }
+
+/**
+ * Fall back node's and rpc's
+ */
+export const FallBackUrl = [
+  {
+    [Network.Testnet]: {
+      node: 'deprecated',
+      rpc: 'deprecated',
+    },
+    [Network.Stagenet]: {
+      node: 'https://stagenet-thornode.ninerealms.com',
+      rpc: 'https://stagenet-rpc.ninerealms.com',
+    },
+    [Network.Mainnet]: {
+      node: 'https://thornode-v1.ninerealms.com',
+      rpc: 'https://rpc-v1.ninerealms.com',
+    },
+  },
+  {
+    [Network.Testnet]: {
+      node: 'deprecated',
+      rpc: 'deprecated',
+    },
+    [Network.Stagenet]: {
+      node: 'https://stagenet-thornode.ninerealms.com',
+      rpc: 'https://stagenet-rpc.ninerealms.com',
+    },
+    [Network.Mainnet]: {
+      node: 'https://thornode.thorswap.net/',
+      rpc: 'https://rpc.thorswap.net',
+    },
+  },
+]

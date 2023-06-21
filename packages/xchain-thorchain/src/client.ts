@@ -38,6 +38,7 @@ import {
   AssetRuneNative,
   DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
+  FallBackUrl,
   MAX_PAGES_PER_FUNCTION_CALL,
   MAX_TX_COUNT_PER_FUNCTION_CALL,
   MAX_TX_COUNT_PER_PAGE,
@@ -115,7 +116,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         rpc: 'https://stagenet-rpc.ninerealms.com',
       },
       [Network.Mainnet]: {
-        node: 'https://thornode-v1.ninerealms.com', // un-pruned node.
+        node: 'https://thornode.ninerealms.com',
         rpc: 'https://rpc.ninerealms.com',
       },
     },
@@ -430,6 +431,28 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     }
   }
 
+  // fetch from fallback urls
+  async fetchTransaction(txId: string) {
+    try {
+      const transaction = await this.cosmosClient.txsHashGet(txId)
+      return transaction
+    } catch (error) {
+      for (const fallbackUrl of FallBackUrl) {
+        try {
+          const clientUrl = fallbackUrl[this.network].node
+          const cosmosClient = new CosmosSDKClient({
+            server: clientUrl,
+            chainId: this.getChainId(this.network),
+            prefix: getPrefix(this.network),
+          })
+          const tx = await cosmosClient.txsHashGet(txId)
+          return tx
+        } catch (error) {}
+      }
+      return null
+    }
+  }
+
   /**
    * Get the transaction details of a given transaction id.
    *
@@ -437,8 +460,9 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getTransactionData(txId: string, address?: Address): Promise<Tx> {
-    try {
-      const txResult = await this.cosmosClient.txsHashGet(txId)
+    const response = await this.fetchTransaction(txId)
+    if (response) {
+      const txResult = response
       const bond = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'bond')
       const transfer = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'transfer')
       if (!transfer) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
@@ -496,8 +520,9 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         date: new Date(txResult.timestamp),
         type,
       }
-    } catch (error) {}
-    return await this.getTransactionDataThornode(txId)
+    } else {
+      return await this.getTransactionDataThornode(txId)
+    }
   }
   /** This function is used when in bound or outbound tx is not of thorchain
    *
