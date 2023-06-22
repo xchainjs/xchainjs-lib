@@ -294,9 +294,10 @@ export type LoanOpenQuote = {
   warning: string
   notes: string
   dustThreshold?: string
+  recommendedMinAmountIn?: string
   memo?: string
   expectedAmountOut: string
-  expectedCollateralizationRation: string
+  expectedCollateralizationRatio: string
   expectedCollateralUp: string
   expectedDebtUp: string
   errors: string[]
@@ -311,6 +312,7 @@ export type LoanCloseQuote = {
   warning: string
   notes: string
   dustThreshold?: string
+  recommendedMinAmountIn?: string
   memo?: string
   expectedAmountOut: string
   expectedCollateralDown: string
