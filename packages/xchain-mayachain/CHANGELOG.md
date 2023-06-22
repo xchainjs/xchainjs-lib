@@ -1,3 +1,9 @@
+# v0.2.3 (2023-06-02)
+
+## Add
+
+- Support to account for `maya` denom when using `getBalance` from client
+
 # v0.2.2 (2023-05-31)
 
 ## Update

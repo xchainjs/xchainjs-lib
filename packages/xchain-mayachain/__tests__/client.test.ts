@@ -7,7 +7,7 @@ import nock from 'nock'
 
 import { mockTendermintNodeInfo, mockTendermintSimulate } from '../__mocks__/mayanode-api'
 import { Client } from '../src/client'
-import { AssetCacao } from '../src/const'
+import { AssetCacao, AssetMaya } from '../src/const'
 
 const chainIds = {
   [Network.Mainnet]: 'mayachain-mainnet-v1',
@@ -282,16 +282,22 @@ describe('Client Test', () => {
     mockAccountsBalance(mayaMainClient.getClientUrl().node, 'maya14e0zalymjxjxlwsmtwyvvtagm2hhw6jkgmwpuz', {
       balances: [
         new cosmosclient.proto.cosmos.base.v1beta1.Coin({
-          denom: 'rune',
+          denom: 'cacao',
+          amount: '100',
+        }),
+        new cosmosclient.proto.cosmos.base.v1beta1.Coin({
+          denom: 'maya',
           amount: '100',
         }),
       ],
     })
 
     const balances = await mayaMainClient.getBalance('maya14e0zalymjxjxlwsmtwyvvtagm2hhw6jkgmwpuz')
-    expect(balances.length).toEqual(1)
+    expect(balances.length).toEqual(2)
     expect(balances[0].asset).toEqual(AssetCacao)
     expect(balances[0].amount.amount().isEqualTo(baseAmount(100).amount())).toBeTruthy()
+    expect(balances[1].asset).toEqual(AssetMaya)
+    expect(balances[1].amount.amount().isEqualTo(baseAmount(100).amount())).toBeTruthy()
   })
 
   it('rune + synth balances', async () => {

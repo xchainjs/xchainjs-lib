@@ -4,7 +4,7 @@ import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 // import nock from 'nock'
 
 import { mockTendermintNodeInfo } from '../__mocks__/mayanode-api'
-import { AssetCacao, defaultExplorerUrls } from '../src/const'
+import { AssetCacao, AssetMaya, defaultExplorerUrls } from '../src/const'
 import { ClientUrl } from '../src/types'
 import {
   assetFromDenom,
@@ -24,6 +24,9 @@ describe('mayachain/util', () => {
     describe('getDenom', () => {
       it('get denom for AssetCacao', () => {
         expect(getDenom(AssetCacao)).toEqual('cacao')
+      })
+      it('get denom for AssetMaya', () => {
+        expect(getDenom(AssetMaya)).toEqual('maya')
       })
       it('get denom for BNB synth', () => {
         expect(getDenom({ ...AssetBNB, synth: true })).toEqual('bnb/bnb')
