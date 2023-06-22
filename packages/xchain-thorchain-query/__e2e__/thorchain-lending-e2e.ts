@@ -35,9 +35,10 @@ function printOpen(quote: LoanOpenQuote) {
     warning: quote.warning,
     notes: quote.notes,
     dustThreshold: quote.dustThreshold,
+    recommendedMinAmountIn: quote.recommendedMinAmountIn,
     memo: quote.memo,
     expectedAmountOut: quote.expectedAmountOut,
-    expectedCollateralizationRation: quote.expectedCollateralizationRation,
+    expectedCollateralizationRatio: quote.expectedCollateralizationRatio,
     expectedCollateralUp: quote.expectedCollateralUp,
     expectedDebtUp: quote.expectedDebtUp,
     errors: quote.errors,
@@ -64,6 +65,7 @@ function printClose(quote: LoanCloseQuote) {
     warning: quote.warning,
     notes: quote.notes,
     dustThreshold: quote.dustThreshold,
+    recommendedMinAmountIn: quote.recommendedMinAmountIn,
     memo: quote.memo,
     expectedAmountOut: quote.expectedAmountOut,
     expectedCollateralDown: quote.expectedCollateralDown,
@@ -101,7 +103,6 @@ describe('Thorchain-query Loan Integration Tests', () => {
   it(`Should fetch a loan withdrawal quote for BTC`, async () => {
     const loanCloseParams: LoanCloseParams = {
       asset: AssetETH,
-      fromAddress: ethAddress,
       loanOwner: btcAddress,
       loanAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC),

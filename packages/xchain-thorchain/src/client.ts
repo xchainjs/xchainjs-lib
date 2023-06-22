@@ -38,6 +38,7 @@ import {
   AssetRuneNative,
   DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
+  FallBackUrls,
   MAX_PAGES_PER_FUNCTION_CALL,
   MAX_TX_COUNT_PER_FUNCTION_CALL,
   MAX_TX_COUNT_PER_PAGE,
@@ -429,6 +430,36 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       txs,
     }
   }
+  /**
+   *
+   * @param txId - tx hash
+   * @returns txResponse
+   */
+  async fetchTransaction(txId: string) {
+    try {
+      const transaction = await this.cosmosClient.txsHashGet(txId)
+      return transaction
+    } catch (error) {
+      for (const fallback of FallBackUrls) {
+        for (const network of Object.keys(fallback)) {
+          try {
+            const networkObj = fallback[network as keyof typeof fallback]
+            const clientUrl = networkObj.node as string | string[]
+            const cosmosClient = new CosmosSDKClient({
+              server: Array.isArray(clientUrl) ? clientUrl[0] : clientUrl,
+              chainId: this.getChainId(network as Network),
+              prefix: getPrefix(network as Network),
+            })
+            const tx = await cosmosClient.txsHashGet(txId)
+            return tx
+          } catch (error) {
+            // Handle specific error if needed
+          }
+        }
+      }
+      return null
+    }
+  }
 
   /**
    * Get the transaction details of a given transaction id.
@@ -436,9 +467,10 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
-  async getTransactionData(txId: string, address: Address): Promise<Tx> {
-    try {
-      const txResult = await this.cosmosClient.txsHashGet(txId)
+  async getTransactionData(txId: string, address?: Address): Promise<Tx> {
+    const response = await this.fetchTransaction(txId)
+    if (response) {
+      const txResult = response
       const bond = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'bond')
       const transfer = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'transfer')
       if (!transfer) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
@@ -457,11 +489,11 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       const action = message[0].attributes.find((attr) => attr.key === 'action')?.value
       if (!bond) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
       // Rune only transactions
-      if (bond[0].type === 'bond' || action === 'send') {
+      if (action === 'send' || bond[0].type === 'bond') {
         const assetTo = AssetRuneNative
         const txData: TxData | null =
           txResult && txResult.logs
-            ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo)
+            ? getDepositTxDataFromLogs(txResult.logs, `${senderAddress}`, senderAsset, assetTo)
             : null
         //console.log(JSON.stringify(txData, null, 2))
         if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
@@ -481,7 +513,9 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       const assetTo = assetFromStringEx(messageBody[7])
 
       const txData: TxData | null =
-        txResult && txResult.logs ? getDepositTxDataFromLogs(txResult.logs, senderAddress, senderAsset, assetTo) : null
+        txResult && txResult.logs
+          ? getDepositTxDataFromLogs(txResult.logs, `${senderAddress}`, senderAsset, assetTo)
+          : null
       if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
 
       const { from, to, type } = txData
@@ -494,8 +528,9 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         date: new Date(txResult.timestamp),
         type,
       }
-    } catch (error) {}
-    return await this.getTransactionDataThornode(txId)
+    } else {
+      return await this.getTransactionDataThornode(txId)
+    }
   }
   /** This function is used when in bound or outbound tx is not of thorchain
    *

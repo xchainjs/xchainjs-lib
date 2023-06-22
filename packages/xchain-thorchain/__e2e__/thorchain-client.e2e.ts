@@ -1,5 +1,5 @@
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
-import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
+import { Network, TxParams } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 
 import { AssetRuneNative } from '../src'
@@ -17,13 +17,13 @@ const chainIds = {
   [Network.Testnet]: 'deprecated',
 }
 
-const thorClient: XChainClient = new ThorClient({
+const thorClient = new ThorClient({
   network: Network.Mainnet,
   phrase: process.env.PHRASE,
   chainIds: chainIds,
 })
-const thorchainClient = (thorClient as unknown) as ThorchainClient
-const bnbClient: XChainClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
+const thorchainClient = thorClient as unknown as ThorchainClient
+const bnbClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
 
 // axios.interceptors.request.use((request) => {
 //   console.log('Starting Request', JSON.stringify(request, null, 2))
@@ -101,17 +101,17 @@ describe('thorchain Integration Tests', () => {
     }
   })
   it('should fetch thorchain txs', async () => {
-    const address = thorClient.getAddress(0)
+    const address = 'thor140yln5gt933vulwgevdmjavktc0jzk2vsyrsfs'
     const txPage = await thorClient.getTransactions({ address })
+    // console.log(txPage)
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
   it('should fetch thorchain tx data', async () => {
-    const txId = 'ED631AF5CB1DD2294220FC62F01F6ECE2343A9ED8DD0B44CE9473A085B41F737'
+    const txId = '21A705A98BD840542CD16BD0E00836D376CFE8B50933E736046EBCC240EEC177'
     const tx = await thorClient.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
-    expect(tx.hash).toBe('ED631AF5CB1DD2294220FC62F01F6ECE2343A9ED8DD0B44CE9473A085B41F737')
-    // expect(tx.asset.ticker).toBe('xx')
+    expect(tx.hash).toBe('21A705A98BD840542CD16BD0E00836D376CFE8B50933E736046EBCC240EEC177')
   })
 
   it('should get synth asset from synth tx', async () => {
@@ -125,7 +125,7 @@ describe('thorchain Integration Tests', () => {
     expect(tx.from[0].asset?.chain).toBe('BTC')
     expect(tx.from[0].asset?.symbol).toBe('BTC')
   })
-  it('should get RUNE asset from RUNE tx', async () => {
+  it('should get transaction data from a rune to pool module', async () => {
     const txId = 'EAC3D95D9160D4CF5A0BD861BDD9A7C5ACBA102B3A825FECD01581393BF76AEF'
     const tx = await thorClient.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
@@ -187,12 +187,21 @@ describe('thorchain Integration Tests', () => {
     expect(outboundTx.to[0].asset?.chain).toBe('ETH')
     expect(outboundTx.to[0].asset?.symbol).toBe('ETH')
   })
-  it('should get RUNE asset from RUNE to RUNE', async () => {
+  it('should get tx data from transfer of rune to rune', async () => {
     const txId = 'C948F21D5218A2A20218B99B7A37C9274FED26D31619FD054383D8E98A866AEB'
     const tx = await thorClient.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
 
     expect(tx.hash).toBe('C948F21D5218A2A20218B99B7A37C9274FED26D31619FD054383D8E98A866AEB')
+    expect(tx.asset.ticker).toBe('RUNE')
+  })
+
+  it('should get transaction data from Bond tx', async () => {
+    const txId = '06576BAF9F56A05828485B8585FFD31583EE226C9E794F013D462CCB7138C42D'
+    const tx = await thorClient.getTransactionData(txId)
+    console.log(JSON.stringify(tx, null, 2))
+
+    expect(tx.hash).toBe('06576BAF9F56A05828485B8585FFD31583EE226C9E794F013D462CCB7138C42D')
     expect(tx.asset.ticker).toBe('RUNE')
   })
 })
