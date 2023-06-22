@@ -38,7 +38,7 @@ import {
   AssetRuneNative,
   DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
-  FallBackUrl,
+  FallBackUrls,
   MAX_PAGES_PER_FUNCTION_CALL,
   MAX_TX_COUNT_PER_FUNCTION_CALL,
   MAX_TX_COUNT_PER_PAGE,
@@ -430,24 +430,32 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       txs,
     }
   }
-
-  // fetch from fallback urls
+  /**
+   *
+   * @param txId - tx hash
+   * @returns txResponse
+   */
   async fetchTransaction(txId: string) {
     try {
       const transaction = await this.cosmosClient.txsHashGet(txId)
       return transaction
     } catch (error) {
-      for (const fallbackUrl of FallBackUrl) {
-        try {
-          const clientUrl = fallbackUrl[this.network].node
-          const cosmosClient = new CosmosSDKClient({
-            server: clientUrl,
-            chainId: this.getChainId(this.network),
-            prefix: getPrefix(this.network),
-          })
-          const tx = await cosmosClient.txsHashGet(txId)
-          return tx
-        } catch (error) {}
+      for (const fallback of FallBackUrls) {
+        for (const network of Object.keys(fallback)) {
+          try {
+            const networkObj = fallback[network as keyof typeof fallback]
+            const clientUrl = networkObj.node as string | string[]
+            const cosmosClient = new CosmosSDKClient({
+              server: Array.isArray(clientUrl) ? clientUrl[0] : clientUrl,
+              chainId: this.getChainId(network as Network),
+              prefix: getPrefix(network as Network),
+            })
+            const tx = await cosmosClient.txsHashGet(txId)
+            return tx
+          } catch (error) {
+            // Handle specific error if needed
+          }
+        }
       }
       return null
     }
