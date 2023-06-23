@@ -305,21 +305,22 @@ describe('Client Test', () => {
     mockAccountsBalance(mayaClient.getClientUrl().node, 'smaya14e0zalymjxjxlwsmtwyvvtagm2hhw6jkuzjh2u', {
       balances: [
         new cosmosclient.proto.cosmos.base.v1beta1.Coin({
-          denom: 'bnb/bnb',
+          denom: 'BNB/BNB',
           amount: '100',
         }),
         new cosmosclient.proto.cosmos.base.v1beta1.Coin({
-          denom: 'bnb/busd-74e',
+          denom: 'BNB/BUSD-74E',
           amount: '200',
         }),
         new cosmosclient.proto.cosmos.base.v1beta1.Coin({
-          denom: 'rune',
+          denom: 'RUNE',
           amount: '200',
         }),
       ],
     })
 
     const balances = await mayaClient.getBalance('smaya14e0zalymjxjxlwsmtwyvvtagm2hhw6jkuzjh2u')
+
     expect(balances.length).toEqual(3)
     // BNB synth
     expect(balances[0].asset).toEqual({ ...AssetBNB, synth: true })
@@ -338,15 +339,15 @@ describe('Client Test', () => {
     mockAccountsBalance(mayaClient.getClientUrl().node, 'smaya14e0zalymjxjxlwsmtwyvvtagm2hhw6jkuzjh2u', {
       balances: [
         new cosmosclient.proto.cosmos.base.v1beta1.Coin({
-          denom: 'bnb/bnb',
+          denom: 'BNB/BNB',
           amount: '100',
         }),
         new cosmosclient.proto.cosmos.base.v1beta1.Coin({
-          denom: 'bnb/busd-74e',
+          denom: 'BNB/BUSD-74E',
           amount: '200',
         }),
         new cosmosclient.proto.cosmos.base.v1beta1.Coin({
-          denom: 'rune',
+          denom: 'RUNE',
           amount: '200',
         }),
       ],
