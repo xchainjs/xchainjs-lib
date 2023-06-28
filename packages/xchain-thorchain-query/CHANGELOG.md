@@ -1,3 +1,9 @@
+# v0.4.5 (2023-06-28)
+
+## Update
+
+- Add logic for strict use of reccomended min amount in
+
 # v0.4.4 (2023-06-21)
 
 ## Update

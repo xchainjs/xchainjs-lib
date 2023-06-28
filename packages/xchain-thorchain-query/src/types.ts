@@ -18,6 +18,7 @@ export type SwapEstimate = {
   netOutput: CryptoAmount
   inboundConfirmationSeconds?: number
   outboundDelaySeconds: number
+  recommendedMinAmountIn?: string
   canSwap: boolean
   errors: string[]
 }
@@ -151,6 +152,7 @@ export type EstimateAddLP = {
   }
   runeToAssetRatio: BigNumber
   estimatedWaitSeconds: number
+  recommendedMinAmountIn?: string
   errors: string[]
   canAdd: boolean
 }
@@ -218,6 +220,7 @@ export type EstimateAddSaver = {
   memo: string
   saverCapFilledPercent: number
   estimatedWaitTime: number
+  recommendedMinAmountIn?: string
   canAddSaver: boolean
   errors: string[]
 }
