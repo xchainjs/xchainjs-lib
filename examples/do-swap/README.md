@@ -17,7 +17,6 @@ tsconfig has already been set in the tsconfig.json
 
 ```bash
 cd examples/do-swap
-yarn install
 ```
 
 ### Do Swap

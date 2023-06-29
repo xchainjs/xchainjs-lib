@@ -8,13 +8,14 @@ import { Network } from '@xchainjs/xchain-client'
 import {
   BlockcypherDataProviders as LTCBlockcypherDataProviders,
   Client as LTCClient,
-  defaultLTCParams,
+  defaultLtcParams,
   sochainDataProviders as LTCSochainDataProviders,
 } from '@xchainjs/xchain-litecoin'
 import { Wallet } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { SochainProvider } from '@xchainjs/xchain-utxo-providers'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function customDataProvider(seed: string, thorchainQuery: ThorchainQuery): Wallet {
   // create a wallet
   const wallet = new Wallet(seed, thorchainQuery)
@@ -44,7 +45,7 @@ function customDataProvider(seed: string, thorchainQuery: ThorchainQuery): Walle
 
   //overridde the default init params with your onfig
   const ltcInitParams = {
-    ...defaultLTCParams,
+    ...defaultLtcParams,
     dataProviders: [LTCSochainDataProviders, LTCBlockcypherDataProviders], // use sochain first and blockcypher as fallback
     phrase: seed,
   }
