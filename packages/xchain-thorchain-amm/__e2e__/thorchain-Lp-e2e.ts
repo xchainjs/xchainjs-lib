@@ -1,7 +1,7 @@
 import { BNBChain } from '@xchainjs/xchain-binance'
 import { AssetBTC, BTCChain } from '@xchainjs/xchain-bitcoin'
 import { AssetATOM, COSMOS_DECIMAL } from '@xchainjs/xchain-cosmos'
-import { AssetETH, ETHChain, ETH_DECIMAL } from '@xchainjs/xchain-ethereum'
+import { AssetETH, ETHChain, ETH_GAS_ASSET_DECIMAL } from '@xchainjs/xchain-ethereum'
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   AddliquidityPosition,
@@ -65,7 +65,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
   })
   it(`Should add ETH liquidity asymmetrically to ETH pool `, async () => {
     const addLPparams: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(1.5, ETH_DECIMAL)), AssetETH),
+      asset: new CryptoAmount(assetToBase(assetAmount(1.5, ETH_GAS_ASSET_DECIMAL)), AssetETH),
       rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
     }
     const hash = await mainetThorchainAmm.addLiquidityPosition(mainnetWallet, addLPparams)
