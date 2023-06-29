@@ -1,5 +1,5 @@
 {
-  "name": "xchainjs-test",
+  "name": "example-loan-quotes",
   "version": "1.0.0",
   "scripts": {
     "loanQuoteOpen": "npx ts-node loanQuoteOpen.ts",
