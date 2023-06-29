@@ -1,3 +1,9 @@
+# v0.5.6 (2023-06-28)
+
+## Update
+
+- Update deps for thorchain-query & mayachain
+
 # v0.5.5 (2023-06-21)
 
 ## Update

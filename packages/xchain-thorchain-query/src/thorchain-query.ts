@@ -101,9 +101,18 @@ export class ThorchainQuery {
       affiliateAddress,
       height,
     )
+
     // error handling
     const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
     if (response.error) errors.push(`Thornode request quote: ${response.error}`)
+    //The recommended minimum inbound amount for this transaction type & inbound asset.
+    // Sending less than this amount could result in failed refunds
+    if (swapQuote.recommended_min_amount_in && inputAmount.toNumber() < +swapQuote.recommended_min_amount_in)
+      errors.push(
+        `Error amount in: ${inputAmount.toNumber()} is less than reccommended Min Amount: ${
+          swapQuote.recommended_min_amount_in
+        }`,
+      )
 
     if (errors.length > 0) {
       return {
@@ -142,6 +151,7 @@ export class ThorchainQuery {
         netOutput: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
         outboundDelaySeconds: swapQuote.outbound_delay_seconds,
         inboundConfirmationSeconds: swapQuote.inbound_confirmation_seconds,
+        recommendedMinAmountIn: swapQuote.recommended_min_amount_in,
         canSwap: true,
         errors,
       },
@@ -576,9 +586,21 @@ export class ThorchainQuery {
       assetToString(addAmount.asset),
       newAddAmount.toNumber(),
     )
+
     // error handling
     const response: { error?: string } = JSON.parse(JSON.stringify(depositQuote))
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
+    //The recommended minimum inbound amount for this transaction type & inbound asset.
+    // Sending less than this amount could result in failed refunds
+    if (
+      depositQuote.recommended_min_amount_in &&
+      addAmount.baseAmount.amount().toNumber() < +depositQuote.recommended_min_amount_in
+    )
+      errors.push(
+        `Error amount in: ${addAmount.baseAmount.amount().toNumber()} is less than reccommended Min Amount: ${
+          depositQuote.recommended_min_amount_in
+        }`,
+      )
     // Return errors if there is any
     if (errors.length > 0) {
       return {
@@ -595,6 +617,7 @@ export class ThorchainQuery {
         saverCapFilledPercent: -1,
         estimatedWaitTime: -1,
         slipBasisPoints: -1,
+        recommendedMinAmountIn: depositQuote.recommended_min_amount_in,
         canAddSaver: false,
         errors,
       }
@@ -628,6 +651,7 @@ export class ThorchainQuery {
       canAddSaver: errors.length === 0,
       slipBasisPoints: depositQuote.slippage_bps,
       saverCapFilledPercent,
+      recommendedMinAmountIn: depositQuote.recommended_min_amount_in,
       errors,
     }
     return estimateAddSaver
@@ -812,6 +836,15 @@ export class ThorchainQuery {
     )
     const response: { error?: string } = JSON.parse(JSON.stringify(loanOpenResp))
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
+    if (
+      loanOpenResp.recommended_min_amount_in &&
+      amount.baseAmount.amount().toNumber() < +loanOpenResp.recommended_min_amount_in
+    )
+      errors.push(
+        `Error amount in: ${amount.baseAmount.amount().toNumber()} is less than reccommended Min Amount: ${
+          loanOpenResp.recommended_min_amount_in
+        }`,
+      )
     if (errors.length > 0) {
       return {
         inboundAddress: '',
@@ -831,7 +864,7 @@ export class ThorchainQuery {
         warning: '',
         notes: '',
         dustThreshold: undefined,
-        recommendedMinAmountIn: '',
+        recommendedMinAmountIn: loanOpenResp.recommended_min_amount_in,
         memo: undefined,
         expectedAmountOut: '',
         expectedCollateralizationRatio: '',
@@ -912,7 +945,7 @@ export class ThorchainQuery {
         warning: '',
         notes: '',
         dustThreshold: undefined,
-        recommendedMinAmountIn: '',
+        recommendedMinAmountIn: loanCloseResp.recommended_min_amount_in,
         memo: undefined,
         expectedAmountOut: '',
         expectedCollateralDown: '',

@@ -29,7 +29,7 @@ yarn updateDeps @psf/bitcoincashjs-lib 4.0.3 true
 For the whole library
 
 ```
-yarn updatePackages minor Update "update rollup config and axios to the latest"
+yarn updatePackages patch Update "update rollup config and axios to the latest"
 ```
 
 For just one package

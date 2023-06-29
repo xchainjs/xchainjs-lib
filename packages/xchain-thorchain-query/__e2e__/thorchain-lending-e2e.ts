@@ -99,6 +99,17 @@ describe('Thorchain-query Loan Integration Tests', () => {
 
     printOpen(loanQuote)
   })
+  it(`Should fail a loan quote for ETH`, async () => {
+    const loanQuoteParams: LoanOpenParams = {
+      asset: AssetETH,
+      amount: new CryptoAmount(assetToBase(assetAmount('0.03')), AssetETH),
+      targetAsset: AssetBTC,
+      destination: btcAddress,
+    }
+    const loanQuote = await thorchainQuery.getLoanQuoteOpen(loanQuoteParams)
+    expect(loanQuote.errors.length).toBeGreaterThanOrEqual(1)
+    printOpen(loanQuote)
+  })
 
   it(`Should fetch a loan withdrawal quote for BTC`, async () => {
     const loanCloseParams: LoanCloseParams = {
