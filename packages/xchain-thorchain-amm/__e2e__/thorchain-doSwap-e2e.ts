@@ -19,7 +19,7 @@ import { fail } from 'assert'
 import BigNumber from 'bignumber.js'
 
 import { ThorchainAMM } from '../src/thorchain-amm'
-import { EthHelper } from '../src/utils/eth-helper'
+import { EvmHelper } from '../src/utils/evm-helper'
 import { Wallet } from '../src/wallet'
 
 require('dotenv').config()
@@ -284,7 +284,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
         wallet: mainnetWallet,
         walletIndex: 0,
       }
-      const ethHelper = new EthHelper(mainnetWallet.clients.ETH, thorchainQueryMainnet.thorchainCache)
+      const ethHelper = new EvmHelper(mainnetWallet.clients.ETH, thorchainQueryMainnet.thorchainCache)
       const approved = await ethHelper.isTCRouterApprovedToSpend(
         estimateSwapParams.amount.asset,
         estimateSwapParams.amount.baseAmount,
@@ -332,7 +332,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       wallet: mainnetWallet,
       walletIndex: 0,
     }
-    const ethHelper = new EthHelper(mainnetWallet.clients.ETH, thorchainQueryMainnet.thorchainCache)
+    const ethHelper = new EvmHelper(mainnetWallet.clients.ETH, thorchainQueryMainnet.thorchainCache)
     const approved = await ethHelper.isTCRouterApprovedToSpend(
       estimateSwapParams.amount.asset,
       estimateSwapParams.amount.baseAmount,

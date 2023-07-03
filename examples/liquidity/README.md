@@ -17,7 +17,6 @@ tsconfig has already been set in the tsconfig.json
 
 ```bash
 cd examples/liquidity
-yarn install
 ```
 
 ### Estimate Add Liquidity

@@ -114,9 +114,9 @@ describe('Thorchain-query Loan Integration Tests', () => {
   it(`Should fetch a loan withdrawal quote for BTC`, async () => {
     const loanCloseParams: LoanCloseParams = {
       asset: AssetETH,
-      loanOwner: btcAddress,
-      loanAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC),
+      loanAsset: AssetBTC,
+      loanOwner: btcAddress,
     }
     const loanQuoteWithdraw = await thorchainQuery.getLoanQuoteClose(loanCloseParams)
 

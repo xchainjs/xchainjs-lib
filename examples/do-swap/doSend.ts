@@ -17,7 +17,7 @@ const doSend = async (wallet: Wallet) => {
 
     const toChain = asset.synth ? THORChain : asset.chain
     const client = wallet.clients[toChain]
-    console.log(`sending ${amount.amount().toFixed()} ${asset} to ${destinationAddress}`)
+    console.log(`sending ${amount.amount().toFixed()} ${asset.chain} to ${destinationAddress}`)
     const tx = await client.transfer({ recipient: destinationAddress, amount: assetToBase(amount), memo: memo })
     console.log(tx)
   } catch (error) {

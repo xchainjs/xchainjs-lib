@@ -17,7 +17,6 @@ tsconfig has already been set in the tsconfig.json
 
 ```bash
 cd examples/estimate-swap
-yarn install
 ```
 ### Setting Headers for Nine Realms endpoints
 
