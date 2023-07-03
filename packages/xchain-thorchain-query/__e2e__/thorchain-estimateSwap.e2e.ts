@@ -39,6 +39,7 @@ function print(estimate: SwapEstimate, amount: CryptoAmount) {
     netOutput: estimate.netOutput.formatedAssetString(),
     outboundDelaySeconds: estimate.outboundDelaySeconds,
     inboundConfirmationSeconds: estimate.inboundConfirmationSeconds,
+    recommendedMinAmountIn: estimate.recommendedMinAmountIn,
     canSwap: estimate.canSwap,
     errors: estimate.errors,
   }
@@ -293,5 +294,16 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const estimate = await thorchainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate).toBeTruthy()
+  })
+  it(`Should fail estimate if amount in is less than reccommended`, async () => {
+    const swapParams: QuoteSwapParams = {
+      fromAsset: AssetRuneNative,
+      amount: new CryptoAmount(assetToBase(assetAmount('20')), AssetRuneNative),
+      destinationAsset: AssetBTC,
+      destinationAddress: btcAddress,
+      fromAddress: runeAddress,
+    }
+    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    expect(estimate.txEstimate.canSwap).toBe(false)
   })
 })

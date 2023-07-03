@@ -107,6 +107,7 @@ function printSaver(saver: EstimateAddSaver) {
     slippage: saver.slipBasisPoints,
     memo: saver.memo,
     estimateWaitTime: saver.estimatedWaitTime,
+    recommendedMinAmountIn: saver.recommendedMinAmountIn,
     canAdd: saver.canAddSaver,
     errors: saver.errors,
   }

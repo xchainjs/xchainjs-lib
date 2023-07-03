@@ -1,3 +1,9 @@
+# v0.28.3 (2023-06-30)
+
+## Update
+
+- Updating const defaul_gas_limit_value from 4000000 to 6000000
+
 # v0.28.2 (2023-06-21)
 
 ## Update
