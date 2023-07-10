@@ -27,14 +27,20 @@ yarn add @xchainjs/xchain-evm @xchainjs/xchain-client @xchainjs/xchain-crypto @x
 
 This package uses the following service providers:
 
-| Function                  | Service   | Notes                                                                          |
-| ------------------------- | --------- | ------------------------------------------------------------------------------ |
+| Function                  | Service   | Notes                                                                              |
+| ------------------------- | --------- | ---------------------------------------------------------------------------------- |
 | ETH balances              | Etherscan | https://api.snowtrace.io/apis#accounts (module=`account`, action=`balance`)        |
 | Token balances            | Etherscan | https://api.snowtrace.io/apis#tokens (module=`account`, action=`tokenbalance`)     |
 | ETH transaction history   | Etherscan | https://api.snowtrace.io/apis#accounts (module=`account`, action=`txlistinternal`) |
 | Token transaction history | Etherscan | https://api.snowtrace.io/apis#accounts (module=`account`, action=`tokentx`)        |
-| Explorer                  | Etherscan | https://snowtrace.io/                                                          |
+| Explorer                  | Etherscan | https://snowtrace.io/                                                              |
 
 Etherscan API rate limits: https://snowtrace.io/apis
 
 - This package uses `etherjs` library, by default it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
+
+// set in env variables so default config can access.
+`SNOWTRACE_API_KEY={YOURKEY}`
+
+//Default config can access.
+process.env["SNOWTRACE_API_KEY"]

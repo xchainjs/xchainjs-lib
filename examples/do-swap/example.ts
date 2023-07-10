@@ -4,7 +4,6 @@ import {
   SochainDataProviders as BTCSochainDataProviders,
   defaultBTCParams,
 } from '@xchainjs/xchain-bitcoin'
-import { Network } from '@xchainjs/xchain-client'
 import {
   BlockcypherDataProviders as LTCBlockcypherDataProviders,
   Client as LTCClient,
@@ -13,7 +12,6 @@ import {
 } from '@xchainjs/xchain-litecoin'
 import { Wallet } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { SochainProvider } from '@xchainjs/xchain-utxo-providers'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function customDataProvider(seed: string, thorchainQuery: ThorchainQuery): Wallet {
@@ -24,8 +22,7 @@ function customDataProvider(seed: string, thorchainQuery: ThorchainQuery): Walle
   // ===customize BTC client=====
   // ============================
   // override with your API key
-  const mySochainProvider = BTCSochainDataProviders[Network.Mainnet] as SochainProvider
-  mySochainProvider.apiKey = 'YOU_SOCHAIN_API_KEY'
+  // set api key in environment variables.
 
   //overridde the default init params with your onfig
   const btcInitParams = {
@@ -40,8 +37,7 @@ function customDataProvider(seed: string, thorchainQuery: ThorchainQuery): Walle
   // ===customize LTC client=====
   // ============================
   // override with your API key
-  const myLtcSochainProvider = LTCSochainDataProviders[Network.Mainnet] as SochainProvider
-  myLtcSochainProvider.apiKey = 'YOU_SOCHAIN_API_KEY'
+  // set api key in environment variables.
 
   //overridde the default init params with your onfig
   const ltcInitParams = {
