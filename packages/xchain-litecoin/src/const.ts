@@ -52,7 +52,7 @@ export const explorerProviders = {
 
 const testnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  'PLACEHOLDER_APIKEY',
+  process.env['SOCHAIN_API_KEY'] || '',
   LTCChain,
   AssetLTC,
   8,
@@ -60,7 +60,7 @@ const testnetSochainProvider = new SochainProvider(
 )
 const mainnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  'PLACEHOLDER_APIKEY',
+  process.env['SOCHAIN_API_KEY'] || '',
   LTCChain,
   AssetLTC,
   8,
@@ -81,6 +81,7 @@ const mainnetBlockcypherProvider = new BlockcypherProvider(
   AssetLTC,
   8,
   BlockcypherNetwork.LTC,
+  process.env['BlOCKCYPHER_API_KEY'] || '',
 )
 export const BlockcypherDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined,
