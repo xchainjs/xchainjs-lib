@@ -1,8 +1,8 @@
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
-import { Client as MayaClient, MayachainClient } from '@xchainjs/xchain-mayachain'
 import { Asset, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 
+import { Client as MayaClient, MayachainClient } from '../src/client'
 import { AssetCacao } from '../src/const'
 // import axios from 'axios'
 
@@ -18,8 +18,8 @@ const chainIds = {
   [Network.Testnet]: 'deprecated',
 }
 
-const mayaClient: XChainClient = new MayaClient({
-  network: Network.Stagenet,
+const mayaClient = new MayaClient({
+  network: Network.Mainnet,
   phrase: process.env.PHRASE,
   chainIds: chainIds,
 })
@@ -58,7 +58,7 @@ describe('Mayachain Integration Tests', () => {
       }
       await mayaClient.transfer(transferTx)
       fail()
-    } catch (error) {
+    } catch (error: any) {
       expect(error.toString().includes('account sequence mismatch')).toBe(true)
     }
   })
@@ -84,7 +84,7 @@ describe('Mayachain Integration Tests', () => {
       // Wait 10 seconds, make sure previous test has finished to avoid sequnce conflict
       await delay(10 * 1000)
 
-      const address = await bnbClient.getAddress()
+      const address = bnbClient.getAddress()
       const memo = `=:BNB.BNB:${address}`
 
       const hash = await mayachainClient.deposit({
@@ -107,10 +107,10 @@ describe('Mayachain Integration Tests', () => {
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
   it('should fetch mayachain tx data', async () => {
-    const txId = '63C7B481C52EAAA5BE6D603C91CE6011CA4B9A5987214D316C208DE19106D430'
+    const txId = '28DA11D33AC96BA87981F45FCB2EC80536C60BB824321E0CAEF097D10B568BA5'
     const tx = await mayaClient.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
-    expect(tx.hash).toBe('63C7B481C52EAAA5BE6D603C91CE6011CA4B9A5987214D316C208DE19106D430')
+    expect(tx.hash).toBe('28DA11D33AC96BA87981F45FCB2EC80536C60BB824321E0CAEF097D10B568BA5')
     // expect(tx.asset.ticker).toBe('xx')
   })
 })

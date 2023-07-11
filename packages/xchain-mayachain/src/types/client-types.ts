@@ -54,7 +54,7 @@ export type TxOfflineParams = TxParams & {
 }
 
 /**
- * Response from `thorchain/constants` endpoint
+ * Response from `mayachain/constants` endpoint
  */
 export type MayachainConstantsResponse = {
   int_64_values: {
