@@ -2,7 +2,7 @@
 
 ## Update
 
-- Removed all instances of  from comments and some urls
+- Removed all instances of 'thorchain' from comments and some urls
 
 # v0.2.3 (2023-06-02)
 
