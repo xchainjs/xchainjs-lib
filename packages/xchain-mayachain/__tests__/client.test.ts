@@ -55,7 +55,7 @@ const mockAccountsBalance = (
 
 const mockMayachainConstants = (url: string) => {
   const response = require('../__mocks__/responses/mayachain/constants.json')
-  nock(url).get('/thorchain/constants').reply(200, response)
+  nock(url).get('/mayachain/constants').reply(200, response)
 }
 
 const assertTxsPost = (
@@ -568,14 +568,14 @@ describe('Client Test', () => {
 
     const fees = await mayaClient.getFees()
 
-    expect(fees.average.amount().toString()).toEqual('2000000')
-    expect(fees.fast.amount().toString()).toEqual('2000000')
-    expect(fees.fastest.amount().toString()).toEqual('2000000')
+    expect(fees.average.amount().toString()).toEqual('200000000')
+    expect(fees.fast.amount().toString()).toEqual('200000000')
+    expect(fees.fastest.amount().toString()).toEqual('200000000')
   })
 
   it('returns default fees if client is not available', async () => {
     const url = mayaClient.getClientUrl().node
-    nock(url).get('/thorchain/constants').reply(404)
+    nock(url).get('/mayachain/constants').reply(404)
 
     const fees = await mayaClient.getFees()
 

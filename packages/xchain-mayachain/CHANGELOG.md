@@ -1,3 +1,9 @@
+# v0.2.4 (2023-07-11)
+
+## Update
+
+- Removed all instances of 'thorchain' from comments and some urls
+
 # v0.2.3 (2023-06-02)
 
 ## Add

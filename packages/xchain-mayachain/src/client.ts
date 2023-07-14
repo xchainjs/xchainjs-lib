@@ -61,7 +61,7 @@ import {
 } from './utils'
 
 /**
- * Interface for custom Thorchain client
+ * Interface for custom maychain client
  */
 export interface MayachainClient {
   setClientUrl(clientUrl: ClientUrl): void
@@ -74,7 +74,7 @@ export interface MayachainClient {
 }
 
 /**
- * Custom Thorchain Client
+ * Custom maychain Client
  */
 class Client extends BaseXChainClient implements MayachainClient, XChainClient {
   private clientUrl: ClientUrl
@@ -171,7 +171,7 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
   /**
    * Get the client url.
    *
-   * @returns {NodeUrl} The client url for thorchain based on the current network.
+   * @returns {NodeUrl} The client url for maychain based on the current network.
    */
   getClientUrl(): NodeUrl {
     return this.clientUrl[this.network]
@@ -190,7 +190,7 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
   /**
    * Get the explorer url.
    *
-   * @returns {string} The explorer url for thorchain based on the current network.
+   * @returns {string} The explorer url for maychain based on the current network.
    */
   getExplorerUrl(): string {
     return this.explorerUrls.root[this.network]
@@ -395,7 +395,7 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
-  async getTransactionData(txId: string, address: Address): Promise<Tx> {
+  async getTransactionData(txId: string, address?: Address): Promise<Tx> {
     const txResult = await this.cosmosClient.txsHashGet(txId)
     const txData: TxData | null = txResult && txResult.logs ? getDepositTxDataFromLogs(txResult.logs, address) : null
     if (!txResult || !txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
@@ -413,15 +413,15 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
   }
 
   /**
-   * Get the transaction details of a given transaction id. (from /thorchain/txs/hash)
+   * Get the transaction details of a given transaction id. (from /maychain/txs/hash)
    *
-   * Node: /thorchain/txs/hash response doesn't have timestamp field.
+   * Node: /maychain/txs/hash response doesn't have timestamp field.
    *
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
   async getDepositTransaction(txId: string): Promise<Omit<Tx, 'date'>> {
-    const result: TxResult = (await axios.get(`${this.getClientUrl().node}/thorchain/tx/${txId}`)).data
+    const result: TxResult = (await axios.get(`${this.getClientUrl().node}/maychain/tx/${txId}`)).data
 
     if (!result || !result.observed_tx) throw new Error('transaction not found')
 
@@ -673,7 +673,7 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
         data: {
           int_64_values: { NativeTransactionFee: fee },
         },
-      } = await axios.get<MayachainConstantsResponse>(`${this.getClientUrl().node}/thorchain/constants`)
+      } = await axios.get<MayachainConstantsResponse>(`${this.getClientUrl().node}/maychain/constants`)
 
       // validate data
       if (!fee || isNaN(fee) || fee < 0) throw Error(`Invalid fee: ${fee.toString()}`)
