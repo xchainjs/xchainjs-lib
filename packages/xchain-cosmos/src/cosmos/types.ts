@@ -54,6 +54,7 @@ export type TxOfflineParams = TxParams & {
 export type RawTxResponse = {
   body: {
     messages: cosmosclient.proto.cosmos.bank.v1beta1.IMsgSend[]
+    memo: string
   }
 }
 

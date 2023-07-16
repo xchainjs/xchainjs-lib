@@ -209,6 +209,7 @@ describe('Client Test', () => {
           tx: {
             body: {
               messages: [msgSend],
+              memo: '',
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -248,6 +249,7 @@ describe('Client Test', () => {
           tx: {
             body: {
               messages: [msgSend2],
+              memo: '',
             },
           },
           timestamp: '2020-09-25T06:09:15Z',
@@ -320,6 +322,7 @@ describe('Client Test', () => {
         tx: {
           body: {
             messages: [msgSend],
+            memo: '',
           },
         },
         timestamp: '2020-09-25T06:09:15Z',

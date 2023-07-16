@@ -1,3 +1,9 @@
+# v0.21.2 (2023-07-16)
+
+## Update
+
+- Added type memo:string to rawtxresponse, needed to read memos
+
 # v0.21.1 (2023-05-18)
 
 ## Add

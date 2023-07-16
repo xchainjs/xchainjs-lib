@@ -101,17 +101,16 @@ describe('thorchain Integration Tests', () => {
     }
   })
   it('should fetch thorchain txs', async () => {
-    const address = 'thor140yln5gt933vulwgevdmjavktc0jzk2vsyrsfs'
+    const address = 'thor1nx3yxgdw94nfw0uzwns2ay5ap85nk9p6hjaqn9'
     const txPage = await thorClient.getTransactions({ address })
-    // console.log(txPage)
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
   it('should fetch thorchain tx data', async () => {
-    const txId = '21A705A98BD840542CD16BD0E00836D376CFE8B50933E736046EBCC240EEC177'
+    const txId = '6F75AAE03F9C50827DBA89BC00F09F4D47A3D378DF0893291C04A8C32095FCE1'
     const tx = await thorClient.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
-    expect(tx.hash).toBe('21A705A98BD840542CD16BD0E00836D376CFE8B50933E736046EBCC240EEC177')
+    expect(tx.hash).toBe('6F75AAE03F9C50827DBA89BC00F09F4D47A3D378DF0893291C04A8C32095FCE1')
   })
 
   it('should get synth asset from synth tx', async () => {
@@ -133,19 +132,18 @@ describe('thorchain Integration Tests', () => {
     expect(tx.hash).toBe('EAC3D95D9160D4CF5A0BD861BDD9A7C5ACBA102B3A825FECD01581393BF76AEF')
     expect(tx.asset.ticker).toBe('RUNE')
   })
-  it('should get THOR.RUNE to ETH.ETH inbound', async () => {
+  it('should get THOR.RUNE to ETH.ETH outbound', async () => {
     // thor.rune msgDeposit (inbound)
     const txId = '3F763B3F874DC5EEEA965D570A0C8DCA68915669D38A486A826B2238447E5498'
     const tx = await thorClient.getTransactionData(txId)
 
-    console.log(JSON.stringify(tx, null, 2))
+    //console.log(JSON.stringify(tx, null, 2))
 
     expect(tx.hash).toBe(txId)
     expect(tx.from[0].asset?.chain).toBe('THOR')
     expect(tx.from[0].asset?.symbol).toBe('RUNE')
     expect(tx.from[0].amount.amount().toFixed()).toBe('2000000000')
     expect(tx.from[0].from).toBe('thor1zdf2n0jx9nqvdnd2u3y93t5y0rs4znnv9rn5zc')
-
     expect(tx.to[0].asset?.chain).toBe('ETH')
     expect(tx.to[0].asset?.symbol).toBe('ETH')
     expect(tx.to[0].to).toBe('0x17AF7fd6Eb8D414be10296dcac9b922D9c9F0076')
