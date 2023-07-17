@@ -119,6 +119,7 @@ describe('cosmos/util', () => {
         tx: {
           body: {
             messages: [msgSend, msgSend],
+            memo: '',
           },
         } as RawTxResponse,
         timestamp: new Date().toString(),
@@ -133,6 +134,7 @@ describe('cosmos/util', () => {
         tx: {
           body: {
             messages: [msgSend, msgSend],
+            memo: '',
           },
         } as RawTxResponse,
         timestamp: new Date().toString(),
