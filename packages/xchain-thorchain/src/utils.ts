@@ -125,7 +125,12 @@ export const getDepositTxDataFromLogs = (
         const newData = acc2[acc2.length - 1]
         if (key === 'sender') newData.sender = value
         if (key === 'recipient') newData.recipient = value
-        if (key === 'amount') newData.amount = baseAmount(value.replace(/rune/, ''), RUNE_DECIMAL)
+        if (key === 'amount') {
+          const amountAsset = value.match(/(\d+)(\D+)/)
+          if (amountAsset) {
+            newData.amount = baseAmount(parseInt(amountAsset[1]))
+          }
+        }
         return acc2
       }, acc)
     }
