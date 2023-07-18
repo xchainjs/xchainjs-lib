@@ -1,3 +1,10 @@
+# v0.28.5 (2023-07-18)
+
+## Update
+
+- fixed amount returned from getTransactionData()
+- Bump comsos dep
+
 # v0.28.4 (2023-07-16)
 
 ## Update
