@@ -448,7 +448,7 @@ describe('Client Test', () => {
     mockTxHistory(thorClient.getClientUrl().rpc, historyData)
 
     assertTxHashGet(thorClient.getClientUrl().node, txHashA, { tx_response: bondTxData })
-    assertTxHashGet(thorClient.getClientUrl().node, txHashB, { tx_response: bondTxData })
+    // assertTxHashGet(thorClient.getClientUrl().node, txHashB, { tx_response: bondTxData })
 
     const txs = await thorClient.getTransactions({
       address: 'tthor137kees65jmhjm3gxyune0km5ea0zkpnj4lw29f',
@@ -469,7 +469,6 @@ describe('Client Test', () => {
     expect(to[0].amount.amount().toString()).toEqual(assetToBase(assetAmount(0.02)).amount().toString())
     expect(to[1].to).toEqual('tthor17gw75axcnr8747pkanye45pnrwk7p9c3uhzgff')
     expect(to[1].amount.amount().toString()).toEqual(assetToBase(assetAmount(1700)).amount().toString())
-
     expect(txs.txs[1].hash).toEqual(txHashB)
   })
 

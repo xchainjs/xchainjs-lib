@@ -38,10 +38,10 @@ export const defaultExplorerUrls: ExplorerUrls = {
 export const MAYAChain = 'MAYA' as const
 
 /**
- * Base "chain" asset on thorchain main net.
+ * Base "chain" asset on mayachain main net.
  *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ * Based on definition in mayachain `common`
+ * @see https://gitlab.com/mayachain/mayanode
  */
 export const AssetCacao: Asset = { chain: MAYAChain, symbol: 'CACAO', ticker: 'CACAO', synth: false }
 export const AssetMaya: Asset = { chain: MAYAChain, symbol: 'MAYA', ticker: 'MAYA', synth: false }

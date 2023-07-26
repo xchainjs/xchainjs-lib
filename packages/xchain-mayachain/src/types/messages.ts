@@ -33,7 +33,7 @@ export type AminoWrapping<T> = {
   value: T
 }
 
-export type ThorchainDepositResponse = AminoWrapping<{
+export type MayachainDepositResponse = AminoWrapping<{
   msg: AminoWrapping<{
     coins: MsgCoin[]
     memo: string

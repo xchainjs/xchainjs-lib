@@ -93,7 +93,7 @@ export const registerSendCodecs = () => {
  * @param {Address} address - Address to get transaction data for
  * @returns {TxData} Parsed transaction data
  */
-export const getDepositTxDataFromLogs = (logs: TxLog[], address: Address): TxData => {
+export const getDepositTxDataFromLogs = (logs: TxLog[], address?: Address): TxData => {
   const events = logs[0]?.events
 
   if (!events) {
@@ -154,8 +154,8 @@ export const getTxType = (txData: string, encoding: 'base64' | 'hex'): string =>
 }
 
 /**
- * Helper to get THORChain's chain id
- * @param {string} nodeUrl THORNode url
+ * Helper to get mayachain's chain id
+ * @param {string} nodeUrl MAYAnode url
  */
 export const getChainId = async (nodeUrl: string): Promise<ChainId> => {
   const { data } = await axios.get<NodeInfoResponse>(`${nodeUrl}/cosmos/base/tendermint/v1beta1/node_info`)
@@ -397,7 +397,7 @@ export const getBalance = async ({
  *
  * @param {Network} network
  * @param {ExplorerUrls} Explorer urls
- * @returns {string} The explorer url for thorchain based on the given network.
+ * @returns {string} The explorer url for mayachain based on the given network.
  */
 export const getExplorerUrl = ({ root }: ExplorerUrls, network: Network): string => root[network]
 

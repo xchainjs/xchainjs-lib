@@ -13,7 +13,7 @@ const BSC_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https:
 const provider = new EtherscanProvider(
   BSC_TESTNET_ETHERS_PROVIDER,
   'https://api-testnet.bscscan.com',
-  'XXX-BSCSCAN-API-KEY',
+  process.env['BSCCHAIN_API_KEY'] || '',
   BSCChain,
   AssetBSC,
   18,

@@ -1,3 +1,9 @@
+# v0.5.7 (2023-07-10)
+
+## Update
+
+- Update deps for avax, bsc, bitcoin, doge & litecoin
+
 # v0.5.6 (2023-06-28)
 
 ## Update

@@ -1,3 +1,9 @@
+# v0.6.2 (2023-07-10)
+
+## Update
+
+- added process.env[apikey] config as default option to provider creation
+
 # v0.6.1 (2023-05-18)
 
 ## Add

@@ -40,7 +40,7 @@ const ethersJSProviders = {
 const BSC_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
   BSC_TESTNET_ETHERS_PROVIDER,
   'https://api-testnet.bscscan.com',
-  'X-ETHERSCAN-API-KEY',
+  process.env['BSCCHAIN_API_KEY'] || '',
   BSCChain,
   AssetBSC,
   BSC_GAS_ASSET_DECIMAL,
@@ -48,7 +48,7 @@ const BSC_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
 const BSC_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
   BSC_MAINNET_ETHERS_PROVIDER,
   'https://api.bscscan.com',
-  'X-ETHERSCAN-API-KEY',
+  process.env['BSCCHAIN_API_KEY'] || '',
   BSCChain,
   AssetBSC,
   BSC_GAS_ASSET_DECIMAL,

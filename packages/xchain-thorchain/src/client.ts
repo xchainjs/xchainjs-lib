@@ -413,14 +413,18 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       .filter(params?.filterFn ? params.filterFn : (tx) => tx)
 
     history = history.filter((_, index) => index >= offset && index < offset + limit)
-
     const total = history.length
 
     const txs: Tx[] = []
 
     for (let i = 0; i < history.length; i += 10) {
       const batch = history.slice(i, i + 10)
-      const result = await Promise.all(batch.map(({ hash }) => this.getTransactionData(hash, address)))
+      const result = await Promise.all(
+        batch.map(async ({ hash }) => {
+          const data = await this.getTransactionData(hash, address)
+          return data
+        }),
+      )
       txs.push(...result)
       delay(2000) // Delay to avoid 503 from ninerealms server
     }
@@ -467,66 +471,91 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
    * @param {string} txId The transaction id.
    * @returns {Tx} The transaction details of the given transaction id.
    */
-  async getTransactionData(txId: string, address?: Address): Promise<Tx> {
-    const response = await this.fetchTransaction(txId)
-    if (response) {
-      const txResult = response
-      const bond = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'bond')
-      const transfer = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'transfer')
-      if (!transfer) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
-      const sender = transfer[0].attributes.find((attr) => attr.key === 'sender')?.value
-      const senderAmount = transfer[0].attributes.filter((attr) => attr.key === 'amount')[1].value
-      const regex = /[a-zA-Z]+$/
-      const match = senderAmount.match(regex)
-      const asset = match ? match[0] : null
-      const senderAsset = asset === 'rune' ? AssetRuneNative : assetFromStringEx(`${asset}`)
+  async getTransactionData(txId: string, address?: string): Promise<Tx> {
+    const txResult = await this.fetchTransaction(txId)
+    if (txResult && txResult.logs) {
+      // extract values from the response
+      const transferEvent = txResult.logs[0].events?.find((event) => event.type === 'transfer')
+      const messageEvent = txResult.logs[0].events?.find((event) => event.type === 'message')
 
-      const senderAddress = sender ? sender : address
-      const message = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'message')
-      const coinSpent = txResult.logs && txResult.logs[0].events.filter((i) => i.type === 'coin_spent')
-      if (!message || !coinSpent) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
+      if (!transferEvent || !messageEvent) {
+        throw new Error('Invalid transaction data')
+      }
+      const attributeGroups: { [key: string]: string[] } = {}
 
-      const action = message[0].attributes.find((attr) => attr.key === 'action')?.value
-      if (!bond) throw new Error(`Failed to get transaction logs (tx-hash: ${txId})`)
-      // Rune only transactions
-      if (action === 'send' || bond[0].type === 'bond') {
-        const assetTo = AssetRuneNative
+      for (const attr of transferEvent.attributes) {
+        if (!attributeGroups[attr.key]) {
+          attributeGroups[attr.key] = []
+        }
+        attributeGroups[attr.key].push(attr.value)
+      }
+      const assetAmount = attributeGroups['amount'][1]
+        ? attributeGroups['amount'][1].split(/(?<=\d)(?=\D)/).filter(Boolean)[0]
+        : attributeGroups['amount'][0].split(/(?<=\d)(?=\D)/).filter(Boolean)[0]
+      const assetString = attributeGroups['amount'][1]
+        ? attributeGroups['amount'][1]
+            .split(/(?<=\d)(?=\D)/)
+            .filter(Boolean)[1]
+            .replace(/[a-z]/g, (letter) => letter.toUpperCase())
+        : attributeGroups['amount'][0]
+            .split(/(?<=\d)(?=\D)/)
+            .filter(Boolean)[1]
+            .replace(/[a-z]/g, (letter) => letter.toUpperCase())
+      const fromAddress = transferEvent.attributes.find((attr) => attr.key === 'sender')?.value
+        ? transferEvent.attributes.find((attr) => attr.key === 'sender')?.value
+        : address
+      const memo = txResult.tx?.body ? txResult.tx.body.memo.split(':') : ''
+      const toAddress = memo[2] ? memo[2] : ''
+      const toAsset = memo[1] ? assetFromStringEx(memo[1]) : AssetRuneNative
+      const date = new Date(txResult.timestamp)
+      const typeString = messageEvent.attributes.find((attr) => attr.key === 'action')?.value
+      const hash = txResult.txhash
+
+      if (assetString && hash && fromAddress && typeString) {
+        const fromAsset = assetString === 'RUNE' ? AssetRuneNative : assetFromStringEx(assetString)
         const txData: TxData | null =
-          txResult && txResult.logs
-            ? getDepositTxDataFromLogs(txResult.logs, `${senderAddress}`, senderAsset, assetTo)
+          txResult && txResult.raw_log
+            ? getDepositTxDataFromLogs(txResult.logs, `${fromAddress}`, fromAsset, toAsset)
             : null
-        //console.log(JSON.stringify(txData, null, 2))
         if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
 
-        const { from, to, type } = txData
-        return {
-          hash: txId,
-          asset: senderAsset,
-          from,
-          to,
-          date: new Date(txResult.timestamp),
-          type,
+        if (isAssetRuneNative(toAsset) || toAsset.synth) {
+          const { from, to, type } = txData
+          const tx: Tx = {
+            asset: fromAsset,
+            from: from,
+            to: to,
+            date: date,
+            type: type,
+            hash: hash,
+          }
+          return tx
+        } else {
+          const tx: Tx = {
+            asset: fromAsset,
+            from: [{ from: fromAddress, amount: baseAmount(assetAmount), asset: fromAsset }],
+            to: [{ to: toAddress, amount: baseAmount(memo[3]), asset: toAsset }],
+            date: date,
+            type: TxType.Transfer,
+            hash: hash,
+          }
+          return tx
         }
-      }
-      // synths and other tx types
-      const messageBody = JSON.stringify(txResult.tx?.body.messages).split(':')
-      const assetTo = assetFromStringEx(messageBody[7])
-
-      const txData: TxData | null =
-        txResult && txResult.logs
-          ? getDepositTxDataFromLogs(txResult.logs, `${senderAddress}`, senderAsset, assetTo)
-          : null
-      if (!txData) throw new Error(`Failed to get transaction data (tx-hash: ${txId})`)
-
-      const { from, to, type } = txData
-
-      return {
-        hash: txId,
-        asset: senderAsset,
-        from,
-        to,
-        date: new Date(txResult.timestamp),
-        type,
+      } else {
+        const tx: Tx = {
+          asset: {
+            chain: '',
+            symbol: '',
+            ticker: '',
+            synth: false,
+          },
+          from: [],
+          to: [],
+          date: new Date(),
+          type: TxType.Transfer,
+          hash: '',
+        }
+        return tx
       }
     } else {
       return await this.getTransactionDataThornode(txId)

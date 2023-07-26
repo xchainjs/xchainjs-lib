@@ -101,17 +101,17 @@ describe('thorchain Integration Tests', () => {
     }
   })
   it('should fetch thorchain txs', async () => {
-    const address = 'thor140yln5gt933vulwgevdmjavktc0jzk2vsyrsfs'
+    const address = 'thor1nx3yxgdw94nfw0uzwns2ay5ap85nk9p6hjaqn9'
     const txPage = await thorClient.getTransactions({ address })
-    // console.log(txPage)
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
   it('should fetch thorchain tx data', async () => {
-    const txId = '21A705A98BD840542CD16BD0E00836D376CFE8B50933E736046EBCC240EEC177'
+    const txId = '6F75AAE03F9C50827DBA89BC00F09F4D47A3D378DF0893291C04A8C32095FCE1'
     const tx = await thorClient.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
-    expect(tx.hash).toBe('21A705A98BD840542CD16BD0E00836D376CFE8B50933E736046EBCC240EEC177')
+    expect(tx.hash).toBe('6F75AAE03F9C50827DBA89BC00F09F4D47A3D378DF0893291C04A8C32095FCE1')
+    expect(tx.from[0].amount.amount().toNumber()).toBe(110000000000)
   })
 
   it('should get synth asset from synth tx', async () => {
@@ -123,6 +123,7 @@ describe('thorchain Integration Tests', () => {
     expect(tx.asset.ticker).toBe('BTC')
     expect(tx.asset.synth).toBeTruthy()
     expect(tx.from[0].asset?.chain).toBe('BTC')
+    expect(tx.from[1].amount.amount().toNumber()).toBe(8734)
     expect(tx.from[0].asset?.symbol).toBe('BTC')
   })
   it('should get transaction data from a rune to pool module', async () => {
@@ -132,20 +133,20 @@ describe('thorchain Integration Tests', () => {
 
     expect(tx.hash).toBe('EAC3D95D9160D4CF5A0BD861BDD9A7C5ACBA102B3A825FECD01581393BF76AEF')
     expect(tx.asset.ticker).toBe('RUNE')
+    expect(tx.to[1].amount.amount().toNumber()).toBe(30371900000)
   })
-  it('should get THOR.RUNE to ETH.ETH inbound', async () => {
+  it('should get THOR.RUNE to ETH.ETH outbound', async () => {
     // thor.rune msgDeposit (inbound)
     const txId = '3F763B3F874DC5EEEA965D570A0C8DCA68915669D38A486A826B2238447E5498'
     const tx = await thorClient.getTransactionData(txId)
 
-    console.log(JSON.stringify(tx, null, 2))
+    //console.log(JSON.stringify(tx, null, 2))
 
     expect(tx.hash).toBe(txId)
     expect(tx.from[0].asset?.chain).toBe('THOR')
     expect(tx.from[0].asset?.symbol).toBe('RUNE')
     expect(tx.from[0].amount.amount().toFixed()).toBe('2000000000')
     expect(tx.from[0].from).toBe('thor1zdf2n0jx9nqvdnd2u3y93t5y0rs4znnv9rn5zc')
-
     expect(tx.to[0].asset?.chain).toBe('ETH')
     expect(tx.to[0].asset?.symbol).toBe('ETH')
     expect(tx.to[0].to).toBe('0x17AF7fd6Eb8D414be10296dcac9b922D9c9F0076')
@@ -171,10 +172,12 @@ describe('thorchain Integration Tests', () => {
     expect(tx.from[0].asset?.chain).toBe('ETH')
     expect(tx.from[0].asset?.symbol).toBe('ETH')
     expect(tx.from[0].from).toBe('0xd4d99d205e67e88e5e19d91afd6fcab665b532e8')
+    expect(tx.from[0].amount.amount().toNumber()).toBe(50000000)
 
     expect(tx.to[0].asset?.chain).toBe('THOR')
     expect(tx.to[0].asset?.symbol).toBe('RUNE')
     expect(tx.to[0].to).toBe('thor1auu0xc7zzcestqt60g429gpfkk9ynhqazw3epa')
+    expect(tx.to[0].amount.amount().toNumber()).toBe(46443816698)
 
     // asgard -> eth (outbound)
     const outboundTxId = '0049ECD2785F84D845DC2FA29E1046CBB39F0EFB1D991CB48F97A577887D5613'
@@ -194,6 +197,11 @@ describe('thorchain Integration Tests', () => {
 
     expect(tx.hash).toBe('C948F21D5218A2A20218B99B7A37C9274FED26D31619FD054383D8E98A866AEB')
     expect(tx.asset.ticker).toBe('RUNE')
+    expect(tx.type).toBe('transfer')
+    expect(tx.from[1].amount.amount().toNumber()).toBe(356890907)
+
+    expect(tx.to[1].to).toBe('thor1nx3yxgdw94nfw0uzwns2ay5ap85nk9p6hjaqn9')
+    expect(tx.to[1].amount.amount().toNumber()).toBe(356890907)
   })
 
   it('should get transaction data from Bond tx', async () => {
@@ -203,5 +211,7 @@ describe('thorchain Integration Tests', () => {
 
     expect(tx.hash).toBe('06576BAF9F56A05828485B8585FFD31583EE226C9E794F013D462CCB7138C42D')
     expect(tx.asset.ticker).toBe('RUNE')
+    expect(tx.type).toBe('transfer')
+    expect(tx.from[1].amount.amount().toNumber()).toBe(13744300000000)
   })
 })
