@@ -13,14 +13,21 @@ export type TotalFees = {
 }
 
 export type SwapEstimate = {
-  totalFees: TotalFees
-  slipBasisPoints: number
   netOutput: CryptoAmount
+  totalFees: TotalFees
+  netOutputStreaming: CryptoAmount
+  maxStreamingQuantity: number
   inboundConfirmationSeconds?: number
   outboundDelaySeconds: number
+  outboundDelayBlocks: number
   recommendedMinAmountIn?: string
+  slipBasisPoints: number
+  streamingSlipBasisPoints: number
+  streamingSwapBlocks: number
+  totalSwapSeconds: number
   canSwap: boolean
   errors: string[]
+  warning: string
 }
 
 export type PoolCache = {
@@ -47,6 +54,8 @@ export type QuoteSwapParams = {
   destinationAsset: Asset
   amount: CryptoAmount
   destinationAddress?: string
+  streamingInterval?: number
+  streamingQuantity?: number
   fromAddress?: string
   toleranceBps?: number
   affiliateAddress?: string
@@ -113,6 +122,7 @@ export type ConstructMemo = {
 
 export type TxDetails = {
   memo: string
+  dustThreshold: CryptoAmount
   toAddress: Address
   expiry: Date
   txEstimate: SwapEstimate

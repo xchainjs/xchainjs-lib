@@ -1,3 +1,9 @@
+# v0.5.8 (2023-07-26)
+
+## Update
+
+- Updated dependencies for cosmos, thorchain & query
+
 # v0.5.7 (2023-07-10)
 
 ## Update
