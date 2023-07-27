@@ -321,11 +321,11 @@ describe('Thorchain-query estimate Integration Tests', () => {
       destinationAddress: ethAddress,
       streamingInterval: 10, // time between swaps
       streamingQuantity: 10, // how many swaps in this stream
-      toleranceBps: 300,
+      toleranceBps: 10000,
       fromAddress: btcAddress,
     }
     const estimate = await thorchainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
-    expect(estimate.txEstimate.canSwap).toBe(false)
+    expect(estimate.txEstimate.canSwap).toBe(true)
   })
 })

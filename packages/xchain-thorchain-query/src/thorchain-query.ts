@@ -80,7 +80,6 @@ export class ThorchainQuery {
     streamingQuantity,
     fromAddress,
     toleranceBps,
-    interfaceID = '555',
     affiliateBps,
     affiliateAddress,
     height,
@@ -181,7 +180,7 @@ export class ThorchainQuery {
 
     // No errors ? return quote flag canSwap to true
     const txDetails: TxDetails = {
-      memo: this.constructSwapMemo(`${swapQuote.memo}`, interfaceID),
+      memo: swapQuote.memo ? swapQuote.memo : '',
       dustThreshold: new CryptoAmount(baseAmount(swapQuote.dust_threshold), fromAsset),
       toAddress: swapQuote.inbound_address ? swapQuote.inbound_address : '',
       expiry: new Date(swapQuote.expiry * 1000),
@@ -210,24 +209,24 @@ export class ThorchainQuery {
     return txDetails
   }
 
-  /**
-   *
-   * @param params - swap object
-   * @returns - constructed memo string
-   */
-  private constructSwapMemo(memo: string, interfaceID: string): string {
-    const memoPart = memo.split(':')
-    if (memoPart.length > 3) {
-      memoPart[3] =
-        memoPart[3].length >= 3 ? memoPart[3].substring(0, memoPart[3].length - 3).concat(interfaceID) : interfaceID
-      let outmemo = ''
-      for (let i = 0; i < memoPart.length; i++) {
-        outmemo = outmemo.concat(`${memoPart[i]}:`)
-      }
-      return outmemo.substring(0, outmemo.length - 1)
-    }
-    return memo
-  }
+  // /**
+  //  * This is no longer used
+  //  * @param params - swap object
+  //  * @returns - constructed memo string
+  //  */
+  // private constructSwapMemo(memo: string, interfaceID: string): string {
+  //   const memoPart = memo.split(':')
+  //   if (memoPart.length > 3) {
+  //     memoPart[3] =
+  //       memoPart[3].length >= 3 ? memoPart[3].substring(0, memoPart[3].length - 3).concat(interfaceID) : interfaceID
+  //     let outmemo = ''
+  //     for (let i = 0; i < memoPart.length; i++) {
+  //       outmemo = outmemo.concat(`${memoPart[i]}:`)
+  //     }
+  //     return outmemo.substring(0, outmemo.length - 1)
+  //   }
+  //   return memo
+  // }
 
   /**
    * Works out how long an outbound Tx will be held by THORChain before sending.
