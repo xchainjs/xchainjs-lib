@@ -196,7 +196,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       fromAsset: sETH,
       amount: new CryptoAmount(assetToBase(assetAmount(1)), sETH),
       destinationAsset: sBNBETH,
-      destinationAddress: 'xxx',
+      destinationAddress: runeAddress,
       // affiliate: affiliateAddress,
       // affiliateBps: 30, //optional
       toleranceBps: 20, //optional
@@ -212,7 +212,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       amount: new CryptoAmount(assetToBase(assetAmount(1000, 8)), AssetRuneNative),
       destinationAsset: AssetBTC,
       destinationAddress: btcAddress,
-      //toleranceBps: 200, //optional
+      toleranceBps: 200, //optional
       fromAddress: runeAddress,
     }
     const estimate = await thorchainQuery.quoteSwap(swapParams)
