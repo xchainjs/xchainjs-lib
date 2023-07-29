@@ -1,3 +1,9 @@
+# v0.4.6 (2023-07-26)
+
+## Update
+
+- Update thornode dep, and fixed swapQuote error returns
+
 # v0.4.5 (2023-06-28)
 
 ## Update

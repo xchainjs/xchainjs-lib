@@ -76,9 +76,10 @@ export class ThorchainQuery {
     destinationAsset,
     amount,
     destinationAddress,
+    streamingInterval,
+    streamingQuantity,
     fromAddress,
     toleranceBps,
-    interfaceID = '555',
     affiliateBps,
     affiliateAddress,
     height,
@@ -95,6 +96,8 @@ export class ThorchainQuery {
       toAssetString,
       inputAmount.toNumber(),
       destinationAddress,
+      streamingInterval,
+      streamingQuantity,
       fromAddress,
       toleranceBps,
       affiliateBps,
@@ -102,22 +105,14 @@ export class ThorchainQuery {
       height,
     )
 
-    // error handling
+    // error handling for fetch response
     const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
     if (response.error) errors.push(`Thornode request quote: ${response.error}`)
-    //The recommended minimum inbound amount for this transaction type & inbound asset.
-    // Sending less than this amount could result in failed refunds
-    if (swapQuote.recommended_min_amount_in && inputAmount.toNumber() < +swapQuote.recommended_min_amount_in)
-      errors.push(
-        `Error amount in: ${inputAmount.toNumber()} is less than reccommended Min Amount: ${
-          swapQuote.recommended_min_amount_in
-        }`,
-      )
-
     if (errors.length > 0) {
       return {
         memo: ``,
         toAddress: ``,
+        dustThreshold: new CryptoAmount(baseAmount(0), AssetRuneNative),
         expiry: new Date(),
         txEstimate: {
           totalFees: {
@@ -131,15 +126,33 @@ export class ThorchainQuery {
           inboundConfirmationSeconds: 0,
           canSwap: false,
           errors,
+          netOutputStreaming: new CryptoAmount(baseAmount(0), AssetRuneNative),
+          maxStreamingQuantity: 0,
+          outboundDelayBlocks: 0,
+          streamingSlipBasisPoints: 0,
+          streamingSwapBlocks: 0,
+          totalSwapSeconds: 0,
+          warning: '',
         },
       }
     }
-
-    // Return quote
+    // The recommended minimum inbound amount for this transaction type & inbound asset.
+    // Sending less than this amount could result in failed refunds
     const feeAsset = assetFromStringEx(swapQuote.fees.asset)
+    if (swapQuote.recommended_min_amount_in && inputAmount.toNumber() < +swapQuote.recommended_min_amount_in)
+      errors.push(
+        `Error amount in: ${inputAmount.toNumber()} is less than reccommended Min Amount: ${
+          swapQuote.recommended_min_amount_in
+        }`,
+      )
+    // Check to see if memo is undefined
+    if (swapQuote.memo === undefined) errors.push(`Error parsing swap quote: Memo is ${swapQuote.memo}`)
+
+    // No errors ? and memo is returned ? return quote flag canSwap to true
     const txDetails: TxDetails = {
-      memo: this.constructSwapMemo(`${swapQuote.memo}`, interfaceID),
-      toAddress: `${swapQuote.inbound_address}`,
+      memo: swapQuote.memo ? swapQuote.memo : '',
+      dustThreshold: new CryptoAmount(baseAmount(swapQuote.dust_threshold), fromAsset),
+      toAddress: swapQuote.inbound_address ? swapQuote.inbound_address : '',
       expiry: new Date(swapQuote.expiry * 1000),
       txEstimate: {
         totalFees: {
@@ -149,34 +162,41 @@ export class ThorchainQuery {
         },
         slipBasisPoints: swapQuote.slippage_bps,
         netOutput: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
+        netOutputStreaming: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
         outboundDelaySeconds: swapQuote.outbound_delay_seconds,
         inboundConfirmationSeconds: swapQuote.inbound_confirmation_seconds,
         recommendedMinAmountIn: swapQuote.recommended_min_amount_in,
-        canSwap: true,
+        maxStreamingQuantity: swapQuote.max_streaming_quantity ? swapQuote.max_streaming_quantity : 0,
+        outboundDelayBlocks: swapQuote.outbound_delay_blocks,
+        streamingSlipBasisPoints: swapQuote.streaming_slippage_bps,
+        streamingSwapBlocks: swapQuote.streaming_swap_blocks ? swapQuote.streaming_swap_blocks : 0,
+        totalSwapSeconds: swapQuote.total_swap_seconds ? swapQuote.total_swap_seconds : 0,
+        canSwap: !swapQuote.memo || errors.length > 0 ? false : true,
         errors,
+        warning: swapQuote.warning,
       },
     }
     return txDetails
   }
 
-  /**
-   *
-   * @param params - swap object
-   * @returns - constructed memo string
-   */
-  private constructSwapMemo(memo: string, interfaceID: string): string {
-    const memoPart = memo.split(':')
-    if (memoPart.length > 3) {
-      memoPart[3] =
-        memoPart[3].length >= 3 ? memoPart[3].substring(0, memoPart[3].length - 3).concat(interfaceID) : interfaceID
-      let outmemo = ''
-      for (let i = 0; i < memoPart.length; i++) {
-        outmemo = outmemo.concat(`${memoPart[i]}:`)
-      }
-      return outmemo.substring(0, outmemo.length - 1)
-    }
-    return memo
-  }
+  // /**
+  //  * This is no longer used
+  //  * @param params - swap object
+  //  * @returns - constructed memo string
+  //  */
+  // private constructSwapMemo(memo: string, interfaceID: string): string {
+  //   const memoPart = memo.split(':')
+  //   if (memoPart.length > 3) {
+  //     memoPart[3] =
+  //       memoPart[3].length >= 3 ? memoPart[3].substring(0, memoPart[3].length - 3).concat(interfaceID) : interfaceID
+  //     let outmemo = ''
+  //     for (let i = 0; i < memoPart.length; i++) {
+  //       outmemo = outmemo.concat(`${memoPart[i]}:`)
+  //     }
+  //     return outmemo.substring(0, outmemo.length - 1)
+  //   }
+  //   return memo
+  // }
 
   /**
    * Works out how long an outbound Tx will be held by THORChain before sending.
