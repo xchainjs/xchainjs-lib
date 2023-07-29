@@ -43,6 +43,8 @@ const BusdMidgardPoolDetails1: PoolDetail = {
   synthUnits: '15611003797131',
   units: '119365324519968',
   volume24h: '472358072383752',
+  totalCollateral: '',
+  totalDebtTor: '',
 }
 const BusdThornodePoolDetails1: Pool = {
   LP_units: '52543071634074',
@@ -80,6 +82,8 @@ const emptyBusdPoolDetails: PoolDetail = {
   synthUnits: '0',
   units: '100000000',
   volume24h: '0',
+  totalCollateral: '',
+  totalDebtTor: '',
 }
 describe(`Liquidity calc tests`, () => {
   beforeAll(() => {
