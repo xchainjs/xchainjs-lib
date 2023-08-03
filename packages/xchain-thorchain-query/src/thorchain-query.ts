@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Asset,
