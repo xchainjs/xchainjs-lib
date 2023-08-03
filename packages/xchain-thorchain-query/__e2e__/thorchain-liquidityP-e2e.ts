@@ -322,7 +322,11 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
       asset: AssetAVAX,
       address: addressAvax,
     }
-    const getSavers = await thorchainQuery.getSaverPositions([saverAtom, saverBtc, saverAvax])
+    const saverInvalid: getSaver = {
+      asset: { chain: 'x', symbol: 'x', ticker: 'x', synth: false },
+      address: addressAvax,
+    }
+    const getSavers = await thorchainQuery.getSaverPositions([saverAtom, saverBtc, saverAvax, saverInvalid])
     getSavers.forEach((getSaver) => printSaversPosition(getSaver))
   })
 })
