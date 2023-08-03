@@ -267,6 +267,7 @@ export type SaversPosition = {
   percentageGrowth: number
   ageInYears: number
   ageInDays: number
+  asset: Asset
   errors: string[]
 }
 

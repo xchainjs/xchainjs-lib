@@ -6,6 +6,7 @@ import {
   MidgardApi,
   PoolDetail,
   PoolStatsDetail,
+  SaverDetails,
   THORNameDetails,
 } from '@xchainjs/xchain-midgard'
 import axios from 'axios'
@@ -106,6 +107,23 @@ export class Midgard {
       try {
         const memberDetail = (await api.getMemberDetail(address)).data
         return memberDetail
+      } catch (e) {
+        //console.error(e)
+      }
+    }
+    throw Error(`Midgard not responding`)
+  }
+
+  /**
+   * Function to return member details based on valid liquidity position
+   * @param address - query can also be multiple addresses should be separated by comma
+   * @returns - object type of Member Detail
+   */
+  public async getSavers(address: string): Promise<SaverDetails> {
+    for (const api of this.midgardApis) {
+      try {
+        const saverDetails = (await api.getSaverDetail(address)).data
+        return saverDetails
       } catch (e) {
         //console.error(e)
       }

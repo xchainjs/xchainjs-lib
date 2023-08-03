@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Asset,
   Chain,
   assetAmount,
+  assetFromString,
   assetFromStringEx,
   assetToBase,
   assetToString,
@@ -807,9 +809,51 @@ export class ThorchainQuery {
       percentageGrowth: saverGrowth.assetAmount.amount().toNumber(),
       ageInYears: saversAge,
       ageInDays: saversAge * 365,
+      asset: params.asset,
       errors,
     }
     return saversPos
+  }
+
+  public async getSaverPositions(params: getSaver[]): Promise<SaversPosition[]> {
+    const addresses: Set<string> = new Set<string>()
+    params.forEach((param) => addresses.add(param.address))
+    const addressesString: string = Array.from(addresses).join(',')
+    const saversDetail = await this.thorchainCache.midgard.getSavers(addressesString)
+    const pools = await this.thorchainCache.getPools()
+
+    // const blocksData = await this.thorchainCache.thornode.getLastBlock()
+
+    return saversDetail.pools.map((saver) => {
+      // ----
+      const asset = assetFromString(saver.pool)
+      if (asset === null) {
+        throw new Error('Invalid asset')
+      }
+      // const lastBlock = blocksData.find((block) => block.chain.toLowerCase() === asset.chain.toLowerCase())
+      const liquidityPool = pools[`${asset.chain}.${asset.ticker}`]
+      const depositAmount = new CryptoAmount(baseAmount(saver.assetAdded).minus(saver.assetWithdrawn), asset)
+      const ownerUnits = Number(saver?.saverUnits) // TODO: Update autogenerates files for APIs
+      const saverUnits = Number(liquidityPool.pool.saversUnits)
+      const assetDepth = Number(liquidityPool.pool.saversDepth)
+      const redeemableValue = (ownerUnits / saverUnits) * assetDepth
+      const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue), asset)
+      const lastAddHeight = 0 // TODO: 6s per block
+      const saverGrowth = redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
+      const saversAge = (Date.now() / 1000 - Number(saver.dateLastAdded)) / (365 * 86400)
+      // ----
+
+      return {
+        depositValue: depositAmount,
+        redeemableValue: redeemableAssetAmount,
+        lastAddHeight: lastAddHeight,
+        percentageGrowth: saverGrowth.assetAmount.amount().toNumber(),
+        ageInYears: saversAge,
+        ageInDays: saversAge * 365,
+        asset,
+        errors: [],
+      }
+    })
   }
 
   private async getAddSaversEstimateErrors(addAmount: CryptoAmount): Promise<string[]> {

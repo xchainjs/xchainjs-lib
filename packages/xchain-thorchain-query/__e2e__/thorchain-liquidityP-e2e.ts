@@ -137,6 +137,7 @@ function printSaversPosition(saver: SaversPosition) {
     percentageGrowth: saver.percentageGrowth,
     ageInYears: saver.ageInYears,
     ageInDays: saver.ageInDays,
+    asset: saver.asset,
   }
   console.log(expanded)
 }
@@ -297,12 +298,31 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
     printWithdrawSaver(estimateWithdrawSaver)
   })
   it(`Should get saver position`, async () => {
-    const address = 'bc1qpcaardpf2wzcu6uwd4hhsmt0fz8su80cjfk5lh'
+    const address = '0x4359b6da2312cc9650cc887217cf6a418e48a551'
     const saver: getSaver = {
-      asset: AssetBTC,
+      asset: AssetAVAX,
       address: address,
     }
     const getSavers = await thorchainQuery.getSaverPosition(saver)
     printSaversPosition(getSavers)
+  })
+  it(`Should get savers positions`, async () => {
+    const addressBtc = 'bc1qk75wen2e7zus3ea4j674dyezvdwr7jj3a9qf6q'
+    const addressCosmos = 'cosmos1dmffpc3hw9g0lv48u7hzhpcvlplms9evm4ayex'
+    const addressAvax = '0x4359b6da2312cc9650cc887217cf6a418e48a551'
+    const saverBtc: getSaver = {
+      asset: AssetBTC,
+      address: addressBtc,
+    }
+    const saverAtom: getSaver = {
+      asset: AssetATOM,
+      address: addressCosmos,
+    }
+    const saverAvax: getSaver = {
+      asset: AssetAVAX,
+      address: addressAvax,
+    }
+    const getSavers = await thorchainQuery.getSaverPositions([saverAtom, saverBtc, saverAvax])
+    getSavers.forEach((getSaver) => printSaversPosition(getSaver))
   })
 })
