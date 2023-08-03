@@ -298,9 +298,9 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
     printWithdrawSaver(estimateWithdrawSaver)
   })
   it(`Should get saver position`, async () => {
-    const address = '0x4359b6da2312cc9650cc887217cf6a418e48a551'
+    const address = 'bc1qpcaardpf2wzcu6uwd4hhsmt0fz8su80cjfk5lh'
     const saver: getSaver = {
-      asset: AssetAVAX,
+      asset: AssetBTC,
       address: address,
     }
     const getSavers = await thorchainQuery.getSaverPosition(saver)
