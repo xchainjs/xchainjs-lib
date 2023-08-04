@@ -1,5 +1,5 @@
 {
-	"int_64_values": {
+	"int64_values": {
 		"AsgardSize": 40,
 		"BadValidatorRate": 43200,
 		"BadValidatorRedline": 3,

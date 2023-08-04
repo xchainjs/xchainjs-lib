@@ -77,7 +77,7 @@ export type UnitData = {
 }
 
 export type LiquidityData = {
-  rune: CryptoAmount
+  cacao: CryptoAmount
   asset: CryptoAmount
 }
 
@@ -140,16 +140,16 @@ export type TransactionStatus = {
 
 export type LiquidityToAdd = {
   asset: CryptoAmount
-  rune: CryptoAmount
+  cacao: CryptoAmount
 }
 export type PostionDepositValue = {
   asset: BaseAmount
-  rune: BaseAmount
+  cacao: BaseAmount
 }
 
 export type PoolShareDetail = {
   assetShare: CryptoAmount
-  runeShare: CryptoAmount
+  cacaoShare: CryptoAmount
 }
 
 export type EstimateAddLP = {
@@ -160,7 +160,7 @@ export type EstimateAddLP = {
   inbound: {
     fees: LPAmounts
   }
-  runeToAssetRatio: BigNumber
+  cacaoToAssetRatio: BigNumber
   estimatedWaitSeconds: number
   recommendedMinAmountIn?: string
   errors: string[]
@@ -168,7 +168,7 @@ export type EstimateAddLP = {
 }
 export type EstimateWithdrawLP = {
   assetAddress?: string
-  runeAddress?: string
+  cacaoAddress?: string
   slipPercent: BigNumber
   inbound: {
     minToSend: LPAmounts
@@ -176,31 +176,31 @@ export type EstimateWithdrawLP = {
   }
   outboundFee: LPAmounts
   assetAmount: CryptoAmount
-  runeAmount: CryptoAmount
+  cacaoAmount: CryptoAmount
   lpGrowth: string
   impermanentLossProtection: ILProtectionData
   estimatedWaitSeconds: number
   assetPool: string
 }
 export type LPAmounts = {
-  rune: CryptoAmount
+  cacao: CryptoAmount
   asset: CryptoAmount
   total: CryptoAmount
 }
 
 export type DustValues = {
   asset: CryptoAmount
-  rune: CryptoAmount
+  cacao: CryptoAmount
 }
 export type AddliquidityPosition = {
   asset: CryptoAmount
-  rune: CryptoAmount
+  cacao: CryptoAmount
 }
 export type WithdrawLiquidityPosition = {
   asset: Asset
   percentage: number
   assetAddress?: string
-  runeAddress?: string
+  cacaoAddress?: string
 }
 export type LiquidityPosition = {
   poolShare: PoolShareDetail
@@ -211,7 +211,7 @@ export type LiquidityPosition = {
 
 export type PoolRatios = {
   assetToRune: BigNumber
-  runeToAsset: BigNumber
+  cacaoToAsset: BigNumber
 }
 
 export type getSaver = {

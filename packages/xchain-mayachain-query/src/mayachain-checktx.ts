@@ -131,47 +131,48 @@ export class TransactionStage {
     this.mayachainCache = mayachainCache
     this.chainAttributes = chainAttributes
   }
-  public async checkTxProgress(inboundTxHash: string): Promise<TXProgress> {
-    let txData
-    try {
-      if (inboundTxHash.length < 1) throw Error('inboundTxHash too short')
-      txData = await this.mayachainCache.mayanode.getTxDetail(inboundTxHash)
-      // console.log(JSON.stringify(txData, null, 2))
-    } catch (error) {
-      return {
-        txType: TxType.Unknown,
-      }
-    }
-    //valid tx
-    const progress = await this.determineObserved(txData)
-
-    switch (progress.txType) {
-      case TxType.Swap:
-        await this.checkSwapProgress(txData, progress)
-        break
-      case TxType.AddLP:
-        await this.checkAddLpProgress(txData, progress)
-        break
-      case TxType.WithdrawLP:
-        await this.checkWithdrawLpProgress(txData, progress)
-        break
-      case TxType.AddSaver:
-        await this.checkAddSaverProgress(txData, progress)
-        break
-      case TxType.WithdrawSaver:
-        await this.checkWithdrawSaverProgress(txData, progress)
-        break
-      case TxType.Refund:
-        await this.checkRefund(txData, progress)
-        break
-      case TxType.Other:
-        break
-      default:
-        break
-    }
-
-    return progress
-  }
+  // public async checkTxProgress(inboundTxHash: string): Promise<TXProgress> {
+  //   let txData
+  //   try {
+  //     if (inboundTxHash.length < 1) throw Error('inboundTxHash too short')
+  //     txData = await this.mayachainCache.mayanode.getTxDetail(inboundTxHash)
+  //     // console.log(JSON.stringify(txData, null, 2))
+  //   } catch (error) {
+  //     return {
+  //       txType: TxType.Unknown,
+  //     }
+  //   }
+  //   //valid tx
+  //   const progress = await this.determineObserved(txData)
+  //
+  //   switch (progress.txType) {
+  //     case TxType.Swap:
+  //       await this.checkSwapProgress(txData, progress)
+  //       break
+  //     case TxType.AddLP:
+  //       await this.checkAddLpProgress(txData, progress)
+  //       break
+  //     case TxType.WithdrawLP:
+  //       await this.checkWithdrawLpProgress(txData, progress)
+  //       break
+  //     case TxType.AddSaver:
+  //       await this.checkAddSaverProgress(txData, progress)
+  //       break
+  //     case TxType.WithdrawSaver:
+  //       await this.checkWithdrawSaverProgress(txData, progress)
+  //       break
+  //     case TxType.Refund:
+  //       await this.checkRefund(txData, progress)
+  //       break
+  //     case TxType.Other:
+  //       break
+  //     default:
+  //       break
+  //   }
+  //
+  //   return progress
+  // }
+  // @ts-ignore
   private async checkSwapProgress(txData: TxDetailsResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
       const memo = txData.tx.tx.memo ?? ''
@@ -224,6 +225,7 @@ export class TransactionStage {
       MAYAChain === asset.chain ? 8 : Number((await this.mayachainCache.getPoolForAsset(asset)).pool.nativeDecimal)
     return new CryptoAmount(baseAmount(baseAmt, decimals), asset)
   }
+  // @ts-ignore
   private async determineObserved(txData: TxSignersResponse): Promise<TXProgress> {
     const progress: TXProgress = {
       txType: TxType.Unknown,
@@ -276,6 +278,7 @@ export class TransactionStage {
     return progress
   }
 
+  // @ts-ignore
   private async checkAddLpProgress(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
       const memo = txData.tx.tx.memo ?? ''
@@ -303,6 +306,7 @@ export class TransactionStage {
     }
   }
 
+  // @ts-ignore
   private async checkWithdrawLpProgress(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
       const memo = txData.tx.tx.memo ?? ''
@@ -342,24 +346,25 @@ export class TransactionStage {
     }
   }
 
-  private async checkAddSaverProgress(txData: TxSignersResponse, progress: TXProgress) {
-    if (progress.inboundObserved) {
-      const assetTx = !isAssetCacaoNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
+  // private async checkAddSaverProgress(txData: TxSignersResponse, progress: TXProgress) {
+  //   if (progress.inboundObserved) {
+  //     const assetTx = !isAssetCacaoNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
+  //
+  //     const checkSaverVaults = await this.mayachainCache.mayanode.getSaver(
+  //       txData.tx.tx.coins[0].asset,
+  //       `${assetTx?.fromAddress}`,
+  //     )
+  //     const status = checkSaverVaults ? AddSaverStatus.Complete : AddSaverStatus.Incomplete
+  //     const addSaverInfo: AddSaverInfo = {
+  //       status: status,
+  //       assetTx,
+  //       saverPos: checkSaverVaults,
+  //     }
+  //     progress.addSaverInfo = addSaverInfo
+  //   }
+  // }
 
-      const checkSaverVaults = await this.mayachainCache.mayanode.getSaver(
-        txData.tx.tx.coins[0].asset,
-        `${assetTx?.fromAddress}`,
-      )
-      const status = checkSaverVaults ? AddSaverStatus.Complete : AddSaverStatus.Incomplete
-      const addSaverInfo: AddSaverInfo = {
-        status: status,
-        assetTx,
-        saverPos: checkSaverVaults,
-      }
-      progress.addSaverInfo = addSaverInfo
-    }
-  }
-
+  // @ts-ignore
   private async checkWithdrawSaverProgress(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
       const memo = txData.tx.tx.memo ?? ''
@@ -401,6 +406,7 @@ export class TransactionStage {
     }
   }
 
+  // @ts-ignore
   private async checkRefund(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
       const lastBlockObj = await this.mayachainCache.mayanode.getLastBlock()

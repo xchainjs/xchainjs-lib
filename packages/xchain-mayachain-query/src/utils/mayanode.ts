@@ -27,21 +27,22 @@ import { SaversWithdraw } from '../types'
 
 export type MayanodeConfig = {
   apiRetries: number
-  thornodeBaseUrls: string[]
+  mayanodeBaseUrls: string[]
 }
 
 const defaultMayanodeConfig: Record<Network, MayanodeConfig> = {
   mainnet: {
     apiRetries: 3,
-    thornodeBaseUrls: [`https://thornode.ninerealms.com`, `https://thornode.thorswap.net`],
+    mayanodeBaseUrls: ['https://mayanode.mayachain.info'],
   },
   stagenet: {
     apiRetries: 3,
-    thornodeBaseUrls: ['https://stagenet-thornode.ninerealms.com'],
+    mayanodeBaseUrls: ['https://stagenet.mayanode.mayachain.info'],
   },
   testnet: {
     apiRetries: 3,
-    thornodeBaseUrls: ['https://testnet.thornode.thorchain.info'],
+    // @@@ There is no testnet for mayanode
+    mayanodeBaseUrls: ['https://stagenet.mayanode.mayachain.info'],
   },
 }
 
@@ -60,17 +61,17 @@ export class Mayanode {
     this.network = network
     this.config = config ?? defaultMayanodeConfig[this.network]
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })
-    this.transactionsApi = this.config.thornodeBaseUrls.map(
+    this.transactionsApi = this.config.mayanodeBaseUrls.map(
       (url) => new TransactionsApi(new Configuration({ basePath: url })),
     )
-    this.queueApi = this.config.thornodeBaseUrls.map((url) => new QueueApi(new Configuration({ basePath: url })))
-    this.networkApi = this.config.thornodeBaseUrls.map((url) => new NetworkApi(new Configuration({ basePath: url })))
-    this.poolsApi = this.config.thornodeBaseUrls.map((url) => new PoolsApi(new Configuration({ basePath: url })))
-    this.liquidityProvidersApi = this.config.thornodeBaseUrls.map(
+    this.queueApi = this.config.mayanodeBaseUrls.map((url) => new QueueApi(new Configuration({ basePath: url })))
+    this.networkApi = this.config.mayanodeBaseUrls.map((url) => new NetworkApi(new Configuration({ basePath: url })))
+    this.poolsApi = this.config.mayanodeBaseUrls.map((url) => new PoolsApi(new Configuration({ basePath: url })))
+    this.liquidityProvidersApi = this.config.mayanodeBaseUrls.map(
       (url) => new LiquidityProvidersApi(new Configuration({ basePath: url })),
     )
-    this.quoteApi = this.config.thornodeBaseUrls.map((url) => new QuoteApi(new Configuration({ basePath: url })))
-    this.mimirApi = this.config.thornodeBaseUrls.map((url) => new MimirApi(new Configuration({ basePath: url })))
+    this.quoteApi = this.config.mayanodeBaseUrls.map((url) => new QuoteApi(new Configuration({ basePath: url })))
+    this.mimirApi = this.config.mayanodeBaseUrls.map((url) => new MimirApi(new Configuration({ basePath: url })))
   }
 
   /**
@@ -155,17 +156,17 @@ export class Mayanode {
    * @param txHash - transaction hash
    * @returns - transaction object
    */
-  async getTxDetail(txHash: string): Promise<TxDetailsResponse> {
-    for (const api of this.transactionsApi) {
-      try {
-        const txResponse = await api.txSigners(txHash)
-        return txResponse.data
-      } catch (e) {
-        throw new Error(`MAYANode not responding`)
-      }
-    }
-    throw new Error(`MAYANode not responding`)
-  }
+  // async getTxDetail(txHash: string): Promise<TxDetailsResponse> {
+  //   for (const api of this.transactionsApi) {
+  //     try {
+  //       const txResponse = await api.txSigners(txHash)
+  //       return txResponse.data
+  //     } catch (e) {
+  //       throw new Error(`MAYANode not responding`)
+  //     }
+  //   }
+  //   throw new Error(`MAYANode not responding`)
+  // }
   /**
    *
    * @param height - optional thorchain height only
@@ -297,6 +298,42 @@ export class Mayanode {
 
   /**
    *
+   * @param asset - asset string
+   * @param height - optional thorchain block height parameter
+   * @returns - Liquidity Provider Object
+   */
+  // async getSavers(asset: string, height?: number): Promise<SaversResponse> {
+  //   for (const api of this.saversApi) {
+  //     try {
+  //       const resp = (await api.savers(asset, height)).data
+  //       return resp
+  //     } catch (e) {
+  //       //console.error(e)
+  //     }
+  //   }
+  //   throw new Error(`THORNode not responding`)
+  // }
+
+  /**
+   *
+   * @param asset - asset string
+   * @param height - optional thorchain block height parameter
+   * @returns - Liquidity Provider Object
+   */
+  // async getSaver(asset: string, address: string, height?: number): Promise<Saver> {
+  //   for (const api of this.saversApi) {
+  //     try {
+  //       const resp = (await api.saver(asset, address, height)).data
+  //       return resp
+  //     } catch (e) {
+  //       //console.error(e)
+  //     }
+  //   }
+  //   throw new Error(`THORNode not responding`)
+  // }
+
+  /**
+   *
    * @param asset - asset to add to savers
    * @param amount - amount to deposit
    * @param height - block height
@@ -382,4 +419,70 @@ export class Mayanode {
     }
     throw new Error(`MAYANode not responding`)
   }
+
+  /**
+   *
+   * @param height
+   * @param asset
+   * @param amount
+   * @param targetAsset
+   * @param destination
+   * @param minOut
+   * @param affiliateBps
+   * @param affiliate
+   * @returns
+   */
+  // async getLoanQuoteOpen(
+  //   asset: string,
+  //   amount: number,
+  //   targetAsset: string,
+  //   destination: string,
+  //   minOut?: string,
+  //   affiliateBps?: number,
+  //   affiliate?: string,
+  //   height?: number,
+  // ): Promise<QuoteLoanOpenResponse> {
+  //   for (const api of this.quoteApi) {
+  //     try {
+  //       const resp = (
+  //         await api.quoteloanopen(height, asset, amount, targetAsset, destination, minOut, affiliateBps, affiliate)
+  //       ).data
+  //       return resp
+  //     } catch (e) {
+  //       //console.log(e)
+  //     }
+  //   }
+  //   throw new Error(`MAYANode is not responding`)
+  // }
+
+  /**
+   *
+   * @param height
+   * @param asset
+   * @param amount
+   * @param targetAsset
+   * @param destination
+   * @param minOut
+   * @param affiliateBps
+   * @param affiliate
+   * @returns
+   */
+  // async getLoanQuoteClose(
+  //   asset: string,
+  //   amount: number,
+  //   loanAsset: string,
+  //   loanOwner: string,
+  //   minOut?: string,
+  //   height?: number,
+  // ): Promise<QuoteLoanCloseResponse> {
+  //   for (const api of this.quoteApi) {
+  //     try {
+  //       const resp = (await api.quoteloanclose(height, asset, amount, loanAsset, loanOwner, minOut)).data
+  //       return resp
+  //     } catch (e) {
+  //       // console.log(e)
+  //     }
+  //   }
+  //   throw new Error(`MAYANode is not responding`)
+  // }
 }

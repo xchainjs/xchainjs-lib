@@ -1,15 +1,15 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard'
-import { Pool } from '@xchainjs/xchain-thornode'
+import { Pool } from '@xchainjs/xchain-mayanode'
 import { assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
-import mockThornodeApi from '../__mocks__/thornode-api'
+import mockMayanodeApi from '../__mocks__/mayanode-api'
 import { CryptoAmount } from '../src/crypto-amount'
 import { LiquidityPool } from '../src/liquidity-pool'
-import { ThorchainQuery } from '../src/thorchain-query'
+import { MayachainQuery } from '../src/mayachain-query'
 import { Block, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData } from '../src/types'
-import { AssetRuneNative } from '../src/utils'
+import { AssetCacaoNative } from '../src/utils'
 import {
   getLiquidityProtectionData,
   getLiquidityUnits,
@@ -18,7 +18,7 @@ import {
   getSlipOnLiquidity,
 } from '../src/utils/liquidity'
 
-const thorchainQuery = new ThorchainQuery()
+const mayachainQuery = new MayachainQuery()
 
 const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
@@ -50,18 +50,13 @@ const BusdThornodePoolDetails1: Pool = {
   LP_units: '52543071634074',
   asset: 'BNB.BUSD-BD1',
   balance_asset: '377399468483592',
-  balance_rune: '250518706651581',
+  balance_cacao: '250518706651581',
   pending_inbound_asset: '280314005423',
-  pending_inbound_rune: '533139903979',
+  pending_inbound_cacao: '533139903979',
   pool_units: '56086787104869',
-  savers_depth: '0',
-  savers_units: '0',
   status: 'Available',
-  synth_mint_paused: false,
   synth_supply: '47690245926711',
-  synth_supply_remaining: '329709222556881',
   synth_units: '3543715470795',
-  loan_collateral: '',
 }
 
 const emptyBusdPoolDetails: PoolDetail = {
@@ -88,18 +83,18 @@ const emptyBusdPoolDetails: PoolDetail = {
 describe(`Liquidity calc tests`, () => {
   beforeAll(() => {
     mockMidgardApi.init()
-    mockThornodeApi.init()
+    mockMayanodeApi.init()
   })
   afterEach(() => {
     mockMidgardApi.restore()
-    mockThornodeApi.restore()
+    mockMayanodeApi.restore()
   })
 
   it(`Should calculate correct liquidity units for above entry`, async () => {
     const BusdPool1 = new LiquidityPool(BusdMidgardPoolDetails1, BusdThornodePoolDetails1)
     const liquidityBUSd: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount(`2.05262786`, 6)), BUSD),
-      rune: new CryptoAmount(assetToBase(assetAmount('1.02658114')), AssetRuneNative),
+      cacao: new CryptoAmount(assetToBase(assetAmount('1.02658114')), AssetCacaoNative),
     }
     const getLUnits = getLiquidityUnits(liquidityBUSd, BusdPool1)
     const correctLiquidityUnits = new BigNumber('27826794')
@@ -107,7 +102,7 @@ describe(`Liquidity calc tests`, () => {
   })
   // Not sure what Lp units actually represents
   it(`Should calculate pool share`, async () => {
-    const busdPool = await thorchainQuery.thorchainCache.getPoolForAsset(BUSD)
+    const busdPool = await mayachainQuery.mayachainCache.getPoolForAsset(BUSD)
     const unitData: UnitData = {
       liquidityUnits: new BigNumber('27826793'),
       totalUnits: new BigNumber('128097884443169'),
@@ -115,46 +110,46 @@ describe(`Liquidity calc tests`, () => {
     const getLPoolShare = getPoolShare(unitData, busdPool)
     const correctShare: PoolShareDetail = {
       assetShare: new CryptoAmount(assetToBase(assetAmount(`2.05262786`)), BUSD),
-      runeShare: new CryptoAmount(assetToBase(assetAmount('1.02658114')), AssetRuneNative),
+      cacaoShare: new CryptoAmount(assetToBase(assetAmount('1.02658114')), AssetCacaoNative),
     }
     expect(getLPoolShare.assetShare.assetAmount.amount()).toEqual(correctShare.assetShare.assetAmount.amount())
-    expect(getLPoolShare.runeShare.assetAmount.amount()).toEqual(correctShare.runeShare.assetAmount.amount())
+    expect(getLPoolShare.cacaoShare.assetAmount.amount()).toEqual(correctShare.cacaoShare.assetAmount.amount())
   })
   it(`Should calculate slip on liquidity for single sided BTC add`, async () => {
-    const btcPool = await thorchainQuery.thorchainCache.getPoolForAsset(AssetBTC)
+    const btcPool = await mayachainQuery.mayachainCache.getPoolForAsset(AssetBTC)
     const liquidityOneSided: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount('100')), AssetBTC),
-      rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative),
+      cacao: new CryptoAmount(assetToBase(assetAmount('0')), AssetCacaoNative),
     }
     const getSlip = getSlipOnLiquidity(liquidityOneSided, btcPool)
     const correctSlip = '12.3' // percent slippage
     expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
   })
   it(`Should calculate slip on liquidity for single sided USDC add`, async () => {
-    const usdcPool = await thorchainQuery.thorchainCache.getPoolForAsset(USDC)
+    const usdcPool = await mayachainQuery.mayachainCache.getPoolForAsset(USDC)
     const liquidityOneSided: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount('10000', 6)), USDC),
-      rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative),
+      cacao: new CryptoAmount(assetToBase(assetAmount('0')), AssetCacaoNative),
     }
     const getSlip = getSlipOnLiquidity(liquidityOneSided, usdcPool)
     const correctSlip = '0.307' // percent slippage
     expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
   })
   it(`Should calculate slip on liquidity for single sided ETH add`, async () => {
-    const ethPool = await thorchainQuery.thorchainCache.getPoolForAsset(AssetETH)
+    const ethPool = await mayachainQuery.mayachainCache.getPoolForAsset(AssetETH)
     const liquidityOneSided: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount('100', 18)), AssetETH),
-      rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative),
+      cacao: new CryptoAmount(assetToBase(assetAmount('0')), AssetCacaoNative),
     }
     const getSlip = getSlipOnLiquidity(liquidityOneSided, ethPool)
     const correctSlip = '1.56' // percent slippage
     expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
   })
   it(`Should calculate slip on liquidity for single sided RUNE add`, async () => {
-    const btcPool = await thorchainQuery.thorchainCache.getPoolForAsset(AssetBTC)
+    const btcPool = await mayachainQuery.mayachainCache.getPoolForAsset(AssetBTC)
     const liquidityOneSided: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount('0')), AssetBTC),
-      rune: new CryptoAmount(assetToBase(assetAmount('9177')), AssetRuneNative),
+      cacao: new CryptoAmount(assetToBase(assetAmount('9177')), AssetCacaoNative),
     }
     const getSlip = getSlipOnLiquidity(liquidityOneSided, btcPool)
     const correctSlip = '0.104' // percent slippage
@@ -164,12 +159,12 @@ describe(`Liquidity calc tests`, () => {
     // Starting position
     const depositValue: PostionDepositValue = {
       asset: new CryptoAmount(assetToBase(assetAmount(`1`)), AssetBTC).baseAmount,
-      rune: new CryptoAmount(assetToBase(assetAmount('4000')), AssetRuneNative).baseAmount,
+      cacao: new CryptoAmount(assetToBase(assetAmount('4000')), AssetCacaoNative).baseAmount,
     }
     // Current pool position
     const poolShare: PoolShareDetail = {
       assetShare: new CryptoAmount(assetToBase(assetAmount(`0.888889`)), AssetBTC),
-      runeShare: new CryptoAmount(assetToBase(assetAmount('4444.444')), AssetRuneNative),
+      cacaoShare: new CryptoAmount(assetToBase(assetAmount('4444.444')), AssetCacaoNative),
     }
     // Current block data
     const block: Block = {
@@ -185,12 +180,12 @@ describe(`Liquidity calc tests`, () => {
     // Starting position
     const depositValue: PostionDepositValue = {
       asset: new CryptoAmount(assetToBase(assetAmount(`1`)), AssetBTC).baseAmount,
-      rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative).baseAmount,
+      cacao: new CryptoAmount(assetToBase(assetAmount('0')), AssetCacaoNative).baseAmount,
     }
     // Current pool position
     const poolShare: PoolShareDetail = {
       assetShare: new CryptoAmount(assetToBase(assetAmount(`0.499999`)), AssetBTC),
-      runeShare: new CryptoAmount(assetToBase(assetAmount('6000.88')), AssetRuneNative),
+      cacaoShare: new CryptoAmount(assetToBase(assetAmount('6000.88')), AssetCacaoNative),
     }
     // Current block data
     const block: Block = {
@@ -206,7 +201,7 @@ describe(`Liquidity calc tests`, () => {
     const BusdPool = new LiquidityPool(emptyBusdPoolDetails, BusdThornodePoolDetails1)
     const liquidityToAdd: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount('50')), BUSD),
-      rune: new CryptoAmount(assetToBase(assetAmount('50')), AssetRuneNative),
+      cacao: new CryptoAmount(assetToBase(assetAmount('50')), AssetCacaoNative),
     }
     const onwershipPercent = getPoolOwnership(liquidityToAdd, BusdPool)
     const correctOwership = 0.5000000002 // percent ownership

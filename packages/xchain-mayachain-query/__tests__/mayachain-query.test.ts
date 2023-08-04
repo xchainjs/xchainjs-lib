@@ -9,7 +9,7 @@ import { QuoteSwapParams, TxDetails } from '../src/types'
 
 //import { AssetRuneNative } from '../src/utils'
 const thorchainCache = new MayachainCache()
-const thorchainQuery = new MayachainQuery(thorchainCache)
+const mayachainQuery = new MayachainQuery(thorchainCache)
 
 // const assetUOS = assetFromStringEx('ETH.UOS-0XD13C7342E1EF687C5AD21B27C2B65D772CAB5C8C')
 // const assetEthUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
@@ -70,7 +70,7 @@ describe('Mayachain-query tests', () => {
       affiliateBps: 50,
       fromAddress: btcAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
   })
 
@@ -82,7 +82,7 @@ describe('Mayachain-query tests', () => {
       destinationAddress: 'thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu',
       fromAddress: 'thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu',
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
   })
 })

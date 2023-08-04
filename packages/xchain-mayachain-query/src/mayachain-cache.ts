@@ -185,11 +185,11 @@ export class MayachainCache {
       if (
         !chain ||
         !inbound.gas_rate ||
-        !inbound.address ||
-        !inbound.gas_rate_units ||
-        !inbound.outbound_tx_size ||
-        !inbound.outbound_fee ||
-        !inbound.gas_rate_units
+        !inbound.address
+        // !inbound.gas_rate_units ||
+        // !inbound.outbound_tx_size ||
+        // !inbound.outbound_fee ||
+        // !inbound.gas_rate_units
       )
         throw new Error(`Missing required inbound info`)
 
@@ -199,8 +199,10 @@ export class MayachainCache {
         router: inbound.router,
         gasRate: new BigNumber(inbound.gas_rate),
         gasRateUnits: inbound.gas_rate,
-        outboundTxSize: new BigNumber(inbound.outbound_tx_size),
-        outboundFee: new BigNumber(inbound.outbound_fee),
+        // outboundTxSize: new BigNumber(inbound.outbound_tx_size),
+        // outboundFee: new BigNumber(inbound.outbound_fee),
+        outboundTxSize: new BigNumber(0),
+        outboundFee: new BigNumber(0),
         haltedChain: inbound?.halted || !!mimirDetails[`HALT${chain}CHAIN`] || !!mimirDetails['HALTCHAINGLOBAL'],
         haltedTrading: !!mimirDetails['HALTTRADING'] || !!mimirDetails[`HALT${chain}TRADING`],
         haltedLP: !!mimirDetails['PAUSELP'] || !!mimirDetails[`PAUSELP${chain}`],

@@ -33,6 +33,8 @@ describe(`Mayanode transaction status tests`, () => {
   it(`Should return networkValue by name`, async () => {
     const networkValues = await mayanode.getNetworkValues()
     const val = networkValues[networkName.toUpperCase()]
+    console.log(val)
+    console.log(networkValues)
     expect(val).toBeTruthy()
     expect(val).toEqual(FullImpLossProtectionBlocks)
   })

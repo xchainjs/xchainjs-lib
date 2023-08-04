@@ -17,7 +17,7 @@ import { getBaseAmountWithDiffDecimals } from './utils'
 export const getLiquidityUnits = (liquidity: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
   const baseAmount8decimals = getBaseAmountWithDiffDecimals(liquidity.asset, 8)
   const P = new BigNumber(pool.pool.liquidityUnits)
-  const r = liquidity.rune.baseAmount.amount()
+  const r = liquidity.cacao.baseAmount.amount()
   const a = baseAmount8decimals
   const R = pool.runeBalance.amount()
   const A = pool.assetBalance.amount()
@@ -45,7 +45,7 @@ export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShare
   const rune = R.times(units).div(total)
   const poolShareDetail = {
     assetShare: new CryptoAmount(baseAmount(asset), pool.asset),
-    runeShare: new CryptoAmount(baseAmount(rune), AssetCacao),
+    cacaoShare: new CryptoAmount(baseAmount(rune), AssetCacao),
   }
   return poolShareDetail
 }
@@ -59,7 +59,7 @@ export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShare
 export const getSlipOnLiquidity = (stake: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
   const baseAmount8decimals = getBaseAmountWithDiffDecimals(stake.asset, 8)
   // formula: (t * R - T * r)/ (T*r + R*T)
-  const r = stake.rune.baseAmount.amount()
+  const r = stake.cacao.baseAmount.amount()
   const t = baseAmount8decimals
   const R = pool.runeBalance.amount()
   const T = pool.assetBalance.amount()
@@ -84,9 +84,9 @@ export const getLiquidityProtectionData = (
 ): ILProtectionData => {
   //Coverage formula coverage=((A0∗P1)+R0)−((A1∗P1)+R1)=>((A0∗R1/A1)+R0)−(R1+R1)
   //formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
-  const R0 = depositValue.rune.amount() // rune deposit value
+  const R0 = depositValue.cacao.amount() // rune deposit value
   const A0 = depositValue.asset.amount() // asset deposit value
-  const R1 = poolShare.runeShare.baseAmount.amount() // rune amount to redeem
+  const R1 = poolShare.cacaoShare.baseAmount.amount() // rune amount to redeem
   const A1 = poolShare.assetShare.baseAmount.amount() // asset amount to redeem
   const P1 = R1.div(A1) // Pool ratio at withdrawal
   const part1 = A0.times(P1).plus(R0).minus(A1.times(P1).plus(R1)) // start position minus end position
@@ -114,7 +114,7 @@ export const getLiquidityProtectionData = (
  */
 export const getPoolOwnership = (liquidity: LiquidityToAdd, pool: LiquidityPool): number => {
   const P = new BigNumber(pool.pool.liquidityUnits)
-  const r = liquidity.rune.baseAmount.amount()
+  const r = liquidity.cacao.baseAmount.amount()
   const a = liquidity.asset.baseAmount.amount()
   const R = pool.runeBalance.amount().plus(r) // Must add r first
   const A = pool.assetBalance.amount().plus(a) // Must add t first

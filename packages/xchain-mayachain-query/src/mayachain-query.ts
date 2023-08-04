@@ -1,4 +1,3 @@
-import { LastBlock } from '@xchainjs/xchain-mayanode'
 import {
   Asset,
   Chain,
@@ -21,23 +20,15 @@ import {
   EstimateAddLP,
   EstimateAddSaver,
   EstimateWithdrawLP,
-  EstimateWithdrawSaver,
   LiquidityPosition,
-  LoanCloseParams,
-  LoanCloseQuote,
-  LoanOpenParams,
-  LoanOpenQuote,
   PoolRatios,
   PostionDepositValue,
   QuoteSwapParams,
   SaverFees,
-  SaversPosition,
-  SaversWithdraw,
   TotalFees,
   TxDetails,
   UnitData,
   WithdrawLiquidityPosition,
-  getSaver,
 } from './types'
 import { AssetBNB, AssetCacao, BNBChain, GAIAChain, THORChain, isAssetCacaoNative } from './utils'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
@@ -145,9 +136,9 @@ export class MayachainQuery {
     // No errors ? and memo is returned ? return quote flag canSwap to true
     const txDetails: TxDetails = {
       memo: swapQuote.memo ? swapQuote.memo : '',
-      dustThreshold: new CryptoAmount(baseAmount(swapQuote.dust_threshold), fromAsset),
+      dustThreshold: new CryptoAmount(baseAmount(0), fromAsset),
       toAddress: swapQuote.inbound_address ? swapQuote.inbound_address : '',
-      expiry: new Date(swapQuote.expiry * 1000),
+      expiry: new Date(),
       txEstimate: {
         totalFees: {
           asset: fromAsset,
@@ -159,15 +150,15 @@ export class MayachainQuery {
         netOutputStreaming: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
         outboundDelaySeconds: swapQuote.outbound_delay_seconds,
         inboundConfirmationSeconds: swapQuote.inbound_confirmation_seconds,
-        recommendedMinAmountIn: swapQuote.recommended_min_amount_in,
-        maxStreamingQuantity: swapQuote.max_streaming_quantity ? swapQuote.max_streaming_quantity : 0,
-        outboundDelayBlocks: swapQuote.outbound_delay_blocks,
-        streamingSlipBasisPoints: swapQuote.streaming_slippage_bps,
-        streamingSwapBlocks: swapQuote.streaming_swap_blocks ? swapQuote.streaming_swap_blocks : 0,
-        totalSwapSeconds: swapQuote.total_swap_seconds ? swapQuote.total_swap_seconds : 0,
+        recommendedMinAmountIn: '',
+        maxStreamingQuantity: 0,
+        outboundDelayBlocks: 0,
+        streamingSlipBasisPoints: swapQuote.slippage_bps,
+        streamingSwapBlocks: 0,
+        totalSwapSeconds: 0,
         canSwap: !swapQuote.memo || errors.length > 0 ? false : true,
         errors,
-        warning: swapQuote.warning,
+        warning: '',
       },
     }
     return txDetails
@@ -308,12 +299,12 @@ export class MayachainQuery {
    */
   public async estimateAddLP(params: AddliquidityPosition): Promise<EstimateAddLP> {
     const errors: string[] = []
-    if (params.asset.asset.synth || params.rune.asset.synth) errors.push('you cannot add liquidity with a synth')
-    if (!isAssetCacaoNative(params.rune.asset)) errors.push('params.rune must be THOR.RUNE')
+    if (params.asset.asset.synth || params.cacao.asset.synth) errors.push('you cannot add liquidity with a synth')
+    if (!isAssetCacaoNative(params.cacao.asset)) errors.push('params.rune must be THOR.RUNE')
 
     const assetPool = await this.mayachainCache.getPoolForAsset(params.asset.asset)
 
-    const lpUnits = getLiquidityUnits({ asset: params.asset, rune: params.rune }, assetPool)
+    const lpUnits = getLiquidityUnits({ asset: params.asset, cacao: params.cacao }, assetPool)
     const inboundDetails = await this.mayachainCache.getInboundDetails()
     const unitData: UnitData = {
       liquidityUnits: lpUnits,
@@ -321,7 +312,7 @@ export class MayachainQuery {
     }
     const poolShare = getPoolShare(unitData, assetPool)
     const assetWaitTimeSeconds = await this.confCounting(params.asset)
-    const runeWaitTimeSeconds = await this.confCounting(params.rune)
+    const runeWaitTimeSeconds = await this.confCounting(params.cacao)
     const waitTimeSeconds = assetWaitTimeSeconds > runeWaitTimeSeconds ? assetWaitTimeSeconds : runeWaitTimeSeconds
 
     let assetInboundFee = new CryptoAmount(baseAmount(0), params.asset.asset)
@@ -332,23 +323,23 @@ export class MayachainQuery {
       if (assetInboundFee.assetAmount.amount().times(3).gt(params.asset.assetAmount.amount()))
         errors.push(`Asset amount is less than fees`)
     }
-    if (!params.rune.assetAmount.eq(0)) {
-      runeInboundFee = calcNetworkFee(params.rune.asset, inboundDetails[params.rune.asset.chain])
-      if (runeInboundFee.assetAmount.amount().times(3).gt(params.rune.assetAmount.amount()))
+    if (!params.cacao.assetAmount.eq(0)) {
+      runeInboundFee = calcNetworkFee(params.cacao.asset, inboundDetails[params.cacao.asset.chain])
+      if (runeInboundFee.assetAmount.amount().times(3).gt(params.cacao.assetAmount.amount()))
         errors.push(`Rune amount is less than fees`)
     }
     const totalFees = (await this.convert(assetInboundFee, AssetCacao)).plus(runeInboundFee)
-    const slip = getSlipOnLiquidity({ asset: params.asset, rune: params.rune }, assetPool)
+    const slip = getSlipOnLiquidity({ asset: params.asset, cacao: params.cacao }, assetPool)
     const estimateLP: EstimateAddLP = {
       assetPool: assetPool.pool.asset,
       slipPercent: slip.times(100),
       poolShare: poolShare,
       lpUnits: baseAmount(lpUnits),
-      runeToAssetRatio: assetPool.runeToAssetRatio,
+      cacaoToAssetRatio: assetPool.runeToAssetRatio,
       inbound: {
         fees: {
           asset: assetInboundFee,
-          rune: runeInboundFee,
+          cacao: runeInboundFee,
           total: totalFees,
         },
       },
@@ -391,18 +382,18 @@ export class MayachainQuery {
     //
     const currentLP: PostionDepositValue = {
       asset: baseAmount(liquidityProvider.asset_deposit_value),
-      rune: baseAmount(liquidityProvider.cacao_deposit_value),
+      cacao: baseAmount(liquidityProvider.cacao_deposit_value),
     }
 
     const poolShare = getPoolShare(unitData, poolAsset)
     // Liquidity Unit Value Index = sprt(assetdepth * runeDepth) / Poolunits
     // Using this formula we can work out an individual position to find LUVI and then the growth rate
     const depositLuvi = Math.sqrt(
-      currentLP.asset.times(currentLP.rune).div(unitData.liquidityUnits).amount().toNumber(),
+      currentLP.asset.times(currentLP.cacao).div(unitData.liquidityUnits).amount().toNumber(),
     )
     const redeemLuvi = Math.sqrt(
       poolShare.assetShare.baseAmount
-        .times(poolShare.runeShare.baseAmount)
+        .times(poolShare.cacaoShare.baseAmount)
         .div(unitData.liquidityUnits)
         .amount()
         .toNumber(),
@@ -429,7 +420,7 @@ export class MayachainQuery {
     const assetPool = await this.mayachainCache.getPoolForAsset(asset)
     const poolRatio: PoolRatios = {
       assetToRune: assetPool.assetToRuneRatio,
-      runeToAsset: assetPool.runeToAssetRatio,
+      cacaoToAsset: assetPool.runeToAssetRatio,
     }
     return poolRatio
   }
@@ -440,7 +431,7 @@ export class MayachainQuery {
    */
   public async estimateWithdrawLP(params: WithdrawLiquidityPosition): Promise<EstimateWithdrawLP> {
     // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
-    const assetOrRuneAddress = params.assetAddress ? params.assetAddress : params.runeAddress
+    const assetOrRuneAddress = params.assetAddress ? params.assetAddress : params.cacaoAddress
     const memberDetail = await this.checkLiquidityPosition(params.asset, assetOrRuneAddress)
     const dustValues = await this.getDustValues(params.asset) // returns asset and rune dust values
     const assetPool = await this.mayachainCache.getPoolForAsset(params.asset)
@@ -456,13 +447,13 @@ export class MayachainQuery {
     const slip = getSlipOnLiquidity(
       {
         asset: poolShare.assetShare,
-        rune: poolShare.runeShare,
+        cacao: poolShare.cacaoShare,
       },
       assetPool,
     )
     // TODO make sure we compare wait times for withdrawing both rune and asset OR just rune OR just asset
     const waitTimeSecondsForAsset = await this.confCounting(poolShare.assetShare.div(params.percentage / 100))
-    const waitTimeSecondsForRune = await this.confCounting(poolShare.runeShare.div(params.percentage / 100))
+    const waitTimeSecondsForRune = await this.confCounting(poolShare.cacaoShare.div(params.percentage / 100))
     let waitTimeSeconds = 0
     if (memberDetail.position.asset_address && memberDetail.position.cacao_address) {
       waitTimeSeconds =
@@ -481,27 +472,27 @@ export class MayachainQuery {
 
     const estimateLP: EstimateWithdrawLP = {
       assetAddress: memberDetail.position.asset_address,
-      runeAddress: memberDetail.position.cacao_address,
+      cacaoAddress: memberDetail.position.cacao_address,
       slipPercent: slip.times(100),
       inbound: {
         minToSend: {
-          rune: dustValues.rune,
+          cacao: dustValues.cacao,
           asset: dustValues.asset,
-          total: (await this.convert(dustValues.asset, AssetCacao)).plus(dustValues.rune),
+          total: (await this.convert(dustValues.asset, AssetCacao)).plus(dustValues.cacao),
         },
         fees: {
-          rune: runeInbound,
+          cacao: runeInbound,
           asset: assetInbound,
           total: (await this.convert(assetInbound, AssetCacao)).plus(runeInbound),
         },
       },
       outboundFee: {
         asset: assetOutbound,
-        rune: runeOutbound,
+        cacao: runeOutbound,
         total: (await this.convert(assetOutbound, AssetCacao)).plus(runeOutbound),
       },
       assetAmount: poolShare.assetShare,
-      runeAmount: poolShare.runeShare,
+      cacaoAmount: poolShare.cacaoShare,
       lpGrowth: memberDetail.lpGrowth,
       estimatedWaitSeconds: waitTimeSeconds,
       impermanentLossProtection: memberDetail.impermanentLossProtection,
@@ -520,7 +511,7 @@ export class MayachainQuery {
       case 'BNB':
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0.000001)), AssetBNB),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
+          cacao: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
         }
         return dustValues
       case 'BTC':
@@ -529,56 +520,56 @@ export class MayachainQuery {
         // 10k sats
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0.0001)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
+          cacao: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
         }
         return dustValues
       case 'ETH':
         // 0 wei
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
+          cacao: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
         }
         return dustValues
       case 'THOR':
         // 0 Rune
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
+          cacao: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
         }
         return dustValues
       case 'GAIA':
         // 0 GAIA
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
+          cacao: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
         }
         return dustValues
       case 'DOGE':
         // 1 million sats
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0.01)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
+          cacao: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
         }
         return dustValues
       case 'AVAX':
         // 0 AVAX
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
+          cacao: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
         }
         return dustValues
       case 'BSC':
         // 0 BSC
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
+          cacao: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
         }
         return dustValues
       case 'MAYA':
         // 0 MAYA
         dustValues = {
           asset: new CryptoAmount(assetToBase(assetAmount(0)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
+          cacao: new CryptoAmount(assetToBase(assetAmount(0)), AssetCacao),
         }
         return dustValues
       default:
@@ -670,141 +661,142 @@ export class MayachainQuery {
     }
     return estimateAddSaver
   }
-  /**
-   *
-   * @param withdrawParams - height?, asset, address, withdrawalBasisPoints
-   * @returns - savers withdrawal quote with extras
-   */
-  public async estimateWithdrawSaver(withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
-    const errors: string[] = []
-    // return error if Asset in is incorrect
-    if (isAssetCacaoNative(withdrawParams.asset) || withdrawParams.asset.synth)
-      errors.push(`Native Rune and synth assets are not supported only L1's`)
-    const inboundDetails = await this.mayachainCache.getInboundDetails()
-    // Check to see if there is a position before calling withdraw quote
-    const checkPositon = await this.getSaverPosition(withdrawParams)
-    if (checkPositon.errors.length > 0) {
-      for (let i = 0; i < checkPositon.errors.length; i++) {
-        errors.push(checkPositon.errors[i])
-      }
-      return {
-        expectedAssetAmount: new CryptoAmount(
-          assetToBase(assetAmount(checkPositon.redeemableValue.assetAmount.amount())),
-          withdrawParams.asset,
-        ),
-        fee: {
-          affiliate: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
-          asset: withdrawParams.asset,
-          outbound: new CryptoAmount(
-            assetToBase(
-              assetAmount(
-                calcOutboundFee(withdrawParams.asset, inboundDetails[withdrawParams.asset.chain]).assetAmount.amount(),
-              ),
-            ),
-            withdrawParams.asset,
-          ),
-        },
-        expiry: new Date(0),
-        toAddress: '',
-        memo: '',
-        estimatedWaitTime: -1,
-        slipBasisPoints: -1,
-        dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
-        errors,
-      }
-    }
-    // Request withdraw quote
-    const withdrawQuote = await this.mayachainCache.mayanode.getSaversWithdrawQuote(withdrawParams)
-    // error handling
-    const response: { error?: string } = JSON.parse(JSON.stringify(withdrawQuote))
-    if (response.error) errors.push(`Mayanode request quote failed: ${response.error}`)
-    if (errors.length > 0) {
-      return {
-        expectedAssetAmount: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
-        fee: {
-          affiliate: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
-          asset: withdrawParams.asset,
-          outbound: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
-        },
-        expiry: new Date(0),
-        toAddress: '',
-        memo: '',
-        estimatedWaitTime: -1,
-        slipBasisPoints: -1,
-        dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
-        errors,
-      }
-    }
-
-    // Calculate transaction expiry time of the vault address
-    const currentDatetime = new Date()
-    const minutesToAdd = 15
-    const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
-
-    const estimatedWait = +withdrawQuote.outbound_delay_seconds
-    const withdrawAsset = assetFromStringEx(withdrawQuote.fees.asset)
-    const estimateWithdrawSaver: EstimateWithdrawSaver = {
-      expectedAssetAmount: new CryptoAmount(baseAmount(withdrawQuote.expected_amount_out), withdrawParams.asset),
-      fee: {
-        affiliate: new CryptoAmount(baseAmount(withdrawQuote.fees.affiliate), withdrawAsset),
-        asset: withdrawAsset,
-        outbound: new CryptoAmount(baseAmount(withdrawQuote.fees.outbound), withdrawAsset),
-      },
-      expiry: expiryDatetime,
-      toAddress: withdrawQuote.inbound_address,
-      memo: withdrawQuote.memo,
-      estimatedWaitTime: estimatedWait,
-      slipBasisPoints: withdrawQuote.slippage_bps,
-      dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount), withdrawParams.asset),
-      errors,
-    }
-    return estimateWithdrawSaver
-  }
 
   /**
    *
    * @param params - getSaver object > asset, addresss, height?
    * @returns - Savers position object
    */
-  public async getSaverPosition(params: getSaver): Promise<SaversPosition> {
-    const errors: string[] = []
-    const inboundDetails = await this.mayachainCache.getInboundDetails()
-    const blockData = (await this.mayachainCache.mayanode.getLastBlock()).find(
-      (item: LastBlock) => item.chain === params.asset.chain,
-    )
-    const savers = (await this.mayachainCache.mayanode.getSavers(`${params.asset.chain}.${params.asset.ticker}`)).find(
-      (item) => item.asset_address === params.address,
-    )
+  // public async getSaverPosition(params: getSaver): Promise<SaversPosition> {
+  //   const errors: string[] = []
+  //   const inboundDetails = await this.thorchainCache.getInboundDetails()
+  //   const blockData = (await this.thorchainCache.thornode.getLastBlock()).find(
+  //     (item: LastBlock) => item.chain === params.asset.chain,
+  //   )
+  //   const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.ticker}`)).find(
+  //     (item) => item.asset_address === params.address,
+  //   )
+  //
+  //   const pool = (await this.thorchainCache.getPoolForAsset(params.asset)).pool
+  //   if (!savers) errors.push(`Could not find position for ${params.address}`)
+  //   if (!savers?.last_add_height) errors.push(`Could not find position for ${params.address}`)
+  //   if (!blockData?.thorchain) errors.push(`Could not get thorchain block height`)
+  //   const outboundFee = calcOutboundFee(params.asset, inboundDetails[params.asset.chain])
+  //   const convertToBaseEight = getBaseAmountWithDiffDecimals(outboundFee, 8)
+  //   // For comparison use 1e8 since asset_redeem_value is returned in 1e8
+  //   if (Number(savers?.asset_redeem_value) < convertToBaseEight.toNumber())
+  //     errors.push(`Unlikely to withdraw balance as outbound fee is greater than redeemable amount`)
+  //   const ownerUnits = Number(savers?.units)
+  //   const lastAdded = Number(savers?.last_add_height)
+  //   const saverUnits = Number(pool.saversUnits)
+  //   const assetDepth = Number(pool.saversDepth)
+  //   const redeemableValue = (ownerUnits / saverUnits) * assetDepth
+  //   const depositAmount = new CryptoAmount(baseAmount(savers?.asset_deposit_value), params.asset)
+  //   const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue), params.asset)
+  //   const saversAge = (Number(blockData?.thorchain) - lastAdded) / ((365 * 86400) / 6)
+  //   const saverGrowth = redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
+  //   const saversPos: SaversPosition = {
+  //     depositValue: depositAmount,
+  //     redeemableValue: redeemableAssetAmount,
+  //     lastAddHeight: Number(savers?.last_add_height),
+  //     percentageGrowth: saverGrowth.assetAmount.amount().toNumber(),
+  //     ageInYears: saversAge,
+  //     ageInDays: saversAge * 365,
+  //     errors,
+  //   }
+  //   return saversPos
+  // }
 
-    const pool = (await this.mayachainCache.getPoolForAsset(params.asset)).pool
-    if (!savers) errors.push(`Could not find position for ${params.address}`)
-    if (!savers?.last_add_height) errors.push(`Could not find position for ${params.address}`)
-    if (!blockData?.mayachain) errors.push(`Could not get thorchain block height`)
-    const outboundFee = calcOutboundFee(params.asset, inboundDetails[params.asset.chain])
-    const convertToBaseEight = getBaseAmountWithDiffDecimals(outboundFee, 8)
-    // For comparison use 1e8 since asset_redeem_value is returned in 1e8
-    if (Number(savers?.asset_redeem_value) < convertToBaseEight.toNumber())
-      errors.push(`Unlikely to withdraw balance as outbound fee is greater than redeemable amount`)
-    const ownerUnits = Number(savers?.units)
-    const lastAdded = Number(savers?.last_add_height)
-    const saverUnits = Number(pool.saversUnits)
-    const assetDepth = Number(pool.saversDepth)
-    const redeemableValue = (ownerUnits / saverUnits) * assetDepth
-    const depositAmount = new CryptoAmount(baseAmount(savers?.asset_deposit_value), params.asset)
-    const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue), params.asset)
-    const saversAge = (Number(blockData?.mayachain) - lastAdded) / ((365 * 86400) / 6)
-    const saverGrowth = redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
-    const saversPos: SaversPosition = {
-      depositValue: depositAmount,
-      redeemableValue: redeemableAssetAmount,
-      lastAddHeight: Number(savers?.last_add_height),
-      percentageGrowth: saverGrowth.assetAmount.amount().toNumber(),
-      ageInYears: saversAge,
-      ageInDays: saversAge * 365,
-      errors,
-    }
-    return saversPos
-  }
+  /**
+   *
+   * @param withdrawParams - height?, asset, address, withdrawalBasisPoints
+   * @returns - savers withdrawal quote with extras
+   */
+  // public async estimateWithdrawSaver(withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
+  //   const errors: string[] = []
+  //   // return error if Asset in is incorrect
+  //   if (isAssetCacaoNative(withdrawParams.asset) || withdrawParams.asset.synth)
+  //     errors.push(`Native Rune and synth assets are not supported only L1's`)
+  //   const inboundDetails = await this.mayachainCache.getInboundDetails()
+  //   // Check to see if there is a position before calling withdraw quote
+  //   const checkPositon = await this.getSaverPosition(withdrawParams)
+  //   if (checkPositon.errors.length > 0) {
+  //     for (let i = 0; i < checkPositon.errors.length; i++) {
+  //       errors.push(checkPositon.errors[i])
+  //     }
+  //     return {
+  //       expectedAssetAmount: new CryptoAmount(
+  //         assetToBase(assetAmount(checkPositon.redeemableValue.assetAmount.amount())),
+  //         withdrawParams.asset,
+  //       ),
+  //       fee: {
+  //         affiliate: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
+  //         asset: withdrawParams.asset,
+  //         outbound: new CryptoAmount(
+  //           assetToBase(
+  //             assetAmount(
+  //               calcOutboundFee(withdrawParams.asset, inboundDetails[withdrawParams.asset.chain]).assetAmount.amount(),
+  //             ),
+  //           ),
+  //           withdrawParams.asset,
+  //         ),
+  //       },
+  //       expiry: new Date(0),
+  //       toAddress: '',
+  //       memo: '',
+  //       estimatedWaitTime: -1,
+  //       slipBasisPoints: -1,
+  //       dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
+  //       errors,
+  //     }
+  //   }
+  //   // Request withdraw quote
+  //   const withdrawQuote = await this.mayachainCache.mayanode.getSaversWithdrawQuote(withdrawParams)
+  //   // error handling
+  //   const response: { error?: string } = JSON.parse(JSON.stringify(withdrawQuote))
+  //   if (response.error) errors.push(`Mayanode request quote failed: ${response.error}`)
+  //   if (errors.length > 0) {
+  //     return {
+  //       expectedAssetAmount: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
+  //       fee: {
+  //         affiliate: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
+  //         asset: withdrawParams.asset,
+  //         outbound: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
+  //       },
+  //       expiry: new Date(0),
+  //       toAddress: '',
+  //       memo: '',
+  //       estimatedWaitTime: -1,
+  //       slipBasisPoints: -1,
+  //       dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
+  //       errors,
+  //     }
+  //   }
+  //
+  //   // Calculate transaction expiry time of the vault address
+  //   const currentDatetime = new Date()
+  //   const minutesToAdd = 15
+  //   const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
+  //
+  //   const estimatedWait = +withdrawQuote.outbound_delay_seconds
+  //   const withdrawAsset = assetFromStringEx(withdrawQuote.fees.asset)
+  //   const estimateWithdrawSaver: EstimateWithdrawSaver = {
+  //     expectedAssetAmount: new CryptoAmount(baseAmount(withdrawQuote.expected_amount_out), withdrawParams.asset),
+  //     fee: {
+  //       affiliate: new CryptoAmount(baseAmount(withdrawQuote.fees.affiliate), withdrawAsset),
+  //       asset: withdrawAsset,
+  //       outbound: new CryptoAmount(baseAmount(withdrawQuote.fees.outbound), withdrawAsset),
+  //     },
+  //     expiry: expiryDatetime,
+  //     toAddress: withdrawQuote.inbound_address,
+  //     memo: withdrawQuote.memo,
+  //     estimatedWaitTime: estimatedWait,
+  //     slipBasisPoints: withdrawQuote.slippage_bps,
+  //     dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount), withdrawParams.asset),
+  //     errors,
+  //   }
+  //   return estimateWithdrawSaver
+  // }
 
   private async getAddSaversEstimateErrors(addAmount: CryptoAmount): Promise<string[]> {
     const errors = []
@@ -827,172 +819,78 @@ export class MayachainQuery {
    * @param loanOpenParams - params needed for the end Point
    * @returns
    */
-  public async getLoanQuoteOpen({
-    asset,
-    amount,
-    targetAsset,
-    destination,
-    minOut,
-    affiliateBps,
-    affiliate,
-    height,
-  }: LoanOpenParams): Promise<LoanOpenQuote> {
-    const errors: string[] = []
-    const loanOpenResp = await this.mayachainCache.mayanode.getLoanQuoteOpen(
-      `${asset.chain}.${asset.ticker}`,
-      amount.baseAmount.amount().toNumber(),
-      `${targetAsset.chain}.${targetAsset.ticker}`,
-      destination,
-      minOut,
-      affiliateBps,
-      affiliate,
-      height,
-    )
-    const response: { error?: string } = JSON.parse(JSON.stringify(loanOpenResp))
-    if (response.error) errors.push(`Mayanode request quote failed: ${response.error}`)
-    if (
-      loanOpenResp.recommended_min_amount_in &&
-      amount.baseAmount.amount().toNumber() < +loanOpenResp.recommended_min_amount_in
-    )
-      errors.push(
-        `Error amount in: ${amount.baseAmount.amount().toNumber()} is less than reccommended Min Amount: ${
-          loanOpenResp.recommended_min_amount_in
-        }`,
-      )
-    if (errors.length > 0) {
-      return {
-        inboundAddress: '',
-        expectedWaitTime: {
-          outboundDelayBlocks: undefined,
-          outbondDelaySeconds: undefined,
-        },
-        fees: {
-          asset: '',
-          liquidity: undefined,
-          outbound: undefined,
-          total_bps: undefined,
-        },
-        slippageBps: undefined,
-        router: undefined,
-        expiry: 0,
-        warning: '',
-        notes: '',
-        dustThreshold: undefined,
-        recommendedMinAmountIn: loanOpenResp.recommended_min_amount_in,
-        memo: undefined,
-        expectedAmountOut: '',
-        expectedCollateralizationRatio: '',
-        expectedCollateralUp: '',
-        expectedDebtUp: '',
-        errors: errors,
-      }
-    }
-    const loanOpenQuote: LoanOpenQuote = {
-      inboundAddress: loanOpenResp.inbound_address,
-      expectedWaitTime: {
-        outboundDelayBlocks: loanOpenResp.outbound_delay_blocks,
-        outbondDelaySeconds: loanOpenResp.outbound_delay_seconds,
-      },
-      fees: {
-        asset: loanOpenResp.fees.asset,
-        liquidity: loanOpenResp.fees.liquidity,
-        outbound: loanOpenResp.fees.outbound,
-        total_bps: loanOpenResp.fees.total_bps,
-      },
-      slippageBps: loanOpenResp.slippage_bps,
-      router: loanOpenResp.router,
-      expiry: loanOpenResp.expiry,
-      warning: loanOpenResp.warning,
-      notes: loanOpenResp.notes,
-      dustThreshold: loanOpenResp.dust_threshold,
-      recommendedMinAmountIn: loanOpenResp.recommended_min_amount_in,
-      memo: loanOpenResp.memo,
-      expectedAmountOut: loanOpenResp.expected_amount_out,
-      expectedCollateralizationRatio: loanOpenResp.expected_collateralization_ratio,
-      expectedCollateralUp: loanOpenResp.expected_collateral_up,
-      expectedDebtUp: loanOpenResp.expected_collateral_up,
-      errors: errors,
-    }
-    return loanOpenQuote
-  }
-
-  /**
-   *
-   * @param loanOpenParams - params needed for the end Point
-   * @returns
-   */
-  public async getLoanQuoteClose({
-    asset,
-    amount,
-    loanAsset,
-    loanOwner,
-    minOut,
-    height,
-  }: LoanCloseParams): Promise<LoanCloseQuote> {
-    const errors: string[] = []
-    const loanCloseResp = await this.mayachainCache.mayanode.getLoanQuoteClose(
-      `${asset.chain}.${asset.ticker}`,
-      amount.baseAmount.amount().toNumber(),
-      `${loanAsset.chain}.${loanAsset.ticker}`,
-      loanOwner,
-      minOut,
-      height,
-    )
-    const response: { error?: string } = JSON.parse(JSON.stringify(loanCloseResp))
-    if (response.error) errors.push(`Mayanode request quote failed: ${response.error}`)
-    if (errors.length > 0) {
-      return {
-        inboundAddress: '',
-        expectedWaitTime: {
-          outboundDelayBlocks: undefined,
-          outbondDelaySeconds: undefined,
-        },
-        fees: {
-          asset: '',
-          liquidity: undefined,
-          outbound: undefined,
-          total_bps: undefined,
-        },
-        slippageBps: undefined,
-        router: undefined,
-        expiry: 0,
-        warning: '',
-        notes: '',
-        dustThreshold: undefined,
-        recommendedMinAmountIn: loanCloseResp.recommended_min_amount_in,
-        memo: undefined,
-        expectedAmountOut: '',
-        expectedCollateralDown: '',
-        expectedDebtDown: '',
-        errors: errors,
-      }
-    }
-    const loanCloseQuote: LoanCloseQuote = {
-      inboundAddress: loanCloseResp.inbound_address,
-      expectedWaitTime: {
-        outboundDelayBlocks: loanCloseResp.outbound_delay_blocks,
-        outbondDelaySeconds: loanCloseResp.outbound_delay_seconds,
-      },
-      fees: {
-        asset: loanCloseResp.fees.asset,
-        liquidity: loanCloseResp.fees.liquidity,
-        outbound: loanCloseResp.fees.outbound,
-        total_bps: loanCloseResp.fees.total_bps,
-      },
-      slippageBps: loanCloseResp.slippage_bps,
-      router: loanCloseResp.router,
-      expiry: loanCloseResp.expiry,
-      warning: loanCloseResp.warning,
-      notes: loanCloseResp.notes,
-      dustThreshold: loanCloseResp.dust_threshold,
-      recommendedMinAmountIn: loanCloseResp.recommended_min_amount_in,
-      memo: loanCloseResp.memo,
-      expectedAmountOut: loanCloseResp.expected_amount_out,
-      expectedCollateralDown: loanCloseResp.expected_collateral_down,
-      expectedDebtDown: loanCloseResp.expected_debt_down,
-      errors: errors,
-    }
-
-    return loanCloseQuote
-  }
+  // public async getLoanQuoteClose({
+  //   asset,
+  //   amount,
+  //   loanAsset,
+  //   loanOwner,
+  //   minOut,
+  //   height,
+  // }: LoanCloseParams): Promise<LoanCloseQuote> {
+  //   const errors: string[] = []
+  //   const loanCloseResp = await this.mayachainCache.mayanode.getLoanQuoteClose(
+  //     `${asset.chain}.${asset.ticker}`,
+  //     amount.baseAmount.amount().toNumber(),
+  //     `${loanAsset.chain}.${loanAsset.ticker}`,
+  //     loanOwner,
+  //     minOut,
+  //     height,
+  //   )
+  //   const response: { error?: string } = JSON.parse(JSON.stringify(loanCloseResp))
+  //   if (response.error) errors.push(`Mayanode request quote failed: ${response.error}`)
+  //   if (errors.length > 0) {
+  //     return {
+  //       inboundAddress: '',
+  //       expectedWaitTime: {
+  //         outboundDelayBlocks: undefined,
+  //         outbondDelaySeconds: undefined,
+  //       },
+  //       fees: {
+  //         asset: '',
+  //         liquidity: undefined,
+  //         outbound: undefined,
+  //         total_bps: undefined,
+  //       },
+  //       slippageBps: undefined,
+  //       router: undefined,
+  //       expiry: 0,
+  //       warning: '',
+  //       notes: '',
+  //       dustThreshold: undefined,
+  //       recommendedMinAmountIn: loanCloseResp.recommended_min_amount_in,
+  //       memo: undefined,
+  //       expectedAmountOut: '',
+  //       expectedCollateralDown: '',
+  //       expectedDebtDown: '',
+  //       errors: errors,
+  //     }
+  //   }
+  //   const loanCloseQuote: LoanCloseQuote = {
+  //     inboundAddress: loanCloseResp.inbound_address,
+  //     expectedWaitTime: {
+  //       outboundDelayBlocks: loanCloseResp.outbound_delay_blocks,
+  //       outbondDelaySeconds: loanCloseResp.outbound_delay_seconds,
+  //     },
+  //     fees: {
+  //       asset: loanCloseResp.fees.asset,
+  //       liquidity: loanCloseResp.fees.liquidity,
+  //       outbound: loanCloseResp.fees.outbound,
+  //       total_bps: loanCloseResp.fees.total_bps,
+  //     },
+  //     slippageBps: loanCloseResp.slippage_bps,
+  //     router: loanCloseResp.router,
+  //     expiry: loanCloseResp.expiry,
+  //     warning: loanCloseResp.warning,
+  //     notes: loanCloseResp.notes,
+  //     dustThreshold: loanCloseResp.dust_threshold,
+  //     recommendedMinAmountIn: loanCloseResp.recommended_min_amount_in,
+  //     memo: loanCloseResp.memo,
+  //     expectedAmountOut: loanCloseResp.expected_amount_out,
+  //     expectedCollateralDown: loanCloseResp.expected_collateral_down,
+  //     expectedDebtDown: loanCloseResp.expected_debt_down,
+  //     errors: errors,
+  //   }
+  //
+  //   return loanCloseQuote
+  // }
 }
