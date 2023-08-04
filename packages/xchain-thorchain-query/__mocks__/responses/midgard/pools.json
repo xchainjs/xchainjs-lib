@@ -48,7 +48,9 @@
     "synthSupply": "32889120336",
     "synthUnits": "625127816672",
     "units": "22061803363618",
-    "volume24h": "8370845079708"
+    "volume24h": "8370845079708",
+    "totalCollateral": "",
+    "totalDebtTor": ""
   },
   {
     "annualPercentageRate": "-0.23702690322303438",

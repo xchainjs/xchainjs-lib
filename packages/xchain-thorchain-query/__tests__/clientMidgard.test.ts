@@ -34,6 +34,8 @@ describe('Midgard Client Test', () => {
     synthUnits: '625127816672',
     units: '22061803363618',
     volume24h: '8370845079708',
+    totalCollateral: '',
+    totalDebtTor: '',
   }
   // const inboundBCHAdress: InboundAddressesItem = {
   //   chain: 'BCH',
