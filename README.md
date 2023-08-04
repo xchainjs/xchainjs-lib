@@ -61,6 +61,7 @@ A single common interface:
 - [`xchain-mayanode`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayanode)
 - [`xchain-mayachain`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayachain)
 - [`xchain-dash`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-dash)
+- [`xchain-mayachain-query`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayachain-query)
 
 ### Working Examples
 
