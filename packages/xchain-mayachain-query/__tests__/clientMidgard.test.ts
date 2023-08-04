@@ -1,7 +1,7 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
-import mockThornodeApi from '../__mocks__/thornode-api'
+import mockMayanodeApi from '../__mocks__/mayanode-api'
 import { Midgard } from '../src/utils/midgard'
 
 const mainnetMidgard = new Midgard()
@@ -9,11 +9,11 @@ const mainnetMidgard = new Midgard()
 describe('Midgard Client Test', () => {
   beforeAll(() => {
     mockMidgardApi.init()
-    mockThornodeApi.init()
+    mockMayanodeApi.init()
   })
   afterEach(() => {
     mockMidgardApi.restore()
-    mockThornodeApi.restore()
+    mockMayanodeApi.restore()
   })
 
   const poolDetail: PoolDetail = {

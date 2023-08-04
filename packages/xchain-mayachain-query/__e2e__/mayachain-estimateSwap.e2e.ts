@@ -2,15 +2,15 @@ import { Network } from '@xchainjs/xchain-client'
 import { assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
 import { CryptoAmount } from '../src/crypto-amount'
-import { ThorchainCache } from '../src/thorchain-cache'
-import { ThorchainQuery } from '../src/thorchain-query'
+import { MayachainCache } from '../src/mayachain-cache'
+import { MayachainQuery } from '../src/mayachain-query'
 import { QuoteSwapParams, SwapEstimate, TxDetails } from '../src/types'
-import { AssetRuneNative } from '../src/utils'
+import { AssetCacaoNative } from '../src/utils'
 import { Midgard } from '../src/utils/midgard'
-import { Thornode } from '../src/utils/thornode'
+import { Mayanode } from '../src/utils/mayanode'
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
-const thorchainQuery = new ThorchainQuery(thorchainCache)
+const mayachainCache = new MayachainCache(new Midgard(Network.Mainnet), new Mayanode(Network.Mainnet))
+const mayachainQuery = new MayachainQuery(mayachainCache)
 
 const AssetAVAX = assetFromStringEx('AVAX.AVAX')
 const AssetBTC = assetFromStringEx('BTC.BTC')
@@ -25,8 +25,6 @@ const bnbAddress = 'bnb1mtvk4jm2a9m7lfdnvfc2vz9r9qgavs4xfc6dtx'
 const runeAddress = 'thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu'
 const ethAddress = '0xf155e9cdD77A5d77073aB43d17F661507C08E23d'
 const avaxAddress = '0xf155e9cdD77A5d77073aB43d17F661507C08E23d'
-// const stagenetCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
-// const thorchainQuery = new ThorchainQuery(stagenetCache)
 
 function print(estimate: SwapEstimate, amount: CryptoAmount) {
   const expanded = {
@@ -65,13 +63,13 @@ const BTCB = assetFromStringEx('BNB.BTCB-1DE')
 //const USDCETH = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 // Test User Functions - single and double swap using mock pool data
-describe('Thorchain-query estimate Integration Tests', () => {
+describe('Mayachain-query estimate Integration Tests', () => {
   // Test estimate swaps with mock pool data
   it('should estimate a swap of 10 BTC to RUNE with 0.3 affiliate fee', async () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('10')), AssetBTC),
-      destinationAsset: AssetRuneNative,
+      destinationAsset: AssetCacaoNative,
       destinationAddress: 'xxx',
       toleranceBps: 300,
       affiliateAddress: affiliateAddress,
@@ -79,8 +77,8 @@ describe('Thorchain-query estimate Integration Tests', () => {
       fromAddress: btcAddress,
     }
 
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
-    const estimateInBusd = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
+    const estimateInBusd = await mayachainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
     estimate.txEstimate.totalFees = estimateInBusd
     printTx(estimate, swapParams.amount)
   })
@@ -94,11 +92,11 @@ describe('Thorchain-query estimate Integration Tests', () => {
       fromAddress: btcAddress,
     }
 
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
-    const estimateInBusd = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
+    const estimateInBusd = await mayachainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
     estimate.txEstimate.totalFees = estimateInBusd
     printTx(estimate, swapParams.amount)
-    const exchangeRate = await thorchainQuery.convert(new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC), BUSD)
+    const exchangeRate = await mayachainQuery.convert(new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC), BUSD)
     const minFee = new CryptoAmount(baseAmount(10000000), BUSD)
     console.log(`1 ${swapParams.amount.asset.ticker} = ${exchangeRate.formatedAssetString()}`)
     expect(estimate.txEstimate.canSwap).toBe(true)
@@ -116,11 +114,11 @@ describe('Thorchain-query estimate Integration Tests', () => {
       // toleranceBps: 400,
     }
 
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
-    const estimateInBusd = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
+    const estimateInBusd = await mayachainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
     estimate.txEstimate.totalFees = estimateInBusd
     printTx(estimate, swapParams.amount)
-    const exchangeRate = await thorchainQuery.convert(new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC), BUSD)
+    const exchangeRate = await mayachainQuery.convert(new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC), BUSD)
     const minFee = new CryptoAmount(baseAmount(10000000), BUSD)
     console.log(`1 ${swapParams.amount.asset.ticker} = ${exchangeRate.formatedAssetString()}`)
     expect(estimate.txEstimate.canSwap).toBe(true)
@@ -145,7 +143,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       toleranceBps: 300, //optional
       fromAddress: btcAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate).toBeTruthy()
   })
@@ -164,7 +162,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       //toleranceBps: 20, //optional\
       fromAddress: runeAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate).toBeTruthy()
   })
@@ -183,7 +181,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       toleranceBps: 20, //optional
       fromAddress: runeAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate).toBeTruthy()
   })
@@ -202,20 +200,20 @@ describe('Thorchain-query estimate Integration Tests', () => {
       toleranceBps: 20, //optional
       fromAddress: runeAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate).toBeTruthy()
   })
   it(`Should estimate single swap of 1000 RUNE To BTC `, async () => {
     const swapParams: QuoteSwapParams = {
-      fromAsset: AssetRuneNative,
-      amount: new CryptoAmount(assetToBase(assetAmount(1000, 8)), AssetRuneNative),
+      fromAsset: AssetCacaoNative,
+      amount: new CryptoAmount(assetToBase(assetAmount(1000, 8)), AssetCacaoNative),
       destinationAsset: AssetBTC,
       destinationAddress: btcAddress,
       toleranceBps: 200, //optional
       fromAddress: runeAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
@@ -228,20 +226,20 @@ describe('Thorchain-query estimate Integration Tests', () => {
       destinationAddress: btcAddress,
       fromAddress: bnbAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
   })
   it(`Should fail estimate single swap of 0.01 RUNE To BTC `, async () => {
     const swapParams: QuoteSwapParams = {
-      fromAsset: AssetRuneNative,
-      amount: new CryptoAmount(assetToBase(assetAmount(0.01)), AssetRuneNative),
+      fromAsset: AssetCacaoNative,
+      amount: new CryptoAmount(assetToBase(assetAmount(0.01)), AssetCacaoNative),
       destinationAsset: AssetBTC,
       destinationAddress: btcAddress,
       fromAddress: runeAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate.txEstimate.canSwap).toBe(false)
     expect(estimate).toBeTruthy()
@@ -257,7 +255,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       fromAddress: btcAddress,
     }
 
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     print(estimate.txEstimate, swapParams.amount)
     expect(estimate.txEstimate.errors.length).toEqual(1)
@@ -271,7 +269,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       fromAddress: btcAddress,
     }
 
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     print(estimate.txEstimate, swapParams.amount)
 
     expect(estimate.txEstimate.errors.length).toEqual(1)
@@ -281,35 +279,35 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetAVAX,
       amount: new CryptoAmount(assetToBase(assetAmount('1', 18)), AssetAVAX),
-      destinationAsset: AssetRuneNative,
+      destinationAsset: AssetCacaoNative,
       destinationAddress: runeAddress,
       fromAddress: avaxAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate).toBeTruthy()
   })
   it(`Should estimate a swap from RUNE to Avax`, async () => {
     const swapParams: QuoteSwapParams = {
-      fromAsset: AssetRuneNative,
-      amount: new CryptoAmount(assetToBase(assetAmount('1000')), AssetRuneNative),
+      fromAsset: AssetCacaoNative,
+      amount: new CryptoAmount(assetToBase(assetAmount('1000')), AssetCacaoNative),
       destinationAsset: AssetAVAX,
       destinationAddress: avaxAddress,
       fromAddress: runeAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate).toBeTruthy()
   })
   it(`Should fail estimate if amount in is less than reccommended`, async () => {
     const swapParams: QuoteSwapParams = {
-      fromAsset: AssetRuneNative,
-      amount: new CryptoAmount(assetToBase(assetAmount('20')), AssetRuneNative),
+      fromAsset: AssetCacaoNative,
+      amount: new CryptoAmount(assetToBase(assetAmount('20')), AssetCacaoNative),
       destinationAsset: AssetBTC,
       destinationAddress: btcAddress,
       fromAddress: runeAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     expect(estimate.txEstimate.canSwap).toBe(false)
   })
 
@@ -324,7 +322,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       toleranceBps: 10000,
       fromAddress: btcAddress,
     }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate.txEstimate.canSwap).toBe(true)
   })

@@ -2,15 +2,15 @@ import { Network } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import { CryptoAmount } from '../src/crypto-amount'
-import { ThorchainCache } from '../src/thorchain-cache'
-import { ThorchainQuery } from '../src/thorchain-query'
+import { MayachainCache } from '../src/mayachain-cache'
+import { MayachainQuery } from '../src/mayachain-query'
 import { LoanCloseParams, LoanCloseQuote, LoanOpenParams, LoanOpenQuote } from '../src/types'
 import { AssetBTC, AssetETH } from '../src/utils'
 import { Midgard } from '../src/utils/midgard'
-import { Thornode } from '../src/utils/thornode'
+import { Mayanode } from '../src/utils/mayanode'
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
-const thorchainQuery = new ThorchainQuery(thorchainCache)
+const thorchainCache = new MayachainCache(new Midgard(Network.Stagenet), new Mayanode(Network.Stagenet))
+const thorchainQuery = new MayachainQuery(thorchainCache)
 
 // addresses
 const btcAddress = 'bc1q3q6gfcg2n4c7hdzjsvpq5rp9rfv5t59t5myz5v'
@@ -76,7 +76,7 @@ function printClose(quote: LoanCloseQuote) {
 }
 
 // Testing lending queries
-describe('Thorchain-query Loan Integration Tests', () => {
+describe('Mayachain-query Loan Integration Tests', () => {
   it(`Should fetch a loan quote for BTC`, async () => {
     const loanQuoteParams: LoanOpenParams = {
       asset: AssetBTC,

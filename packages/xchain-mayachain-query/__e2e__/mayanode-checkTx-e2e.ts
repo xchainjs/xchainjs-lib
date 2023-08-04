@@ -5,7 +5,7 @@ const mayachainCache = new MayachainCache()
 
 const checkTxStage = new TransactionStage(mayachainCache)
 
-describe('Thorchain query checkTx Integration Tests', () => {
+describe('Mayachain query checkTx Integration Tests', () => {
   it(`Should check asymBTCAddLp `, async () => {
     const hash = 'E5C8AA800DD54F9D069E6822E99EC66DF8FA81DAE748CE534B9325AF2A4B1666'
     const progress = await checkTxStage.checkTxProgress(hash)
