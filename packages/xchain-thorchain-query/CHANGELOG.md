@@ -1,3 +1,9 @@
+# v0.4.7 (2023-08-03)
+
+## Update
+
+- Add new function getSaverPositions()
+
 # v0.4.6 (2023-07-26)
 
 ## Update
@@ -20,7 +26,7 @@
 
 ## Update
 
-- Add new queries to support lending getLoanQuoteClose & getLoanQuoteOpen 
+- Add new queries to support lending getLoanQuoteClose & getLoanQuoteOpen
 
 # v0.4.2 (2023-05-18)
 
