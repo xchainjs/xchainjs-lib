@@ -24,7 +24,6 @@ export default {
   plugins: [
     json(),
     typescript({
-      rollupCommonJSResolveHack: true,
       exclude: '__tests__/**',
       clean: true,
       browser: true,
@@ -34,5 +33,5 @@ export default {
       browser: true,
     }),
   ],
-  external: ['readable-stream', 'buffer', 'stream', 'string_decoder', '@xchainjs/xchain-client', 'axios'],
+  external: ['readable-stream', 'buffer', 'stream', 'string_decoder', 'axios'],
 }
