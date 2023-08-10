@@ -53,6 +53,24 @@ describe('etherscan Integration Tests (AVAX)', () => {
     })
     expect(txs.total).toBeGreaterThan(10)
   })
+
+  it('get transaction', async () => {
+    const tx = await avaxProvider.getTransactionData(
+      '0xcf01cd912b1411f2b46c1b7874fb8000b5c05cbef5911adcc5e77c5f26d6bb0f',
+    )
+    console.log(JSON.stringify(tx))
+    expect(tx.type).toBe('transfer')
+  })
+
+  it('get token transaction', async () => {
+    const tx = await avaxProvider.getTransactionData(
+      '0xe3885c55a2c3643a3c858ae36d21a9744bc12390c7245965f03aa8b768550efa',
+      '0xa9d19d5e8712C1899C4344059FD2D873a3e2697E',
+    )
+    console.log(JSON.stringify(tx))
+    // console.log(JSON.stringify(tx))
+    expect(tx.type).toBe('transfer')
+  })
 })
 
 describe('etherscan Integration Tests (BSC)', () => {
