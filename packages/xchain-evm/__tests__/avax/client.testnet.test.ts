@@ -149,7 +149,7 @@ const avaxParams: EVMClientParams = {
   defaults,
   providers: ethersJSProviders,
   explorerProviders: avaxExplorerProviders,
-  dataProviders: avaxProviders,
+  dataProviders: [avaxProviders],
   network: Network.Testnet,
   phrase,
   feeBounds: {

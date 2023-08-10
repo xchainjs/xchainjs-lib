@@ -108,7 +108,7 @@ export const defaultEthParams: EVMClientParams = {
   defaults,
   providers: ethersJSProviders,
   explorerProviders: ethExplorerProviders,
-  dataProviders: ethProviders,
+  dataProviders: [ethProviders],
   network: Network.Testnet,
   feeBounds: {
     lower: LOWER_FEE_BOUND,
