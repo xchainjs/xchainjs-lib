@@ -1,6 +1,6 @@
 // import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
-import { EtherscanProvider } from '@xchainjs/xchain-evm'
+import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset, Chain } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, ethers, providers } from 'ethers'
 import nock from 'nock'
