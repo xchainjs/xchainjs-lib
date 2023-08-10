@@ -1,3 +1,10 @@
+# v0.3.0 (2023-08-10)
+
+## Update
+
+- add support for fallback on providers
+- Update to use `xchain-evm-providers`
+
 # v0.2.3 (2023-07-10)
 
 ## Update
@@ -8,7 +15,7 @@
 
 ## Update
 
-- Update client & evm  dependencies
+- Update client & evm dependencies
 
 # v0.2.1 (2023-05-09)
 
