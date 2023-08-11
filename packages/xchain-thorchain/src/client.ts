@@ -477,6 +477,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       // extract values from the response
       const transferEvent = txResult.logs[0].events?.find((event) => event.type === 'transfer')
       const messageEvent = txResult.logs[0].events?.find((event) => event.type === 'message')
+      const coinReceivedEvent = txResult.logs[0].events?.find((event) => event.type === 'coin_received')
 
       if (!transferEvent || !messageEvent) {
         throw new Error('Invalid transaction data')
@@ -506,7 +507,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         : address
       const memo = txResult.tx?.body ? txResult.tx.body.memo.split(':') : ''
       const toAddress = memo[2] ? memo[2] : ''
-      const toAsset = memo[1] ? assetFromStringEx(memo[1]) : AssetRuneNative
+      const toAsset = memo[1] && !coinReceivedEvent ? assetFromStringEx(memo[1]) : AssetRuneNative
       const date = new Date(txResult.timestamp)
       const typeString = messageEvent.attributes.find((attr) => attr.key === 'action')?.value
       const hash = txResult.txhash
