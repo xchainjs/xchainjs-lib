@@ -55,9 +55,6 @@ const delayedLog = async (message: string, delayMs: number) => {
   console.log(`${message} (Done!)`)
 }
 
-/**
- * From asset to asset with no Affiliate address minimizing slippage
- */
 const doStreamingSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Network) => {
   try {
     const amount = process.argv[4]
