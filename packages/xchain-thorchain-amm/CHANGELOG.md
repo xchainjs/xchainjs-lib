@@ -1,3 +1,9 @@
+# v0.5.9 (2023-08-14)
+
+## Update
+
+- update deps, query, thorchain, evm, ethereum, avax, bsc
+
 # v0.5.8 (2023-07-26)
 
 ## Update

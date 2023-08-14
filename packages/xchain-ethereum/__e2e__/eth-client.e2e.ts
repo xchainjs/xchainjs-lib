@@ -1,10 +1,5 @@
 import { Balance, Network, TxType } from '@xchainjs/xchain-client'
-import {
-  ApproveParams,
-  EstimateApproveParams,
-  // EtherscanProvider as XchainEtherscanProvider,
-  IsApprovedParams,
-} from '@xchainjs/xchain-evm'
+import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
 import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import Client from '../src/client'

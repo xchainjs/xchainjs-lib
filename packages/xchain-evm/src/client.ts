@@ -77,7 +77,7 @@ export type EVMClientParams = XChainClientParams & {
   defaults: Record<Network, EvmDefaults>
   providers: Record<Network, Provider>
   explorerProviders: ExplorerProviders
-  dataProviders: OnlineDataProviders
+  dataProviders: OnlineDataProviders[]
 }
 
 /**
@@ -90,7 +90,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
   private hdNode?: HDNode
   private defaults: Record<Network, EvmDefaults>
   private explorerProviders: ExplorerProviders
-  private dataProviders: OnlineDataProviders
+  private dataProviders: OnlineDataProviders[]
   private providers: Record<Network, Provider>
   /**
    * Constructor
@@ -272,9 +272,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
    * @throws {"Invalid asset"} throws when the give asset is an invalid one
    */
   async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
-    const prov = this.dataProviders[this.network]
-    if (!prov) throw Error('Provider unidefined')
-    return await prov.getBalance(address, assets)
+    return await this.roundRobinGetBalance(address, assets)
   }
 
   /**
@@ -293,9 +291,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
       asset: params?.asset,
     }
 
-    const prov = this.dataProviders[this.network]
-    if (!prov) throw Error('Provider unidefined')
-    return await prov.getTransactions(filteredParams)
+    return await this.roundRobinGetTransactions(filteredParams)
   }
 
   /**
@@ -309,9 +305,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
    * Thrown if the given txId is invalid.
    */
   async getTransactionData(txId: string, assetAddress?: Address): Promise<Tx> {
-    const prov = this.dataProviders[this.network]
-    if (!prov) throw Error('Provider unidefined')
-    return await prov.getTransactionData(txId, assetAddress)
+    return await this.roundRobinGetTransactionData(txId, assetAddress)
   }
 
   /**
@@ -698,6 +692,40 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
     const { fees } = await this.estimateFeesWithGasPricesAndLimits(params)
     return fees
+  }
+
+  protected async roundRobinGetBalance(address: Address, assets?: Asset[]) {
+    for (const provider of this.dataProviders) {
+      try {
+        const prov = provider[this.network]
+        if (prov) return await prov.getBalance(address, assets)
+      } catch (error) {
+        console.warn(error)
+      }
+    }
+    throw Error('no provider able to get balance')
+  }
+  protected async roundRobinGetTransactionData(txId: string, assetAddress?: string) {
+    for (const provider of this.dataProviders) {
+      try {
+        const prov = provider[this.network]
+        if (prov) return await prov.getTransactionData(txId, assetAddress)
+      } catch (error) {
+        console.warn(error)
+      }
+    }
+    throw Error('no provider able to GetTransactionData')
+  }
+  protected async roundRobinGetTransactions(params: TxHistoryParams) {
+    for (const provider of this.dataProviders) {
+      try {
+        const prov = provider[this.network]
+        if (prov) return await prov.getTransactions(params)
+      } catch (error) {
+        console.warn(error)
+      }
+    }
+    throw Error('no provider able to GetTransactions')
   }
 }
 
