@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "doSwap": "npx ts-node doSwap.ts",
+    "doStreamingSwap": "npx ts-node doStreamingSwap.ts",
     "doSend": "npx ts-node doSend.ts"
   },
   "description": "example of doing a swap withthorchain-amm package",
