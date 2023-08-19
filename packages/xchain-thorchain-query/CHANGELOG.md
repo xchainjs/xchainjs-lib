@@ -1,3 +1,9 @@
+# v0.4.8 (2023-08-19)
+
+## Update
+
+- update Txdetails with Streaming swap seconds
+
 # v0.4.7 (2023-08-03)
 
 ## Update

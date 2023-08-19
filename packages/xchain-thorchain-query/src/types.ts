@@ -24,6 +24,7 @@ export type SwapEstimate = {
   slipBasisPoints: number
   streamingSlipBasisPoints: number
   streamingSwapBlocks: number
+  streamingSwapSeconds: number
   totalSwapSeconds: number
   canSwap: boolean
   errors: string[]
