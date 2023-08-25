@@ -1,5 +1,4 @@
 import { Network } from '@xchainjs/xchain-client'
-import { COSMOS_DECIMAL } from '@xchainjs/xchain-cosmos'
 import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
 import { CryptoAmount } from '../src/crypto-amount'
@@ -281,7 +280,7 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
 
   it(`Should estimate saver addition`, async () => {
     try {
-      const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(0.1, COSMOS_DECIMAL)), AssetATOM)
+      const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(20, 6)), USDC)
       const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
       printSaver(estimateAddsSaver)
     } catch (error) {
