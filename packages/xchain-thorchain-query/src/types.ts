@@ -313,8 +313,8 @@ export type LoanOpenQuote = {
   memo?: string
   expectedAmountOut: string
   expectedCollateralizationRatio: string
-  expectedCollateralUp: string
-  expectedDebtUp: string
+  expectedCollateralDeposited: string
+  expectedDebtIssued: string
   errors: string[]
 }
 export type LoanCloseQuote = {
@@ -330,8 +330,8 @@ export type LoanCloseQuote = {
   recommendedMinAmountIn?: string
   memo?: string
   expectedAmountOut: string
-  expectedCollateralDown: string
-  expectedDebtDown: string
+  expectedCollateralWithdrawn: string
+  expectedDebtRepaid: string
   errors: string[]
 }
 
