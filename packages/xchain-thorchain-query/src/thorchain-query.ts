@@ -604,6 +604,8 @@ export class ThorchainQuery {
     // request param amount should always be in 1e8 which is why we pass in adjusted decimals if chain decimals != 8
     const newAddAmount =
       addAmount.baseAmount.decimal != 8 ? getBaseAmountWithDiffDecimals(addAmount, 8) : addAmount.baseAmount.amount()
+
+    console.log(assetToString(addAmount.asset))
     // Fetch quote
     const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
       assetToString(addAmount.asset),
@@ -872,7 +874,8 @@ export class ThorchainQuery {
     if (pool.status.toLowerCase() !== 'available')
       errors.push(`Pool is not available for this asset ${assetToString(addAmount.asset)}`)
     const inboundFee = calcNetworkFee(addAmount.asset, inboundDetails[addAmount.asset.chain])
-    if (addAmount.lte(inboundFee)) errors.push(`Add amount does not cover fees`)
+    const inboundFeeInAddAmountAsset = await this.convert(inboundFee, addAmount.asset) // to make sure maths is being done on same assets
+    if (addAmount.lte(inboundFeeInAddAmountAsset)) errors.push(`Add amount does not cover fees`)
     return errors
   }
 
@@ -936,8 +939,8 @@ export class ThorchainQuery {
         memo: undefined,
         expectedAmountOut: '',
         expectedCollateralizationRatio: '',
-        expectedCollateralUp: '',
-        expectedDebtUp: '',
+        expectedCollateralDeposited: '',
+        expectedDebtIssued: '',
         errors: errors,
       }
     }
@@ -963,8 +966,8 @@ export class ThorchainQuery {
       memo: loanOpenResp.memo,
       expectedAmountOut: loanOpenResp.expected_amount_out,
       expectedCollateralizationRatio: loanOpenResp.expected_collateralization_ratio,
-      expectedCollateralUp: loanOpenResp.expected_collateral_up,
-      expectedDebtUp: loanOpenResp.expected_collateral_up,
+      expectedCollateralDeposited: loanOpenResp.expected_collateral_deposited,
+      expectedDebtIssued: loanOpenResp.expected_debt_issued,
       errors: errors,
     }
     return loanOpenQuote
@@ -1016,8 +1019,8 @@ export class ThorchainQuery {
         recommendedMinAmountIn: loanCloseResp.recommended_min_amount_in,
         memo: undefined,
         expectedAmountOut: '',
-        expectedCollateralDown: '',
-        expectedDebtDown: '',
+        expectedCollateralWithdrawn: '',
+        expectedDebtRepaid: '',
         errors: errors,
       }
     }
@@ -1042,8 +1045,8 @@ export class ThorchainQuery {
       recommendedMinAmountIn: loanCloseResp.recommended_min_amount_in,
       memo: loanCloseResp.memo,
       expectedAmountOut: loanCloseResp.expected_amount_out,
-      expectedCollateralDown: loanCloseResp.expected_collateral_down,
-      expectedDebtDown: loanCloseResp.expected_debt_down,
+      expectedCollateralWithdrawn: loanCloseResp.expected_collateral_withdrawn,
+      expectedDebtRepaid: loanCloseResp.expected_debt_repaid,
       errors: errors,
     }
 

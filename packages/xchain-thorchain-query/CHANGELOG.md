@@ -1,3 +1,9 @@
+# v0.4.9 (2023-08-25)
+
+## Update
+
+- Fix asset comparison in query & update thornode dep
+
 # v0.4.8 (2023-08-19)
 
 ## Update
