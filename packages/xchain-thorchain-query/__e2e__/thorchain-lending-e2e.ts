@@ -39,8 +39,8 @@ function printOpen(quote: LoanOpenQuote) {
     memo: quote.memo,
     expectedAmountOut: quote.expectedAmountOut,
     expectedCollateralizationRatio: quote.expectedCollateralizationRatio,
-    expectedCollateralUp: quote.expectedCollateralUp,
-    expectedDebtUp: quote.expectedDebtUp,
+    expectedCollateralDeposited: quote.expectedCollateralDeposited,
+    expectedDebtUp: quote.expectedDebtIssued,
     errors: quote.errors,
   }
   console.log(expanded)
@@ -68,8 +68,8 @@ function printClose(quote: LoanCloseQuote) {
     recommendedMinAmountIn: quote.recommendedMinAmountIn,
     memo: quote.memo,
     expectedAmountOut: quote.expectedAmountOut,
-    expectedCollateralDown: quote.expectedCollateralDown,
-    expectedDebtDown: quote.expectedDebtDown,
+    expectedCollateralWithdrawn: quote.expectedCollateralWithdrawn,
+    expectedDebtRepaid: quote.expectedDebtRepaid,
     errors: quote.errors,
   }
   console.log(expanded)

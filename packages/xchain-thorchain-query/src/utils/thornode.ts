@@ -21,6 +21,8 @@ import {
   Saver,
   SaversApi,
   SaversResponse,
+  ThornameResponse,
+  ThornamesApi,
   TransactionsApi,
   TxDetailsResponse,
   TxOutItem,
@@ -62,6 +64,7 @@ export class Thornode {
   private saversApi: SaversApi[]
   private quoteApi: QuoteApi[]
   private mimirApi: MimirApi[]
+  private thornamesApi: ThornamesApi[]
 
   constructor(network: Network = Network.Mainnet, config?: ThornodeConfig) {
     this.network = network
@@ -79,6 +82,9 @@ export class Thornode {
     this.saversApi = this.config.thornodeBaseUrls.map((url) => new SaversApi(new Configuration({ basePath: url })))
     this.quoteApi = this.config.thornodeBaseUrls.map((url) => new QuoteApi(new Configuration({ basePath: url })))
     this.mimirApi = this.config.thornodeBaseUrls.map((url) => new MimirApi(new Configuration({ basePath: url })))
+    this.thornamesApi = this.config.thornodeBaseUrls.map(
+      (url) => new ThornamesApi(new Configuration({ basePath: url })),
+    )
   }
 
   /**
@@ -486,6 +492,18 @@ export class Thornode {
     for (const api of this.quoteApi) {
       try {
         const resp = (await api.quoteloanclose(height, asset, amount, loanAsset, loanOwner, minOut)).data
+        return resp
+      } catch (e) {
+        // console.log(e)
+      }
+    }
+    throw new Error(`THORNode is not responding`)
+  }
+
+  async getThornameDetails(thorname: string, height?: number): Promise<ThornameResponse> {
+    for (const api of this.thornamesApi) {
+      try {
+        const resp = (await api.thorname(thorname, height)).data
         return resp
       } catch (e) {
         // console.log(e)

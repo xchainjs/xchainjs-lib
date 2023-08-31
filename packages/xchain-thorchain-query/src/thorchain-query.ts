@@ -1,5 +1,6 @@
 import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
+  Address,
   Asset,
   Chain,
   assetAmount,
@@ -34,6 +35,8 @@ import {
   SaverFees,
   SaversPosition,
   SaversWithdraw,
+  ThornameAlias,
+  ThornameDetails,
   TotalFees,
   TxDetails,
   UnitData,
@@ -604,8 +607,6 @@ export class ThorchainQuery {
     // request param amount should always be in 1e8 which is why we pass in adjusted decimals if chain decimals != 8
     const newAddAmount =
       addAmount.baseAmount.decimal != 8 ? getBaseAmountWithDiffDecimals(addAmount, 8) : addAmount.baseAmount.amount()
-
-    console.log(assetToString(addAmount.asset))
     // Fetch quote
     const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
       assetToString(addAmount.asset),
@@ -1051,5 +1052,46 @@ export class ThorchainQuery {
     }
 
     return loanCloseQuote
+  }
+
+  /**
+   *
+   * @param thorname - input param
+   * @returns retrieves details for a thorname
+   */
+  public async getThornameDetails(thorname: string, height?: number): Promise<ThornameDetails> {
+    const errors: string[] = []
+
+    const thornameResp = await this.thorchainCache.thornode.getThornameDetails(thorname, height)
+    const response: { error?: string } = JSON.parse(JSON.stringify(thornameResp))
+    if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
+    if (errors.length > 0) {
+      const errorResp: ThornameDetails = {
+        name: '',
+        expireBlockHeight: 0,
+        owner: '',
+        preferredAsset: '',
+        affiliateCollectorRune: '',
+        aliases: [],
+        error: errors,
+      }
+      return errorResp
+    }
+
+    const thornameAliases: ThornameAlias[] = thornameResp.aliases.map((alias) => ({
+      chain: alias.chain as Chain,
+      address: alias.address as Address,
+    }))
+
+    const thornameDetails: ThornameDetails = {
+      name: thornameResp.name || '',
+      expireBlockHeight: thornameResp.expire_block_height || 0,
+      owner: thornameResp.owner || '',
+      preferredAsset: thornameResp.preferred_asset,
+      affiliateCollectorRune: thornameResp.affiliate_collector_rune || '',
+      aliases: thornameAliases,
+    }
+
+    return thornameDetails // Return the array
   }
 }
