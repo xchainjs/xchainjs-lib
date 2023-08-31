@@ -26,12 +26,11 @@ import {
   AssetLTC,
   AssetRuneNative,
 } from '../src/utils/const'
-import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
 
 require('dotenv').config()
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+const thorchainCache = new ThorchainCache(new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 // mainnet asset
@@ -304,28 +303,5 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
     }
     const getSavers = await thorchainQuery.getSaverPosition(saver)
     printSaversPosition(getSavers)
-  })
-  it(`Should get savers positions`, async () => {
-    const addressBtc = 'bc1qk75wen2e7zus3ea4j674dyezvdwr7jj3a9qf6q'
-    const addressCosmos = 'cosmos1dmffpc3hw9g0lv48u7hzhpcvlplms9evm4ayex'
-    const addressAvax = '0x4359b6da2312cc9650cc887217cf6a418e48a551'
-    const saverBtc: getSaver = {
-      asset: AssetBTC,
-      address: addressBtc,
-    }
-    const saverAtom: getSaver = {
-      asset: AssetATOM,
-      address: addressCosmos,
-    }
-    const saverAvax: getSaver = {
-      asset: AssetAVAX,
-      address: addressAvax,
-    }
-    const saverInvalid: getSaver = {
-      asset: { chain: 'x', symbol: 'x', ticker: 'x', synth: false },
-      address: addressAvax,
-    }
-    const getSavers = await thorchainQuery.getSaverPositions([saverAtom, saverBtc, saverAvax, saverInvalid])
-    getSavers.forEach((getSaver) => printSaversPosition(getSaver))
   })
 })

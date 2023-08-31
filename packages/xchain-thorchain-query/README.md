@@ -1,6 +1,6 @@
 # `@xchainjs/xchain-thorchain-query`
 
-Thorchain-query module to query thorchain for estimation of swaps/ add and remove Liquidity and checking a transaction stage. 
+Thorchain-query module to query thorchain for estimation of swaps/ add and remove Liquidity and checking a transaction stage.
 Returns a TxDetail object with all the information needed to conduct a swap, or add liquidity. This includes estimateAddSavers()
 
 ## Installation
@@ -12,7 +12,7 @@ yarn add @xchainjs/xchain-thorchain-query
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-thorchain-query`.
 
 ```
-yarn add @xchainjs/xchain-client @xchainjs/xchain-util @xchainjs/xchain-midgard @xchainjs/xchain-thornode axios
+yarn add @xchainjs/xchain-client @xchainjs/xchain-util @xchainjs/xchain-midgard-query @xchainjs/xchain-thornode axios
 
 ```
 
@@ -43,6 +43,7 @@ Estimation example from a swap of 2 BTC to RUNE
 ```
 
 Estimation of add symetric liquidity
+
 ```ts
 {
   rune: 'ᚱ 12,000',
@@ -58,6 +59,7 @@ Estimation of add symetric liquidity
 ```
 
 Estimation of remove Liquidity
+
 ```ts
 {
   asset: { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false },
@@ -83,6 +85,7 @@ Estimation of remove Liquidity
 ```
 
 Estimation of Add Saver
+
 ```ts
 {
   assetAmount: '₿ 0.5',
@@ -125,7 +128,7 @@ Get Network Values: https://replit.com/@thorchain/networkValues#index.ts\
 
 Estimate AddSaver() & WithdrawSaver() & getSaverPosition() https://replit.com/@thorchain/quoteDepositTS#index.ts
 
-Check transaction Stage 
+Check transaction Stage
 
 ### Setting Headers for Nine Realms endpoints
 

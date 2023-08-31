@@ -16,7 +16,7 @@ import { getBaseAmountWithDiffDecimals } from './utils'
  */
 export const getLiquidityUnits = (liquidity: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
   const baseAmount8decimals = getBaseAmountWithDiffDecimals(liquidity.asset, 8)
-  const P = new BigNumber(pool.pool.liquidityUnits)
+  const P = new BigNumber(pool.thornodeDetails.LP_units)
   const r = liquidity.rune.baseAmount.amount()
   const a = baseAmount8decimals
   const R = pool.runeBalance.amount()
@@ -113,7 +113,7 @@ export const getLiquidityProtectionData = (
  * @returns liquidity units - % ownership of pool
  */
 export const getPoolOwnership = (liquidity: LiquidityToAdd, pool: LiquidityPool): number => {
-  const P = new BigNumber(pool.pool.liquidityUnits)
+  const P = new BigNumber(pool.thornodeDetails.LP_units)
   const r = liquidity.rune.baseAmount.amount()
   const a = liquidity.asset.baseAmount.amount()
   const R = pool.runeBalance.amount().plus(r) // Must add r first

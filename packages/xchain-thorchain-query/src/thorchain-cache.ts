@@ -1,3 +1,4 @@
+import { MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { Address, Asset, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -5,33 +6,20 @@ import { CryptoAmount } from './crypto-amount'
 import { LiquidityPool } from './liquidity-pool'
 import { InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache } from './types'
 import { THORChain, isAssetRuneNative } from './utils'
-import { Midgard } from './utils/midgard'
 import { Thornode } from './utils/thornode'
 
 const SAME_ASSET_EXCHANGE_RATE = new BigNumber(1)
 const TEN_MINUTES = 10 * 60 * 1000
-const DEFAULT_THORCHAIN_DECIMALS = 8
-// const USD_ASSETS: Record<Network, Asset[]> = {
-//   mainnet: [
-//     assetFromStringEx('BNB.BUSD-BD1'),
-//     assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48'),
-//     assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7'),
-//   ],
-//   stagenet: [assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')],
-//   testnet: [
-//     assetFromStringEx('BNB.BUSD-74E'),
-//     assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306'),
-//   ],
-// }
-const defaultMidgard = new Midgard()
+
 const defaultThornode = new Thornode()
+const defaultMidgardQuery = new MidgardQuery()
 
 /**
  * This class manages retrieving information from up to date Thorchain
  */
 export class ThorchainCache {
-  readonly midgard: Midgard
   readonly thornode: Thornode
+  readonly midgardQuery: MidgardQuery
   private poolCache: PoolCache | undefined
   private inboundDetailCache: InboundDetailCache | undefined = undefined
   private networkValuesCache: NetworkValuesCache | undefined = undefined
@@ -44,6 +32,7 @@ export class ThorchainCache {
    * Contrustor to create a ThorchainCache
    *
    * @param midgard - an instance of the midgard API (could be pointing to stagenet,testnet,mainnet)
+   * @param midgardQuery - an instance of the midgard query class (could be pointing to stagenet,testnet,mainnet)
    * @param expirePoolCacheMillis - how long should the pools be cached before expiry
    * @param expireAsgardCacheMillis - how long should the inboundAsgard Addresses be cached before expiry
    * @param expireInboundDetailsCacheMillis - how long should the InboundDetails be cached before expiry
@@ -51,14 +40,13 @@ export class ThorchainCache {
    * @returns ThorchainCache
    */
   constructor(
-    midgard = defaultMidgard,
     thornode = defaultThornode,
     expirePoolCacheMillis = 6000,
     expireInboundDetailsCacheMillis = 6000,
     expireNetworkValuesCacheMillis = TEN_MINUTES,
   ) {
-    this.midgard = midgard
     this.thornode = thornode
+    this.midgardQuery = defaultMidgardQuery
     this.expirePoolCacheMillis = expirePoolCacheMillis
     this.expireInboundDetailsCacheMillis = expireInboundDetailsCacheMillis
     this.expireNetworkValuesCacheMillis = expireNetworkValuesCacheMillis
@@ -116,7 +104,7 @@ export class ThorchainCache {
 
   /**
    * Get all the Liquidity Pools currently cached.
-   * if the cache is expired, the pools wioll be re-fetched from midgard
+   * if the cache is expired, the pools wioll be re-fetched from thornode
    *
    * @returns Promise<Record<string, LiquidityPool>>
    */
@@ -143,15 +131,15 @@ export class ThorchainCache {
    */
   private async refreshPoolCache(): Promise<void> {
     try {
-      const [thornodePools, midgardPools] = await Promise.all([this.thornode.getPools(), this.midgard.getPools()])
+      const thornodePools = await this.thornode.getPools()
       const poolMap: Record<string, LiquidityPool> = {}
 
-      if (midgardPools) {
-        for (const pool of midgardPools) {
+      if (thornodePools) {
+        for (const pool of thornodePools) {
           try {
             const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
             if (!thornodePool) throw Error(`Could not find thornode pool ${pool.asset}`)
-            const lp = new LiquidityPool(pool, thornodePool)
+            const lp = new LiquidityPool(thornodePool)
             poolMap[`${lp.asset.chain}.${lp.asset.ticker}`] = lp
           } catch (error) {
             console.log(error)
@@ -253,7 +241,7 @@ export class ThorchainCache {
    */
   async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
     const exchangeRate = await this.getExchangeRate(input.asset, outAsset)
-    const outDecimals = await this.getDecimalForAsset(outAsset)
+    const outDecimals = await this.midgardQuery.getDecimalForAsset(outAsset)
     const inDecimals = input.baseAmount.decimal
 
     let baseAmountOut = input.baseAmount.times(exchangeRate).amount()
@@ -262,20 +250,8 @@ export class ThorchainCache {
     baseAmountOut = baseAmountOut.times(10 ** adjustDecimals)
     const amt = baseAmount(baseAmountOut, outDecimals)
     const result = new CryptoAmount(amt, outAsset)
-    // console.log(
-    //   `${input.formatedAssetString()} ${input.asset.ticker} = ${result.formatedAssetString()} ${outAsset.ticker}`,
-    // )
 
     return result
-  }
-  private async getDecimalForAsset(asset: Asset): Promise<number> {
-    if (!isAssetRuneNative(asset)) {
-      const pool = await this.getPoolForAsset(asset)
-      const decimals = Number(pool.pool.nativeDecimal)
-      if (decimals > 0) return decimals
-      else return DEFAULT_THORCHAIN_DECIMALS
-    }
-    return DEFAULT_THORCHAIN_DECIMALS
   }
 
   async getRouterAddressForChain(chain: Chain): Promise<Address> {

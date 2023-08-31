@@ -1,8 +1,11 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard'
-import { CryptoAmount, assetFromString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, CryptoAmount, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import { MidgardCache } from './midgard-cache'
 import { SaversPosition, getSaver } from './types'
+import { isAssetRuneNative } from './utils/const'
+
+const DEFAULT_THORCHAIN_DECIMALS = 8
 
 const defaultCache = new MidgardCache()
 
@@ -67,5 +70,15 @@ export class MidgardQuery {
     })
     await Promise.all(allPositionsPromises)
     return saversPositions
+  }
+
+  public async getDecimalForAsset(asset: Asset): Promise<number> {
+    if (!isAssetRuneNative(asset)) {
+      const pool = await this.getPool(assetToString(asset))
+      const decimals = Number(pool.nativeDecimal)
+      if (decimals > 0) return decimals
+      else return DEFAULT_THORCHAIN_DECIMALS
+    }
+    return DEFAULT_THORCHAIN_DECIMALS
   }
 }
