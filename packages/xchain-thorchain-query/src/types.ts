@@ -237,14 +237,16 @@ export type EstimateAddSaver = {
 }
 
 export type EstimateWithdrawSaver = {
+  dustAmount: CryptoAmount
+  dustThreshold: CryptoAmount
   expectedAssetAmount: CryptoAmount
-  fee: SaverFees
+  fee: SaverWithdrawFees
   expiry: Date
   toAddress: Address
   memo: string
-  estimatedWaitTime: number
+  outBoundDelayBlocks: number
+  outBoundDelaySeconds: number
   slipBasisPoints: number
-  dustAmount: CryptoAmount
   errors: string[]
 }
 
@@ -252,6 +254,14 @@ export type SaverFees = {
   affiliate: CryptoAmount
   asset: Asset
   outbound: CryptoAmount
+}
+
+export type SaverWithdrawFees = {
+  affiliate: CryptoAmount
+  asset: Asset
+  liquidity: CryptoAmount
+  outbound: CryptoAmount
+  totalBps: string
 }
 
 export type QuoteFees = {
