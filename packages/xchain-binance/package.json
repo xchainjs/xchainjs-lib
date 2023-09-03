@@ -37,7 +37,7 @@
     "@types/big.js": "^6.1.6",
     "@xchainjs/xchain-client": "^0.14.1",
     "@xchainjs/xchain-crypto": "^0.3.0",
-    "@xchainjs/xchain-util": "^0.13.0"
+    "@xchainjs/xchain-util": "^0.13.1"
   },
   "publishConfig": {
     "access": "public"
@@ -46,6 +46,6 @@
     "@binance-chain/javascript-sdk": "^4.2.0",
     "@xchainjs/xchain-client": "^0.14.1",
     "@xchainjs/xchain-crypto": "^0.3.0",
-    "@xchainjs/xchain-util": "^0.13.0"
+    "@xchainjs/xchain-util": "^0.13.1"
   }
 }

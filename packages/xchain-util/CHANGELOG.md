@@ -1,3 +1,9 @@
+# v0.13.1 (2023-09-03)
+
+## Update
+
+- Add CryptoAmount and CachedValue utilities
+
 # v0.13.0 (2023-05-02)
 
 ## Update

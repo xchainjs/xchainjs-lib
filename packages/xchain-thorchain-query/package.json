@@ -36,7 +36,7 @@
     "@xchainjs/xchain-client": "^0.14.1",
     "@xchainjs/xchain-midgard-query": "^0.1.0",
     "@xchainjs/xchain-thornode": "^0.3.5",
-    "@xchainjs/xchain-util": "^0.13.0",
+    "@xchainjs/xchain-util": "^0.13.1",
     "axios": "^1.3.6",
     "axios-retry": "^3.2.5",
     "bignumber.js": "^9.0.0"
@@ -45,7 +45,7 @@
     "@xchainjs/xchain-client": "^0.14.1",
     "@xchainjs/xchain-midgard-query": "^0.1.0",
     "@xchainjs/xchain-thornode": "^0.3.5",
-    "@xchainjs/xchain-util": "^0.13.0",
+    "@xchainjs/xchain-util": "^0.13.1",
     "axios": "^1.3.6",
     "axios-retry": "^3.2.5",
     "bignumber.js": "^9.0.0"
