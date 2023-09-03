@@ -692,6 +692,7 @@ export class ThorchainQuery {
     const inboundDetails = await this.thorchainCache.getInboundDetails()
     // Check to see if there is a position before calling withdraw quote
     const checkPositon = await this.getSaverPosition(withdrawParams)
+
     if (checkPositon.errors.length > 0) {
       for (let i = 0; i < checkPositon.errors.length; i++) {
         errors.push(checkPositon.errors[i])
@@ -728,6 +729,7 @@ export class ThorchainQuery {
     }
     // Request withdraw quote
     const withdrawQuote = await this.thorchainCache.thornode.getSaversWithdrawQuote(withdrawParams)
+
     // error handling
     const response: { error?: string } = JSON.parse(JSON.stringify(withdrawQuote))
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
@@ -741,7 +743,7 @@ export class ThorchainQuery {
           asset: withdrawParams.asset,
           liquidity: new CryptoAmount(baseAmount(0), withdrawParams.asset),
           outbound: new CryptoAmount(baseAmount(0), withdrawParams.asset),
-          totalBps: withdrawQuote.fees.total_bps || '',
+          totalBps: '',
         },
         expiry: new Date(0),
         toAddress: '',
@@ -787,7 +789,7 @@ export class ThorchainQuery {
     const blockData = (await this.thorchainCache.thornode.getLastBlock()).find(
       (item: LastBlock) => item.chain === params.asset.chain,
     )
-    const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.ticker}`)).find(
+    const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.symbol}`)).find(
       (item) => item.asset_address === params.address,
     )
 
@@ -856,9 +858,9 @@ export class ThorchainQuery {
   }: LoanOpenParams): Promise<LoanOpenQuote> {
     const errors: string[] = []
     const loanOpenResp = await this.thorchainCache.thornode.getLoanQuoteOpen(
-      `${asset.chain}.${asset.ticker}`,
+      `${asset.chain}.${asset.symbol}`,
       amount.baseAmount.amount().toNumber(),
-      `${targetAsset.chain}.${targetAsset.ticker}`,
+      `${targetAsset.chain}.${targetAsset.symbol}`,
       destination,
       minOut,
       affiliateBps,
@@ -948,9 +950,9 @@ export class ThorchainQuery {
   }: LoanCloseParams): Promise<LoanCloseQuote> {
     const errors: string[] = []
     const loanCloseResp = await this.thorchainCache.thornode.getLoanQuoteClose(
-      `${asset.chain}.${asset.ticker}`,
+      `${asset.chain}.${asset.symbol}`,
       amount.baseAmount.amount().toNumber(),
-      `${loanAsset.chain}.${loanAsset.ticker}`,
+      `${loanAsset.chain}.${loanAsset.symbol}`,
       loanOwner,
       minOut,
       height,

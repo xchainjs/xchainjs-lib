@@ -17,14 +17,15 @@ import {
   getSaver,
 } from '../src/types'
 import {
-  AssetATOM,
   AssetAVAX,
   AssetBCH,
+  AssetBNB,
   AssetBTC,
   AssetDOGE,
   AssetETH,
   AssetLTC,
   AssetRuneNative,
+  assetUSDC,
 } from '../src/utils/const'
 import { Thornode } from '../src/utils/thornode'
 
@@ -288,17 +289,17 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
   })
   it(`Should estimate saver withdrawal`, async () => {
     const withdrawPos: SaversWithdraw = {
-      address: `cosmos1f2hzu2cup9tk427w5tpfysvx9cf4c9wkud0qn9`,
-      asset: AssetATOM,
+      address: `0xe282cb156555bba777f58dfd40671363e4ae0519`,
+      asset: assetUSDC,
       withdrawBps: 10000,
     }
     const estimateWithdrawSaver = await thorchainQuery.estimateWithdrawSaver(withdrawPos)
     printWithdrawSaver(estimateWithdrawSaver)
   })
   it(`Should get saver position`, async () => {
-    const address = 'bc1qpcaardpf2wzcu6uwd4hhsmt0fz8su80cjfk5lh'
+    const address = '0xe282cb156555bba777f58dfd40671363e4ae0519'
     const saver: getSaver = {
-      asset: AssetBTC,
+      asset: AssetBNB,
       address: address,
     }
     const getSavers = await thorchainQuery.getSaverPosition(saver)

@@ -1,3 +1,9 @@
+# v0.5.0 (2023-09-03)
+
+## fix
+
+- asset string changed to use symbol instead of ticker
+
 # v0.4.9 (2023-08-25)
 
 ## Update
