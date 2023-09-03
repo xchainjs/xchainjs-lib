@@ -2,7 +2,7 @@
   "name": "@xchainjs/xchain-midgard-query",
   "version": "0.1.0",
   "license": "MIT",
-  "description": "Thorchain query module that is responsible for get data from Midgard API",
+  "description": "Module that is responsible for get data from Midgard API",
   "keywords": [
     "XChain"
   ],
