@@ -4,7 +4,6 @@ import { Address, Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
-import { LiquidityPool } from './liquidity-pool'
 
 export type TotalFees = {
   asset: Asset
@@ -29,25 +28,6 @@ export type SwapEstimate = {
   canSwap: boolean
   errors: string[]
   warning: string
-}
-
-export type PoolCache = {
-  lastRefreshed: number
-  pools: Record<string, LiquidityPool>
-}
-
-export type InboundDetailCache = {
-  lastRefreshed: number
-  inboundDetails: Record<string, InboundDetail>
-}
-export type NetworkValuesCache = {
-  lastRefreshed: number
-  networkValues: Record<string, number>
-}
-
-export type MidgardConfig = {
-  apiRetries: number
-  midgardBaseUrls: string[]
 }
 
 export type QuoteSwapParams = {

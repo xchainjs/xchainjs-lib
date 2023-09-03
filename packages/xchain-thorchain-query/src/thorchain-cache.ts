@@ -1,10 +1,10 @@
 import { MidgardQuery } from '@xchainjs/xchain-midgard-query'
-import { Address, Asset, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, CachedValue, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
 import { LiquidityPool } from './liquidity-pool'
-import { InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache } from './types'
+import { InboundDetail } from './types'
 import { THORChain, isAssetRuneNative } from './utils'
 import { Thornode } from './utils/thornode'
 
@@ -20,16 +20,12 @@ const defaultMidgardQuery = new MidgardQuery()
 export class ThorchainCache {
   readonly thornode: Thornode
   readonly midgardQuery: MidgardQuery
-  private poolCache: PoolCache | undefined
-  private inboundDetailCache: InboundDetailCache | undefined = undefined
-  private networkValuesCache: NetworkValuesCache | undefined = undefined
-
-  private expirePoolCacheMillis
-  private expireInboundDetailsCacheMillis
-  private expireNetworkValuesCacheMillis
+  private readonly poolCache: CachedValue<Record<string, LiquidityPool> | undefined>
+  private readonly inboundDetailCache: CachedValue<Record<string, InboundDetail>>
+  private readonly networkValuesCache: CachedValue<Record<string, number>>
 
   /**
-   * Contrustor to create a ThorchainCache
+   * Constructor to create a ThorchainCache
    *
    * @param midgard - an instance of the midgard API (could be pointing to stagenet,testnet,mainnet)
    * @param midgardQuery - an instance of the midgard query class (could be pointing to stagenet,testnet,mainnet)
@@ -47,12 +43,19 @@ export class ThorchainCache {
   ) {
     this.thornode = thornode
     this.midgardQuery = defaultMidgardQuery
-    this.expirePoolCacheMillis = expirePoolCacheMillis
-    this.expireInboundDetailsCacheMillis = expireInboundDetailsCacheMillis
-    this.expireNetworkValuesCacheMillis = expireNetworkValuesCacheMillis
 
-    //initialize the cache
-    this.refreshPoolCache()
+    this.poolCache = new CachedValue<Record<string, LiquidityPool> | undefined>(
+      () => this.refreshPoolCache(),
+      expirePoolCacheMillis,
+    )
+    this.inboundDetailCache = new CachedValue<Record<string, InboundDetail>>(
+      () => this.refreshInboundDetailCache(),
+      expireInboundDetailsCacheMillis,
+    )
+    this.networkValuesCache = new CachedValue<Record<string, number>>(
+      () => thornode.getNetworkValues(),
+      expireNetworkValuesCacheMillis,
+    )
   }
 
   /**
@@ -109,27 +112,17 @@ export class ThorchainCache {
    * @returns Promise<Record<string, LiquidityPool>>
    */
   async getPools(): Promise<Record<string, LiquidityPool>> {
-    const millisSinceLastRefeshed = Date.now() - (this.poolCache?.lastRefreshed || 0)
-    if (millisSinceLastRefeshed > this.expirePoolCacheMillis) {
-      try {
-        await this.refreshPoolCache()
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    if (this.poolCache) {
-      return this.poolCache?.pools
+    const pools = await this.poolCache.getValue()
+    if (pools) {
+      return pools
     } else {
-      throw Error(`Could not refresh Pools `)
+      throw Error('Could not refresh pools')
     }
   }
   /**
    * Refreshes the Pool Cache
-   *
-   * NOTE: do not call refreshPoolCache() directly, call getPools() instead
-   * which will refresh the cache if it's expired
    */
-  private async refreshPoolCache(): Promise<void> {
+  private async refreshPoolCache(): Promise<Record<string, LiquidityPool> | undefined> {
     try {
       const thornodePools = await this.thornode.getPools()
       const poolMap: Record<string, LiquidityPool> = {}
@@ -146,23 +139,18 @@ export class ThorchainCache {
           }
         }
 
-        this.poolCache = {
-          lastRefreshed: Date.now(),
-          pools: poolMap,
-        }
+        return poolMap
       }
     } catch (error) {
       console.error('Error refreshing pool cache:', error)
     }
+    return undefined
   }
 
   /**
    * Refreshes the InboundDetailCache Cache
-   *
-   * NOTE: do not call refereshInboundDetailCache() directly, call getInboundDetails() instead
-   * which will refresh the cache if it's expired
    */
-  private async refereshInboundDetailCache(): Promise<void> {
+  private async refreshInboundDetailCache(): Promise<Record<string, InboundDetail>> {
     const [mimirDetails, allInboundAddresses] = await Promise.all([
       this.thornode.getMimir(),
       this.thornode.getInboundAddresses(),
@@ -210,24 +198,7 @@ export class ThorchainCache {
     }
     inboundDetails[THORChain] = details
 
-    this.inboundDetailCache = {
-      lastRefreshed: Date.now(),
-      inboundDetails,
-    }
-  }
-  /**
-   * Refreshes the NetworkValuesCache Cache
-   *
-   * NOTE: do not call refereshNetworkValuesCache() directly, call getNetworkValuess() instead
-   * which will refresh the cache if it's expired
-   */
-  private async refereshNetworkValuesCache(): Promise<void> {
-    const networkValues = await this.thornode.getNetworkValues()
-
-    this.networkValuesCache = {
-      lastRefreshed: Date.now(),
-      networkValues,
-    }
+    return inboundDetails
   }
 
   /**
@@ -268,18 +239,10 @@ export class ThorchainCache {
    * @returns - inbound details
    */
   async getInboundDetails(): Promise<Record<string, InboundDetail>> {
-    const millisSinceLastRefeshed = Date.now() - (this.inboundDetailCache?.lastRefreshed || 0)
-    if (millisSinceLastRefeshed > this.expireInboundDetailsCacheMillis) {
-      try {
-        await this.refereshInboundDetailCache()
-      } catch (e) {
-        console.error(e)
-      }
-    }
     if (this.inboundDetailCache) {
-      return this.inboundDetailCache.inboundDetails
+      return await this.inboundDetailCache.getValue()
     } else {
-      throw Error(`Could not refereshInboundDetailCache `)
+      throw Error(`Could not refresh inbound details `)
     }
   }
   /**
@@ -287,18 +250,10 @@ export class ThorchainCache {
    * @returns - network values
    */
   async getNetworkValues(): Promise<Record<string, number>> {
-    const millisSinceLastRefeshed = Date.now() - (this.networkValuesCache?.lastRefreshed || 0)
-    if (millisSinceLastRefeshed > this.expireNetworkValuesCacheMillis) {
-      try {
-        await this.refereshNetworkValuesCache()
-      } catch (e) {
-        console.error(e)
-      }
-    }
     if (this.networkValuesCache) {
-      return this.networkValuesCache.networkValues
+      return await this.networkValuesCache.getValue()
     } else {
-      throw Error(`Could not refereshInboundDetailCache `)
+      throw Error(`Could not refresh network values `)
     }
   }
 }
