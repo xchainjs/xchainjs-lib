@@ -1,3 +1,9 @@
+# v0.6.0 (2023-09-04)
+
+## Update
+
+-  Update peer deps, thorchain-query
+
 # v0.5.9 (2023-08-14)
 
 ## Update
