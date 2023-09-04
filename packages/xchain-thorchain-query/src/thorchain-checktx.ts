@@ -221,7 +221,7 @@ export class TransactionStage {
   }
   private async getCryptoAmount(baseAmt: string, asset: Asset): Promise<CryptoAmount> {
     const decimals =
-      THORChain === asset.chain ? 8 : Number((await this.thorchainCache.getPoolForAsset(asset)).pool.nativeDecimal)
+      THORChain === asset.chain ? 8 : Number(await this.thorchainCache.midgardQuery.getDecimalForAsset(asset))
     return new CryptoAmount(baseAmount(baseAmt, decimals), asset)
   }
   private async determineObserved(txData: TxSignersResponse): Promise<TXProgress> {

@@ -1,4 +1,3 @@
-import { PoolDetail } from '@xchainjs/xchain-midgard'
 import { Pool } from '@xchainjs/xchain-thornode'
 import { assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
@@ -25,27 +24,6 @@ const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606E
 const AssetBTC = assetFromStringEx('BTC.BTC')
 const AssetETH = assetFromStringEx('ETH.ETH')
 
-const BusdMidgardPoolDetails1: PoolDetail = {
-  annualPercentageRate: '-0.08690907236215786',
-  asset: 'BNB.BUSD-BD1',
-  assetDepth: '782699801097358',
-  assetPrice: '0.6213456696171857',
-  assetPriceUSD: '1',
-  liquidityUnits: '117576764000000',
-  nativeDecimal: '8',
-  saversDepth: '0',
-  saversUnits: '0',
-  saversAPR: '0',
-  poolAPY: '0',
-  runeDepth: '486327132022076',
-  status: 'available',
-  synthSupply: '204728293012779',
-  synthUnits: '15611003797131',
-  units: '119365324519968',
-  volume24h: '472358072383752',
-  totalCollateral: '',
-  totalDebtTor: '',
-}
 const BusdThornodePoolDetails1: Pool = {
   LP_units: '52543071634074',
   asset: 'BNB.BUSD-BD1',
@@ -65,27 +43,6 @@ const BusdThornodePoolDetails1: Pool = {
   loan_cr: '',
 }
 
-const emptyBusdPoolDetails: PoolDetail = {
-  annualPercentageRate: '0',
-  asset: 'BNB.BUSD-BD1',
-  assetDepth: '0',
-  assetPrice: '0',
-  assetPriceUSD: '0',
-  liquidityUnits: '10',
-  nativeDecimal: '8',
-  saversDepth: '0',
-  saversUnits: '0',
-  saversAPR: '0',
-  poolAPY: '0',
-  runeDepth: '0',
-  status: 'available',
-  synthSupply: '0',
-  synthUnits: '0',
-  units: '100000000',
-  volume24h: '0',
-  totalCollateral: '',
-  totalDebtTor: '',
-}
 describe(`Liquidity calc tests`, () => {
   beforeAll(() => {
     mockMidgardApi.init()
@@ -97,13 +54,13 @@ describe(`Liquidity calc tests`, () => {
   })
 
   it(`Should calculate correct liquidity units for above entry`, async () => {
-    const BusdPool1 = new LiquidityPool(BusdMidgardPoolDetails1, BusdThornodePoolDetails1)
+    const BusdPool1 = new LiquidityPool(BusdThornodePoolDetails1)
     const liquidityBUSd: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount(`2.05262786`, 6)), BUSD),
       rune: new CryptoAmount(assetToBase(assetAmount('1.02658114')), AssetRuneNative),
     }
     const getLUnits = getLiquidityUnits(liquidityBUSd, BusdPool1)
-    const correctLiquidityUnits = new BigNumber('27826794')
+    const correctLiquidityUnits = new BigNumber('25054365')
     expect(baseAmount(getLUnits).amount()).toEqual(baseAmount(correctLiquidityUnits).amount())
   })
   // Not sure what Lp units actually represents
@@ -115,8 +72,8 @@ describe(`Liquidity calc tests`, () => {
     }
     const getLPoolShare = getPoolShare(unitData, busdPool)
     const correctShare: PoolShareDetail = {
-      assetShare: new CryptoAmount(assetToBase(assetAmount(`2.05262786`)), BUSD),
-      runeShare: new CryptoAmount(assetToBase(assetAmount('1.02658114')), AssetRuneNative),
+      assetShare: new CryptoAmount(assetToBase(assetAmount(`2.05028139`)), BUSD),
+      runeShare: new CryptoAmount(assetToBase(assetAmount('1.02857666')), AssetRuneNative),
     }
     expect(getLPoolShare.assetShare.assetAmount.amount()).toEqual(correctShare.assetShare.assetAmount.amount())
     expect(getLPoolShare.runeShare.assetAmount.amount()).toEqual(correctShare.runeShare.assetAmount.amount())
@@ -204,13 +161,13 @@ describe(`Liquidity calc tests`, () => {
     expect(checkILP.totalDays).toEqual('100.00')
   })
   it(`Should calculate correct pool ownership`, async () => {
-    const BusdPool = new LiquidityPool(emptyBusdPoolDetails, BusdThornodePoolDetails1)
+    const BusdPool = new LiquidityPool(BusdThornodePoolDetails1)
     const liquidityToAdd: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount('50')), BUSD),
       rune: new CryptoAmount(assetToBase(assetAmount('50')), AssetRuneNative),
     }
     const onwershipPercent = getPoolOwnership(liquidityToAdd, BusdPool)
-    const correctOwership = 0.5000000002 // percent ownership
+    const correctOwership = 0.00000997909552651165 // percent ownership
     expect(onwershipPercent).toEqual(correctOwership)
   })
 })
