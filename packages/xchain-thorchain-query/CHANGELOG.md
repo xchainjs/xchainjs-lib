@@ -1,3 +1,14 @@
+# v0.5.0 (2023-09-03)
+
+## fix
+
+- asset string changed to use symbol instead of ticker
+
+## Update
+
+- Reduce dependency from midgard extracting all code to midgard-xchain-query package
+- Improve cache handling using CachedValue class
+
 # v0.4.9 (2023-08-25)
 
 ## Update

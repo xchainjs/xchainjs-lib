@@ -372,7 +372,7 @@ export class Thornode {
       try {
         const resp = await api.quotesaverwithdraw(
           withdrawParams.height,
-          `${withdrawParams.asset.chain}.${withdrawParams.asset.ticker}`,
+          `${withdrawParams.asset.chain}.${withdrawParams.asset.symbol}`,
           withdrawParams.address,
           withdrawParams.withdrawBps,
         )

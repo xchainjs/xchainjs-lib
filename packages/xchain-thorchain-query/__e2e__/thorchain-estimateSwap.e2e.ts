@@ -6,10 +6,9 @@ import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { QuoteSwapParams, SwapEstimate, TxDetails } from '../src/types'
 import { AssetRuneNative } from '../src/utils'
-import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+const thorchainCache = new ThorchainCache(new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 const AssetAVAX = assetFromStringEx('AVAX.AVAX')

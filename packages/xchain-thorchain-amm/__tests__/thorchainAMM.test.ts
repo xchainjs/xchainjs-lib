@@ -26,7 +26,7 @@ describe('ThorchainAmm Client Test', () => {
     const input = new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBTC)
     const outboundAsset: Asset = AssetETH
     const outboundETHAmount = await thorchainQuery.convert(input, outboundAsset)
-    const EthAmount = new CryptoAmount(assetToBase(assetAmount('6.25601439')), AssetETH)
+    const EthAmount = new CryptoAmount(assetToBase(assetAmount('6.36639806')), AssetETH)
     expect(outboundETHAmount.assetAmount.amount().toFixed()).toEqual(EthAmount.assetAmount.amount().toFixed())
   })
 
@@ -34,7 +34,7 @@ describe('ThorchainAmm Client Test', () => {
     const input = new CryptoAmount(assetToBase(assetAmount(1)), AssetBTC)
     const outboundAsset: Asset = AssetRuneNative
     const outboundRuneAmount = await thorchainQuery.convert(input, outboundAsset)
-    const expectedAmount = new CryptoAmount(assetToBase(assetAmount('10896.63786286')), AssetRuneNative)
+    const expectedAmount = new CryptoAmount(assetToBase(assetAmount('10420.94599452')), AssetRuneNative)
     expect(outboundRuneAmount.assetAmount.amount()).toEqual(expectedAmount.assetAmount.amount())
   })
 
@@ -42,7 +42,7 @@ describe('ThorchainAmm Client Test', () => {
     const input = new CryptoAmount(assetToBase(assetAmount(100)), AssetRuneNative)
     const outboundAsset: Asset = AssetBTC
     const outboundBTCAmount = await thorchainQuery.convert(input, outboundAsset)
-    const expectedAmount = new CryptoAmount(assetToBase(assetAmount('917714')), AssetBTC)
+    const expectedAmount = new CryptoAmount(assetToBase(assetAmount('959606')), AssetBTC)
     expect(outboundBTCAmount.baseAmount.amount()).toEqual(expectedAmount.assetAmount.amount())
   })
 })

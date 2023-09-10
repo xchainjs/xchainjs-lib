@@ -13,14 +13,14 @@ export default {
     //Mock thorchain/inbound_addresses
     mock.onGet(/\/thorchain\/quote/).reply(function (config) {
       const parsedUrl = new URL(`${config.url}`)
-      const from_asset = parsedUrl.searchParams.get("from_asset") ?? ""
-      const to_asset = parsedUrl.searchParams.get("to_asset") ?? ""
-      if(from_asset.match('/')) {
+      const from_asset = parsedUrl.searchParams.get('from_asset') ?? ''
+      const to_asset = parsedUrl.searchParams.get('to_asset') ?? ''
+      if (from_asset.match('/')) {
         const resp = require(`./responses/thornode/s${from_asset.split('/')[0]}SwapTos${to_asset.split('/')[0]}.json`)
-        return [200, resp];
+        return [200, resp]
       } else {
         const resp = require(`./responses/thornode/${from_asset.split('.')[0]}SwapTo${to_asset.split('.')[0]}.json`)
-        return [200, resp];
+        return [200, resp]
       }
     })
 

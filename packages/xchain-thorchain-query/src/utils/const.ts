@@ -11,6 +11,7 @@ export const AssetATOM = assetFromStringEx('GAIA.ATOM')
 export const AssetMAYA = assetFromStringEx('MAYA.CACAO')
 export const AssetBSC = assetFromStringEx('BSC.BNB')
 export const AssetRuneNative = assetFromStringEx('THOR.RUNE')
+export const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 export const BNBChain = 'BNB'
 export const BTCChain = 'BTC'
