@@ -18,28 +18,20 @@ import { Wallet } from '../src/wallet'
 
 require('dotenv').config()
 
-const thorchainCacheMainnet = new ThorchainCache(new Thornode(Network.Mainnet))
-const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
-
-const thorchainCacheStagenet = new ThorchainCache(new Thornode(Network.Stagenet))
-const thorchainQueryStagenet = new ThorchainQuery(thorchainCacheStagenet)
-
 const midgardCacheMainnet = new MidgardCache(new Midgard(Network.Mainnet))
 const midgardQueryMainnet = new MidgardQuery(midgardCacheMainnet)
 
 const midgardCacheStagenet = new MidgardCache(new Midgard(Network.Stagenet))
 const midgardQueryStagenet = new MidgardQuery(midgardCacheStagenet)
 
-const mainnetWallet = new Wallet(
-  process.env.MAINNETPHRASE || 'you forgot to set the phrase',
-  thorchainQueryMainnet,
-  midgardQueryMainnet,
-)
-const stagenetWallet = new Wallet(
-  process.env.MAINNETPHRASE || 'you forgot to set the phrase',
-  thorchainQueryStagenet,
-  midgardQueryStagenet,
-)
+const thorchainCacheMainnet = new ThorchainCache(new Thornode(Network.Mainnet), midgardQueryMainnet)
+const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
+
+const thorchainCacheStagenet = new ThorchainCache(new Thornode(Network.Stagenet), midgardQueryStagenet)
+const thorchainQueryStagenet = new ThorchainQuery(thorchainCacheStagenet)
+
+const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
+const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryStagenet)
 
 const mainnetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 const stagenetThorchainAmm = new ThorchainAMM(thorchainQueryStagenet)

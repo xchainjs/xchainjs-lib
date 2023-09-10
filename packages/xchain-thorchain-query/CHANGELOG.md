@@ -1,3 +1,9 @@
+# v0.6.0 (2023-09-03)
+
+## Update
+
+- New param thorchain-cache constructor: midgard-query
+
 # v0.5.0 (2023-09-03)
 
 ## fix
