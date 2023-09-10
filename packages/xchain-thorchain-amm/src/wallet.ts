@@ -9,6 +9,7 @@ import { Client as DogeClient } from '@xchainjs/xchain-doge'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
+import { MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { Client as ThorClient, THORChain, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Address, Asset } from '@xchainjs/xchain-util'
@@ -31,6 +32,7 @@ export type NodeUrls = Record<Network, string>
  */
 export class Wallet {
   private thorchainQuery: ThorchainQuery
+  private midgardQuery: MidgardQuery
   clients: Record<string, XChainClient>
   evmHelpers: Record<string, EvmHelper>
   /**
@@ -40,10 +42,11 @@ export class Wallet {
    * @param thorchainCache - an instance of the ThorchainCache (could be pointing to stagenet,testnet,mainnet)
    * @returns Wallet
    */
-  constructor(phrase: string, thorchainQuery: ThorchainQuery) {
+  constructor(phrase: string, thorchainQuery: ThorchainQuery, midgardQuery: MidgardQuery) {
     this.thorchainQuery = thorchainQuery
+    this.midgardQuery = midgardQuery
 
-    const settings = { network: thorchainQuery.thorchainCache.midgard.network, phrase }
+    const settings = { network: midgardQuery.midgardCache.midgard.network, phrase }
     this.clients = {
       BCH: new BchClient(),
       BTC: new BtcClient(),
@@ -153,7 +156,7 @@ export class Wallet {
   }
 
   private async isThorname(name: string): Promise<boolean> {
-    const thornameDetails = await this.thorchainQuery.thorchainCache.midgard.getTHORNameDetails(name)
+    const thornameDetails = await this.midgardQuery.midgardCache.midgard.getTHORNameDetails(name)
     return thornameDetails !== undefined
   }
 

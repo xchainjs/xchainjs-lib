@@ -5,15 +5,9 @@ import { Network } from '@xchainjs/xchain-client'
 import { AssetATOM } from '@xchainjs/xchain-cosmos'
 import { AssetETH, ETHChain } from '@xchainjs/xchain-ethereum'
 import { AssetLTC } from '@xchainjs/xchain-litecoin'
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
-import {
-  CryptoAmount,
-  Midgard,
-  ThorchainCache,
-  ThorchainQuery,
-  Thornode,
-  TxDetails,
-} from '@xchainjs/xchain-thorchain-query'
+import { CryptoAmount, ThorchainCache, ThorchainQuery, Thornode, TxDetails } from '@xchainjs/xchain-thorchain-query'
 import { Asset, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 import { fail } from 'assert'
 import BigNumber from 'bignumber.js'
@@ -24,14 +18,28 @@ import { Wallet } from '../src/wallet'
 
 require('dotenv').config()
 
-const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+const thorchainCacheMainnet = new ThorchainCache(new Thornode(Network.Mainnet))
 const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 
-const thorchainCacheStagenet = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
+const thorchainCacheStagenet = new ThorchainCache(new Thornode(Network.Stagenet))
 const thorchainQueryStagenet = new ThorchainQuery(thorchainCacheStagenet)
 
-const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
-const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryStagenet)
+const midgardCacheMainnet = new MidgardCache(new Midgard(Network.Mainnet))
+const midgardQueryMainnet = new MidgardQuery(midgardCacheMainnet)
+
+const midgardCacheStagenet = new MidgardCache(new Midgard(Network.Stagenet))
+const midgardQueryStagenet = new MidgardQuery(midgardCacheStagenet)
+
+const mainnetWallet = new Wallet(
+  process.env.MAINNETPHRASE || 'you forgot to set the phrase',
+  thorchainQueryMainnet,
+  midgardQueryMainnet,
+)
+const stagenetWallet = new Wallet(
+  process.env.MAINNETPHRASE || 'you forgot to set the phrase',
+  thorchainQueryStagenet,
+  midgardQueryStagenet,
+)
 
 const mainnetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 const stagenetThorchainAmm = new ThorchainAMM(thorchainQueryStagenet)
