@@ -8,7 +8,6 @@ const thorchainQuery = new ThorchainQuery(thorchainCache)
 describe('Thorchain-query thorname Integration Tests', () => {
   it('should fetch thorname details', async () => {
     const thorname = await thorchainQuery.getThornameDetails('dx')
-
     console.log(thorname)
   })
 })

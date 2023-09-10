@@ -1,4 +1,4 @@
-import { LastBlock } from '@xchainjs/xchain-thornode'
+import { LastBlock, Thorname } from '@xchainjs/xchain-thornode'
 import {
   Address,
   Asset,
@@ -183,25 +183,6 @@ export class ThorchainQuery {
     }
     return txDetails
   }
-
-  // /**
-  //  * This is no longer used
-  //  * @param params - swap object
-  //  * @returns - constructed memo string
-  //  */
-  // private constructSwapMemo(memo: string, interfaceID: string): string {
-  //   const memoPart = memo.split(':')
-  //   if (memoPart.length > 3) {
-  //     memoPart[3] =
-  //       memoPart[3].length >= 3 ? memoPart[3].substring(0, memoPart[3].length - 3).concat(interfaceID) : interfaceID
-  //     let outmemo = ''
-  //     for (let i = 0; i < memoPart.length; i++) {
-  //       outmemo = outmemo.concat(`${memoPart[i]}:`)
-  //     }
-  //     return outmemo.substring(0, outmemo.length - 1)
-  //   }
-  //   return memo
-  // }
 
   /**
    * Works out how long an outbound Tx will be held by THORChain before sending.
@@ -1026,7 +1007,8 @@ export class ThorchainQuery {
     const errors: string[] = []
 
     const thornameResp = await this.thorchainCache.thornode.getThornameDetails(thorname, height)
-    const response: { error?: string } = JSON.parse(JSON.stringify(thornameResp))
+    const thornameRawData = thornameResp as unknown as Thorname // TODO: Until integrate THORNode PR
+    const response: { error?: string } = JSON.parse(JSON.stringify(thorname))
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
     if (errors.length > 0) {
       const errorResp: ThornameDetails = {
@@ -1041,17 +1023,17 @@ export class ThorchainQuery {
       return errorResp
     }
 
-    const thornameAliases: ThornameAlias[] = thornameResp.aliases.map((alias) => ({
+    const thornameAliases: ThornameAlias[] = thornameRawData.aliases.map((alias) => ({
       chain: alias.chain as Chain,
       address: alias.address as Address,
     }))
 
     const thornameDetails: ThornameDetails = {
-      name: thornameResp.name || '',
-      expireBlockHeight: thornameResp.expire_block_height || 0,
-      owner: thornameResp.owner || '',
-      preferredAsset: thornameResp.preferred_asset,
-      affiliateCollectorRune: thornameResp.affiliate_collector_rune || '',
+      name: thornameRawData.name || '',
+      expireBlockHeight: thornameRawData.expire_block_height || 0,
+      owner: thornameRawData.owner || '',
+      preferredAsset: thornameRawData.preferred_asset,
+      affiliateCollectorRune: thornameRawData.affiliate_collector_rune || '',
       aliases: thornameAliases,
     }
 
