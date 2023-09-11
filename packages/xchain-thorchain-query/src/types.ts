@@ -220,7 +220,7 @@ export type EstimateWithdrawSaver = {
   dustAmount: CryptoAmount
   dustThreshold: CryptoAmount
   expectedAssetAmount: CryptoAmount
-  fee: SaverWithdrawFees
+  fee: SaverFees
   expiry: Date
   toAddress: Address
   memo: string
@@ -233,22 +233,16 @@ export type EstimateWithdrawSaver = {
 export type SaverFees = {
   affiliate: CryptoAmount
   asset: Asset
-  outbound: CryptoAmount
-}
-
-export type SaverWithdrawFees = {
-  affiliate: CryptoAmount
-  asset: Asset
   liquidity: CryptoAmount
   outbound: CryptoAmount
-  totalBps: string
+  totalBps: number
 }
 
 export type QuoteFees = {
   asset: string
   liquidity?: string
   outbound?: string
-  total_bps?: string
+  total_bps?: number
 }
 
 export type SaversPosition = {

@@ -1,3 +1,9 @@
+# v0.28.7 (2023-09-11)
+
+## Update
+
+- Bumped dependencies for util
+
 # v0.28.6 (2023-08-11)
 
 ## Update

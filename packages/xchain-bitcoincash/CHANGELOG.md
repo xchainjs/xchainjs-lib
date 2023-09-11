@@ -1,3 +1,9 @@
+# v0.16.3 (2023-09-11)
+
+## Update
+
+- Bumped dependencies util & utxo Providers
+
 # v0.16.2 (2023-05-31)
 
 ## Update

@@ -1,3 +1,9 @@
+# v0.5.1 (2023-09-11)
+
+## Update
+
+- Updated thornode deps, adjusted new return types and fee object
+
 # v0.5.0 (2023-09-03)
 
 ## fix
