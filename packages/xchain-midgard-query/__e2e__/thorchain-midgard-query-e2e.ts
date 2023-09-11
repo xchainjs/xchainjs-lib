@@ -1,4 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
+import { THORNameDetails } from '@xchainjs/xchain-midgard'
 
 import { MidgardCache } from '../src/midgard-cache'
 import { MidgardQuery } from '../src/midgard-query'
@@ -8,8 +9,8 @@ import { Midgard } from '../src/utils/midgard'
 
 require('dotenv').config()
 
-const thorchainCache = new MidgardCache(new Midgard(Network.Mainnet))
-const thorchainQuery = new MidgardQuery(thorchainCache)
+const midgardCache = new MidgardCache(new Midgard(Network.Mainnet))
+const midgardQuery = new MidgardQuery(midgardCache)
 
 function printSaversPosition(saver: SaversPosition) {
   const expanded = {
@@ -22,6 +23,15 @@ function printSaversPosition(saver: SaversPosition) {
     asset: saver.asset,
   }
   console.log(expanded)
+}
+
+function printThorname(thorname: THORNameDetails | undefined) {
+  const thornameData = {
+    entries: thorname?.entries,
+    owner: thorname?.owner,
+    expire: thorname?.expire,
+  }
+  console.log(thornameData)
 }
 
 describe('Midgard-query liquidity action end to end Tests', () => {
@@ -45,7 +55,12 @@ describe('Midgard-query liquidity action end to end Tests', () => {
       asset: { chain: 'x', symbol: 'x', ticker: 'x', synth: false },
       address: addressAvax,
     }
-    const getSavers = await thorchainQuery.getSaverPositions([saverAtom, saverBtc, saverAvax, saverInvalid])
+    const getSavers = await midgardQuery.getSaverPositions([saverAtom, saverBtc, saverAvax, saverInvalid])
     getSavers.forEach((getSaver) => printSaversPosition(getSaver))
+  })
+  it(`Should get thorname`, async () => {
+    const thorname = await midgardQuery.midgardCache.midgard.getTHORNameDetails('gx')
+    console.log('thorname', thorname)
+    printThorname(thorname)
   })
 })
