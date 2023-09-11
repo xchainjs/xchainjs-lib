@@ -10,13 +10,13 @@ export class LiquidityPool {
   readonly pool: PoolDetail
   readonly mayanodeDetails: Pool
   readonly assetBalance: BaseAmount
-  readonly runeBalance: BaseAmount
+  readonly cacaoBalance: BaseAmount
   // readonly decimals: number
 
   readonly asset: Asset
   readonly assetString: string
-  readonly runeToAssetRatio: BigNumber
-  readonly assetToRuneRatio: BigNumber
+  readonly cacaoToAssetRatio: BigNumber
+  readonly assetToCacaoRatio: BigNumber
 
   constructor(pool: PoolDetail, mayanodeDetails: Pool) {
     this.pool = pool
@@ -28,10 +28,10 @@ export class LiquidityPool {
     // this.decimals = decimals
     this.assetString = this.pool.asset
     this.assetBalance = baseAmount(this.pool.assetDepth)
-    this.runeBalance = baseAmount(this.pool.runeDepth)
+    this.cacaoBalance = baseAmount(this.pool.runeDepth)
 
-    this.runeToAssetRatio = this.runeBalance.amount().div(this.assetBalance.amount())
-    this.assetToRuneRatio = this.assetBalance.amount().div(this.runeBalance.amount())
+    this.cacaoToAssetRatio = this.cacaoBalance.amount().div(this.assetBalance.amount())
+    this.assetToCacaoRatio = this.assetBalance.amount().div(this.cacaoBalance.amount())
   }
   isAvailable(): boolean {
     return this.pool.status.toLowerCase() === 'available'

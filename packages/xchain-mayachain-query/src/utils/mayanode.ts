@@ -193,7 +193,7 @@ export class Mayanode {
         const pools = await api.pools()
         return pools.data
       } catch (e) {
-        //console.error(e)
+        // console.error(e)
       }
     }
     throw new Error(`MAYANode not responding`)

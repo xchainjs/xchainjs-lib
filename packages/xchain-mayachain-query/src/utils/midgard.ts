@@ -16,15 +16,16 @@ import { MidgardConfig } from '../types'
 const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://midgard.ninerealms.com'],
+    midgardBaseUrls: ['https://midgard.mayachain.info'],
   },
   stagenet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://stagenet-midgard.ninerealms.com'],
+    midgardBaseUrls: ['https://stagenet.midgard.mayachain.info'],
   },
   testnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://testnet.midgard.thorchain.info'],
+    // midgard currently has no testnet
+    midgardBaseUrls: ['https://stagenet.midgard.mayachain.info'],
   },
 }
 
@@ -49,7 +50,7 @@ export class Midgard {
       try {
         return (await api.getPools()).data
       } catch (e) {
-        //console.error(e)
+        console.error(e)
       }
     }
     throw new Error(`Midgard not responding`)

@@ -1,7 +1,7 @@
 import { assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 
-import mockMidgardApi from '../__mocks__/midgard-api'
 import mockMayanodeApi from '../__mocks__/mayanode-api'
+import mockMidgardApi from '../__mocks__/midgard-api'
 import { CryptoAmount } from '../src/crypto-amount'
 import { MayachainQuery } from '../src/mayachain-query'
 import { AssetCacaoNative } from '../src/utils'
@@ -19,11 +19,12 @@ describe('decimal math tests', () => {
     mockMayanodeApi.init()
   })
   afterAll(() => {
-    mockMayanodeApi.restore()
+    mockMidgardApi.restore()
     mockMayanodeApi.restore()
   })
 
   it(`Should convert BTC to ETH `, async () => {
+    console.log('first test')
     const input = new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBTC)
     const amount = await mayachainQuery.mayachainCache.convert(input, AssetETH)
     const expected = new CryptoAmount(baseAmount('625601439'), AssetETH)

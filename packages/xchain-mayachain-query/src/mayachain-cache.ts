@@ -10,7 +10,7 @@ import { Mayanode } from './utils/mayanode'
 
 const SAME_ASSET_EXCHANGE_RATE = new BigNumber(1)
 const TEN_MINUTES = 10 * 60 * 1000
-const DEFAULT_THORCHAIN_DECIMALS = 8
+const DEFAULT_MAYACHAIN_DECIMALS = 8
 // const USD_ASSETS: Record<Network, Asset[]> = {
 //   mainnet: [
 //     assetFromStringEx('BNB.BUSD-BD1'),
@@ -44,8 +44,8 @@ export class MayachainCache {
    * Contrustor to create a MayachainCache
    *
    * @param midgard - an instance of the midgard API (could be pointing to stagenet,testnet,mainnet)
+   * @param mayanode
    * @param expirePoolCacheMillis - how long should the pools be cached before expiry
-   * @param expireAsgardCacheMillis - how long should the inboundAsgard Addresses be cached before expiry
    * @param expireInboundDetailsCacheMillis - how long should the InboundDetails be cached before expiry
    * @param expireNetworkValuesCacheMillis - how long should the Mimir/Constants be cached before expiry
    * @returns MayachainCache
@@ -70,7 +70,7 @@ export class MayachainCache {
   /**
    * Gets the exchange rate of the from asset in terms on the to asset
    *
-   * @param asset - cannot be RUNE.
+   * @param asset - cannot be CACAO.
    * @returns Promise<BigNumber>
    */
   async getExchangeRate(from: Asset, to: Asset): Promise<BigNumber> {
@@ -78,19 +78,19 @@ export class MayachainCache {
     if (eqAsset(from, to)) {
       exchangeRate = SAME_ASSET_EXCHANGE_RATE
     } else if (isAssetCacaoNative(from)) {
-      //  Runes per Asset
+      //  Cacaos per Asset
       const lpTo = await this.getPoolForAsset(to)
-      exchangeRate = lpTo.assetToRuneRatio
+      exchangeRate = lpTo.assetToCacaoRatio
     } else if (isAssetCacaoNative(to)) {
-      //  Asset per rune
+      //  Asset per cacao
       const lpFrom = await this.getPoolForAsset(from)
-      exchangeRate = lpFrom.runeToAssetRatio
+      exchangeRate = lpFrom.cacaoToAssetRatio
     } else {
       //  AssetA per AssetB
       const lpFrom = await this.getPoolForAsset(from)
       const lpTo = await this.getPoolForAsset(to)
       // from/R * R/to = from/to
-      exchangeRate = lpFrom.runeToAssetRatio.times(lpTo.assetToRuneRatio)
+      exchangeRate = lpFrom.cacaoToAssetRatio.times(lpTo.assetToCacaoRatio)
     }
     // console.log(` 1 ${assetToString(from)} = ${exchangeRate} ${assetToString(to)}`)
     return exchangeRate
@@ -99,11 +99,11 @@ export class MayachainCache {
   /**
    * Gets the Liquidity Pool for a given Asset
    *
-   * @param asset - cannot be RUNE, since Rune is the other side of each pool.
+   * @param asset - cannot be CACAO, since Cacao is the other side of each pool.
    * @returns Promise<LiquidityPool>
    */
   async getPoolForAsset(asset: Asset): Promise<LiquidityPool> {
-    if (isAssetCacaoNative(asset)) throw Error(`AssetRuneNative doesn't have a pool`)
+    if (isAssetCacaoNative(asset)) throw Error(`AssetCacaoNative doesn't have a pool`)
     const pools = await this.getPools()
     // Note: we use ticker, not asset string to get the same pool for both assets and synths
     // using ticker causes problems between same named tickers but different chains
@@ -143,15 +143,15 @@ export class MayachainCache {
    */
   private async refreshPoolCache(): Promise<void> {
     try {
-      const [thornodePools, midgardPools] = await Promise.all([this.mayanode.getPools(), this.midgard.getPools()])
+      const [mayanodePools, midgardPools] = await Promise.all([this.mayanode.getPools(), this.midgard.getPools()])
       const poolMap: Record<string, LiquidityPool> = {}
 
       if (midgardPools) {
         for (const pool of midgardPools) {
           try {
-            const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
-            if (!thornodePool) throw Error(`Could not find thornode pool ${pool.asset}`)
-            const lp = new LiquidityPool(pool, thornodePool)
+            const mayanodePool = mayanodePools.find((p) => p.asset === pool.asset)
+            if (!mayanodePool) throw Error(`Could not find mayanode pool ${pool.asset}`)
+            const lp = new LiquidityPool(pool, mayanodePool)
             poolMap[`${lp.asset.chain}.${lp.asset.ticker}`] = lp
           } catch (error) {
             console.log(error)
@@ -275,9 +275,9 @@ export class MayachainCache {
       const pool = await this.getPoolForAsset(asset)
       const decimals = Number(pool.pool.nativeDecimal)
       if (decimals > 0) return decimals
-      else return DEFAULT_THORCHAIN_DECIMALS
+      else return DEFAULT_MAYACHAIN_DECIMALS
     }
-    return DEFAULT_THORCHAIN_DECIMALS
+    return DEFAULT_MAYACHAIN_DECIMALS
   }
 
   async getRouterAddressForChain(chain: Chain): Promise<Address> {

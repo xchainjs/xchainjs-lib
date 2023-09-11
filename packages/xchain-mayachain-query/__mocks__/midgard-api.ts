@@ -1,6 +1,7 @@
 import mock from './axios-adapter'
 
 export default {
+  history: mock.history,
   reset: mock.reset,
   restore: mock.restore,
   init: () => {
@@ -9,18 +10,18 @@ export default {
       const resp = require(`./responses/midgard/pools.json`)
       return [200, resp]
     })
-    //Mock thorchain/mimir
-    mock.onGet(/\/v2\/thorchain\/mimir/).reply(function () {
+    //Mock mayachain/mimir
+    mock.onGet(/\/v2\/mayachain\/mimir/).reply(function () {
       const resp = require(`./responses/mimir/mimirConstants.json`)
       return [200, resp]
     })
-    //Mock thorchain/mimir
-    mock.onGet(/\/v2\/thorchain\/constants/).reply(function () {
+    //Mock mayachain/mimir
+    mock.onGet(/\/v2\/mayachain\/constants/).reply(function () {
       const resp = require(`./responses/thorchain/thorchainConstants.json`)
       return [200, resp]
     })
-    //Mock thorchain/mimir
-    mock.onGet(/\/v2\/thorchain\/queue/).reply(function () {
+    //Mock mayachain/mimir
+    mock.onGet(/\/v2\/mayachain\/queue/).reply(function () {
       const resp = require(`./responses/thorchain/outboundQueue.json`)
       return [200, resp]
     })

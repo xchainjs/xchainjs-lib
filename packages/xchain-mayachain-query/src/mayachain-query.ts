@@ -335,7 +335,7 @@ export class MayachainQuery {
       slipPercent: slip.times(100),
       poolShare: poolShare,
       lpUnits: baseAmount(lpUnits),
-      cacaoToAssetRatio: assetPool.runeToAssetRatio,
+      cacaoToAssetRatio: assetPool.cacaoToAssetRatio,
       inbound: {
         fees: {
           asset: assetInboundFee,
@@ -419,8 +419,8 @@ export class MayachainQuery {
   public async getPoolRatios(asset: Asset): Promise<PoolRatios> {
     const assetPool = await this.mayachainCache.getPoolForAsset(asset)
     const poolRatio: PoolRatios = {
-      assetToRune: assetPool.assetToRuneRatio,
-      cacaoToAsset: assetPool.runeToAssetRatio,
+      assetToRune: assetPool.assetToCacaoRatio,
+      cacaoToAsset: assetPool.cacaoToAssetRatio,
     }
     return poolRatio
   }

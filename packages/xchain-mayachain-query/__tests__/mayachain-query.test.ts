@@ -8,8 +8,8 @@ import { MayachainQuery } from '../src/mayachain-query'
 import { QuoteSwapParams, TxDetails } from '../src/types'
 
 //import { AssetRuneNative } from '../src/utils'
-const thorchainCache = new MayachainCache()
-const mayachainQuery = new MayachainQuery(thorchainCache)
+const mayachainCache = new MayachainCache()
+const mayachainQuery = new MayachainQuery(mayachainCache)
 
 // const assetUOS = assetFromStringEx('ETH.UOS-0XD13C7342E1EF687C5AD21B27C2B65D772CAB5C8C')
 // const assetEthUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
