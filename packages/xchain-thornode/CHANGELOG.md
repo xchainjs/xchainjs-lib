@@ -1,3 +1,9 @@
+# v0.3.6 (2023-09-11)
+
+## Update
+
+- updated thornode to the latest 1.120.1
+
 # v0.3.5 (2023-08-25)
 
 ## Update

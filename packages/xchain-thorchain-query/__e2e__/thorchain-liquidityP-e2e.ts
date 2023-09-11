@@ -99,7 +99,9 @@ function printSaver(saver: EstimateAddSaver) {
     fee: {
       affiliateFee: saver.fee.affiliate.formatedAssetString(),
       asset: saver.fee.asset,
+      liquidity: saver.fee.liquidity.formatedAssetString(),
       outbound: saver.fee.outbound.formatedAssetString(),
+      totalBps: saver.fee.totalBps,
     },
     expiry: saver.expiry,
     toAddress: saver.toAddress,
@@ -119,6 +121,8 @@ function printWithdrawSaver(saver: EstimateWithdrawSaver) {
       affiliate: saver.fee.affiliate.formatedAssetString(),
       liquidityFee: saver.fee.asset,
       totalFees: saver.fee.outbound.formatedAssetString(),
+      outbound: saver.fee.outbound.formatedAssetString(),
+      totalBps: saver.fee.totalBps,
     },
     expiry: saver.expiry,
     toAddress: saver.toAddress,

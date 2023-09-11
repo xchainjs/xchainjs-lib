@@ -12,7 +12,7 @@ const defaultMidgard = new Midgard()
  * This class manages retrieving information from Midgard API and cached it
  */
 export class MidgardCache {
-  private readonly midgard: Midgard
+  readonly midgard: Midgard
   private readonly cachedPools: CachedValue<PoolDetail[]>
   private readonly cachedSavers: CachedValue<SaverDetails>
   /**

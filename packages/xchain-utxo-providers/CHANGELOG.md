@@ -1,3 +1,9 @@
+# v0.2.3 (2023-09-11)
+
+## Update
+
+- Bumped dependencies for client &  util
+
 # v0.2.2 (2023-06-07)
 
 ## Update
