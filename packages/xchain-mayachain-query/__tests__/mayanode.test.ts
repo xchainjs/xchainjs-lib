@@ -12,29 +12,28 @@ describe(`Mayanode transaction status tests`, () => {
   afterEach(() => {
     mockMayanodeApi.restore()
   })
-  const txResp = `276CE5005FF822294773C549E74513636808A6A9817FE7ADCE1709EE06BC7F52`
+  const txResp = `40CB2D3323F3A68B15B270419A24D3894DC02B56FD6DA73E5560F91B8B1C0FBF`
 
   it(`Should return thornode txData from hash and match chain btc`, async () => {
     const txStatus = await mayanode.getTxData(txResp)
-    expect(txStatus.observed_tx?.tx.chain).toEqual('BTC')
+    expect(txStatus.observed_tx?.tx.chain).toEqual('MAYA')
   })
 
   it(`Should return get scheduled Queue`, async () => {
     const getscheduledQueue = await mayanode.getscheduledQueue()
     expect(getscheduledQueue).toBeTruthy()
-    expect(getscheduledQueue[0].chain).toEqual('BNB')
+    expect(getscheduledQueue[0].chain).toEqual('ETH')
   })
 
   it(`Should return get last block`, async () => {
     const lastBlock = await mayanode.getLastBlock()
     expect(lastBlock).toBeTruthy()
-    expect(lastBlock[0].chain).toEqual('BCH')
+    expect(lastBlock[0].chain).toEqual('BTC')
   })
-  it(`Should return networkValue by name`, async () => {
+  // skip due to networkName key not supported in /mimir
+  it.skip(`Should return networkValue by name`, async () => {
     const networkValues = await mayanode.getNetworkValues()
     const val = networkValues[networkName.toUpperCase()]
-    console.log(val)
-    console.log(networkValues)
     expect(val).toBeTruthy()
     expect(val).toEqual(FullImpLossProtectionBlocks)
   })
