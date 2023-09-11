@@ -261,11 +261,7 @@ export class Mayanode {
    * @param height - optional block height, defaults to current tip
    * @returns
    */
-  async getLiquidityProvider(
-    asset: string,
-    address: string,
-    height?: number,
-  ): Promise<LiquidityProvider | undefined> {
+  async getLiquidityProvider(asset: string, address: string, height?: number): Promise<LiquidityProvider | undefined> {
     for (const api of this.liquidityProvidersApi) {
       try {
         const lps = (await api.liquidityProviders(asset, height)).data

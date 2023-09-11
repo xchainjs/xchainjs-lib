@@ -1,7 +1,7 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard'
 
-import mockMidgardApi from '../__mocks__/midgard-api'
 import mockMayanodeApi from '../__mocks__/mayanode-api'
+import mockMidgardApi from '../__mocks__/midgard-api'
 import { Midgard } from '../src/utils/midgard'
 
 const mainnetMidgard = new Midgard()

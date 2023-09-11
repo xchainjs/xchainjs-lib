@@ -5,8 +5,8 @@ import { CryptoAmount } from './crypto-amount'
 import { LiquidityPool } from './liquidity-pool'
 import { InboundDetail, InboundDetailCache, NetworkValuesCache, PoolCache } from './types'
 import { MAYAChain, isAssetCacaoNative } from './utils'
-import { Midgard } from './utils/midgard'
 import { Mayanode } from './utils/mayanode'
+import { Midgard } from './utils/midgard'
 
 const SAME_ASSET_EXCHANGE_RATE = new BigNumber(1)
 const TEN_MINUTES = 10 * 60 * 1000

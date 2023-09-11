@@ -192,10 +192,7 @@ export class MayachainQuery {
    */
   async outboundDelay(outboundAmount: CryptoAmount): Promise<number> {
     const networkValues = await this.mayachainCache.getNetworkValues()
-    const minTxOutVolumeThreshold = new CryptoAmount(
-      baseAmount(networkValues['MINTXOUTVOLUMETHRESHOLD']),
-      AssetCacao,
-    )
+    const minTxOutVolumeThreshold = new CryptoAmount(baseAmount(networkValues['MINTXOUTVOLUMETHRESHOLD']), AssetCacao)
     const maxTxOutOffset = networkValues['MAXTXOUTOFFSET']
     let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetCacao).assetAmount
       .amount()

@@ -1,10 +1,10 @@
-import { PoolDetail } from '@xchainjs/xchain-midgard'
 import { Pool } from '@xchainjs/xchain-mayanode'
+import { PoolDetail } from '@xchainjs/xchain-midgard'
 import { assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
-import mockMidgardApi from '../__mocks__/midgard-api'
 import mockMayanodeApi from '../__mocks__/mayanode-api'
+import mockMidgardApi from '../__mocks__/midgard-api'
 import { CryptoAmount } from '../src/crypto-amount'
 import { LiquidityPool } from '../src/liquidity-pool'
 import { MayachainQuery } from '../src/mayachain-query'

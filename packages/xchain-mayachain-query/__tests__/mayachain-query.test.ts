@@ -1,7 +1,7 @@
 import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
-import mockMidgardApi from '../__mocks__/midgard-api'
 import mockMayanodeApi from '../__mocks__/mayanode-api'
+import mockMidgardApi from '../__mocks__/midgard-api'
 import { CryptoAmount } from '../src/crypto-amount'
 import { MayachainCache } from '../src/mayachain-cache'
 import { MayachainQuery } from '../src/mayachain-query'

@@ -1,5 +1,5 @@
-import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
 import { Pool } from '@xchainjs/xchain-mayanode/lib'
+import { PoolDetail } from '@xchainjs/xchain-midgard/lib'
 import { Asset, BaseAmount, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
