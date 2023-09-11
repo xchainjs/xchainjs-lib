@@ -26,12 +26,12 @@ export default {
 
     //Mock mayanode pools
     mock.onGet(/\/mayachain\/pools/).reply(function () {
-      const resp = require(`./responses/mayanode/thornodePools.json`)
+      const resp = require(`./responses/mayanode/mayanodePools.json`)
       return [200, resp]
     })
     //Mock mayanode observed tx
-    mock.onGet(/\/mayachain\/tx\/276CE5005FF822294773C549E74513636808A6A9817FE7ADCE1709EE06BC7F52/).reply(function () {
-      const resp = require(`./responses/mayanode/thornodeObservedTx.json`)
+    mock.onGet(/\/mayachain\/tx\/40CB2D3323F3A68B15B270419A24D3894DC02B56FD6DA73E5560F91B8B1C0FBF/).reply(function () {
+      const resp = require(`./responses/mayanode/mayanodeObservedTx.json`)
       return [200, resp]
     })
     //Mock mayanode unobserved tx
@@ -41,7 +41,7 @@ export default {
     })
     // Mock mayanode incomplete tx
     mock.onGet(/\/mayachain\/tx\/28833B25B58B1907A3E4171E991DEB5E168A98829810F1215E0959D59BDD7CF5/).reply(function () {
-      const resp = require('./responses/mayanode/thornodeIncompleteTx.json')
+      const resp = require('./responses/mayanode/mayanodeIncompleteTx.json')
       return [200, resp]
     })
     // Mock mayanode block height difference
@@ -66,8 +66,8 @@ export default {
     })
 
     // Mock Outbound Confirmed tx
-    mock.onGet(/\/mayachain\/tx\/776CE5005FF822294773C549E74513636808A6A9817FE7ADCE1709EE06BC7F53/).reply(function () {
-      const resp = require('./responses/mayanode/thornodeTx.json')
+    mock.onGet(/\/mayachain\/tx\/C78464BFACC6A5F0A538F12A044DE58B44EF6077111FC8868E5C2EF8BE9A48B4/).reply(function () {
+      const resp = require('./responses/mayanode/mayanodeTx.json')
       return [200, resp]
     })
     // Mock constants tx

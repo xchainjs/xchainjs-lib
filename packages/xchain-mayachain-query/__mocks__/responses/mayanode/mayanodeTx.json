@@ -1,0 +1,50 @@
+{
+	"observed_tx": {
+		"tx": {
+			"id": "C78464BFACC6A5F0A538F12A044DE58B44EF6077111FC8868E5C2EF8BE9A48B4",
+			"chain": "MAYA",
+			"from_address": "maya10q0s8avwafmln3ejkzkkdkcy5zqau70a9fsyqs",
+			"to_address": "maya1g98cy3n9mmjrpn0sxmn63lztelera37n8yyjwl",
+			"coins": [
+				{
+					"asset": "MAYA.CACAO",
+					"amount": "10"
+				}
+			],
+			"gas": [
+				{
+					"asset": "MAYA.CACAO",
+					"amount": "10000000000"
+				}
+			],
+			"memo": "-:eth.usdt:50:maya.cacao"
+		},
+		"status": "done",
+		"out_hashes": [
+			"0000000000000000000000000000000000000000000000000000000000000000"
+		],
+		"signers": [
+			"maya12amvthg5jqv99j0w4pnmqwqnysgvgljxmazgnq",
+			"maya13du3gfgaaht0yly0lxzzm8zqm5whmq6jv30r5h",
+			"maya15uy36yhdyyv766ejxry5y3dspu53hjlylvst6m",
+			"maya16ml8r3y2wc87v3ztw5lq7xz9u8xlfh6cpnflef",
+			"maya17daqdt5d5fy84fs7jxgcx7xtcmsnp0rhz9c57g",
+			"maya19cjeqdzc7g3rr7zah9kmvevmssrc2vkr53lmgh",
+			"maya1a9yx064qcjn8en4eal5sqragshtqdq0dj6maya",
+			"maya1e6mp4nhgpsapttkegxptjn5az27ljpe80q6h2k",
+			"maya1gv85v0jvc0rsjunku3qxempax6kmrg5jqh8vmg",
+			"maya1q3jj8n8pkvl2kjv3pajdyju4hp92cmxnadknd2",
+			"maya1qshnkd7k445gd649a2k595vs6cfmwuceq0yxfz",
+			"maya1rw0u9q4p4a9kaellp7m2x2rsu4teqm475cdash",
+			"maya1rzr9m407svj4jmc6rsxzsg75cx7gm3lsyyttyj",
+			"maya1sdzg4pxe80h4tm85pkjalwtdzkwqs6cgc8pk75",
+			"maya1v6lt70lqkhxhftlpx26d52ryzc6s3fl4adyzuv",
+			"maya1v7gqc98d7d2sugsw5p4pshv0mm24mfmzgmj64n",
+			"maya1vm43yk3jq0evzn2u6a97mh2k9x4xf5mzp62g23"
+		]
+	},
+	"keysign_metric": {
+		"tx_id": "C78464BFACC6A5F0A538F12A044DE58B44EF6077111FC8868E5C2EF8BE9A48B4",
+		"node_tss_times": null
+	}
+}
