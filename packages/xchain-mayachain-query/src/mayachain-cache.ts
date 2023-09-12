@@ -154,7 +154,7 @@ export class MayachainCache {
             const lp = new LiquidityPool(pool, mayanodePool)
             poolMap[`${lp.asset.chain}.${lp.asset.ticker}`] = lp
           } catch (error) {
-            console.log(error)
+            // console.log(error)
           }
         }
 

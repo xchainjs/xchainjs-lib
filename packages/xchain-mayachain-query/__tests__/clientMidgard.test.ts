@@ -16,27 +16,21 @@ describe('Midgard Client Test', () => {
     mockMayanodeApi.restore()
   })
 
-  const poolDetail: PoolDetail = {
-    annualPercentageRate: '0.0925796460549001',
-    asset: 'BCH.BCH',
-    assetDepth: '580355957856',
-    assetPrice: '64.89141427538918',
-    assetPriceUSD: '129.74904173711747',
-    liquidityUnits: '21436675546946',
-    nativeDecimal: '8',
-    saversDepth: '0',
-    saversUnits: '0',
-    saversAPR: '0',
-    poolAPY: '0.0925796460549001',
-    runeDepth: '37660118888424',
+  const poolDetail = {
+    annualPercentageRate: '0.013595729691758521',
+    asset: 'ETH.ETH',
+    assetDepth: '90203564606',
+    assetPrice: '15946.534299949502',
+    assetPriceUSD: '1574.2655930114458',
+    liquidityUnits: '137524482425559951',
+    poolAPY: '0.013595729691758521',
+    runeDepth: '143843423696728998',
     status: 'available',
-    synthSupply: '32889120336',
-    synthUnits: '625127816672',
-    units: '22061803363618',
-    volume24h: '8370845079708',
-    totalCollateral: '',
-    totalDebtTor: '',
-  }
+    synthSupply: '892853674',
+    synthUnits: '684008216230231',
+    units: '138208490641790182',
+    volume24h: '2818226141063648',
+  } as PoolDetail
   // const inboundBCHAdress: InboundAddressesItem = {
   //   chain: 'BCH',
   //   pub_key: 'thorpub1addwnpepq2fsvewl3ph68mx4v70v46eu7d36dkyuenk9p5d59gaf7kn4l3gczenjkw0',
