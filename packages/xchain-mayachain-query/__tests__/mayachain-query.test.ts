@@ -8,10 +8,10 @@ import { MayachainQuery } from '../src/mayachain-query'
 import { QuoteSwapParams, TxDetails } from '../src/types'
 
 //import { AssetRuneNative } from '../src/utils'
-const mayachainCache = new MayachainCache()
-const mayachainQuery = new MayachainQuery(mayachainCache)
-
 // const assetUOS = assetFromStringEx('ETH.UOS-0XD13C7342E1EF687C5AD21B27C2B65D772CAB5C8C')
+let mayachainCache: MayachainCache
+let mayachainQuery: MayachainQuery
+
 // const assetEthUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 // const assetAVAXUSDC = assetFromStringEx(`AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E`)
 // const BUSD = assetFromStringEx('BNB.BUSD-BD1')
@@ -54,6 +54,9 @@ describe('Mayachain-query tests', () => {
   beforeAll(() => {
     mockMidgardApi.init()
     mockMayanodeApi.init()
+
+    mayachainCache = new MayachainCache()
+    mayachainQuery = new MayachainQuery(mayachainCache)
   })
   afterAll(() => {
     mockMidgardApi.restore()

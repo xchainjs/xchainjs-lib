@@ -377,7 +377,7 @@ export class Mayanode {
    * @param fromAsset - input asset
    * @param toAsset - output asset
    * @param amount - amount to swap
-   * @param destination - vault address
+   * @param destinationAddress - destination address for the swap
    * @param toleranceBps - slip percent
    * @param affiliateBps - affiliate percent
    * @param affiliate - affiliate address
