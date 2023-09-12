@@ -628,11 +628,13 @@ export class ThorchainQuery {
     if (errors.length > 0) {
       return {
         assetAmount: addAmount,
-        estimatedDepositValue: new CryptoAmount(assetToBase(assetAmount(0)), addAmount.asset),
+        estimatedDepositValue: new CryptoAmount(baseAmount(0), addAmount.asset),
         fee: {
-          affiliate: new CryptoAmount(assetToBase(assetAmount(0)), addAmount.asset),
+          affiliate: new CryptoAmount(baseAmount(0), addAmount.asset),
           asset: addAmount.asset,
-          outbound: new CryptoAmount(assetToBase(assetAmount(0)), addAmount.asset),
+          outbound: new CryptoAmount(baseAmount(0), addAmount.asset),
+          liquidity: new CryptoAmount(baseAmount(0), addAmount.asset),
+          totalBps: depositQuote.fees.total_bps || 0,
         },
         expiry: new Date(0),
         toAddress: '',
@@ -645,20 +647,15 @@ export class ThorchainQuery {
         errors,
       }
     }
-    // Calculate transaction expiry time of the vault address
-    const currentDatetime = new Date()
-    const minutesToAdd = 15
-    const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
-    // Calculate seconds
-    const estimatedWait = depositQuote.inbound_confirmation_seconds
-      ? depositQuote.inbound_confirmation_seconds
-      : await this.confCounting(addAmount)
+
     const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).thornodeDetails
     // Organise fees
     const saverFees: SaverFees = {
       affiliate: new CryptoAmount(baseAmount(depositQuote.fees.affiliate), addAmount.asset),
       asset: assetFromStringEx(depositQuote.fees.asset),
       outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound), addAmount.asset),
+      liquidity: new CryptoAmount(baseAmount(depositQuote.fees.liquidity), addAmount.asset),
+      totalBps: depositQuote.fees.total_bps || 0,
     }
     // define savers filled capacity
     const saverCapFilledPercent = (Number(pool.synth_supply) / Number(pool.balance_asset)) * 100
@@ -667,10 +664,10 @@ export class ThorchainQuery {
       assetAmount: new CryptoAmount(baseAmount(depositQuote.expected_amount_out), addAmount.asset),
       estimatedDepositValue: new CryptoAmount(baseAmount(depositQuote.expected_amount_deposit), addAmount.asset),
       fee: saverFees,
-      expiry: expiryDatetime,
+      expiry: new Date(depositQuote.expiry),
       toAddress: depositQuote.inbound_address,
       memo: depositQuote.memo,
-      estimatedWaitTime: estimatedWait,
+      estimatedWaitTime: depositQuote.inbound_confirmation_seconds || 0,
       canAddSaver: errors.length === 0,
       slipBasisPoints: depositQuote.slippage_bps,
       saverCapFilledPercent,
@@ -716,7 +713,7 @@ export class ThorchainQuery {
             ),
             withdrawParams.asset,
           ),
-          totalBps: '',
+          totalBps: 0,
         },
         expiry: new Date(0),
         toAddress: '',
@@ -743,7 +740,7 @@ export class ThorchainQuery {
           asset: withdrawParams.asset,
           liquidity: new CryptoAmount(baseAmount(0), withdrawParams.asset),
           outbound: new CryptoAmount(baseAmount(0), withdrawParams.asset),
-          totalBps: '',
+          totalBps: 0,
         },
         expiry: new Date(0),
         toAddress: '',
@@ -765,7 +762,7 @@ export class ThorchainQuery {
         asset: withdrawAsset,
         liquidity: new CryptoAmount(baseAmount(withdrawQuote.fees.liquidity), withdrawAsset),
         outbound: new CryptoAmount(baseAmount(withdrawQuote.fees.outbound), withdrawAsset),
-        totalBps: withdrawQuote.fees.total_bps || '',
+        totalBps: withdrawQuote.fees.total_bps || 0,
       },
       expiry: new Date(withdrawQuote.expiry),
       toAddress: withdrawQuote.inbound_address,

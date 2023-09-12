@@ -2,6 +2,7 @@
 
 ## Update
 
+- Updated thornode deps, adjusted new return types and fee object
 - New param thorchain-cache constructor: midgard-query
 
 # v0.5.0 (2023-09-03)
