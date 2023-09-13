@@ -37,12 +37,13 @@ export class ThorchainCache {
    */
   constructor(
     thornode = defaultThornode,
+    midgardQuery = defaultMidgardQuery,
     expirePoolCacheMillis = 6000,
     expireInboundDetailsCacheMillis = 6000,
     expireNetworkValuesCacheMillis = TEN_MINUTES,
   ) {
     this.thornode = thornode
-    this.midgardQuery = defaultMidgardQuery
+    this.midgardQuery = midgardQuery
 
     this.poolCache = new CachedValue<Record<string, LiquidityPool> | undefined>(
       () => this.refreshPoolCache(),

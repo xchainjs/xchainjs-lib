@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Configuration, MidgardApi, PoolDetail, SaverDetails } from '@xchainjs/xchain-midgard'
+import { Configuration, MidgardApi, PoolDetail, SaverDetails, THORNameDetails } from '@xchainjs/xchain-midgard'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 
@@ -64,5 +64,24 @@ export class Midgard {
       }
     }
     throw new Error(`Midgard not responding`)
+  }
+
+  public async getTHORNameDetails(name: string): Promise<THORNameDetails | undefined> {
+    for (const api of this.midgardApis) {
+      try {
+        const resp = await api.getTHORNameDetail(name)
+        if (resp.status == 404) {
+          return undefined
+        } else if (resp.status == 200) {
+          return resp.data
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
+        if (e.response.status == 404) {
+          return undefined
+        }
+      }
+    }
+    throw Error(`Midgard not responding`)
   }
 }

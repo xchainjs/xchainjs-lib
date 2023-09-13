@@ -43,7 +43,7 @@ export class Wallet {
   constructor(phrase: string, thorchainQuery: ThorchainQuery) {
     this.thorchainQuery = thorchainQuery
 
-    const settings = { network: thorchainQuery.thorchainCache.midgard.network, phrase }
+    const settings = { network: this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network, phrase }
     this.clients = {
       BCH: new BchClient(),
       BTC: new BtcClient(),
@@ -153,7 +153,8 @@ export class Wallet {
   }
 
   private async isThorname(name: string): Promise<boolean> {
-    const thornameDetails = await this.thorchainQuery.thorchainCache.midgard.getTHORNameDetails(name)
+    const thornameDetails =
+      await this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.getTHORNameDetails(name) // Update when thorchainCache expose getTHORNameDetails method
     return thornameDetails !== undefined
   }
 
