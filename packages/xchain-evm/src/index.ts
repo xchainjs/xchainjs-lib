@@ -7,17 +7,14 @@ export {
   estimateCall,
   // estimateDefaultFeesWithGasPricesAndLimits,
   getApprovalAmount,
-  // getDecimal,
   // getDefaultFees,
   // getDefaultGasPrices,
   getTokenAddress,
   getPrefix,
-  // getFee,
+  getFee,
   isApproved,
   strip0x,
   validateAddress,
-  // ETHAddress,
-  // ETH_DECIMAL,
   MAX_APPROVAL,
 } from './utils'
 
