@@ -115,10 +115,13 @@ describe('etherscan Integration Tests (BSC)', () => {
 })
 
 describe('etherscan Integration Tests (ETH)', () => {
+  // as per https://docs.ethers.org/v5/api/providers/api-providers/#EtherscanProvider
+  const network = ethers.providers.getNetwork('sepolia')
   const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(
-    'sepolia',
-    process.env['ETHERSCAN_API_KEY'],
+    network,
+    process.env['ETHERSCAN_API'] || '',
   )
+
   // Define here to avoid cyclic dependency
   const ETHChain = 'ETH'
   const AssetETH: Asset = {
@@ -135,8 +138,8 @@ describe('etherscan Integration Tests (ETH)', () => {
     AssetETH,
     18,
   )
-  it('should fetch all balances 1', async () => {
-    const balances = await provider.getBalance('0x26000cc95ab0886FE8439E53c73b1219Eba9DBCF')
+  it('should fetch all balances sepolia', async () => {
+    const balances = await provider.getBalance('0xFf5800fbd96906532a4366CE1A01a904a5dA0FB9')
     balances.forEach((bal: Balance) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
@@ -144,7 +147,7 @@ describe('etherscan Integration Tests (ETH)', () => {
   })
 
   it('should fetch alltxs', async () => {
-    const txs = await provider.getTransactions({ address: '0x26000cc95ab0886FE8439E53c73b1219Eba9DBCF' })
+    const txs = await provider.getTransactions({ address: '0xFf5800fbd96906532a4366CE1A01a904a5dA0FB9' })
     txs.txs.forEach((tx) => {
       console.log(JSON.stringify(tx))
     })

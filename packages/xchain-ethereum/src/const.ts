@@ -23,7 +23,9 @@ const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(
   'homestead',
   process.env['ETHERSCAN_API_KEY'],
 )
-const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider('sepolia', process.env['ETHERSCAN_API_KEY'])
+// as per https://docs.ethers.org/v5/api/providers/api-providers/#EtherscanProvider
+const network = ethers.providers.getNetwork('sepolia')
+const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(network, process.env['ETHERSCAN_API'] || '')
 
 const ethersJSProviders = {
   [Network.Mainnet]: ETH_MAINNET_ETHERS_PROVIDER,
