@@ -63,4 +63,16 @@ describe('Midgard-query liquidity action end to end Tests', () => {
     console.log('thorname', thorname)
     printThorname(thorname)
   })
+  it(`Should get thornames by alias address`, async () => {
+    const thornames = await midgardQuery.midgardCache.midgard.getTHORNameReverseLookup(
+      'bc1qy6hm644lr8ezl37wn0x59fzd5ps4k4hpufw0dp',
+    )
+    console.log('thornames', thornames)
+  })
+  it(`Try get thornames by alias address`, async () => {
+    const thornames = await midgardQuery.midgardCache.midgard.getTHORNameReverseLookup(
+      'thor138yxnksuhm37j9qqcugt3xzh8cykgvmmtgt63u',
+    )
+    console.log('thornames', thornames)
+  })
 })

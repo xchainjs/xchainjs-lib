@@ -340,3 +340,13 @@ export type ThornameAlias = {
   chain: Chain
   address: Address
 }
+
+export type QuoteThornameParams = {
+  thorname: string
+  chain: string
+  chainAddress: string
+  owner?: string
+  preferredAsset?: Asset | null
+  expirity?: Date
+  isUpdate?: boolean
+}

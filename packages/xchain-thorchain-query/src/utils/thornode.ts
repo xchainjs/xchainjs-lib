@@ -500,13 +500,16 @@ export class Thornode {
     throw new Error(`THORNode is not responding`)
   }
 
-  async getThornameDetails(thorname: string, height?: number): Promise<ThornameResponse> {
+  async getThornameDetails(thorname: string, height?: number): Promise<ThornameResponse | undefined> {
     for (const api of this.thornamesApi) {
       try {
         const resp = (await api.thorname(thorname, height)).data
         return resp
-      } catch (e) {
-        // console.log(e)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
+        if (e.response.status == 404) {
+          return undefined
+        }
       }
     }
     throw new Error(`THORNode is not responding`)

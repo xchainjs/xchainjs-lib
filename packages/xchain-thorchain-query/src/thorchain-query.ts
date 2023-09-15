@@ -31,6 +31,7 @@ import {
   PoolRatios,
   PostionDepositValue,
   QuoteSwapParams,
+  QuoteThornameParams,
   SaverFees,
   SaversPosition,
   SaversWithdraw,
@@ -1000,7 +1001,7 @@ export class ThorchainQuery {
    * @param thorname - input param
    * @returns retrieves details for a thorname
    */
-  public async getThornameDetails(thorname: string, height?: number): Promise<ThornameDetails> {
+  public async getThornameDetails(thorname: string, height?: number): Promise<ThornameDetails | undefined> {
     const errors: string[] = []
 
     const thornameResp = await this.thorchainCache.thornode.getThornameDetails(thorname, height)
@@ -1035,5 +1036,62 @@ export class ThorchainQuery {
     }
 
     return thornameDetails // Return the array
+  }
+
+  /**
+   * Generate the memo and estimate the cost of register or update a THORName
+   * @param thorname - Name to register
+   * @param chain - Chain to update / register
+   * @param chainAddress - Address to add to chain alias
+   * @param owner - Owner address (rune address)
+   * @param preferredAsset - referred asset
+   * @param expirity - expirity of the domain in MILLISECONDS
+   * @param isUpdate - true only if the domain is already register and you want to update its data
+   * @returns memo and value of deposit
+   */
+  public async estimateThorname(params: QuoteThornameParams) {
+    // CHECK IF ALREADY EXISTS
+    const thornameDetails = (await this.thorchainCache.thornode.getThornameDetails(
+      params.thorname,
+    )) as unknown as Thorname // TODO: Until integrate THORNode PR
+
+    if (thornameDetails && !params.isUpdate) {
+      throw Error('Thorname already reistered')
+    }
+
+    const blockData = await this.thorchainCache.thornode.getLastBlock()
+    const currentThorchainHeight = blockData[0].thorchain
+    const currentHeightForExpirity = params.isUpdate
+      ? (thornameDetails?.expire_block_height as number)
+      : currentThorchainHeight
+
+    // DEFAULT EXPIRITY
+    let numberOfBlocksToAddToExpirity = params.isUpdate ? 0 : 5259600 // One year by default
+
+    // COMPUTE EXPIRITY HEIGHT
+    if (params.expirity) {
+      const currentTimestamp = Math.floor(Date.now() / 1000)
+      const expirityTimestamp = Math.floor(params.expirity.getTime() / 1000)
+      const numberOfSecondsToExpire = expirityTimestamp - currentTimestamp
+      const numberOfBlocks = Math.round(numberOfSecondsToExpire / 6)
+      const newHeightExpirity = currentThorchainHeight + numberOfBlocks
+      numberOfBlocksToAddToExpirity = thornameDetails?.expire_block_height
+        ? newHeightExpirity - thornameDetails?.expire_block_height
+        : numberOfBlocks
+    }
+    // COMPUTE VALUE
+    const constantsDetails = await this.thorchainCache.thornode.getTcConstants()
+    const oneTimeFee = params.isUpdate ? baseAmount(0) : baseAmount(constantsDetails['TNSRegisterFee'])
+    const totalFeePerBlock = baseAmount(constantsDetails['TNSFeePerBlock']).times(
+      numberOfBlocksToAddToExpirity > 0 ? numberOfBlocksToAddToExpirity : 0,
+    )
+    const totalCost = new CryptoAmount(oneTimeFee.plus(totalFeePerBlock), AssetRuneNative)
+    const thornameMemo = `~:${params.thorname}:${params.chain}:${params.chainAddress}:${params.owner}:${
+      params.preferredAsset ? assetToString(params.preferredAsset) : ''
+    }:${currentHeightForExpirity + numberOfBlocksToAddToExpirity}`
+    return {
+      memo: thornameMemo,
+      value: totalCost,
+    }
   }
 }
