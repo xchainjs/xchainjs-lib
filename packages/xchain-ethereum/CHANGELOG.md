@@ -1,3 +1,9 @@
+# v0.30.2 (2023-09-14)
+
+## Update
+
+- bump xchain-evm dep
+
 # v0.30.1 (2023-09-11)
 
 ## Update
