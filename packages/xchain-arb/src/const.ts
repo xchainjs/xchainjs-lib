@@ -109,7 +109,7 @@ export const defaultArbParams: EVMClientParams = {
   defaults,
   providers: ethersJSProviders,
   explorerProviders: arbExplorerProviders,
-  dataProviders: arbProviders,
+  dataProviders: [arbProviders],
   network: Network.Testnet,
   feeBounds: {
     lower: LOWER_FEE_BOUND,
