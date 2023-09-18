@@ -1,5 +1,6 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
-import { EVMClientParams, EtherscanProvider } from '@xchainjs/xchain-evm'
+import { EVMClientParams } from '@xchainjs/xchain-evm'
+import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
@@ -112,7 +113,7 @@ export const defaultBscParams: EVMClientParams = {
   defaults,
   providers: ethersJSProviders,
   explorerProviders: bscExplorerProviders,
-  dataProviders: bscProviders,
+  dataProviders: [bscProviders],
   network: Network.Testnet,
   feeBounds: {
     lower: LOWER_FEE_BOUND,

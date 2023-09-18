@@ -4,7 +4,6 @@ import { Address, Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 import { CryptoAmount } from './crypto-amount'
-import { LiquidityPool } from './liquidity-pool'
 
 export type TotalFees = {
   asset: Asset
@@ -13,33 +12,22 @@ export type TotalFees = {
 }
 
 export type SwapEstimate = {
-  totalFees: TotalFees
-  slipBasisPoints: number
   netOutput: CryptoAmount
+  totalFees: TotalFees
+  netOutputStreaming: CryptoAmount
+  maxStreamingQuantity: number
   inboundConfirmationSeconds?: number
   outboundDelaySeconds: number
+  outboundDelayBlocks: number
   recommendedMinAmountIn?: string
+  slipBasisPoints: number
+  streamingSlipBasisPoints: number
+  streamingSwapBlocks: number
+  streamingSwapSeconds: number
+  totalSwapSeconds: number
   canSwap: boolean
   errors: string[]
-}
-
-export type PoolCache = {
-  lastRefreshed: number
-  pools: Record<string, LiquidityPool>
-}
-
-export type InboundDetailCache = {
-  lastRefreshed: number
-  inboundDetails: Record<string, InboundDetail>
-}
-export type NetworkValuesCache = {
-  lastRefreshed: number
-  networkValues: Record<string, number>
-}
-
-export type MidgardConfig = {
-  apiRetries: number
-  midgardBaseUrls: string[]
+  warning: string
 }
 
 export type QuoteSwapParams = {
@@ -47,6 +35,8 @@ export type QuoteSwapParams = {
   destinationAsset: Asset
   amount: CryptoAmount
   destinationAddress?: string
+  streamingInterval?: number
+  streamingQuantity?: number
   fromAddress?: string
   toleranceBps?: number
   affiliateAddress?: string
@@ -113,6 +103,7 @@ export type ConstructMemo = {
 
 export type TxDetails = {
   memo: string
+  dustThreshold: CryptoAmount
   toAddress: Address
   expiry: Date
   txEstimate: SwapEstimate
@@ -226,28 +217,32 @@ export type EstimateAddSaver = {
 }
 
 export type EstimateWithdrawSaver = {
+  dustAmount: CryptoAmount
+  dustThreshold: CryptoAmount
   expectedAssetAmount: CryptoAmount
   fee: SaverFees
   expiry: Date
   toAddress: Address
   memo: string
-  estimatedWaitTime: number
+  outBoundDelayBlocks: number
+  outBoundDelaySeconds: number
   slipBasisPoints: number
-  dustAmount: CryptoAmount
   errors: string[]
 }
 
 export type SaverFees = {
   affiliate: CryptoAmount
   asset: Asset
+  liquidity: CryptoAmount
   outbound: CryptoAmount
+  totalBps: number
 }
 
 export type QuoteFees = {
   asset: string
   liquidity?: string
   outbound?: string
-  total_bps?: string
+  total_bps?: number
 }
 
 export type SaversPosition = {
@@ -257,6 +252,7 @@ export type SaversPosition = {
   percentageGrowth: number
   ageInYears: number
   ageInDays: number
+  asset: Asset
   errors: string[]
 }
 
@@ -301,8 +297,8 @@ export type LoanOpenQuote = {
   memo?: string
   expectedAmountOut: string
   expectedCollateralizationRatio: string
-  expectedCollateralUp: string
-  expectedDebtUp: string
+  expectedCollateralDeposited: string
+  expectedDebtIssued: string
   errors: string[]
 }
 export type LoanCloseQuote = {
@@ -318,8 +314,8 @@ export type LoanCloseQuote = {
   recommendedMinAmountIn?: string
   memo?: string
   expectedAmountOut: string
-  expectedCollateralDown: string
-  expectedDebtDown: string
+  expectedCollateralWithdrawn: string
+  expectedDebtRepaid: string
   errors: string[]
 }
 

@@ -1,0 +1,46 @@
+{
+  "name": "@xchainjs/xchain-mayanode",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Mayanode module that exposes all mayanode functions using openapi-generator-cli",
+  "keywords": [
+    "XChain",
+    "Mayanode"
+  ],
+  "author": "MAYAChain",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
+  "scripts": {
+    "clean": "rimraf lib/**",
+    "build": "yarn clean && rollup -c",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "prepublishOnly": "yarn build",
+    "test": "jest --passWithNoTests",
+    "generate:types": "yarn clean:types:mayanode && yarn generate:types:mayanode",
+    "generate:types:mayanode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://mayanode.mayachain.info/mayachain/doc//openapi.yaml -g typescript-axios -o ./src/generated/mayanodeApi --skip-validate-spec --generate-alias-as-model",
+    "clean:types:mayanode": "rimraf ./src/generated/mayanodeApi"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.6.0",
+    "rimraf": "^5.0.0"
+  },
+  "peerDependencies": {
+    "axios": "^1.3.6"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

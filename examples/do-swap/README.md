@@ -51,3 +51,20 @@ yarn doSend "MnemonicPhrase" mainnet 10 8 THOR.RUNE thor19pws7ukjew3vujdhfcr0eaq
 yarn doSend "MnemonicPhrase" mainnet 1 8 THOR.RUNE thorxxxx +:thor.rune:mayaxxxx
 
 ```
+
+### Do streaming swap
+
+executes a transfer of an asset from your wallet to another address minimizing slippage
+`yarn doStreamingSwap "MnemonicPhrase" stagenet|mainnet assetsAmount decimals fromString toString streamingInterval streamingQuantity`
+
+streamingInterval: The maximum interval for swaps that involve L1 assets (such as BTC, ETH) is restricted by the limitation of the maximum duration for a swap; currently, this limitation is 24 hours.
+
+streamingQuantity: The minimum quantity is defined according to the following formula: https://dev.thorchain.org/thorchain-dev/concepts/streaming-swaps#calculate-optimal-swap.
+
+```bash
+# example of swapping 10 RUNE to ATOM minimizing slippage
+yarn doStreamingSwap "MnemonicPhrase" mainnet 450 8 THOR.RUNE GAIA.ATOM 1 0
+
+# example of swapping 74 ATOM to RUNE doing 2 mini-swaps with a separation of (5 block * 6s) = 30 second
+yarn doStreamingSwap "MnemonicPhrase" mainnet 74 6 GAIA.ATOM THOR.RUNE 5 2
+```

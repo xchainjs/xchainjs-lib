@@ -34,8 +34,9 @@ A single common interface:
 5. Make a simple transfer
 6. Get blockchain fee information (standard, fast, fastest)
 
-### Packages
+### Packages - Thorchain
 
+- [`xchain-avax`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-avax)
 - [`xchain-binance`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-binance)
 - [`xchain-bitcoin`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoin)
 - [`xchain-bitcoincash`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoincash)
@@ -45,14 +46,33 @@ A single common interface:
 - [`xchain-crypto`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-crypto)
 - [`xchain-doge`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-doge)
 - [`xchain-ethereum`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-ethereum)
+- [`xchain-evm`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-evm)
 - [`xchain-litecoin`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-litecoin)
+- [`xchain-midgard`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-midgard)
 - [`xchain-thorchain`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain)
-- [`xchain-util`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-util)
 - [`xchain-thorchain-amm`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-amm)
 - [`xchain-thorchain-query`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-query)
-- [`xchain-avax`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-avax)
-- [`xchain-midgard`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-midgard)
 - [`xchain-thornode`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thornode)
+- [`xchain-util`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-util)
+- [`xchain-utxo-providers`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-utxo-providers)
+
+### Packages - Mayachain
+
+- [`xchain-mayanode`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayanode)
+- [`xchain-mayachain`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayachain)
+- [`xchain-dash`](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-dash)
+
+### Working Examples
+
+- [`doSwap(), doSend()`](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/do-swap)
+- [`addLiquidity()`](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/liquidity)
+- [`estimateSwap()`](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/estimate-swap)
+- [`checkTx()`](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/check-tx)
+- [`loans()`](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/loans)
+
+### Tools / TxJammer
+
+- [`Tx Jammer`](https://github.com/xchainjs/xchainjs-lib/tree/master/tools/txJammer)
 
 ## Advanced Features
 

@@ -1,5 +1,6 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
-import { EVMClientParams, EtherscanProvider } from '@xchainjs/xchain-evm'
+import { EVMClientParams } from '@xchainjs/xchain-evm'
+import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
@@ -22,7 +23,9 @@ const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(
   'homestead',
   process.env['ETHERSCAN_API_KEY'],
 )
-const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider('sepolia', process.env['ETHERSCAN_API_KEY'])
+// as per https://docs.ethers.org/v5/api/providers/api-providers/#EtherscanProvider
+const network = ethers.providers.getNetwork('sepolia')
+const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(network, process.env['ETHERSCAN_API'] || '')
 
 const ethersJSProviders = {
   [Network.Mainnet]: ETH_MAINNET_ETHERS_PROVIDER,
@@ -108,7 +111,7 @@ export const defaultEthParams: EVMClientParams = {
   defaults,
   providers: ethersJSProviders,
   explorerProviders: ethExplorerProviders,
-  dataProviders: ethProviders,
+  dataProviders: [ethProviders],
   network: Network.Testnet,
   feeBounds: {
     lower: LOWER_FEE_BOUND,

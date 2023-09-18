@@ -366,7 +366,7 @@ export class Thornode {
       try {
         const resp = await api.quotesaverwithdraw(
           withdrawParams.height,
-          `${withdrawParams.asset.chain}.${withdrawParams.asset.ticker}`,
+          `${withdrawParams.asset.chain}.${withdrawParams.asset.symbol}`,
           withdrawParams.address,
           withdrawParams.withdrawBps,
         )
@@ -395,6 +395,8 @@ export class Thornode {
     toAsset: string,
     amount: number,
     destinationAddress?: string,
+    streamingInterval?: number,
+    streamingQuantity?: number,
     fromAddress?: string,
     toleranceBps?: number,
     affiliateBps?: number,
@@ -410,6 +412,8 @@ export class Thornode {
             toAsset,
             amount,
             destinationAddress,
+            streamingInterval,
+            streamingQuantity,
             fromAddress,
             toleranceBps,
             affiliateBps,

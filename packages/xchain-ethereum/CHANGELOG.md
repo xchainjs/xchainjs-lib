@@ -1,3 +1,28 @@
+# v0.30.3 (2023-09-15)
+
+## Update
+
+-  Updated creation of the testnet provider to match -[ethers docs]- ( https://docs.ethers.org/v5/api/providers/api-providers/#EtherscanProvider)
+
+# v0.30.2 (2023-09-14)
+
+## Update
+
+- bump xchain-evm dep
+
+# v0.30.1 (2023-09-11)
+
+## Update
+
+- Bumped dependencies for util
+
+# v0.30.0 (2023-08-10)
+
+## Update
+
+- add support for fallback on providers
+- Update to use `xchain-evm-providers`
+
 # v0.29.0 (2023-05-31)
 
 ## Refactor

@@ -1,6 +1,5 @@
 export * from './types'
 export * from './client'
-export * from './providers'
 
 export {
   call,
@@ -8,17 +7,14 @@ export {
   estimateCall,
   // estimateDefaultFeesWithGasPricesAndLimits,
   getApprovalAmount,
-  // getDecimal,
   // getDefaultFees,
   // getDefaultGasPrices,
   getTokenAddress,
   getPrefix,
-  // getFee,
+  getFee,
   isApproved,
   strip0x,
   validateAddress,
-  // ETHAddress,
-  // ETH_DECIMAL,
   MAX_APPROVAL,
 } from './utils'
 

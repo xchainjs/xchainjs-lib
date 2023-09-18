@@ -76,9 +76,10 @@ export class ThorchainQuery {
     destinationAsset,
     amount,
     destinationAddress,
+    streamingInterval,
+    streamingQuantity,
     fromAddress,
     toleranceBps,
-    interfaceID = '555',
     affiliateBps,
     affiliateAddress,
     height,
@@ -95,6 +96,8 @@ export class ThorchainQuery {
       toAssetString,
       inputAmount.toNumber(),
       destinationAddress,
+      streamingInterval,
+      streamingQuantity,
       fromAddress,
       toleranceBps,
       affiliateBps,
@@ -102,22 +105,14 @@ export class ThorchainQuery {
       height,
     )
 
-    // error handling
+    // error handling for fetch response
     const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
     if (response.error) errors.push(`Thornode request quote: ${response.error}`)
-    //The recommended minimum inbound amount for this transaction type & inbound asset.
-    // Sending less than this amount could result in failed refunds
-    if (swapQuote.recommended_min_amount_in && inputAmount.toNumber() < +swapQuote.recommended_min_amount_in)
-      errors.push(
-        `Error amount in: ${inputAmount.toNumber()} is less than reccommended Min Amount: ${
-          swapQuote.recommended_min_amount_in
-        }`,
-      )
-
     if (errors.length > 0) {
       return {
         memo: ``,
         toAddress: ``,
+        dustThreshold: new CryptoAmount(baseAmount(0), AssetRuneNative),
         expiry: new Date(),
         txEstimate: {
           totalFees: {
@@ -131,15 +126,34 @@ export class ThorchainQuery {
           inboundConfirmationSeconds: 0,
           canSwap: false,
           errors,
+          netOutputStreaming: new CryptoAmount(baseAmount(0), AssetRuneNative),
+          maxStreamingQuantity: 0,
+          outboundDelayBlocks: 0,
+          streamingSlipBasisPoints: 0,
+          streamingSwapBlocks: 0,
+          streamingSwapSeconds: 0,
+          totalSwapSeconds: 0,
+          warning: '',
         },
       }
     }
-
-    // Return quote
+    // The recommended minimum inbound amount for this transaction type & inbound asset.
+    // Sending less than this amount could result in failed refunds
     const feeAsset = assetFromStringEx(swapQuote.fees.asset)
+    if (swapQuote.recommended_min_amount_in && inputAmount.toNumber() < Number(swapQuote.recommended_min_amount_in))
+      errors.push(
+        `Error amount in: ${inputAmount.toNumber()} is less than reccommended Min Amount: ${
+          swapQuote.recommended_min_amount_in
+        }`,
+      )
+    // Check to see if memo is undefined
+    if (swapQuote.memo === undefined) errors.push(`Error parsing swap quote: Memo is ${swapQuote.memo}`)
+
+    // No errors ? and memo is returned ? return quote flag canSwap to true
     const txDetails: TxDetails = {
-      memo: this.constructSwapMemo(`${swapQuote.memo}`, interfaceID),
-      toAddress: `${swapQuote.inbound_address}`,
+      memo: swapQuote.memo ? swapQuote.memo : '',
+      dustThreshold: new CryptoAmount(baseAmount(swapQuote.dust_threshold), fromAsset),
+      toAddress: swapQuote.inbound_address ? swapQuote.inbound_address : '',
       expiry: new Date(swapQuote.expiry * 1000),
       txEstimate: {
         totalFees: {
@@ -149,34 +163,42 @@ export class ThorchainQuery {
         },
         slipBasisPoints: swapQuote.slippage_bps,
         netOutput: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
+        netOutputStreaming: new CryptoAmount(baseAmount(swapQuote.expected_amount_out_streaming), destinationAsset),
         outboundDelaySeconds: swapQuote.outbound_delay_seconds,
         inboundConfirmationSeconds: swapQuote.inbound_confirmation_seconds,
         recommendedMinAmountIn: swapQuote.recommended_min_amount_in,
-        canSwap: true,
+        maxStreamingQuantity: swapQuote.max_streaming_quantity ? swapQuote.max_streaming_quantity : 0,
+        outboundDelayBlocks: swapQuote.outbound_delay_blocks,
+        streamingSlipBasisPoints: swapQuote.streaming_slippage_bps,
+        streamingSwapBlocks: swapQuote.streaming_swap_blocks ? swapQuote.streaming_swap_blocks : 0,
+        streamingSwapSeconds: swapQuote.streaming_swap_seconds ? swapQuote.streaming_swap_seconds : 0,
+        totalSwapSeconds: swapQuote.total_swap_seconds ? swapQuote.total_swap_seconds : 0,
+        canSwap: !swapQuote.memo || errors.length > 0 ? false : true,
         errors,
+        warning: swapQuote.warning,
       },
     }
     return txDetails
   }
 
-  /**
-   *
-   * @param params - swap object
-   * @returns - constructed memo string
-   */
-  private constructSwapMemo(memo: string, interfaceID: string): string {
-    const memoPart = memo.split(':')
-    if (memoPart.length > 3) {
-      memoPart[3] =
-        memoPart[3].length >= 3 ? memoPart[3].substring(0, memoPart[3].length - 3).concat(interfaceID) : interfaceID
-      let outmemo = ''
-      for (let i = 0; i < memoPart.length; i++) {
-        outmemo = outmemo.concat(`${memoPart[i]}:`)
-      }
-      return outmemo.substring(0, outmemo.length - 1)
-    }
-    return memo
-  }
+  // /**
+  //  * This is no longer used
+  //  * @param params - swap object
+  //  * @returns - constructed memo string
+  //  */
+  // private constructSwapMemo(memo: string, interfaceID: string): string {
+  //   const memoPart = memo.split(':')
+  //   if (memoPart.length > 3) {
+  //     memoPart[3] =
+  //       memoPart[3].length >= 3 ? memoPart[3].substring(0, memoPart[3].length - 3).concat(interfaceID) : interfaceID
+  //     let outmemo = ''
+  //     for (let i = 0; i < memoPart.length; i++) {
+  //       outmemo = outmemo.concat(`${memoPart[i]}:`)
+  //     }
+  //     return outmemo.substring(0, outmemo.length - 1)
+  //   }
+  //   return memo
+  // }
 
   /**
    * Works out how long an outbound Tx will be held by THORChain before sending.
@@ -303,7 +325,7 @@ export class ThorchainQuery {
     const inboundDetails = await this.thorchainCache.getInboundDetails()
     const unitData: UnitData = {
       liquidityUnits: lpUnits,
-      totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
+      totalUnits: new BigNumber(assetPool.thornodeDetails.LP_units),
     }
     const poolShare = getPoolShare(unitData, assetPool)
     const assetWaitTimeSeconds = await this.confCounting(params.asset)
@@ -326,7 +348,7 @@ export class ThorchainQuery {
     const totalFees = (await this.convert(assetInboundFee, AssetRuneNative)).plus(runeInboundFee)
     const slip = getSlipOnLiquidity({ asset: params.asset, rune: params.rune }, assetPool)
     const estimateLP: EstimateAddLP = {
-      assetPool: assetPool.pool.asset,
+      assetPool: assetPool.thornodeDetails.asset,
       slipPercent: slip.times(100),
       poolShare: poolShare,
       lpUnits: baseAmount(lpUnits),
@@ -365,7 +387,7 @@ export class ThorchainQuery {
     if (!blockData) throw Error(`Could not get block data`)
     // Pools total units & Lp's total units
     const unitData: UnitData = {
-      totalUnits: new BigNumber(poolAsset.pool.liquidityUnits),
+      totalUnits: new BigNumber(poolAsset.thornodeDetails.LP_units),
       liquidityUnits: new BigNumber(liquidityProvider.units),
     }
     const networkValues = await this.thorchainCache.thornode.getNetworkValues()
@@ -434,7 +456,7 @@ export class ThorchainQuery {
     const poolShare = getPoolShare(
       {
         liquidityUnits: new BigNumber(memberDetail.position.units),
-        totalUnits: new BigNumber(assetPool.pool.liquidityUnits),
+        totalUnits: new BigNumber(assetPool.thornodeDetails.LP_units),
       },
       assetPool,
     )
@@ -491,7 +513,7 @@ export class ThorchainQuery {
       lpGrowth: memberDetail.lpGrowth,
       estimatedWaitSeconds: waitTimeSeconds,
       impermanentLossProtection: memberDetail.impermanentLossProtection,
-      assetPool: assetPool.pool.asset,
+      assetPool: assetPool.thornodeDetails.asset,
     }
     return estimateLP
   }
@@ -581,6 +603,7 @@ export class ThorchainQuery {
     // request param amount should always be in 1e8 which is why we pass in adjusted decimals if chain decimals != 8
     const newAddAmount =
       addAmount.baseAmount.decimal != 8 ? getBaseAmountWithDiffDecimals(addAmount, 8) : addAmount.baseAmount.amount()
+
     // Fetch quote
     const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
       assetToString(addAmount.asset),
@@ -594,7 +617,7 @@ export class ThorchainQuery {
     // Sending less than this amount could result in failed refunds
     if (
       depositQuote.recommended_min_amount_in &&
-      addAmount.baseAmount.amount().toNumber() < +depositQuote.recommended_min_amount_in
+      addAmount.baseAmount.amount().toNumber() < Number(depositQuote.recommended_min_amount_in)
     )
       errors.push(
         `Error amount in: ${addAmount.baseAmount.amount().toNumber()} is less than reccommended Min Amount: ${
@@ -605,11 +628,13 @@ export class ThorchainQuery {
     if (errors.length > 0) {
       return {
         assetAmount: addAmount,
-        estimatedDepositValue: new CryptoAmount(assetToBase(assetAmount(0)), addAmount.asset),
+        estimatedDepositValue: new CryptoAmount(baseAmount(0), addAmount.asset),
         fee: {
-          affiliate: new CryptoAmount(assetToBase(assetAmount(0)), addAmount.asset),
+          affiliate: new CryptoAmount(baseAmount(0), addAmount.asset),
           asset: addAmount.asset,
-          outbound: new CryptoAmount(assetToBase(assetAmount(0)), addAmount.asset),
+          outbound: new CryptoAmount(baseAmount(0), addAmount.asset),
+          liquidity: new CryptoAmount(baseAmount(0), addAmount.asset),
+          totalBps: depositQuote.fees.total_bps || 0,
         },
         expiry: new Date(0),
         toAddress: '',
@@ -622,32 +647,27 @@ export class ThorchainQuery {
         errors,
       }
     }
-    // Calculate transaction expiry time of the vault address
-    const currentDatetime = new Date()
-    const minutesToAdd = 15
-    const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
-    // Calculate seconds
-    const estimatedWait = depositQuote.inbound_confirmation_seconds
-      ? depositQuote.inbound_confirmation_seconds
-      : await this.confCounting(addAmount)
-    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
+
+    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).thornodeDetails
     // Organise fees
     const saverFees: SaverFees = {
       affiliate: new CryptoAmount(baseAmount(depositQuote.fees.affiliate), addAmount.asset),
       asset: assetFromStringEx(depositQuote.fees.asset),
       outbound: new CryptoAmount(baseAmount(depositQuote.fees.outbound), addAmount.asset),
+      liquidity: new CryptoAmount(baseAmount(depositQuote.fees.liquidity), addAmount.asset),
+      totalBps: depositQuote.fees.total_bps || 0,
     }
     // define savers filled capacity
-    const saverCapFilledPercent = (+pool.synthSupply / +pool.assetDepth) * 100
+    const saverCapFilledPercent = (Number(pool.synth_supply) / Number(pool.balance_asset)) * 100
     // return object
     const estimateAddSaver: EstimateAddSaver = {
       assetAmount: new CryptoAmount(baseAmount(depositQuote.expected_amount_out), addAmount.asset),
       estimatedDepositValue: new CryptoAmount(baseAmount(depositQuote.expected_amount_deposit), addAmount.asset),
       fee: saverFees,
-      expiry: expiryDatetime,
+      expiry: new Date(depositQuote.expiry),
       toAddress: depositQuote.inbound_address,
       memo: depositQuote.memo,
-      estimatedWaitTime: estimatedWait,
+      estimatedWaitTime: depositQuote.inbound_confirmation_seconds || 0,
       canAddSaver: errors.length === 0,
       slipBasisPoints: depositQuote.slippage_bps,
       saverCapFilledPercent,
@@ -669,11 +689,14 @@ export class ThorchainQuery {
     const inboundDetails = await this.thorchainCache.getInboundDetails()
     // Check to see if there is a position before calling withdraw quote
     const checkPositon = await this.getSaverPosition(withdrawParams)
+
     if (checkPositon.errors.length > 0) {
       for (let i = 0; i < checkPositon.errors.length; i++) {
         errors.push(checkPositon.errors[i])
       }
       return {
+        dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
+        dustThreshold: new CryptoAmount(baseAmount(0), withdrawParams.asset),
         expectedAssetAmount: new CryptoAmount(
           assetToBase(assetAmount(checkPositon.redeemableValue.assetAmount.amount())),
           withdrawParams.asset,
@@ -681,6 +704,7 @@ export class ThorchainQuery {
         fee: {
           affiliate: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
           asset: withdrawParams.asset,
+          liquidity: new CryptoAmount(baseAmount(0), withdrawParams.asset),
           outbound: new CryptoAmount(
             assetToBase(
               assetAmount(
@@ -689,59 +713,63 @@ export class ThorchainQuery {
             ),
             withdrawParams.asset,
           ),
+          totalBps: 0,
         },
         expiry: new Date(0),
         toAddress: '',
         memo: '',
-        estimatedWaitTime: -1,
+        outBoundDelayBlocks: 0,
+        outBoundDelaySeconds: 0,
         slipBasisPoints: -1,
-        dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
         errors,
       }
     }
     // Request withdraw quote
     const withdrawQuote = await this.thorchainCache.thornode.getSaversWithdrawQuote(withdrawParams)
+
     // error handling
     const response: { error?: string } = JSON.parse(JSON.stringify(withdrawQuote))
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
     if (errors.length > 0) {
       return {
+        dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
+        dustThreshold: new CryptoAmount(baseAmount(0), withdrawParams.asset),
         expectedAssetAmount: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
         fee: {
-          affiliate: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
+          affiliate: new CryptoAmount(baseAmount(0), withdrawParams.asset),
           asset: withdrawParams.asset,
-          outbound: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
+          liquidity: new CryptoAmount(baseAmount(0), withdrawParams.asset),
+          outbound: new CryptoAmount(baseAmount(0), withdrawParams.asset),
+          totalBps: 0,
         },
         expiry: new Date(0),
         toAddress: '',
         memo: '',
-        estimatedWaitTime: -1,
+        outBoundDelayBlocks: 0,
+        outBoundDelaySeconds: 0,
         slipBasisPoints: -1,
-        dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
         errors,
       }
     }
 
-    // Calculate transaction expiry time of the vault address
-    const currentDatetime = new Date()
-    const minutesToAdd = 15
-    const expiryDatetime = new Date(currentDatetime.getTime() + minutesToAdd * 60000)
-
-    const estimatedWait = +withdrawQuote.outbound_delay_seconds
     const withdrawAsset = assetFromStringEx(withdrawQuote.fees.asset)
     const estimateWithdrawSaver: EstimateWithdrawSaver = {
+      dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount), withdrawParams.asset),
+      dustThreshold: new CryptoAmount(baseAmount(withdrawQuote.dust_threshold), withdrawParams.asset),
       expectedAssetAmount: new CryptoAmount(baseAmount(withdrawQuote.expected_amount_out), withdrawParams.asset),
       fee: {
         affiliate: new CryptoAmount(baseAmount(withdrawQuote.fees.affiliate), withdrawAsset),
         asset: withdrawAsset,
+        liquidity: new CryptoAmount(baseAmount(withdrawQuote.fees.liquidity), withdrawAsset),
         outbound: new CryptoAmount(baseAmount(withdrawQuote.fees.outbound), withdrawAsset),
+        totalBps: withdrawQuote.fees.total_bps || 0,
       },
-      expiry: expiryDatetime,
+      expiry: new Date(withdrawQuote.expiry),
       toAddress: withdrawQuote.inbound_address,
       memo: withdrawQuote.memo,
-      estimatedWaitTime: estimatedWait,
+      outBoundDelayBlocks: withdrawQuote.inbound_confirmation_blocks || 0,
+      outBoundDelaySeconds: withdrawQuote.inbound_confirmation_seconds || 0,
       slipBasisPoints: withdrawQuote.slippage_bps,
-      dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount), withdrawParams.asset),
       errors,
     }
     return estimateWithdrawSaver
@@ -758,11 +786,11 @@ export class ThorchainQuery {
     const blockData = (await this.thorchainCache.thornode.getLastBlock()).find(
       (item: LastBlock) => item.chain === params.asset.chain,
     )
-    const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.ticker}`)).find(
+    const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.symbol}`)).find(
       (item) => item.asset_address === params.address,
     )
 
-    const pool = (await this.thorchainCache.getPoolForAsset(params.asset)).pool
+    const pool = (await this.thorchainCache.getPoolForAsset(params.asset)).thornodeDetails
     if (!savers) errors.push(`Could not find position for ${params.address}`)
     if (!savers?.last_add_height) errors.push(`Could not find position for ${params.address}`)
     if (!blockData?.thorchain) errors.push(`Could not get thorchain block height`)
@@ -773,8 +801,8 @@ export class ThorchainQuery {
       errors.push(`Unlikely to withdraw balance as outbound fee is greater than redeemable amount`)
     const ownerUnits = Number(savers?.units)
     const lastAdded = Number(savers?.last_add_height)
-    const saverUnits = Number(pool.saversUnits)
-    const assetDepth = Number(pool.saversDepth)
+    const saverUnits = Number(pool.savers_units)
+    const assetDepth = Number(pool.savers_depth)
     const redeemableValue = (ownerUnits / saverUnits) * assetDepth
     const depositAmount = new CryptoAmount(baseAmount(savers?.asset_deposit_value), params.asset)
     const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue), params.asset)
@@ -787,6 +815,7 @@ export class ThorchainQuery {
       percentageGrowth: saverGrowth.assetAmount.amount().toNumber(),
       ageInYears: saversAge,
       ageInDays: saversAge * 365,
+      asset: params.asset,
       errors,
     }
     return saversPos
@@ -795,16 +824,17 @@ export class ThorchainQuery {
   private async getAddSaversEstimateErrors(addAmount: CryptoAmount): Promise<string[]> {
     const errors = []
     const pools = await this.thorchainCache.getPools()
-    const saversPools = Object.values(pools).filter((i) => i.pool.saversDepth !== '0')
+    const saversPools = Object.values(pools).filter((i) => i.thornodeDetails.savers_depth !== '0')
     const inboundDetails = await this.thorchainCache.getInboundDetails()
     const saverPool = saversPools.find((i) => assetToString(i.asset) === assetToString(addAmount.asset))
     if (!saverPool) errors.push(` ${assetToString(addAmount.asset)} does not have a saver's pool`)
     if (inboundDetails[addAmount.asset.chain].haltedChain) errors.push(`${addAmount.asset.chain} is halted, cannot add`)
-    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).pool
+    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).thornodeDetails
     if (pool.status.toLowerCase() !== 'available')
       errors.push(`Pool is not available for this asset ${assetToString(addAmount.asset)}`)
     const inboundFee = calcNetworkFee(addAmount.asset, inboundDetails[addAmount.asset.chain])
-    if (addAmount.lte(inboundFee)) errors.push(`Add amount does not cover fees`)
+    const inboundFeeInAddAmountAsset = await this.convert(inboundFee, addAmount.asset) // to make sure maths is being done on same assets
+    if (addAmount.lte(inboundFeeInAddAmountAsset)) errors.push(`Add amount does not cover fees`)
     return errors
   }
 
@@ -825,9 +855,9 @@ export class ThorchainQuery {
   }: LoanOpenParams): Promise<LoanOpenQuote> {
     const errors: string[] = []
     const loanOpenResp = await this.thorchainCache.thornode.getLoanQuoteOpen(
-      `${asset.chain}.${asset.ticker}`,
+      `${asset.chain}.${asset.symbol}`,
       amount.baseAmount.amount().toNumber(),
-      `${targetAsset.chain}.${targetAsset.ticker}`,
+      `${targetAsset.chain}.${targetAsset.symbol}`,
       destination,
       minOut,
       affiliateBps,
@@ -838,7 +868,7 @@ export class ThorchainQuery {
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
     if (
       loanOpenResp.recommended_min_amount_in &&
-      amount.baseAmount.amount().toNumber() < +loanOpenResp.recommended_min_amount_in
+      amount.baseAmount.amount().toNumber() < Number(loanOpenResp.recommended_min_amount_in)
     )
       errors.push(
         `Error amount in: ${amount.baseAmount.amount().toNumber()} is less than reccommended Min Amount: ${
@@ -868,8 +898,8 @@ export class ThorchainQuery {
         memo: undefined,
         expectedAmountOut: '',
         expectedCollateralizationRatio: '',
-        expectedCollateralUp: '',
-        expectedDebtUp: '',
+        expectedCollateralDeposited: '',
+        expectedDebtIssued: '',
         errors: errors,
       }
     }
@@ -895,8 +925,8 @@ export class ThorchainQuery {
       memo: loanOpenResp.memo,
       expectedAmountOut: loanOpenResp.expected_amount_out,
       expectedCollateralizationRatio: loanOpenResp.expected_collateralization_ratio,
-      expectedCollateralUp: loanOpenResp.expected_collateral_up,
-      expectedDebtUp: loanOpenResp.expected_collateral_up,
+      expectedCollateralDeposited: loanOpenResp.expected_collateral_deposited,
+      expectedDebtIssued: loanOpenResp.expected_debt_issued,
       errors: errors,
     }
     return loanOpenQuote
@@ -917,9 +947,9 @@ export class ThorchainQuery {
   }: LoanCloseParams): Promise<LoanCloseQuote> {
     const errors: string[] = []
     const loanCloseResp = await this.thorchainCache.thornode.getLoanQuoteClose(
-      `${asset.chain}.${asset.ticker}`,
+      `${asset.chain}.${asset.symbol}`,
       amount.baseAmount.amount().toNumber(),
-      `${loanAsset.chain}.${loanAsset.ticker}`,
+      `${loanAsset.chain}.${loanAsset.symbol}`,
       loanOwner,
       minOut,
       height,
@@ -948,8 +978,8 @@ export class ThorchainQuery {
         recommendedMinAmountIn: loanCloseResp.recommended_min_amount_in,
         memo: undefined,
         expectedAmountOut: '',
-        expectedCollateralDown: '',
-        expectedDebtDown: '',
+        expectedCollateralWithdrawn: '',
+        expectedDebtRepaid: '',
         errors: errors,
       }
     }
@@ -974,8 +1004,8 @@ export class ThorchainQuery {
       recommendedMinAmountIn: loanCloseResp.recommended_min_amount_in,
       memo: loanCloseResp.memo,
       expectedAmountOut: loanCloseResp.expected_amount_out,
-      expectedCollateralDown: loanCloseResp.expected_collateral_down,
-      expectedDebtDown: loanCloseResp.expected_debt_down,
+      expectedCollateralWithdrawn: loanCloseResp.expected_collateral_withdrawn,
+      expectedDebtRepaid: loanCloseResp.expected_debt_repaid,
       errors: errors,
     }
 

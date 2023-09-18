@@ -22,7 +22,6 @@ import {
   getTxsParams,
 } from './types'
 
-// Don't import from @xchainjs/xchain-avax to avoid circular dependency
 const AVAXChain: Chain = 'AVAX'
 const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
 
@@ -70,87 +69,17 @@ export class CovalentProvider implements OnlineDataProvider {
         amount: baseAmount(balance.balance, balance.contract_decimals),
       })
     }
-    //TODO filter out assets
-    assets
 
-    return balances
+    let finalBalances = balances
+
+    if (assets) {
+      finalBalances = balances.filter((balance) => {
+        return assets.some((asset) => asset.symbol === balance.asset.symbol)
+      })
+    }
+
+    return finalBalances
   }
-  // private isFromTx(decodedEvent: DecodedEvent, myAddress: Address): boolean {
-  //   const params = decodedEvent.params
-  //   const from = params?.find((item) => item.name === 'from')
-  //   return from?.value.toLowerCase() === myAddress.toLowerCase()
-  // }
-  // private buildFromTx(decodedEvent: DecodedEvent, asset: Asset): TxFrom {
-  //   const params = decodedEvent.params || []
-  //   const from = params.find((item) => item.name === 'from')
-  //   // const to = params.find((item) => item.name === 'to')
-  //   const value = params.find((item) => item.name === 'value')
-  //   const amount = baseAmount(value?.value, 1)
-
-  //   return {
-  //     from: from?.value as Address | '',
-  //     amount,
-  //     asset,
-  //   }
-  // }
-  // private buildTxFromLogEvent(logEvent: LogEvent, myAddress: Address): Tx | undefined {
-  //   if (logEvent.decoded && logEvent.decoded.params !== null) {
-  //     if (logEvent.decoded.name.toLowerCase() === 'transfer') {
-  //       //transfer
-  //       if (this.isFromTx(logEvent.decoded, myAddress)) {
-  //         // from.push()
-  //       } else {
-  //         // to.push()
-  //       }
-  //     }
-  //   }
-  //   return undefined
-  // }
-  // private buildAsset(logEvent: LogEvent): Asset {
-  //   const ticker = logEvent.sender_contract_ticker_symbol
-  //   // if(){
-
-  //   // }
-  //   return {
-  //     chain: AVAXChain,
-  //     symbol: 'string',
-  //     ticker: 'string',
-  //     synth: false,
-  //   }
-  // }
-  // private buildTX(decodedEvent: DecodedEvent, myAddress: Address, hash: string, date: Date): Tx {
-  //   const from: TxFrom[] = []
-  //   const to: TxTo[] = []
-  //   if (decodedEvent.params && decodedEvent.params !== null) {
-  //     if (decodedEvent.name.toLowerCase() === 'transfer') {
-  //       //transfer
-  //       if (this.isFromTx(decodedEvent, myAddress)) {
-  //         from.push()
-  //       } else {
-  //         to.push()
-  //       }
-  //     } else {
-  //       //unknown
-  //     }
-  //     // for (const eventParam of decodedEvent.params) {
-  //     //   console.log(`${decodedEvent.name} ${decodedEvent.type} ${decodedEvent.value}`)
-  //     // }
-  //   }
-
-  //   return {
-  //     asset: {
-  //       chain: AVAXChain,
-  //       symbol: 'string',
-  //       ticker: 'string',
-  //       synth: false,
-  //     },
-  //     from,
-  //     to,
-  //     date,
-  //     type: TxType.Transfer,
-  //     hash,
-  //   }
-  // }
 
   private buildNativeTx(item: GetTransactionsItem): Tx {
     const amount = baseAmount(item.value, this.nativeAssetDecimals)
@@ -167,16 +96,36 @@ export class CovalentProvider implements OnlineDataProvider {
       hash: item.tx_hash,
     }
   }
-  private buildNonNativeTx(item: GetTransactionsItem): Tx {
-    const amount = baseAmount(item.value, this.nativeAssetDecimals)
-    console.log(item.log_events, null, 2)
-    const transferEvents = item.log_events.filter((i) => i.decoded?.name.toLowerCase() === 'transfer')
-    console.log(transferEvents, null, 2)
-    const from: TxFrom[] = [{ from: item.from_address, amount }]
-    const to: TxTo[] = [{ to: item.to_address, amount }]
+  private buildNonNativeTx(item: GetTransactionsItem): Tx | null {
+    const transferEvent = item.log_events.find((i) => i.decoded?.name.toLowerCase() === 'transfer')
+
+    if (!transferEvent || !transferEvent.decoded || !transferEvent.decoded.params) {
+      return null
+    }
+
+    const from: TxFrom[] = [
+      {
+        from: transferEvent.decoded.params[0].value,
+        amount: baseAmount(transferEvent.decoded.params[2].value, transferEvent.sender_contract_decimals),
+      },
+    ]
+
+    const to: TxTo[] = [
+      {
+        to: transferEvent.decoded.params[1].value,
+        amount: baseAmount(transferEvent.decoded.params[2].value, transferEvent.sender_contract_decimals),
+      },
+    ]
+
+    const symbol = `${transferEvent.sender_contract_ticker_symbol}-${transferEvent.sender_address}`
 
     return {
-      asset: AssetAVAX,
+      asset: {
+        chain: this.chain,
+        symbol,
+        ticker: transferEvent.sender_contract_ticker_symbol as string,
+        synth: false,
+      },
       from,
       to,
       date: new Date(item.block_signed_at),
@@ -185,32 +134,27 @@ export class CovalentProvider implements OnlineDataProvider {
     }
   }
   private async getTxsPage(params: getTxsParams): Promise<Tx[]> {
-    // curl -X GET https://api.covalenthq.com/v1/:chain_id/address/:address/transactions_v2/?&key=ckey_4e17b519e504427586fc93c5b33
     const txs: Tx[] = []
     const response = (
       await axios.get<GetTransactionsResponse>(
         `${this.baseUrl}/v1/${this.chainId}/address/${params.address}/transactions_v2/?key=${this.apiKey}`,
       )
     ).data
-    // console.log(JSON.stringify(response))
 
     for (const item of response.data.items) {
       if (!item.log_events || item.log_events.length === 0) {
         //native tx
         txs.push(this.buildNativeTx(item))
       } else {
-        //TODO non native txs
+        const tx = this.buildNonNativeTx(item)
+        if (tx) {
+          txs.push(tx)
+        }
       }
-      // for (const logEvent of tx.log_events) {
-      //   if (logEvent.decoded?.params && logEvent.decoded.params !== null) {
-      //     for (const decodedEvent of logEvent.decoded.params) {
-      //       console.log(`${decodedEvent.name} ${decodedEvent.type} ${decodedEvent.value}`)
-      //     }
-      //   }
-      // }
     }
     return txs
   }
+
   async getTransactions(params: TxHistoryParams): Promise<TxsPage> {
     const offset = params?.offset || 0
     const limit = params?.limit || 10
@@ -229,6 +173,7 @@ export class CovalentProvider implements OnlineDataProvider {
       txs: transactions.filter((_, index) => index >= offset && index < offset + limit),
     }
   }
+
   async getTransactionData(txHash: string, assetAddress?: Address): Promise<Tx> {
     assetAddress
     const response = (
@@ -241,8 +186,12 @@ export class CovalentProvider implements OnlineDataProvider {
         //native tx
         return this.buildNativeTx(item)
       } else {
-        //TODO non native txs
-        return this.buildNonNativeTx(item)
+        //non native txs
+        const tx = this.buildNonNativeTx(item)
+        if (!tx) {
+          throw new Error('Non transfer transaction')
+        }
+        return tx
       }
     }
     return {
@@ -263,9 +212,3 @@ export class CovalentProvider implements OnlineDataProvider {
     }
   }
 }
-//
-// curl -X GET https://api.covalenthq.com/v1/:chain_id/address/:address/balances_v2/?&key=ckey_4e17b519e504427586fc93c5b33
-//  \ -H "Accept: application/json"
-
-// curl 'https://api.covalenthq.com/v1/43114/address/0x4aeFa39caEAdD662aE31ab0CE7c8C2c9c0a013E8/balances_v2/?&key=ckey_4e17b519e504427586fc93c5b33'
-// curl 'https://api.covalenthq.com/v1/43114/transaction_v2/0xd51ce4ff4833a0bd750c9d08d680ab285656fbbc1864ee23845819919a836bd8/?&key=ckey_4e17b519e504427586fc93c5b33'

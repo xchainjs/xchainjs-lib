@@ -1,3 +1,9 @@
+# v0.2.5 (2023-07-29)
+
+## Update
+
+- udpate spelling error in client
+
 # v0.2.4 (2023-07-11)
 
 ## Update

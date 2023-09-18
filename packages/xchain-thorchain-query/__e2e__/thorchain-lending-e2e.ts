@@ -6,10 +6,9 @@ import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { LoanCloseParams, LoanCloseQuote, LoanOpenParams, LoanOpenQuote } from '../src/types'
 import { AssetBTC, AssetETH } from '../src/utils'
-import { Midgard } from '../src/utils/midgard'
 import { Thornode } from '../src/utils/thornode'
 
-const thorchainCache = new ThorchainCache(new Midgard(Network.Stagenet), new Thornode(Network.Stagenet))
+const thorchainCache = new ThorchainCache(new Thornode(Network.Stagenet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 // addresses
@@ -39,8 +38,8 @@ function printOpen(quote: LoanOpenQuote) {
     memo: quote.memo,
     expectedAmountOut: quote.expectedAmountOut,
     expectedCollateralizationRatio: quote.expectedCollateralizationRatio,
-    expectedCollateralUp: quote.expectedCollateralUp,
-    expectedDebtUp: quote.expectedDebtUp,
+    expectedCollateralDeposited: quote.expectedCollateralDeposited,
+    expectedDebtUp: quote.expectedDebtIssued,
     errors: quote.errors,
   }
   console.log(expanded)
@@ -68,8 +67,8 @@ function printClose(quote: LoanCloseQuote) {
     recommendedMinAmountIn: quote.recommendedMinAmountIn,
     memo: quote.memo,
     expectedAmountOut: quote.expectedAmountOut,
-    expectedCollateralDown: quote.expectedCollateralDown,
-    expectedDebtDown: quote.expectedDebtDown,
+    expectedCollateralWithdrawn: quote.expectedCollateralWithdrawn,
+    expectedDebtRepaid: quote.expectedDebtRepaid,
     errors: quote.errors,
   }
   console.log(expanded)

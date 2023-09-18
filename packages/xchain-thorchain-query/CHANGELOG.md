@@ -1,3 +1,45 @@
+# v0.6.0 (2023-09-10)
+
+## Update
+
+- Updated thornode deps, adjusted new return types and fee object
+- New param thorchain-cache constructor: midgard-query
+
+# v0.5.0 (2023-09-03)
+
+## fix
+
+- asset string changed to use symbol instead of ticker
+
+## Update
+
+- Reduce dependency from midgard extracting all code to midgard-xchain-query package
+- Improve cache handling using CachedValue class
+
+# v0.4.9 (2023-08-25)
+
+## Update
+
+- Fix asset comparison in query & update thornode dep
+
+# v0.4.8 (2023-08-19)
+
+## Update
+
+- update Txdetails with Streaming swap seconds
+
+# v0.4.7 (2023-08-03)
+
+## Update
+
+- Add new function getSaverPositions()
+
+# v0.4.6 (2023-07-26)
+
+## Update
+
+- Update thornode dep, and fixed swapQuote error returns
+
 # v0.4.5 (2023-06-28)
 
 ## Update
@@ -14,7 +56,7 @@
 
 ## Update
 
-- Add new queries to support lending getLoanQuoteClose & getLoanQuoteOpen 
+- Add new queries to support lending getLoanQuoteClose & getLoanQuoteOpen
 
 # v0.4.2 (2023-05-18)
 

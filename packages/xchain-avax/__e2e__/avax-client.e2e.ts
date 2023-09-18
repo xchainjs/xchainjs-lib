@@ -1,5 +1,6 @@
-import { Balance, Network, TxType } from '@xchainjs/xchain-client'
+import { Balance, Network, OnlineDataProviders, TxType } from '@xchainjs/xchain-client'
 import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
+import { CovalentProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import AvaxClient from '../src/client'
@@ -15,8 +16,39 @@ const assetRIP: Asset = {
   ticker: `RIP`,
   synth: false,
 }
+
+const AVAX_ONLINE_PROVIDER_TESTNET = new CovalentProvider(
+  process.env.COVALENT_API_KEY as string,
+  AVAXChain,
+  43113,
+  AssetAVAX,
+  18,
+)
+
+const AVAX_ONLINE_PROVIDER_MAINNET = new CovalentProvider(
+  process.env.COVALENT_API_KEY as string,
+  AVAXChain,
+  43114,
+  AssetAVAX,
+  18,
+)
+
+const avaxProviders = {
+  [Network.Mainnet]: AVAX_ONLINE_PROVIDER_MAINNET,
+  [Network.Testnet]: AVAX_ONLINE_PROVIDER_TESTNET,
+  [Network.Stagenet]: AVAX_ONLINE_PROVIDER_MAINNET,
+}
+
+const fakeProviders = {
+  [Network.Mainnet]: {} as OnlineDataProviders,
+  [Network.Testnet]: {} as OnlineDataProviders,
+  [Network.Stagenet]: {} as OnlineDataProviders,
+}
+
 defaultAvaxParams.network = Network.Testnet
 defaultAvaxParams.phrase = process.env.PHRASE
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+defaultAvaxParams.dataProviders = [fakeProviders as any, avaxProviders]
 const client = new AvaxClient(defaultAvaxParams)
 
 function delay(ms: number) {

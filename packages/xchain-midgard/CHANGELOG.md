@@ -1,3 +1,9 @@
+# v0.5.1 (2023-07-29)
+
+## Update
+
+- Update Midgard Api to 2.16.1
+
 # v0.5.0 (2023-05-02)
 
 ## Update

@@ -18,13 +18,14 @@ tsconfig has already been set in the tsconfig.json
 ```bash
 cd examples/estimate-swap
 ```
+
 ### Setting Headers for Nine Realms endpoints
 
 If you plan on using the publically accessible endpoints provided by Nine Realms(listed below), ensure that you add a valid 'x-client-id' to all requests
 
 - https://midgard.ninerealms.com
 - https://haskoin.ninerealms.com (BTC/BCH/LTC)
-- https://thornode.ninerealms.com 
+- https://thornode.ninerealms.com
 
 Example
 
@@ -118,9 +119,9 @@ Please refer to [asset-notation](https://dev.thorchain.org/thorchain-dev/network
 ```bash
 yarn estimateSwap [network (Mainnet | Stagenet)] [swap amount]] [source asset][source decimals] [destination asset] ([destination address])
 
-yarn estimateSwap mainnet 0.002 8 BTC.BTC ETH.ETH # good estimate
-yarn estimateSwap mainnet 2 8 BTC.BTC ETH.ETH     # Note due to testnet pools being inconsistent with real world prices use mainnet to retrieve accurate estimations
-yarn estimateSwap mainnet 2 8 BTC/BTC THOR.RUNE
+yarn estimateSwap mainnet 0.002 8 BTC.BTC ETH.ETH DESTINATION_ADDRESS # good estimate
+yarn estimateSwap mainnet 2 8 BTC.BTC ETH.ETH DESTINATION_ADDRESS   # Note due to testnet pools being inconsistent with real world prices use mainnet to retrieve accurate estimations
+yarn estimateSwap mainnet 2 8 BTC/BTC THOR.RUNE DESTINATION_ADDRESS FROM_ADDRESS #from address is required since its from a synth
 
 See full Estimate Swap at http://docs.xchainjs.org/xchain-thorchain-query/how-to-use.html
 ```

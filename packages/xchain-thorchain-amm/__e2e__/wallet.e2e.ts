@@ -1,6 +1,6 @@
 import cosmosclient from '@cosmos-client/core'
 import { Network } from '@xchainjs/xchain-client'
-import { Midgard, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
+import { ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
 import { baseToAsset, formatAssetAmountCurrency, register9Rheader } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
@@ -11,7 +11,7 @@ require('dotenv').config()
 register9Rheader(axios)
 register9Rheader(cosmosclient.config.globalAxios)
 
-const thorchainCacheMainnet = new ThorchainCache(new Midgard(Network.Mainnet), new Thornode(Network.Mainnet))
+const thorchainCacheMainnet = new ThorchainCache(new Thornode(Network.Mainnet))
 const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
 

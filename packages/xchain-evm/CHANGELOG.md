@@ -1,3 +1,22 @@
+# v0.3.2 (2023-09-14)
+
+## Update
+
+- add getFee() from utils into index.js
+
+# v0.3.1 (2023-09-11)
+
+## Update
+
+- Bumped dependencies for util
+
+# v0.3.0 (2023-08-10)
+
+## Update
+
+- add support for fallback on providers
+- Update to use `xchain-evm-providers`
+
 # v0.2.2 (2023-05-18)
 
 ## Add

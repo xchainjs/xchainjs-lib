@@ -1,3 +1,27 @@
+# v0.7.0 (2023-09-10)
+
+## Update
+
+- Replace calls to Midgard, now made using the midgard-query package
+
+# v0.6.0 (2023-09-04)
+
+## Update
+
+- Update peer deps, thorchain-query
+
+# v0.5.9 (2023-08-14)
+
+## Update
+
+- update deps, query, thorchain, evm, ethereum, avax, bsc
+
+# v0.5.8 (2023-07-26)
+
+## Update
+
+- Updated dependencies for cosmos, thorchain & query
+
 # v0.5.7 (2023-07-10)
 
 ## Update

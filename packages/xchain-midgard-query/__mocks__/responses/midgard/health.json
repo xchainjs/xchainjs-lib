@@ -1,0 +1,21 @@
+{
+	"database": true,
+	"inSync": true,
+	"lastAggregated": {
+		"height": 0,
+		"timestamp": 1658126949
+	},
+	"lastCommitted": {
+		"height": 6481697,
+		"timestamp": 1658126949
+	},
+	"lastFetched": {
+		"height": 6481697,
+		"timestamp": 1658126949
+	},
+	"lastThorNode": {
+		"height": 6481698,
+		"timestamp": 1658126955
+	},
+	"scannerHeight": "6481698"
+}
