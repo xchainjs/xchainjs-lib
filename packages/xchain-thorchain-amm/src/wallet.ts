@@ -485,7 +485,6 @@ export class Wallet {
       isUpdate: true,
       preferredAsset: params.preferredAsset || assetFromString(thornameDetail.preferredAsset),
       chainAddress: params.chainAddress || chainClient.getAddress(),
-      owner: params.owner || thorClient.getAddress(),
     })
 
     const castedThorClient = thorClient as unknown as ThorchainClient

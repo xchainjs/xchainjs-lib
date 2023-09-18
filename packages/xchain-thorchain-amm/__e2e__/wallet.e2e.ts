@@ -2,6 +2,7 @@ import cosmosclient from '@cosmos-client/core'
 import { Network } from '@xchainjs/xchain-client'
 import {
   AssetBTC,
+  AssetETH,
   BCHChain,
   BTCChain,
   ETHChain,
@@ -83,6 +84,19 @@ describe('xchain-swap wallet Tests', () => {
         chainAddress: 'qz53fqdfjqwefhff9xf3dmq45g3l7jydyu6d990e76',
         expirity: new Date(2024, 9, 11, 14, 30, 0, 0),
       })
+    } catch (e) {
+      console.error(e)
+    }
+  })
+
+  it(`Update thorname prefered asset`, async () => {
+    try {
+      const hash = await mainnetWallet.updateThorname({
+        thorname: 'hippo',
+        chain: ETHChain,
+        preferredAsset: AssetETH,
+      })
+      console.log('hash', hash)
     } catch (e) {
       console.error(e)
     }

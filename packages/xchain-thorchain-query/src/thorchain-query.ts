@@ -1086,9 +1086,11 @@ export class ThorchainQuery {
       numberOfBlocksToAddToExpirity > 0 ? numberOfBlocksToAddToExpirity : 0,
     )
     const totalCost = new CryptoAmount(oneTimeFee.plus(totalFeePerBlock), AssetRuneNative)
-    const thornameMemo = `~:${params.thorname}:${params.chain}:${params.chainAddress}:${params.owner}:${
-      params.preferredAsset ? assetToString(params.preferredAsset) : ''
-    }:${currentHeightForExpirity + numberOfBlocksToAddToExpirity}`
+    const thornameMemo = `~:${params.thorname}:${params.chain}:${params.chainAddress}:${
+      params.owner ? params.owner : ''
+    }:${params.preferredAsset ? assetToString(params.preferredAsset) : ''}:${
+      currentHeightForExpirity + numberOfBlocksToAddToExpirity
+    }`
     return {
       memo: thornameMemo,
       value: totalCost,

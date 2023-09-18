@@ -33,7 +33,6 @@ describe('Thorchain-query thorname Integration Tests', () => {
       isUpdate: true,
       chain: BTCChain,
       chainAddress: btcAddress,
-      owner: owner,
       preferredAsset: AssetBTC,
     })
     console.log(thorname.value.baseAmount.amount().toString())
