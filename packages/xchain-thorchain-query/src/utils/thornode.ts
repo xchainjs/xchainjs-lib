@@ -21,6 +21,8 @@ import {
   Saver,
   SaversApi,
   SaversResponse,
+  ThornameResponse,
+  ThornamesApi,
   TransactionsApi,
   TxDetailsResponse,
   TxOutItem,
@@ -62,6 +64,7 @@ export class Thornode {
   private saversApi: SaversApi[]
   private quoteApi: QuoteApi[]
   private mimirApi: MimirApi[]
+  private thornamesApi: ThornamesApi[]
 
   constructor(network: Network = Network.Mainnet, config?: ThornodeConfig) {
     this.network = network
@@ -79,6 +82,9 @@ export class Thornode {
     this.saversApi = this.config.thornodeBaseUrls.map((url) => new SaversApi(new Configuration({ basePath: url })))
     this.quoteApi = this.config.thornodeBaseUrls.map((url) => new QuoteApi(new Configuration({ basePath: url })))
     this.mimirApi = this.config.thornodeBaseUrls.map((url) => new MimirApi(new Configuration({ basePath: url })))
+    this.thornamesApi = this.config.thornodeBaseUrls.map(
+      (url) => new ThornamesApi(new Configuration({ basePath: url })),
+    )
   }
 
   /**
@@ -489,6 +495,21 @@ export class Thornode {
         return resp
       } catch (e) {
         // console.log(e)
+      }
+    }
+    throw new Error(`THORNode is not responding`)
+  }
+
+  async getThornameDetails(thorname: string, height?: number): Promise<ThornameResponse | undefined> {
+    for (const api of this.thornamesApi) {
+      try {
+        const resp = (await api.thorname(thorname, height)).data
+        return resp
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
+        if (e.response.status == 404) {
+          return undefined
+        }
       }
     }
     throw new Error(`THORNode is not responding`)

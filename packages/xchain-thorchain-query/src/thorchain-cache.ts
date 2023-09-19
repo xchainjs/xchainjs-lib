@@ -27,10 +27,9 @@ export class ThorchainCache {
   /**
    * Constructor to create a ThorchainCache
    *
-   * @param midgard - an instance of the midgard API (could be pointing to stagenet,testnet,mainnet)
+   * @param thornode - an instance of the thornode API (could be pointing to stagenet,testnet,mainnet)
    * @param midgardQuery - an instance of the midgard query class (could be pointing to stagenet,testnet,mainnet)
    * @param expirePoolCacheMillis - how long should the pools be cached before expiry
-   * @param expireAsgardCacheMillis - how long should the inboundAsgard Addresses be cached before expiry
    * @param expireInboundDetailsCacheMillis - how long should the InboundDetails be cached before expiry
    * @param expireNetworkValuesCacheMillis - how long should the Mimir/Constants be cached before expiry
    * @returns ThorchainCache

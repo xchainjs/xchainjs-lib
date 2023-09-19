@@ -64,3 +64,21 @@ export type LoanCloseParams = {
   amount: CryptoAmount
   toAddress: Address
 }
+
+export type RegisterThornameParams = {
+  thorname: string
+  owner?: string
+  chain?: string
+  chainAddress?: string
+  preferredAsset?: Asset
+  expirity?: Date
+}
+
+export type UpdateThornameParams = {
+  thorname: string
+  owner?: string
+  chain?: string
+  chainAddress?: string
+  preferredAsset?: Asset
+  expirity?: Date
+}

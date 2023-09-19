@@ -1,3 +1,9 @@
+# v0.7.1 (2023-09-18)
+
+## Update
+
+- Add functions getThornamesByAddress, registerThorname and updateThorname
+
 # v0.7.0 (2023-09-10)
 
 ## Update
