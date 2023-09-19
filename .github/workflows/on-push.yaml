@@ -1,9 +1,11 @@
 name: Test Commit
 
 on:
-  push:
   pull_request:
     types: [opened, synchronize]
+  push:
+    branches:
+      - master
 
 jobs:
   build:
