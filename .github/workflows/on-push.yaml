@@ -1,34 +1,30 @@
 name: Test Commit
 
-on: [push]
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
           node-version: '16.x'
-
       - name: Cache Yarn packages
         uses: actions/cache@v2
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
       - name: Install Deps
         run: yarn && yarn yarn-audit-ci --high
-
       - name: Build Packages
         run: yarn build
-
       - name: Lint
         run: yarn lint
-
       - name: Test
         run: yarn test
         env:
