@@ -1,3 +1,9 @@
+# v0.13.2 (2023-09-23)
+
+## Update
+
+- Support no expirity time on cached-value class
+
 # v0.13.1 (2023-09-03)
 
 ## Update

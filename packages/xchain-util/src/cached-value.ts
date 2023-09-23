@@ -6,8 +6,8 @@ export class CachedValue<T> {
   private refreshData: (params?: any) => Promise<T>
   private refreshPromise: Promise<T> | null = null
 
-  constructor(refreshData: (params?: any) => Promise<T>, cacheMaxAge: number) {
-    this.cacheMaxAge = cacheMaxAge
+  constructor(refreshData: (params?: any) => Promise<T>, cacheMaxAge?: number) {
+    this.cacheMaxAge = cacheMaxAge || Infinity
     this.refreshData = refreshData
   }
 
@@ -15,7 +15,7 @@ export class CachedValue<T> {
     return Boolean(this.cacheTimestamp && new Date().getTime() - this.cacheTimestamp.getTime() < this.cacheMaxAge)
   }
 
-  async getValue(params?: any) {
+  async getValue(params?: any): Promise<T> {
     if (this.isCacheValid()) {
       return this.cachedValue as T
     }
