@@ -1,14 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { THORChain } from '@xchainjs/xchain-thorchain'
 import { AmmEstimateSwapParams, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
-import {
-  CryptoAmount,
-  Midgard,
-  ThorchainCache,
-  ThorchainQuery,
-  Thornode,
-  TxDetails,
-} from '@xchainjs/xchain-thorchain-query'
+import { CryptoAmount, ThorchainCache, ThorchainQuery, Thornode, TxDetails } from '@xchainjs/xchain-thorchain-query'
 import { assetAmount, assetFromString, assetToBase, assetToString, delay } from '@xchainjs/xchain-util'
 
 import { checkTx } from '../check-tx/check-tx'
@@ -112,7 +106,8 @@ const doStreamingSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Net
 const main = async () => {
   const seed = process.argv[2]
   const network = process.argv[3] as Network
-  const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
+  const midgardCache = new MidgardCache(new Midgard(network))
+  const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
   const thorchainQuery = new ThorchainQuery(thorchainCache)
   const thorchainAmm = new ThorchainAMM(thorchainQuery)
   const wallet = new Wallet(seed, thorchainQuery)

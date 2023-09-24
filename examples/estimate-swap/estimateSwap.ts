@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import {
   CryptoAmount,
-  Midgard,
   QuoteSwapParams,
   SwapEstimate,
   ThorchainCache,
@@ -53,7 +53,8 @@ const estimateSwap = async () => {
     const toAsset = assetFromString(`${process.argv[6]}`)
     const toDestinationAddress = `${process.argv[7]}`
     const fromAddress = `${process.argv[8]}`
-    const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
+    const midgardCache = new MidgardCache(new Midgard(network))
+    const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     const thorchainQuery = new ThorchainQuery(thorchainCache)
     let swapParams: QuoteSwapParams
 
