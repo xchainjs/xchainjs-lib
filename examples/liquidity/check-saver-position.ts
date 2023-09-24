@@ -1,12 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
-import {
-  Midgard,
-  SaversPosition,
-  ThorchainCache,
-  ThorchainQuery,
-  Thornode,
-  getSaver,
-} from '@xchainjs/xchain-thorchain-query'
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
+import { SaversPosition, ThorchainCache, ThorchainQuery, Thornode, getSaver } from '@xchainjs/xchain-thorchain-query'
 import { assetFromString } from '@xchainjs/xchain-util'
 
 function printSaversPosition(saver: SaversPosition) {
@@ -26,7 +20,8 @@ function printSaversPosition(saver: SaversPosition) {
 const getSaverPosition = async () => {
   try {
     const network = process.argv[2] as Network
-    const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
+    const midgardCache = new MidgardCache(new Midgard(network))
+    const thorchainCacheMainnet = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
     const getSaver: getSaver = {
       asset: assetFromString(process.argv[4]),

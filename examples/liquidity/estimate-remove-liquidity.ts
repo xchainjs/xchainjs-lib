@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import {
   EstimateWithdrawLP,
-  Midgard,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
@@ -35,7 +35,8 @@ function print(estimate: EstimateWithdrawLP, withdrawLpParams: WithdrawLiquidity
 const estimateWithdrawLp = async () => {
   try {
     const network = process.argv[2] as Network
-    const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
+    const midgardCache = new MidgardCache(new Midgard(network))
+    const thorchainCacheMainnet = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 
     const asset = assetFromString(process.argv[3])
