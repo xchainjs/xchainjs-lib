@@ -113,4 +113,18 @@ describe('xchain-swap wallet Tests', () => {
       console.error(e)
     }
   })
+
+  it(`Transfer thorname`, async () => {
+    try {
+      const hash = await mainnetWallet.updateThorname({
+        thorname: 'hippo',
+        chain: ETHChain,
+        preferredAsset: AssetETH,
+        owner: 'thor1k5at9pzfjsqfys380cgu3v9gz2s4vgsyzl2tue',
+      })
+      console.log('hash', hash)
+    } catch (e) {
+      console.error(e)
+    }
+  })
 })

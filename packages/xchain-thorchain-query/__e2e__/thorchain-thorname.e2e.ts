@@ -7,6 +7,7 @@ const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 const btcAddress = 'bc1q3q6gfcg2n4c7hdzjsvpq5rp9rfv5t59t5myz5v'
 const owner = 'thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu'
+const owner2 = 'thor1k5at9pzfjsqfys380cgu3v9gz2s4vgsyzl2tue'
 
 // Test User Functions - single and double swap using mock pool data
 describe('Thorchain-query thorname Integration Tests', () => {
@@ -62,13 +63,15 @@ describe('Thorchain-query thorname Integration Tests', () => {
   })
   it('Try to estimate already registered thorname', async () => {
     const thorname = await thorchainQuery.estimateThorname({
-      thorname: 'dx',
+      thorname: 'hippo',
       chain: BTCChain,
       chainAddress: btcAddress,
-      owner: owner,
+      owner: owner2,
       preferredAsset: AssetBTC,
-      expirity: new Date(2024, 8, 11, 14, 30, 0, 0),
+      expirity: new Date(2025, 8, 11, 14, 30, 0, 0),
+      isUpdate: true,
     })
     console.log(thorname.value.baseAmount.amount().toString())
+    console.log(thorname.memo)
   })
 })

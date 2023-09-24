@@ -1089,7 +1089,7 @@ export class ThorchainQuery {
     const thornameMemo = `~:${params.thorname}:${params.chain}:${params.chainAddress}:${
       params.owner ? params.owner : ''
     }:${params.preferredAsset ? assetToString(params.preferredAsset) : ''}:${
-      currentHeightForExpirity + numberOfBlocksToAddToExpirity
+      params.isUpdate ? '' : currentHeightForExpirity + numberOfBlocksToAddToExpirity
     }`
     return {
       memo: thornameMemo,
