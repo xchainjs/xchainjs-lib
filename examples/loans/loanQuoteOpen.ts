@@ -1,9 +1,9 @@
 import { Network } from '@xchainjs/xchain-client'
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import {
   CryptoAmount,
   LoanOpenParams,
-  Midgard,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
@@ -37,7 +37,8 @@ const getLoanQuoteOpen = async (tcAmm: ThorchainAMM) => {
 // Call the function from main()
 const main = async () => {
   const network = process.argv[2] as Network
-  const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
+  const midgardCache = new MidgardCache(new Midgard(network))
+  const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
   const thorchainQuery = new ThorchainQuery(thorchainCache)
   const thorchainAmm = new ThorchainAMM(thorchainQuery)
   await getLoanQuoteOpen(thorchainAmm)

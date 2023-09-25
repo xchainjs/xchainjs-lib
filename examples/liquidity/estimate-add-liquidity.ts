@@ -1,10 +1,10 @@
 import { Network } from '@xchainjs/xchain-client'
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import {
   AddliquidityPosition,
   CryptoAmount,
   EstimateAddLP,
-  Midgard,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
@@ -36,7 +36,8 @@ function print(estimate: EstimateAddLP, rune: CryptoAmount, asset: CryptoAmount)
 const estimateAddLp = async () => {
   try {
     const network = process.argv[2] as Network
-    const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
+    const midgardCache = new MidgardCache(new Midgard(network))
+    const thorchainCacheMainnet = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 
     // TODO check if synth?

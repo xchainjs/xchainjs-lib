@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Midgard } from '@xchainjs/xchain-thorchain-query'
+import { Midgard } from '@xchainjs/xchain-midgard-query'
 
 const main = async () => {
   const network = process.argv[2] as Network
