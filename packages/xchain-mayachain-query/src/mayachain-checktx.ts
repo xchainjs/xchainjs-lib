@@ -1,11 +1,7 @@
-import { TxSignersResponse } from '@xchainjs/xchain-mayanode'
-import { Asset, Chain, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
+import { Asset } from '@xchainjs/xchain-util'
 
-import { DefaultChainAttributes } from './chain-defaults'
 import { CryptoAmount } from './crypto-amount'
 import { MayachainCache } from './mayachain-cache'
-import { ChainAttributes } from './types'
-import { AssetCacaoNative, MAYAChain, isAssetCacaoNative } from './utils'
 
 export enum TxType {
   Swap = 'Swap',
@@ -125,11 +121,9 @@ export type TXProgress = {
 
 export class TransactionStage {
   readonly mayachainCache: MayachainCache
-  private chainAttributes: Record<Chain, ChainAttributes>
 
-  constructor(mayachainCache: MayachainCache, chainAttributes = DefaultChainAttributes) {
+  constructor(mayachainCache: MayachainCache) {
     this.mayachainCache = mayachainCache
-    this.chainAttributes = chainAttributes
   }
   // public async checkTxProgress(inboundTxHash: string): Promise<TXProgress> {
   //   let txData
@@ -172,179 +166,175 @@ export class TransactionStage {
   //
   //   return progress
   // }
-  // @ts-ignore
-  private async checkSwapProgress(txData: TxDetailsResponse, progress: TXProgress) {
-    if (progress.inboundObserved) {
-      const memo = txData.tx.tx.memo ?? ''
-      const memoFields = this.parseSwapMemo(memo)
-      const assetOut = assetFromStringEx(memoFields.asset.toUpperCase())
-      //const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
-      const swapStatus = txData.out_txs[0].memo?.match('OUT') ? SwapStatus.Complete : SwapStatus.Complete_Refunded
-      // current height of mayachain, neeed for confirmations
-      const chainHeight = await this.blockHeight(AssetCacaoNative)
+  // private async checkSwapProgress(txData: TxDetailsResponse, progress: TXProgress) {
+  //   if (progress.inboundObserved) {
+  //     const memo = txData.tx.tx.memo ?? ''
+  //     const memoFields = this.parseSwapMemo(memo)
+  //     const assetOut = assetFromStringEx(memoFields.asset.toUpperCase())
+  //     //const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
+  //     const swapStatus = txData.out_txs[0].memo?.match('OUT') ? SwapStatus.Complete : SwapStatus.Complete_Refunded
+  //     // current height of mayachain, neeed for confirmations
+  //     const chainHeight = await this.blockHeight(AssetCacaoNative)
 
-      // expected outbound height
-      const outboundHeight = Number(txData.outbound_height ?? txData.finalised_height)
-      const expectedOutBlock = Number(txData.outbound_height ?? txData.finalised_height)
-      const expectedOutDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // height held in the scheduled queue
-      const confirmations = chainHeight > outboundHeight ? chainHeight - outboundHeight : 0
-      const minimumAmountOut = memoFields.limit
-        ? await this.getCryptoAmount(memoFields.limit, assetOut)
-        : await this.getCryptoAmount('0', assetOut)
+  //     // expected outbound height
+  //     const outboundHeight = Number(txData.outbound_height ?? txData.finalised_height)
+  //     const expectedOutBlock = Number(txData.outbound_height ?? txData.finalised_height)
+  //     const expectedOutDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // height held in the scheduled queue
+  //     const confirmations = chainHeight > outboundHeight ? chainHeight - outboundHeight : 0
+  //     const minimumAmountOut = memoFields.limit
+  //       ? await this.getCryptoAmount(memoFields.limit, assetOut)
+  //       : await this.getCryptoAmount('0', assetOut)
 
-      const affliateFee = memoFields.affiliateFee
-        ? await this.getCryptoAmount(memoFields.affiliateFee, assetOut)
-        : await this.getCryptoAmount('0', assetOut)
-      // TODO get out tx
-      const swapInfo: SwapInfo = {
-        status: swapStatus,
-        expectedOutBlock,
-        expectedOutDate,
-        expectedAmountOut: minimumAmountOut, // TODO call estimateSwap()
-        confirmations,
-        minimumAmountOut,
-        affliateFee,
-        toAddress: memoFields.destAddress,
-      }
-      progress.swapInfo = swapInfo
-    }
-  }
-  private parseSwapMemo(memo: string) {
-    //SWAP:ASSET:DESTADDR:LIM:AFFILIATE:FEE
-    const parts = memo.split(`:`)
-    const action = parts[0]
-    const asset = parts[1]
-    const destAddress = parts[2]
-    const limit = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
-    const affiliateAddress = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
-    const affiliateFee = parts.length > 5 && parts[5].length > 0 ? parts[5] : undefined
-    return { action, asset, destAddress, limit, affiliateAddress, affiliateFee }
-  }
-  private async getCryptoAmount(baseAmt: string, asset: Asset): Promise<CryptoAmount> {
-    const decimals =
-      MAYAChain === asset.chain ? 8 : Number((await this.mayachainCache.getPoolForAsset(asset)).pool.nativeDecimal)
-    return new CryptoAmount(baseAmount(baseAmt, decimals), asset)
-  }
-  // @ts-ignore
-  private async determineObserved(txData: TxSignersResponse): Promise<TXProgress> {
-    const progress: TXProgress = {
-      txType: TxType.Unknown,
-    }
+  //     const affliateFee = memoFields.affiliateFee
+  //       ? await this.getCryptoAmount(memoFields.affiliateFee, assetOut)
+  //       : await this.getCryptoAmount('0', assetOut)
+  //     // TODO get out tx
+  //     const swapInfo: SwapInfo = {
+  //       status: swapStatus,
+  //       expectedOutBlock,
+  //       expectedOutDate,
+  //       expectedAmountOut: minimumAmountOut, // TODO call estimateSwap()
+  //       confirmations,
+  //       minimumAmountOut,
+  //       affliateFee,
+  //       toAddress: memoFields.destAddress,
+  //     }
+  //     progress.swapInfo = swapInfo
+  //   }
+  // }
+  // private parseSwapMemo(memo: string) {
+  //   //SWAP:ASSET:DESTADDR:LIM:AFFILIATE:FEE
+  //   const parts = memo.split(`:`)
+  //   const action = parts[0]
+  //   const asset = parts[1]
+  //   const destAddress = parts[2]
+  //   const limit = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
+  //   const affiliateAddress = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
+  //   const affiliateFee = parts.length > 5 && parts[5].length > 0 ? parts[5] : undefined
+  //   return { action, asset, destAddress, limit, affiliateAddress, affiliateFee }
+  // }
+  // private async getCryptoAmount(baseAmt: string, asset: Asset): Promise<CryptoAmount> {
+  //   const decimals =
+  //     MAYAChain === asset.chain ? 8 : Number((await this.mayachainCache.getPoolForAsset(asset)).pool.nativeDecimal)
+  //   return new CryptoAmount(baseAmount(baseAmt, decimals), asset)
+  // }
+  // private async determineObserved(txData: TxSignersResponse): Promise<TXProgress> {
+  //   const progress: TXProgress = {
+  //     txType: TxType.Unknown,
+  //   }
 
-    if (txData.tx) {
-      const memo = txData.tx.tx.memo ?? ''
-      const parts = memo?.split(`:`)
-      const operation = parts && parts[0] ? parts[0] : ''
-      const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
-      const inboundAmount = txData.tx.tx.coins?.[0].amount
-      const fromAddress = txData.tx.tx.from_address ?? 'unknkown'
-      const block = txData.tx.tx.chain == MAYAChain ? Number(txData.finalised_height) : Number(txData.tx.block_height)
+  //   if (txData.tx) {
+  //     const memo = txData.tx.tx.memo ?? ''
+  //     const parts = memo?.split(`:`)
+  //     const operation = parts && parts[0] ? parts[0] : ''
+  //     const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
+  //     const inboundAmount = txData.tx.tx.coins?.[0].amount
+  //     const fromAddress = txData.tx.tx.from_address ?? 'unknkown'
+  //     const block = txData.tx.tx.chain == MAYAChain ? Number(txData.finalised_height) : Number(txData.tx.block_height)
 
-      const finalizeBlock =
-        txData.tx.tx.chain == MAYAChain ? Number(txData.finalised_height) : Number(txData.tx.finalise_height)
+  //     const finalizeBlock =
+  //       txData.tx.tx.chain == MAYAChain ? Number(txData.finalised_height) : Number(txData.tx.finalise_height)
 
-      const status = txData.tx.status === 'done' ? InboundStatus.Observed_Consensus : InboundStatus.Observed_Incomplete
+  //     const status = txData.tx.status === 'done' ? InboundStatus.Observed_Consensus : InboundStatus.Observed_Incomplete
 
-      if (operation.match(/swap|s|=/gi)) progress.txType = TxType.Swap
-      if ((operation.match(/add/gi) && parts[1].match(`/`)) || (operation.match(/a|[+]/) && parts[1].match(/[/]/)))
-        progress.txType = TxType.AddSaver
-      if ((operation.match(/add/gi) && parts[1].match(`.`)) || (operation.match(/a|[+]/) && parts[1].match(/[.]/)))
-        progress.txType = TxType.AddLP
-      if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[/]/)) progress.txType = TxType.WithdrawSaver
-      if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[.]/)) progress.txType = TxType.WithdrawLP
-      if (operation.match(/refund/gi)) progress.txType = TxType.Refund
-      if (operation.match(/out/gi)) progress.txType = TxType.Other
+  //     if (operation.match(/swap|s|=/gi)) progress.txType = TxType.Swap
+  //     if ((operation.match(/add/gi) && parts[1].match(`/`)) || (operation.match(/a|[+]/) && parts[1].match(/[/]/)))
+  //       progress.txType = TxType.AddSaver
+  //     if ((operation.match(/add/gi) && parts[1].match(`.`)) || (operation.match(/a|[+]/) && parts[1].match(/[.]/)))
+  //       progress.txType = TxType.AddLP
+  //     if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[/]/)) progress.txType = TxType.WithdrawSaver
+  //     if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[.]/)) progress.txType = TxType.WithdrawLP
+  //     if (operation.match(/refund/gi)) progress.txType = TxType.Refund
+  //     if (operation.match(/out/gi)) progress.txType = TxType.Other
 
-      const amount = await this.getCryptoAmount(inboundAmount, assetIn)
-      // find a date for when it should be competed
+  //     const amount = await this.getCryptoAmount(inboundAmount, assetIn)
+  //     // find a date for when it should be competed
 
-      const dateObserved = await this.blockToDate(MAYAChain, txData)
-      const expectedConfirmationDate =
-        txData.tx.tx.chain === MAYAChain
-          ? await this.blockToDate(MAYAChain, txData)
-          : await this.blockToDate(assetIn.chain, txData)
+  //     const dateObserved = await this.blockToDate(MAYAChain, txData)
+  //     const expectedConfirmationDate =
+  //       txData.tx.tx.chain === MAYAChain
+  //         ? await this.blockToDate(MAYAChain, txData)
+  //         : await this.blockToDate(assetIn.chain, txData)
 
-      progress.inboundObserved = {
-        status,
-        date: dateObserved, // date observed?
-        block,
-        expectedConfirmationBlock: finalizeBlock,
-        expectedConfirmationDate,
-        amount,
-        fromAddress,
-        memo,
-      }
-    }
-    return progress
-  }
+  //     progress.inboundObserved = {
+  //       status,
+  //       date: dateObserved, // date observed?
+  //       block,
+  //       expectedConfirmationBlock: finalizeBlock,
+  //       expectedConfirmationDate,
+  //       amount,
+  //       fromAddress,
+  //       memo,
+  //     }
+  //   }
+  //   return progress
+  // }
 
-  // @ts-ignore
-  private async checkAddLpProgress(txData: TxSignersResponse, progress: TXProgress) {
-    if (progress.inboundObserved) {
-      const memo = txData.tx.tx.memo ?? ''
-      const memoFields = this.parseAddLpMemo(memo)
-      const asset = assetFromStringEx(memoFields.asset)
-      const isSymmetric = memoFields.pairedAddress ? true : false
-      const assetTx = !isAssetCacaoNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
-      const runeTx = isAssetCacaoNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
+  // private async checkAddLpProgress(txData: TxSignersResponse, progress: TXProgress) {
+  //   if (progress.inboundObserved) {
+  //     const memo = txData.tx.tx.memo ?? ''
+  //     const memoFields = this.parseAddLpMemo(memo)
+  //     const asset = assetFromStringEx(memoFields.asset)
+  //     const isSymmetric = memoFields.pairedAddress ? true : false
+  //     const assetTx = !isAssetCacaoNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
+  //     const runeTx = isAssetCacaoNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
 
-      const pairedAssetExpectedConfirmationDate = assetTx ? await this.blockToDate(asset.chain, txData) : undefined
-      const checkLpPosition = await this.mayachainCache.mayanode.getLiquidityProvider(
-        memoFields.asset,
-        progress.inboundObserved.fromAddress,
-      )
-      const status = checkLpPosition ? AddLpStatus.Complete : AddLpStatus.Incomplete
-      const addLpInfo: AddLpInfo = {
-        status,
-        isSymmetric,
-        assetTx,
-        runeTx,
-        assetConfirmationDate: pairedAssetExpectedConfirmationDate,
-        pool: asset,
-      }
-      progress.addLpInfo = addLpInfo
-    }
-  }
+  //     const pairedAssetExpectedConfirmationDate = assetTx ? await this.blockToDate(asset.chain, txData) : undefined
+  //     const checkLpPosition = await this.mayachainCache.mayanode.getLiquidityProvider(
+  //       memoFields.asset,
+  //       progress.inboundObserved.fromAddress,
+  //     )
+  //     const status = checkLpPosition ? AddLpStatus.Complete : AddLpStatus.Incomplete
+  //     const addLpInfo: AddLpInfo = {
+  //       status,
+  //       isSymmetric,
+  //       assetTx,
+  //       runeTx,
+  //       assetConfirmationDate: pairedAssetExpectedConfirmationDate,
+  //       pool: asset,
+  //     }
+  //     progress.addLpInfo = addLpInfo
+  //   }
+  // }
 
-  // @ts-ignore
-  private async checkWithdrawLpProgress(txData: TxSignersResponse, progress: TXProgress) {
-    if (progress.inboundObserved) {
-      const memo = txData.tx.tx.memo ?? ''
-      const memoFields = this.parseWithdrawLpMemo(memo)
-      const asset = assetFromStringEx(memoFields.asset)
+  // private async checkWithdrawLpProgress(txData: TxSignersResponse, progress: TXProgress) {
+  //   if (progress.inboundObserved) {
+  //     const memo = txData.tx.tx.memo ?? ''
+  //     const memoFields = this.parseWithdrawLpMemo(memo)
+  //     const asset = assetFromStringEx(memoFields.asset)
 
-      const lastBlockObj = await this.mayachainCache.mayanode.getLastBlock()
-      const currentHeight = lastBlockObj.find((obj) => obj)
+  //     const lastBlockObj = await this.mayachainCache.mayanode.getLastBlock()
+  //     const currentHeight = lastBlockObj.find((obj) => obj)
 
-      // find the date in which the asset should be seen in the wallet
-      const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
+  //     // find the date in which the asset should be seen in the wallet
+  //     const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
 
-      const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in mayachain
+  //     const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in mayachain
 
-      // if the TC has process the block that the outbound tx was assigned to then its completed.
-      const status = txData.tx.status === 'done' ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
+  //     // if the TC has process the block that the outbound tx was assigned to then its completed.
+  //     const status = txData.tx.status === 'done' ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
 
-      const outAmount =
-        status === WithdrawStatus.Complete ? JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`) : ''
-      const outboundBlock = Number(txData.outbound_height ?? txData.finalised_height)
-      const currentTCHeight = Number(`${currentHeight?.mayachain}`)
-      const estimatedWaitTime =
-        outboundBlock > currentTCHeight
-          ? (outboundBlock - currentTCHeight) * this.chainAttributes[MAYAChain].avgBlockTimeInSecs
-          : 0
-      const withdrawalAmount = await this.getCryptoAmount(outAmount[0], asset)
+  //     const outAmount =
+  //       status === WithdrawStatus.Complete ? JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`) : ''
+  //     const outboundBlock = Number(txData.outbound_height ?? txData.finalised_height)
+  //     const currentTCHeight = Number(`${currentHeight?.mayachain}`)
+  //     const estimatedWaitTime =
+  //       outboundBlock > currentTCHeight
+  //         ? (outboundBlock - currentTCHeight) * this.chainAttributes[MAYAChain].avgBlockTimeInSecs
+  //         : 0
+  //     const withdrawalAmount = await this.getCryptoAmount(outAmount[0], asset)
 
-      const withdrawLpInfo: WithdrawInfo = {
-        status,
-        withdrawalAmount,
-        expectedConfirmationDate,
-        mayachainHeight: currentTCHeight,
-        outboundHeight: outboundBlock,
-        estimatedWaitTime,
-      }
-      progress.withdrawLpInfo = withdrawLpInfo
-    }
-  }
+  //     const withdrawLpInfo: WithdrawInfo = {
+  //       status,
+  //       withdrawalAmount,
+  //       expectedConfirmationDate,
+  //       mayachainHeight: currentTCHeight,
+  //       outboundHeight: outboundBlock,
+  //       estimatedWaitTime,
+  //     }
+  //     progress.withdrawLpInfo = withdrawLpInfo
+  //   }
+  // }
 
   // private async checkAddSaverProgress(txData: TxSignersResponse, progress: TXProgress) {
   //   if (progress.inboundObserved) {
@@ -364,169 +354,166 @@ export class TransactionStage {
   //   }
   // }
 
-  // @ts-ignore
-  private async checkWithdrawSaverProgress(txData: TxSignersResponse, progress: TXProgress) {
-    if (progress.inboundObserved) {
-      const memo = txData.tx.tx.memo ?? ''
-      const memoFields = this.parseWithdrawLpMemo(memo)
-      const asset = assetFromStringEx(memoFields.asset)
+  // private async checkWithdrawSaverProgress(txData: TxSignersResponse, progress: TXProgress) {
+  //   if (progress.inboundObserved) {
+  //     const memo = txData.tx.tx.memo ?? ''
+  //     const memoFields = this.parseWithdrawLpMemo(memo)
+  //     const asset = assetFromStringEx(memoFields.asset)
 
-      const lastBlockObj = await this.mayachainCache.mayanode.getLastBlock()
-      const currentHeight = lastBlockObj.find((obj) => obj)
+  //     const lastBlockObj = await this.mayachainCache.mayanode.getLastBlock()
+  //     const currentHeight = lastBlockObj.find((obj) => obj)
 
-      // find the date in which the asset should be seen in the wallet
-      const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
+  //     // find the date in which the asset should be seen in the wallet
+  //     const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
 
-      const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in mayachain
+  //     const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in mayachain
 
-      const outAmount = txData.out_txs ? JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`) : ''
-      const outboundBlock = Number(txData.outbound_height)
-      const finalisedHeight = Number(txData.finalised_height)
-      const currentTCHeight = Number(`${currentHeight?.mayachain}`)
-      const estimatedWaitTime =
-        outboundBlock > currentTCHeight
-          ? (outboundBlock - currentTCHeight) * this.chainAttributes[MAYAChain].avgBlockTimeInSecs +
-            this.chainAttributes[asset.chain].avgBlockTimeInSecs
-          : 0
+  //     const outAmount = txData.out_txs ? JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`) : ''
+  //     const outboundBlock = Number(txData.outbound_height)
+  //     const finalisedHeight = Number(txData.finalised_height)
+  //     const currentTCHeight = Number(`${currentHeight?.mayachain}`)
+  //     const estimatedWaitTime =
+  //       outboundBlock > currentTCHeight
+  //         ? (outboundBlock - currentTCHeight) * this.chainAttributes[MAYAChain].avgBlockTimeInSecs +
+  //           this.chainAttributes[asset.chain].avgBlockTimeInSecs
+  //         : 0
 
-      // if the TC has process the block that the outbound tx was assigned to then its completed.
-      const status = txData.out_txs ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
+  //     // if the TC has process the block that the outbound tx was assigned to then its completed.
+  //     const status = txData.out_txs ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
 
-      const withdrawalAmount = await this.getCryptoAmount(outAmount[0], asset)
-      const withdrawSaverInfo: WithdrawSaverInfo = {
-        status,
-        withdrawalAmount,
-        expectedConfirmationDate,
-        mayachainHeight: currentTCHeight,
-        finalisedHeight,
-        outboundBlock,
-        estimatedWaitTime,
-      }
-      progress.withdrawSaverInfo = withdrawSaverInfo
-    }
-  }
+  //     const withdrawalAmount = await this.getCryptoAmount(outAmount[0], asset)
+  //     const withdrawSaverInfo: WithdrawSaverInfo = {
+  //       status,
+  //       withdrawalAmount,
+  //       expectedConfirmationDate,
+  //       mayachainHeight: currentTCHeight,
+  //       finalisedHeight,
+  //       outboundBlock,
+  //       estimatedWaitTime,
+  //     }
+  //     progress.withdrawSaverInfo = withdrawSaverInfo
+  //   }
+  // }
 
-  // @ts-ignore
-  private async checkRefund(txData: TxSignersResponse, progress: TXProgress) {
-    if (progress.inboundObserved) {
-      const lastBlockObj = await this.mayachainCache.mayanode.getLastBlock()
-      // find the date in which the asset should be seen in the wallet
-      const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
+  // private async checkRefund(txData: TxSignersResponse, progress: TXProgress) {
+  //   if (progress.inboundObserved) {
+  //     const lastBlockObj = await this.mayachainCache.mayanode.getLastBlock()
+  //     // find the date in which the asset should be seen in the wallet
+  //     const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
 
-      const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in mayachain
+  //     const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in mayachain
 
-      const amount = txData.tx.tx.coins[0].amount
-      const asset = assetFromStringEx(txData.tx.tx.coins[0].asset)
-      const toAddress = `${txData.tx.tx.to_address}`
-      const currentHeight = lastBlockObj.find((obj) => obj.chain === asset.chain)
-      console.log(currentHeight)
-      const outboundBlock = Number(`${currentHeight?.last_observed_in}`)
-      const finalisedHeight = Number(txData.finalised_height)
-      const currentTCHeight = Number(`${currentHeight?.mayachain}`)
-      const estimatedWaitTime =
-        outboundBlock > currentTCHeight
-          ? (outboundBlock - currentTCHeight) * this.chainAttributes[MAYAChain].avgBlockTimeInSecs +
-            this.chainAttributes[asset.chain].avgBlockTimeInSecs
-          : 0
+  //     const amount = txData.tx.tx.coins[0].amount
+  //     const asset = assetFromStringEx(txData.tx.tx.coins[0].asset)
+  //     const toAddress = `${txData.tx.tx.to_address}`
+  //     const currentHeight = lastBlockObj.find((obj) => obj.chain === asset.chain)
+  //     console.log(currentHeight)
+  //     const outboundBlock = Number(`${currentHeight?.last_observed_in}`)
+  //     const finalisedHeight = Number(txData.finalised_height)
+  //     const currentTCHeight = Number(`${currentHeight?.mayachain}`)
+  //     const estimatedWaitTime =
+  //       outboundBlock > currentTCHeight
+  //         ? (outboundBlock - currentTCHeight) * this.chainAttributes[MAYAChain].avgBlockTimeInSecs +
+  //           this.chainAttributes[asset.chain].avgBlockTimeInSecs
+  //         : 0
 
-      // if the TC has process the block that the outbound tx was assigned to then its completed.
-      const status = txData.tx.status === 'done' ? RefundStatus.Complete : RefundStatus.Incomplete
+  //     // if the TC has process the block that the outbound tx was assigned to then its completed.
+  //     const status = txData.tx.status === 'done' ? RefundStatus.Complete : RefundStatus.Incomplete
 
-      const refundAmount = await this.getCryptoAmount(amount, asset)
-      const refundInfo: RefundInfo = {
-        status,
-        refundAmount,
-        toAddress,
-        expectedConfirmationDate,
-        mayachainHeight: currentTCHeight,
-        finalisedHeight,
-        outboundBlock,
-        estimatedWaitTime,
-      }
-      progress.refundInfo = refundInfo
-    }
-  }
+  //     const refundAmount = await this.getCryptoAmount(amount, asset)
+  //     const refundInfo: RefundInfo = {
+  //       status,
+  //       refundAmount,
+  //       toAddress,
+  //       expectedConfirmationDate,
+  //       mayachainHeight: currentTCHeight,
+  //       finalisedHeight,
+  //       outboundBlock,
+  //       estimatedWaitTime,
+  //     }
+  //     progress.refundInfo = refundInfo
+  //   }
+  // }
 
-  private parseAddLpMemo(memo: string) {
-    //ADD:POOL:PAIREDADDR:AFFILIATE:FEE
-    const parts = memo.split(`:`)
-    const action = parts[0]
-    const asset = parts[1]
-    //optional fields
-    const pairedAddress = parts.length > 2 && parts[2].length > 0 ? parts[2] : undefined
-    const affiliateAddress = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
-    const affiliateFee = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
-    return { action, asset, pairedAddress, affiliateAddress, affiliateFee }
-  }
-
-  private parseWithdrawLpMemo(memo: string) {
-    //ADD:POOL:PAIREDADDR:AFFILIATE:FEE
-    const parts = memo.split(`:`)
-    const action = parts[0]
-    const asset = parts[1]
-    //optional fields
-    const pairedAddress = parts.length > 2 && parts[2].length > 0 ? parts[2] : undefined
-    const affiliateAddress = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
-    const affiliateFee = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
-    return { action, asset, pairedAddress, affiliateAddress, affiliateFee }
-  }
+  // private parseAddLpMemo(memo: string) {
+  //   //ADD:POOL:PAIREDADDR:AFFILIATE:FEE
+  //   const parts = memo.split(`:`)
+  //   const action = parts[0]
+  //   const asset = parts[1]
+  //   //optional fields
+  //   const pairedAddress = parts.length > 2 && parts[2].length > 0 ? parts[2] : undefined
+  //   const affiliateAddress = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
+  //   const affiliateFee = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
+  //   return { action, asset, pairedAddress, affiliateAddress, affiliateFee }
+  // }
+  // private parseWithdrawLpMemo(memo: string) {
+  //   //ADD:POOL:PAIREDADDR:AFFILIATE:FEE
+  //   const parts = memo.split(`:`)
+  //   const action = parts[0]
+  //   const asset = parts[1]
+  //   //optional fields
+  //   const pairedAddress = parts.length > 2 && parts[2].length > 0 ? parts[2] : undefined
+  //   const affiliateAddress = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
+  //   const affiliateFee = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
+  //   return { action, asset, pairedAddress, affiliateAddress, affiliateFee }
+  // }
   /**
    * Private function to return the date stamp from block height and chain
    * @param chain - input chain
    * @param txData - txResponse
    * @returns date()
    */
-  private async blockToDate(chain: Chain, txData: TxSignersResponse, outboundBlock?: number) {
-    const lastBlockObj = await this.mayachainCache.mayanode.getLastBlock()
-    const time = new Date()
-    let blockDifference: number
-    const currentHeight = lastBlockObj.find((obj) => obj.chain == chain)
-    const chainHeight = Number(`${currentHeight?.last_observed_in}`)
-    const recordedChainHeight = Number(`${txData.tx.block_height}`)
-    // If outbound time is required
-    if (outboundBlock) {
-      const currentHeight = lastBlockObj.find((obj) => obj)
-      const mayachainHeight = Number(`${currentHeight?.mayachain}`)
-      if (outboundBlock > mayachainHeight) {
-        blockDifference = outboundBlock - mayachainHeight
-        time.setSeconds(time.getSeconds() + blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        console.log(time)
-      } else {
-        blockDifference = mayachainHeight - outboundBlock // already processed find the date it was completed
-        time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        return time
-      }
-    }
-    // find out how long ago it was processed for all chains
-    if (chain == MAYAChain) {
-      const currentHeight = lastBlockObj.find((obj) => obj)
-      const mayachainHeight = Number(`${currentHeight?.mayachain}`) // current height of the TC
-      const finalisedHeight = Number(`${txData.finalised_height}`) // height tx was completed in
-      blockDifference = mayachainHeight - finalisedHeight
-      time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs) // note if using data from a tx that was before a mayachain halt this calculation becomes inaccurate...
-    } else {
-      // set the time for all other chains
-      blockDifference = chainHeight - recordedChainHeight
-      time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-    }
-    return time
-  }
+  // private async blockToDate(chain: Chain, txData: TxSignersResponse, outboundBlock?: number) {
+  //   const lastBlockObj = await this.mayachainCache.mayanode.getLastBlock()
+  //   const time = new Date()
+  //   let blockDifference: number
+  //   const currentHeight = lastBlockObj.find((obj) => obj.chain == chain)
+  //   const chainHeight = Number(`${currentHeight?.last_observed_in}`)
+  //   const recordedChainHeight = Number(`${txData.tx.block_height}`)
+  //   // If outbound time is required
+  //   if (outboundBlock) {
+  //     const currentHeight = lastBlockObj.find((obj) => obj)
+  //     const mayachainHeight = Number(`${currentHeight?.mayachain}`)
+  //     if (outboundBlock > mayachainHeight) {
+  //       blockDifference = outboundBlock - mayachainHeight
+  //       time.setSeconds(time.getSeconds() + blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
+  //       console.log(time)
+  //     } else {
+  //       blockDifference = mayachainHeight - outboundBlock // already processed find the date it was completed
+  //       time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
+  //       return time
+  //     }
+  //   }
+  //   // find out how long ago it was processed for all chains
+  //   if (chain == MAYAChain) {
+  //     const currentHeight = lastBlockObj.find((obj) => obj)
+  //     const mayachainHeight = Number(`${currentHeight?.mayachain}`) // current height of the TC
+  //     const finalisedHeight = Number(`${txData.finalised_height}`) // height tx was completed in
+  //     blockDifference = mayachainHeight - finalisedHeight
+  //     time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs) // note if using data from a tx that was before a mayachain halt this calculation becomes inaccurate...
+  //   } else {
+  //     // set the time for all other chains
+  //     blockDifference = chainHeight - recordedChainHeight
+  //     time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
+  //   }
+  //   return time
+  // }
 
   /**
    * Returns current block height of an asset's native chain
    * @param chain
    * @returns
    */
-  private async blockHeight(asset: Asset) {
-    const lastBlockObj = await this.mayachainCache.mayanode.getLastBlock()
-    const currentHeight = lastBlockObj.find((obj) => obj.chain == asset.chain)
-    let blockHeight
-    if (asset.chain === MAYAChain || asset.synth) {
-      const currentHeight = lastBlockObj.find((obj) => obj)
-      blockHeight = Number(`${currentHeight?.mayachain}`)
-    } else {
-      blockHeight = Number(`${currentHeight?.last_observed_in}`)
-    }
-    return blockHeight
-  }
+  // private async blockHeight(asset: Asset) {
+  //   const lastBlockObj = await this.mayachainCache.mayanode.getLastBlock()
+  //   const currentHeight = lastBlockObj.find((obj) => obj.chain == asset.chain)
+  //   let blockHeight
+  //   if (asset.chain === MAYAChain || asset.synth) {
+  //     const currentHeight = lastBlockObj.find((obj) => obj)
+  //     blockHeight = Number(`${currentHeight?.mayachain}`)
+  //   } else {
+  //     blockHeight = Number(`${currentHeight?.last_observed_in}`)
+  //   }
+  //   return blockHeight
+  // }
 }
