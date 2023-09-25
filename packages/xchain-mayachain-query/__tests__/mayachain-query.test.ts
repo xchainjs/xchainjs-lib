@@ -69,7 +69,7 @@ describe('Mayachain-query tests', () => {
       fromAsset: AssetBTC,
       destinationAsset: AssetETH,
       destinationAddress: ethAddress,
-      affiliateAddress: `thor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx`,
+      affiliateAddress: `maya13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx`,
       affiliateBps: 50,
       fromAddress: btcAddress,
     }
@@ -82,8 +82,8 @@ describe('Mayachain-query tests', () => {
       amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetsBTC),
       fromAsset: AssetsBTC,
       destinationAsset: AssetsETH,
-      destinationAddress: 'thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu',
-      fromAddress: 'thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu',
+      destinationAddress: 'maya1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu',
+      fromAddress: 'maya1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu',
     }
     const estimate = await mayachainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)

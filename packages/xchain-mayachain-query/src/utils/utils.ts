@@ -23,6 +23,7 @@ import {
   AssetDOGE,
   AssetETH,
   AssetLTC,
+  AssetRuneNative,
   BCHChain,
   BNBChain,
   BSCChain,
@@ -57,7 +58,7 @@ export const getChainAsset = (chain: Chain): Asset => {
     case ETHChain:
       return AssetETH
     case THORChain:
-      return AssetCacao
+      return AssetRuneNative
     case GAIAChain:
       return AssetATOM
     case BCHChain:
@@ -175,7 +176,7 @@ export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmo
     case BSCChain:
       return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBSC)
     case THORChain:
-      return new CryptoAmount(baseAmount(2000000), AssetCacao)
+      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetRuneNative)
     case MAYAChain:
       return new CryptoAmount(baseAmount(2000000), AssetCacaoNative)
   }

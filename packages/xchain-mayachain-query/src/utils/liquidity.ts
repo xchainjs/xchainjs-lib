@@ -9,7 +9,7 @@ import { AssetCacao } from './const'
 import { getBaseAmountWithDiffDecimals } from './utils'
 
 /**
- * https://dev.thorchain.org/thorchain-dev/interface-guide/math#lp-units-add
+ * https://docs.mayaprotocol.com/dev-docs/mayachain/concepts/math#lp-units-add
  * @param liquidity - asset amount added
  * @param pool  - pool depths
  * @returns liquidity units - ownership of pool
@@ -70,7 +70,7 @@ export const getSlipOnLiquidity = (stake: LiquidityToAdd, pool: LiquidityPool): 
 }
 
 /**
- * https://docs.thorchain.org/thorchain-finance/continuous-liquidity-pools#impermanent-loss-protection
+ * https://docs.mayaprotocol.com/deep-dive/how-it-works/impermanent-loss-protection-ilp
  * @param poolShare - the share of asset and rune added to the pool
  * @param pool - Pool that the asset is attached to
  * @param block - blockl object with current, last added and the constant blocksforlossProtection
@@ -107,7 +107,7 @@ export const getLiquidityProtectionData = (
 }
 
 /**
- * https://docs.thorchain.org/thorchain-finance/continuous-liquidity-pools#calculating-pool-ownership
+ * https://docs.mayaprotocol.com/deep-dive/mayachain-finance/continuous-liquidity-pools#calculating-pool-ownership
  * @param liquidity - asset amount added
  * @param pool  - pool depths
  * @returns liquidity units - % ownership of pool

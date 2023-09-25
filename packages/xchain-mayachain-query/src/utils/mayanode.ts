@@ -75,7 +75,7 @@ export class Mayanode {
   }
 
   /**
-   * Returns the oubound transactions held by THORChain due to outbound delay
+   * Returns the oubound transactions held by MAYAChain due to outbound delay
    * May be empty if there are no transactions
    *
    * @returns {ScheduledQueueItem} Array
@@ -169,7 +169,7 @@ export class Mayanode {
   // }
   /**
    *
-   * @param height - optional thorchain height only
+   * @param height - optional mayachain height only
    * @returns - last block data || or block data pertaining to that height number
    */
   async getLastBlock(height?: number): Promise<LastBlock[]> {
@@ -185,7 +185,7 @@ export class Mayanode {
   }
   /**
    *
-   * @returns - thorchain pools
+   * @returns - mayachain pools
    */
   async getPools(): Promise<Pool[]> {
     for (const api of this.poolsApi) {
@@ -201,7 +201,7 @@ export class Mayanode {
 
   /**
    *
-   * @returns - thorchain pool
+   * @returns - mayachain pool
    */
   async getPool(asset: string): Promise<Pool> {
     for (const api of this.poolsApi) {
@@ -223,8 +223,8 @@ export class Mayanode {
     for (const api of this.networkApi) {
       try {
         const constants = await api.constants()
-        if (constants.data.int64_values) {
-          return constants.data.int64_values
+        if (constants.data.int_64_values) {
+          return constants.data.int_64_values
         }
       } catch (e) {
         //console.error(e)
@@ -295,7 +295,7 @@ export class Mayanode {
   /**
    *
    * @param asset - asset string
-   * @param height - optional thorchain block height parameter
+   * @param height - optional mayachain block height parameter
    * @returns - Liquidity Provider Object
    */
   // async getSavers(asset: string, height?: number): Promise<SaversResponse> {
@@ -307,13 +307,13 @@ export class Mayanode {
   //       //console.error(e)
   //     }
   //   }
-  //   throw new Error(`THORNode not responding`)
+  //   throw new Error(`MAYANode not responding`)
   // }
 
   /**
    *
    * @param asset - asset string
-   * @param height - optional thorchain block height parameter
+   * @param height - optional mayachain block height parameter
    * @returns - Liquidity Provider Object
    */
   // async getSaver(asset: string, address: string, height?: number): Promise<Saver> {
@@ -325,7 +325,7 @@ export class Mayanode {
   //       //console.error(e)
   //     }
   //   }
-  //   throw new Error(`THORNode not responding`)
+  //   throw new Error(`MAYANode not responding`)
   // }
 
   /**

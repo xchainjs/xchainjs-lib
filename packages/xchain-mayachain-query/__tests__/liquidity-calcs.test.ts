@@ -46,7 +46,7 @@ const BusdMidgardPoolDetails1: PoolDetail = {
   totalCollateral: '',
   totalDebtTor: '',
 }
-const BusdThornodePoolDetails1: Pool = {
+const BusdMayanodePoolDetails1: Pool = {
   LP_units: '52543071634074',
   asset: 'BNB.BUSD-BD1',
   balance_asset: '377399468483592',
@@ -91,7 +91,7 @@ describe(`Liquidity calc tests`, () => {
   })
 
   it.skip(`Should calculate correct liquidity units for above entry`, async () => {
-    const BusdPool1 = new LiquidityPool(BusdMidgardPoolDetails1, BusdThornodePoolDetails1)
+    const BusdPool1 = new LiquidityPool(BusdMidgardPoolDetails1, BusdMayanodePoolDetails1)
     const liquidityBUSd: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount(`2.05262786`, 6)), BUSD),
       cacao: new CryptoAmount(assetToBase(assetAmount('1.02658114')), AssetCacaoNative),
@@ -198,7 +198,7 @@ describe(`Liquidity calc tests`, () => {
     expect(checkILP.totalDays).toEqual('100.00')
   })
   it.skip(`Should calculate correct pool ownership`, async () => {
-    const BusdPool = new LiquidityPool(emptyBusdPoolDetails, BusdThornodePoolDetails1)
+    const BusdPool = new LiquidityPool(emptyBusdPoolDetails, BusdMayanodePoolDetails1)
     const liquidityToAdd: LiquidityToAdd = {
       asset: new CryptoAmount(assetToBase(assetAmount('50')), BUSD),
       cacao: new CryptoAmount(assetToBase(assetAmount('50')), AssetCacaoNative),

@@ -1,4 +1,4 @@
-import { Saver, TxDetailsResponse, TxSignersResponse } from '@xchainjs/xchain-thornode'
+import { TxSignersResponse } from '@xchainjs/xchain-mayanode'
 import { Asset, Chain, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
@@ -73,7 +73,7 @@ export type WithdrawSaverInfo = {
   status: WithdrawStatus
   withdrawalAmount: CryptoAmount
   expectedConfirmationDate: Date
-  thorchainHeight: number
+  mayachainHeight: number
   finalisedHeight: number
   outboundBlock: number
   estimatedWaitTime: number
@@ -82,7 +82,7 @@ export type WithdrawInfo = {
   status: WithdrawStatus
   withdrawalAmount: CryptoAmount
   expectedConfirmationDate: Date
-  thorchainHeight: number
+  mayachainHeight: number
   outboundHeight: number
   estimatedWaitTime: number
 }
@@ -92,7 +92,7 @@ export type RefundInfo = {
   toAddress: string
   expectedConfirmationDate: Date
   finalisedHeight: number
-  thorchainHeight: number
+  mayachainHeight: number
   outboundBlock: number
   estimatedWaitTime: number
 }
@@ -100,7 +100,7 @@ export type RefundInfo = {
 export type AddSaverInfo = {
   status: AddSaverStatus
   assetTx?: InboundTx
-  saverPos?: Saver
+  // saverPos?: Saver
 }
 type InboundTx = {
   status: InboundStatus
@@ -180,7 +180,7 @@ export class TransactionStage {
       const assetOut = assetFromStringEx(memoFields.asset.toUpperCase())
       //const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
       const swapStatus = txData.out_txs[0].memo?.match('OUT') ? SwapStatus.Complete : SwapStatus.Complete_Refunded
-      // current height of thorchain, neeed for confirmations
+      // current height of mayachain, neeed for confirmations
       const chainHeight = await this.blockHeight(AssetCacaoNative)
 
       // expected outbound height
@@ -319,7 +319,7 @@ export class TransactionStage {
       // find the date in which the asset should be seen in the wallet
       const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
 
-      const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in thorchain
+      const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in mayachain
 
       // if the TC has process the block that the outbound tx was assigned to then its completed.
       const status = txData.tx.status === 'done' ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
@@ -338,7 +338,7 @@ export class TransactionStage {
         status,
         withdrawalAmount,
         expectedConfirmationDate,
-        thorchainHeight: currentTCHeight,
+        mayachainHeight: currentTCHeight,
         outboundHeight: outboundBlock,
         estimatedWaitTime,
       }
@@ -377,7 +377,7 @@ export class TransactionStage {
       // find the date in which the asset should be seen in the wallet
       const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
 
-      const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in thorchain
+      const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in mayachain
 
       const outAmount = txData.out_txs ? JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`) : ''
       const outboundBlock = Number(txData.outbound_height)
@@ -397,7 +397,7 @@ export class TransactionStage {
         status,
         withdrawalAmount,
         expectedConfirmationDate,
-        thorchainHeight: currentTCHeight,
+        mayachainHeight: currentTCHeight,
         finalisedHeight,
         outboundBlock,
         estimatedWaitTime,
@@ -413,7 +413,7 @@ export class TransactionStage {
       // find the date in which the asset should be seen in the wallet
       const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
 
-      const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in thorchain
+      const expectedConfirmationDate = await this.blockToDate(MAYAChain, txData, outboundHeight) // always pass in mayachain
 
       const amount = txData.tx.tx.coins[0].amount
       const asset = assetFromStringEx(txData.tx.tx.coins[0].asset)
@@ -438,7 +438,7 @@ export class TransactionStage {
         refundAmount,
         toAddress,
         expectedConfirmationDate,
-        thorchainHeight: currentTCHeight,
+        mayachainHeight: currentTCHeight,
         finalisedHeight,
         outboundBlock,
         estimatedWaitTime,
@@ -486,13 +486,13 @@ export class TransactionStage {
     // If outbound time is required
     if (outboundBlock) {
       const currentHeight = lastBlockObj.find((obj) => obj)
-      const thorchainHeight = Number(`${currentHeight?.mayachain}`)
-      if (outboundBlock > thorchainHeight) {
-        blockDifference = outboundBlock - thorchainHeight
+      const mayachainHeight = Number(`${currentHeight?.mayachain}`)
+      if (outboundBlock > mayachainHeight) {
+        blockDifference = outboundBlock - mayachainHeight
         time.setSeconds(time.getSeconds() + blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
         console.log(time)
       } else {
-        blockDifference = thorchainHeight - outboundBlock // already processed find the date it was completed
+        blockDifference = mayachainHeight - outboundBlock // already processed find the date it was completed
         time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
         return time
       }
@@ -500,10 +500,10 @@ export class TransactionStage {
     // find out how long ago it was processed for all chains
     if (chain == MAYAChain) {
       const currentHeight = lastBlockObj.find((obj) => obj)
-      const thorchainHeight = Number(`${currentHeight?.mayachain}`) // current height of the TC
+      const mayachainHeight = Number(`${currentHeight?.mayachain}`) // current height of the TC
       const finalisedHeight = Number(`${txData.finalised_height}`) // height tx was completed in
-      blockDifference = thorchainHeight - finalisedHeight
-      time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs) // note if using data from a tx that was before a thorchain halt this calculation becomes inaccurate...
+      blockDifference = mayachainHeight - finalisedHeight
+      time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs) // note if using data from a tx that was before a mayachain halt this calculation becomes inaccurate...
     } else {
       // set the time for all other chains
       blockDifference = chainHeight - recordedChainHeight

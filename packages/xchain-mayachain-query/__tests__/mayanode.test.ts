@@ -14,7 +14,7 @@ describe(`Mayanode transaction status tests`, () => {
   })
   const txResp = `40CB2D3323F3A68B15B270419A24D3894DC02B56FD6DA73E5560F91B8B1C0FBF`
 
-  it(`Should return thornode txData from hash and match chain btc`, async () => {
+  it(`Should return mayanode txData from hash and match chain btc`, async () => {
     const txStatus = await mayanode.getTxData(txResp)
     expect(txStatus.observed_tx?.tx.chain).toEqual('MAYA')
   })

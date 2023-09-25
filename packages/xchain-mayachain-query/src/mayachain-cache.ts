@@ -209,7 +209,7 @@ export class MayachainCache {
       }
       inboundDetails[chain] = details
     }
-    // add mock THORCHAIN inbound details
+    // add mock MAYACHAIN inbound details
     const details: InboundDetail = {
       chain: MAYAChain,
       address: '',

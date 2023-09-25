@@ -10,7 +10,8 @@ export const AssetLTC = assetFromStringEx('LTC.LTC')
 export const AssetATOM = assetFromStringEx('GAIA.ATOM')
 export const AssetCacaoNative = assetFromStringEx('MAYA.CACAO')
 export const AssetBSC = assetFromStringEx('BSC.BNB')
-export const AssetCacao = assetFromStringEx('THOR.RUNE')
+export const AssetCacao = assetFromStringEx('MAYA.CACAO')
+export const AssetRuneNative = assetFromStringEx('THOR.RUNE')
 
 export const BNBChain = 'BNB'
 export const BTCChain = 'BTC'

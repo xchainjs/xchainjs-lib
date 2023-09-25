@@ -30,7 +30,7 @@ import {
   UnitData,
   WithdrawLiquidityPosition,
 } from './types'
-import { AssetBNB, AssetCacao, BNBChain, GAIAChain, THORChain, isAssetCacaoNative } from './utils'
+import { AssetBNB, AssetCacao, BNBChain, GAIAChain, MAYAChain, isAssetCacaoNative } from './utils'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
 import { calcNetworkFee, calcOutboundFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/utils'
 
@@ -184,7 +184,7 @@ export class MayachainQuery {
   // }
 
   /**
-   * Works out how long an outbound Tx will be held by THORChain before sending.
+   * Works out how long an outbound Tx will be held by MAYAChain before sending.
    *
    * @param outboundAmount: CryptoAmount  being sent.
    * @returns required delay in seconds
@@ -199,12 +199,12 @@ export class MayachainQuery {
       .toNumber()
     const getQueue = await this.mayachainCache.mayanode.getQueue()
     const outboundValue = new CryptoAmount(baseAmount(getQueue.scheduled_outbound_value), AssetCacao)
-    const thorChainblocktime = this.chainAttributes[THORChain].avgBlockTimeInSecs // blocks required to confirm tx
+    const mayachainBlocktime = this.chainAttributes[MAYAChain].avgBlockTimeInSecs // blocks required to confirm tx
     // If asset is equal to Rune set runeValue as outbound amount else set it to the asset's value in rune
     const runeValue = await this.mayachainCache.convert(outboundAmount, AssetCacao)
     // Check rune value amount
     if (runeValue.lt(minTxOutVolumeThreshold)) {
-      return thorChainblocktime
+      return mayachainBlocktime
     }
     // Rune value in the outbound queue
     if (outboundValue == undefined) {
@@ -219,7 +219,7 @@ export class MayachainQuery {
     // calculate the minimum number of blocks in the future the txn has to be
     let minBlocks = runeValue.assetAmount.amount().toNumber() / txOutDelayRate
     minBlocks = minBlocks > maxTxOutOffset ? maxTxOutOffset : minBlocks
-    return minBlocks * thorChainblocktime
+    return minBlocks * mayachainBlocktime
   }
 
   /**
@@ -255,13 +255,13 @@ export class MayachainQuery {
     return await this.mayachainCache.convert(input, outAsset)
   }
   /**
-   * Finds the required confCount required for an inbound or outbound Tx to THORChain. Estimate based on Midgard data only.
+   * Finds the required confCount required for an inbound or outbound Tx to MAYAChain. Estimate based on Midgard data only.
    *
    * Finds the gas asset of the given asset (e.g. BUSD is on BNB), finds the value of asset in Gas Asset then finds the required confirmation count.
    * ConfCount is then times by 6 seconds.
    *
    * @param inbound: CryptoAmount - amount/asset of the outbound amount.
-   * @returns time in seconds before a Tx is confirmed by THORChain
+   * @returns time in seconds before a Tx is confirmed by MAYAChain
    * @see https://docs.thorchain.org/chain-clients/overview
    */
   async confCounting(inbound: CryptoAmount): Promise<number> {
@@ -272,7 +272,7 @@ export class MayachainQuery {
       inbound.asset.chain == GAIAChain ||
       inbound.asset.synth
     ) {
-      return this.chainAttributes[THORChain].avgBlockTimeInSecs
+      return this.chainAttributes[MAYAChain].avgBlockTimeInSecs
     }
     // Get the gas asset for the inbound.asset.chain
     const chainGasAsset = getChainAsset(inbound.asset.chain)
