@@ -462,7 +462,6 @@ export class Wallet {
    * @param owner - Owner address (rune address)
    * @param preferredAsset - referred asset
    * @param expirity - expirity of the domain in MILLISECONDS
-   * @param isUpdate - true only if the domain is already register and you want to update its data
    * @returns memo and value of deposit
    */
   async updateThorname(params: UpdateThornameParams) {
