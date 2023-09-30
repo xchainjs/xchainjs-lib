@@ -36,7 +36,7 @@ export type CosmosSdkClientParams = XChainClientParams & {
 }
 
 /**
- * Generic implementation of the XChainClient interface to work with strings built with cosmos-sdk (https://docs.cosmos.network/) using the dependencies of the official @cosmjs monorepo.
+ * Generic implementation of the XChainClient interface chains built with cosmos-sdk (https://docs.cosmos.network/) using the dependencies of the official @cosmjs monorepo.
  */
 export default abstract class Client extends BaseXChainClient implements XChainClient {
   private readonly startgateClient: CachedValue<StargateClient>
