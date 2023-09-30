@@ -52,7 +52,7 @@ export class Midgard {
         const saverDetails = (await api.getSaverDetail(address)).data
         return saverDetails
       } catch (e) {
-        //console.error(e)
+        // console.error(e)
       }
     }
     throw Error(`Midgard not responding`)
@@ -67,7 +67,7 @@ export class Midgard {
       try {
         return (await api.getPools()).data
       } catch (e) {
-        //console.error(e)
+        // console.error(e)
       }
     }
     throw new Error(`Midgard not responding`)

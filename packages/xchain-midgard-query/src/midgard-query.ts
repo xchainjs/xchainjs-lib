@@ -10,21 +10,28 @@ const DEFAULT_THORCHAIN_DECIMALS = 8
 const defaultCache = new MidgardCache()
 
 /**
- * THORChain Class for getting  data from Midgard API (THORChain L2 Api).
+ * Class for getting data and process from Midgard API using MidgardCache for optimize request number (THORChain L2 Api).
  */
 export class MidgardQuery {
   readonly midgardCache: MidgardCache
 
   /**
-   * Contructor to create a ThorchainAMM
+   * Contructor to create a MidgardQuery
    *
    * @param midgardCache - an instance of the midgardCache (could be pointing to stagenet,testnet,mainnet)
-   * @returns ThorchainAMM
+   * @returns MidgardQuery
    */
   constructor(midgardCache = defaultCache) {
     this.midgardCache = midgardCache
   }
 
+  /**
+   * Get pool by asset
+   *
+   * @param {string} asset In example: BTC.BTC
+   * @returns {PoolDetail} Details of selected pool
+   * @throws {Error} Can't find pool for asset
+   */
   private async getPool(asset: string): Promise<PoolDetail> {
     const pools = await this.midgardCache.getPools()
     const pool = pools.find((pool) => pool.asset === asset)
@@ -34,6 +41,12 @@ export class MidgardQuery {
     return pool
   }
 
+  /**
+   * Get saver positions by array of saver descriptions
+   *
+   * @param {getSaver[]} params array of search conditions
+   * @returns {SaversPosition[]} Information on the positions found
+   */
   public async getSaverPositions(params: getSaver[]): Promise<SaversPosition[]> {
     const addresses: Set<string> = new Set<string>()
     params.forEach((param) => addresses.add(param.address))
@@ -72,6 +85,12 @@ export class MidgardQuery {
     return saversPositions
   }
 
+  /**
+   * Returns number of decimals by asset
+   *
+   * @param {Asset} asset asset for getting decimals
+   * @returns {number} Number of decimals from Midgard https://gitlab.com/thorchain/midgard#refresh-native-decimals
+   */
   public async getDecimalForAsset(asset: Asset): Promise<number> {
     if (!isAssetRuneNative(asset)) {
       const pool = await this.getPool(assetToString(asset))
