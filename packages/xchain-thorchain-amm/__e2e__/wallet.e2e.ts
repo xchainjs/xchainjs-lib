@@ -1,6 +1,15 @@
 import cosmosclient from '@cosmos-client/core'
 import { Network } from '@xchainjs/xchain-client'
-import { ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
+import {
+  AssetBTC,
+  AssetETH,
+  BCHChain,
+  BTCChain,
+  ETHChain,
+  ThorchainCache,
+  ThorchainQuery,
+  Thornode,
+} from '@xchainjs/xchain-thorchain-query'
 import { baseToAsset, formatAssetAmountCurrency, register9Rheader } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
@@ -38,6 +47,82 @@ describe('xchain-swap wallet Tests', () => {
           }
         }
       }
+    } catch (e) {
+      console.error(e)
+    }
+  })
+  it(`Register thorname`, async () => {
+    try {
+      await mainnetWallet.registerThorname({
+        thorname: 'hippocampus',
+        chain: BTCChain,
+        preferredAsset: AssetBTC,
+        expirity: new Date(2024, 8, 11, 14, 30, 0, 0),
+      })
+    } catch (e) {
+      console.error(e)
+    }
+  })
+
+  it(`Update thorname`, async () => {
+    try {
+      await mainnetWallet.updateThorname({
+        thorname: 'hippo',
+        chain: BCHChain,
+        chainAddress: 'qz53fqdfjqwefhff9xf3dmq45g3l7jydyu6d990e76',
+      })
+    } catch (e) {
+      console.error(e)
+    }
+  })
+
+  it(`Update thorname with expirity`, async () => {
+    try {
+      await mainnetWallet.updateThorname({
+        thorname: 'hippo',
+        chain: BCHChain,
+        chainAddress: 'qz53fqdfjqwefhff9xf3dmq45g3l7jydyu6d990e76',
+        expirity: new Date(2024, 9, 11, 14, 30, 0, 0),
+      })
+    } catch (e) {
+      console.error(e)
+    }
+  })
+
+  it(`Update thorname prefered asset`, async () => {
+    try {
+      const hash = await mainnetWallet.updateThorname({
+        thorname: 'hippo',
+        chain: ETHChain,
+        preferredAsset: AssetETH,
+      })
+      console.log('hash', hash)
+    } catch (e) {
+      console.error(e)
+    }
+  })
+
+  it(`Try update thorname is not yours`, async () => {
+    try {
+      await mainnetWallet.updateThorname({
+        thorname: 'dx',
+        chain: ETHChain,
+        chainAddress: '0xc50531811f3d8161a2b53349974ae4c7c6d3bfba',
+      })
+    } catch (e) {
+      console.error(e)
+    }
+  })
+
+  it(`Transfer thorname`, async () => {
+    try {
+      const hash = await mainnetWallet.updateThorname({
+        thorname: 'hippo',
+        chain: ETHChain,
+        preferredAsset: AssetETH,
+        owner: 'thor1k5at9pzfjsqfys380cgu3v9gz2s4vgsyzl2tue',
+      })
+      console.log('hash', hash)
     } catch (e) {
       console.error(e)
     }

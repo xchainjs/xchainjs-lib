@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "@xchainjs/xchain-thorchain-query": "file:../../packages/xchain-thorchain-query",
+    "@xchainjs/xchain-midgard-query": "file:../../packages/xchain-midgard-query",
     "@xchainjs/xchain-client": "file:../../packages/xchain-client",
     "@xchainjs/xchain-midgard": "file:../../packages/xchain-midgard",
     "@xchainjs/xchain-thornode": "file:../../packages/xchain-thornode",

@@ -1,8 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import {
   CryptoAmount,
   EstimateAddSaver,
-  Midgard,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
@@ -37,7 +37,8 @@ function printSaver(saver: EstimateAddSaver) {
 const estimateAddSaver = async () => {
   try {
     const network = process.argv[2] as Network
-    const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
+    const midgardCache = new MidgardCache(new Midgard(network))
+    const thorchainCacheMainnet = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 
     const asset = new CryptoAmount(

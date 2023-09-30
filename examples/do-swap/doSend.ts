@@ -1,7 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { THORChain } from '@xchainjs/xchain-thorchain'
 import { Wallet } from '@xchainjs/xchain-thorchain-amm'
-import { Midgard, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
+import { ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
 import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 
 /**
@@ -28,7 +29,8 @@ const doSend = async (wallet: Wallet) => {
 const main = async () => {
   const seed = process.argv[2]
   const network = process.argv[3] as Network
-  const thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
+  const midgardCache = new MidgardCache(new Midgard(network))
+  const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
   const thorchainQuery = new ThorchainQuery(thorchainCache)
   const wallet = new Wallet(seed, thorchainQuery)
   console.log(`\ Send on ${network} :)\n`)

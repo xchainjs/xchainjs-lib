@@ -1,3 +1,15 @@
+# v0.6.2 (2023-09-24)
+
+## Update
+
+- Support transefer and renewal THORNames
+
+# v0.6.1 (2023-09-18)
+
+## Update
+
+- New functions estimateThorname and getThornameDetails
+
 # v0.6.0 (2023-09-10)
 
 ## Update

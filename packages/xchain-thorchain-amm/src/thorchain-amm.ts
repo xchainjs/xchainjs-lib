@@ -268,4 +268,13 @@ export class ThorchainAMM {
       toAddress: `${withdrawLoan.inboundAddress}`,
     })
   }
+
+  /**
+   * Get all Thornames and its data associated owned by an address
+   * @param address - address
+   * @returns thornames data
+   */
+  public async getThornamesByAddress(address: string) {
+    return this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.getTHORNameReverseLookup(address)
+  }
 }

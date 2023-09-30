@@ -31,6 +31,7 @@
     "@xchainjs/xchain-util": "file:../../packages/xchain-util",
     "@xchainjs/xchain-avax": "file:../../packages/xchain-avax",
     "@xchainjs/xchain-thorchain-query": "file:../../packages/xchain-thorchain-query",
+    "@xchainjs/xchain-midgard-query": "file:../../packages/xchain-midgard-query",
     "axios-retry": "^3.3.1",
     "bchaddrjs": "^0.5.2",
     "bech32-buffer": "^0.2.0",

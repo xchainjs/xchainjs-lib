@@ -1,3 +1,15 @@
+# v0.7.2 (2023-09-24)
+
+## Update
+
+- Support transefer and renewal THORNames
+
+# v0.7.1 (2023-09-18)
+
+## Update
+
+- Add functions getThornamesByAddress, registerThorname and updateThorname
+
 # v0.7.0 (2023-09-10)
 
 ## Update

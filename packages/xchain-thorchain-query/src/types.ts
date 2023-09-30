@@ -325,3 +325,28 @@ export type BlockInformation = {
   outboundDelayBlocks?: number
   outbondDelaySeconds?: number
 }
+
+export type ThornameDetails = {
+  name: string
+  expireBlockHeight: number
+  owner: string
+  preferredAsset: string
+  affiliateCollectorRune: string
+  aliases: ThornameAlias[]
+  error?: string[]
+}
+
+export type ThornameAlias = {
+  chain: Chain
+  address: Address
+}
+
+export type QuoteThornameParams = {
+  thorname: string
+  chain: string
+  chainAddress: string
+  owner?: string
+  preferredAsset?: Asset | null
+  expirity?: Date
+  isUpdate?: boolean
+}

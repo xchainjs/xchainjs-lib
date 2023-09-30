@@ -1,5 +1,6 @@
-import { LastBlock } from '@xchainjs/xchain-thornode'
+import { LastBlock, Thorname } from '@xchainjs/xchain-thornode'
 import {
+  Address,
   Asset,
   Chain,
   assetAmount,
@@ -30,9 +31,12 @@ import {
   PoolRatios,
   PostionDepositValue,
   QuoteSwapParams,
+  QuoteThornameParams,
   SaverFees,
   SaversPosition,
   SaversWithdraw,
+  ThornameAlias,
+  ThornameDetails,
   TotalFees,
   TxDetails,
   UnitData,
@@ -180,25 +184,6 @@ export class ThorchainQuery {
     }
     return txDetails
   }
-
-  // /**
-  //  * This is no longer used
-  //  * @param params - swap object
-  //  * @returns - constructed memo string
-  //  */
-  // private constructSwapMemo(memo: string, interfaceID: string): string {
-  //   const memoPart = memo.split(':')
-  //   if (memoPart.length > 3) {
-  //     memoPart[3] =
-  //       memoPart[3].length >= 3 ? memoPart[3].substring(0, memoPart[3].length - 3).concat(interfaceID) : interfaceID
-  //     let outmemo = ''
-  //     for (let i = 0; i < memoPart.length; i++) {
-  //       outmemo = outmemo.concat(`${memoPart[i]}:`)
-  //     }
-  //     return outmemo.substring(0, outmemo.length - 1)
-  //   }
-  //   return memo
-  // }
 
   /**
    * Works out how long an outbound Tx will be held by THORChain before sending.
@@ -603,7 +588,6 @@ export class ThorchainQuery {
     // request param amount should always be in 1e8 which is why we pass in adjusted decimals if chain decimals != 8
     const newAddAmount =
       addAmount.baseAmount.decimal != 8 ? getBaseAmountWithDiffDecimals(addAmount, 8) : addAmount.baseAmount.amount()
-
     // Fetch quote
     const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
       assetToString(addAmount.asset),
@@ -1010,5 +994,106 @@ export class ThorchainQuery {
     }
 
     return loanCloseQuote
+  }
+
+  /**
+   *
+   * @param thorname - input param
+   * @returns retrieves details for a thorname
+   */
+  public async getThornameDetails(thorname: string, height?: number): Promise<ThornameDetails | undefined> {
+    const errors: string[] = []
+
+    const thornameResp = await this.thorchainCache.thornode.getThornameDetails(thorname, height)
+    const thornameRawData = thornameResp as unknown as Thorname // TODO: Until integrate THORNode PR
+    const response: { error?: string } = JSON.parse(JSON.stringify(thorname))
+    if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
+    if (errors.length > 0) {
+      const errorResp: ThornameDetails = {
+        name: '',
+        expireBlockHeight: 0,
+        owner: '',
+        preferredAsset: '',
+        affiliateCollectorRune: '',
+        aliases: [],
+        error: errors,
+      }
+      return errorResp
+    }
+
+    const thornameAliases: ThornameAlias[] = thornameRawData.aliases.map((alias) => ({
+      chain: alias.chain as Chain,
+      address: alias.address as Address,
+    }))
+
+    const thornameDetails: ThornameDetails = {
+      name: thornameRawData.name || '',
+      expireBlockHeight: thornameRawData.expire_block_height || 0,
+      owner: thornameRawData.owner || '',
+      preferredAsset: thornameRawData.preferred_asset,
+      affiliateCollectorRune: thornameRawData.affiliate_collector_rune || '',
+      aliases: thornameAliases,
+    }
+
+    return thornameDetails // Return the array
+  }
+
+  /**
+   * Generate the memo and estimate the cost of register or update a THORName
+   * @param thorname - Name to register
+   * @param chain - Chain to update / register
+   * @param chainAddress - Address to add to chain alias
+   * @param owner - Owner address (rune address)
+   * @param preferredAsset - referred asset
+   * @param expirity - expirity of the domain in MILLISECONDS
+   * @param isUpdate - true only if the domain is already register and you want to update its data
+   * @returns memo and value of deposit
+   */
+  public async estimateThorname(params: QuoteThornameParams) {
+    // CHECK IF ALREADY EXISTS
+    const thornameDetails = (await this.thorchainCache.thornode.getThornameDetails(
+      params.thorname,
+    )) as unknown as Thorname // TODO: Until integrate THORNode PR
+
+    if (thornameDetails && !params.isUpdate) {
+      throw Error('Thorname already reistered')
+    }
+
+    const blockData = await this.thorchainCache.thornode.getLastBlock()
+    const currentThorchainHeight = blockData[0].thorchain
+    const currentHeightForExpirity = params.isUpdate
+      ? (thornameDetails?.expire_block_height as number)
+      : currentThorchainHeight
+
+    // DEFAULT EXPIRITY
+    let numberOfBlocksToAddToExpirity = params.isUpdate ? 0 : 5259600 // One year by default
+
+    // COMPUTE EXPIRITY HEIGHT
+    if (params.expirity) {
+      const currentTimestamp = Math.floor(Date.now() / 1000)
+      const expirityTimestamp = Math.floor(params.expirity.getTime() / 1000)
+      const numberOfSecondsToExpire = expirityTimestamp - currentTimestamp
+      const numberOfBlocks = Math.round(numberOfSecondsToExpire / 6)
+      const newHeightExpirity = currentThorchainHeight + numberOfBlocks
+      numberOfBlocksToAddToExpirity = thornameDetails?.expire_block_height
+        ? newHeightExpirity - thornameDetails?.expire_block_height
+        : numberOfBlocks
+    }
+    // COMPUTE VALUE
+    const constantsDetails = await this.thorchainCache.thornode.getTcConstants()
+    const oneTimeFee = params.isUpdate ? baseAmount(0) : baseAmount(constantsDetails['TNSRegisterFee'])
+    const totalFeePerBlock = baseAmount(constantsDetails['TNSFeePerBlock']).times(
+      numberOfBlocksToAddToExpirity > 0 ? numberOfBlocksToAddToExpirity : 0,
+    )
+    const totalCost = new CryptoAmount(oneTimeFee.plus(totalFeePerBlock), AssetRuneNative)
+    const thornameMemo = `~:${params.thorname}:${params.chain}:${params.chainAddress}:${
+      params.owner ? params.owner : ''
+    }:${params.preferredAsset ? assetToString(params.preferredAsset) : ''}:${
+      params.isUpdate ? '' : currentHeightForExpirity + numberOfBlocksToAddToExpirity
+    }`
+    return {
+      memo: thornameMemo,
+      value: totalCost,
+    }
   }
 }

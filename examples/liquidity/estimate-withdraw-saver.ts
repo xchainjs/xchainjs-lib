@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import {
   EstimateWithdrawSaver,
-  Midgard,
   SaversWithdraw,
   ThorchainCache,
   ThorchainQuery,
@@ -20,7 +20,6 @@ function printWithdrawSaver(saver: EstimateWithdrawSaver) {
     expiry: saver.expiry,
     toAddress: saver.toAddress,
     memo: saver.memo,
-    estimateWaitTime: saver.estimatedWaitTime,
     slipBasisPoints: saver.slipBasisPoints,
   }
   console.log(expanded)
@@ -33,7 +32,8 @@ function printWithdrawSaver(saver: EstimateWithdrawSaver) {
 const estimateWithdrawSaver = async () => {
   try {
     const network = process.argv[2] as Network
-    const thorchainCacheMainnet = new ThorchainCache(new Midgard(network), new Thornode(network))
+    const midgardCache = new MidgardCache(new Midgard(network))
+    const thorchainCacheMainnet = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
     const asset = assetFromStringEx(process.argv[4])
     const withdrawPos: SaversWithdraw = {

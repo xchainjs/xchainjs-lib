@@ -1,6 +1,6 @@
 import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
-import { Client as BtcClient } from '@xchainjs/xchain-bitcoin'
+import { BTCChain, Client as BtcClient } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
 import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { FeeOption, Network, XChainClient } from '@xchainjs/xchain-client'
@@ -11,7 +11,7 @@ import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
 import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { Client as ThorClient, THORChain, ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { Address, Asset } from '@xchainjs/xchain-util'
+import { Address, Asset, assetFromString } from '@xchainjs/xchain-util'
 
 import {
   AddLiquidity,
@@ -19,7 +19,9 @@ import {
   ExecuteSwap,
   LoanCloseParams,
   LoanOpenParams,
+  RegisterThornameParams,
   TxSubmitted,
+  UpdateThornameParams,
   WithdrawLiquidity,
 } from './types'
 import { EvmHelper } from './utils/evm-helper'
@@ -412,6 +414,87 @@ export class Wallet {
         return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
       }
     }
+  }
+
+  /**
+   * Register a THORName with a default expirity of one year. By default chain and chainAddress is getting from wallet instance and is BTC.
+   * By default owner is getting from wallet
+   * @param thorname - Name to register
+   * @param chain - Chain to add alias
+   * @param chainAddress - Address to add to chain alias
+   * @param owner - Owner address (rune address)
+   * @param preferredAsset - referred asset
+   * @param expirity - expirity of the domain in MILLISECONDS
+   * @param isUpdate - true only if the domain is already register and you want to update its data
+   * @returns memo and value of deposit
+   */
+  async registerThorname(params: RegisterThornameParams) {
+    const chainClient = this.clients[params.chain || BTCChain]
+    const thorClient = this.clients.THOR
+
+    if (!chainClient || !thorClient) {
+      throw Error('Can not find a wallet client')
+    }
+
+    const thornameEstimation = await this.thorchainQuery.estimateThorname({
+      ...params,
+      chain: params.chain || BTCChain,
+      chainAddress: params.chainAddress || chainClient.getAddress(),
+      owner: params.owner || thorClient.getAddress(),
+    })
+
+    const castedThorClient = thorClient as unknown as ThorchainClient
+    const result = await castedThorClient.deposit({
+      asset: thornameEstimation.value.asset,
+      amount: thornameEstimation.value.baseAmount,
+      memo: thornameEstimation.memo,
+    })
+
+    return result
+  }
+
+  /**
+   * Register a THORName with a default expirity of one year. By default chain and chainAddress is getting from wallet instance and is BTC.
+   * By default owner is getting from wallet
+   * @param thorname - Name to register
+   * @param chain - Chain to add alias
+   * @param chainAddress - Address to add to chain alias
+   * @param owner - Owner address (rune address)
+   * @param preferredAsset - referred asset
+   * @param expirity - expirity of the domain in MILLISECONDS
+   * @returns memo and value of deposit
+   */
+  async updateThorname(params: UpdateThornameParams) {
+    const chainClient = this.clients[params.chain || BTCChain]
+    const thorClient = this.clients.THOR
+
+    if (!chainClient || !thorClient) {
+      throw Error('Can not find a wallet client')
+    }
+
+    const thornameDetail = await this.thorchainQuery.getThornameDetails(params.thorname)
+
+    if (thornameDetail?.owner !== thorClient.getAddress()) {
+      throw Error('You cannot update a domain that is not yours')
+    }
+
+    const thornameEstimation = await this.thorchainQuery.estimateThorname({
+      ...params,
+      chain: params.chain || BTCChain,
+      isUpdate: true,
+      preferredAsset: params.preferredAsset || assetFromString(thornameDetail.preferredAsset),
+      chainAddress: params.chainAddress || chainClient.getAddress(),
+    })
+
+    const castedThorClient = thorClient as unknown as ThorchainClient
+
+    const result = await castedThorClient.deposit({
+      asset: thornameEstimation.value.asset,
+      amount: thornameEstimation.value.baseAmount,
+      memo: thornameEstimation.memo,
+    })
+
+    return result
   }
 
   /** Function handles liquidity add for all non rune assets
