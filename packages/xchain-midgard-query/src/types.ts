@@ -1,5 +1,8 @@
 import { Address, Asset, CryptoAmount } from '@xchainjs/xchain-util'
 
+/**
+ * Search parameters to search for positions within the THORChain SAVER investment product trunks.
+ */
 export type getSaver = {
   asset: Asset
   address: Address

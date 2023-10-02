@@ -36,7 +36,7 @@ export type CosmosSdkClientParams = XChainClientParams & {
 }
 
 /**
- * Cosmos-sdk client
+ * Generic implementation of the XChainClient interface chains built with cosmos-sdk (https://docs.cosmos.network/) using the dependencies of the official @cosmjs monorepo.
  */
 export default abstract class Client extends BaseXChainClient implements XChainClient {
   private readonly startgateClient: CachedValue<StargateClient>
@@ -48,6 +48,8 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   protected readonly baseDenom: string
   /**
    * Constructor
+   * @constructor
+   * @param {CosmosSdkClientParams} params client configuration (prefix, decimal, fees, urls...)
    */
   constructor(params: CosmosSdkClientParams) {
     super(params.chain, params)
@@ -70,7 +72,10 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   }
 
   /**
-   * Give 300000uatom return { amount: 300000, denom: uatom }
+   * @private
+   * Split on amount and denom strings with format 300000uatom
+   * @param {string[]} amountsAndDenoms strings with format 3000uatom
+   * @returns {Array} array of strings splitted { amount: 300000, denom: uatom }
    */
   private splitAmountAndDenom(amountsAndDenoms: string[]) {
     const amounAndDenomParsed: { amount: string; denom: string }[] = []
@@ -87,6 +92,12 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     return amounAndDenomParsed
   }
 
+  /**
+   * @private
+   * Function that transforms the transaction type returned by cosmjs to the transaction type used by xchainjs.
+   * @param {IndexedTx} indexedTx transaction to transform
+   * @returns {Tx} transaction with xchainjs format
+   */
   private async mapIndexedTxToTx(indexedTx: IndexedTx): Promise<Tx> {
     const mapTo: Map<Address, { amount: BaseAmount; asset: Asset | undefined }> = new Map()
     const mapFrom: Map<Address, { amount: BaseAmount; asset: Asset | undefined }> = new Map()
@@ -181,6 +192,11 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     }
   }
 
+  /**
+   * This function returns the fee object in a generalised way for a simple transfer function. In this case this funcion use the default fee
+   * defined in the constructor.
+   * @returns {Fees} fees estimation for average, fast and fastests scenarios.
+   */
   getFees(): Promise<Fees> {
     return Promise.resolve(singleFee(FeeType.FlatFee, this.defaultFee))
   }
@@ -194,6 +210,11 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     }
   }
 
+  /**
+   * Get an address derived from the phrase defined in the constructor.
+   * @param {number | undefined} walletIndex derivation path index of address that will be generated
+   * @returns {string} user address at index defined on walletIndex
+   */
   public getAddress(walletIndex?: number | undefined): string {
     const seed = xchainCrypto.getSeed(this.phrase)
     const node = BIP32.fromSeed(seed)
@@ -209,6 +230,11 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     return address
   }
 
+  /**
+   * Validate the address format.
+   * @param {string} address address to be validated
+   * @returns {boolean} represents whether the address is valid or invalid
+   */
   public validateAddress(address: string): boolean {
     try {
       const { prefix: decodedPrefix } = fromBech32(address)
@@ -221,6 +247,13 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     }
   }
 
+  /**
+   * Obtains all the balances of the address passed as parameter for all the assets of the network. For the moment for this client the assets parameter is ignored.
+   * Do not hesitate to open a PR if you need it and it is not yet available.
+   * @param {string} address address to be validated
+   * @param {Asset[] | undefined} _assets IGNORED FOR THIS IMPLEMENTATION
+   * @returns {Balance[]} array of balances
+   */
   public async getBalance(address: string, _assets?: Asset[] | undefined): Promise<Balance[]> {
     const client = await this.startgateClient.getValue()
     const result = await client.getAllBalances(address)
@@ -238,6 +271,11 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     return balances
   }
 
+  /**
+   * Get transactions filtered using params
+   * @param {TxHistoryParams | undefined} params Only param address IS SUPPORTED FOR THIS CLIENT, new feature will be added in the future
+   * @returns {TxsPage} array of balances
+   */
   public async getTransactions(params?: TxHistoryParams | undefined): Promise<TxsPage> {
     // TODO: Use all filters
     if (params?.startTime || params?.limit || params?.offset) {
@@ -271,6 +309,11 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     }
   }
 
+  /**
+   * Get transaction info using txId
+   * @param {string} txId Idetifier of transaction
+   * @returns {Tx} Transaction data
+   */
   public async getTransactionData(txId: string, _assetAddress?: string | undefined): Promise<Tx> {
     const client = await this.startgateClient.getValue()
     const tx = await client.getTx(txId)
