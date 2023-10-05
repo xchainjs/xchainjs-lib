@@ -86,7 +86,8 @@ export type GetBalanceDTO = {
 }
 
 export type GetTxsDTO = {
-  txrefs: AddressTxDTO[]
+  txrefs?: AddressTxDTO[]
+  unconfirmed_txrefs?: { tx_hash: string }[]
 }
 
 export type BroadcastDTO = {
