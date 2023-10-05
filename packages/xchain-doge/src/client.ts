@@ -198,7 +198,7 @@ class Client extends UTXOClient {
   }): Promise<{ psbt: Dogecoin.Psbt; utxos: UTXO[] }> => {
     if (!this.validateAddress(recipient)) throw new Error('Invalid address')
 
-    const utxos = await this.scanUTXOs(sender)
+    const utxos = await this.scanUTXOs(sender, false)
     if (utxos.length === 0) throw new Error('No utxos to send')
     const feeRateWhole = Number(feeRate.toFixed(0))
     const compiledMemo = memo ? Utils.compileMemo(memo) : null

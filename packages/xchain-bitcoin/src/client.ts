@@ -173,17 +173,10 @@ class Client extends UTXOClient {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
 
-    /**
-     * do not spend pending UTXOs when adding a memo
-     * https://github.com/xchainjs/xchainjs-lib/issues/330
-     */
-    const spendPendingUTXO = !params.memo
-
     const { psbt } = await this.buildTx({
       ...params,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
-      spendPendingUTXO,
     })
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
     psbt.signAllInputs(btcKeys) // Sign all inputs
@@ -208,7 +201,7 @@ class Client extends UTXOClient {
     memo,
     feeRate,
     sender,
-    spendPendingUTXO = false, // default: prevent spending uncomfirmed UTXOs
+    spendPendingUTXO = true, // default: prevent spending uncomfirmed UTXOs
   }: TxParams & {
     feeRate: FeeRate
     sender: Address
