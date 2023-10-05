@@ -119,6 +119,7 @@ export type TxUnspent = {
   block: {
     height: number
     position: number
+    mempool: number
   }
   index: number
   txid: string
