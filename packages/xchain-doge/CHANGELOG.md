@@ -1,3 +1,9 @@
+# v0.6.4 (2023-10-05)
+
+## Update
+
+- update deps client & util & utxo-providers
+
 # v0.6.3 (2023-09-13)
 
 ## Update
