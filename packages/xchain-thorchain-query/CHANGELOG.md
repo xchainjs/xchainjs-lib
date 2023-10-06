@@ -1,3 +1,9 @@
+# v0.6.3 (2023-10-06)
+
+## Update
+
+- Update deps for thornode & midgard-query
+
 # v0.6.2 (2023-09-24)
 
 ## Update

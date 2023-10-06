@@ -1,3 +1,9 @@
+# v0.5.2 (2023-10-06)
+
+## Update
+
+- Update MIdgard to the lastest api spec 2.17.0
+
 # v0.5.1 (2023-07-29)
 
 ## Update

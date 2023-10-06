@@ -726,27 +726,27 @@
     "@types/yargs-parser" "*"
 
 "@xchainjs/xchain-avax@file:../../packages/xchain-avax":
-  version "0.2.0"
+  version "0.3.2"
 
 "@xchainjs/xchain-binance@file:../../packages/xchain-binance":
-  version "5.7.0"
+  version "5.7.2"
 
 "@xchainjs/xchain-bitcoin@file:../../packages/xchain-bitcoin":
-  version "0.22.0"
+  version "0.22.3"
 
 "@xchainjs/xchain-bitcoincash@file:../../packages/xchain-bitcoincash":
-  version "0.16.0"
+  version "0.16.3"
   dependencies:
     uniqid "^5.4.0"
 
 "@xchainjs/xchain-bsc@file:../../packages/xchain-bsc":
-  version "0.2.0"
+  version "0.3.2"
 
 "@xchainjs/xchain-client@file:../../packages/xchain-client":
-  version "0.14.0"
+  version "0.14.2"
 
 "@xchainjs/xchain-cosmos@file:../../packages/xchain-cosmos":
-  version "0.21.0"
+  version "0.21.3"
 
 "@xchainjs/xchain-crypto@file:../../packages/xchain-crypto":
   version "0.3.0"
@@ -759,31 +759,34 @@
     uuid "^9.0.0"
 
 "@xchainjs/xchain-doge@file:../../packages/xchain-doge":
-  version "0.6.0"
+  version "0.6.3"
 
 "@xchainjs/xchain-ethereum@file:../../packages/xchain-ethereum":
-  version "0.28.0"
+  version "0.30.3"
 
 "@xchainjs/xchain-litecoin@file:../../packages/xchain-litecoin":
-  version "0.12.0"
+  version "0.12.3"
+
+"@xchainjs/xchain-midgard-query@file:../../packages/xchain-midgard-query":
+  version "0.1.2"
 
 "@xchainjs/xchain-midgard@file:../../packages/xchain-midgard":
-  version "0.5.0"
+  version "0.5.1"
 
 "@xchainjs/xchain-thorchain-amm@file:../../packages/xchain-thorchain-amm":
-  version "0.4.1"
+  version "0.7.2"
 
 "@xchainjs/xchain-thorchain-query@file:../../packages/xchain-thorchain-query":
-  version "0.3.1"
+  version "0.6.2"
 
 "@xchainjs/xchain-thorchain@file:../../packages/xchain-thorchain":
-  version "0.28.0"
+  version "0.28.7"
 
 "@xchainjs/xchain-thornode@file:../../packages/xchain-thornode":
-  version "0.3.0"
+  version "0.3.6"
 
 "@xchainjs/xchain-util@file:../../packages/xchain-util":
-  version "0.13.0"
+  version "0.13.2"
 
 aes-js@3.0.0:
   version "3.0.0"
