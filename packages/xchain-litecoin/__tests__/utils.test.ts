@@ -40,12 +40,12 @@ describe('Litecoin Utils Test', () => {
 
   it('get the right vault fee', () => {
     const fee = Utils.getFee(utxos, 10, OP_RETURN)
-    expect(fee).toEqual(1890)
+    expect(fee).toEqual(1900)
   })
 
   it('get the right normal fee', () => {
     const fee = Utils.getFee(utxos, 10, null)
-    expect(fee).toEqual(1640)
+    expect(fee).toEqual(1650)
   })
 
   it('should return a minimum fee of 1000', () => {
@@ -98,6 +98,11 @@ describe('Litecoin Utils Test', () => {
     expect(utxos.length).toEqual(2)
     // expect(utxos?.[0].txHex).toBeUndefined() // not sure what this is meant to do
     // expect(utxos?.[1].txHex).toBeUndefined()
+  })
+
+  it('calc fee', () => {
+    const fee = Utils.calcFee(50)
+    expect(fee.amount().toNumber()).toEqual(18800)
   })
 
   describe('broadcastTx', () => {

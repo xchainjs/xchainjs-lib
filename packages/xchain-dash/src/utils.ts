@@ -159,7 +159,7 @@ export const buildTx = async ({
 
 export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXO[] = []): BaseAmount => {
   const scriptData: Buffer = Buffer.from(`${memo}`, 'utf8')
-  const fee = getFee(utxos.length, feeRate, scriptData)
+  const fee = getFee(utxos.length > 0 ? utxos.length : 2, feeRate, scriptData) // By default 2 UTXOs // Temporal solution until issue addressed https://github.com/xchainjs/xchainjs-lib/issues/850
   return baseAmount(fee)
 }
 

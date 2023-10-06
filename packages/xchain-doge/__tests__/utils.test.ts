@@ -50,6 +50,11 @@ describe('Dogecoin Utils Test', () => {
     expect(estimates.average).toBeDefined()
   })
 
+  it('calc fee', () => {
+    const fee = Utils.calcFee(50)
+    expect(fee.amount().toNumber()).toEqual(100000)
+  })
+
   // it('should fetch as many uxtos as are associated with an address', async () => {
   //   const address = 'DRapidDiBYggT1zdrELnVhNDqyAHn89cRi'
   //   const utxos: UTXO[] = await Utils.scanUTXOs({

@@ -19,6 +19,11 @@ describe('Dash Utils Test', () => {
     expect(fee).toEqual(3246)
   })
 
+  it('calc fee', () => {
+    const fee = utils.calcFee(50)
+    expect(fee.amount().toNumber()).toEqual(19650)
+  })
+
   it('should return default fees of a normal tx', async () => {
     const estimates = utils.getDefaultFees()
     expect(estimates.fast).toBeDefined()
