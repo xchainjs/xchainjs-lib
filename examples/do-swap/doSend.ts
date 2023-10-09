@@ -1,3 +1,4 @@
+import cosmosclient from '@cosmos-client/core'
 import { Network } from '@xchainjs/xchain-client'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { THORChain } from '@xchainjs/xchain-thorchain'
@@ -6,6 +7,7 @@ import { ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorc
 import { assetAmount, assetFromString, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
+register9Rheader(cosmosclient.config.globalAxios)
 register9Rheader(axios)
 
 /**

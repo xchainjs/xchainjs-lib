@@ -1,3 +1,4 @@
+import cosmosclient from '@cosmos-client/core'
 import { Network } from '@xchainjs/xchain-client'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { THORChain } from '@xchainjs/xchain-thorchain'
@@ -13,9 +14,10 @@ import {
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
-register9Rheader(axios)
-
 import { checkTx } from '../check-tx/check-tx'
+
+register9Rheader(cosmosclient.config.globalAxios)
+register9Rheader(axios)
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {
