@@ -1,3 +1,10 @@
+# v0.7.4 (2023-10-09)
+
+## Update
+
+- Fix pending UTXOs bug
+- Increate default fee estimation
+
 # v0.7.3 (2023-10-06)
 
 ## Update
