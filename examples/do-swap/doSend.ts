@@ -3,7 +3,10 @@ import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-qu
 import { THORChain } from '@xchainjs/xchain-thorchain'
 import { Wallet } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromString, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
+import axios from 'axios'
+
+register9Rheader(axios)
 
 /**
  * send an asset from your wallet to another address

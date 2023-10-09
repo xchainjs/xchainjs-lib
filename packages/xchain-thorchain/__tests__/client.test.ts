@@ -2,7 +2,8 @@ import cosmosclient from '@cosmos-client/core'
 import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
 import { Network, TxsPage } from '@xchainjs/xchain-client'
 import { CosmosSDKClient, RPCResponse, RPCTxSearchResult, TxResponse } from '@xchainjs/xchain-cosmos'
-import { Asset, BaseAmount, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, assetAmount, assetToBase, baseAmount, register9Rheader } from '@xchainjs/xchain-util'
+import axios from 'axios'
 import nock from 'nock'
 
 import { mockTendermintNodeInfo, mockTendermintSimulate } from '../__mocks__/thornode-api'
@@ -14,6 +15,9 @@ const chainIds = {
   [Network.Stagenet]: 'thorchain-stagenet-v2',
   [Network.Testnet]: 'deprecated',
 }
+
+register9Rheader(axios)
+register9Rheader(cosmosclient.config.globalAxios)
 
 const mockAccountsAddress = (
   url: string,

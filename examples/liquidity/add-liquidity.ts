@@ -9,7 +9,10 @@ import {
   ThorchainQuery,
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromStringEx, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
+import axios from 'axios'
+
+register9Rheader(axios)
 
 /**
  * Add LP

@@ -3,7 +3,17 @@ import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-qu
 import { THORChain } from '@xchainjs/xchain-thorchain'
 import { AmmEstimateSwapParams, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import { CryptoAmount, ThorchainCache, ThorchainQuery, Thornode, TxDetails } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromString, assetToBase, assetToString, delay } from '@xchainjs/xchain-util'
+import {
+  assetAmount,
+  assetFromString,
+  assetToBase,
+  assetToString,
+  delay,
+  register9Rheader,
+} from '@xchainjs/xchain-util'
+import axios from 'axios'
+
+register9Rheader(axios)
 
 import { checkTx } from '../check-tx/check-tx'
 
