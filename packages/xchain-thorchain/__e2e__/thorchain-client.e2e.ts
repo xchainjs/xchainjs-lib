@@ -43,8 +43,7 @@ register9Rheader(cosmosclient.config.globalAxios)
 describe('thorchain Integration Tests', () => {
   it('should fetch thorchain balances', async () => {
     const address = thorClient.getAddress(0)
-    const url = thorClient.getChainId()
-    console.log(address, url)
+    console.log(address)
     const balances = await thorClient.getBalance('thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu')
     balances.forEach((bal) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
