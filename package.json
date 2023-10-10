@@ -8,6 +8,7 @@
   "scripts": {
     "clean": "lerna run clean",
     "build": "lerna run build",
+    "build:examples": "tsc examples/**/*.ts --noEmit --skipLibCheck",
     "pub": "lerna publish",
     "test": "lerna run test",
     "e2e": "lerna run e2e",
