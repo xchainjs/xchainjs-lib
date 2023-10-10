@@ -9,7 +9,10 @@ import {
   Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromString, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
+import axios from 'axios'
+
+register9Rheader(axios)
 
 // Helper function for printing out the returned object
 function print(estimate: SwapEstimate, input: CryptoAmount) {

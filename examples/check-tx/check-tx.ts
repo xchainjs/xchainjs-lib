@@ -1,6 +1,10 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { ThorchainCache, Thornode, TransactionStage } from '@xchainjs/xchain-thorchain-query'
+import { register9Rheader } from '@xchainjs/xchain-util'
+import axios from 'axios'
+
+register9Rheader(axios)
 
 //function printTx(inboundTxHash: string, source: string) {}
 

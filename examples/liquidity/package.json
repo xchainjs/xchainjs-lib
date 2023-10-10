@@ -18,6 +18,7 @@
   "author": "THORIANITE",
   "license": "MIT",
   "dependencies": {
+    "@cosmos-client/core": "^0.46.1",
     "@xchainjs/xchain-thorchain-amm": "file:../../packages/xchain-thorchain-amm",
     "@xchainjs/xchain-thorchain-query": "file:../../packages/xchain-thorchain-query",
     "@xchainjs/xchain-midgard-query": "file:../../packages/xchain-midgard-query",

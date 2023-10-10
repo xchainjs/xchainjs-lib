@@ -1,6 +1,8 @@
+import cosmosclient from '@cosmos-client/core'
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Network, TxParams } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, assetToString, baseAmount, delay, register9Rheader } from '@xchainjs/xchain-util'
+import axios from 'axios'
 
 import { AssetRuneNative } from '../src'
 import { Client as ThorClient, ThorchainClient } from '../src/index'
@@ -25,6 +27,9 @@ const thorClient = new ThorClient({
 const thorchainClient = thorClient as unknown as ThorchainClient
 const bnbClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
 
+register9Rheader(axios)
+register9Rheader(cosmosclient.config.globalAxios)
+
 // axios.interceptors.request.use((request) => {
 //   console.log('Starting Request', JSON.stringify(request, null, 2))
 //   return request
@@ -39,7 +44,7 @@ describe('thorchain Integration Tests', () => {
   it('should fetch thorchain balances', async () => {
     const address = thorClient.getAddress(0)
     console.log(address)
-    const balances = await thorClient.getBalance('thor18958nd6r803zespz8lff3jxlamgnv82pe87jaw')
+    const balances = await thorClient.getBalance('thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu')
     balances.forEach((bal) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
