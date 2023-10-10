@@ -1,8 +1,14 @@
+# v0.2.4 (2023-10-05)
+
+## Update
+
+- Fix bugs related with pending utxos on Hashkoin and Blockcypher
+
 # v0.2.3 (2023-09-11)
 
 ## Update
 
-- Bumped dependencies for client &  util
+- Bumped dependencies for client & util
 
 # v0.2.2 (2023-06-07)
 
@@ -14,7 +20,7 @@
 
 ## Update
 
--  Update client dependency
+- Update client dependency
 
 # v0.2.0 (2023-05-02)
 

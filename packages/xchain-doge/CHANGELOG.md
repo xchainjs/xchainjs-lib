@@ -1,3 +1,15 @@
+# v0.6.5 (2023-06-10)
+
+## Update
+
+- Increase fee estimation
+
+# v0.6.4 (2023-10-05)
+
+## Update
+
+- update deps client & util & utxo-providers
+
 # v0.6.3 (2023-09-13)
 
 ## Update
