@@ -104,8 +104,8 @@ export const FallBackUrls = [
       rpc: ['https://stagenet-rpc.ninerealms.com'],
     },
     [Network.Mainnet]: {
-      node: ['https://thornode-v1.ninerealms.com', 'https://thornode.thorswap.net/'],
-      rpc: ['https://rpc-v1.ninerealms.com', 'https://rpc.thorswap.net'],
+      node: ['https://thornode-v1.ninerealms.com'],
+      rpc: ['https://rpc-v1.ninerealms.com'],
     },
   },
 ]
