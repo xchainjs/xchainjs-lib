@@ -27,7 +27,6 @@ const data = midgardApi.getPool('BTC.BTC')
 ## Documentation
 
 [`Midgard Thorchain endpoint`](https://midgard.thorchain.info/v2/doc)
-[`Midgard Thorswap endpoint`](https://midgard.thorswap.net/v2/doc)
 [`Midgard NineRelms endpoint`](https://midgard.ninerealms.com/v2/doc)
 
 ### Setting Headers for Nine Realms endpoints
