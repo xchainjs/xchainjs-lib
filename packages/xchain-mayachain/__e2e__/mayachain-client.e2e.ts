@@ -1,9 +1,9 @@
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, assetFromString, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 
-import { Client as MayaClient, MayachainClient } from '../src/client'
-import { AssetCacao } from '../src/const'
+import { Client as MayaClient } from '../src/client'
+import { AssetCacao, CACAO_DECIMAL } from '../src/const'
 // import axios from 'axios'
 
 export type Swap = {
@@ -23,18 +23,8 @@ const mayaClient = new MayaClient({
   phrase: process.env.PHRASE,
   chainIds: chainIds,
 })
-const mayachainClient = mayaClient as unknown as MayachainClient
+const mayachainClient = mayaClient
 const bnbClient: XChainClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
-
-// axios.interceptors.request.use((request) => {
-//   console.log('Starting Request', JSON.stringify(request, null, 2))
-//   return request
-// })
-
-// axios.interceptors.response.use((response) => {
-//   console.log('Response:', JSON.stringify(response, null, 2))
-//   return response
-// })
 
 describe('Mayachain Integration Tests', () => {
   it('should fetch mayachain balances', async () => {
@@ -94,6 +84,44 @@ describe('Mayachain Integration Tests', () => {
         memo,
       })
 
+      expect(hash.length).toBeGreaterThan(5)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  })
+  it('should swap some CACAO for ETH/ETH', async () => {
+    try {
+      // Wait 10 seconds, make sure previous test has finished to avoid sequnce conflict
+      await delay(10 * 1000)
+
+      const address = await mayachainClient.getAddress()
+      const memo = `=:ETH/ETH:${address}`
+
+      const hash = await mayachainClient.deposit({
+        walletIndex: 0,
+        amount: baseAmount('100000000000', CACAO_DECIMAL),
+        asset: AssetCacao,
+        memo,
+      })
+      expect(hash.length).toBeGreaterThan(5)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  })
+
+  it('should transfer some ETH/ETH', async () => {
+    try {
+      const address = await mayachainClient.getAddress(1)
+      const asset = assetFromString('ETH/ETH') as Asset
+      const transferTx: TxParams = {
+        walletIndex: 0,
+        asset: asset,
+        amount: baseAmount('30000', CACAO_DECIMAL),
+        recipient: address,
+      }
+      const hash = await mayaClient.transfer(transferTx)
       expect(hash.length).toBeGreaterThan(5)
     } catch (error) {
       console.log(error)

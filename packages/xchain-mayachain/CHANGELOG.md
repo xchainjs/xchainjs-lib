@@ -1,3 +1,9 @@
+# v0.2.6 (2023-10-11)
+
+## Update
+
+- Fix transfer sync and fee estimation decimals
+
 # v0.2.5 (2023-07-29)
 
 ## Update

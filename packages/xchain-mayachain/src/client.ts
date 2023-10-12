@@ -551,8 +551,9 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
       balances.filter(({ asset: assetInList }) => assetInList.ticker === AssetCacao.ticker)[0]?.amount ??
       baseAmount(0, CACAO_DECIMAL)
     const assetBalance: BaseAmount =
-      balances.filter(({ asset: assetInList }) => assetToString(assetInList) === assetToString(asset))[0]?.amount ??
-      baseAmount(0, CACAO_DECIMAL)
+      balances.filter(
+        ({ asset: assetInList }) => assetToString(assetInList).toLowerCase() === assetToString(asset).toLowerCase(),
+      )[0]?.amount ?? baseAmount(0, CACAO_DECIMAL)
 
     const fee = (await this.getFees()).average
 
@@ -678,7 +679,7 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
       // validate data
       if (!fee || isNaN(fee) || fee < 0) throw Error(`Invalid fee: ${fee.toString()}`)
 
-      return singleFee(FeeType.FlatFee, baseAmount(fee))
+      return singleFee(FeeType.FlatFee, baseAmount(fee, CACAO_DECIMAL))
     } catch {
       return getDefaultFees()
     }
