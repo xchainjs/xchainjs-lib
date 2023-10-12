@@ -1,3 +1,9 @@
+# v0.1.3 (2023-10-06)
+
+## Update
+
+- Update deps for midgard
+
 # v0.1.2 (2023-09-18)
 
 ## Update

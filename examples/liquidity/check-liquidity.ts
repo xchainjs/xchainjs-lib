@@ -1,7 +1,13 @@
+import cosmosclient from '@cosmos-client/core'
 import { Network } from '@xchainjs/xchain-client'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { LiquidityPosition, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
-import { assetFromString } from '@xchainjs/xchain-util'
+import { assetFromString, register9Rheader } from '@xchainjs/xchain-util'
+import axios from 'axios'
+
+register9Rheader(axios)
+
+register9Rheader(cosmosclient.config.globalAxios)
 
 function print(estimate: LiquidityPosition, address: string) {
   const expanded = {

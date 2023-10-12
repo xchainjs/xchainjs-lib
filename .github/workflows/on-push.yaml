@@ -25,6 +25,8 @@ jobs:
         run: yarn && yarn yarn-audit-ci --high
       - name: Build Packages
         run: yarn build
+      - name: Build examples
+        run: yarn build:examples
       - name: Lint
         run: yarn lint
       - name: Test

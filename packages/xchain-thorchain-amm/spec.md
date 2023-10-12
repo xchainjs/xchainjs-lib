@@ -26,10 +26,10 @@ Basic validation of a request before running the
 if sourceAsset <= 0
  return "source asset is 0"
 
-if source asset != RUNE && source asset not in active pool list (https://midgard.thorswap.net/v2/pools where status = "available")
+if source asset != RUNE && source asset not in active pool list (https://midgard.ninerealms.com/v2/pools where status = "available")
   return "source asset not on pool list"
 
-if destinationAsset != RUNE && destinationAsset not in active pool list (https://midgard.thorswap.net/v2/pools where status = "available")
+if destinationAsset != RUNE && destinationAsset not in active pool list (https://midgard.ninerealms.com/v2/pools where status = "available")
   return "destination asset not on pool list"
 
 If valueofRUNE(inbound fee + outbound fee) > valueOfRUNE(inboundAsset)
@@ -99,7 +99,7 @@ This will be the Min Outbound delay time. Could be more depending on network act
 ### Midgard Requirements
 
 1. Mimir values
-1. Outbound Queue (https://midgard.thorswap.net/v2/thorchain/queue)
+1. Outbound Queue (https://midgard.ninerealms.com/v2/thorchain/queue)
 
 ### Logic
 
@@ -120,7 +120,7 @@ runeValue = runeValueOf(outputAmount)
 if runeValue < minTxOutVolumeThreshold
     Return 6 // likley next block.
 
-sumValue = runeValue + scheduled_outbound_value (https://midgard.thorswap.net/v2/thorchain/queue)
+sumValue = runeValue + scheduled_outbound_value (https://midgard.ninerealms.com/v2/thorchain/queue)
 
 // reduce delay rate relative to the total scheduled value. In high volume
 // scenarios, this causes the network to send outbound transactions slower,
@@ -356,8 +356,8 @@ Removes liquidity for a user
 
 ### Midgard Requirements
 
-1. `LP Details https://midgard.thorswap.net/v2/member/{address}`
-1. `Pool List https://midgard.thorswap.net/v2/pools `
+1. `LP Details https://midgard.ninerealms.com/v2/member/{address}`
+1. `Pool List https://midgard.ninerealms.com/v2/pools `
 
 See if the the pool is valid
 See if their wallet is a member of the pool.

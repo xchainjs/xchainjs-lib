@@ -1,3 +1,9 @@
+# v0.22.4 (2023-10-05)
+
+## Update
+
+- Spend pending UTXO by default
+
 # v0.22.3 (2023-09-11)
 
 ## Update

@@ -51,11 +51,13 @@ export const compileMemo = (memo: string): Buffer => {
  * @returns {number} The fee amount.
  */
 export function getFee(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
+  const inputSizeBasedOnInputs =
+    inputs.length > 0
+      ? inputs.reduce((a, x) => a + inputBytes(x), 0) + inputs.length // +1 byte for each input signature
+      : (TX_INPUT_BASE + TX_INPUT_PUBKEYHASH) * 2 + 2 // By default 2 UTXOs // Temporal solution until issue addressed https://github.com/xchainjs/xchainjs-lib/issues/850
   let sum =
     TX_EMPTY_SIZE +
-    inputs.reduce(function (a, x) {
-      return a + inputBytes(x)
-    }, 0) +
+    inputSizeBasedOnInputs +
     inputs.length + // +1 byte for each input signature
     TX_OUTPUT_BASE +
     TX_OUTPUT_PUBKEYHASH +

@@ -1,9 +1,19 @@
+import cosmosclient from '@cosmos-client/core'
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Network, TxParams } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  BaseAmount,
+  assetFromString,
+  assetToString,
+  baseAmount,
+  delay,
+  register9Rheader,
+} from '@xchainjs/xchain-util'
+import axios from 'axios'
 
 import { AssetRuneNative } from '../src'
-import { Client as ThorClient, ThorchainClient } from '../src/index'
+import { Client as ThorClient } from '../src/index'
 
 export type Swap = {
   fromBaseAmount: BaseAmount
@@ -22,8 +32,11 @@ const thorClient = new ThorClient({
   phrase: process.env.PHRASE,
   chainIds: chainIds,
 })
-const thorchainClient = thorClient as unknown as ThorchainClient
+const thorchainClient = thorClient
 const bnbClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
+
+register9Rheader(axios)
+register9Rheader(cosmosclient.config.globalAxios)
 
 // axios.interceptors.request.use((request) => {
 //   console.log('Starting Request', JSON.stringify(request, null, 2))
@@ -39,7 +52,7 @@ describe('thorchain Integration Tests', () => {
   it('should fetch thorchain balances', async () => {
     const address = thorClient.getAddress(0)
     console.log(address)
-    const balances = await thorClient.getBalance('thor18958nd6r803zespz8lff3jxlamgnv82pe87jaw')
+    const balances = await thorClient.getBalance('thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu')
     balances.forEach((bal) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
@@ -100,6 +113,46 @@ describe('thorchain Integration Tests', () => {
       throw error
     }
   })
+
+  it('should swap some RUNE for BNB/BNB', async () => {
+    try {
+      // Wait 10 seconds, make sure previous test has finished to avoid sequnce conflict
+      await delay(10 * 1000)
+
+      const address = await thorClient.getAddress()
+      const memo = `=:BNB/BNB:${address}`
+
+      const hash = await thorchainClient.deposit({
+        walletIndex: 0,
+        amount: baseAmount('100000000'),
+        asset: AssetRuneNative,
+        memo,
+      })
+      expect(hash.length).toBeGreaterThan(5)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  })
+
+  it('should transfer some BNB/BNB', async () => {
+    try {
+      const address = await thorClient.getAddress()
+      const asset = assetFromString('BNB/BNB') as Asset
+      const transferTx: TxParams = {
+        walletIndex: 0,
+        asset: asset,
+        amount: baseAmount('2000'),
+        recipient: address,
+      }
+      const hash = await thorClient.transfer(transferTx)
+      expect(hash.length).toBeGreaterThan(5)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  })
+
   it('should fetch thorchain txs', async () => {
     const address = 'thor1nx3yxgdw94nfw0uzwns2ay5ap85nk9p6hjaqn9'
     const txPage = await thorClient.getTransactions({ address })

@@ -7,7 +7,10 @@ import {
   ThorchainQuery,
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetFromStringEx } from '@xchainjs/xchain-util'
+import { assetFromStringEx, register9Rheader } from '@xchainjs/xchain-util'
+import axios from 'axios'
+
+register9Rheader(axios)
 
 function printWithdrawSaver(saver: EstimateWithdrawSaver) {
   const expanded = {

@@ -1,11 +1,23 @@
+import cosmosclient from '@cosmos-client/core'
 import { Network } from '@xchainjs/xchain-client'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { THORChain } from '@xchainjs/xchain-thorchain'
 import { AmmEstimateSwapParams, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import { CryptoAmount, ThorchainCache, ThorchainQuery, Thornode, TxDetails } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromString, assetToBase, assetToString, delay } from '@xchainjs/xchain-util'
+import {
+  assetAmount,
+  assetFromString,
+  assetToBase,
+  assetToString,
+  delay,
+  register9Rheader,
+} from '@xchainjs/xchain-util'
+import axios from 'axios'
 
 import { checkTx } from '../check-tx/check-tx'
+
+register9Rheader(axios)
+register9Rheader(cosmosclient.config.globalAxios)
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {

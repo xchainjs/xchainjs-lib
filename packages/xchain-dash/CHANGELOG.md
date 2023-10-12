@@ -1,3 +1,9 @@
+# v0.1.3 (2023-06-10)
+
+## Update
+
+- Increase fee estimation
+
 # v0.1.2 (2023-09-11)
 
 ## Update

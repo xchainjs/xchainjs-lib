@@ -49,7 +49,7 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
       network: this.haskoinNetwork,
       address,
     })
-    const confirmedUnspent = allUnspent.filter((i) => i.block) //if it has a block noumber it's been confirmed
+    const confirmedUnspent = allUnspent.filter((i) => i.block && !i.block.mempool)
     return this.mapUTXOs(confirmedUnspent)
   }
   async getUnspentTxs(address: string): Promise<UTXO[]> {

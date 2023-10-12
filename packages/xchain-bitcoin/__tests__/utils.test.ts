@@ -50,6 +50,11 @@ describe('Bitcoin Utils Test', () => {
     expect(fee).toEqual(1000)
   })
 
+  it('calc fee', () => {
+    const fee = Utils.calcFee(50)
+    expect(fee.amount().toNumber()).toEqual(18800)
+  })
+
   it('should return default fees of a normal tx', async () => {
     const estimates = Utils.getDefaultFees()
     expect(estimates.fast).toBeDefined()

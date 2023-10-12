@@ -7,7 +7,10 @@ import {
   Thornode,
   WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetFromString } from '@xchainjs/xchain-util'
+import { assetFromString, register9Rheader } from '@xchainjs/xchain-util'
+import axios from 'axios'
+
+register9Rheader(axios)
 
 function print(estimate: EstimateWithdrawLP, withdrawLpParams: WithdrawLiquidityPosition) {
   const expanded = {
