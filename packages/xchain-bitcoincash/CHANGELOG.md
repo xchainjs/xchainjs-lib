@@ -1,3 +1,9 @@
+# v0.16.4 (2023-10-12)
+
+## Update
+
+- Bumped utxo-provider dependency
+
 # v0.16.3 (2023-09-11)
 
 ## Update
