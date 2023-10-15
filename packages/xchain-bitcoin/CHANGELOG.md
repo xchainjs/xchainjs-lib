@@ -1,3 +1,9 @@
+# v.0.23.0 (2023-10-25)
+
+- Remove functions `getFee`, `calcFee`, `getDefaultFeesWithRates`, and `getDefaultFees` from utils
+- Remove function `getFeesWithMemo` from client
+- Support option `sender` in functions `getFeesWithRates` and `getFees`
+
 # v0.22.4 (2023-10-05)
 
 ## Update
