@@ -1,65 +1,19 @@
-import * as bitcash from '@psf/bitcoincashjs-lib'
-import {
-  FeeRate,
-  Fees,
-  FeesWithRates,
-  Network,
-  Tx,
-  TxFrom,
-  TxTo,
-  TxType,
-  calcFees,
-  standardFeeRates,
-} from '@xchainjs/xchain-client'
-import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Network, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'
+import { Address, baseAmount } from '@xchainjs/xchain-util'
 import * as bchaddr from 'bchaddrjs'
 import coininfo from 'coininfo'
 
 import { AssetBCH, BCH_DECIMAL } from './const'
-import { Transaction, TransactionInput, TransactionOutput, UTXO } from './types'
+import { Transaction, TransactionInput, TransactionOutput } from './types'
 import { Network as BCHNetwork } from './types/bitcoincashjs-types'
 
 export const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
 
-const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
-const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
-const TX_INPUT_PUBKEYHASH = 107
-const TX_OUTPUT_BASE = 8 + 1 //9
-const TX_OUTPUT_PUBKEYHASH = 25
-
-/**
- * Compile memo.
- *
- * @param {string} memo The memo to be compiled.
- * @returns {Buffer} The compiled memo.
- */
-export const compileMemo = (memo: string): Buffer => {
-  const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
-  return bitcash.script.compile([bitcash.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
-}
-
-/**
- * Get the transaction fee.
- *
- * reference to https://github.com/Permissionless-Software-Foundation/bch-js/blob/acc0300a444059d612daec2564da743c11e27139/src/bitcoincash.js#L408
- *
- * @param {number} inputs The inputs count.
- * @param {number} outputs The outputs count.
- * @param {FeeRate} feeRate The fee rate.
- * @param {Buffer} data The compiled memo (Optional).
- * @returns {number} The fee amount.
- */
-export function getFee(inputs: number, feeRate: FeeRate, data: Buffer | null = null): number {
-  let totalWeight = TX_EMPTY_SIZE
-
-  totalWeight += (TX_INPUT_PUBKEYHASH + TX_INPUT_BASE) * inputs
-  totalWeight += (TX_OUTPUT_BASE + TX_OUTPUT_PUBKEYHASH) * 2
-  if (data) {
-    totalWeight += 9 + data.length
-  }
-
-  return Math.ceil(totalWeight * feeRate)
-}
+export const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
+export const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
+export const TX_INPUT_PUBKEYHASH = 107
+export const TX_OUTPUT_BASE = 8 + 1 //9
+export const TX_OUTPUT_PUBKEYHASH = 25
 
 /**
  * Get BCH network to be used with bitcore-lib.
@@ -184,43 +138,4 @@ export const toBCHAddressNetwork = (network: Network): string => {
 export const validateAddress = (address: string, network: Network): boolean => {
   const toAddress = toCashAddress(address)
   return bchaddr.isValidAddress(toAddress) && bchaddr.detectAddressNetwork(toAddress) === toBCHAddressNetwork(network)
-}
-
-/**
- * Calculate fees based on fee rate and memo.
- *
- * @param {FeeRate} feeRate
- * @param {string} memo (optional)
- * @param {UnspentOutput} utxos (optional)
- * @returns {BaseAmount} The calculated fees based on fee rate and the memo.
- */
-export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXO[] = []): BaseAmount => {
-  const compiledMemo = memo ? compileMemo(memo) : null
-  const fee = getFee(utxos.length, feeRate, compiledMemo)
-  return baseAmount(fee)
-}
-
-/**
- * Get the default fees with rates.
- *
- * @returns {FeesWithRates} The default fees and rates.
- */
-export const getDefaultFeesWithRates = (): FeesWithRates => {
-  const nextBlockFeeRate = 1
-  const rates = standardFeeRates(nextBlockFeeRate)
-
-  return {
-    fees: calcFees(rates, calcFee),
-    rates,
-  }
-}
-
-/**
- * Get the default fees.
- *
- * @returns {Fees} The default fees.
- */
-export const getDefaultFees = (): Fees => {
-  const { fees } = getDefaultFeesWithRates()
-  return fees
 }

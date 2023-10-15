@@ -1,5 +1,5 @@
 export * from './types'
 export * from './client'
 export * from './const'
-export { getDefaultFees, getDefaultFeesWithRates, validateAddress, calcFee, getPrefix } from './utils'
+export { validateAddress, getPrefix } from './utils'
 export { getSendTxUrl } from './blockcypher-api'

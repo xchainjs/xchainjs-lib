@@ -123,4 +123,30 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
       fail()
     }
   })
+  it('Try to send max amount', async () => {
+    try {
+      const firstAddress = btcClientTestnet.getAddress(0)
+      const address = btcClientTestnet.getAddress(1)
+      console.log('address', address)
+      const balance = await btcClientTestnet.getBalance(address)
+      console.log(balance[0].amount.amount().toString())
+      const fee = await btcClientTestnet.getFees({
+        memo: address,
+        sender: address,
+      })
+      console.log(fee.fast.amount().toString())
+      const txid = await btcClientTestnet.transfer({
+        walletIndex: 1,
+        asset: AssetBTC,
+        recipient: firstAddress,
+        amount: balance[0].amount.minus(fee.fast),
+        memo: 'test',
+        feeRate: 1,
+      })
+      console.log('txid', txid)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
 })

@@ -214,7 +214,7 @@ describe('DogecoinClient Test', () => {
   it('returns fees and rates of a tx w/ memo', async () => {
     dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
-    const { fees, rates } = await dogeClient.getFeesWithRates(MEMO)
+    const { fees, rates } = await dogeClient.getFeesWithRates({ memo: MEMO })
     // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
@@ -229,16 +229,23 @@ describe('DogecoinClient Test', () => {
     dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const estimates = await dogeClient.getFees()
-    expect(estimates.fast).toBeDefined()
-    expect(estimates.fastest).toBeDefined()
-    expect(estimates.average).toBeDefined()
+    expect(estimates.fast.amount().toString()).toEqual('25280424')
+    expect(estimates.fastest.amount().toString()).toEqual('126402120')
+    expect(estimates.average.amount().toString()).toEqual('12640212')
+
+    const estimatesWithSender = await dogeClient.getFees({
+      sender: dogeClient.getAddress(0),
+    })
+    expect(estimatesWithSender.fast.amount().toString()).toEqual('73572516')
+    expect(estimatesWithSender.fastest.amount().toString()).toEqual('367862580')
+    expect(estimatesWithSender.average.amount().toString()).toEqual('36786258')
   })
 
   it('should return estimated fees of a vault tx that are more expensive than a normal tx (in case of > MIN_TX_FEE only)', async () => {
     dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const normalTx = await dogeClient.getFees()
-    const vaultTx = await dogeClient.getFeesWithMemo(MEMO)
+    const vaultTx = await dogeClient.getFees({ memo: MEMO })
 
     if (vaultTx.average.amount().isGreaterThan(MIN_TX_FEE)) {
       expect(vaultTx.average.amount().isGreaterThan(normalTx.average.amount())).toBeTruthy()

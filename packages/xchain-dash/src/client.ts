@@ -1,7 +1,7 @@
+import * as dashcore from '@dashevo/dashcore-lib'
 import {
   AssetInfo,
   Balance,
-  Fee,
   FeeOption,
   FeeRate,
   Network,
@@ -11,6 +11,7 @@ import {
   TxParams,
   TxType,
   TxsPage,
+  UTXO,
   UTXOClient,
   UtxoClientParams,
   checkFeeBounds,
@@ -239,10 +240,6 @@ class Client extends UTXOClient {
     }
   }
 
-  protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
-    return Utils.calcFee(feeRate, memo)
-  }
-
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const fromAddressIndex = params?.walletIndex || 0
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Average]
@@ -261,6 +258,52 @@ class Client extends UTXOClient {
       nodeUrl: this.nodeUrls[this.network],
       auth: this.nodeAuth,
     })
+  }
+
+  /**
+   * Compile memo.
+   *
+   * @param {string} memo The memo to be compiled.
+   * @returns {Buffer} The compiled memo.
+   */
+  protected compileMemo(memo: string): Buffer {
+    return dashcore.Script.buildDataOut(memo)
+  }
+
+  /**
+   * Get the transaction fee.
+   *
+   * @param {UTXO[]} inputs The UTXOs.
+   * @param {FeeRate} feeRate The fee rate.
+   * @param {Buffer} data The compiled memo (Optional).
+   * @returns {number} The fee amount.
+   */
+  protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
+    let sum =
+      Utils.TransactionBytes.Version +
+      Utils.TransactionBytes.Type +
+      Utils.TransactionBytes.InputCount +
+      inputs.length *
+        (Utils.TransactionBytes.InputPrevOutputHash +
+          Utils.TransactionBytes.InputPrevOutputIndex +
+          Utils.TransactionBytes.InputScriptLength +
+          Utils.TransactionBytes.InputPubkeyHash +
+          Utils.TransactionBytes.InputSequence) +
+      Utils.TransactionBytes.OutputCount +
+      2 *
+        (Utils.TransactionBytes.OutputValue +
+          Utils.TransactionBytes.OutputScriptLength +
+          Utils.TransactionBytes.OutputPubkeyHash) +
+      Utils.TransactionBytes.LockTime
+    if (data) {
+      sum +=
+        Utils.TransactionBytes.OutputValue +
+        Utils.TransactionBytes.OutputScriptLength +
+        Utils.TransactionBytes.OutputOpReturn +
+        data.length
+    }
+    const fee = sum * feeRate
+    return fee > Utils.TX_MIN_FEE ? fee : Utils.TX_MIN_FEE
   }
 }
 

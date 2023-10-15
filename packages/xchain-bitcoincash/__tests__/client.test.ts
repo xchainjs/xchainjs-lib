@@ -205,7 +205,7 @@ describe('BCHClient Test', () => {
     bchClient.setNetwork(Network.Testnet)
     bchClient.setPhrase(phrase)
 
-    const { fees, rates } = await bchClient.getFeesWithRates('SWAP:THOR.RUNE')
+    const { fees, rates } = await bchClient.getFeesWithRates({ memo: 'SWAP:THOR.RUNE' })
     // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
@@ -221,9 +221,16 @@ describe('BCHClient Test', () => {
     bchClient.setPhrase(phrase)
 
     const estimates = await bchClient.getFees()
-    expect(estimates.fast).toBeDefined()
-    expect(estimates.fastest).toBeDefined()
-    expect(estimates.average).toBeDefined()
+    expect(estimates.fast.amount().toString()).toEqual('234')
+    expect(estimates.fastest.amount().toString()).toEqual('1170')
+    expect(estimates.average.amount().toString()).toEqual('117')
+
+    const estimatesWithSender = await bchClient.getFees({
+      sender: bchClient.getAddress(0),
+    })
+    expect(estimatesWithSender.fast.amount().toString()).toEqual('678')
+    expect(estimatesWithSender.fastest.amount().toString()).toEqual('3390')
+    expect(estimatesWithSender.average.amount().toString()).toEqual('339')
   })
 
   it('returns different fee rates for a normal tx', async () => {
