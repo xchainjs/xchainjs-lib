@@ -1,7 +1,6 @@
 import * as bitcash from '@psf/bitcoincashjs-lib'
 import {
   AssetInfo,
-  Fee,
   FeeOption,
   FeeRate,
   Network,
@@ -133,10 +132,6 @@ class Client extends UTXOClient {
     return await this.getSuggestedFee()
   }
 
-  protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
-    return Utils.calcFee(feeRate, memo)
-  }
-
   /**
    * Transfer BCH.
    *
@@ -160,7 +155,7 @@ class Client extends UTXOClient {
     const keyPair = this.getBCHKeys(this.phrase, derivationPath)
 
     inputs.forEach((utxo, index) => {
-      builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo.value)
+      builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo?.value)
     })
 
     const txHex = builder.build().toHex()
@@ -188,7 +183,7 @@ class Client extends UTXOClient {
     if (utxos.length === 0) throw new Error('No utxos to send')
 
     const feeRateWhole = Number(feeRate.toFixed(0))
-    const compiledMemo = memo ? Utils.compileMemo(memo) : null
+    const compiledMemo = memo ? this.compileMemo(memo) : null
 
     const targetOutputs = []
 
@@ -244,6 +239,37 @@ class Client extends UTXOClient {
     } catch (error) {
       return Utils.DEFAULT_SUGGESTED_TRANSACTION_FEE
     }
+  }
+
+  /**
+   * Compile memo.
+   *
+   * @param {string} memo The memo to be compiled.
+   * @returns {Buffer} The compiled memo.
+   */
+  protected compileMemo(memo: string): Buffer {
+    const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
+    return bitcash.script.compile([bitcash.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
+  }
+
+  /**
+   * Get the transaction fee.
+   *
+   * @param {UTXO[]} inputs The UTXOs.
+   * @param {FeeRate} feeRate The fee rate.
+   * @param {Buffer} data The compiled memo (Optional).
+   * @returns {number} The fee amount.
+   */
+  protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
+    let totalWeight = Utils.TX_EMPTY_SIZE
+
+    totalWeight += (Utils.TX_INPUT_PUBKEYHASH + Utils.TX_INPUT_BASE) * inputs.length
+    totalWeight += (Utils.TX_OUTPUT_BASE + Utils.TX_OUTPUT_PUBKEYHASH) * 2
+    if (data) {
+      totalWeight += 9 + data.length
+    }
+
+    return Math.ceil(totalWeight * feeRate)
   }
 }
 

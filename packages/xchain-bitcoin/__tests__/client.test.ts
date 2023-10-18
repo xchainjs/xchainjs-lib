@@ -271,7 +271,7 @@ describe('BitcoinClient Test', () => {
   it('returns fees and rates of a tx w/ memo', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
-    const { fees, rates } = await btcClient.getFeesWithRates(MEMO)
+    const { fees, rates } = await btcClient.getFeesWithRates({ memo: MEMO })
     // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
@@ -285,17 +285,25 @@ describe('BitcoinClient Test', () => {
   it('should return estimated fees of a normal tx', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
+    // Estimate without provider request
     const estimates = await btcClient.getFees()
-    expect(estimates.fast).toBeDefined()
-    expect(estimates.fastest).toBeDefined()
-    expect(estimates.average).toBeDefined()
+    expect(estimates.fast.amount().toString()).toEqual('3588')
+    expect(estimates.fastest.amount().toString()).toEqual('17940')
+    expect(estimates.average.amount().toString()).toEqual('1794')
+    // Estimate with max preccission
+    const estimatesWithSender = await btcClient.getFees({
+      sender: btcClient.getAddress(0),
+    })
+    expect(estimatesWithSender.fast.amount().toString()).toEqual('9476')
+    expect(estimatesWithSender.fastest.amount().toString()).toEqual('47380')
+    expect(estimatesWithSender.average.amount().toString()).toEqual('4738')
   })
 
   it('should return estimated fees of a vault tx that are more expensive than a normal tx (in case of > MIN_TX_FEE only)', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const normalTx = await btcClient.getFees()
-    const vaultTx = await btcClient.getFees(MEMO)
+    const vaultTx = await btcClient.getFees({ memo: MEMO })
 
     if (vaultTx.average.amount().isGreaterThan(MIN_TX_FEE)) {
       expect(vaultTx.average.amount().isGreaterThan(normalTx.average.amount())).toBeTruthy()

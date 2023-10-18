@@ -1,3 +1,9 @@
+# v0.2.5 (2023-10-15)
+
+## Update
+
+- Update client version
+
 # v0.2.4 (2023-10-05)
 
 ## Update

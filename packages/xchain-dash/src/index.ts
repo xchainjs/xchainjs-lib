@@ -1,2 +1,2 @@
 export * from './client'
-export { buildTx, getDefaultFees, getDefaultFeesWithRates, getPrefix, validateAddress, calcFee } from './utils'
+export { buildTx, getPrefix, validateAddress } from './utils'

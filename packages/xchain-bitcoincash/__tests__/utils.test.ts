@@ -14,20 +14,6 @@ describe('Bitcoin Cash Utils Test', () => {
 
   const testnet_address = 'bchtest:qpd7jmj0hltgxux06v9d9u6933vq7zd0kyjlapya0g'
   const mainnet_address = 'bitcoincash:qp4kjpk684c3d9qjk5a37vl2xn86wxl0f5j2ru0daj'
-  //const haskoinUrl = 'https://haskoin.ninerealms.com/btctest'
-
-  describe('stripPrefix', () => {
-    it('get the right vault fee', () => {
-      const memo = 'SWAP:THOR.RUNE'
-      const fee = Utils.calcFee(1, memo)
-      expect(fee.amount().toNumber()).toEqual(103)
-    })
-
-    it('get the right normal fee', () => {
-      const fee = Utils.calcFee(1)
-      expect(fee.amount().toNumber()).toEqual(78)
-    })
-  })
 
   describe('stripPrefix', () => {
     it('should strip out the prefix from the testnet address', () => {

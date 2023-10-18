@@ -11,7 +11,7 @@ export type UTXO = {
   hash: string
   index: number
   value: number
-  witnessUtxo: Witness
+  witnessUtxo?: Witness
   txHex?: string
 }
 

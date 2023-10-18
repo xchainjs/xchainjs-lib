@@ -1,3 +1,8 @@
+# v.0.15.0 (2023-10-25)
+
+- Remove function `getFeesWithMemo` from UTXOClient
+- Update signature (support option `sender`) in functions `getFeesWithRates` and `getFees` from UTXOClient
+
 # v0.14.2 (2023-09-11)
 
 ## Update

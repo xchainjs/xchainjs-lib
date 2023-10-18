@@ -1,4 +1,4 @@
-import { Address, Asset, Chain } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 
 import { BaseXChainClient as Client } from './BaseXChainClient'
 import { standardFeeRates } from './feeRates'
@@ -7,6 +7,7 @@ import { ExplorerProviders, UTXO, UtxoOnlineDataProviders } from './provider-typ
 import {
   Balance,
   Fee,
+  FeeEstimateOptions,
   FeeRate,
   FeeRates,
   Fees,
@@ -27,7 +28,18 @@ export abstract class UTXOClient extends Client {
   protected dataProviders: UtxoOnlineDataProviders[]
 
   protected abstract getSuggestedFeeRate(): Promise<FeeRate>
-  protected abstract calcFee(feeRate: FeeRate, memo?: string): Promise<Fee>
+  protected abstract compileMemo(memo: string): Buffer
+  protected abstract getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null): number
+
+  protected async calcFee(feeRate: FeeRate, options?: FeeEstimateOptions): Promise<Fee> {
+    let utxos: UTXO[] = []
+    if (options?.sender) {
+      utxos = await this.scanUTXOs(options.sender, false)
+    }
+    const compiledMemo = options?.memo ? this.compileMemo(options.memo) : null
+    const fee = this.getFeeFromUtxos(utxos, feeRate, compiledMemo)
+    return baseAmount(fee)
+  }
 
   /**
    * Constructor
@@ -126,25 +138,17 @@ export abstract class UTXOClient extends Client {
   ): Promise<UTXO[]> {
     return this.roundRobinGetUnspentTxs(address, confirmedOnly)
   }
-  async getFeesWithRates(memo?: string): Promise<FeesWithRates> {
+  async getFeesWithRates(options?: FeeEstimateOptions): Promise<FeesWithRates> {
     const rates = await this.getFeeRates()
     return {
       // @ts-ignore
-      fees: await calcFeesAsync(rates, this.calcFee.bind(this), memo),
+      fees: await calcFeesAsync(rates, this.calcFee.bind(this), options),
       rates,
     }
   }
 
-  async getFees(memo?: string): Promise<Fees> {
-    const { fees } = await this.getFeesWithRates(memo)
-    return fees
-  }
-
-  /**
-   * @deprecated Use getFees(memo) instead
-   */
-  async getFeesWithMemo(memo: string): Promise<Fees> {
-    const { fees } = await this.getFeesWithRates(memo)
+  async getFees(options?: FeeEstimateOptions): Promise<Fees> {
+    const { fees } = await this.getFeesWithRates(options)
     return fees
   }
 

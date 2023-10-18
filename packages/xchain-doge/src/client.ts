@@ -1,6 +1,5 @@
 import {
   AssetInfo,
-  Fee,
   FeeRate,
   Network,
   TxHash,
@@ -21,6 +20,7 @@ import {
   DOGEChain,
   DOGE_DECIMAL,
   LOWER_FEE_BOUND,
+  MIN_TX_FEE,
   UPPER_FEE_BOUND,
   blockcypherDataProviders,
   blockstreamExplorerProviders,
@@ -153,10 +153,6 @@ class Client extends UTXOClient {
     }
   }
 
-  protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
-    return Utils.calcFee(feeRate, memo)
-  }
-
   /**
    * Transfer Doge.
    *
@@ -201,7 +197,7 @@ class Client extends UTXOClient {
     const utxos = await this.scanUTXOs(sender, false)
     if (utxos.length === 0) throw new Error('No utxos to send')
     const feeRateWhole = Number(feeRate.toFixed(0))
-    const compiledMemo = memo ? Utils.compileMemo(memo) : null
+    const compiledMemo = memo ? this.compileMemo(memo) : null
 
     const targetOutputs = []
     //1. output to recipient
@@ -266,6 +262,45 @@ class Client extends UTXOClient {
       newTxHex: psbt.data.globalMap.unsignedTx.toBuffer().toString('hex'),
     }
     return ledgerTxInfo
+  }
+
+  /**
+   * Compile memo.
+   *
+   * @param {string} memo The memo to be compiled.
+   * @returns {Buffer} The compiled memo.
+   */
+  protected compileMemo(memo: string): Buffer {
+    const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
+    return Dogecoin.script.compile([Dogecoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
+  }
+
+  /**
+   * Get the transaction fee.
+   *
+   * @param {UTXO[]} inputs The UTXOs.
+   * @param {FeeRate} feeRate The fee rate.
+   * @param {Buffer} data The compiled memo (Optional).
+   * @returns {number} The fee amount.
+   */
+  protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
+    const inputSizeBasedOnInputs =
+      inputs.length > 0
+        ? inputs.reduce((a) => a + Utils.inputBytes(), 0) + inputs.length // +1 byte for each input signature
+        : 0
+    let sum =
+      Utils.TX_EMPTY_SIZE +
+      inputSizeBasedOnInputs + // +1 byte for each input signature
+      Utils.TX_OUTPUT_BASE +
+      Utils.TX_OUTPUT_PUBKEYHASH +
+      Utils.TX_OUTPUT_BASE +
+      Utils.TX_OUTPUT_PUBKEYHASH
+
+    if (data) {
+      sum += Utils.TX_OUTPUT_BASE + data.length
+    }
+    const fee = sum * feeRate
+    return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
   }
 }
 

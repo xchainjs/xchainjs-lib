@@ -35,7 +35,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.14.2",
+    "@xchainjs/xchain-client": "^0.15.0",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-evm": "^0.3.2",
     "@xchainjs/xchain-util": "^0.13.1",
@@ -44,7 +44,7 @@
     "ethers": "^5.7.2"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.14.2",
+    "@xchainjs/xchain-client": "^0.15.0",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-evm": "^0.3.2",
     "@xchainjs/xchain-util": "^0.13.1",

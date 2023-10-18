@@ -3,31 +3,15 @@ import { Address as DashAddress } from '@dashevo/dashcore-lib/typings/Address'
 import { Script } from '@dashevo/dashcore-lib/typings/script/Script'
 import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transaction'
 import { Input } from '@dashevo/dashcore-lib/typings/transaction/input/Input'
-import {
-  FeeOption,
-  FeeRate,
-  Fees,
-  FeesWithRates,
-  Network,
-  TxParams,
-  calcFees,
-  standardFeeRates,
-} from '@xchainjs/xchain-client'
-import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { FeeRate, Network, TxParams, UTXO } from '@xchainjs/xchain-client'
+import { Address } from '@xchainjs/xchain-util'
 import * as Dash from 'bitcoinjs-lib'
 import * as coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'
 
 import * as insight from './insight-api'
 
-export type UTXO = {
-  hash: string
-  index: number
-  value: number
-  txHex?: string
-}
-
-const TransactionBytes = {
+export const TransactionBytes = {
   Version: 2,
   Type: 2,
   InputCount: 1,
@@ -46,28 +30,6 @@ const TransactionBytes = {
 
 export const TX_MIN_FEE = 1000
 export const TX_DUST_THRESHOLD = dashcore.Transaction.DUST_AMOUNT
-
-export function getFee(inputCount: number, feeRate: FeeRate, data: Buffer | null = null): number {
-  let sum =
-    TransactionBytes.Version +
-    TransactionBytes.Type +
-    TransactionBytes.InputCount +
-    inputCount *
-      (TransactionBytes.InputPrevOutputHash +
-        TransactionBytes.InputPrevOutputIndex +
-        TransactionBytes.InputScriptLength +
-        TransactionBytes.InputPubkeyHash +
-        TransactionBytes.InputSequence) +
-    TransactionBytes.OutputCount +
-    2 * (TransactionBytes.OutputValue + TransactionBytes.OutputScriptLength + TransactionBytes.OutputPubkeyHash) +
-    TransactionBytes.LockTime
-  if (data) {
-    sum +=
-      TransactionBytes.OutputValue + TransactionBytes.OutputScriptLength + TransactionBytes.OutputOpReturn + data.length
-  }
-  const fee = sum * feeRate
-  return fee > TX_MIN_FEE ? fee : TX_MIN_FEE
-}
 
 export const dashNetwork = (network: Network): Dash.Network => {
   switch (network) {
@@ -155,29 +117,6 @@ export const buildTx = async ({
   }
 
   return { tx, utxos }
-}
-
-export const calcFee = (feeRate: FeeRate, memo?: string, utxos: UTXO[] = []): BaseAmount => {
-  const scriptData: Buffer = Buffer.from(`${memo}`, 'utf8')
-  const fee = getFee(utxos.length > 0 ? utxos.length : 2, feeRate, scriptData) // By default 2 UTXOs // Temporal solution until issue addressed https://github.com/xchainjs/xchainjs-lib/issues/850
-  return baseAmount(fee)
-}
-
-export const getDefaultFeesWithRates = (): FeesWithRates => {
-  const rates = {
-    ...standardFeeRates(20),
-    [FeeOption.Fastest]: 50,
-  }
-
-  return {
-    fees: calcFees(rates, calcFee),
-    rates,
-  }
-}
-
-export const getDefaultFees = (): Fees => {
-  const { fees } = getDefaultFeesWithRates()
-  return fees
 }
 
 export const getPrefix = (network: Network) => {

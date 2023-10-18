@@ -65,6 +65,11 @@ export type TxParams = {
   memo?: string // optional memo to pass
 }
 
+export type FeeEstimateOptions = {
+  memo?: string
+  sender?: string
+}
+
 export enum FeeOption {
   Average = 'average',
   Fast = 'fast',
@@ -116,7 +121,7 @@ export interface XChainClient {
 
   getTransactionData(txId: string, assetAddress?: Address): Promise<Tx>
 
-  getFees(): Promise<Fees>
+  getFees(options?: FeeEstimateOptions): Promise<Fees>
 
   transfer(params: TxParams): Promise<TxHash>
   // prepareTx(params: TxParams): Promise<UnsignedTx>

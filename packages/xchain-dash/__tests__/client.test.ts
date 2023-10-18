@@ -164,7 +164,7 @@ describe('DashClient Test', () => {
   })
 
   it('returns fees and rates of a tx w/ memo', async () => {
-    const { fees, rates } = await dashClient.getFeesWithRates('SWAP:THOR.RUNE')
+    const { fees, rates } = await dashClient.getFeesWithRates({ memo: 'SWAP:THOR.RUNE' })
 
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()

@@ -1,6 +1,5 @@
 import {
   AssetInfo,
-  Fee,
   FeeOption,
   FeeRate,
   Network,
@@ -23,6 +22,7 @@ import {
   BTC_DECIMAL,
   BlockcypherDataProviders,
   LOWER_FEE_BOUND,
+  MIN_TX_FEE,
   UPPER_FEE_BOUND,
   blockstreamExplorerProviders,
 } from './const'
@@ -154,8 +154,43 @@ class Client extends UTXOClient {
     }
   }
 
-  protected async calcFee(feeRate: FeeRate, memo?: string): Promise<Fee> {
-    return Utils.calcFee(feeRate, memo)
+  /**
+   * Compile memo.
+   *
+   * @param {string} memo The memo to be compiled.
+   * @returns {Buffer} The compiled memo.
+   */
+  protected compileMemo(memo: string): Buffer {
+    const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
+    return Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
+  }
+
+  /**
+   * Get the transaction fee.
+   *
+   * @param {UTXO[]} inputs The UTXOs.
+   * @param {FeeRate} feeRate The fee rate.
+   * @param {Buffer} data The compiled memo (Optional).
+   * @returns {number} The fee amount.
+   */
+  protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
+    const inputSizeBasedOnInputs =
+      inputs.length > 0
+        ? inputs.reduce((a, x) => a + Utils.inputBytes(x), 0) + inputs.length // +1 byte for each input signature
+        : 0
+    let sum =
+      Utils.TX_EMPTY_SIZE +
+      inputSizeBasedOnInputs +
+      Utils.TX_OUTPUT_BASE +
+      Utils.TX_OUTPUT_PUBKEYHASH +
+      Utils.TX_OUTPUT_BASE +
+      Utils.TX_OUTPUT_PUBKEYHASH
+
+    if (data) {
+      sum += Utils.TX_OUTPUT_BASE + data.length
+    }
+    const fee = sum * feeRate
+    return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
   }
 
   /**
@@ -217,7 +252,7 @@ class Client extends UTXOClient {
     const utxos = await this.scanUTXOs(sender, confirmedOnly)
     if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
     const feeRateWhole = Math.ceil(feeRate)
-    const compiledMemo = memo ? Utils.compileMemo(memo) : null
+    const compiledMemo = memo ? this.compileMemo(memo) : null
 
     const targetOutputs = []
 

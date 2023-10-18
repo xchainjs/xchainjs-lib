@@ -1,3 +1,9 @@
+# v0.7.5 (2023-10-09)
+
+## Update
+
+- Increase client versions for supporting 'sender' option on `getFees()``
+
 # v0.7.4 (2023-10-09)
 
 ## Update
