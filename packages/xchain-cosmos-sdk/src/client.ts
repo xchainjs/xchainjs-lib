@@ -1,5 +1,11 @@
-import { fromBech32 } from '@cosmjs/encoding'
-import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing'
+import { fromBech32, toBase64 } from '@cosmjs/encoding'
+import {
+  DirectSecp256k1HdWallet,
+  Registry,
+  TxBodyEncodeObject,
+  encodePubkey,
+  makeAuthInfoBytes,
+} from '@cosmjs/proto-signing'
 import { GasPrice, IndexedTx, SigningStargateClient, StargateClient, StdFee, calculateFee } from '@cosmjs/stargate'
 import {
   AssetInfo,
@@ -23,6 +29,7 @@ import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { Address, Asset, BaseAmount, CachedValue, Chain, baseAmount } from '@xchainjs/xchain-util'
 import * as bech32 from 'bech32'
 import * as BIP32 from 'bip32'
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import * as crypto from 'crypto'
 import * as secp256k1 from 'secp256k1'
 
@@ -58,10 +65,12 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     this.defaultDecimals = params.defaultDecimals
     this.defaultFee = params.defaultFee
     this.baseDenom = params.baseDenom
-    this.signer = new CachedValue<DirectSecp256k1HdWallet>(
-      async () =>
-        await DirectSecp256k1HdWallet.fromMnemonic(params.phrase as string, { prefix: params.prefix || 'cosmos' }),
-    )
+    if (params.phrase) {
+      this.signer = new CachedValue<DirectSecp256k1HdWallet>(
+        async () =>
+          await DirectSecp256k1HdWallet.fromMnemonic(params.phrase as string, { prefix: params.prefix || 'cosmos' }),
+      )
+    }
     this.startgateClient = new CachedValue<StargateClient>(() =>
       this.connectClient(this.clientUrls[params.network || Network.Mainnet]),
     )
@@ -354,6 +363,70 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     const client = await this.startgateClient.getValue()
     const txResponse = await client.broadcastTx(new Uint8Array(Buffer.from(txHex, 'hex')))
     return txResponse.transactionHash
+  }
+
+  /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address} params The transfer options.
+   * @returns {string} The raw unsigned transaction.
+   */
+  public async prepareTx({ sender, recipient, asset, amount, memo }: TxParams & { sender: Address }): Promise<string> {
+    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
+    if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
+
+    const denom = this.getDenom(asset || this.getAssetInfo().asset)
+    if (!denom)
+      throw Error(`Invalid asset ${asset?.symbol} - Only ${this.baseDenom} asset is currently supported to transfer`)
+
+    const demonAmount = { amount: amount.amount().toString(), denom }
+
+    const txBody: TxBodyEncodeObject = {
+      typeUrl: '/cosmos.tx.v1beta1.TxBody',
+      value: {
+        messages: [
+          {
+            typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+            value: {
+              fromAddress: sender,
+              toAddress: recipient,
+              amount: [demonAmount],
+            },
+          },
+        ],
+        memo: memo,
+      },
+    }
+
+    const defaultGasPrice = GasPrice.fromString(`0.025${denom}`)
+    const defaultSendFee: StdFee = calculateFee(90_000, defaultGasPrice)
+
+    const client = await this.startgateClient.getValue()
+    const account = await client.getAccount(sender)
+    if (!account) throw Error('Can not get account from sender')
+    if (!account.pubkey) throw Error('Can not get account from sender')
+
+    const authInfoBytes = makeAuthInfoBytes(
+      [
+        {
+          pubkey: encodePubkey({
+            type: 'tendermint/PubKeySecp256k1',
+            value: toBase64(account.pubkey.value),
+          }),
+          sequence: account.sequence,
+        },
+      ],
+      defaultSendFee.amount,
+      Number(defaultSendFee.gas),
+      defaultSendFee.granter,
+      defaultSendFee.payer,
+    )
+
+    const rawTx = TxRaw.fromPartial({
+      bodyBytes: new Registry().encode(txBody),
+      authInfoBytes,
+    })
+    return toBase64(TxRaw.encode(rawTx).finish())
   }
 
   abstract getAssetInfo(): AssetInfo

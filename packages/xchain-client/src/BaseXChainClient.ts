@@ -161,4 +161,5 @@ export abstract class BaseXChainClient implements XChainClient {
   abstract transfer(params: TxParams): Promise<string>
   abstract broadcastTx(txHex: string): Promise<TxHash>
   abstract getAssetInfo(): AssetInfo
+  abstract prepareTx(params: TxParams): Promise<string>
 }

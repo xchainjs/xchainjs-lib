@@ -267,4 +267,21 @@ describe('thorchain Integration Tests', () => {
     expect(tx.type).toBe('transfer')
     expect(tx.from[1].amount.amount().toNumber()).toBe(13744300000000)
   })
+  it('should prepare transaction', async () => {
+    try {
+      const from = 'thor1nx3yxgdw94nfw0uzwns2ay5ap85nk9p6hjaqn9'
+      const to = 'thor1nx3yxgdw94nfw0uzwns2ay5ap85nk9p6hjaqn9'
+      const amount = baseAmount('0.0001')
+      const rawUnsignedTransaction = await thorClient.prepareTx({
+        sender: from,
+        recipient: to,
+        amount,
+        memo: 'test',
+      })
+      console.log(rawUnsignedTransaction)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
 })

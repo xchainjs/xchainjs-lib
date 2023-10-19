@@ -1,4 +1,4 @@
-import { assetToString } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import { Client } from '../src/client'
 import { AssetDOGE } from '../src/const'
@@ -76,5 +76,23 @@ describe('Dogecoin Integration Tests', () => {
     //   console.log(tx.to[0].to, tx.to[0].amount.amount().toFixed())
     //   // console.log(JSON.stringify(txHistory, null, 2))
     // }
+  })
+  it('should prepare transaction', async () => {
+    try {
+      const from = 'DBfThwN6PMLrwcEfWBNqeqM1wbhdshbr5P'
+      const to = 'DBfThwN6PMLrwcEfWBNqeqM1wbhdshbr5P'
+      const amount = assetToBase(assetAmount('0.0001'))
+      const rawUnsignedTransaction = await dogeClient.prepareTx({
+        sender: from,
+        recipient: to,
+        amount,
+        memo: 'test',
+        feeRate: 1,
+      })
+      console.log(rawUnsignedTransaction)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
   })
 })

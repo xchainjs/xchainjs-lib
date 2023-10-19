@@ -214,6 +214,7 @@ class Client extends UTXOClient {
       sender: this.getAddress(fromAddressIndex),
     })
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
+
     psbt.signAllInputs(btcKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
@@ -236,7 +237,7 @@ class Client extends UTXOClient {
     memo,
     feeRate,
     sender,
-    spendPendingUTXO = true, // default: prevent spending uncomfirmed UTXOs
+    spendPendingUTXO = true,
   }: TxParams & {
     feeRate: FeeRate
     sender: Address
@@ -299,6 +300,36 @@ class Client extends UTXOClient {
     })
 
     return { psbt, utxos, inputs }
+  }
+
+  /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
+   * @returns {string} The raw unsigned transaction.
+   */
+  async prepareTx({
+    sender,
+    memo,
+    amount,
+    recipient,
+    spendPendingUTXO = true,
+    feeRate,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+  }): Promise<string> {
+    const { psbt } = await this.buildTx({
+      sender,
+      recipient,
+      amount,
+      feeRate,
+      memo,
+      spendPendingUTXO,
+    })
+
+    return psbt.toBase64()
   }
 }
 

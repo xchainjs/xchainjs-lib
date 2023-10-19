@@ -1,4 +1,4 @@
-import { assetToString } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import { Client } from '../src/client'
 import { AssetLTC } from '../src/const'
@@ -61,6 +61,24 @@ describe('Litecoin Integration Tests', () => {
     const txId = '91a7a17110081c1f3da4b71d1526e4cb8494b5727521b32b2caf25fb8409619a'
     const tx = await ltcClient.getTransactionData(txId)
     expect(tx.hash).toBe(txId)
+  })
+  it('should prepare transaction', async () => {
+    try {
+      const from = 'M9mFmGYW7azHoFvMkYBh3L78YCe1SpwTM4'
+      const to = 'M9mFmGYW7azHoFvMkYBh3L78YCe1SpwTM4'
+      const amount = assetToBase(assetAmount('0.0001'))
+      const rawUnsignedTransaction = await ltcClient.prepareTx({
+        sender: from,
+        recipient: to,
+        amount,
+        memo: 'test',
+        feeRate: 1,
+      })
+      console.log(rawUnsignedTransaction)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
   })
   // it('should send a testnet btc tx', async () => {
   //   try {

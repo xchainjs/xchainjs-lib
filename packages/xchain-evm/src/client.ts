@@ -615,7 +615,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
    *
    * @returns {BaseAmount} The estimated gas fee.
    */
-  async estimateGasLimit({ asset, recipient, amount, memo }: TxParams): Promise<BigNumber> {
+  async estimateGasLimit({ asset, recipient, amount, memo, from }: TxParams & { from?: Address }): Promise<BigNumber> {
     const txAmount = BigNumber.from(amount.amount().toFixed())
     const theAsset = asset ?? this.gasAsset
     let gasEstimate: BigNumber
@@ -626,12 +626,12 @@ export default class Client extends BaseXChainClient implements XChainClient {
       const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
 
       gasEstimate = await contract.estimateGas.transfer(recipient, txAmount, {
-        from: this.getAddress(),
+        from: from || this.getAddress(),
       })
     } else {
       // ETH gas estimate
       const transactionRequest = {
-        from: this.getAddress(),
+        from: from || this.getAddress(),
         to: recipient,
         value: txAmount,
         data: memo ? toUtf8Bytes(memo) : undefined,
@@ -726,6 +726,109 @@ export default class Client extends BaseXChainClient implements XChainClient {
       }
     }
     throw Error('no provider able to GetTransactions')
+  }
+
+  /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address&FeeOption&BaseAmount&BigNumber} params The transfer options.
+   * @returns {string} The raw unsigned transaction.
+   */
+  async prepareTx({
+    sender,
+    asset = this.gasAsset,
+    memo,
+    amount,
+    recipient,
+    feeOption = FeeOption.Fast,
+    gasPrice,
+    gasLimit,
+  }: TxParams & {
+    sender: Address
+    feeOption?: FeeOption
+    gasPrice?: BaseAmount
+    gasLimit?: BigNumber
+  }): Promise<string> {
+    if (asset.chain !== this.chain)
+      throw Error(`This client can only prepare transactions on chain: ${this.chain}. Bad asset: ${asset.chain}`)
+
+    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
+    if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
+
+    const txGasPrice: BigNumber = gasPrice
+      ? BigNumber.from(gasPrice.amount().toFixed())
+      : await this.estimateGasPrices()
+          .then((prices) => prices[feeOption])
+          .then((gp) => BigNumber.from(gp.amount().toFixed()))
+
+    let txGasLimit: BigNumber
+    if (!gasLimit) {
+      try {
+        txGasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo, from: sender })
+      } catch (error) {
+        txGasLimit = this.isGasAsset(asset)
+          ? this.defaults[this.network].transferGasAssetGasLimit
+          : this.defaults[this.network].transferTokenGasLimit
+      }
+    } else {
+      txGasLimit = gasLimit
+    }
+
+    if (this.isGasAsset(asset)) {
+      return ethers.utils.serializeTransaction({
+        to: recipient,
+        value: BigNumber.from(amount.amount().toFixed()),
+        gasLimit: txGasLimit,
+        gasPrice: txGasPrice,
+        data: memo ? toUtf8Bytes(memo) : undefined,
+      })
+    } else {
+      const assetAddress = getTokenAddress(asset)
+      if (!assetAddress) throw Error(`Can't parse address from asset ${assetToString(asset)}`)
+
+      const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
+      /* as same as ethers.TransactionResponse expected by `sendTransaction` */
+      const unsignedTx: ethers.PopulatedTransaction = await contract.populateTransaction.transfer(
+        recipient,
+        BigNumber.from(amount.amount().toFixed()),
+      )
+      unsignedTx.gasLimit = txGasLimit
+      unsignedTx.gasPrice = txGasPrice
+
+      return ethers.utils.serializeTransaction(unsignedTx)
+    }
+  }
+
+  public async prepareApprove({
+    contractAddress,
+    spenderAddress,
+    feeOption = FeeOption.Fastest,
+    amount,
+    sender,
+  }: ApproveParams & { sender: string }): Promise<string> {
+    if (!this.validateAddress(contractAddress)) throw Error('Invalid contractAddress address')
+    if (!this.validateAddress(spenderAddress)) throw Error('Invalid spenderAddress address')
+    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
+
+    const gasPrices = await this.estimateGasPrices()
+    const gasPrice = BigNumber.from(gasPrices[feeOption].amount().toFixed())
+
+    const gasLimit: BigNumber = await this.estimateApprove({
+      spenderAddress,
+      contractAddress,
+      fromAddress: sender,
+      amount,
+    }).catch(() => {
+      return BigNumber.from(this.config.defaults[this.network].approveGasLimit)
+    })
+
+    const valueToApprove = getApprovalAmount(amount)
+    const contract = new ethers.Contract(contractAddress, erc20ABI, this.getProvider())
+
+    const unsignedTx = await contract.populateTransaction.approve(spenderAddress, valueToApprove)
+    unsignedTx.gasLimit = gasLimit
+    unsignedTx.gasPrice = gasPrice
+    return ethers.utils.serializeTransaction(unsignedTx)
   }
 }
 

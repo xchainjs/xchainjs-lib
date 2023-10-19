@@ -1,6 +1,6 @@
 import { Network, TxParams } from '@xchainjs/xchain-client'
 import { AssetATOM, Client as CosmosClient } from '@xchainjs/xchain-cosmos'
-import { assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
 
 let xchainClient: CosmosClient = new CosmosClient({})
 
@@ -74,5 +74,13 @@ describe('Cosmos Integration Tests', () => {
     } catch (error) {
       throw error
     }
+  })
+  it('Prepate transaction', async () => {
+    const unsignedRawTx = await xchainClient.prepareTx({
+      sender: 'cosmos1x4tau5pfrqyyawcewur9ks0jt4e5tnvu8hsag9',
+      recipient: 'cosmos1x4tau5pfrqyyawcewur9ks0jt4e5tnvu8hsag9',
+      amount: assetToBase(assetAmount(0.01, 6)),
+    })
+    console.log(unsignedRawTx)
   })
 })

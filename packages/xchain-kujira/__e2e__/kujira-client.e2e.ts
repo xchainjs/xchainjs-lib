@@ -1,5 +1,5 @@
 import { Network, TxParams } from '@xchainjs/xchain-client'
-import { assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import { Client as KujiraClient } from '../src/client'
 import { AssetKUJI, KUJIChain } from '../src/const'
@@ -62,5 +62,14 @@ describe('Kujira client Integration Tests', () => {
     }
     const txHash = await xchainClient.transfer(txDate)
     console.log('txHash', txHash)
+  })
+  it('Prepare transaction', async () => {
+    const unsignedRawTx = await xchainClient.prepareTx({
+      sender: 'kujira1es76p8qspctcxhex79c32nng9fvhuxjn4z6u7k',
+      recipient: 'kujira1es76p8qspctcxhex79c32nng9fvhuxjn4z6u7k',
+      amount: assetToBase(assetAmount(0.01, 6)),
+      asset: xchainClient.getAssetInfo().asset,
+    })
+    console.log(unsignedRawTx)
   })
 })

@@ -1,6 +1,15 @@
 import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount, assetFromString, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  BaseAmount,
+  assetAmount,
+  assetFromString,
+  assetToBase,
+  assetToString,
+  baseAmount,
+  delay,
+} from '@xchainjs/xchain-util'
 
 import { Client as MayaClient } from '../src/client'
 import { AssetCacao, CACAO_DECIMAL } from '../src/const'
@@ -140,5 +149,22 @@ describe('Mayachain Integration Tests', () => {
     console.log(JSON.stringify(tx, null, 2))
     expect(tx.hash).toBe('28DA11D33AC96BA87981F45FCB2EC80536C60BB824321E0CAEF097D10B568BA5')
     // expect(tx.asset.ticker).toBe('xx')
+  })
+  it('should prepare transaction', async () => {
+    try {
+      const from = 'maya1fs0zqmeulyej044snvkey5mu5xp9d4xc9dxzar'
+      const to = 'maya1fs0zqmeulyej044snvkey5mu5xp9d4xc9dxzar'
+      const amount = assetToBase(assetAmount('0.0001'))
+      const rawUnsignedTransaction = await mayaClient.prepareTx({
+        sender: from,
+        recipient: to,
+        amount,
+        memo: 'test',
+      })
+      console.log(rawUnsignedTransaction)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
   })
 })

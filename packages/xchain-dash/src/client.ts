@@ -259,7 +259,33 @@ class Client extends UTXOClient {
       auth: this.nodeAuth,
     })
   }
+  /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address&FeeRate} params The transfer options.
+   * @returns {string} The raw unsigned transaction.
+   */
+  async prepareTx({
+    sender,
+    memo,
+    amount,
+    recipient,
+    feeRate,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+  }): Promise<string> {
+    const { tx } = await Utils.buildTx({
+      sender,
+      recipient,
+      memo,
+      amount,
+      feeRate,
+      network: this.network,
+    })
 
+    return tx.toString()
+  }
   /**
    * Compile memo.
    *

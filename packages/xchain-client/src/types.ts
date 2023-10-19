@@ -124,7 +124,7 @@ export interface XChainClient {
   getFees(options?: FeeEstimateOptions): Promise<Fees>
 
   transfer(params: TxParams): Promise<TxHash>
-  // prepareTx(params: TxParams): Promise<UnsignedTx>
+  prepareTx(params: TxParams): Promise<string>
   // signTx(params: UnsignedTx, signer: Signer): Promise<SignedTx>
   broadcastTx(txHex: string): Promise<TxHash>
 

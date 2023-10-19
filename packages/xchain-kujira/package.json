@@ -34,7 +34,7 @@
   "devDependencies": {
     "@xchainjs/xchain-client": "^0.15.0",
     "@xchainjs/xchain-util": "^0.13.2",
-    "@xchainjs/xchain-cosmos-sdk": "^0.1.0"
+    "@xchainjs/xchain-cosmos-sdk": "^0.1.1"
   },
   "publishConfig": {
     "access": "public"
@@ -42,6 +42,6 @@
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.15.0",
     "@xchainjs/xchain-util": "^0.13.2",
-    "@xchainjs/xchain-cosmos-sdk": "^0.1.0"
+    "@xchainjs/xchain-cosmos-sdk": "^0.1.1"
   }
 }

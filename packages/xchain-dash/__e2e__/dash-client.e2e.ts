@@ -81,4 +81,23 @@ describe('Dash Integration Tests', () => {
       fail()
     }
   })
+  it('should prepare transaction', async () => {
+    try {
+      const from = 'yeRZBWYfeNE4yVUHV4ZLs83Ppn9aMRH57A'
+      const to = 'yeRZBWYfeNE4yVUHV4ZLs83Ppn9aMRH57A'
+      const amount = assetToBase(assetAmount('0.0001'))
+      const rawUnsignedTransaction = await dashClientTestnet.prepareTx({
+        asset: AssetDASH,
+        sender: from,
+        recipient: to,
+        amount,
+        memo: 'test',
+        feeRate: 1,
+      })
+      console.log(rawUnsignedTransaction)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
 })

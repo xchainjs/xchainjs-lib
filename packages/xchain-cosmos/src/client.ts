@@ -1,3 +1,4 @@
+import cosmosclient from '@cosmos-client/core'
 import { proto } from '@cosmos-client/core/cjs/module'
 import {
   AssetInfo,
@@ -30,6 +31,7 @@ import {
   getDenom,
   getTxsFromHistory,
   protoFee,
+  protoTxBody,
 } from './utils'
 
 /**
@@ -349,6 +351,58 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     } catch (error) {
       return singleFee(FeeType.FlatFee, DEFAULT_FEE)
     }
+  }
+
+  /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address&BaseAmount&BigNumber} params The transfer options.
+   * @returns {string} The raw unsigned transaction.
+   */
+  async prepareTx({
+    sender,
+    recipient,
+    amount,
+    memo,
+    asset = AssetATOM,
+    feeAmount = DEFAULT_FEE,
+    gasLimit = new BigNumber(DEFAULT_GAS_LIMIT),
+  }: TxParams & { sender: Address; feeAmount?: BaseAmount; gasLimit?: BigNumber }): Promise<string> {
+    const denom = getDenom(asset)
+
+    if (!denom)
+      throw Error(`Invalid asset ${assetToString(asset)} - Only ATOM asset is currently supported to transfer`)
+
+    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
+    if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
+
+    this.sdkClient.setPrefix()
+
+    const account = await this.sdkClient.getAccount(cosmosclient.AccAddress.fromString(sender))
+
+    const { sequence, account_number: accountNumber, pub_key: pubkey } = account
+    if (!sequence) throw Error(`Transfer failed - missing sequence`)
+    if (!accountNumber) throw Error(`Transfer failed - missing account number`)
+    if (!pubkey) throw Error(`Transfer failed - missing pub key`)
+    const txBody = protoTxBody({ from: sender, to: recipient, amount, denom, memo })
+    const fee = protoFee({ denom, amount: feeAmount, gasLimit })
+
+    const authInfo = new cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo({
+      fee,
+      signer_infos: [
+        {
+          public_key: pubkey,
+          mode_info: {
+            single: {
+              mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+            },
+          },
+          sequence,
+        },
+      ],
+    })
+
+    return new cosmosclient.TxBuilder(this.sdkClient.sdk, txBody, authInfo).txBytes()
   }
 }
 

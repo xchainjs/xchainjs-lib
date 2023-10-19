@@ -242,6 +242,32 @@ class Client extends UTXOClient {
   }
 
   /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address&FeeRate} params The transfer options.
+   * @returns {string} The raw unsigned transaction.
+   */
+  async prepareTx({
+    sender,
+    memo,
+    amount,
+    recipient,
+    feeRate,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+  }): Promise<string> {
+    const { builder } = await this.buildTx({
+      sender,
+      recipient,
+      amount,
+      memo,
+      feeRate,
+    })
+
+    return builder.buildIncomplete().toHex()
+  }
+  /**
    * Compile memo.
    *
    * @param {string} memo The memo to be compiled.
